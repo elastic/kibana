@@ -9,6 +9,7 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
+import { completeIdentityFailureCleanup } from './complete_identity_failure_cleanup';
 import { handlePostExecutionLoop } from './handle_post_execution_loop';
 import { setupDependencies } from './setup_dependencies';
 import { isWorkflowGraphSetupError } from './workflow_graph_setup_error';
@@ -17,9 +18,7 @@ import { emitWorkflowExecutionFailedEventIfFailed } from '../lib/emit_workflow_e
 import type { WorkflowsMeteringService } from '../metering';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
-import {
-  withWorkflowExecutionIdentity,
-} from '../service_account_execution';
+import { withWorkflowExecutionIdentity } from '../service_account_execution';
 import type {
   InternalResumeWorkflowExecution,
   WorkflowsExecutionEnginePluginStart,
@@ -193,7 +192,7 @@ export const resumeWorkflow = async (
     throw new Error('Workflow execution not found.');
   }
   if (isTerminalStatus(execution.status)) {
-    await handlePostExecutionLoop({
+    await completeIdentityFailureCleanup(execution, {
       ...params,
       workflowTaskManager: new WorkflowTaskManager(params.dependencies.taskManager),
       cloudSetup: params.dependencies.cloudSetup,
@@ -217,17 +216,23 @@ export const resumeWorkflow = async (
         type: 'ServiceAccountExecutionError',
         message: error instanceof Error ? error.message : String(error),
       };
+      const failedExecution = {
+        ...execution,
+        status: ExecutionStatus.FAILED,
+        context: { ...execution.context, serviceAccountFailureCleanupPending: true },
+      };
       // Finalize steps before publishing the terminal execution status that stops UI polling.
       await params.stepExecutionRepository.markNonTerminalStepsFailed(execution.id, executionError);
       await params.workflowExecutionRepository.updateWorkflowExecution({
         id: execution.id,
         status: ExecutionStatus.FAILED,
+        context: failedExecution.context,
         finishedAt: new Date().toISOString(),
         error: executionError,
       });
-      await handlePostExecutionLoop({
+      await completeIdentityFailureCleanup(failedExecution, {
         ...params,
-          workflowTaskManager: new WorkflowTaskManager(params.dependencies.taskManager),
+        workflowTaskManager: new WorkflowTaskManager(params.dependencies.taskManager),
         cloudSetup: params.dependencies.cloudSetup,
       });
     }

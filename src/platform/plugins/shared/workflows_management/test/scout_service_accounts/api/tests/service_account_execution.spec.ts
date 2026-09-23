@@ -146,77 +146,102 @@ apiTest.describe(
     });
 
     const cleanupWorkflows = async (apiClient: ApiClientFixture): Promise<void> => {
+      const failures: Error[] = [];
       for (const id of workflowIds) {
-        const disabled = await apiClient.put(`api/workflows/workflow/${id}`, {
-          headers,
-          body: { enabled: false },
-          responseType: 'json',
-        });
-        expect(disabled, JSON.stringify(disabled.body)).toHaveStatusCode(200);
-        const cancelled = await apiClient.post(`api/workflows/workflow/${id}/executions/cancel`, {
-          headers,
-          responseType: 'json',
-        });
-        expect(cancelled, JSON.stringify(cancelled.body)).toHaveStatusCode(200);
-        const query = new URLSearchParams(
-          NonTerminalExecutionStatuses.map((status) => ['statuses', status])
-        );
-        await expect
-          .poll(
-            async () => {
-              const active = await apiClient.get(
-                `api/workflows/workflow/${id}/executions?${query}`,
-                { headers, responseType: 'json' }
-              );
-              expect(active).toHaveStatusCode(200);
-              return active.body.results.map((execution: WorkflowExecutionDto) => ({
-                id: execution.id,
-                status: execution.status,
-              }));
-            },
-            { timeout: 30_000 }
-          )
-          .toStrictEqual([]);
-        const response = await apiClient.delete('api/workflows?force=true', {
-          headers,
-          body: { ids: [id] },
-          responseType: 'json',
-        });
-        expect(response, JSON.stringify(response.body)).toHaveStatusCode(200);
-        expect(response.body.failures).toStrictEqual([]);
-        expect(response.body.deleted).toBe(1);
-        const remaining = await apiClient.get(`api/workflows/workflow/${id}`, {
-          headers,
-          responseType: 'json',
-        });
-        expect(remaining).toHaveStatusCode(404);
-        workflowIds.delete(id);
+        try {
+          const disabled = await apiClient.put(`api/workflows/workflow/${id}`, {
+            headers,
+            body: { enabled: false },
+            responseType: 'json',
+          });
+          if (disabled.statusCode === 404) {
+            workflowIds.delete(id);
+          } else {
+            expect(disabled, JSON.stringify(disabled.body)).toHaveStatusCode(200);
+            const cancelled = await apiClient.post(
+              `api/workflows/workflow/${id}/executions/cancel`,
+              {
+                headers,
+                responseType: 'json',
+              }
+            );
+            expect(cancelled, JSON.stringify(cancelled.body)).toHaveStatusCode(200);
+            const query = new URLSearchParams(
+              NonTerminalExecutionStatuses.map((status) => ['statuses', status])
+            );
+            await expect
+              .poll(
+                async () => {
+                  const active = await apiClient.get(
+                    `api/workflows/workflow/${id}/executions?${query}`,
+                    { headers, responseType: 'json' }
+                  );
+                  expect(active).toHaveStatusCode(200);
+                  return active.body.results.map((execution: WorkflowExecutionDto) => ({
+                    id: execution.id,
+                    status: execution.status,
+                  }));
+                },
+                { timeout: 30_000 }
+              )
+              .toStrictEqual([]);
+            const response = await apiClient.delete('api/workflows?force=true', {
+              headers,
+              body: { ids: [id] },
+              responseType: 'json',
+            });
+            expect(response, JSON.stringify(response.body)).toHaveStatusCode(200);
+            expect(response.body.failures).toStrictEqual([]);
+            expect(response.body.deleted).toBe(1);
+            const remaining = await apiClient.get(`api/workflows/workflow/${id}`, {
+              headers,
+              responseType: 'json',
+            });
+            expect(remaining).toHaveStatusCode(404);
+            workflowIds.delete(id);
+          }
+        } catch (error) {
+          failures.push(new Error(`Failed to clean workflow ${id}`, { cause: error }));
+        }
       }
+      if (failures.length) throw new AggregateError(failures, 'Workflow cleanup failed');
     };
 
     apiTest.afterEach(async ({ apiClient }) => cleanupWorkflows(apiClient));
 
-    apiTest.afterAll(async () => {
+    apiTest.afterAll(async ({ apiClient }) => {
+      const failures: Error[] = [];
+      try {
+        await cleanupWorkflows(apiClient);
+      } catch (error) {
+        failures.push(new Error('Final workflow cleanup failed', { cause: error }));
+      }
       // Remove only this suite's disposable Cosmos fixtures; project-account revocation
       // is not authorized by the seeded organization API key in the local UIAM image.
       const dispatcher = new Agent({ connect: { rejectUnauthorized: false } });
       try {
         for (const id of accountIds) {
-          const resource = `dbs/${MOCK_IDP_UIAM_COSMOS_DB_NAME}/colls/${MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_ORGANIZATION_SERVICE_ACCOUNTS}/docs/${id}`;
-          const response = await fetch(`${MOCK_IDP_UIAM_COSMOS_DB_URL}/${resource}`, {
-            method: 'DELETE',
-            dispatcher,
-            headers: {
-              ...generateCosmosDBApiRequestHeaders('DELETE', 'docs', resource),
-              'x-ms-documentdb-partitionkey': JSON.stringify([id]),
-            },
-          });
-          expect(response.status, await response.text()).toBe(204);
-          accountIds.delete(id);
+          try {
+            const resource = `dbs/${MOCK_IDP_UIAM_COSMOS_DB_NAME}/colls/${MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_ORGANIZATION_SERVICE_ACCOUNTS}/docs/${id}`;
+            const response = await fetch(`${MOCK_IDP_UIAM_COSMOS_DB_URL}/${resource}`, {
+              method: 'DELETE',
+              dispatcher,
+              headers: {
+                ...generateCosmosDBApiRequestHeaders('DELETE', 'docs', resource),
+                'x-ms-documentdb-partitionkey': JSON.stringify([id]),
+              },
+            });
+            expect(response.status, await response.text()).toBe(204);
+            accountIds.delete(id);
+          } catch (error) {
+            failures.push(new Error(`Failed to clean service account ${id}`, { cause: error }));
+          }
         }
       } finally {
         await dispatcher.close();
       }
+      if (failures.length)
+        throw new AggregateError(failures, 'Service-account suite cleanup failed');
     });
 
     apiTest(
@@ -271,7 +296,7 @@ apiTest.describe(
           responseType: 'json',
         });
         expect(stepTest, JSON.stringify(stepTest.body)).toHaveStatusCode(400);
-        expect(stepTest.body.message).toContain('individual step tests');
+        expect(stepTest.body.message).toContain('bypass the saved workflow control flow');
         const after = await apiClient.get(executionsPath, { headers, responseType: 'json' });
         expect(after).toHaveStatusCode(200);
         expect(after.body.total).toBe(before.body.total);
@@ -320,6 +345,26 @@ apiTest.describe(
           responseType: 'json',
         });
         expect(existing).toHaveStatusCode(200);
+        const ordinaryId = await create(
+          apiClient,
+          workflowYaml(accountId).replace(`settings:\n  run_as: ${accountId}\n`, '')
+        );
+        const mixedDelete = await apiClient.delete('api/workflows?force=true', {
+          headers: executorHeaders,
+          body: { ids: [id, ordinaryId] },
+          responseType: 'json',
+        });
+        expect(mixedDelete, JSON.stringify(mixedDelete.body)).toHaveStatusCode(200);
+        expect(mixedDelete.body.deleted).toBe(1);
+        expect(mixedDelete.body.failures).toStrictEqual([
+          { id, error: expect.stringContaining('manage_security') },
+        ]);
+        const ordinary = await apiClient.get(`api/workflows/workflow/${ordinaryId}`, {
+          headers,
+          responseType: 'json',
+        });
+        expect(ordinary).toHaveStatusCode(404);
+        workflowIds.delete(ordinaryId);
         expectAccount(await wait(apiClient, await run(apiClient, id, executorHeaders)), accountId);
       }
     );
@@ -406,7 +451,7 @@ apiTest.describe(
           );
           const executionId = await run(apiClient, id);
           try {
-            await wait(apiClient, executionId, 'waiting_for_input');
+            const pausedExecution = await wait(apiClient, executionId, 'waiting_for_input');
             await expectPausedExecutionSearchable(apiClient, id, executionId);
             const response = await apiClient.delete(`api/workflows/workflow/${id}?force=true`, {
               headers,
@@ -418,6 +463,17 @@ apiTest.describe(
               responseType: 'json',
             });
             expect(workflow).toHaveStatusCode(200);
+            if (bound) {
+              await resume(apiClient, {
+                id,
+                yaml,
+                executionId,
+                stepExecutionId: pausedExecution.stepExecutions?.find(
+                  (step) => step.stepId === 'approval'
+                )?.id,
+              });
+              expectAccount(await wait(apiClient, executionId), accountId);
+            }
             await cleanupWorkflows(apiClient);
           } finally {
             await discardPausedFixture(apiClient, id);
@@ -425,6 +481,38 @@ apiTest.describe(
         }
       );
     }
+
+    apiTest(
+      'cleanup continues after one failure and tolerates already deleted workflows',
+      async ({ apiClient }) => {
+        const firstId = await create(apiClient, workflowYaml(accountId));
+        const secondId = await create(apiClient, workflowYaml(accountId));
+        const failingClient = new Proxy(apiClient, {
+          get(target, property) {
+            if (property === 'put') {
+              return (...args: Parameters<ApiClientFixture['put']>) => {
+                if (args[0] === `api/workflows/workflow/${firstId}`) {
+                  throw new Error('Injected cleanup failure');
+                }
+                return target.put(...args);
+              };
+            }
+            return Reflect.get(target, property);
+          },
+        });
+        await expect(cleanupWorkflows(failingClient)).rejects.toThrow('Workflow cleanup failed');
+        expect(workflowIds.has(firstId)).toBe(true);
+        expect(workflowIds.has(secondId)).toBe(false);
+        const remaining = await apiClient.get(`api/workflows/workflow/${secondId}`, {
+          headers,
+          responseType: 'json',
+        });
+        expect(remaining).toHaveStatusCode(404);
+        workflowIds.add(secondId);
+        await cleanupWorkflows(apiClient);
+        expect(workflowIds.size).toBe(0);
+      }
+    );
 
     apiTest('cleanup removes a workflow left paused for input', async ({ apiClient }) => {
       apiTest.setTimeout(180_000);

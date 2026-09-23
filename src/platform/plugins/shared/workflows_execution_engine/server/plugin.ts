@@ -1202,6 +1202,30 @@ export class WorkflowsExecutionEnginePlugin
       }
     };
 
+    const ensureServiceAccountBinding = async (
+      workflow: WorkflowExecutionEngineModel,
+      spaceId: string
+    ): Promise<void> => {
+      const serviceAccountId = workflow.definition?.settings?.run_as;
+      if (serviceAccountId) {
+        if (!coreStart.security.serviceAccounts.isEnabled())
+          throw Boom.forbidden('Service account execution is disabled.');
+        const saved = await workflowRepository.getWorkflow(workflow.id, spaceId);
+        if (!saved || !isEqual(saved.definition, workflow.definition)) {
+          throw Boom.badRequest(
+            'Service accounts require the latest saved version of the workflow; inline or unsaved YAML cannot run as a service account.'
+          );
+        }
+        const binding = await coreStart.security.serviceAccounts.getWorkloadBinding({
+          workloadType: WORKFLOW_SERVICE_ACCOUNT_TYPE,
+          workloadId: workflow.id,
+          spaceId,
+        });
+        if (binding?.serviceAccountId !== serviceAccountId)
+          throw Boom.forbidden('Workflow service account binding does not match.');
+      }
+    };
+
     const buildExecutionDocument = async (args: {
       workflow: WorkflowExecutionEngineModel;
       context: Record<string, unknown>;
@@ -1209,25 +1233,10 @@ export class WorkflowsExecutionEnginePlugin
       authenticatedUser: string | undefined;
       now: Date;
     }): Promise<WorkflowExecutionForInputRendering> => {
-      const serviceAccountId = args.workflow.definition?.settings?.run_as;
-      if (serviceAccountId) {
-        if (!coreStart.security.serviceAccounts.isEnabled())
-          throw Boom.forbidden('Service account execution is disabled.');
-        const spaceId = (args.context.spaceId as string | undefined) || 'default';
-        const saved = await workflowRepository.getWorkflow(args.workflow.id, spaceId);
-        if (!saved || !isEqual(saved.definition, args.workflow.definition)) {
-          throw Boom.badRequest(
-            'Service accounts require an unchanged saved workflow; inline or unsaved YAML cannot run as a service account.'
-          );
-        }
-        const binding = await coreStart.security.serviceAccounts.getWorkloadBinding({
-          workloadType: WORKFLOW_SERVICE_ACCOUNT_TYPE,
-          workloadId: args.workflow.id,
-          spaceId,
-        });
-        if (binding?.serviceAccountId !== serviceAccountId)
-          throw Boom.forbidden('Workflow service account binding does not match.');
-      }
+      await ensureServiceAccountBinding(
+        args.workflow,
+        (args.context.spaceId as string | undefined) || 'default'
+      );
       return buildWorkflowExecutionDocument({
         ...args,
         maxEventChainDepth: this.config.eventDriven.maxChainDepth,
@@ -1681,7 +1690,7 @@ export class WorkflowsExecutionEnginePlugin
       await checkLicense(plugins.licensing);
       if (workflow.definition?.settings?.run_as) {
         throw Boom.badRequest(
-          'Service accounts cannot be used for individual step tests. Run the complete saved workflow instead.'
+          'Service-account step tests could bypass the saved workflow control flow. Run the complete latest saved workflow instead.'
         );
       }
 

@@ -488,7 +488,9 @@ describe('runWorkflow', () => {
         const reportWorkflowExecution = jest.fn().mockResolvedValue(undefined);
         const meteringService = { reportWorkflowExecution } as unknown as WorkflowsMeteringService;
 
-        workflowExecutionRepository.getWorkflowExecutionById.mockResolvedValue(finalExecution);
+        workflowExecutionRepository.getWorkflowExecutionById
+          .mockResolvedValue(finalExecution)
+          .mockResolvedValueOnce({ ...finalExecution, status: ExecutionStatus.PENDING });
 
         await runWorkflowWithDefaults({ meteringService });
 

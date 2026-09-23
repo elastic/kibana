@@ -2887,6 +2887,8 @@ describe('bound workflow deletion errors', () => {
         hits: [
           {
             _id: 'bound',
+            _seq_no: 1,
+            _primary_term: 1,
             _source: makeSource({
               definition: {
                 version: '1',
@@ -2916,10 +2918,82 @@ describe('bound workflow deletion errors', () => {
       service: new WorkflowCrudService(deps),
       request: httpServerMock.createKibanaRequest(),
       bindings,
+      core,
+      deps,
       conflict,
       deleteDocuments,
     };
   };
+
+  it('deletes ordinary items when a bound item is forbidden', async () => {
+    const { service, request, core, bindings, deleteDocuments } = setup();
+    core.elasticsearch.client.asScoped().asCurrentUser.security.hasPrivileges.mockResolvedValue({
+      has_all_requested: false,
+      username: 'editor',
+      cluster: { manage_security: false },
+      index: {},
+      application: {},
+    });
+    deleteDocuments
+      .mockReset()
+      .mockResolvedValue({ total: 1, deleted: 1, failures: [], successfulIds: ['ordinary'] });
+    await expect(
+      service.deleteWorkflows(['bound', 'ordinary'], 'default', {}, request)
+    ).resolves.toMatchObject({
+      deleted: 1,
+      successfulIds: ['ordinary'],
+      failures: [{ id: 'bound', error: expect.stringContaining('manage_security') }],
+    });
+    expect(bindings.unbindWorkload).not.toHaveBeenCalled();
+    expect(deleteDocuments).toHaveBeenCalledTimes(1);
+  });
+
+  it('rejects active-execution deletion before touching the binding', async () => {
+    const { service, request, deps, bindings, deleteDocuments } = setup();
+    jest
+      .mocked(deps.executionQueryService.getWorkflowExecutions)
+      .mockResolvedValue({ total: 1, results: [], page: 1, size: 1 });
+    await expect(
+      service.deleteWorkflows(['bound'], 'default', { force: true }, request)
+    ).rejects.toThrow('running executions');
+    expect(bindings.unbindWorkload).not.toHaveBeenCalled();
+    expect(bindings.bindWorkload).not.toHaveBeenCalled();
+    expect(deleteDocuments).not.toHaveBeenCalled();
+  });
+
+  it('preserves a concurrent winning binding and returns a typed deletion conflict', async () => {
+    const { service, request, bindings, deleteDocuments } = setup();
+    bindings.getWorkloadBinding
+      .mockReset()
+      .mockResolvedValueOnce({
+        pluginId: 'workflowsExecutionEngine',
+        workloadType: 'workflow',
+        workloadId: 'bound',
+        spaceId: 'default',
+        serviceAccountId: 'account-a',
+        boundAt: '2026-09-23',
+        boundBy: { type: 'user', username: 'owner' },
+      })
+      .mockResolvedValueOnce({
+        pluginId: 'workflowsExecutionEngine',
+        workloadType: 'workflow',
+        workloadId: 'bound',
+        spaceId: 'default',
+        serviceAccountId: 'account-b',
+        boundAt: '2026-09-23',
+        boundBy: { type: 'user', username: 'owner' },
+      });
+    deleteDocuments
+      .mockReset()
+      .mockRejectedValue(
+        Object.assign(new Error('version conflict'), { statusCode: 409, meta: { statusCode: 409 } })
+      );
+    await expect(service.deleteWorkflows(['bound'], 'default', {}, request)).rejects.toBeInstanceOf(
+      WorkflowConflictError
+    );
+    expect(bindings.unbindWorkload).toHaveBeenCalledTimes(1);
+    expect(bindings.bindWorkload).not.toHaveBeenCalled();
+  });
 
   it('rethrows the original single-delete conflict after restoring its binding', async () => {
     const { service, request, bindings, conflict } = setup();

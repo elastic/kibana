@@ -280,6 +280,79 @@ const softDeleteWorkflows = async (
   };
 };
 
+interface GuardedWorkflowDeletion {
+  id: string;
+  document: WorkflowProperties;
+  seqNo: number;
+  primaryTerm: number;
+  deleteDocument: (seqNo: number, primaryTerm: number) => Promise<void>;
+}
+
+const deleteBoundWorkflow = async (
+  guarded: GuardedWorkflowDeletion,
+  params: Parameters<typeof deleteWorkflows>[0]
+): Promise<DeleteWorkflowsResponse> => {
+  const { id, document } = guarded;
+  const client = params.storage.getClient();
+  const write = async (
+    source: WorkflowProperties,
+    revision: { seqNo: number; primaryTerm: number }
+  ) => {
+    const response = await client.index({
+      id,
+      document: source,
+      if_seq_no: revision.seqNo,
+      if_primary_term: revision.primaryTerm,
+      refresh: true,
+    });
+    if (response._seq_no == null || response._primary_term == null) {
+      throw new Error(`Missing revision after disabling workflow ${id}.`);
+    }
+    return { seqNo: response._seq_no, primaryTerm: response._primary_term };
+  };
+
+  if (params.force) {
+    const disabledRevision = await write({ ...document, enabled: false }, guarded);
+    try {
+      // Retain the check after disabling to catch executions started after the preflight.
+      const executions = await params.getWorkflowExecutions(
+        { workflowId: id, statuses: [...NonTerminalExecutionStatuses], size: 1 },
+        params.spaceId
+      );
+      if (executions.total > 0) {
+        throw new WorkflowConflictError(
+          `Cannot force-delete workflow with running executions: ${id}`,
+          id
+        );
+      }
+      await guarded.deleteDocument(disabledRevision.seqNo, disabledRevision.primaryTerm);
+    } catch (error) {
+      try {
+        // Restore only our own disabled revision, never overwrite a concurrent editor.
+        await write(document, disabledRevision);
+      } catch (restoreError) {
+        params.logger.warn(
+          `Could not restore workflow ${id} after rejected deletion: ${String(restoreError)}`
+        );
+      }
+      throw error;
+    }
+  } else {
+    await write({ ...document, enabled: false, deleted_at: new Date() }, guarded);
+  }
+  await unscheduleWorkflowTasks([id], params.taskScheduler);
+  if (params.force) {
+    await purgeWorkflowRelatedData(
+      [id],
+      params.spaceId,
+      params.workflowExecutionsDataClient,
+      params.stepExecutionsDataClient,
+      params.logger
+    );
+  }
+  return { total: 1, deleted: 1, failures: [], successfulIds: [id] };
+};
+
 /**
  * Deletes workflows by IDs. Dispatches to soft or hard delete based on the `force` option.
  */
@@ -287,6 +360,7 @@ export const deleteWorkflows = async (params: {
   ids: string[];
   spaceId: string;
   force: boolean;
+  guardedDelete?: GuardedWorkflowDeletion;
   storage: WorkflowStorage;
   workflowExecutionsDataClient: WorkflowExecutionsDataClient;
   stepExecutionsDataClient: StepExecutionsDataClient;
@@ -297,6 +371,7 @@ export const deleteWorkflows = async (params: {
     sp: string
   ) => Promise<WorkflowExecutionListDto>;
 }): Promise<DeleteWorkflowsResponse> => {
+  if (params.guardedDelete) return deleteBoundWorkflow(params.guardedDelete, params);
   const {
     ids,
     spaceId,

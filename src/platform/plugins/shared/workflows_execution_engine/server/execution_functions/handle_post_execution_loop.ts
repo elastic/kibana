@@ -50,6 +50,8 @@ export async function handlePostExecutionLoop({
       return null;
     });
 
+  if (!finalExecution) return;
+
   if (finalExecution && isTerminalStatus(finalExecution.status)) {
     const concurrency = finalExecution.workflowDefinition?.settings?.concurrency;
     const groupKey = finalExecution.concurrencyGroupKey;
@@ -92,6 +94,12 @@ export async function handlePostExecutionLoop({
           err instanceof Error ? err.message : String(err)
         }`
       );
+    });
+  }
+  if (finalExecution.context?.serviceAccountFailureCleanupPending) {
+    await workflowExecutionRepository.updateWorkflowExecution({
+      id: finalExecution.id,
+      context: { ...finalExecution.context, serviceAccountFailureCleanupPending: false },
     });
   }
 }

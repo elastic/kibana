@@ -140,7 +140,7 @@ describe.each([
     await execute(params);
 
     expect(accounts.withScopedRequestForWorkload).toHaveBeenCalledTimes(1);
-    expect(repository.updateWorkflowExecution).toHaveBeenCalledTimes(1);
+    expect(repository.updateWorkflowExecution).toHaveBeenCalledTimes(2);
     expect({
       parentResumes: params.internalResumeWorkflowExecution.mock.calls,
       queueDrains: jest.mocked(drainConcurrencyQueueSlots).mock.calls,
@@ -163,5 +163,17 @@ describe.each([
     expect(params.workflowExecutionRepository.updateWorkflowExecution).not.toHaveBeenCalled();
     expect(params.stepExecutionRepository.markNonTerminalStepsFailed).not.toHaveBeenCalled();
     expect(setupDependencies).not.toHaveBeenCalled();
+    expect(params.internalResumeWorkflowExecution).not.toHaveBeenCalled();
+    expect(drainConcurrencyQueueSlots).not.toHaveBeenCalled();
+    expect(params.meteringService.reportWorkflowExecution).not.toHaveBeenCalled();
+  });
+
+  it('does not repeat successful identity-failure cleanup on a later invocation', async () => {
+    const { params } = setup();
+    await expect(execute(params)).rejects.toThrow('Binding changed');
+    await execute(params);
+    expect(params.internalResumeWorkflowExecution).toHaveBeenCalledTimes(1);
+    expect(drainConcurrencyQueueSlots).toHaveBeenCalledTimes(1);
+    expect(params.meteringService.reportWorkflowExecution).toHaveBeenCalledTimes(1);
   });
 });

@@ -1,5 +1,5 @@
 {
-  "sha1": "ad30a0f7f203d553a407684f81e575f95dd26f44",
+  "sha1": "6f5ff69c5aea159e72844ea51fb3b60ec6dca9f9",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -13,8 +13,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
-        "line": 224,
-        "column": 32
+        "line": 248,
+        "column": 7
       }
     },
     {
@@ -26,8 +26,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
-        "line": 255,
-        "column": 7
+        "line": 275,
+        "column": 16
       }
     },
     {
@@ -39,8 +39,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
-        "line": 294,
-        "column": 16
+        "line": 317,
+        "column": 27
       }
     },
     {
@@ -52,8 +52,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
-        "line": 402,
-        "column": 24
+        "line": 453,
+        "column": 15
       }
     },
     {
@@ -65,8 +65,21 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
-        "line": 402,
-        "column": 24
+        "line": 453,
+        "column": 15
+      }
+    },
+    {
+      "id": "59645759a29407d-e04cfefe05a81d9",
+      "title": "[NON-MKI] Saved workflow service account execution cleanup continues after one failure and tolerates already deleted workflows",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
+        "line": 490,
+        "column": 28
       }
     },
     {
@@ -78,8 +91,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
-        "line": 429,
-        "column": 90
+        "line": 518,
+        "column": 15
       }
     },
     {
@@ -91,8 +104,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
-        "line": 446,
-        "column": 13
+        "line": 534,
+        "column": 67
       }
     },
     {
@@ -104,8 +117,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
-        "line": 450,
-        "column": 21
+        "line": 539,
+        "column": 7
       }
     },
     {
@@ -117,7 +130,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
-        "line": 468,
+        "line": 557,
         "column": 14
       }
     },
@@ -130,8 +143,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
-        "line": 494,
-        "column": 20
+        "line": 582,
+        "column": 71
       }
     },
     {
@@ -143,8 +156,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
-        "line": 543,
-        "column": 16
+        "line": 632,
+        "column": 27
       }
     }
   ]
