@@ -9,6 +9,7 @@ import {
   ConversationOriginType,
   ConversationRoundStepType,
   EventActorType,
+  TimelineEventType,
   ToolResultType,
 } from '@kbn/agent-builder-common';
 import type { ToolResult } from '@kbn/agent-builder-common';
@@ -21,6 +22,7 @@ import { createExecutionAbortedEvent } from './items/execution_aborted_event.fac
 import { createExecutionStepEvent } from './items/execution_step.factory';
 import { createPromptResponseEvent } from './items/prompt_response_event.factory';
 import { createAttachmentAddedEvent } from './items/attachment_added_event.factory';
+import { createAttachmentUpdatedEvent } from './items/attachment_updated_event.factory';
 import type { ConversationEvent } from '@kbn/agent-builder-common';
 import type { ExecutionStreamingEvent, TimelineDisplayEvent } from '../../../../services/events';
 import { EXECUTION_STREAMING_EVENT_TYPE } from '../../../../services/events';
@@ -795,12 +797,83 @@ describe('groupTimelineEvents with events outside the built-in set', () => {
 
     expect(items.map((item) => item.kind)).toEqual(['userMessage', 'agentTurn']);
   });
+});
 
-  it('still drops attachment events', () => {
-    const attachmentAdded = createAttachmentAddedEvent({ id: 'aa-1' });
+describe('groupTimelineEvents with attachment events', () => {
+  const user = createUserMessageEvent({ id: 'user-1' });
+  const started = createExecutionStartedEvent({ id: 'es-1', execution_id: 'exec-1' });
+  const step = createExecutionStepEvent({ id: 'step-1', execution_id: 'exec-1' });
+  const terminated = createExecutionTerminatedEvent({ id: 'et-1', execution_id: 'exec-1' });
 
-    const items = buildItems([user, started, terminated, attachmentAdded]);
+  it('emits an unresolved attachment item for an added event flagged render_inline', () => {
+    const added = createAttachmentAddedEvent({ id: 'aa-1' });
+
+    const items = buildItems([user, started, terminated, added]);
+
+    expect(items).toHaveLength(3);
+    expect(items[2]).toEqual({ kind: 'attachment', key: 'aa-1', event: added });
+  });
+
+  it('never emits when render_inline is false', () => {
+    const added = createAttachmentAddedEvent({
+      id: 'aa-1',
+      data: { ...createAttachmentAddedEvent().data, render_inline: false },
+    });
+    const updated = createAttachmentUpdatedEvent({
+      id: 'au-1',
+      data: { ...createAttachmentUpdatedEvent().data, render_inline: false },
+    });
+
+    const items = buildItems([user, started, terminated, added, updated]);
 
     expect(items.map((item) => item.kind)).toEqual(['userMessage', 'agentTurn']);
+  });
+
+  it('gives an updated event its own item keyed by the event id', () => {
+    const added = createAttachmentAddedEvent({ id: 'aa-1' });
+    const updated = createAttachmentUpdatedEvent({ id: 'au-1' });
+
+    const items = buildItems([user, started, terminated, added, updated]);
+
+    expect(items.map((item) => item.key)).toEqual(['user-1', 'exec-1', 'aa-1', 'au-1']);
+    expect(items[3]).toEqual({ kind: 'attachment', key: 'au-1', event: updated });
+  });
+
+  it('emits nothing for a deleted event', () => {
+    const deleted = {
+      ...createAttachmentAddedEvent({ id: 'ad-1' }),
+      type: TimelineEventType.attachmentDeleted,
+      data: {
+        attachment_id: 'attachment-1',
+        attachment_type: 'dashboard',
+        hard_delete: true,
+        source: 'http_api',
+      },
+    } as unknown as ConversationEvent;
+
+    const items = buildItems([user, started, terminated, deleted]);
+
+    expect(items.map((item) => item.kind)).toEqual(['userMessage', 'agentTurn']);
+  });
+
+  it('keeps array order, so an event between two turns sits between them', () => {
+    const added = createAttachmentAddedEvent({ id: 'aa-1' });
+    const user2 = createUserMessageEvent({ id: 'user-2' });
+    const started2 = createExecutionStartedEvent({ id: 'es-2', execution_id: 'exec-2' });
+    const terminated2 = createExecutionTerminatedEvent({ id: 'et-2', execution_id: 'exec-2' });
+
+    const items = buildItems([user, started, terminated, added, user2, started2, terminated2]);
+
+    expect(items.map((item) => item.key)).toEqual(['user-1', 'exec-1', 'aa-1', 'user-2', 'exec-2']);
+  });
+
+  it('places an event that fell between two step events after the whole execution', () => {
+    const added = createAttachmentAddedEvent({ id: 'aa-1' });
+    const step2 = createExecutionStepEvent({ id: 'step-2', execution_id: 'exec-1' });
+
+    const items = buildItems([user, started, step, added, step2, terminated]);
+
+    expect(items.map((item) => item.key)).toEqual(['user-1', 'exec-1', 'aa-1']);
+    expect(items[1].kind === 'agentTurn' && items[1].steps).toHaveLength(2);
   });
 });

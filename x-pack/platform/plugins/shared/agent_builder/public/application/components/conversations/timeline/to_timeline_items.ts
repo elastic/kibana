@@ -83,6 +83,15 @@ export const groupTimelineEvents = (
         foldAttachmentRefs(seenAttachmentRefs, event.data.input?.attachment_refs);
         break;
 
+      case TimelineEventType.attachmentAdded:
+      case TimelineEventType.attachmentUpdated:
+        // Only the server's explicit ask to show the attachment becomes an item. Whether the
+        // attachment still exists and can draw is the resolve step's call.
+        if (event.data.render_inline) {
+          ordered.push({ kind: 'attachment', key: event.id, event });
+        }
+        break;
+
       case TimelineEventType.executionStarted: {
         if (!event.execution_id) break;
         const acc = getOrCreateAcc(event.execution_id, event.created_at, event.trigger_event_id);
