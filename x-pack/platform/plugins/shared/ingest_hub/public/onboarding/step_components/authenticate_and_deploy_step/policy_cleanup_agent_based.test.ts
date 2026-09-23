@@ -59,7 +59,13 @@ beforeEach(() => {
   jest.clearAllMocks();
   mockGetPackageInfo.mockResolvedValue({ data: { item: { version: '3.0.0', vars: [] } } });
   mockGetOnePackagePolicy.mockResolvedValue({
-    data: { item: { name: 'existing-policy-name', namespace: 'existing-ns', package: { version: '2.5.0' } } },
+    data: {
+      item: {
+        name: 'existing-policy-name',
+        namespace: 'existing-ns',
+        package: { version: '2.5.0' },
+      },
+    },
   });
   mockDeletePackagePolicy.mockResolvedValue({});
   mockUpdatePackagePolicy.mockResolvedValue({});
