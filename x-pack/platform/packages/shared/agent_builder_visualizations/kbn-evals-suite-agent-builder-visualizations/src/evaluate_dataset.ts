@@ -147,116 +147,147 @@ export function createEvaluateDataset({
   esClient: EsClient;
   log: ToolingLog;
 }): EvaluateDataset {
-  const visualizationExtractor = (output: VisualizationAgentTaskOutput) =>
-    output.visualizations ?? extractVisualizations(output);
+  const buildEvaluators = () => {
+    const visualizationExtractor = (output: VisualizationAgentTaskOutput) =>
+      output.visualizations ?? extractVisualizations(output);
 
-  // Four evaluators execute the candidate ES|QL; one runner means each query runs once.
-  const runQuery = createEsqlQueryRunner(esClient);
+    // Four evaluators execute the candidate ES|QL; one runner means each query runs once.
+    // Built per dataset run so cached results never outlive the fixtures a spec's
+    // beforeAll (re)installs.
+    const runQuery = createEsqlQueryRunner(esClient);
 
-  const esqlExecutionEvaluator = createEsqlExecutionEvaluator<
-    VisualizationDatasetExample,
-    VisualizationAgentTaskOutput
-  >({
-    esClient,
-    runQuery,
-    // Last-turn visualizations only; `output.steps` also carries the first turn of edit examples.
-    queryExtractor: (output) =>
-      visualizationExtractor(output).map((visualization) => visualization.esql),
-    includeHitDetection: true,
-  });
+    const esqlExecutionEvaluator = createEsqlExecutionEvaluator<
+      VisualizationDatasetExample,
+      VisualizationAgentTaskOutput
+    >({
+      esClient,
+      runQuery,
+      // Last-turn visualizations only; `output.steps` also carries the first turn of edit examples.
+      queryExtractor: (output) =>
+        visualizationExtractor(output).map((visualization) => visualization.esql),
+      includeHitDetection: true,
+    });
 
-  const esqlEquivalenceEvaluator = createCalibratedEsqlEquivalenceEvaluator<
-    VisualizationDatasetExample,
-    VisualizationAgentTaskOutput
-  >({
-    inferenceClient,
-    log,
-    predictionExtractor: (output) => output.esql ?? '',
-    groundTruthExtractor: (expected) => extractGoldQuery(expected),
-  });
+    const esqlEquivalenceEvaluator = createCalibratedEsqlEquivalenceEvaluator<
+      VisualizationDatasetExample,
+      VisualizationAgentTaskOutput
+    >({
+      inferenceClient,
+      log,
+      predictionExtractor: (output) => output.esql ?? '',
+      groundTruthExtractor: (expected) => extractGoldQuery(expected),
+    });
 
-  const esqlResultEquivalenceEvaluator = createEsqlResultEquivalenceEvaluator<
-    VisualizationDatasetExample,
-    VisualizationAgentTaskOutput
-  >({
-    esClient,
-    runQuery,
-    predictionExtractor: (output) => output.esql ?? '',
-    groundTruthExtractor: (expected) => extractGoldQuery(expected),
-  });
+    const esqlResultEquivalenceEvaluator = createEsqlResultEquivalenceEvaluator<
+      VisualizationDatasetExample,
+      VisualizationAgentTaskOutput
+    >({
+      esClient,
+      runQuery,
+      predictionExtractor: (output) => output.esql ?? '',
+      groundTruthExtractor: (expected) => extractGoldQuery(expected),
+    });
 
-  const chartTypeVsIntentEvaluator = createChartTypeVsIntentEvaluator<
-    VisualizationDatasetExample,
-    VisualizationAgentTaskOutput
-  >({
-    visualizationExtractor,
-    questionExtractor: describeRequest,
-    expectedChartFormExtractor: (expected) => extractGoldChartForm(expected),
-    judge: createChartIntentJudge({ inferenceClient, log }),
-  });
+    const chartTypeVsIntentEvaluator = createChartTypeVsIntentEvaluator<
+      VisualizationDatasetExample,
+      VisualizationAgentTaskOutput
+    >({
+      visualizationExtractor,
+      questionExtractor: describeRequest,
+      expectedChartFormExtractor: (expected) => extractGoldChartForm(expected),
+      judge: createChartIntentJudge({ inferenceClient, log }),
+    });
 
-  const rendererVsIntentEvaluator = createRendererVsIntentEvaluator<
-    VisualizationDatasetExample,
-    VisualizationAgentTaskOutput
-  >({
-    visualizationExtractor,
-    expectedRendererExtractor: (expected) => extractGoldRenderer(expected),
-  });
+    const rendererVsIntentEvaluator = createRendererVsIntentEvaluator<
+      VisualizationDatasetExample,
+      VisualizationAgentTaskOutput
+    >({
+      visualizationExtractor,
+      expectedRendererExtractor: (expected) => extractGoldRenderer(expected),
+    });
 
-  const visualizationConfigValidityEvaluator = createVisualizationConfigValidityEvaluator<
-    VisualizationDatasetExample,
-    VisualizationAgentTaskOutput
-  >({
-    visualizationExtractor,
-  });
+    const visualizationConfigValidityEvaluator = createVisualizationConfigValidityEvaluator<
+      VisualizationDatasetExample,
+      VisualizationAgentTaskOutput
+    >({
+      visualizationExtractor,
+    });
 
-  const visualizationConfigVsIntentEvaluator = createVisualizationConfigVsIntentEvaluator<
-    VisualizationDatasetExample,
-    VisualizationAgentTaskOutput
-  >({
-    visualizationExtractor,
-    expectedConfigExtractor: (expected) => expected?.config,
-  });
+    const visualizationConfigVsIntentEvaluator = createVisualizationConfigVsIntentEvaluator<
+      VisualizationDatasetExample,
+      VisualizationAgentTaskOutput
+    >({
+      visualizationExtractor,
+      expectedConfigExtractor: (expected) => expected?.config,
+    });
 
-  const columnBindingIntegrityEvaluator = createColumnBindingIntegrityEvaluator<
-    VisualizationDatasetExample,
-    VisualizationAgentTaskOutput
-  >({
-    esClient,
-    runQuery,
-    visualizationExtractor,
-  });
+    const columnBindingIntegrityEvaluator = createColumnBindingIntegrityEvaluator<
+      VisualizationDatasetExample,
+      VisualizationAgentTaskOutput
+    >({
+      esClient,
+      runQuery,
+      visualizationExtractor,
+    });
 
-  const chartCompatibleResultEvaluator = createChartCompatibleResultEvaluator<
-    VisualizationDatasetExample,
-    VisualizationAgentTaskOutput
-  >({
-    esClient,
-    runQuery,
-    visualizationExtractor,
-    expectedChartTypeExtractor: (expected) => extractGoldChartType(expected),
-  });
+    const chartCompatibleResultEvaluator = createChartCompatibleResultEvaluator<
+      VisualizationDatasetExample,
+      VisualizationAgentTaskOutput
+    >({
+      esClient,
+      runQuery,
+      visualizationExtractor,
+      expectedChartTypeExtractor: (expected) => extractGoldChartType(expected),
+    });
 
-  const visualizationRefusalEvaluator = createVisualizationRefusalEvaluator<
-    VisualizationDatasetExample,
-    VisualizationAgentTaskOutput
-  >({
-    visualizationExtractor,
-    messagesExtractor: (output) => output.messages.map(({ message }) => message),
-    promptsExtractor: (output) => output.prompts,
-    expectedRefusalExtractor: (expected) => expected?.refusal,
-  });
+    const visualizationRefusalEvaluator = createVisualizationRefusalEvaluator<
+      VisualizationDatasetExample,
+      VisualizationAgentTaskOutput
+    >({
+      visualizationExtractor,
+      messagesExtractor: (output) => output.messages.map(({ message }) => message),
+      promptsExtractor: (output) => output.prompts,
+      expectedRefusalExtractor: (expected) => expected?.refusal,
+    });
 
-  const trajectoryEvaluator = createTrajectoryEvaluator({
-    extractToolCalls: (output) => getToolIds(output as VisualizationAgentTaskOutput),
-    goldenPathExtractor: (expected) =>
-      (expected as VisualizationDatasetExample['output'])?.goldenToolPath ?? [],
-    orderWeight: 0.4,
-    coverageWeight: 0.6,
-  });
+    const trajectoryEvaluator = createTrajectoryEvaluator({
+      extractToolCalls: (output) => getToolIds(output as VisualizationAgentTaskOutput),
+      goldenPathExtractor: (expected) =>
+        (expected as VisualizationDatasetExample['output'])?.goldenToolPath ?? [],
+      orderWeight: 0.4,
+      coverageWeight: 0.6,
+    });
+
+    return {
+      esqlExecutionEvaluator,
+      esqlEquivalenceEvaluator,
+      esqlResultEquivalenceEvaluator,
+      chartTypeVsIntentEvaluator,
+      rendererVsIntentEvaluator,
+      visualizationConfigValidityEvaluator,
+      visualizationConfigVsIntentEvaluator,
+      columnBindingIntegrityEvaluator,
+      chartCompatibleResultEvaluator,
+      visualizationRefusalEvaluator,
+      trajectoryEvaluator,
+    };
+  };
 
   return async function evaluateDataset({ dataset: { name, description, examples } }) {
     const dataset = { name, description, examples } satisfies EvaluationDataset;
+    const {
+      esqlExecutionEvaluator,
+      esqlEquivalenceEvaluator,
+      esqlResultEquivalenceEvaluator,
+      chartTypeVsIntentEvaluator,
+      rendererVsIntentEvaluator,
+      visualizationConfigValidityEvaluator,
+      visualizationConfigVsIntentEvaluator,
+      columnBindingIntegrityEvaluator,
+      chartCompatibleResultEvaluator,
+      visualizationRefusalEvaluator,
+      trajectoryEvaluator,
+    } = buildEvaluators();
 
     const task: ExperimentTask<VisualizationDatasetExample, VisualizationAgentTaskOutput> = async ({
       input,
