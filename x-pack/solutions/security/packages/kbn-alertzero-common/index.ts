@@ -9,7 +9,7 @@
  * Explicit allow-list of the public surface (single entry, single source of truth).
  *
  * Prefer named `export { … } from '…'` over `export *`. Star re-exports defeat
- * `@kbn/optimizer` tree-shaking: importing a few constants from the plugin
+ * `@kbn/rspack-optimizer` tree-shaking: importing a few constants from the plugin
  * entry can otherwise drag Zod schemas into page-load JS.
  */
 
@@ -37,9 +37,9 @@ export {
   ALERTZERO_WORKER_URL_TEMPLATE,
   SYSTEM_SECURITY_WATCH_CATALOG,
   SYSTEM_SECURITY_WATCH_HUNT_ID,
-  SYSTEM_SECURITY_WATCH_DEEP_ID,
   SYSTEM_SECURITY_WATCH_DETECTION_ID,
   SYSTEM_SECURITY_WATCH_FLOOR_ID,
+  SYSTEM_SECURITY_WATCH_FORENSICS_ID,
   SYSTEM_SECURITY_WATCH_IDS,
   SYSTEM_SECURITY_WATCH_OFFICER_ID,
   SYSTEM_SECURITY_WORKER_CATALOG,
@@ -48,6 +48,7 @@ export {
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
+  SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
   SYSTEM_SECURITY_WORKER_IDS,
   TEMPLATE_ID_ESCALATION,
   TEMPLATE_ID_INVESTIGATION,
@@ -55,9 +56,9 @@ export {
   WATCH_AUTONOMY_REVIEW_GATED,
   WORKER_SCHEDULE_UNITS,
   WATCH_HUNT_TAG,
-  WATCH_DEEP_TAG,
   WATCH_DETECTION_TAG,
   WATCH_FLOOR_TAG,
+  WATCH_FORENSICS_TAG,
   WATCH_OFFICER_TAG,
   WATCH_TAG,
   WATCH_TIER_TAGS,
@@ -111,6 +112,7 @@ export {
   coverageFromSchedule,
   createCatalogWatchPlaceholder,
   isOnDutyNow,
+  resolveWatchAccent,
 } from './impl/watches/watch_helpers';
 export type {
   CatalogWatchId,
