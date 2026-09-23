@@ -106,6 +106,7 @@ export const createVislibVisController = (
             visParams,
             fireEvent,
             hasCompatibleActions,
+            handlers.isInteractive(),
             uiState as PersistedState
           );
         }
@@ -135,10 +136,10 @@ export const createVislibVisController = (
           visParams,
           fireEvent,
           hasCompatibleActions,
+          handlers.isInteractive(),
           uiState as PersistedState
         );
       }
-
       this.vislibVis.render(esResponse, uiState);
     }
 
@@ -148,6 +149,7 @@ export const createVislibVisController = (
       visParams: BasicVislibParams,
       fireEvent: IInterpreterRenderHandlers['event'],
       hasCompatibleActions: IInterpreterRenderHandlers['hasCompatibleActions'],
+      isInteractive: boolean,
       uiState?: PersistedState
     ) {
       const { legendPosition } = visParams;
@@ -161,6 +163,7 @@ export const createVislibVisController = (
           hasCompatibleActions={hasCompatibleActions}
           addLegend={this.showLegend(visParams)}
           position={legendPosition}
+          isInteractive={isInteractive}
         />,
         startServices
       )(this.legendEl);
