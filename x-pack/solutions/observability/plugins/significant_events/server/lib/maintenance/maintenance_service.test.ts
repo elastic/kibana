@@ -273,7 +273,11 @@ function makeService(params?: {
     core: {
       savedObjects,
       dataStreams: { initializeClient },
-      elasticsearch: { client: { asInternalUser: esClient } },
+      elasticsearch: {
+        client: {
+          asScoped: jest.fn(() => ({ asCurrentUser: esClient })),
+        },
+      },
       uiSettings: {
         asScopedToClient: jest.fn(() => spaceUiSettingsClient),
       },
