@@ -12,6 +12,7 @@ import {
   AS_CODE_DATA_VIEW_SPEC_TYPE,
   AS_CODE_ESQL_DATA_SOURCE_TYPE,
 } from '@kbn/as-code-data-views-schema';
+import type { DiscoverSessionApiEmbeddableTab } from '@kbn/as-code-discover-schema';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-common/src/server_types';
 import {
   fromStoredSearchEmbeddable,
@@ -738,7 +739,7 @@ describe('search embeddable transform utils', () => {
     });
   });
 
-  describe('fromStoredPanelOverrides', () => {
+  describe('toDiscoverSessionEmbeddableOverrides', () => {
     it('converts stored state with all fields to panel overrides', () => {
       const storedState: StoredSearchEmbeddableState = {
         sort: [['@timestamp', 'desc']],
@@ -820,7 +821,7 @@ describe('search embeddable transform utils', () => {
     });
   });
 
-  describe('toStoredPanelOverrides', () => {
+  describe('fromDiscoverSessionEmbeddableOverrides', () => {
     it('converts panel overrides with all fields to stored state', () => {
       const apiState = {
         sort: [{ name: '@timestamp', direction: 'desc' as const }],
@@ -890,7 +891,7 @@ describe('search embeddable transform utils', () => {
       expect(result.headerRowHeight).toBe(2);
     });
 
-    it('round-trips with fromStoredPanelOverrides', () => {
+    it('round-trips with toDiscoverSessionEmbeddableOverrides', () => {
       const storedState: StoredSearchEmbeddableState = {
         sort: [
           ['@timestamp', 'desc'],
@@ -1072,7 +1073,7 @@ describe('search embeddable transform utils', () => {
 
   describe('toStoredTab', () => {
     it('converts API classic tab to stored tab with references', () => {
-      const apiTab: DiscoverSessionEmbeddableByValueState['tabs'][0] = {
+      const apiTab: DiscoverSessionApiEmbeddableTab = {
         type: DiscoverTabType.Default,
         column_order: ['message', '@timestamp'],
         column_settings: { '@timestamp': { width: 200 } },
@@ -1123,7 +1124,7 @@ describe('search embeddable transform utils', () => {
       const references: SavedObjectReference[] = [
         { name: 'kibanaSavedObjectMeta.searchSourceJSON.index', type: 'index-pattern', id: 'dv-1' },
       ];
-      const apiTab: DiscoverSessionEmbeddableByValueState['tabs'][0] = {
+      const apiTab: DiscoverSessionApiEmbeddableTab = {
         type: DiscoverTabType.Default,
         column_order: [],
         sort: [],
@@ -1156,7 +1157,7 @@ describe('search embeddable transform utils', () => {
     });
 
     it('converts API tab with index-pattern data_source (no refs) when inline', () => {
-      const apiTab: DiscoverSessionEmbeddableByValueState['tabs'][0] = {
+      const apiTab: DiscoverSessionApiEmbeddableTab = {
         type: DiscoverTabType.Default,
         column_order: ['foo'],
         sort: [],
@@ -1183,7 +1184,7 @@ describe('search embeddable transform utils', () => {
 
     it('converts API ES|QL tab to stored tab without index', () => {
       const esql = 'FROM logs-* | LIMIT 50';
-      const apiTab: DiscoverSessionEmbeddableByValueState['tabs'][0] = {
+      const apiTab: DiscoverSessionApiEmbeddableTab = {
         type: DiscoverTabType.Default,
         column_order: ['@timestamp'],
         sort: [],

@@ -8,23 +8,10 @@
  */
 
 export {
-  dataTableSchema,
-  dataTableLimitsSchema,
-  viewModeSchema,
-  discoverSessionApiEmbeddableOverridesSchema,
-  discoverSessionApiClassicTabBaseSchema,
-  discoverSessionApiEsqlTabBaseSchema,
-  discoverSessionApiTabBaseSchema,
   discoverSessionApiEmbeddableByValueConfigSchema,
   discoverSessionApiEmbeddableByReferenceConfigSchema,
-  visContextSchema,
   discoverSessionApiControlPanelSchema,
   discoverSessionApiControlPanelsSchema,
-  discoverSessionApiDefaultTabTypeStateSchema,
-  discoverSessionApiClassicTabSchema,
-  discoverSessionApiEsqlTabSchema,
-  discoverSessionApiMetricsTabSchema,
-  discoverSessionApiMetricsTabTypeStateSchema,
   discoverSessionApiTabSchema,
   discoverSessionApiDataSchema,
 } from './src/schemas';
@@ -42,6 +29,7 @@ export type {
   DiscoverSessionApiMetricsTabTypeState,
   DiscoverSessionApiTabTypeState,
   DiscoverSessionApiEmbeddableOverrides,
+  DiscoverSessionApiEmbeddableTab,
   DiscoverSessionApiEmbeddableByValueConfig,
   DiscoverSessionApiEmbeddableByReferenceConfig,
 } from './src/types';

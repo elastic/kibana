@@ -27,6 +27,7 @@ import type {
   discoverSessionApiEmbeddableByReferenceConfigSchema,
 } from './schemas/embeddable';
 import type { discoverSessionApiEmbeddableOverridesSchema } from './schemas/embeddable_overrides';
+import type { discoverSessionApiEmbeddableTabSchema } from './schemas/embeddable_tab';
 
 // Output types (after parsing — all defaults resolved)
 // Base tabs hold the settings shared by panels and sessions.
@@ -57,6 +58,9 @@ export type DiscoverSessionApiDataInput = z.input<typeof discoverSessionApiDataS
 // Discover embeddable configuration; title, time range and drilldowns are added separately.
 export type DiscoverSessionApiEmbeddableOverrides = z.output<
   typeof discoverSessionApiEmbeddableOverridesSchema
+>;
+export type DiscoverSessionApiEmbeddableTab = z.output<
+  typeof discoverSessionApiEmbeddableTabSchema
 >;
 export type DiscoverSessionApiEmbeddableByValueConfig = z.output<
   typeof discoverSessionApiEmbeddableByValueConfigSchema

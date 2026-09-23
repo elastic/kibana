@@ -26,6 +26,7 @@ import { DiscoverTabType } from '@kbn/discover-session-constants';
 import type {
   DiscoverSessionApiMetricsTabTypeState,
   DiscoverSessionApiEmbeddableOverrides,
+  DiscoverSessionApiEmbeddableTab,
   DiscoverSessionApiTabBase,
 } from '@kbn/as-code-discover-schema';
 import { isOfAggregateQueryType } from '@kbn/es-query';
@@ -154,7 +155,7 @@ export function fromStoredSearchEmbeddableByValue(
   const apiTab = fromStoredTab(tab.attributes, references);
   // Saved Metrics settings only apply to an ES|QL tab; a mismatch is dropped rather than failing
   // the panel, unlike the session API which rejects the session outright.
-  const typedTab: DiscoverSessionEmbeddableByValueState['tabs'][number] =
+  const typedTab: DiscoverSessionApiEmbeddableTab =
     tab.attributes.tabTypeState && isDiscoverSessionEsqlTab(apiTab)
       ? { ...apiTab, ...fromStoredMetricsTabTypeState(tab.attributes.tabTypeState) }
       : { ...apiTab, type: DiscoverTabType.Default };
