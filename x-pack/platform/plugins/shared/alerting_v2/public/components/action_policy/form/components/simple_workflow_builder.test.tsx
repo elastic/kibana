@@ -9,7 +9,7 @@ import React from 'react';
 import '@testing-library/jest-dom';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import type { ConnectorCreationMode } from '@kbn/alerting-v2-rule-form';
+import type { ConnectorCreationConfig } from '@kbn/alerting-v2-rule-form';
 import { I18nProvider } from '@kbn/i18n-react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { DEFAULT_FORM_STATE } from '../constants';
@@ -50,28 +50,31 @@ jest.mock('@kbn/alerting-v2-rule-form', () => ({
   getInlineActionStepDefinition: (id: string) => INLINE_DEFS.find((d) => d.id === id),
   InlineWorkflowEditor: ({
     value,
-    connectorCreationMode,
+    connectorCreation,
   }: {
     value: { id: string };
-    connectorCreationMode?: ConnectorCreationMode;
+    connectorCreation?: ConnectorCreationConfig;
   }) => (
     <div
       data-test-subj={`inlineWorkflowEditor-${value.id}`}
-      data-connector-creation-mode={connectorCreationMode}
+      data-connector-creation-mode={connectorCreation?.mode}
+      data-connector-creation-href={
+        connectorCreation?.mode === 'new-tab' ? connectorCreation.href : undefined
+      }
     />
   ),
 }));
 
 const renderBuilder = (
   defaultValues: ActionPolicyFormState = DEFAULT_FORM_STATE,
-  connectorCreationMode?: ConnectorCreationMode
+  connectorCreation?: ConnectorCreationConfig
 ) => {
   const TestComponent = () => {
     const methods = useForm<ActionPolicyFormState>({ defaultValues });
     return (
       <I18nProvider>
         <FormProvider {...methods}>
-          <SimpleWorkflowBuilder connectorCreationMode={connectorCreationMode} />
+          <SimpleWorkflowBuilder connectorCreation={connectorCreation} />
         </FormProvider>
       </I18nProvider>
     );
@@ -110,15 +113,19 @@ describe('SimpleWorkflowBuilder', () => {
     expect(screen.getByTestId('simpleWorkflowAdd-slack')).toBeInTheDocument();
   });
 
-  it('forwards the connector creation mode to inline workflow editors', async () => {
+  it('forwards the connector creation config to inline workflow editors', async () => {
     const user = userEvent.setup();
-    renderBuilder(DEFAULT_FORM_STATE, 'new-tab');
+    renderBuilder(DEFAULT_FORM_STATE, { mode: 'new-tab', href: '/connectors' });
 
     await user.click(screen.getByTestId('simpleWorkflowAdd-slack'));
 
     expect(await screen.findByTestId(/inlineWorkflowEditor-/)).toHaveAttribute(
       'data-connector-creation-mode',
       'new-tab'
+    );
+    expect(screen.getByTestId(/inlineWorkflowEditor-/)).toHaveAttribute(
+      'data-connector-creation-href',
+      '/connectors'
     );
   });
 

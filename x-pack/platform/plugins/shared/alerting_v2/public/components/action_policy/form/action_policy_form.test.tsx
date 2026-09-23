@@ -55,14 +55,14 @@ jest.mock('@kbn/alerting-v2-rule-form', () => ({
   getInlineActionStepDefinition: (id: string) => INLINE_DEFS.find((d) => d.id === id),
   InlineWorkflowEditor: ({
     value,
-    connectorCreationMode,
+    connectorCreation,
   }: {
     value: { id: string };
-    connectorCreationMode?: string;
+    connectorCreation?: { mode: string; href?: string };
   }) => (
     <div
       data-test-subj={`inlineWorkflowEditor-${value.id}`}
-      data-connector-creation-mode={connectorCreationMode}
+      data-connector-creation-mode={connectorCreation?.mode}
     />
   ),
   isActionValid: () => true,
@@ -148,7 +148,7 @@ describe('ActionPolicyForm', () => {
   it('only collapses configured sections and keeps notification controls initially closed', async () => {
     const user = userEvent.setup();
     renderForm(DEFAULT_FORM_STATE, {
-      connectorCreationMode: 'flyout',
+      connectorCreation: { mode: 'new-tab', href: '/connectors' },
       collapsibleSections: {
         notificationControls: { initialIsOpen: false },
         destination: { initialIsOpen: true },
@@ -177,7 +177,7 @@ describe('ActionPolicyForm', () => {
     await user.click(screen.getByTestId('simpleWorkflowAdd-slack'));
     expect(await screen.findByTestId(/inlineWorkflowEditor-/)).toHaveAttribute(
       'data-connector-creation-mode',
-      'flyout'
+      'new-tab'
     );
   });
 

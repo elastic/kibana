@@ -8,20 +8,20 @@
 import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { getInlineActionStepDefinition } from '../registry';
-import type { ConnectorCreationMode, InlineWorkflowActionDraft } from '../types';
+import type { ConnectorCreationConfig, InlineWorkflowActionDraft } from '../types';
 import { ConnectorSelector } from './connector_selector';
 import { ParamsEditor } from './params_editor';
 
 export interface InlineWorkflowEditorProps {
   value: InlineWorkflowActionDraft;
   onChange: (next: InlineWorkflowActionDraft) => void;
-  connectorCreationMode?: ConnectorCreationMode;
+  connectorCreation?: ConnectorCreationConfig;
 }
 
 export const InlineWorkflowEditor = ({
   value,
   onChange,
-  connectorCreationMode,
+  connectorCreation,
 }: InlineWorkflowEditorProps) => {
   const definition = getInlineActionStepDefinition(value.stepType);
   if (!definition) {
@@ -33,7 +33,7 @@ export const InlineWorkflowEditor = ({
       <ConnectorSelector
         connectorTypeId={definition.connectorTypeId}
         value={value.connectorId}
-        connectorCreationMode={connectorCreationMode}
+        connectorCreationConfig={connectorCreation}
         onChange={(connectorId) => {
           if (connectorId === value.connectorId) return;
           onChange({ ...value, connectorId });

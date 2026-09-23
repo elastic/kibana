@@ -11,7 +11,10 @@ import type {
   PolicyMatcher,
   ThrottleStrategy,
 } from '@kbn/alerting-v2-schemas';
-import type { ConnectorCreationMode, InlineWorkflowActionDraft } from '@kbn/alerting-v2-rule-form';
+import type {
+  ConnectorCreationConfig,
+  InlineWorkflowActionDraft,
+} from '@kbn/alerting-v2-rule-form';
 
 export type ActionPolicyFormCollapsibleSection = 'notificationControls' | 'destination';
 
@@ -20,7 +23,7 @@ export interface ActionPolicyFormCollapsibleSectionConfig {
 }
 
 export interface ActionPolicyFormConfig {
-  readonly connectorCreationMode: ConnectorCreationMode;
+  readonly connectorCreation: ConnectorCreationConfig;
   readonly collapsibleSections?: Partial<
     Record<ActionPolicyFormCollapsibleSection, ActionPolicyFormCollapsibleSectionConfig>
   >;

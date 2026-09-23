@@ -22,16 +22,21 @@ import {
   type SingleStepConnector,
   useFetchConnectorsByType,
 } from '../hooks/use_fetch_connectors_by_type';
-import type { ConnectorCreationMode } from '../types';
+import type { ConnectorCreationConfig } from '../types';
 
 interface ConnectorSelectorProps {
   connectorTypeId: string;
   value: string | null;
   onChange: (connectorId: string | null) => void;
-  connectorCreationMode?: ConnectorCreationMode;
+  connectorCreationConfig?: ConnectorCreationConfig;
 }
 
-export const ConnectorSelector = ({ connectorTypeId, value, onChange }: ConnectorSelectorProps) => {
+export const ConnectorSelector = ({
+  connectorTypeId,
+  value,
+  onChange,
+  connectorCreationConfig: connectorCreation = { mode: 'flyout' },
+}: ConnectorSelectorProps) => {
   const { data: connectors = [], isLoading } = useFetchConnectorsByType({ connectorTypeId });
   const triggersActionsUi = useService(
     PluginStart('triggersActionsUi')
@@ -91,7 +96,13 @@ export const ConnectorSelector = ({ connectorTypeId, value, onChange }: Connecto
         labelAppend={
           <EuiLink
             data-test-subj="singleStepWorkflowCreateConnectorLink"
-            onClick={() => setIsCreateFlyoutOpen(true)}
+            {...(connectorCreation.mode === 'new-tab'
+              ? {
+                  href: connectorCreation.href,
+                  target: '_blank',
+                  rel: 'noopener noreferrer',
+                }
+              : { onClick: () => setIsCreateFlyoutOpen(true) })}
           >
             {i18n.translate('xpack.responseOps.alertingV2RuleForm.actionForm.connector.createNew', {
               defaultMessage: '+ Create new connector',
@@ -117,7 +128,7 @@ export const ConnectorSelector = ({ connectorTypeId, value, onChange }: Connecto
           options={options}
         />
       </EuiFormRow>
-      {isCreateFlyoutOpen && (
+      {connectorCreation.mode === 'flyout' && isCreateFlyoutOpen && (
         <KibanaContextProvider services={connectorFlyoutServices}>
           {triggersActionsUi.getAddConnectorFlyout({
             initialConnector: { actionTypeId: connectorTypeId },
