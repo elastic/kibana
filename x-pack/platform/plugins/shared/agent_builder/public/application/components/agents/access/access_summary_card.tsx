@@ -8,7 +8,6 @@
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import {
-  EuiAvatar,
   EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -20,7 +19,13 @@ import {
   useEuiTheme,
   type EuiThemeComputed,
 } from '@elastic/eui';
-import { agentBuilderDefaultAgentId, type AgentDefinition } from '@kbn/agent-builder-common';
+import { UserAvatar, getUserDisplayName } from '@kbn/user-profile-components';
+import {
+  agentBuilderDefaultAgentId,
+  getAccessControlEntryKey,
+  type AgentDefinition,
+} from '@kbn/agent-builder-common';
+import { useAccessControlEntryProfiles } from '../../../hooks/agents/use_access_control_entry_profiles';
 import { useAgentAccessControl } from '../../../hooks/agents/use_agent_access_control';
 import { useCanUpdateAgentAccess } from '../../../hooks/agents/use_can_update_agent_access';
 import { ROLE_LABEL } from './role_to_capabilities';
@@ -70,6 +75,8 @@ export const AccessSummaryCard: React.FC<AccessSummaryCardProps> = ({ agent, onM
   );
   const overflow = (data?.access_control.entries.length ?? 0) - previewEntries.length;
 
+  const profileByUid = useAccessControlEntryProfiles(previewEntries);
+
   if (isDefaultAgent) {
     return null;
   }
@@ -101,14 +108,28 @@ export const AccessSummaryCard: React.FC<AccessSummaryCardProps> = ({ agent, onM
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
           <EuiFlexItem grow={false}>
             <div css={tokenStackStyles(euiTheme)} aria-hidden>
-              {previewEntries.map((entry) => (
-                <EuiToolTip
-                  key={`${entry.type}:${entry.name}`}
-                  content={`${entry.name} — ${ROLE_LABEL[entry.role]}`}
-                >
-                  <EuiAvatar name={entry.name} size="s" />
-                </EuiToolTip>
-              ))}
+              {previewEntries.map((entry) => {
+                const profile = entry.id !== undefined ? profileByUid.get(entry.id) : undefined;
+                const displayName = profile ? getUserDisplayName(profile.user) : entry.name;
+                const roleLabel = ROLE_LABEL[entry.role];
+                return (
+                  <EuiToolTip
+                    key={getAccessControlEntryKey(entry)}
+                    content={
+                      displayName !== undefined ? `${displayName} — ${roleLabel}` : roleLabel
+                    }
+                  >
+                    {profile ? (
+                      <UserAvatar user={profile.user} avatar={profile.data?.avatar} size="s" />
+                    ) : (
+                      <UserAvatar
+                        user={entry.name !== undefined ? { username: entry.name } : undefined}
+                        size="s"
+                      />
+                    )}
+                  </EuiToolTip>
+                );
+              })}
               {overflow > 0 ? (
                 <EuiText
                   size="xs"

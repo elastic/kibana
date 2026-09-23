@@ -18,7 +18,7 @@
     "@kbn/agent-builder-browser",
     "@kbn/agent-builder-common",
     "@kbn/flyout-info-blocks",
-    "@kbn/react-hooks",
+    "@kbn/proposals-ui",
     "@kbn/test-jest-helpers",
   ]
 }
