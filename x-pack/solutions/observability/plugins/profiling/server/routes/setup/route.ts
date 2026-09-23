@@ -88,34 +88,45 @@ export function registerSetupRoute({
     },
     async (context, request, response) => {
       try {
-        const esClient = await getClient(context);
-        const core = await context.core;
-        const clientWithDefaultAuth = createProfilingEsClient({
-          esClient,
-          request,
-          useDefaultAuth: true,
-        });
-        const clientWithProfilingAuth = createProfilingEsClient({
-          esClient,
-          request,
-          useDefaultAuth: false,
-        });
-
-        const commonSetupParams: ProfilingSetupOptions = {
-          client: clientWithDefaultAuth,
-          clientWithProfilingAuth,
-          logger,
-          soClient: core.savedObjects.client,
-          spaceId:
-            dependencies.setup.spaces?.spacesService?.getSpaceId(request) ?? DEFAULT_SPACE_ID,
-        };
+        /* 
+        The `elasticsearch` config option is meant to grant read-only access to a remote cluster and
+        redirects every profiling ES client to it. This setup call would write to the remote cluster,
+        which is not allowed. Therefore, we reject the setup request if a remote profiling cluster is configured.
+        This branch can only be reached during local development, since the config option is forbidden in distributions.
+        The verbose error message is meant to be read by developers, not end users. 
+        */
+        if (dependencies.config.elasticsearch) {
+          return response.badRequest({
+            body: {
+              message:
+                'Universal Profiling setup is not supported while "xpack.profiling.elasticsearch" is configured: ' +
+                'the setup status is read from the configured remote cluster, but setup would write to the cluster ' +
+                'Kibana is connected to. Set up Universal Profiling on the remote cluster itself, point the setting ' +
+                'at a cluster that is already set up, or remove the setting to set up the local cluster.',
+            },
+          });
+        }
 
         // For now, we don't support serverless setup
         if (dependencies.esCapabilities.serverless) {
           return response.badRequest({ body: { message: 'Serverless setup is not supported' } });
         }
 
-        const scopedESClient = (await context.core).elasticsearch.client;
+        const esClient = await getClient(context);
+        const core = await context.core;
+
+        const client = createProfilingEsClient({ esClient, request });
+
+        const commonSetupParams: ProfilingSetupOptions = {
+          client,
+          clientWithProfilingAuth: client,
+          logger,
+          soClient: core.savedObjects.client,
+          spaceId:
+            dependencies.setup.spaces?.spacesService?.getSpaceId(request) ?? DEFAULT_SPACE_ID,
+        };
+
+        const scopedESClient = core.elasticsearch.client;
         const { type, setupState } =
           await dependencies.start.profilingDataAccess.services.getSetupState({
             esClient: scopedESClient,
@@ -159,7 +170,7 @@ export function registerSetupRoute({
         }
 
         // Wait until Profiling ES plugin creates all resources
-        await clientWithDefaultAuth.profilingStatus({ waitForResourcesCreated: true });
+        await client.profilingStatus({ waitForResourcesCreated: true });
 
         if (dependencies.telemetryUsageCounter) {
           dependencies.telemetryUsageCounter.incrementCounter({
