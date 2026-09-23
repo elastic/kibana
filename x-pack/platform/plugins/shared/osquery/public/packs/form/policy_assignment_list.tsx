@@ -195,15 +195,6 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
     onChange([]);
   }, [onChange]);
 
-  const selectionCountValues = useMemo(
-    () => ({
-      selected: selectedSet.size,
-      total: allPolicies.length,
-      agents: totalAgents,
-    }),
-    [selectedSet.size, allPolicies.length, totalAgents]
-  );
-
   const columns = useMemo<Array<EuiBasicTableColumn<PolicyRow>>>(
     () => [
       {
@@ -415,7 +406,12 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
               <FormattedMessage
                 id="xpack.osquery.pack.policyList.selectionCount"
                 defaultMessage="{selected} of {total} selected | {agents, plural, one {# agent} other {# agents}} enrolled"
-                values={selectionCountValues}
+                // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+                values={{
+                  selected: selectedSet.size,
+                  total: allPolicies.length,
+                  agents: totalAgents,
+                }}
               />
             </EuiText>
           </EuiFlexItem>
