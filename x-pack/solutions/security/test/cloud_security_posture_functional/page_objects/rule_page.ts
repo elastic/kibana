@@ -59,6 +59,13 @@ export function RulePagePageProvider({ getService, getPageObjects }: FtrProvider
       await testSubjects.existOrFail(RULES_BULK_ACTION_OPTION_DISABLE, { timeout: 5000 });
     },
 
+    closeBulkActionButton: async () => {
+      const button = await testSubjects.find(RULES_BULK_ACTION_BUTTON);
+      if ((await button.getAttribute('aria-expanded')) === 'true') {
+        await button.click();
+      }
+    },
+
     clickBulkActionOption: async (optionTestId: string) => {
       const bulkActionOption = await testSubjects.find(optionTestId);
       await bulkActionOption.click();

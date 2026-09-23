@@ -68,6 +68,7 @@ export default function ({ getPageObjects }: FtrProviderContext) {
       await pageObjects.header.waitUntilLoadingHasFinished();
 
       await cisIntegration.clickSaveButton();
+      await cisIntegration.waitForIntegrationCreated();
       await pageObjects.header.waitUntilLoadingHasFinished();
 
       await cisIntegration.navigateToIntegrationCspList();
@@ -95,6 +96,7 @@ export default function ({ getPageObjects }: FtrProviderContext) {
       await pageObjects.header.waitUntilLoadingHasFinished();
 
       await cisIntegration.clickSaveButton();
+      await cisIntegration.waitForPostInstallModal();
       await pageObjects.header.waitUntilLoadingHasFinished();
 
       const agentPolicyName = await cisIntegration.getAgentBasedPolicyValue();

@@ -133,8 +133,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
         await pageObjects.header.waitUntilLoadingHasFinished();
         await rule.rulePage.clickSelectAllRules();
-        await rule.rulePage.toggleBulkActionButton();
-        await expectBulkActionDisabledState(false, true);
+        await retryService.tryForTime(30000, async () => {
+          await rule.rulePage.closeBulkActionButton();
+          await rule.rulePage.toggleBulkActionButton();
+          await expectBulkActionDisabledState(false, true);
+        });
       });
 
       it('Both option should not be disabled if selected rules contains both enabled and disabled rules', async () => {
@@ -196,11 +199,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('Alerts section of Rules Flyout shows Detection Rule Counter component when Rules are enabled', async () => {
         await rule.rulePage.clickRulesNames(0);
         await pageObjects.header.waitUntilLoadingHasFinished();
-        expect(
-          (await rule.rulePage.doesElementExist(
-            'csp:findings-flyout-create-detection-rule-link'
-          )) === true
-        ).to.be(true);
+        await retryService.waitForWithTimeout('detection rule link to appear', 10000, () =>
+          rule.rulePage.doesElementExist('csp:findings-flyout-create-detection-rule-link')
+        );
       });
     });
   });

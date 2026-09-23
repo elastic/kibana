@@ -102,12 +102,12 @@ const UIAM_BASE_CONTAINERS: UiamContainer[] = [
       '--net',
       'elastic',
 
-      // Cap container memory so the kernel OOM-killer doesn't pick UIAM stack
-      // when total stack RSS approaches Docker VM limit.
+      // PostgreSQL initialization exceeds 1 GB; cap at 2 GB so the container
+      // stays healthy without letting the UIAM stack exhaust the Docker VM.
       '--memory',
-      '1g',
+      '2g',
       '--memory-swap',
-      '1g',
+      '2g',
 
       '--volume',
       `${SERVERLESS_UIAM_CERTIFICATE_BUNDLE_PATH}:/scripts/certs/uiam_cosmosdb.pfx:z`,

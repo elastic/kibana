@@ -100,7 +100,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           continue;
         }
         it('renders ' + settingId + ' edit field', async () => {
-          expect(await testSubjects.exists(getFieldTestSubj(settingId))).to.be(true);
+          await testSubjects.existOrFail(getFieldTestSubj(settingId), { timeout: 5000 });
         });
       }
     });
@@ -121,7 +121,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         }
 
         it('renders ' + settingId + ' edit field', async () => {
-          expect(await testSubjects.exists(getFieldTestSubj(settingId))).to.be(true);
+          await testSubjects.existOrFail(getFieldTestSubj(settingId), { timeout: 5000 });
         });
       }
     });
@@ -149,7 +149,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('allows resetting a setting to its default value', async () => {
         const fieldTestSubj = 'management-settings-editField-' + settings.CSV_QUOTE_VALUES_ID;
         const resetLinkTestSubj = 'management-settings-resetField-' + settings.CSV_QUOTE_VALUES_ID;
-        expect(await testSubjects.exists(resetLinkTestSubj)).to.be(true);
+        await testSubjects.existOrFail(resetLinkTestSubj, { timeout: 5000 });
         await testSubjects.click(resetLinkTestSubj);
 
         await retry.waitFor('reset link to be hidden', async () => {
@@ -176,7 +176,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // Save changes
         await testSubjects.click(SAVE_BUTTON_TEST_SUBJ);
 
-        expect(await testSubjects.exists(PAGE_RELOAD_BUTTON_TEST_SUBJ)).to.be(true);
+        await testSubjects.existOrFail(PAGE_RELOAD_BUTTON_TEST_SUBJ, { timeout: 5000 });
         await testSubjects.click(PAGE_RELOAD_BUTTON_TEST_SUBJ);
         await pageObjects.common.sleep(2000);
 

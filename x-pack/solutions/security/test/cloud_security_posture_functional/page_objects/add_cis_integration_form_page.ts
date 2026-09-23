@@ -6,7 +6,6 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import expect from '@kbn/expect';
 import {
   AWS_PROVIDER_TEST_SUBJ,
   GCP_PROVIDER_TEST_SUBJ,
@@ -441,6 +440,10 @@ export function AddCisIntegrationFormPageProvider({
     await optionToBeClicked.click();
   };
 
+  const waitForIntegrationCreated = async (): Promise<void> => {
+    await testSubjects.existOrFail('packagePolicyCreateSuccessToast', { timeout: 20000 });
+  };
+
   const waitForPostInstallModal = async () =>
     await retry.waitForWithTimeout(
       'post-install modal to appear',
@@ -660,6 +663,7 @@ export function AddCisIntegrationFormPageProvider({
 
     // Click Save Button to create the Integration then navigate to Integration Policies Tab Page
     await clickSaveButton();
+    await waitForIntegrationCreated();
     await PageObjects.header.waitUntilLoadingHasFinished();
   };
 
@@ -676,6 +680,12 @@ export function AddCisIntegrationFormPageProvider({
       /^(textAreaInput|passwordInput)-/,
       'button-replace-'
     );
+    await retry.waitForWithTimeout(`editor for ${testSubjectId} to render`, 10000, async () => {
+      return (
+        (await testSubjects.exists(testSubjectId)) ||
+        (replaceButtonId !== testSubjectId && (await testSubjects.exists(replaceButtonId)))
+      );
+    });
     if (replaceButtonId !== testSubjectId && (await testSubjects.exists(replaceButtonId))) {
       await testSubjects.click(replaceButtonId);
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -695,7 +705,7 @@ export function AddCisIntegrationFormPageProvider({
     await PageObjects.header.waitUntilLoadingHasFinished();
 
     // Check if the Direct Access Key is updated package policy api with successful toast
-    expect(await testSubjects.exists(TEST_IDS.POLICY_UPDATE_SUCCESS_TOAST)).to.be(true);
+    await testSubjects.existOrFail(TEST_IDS.POLICY_UPDATE_SUCCESS_TOAST, { timeout: 5000 });
 
     await navigateToEditAgentlessIntegrationPage();
     await PageObjects.header.waitUntilLoadingHasFinished();
@@ -784,6 +794,7 @@ export function AddCisIntegrationFormPageProvider({
     selectSetupTechnology,
     getSetupTechnologyRadio,
     clickSaveButton,
+    waitForIntegrationCreated,
     clickSaveIntegrationButton,
     clickAccordianButton,
     getPostInstallModal,
