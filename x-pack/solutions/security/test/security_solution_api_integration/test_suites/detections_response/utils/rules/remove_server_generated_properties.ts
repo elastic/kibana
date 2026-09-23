@@ -6,6 +6,7 @@
  */
 import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { omit, pickBy } from 'lodash';
+import { stripMissingUiamApiKeyTag } from '../missing_uiam_api_key_tag';
 
 const serverGeneratedProperties = ['id', 'created_at', 'updated_at', 'execution_summary'] as const;
 
@@ -20,6 +21,10 @@ export const removeServerGeneratedProperties = (
   rule: RuleResponse
 ): RuleWithoutServerGeneratedProperties => {
   const removedProperties = omit(rule, serverGeneratedProperties);
+
+  if (Array.isArray(removedProperties.tags)) {
+    removedProperties.tags = stripMissingUiamApiKeyTag(removedProperties.tags);
+  }
 
   // We're only removing undefined values, so this cast correctly narrows the type
   return pickBy(

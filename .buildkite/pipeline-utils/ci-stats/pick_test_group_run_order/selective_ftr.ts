@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { allChangedFilesInScope, touchedCriticalFiles } from '../../affected-packages';
+import { allChangedFilesInScope, touchedCriticalFiles } from '../../affected-packages/index.ts';
 
 /**
  * Modules that cannot affect FTR. When a PR only touches these (and no critical
@@ -66,7 +66,7 @@ export const FTR_CRITICAL_PATHS: readonly string[] = [
   'scripts/functional_tests_server.js',
   'scripts/functional_test_runner.js',
   'package.json',
-  'yarn.lock',
+  'pnpm-lock.yaml',
   '.node-version',
   '.nvmrc',
   'config/**/*.yml',

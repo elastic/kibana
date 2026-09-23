@@ -22,7 +22,6 @@ import {
   type InvestigationState,
 } from '@kbn/significant-events-schema';
 import type { InvestigationStatus } from './types';
-import { normalizeLegacyInvestigationState } from './normalize_legacy_investigation_state';
 
 /**
  * Path of the internal route that resolves the agent execution tagged with a given metadata
@@ -86,8 +85,7 @@ export interface UseInvestigationStateResult {
 /**
  * Surfaces the current state of an investigation, live or completed, from a single source:
  * `investigationStateSchema` — the same schema the investigation agent streams via
- * `investigation_progress` `tool_ui` events AND the schema of the `investigate` step's final
- * structured output persisted to the workflow execution document.
+ * `investigation_progress` `tool_ui` events and returns from the `investigate` step.
  *
  * - While the investigation runs, the underlying agent execution's id isn't known upfront (it's
  *   auto-generated) — the workflow tags it with `workflowExecutionId` as metadata instead of
@@ -101,10 +99,7 @@ export interface UseInvestigationStateResult {
  * - When the stream ends (or the caller already knows the run is over), reads the persisted
  *   final result via `WorkflowApi`, keyed by `workflowExecutionId` — but only trusts it once the
  *   workflow execution itself is terminal. A just-completed execution whose output hasn't been
- *   persisted yet is retried briefly instead of being reported as unloadable. Before validating,
- *   the persisted output passes through {@link normalizeLegacyInvestigationState}, which recovers
- *   investigations predating structured `recommendations`/`blind_spots` — the live stream never
- *   needs this, since its events always come from a current agent.
+ *   persisted yet is retried briefly instead of being reported as unloadable.
  * - The investigation *failing* (`failed`, with the step's error) is distinguished from its
  *   result being *unloadable* (`unavailable`, e.g. missing privileges) — see
  *   {@link InvestigationStatus}.
@@ -215,9 +210,7 @@ export function useInvestigationState({
         if (output?.conversation_id) {
           setConversationId(output.conversation_id);
         }
-        const parsed = investigationStateSchema.safeParse(
-          normalizeLegacyInvestigationState(output?.structured_output)
-        );
+        const parsed = investigationStateSchema.safeParse(output?.structured_output);
 
         if (parsed.success) {
           applySettled({ status: 'complete', state: parsed.data });

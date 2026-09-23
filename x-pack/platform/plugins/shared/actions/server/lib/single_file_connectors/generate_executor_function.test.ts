@@ -14,6 +14,7 @@ import type {
   BuildContext,
   ConnectorNetworkSettings,
   ConnectorSpec,
+  PlatformServices,
 } from '@kbn/connector-specs';
 import type { GetAxiosInstanceWithAuthFn, GetCredentialFn } from '../get_axios_instance';
 import { LeasePool } from '../lease_pool';
@@ -33,6 +34,7 @@ describe('generateExecutorFunction', () => {
   let mockHandler: jest.Mock;
   let fakeLeasePool: LeasePool<unknown>;
   let mockNetwork: ConnectorNetworkSettings;
+  let mockPlatform: PlatformServices;
 
   const makeExecOptions = (params: Record<string, unknown>) =>
     ({
@@ -72,6 +74,10 @@ describe('generateExecutorFunction', () => {
       getCustomHostSettings: jest.fn(),
       getResponseSettings: jest.fn(),
     };
+    mockPlatform = {
+      resolveSrvHosts: jest.fn(),
+      buildTlsOptions: jest.fn(),
+    };
   });
 
   const makeActions = (handler: jest.Mock = mockHandler): ConnectorSpec['actions'] => ({
@@ -90,6 +96,7 @@ describe('generateExecutorFunction', () => {
       getCredential: mockGetCredential,
       getClientLeasePool: () => fakeLeasePool,
       networkSettings: mockNetwork,
+      platform: mockPlatform,
     });
 
   describe('successful execution', () => {
@@ -131,6 +138,50 @@ describe('generateExecutorFunction', () => {
         }),
         {}
       );
+    });
+
+    it('passes the Relay client in the handler context for relay-authenticated executions', async () => {
+      const relay = { trigger: jest.fn(), listBindings: jest.fn() };
+      const executor = generateExecutorFunction({
+        actions: makeActions(),
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getCredential: mockGetCredential,
+        getClientLeasePool: () => fakeLeasePool,
+        getRelayClient: () => relay,
+        networkSettings: mockNetwork,
+        platform: mockPlatform,
+      });
+
+      const opts = makeExecOptions({ subAction: 'testAction', subActionParams: {} });
+      await executor({ ...opts, secrets: { authType: 'relay', tenantKey: 'tenant-A' } });
+
+      expect(mockHandler).toHaveBeenCalledWith(expect.objectContaining({ relay }), {});
+    });
+
+    it('leaves the Relay client undefined for non-relay auth types even when one is configured', async () => {
+      const relay = { trigger: jest.fn(), listBindings: jest.fn() };
+      const executor = generateExecutorFunction({
+        actions: makeActions(),
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getCredential: mockGetCredential,
+        getClientLeasePool: () => fakeLeasePool,
+        getRelayClient: () => relay,
+        networkSettings: mockNetwork,
+        platform: mockPlatform,
+      });
+
+      const opts = makeExecOptions({ subAction: 'testAction', subActionParams: {} });
+      await executor({ ...opts, secrets: { authType: 'bearer', token: 'secret' } });
+
+      expect(mockHandler.mock.calls[0][0]).toHaveProperty('relay', undefined);
+    });
+
+    it('leaves the Relay client undefined when no Relay is configured', async () => {
+      const executor = makeExecutor();
+
+      await executor(makeExecOptions({ subAction: 'testAction', subActionParams: {} }));
+
+      expect(mockHandler.mock.calls[0][0]).toHaveProperty('relay', undefined);
     });
 
     it('returns empty object as data when handler returns null', async () => {
@@ -205,8 +256,8 @@ describe('generateExecutorFunction', () => {
     });
   });
 
-  describe('ctx.getClient - build receives networkSettings from generateExecutorFunction', () => {
-    it('passes networkSettings to clientType.build', async () => {
+  describe('ctx.getClient - build receives networkSettings and platform from generateExecutorFunction', () => {
+    it('passes networkSettings and platform to clientType.build', async () => {
       const fakeClient = { id: 'x' };
       const buildSpy = jest.fn().mockResolvedValue(fakeClient);
       const fakeClientType = {
@@ -231,13 +282,14 @@ describe('generateExecutorFunction', () => {
         getCredential: mockGetCredential,
         getClientLeasePool: () => fakeLeasePool,
         networkSettings: mockNetwork,
+        platform: mockPlatform,
         clientTypes: { typed: fakeClientType },
       });
 
       await executor(makeExecOptions({ subAction: 'testAction', subActionParams: {} }));
 
       expect(buildSpy).toHaveBeenCalledWith(
-        expect.objectContaining({ networkSettings: mockNetwork })
+        expect.objectContaining({ networkSettings: mockNetwork, platform: mockPlatform })
       );
       expect(buildSpy.mock.calls[0][0]).not.toHaveProperty('axiosInstance');
     });
@@ -267,6 +319,7 @@ describe('generateExecutorFunction', () => {
         getCredential: mockGetCredential,
         getClientLeasePool: () => fakeLeasePool,
         networkSettings: mockNetwork,
+        platform: mockPlatform,
         clientTypes: { typed: fakeClientType },
       });
 
@@ -319,6 +372,7 @@ describe('generateExecutorFunction', () => {
         getCredential: mockGetCredential,
         getClientLeasePool: () => fakeLeasePool,
         networkSettings: mockNetwork,
+        platform: mockPlatform,
         clientTypes: { typed: fakeClientType },
       });
 
@@ -363,6 +417,7 @@ describe('generateExecutorFunction', () => {
         getCredential: mockGetCredential,
         getClientLeasePool: () => fakeLeasePool,
         networkSettings: mockNetwork,
+        platform: mockPlatform,
         clientTypes: { mcp: fakeClientType },
       });
 
@@ -401,6 +456,7 @@ describe('generateExecutorFunction', () => {
         getCredential: mockGetCredential,
         getClientLeasePool: () => pool,
         networkSettings: mockNetwork,
+        platform: mockPlatform,
         clientTypes: { fake: fakeClientType },
       });
 
@@ -434,6 +490,7 @@ describe('generateExecutorFunction', () => {
         getCredential: mockGetCredential,
         getClientLeasePool: () => pool,
         networkSettings: mockNetwork,
+        platform: mockPlatform,
         clientTypes: { unused: fakeClientType },
       });
 
@@ -465,6 +522,7 @@ describe('generateExecutorFunction', () => {
         getCredential: mockGetCredential,
         getClientLeasePool: () => pool,
         networkSettings: mockNetwork,
+        platform: mockPlatform,
         clientTypes: { failing: fakeClientType },
       });
 
@@ -497,6 +555,7 @@ describe('generateExecutorFunction', () => {
         getCredential: mockGetCredential,
         getClientLeasePool: () => pool,
         networkSettings: mockNetwork,
+        platform: mockPlatform,
         clientTypes: { typed: fakeClientType },
       });
 
@@ -541,6 +600,7 @@ describe('generateExecutorFunction', () => {
         getCredential: mockGetCredential,
         getClientLeasePool: () => pool,
         networkSettings: mockNetwork,
+        platform: mockPlatform,
         clientTypes: { mcp: fakeClientType },
       });
 
@@ -584,6 +644,7 @@ describe('generateExecutorFunction', () => {
         getCredential: mockGetCredential,
         getClientLeasePool: () => pool,
         networkSettings: mockNetwork,
+        platform: mockPlatform,
         clientTypes: { mcp: fakeClientType },
       });
 
@@ -636,6 +697,7 @@ describe('generateExecutorFunction', () => {
         getCredential: mockGetCredential,
         getClientLeasePool: () => pool,
         networkSettings: network,
+        platform: mockPlatform,
         clientTypes: { mcp: fakeClientType },
       });
 
@@ -668,6 +730,7 @@ describe('generateExecutorFunction', () => {
         getCredential: mockGetCredential,
         getClientLeasePool: () => pool,
         networkSettings: mockNetwork,
+        platform: mockPlatform,
         clientTypes: { wrapped: fakeClientType },
       });
 
@@ -706,6 +769,7 @@ describe('generateExecutorFunction', () => {
         getCredential: mockGetCredential,
         getClientLeasePool: () => pool,
         networkSettings: mockNetwork,
+        platform: mockPlatform,
         clientTypes: {},
       });
 
@@ -743,6 +807,7 @@ describe('generateExecutorFunction', () => {
         getCredential: mockGetCredential,
         getClientLeasePool: () => pool,
         networkSettings: mockNetwork,
+        platform: mockPlatform,
         clientTypes: { fake: fakeClientType },
       });
 
@@ -794,6 +859,7 @@ describe('generateExecutorFunction', () => {
         getCredential: mockGetCredential,
         getClientLeasePool: () => pool,
         networkSettings: mockNetwork,
+        platform: mockPlatform,
         clientTypes: { fake: fakeClientType },
       });
 
@@ -828,6 +894,7 @@ describe('generateExecutorFunction', () => {
         getCredential: mockGetCredential,
         getClientLeasePool: () => pool,
         networkSettings: mockNetwork,
+        platform: mockPlatform,
         clientTypes: { fake: fakeClientType },
       });
 
@@ -856,6 +923,7 @@ describe('generateExecutorFunction', () => {
         getCredential: mockGetCredential,
         getClientLeasePool: () => fakeLeasePool,
         networkSettings: mockNetwork,
+        platform: mockPlatform,
         clientTypes: { fake: fakeClientType },
       });
 
@@ -889,6 +957,7 @@ describe('generateExecutorFunction', () => {
         getCredential: mockGetCredential,
         getClientLeasePool: () => fakeLeasePool,
         networkSettings: mockNetwork,
+        platform: mockPlatform,
         clientTypes: { fake: fakeClientType },
       });
 
@@ -924,6 +993,7 @@ describe('generateExecutorFunction', () => {
         getCredential: mockGetCredential,
         getClientLeasePool: () => pool,
         networkSettings: mockNetwork,
+        platform: mockPlatform,
         clientTypes: { fake: fakeClientType },
       });
 
@@ -962,6 +1032,7 @@ describe('generateExecutorFunction', () => {
         getCredential: mockGetCredential,
         getClientLeasePool: () => fakeLeasePool,
         networkSettings: mockNetwork,
+        platform: mockPlatform,
         clientTypes: { fake: fakeClientType },
       });
 
@@ -1058,6 +1129,7 @@ describe('generateExecutorFunction', () => {
         getCredential: mockGetCredential,
         getClientLeasePool: () => fakeLeasePool,
         networkSettings: mockNetwork,
+        platform: mockPlatform,
       });
 
       const result = await executor(
@@ -1181,6 +1253,7 @@ describe('generateExecutorFunction', () => {
         getCredential: mockGetCredential,
         getClientLeasePool: () => fakeLeasePool,
         networkSettings: mockNetwork,
+        platform: mockPlatform,
       });
 
       const result = await executor(
@@ -1211,6 +1284,7 @@ describe('generateExecutorFunction', () => {
         getCredential: mockGetCredential,
         getClientLeasePool: () => fakeLeasePool,
         networkSettings: mockNetwork,
+        platform: mockPlatform,
       });
 
       const result = await executor(
@@ -1241,6 +1315,7 @@ describe('generateExecutorFunction', () => {
         getCredential: mockGetCredential,
         getClientLeasePool: () => fakeLeasePool,
         networkSettings: mockNetwork,
+        platform: mockPlatform,
       });
 
       const result1 = await executor(

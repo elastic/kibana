@@ -18,6 +18,7 @@ import type {
   AiIndexFeedbackAnalysis,
   AiIndexProperties,
   CreateAiIndexResponse,
+  DeleteAiIndexResponse,
   GetAiIndexResponse,
   ListAiIndexResponse,
   PutAiIndexFeedbackAnalysisResponse,
@@ -108,3 +109,21 @@ export const putAiIndexFeedbackAnalysis = (
       body: JSON.stringify(feedbackAnalysis),
     }
   );
+
+interface DeleteAiIndexArgs {
+  aiIndexId: string;
+  deleteKnowledgeIndicators?: boolean;
+  deleteAutomations?: boolean;
+}
+
+export const deleteAiIndex = (
+  http: HttpStart,
+  { aiIndexId, deleteKnowledgeIndicators = false, deleteAutomations = false }: DeleteAiIndexArgs
+): Promise<DeleteAiIndexResponse> =>
+  http.delete<DeleteAiIndexResponse>(buildPath(aiIndexByIdPath, { aiIndexId }), {
+    version: AI_INDEX_API_VERSION,
+    query: {
+      delete_knowledge_indicators: deleteKnowledgeIndicators,
+      delete_automations: deleteAutomations,
+    },
+  });

@@ -23,6 +23,8 @@ import { useConversationContext } from '../../../context/conversation/conversati
 import { useSubmitMessage } from '../../../hooks/use_submit_message';
 import { useToasts } from '../../../hooks/use_toasts';
 import { useMessageEditor } from './message_editor';
+import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
+import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
 
 jest.mock('../../../hooks/use_conversation_stream', () => ({
   useConversationStream: jest.fn(),
@@ -64,8 +66,29 @@ jest.mock('./message_editor', () => ({
 jest.mock('./input_actions', () => ({
   InputActions: () => null,
 }));
-jest.mock('./attachment_pills_row', () => ({
-  AttachmentPillsRow: () => null,
+jest.mock('./attachment_pill', () => ({
+  AttachmentPill: ({
+    attachment,
+    onRemoveAttachment,
+  }: {
+    attachment: { id: string };
+    onRemoveAttachment?: () => void;
+  }) => (
+    <button
+      data-test-subj={`mock-remove-attachment-${attachment.id}`}
+      type="button"
+      onClick={onRemoveAttachment}
+    />
+  ),
+}));
+jest.mock('./attachment_group_pill', () => ({
+  AttachmentGroupPill: () => null,
+}));
+jest.mock('../../../hooks/use_agent_builder_service', () => ({
+  useAgentBuilderServices: jest.fn(),
+}));
+jest.mock('../../../hooks/use_experimental_features', () => ({
+  useExperimentalFeatures: jest.fn(),
 }));
 jest.mock('@kbn/agent-builder-browser', () => ({
   ConversationInputShell: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
@@ -84,6 +107,8 @@ const mockedUseConversationContext = jest.mocked(useConversationContext);
 const mockedUseSubmitMessage = jest.mocked(useSubmitMessage);
 const mockedUseToasts = jest.mocked(useToasts);
 const mockedUseMessageEditor = jest.mocked(useMessageEditor);
+const mockedUseAgentBuilderServices = jest.mocked(useAgentBuilderServices);
+const mockedUseExperimentalFeatures = jest.mocked(useExperimentalFeatures);
 
 const submitMessage = jest.fn();
 const editorController = {
@@ -92,6 +117,8 @@ const editorController = {
   setContent: jest.fn(),
   clear: jest.fn(),
   isEmpty: false,
+  getPlaceholderNames: jest.fn(() => []),
+  removePlaceholderByName: jest.fn(),
 };
 
 describe('ConversationInput', () => {
@@ -117,9 +144,19 @@ describe('ConversationInput', () => {
     mockedUseConversationId.mockReturnValue(undefined);
     mockedUseConversationContext.mockReturnValue({
       attachments: [],
+      upsertAttachments: jest.fn(),
+      removeAttachment: jest.fn(),
+      resetAttachments: jest.fn(),
       isEmbeddedContext: false,
       conversationActions: {} as never,
     });
+    mockedUseAgentBuilderServices.mockReturnValue({
+      filesClient: {
+        create: jest.fn().mockResolvedValue({ file: { id: 'test-file-id' } }),
+        upload: jest.fn().mockResolvedValue(undefined),
+      },
+    } as never);
+    mockedUseExperimentalFeatures.mockReturnValue(true);
     mockedUseSubmitMessage.mockReturnValue(submitMessage);
     mockedUseToasts.mockReturnValue({
       addErrorToast: jest.fn(),
@@ -188,6 +225,46 @@ describe('ConversationInput', () => {
       jest.advanceTimersByTime(200);
       expect(editorController.focus).not.toHaveBeenCalled();
       jest.useRealTimers();
+    });
+  });
+
+  describe('attachment removal', () => {
+    const attachment = { id: 'a1', type: 'text', data: {} };
+
+    it('removes a normal attachment via context when image upload is enabled', () => {
+      const removeAttachment = jest.fn();
+      mockedUseExperimentalFeatures.mockReturnValue(true);
+      mockedUseConversationContext.mockReturnValue({
+        attachments: [attachment],
+        upsertAttachments: jest.fn(),
+        removeAttachment,
+        resetAttachments: jest.fn(),
+        isEmbeddedContext: false,
+        conversationActions: {} as never,
+      } as never);
+
+      render(<ConversationInput />);
+      fireEvent.click(screen.getByTestId('mock-remove-attachment-a1'));
+
+      expect(removeAttachment).toHaveBeenCalledWith(0);
+    });
+
+    it('still removes a normal attachment via context when image upload is disabled', () => {
+      const removeAttachment = jest.fn();
+      mockedUseExperimentalFeatures.mockReturnValue(false);
+      mockedUseConversationContext.mockReturnValue({
+        attachments: [attachment],
+        upsertAttachments: jest.fn(),
+        removeAttachment,
+        resetAttachments: jest.fn(),
+        isEmbeddedContext: false,
+        conversationActions: {} as never,
+      } as never);
+
+      render(<ConversationInput />);
+      fireEvent.click(screen.getByTestId('mock-remove-attachment-a1'));
+
+      expect(removeAttachment).toHaveBeenCalledWith(0);
     });
   });
 });

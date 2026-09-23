@@ -816,7 +816,7 @@ describe('DispatcherService', () => {
 
     it('only matches episodes whose hydrated data satisfies a KQL matcher', async () => {
       mockNpFindAllDecrypted(mockFindAllDecrypted, ['policy_456'], {
-        matcher: 'data.severity: "critical"',
+        matcher: { expression: 'data.severity: "critical"' },
       });
 
       const alertEpisodes: AlertEpisode[] = [

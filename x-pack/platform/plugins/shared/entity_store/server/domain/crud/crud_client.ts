@@ -35,6 +35,8 @@ import { buildEntityFromSource } from './entity_from_source';
 import { runWithSpan } from '../../telemetry/traces';
 import {
   searchEntitiesV2,
+  searchEntitiesV2Batch,
+  type SearchEntitiesV2BatchItemResult,
   type SearchEntitiesV2Inspect,
   type SearchEntitiesV2Params,
   type SearchEntitiesV2Result,
@@ -85,6 +87,9 @@ export interface ListEntitiesResult {
   per_page?: number;
   inspect?: SearchEntitiesV2Inspect;
 }
+
+export type ListEntitiesBatchParams = SearchEntitiesV2Params;
+export type ListEntitiesBatchItemResult = SearchEntitiesV2BatchItemResult;
 
 export interface BulkObject {
   type: EntityType;
@@ -278,6 +283,26 @@ export class CRUDClient {
 
     Object.defineProperty(this, 'listEntities', {
       value: tracedListEntities,
+      configurable: true,
+      writable: true,
+    });
+
+    const baseListEntitiesBatch = this.listEntitiesBatch.bind(this);
+    const tracedListEntitiesBatch = (
+      paramsList: ListEntitiesBatchParams[]
+    ): Promise<ListEntitiesBatchItemResult[]> =>
+      runWithSpan({
+        name: 'entityStore.crud.list_entities_batch',
+        namespace,
+        attributes: {
+          'entity_store.crud.operation': 'list_entities_batch',
+          'entity_store.crud.batch_size': paramsList.length,
+        },
+        cb: () => baseListEntitiesBatch(paramsList),
+      });
+
+    Object.defineProperty(this, 'listEntitiesBatch', {
+      value: tracedListEntitiesBatch,
       configurable: true,
       writable: true,
     });
@@ -682,5 +707,20 @@ export class CRUDClient {
       nextSearchAfter: lastHit?.sort as Array<string | number> | undefined,
       ...(entityFields ? { fields: entityFields } : {}),
     };
+  }
+
+  // Runs several page-mode queries as one ES `_msearch` request instead of N
+  // separate listEntities calls, resolving the index name once for all of them.
+  // One query's failure surfaces as `{ error }` at its position instead of
+  // rejecting the others.
+  public async listEntitiesBatch(
+    paramsList: ListEntitiesBatchParams[]
+  ): Promise<ListEntitiesBatchItemResult[]> {
+    this.logger.debug(`Listing entities (batch mode, ${paramsList.length} queries)`);
+    return searchEntitiesV2Batch({
+      esClient: this.esClient,
+      namespace: this.namespace,
+      queries: paramsList,
+    });
   }
 }

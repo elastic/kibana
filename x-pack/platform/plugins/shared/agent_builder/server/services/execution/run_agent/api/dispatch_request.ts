@@ -8,8 +8,8 @@
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { HttpSelfService, KibanaRequest } from '@kbn/core-http-server';
 import type { ApiTarget } from '@kbn/agent-builder-common';
+import { ALERTING_CLONE_API_KEY_HEADER } from '@kbn/alerting-plugin/common';
 import { toSelfFetchQuery } from './query_params';
-import { isRecord } from './types';
 import type { ApiRequest } from './types';
 
 export interface DispatchApiRequestParams {
@@ -19,6 +19,19 @@ export interface DispatchApiRequestParams {
   selfClient: HttpSelfService;
   request: KibanaRequest;
 }
+
+// Matches POST /api/alerting/rule and /api/alerting/rule/{id} (create with a caller-chosen id).
+const ALERTING_RULE_CREATE_PATH = /^\/api\/alerting\/rule(?:\/[^/]+)?$/;
+
+const isAlertingRuleCreate = (method: string, path: string): boolean =>
+  method.toUpperCase() === 'POST' && ALERTING_RULE_CREATE_PATH.test(path);
+
+// The agent's requests authenticate with the API key Task Manager granted for this run-agent
+// task, which TM invalidates once the task drains. Alerting persists an API-key caller's
+// credential on created rules by default ("the user owns this key"), which for this borrowed key
+// would kill every rule from the conversation about an hour after the task completes. This header
+// tells alerting to mint the rule its own framework-managed key instead.
+const cloneApiKeyHeaders = { [ALERTING_CLONE_API_KEY_HEADER]: 'true' };
 
 /**
  * Sends a prepared API request to its backend on behalf of the current user.
@@ -35,13 +48,14 @@ export const dispatchApiRequest = async ({
   selfClient,
   request,
 }: DispatchApiRequestParams): Promise<unknown> => {
-  const { method, path, querystring, body } = apiRequest;
+  const { method, path, querystring, body, bulkBody } = apiRequest;
 
   if (target === 'kibana') {
     return selfClient.asScoped(request).fetch(path, {
       method,
       query: toSelfFetchQuery(querystring),
       body,
+      ...(isAlertingRuleCreate(method, path) ? { headers: cloneApiKeyHeaders } : {}),
       access: path.startsWith('/internal') ? 'internal' : 'public',
     });
   }
@@ -54,7 +68,9 @@ export const dispatchApiRequest = async ({
   if (querystring != null) {
     transportParams.querystring = querystring;
   }
-  if (isRecord(body)) {
+  if (Array.isArray(bulkBody)) {
+    transportParams.bulkBody = bulkBody;
+  } else if (body != null) {
     transportParams.body = body;
   }
 

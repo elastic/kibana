@@ -6,7 +6,11 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { groupingModeSchema, MATCHER_CONTEXT_FIELDS } from '@kbn/alerting-v2-schemas';
+import {
+  groupingModeSchema,
+  MATCHER_CONTEXT_FIELDS,
+  POLICY_MATCHER_TAGS_MAX,
+} from '@kbn/alerting-v2-schemas';
 import type { ActionPolicyWorkflowPayload, AlertEpisode } from '../../lib/dispatcher/types';
 import {
   generateApiSchemaDoc,
@@ -408,7 +412,7 @@ describe('schema_to_skill_docs', () => {
 
     it('renders arrays whose items are referenced schemas', () => {
       expect(generateRuleSchemaDoc()).toContain(
-        '| `artifacts` | object[] | optional | Artifacts attached to the rule, each shaped as `{ id, type, data }`. `data` is a type-specific object (for example a `runbook` may carry `content`, a `dashboard` may carry `dashboardId`). Per-type shape is validated by the artifact-type registry when the type is registered; unregistered types pass through with envelope bounds only. (max items: 100) |'
+        '| `artifacts` | object[] | optional | Optional objects attached to the rule, such as a runbook or a dashboard. Each item has `id`, `type`, and `data`. The shape of `data` depends on `type`. For example, a `runbook` uses `content` and a `dashboard` uses `dashboard_id`. Known types are validated against that shape. Unknown types are stored when `id`, `type`, and `data` are present. (max items: 100) |'
       );
       expect(generateActionPolicySchemaDoc()).toContain(
         '| `destinations` | { type: "workflow", ... }[] | required | The list of destinations. At least one is required. (min items: 1, max items: 10) |'
@@ -579,6 +583,42 @@ describe('schema_to_skill_docs', () => {
       expect(doc).toContain('`active`');
       expect(doc).toContain('`critical`');
     });
+
+    it('documents the matcher shape with tags and expression fields', () => {
+      const doc = generateMatcherContextDoc();
+      // The intro code block shows `matcher: { tags?: ..., expression?: ... }`
+      expect(doc).toContain('matcher.tags');
+      expect(doc).toContain('expression');
+      expect(doc).toContain('at least one');
+    });
+
+    it('explains AND combination and catch-all semantics', () => {
+      const doc = generateMatcherContextDoc();
+      expect(doc).toContain('AND');
+      expect(doc).toContain('catch-all');
+    });
+
+    it('documents that set_matcher replaces the whole matcher', () => {
+      const doc = generateMatcherContextDoc();
+      expect(doc).toContain('set_matcher');
+      expect(doc).toContain('replaces');
+    });
+
+    it('states that rule.id and rule.tags are not available as KQL expression fields', () => {
+      const doc = generateMatcherContextDoc();
+      // The doc mentions rule.id/rule.tags explicitly to say they are excluded;
+      // confirm they appear in an exclusion context and not as usable KQL operators.
+      expect(doc).toContain('rule.id');
+      expect(doc).toContain('**not** available');
+      // No KQL filter syntax using rule.* (colon = field: value syntax in KQL)
+      expect(doc).not.toContain('rule.id:');
+      expect(doc).not.toContain('rule.tags:');
+    });
+
+    it('renders the max-tags limit from the schema constant', () => {
+      const doc = generateMatcherContextDoc();
+      expect(doc).toContain(`Max ${POLICY_MATCHER_TAGS_MAX} tags`);
+    });
   });
 
   describe('generateThrottleGroupingCompatibilityDoc', () => {
@@ -632,15 +672,26 @@ describe('schema_to_skill_docs', () => {
       expect(generateSingleRuleActionPolicyDoc()).toMatchSnapshot();
     });
 
-    it('scopes with rule.id and defers shared policies to the multi-rule reference', () => {
+    it('instructs the link-tag flow and defers shared policies to the multi-rule reference', () => {
       const doc = generateSingleRuleActionPolicyDoc();
       expect(doc).toContain('# Single-rule Action Policies');
+      expect(doc).toContain('manage_rule');
       expect(doc).toContain('set_metadata');
       expect(doc).toContain('set_destinations');
-      expect(doc).toContain('rule.id:');
+      expect(doc).toContain('set_matcher');
+      expect(doc).toContain('notify-');
+      expect(doc).not.toContain('rule.id:');
       expect(doc).toContain('kind: signal');
       expect(doc).toContain('(./action-policy-multi-rule.md)');
       expect(doc).not.toContain('./references/');
+    });
+
+    it('never tells the agent to omit the matcher or leave it as catch-all', () => {
+      const doc = generateSingleRuleActionPolicyDoc();
+      // Historically the doc said "omit (leave as catch-all)" — that is wrong
+      expect(doc).not.toContain('leave as catch-all');
+      expect(doc).not.toContain('omit set_matcher');
+      expect(doc).not.toContain('omit `set_matcher`');
     });
   });
 
@@ -653,7 +704,9 @@ describe('schema_to_skill_docs', () => {
       const doc = generateMultiRuleActionPolicyDoc();
       expect(doc).toContain('# Multi-rule Action Policies');
       expect(doc).toContain('Catch-all');
-      expect(doc).toContain('rule.tags');
+      expect(doc).not.toContain('rule.tags');
+      expect(doc).not.toContain('rule.id');
+      expect(doc).toContain('matcher: { tags: [');
       expect(doc).toContain('(./action-policy-matchers.md)');
       expect(doc).toContain('(./action-policy-single-rule.md)');
       expect(doc).not.toContain('./references/');

@@ -160,6 +160,7 @@ describe('RecoveryDelayField', () => {
       {
         wrapper: createFormWrapper({
           kind: 'alert',
+          recoveryStrategy: 'no_breach',
           stateTransitionAlertDelayMode: 'breaches',
           stateTransitionRecoveryDelayMode: 'recoveries',
           stateTransition: {

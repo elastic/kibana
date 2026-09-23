@@ -43,6 +43,19 @@ const getCredentialsFromRequest = (request: KibanaRequest) => {
 };
 
 /**
+ * Splits the `base64(<id>:<secret>)` envelope that Elasticsearch API keys — and
+ * UIAM-provisioned keys — are persisted in. This is the only place that decoding lives.
+ *
+ * For a value that is not in that shape (e.g. a raw `essu_…` secret) `secret` is absent and
+ * `id` is meaningless, so every caller has to validate what it gets back before using it.
+ */
+export const decodeStoredApiKey = (storedApiKey: string): { id: string; secret?: string } => {
+  const [id, secret] = Buffer.from(storedApiKey, 'base64').toString().split(':');
+
+  return { id, secret };
+};
+
+/**
  * Normalizes a stored task `uiamApiKey` into the credential UIAM expects on the wire.
  *
  * Two writers persist this attribute in different shapes:
@@ -60,9 +73,27 @@ export const getUiamApiKeySecret = (storedUiamApiKey: string): string => {
     return storedUiamApiKey;
   }
 
-  const [, secret] = Buffer.from(storedUiamApiKey, 'base64').toString().split(':');
+  const { secret } = decodeStoredApiKey(storedUiamApiKey);
 
   return secret && isUiamCredential(secret) ? secret : storedUiamApiKey;
+};
+
+/**
+ * Extracts the UIAM key id from a stored `uiamApiKey`, the counterpart to
+ * {@link getUiamApiKeySecret}.
+ *
+ * Only the `base64(<id>:<secret>)` shape carries an id. User-created Cloud keys are stored as
+ * the raw `essu_…` secret and have no id, so `undefined` for them is the correct answer rather
+ * than a gap: nothing in Kibana owns — or may invalidate — those keys.
+ */
+export const getUiamApiKeyId = (storedUiamApiKey?: string | null): string | undefined => {
+  if (!storedUiamApiKey || isUiamCredential(storedUiamApiKey)) {
+    return undefined;
+  }
+
+  const { id, secret } = decodeStoredApiKey(storedUiamApiKey);
+
+  return id && secret && isUiamCredential(secret) ? id : undefined;
 };
 
 export const isRequestApiKeyType = (user: AuthenticatedUser | null) => {
@@ -88,11 +119,11 @@ export const getApiKeyFromRequest = (request: KibanaRequest): RequestApiKeyCrede
       return { api_key: credentials };
     }
 
-    const apiKey = Buffer.from(credentials, 'base64').toString().split(':');
+    const { id, secret } = decodeStoredApiKey(credentials);
 
     return {
-      id: apiKey[0],
-      api_key: apiKey[1],
+      id,
+      api_key: secret,
     };
   }
   return null;
