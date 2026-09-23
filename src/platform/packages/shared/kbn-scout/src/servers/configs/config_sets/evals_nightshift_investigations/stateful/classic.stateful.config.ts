@@ -112,6 +112,17 @@ const createInvestigationConfig = (sandboxKey: string): ScoutServerConfig => {
 // changes but not when the selection does, and smoke runs on either server. The suite's Playwright
 // config decides which evals run and rejects investigation selections without credentials.
 const sandboxApiKey = process.env.SANDBOX_API_KEY;
+// Any other SANDBOX_* without the key is a typo or half-filled config, not a smoke-only run.
+const partialSandboxVars = Object.keys(process.env).filter(
+  (name) => name.startsWith('SANDBOX_') && name !== 'SANDBOX_API_KEY' && process.env[name]
+);
+if (!sandboxApiKey && partialSandboxVars.length > 0) {
+  throw new Error(
+    `${partialSandboxVars.sort().join(', ')} set without SANDBOX_API_KEY; set the key to use the ` +
+      'sandbox, or unset every SANDBOX_* variable to run only the smoke eval.'
+  );
+}
+
 export const servers: ScoutServerConfig = sandboxApiKey
   ? createInvestigationConfig(sandboxApiKey)
   : tracing;

@@ -67,7 +67,7 @@ fi
 if [[ -n "$TRACING_EXPORTERS_JSON" && "$TRACING_EXPORTERS_JSON" != "null" ]]; then
   export TRACING_EXPORTERS="$TRACING_EXPORTERS_JSON"
 fi
-# Mirrors setup_job_env.sh, minus its EVAL_SERVER_CONFIG_SET gate, since locally you pick the suite.
+# Mirrors .buildkite/scripts/steps/evals/run_suite.sh, minus its EVAL_SERVER_CONFIG_SET gate, since locally you pick the suite.
 if [[ "$(jq -r 'has("sandbox")' <<<"$CONFIG_JSON")" == "true" ]]; then
   export SANDBOX_API_HOST="$(jq -r '.sandbox.host // empty' <<<"$CONFIG_JSON")"
   export SANDBOX_API_PORT="$(jq -r '.sandbox.port // empty' <<<"$CONFIG_JSON")"

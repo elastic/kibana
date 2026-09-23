@@ -142,6 +142,27 @@ describe('evals_nightshift_investigations config set', () => {
     );
   });
 
+  it('rejects other sandbox settings without the API key instead of starting the plain server', () => {
+    const { SANDBOX_API_KEY, ...partial } = SANDBOX_ENV;
+    expect(() => loadConfig(partial)).toThrow(
+      'SANDBOX_API_HOST, SANDBOX_API_PORT, SANDBOX_CA_CERT, SANDBOX_CLIENT_CERT, SANDBOX_CLIENT_KEY set without SANDBOX_API_KEY'
+    );
+  });
+
+  it('rejects a lone *_PATH setting without the API key', () => {
+    expect(() => loadConfig({ SANDBOX_CLIENT_CERT_PATH: '/tmp/tls.crt' })).toThrow(
+      'SANDBOX_CLIENT_CERT_PATH set without SANDBOX_API_KEY'
+    );
+  });
+
+  it('treats empty sandbox variables as unset', () => {
+    // The CI export writes '' for absent optional fields such as the CA.
+    const { servers } = loadConfig({ SANDBOX_API_HOST: '', SANDBOX_CA_CERT: '' });
+    expect(servers.kbnTestServer.serverArgs).not.toContain(
+      '--xpack.nightshift_investigations.enabled=true'
+    );
+  });
+
   it('defaults host and port when the shell exports them empty', () => {
     const { servers } = loadConfig({ ...SANDBOX_ENV, SANDBOX_API_HOST: '', SANDBOX_API_PORT: '' });
     const configArg = servers.kbnTestServer.serverArgs.find((arg: string) =>
