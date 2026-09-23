@@ -140707,30 +140707,6 @@ components:
           type: array
       required:
         - items
-    Kibana_HTTP_APIs_alerting_bulk_unsnooze_series_item:
-      additionalProperties: false
-      type: object
-      properties:
-        group_hash:
-          description: Hash identifying the alert episode series to apply the action to.
-          maxLength: 256
-          minLength: 1
-          type: string
-      required:
-        - group_hash
-    Kibana_HTTP_APIs_alerting_bulk_unsnooze_series_request:
-      additionalProperties: false
-      type: object
-      properties:
-        items:
-          description: List of 1 to 100 unsnooze actions to create.
-          items:
-            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_unsnooze_series_item'
-          maxItems: 100
-          minItems: 1
-          type: array
-      required:
-        - items
     Kibana_HTTP_APIs_alerting_error_response:
       additionalProperties: false
       type: object
