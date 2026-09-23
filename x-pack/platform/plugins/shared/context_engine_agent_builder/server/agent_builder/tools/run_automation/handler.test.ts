@@ -130,7 +130,12 @@ describe('runAutomationHandler', () => {
 
     const result = await runAutomationHandler(buildDeps());
 
-    expect(updateWorkflowMock).toHaveBeenCalledWith(workflowId, { enabled: true }, spaceId, request);
+    expect(updateWorkflowMock).toHaveBeenCalledWith(
+      workflowId,
+      { enabled: true },
+      spaceId,
+      request
+    );
     expect(result.started).toBe(true);
     expect(result.enabledForRun).toBe(true);
   });
