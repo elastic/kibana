@@ -60,6 +60,7 @@ import {
   CloudConnectorSchemaV4,
   CloudConnectorSchemaV5,
   CloudOnboardingDeploymentSchemaV1,
+  CloudOnboardingDeploymentSchemaV2,
 } from '../types';
 
 import { downloadSourceSchemaV2 } from '../../common/types/models/download_source_schema';
@@ -2135,6 +2136,16 @@ export const getSavedObjectTypes = (
               { unknowns: 'ignore' }
             ),
             create: CloudOnboardingDeploymentSchemaV1,
+          },
+        },
+        2: {
+          changes: [],
+          schemas: {
+            forwardCompatibility: CloudOnboardingDeploymentSchemaV2.extends(
+              {},
+              { unknowns: 'ignore' }
+            ),
+            create: CloudOnboardingDeploymentSchemaV2,
           },
         },
       },

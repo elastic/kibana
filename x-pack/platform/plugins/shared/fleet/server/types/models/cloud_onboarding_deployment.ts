@@ -61,3 +61,13 @@ export const CloudOnboardingDeploymentSchemaV1 = schema.object({
     )
   ),
 });
+
+// V2 adds nullable connectorId/authMethod to support MI→ECF transition clearing both fields.
+export const CloudOnboardingDeploymentSchemaV2 = CloudOnboardingDeploymentSchemaV1.extends({
+  connectorId: schema.maybe(schema.nullable(schema.string({ minLength: 1 }))),
+  authMethod: schema.maybe(
+    schema.nullable(
+      schema.oneOf([schema.literal('identity_federation'), schema.literal('static_keys')])
+    )
+  ),
+});

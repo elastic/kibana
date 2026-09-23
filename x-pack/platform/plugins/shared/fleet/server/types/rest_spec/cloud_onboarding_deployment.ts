@@ -275,7 +275,7 @@ export const UpdateCloudOnboardingDeploymentRequestSchema = {
         meta: { description: 'ECF CloudFormation stacks to record for this deployment.' },
       })
     ),
-    connectorId: schema.maybe(schema.string({ maxLength: 255 })),
+    connectorId: schema.maybe(schema.nullable(schema.string({ maxLength: 255 }))),
     authMethod: schema.maybe(
       schema.nullable(
         schema.oneOf([schema.literal('identity_federation'), schema.literal('static_keys')])
