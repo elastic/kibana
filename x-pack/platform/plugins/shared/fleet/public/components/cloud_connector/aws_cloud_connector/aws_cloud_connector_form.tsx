@@ -22,7 +22,7 @@ import {
 import { type CloudConnectorFormProps } from '../types';
 
 import { updateInputVarsWithCredentials, isAwsCredentials } from '../utils';
-import { ORGANIZATION_ACCOUNT } from '../constants';
+import { AWS_CLOUD_CONNECTOR_FIELD_NAMES, ORGANIZATION_ACCOUNT } from '../constants';
 
 import { CloudConnectorInputFields } from '../form/cloud_connector_input_fields';
 import { CloudConnectorNameField } from '../form/cloud_connector_name_field';
@@ -92,6 +92,11 @@ export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
     : inputVars;
 
   const fields = getAwsCloudConnectorsCredentialsFormOptions(updatedInputVars);
+  const hasExternalId = !!fields?.some(
+    (field) =>
+      field.id === AWS_CLOUD_CONNECTOR_FIELD_NAMES.EXTERNAL_ID ||
+      field.id === AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_EXTERNAL_ID
+  );
 
   return (
     <>
@@ -114,7 +119,10 @@ export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
         buttonContent={<EuiLink>{'Steps to assume role'}</EuiLink>}
         paddingSize="l"
       >
-        <CloudFormationCloudCredentialsGuide accountType={accountType} />
+        <CloudFormationCloudCredentialsGuide
+          accountType={accountType}
+          hasExternalId={hasExternalId}
+        />
       </EuiAccordion>
       <EuiSpacer size="l" />
       <EuiButton

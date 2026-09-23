@@ -20,11 +20,17 @@ export type CloudFormationCredentialType = 'identity_federation' | 'direct_acces
 export interface CloudFormationCloudCredentialsGuideProps {
   accountType?: AccountType;
   credentialType?: CloudFormationCredentialType;
+  /** Whether the form below asks for an External ID next to the Role ARN. */
+  hasExternalId?: boolean;
 }
 
 export const CloudFormationCloudCredentialsGuide: React.FC<
   CloudFormationCloudCredentialsGuideProps
-> = ({ accountType = ORGANIZATION_ACCOUNT, credentialType = 'identity_federation' }) => {
+> = ({
+  accountType = ORGANIZATION_ACCOUNT,
+  credentialType = 'identity_federation',
+  hasExternalId = false,
+}) => {
   const isOrganization = accountType === ORGANIZATION_ACCOUNT;
 
   const lastStep =
@@ -35,6 +41,15 @@ export const CloudFormationCloudCredentialsGuide: React.FC<
         values={{
           accessKeyId: <strong>{'Access Key ID'}</strong>,
           secretAccessKey: <strong>{'Secret Access Key'}</strong>,
+        }}
+      />
+    ) : hasExternalId ? (
+      <FormattedMessage
+        id="xpack.fleet.cloudConnector.aws.guide.steps.credentials"
+        defaultMessage="Copy {role} and {external_id} then paste the role credentials below"
+        values={{
+          role: <strong>{'Role ARN'}</strong>,
+          external_id: <strong>{'External ID'}</strong>,
         }}
       />
     ) : (
