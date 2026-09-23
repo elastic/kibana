@@ -206,7 +206,8 @@ function readVegaMark(spec: unknown): string | undefined {
  * LLM evaluator: asks a judge whether each produced chart's form (chart type,
  * xy series types, Vega mark) satisfies the user request, using the gold chart
  * form as the reference for intent. Skips when the gold declares no chart form
- * and abstains (`score: null`) when the judge returns no verdict.
+ * and abstains (`score: null`) only when the judge returned no verdict at all;
+ * visualizations it did rule on are scored and the failures reported.
  */
 export function createChartTypeVsIntentEvaluator<
   TExample extends Example = Example,
@@ -282,34 +283,46 @@ export function createChartTypeVsIntentEvaluator<
       );
 
       // A judge that returns no verdict is an infrastructure failure, not an agent
-      // failure: abstain like the other evaluators do for gold-side problems.
+      // failure. Verdicts that did come back are scored; only when none did does the
+      // evaluator abstain, as the others do for gold-side problems.
+      const judged = details.filter((detail) => detail.fallback === undefined);
       const judgeFailures = details.filter((detail) => detail.fallback !== undefined);
-      if (judgeFailures.length > 0) {
+      const failureSummary =
+        judgeFailures.length === 0
+          ? ''
+          : `Judge failed on ${judgeFailures.length}/${
+              details.length
+            } visualization(s): ${judgeFailures.map((detail) => detail.reason).join('; ')}`;
+
+      if (judged.length === 0) {
         return {
           score: null,
           label: 'judge-failure',
-          explanation: `Chart form judge failed on ${judgeFailures.length}/${
-            details.length
-          } visualization(s): ${judgeFailures.map((detail) => detail.reason).join('; ')}`,
+          explanation: failureSummary,
           metadata: {
             gold,
             totalVisualizations: details.length,
+            judgeFailures: judgeFailures.length,
             visualizations: details,
             judgeVersion: CHART_TYPE_VS_INTENT_JUDGE_VERSION,
           },
         };
       }
 
-      const satisfiedCount = details.filter((detail) => detail.satisfies).length;
-      const score = satisfiedCount / details.length;
+      const satisfiedCount = judged.filter((detail) => detail.satisfies).length;
+      const score = satisfiedCount / judged.length;
 
       return {
         score,
         label: score === 1 ? 'match' : score === 0 ? 'mismatch' : 'partial',
-        explanation: details.map((detail) => detail.reason).join(' '),
+        explanation: [...judged.map((detail) => detail.reason), failureSummary]
+          .filter((part) => part.length > 0)
+          .join(' '),
         metadata: {
           gold,
           satisfiedCount,
+          judgedVisualizations: judged.length,
+          judgeFailures: judgeFailures.length,
           totalVisualizations: details.length,
           visualizations: details,
           judgeVersion: CHART_TYPE_VS_INTENT_JUDGE_VERSION,
