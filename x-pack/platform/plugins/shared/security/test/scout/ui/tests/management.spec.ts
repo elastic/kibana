@@ -26,7 +26,8 @@ test.describe('Security - Management navigation', { tag: tags.stateful.classic }
   });
 
   test('Can navigate to create user section', async ({ pageObjects, page }) => {
-    await pageObjects.securityUsers.goto();
+    await page.gotoApp('management');
+    await page.testSubj.locator('users').click();
     await pageObjects.securityUsers.clickCreateNewUser();
     await expect(page).toHaveURL(new RegExp(CREATE_USERS_PATH));
   });
@@ -83,8 +84,9 @@ test.describe('Security - Management navigation', { tag: tags.stateful.classic }
     }
   });
 
-  test('Can navigate to roles section', async ({ pageObjects, page }) => {
-    await pageObjects.securityRoles.goto();
+  test('Can navigate to roles section', async ({ page }) => {
+    await page.gotoApp('management');
+    await page.testSubj.locator('roles').click();
     await expect(page).toHaveURL(new RegExp(ROLES_PATH));
   });
 

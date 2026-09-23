@@ -30,11 +30,6 @@ const eastOnlyIndexPrivileges: RoleIndexPrivilege[] = [
   },
 ];
 
-const eastOnlyRole: KibanaRole = {
-  elasticsearch: { cluster: [], indices: eastOnlyIndexPrivileges },
-  kibana: [{ base: ['all'], feature: {}, spaces: ['*'] }],
-};
-
 test.describe('Document Level Security', { tag: tags.stateful.classic }, () => {
   let dataViewId: string | undefined;
   let defaultIndex: string | undefined;
@@ -65,7 +60,11 @@ test.describe('Document Level Security', { tag: tags.stateful.classic }, () => {
     await esClient.indices.delete({ index: dataIndex, ignore_unavailable: true });
   });
 
-  test(`should add new role ${customRole}`, async ({ browserAuth, pageObjects }) => {
+  test('UI-created user and role restrict Discover to EAST documents', async ({
+    browserAuth,
+    pageObjects,
+    page,
+  }) => {
     await browserAuth.loginWithCustomRole(manageSecurityRole);
     await pageObjects.securityRoles.goto();
     await pageObjects.securityRoles.createRole(customRole, {
@@ -74,12 +73,7 @@ test.describe('Document Level Security', { tag: tags.stateful.classic }, () => {
 
     const roles = await pageObjects.securityRoles.getAllRoles();
     expect(roles.some((r) => r.rolename === customRole)).toBe(true);
-    expect(roles.find((r) => r.rolename === customRole)!.reserved).toBe(false);
-  });
-
-  test(`should add new user ${customUser}`, async ({ browserAuth, esClient, pageObjects }) => {
-    await esClient.security.putRole({ name: customRole, indices: eastOnlyIndexPrivileges });
-    await browserAuth.loginWithCustomRole(manageSecurityRole);
+    expect(roles.find((r) => r.rolename === customRole)?.reserved).toBe(false);
     await pageObjects.securityUsers.createUser({
       username: customUser,
       password: 'changeme',
@@ -92,12 +86,11 @@ test.describe('Document Level Security', { tag: tags.stateful.classic }, () => {
     const users = await pageObjects.securityUsers.getAllUsers();
     const user = users.find((u) => u.username === customUser);
     expect(user).toBeDefined();
-    expect(user!.roles).toContain(customRole);
-    expect(user!.reserved).toBe(false);
-  });
+    expect(user?.roles).toStrictEqual(['kibana_admin', customRole]);
+    expect(user?.reserved).toBe(false);
 
-  test('user East should only see EAST doc in Discover', async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginWithCustomRole(eastOnlyRole);
+    await page.context().clearCookies();
+    await pageObjects.login.loginWithUsernamePassword(customUser, 'changeme');
 
     await pageObjects.discover.goto({ queryMode: 'classic' });
     await pageObjects.discover.selectDataView(dataIndex, { createAdHocIfMissing: false });

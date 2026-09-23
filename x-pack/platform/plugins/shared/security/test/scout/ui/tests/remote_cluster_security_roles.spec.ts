@@ -24,8 +24,10 @@ test.describe('Remote Cluster Privileges', { tag: tags.stateful.classic }, () =>
     await esClient.security.deleteRole({ name: customRole }).catch(() => {});
   });
 
-  test(`should add new role ${customRole} with remote cluster privileges`, async ({
+  test(`should create and update role ${customRole} with remote cluster privileges`, async ({
     pageObjects,
+    page,
+    esClient,
   }) => {
     await pageObjects.securityRoles.goto();
     await pageObjects.securityRoles.createRole(customRole, {
@@ -47,27 +49,15 @@ test.describe('Remote Cluster Privileges', { tag: tags.stateful.classic }, () =>
 
     const roles = await pageObjects.securityRoles.getAllRoles();
     expect(roles.some((r) => r.rolename === customRole)).toBe(true);
-    expect(roles.find((r) => r.rolename === customRole)!.reserved).toBe(false);
-  });
-
-  test(`should update role ${customRole} with remote cluster privileges`, async ({
-    pageObjects,
-    page,
-    esClient,
-  }) => {
-    await esClient.security.putRole({
-      name: customRole,
-      indices: [{ names: ['dlstest'], privileges: ['read', 'view_index_metadata'] }],
-      remote_cluster: [{ clusters: ['cluster1', 'cluster2'], privileges: ['monitor_enrich'] }],
-    });
+    expect(roles.find((r) => r.rolename === customRole)?.reserved).toBe(false);
     await pageObjects.securityRoles.goto();
     await pageObjects.securityRoles.clickEditRole(customRole);
 
     await expect(page).toHaveURL(/security\/roles\/edit/);
 
     const { clusters, privileges } = await pageObjects.securityRoles.getRemoteClusterPrivilege(0);
-    expect(clusters).toStrictEqual(expect.arrayContaining(['cluster1', 'cluster2']));
-    expect(privileges).toStrictEqual(expect.arrayContaining(['monitor_enrich']));
+    expect(clusters).toStrictEqual(['cluster1', 'cluster2']);
+    expect(privileges).toStrictEqual(['monitor_enrich']);
 
     await pageObjects.securityRoles.deleteRemoteClusterPrivilege(0);
     await pageObjects.securityRoles.addRemoteClusterPrivilege({
@@ -76,7 +66,9 @@ test.describe('Remote Cluster Privileges', { tag: tags.stateful.classic }, () =>
     });
 
     await pageObjects.securityRoles.saveRole();
-    const roles = await pageObjects.securityRoles.getAllRoles();
-    expect(roles.some((r) => r.rolename === customRole)).toBe(true);
+    const updatedRole = await esClient.security.getRole({ name: customRole });
+    expect(updatedRole[customRole].remote_cluster).toStrictEqual([
+      { clusters: ['cluster3', 'cluster4'], privileges: ['monitor_enrich'] },
+    ]);
   });
 });

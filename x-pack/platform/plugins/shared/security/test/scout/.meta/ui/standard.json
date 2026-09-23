@@ -1,5 +1,5 @@
 {
-  "sha1": "42cd7d94429af9c1beddd8d8d94ff190169612c0",
+  "sha1": "6cd79dd655356d83b8442faeeff547cd958effad",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -215,8 +215,8 @@
       }
     },
     {
-      "id": "69cbac632fc79b1-ee750334dc92886",
-      "title": "Document Level Security should add new role myroleEast",
+      "id": "69cbac632fc79b1-91e6fdd7bb283a7",
+      "title": "Document Level Security UI-created user and role restrict Discover to EAST documents",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -224,41 +224,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/doc_level_security.spec.ts",
-        "line": 72,
-        "column": 33
+        "line": 65,
+        "column": 16
       }
     },
     {
-      "id": "69cbac632fc79b1-98b4a5771c857b5",
-      "title": "Document Level Security should add new user userEast",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/doc_level_security.spec.ts",
-        "line": 81,
-        "column": 20
-      }
-    },
-    {
-      "id": "69cbac632fc79b1-a2e8f799d2dd4b4",
-      "title": "Document Level Security user East should only see EAST doc in Discover",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/doc_level_security.spec.ts",
-        "line": 100,
-        "column": 23
-      }
-    },
-    {
-      "id": "8a0874bdac36028-c08e487c51c1e2e",
-      "title": "Field Level Security should add new role a_viewssnrole",
+      "id": "8a0874bdac36028-00d1c6b21cd883f",
+      "title": "Field Level Security UI-created user customer1 sees SSN in Discover",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -266,13 +238,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/field_level_security.spec.ts",
-        "line": 67,
-        "column": 61
+        "line": 79,
+        "column": 11
       }
     },
     {
-      "id": "8a0874bdac36028-c8e6deb139b1740",
-      "title": "Field Level Security should add new role a_view_no_ssn_role",
+      "id": "8a0874bdac36028-bc3ae17236d20e6",
+      "title": "Field Level Security UI-created user customer2 cannot see SSN in Discover",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -280,36 +252,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/field_level_security.spec.ts",
-        "line": 89,
-        "column": 18
-      }
-    },
-    {
-      "id": "8a0874bdac36028-b458f01f676768a",
-      "title": "Field Level Security should add new user customer1",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/field_level_security.spec.ts",
-        "line": 106,
-        "column": 23
-      }
-    },
-    {
-      "id": "8a0874bdac36028-abf7b57f9634956",
-      "title": "Field Level Security should add new user customer2",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/field_level_security.spec.ts",
-        "line": 135,
-        "column": 12
+        "line": 79,
+        "column": 11
       }
     },
     {
@@ -322,36 +266,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/field_level_security.spec.ts",
-        "line": 170,
-        "column": 8
-      }
-    },
-    {
-      "id": "8a0874bdac36028-b3e6353f0f83774",
-      "title": "Field Level Security user with SSN access (a_viewssnrole) should see ssn field in Discover",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/field_level_security.spec.ts",
-        "line": 285,
-        "column": 24
-      }
-    },
-    {
-      "id": "8a0874bdac36028-ccc6703b855fb86",
-      "title": "Field Level Security user without SSN access (a_view_no_ssn_role) should not see ssn field in Discover",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/field_level_security.spec.ts",
-        "line": 310,
-        "column": 24
+        "line": 131,
+        "column": 84
       }
     },
     {
@@ -364,8 +280,36 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/login.spec.ts",
-        "line": 13,
-        "column": 14
+        "line": 22,
+        "column": 41
+      }
+    },
+    {
+      "id": "b565e04e3725128-e8501ae33568cc4",
+      "title": "Security - Login Page displays message acknowledging logout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/login.spec.ts",
+        "line": 26,
+        "column": 8
+      }
+    },
+    {
+      "id": "b565e04e3725128-14215394dca17ca",
+      "title": "Security - Login Page logging out of a non-default space redirects to the root login page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/login.spec.ts",
+        "line": 30,
+        "column": 5
       }
     },
     {
@@ -378,8 +322,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/login.spec.ts",
-        "line": 14,
-        "column": 36
+        "line": 49,
+        "column": 58
       }
     },
     {
@@ -392,8 +336,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/login.spec.ts",
-        "line": 20,
-        "column": 58
+        "line": 54,
+        "column": 13
       }
     },
     {
@@ -406,8 +350,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/login.spec.ts",
-        "line": 31,
-        "column": 82
+        "line": 66,
+        "column": 21
       }
     },
     {
@@ -420,8 +364,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/login.spec.ts",
-        "line": 38,
-        "column": 72
+        "line": 78,
+        "column": 65
       }
     },
     {
@@ -448,7 +392,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/management.spec.ts",
-        "line": 34,
+        "line": 35,
         "column": 8
       }
     },
@@ -462,7 +406,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/management.spec.ts",
-        "line": 41,
+        "line": 42,
         "column": 11
       }
     },
@@ -476,7 +420,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/management.spec.ts",
-        "line": 63,
+        "line": 64,
         "column": 13
       }
     },
@@ -490,7 +434,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/management.spec.ts",
-        "line": 78,
+        "line": 79,
         "column": 24
       }
     },
@@ -504,8 +448,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/management.spec.ts",
-        "line": 82,
-        "column": 22
+        "line": 83,
+        "column": 54
       }
     },
     {
@@ -518,8 +462,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/management.spec.ts",
-        "line": 86,
-        "column": 8
+        "line": 87,
+        "column": 50
       }
     },
     {
@@ -532,8 +476,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/management.spec.ts",
-        "line": 91,
-        "column": 8
+        "line": 93,
+        "column": 67
       }
     },
     {
@@ -546,8 +490,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/management.spec.ts",
-        "line": 103,
-        "column": 23
+        "line": 106,
+        "column": 11
       }
     },
     {
@@ -560,8 +504,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/management.spec.ts",
-        "line": 122,
-        "column": 22
+        "line": 124,
+        "column": 50
       }
     },
     {
@@ -574,13 +518,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/management.spec.ts",
-        "line": 134,
+        "line": 137,
         "column": 24
       }
     },
     {
-      "id": "156bbf95ee40dd2-d476b03ee6cb1a3",
-      "title": "Remote Cluster Privileges should add new role rc-custom-role with remote cluster privileges",
+      "id": "156bbf95ee40dd2-a425f627fde306f",
+      "title": "Remote Cluster Privileges should create and update role rc-custom-role with remote cluster privileges",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -589,21 +533,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/remote_cluster_security_roles.spec.ts",
         "line": 28,
-        "column": 5
-      }
-    },
-    {
-      "id": "156bbf95ee40dd2-3ee7c5a84828972",
-      "title": "Remote Cluster Privileges should update role rc-custom-role with remote cluster privileges",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/remote_cluster_security_roles.spec.ts",
-        "line": 61,
-        "column": 75
+        "column": 16
       }
     },
     {
@@ -845,8 +775,8 @@
       }
     },
     {
-      "id": "07cac0e133757eb-5cd9594fc3ebd58",
-      "title": "Secure roles and permissions should add new role logstash_reader",
+      "id": "07cac0e133757eb-262ac215a931cba",
+      "title": "Secure roles and permissions UI-created user can export a saved search but cannot manage users",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -854,50 +784,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/secure_roles_permissions.spec.ts",
-        "line": 31,
+        "line": 34,
         "column": 5
-      }
-    },
-    {
-      "id": "07cac0e133757eb-19a0aae8210cd9b",
-      "title": "Secure roles and permissions should add new user Rashmi with logstash_reader role",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/secure_roles_permissions.spec.ts",
-        "line": 63,
-        "column": 5
-      }
-    },
-    {
-      "id": "07cac0e133757eb-db945ab484a703a",
-      "title": "Secure roles and permissions Kibana User without manage_security does not have link to user management",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/secure_roles_permissions.spec.ts",
-        "line": 99,
-        "column": 62
-      }
-    },
-    {
-      "id": "07cac0e133757eb-d5323f08de95676",
-      "title": "Secure roles and permissions Kibana User with read access can navigate to Discover and see export button",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/secure_roles_permissions.spec.ts",
-        "line": 128,
-        "column": 3
       }
     },
     {
@@ -1022,8 +910,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/users.spec.ts",
-        "line": 31,
-        "column": 24
+        "line": 33,
+        "column": 19
       }
     },
     {
@@ -1036,8 +924,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/users.spec.ts",
-        "line": 44,
-        "column": 22
+        "line": 59,
+        "column": 24
       }
     },
     {
@@ -1050,8 +938,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/users.spec.ts",
-        "line": 66,
-        "column": 23
+        "line": 82,
+        "column": 54
       }
     },
     {
@@ -1064,8 +952,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/users.spec.ts",
-        "line": 81,
-        "column": 50
+        "line": 97,
+        "column": 12
       }
     },
     {
@@ -1078,8 +966,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/users.spec.ts",
-        "line": 95,
-        "column": 8
+        "line": 116,
+        "column": 5
       }
     },
     {
@@ -1092,8 +980,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/users.spec.ts",
-        "line": 111,
-        "column": 16
+        "line": 143,
+        "column": 14
       }
     },
     {
@@ -1106,8 +994,22 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/users.spec.ts",
-        "line": 135,
-        "column": 93
+        "line": 168,
+        "column": 9
+      }
+    },
+    {
+      "id": "0d1225b71b2e81f-fd0c9ea688592e5",
+      "title": "Security - Users management change password of current user when submitting form",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/users.spec.ts",
+        "line": 189,
+        "column": 24
       }
     },
     {
@@ -1120,8 +1022,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/users.spec.ts",
-        "line": 156,
-        "column": 13
+        "line": 220,
+        "column": 7
       }
     },
     {
@@ -1134,8 +1036,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/users.spec.ts",
-        "line": 172,
-        "column": 24
+        "line": 235,
+        "column": 17
       }
     },
     {
@@ -1148,8 +1050,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/users.spec.ts",
-        "line": 189,
-        "column": 55
+        "line": 255,
+        "column": 9
       }
     },
     {
@@ -1162,8 +1064,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/users.spec.ts",
-        "line": 207,
-        "column": 20
+        "line": 273,
+        "column": 5
       }
     },
     {
@@ -1176,8 +1078,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/users.spec.ts",
-        "line": 218,
-        "column": 21
+        "line": 278,
+        "column": 39
       }
     },
     {
@@ -1190,8 +1092,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/users.spec.ts",
-        "line": 225,
-        "column": 76
+        "line": 284,
+        "column": 23
       }
     },
     {
@@ -1204,8 +1106,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/users.spec.ts",
-        "line": 231,
-        "column": 89
+        "line": 294,
+        "column": 23
       }
     },
     {
@@ -1218,8 +1120,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/users.spec.ts",
-        "line": 238,
-        "column": 8
+        "line": 298,
+        "column": 5
       }
     },
     {
@@ -1232,8 +1134,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout/ui/tests/users.spec.ts",
-        "line": 258,
-        "column": 9
+        "line": 321,
+        "column": 83
       }
     }
   ]

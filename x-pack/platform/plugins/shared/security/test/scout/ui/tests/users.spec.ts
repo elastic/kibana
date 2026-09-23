@@ -26,17 +26,22 @@ test.describe('Security - Users management', { tag: tags.stateful.classic }, () 
     await pageObjects.securityUsers.goto();
   });
 
-  test('should show the default elastic and kibana_system users', async ({ pageObjects }) => {
+  test('should show the default elastic and kibana_system users', async ({
+    pageObjects,
+    config,
+  }) => {
     const users = await pageObjects.securityUsers.getAllUsers();
     const byUsername = Object.fromEntries(users.map((u) => [u.username, u]));
 
-    expect(byUsername.elastic.roles).toContain('superuser');
-    expect(byUsername.elastic.reserved).toBe(true);
-    expect(byUsername.elastic.deprecated).toBe(false);
-
-    expect(byUsername.kibana_system.roles).toContain('kibana_system');
-    expect(byUsername.kibana_system.reserved).toBe(true);
-    expect(byUsername.kibana_system.deprecated).toBe(false);
+    const builtInUsers = [
+      { username: 'elastic', roles: ['superuser'], reserved: true, deprecated: false },
+      { username: 'kibana_system', roles: ['kibana_system'], reserved: true, deprecated: false },
+      { username: 'kibana', roles: ['kibana_system'], reserved: true, deprecated: true },
+    ];
+    for (const user of builtInUsers) {
+      const expected = config.isCloud ? undefined : expect.objectContaining(user);
+      expect(byUsername[user.username]).toStrictEqual(expected);
+    }
   });
 
   test('should add new user', async ({ pageObjects, esClient }) => {
@@ -53,7 +58,7 @@ test.describe('Security - Users management', { tag: tags.stateful.classic }, () 
       const users = await pageObjects.securityUsers.getAllUsers();
       const lee = users.find((u) => u.username === 'Lee');
       expect(lee).toBeDefined();
-      expect(lee!.roles).toContain('kibana_admin');
+      expect(lee!.roles).toStrictEqual(['kibana_admin']);
       expect(lee!.fullname).toBe('LeeFirst LeeLast');
       expect(lee!.email).toBe('lee@myEmail.com');
       expect(lee!.reserved).toBe(false);
@@ -69,7 +74,7 @@ test.describe('Security - Users management', { tag: tags.stateful.classic }, () 
       const users = await pageObjects.securityUsers.getAllUsers();
       const user = users.find((u) => u.username === optionalUser.username);
       expect(user).toBeDefined();
-      expect(user!.roles).toContain('superuser');
+      expect(user!.roles).toStrictEqual(optionalUser.roles);
       expect(user!.fullname).toBe('');
       expect(user!.email).toBe('');
       expect(user!.reserved).toBe(false);
@@ -97,13 +102,19 @@ test.describe('Security - Users management', { tag: tags.stateful.classic }, () 
     const roles = await pageObjects.securityRoles.getAllRoles();
     const byName = Object.fromEntries(roles.map((r) => [r.rolename, r]));
 
-    expect(byName.apm_system?.reserved).toBe(true);
-    expect(byName.beats_admin?.reserved).toBe(true);
-    expect(byName.beats_system?.reserved).toBe(true);
-    expect(byName.kibana_admin?.reserved).toBe(true);
-    expect(byName.kibana_system?.reserved).toBe(true);
-    expect(byName.logstash_system?.reserved).toBe(true);
-    expect(byName.monitoring_user?.reserved).toBe(true);
+    for (const role of [
+      'apm_system',
+      'beats_admin',
+      'beats_system',
+      'kibana_admin',
+      'kibana_system',
+      'logstash_system',
+      'monitoring_user',
+    ]) {
+      expect(byName[role]?.reserved).toBe(true);
+      expect(byName[role]?.deprecated).toBe(false);
+    }
+    expect(byName.kibana_user?.reserved).toBe(true);
     expect(byName.kibana_user?.deprecated).toBe(true);
   });
 
@@ -131,6 +142,8 @@ test.describe('Security - Users management', { tag: tags.stateful.classic }, () 
       const user = users.find((u) => u.username === optionalUser.username);
       expect(user!.fullname).toBe('Optional User');
       expect(user!.email).toBe('optionalUser@elastic.co');
+      expect(user!.roles).toStrictEqual(optionalUser.roles);
+      expect(user!.reserved).toBe(false);
     } finally {
       await esClient.security.deleteUser({ username: optionalUser.username }).catch(() => {});
     }
@@ -158,6 +171,44 @@ test.describe('Security - Users management', { tag: tags.stateful.classic }, () 
       );
     } finally {
       await esClient.security.deleteUser({ username: optionalUser.username }).catch(() => {});
+    }
+  });
+
+  test('change password of current user when submitting form', async ({
+    pageObjects,
+    page,
+    esClient,
+  }) => {
+    await esClient.security.putUser({
+      username: optionalUser.username,
+      password: optionalUser.password,
+      roles: optionalUser.roles,
+    });
+    try {
+      await page.context().clearCookies();
+      await pageObjects.login.loginWithUsernamePassword(
+        optionalUser.username,
+        optionalUser.password
+      );
+      await pageObjects.securityUsers.goto();
+      await pageObjects.securityUsers.updateUserPassword(
+        {
+          username: optionalUser.username,
+          current_password: optionalUser.password,
+          password: 'NewOptionalUserPwd',
+          confirm_password: 'NewOptionalUserPwd',
+        },
+        true
+      );
+      await pageObjects.toasts.waitForToastWithText('Password successfully changed');
+      await page.context().clearCookies();
+      await pageObjects.login.loginWithUsernamePassword(
+        optionalUser.username,
+        'NewOptionalUserPwd'
+      );
+      await expect(page.testSubj.locator('userMenuAvatar')).toBeVisible();
+    } finally {
+      await esClient.security.deleteUser({ username: optionalUser.username });
     }
   });
 

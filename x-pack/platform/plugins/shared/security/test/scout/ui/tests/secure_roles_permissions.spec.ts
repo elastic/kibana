@@ -10,6 +10,9 @@ import { expect } from '@kbn/scout/ui';
 
 import { test } from '../fixtures';
 
+const roleName = 'logstash_reader_perm_test';
+const username = 'Rashmi';
+
 test.describe('Secure roles and permissions', { tag: tags.stateful.classic }, () => {
   let defaultIndex: string | undefined;
 
@@ -32,97 +35,56 @@ test.describe('Secure roles and permissions', { tag: tags.stateful.classic }, ()
     await kbnClient.importExport.unload(
       'x-pack/platform/test/functional/fixtures/kbn_archives/security/discover'
     );
-    await esClient.security.deleteRole({ name: 'logstash_reader_perm_test' }).catch(() => {});
-    await esClient.security.deleteUser({ username: 'Rashmi' }).catch(() => {});
+    await esClient.security.deleteUser({ username });
+    await esClient.security.deleteRole({ name: roleName });
   });
 
-  test('should add new role logstash_reader', async ({ browserAuth, pageObjects }) => {
+  test('UI-created user can export a saved search but cannot manage users', async ({
+    browserAuth,
+    pageObjects,
+    page,
+  }) => {
     await browserAuth.loginWithCustomRole({
       elasticsearch: { cluster: ['manage_security'], indices: [] },
       kibana: [{ base: ['all'], feature: {}, spaces: ['*'] }],
     });
     await pageObjects.securityRoles.goto();
-    await pageObjects.securityRoles.createRole('logstash_reader_perm_test', {
+    await pageObjects.securityRoles.createRole(roleName, {
       elasticsearch: {
-        indices: [
-          {
-            names: ['logstash-*'],
-            privileges: ['read', 'view_index_metadata'],
-          },
-        ],
+        indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
       },
     });
-
     const roles = await pageObjects.securityRoles.getAllRoles();
-    expect(roles.some((r) => r.rolename === 'logstash_reader_perm_test')).toBe(true);
-  });
+    expect(roles.some((role) => role.rolename === roleName)).toBe(true);
 
-  test('should add new user Rashmi with logstash_reader role', async ({
-    browserAuth,
-    pageObjects,
-    esClient,
-  }) => {
-    await esClient.security.putRole({
-      name: 'logstash_reader_perm_test',
-      indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
-    });
-    await browserAuth.loginWithCustomRole({
-      elasticsearch: { cluster: ['manage_security'], indices: [] },
-      kibana: [{ base: ['all'], feature: {}, spaces: ['*'] }],
-    });
     await pageObjects.securityUsers.createUser({
-      username: 'Rashmi',
+      username,
       password: 'changeme',
       confirm_password: 'changeme',
       full_name: 'RashmiFirst RashmiLast',
       email: 'rashmi@myEmail.com',
-      roles: ['logstash_reader_perm_test'],
+      roles: [roleName],
     });
-
     const users = await pageObjects.securityUsers.getAllUsers();
-    const user = users.find((u) => u.username === 'Rashmi');
-    expect(user).toBeDefined();
-    expect(user!.roles).toContain('logstash_reader_perm_test');
-    expect(user!.fullname).toBe('RashmiFirst RashmiLast');
-    expect(user!.reserved).toBe(false);
-  });
+    const user = users.find((entry) => entry.username === username);
+    expect(user?.roles).toStrictEqual([roleName]);
+    expect(user?.fullname).toBe('RashmiFirst RashmiLast');
+    expect(user?.reserved).toBe(false);
 
-  test('Kibana User without manage_security does not have link to user management', async ({
-    browserAuth,
-    page,
-  }) => {
-    await browserAuth.loginWithCustomRole({
-      elasticsearch: {
-        cluster: [],
-        indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
-      },
-      kibana: [{ base: ['read'], feature: {}, spaces: ['*'] }],
-    });
-
+    await page.context().clearCookies();
+    await pageObjects.login.loginWithUsernamePassword(username, 'changeme');
     await page.gotoApp('management');
+    await expect(
+      page.testSubj
+        .locator('managementHome')
+        .or(page.testSubj.locator('managementHomeSolution'))
+        .or(page.testSubj.locator('cards-navigation-page'))
+    ).toBeVisible();
     await expect(page.testSubj.locator('users')).toBeHidden();
-  });
-
-  test('Kibana User with read access can navigate to Discover and see export button', async ({
-    browserAuth,
-    pageObjects,
-    page,
-  }) => {
-    await browserAuth.loginWithCustomRole({
-      elasticsearch: {
-        cluster: [],
-        indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
-      },
-      kibana: [
-        {
-          base: [],
-          feature: { discover: ['read'] },
-          spaces: ['*'],
-        },
-      ],
-    });
 
     await pageObjects.discover.goto({ queryMode: 'classic' });
-    await expect(page.testSubj.locator('shareTopNavButton')).toBeVisible();
+    await pageObjects.discover.loadSavedSearch('A Saved Search');
+    await pageObjects.discover.clickAppMenuItem('exportTopNavButton');
+    await expect(page.testSubj.locator('exportPopoverPanel')).toBeVisible();
   });
 });

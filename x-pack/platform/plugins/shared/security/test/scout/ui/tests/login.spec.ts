@@ -11,10 +11,55 @@ import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 
 test.describe('Security - Login Page', { tag: tags.stateful.classic }, () => {
-  test('can login', async ({ page, browserAuth }) => {
-    await browserAuth.loginAsAdmin();
-    await page.gotoApp('home');
+  const username = 'scout-login-test-user';
+  const password = 'scout-login-test-password';
+  const spaceId = 'scout-login-test-space';
+
+  test.beforeAll(async ({ esClient }) => {
+    await esClient.security.putUser({ username, password, roles: ['superuser'] });
+  });
+
+  test.afterAll(async ({ esClient }) => {
+    await esClient.security.deleteUser({ username });
+  });
+
+  test('can login', async ({ page, pageObjects }) => {
+    await pageObjects.login.loginWithUsernamePassword(username, password);
+    await pageObjects.home.goto();
     await expect(page.testSubj.locator('userMenuAvatar')).toBeVisible();
+  });
+
+  test('displays message acknowledging logout', async ({ page, pageObjects }) => {
+    await pageObjects.login.loginWithUsernamePassword(username, password);
+    await pageObjects.home.goto();
+    await page.testSubj.locator('userMenuAvatar').click();
+    await page.testSubj.locator('logoutLink').click();
+    await expect(page.testSubj.locator('loginInfoMessage')).toHaveText(
+      'You have logged out of Elastic.'
+    );
+  });
+
+  test('logging out of a non-default space redirects to the root login page', async ({
+    page,
+    pageObjects,
+    kbnUrl,
+    apiServices,
+  }) => {
+    await pageObjects.login.loginWithUsernamePassword(username, password);
+    await apiServices.spaces.create({ id: spaceId, name: 'Login test space' });
+    try {
+      await pageObjects.home.goto();
+      await page.goto(kbnUrl.app('home', { space: spaceId }));
+      await expect(pageObjects.home.homeApp).toBeVisible();
+      await expect(page).toHaveURL(new RegExp(`/s/${spaceId}/app/home`));
+      await page.testSubj.locator('userMenuAvatar').click();
+      await page.testSubj.locator('logoutLink').click();
+      await expect(page).toHaveURL(
+        (url) => url.pathname === new URL(kbnUrl.get('/login')).pathname
+      );
+    } finally {
+      await apiServices.spaces.delete(spaceId);
+    }
   });
 
   test('displays message if login fails', async ({ page, kbnUrl }) => {

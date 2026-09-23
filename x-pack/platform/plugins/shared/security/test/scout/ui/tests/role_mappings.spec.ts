@@ -145,7 +145,7 @@ test.describe('Role Mappings', { tag: tags.stateful.classic }, () => {
   test('displays an error when navigating to a non-existent role mapping', async ({ page }) => {
     await page.gotoApp('management/security/role_mappings/edit/i-do-not-exist');
     await expect(page.testSubj.locator('errorLoadingRoleMappingEditorToast')).toBeVisible();
-    await expect(page).toHaveURL(/management\/security\/role_mappings\//);
+    await expect(page).toHaveURL(/\/management\/security\/role_mappings\/?(?:\?.*)?$/);
   });
 
   test('displays a table of all role mappings', async ({ pageObjects, kbnClient }) => {
