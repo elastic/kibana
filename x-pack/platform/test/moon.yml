@@ -45,7 +45,6 @@ dependsOn:
   - '@kbn/aiops-log-rate-analysis'
   - '@kbn/aiops-test-utils'
   - '@kbn/ml-agg-utils'
-  - '@kbn/share-plugin'
   - '@kbn/tooling-log'
   - '@kbn/snapshot-restore-plugin'
   - '@kbn/monitoring-plugin'
@@ -158,6 +157,7 @@ dependsOn:
   - '@kbn/deeplinks-analytics'
   - '@kbn/core-user-profile-common'
   - '@kbn/significant-events-plugin'
+  - '@kbn/nightshift-shared'
   - '@kbn/alerting-v2-schemas'
 tags:
   - test-helper

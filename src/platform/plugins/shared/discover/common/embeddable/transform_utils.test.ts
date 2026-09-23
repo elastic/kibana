@@ -12,6 +12,7 @@ import {
   AS_CODE_DATA_VIEW_SPEC_TYPE,
   AS_CODE_ESQL_DATA_SOURCE_TYPE,
 } from '@kbn/as-code-data-views-schema';
+import type { DiscoverSessionApiEmbeddableTab } from '@kbn/as-code-discover-schema';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-common/src/server_types';
 import {
   fromStoredSearchEmbeddable,
@@ -19,7 +20,7 @@ import {
   fromStoredSearchEmbeddableByValue,
   fromStoredGrid,
   fromStoredRowHeight,
-  toDiscoverSessionPanelOverrides,
+  toDiscoverSessionEmbeddableOverrides,
   fromStoredSort,
   fromStoredTab,
   toStoredSearchEmbeddable,
@@ -27,7 +28,7 @@ import {
   toStoredSearchEmbeddableByValue,
   toStoredGrid,
   toStoredHeight,
-  fromDiscoverSessionPanelOverrides,
+  fromDiscoverSessionEmbeddableOverrides,
   toStoredSort,
   toStoredTab,
 } from './transform_utils';
@@ -43,11 +44,12 @@ import {
   SAVED_SEARCH_SAVED_OBJECT_REF_NAME,
 } from './constants';
 import { SavedSearchType, VIEW_MODE } from '@kbn/saved-search-plugin/common';
+import type { DiscoverSessionTabTypeState } from '@kbn/saved-search-plugin/common';
 import type {
   DiscoverSessionEmbeddableByReferenceState,
   DiscoverSessionEmbeddableByValueState,
 } from '../../server';
-import { DataGridDensity } from '@kbn/discover-session-constants';
+import { DataGridDensity, DiscoverTabType } from '@kbn/discover-session-constants';
 import { ASCODE_FILTER_OPERATOR, ASCODE_FILTER_TYPE } from '@kbn/as-code-filters-constants';
 
 describe('search embeddable transform utils', () => {
@@ -206,6 +208,7 @@ describe('search embeddable transform utils', () => {
         description: 'Panel description',
         tabs: [
           {
+            type: DiscoverTabType.Default,
             column_order: ['message'],
             sort: [],
             view_mode: VIEW_MODE.DOCUMENT_LEVEL,
@@ -278,6 +281,7 @@ describe('search embeddable transform utils', () => {
         description: 'my description',
         tabs: [
           {
+            type: DiscoverTabType.Default,
             query: { language: 'kql', expression: 'service.type: "elasticsearch"' },
             filters: [
               {
@@ -478,6 +482,7 @@ describe('search embeddable transform utils', () => {
         time_range: { from: 'now-1h', to: 'now' },
         tabs: [
           {
+            type: DiscoverTabType.Default,
             column_order: ['message', '@timestamp'],
             column_settings: { '@timestamp': { width: 200 } },
             sort: [{ name: '@timestamp', direction: 'desc' }],
@@ -530,6 +535,7 @@ describe('search embeddable transform utils', () => {
         time_range: { from: 'now-1h', to: 'now' },
         tabs: [
           {
+            type: DiscoverTabType.Default,
             column_order: ['foo'],
             sort: [],
             view_mode: VIEW_MODE.DOCUMENT_LEVEL,
@@ -733,7 +739,7 @@ describe('search embeddable transform utils', () => {
     });
   });
 
-  describe('fromStoredPanelOverrides', () => {
+  describe('toDiscoverSessionEmbeddableOverrides', () => {
     it('converts stored state with all fields to panel overrides', () => {
       const storedState: StoredSearchEmbeddableState = {
         sort: [['@timestamp', 'desc']],
@@ -752,7 +758,7 @@ describe('search embeddable transform utils', () => {
           },
         },
       };
-      const result = toDiscoverSessionPanelOverrides(storedState);
+      const result = toDiscoverSessionEmbeddableOverrides(storedState);
       expect(result).toEqual({
         sort: [{ name: '@timestamp', direction: 'desc' }],
         column_order: ['message', '@timestamp'],
@@ -778,7 +784,7 @@ describe('search embeddable transform utils', () => {
         columns: ['message'],
         grid: { columns: {} },
       };
-      const result = toDiscoverSessionPanelOverrides(storedState);
+      const result = toDiscoverSessionEmbeddableOverrides(storedState);
       expect(result).toEqual({
         sort: [{ name: '@timestamp', direction: 'desc' }],
         column_order: ['message'],
@@ -799,7 +805,7 @@ describe('search embeddable transform utils', () => {
         rowHeight: 5,
         headerRowHeight: 2,
       };
-      const result = toDiscoverSessionPanelOverrides(storedState);
+      const result = toDiscoverSessionEmbeddableOverrides(storedState);
       expect(result.row_height).toBe(5);
       expect(result.header_row_height).toBe(2);
     });
@@ -809,13 +815,13 @@ describe('search embeddable transform utils', () => {
         rowHeight: -1,
         headerRowHeight: -1,
       };
-      const result = toDiscoverSessionPanelOverrides(storedState);
+      const result = toDiscoverSessionEmbeddableOverrides(storedState);
       expect(result.row_height).toBe('auto');
       expect(result.header_row_height).toBe('auto');
     });
   });
 
-  describe('toStoredPanelOverrides', () => {
+  describe('fromDiscoverSessionEmbeddableOverrides', () => {
     it('converts panel overrides with all fields to stored state', () => {
       const apiState = {
         sort: [{ name: '@timestamp', direction: 'desc' as const }],
@@ -830,7 +836,7 @@ describe('search embeddable transform utils', () => {
         wrap_lines: false,
         default_rendered_nodes: 2,
       };
-      const result = fromDiscoverSessionPanelOverrides(apiState);
+      const result = fromDiscoverSessionEmbeddableOverrides(apiState);
       expect(result).toEqual({
         sort: [['@timestamp', 'desc']],
         columns: ['message', '@timestamp'],
@@ -853,7 +859,7 @@ describe('search embeddable transform utils', () => {
         sort: [{ name: '@timestamp', direction: 'desc' as const }],
         column_order: ['message'],
       };
-      const result = fromDiscoverSessionPanelOverrides(apiState);
+      const result = fromDiscoverSessionEmbeddableOverrides(apiState);
       expect(result).toEqual({
         sort: [['@timestamp', 'desc']],
         columns: ['message'],
@@ -870,7 +876,7 @@ describe('search embeddable transform utils', () => {
         row_height: 'auto' as const,
         header_row_height: 'auto' as const,
       };
-      const result = fromDiscoverSessionPanelOverrides(apiState);
+      const result = fromDiscoverSessionEmbeddableOverrides(apiState);
       expect(result.rowHeight).toBe(-1);
       expect(result.headerRowHeight).toBe(-1);
     });
@@ -880,12 +886,12 @@ describe('search embeddable transform utils', () => {
         row_height: 5,
         header_row_height: 2,
       };
-      const result = fromDiscoverSessionPanelOverrides(apiState);
+      const result = fromDiscoverSessionEmbeddableOverrides(apiState);
       expect(result.rowHeight).toBe(5);
       expect(result.headerRowHeight).toBe(2);
     });
 
-    it('round-trips with fromStoredPanelOverrides', () => {
+    it('round-trips with toDiscoverSessionEmbeddableOverrides', () => {
       const storedState: StoredSearchEmbeddableState = {
         sort: [
           ['@timestamp', 'desc'],
@@ -903,8 +909,8 @@ describe('search embeddable transform utils', () => {
           },
         },
       };
-      const overrides = toDiscoverSessionPanelOverrides(storedState);
-      const back = fromDiscoverSessionPanelOverrides(overrides);
+      const overrides = toDiscoverSessionEmbeddableOverrides(storedState);
+      const back = fromDiscoverSessionEmbeddableOverrides(overrides);
       expect(back.sort).toEqual(storedState.sort);
       expect(back.columns).toEqual(storedState.columns);
       expect(back.rowHeight).toBe(storedState.rowHeight);
@@ -1067,7 +1073,8 @@ describe('search embeddable transform utils', () => {
 
   describe('toStoredTab', () => {
     it('converts API classic tab to stored tab with references', () => {
-      const apiTab: DiscoverSessionEmbeddableByValueState['tabs'][0] = {
+      const apiTab: DiscoverSessionApiEmbeddableTab = {
+        type: DiscoverTabType.Default,
         column_order: ['message', '@timestamp'],
         column_settings: { '@timestamp': { width: 200 } },
         sort: [{ name: '@timestamp', direction: 'desc' }],
@@ -1105,6 +1112,7 @@ describe('search embeddable transform utils', () => {
       expect(state.density).toBe(DataGridDensity.COMPACT);
       expect(state.hideChart).toBe(false);
       expect(state.isTextBasedQuery).toBe(false);
+      expect(state.tabTypeState).toBeUndefined();
       const searchSource = JSON.parse(state.kibanaSavedObjectMeta.searchSourceJSON);
       expect(searchSource.indexRefName).toBe('kibanaSavedObjectMeta.searchSourceJSON.index');
       expect(searchSource.index).toBeUndefined();
@@ -1116,7 +1124,8 @@ describe('search embeddable transform utils', () => {
       const references: SavedObjectReference[] = [
         { name: 'kibanaSavedObjectMeta.searchSourceJSON.index', type: 'index-pattern', id: 'dv-1' },
       ];
-      const apiTab: DiscoverSessionEmbeddableByValueState['tabs'][0] = {
+      const apiTab: DiscoverSessionApiEmbeddableTab = {
+        type: DiscoverTabType.Default,
         column_order: [],
         sort: [],
         view_mode: VIEW_MODE.DOCUMENT_LEVEL,
@@ -1148,7 +1157,8 @@ describe('search embeddable transform utils', () => {
     });
 
     it('converts API tab with index-pattern data_source (no refs) when inline', () => {
-      const apiTab: DiscoverSessionEmbeddableByValueState['tabs'][0] = {
+      const apiTab: DiscoverSessionApiEmbeddableTab = {
+        type: DiscoverTabType.Default,
         column_order: ['foo'],
         sort: [],
         view_mode: VIEW_MODE.DOCUMENT_LEVEL,
@@ -1174,7 +1184,8 @@ describe('search embeddable transform utils', () => {
 
     it('converts API ES|QL tab to stored tab without index', () => {
       const esql = 'FROM logs-* | LIMIT 50';
-      const apiTab: DiscoverSessionEmbeddableByValueState['tabs'][0] = {
+      const apiTab: DiscoverSessionApiEmbeddableTab = {
+        type: DiscoverTabType.Default,
         column_order: ['@timestamp'],
         sort: [],
         density: DataGridDensity.COMPACT,
@@ -1189,6 +1200,100 @@ describe('search embeddable transform utils', () => {
       expect(searchSource.query).toEqual({ esql });
       expect(searchSource.index).toBeUndefined();
       expect(searchSource.filter).toBeUndefined();
+    });
+  });
+
+  describe('by-value tab type state', () => {
+    const storedMetricsTabTypeState: DiscoverSessionTabTypeState = {
+      type: DiscoverTabType.Metrics,
+      dimensions: ['host.name'],
+      searchTerm: 'cpu',
+      counterAggregation: 'max',
+      gaugeAggregation: 'avg',
+      histogramPercentile: 'p99',
+    };
+
+    it('round-trips Metrics profile state between the by-value and stored formats', () => {
+      const apiState: DiscoverSessionEmbeddableByValueState = {
+        title: 'Metrics panel',
+        description: '',
+        tabs: [
+          {
+            type: DiscoverTabType.Metrics,
+            dimensions: ['host.name'],
+            search_term: 'cpu',
+            counter_aggregation: 'max',
+            gauge_aggregation: 'avg',
+            histogram_percentile: 'p99',
+            column_order: [],
+            sort: [],
+            data_source: { type: AS_CODE_ESQL_DATA_SOURCE_TYPE, query: 'TS metrics-*' },
+          },
+        ],
+      };
+
+      const { state } = toStoredSearchEmbeddableByValue(apiState);
+
+      expect(state.attributes.tabs[0].attributes.tabTypeState).toEqual(storedMetricsTabTypeState);
+      expect(state.attributes).not.toHaveProperty('tabTypeState');
+      expect(fromStoredSearchEmbeddableByValue(state)).toEqual(apiState);
+    });
+
+    it('does not store profile state for an explicit default tab type', () => {
+      const apiState: DiscoverSessionEmbeddableByValueState = {
+        title: 'Default panel',
+        description: '',
+        tabs: [
+          {
+            type: DiscoverTabType.Default,
+            column_order: [],
+            sort: [],
+            data_source: { type: AS_CODE_ESQL_DATA_SOURCE_TYPE, query: 'FROM logs-*' },
+          },
+        ],
+      };
+
+      const { state } = toStoredSearchEmbeddableByValue(apiState);
+
+      expect(state.attributes).not.toHaveProperty('tabTypeState');
+      expect(state.attributes.tabs[0].attributes).not.toHaveProperty('tabTypeState');
+      expect(fromStoredSearchEmbeddableByValue(state).tabs[0]).toHaveProperty(
+        'type',
+        DiscoverTabType.Default
+      );
+    });
+
+    it('drops Metrics profile state from a stored classic tab', () => {
+      const apiState: DiscoverSessionEmbeddableByValueState = {
+        title: 'Classic panel',
+        description: '',
+        tabs: [
+          {
+            type: DiscoverTabType.Default,
+            filters: [],
+            sort: [],
+            view_mode: VIEW_MODE.DOCUMENT_LEVEL,
+            data_source: {
+              type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+              index_pattern: 'logs-*',
+            },
+          },
+        ],
+      };
+      const { state } = toStoredSearchEmbeddableByValue(apiState);
+      const [storedTab] = state.attributes.tabs;
+      state.attributes.tabs[0] = {
+        ...storedTab,
+        attributes: {
+          ...storedTab.attributes,
+          tabTypeState: storedMetricsTabTypeState,
+        },
+      };
+
+      const [resultTab] = fromStoredSearchEmbeddableByValue(state).tabs;
+
+      expect(resultTab).toHaveProperty('type', DiscoverTabType.Default);
+      expect(resultTab).not.toHaveProperty('dimensions');
     });
   });
 });

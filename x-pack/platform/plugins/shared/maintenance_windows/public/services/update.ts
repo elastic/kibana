@@ -20,11 +20,13 @@ export interface UpdateParams {
   rRule: MaintenanceWindowUI['rRule'];
   categoryIds?: MaintenanceWindowUI['categoryIds'];
   scopedQuery?: MaintenanceWindowUI['scopedQuery'];
+  scope?: MaintenanceWindowUI['scope'];
 }
 
 const transformUpdateBodySchema = (
   updateParams: UpdateParams
 ): UpdateMaintenanceWindowRequestBody => {
+  const { scope } = updateParams;
   return {
     title: updateParams.title,
     duration: updateParams.duration,
@@ -36,6 +38,14 @@ const transformUpdateBodySchema = (
         }
       : {}),
     ...(updateParams.scopedQuery !== undefined ? { scoped_query: updateParams.scopedQuery } : {}),
+    ...(scope !== undefined
+      ? {
+          scope: {
+            ...(scope.alerting !== undefined ? { alerting: scope.alerting } : {}),
+            ...(scope.alertingV2 !== undefined ? { alerting_v2: scope.alertingV2 } : {}),
+          },
+        }
+      : {}),
   };
 };
 
