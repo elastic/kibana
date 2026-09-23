@@ -169,7 +169,6 @@ describe('useToggleEntityAnalytics', () => {
       const { result } = renderHook(() => useToggleEntityAnalytics(defaultOptions));
 
       expect(result.current.errors.entityStore).toContain('Entity store install failed');
-      expect(result.current.errors.riskEngine).toHaveLength(0);
     });
   });
 

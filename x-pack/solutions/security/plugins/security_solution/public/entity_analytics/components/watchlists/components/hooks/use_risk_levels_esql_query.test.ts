@@ -82,6 +82,7 @@ describe('useRiskLevelsEsqlQuery', () => {
         },
         error: undefined,
         isError: false,
+        isFetching: false,
         isRefetching: false,
         refetch: mockRefetchQuery,
       };

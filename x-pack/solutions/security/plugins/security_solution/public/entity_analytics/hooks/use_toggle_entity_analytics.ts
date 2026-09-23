@@ -54,7 +54,6 @@ interface UseToggleEntityAnalyticsReturn {
 }
 
 interface EntityAnalyticsErrors {
-  riskEngine: string[];
   entityStore: string[];
 }
 
@@ -96,7 +95,6 @@ export const useToggleEntityAnalytics = ({
 
   const errors: EntityAnalyticsErrors = useMemo(
     () => ({
-      riskEngine: [],
       entityStore: entityStoreState.errors,
     }),
     [entityStoreState.errors]

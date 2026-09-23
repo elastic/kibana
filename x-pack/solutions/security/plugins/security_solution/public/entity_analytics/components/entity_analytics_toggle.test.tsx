@@ -33,7 +33,7 @@ let mockUseToggleReturn: {
   isLoading: boolean;
   isStatusLoading: boolean;
   toggle: jest.Mock;
-  errors: { riskEngine: string[]; entityStore: string[] };
+  errors: { entityStore: string[] };
 };
 
 const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -59,32 +59,14 @@ describe('EntityAnalyticsHealth', () => {
 
 describe('EntityAnalyticsErrorPanel', () => {
   it('renders nothing when there are no errors', () => {
-    const { container } = render(
-      <EntityAnalyticsErrorPanel riskEngineErrors={[]} entityStoreErrors={[]} />
-    );
+    const { container } = render(<EntityAnalyticsErrorPanel entityStoreErrors={[]} />);
     expect(container.firstChild).toBeNull();
   });
 
-  it('renders error callout with risk engine errors', () => {
-    render(
-      <EntityAnalyticsErrorPanel
-        riskEngineErrors={['Risk engine init failed']}
-        entityStoreErrors={[]}
-      />
-    );
+  it('renders error callout with entity store errors', () => {
+    render(<EntityAnalyticsErrorPanel entityStoreErrors={['Entity store install failed']} />);
     expect(screen.getByTestId(ENTITY_ANALYTICS_ERROR_PANEL_TEST_ID)).toBeInTheDocument();
-    expect(screen.getByText('Risk engine init failed')).toBeInTheDocument();
-  });
-
-  it('renders both risk and entity store errors', () => {
-    render(
-      <EntityAnalyticsErrorPanel
-        riskEngineErrors={['Risk error']}
-        entityStoreErrors={['Store error']}
-      />
-    );
-    expect(screen.getByText('Risk error')).toBeInTheDocument();
-    expect(screen.getByText('Store error')).toBeInTheDocument();
+    expect(screen.getByText('Entity store install failed')).toBeInTheDocument();
   });
 });
 
@@ -105,7 +87,7 @@ describe('EntityAnalyticsToggle', () => {
       isLoading: false,
       isStatusLoading: false,
       toggle: mockToggle,
-      errors: { riskEngine: [], entityStore: [] },
+      errors: { entityStore: [] },
     };
   });
 

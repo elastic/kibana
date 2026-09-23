@@ -51,6 +51,7 @@ export const useRiskLevelsEsqlQuery = ({
   const queryKey = useMemo(() => ['watchlistRiskLevels', query, filterQuery], [query, filterQuery]);
 
   const {
+    isFetching,
     isRefetching,
     data: result,
     error,
@@ -132,7 +133,7 @@ export const useRiskLevelsEsqlQuery = ({
 
   return {
     records: esqlResponseToRecords<WatchlistRiskLevelsQueryResult>(response),
-    isLoading: isRefetching,
+    isLoading: isFetching,
     refetch: handleRefetch,
     inspect,
     error,
