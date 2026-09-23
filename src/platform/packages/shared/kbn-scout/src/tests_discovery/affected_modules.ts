@@ -46,7 +46,7 @@ export const markModulesAffectedStatusFromSet = (
 
     if (!moduleId) {
       log.warning(
-        `Selective testing: module '${module.name}' could not resolve @kbn/ ID (check kibana.jsonc or run 'yarn kbn bootstrap')`
+        `Selective testing: module '${module.name}' could not resolve @kbn/ ID (check kibana.jsonc or run 'pnpm kbn bootstrap')`
       );
       unmappedCount += 1;
       return { ...module, isAffected: false };
