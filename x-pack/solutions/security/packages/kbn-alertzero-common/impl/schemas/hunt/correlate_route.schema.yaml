@@ -10,8 +10,9 @@ paths:
       operationId: Correlate
       description: >-
         Runs the anchors correlation leg. `no_match` and `unavailable` are
-        both successful outcomes: unavailable correlation blocks containment
-        but never blocks the Tier 1 finding.
+        both successful outcomes. `unavailable` never blocks the Tier 1
+        finding, and packaging still mints contain Proposals on a Tier 1 hit;
+        correlation evidence is optional context, not a mint gate.
       summary: Correlate a report against others by shared anchors
       tags:
         - AlertZero API

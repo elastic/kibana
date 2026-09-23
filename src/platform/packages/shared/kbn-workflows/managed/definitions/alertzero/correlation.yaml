@@ -58,7 +58,8 @@ steps:
   # `matched` writes the correlation narrative + the security.hunt_correlation
   # attachment inline; `no_match` and `unavailable` both write a plain note
   # with no attachment (mvp-slice.md:429; `unavailable` is a successful
-  # outcome that blocks containment, never the Tier 1 finding).
+  # outcome: packaging still mints contain Proposals on a Tier 1 hit;
+  # correlation evidence is optional context, not a mint gate).
   - name: journal_matched
     type: workflow.execute
     if: "${{ steps.run_correlate.output.status == 'matched' }}"
