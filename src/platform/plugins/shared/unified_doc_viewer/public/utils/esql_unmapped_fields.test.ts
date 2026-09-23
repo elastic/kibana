@@ -15,14 +15,14 @@ describe('applyUnmappedFieldsPolicy', () => {
     const query = esql.from('logs-*');
     applyUnmappedFieldsPolicy(query, 'NULLIFY');
 
-    expect(query.print('pipe-multiline')).toBe('SET unmapped_fields = "NULLIFY"; FROM logs-*');
+    expect(query.print('pipe-multiline')).toBe('SET unmapped_fields = "NULLIFY";\nFROM logs-*');
   });
 
   it('adds the LOAD directive when the policy is LOAD', () => {
     const query = esql.from('logs-*');
     applyUnmappedFieldsPolicy(query, 'LOAD');
 
-    expect(query.print('pipe-multiline')).toBe('SET unmapped_fields = "LOAD"; FROM logs-*');
+    expect(query.print('pipe-multiline')).toBe('SET unmapped_fields = "LOAD";\nFROM logs-*');
   });
 
   it('preserves the rest of the query, including its line breaks', () => {
@@ -34,7 +34,7 @@ describe('applyUnmappedFieldsPolicy', () => {
     applyUnmappedFieldsPolicy(query, 'NULLIFY');
 
     expect(query.print('pipe-multiline')).toBe(
-      `SET unmapped_fields = "NULLIFY"; ${withoutDirective}`
+      `SET unmapped_fields = "NULLIFY";\n${withoutDirective}`
     );
   });
 
@@ -54,6 +54,6 @@ describe('applyUnmappedFieldsPolicy', () => {
 
     applyUnmappedFieldsPolicy(query, 'LOAD');
 
-    expect(query.print('pipe-multiline')).toBe('SET unmapped_fields = "LOAD"; FROM logs-*');
+    expect(query.print('pipe-multiline')).toBe('SET unmapped_fields = "LOAD";\nFROM logs-*');
   });
 });

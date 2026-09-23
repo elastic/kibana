@@ -641,7 +641,7 @@ steps:
     type: workflow.execute
     if: "${{ steps.resolve_escalation.output.escalate == true }}"
     with:
-      workflow-id: system-create-investigation-proposal
+      workflow-id: system-create-proposal
       inputs:
         conversationId: "{{ steps.resolve_investigation_id.output.investigation_id }}"
         comment: "{{ steps.resolve_escalation.output.comment }}"
@@ -661,7 +661,7 @@ steps:
     with:
       request:
         method: GET
-        path: "/internal/investigations/proposals/{{ steps.escalation_gate.output.proposalId }}"
+        path: "/internal/proposals/{{ steps.escalation_gate.output.proposalId }}"
         headers:
           elastic-api-version: "1"
     on-failure:
