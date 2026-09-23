@@ -14,8 +14,8 @@ import {
   OAUTH_MAX_BULK_CONNECTIONS,
   OAUTH_MAX_STRING_FIELD_LENGTH,
 } from '../../../common/oauth/constants';
-import { UiamOAuth } from '../../authentication/oauth';
 import { wrapError, wrapIntoCustomErrorResponse } from '../../errors';
+import { getUiamAuthorizationHeaderFromRequest } from '../../uiam';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
 interface BulkDeleteOAuthConnectionResultItem {
@@ -75,7 +75,7 @@ export function defineBulkDeleteOAuthConnectionsRoute({
         }
 
         // Fail the request up front rather than reporting a bad credential against every target.
-        UiamOAuth.getAccessToken(request);
+        getUiamAuthorizationHeaderFromRequest(request);
 
         const targets = uniqWith(request.body.connections, isEqual);
 

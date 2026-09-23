@@ -26,9 +26,12 @@ export type DiscoverSessionApiEsqlTab =
   | z.output<typeof discoverSessionEsqlTabSchema>
   | DiscoverSessionApiMetricsTab;
 export type DiscoverSessionApiTab = z.output<typeof discoverSessionApiTabSchema>;
+export type DiscoverSessionApiMetricsTabTypeState = z.output<
+  typeof discoverSessionMetricsTabTypeStateSchema
+>;
 export type DiscoverSessionApiTabTypeState =
   | z.output<typeof discoverSessionDefaultTabTypeStateSchema>
-  | z.output<typeof discoverSessionMetricsTabTypeStateSchema>;
+  | DiscoverSessionApiMetricsTabTypeState;
 
 // Input types (before parsing — fields with defaults are optional)
 export type DiscoverSessionApiInput = z.input<typeof discoverSessionApiDataSchema>;

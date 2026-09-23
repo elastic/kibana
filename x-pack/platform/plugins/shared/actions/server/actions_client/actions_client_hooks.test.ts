@@ -160,6 +160,13 @@ beforeEach(() => {
     getAxiosInstanceWithAuth,
   });
 
+  unsecuredSavedObjectsClient.find.mockResolvedValue({
+    saved_objects: [],
+    total: 0,
+    page: 1,
+    per_page: 10,
+  } as never);
+
   actionTypeRegistry.register({
     id: 'hooked-action-type',
     name: 'Hooked action type',

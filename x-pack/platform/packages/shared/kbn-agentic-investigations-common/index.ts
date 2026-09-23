@@ -13,6 +13,7 @@ export {
 } from './src/components/actions/base_actions';
 
 export { ConversationCard } from './src/components/conversation_card/conversation_card';
+export { ConversationCardCompact } from './src/components/conversation_card/conversation_card_compact';
 export { ConversationMetaInfo } from './src/components/conversation_card/conversation_meta_info';
 export { TemplateBadge } from './src/components/conversation_card/template_badge';
 export { type ConversationsActionsGroupProps } from './src/components/conversation_card/actions_group';
@@ -20,16 +21,28 @@ export { type ConversationsActionsGroupProps } from './src/components/conversati
 export { ConversationQueue } from './src/components/conversation_queue/conversation_queue';
 
 export {
-  ConversationDetailsFlyout,
-  type ConversationDetailsFlyoutProps,
-} from './src/components/details/details_flyout';
+  ConversationDetailsFlyoutHeader,
+  type ConversationDetailsFlyoutHeaderProps,
+} from './src/components/details/flyout_header';
+export {
+  ConversationDetailsFlyoutFooter,
+  type ConversationDetailsFlyoutFooterProps,
+} from './src/components/details/flyout_footer';
+export {
+  InvestigationHeaderBlocks,
+  type InvestigationHeaderBlocksProps,
+} from './src/components/details/header_blocks';
+export { OverviewTab } from './src/components/details/details_flyout_tab_contents';
 export { DetailsBlock } from './src/components/details/detail_block';
 
-export { TimelineEventList } from './src/components/timeline/timeline_event_list';
+export {
+  registerAgenticInvestigationTemplateUI,
+  type RegisterAgenticInvestigationTemplateUIOptions,
+  getInvestigationTabIds,
+} from './src/template_ui/register';
+export { conversationToInvestigation } from './src/template_ui/conversation_to_investigation';
 
-export { useOpenInChat } from './src/hooks/use_open_in_chat';
-
-export { getEmptyValue, getActionButtonIconProps } from './src/components/helpers';
+export { getEmptyValue, getActionButtonIconProps, isDecided } from './src/components/helpers';
 
 export type { Investigation, RecommendedAction, TimelineEvent } from './src/types/investigation';
 export {
@@ -38,18 +51,15 @@ export {
   CONVERSATION_CATEGORY_COLORS,
 } from './src/types/queue';
 
-export { BlastRadius } from './src/components/filters/blast_radius/blast_radius';
+export { Impact } from './src/components/filters/impact/impact';
 
-export {
-  BaseActionModal,
-  type BaseActionModalProps,
-  type ActionModalPrimaryAction,
-} from './src/components/modals/base_action_modal';
-export {
-  AssignActionModal,
-  type AssignActionModalProps,
-} from './src/components/modals/assign_action_modal';
+export { BaseActionModal } from './src/components/modals/base_action_modal';
+export { AssignActionModal } from './src/components/modals/assign_action_modal';
 export { MODAL_TRANSLATIONS } from './src/components/modals/translations';
+export {
+  InvestigationActionModals,
+  type InvestigationActionModalsProps,
+} from './src/components/modals/investigation_action_modals';
 export {
   ApprovalModal,
   type ApprovalModalProps,
@@ -60,9 +70,15 @@ export {
   type ApprovalAction,
   type AlwaysAllowOption,
 } from './src/components/modals/approval_modal/approval_content';
-export { type BlastRadiusItemProps } from './src/components/modals/approval_modal/blast_radius_item';
 export {
-  BlastRadiusSection,
-  type BlastRadiusContent,
-  type BlastRadiusSectionProps,
-} from './src/components/modals/approval_modal/blast_radius_section';
+  getProposalTone,
+  isProposalExpired,
+} from './src/components/modals/approval_modal/proposal_helpers';
+export { toActionImpactItems } from './src/components/modals/approval_modal/to_action_impact_items';
+export type { ApprovalProposal } from './src/components/modals/approval_modal/types';
+export { type ActionImpactItemProps } from './src/components/modals/approval_modal/action_impact_item';
+export {
+  type EscalationModalMode,
+  type EscalationIncidentSummary,
+} from './src/components/modals/escalation_modal';
+export { type EscalationModalRenderProps } from './src/components/modals/investigation_action_modals';
