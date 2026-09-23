@@ -131,7 +131,7 @@ describe('validateConnectorIds', () => {
       });
     });
 
-    it('should validate inference endpoints without offering an edit connector action', () => {
+    it('should link inference endpoints to Feature Settings', () => {
       const getStepDefinitionSpy = jest.spyOn(stepSchemas, 'getStepDefinition').mockReturnValue({
         editorHandlers: {
           config: {
@@ -165,7 +165,8 @@ describe('validateConnectorIds', () => {
       const results = validateConnectorIds(
         [createConnectorIdItem({ key: 'inference-endpoint', connectorType: 'ai.summarize' })],
         mockConnectorTypes,
-        ''
+        'http://test/connectors',
+        'http://test/feature-settings'
       );
       getStepDefinitionSpy.mockRestore();
 
@@ -174,9 +175,11 @@ describe('validateConnectorIds', () => {
           severity: 'info',
           message: null,
           beforeMessage: '✓ Inference endpoint',
-          hoverMessage: expect.not.stringContaining('Edit connector'),
+          hoverMessage: expect.stringContaining('[Feature Settings](http://test/feature-settings)'),
         }),
       ]);
+      expect(results[0].hoverMessage).not.toContain('Edit connector');
+      expect(results[0].hoverMessage).not.toContain('Manage connectors');
     });
 
     it('should accept the wildcard only on a trigger connector-id', () => {
