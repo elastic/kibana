@@ -6,27 +6,40 @@
  */
 
 import { Subject } from 'rxjs';
-import { whenNightshiftTurnsOff } from './when_nightshift_turns_off';
+import { NIGHTSHIFT_FLAG_SETTLE_MS, whenNightshiftTurnsOff } from './when_nightshift_turns_off';
 
 describe('whenNightshiftTurnsOff', () => {
-  it('emits only for runtime on→off flips, never for the boot-time fallback', () => {
+  beforeEach(() => jest.useFakeTimers());
+  afterEach(() => jest.useRealTimers());
+
+  it('emits only for settled runtime on→off flips, never for boot-time or transient readings', () => {
     const enabled$ = new Subject<boolean>();
     const onTurnedOff = jest.fn();
     whenNightshiftTurnsOff(enabled$).subscribe(onTurnedOff);
+    const emit = (value: boolean, holdMs: number) => {
+      enabled$.next(value);
+      jest.advanceTimersByTime(holdMs);
+    };
 
-    // Boot: fallback `false` until the provider connects, then the real value.
-    enabled$.next(false);
-    enabled$.next(true);
-    // Re-evaluations with the same value are not flips.
-    enabled$.next(true);
+    // Boot: fallback `false`, a transient `true` against an incomplete context, then the
+    // authoritative `false`, all before the value settles.
+    emit(false, 100);
+    emit(true, 100);
+    emit(false, NIGHTSHIFT_FLAG_SETTLE_MS);
     expect(onTurnedOff).not.toHaveBeenCalled();
 
-    enabled$.next(false);
-    enabled$.next(false);
+    // Turned on and held, then a brief off that flips back on before settling.
+    emit(true, NIGHTSHIFT_FLAG_SETTLE_MS);
+    emit(false, 100);
+    emit(true, NIGHTSHIFT_FLAG_SETTLE_MS);
+    expect(onTurnedOff).not.toHaveBeenCalled();
+
+    // A real runtime flip off, held long enough to count.
+    emit(false, NIGHTSHIFT_FLAG_SETTLE_MS);
     expect(onTurnedOff).toHaveBeenCalledTimes(1);
 
-    enabled$.next(true);
-    enabled$.next(false);
+    emit(true, NIGHTSHIFT_FLAG_SETTLE_MS);
+    emit(false, NIGHTSHIFT_FLAG_SETTLE_MS);
     expect(onTurnedOff).toHaveBeenCalledTimes(2);
   });
 });

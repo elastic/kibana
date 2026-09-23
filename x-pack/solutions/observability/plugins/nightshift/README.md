@@ -28,7 +28,8 @@ every space, in-flight executions are cancelled, and the continuous onboarding a
 scheduled discovery toggles are turned off, with their previous values kept for Resume.
 The maintenance state records `system:feature_flag` as who paused it. The alerting rules
 backing knowledge indicator queries keep running, because alerting v2 cannot toggle rules
-without a user request. The flag's value at startup never triggers a pause.
+without a user request. A flag value only counts once it has held for 15 seconds, so the
+value read at startup, or a brief flip, never triggers a pause.
 
 Flipping it back on does not resume. After the managed workflows are reinstalled the pause
 is re-asserted, and activity stays stopped until a user resumes it. While the flag is off,

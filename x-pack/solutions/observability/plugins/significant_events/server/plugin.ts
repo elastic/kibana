@@ -546,18 +546,15 @@ export class SignificantEventsPlugin
       })
     );
 
-    // Turning Nightshift off at runtime pauses background activity. Turning it back on
-    // leaves the pause in place (the install above re-asserts it) until a user resumes.
+    // Turning Nightshift off at runtime (once the value settles) pauses background activity.
+    // Turning it back on leaves the pause in place (the install above re-asserts it) until a
+    // user resumes.
     this.subscriptions.push(
       whenNightshiftTurnsOff(
         core.featureFlags.getBooleanValue$(NIGHTSHIFT_ENABLED_FLAG, false)
       ).subscribe(() => {
         void this.maintenanceService?.pauseOnFlagOff().catch((error: unknown) => {
-          this.logger.error(
-            `significantEvents: failed to pause after Nightshift was turned off: ${
-              error instanceof Error ? error.message : String(error)
-            }`
-          );
+          this.logFlagOffPauseError(error);
         });
       })
     );
@@ -662,6 +659,14 @@ export class SignificantEventsPlugin
   private logManagedResourceError(context: string, error: unknown): void {
     this.logger.error(
       `significantEvents: failed to install managed resources (${context}): ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+  }
+
+  private logFlagOffPauseError(error: unknown): void {
+    this.logger.error(
+      `significantEvents: failed to pause after Nightshift was turned off: ${
         error instanceof Error ? error.message : String(error)
       }`
     );
