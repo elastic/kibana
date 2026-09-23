@@ -233,8 +233,14 @@ export const useTemplateFormSync = (
         revertConnectorToDefault(updateFieldValues);
       }
       if (didApplySettingsRef.current) {
-        didApplySettingsRef.current = false;
-        revertSettingsToDefault(setFieldValue, spaceExtractObservables);
+        // syncAlerts reverts immediately. extractObservables waits for configurations to settle
+        // so we don't commit a provisional spaceExtractObservables value during loading.
+        setFieldValue('syncAlerts', DEFAULT_SYNC_ALERTS);
+        if (!isLoadingConfigurations) {
+          setFieldValue('extractObservables', spaceExtractObservables);
+          didApplySettingsRef.current = false;
+        }
+        // else: keep didApplySettingsRef.current = true; re-run after loading completes.
       }
       return;
     }

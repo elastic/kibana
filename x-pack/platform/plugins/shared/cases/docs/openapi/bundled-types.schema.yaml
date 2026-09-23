@@ -367,7 +367,7 @@ paths:
                     extractObservables:
                       type: boolean
                       description: |
-                        Indicates whether observables are automatically extracted from alerts when they are added to new cases. Defaults to `true`.
+                        Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.
                       example: true
                     owner:
                       $ref: '#/components/schemas/owner'
@@ -557,7 +557,7 @@ paths:
                   extractObservables:
                     type: boolean
                     description: |
-                      Indicates whether observables are automatically extracted from alerts when they are added to new cases. Defaults to `true`.
+                      Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.
                     example: true
                   owner:
                     $ref: '#/components/schemas/owner'
@@ -749,7 +749,7 @@ paths:
                   extractObservables:
                     type: boolean
                     description: |
-                      Indicates whether observables are automatically extracted from alerts when they are added to new cases. Defaults to `true`.
+                      Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.
                     example: true
                   owner:
                     $ref: '#/components/schemas/owner'

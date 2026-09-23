@@ -561,7 +561,7 @@
                       },
                       "extractObservables": {
                         "type": "boolean",
-                        "description": "Indicates whether observables are automatically extracted from alerts when they are added to new cases. Defaults to `true`.\n",
+                        "description": "Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.\n",
                         "example": true
                       },
                       "owner": {
@@ -826,7 +826,7 @@
                     },
                     "extractObservables": {
                       "type": "boolean",
-                      "description": "Indicates whether observables are automatically extracted from alerts when they are added to new cases. Defaults to `true`.\n",
+                      "description": "Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.\n",
                       "example": true
                     },
                     "owner": {
@@ -1095,7 +1095,7 @@
                     },
                     "extractObservables": {
                       "type": "boolean",
-                      "description": "Indicates whether observables are automatically extracted from alerts when they are added to new cases. Defaults to `true`.\n",
+                      "description": "Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.\n",
                       "example": true
                     },
                     "owner": {

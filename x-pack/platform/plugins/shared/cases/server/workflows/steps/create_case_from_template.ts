@@ -103,7 +103,7 @@ export const createCaseFromTemplateStepDefinition = (
           // tags / connector / settings / owner) plus the pinned template reference. We must NOT
           // materialize severity / assignees / category here, because `cases.create`'s expansion
           // only applies a template default when the field is `=== undefined`.
-          const { syncAlerts, extractObservables } = getCaseSettings(owner);
+          const { syncAlerts } = getCaseSettings(owner);
           const createPayload = {
             owner,
             title: '',
@@ -113,9 +113,9 @@ export const createCaseFromTemplateStepDefinition = (
             tags: [],
             connector: getNoneConnector(),
             // Expansion never fills `syncAlerts` (required on the wire). `extractObservables` is
-            // optional there, but seeding both from template-over-OWNER_INFO keeps non-Security
-            // cases from inheriting a missing-template true default.
-            settings: { syncAlerts, extractObservables, ...parsed.definition.settings },
+            // omitted here so the server applies space-config → true precedence when the template
+            // definition does not declare it (explicit template value still wins via the spread).
+            settings: { syncAlerts, ...parsed.definition.settings },
             ...seededDefaults,
             // Caller overwrites win over the template's seeded title / description and the
             // wire-required scaffolding above.
@@ -146,11 +146,19 @@ export const createCaseFromTemplateStepDefinition = (
         throw new Error(`Case template not found for owner "${owner}": ${case_template_id}`);
       }
 
-      const mergedCreatePayload = getInitialCaseValue({
+      const mergedInput = {
         owner,
         ...(template.caseFields ?? {}),
         ...normalizedOverwrites,
-      } as GetInitialCaseValueArgs);
+      } as GetInitialCaseValueArgs;
+      const mergedBase = getInitialCaseValue(mergedInput);
+      // Omit extractObservables when neither the legacy template nor overwrites supplied it so the
+      // server applies space-config → true precedence.
+      let mergedCreatePayload = mergedBase;
+      if (mergedInput.settings?.extractObservables === undefined) {
+        const { extractObservables: _omitted, ...settingsWithoutExtract } = mergedBase.settings;
+        mergedCreatePayload = { ...mergedBase, settings: settingsWithoutExtract };
+      }
 
       const createdCase = await casesClient.cases.create(mergedCreatePayload);
       return safeParseCaseForWorkflowOutput(
