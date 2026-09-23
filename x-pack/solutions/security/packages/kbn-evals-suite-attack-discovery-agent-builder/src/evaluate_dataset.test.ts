@@ -1445,7 +1445,7 @@ describe('slow-path handoff (#293046): waitForValidationPhase', () => {
     try {
       const fetch = jest.fn().mockResolvedValue(trackingWith(null));
       const pending = waitForValidationPhase({ fetch, executionId: 'exec-1' });
-      const settled = await jest.advanceTimersByTimeAsync(120_000).then(() => pending);
+      const settled = await jest.advanceTimersByTimeAsync(180_000).then(() => pending);
 
       expect(settled.validation).toBeNull();
     } finally {
@@ -1465,7 +1465,7 @@ describe('slow-path handoff (#293046): waitForValidationPhase', () => {
       const pending = waitForValidationPhase({ fetch, executionId: 'exec-1' }).catch(
         (error: Error) => error
       );
-      await jest.advanceTimersByTimeAsync(120_000);
+      await jest.advanceTimersByTimeAsync(180_000);
       const result = await pending;
 
       expect(result).toBeInstanceOf(Error);

@@ -1103,8 +1103,10 @@ export const buildWorkflow = ({
  * pipeline response read afterwards reflects the completed run instead of a
  * mid-flight snapshot. A 404 means the execution has not been indexed into the
  * event log yet — keep polling, the deadline handoff commonly wins that race.
+ * Budget: 90s soft deadline + observed ~80s generation tail, with headroom —
+ * a 170s completion would miss a 120s budget (observed in run-29 rep 1).
  */
-const WAIT_FOR_VALIDATION_PHASE_TIMEOUT_MS = 120_000;
+const WAIT_FOR_VALIDATION_PHASE_TIMEOUT_MS = 180_000;
 const WAIT_FOR_VALIDATION_PHASE_INTERVAL_MS = 5_000;
 
 /**
