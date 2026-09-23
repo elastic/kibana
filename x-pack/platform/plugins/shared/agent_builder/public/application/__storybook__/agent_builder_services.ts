@@ -14,6 +14,7 @@ import {
 import type { ImageAttachmentData, UnknownAttachment } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser';
 import { AttachmentsService } from '../../services/attachments';
+import { ConversationEventsService } from '../../services/conversation_events';
 import type { AgentBuilderInternalService } from '../../services/types';
 import { createStorybookKibanaServices } from './kibana_services';
 
@@ -81,6 +82,7 @@ const defaultServices: AgentBuilderInternalService = {
     delete: () => Promise.resolve({} as never),
   } as never,
   attachmentsService: storybookAttachmentsService,
+  conversationEventsService: new ConversationEventsService(),
   renderersService: {} as never,
   chatService: {} as never,
   conversationsService: {} as never,
