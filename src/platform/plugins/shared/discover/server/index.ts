@@ -41,8 +41,6 @@ export interface DiscoverServerPluginStart {
 
 export { config } from './config';
 export type {
-  DiscoverSessionEmbeddableByValueProps,
-  DiscoverSessionEmbeddableByReferenceProps,
   DiscoverSessionEmbeddableByValueState,
   DiscoverSessionEmbeddableByReferenceState,
   DiscoverSessionEmbeddableState,

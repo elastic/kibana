@@ -25,7 +25,7 @@ import {
   isDiscoverSessionEmbeddableByReferenceState,
   isSearchEmbeddableLegacyPanelState,
   toStoredSearchEmbeddableByValue,
-  fromDiscoverSessionPanelOverrides,
+  fromDiscoverSessionEmbeddableOverrides,
 } from '../../../common/embeddable';
 import { EDITABLE_SAVED_SEARCH_KEYS } from '../../../common/embeddable/constants';
 import type { DiscoverServices } from '../../build_services';
@@ -56,7 +56,7 @@ export const deserializeState = async ({
     const resolvedTab = selectedTab ?? session.tabs[0];
     const isSelectedTabDeleted = Boolean(selectedTabId && !selectedTab);
     const resolvedSelectedTabId = isSelectedTabDeleted ? selectedTabId : resolvedTab?.id;
-    const savedObjectOverride = fromDiscoverSessionPanelOverrides(apiState.overrides ?? {});
+    const savedObjectOverride = fromDiscoverSessionEmbeddableOverrides(apiState.overrides ?? {});
 
     // Build runtime state from the resolved tab's attributes
     // ignore the time range from the tab - only global time range + panel time range matter
@@ -90,7 +90,7 @@ export const deserializeState = async ({
   } else {
     // by value
     const [tab] = apiState.tabs;
-    const savedObjectOverride = fromDiscoverSessionPanelOverrides(tab ?? {});
+    const savedObjectOverride = fromDiscoverSessionEmbeddableOverrides(tab ?? {});
     const { byValueToSavedSearch } = discoverServices.savedSearch;
 
     const { state: storedState, references } = toStoredSearchEmbeddableByValue(apiState);

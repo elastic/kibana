@@ -26,5 +26,5 @@ export {
   fromStoredSearchEmbeddableByValue,
   toStoredSearchEmbeddable,
   toStoredSearchEmbeddableByValue,
-  fromDiscoverSessionPanelOverrides,
+  fromDiscoverSessionEmbeddableOverrides,
 } from './transform_utils';

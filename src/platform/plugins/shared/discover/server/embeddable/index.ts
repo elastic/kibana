@@ -9,8 +9,6 @@
 
 export { createSearchEmbeddableFactory } from './search_embeddable_factory';
 export type {
-  DiscoverSessionEmbeddableByValueProps,
-  DiscoverSessionEmbeddableByReferenceProps,
   DiscoverSessionEmbeddableByValueState,
   DiscoverSessionEmbeddableByReferenceState,
   DiscoverSessionEmbeddableState,

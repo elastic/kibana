@@ -12,7 +12,7 @@ import { discoverSessionApiClassicTabBaseSchema, discoverSessionApiEsqlTabBaseSc
 import { discoverSessionApiMetricsTabTypeStateSchema } from './metrics_tab';
 import { discoverSessionApiDefaultTabTypeStateSchema } from './session_data';
 
-const panelMetricsTabSchema = discoverSessionApiEsqlTabBaseSchema
+const embeddableMetricsTabSchema = discoverSessionApiEsqlTabBaseSchema
   .extend(discoverSessionApiMetricsTabTypeStateSchema.shape)
   .meta({
     title: 'Metrics tab',
@@ -26,11 +26,11 @@ const panelMetricsTabSchema = discoverSessionApiEsqlTabBaseSchema
  * Inline tab configuration for a by-value Discover panel. Unlike the session API tab schemas, it
  * omits session-only fields such as id, label, and presentation state.
  */
-export const panelTabSchema = z.union([
+export const discoverSessionApiEmbeddableTabSchema = z.union([
   discoverSessionApiClassicTabBaseSchema.extend(discoverSessionApiDefaultTabTypeStateSchema.shape),
   discoverSessionApiEsqlTabBaseSchema
     .extend(discoverSessionApiDefaultTabTypeStateSchema.shape)
     // extend() does not preserve object-level metadata.
     .meta({ ...discoverSessionApiEsqlTabBaseSchema.meta() }),
-  panelMetricsTabSchema,
+  embeddableMetricsTabSchema,
 ]);
