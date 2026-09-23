@@ -22,7 +22,7 @@ export const assertCanManageSignificantEvents = async ({
     throw Boom.forbidden('Managing significant events requires the Nightshift manage privilege');
   }
 
-  const result = await authz.checkPrivilegesWithRequest(request).globally({
+  const result = await authz.checkPrivilegesDynamicallyWithRequest(request)({
     kibana: [authz.actions.api.get(NIGHTSHIFT_API_PRIVILEGES.manage)],
   });
   if (!result.hasAllRequested) {
