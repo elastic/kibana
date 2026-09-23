@@ -82,6 +82,13 @@ interface RequestOptions {
   maxAttempts?: number;
 }
 
+/**
+ * Pause before every request that creates or changes content, following GitHub's guidance to
+ * keep content-generating requests around one per second so the secondary rate limit, shared by
+ * every job using the same token, is never approached.
+ */
+const WRITE_INTERVAL_MS = 1000;
+
 /** Longest single wait for a rate limit; the fifth secondary-limit retry would otherwise be 16 min. */
 const MAX_RATE_LIMIT_WAIT_SECONDS = 5 * 60;
 
@@ -126,6 +133,8 @@ export class GithubApi {
   private readonly baseUrl: string;
   private readonly defaultHeaders: Record<string, string>;
   private requestCount: number = 0;
+  private lastWriteAt: number = 0;
+  private writeQueue: Promise<void> = Promise.resolve();
 
   /**
    * Create a GithubApi helper object, if token is undefined requests won't be
@@ -323,6 +332,10 @@ export class GithubApi {
 
       this.requestCount += 1;
 
+      if (options.method !== 'GET') {
+        await this.paceWrite();
+      }
+
       let response: Response;
       try {
         response = await fetch(options.url, {
@@ -377,5 +390,18 @@ export class GithubApi {
         data: (await response.json()) as T,
       };
     }
+  }
+
+  /** Writes take turns, so concurrent callers are spaced out too. */
+  private paceWrite(): Promise<void> {
+    const turn = this.writeQueue.then(async () => {
+      const waitMs = this.lastWriteAt + WRITE_INTERVAL_MS - Date.now();
+      if (waitMs > 0) {
+        await sleep(waitMs);
+      }
+      this.lastWriteAt = Date.now();
+    });
+    this.writeQueue = turn.catch(() => {});
+    return turn;
   }
 }
