@@ -17,7 +17,7 @@ export const findIngressCredentialsForConnector = async ({
   unsecuredSavedObjectsClient,
   connectorId,
 }: {
-  unsecuredSavedObjectsClient: SavedObjectsClientContract;
+  unsecuredSavedObjectsClient: Pick<SavedObjectsClientContract, 'find'>;
   connectorId: string;
 }): Promise<Array<SavedObject<RawConnectorIngressCredential>>> => {
   const type = CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE;

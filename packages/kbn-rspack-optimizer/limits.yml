@@ -7,12 +7,12 @@ pageLoadAssetSize:
   agentBuilderSml: 597
   agentBuilderVisualizations: 1551
   agentBuilderWorkflows: 1029
-  agenticInvestigations: 13459
+  agenticInvestigations: 4869
   aiAssistantManagementSelection: 355
   aiops: 586
   alerting: 8789
   alertingVTwo: 24358
-  alertzero: 10276
+  alertzero: 17737
   apm: 35746
   apmShared: 1896
   apmSourcesAccess: 1174
@@ -112,7 +112,7 @@ pageLoadAssetSize:
   interactiveSetup: 32694
   intercepts: 14374
   kibanaOverview: 1863
-  kibanaReact: 1225
+  kibanaReact: 1618
   kibanaUsageCollection: 529
   kibanaUtils: 2884
   kql: 337
@@ -156,6 +156,7 @@ pageLoadAssetSize:
   productDocBase: 4218
   productIntercept: 4738
   profiling: 12944
+  proposals: 13459
   queryActivity: 1149
   reindexService: 1964
   remoteClusters: 5794
