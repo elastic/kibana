@@ -36,9 +36,8 @@ interface AgentTurnProps {
   item: AgentTurnItem;
   agent?: AgentDefinition | null;
   conversationAttachments?: VersionedAttachment[];
-  showHeader?: boolean;
-  /** Spins the shared avatar while a later turn of this turn's visual group is running. */
-  isGroupLoading?: boolean;
+  /** True while an answered prompt's resume is in flight but its first event has not arrived yet. */
+  isResuming?: boolean;
 }
 
 // One `AgentResponse` at the same position for running, awaiting-prompt and completed turns, so
@@ -116,13 +115,12 @@ export const AgentTurn: React.FC<AgentTurnProps> = ({
   item,
   agent,
   conversationAttachments,
-  showHeader = true,
-  isGroupLoading,
+  isResuming = false,
 }) => {
   const { euiTheme } = useEuiTheme();
   const conversationId = useConversationId();
   const { status, startedAt, origin } = item;
-  const isLoading = isGroupLoading ?? status === 'running';
+  const isLoading = status === 'running' || isResuming;
 
   const avatarColumnStyles = css`
     min-inline-size: ${euiTheme.size.l};
@@ -132,22 +130,21 @@ export const AgentTurn: React.FC<AgentTurnProps> = ({
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
-      {/* The column always renders so grouped turns stay aligned with the one above. */}
+      {/* The column keeps its width while the agent definition is still loading. */}
       <EuiFlexItem
         grow={false}
         css={avatarColumnStyles}
         data-test-subj="agentBuilderTimelineAvatar"
       >
-        {showHeader &&
-          (isLoading ? (
-            <EuiLoadingElastic size="l" aria-label={loadingLabel} />
-          ) : (
-            agent && <AgentAvatar agent={agent} size="s" iconSize="l" />
-          ))}
+        {isLoading ? (
+          <EuiLoadingElastic size="l" aria-label={loadingLabel} />
+        ) : (
+          agent && <AgentAvatar agent={agent} size="s" iconSize="l" />
+        )}
       </EuiFlexItem>
       <EuiFlexItem grow={true}>
         <EuiFlexGroup direction="column" gutterSize="s">
-          {showHeader && agent && (
+          {agent && (
             <EuiFlexItem grow={false}>
               <RoundAuthorHeader
                 name={agent.name}

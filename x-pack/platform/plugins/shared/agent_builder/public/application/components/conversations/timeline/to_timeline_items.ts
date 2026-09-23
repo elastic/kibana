@@ -14,6 +14,7 @@ import { accumulatorToItem, foldAttachmentRefs } from './timeline_item_utils';
 import { findAwaitingPromptEventId } from './awaiting_prompt';
 import { answersByPromptId, withQuestionAnswers } from './prompt_answers';
 import { resolvedToolCallIds, isSupersededToolCallStep } from './tool_call_steps';
+import { resumeToOriginalExecutionId } from './execution_chains';
 
 export const groupTimelineEvents = (
   events: TimelineDisplayEvent[],
@@ -24,6 +25,7 @@ export const groupTimelineEvents = (
   const awaitingPromptEventId = findAwaitingPromptEventId(events);
   const answers = answersByPromptId(events);
   const resolvedToolCalls = resolvedToolCallIds(events);
+  const resumeLinks = resumeToOriginalExecutionId(events, eventsById);
 
   const ordered: Array<UserEntry | ExecutionAccumulator> = [];
   const accMap = new Map<string, ExecutionAccumulator>();
@@ -34,16 +36,17 @@ export const groupTimelineEvents = (
     createdAt: string,
     triggerEventId?: string
   ): ExecutionAccumulator => {
-    let acc = accMap.get(executionId);
+    const canonicalId = resumeLinks.get(executionId) ?? executionId;
+    let acc = accMap.get(canonicalId);
     if (!acc) {
       acc = {
-        executionId,
+        executionId: canonicalId,
         startedAt: createdAt,
         triggerEventId,
         steps: [],
         attachmentRefs: Array.from(seenAttachmentRefs.values()),
       };
-      accMap.set(executionId, acc);
+      accMap.set(canonicalId, acc);
       ordered.push(acc);
     }
     return acc;
@@ -65,10 +68,12 @@ export const groupTimelineEvents = (
         foldAttachmentRefs(seenAttachmentRefs, event.data.input?.attachment_refs);
         break;
 
-      case TimelineEventType.executionStarted:
+      case TimelineEventType.executionStarted: {
         if (!event.execution_id) break;
-        getOrCreateAcc(event.execution_id, event.created_at, event.trigger_event_id);
+        const acc = getOrCreateAcc(event.execution_id, event.created_at, event.trigger_event_id);
+        acc.terminal = undefined;
         break;
+      }
 
       case TimelineEventType.executionStep: {
         if (!event.execution_id) break;
@@ -86,12 +91,26 @@ export const groupTimelineEvents = (
         break;
       }
 
-      case TimelineEventType.executionTerminated:
+      case TimelineEventType.executionTerminated: {
+        if (!event.execution_id) break;
+        const acc = getOrCreateAcc(event.execution_id, event.created_at, event.trigger_event_id);
+        acc.terminal = event;
+        break;
+      }
+
       case TimelineEventType.executionFailed:
       case TimelineEventType.executionAborted: {
         if (!event.execution_id) break;
         const acc = getOrCreateAcc(event.execution_id, event.created_at, event.trigger_event_id);
-        acc.terminal = event;
+        const openPause = awaitingPromptEventId ? eventsById.get(awaitingPromptEventId) : undefined;
+        const openPauseExecutionId = openPause?.execution_id
+          ? resumeLinks.get(openPause.execution_id) ?? openPause.execution_id
+          : undefined;
+        acc.terminal =
+          openPause?.type === TimelineEventType.executionTerminated &&
+          openPauseExecutionId === acc.executionId
+            ? openPause
+            : event;
         break;
       }
 

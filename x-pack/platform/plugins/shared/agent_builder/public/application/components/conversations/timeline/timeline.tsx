@@ -18,7 +18,7 @@ interface TimelineProps {
   items: TimelineItem[];
   agent?: AgentDefinition | null;
   conversationAttachments?: VersionedAttachment[];
-  /** True while an answered prompt's resume is in flight; spins the last group's avatar. */
+  /** True while an answered prompt's resume is in flight; spins the last turn's avatar. */
   isResuming?: boolean;
 }
 
@@ -36,32 +36,11 @@ export const Timeline: React.FC<TimelineProps> = ({
     return !previous || !moment(itemDate(items[index])).isSame(moment(itemDate(previous)), 'day');
   };
 
-  // After user resumed, make the previous turn to show the loader
-  const isGroupLoading = (start: number): boolean => {
-    let index = start;
-    let running = false;
-    while (index < items.length) {
-      const entry = items[index];
-      if (entry.kind !== 'agentTurn') {
-        return running;
-      }
-      if (index > start && startsNewDateGroup(index)) {
-        return running;
-      }
-      running = running || entry.status === 'running';
-      index++;
-    }
-    return running || isResuming;
-  };
-
   return (
     <>
       <EuiFlexGroup direction="column" gutterSize="l">
         {items.map((item, index) => {
-          const previous = items[index - 1];
           const showDivider = startsNewDateGroup(index);
-          const showHeader =
-            showDivider || !(item.kind === 'agentTurn' && previous?.kind === 'agentTurn');
           let content: React.ReactNode;
           switch (item.kind) {
             case 'userMessage':
@@ -79,8 +58,7 @@ export const Timeline: React.FC<TimelineProps> = ({
                   item={item}
                   agent={agent}
                   conversationAttachments={conversationAttachments}
-                  showHeader={showHeader}
-                  isGroupLoading={showHeader ? isGroupLoading(index) : false}
+                  isResuming={isResuming && index === items.length - 1}
                 />
               );
               break;
