@@ -228,12 +228,9 @@ export const CostEstimate = () => {
             buttonContent={
               <EuiTitle size="xs">
                 <h3>
-                  {i18n.translate(
-                    'xpack.significantEventsApp.settings.costEstimate.sectionTitle',
-                    {
-                      defaultMessage: 'Approximate inference cost across all spaces',
-                    }
-                  )}
+                  {i18n.translate('xpack.significantEventsApp.settings.costEstimate.sectionTitle', {
+                    defaultMessage: 'Approximate inference cost across all spaces',
+                  })}
                 </h3>
               </EuiTitle>
             }
