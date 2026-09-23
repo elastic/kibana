@@ -8,8 +8,6 @@
  */
 
 import type { ScoutServerConfig } from '../../../../../types';
-
-import type { ScoutServerConfig } from '../../../../../types';
 import { servers as ruleCreationConfig } from '../../evals_detection_watch_rule_creation/stateful/classic.stateful.config';
 
 /**
