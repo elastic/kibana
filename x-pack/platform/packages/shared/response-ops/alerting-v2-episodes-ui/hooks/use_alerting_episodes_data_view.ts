@@ -12,7 +12,7 @@ import type { DataViewsContract, RuntimeField } from '@kbn/data-views-plugin/pub
 import { useMemo } from 'react';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { buildEpisodesBaseQuery } from '@kbn/alerting-v2-common-queries';
+import { addEpisodeDataExtraction, buildEpisodesBaseQuery } from '@kbn/alerting-v2-common-queries';
 import * as i18n from './translations';
 import { useSpaceId } from './use_space_id';
 
@@ -74,7 +74,12 @@ const computedFields: Record<string, RuntimeField> = {
  */
 export const useAlertingEpisodesDataView = ({ services }: UseAlertingEpisodesDataViewOptions) => {
   const spaceId = useSpaceId(services.spaces);
-  const query = buildEpisodesBaseQuery(spaceId).print('basic');
+  const query = useMemo(() => {
+    // Only the columns matter here, so the extraction placement is irrelevant.
+    const baseQuery = buildEpisodesBaseQuery(spaceId, undefined, { withEpisodeDataRow: true });
+    addEpisodeDataExtraction(baseQuery);
+    return baseQuery.print('basic');
+  }, [spaceId]);
 
   const dataViewAsync = useAsync(
     () => getEsqlDataView({ esql: query }, undefined, services),

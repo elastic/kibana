@@ -7,7 +7,14 @@
 
 import { ALERT_ACTIONS_DATA_STREAM, ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import { PAGE_SIZE_ESQL_VARIABLE } from './constants';
-import { buildEpisodesBaseQuery, buildEpisodesQuery } from './episodes_query';
+import {
+  ALERT_EPISODE_LIST_FIELDS,
+  addEpisodeDataExtraction,
+  buildEpisodesBaseQuery,
+  buildEpisodesListQuery,
+  buildEpisodesQuery,
+  episodesFilterNeedsActions,
+} from './episodes_query';
 
 const SPACE_ID = 'default';
 
@@ -26,11 +33,6 @@ describe('buildEpisodesBaseQuery', () => {
     expect(queryString).toContain('last_timestamp = MAX(@timestamp)');
     expect(queryString).toContain('triggered_at = MIN(@timestamp) WHERE');
     expect(queryString).toContain('"active"');
-    expect(queryString).toContain('episode_data');
-    expect(queryString).toContain('extracted_data = JSON_EXTRACT(_source, "data")');
-    expect(queryString).toContain(
-      'episode_data = LAST(extracted_data, @timestamp) WHERE extracted_data != "{}"'
-    );
     expect(queryString).toContain(
       'severity = LAST(severity, @timestamp) WHERE status == "breached" AND severity IS NOT NULL'
     );
@@ -40,6 +42,29 @@ describe('buildEpisodesBaseQuery', () => {
     expect(queryString).toContain('first_timestamp');
     expect(queryString).toContain('last_timestamp');
     expect(queryString).toContain('WHERE @timestamp == last_timestamp');
+  });
+
+  it('does not read _source or compute episode_data', () => {
+    const queryString = buildEpisodesBaseQuery(SPACE_ID).print('basic');
+
+    expect(queryString).not.toContain('JSON_EXTRACT');
+    expect(queryString).not.toContain('episode_data');
+    expect(queryString).not.toContain('data_timestamp');
+  });
+
+  it('keeps the last breached event row when withEpisodeDataRow is set', () => {
+    const queryString = buildEpisodesBaseQuery(SPACE_ID, undefined, {
+      withEpisodeDataRow: true,
+    }).print('basic');
+
+    expect(queryString).toContain('data_timestamp = MAX(@timestamp) WHERE status == "breached"');
+    expect(queryString).toContain('last_status = LAST(`episode.status`, @timestamp)');
+    expect(queryString).toContain('WHERE @timestamp == COALESCE(data_timestamp, last_timestamp)');
+    expect(queryString).toContain(
+      'EVAL @timestamp = last_timestamp, `episode.status` = last_status'
+    );
+    expect(queryString).not.toContain('WHERE @timestamp == last_timestamp');
+    expect(queryString).not.toContain('JSON_EXTRACT');
   });
 
   it('computes last_snooze_action and snooze_expiry grouped by group_hash', () => {
@@ -103,6 +128,106 @@ describe('duration lower bound flag', () => {
   });
 });
 
+describe('buildEpisodesListQuery', () => {
+  it('pages the episodes from the alert events stream with a plain STATS', () => {
+    const queryString = buildEpisodesListQuery(SPACE_ID).print('basic');
+
+    expect(queryString).toContain(`FROM ${ALERT_EVENTS_DATA_STREAM} |`);
+    expect(queryString).not.toContain(ALERT_ACTIONS_DATA_STREAM);
+    expect(queryString).not.toContain('_source');
+    expect(queryString).not.toContain('INLINE STATS');
+    expect(queryString).toContain(`WHERE space_id == "${SPACE_ID}"`);
+    expect(queryString).toContain('WHERE type == "alert"');
+    expect(queryString).toContain(
+      'STATS last_timestamp = MAX(@timestamp), first_timestamp = MIN(@timestamp), `episode.status` = LAST(`episode.status`, @timestamp), `rule.id` = MAX(`rule.id`), group_hash = MAX(group_hash) BY `episode.id`'
+    );
+    expect(queryString).toContain(
+      'EVAL @timestamp = last_timestamp, duration = DATE_DIFF("ms", first_timestamp, last_timestamp)'
+    );
+    expect(queryString).toContain('SORT @timestamp DESC | LIMIT ?pageSize');
+    expect(queryString).toContain(
+      `KEEP ${ALERT_EPISODE_LIST_FIELDS.map((f) => (f.includes('.') ? `\`${f}\`` : f)).join(', ')}`
+    );
+    expect(queryString).not.toContain('severity');
+  });
+
+  it('applies the rule, group hash and search filters before the STATS', () => {
+    const queryString = buildEpisodesListQuery(SPACE_ID, undefined, {
+      ruleId: 'rule-1',
+      groupHash: 'hash-1',
+      queryString: 'host.name: web',
+    }).print('basic');
+    const statsIndex = queryString.indexOf('STATS ');
+
+    expect(queryString.indexOf('WHERE rule.id == "rule-1"')).toBeLessThan(statsIndex);
+    expect(queryString).not.toContain('rule_id');
+    expect(queryString.indexOf('WHERE group_hash == "hash-1"')).toBeLessThan(statsIndex);
+    expect(queryString.indexOf('WHERE QSTR("host.name: web")')).toBeLessThan(statsIndex);
+  });
+
+  it('applies the status filter after the STATS', () => {
+    const queryString = buildEpisodesListQuery(SPACE_ID, undefined, {
+      status: ['active'],
+    }).print('basic');
+
+    expect(queryString.indexOf('WHERE `episode.status` == "active"')).toBeGreaterThan(
+      queryString.indexOf('STATS ')
+    );
+  });
+
+  it('only aggregates severity when the sort or the filter reads it', () => {
+    const sorted = buildEpisodesListQuery(SPACE_ID, {
+      sortField: 'severity',
+      sortDirection: 'desc',
+    }).print('basic');
+    expect(sorted).toContain(
+      'severity = LAST(severity, @timestamp) WHERE status == "breached" AND severity IS NOT NULL'
+    );
+    expect(sorted).toContain('SORT _severity_sort DESC');
+    expect(sorted).toMatch(/KEEP .*severity/);
+
+    const filtered = buildEpisodesListQuery(SPACE_ID, undefined, {
+      severity: ['critical'],
+    }).print('basic');
+    expect(filtered).toContain('severity = LAST(severity, @timestamp)');
+    expect(filtered.indexOf('WHERE severity IN ("critical")')).toBeGreaterThan(
+      filtered.indexOf('STATS ')
+    );
+  });
+
+  it('sorts by the allowlisted fields', () => {
+    const queryString = buildEpisodesListQuery(SPACE_ID, {
+      sortField: 'rule.id',
+      sortDirection: 'asc',
+    }).print('basic');
+
+    expect(queryString).toContain('SORT `rule.id` ASC');
+  });
+
+  it('throws when a filter needs the action state columns', () => {
+    expect(() => buildEpisodesListQuery(SPACE_ID, undefined, { tags: ['prod'] })).toThrow();
+    expect(() => buildEpisodesListQuery(SPACE_ID, undefined, { assigneeUid: 'u1' })).toThrow();
+  });
+});
+
+describe('episodesFilterNeedsActions', () => {
+  it('is true only for the filters reading action state columns', () => {
+    expect(episodesFilterNeedsActions(undefined)).toBe(false);
+    expect(episodesFilterNeedsActions({ status: ['active'], ruleId: 'r' })).toBe(false);
+    expect(episodesFilterNeedsActions({ tags: ['prod'] })).toBe(true);
+    expect(episodesFilterNeedsActions({ assigneeUid: 'u1' })).toBe(true);
+  });
+});
+
+describe('addEpisodeDataExtraction', () => {
+  it('reads the episode data from _source', () => {
+    const query = buildEpisodesBaseQuery(SPACE_ID, undefined, { withEpisodeDataRow: true });
+    addEpisodeDataExtraction(query);
+
+    expect(query.print('basic')).toContain('EVAL episode_data = JSON_EXTRACT(_source, "data")');
+  });
+});
+
 describe('buildEpisodesQuery', () => {
   it('should join both data streams', () => {
     const query = buildEpisodesQuery(SPACE_ID);
@@ -111,6 +236,21 @@ describe('buildEpisodesQuery', () => {
     expect(queryString).toContain(`FROM ${ALERT_EVENTS_DATA_STREAM}`);
     expect(queryString).toContain(ALERT_ACTIONS_DATA_STREAM);
     expect(queryString).toContain('episode_data');
+  });
+
+  it('extracts episode_data from _source only after the page LIMIT', () => {
+    const queryString = buildEpisodesQuery(SPACE_ID).print('basic');
+    const limitIndex = queryString.indexOf('LIMIT ?pageSize');
+    const extractionIndex = queryString.indexOf(
+      'EVAL episode_data = JSON_EXTRACT(_source, "data")'
+    );
+    const keepIndex = queryString.indexOf('KEEP ');
+
+    expect(queryString).toContain('WHERE @timestamp == COALESCE(data_timestamp, last_timestamp)');
+    expect(limitIndex).toBeGreaterThan(-1);
+    expect(extractionIndex).toBeGreaterThan(limitIndex);
+    expect(keepIndex).toBeGreaterThan(extractionIndex);
+    expect(queryString).toMatch(/KEEP .*episode_data/);
   });
 
   it('should build query with default sort', () => {

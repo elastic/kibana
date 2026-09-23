@@ -9,6 +9,7 @@ import { esql } from '@elastic/esql';
 import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import {
   ALERT_EPISODE_FIELDS,
+  addEpisodeDataExtraction,
   buildEpisodesBaseQuery,
   type AlertEpisodeEsqlRow,
 } from './episodes_query';
@@ -25,11 +26,13 @@ export const buildEpisodeQuery = (
   spaceId: string,
   episodeId: string,
   groupHash: string
-): TypedEsqlQuery<AlertEpisodeEsqlRow> =>
-  asTypedEsqlQuery<AlertEpisodeEsqlRow>(
-    buildEpisodesBaseQuery(spaceId, { groupHash }).where`episode.id == ${episodeId}`
-      .pipe`LIMIT 1`.keep(...ALERT_EPISODE_FIELDS)
-  );
+): TypedEsqlQuery<AlertEpisodeEsqlRow> => {
+  const query = buildEpisodesBaseQuery(spaceId, { groupHash }, { withEpisodeDataRow: true })
+    .where`episode.id == ${episodeId}`.pipe`LIMIT 1`;
+  addEpisodeDataExtraction(query);
+
+  return asTypedEsqlQuery<AlertEpisodeEsqlRow>(query.keep(...ALERT_EPISODE_FIELDS));
+};
 
 /**
  * Raw ES|QL response shape of the group hash lookup.
