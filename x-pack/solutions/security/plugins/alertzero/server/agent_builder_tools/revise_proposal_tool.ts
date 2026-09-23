@@ -15,8 +15,8 @@ import {
   boundedActionInput,
   proposalConfidenceSchema,
   proposalImpactSchema,
-} from '@kbn/agentic-investigations-plugin/common';
-import type { AgenticInvestigationsPluginStart } from '@kbn/agentic-investigations-plugin/server';
+} from '@kbn/proposals-common';
+import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 
 const reviseProposalSchema = z.object({
   proposalId: z
@@ -51,7 +51,7 @@ const reviseProposalSchema = z.object({
  * direct in-process call bypasses both the route and the step wrapper.
  */
 export const reviseProposalTool = (
-  getAgenticInvestigations: () => AgenticInvestigationsPluginStart
+  getProposals: () => ProposalsPluginStart
 ): BuiltinToolDefinition<typeof reviseProposalSchema> => ({
   id: ALERTZERO_PROPOSALS_REVISE_TOOL_ID,
   type: ToolType.builtin,
@@ -68,10 +68,10 @@ export const reviseProposalTool = (
   tags: ['alertzero'],
   handler: async ({ proposalId, ...overrides }, { logger, request, spaceId }) => {
     try {
-      const agenticInvestigations = getAgenticInvestigations();
-      await agenticInvestigations.getProposalPrivileges().assertCanManage(request);
+      const proposals = getProposals();
+      await proposals.getProposalPrivileges().assertCanManage(request);
 
-      const service = agenticInvestigations.getProposalsService();
+      const service = proposals.getProposalsService();
 
       // The schema accepts any id in the chain, but `revise()` refuses a
       // superseded one, so a model holding the original id needs the head.

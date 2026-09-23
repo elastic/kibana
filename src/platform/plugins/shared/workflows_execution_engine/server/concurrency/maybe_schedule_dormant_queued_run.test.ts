@@ -83,8 +83,7 @@ describe('handleConcurrencyBlockedExecution', () => {
     expect(internalResumeWorkflowExecution).toHaveBeenCalledWith(
       parentWorkflowExecutionId,
       spaceId,
-      undefined,
-      request
+      undefined
     );
     expect(workflowTaskManager.scheduleDormantQueuedRunTask).not.toHaveBeenCalled();
   });

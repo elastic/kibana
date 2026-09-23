@@ -84,7 +84,7 @@ describe('useMatchedActionPolicies', () => {
         is_truncated: false,
       } as any)
       .mockResolvedValueOnce({
-        items: [{ action_policy: { id: 'ap-2' }, category: 'catch-all' }],
+        items: [{ action_policy: { id: 'ap-2' }, category: 'catch_all' }],
         total: 1,
         evaluated_count: 1,
         is_truncated: false,
@@ -106,7 +106,7 @@ describe('useMatchedActionPolicies', () => {
   it('fires a request with an empty rule body when no tags are provided', async () => {
     const http = httpServiceMock.createStartContract();
     const fakeResponse = {
-      items: [{ action_policy: { id: 'ap-global', name: 'Global Policy' }, category: 'catch-all' }],
+      items: [{ action_policy: { id: 'ap-global', name: 'Global Policy' }, category: 'catch_all' }],
       total: 1,
       evaluated_count: 1,
       is_truncated: false,
