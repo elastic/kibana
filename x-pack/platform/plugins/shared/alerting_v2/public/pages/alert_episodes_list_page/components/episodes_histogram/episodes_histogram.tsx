@@ -95,6 +95,9 @@ export const EpisodesHistogram = ({
   const { euiTheme } = useEuiTheme();
   const spaceId = useSpaceId(services.spaces);
   const histogramSessionId = useMemo(() => `alerting_v2_histogram_${Date.now()}`, []);
+  // Lens treats a present `abortController` prop as owned. Unified histogram always
+  // forwards the prop, so an undefined value crashes the embeddable before it draws.
+  const abortController = useMemo(() => new AbortController(), []);
   const [bucketInterval, setBucketInterval] = useState(() => autoInterval(timeRange));
   const prevTimeRange = useRef(timeRange);
 
@@ -194,6 +197,7 @@ export const EpisodesHistogram = ({
     if (!table || !dataView) return;
     api.fetch({
       requestAdapter: undefined,
+      abortController,
       searchSessionId: histogramSessionId,
       dataSource: new DataViewSource(dataView),
       query: esqlQuery,
@@ -206,6 +210,7 @@ export const EpisodesHistogram = ({
       getModifiedVisAttributes,
     });
   }, [
+    abortController,
     api,
     dataView,
     esqlQuery,

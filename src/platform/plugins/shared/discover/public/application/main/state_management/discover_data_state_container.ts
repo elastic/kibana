@@ -81,6 +81,7 @@ export interface DataDocumentsMsg extends DataMsg {
   dataSource?: DataSource;
   esqlHeaderWarning?: string;
   interceptedWarnings?: SearchResponseWarning[]; // warnings (like shard failures)
+  approximationApplied?: boolean;
 }
 
 export interface DataTotalHitsMsg extends DataMsg {
