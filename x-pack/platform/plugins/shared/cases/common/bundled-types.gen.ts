@@ -1625,12 +1625,15 @@ export type TemplateDryRunResponse = z.infer<typeof TemplateDryRunResponse>;
 export const FieldDefinitionResponse = lazySchema(() =>
   z.object({
     /**
-     * Unique server-assigned identifier for the field definition (UUIDv4).
-     */
+      * Unique server-assigned identifier for the field definition (UUID). May be UUIDv4 for definitions created through the public API, or UUIDv5 for definitions created by internal migration processes.
+
+      */
     fieldDefinitionId: z
       .string()
       .max(36)
-      .describe('Unique server-assigned identifier for the field definition (UUIDv4).'),
+      .describe(
+        'Unique server-assigned identifier for the field definition (UUID). May be UUIDv4 for definitions created through the public API, or UUIDv5 for definitions created by internal migration processes.\n'
+      ),
     /**
       * The field name. Must match the `name` property in the YAML definition and is unique per owner (case-insensitive). Immutable after creation.
 
@@ -1649,7 +1652,10 @@ export const FieldDefinitionResponse = lazySchema(() =>
       .describe(
         'The field definition as a YAML string. New definitions are limited to 30 000 characters, but existing definitions created via internal tooling may be longer.\n'
       ),
-    owner: Owner,
+    /**
+     * The application that owns this field definition.
+     */
+    owner: z.string().max(50).describe('The application that owns this field definition.'),
     /**
      * Optional human-readable description of the field's purpose.
      */
@@ -1732,7 +1738,10 @@ export const FieldDefinitionWriteRequest = lazySchema(() =>
         .describe(
           'The field name, unique per owner (case-insensitive). Must match the `name` key inside the YAML definition. When omitted, the name is extracted from the definition YAML automatically. Immutable after creation.\n'
         ),
-      owner: Owner,
+      /**
+       * The application that owns this field definition.
+       */
+      owner: z.string().min(1).max(50).describe('The application that owns this field definition.'),
       /**
        * The field definition as a YAML string describing a single field (type, label, control, metadata).
        */
@@ -1788,7 +1797,10 @@ export const FieldDefinitionPutRequest = lazySchema(() =>
         .describe(
           'The field name, unique per owner (case-insensitive). Must match the `name` key inside the YAML definition. When omitted, the name is extracted from the definition YAML automatically. Immutable after creation. Unlike POST, the 50-character limit is not enforced on PUT so that definitions with legacy names that exceed the limit remain modifiable.\n'
         ),
-      owner: Owner,
+      /**
+       * The application that owns this field definition.
+       */
+      owner: z.string().min(1).max(50).describe('The application that owns this field definition.'),
       /**
        * The field definition as a YAML string describing a single field (type, label, control, metadata).
        */
