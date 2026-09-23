@@ -100,6 +100,8 @@ export {
   type SampleDocument,
   type FlattenRecord,
   flattenRecord,
+  boundedFlattenRecord,
+  boundedJsonValue,
   recursiveRecord,
 } from './src/shared/record_types';
 export { isSchema, createIsNarrowSchema, isRecord } from './src/shared/type_guards';
@@ -137,6 +139,8 @@ export {
   ALL_FIELD_DEFINITION_TYPES,
   fieldDefinitionConfigSchema,
   namedFieldDefinitionConfigSchema,
+  boundedFieldDefinitionConfigSchema,
+  boundedNamedFieldDefinitionSchema,
 } from './src/fields';
 
 export {
