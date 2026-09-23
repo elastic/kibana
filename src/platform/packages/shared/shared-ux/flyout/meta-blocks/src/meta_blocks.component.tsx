@@ -119,28 +119,23 @@ export const MetaBlocks: FunctionComponent<MetaBlocksProps> = ({ items, ...rest 
 
   return (
     <div css={memoized.list} data-test-subj={rest['data-test-subj'] ?? 'metablocks-container'}>
-      {items.map((item, index) => {
-        const truncatableText = getTruncatableText(item.value);
+      {items.map(({ id, title, value, ...itemProps }, index) => {
+        const truncatableText = getTruncatableText(value);
 
         return (
-          <EuiText
-            key={item.id ?? index}
-            size="s"
-            css={memoized.item}
-            data-test-subj={item['data-test-subj']}
-          >
-            <span css={memoized.key}>{item.title}</span>
+          <EuiText key={id ?? index} {...itemProps} size="s" css={memoized.item}>
+            <span css={memoized.key}>{title}</span>
             {truncatableText !== undefined ? (
               <span css={memoized.truncatedValue}>
                 <span css={memoized.fullTextSizer} aria-hidden>
                   {truncatableText}
                 </span>
                 <span css={memoized.truncationOverlay}>
-                  {renderTruncated(item.value, truncatableText)}
+                  {renderTruncated(value, truncatableText)}
                 </span>
               </span>
             ) : (
-              <span css={memoized.value}>{item.value}</span>
+              <span css={memoized.value}>{value}</span>
             )}
           </EuiText>
         );

@@ -32,6 +32,8 @@ export const InfoBlock: FunctionComponent<InfoBlockProps> = ({
   value,
   size,
   color,
+  id,
+  'data-test-subj': dataTestSubj,
   ...rest
 }) => {
   const euiThemeContext = useEuiTheme();
@@ -50,7 +52,7 @@ export const InfoBlock: FunctionComponent<InfoBlockProps> = ({
     : { fontWeight: euiTheme.font.weight.bold };
 
   return (
-    <div data-test-subj={rest['data-test-subj'] ?? 'infoBlock'} css={styles.block}>
+    <div {...rest} data-test-subj={dataTestSubj ?? 'infoBlock'} css={styles.block}>
       <EuiText size="xs" color="subdued">
         <EuiTextTruncate text={title} />
       </EuiText>
