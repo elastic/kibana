@@ -14,6 +14,6 @@ Use [`server.rewriteBasePath`](/reference/configuration-reference/general-settin
 If you want to turn off the basepath when in development mode, start {{kib}} with the `--no-base-path` flag
 
 ```bash
-yarn start --no-base-path
+pnpm start --no-base-path
 ```
 
