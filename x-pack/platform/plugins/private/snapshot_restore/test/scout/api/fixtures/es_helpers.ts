@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import { errors } from '@elastic/elasticsearch';
-import { expect } from '@kbn/scout/api';
 import type { EsClient } from '@kbn/scout';
-
-// A snapshot that hasn't been registered yet surfaces as `snapshot_missing_exception`; every other
-// error (auth, wrong repository name, etc.) is a real failure and must be surfaced, not polled on.
-const isSnapshotMissingError = (error: unknown): boolean =>
-  error instanceof errors.ResponseError && error.body?.error?.type === 'snapshot_missing_exception';
 
 export interface SeedSlmPolicy {
   policyName: string;
@@ -84,36 +77,3 @@ export const createSnapshot = (esClient: EsClient, snapshot: string, repository:
 
 export const deleteAllSnapshotsInRepo = (esClient: EsClient, repository: string) =>
   esClient.snapshot.delete({ repository, snapshot: '*' }, { ignore: [404] });
-
-/**
- * Waits for a specific snapshot to reach a terminal state. SLM runs are asynchronous, so this
- * replaces the FTR suite's fixed `setTimeout` with a deterministic poll before assertions.
- */
-export const waitForSnapshotToFinish = async (
-  esClient: EsClient,
-  repository: string,
-  snapshot: string,
-  timeout = 30_000
-): Promise<void> => {
-  const readState = async () => {
-    const snapshots = await esClient.snapshot
-      .get({ repository, snapshot, ignore_unavailable: true })
-      .then((response) => response.snapshots)
-      .catch((error) => {
-        if (isSnapshotMissingError(error)) {
-          return undefined;
-        }
-        throw error;
-      });
-    return snapshots?.[0]?.state;
-  };
-
-  await expect
-    .poll(readState, { timeout, intervals: [500, 1_000, 2_000] })
-    .toMatch(/SUCCESS|PARTIAL|FAILED/);
-
-  expect(
-    await readState(),
-    `snapshot "${snapshot}" in repository "${repository}" did not complete successfully`
-  ).toMatch(/SUCCESS|PARTIAL/);
-};

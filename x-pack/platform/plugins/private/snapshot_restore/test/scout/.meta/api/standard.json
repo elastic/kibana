@@ -1,5 +1,5 @@
 {
-  "sha1": "34420036995dbd0deb86cc40ddad94f5c411fbb4",
+  "sha1": "e29c59086880e42736b1152ab8c9fc32b50e24fc",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -14,7 +14,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/snapshot_restore/test/scout/api/tests/policies.spec.ts",
-        "line": 79,
+        "line": 83,
         "column": 27
       }
     },
@@ -28,7 +28,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/snapshot_restore/test/scout/api/tests/policies.spec.ts",
-        "line": 128,
+        "line": 132,
         "column": 9
       }
     },
@@ -42,7 +42,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/snapshot_restore/test/scout/api/tests/policies.spec.ts",
-        "line": 158,
+        "line": 162,
         "column": 59
       }
     },
@@ -56,7 +56,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/snapshot_restore/test/scout/api/tests/policies.spec.ts",
-        "line": 218,
+        "line": 222,
         "column": 21
       }
     },
@@ -70,7 +70,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/snapshot_restore/test/scout/api/tests/policies.spec.ts",
-        "line": 247,
+        "line": 251,
         "column": 12
       }
     },

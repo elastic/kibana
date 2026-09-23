@@ -13,6 +13,7 @@ import type { ApiClientFixture, EsClient, RoleApiCredentials } from '@kbn/scout'
 
 import type { SnapshotDetails } from '../../../../common/types';
 import { SNAPSHOT_RESTORE_ADMIN_ROLE } from '../../common/fixtures/constants';
+import { waitForSnapshotToFinish } from '../../common/fixtures/es_helpers';
 import { API_BASE_PATH, COMMON_HEADERS } from '../fixtures/constants';
 import {
   createFsRepository,
@@ -22,7 +23,6 @@ import {
   deleteSlmPolicy,
   executeSlmPolicy,
   putSlmPolicy,
-  waitForSnapshotToFinish,
 } from '../fixtures/es_helpers';
 
 // Namespace all cluster-level resources per run so parallel/orphaned suites can't collide. Prefixes

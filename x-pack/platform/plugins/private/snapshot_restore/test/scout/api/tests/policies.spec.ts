@@ -33,6 +33,10 @@ const CREATE_POLICY_NAME = `test_create_policy_${runId}`;
 const CREATE_REQUIRED_FIELDS_POLICY_NAME = `test_create_required_fields_policy_${runId}`;
 const UPDATE_POLICY_NAME = `test_update_policy_${runId}`;
 const UPDATE_SNAPSHOT_NAME = 'my_snapshot';
+// Dates that never exist (30 Feb, 31 Apr), so SLM can never fire these policies and take a snapshot
+// mid-test; the tests only assert that the schedule is persisted.
+const SCHEDULE = '0 0 0 30 2 ?';
+const UPDATED_SCHEDULE = '0 0 0 31 4 ?';
 
 // Runs on local and Cloud. Locally we register a file system (`fs`) repository; on Cloud that is
 // forbidden, so we reuse the always-present managed `found-snapshots` repository instead. These
@@ -74,7 +78,7 @@ apiTest.describe('Snapshot and Restore - SLM policies', { tag: tags.stateful.cla
     await putSlmPolicy(esClient, {
       policyName: UPDATE_POLICY_NAME,
       snapshotName: UPDATE_SNAPSHOT_NAME,
-      schedule: '0 30 1 * * ?',
+      schedule: SCHEDULE,
       repository: repoName,
       config: { indices: ['my_index'], ignoreUnavailable: true },
       retention: { expireAfter: '7d', maxCount: 20, minCount: 2 },
@@ -91,7 +95,7 @@ apiTest.describe('Snapshot and Restore - SLM policies', { tag: tags.stateful.cla
       body: {
         name: policyName,
         snapshotName: 'my_snapshot',
-        schedule: '0 30 1 * * ?',
+        schedule: SCHEDULE,
         repository: repoName,
         config: {
           indices: ['my_index'],
@@ -117,7 +121,7 @@ apiTest.describe('Snapshot and Restore - SLM policies', { tag: tags.stateful.cla
     const policyFromEs = await esClient.slm.getLifecycle({ policy_id: policyName, human: true });
     expect(policyFromEs[policyName].policy).toStrictEqual({
       name: 'my_snapshot',
-      schedule: '0 30 1 * * ?',
+      schedule: SCHEDULE,
       repository: repoName,
       config: {
         indices: ['my_index'],
@@ -149,7 +153,7 @@ apiTest.describe('Snapshot and Restore - SLM policies', { tag: tags.stateful.cla
           name: policyName,
           snapshotName: 'my_snapshot',
           repository: repoName,
-          schedule: '0 30 1 * * ?',
+          schedule: SCHEDULE,
           isManagedPolicy: false,
         },
       });
@@ -164,7 +168,7 @@ apiTest.describe('Snapshot and Restore - SLM policies', { tag: tags.stateful.cla
       expect(policyFromEs[policyName].policy).toStrictEqual({
         name: 'my_snapshot',
         repository: repoName,
-        schedule: '0 30 1 * * ?',
+        schedule: SCHEDULE,
       });
     }
   );
@@ -180,7 +184,7 @@ apiTest.describe('Snapshot and Restore - SLM policies', { tag: tags.stateful.cla
         body: {
           name: UPDATE_POLICY_NAME,
           snapshotName: UPDATE_SNAPSHOT_NAME,
-          schedule: '0 0 0 ? * 7',
+          schedule: UPDATED_SCHEDULE,
           repository: repoName,
           config: {
             indices: ['my_index'],
@@ -209,7 +213,7 @@ apiTest.describe('Snapshot and Restore - SLM policies', { tag: tags.stateful.cla
       });
       expect(policyFromEs[UPDATE_POLICY_NAME].policy).toStrictEqual({
         name: 'my_snapshot',
-        schedule: '0 0 0 ? * 7',
+        schedule: UPDATED_SCHEDULE,
         repository: repoName,
         config: {
           indices: ['my_index'],
@@ -238,7 +242,7 @@ apiTest.describe('Snapshot and Restore - SLM policies', { tag: tags.stateful.cla
       body: {
         name: UPDATE_POLICY_NAME,
         snapshotName: UPDATE_SNAPSHOT_NAME,
-        schedule: '0 30 1 * * ?',
+        schedule: SCHEDULE,
         repository: repoName,
         isManagedPolicy: false,
       },
@@ -253,7 +257,7 @@ apiTest.describe('Snapshot and Restore - SLM policies', { tag: tags.stateful.cla
     });
     expect(policyFromEs[UPDATE_POLICY_NAME].policy).toStrictEqual({
       name: 'my_snapshot',
-      schedule: '0 30 1 * * ?',
+      schedule: SCHEDULE,
       repository: repoName,
     });
   });
