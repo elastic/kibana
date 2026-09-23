@@ -385,6 +385,42 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(anchorStep.with.anchor_timestamp).toBe('{{ variables.alert_set[0]["@timestamp"] }}');
   });
 
+  it('scopes enrichment alert-index queries to the executing Kibana space', () => {
+    // Worker-path rule UUID is caller-supplied; without space isolation a forged UUID could
+    // read another space's close-history / prevalence / rule-metadata into the model prompt.
+    const initStep = findStepByName(workflow.steps, 'set_workflow_variables') as {
+      with: { spaceId: string };
+    };
+    expect(initStep.with.spaceId).toBe('{{ workflow.spaceId }}');
+
+    for (const stepName of [
+      'get_close_history_search',
+      'get_close_history_false_positive_count',
+      'get_global_prevalence_stats',
+      'get_noise_signal_stats',
+      'get_rule_metadata_source',
+    ]) {
+      const step = findStepByName(workflow.steps, stepName) as {
+        with: { index: string; query: { bool: { filter: Array<Record<string, unknown>> } } };
+      };
+      expect(step.with.index).toBe('.alerts-security.alerts-{{ variables.spaceId }}');
+      expect(step.with.query.bool.filter).toEqual(
+        expect.arrayContaining([{ term: { 'kibana.space_ids': '{{ variables.spaceId }}' } }])
+      );
+    }
+
+    const esqlStep = findStepByName(workflow.steps, 'get_close_history_reasons_summary') as {
+      with: {
+        query: string;
+        filter: { bool: { filter: Array<Record<string, unknown>> } };
+      };
+    };
+    expect(esqlStep.with.query).toContain('FROM .alerts-security.alerts-{{ variables.spaceId }}');
+    expect(esqlStep.with.filter.bool.filter).toEqual(
+      expect.arrayContaining([{ term: { 'kibana.space_ids': '{{ variables.spaceId }}' } }])
+    );
+  });
+
   it('keeps the related-alert graph per alert and summarises it into the batch prompt', () => {
     const graphStep = findStepByName(workflow.steps, 'get_related_alerts') as {
       type: string;

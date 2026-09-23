@@ -391,6 +391,9 @@ steps:
   - name: set_workflow_variables
     type: data.set
     with:
+      # Copy for ES/Liquid bodies — sibling managed workflows (threat-intel, significant
+      # events) do the same so enrichment queries can term-filter kibana.space_ids.
+      spaceId: "{{ workflow.spaceId }}"
       normalized_version: "{{ consts.workflow_version | downcase | replace: ' ', '_' }}"
       # One entry per alert, appended by each batch call: { id, classification,
       # confidence_score, rationale, contributing_factors }. `id` is the model's echo of the
@@ -694,12 +697,16 @@ steps:
       - name: get_close_history_search
         type: elasticsearch.search
         with:
-          index: ".alerts-security.alerts-*"
+          # Space-scoped alias + kibana.space_ids filter: Worker-path rule UUID comes from
+          # caller-supplied alerts and must not read another space's alert data.
+          index: ".alerts-security.alerts-{{ variables.spaceId }}"
           size: 0
           track_total_hits: true
           query:
             bool:
               filter:
+                - term:
+                    kibana.space_ids: "{{ variables.spaceId }}"
                 - term:
                     kibana.alert.rule.uuid: "{{ variables.rule_id }}"
                 - term:
@@ -712,12 +719,14 @@ steps:
       - name: get_close_history_false_positive_count
         type: elasticsearch.search
         with:
-          index: ".alerts-security.alerts-*"
+          index: ".alerts-security.alerts-{{ variables.spaceId }}"
           size: 0
           track_total_hits: true
           query:
             bool:
               filter:
+                - term:
+                    kibana.space_ids: "{{ variables.spaceId }}"
                 - term:
                     kibana.alert.rule.uuid: "{{ variables.rule_id }}"
                 - term:
@@ -748,7 +757,7 @@ steps:
         type: elasticsearch.esql.query
         with:
           query: |-
-            FROM .alerts-security.alerts-*
+            FROM .alerts-security.alerts-{{ variables.spaceId }}
             | WHERE `kibana.alert.rule.uuid` == ?1 AND `kibana.alert.workflow_status` == "closed"
             | EVAL close_reason = COALESCE(`kibana.alert.workflow_reason`, "unknown")
             | STATS close_reason_count = COUNT(*) BY close_reason
@@ -758,6 +767,8 @@ steps:
           filter:
             bool:
               filter:
+                - term:
+                    kibana.space_ids: "{{ variables.spaceId }}"
                 - range:
                     "@timestamp":
                       gte: '{{ variables.anchor_timestamp }}||-30d'
@@ -783,7 +794,7 @@ steps:
       - name: get_global_prevalence_stats
         type: elasticsearch.search
         with:
-          index: ".alerts-security.alerts-*"
+          index: ".alerts-security.alerts-{{ variables.spaceId }}"
           size: 0
           track_total_hits: true
           runtime_mappings:
@@ -816,6 +827,8 @@ steps:
           query:
             bool:
               filter:
+                - term:
+                    kibana.space_ids: "{{ variables.spaceId }}"
                 - term:
                     kibana.alert.rule.uuid: "{{ variables.rule_id }}"
                 - range:
@@ -863,7 +876,7 @@ steps:
       - name: get_noise_signal_stats
         type: elasticsearch.search
         with:
-          index: ".alerts-security.alerts-*"
+          index: ".alerts-security.alerts-{{ variables.spaceId }}"
           size: 0
           track_total_hits: true
           runtime_mappings:
@@ -896,6 +909,8 @@ steps:
           query:
             bool:
               filter:
+                - term:
+                    kibana.space_ids: "{{ variables.spaceId }}"
                 - term:
                     kibana.alert.rule.uuid: "{{ variables.rule_id }}"
                 - range:
@@ -938,7 +953,7 @@ steps:
       - name: get_rule_metadata_source
         type: elasticsearch.search
         with:
-          index: ".alerts-security.alerts-*"
+          index: ".alerts-security.alerts-{{ variables.spaceId }}"
           size: 1
           _source:
             - "kibana.alert.rule.name"
@@ -951,8 +966,12 @@ steps:
             - "kibana.alert.rule.references"
             - "kibana.alert.rule.threat"
           query:
-            term:
-              kibana.alert.rule.uuid: "{{ variables.rule_id }}"
+            bool:
+              filter:
+                - term:
+                    kibana.space_ids: "{{ variables.spaceId }}"
+                - term:
+                    kibana.alert.rule.uuid: "{{ variables.rule_id }}"
 
       - name: get_rule_metadata
         type: data.set
