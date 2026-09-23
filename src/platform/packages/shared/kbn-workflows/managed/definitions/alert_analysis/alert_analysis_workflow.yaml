@@ -85,6 +85,9 @@ triggers:
                 maxLength: 512
               '@timestamp':
                 type: string
+                # Used verbatim as the ES date-math enrichment anchor (e.g. `||-24h`).
+                # Reject non-dates at the input boundary so enrichment does not fail mid-run.
+                format: date-time
                 minLength: 1
                 maxLength: 64
               kibana:
