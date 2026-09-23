@@ -75,7 +75,6 @@ describe('UiamServiceAccounts', () => {
     name: 'nightshift-relay',
     organization_id: 'organization-id',
     role_assignments: expectedRoleAssignments,
-    limited_by: expectedRoleAssignments,
     assumable_by: [
       {
         type: 'project-service-account' as const,
@@ -267,10 +266,6 @@ describe('UiamServiceAccounts', () => {
       {
         name: 'a `role_assignments` shape UIAM has changed',
         result: { ...validResponse, role_assignments: 'everything' } as never,
-      },
-      {
-        name: 'a missing `limited_by`',
-        result: { ...validResponse, limited_by: undefined },
       },
       {
         name: 'a missing `organization_id`',

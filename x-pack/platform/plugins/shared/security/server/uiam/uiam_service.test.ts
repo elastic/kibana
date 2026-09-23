@@ -1296,7 +1296,6 @@ describe('UiamService', () => {
         name: 'nightshift-relay',
         organization_id: 'organization-id',
         role_assignments: roleAssignments,
-        limited_by: roleAssignments,
         assumable_by: body.assumable_by,
       };
 

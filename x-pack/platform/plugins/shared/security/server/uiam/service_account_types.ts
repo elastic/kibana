@@ -42,8 +42,8 @@ export interface UiamOrganizationRoleAssignment {
 }
 
 /**
- * One project-scoped role assignment. Kibana does not send these, but UIAM reports them. A
- * creator's `limited_by` is keyed by project type.
+ * One project-scoped role assignment. Kibana does not send these, but UIAM reports them on
+ * accounts created before the organization-wide role existed.
  * Scope is either every project of that type in the organization (`all: true`) or the listed `project_ids`.
  */
 export interface UiamProjectRoleAssignment {
@@ -57,11 +57,12 @@ export interface UiamProjectRoleAssignment {
 /**
  * Role assignments as Kibana sends them when creating a service account and as UIAM reports them
  * on one. Only the organization and project sections are modelled. Kibana writes the
- * organization section, and UIAM reports the creator's roles in the project section. The other
+ * organization section, and accounts created before Kibana did so may carry the project section. The other
  * sections (deployment, platform, and so on) are not something a Kibana-created account carries.
  *
  * On create, UIAM stores these as the account's roles and records the creator's own role
- * assignments as the account's `limited_by`. At runtime UIAM and Elasticsearch authorize against
+ * assignments as the account's `limited_by`. UIAM reports that ceiling only when the account's
+ * token is authenticated, never on the account itself. At runtime UIAM and Elasticsearch authorize against
  * both, so the account's effective privileges are the intersection. UIAM also accepts a
  * `{ limit: { access, resource } }` request instead, meaning "the creator's own application
  * privileges with no ceiling". Kibana does not send this, as it requires the account to have explicit roles.
@@ -81,7 +82,5 @@ export interface UiamServiceAccount {
   name: string;
   organization_id: string;
   role_assignments: UiamRoleAssignments;
-  /** The creator's role assignments, recorded as a ceiling. Absent for accounts created before downscoping existed. */
-  limited_by?: UiamRoleAssignments;
   assumable_by: ServiceAccountAssumableBy[];
 }
