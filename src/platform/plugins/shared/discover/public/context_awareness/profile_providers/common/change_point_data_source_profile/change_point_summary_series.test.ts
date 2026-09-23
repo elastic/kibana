@@ -12,9 +12,12 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { getTime } from '@kbn/data-plugin/public';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { ESQLVariableType } from '@kbn/esql-types';
+import { renderHook } from '@testing-library/react';
+import { of } from 'rxjs';
 import {
   createChangePointSummarySeriesCache,
   getSeriesCacheKey,
+  useChangePointSummarySeries,
   type ChangePointSummarySeriesCache,
   type ChangePointSummaryFetchParams,
   type ChangePointSummarySeriesState,
@@ -557,6 +560,26 @@ describe('change_point_summary_series', () => {
       await waitForTerminalState(harness.cache, secondFetchParams, harness.data);
 
       expect(harness.esql).toHaveBeenCalledTimes(2);
+    });
+
+    it('calls getSeries$ once when the hook rerenders with the same inputs', () => {
+      const getSeries$ = jest.fn(() => of({ status: 'idle' as const }));
+      const cache = { getSeries$ } as ChangePointSummarySeriesCache;
+      const fetchParams = {
+        searchSessionId: 'session-1',
+        requestId: 1,
+        query: { esql: ESQL_NO_BY },
+        table: makeTable(COLUMNS_NO_BY, []),
+        filters: [],
+        timeRange: { from: 'now-1d', to: 'now' },
+        dataView: dataViewMock,
+      } as ChangePointFetchParams;
+      const data = { search: { esql: jest.fn() } } as unknown as DataPublicPluginStart;
+
+      const { rerender } = renderHook(() => useChangePointSummarySeries(fetchParams, data, cache));
+      rerender();
+
+      expect(getSeries$).toHaveBeenCalledTimes(1);
     });
   });
 });

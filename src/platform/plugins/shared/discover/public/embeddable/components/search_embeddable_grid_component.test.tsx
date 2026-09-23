@@ -161,7 +161,7 @@ describe('SearchEmbeddableGridComponent', () => {
       </DiscoverTestProvider>
     );
 
-    return { stateManager };
+    return { api, stateManager };
   };
 
   const getLastFlyoutMenuTrailingActions = (): EuiFlyoutMenuAction[] | undefined =>
