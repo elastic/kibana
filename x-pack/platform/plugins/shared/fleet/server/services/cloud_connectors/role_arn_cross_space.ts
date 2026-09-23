@@ -35,32 +35,6 @@ const orderCurrentSpaceFirst = (spaceIds: string[], currentSpaceId: string): str
   return [currentSpaceId, ...spaceIds.filter((spaceId) => spaceId !== currentSpaceId)];
 };
 
-const resolveFanOutSpaces = async (
-  namespaces: string[] | undefined,
-  currentSpaceId: string,
-  listSpaces?: () => Promise<Array<{ id: string }>>
-): Promise<string[]> => {
-  const unique = [...new Set((namespaces ?? []).filter((spaceId) => spaceId.length > 0))];
-  if (unique.includes(ALL_SPACES_ID)) {
-    if (!listSpaces) {
-      throw sharedSpacesUnauthorized();
-    }
-    const listed = await listSpaces();
-    const ids = [
-      ...new Set(
-        listed
-          .map((space) => space.id)
-          .filter((spaceId) => spaceId.length > 0 && spaceId !== ALL_SPACES_ID)
-      ),
-    ];
-    if (ids.length === 0) {
-      throw sharedSpacesUnauthorized();
-    }
-    return orderCurrentSpaceFirst(ids, currentSpaceId);
-  }
-  return orderCurrentSpaceFirst(unique, currentSpaceId);
-};
-
 const assertCanWriteIntegrationPoliciesInSpaces = async (
   request: KibanaRequest,
   spaceIds: string[]
@@ -82,6 +56,34 @@ const assertCanWriteIntegrationPoliciesInSpaces = async (
 };
 
 /**
+ * A connector shared with all spaces needs the privileges granted in all spaces, because the
+ * spaces list only returns spaces the caller can access and would hide the rest.
+ */
+const authorizeAllSpacesConnector = async (
+  currentSpaceId: string,
+  request?: KibanaRequest,
+  listSpaces?: () => Promise<Array<{ id: string }>>
+): Promise<string[]> => {
+  if (!request || !listSpaces) {
+    throw sharedSpacesUnauthorized();
+  }
+  await assertCanWriteIntegrationPoliciesInSpaces(request, [ALL_SPACES_ID]);
+
+  const listed = await listSpaces();
+  const spaceIds = [
+    ...new Set(
+      listed
+        .map((space) => space.id)
+        .filter((spaceId) => spaceId.length > 0 && spaceId !== ALL_SPACES_ID)
+    ),
+  ];
+  if (spaceIds.length === 0) {
+    throw sharedSpacesUnauthorized();
+  }
+  return orderCurrentSpaceFirst(spaceIds, currentSpaceId);
+};
+
+/**
  * Spaces a shared connector's Role ARN edit must cover. Throws when the caller cannot write
  * integration policies in every one of them. The current space is first.
  */
@@ -96,8 +98,12 @@ export const authorizeSharedConnectorRoleArnSpaces = async ({
   request?: KibanaRequest;
   listSpaces?: () => Promise<Array<{ id: string }>>;
 }): Promise<string[]> => {
-  const spaceIds = await resolveFanOutSpaces(namespaces, currentSpaceId, listSpaces);
+  const unique = [...new Set((namespaces ?? []).filter((spaceId) => spaceId.length > 0))];
+  if (unique.includes(ALL_SPACES_ID)) {
+    return authorizeAllSpacesConnector(currentSpaceId, request, listSpaces);
+  }
 
+  const spaceIds = orderCurrentSpaceFirst(unique, currentSpaceId);
   if (spaceIds.length > 1) {
     if (!request) {
       throw sharedSpacesUnauthorized();

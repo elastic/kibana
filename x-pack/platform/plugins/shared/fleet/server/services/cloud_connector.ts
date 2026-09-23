@@ -534,7 +534,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         }
       }
 
-      async function fanOutRoleArnChange() {
+      async function fanOutRoleArnChange(targetRoleArn: string) {
         if (!esClient) {
           throw new CloudConnectorCreateError(
             'Role ARN update is not supported from this code path (missing esClient for package-policy fan-out).'
@@ -562,7 +562,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
                 soClient: spaceClient,
                 esClient,
                 connectorId: cloudConnectorId,
-                newRoleArn,
+                newRoleArn: targetRoleArn,
                 user,
               });
               if (rollback) {
@@ -624,7 +624,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
             soClient,
             esClient,
             connectorId: cloudConnectorId,
-            newRoleArn,
+            newRoleArn: targetRoleArn,
             user,
           });
         }
@@ -720,7 +720,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
                     locked.attributes.vars as AwsCloudConnectorVars | undefined
                   )?.role_arn?.value;
                   if (lockedRoleArn !== newRoleArn) {
-                    await fanOutRoleArnChange();
+                    await fanOutRoleArnChange(newRoleArn);
                   } else {
                     logger.info(
                       `Connector ${cloudConnectorId} already stores the requested Role ARN; leaving its policies unchanged.`

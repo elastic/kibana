@@ -1743,7 +1743,22 @@ describe('CloudConnectorService', () => {
           expect(mockSoClient.update).not.toHaveBeenCalled();
         });
 
-        it('checks every space when the connector is shared with all spaces', async () => {
+        it('refuses a connector shared with all spaces unless the caller holds the privileges in all spaces', async () => {
+          shareConnector(['*']);
+          atSpaces.mockResolvedValue({ hasAllRequested: false });
+          const listSpaces = jest.fn().mockResolvedValue([{ id: 'default' }, { id: 'space-b' }]);
+
+          await expect(updateSharedRole({ listSpaces })).rejects.toThrow(FleetUnauthorizedError);
+
+          expect(atSpaces).toHaveBeenCalledWith(['*'], {
+            kibana: ['api:fleet-agent-policies-all', 'api:integrations-all'],
+          });
+          expect(listSpaces).not.toHaveBeenCalled();
+          expect(propagateRoleArnToPackagePoliciesMock).not.toHaveBeenCalled();
+          expect(mockSoClient.update).not.toHaveBeenCalled();
+        });
+
+        it('fans out to every space when the caller holds the privileges in all spaces', async () => {
           shareConnector(['*']);
           const listSpaces = jest
             .fn()
@@ -1755,7 +1770,8 @@ describe('CloudConnectorService', () => {
 
           await updateSharedRole({ listSpaces });
 
-          expect(atSpaces).toHaveBeenCalledWith(['default', 'space-b', 'space-c'], {
+          expect(atSpaces).toHaveBeenCalledTimes(1);
+          expect(atSpaces).toHaveBeenCalledWith(['*'], {
             kibana: ['api:fleet-agent-policies-all', 'api:integrations-all'],
           });
           expect(propagateRoleArnToPackagePoliciesMock).toHaveBeenCalledTimes(3);
