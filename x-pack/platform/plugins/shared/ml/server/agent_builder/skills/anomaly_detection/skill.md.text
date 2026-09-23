@@ -44,8 +44,8 @@ ml.query_anomalies
     FROM .ml-anomalies
     | WHERE result_type == "record"
       AND job_id LIKE ?job_id_pattern
-      AND record_score >= ?min_score
-    | SORT record_score DESC
+      AND score >= ?min_score
+    | SORT score DESC
     | LIMIT 50
   params:
     job_id_pattern: "*"
@@ -67,8 +67,8 @@ When a question spans modes: **Investigate → Explain → Troubleshoot**. Don't
 
 ## Score Quick Reference
 
-- `record_score` bands: **>75** critical · **50–75** warning · **25–50** minor · **<25** informational
-- `initial_record_score >> record_score` → renormalization (model saw worse anomalies later)
+- `score` bands (all result types on `.ml-anomalies`): **>75** critical · **50–75** warning · **25–50** minor · **<25** informational
+- `initial_score >> score` → renormalization (model saw worse anomalies later)
 - `actual << typical` with `count`/`low_count`/`low_mean` → absence/outage, not just low value
 - Low scores across many jobs > one high score — composite cross-job signal often beats single-detector severity
 
@@ -78,14 +78,15 @@ When a question spans modes: **Investigate → Explain → Troubleshoot**. Don't
 
 Treat `.ml-anomalies` as three layers, accessed via `result_type`:
 
-- **`bucket`** — bucket-level unusualness per `bucket_span`. `anomaly_score` is the aggregate across all detectors.
-- **`record`** — finest-grained rows with `actual` vs `typical`, `record_score`, `initial_record_score`, detector `function` / `field_name`, and flattened entity fields (`by_field_*`, `over_field_*`, `partition_field_*`).
-- **`influencer`** — entity contributions ranked within a bucket (`influencer_score`).
+- **`bucket`** — bucket-level unusualness per `bucket_span`. `score` is the aggregate across all detectors.
+- **`record`** — finest-grained rows with `actual` vs `typical`, `score`, `initial_score`, detector `function` / `field_name`, and flattened entity fields (`by_field_*`, `over_field_*`, `partition_field_*`).
+- **`influencer`** — entity contributions ranked within a bucket (`score`).
 
 Read scores this way:
 
-- `anomaly_score` / `record_score` / `influencer_score` = **current normalized** values (move as the model sees new extremes).
-- `initial_anomaly_score` / `initial_record_score` / `initial_influencer_score` = **immutable snapshots** from detection time.
+- `score` = **current normalized** value for the result (bucket aggregate, record, or influencer). Moves as the model sees new extremes.
+- `initial_score` = **immutable snapshot** of `score` from detection time.
+- Raw per-type fields (`record_score`, `anomaly_score`, `influencer_score`, `initial_record_score`, …) exist on `.ml-anomalies-*` only; use `score` / `initial_score` in all ES|QL templates.
 - Compare `actual` to `typical`.
 - Map entities via `partition_field_value` / `by_field_value` / `over_field_value` / `influencer_field_value`.
 - Filter time ranges with `` `event.ingested` ``; use `timestamp` for the bucket time and for aggregating scores over time.
@@ -136,12 +137,14 @@ See `esql-read-queries` and `esql-metadata-queries` referenced content for all E
 
 ### Score types
 
-| Field                  | Scope           | Meaning                                                                 |
-| ---------------------- | --------------- | ----------------------------------------------------------------------- |
-| `record_score`         | Single record   | Normalized severity after renormalization.                              |
-| `initial_record_score` | Single record   | Score at detection time. Gap vs `record_score` = renormalization drift. |
-| `anomaly_score`        | Bucket          | Aggregate severity across all detectors in a bucket.                    |
-| `influencer_score`     | Entity × bucket | How anomalous a specific entity is in that bucket.                      |
+On `.ml-anomalies` the per-result-type score columns are unified:
+
+| Field (`.ml-anomalies` view) | Raw field (`.ml-anomalies-*`)  | Scope           | Meaning                                                                 |
+| ---------------------------- | ------------------------------ | --------------- | ----------------------------------------------------------------------- |
+| `score`                      | `record_score`                 | Single record   | Normalized severity after renormalization.                              |
+| `initial_score`              | `initial_record_score`         | Single record   | Score at detection time. Gap vs `score` = renormalization drift.        |
+| `score`                      | `anomaly_score`                | Bucket          | Aggregate severity across all detectors in a bucket.                    |
+| `score`                      | `influencer_score`             | Entity × bucket | How anomalous a specific entity is in that bucket.                      |
 
 ### Why a score looks wrong
 
@@ -168,17 +171,17 @@ ES|QL against `.ml-anomalies` does not include `anomaly_score_explanation.*`, `p
 1. `ml.ad_get_job_info` (`operation=get_jobs`) — ≥3 weeks data for weekly seasonality?
 2. `ml.query_anomalies` (`ad_ts_model_memory_health`) — `memory_status` healthy?
 3. `ml.query_anomalies` (`ad_ts_delayed_data_annotations`) — no incomplete buckets?
-4. `ml.query_anomalies` (`ad_query_anomaly_records`) — compare `record_score` vs `initial_record_score`.
+4. `ml.query_anomalies` (`ad_query_anomaly_records`) — compare `score` vs `initial_score`.
 5. `ml.ad_get_job_info` (`operation=get_jobs`) — `bucket_span`, detector function, `custom_rules`, `use_null`.
 6. `ml.query_anomalies` (`ad_get_model_plot`) — wide model bounds mean the spike was less surprising.
 7. `ml.query_anomalies` (`ad_rca_score_reassessment`) — renormalization drift across history.
-8. Explain using `actual` vs `typical`, `initial_record_score` vs `record_score`, detector `function`, and model-plot bounds.
+8. Explain using `actual` vs `typical`, `initial_score` vs `score`, detector `function`, and model-plot bounds.
 
 See `esql-score-queries` referenced content for model_plot, forecast, and score reassessment templates.
 
 ### Rules
 
-1. **Always show both `initial_record_score` and `record_score`** — the gap is the renormalization story.
+1. **Always show both `initial_score` and `score`** — the gap is the renormalization story.
 2. **Explain renormalization before diagnosing config** — score drift is the most common "score dropped" cause and needs no config change.
 3. **`actual << typical` with `count`/`low_count` is an absence anomaly** — distinguish outages from value spikes.
 4. **Weekly seasonality needs ≥3 weeks of training data** — flag young jobs as the cause.
@@ -500,7 +503,7 @@ GET  _ml/anomaly_detectors/<job_id>/results  # 4. Read results      (ml.query_an
 2. **`ml.ad_get_job_info` with `validate_permissions` first** on empty results — privileges are the most common false-negative cause.
 3. **Score bands are absolute thresholds**: `>75` critical, `50–75` warning, `25–50` minor, `<25` informational.
 4. **Multi-job entities are prime suspects.** Use `min_job_count=2` in `ad_rca_multi_job_entities`.
-5. **Show `initial_record_score` alongside `record_score`** — the gap tells the renormalization story.
+5. **Show `initial_score` alongside `score`** — the gap tells the renormalization story.
 6. **Fix memory before `query_delay`.** `hard_limit` invalidates downstream diagnostics.
 7. **Stop datafeed → close job → update config → open job → start datafeed** for any config change to memory or query delay.
 8. **Confirm RCAs with `ad_rca_source_evidence`.** Raw source documents are ground truth.

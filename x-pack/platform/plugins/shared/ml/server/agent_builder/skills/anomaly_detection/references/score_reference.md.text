@@ -2,23 +2,25 @@
 
 Canonical definitions for all score and impact fields in Elastic ML anomaly detection.
 
-**ES|QL against `.ml-anomalies` (materialized view)** only has the fields listed in `esql-read-queries`. `causes` is not supported. `probability`, `multi_bucket_impact`, and `anomaly_score_explanation.*` are **not** queryable via that view — explain scores from `actual` vs `typical`, `initial_*` vs current scores, detector `function`, and `ad_get_model_plot` on `.ml-anomalies-*`.
+**ES|QL against `.ml-anomalies` (materialized view)** only has the fields listed in `esql-read-queries`. Use `score` / `initial_score` — the view does not expose `record_score`, `anomaly_score`, `influencer_score`, `initial_record_score`, `initial_anomaly_score`, or `initial_influencer_score` directly. `causes` is not supported. `probability`, `multi_bucket_impact`, and `anomaly_score_explanation.*` are **not** queryable via that view — explain scores from `actual` vs `typical`, `initial_score` vs `score`, detector `function`, and `ad_get_model_plot` on `.ml-anomalies-*`.
 
 ---
 
 ## Score Types
 
-| Field                   | Scope                 | Range | Description                                                                            |
-| ----------------------- | --------------------- | ----- | -------------------------------------------------------------------------------------- |
-| `record_score`          | Single anomaly record | 0–100 | Current normalized severity. May change over time as the model sees more extreme data. |
-| `initial_record_score`  | Single anomaly record | 0–100 | Score at detection time — never changes. Use for alerting on fresh anomalies.          |
-| `anomaly_score`         | Bucket (time window)  | 0–100 | Aggregate severity across all detectors in a bucket.                                   |
-| `initial_anomaly_score` | Bucket                | 0–100 | Bucket score at detection time — never changes.                                        |
-| `influencer_score`      | Entity × bucket       | 0–100 | How anomalous a specific entity (host, user, service) is within that bucket.           |
+On `.ml-anomalies` the view exposes `score` and `initial_score` for all result types. On `.ml-anomalies-*` (raw indices) the per-type columns exist separately.
+
+| View column     | Raw field(s)                                        | Scope                 | Range | Description                                                                            |
+| --------------- | --------------------------------------------------- | --------------------- | ----- | -------------------------------------------------------------------------------------- |
+| `score`         | `record_score`                                      | Single anomaly record | 0–100 | Current normalized severity. May change over time as the model sees more extreme data. |
+| `initial_score` | `initial_record_score`                              | Single anomaly record | 0–100 | Score at detection time — never changes. Use for alerting on fresh anomalies.          |
+| `score`         | `anomaly_score`                                     | Bucket (time window)  | 0–100 | Aggregate severity across all detectors in a bucket.                                   |
+| `initial_score` | `initial_anomaly_score`                             | Bucket                | 0–100 | Bucket score at detection time — never changes.                                        |
+| `score`         | `influencer_score`                                  | Entity × bucket       | 0–100 | How anomalous a specific entity (host, user, service) is within that bucket.           |
 
 ---
 
-## `record_score` Severity Bands
+## `score` Severity Bands
 
 | Band          | Range | Interpretation                                             |
 | ------------- | ----- | ---------------------------------------------------------- |
@@ -39,19 +41,19 @@ Scale from -5 to +5 indicating whether the anomaly spans multiple consecutive ti
 
 ---
 
-## `initial_record_score` vs `record_score`
+## `initial_score` vs `score`
 
 Elasticsearch continuously renormalizes scores relative to the most extreme anomaly ever seen by the job. A score of 90 today may become 60 if a more extreme event appears later — by design, so the "worst ever" event always scores near 100.
 
 **When to use each:**
 
-| Use case                                                     | Field                                                                                |
-| ------------------------------------------------------------ | ------------------------------------------------------------------------------------ |
-| Alerting on newly detected anomalies                         | `initial_record_score` — captures severity at detection time                         |
-| Ranking historical anomalies by current importance           | `record_score` — reflects how bad this was relative to all history                   |
-| Detecting renormalization (model calibrated away an anomaly) | Compare: if `initial_record_score >> record_score`, the model saw worse events later |
+| Use case                                                     | Field                                                                            |
+| ------------------------------------------------------------ | -------------------------------------------------------------------------------- |
+| Alerting on newly detected anomalies                         | `initial_score` — captures severity at detection time                            |
+| Ranking historical anomalies by current importance           | `score` — reflects how bad this was relative to all history                      |
+| Detecting renormalization (model calibrated away an anomaly) | Compare: if `initial_score >> score`, the model saw worse events later           |
 
-**Quantify drift:** `score_drift = initial_record_score - record_score`
+**Quantify drift:** `score_drift = initial_score - score`
 
 - Large positive drift = renormalized away (model calibrated)
 - Small drift = score is stable and genuine
@@ -91,7 +93,7 @@ When `actual << typical` with `count`, `low_count`, `low_mean`, or `low_sum` fun
 - `low_mean(response_time)` → requests completing too fast (cache hit storm, bypassed processing)
 - Very low `sum(bytes_sent)` → network partition or data source failure
 
-**Key insight:** A `record_score` of 80 with `actual = 0` and `typical = 5000` is an outage signal, not just a low number.
+**Key insight:** A `score` of 80 with `actual = 0` and `typical = 5000` is an outage signal, not just a low number.
 
 ---
 

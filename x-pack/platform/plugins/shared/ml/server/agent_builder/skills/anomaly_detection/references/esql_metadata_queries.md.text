@@ -4,7 +4,7 @@ Use `ml.query_anomalies` and pass the ES|QL below in the `query` parameter for `
 
 For **`ad_ts_ingest_latency_estimate`** (source data indices) use `platform.core.execute_esql` instead.
 
-`category_definition`, `model_size_stats`, and bucket `event_count` are **not** on the `.ml-anomalies` materialized view. Those queries must use `FROM .ml-anomalies-*`. Record / bucket / influencer results use `FROM .ml-anomalies` — see `esql-read-queries` for the allowed field list (`causes` is not supported).
+`category_definition` and `model_size_stats` are **not** on the `.ml-anomalies` materialized view — those queries must use `FROM .ml-anomalies-*`. Record / bucket / influencer results (including `event_count`) use `FROM .ml-anomalies` — see `esql-read-queries` for the allowed field list (`causes` is not supported). Use `score` / `initial_score` (not `record_score` / `anomaly_score`) on the view.
 
 ---
 
@@ -168,18 +168,16 @@ FROM .ml-annotations-*
 
 Find buckets with zero or suspiciously low event counts. Compare `event_count` across buckets to identify time ranges where data was lost.
 
-`event_count` is not on the `.ml-anomalies` materialized view — query `FROM .ml-anomalies-*`.
-
 **Parameters:** `job_id` (string), `start_time` (ISO 8601), `end_time` (ISO 8601)
 
 ```esql
-FROM .ml-anomalies-*
+FROM .ml-anomalies
 | WHERE result_type == "bucket"
   AND job_id == ?job_id
-  AND timestamp >= ?start_time
-  AND timestamp <= ?end_time
+  AND `event.ingested` >= ?start_time
+  AND `event.ingested` <= ?end_time
 | SORT timestamp ASC
-| KEEP timestamp, event_count, anomaly_score, bucket_span, is_interim
+| KEEP timestamp, event_count, score, bucket_span, is_interim
 | LIMIT 500
 ```
 

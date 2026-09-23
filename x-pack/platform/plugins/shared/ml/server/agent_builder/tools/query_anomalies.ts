@@ -47,6 +47,56 @@ const ML_ANOMALIES_VIEW_TOKEN = /(?<![.\w-])\.ml-anomalies(?![\w*-])/g;
 
 const DEFAULT_LIMIT = 100;
 
+/**
+ * EVAL injected when falling back from the `.ml-anomalies` view to `.ml-anomalies-*`.
+ * Exposes the view's unified `score` / `initial_score` columns from the per-result-type
+ * raw fields so that templates written for the view work unchanged on older ES clusters.
+ */
+const SCORE_EVAL_INJECTION =
+  '| EVAL score = COALESCE(record_score, anomaly_score, influencer_score),' +
+  ' initial_score = COALESCE(initial_record_score, initial_anomaly_score, initial_influencer_score)\n';
+
+// Kibana-style date math units → milliseconds (approximate; M = 30 d, y = 365 d).
+const DATE_MATH_UNIT_MS: Record<string, number> = {
+  s: 1_000,
+  m: 60_000,
+  h: 3_600_000,
+  d: 86_400_000,
+  w: 604_800_000,
+  M: 2_592_000_000,
+  y: 31_536_000_000,
+};
+
+// Matches: now, now±Nunits, with optional /roundUnit suffix (suffix is dropped — we floor).
+const DATE_MATH_RE = /^now(?:([+-])(\d+)([smhdwMy]))?(?:\/[smhdwMy])?$/;
+
+const resolveDateMathParam = (value: string): string => {
+  const match = DATE_MATH_RE.exec(value);
+  if (!match) return value;
+  let ms = Date.now();
+  const [, sign, amount, unit] = match;
+  if (sign && amount && unit) {
+    const delta = parseInt(amount, 10) * (DATE_MATH_UNIT_MS[unit] ?? 0);
+    ms = sign === '+' ? ms + delta : ms - delta;
+  }
+  return new Date(ms).toISOString();
+};
+
+/**
+ * Converts Kibana-style relative date math (e.g. `now-2y`, `now-6M`, `now`) to
+ * absolute ISO 8601 strings. ES|QL parameterized queries require typed datetime values
+ * and do not support relative date math in params.
+ */
+export const resolveParamDates = (
+  params: Record<string, string | number | boolean>
+): Record<string, string | number | boolean> => {
+  const result: Record<string, string | number | boolean> = {};
+  for (const [k, v] of Object.entries(params)) {
+    result[k] = typeof v === 'string' ? resolveDateMathParam(v) : v;
+  }
+  return result;
+};
+
 const schema = z.object({
   query: z
     .string()
@@ -136,20 +186,39 @@ export const queryUsesMlAnomaliesView = (query: string): boolean =>
 
 /**
  * Rewrites a materialized-view query for clusters that only have the
- * `.ml-anomalies-*` result indices. Also maps `event.ingested` (view-only)
- * to `timestamp`.
+ * `.ml-anomalies-*` result indices:
+ *   1. Replaces the exact view name with the wildcard pattern.
+ *   2. Injects a EVAL right after the FROM clause that aliases the raw per-result-type
+ *      score fields to the unified `score` / `initial_score` column names used by all
+ *      templates (matching the columns exposed by the view on new ES clusters).
+ *   3. Drops or maps `event.ingested` (view-only) to `timestamp`.
  */
-export const rewriteMlAnomaliesViewQuery = (query: string): string =>
-  query
-    .replace(ML_ANOMALIES_VIEW_TOKEN, ML_ANOMALIES_WILDCARD)
-    // Drop view-only event.ingested when timestamp is already selected, then
-    // map remaining filters to timestamp.
+export const rewriteMlAnomaliesViewQuery = (query: string): string => {
+  const withWildcard = query.replace(ML_ANOMALIES_VIEW_TOKEN, ML_ANOMALIES_WILDCARD);
+
+  // Only inject the score-aliasing EVAL when the view name was actually replaced.
+  // Queries already targeting .ml-anomalies-* pass through unchanged.
+  let withScoreEval = withWildcard;
+  if (withWildcard !== query) {
+    // Inject immediately before the first pipe so all subsequent WHERE / SORT / KEEP
+    // steps can reference score / initial_score.
+    const firstPipe = withWildcard.indexOf('|');
+    withScoreEval =
+      firstPipe === -1
+        ? `${withWildcard}\n${SCORE_EVAL_INJECTION}`
+        : withWildcard.slice(0, firstPipe) + SCORE_EVAL_INJECTION + withWildcard.slice(firstPipe);
+  }
+
+  // Drop view-only event.ingested when timestamp is already selected, then
+  // map remaining filter references to timestamp.
+  return withScoreEval
     .replace(/,\s*`event\.ingested`/g, '')
     .replace(/`event\.ingested`\s*,\s*/g, '')
     .replace(/`event\.ingested`/g, 'timestamp')
     .replace(/,\s*event\.ingested\b/g, '')
     .replace(/\bevent\.ingested\s*,\s*/g, '')
     .replace(/\bevent\.ingested\b/g, 'timestamp');
+};
 
 export const isMlAnomaliesViewUnavailableError = (err: unknown): boolean => {
   const message = err instanceof Error ? err.message : String(err);
@@ -258,7 +327,7 @@ Example (no placeholders — omit params):
 
 Example (with placeholders — bind every ?name):
 {
-  "query": "FROM .ml-anomalies | WHERE result_type == \\"record\\" AND job_id LIKE ?job_id_pattern AND record_score >= ?min_score | SORT record_score DESC | LIMIT 50",
+  "query": "FROM .ml-anomalies | WHERE result_type == \\"record\\" AND job_id LIKE ?job_id_pattern AND score >= ?min_score | SORT score DESC | LIMIT 50",
   "params": { "job_id_pattern": "*", "min_score": 50 }
 }
 
@@ -301,7 +370,10 @@ For source-data indices use \`platform.core.execute_esql\` instead.
         return { results: [createErrorResult(validationError)] };
       }
 
-      const paramArray: Array<Record<string, FieldValue>> = Object.entries(esqlParams).map(
+      // Resolve Kibana-style relative date math (e.g. "now-2y") to absolute ISO 8601
+      // strings; ES|QL parameterized queries require typed datetime values.
+      const resolvedParams = resolveParamDates(esqlParams);
+      const paramArray: Array<Record<string, FieldValue>> = Object.entries(resolvedParams).map(
         ([key, value]) => ({ [key]: value })
       );
 

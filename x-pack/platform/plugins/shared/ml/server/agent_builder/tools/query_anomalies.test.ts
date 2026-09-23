@@ -14,6 +14,7 @@ import {
   isAllowedMlIndex,
   isMlAnomaliesViewUnavailableError,
   queryUsesMlAnomaliesView,
+  resolveParamDates,
   rewriteMlAnomaliesViewQuery,
   validateMlSystemIndexQuery,
 } from './query_anomalies';
@@ -151,15 +152,20 @@ describe('queryUsesMlAnomaliesView', () => {
 });
 
 describe('rewriteMlAnomaliesViewQuery', () => {
-  it('rewrites the view to the wildcard and maps event.ingested to timestamp', () => {
+  it('rewrites the view to the wildcard, injects score EVAL, and maps event.ingested to timestamp', () => {
     const rewritten = rewriteMlAnomaliesViewQuery(`FROM .ml-anomalies
 | WHERE result_type == "record"
+  AND score >= ?min_score
   AND \`event.ingested\` >= ?start_time
   AND event.ingested <= ?end_time
-| KEEP job_id, timestamp, \`event.ingested\``);
+| KEEP job_id, timestamp, \`event.ingested\`, score, initial_score`);
 
     expect(rewritten).toContain('FROM .ml-anomalies-*');
     expect(rewritten).not.toMatch(/FROM \.ml-anomalies\n/);
+    // EVAL must appear before the WHERE clause
+    expect(rewritten).toMatch(/EVAL score = COALESCE\(record_score/);
+    expect(rewritten).toMatch(/initial_score = COALESCE\(initial_record_score/);
+    expect(rewritten.indexOf('EVAL')).toBeLessThan(rewritten.indexOf('WHERE'));
     expect(rewritten).not.toContain('event.ingested');
     expect(rewritten).toContain('AND timestamp >= ?start_time');
     expect(rewritten).toContain('AND timestamp <= ?end_time');
@@ -174,6 +180,47 @@ describe('rewriteMlAnomaliesViewQuery', () => {
     expect(rewriteMlAnomaliesViewQuery('FROM .ml-anomalies-shared | LIMIT 10')).toBe(
       'FROM .ml-anomalies-shared | LIMIT 10'
     );
+  });
+});
+
+describe('resolveParamDates', () => {
+  it('leaves non-date-math values unchanged', () => {
+    expect(resolveParamDates({ job_id_pattern: 'web-*', min_score: 50, flag: true })).toEqual({
+      job_id_pattern: 'web-*',
+      min_score: 50,
+      flag: true,
+    });
+  });
+
+  it('converts "now" to an ISO 8601 string', () => {
+    const before = Date.now();
+    const result = resolveParamDates({ end_time: 'now' });
+    const after = Date.now();
+    const resolved = new Date(result.end_time as string).getTime();
+    expect(resolved).toBeGreaterThanOrEqual(before);
+    expect(resolved).toBeLessThanOrEqual(after);
+  });
+
+  it('converts "now-2y" to an approximate ISO 8601 string', () => {
+    const result = resolveParamDates({ start_time: 'now-2y' });
+    const resolved = new Date(result.start_time as string).getTime();
+    const twoYearsAgo = Date.now() - 2 * 31_536_000_000;
+    // Allow ±5 s for test execution time
+    expect(Math.abs(resolved - twoYearsAgo)).toBeLessThan(5_000);
+  });
+
+  it('converts "now-6M" correctly', () => {
+    const result = resolveParamDates({ start_time: 'now-6M' });
+    const resolved = new Date(result.start_time as string).getTime();
+    const sixMonthsAgo = Date.now() - 6 * 2_592_000_000;
+    expect(Math.abs(resolved - sixMonthsAgo)).toBeLessThan(5_000);
+  });
+
+  it('strips /roundUnit suffix without error', () => {
+    expect(() => resolveParamDates({ t: 'now/d' })).not.toThrow();
+    const result = resolveParamDates({ t: 'now-1d/d' });
+    expect(typeof result.t).toBe('string');
+    expect(result.t).toMatch(/^\d{4}-\d{2}-\d{2}T/);
   });
 });
 
@@ -254,7 +301,7 @@ describe('queryAnomaliesTool', () => {
       const esClient = createEsClientMock();
       const context = createContext(esClient);
       const query =
-        'FROM .ml-anomalies | WHERE job_id LIKE ?job_id_pattern AND record_score >= ?min_score';
+        'FROM .ml-anomalies | WHERE job_id LIKE ?job_id_pattern AND score >= ?min_score';
 
       await queryAnomaliesTool.handler(
         { query, params: { job_id_pattern: 'web-*', min_score: 75 }, limit: 100 },
@@ -266,6 +313,28 @@ describe('queryAnomaliesTool', () => {
           params: [{ job_id_pattern: 'web-*' }, { min_score: 75 }],
         })
       );
+    });
+
+    it('resolves date math params to ISO 8601 before passing to ES|QL', async () => {
+      const tool = createQueryAnomaliesTool(resolveMlCapabilities);
+      const esClient = createEsClientMock();
+      const context = createContext(esClient);
+      const query =
+        'FROM .ml-config | WHERE job_type == "anomaly_detector" AND timestamp >= ?start_time AND timestamp <= ?end_time | LIMIT 10';
+
+      await tool.handler(
+        { query, params: { start_time: 'now-2y', end_time: 'now' }, limit: 10 },
+        context
+      );
+
+      const calledParams = esClient.asInternalUser.esql.query.mock.calls[0][0].params as Array<
+        Record<string, unknown>
+      >;
+      const startValue = calledParams.find((p) => 'start_time' in p)?.start_time as string;
+      const endValue = calledParams.find((p) => 'end_time' in p)?.end_time as string;
+      expect(startValue).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+      expect(endValue).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+      expect(new Date(startValue).getTime()).toBeLessThan(new Date(endValue).getTime());
     });
 
     it('rejects queries against non-ML indices without calling ES', async () => {
@@ -349,10 +418,10 @@ describe('queryAnomaliesTool', () => {
       const esClient = createEsClientMock();
       const context = createContext(esClient);
       const query =
-        'FROM .ml-anomalies | WHERE result_type == "record" AND `event.ingested` >= ?start_time';
+        'FROM .ml-anomalies | WHERE result_type == "record" AND score >= ?min_score AND `event.ingested` >= ?start_time';
 
       await tool.handler(
-        { query, params: { start_time: '2024-01-01T00:00:00Z' }, limit: 100 },
+        { query, params: { min_score: 50, start_time: '2024-01-01T00:00:00Z' }, limit: 100 },
         context
       );
 
@@ -360,12 +429,12 @@ describe('queryAnomaliesTool', () => {
       expect(esClient.asInternalUser.esql.query.mock.calls[0][0].query).toMatch(
         /FROM \.ml-anomalies\s*\n\| LIMIT 0/
       );
-      expect(esClient.asInternalUser.esql.query.mock.calls[1][0].query).toContain(
-        'FROM .ml-anomalies |'
-      );
-      expect(esClient.asInternalUser.esql.query.mock.calls[1][0].query).toContain(
-        '`event.ingested`'
-      );
+      // View is available — query must not be rewritten (score / event.ingested kept as-is).
+      const executedQuery = esClient.asInternalUser.esql.query.mock.calls[1][0].query as string;
+      expect(executedQuery).toContain('FROM .ml-anomalies |');
+      expect(executedQuery).toContain('score >=');
+      expect(executedQuery).toContain('`event.ingested`');
+      expect(executedQuery).not.toContain('EVAL score = COALESCE');
     });
 
     it('falls back to .ml-anomalies-* when the materialized view is unavailable', async () => {
@@ -380,10 +449,11 @@ describe('queryAnomaliesTool', () => {
       const context = createContext(esClient);
       const query = `FROM .ml-anomalies
 | WHERE result_type == "record"
+  AND score >= ?min_score
   AND \`event.ingested\` >= ?start_time`;
 
       const result = await tool.handler(
-        { query, params: { start_time: '2024-01-01T00:00:00Z' }, limit: 50 },
+        { query, params: { min_score: 50, start_time: '2024-01-01T00:00:00Z' }, limit: 50 },
         context
       );
 
@@ -391,6 +461,9 @@ describe('queryAnomaliesTool', () => {
       const executedQuery = esClient.asInternalUser.esql.query.mock.calls[1][0].query as string;
       expect(executedQuery).toContain('FROM .ml-anomalies-*');
       expect(executedQuery).not.toMatch(/FROM \.ml-anomalies\n/);
+      // Score EVAL must be injected before the WHERE clause.
+      expect(executedQuery).toContain('EVAL score = COALESCE(record_score');
+      expect(executedQuery.indexOf('EVAL')).toBeLessThan(executedQuery.indexOf('WHERE'));
       expect(executedQuery).toContain('timestamp >= ?start_time');
       expect(executedQuery).not.toContain('event.ingested');
 
