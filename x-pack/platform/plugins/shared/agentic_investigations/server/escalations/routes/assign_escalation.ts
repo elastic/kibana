@@ -7,43 +7,46 @@
 
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { AGENTIC_INVESTIGATIONS_API_VERSION } from '../../../common/constants';
-import { ESCALATION_BY_ID_URL } from '../../../common/escalations/constants';
-import { updateEscalationRequestSchema } from '../../../common/escalations/escalation';
+import { ESCALATION_ASSIGN_URL, ESCALATION_TEMPLATE_ID } from '../../../common/escalations/constants';
+import {
+  assignConversationRequestBodySchema,
+  assignConversationRequestParamsSchema,
+} from '../../../common/assignments/assignment';
 import { ESCALATIONS_API_PRIVILEGE_MANAGE } from '../constants';
 import type { EscalationRouteDependencies } from '../types';
 import { handleEscalationRouteError } from './handle_route_error';
-import { escalationIdParamsSchema } from './shared';
 
-export const registerUpdateEscalationRoute = ({
+export const registerAssignEscalationRoute = ({
   router,
   logger,
-  getEscalationsService,
+  getAssignmentsService,
 }: EscalationRouteDependencies) => {
   router.versioned
-    .patch({
-      path: ESCALATION_BY_ID_URL,
+    .put({
+      path: ESCALATION_ASSIGN_URL,
       access: 'internal',
       security: { authz: { requiredPrivileges: [ESCALATIONS_API_PRIVILEGE_MANAGE] } },
-      summary: 'Update an escalation title, linked investigations, or status',
+      summary: 'Assign users to an escalation',
     })
     .addVersion(
       {
         version: AGENTIC_INVESTIGATIONS_API_VERSION,
         validate: {
           request: {
-            params: buildRouteValidationWithZod(escalationIdParamsSchema),
-            body: buildRouteValidationWithZod(updateEscalationRequestSchema),
+            params: buildRouteValidationWithZod(assignConversationRequestParamsSchema),
+            body: buildRouteValidationWithZod(assignConversationRequestBodySchema),
           },
         },
       },
       async (_context, request, response) => {
         try {
-          const escalation = await getEscalationsService().update(
+          const conversation = await getAssignmentsService().assign({
             request,
-            request.params.id,
-            request.body
-          );
-          return response.ok({ body: escalation });
+            conversationId: request.params.id,
+            assignees: request.body.assignees,
+            expectedTemplate: ESCALATION_TEMPLATE_ID,
+          });
+          return response.ok({ body: conversation });
         } catch (error) {
           return handleEscalationRouteError(error, response, logger);
         }

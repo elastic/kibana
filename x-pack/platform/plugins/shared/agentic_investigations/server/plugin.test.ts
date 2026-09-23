@@ -38,6 +38,7 @@ import {
   ESCALATIONS_API_PRIVILEGE_MANAGE,
   ESCALATIONS_API_PRIVILEGE_READ,
 } from './escalations/constants';
+import { INVESTIGATIONS_API_PRIVILEGE_MANAGE } from './investigations/constants';
 
 jest.mock('./proposals/managed_workflows/initialize_managed_workflows', () => ({
   initializeManagedWorkflows: jest.fn().mockResolvedValue(undefined),
@@ -189,6 +190,20 @@ describe('AgenticInvestigationsPlugin', () => {
                   id: 'escalations_read',
                   includeIn: 'read',
                   api: [ESCALATIONS_API_PRIVILEGE_READ],
+                }),
+              ],
+            }),
+          ],
+        }),
+        expect.objectContaining({
+          privilegeGroups: [
+            expect.objectContaining({
+              groupType: 'mutually_exclusive',
+              privileges: [
+                expect.objectContaining({
+                  id: 'investigations_all',
+                  includeIn: 'all',
+                  api: [INVESTIGATIONS_API_PRIVILEGE_MANAGE],
                 }),
               ],
             }),

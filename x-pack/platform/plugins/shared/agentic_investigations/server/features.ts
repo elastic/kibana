@@ -20,6 +20,10 @@ import {
   ESCALATIONS_UI_CAPABILITY_SHOW,
 } from '../common/escalations/constants';
 import {
+  INVESTIGATIONS_UI_CAPABILITY_MANAGE,
+  INVESTIGATIONS_UI_CAPABILITY_SHOW,
+} from '../common/investigations/constants';
+import {
   PROPOSALS_API_PRIVILEGE_MANAGE,
   PROPOSALS_API_PRIVILEGE_READ,
 } from './proposals/constants';
@@ -27,6 +31,7 @@ import {
   ESCALATIONS_API_PRIVILEGE_MANAGE,
   ESCALATIONS_API_PRIVILEGE_READ,
 } from './escalations/constants';
+import { INVESTIGATIONS_API_PRIVILEGE_MANAGE } from './investigations/constants';
 
 export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }) => {
   features.registerKibanaFeature({
@@ -96,6 +101,29 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
                 api: [ESCALATIONS_API_PRIVILEGE_READ],
                 savedObject: { all: [], read: [] },
                 ui: [ESCALATIONS_UI_CAPABILITY_SHOW],
+              },
+            ],
+          },
+        ],
+      },
+      {
+        name: i18n.translate('xpack.agenticInvestigations.investigationsSubFeatureName', {
+          defaultMessage: 'Investigations',
+        }),
+        privilegeGroups: [
+          {
+            groupType: 'mutually_exclusive',
+            privileges: [
+              {
+                id: 'investigations_all',
+                name: i18n.translate(
+                  'xpack.agenticInvestigations.investigationsAllPrivilegeName',
+                  { defaultMessage: 'Manage investigations' }
+                ),
+                includeIn: 'all',
+                api: [INVESTIGATIONS_API_PRIVILEGE_MANAGE],
+                savedObject: { all: [], read: [] },
+                ui: [INVESTIGATIONS_UI_CAPABILITY_SHOW, INVESTIGATIONS_UI_CAPABILITY_MANAGE],
               },
             ],
           },

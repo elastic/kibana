@@ -14,7 +14,6 @@ import {
 import { EscalationsService } from './escalations_service';
 import { InvalidLinkedInvestigationError, NotAnEscalationError } from './errors';
 import {
-  ESCALATION_ASSIGNEES_FIELD,
   ESCALATION_LINKED_INVESTIGATIONS_FIELD,
   ESCALATION_STATUS_FIELD,
   ESCALATION_TEMPLATE_ID,
@@ -303,6 +302,34 @@ describe('EscalationsService.create', () => {
       })
     ).rejects.toThrow(/"escalation" not found/);
   });
+
+  it('sets assignees in metadata when provided', async () => {
+    const { service, client } = makeService();
+
+    await service.create(request, {
+      linked_investigation_id: 'inv-1',
+      visibility: 'public',
+      collaborators: [],
+      assignees: ['uid-creator'],
+    });
+
+    const { metadata } = client.create.mock.calls[0][0];
+    expect(metadata.assignees).toEqual(['uid-creator']);
+  });
+
+  it('does not set assignees in metadata when empty', async () => {
+    const { service, client } = makeService();
+
+    await service.create(request, {
+      linked_investigation_id: 'inv-1',
+      visibility: 'public',
+      collaborators: [],
+      assignees: [],
+    });
+
+    const { metadata } = client.create.mock.calls[0][0];
+    expect(metadata).not.toHaveProperty('assignees');
+  });
 });
 
 describe('EscalationsService.update', () => {
@@ -336,7 +363,8 @@ describe('EscalationsService.update', () => {
       'escalation-1',
       expect.objectContaining({
         [ESCALATION_LINKED_INVESTIGATIONS_FIELD]: ['inv-1', 'inv-2'],
-      })
+      }),
+      { access: 'converse' }
     );
   });
 
@@ -399,11 +427,12 @@ describe('EscalationsService.update', () => {
 
     expect(client.patchMetadata).toHaveBeenCalledWith(
       'escalation-1',
-      expect.objectContaining({ status: 'closed' })
+      expect.objectContaining({ status: 'closed' }),
+      { access: 'converse' }
     );
   });
 
-  it('issues exactly one patchMetadata call when linked_investigations, assignees, and status are all present', async () => {
+  it('issues exactly one patchMetadata call when linked_investigations and status are both present', async () => {
     const { service, client } = makeService({
       get: jest.fn().mockResolvedValue({
         id: 'escalation-1',
@@ -411,14 +440,12 @@ describe('EscalationsService.update', () => {
         metadata: {
           [ESCALATION_LINKED_INVESTIGATIONS_FIELD]: [],
           status: 'open',
-          assignees: [],
         },
       }),
     });
 
     await service.update(request, 'escalation-1', {
       linked_investigations: ['inv-1'],
-      assignees: ['user-uid-1'],
       status: 'closed',
     });
 
@@ -428,9 +455,9 @@ describe('EscalationsService.update', () => {
       'escalation-1',
       expect.objectContaining({
         [ESCALATION_LINKED_INVESTIGATIONS_FIELD]: expect.arrayContaining(['inv-1']),
-        [ESCALATION_ASSIGNEES_FIELD]: ['user-uid-1'],
         [ESCALATION_STATUS_FIELD]: 'closed',
-      })
+      }),
+      { access: 'converse' }
     );
   });
 

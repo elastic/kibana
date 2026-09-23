@@ -11,8 +11,8 @@ import { UserAvatar, UserProfilesPopover, UserToolTip } from '@kbn/user-profile-
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { ESCALATION_QUEUE_LABELS } from './translations';
 
-interface EscalationAssigneesProps {
-  escalationId: string;
+interface AssignToUsersProps {
+  conversationId: string;
   /** User profiles for currently assigned users (pre-fetched by the page). */
   selected: UserProfileWithAvatar[];
   /** User profiles returned by the search suggestion query. */
@@ -54,9 +54,9 @@ interface EscalationAssigneesProps {
  * - `isProfilesLoading: true` → picker button disabled; prevents a change that
  *   would silently drop unresolved UIDs from the replace-in-full payload.
  */
-export const EscalationAssignees = memo<EscalationAssigneesProps>(
+export const AssignToUsers = memo<AssignToUsersProps>(
   ({
-    escalationId,
+    conversationId,
     selected,
     suggestions,
     isSuggestionsLoading,
@@ -111,7 +111,7 @@ export const EscalationAssignees = memo<EscalationAssigneesProps>(
           color="text"
           onClick={togglePopover}
           isDisabled={isProfilesLoading}
-          data-test-subj={`escalationAssigneesAdd-${escalationId}`}
+          data-test-subj={`assignToUsersAdd-${conversationId}`}
         />
       </EuiToolTip>
     );
@@ -133,7 +133,7 @@ export const EscalationAssignees = memo<EscalationAssigneesProps>(
               isLoading: isSuggestionsLoading || isUpdating,
               singleSelection: false,
               loadingMessage: ESCALATION_QUEUE_LABELS.searchAssignees,
-              'data-test-subj': `escalationAssigneesSelectable-${escalationId}`,
+              'data-test-subj': `assignToUsersSelectable-${conversationId}`,
             }}
           />
         </EuiFlexItem>
@@ -142,4 +142,4 @@ export const EscalationAssignees = memo<EscalationAssigneesProps>(
   }
 );
 
-EscalationAssignees.displayName = 'EscalationAssignees';
+AssignToUsers.displayName = 'AssignToUsers';

@@ -12,6 +12,7 @@ import { useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import {
   AGENTIC_INVESTIGATIONS_API_VERSION,
+  ESCALATION_ASSIGN_URL,
   ESCALATIONS_INTERNAL_URL,
   ESCALATION_BY_ID_URL,
 } from '../../../common';
@@ -96,6 +97,24 @@ export const useAddToEscalation = () => {
         {
           version: AGENTIC_INVESTIGATIONS_API_VERSION,
           body: JSON.stringify({ linked_investigations: [linkedInvestigationId] }),
+        }
+      ),
+    onSuccess: () => invalidateEscalations(queryClient),
+  });
+};
+
+/** Replaces the assignee list on an escalation (replace-in-full semantics). */
+export const useAssignEscalation = () => {
+  const { services } = useKibana<CoreStart>();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ escalationId, assignees }: { escalationId: string; assignees: string[] }) =>
+      services.http.put(
+        ESCALATION_ASSIGN_URL.replace('{id}', encodeURIComponent(escalationId)),
+        {
+          version: AGENTIC_INVESTIGATIONS_API_VERSION,
+          body: JSON.stringify({ assignees }),
         }
       ),
     onSuccess: () => invalidateEscalations(queryClient),

@@ -8,7 +8,7 @@
 export {
   EscalationQueue,
   EscalationCard,
-  EscalationAssignees,
+  AssignToUsers,
   EscalationMetaInfo,
   LinkedInvestigationsBadge,
   type EscalationQueueItem,

@@ -93,6 +93,7 @@ export type { AttachImpactRequest, GetImpactQuery, Impact, ImpactEntity } from '
 
 export {
   ESCALATION_ASSIGNEES_FIELD,
+  ESCALATION_ASSIGN_URL,
   ESCALATION_BY_ID_URL,
   ESCALATION_LINKED_INVESTIGATIONS_FIELD,
   ESCALATION_STATUS_FIELD,
@@ -111,6 +112,19 @@ export {
   listEscalationsQuerySchema,
   updateEscalationRequestSchema,
 } from './escalations';
+
+export {
+  INVESTIGATION_ASSIGN_URL,
+  INVESTIGATIONS_INTERNAL_URL,
+  INVESTIGATIONS_UI_CAPABILITY_MANAGE,
+  INVESTIGATIONS_UI_CAPABILITY_SHOW,
+} from './investigations/constants';
+
+export {
+  assignConversationRequestBodySchema,
+  assignConversationRequestParamsSchema,
+} from './assignments/assignment';
+export type { AssignConversationRequest } from './assignments/assignment';
 
 export type {
   CreateEscalationRequest,

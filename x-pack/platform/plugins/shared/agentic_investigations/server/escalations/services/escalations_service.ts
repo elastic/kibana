@@ -111,6 +111,7 @@ export class EscalationsService {
     const metadata = {
       ...filteredMetadata,
       [ESCALATION_LINKED_INVESTIGATIONS_FIELD]: [body.linked_investigation_id],
+      ...(body.assignees.length > 0 ? { [ESCALATION_ASSIGNEES_FIELD]: body.assignees } : {}),
     };
 
     const accessControl =
@@ -189,24 +190,14 @@ export class EscalationsService {
       metadataUpdates[ESCALATION_LINKED_INVESTIGATIONS_FIELD] = union;
     }
 
-    if (body.assignees !== undefined) {
-      // Replace-in-full: the caller sends the complete desired assignee set.
-      //
-      // Known limitation: this only updates the metadata field. On a private escalation,
-      // an assignee who is not already an ACL member cannot see the escalation in their
-      // own queue because Agent Builder's search filters by ACL independently of assignee
-      // metadata. Syncing the ACL here requires `updateAccessControl`, which is owner-only
-      // (see `hasConversationUpdateAccessControlAccess`), introducing a design constraint for
-      // non-owner managers. Tracked as a follow-up.
-      metadataUpdates[ESCALATION_ASSIGNEES_FIELD] = body.assignees;
-    }
-
     if (body.status !== undefined) {
       metadataUpdates[ESCALATION_STATUS_FIELD] = body.status;
     }
 
     if (Object.keys(metadataUpdates).length > 0) {
-      const { conversation } = await client.patchMetadata(escalationId, metadataUpdates);
+      const { conversation } = await client.patchMetadata(escalationId, metadataUpdates, {
+        access: 'converse',
+      });
       result = conversation;
     }
 

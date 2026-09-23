@@ -60,8 +60,12 @@ export const createConversationPublicClient = ({
         rounds: [],
       });
     },
-    patchMetadata: async (conversationId, updates) => {
-      const { conversation, changedFields } = await client.patchMetadata(conversationId, updates);
+    patchMetadata: async (conversationId, updates, options) => {
+      const { conversation, changedFields } = await client.patchMetadata(
+        conversationId,
+        updates,
+        options
+      );
       return { conversation, changedFields };
     },
     update: async ({ id, title }) => {

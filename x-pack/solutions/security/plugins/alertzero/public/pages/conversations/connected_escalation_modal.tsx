@@ -159,6 +159,14 @@ export const ConnectedEscalationModal = memo<EscalationModalRenderProps>(
                   title,
                   visibility,
                   collaborators: collaboratorUids,
+                  // For private escalations collaboratorUids already includes the creator uid.
+                  // For public escalations there are no ACL entries, so add the creator alone.
+                  assignees:
+                    visibility === 'private'
+                      ? collaboratorUids
+                      : [currentUserProfile?.uid].filter(
+                          (uid): uid is string => typeof uid === 'string' && uid.length > 0
+                        ),
                 },
                 {
                   onSuccess: () => {

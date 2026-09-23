@@ -15,20 +15,20 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import {
-  EscalationAssignees,
+  AssignToUsers,
   EscalationQueue,
   type EscalationQueueItem,
 } from '@kbn/agentic-investigations-common';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import {
+  useAssignEscalation,
   useListEscalations,
-  useUpdateEscalation,
   useUserProfiles,
   useSuggestUserProfiles,
 } from '@kbn/agentic-investigations-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
-import { ESCALATION_ASSIGNEES_FIELD } from '@kbn/agentic-investigations-plugin/common';
+
 import { AlertZeroPageSection } from '../../components/layout/alertzero_page_section';
 import { EscalationsPageHeader } from '../../components/escalations_page_header';
 import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
@@ -130,7 +130,7 @@ export const EscalationsPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const suggestQuery = useSuggestUserProfiles(searchTerm, { size: 20, enabled: canManage });
 
-  const updateEscalation = useUpdateEscalation();
+  const assignEscalation = useAssignEscalation();
 
   // Optimistic assignee state: maps escalationId → the selected profiles that were submitted
   // but not yet confirmed by the server. The avatar stack renders from this while in-flight.
@@ -145,10 +145,10 @@ export const EscalationsPage: React.FC = () => {
       // Show the new selection immediately before the server responds.
       setPendingAssignees((prev) => new Map(prev).set(escalationId, selected));
 
-      updateEscalation.mutate(
+      assignEscalation.mutate(
         {
           escalationId,
-          body: { [ESCALATION_ASSIGNEES_FIELD]: selected.map((p) => p.uid) },
+          assignees: selected.map((p) => p.uid),
         },
         {
           onSuccess: () => {
@@ -168,7 +168,7 @@ export const EscalationsPage: React.FC = () => {
         }
       );
     },
-    [updateEscalation, notifications]
+    [assignEscalation, notifications]
   );
 
   const renderAssignees = useCallback(
@@ -194,8 +194,8 @@ export const EscalationsPage: React.FC = () => {
           });
 
       return (
-        <EscalationAssignees
-          escalationId={escalation.id}
+        <AssignToUsers
+          conversationId={escalation.id}
           selected={selected}
           suggestions={suggestQuery.data ?? []}
           isSuggestionsLoading={suggestQuery.isLoading}

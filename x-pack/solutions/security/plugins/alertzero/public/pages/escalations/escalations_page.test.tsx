@@ -14,8 +14,8 @@ import { createMemoryHistory } from 'history';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import {
+  useAssignEscalation,
   useListEscalations,
-  useUpdateEscalation,
   useUserProfiles,
   useSuggestUserProfiles,
 } from '@kbn/agentic-investigations-plugin/public';
@@ -23,13 +23,13 @@ import { EscalationsPage } from './escalations_page';
 
 jest.mock('@kbn/agentic-investigations-plugin/public', () => ({
   ...jest.requireActual('@kbn/agentic-investigations-plugin/public'),
+  useAssignEscalation: jest.fn(),
   useListEscalations: jest.fn(),
-  useUpdateEscalation: jest.fn(),
   useUserProfiles: jest.fn(),
   useSuggestUserProfiles: jest.fn(),
 }));
 
-// Replace EscalationAssignees with a minimal stub: clicking the "assign" button calls
+// Replace AssignToUsers with a minimal stub: clicking the "assign" button calls
 // onChange with a known profile. This isolates the page-level mutation wiring from the
 // internals of the EUI UserProfilesPopover (which renders in a portal difficult to drive
 // in JSDOM tests).
@@ -38,18 +38,18 @@ jest.mock('@kbn/agentic-investigations-common', () => {
   return {
     ...actual,
     // eslint-disable-next-line react/display-name
-    EscalationAssignees: ({
-      escalationId,
+    AssignToUsers: ({
+      conversationId,
       onChange,
       canManage,
     }: {
-      escalationId: string;
+      conversationId: string;
       onChange: (s: unknown[]) => void;
       canManage: boolean;
     }) =>
       canManage ? (
         <button
-          data-test-subj={`mock-assign-${escalationId}`}
+          data-test-subj={`mock-assign-${conversationId}`}
           onClick={() =>
             onChange([{ uid: 'user-uid-1', enabled: true, user: { username: 'alice' }, data: {} }])
           }
@@ -57,7 +57,7 @@ jest.mock('@kbn/agentic-investigations-common', () => {
           Assign
         </button>
       ) : (
-        <span data-test-subj={`mock-assignees-readonly-${escalationId}`}>Read-only</span>
+        <span data-test-subj={`mock-assignees-readonly-${conversationId}`}>Read-only</span>
       ),
   };
 });
@@ -67,8 +67,8 @@ jest.mock('../../hooks/use_alertzero_doc_title', () => ({
   useAlertZeroDocTitle: jest.fn(),
 }));
 
+const mockUseAssignEscalation = useAssignEscalation as jest.Mock;
 const mockUseListEscalations = useListEscalations as jest.Mock;
-const mockUseUpdateEscalation = useUpdateEscalation as jest.Mock;
 const mockUseUserProfiles = useUserProfiles as jest.Mock;
 const mockUseSuggestUserProfiles = useSuggestUserProfiles as jest.Mock;
 
@@ -88,7 +88,7 @@ const closedEscalation = {
   metadata: { status: 'closed' },
 };
 
-const updateMutate = jest.fn();
+const assignMutate = jest.fn();
 
 const renderPage = (overrides: { capabilities?: object } = {}) => {
   const core = coreMock.createStart();
@@ -116,7 +116,7 @@ const renderPage = (overrides: { capabilities?: object } = {}) => {
 };
 
 beforeEach(() => {
-  mockUseUpdateEscalation.mockReturnValue({ mutate: updateMutate });
+  mockUseAssignEscalation.mockReturnValue({ mutate: assignMutate });
   mockUseUserProfiles.mockReturnValue({ data: [], isLoading: false });
   mockUseSuggestUserProfiles.mockReturnValue({ data: [], isLoading: false });
 });
@@ -227,18 +227,18 @@ describe('EscalationsPage', () => {
     expect(screen.getByText('Nothing attached')).toBeInTheDocument();
   });
 
-  it('calls the update mutation when assignees change', () => {
+  it('calls the assign mutation when assignees change', () => {
     mockBothQueues([openEscalation], []);
     renderPage();
 
-    // Simulate the stub EscalationAssignees calling onChange with a new profile selection.
+    // Simulate the stub AssignToUsers calling onChange with a new profile selection.
     const assignButton = screen.getByTestId('mock-assign-esc-open-1');
     fireEvent.click(assignButton);
 
-    expect(updateMutate).toHaveBeenCalledWith(
+    expect(assignMutate).toHaveBeenCalledWith(
       expect.objectContaining({
         escalationId: 'esc-open-1',
-        body: expect.objectContaining({ assignees: ['user-uid-1'] }),
+        assignees: ['user-uid-1'],
       }),
       expect.anything()
     );
@@ -251,7 +251,7 @@ describe('EscalationsPage', () => {
     fireEvent.click(screen.getByTestId('mock-assign-esc-open-1'));
 
     // Extract the callbacks object passed as the second arg to mutate and invoke onSuccess.
-    const [, callbacks] = updateMutate.mock.calls[0];
+    const [, callbacks] = assignMutate.mock.calls[0];
     callbacks.onSuccess();
 
     expect(core.notifications.toasts.addSuccess).toHaveBeenCalledWith('Assignees updated');

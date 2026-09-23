@@ -30,6 +30,7 @@ export { queryKeys } from './proposals/query_keys';
 export { DISMISS_REASON_LABELS, DISMISS_REASON_OPTIONS } from './proposals/dismiss_reason_i18n';
 
 export {
+  useAssignEscalation,
   useListEscalations,
   useCreateEscalation,
   useAddToEscalation,

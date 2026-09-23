@@ -17,7 +17,6 @@ import type {
 } from '@kbn/agent-builder-common';
 import { z } from '@kbn/zod/v4';
 import {
-  ESCALATION_ASSIGNEES_FIELD,
   ESCALATION_LINKED_INVESTIGATIONS_FIELD,
   MAX_ESCALATION_ASSIGNEES,
   MAX_ESCALATION_LINKED_INVESTIGATIONS,
@@ -69,6 +68,12 @@ export const createEscalationRequestSchema = z
       .array(collaboratorIdSchema)
       .max(CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES)
       .default([]),
+    /**
+     * User profile uids to assign to the escalation. Stored in `metadata.assignees`.
+     * Defaults to empty — callers that know the current user's uid should include it
+     * so the creator is automatically listed as a responsible party.
+     */
+    assignees: z.array(collaboratorIdSchema).max(MAX_ESCALATION_ASSIGNEES).default([]),
   })
   .superRefine((value, ctx) => {
     if (value.visibility === 'private' && value.collaborators.length === 0) {
@@ -109,21 +114,9 @@ export const updateEscalationRequestSchema = z
       .max(MAX_ESCALATION_LINKED_INVESTIGATIONS)
       .optional(),
     /**
-     * Full replacement list of user profile uids assigned to this escalation.
-     * Unlike `linked_investigations` this is a replace-in-full, not an append:
-     * the caller sends the complete desired set.
-     *
-     * May be combined with `linked_investigations`, `assignees`, or `status` in a single
-     * request (all are `patchMetadata` writes). Cannot be combined with `title`.
-     */
-    [ESCALATION_ASSIGNEES_FIELD]: z
-      .array(collaboratorIdSchema)
-      .max(MAX_ESCALATION_ASSIGNEES)
-      .optional(),
-    /**
      * Open/closed state of the escalation. Uses replace semantics on `metadata.status`.
      *
-     * May be combined with other metadata writes (`linked_investigations`, `assignees`).
+     * May be combined with `linked_investigations`.
      * Cannot be combined with `title`.
      */
     status: escalationStatusSchema.optional(),
@@ -132,11 +125,9 @@ export const updateEscalationRequestSchema = z
     (value) =>
       value.title !== undefined ||
       value[ESCALATION_LINKED_INVESTIGATIONS_FIELD] !== undefined ||
-      value[ESCALATION_ASSIGNEES_FIELD] !== undefined ||
       value.status !== undefined,
     {
-      message:
-        'at least one of title, linked_investigations, assignees, or status must be provided',
+      message: 'at least one of title, linked_investigations, or status must be provided',
     }
   )
   .refine(
@@ -145,13 +136,6 @@ export const updateEscalationRequestSchema = z
     {
       message:
         'title and linked_investigations cannot be updated in the same request; send separate PATCH calls',
-    }
-  )
-  .refine(
-    (value) => !(value.title !== undefined && value[ESCALATION_ASSIGNEES_FIELD] !== undefined),
-    {
-      message:
-        'title and assignees cannot be updated in the same request; send separate PATCH calls',
     }
   )
   .refine((value) => !(value.title !== undefined && value.status !== undefined), {

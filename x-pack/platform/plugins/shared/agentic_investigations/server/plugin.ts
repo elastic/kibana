@@ -33,6 +33,8 @@ import { registerStepDefinitions } from './proposals/step_types';
 import { createProposalsStorageClient } from './proposals/storage/proposals_storage';
 import { EscalationsService } from './escalations/services/escalations_service';
 import { registerEscalationRoutes } from './escalations/routes/register_routes';
+import { AssignmentsService } from './assignments/assignments_service';
+import { registerInvestigationRoutes } from './investigations/routes/register_routes';
 import type {
   AgenticInvestigationsPluginSetup,
   AgenticInvestigationsPluginStart,
@@ -57,6 +59,7 @@ export class AgenticInvestigationsPlugin
   private impactService?: ImpactService;
   private proposalPrivileges?: ProposalPrivilegesChecker;
   private escalationsService?: EscalationsService;
+  private assignmentsService?: AssignmentsService;
   private spaces?: AgenticInvestigationsStartDependencies['spaces'];
   private resolveUser?: ResolveProposalUser;
 
@@ -119,8 +122,15 @@ export class AgenticInvestigationsPlugin
       router,
       logger: this.logger,
       getEscalationsService: () => this.requireEscalationsService(),
+      getAssignmentsService: () => this.requireAssignmentsService(),
       getSpaceId: (request) => this.getSpaceId(request),
       getSecurity: async () => (await coreSetup.getStartServices())[1].security,
+    });
+
+    registerInvestigationRoutes({
+      router,
+      logger: this.logger,
+      getAssignmentsService: () => this.requireAssignmentsService(),
     });
 
     return {};
@@ -162,6 +172,11 @@ export class AgenticInvestigationsPlugin
       getConversationClient: (request) =>
         plugins.agentBuilder.conversations.getScopedClient({ request }),
       conversationTemplates: plugins.agentBuilder.conversationTemplates,
+    });
+
+    this.assignmentsService = new AssignmentsService({
+      getConversationClient: (request) =>
+        plugins.agentBuilder.conversations.getScopedClient({ request }),
     });
 
     void initializeManagedWorkflows({
@@ -248,6 +263,15 @@ export class AgenticInvestigationsPlugin
       );
     }
     return this.escalationsService;
+  }
+
+  private requireAssignmentsService(): AssignmentsService {
+    if (!this.assignmentsService) {
+      throw new Error(
+        'Assignments service is not available until the agenticInvestigations plugin has started'
+      );
+    }
+    return this.assignmentsService;
   }
 
   private getSpaceId(request: KibanaRequest): string {

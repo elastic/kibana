@@ -162,7 +162,8 @@ export interface ConversationClient {
   applyTemplate(conversationId: string, templateId: string): Promise<Conversation>;
   patchMetadata(
     conversationId: string,
-    updates: Record<string, unknown>
+    updates: Record<string, unknown>,
+    options?: { access: ConversationAccess }
   ): Promise<{ conversation: Conversation; changedFields: string[] }>;
 }
 
@@ -996,20 +997,10 @@ class ConversationClientImpl implements ConversationClient {
 
   async patchMetadata(
     conversationId: string,
-    updates: Record<string, unknown>
+    updates: Record<string, unknown>,
+    { access = 'owner' }: { access?: ConversationAccess } = {}
   ): Promise<{ conversation: Conversation; changedFields: string[] }> {
     let changedFields: string[] = [];
-    // 'converse' (rather than 'owner') lets any conversation member — or any authenticated user
-    // for public conversations — patch template metadata. This is intentional: escalation
-    // collaborators need to update fields like `status` and `assignees` through the escalation
-    // PATCH route, which enforces its own privilege check (ESCALATIONS_API_PRIVILEGE_MANAGE).
-    //
-    // Known residual gap: `PATCH /internal/agent_builder/conversations/{id}/metadata` is gated
-    // only on `readAgentBuilder`, so any AB reader can reach this path for a public conversation
-    // without holding the escalation manage privilege. `validateMetadataUpdate` limits writes to
-    // template-declared fields and their permitted values, so no arbitrary data can be written.
-    // Tightening that route's authz is tracked as a follow-up.
-    const access: ConversationAccess = 'converse';
 
     const result = await this.writeConversation({
       conversationId,
