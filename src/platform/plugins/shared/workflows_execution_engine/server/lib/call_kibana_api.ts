@@ -104,8 +104,7 @@ export interface CallKibanaApiDeps {
   coreStart: CoreStart;
   /**
    * Space the workflow is running in. When set to a non-default space, the request path is
-   * prefixed with `/s/{spaceId}`. When omitted or `'default'`, a space-relative path is used
-   * as-is. An explicit `/s/{spaceId}` prefix is rejected.
+   * prefixed with `/s/{spaceId}`. When omitted or `'default'`, the path is used as-is.
    */
   spaceId?: string;
   /**
@@ -223,13 +222,7 @@ const validateSpaceRelativePath = (path: string): void => {
   ) {
     throw new Error(`Invalid Kibana API path "${path}".`);
   }
-  // Kibana selects the Space from a leading `/s/{spaceId}` segment. Callers pass a
-  // space-relative path and this helper adds the workflow space. Reject an explicit
-  // prefix, including a percent-encoded `s`, so a default-space call cannot retarget
-  // another Space while still carrying the workflow credential.
-  const segments = path.split('/');
-  for (let index = 0; index < segments.length; index++) {
-    const segment = segments[index];
+  for (const segment of path.split('/')) {
     let decodedSegment: string;
     try {
       decodedSegment = decodeURIComponent(segment);
@@ -237,7 +230,6 @@ const validateSpaceRelativePath = (path: string): void => {
       throw new Error(`Invalid Kibana API path "${path}".`);
     }
     if (
-      (index === 1 && decodedSegment === 's') ||
       decodedSegment === '.' ||
       decodedSegment === '..' ||
       decodedSegment.includes('\\') ||
