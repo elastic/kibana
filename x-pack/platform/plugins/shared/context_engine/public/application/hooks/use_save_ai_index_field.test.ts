@@ -27,6 +27,7 @@ describe('toProperties', () => {
   it('strips server-managed fields and derived trace queries', () => {
     expect(toProperties(aiIndex)).toEqual({
       dest: aiIndex.dest,
+      memory_enabled: true,
       automations: [],
       sources: [{ type: 'esql', value: 'FROM logs-*' }],
       traces: [
