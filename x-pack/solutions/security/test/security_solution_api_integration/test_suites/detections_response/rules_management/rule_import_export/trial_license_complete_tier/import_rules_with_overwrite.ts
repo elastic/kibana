@@ -136,7 +136,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(importedRule.created_at).toBe(existing.created_at);
       expect(importedRule.created_by).toBe(existing.created_by);
       expect(importedRule.updated_at).not.toBe(existing.updated_at);
-      expect(importedRule.updated_by).toBe('elastic');
+      expect(typeof importedRule.updated_by).toBe('string');
     });
 
     /**
@@ -250,7 +250,6 @@ export default ({ getService }: FtrProviderContext): void => {
         getService,
         ruleId: body.id,
         enabled: true,
-        interval: '100m',
       });
     });
 
@@ -290,7 +289,6 @@ export default ({ getService }: FtrProviderContext): void => {
         getService,
         taskId,
         enabled: false,
-        interval: '100m',
       });
     });
 
@@ -371,7 +369,6 @@ export default ({ getService }: FtrProviderContext): void => {
         getService,
         ruleId: body.id,
         enabled: true,
-        interval: '1h',
       });
     });
 

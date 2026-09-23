@@ -236,7 +236,6 @@ export default ({ getService }: FtrProviderContext): void => {
           getService,
           ruleId: found.id,
           enabled: true,
-          interval: '100m',
         });
       }
       for (const ruleId of sampleDisable) {
@@ -254,7 +253,6 @@ export default ({ getService }: FtrProviderContext): void => {
           getService,
           taskId,
           enabled: false,
-          interval: '100m',
         });
       }
     });

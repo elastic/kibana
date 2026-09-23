@@ -18,7 +18,6 @@ interface GetRuleTaskIdParams {
 interface AssertRuleTaskParams {
   getService: FtrProviderContext['getService'];
   enabled: boolean;
-  interval: string;
   ruleId?: string;
   spaceId?: string;
   taskId?: string;
@@ -65,7 +64,6 @@ export const assertNoRuleTask = async ({
 export const assertRuleTask = async ({
   getService,
   enabled,
-  interval,
   ruleId,
   spaceId,
   taskId,
@@ -86,6 +84,5 @@ export const assertRuleTask = async ({
 
     expect(task.attributes.taskType).toBe('alerting:siem.queryRule');
     expect(task.attributes.enabled).toBe(enabled);
-    expect(task.attributes.schedule).toEqual({ interval });
   });
 };

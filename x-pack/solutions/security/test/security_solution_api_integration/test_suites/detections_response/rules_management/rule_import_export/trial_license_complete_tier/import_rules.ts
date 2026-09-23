@@ -244,7 +244,6 @@ export default ({ getService }: FtrProviderContext): void => {
             getService,
             ruleId: imported.id,
             enabled: true,
-            interval: '100m',
             spaceId: kibanaSpaceId,
           });
         });
