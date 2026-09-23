@@ -39,6 +39,7 @@ export const useInvestigationAvailability = () => {
       }),
     enabled: Boolean(investigationsClient),
     retry: false,
+    staleTime: 30_000,
   });
 };
 
@@ -94,17 +95,18 @@ export const useInvestigateAlert = ({
       defaultMessage: 'View investigation',
     }
   );
-  const investigateActionLabel = isInvestigating
-    ? i18n.translate('xpack.observability.alerts.investigating', {
-        defaultMessage: 'Investigating',
-      })
-    : latestStatus === 'completed'
-    ? i18n.translate('xpack.observability.alerts.reinvestigate', {
-        defaultMessage: 'Re-investigate',
-      })
-    : i18n.translate('xpack.observability.alerts.investigate', {
-        defaultMessage: 'Investigate',
-      });
+  let investigateActionLabel = i18n.translate('xpack.observability.alerts.investigate', {
+    defaultMessage: 'Investigate',
+  });
+  if (isInvestigating) {
+    investigateActionLabel = i18n.translate('xpack.observability.alerts.investigating', {
+      defaultMessage: 'Investigating',
+    });
+  } else if (latestStatus === 'completed') {
+    investigateActionLabel = i18n.translate('xpack.observability.alerts.reinvestigate', {
+      defaultMessage: 'Re-investigate',
+    });
+  }
 
   const handleInvestigate = async () => {
     if (!alertId || !investigationsClient || isInvestigating) return;
