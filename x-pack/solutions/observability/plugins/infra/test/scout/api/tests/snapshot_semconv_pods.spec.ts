@@ -110,10 +110,12 @@ apiTest.describe(
         expect(lastPath(node)?.label).toBe(fixture.name);
 
         const cpu = findMetric(node, 'cpu');
-        expect(cpu.value).toBeCloseTo(
-          fixture.withoutLimits ? SEMCONV_CPU_WITHOUT_LIMIT : SEMCONV_CPU_WITH_LIMIT,
-          2
-        );
+        const expectedCpu = fixture.withoutLimits
+          ? SEMCONV_CPU_WITHOUT_LIMIT
+          : SEMCONV_CPU_WITH_LIMIT;
+        // toFixed(2) absorbs ES avg float noise; the painless limit-vs-node pick is
+        // deterministic on constant synthtrace fixtures.
+        expect(Number(cpu.value?.toFixed(2))).toStrictEqual(expectedCpu);
 
         const memory = findMetric(node, 'memory');
         const expectedMemory = fixture.omitMemory
