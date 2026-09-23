@@ -16,6 +16,7 @@ import { getInvestigationAvailabilityRoute } from './get_investigation_availabil
 import { listCortexPagesRoute } from './list_cortex_pages';
 import { getCortexPageRoute } from './get_cortex_page';
 import { getCortexAvailabilityRoute } from './get_cortex_availability';
+import { sandboxSecretsRoutes } from './sandbox_secrets';
 
 export const nightshiftInvestigationsRouteRepository = {
   ...startInvestigationRoute,
@@ -29,6 +30,7 @@ export const nightshiftInvestigationsRouteRepository = {
   ...listCortexPagesRoute,
   ...getCortexPageRoute,
   ...getCortexAvailabilityRoute,
+  ...sandboxSecretsRoutes,
 };
 
 export type NightshiftInvestigationsRouteRepository =

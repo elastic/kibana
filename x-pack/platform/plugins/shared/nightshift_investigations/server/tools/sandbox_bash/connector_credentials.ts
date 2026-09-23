@@ -13,7 +13,7 @@ import type { SandboxCallContext } from './tool_utils';
 export const CONNECTOR_ENV_PREFIX = 'CONNECTOR_';
 
 /** Minimum length for a secret value to be redacted from command output. */
-const MIN_REDACTABLE_SECRET_LENGTH = 6;
+export const MIN_REDACTABLE_SECRET_LENGTH = 6;
 
 export interface ConnectorCredentialEnv {
   /** Environment variables to inject into the command. */

@@ -45,8 +45,11 @@ import { createConnectorCredentialResolver } from './tools/sandbox_bash/connecto
 import { createSandboxWorkspaceManager } from './tools/sandbox_bash/sandbox_workspace_manager';
 import {
   nightshiftInvestigationSavedObjectType,
+  nightshiftSecretsEncryptionParams,
+  nightshiftSecretsSavedObjectType,
   NIGHTSHIFT_INVESTIGATION_SO_TYPE,
 } from './saved_objects';
+import { createSandboxSecretsClient } from './sandbox_secrets';
 import { SavedObjectInvestigationRepository } from './storage';
 import {
   registerInvestigationReconciliationTask,
@@ -82,6 +85,7 @@ export class NightshiftInvestigationsPlugin
   private savedObjects?: CoreStart['savedObjects'];
   private featureFlags?: CoreStart['featureFlags'];
   private actionsStart?: ActionsPluginStart;
+  private encryptedSavedObjectsStart?: NightshiftInvestigationsStartDeps['encryptedSavedObjects'];
   private cortexEnabled = false;
   private investigationQuotaCallback?: InvestigationQuotaCallback;
 
@@ -103,6 +107,18 @@ export class NightshiftInvestigationsPlugin
     }
 
     core.savedObjects.registerType(nightshiftInvestigationSavedObjectType);
+    core.savedObjects.registerType(nightshiftSecretsSavedObjectType);
+    plugins.encryptedSavedObjects?.registerType(nightshiftSecretsEncryptionParams);
+
+    const sandboxSecretsClient = createSandboxSecretsClient({
+      getDeps: () => ({
+        savedObjects: this.savedObjects,
+        encryptedSavedObjects: this.encryptedSavedObjectsStart,
+        spaces: this.spaces,
+      }),
+      canEncrypt: plugins.encryptedSavedObjects?.canEncrypt ?? false,
+      logger: this.logger.get('sandbox_secrets'),
+    });
 
     registerInvestigationReconciliationTask({
       core,
@@ -145,7 +161,7 @@ export class NightshiftInvestigationsPlugin
         // Start deps are read lazily: tools are registered in setup() but only run after start().
         const getSandboxStart = () => this.sandboxStart;
         const sandboxWorkspaceManager = createSandboxWorkspaceManager({
-          getDeps: () => ({ actions: this.actionsStart }),
+          getDeps: () => ({ actions: this.actionsStart, sandboxSecretsClient }),
           telemetryConnectorId,
           logger: sandboxLogger,
         });
@@ -159,6 +175,7 @@ export class NightshiftInvestigationsPlugin
             getSandboxStart,
             sandboxWorkspaceManager,
             resolveConnectorCredentials,
+            sandboxSecretsClient,
             logger: sandboxLogger,
           })
         );
@@ -220,6 +237,7 @@ export class NightshiftInvestigationsPlugin
           getAlertsClient: (request: KibanaRequest) =>
             this.ruleRegistry?.getRacClientWithRequest(request),
           isCortexEnabled: () => this.cortexEnabled,
+          sandboxSecretsClient,
           getCortexPageStore: (request: KibanaRequest) => {
             if (!this.elasticsearch) {
               throw new Error(
@@ -268,6 +286,7 @@ export class NightshiftInvestigationsPlugin
     this.savedObjects = coreStart.savedObjects;
     this.featureFlags = coreStart.featureFlags;
     this.actionsStart = plugins.actions;
+    this.encryptedSavedObjectsStart = plugins.encryptedSavedObjects;
 
     // The `nightshift.ensureInvestigationAgent` workflow step is the general guarantee that the
     // agent exists wherever an investigation runs. This narrower install exists so the agent is

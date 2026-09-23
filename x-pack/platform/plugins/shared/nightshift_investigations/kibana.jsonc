@@ -15,6 +15,7 @@
       "actions",
       "agentBuilder",
       "contextEngine",
+      "encryptedSavedObjects",
       "inference",
       "ruleRegistry",
       "sandbox",

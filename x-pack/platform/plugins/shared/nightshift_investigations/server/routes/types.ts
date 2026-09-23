@@ -10,6 +10,7 @@ import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository'
 import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import type { NightshiftInvestigationsClient } from '../client/investigations_client';
 import type { CortexPageStore } from '../cortex/page_store';
+import type { SandboxSecretsClient } from '../sandbox_secrets';
 import type { GetTriggerEmitter } from '../types';
 
 export type GetInvestigationsClient = (
@@ -28,4 +29,5 @@ export interface NightshiftInvestigationsRouteHandlerResources
   getAlertsClient: GetAlertsClient;
   getCortexPageStore: GetCortexPageStore;
   isCortexEnabled: () => boolean;
+  sandboxSecretsClient: SandboxSecretsClient;
 }

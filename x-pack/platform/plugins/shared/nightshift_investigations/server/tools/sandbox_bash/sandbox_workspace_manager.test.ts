@@ -175,6 +175,64 @@ describe('createSandboxWorkspaceManager', () => {
     expect(mockWriteConnectorManifest).toHaveBeenCalledTimes(1);
   });
 
+  describe('sandbox secrets', () => {
+    const createManagerWithSecrets = (listKeys: jest.Mock) =>
+      createSandboxWorkspaceManager({
+        getDeps: () => ({ sandboxSecretsClient: { listKeys } }),
+        logger,
+      });
+
+    it('passes the available secret keys to the manifest', async () => {
+      const listKeys = jest.fn().mockResolvedValue({ keys: ['GITHUB_TOKEN'], canEncrypt: true });
+      const session = createSessionMock(true);
+
+      await createManagerWithSecrets(listKeys).ensureWorkspaceReady({
+        session,
+        callContext: createCallContext(['connector-1']),
+      });
+
+      expect(mockWriteConnectorManifest).toHaveBeenCalledWith(
+        expect.objectContaining({ secretKeys: ['GITHUB_TOKEN'] })
+      );
+    });
+
+    it('rewrites the manifest when the secret keys change', async () => {
+      const listKeys = jest
+        .fn()
+        .mockResolvedValueOnce({ keys: ['GITHUB_TOKEN'], canEncrypt: true })
+        .mockResolvedValueOnce({ keys: ['GITHUB_TOKEN'], canEncrypt: true })
+        .mockResolvedValueOnce({ keys: ['GITHUB_TOKEN', 'NEW_KEY'], canEncrypt: true });
+      const managerWithSecrets = createManagerWithSecrets(listKeys);
+      const session = createSessionMock(false);
+      const callContext = createCallContext(['connector-1']);
+
+      await managerWithSecrets.ensureWorkspaceReady({ session, callContext });
+      await managerWithSecrets.ensureWorkspaceReady({ session, callContext });
+      expect(mockWriteConnectorManifest).toHaveBeenCalledTimes(1);
+
+      await managerWithSecrets.ensureWorkspaceReady({ session, callContext });
+      expect(mockWriteConnectorManifest).toHaveBeenCalledTimes(2);
+      expect(mockWriteConnectorManifest).toHaveBeenLastCalledWith(
+        expect.objectContaining({ secretKeys: ['GITHUB_TOKEN', 'NEW_KEY'] })
+      );
+    });
+
+    it('treats a failing secrets lookup as no secrets and logs a warning', async () => {
+      const listKeys = jest.fn().mockRejectedValue(new Error('boom'));
+      const session = createSessionMock(true);
+
+      await createManagerWithSecrets(listKeys).ensureWorkspaceReady({
+        session,
+        callContext: createCallContext(['connector-1']),
+      });
+
+      expect(mockWriteConnectorManifest).toHaveBeenCalledWith(
+        expect.objectContaining({ secretKeys: [] })
+      );
+      expect(loggingSystemMock.collect(logger).warn).toHaveLength(1);
+    });
+  });
+
   describe('telemetryConnectorId', () => {
     let managerWithTelemetry: ReturnType<typeof createSandboxWorkspaceManager>;
 
