@@ -445,10 +445,6 @@ steps:
       - name: set_caller_overrides
         type: data.set
         with:
-          # Swap to the feature-registry connector; clear the uiSettings connector so
-          # the ai.agent step's superRefine never sees both non-empty.
-          connector_id: ""
-          connector_id_by_feature: "{{ inputs.connectorIdByFeature }}"
           # When min threshold is omitted, keep the uiSettings max. Collapsing max to 1
           # happens only in collapse_max_threshold_if_min_provided below — otherwise a
           # Worker that enables auto-close without passing min would widen the range to
@@ -470,6 +466,19 @@ steps:
           # omits autoCloseEnabled — otherwise a space with uiSettings auto-close on would
           # still close FPs inside this sub-workflow and bypass the proposal gate.
           auto_close_enabled: false
+
+      # Swap to the feature-registry connector only when one is supplied, so an omitted
+      # connectorIdByFeature keeps the space's uiSettings connector. Clearing connector_id
+      # keeps the ai.agent step's superRefine from seeing both non-empty.
+      - name: use_connector_by_feature_if_provided
+        type: if
+        condition: "${{ inputs.connectorIdByFeature != null }}"
+        steps:
+          - name: apply_connector_by_feature
+            type: data.set
+            with:
+              connector_id: ""
+              connector_id_by_feature: "{{ inputs.connectorIdByFeature }}"
 
       # When the Worker supplies a min threshold, collapse max to 1 so the range is a
       # floor (close at any score >= min). Gated separately so omitting min leaves the
@@ -540,22 +549,10 @@ steps:
         with:
           pending_filter_expr: 'false'
 
-  # Worker path with a missing or empty alerts input would otherwise skip analysis and
-  # emit empty workflow.output with status completed — a miswired caller looks healthy.
-  # Fail loud instead so the Worker treats the run as an error and retries / surfaces it.
-  # Split into two gates so a missing `alerts` and an empty array each get a distinct
-  # workflow.fail message (parentheses are fine — groupedExpressions is enabled).
-  - name: require_caller_alerts_present
-    type: if
-    condition: "${{ inputs.calledByWorker == true and inputs.alerts == null }}"
-    steps:
-      - name: fail_missing_caller_alerts
-        type: workflow.fail
-        with:
-          message: >-
-            Alert Analysis Worker path requires a non-empty alerts input;
-            inputs.alerts was missing.
-
+  # Worker path with no alerts would otherwise skip analysis and emit empty workflow.output
+  # with status completed — a miswired caller looks healthy. Fail loud instead so the
+  # Worker treats the run as an error. Input defaulting turns an omitted array into [],
+  # so this one check covers both a missing and an empty `alerts`.
   - name: require_caller_alerts_nonempty
     type: if
     condition: "${{ inputs.calledByWorker == true and inputs.alerts.size == 0 }}"
@@ -565,7 +562,7 @@ steps:
         with:
           message: >-
             Alert Analysis Worker path requires a non-empty alerts input;
-            inputs.alerts was an empty array.
+            inputs.alerts was missing or empty.
 
   # Duplicate _id entries would be analyzed/written multiple times while the model only
   # returns one verdict per id — select_alert_verdict would reuse the same match and
@@ -1725,6 +1722,7 @@ steps:
               # be discarded). Real alert id only — never the model's echo.
               - name: accumulate_missing_alert_id
                 type: data.set
+                if: "${{ inputs.calledByWorker == true }}"
                 with:
                   missing_alert_ids: "${{ variables.missing_alert_ids | push: foreach.item._id }}"
             else:

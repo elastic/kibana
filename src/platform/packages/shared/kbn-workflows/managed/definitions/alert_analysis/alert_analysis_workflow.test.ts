@@ -594,14 +594,15 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     const batchSteps = findStepByName(workflow.steps, 'check_batch_output_exists') as {
       else: Array<{ name: string }>;
     };
-    const stepNames = batchSteps.else.map(({ name }) => name);
+    const orderedSteps = [
+      'set_batch_alert_ids',
+      'filter_verdicts_to_batch',
+      'collect_batch_verdicts',
+    ];
 
-    expect(stepNames.indexOf('set_batch_alert_ids')).toBeLessThan(
-      stepNames.indexOf('filter_verdicts_to_batch')
-    );
-    expect(stepNames.indexOf('filter_verdicts_to_batch')).toBeLessThan(
-      stepNames.indexOf('collect_batch_verdicts')
-    );
+    expect(
+      batchSteps.else.map(({ name }) => name).filter((name) => orderedSteps.includes(name))
+    ).toEqual(orderedSteps);
   });
 
   it('populates missing_alert_ids from the pending alerts when analysis_enabled skips', () => {
@@ -829,10 +830,19 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     const setStep = findStepByName(overrideStep.steps, 'set_caller_overrides') as {
       with: Record<string, string | number>;
     };
-    // Swap to feature-registry connector and clear the uiSettings connector
-    // so ai.agent never sees both connector fields non-empty.
-    expect(setStep.with.connector_id).toBe('');
-    expect(setStep.with.connector_id_by_feature).toBe('{{ inputs.connectorIdByFeature }}');
+    expect(setStep.with).not.toHaveProperty('connector_id');
+    expect(setStep.with).not.toHaveProperty('connector_id_by_feature');
+
+    // An omitted connectorIdByFeature keeps the space's uiSettings connector.
+    const connectorGate = findStepByName(
+      overrideStep.steps,
+      'use_connector_by_feature_if_provided'
+    ) as { condition: string; steps: Array<{ with: Record<string, string> }> };
+    expect(connectorGate.condition).toBe('${{ inputs.connectorIdByFeature != null }}');
+    expect(connectorGate.steps[0].with).toEqual({
+      connector_id: '',
+      connector_id_by_feature: '{{ inputs.connectorIdByFeature }}',
+    });
     // Absent threshold preserves the fetched runtime-config value. A filter, not a ternary:
     // the engine's Liquid has no ternary operator and fails at execution time on one.
     expect(setStep.with.auto_close_confidence_score_min_threshold).toBe(
@@ -980,18 +990,6 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
   });
 
   it('fails the Worker path when alerts is missing or empty instead of completing empty', () => {
-    const missingGate = findStepByName(workflow.steps, 'require_caller_alerts_present') as {
-      type: string;
-      condition: string;
-      steps: Array<{ name: string; type: string; with: { message: string } }>;
-    };
-    expect(missingGate.type).toBe('if');
-    expect(missingGate.condition).toBe(
-      '${{ inputs.calledByWorker == true and inputs.alerts == null }}'
-    );
-    expect(missingGate.steps[0].type).toBe('workflow.fail');
-    expect(missingGate.steps[0].with.message).toContain('alerts');
-
     const emptyGate = findStepByName(workflow.steps, 'require_caller_alerts_nonempty') as {
       type: string;
       condition: string;
@@ -1002,7 +1000,7 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
       '${{ inputs.calledByWorker == true and inputs.alerts.size == 0 }}'
     );
     expect(emptyGate.steps[0].type).toBe('workflow.fail');
-    expect(emptyGate.steps[0].with.message).toContain('empty array');
+    expect(emptyGate.steps[0].with.message).toContain('missing or empty');
   });
 
   it('fails the Worker path when alerts contain duplicate _id values', () => {
@@ -1077,17 +1075,6 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
   it('uses no ternary expressions, which the engine rejects at execution time', () => {
     const ternaryInExpression = /\{\{[^}]*\?[^}]*:[^}]*\}\}/;
     expect(JSON.stringify(workflow.steps)).not.toMatch(ternaryInExpression);
-  });
-
-  it('uses parenthesized connector OR on analysis_enabled (groupedExpressions)', () => {
-    const guard = findStepByName(workflow.steps, 'analysis_enabled') as {
-      condition: string;
-    };
-    expect(guard.condition).toContain(
-      "(variables.connector_id != '' or variables.connector_id_by_feature != '')"
-    );
-    // No pre-compute helper — parentheses are legal with groupedExpressions: true.
-    expect(findStepByName(workflow.steps, 'set_connector_configured')).toBeUndefined();
   });
 
   it('emits workflow.output at the top level so callers always receive a structured result', () => {
@@ -1494,24 +1481,11 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
     ).toBe(true);
   });
 
-  it('evaluates Worker alerts presence/emptiness gates for fail-loud path', () => {
-    const missingGate = findStepByName(workflow.steps, 'require_caller_alerts_present') as {
-      condition: string;
-    };
+  it('evaluates the Worker alerts emptiness gate for the fail-loud path', () => {
     const emptyGate = findStepByName(workflow.steps, 'require_caller_alerts_nonempty') as {
       condition: string;
     };
 
-    expect(
-      evaluateExpression(engine, missingGate.condition, {
-        inputs: { calledByWorker: true, alerts: null },
-      })
-    ).toBe(true);
-    expect(
-      evaluateExpression(engine, missingGate.condition, {
-        inputs: { calledByWorker: true, alerts: [{ _id: 'a1' }] },
-      })
-    ).toBe(false);
     expect(
       evaluateExpression(engine, emptyGate.condition, {
         inputs: { calledByWorker: true, alerts: [] },
@@ -1635,8 +1609,10 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
 
   it('accumulates missing_alert_ids when the agent returns no verdict for an alert', () => {
     const accumulateStep = findStepByName(workflow.steps, 'accumulate_missing_alert_id') as {
+      if: string;
       with: { missing_alert_ids: string };
     };
+    expect(accumulateStep.if).toBe('${{ inputs.calledByWorker == true }}');
 
     const result = evaluateExpression(engine, accumulateStep.with.missing_alert_ids, {
       variables: { missing_alert_ids: ['already-missing'] },

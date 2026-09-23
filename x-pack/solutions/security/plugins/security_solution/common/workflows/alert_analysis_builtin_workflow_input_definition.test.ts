@@ -20,7 +20,10 @@ import {
   builtinWorkflowInputDefinitions,
 } from '@kbn/workflows';
 import type { AlertAnalysisCallerAlertItem } from './alert_analysis_workflow';
-import { AlertAnalysisCallerAlerts } from './alert_analysis_workflow';
+import {
+  ALERT_ANALYSIS_CALLER_ALERT_INDEX_PATTERN,
+  AlertAnalysisCallerAlerts,
+} from './alert_analysis_workflow';
 
 // Keyed on `.shape`: the loose object's inferred type has a string index signature, so
 // `keyof AlertAnalysisCallerAlertItem` would accept any key and never fail to compile.
@@ -61,7 +64,7 @@ describe('securityAlertAnalysisCallerAlerts builtin workflow input definition', 
     };
     expect(items?.properties?._index?.maxLength).toBe(512);
     expect(items?.properties?._index?.pattern).toBe(
-      '^\\.(internal\\.)?(preview\\.)?alerts-security\\.alerts-[a-zA-Z0-9._-]+$'
+      ALERT_ANALYSIS_CALLER_ALERT_INDEX_PATTERN.source
     );
   });
 
