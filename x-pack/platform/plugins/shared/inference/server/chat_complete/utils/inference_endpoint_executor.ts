@@ -9,6 +9,20 @@ import type { Readable } from 'stream';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ChatCompleteMetadata } from '@kbn/inference-common';
 
+/**
+ * Default timeout for inference endpoint streaming calls (5 minutes).
+ *
+ * The previous default of 180s (3 minutes) was too low for reasoning models
+ * (e.g. GLM-5.2) that can take 10-15 minutes to produce first output. At 180s,
+ * EIS times out mid-stream and emits an SSE error frame that crashes the
+ * streaming processor, wedging the Node.js event loop.
+ *
+ * 300s is a compromise: long enough for most reasoning models to produce
+ * output, short enough to fail fast on genuinely stuck requests. Callers can
+ * override via the `timeout` option in {@link InferenceEndpointInvokeOptions}.
+ */
+const DEFAULT_INFERENCE_ENDPOINT_TIMEOUT_MS = 300_000;
+
 export interface InferenceEndpointInvokeOptions {
   body: Record<string, unknown>;
   signal?: AbortSignal;
@@ -28,7 +42,12 @@ export const createInferenceEndpointExecutor = ({
   esClient: ElasticsearchClient;
 }): InferenceEndpointExecutor => {
   return {
-    async invoke({ body, signal, metadata, timeout = 180_000 }): Promise<Readable> {
+    async invoke({
+      body,
+      signal,
+      metadata,
+      timeout = DEFAULT_INFERENCE_ENDPOINT_TIMEOUT_MS,
+    }: InferenceEndpointInvokeOptions): Promise<Readable> {
       const response = await esClient.transport.request(
         {
           method: 'POST',
