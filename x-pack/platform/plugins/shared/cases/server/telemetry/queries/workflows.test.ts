@@ -12,8 +12,8 @@ import {
   CASE_WORKFLOW_ORIGIN_TYPE,
   OBSERVABLE_WORKFLOW_ORIGIN_TYPE,
   OBSERVABLES_WORKFLOW_ORIGIN_TYPE,
-  ALERT_WORKFLOW_ORIGIN_TYPE,
-  ALERTS_WORKFLOW_ORIGIN_TYPE,
+  ATTACHMENT_WORKFLOW_ORIGIN_TYPE,
+  ATTACHMENTS_WORKFLOW_ORIGIN_TYPE,
 } from '../../../common/constants/workflow';
 
 describe('workflows', () => {
@@ -84,8 +84,8 @@ describe('workflows', () => {
           case: 0,
           observable: 0,
           observables: 0,
-          alert: 0,
-          alerts: 0,
+          attachment: 0,
+          attachments: 0,
           unattributed: 0,
         },
         configurationsWithWorkflowTags: 0,
@@ -106,7 +106,7 @@ describe('workflows', () => {
             byOriginType: [
               { key: CASE_WORKFLOW_ORIGIN_TYPE, doc_count: 6 },
               { key: OBSERVABLE_WORKFLOW_ORIGIN_TYPE, doc_count: 2 },
-              { key: ALERTS_WORKFLOW_ORIGIN_TYPE, doc_count: 1 },
+              { key: ATTACHMENTS_WORKFLOW_ORIGIN_TYPE, doc_count: 1 },
             ],
           })
         )
@@ -122,8 +122,8 @@ describe('workflows', () => {
           case: 6,
           observable: 2,
           observables: 0,
-          alert: 0,
-          alerts: 1,
+          attachment: 0,
+          attachments: 1,
           // 10 total − (6 + 2 + 1) = 1
           unattributed: 1,
         },
@@ -140,7 +140,7 @@ describe('workflows', () => {
             byOriginType: [
               { key: CASE_WORKFLOW_ORIGIN_TYPE, doc_count: 3 },
               { key: OBSERVABLES_WORKFLOW_ORIGIN_TYPE, doc_count: 1 },
-              { key: ALERT_WORKFLOW_ORIGIN_TYPE, doc_count: 1 },
+              { key: ATTACHMENT_WORKFLOW_ORIGIN_TYPE, doc_count: 1 },
             ],
           })
         )

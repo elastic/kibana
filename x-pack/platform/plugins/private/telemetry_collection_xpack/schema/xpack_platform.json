@@ -9957,16 +9957,16 @@
                     "description": "Runs triggered from the observables table with a multi-observable selection"
                   }
                 },
-                "alert": {
+                "attachment": {
                   "type": "long",
                   "_meta": {
-                    "description": "Runs triggered from the alerts table for a single alert"
+                    "description": "Runs triggered from a single attachment row (for example an alert or event) in a case"
                   }
                 },
-                "alerts": {
+                "attachments": {
                   "type": "long",
                   "_meta": {
-                    "description": "Runs triggered from the alerts table with a multi-alert selection"
+                    "description": "Runs triggered from a bulk attachment selection (for example alerts) in a case"
                   }
                 },
                 "unattributed": {

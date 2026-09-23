@@ -13,41 +13,10 @@ import { getConfigurationTelemetryData } from './queries/configuration';
 import { getConnectorsTelemetryData } from './queries/connectors';
 import { getPushedTelemetryData } from './queries/push';
 import { getUserActionsTelemetryData } from './queries/user_actions';
-import { getEmptyTemplatesTelemetry, getTemplatesTelemetryData } from './queries/templates';
+import { getTemplatesTelemetryData } from './queries/templates';
 import { getFieldLibraryTelemetryData } from './queries/field_definitions';
 import { getWorkflowsTelemetryData } from './queries/workflows';
-import type {
-  CasesTelemetry,
-  CollectCasesTelemetryParams,
-  CollectTelemetryDataParams,
-  TemplatesTelemetry,
-} from './types';
-
-/**
- * The templates area, reporting the flag state alongside the counts.
- *
- * When the flag is off the reads are skipped rather than left to come back empty. With the
- * flag off, `getSavedObjectsTypes` leaves the templates type out of the telemetry
- * repository, so the two template reads would return nothing — but the case-adoption read
- * is over the cases type, which is always included, and would report real counts inside a
- * payload that claims the feature is off.
- *
- * Throws on a read failure. The caller owns the error boundary.
- */
-const collectTemplatesTelemetry = async ({
-  savedObjectsClient,
-  logger,
-  templatesEnabled,
-}: CollectCasesTelemetryParams): Promise<TemplatesTelemetry> => {
-  if (!templatesEnabled) {
-    return { featureEnabled: false, ...getEmptyTemplatesTelemetry() };
-  }
-
-  return {
-    featureEnabled: true,
-    ...(await getTemplatesTelemetryData({ savedObjectsClient, logger })),
-  };
-};
+import type { CasesTelemetry, CollectTelemetryDataParams } from './types';
 
 export const collectTelemetryData = async ({
   savedObjectsClient,
