@@ -399,19 +399,19 @@ describe('getDiscoveryQueriesRoute stream resolution', () => {
     );
   });
 
-  it('keeps requested source ids that are still in the catalog', async () => {
+  it('passes explicit source ids through without listing the catalog', async () => {
     await discoveryQueriesRoute.handler(
       makeDiscoveryHandlerParams({
         ...discoveryBaseQuery,
         query: 'checkout',
-        streamNames: ['logs.b', 'logs.missing'],
+        streamNames: ['logs.only'],
       })
     );
 
-    expect(list).toHaveBeenCalled();
+    expect(list).not.toHaveBeenCalled();
     expect(mockFetchQueryLinks).toHaveBeenCalledWith(
       expect.objectContaining({
-        streamNames: ['logs.b'],
+        streamNames: ['logs.only'],
         query: 'checkout',
       }),
       kiClient

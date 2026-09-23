@@ -9,17 +9,17 @@ import type { SourcesClient } from '@kbn/nightshift-sources-plugin/server';
 import { listAllSources } from './list_all_sources';
 
 /**
- * Source ids for a KI read. An omitted filter is the whole catalog. An
- * explicit list keeps only ids that are still sources, in the caller's order.
+ * Source ids for a KI read. An omitted filter is the whole catalog. A
+ * caller-provided list is returned as-is, since those values are already
+ * source ids and checking them would list every source on the read path.
  * The HTTP query parameter is still named `streamNames`.
  */
 export async function resolveSourceIds(
   sourceIds: string[] | undefined,
   sourcesClient: SourcesClient
 ): Promise<string[]> {
-  const catalogIds = new Set((await listAllSources(sourcesClient)).map((source) => source.id));
-  if (!sourceIds?.length) {
-    return [...catalogIds];
+  if (sourceIds?.length) {
+    return sourceIds;
   }
-  return sourceIds.filter((sourceId) => catalogIds.has(sourceId));
+  return (await listAllSources(sourcesClient)).map((source) => source.id);
 }
