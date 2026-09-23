@@ -138,6 +138,12 @@ describe('Endpoint analysis run', () => {
       expect(termValue('type')).toBe('security.analyze_endpoint');
     });
 
+    // The sweep only dispatches `pending`. Without the same term here, a re-dispatch
+    // or a manual retry of an indicator that already settled would analyze it again.
+    it('reads only an indicator the sweep would still dispatch', () => {
+      expect(termValue('attributes.status')).toBe('pending');
+    });
+
     // The filters have to sit on the read rather than on each write, because the read
     // is the single thing every later gate derives from. An id that fails them yields
     // no hits, which the conditions below already treat as nothing to act on.
@@ -173,9 +179,9 @@ describe('Endpoint analysis run', () => {
       expect(evaluate(String(stepByName('mark_unreachable')?.if), noHits)).toBe(false);
     });
 
-    // The dispatcher selects on the same two fields. If either side changed its mind
-    // about how an indicator is identified, the sweep would keep handing over work the
-    // child then refused to read, and the indicator would never retire.
+    // The dispatcher selects on the same type, space, and status. If either side changed
+    // its mind about how an indicator is identified, the sweep would keep handing over
+    // work the child then refused to read, and the indicator would never retire.
     it('matches the fields the dispatcher selects on', () => {
       const sweepQuery = JSON.stringify(
         (
@@ -186,6 +192,10 @@ describe('Endpoint analysis run', () => {
       );
       expect(sweepQuery).toContain('security.analyze_endpoint');
       expect(sweepQuery).toContain('attributes.space_id');
+      expect(sweepQuery).toContain('attributes.status');
+      expect(termValue('type')).toBe('security.analyze_endpoint');
+      expect(termValue('attributes.space_id')).toBe('{{ workflow.spaceId }}');
+      expect(termValue('attributes.status')).toBe('pending');
     });
   });
 
