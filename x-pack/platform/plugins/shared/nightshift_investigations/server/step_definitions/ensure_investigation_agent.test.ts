@@ -40,14 +40,23 @@ describe('ensureInvestigationAgentStepDefinition', () => {
       stepType: 'nightshift.ensureInvestigationAgent',
     } as never);
 
+  const availability = { cacheMode: 'space' as const, handler: jest.fn() };
+
   const run = (input: Record<string, unknown>) =>
-    ensureInvestigationAgentStepDefinition(() => agentBuilder).handler(createContext(input));
+    ensureInvestigationAgentStepDefinition({
+      getAgentBuilder: () => agentBuilder,
+      getAgentAvailability: () => availability,
+    }).handler(createContext(input));
 
   // A step that omits `with` never reaches the input schema, so the default has to hold for `{}`.
   it('installs the Nightshift investigator when no agent is requested', async () => {
     const result = await run({});
 
-    expect(installInvestigationAgent).toHaveBeenCalledWith({ agentBuilder, spaceId: 'space-1' });
+    expect(installInvestigationAgent).toHaveBeenCalledWith({
+      agentBuilder,
+      spaceId: 'space-1',
+      availability,
+    });
     expect(callKibanaApi).toHaveBeenCalledWith({
       method: 'GET',
       path: `/api/agent_builder/agents/${NIGHTSHIFT_INVESTIGATION_AGENT_ID}`,
@@ -63,6 +72,7 @@ describe('ensureInvestigationAgentStepDefinition', () => {
     expect(installInvestigationAgent).toHaveBeenCalledWith({
       agentBuilder,
       spaceId: 'space-1',
+      availability,
     });
     expect(callKibanaApi).toHaveBeenCalledWith({
       method: 'GET',
