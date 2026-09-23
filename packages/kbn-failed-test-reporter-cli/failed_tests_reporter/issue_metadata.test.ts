@@ -121,4 +121,15 @@ describe('updateIssueMetadata', () => {
       <!-- kibanaCiData = {\\"failed-test\\":{\\"box\\":\\"baz\\"}} -->"
     `);
   });
+
+  it('keeps data of different prefixes apart within the same comment', () => {
+    const body = updateIssueMetadata(HAS_METADATA, { box: 'baz' }, 'some-other');
+
+    expect(body).toContain(
+      '<!-- kibanaCiData = {"failed-test":{"foo":"bar"},"some-other":{"box":"baz"}} -->'
+    );
+    expect(getIssueMetadata(body, 'box', undefined, 'some-other')).toBe('baz');
+    expect(getIssueMetadata(body, 'box')).toBeUndefined();
+    expect(getIssueMetadata(body, 'foo')).toBe('bar');
+  });
 });
