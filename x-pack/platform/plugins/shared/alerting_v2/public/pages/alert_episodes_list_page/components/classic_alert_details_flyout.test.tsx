@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { fetchClassicAlertById } from '@kbn/alerting-v2-episodes-ui/classic_alerts/apis/fetch_classic_alert_by_id';
@@ -143,7 +143,8 @@ describe('ClassicAlertDetailsFlyout', () => {
       expect(screen.getByTestId('classicAlertEpisodeDetailsTabs')).toBeInTheDocument();
     });
 
-    expect(screen.getByTestId('alertingV2EpisodeFlyoutTakeAction')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('alertingV2EpisodeFlyoutTakeActionButton'));
+    expect(await screen.findByTestId('alertingV2EpisodeFlyoutTakeAction')).toBeInTheDocument();
     expect(mockAction.isCompatible).toHaveBeenCalledWith({
       episodes: [expect.objectContaining({ source_id: 'v1' })],
     });

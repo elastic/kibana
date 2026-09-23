@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -32,7 +32,10 @@ import { css } from '@emotion/react';
 import { useQuery } from '@kbn/react-query';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { AlertFieldsTable } from '@kbn/alerts-ui-shared';
-import { formatMetadataListDuration } from '@kbn/alerting-v2-episodes-ui/components/details/translations';
+import {
+  FLYOUT_TAKE_ACTION,
+  formatMetadataListDuration,
+} from '@kbn/alerting-v2-episodes-ui/components/details/translations';
 import {
   ALERT_DURATION,
   ALERT_REASON,
@@ -144,6 +147,8 @@ export const ClassicAlertDetailsFlyout = ({
 }: ClassicAlertDetailsFlyoutProps) => {
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'classicAlertDetailsFlyout' });
   const [selectedTabId, setSelectedTabId] = useState<TabId>('overview');
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuAnchorRef = useRef<HTMLButtonElement | null>(null);
 
   const {
     data: alert,
@@ -227,7 +232,7 @@ export const ClassicAlertDetailsFlyout = ({
     [alert, alertId, services.http]
   );
 
-  return (
+  const flyout = (
     <EuiFlyout
       type="push"
       hasAnimation
@@ -385,12 +390,16 @@ export const ClassicAlertDetailsFlyout = ({
             </EuiFlexItem>
             {actions && (compatibleActions.length > 0 || alertDetailsHref) ? (
               <EuiFlexItem grow={false}>
-                <EpisodeFooterActionMenu
-                  actions={compatibleActions}
-                  episodes={episodes}
-                  viewDetailsHref={alertDetailsHref}
-                  onSuccess={onSuccess}
-                />
+                <EuiButton
+                  buttonRef={menuAnchorRef}
+                  fill
+                  iconSide="right"
+                  iconType="chevronSingleDown"
+                  data-test-subj="alertingV2EpisodeFlyoutTakeActionButton"
+                  onClick={() => setIsMenuOpen((open) => !open)}
+                >
+                  {FLYOUT_TAKE_ACTION}
+                </EuiButton>
               </EuiFlexItem>
             ) : alertDetailsHref ? (
               <EuiFlexItem grow={false}>
@@ -410,5 +419,22 @@ export const ClassicAlertDetailsFlyout = ({
         </EuiPanel>
       </EuiFlyoutFooter>
     </EuiFlyout>
+  );
+
+  return (
+    <>
+      {flyout}
+      {menuAnchorRef.current && (
+        <EpisodeFooterActionMenu
+          anchor={menuAnchorRef.current}
+          isOpen={isMenuOpen}
+          onClose={() => setIsMenuOpen(false)}
+          actions={compatibleActions}
+          episodes={episodes}
+          viewDetailsHref={alertDetailsHref}
+          onSuccess={onSuccess}
+        />
+      )}
+    </>
   );
 };
