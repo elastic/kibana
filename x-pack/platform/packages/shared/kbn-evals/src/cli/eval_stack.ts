@@ -12,6 +12,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import { resolveCcmApiKey } from '@kbn/es';
 import { scoutEvalsArgs } from './prompts';
 import {
+  isAlive,
   isServiceRunning,
   isScoutStale,
   isEdotStale,
@@ -38,13 +39,25 @@ const SCOUT_LOCAL_CONFIG = '.scout/servers/local.json';
 const SCOUT_READY_POLL_INTERVAL_MS = 3000;
 const SCOUT_READY_TIMEOUT_MS = 180_000;
 
-const waitForScoutReady = async (repoRoot: string, log: ToolingLog): Promise<void> => {
+const waitForScoutReady = async (
+  repoRoot: string,
+  log: ToolingLog,
+  scoutPid: number
+): Promise<void> => {
   const configPath = Path.join(repoRoot, SCOUT_LOCAL_CONFIG);
   const startTime = Date.now();
   let esUrl: string | undefined;
   let kbnUrl: string | undefined;
 
   while (Date.now() - startTime < SCOUT_READY_TIMEOUT_MS) {
+    // A config set that throws exits Scout immediately; its error
+    // is already streamed above by tailLog, so fail now rather than after the full timeout.
+    if (!isAlive(scoutPid)) {
+      throw new Error(
+        `Scout exited before becoming ready. See the log above or: node scripts/evals logs --service scout`
+      );
+    }
+
     if (!esUrl && Fs.existsSync(configPath)) {
       try {
         const raw = Fs.readFileSync(configPath, 'utf-8');
@@ -222,7 +235,7 @@ export const ensureScout = async ({
 
   log.info(`[scout] Starting Scout server (backgrounded, stateful/classic, ${serverConfigSet})...`);
 
-  startService(
+  const scoutPid = startService(
     repoRoot,
     'scout',
     'node',
@@ -238,8 +251,11 @@ export const ensureScout = async ({
 
   const stopTail = tailLog(repoRoot, 'scout', log, { fromStart: true });
   log.info('[scout] Waiting for ES + Kibana to be ready...');
-  await waitForScoutReady(repoRoot, log);
-  stopTail();
+  try {
+    await waitForScoutReady(repoRoot, log, scoutPid);
+  } finally {
+    stopTail();
+  }
   log.info('[scout] Scout server ready');
 };
 

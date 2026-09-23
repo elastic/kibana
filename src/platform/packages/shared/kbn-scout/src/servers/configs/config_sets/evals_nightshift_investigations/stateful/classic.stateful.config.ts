@@ -12,24 +12,33 @@ import { tmpdir } from 'os';
 import { join } from 'path';
 import type { ScoutServerConfig } from '../../../../../types';
 import { servers as tracing } from '../../evals_tracing/stateful/classic.stateful.config';
-import { resolveNightshiftEvalSelection } from '../eval_selection';
 
 /** Reads PEM contents from `<name>` (e.g. the evals vault profile) or the file at `<name>_PATH`. */
 const readPem = (name: string): string | undefined => {
   const contents = process.env[name];
   if (contents) return contents;
   const path = process.env[`${name}_PATH`];
-  return path ? readFileSync(path, 'utf8') : undefined;
+  if (!path) return undefined;
+  try {
+    return readFileSync(path, 'utf8');
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : String(error);
+    throw new Error(`Cannot read ${name}_PATH (${path}): ${reason}`);
+  }
 };
 
-/** Builds the investigation server config; exported for tests. */
-export const createInvestigationConfig = (): ScoutServerConfig => {
-  const sandboxKey = process.env.SANDBOX_API_KEY;
-  if (!sandboxKey)
-    throw new Error(
-      'SANDBOX_API_KEY is required; add a "sandbox" block to the evals profile or export SANDBOX_* before running Nightshift evals.'
-    );
+/** Parses `SANDBOX_API_PORT` from the shell or profile, defaulting to sandbox-api's gRPC port. */
+const readSandboxPort = (): number => {
+  const raw = process.env.SANDBOX_API_PORT;
+  if (!raw) return 9090;
+  const port = Number(raw);
+  if (!Number.isInteger(port) || port < 1 || port > 65535) {
+    throw new Error(`SANDBOX_API_PORT must be an integer between 1 and 65535, got "${raw}".`);
+  }
+  return port;
+};
 
+const createInvestigationConfig = (sandboxKey: string): ScoutServerConfig => {
   const certificate = readPem('SANDBOX_CLIENT_CERT');
   const key = readPem('SANDBOX_CLIENT_KEY');
   const certificateAuthorities = readPem('SANDBOX_CA_CERT');
@@ -63,8 +72,8 @@ export const createInvestigationConfig = (): ScoutServerConfig => {
     ...(exporterArg ? { 'telemetry.tracing.exporters': exporters } : {}),
     'xpack.sandbox': {
       enabled: true,
-      host: process.env.SANDBOX_API_HOST ?? 'localhost',
-      port: Number(process.env.SANDBOX_API_PORT ?? 9090),
+      host: process.env.SANDBOX_API_HOST || 'localhost',
+      port: readSandboxPort(),
       api_key: sandboxKey,
       ssl: {
         certificate,
@@ -97,6 +106,10 @@ export const createInvestigationConfig = (): ScoutServerConfig => {
   };
 };
 
-export const servers: ScoutServerConfig = resolveNightshiftEvalSelection().startInvestigationServer
-  ? createInvestigationConfig()
+// Keyed on credentials alone, never NIGHTSHIFT_DATASETS: the CLI restarts Scout when SANDBOX_*
+// changes but not when the selection does, and smoke runs on either server. The suite's Playwright
+// config decides which evals run and rejects investigation selections without credentials.
+const sandboxApiKey = process.env.SANDBOX_API_KEY;
+export const servers: ScoutServerConfig = sandboxApiKey
+  ? createInvestigationConfig(sandboxApiKey)
   : tracing;

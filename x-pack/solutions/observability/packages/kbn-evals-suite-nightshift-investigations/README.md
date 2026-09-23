@@ -208,9 +208,9 @@ evaluate.describe(dataset.id, () => {
 ## Adding a new eval
 
 For seeded evals, follow [`evals/smoke/`](evals/smoke). For file-driven investigations, follow
-[`evals/investigation/`](evals/investigation). Register new eval folders in the
-`testIgnore` map in `playwright.config.ts` so each `NIGHTSHIFT_DATASETS` selection runs exactly
-the folders it names; `all` (the CI default) runs every folder.
+[`evals/investigation/`](evals/investigation). Which folders run is decided by
+[`resolveEvalSelection`](src/datasets/eval_selection.ts) and applied as `testIgnore` in
+`playwright.config.ts`; a new seeded eval is covered by adding its datasets to `selectDatasets`.
 
 1. **`types.ts`** — describe an example: its input, the expected output your evaluators will read,
    and an evaluator type bound to your task's output.
@@ -302,7 +302,7 @@ against.
 
 | Variable              | Effect                                                                                                                                                                                                                                                                                              |
 | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `NIGHTSHIFT_DATASETS` | `synthetic-smoke` runs the seed smoke eval, `trace-only` the file-driven investigations, `all` both. Unset means `all` when sandbox credentials are present, otherwise `synthetic-smoke` with a warning. An explicit `all` or `trace-only` without sandbox credentials fails before any test runs, even when Scout is reused. Unknown values fail early. |
+| `NIGHTSHIFT_DATASETS` | Comma-separated dataset ids (whitespace trimmed). Smoke dataset ids such as `synthetic-smoke` select seeded evals; `trace-only` selects the file-driven investigations; they can be combined, e.g. `synthetic-smoke,trace-only`. Unset or `all` runs every eval when sandbox credentials are present, otherwise only smoke with a warning. Selecting `trace-only` without sandbox credentials fails before any test runs, even when Scout is reused. Unknown ids fail early. |
 | `SELECTED_EVALUATORS` | Standard `@kbn/evals` filter, by evaluator name (`documents_restored`, `timestamps_replayed`).                                                                                                                                                                                                      |
 | `GCS_CREDENTIALS`     | Service account JSON Elasticsearch uses to reach the seed-data bucket. Read access is enough to run the suite.                                                                                                                                                                                      |
 

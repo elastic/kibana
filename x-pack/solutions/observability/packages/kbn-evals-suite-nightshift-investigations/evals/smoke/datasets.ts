@@ -6,7 +6,7 @@
  */
 
 import type { Dataset } from '../../src/datasets';
-import { selectDatasets } from '../../src/datasets';
+import { resolveEvalSelection, selectDatasets } from '../../src/datasets';
 import { SYNTHETIC_SMOKE_DOCUMENT_COUNT, SYNTHETIC_SMOKE_SEED } from '../../src/seed_data';
 import type { SmokeExample } from './types';
 
@@ -45,4 +45,5 @@ const syntheticSmokeDataset: Dataset<SmokeExample> = {
 const DATASETS: ReadonlyArray<Dataset<SmokeExample>> = [syntheticSmokeDataset];
 
 /** Eval datasets to run in this process, narrowed by `NIGHTSHIFT_DATASETS`. */
-export const getSmokeDatasets = (): Array<Dataset<SmokeExample>> => selectDatasets(DATASETS);
+export const getSmokeDatasets = (): Array<Dataset<SmokeExample>> =>
+  selectDatasets(DATASETS, resolveEvalSelection().smokeDatasetsRequest);

@@ -7,8 +7,8 @@
 
 const ALL_DATASETS = 'all';
 
-/** Returns `undefined` when every registered dataset should run. */
-const parseRequestedIds = (requested: string | undefined): string[] | undefined => {
+/** Parses `NIGHTSHIFT_DATASETS`; returns `undefined` when every registered dataset should run. */
+export const parseRequestedIds = (requested: string | undefined): string[] | undefined => {
   const normalized = requested?.trim();
 
   if (!normalized || normalized === ALL_DATASETS) {

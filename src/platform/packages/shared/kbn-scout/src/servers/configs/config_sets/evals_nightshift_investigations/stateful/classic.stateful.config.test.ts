@@ -54,21 +54,30 @@ describe('evals_nightshift_investigations config set', () => {
     process.env = originalEnv;
   });
 
-  it('starts plain evals_tracing when no sandbox credentials are available', () => {
-    const { servers } = loadConfig({});
-    const { servers: tracing } = jest.requireActual(
-      '../../evals_tracing/stateful/classic.stateful.config'
-    );
-    expect(servers.kbnTestServer.serverArgs).toEqual(tracing.kbnTestServer.serverArgs);
-  });
+  // The config set must ignore NIGHTSHIFT_DATASETS: Scout is reused when only the selection changes.
+  it.each([undefined, 'synthetic-smoke', 'trace-only', 'all'])(
+    'starts plain evals_tracing without sandbox credentials (NIGHTSHIFT_DATASETS=%s)',
+    (selection) => {
+      const { servers } = loadConfig(selection ? { NIGHTSHIFT_DATASETS: selection } : {});
+      const { servers: tracing } = jest.requireActual(
+        '../../evals_tracing/stateful/classic.stateful.config'
+      );
+      expect(servers.kbnTestServer.serverArgs).toEqual(tracing.kbnTestServer.serverArgs);
+    }
+  );
 
-  it('starts the investigation server for an explicit smoke selection when credentials are present', () => {
-    // Switching the selection later reuses this server, so it must already have the engine.
-    const { servers } = loadConfig({ ...SANDBOX_ENV, NIGHTSHIFT_DATASETS: 'synthetic-smoke' });
-    expect(servers.kbnTestServer.serverArgs).toContain(
-      '--xpack.nightshift_investigations.enabled=true'
-    );
-  });
+  it.each([undefined, 'synthetic-smoke', 'trace-only', 'all'])(
+    'starts the investigation server with sandbox credentials (NIGHTSHIFT_DATASETS=%s)',
+    (selection) => {
+      const { servers } = loadConfig({
+        ...SANDBOX_ENV,
+        ...(selection ? { NIGHTSHIFT_DATASETS: selection } : {}),
+      });
+      expect(servers.kbnTestServer.serverArgs).toContain(
+        '--xpack.nightshift_investigations.enabled=true'
+      );
+    }
+  );
 
   it('enables the investigation availability flag and engine by default with credentials', () => {
     const { servers } = loadConfig(SANDBOX_ENV);
@@ -96,9 +105,32 @@ describe('evals_nightshift_investigations config set', () => {
     });
   });
 
-  it('fails fast when an investigation selection is requested without credentials', () => {
-    expect(() => loadConfig({ NIGHTSHIFT_DATASETS: 'trace-only' })).toThrow(
-      'SANDBOX_API_KEY is required'
+  it('requires mTLS certificates alongside the API key', () => {
+    expect(() => loadConfig({ SANDBOX_API_KEY: 'key' })).toThrow(
+      'Sandbox-api mTLS needs SANDBOX_CLIENT_CERT and SANDBOX_CLIENT_KEY'
     );
+  });
+
+  it('defaults host and port when the shell exports them empty', () => {
+    const { servers } = loadConfig({ ...SANDBOX_ENV, SANDBOX_API_HOST: '', SANDBOX_API_PORT: '' });
+    const configArg = servers.kbnTestServer.serverArgs.find((arg: string) =>
+      arg.startsWith('--config=')
+    );
+    if (!configArg) throw new Error('expected a --config= server arg');
+    const written = JSON.parse(readFileSync(configArg.slice('--config='.length), 'utf8'));
+    expect(written['xpack.sandbox']).toMatchObject({ host: 'localhost', port: 9090 });
+  });
+
+  it.each(['abc', '0', '65536', '9090.5'])('rejects SANDBOX_API_PORT=%s', (port) => {
+    expect(() => loadConfig({ ...SANDBOX_ENV, SANDBOX_API_PORT: port })).toThrow(
+      `SANDBOX_API_PORT must be an integer between 1 and 65535, got "${port}"`
+    );
+  });
+
+  it('names the variable and path when a PEM file cannot be read', () => {
+    const { SANDBOX_CLIENT_CERT, ...env } = SANDBOX_ENV;
+    expect(() =>
+      loadConfig({ ...env, SANDBOX_CLIENT_CERT_PATH: '/does/not/exist/tls.crt' })
+    ).toThrow('Cannot read SANDBOX_CLIENT_CERT_PATH (/does/not/exist/tls.crt): ');
   });
 });

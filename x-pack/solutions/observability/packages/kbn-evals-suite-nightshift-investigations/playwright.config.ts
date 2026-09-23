@@ -7,26 +7,24 @@
 
 import Path from 'path';
 import { createPlaywrightEvalsConfig } from '@kbn/evals';
-import { resolveNightshiftEvalSelection, type NightshiftEvalSelection } from '@kbn/scout';
+import { resolveEvalSelection } from './src/datasets/eval_selection';
 
-// Shares its selection rule with the `evals_nightshift_investigations` Scout config set, which
-// enables the sandbox for exactly the selections that run investigation specs.
-const { selection, needsSandbox, fellBackToSmoke } = resolveNightshiftEvalSelection();
-if (fellBackToSmoke) {
+// The `evals_nightshift_investigations` Scout config set starts the investigation server whenever
+// SANDBOX_API_KEY is set, which is exactly when investigation specs can run here.
+const { runSmoke, runInvestigations, fellBackToSmoke } = resolveEvalSelection();
+// Workers re-evaluate this config; only the main process (no TEST_WORKER_INDEX) warns.
+if (fellBackToSmoke && process.env.TEST_WORKER_INDEX === undefined) {
   process.stderr.write(
     '[nightshift-investigations] No sandbox credentials (SANDBOX_API_KEY); running only the smoke eval. ' +
       'Use --profile dev-vault or set NIGHTSHIFT_DATASETS to choose explicitly.\n'
   );
 }
 
-const TEST_IGNORE: Record<NightshiftEvalSelection, string[]> = {
-  all: [],
-  'trace-only': ['**/smoke/**'],
-  'synthetic-smoke': ['**/investigation/**'],
-};
-
 export default createPlaywrightEvalsConfig({
   testDir: Path.resolve(__dirname, './evals'),
-  timeout: needsSandbox ? 45 * 60_000 : 10 * 60_000,
-  testIgnore: TEST_IGNORE[selection],
+  timeout: runInvestigations ? 45 * 60_000 : 10 * 60_000,
+  testIgnore: [
+    ...(runSmoke ? [] : ['**/smoke/**']),
+    ...(runInvestigations ? [] : ['**/investigation/**']),
+  ],
 });

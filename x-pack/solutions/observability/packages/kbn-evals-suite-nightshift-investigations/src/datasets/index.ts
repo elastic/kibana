@@ -11,5 +11,7 @@
  */
 
 export { selectDatasets } from './select_datasets';
+export { resolveEvalSelection, INVESTIGATION_DATASET_ID } from './eval_selection';
+export type { EvalSelection } from './eval_selection';
 export { toEvaluationDataset } from './to_evaluation_dataset';
 export type { Dataset } from './types';
