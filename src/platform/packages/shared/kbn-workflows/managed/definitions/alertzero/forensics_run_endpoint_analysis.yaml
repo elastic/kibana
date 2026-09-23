@@ -183,12 +183,12 @@ steps:
 
       # Only the not-found case reaches here now: a read error failed the run above. A
       # missing alert is permanent — the discovery this indicator names is gone — so it
-      # is narrated and the indicator is retired rather than retried.
+      # is narrated and the indicator is retired rather than retried. A failed note
+      # fails the run instead, leaving the indicator pending for the next sweep.
+      # This step is before the agent, so that retry is cheap.
       - name: journal_fetch_alert_problem
         type: workflow.execute
         if: "${{ steps.fetch_attack_discovery_alert.output.hits.hits[0]._id == blank }}"
-        on-failure:
-          continue: true
         with:
           workflow-id: "{{ consts.journal_note }}"
           inputs:
@@ -583,10 +583,10 @@ steps:
         else:
           - name: journal_no_host
             type: workflow.execute
-            # Only journal if there is an Attack Discovery alert to reference but no host
+            # Only journal if there is an Attack Discovery alert to reference but no host.
+            # A failed note fails the run and leaves the indicator pending. The next
+            # sweep retries this lookup, which is still before the agent.
             if: "${{ steps.fetch_attack_discovery_alert.output.hits.hits[0]._id != blank }}"
-            on-failure:
-              continue: true
             with:
               workflow-id: "{{ consts.journal_note }}"
               inputs:

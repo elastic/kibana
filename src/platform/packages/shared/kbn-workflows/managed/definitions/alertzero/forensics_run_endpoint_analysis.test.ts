@@ -491,12 +491,15 @@ describe('Endpoint analysis run', () => {
       expect((stepByName('attach_rationale')?.with as { type?: string })?.type).toBe('text');
     });
 
-    // The note is the least important thing this run does and the investigation is the
-    // point of it, so a rejected note must never take down the analysis around it.
-    it('never lets a lost note fail the run', () => {
-      for (const step of journalSteps) {
-        expect(step['on-failure']).toEqual({ continue: true });
-      }
+    // The two notes before the agent are the only record of why this run stopped.
+    // A failed note fails the run and leaves the indicator pending for a cheap retry.
+    // Notes beside a retirement still continue, so a rejected note cannot block the
+    // write that stops the sweep.
+    it('fails the run when a note before the agent is lost', () => {
+      expect(stepByName('journal_fetch_alert_problem')?.['on-failure']).toBeUndefined();
+      expect(stepByName('journal_no_host')?.['on-failure']).toBeUndefined();
+      expect(stepByName('journal_invalid_request')?.['on-failure']).toEqual({ continue: true });
+      expect(stepByName('journal_analysis_problem')?.['on-failure']).toEqual({ continue: true });
     });
   });
 
