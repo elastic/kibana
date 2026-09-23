@@ -13,6 +13,7 @@ import { getJourneyScreenshotBlocks } from '../../lib/requests/get_journey_scree
 import type { UMServerLibs } from '../../lib/lib';
 import type { RouteContext, UMRestApiRouteFactory, UptimeRouteContext } from '../types';
 import { API_URLS } from '../../../../common/constants';
+import { MAX_HASH_LENGTH, boundedStringArray } from '../schema_limits';
 import type { ScreenshotBlockDoc } from '../../../../common/runtime_types/ping/synthetics';
 
 function isStringArray(data: unknown): data is string[] {
@@ -26,7 +27,7 @@ export const createJourneyScreenshotBlocksRoute: UMRestApiRouteFactory<Screensho
   path: API_URLS.JOURNEY_SCREENSHOT_BLOCKS,
   validate: {
     body: schema.object({
-      hashes: schema.arrayOf(schema.string(), { maxSize: 1000 }),
+      hashes: boundedStringArray(MAX_HASH_LENGTH, 1000),
     }),
   },
   handler: async (routeProps) => {

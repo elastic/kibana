@@ -304,7 +304,15 @@ You get back `proposalId` and `status`.
 
 **`expiresIn` is deliberately unbounded, and `settings.timeout` is a sentinel.** The workflow wants no ceiling at all: every path is already bounded — the gate by the remaining deadline, the action by its own workflow timeout, the loop by `max_attempts` — so a ceiling adds no safety and one failure mode, since it runs no handler and strands the record as `pending`. The engine has no way to express "no timeout" (omitting it applies `DEFAULT_WORKFLOW_TIMEOUT`, 6h, which would cut every parked gate short), so it is set to `52w`. Do not tighten it to fit a particular deadline, and do not bound `expiresIn` to fit it: a ceiling that can fire before the gate settles is strictly worse than no ceiling. A caller asking for a deadline beyond a year is the one case this does not cover.
 
-**`autoApprove` is for callers that already resolved autonomy.** This plugin has no autonomy policy of its own; a Worker that has decided the action is permitted without a human passes `autoApprove: true` and the gate is skipped — the proposal is still recorded, and the action still runs. Anything else leaves it unset. It applies only to action proposals: a proposal with no `actionWorkflowId` is always gated regardless of the flag.
+**`autoApprove` is for callers that already resolved autonomy.** This plugin has no autonomy policy of its own; a Worker that has decided the action is permitted without a human passes `autoApprove: true`. Anything else leaves it unset.
+
+The flag is a request, not a guarantee. The gate skips the human decision only when all three of these hold, and parks on a human otherwise:
+
+1. `autoApprove` is `true`;
+2. `actionWorkflowId` is set — autonomy governs whether an *action* may run unattended, and a proposal with no action has none to govern, so it is always gated regardless of the flag;
+3. the action does not declare `approvalPolicy: always-gate`.
+
+An action declaring `always-gate` therefore overrides any autonomy the caller resolved: a Worker cannot auto-approve it by mistake, and the action's own declaration is what enforces that rather than the caller's good behaviour. When the gate is skipped the proposal is still recorded, and the action still runs.
 
 **The calling workflow must itself be managed.** An unmanaged parent can neither execute a managed child nor see globally-installed definitions, so a Worker registered outside `@kbn/workflows/managed` cannot reach the gate.
 

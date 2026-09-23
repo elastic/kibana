@@ -613,15 +613,15 @@ describe('create-investigation-proposal workflow', () => {
     });
 
     it('routes every post-gate write through that one adopt', () => {
-      // The timeout, autonomy and answered paths each used to carry an adopt
-      // of their own. One placed after the privilege check and before every
-      // branch that writes covers all three, and is the only reason the
-      // branches below it can be read as a plain sequence.
+      // One adopt, after the privilege check and before every branch that
+      // writes, covers the timeout, autonomy and answered paths alike. It is
+      // the only reason those branches can be read as a plain sequence.
       const body = (loop().steps ?? []).map(({ name }) => name);
       const adopt = body.indexOf('adopt_live_head_before_writes_branch');
 
+      // `gate_branch` carries the autonomy path in its `else`, so both
+      // decision paths are upstream of the adopt.
       expect(adopt).toBeGreaterThan(body.indexOf('gate_branch'));
-      expect(adopt).toBeGreaterThan(body.indexOf('auto_branch'));
       for (const write of [
         'handle_gate_timeout',
         'settle_expired_after_gate',
@@ -803,6 +803,22 @@ describe('create-investigation-proposal workflow', () => {
       expect(String(findStep(workflow.steps, 'init_state')?.with?.needs_gate)).toContain(
         'inputs.actionWorkflowId'
       );
+    });
+
+    it('always gates an action that declares always-gate, whatever the caller resolved', () => {
+      // The action's own policy has to outrank the flag, or a Worker could
+      // auto-approve an action whose author declared it must never be.
+      expect(String(findStep(workflow.steps, 'init_state')?.with?.needs_gate)).toContain(
+        'steps.create_proposal.output.alwaysGate'
+      );
+    });
+
+    it('combines the gating reasons with or alone, since Liquid cannot bind a mixed expression', () => {
+      // No parentheses and no operator precedence: one `and` among the `or`s
+      // would silently gate the wrong proposals.
+      const needsGate = String(findStep(workflow.steps, 'init_state')?.with?.needs_gate);
+
+      expect(needsGate).not.toContain(' and ');
     });
   });
 

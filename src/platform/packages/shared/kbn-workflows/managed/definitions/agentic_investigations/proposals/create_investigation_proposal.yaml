@@ -184,10 +184,16 @@ steps:
       # replace it with the live revision's own value.
       action_input: '${{ inputs.actionInput }}'
       decided_by: ''
-      # Autonomy governs whether an *action* may run without a human. A
-      # proposal with no action has none to govern and approval is its whole
-      # lifecycle, so it is always gated and the flag is ignored.
-      needs_gate: '${{ inputs.autoApprove != true or inputs.actionWorkflowId == blank }}'
+      # Any one of these holds the decision for a human: the caller's autonomy
+      # did not permit running unattended; there is no action to run, since
+      # autonomy governs whether an *action* runs without a human and approval
+      # is a non-action proposal's whole lifecycle; or the action declares
+      # `approvalPolicy: always-gate` — which covers metadata that could not be
+      # read at all, since that is not "confirmed safe" either.
+      #
+      # All `or`, never mixed with `and`: Liquid has no operator precedence and
+      # no parentheses, so a mixed expression would not bind the way it reads.
+      needs_gate: '${{ inputs.autoApprove != true or inputs.actionWorkflowId == blank or steps.create_proposal.output.alwaysGate == true }}'
 
   - name: decision_loop
     type: while
