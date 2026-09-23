@@ -13,6 +13,7 @@ import { getShape } from '@kbn/workflows/common/utils/zod';
 import { getScalarValueAtOffset } from '../../yaml/get_scalar_value_at_offset';
 import { z } from '@kbn/zod/v4';
 import {
+  createTemplateLocalSchemaCache,
   extendContextWithTemplateLocals,
   getContextSchemaWithTemplateLocals,
   mapBlockScalarSourceToValueOffset,
@@ -102,6 +103,91 @@ describe('extendContextWithTemplateLocals', () => {
     const itemSchema = getShape(extended).item as z.ZodType;
     expect(itemSchema.safeParse({ name: 'Alice' }).success).toBe(true);
     expect(itemSchema.safeParse({ id: '1' }).success).toBe(false);
+  });
+});
+
+describe('extendContextWithTemplateLocals reuse', () => {
+  // The cache belongs to the caller, so reuse only happens within one of them.
+  let schemaCache = createTemplateLocalSchemaCache();
+
+  beforeEach(() => {
+    schemaCache = createTemplateLocalSchemaCache();
+  });
+
+  const extend = (template: string, offset: number) =>
+    extendContextWithTemplateLocals(DynamicStepContextSchema, template, offset, schemaCache);
+
+  it('builds a separate schema for a caller with its own cache', () => {
+    const template = '{% assign a = "x" %}{{ a }}';
+    const offset = template.indexOf('{{ a }}');
+    const other = createTemplateLocalSchemaCache();
+
+    expect(
+      extendContextWithTemplateLocals(DynamicStepContextSchema, template, offset, other)
+    ).not.toBe(extend(template, offset));
+  });
+
+  it('builds a new schema every call when no cache is passed', () => {
+    const template = '{% assign a = "x" %}{{ a }}';
+    const offset = template.indexOf('{{ a }}');
+
+    expect(extendContextWithTemplateLocals(DynamicStepContextSchema, template, offset)).not.toBe(
+      extendContextWithTemplateLocals(DynamicStepContextSchema, template, offset)
+    );
+  });
+
+  it('returns one schema for references that share the same locals', () => {
+    // Both references sit after the same assign, so both see the same locals.
+    const template = '{% assign a = "x" %}{{ a }}{{ a }}';
+    const first = template.indexOf('{{ a }}');
+    const second = template.lastIndexOf('{{ a }}');
+
+    expect(extend(template, second)).toBe(extend(template, first));
+  });
+
+  it('builds a new schema once another local comes into scope', () => {
+    const template = '{% assign a = "x" %}{{ a }}{% assign b = "y" %}{{ b }}';
+    const beforeB = extend(template, template.indexOf('{{ a }}'));
+    const afterB = extend(template, template.lastIndexOf('{{ b }}'));
+
+    expect(afterB).not.toBe(beforeB);
+    expect(getShape(beforeB)).not.toHaveProperty('b');
+    expect(getShape(afterB)).toHaveProperty('b');
+  });
+
+  // A nested tag is recorded during the walk before its parent completes, so
+  // walk order is not gate order. Anything looked up by gate has to be sorted
+  // first; these pin the locals in scope either side of each closing tag.
+  describe('nested tags', () => {
+    const template = [
+      '{% capture outer %}',
+      '{% assign inside = "1" %}',
+      '{% capture inner %}x{% endcapture %}',
+      'MIDDLE',
+      '{% endcapture %}',
+      '{% assign after = "2" %}',
+      'END',
+    ].join('');
+
+    it.each([
+      ['before any tag closes', 'outer %}', [], ['inside', 'inner', 'outer', 'after']],
+      ['inside outer, past inner', 'MIDDLE', ['inside', 'inner'], ['outer', 'after']],
+      ['past every tag', 'END', ['inside', 'inner', 'outer', 'after'], []],
+    ])('%s', (_label, marker, inScope, outOfScope) => {
+      const shape = getShape(extend(template, template.indexOf(marker)));
+
+      inScope.forEach((name) => expect(shape).toHaveProperty(name));
+      outOfScope.forEach((name) => expect(shape).not.toHaveProperty(name));
+    });
+  });
+
+  it('keeps templates of equal length apart', () => {
+    const withX = '{% assign x = "1" %}{{ v }}';
+    const withZ = '{% assign z = "1" %}{{ v }}';
+    expect(withX).toHaveLength(withZ.length);
+
+    expect(getShape(extend(withX, withX.length))).toHaveProperty('x');
+    expect(getShape(extend(withZ, withZ.length))).toHaveProperty('z');
   });
 });
 

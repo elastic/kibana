@@ -13,6 +13,7 @@ import { visit } from 'yaml';
 import type { DynamicStepContextSchema, WorkflowYaml } from '@kbn/workflows';
 import { getPathFromAncestors } from '@kbn/workflows/common/utils/yaml';
 import type { YamlValidationErrorSeverity, YamlValidationResult } from '../types';
+import { spendBudgetUnit, type ValidationBudget } from '../budget';
 import { extractLiquidErrorPosition } from '../../liquid/extract_liquid_error_position';
 import { parseTemplateString } from '../../liquid/liquid_parse_cache';
 import { parseVariablePath } from '../parse_variable_path';
@@ -63,7 +64,8 @@ export function validateLiquidYamlScalars(
   yamlString: string,
   yamlDocument: Document,
   lineCounter: LineCounter,
-  contextDeps?: LiquidContextDeps
+  contextDeps?: LiquidContextDeps,
+  budget?: ValidationBudget
 ): YamlValidationResult[] {
   if (lineCounter.lineStarts.length === 0) {
     throw new Error('LineCounter must be initialized by parsing the YAML source');
@@ -123,8 +125,13 @@ export function validateLiquidYamlScalars(
 
       if (forLoopContext != null && hasTag) {
         results.push(
-          ...collectForLoopCollectionResults(forLoopContext, node, node.value, ancestors)
+          ...collectForLoopCollectionResults(forLoopContext, node, node.value, ancestors, budget)
         );
+        // The per-scope work above is the expensive part, so an exhausted
+        // budget must end the walk, not just stop recording results.
+        if (budget?.exhausted) {
+          return visit.BREAK;
+        }
       }
     },
   });
@@ -174,7 +181,8 @@ function collectForLoopCollectionResults(
   ctx: ForLoopValidationContext,
   node: Scalar,
   templateString: string,
-  ancestors: readonly YamlAncestor[]
+  ancestors: readonly YamlAncestor[],
+  budget?: ValidationBudget
 ): YamlValidationResult[] {
   const results: YamlValidationResult[] = [];
   const yamlPath = getPathFromAncestors(ancestors, node);
@@ -194,6 +202,9 @@ function collectForLoopCollectionResults(
 
   const forLoopScopes = getAllForLoopScopes(templateString);
   for (const scope of forLoopScopes) {
+    if (!spendBudgetUnit(budget)) {
+      break;
+    }
     if (!scope.collectionPath || isLiquidRangeLiteral(scope.collectionPath)) {
       continue;
     }
@@ -218,7 +229,8 @@ function collectForLoopCollectionResults(
         ctx.yamlDocument,
         absRange.start,
         stepSchema,
-        ctx.yamlString
+        ctx.yamlString,
+        ctx.stepContext.templateLocalSchemaCache
       );
     }
 
