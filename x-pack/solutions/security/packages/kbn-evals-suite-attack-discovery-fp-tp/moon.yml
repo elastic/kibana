@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/evals-suite-attack-discovery-fp-tp'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/security-generative-ai'
+  defaultOwner: '@elastic/security-threat-hunting'
 toolchains:
   default: node
 language: typescript
@@ -14,17 +14,15 @@ project:
   title: '@kbn/evals-suite-attack-discovery-fp-tp'
   description: Moon project for @kbn/evals-suite-attack-discovery-fp-tp
   channel: ''
-  owner: '@elastic/security-generative-ai'
+  owner: '@elastic/security-threat-hunting'
   sourceRoot: x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-fp-tp
 dependsOn:
-  - '@kbn/core'
-  - '@kbn/dev-cli-runner'
   - '@kbn/evals'
-  - '@kbn/evals-suite-attack-discovery-agent-builder'
   - '@kbn/scout'
-  - '@kbn/security-evals-workflow-traces'
   - '@kbn/tooling-log'
+  - '@kbn/core'
   - '@kbn/workflows'
+  - '@kbn/gen-ai-functional-testing'
 tags:
   - functional-tests
   - package

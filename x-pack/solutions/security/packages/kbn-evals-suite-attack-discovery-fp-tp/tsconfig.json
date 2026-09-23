@@ -7,13 +7,12 @@
   "include": ["**/*.ts"],
   "exclude": ["target/**/*"],
   "kbn_references": [
-    "@kbn/core",
-    "@kbn/dev-cli-runner",
     "@kbn/evals",
-    "@kbn/evals-suite-attack-discovery-agent-builder",
     "@kbn/scout",
-    "@kbn/security-evals-workflow-traces",
     "@kbn/tooling-log",
-    "@kbn/workflows"
+    "@kbn/agent-builder-common",
+    "@kbn/workflows",
+    "@kbn/core",
+    "@kbn/gen-ai-functional-testing"
   ]
 }
