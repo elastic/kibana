@@ -103,6 +103,11 @@ tags:
       url: https://www.elastic.co/docs/reference/kibana/connectors-kibana
     x-displayName: Connectors
   - name: context engine
+    description: |
+      Use the Context Engine APIs to manage AI Indices, query them with ES|QL, and describe them for an agent. An AI Index attaches a name, sources, traces, and automations to a single data stream or index.
+
+      In each space, these APIs return a 404 until the `contextEngine:enabled` advanced setting is turned on for that space.
+    x-displayName: Context Engine
   - name: Dashboards
     description: |
       > This documentation is temporarily hosted at a separate location.
@@ -22159,6 +22164,7 @@ paths:
               examples:
                 listAiIndicesResponseExample:
                   description: Example response listing the AI Indices the caller can read
+                  summary: AI Indices the caller can read
                   value:
                     ai_indices:
                       - automations: []
@@ -22212,6 +22218,7 @@ paths:
                           type: string
                         dest:
                           additionalProperties: false
+                          description: The data stream or index that backs the AI Index.
                           type: object
                           properties:
                             type:
@@ -22228,6 +22235,7 @@ paths:
                             - value
                         feedback_analysis:
                           additionalProperties: false
+                          description: The recurring feedback analysis, which reads agent signals and proposes improvement actions for the AI Index.
                           type: object
                           properties:
                             agent_id:
@@ -22236,6 +22244,7 @@ paths:
                             allowed_actions:
                               description: Improvement actions the analysis may propose.
                               items:
+                                description: Add, edit, or remove a Knowledge Indicator (`*_ki`), a workflow automation (`*_workflow`), or a source (`*_source`).
                                 enum:
                                   - add_ki
                                   - edit_ki
@@ -22253,6 +22262,7 @@ paths:
                               type: boolean
                             schedule:
                               additionalProperties: false
+                              description: When the analysis runs.
                               type: object
                               properties:
                                 interval:
@@ -22306,6 +22316,7 @@ paths:
                             type: object
                             properties:
                               type:
+                                description: '`esql` for an ES|QL query, or `connector` for a data connector.'
                                 enum:
                                   - esql
                                   - connector
@@ -22327,6 +22338,7 @@ paths:
                                 description: The ES|QL query derived from this trace source at read time.
                                 type: string
                               type:
+                                description: '`elastic_agent` for an Agent Builder agent, `index` for an index or data stream name or pattern, or `esql` for an ES|QL query.'
                                 enum:
                                   - elastic_agent
                                   - index
@@ -22365,7 +22377,7 @@ paths:
         - lang: Console
           source: |
             GET kbn:/api/context_engine/ai_index
-      x-state: Experimental
+      x-state: Experimental; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -22393,6 +22405,7 @@ paths:
             examples:
               createAiIndexRequestExample:
                 description: Example request to create an AI Index attached to a data stream
+                summary: Create an AI Index
                 value:
                   automations:
                     - type: workflow
@@ -22441,6 +22454,7 @@ paths:
                   type: string
                 dest:
                   additionalProperties: false
+                  description: The data stream or index that backs the AI Index.
                   type: object
                   properties:
                     type:
@@ -22450,7 +22464,7 @@ paths:
                         - index
                       type: string
                     value:
-                      description: The data stream or index (e.g. `ai-index-ds-foo`, `ai-index-idx-foo`) the AI Index is attached to. Must name a single data stream or index (no wildcards or comma-separated lists), match `type`, and start with `ai-index-ds-` (for `data_stream`) or `ai-index-idx-` (for `index`). The rest of the value must be a valid AI index id. System indices are not allowed.
+                      description: The data stream or index (e.g. `ai-index-ds-foo`, `ai-index-idx-foo`) the AI Index is attached to. Must name a single data stream or index (no wildcards or comma-separated lists), match `type`, and start with `ai-index-ds-` (for `data_stream`) or `ai-index-idx-` (for `index`). The rest of the value must be a valid AI Index id. System indices are not allowed.
                       maxLength: 1024
                       minLength: 1
                       type: string
@@ -22459,6 +22473,7 @@ paths:
                     - value
                 feedback_analysis:
                   additionalProperties: false
+                  description: The recurring feedback analysis, which reads agent signals and proposes improvement actions for the AI Index.
                   type: object
                   properties:
                     agent_id:
@@ -22478,6 +22493,7 @@ paths:
                         - remove_source
                       description: Improvement actions the analysis may propose. An empty list is observe-only.
                       items:
+                        description: Add, edit, or remove a Knowledge Indicator (`*_ki`), a workflow automation (`*_workflow`), or a source (`*_source`).
                         enum:
                           - add_ki
                           - edit_ki
@@ -22498,6 +22514,7 @@ paths:
                       additionalProperties: false
                       default:
                         interval: 24h
+                      description: When the analysis runs.
                       type: object
                       properties:
                         interval:
@@ -22590,7 +22607,7 @@ paths:
                   type: array
                 traces:
                   default: []
-                  description: Trace sources linked to this AI index. A write replaces the whole array. Defaults to an empty array when omitted.
+                  description: Trace sources linked to this AI Index. A write replaces the whole array. Defaults to an empty array when omitted.
                   items:
                     anyOf:
                       - additionalProperties: false
@@ -22650,10 +22667,12 @@ paths:
               examples:
                 createAiIndexResponseExample:
                   description: Example response after the AI Index is created
+                  summary: AI Index created
                   value:
                     status: created
               schema:
                 additionalProperties: false
+                description: Confirms that the AI Index was created.
                 type: object
                 properties:
                   status:
@@ -22669,6 +22688,7 @@ paths:
               examples:
                 invalidDestExample:
                   description: The dest value does not follow the naming convention
+                  summary: Invalid dest
                   value:
                     error: Bad Request
                     message: "dest.value 'support-cases' is not allowed: it must start with 'ai-index-ds-'"
@@ -22696,6 +22716,7 @@ paths:
               examples:
                 forbiddenTraceExample:
                   description: The caller lacks Elasticsearch index privileges to look up an index trace
+                  summary: Index trace lookup denied
                   value:
                     error: Forbidden
                     message: 'security_exception: action [indices:admin/resolve/index] is unauthorized for user [jdoe] with effective roles [support_reader] on indices [traces-support], this action is granted by the index privileges [view_index_metadata,manage,read,all]'
@@ -22723,6 +22744,7 @@ paths:
               examples:
                 alreadyExistsExample:
                   description: An AI Index with the same id already exists
+                  summary: AI Index already exists
                   value:
                     error: Conflict
                     message: AI index 'customer_support' already exists
@@ -22780,7 +22802,7 @@ paths:
                 { "type": "index", "value": "traces-support" }
               ]
             }
-      x-state: Experimental
+      x-state: Experimental; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -22809,6 +22831,7 @@ paths:
             examples:
               queryAiIndicesRequestExample:
                 description: Example ES|QL query with a named parameter and a row limit
+                summary: Query with a parameter and a limit
                 value:
                   limit: 10
                   params:
@@ -22846,6 +22869,7 @@ paths:
               examples:
                 queryAiIndicesResponseExample:
                   description: Example response with column metadata and matching rows. `flattened` columns such as `attributes` are returned as objects.
+                  summary: Columns and rows
                   value:
                     columns:
                       - name: title
@@ -22898,6 +22922,7 @@ paths:
               examples:
                 invalidQueryExample:
                   description: The ES|QL query references a column that does not exist
+                  summary: Unknown column
                   value:
                     error: Bad Request
                     message: |-
@@ -22929,6 +22954,7 @@ paths:
               examples:
                 forbiddenExample:
                   description: The caller lacks Elasticsearch index privileges
+                  summary: Missing index privileges
                   value:
                     error: Forbidden
                     message: |-
@@ -22977,7 +23003,7 @@ paths:
               "params": { "type": "faq" },
               "limit": 10
             }
-      x-state: Experimental
+      x-state: Experimental; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -23008,7 +23034,7 @@ paths:
             maxLength: 256
             minLength: 1
             type: string
-        - description: When true, also delete the backing data stream/index, which removes its Knowledge Indicators. Skipped when another AI index still uses the same dest. Defaults to false.
+        - description: When true, also delete the backing data stream/index, which removes its Knowledge Indicators. Skipped when another AI Index still uses the same dest. Defaults to false.
           in: query
           name: delete_knowledge_indicators
           required: false
@@ -23029,12 +23055,14 @@ paths:
               examples:
                 deleteAiIndexPartialFailureExample:
                   description: The entry was deleted but a best-effort cleanup step failed
+                  summary: Deleted with a cleanup error
                   value:
                     acknowledged: true
                     errors:
                       - 'Failed to delete automations: Workflows management is unavailable.'
                 deleteAiIndexResponseExample:
                   description: Example response after the AI Index entry is deleted
+                  summary: AI Index deleted
                   value:
                     acknowledged: true
                     errors: []
@@ -23060,6 +23088,7 @@ paths:
               examples:
                 notFoundExample:
                   description: No AI Index with the given id exists in the current space
+                  summary: AI Index not found
                   value:
                     error: Not Found
                     message: AI index 'customer_support' not found
@@ -23087,6 +23116,7 @@ paths:
               examples:
                 managedExample:
                   description: The AI Index is managed by a plugin and cannot be deleted
+                  summary: Managed AI Index
                   value:
                     error: Conflict
                     message: AI index 'customer_support' is managed and cannot be modified via the API
@@ -23121,7 +23151,7 @@ paths:
         - lang: Console
           source: |
             DELETE kbn:/api/context_engine/ai_index/customer_support?delete_knowledge_indicators=true
-      x-state: Experimental
+      x-state: Experimental; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -23133,7 +23163,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Fetches an AI Index by id.<br/><br/>[Required authorization] Route required privileges: contextEngine:read.
+        Fetches an AI Index by id from the current space, including the ES|QL query derived from each trace.<br/><br/>[Required authorization] Route required privileges: contextEngine:read.
       operationId: get-context-engine-ai-index-aiindexid
       parameters:
         - description: The unique identifier of the AI Index.
@@ -23151,6 +23181,7 @@ paths:
               examples:
                 getAiIndexResponseExample:
                   description: Example response returning an AI Index by id
+                  summary: An AI Index
                   value:
                     automations:
                       - type: workflow
@@ -23204,6 +23235,7 @@ paths:
                     type: string
                   dest:
                     additionalProperties: false
+                    description: The data stream or index that backs the AI Index.
                     type: object
                     properties:
                       type:
@@ -23220,6 +23252,7 @@ paths:
                       - value
                   feedback_analysis:
                     additionalProperties: false
+                    description: The recurring feedback analysis, which reads agent signals and proposes improvement actions for the AI Index.
                     type: object
                     properties:
                       agent_id:
@@ -23228,6 +23261,7 @@ paths:
                       allowed_actions:
                         description: Improvement actions the analysis may propose.
                         items:
+                          description: Add, edit, or remove a Knowledge Indicator (`*_ki`), a workflow automation (`*_workflow`), or a source (`*_source`).
                           enum:
                             - add_ki
                             - edit_ki
@@ -23245,6 +23279,7 @@ paths:
                         type: boolean
                       schedule:
                         additionalProperties: false
+                        description: When the analysis runs.
                         type: object
                         properties:
                           interval:
@@ -23298,6 +23333,7 @@ paths:
                       type: object
                       properties:
                         type:
+                          description: '`esql` for an ES|QL query, or `connector` for a data connector.'
                           enum:
                             - esql
                             - connector
@@ -23319,6 +23355,7 @@ paths:
                           description: The ES|QL query derived from this trace source at read time.
                           type: string
                         type:
+                          description: '`elastic_agent` for an Agent Builder agent, `index` for an index or data stream name or pattern, or `esql` for an ES|QL query.'
                           enum:
                             - elastic_agent
                             - index
@@ -23348,6 +23385,7 @@ paths:
               examples:
                 notFoundExample:
                   description: No AI Index with the given id exists in the current space
+                  summary: AI Index not found
                   value:
                     error: Not Found
                     message: AI index 'customer_support' not found
@@ -23381,7 +23419,7 @@ paths:
         - lang: Console
           source: |
             GET kbn:/api/context_engine/ai_index/customer_support
-      x-state: Experimental
+      x-state: Experimental; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -23393,7 +23431,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Creates or updates an AI Index record attached to a data stream or index.<br/><br/>[Required authorization] Route required privileges: contextEngine:write.
+        Creates an AI Index with the given id, or replaces an existing one. The request body replaces the whole record: omitted fields are removed, and omitted arrays become empty. A managed AI Index cannot be replaced and returns a 409.<br/><br/>[Required authorization] Route required privileges: contextEngine:write.
       operationId: put-context-engine-ai-index-aiindexid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -23417,6 +23455,7 @@ paths:
             examples:
               putAiIndexRequestExample:
                 description: Example request to create or fully replace an AI Index
+                summary: Create or replace an AI Index
                 value:
                   automations:
                     - type: workflow
@@ -23462,6 +23501,7 @@ paths:
                   type: string
                 dest:
                   additionalProperties: false
+                  description: The data stream or index that backs the AI Index.
                   type: object
                   properties:
                     type:
@@ -23471,7 +23511,7 @@ paths:
                         - index
                       type: string
                     value:
-                      description: The data stream or index (e.g. `ai-index-ds-foo`, `ai-index-idx-foo`) the AI Index is attached to. Must name a single data stream or index (no wildcards or comma-separated lists), match `type`, and start with `ai-index-ds-` (for `data_stream`) or `ai-index-idx-` (for `index`). The rest of the value must be a valid AI index id. System indices are not allowed.
+                      description: The data stream or index (e.g. `ai-index-ds-foo`, `ai-index-idx-foo`) the AI Index is attached to. Must name a single data stream or index (no wildcards or comma-separated lists), match `type`, and start with `ai-index-ds-` (for `data_stream`) or `ai-index-idx-` (for `index`). The rest of the value must be a valid AI Index id. System indices are not allowed.
                       maxLength: 1024
                       minLength: 1
                       type: string
@@ -23480,6 +23520,7 @@ paths:
                     - value
                 feedback_analysis:
                   additionalProperties: false
+                  description: The recurring feedback analysis, which reads agent signals and proposes improvement actions for the AI Index.
                   type: object
                   properties:
                     agent_id:
@@ -23499,6 +23540,7 @@ paths:
                         - remove_source
                       description: Improvement actions the analysis may propose. An empty list is observe-only.
                       items:
+                        description: Add, edit, or remove a Knowledge Indicator (`*_ki`), a workflow automation (`*_workflow`), or a source (`*_source`).
                         enum:
                           - add_ki
                           - edit_ki
@@ -23519,6 +23561,7 @@ paths:
                       additionalProperties: false
                       default:
                         interval: 24h
+                      description: When the analysis runs.
                       type: object
                       properties:
                         interval:
@@ -23606,7 +23649,7 @@ paths:
                   type: array
                 traces:
                   default: []
-                  description: Trace sources linked to this AI index. A write replaces the whole array. Defaults to an empty array when omitted.
+                  description: Trace sources linked to this AI Index. A write replaces the whole array. Defaults to an empty array when omitted.
                   items:
                     anyOf:
                       - additionalProperties: false
@@ -23665,10 +23708,12 @@ paths:
               examples:
                 putAiIndexUpdatedExample:
                   description: Example response after an existing AI Index is replaced
+                  summary: AI Index updated
                   value:
                     status: updated
               schema:
                 additionalProperties: false
+                description: Confirms that the AI Index was updated.
                 type: object
                 properties:
                   status:
@@ -23684,10 +23729,12 @@ paths:
               examples:
                 putAiIndexCreatedExample:
                   description: Example response after a new AI Index is created
+                  summary: AI Index created
                   value:
                     status: created
               schema:
                 additionalProperties: false
+                description: Confirms that the AI Index was created.
                 type: object
                 properties:
                   status:
@@ -23703,6 +23750,7 @@ paths:
               examples:
                 invalidDestExample:
                   description: The dest value does not follow the naming convention
+                  summary: Invalid dest
                   value:
                     error: Bad Request
                     message: "dest.value 'support-cases' is not allowed: it must start with 'ai-index-ds-'"
@@ -23730,6 +23778,7 @@ paths:
               examples:
                 forbiddenTraceExample:
                   description: The caller lacks Elasticsearch index privileges to look up an index trace
+                  summary: Index trace lookup denied
                   value:
                     error: Forbidden
                     message: 'security_exception: action [indices:admin/resolve/index] is unauthorized for user [jdoe] with effective roles [support_reader] on indices [traces-support], this action is granted by the index privileges [view_index_metadata,manage,read,all]'
@@ -23757,6 +23806,7 @@ paths:
               examples:
                 managedExample:
                   description: The AI Index is managed by a plugin and cannot be replaced
+                  summary: Managed AI Index
                   value:
                     error: Conflict
                     message: AI index 'customer_support' is managed and cannot be modified via the API
@@ -23806,7 +23856,7 @@ paths:
               "sources": [{ "type": "esql", "value": "FROM support-cases | LIMIT 100" }],
               "traces": [{ "type": "index", "value": "traces-support" }]
             }
-      x-state: Experimental
+      x-state: Experimental; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -23837,6 +23887,7 @@ paths:
               examples:
                 describeAiIndexResponseExample:
                   description: Example response with a context block for an agent
+                  summary: Context block for an agent
                   value:
                     response: |-
                       AI index: customer_support
@@ -23906,6 +23957,7 @@ paths:
               examples:
                 tooLargeExample:
                   description: The field metadata for the backing indices exceeded the size limit
+                  summary: Response too large
                   value:
                     error: Bad Request
                     message: Field metadata for the AI index exceeded the maximum allowed size of 20MB. Point the AI index at fewer or smaller indices.
@@ -23933,6 +23985,7 @@ paths:
               examples:
                 forbiddenExample:
                   description: The caller lacks Elasticsearch index privileges
+                  summary: Missing index privileges
                   value:
                     error: Forbidden
                     message: |-
@@ -23963,6 +24016,7 @@ paths:
               examples:
                 notFoundExample:
                   description: No AI Index with the given id exists in the current space
+                  summary: AI Index not found
                   value:
                     error: Not Found
                     message: AI index 'customer_support' not found
@@ -23996,7 +24050,7 @@ paths:
         - lang: Console
           source: |
             GET kbn:/api/context_engine/ai_index/customer_support/_describe
-      x-state: Experimental
+      x-state: Experimental; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
