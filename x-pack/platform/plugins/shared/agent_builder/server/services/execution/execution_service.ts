@@ -212,15 +212,30 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       conversationParams.storeConversation !== false &&
       !isPendingResumeConversation(conversation)
     ) {
-      await persistUserMessage({
-        conversation,
-        conversationClient,
-        receivedAt,
-        eventId: roundUserMessageEventId(roundId),
-        input: conversationParams.nextInput,
-        author: conversationClient.getAuthor(conversationParams.origin?.author),
-        ...(conversationParams.origin ? { origin: { type: conversationParams.origin.type } } : {}),
-      });
+      try {
+        await persistUserMessage({
+          conversation,
+          conversationClient,
+          receivedAt,
+          eventId: roundUserMessageEventId(roundId),
+          input: conversationParams.nextInput,
+          author: conversationClient.getAuthor(conversationParams.origin?.author),
+          ...(conversationParams.origin
+            ? { origin: { type: conversationParams.origin.type } }
+            : {}),
+        });
+      } catch (err) {
+        try {
+          await executionClient.updateStatus(executionId, ExecutionStatus.failed, {
+            error: serializeExecutionError(err),
+          });
+        } catch (statusErr) {
+          this.logger.error(
+            `Failed to record status for execution ${executionId} after a failed message write: ${statusErr.message}`
+          );
+        }
+        throw err;
+      }
     }
 
     // Wire up external abort signal to execution abort. A cascaded abort keeps the original

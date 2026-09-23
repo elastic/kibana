@@ -1054,6 +1054,24 @@ describe('AgentExecutionService', () => {
       expect(mockExecutionClient.create).toHaveBeenCalledTimes(1);
     });
 
+    it('marks the execution failed, instead of leaving it scheduled, when the write itself fails', async () => {
+      const writeError = new Error('ES unavailable');
+      conversationClient.appendEvents.mockRejectedValue(writeError);
+
+      await expect(converse()).rejects.toThrow('ES unavailable');
+
+      const [{ executionId }] = mockExecutionClient.create.mock.calls[0];
+      expect(mockExecutionClient.updateStatus).toHaveBeenCalledWith(
+        executionId,
+        ExecutionStatus.failed,
+        expect.objectContaining({ error: expect.objectContaining({ message: 'ES unavailable' }) })
+      );
+      // Never dispatched: a replay with the same idempotency key must not schedule a task over a
+      // conversation whose opening message never landed.
+      expect(mockHandleAgentExecution).not.toHaveBeenCalled();
+      expect(mockTaskManagerSchedule).not.toHaveBeenCalled();
+    });
+
     it('waits for the write before handing off to the runner', async () => {
       let releaseWrite!: () => void;
       conversationClient.appendEvents.mockReturnValue(
