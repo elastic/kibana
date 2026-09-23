@@ -74,6 +74,8 @@ export function EsqlNotificationPopover({ api }: { api: EsqlNotificationActionAp
         gutterSize="s"
         css={css`
           min-width: 300px;
+          max-height: 400px;
+          overflow-y: auto;
         `}
       >
         {esqlQueries.map((query, index) => (
