@@ -60,6 +60,7 @@ describe('updateFiltering lib function', () => {
 
     mockClient.transport.request.mockImplementationOnce(() => ({ result: 'updated' }));
     mockClient.transport.request.mockImplementationOnce(() => ({
+      id: 'connectorId',
       filtering: [{ active: draftToActivate }],
     }));
 
