@@ -101,14 +101,15 @@ const register = (
   });
 
 describe('registerAgenticInvestigationTemplateUI', () => {
-  it('registers the overview, attachments and timeline tabs', () => {
+  it('registers the overview tab', () => {
     const { contract } = createFakeService();
 
     register(contract);
 
     expect(contract.getTab('investigation.overview')?.label).toBe('Overview');
-    expect(contract.getTab('investigation.attachments')?.label).toBe('Attachments');
-    expect(contract.getTab('investigation.timeline')?.label).toBe('Timeline');
+    expect(contract.getTemplateUIDefinition('investigation')?.tabs).toEqual([
+      'investigation.overview',
+    ]);
   });
 
   it('registers the template UI definition with a header and footer', () => {
