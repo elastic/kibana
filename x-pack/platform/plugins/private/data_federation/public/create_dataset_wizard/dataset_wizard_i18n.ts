@@ -448,12 +448,12 @@ export const datasetWizardStrings = {
 
   commonSettingsTitle: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.commonSettingsTitle', {
-      defaultMessage: 'Common settings (optional)',
+      defaultMessage: 'Common settings',
     }),
 
   advancedSettingsTitleFlow3: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.advancedSettingsTitleFlow3', {
-      defaultMessage: 'Advanced settings (optional)',
+      defaultMessage: 'Advanced settings',
     }),
 
   settingsCustomJsonLabel: () =>
