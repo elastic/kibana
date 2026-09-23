@@ -98,6 +98,13 @@ describe('createImpactAttachmentType', () => {
       }
     });
 
+    it('rejects an overlong zero-padded Liquid count string before parsing', async () => {
+      const result = await attachmentType.validate({
+        entities: [{ ...validEntity, alert_count: '0'.repeat(7) }],
+      });
+      expect(result.valid).toBe(false);
+    });
+
     it('accepts a truncated payload with the flag set (native boolean)', async () => {
       const result = await attachmentType.validate({
         entities: [validEntity],

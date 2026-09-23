@@ -19,6 +19,7 @@ const liquidNonNegativeInt = z.union([
   z.number().int().min(0).max(100_000),
   z
     .string()
+    .max(6)
     .regex(/^\d+$/, 'Expected a non-negative integer string')
     .transform((value) => Number(value))
     .pipe(z.number().int().min(0).max(100_000)),
