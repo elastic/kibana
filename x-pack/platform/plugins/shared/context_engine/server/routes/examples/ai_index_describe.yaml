@@ -92,6 +92,13 @@ responses:
               statusCode: 404
               error: Not Found
               message: "AI index 'customer_support' not found"
+          contextEngineDisabledExample:
+            summary: "Context Engine turned off"
+            description: "Context Engine is turned off in this space"
+            value:
+              statusCode: 404
+              error: Not Found
+              message: Not Found
 x-codeSamples:
   - lang: curl
     source: |

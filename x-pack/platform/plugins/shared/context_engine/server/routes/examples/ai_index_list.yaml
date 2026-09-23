@@ -21,6 +21,17 @@ responses:
                   traces: []
                   date_created: "2026-09-22T12:00:00.000Z"
                   date_modified: "2026-09-22T12:00:00.000Z"
+  404:
+    content:
+      application/json:
+        examples:
+          contextEngineDisabledExample:
+            summary: "Context Engine turned off"
+            description: "Context Engine is turned off in this space"
+            value:
+              statusCode: 404
+              error: Not Found
+              message: Not Found
 x-codeSamples:
   - lang: curl
     source: |

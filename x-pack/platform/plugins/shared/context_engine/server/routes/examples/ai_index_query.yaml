@@ -51,6 +51,17 @@ responses:
               statusCode: 403
               error: Forbidden
               message: "security_exception\n\tRoot causes:\n\t\tsecurity_exception: action [indices:data/read/esql] is unauthorized for user [jdoe] with effective roles [support_reader], this action is granted by the index privileges [read_cross_cluster,read,all]"
+  404:
+    content:
+      application/json:
+        examples:
+          contextEngineDisabledExample:
+            summary: "Context Engine turned off"
+            description: "Context Engine is turned off in this space"
+            value:
+              statusCode: 404
+              error: Not Found
+              message: Not Found
 x-codeSamples:
   - lang: curl
     source: |

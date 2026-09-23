@@ -54,6 +54,17 @@ responses:
               statusCode: 403
               error: Forbidden
               message: "security_exception: action [indices:admin/resolve/index] is unauthorized for user [jdoe] with effective roles [support_reader] on indices [traces-support], this action is granted by the index privileges [view_index_metadata,manage,read,all]"
+  404:
+    content:
+      application/json:
+        examples:
+          contextEngineDisabledExample:
+            summary: "Context Engine turned off"
+            description: "Context Engine is turned off in this space"
+            value:
+              statusCode: 404
+              error: Not Found
+              message: Not Found
   409:
     content:
       application/json:

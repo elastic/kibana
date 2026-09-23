@@ -116,6 +116,8 @@ const DELETE_SECURITY: RouteSecurity = {
 const CONTEXT_ENGINE_DISABLED_NOTE =
   'Returns a 404 while Context Engine is turned off in this space (`contextEngine:enabled`).';
 
+const CONTEXT_ENGINE_DISABLED_DESCRIPTION = 'Context Engine is turned off in this space.';
+
 const hasWorkflowDeletePrivilege = (request: KibanaRequest): boolean =>
   WorkflowsManagementOperationPrivileges.delete.every(
     (privilege) => request.authzResult?.[privilege] === true
@@ -241,6 +243,10 @@ export const registerAiIndexRoutes = ({
               description:
                 'Elasticsearch denied the `index` trace lookup outright; the caller lacks index privileges for it.',
             },
+            404: {
+              body: errorResponseSchema,
+              description: CONTEXT_ENGINE_DISABLED_DESCRIPTION,
+            },
             409: {
               body: errorResponseSchema,
               description: 'An AI Index with the same id already exists, or the write conflicted.',
@@ -321,6 +327,10 @@ export const registerAiIndexRoutes = ({
               description:
                 'Elasticsearch denied the `index` trace lookup outright; the caller lacks index privileges for it.',
             },
+            404: {
+              body: errorResponseSchema,
+              description: CONTEXT_ENGINE_DISABLED_DESCRIPTION,
+            },
             409: {
               body: errorResponseSchema,
               description: 'The AI Index is managed and immutable, or the write conflicted.',
@@ -392,7 +402,8 @@ export const registerAiIndexRoutes = ({
             },
             404: {
               body: errorResponseSchema,
-              description: 'No AI Index with the given id exists in the current space.',
+              description:
+                'No AI Index with the given id exists in the current space, or Context Engine is turned off in this space.',
             },
           },
         },
@@ -438,6 +449,10 @@ export const registerAiIndexRoutes = ({
             200: {
               body: listAiIndexResponseSchema,
               description: 'The AI Indices available to the caller in the current space.',
+            },
+            404: {
+              body: errorResponseSchema,
+              description: CONTEXT_ENGINE_DISABLED_DESCRIPTION,
             },
           },
         },
@@ -490,6 +505,10 @@ export const registerAiIndexRoutes = ({
             403: {
               body: errorResponseSchema,
               description: 'Elasticsearch rejected the read; the caller lacks index privileges.',
+            },
+            404: {
+              body: errorResponseSchema,
+              description: CONTEXT_ENGINE_DISABLED_DESCRIPTION,
             },
           },
         },
@@ -546,7 +565,8 @@ export const registerAiIndexRoutes = ({
             },
             404: {
               body: errorResponseSchema,
-              description: 'No AI Index with the given id exists in the current space.',
+              description:
+                'No AI Index with the given id exists in the current space, or Context Engine is turned off in this space.',
             },
           },
         },
@@ -730,7 +750,8 @@ export const registerAiIndexRoutes = ({
             },
             404: {
               body: errorResponseSchema,
-              description: 'No AI Index with the given id exists in the current space.',
+              description:
+                'No AI Index with the given id exists in the current space, or Context Engine is turned off in this space.',
             },
             409: {
               body: errorResponseSchema,
