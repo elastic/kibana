@@ -114,16 +114,26 @@ steps:
         slack_api:
           connector-id: my-slack-api
           channels: ["C0123"]
+        email:
+          connector-id: my-email
+          to: ["oncall@example.com"]
+        slack2:
+          connector-id: my-slack2
+          channels: ["C0123"]
 `;
     const lineCounter = new LineCounter();
     const yamlDocument = parseDocument(yaml, { lineCounter });
     const result = collectAllConnectorIds(yamlDocument, lineCounter);
 
-    expect(result).toHaveLength(2);
+    expect(result).toHaveLength(4);
     expect(result[0].key).toBe('my-slack');
     expect(result[0].connectorType).toBe('slack');
     expect(result[1].key).toBe('my-slack-api');
     expect(result[1].connectorType).toBe('slack_api');
+    expect(result[2].key).toBe('my-email');
+    expect(result[2].connectorType).toBe('email');
+    expect(result[3].key).toBe('my-slack2');
+    expect(result[3].connectorType).toBe('slack2');
   });
 
   it('maps trigger connector-id to the connector type id from the event spec', () => {
