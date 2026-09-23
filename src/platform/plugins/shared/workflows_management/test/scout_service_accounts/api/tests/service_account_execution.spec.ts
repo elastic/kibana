@@ -145,7 +145,7 @@ apiTest.describe(
       [accountId, otherAccountId] = accounts;
     });
 
-    apiTest.afterEach(async ({ apiClient }) => {
+    const cleanupWorkflows = async (apiClient: ApiClientFixture): Promise<void> => {
       for (const id of workflowIds) {
         const disabled = await apiClient.put(`api/workflows/workflow/${id}`, {
           headers,
@@ -153,6 +153,11 @@ apiTest.describe(
           responseType: 'json',
         });
         expect(disabled, JSON.stringify(disabled.body)).toHaveStatusCode(200);
+        const cancelled = await apiClient.post(`api/workflows/workflow/${id}/executions/cancel`, {
+          headers,
+          responseType: 'json',
+        });
+        expect(cancelled, JSON.stringify(cancelled.body)).toHaveStatusCode(200);
         const query = new URLSearchParams(
           NonTerminalExecutionStatuses.map((status) => ['statuses', status])
         );
@@ -187,7 +192,9 @@ apiTest.describe(
         expect(remaining).toHaveStatusCode(404);
         workflowIds.delete(id);
       }
-    });
+    };
+
+    apiTest.afterEach(async ({ apiClient }) => cleanupWorkflows(apiClient));
 
     apiTest.afterAll(async () => {
       // Remove only this suite's disposable Cosmos fixtures; project-account revocation
@@ -343,6 +350,98 @@ apiTest.describe(
       );
       expect(response, JSON.stringify(response.body)).toHaveStatusCode(200);
     };
+
+    const expectPausedExecutionSearchable = async (
+      apiClient: ApiClientFixture,
+      id: string,
+      executionId: string
+    ): Promise<void> => {
+      await expect
+        .poll(
+          async () => {
+            const executions = await apiClient.get(
+              `api/workflows/workflow/${id}/executions?statuses=waiting_for_input`,
+              { headers, responseType: 'json' }
+            );
+            expect(executions).toHaveStatusCode(200);
+            return executions.body.results.some(
+              (execution: WorkflowExecutionDto) => execution.id === executionId
+            );
+          },
+          { timeout: 15_000 }
+        )
+        .toBe(true);
+    };
+
+    const discardPausedFixture = async (apiClient: ApiClientFixture, id: string): Promise<void> => {
+      if (!workflowIds.has(id)) return;
+      // Soft deletion supports active executions and releases bindings without waiting for resume.
+      const response = await apiClient.delete('api/workflows', {
+        headers,
+        body: { ids: [id] },
+        responseType: 'json',
+      });
+      expect(response, JSON.stringify(response.body)).toHaveStatusCode(200);
+      expect(response.body.failures).toStrictEqual([]);
+      expect(response.body.deleted).toBe(1);
+      const remaining = await apiClient.get(`api/workflows/workflow/${id}`, {
+        headers,
+        responseType: 'json',
+      });
+      expect(remaining).toHaveStatusCode(404);
+      workflowIds.delete(id);
+    };
+
+    for (const bound of [false, true]) {
+      apiTest(
+        `returns conflict when force-deleting ${
+          bound ? 'a bound' : 'an unbound'
+        } workflow with a paused execution`,
+        async ({ apiClient }) => {
+          apiTest.setTimeout(180_000);
+          const yaml = workflowYaml(accountId, waitStep + authenticationStep);
+          const id = await create(
+            apiClient,
+            bound ? yaml : yaml.replace(`settings:\n  run_as: ${accountId}\n`, '')
+          );
+          const executionId = await run(apiClient, id);
+          try {
+            await wait(apiClient, executionId, 'waiting_for_input');
+            await expectPausedExecutionSearchable(apiClient, id, executionId);
+            const response = await apiClient.delete(`api/workflows/workflow/${id}?force=true`, {
+              headers,
+              responseType: 'json',
+            });
+            expect(response, JSON.stringify(response.body)).toHaveStatusCode(409);
+            const workflow = await apiClient.get(`api/workflows/workflow/${id}`, {
+              headers,
+              responseType: 'json',
+            });
+            expect(workflow).toHaveStatusCode(200);
+            await cleanupWorkflows(apiClient);
+          } finally {
+            await discardPausedFixture(apiClient, id);
+          }
+        }
+      );
+    }
+
+    apiTest('cleanup removes a workflow left paused for input', async ({ apiClient }) => {
+      apiTest.setTimeout(180_000);
+      const paused = await pause(apiClient);
+      try {
+        await expectPausedExecutionSearchable(apiClient, paused.id, paused.executionId);
+        await cleanupWorkflows(apiClient);
+        const workflow = await apiClient.get(`api/workflows/workflow/${paused.id}`, {
+          headers,
+          responseType: 'json',
+        });
+        expect(workflow).toHaveStatusCode(404);
+      } finally {
+        // Recover the fixture even when the cleanup under test fails before deleting it.
+        await discardPausedFixture(apiClient, paused.id);
+      }
+    });
 
     apiTest('resumes with the original service account', async ({ apiClient }) => {
       apiTest.setTimeout(120_000);

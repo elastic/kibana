@@ -193,7 +193,15 @@ export const resumeWorkflow = async (
   if (!execution) {
     throw new Error('Workflow execution not found.');
   }
-  if (isTerminalStatus(execution.status)) return {};
+  if (isTerminalStatus(execution.status)) {
+    await handlePostExecutionLoop({
+      ...params,
+      fakeRequest: getWorkflowOriginalRequest(params.fakeRequest),
+      workflowTaskManager: new WorkflowTaskManager(params.dependencies.taskManager),
+      cloudSetup: params.dependencies.cloudSetup,
+    });
+    return {};
+  }
   let enteredExecution = false;
   try {
     return await withWorkflowExecutionIdentity(

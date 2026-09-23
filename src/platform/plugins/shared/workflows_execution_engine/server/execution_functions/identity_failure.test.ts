@@ -122,6 +122,35 @@ describe.each([
     expect(setupDependencies).not.toHaveBeenCalled();
   });
 
+  it('retries parent and queue cleanup after a transient post-execution read failure', async () => {
+    const { params, accounts } = setup();
+    const repository = params.workflowExecutionRepository;
+    const execution = await repository.getWorkflowExecutionById('child', 'default');
+    jest
+      .spyOn(repository, 'getWorkflowExecutionById')
+      .mockResolvedValueOnce(execution)
+      .mockRejectedValueOnce(new Error('Transient post-execution read failure'));
+
+    await expect(execute(params)).rejects.toThrow('Binding changed');
+    expect((await repository.getWorkflowExecutionById('child', 'default'))?.status).toBe(
+      ExecutionStatus.FAILED
+    );
+    expect(params.internalResumeWorkflowExecution).not.toHaveBeenCalled();
+    expect(drainConcurrencyQueueSlots).not.toHaveBeenCalled();
+
+    await execute(params);
+
+    expect(accounts.withScopedRequestForWorkload).toHaveBeenCalledTimes(1);
+    expect(repository.updateWorkflowExecution).toHaveBeenCalledTimes(1);
+    expect({
+      parentResumes: params.internalResumeWorkflowExecution.mock.calls,
+      queueDrains: jest.mocked(drainConcurrencyQueueSlots).mock.calls,
+    }).toEqual({
+      parentResumes: [['parent', 'default', undefined, params.fakeRequest]],
+      queueDrains: [[expect.objectContaining({ concurrencyGroupKey: 'group' })]],
+    });
+  });
+
   it.each([
     ExecutionStatus.COMPLETED,
     ExecutionStatus.FAILED,

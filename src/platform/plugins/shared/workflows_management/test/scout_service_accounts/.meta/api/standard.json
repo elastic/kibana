@@ -1,5 +1,5 @@
 {
-  "sha1": "e6b50502cc4f6feb7c40dafaaa328d6c8bc1ee3c",
+  "sha1": "ad30a0f7f203d553a407684f81e575f95dd26f44",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -13,7 +13,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
-        "line": 217,
+        "line": 224,
         "column": 32
       }
     },
@@ -26,7 +26,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
-        "line": 248,
+        "line": 255,
         "column": 7
       }
     },
@@ -39,8 +39,47 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
-        "line": 287,
+        "line": 294,
         "column": 16
+      }
+    },
+    {
+      "id": "59645759a29407d-845fc0fedbf8da6",
+      "title": "[NON-MKI] Saved workflow service account execution returns conflict when force-deleting an unbound workflow with a paused execution",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
+        "line": 402,
+        "column": 24
+      }
+    },
+    {
+      "id": "59645759a29407d-e3ed55dd03ec2e6",
+      "title": "[NON-MKI] Saved workflow service account execution returns conflict when force-deleting a bound workflow with a paused execution",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
+        "line": 402,
+        "column": 24
+      }
+    },
+    {
+      "id": "59645759a29407d-428d02025f1eb76",
+      "title": "[NON-MKI] Saved workflow service account execution cleanup removes a workflow left paused for input",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
+        "line": 429,
+        "column": 90
       }
     },
     {
@@ -52,8 +91,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
-        "line": 345,
-        "column": 6
+        "line": 446,
+        "column": 13
       }
     },
     {
@@ -65,8 +104,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
-        "line": 350,
-        "column": 20
+        "line": 450,
+        "column": 21
       }
     },
     {
@@ -78,7 +117,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
-        "line": 368,
+        "line": 468,
         "column": 14
       }
     },
@@ -91,8 +130,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
-        "line": 394,
-        "column": 8
+        "line": 494,
+        "column": 20
       }
     },
     {
@@ -104,7 +143,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
-        "line": 443,
+        "line": 543,
         "column": 16
       }
     }

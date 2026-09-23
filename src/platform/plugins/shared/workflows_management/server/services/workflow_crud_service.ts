@@ -1063,6 +1063,8 @@ export class WorkflowCrudService {
               },
             });
           } catch (error) {
+            // Preserve typed route errors for single deletes after binding compensation completes.
+            if (ids.length === 1) throw error;
             result.failures.push({
               id,
               error: error instanceof Error ? error.message : String(error),
