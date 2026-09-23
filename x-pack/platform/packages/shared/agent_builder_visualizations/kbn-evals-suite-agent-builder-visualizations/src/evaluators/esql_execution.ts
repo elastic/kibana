@@ -6,9 +6,9 @@
  */
 
 import { validateQuery } from '@kbn/esql-language';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import type { Evaluator, EvaluationResult, Example, TaskOutput } from '@kbn/evals';
-import { createEsqlQueryRunner, type EsqlQueryRunner } from './esql_query_runner';
+import type { EsqlQueryRunner } from './esql_query_runner';
 
 export const ESQL_EXECUTION_EVALUATOR_NAME = 'ES|QL Execution Validity';
 
@@ -97,7 +97,7 @@ async function evaluateSingleQuery(
 
 /**
  * Two- or three-tier CODE evaluator: AST parse → ES execution → optional hit detection.
- * Score is the unweighted mean of included tiers. Requires a live ES cluster.
+ * Score is the unweighted mean of included tiers. Requires a live ES cluster via `runQuery`.
  * `scoreOnEmptyQueries` defaults to `0` (no query = failed generation).
  * `includeHitDetection` can be a per-example function keyed on dataset metadata.
  */
@@ -105,18 +105,16 @@ export function createEsqlExecutionEvaluator<
   TExample extends Example = Example,
   TTaskOutput extends TaskOutput = TaskOutput
 >(config: {
-  esClient: ElasticsearchClient;
+  /** Executes ES|QL; share one runner across evaluators so each query runs once. */
+  runQuery: EsqlQueryRunner;
   queryExtractor: (output: TTaskOutput) => string[];
   includeHitDetection?: IncludeHitDetection<TExample, TTaskOutput>;
   logger?: Logger;
   name?: string;
   scoreOnEmptyQueries?: number;
-  /** Shared runner so evaluators that execute the same query hit ES once. */
-  runQuery?: EsqlQueryRunner;
 }): Evaluator<TExample, TTaskOutput> {
   const {
-    esClient,
-    runQuery = createEsqlQueryRunner(esClient),
+    runQuery,
     queryExtractor,
     includeHitDetection = false,
     logger,

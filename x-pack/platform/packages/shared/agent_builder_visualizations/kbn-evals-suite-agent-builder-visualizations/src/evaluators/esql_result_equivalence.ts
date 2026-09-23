@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EvaluationResult, Evaluator, Example, TaskOutput } from '@kbn/evals';
-import { createEsqlQueryRunner, type EsqlQueryRunner } from './esql_query_runner';
+import type { EsqlQueryRunner } from './esql_query_runner';
 import { normalizeEsqlForEquivalence } from './normalize_esql_for_equivalence';
 
 export const ESQL_RESULT_EQUIVALENCE_EVALUATOR_NAME = 'ES|QL Result Equivalence';
@@ -82,17 +81,15 @@ export function createEsqlResultEquivalenceEvaluator<
   TExample extends Example = Example,
   TTaskOutput extends TaskOutput = TaskOutput
 >(config: {
-  esClient: ElasticsearchClient;
+  /** Executes ES|QL; share one runner across evaluators so each query runs once. */
+  runQuery: EsqlQueryRunner;
   predictionExtractor: (output: TTaskOutput) => string;
   groundTruthExtractor: (expected: TExample['output']) => string;
   normalize?: RowNormalizeOptions;
   name?: string;
-  /** Shared runner so evaluators that execute the same query hit ES once. */
-  runQuery?: EsqlQueryRunner;
 }): Evaluator<TExample, TTaskOutput> {
   const {
-    esClient,
-    runQuery = createEsqlQueryRunner(esClient),
+    runQuery,
     predictionExtractor,
     groundTruthExtractor,
     normalize = {},

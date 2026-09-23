@@ -11,6 +11,7 @@ import {
   createEsqlResultEquivalenceEvaluator,
   normalizeRows,
 } from './esql_result_equivalence';
+import { createEsqlQueryRunner } from './esql_query_runner';
 
 describe('normalizeRows', () => {
   it('ignores column order and row order, and rounds numerics', () => {
@@ -61,7 +62,7 @@ describe('createEsqlResultEquivalenceEvaluator', () => {
 
   const evaluate = (esClient: ElasticsearchClient, goldQuery = GOLD, candidateQuery = CANDIDATE) =>
     createEsqlResultEquivalenceEvaluator({
-      esClient,
+      runQuery: createEsqlQueryRunner(esClient),
       predictionExtractor: () => candidateQuery,
       groundTruthExtractor: () => goldQuery,
     }).evaluate({

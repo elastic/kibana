@@ -12,6 +12,7 @@ import {
   collectColumnBindings,
   createColumnBindingIntegrityEvaluator,
 } from './column_binding_integrity';
+import { createEsqlQueryRunner } from './esql_query_runner';
 
 const XY: ExtractedVisualization = {
   esql: 'FROM logs | STATS count = COUNT(*), bytes = SUM(bytes) BY response.keyword',
@@ -130,7 +131,7 @@ describe('createColumnBindingIntegrityEvaluator', () => {
 
   const evaluate = (visualizations: ExtractedVisualization[], esClient = buildEsClient()) =>
     createColumnBindingIntegrityEvaluator({
-      esClient,
+      runQuery: createEsqlQueryRunner(esClient),
       visualizationExtractor: () => visualizations,
     }).evaluate({
       input: { question: 'q' },

@@ -160,7 +160,6 @@ export function createEvaluateDataset({
       VisualizationDatasetExample,
       VisualizationAgentTaskOutput
     >({
-      esClient,
       runQuery,
       // Last-turn visualizations only; `output.steps` also carries the first turn of edit examples.
       queryExtractor: (output) =>
@@ -184,7 +183,6 @@ export function createEvaluateDataset({
       VisualizationDatasetExample,
       VisualizationAgentTaskOutput
     >({
-      esClient,
       runQuery,
       predictionExtractor: (output) => output.esql ?? '',
       groundTruthExtractor: (expected) => extractGoldQuery(expected),
@@ -227,7 +225,6 @@ export function createEvaluateDataset({
       VisualizationDatasetExample,
       VisualizationAgentTaskOutput
     >({
-      esClient,
       runQuery,
       visualizationExtractor,
     });
@@ -236,7 +233,6 @@ export function createEvaluateDataset({
       VisualizationDatasetExample,
       VisualizationAgentTaskOutput
     >({
-      esClient,
       runQuery,
       visualizationExtractor,
       expectedChartTypeExtractor: (expected) => extractGoldChartType(expected),

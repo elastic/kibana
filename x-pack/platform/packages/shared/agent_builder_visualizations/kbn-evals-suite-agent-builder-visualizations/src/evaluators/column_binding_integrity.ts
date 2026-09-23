@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EvaluationResult, Evaluator, Example, TaskOutput } from '@kbn/evals';
 import type { ExtractedVisualization } from '../extract_visualization';
 import { isRecord, skippedResult } from '../evaluator_utils';
 import { isNumericColumn, type EsqlColumn } from './esql_column_types';
-import { createEsqlQueryRunner, type EsqlQueryRunner } from './esql_query_runner';
+import type { EsqlQueryRunner } from './esql_query_runner';
 
 export const COLUMN_BINDING_INTEGRITY_EVALUATOR_NAME = 'Column Binding Integrity';
 
@@ -164,15 +163,13 @@ export function createColumnBindingIntegrityEvaluator<
   TExample extends Example = Example,
   TTaskOutput extends TaskOutput = TaskOutput
 >(config: {
-  esClient: ElasticsearchClient;
+  /** Executes ES|QL; share one runner across evaluators so each query runs once. */
+  runQuery: EsqlQueryRunner;
   visualizationExtractor: (output: TTaskOutput) => ExtractedVisualization[];
   name?: string;
-  /** Shared runner so evaluators that execute the same query hit ES once. */
-  runQuery?: EsqlQueryRunner;
 }): Evaluator<TExample, TTaskOutput> {
   const {
-    esClient,
-    runQuery = createEsqlQueryRunner(esClient),
+    runQuery,
     visualizationExtractor,
     name = COLUMN_BINDING_INTEGRITY_EVALUATOR_NAME,
   } = config;

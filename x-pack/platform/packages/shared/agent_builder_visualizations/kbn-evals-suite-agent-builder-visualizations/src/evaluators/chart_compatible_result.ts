@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { EvaluationResult, Evaluator, Example, TaskOutput } from '@kbn/evals';
 import type { ExtractedVisualization } from '../extract_visualization';
 import { isNumericColumn, type EsqlColumn } from './esql_column_types';
-import { createEsqlQueryRunner, type EsqlQueryRunner } from './esql_query_runner';
+import type { EsqlQueryRunner } from './esql_query_runner';
 
 export const CHART_COMPATIBLE_RESULT_EVALUATOR_NAME = 'Chart Compatible Result';
 
@@ -111,17 +110,15 @@ export function createChartCompatibleResultEvaluator<
   TExample extends Example = Example,
   TTaskOutput extends TaskOutput = TaskOutput
 >(config: {
-  esClient: ElasticsearchClient;
+  /** Executes ES|QL; share one runner across evaluators so each query runs once. */
+  runQuery: EsqlQueryRunner;
   visualizationExtractor: (output: TTaskOutput) => ExtractedVisualization[];
   expectedChartTypeExtractor?: (expected: TExample['output']) => string | string[] | undefined;
   name?: string;
   scoreOnEmptyVisualizations?: number;
-  /** Shared runner so evaluators that execute the same query hit ES once. */
-  runQuery?: EsqlQueryRunner;
 }): Evaluator<TExample, TTaskOutput> {
   const {
-    esClient,
-    runQuery = createEsqlQueryRunner(esClient),
+    runQuery,
     visualizationExtractor,
     expectedChartTypeExtractor,
     name = CHART_COMPATIBLE_RESULT_EVALUATOR_NAME,
