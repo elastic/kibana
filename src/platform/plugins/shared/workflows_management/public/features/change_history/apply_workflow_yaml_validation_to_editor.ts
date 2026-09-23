@@ -72,7 +72,6 @@ export const applyValidationHighlightsToEditor = (
 
 export async function applyWorkflowYamlValidationFromComputed(
   editor: monaco.editor.IStandaloneCodeEditor,
-  yamlString: string,
   computed: ComputedData,
   highlightValidationErrors: boolean,
   decorationsCollectionRef: MutableRefObject<monaco.editor.IEditorDecorationsCollection | null>,
@@ -88,13 +87,13 @@ export async function applyWorkflowYamlValidationFromComputed(
     return { validationResults: [], yamlDocument: null };
   }
 
-  if (!computed.yamlDocument || !computed.yamlLineCounter) {
+  if (computed.yamlString === undefined || !computed.yamlDocument || !computed.yamlLineCounter) {
     clearEditorValidation(model, decorationsCollectionRef);
     return { validationResults: [], yamlDocument: computed.yamlDocument ?? null };
   }
 
   const validationResults = await collectFullWorkflowYamlValidationResults({
-    yamlString,
+    yamlString: computed.yamlString,
     model,
     yamlDocument: computed.yamlDocument,
     lineCounter: computed.yamlLineCounter,
@@ -151,7 +150,6 @@ export async function applyWorkflowYamlValidationToEditor(
 
   return applyWorkflowYamlValidationFromComputed(
     editor,
-    yamlString,
     computed,
     highlightValidationErrors,
     decorationsCollectionRef,

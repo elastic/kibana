@@ -69,7 +69,6 @@ describe('applyWorkflowYamlValidationToEditor', () => {
 
     const { validationResults } = await applyWorkflowYamlValidationFromComputed(
       editor,
-      yaml,
       computed,
       true,
       decorationsRef,
@@ -92,12 +91,11 @@ describe('applyWorkflowYamlValidationToEditor', () => {
     const editor = createMockEditor(model);
     const decorationsRef = { current: null as monaco.editor.IEditorDecorationsCollection | null };
 
-    await applyWorkflowYamlValidationFromComputed(editor, yaml, computed, true, decorationsRef, {
+    await applyWorkflowYamlValidationFromComputed(editor, computed, true, decorationsRef, {
       validationContext: testValidationContext,
     });
     const { validationResults } = await applyWorkflowYamlValidationFromComputed(
       editor,
-      yaml,
       computed,
       false,
       decorationsRef,
@@ -134,7 +132,6 @@ describe('applyWorkflowYamlValidationToEditor', () => {
 
     const { validationResults } = await applyWorkflowYamlValidationFromComputed(
       editor,
-      yaml,
       computed,
       true,
       decorationsRef,
@@ -195,7 +192,6 @@ describe('applyWorkflowYamlValidationToEditor', () => {
 
     const { validationResults } = await applyWorkflowYamlValidationFromComputed(
       editor,
-      yaml,
       computed,
       true,
       decorationsRef,
@@ -232,7 +228,6 @@ describe('applyWorkflowYamlValidationToEditor', () => {
 
     const { validationResults } = await applyWorkflowYamlValidationFromComputed(
       editor,
-      yaml,
       computed,
       true,
       decorationsRef,
@@ -292,7 +287,6 @@ describe('applyWorkflowYamlValidationToEditor', () => {
 
     const { validationResults } = await applyWorkflowYamlValidationFromComputed(
       editor,
-      yaml,
       computed,
       true,
       decorationsRef,

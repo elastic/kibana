@@ -44,6 +44,7 @@ describe('validateVariable', () => {
     endLineNumber: 1,
     endColumn: 10,
     yamlPath: ['steps', 0, 'params', 'value'],
+    offset: 0,
     ...overrides,
   });
 
