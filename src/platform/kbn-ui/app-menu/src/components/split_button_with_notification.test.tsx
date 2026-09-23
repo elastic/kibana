@@ -90,26 +90,17 @@ describe('<SplitButtonWithNotification />', () => {
     expect(onMainButtonClick).not.toHaveBeenCalled();
   });
 
-  it('should invoke onClick exactly once when the notification indicator is clicked', async () => {
-    // Regression: clicking the notification dot previously fired onClick twice —
-    // once from the dot's own handler and once from the event bubbling to ActionPrimary.
-    const onMainButtonClick = jest.fn();
-    // bypass pointer-events: none on the outer wrapper — only the inner icon is interactive
-    const user = userEvent.setup({ pointerEventsCheck: 0 });
-
-    render(
-      <SplitButtonWithNotification
-        label="Save"
-        onClick={onMainButtonClick}
-        onSecondaryButtonClick={jest.fn()}
-        secondaryButtonAriaLabel="More options"
-        showNotificationIndicator={true}
-        iconType="save"
-      />
-    );
+  it('should invoke onClick exactly once when the notification tip icon is clicked', async () => {
+    // Regression: the EuiIconTip previously had its own onClick handler, causing it to fire
+    // once directly and once again via bubbling to ActionPrimary — two modals from one click.
+    const { onMainButtonClick, user } = setup({ showNotificationIndicator: true, iconType: 'save' });
 
     const indicator = screen.getByTestId(APP_MENU_TEST_SUBJECTS.notificationIndicator);
-    await user.click(indicator);
+    // EuiIcon renders as a span[data-euiicon-type] in the test environment; it sits inside
+    // a span with pointer-events: auto so normal pointer-event checks apply.
+    const tipIcon = indicator.querySelector('[data-euiicon-type]');
+    expect(tipIcon).not.toBeNull();
+    await user.click(tipIcon!);
     expect(onMainButtonClick).toHaveBeenCalledTimes(1);
   });
 });
