@@ -282,9 +282,7 @@ describe('rule-tuning approval gate contract', () => {
       expect(readReview()).toMatch(
         /expression: "\{\{ steps.diagnose_rule.output.structured_output.change_type \}\}"/
       );
-      expect(blockOf('propose_query')).toContain(
-        'workflow-id: system-create-proposal'
-      );
+      expect(blockOf('propose_query')).toContain('workflow-id: system-create-proposal');
       expect(blockOf('propose_query')).toContain(
         'actionWorkflowId: system-alertzero-action-edit-rule'
       );
