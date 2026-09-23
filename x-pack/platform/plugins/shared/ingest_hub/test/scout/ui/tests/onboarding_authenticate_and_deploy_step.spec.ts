@@ -242,8 +242,9 @@ test.describe('Onboarding Authenticate and Deploy step', { tag: tags.stateful.cl
           new URL(req.url()).pathname
         )
     );
-
-    await deployButton.click();
+    await updateRequestPromise; // PUT — shared policy updated with elb inputs only
+    await expect(deployButton).toBeHidden();
+    expect(deleteObserved).toBe(false);
 
     await updateRequestPromise; // PUT — shared policy updated with elb inputs only
     expect(deleteObserved).toBe(false);
