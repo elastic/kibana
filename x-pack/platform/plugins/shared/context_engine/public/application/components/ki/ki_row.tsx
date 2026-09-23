@@ -89,21 +89,17 @@ export const KiRow = ({ aiIndexId, ki }: KiRowProps) => {
       data-test-subj="contextKiRow"
       buttonProps={{
         'data-test-subj': 'contextKiRowToggle',
+        ...getEbtProps({
+          element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageKiListPanel,
+          action: CONTEXT_ENGINE_UI_EBT.action.kiList.TOGGLE_ROW,
+        }),
       }}
       onToggle={setIsOpen}
       buttonContent={
         <div>
           <EuiTitle size="xxs">
             <EuiTextBlockTruncate lines={2} cloneElement>
-              <span
-                data-test-subj="contextKiRowTitle"
-                {...getEbtProps({
-                  element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageKiListPanel,
-                  action: CONTEXT_ENGINE_UI_EBT.action.kiList.TOGGLE_ROW,
-                })}
-              >
-                {title}
-              </span>
+              <span data-test-subj="contextKiRowTitle">{title}</span>
             </EuiTextBlockTruncate>
           </EuiTitle>
           <EuiText size="xs" color="subdued" data-test-subj="contextKiRowType">
