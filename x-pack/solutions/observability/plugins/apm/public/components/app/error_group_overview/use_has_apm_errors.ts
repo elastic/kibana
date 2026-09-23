@@ -38,8 +38,14 @@ export function getApmErrorsPresence({
 
   // `getBuckets` uses `min_doc_count: 0` + `extended_bounds`, so bucket arrays are
   // never empty — you must sum the `y` values rather than checking `length`.
-  const currentTotal = errorDistributionData.currentPeriod.reduce((sum, { y }) => sum + (y ?? 0), 0);
-  const previousTotal = errorDistributionData.previousPeriod.reduce((sum, { y }) => sum + (y ?? 0), 0);
+  const currentTotal = errorDistributionData.currentPeriod.reduce(
+    (sum, { y }) => sum + (y ?? 0),
+    0
+  );
+  const previousTotal = errorDistributionData.previousPeriod.reduce(
+    (sum, { y }) => sum + (y ?? 0),
+    0
+  );
 
   return currentTotal + previousTotal > 0 ? 'present' : 'absent';
 }
