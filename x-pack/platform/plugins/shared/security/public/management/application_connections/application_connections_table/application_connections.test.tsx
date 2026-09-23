@@ -1072,7 +1072,7 @@ describe('ApplicationConnections', () => {
       mcpServerUrl: 'https://cluster.example.com/s/engineering/api/agent_builder/mcp',
     },
   ])('opens the client details flyout in $spaceId', async ({ resource, spaceId, mcpServerUrl }) => {
-    coreStart.http.spaceId = asSpaceId(spaceId);
+    coreStart.http = { ...coreStart.http, spaceId: asSpaceId(spaceId) };
     setupHttpResponses(coreStart, {
       clients: {
         clients: [
