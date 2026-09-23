@@ -17,9 +17,16 @@ import { columnsReferToSameExpression, resolveColumnExpression } from './resolve
 
 export const VISUALIZATION_CONFIG_VS_INTENT_EVALUATOR_NAME = 'Visualization Config vs Intent';
 
-// `data_source` is scored by the ES|QL evaluators; `type` / `mark` by the Chart Type vs Intent judge.
-const SKIP_KEYS = new Set(['data_source', 'type', 'mark']);
 const COLUMN_KEYS = new Set(['column', 'field']);
+const LAYER_PATH = /^layers\[\d+\]$/;
+
+// `data_source` is scored by the ES|QL evaluators. The chart form the Chart Type vs
+// Intent judge owns is the root `type`, `layers[].type`, and Vega `spec.mark`; a `type`
+// anywhere else (e.g. `spec.encoding.x.type`) is an ordinary leaf.
+const isSkippedKey = (path: string, key: string): boolean =>
+  key === 'data_source' ||
+  (key === 'type' && (path === '' || LAYER_PATH.test(path))) ||
+  (key === 'mark' && path === 'spec');
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -40,8 +47,9 @@ const mergeReports = (target: MatchReport, source: MatchReport): void => {
  * CODE evaluator: subset-matches gold Config API against the generated
  * visualization and scores the fraction of gold leaf assertions that hold.
  * Leaves are `column` / `field` bindings (alias-tolerant) and string / number /
- * boolean / null values (strict equality). `type` and `mark` are left to the
- * Chart Type vs Intent judge. Keys absent from gold are never checked, so
+ * boolean / null values (strict equality). The chart form (root `type`,
+ * `layers[].type`, `spec.mark`) is left to the Chart Type vs Intent judge.
+ * Keys absent from gold are never checked, so
  * titles, styling, and alias wording are ignored unless the gold spells them out.
  */
 export function createVisualizationConfigVsIntentEvaluator<
@@ -206,7 +214,11 @@ function matchValue(
   // A missing parent still recurses so every gold leaf below it is counted and reported.
   const actualRecord = isRecord(actual) ? actual : {};
   for (const [key, goldChild] of Object.entries(gold)) {
-    if (goldChild === undefined || SKIP_KEYS.has(key) || (goldColumn && COLUMN_KEYS.has(key))) {
+    if (
+      goldChild === undefined ||
+      isSkippedKey(path, key) ||
+      (goldColumn && COLUMN_KEYS.has(key))
+    ) {
       continue;
     }
     matchValue(

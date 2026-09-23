@@ -220,7 +220,7 @@ describe('createVisualizationConfigVsIntentEvaluator', () => {
     expect(result.score).toBe(1);
   });
 
-  it('matches Vega encoding fields after alias resolution and ignores the mark', async () => {
+  it('matches Vega encoding fields and types after alias resolution and ignores the mark', async () => {
     const query = `FROM kibana_sample_data_logs
 | STATS \`Average Bytes\` = AVG(bytes), \`Request Count\` = COUNT(*), \`Unique URLs\` = COUNT_DISTINCT(url.keyword) BY clientip`;
 
@@ -245,7 +245,7 @@ describe('createVisualizationConfigVsIntentEvaluator', () => {
             spec: JSON.stringify({
               mark: { type: 'bar' },
               encoding: {
-                x: { field: 'avg_bytes', type: 'nominal' },
+                x: { field: 'avg_bytes', type: 'quantitative' },
                 y: { field: 'requests' },
                 size: { field: 'urls' },
               },
@@ -256,7 +256,7 @@ describe('createVisualizationConfigVsIntentEvaluator', () => {
     });
 
     expect(result.score).toBe(1);
-    expect(result.metadata).toEqual(expect.objectContaining({ checkedLeaves: 3 }));
+    expect(result.metadata).toEqual(expect.objectContaining({ checkedLeaves: 4 }));
   });
 
   it('compares plain strings exactly', async () => {
