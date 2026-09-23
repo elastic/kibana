@@ -37,7 +37,7 @@ const CREATE_INVESTIGATION_PROPOSAL_WORKFLOW_ID = 'system-create-investigation-p
  * same surfaces an analyst's inbox uses; both release the parked gate through the
  * plugin's `ProposalsService.releaseGate`, which resumes the child execution.
  */
-const PROPOSALS_API_URL = '/internal/investigations/proposals';
+const PROPOSALS_API_URL = '/internal/proposals';
 const PROPOSALS_API_VERSION = '1';
 const proposalsHeaders = {
   'elastic-api-version': PROPOSALS_API_VERSION,
@@ -355,7 +355,7 @@ const findPendingProposalForChild = async (
  * Respond to one proposal's gate through the proposals decision API, retrying the 409
  * waiting-step race.
  *
- * This is the surface an analyst's inbox uses: `POST /internal/investigations/proposals/{id}/approve`
+ * This is the surface an analyst's inbox uses: `POST /internal/proposals/{id}/approve`
  * (or `/dismiss`), registered in the agentic_investigations plugin's `approve_proposal.ts` /
  * `dismiss_proposal.ts`. The route releases the parked gate through
  * `ProposalsService.releaseGate`, which resolves the waiting step itself — the harness
@@ -844,7 +844,7 @@ export const runRuleTuningToApprovalGate = async ({
  * Answer a parked review's proposal gate and wait for the review to settle.
  *
  * Posts the decision an analyst's inbox sends — the proposals decision API
- * (`POST /internal/investigations/proposals/{id}/approve|dismiss`), which releases the
+ * (`POST /internal/proposals/{id}/approve|dismiss`), which releases the
  * gate through `ProposalsService.releaseGate` — and retries the 409 `waiting step not
  * found` read-after-write race (see `decideProposal`). Returns the terminal review
  * execution so the caller can read the apply steps' outcomes out of it.
