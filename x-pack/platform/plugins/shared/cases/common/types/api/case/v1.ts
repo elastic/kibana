@@ -46,7 +46,6 @@ import {
   CaseSeverityRt,
   CasesRt,
   CaseStatusRt,
-  CaseTemplate,
   RelatedCaseRt,
   SimilarCaseRt,
 } from '../../domain/case/v1';
@@ -77,9 +76,19 @@ const TemplateVersionRt = new rt.Type<number, number, unknown>(
 );
 
 /**
- * Template reference accepted on case CREATION. Unlike the stored/domain `CaseTemplate` (and the
- * PATCH request, where switching templates is an explicit versioned action), `version` may be
- * omitted here: the server resolves the template's latest version and pins it on the case.
+ * Template reference accepted on case UPDATE. Both `id` and `version` are required: switching a
+ * template on update is an explicit versioned action; the server does not resolve a latest version
+ * here. `version` must be a positive integer (≥ 1).
+ */
+export const CaseUpdateRequestTemplateRt = rt.strict({
+  id: rt.string,
+  version: TemplateVersionRt,
+});
+
+/**
+ * Template reference accepted on case CREATION. Unlike `CaseUpdateRequestTemplateRt` (and the
+ * stored/domain `CaseTemplate`), `version` may be omitted here: the server resolves the
+ * template's latest version and pins it on the case.
  */
 export const CaseRequestTemplateRt = rt.intersection([
   rt.strict({
@@ -110,6 +119,10 @@ const CustomFieldRt = rt.union([
   CaseCustomFieldNumberWithValidationRt,
 ]);
 
+/**
+ * @deprecated Use `extended_fields` (CASE_EXTENDED_FIELDS) instead. Values written here still work
+ * during the migration to the field-library / extended-fields system.
+ */
 export const CaseRequestCustomFieldsRt = limitedArraySchema({
   codec: CustomFieldRt,
   fieldName: 'customFields',
@@ -172,7 +185,10 @@ export const CaseBaseOptionalFieldsRequestRt = rt.exact(
      * The alert sync settings
      */
     settings: CaseSettingsRt,
-    template: rt.union([CaseTemplate, rt.null]),
+    template: rt.union([CaseUpdateRequestTemplateRt, rt.null]),
+    // Field-library values keyed by storage key (`<name>_as_<type>`); the replacement for
+    // `customFields`. Only keys defined in the owner's field library (or an applied template) are
+    // accepted. Discover valid keys via `GET /api/cases/fields`.
     [CASE_EXTENDED_FIELDS]: rt.union([rt.undefined, rt.record(rt.string, rt.string)]),
     /**
      * The close reason to sync to attached alerts
