@@ -120,7 +120,7 @@ describe('executeFeatureIdentificationAgent', () => {
             pluginId: 'significant_events_ki_extraction',
             aggregateBy: 'significant_events',
             productSolution: 'observability',
-            productFeature: 'significant_events',
+            productFeature: 'nightshift',
             interactionId: 'run-1',
           },
         }),

@@ -81,10 +81,10 @@ describe('significant events persistence workflow contracts', () => {
     expect(triggerStep.with?.inputs?.context?.trigger_type).toBe('automatic');
   });
 
-  it('attributes discovery agent calls to Significant Events', () => {
+  it('attributes discovery agent calls to Nightshift', () => {
     expect(requireStep(discovery, 'run_discovery_agent')).toMatchObject({
       'product-solution': 'observability',
-      'product-feature': 'significant_events',
+      'product-feature': 'nightshift',
     });
   });
 

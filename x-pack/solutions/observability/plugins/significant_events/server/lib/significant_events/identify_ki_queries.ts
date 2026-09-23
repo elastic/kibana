@@ -12,6 +12,7 @@ import type { GeneratedSignificantEventQuery } from '@kbn/significant-events-sch
 import {
   SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
+  SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_FEATURE,
   SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_SOLUTION,
 } from '@kbn/significant-events-schema';
 import {
@@ -123,7 +124,7 @@ export async function identifyKIQueries(
         pluginId: SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
         aggregateBy: SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
         productSolution: SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_SOLUTION,
-        productFeature: SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
+        productFeature: SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_FEATURE,
         interactionId: runId,
       },
     },

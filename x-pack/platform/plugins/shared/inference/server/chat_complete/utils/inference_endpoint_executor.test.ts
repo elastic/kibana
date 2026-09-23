@@ -57,7 +57,7 @@ describe('createInferenceEndpointExecutor', () => {
         connectorTelemetry: {
           pluginId: 'significant_events_discovery',
           productSolution: 'observability',
-          productFeature: 'significant_events',
+          productFeature: 'nightshift',
           interactionId: 'execution-1',
         },
       },
@@ -69,7 +69,7 @@ describe('createInferenceEndpointExecutor', () => {
         headers: {
           'X-Elastic-Product-Use-Case': 'significant_events_discovery',
           'X-Elastic-Product-Solution': 'observability',
-          'X-Elastic-Product-Feature': 'significant_events',
+          'X-Elastic-Product-Feature': 'nightshift',
           'X-Elastic-Inference-Interaction-Id': 'execution-1',
         },
       })

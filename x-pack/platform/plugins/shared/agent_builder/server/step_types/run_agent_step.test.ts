@@ -886,7 +886,7 @@ describe('ai.agent workflow step (Agent Builder)', () => {
             'plugin-id': 'streams_significant_events_discovery',
             'aggregate-by': 'streams_significant_events',
             'product-solution': 'observability',
-            'product-feature': 'significant_events',
+            'product-feature': 'nightshift',
           },
         })
       );
@@ -898,7 +898,7 @@ describe('ai.agent workflow step (Agent Builder)', () => {
               pluginId: 'streams_significant_events_discovery',
               aggregateBy: 'streams_significant_events',
               productSolution: 'observability',
-              productFeature: 'significant_events',
+              productFeature: 'nightshift',
               interactionId: 'exec-1',
             },
           }),
@@ -916,7 +916,7 @@ describe('ai.agent workflow step (Agent Builder)', () => {
           input: { message: 'hello' },
           config: {
             'product-solution': 'observability',
-            'product-feature': 'significant_events',
+            'product-feature': 'nightshift',
           },
         })
       );

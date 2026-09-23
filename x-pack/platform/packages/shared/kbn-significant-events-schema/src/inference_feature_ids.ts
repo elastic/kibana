@@ -11,6 +11,9 @@ export const SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID = 'significant_event
 /** Product solution for Significant Events EIS attribution. */
 export const SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_SOLUTION = 'observability' as const;
 
+/** Product feature for Significant Events EIS attribution. */
+export const SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_FEATURE = 'nightshift' as const;
+
 /** Knowledge Indicator feature extraction (KI extraction). */
 export const SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID =
   'significant_events_ki_extraction' as const;
@@ -26,3 +29,7 @@ export const SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID =
 /** Root cause investigation. */
 export const SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID =
   'significant_events_investigation' as const;
+
+/** Decision tree reinforcement. */
+export const SIGNIFICANT_EVENTS_DECISION_TREE_REINFORCE_INFERENCE_FEATURE_ID =
+  'significant_events_decision_tree_reinforce' as const;

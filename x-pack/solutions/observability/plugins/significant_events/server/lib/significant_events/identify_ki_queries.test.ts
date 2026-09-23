@@ -109,7 +109,7 @@ describe('generateSignificantEventDefinitions (semantic code search wiring)', ()
           pluginId: 'significant_events_ki_query_generation',
           aggregateBy: 'significant_events',
           productSolution: 'observability',
-          productFeature: 'significant_events',
+          productFeature: 'nightshift',
           interactionId: 'run-1',
         },
       },

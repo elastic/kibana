@@ -8,6 +8,7 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
+  SIGNIFICANT_EVENTS_DECISION_TREE_REINFORCE_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
   SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
@@ -41,6 +42,7 @@ const PRICES: PriceMap = new Map([
 const KNOWN_FEATURE_IDS = [
   SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
+  SIGNIFICANT_EVENTS_DECISION_TREE_REINFORCE_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
 ] as const;
@@ -183,7 +185,7 @@ describe('calculateSignificantEventsCost', () => {
     expect(result.month.periodEnd).toBe(PERIOD_END);
   });
 
-  it('filters on the parent feature id and maps all 4 feature IDs onto three groups', async () => {
+  it('filters on the parent feature id and maps all 5 feature IDs onto three groups', async () => {
     const features: Record<string, ReturnType<typeof featureBucket>> = {};
     for (const featureId of KNOWN_FEATURE_IDS) {
       features[featureId] = featureBucket({
@@ -270,7 +272,7 @@ describe('calculateSignificantEventsCost', () => {
           },
         },
       });
-      return { aggregations: aggregations({ total: 40, features }) };
+      return { aggregations: aggregations({ total: 50, features }) };
     });
 
     const result = await calculate({ esClient });
@@ -284,11 +286,32 @@ describe('calculateSignificantEventsCost', () => {
     ]);
     expect(result.today.groups.find((group) => group.group === 'discovery')?.totalTokens).toBe(10);
     expect(result.today.groups.find((group) => group.group === 'investigation')?.totalTokens).toBe(
-      10
+      20
     );
     expect(result.today.groups.find((group) => group.group === 'ki_extraction')?.totalTokens).toBe(
       20
     );
+  });
+
+  it('counts decision tree reinforcement tokens in the investigation group', async () => {
+    const esClient = createEsClient(() => ({
+      aggregations: aggregations({
+        total: 25,
+        features: {
+          [SIGNIFICANT_EVENTS_DECISION_TREE_REINFORCE_INFERENCE_FEATURE_ID]: featureBucket({
+            featureTotal: 25,
+            models: [modelBucket({ key: SONNET, total: 25, prompt: 25 })],
+          }),
+        },
+      }),
+    }));
+
+    const result = await calculate({ esClient });
+
+    expect(result.today.groups.find((group) => group.group === 'investigation')?.totalTokens).toBe(
+      25
+    );
+    expect(result.today.unknownFeatureTokens).toBe(0);
   });
 
   it('prices prompt, cached, completion, and thinking tokens with conserved totals', async () => {

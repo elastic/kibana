@@ -203,12 +203,13 @@ steps:
     # @kbn/significant-events-schema
     # inference_feature_ids.ts (SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID /
     # SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID /
-    # SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_SOLUTION).
+    # SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_SOLUTION /
+    # SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_FEATURE).
     connector-id-by-feature: 'significant_events_discovery'
     plugin-id: 'significant_events_discovery'
     aggregate-by: 'significant_events'
     product-solution: 'observability'
-    product-feature: 'significant_events'
+    product-feature: 'nightshift'
     create-conversation: true
     public-conversation: true
     with:

@@ -14,6 +14,7 @@ interface WorkflowStep {
   name: string;
   type?: string;
   if?: string;
+  'plugin-id'?: string;
   'product-solution'?: string;
   'product-feature'?: string;
   with?: { method?: string; path?: string; body?: Record<string, unknown> };
@@ -78,10 +79,11 @@ describe('deductive investigation workflow', () => {
     expect(persistCompleted.with?.body).not.toHaveProperty('blind_spots');
   });
 
-  it('attributes agent calls to Significant Events', () => {
+  it('attributes agent calls to Nightshift under the shared investigation id', () => {
     expect(requireStep('investigate')).toMatchObject({
+      'plugin-id': 'significant_events_investigation',
       'product-solution': 'observability',
-      'product-feature': 'significant_events',
+      'product-feature': 'nightshift',
     });
   });
 
