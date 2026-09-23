@@ -566,7 +566,7 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
             <EuiSpacer size="m" />
           </>
         )}
-        {showIac && (
+        {isAws && (
           <>
             <IacTemplateDetails
               iacDeploymentId={editedIacDeploymentId}
