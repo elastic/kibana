@@ -96,7 +96,7 @@ conversation trace; the placeholder has a separate evaluator trace.
 
 The `evals_nightshift_investigations` server config extends `evals_tracing` for `all` (the default)
 and `trace-only`; `synthetic-smoke` gets plain `evals_tracing` and needs no sandbox credentials.
-It enables the investigation engine, its `streams.significantEventsAvailable` feature flag and
+It enables the investigation engine, its `nightshift.enabled` feature flag and
 sandbox, disables Cortex, and exports full Agent Builder
 payloads (user messages, system instructions, responses, tool arguments/results and conversation
 IDs) to the profile's configured destination. Sandbox credentials, PEM material and trace-exporter
