@@ -11,6 +11,7 @@ import { expect } from '@kbn/scout/api';
 import {
   API_VERSIONS,
   FF_ENABLE_ENTITY_STORE_V2,
+  RESOLUTION_RULE_IDS,
   type GetEntityMaintainersResponse,
 } from '../../../../common';
 import type { EntityStoreStatusResponseBody } from '../../../../server/routes/apis/status';
@@ -226,6 +227,12 @@ export const installEntityStoreSuite = async ({
     },
   });
   expect(resetConfigResponse.statusCode).toBe(200);
+
+  const enableEmailRuleResponse = await apiClient.put(
+    ENTITY_STORE_ROUTES.public.RESOLUTION_RULES_ENABLE(RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH),
+    { headers: defaultHeaders, responseType: 'json' }
+  );
+  expect(enableEmailRuleResponse.statusCode).toBe(200);
 
   const stopResponse = await stopAllEntityTypes(apiClient, defaultHeaders);
   expect(stopResponse.statusCode).toBe(200);
