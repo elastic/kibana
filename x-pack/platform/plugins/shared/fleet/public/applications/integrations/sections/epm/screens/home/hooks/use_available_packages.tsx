@@ -275,7 +275,8 @@ export const useAvailablePackages = ({
 
   // Cards with the agentless filter applied (used by the old home page and
   // its category sidebar counts). Derived from allCards so the sort/map work
-  // is not duplicated.
+  // is not duplicated. Re-sorted after filtering because singleton degradation
+  // can change a card's title, shifting its position relative to the allCards sort.
   const cards: IntegrationCardItem[] = useMemo(() => {
     if (!isAgentlessEnabled || !onlyAgentlessFilter) return allCards;
     const agentlessMatch = (c: IntegrationCardItem) => c.supportsAgentless === true;
@@ -294,13 +295,14 @@ export const useAvailablePackages = ({
       const filteredCategories = [...new Set(filteredMembers.flatMap((m) => m.categories))];
       result.push({ ...card, groupMembers: filteredMembers, categories: filteredCategories });
     }
-    return result;
+    return result.sort((a, b) => a.title.localeCompare(b.title));
   }, [allCards, isAgentlessEnabled, onlyAgentlessFilter]);
 
   // Packages to show
   // Filters out based on selected category and subcategory (if any).
   // For collection cards, filters groupMembers too so badge counts and flyout
-  // variants reflect the active filter state.
+  // variants reflect the active filter state. Re-sorted after filtering because
+  // singleton degradation can change a card's title, shifting its position.
   const filteredCards = useMemo(() => {
     if (selectedCategory === '') return cards;
     const categoryMatch = (c: IntegrationCardItem) =>
@@ -322,7 +324,7 @@ export const useAvailablePackages = ({
       const filteredCategories = [...new Set(filteredMembers.flatMap((m) => m.categories))];
       result.push({ ...card, groupMembers: filteredMembers, categories: filteredCategories });
     }
-    return result;
+    return result.sort((a, b) => a.title.localeCompare(b.title));
   }, [cards, selectedCategory, selectedSubCategory]);
 
   const {

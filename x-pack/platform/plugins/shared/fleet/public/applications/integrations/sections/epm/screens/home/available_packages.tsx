@@ -140,11 +140,12 @@ export const AvailablePackages: React.FC<{ prereleaseIntegrationsEnabled: boolea
 
   // Clear stale ?collection= param when active filters remove or degrade the open collection
   // so it does not unexpectedly re-open the flyout after the filter is cleared.
+  // Guard on isLoading: filteredCards is empty while packages load, so openCollectionCard
+  // would be undefined on every initial render, wiping a bookmarked ?collection= before it resolves.
   useEffect(() => {
-    if (openCollectionGroupId && !openCollectionCard) {
-      closeCollection();
-    }
-  }, [openCollectionGroupId, openCollectionCard, closeCollection]);
+    if (isLoading || !openCollectionGroupId || openCollectionCard) return;
+    closeCollection();
+  }, [isLoading, openCollectionGroupId, openCollectionCard, closeCollection]);
 
   // Build the return path that member detail pages use to navigate back here with the flyout open.
   const collectionReturnPath = useMemo(

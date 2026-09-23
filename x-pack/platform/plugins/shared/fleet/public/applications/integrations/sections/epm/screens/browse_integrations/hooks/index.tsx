@@ -225,17 +225,31 @@ export function useBrowseIntegrationHook({
 
   // Recompute category counts based on non-category filtered cards so
   // sidebar counts reflect active filters (e.g. agentless, search, signal).
+  // For collection cards, simulate singleton promotion: if only one member matches
+  // the category and that member would be blocked by implicitVisible (e.g. deprecated),
+  // don't count the collection — clicking the category would yield an empty grid.
   const filteredAllCategories = useMemo(() => {
+    const showDeprecated = urlFilters.status?.includes(STATUS_DEPRECATED) ?? false;
+    const implicitVisible = (c: IntegrationCardItem) =>
+      (showDeprecated || !('isDeprecated' in c && c.isDeprecated === true)) &&
+      (urlFilters.showContent || c.type !== 'content');
+
     return allCategories.map((category) => {
       if (category.id === '') {
         return { ...category, count: nonCategoryFilteredCards.length };
       }
-      const count = nonCategoryFilteredCards.filter((card) =>
-        card.categories.includes(category.id)
-      ).length;
+      const count = nonCategoryFilteredCards.filter((card) => {
+        if (!card.isCollectionCard) return card.categories.includes(category.id);
+        const membersInCategory = (card.groupMembers ?? []).filter((m) =>
+          m.categories.includes(category.id)
+        );
+        if (membersInCategory.length === 0) return false;
+        if (membersInCategory.length >= 2) return true;
+        return implicitVisible(membersInCategory[0]);
+      }).length;
       return { ...category, count };
     });
-  }, [allCategories, nonCategoryFilteredCards]);
+  }, [allCategories, nonCategoryFilteredCards, urlFilters.status, urlFilters.showContent]);
 
   const filteredMainCategories = useMemo(() => {
     return filteredAllCategories.filter((category) => category.parent_id === undefined);

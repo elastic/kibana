@@ -617,9 +617,14 @@ describe('useBrowseIntegrationHook', () => {
     });
 
     describe('sort stability after singleton degradation', () => {
-      it('re-sorts A-Z after a collection degrades to a differently titled singleton', () => {
+      it('re-sorts A-Z after a collection degrades to a singleton with a title that crosses another card', () => {
+        // The "apache" collection (title "Apache", sorts at A) has one member in the
+        // 'opentelemetry' category whose title starts with T ("Tomcat OTel"). After the
+        // category filter, only "Tomcat OTel" survives (singleton degradation). Without
+        // a re-sort, "Tomcat OTel" would occupy the "A" slot — before "Nginx" — even
+        // though T > N alphabetically. The re-sort must move it after "Nginx".
         const apacheCollection = makeCollection('apache', [
-          { title: 'Apache OTel', categories: ['web', 'opentelemetry'] },
+          { title: 'Tomcat OTel', categories: ['web', 'opentelemetry'] },
           { title: 'Apache ECS', categories: ['web'] },
         ]);
         const nginxCard = {
@@ -630,7 +635,7 @@ describe('useBrowseIntegrationHook', () => {
           type: 'integration',
         } as unknown as IntegrationCardItem;
 
-        // A-Z: apache collection (A) comes before nginx (N)
+        // A-Z: apache collection (A) comes before nginx (N) in the pre-filter sort
         mockUseAvailablePackages([apacheCollection, nginxCard] as IntegrationCardItem[]);
         (useUrlCategories as jest.Mock).mockReturnValue({
           category: 'opentelemetry',
@@ -642,8 +647,8 @@ describe('useBrowseIntegrationHook', () => {
           useBrowseIntegrationHook({ prereleaseIntegrationsEnabled: false })
         );
 
-        // apache collection degrades to 'Apache OTel'; sorted A-Z: Apache OTel < Nginx
-        expect(result.current.filteredCards.map((c) => c.title)).toEqual(['Apache OTel', 'Nginx']);
+        // apache collection degrades to 'Tomcat OTel'; re-sorted A-Z: Nginx (N) < Tomcat OTel (T)
+        expect(result.current.filteredCards.map((c) => c.title)).toEqual(['Nginx', 'Tomcat OTel']);
       });
     });
   });
