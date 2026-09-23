@@ -80,21 +80,21 @@ interface CandidatePage<T> {
   total?: number;
 }
 
-/** Structural view of the Fleet agent fields this lookup reads. */
-interface FleetCandidate {
-  id: string;
-  /** Fleet reports this as optional. */
-  status?: string;
-  packages?: string[];
-  enrolled_at?: string;
-}
-
 /** Structural view of the metadata-index fields this lookup reads. */
 interface MetadataCandidate {
   metadata?: { agent?: { id?: string } };
   host_status?: string;
   /** HostInfo `last_checkin` — ISO timestamp used for the recency tiebreak. */
   last_checkin?: string;
+}
+
+/**
+ * A metadata candidate with its agent id proven present. Narrowed with a
+ * plain boolean filter — a type predicate cannot express this, because the
+ * predicate's type must be assignable to the (id-optional) mapped type.
+ */
+interface MetadataCandidateWithAgent extends MetadataCandidate {
+  metadata: { agent: { id: string } };
 }
 
 /**
@@ -305,9 +305,10 @@ export function createEndpointLookupService(
       return { items: data ?? [], total: pageTotal };
     });
 
-    const candidates = items
+    const candidates: NormalizedCandidate[] = items
+      .filter((entry): entry is MetadataCandidateWithAgent => Boolean(entry.metadata?.agent?.id))
       .map((entry) => ({
-        agentId: entry.metadata?.agent?.id,
+        agentId: entry.metadata.agent.id,
         // Metadata `host_status` is the HostStatus enum, not Fleet's
         // agent-level `online`. Only records that are definitively gone
         // (offline / inactive / unenrolled) count as not live; `updating` and
@@ -317,8 +318,7 @@ export function createEndpointLookupService(
         ),
         status: entry.host_status as string,
         enrolledAt: entry.last_checkin,
-      }))
-      .filter((candidate): candidate is NormalizedCandidate => Boolean(candidate.agentId));
+      }));
 
     return { candidates, truncated, total };
   };
