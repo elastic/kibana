@@ -265,6 +265,28 @@ describe('useWatchSettingsDraft', () => {
       });
     });
 
+    it('keeps the server body message when a save is forbidden', async () => {
+      const forbidden = Object.assign(new Error('Forbidden'), {
+        request: {},
+        body: {
+          message: 'Enabling or disabling a worker requires update access to managed workflows',
+        },
+      });
+      mutateAsync.mockRejectedValueOnce(forbidden);
+      const { result } = renderHook(() => useWatchSettingsDraft([ruleCreation]));
+
+      act(() => {
+        result.current.updateEnabled(ruleCreation, true);
+      });
+      await act(async () => {
+        await result.current.save();
+      });
+
+      expect(result.current.resolve(ruleCreation).error).toBe(
+        'Enabling or disabling a worker requires update access to managed workflows'
+      );
+    });
+
     it("discards the failed Worker's edits without undoing the successful write", async () => {
       const { result } = await saveWithOneFailure();
 

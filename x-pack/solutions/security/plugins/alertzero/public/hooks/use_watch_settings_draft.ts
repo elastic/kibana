@@ -6,6 +6,7 @@
  */
 
 import { useCallback, useMemo, useState } from 'react';
+import { isHttpFetchError } from '@kbn/core-http-browser';
 import { isEqual } from 'lodash';
 import type {
   UpdateWorkerRequestBody,
@@ -32,6 +33,23 @@ interface WorkerDraftOverlay {
   settings?: WorkerSettingsDraft;
   error?: string;
 }
+
+/** Prefer the route's body message. A 403's Error message is only the status text, "Forbidden". */
+const messageFromWorkerUpdateError = (error: unknown): string => {
+  if (isHttpFetchError(error)) {
+    const body = error.body;
+    if (
+      body != null &&
+      typeof body === 'object' &&
+      'message' in body &&
+      typeof body.message === 'string' &&
+      body.message.length > 0
+    ) {
+      return body.message;
+    }
+  }
+  return error instanceof Error ? error.message : String(error);
+};
 
 const isWorkerDirty = (worker: Worker, overlay: WorkerDraftOverlay | undefined): boolean => {
   if (!overlay) {
@@ -148,7 +166,7 @@ export const useWatchSettingsDraft = (workers: Worker[]) => {
             ...current,
             [worker.id]: {
               ...current[worker.id],
-              error: error instanceof Error ? error.message : String(error),
+              error: messageFromWorkerUpdateError(error),
             },
           }));
         }

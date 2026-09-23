@@ -10,6 +10,7 @@ import { css } from '@emotion/react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -109,11 +110,13 @@ export const WatchDetailPage: React.FC = () => {
       label: settingsI18n.SAVE_WATCH_SETTINGS,
       iconType: 'save' as const,
       isLoading: isSaving,
-      disableButton: !isDirty || isSaving || Boolean(workersError) || hasInvalidDraft,
+      // A read user still sees Save; the menu tooltip explains why it does nothing.
+      disableButton: !canWrite || !isDirty || isSaving || Boolean(workersError) || hasInvalidDraft,
+      tooltipContent: canWrite ? undefined : settingsI18n.WATCH_SETTINGS_READ_ONLY_SAVE_TOOLTIP,
       testId: 'alertZeroWatchSettingsSave',
       run: onSave,
     }),
-    [isSaving, isDirty, workersError, hasInvalidDraft, onSave]
+    [canWrite, isSaving, isDirty, workersError, hasInvalidDraft, onSave]
   );
 
   const headerItems = useMemo(
@@ -123,12 +126,12 @@ export const WatchDetailPage: React.FC = () => {
         label: settingsI18n.DISCARD_WATCH_SETTINGS,
         iconType: 'cross' as const,
         // A flagged trigger amount is not part of the draft, so it can be the only thing to undo.
-        disableButton: (!isDirty && !hasInvalidDraft) || isSaving,
+        disableButton: !canWrite || (!isDirty && !hasInvalidDraft) || isSaving,
         testId: 'alertZeroWatchSettingsDiscard',
         run: onDiscard,
       },
     ],
-    [isDirty, isSaving, hasInvalidDraft, onDiscard]
+    [canWrite, isDirty, isSaving, hasInvalidDraft, onDiscard]
   );
   // Collapsed Workers (default: all expanded). Parameter-only navigation keeps this page mounted,
   // so the initializer runs only on the first Watch — reset whenever watchId changes.
@@ -271,8 +274,8 @@ export const WatchDetailPage: React.FC = () => {
     <WatchesSectionLayout
       active={watchId}
       title={watch.name}
-      headerPrimaryActionItem={canWrite ? headerPrimaryActionItem : undefined}
-      headerItems={canWrite ? headerItems : undefined}
+      headerPrimaryActionItem={headerPrimaryActionItem}
+      headerItems={headerItems}
     >
       <EuiFlexGroup direction="column" gutterSize="l" responsive={false}>
         {saveBlockedByInvalidDraft || hasInvalidDraft ? (
@@ -288,6 +291,20 @@ export const WatchDetailPage: React.FC = () => {
             <EuiText size="s" color="subdued" data-test-subj="alertZeroWatchIntro">
               <p>{intro}</p>
             </EuiText>
+          </EuiFlexItem>
+        ) : null}
+
+        {!canWrite ? (
+          <EuiFlexItem grow={false}>
+            <EuiCallOut
+              announceOnMount
+              size="s"
+              color="warning"
+              iconType="lock"
+              data-test-subj="alertZeroWatchSettingsReadOnly"
+            >
+              <p>{settingsI18n.WATCH_SETTINGS_READ_ONLY}</p>
+            </EuiCallOut>
           </EuiFlexItem>
         ) : null}
 

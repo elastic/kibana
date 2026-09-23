@@ -43,6 +43,19 @@ export const DISCARD_WATCH_SETTINGS = i18n.translate(
   { defaultMessage: 'Discard' }
 );
 
+export const WATCH_SETTINGS_READ_ONLY = i18n.translate(
+  'xpack.alertzero.watches.settings.readOnlyCallout',
+  {
+    defaultMessage:
+      'You have read-only access to Watch settings. Ask an administrator for the required privilege.',
+  }
+);
+
+export const WATCH_SETTINGS_READ_ONLY_SAVE_TOOLTIP = i18n.translate(
+  'xpack.alertzero.watches.settings.saveReadOnlyTooltip',
+  { defaultMessage: 'Read-only access' }
+);
+
 export const WORKER_SETTINGS_SAVE_ERROR = i18n.translate(
   'xpack.alertzero.watches.settings.worker.saveError',
   { defaultMessage: 'Could not save this Worker. Other saved changes were kept.' }

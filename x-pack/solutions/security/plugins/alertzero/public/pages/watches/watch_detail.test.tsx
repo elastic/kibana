@@ -50,6 +50,7 @@ jest.mock('./components/watches_section_layout', () => ({
       label: string;
       testId?: string;
       disableButton?: boolean | (() => boolean);
+      tooltipContent?: string;
       isLoading?: boolean;
       run: () => void;
     };
@@ -57,6 +58,7 @@ jest.mock('./components/watches_section_layout', () => ({
       label: string;
       testId?: string;
       disableButton?: boolean | (() => boolean);
+      tooltipContent?: string;
       run: () => void;
     }>;
   }) => {
@@ -71,6 +73,7 @@ jest.mock('./components/watches_section_layout', () => ({
             type="button"
             data-test-subj={item.testId}
             disabled={resolveDisabled(item.disableButton)}
+            title={item.tooltipContent}
             onClick={() => item.run()}
           >
             {item.label}
@@ -81,6 +84,7 @@ jest.mock('./components/watches_section_layout', () => ({
             type="button"
             data-test-subj={headerPrimaryActionItem.testId}
             disabled={resolveDisabled(headerPrimaryActionItem.disableButton)}
+            title={headerPrimaryActionItem.tooltipContent}
             onClick={() => headerPrimaryActionItem.run()}
           >
             {headerPrimaryActionItem.label}
@@ -453,7 +457,9 @@ describe('WatchDetailPage', () => {
       within(ruleCreation).queryByTestId('alertZeroAnalysisWindowDays')
     ).not.toBeInTheDocument();
     expect(screen.getByTestId('alertZeroWatchSettingsSave')).toBeDisabled();
+    expect(screen.getByTestId('alertZeroWatchSettingsSave')).not.toHaveAttribute('title');
     expect(screen.getByTestId('alertZeroWatchSettingsDiscard')).toBeDisabled();
+    expect(screen.queryByTestId('alertZeroWatchSettingsReadOnly')).not.toBeInTheDocument();
 
     fireEvent.click(
       screen.getByTestId(
@@ -735,26 +741,64 @@ describe('WatchDetailPage', () => {
     });
   });
 
-  it('locks worker settings and hides save when the user cannot write', () => {
+  it('shows the read-only callout and disables every control without hiding Save or Discard', () => {
     mockUseCanWriteAlertZero.mockReturnValue(false);
     renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, detectionWorkers);
 
-    expect(screen.queryByTestId('alertZeroWatchSettingsSave')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('alertZeroWatchSettingsDiscard')).not.toBeInTheDocument();
+    expect(screen.getByTestId('alertZeroWatchSettingsReadOnly')).toHaveTextContent(
+      'You have read-only access to Watch settings. Ask an administrator for the required privilege.'
+    );
+
+    const save = screen.getByTestId('alertZeroWatchSettingsSave');
+    const discard = screen.getByTestId('alertZeroWatchSettingsDiscard');
+    expect(save).toBeDisabled();
+    expect(save).toHaveAttribute('title', 'Read-only access');
+    expect(discard).toBeDisabled();
+    expect(discard).not.toHaveAttribute('title');
+
+    const section = screen.getByTestId(
+      `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID}`
+    );
     expect(
-      screen.getByTestId(
+      within(section).getByTestId(
         `alertZeroWorkerEnabledSwitch-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID}`
       )
     ).toBeDisabled();
     expect(
-      within(
-        within(
-          screen.getByTestId(
-            `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID}`
-          )
-        ).getByTestId('alertZeroAutonomyCard-manual')
-      ).getByRole('radio')
+      within(within(section).getByTestId('alertZeroAutonomyCard-manual')).getByRole('radio')
     ).toBeDisabled();
+    expect(
+      within(section).getByTestId(
+        `alertZeroTriggerAmount-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID}`
+      )
+    ).toBeDisabled();
+    expect(
+      within(section).getByTestId(
+        `alertZeroTriggerUnit-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID}`
+      )
+    ).toBeDisabled();
+    expect(within(section).getByTestId('alertZeroAnalysisWindowDays')).toBeDisabled();
+    expect(within(section).getByTestId('alertZeroAnalysisWindowDays')).toHaveValue(14);
+
+    // The accordion stays interactive so a read user can still open a Worker and see its values.
+    fireEvent.click(
+      screen.getByTestId(
+        `alertZeroWorkerAccordionHeader-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID}`
+      )
+    );
+    expect(
+      within(
+        screen.getByTestId(
+          `alertZeroWatchWorkerAccordion-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID}`
+        )
+      ).getByRole('button', { expanded: false })
+    ).toBeInTheDocument();
+    fireEvent.click(
+      screen.getByTestId(
+        `alertZeroWorkerAccordionHeader-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID}`
+      )
+    );
+    expect(within(section).getByTestId('alertZeroAnalysisWindowDays')).toHaveValue(14);
   });
 
   it('resets collapsed accordion state when navigating to a different Watch, not just on remount', () => {
@@ -996,5 +1040,36 @@ describe('WatchDetailPage', () => {
     expect(
       await screen.findByTestId(`alertZeroWorkerHeaderSaveError-${shared.id}`)
     ).toBeInTheDocument();
+  });
+
+  it('shows the server message on the Worker when saving is forbidden', async () => {
+    const { mutateAsync } = renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, detectionWorkers);
+    const forbidden = Object.assign(new Error('Forbidden'), {
+      request: {},
+      body: {
+        message: 'Enabling or disabling a worker requires update access to managed workflows',
+      },
+    });
+    mutateAsync.mockRejectedValue(forbidden);
+
+    fireEvent.click(
+      screen.getByTestId(
+        `alertZeroWorkerEnabledSwitch-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID}`
+      )
+    );
+    fireEvent.click(screen.getByTestId('alertZeroWatchSettingsSave'));
+
+    expect(
+      await screen.findByTestId(
+        `alertZeroWorkerSaveError-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID}`
+      )
+    ).toHaveTextContent(
+      'Enabling or disabling a worker requires update access to managed workflows'
+    );
+    expect(
+      screen.getByTestId(
+        `alertZeroWorkerSaveError-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID}`
+      )
+    ).not.toHaveTextContent('Forbidden');
   });
 });
