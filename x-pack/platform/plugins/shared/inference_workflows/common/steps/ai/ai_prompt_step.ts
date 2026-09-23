@@ -24,6 +24,12 @@ export const ConfigSchema = z.object({
     .describe(
       '[tech preview] Reasoning effort level forwarded to the LLM. One of: none, minimal, low, medium, high, xhigh. Support depends on the underlying model and provider.'
     ),
+  'effort-level': z
+    .enum(['low', 'high'])
+    .optional()
+    .describe(
+      'Model tier to use. "low" routes to the admin-configured fast/cheap model (e.g. Gemini Flash Lite, Haiku). "high" (default) routes to the frontier model configured for AI prompt steps.'
+    ),
 });
 
 // Maybe we can define specific schema for metadata in the future

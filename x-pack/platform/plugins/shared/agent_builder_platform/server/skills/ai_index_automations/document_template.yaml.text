@@ -83,6 +83,7 @@ steps:
 
       - name: summarize_document
         type: ai.prompt
+        effort-level: low
         with:
           systemPrompt: |
             You summarise source documents for a retrieval index. Ground every statement in the
