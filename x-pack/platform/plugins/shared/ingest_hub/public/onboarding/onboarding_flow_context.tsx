@@ -56,11 +56,7 @@ interface PersistedAuthenticateAndDeployStep {
   agentPolicyName?: string; // denormalised so step 4 needs no GET
   selectedAgentPolicyIds?: string[]; // for existing-policy mode
   // Agent-based credential method — persisted so switching steps preserves the selection.
-  agentCredentialMethod?:
-    | 'static_keys'
-    | 'temporary_keys'
-    | 'shared_credentials'
-    | 'assume_role';
+  agentCredentialMethod?: 'static_keys' | 'temporary_keys' | 'shared_credentials' | 'assume_role';
   // Non-secret credential fields for shared_credentials and assume_role methods.
   // secret_access_key / session_token are never persisted (memory only).
   sharedCredentialFile?: string;
@@ -96,11 +92,7 @@ export interface AgentBasedDeploymentState {
   agentPolicyId?: string;
   agentPolicyName?: string;
   selectedAgentPolicyIds: string[];
-  agentCredentialMethod:
-    | 'static_keys'
-    | 'temporary_keys'
-    | 'shared_credentials'
-    | 'assume_role';
+  agentCredentialMethod: 'static_keys' | 'temporary_keys' | 'shared_credentials' | 'assume_role';
   sharedCredentialFile?: string;
   credentialProfileName?: string;
   roleArn?: string;
