@@ -79,6 +79,10 @@ export const LogExtractionTypeOverride = z.object(
   nullishFields(LogExtractionObj.omit({ timeout: true, fieldHistoryLength: true }).shape)
 );
 
+/** Minimum allowed sampling rate: 10 % of documents. Zero is excluded to prevent accidentally
+ * silencing non-priority extraction entirely via a misconfigured override. */
+export const MIN_SAMPLING_RATE = 0.1;
+
 export type NonPriorityLogExtractionTypeOverride = z.infer<
   typeof NonPriorityLogExtractionTypeOverride
 >;
@@ -100,7 +104,7 @@ export const NonPriorityLogExtractionTypeOverride = z.object({
       excludedIndexPatterns: true,
     }).shape
   ),
-  samplingRate: z.number().min(0).max(1).nullable().optional(),
+  samplingRate: z.number().min(MIN_SAMPLING_RATE).max(1).nullable().optional(),
 });
 
 const base = LogExtractionObj.shape;

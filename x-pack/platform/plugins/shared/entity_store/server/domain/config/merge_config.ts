@@ -81,7 +81,6 @@ const setSharedFields = (
 const setNonPriorityFields = (
   layer: NonPriorityLogExtractionTypeOverride | undefined
 ): Partial<LogExtractionConfig> => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { samplingRate: _samplingRate, ...rest } = layer ?? {};
   return Object.fromEntries(
     Object.entries(rest).filter(([, value]) => value !== null && value !== undefined)

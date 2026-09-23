@@ -9,6 +9,7 @@ import type { SavedObjectsFullModelVersion } from '@kbn/core-saved-objects-serve
 import type { SavedObjectsType } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { ENGINE_DESCRIPTOR_TYPE_NAME } from '../../../../common/privileges';
+import { MIN_SAMPLING_RATE } from '../global_state/constants';
 
 export const EngineDescriptorTypeName = ENGINE_DESCRIPTOR_TYPE_NAME;
 
@@ -436,7 +437,7 @@ const nonPriorityLogExtractionConfigSchemaV11 = schema.object({
   maxLogsPerWindowCapBehavior: schema.maybe(
     schema.nullable(schema.oneOf([schema.literal('defer'), schema.literal('drop')] as const))
   ),
-  samplingRate: schema.maybe(schema.nullable(schema.number())),
+  samplingRate: schema.maybe(schema.nullable(schema.number({ min: MIN_SAMPLING_RATE, max: 1 }))),
 });
 
 const engineDescriptorSchemaV11 = engineDescriptorSchemaV10.extends({

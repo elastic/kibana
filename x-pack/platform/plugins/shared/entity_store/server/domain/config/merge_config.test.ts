@@ -272,4 +272,47 @@ describe('getMergedConfig', () => {
       expect(merged.maxLogsPerWindowCapBehavior).toBe('drop');
     });
   });
+
+  describe('nonPriorityOverride (5th argument)', () => {
+    it('nonPriorityOverride wins over mode defaults for non-priority', () => {
+      const merged = getMergedConfig('user', {}, undefined, 'nonPriority', {
+        maxLogsPerWindowCapBehavior: 'defer',
+      });
+
+      expect(merged.maxLogsPerWindowCapBehavior).toBe('defer');
+    });
+
+    it('nonPriorityOverride wins over global override for non-priority', () => {
+      const merged = getMergedConfig('user', { frequency: '10m' }, undefined, 'nonPriority', {
+        frequency: '3m',
+      });
+
+      expect(merged.frequency).toBe('3m');
+    });
+
+    it('null in nonPriorityOverride falls through to global override', () => {
+      const merged = getMergedConfig('user', { frequency: '10m' }, undefined, 'nonPriority', {
+        frequency: null,
+      });
+
+      expect(merged.frequency).toBe('10m');
+    });
+
+    it('null in nonPriorityOverride falls through to mode default', () => {
+      const merged = getMergedConfig('user', {}, undefined, 'nonPriority', {
+        maxLogsPerWindowCapBehavior: null,
+      });
+
+      expect(merged.maxLogsPerWindowCapBehavior).toBe('drop');
+    });
+
+    it('nonPriorityOverride has no effect in priority mode', () => {
+      const merged = getMergedConfig('user', {}, undefined, 'priority', {
+        maxLogsPerWindowCapBehavior: 'drop',
+      });
+
+      // priority mode reads from typeOverride, not nonPriorityOverride — mode default for priority is defer
+      expect(merged.maxLogsPerWindowCapBehavior).toBe('defer');
+    });
+  });
 });
