@@ -9,13 +9,13 @@ import type { Evaluator } from '@kbn/evals';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { skipRefusalExamples, skippedResult, withLowScoreLogging } from './evaluator_utils';
 
-const buildEvaluator = (score: number | null): Evaluator => ({
+const buildEvaluator = (score: number | null, label = 'fixture'): Evaluator => ({
   name: 'Fixture Evaluator',
   kind: 'CODE',
   direction: 'maximize',
   evaluate: jest.fn().mockResolvedValue({
     score,
-    label: 'fixture',
+    label,
     explanation: 'because',
     metadata: { mismatches: ['x: missing column'] },
   }),
@@ -94,10 +94,11 @@ describe('withLowScoreLogging', () => {
     const log = buildLog();
 
     await withLowScoreLogging(buildEvaluator(1), log).evaluate(params);
-    await withLowScoreLogging(buildEvaluator(null), log).evaluate(params);
+    await withLowScoreLogging(buildEvaluator(null, 'skipped'), log).evaluate(params);
 
     expect(log.warning).not.toHaveBeenCalled();
   });
+
 });
 
 describe('skipRefusalExamples', () => {

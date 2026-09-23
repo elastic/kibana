@@ -48,10 +48,14 @@ const formatVisualization = (visualization: ExtractedVisualization, index: numbe
     .filter((line): line is string => line !== undefined)
     .join('\n');
 
+const isAbstention = (result: EvaluationResult): boolean =>
+  result.score === null && result.label !== 'skipped';
+
 /**
- * Logs everything needed to diagnose a score below 1 in one place: the
- * question, the gold, every produced visualization with its ES|QL and config,
- * the evaluator's explanation and metadata, and the agent trace id.
+ * Logs everything needed to diagnose a score below 1, or a harness-side
+ * abstention (`score: null` with a label other than `skipped`), in one place:
+ * the question, the gold, every produced visualization with its ES|QL and
+ * config, the evaluator's explanation and metadata, and the agent trace id.
  */
 export const withLowScoreLogging = <
   TExample extends Example = Example,
@@ -63,7 +67,8 @@ export const withLowScoreLogging = <
   ...evaluator,
   evaluate: async (params) => {
     const result = await evaluator.evaluate(params);
-    if (typeof result.score !== 'number' || result.score >= 1) {
+    const lowScore = typeof result.score === 'number' && result.score < 1;
+    if (!lowScore && !isAbstention(result)) {
       return result;
     }
 
@@ -76,7 +81,9 @@ export const withLowScoreLogging = <
     const traceId = output.agentTraceId ?? output.traceId;
 
     const sections = [
-      `\n━━━━━━ LOW SCORE: ${evaluator.name} = ${result.score} ━━━━━━`,
+      lowScore
+        ? `\n━━━━━━ LOW SCORE: ${evaluator.name} = ${result.score} ━━━━━━`
+        : `\n━━━━━━ ABSTAINED: ${evaluator.name} (${result.label}) ━━━━━━`,
       question ? `Question:    ${question}` : undefined,
       followUp ? `Follow-up:   ${followUp}` : undefined,
       result.label ? `Label:       ${result.label}` : undefined,
