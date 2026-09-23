@@ -152,15 +152,17 @@ export const CUSTOM_YARA_SIGNATURES_PATH = `${MANAGEMENT_PATH}/custom_yara_signa
 export const RESPONSE_ACTIONS_HISTORY_PATH = `${MANAGEMENT_PATH}/response_actions_history` as const;
 export const SCRIPT_LIBRARY_PATH = `${MANAGEMENT_PATH}/script_library` as const;
 export const ENTITY_ANALYTICS_PATH = '/entity_analytics' as const;
+/** @deprecated Bookmark-only; redirects to {@link ENTITY_ANALYTICS_HOME_PAGE_PATH}. */
+export const ENTITY_ANALYTICS_LANDING_PATH = '/entity_analytics_landing' as const;
+/** @deprecated Bookmark-only; redirects to {@link ENTITY_ANALYTICS_HOME_PAGE_PATH}. */
+export const ENTITY_ANALYTICS_OVERVIEW_PATH = '/entity_analytics_overview' as const;
 export const ENTITY_ANALYTICS_MANAGEMENT_PATH = `/entity_analytics_management` as const;
 export const ENTITY_ANALYTICS_ASSET_CRITICALITY_PATH =
   `/entity_analytics_asset_criticality` as const;
 export const ENTITY_ANALYTICS_ENTITY_STORE_MANAGEMENT_PATH =
   `/entity_analytics_entity_store` as const;
-export const ENTITY_ANALYTICS_LANDING_PATH = '/entity_analytics_landing' as const;
 export const ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH =
   '/entity_analytics_privileged_user_monitoring' as const;
-export const ENTITY_ANALYTICS_OVERVIEW_PATH = `/entity_analytics_overview` as const;
 export const ENTITY_ANALYTICS_HOME_PAGE_PATH = '/entity_analytics_home_page' as const;
 export const USE_NEW_ENTITY_ANALYTICS_HOME_PAGE_FLAG =
   'securitySolution.useNewEntityAnalyticsPage' as const;
@@ -749,10 +751,15 @@ export const ESSENTIAL_ALERT_FIELDS: string[] = [
 export enum SecurityAgentBuilderAttachments {
   alert = 'security.alert',
   alerts = 'security.alerts',
+  attackDiscovery = 'security.attack_discovery',
+  attackDiscoveryVerdict = 'security.attack_discovery.verdict',
   entity = 'security.entity',
   entityAnalyticsDashboard = 'security.entity_analytics_dashboard',
   entityGraph = 'security.entity_graph',
   entityRiskScoreHistory = 'security.entity_risk_score_history',
+  exception = 'security.exception',
+  investigationIocs = 'security.investigation.iocs',
+  investigationTimeline = 'security.investigation.timeline',
   rule = 'security.rule',
   rulePreview = 'security.rule.preview',
 }

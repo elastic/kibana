@@ -78,7 +78,7 @@ import { fromDiscoverSessionApiResponse } from '../../../session/session_convers
 import { createSessionService } from '../../../session/session_service';
 import type {
   DiscoverSessionClient,
-  DiscoverSessionRequestData,
+  DiscoverSessionClientRequestData,
 } from '../../../session/api_client';
 import { TABS_LOCAL_STORAGE_KEY } from './tabs_storage_manager';
 import { appLocatorGetLocationCommon } from '../../../../common/app_locator_get_location';
@@ -249,7 +249,9 @@ describe('Discover state', () => {
         })
       );
       await new Promise(process.nextTick);
-      expect(getCurrentUrl()).toBe('/#?_g=(refreshInterval:(pause:!t,value:5000))');
+      expect(getCurrentUrl()).toBe(
+        '/#?_g=(refreshInterval:(pause:!t,value:5000),time:(from:now-15m,to:now))'
+      );
     });
   });
 
@@ -676,7 +678,7 @@ describe('Discover state', () => {
 
       const savedResponse = cloneDeep(response);
       savedResponse.id = savedId;
-      const respondToSave = async (data: DiscoverSessionRequestData) => {
+      const respondToSave = async (data: DiscoverSessionClientRequestData) => {
         expect(data.tabs).toHaveLength(1);
         expect(data.tabs[0]).toMatchObject({
           data_source: { type: 'data_view_spec', index_pattern: 'logs-*' },
@@ -689,7 +691,9 @@ describe('Discover state', () => {
       };
       const apiClient: jest.Mocked<DiscoverSessionClient> = {
         create: jest.fn(respondToSave),
-        upsert: jest.fn((_id: string, data: DiscoverSessionRequestData) => respondToSave(data)),
+        upsert: jest.fn((_id: string, data: DiscoverSessionClientRequestData) =>
+          respondToSave(data)
+        ),
         get: jest.fn(async (_id: string) => ({ ...cloneDeep(savedResponse), resolve: {} })),
       };
       const sessionService = createSessionService({

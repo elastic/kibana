@@ -8,6 +8,24 @@
 export { Streams, streamDefinitionSchema } from './src/models/streams';
 export type * as StreamsV2 from './src/v2';
 export * as StreamsV2Examples from './src/v2/__examples__';
+export {
+  collectUnitComponentIds,
+  findDuplicateUnitComponentIds,
+  streamsConfigEntrySchema,
+  streamsOttlRoutingContextSchema,
+  streamsPipelineConfigEntrySchema,
+  streamsPipelineRouteSchema,
+  streamsPipelineSchema,
+  streamsSignalSchema,
+  streamsSupportedTelemetrySchema,
+  streamsUnitIdentifierSchema,
+  streamsUnitResponseSchema,
+  streamsUnitSchema,
+  streamsUnitSecretsSchema,
+  streamsUnitUiMetadataSchema,
+  streamsUnitUpsertRequestSchema,
+} from './src/models/unit';
+export type { StreamsUnit } from './src/models/unit';
 export { IngestBase, type IngestStreamIndexMode } from './src/models/ingest/base';
 export { Ingest, IngestStream, IngestUpsertRequest } from './src/models/ingest';
 export {
@@ -109,6 +127,8 @@ export {
   type SampleDocument,
   type FlattenRecord,
   flattenRecord,
+  boundedFlattenRecord,
+  boundedJsonValue,
   recursiveRecord,
 } from './src/shared/record_types';
 export { isSchema, createIsNarrowSchema, isRecord } from './src/shared/type_guards';
@@ -146,6 +166,8 @@ export {
   ALL_FIELD_DEFINITION_TYPES,
   fieldDefinitionConfigSchema,
   namedFieldDefinitionConfigSchema,
+  boundedFieldDefinitionConfigSchema,
+  boundedNamedFieldDefinitionSchema,
 } from './src/fields';
 
 export {

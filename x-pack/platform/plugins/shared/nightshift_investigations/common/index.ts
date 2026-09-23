@@ -201,22 +201,8 @@ export interface PaginatedResponse<T> {
 
 export type ListInvestigationsResponse = PaginatedResponse<ListInvestigationItem>;
 
-/**
- * Filters for the severity-count facet. A subset of `ListInvestigationsRequest`: no pagination,
- * no sort, and no `severities` — the counts describe how many investigations sit in each tier
- * under the other active filters, so narrowing by tier would make them self-referential.
- */
-export type SeverityCountsRequest = Omit<
-  ListInvestigationsRequest,
-  'severities' | 'sort_field' | 'sort_order' | 'page' | 'size'
->;
-
 /** Counts of investigations at each severity tier, zero-filled for all four tiers. */
 export type SeverityCounts = Record<Severity, number>;
-
-export interface SeverityCountsResponse {
-  severity_counts: SeverityCounts;
-}
 
 export {
   CORTEX_AI_INDEX_ID,
@@ -232,6 +218,34 @@ export {
   type ListCortexPagesResponse,
   type GetCortexPageResponse,
 } from './cortex';
+
+export {
+  NIGHTSHIFT_INVESTIGATION_LOCATOR_ID,
+  NIGHTSHIFT_SEARCH_QUERY_PARAM,
+  NIGHTSHIFT_SEVERITY_QUERY_PARAM,
+  NIGHTSHIFT_INVESTIGATION_ID_QUERY_PARAM,
+  InvestigationLocatorDefinition,
+  type InvestigationLocatorParams,
+  type InvestigationLocator,
+} from './locators';
+
+export {
+  DECISION_TREE_AI_INDEX_ID,
+  DECISION_TREE_AI_INDEX_DEST,
+  DECISION_TREE_DOC_TYPES,
+  type DecisionTreeDocType,
+  type DecisionTreeStatus,
+  type DecisionTreeSummary,
+  type DecisionTreeDetail,
+  type DecisionTreeVersionSummary,
+  type DecisionTreeVersionDetail,
+  type DecisionTreeStats,
+  type ListDecisionTreesResponse,
+  type GetDecisionTreeResponse,
+  type ListDecisionTreeVersionsResponse,
+  type GetDecisionTreeVersionResponse,
+  type GetDecisionTreesAvailabilityResponse,
+} from './decision_trees';
 
 export {
   INVESTIGATION_STARTED_TRIGGER_ID,
