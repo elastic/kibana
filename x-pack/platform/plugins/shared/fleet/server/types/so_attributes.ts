@@ -409,6 +409,8 @@ export interface CloudOnboardingDeploymentSOAttributes {
   authMethod?: CloudOnboardingDeploymentAuthMethod | null;
   /** Fleet package policy IDs — one per distinct integration package (e.g. one for 'aws', one for 'aws_bedrock'). Present when agentless is in mechanisms. For agent_based, the package policies are attached to the user-managed agent policy tracked in agentPolicyId. */
   packagePolicyIds?: string[];
+  /** instanceId → policyId mapping persisted after deploy. Hydrated into session storage on resume so cleanup correctly targets stale policies when services are removed after reopening a deployed onboarding URL. */
+  policyIdsByInstance?: Record<string, string>;
   /** Agent policy ID for agent_based mechanism — the user-managed agent policy the package policies are attached to. In agentless, agentPolicyId equals packagePolicyId and is not stored separately. */
   agentPolicyId?: string;
   /** Elasticsearch API key ID for push mechanisms (firehose, cloud_forwarder). Set by the backend after key creation; used to identify the key for rotation/revocation. No package policy exists for push services. */
