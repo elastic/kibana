@@ -135,7 +135,8 @@ describe('AuthorFilter', () => {
 
     await userEvent.click(screen.getByTestId('options-filter-popover-button-author'));
     await userEvent.click(
-      await screen.findByTestId(`options-filter-popover-item-${otherUser.username}`)
+      await screen.findByTestId(`options-filter-popover-item-${otherUser.username}`),
+      { pointerEventsCheck: 0 }
     );
 
     await waitFor(() => {

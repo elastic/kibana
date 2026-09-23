@@ -197,7 +197,9 @@ describe('CasesList', () => {
     );
 
     await userEvent.click(screen.getByTestId('tablePaginationPopoverButton'));
-    await userEvent.click(screen.getByTestId('tablePagination-25-rows'));
+    await userEvent.click(screen.getByTestId('tablePagination-25-rows'), {
+      pointerEventsCheck: 0,
+    });
 
     expect(onChange).toHaveBeenCalledWith({ page: { index: 0, size: 25 } });
   });
