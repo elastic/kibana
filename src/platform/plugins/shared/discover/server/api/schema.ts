@@ -15,7 +15,7 @@ import {
   getAsCodeTagsSchema,
   PAGINATION_MAX_SIZE,
 } from '@kbn/as-code-shared-schemas';
-import type { discoverSessionControlPanelsSchema } from '@kbn/as-code-discover-schema';
+import type { discoverSessionApiControlPanelsSchema } from '@kbn/as-code-discover-schema';
 import { discoverSessionApiDataSchema } from '@kbn/as-code-discover-schema';
 import {
   MAX_DISCOVER_SESSION_TAGS,
@@ -73,7 +73,7 @@ export const discoverSessionSanitizeResponseSchema = z
   })
   .strict();
 
-export const discoverSessionSearchParamsSchema = asCodeSearchRequestSchema.extend({
+export const discoverSessionSearchRequestParamsSchema = asCodeSearchRequestSchema.extend({
   query: z
     .string()
     .max(MAX_SEARCH_QUERY_LENGTH)
@@ -114,16 +114,16 @@ export const discoverSessionSearchResponseSchema = z
   })
   .strict();
 
-export type DiscoverSessionApiData = z.output<typeof discoverSessionApiDataSchema>;
 export type DiscoverSessionApiResponse = z.output<typeof discoverSessionApiResponseSchema>;
 export type DiscoverSessionGetResponse = z.output<typeof discoverSessionGetResponseSchema>;
 export type DiscoverSessionSanitizeResponse = z.output<
   typeof discoverSessionSanitizeResponseSchema
 >;
 export type DiscoverSessionWarning = z.output<typeof discoverSessionWarningsSchema>[number];
-export type DiscoverSessionSearchParams = z.output<typeof discoverSessionSearchParamsSchema>;
+export type DiscoverSessionSearchRequestParams = z.output<
+  typeof discoverSessionSearchRequestParamsSchema
+>;
 export type DiscoverSessionSearchResponse = z.output<typeof discoverSessionSearchResponseSchema>;
-export type DiscoverSessionControlPanels = z.output<typeof discoverSessionControlPanelsSchema>;
-
-// Input types (shape accepted by the API, before defaults applied)
-export type DiscoverSessionApiDataInput = z.input<typeof discoverSessionApiDataSchema>;
+export type DiscoverSessionApiControlPanels = z.output<
+  typeof discoverSessionApiControlPanelsSchema
+>;

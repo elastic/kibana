@@ -157,6 +157,31 @@ describe('ActionPolicyClient', () => {
       expect(res.auth).not.toHaveProperty('apiKey');
     });
 
+    it('trims surrounding whitespace from the policy name for the API key and stored attributes', async () => {
+      mockSavedObjectsClient.create.mockResolvedValueOnce({
+        id: 'policy-id-1',
+        type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+        attributes: {} as ActionPolicySavedObjectAttributes,
+        references: [],
+        version: 'WzEsMV0=',
+      });
+
+      await client.createActionPolicy({
+        data: {
+          name: '  my-policy  ',
+          description: 'my-policy description',
+          destinations: [{ type: 'workflow', id: 'my-workflow' }],
+        },
+      });
+
+      expect(apiKeyService.create).toHaveBeenCalledWith('Action Policy: my-policy');
+      expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
+        ACTION_POLICY_SAVED_OBJECT_TYPE,
+        expect.objectContaining({ name: 'my-policy' }),
+        expect.anything()
+      );
+    });
+
     it('creates a action policy without custom id', async () => {
       mockSavedObjectsClient.create.mockImplementationOnce(async (_type, _attrs, options) => {
         return {
@@ -1711,6 +1736,20 @@ describe('ActionPolicyClient', () => {
       expect(apiKeyService.markApiKeysForInvalidation).toHaveBeenCalledWith(['old-api-key']);
     });
 
+    it('trims stored policy names when granting a replacement API key', async () => {
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        id: 'policy-id-update-key-trim',
+        type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+        references: [],
+        version: 'WzEsMV0=',
+        attributes: { ...existingAttributes, name: 'existing-policy  ' },
+      });
+
+      await client.updateActionPolicyApiKey({ id: 'policy-id-update-key-trim' });
+
+      expect(apiKeyService.create).toHaveBeenCalledWith('Action Policy: existing-policy');
+    });
+
     it('does not invalidate old API key when createdByUser is true', async () => {
       mockSavedObjectsClient.get.mockResolvedValueOnce({
         id: 'policy-id-update-key-user',
@@ -2939,7 +2978,7 @@ describe('ActionPolicyClient', () => {
     });
   });
 
-  describe('matchActionPoliciesForRule', () => {
+  describe('matchActionPolicies', () => {
     const makeFindResponse = (
       items: Array<{
         id: string;
@@ -2977,7 +3016,7 @@ describe('ActionPolicyClient', () => {
       updatedAt: '2025-01-01T00:00:00.000Z',
     };
 
-    it('returns catch-all APs for policies with no matcher, along with the space-scoped total', async () => {
+    it('returns catch_all APs for policies with no matcher, along with the space-scoped total', async () => {
       mockSavedObjectsClient.find.mockResolvedValueOnce(
         makeFindResponse(
           [{ id: 'ap-catchall', attributes: { ...baseAttributes, matcher: null } }],
@@ -2985,10 +3024,10 @@ describe('ActionPolicyClient', () => {
         )
       );
 
-      const result = await client.matchActionPoliciesForRule({ ruleTags: ['prod'] });
+      const result = await client.matchActionPolicies({ ruleTags: ['prod'] });
 
       expect(result.items).toHaveLength(1);
-      expect(result.items[0].category).toBe('catch-all');
+      expect(result.items[0].category).toBe('catch_all');
       expect(result.items[0].action_policy.id).toBe('ap-catchall');
       expect(result.total).toBe(150);
       expect(result.evaluated_count).toBe(1);
@@ -3014,7 +3053,7 @@ describe('ActionPolicyClient', () => {
         )
       );
 
-      const result = await client.matchActionPoliciesForRule({ ruleTags: ['prod'] });
+      const result = await client.matchActionPolicies({ ruleTags: ['prod'] });
 
       expect(result.items).toHaveLength(evaluatedCount);
       expect(result).toMatchObject({
@@ -3028,7 +3067,7 @@ describe('ActionPolicyClient', () => {
       );
     });
 
-    it('returns catch-all APs for policies whose matcher has neither tags nor an expression', async () => {
+    it('returns catch_all APs for policies whose matcher has neither tags nor an expression', async () => {
       const matcherAttr: ActionPolicySavedObjectAttributes = {
         ...baseAttributes,
         matcher: { tags: [], expression: '  ' },
@@ -3038,22 +3077,22 @@ describe('ActionPolicyClient', () => {
         makeFindResponse([{ id: 'ap-empty-matcher', attributes: matcherAttr }])
       );
 
-      const result = await client.matchActionPoliciesForRule({ ruleTags: ['prod'] });
+      const result = await client.matchActionPolicies({ ruleTags: ['prod'] });
 
       expect(result.items).toHaveLength(1);
-      expect(result.items[0].category).toBe('catch-all');
+      expect(result.items[0].category).toBe('catch_all');
       expect(result.items[0].action_policy.id).toBe('ap-empty-matcher');
     });
 
-    it('returns catch-all APs even when the rule has no tags', async () => {
+    it('returns catch_all APs even when the rule has no tags', async () => {
       mockSavedObjectsClient.find.mockResolvedValueOnce(
         makeFindResponse([{ id: 'ap-catchall', attributes: { ...baseAttributes, matcher: null } }])
       );
 
-      const result = await client.matchActionPoliciesForRule({});
+      const result = await client.matchActionPolicies({});
 
       expect(result.items).toHaveLength(1);
-      expect(result.items[0].category).toBe('catch-all');
+      expect(result.items[0].category).toBe('catch_all');
     });
 
     it('returns tags APs when the rule tags intersect the matcher tag clause', async () => {
@@ -3066,7 +3105,7 @@ describe('ActionPolicyClient', () => {
         makeFindResponse([{ id: 'ap-matcher', attributes: matcherAttr }])
       );
 
-      const result = await client.matchActionPoliciesForRule({ ruleTags: ['prod'] });
+      const result = await client.matchActionPolicies({ ruleTags: ['prod'] });
 
       expect(result.items).toHaveLength(1);
       expect(result.items[0].category).toBe('tags');
@@ -3083,7 +3122,7 @@ describe('ActionPolicyClient', () => {
         makeFindResponse([{ id: 'ap-no-match', attributes: matcherAttr }])
       );
 
-      const result = await client.matchActionPoliciesForRule({ ruleTags: ['prod'] });
+      const result = await client.matchActionPolicies({ ruleTags: ['prod'] });
 
       expect(result.items).toHaveLength(0);
     });
@@ -3098,7 +3137,7 @@ describe('ActionPolicyClient', () => {
         makeFindResponse([{ id: 'ap-expression', attributes: matcherAttr }])
       );
 
-      const result = await client.matchActionPoliciesForRule({ ruleTags: ['prod'] });
+      const result = await client.matchActionPolicies({ ruleTags: ['prod'] });
 
       expect(result.items).toHaveLength(0);
     });
@@ -3113,7 +3152,7 @@ describe('ActionPolicyClient', () => {
         makeFindResponse([{ id: 'ap-combined', attributes: matcherAttr }])
       );
 
-      const result = await client.matchActionPoliciesForRule({ ruleTags: ['prod', 'infra'] });
+      const result = await client.matchActionPolicies({ ruleTags: ['prod', 'infra'] });
 
       expect(result.items).toHaveLength(1);
       expect(result.items[0].category).toBe('tags');
