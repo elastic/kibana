@@ -530,6 +530,14 @@ export interface ValidationErrors {
     message: string;
     type: { expression: string };
   };
+  denseVectorInvalidSuffixModifier: {
+    message: string;
+    type: { keyword: string };
+  };
+  denseVectorMultipleFieldsWithTarget: {
+    message: string;
+    type: { target: string };
+  };
   tsdbIncompatibleFunction: {
     message: string;
     type: { fnName: string };
