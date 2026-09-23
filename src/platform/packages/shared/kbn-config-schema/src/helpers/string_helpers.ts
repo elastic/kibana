@@ -9,6 +9,7 @@
 
 import {
   assertUnboundedStringReason,
+  assertValidMinLength,
   getStringHelperLimits,
   reportStringLengthViolation,
 } from '@kbn/schema-string-helpers';
@@ -75,5 +76,6 @@ export type UnboundedStringOptions = Omit<StringOptions, 'maxLength'> & { reason
 /** Creates an intentionally unbounded string with a required explanation. */
 export const unboundedString = ({ reason, ...options }: UnboundedStringOptions): Type<string> => {
   assertUnboundedStringReason(reason);
+  assertValidMinLength(options.minLength);
   return new StringType({ ...options, maxLength: undefined });
 };

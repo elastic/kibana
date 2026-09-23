@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { assertUnboundedStringReason, getStringHelperLimits } from './limits';
+import { assertUnboundedStringReason, assertValidMinLength, getStringHelperLimits } from './limits';
 
 test.each([NaN, Infinity, -1, 1.5, Number.MAX_SAFE_INTEGER + 1])(
   'rejects invalid maximum length %s',
@@ -38,4 +38,14 @@ test('allows empty-only strings and finite overrides', () => {
 test('requires a nonempty explanation', () => {
   expect(() => assertUnboundedStringReason('  ')).toThrow();
   expect(() => assertUnboundedStringReason('Enforced upstream')).not.toThrow();
+});
+
+test.each([-1, -0.5, 1.5, Infinity, NaN])('rejects invalid unbounded minLength %s', (minLength) => {
+  expect(() => assertValidMinLength(minLength)).toThrow('requires a non-negative integer minLength');
+});
+
+test('accepts valid unbounded minLength values', () => {
+  expect(() => assertValidMinLength(undefined)).not.toThrow();
+  expect(() => assertValidMinLength(0)).not.toThrow();
+  expect(() => assertValidMinLength(1)).not.toThrow();
 });

@@ -10,8 +10,8 @@
 // Keep the saved objects related defaults aligned with core's saved_objects_length_limits.ts
 export const STRING_HELPER_DEFAULTS = {
   savedObjectId: { minLength: 1, maxLength: 512 },
-  savedObjectType: { minLength: 0, maxLength: 256 },
-  savedObjectVersion: { minLength: 0, maxLength: 256 },
+  savedObjectType: { minLength: 1, maxLength: 256 },
+  savedObjectVersion: { minLength: 1, maxLength: 256 },
   spaceId: { minLength: 1, maxLength: 512 },
   displayName: { minLength: 1, maxLength: 1024 },
   description: { minLength: 0, maxLength: 10_000 },
@@ -44,6 +44,13 @@ export const getStringHelperLimits = (
     throw new Error(`${helper}() requires non-negative integer limits with minLength <= maxLength`);
   }
   return { minLength, maxLength };
+};
+
+/** Validates that minLength, if provided, is a non-negative safe integer. */
+export const assertValidMinLength = (minLength: number | undefined): void => {
+  if (minLength !== undefined && (!Number.isSafeInteger(minLength) || minLength < 0)) {
+    throw new Error('unboundedString() requires a non-negative integer minLength');
+  }
 };
 
 /** Requires an explanation when opting out of a string length bound. */

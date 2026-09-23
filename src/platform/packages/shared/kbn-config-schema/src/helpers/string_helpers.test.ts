@@ -32,8 +32,8 @@ beforeEach(() => jest.clearAllMocks());
 
 describe.each([
   ['savedObjectId', savedObjectId, 1, 512],
-  ['savedObjectType', savedObjectType, 0, 256],
-  ['savedObjectVersion', savedObjectVersion, 0, 256],
+  ['savedObjectType', savedObjectType, 1, 256],
+  ['savedObjectVersion', savedObjectVersion, 1, 256],
   ['spaceId', spaceId, 1, 512],
   ['displayName', displayName, 1, 1024],
   ['description', description, 0, 10000],
@@ -98,6 +98,15 @@ describe('unboundedString', () => {
   test.each(['', '  ', '\n\t'])('rejects an empty reason %j at definition time', (reason) => {
     expect(() => unboundedString({ reason })).toThrow('requires a non-empty reason');
   });
+
+  test.each([-1, -0.5, 1.5, Infinity, NaN])(
+    'rejects invalid minLength %j at definition time',
+    (minLength) => {
+      expect(() => unboundedString({ reason: 'valid reason', minLength })).toThrow(
+        'requires a non-negative integer minLength'
+      );
+    }
+  );
 
   test('accepts large strings, preserves minimum length and validates the input type', () => {
     const unbounded = unboundedString({

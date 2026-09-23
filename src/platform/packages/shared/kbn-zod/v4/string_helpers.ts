@@ -10,6 +10,7 @@
 import { z } from 'zod/v4';
 import {
   assertUnboundedStringReason,
+  assertValidMinLength,
   getStringHelperLimits,
   reportStringLengthViolation,
 } from '@kbn/schema-string-helpers';
@@ -81,6 +82,7 @@ export const unboundedString = ({
   ...params
 }: UnboundedStringOptions): z.ZodString => {
   assertUnboundedStringReason(reason);
+  assertValidMinLength(minLength);
   const stringSchema = z.string(params);
   return minLength === undefined ? stringSchema : stringSchema.min(minLength);
 };

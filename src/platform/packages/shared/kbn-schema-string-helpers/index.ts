@@ -11,6 +11,7 @@ export {
   STRING_HELPER_DEFAULTS,
   getStringHelperLimits,
   assertUnboundedStringReason,
+  assertValidMinLength,
 } from './limits';
 export type { StringHelperName, StringHelperLimits } from './limits';
 export { reportStringLengthViolation } from './report_string_length_violation';
