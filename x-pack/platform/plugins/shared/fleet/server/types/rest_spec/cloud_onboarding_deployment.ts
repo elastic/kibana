@@ -322,7 +322,7 @@ export const UpdateCloudOnboardingDeploymentRequestSchema = {
     ),
     packagePolicyIds: schema.maybe(
       schema.arrayOf(schema.string({ maxLength: 255 }), {
-        maxSize: 100,
+        maxSize: 1000,
         meta: {
           description:
             'Package policy IDs created for this deployment (managed_integration and agent_based).',

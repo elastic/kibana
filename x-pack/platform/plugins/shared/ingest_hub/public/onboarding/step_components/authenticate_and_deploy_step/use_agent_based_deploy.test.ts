@@ -325,8 +325,9 @@ describe('useAgentBasedDeploy — SO persistence', () => {
     );
   });
 
-  // catch-path update must be status-only (no services/serviceVars)
-  it('catch-path update is status-only — unexpected throw does not widen the SO with partial services', async () => {
+  // catch-path update includes services/serviceVars/authMethod so a resumed-after-error
+  // deployment restores the correct service set and credential method.
+  it('catch-path update includes services, serviceVars, and authMethod so resume after unexpected error is consistent', async () => {
     mockCreateDeployment.mockResolvedValue(null);
     // Set up with a pre-existing SO id so the catch update fires.
     mockUseOnboardingFlow.mockReturnValue({
@@ -358,9 +359,11 @@ describe('useAgentBasedDeploy — SO persistence', () => {
     expect(mockUpdateDeployment).toHaveBeenCalledTimes(1);
     const [, payload] = mockUpdateDeployment.mock.calls[0];
     expect(payload).toHaveProperty('status', 'failed');
-    // Regression guard: catch path must NOT carry services or serviceVars.
-    expect(payload).not.toHaveProperty('services');
-    expect(payload).not.toHaveProperty('serviceVars');
+    // Catch path must carry services/serviceVars/authMethod so resume after an unexpected error
+    // restores the correct service set and credential method rather than a stale snapshot.
+    expect(payload).toHaveProperty('services', ['serviceA']);
+    expect(payload).toHaveProperty('serviceVars');
+    expect(payload).toHaveProperty('authMethod');
   });
 
   it('create payload includes agentPolicyIds for existing-policy mode so mid-deploy tab-close leaves a resumable record', async () => {

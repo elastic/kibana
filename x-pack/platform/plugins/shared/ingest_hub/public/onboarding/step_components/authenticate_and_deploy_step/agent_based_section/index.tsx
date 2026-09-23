@@ -273,6 +273,26 @@ export function AgentBasedSection({
 
   const isEmpty = !isPoliciesLoading && policyOptions.length === 0;
 
+  // After policies load, filter out any persisted ids that no longer exist or are now managed/
+  // Fleet-Server policies (deleted between sessions, or policy type changed). The raw
+  // selectedAgentPolicyIds array is the source of truth for deployment but policyOptions
+  // already excludes managed/Fleet-Server policies, so reconciling against it keeps the two
+  // in sync and prevents a stale id from being passed to the deploy function.
+  useEffect(() => {
+    if (isPoliciesLoading || agentHostsMode !== 'existing') return;
+    const validIds = new Set(policyOptions.map((o) => o.value));
+    const reconciled = selectedAgentPolicyIds.filter((id) => validIds.has(id));
+    if (reconciled.length !== selectedAgentPolicyIds.length) {
+      setAgentBasedDeployment({ selectedAgentPolicyIds: reconciled });
+    }
+  }, [
+    policyOptions,
+    isPoliciesLoading,
+    agentHostsMode,
+    selectedAgentPolicyIds,
+    setAgentBasedDeployment,
+  ]);
+
   // ── Flyout ────────────────────────────────────────────────────────────────
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
 

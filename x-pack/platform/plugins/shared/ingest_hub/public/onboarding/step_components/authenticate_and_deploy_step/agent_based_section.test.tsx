@@ -572,6 +572,100 @@ describe('AgentBasedSection', () => {
     });
   });
 
+  describe('selectedAgentPolicyIds reconciliation after policies load', () => {
+    it('filters out deleted/managed policy ids from selectedAgentPolicyIds when policies load', async () => {
+      const setAgentBasedDeployment = jest.fn();
+      setupMocks({
+        agentHostsMode: 'existing',
+        selectedAgentPolicyIds: ['valid-policy', 'deleted-policy'],
+        setAgentBasedDeployment,
+      });
+      // Only 'valid-policy' exists in loaded options; 'deleted-policy' has been removed.
+      mockUseGetAgentPoliciesQuery.mockReturnValue({
+        data: {
+          items: [
+            {
+              id: 'valid-policy',
+              name: 'Valid Policy',
+              is_managed: false,
+              has_fleet_server: false,
+            },
+          ],
+        },
+        isLoading: false,
+      });
+      renderSection();
+      await waitFor(() => {
+        expect(setAgentBasedDeployment).toHaveBeenCalledWith(
+          expect.objectContaining({ selectedAgentPolicyIds: ['valid-policy'] })
+        );
+      });
+    });
+
+    it('does not call setAgentBasedDeployment when all ids are still valid', async () => {
+      const setAgentBasedDeployment = jest.fn();
+      setupMocks({
+        agentHostsMode: 'existing',
+        selectedAgentPolicyIds: ['policy-a', 'policy-b'],
+        setAgentBasedDeployment,
+      });
+      mockUseGetAgentPoliciesQuery.mockReturnValue({
+        data: {
+          items: [
+            { id: 'policy-a', name: 'Policy A', is_managed: false, has_fleet_server: false },
+            { id: 'policy-b', name: 'Policy B', is_managed: false, has_fleet_server: false },
+          ],
+        },
+        isLoading: false,
+      });
+      renderSection();
+      await waitFor(() => {
+        // setAgentBasedDeployment may be called for other reasons (e.g. form state),
+        // but must NOT be called with selectedAgentPolicyIds when no ids were removed.
+        const calls = setAgentBasedDeployment.mock.calls.filter(
+          (c) => c[0]?.selectedAgentPolicyIds !== undefined
+        );
+        expect(calls).toHaveLength(0);
+      });
+    });
+
+    it('does not reconcile when policies are still loading', async () => {
+      const setAgentBasedDeployment = jest.fn();
+      setupMocks({
+        agentHostsMode: 'existing',
+        selectedAgentPolicyIds: ['policy-a'],
+        setAgentBasedDeployment,
+      });
+      mockUseGetAgentPoliciesQuery.mockReturnValue({ data: undefined, isLoading: true });
+      renderSection();
+      // Wait a tick to confirm no reconciliation fires during loading.
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      const reconciliationCalls = setAgentBasedDeployment.mock.calls.filter(
+        (c) => c[0]?.selectedAgentPolicyIds !== undefined
+      );
+      expect(reconciliationCalls).toHaveLength(0);
+    });
+
+    it('does not reconcile when not in existing mode', async () => {
+      const setAgentBasedDeployment = jest.fn();
+      setupMocks({
+        agentHostsMode: 'new',
+        selectedAgentPolicyIds: [],
+        setAgentBasedDeployment,
+      });
+      mockUseGetAgentPoliciesQuery.mockReturnValue({
+        data: { items: [] },
+        isLoading: false,
+      });
+      renderSection();
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      const reconciliationCalls = setAgentBasedDeployment.mock.calls.filter(
+        (c) => c[0]?.selectedAgentPolicyIds !== undefined
+      );
+      expect(reconciliationCalls).toHaveLength(0);
+    });
+  });
+
   describe('section accordion never auto-collapses', () => {
     it('when isDone transitions false→true, section content stays visible (autoCollapse=false)', () => {
       const { rerender } = renderSection({ isDone: false });

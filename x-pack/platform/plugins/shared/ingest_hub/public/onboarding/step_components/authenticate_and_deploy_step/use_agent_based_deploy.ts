@@ -117,18 +117,17 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
       setIsDeploying(true);
       updateDetectAndReviewStep({ isDeploying: true });
 
-      // Hoisted so the catch block can best-effort update the SO to 'failed' on unexpected errors,
-      // including the agent policy ids known at the time of failure.
+      // Hoisted so the catch block can best-effort update the SO on unexpected errors,
+      // including agent policy ids, services, serviceVars, and authMethod known at failure time.
       let onboardingDeploymentId = detectAndReviewStep.onboardingDeploymentId;
       let resolvedAgentPolicyIds: string[] = [];
+      const { agentHostsMode, agentPolicyId, selectedAgentPolicyIds, agentCredentialMethod } =
+        agentBasedDeployment;
+      const globalRegion = serviceSettings?.globalRegion ?? '';
+      const storedServiceVars = serviceSettings?.serviceVars ?? {};
+      const { dataFormat } = servicesStep;
 
       try {
-        const { agentHostsMode, agentPolicyId, selectedAgentPolicyIds, agentCredentialMethod } =
-          agentBasedDeployment;
-        const globalRegion = serviceSettings?.globalRegion ?? '';
-        const storedServiceVars = serviceSettings?.serviceVars ?? {};
-        const { dataFormat } = servicesStep;
-
         const baseOpts = {
           namespace,
           globalRegion,
@@ -280,11 +279,18 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
           deployErrors: Object.fromEntries(allIds.map((id) => [id, msg])),
         });
         // Best-effort: mark the SO as failed so resume doesn't see a stale 'pending' record.
-        // Include any agent policy ids already resolved before the throw, and the merged
-        // failure set so SO status accurately reflects the full deployment state.
+        // Include agent policy ids, services, serviceVars and authMethod known at failure time
+        // so a resumed-after-unexpected-error deployment restores the correct service set and
+        // credential method, not a stale snapshot from a prior successful deploy.
         if (onboardingDeploymentId) {
           await updateDeployment(onboardingDeploymentId, {
             ...(resolvedAgentPolicyIds.length ? { agentPolicyIds: resolvedAgentPolicyIds } : {}),
+            services: selectedServiceIds,
+            serviceVars: toSOServiceVars(storedServiceVars, servicesMap ?? new Map()) as Record<
+              string,
+              Record<string, unknown>
+            >,
+            authMethod: toSOAuthMethod(agentCredentialMethod),
             status: 'failed',
           });
         }
