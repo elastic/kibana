@@ -11,6 +11,7 @@ import type { DagPositionedEdge, DagPositionedNode } from '@kbn/dag-layout';
 import { dagLayout, separatePositionedOverlapsInPlace } from '@kbn/dag-layout';
 import type { LayoutDirection, TransformResult } from '@kbn/workflows';
 import {
+  buildContainerDescendants,
   enforceForkBranchCompoundOrder,
   enforceForkLaneOrder,
   enforceTriggerLaneOrder,
@@ -122,6 +123,13 @@ export const computeWorkflowLayout = (
     laid.nodes.map((n) => [n.id, crossAxis === 'x' ? n.x + n.width / 2 : n.y + n.height / 2])
   );
 
+  // Build the transitive descendant closure once for all post-dagre passes.
+  // ForeachGroup.innerNodes holds direct members only; a nested container pushes
+  // its body as a sibling foreachGroups entry, so every pass that moves a
+  // container must carry ALL descendants, not just members (see CONTEXT.md,
+  // "container members vs container descendants").
+  const containerDescendants = buildContainerDescendants(transformed.foreachGroups);
+
   // Post-dagre pass 1: enforce fork lane declaration order.
   // Runs once per graph (outer + each foreachGroup body) so containers move as
   // opaque units — prevents inner nodes from detaching from their container.
@@ -130,7 +138,8 @@ export const computeWorkflowLayout = (
     laid.edges,
     transformed,
     direction,
-    WORKFLOW_NODE_SEP
+    WORKFLOW_NODE_SEP,
+    containerDescendants
   );
 
   // Post-dagre pass 1b: pack fork branches as per-step micro-compounds.
@@ -143,7 +152,8 @@ export const computeWorkflowLayout = (
     orderedEdges,
     transformed,
     direction,
-    WORKFLOW_NODE_SEP
+    WORKFLOW_NODE_SEP,
+    containerDescendants
   );
 
   // Post-dagre pass 2: enforce trigger lane declaration order.
@@ -161,16 +171,15 @@ export const computeWorkflowLayout = (
   // are tagged `crossPinned: true` by dagLayout — PAVA treats them as immovable
   // anchors so packing cannot narrow the reserved margin. On raw dagLayout
   // output this is expected to be a no-op (verify with the seeded corpus).
-  const groupInnerIds = new Map<string, Set<string>>(
-    transformed.foreachGroups.map((g) => [
-      g.id,
-      new Set([...g.innerNodes.map((n) => n.id), ...(g.bypassLaneNodes ?? []).map((n) => n.id)]),
-    ])
-  );
 
   // separatePositionedOverlapsInPlace mutates the array in place.
   const repairedNodes = [...triggeredNodes];
-  separatePositionedOverlapsInPlace(repairedNodes, crossAxis, WORKFLOW_NODE_SEP, groupInnerIds);
+  separatePositionedOverlapsInPlace(
+    repairedNodes,
+    crossAxis,
+    WORKFLOW_NODE_SEP,
+    containerDescendants
+  );
 
   // Post-dagre pass 4: reconcile edge waypoints.
   // Translate-or-clear based on how much each endpoint moved since dagLayout.

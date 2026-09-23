@@ -228,6 +228,42 @@ export function layoutGraphWithLanes(
     return maxEnd;
   }
 
+  // Build a spine adjacency list for topology-based successor lookup (Fix 6).
+  // D7 push must only move actual spine successors of the owner — not parallel
+  // branches that happen to share a similar main-axis position. Using centre-y
+  // comparison would push else-branch nodes when they are at the same rank as
+  // a then-branch owner, moving them far below the Loop Step.
+  //
+  // Hoisted above §3.5: the same adjacency map and reachability function serve
+  // as the shortcut-edge guard inside §3.5, and outTargetsBySource (which §3.5
+  // formerly built separately) is structurally identical to spineAdj — one map
+  // is sufficient.
+  const spineAdj = new Map<string, string[]>();
+  for (const e of spineEdges) {
+    if (!spineAdj.has(e.source)) spineAdj.set(e.source, []);
+    spineAdj.get(e.source)!.push(e.target);
+  }
+
+  // Memoised reachability: avoids repeated BFS for the same fork source in §3.5.
+  const successorCache = new Map<string, Set<string>>();
+  function getTransitiveSuccessors(startId: string): Set<string> {
+    const cached = successorCache.get(startId);
+    if (cached) return cached;
+    const visited = new Set<string>();
+    const queue = [startId];
+    while (queue.length > 0) {
+      const id = queue.shift()!;
+      for (const next of spineAdj.get(id) ?? []) {
+        if (!visited.has(next)) {
+          visited.add(next);
+          queue.push(next);
+        }
+      }
+    }
+    successorCache.set(startId, visited);
+    return visited;
+  }
+
   // ── 3.5. Align fork heads (post-dagre rank correction) ──────────────────────
   //
   // Dagre's tight-tree ranker assigns the shorter branch of an if/switch/parallel
@@ -239,22 +275,29 @@ export function layoutGraphWithLanes(
   // Fix: for each spine node with 2+ outgoing edges (a fork), move all fork heads
   // to the minimum main position among them. After this, all fork heads share rank 1
   // and the topology push correctly skips them (they are not successors of the owner).
+  //
+  // Guard: only align targets that are mutually exclusive branch heads — i.e. no
+  // target is reachable from a sibling target. In the transitive-successor (shortcut)
+  // shape a→b, a→c, b→c, collapsing c onto b's rank would destroy the non-overlap
+  // guarantee that dagre establishes. The reachability check uses spineAdj above;
+  // the memoised cache keeps the overall cost O(V + E) across the whole loop.
   const repositionedByAlignment = new Set<string>();
   {
-    const outTargetsBySource = new Map<string, string[]>();
-    for (const e of spineEdges) {
-      if (!outTargetsBySource.has(e.source)) outTargetsBySource.set(e.source, []);
-      outTargetsBySource.get(e.source)!.push(e.target);
-    }
-    for (const targets of outTargetsBySource.values()) {
+    for (const [, targets] of spineAdj) {
       if (targets.length < 2) continue;
       const targetNodes = targets.flatMap((t) => {
         const n = spineById.get(t);
         return n ? [n] : [];
       });
       if (targetNodes.length < 2) continue;
-      const minMain = Math.min(...targetNodes.map((n) => mainOf(n, isLR)));
-      for (const n of targetNodes) {
+      // Filter out any target that is reachable from a sibling target.
+      // Such a target is a transitive successor, not a mutually-exclusive fork head.
+      const alignable = targetNodes.filter(
+        (n) => !targetNodes.some((o) => o.id !== n.id && getTransitiveSuccessors(o.id).has(n.id))
+      );
+      if (alignable.length < 2) continue;
+      const minMain = Math.min(...alignable.map((n) => mainOf(n, isLR)));
+      for (const n of alignable) {
         const curMain = mainOf(n, isLR);
         if (curMain > minMain + 0.001) {
           spineById.set(n.id, shiftMain(n, minMain - curMain, isLR));
@@ -270,32 +313,6 @@ export function layoutGraphWithLanes(
         }
       });
     }
-  }
-
-  // Build a spine adjacency list for topology-based successor lookup (Fix 6).
-  // D7 push must only move actual spine successors of the owner — not parallel
-  // branches that happen to share a similar main-axis position. Using centre-y
-  // comparison would push else-branch nodes when they are at the same rank as
-  // a then-branch owner, moving them far below the Loop Step.
-  const spineAdj = new Map<string, string[]>();
-  for (const e of spineEdges) {
-    if (!spineAdj.has(e.source)) spineAdj.set(e.source, []);
-    spineAdj.get(e.source)!.push(e.target);
-  }
-
-  function getTransitiveSuccessors(startId: string): Set<string> {
-    const visited = new Set<string>();
-    const queue = [startId];
-    while (queue.length > 0) {
-      const id = queue.shift()!;
-      for (const next of spineAdj.get(id) ?? []) {
-        if (!visited.has(next)) {
-          visited.add(next);
-          queue.push(next);
-        }
-      }
-    }
-    return visited;
   }
 
   // Process spine owners top-down; each push applies before the next owner is

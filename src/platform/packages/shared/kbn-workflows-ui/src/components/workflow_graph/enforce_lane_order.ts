@@ -311,6 +311,56 @@ const enforceForkLaneOrderForGraph = (
 };
 
 /**
+ * Build a map from each container id to the set of ALL its descendant node ids
+ * (inner nodes, bypass lane nodes, and transitively those of any nested
+ * containers). Any pass that moves a container must carry ALL descendants, not
+ * just direct members — `ForeachGroup.innerNodes` holds members only; a nested
+ * container pushes its body as a sibling `foreachGroups` entry (see CONTEXT.md,
+ * "container members vs container descendants").
+ */
+export const buildContainerDescendants = (
+  foreachGroups: readonly ForeachGroup[]
+): Map<string, Set<string>> => {
+  const groupById = new Map<string, ForeachGroup>(foreachGroups.map((g) => [g.id, g]));
+  const result = new Map<string, Set<string>>();
+
+  const getDescendants = (groupId: string): Set<string> => {
+    const cached = result.get(groupId);
+    if (cached) return cached;
+
+    const group = groupById.get(groupId);
+    if (!group) {
+      const empty = new Set<string>();
+      result.set(groupId, empty);
+      return empty;
+    }
+
+    // Set before recursing so any cycle (shouldn't occur in a DAG) is safe.
+    const descendants = new Set<string>();
+    result.set(groupId, descendants);
+
+    for (const node of group.innerNodes) {
+      descendants.add(node.id);
+      // If this direct child is itself a container, include all its descendants.
+      for (const d of getDescendants(node.id)) {
+        descendants.add(d);
+      }
+    }
+    for (const node of group.bypassLaneNodes ?? []) {
+      descendants.add(node.id);
+    }
+
+    return descendants;
+  };
+
+  for (const group of foreachGroups) {
+    getDescendants(group.id);
+  }
+
+  return result;
+};
+
+/**
  * Enforce fork lane declaration order across the outer graph and each
  * foreachGroup's inner graph.
  *
@@ -325,7 +375,8 @@ export const enforceForkLaneOrder = (
     foreachGroups: readonly ForeachGroup[];
   },
   direction: 'TB' | 'LR',
-  nodeSep: number
+  nodeSep: number,
+  containerDescendants: ReadonlyMap<string, ReadonlySet<string>>
 ): { nodes: DagPositionedNode[]; edges: DagPositionedEdge[] } => {
   const crossAxis: 'x' | 'y' = direction === 'TB' ? 'x' : 'y';
 
@@ -334,38 +385,27 @@ export const enforceForkLaneOrder = (
     nodes.map((n) => [n.id, { x: n.x, y: n.y, width: n.width, height: n.height }])
   );
 
-  // Build container → inner node ids mapping (for outer pass only).
-  // A container that moves carries ALL its inner nodes (including nested).
-  const containerInnerIds = new Map<string, Set<string>>();
-  for (const group of transformed.foreachGroups) {
-    const ids = new Set([
-      ...group.innerNodes.map((n) => n.id),
-      ...(group.bypassLaneNodes ?? []).map((n) => n.id),
-    ]);
-    containerInnerIds.set(group.id, ids);
-  }
-
   // Outer pass: uses transformed.edges, containers are opaque.
   enforceForkLaneOrderForGraph(
     transformed.edges,
     mutableNodes,
     crossAxis,
-    containerInnerIds,
+    containerDescendants,
     nodeSep
   );
 
   // Inner pass per foreachGroup: each group's body is an independent graph.
   // After the outer pass has moved the containers, inner node absolute positions
   // are already updated (they were moved with their container). The inner pass
-  // reorders forks INSIDE each body independently.
+  // reorders forks INSIDE each body independently. Sub-containers within an
+  // inner graph carry THEIR own descendants, so pass the full closure map.
   for (const group of transformed.foreachGroups) {
     if (group.innerEdges.length > 0) {
-      // No nested container closure needed — inner graph treats sub-containers as opaque.
       enforceForkLaneOrderForGraph(
         group.innerEdges,
         mutableNodes,
         crossAxis,
-        new Map(), // inner graphs have no container inner-ids to carry
+        containerDescendants,
         nodeSep
       );
     }
@@ -407,7 +447,8 @@ export const enforceForkBranchCompoundOrder = (
     foreachGroups: readonly ForeachGroup[];
   },
   direction: 'TB' | 'LR',
-  nodeSep: number
+  nodeSep: number,
+  containerDescendants: ReadonlyMap<string, ReadonlySet<string>>
 ): { nodes: DagPositionedNode[]; edges: DagPositionedEdge[] } => {
   const crossAxis: 'x' | 'y' = direction === 'TB' ? 'x' : 'y';
   const mainAxis: 'x' | 'y' = crossAxis === 'x' ? 'y' : 'x';
@@ -417,18 +458,6 @@ export const enforceForkBranchCompoundOrder = (
   const mutableNodes: MutableNodes = new Map(
     nodes.map((n) => [n.id, { x: n.x, y: n.y, width: n.width, height: n.height }])
   );
-
-  // Container inner ids — needed to carry inner nodes when a container shifts.
-  const containerInnerIds = new Map<string, Set<string>>();
-  for (const group of transformed.foreachGroups) {
-    containerInnerIds.set(
-      group.id,
-      new Set([
-        ...group.innerNodes.map((n) => n.id),
-        ...(group.bypassLaneNodes ?? []).map((n) => n.id),
-      ])
-    );
-  }
 
   // Partition lanes by host graph: outer graph (graphId === undefined) vs per-group.
   const outerLanes = transformed.fallbackLanes.filter((l) => l.graphId === undefined);
@@ -441,7 +470,7 @@ export const enforceForkBranchCompoundOrder = (
     }
   }
 
-  // Shift a node (and its container inner nodes) along the cross axis by delta.
+  // Shift a node (and all its descendant inner nodes) along the cross axis by delta.
   const shiftNode = (id: string, delta: number): void => {
     const n = mutableNodes.get(id);
     if (!n) return;
@@ -450,7 +479,7 @@ export const enforceForkBranchCompoundOrder = (
       x: n.x + (crossAxis === 'x' ? delta : 0),
       y: n.y + (crossAxis === 'y' ? delta : 0),
     });
-    for (const innerId of containerInnerIds.get(id) ?? []) {
+    for (const innerId of containerDescendants.get(id) ?? []) {
       const inner = mutableNodes.get(innerId);
       if (inner) {
         mutableNodes.set(innerId, {

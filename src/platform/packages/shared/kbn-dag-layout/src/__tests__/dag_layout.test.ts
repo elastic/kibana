@@ -912,14 +912,10 @@ describe('dagLayout — reservedLanes', () => {
 //
 // §3.5 of layout_graph_with_lanes.ts corrects a dagre tight-tree artifact:
 // the shorter branch of an if/else gets assigned a later rank to tighten the
-// edge to the merge node. This correction should apply regardless of whether
-// any reserved lane exists elsewhere in the graph.
-//
-// Bug: §3.5 sits after the `lanes.length === 0` early return, so it only runs
-// when some (possibly unrelated) lane exists. Adding an on-failure to any step
-// anywhere in the YAML silently changes every unrelated fork's geometry.
-//
-// Fix: hoist §3.5 above the early return so it always runs.
+// edge to the merge node. This correction now runs unconditionally (it was
+// formerly gated behind `lanes.length === 0` and has since been hoisted).
+// The invariant tested here is that the correction applies regardless of
+// whether any reserved lane exists elsewhere in the graph.
 
 describe('dagLayout — fork-head alignment is lane-independent (Cycle B)', () => {
   it('fork heads share the same main-axis rank with and without an unrelated lane', () => {
@@ -982,6 +978,9 @@ describe('dagLayout — fork-head alignment is lane-independent (Cycle B)', () =
     // equality of fork heads matters here.
     expect(elsWithout.y).toBeCloseTo(thenWithout.y, 0);
     expect(elsWith.y).toBeCloseTo(thenWith.y, 0);
+    // No overlap in either layout — the alignment must not collapse ranks.
+    expectNoPairwiseOverlap(withoutLane);
+    expectNoPairwiseOverlap(withLane);
   });
 });
 
@@ -1114,5 +1113,59 @@ describe('dagLayout — lanePlacements coordinate space (Cycle D)', () => {
     // is group-local (no padding shift applied), so it is PAD_LEFT smaller than
     // fallback.x.
     expect(placement.crossStart).toBeCloseTo(fallbackNode.x, 0);
+  });
+});
+
+// ─── §3.5 shortcut-edge guard ──────────────────────────────────────────────────
+//
+// §3.5 (fork-head alignment) moves all targets of a multi-out-edge source to the
+// minimum main-axis rank among them. In the shortcut graph a→b, a→c, b→c, `c` is
+// a transitive successor of b — collapsing it onto b's rank puts two nodes at the
+// same main-axis rank in the same column, destroying dagre's non-overlap guarantee.
+//
+// Fix: before aligning, filter out any target that is reachable from a sibling
+// target. Only mutually-exclusive branch heads are aligned; transitive successors
+// stay at their dagre-assigned rank.
+
+describe('dagLayout — §3.5 does not collapse shortcut-edge targets (Cycle C)', () => {
+  it('shortcut graph a→b, a→c, b→c: c stays below b and nodes do not overlap', () => {
+    // a forks to b and c; b also leads to c — c is a transitive successor, not a
+    // sibling fork head. Without the guard §3.5 pulls c up to b's rank.
+    const nodes = [node('a'), node('b'), node('c')];
+    const edges = [edge('ab', 'a', 'b'), edge('ac', 'a', 'c'), edge('bc', 'b', 'c')];
+    const { nodes: laid } = dagLayout(nodes, edges, [], { direction: 'TB' });
+    const a = findNode(laid, 'a');
+    const b = findNode(laid, 'b');
+    const c = findNode(laid, 'c');
+    // b and c must be at different ranks: c below b (TB direction).
+    expect(c.y).toBeGreaterThan(b.y + b.height - 1);
+    // No two nodes may overlap.
+    expectNoPairwiseOverlap(laid);
+    // a must be above b (the fork comes first).
+    expect(a.y).toBeLessThan(b.y);
+  });
+
+  it('mixed fork a→{b,c,d} with b→c: b and d align, c stays below', () => {
+    // a has three out-edges. b→c makes c a transitive successor of b.
+    // b and d are mutually exclusive (neither reaches the other) so they align;
+    // c must remain below both.
+    const nodes = [node('a'), node('b'), node('c'), node('d'), node('end')];
+    const edges = [
+      edge('ab', 'a', 'b'),
+      edge('ac', 'a', 'c'),
+      edge('ad', 'a', 'd'),
+      edge('bc', 'b', 'c'),
+      edge('c-end', 'c', 'end'),
+      edge('d-end', 'd', 'end'),
+    ];
+    const { nodes: laid } = dagLayout(nodes, edges, [], { direction: 'TB' });
+    const b = findNode(laid, 'b');
+    const c = findNode(laid, 'c');
+    const d = findNode(laid, 'd');
+    // b and d should share the same main-axis rank (fork heads).
+    expect(b.y).toBeCloseTo(d.y, 0);
+    // c must be strictly below b (it is b's successor, not a sibling).
+    expect(c.y).toBeGreaterThan(b.y + b.height - 1);
+    expectNoPairwiseOverlap(laid);
   });
 });
