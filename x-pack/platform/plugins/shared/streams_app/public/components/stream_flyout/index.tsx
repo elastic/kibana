@@ -184,7 +184,8 @@ function StreamFlyoutContent({ name, onClose, refreshStreams }: StreamFlyoutProp
     () =>
       definition &&
       Streams.ingest.all.GetResponse.is(definition) &&
-      'processors' in definition.stream.ingest.processing,
+      'processors' in definition.stream.ingest.processing &&
+      definition.stream.ingest.processing.processors.length > 0,
     [definition]
   );
 
