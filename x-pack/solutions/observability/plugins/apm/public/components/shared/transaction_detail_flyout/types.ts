@@ -15,6 +15,8 @@ export interface TransactionDetailFlyoutFilters {
   environment: string;
   rangeFrom: string;
   rangeTo: string;
+  start: string;
+  end: string;
 }
 
 export interface TransactionDetailFlyoutProps {
@@ -23,8 +25,20 @@ export interface TransactionDetailFlyoutProps {
   onClose: () => void;
   historyKey?: symbol;
   /**
-   * Set by hosts whose surrounding UI is computed from raw documents (Discover):
-   * RED charts then stay ES|QL so they agree with the host.
+   * When parent filters changed and this transaction is no longer in the
+   * filtered set, keep showing the previous filter snapshot and surface a banner.
+   */
+  isFiltersStale?: boolean;
+  /**
+   * True while parent filters changed and the transactions list has not yet settled —
+   * the child still shows the last confirmed snapshot.
+   */
+  isFiltersPending?: boolean;
+  /** Bumped by the parent refresh control so nested charts and fetchers reload. */
+  refreshToken?: number;
+  /**
+   * When the surrounding UI is computed from raw documents (e.g. Discover),
+   * RED charts stay ES|QL so they agree with that UI.
    */
   preferDocumentBasedCharts?: boolean;
   schema?: ServiceSchemaType;
