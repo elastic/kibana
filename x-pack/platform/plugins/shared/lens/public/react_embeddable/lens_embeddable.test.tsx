@@ -151,6 +151,31 @@ describe('Lens embeddable applySerializedState', () => {
     }
   );
 
+  it('keeps the state from the latest applySerializedState call when an earlier call finishes loading after it', async () => {
+    const services = makeEmbeddableServices();
+    const { attributes: oldAttributes } = createEmptyLensState('lnsMetric', 'Old title');
+    const { attributes: newAttributes } = createEmptyLensState('lnsMetric', 'New title');
+    services.attributeService.loadFromLibrary = jest
+      .fn()
+      .mockResolvedValue({ attributes: oldAttributes });
+    const panel = await buildPanel({ ref_id: 'same-id' }, services);
+
+    let resolveFirst!: (value: { attributes: typeof oldAttributes }) => void;
+    let resolveSecond!: (value: { attributes: typeof newAttributes }) => void;
+    services.attributeService.loadFromLibrary = jest
+      .fn()
+      .mockImplementationOnce(() => new Promise((resolve) => (resolveFirst = resolve)))
+      .mockImplementationOnce(() => new Promise((resolve) => (resolveSecond = resolve)));
+
+    const first = panel.applySerializedState({ ref_id: 'same-id' });
+    const second = panel.applySerializedState({ ref_id: 'same-id' });
+    resolveSecond({ attributes: newAttributes });
+    resolveFirst({ attributes: oldAttributes });
+    await Promise.all([first, second]);
+
+    expect(getTitle(panel)).toBe('New title');
+  });
+
   it('falls back to a retained visualization title when panel overrides are removed', async () => {
     const next = createEmptyLensState('lnsMetric', 'Metric');
     const panel = await buildPanel({ ...next, title: '', hide_title: true });
