@@ -7,10 +7,10 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { I18nProvider } from '@kbn/i18n-react';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
+import { I18nProvider } from '@kbn/i18n-react';
 import { createQueryClientWrapper, createTestQueryClient } from '../hooks/test_utils';
-import { AlertEpisodeAssigneeCell } from './assignee_cell';
+import { UserProfileDisplay } from './user_profile_display';
 
 const queryClient = createTestQueryClient();
 const wrapper = createQueryClientWrapper(queryClient);
@@ -18,16 +18,16 @@ const wrapper = createQueryClientWrapper(queryClient);
 const mockBulkGet = jest.fn();
 const mockUserProfile = { bulkGet: mockBulkGet } as unknown as UserProfileService;
 
-describe('AlertEpisodeAssigneeCell', () => {
+describe('UserProfileDisplay', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     queryClient.clear();
   });
 
-  it('retains the assignee empty state', () => {
+  it('renders the configured empty state without fetching a profile', () => {
     render(
       <I18nProvider>
-        <AlertEpisodeAssigneeCell assigneeUid={null} userProfile={mockUserProfile} />
+        <UserProfileDisplay userProfileUid={null} userProfile={mockUserProfile} emptyState="—" />
       </I18nProvider>,
       { wrapper }
     );
@@ -36,27 +36,27 @@ describe('AlertEpisodeAssigneeCell', () => {
     expect(mockBulkGet).not.toHaveBeenCalled();
   });
 
-  it('renders a skeleton while the assignee profile is loading', () => {
+  it('renders a skeleton while the profile is loading', () => {
     mockBulkGet.mockImplementation(() => new Promise(() => {}));
 
     render(
       <I18nProvider>
-        <AlertEpisodeAssigneeCell assigneeUid="u-1" userProfile={mockUserProfile} />
+        <UserProfileDisplay userProfileUid="u-1" userProfile={mockUserProfile} />
       </I18nProvider>,
       { wrapper }
     );
 
     expect(
-      screen.getByTestId('alertingV2EpisodeAssigneeCellLoading').querySelector('.euiSkeletonCircle')
+      screen.getByTestId('alertingV2UserProfileDisplayLoading').querySelector('.euiSkeletonCircle')
     ).not.toBeNull();
   });
 
-  it('renders the assignee username once the profile loads', async () => {
+  it('renders the username once the profile loads', async () => {
     mockBulkGet.mockResolvedValue([{ uid: 'u-1', user: { username: 'jdoe' }, data: {} }] as never);
 
     render(
       <I18nProvider>
-        <AlertEpisodeAssigneeCell assigneeUid="u-1" userProfile={mockUserProfile} />
+        <UserProfileDisplay userProfileUid="u-1" userProfile={mockUserProfile} />
       </I18nProvider>,
       { wrapper }
     );
@@ -64,13 +64,13 @@ describe('AlertEpisodeAssigneeCell', () => {
     expect(await screen.findByText('jdoe')).toBeInTheDocument();
   });
 
-  it('does not make an unknown assignee tooltip focusable when embedded in a button', async () => {
+  it('can keep the unknown-user tooltip out of the tab order', async () => {
     mockBulkGet.mockResolvedValue([]);
 
     render(
       <I18nProvider>
-        <AlertEpisodeAssigneeCell
-          assigneeUid="u-1"
+        <UserProfileDisplay
+          userProfileUid="u-1"
           userProfile={mockUserProfile}
           isTooltipFocusable={false}
         />
