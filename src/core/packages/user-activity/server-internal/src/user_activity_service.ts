@@ -106,13 +106,17 @@ export class UserActivityService
       message = `User ${injectedContext.user?.name} performed ${event.action} on ${object.name} (${object.id})`;
     }
 
+    // ECS `source` is a role-agnostic copy of the role-annotated `client` fields.
+    const clientIp = injectedContext.client?.ip;
+
     this.logger.info(message, {
       message,
-      event,
+      event: { ...event, outcome: event.outcome ?? 'unknown' },
       object,
       ...(metadata ? { metadata } : {}),
       ...(error ? { error } : {}),
       ...injectedContext,
+      ...(clientIp ? { source: { address: clientIp, ip: clientIp } } : {}),
     });
   };
 
@@ -123,9 +127,9 @@ export class UserActivityService
 
     this.injectedContextAsyncStorage.enterWith({
       client: { ...current.client, ...newContext.client },
-      session: { ...current.session, ...newContext.session },
       kibana: {
         space: { ...current.kibana?.space, ...newContext.kibana?.space },
+        session: { ...current.kibana?.session, ...newContext.kibana?.session },
       },
       user: { ...current.user, ...newContext.user },
       http: {
