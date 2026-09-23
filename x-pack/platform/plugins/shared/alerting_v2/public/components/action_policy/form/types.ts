@@ -13,6 +13,19 @@ import type {
 } from '@kbn/alerting-v2-schemas';
 import type { InlineWorkflowActionDraft } from '@kbn/alerting-v2-rule-form';
 
+export type ActionPolicyFormCollapsibleSection = 'notificationControls' | 'destination';
+
+export interface ActionPolicyFormCollapsibleSectionConfig {
+  readonly initialIsOpen?: boolean;
+}
+
+export interface ActionPolicyFormConfig {
+  readonly connectorCreationMode: 'flyout' | 'new-tab';
+  readonly collapsibleSections?: Partial<
+    Record<ActionPolicyFormCollapsibleSection, ActionPolicyFormCollapsibleSectionConfig>
+  >;
+}
+
 export interface ActionPolicyFormState {
   name: string;
   description: string;
