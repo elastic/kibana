@@ -69,7 +69,7 @@ Worked examples against the bar-chart gold above (Config vs Intent sees `x` + `y
 - Actual `y: [{ column: 'total' }]` over `STATS total = SUM(bytes) BY response.keyword` → Config 1/2, `y[0]` fails because `total` resolves to `SUM(bytes)`, not `COUNT(*)`.
 - Gold is only `{ type: 'metric', data_source }` → Config vs Intent skips (nothing left to check); only the judge scores.
 
-Column resolution follows one alias hop inside `STATS` and `EVAL`, tolerates `.keyword` twins, `COUNT()` / `COUNT(*)`, `HOUR()` / `DATE_EXTRACT("HOUR_OF_DAY", …)`, and treats any `BUCKET` / `TBUCKET` as the same time axis. It does not follow `RENAME` or chained aliases (`EVAL a = … | STATS b = AVG(a)`).
+Column resolution follows one alias hop inside `STATS` and `EVAL`, tolerates `.keyword` twins, `COUNT()` / `COUNT(*)`, `HOUR()` / `DATE_EXTRACT("HOUR_OF_DAY", …)`, and treats `TBUCKET` and any `BUCKET` over a time span (bind params, a duration literal such as `1h`, or a date literal) as the same time axis. A numeric `BUCKET(bytes, 20)` is not a time axis; it matches another numeric bucket over the same field regardless of bucket count. It does not follow `RENAME` or chained aliases (`EVAL a = … | STATS b = AVG(a)`).
 
 **Gold queries follow the agent's idiom** (see `agent-builder-visualizations-server/shared/esql_instructions.ts`):
 

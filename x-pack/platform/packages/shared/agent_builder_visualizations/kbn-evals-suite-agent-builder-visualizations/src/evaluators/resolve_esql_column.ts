@@ -11,12 +11,17 @@ import type { ESQLAstItem, ESQLColumn, ESQLSingleAstItem } from '@elastic/esql/t
 // Anywhere in the expression, so `count_distinct(url.keyword)` matches `count_distinct(url)`.
 const KEYWORD_SUFFIX = /\.keyword\b/gi;
 
+// A BUCKET whose span is a time window: bind params, a duration literal, or a date literal.
+const TIME_SPAN_ARGS =
+  /\?_tstart|\?_tend|"\d{4}-\d{2}-\d{2}|\b\d+\s*(?:ms|milliseconds?|mo|months?|min|minutes?|sec|seconds?|hours?|days?|weeks?|quarters?|years?|[smhdwqy])\b/;
+const BUCKET_CALL = /^bucket\s*\(\s*([^,)]+)(.*)\)$/;
+
 /**
  * True when two Lens/Vega column names refer to the same ES|QL expression after
  * resolving STATS/EVAL/BY aliases. Column alias wording is ignored; `.keyword`
  * twins (as a grouping or inside an aggregation), COUNT()/COUNT(*),
- * HOUR()/DATE_EXTRACT hour-of-day, and BUCKET/TBUCKET time buckets count as
- * the same expression.
+ * HOUR()/DATE_EXTRACT hour-of-day, and TBUCKET / time-span BUCKET buckets count
+ * as the same expression. A numeric BUCKET matches only on its bucketed field.
  */
 export function columnsReferToSameExpression(
   goldColumn: string,
@@ -117,8 +122,13 @@ function normalizeExpression(value: string): string {
     /\bdate_extract\s*\(\s*["']hour_of_day["']\s*,\s*([^)]+)\)/g,
     'hour($1)'
   );
-  if (/^t?bucket\s*\(/.test(normalized)) {
+  if (/^tbucket\s*\(/.test(normalized)) {
     return 'time_bucket';
+  }
+  const bucket = BUCKET_CALL.exec(normalized);
+  if (bucket) {
+    const [, field, spanArgs] = bucket;
+    return TIME_SPAN_ARGS.test(spanArgs) ? 'time_bucket' : `bucket(${field.trim()})`;
   }
   return normalized;
 }
