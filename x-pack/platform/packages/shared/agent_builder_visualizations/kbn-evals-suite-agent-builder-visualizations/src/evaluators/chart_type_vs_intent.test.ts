@@ -151,7 +151,7 @@ describe('createChartTypeVsIntentEvaluator', () => {
     expect(result.label).toBe('partial');
   });
 
-  it('scores a visualization as not satisfying when the judge throws', async () => {
+  it('abstains with a null score when the judge throws', async () => {
     const failing: ChartIntentJudge = async () => {
       throw new Error('no tool call');
     };
@@ -162,7 +162,9 @@ describe('createChartTypeVsIntentEvaluator', () => {
       visualizations: [{ esql: 'FROM a', chartType: 'xy' }],
     });
 
-    expect(result.score).toBe(0);
+    expect(result.score).toBeNull();
+    expect(result.label).toBe('judge-failure');
+    expect(result.explanation).toContain('no tool call');
     expect(result.metadata).toEqual(
       expect.objectContaining({
         visualizations: [

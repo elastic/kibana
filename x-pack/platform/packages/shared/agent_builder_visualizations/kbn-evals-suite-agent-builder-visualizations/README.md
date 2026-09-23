@@ -21,7 +21,7 @@ Per [issue #277136](https://github.com/elastic/kibana/issues/277136), "correct" 
 - **Trajectory** — the agent routed the request to `load_skill` → `platform.core.create_visualization`.
 - **Trace-based** — tokens / latency / tool-call counts from OTel spans.
 
-Evaluators that have nothing to check for an example (no gold renderer, chart form, or structural config) return `score: null` with label `skipped`, so they drop out of averages instead of inflating them.
+Evaluators that have nothing to check for an example (no gold renderer, chart form, or structural config) return `score: null` with label `skipped`, so they drop out of averages instead of inflating them. The same applies to harness-side failures: a gold query that does not run (`gold-execution-failure`) or a judge that returns no verdict (`judge-failure`) abstain with `score: null` rather than being booked as agent failures.
 
 A standalone ES|QL Validity evaluator also exists in this suite (`createEsqlValidityEvaluator`) but is not in the default set — execution already covers AST validation.
 

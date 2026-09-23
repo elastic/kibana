@@ -101,7 +101,8 @@ const ChartIntentPrompt = createPrompt({
             verdict: {
               type: 'string',
               enum: ['satisfies', 'does_not_satisfy'],
-              description: 'Whether the produced chart form is the kind of chart the user asked for.',
+              description:
+                'Whether the produced chart form is the kind of chart the user asked for.',
             },
             reason: {
               type: 'string',
@@ -206,7 +207,8 @@ function readVegaMark(spec: unknown): string | undefined {
 /**
  * LLM evaluator: asks a judge whether each produced chart's form (chart type,
  * xy series types, Vega mark) satisfies the user request, using the gold chart
- * form as the reference for intent. Skips when the gold declares no chart form.
+ * form as the reference for intent. Skips when the gold declares no chart form
+ * and abstains (`score: null`) when the judge returns no verdict.
  */
 export function createChartTypeVsIntentEvaluator<
   TExample extends Example = Example,
@@ -262,20 +264,43 @@ export function createChartTypeVsIntentEvaluator<
           const actual = describeActualChartForm(visualization);
           try {
             const { verdict, reason } = await judge({ question, gold, actual });
-            return { index, actual, satisfies: verdict === 'satisfies', reason };
+            return {
+              index,
+              actual,
+              satisfies: verdict === 'satisfies',
+              reason,
+              fallback: undefined as 'judge_no_tool_call' | undefined,
+            };
           } catch (error) {
-            // Conservatively score as not satisfying so one bad judge response does not
-            // fail the suite; filter via metadata.fallback.
             return {
               index,
               actual,
               satisfies: false,
               reason: error instanceof Error ? error.message : String(error),
-              fallback: 'judge_no_tool_call',
+              fallback: 'judge_no_tool_call' as const,
             };
           }
         })
       );
+
+      // A judge that returns no verdict is an infrastructure failure, not an agent
+      // failure: abstain like the other evaluators do for gold-side problems.
+      const judgeFailures = details.filter((detail) => detail.fallback !== undefined);
+      if (judgeFailures.length > 0) {
+        return {
+          score: null,
+          label: 'judge-failure',
+          explanation: `Chart form judge failed on ${judgeFailures.length}/${
+            details.length
+          } visualization(s): ${judgeFailures.map((detail) => detail.reason).join('; ')}`,
+          metadata: {
+            gold,
+            totalVisualizations: details.length,
+            visualizations: details,
+            judgeVersion: CHART_TYPE_VS_INTENT_JUDGE_VERSION,
+          },
+        };
+      }
 
       const satisfiedCount = details.filter((detail) => detail.satisfies).length;
       const score = satisfiedCount / details.length;
