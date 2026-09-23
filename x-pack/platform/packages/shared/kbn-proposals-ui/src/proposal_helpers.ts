@@ -6,6 +6,14 @@
  */
 
 import type { ApprovalProposal } from './types';
+import { APPROVAL_MODAL_TRANSLATIONS } from './translations';
+
+/**
+ * Shared with anything that opens the approval decision for a proposal (the modal itself, the
+ * flyout's proposed-action row), so they title it identically.
+ */
+export const getProposalTitle = (proposal: ApprovalProposal): string =>
+  proposal.action?.name ?? proposal.actionWorkflowId ?? APPROVAL_MODAL_TRANSLATIONS.noAction;
 
 /**
  * The row's own impact first: a revision can override it, and it is the value the queue sorts

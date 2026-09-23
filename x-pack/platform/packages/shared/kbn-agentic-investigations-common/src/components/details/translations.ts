@@ -55,4 +55,18 @@ export const DETAILS_FLYOUT_LABELS = Object.freeze({
       defaultMessage: 'Dismiss',
     }),
   },
+  proposedAction: {
+    needsReviewBadge: i18n.translate('xpack.alertzero.detailsFlyout.proposedAction.needsReview', {
+      defaultMessage: 'Needs review',
+    }),
+    reversible: i18n.translate('xpack.alertzero.detailsFlyout.proposedAction.reversible', {
+      defaultMessage: 'Reversible',
+    }),
+    irreversible: i18n.translate('xpack.alertzero.detailsFlyout.proposedAction.irreversible', {
+      defaultMessage: 'Irreversible',
+    }),
+    ariaLabel: i18n.translate('xpack.alertzero.detailsFlyout.proposedAction.ariaLabel', {
+      defaultMessage: 'Review proposed action',
+    }),
+  },
 });

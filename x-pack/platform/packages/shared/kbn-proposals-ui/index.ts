@@ -12,7 +12,7 @@ export {
   type ApprovalAction,
   type AlwaysAllowOption,
 } from './src/approval_content';
-export { getProposalTone, isProposalExpired } from './src/proposal_helpers';
+export { getProposalTitle, getProposalTone, isProposalExpired } from './src/proposal_helpers';
 export { toActionImpactItems } from './src/to_action_impact_items';
 export type { ApprovalProposal } from './src/types';
 export {

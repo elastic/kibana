@@ -9,7 +9,7 @@ import React, { memo } from 'react';
 import { css } from '@emotion/react';
 import { EuiModal, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
 import { ApprovalContent } from './approval_content';
-import { getProposalTone, isProposalExpired } from './proposal_helpers';
+import { getProposalTitle, getProposalTone, isProposalExpired } from './proposal_helpers';
 import { toActionImpactItems } from './to_action_impact_items';
 import { APPROVAL_MODAL_TRANSLATIONS } from './translations';
 import type { ApprovalProposal } from './types';
@@ -44,8 +44,7 @@ export const ApprovalModal = memo<ApprovalModalProps>(
     const { euiTheme } = useEuiTheme();
     const titleId = useGeneratedHtmlId({ prefix: 'approvalModalHeader' });
 
-    const title =
-      proposal.action?.name ?? proposal.actionWorkflowId ?? APPROVAL_MODAL_TRANSLATIONS.noAction;
+    const title = getProposalTitle(proposal);
     const isExpired = isProposalExpired(proposal);
 
     return (

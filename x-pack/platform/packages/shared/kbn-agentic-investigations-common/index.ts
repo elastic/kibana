@@ -44,6 +44,10 @@ export {
 } from './src/components/details/header_blocks';
 export { OverviewTab } from './src/components/details/details_flyout_tab_contents';
 export { DetailsBlock } from './src/components/details/detail_block';
+export {
+  ProposedActionButton,
+  type ProposedActionButtonProps,
+} from './src/components/details/proposed_action_button';
 
 export {
   AttachmentSummarySection,
