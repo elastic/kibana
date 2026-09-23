@@ -949,6 +949,8 @@ export function SettingsTab() {
 
       {isAppsEnabled && <AppsSection canEdit={canManageSlack} />}
 
+      <EuiSpacer />
+
       {isConfirmingZeroMatch && (
         <EuiConfirmModal
           aria-labelledby={zeroMatchConfirmModalTitleId}
