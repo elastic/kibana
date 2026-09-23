@@ -48,25 +48,52 @@ const chipLabelCss = css`
   white-space: nowrap;
 `;
 
-export const FieldMarkdownRenderer = ({ icon, name, value }: ParsedField) => {
-  const { disableActions, scopeId, alertIds } = useMarkdownFormatterContext();
-  const { openFlyout, openRightPanel } = useExpandableFlyoutApi();
-  const { openDocumentFlyoutFromPattern, openHostFlyout, openUserFlyout } = useFlyoutApi();
-  const { euiTheme } = useEuiTheme();
-  const enableNewFlyout = useIsNewFlyoutEnabled();
+/** Chat / investigation chips sit in a narrow card; wrapping the label is
+ *  better than clipping the sentence at 10rem. */
+const wrapChipLabelCss = css`
+  display: inline;
+  overflow-wrap: anywhere;
+  vertical-align: middle;
+  white-space: normal;
+`;
 
-  // Detect whether the chip label is visually truncated so the full-value tooltip is only shown
-  // when needed — avoids a redundant tooltip for short values that already fit in the chip.
-  // Re-run whenever `value` or `disableActions` changes: a different value changes the text width,
-  // and a different `disableActions` switches the render path (attaching `chipLabelRef` to a
-  // different DOM node), so the measurement needs to be refreshed in both cases.
+const useIsChipLabelTruncated = (value: ParsedField['value']) => {
   const chipLabelRef = useRef<HTMLSpanElement>(null);
   const [isValueTruncated, setIsValueTruncated] = useState(false);
 
   useLayoutEffect(() => {
     const el = chipLabelRef.current;
     setIsValueTruncated(el != null && el.scrollWidth > el.clientWidth);
-  }, [value, disableActions]);
+  }, [value]);
+
+  return { chipLabelRef, isValueTruncated };
+};
+
+/**
+ * Static field chip used when flyout / cell-action providers are not available
+ * (Agent Builder chat outside the Security app shell).
+ */
+const DisabledFieldMarkdownRenderer = ({ icon, name, value }: ParsedField) => {
+  return (
+    <span css={inlineFieldWrapperCss} data-test-subj="fieldMarkdownRendererInlineWrapper">
+      <EuiToolTip content={name} data-test-subj="fieldMarkdownRendererToolTip" position="top">
+        <EuiBadge color="hollow" data-test-subj="disabledActionsBadge" iconType={icon} tabIndex={0}>
+          <span css={wrapChipLabelCss} data-allow-wrap="true" data-test-subj="disabledChipLabel">
+            {value}
+          </span>
+        </EuiBadge>
+      </EuiToolTip>
+    </span>
+  );
+};
+
+const InteractiveFieldMarkdownRenderer = ({ icon, name, value }: ParsedField) => {
+  const { scopeId, alertIds } = useMarkdownFormatterContext();
+  const { openFlyout, openRightPanel } = useExpandableFlyoutApi();
+  const { openDocumentFlyoutFromPattern, openHostFlyout, openUserFlyout } = useFlyoutApi();
+  const { euiTheme } = useEuiTheme();
+  const enableNewFlyout = useIsNewFlyoutEnabled();
+  const { chipLabelRef, isValueTruncated } = useIsChipLabelTruncated(value);
 
   const stringValue = typeof value === 'string' ? value : undefined;
 
@@ -76,10 +103,7 @@ export const FieldMarkdownRenderer = ({ icon, name, value }: ParsedField) => {
 
   // Alert-id chips are clickable only when the value is a known alert id for this attack.
   const isClickableAlertId =
-    ALERT_ID_FIELDS.has(name) &&
-    !disableActions &&
-    stringValue != null &&
-    alertIdSet.has(stringValue);
+    ALERT_ID_FIELDS.has(name) && stringValue != null && alertIdSet.has(stringValue);
 
   const onAlertIdClick = useCallback(() => {
     if (stringValue == null) return;
@@ -105,7 +129,7 @@ export const FieldMarkdownRenderer = ({ icon, name, value }: ParsedField) => {
     alertIds: alertIds ?? [],
     fieldName: name,
     fieldValue: typeof value === 'string' ? value : '',
-    enabled: !disableActions && isEntityField,
+    enabled: isEntityField,
   });
 
   const flyoutPanelProps = useMemo(
@@ -172,29 +196,6 @@ export const FieldMarkdownRenderer = ({ icon, name, value }: ParsedField) => {
     [euiTheme.font.scale.s, euiTheme.size.xs, flyoutPanelProps, isLoading, onEntityClick, value]
   );
 
-  if (disableActions) {
-    return (
-      <span css={inlineFieldWrapperCss} data-test-subj="fieldMarkdownRendererInlineWrapper">
-        <EuiToolTip
-          content={isValueTruncated ? `${name}: ${value}` : name}
-          data-test-subj="fieldMarkdownRendererToolTip"
-          position="top"
-        >
-          <EuiBadge
-            color="hollow"
-            data-test-subj="disabledActionsBadge"
-            iconType={icon}
-            tabIndex={0}
-          >
-            <span ref={chipLabelRef} css={chipLabelCss}>
-              {value}
-            </span>
-          </EuiBadge>
-        </EuiToolTip>
-      </span>
-    );
-  }
-
   if (isClickableAlertId && stringValue != null) {
     return (
       <span css={inlineFieldWrapperCss} data-test-subj="fieldMarkdownRendererInlineWrapper">
@@ -257,4 +258,14 @@ export const FieldMarkdownRenderer = ({ icon, name, value }: ParsedField) => {
       </DraggableBadge>
     </span>
   );
+};
+
+export const FieldMarkdownRenderer = (props: ParsedField) => {
+  const { disableActions } = useMarkdownFormatterContext();
+
+  if (disableActions) {
+    return <DisabledFieldMarkdownRenderer {...props} />;
+  }
+
+  return <InteractiveFieldMarkdownRenderer {...props} />;
 };

@@ -145,6 +145,33 @@ describe('FieldMarkdownRenderer', () => {
     expect(disabledActionsBadge).toBeInTheDocument();
   });
 
+  it('does not clip disabled chip labels to 10rem', () => {
+    const value = '6364495c-9c4a-43ab-add4-1816a4365f53';
+
+    render(
+      <TestProviders>
+        <MarkdownFormatterContext.Provider value={{ disableActions: true }}>
+          <FieldMarkdownRenderer icon="display" name="host.name" operator={':'} value={value} />
+        </MarkdownFormatterContext.Provider>
+      </TestProviders>
+    );
+
+    expect(screen.getByTestId('disabledChipLabel')).toHaveAttribute('data-allow-wrap', 'true');
+    expect(screen.getByText(value)).toBeInTheDocument();
+  });
+
+  it('does not subscribe to the expandable flyout when actions are disabled', () => {
+    render(
+      <TestProviders>
+        <MarkdownFormatterContext.Provider value={{ disableActions: true }}>
+          <FieldMarkdownRenderer icon="" name="host.name" operator={':'} value="srv-1" />
+        </MarkdownFormatterContext.Provider>
+      </TestProviders>
+    );
+
+    expect(mockUseExpandableFlyoutApi).not.toHaveBeenCalled();
+  });
+
   it('renders the field tooltip on the badge when disableActions is true', () => {
     const icon = 'user';
     const name = 'user.name';

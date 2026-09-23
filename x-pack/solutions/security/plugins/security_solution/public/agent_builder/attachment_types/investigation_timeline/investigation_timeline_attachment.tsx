@@ -29,6 +29,12 @@ export const createInvestigationTimelineAttachmentDefinition =
   (): AttachmentUIDefinition<InvestigationTimelineAttachment> => ({
     getLabel: (attachment) => attachment?.data?.attachmentLabel ?? DEFAULT_LABEL,
     getIcon: () => 'timeline',
+    // The investigation details flyout skips attachment types that omit this hook.
+    renderConversationDetailsContent: ({ attachment }) => (
+      <React.Suspense fallback={<EuiSkeletonText lines={4} />}>
+        <LazyInvestigationTimelineInlineContent attachment={attachment} isSidebar={false} />
+      </React.Suspense>
+    ),
     renderInlineContent: (props: AttachmentRenderProps<InvestigationTimelineAttachment>) => (
       <React.Suspense fallback={<EuiSkeletonText lines={4} />}>
         <LazyInvestigationTimelineInlineContent {...props} />

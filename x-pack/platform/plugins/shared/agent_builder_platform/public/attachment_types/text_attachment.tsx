@@ -38,6 +38,12 @@ export const textAttachmentDefinition: AttachmentUIDefinition<TextAttachment> = 
       defaultMessage: 'Text',
     }),
   getIcon: () => 'document',
+  // Desk-test only (PR4): the conversation details flyout skips attachment types that
+  // omit this hook, so `text` attachments render inline but vanish from the Attachments
+  // tab. Upstream separately rather than folding into PR1–PR3.
+  renderConversationDetailsContent: ({ attachment }) => (
+    <TextInlineContent attachment={attachment} isSidebar={false} />
+  ),
   renderInlineContent: (props) => <TextInlineContent {...props} />,
   getActionButtons: ({ attachment }) => [
     {
