@@ -15,8 +15,11 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { OnboardingPage } from './onboarding_page';
 
-const renderPage = () => {
+const renderPage = ({ canWrite = false }: { canWrite?: boolean } = {}) => {
   const core = coreMock.createStart();
+  // coreMock.createStart() does not populate feature capabilities; set the
+  // alertzero.write capability so the component can branch on it.
+  (core.application.capabilities as Record<string, unknown>).alertzero = { write: canWrite };
   const history = createMemoryHistory();
 
   render(
@@ -40,20 +43,34 @@ describe('OnboardingPage', () => {
     expect(screen.getByText('Get started with AlertZero')).toBeInTheDocument();
   });
 
-  it('renders the body copy', () => {
-    renderPage();
-    expect(
-      screen.getByText(/Enable a Watch worker to start receiving investigations/)
-    ).toBeInTheDocument();
+  describe('with write capability', () => {
+    it('renders the writable body copy', () => {
+      renderPage({ canWrite: true });
+      expect(
+        screen.getByText(/Enable a Watch worker to start receiving investigations/)
+      ).toBeInTheDocument();
+    });
+
+    it('renders a Configure Watches button that navigates to /watches', () => {
+      const { history } = renderPage({ canWrite: true });
+      const button = screen.getByRole('button', { name: 'Configure Watches' });
+      expect(button).toBeInTheDocument();
+
+      fireEvent.click(button);
+
+      expect(history.location.pathname).toBe('/watches');
+    });
   });
 
-  it('renders a Configure Watches button that navigates to /watches', () => {
-    const { history } = renderPage();
-    const button = screen.getByRole('button', { name: 'Configure Watches' });
-    expect(button).toBeInTheDocument();
+  describe('without write capability (read-only user)', () => {
+    it('renders the read-only body copy', () => {
+      renderPage({ canWrite: false });
+      expect(screen.getByText(/Ask an administrator to enable a Watch worker/)).toBeInTheDocument();
+    });
 
-    fireEvent.click(button);
-
-    expect(history.location.pathname).toBe('/watches');
+    it('does not render the Configure Watches button', () => {
+      renderPage({ canWrite: false });
+      expect(screen.queryByRole('button', { name: 'Configure Watches' })).not.toBeInTheDocument();
+    });
   });
 });

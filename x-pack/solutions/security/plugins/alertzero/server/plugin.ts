@@ -142,7 +142,7 @@ export class AlertZeroPlugin
   start(_core: CoreStart, plugins: AlertZeroStartDependencies): AlertZeroPluginStart {
     this.spaces = plugins.spaces;
     this.agenticInvestigations = plugins.agenticInvestigations;
-    this.agentBuilderConversations = plugins.agentBuilder.conversations;
+    this.agentBuilderConversations = plugins.agentBuilder?.conversations;
 
     if (!this.config.enabled) {
       return {};
