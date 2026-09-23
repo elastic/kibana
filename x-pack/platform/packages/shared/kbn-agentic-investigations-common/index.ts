@@ -13,6 +13,7 @@ export {
 } from './src/components/actions/base_actions';
 
 export { ConversationCard } from './src/components/conversation_card/conversation_card';
+export { ConversationCardCompact } from './src/components/conversation_card/conversation_card_compact';
 export { ConversationMetaInfo } from './src/components/conversation_card/conversation_meta_info';
 export { TemplateBadge } from './src/components/conversation_card/template_badge';
 export { type ConversationsActionsGroupProps } from './src/components/conversation_card/actions_group';
@@ -31,15 +32,8 @@ export {
   InvestigationHeaderBlocks,
   type InvestigationHeaderBlocksProps,
 } from './src/components/details/header_blocks';
-export {
-  AttachmentsTab,
-  type AttachmentsTabProps,
-  OverviewTab,
-  TimelineTab,
-} from './src/components/details/details_flyout_tab_contents';
+export { OverviewTab } from './src/components/details/details_flyout_tab_contents';
 export { DetailsBlock } from './src/components/details/detail_block';
-
-export { TimelineEventList } from './src/components/timeline/timeline_event_list';
 
 export {
   registerAgenticInvestigationTemplateUI,
@@ -84,7 +78,7 @@ export { toActionImpactItems } from './src/components/modals/approval_modal/to_a
 export type { ApprovalProposal } from './src/components/modals/approval_modal/types';
 export { type ActionImpactItemProps } from './src/components/modals/approval_modal/action_impact_item';
 export {
-  ActionImpactSection,
-  type ActionImpactContent,
-  type ActionImpactSectionProps,
-} from './src/components/modals/approval_modal/action_impact_section';
+  type EscalationModalMode,
+  type EscalationIncidentSummary,
+} from './src/components/modals/escalation_modal';
+export { type EscalationModalRenderProps } from './src/components/modals/investigation_action_modals';
