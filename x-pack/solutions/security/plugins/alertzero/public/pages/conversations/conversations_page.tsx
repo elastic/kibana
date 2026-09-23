@@ -14,12 +14,17 @@ import {
   type CardActionType,
   type Investigation,
   InvestigationActionModals,
+  type EscalationModalRenderProps,
   Impact,
 } from '@kbn/agentic-investigations-common';
-import { useApproveProposal, useDismissProposal } from '@kbn/agentic-investigations-plugin/public';
+import { useApproveProposal, useDismissProposal } from '@kbn/proposals-plugin/public';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
+import {
+  AGENTIC_INVESTIGATIONS_PLUGIN_ID,
+  ESCALATIONS_UI_CAPABILITY_MANAGE,
+} from '@kbn/agentic-investigations-plugin/common';
 import type { ProposalItem } from '../../../common/proposals/list';
 import { useProposalChartsSummary } from '../../hooks/use_proposal_charts_summary';
 import { AlertZeroPageSection } from '../../components/layout/alertzero_page_section';
@@ -31,9 +36,16 @@ import { useInvestigationDetails } from './use_investigation_details';
 import { QUEUE_PAGE_INFO, DECISION_ERRORS } from './translations';
 import { ProposalsTrendChartRow } from '../../components/proposals_trend_chart';
 import { DismissProposalModal } from '../../components/pending_proposals/dismiss_proposal_modal';
+import { EscalationModalBoundary } from './escalation_modal_boundary';
 import { useQueueSections } from './queue/use_queue_sections';
 import { useDropDecidedProposal } from './queue/use_drop_decided_proposal';
 import { QueueSection } from './queue/queue_section';
+
+// Lazy-loaded so that the escalation modal tree (React Query hooks, form components,
+// translations, and user-profile API) stays out of alertzero's main chunk.
+const LazyConnectedEscalationModal = React.lazy(() =>
+  import('./connected_escalation_modal').then((m) => ({ default: m.ConnectedEscalationModal }))
+);
 
 /**
  * The proposals route distinguishes why a decision was refused — 410 the deadline passed,
@@ -113,8 +125,13 @@ export const ConversationsPage: React.FC = () => {
   );
 
   const {
-    services: { notifications },
+    services: { notifications, application },
   } = useKibana<CoreStart>();
+
+  const canManageEscalations =
+    application?.capabilities[AGENTIC_INVESTIGATIONS_PLUGIN_ID]?.[
+      ESCALATIONS_UI_CAPABILITY_MANAGE
+    ] === true;
 
   // Both decisions close on success only, and surface the refusal otherwise: an expired
   // deadline or a proposal someone else already decided must not look like it landed.
@@ -171,6 +188,15 @@ export const ConversationsPage: React.FC = () => {
     [dismiss, dropDecided, onDecisionError]
   );
 
+  const renderEscalationModal = useCallback(
+    (props: EscalationModalRenderProps) => (
+      <EscalationModalBoundary>
+        <LazyConnectedEscalationModal {...props} />
+      </EscalationModalBoundary>
+    ),
+    []
+  );
+
   const onClickRecommendedAction: ConversationsActionsGroupProps['onClickRecommendedAction'] =
     useCallback(
       ({ id }) => {
@@ -214,12 +240,14 @@ export const ConversationsPage: React.FC = () => {
         action={modalState.type}
         recordId={modalState.recordId}
         initialAssignee={actionInvestigation?.assignee}
+        investigation={actionInvestigation}
         approvalProposal={selectedProposal}
         onCloseAction={closeModal}
         onCloseApproval={closeApproval}
         onConfirmApproval={confirmApproval}
         onDismissApproval={dismissApproval}
         renderDismissModal={renderDismissModal}
+        renderEscalationModal={renderEscalationModal}
       />
 
       <EuiFlexGroup gutterSize="l" direction="column" wrap>
@@ -260,6 +288,7 @@ export const ConversationsPage: React.FC = () => {
               onClickCard={onClickCard}
               onOpenChat={openChatForProposal}
               getChatHref={getChatHrefForProposal}
+              canManageEscalations={canManageEscalations}
             />
           </EuiFlexItem>
         ))}
