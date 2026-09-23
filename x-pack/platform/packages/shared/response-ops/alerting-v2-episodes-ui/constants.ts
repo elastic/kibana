@@ -13,6 +13,8 @@ export const LAST_EPISODE_TIMESTAMP_ESQL_VARIABLE = 'lastEpisodeTimestamp';
 export const RELATED_ALERT_EPISODES_PAGE_SIZE = 5;
 /** Max episodes returned per list page (ESQL LIMIT) and max unique rules resolved in one batch. */
 export const ALERT_EPISODES_LIST_PAGE_SIZE = 1000;
+/** Source id used when settling the native v2 ES|QL episode fetches. */
+export const ALERTING_V2_EPISODE_SOURCE_ID = 'v2';
 export const QUERY_STALE_TIME = 30_000;
 /**
  * Fields produced by buildEpisodesHistogramQuery that are valid as breakdown dimensions.
@@ -49,4 +51,3 @@ export const HISTOGRAM_BREAKDOWN_COLUMNS: DatatableColumn[] = [
 ];
 export const HISTOGRAM_EPISODE_LIMIT = 10_000;
 export const DEFAULT_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
-export const FLYOUT_FOOTER_OFFSET = 80;

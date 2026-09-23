@@ -11,6 +11,22 @@ import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
 import { ConversationMetadataUpdatedTriggerId } from '@kbn/agent-builder-common';
 
 export { ConversationMetadataUpdatedTriggerId };
+export {
+  ConversationAttachmentAddedTriggerId,
+  ConversationAttachmentUpdatedTriggerId,
+  ConversationAttachmentDeletedTriggerId,
+} from '@kbn/agent-builder-common';
+export type {
+  AttachmentAddedTriggerEvent,
+  AttachmentUpdatedTriggerEvent,
+  AttachmentDeletedTriggerEvent,
+} from '@kbn/agent-builder-common';
+export {
+  attachmentAddedTriggerCommonDefinition,
+  attachmentUpdatedTriggerCommonDefinition,
+  attachmentDeletedTriggerCommonDefinition,
+  attachmentTriggerCommonDefinitions,
+} from './attachments';
 
 const conversationMetadataUpdatedEventSchema = z.object({
   conversationId: z.string().meta({

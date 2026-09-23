@@ -9,6 +9,7 @@ import {
   platformCoreTools,
   platformCoreCasesTools,
   platformSignificantEventsTools,
+  contextEngineAiIndexTools,
 } from '@kbn/agent-builder-common/tools';
 import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
 import { chatAgentTypeId } from '@kbn/agent-builder-common';
@@ -57,6 +58,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
 
   // Security Solution
   `${internalNamespaces.security}.alertzero.actions.list`,
+  `${internalNamespaces.security}.alertzero.proposals.revise`,
   `${internalNamespaces.security}.entity_risk_score`,
   `${internalNamespaces.security}.create_detection_rule`,
   `${internalNamespaces.security}.run_rule_preview`,
@@ -114,6 +116,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
 
   // Platform – Context Engine
   `${internalNamespaces.platformContextEngine}.save_automation`,
+  ...Object.values(contextEngineAiIndexTools),
 
   // Nightshift – Sandbox
   'nightshift_sandbox_bash',
@@ -142,6 +145,7 @@ export const AGENT_BUILDER_BUILTIN_AGENTS = [
   `${internalNamespaces.search}.agent`,
   `${internalNamespaces.security}.agent`,
   'deductive.ai',
+  `${internalNamespaces.platformContextEngine}.setup`,
 ] as const;
 
 export type AgentBuilderBuiltinAgent = (typeof AGENT_BUILDER_BUILTIN_AGENTS)[number];
@@ -161,9 +165,11 @@ export const isAllowedBuiltinAgent = (agentName: string): agentName is AgentBuil
 export const AGENT_BUILDER_AGENT_TYPES = [
   chatAgentTypeId,
   `${internalNamespaces.platformSignificantEvents}.investigation-type`,
+  `${internalNamespaces.platformSignificantEvents}.deductive-investigation-type`,
   `${internalNamespaces.platformSignificantEvents}.discovery-type`,
   `${internalNamespaces.security}.alertzero-type`,
   `${internalNamespaces.platformSignificantEvents}.feature-identification-type`,
+  `${internalNamespaces.platformContextEngine}.setup-type`,
 ] as const;
 
 export type AgentBuilderAgentType = (typeof AGENT_BUILDER_AGENT_TYPES)[number];
@@ -199,7 +205,6 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
 
   // Platform – Streams
   'streams-management',
-  'significant-events-memory',
   'significant-events-management',
   'significant-events-changepoint-analysis',
   'significant-events-ki-grounding',
@@ -208,11 +213,6 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'knowledge-indicators-management',
   'ki-identification-management',
   'feature-identification',
-  'streams-memory-synthesis',
-  'streams-memory-consolidation',
-  'streams-conversation-scraper',
-  'significant-events-onboarding',
-  'streams-gap-detection',
 
   // Platform – Context Engine
   'ki-retrieval',
@@ -242,6 +242,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'detection-coverage',
   'pci-compliance',
   'endpoint-forensic-analysis',
+  'elastic-defend-policy-management',
   'investigate-rule',
   'siem-readiness',
   'automatic-migration-rules-start-migration',
@@ -351,6 +352,9 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   'security.entity_analytics_dashboard',
   'security.entity_graph',
   'security.entity_risk_score_history',
+  'security.exception',
+  'security.investigation.iocs',
+  'security.investigation.timeline',
   'security.rule',
   'security.siem_readiness',
   // gated behind experimentalFeatures.rulePreviewAttachmentEnabled
@@ -359,6 +363,8 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   // Security Solution – Attack Discovery (discoveries plugin)
   // gated behind the workflows feature flag
   'diagnostic_report',
+  'security.attack_discovery',
+  'security.attack_discovery.verdict',
 
   // Observability
   'observability.ai_insight',
@@ -377,6 +383,9 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
 
   // Platform – Custom Content
   'platform.custom_content.panel_context',
+
+  // Platform – Agentic Investigations
+  'investigation_proposal',
 ] as const;
 
 export type AgentBuilderBuiltinAttachment = (typeof AGENT_BUILDER_BUILTIN_ATTACHMENTS)[number];

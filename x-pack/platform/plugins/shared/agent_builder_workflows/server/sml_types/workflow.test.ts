@@ -46,12 +46,15 @@ const createSmlDocument = (originId = 'workflow-abc'): SmlDocument => ({
       privileges: [{ space: 'default', name: [`ai_index:${WORKFLOW_KI_TYPE}/read`], count: 1 }],
     },
   },
-  attributes: {
-    id: 'chunk-1',
-    origin: { uri: `workflow://${originId}` },
-    created_at: '2025-01-01T00:00:00.000Z',
-    updated_at: '2025-01-01T00:00:00.000Z',
-    ingestion_method: 'crawled',
+  id: 'chunk-1',
+  '@timestamp': '2025-01-01T00:00:00.000Z',
+  updated_at: '2025-01-01T00:00:00.000Z',
+  references: [{ uri: `workflow://${originId}`, relation: 'derived_from' }],
+  governance: {
+    provenance: {
+      created_by: { uri: 'crawler://sml', metadata: { ingestion_method: 'crawled' } },
+      updated_by: { uri: 'crawler://sml', metadata: { ingestion_method: 'crawled' } },
+    },
   },
 });
 

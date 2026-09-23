@@ -19,7 +19,6 @@ const validResponse = {
   destinations: [{ type: 'workflow' as const, id: 'wf-1' }],
   matcher: { expression: 'host.name: "server-1"' },
   group_by: ['host.name'],
-  tags: ['production'],
   grouping_mode: 'per_episode' as const,
   throttle: { strategy: 'on_status_change' as const, interval: null },
   snoozed_until: null,
@@ -42,7 +41,6 @@ describe('actionPolicyResponseSchema', () => {
       version: undefined,
       matcher: null,
       group_by: null,
-      tags: null,
       grouping_mode: null,
       throttle: null,
       snoozed_until: null,
@@ -51,7 +49,6 @@ describe('actionPolicyResponseSchema', () => {
     });
     expect(result.matcher).toBeNull();
     expect(result.group_by).toBeNull();
-    expect(result.tags).toBeNull();
     expect(result.grouping_mode).toBeNull();
     expect(result.throttle).toBeNull();
   });

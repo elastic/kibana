@@ -7,7 +7,7 @@
 
 import { platformSignificantEventsTools, ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { BuiltinToolDefinition, ToolAvailabilityConfig } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import {
@@ -32,19 +32,22 @@ const toolDescription = dedent`
     'xpack.nightshiftInvestigations.agentBuilder.tools.investigationProgressReport.description.rules',
     {
       defaultMessage:
-        'Call this whenever a hypothesis is added, its confidence changes, or its status changes (investigating, dismissed, confirmed). Keep "summary" short (one or two sentences) describing what is happening right now. Set "impact" progressively from step 2.5 onward — include it in every snapshot once seeded. This tool does not end the investigation — keep working after calling it.',
+        'Call this whenever a hypothesis is added, its confidence changes, or its status changes (investigating, dismissed, confirmed). Keep "title" a short headline naming the affected entity and the problem, sharpening it as the cause becomes clear. Keep "summary" short (one or two sentences) describing what is happening right now. Set "impact" progressively from step 2.5 onward — include it in every snapshot once seeded. This tool does not end the investigation — keep working after calling it.',
     }
   )}
 `;
 
 export const createInvestigationProgressReportTool = ({
   logger,
+  availability,
 }: {
   logger: Logger;
+  availability: ToolAvailabilityConfig;
 }): BuiltinToolDefinition<typeof investigationStateSchema> => ({
   id: SIGNIFICANT_EVENTS_INVESTIGATION_PROGRESS_REPORT_TOOL_ID,
   type: ToolType.builtin,
   description: toolDescription,
+  availability,
   annotations: {
     title: 'Report Investigation Progress',
     readOnlyHint: true,

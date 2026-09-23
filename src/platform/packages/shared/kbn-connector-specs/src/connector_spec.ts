@@ -262,10 +262,11 @@ export interface ActionDefinition<TInput = unknown, TOutput = unknown, TError = 
 export interface RelayActionClient {
   trigger(input: {
     tenantKey: string;
+    /** Slack conversation id or a connected channel name (`#general`). */
     channel: string;
     message: string;
     threadTs?: string;
-  }): Promise<{ ref: string; tenantKey: string }>;
+  }): Promise<{ ref: string; tenantKey: string; channel: string }>;
   /** One page of the channels this deployment has connected; follow `nextCursor` for the rest. */
   listBindings(
     tenantKey: string,
@@ -289,8 +290,8 @@ export interface ActionContext {
    * and only the client types a handler actually asks for are ever built.
    *
    * Lifetime is governed by the actions plugin's client lease pool, not by the action
-   * stack frame. No client types are registered yet, so `ClientTypeId` currently
-   * resolves to `never`.
+   * stack frame. `ClientTypeId` resolves to a union of every id registered in
+   * `ClientRegistry` (see lib/clients/index.ts) — `never` only if none are registered.
    */
   getClient: <K extends ClientTypeId>(id: K) => Promise<ClientRegistry[K]>;
   config?: Record<string, unknown>;

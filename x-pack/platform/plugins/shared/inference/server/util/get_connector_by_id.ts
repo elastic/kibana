@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isBoom } from '@hapi/boom';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { KibanaRequest, ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
@@ -17,21 +18,55 @@ import {
 import type { ActionsClientProvider } from '../types';
 import { getConnectorList } from './get_connector_list';
 
+type GetActionsClient = () => Promise<PublicMethodsOf<ActionsClient>>;
+
+const isForbiddenError = (e: unknown): boolean => isBoom(e) && e.output.statusCode === 403;
+
 /**
- * Given a merged connector list and the raw stack connectors, find the connector
- * matching `connectorId`. Falls back to resolving `.inference` stack connector
- * aliases (where the stack connector ID differs from the inference endpoint ID
- * returned in the merged list).
+ * Lists raw stack connectors for alias resolution. Stack connectors being unavailable
+ * (no actions client, e.g. missing encryption key) or forbidden (no Actions privilege)
+ * must not prevent resolving inference endpoints, so both degrade to an empty list.
+ * Other listing failures are surfaced rather than reported as "not found".
  */
-const findConnectorById = ({
+const getRawStackConnectors = async (
+  getActionsClient: GetActionsClient,
+  logger: Logger
+): Promise<RawConnector[]> => {
+  let actionsClient: PublicMethodsOf<ActionsClient>;
+  try {
+    actionsClient = await getActionsClient();
+  } catch (e) {
+    logger.debug(`Cannot create actions client for alias resolution: ${e.message}`);
+    return [];
+  }
+
+  try {
+    return await actionsClient.getAll({ includeSystemActions: false });
+  } catch (e) {
+    if (!isForbiddenError(e)) {
+      throw e;
+    }
+    logger.debug(`Cannot list stack connectors for alias resolution: ${e.message}`);
+    return [];
+  }
+};
+
+/**
+ * Given a merged connector list, find the connector matching `connectorId`.
+ * Falls back to resolving `.inference` stack connector aliases (where the stack
+ * connector ID differs from the inference endpoint ID returned in the merged list).
+ */
+const findConnectorById = async ({
   connectorId,
   connectors,
-  rawStackConnectors,
+  getActionsClient,
+  logger,
 }: {
   connectorId: string;
   connectors: InferenceConnector[];
-  rawStackConnectors: RawConnector[];
-}): InferenceConnector | undefined => {
+  getActionsClient: GetActionsClient;
+  logger: Logger;
+}): Promise<InferenceConnector | undefined> => {
   const match = connectors.find((c) => c.connectorId === connectorId);
   if (match) {
     return match;
@@ -40,6 +75,7 @@ const findConnectorById = ({
   // The requested ID may belong to a stack `.inference` connector whose underlying inference
   // endpoint was already returned in the list under `inferenceId`. Look up the raw stack
   // connector to resolve the alias.
+  const rawStackConnectors = await getRawStackConnectors(getActionsClient, logger);
   const stackConnector = rawStackConnectors.find((c) => c.id === connectorId);
   if (stackConnector?.actionTypeId === InferenceConnectorType.Inference) {
     const inferenceId = stackConnector.config?.inferenceId as string | undefined;
@@ -73,13 +109,11 @@ export const getConnectorById = async ({
 }): Promise<InferenceConnector> => {
   const connectors = await getConnectorList({ actions, request, esClient, logger });
 
-  const actionClient = await actions.getActionsClientWithRequest(request);
-  const allStackConnectors = await actionClient.getAll({ includeSystemActions: false });
-
-  const result = findConnectorById({
+  const result = await findConnectorById({
     connectorId,
     connectors,
-    rawStackConnectors: allStackConnectors,
+    getActionsClient: () => actions.getActionsClientWithRequest(request),
+    logger,
   });
   if (result) {
     return result;
@@ -111,12 +145,11 @@ export const getConnectorByIdWithoutClientRequest = async ({
 }): Promise<InferenceConnector> => {
   const connectors = await getConnectorList({ actionsClient, esClient, logger });
 
-  const allStackConnectors = await actionsClient.getAll({ includeSystemActions: false });
-
-  const result = findConnectorById({
+  const result = await findConnectorById({
     connectorId,
     connectors,
-    rawStackConnectors: allStackConnectors,
+    getActionsClient: async () => actionsClient,
+    logger,
   });
   if (result) {
     return result;
