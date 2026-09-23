@@ -19,8 +19,8 @@ export const SECURITY_ALERT_ANALYSIS_WORKFLOW_ID = 'system-security-alert-analys
 export const SECURITY_ALERT_ANALYSIS_WORKFLOW = {
   id: SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
   pluginId: 'securitySolution',
-  // Tip of the Worker-callable YAML (trim noisy set_workflow_variables comments).
-  version: 38,
+  // Tip of the Worker-callable YAML (Libra: filter per-batch verdicts, skip-path missing_alert_ids, JSON Schema/Zod passthrough, @timestamp datetime).
+  version: 39,
   billable: false,
   visibility: {
     selectors: ['rule_action'],

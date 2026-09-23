@@ -549,8 +549,11 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     const collectStep = findStepByName(workflow.steps, 'collect_batch_verdicts') as {
       with: Record<string, string>;
     };
+    // Verdicts are first filtered to current-batch IDs (filter_verdicts_to_batch step) to
+    // prevent cross-batch contamination from hallucinated IDs; the filtered batch_verdicts
+    // variable is then concatenated rather than the raw agent output.
     expect(collectStep.with.all_verdicts).toBe(
-      '${{ variables.all_verdicts | concat: steps.runAgent_step.output.structured_output.verdicts }}'
+      '${{ variables.all_verdicts | concat: variables.batch_verdicts }}'
     );
     expect(collectStep.with.batch_input_tokens).toContain(
       'steps.runAgent_step.output.metadata.usage.inputTokens'
@@ -558,6 +561,40 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(collectStep.with.batch_output_tokens).toContain(
       'steps.runAgent_step.output.metadata.usage.outputTokens'
     );
+  });
+
+  it('filters model verdicts to current-batch IDs before concatenating to all_verdicts', () => {
+    // set_current_batch_alert_ids must precede filter_verdicts_to_batch which precedes collect
+    const setCurrent = findStepByName(workflow.steps, 'set_current_batch_alert_ids') as {
+      with: Record<string, string>;
+    };
+    expect(setCurrent).toBeDefined();
+    expect(setCurrent.with.current_batch_alert_ids).toBe("${{ foreach.item | map: '_id' }}");
+
+    const filterStep = findStepByName(workflow.steps, 'filter_verdicts_to_batch') as {
+      with: Record<string, string>;
+    };
+    expect(filterStep).toBeDefined();
+    // Must restrict to IDs in this batch; the where_exp variable references current_batch_alert_ids.
+    expect(filterStep.with.batch_verdicts).toContain('current_batch_alert_ids');
+    expect(filterStep.with.batch_verdicts).toContain(
+      'runAgent_step.output.structured_output.verdicts'
+    );
+  });
+
+  it('populates missing_alert_ids on the Worker skip-path so the Worker knows no alerts were analysed', () => {
+    const skipFallback = findStepByName(workflow.steps, 'set_missing_alert_ids_on_skip') as {
+      condition: string;
+      with: Record<string, string>;
+    };
+    expect(skipFallback).toBeDefined();
+    // Only fires on Worker path when pending alerts exist but output_verdicts is empty (skip).
+    expect(skipFallback.condition).toContain('calledByWorker == true');
+    expect(skipFallback.condition).toContain('pending_alert_count > 0');
+    expect(skipFallback.condition).toContain('output_verdicts.size == 0');
+    // Derives IDs from the pending (non-deduped) alert set, matching the Worker's expectations.
+    expect(skipFallback.with.missing_alert_ids).toContain('alert_set');
+    expect(skipFallback.with.missing_alert_ids).toContain("map: '_id'");
   });
 
   it('formats the verdict note timestamp with a human-readable date filter', () => {
