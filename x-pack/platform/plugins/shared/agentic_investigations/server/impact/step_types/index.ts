@@ -6,7 +6,7 @@
  */
 
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
-import type { ResolveProposalUser } from '../../proposals/services/resolve_proposal_user';
+import type { ResolveUser } from '../../services/resolve_user';
 import type { ImpactService } from '../services/impact_service';
 import type { ImpactPrivilegesChecker } from '../services/check_impact_privileges';
 import { getAttachImpactStepDefinition } from './attach_impact_step';
@@ -21,7 +21,7 @@ export const registerImpactStepDefinitions = ({
 }: {
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
   getImpactService: () => ImpactService;
-  resolveUser: ResolveProposalUser;
+  resolveUser: ResolveUser;
   privileges: ImpactPrivilegesChecker;
 }) => {
   workflowsExtensions.registerStepDefinition(

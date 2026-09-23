@@ -7,8 +7,8 @@
 
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { attachImpactStepCommonDefinition } from '../../../common/impact/step_types/attach_impact_step';
-import type { ResolveProposalUser } from '../../proposals/services/resolve_proposal_user';
-import { parseStepInput } from '../../proposals/step_types/parse_step_input';
+import type { ResolveUser } from '../../services/resolve_user';
+import { parseStepInput } from './parse_step_input';
 import type { ImpactService } from '../services/impact_service';
 import type { ImpactPrivilegesChecker } from '../services/check_impact_privileges';
 import { toStepError } from './to_step_error';
@@ -20,7 +20,7 @@ export const getAttachImpactStepDefinition = ({
   privileges,
 }: {
   getImpactService: () => ImpactService;
-  resolveUser: ResolveProposalUser;
+  resolveUser: ResolveUser;
   privileges: ImpactPrivilegesChecker;
 }) =>
   createServerStepDefinition({
