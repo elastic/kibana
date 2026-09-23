@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { NotificationItem } from '@kbn/ml-common-types/notifications';
 import { expect } from '@kbn/scout/api';
 import { mlApiTest as apiTest, INTERNAL_API_HEADERS } from '../../fixtures';
 import {
@@ -65,6 +66,42 @@ apiTest.describe('GET notifications', { tag: '@local-stateful-classic' }, () => 
     expect(res).toHaveStatusCode(200);
     expect(res.body.total).toBe(2);
   });
+
+  apiTest(
+    'returns notifications for an authorized user when no queryString is provided',
+    async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asMlPoweruser();
+
+      // Deliberately unscoped so the endpoint's default behaviour is exercised. Other jobs and
+      // the system channel can contribute here, so assert the contract rather than an exact total.
+      const res = await apiClient.get(
+        `internal/ml/notifications?earliest=${testStart}&latest=now`,
+        {
+          headers: { ...INTERNAL_API_HEADERS, ...cookieHeader },
+          responseType: 'json',
+        }
+      );
+
+      expect(res).toHaveStatusCode(200);
+      expect(typeof res.body.total).toBe('number');
+      expect(Array.isArray(res.body.results)).toBe(true);
+      expect(res.body.total).toBeGreaterThanOrEqual(2);
+
+      const results = res.body.results as NotificationItem[];
+      const jobIds = results.map((result) => result.job_id);
+      expect(jobIds).toContain(AD_JOB_ID);
+      expect(jobIds).toContain(DFA_JOB_ID);
+
+      const [notification] = results.filter((result) => result.job_id === AD_JOB_ID);
+      expect(notification).toBeDefined();
+      expect(typeof notification.id).toBe('string');
+      expect(typeof notification.message).toBe('string');
+      expect(typeof notification.level).toBe('string');
+      expect(typeof notification.timestamp).toBe('number');
+      expect(typeof notification.node_name).toBe('string');
+      expect(notification.job_type).toBe('anomaly_detector');
+    }
+  );
 
   apiTest(
     'returns filtered notifications when queryString is provided',
