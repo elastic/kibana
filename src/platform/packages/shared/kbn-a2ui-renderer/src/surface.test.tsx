@@ -219,3 +219,56 @@ describe('A2uiSurface', () => {
     expect(screen.getByText('after')).toBeInTheDocument();
   });
 });
+
+describe('nested bindings', () => {
+  it('resolves bindings inside arrays of objects', () => {
+    const catalogWithList: Catalog = {
+      ...catalog,
+      components: {
+        ...catalog.components,
+        List: {
+          name: 'List',
+          render: ({ props }) => (
+            <ul>
+              {(props.items as Array<{ label: string }>).map((item, i) => (
+                <li key={i}>{String(item.label)}</li>
+              ))}
+            </ul>
+          ),
+        },
+      },
+    };
+
+    const processor = new MessageProcessor();
+    processor.applyAll([
+      createSurface(
+        [
+          {
+            id: 'root',
+            component: 'List',
+            items: [{ label: { path: '/a' } }, { label: { path: '/b' } }],
+          },
+        ],
+        { a: 'first', b: 'second' }
+      ),
+    ]);
+
+    render(<A2uiSurface surface={processor.getSurface('s1')!} catalog={catalogWithList} />);
+
+    expect(screen.getByText('first')).toBeInTheDocument();
+    expect(screen.getByText('second')).toBeInTheDocument();
+  });
+
+  it('leaves a child list template intact rather than resolving it away', () => {
+    renderMessages([
+      createSurface(
+        [
+          { id: 'root', component: 'Column', children: { componentId: 'row', path: '/items' } },
+          { id: 'row', component: 'Text', text: { path: 'name' } },
+        ],
+        { items: [{ name: 'alpha' }] }
+      ),
+    ]);
+    expect(screen.getByText('alpha')).toBeInTheDocument();
+  });
+});

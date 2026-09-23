@@ -11,6 +11,7 @@ import type { Catalog } from '@kbn/a2ui-renderer';
 import catalogSchema from '../catalog.json';
 import { Card, Column, Divider, Row, Tabs } from './components/layout';
 import { Badge, Callout, Icon, Stat, Table, Text } from './components/display';
+import { Accordion, DescriptionList, Health, Link, Modal, Progress } from './components/feedback';
 import {
   Button,
   CheckBox,
@@ -41,6 +42,12 @@ const components = [
   ChoicePicker,
   Slider,
   DateTimeInput,
+  Modal,
+  Accordion,
+  Health,
+  Link,
+  DescriptionList,
+  Progress,
 ];
 
 export const euiCatalog: Catalog = {

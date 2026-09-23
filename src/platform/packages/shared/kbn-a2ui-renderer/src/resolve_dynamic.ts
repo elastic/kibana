@@ -77,6 +77,22 @@ export function resolveDynamic(value: DynamicValue, scope: ResolveScope): JsonVa
     return value.map((item) => resolveDynamic(item, scope) ?? null);
   }
 
+  /**
+   * Structured props hold bindings too — a DescriptionList's `items`, a Table's
+   * `columns`. Without recursing here those would reach the component as raw
+   * `{ path }` objects and render blank, which is far harder to diagnose than a
+   * hard failure. Bindings and function calls are handled above, so anything
+   * reaching this point is an ordinary container.
+   */
+  if (typeof value === 'object' && value !== null) {
+    const resolved: Record<string, JsonValue> = {};
+    for (const [key, item] of Object.entries(value)) {
+      const next = resolveDynamic(item as DynamicValue, scope);
+      if (next !== undefined) resolved[key] = next;
+    }
+    return resolved;
+  }
+
   return value as JsonValue;
 }
 

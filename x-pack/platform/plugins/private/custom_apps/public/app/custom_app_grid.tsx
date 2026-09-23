@@ -5,25 +5,36 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { GridLayout } from '@kbn/grid-layout';
 import type { GridLayoutData } from '@kbn/grid-layout';
 import { A2uiSurface, MessageProcessor } from '@kbn/a2ui-renderer';
-import type { A2uiMessage, ResolvedActionEvent, Surface } from '@kbn/a2ui-renderer';
+import type { A2uiMessage, JsonValue, ResolvedActionEvent, Surface } from '@kbn/a2ui-renderer';
 import { EuiCallOut, EuiLoadingChart, EuiText } from '@elastic/eui';
 import { customAppCatalog, useCustomAppServices } from '../catalog';
 import type { CustomAppDefinition, EsqlQuery } from '../../common/app_definition';
-import { GRID_SETTINGS } from '../../common/constants';
+import { ACTION_SET_DATA, GRID_SETTINGS } from '../../common/constants';
 import { CustomAppPanel } from './custom_app_panel';
 import { useEsqlQueries } from './use_esql_queries';
 
 export interface CustomAppGridProps {
   definition: CustomAppDefinition;
   isEditing: boolean;
+  /** When set, only untabbed panels and panels on this tab are rendered. */
+  activeTab?: string;
   onLayoutChange: (layout: GridLayoutData) => void;
   onAction: (event: ResolvedActionEvent) => void;
   onEditPanel: (panelId: string) => void;
   onRemovePanel: (panelId: string) => void;
+}
+
+/** Distinct tab names, in the order the panels declare them. */
+export function getTabs(definition: CustomAppDefinition): string[] {
+  const tabs: string[] = [];
+  for (const panel of Object.values(definition.panels)) {
+    if (panel.tab && !tabs.includes(panel.tab)) tabs.push(panel.tab);
+  }
+  return tabs;
 }
 
 /**
@@ -49,6 +60,24 @@ function PanelSurface({
     http: services?.http as never,
   });
 
+  /**
+   * `kbn.setData` is handled here rather than in the shared action handler
+   * because it writes to *this* panel's data model — which is what lets a table
+   * row action open a modal without any component holding hidden state.
+   */
+  const handleAction = useCallback(
+    (event: ResolvedActionEvent) => {
+      if (event.name !== ACTION_SET_DATA) {
+        onAction(event);
+        return;
+      }
+      const path = event.context.path;
+      if (typeof path !== 'string') return;
+      surface.dataModel.set(path, (event.context.value ?? event.context.row ?? null) as JsonValue);
+    },
+    [onAction, surface]
+  );
+
   return (
     <>
       {errors.length > 0 && (
@@ -66,7 +95,7 @@ function PanelSurface({
         <A2uiSurface
           surface={surface}
           catalog={customAppCatalog}
-          onAction={onAction}
+          onAction={handleAction}
           renderUnknown={(componentType) => (
             <EuiCallOut
               announceOnMount
@@ -89,6 +118,7 @@ function PanelSurface({
 export function CustomAppGrid({
   definition,
   isEditing,
+  activeTab,
   onLayoutChange,
   onAction,
   onEditPanel,
@@ -104,18 +134,51 @@ export function CustomAppGrid({
     return next;
   }, [definition.surfaces]);
 
+  /**
+   * Hidden tabs are filtered out of the layout rather than the rendered output,
+   * so the grid never reserves space for them. Panels with no tab stay put —
+   * that is what keeps a header or filter panel visible across tabs.
+   */
+  const visibleLayout = useMemo(() => {
+    if (!activeTab) return definition.layout as GridLayoutData;
+    const filtered: GridLayoutData = {};
+    for (const [id, widget] of Object.entries(definition.layout)) {
+      const tab = definition.panels[id]?.tab;
+      if (!tab || tab === activeTab) filtered[id] = widget as GridLayoutData[string];
+    }
+    return filtered;
+  }, [definition.layout, definition.panels, activeTab]);
+
+  /**
+   * The grid only knows about the visible tab, so it echoes back a layout
+   * containing just those panels. Merging over the full layout keeps the
+   * hidden tabs' panels from being dropped on the next save.
+   *
+   * Outside edit mode the echo is ignored entirely: nothing can have moved, and
+   * accepting it would mark a freshly opened app as having unsaved changes.
+   * The dashboard applies the same guard in `dashboard_grid`.
+   */
+  const mergeLayoutChange = useCallback(
+    (next: GridLayoutData) => {
+      if (!isEditing) return;
+      onLayoutChange({ ...(definition.layout as GridLayoutData), ...next });
+    },
+    [definition.layout, isEditing, onLayoutChange]
+  );
+
   return (
     <GridLayout
-      layout={definition.layout as GridLayoutData}
+      layout={visibleLayout}
       gridSettings={GRID_SETTINGS}
       accessMode={isEditing ? 'EDIT' : 'VIEW'}
-      onLayoutChange={onLayoutChange}
+      onLayoutChange={mergeLayoutChange}
       useCustomDragHandle
       renderPanelContents={(panelId, setDragHandles) => {
         const surface = processor.getSurface(panelId);
         return (
           <CustomAppPanel
             title={definition.panels[panelId]?.title}
+            hideBorder={definition.panels[panelId]?.hideBorder}
             isEditing={isEditing}
             setDragHandles={setDragHandles}
             onEdit={() => onEditPanel(panelId)}

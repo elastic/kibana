@@ -80,6 +80,44 @@ describe.each(CUSTOM_APP_TEMPLATES.map((t) => [t.name, t] as const))(
       expect(serialized).toContain('"variant":"heading1"');
     });
 
+    it('drops the panel frame on prose and controls, keeps it on data panels', () => {
+      const borderless = Object.entries(definition.panels)
+        .filter(([, panel]) => panel.hideBorder)
+        .map(([id]) => id);
+      // A borderless panel should have no title — the two go together, since a
+      // titled panel with no frame looks like a rendering bug.
+      for (const id of borderless) {
+        expect(definition.panels[id].title).toBeUndefined();
+      }
+      expect(borderless.length).toBeGreaterThan(0);
+    });
+
+    it('puts every tabbed panel on a tab that the tab bar will show', () => {
+      const tabs = new Set(
+        Object.values(definition.panels)
+          .map((panel) => panel.tab)
+          .filter(Boolean)
+      );
+      expect(tabs.size).toBeGreaterThan(1);
+      // The header and filter panels must stay untabbed so they persist.
+      expect(definition.panels.header?.tab).toBeUndefined();
+      expect(definition.panels.filters?.tab).toBeUndefined();
+    });
+
+    it('lays each tab out from the same starting row', () => {
+      const byTab = new Map<string, number[]>();
+      for (const [id, panel] of Object.entries(definition.panels)) {
+        const widget = definition.layout[id];
+        if (!panel.tab || !widget || widget.type !== 'panel') continue;
+        byTab.set(panel.tab, [...(byTab.get(panel.tab) ?? []), widget.row]);
+      }
+      // Tabs are shown one at a time, so each must start just below the
+      // persistent panels rather than continuing the previous tab's rows.
+      for (const rows of byTab.values()) {
+        expect(Math.min(...rows)).toBe(5);
+      }
+    });
+
     it('owns its time filter, exactly once', () => {
       const pickers = Object.keys(definition.surfaces)
         .flatMap(componentsOf)

@@ -193,3 +193,60 @@ describe('euiCatalog', () => {
     expect(screen.getByText('overview body')).toBeInTheDocument();
   });
 });
+
+describe('row actions and dialogs', () => {
+  it('dispatches a row action with the clicked row merged into the context', () => {
+    const onAction = jest.fn();
+    renderApp(
+      [
+        {
+          id: 'root',
+          component: 'Table',
+          caption: 'Errors',
+          rows: { path: '/rows' },
+          columns: [{ field: 'page', name: 'Page' }],
+          rowActions: [
+            {
+              label: 'Inspect',
+              action: { event: { name: 'kbn.setData', context: { path: '/selected' } } },
+            },
+          ],
+        },
+      ],
+      { rows: [{ page: '/a', status: '404' }] },
+      onAction
+    );
+
+    fireEvent.click(screen.getByLabelText('Inspect'));
+
+    expect(onAction).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'kbn.setData',
+        context: { path: '/selected', row: { page: '/a', status: '404' } },
+      })
+    );
+  });
+
+  it('shows a Modal only while its bound value is truthy', () => {
+    const components = [
+      {
+        id: 'root',
+        component: 'Modal',
+        title: 'Detail',
+        isOpen: {
+          call: 'not',
+          args: { value: { call: 'isEmpty', args: { value: { path: '/selected' } } } },
+        },
+        child: 'body',
+      },
+      { id: 'body', component: 'Text', text: 'the detail' },
+    ];
+
+    const { unmount } = renderApp(components, { selected: null });
+    expect(screen.queryByText('the detail')).not.toBeInTheDocument();
+    unmount();
+
+    renderApp(components, { selected: { page: '/a' } });
+    expect(screen.getByText('the detail')).toBeInTheDocument();
+  });
+});

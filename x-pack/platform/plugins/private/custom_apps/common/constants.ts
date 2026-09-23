@@ -33,4 +33,6 @@ export const DEFAULT_PANEL_HEIGHT = 15;
  */
 export const ACTION_RUN_WORKFLOW = 'kbn.runWorkflow';
 export const ACTION_NAVIGATE = 'kbn.navigate';
-export const SUPPORTED_ACTIONS = [ACTION_RUN_WORKFLOW, ACTION_NAVIGATE] as const;
+/** Writes a value into the dispatching panel's own data model. */
+export const ACTION_SET_DATA = 'kbn.setData';
+export const SUPPORTED_ACTIONS = [ACTION_RUN_WORKFLOW, ACTION_NAVIGATE, ACTION_SET_DATA] as const;

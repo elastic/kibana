@@ -18,180 +18,393 @@
       "type": "object",
       "description": "Arranges its children vertically. Maps to EuiFlexGroup with direction=column.",
       "properties": {
-        "component": { "const": "Column" },
-        "children": { "$ref": "common_types.json#/$defs/ChildList" },
+        "component": {
+          "const": "Column"
+        },
+        "children": {
+          "$ref": "common_types.json#/$defs/ChildList"
+        },
         "gap": {
           "type": "string",
-          "enum": ["none", "xs", "s", "m", "l", "xl"],
+          "enum": [
+            "none",
+            "xs",
+            "s",
+            "m",
+            "l",
+            "xl"
+          ],
           "default": "m",
           "description": "Spacing between children."
         },
         "align": {
           "type": "string",
-          "enum": ["start", "center", "end", "stretch"],
+          "enum": [
+            "start",
+            "center",
+            "end",
+            "stretch"
+          ],
           "description": "Cross-axis (horizontal) alignment of children."
         },
         "justify": {
           "type": "string",
-          "enum": ["start", "center", "end", "spaceBetween", "spaceAround", "spaceEvenly"],
+          "enum": [
+            "start",
+            "center",
+            "end",
+            "spaceBetween",
+            "spaceAround",
+            "spaceEvenly"
+          ],
           "description": "Main-axis (vertical) distribution of children."
         }
       },
-      "required": ["component", "children"]
+      "required": [
+        "component",
+        "children"
+      ]
     },
     "Row": {
       "type": "object",
       "description": "Arranges its children horizontally. Maps to EuiFlexGroup with direction=row.",
       "properties": {
-        "component": { "const": "Row" },
-        "children": { "$ref": "common_types.json#/$defs/ChildList" },
+        "component": {
+          "const": "Row"
+        },
+        "children": {
+          "$ref": "common_types.json#/$defs/ChildList"
+        },
         "gap": {
           "type": "string",
-          "enum": ["none", "xs", "s", "m", "l", "xl"],
+          "enum": [
+            "none",
+            "xs",
+            "s",
+            "m",
+            "l",
+            "xl"
+          ],
           "default": "m"
         },
         "align": {
           "type": "string",
-          "enum": ["start", "center", "end", "stretch", "baseline"],
+          "enum": [
+            "start",
+            "center",
+            "end",
+            "stretch",
+            "baseline"
+          ],
           "description": "Cross-axis (vertical) alignment of children."
         },
         "justify": {
           "type": "string",
-          "enum": ["start", "center", "end", "spaceBetween", "spaceAround", "spaceEvenly"]
+          "enum": [
+            "start",
+            "center",
+            "end",
+            "spaceBetween",
+            "spaceAround",
+            "spaceEvenly"
+          ]
         },
-        "wrap": { "type": "boolean", "default": false }
+        "wrap": {
+          "type": "boolean",
+          "default": false
+        }
       },
-      "required": ["component", "children"]
+      "required": [
+        "component",
+        "children"
+      ]
     },
     "Card": {
       "type": "object",
       "description": "A bordered, padded container with an optional title. Maps to EuiPanel.",
       "properties": {
-        "component": { "const": "Card" },
-        "title": { "$ref": "common_types.json#/$defs/DynamicString" },
-        "child": { "$ref": "common_types.json#/$defs/Child" },
+        "component": {
+          "const": "Card"
+        },
+        "title": {
+          "$ref": "common_types.json#/$defs/DynamicString"
+        },
+        "child": {
+          "$ref": "common_types.json#/$defs/Child"
+        },
         "paddingSize": {
           "type": "string",
-          "enum": ["none", "s", "m", "l"],
+          "enum": [
+            "none",
+            "s",
+            "m",
+            "l"
+          ],
           "default": "m"
         },
-        "hasBorder": { "type": "boolean", "default": true }
+        "hasBorder": {
+          "type": "boolean",
+          "default": true
+        }
       },
-      "required": ["component", "child"]
+      "required": [
+        "component",
+        "child"
+      ]
     },
     "Tabs": {
       "type": "object",
       "description": "A set of tabs, each showing one child component. Maps to EuiTabbedContent.",
       "properties": {
-        "component": { "const": "Tabs" },
+        "component": {
+          "const": "Tabs"
+        },
         "tabs": {
           "type": "array",
           "minItems": 1,
           "items": {
             "type": "object",
             "properties": {
-              "title": { "$ref": "common_types.json#/$defs/DynamicString" },
-              "child": { "$ref": "common_types.json#/$defs/Child" }
+              "title": {
+                "$ref": "common_types.json#/$defs/DynamicString"
+              },
+              "child": {
+                "$ref": "common_types.json#/$defs/Child"
+              }
             },
-            "required": ["title", "child"],
+            "required": [
+              "title",
+              "child"
+            ],
             "additionalProperties": false
           }
         }
       },
-      "required": ["component", "tabs"]
+      "required": [
+        "component",
+        "tabs"
+      ]
     },
     "Divider": {
       "type": "object",
       "description": "A horizontal rule separating content. Maps to EuiHorizontalRule.",
       "properties": {
-        "component": { "const": "Divider" },
-        "margin": { "type": "string", "enum": ["none", "s", "m", "l"], "default": "m" }
+        "component": {
+          "const": "Divider"
+        },
+        "margin": {
+          "type": "string",
+          "enum": [
+            "none",
+            "s",
+            "m",
+            "l"
+          ],
+          "default": "m"
+        }
       },
-      "required": ["component"]
+      "required": [
+        "component"
+      ]
     },
     "Text": {
       "type": "object",
       "description": "Displays text. Supports simple Markdown (bold, italics, lists, inline code). Maps to EuiText / EuiTitle.",
       "properties": {
-        "component": { "const": "Text" },
-        "text": { "$ref": "common_types.json#/$defs/DynamicString" },
+        "component": {
+          "const": "Text"
+        },
+        "text": {
+          "$ref": "common_types.json#/$defs/DynamicString"
+        },
         "variant": {
           "type": "string",
-          "enum": ["heading1", "heading2", "heading3", "body", "caption"],
+          "enum": [
+            "heading1",
+            "heading2",
+            "heading3",
+            "body",
+            "caption"
+          ],
           "default": "body",
           "description": "Use heading variants for section titles, 'caption' for small secondary text."
         },
         "color": {
           "type": "string",
-          "enum": ["default", "subdued", "success", "warning", "danger", "accent"],
+          "enum": [
+            "default",
+            "subdued",
+            "success",
+            "warning",
+            "danger",
+            "accent"
+          ],
           "default": "default"
         },
-        "textAlign": { "type": "string", "enum": ["left", "center", "right"] }
+        "textAlign": {
+          "type": "string",
+          "enum": [
+            "left",
+            "center",
+            "right"
+          ]
+        }
       },
-      "required": ["component", "text"]
+      "required": [
+        "component",
+        "text"
+      ]
     },
     "Icon": {
       "type": "object",
       "description": "A named EUI glyph. Maps to EuiIcon.",
       "properties": {
-        "component": { "const": "Icon" },
+        "component": {
+          "const": "Icon"
+        },
         "name": {
           "type": "string",
           "description": "An EUI icon type, for example 'check', 'warning', 'alert', 'user', 'gear', 'discoverApp'."
         },
-        "color": { "type": "string", "enum": ["default", "subdued", "success", "warning", "danger", "accent"] },
-        "size": { "type": "string", "enum": ["s", "m", "l", "xl"], "default": "m" }
+        "color": {
+          "type": "string",
+          "enum": [
+            "default",
+            "subdued",
+            "success",
+            "warning",
+            "danger",
+            "accent"
+          ]
+        },
+        "size": {
+          "type": "string",
+          "enum": [
+            "s",
+            "m",
+            "l",
+            "xl"
+          ],
+          "default": "m"
+        }
       },
-      "required": ["component", "name"]
+      "required": [
+        "component",
+        "name"
+      ]
     },
     "Badge": {
       "type": "object",
       "description": "A small coloured label for statuses and tags. Maps to EuiBadge.",
       "properties": {
-        "component": { "const": "Badge" },
-        "label": { "$ref": "common_types.json#/$defs/DynamicString" },
+        "component": {
+          "const": "Badge"
+        },
+        "label": {
+          "$ref": "common_types.json#/$defs/DynamicString"
+        },
         "color": {
           "type": "string",
-          "enum": ["default", "hollow", "primary", "success", "warning", "danger", "accent"],
+          "enum": [
+            "default",
+            "hollow",
+            "primary",
+            "success",
+            "warning",
+            "danger",
+            "accent"
+          ],
           "default": "default"
         },
-        "iconType": { "type": "string" }
+        "iconType": {
+          "type": "string"
+        }
       },
-      "required": ["component", "label"]
+      "required": [
+        "component",
+        "label"
+      ]
     },
     "Stat": {
       "type": "object",
       "description": "A single prominent metric with a caption. Use for KPI tiles. Maps to EuiStat.",
       "properties": {
-        "component": { "const": "Stat" },
-        "title": { "$ref": "common_types.json#/$defs/DynamicString" },
-        "description": { "$ref": "common_types.json#/$defs/DynamicString" },
-        "color": { "type": "string", "enum": ["default", "subdued", "primary", "success", "warning", "danger", "accent"] },
-        "textAlign": { "type": "string", "enum": ["left", "center", "right"], "default": "left" }
+        "component": {
+          "const": "Stat"
+        },
+        "title": {
+          "$ref": "common_types.json#/$defs/DynamicString"
+        },
+        "description": {
+          "$ref": "common_types.json#/$defs/DynamicString"
+        },
+        "color": {
+          "type": "string",
+          "enum": [
+            "default",
+            "subdued",
+            "primary",
+            "success",
+            "warning",
+            "danger",
+            "accent"
+          ]
+        },
+        "textAlign": {
+          "type": "string",
+          "enum": [
+            "left",
+            "center",
+            "right"
+          ],
+          "default": "left"
+        }
       },
-      "required": ["component", "title", "description"]
+      "required": [
+        "component",
+        "title",
+        "description"
+      ]
     },
     "Callout": {
       "type": "object",
       "description": "A coloured box drawing attention to a status, warning or error. Maps to EuiCallOut.",
       "properties": {
-        "component": { "const": "Callout" },
-        "title": { "$ref": "common_types.json#/$defs/DynamicString" },
+        "component": {
+          "const": "Callout"
+        },
+        "title": {
+          "$ref": "common_types.json#/$defs/DynamicString"
+        },
         "color": {
           "type": "string",
-          "enum": ["primary", "success", "warning", "danger"],
+          "enum": [
+            "primary",
+            "success",
+            "warning",
+            "danger"
+          ],
           "default": "primary"
         },
-        "iconType": { "type": "string" },
-        "child": { "$ref": "common_types.json#/$defs/Child" }
+        "iconType": {
+          "type": "string"
+        },
+        "child": {
+          "$ref": "common_types.json#/$defs/Child"
+        }
       },
-      "required": ["component", "title"]
+      "required": [
+        "component",
+        "title"
+      ]
     },
     "Table": {
       "type": "object",
       "description": "A read-only data table. Bind 'rows' to an array of objects in the data model and declare which fields to show. Maps to EuiBasicTable.",
       "properties": {
-        "component": { "const": "Table" },
+        "component": {
+          "const": "Table"
+        },
         "caption": {
           "$ref": "common_types.json#/$defs/DynamicString",
           "description": "A short description of what the table contains, announced by screen readers. Required for accessibility."
@@ -202,11 +415,27 @@
           "items": {
             "type": "object",
             "properties": {
-              "field": { "type": "string", "description": "Key to read from each row object." },
-              "name": { "type": "string", "description": "Column header text." },
-              "align": { "type": "string", "enum": ["left", "center", "right"] }
+              "field": {
+                "type": "string",
+                "description": "Key to read from each row object."
+              },
+              "name": {
+                "type": "string",
+                "description": "Column header text."
+              },
+              "align": {
+                "type": "string",
+                "enum": [
+                  "left",
+                  "center",
+                  "right"
+                ]
+              }
             },
-            "required": ["field", "name"],
+            "required": [
+              "field",
+              "name"
+            ],
             "additionalProperties": false
           }
         },
@@ -214,108 +443,434 @@
           "$ref": "common_types.json#/$defs/DynamicValue",
           "description": "An array of row objects, normally a binding such as {\"path\": \"/results\"}."
         },
-        "compressed": { "type": "boolean", "default": false }
+        "compressed": {
+          "type": "boolean",
+          "default": false
+        },
+        "rowActions": {
+          "type": "array",
+          "description": "Buttons shown on every row. When clicked the row object is merged into the action's context as `row`, which is how the handler knows which row was pressed.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "label": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "iconType": {
+                "type": "string"
+              },
+              "color": {
+                "type": "string"
+              },
+              "action": {
+                "$ref": "common_types.json#/$defs/Action"
+              }
+            },
+            "required": [
+              "label",
+              "action"
+            ],
+            "additionalProperties": false
+          }
+        }
       },
-      "required": ["component", "caption", "columns", "rows"]
+      "required": [
+        "component",
+        "caption",
+        "columns",
+        "rows"
+      ]
     },
     "Button": {
       "type": "object",
       "description": "A clickable button that dispatches an action.",
       "properties": {
-        "component": { "const": "Button" },
-        "label": { "$ref": "common_types.json#/$defs/DynamicString" },
+        "component": {
+          "const": "Button"
+        },
+        "label": {
+          "$ref": "common_types.json#/$defs/DynamicString"
+        },
         "variant": {
           "type": "string",
-          "enum": ["default", "primary", "danger", "borderless"],
+          "enum": [
+            "default",
+            "primary",
+            "danger",
+            "borderless"
+          ],
           "default": "default",
           "description": "'primary' marks the main call to action; 'borderless' renders as a link."
         },
-        "iconType": { "type": "string" },
-        "disabled": { "$ref": "common_types.json#/$defs/DynamicBoolean" },
-        "fullWidth": { "type": "boolean", "default": false },
-        "action": { "$ref": "common_types.json#/$defs/Action" }
+        "iconType": {
+          "type": "string"
+        },
+        "disabled": {
+          "$ref": "common_types.json#/$defs/DynamicBoolean"
+        },
+        "fullWidth": {
+          "type": "boolean",
+          "default": false
+        },
+        "action": {
+          "$ref": "common_types.json#/$defs/Action"
+        }
       },
-      "required": ["component", "label", "action"]
+      "required": [
+        "component",
+        "label",
+        "action"
+      ]
     },
     "TextField": {
       "type": "object",
       "description": "A text input. Bind 'value' to a data model path to capture what the user types.",
       "properties": {
-        "component": { "const": "TextField" },
-        "label": { "$ref": "common_types.json#/$defs/DynamicString" },
-        "value": { "$ref": "common_types.json#/$defs/DynamicString" },
-        "placeholder": { "$ref": "common_types.json#/$defs/DynamicString" },
-        "helpText": { "$ref": "common_types.json#/$defs/DynamicString" },
+        "component": {
+          "const": "TextField"
+        },
+        "label": {
+          "$ref": "common_types.json#/$defs/DynamicString"
+        },
+        "value": {
+          "$ref": "common_types.json#/$defs/DynamicString"
+        },
+        "placeholder": {
+          "$ref": "common_types.json#/$defs/DynamicString"
+        },
+        "helpText": {
+          "$ref": "common_types.json#/$defs/DynamicString"
+        },
         "variant": {
           "type": "string",
-          "enum": ["shortText", "longText", "number", "obscured"],
+          "enum": [
+            "shortText",
+            "longText",
+            "number",
+            "obscured"
+          ],
           "default": "shortText"
         },
-        "disabled": { "$ref": "common_types.json#/$defs/DynamicBoolean" }
+        "disabled": {
+          "$ref": "common_types.json#/$defs/DynamicBoolean"
+        }
       },
-      "required": ["component", "label", "value"]
+      "required": [
+        "component",
+        "label",
+        "value"
+      ]
     },
     "CheckBox": {
       "type": "object",
       "description": "A single checkbox bound to a boolean in the data model.",
       "properties": {
-        "component": { "const": "CheckBox" },
-        "label": { "$ref": "common_types.json#/$defs/DynamicString" },
-        "value": { "$ref": "common_types.json#/$defs/DynamicBoolean" },
-        "disabled": { "$ref": "common_types.json#/$defs/DynamicBoolean" }
+        "component": {
+          "const": "CheckBox"
+        },
+        "label": {
+          "$ref": "common_types.json#/$defs/DynamicString"
+        },
+        "value": {
+          "$ref": "common_types.json#/$defs/DynamicBoolean"
+        },
+        "disabled": {
+          "$ref": "common_types.json#/$defs/DynamicBoolean"
+        }
       },
-      "required": ["component", "label", "value"]
+      "required": [
+        "component",
+        "label",
+        "value"
+      ]
     },
     "ChoicePicker": {
       "type": "object",
       "description": "Select one option from a fixed list. Maps to EuiSelect.",
       "properties": {
-        "component": { "const": "ChoicePicker" },
-        "label": { "$ref": "common_types.json#/$defs/DynamicString" },
-        "value": { "$ref": "common_types.json#/$defs/DynamicString" },
+        "component": {
+          "const": "ChoicePicker"
+        },
+        "label": {
+          "$ref": "common_types.json#/$defs/DynamicString"
+        },
+        "value": {
+          "$ref": "common_types.json#/$defs/DynamicString"
+        },
         "options": {
           "type": "array",
           "minItems": 1,
           "items": {
             "type": "object",
             "properties": {
-              "label": { "type": "string" },
-              "value": { "type": "string" }
+              "label": {
+                "type": "string"
+              },
+              "value": {
+                "type": "string"
+              }
             },
-            "required": ["label", "value"],
+            "required": [
+              "label",
+              "value"
+            ],
             "additionalProperties": false
           }
         },
-        "disabled": { "$ref": "common_types.json#/$defs/DynamicBoolean" }
+        "disabled": {
+          "$ref": "common_types.json#/$defs/DynamicBoolean"
+        }
       },
-      "required": ["component", "label", "value", "options"]
+      "required": [
+        "component",
+        "label",
+        "value",
+        "options"
+      ]
     },
     "Slider": {
       "type": "object",
       "description": "Select a number within a range. Maps to EuiRange.",
       "properties": {
-        "component": { "const": "Slider" },
-        "label": { "$ref": "common_types.json#/$defs/DynamicString" },
-        "value": { "$ref": "common_types.json#/$defs/DynamicNumber" },
-        "min": { "type": "number", "default": 0 },
-        "max": { "type": "number", "default": 100 },
-        "step": { "type": "number", "default": 1 },
-        "showValue": { "type": "boolean", "default": true },
-        "disabled": { "$ref": "common_types.json#/$defs/DynamicBoolean" }
+        "component": {
+          "const": "Slider"
+        },
+        "label": {
+          "$ref": "common_types.json#/$defs/DynamicString"
+        },
+        "value": {
+          "$ref": "common_types.json#/$defs/DynamicNumber"
+        },
+        "min": {
+          "type": "number",
+          "default": 0
+        },
+        "max": {
+          "type": "number",
+          "default": 100
+        },
+        "step": {
+          "type": "number",
+          "default": 1
+        },
+        "showValue": {
+          "type": "boolean",
+          "default": true
+        },
+        "disabled": {
+          "$ref": "common_types.json#/$defs/DynamicBoolean"
+        }
       },
-      "required": ["component", "label", "value"]
+      "required": [
+        "component",
+        "label",
+        "value"
+      ]
     },
     "DateTimeInput": {
       "type": "object",
       "description": "Pick a date, as an ISO 8601 string in the data model. Maps to EuiDatePicker.",
       "properties": {
-        "component": { "const": "DateTimeInput" },
-        "label": { "$ref": "common_types.json#/$defs/DynamicString" },
-        "value": { "$ref": "common_types.json#/$defs/DynamicString" },
-        "showTime": { "type": "boolean", "default": false },
-        "disabled": { "$ref": "common_types.json#/$defs/DynamicBoolean" }
+        "component": {
+          "const": "DateTimeInput"
+        },
+        "label": {
+          "$ref": "common_types.json#/$defs/DynamicString"
+        },
+        "value": {
+          "$ref": "common_types.json#/$defs/DynamicString"
+        },
+        "showTime": {
+          "type": "boolean",
+          "default": false
+        },
+        "disabled": {
+          "$ref": "common_types.json#/$defs/DynamicBoolean"
+        }
       },
-      "required": ["component", "label", "value"]
+      "required": [
+        "component",
+        "label",
+        "value"
+      ]
+    },
+    "Modal": {
+      "type": "object",
+      "description": "A dialog. Its visibility is a data binding, so anything that writes to the data model can open it \u2014 typically a Table row action. Keep it in the same panel as whatever opens it.",
+      "properties": {
+        "component": {
+          "const": "Modal"
+        },
+        "title": {
+          "$ref": "common_types.json#/$defs/DynamicString"
+        },
+        "isOpen": {
+          "$ref": "common_types.json#/$defs/DynamicBoolean",
+          "description": "Bind to a data model value; the dialog shows while it is truthy."
+        },
+        "child": {
+          "$ref": "common_types.json#/$defs/Child"
+        },
+        "footer": {
+          "$ref": "common_types.json#/$defs/Child"
+        },
+        "onClose": {
+          "$ref": "common_types.json#/$defs/Action",
+          "description": "Dispatched when dismissed. Normally kbn.setData writing null to the path isOpen reads."
+        }
+      },
+      "required": [
+        "component",
+        "title",
+        "isOpen",
+        "child"
+      ]
+    },
+    "Accordion": {
+      "type": "object",
+      "description": "A collapsible section, for detail that should not crowd the panel.",
+      "properties": {
+        "component": {
+          "const": "Accordion"
+        },
+        "label": {
+          "$ref": "common_types.json#/$defs/DynamicString"
+        },
+        "child": {
+          "$ref": "common_types.json#/$defs/Child"
+        },
+        "initialIsOpen": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "required": [
+        "component",
+        "label",
+        "child"
+      ]
+    },
+    "Health": {
+      "type": "object",
+      "description": "A coloured status dot with a label, for health and state.",
+      "properties": {
+        "component": {
+          "const": "Health"
+        },
+        "label": {
+          "$ref": "common_types.json#/$defs/DynamicString"
+        },
+        "color": {
+          "type": "string",
+          "enum": [
+            "subdued",
+            "primary",
+            "success",
+            "warning",
+            "danger",
+            "accent"
+          ],
+          "default": "subdued"
+        }
+      },
+      "required": [
+        "component",
+        "label"
+      ]
+    },
+    "Link": {
+      "type": "object",
+      "description": "A hyperlink. Give it href for an external URL, or action to dispatch an event.",
+      "properties": {
+        "component": {
+          "const": "Link"
+        },
+        "label": {
+          "$ref": "common_types.json#/$defs/DynamicString"
+        },
+        "href": {
+          "$ref": "common_types.json#/$defs/DynamicString"
+        },
+        "action": {
+          "$ref": "common_types.json#/$defs/Action"
+        }
+      },
+      "required": [
+        "component",
+        "label"
+      ]
+    },
+    "DescriptionList": {
+      "type": "object",
+      "description": "Term and value pairs, for showing the fields of one record.",
+      "properties": {
+        "component": {
+          "const": "DescriptionList"
+        },
+        "items": {
+          "$ref": "common_types.json#/$defs/DynamicValue",
+          "description": "Array of { title, description } objects, or a binding to one."
+        },
+        "variant": {
+          "type": "string",
+          "enum": [
+            "row",
+            "inline",
+            "column"
+          ],
+          "default": "row"
+        },
+        "compressed": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "required": [
+        "component",
+        "items"
+      ]
+    },
+    "Progress": {
+      "type": "object",
+      "description": "A progress or proportion bar.",
+      "properties": {
+        "component": {
+          "const": "Progress"
+        },
+        "label": {
+          "$ref": "common_types.json#/$defs/DynamicString"
+        },
+        "value": {
+          "$ref": "common_types.json#/$defs/DynamicNumber"
+        },
+        "max": {
+          "$ref": "common_types.json#/$defs/DynamicNumber",
+          "default": 100
+        },
+        "color": {
+          "type": "string",
+          "enum": [
+            "subdued",
+            "primary",
+            "success",
+            "warning",
+            "danger",
+            "accent"
+          ],
+          "default": "primary"
+        },
+        "showValue": {
+          "type": "boolean",
+          "default": true
+        }
+      },
+      "required": [
+        "component",
+        "value"
+      ]
     }
   },
   "functions": {
@@ -324,79 +879,134 @@
       "description": "Formats a number with thousands separators and fixed decimals.",
       "returnType": "string",
       "properties": {
-        "call": { "const": "formatNumber" },
+        "call": {
+          "const": "formatNumber"
+        },
         "args": {
           "type": "object",
           "properties": {
-            "value": { "$ref": "common_types.json#/$defs/DynamicNumber" },
-            "decimals": { "$ref": "common_types.json#/$defs/DynamicNumber" }
+            "value": {
+              "$ref": "common_types.json#/$defs/DynamicNumber"
+            },
+            "decimals": {
+              "$ref": "common_types.json#/$defs/DynamicNumber"
+            }
           },
-          "required": ["value"]
+          "required": [
+            "value"
+          ]
         }
       },
-      "required": ["call", "args"]
+      "required": [
+        "call",
+        "args"
+      ]
     },
     "formatDate": {
       "type": "object",
       "description": "Formats an ISO 8601 date string for display.",
       "returnType": "string",
       "properties": {
-        "call": { "const": "formatDate" },
+        "call": {
+          "const": "formatDate"
+        },
         "args": {
           "type": "object",
           "properties": {
-            "value": { "$ref": "common_types.json#/$defs/DynamicString" },
-            "withTime": { "$ref": "common_types.json#/$defs/DynamicBoolean" }
+            "value": {
+              "$ref": "common_types.json#/$defs/DynamicString"
+            },
+            "withTime": {
+              "$ref": "common_types.json#/$defs/DynamicBoolean"
+            }
           },
-          "required": ["value"]
+          "required": [
+            "value"
+          ]
         }
       },
-      "required": ["call", "args"]
+      "required": [
+        "call",
+        "args"
+      ]
     },
     "concat": {
       "type": "object",
       "description": "Joins values into one string.",
       "returnType": "string",
       "properties": {
-        "call": { "const": "concat" },
+        "call": {
+          "const": "concat"
+        },
         "args": {
           "type": "object",
           "properties": {
-            "values": { "$ref": "common_types.json#/$defs/DynamicValue" },
-            "separator": { "$ref": "common_types.json#/$defs/DynamicString" }
+            "values": {
+              "$ref": "common_types.json#/$defs/DynamicValue"
+            },
+            "separator": {
+              "$ref": "common_types.json#/$defs/DynamicString"
+            }
           },
-          "required": ["values"]
+          "required": [
+            "values"
+          ]
         }
       },
-      "required": ["call", "args"]
+      "required": [
+        "call",
+        "args"
+      ]
     },
     "not": {
       "type": "object",
       "description": "Logical negation, useful for 'disabled' bindings.",
       "returnType": "boolean",
       "properties": {
-        "call": { "const": "not" },
+        "call": {
+          "const": "not"
+        },
         "args": {
           "type": "object",
-          "properties": { "value": { "$ref": "common_types.json#/$defs/DynamicBoolean" } },
-          "required": ["value"]
+          "properties": {
+            "value": {
+              "$ref": "common_types.json#/$defs/DynamicBoolean"
+            }
+          },
+          "required": [
+            "value"
+          ]
         }
       },
-      "required": ["call", "args"]
+      "required": [
+        "call",
+        "args"
+      ]
     },
     "isEmpty": {
       "type": "object",
       "description": "True when the value is null, undefined, an empty string, or an empty array.",
       "returnType": "boolean",
       "properties": {
-        "call": { "const": "isEmpty" },
+        "call": {
+          "const": "isEmpty"
+        },
         "args": {
           "type": "object",
-          "properties": { "value": { "$ref": "common_types.json#/$defs/DynamicValue" } },
-          "required": ["value"]
+          "properties": {
+            "value": {
+              "$ref": "common_types.json#/$defs/DynamicValue"
+            }
+          },
+          "required": [
+            "value"
+          ]
         }
       },
-      "required": ["call", "args"]
+      "required": [
+        "call",
+        "args"
+      ]
     }
   }
 }

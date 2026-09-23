@@ -12,6 +12,9 @@ import {
   EuiCallOut,
   EuiLoadingSpinner,
   EuiPageTemplate,
+  EuiSpacer,
+  EuiTab,
+  EuiTabs,
 } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -25,7 +28,7 @@ import type { CustomAppDefinition } from '../../common/app_definition';
 import { getPanelIds } from '../../common/app_definition';
 import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../../common/constants';
 import type { CustomAppClient } from './custom_app_client';
-import { CustomAppGrid } from './custom_app_grid';
+import { CustomAppGrid, getTabs } from './custom_app_grid';
 import { PanelEditorFlyout } from './panel_editor_flyout';
 import { AppEditorFlyout } from './app_editor_flyout';
 import { createActionHandler } from './handle_action';
@@ -65,6 +68,7 @@ export function CustomAppPage({ core, data, client, appId, onNavigateToList }: C
   const [isEditing, setIsEditing] = useState(false);
   const [editingPanelId, setEditingPanelId] = useState<string | undefined>();
   const [isAppEditorOpen, setIsAppEditorOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<string | undefined>();
   const [loadError, setLoadError] = useState<string | undefined>();
   const [isSaving, setIsSaving] = useState(false);
   // One time range for the whole page; every chart panel reads it from context.
@@ -98,6 +102,15 @@ export function CustomAppPage({ core, data, client, appId, onNavigateToList }: C
       }),
     [core]
   );
+
+  const tabs = useMemo(() => (definition ? getTabs(definition) : []), [definition]);
+
+  // An app can gain or lose tabs through the editor, so fall back to the first
+  // one rather than leaving the grid filtered to a tab that no longer exists.
+  useEffect(() => {
+    if (tabs.length === 0) setActiveTab(undefined);
+    else if (!activeTab || !tabs.includes(activeTab)) setActiveTab(tabs[0]);
+  }, [tabs, activeTab]);
 
   const hasUnsavedChanges = useMemo(
     () => Boolean(definition && saved && JSON.stringify(definition) !== JSON.stringify(saved)),
@@ -260,12 +273,26 @@ export function CustomAppPage({ core, data, client, appId, onNavigateToList }: C
 
         <SampleDataCallout core={core} />
 
+        {tabs.length > 0 && (
+          <>
+            <EuiTabs>
+              {tabs.map((tab) => (
+                <EuiTab key={tab} isSelected={tab === activeTab} onClick={() => setActiveTab(tab)}>
+                  {tab}
+                </EuiTab>
+              ))}
+            </EuiTabs>
+            <EuiSpacer size="m" />
+          </>
+        )}
+
         <CustomAppServicesProvider
           services={{ timeRange, setTimeRange, search: data.search.search, http: core.http }}
         >
           <CustomAppGrid
             definition={definition}
             isEditing={isEditing}
+            activeTab={activeTab}
             onLayoutChange={onLayoutChange}
             onAction={onAction}
             onEditPanel={setEditingPanelId}

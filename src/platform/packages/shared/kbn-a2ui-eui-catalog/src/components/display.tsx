@@ -11,12 +11,16 @@ import React from 'react';
 import {
   EuiBadge,
   EuiBasicTable,
+  EuiButtonIcon,
   EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiIcon,
   EuiMarkdownFormat,
   EuiStat,
   EuiText,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import type { CatalogComponent } from '@kbn/a2ui-renderer';
@@ -128,7 +132,7 @@ export const Callout: CatalogComponent = {
 
 export const Table: CatalogComponent = {
   name: 'Table',
-  render: ({ props, accessibility }) => {
+  render: ({ props, rawProps, dispatchAction, accessibility }) => {
     const items = objectArray(props.rows);
     const columns: Array<EuiBasicTableColumn<Record<string, unknown>>> = objectArray(
       props.columns
@@ -140,6 +144,52 @@ export const Table: CatalogComponent = {
         : undefined,
       render: (value: unknown) => str(value),
     }));
+
+    /**
+     * Row actions dispatch with the clicked row merged into the event context
+     * as `row`. Without that the handler would have no way to tell which row
+     * was pressed — the action itself is declared once for the whole column.
+     */
+    const rowActions = objectArray(rawProps.rowActions);
+    if (rowActions.length > 0) {
+      // Rendered explicitly rather than via EuiBasicTable's `actions` shorthand,
+      // which leaves the icon buttons without an accessible name.
+      columns.push({
+        name: 'Actions',
+        align: 'right',
+        width: `${rowActions.length * 40}px`,
+        // A column with no `field` is a computed column, so EuiBasicTable hands
+        // the whole record as the first argument rather than a cell value.
+        render: (row: Record<string, unknown>) => (
+          <EuiFlexGroup gutterSize="xs" justifyContent="flexEnd" responsive={false}>
+            {rowActions.map((entry, index) => {
+              const label = str(entry.label, 'Action');
+              return (
+                <EuiFlexItem key={`${label}-${index}`} grow={false}>
+                  <EuiToolTip content={label} disableScreenReaderOutput>
+                    <EuiButtonIcon
+                      iconType={optionalStr(entry.iconType) ?? 'inspect'}
+                      color={(optionalStr(entry.color) ?? 'primary') as never}
+                      size="xs"
+                      aria-label={label}
+                      onClick={() => {
+                        const action = entry.action as {
+                          event?: { name: string; context?: object };
+                        };
+                        if (!action?.event) return;
+                        dispatchAction({
+                          event: { ...action.event, context: { ...action.event.context, row } },
+                        } as never);
+                      }}
+                    />
+                  </EuiToolTip>
+                </EuiFlexItem>
+              );
+            })}
+          </EuiFlexGroup>
+        ),
+      } as EuiBasicTableColumn<Record<string, unknown>>);
+    }
 
     if (columns.length === 0) return null;
 

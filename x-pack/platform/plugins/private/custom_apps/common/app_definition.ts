@@ -77,7 +77,19 @@ export const customAppDefinitionSchema = z.object({
   title: z.string().min(1),
   description: z.string().optional(),
   layout: z.record(z.string(), layoutWidgetSchema),
-  panels: z.record(z.string(), z.object({ title: z.string().optional() })),
+  panels: z.record(
+    z.string(),
+    z.object({
+      title: z.string().optional(),
+      /** Drop the panel frame so prose and controls read as page content. */
+      hideBorder: z.boolean().optional(),
+      /**
+       * Groups panels into top-level tabs. Panels with no tab are always
+       * visible, which is what makes a header or filter panel persistent.
+       */
+      tab: z.string().optional(),
+    })
+  ),
   surfaces: z.record(z.string(), z.array(a2uiMessageSchema)),
   queries: z.record(z.string(), z.array(esqlQuerySchema)).optional(),
 });

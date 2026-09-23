@@ -19,6 +19,7 @@ import { css } from '@emotion/react';
 
 export interface CustomAppPanelProps {
   title?: string;
+  hideBorder?: boolean;
   isEditing: boolean;
   setDragHandles: (refs: Array<HTMLElement | null>) => void;
   onEdit: () => void;
@@ -32,6 +33,7 @@ export interface CustomAppPanelProps {
  */
 export function CustomAppPanel({
   title,
+  hideBorder,
   isEditing,
   setDragHandles,
   onEdit,
@@ -50,7 +52,10 @@ export function CustomAppPanel({
 
   return (
     <EuiPanel
-      hasBorder
+      // A borderless panel still needs a frame while editing, or it cannot be
+      // seen well enough to select, drag or resize.
+      hasBorder={!hideBorder || isEditing}
+      color={hideBorder && !isEditing ? 'transparent' : 'plain'}
       paddingSize="none"
       css={css`
         height: 100%;
