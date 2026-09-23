@@ -68,7 +68,13 @@ export class ConversationServiceImpl implements ConversationService {
   }
 
   async getScopedClient({ request }: { request: KibanaRequest }): Promise<ConversationClient> {
-    return this.createScopedClient({ request, user: await this.getCurrentUser({ request }) });
+    const user = await getUserFromRequest({
+      request,
+      security: this.security,
+      esClient: this.getScopedEsClient(request).asCurrentUser,
+    });
+
+    return this.createScopedClient({ request, user });
   }
 
   async getScopedClientAsUser({
@@ -101,14 +107,6 @@ export class ConversationServiceImpl implements ConversationService {
       agentRegistry,
       conversationEvents: this.conversationEvents,
       eventEmitter: eventBus ? createScopedConversationEventEmitter(eventBus, request) : undefined,
-    });
-  }
-
-  private async getCurrentUser({ request }: { request: KibanaRequest }): Promise<CurrentUser> {
-    return getUserFromRequest({
-      request,
-      security: this.security,
-      esClient: this.getScopedEsClient(request).asCurrentUser,
     });
   }
 
