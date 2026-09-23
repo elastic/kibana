@@ -100,7 +100,7 @@ export async function runJest(configName = 'jest.config.js'): Promise<void> {
   // Prepare Jest execution context
   const { originalArgv, jestArgv } = await prepareJestExecution(baseConfig);
 
-  log.info('yarn jest', originalArgv.join(' '));
+  log.info('node scripts/jest', originalArgv.join(' '));
 
   log.debug('Setting up Jest with shared cache directory:', jestArgv.join(' '));
 
@@ -147,7 +147,7 @@ function parseJestArguments(): ParsedJestArguments {
 
   If this flag is valid you might need to update the flags in "src/platform/packages/shared/kbn-test/src/jest/run.js".
 
-  Run 'yarn jest --help | node scripts/read_jest_help.mjs' to update this scripts knowledge of what
+  Run 'pnpm exec jest --help | node scripts/read_jest_help.mjs' to update this scripts knowledge of what
   flags jest supports
 
 `);

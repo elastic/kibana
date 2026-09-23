@@ -12,7 +12,7 @@ tl;dr:
 ## Using these packages
 
 We no longer publish these packages to the npm registry. Now, instead of
-specifying a version when including these packages, we rely on yarn workspaces,
+specifying a version when including these packages, we rely on pnpm workspaces,
 which sets up a symlink to the package.
 
 For example if you want to use the `@kbn/i18n` package in Kibana itself, you
@@ -30,7 +30,7 @@ instead be:
 "@kbn/i18n": "link:../../kibana/src/platform/packages/shared/kbn-i18n"
 ```
 
-then run `yarn kbn bootstrap` from the plugin directory.
+then run `pnpm kbn bootstrap` from the plugin directory.
 
 ## Creating a new package
 
@@ -50,8 +50,8 @@ A package should follow the pattern of having `.test.js` files as siblings of th
 
 A package using the `.test.js` naming convention will have those tests automatically picked up by Jest and run by the unit test runner, currently mapped to the Kibana `test` script in the root `package.json`.
 
-* `yarn test` runs all unit tests.
-* `yarn jest` runs all Jest tests in Kibana.
+* `pnpm test` runs all unit tests.
+* `pnpm exec jest` runs all Jest tests in Kibana.
 
 In order for the plugin or package to use Jest, a jest.config.js file must be present in it's root. However, there are safeguards for this in CI should a test file be added without a corresponding config file.
 
