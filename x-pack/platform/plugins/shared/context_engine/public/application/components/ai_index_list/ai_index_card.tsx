@@ -19,20 +19,12 @@ import {
   EuiText,
   EuiTextBlockTruncate,
   EuiToolTip,
-  logicalCSS,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import React, { useState } from 'react';
 import type { AiIndexHttpItem } from '../../../../common/http_api/ai_indices';
 import { AI_INDEX_TYPE_LABEL } from './labels';
-
-// The grid sizes its `1fr` tracks from each card's min-content width, and the title never wraps,
-// so without this an id stretches its column — and the whole grid — past the viewport.
-const shrinkable = css`
-  ${logicalCSS('min-width', 0)}
-`;
 
 const AiIndexCardFooter = ({ aiIndex }: { aiIndex: AiIndexHttpItem }) => (
   <>
@@ -74,7 +66,6 @@ export const AiIndexCard = ({ aiIndex, href, onDeleteClick }: AiIndexCardProps) 
 
   return (
     <EuiCard
-      css={shrinkable}
       data-test-subj="contextAiIndexCard"
       textAlign="left"
       titleSize="xs"
@@ -87,12 +78,22 @@ export const AiIndexCard = ({ aiIndex, href, onDeleteClick }: AiIndexCardProps) 
           justifyContent="spaceBetween"
           responsive={false}
         >
-          <EuiFlexItem className="eui-textTruncate" css={shrinkable}>
+          <EuiFlexItem>
             <EuiFlexGroup gutterSize="s" alignItems="baseline" responsive={false}>
-              <EuiFlexItem className="eui-textTruncate" css={shrinkable}>
-                <span className="eui-textTruncate" title={aiIndex.id}>
+              <EuiFlexItem>
+                {/*
+                 * The grid sizes its `1fr` tracks from each card's min-content width, so the id
+                 * has to stay breakable: a title that cannot wrap stretches its column — and the
+                 * whole grid — past the viewport. The clamp keeps it to the original single line.
+                 */}
+                <EuiTextBlockTruncate
+                  lines={1}
+                  className="eui-textBreakWord"
+                  title={aiIndex.id}
+                  data-test-subj="contextAiIndexCardTitle"
+                >
                   {aiIndex.id}
-                </span>
+                </EuiTextBlockTruncate>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiText
@@ -179,7 +180,9 @@ export const AiIndexCard = ({ aiIndex, href, onDeleteClick }: AiIndexCardProps) 
         {aiIndex.description !== undefined && (
           <EuiFlexItem grow={false}>
             <EuiText size="s" color="subdued" data-test-subj="contextAiIndexCardDescription">
-              <EuiTextBlockTruncate lines={2}>{aiIndex.description}</EuiTextBlockTruncate>
+              <EuiTextBlockTruncate lines={2} className="eui-textBreakWord">
+                {aiIndex.description}
+              </EuiTextBlockTruncate>
             </EuiText>
           </EuiFlexItem>
         )}
