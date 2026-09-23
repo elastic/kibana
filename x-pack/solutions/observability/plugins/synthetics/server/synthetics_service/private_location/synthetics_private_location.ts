@@ -53,6 +53,7 @@ import {
   isConditionShardedLocation,
   isEqlSafeLiteral,
 } from './assign_by_condition';
+import { applyForcedAgentSharding, isAgentShardingForced } from './agent_sharding_forced';
 
 export interface PrivateConfig {
   config: HeartbeatConfig;
@@ -344,6 +345,12 @@ export class SyntheticsPrivateLocation {
     }
   }
 
+  async withEffectiveAgentSharding<T extends { isAgentSharding?: boolean }>(
+    locations: T[]
+  ): Promise<T[]> {
+    return applyForcedAgentSharding(locations, await isAgentShardingForced(this.server));
+  }
+
   /** Resolves each touched scalable location at most once per monitor batch. */
   private async getScalableAgentsByLocation(
     locations: Array<{ id: string; agentPolicyId: string; isAgentSharding?: boolean }>
@@ -380,7 +387,7 @@ export class SyntheticsPrivateLocation {
 
   async createPackagePolicies(
     configs: PrivateConfig[],
-    privateLocations: SyntheticsPrivateLocations,
+    storedPrivateLocations: SyntheticsPrivateLocations,
     spaceId: string,
     maintenanceWindows: MaintenanceWindow[],
     testRunId?: string,
@@ -389,6 +396,7 @@ export class SyntheticsPrivateLocation {
     if (configs.length === 0) {
       return { created: [], failed: [] };
     }
+    const privateLocations = await this.withEffectiveAgentSharding(storedPrivateLocations);
     const newPolicies: NewPackagePolicyWithId[] = [];
     const newPolicyTemplate = await this.buildNewPolicy(spaceId);
     const referencedPrivateLocations = this.getReferencedPrivateLocations(
@@ -493,7 +501,9 @@ export class SyntheticsPrivateLocation {
 
       const privateLocation = locations.find((loc) => !loc.isServiceManaged);
 
-      const location = allPrivateLocations?.find((loc) => loc.id === privateLocation?.id)!;
+      const [location] = await this.withEffectiveAgentSharding(
+        allPrivateLocations.filter((loc) => loc.id === privateLocation?.id)
+      );
       const assignAgentConditions = await this.isShardRebalanceEnabled();
       const conditionHosts =
         assignAgentConditions && isConditionShardedLocation(location)
@@ -531,7 +541,7 @@ export class SyntheticsPrivateLocation {
 
   async editMonitors(
     configs: Array<{ config: HeartbeatConfig; globalParams: Record<string, string> }>,
-    allPrivateLocations: SyntheticsPrivateLocations,
+    storedPrivateLocations: SyntheticsPrivateLocations,
     spaceId: string,
     maintenanceWindows: MaintenanceWindow[]
   ) {
@@ -540,6 +550,7 @@ export class SyntheticsPrivateLocation {
         failedUpdates: [],
       };
     }
+    const allPrivateLocations = await this.withEffectiveAgentSharding(storedPrivateLocations);
 
     const [newPolicyTemplate, { policies: existingPolicies, allSpaces }] = await Promise.all([
       this.buildNewPolicy(spaceId),
@@ -865,9 +876,9 @@ export class SyntheticsPrivateLocation {
    */
   async clearShardConditions(): Promise<{ cleared: number; failed: number }> {
     const soClient = this.server.coreStart.savedObjects.createInternalRepository();
-    const locations = (await getPrivateLocations(soClient, ALL_SPACES_ID)).filter(
-      isConditionShardedLocation
-    );
+    const locations = (
+      await this.withEffectiveAgentSharding(await getPrivateLocations(soClient, ALL_SPACES_ID))
+    ).filter(isConditionShardedLocation);
     const agentPolicyIds = [...new Set(locations.map((location) => location.agentPolicyId))];
 
     let cleared = 0;

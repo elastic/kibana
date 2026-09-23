@@ -20,6 +20,7 @@ import type { RouteContext, SyntheticsRestApiRouteFactory } from '../../types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { toClientContract, updatePrivateLocationMonitors } from './helpers';
 import { assertCanEnableAgentSharding } from './agent_sharding_license';
+import { isAgentShardingForced } from '../../../synthetics_service/private_location/agent_sharding_forced';
 import type { PrivateLocation } from '../../../../common/runtime_types';
 import { parseArrayFilters } from '../../common';
 import { syntheticsMonitorSOTypes } from '../../../../common/types/saved_objects';
@@ -143,13 +144,11 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
   },
   requiredPrivileges: [PRIVATE_LOCATION_WRITE_API],
   handler: async (routeContext) => {
-    const { response, request, savedObjectsClient, context } = routeContext;
+    const { response, request, savedObjectsClient, context, server } = routeContext;
     const { locationId } = request.params;
-    const {
-      label: newLocationLabel,
-      tags: newTags,
-      isAgentSharding: newIsAgentSharding,
-    } = request.body;
+    const isShardingForced = await isAgentShardingForced(server);
+    const { label: newLocationLabel, tags: newTags } = request.body;
+    const newIsAgentSharding = isShardingForced ? undefined : request.body.isAgentSharding;
 
     const repo = new PrivateLocationRepository(routeContext);
 
@@ -177,7 +176,10 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
       let newLocation: Awaited<ReturnType<typeof repo.editPrivateLocation>> | undefined;
 
       if (
-        isPrivateLocationChanged({ privateLocation: existingLocation, newParams: request.body })
+        isPrivateLocationChanged({
+          privateLocation: existingLocation,
+          newParams: { ...request.body, isAgentSharding: newIsAgentSharding },
+        })
       ) {
         const isLabelChanged = isPrivateLocationLabelChanged(
           existingLocation.attributes.label,
@@ -235,6 +237,7 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
         attributes: {
           ...existingLocation.attributes,
           ...(newLocation ? newLocation.attributes : {}),
+          ...(isShardingForced ? { isAgentSharding: true } : {}),
         },
       });
     } catch (error) {

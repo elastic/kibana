@@ -17,9 +17,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { AGENT_SHARDING_MIN_LICENSE } from '../../../../../../common/constants/license';
 import { useLicense } from '../../../hooks/use_license';
 import type { PrivateLocation } from '../../../../../../common/runtime_types';
+import type { ClientPluginsStart } from '../../../../../plugin';
 
 export const AGENT_SHARDING_FIELD_NAME = 'isAgentSharding';
 
@@ -29,9 +31,12 @@ export const AgentShardingField = ({
   isEditingShardedLocation: boolean;
 }) => {
   const { control } = useFormContext<PrivateLocation>();
-  const isAgentSharding = useWatch({ control, name: AGENT_SHARDING_FIELD_NAME });
   const { hasAtLeast } = useLicense();
+  const { cloud } = useKibana<ClientPluginsStart>().services;
   const canEnable = hasAtLeast(AGENT_SHARDING_MIN_LICENSE) === true;
+  const isForced = canEnable && Boolean(cloud?.isCloudEnabled);
+  const isAgentSharding =
+    useWatch({ control, name: AGENT_SHARDING_FIELD_NAME }) === true || isForced;
   const [isConfirmingDisable, setIsConfirmingDisable] = useState(false);
   const confirmTitleId = useGeneratedHtmlId();
 
@@ -49,7 +54,8 @@ export const AgentShardingField = ({
             <EuiSwitch
               data-test-subj="syntheticsAgentShardingSwitch"
               label={AGENT_SHARDING_TOGGLE_SWITCH}
-              checked={Boolean(field.value)}
+              checked={Boolean(field.value) || isForced}
+              disabled={isForced}
               onChange={(event) => {
                 if (isEditingShardedLocation && field.value && !event.target.checked) {
                   setIsConfirmingDisable(true);
@@ -82,9 +88,9 @@ export const AgentShardingField = ({
       />
       <EuiSpacer size="xs" />
       <EuiText size="xs" color="subdued">
-        {AGENT_SHARDING_HELP_DESCRIPTION}
+        {isForced ? AGENT_SHARDING_FORCED_HELP_DESCRIPTION : AGENT_SHARDING_HELP_DESCRIPTION}
       </EuiText>
-      {Boolean(isAgentSharding) && (
+      {isAgentSharding && (
         <>
           <EuiSpacer />
           <EuiCallOut
@@ -121,6 +127,14 @@ const AGENT_SHARDING_HELP_DESCRIPTION = i18n.translate(
   {
     defaultMessage:
       'Run several agents under this one policy and let Kibana shard monitors across them for at-most-once execution and failover. Requires an Enterprise license.',
+  }
+);
+
+const AGENT_SHARDING_FORCED_HELP_DESCRIPTION = i18n.translate(
+  'xpack.synthetics.monitorManagement.agentShardingForcedHelpDescription',
+  {
+    defaultMessage:
+      'Always on for Enterprise deployments on Elastic Cloud. Kibana shards monitors across the agents on this policy for at-most-once execution and failover.',
   }
 );
 

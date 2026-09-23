@@ -9,6 +9,7 @@ import type { CoreStart } from '@kbn/core-lifecycle-server';
 import { coreMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
+import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import {
   RebalancePrivateLocationShardsTask,
@@ -272,6 +273,38 @@ describe('RebalancePrivateLocationShardsTask', () => {
         [REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY]: false,
         [REBALANCE_SHARDS_PIN_CLEAR_ATTEMPTS_STATE_KEY]: 0,
       });
+    });
+
+    it('rebalances classic locations when sharding is forced on Cloud with Enterprise', async () => {
+      jest
+        .spyOn(getPrivateLocationsModule, 'getPrivateLocations')
+        .mockResolvedValue([location({ isAgentSharding: false })]);
+      jest
+        .spyOn(getAgentInfoModule, 'getAgentInfo')
+        .mockResolvedValue(new Map([['agent-1', agentInfo(NOW)]]));
+      const forcedTask = new RebalancePrivateLocationShardsTask(
+        {
+          ...mockServerSetup,
+          cloud: { isCloudEnabled: true },
+          pluginsStart: {
+            ...mockServerSetup.pluginsStart,
+            licensing: {
+              getLicense: jest
+                .fn()
+                .mockResolvedValue(licenseMock.createLicense({ license: { type: 'enterprise' } })),
+            },
+          },
+        } as unknown as SyntheticsServerSetup,
+        mockSyntheticsMonitorClient
+      );
+
+      await forcedTask.runTask({ taskInstance: taskInstance(), signal: openSignal() });
+
+      expect(mockRebalanceShards).toHaveBeenCalledWith(
+        expect.objectContaining({
+          location: expect.objectContaining({ id: 'loc-1' }),
+        })
+      );
     });
 
     it('rebalances a healthy location, passing healthy/recovery agents and capacities', async () => {

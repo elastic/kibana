@@ -18,6 +18,10 @@ import type { SyntheticsRestApiRouteFactory } from '../../types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { toClientContract, toSavedObjectContract } from './helpers';
 import { assertCanEnableAgentSharding } from './agent_sharding_license';
+import {
+  applyForcedAgentSharding,
+  isAgentShardingForced,
+} from '../../../synthetics_service/private_location/agent_sharding_forced';
 import { MAX_ROUTE_ID_LENGTH } from '../../zod_query';
 import type { PrivateLocation } from '../../../../common/runtime_types';
 
@@ -107,8 +111,11 @@ export const addPrivateLocationRoute: SyntheticsRestApiRouteFactory<PrivateLocat
 
     try {
       const result = await repo.createPrivateLocation(formattedLocation, newId);
-
-      return toClientContract(result);
+      const [createdLocation] = applyForcedAgentSharding(
+        [toClientContract(result)],
+        await isAgentShardingForced(server)
+      );
+      return createdLocation;
     } catch (error) {
       if (SavedObjectsErrorHelpers.isForbiddenError(error)) {
         return response.customError({

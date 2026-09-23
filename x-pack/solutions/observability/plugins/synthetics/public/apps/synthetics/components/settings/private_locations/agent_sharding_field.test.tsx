@@ -16,6 +16,12 @@ import type { PrivateLocation } from '../../../../../../common/runtime_types';
 
 jest.mock('../../../hooks/use_license');
 
+let mockCloud: { isCloudEnabled: boolean } | undefined;
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  ...jest.requireActual('@kbn/kibana-react-plugin/public'),
+  useKibana: () => ({ services: { cloud: mockCloud } }),
+}));
+
 const useLicenseMock = useLicense as jest.MockedFunction<typeof useLicense>;
 
 const Form = ({
@@ -38,6 +44,30 @@ const Form = ({
 };
 
 describe('AgentShardingField', () => {
+  beforeEach(() => {
+    mockCloud = undefined;
+  });
+
+  it('locks the switch on for Enterprise on Cloud, even for a classic location', () => {
+    mockCloud = { isCloudEnabled: true };
+    useLicenseMock.mockReturnValue({ hasAtLeast: () => true, getLicense: () => null });
+    render(<Form isEditingShardedLocation={false} />);
+
+    const toggle = screen.getByTestId('syntheticsAgentShardingSwitch');
+    expect(toggle).toBeChecked();
+    expect(toggle).toBeDisabled();
+    expect(screen.getByText(/Always on for Enterprise deployments/)).toBeInTheDocument();
+    expect(screen.getByTestId('syntheticsAgentShardingCallout')).toBeInTheDocument();
+  });
+
+  it('keeps the toggle editable on Cloud without Enterprise', () => {
+    mockCloud = { isCloudEnabled: true };
+    useLicenseMock.mockReturnValue({ hasAtLeast: () => false, getLicense: () => null });
+    render(<Form isEditingShardedLocation={true} defaultChecked={true} />);
+
+    expect(screen.getByTestId('syntheticsAgentShardingSwitch')).not.toBeDisabled();
+  });
+
   it('hides the switch without an Enterprise license on a classic location', () => {
     useLicenseMock.mockReturnValue({ hasAtLeast: () => false, getLicense: () => null });
     render(<Form isEditingShardedLocation={false} />);

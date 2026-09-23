@@ -38,8 +38,16 @@ const existingLocation = {
   },
 };
 
-const makeRouteContext = (body: Record<string, unknown>, { hasEnterprise = false } = {}) => {
+const makeRouteContext = (
+  body: Record<string, unknown>,
+  { hasEnterprise = false, isCloudEnabled = false } = {}
+) => {
   const response = httpServerMock.createResponseFactory();
+  const license = {
+    isAvailable: true,
+    isActive: true,
+    hasAtLeast: (level: string) => level === 'enterprise' && hasEnterprise,
+  };
   const routeContext = {
     request: { params: { locationId: 'loc-1' }, body },
     response,
@@ -48,18 +56,16 @@ const makeRouteContext = (body: Record<string, unknown>, { hasEnterprise = false
       findDecryptedMonitors: jest.fn().mockResolvedValue([]),
     },
     server: {
+      cloud: { isCloudEnabled },
       coreStart: {
         savedObjects: { createInternalRepository: jest.fn().mockReturnValue({}) },
       },
+      pluginsStart: {
+        licensing: { getLicense: jest.fn().mockResolvedValue(license) },
+      },
     },
     context: {
-      licensing: Promise.resolve({
-        license: {
-          isAvailable: true,
-          isActive: true,
-          hasAtLeast: (level: string) => level === 'enterprise' && hasEnterprise,
-        },
-      }),
+      licensing: Promise.resolve({ license }),
     },
   } as any;
   return { routeContext, response };
@@ -135,6 +141,20 @@ describe('editPrivateLocationRoute isAgentSharding', () => {
         newLocationLabel: 'Loc',
       })
     );
+  });
+
+  it('ignores isAgentSharding edits and reports sharding on when forced on Cloud with Enterprise', async () => {
+    const edit = stubRepo();
+    const { routeContext } = makeRouteContext(
+      { isAgentSharding: false },
+      { hasEnterprise: true, isCloudEnabled: true }
+    );
+
+    const result = await editPrivateLocationRoute().handler(routeContext);
+
+    expect(edit).not.toHaveBeenCalled();
+    expect(updatePrivateLocationMonitors).not.toHaveBeenCalled();
+    expect(result).toEqual(expect.objectContaining({ isAgentSharding: true }));
   });
 
   it('does not write when the body omits isAgentSharding and other fields', async () => {

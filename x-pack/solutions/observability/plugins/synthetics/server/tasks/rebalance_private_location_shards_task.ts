@@ -15,6 +15,10 @@ import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import pRetry from 'p-retry';
 import { getPrivateLocations } from '../synthetics_service/get_private_locations';
 import { isConditionShardedLocation } from '../synthetics_service/private_location/assign_by_condition';
+import {
+  applyForcedAgentSharding,
+  isAgentShardingForced,
+} from '../synthetics_service/private_location/agent_sharding_forced';
 import { getAgentInfo } from '../synthetics_service/private_location/get_agent_info';
 import { getRecentlyActiveAgentIds } from '../synthetics_service/private_location/get_active_agent_ids';
 import {
@@ -116,9 +120,10 @@ export class RebalancePrivateLocationShardsTask {
 
       const soClient = coreStart.savedObjects.createInternalRepository();
 
-      const scalableLocations = (await getPrivateLocations(soClient, ALL_SPACES_ID)).filter(
-        isConditionShardedLocation
-      );
+      const scalableLocations = applyForcedAgentSharding(
+        await getPrivateLocations(soClient, ALL_SPACES_ID),
+        await isAgentShardingForced(this.serverSetup)
+      ).filter(isConditionShardedLocation);
 
       if (scalableLocations.length === 0) {
         return {

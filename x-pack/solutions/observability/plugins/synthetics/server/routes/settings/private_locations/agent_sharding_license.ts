@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ILicense } from '@kbn/licensing-types';
-import { AGENT_SHARDING_MIN_LICENSE } from '../../../../common/constants/license';
+import { hasAgentShardingLicense } from '../../../synthetics_service/private_location/agent_sharding_forced';
 
 const isEnablingAgentSharding = (
   requestedIsAgentSharding?: boolean,
@@ -25,13 +25,6 @@ export const getAgentShardingLicenseError = (): string =>
  * without an Enterprise license. Classic create/edit and turning sharding off
  * are allowed on any license.
  */
-const hasAgentShardingLicense = (
-  license?: Pick<ILicense, 'hasAtLeast' | 'isAvailable' | 'isActive'>
-): boolean =>
-  Boolean(
-    license?.isAvailable && license.isActive && license.hasAtLeast(AGENT_SHARDING_MIN_LICENSE)
-  );
-
 export const assertCanEnableAgentSharding = (
   license?: Pick<ILicense, 'hasAtLeast' | 'isAvailable' | 'isActive'>,
   requestedIsAgentSharding?: boolean,
