@@ -124,7 +124,7 @@ const indexResponseActionHost = ({
   return indexHostsAndAlerts(
     esClient,
     kbnClient,
-    0,
+    `history-log-${randomUUID()}`,
     1,
     1,
     METADATA_DATASTREAM,
@@ -132,7 +132,7 @@ const indexResponseActionHost = ({
     ENDPOINT_EVENTS_INDEX,
     ENDPOINT_ALERTS_INDEX,
     ENDPOINT_DEVICE_INDEX,
-    0,
+    1,
     true,
     {},
     EndpointDocGenerator,
