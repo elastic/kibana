@@ -243,8 +243,8 @@ test.describe(
         page,
         pageObjects,
       }) => {
-        // Use a 640x360 viewport to simulate 400% zoom (WCAG 1.4.10 reflow target).
-        await page.setViewportSize({ width: 640, height: 360 });
+        // 1280x1024 at 400% zoom, the WCAG 1.4.10 reflow reference.
+        await page.setViewportSize({ width: 320, height: 256 });
 
         const app = pageObjects.flyoutSystem;
         const session = app.session(form);
