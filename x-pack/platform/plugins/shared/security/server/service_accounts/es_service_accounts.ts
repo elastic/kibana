@@ -19,18 +19,23 @@ import type { CheckPrivilegesWithRequest } from '@kbn/security-plugin-types-serv
 import { z } from '@kbn/zod';
 
 import { bestEffortUserProfileIdResolver, resolveWorkloadBinder } from './bindings';
+import { ensureClusterPrivilege } from './cluster_privilege';
 import { parseCreateServiceAccountParams } from './create_params';
 import type { ServiceAccountCredentialStore } from './credentials';
-import { ensureManageSecurityPrivilege } from './manage_security_privilege';
-import type { ServiceAccountsBackend } from './types';
+import type { EsServiceAccountPrincipal } from './es_service_account_id';
+import { parseEsServiceAccountId } from './es_service_account_id';
+import type { ListServiceAccountsParams, ServiceAccountsBackend } from './types';
 import type { SecurityLicense } from '../../common';
+import type {
+  ListServiceAccountsResponse,
+  ServiceAccountDirectoryEntry,
+} from '../../common/service_accounts';
 import {
   ES_SERVICE_ACCOUNT_FALLBACK_ROLE,
   ES_SERVICE_ACCOUNT_NAMESPACE,
   ES_SERVICE_ACCOUNT_TOKEN_MAX_LENGTH,
   ES_SERVICE_ACCOUNT_TOKEN_NAME,
-  SERVICE_ACCOUNT_MAX_ROLES,
-  serviceAccountRoleNameSchema,
+  SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE,
   serviceAccountRolesSchema,
 } from '../../common/service_accounts';
 import { getDetailedErrorMessage } from '../errors';
@@ -46,9 +51,14 @@ const userManagedEntrySchema = z.object({ type: z.literal('user_managed') });
  * The rest of what Elasticsearch reports for an account keyed by its `{namespace}/{service}`
  * principal. Parsed separately from the discriminator above, so "this is not Kibana's account"
  * and "Kibana cannot read this account" stay different answers.
+ *
+ * Shape only, matching what {@link list} takes from the query API. The caps Kibana puts on a
+ * create are its own and Elasticsearch enforces none of them, so an account created outside
+ * Kibana may hold more roles, or longer role names, than Kibana would ever have written. Holding
+ * a read to the bounds of a write would let such an account list cleanly and then fail to open.
  */
 const accountEntrySchema = z.object({
-  roles: z.array(serviceAccountRoleNameSchema).max(SERVICE_ACCOUNT_MAX_ROLES),
+  roles: z.array(z.string()),
   enabled: z.boolean(),
 });
 
@@ -58,6 +68,16 @@ const createTokenResponseSchema = z.object({
   }),
 });
 
+/**
+ * One account as the query API reports it. Unlike the keyed GET response, the principal is a
+ * `username` field on each item. The API only ever returns user-managed accounts.
+ */
+interface QueriedServiceAccount {
+  username: string;
+  roles: string[];
+  enabled: boolean;
+}
+
 /** An Elasticsearch user-managed service account, as Elasticsearch reports it. */
 interface ElasticsearchServiceAccount {
   id: string;
@@ -66,6 +86,18 @@ interface ElasticsearchServiceAccount {
   roles: string[];
   enabled: boolean;
 }
+
+/** Narrows an account to the directory entry. */
+const toDirectoryEntry = (
+  { id, name, roles, enabled }: ElasticsearchServiceAccount,
+  assumable: boolean
+): ServiceAccountDirectoryEntry => ({
+  id,
+  name,
+  roles,
+  enabled,
+  assumable,
+});
 
 export interface EsServiceAccountsOptions {
   logger: Logger;
@@ -153,10 +185,11 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
       );
     }
 
-    await ensureManageSecurityPrivilege({
+    await ensureClusterPrivilege({
       request,
       checkPrivilegesWithRequest: this.checkPrivilegesWithRequest,
       logger: this.logger,
+      privilege: 'manage_security',
       action: 'create a service account',
     });
 
@@ -231,9 +264,8 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
    * The roles a new account gets when the caller named none: the creator's own, or the fallback
    * role when the creator reports none, as an API-key authentication does.
    *
-   * The creator's roles are held to the same bounds as an explicit `roles`. Elasticsearch caps
-   * neither the count nor the name length, so without this the account could be written and then
-   * refused by `readAccount`, turning the next create for that name into a 502 rather than a 409.
+   * The creator's roles are held to the same bounds as an explicit `roles`, so that an account
+   * Kibana fills in for is never given something a caller could not have asked for by name.
    */
   private deriveRoles(user: AuthenticatedUser, serviceAccountId: string): string[] {
     if (user.roles.length === 0) {
@@ -255,6 +287,161 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     }
 
     return parsed.data;
+  }
+
+  /**
+   * Lists every user-managed account in the cluster, whichever namespace it lives in, sorted by
+   * principal. The cursor is the principal of the last account Elasticsearch reported for the
+   * page, which `search_after` resumes from — the last one reported, not the last one returned,
+   * so that an account this page skipped is stepped over rather than served again.
+   *
+   * Unlike {@link get}, a stored credential is taken at face value here. Confirming each one the
+   * way {@link isAssumable} does would cost an Elasticsearch round trip per account, up to a
+   * hundred of them on one page, so a listed account that was deleted and recreated outside
+   * Kibana keeps a stale `assumable` until it is opened.
+   */
+  async list(
+    request: KibanaRequest,
+    { limit = SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE, after }: ListServiceAccountsParams = {}
+  ): Promise<ListServiceAccountsResponse> {
+    if (!this.license.isEnabled()) {
+      throw Boom.forbidden(
+        'Cannot list service accounts: security features are disabled in Elasticsearch'
+      );
+    }
+
+    await ensureClusterPrivilege({
+      request,
+      checkPrivilegesWithRequest: this.checkPrivilegesWithRequest,
+      logger: this.logger,
+      privilege: 'read_security',
+      action: 'list service accounts',
+    });
+
+    const esClient = this.clusterClient.asScoped(request).asCurrentUser;
+
+    // One more than the page, so that "is there another page" is answered by the same query
+    // without trusting a total that a concurrent create could shift.
+    const { service_accounts: rawAccounts } = await esClient.transport.request<{
+      service_accounts: QueriedServiceAccount[];
+    }>({
+      method: 'POST',
+      path: '/_security/_query/service',
+      body: {
+        size: limit + 1,
+        sort: ['username'],
+        ...(after !== undefined ? { search_after: [after] } : {}),
+      },
+    });
+
+    // An account whose principal Kibana cannot split is skipped rather than taken as a reason to
+    // refuse the page: an oddity in one account must not make the whole directory unreadable.
+    const accounts = rawAccounts.slice(0, limit).flatMap(({ username, roles, enabled }) => {
+      const principal = parseEsServiceAccountId(username);
+      if (!principal) {
+        this.logger.warn(
+          `Skipping service account [${username}], which Elasticsearch reported with an unrecognized principal`
+        );
+        return [];
+      }
+
+      return [{ id: username, ...principal, roles, enabled }];
+    });
+
+    const credentialled = await this.credentialStore.findExisting(accounts.map(({ id }) => id));
+
+    const serviceAccounts = accounts.map((account) =>
+      toDirectoryEntry(account, credentialled.has(account.id))
+    );
+
+    if (rawAccounts.length <= limit) {
+      return { serviceAccounts };
+    }
+
+    // The cursor comes off the raw page rather than the entries above, so that skipping an entry
+    // cannot rewind paging over everything that followed it.
+    return { serviceAccounts, nextPage: rawAccounts[limit - 1].username };
+  }
+
+  async get(request: KibanaRequest, id: string): Promise<ServiceAccountDirectoryEntry> {
+    if (!this.license.isEnabled()) {
+      throw Boom.forbidden(
+        'Cannot get a service account: security features are disabled in Elasticsearch'
+      );
+    }
+
+    await ensureClusterPrivilege({
+      request,
+      checkPrivilegesWithRequest: this.checkPrivilegesWithRequest,
+      logger: this.logger,
+      privilege: 'read_security',
+      action: 'get a service account',
+    });
+
+    // An id that is not `{namespace}/{service}` names no Elasticsearch account, so it is missing
+    // rather than malformed.
+    const principal = parseEsServiceAccountId(id);
+    if (!principal) {
+      throw Boom.notFound(`Service account [${id}] was not found`);
+    }
+
+    const esClient = this.clusterClient.asScoped(request).asCurrentUser;
+
+    // Built-in accounts resolve to `undefined` here too, so `elastic/kibana` is a 404 rather
+    // than a directory entry: they are not Kibana's to list or bind.
+    const account = await this.readAccount(esClient, principal.namespace, principal.name);
+    if (!account) {
+      throw Boom.notFound(`Service account [${id}] was not found`);
+    }
+
+    const stored = (await this.credentialStore.findExisting([id])).has(id);
+    return toDirectoryEntry(account, await this.isAssumable(esClient, principal, stored));
+  }
+
+  /**
+   * Whether Kibana can act as this account, which on Elasticsearch means holding a token the
+   * account still recognizes.
+   *
+   * A credential document is keyed by principal alone, so it outlives the account it was written
+   * for: delete `namespace/name` through Elasticsearch and recreate it, and Kibana's document is
+   * still there, holding a token that cannot authenticate the new account. Answering `true` off
+   * the document alone would send a caller into an exchange that fails, so the account is asked
+   * whether it still holds the token Kibana mints.
+   *
+   * Two limits worth knowing. An operator who recreates the account and then mints their own
+   * token under Kibana's reserved name passes this check, because the name is all Elasticsearch
+   * exposes. And a check that cannot be completed falls through to the stored document rather
+   * than calling the account unassumable: `read_security` is enough to read an account's tokens,
+   * so this is a transient failure rather than an authorization one, and one call that did not
+   * land is weaker evidence than the record Kibana holds.
+   */
+  private async isAssumable(
+    esClient: ElasticsearchClient,
+    { namespace, name }: EsServiceAccountPrincipal,
+    stored: boolean
+  ): Promise<boolean> {
+    // Ordered so that an account Kibana never created costs no extra round trip.
+    if (!stored) {
+      return false;
+    }
+
+    try {
+      if (await this.hasManagedToken(esClient, namespace, name)) {
+        return true;
+      }
+    } catch (e) {
+      this.logger.debug(
+        `Could not confirm the credential of service account [${namespace}/${name}], so the ` +
+          `stored one was reported as it is: ${getDetailedErrorMessage(e)}`
+      );
+      return true;
+    }
+
+    this.logger.debug(
+      `Service account [${namespace}/${name}] no longer holds a [${ES_SERVICE_ACCOUNT_TOKEN_NAME}] ` +
+        `token, so the credential Kibana stored for it was not reported.`
+    );
+    return false;
   }
 
   // See https://github.com/elastic/kibana/issues/284466.

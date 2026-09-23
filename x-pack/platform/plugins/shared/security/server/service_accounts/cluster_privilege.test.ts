@@ -8,9 +8,9 @@
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
 
-import { ensureManageSecurityPrivilege } from './manage_security_privilege';
+import { ensureClusterPrivilege } from './cluster_privilege';
 
-describe('ensureManageSecurityPrivilege', () => {
+describe('ensureClusterPrivilege', () => {
   let logger: MockedLogger;
   let globally: jest.Mock;
   let checkPrivilegesWithRequest: jest.Mock;
@@ -22,26 +22,40 @@ describe('ensureManageSecurityPrivilege', () => {
   });
 
   const check = (action = 'create a service account') =>
-    ensureManageSecurityPrivilege({
+    ensureClusterPrivilege({
       request: httpServerMock.createKibanaRequest(),
       checkPrivilegesWithRequest,
       logger,
+      privilege: 'manage_security',
       action,
     });
 
-  it('checks the `manage_security` cluster privilege globally, for the given request', async () => {
+  it('checks the given cluster privilege globally, for the given request', async () => {
     const request = httpServerMock.createKibanaRequest();
 
-    await ensureManageSecurityPrivilege({
+    await ensureClusterPrivilege({
       request,
       checkPrivilegesWithRequest,
       logger,
+      privilege: 'manage_security',
       action: 'create a service account',
     });
 
     expect(checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
     expect(globally).toHaveBeenCalledWith({
       elasticsearch: { cluster: ['manage_security'], index: {} },
+    });
+
+    await ensureClusterPrivilege({
+      request,
+      checkPrivilegesWithRequest,
+      logger,
+      privilege: 'read_security',
+      action: 'list service accounts',
+    });
+
+    expect(globally).toHaveBeenLastCalledWith({
+      elasticsearch: { cluster: ['read_security'], index: {} },
     });
   });
 

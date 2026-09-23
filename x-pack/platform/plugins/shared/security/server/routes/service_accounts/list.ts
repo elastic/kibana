@@ -5,32 +5,29 @@
  * 2.0.
  */
 
-import { createServiceAccountBodySchema } from './schemas';
+import { listServiceAccountsQuerySchema } from './schemas';
 import { serviceAccountsUnavailable } from './unavailable';
 import type { RouteDefinitionParams } from '..';
-import { SERVICE_ACCOUNT_CREATE_MAX_BODY_BYTES } from '../../../common/service_accounts';
 import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
-export function defineCreateServiceAccountRoute({
+export function defineListServiceAccountsRoute({
   router,
   getServiceAccountsService,
 }: RouteDefinitionParams) {
-  router.post(
+  router.get(
     {
       path: '/internal/security/service_account',
       security: {
         authz: {
           enabled: false,
           reason:
-            'This route delegates authorization to the service account provider: UIAM via the ' +
-            "forwarded access token, or Elasticsearch via the caller's `manage_security` cluster privilege",
+            'This route delegates authorization to the service accounts backend, which requires the `read_security` cluster privilege',
         },
       },
-      validate: { body: createServiceAccountBodySchema },
+      validate: { query: listServiceAccountsQuerySchema },
       options: {
         access: 'internal',
-        body: { maxBytes: SERVICE_ACCOUNT_CREATE_MAX_BODY_BYTES },
       },
     },
     createLicensedRouteHandler(async (context, request, response) => {
@@ -41,7 +38,7 @@ export function defineCreateServiceAccountRoute({
         }
 
         return response.ok({
-          body: await serviceAccounts.backend.create(request, request.body),
+          body: await serviceAccounts.backend.list(request, request.query),
         });
       } catch (error) {
         return response.customError(wrapIntoCustomErrorResponse(error));

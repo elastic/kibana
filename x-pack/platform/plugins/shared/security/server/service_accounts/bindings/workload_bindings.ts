@@ -22,7 +22,7 @@ import { bestEffortUserProfileIdResolver, resolveWorkloadBinder } from './resolv
 import type { WorkloadBindingStore } from './workload_binding_store';
 import type { AuthenticatedUser, SecurityLicense } from '../../../common';
 import { getDetailedErrorMessage } from '../../errors';
-import { ensureManageSecurityPrivilege } from '../manage_security_privilege';
+import { ensureClusterPrivilege } from '../cluster_privilege';
 import type { ServiceAccountsBackend } from '../types';
 
 /**
@@ -266,7 +266,8 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
   }
 
   private ensureCanManage(request: KibanaRequest, action: string): Promise<void> {
-    return ensureManageSecurityPrivilege({
+    return ensureClusterPrivilege({
+      privilege: 'manage_security',
       request,
       checkPrivilegesWithRequest: this.checkPrivilegesWithRequest,
       logger: this.logger,

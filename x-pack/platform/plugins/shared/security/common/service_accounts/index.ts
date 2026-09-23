@@ -11,6 +11,7 @@ export {
   ES_SERVICE_ACCOUNT_TOKEN_MAX_LENGTH,
   ES_SERVICE_ACCOUNT_TOKEN_NAME,
   SERVICE_ACCOUNT_CREATE_MAX_BODY_BYTES,
+  SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE,
   SERVICE_ACCOUNT_MAX_ROLES,
   SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH,
   SERVICE_ACCOUNT_NAME_MAX_LENGTH,
@@ -24,3 +25,8 @@ export {
   serviceAccountRoleNameSchema,
   serviceAccountRolesSchema,
 } from './schemas';
+export type {
+  ListServiceAccountsResponse,
+  ServiceAccountDirectoryCreator,
+  ServiceAccountDirectoryEntry,
+} from './types';
