@@ -1,5 +1,5 @@
 {
-  "sha1": "7178f90585c0fb8dbcabe3ff4c2042a0ee1af850",
+  "sha1": "e629b2a1145ed2ed9b9df0528cdcb584e64e3372",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -3514,8 +3514,8 @@
       }
     },
     {
-      "id": "72d92ac0c91652a-e6b57e809ab5e8d",
-      "title": "Run rule API run: returns 204 for an enabled rule",
+      "id": "72d92ac0c91652a-d50d1ffe579ba83",
+      "title": "Run rule API run: returns 202 for an enabled rule",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -3553,8 +3553,8 @@
       }
     },
     {
-      "id": "72d92ac0c91652a-68e2933dec8cbd1",
-      "title": "Run rule API authorization: returns 204 for a user with full alerting_v2 privileges",
+      "id": "72d92ac0c91652a-972e116122c690f",
+      "title": "Run rule API authorization: returns 202 for a user with full alerting_v2 privileges",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
