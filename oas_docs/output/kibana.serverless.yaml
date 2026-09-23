@@ -21668,33 +21668,6 @@ paths:
                 required:
                   - ai_indices
           description: The AI Indices available to the caller in the current space.
-        '403':
-          content:
-            application/json:
-              examples:
-                forbiddenExample:
-                  description: The caller lacks Elasticsearch index privileges
-                  value:
-                    error: Forbidden
-                    message: 'security_exception: action [indices:data/read/search] is unauthorized'
-                    statusCode: 403
-              schema:
-                additionalProperties: false
-                description: Generic error response.
-                type: object
-                properties:
-                  error:
-                    description: The HTTP status text.
-                    type: string
-                  message:
-                    description: A human-readable error message.
-                    type: string
-                  statusCode:
-                    description: The HTTP status code.
-                    type: number
-                required:
-                  - message
-          description: Elasticsearch rejected the read; the caller lacks index privileges.
       summary: List AI Indices
       tags:
         - context engine
@@ -21749,7 +21722,7 @@ paths:
                       value: FROM support-cases | LIMIT 100
                   traces:
                     - type: elastic_agent
-                      value: support_agent
+                      value: elastic-ai-agent
             schema:
               additionalProperties: false
               type: object
@@ -21784,13 +21757,13 @@ paths:
                   type: object
                   properties:
                     type:
-                      description: The type of the backing store. `data_stream` for a data stream, or `index` for an index or index pattern.
+                      description: The type of the backing store. `data_stream` for a data stream, or `index` for an index.
                       enum:
                         - data_stream
                         - index
                       type: string
                     value:
-                      description: The data stream or index (e.g. `ai-index-ds-foo`, `ai-index-idx-foo*`) the AI Index is attached to. Must match `type` and start with `ai-index-ds-` (for `data_stream`) or `ai-index-idx-` (for `index`). System indices are not allowed.
+                      description: The data stream or index (e.g. `ai-index-ds-foo`, `ai-index-idx-foo`) the AI Index is attached to. Must name a single data stream or index (no wildcards or comma-separated lists), match `type`, and start with `ai-index-ds-` (for `data_stream`) or `ai-index-idx-` (for `index`). The rest of the value must be a valid AI index id. System indices are not allowed.
                       maxLength: 1024
                       minLength: 1
                       type: string
@@ -22011,7 +21984,7 @@ paths:
                   description: The dest value does not follow the naming convention
                   value:
                     error: Bad Request
-                    message: "dest.value 'support-cases' is not allowed: every expression must start with 'ai-index-ds-'"
+                    message: "dest.value 'support-cases' is not allowed: it must start with 'ai-index-ds-'"
                     statusCode: 400
               schema:
                 additionalProperties: false
@@ -22212,10 +22185,14 @@ paths:
             application/json:
               examples:
                 invalidQueryExample:
-                  description: The ES|QL query could not be parsed
+                  description: The ES|QL query references a column that does not exist
                   value:
                     error: Bad Request
-                    message: "parsing_exception: line 1:1: mismatched input 'SELECT' expecting {'explain', 'from', 'row', 'show'}"
+                    message: |-
+                      verification_exception
+                      	Root causes:
+                      		verification_exception: Found 1 problem
+                      line 1:46: Unknown column [titel], did you mean [title]?
                     statusCode: 400
               schema:
                 additionalProperties: false
@@ -22242,7 +22219,10 @@ paths:
                   description: The caller lacks Elasticsearch index privileges
                   value:
                     error: Forbidden
-                    message: 'security_exception: action [indices:data/read/esql] is unauthorized'
+                    message: |-
+                      security_exception
+                      	Root causes:
+                      		security_exception: action [indices:data/read/esql] is unauthorized for user [jdoe] with effective roles [support_reader], this action is granted by the index privileges [read_cross_cluster,read,all]
                     statusCode: 403
               schema:
                 additionalProperties: false
@@ -22397,7 +22377,7 @@ paths:
                   description: The AI Index is managed by a plugin and cannot be deleted
                   value:
                     error: Conflict
-                    message: AI index 'customer_support' is managed and cannot be modified
+                    message: AI index 'customer_support' is managed and cannot be modified via the API
                     statusCode: 409
               schema:
                 additionalProperties: false
@@ -22475,9 +22455,11 @@ paths:
                       - type: esql
                         value: FROM support-cases | LIMIT 100
                     traces:
-                      - query: FROM traces-* | WHERE agent.id == "support_agent"
+                      - query: |-
+                          FROM traces-agent_builder.otel-default
+                          | WHERE attributes.gen_ai.agent.id IN ("elastic-ai-agent")
                         type: elastic_agent
-                        value: support_agent
+                        value: elastic-ai-agent
               schema:
                 additionalProperties: false
                 type: object
@@ -22782,13 +22764,13 @@ paths:
                   type: object
                   properties:
                     type:
-                      description: The type of the backing store. `data_stream` for a data stream, or `index` for an index or index pattern.
+                      description: The type of the backing store. `data_stream` for a data stream, or `index` for an index.
                       enum:
                         - data_stream
                         - index
                       type: string
                     value:
-                      description: The data stream or index (e.g. `ai-index-ds-foo`, `ai-index-idx-foo*`) the AI Index is attached to. Must match `type` and start with `ai-index-ds-` (for `data_stream`) or `ai-index-idx-` (for `index`). System indices are not allowed.
+                      description: The data stream or index (e.g. `ai-index-ds-foo`, `ai-index-idx-foo`) the AI Index is attached to. Must name a single data stream or index (no wildcards or comma-separated lists), match `type`, and start with `ai-index-ds-` (for `data_stream`) or `ai-index-idx-` (for `index`). The rest of the value must be a valid AI index id. System indices are not allowed.
                       maxLength: 1024
                       minLength: 1
                       type: string
@@ -23026,7 +23008,7 @@ paths:
                   description: The dest value does not follow the naming convention
                   value:
                     error: Bad Request
-                    message: "dest.value 'support-cases' is not allowed: every expression must start with 'ai-index-ds-'"
+                    message: "dest.value 'support-cases' is not allowed: it must start with 'ai-index-ds-'"
                     statusCode: 400
               schema:
                 additionalProperties: false
@@ -23053,7 +23035,7 @@ paths:
                   description: The AI Index is managed by a plugin and cannot be replaced
                   value:
                     error: Conflict
-                    message: AI index 'customer_support' is managed and cannot be modified
+                    message: AI index 'customer_support' is managed and cannot be modified via the API
                     statusCode: 409
               schema:
                 additionalProperties: false
@@ -23130,16 +23112,58 @@ paths:
                 describeAiIndexResponseExample:
                   description: Example response with a context block for an agent
                   value:
-                    response: |
-                      AI Index: customer_support
+                    response: |-
+                      AI index: customer_support
                       Knowledge about customer support cases.
+                      Query with ES|QL against: ai-index-ds-customer-support
 
-                      Query target: FROM ai-index-ds-customer-support
+                      Fields
+                      @timestamp: date, searchable, aggregatable
+                      content: text, searchable
+                      content.semantic: semantic_text, searchable
+                      description: text, searchable
+                      description.semantic: semantic_text, searchable
+                      tags: keyword, searchable, aggregatable
+                      title: text, searchable
+                      title.semantic: semantic_text, searchable
+                      type: keyword, searchable, aggregatable
 
-                      Fields: title (keyword), content (semantic_text), type (keyword), tags (keyword)
+                      Semantic fields
+                      content.semantic
+                      description.semantic
+                      title.semantic
 
-                      Example queries:
-                        FROM ai-index-ds-customer-support | WHERE type == "faq" | LIMIT 10
+                      Knowledge item types
+                      "faq": 12
+                      "runbook": 4
+
+                      Tags
+                      "billing": 7
+                      "password": 5
+
+                      Example queries (adapt field names for non-canonical indices)
+
+                      Full text search, lexical and semantic fused together (?query)
+                      FROM ai-index-ds-customer-support METADATA _id, _index, _score
+                      | FORK
+                          ( WHERE MATCH(title, ?query) OR MATCH(description, ?query) OR MATCH(content, ?query) | SORT _score DESC | LIMIT 20 )
+                          ( WHERE MATCH(title.semantic, ?query) OR MATCH(description.semantic, ?query) OR MATCH(content.semantic, ?query) | SORT _score DESC | LIMIT 20 )
+                      | FUSE
+                      | SORT _score DESC, _id ASC
+                      | KEEP title, description, content, type, tags
+                      | LIMIT 5
+
+                      Filter by knowledge item type and tag (?type, ?tag; tags is multi-valued, so MATCH)
+                      FROM ai-index-ds-customer-support
+                      | WHERE type == ?type AND MATCH(tags, ?tag)
+                      | KEEP title, description, content, type, tags
+                      | LIMIT 20
+
+                      Count by type
+                      FROM ai-index-ds-customer-support
+                      | STATS count = COUNT(*) BY type
+                      | SORT count DESC
+                      | LIMIT 20
               schema:
                 additionalProperties: false
                 type: object
@@ -23155,10 +23179,10 @@ paths:
             application/json:
               examples:
                 tooLargeExample:
-                  description: The description response exceeded the size limit
+                  description: The field metadata for the backing indices exceeded the size limit
                   value:
                     error: Bad Request
-                    message: Describe response exceeded the maximum size of 1048576 bytes
+                    message: Field metadata for the AI index exceeded the maximum allowed size of 20MB. Point the AI index at fewer or smaller indices.
                     statusCode: 400
               schema:
                 additionalProperties: false
@@ -23185,7 +23209,10 @@ paths:
                   description: The caller lacks Elasticsearch index privileges
                   value:
                     error: Forbidden
-                    message: 'security_exception: action [indices:admin/mappings/fields/get] is unauthorized'
+                    message: |-
+                      security_exception
+                      	Root causes:
+                      		security_exception: action [indices:admin/mappings/get] is unauthorized for user [jdoe] with effective roles [support_reader] on indices [ai-index-ds-customer-support], this action is granted by the index privileges [view_index_metadata,manage,all]
                     statusCode: 403
               schema:
                 additionalProperties: false
