@@ -58,15 +58,14 @@ export function EsqlNotificationPopover({ api }: { api: EsqlNotificationActionAp
       anchorPosition="upCenter"
       aria-label={esqlLabel}
     >
-      <div
+      <EuiPopoverTitle>{esqlLabel}</EuiPopoverTitle>
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="s"
         css={css`
           min-width: 300px;
-          display: flex;
-          flex-direction: column;
-          gap: ${euiThemeVars.euiSizeS};
         `}
       >
-        <EuiFormLabel>{esqlLabel}</EuiFormLabel>
         {esqlQueries.map((query, index) => (
           <EuiCodeBlock
             key={index}
@@ -78,7 +77,7 @@ export function EsqlNotificationPopover({ api }: { api: EsqlNotificationActionAp
             {query.esql}
           </EuiCodeBlock>
         ))}
-      </div>
+      </EuiFlexGroup>
     </EuiPopover>
   );
 }
