@@ -27,37 +27,40 @@ const REJECTED_DOCUMENT = {
 
 const buildBulkResponse = (
   count: number,
-  failures: Array<{ id: string; reason: string }> = []
+  failures: Array<{ id: string; reason: string }> = [],
+  opKey: 'index' | 'create' = 'index'
 ) => ({
   errors: failures.length > 0,
   items: Array.from({ length: count }, (_, position) =>
     position < failures.length
       ? {
-          index: {
+          [opKey]: {
             _id: failures[position].id,
             status: 400,
             error: { type: 'mapper_parsing_exception', reason: failures[position].reason },
           },
         }
-      : { index: { _id: `doc-${position}`, status: 201 } }
+      : { [opKey]: { _id: `doc-${position}`, status: 201 } }
   ),
   took: 1,
   ingest_took: 0,
 });
 
 /**
- * The seeding call issues two bulk requests — alerts first, then raw events —
- * so each test rejects exactly one of them.
+ * The seeding call issues two bulk requests — alerts (`index` op) first, then
+ * raw events (`create` op, data streams reject `index`) — so each test
+ * rejects exactly one of them, using that call's actual op key.
  */
 const buildBulk = (rejectedCall: 1 | 2 | undefined) => {
   let call = 0;
   return jest.fn().mockImplementation(({ operations }: { operations: unknown[] }) => {
     call += 1;
     const count = operations.length / 2;
+    const opKey = call === 2 ? 'create' : 'index';
     return Promise.resolve(
       call === rejectedCall
-        ? buildBulkResponse(count, [REJECTED_DOCUMENT])
-        : buildBulkResponse(count)
+        ? buildBulkResponse(count, [REJECTED_DOCUMENT], opKey)
+        : buildBulkResponse(count, [], opKey)
     );
   });
 };
@@ -162,14 +165,19 @@ const buildStoreClient = () => {
     bulk: jest.fn(async ({ operations }: { operations: unknown[] }) => {
       const items = [];
       for (let position = 0; position < operations.length; position += 2) {
-        const action = operations[position] as { index: { _index: string; _id: string } };
+        const action = operations[position] as {
+          index?: { _index: string; _id: string };
+          create?: { _index: string; _id: string };
+        };
+        const target = action.index ?? action.create;
+        const opKey = action.index !== undefined ? 'index' : 'create';
         const source = operations[position + 1] as Record<string, unknown>;
-        documents.set(`${action.index._index}\u0000${action.index._id}`, {
-          index: action.index._index,
-          id: action.index._id,
+        documents.set(`${target!._index}\u0000${target!._id}`, {
+          index: target!._index,
+          id: target!._id,
           source,
         });
-        items.push({ index: { _id: action.index._id, status: 201 } });
+        items.push({ [opKey]: { _id: target!._id, status: 201 } });
       }
       return { errors: false, items, took: 1 };
     }),
