@@ -673,6 +673,8 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
         /^x-pack\/solutions\/security\/plugins\/security_solution\/test\/scout_edr_real_fleet/,
         /^src\/platform\/packages\/shared\/kbn-scout\/src\/servers\/configs\/config_sets\/edr_real_fleet/,
         /^\.buildkite\/pipelines\/pull_request\/security_solution\/scout_edr_real_fleet\.yml/,
+        /^\.buildkite\/pipelines\/security_solution\/scout_edr_real_fleet_weekday\.yml/,
+        /^\.buildkite\/pipeline-resource-definitions\/kibana-scout-edr-real-fleet-weekday\.yml/,
         /^\.buildkite\/scripts\/steps\/test\/scout_edr_real_fleet\.sh/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:scout-edr-real-fleet') ||
