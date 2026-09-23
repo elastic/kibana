@@ -2962,6 +2962,15 @@ importers:
       '@kbn/projects-solutions-groups':
         specifier: workspace:*
         version: link:src/platform/packages/private/kbn-projects-solutions-groups
+      '@kbn/proposals-common':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/kbn-proposals-common
+      '@kbn/proposals-plugin':
+        specifier: workspace:*
+        version: link:x-pack/platform/plugins/shared/proposals
+      '@kbn/proposals-ui':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/kbn-proposals-ui
       '@kbn/query-activity-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/query_activity
@@ -9045,6 +9054,10 @@ importers:
 
   x-pack/platform/packages/shared/kbn-profiler-cli: {}
 
+  x-pack/platform/packages/shared/kbn-proposals-common: {}
+
+  x-pack/platform/packages/shared/kbn-proposals-ui: {}
+
   x-pack/platform/packages/shared/kbn-sample-parser: {}
 
   x-pack/platform/packages/shared/kbn-search-index-documents: {}
@@ -9374,6 +9387,8 @@ importers:
   x-pack/platform/plugins/shared/osquery: {}
 
   x-pack/platform/plugins/shared/osquery/cypress: {}
+
+  x-pack/platform/plugins/shared/proposals: {}
 
   x-pack/platform/plugins/shared/query_activity: {}
 
