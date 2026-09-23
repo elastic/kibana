@@ -235,9 +235,12 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     // ECF-only), stale MI policies need cleanup. handleDeploy detects live-stale entries and runs
     // cleanup even when no new MI targets exist. onContinue is a no-op here so it won't navigate —
     // cleanup completes before the rest of handleNext continues.
+    // !isAgentBased: agent-based policyIdsByInstance holds package policy IDs, not MI policies —
+    // calling the MI deploy in agent-based mode would POST to /managed_integrations incorrectly.
     const hasStaleMiPolicies =
-      Object.keys(detectAndReviewStep.policyIdsByInstance ?? {}).length > 0 ||
-      Object.keys(detectAndReviewStep.pendingCleanupPolicyIds ?? {}).length > 0;
+      !isAgentBased &&
+      (Object.keys(detectAndReviewStep.policyIdsByInstance ?? {}).length > 0 ||
+        Object.keys(detectAndReviewStep.pendingCleanupPolicyIds ?? {}).length > 0);
     if (hasStaleMiPolicies && miServiceIds.length === 0) {
       // Lock the Next button while cleanup runs — showMiSection is false here so isNextDisabled
       // does not consume the MI isDeploying state, leaving Next clickable without this guard.
