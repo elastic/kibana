@@ -108,7 +108,10 @@ export {
   mapPackageReleaseToIntegrationCardRelease,
 } from './package_prerelease';
 
-export { getAllowedOutputTypesForAgentPolicy } from './output_helpers';
+export {
+  getAllowedOutputTypesForAgentPolicy,
+  getAllowedOutputTypesForMonitoring,
+} from './output_helpers';
 export { agentStatusesToSummary } from './agent_statuses_to_summary';
 
 export {
