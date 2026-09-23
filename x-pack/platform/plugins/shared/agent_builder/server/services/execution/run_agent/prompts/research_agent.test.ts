@@ -212,8 +212,10 @@ describe('getResearchAgentPrompt', () => {
     );
     const system = asText(messages[0]);
 
-    expect(system).toContain('`elastic` (FROM sml-main)');
-    expect(system).toContain('`my-custom` (FROM ai-index-idx-custom) — Support tickets');
+    expect(system).toContain('Registry ID: `elastic`; ES|QL target: `sml-main`');
+    expect(system).toContain(
+      'Registry ID: `my-custom`; ES|QL target: `ai-index-idx-custom` — Support tickets'
+    );
   });
 
   it('includes the static attachment tools guidance but no dynamic (conversation-specific) attachment content', async () => {
