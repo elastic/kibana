@@ -224,6 +224,34 @@ describe('deleteWorkflows', () => {
       );
     });
 
+    it('deletes workflows with running executions when orphan cleanup requests it', async () => {
+      const { client, storage } = makeStorageClient([
+        { _id: 'wf-1', _source: makeWorkflowSource() },
+        { _id: 'wf-2', _source: makeWorkflowSource() },
+      ]);
+      const { workflowExecutionsDataClient, stepExecutionsDataClient } = makeExecutionsDataAccess();
+      const getWorkflowExecutions = jest.fn().mockResolvedValue({ total: 1, results: [{}] });
+
+      const result = await deleteWorkflows({
+        ids: ['wf-1', 'wf-2'],
+        spaceId: 'default',
+        force: true,
+        deleteRunning: true,
+        storage,
+        workflowExecutionsDataClient,
+        stepExecutionsDataClient,
+        taskScheduler: null,
+        logger,
+        getWorkflowExecutions,
+      });
+
+      expect(result.deleted).toBe(2);
+      expect(result.successfulIds).toEqual(['wf-1', 'wf-2']);
+      expect(getWorkflowExecutions).not.toHaveBeenCalled();
+      expect(client.delete).toHaveBeenCalledWith({ id: 'wf-1' });
+      expect(client.delete).toHaveBeenCalledWith({ id: 'wf-2' });
+    });
+
     it('throws when workflows have running executions', async () => {
       const { client, storage } = makeStorageClient([
         { _id: 'wf-1', _source: makeWorkflowSource() },

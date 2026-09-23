@@ -153,6 +153,7 @@ const hardDeleteWorkflows = async (
       params: SearchWorkflowExecutionsParams,
       sp: string
     ) => Promise<WorkflowExecutionListDto>;
+    deleteRunning?: boolean;
   }
 ): Promise<DeleteWorkflowsResponse> => {
   const {
@@ -161,34 +162,37 @@ const hardDeleteWorkflows = async (
     taskScheduler,
     logger,
     getWorkflowExecutions,
+    deleteRunning = false,
   } = deps;
   const foundIds = hits.map((hit) => hit._id).filter(Boolean) as string[];
 
   const disabledIds = await disableWorkflowsForDeletion(hits, client);
 
-  let executionChecks: Array<{ id: string; hasRunning: boolean }>;
-  try {
-    executionChecks = await Promise.all(
-      foundIds.map(async (id) => {
-        const executions = await getWorkflowExecutions(
-          { workflowId: id, statuses: [...NonTerminalExecutionStatuses], size: 1 },
-          spaceId
-        );
-        return { id, hasRunning: executions.total > 0 };
-      })
-    );
-  } catch (error) {
-    await restoreDisabledWorkflows(hits, disabledIds, client, logger);
-    throw error;
-  }
+  if (!deleteRunning) {
+    let executionChecks: Array<{ id: string; hasRunning: boolean }>;
+    try {
+      executionChecks = await Promise.all(
+        foundIds.map(async (id) => {
+          const executions = await getWorkflowExecutions(
+            { workflowId: id, statuses: [...NonTerminalExecutionStatuses], size: 1 },
+            spaceId
+          );
+          return { id, hasRunning: executions.total > 0 };
+        })
+      );
+    } catch (error) {
+      await restoreDisabledWorkflows(hits, disabledIds, client, logger);
+      throw error;
+    }
 
-  const runningIds = executionChecks.filter((c) => c.hasRunning).map((c) => c.id);
-  if (runningIds.length > 0) {
-    await restoreDisabledWorkflows(hits, disabledIds, client, logger);
-    throw new WorkflowConflictError(
-      `Cannot force-delete workflows with running executions: [${runningIds.join(', ')}]`,
-      runningIds[0]
-    );
+    const runningIds = executionChecks.filter((c) => c.hasRunning).map((c) => c.id);
+    if (runningIds.length > 0) {
+      await restoreDisabledWorkflows(hits, disabledIds, client, logger);
+      throw new WorkflowConflictError(
+        `Cannot force-delete workflows with running executions: [${runningIds.join(', ')}]`,
+        runningIds[0]
+      );
+    }
   }
 
   const successfulIds: string[] = [];
@@ -287,6 +291,7 @@ export const deleteWorkflows = async (params: {
   ids: string[];
   spaceId: string;
   force: boolean;
+  deleteRunning?: boolean;
   storage: WorkflowStorage;
   workflowExecutionsDataClient: WorkflowExecutionsDataClient;
   stepExecutionsDataClient: StepExecutionsDataClient;
@@ -301,6 +306,7 @@ export const deleteWorkflows = async (params: {
     ids,
     spaceId,
     force,
+    deleteRunning,
     storage,
     workflowExecutionsDataClient,
     stepExecutionsDataClient,
@@ -330,6 +336,7 @@ export const deleteWorkflows = async (params: {
       taskScheduler,
       logger,
       getWorkflowExecutions,
+      deleteRunning,
     });
   }
 
