@@ -87,7 +87,7 @@ export function registerTrackUserActivityRoute(router: IRouter<RequestHandlerCon
         } dashboard "${req.body.title}" (id: ${req.params.id}).`,
         event: {
           action: req.params.type === 'view' ? 'dashboard_view' : 'dashboard_refresh',
-          type: 'access',
+          type: ['access'],
           start: new Date(req.body.start).toISOString(),
           end: new Date(req.body.end).toISOString(),
           duration: (req.body.end - req.body.start) * 1000000, // convert to nanoseconds

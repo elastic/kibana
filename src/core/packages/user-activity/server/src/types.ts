@@ -78,9 +78,9 @@ export interface UserActivityError {
 export interface UserActivityEvent {
   /** Descriptive action name, e.g., 'view_dashboard', 'edit_case', 'save_search' */
   action: UserActivityActionId;
-  /** Event type {@link UserActivityEventType}. */
-  type: UserActivityEventType;
-  /** ECS event outcome; use with {@link UserActivityEventOutcome}. */
+  /** Event types {@link UserActivityEventType}. ECS defines `event.type` as an array. */
+  type: readonly UserActivityEventType[];
+  /** ECS event outcome; use with {@link UserActivityEventOutcome}. Defaults to `'unknown'` when omitted. */
   outcome?: UserActivityEventOutcome;
   /** ISO8601 timestamp of the event start time. */
   start?: string;
@@ -117,7 +117,7 @@ export interface TrackUserActionParams {
  * @example
  * ```ts
  * core.userActivity.trackUserAction({
- *   event: { action: 'edit_dashboard', type: 'change' },
+ *   event: { action: 'edit_dashboard', type: ['change'] },
  *   object: { id: 'dash-123', name: 'My Dashboard', type: 'dashboard', tags: [] },
  * });
  * ```

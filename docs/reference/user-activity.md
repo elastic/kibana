@@ -34,7 +34,7 @@ user_activity:
 - `user_activity.appenders`: Logging appenders used by the service. This uses the same appender schema as Kibana logging. For more details, refer to [Logging settings](/reference/configuration-reference/logging-settings.md). By default, it uses a JSON console appender.
 - `user_activity.filters`: Optional list of filter rules applied to `event.action`.
 
-When enabled, events are logged under the logger context `user_activity.event` and include the fields `{ message, event, object, metadata, error, user, session, ...}`.
+When enabled, events are logged under the logger context `user_activity.event` and include the fields `{ message, event, object, metadata, error, user, kibana.session.id, kibana.space.id, ...}`.
 
 ### Filters
 
@@ -60,11 +60,11 @@ All dashboard actions include the [common log fields](#logs-schema) and populate
 
 ### Dashboard view
 
-`dashboard_view` sets `event.type` to `access`. `event.start` and `event.end` are ISO8601 timestamps, and `event.duration`, measured in nanoseconds, records each continuous period that the dashboard is visible. A period ends when the user navigates away, closes or reloads the tab, or switches browser tabs.
+`dashboard_view` sets `event.type` to `["access"]`. `event.start` and `event.end` are ISO8601 timestamps, and `event.duration`, measured in nanoseconds, records each continuous period that the dashboard is visible. A period ends when the user navigates away, closes or reloads the tab, or switches browser tabs.
 
 ### Dashboard refresh
 
-`dashboard_refresh` sets `event.type` to `access`. `event.start` and `event.end` are ISO8601 timestamps, and `event.duration` is measured in nanoseconds. `event.outcome` is `success` when no panels return blocking errors and `failure` otherwise.
+`dashboard_refresh` sets `event.type` to `["access"]`. `event.start` and `event.end` are ISO8601 timestamps, and `event.duration` is measured in nanoseconds. `event.outcome` is `success` when no panels return blocking errors and `failure` otherwise.
 
 Each automatic refresh produces a separate `dashboard_refresh` event. Short refresh intervals can therefore increase the volume of user activity logs.
 
@@ -110,8 +110,8 @@ User activity events are written as JSON log entries. When using the JSON loggin
 | **Field** | **Description** |
 | --- | --- |
 | `event.action` | Human readable standardized description of the action performed. Refer to [Available actions](#available-actions) for a list of possible values. |
-| `event.type` | Human readable standardized categorization of actions performed. |
-| `event.outcome` | (Optional) Denotes whether the event represents a success or a failure from the perspective of the entity that produced the event: `success`, `failure`, or `unknown`. |
+| `event.type` | Array of human readable standardized categorizations of the action performed. |
+| `event.outcome` | Denotes whether the event represents a success or a failure from the perspective of the entity that produced the event: `success`, `failure`, or `unknown`. Defaults to `unknown` when the producer does not report an outcome. |
 | `event.start` | (Optional) ISO8601 timestamp of the event start time. |
 | `event.end` | (Optional) ISO8601 timestamp of the event end time. |
 | `event.duration` | (Optional) Duration (in ns) between the event start and end timestamps. |
@@ -126,7 +126,7 @@ User activity events are written as JSON log entries. When using the JSON loggin
 
 | **Field** | **Description** |
 | --- | --- |
-| `session.id` | Redacted id of the session. |
+| `kibana.session.id` | Redacted id of the session. |
 
 ### Space fields
 
@@ -144,7 +144,7 @@ User activity events are written as JSON log entries. When using the JSON loggin
 | `user.roles` | Kibana roles of the user at the time of the action. |
 
 :::::{note}
-Some actions, such as `log_in_user` and `log_out_user`, are recorded on unauthenticated requests. For these events, the `user.*` and `session.id` fields may not be populated. The identity of the user can still be determined from the `object.*` fields.
+Some actions, such as `log_in_user` and `log_out_user`, are recorded on unauthenticated requests. For these events, the `user.*` and `kibana.session.id` fields may not be populated. The identity of the user can still be determined from the `object.*` fields.
 :::::
 
 ### Client and HTTP fields
@@ -153,6 +153,8 @@ Some actions, such as `log_in_user` and `log_out_user`, are recorded on unauthen
 | --- | --- |
 | `client.ip` | IP address of the client that performed the action. |
 | `client.address` | Copy of `client.ip` for OpenTelemetry compliance. |
+| `source.ip` | Copy of `client.ip` (ECS defines `client` as a role-annotated copy of `source`). |
+| `source.address` | Copy of `client.ip` (ECS defines `client` as a role-annotated copy of `source`). |
 | `http.request.referrer` | Referrer associated with the request that triggered the action. |
 
 ### Object fields
