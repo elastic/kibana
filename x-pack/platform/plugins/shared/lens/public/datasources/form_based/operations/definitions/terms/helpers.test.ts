@@ -26,6 +26,7 @@ import {
   isCustomLastValueOrderAgg,
   getOrderAggLastValueSortFieldStatus,
   getOrderAggErrorMessages,
+  type TermsColumnWithLastValueOrderAgg,
 } from './helpers';
 import { MULTI_KEY_VISUAL_SEPARATOR } from './constants';
 import {
@@ -104,7 +105,7 @@ function getCountOperationColumn(
 
 function getTermsWithLastValueOrderAgg(
   orderAggParams?: Partial<LastValueIndexPatternColumn['params']>
-): TermsIndexPatternColumn {
+): TermsColumnWithLastValueOrderAgg {
   return {
     label: 'Top values of source',
     dataType: 'string',
@@ -121,7 +122,7 @@ function getTermsWithLastValueOrderAgg(
         isBucketed: false,
         operationType: 'last_value',
         sourceField: 'bytes',
-        ...(orderAggParams ? { params: orderAggParams } : {}),
+        params: orderAggParams ?? {},
       },
     },
   };
@@ -760,30 +761,16 @@ describe('isCustomLastValueOrderAgg()', () => {
 });
 
 describe('getOrderAggLastValueSortFieldStatus()', () => {
-  it('should return "ok" when the column is not ranked by a custom last_value order-agg', () => {
-    expect(getOrderAggLastValueSortFieldStatus(getLayer().columns.col1, indexPattern)).toEqual({
-      status: 'ok',
-    });
-  });
-
   it('should return "ok" when the sortField is a valid date field', () => {
-    const layer = getLayer(getTermsWithLastValueOrderAgg({ sortField: 'timestamp' }));
-    expect(getOrderAggLastValueSortFieldStatus(layer.columns.col1, indexPattern)).toEqual({
+    const column = getTermsWithLastValueOrderAgg({ sortField: 'timestamp' });
+    expect(getOrderAggLastValueSortFieldStatus(column, indexPattern)).toEqual({
       status: 'ok',
     });
   });
 
   it('should return "missing-with-default" with the default date field when sortField is missing', () => {
-    const layer = getLayer(getTermsWithLastValueOrderAgg({ sortField: undefined }));
-    expect(getOrderAggLastValueSortFieldStatus(layer.columns.col1, indexPattern)).toEqual({
-      status: 'missing-with-default',
-      defaultField: 'timestamp',
-    });
-  });
-
-  it('should return "missing-with-default" when the orderAgg has no params object at all', () => {
-    const layer = getLayer(getTermsWithLastValueOrderAgg());
-    expect(getOrderAggLastValueSortFieldStatus(layer.columns.col1, indexPattern)).toEqual({
+    const column = getTermsWithLastValueOrderAgg({ sortField: undefined });
+    expect(getOrderAggLastValueSortFieldStatus(column, indexPattern)).toEqual({
       status: 'missing-with-default',
       defaultField: 'timestamp',
     });
@@ -791,24 +778,22 @@ describe('getOrderAggLastValueSortFieldStatus()', () => {
 
   it('should return "missing-no-default" when sortField is missing and the data view has no date field', () => {
     const indexPatternWithoutDates = createMockedIndexPatternWithoutType('date');
-    const layer = getLayer(getTermsWithLastValueOrderAgg({ sortField: undefined }));
-    expect(
-      getOrderAggLastValueSortFieldStatus(layer.columns.col1, indexPatternWithoutDates)
-    ).toEqual({
+    const column = getTermsWithLastValueOrderAgg({ sortField: undefined });
+    expect(getOrderAggLastValueSortFieldStatus(column, indexPatternWithoutDates)).toEqual({
       status: 'missing-no-default',
     });
   });
 
   it('should return "not-found" when the sortField does not exist in the data view', () => {
-    const layer = getLayer(getTermsWithLastValueOrderAgg({ sortField: 'nonexistent' }));
-    expect(getOrderAggLastValueSortFieldStatus(layer.columns.col1, indexPattern)).toEqual({
+    const column = getTermsWithLastValueOrderAgg({ sortField: 'nonexistent' });
+    expect(getOrderAggLastValueSortFieldStatus(column, indexPattern)).toEqual({
       status: 'not-found',
     });
   });
 
   it('should return "wrong-type" when the sortField exists but is not a date field', () => {
-    const layer = getLayer(getTermsWithLastValueOrderAgg({ sortField: 'bytes' }));
-    expect(getOrderAggLastValueSortFieldStatus(layer.columns.col1, indexPattern)).toEqual({
+    const column = getTermsWithLastValueOrderAgg({ sortField: 'bytes' });
+    expect(getOrderAggLastValueSortFieldStatus(column, indexPattern)).toEqual({
       status: 'wrong-type',
     });
   });

@@ -293,14 +293,10 @@ export type OrderAggLastValueSortFieldStatus =
  * render auto-fill, editor warnings, and blocking errors all reason about the same field.
  */
 export function getOrderAggLastValueSortFieldStatus(
-  column: GenericIndexPatternColumn | undefined,
+  column: TermsColumnWithLastValueOrderAgg,
   indexPattern: IndexPattern
 ): OrderAggLastValueSortFieldStatus {
-  if (!isCustomLastValueOrderAgg(column)) {
-    return { status: 'ok' };
-  }
-
-  const { sortField } = column.params.orderAgg.params ?? {};
+  const { sortField } = column.params.orderAgg.params;
 
   if (!sortField) {
     const defaultField = getDefaultDateFieldName(indexPattern);
@@ -335,7 +331,7 @@ export function getOrderAggErrorMessages(
   }
 
   const status = getOrderAggLastValueSortFieldStatus(column, indexPattern);
-  const sortField = column.params.orderAgg.params?.sortField ?? '';
+  const sortField = column.params.orderAgg.params.sortField ?? '';
 
   switch (status.status) {
     case 'missing-no-default':
