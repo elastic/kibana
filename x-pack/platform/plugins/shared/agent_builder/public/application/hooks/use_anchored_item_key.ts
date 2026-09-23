@@ -6,25 +6,23 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import { useIsMutating } from '@kbn/react-query';
 import { useTimelineItems } from '../components/conversations/timeline/use_timeline_items';
 import { useConversationId } from '../context/conversation/use_conversation_id';
-import { mutationKeys } from '../mutation_keys';
 import { useCurrentConversationStreamType } from './use_is_current_conversation_streaming';
 
 /**
  * Key of the timeline item the user's latest send appended: the item that landed at the position
- * recorded when the conversation became active (a stream started, or a message post began). Kept
- * after the stream ends so the space below it does not collapse; replaced on the next send.
+ * recorded when this conversation's stream started. Kept after the stream ends so the space below
+ * it does not collapse; replaced on the next send. A post without a run (trigger mode "never")
+ * starts no stream and does not anchor: nothing follows the message, so there is nothing to make
+ * room for.
  */
 export const useAnchoredItemKey = (): string | undefined => {
   const conversationId = useConversationId();
   const items = useTimelineItems();
   const streamType = useCurrentConversationStreamType();
-  const isPosting =
-    useIsMutating({ mutationKey: mutationKeys.sendUserMessage(conversationId) }) > 0;
   const isResuming = streamType === 'resume';
-  const isActive = streamType !== undefined || isPosting;
+  const isActive = streamType !== undefined;
   const observed = useRef<{ conversationId?: string; active: boolean }>({ active: false });
   const lastKey = useRef<string>();
   const [anchor, setAnchor] = useState<{ index: number }>();

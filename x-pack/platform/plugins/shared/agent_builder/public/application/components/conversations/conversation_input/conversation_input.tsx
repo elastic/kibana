@@ -136,7 +136,8 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
   const isAgentIdValid = validateAgentId(agentId);
 
   const isAgentDeleted = !isAgentIdValid && isFetched && Boolean(agentId);
-  const isInputDisabled = isAgentDeleted || isAwaitingPrompt || isCreatingConversation;
+  const isInputDisabled =
+    isAgentDeleted || isAwaitingPrompt || isCreatingConversation || isSendingUserMessage;
   const isSubmitDisabled =
     messageEditorController.isEmpty ||
     isResponseLoading ||
@@ -278,7 +279,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
         <InputActions
           onSubmit={handleSubmit}
           isSubmitDisabled={isSubmitDisabled}
-          isSubmitting={isCreatingConversation}
+          isSubmitting={isCreatingConversation || isSendingUserMessage}
           showTriggerModeToggle={!isNewConversation && isExperimentalEnabled}
           triggerMode={triggerMode}
           onTriggerModeChange={setTriggerMode}
