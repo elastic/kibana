@@ -394,7 +394,7 @@ src/platform/packages/private/kbn-config-mocks @elastic/kibana-core
 src/platform/packages/private/kbn-controls-renderer @elastic/kibana-dashboards
 src/platform/packages/private/kbn-cps-common @elastic/appex-sharedux
 src/platform/packages/private/kbn-data-streams @elastic/kibana-core
-src/platform/packages/private/kbn-discover-session-constants @elastic/kibana-data-discovery
+src/platform/packages/private/kbn-discover-session-constants @elastic/kibana-discover
 src/platform/packages/private/kbn-dot-text @elastic/kibana-operations
 src/platform/packages/private/kbn-dot-text-loader @elastic/kibana-operations
 src/platform/packages/private/kbn-esql-editor @elastic/kibana-discover
@@ -1625,7 +1625,7 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 /x-pack/platform/test/serverless/functional/test_suites/management/data_views @elastic/kibana-discover
 
 # Discover session metrics tab schema
-/src/platform/packages/shared/as-code/discover-schema/src/schemas/metrics_tab.ts @elastic/kibana-data-discovery @elastic/obs-signals-metrics-team
+/src/platform/packages/shared/as-code/discover-schema/src/schemas/metrics_tab.ts @elastic/kibana-discover @elastic/obs-signals-metrics-team
 
 # Discover Profile Providers
 # TODO: this deprecation_logs folder should be owned by kibana management team after 9.0
