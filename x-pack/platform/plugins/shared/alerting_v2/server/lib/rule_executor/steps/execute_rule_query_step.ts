@@ -31,25 +31,19 @@ type EsqlRowBatch = Record<string, unknown>[];
 export class ExecuteRuleQueryStep implements RuleExecutionStep {
   public readonly name = 'execute_rule_query';
 
-  private readonly queryRowLimit: number;
+  private readonly pluginConfig: PluginConfig;
   private readonly maxQueryResponseSize: number;
 
   constructor(
     @inject(QueryServiceScopedSpaceRoutingToken)
     private readonly queryService: QueryServiceContract,
     @inject(EsqlResponseFormatServiceToken)
-    esqlResponseFormatService: EsqlResponseFormatServiceContract,
+    private readonly esqlResponseFormatService: EsqlResponseFormatServiceContract,
     @inject(PluginInitializer('config'))
     pluginConfigAccessor: PluginInitializerContext<PluginConfig>['config']
   ) {
-    const config = pluginConfigAccessor.get<PluginConfig>();
-    // The step is request-scoped, so the row limit is pinned to the format in
-    // effect when this execution started; `QueryService` reads the flag again
-    // when the query runs. A rollout landing inside that window can only leave
-    // the `LIMIT` stricter or looser than the transport's own cap, never
-    // unbounded — `rules.run.query.maxResponseSize` still guards the JSON path.
-    this.queryRowLimit = getQueryRowLimit(config, esqlResponseFormatService.get());
-    this.maxQueryResponseSize = config.rules.run.query.maxResponseSize.getValueInBytes();
+    this.pluginConfig = pluginConfigAccessor.get<PluginConfig>();
+    this.maxQueryResponseSize = this.pluginConfig.rules.run.query.maxResponseSize.getValueInBytes();
   }
 
   public executeStream(streamState: PipelineStateStream): PipelineStateStream {
@@ -69,7 +63,11 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
         lookbackWindow,
       });
 
-      const boundedQuery = appendLimitToQuery(effectiveQuery, step.queryRowLimit);
+      // Snapshot once so the LIMIT appended to the query and the transport
+      // chosen by QueryService are always derived from the same flag value.
+      const format = step.esqlResponseFormatService.get();
+      const queryRowLimit = getQueryRowLimit(step.pluginConfig, format);
+      const boundedQuery = appendLimitToQuery(effectiveQuery, queryRowLimit);
 
       logger.debug({
         message: 'Executing ES|QL query',
@@ -83,6 +81,7 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
           params: queryPayload.params,
           abortSignal: input.executionContext.signal,
           maxResponseSize: step.maxQueryResponseSize,
+          format,
         });
 
         let totalRows = 0;
@@ -95,11 +94,11 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
             [RULE_EXECUTION_COUNTERS.rowsReturnedByQuery]: batch.length,
           };
 
-          if (!loggedRowsDropped && totalRows >= step.queryRowLimit) {
+          if (!loggedRowsDropped && totalRows >= queryRowLimit) {
             loggedRowsDropped = true;
             counters[RULE_EXECUTION_COUNTERS.rowsDroppedByLimit] = 1;
             logger.debug({
-              message: `ES|QL query results truncated at the ${step.queryRowLimit}-row limit; some rows may have been dropped`,
+              message: `ES|QL query results truncated at the ${queryRowLimit}-row limit; some rows may have been dropped`,
               labels: { rule_id: input.ruleId, step: step.name },
             });
           }

@@ -20,7 +20,12 @@ import {
   toRuleExecutionCancellationError,
 } from '../../execution_context';
 import { toRows } from './row_coercion';
-import type { EsqlFormatRequest, EsqlFormatRequestOptions, EsqlRowBatchSource } from './formats';
+import type {
+  EsqlFormatRequest,
+  EsqlFormatRequestOptions,
+  EsqlResponseFormat,
+  EsqlRowBatchSource,
+} from './formats';
 
 export interface ExecuteQueryParams {
   query: EsqlQueryRequest['query'];
@@ -29,6 +34,12 @@ export interface ExecuteQueryParams {
   abortSignal?: AbortSignal;
   /** Maximum allowed response body size in bytes. Passed to the ES transport. */
   maxResponseSize?: number;
+  /**
+   * Response format to use for this stream. When provided, overrides the
+   * feature-flag lookup so the caller can pin the format for the lifetime of
+   * a single rule execution and keep the LIMIT and the transport in sync.
+   */
+  format?: EsqlResponseFormat;
 }
 
 export interface QueryServiceContract {
@@ -94,11 +105,13 @@ export class QueryService implements QueryServiceContract {
    * Streams query results through the response format resolved from the
    * `alertingV2.esqlResponseFormat` feature flag. Resolved per call, because a
    * rollout can change the flag between two executions of the same rule.
+   * Pass `params.format` to pin a pre-snapshotted format and keep the LIMIT
+   * and the transport in sync within a single execution.
    */
   async *executeQueryStream<T = Record<string, unknown>>(
     params: ExecuteQueryParams
   ): AsyncIterable<T[]> {
-    const format = this.esqlResponseFormatService.get();
+    const format = params.format ?? this.esqlResponseFormatService.get();
     const context = createExecutionContext(params.abortSignal ?? new AbortController().signal);
 
     this.logger.debug({
