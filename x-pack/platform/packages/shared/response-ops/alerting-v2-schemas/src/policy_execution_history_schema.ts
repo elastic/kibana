@@ -187,13 +187,12 @@ export const listPolicyExecutionHistoryResponseSchema = z
   .object({
     items: z.array(policyExecutionHistoryItemSchema),
     page: z.number().int().min(1),
-    // Allows 0 for count-only reads (per_page=0).
     per_page: z.number().int().min(0),
     total: z.number().int().nonnegative(),
     search_matches: searchMatchCountsSchema
       .nullable()
       .describe(
-        'Per-type match counts for the active search. Null when no search was provided. When is_truncated is true the server id filter was capped and the result may be truncated.'
+        'Per-type match counts for the active search. Null when no search was provided. When is_truncated is true the server ID filter was capped and the result may be truncated.'
       ),
   })
   .meta({ id: 'alerting_policy_execution_history_response' });
