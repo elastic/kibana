@@ -1498,6 +1498,43 @@ describe('CloudConnectorService', () => {
         });
       });
 
+      it('fans out and writes the connector only while holding the connector lock', async () => {
+        let holdingLock = false;
+        const heldDuring: Record<string, boolean> = {};
+        mockAppContextService.getLockManagerService = jest.fn().mockReturnValue({
+          withLock: jest.fn(async (_lockId: string, callback: () => Promise<unknown>) => {
+            holdingLock = true;
+            try {
+              return await callback();
+            } finally {
+              holdingLock = false;
+            }
+          }),
+        });
+        propagateRoleArnToPackagePoliciesMock.mockImplementationOnce(async () => {
+          heldDuring.fanOut = holdingLock;
+          return undefined;
+        });
+        mockSoClient.update.mockImplementationOnce(async () => {
+          heldDuring.connectorWrite = holdingLock;
+          return {
+            id: connectorId,
+            type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+            references: [],
+            attributes: {},
+          };
+        });
+
+        await service.update(
+          mockSoClient,
+          connectorId,
+          { vars: { role_arn: { type: 'text', value: newArn } } },
+          { esClient: mockEsClient }
+        );
+
+        expect(heldDuring).toEqual({ fanOut: true, connectorWrite: true });
+      });
+
       it('merges a role-only payload into the vars read once the lock is held', async () => {
         const connectorWithSecret = (secretId: string, version: string) =>
           ({
