@@ -640,6 +640,30 @@ steps:
             Alert Analysis Worker path requires a non-empty alerts input;
             inputs.alerts was an empty array.
 
+  # Duplicate _id entries would be analyzed/written multiple times while the model only
+  # returns one verdict per id — select_alert_verdict would reuse the same match and
+  # workflow.output.verdicts would double-count. Fail before batching rather than silently
+  # collapsing (JSON Schema uniqueItems only rejects identical objects, not same-_id pairs).
+  - name: reject_duplicate_caller_alert_ids
+    type: if
+    condition: "${{ inputs.calledByWorker == true }}"
+    steps:
+      - name: compute_caller_alert_id_counts
+        type: data.set
+        with:
+          caller_alert_count: "${{ variables.alert_set.size }}"
+          caller_unique_alert_id_count: "${{ variables.alert_set | map: '_id' | uniq | size }}"
+      - name: fail_if_duplicate_caller_alert_ids
+        type: if
+        condition: "${{ variables.caller_alert_count != variables.caller_unique_alert_id_count }}"
+        steps:
+          - name: fail_duplicate_caller_alert_ids
+            type: workflow.fail
+            with:
+              message: >-
+                Alert Analysis Worker path requires unique alert _id values;
+                inputs.alerts contained duplicate ids.
+
   # ---------------------------------------------------------------------------
   # Rule context for enrichment queries / logs
   # ---------------------------------------------------------------------------
