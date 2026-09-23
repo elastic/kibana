@@ -42,7 +42,10 @@ export {
   InvestigationHeaderBlocks,
   type InvestigationHeaderBlocksProps,
 } from './src/components/details/header_blocks';
-export { OverviewTab } from './src/components/details/details_flyout_tab_contents';
+export {
+  OverviewTab,
+  type OverviewTabProps,
+} from './src/components/details/details_flyout_tab_contents';
 export { DetailsBlock } from './src/components/details/detail_block';
 export {
   ProposedActionButton,

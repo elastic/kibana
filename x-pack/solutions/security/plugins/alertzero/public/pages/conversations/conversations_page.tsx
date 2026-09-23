@@ -18,7 +18,6 @@ import {
   Impact,
 } from '@kbn/agentic-investigations-common';
 import { useApproveProposal, useDismissProposal } from '@kbn/proposals-plugin/public';
-import { isHttpFetchError } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import {
@@ -33,7 +32,8 @@ import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
 import { useOpenInChat } from '../../hooks/use_open_in_chat';
 import { useConversationsUrlParams } from './conversations_url_params';
 import { useInvestigationDetails } from './use_investigation_details';
-import { QUEUE_PAGE_INFO, DECISION_ERRORS } from './translations';
+import { QUEUE_PAGE_INFO } from './translations';
+import { decisionErrorMessage } from './decision_errors';
 import { ProposalsTrendChartRow } from '../../components/proposals_trend_chart';
 import { DismissProposalModal } from '../../components/pending_proposals/dismiss_proposal_modal';
 import { EscalationModalBoundary } from './escalation_modal_boundary';
@@ -46,17 +46,6 @@ import { QueueSection } from './queue/queue_section';
 const LazyConnectedEscalationModal = React.lazy(() =>
   import('./connected_escalation_modal').then((m) => ({ default: m.ConnectedEscalationModal }))
 );
-
-/**
- * The proposals route distinguishes why a decision was refused — 410 the deadline passed,
- * 409 someone decided first or the action input drifted, 400 an input the action rejects.
- * The shared mutations have no `onError`, so the caller has to surface it or the dialog
- * just closes as though the decision had landed.
- */
-const decisionErrorMessage = (error: unknown): string => {
-  const status = isHttpFetchError(error) ? error.response?.status : undefined;
-  return DECISION_ERRORS[status ?? 0] ?? DECISION_ERRORS.default;
-};
 
 export const ConversationsPage: React.FC = () => {
   const { euiTheme } = useEuiTheme();

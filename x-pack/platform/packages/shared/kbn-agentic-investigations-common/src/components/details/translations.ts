@@ -29,6 +29,9 @@ export const DETAILS_FLYOUT_LABELS = Object.freeze({
         defaultMessage: 'Parent investigation',
       }
     ),
+    proposedActions: i18n.translate('xpack.alertzero.detailsFlyout.sections.proposedActions', {
+      defaultMessage: 'Proposed actions',
+    }),
   },
   overview: {
     showMore: i18n.translate('xpack.alertzero.detailsFlyout.overview.showMore', {

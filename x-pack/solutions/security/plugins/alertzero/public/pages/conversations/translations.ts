@@ -31,3 +31,8 @@ export const DECISION_ERRORS: Readonly<Record<number | 'default', string>> = Obj
     defaultMessage: 'The decision could not be submitted. Try again.',
   }),
 });
+
+export const PROPOSED_ACTIONS_EMPTY_LABEL = i18n.translate(
+  'xpack.alertzero.detailsFlyout.proposedActions.empty',
+  { defaultMessage: 'No proposed actions for this investigation.' }
+);

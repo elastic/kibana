@@ -29,6 +29,7 @@ import React from 'react';
 import { registerAgenticInvestigationTemplateUI } from '@kbn/agentic-investigations-common';
 import { getAlertZeroDeepLinks } from './deep_links';
 import { EscalationModalBoundary } from './pages/conversations/escalation_modal_boundary';
+import { ProposedActionsBoundary } from './pages/conversations/proposed_actions_boundary';
 import type {
   AlertZeroClientConfig,
   AlertZeroPublicSetup,
@@ -149,6 +150,37 @@ export class AlertZeroPublicPlugin
       return { default: WrappedModal };
     });
 
+    // Lazy-loaded for the same reason as the escalation modal above: the proposals hooks (React
+    // Query, the HTTP client) stay out of alertzero's main chunk until the flyout's overview tab
+    // actually renders its "Proposed actions" section.
+    const LazyProposedActionsSlot = React.lazy(async () => {
+      const [
+        { KibanaContextProvider },
+        { QueryClient, QueryClientProvider },
+        { ProposedActionsSlot },
+      ] = await Promise.all([
+        import('@kbn/kibana-react-plugin/public'),
+        import('@kbn/react-query'),
+        import('./pages/conversations/proposed_actions_slot'),
+      ]);
+
+      const proposedActionsQueryClient = new QueryClient();
+      const stableServices = { ...core, ...startDeps };
+
+      const WrappedSlot: React.FC<React.ComponentProps<typeof ProposedActionsSlot>> = (props) =>
+        React.createElement(
+          KibanaContextProvider,
+          { services: stableServices },
+          React.createElement(
+            QueryClientProvider,
+            { client: proposedActionsQueryClient },
+            React.createElement(ProposedActionsSlot, props)
+          )
+        );
+
+      return { default: WrappedSlot };
+    });
+
     const canManageEscalations =
       core.application.capabilities[AGENTIC_INVESTIGATIONS_PLUGIN_ID]?.[
         ESCALATIONS_UI_CAPABILITY_MANAGE
@@ -167,6 +199,12 @@ export class AlertZeroPublicPlugin
               React.createElement(LazyEscalationModal, props)
             )
         : undefined,
+      renderProposedActions: (props) =>
+        React.createElement(
+          ProposedActionsBoundary,
+          null,
+          React.createElement(LazyProposedActionsSlot, props)
+        ),
     });
 
     return {};

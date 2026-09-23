@@ -20,10 +20,17 @@ export interface OverviewTabProps {
   investigation: Investigation;
   attachments: VersionedAttachment[] | undefined;
   attachmentsService: AttachmentServiceStartContract;
+  /**
+   * Rendered under a "Proposed actions" heading when supplied. Omitted entirely otherwise: this
+   * package cannot fetch a conversation's proposals itself, so a host that can (see
+   * `renderProposedActions` on `registerAgenticInvestigationTemplateUI`) owns both the fetch and
+   * what appears while it is empty or loading.
+   */
+  proposedActionsContent?: React.ReactNode;
 }
 
 export const OverviewTab = memo<OverviewTabProps>(
-  ({ investigation, attachments, attachmentsService }) => {
+  ({ investigation, attachments, attachmentsService, proposedActionsContent }) => {
     const { summary } = investigation;
     const [expanded, setExpanded] = useState(false);
 
@@ -62,6 +69,14 @@ export const OverviewTab = memo<OverviewTabProps>(
           attachments={attachments}
           attachmentsService={attachmentsService}
         />
+
+        {proposedActionsContent && (
+          <EuiFlexItem>
+            <DetailsBlock title={DETAILS_FLYOUT_LABELS.sections.proposedActions}>
+              {proposedActionsContent}
+            </DetailsBlock>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     );
   }
