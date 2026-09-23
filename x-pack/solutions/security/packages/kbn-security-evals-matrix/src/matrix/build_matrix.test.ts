@@ -1265,3 +1265,110 @@ describe('buildMatrix round-4 review findings', () => {
     );
   });
 });
+
+describe('buildMatrix round-6 review findings', () => {
+  const suite = (
+    suiteId: string,
+    evaluators: Array<{ evaluatorName: string; mean: number; count?: number }>
+  ) => ({
+    suiteId,
+    experimentId: `e-${suiteId}`,
+    datasets: [
+      {
+        datasetId: 'd',
+        datasetName: 'd',
+        evaluators: evaluators.map((e) => ({
+          evaluatorName: e.evaluatorName,
+          mean: e.mean,
+          count: e.count ?? 10,
+        })),
+      },
+    ],
+  });
+
+  it('includes SkillInvoked contract evaluators in the capability axis despite the default exclusion prefix', () => {
+    // Regression: the axis passed config.excludeEvaluators to computeColumnMean, whose
+    // prefix-based exclusion ('Skill Invoked') dropped the contract evaluator
+    // SkillInvoked from the capability axis built to average it.
+    const cfg: MatrixConfig = parseMatrixConfig({
+      columns: [{ id: 'c1', label: 'C1', suites: ['s1'] }],
+      models: [{ id: 'm1', label: 'M1' }],
+    });
+
+    const matrix = buildMatrix(
+      [
+        {
+          modelId: 'm1',
+          suites: [
+            suite('s1', [
+              { evaluatorName: 'SkillInvoked', mean: 0.9 },
+              { evaluatorName: 'Relevance', mean: 0.2 },
+            ]),
+          ],
+        },
+      ],
+      cfg
+    );
+
+    // Capability axis averages only the contract evaluator, ignoring the judged one and
+    // the default 'Skill Invoked' exclusion prefix.
+    expect(matrix.proprietary[0].capability).toEqual({ kind: 'score', value: 9 });
+  });
+
+  it('keeps raw-magnitude evaluators out of the judgedQuality axis', () => {
+    const cfg: MatrixConfig = parseMatrixConfig({
+      columns: [{ id: 'c1', label: 'C1', suites: ['s1'] }],
+      models: [{ id: 'm1', label: 'M1' }],
+    });
+
+    const matrix = buildMatrix(
+      [
+        {
+          modelId: 'm1',
+          suites: [
+            suite('s1', [
+              { evaluatorName: 'Relevance', mean: 0.7 },
+              { evaluatorName: 'Latency', mean: 120 },
+            ]),
+          ],
+        },
+      ],
+      cfg
+    );
+
+    // Latency is excluded by default (raw magnitude); judged axis must see only Relevance.
+    expect(matrix.proprietary[0].judgedQuality).toEqual({ kind: 'score', value: 7 });
+  });
+
+  it('averages raw column means into the axis, not their presentation cells', () => {
+    // Regression: the axis aggregated MatrixCell objects, so a column whose mean fell at
+    // or below notRecommendedBelow collapsed to a valueless not-recommended BEFORE the
+    // average, silently dropping the failing column instead of dragging the axis down.
+    const cfg: MatrixConfig = parseMatrixConfig({
+      notRecommendedBelow: 5,
+      columns: [
+        { id: 'c1', label: 'C1', suites: ['s1'] },
+        { id: 'c2', label: 'C2', suites: ['s2'] },
+      ],
+      models: [{ id: 'm1', label: 'M1' }],
+    });
+
+    const matrix = buildMatrix(
+      [
+        {
+          modelId: 'm1',
+          suites: [
+            suite('s1', [{ evaluatorName: 'Relevance', mean: 0.9 }]),
+            suite('s2', [{ evaluatorName: 'Relevance', mean: 0.1 }]),
+          ],
+        },
+      ],
+      cfg
+    );
+
+    // c2 renders as not-recommended (mean 1 <= 5), but the judgedQuality axis must
+    // average 9 and 1 to 5, not skip c2 entirely and read 9.
+    expect(matrix.proprietary[0].judgedQuality).toEqual({ kind: 'not-recommended' });
+    expect(matrix.proprietary[0].cells.c2).toEqual({ kind: 'not-recommended' });
+  });
+});

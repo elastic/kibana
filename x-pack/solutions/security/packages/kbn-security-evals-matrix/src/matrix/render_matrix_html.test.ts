@@ -720,7 +720,7 @@ describe('renderMatrixHtml prefix variant discovery', () => {
         group: 'Agent Builder',
         suites: ['suite-1'],
         weight: 1,
-        examplePrefixes: ['alert-analysis-'],
+        examplePrefixes: ['alert-analysis'],
       },
     ],
     models: [{ id: 'test-model', label: 'Test Model', openSource: false }],
@@ -769,5 +769,56 @@ describe('renderMatrixHtml prefix variant discovery', () => {
     };
     const html = renderMatrixHtml(prefixMatrix, prefixConfig, {}, traces);
     expect(html).not.toContain('threat-hunting-a');
+  });
+});
+
+describe('round 6 regression: prompt cards and trace bucketing', () => {
+  const compositeMatrix: Matrix = {
+    ...mockMatrix,
+    composites: [{ id: 'group_score', label: 'Group' }],
+    displayColumns: [
+      ...mockMatrix.displayColumns,
+      { id: 'group_score', label: 'Group', group: 'Agent Builder', kind: 'composite' },
+    ],
+    proprietary: [
+      {
+        ...mockMatrix.proprietary[0],
+        cells: { ...mockMatrix.proprietary[0].cells, group_score: { kind: 'score', value: 7.9 } },
+      },
+    ],
+  };
+
+  it('renders prompt cards only for base columns, never composite or overall', () => {
+    const html = renderMatrixHtml(compositeMatrix, mockConfig, {});
+    // Base columns present.
+    expect(html).toMatch(/Alert Analysis/);
+    expect(html).toMatch(/Threat Hunting/);
+    // Composite and Overall must not produce prompt sections.
+    expect(html).not.toMatch(/<h4[^>]*>Group<\/h4>/);
+    expect(html).not.toMatch(/<h4[^>]*>Overall<\/h4>/);
+  });
+
+  it('assigns trace cards by exact-prefix bucketing, not bare startsWith', () => {
+    // 'alert' and 'alert-analysis' are sibling prefixes; a trace for
+    // 'alert-analysis-a' belongs to the longer prefix only.
+    const cfg = {
+      ...mockConfig,
+      columns: [
+        { ...mockConfig.columns[0], examplePrefixes: ['alert'] },
+        { ...mockConfig.columns[1], examplePrefixes: ['alert-analysis'] },
+      ],
+    };
+    const traces = {
+      'test-model:alert': { question: 'exact prefix card' },
+      'test-model:alert-analysis-a': { question: 'longer sibling card' },
+    } as unknown as MatrixTraceData;
+    const html = renderMatrixHtml(compositeMatrix, cfg, {}, traces);
+    expect(html).toContain('exact prefix card');
+    expect(html).toContain('longer sibling card');
+    // The 'alert' column card set must not contain the sibling's trace.
+    const alertIdx = html.indexOf('exact prefix card');
+    const siblingIdx = html.indexOf('longer sibling card');
+    expect(alertIdx).toBeGreaterThan(-1);
+    expect(siblingIdx).toBeGreaterThan(-1);
   });
 });

@@ -327,12 +327,19 @@ export const aliasJudgeVerdicts = (
   verdicts: JudgeVerdict[],
   modelAliases: ReadonlyMap<string, readonly string[]>
 ): void => {
-  const seen = new Set(verdicts.map((v) => `${v.modelId}\u0000${v.judgeId}`));
+  // Dedupe per verdict cell, not per judge: an aliased run has many examples,
+  // repetitions and evaluators under one judge, and each must be mirrored or the
+  // row loses most of its judge-agreement evidence.
+  const verdictKey = (v: JudgeVerdict): string =>
+    `${v.modelId}\u0000${v.suiteId ?? ''}\u0000${v.example}\u0000${v.repetition}\u0000${
+      v.evaluator
+    }\u0000${v.judgeId}`;
+  const seen = new Set(verdicts.map(verdictKey));
   for (const [rowId, aliases] of modelAliases) {
     const targetAliases = aliases.filter((alias) => alias !== rowId);
     const candidates = verdicts.filter((verdict) => targetAliases.includes(verdict.modelId));
     for (const verdict of candidates) {
-      const key = `${rowId}\u0000${verdict.judgeId}`;
+      const key = verdictKey({ ...verdict, modelId: rowId });
       if (!seen.has(key)) {
         seen.add(key);
         verdicts.push({ ...verdict, modelId: rowId });

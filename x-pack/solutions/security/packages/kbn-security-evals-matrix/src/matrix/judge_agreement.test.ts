@@ -199,3 +199,36 @@ describe('judgeAgreementForModel', () => {
     expect(row.worstEvaluators[1].evaluator).toBe('Factuality');
   });
 });
+
+describe('round 6 regression: same-family judges are not paired', () => {
+  it('reports single-judge when every overlapping judge pair shares a model family', () => {
+    // Two Anthropic-family judges with identical cells: family self-consistency, not
+    // an independent second opinion.
+    const verdicts = [
+      verdict('anthropic-claude-4.5-haiku', 'ex-1', 0, 'Relevance', 1),
+      verdict('anthropic-claude-4.6-sonnet', 'ex-1', 0, 'Relevance', 1),
+      verdict('anthropic-claude-4.5-haiku', 'ex-2', 0, 'Relevance', 1),
+      verdict('anthropic-claude-4.6-sonnet', 'ex-2', 0, 'Relevance', 1),
+    ];
+    const row = judgeAgreementForModel(verdicts, 'model-a');
+    expect(row.status).toBe('single-judge');
+    expect(row.pairs).toBe(0);
+  });
+
+  it('prefers a cross-family pair even when a same-family pair overlaps more', () => {
+    const verdicts = [
+      verdict('anthropic-claude-4.5-haiku', 'ex-1', 0, 'Relevance', 1),
+      verdict('anthropic-claude-4.6-sonnet', 'ex-1', 0, 'Relevance', 0),
+      verdict('anthropic-claude-4.6-sonnet', 'ex-2', 0, 'Relevance', 0),
+      verdict('anthropic-claude-4.6-sonnet', 'ex-3', 0, 'Relevance', 0),
+      verdict('anthropic-claude-4.5-haiku', 'ex-2', 0, 'Relevance', 1),
+      verdict('anthropic-claude-4.5-haiku', 'ex-3', 0, 'Relevance', 1),
+      // cross-family overlap on one example only — must win over the 3-cell same-family pair
+      verdict('gemini-2.5-pro', 'ex-1', 0, 'Relevance', 1),
+    ];
+    const row = judgeAgreementForModel(verdicts, 'model-a');
+    expect(row.status).toBe('measured');
+    expect(row.pairs).toBe(1);
+    expect(row.biasJudges).toEqual(['gemini-2.5-pro', 'anthropic-claude-4.5-haiku'].sort());
+  });
+});

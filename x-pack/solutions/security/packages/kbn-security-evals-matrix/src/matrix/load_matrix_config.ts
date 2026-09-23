@@ -90,9 +90,11 @@ const modelSchema = schema.object({
   id: idSchema,
   /** Display name shown in the published matrix (e.g. "Claude Sonnet 4"). */
   label: schema.string({ minLength: 1, maxLength: MAX_STRING_LENGTH }),
-  /** Additional `task.model.id` values that should map to the same row. */
+  /** Additional `task.model.id` values that should map to the same row. Validated by the same
+   * no-colon rule as `id`: aliases become the model portion of `${modelId}:${columnId}` trace
+   * keys, so a colon-bearing alias could collide with an unrelated model's trace keys. */
   matchIds: schema.maybe(
-    schema.arrayOf(schema.string({ minLength: 1, maxLength: MAX_STRING_LENGTH }), {
+    schema.arrayOf(idSchema, {
       maxSize: MAX_ARRAY_SIZE,
     })
   ),

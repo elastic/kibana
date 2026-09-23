@@ -79,8 +79,12 @@ describe('pickShardExperiments', () => {
       experiment('sweep-100-s2of2::suite::glm-5.3-flash', '2026-09-03T10:30:00Z'),
     ]);
 
-    // Complete despite the duplicate; both members retained as listed.
-    expect(picked).toHaveLength(3);
+    // Complete despite the duplicate; the duplicate listing must not be returned twice
+    // (every returned member is fetched and count-weighted downstream).
+    expect(picked.map((e) => e.execution_id)).toEqual([
+      'sweep-100-s1of2::suite::glm-5.3-flash',
+      'sweep-100-s2of2::suite::glm-5.3-flash',
+    ]);
   });
 
   it('ranks a sweep by its last-finishing shard, not its last-listed one', () => {
@@ -195,5 +199,23 @@ describe('mergeShardDatasets', () => {
 
     expect(shard[0].evaluators[0].mean).toBe(8);
     expect(shard[0].evaluators[0].count).toBe(6);
+  });
+});
+
+describe('round 6 regression: duplicate sweep members', () => {
+  it('dedupes a shard listed twice (same execution_id) before returning sweep members', () => {
+    // queryMatrixScores unions experiments across branches; the same shard can be
+    // listed twice. Every member is count-weighted downstream, so a duplicate
+    // double-counts its examples in the merged dataset means.
+    const picked = pickShardExperiments([
+      experiment('sweep-400-s1of2::suite::glm-5.3-flash', '2026-09-03T10:00:00Z'),
+      experiment('sweep-400-s1of2::suite::glm-5.3-flash', '2026-09-03T10:05:00Z'),
+      experiment('sweep-400-s2of2::suite::glm-5.3-flash', '2026-09-03T10:30:00Z'),
+    ]);
+
+    expect(picked.map((e) => e.execution_id)).toEqual([
+      'sweep-400-s1of2::suite::glm-5.3-flash',
+      'sweep-400-s2of2::suite::glm-5.3-flash',
+    ]);
   });
 });

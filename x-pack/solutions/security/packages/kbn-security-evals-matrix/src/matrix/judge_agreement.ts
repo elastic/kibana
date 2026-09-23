@@ -6,6 +6,7 @@
  */
 
 import { wilsonInterval, type ConfidenceInterval } from './trajectory_agreement';
+import { classifyFamily } from './judge_provenance';
 
 /**
  * One evaluator verdict, identified well enough to pair it with the verdict a
@@ -92,17 +93,20 @@ export const judgeAgreementForModel = (
   }
 
   let best: { a: string; b: string; keys: string[] } | undefined;
-  for (let i = 0; i < judges.length; i++) {
-    for (let j = i + 1; j < judges.length; j++) {
-      const a = judges[i];
-      const b = judges[j];
-      const aKeys = new Set(mine.filter((v) => v.judgeId === a).map(cellKey));
-      const shared = [
-        ...new Set(mine.filter((v) => v.judgeId === b && aKeys.has(cellKey(v))).map(cellKey)),
-      ];
-      if (!best || shared.length > best.keys.length) {
-        best = { a, b, keys: shared };
-      }
+  // A "second opinion" from the same model family is not independent evidence: two
+  // Anthropic (or two OpenAI) judges share training biases, so their agreement
+  // measures family self-consistency, not judge reliability. Same-family pairs are
+  // excluded from the selection outright.
+  const crossFamilyPairs = judges
+    .flatMap((a, i) => judges.slice(i + 1).map((b) => ({ a, b })))
+    .filter(({ a, b }) => classifyFamily(a) !== classifyFamily(b));
+  for (const { a, b } of crossFamilyPairs) {
+    const aKeys = new Set(mine.filter((v) => v.judgeId === a).map(cellKey));
+    const shared = [
+      ...new Set(mine.filter((v) => v.judgeId === b && aKeys.has(cellKey(v))).map(cellKey)),
+    ];
+    if (!best || shared.length > best.keys.length) {
+      best = { a, b, keys: shared };
     }
   }
 

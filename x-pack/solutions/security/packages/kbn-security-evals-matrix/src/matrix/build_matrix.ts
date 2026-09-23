@@ -251,29 +251,62 @@ const CONTRACT_EVALUATORS = new Set([
 const axisCell = (
   modelScores: AggregatedModelScores,
   config: MatrixConfig,
-  includeEvaluator: (evaluator: AggregatedEvaluatorScore) => boolean
+  includeEvaluator: (evaluator: AggregatedEvaluatorScore) => boolean,
+  /**
+   * Exclusion list for the mean. A closed allowlist predicate (capability axis) passes `[]`:
+   * it already rejects every non-contract evaluator, and the prefix-listed default
+   * 'Skill Invoked' exclusion would otherwise drop the very contract evaluators the axis
+   * exists to average. A negated predicate (judgedQuality) admits raw-magnitude
+   * evaluators, so it must keep `config.excludeEvaluators`.
+   */
+  excludeEvaluators: readonly string[]
 ): MatrixCell => {
-  const cells = config.columns.map((column) => ({
-    cell: buildCell(
-      computeColumnMean(modelScores, column, config.excludeEvaluators, includeEvaluator),
+  // Aggregate the raw column means, not their presentation cells: `buildCell` collapses
+  // any mean at or below `notRecommendedBelow` into a valueless `not-recommended`, so
+  // averaging cells would silently drop sub-threshold columns from the axis instead of
+  // letting them drag the average down.
+  let weightedSum = 0;
+  let totalWeight = 0;
+  let hasAnyData = false;
+  let suppressed: string[] = [];
+  // The axis predicate is the authoritative filter for this aggregation (see
+  // `excludeEvaluators` param doc); compute the mean once and skip unmeasured columns.
+  const columnMeans = config.columns
+    .map((column) => ({
       column,
-      config,
-      // Only evaluators this axis actually scores from can suppress the axis cell; a judged
-      // evaluator outage must not mark the deterministic capability axis unmeasured (and vice
-      // versa), so the errored set is filtered by the same predicate as the mean.
-      {
-        erroredOutEvaluators: columnErroredOutEvaluators(modelScores, column).filter((name) =>
-          includeEvaluator({
-            evaluatorName: name,
-            mean: 0,
-            count: 0,
-          } as AggregatedEvaluatorScore)
-        ),
-      }
-    ),
-    weight: config.overall.mode === 'weighted' ? column.weight : 1,
-  }));
-  return aggregateCells(cells, config);
+      mean: computeColumnMean(modelScores, column, excludeEvaluators, includeEvaluator),
+    }))
+    .filter((entry) => entry.mean !== undefined);
+  for (const { column, mean } of columnMeans) {
+    if (mean === undefined) {
+      return { kind: 'missing' };
+    }
+    hasAnyData = true;
+    // Only evaluators this axis actually scores from can suppress the axis cell; a judged
+    // evaluator outage must not mark the deterministic capability axis unmeasured (and vice
+    // versa), so the errored set is filtered by the same predicate as the mean.
+    suppressed = [
+      ...suppressed,
+      ...columnErroredOutEvaluators(modelScores, column).filter((name) =>
+        includeEvaluator({
+          evaluatorName: name,
+          mean: 0,
+          count: 0,
+        } as AggregatedEvaluatorScore)
+      ),
+    ];
+    const scale = column.scale ?? config.defaultScale;
+    const weight = config.overall.mode === 'weighted' ? column.weight : 1;
+    weightedSum += mean * scale * weight;
+    totalWeight += weight;
+  }
+  if (suppressed.length > 0) {
+    return { kind: 'insufficient-evaluators', evaluators: suppressed };
+  }
+  if (!hasAnyData || totalWeight === 0) {
+    return { kind: 'missing' };
+  }
+  return toCell(roundTo(weightedSum / totalWeight, config.decimals), config);
 };
 
 /** Weighted mean of computed cells; missing/excluded sources are skipped, "Not recommended" counts as 0 when configured. */
@@ -578,10 +611,16 @@ const buildMatrixRow = (
       config.minCoverage > 0 && scoredColumns < config.minCoverage
         ? { kind: 'insufficient-coverage', covered: scoredColumns, required: config.minCoverage }
         : overall,
-    capability: axisCell(modelScores, config, (evaluator) =>
-      CONTRACT_EVALUATORS.has(
-        evaluator.evaluatorName.replace(/^Skill Invoked \([^)]+\)$/, 'SkillInvoked')
-      )
+    capability: axisCell(
+      modelScores,
+      config,
+      (evaluator) =>
+        CONTRACT_EVALUATORS.has(
+          evaluator.evaluatorName.replace(/^Skill Invoked \([^)]+\)$/, 'SkillInvoked')
+        ),
+      // Allowlist predicate: no exclusion list, so the default 'Skill Invoked' prefix
+      // exclusion cannot drop the contract evaluators this axis averages.
+      []
     ),
     judgedQuality: axisCell(
       modelScores,
@@ -589,7 +628,10 @@ const buildMatrixRow = (
       (evaluator) =>
         !CONTRACT_EVALUATORS.has(
           evaluator.evaluatorName.replace(/^Skill Invoked \([^)]+\)$/, 'SkillInvoked')
-        )
+        ),
+      // Negated predicate: keep the raw-magnitude exclusion list, or Latency/token
+      // evaluators would enter the judged mean on the 0-10 scale.
+      config.excludeEvaluators
     ),
     coverage: {
       covered: scoredColumns,

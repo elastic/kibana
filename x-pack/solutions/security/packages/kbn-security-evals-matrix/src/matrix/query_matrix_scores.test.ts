@@ -1132,3 +1132,81 @@ describe('scoresByPrefixToDatasets errored-out tracking', () => {
     expect(datasets[0].erroredOutEvaluators).toEqual(['Trajectory']);
   });
 });
+
+describe('round 6 regression: admission and accumulation fixes', () => {
+  const log = new ToolingLog() as unknown as SomeDevLog;
+  const stats: ExperimentStats = {
+    taskModel: { id: 'eis-m1' },
+    evaluatorModel: { id: 'judge' },
+    totalRepetitions: 1,
+    stats: [],
+  };
+  const doc = (exampleId: string, judgeModel: { id: string } | undefined) =>
+    ({
+      example: { id: exampleId, index: 0, dataset: { id: 'd1', name: 'D1' } },
+      task: { model: { id: 'eis-m1' }, trace_id: 't' },
+      evaluator: {
+        name: 'correctness',
+        score: 0.6,
+        ...(judgeModel === undefined ? {} : { model: judgeModel }),
+      },
+      metadata: {},
+    } as unknown as EvaluationScoreDocument);
+
+  it('requireEisJudge drops score documents with no judge id at all', () => {
+    // Regression: the guard only ran when judgeId was truthy, so a doc whose evaluator
+    // omitted its judge model was admitted into a matrix claiming every score is
+    // EIS-graded.
+    const datasets = scoresByPrefixToDatasets(
+      [doc('alert-analysis-a', undefined)],
+      ['alert-analysis'],
+      {
+        requireEisJudge: true,
+      }
+    );
+
+    expect(datasets).toHaveLength(0);
+  });
+
+  it('accumulates exclusion counts across suites for the same model', async () => {
+    // Regression: excludedByModel.set overwrote the prior suite's counts, so a model
+    // rejected in two suites reported only the last suite's rejections.
+    const client = {
+      listExperiments: jest.fn().mockResolvedValue([
+        {
+          experiment_id: 'e1',
+          execution_id: 'x1',
+          timestamp: new Date().toISOString(),
+          task_model: { id: 'm1' },
+        },
+      ]),
+      getExperimentStats: jest.fn().mockResolvedValue(stats),
+      // Suite s1 drops a self-judged doc (judge === task model, both eis-backed so the
+      // EIS guard does not fire first); suite s2 drops a non-EIS judge doc. Both
+      // counts must survive on the row.
+      getExperimentScores: jest
+        .fn()
+        .mockImplementation((_id: string, opts: { suiteId: string }) =>
+          Promise.resolve(
+            opts.suiteId === 's1'
+              ? [doc('alert-a', { id: 'eis-m1' })]
+              : [doc('alert-b', { id: 'mystery-judge' })]
+          )
+        ),
+    } as unknown as MatrixEvalsClient;
+
+    const rows = await queryMatrixScores(client, log, {
+      suiteIds: ['s1', 's2'],
+      modelIds: ['eis-m1'],
+      prefixesBySuite: { s1: ['alert'], s2: ['alert'] },
+      scoring: { requireEisJudge: true, excludeSelfJudged: true },
+    });
+
+    expect(rows.find((r) => r.modelId === 'eis-m1')?.excluded).toEqual({
+      nonQuality: 0,
+      nonEis: 1,
+      selfJudged: 1,
+      unmappedVerdict: 0,
+    });
+  });
+});

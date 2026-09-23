@@ -315,3 +315,14 @@ describe('applyModelOverrides', () => {
     expect(() => applyModelOverrides(base, ['dup', 'dup:Other'])).toThrow(/Duplicate --model id/);
   });
 });
+
+describe('round 6 regression: matchIds must be colon-free like ids', () => {
+  it('rejects a matchIds entry containing a colon', () => {
+    expect(() =>
+      parseMatrixConfig({
+        columns: [{ id: 'alert_triage', label: 'Alert Triage', suites: ['s'] }],
+        models: [{ id: 'eis/foo', label: 'Foo', matchIds: ['provider/alias:evil'] }],
+      })
+    ).toThrow(/must not contain ':'/);
+  });
+});

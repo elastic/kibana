@@ -78,9 +78,21 @@ export const pickShardExperiments = (
     return [];
   }
 
-  return [...newest.members].sort((a, b) =>
-    (a.execution_id ?? '').localeCompare(b.execution_id ?? '')
-  );
+  // Dedupe by execution_id (falling back to experiment_id): the same listing can appear
+  // twice when a suite spans branches (queryMatrixScores unions branch experiments), and
+  // every returned member is fetched and count-weighted downstream — a duplicate shard
+  // would double-count its examples in the merged dataset means.
+  const memberIds = new Set<string>();
+  const unique = newest.members.filter((member) => {
+    const id = member.execution_id ?? member.experiment_id;
+    if (memberIds.has(id)) {
+      return false;
+    }
+    memberIds.add(id);
+    return true;
+  });
+
+  return [...unique].sort((a, b) => (a.execution_id ?? '').localeCompare(b.execution_id ?? ''));
 };
 
 /** Folds per-shard dataset scores into one set, weighting means by count. */

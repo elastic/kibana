@@ -431,6 +431,10 @@ const renderModelCard = (
       const total = matrix.displayColumns.length;
 
       const prompts = matrix.displayColumns
+        // Only base columns have a prompt/experiment behind them: composite and legacy
+        // Overall columns are derived aggregates, and rendering them here produced
+        // "Trace unavailable" cards for a prompt that was never run.
+        .filter((col) => col.kind === 'base')
         .map((col) => {
           const cell =
             col.kind === 'overall' ? row.overall : row.cells[col.id] ?? { kind: 'missing' };
@@ -452,7 +456,14 @@ const renderModelCard = (
             );
             for (const key of matchingKeys) {
               const example = key.slice(modelKeyPrefix.length);
-              if (column.examplePrefixes.some((p) => example.startsWith(p))) {
+              // Same bucketing rule as the score path (scoresByPrefixToDatasets): an
+              // example belongs to a prefix when it IS the prefix or extends it with a
+              // hyphen. A bare startsWith also claims a longer sibling prefix's
+              // examples (e.g. 'alert' claiming 'alert-analysis-a'), cross-assigning
+              // traces between columns.
+              if (
+                column.examplePrefixes.some((p) => example === p || example.startsWith(`${p}-`))
+              ) {
                 variantTraces.push({ label: example, trace: traces?.[key] });
               }
             }

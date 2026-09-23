@@ -122,7 +122,11 @@ export const scoresByPrefixToDatasets = (
       if (evaluatorName) {
         const judgeId = doc.evaluator?.model?.id;
         const taskModelId = doc.task?.model?.id;
-        const rejectedEisJudge = options.requireEisJudge && judgeId && !isEisBacked(judgeId);
+        // An admitted provenance of "no judge id at all" is indistinguishable from a
+        // non-EIS judge when requireEisJudge is on: without this, a doc whose evaluator
+        // omitted its judge model silently contributes to a matrix that claims every
+        // score is EIS-graded.
+        const rejectedEisJudge = options.requireEisJudge && (!judgeId || !isEisBacked(judgeId));
         if (rejectedEisJudge) {
           excluded.nonEis += 1;
         }
@@ -551,7 +555,16 @@ export const queryMatrixScores = async (
                 onExcluded: (counts) => {
                   if (counts.selfJudged + counts.nonEis + counts.unmappedVerdict > 0) {
                     suiteExcludedCounts = counts;
-                    excludedByModel.set(modelId, counts);
+                    // Accumulate across suites: the audit summary reads this map after every
+                    // suite has run, so overwriting here would let a later suite's rejection
+                    // reason erase an earlier one for the same model.
+                    const prior = excludedByModel.get(modelId);
+                    excludedByModel.set(modelId, {
+                      nonQuality: (prior?.nonQuality ?? 0) + counts.nonQuality,
+                      nonEis: (prior?.nonEis ?? 0) + counts.nonEis,
+                      selfJudged: (prior?.selfJudged ?? 0) + counts.selfJudged,
+                      unmappedVerdict: (prior?.unmappedVerdict ?? 0) + counts.unmappedVerdict,
+                    });
                   }
                 },
               });
