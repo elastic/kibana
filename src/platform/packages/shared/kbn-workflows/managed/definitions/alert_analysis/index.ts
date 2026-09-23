@@ -19,8 +19,8 @@ export const SECURITY_ALERT_ANALYSIS_WORKFLOW_ID = 'system-security-alert-analys
 export const SECURITY_ALERT_ANALYSIS_WORKFLOW = {
   id: SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
   pluginId: 'securitySolution',
-  // Tip of the Worker-callable YAML (pre-cap host/user entity loops).
-  version: 29,
+  // Tip of the Worker-callable YAML (expose missing_alert_ids in workflow.output).
+  version: 30,
   billable: false,
   visibility: {
     selectors: ['rule_action'],

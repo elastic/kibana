@@ -114,6 +114,7 @@ describe('AlertAnalysisWorkflowOutput', () => {
       },
     ],
     impacted_entities_truncated: 'false',
+    missing_alert_ids: [] as string[],
   };
 
   it('accepts a full workflow.output payload including attribution and impact fields', () => {
@@ -232,6 +233,7 @@ describe('AlertAnalysisWorkflowOutput YAML sync', () => {
 
     expect(workflow.outputs.properties.impacted_entities_truncated.enum).toEqual(['true', 'false']);
     expect(workflow.outputs.properties.impacted_entities.maxItems).toBe(50);
+    expect(workflow.outputs.properties.missing_alert_ids?.maxItems).toBe(1000);
     expect(workflow.outputs.properties.verdicts.items?.properties?.rationale?.maxLength).toBe(500);
     expect(
       workflow.outputs.properties.verdicts.items?.properties?.contributing_factors?.maxItems

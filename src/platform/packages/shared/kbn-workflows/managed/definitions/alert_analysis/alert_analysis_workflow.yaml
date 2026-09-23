@@ -203,6 +203,7 @@ outputs:
     - agent_id
     - impacted_entities
     - impacted_entities_truncated
+    - missing_alert_ids
   properties:
     verdicts:
       type: array
@@ -297,6 +298,18 @@ outputs:
       enum:
         - "true"
         - "false"
+    missing_alert_ids:
+      type: array
+      description: >
+        Alert ids from the analyzed set for which the agent returned no matching
+        verdict. Always present (empty when every alert was reconciled). Workers
+        should treat a non-empty list as a partial result — the run still completes
+        so matched verdicts are not discarded, but missing ids need retry or
+        Investigation follow-up.
+      maxItems: 1000
+      items:
+        type: string
+        maxLength: 512
     false_positive_count:
       type: integer
       minimum: 0
@@ -422,6 +435,9 @@ steps:
       impacted_entities: []
       # Set true when impacted_entities was truncated to 50; false otherwise.
       impacted_entities_truncated: "false"
+      # Alert ids with no agent verdict (apply_verdicts no-match branch). Empty-init so
+      # the skip / standalone path still emits a well-formed workflow.output.
+      missing_alert_ids: []
 
   # ---------------------------------------------------------------------------
   # Read this space's configuration at run time
@@ -1713,6 +1729,15 @@ steps:
                   headers:
                     kbn-xsrf: string
                     Content-Type: application/json
+
+              # Expose the unreconciled id in workflow.output so a Worker can retry or
+              # surface a partial Investigation result instead of treating completed+empty
+              # as success. Prefer this over failing the whole run (matched verdicts would
+              # be discarded). Real alert id only — never the model's echo.
+              - name: accumulate_missing_alert_id
+                type: data.set
+                with:
+                  missing_alert_ids: "${{ variables.missing_alert_ids | push: foreach.item._id }}"
             else:
 
               # -------------------------------------------------------------------
@@ -2084,3 +2109,5 @@ steps:
       impacted_entities: "${{ variables.impacted_entities }}"
       # "true" when the list was capped at 50; "false" otherwise.
       impacted_entities_truncated: "{{ variables.impacted_entities_truncated }}"
+      # Alert ids the agent omitted; empty when every analyzed alert got a verdict.
+      missing_alert_ids: "${{ variables.missing_alert_ids }}"
