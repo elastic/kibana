@@ -94,8 +94,9 @@ reads the saved report and conversation. Raw conversation rounds and tool argume
 retained without grader-specific formatting or truncation. Each persisted score links the agent's
 conversation trace; the placeholder has a separate evaluator trace.
 
-The `evals_nightshift_investigations` server config extends `evals_tracing` for `all` (the default)
-and `trace-only`; `synthetic-smoke` gets plain `evals_tracing` and needs no sandbox credentials.
+The `evals_nightshift_investigations` server config extends `evals_tracing` whenever sandbox
+credentials are present, or `all`/`trace-only` is selected explicitly. Otherwise it is plain
+`evals_tracing`, so the smoke eval needs no sandbox credentials.
 It enables the investigation engine, its `nightshift.enabled` feature flag and
 sandbox, disables Cortex, and exports full Agent Builder
 payloads (user messages, system instructions, responses, tool arguments/results and conversation
@@ -145,12 +146,10 @@ Historical full-grader runs are not acceptance evidence for this runner. Graders
 metrics, automatic provisioning and generalized CI defaults are deferred.
 
 `evals start` restarts Scout automatically when connectors, the server config set,
-`TRACING_EXPORTERS`, `GCS_CREDENTIALS` or any `SANDBOX_*` value (from the profile or the shell)
-changes. Two changes are not detected, so run `node scripts/evals stop` first:
-
-- Switching from `synthetic-smoke` to `all` or `trace-only`. The running stack lacks the sandbox and
-  investigation settings. The reverse switch needs no restart, since smoke runs on either stack.
-- Changing the contents of a file referenced by a `*_PATH` variable. Only the path is compared.
+`TRACING_EXPORTERS`, `GCS_CREDENTIALS` or any `SANDBOX_*` value (from the profile or the shell,
+including the contents of files referenced by `*_PATH` variables) changes. Switching
+`NIGHTSHIFT_DATASETS` needs no restart: whenever sandbox credentials are present, Scout starts with
+the investigation engine and sandbox, and the smoke eval runs on that server too.
 
 Use `evals run` to repeat a run with unchanged startup settings. Without sandbox credentials (for
 example a profile that has no `sandbox` block), an unset `NIGHTSHIFT_DATASETS` runs only the smoke

@@ -97,6 +97,6 @@ export const createInvestigationConfig = (): ScoutServerConfig => {
   };
 };
 
-export const servers: ScoutServerConfig = resolveNightshiftEvalSelection().needsSandbox
+export const servers: ScoutServerConfig = resolveNightshiftEvalSelection().startInvestigationServer
   ? createInvestigationConfig()
   : tracing;

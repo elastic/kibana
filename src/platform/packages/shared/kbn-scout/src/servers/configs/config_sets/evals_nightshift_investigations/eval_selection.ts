@@ -13,8 +13,14 @@ export type NightshiftEvalSelection = (typeof NIGHTSHIFT_EVAL_SELECTIONS)[number
 
 export interface ResolvedNightshiftEvalSelection {
   selection: NightshiftEvalSelection;
-  /** True when the selection needs the investigation engine and sandbox-api. */
+  /** True when the selection runs investigation specs, which need the investigation engine and sandbox-api. */
   needsSandbox: boolean;
+  /**
+   * True when the Scout server should start with the investigation engine and sandbox. It depends
+   * on credentials, not the selection: smoke runs on either server, and the CLI already restarts
+   * Scout when `SANDBOX_*` changes but not when `NIGHTSHIFT_DATASETS` does.
+   */
+  startInvestigationServer: boolean;
   /** True when an unset selection fell back to smoke because no sandbox credentials were found. */
   fellBackToSmoke: boolean;
 }
@@ -38,9 +44,12 @@ export const resolveNightshiftEvalSelection = (
   }
 
   const resolved = selection as NightshiftEvalSelection;
+  const needsSandbox = resolved !== 'synthetic-smoke';
   return {
     selection: resolved,
-    needsSandbox: resolved !== 'synthetic-smoke',
+    needsSandbox,
+    // An explicit investigation selection without credentials still starts it, to fail fast.
+    startInvestigationServer: hasSandbox || needsSandbox,
     fellBackToSmoke: !requested && !hasSandbox,
   };
 };

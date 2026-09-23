@@ -62,6 +62,14 @@ describe('evals_nightshift_investigations config set', () => {
     expect(servers.kbnTestServer.serverArgs).toEqual(tracing.kbnTestServer.serverArgs);
   });
 
+  it('starts the investigation server for an explicit smoke selection when credentials are present', () => {
+    // Switching the selection later reuses this server, so it must already have the engine.
+    const { servers } = loadConfig({ ...SANDBOX_ENV, NIGHTSHIFT_DATASETS: 'synthetic-smoke' });
+    expect(servers.kbnTestServer.serverArgs).toContain(
+      '--xpack.nightshift_investigations.enabled=true'
+    );
+  });
+
   it('enables the investigation availability flag and engine by default with credentials', () => {
     const { servers } = loadConfig(SANDBOX_ENV);
     const args = servers.kbnTestServer.serverArgs;
