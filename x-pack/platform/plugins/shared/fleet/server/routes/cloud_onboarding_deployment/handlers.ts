@@ -9,6 +9,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import type { CloudOnboardingDeployment } from '../../../common/types';
+import { CLOUD_CONNECTOR_SAVED_OBJECT_TYPE } from '../../../common/constants';
 
 import { cloudOnboardingDeploymentService } from '../../services/cloud_onboarding_deployment';
 import type { FleetRequestHandler } from '../../types';
@@ -99,6 +100,22 @@ export const updateCloudOnboardingDeploymentHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   const fleetContext = await context.fleet;
   const { internalSoClient } = fleetContext;
+
+  // Validate non-null connectorId is space-scoped, matching the create-time invariant.
+  if (request.body.connectorId != null) {
+    try {
+      await internalSoClient.get(CLOUD_CONNECTOR_SAVED_OBJECT_TYPE, request.body.connectorId);
+    } catch (error) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+        return response.badRequest({
+          body: {
+            message: `Cloud connector ${request.body.connectorId} not found in this space`,
+          },
+        });
+      }
+      throw error;
+    }
+  }
 
   try {
     const deployment = await cloudOnboardingDeploymentService.update(
