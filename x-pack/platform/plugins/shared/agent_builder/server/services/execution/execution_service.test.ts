@@ -1004,6 +1004,19 @@ describe('AgentExecutionService', () => {
       expect(events[0].id).toBe(`${roundId}::user_message`);
     });
 
+    it('trims the message once, so the receipt-time write and the stored execution agree', async () => {
+      await converse({ nextInput: { message: '  hi  ' } });
+
+      // The receipt-time event, written before the run is dispatched.
+      const [{ events }] = conversationClient.appendEvents.mock.calls[0];
+      expect(events[0]).toMatchObject({ data: { message: 'hi' } });
+
+      // What the record stores for the run to read back: the same trimmed text, so the round the
+      // completed run rewrites carries it too instead of the untrimmed original.
+      const [{ agentParams }] = mockExecutionClient.create.mock.calls[0];
+      expect((agentParams as { nextInput: { message: string } }).nextInput.message).toBe('hi');
+    });
+
     it('records the execution before writing, so a replayed request cannot duplicate the message', async () => {
       mockExecutionClient.create.mockRejectedValueOnce(
         Object.assign(new Error('conflict'), { statusCode: 409 })

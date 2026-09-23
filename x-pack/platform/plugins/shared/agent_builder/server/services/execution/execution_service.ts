@@ -686,9 +686,19 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       request
     );
 
-    return validated
-      ? { ...params, nextInput: { ...params.nextInput, attachments: validated } }
-      : params;
+    // Trimmed once here so the receipt-time write and the round the completed run rewrites agree
+    // on the text; `undefined` stays `undefined` for a purely attachment-driven message.
+    const message =
+      params.nextInput.message !== undefined ? params.nextInput.message.trim() : undefined;
+
+    return {
+      ...params,
+      nextInput: {
+        ...params.nextInput,
+        message,
+        ...(validated ? { attachments: validated } : {}),
+      },
+    };
   }
 
   private createExecutionClient(): AgentExecutionClient {
