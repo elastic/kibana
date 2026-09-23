@@ -9,6 +9,14 @@ import type { Locator, ScoutPage } from '@kbn/scout-security';
 
 const HISTORY_APP_PATH = 'security/administration/response_actions_history';
 
+// Page view lists agent types above these options, and the selectable only renders
+// about seven rows. The action-type options sit on the clipped edge, so a click
+// at the row's center often misses. Labels match FILTER_TYPE_OPTIONS.
+const TYPE_FILTER_QUERY_VALUE: Record<string, string> = {
+  'Triggered by rule': 'automated',
+  'Triggered manually': 'manual',
+};
+
 export class ResponseActionsHistoryPage {
   readonly table: Locator;
   readonly typesFilterButton: Locator;
@@ -32,12 +40,87 @@ export class ResponseActionsHistoryPage {
   }
 
   async toggleTypeFilter(label: string): Promise<void> {
-    const option = this.page.testSubj.locator('types-filter-option').filter({ hasText: label });
-    if (!(await option.isVisible())) {
-      await this.typesFilterButton.click();
-      await option.waitFor({ state: 'visible' });
+    const option = this.typeFilterOption(label);
+    await this.openTypesFilter();
+    const shouldSelect = (await option.getAttribute('aria-checked')) !== 'true';
+
+    await this.clickTypeOption(option);
+    if (!(await this.reachesCheckedState(option, shouldSelect, 2_000))) {
+      await this.clickTypeOption(option);
+      if (!(await this.reachesCheckedState(option, shouldSelect, 5_000))) {
+        throw new Error(
+          `Types filter "${label}" did not become ${shouldSelect ? 'checked' : 'unchecked'}`
+        );
+      }
     }
+
+    await this.closeTypesFilter();
+    await this.waitForTypeQuery(label, shouldSelect);
+  }
+
+  private typeFilterOption(label: string): Locator {
+    return this.page.testSubj.locator('types-filter-option').filter({ hasText: label });
+  }
+
+  private typesFilterList(): Locator {
+    return this.page.testSubj.locator('response-actions-list-types-filter-popoverList');
+  }
+
+  private async openTypesFilter(): Promise<void> {
+    const list = this.typesFilterList();
+    if (await list.isVisible()) {
+      return;
+    }
+    await this.typesFilterButton.click();
+    await list.waitFor({ state: 'visible' });
+  }
+
+  private async closeTypesFilter(): Promise<void> {
+    const list = this.typesFilterList();
+    if (!(await list.isVisible())) {
+      return;
+    }
+    await this.page.keyboard.press('Escape');
+    if (await list.isVisible()) {
+      await this.typesFilterButton.click();
+    }
+    await list.waitFor({ state: 'hidden' });
+  }
+
+  // Scroll before clicking. The option is in the DOM while its center sits
+  // outside the list viewport, and Playwright then clicks whatever is underneath.
+  private async clickTypeOption(option: Locator): Promise<void> {
+    await option.evaluate((element) => {
+      element.scrollIntoView({ block: 'center' });
+    });
     await option.click();
+  }
+
+  private async reachesCheckedState(
+    option: Locator,
+    selected: boolean,
+    timeout: number
+  ): Promise<boolean> {
+    const checkedState = selected
+      ? option.and(this.page.locator('[aria-checked="true"]'))
+      : option.and(this.page.locator(':not([aria-checked="true"])'));
+    try {
+      await checkedState.waitFor({ state: 'attached', timeout });
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  private async waitForTypeQuery(label: string, selected: boolean): Promise<void> {
+    const value = TYPE_FILTER_QUERY_VALUE[label];
+    if (!value) {
+      return;
+    }
+    await this.page.waitForURL((url) => {
+      const types = new URL(url).searchParams.get('types')?.split(',').filter(Boolean) ?? [];
+      return selected ? types.includes(value) : !types.includes(value);
+    });
   }
 
   ruleLinkForHost(hostname: string): Locator {
