@@ -14,12 +14,12 @@
 /**
  * Approval-gate eval for the managed rule-tuning worker/review pair.
  *
- * WHY THIS SPEC EXISTS: `src/workflow_task.ts` answers every review child's gate with
- * `approved: true` and grades the resulting proposal. That measures the *decision* — but a
- * suite that only ever approves cannot show that the gate is load-bearing, because a gate
- * that ignored its input would score identically. This spec leaves the gate unanswered,
- * takes BOTH arms, and asserts the observable difference against the detection engine and
- * the alerts index:
+ * WHY THIS SPEC EXISTS: `src/workflow_task.ts` approves every review's proposal through
+ * the proposals decision API and grades the resulting proposal. That measures the
+ * *decision* — but a suite that only ever approves cannot show that the gate is
+ * load-bearing, because a gate that ignored its input would score identically. This spec
+ * leaves the gate unanswered, takes BOTH arms, and asserts the observable difference
+ * against the detection engine and the alerts index:
  *
  *   reject → the rule's `query` is byte-identical to its pre-run value (nothing was applied)
  *            and the harvested alerts carry the dismissed tag;
@@ -265,6 +265,9 @@ evaluate.describe(
         const gate = await runRuleTuningToApprovalGate({ fetch, log });
         pendingExecutionIds.add(gate.workflowExecutionId);
         pendingExecutionIds.add(gate.reviewExecutionId);
+        // The proposal child hosts the gate itself; cancel it too so afterEach
+        // cannot leave a parked gate holding the review's concurrency slot.
+        pendingExecutionIds.add(gate.proposalChildExecutionId);
 
         const proposedQuery = proposedQueryFrom(gate);
         if (proposedQuery === before.query) {
@@ -278,6 +281,7 @@ evaluate.describe(
         const settled = await respondToReviewGate({
           fetch,
           log,
+          proposalRecordId: gate.proposalRecord.id,
           reviewExecutionId: gate.reviewExecutionId,
           approved: false,
         });
@@ -350,6 +354,7 @@ evaluate.describe(
         const gate = await runRuleTuningToApprovalGate({ fetch, log });
         pendingExecutionIds.add(gate.workflowExecutionId);
         pendingExecutionIds.add(gate.reviewExecutionId);
+        pendingExecutionIds.add(gate.proposalChildExecutionId);
 
         // The proposal is read from the PAUSED review's diagnose step — the same persisted
         // value the gate renders and the apply step interpolates — and captured before the
@@ -366,6 +371,7 @@ evaluate.describe(
         const settled = await respondToReviewGate({
           fetch,
           log,
+          proposalRecordId: gate.proposalRecord.id,
           reviewExecutionId: gate.reviewExecutionId,
           approved: true,
         });

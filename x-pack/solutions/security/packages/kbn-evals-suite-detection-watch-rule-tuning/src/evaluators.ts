@@ -15,6 +15,33 @@ import {
 import type { ExceptionEntry, RuleTuningProposal } from './workflow_task';
 
 const asProposal = (output: unknown): RuleTuningProposal => output as RuleTuningProposal;
+
+/**
+ * The narrative fields every `diagnose_rule` schema branch requires on top of
+ * `change_type` + `summary` (title, fp_pattern, reasoning) and the confidence
+ * vocabulary. Declared here because `workflow_task.ts`'s proposal interface
+ * predates them; the yaml's four oneOf branches are the source of truth.
+ */
+const NARRATIVE_FIELD_LIST = ['title', 'fp_pattern', 'reasoning'] as const;
+const CONFIDENCES = ['low', 'medium', 'high'] as const;
+
+interface ProposalNarrative {
+  title?: string;
+  fp_pattern?: string;
+  reasoning?: string;
+  confidence?: string;
+}
+
+const narrativeOf = (proposal: unknown): ProposalNarrative => proposal as ProposalNarrative;
+
+const narrativeValidFor = (proposal: unknown): boolean => {
+  const narrative = narrativeOf(proposal);
+  const fieldsPresent = NARRATIVE_FIELD_LIST.every(
+    (field) => typeof narrative[field] === 'string' && (narrative[field] as string).trim() !== ''
+  );
+  const confidenceValid = (CONFIDENCES as readonly string[]).includes(String(narrative.confidence));
+  return fieldsPresent && confidenceValid;
+};
 const asExpected = (expected: unknown): { change_type?: ChangeType } | undefined =>
   expected as { change_type?: ChangeType } | undefined;
 
@@ -126,17 +153,28 @@ export const validProposal: Evaluator = {
         break;
     }
 
-    // Every branch requires `summary`, and the review_tuning gate opens only when
+    // Every branch requires `summary`, and the proposal gate opens only when
     // `structured_output.summary != null` — a summary-less proposal can never
     // produce an approval decision, whatever its change_type.
     const summaryValid = typeof proposal.summary === 'string' && proposal.summary.trim() !== '';
 
-    const valid = changeTypeValid && payloadValid && summaryValid;
+    // Every branch also requires the proposal-card narrative fields and a
+    // confidence from the schema's enum; without them the analyst's card renders
+    // with holes and the gate's confidence default kicks in.
+    const narrativeValid = narrativeValidFor(output);
+
+    const valid = changeTypeValid && payloadValid && summaryValid && narrativeValid;
 
     return {
       score: valid ? 1 : 0,
       label: valid ? 'valid' : 'invalid',
-      metadata: { changeTypeValid, payloadValid, summaryValid, ruleType: ruleType ?? null },
+      metadata: {
+        changeTypeValid,
+        payloadValid,
+        summaryValid,
+        narrativeValid,
+        ruleType: ruleType ?? null,
+      },
     };
   },
 };

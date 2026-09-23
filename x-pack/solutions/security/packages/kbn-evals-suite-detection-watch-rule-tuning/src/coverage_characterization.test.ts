@@ -75,11 +75,35 @@ const schemaBranches = (): Map<string, string> => {
   return branches;
 };
 
-/** The branch-level `required:` list — the LAST one in a chunk, not a nested item's. */
+/**
+ * The branch-level `required:` list — the LAST one in a chunk, not a nested item's.
+ */
 const requiredFields = (chunk: string): string[] => {
   const matches = [...chunk.matchAll(/required:\s*\[([^\]]+)\]/g)];
   const branchRequired = matches[matches.length - 1];
   return branchRequired ? branchRequired[1].split(',').map((field) => field.trim()) : [];
+};
+
+/**
+ * The `exception_entries` item union's operator enums, scoped to the slice between the
+ * `exception_entries:` key and the branch-level `required:` list — the confidence enum
+ * (also a lowercase bracket list) sits after it and must not leak into the vocabulary.
+ */
+const exceptionOperators = (): Set<string> => {
+  const chunk = schemaBranches().get('exception') ?? '';
+  const start = chunk.indexOf('exception_entries:');
+  const end = chunk.indexOf('required: [change_type');
+  if (start < 0 || end <= start) {
+    throw new Error(
+      'exception branch no longer declares exception_entries before its required list'
+    );
+  }
+  const items = chunk.slice(start, end);
+  return new Set(
+    [...items.matchAll(/enum:\s*\[([^\]]+)\]/g)].flatMap((match) =>
+      match[1].split(',').map((operator) => operator.trim())
+    )
+  );
 };
 
 describe('rule-tuning coverage characterization', () => {
@@ -129,42 +153,66 @@ describe('rule-tuning coverage characterization', () => {
     expect(schema).not.toMatch(/enum:\s*\[\s*exception/);
   });
 
-  it('characterizes the payload field every oneOf branch requires', () => {
+  it('characterizes the payload fields every oneOf branch requires', () => {
     // The per-branch payload is the contract validProposal enforces: an exception
     // without entries, a query without a query, or a risk_score without a score and
-    // severity can never be rendered by the gate or applied by the apply steps.
+    // severity can never be rendered by the proposal gate or applied by the action.
+    // Since upstream #290665, EVERY branch additionally requires the proposal-card
+    // narrative fields (title, fp_pattern, reasoning) and a confidence — pin the full
+    // list so dropping one from the schema is a deliberate, reviewed change.
+    const narrative = ['title', 'fp_pattern', 'reasoning', 'confidence'];
     const branches = schemaBranches();
     expect(requiredFields(branches.get('exception') ?? '')).toEqual([
       'change_type',
       'summary',
       'exception_entries',
+      ...narrative,
     ]);
     expect(requiredFields(branches.get('query') ?? '')).toEqual([
       'change_type',
       'summary',
       'proposed_query',
+      ...narrative,
     ]);
     expect(requiredFields(branches.get('risk_score') ?? '')).toEqual([
       'change_type',
       'summary',
       'proposed_risk_score',
       'proposed_severity',
+      ...narrative,
     ]);
-    // `manual` carries no payload beyond the summary every branch requires.
-    expect(requiredFields(branches.get('manual') ?? '')).toEqual(['change_type', 'summary']);
+    // `manual` carries no payload beyond the summary + narrative every branch requires.
+    expect(requiredFields(branches.get('manual') ?? '')).toEqual([
+      'change_type',
+      'summary',
+      ...narrative,
+    ]);
   });
 
   it('characterizes the exception operator vocabulary validProposal mirrors', () => {
     // The evaluator maps each operator to the payload field it requires. If the yaml
     // adds or removes an operator, an entry the workflow could apply would score
     // invalid (or vice versa), so the two lists must stay identical.
+    expect(exceptionOperators()).toEqual(new Set(Object.keys(EXCEPTION_OPERATOR_PAYLOAD)));
+  });
+
+  it('characterizes the exception entry bounds as the platform exception schema', () => {
+    // An unbounded recommendation here is rejected when the proposal is created, so
+    // the review fails and the alerts wait for the next sweep instead of reaching an
+    // analyst. Pin the bounds so loosening them is deliberate.
     const exception = schemaBranches().get('exception') ?? '';
-    const operators = new Set(
-      [...exception.matchAll(/enum:\s*\[([^\]]+)\]/g)].flatMap((match) =>
-        match[1].split(',').map((operator) => operator.trim())
-      )
-    );
-    expect(operators).toEqual(new Set(Object.keys(EXCEPTION_OPERATOR_PAYLOAD)));
+    expect(exception).toMatch(/maxItems: 100/);
+    expect(exception).toMatch(/maxLength: 1024/);
+    expect(exception).toMatch(/maxItems: 1000/);
+  });
+
+  it('characterizes the diagnose confidence vocabulary as low|medium|high', () => {
+    // Every branch bounds confidence to the same enum; the proposal gate forwards it
+    // with a `medium` default, so a vocabulary change silently rewrites what the
+    // analyst sees on the card.
+    for (const branch of CHANGE_TYPES) {
+      expect(schemaBranches().get(branch) ?? '').toMatch(/enum: \[low, medium, high\]/);
+    }
   });
 
   it('characterizes the golden label contract of all fixtures', () => {

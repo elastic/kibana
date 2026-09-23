@@ -11,6 +11,7 @@ import {
   TerminalExecutionStatuses,
   NonTerminalExecutionStatuses,
   ExecutionStatus,
+  type ChildWorkflowExecutionItem,
   type WorkflowExecutionDto,
   type WorkflowExecutionListDto,
   type WorkflowExecutionListItemDto,
@@ -22,6 +23,26 @@ import {
   WORKFLOWS_API_VERSION,
   type ChangeType,
 } from './constants';
+
+/**
+ * The `system-create-investigation-proposal` managed workflow. Since the proposal
+ * decision moved behind a proposal record (rule_tuning_review.yaml now fans out
+ * `propose_*` children instead of parking on a review-level gate), this child
+ * execution hosts the actual `waitForApproval` gate.
+ */
+const CREATE_INVESTIGATION_PROPOSAL_WORKFLOW_ID = 'system-create-investigation-proposal';
+
+/**
+ * Proposals decision API (agentic_investigations plugin). Approve/dismiss are the
+ * same surfaces an analyst's inbox uses; both release the parked gate through the
+ * plugin's `ProposalsService.releaseGate`, which resumes the child execution.
+ */
+const PROPOSALS_API_URL = '/internal/investigations/proposals';
+const PROPOSALS_API_VERSION = '1';
+const proposalsHeaders = {
+  'elastic-api-version': PROPOSALS_API_VERSION,
+  'kbn-xsrf': 'true',
+};
 
 /**
  * The `ai.agent` step (diagnose_rule) whose structured output we grade. Matched on
@@ -56,6 +77,19 @@ export interface RuleTuningProposal {
   proposed_severity?: string;
 }
 
+/**
+ * The subset of the agentic_investigations plugin's `Proposal` (zod-inferred, see
+ * `common/proposals/proposal.ts`) that the harness reads. The list route returns
+ * `ProposalWithMetadata[]`; these fields are the join/decision keys.
+ */
+export interface ProposalRecord {
+  id: string;
+  status: string;
+  /** The gate execution this proposal is parked behind — the child execution id. */
+  workflowExecutionId?: string;
+  decision?: 'approved' | 'dismissed';
+}
+
 /** Verdict graded by the suite's evaluators: the diagnose proposal plus run metadata. */
 export interface RuleTuningVerdict extends RuleTuningProposal {
   executionId: string;
@@ -84,15 +118,43 @@ const isTerminal = (status: ExecutionStatus): boolean => TerminalExecutionStatus
 const nonTerminalQuery = { statuses: [...NonTerminalExecutionStatuses] };
 
 /**
- * True while a REVIEW child execution is parked on its review_tuning
- * human-approval gate.
+ * True while the REVIEW child execution is parked on its `propose_*` fan-out.
  *
- * The gate reports `waiting_for_input`, not `waiting` — an earlier bare-string check for
- * 'waiting' alone never matched, so every run sat at the gate until the next task's
- * stale-cancel killed it and no fixture ever scored. Exported so a test pins the contract.
+ * Post-proposal-gate, the review no longer parks `waiting_for_input` itself: it runs
+ * `propose_query`/`propose_risk_score`/`propose_exception`/`propose_manual` — each a
+ * `workflow.execute` child of `system-create-investigation-proposal` — and settles into
+ * `waiting_for_child` until the proposal's gate is decided. (The optional manual-autonomy
+ * entry gate `propose_entry` can also park the review, but its `autonomy_level` defaults
+ * to `assisted`, so the harness normally never hits it.)
+ */
+export const isAwaitingProposalChild = (status: ExecutionStatus): boolean =>
+  status === ExecutionStatus.WAITING_FOR_CHILD;
+
+/**
+ * True while a `system-create-investigation-proposal` child execution is parked on its
+ * `waitForApproval` gate — the actual approval surface this harness answers.
  */
 export const isAwaitingApproval = (status: ExecutionStatus): boolean =>
   status === ExecutionStatus.WAITING_FOR_INPUT || status === ExecutionStatus.WAITING;
+
+/**
+ * The one proposal-child execution parked on its gate, or `undefined` while the review
+ * has not fanned out yet. More than one pending child is always fatal: a single seeded
+ * review proposes exactly one tuning change, so a second pending child means the stack
+ * is shared or the cancel pass missed something, and answering either would be a guess.
+ */
+export const soleProposalChild = (
+  children: ChildWorkflowExecutionItem[]
+): ChildWorkflowExecutionItem | undefined => {
+  const pending = children.filter((child) => isAwaitingApproval(child.status));
+  if (pending.length > 1) {
+    throw new Error(
+      `Expected at most 1 pending proposal child on the review, found ${pending.length}: ` +
+        `${children.map((c) => `${c.executionId}@${c.status}(${c.workflowId})`).join(', ')}`
+    );
+  }
+  return pending[0];
+};
 
 /**
  * True for the 409 the resume route returns when an execution has reached `waiting_for_input`
@@ -202,42 +264,98 @@ const getExecution = async (
   })) as unknown as WorkflowExecutionDto;
 
 /**
- * Respond to one review child's gate with the given decision, retrying the 409
+ * Child executions the review fanned out (`workflow.execute` sub-workflows).
+ *
+ * Mirrors the children route's own service call
+ * (`workflows_management/server/api/routes/executions/get_children_executions.ts` →
+ * `getChildWorkflowExecutions`): `GET /api/workflows/executions/{executionId}/children`,
+ * which returns `ChildWorkflowExecutionItem[]` — including the proposal children that
+ * host the review's gates.
+ */
+const listReviewChildren = async (
+  fetch: HttpHandler,
+  reviewExecutionId: string
+): Promise<ChildWorkflowExecutionItem[]> =>
+  (await fetch(`/api/workflows/executions/${reviewExecutionId}/children`, {
+    method: 'GET',
+    version: WORKFLOWS_API_VERSION,
+    headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
+  })) as unknown as ChildWorkflowExecutionItem[];
+
+/**
+ * The pending proposal record for one parked proposal-child execution, or `undefined`
+ * while the child's gate exists but the record is not queryable yet.
+ *
+ * The proposal record is stamped with its gate execution id at creation (the
+ * `proposals.createProposal` step is the only caller that knows the execution id —
+ * see `register_routes.ts` in the agentic_investigations plugin), so the child
+ * executionId is the join key. Mirrors `get_proposal.ts` +
+ * `isAwaitingDecision` (`common/proposals/proposal.ts`: `pending` is the only status
+ * valid while undecided).
+ */
+const findPendingProposalForChild = async (
+  fetch: HttpHandler,
+  childExecutionId: string
+): Promise<ProposalRecord | undefined> => {
+  const { proposals = [] } = (await fetch(`${PROPOSALS_API_URL}?size=100`, {
+    method: 'GET',
+    headers: proposalsHeaders,
+  })) as unknown as { proposals?: ProposalRecord[] };
+  const pending = proposals.filter(
+    (p) => p.status === 'pending' && p.workflowExecutionId === childExecutionId
+  );
+  if (pending.length > 1) {
+    throw new Error(
+      `Expected at most 1 pending proposal for gate execution ${childExecutionId}, found ` +
+        `${pending.length}: ${pending.map((p) => p.id).join(', ')}`
+    );
+  }
+  return pending[0];
+};
+
+/**
+ * Respond to one proposal's gate through the proposals decision API, retrying the 409
  * waiting-step race.
  *
- * The child reaching `waiting_for_input` does not guarantee its waiting STEP row is
- * queryable yet; `resumeWorkflowExecution` then rejects with 409 `waiting step not
- * found` — a read-after-write race, not a real conflict. Re-poll through it. A genuine
- * double-approval 409 does not match `isWaitingStepNotReady` and still throws.
+ * This is the surface an analyst's inbox uses: `POST /internal/investigations/proposals/{id}/approve`
+ * (or `/dismiss`), registered in the agentic_investigations plugin's `approve_proposal.ts` /
+ * `dismiss_proposal.ts`. The route releases the parked gate through
+ * `ProposalsService.releaseGate`, which resolves the waiting step itself — the harness
+ * does NOT post to the raw `/resume` endpoint anymore.
  *
- * `approved` is the arm under test: the review's apply steps interpolate the same payload
- * (`steps.review_tuning.output.response.approved`) that an analyst's inbox decision sends,
- * so a reject here is byte-identical to a user clicking Dismiss.
+ * The child gate reaching `waiting_for_input` does not guarantee its waiting STEP row is
+ * queryable yet; `releaseGate` then rejects with 409 `waiting step not found` — a
+ * read-after-write race, not a real conflict. Re-poll through it. A genuine
+ * double-decision 409 does not match `isWaitingStepNotReady` and still throws.
  */
-const resumeApprovalGate = async (
+const decideProposal = async (
   fetch: HttpHandler,
   log: ToolingLog,
-  executionId: string,
+  proposalId: string,
   pollIntervalMs: number,
   approved: boolean
 ): Promise<boolean> => {
+  const url = approved
+    ? `${PROPOSALS_API_URL}/${encodeURIComponent(proposalId)}/approve`
+    : `${PROPOSALS_API_URL}/${encodeURIComponent(proposalId)}/dismiss`;
+  // Both request bodies mirror the plugin's zod schemas (approveProposalRequestSchema /
+  // dismissProposalRequestSchema). The route performs no writes — the decision is
+  // written behind the gate — so the response body is not trusted; the caller re-polls.
+  const body = approved ? JSON.stringify({}) : JSON.stringify({ dismissReason: 'other' });
   try {
-    await fetch(`/api/workflows/executions/${executionId}/resume`, {
+    await fetch(url, {
       method: 'POST',
-      version: WORKFLOWS_API_VERSION,
-      headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
-      body: JSON.stringify({ input: { approved } }),
+      headers: proposalsHeaders,
+      body,
     });
-    log.info(
-      `Responded approved=${approved} to the review_tuning gate of review execution ${executionId}`
-    );
+    log.info(`Decided proposal ${proposalId}: ${approved ? 'approved' : 'dismissed'}`);
     return true;
   } catch (error) {
     if (!isWaitingStepNotReady(error)) {
       throw error;
     }
     log.info(
-      `Approval gate for review execution ${executionId} is not resumable yet ` +
+      `Proposal ${proposalId}'s gate is not resumable yet ` +
         `(waiting step not persisted); retrying after ${pollIntervalMs}ms`
     );
     await sleep(pollIntervalMs);
@@ -262,7 +380,13 @@ const cancelStaleExecutions = async ({
   log: ToolingLog;
   pollIntervalMs: number;
 }): Promise<void> => {
-  for (const workflowId of [RULE_TUNING_WORKER_WORKFLOW_ID, RULE_TUNING_REVIEW_WORKFLOW_ID]) {
+  for (const workflowId of [
+    RULE_TUNING_WORKER_WORKFLOW_ID,
+    RULE_TUNING_REVIEW_WORKFLOW_ID,
+    // The proposal children host the gates now; a leftover parked gate is not ours
+    // to decide and would hold the review's concurrency slot.
+    CREATE_INVESTIGATION_PROPOSAL_WORKFLOW_ID,
+  ]) {
     const stale = await listActiveExecutions(fetch, workflowId);
     if ((stale.results ?? []).length > 0) {
       // Route cancels ALL active executions of this workflow (no body needed).
@@ -452,22 +576,36 @@ export const runRuleTuningWorkflow = async ({
 
   const deadline = Date.now() + maxWaitMs;
   let worker: WorkflowExecutionDto | undefined;
-  /** Review executions we have already approved, so a re-poll cannot double-approve. */
-  const approvedReviews = new Set<string>();
+  /**
+   * Proposal children whose gate we have already decided, so a re-poll cannot
+   * double-decide. Keyed by the review child execution id.
+   */
+  const decidedReviews = new Set<string>();
 
   while (Date.now() < deadline) {
     worker = await getExecution(fetch, workflowExecutionId);
     if (isTerminal(worker.status)) break;
 
-    // Discover review children parked on their approval gates and approve them.
+    // Discover review children parked on their proposal fan-out and decide each
+    // pending proposal exactly like the analyst inbox does (proposals decision API).
     // Reviews are keyed `rule-tuning-review-<rule_uuid>` (max:1, drop), so an
-    // un-approved review also blocks any later sweep from re-opening that rule's
-    // gate — approve, don't leave parked.
+    // un-decided review also blocks any later sweep from re-opening that rule's
+    // gate — decide, don't leave parked.
     const activeReviews = await listActiveExecutions(fetch, RULE_TUNING_REVIEW_WORKFLOW_ID);
     for (const review of activeReviews.results ?? []) {
-      if (!approvedReviews.has(review.id) && isAwaitingApproval(review.status)) {
-        const resumed = await resumeApprovalGate(fetch, log, review.id, pollIntervalMs, true);
-        if (resumed) approvedReviews.add(review.id);
+      const eligible = !decidedReviews.has(review.id) && isAwaitingProposalChild(review.status);
+      const proposalChild = eligible
+        ? (await listReviewChildren(fetch, review.id)).find(
+            (c) => c.workflowId === CREATE_INVESTIGATION_PROPOSAL_WORKFLOW_ID
+          )
+        : undefined;
+      const proposalRecord =
+        proposalChild && isAwaitingApproval(proposalChild.status)
+          ? await findPendingProposalForChild(fetch, proposalChild.executionId)
+          : undefined;
+      if (proposalRecord) {
+        const decided = await decideProposal(fetch, log, proposalRecord.id, pollIntervalMs, true);
+        if (decided) decidedReviews.add(review.id);
       }
     }
 
@@ -525,28 +663,33 @@ export const runRuleTuningWorkflow = async ({
   };
 };
 
-/** A review child parked on its `waitForApproval` gate, with the proposal it is showing. */
+/** A review parked on its proposal child, with the pending proposal record. */
 export interface RuleTuningApprovalRequest {
   /** The worker sweep that fanned this review out (kept for diagnostics). */
   workflowExecutionId: string;
-  /** The review child execution currently parked on `review_tuning`. */
+  /** The review child execution currently parked in `waiting_for_child`. */
   reviewExecutionId: string;
+  /** The `system-create-investigation-proposal` child execution hosting the gate. */
+  proposalChildExecutionId: string;
+  /** The pending proposal record this harness will approve or dismiss. */
+  proposalRecord: ProposalRecord;
   /** The diagnose proposal the gate is waiting on a decision for. */
   proposal: RuleTuningProposal;
 }
 
 /**
- * Drive the worker until its review child PARKS on the approval gate, and stop there.
+ * Drive the worker until its review child PARKS on the proposal gate, and stop there.
  *
- * `runRuleTuningWorkflow` answers every gate with `approved: true`, so it can only ever
- * observe the apply arm. This harness deliberately leaves the gate unanswered so a spec can
- * take both arms and assert the observable difference between them — which is the only way
- * to show the gate is load-bearing rather than decorative.
+ * `runRuleTuningWorkflow` approves every proposal through the decision API, so it can only
+ * ever observe the apply arm. This harness deliberately leaves the gate unanswered so a
+ * spec can take both arms and assert the observable difference between them — which is the
+ * only way to show the gate is load-bearing rather than decorative.
  *
  * The same seeding/harvest contract as the auto-approve path applies: exactly one review
- * child must be opened, and it must carry a diagnose proposal (there is nothing to approve
- * or reject otherwise). Every failure path throws with the state that explains it — never
- * returns a "nothing to do" and never silently skips.
+ * child must be opened, and it must carry a diagnose proposal hosting exactly one pending
+ * proposal gate (there is nothing to approve or reject otherwise). Every failure path
+ * throws with the state that explains it — never returns a "nothing to do" and never
+ * silently skips.
  */
 export const runRuleTuningToApprovalGate = async ({
   fetch,
@@ -602,57 +745,86 @@ export const runRuleTuningToApprovalGate = async ({
       const review = await getExecution(fetch, child.id);
       lastReviewStatus = review.status;
 
-      if (isAwaitingApproval(review.status)) {
-        const proposal = readProposalOrThrow(review);
-        log.info(
-          `Review execution ${review.id} is parked on its approval gate ` +
-            `(status: ${review.status}, change_type: ${proposal.change_type})`
-        );
-        return { workflowExecutionId, reviewExecutionId: review.id, proposal };
-      }
+      if (isAwaitingProposalChild(review.status)) {
+        // The review has fanned out its propose_* children and is parked until the
+        // proposal's gate is decided. Exactly one proposal child may be pending —
+        // `soleProposalChild` throws on more than one.
+        const proposalChild = soleProposalChild(await listReviewChildren(fetch, review.id));
+        if (proposalChild) {
+          const proposalRecord = await findPendingProposalForChild(
+            fetch,
+            proposalChild.executionId
+          );
+          if (proposalRecord) {
+            const diagnoseProposal = readProposalOrThrow(review);
+            log.info(
+              `Review execution ${review.id} is parked on its proposal gate ` +
+                `(status: ${review.status}, change_type: ${diagnoseProposal.change_type}, ` +
+                `proposal ${proposalRecord.id}, gate execution ${proposalChild.executionId})`
+            );
+            return {
+              workflowExecutionId,
+              reviewExecutionId: review.id,
+              proposalChildExecutionId: proposalChild.executionId,
+              proposalRecord,
+              proposal: diagnoseProposal,
+            };
+          }
+        }
+        // The proposal child (or its record) is not queryable yet — a
+        // read-after-write race between the fan-out and the record write.
+        // Keep polling; a settled worker below turns this into a hard error.
+        await sleep(pollIntervalMs);
+      } else {
+        // The child finished without ever pausing on the proposal fan-out: the gate is
+        // guarded on the diagnose step producing a summary, so there is no pending
+        // decision to answer. Fail with the state that distinguishes the two causes
+        // instead of polling a review that will never park.
+        if (isTerminal(review.status)) {
+          throw new Error(
+            `Review execution ${review.id} reached ${review.status} without pausing on its ` +
+              `proposal fan-out (waiting_for_child) — ${explainMissingProposal(
+                review.stepExecutions ?? []
+              )}`
+          );
+        }
 
-      // The child finished without ever pausing: the gate is guarded on the diagnose step
-      // producing a summary, so there is no pending decision to answer. Fail with the state
-      // that distinguishes the two causes instead of polling a review that will never park.
-      if (isTerminal(review.status)) {
-        throw new Error(
-          `Review execution ${review.id} reached ${review.status} without pausing at the ` +
-            `approval gate (pendingApproval=false) — ${explainMissingProposal(
-              review.stepExecutions ?? []
-            )}`
-        );
+        await sleep(pollIntervalMs);
       }
-
-      await sleep(pollIntervalMs);
     }
   }
 
   throw new Error(
-    `Review execution never paused at the approval gate within ${maxWaitMs}ms ` +
+    `Review execution never paused on its proposal gate within ${maxWaitMs}ms ` +
       `(last review status: ${lastReviewStatus ?? 'no review child discovered'}, ` +
       `worker status: ${lastWorkerStatus ?? 'unknown'}) — the spec needs ` +
-      `pendingApproval=true to take either arm.`
+      `the review parked in waiting_for_child with one pending proposal to take either arm.`
   );
 };
 
 /**
- * Answer a parked review's gate with `approved` and wait for the review to settle.
+ * Answer a parked review's proposal gate and wait for the review to settle.
  *
- * Posts the same payload an analyst's inbox decision sends, on the workflow's own resume
- * route, and retries the 409 `waiting step not found` read-after-write race (see
- * `resumeApprovalGate`). Returns the terminal review execution so the caller can read the
- * apply steps' outcomes out of it.
+ * Posts the decision an analyst's inbox sends — the proposals decision API
+ * (`POST /internal/investigations/proposals/{id}/approve|dismiss`), which releases the
+ * gate through `ProposalsService.releaseGate` — and retries the 409 `waiting step not
+ * found` read-after-write race (see `decideProposal`). Returns the terminal review
+ * execution so the caller can read the apply steps' outcomes out of it.
  */
 export const respondToReviewGate = async ({
   fetch,
   log,
-  reviewExecutionId,
+  proposalRecordId,
   approved,
+  reviewExecutionId,
   maxWaitMs = 5 * 60_000,
   pollIntervalMs = 3_000,
 }: {
   fetch: HttpHandler;
   log: ToolingLog;
+  /** The pending proposal record the decision is posted against. */
+  proposalRecordId: string;
+  /** The review execution to wait on after the decision (kept for diagnostics). */
   reviewExecutionId: string;
   approved: boolean;
   maxWaitMs?: number;
@@ -662,12 +834,12 @@ export const respondToReviewGate = async ({
 
   let answered = false;
   while (!answered && Date.now() < deadline) {
-    answered = await resumeApprovalGate(fetch, log, reviewExecutionId, pollIntervalMs, approved);
+    answered = await decideProposal(fetch, log, proposalRecordId, pollIntervalMs, approved);
   }
   if (!answered) {
     throw new Error(
-      `Could not answer the approval gate of review execution ${reviewExecutionId} within ` +
-        `${maxWaitMs}ms — the waiting step never became resumable.`
+      `Could not answer the proposal gate of ${proposalRecordId} (review execution ` +
+        `${reviewExecutionId}) within ${maxWaitMs}ms — the waiting step never became resumable.`
     );
   }
 
@@ -681,7 +853,7 @@ export const respondToReviewGate = async ({
 
   throw new Error(
     `Review execution ${reviewExecutionId} did not settle within ${maxWaitMs}ms after ` +
-      `answering its gate (approved=${approved}).`
+      `deciding proposal ${proposalRecordId} (approved=${approved}).`
   );
 };
 

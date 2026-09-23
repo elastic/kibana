@@ -60,9 +60,16 @@ describe('rule-tuning evaluators', () => {
   });
 
   describe('validProposal', () => {
+    // Every oneOf branch in the diagnose schema requires the narrative fields and
+    // a confidence on top of change_type + summary, so the base fixture carries
+    // them — a branch-specific test strips what it pins.
     const base: RuleTuningVerdict = {
       change_type: 'exception',
+      title: 'Exception for the build agent',
       summary: 'FPs are all the build agent running java, not a detection',
+      fp_pattern: 'Every FP alert comes from the shared build agent host',
+      reasoning: '1. All 12 FPs share host.name. 2. The rule logic is otherwise correct.',
+      confidence: 'high',
       exception_entries: [{ field: 'host.name', operator: 'is', value: 'build-agent-01' }],
       executionId: 'exec-4',
       executionStatus: 'completed' as never,
@@ -71,6 +78,46 @@ describe('rule-tuning evaluators', () => {
     it('accepts a well-formed exception proposal', async () => {
       const result = await validProposal.evaluate!({ output: base } as never);
       expect(result.score).toBe(1);
+    });
+
+    it('rejects a proposal missing any of the narrative fields every branch requires', async () => {
+      // The schema requires title, fp_pattern and reasoning on ALL four oneOf
+      // branches: the proposal card renders them, so a hole is schema drift.
+      for (const field of ['title', 'fp_pattern', 'reasoning'] as const) {
+        const result = await validProposal.evaluate!({
+          output: { ...base, [field]: undefined },
+        } as never);
+        expect(result.score).toBe(0);
+        expect((result.metadata as { narrativeValid: boolean }).narrativeValid).toBe(false);
+      }
+    });
+
+    it('rejects a blank narrative field, not just a missing one', async () => {
+      const result = await validProposal.evaluate!({
+        output: { ...base, reasoning: '   ' },
+      } as never);
+      expect(result.score).toBe(0);
+    });
+
+    it('rejects a confidence outside the schema enum', async () => {
+      // The schema bounds confidence to [low, medium, high]; 'certain' can never
+      // be emitted by a schema-conforming run.
+      for (const confidence of ['certain', 'HIGH', '']) {
+        const result = await validProposal.evaluate!({
+          output: { ...base, confidence },
+        } as never);
+        expect(result.score).toBe(0);
+        expect((result.metadata as { narrativeValid: boolean }).narrativeValid).toBe(false);
+      }
+    });
+
+    it('accepts each schema-legal confidence value', async () => {
+      for (const confidence of ['low', 'medium', 'high'] as const) {
+        const result = await validProposal.evaluate!({
+          output: { ...base, confidence },
+        } as never);
+        expect(result.score).toBe(1);
+      }
     });
 
     it('accepts an exception entry that carries a values array', async () => {
@@ -248,7 +295,7 @@ describe('rule-tuning evaluators', () => {
     });
 
     it('rejects any branch that has no renderable summary', async () => {
-      // review_tuning's gate opens only when structured_output.summary != null, so a
+      // The proposal gate opens only when structured_output.summary != null, so a
       // summary-less proposal of ANY change_type can never reach a decision.
       const noSummary = await validProposal.evaluate!({
         output: { ...base, summary: undefined },

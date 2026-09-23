@@ -111,6 +111,10 @@ describe('the suite pipeline (real evaluators through the real summary)', () => 
     const sampled = withScoreCollection([changeTypeAccuracy, validProposal], sink);
     const proposal = {
       change_type: 'exception',
+      title: 'Exception for the build agent',
+      fp_pattern: 'Every FP alert comes from the shared build agent host',
+      reasoning: '1. All FPs share host.name. 2. The rule logic is otherwise correct.',
+      confidence: 'high',
       summary: 'the FP cluster is one known-good host',
       exception_entries: [{ field: 'host.name', operator: 'is', value: 'build-agent-01' }],
     };
