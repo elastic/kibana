@@ -67,14 +67,9 @@ const combineFilters = (
   return { bool: { filter: active } };
 };
 
-// ES has a 1 MB HTTP body limit. A terms filter with thousands of entity IDs easily
-// exceeds it once the grouping aggregation is added. Cap at 500 IDs; the tile count
-// reflects the true total while the table shows at most 500 (sorted risk-desc by the table).
-const MAX_CARD_FILTER_TERMS = 500;
 export const toTermsFilter = (ids: string[]): QueryDslQueryContainer | null => {
   if (ids.length === 0) return null;
-  const capped = ids.length > MAX_CARD_FILTER_TERMS ? ids.slice(0, MAX_CARD_FILTER_TERMS) : ids;
-  return { terms: { 'entity.id': capped } };
+  return { terms: { 'entity.id': ids } };
 };
 
 const getDefaultQuery = ({ query, filters }: EntitiesBaseURLQuery): URLQuery => ({
@@ -363,9 +358,6 @@ const EntityAnalyticsEntitiesTableContent = ({
 
     return {
       ...urlState,
-      // When a tile is selected, force risk-desc sort and reset to page 1 so the
-      // highest-risk entities from the capped 500-ID filter appear first.
-      ...(cardFilter ? { sort: DEFAULT_ENTITIES_TABLE_SORT, pageIndex: 0 } : {}),
       query: {
         ...urlState.query,
         bool: {
