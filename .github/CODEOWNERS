@@ -1114,6 +1114,7 @@ x-pack/platform/packages/shared/kbn-langchain @elastic/security-threat-hunting
 x-pack/platform/packages/shared/kbn-langgraph-checkpoint-saver @elastic/security-threat-hunting
 x-pack/platform/packages/shared/kbn-mcp-client @elastic/workchat-eng
 x-pack/platform/packages/shared/kbn-nightshift-ai @elastic/nightshift-sre-agent-team
+x-pack/platform/packages/shared/kbn-nightshift-decision-trees @elastic/nightshift-investigations-team
 x-pack/platform/packages/shared/kbn-nightshift-shared @elastic/nightshift-context-and-research-team @elastic/nightshift-sre-agent-team
 x-pack/platform/packages/shared/kbn-profiler-cli @elastic/observability-ui
 x-pack/platform/packages/shared/kbn-sample-parser @elastic/streams-ui @elastic/nightshift-sre-agent-team
@@ -3164,6 +3165,24 @@ src/platform/packages/shared/kbn-workflows/managed/definitions/significant_event
 
 # Nightshift investigations managed workflows
 src/platform/packages/shared/kbn-workflows/managed/definitions/nightshift_investigations @elastic/nightshift-context-and-research-team @elastic/nightshift-sre-agent-team
+# Decision-tree workflows and plugin surfaces (investigations team only)
+src/platform/packages/shared/kbn-workflows/managed/definitions/nightshift_investigations/decision_tree_hydrate @elastic/nightshift-investigations-team
+src/platform/packages/shared/kbn-workflows/managed/definitions/nightshift_investigations/decision_tree_reinforce @elastic/nightshift-investigations-team
+x-pack/platform/plugins/shared/nightshift_investigations/common/decision_trees.ts @elastic/nightshift-investigations-team
+x-pack/platform/plugins/shared/nightshift_investigations/server/decision_trees @elastic/nightshift-investigations-team
+x-pack/platform/plugins/shared/nightshift_investigations/server/tools/decision_tree @elastic/nightshift-investigations-team
+x-pack/platform/plugins/shared/nightshift_investigations/server/agents/decision_tree_reinforcement @elastic/nightshift-investigations-team
+x-pack/platform/plugins/shared/nightshift_investigations/server/step_definitions/decision_tree_hydrate.ts @elastic/nightshift-investigations-team
+x-pack/platform/plugins/shared/nightshift_investigations/server/step_definitions/decision_tree_prepare.ts @elastic/nightshift-investigations-team
+x-pack/platform/plugins/shared/nightshift_investigations/server/lib/install_decision_tree_reinforcement_agent.ts @elastic/nightshift-investigations-team
+x-pack/platform/plugins/shared/nightshift_investigations/server/lib/managed_workflows/install_decision_tree_workflows.ts @elastic/nightshift-investigations-team
+x-pack/platform/plugins/shared/nightshift_investigations/server/routes/get_decision_tree.ts @elastic/nightshift-investigations-team
+x-pack/platform/plugins/shared/nightshift_investigations/server/routes/get_decision_tree_version.ts @elastic/nightshift-investigations-team
+x-pack/platform/plugins/shared/nightshift_investigations/server/routes/get_decision_trees_availability.ts @elastic/nightshift-investigations-team
+x-pack/platform/plugins/shared/nightshift_investigations/server/routes/list_decision_tree_versions.ts @elastic/nightshift-investigations-team
+x-pack/platform/plugins/shared/nightshift_investigations/server/routes/list_decision_trees.ts @elastic/nightshift-investigations-team
+x-pack/platform/plugins/shared/nightshift_investigations/server/routes/list_decision_trees.test.ts @elastic/nightshift-investigations-team
+x-pack/solutions/observability/plugins/significant_events_app/public/pages/significant_events/components/decision_trees @elastic/nightshift-investigations-team
 
 # AlertZero managed workflows (shared files: index, constants, template values, rule workflows)
 src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero @elastic/security-solution

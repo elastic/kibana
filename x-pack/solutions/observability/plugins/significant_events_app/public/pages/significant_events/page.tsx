@@ -34,6 +34,8 @@ import { QueriesTable } from './components/queries_table/queries_table';
 import { StreamsView } from './components/streams_view/streams_view';
 import { CortexTab } from './components/cortex/tab';
 import { useCortexEnabled } from './components/cortex/use_cortex';
+import { DecisionTreesTab } from './components/decision_trees/tab';
+import { useDecisionTreesEnabled } from './components/decision_trees/use_decision_trees';
 import { DetectionsTab } from './components/detections_tab';
 import { SignificantEventsTab } from './components/significant_events_tab';
 import { RunLimitsBanner } from './components/run_limits_banner';
@@ -45,6 +47,7 @@ const significantEventsTabs = [
   'detections',
   'significant_events',
   'cortex',
+  'decision_trees',
 ] as const;
 type SignificantEventsTabId = (typeof significantEventsTabs)[number];
 
@@ -73,6 +76,7 @@ export function SignificantEventsPage() {
 
   const { availability, isLoading: isAvailabilityLoading } = useSignificantEventsAvailability();
   const isCortexEnabled = useCortexEnabled();
+  const isDecisionTreesEnabled = useDecisionTreesEnabled();
   const {
     isBlocked,
     isLoading: isMaintenanceStatusLoading,
@@ -185,8 +189,20 @@ export function SignificantEventsPage() {
             },
           ]
         : []),
+      ...(isDecisionTreesEnabled
+        ? [
+            {
+              id: 'decision_trees',
+              label: i18n.translate('xpack.significantEventsApp.decisionTreesTab', {
+                defaultMessage: 'Decision Trees',
+              }),
+              href: router.link('/{tab}', { path: { tab: 'decision_trees' } }),
+              isSelected: tab === 'decision_trees',
+            },
+          ]
+        : []),
     ],
-    [tab, router, isCortexEnabled]
+    [tab, router, isCortexEnabled, isDecisionTreesEnabled]
   );
 
   if (isAvailabilityLoading) {
@@ -331,6 +347,7 @@ export function SignificantEventsPage() {
           {tab === 'detections' && <DetectionsTab />}
           {tab === 'significant_events' && <SignificantEventsTab />}
           {tab === 'cortex' && isCortexEnabled && <CortexTab />}
+          {tab === 'decision_trees' && isDecisionTreesEnabled && <DecisionTreesTab />}
         </SignificantEventsAppPageTemplate.Body>
       </SignificantEventsPageProvider>
     </>

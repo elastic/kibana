@@ -17,6 +17,11 @@ import { listCortexPagesRoute } from './list_cortex_pages';
 import { getCortexPageRoute } from './get_cortex_page';
 import { getCortexAvailabilityRoute } from './get_cortex_availability';
 import { sandboxSecretsRoutes } from './sandbox_secrets';
+import { getDecisionTreesAvailabilityRoute } from './get_decision_trees_availability';
+import { listDecisionTreesRoute } from './list_decision_trees';
+import { getDecisionTreeRoute } from './get_decision_tree';
+import { listDecisionTreeVersionsRoute } from './list_decision_tree_versions';
+import { getDecisionTreeVersionRoute } from './get_decision_tree_version';
 
 export const nightshiftInvestigationsRouteRepository = {
   ...startInvestigationRoute,
@@ -31,6 +36,11 @@ export const nightshiftInvestigationsRouteRepository = {
   ...getCortexPageRoute,
   ...getCortexAvailabilityRoute,
   ...sandboxSecretsRoutes,
+  ...getDecisionTreesAvailabilityRoute,
+  ...listDecisionTreesRoute,
+  ...getDecisionTreeRoute,
+  ...listDecisionTreeVersionsRoute,
+  ...getDecisionTreeVersionRoute,
 };
 
 export type NightshiftInvestigationsRouteRepository =

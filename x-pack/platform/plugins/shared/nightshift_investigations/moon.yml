@@ -54,6 +54,7 @@ dependsOn:
   - '@kbn/inference-plugin'
   - '@kbn/i18n-react'
   - '@kbn/utility-types'
+  - '@kbn/es-errors'
   - '@kbn/encrypted-saved-objects-plugin'
   - '@kbn/security-plugin'
 tags:
