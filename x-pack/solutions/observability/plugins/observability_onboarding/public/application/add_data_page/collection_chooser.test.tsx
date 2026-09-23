@@ -110,7 +110,7 @@ const renderChooser = ({
     <I18nProvider>
       <KibanaContextProvider services={coreMock.createStart()}>
         <MemoryRouter initialEntries={['/']}>
-          <FleetCardsProvider enabled>
+          <FleetCardsProvider>
             <CollectionChooser
               collection={collection}
               searchTerm={searchTerm}

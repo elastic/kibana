@@ -417,7 +417,8 @@ steps:
         expect(mockWorkflowsService.validateWorkflow).toHaveBeenCalledWith(
           mockWorkflowYaml,
           spaceId,
-          mockRequest
+          mockRequest,
+          { includeVariableRules: false }
         );
         const engine = await mockWorkflowsService.getWorkflowsExecutionEngine();
         expect(engine.executeWorkflow).toHaveBeenCalledWith(
@@ -704,7 +705,8 @@ steps:
         expect(mockWorkflowsService.validateWorkflow).toHaveBeenCalledWith(
           mockWorkflowYaml,
           spaceId,
-          mockRequest
+          mockRequest,
+          { includeVariableRules: false }
         );
       });
     });
@@ -926,7 +928,8 @@ steps:
       expect(mockWorkflowsService.validateWorkflow).toHaveBeenCalledWith(
         'name: Test Workflow',
         'default',
-        mockRequest
+        mockRequest,
+        { includeVariableRules: false }
       );
       expect(mockWorkflowsExecutionEngine.executeWorkflow).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -1027,7 +1030,7 @@ steps:
   });
 
   describe('validateWorkflow', () => {
-    it('should delegate to workflowsService.validateWorkflow', async () => {
+    it('should delegate with the variable rules enabled', async () => {
       const expectedResult = { valid: true, diagnostics: [] };
       mockWorkflowsService.validateWorkflow.mockResolvedValue(expectedResult);
 
@@ -1036,7 +1039,8 @@ steps:
       expect(mockWorkflowsService.validateWorkflow).toHaveBeenCalledWith(
         'name: Test',
         'default',
-        mockRequest
+        mockRequest,
+        { includeVariableRules: true }
       );
       expect(result).toBe(expectedResult);
     });
@@ -1061,7 +1065,8 @@ steps:
       expect(mockWorkflowsService.validateWorkflow).toHaveBeenCalledWith(
         'invalid: yaml',
         'my-space',
-        mockRequest
+        mockRequest,
+        { includeVariableRules: true }
       );
       expect(result).toEqual(expectedResult);
     });
@@ -1726,23 +1731,21 @@ steps:
         api.resumeWorkflowExecution('run-1', 'default', { approved: true }, mockRequest, {
           stepExecutionId: 'step-exec-1',
         })
-      ).rejects.toThrow(WorkflowExecutionInvalidStatusError);
+      ).rejects.toThrow(/already responded to or no longer waiting for input/);
 
+      expect(mockWorkflowsService.getWaitingStepExecutionId).not.toHaveBeenCalled();
       expect(mockWorkflowsExecutionEngine.resumeWorkflowExecution).not.toHaveBeenCalled();
     });
 
-    it('resumes without stamping when no waiting step can be resolved (non-HITL wait)', async () => {
+    it('throws a conflict and never resumes when no waiting step can be resolved', async () => {
       (mockWorkflowsService.getWaitingStepExecutionId as jest.Mock).mockResolvedValue(null);
 
-      await api.resumeWorkflowExecution('run-1', 'default', { approved: true }, mockRequest);
+      await expect(
+        api.resumeWorkflowExecution('run-1', 'default', { approved: true }, mockRequest)
+      ).rejects.toThrow(/waiting step not found/);
 
       expect(mockWorkflowsService.markStepAsResponded).not.toHaveBeenCalled();
-      expect(mockWorkflowsExecutionEngine.resumeWorkflowExecution).toHaveBeenCalledWith(
-        'run-1',
-        'default',
-        { approved: true },
-        mockRequest
-      );
+      expect(mockWorkflowsExecutionEngine.resumeWorkflowExecution).not.toHaveBeenCalled();
     });
 
     it('emits resume audit via setAuditLog on success and failure', async () => {

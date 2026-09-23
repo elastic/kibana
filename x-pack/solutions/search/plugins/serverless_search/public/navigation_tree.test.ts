@@ -45,6 +45,20 @@ describe('Navigation Tree', () => {
     expect(body[2]).toMatchObject({ link: 'context_engine' });
   });
 
+  it('includes service accounts in Admin and Settings', () => {
+    const { footer } = createNavigationTree(mockApplication);
+    const adminAndSettingsNode = footer?.find(
+      (item: { id?: string }) => item.id === 'admin_and_settings'
+    );
+    const accessSection = adminAndSettingsNode?.children?.find(
+      (item: { id?: string }) => item.id === 'settings_access'
+    );
+
+    expect(accessSection?.children).toContainEqual(
+      expect.objectContaining({ link: 'management:service_accounts' })
+    );
+  });
+
   it('includes Manage jobs link to Stack Management anomaly detection jobs list under ML nav', () => {
     const { body } = createNavigationTree(mockApplication);
     const mlNode = body.find((item: any) => item.id === 'machine_learning');
@@ -57,6 +71,20 @@ describe('Navigation Tree', () => {
         link: 'management:anomaly_detection',
         title: 'Manage jobs',
       })
+    );
+  });
+
+  it('includes Stack Alerts in Admin and Settings > Alerts and insights', () => {
+    const { footer } = createNavigationTree(mockApplication);
+    const adminAndSettingsNode = footer?.find(
+      (item: { id?: string }) => item.id === 'admin_and_settings'
+    );
+    const alertsSection = adminAndSettingsNode?.children?.find(
+      (item: { id?: string }) => item.id === 'settings_alerts'
+    );
+
+    expect(alertsSection?.children).toContainEqual(
+      expect.objectContaining({ link: 'management:triggersActionsAlerts' })
     );
   });
 

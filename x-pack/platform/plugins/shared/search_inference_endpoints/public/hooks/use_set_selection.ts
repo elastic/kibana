@@ -10,6 +10,7 @@ import { useCallback, useMemo, useState } from 'react';
 export interface UseSetSelectionResult {
   selected: Set<string>;
   seed: (keys: Set<string>) => void;
+  reset: () => void;
   toggle: (key: string) => void;
   selectAll: () => void;
   isDirty: boolean;
@@ -33,6 +34,10 @@ export const useSetSelection = (allKeys: string[]): UseSetSelectionResult => {
     setSelected(snapshot);
     setInitial(new Set(snapshot));
   }, []);
+
+  const reset = useCallback(() => {
+    setSelected(new Set(initial));
+  }, [initial]);
 
   const toggle = useCallback((key: string) => {
     setSelected((prev) => {
@@ -58,6 +63,7 @@ export const useSetSelection = (allKeys: string[]): UseSetSelectionResult => {
   return {
     selected,
     seed,
+    reset,
     toggle,
     selectAll,
     isDirty,

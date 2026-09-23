@@ -97,7 +97,7 @@ export const TabbedTableListView = ({
   const hideHeader = !title && !description && hideTabs;
 
   return (
-    <KibanaPageTemplate panelled data-test-subj={pageDataTestSubject}>
+    <KibanaPageTemplate panelled restrictWidth={false} data-test-subj={pageDataTestSubject}>
       {!hideHeader && (
         <KibanaPageTemplate.Header
           pageTitle={title ? <span id={headingId}>{title}</span> : undefined}

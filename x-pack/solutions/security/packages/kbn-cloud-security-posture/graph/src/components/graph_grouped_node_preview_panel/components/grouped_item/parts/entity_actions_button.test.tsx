@@ -215,26 +215,23 @@ describe('EntityActionsButton', () => {
       );
     });
 
-    it('should fall back to RELATED_ENTITY with entity.* source field values + item.id when engine_type is not user or host', () => {
+    it('should use RELATED_ENTITY with entity.* source field values, never the calculated EUID', () => {
       render(<EntityActionsButton item={mockEntityItem} scopeId={scopeId} />);
       fireEvent.click(screen.getByTestId(GROUPED_ITEM_ACTIONS_BUTTON_TEST_ID));
 
       const relatedButton = screen.getByTestId(GRAPH_NODE_POPOVER_SHOW_RELATED_ITEM_ID);
       fireEvent.click(relatedButton);
 
-      // entity.* value ('entity-abc') + item.id ('entity-123') → emitIsOneOfFilterToggle
-      expect(mockEmitIsOneOfFilterToggle).toHaveBeenCalledWith(
+      // Only the entity.* source field value. item.id ('entity-123') is the calculated EUID, which
+      // appears in no event field — including it produced a filter that matched nothing.
+      // A lone value emits a phrase filter rather than an isOneOf.
+      expect(mockEmitFilterToggle).toHaveBeenCalledWith(
         scopeId,
         RELATED_ENTITY,
-        ['entity-abc', 'entity-123'],
+        'entity-abc',
         'show'
       );
-      expect(mockEmitFilterToggle).not.toHaveBeenCalledWith(
-        scopeId,
-        RELATED_ENTITY,
-        expect.anything(),
-        expect.anything()
-      );
+      expect(mockEmitIsOneOfFilterToggle).not.toHaveBeenCalled();
     });
 
     it('should show "Hide related events" label when RELATED_USER filter is active', () => {

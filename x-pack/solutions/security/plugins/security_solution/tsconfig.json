@@ -11,7 +11,10 @@
     "test/scout/**/*",
     "test/scout_ai_value_report/**/*",
     "test/scout_cps_local/**/*",
+    "test/scout_managed_mitre/**/*",
+    "test/scout_es_max_response_size/**/*",
     "test/scout_security_attacks_alignment/**/*",
+    "test/scout_threat_intel/**/*",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "common/**/*.json",
     "server/**/*.json",
@@ -279,6 +282,8 @@
     "@kbn/agent-builder-plugin",
     "@kbn/core-ui-settings-server-mocks",
     "@kbn/agent-builder-browser",
+    "@kbn/mitre-attack-plugin",
+    "@kbn/security-mitre-attack-common",
     "@kbn/lazy-object",
     "@kbn/ai-assistant-common",
     "@kbn/product-doc-common",
@@ -312,5 +317,9 @@
     "@kbn/core-mount-utils-browser",
     "@kbn/ui-callout",
     "@kbn/shared-ux-utility",
+    "@kbn/app-header",
+    "@kbn/core-execution-context-common",
+    "@kbn/code-editor",
+    "@kbn/code-editor-mock",
   ]
 }

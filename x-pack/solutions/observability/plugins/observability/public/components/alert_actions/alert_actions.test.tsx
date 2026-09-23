@@ -20,6 +20,7 @@ import { Router } from '@kbn/shared-ux-router';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
+import type { CaseUI } from '@kbn/cases-plugin/common';
 import { ALERT_FLAPPING } from '@kbn/rule-data-utils';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { createTelemetryClientMock } from '../../services/telemetry/telemetry_client.mock';
@@ -44,16 +45,13 @@ const mockUseGetRuleTypesPermissions = jest.fn(() => ({
   authorizedToReadRuleForAlert: (): boolean => true,
   authorizedToCreateAnyRules: false,
 }));
-const mockUseInvestigationAvailability = jest.fn(() => true);
 jest.mock('@kbn/alerts-ui-shared/src/common/hooks', () => ({
   ...jest.requireActual('@kbn/alerts-ui-shared/src/common/hooks'),
   useGetRuleTypesPermissions: () => mockUseGetRuleTypesPermissions(),
 }));
-jest.mock('../../hooks/use_investigation_availability', () => ({
-  useInvestigationAvailability: () => mockUseInvestigationAvailability(),
-}));
 
 const refresh = jest.fn();
+const caseForCallback = { id: 'case-id' } as CaseUI;
 const caseHooksReturnedValue = {
   open: () => {
     refresh();
@@ -69,8 +67,6 @@ const mockKibana = {
     telemetryClient: mockTelemetryClient,
   },
 };
-mockKibana.services.cases.hooks.useCasesAddToNewCaseFlyout.mockReturnValue(caseHooksReturnedValue);
-
 mockKibana.services.cases.hooks.useCasesAddToExistingCaseModal.mockReturnValue(
   caseHooksReturnedValue
 );
@@ -129,7 +125,6 @@ jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
 describe('ObservabilityActions component', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseInvestigationAvailability.mockReturnValue(true);
     getFormatterMock.mockReturnValue(jest.fn().mockReturnValue('a reason'));
     mockTelemetryClient.reportAlertAddedToCase.mockClear();
     mockUseGetRuleTypesPermissions.mockReturnValue({
@@ -139,17 +134,9 @@ describe('ObservabilityActions component', () => {
     });
   });
 
-  interface SetupOptions {
-    canWriteAgentBuilder?: boolean;
-    alert?: Alert;
-  }
-
   const setup = async (
     pageId: string,
-    {
-      canWriteAgentBuilder = false,
-      alert = { ...inventoryThresholdAlertEs, [ALERT_FLAPPING]: [false] },
-    }: SetupOptions = {}
+    { alert = { ...inventoryThresholdAlertEs, [ALERT_FLAPPING]: [false] } }: { alert?: Alert } = {}
   ) => {
     const queryClient = new QueryClient({
       defaultOptions: {
@@ -213,26 +200,17 @@ describe('ObservabilityActions component', () => {
 
     const wrapper = mountWithIntl(
       <Router history={createMemoryHistory()}>
-        <KibanaContextProvider
-          services={{
-            ...mockKibana.services,
-            application: {
-              ...mockKibana.services.application,
-              capabilities: {
-                ...mockKibana.services.application.capabilities,
-                agentBuilder: { write: canWriteAgentBuilder },
-              },
-            },
-          }}
-        >
+        <KibanaContextProvider services={mockKibana.services}>
           <AlertsTableContextProvider value={context}>
-            <QueryClientProvider client={queryClient} context={AlertsQueryContext}>
-              <AlertActions
-                {...(props as unknown as ComponentProps<
-                  GetObservabilityAlertsTableProp<'renderActionsCell'>
-                >)}
-                services={services}
-              />
+            <QueryClientProvider client={queryClient}>
+              <QueryClientProvider client={queryClient} context={AlertsQueryContext}>
+                <AlertActions
+                  {...(props as unknown as ComponentProps<
+                    GetObservabilityAlertsTableProp<'renderActionsCell'>
+                  >)}
+                  services={services}
+                />
+              </QueryClientProvider>
             </QueryClientProvider>
           </AlertsTableContextProvider>
         </KibanaContextProvider>
@@ -259,55 +237,6 @@ describe('ObservabilityActions component', () => {
     wrapper.find('[data-test-subj="alertsTableRowActionMore"]').hostNodes().simulate('click');
     await waitFor(() => {
       expect(wrapper.find('[data-test-subj~="viewRuleDetails"]').hostNodes().length).toBe(1);
-    });
-  });
-
-  it('hides the investigate action without Agent Builder write access', async () => {
-    const wrapper = await setup('nothing');
-    wrapper.find('[data-test-subj="alertsTableRowActionMore"]').hostNodes().simulate('click');
-
-    expect(wrapper.find('[data-test-subj="o11yAlertActionsInvestigate"]').hostNodes()).toHaveLength(
-      0
-    );
-  });
-
-  it('hides the investigate action when no investigation connector is available', async () => {
-    mockUseInvestigationAvailability.mockReturnValue(false);
-    const wrapper = await setup('nothing', { canWriteAgentBuilder: true });
-    wrapper.find('[data-test-subj="alertsTableRowActionMore"]').hostNodes().simulate('click');
-
-    expect(wrapper.find('[data-test-subj="o11yAlertActionsInvestigate"]').hostNodes()).toHaveLength(
-      0
-    );
-  });
-
-  it('starts an investigation for the alert', async () => {
-    mockKibana.services.http.post.mockResolvedValue({ investigation_id: 'investigation-1' });
-    const wrapper = await setup('nothing', { canWriteAgentBuilder: true });
-    wrapper.find('[data-test-subj="alertsTableRowActionMore"]').hostNodes().simulate('click');
-    wrapper.find('[data-test-subj="o11yAlertActionsInvestigate"]').hostNodes().simulate('click');
-
-    await waitFor(() => {
-      expect(mockKibana.services.http.post).toHaveBeenCalledWith(
-        '/internal/observability/alerts/6d4c6d74-d51a-495c-897d-88ced3b95e30/investigate'
-      );
-      expect(mockKibana.services.notifications.toasts.addSuccess).toHaveBeenCalledWith({
-        title: 'Investigation started',
-      });
-    });
-  });
-
-  it('reports an investigation request failure', async () => {
-    mockKibana.services.http.post.mockRejectedValue(new Error('Request failed'));
-    const wrapper = await setup('nothing', { canWriteAgentBuilder: true });
-    wrapper.find('[data-test-subj="alertsTableRowActionMore"]').hostNodes().simulate('click');
-    wrapper.find('[data-test-subj="o11yAlertActionsInvestigate"]').hostNodes().simulate('click');
-
-    await waitFor(() => {
-      expect(mockKibana.services.notifications.toasts.addDanger).toHaveBeenCalledWith({
-        title: 'Failed to start investigation',
-        text: 'Request failed',
-      });
     });
   });
 
@@ -344,31 +273,35 @@ describe('ObservabilityActions component', () => {
     });
   });
 
-  it('should refresh when adding an alert to a new case', async () => {
+  it('should open the add-to-case modal', async () => {
     const wrapper = await setup('nothing');
     wrapper.find('[data-test-subj="alertsTableRowActionMore"]').hostNodes().simulate('click');
     await waitFor(() => {
-      expect(wrapper.find('[data-test-subj="add-to-new-case-action"]').hostNodes().length).toBe(1);
-
-      wrapper.find('[data-test-subj="add-to-new-case-action"]').hostNodes().simulate('click');
-      expect(refresh).toHaveBeenCalled();
+      expect(wrapper.find('[data-test-subj="add-to-case-action"]').hostNodes().length).toBe(1);
     });
-  });
-
-  it('should refresh when when calling onSuccess of useCasesAddToNewCaseFlyout', async () => {
-    await setup('nothing');
-
-    // @ts-expect-error: The object will always be defined
-    mockKibana.services.cases.hooks.useCasesAddToNewCaseFlyout.mock.calls[0][0].onSuccess();
+    wrapper.find('[data-test-subj="add-to-case-action"]').hostNodes().simulate('click');
 
     expect(refresh).toHaveBeenCalled();
   });
 
-  it('should report telemetry when adding alert to a new case', async () => {
+  it('should refresh when the add-to-case modal succeeds', async () => {
     await setup('nothing');
 
-    // @ts-expect-error: The object will always be defined
-    mockKibana.services.cases.hooks.useCasesAddToNewCaseFlyout.mock.calls[0][0].onSuccess();
+    const onSuccess =
+      mockKibana.services.cases.hooks.useCasesAddToExistingCaseModal.mock.calls[0]?.[0]?.onSuccess;
+    expect(onSuccess).toBeDefined();
+    onSuccess?.(caseForCallback, false);
+
+    expect(refresh).toHaveBeenCalled();
+  });
+
+  it('should report telemetry when creating a case from the modal', async () => {
+    await setup('nothing');
+
+    const onSuccess =
+      mockKibana.services.cases.hooks.useCasesAddToExistingCaseModal.mock.calls[0]?.[0]?.onSuccess;
+    expect(onSuccess).toBeDefined();
+    onSuccess?.(caseForCallback, true);
 
     expect(mockTelemetryClient.reportAlertAddedToCase).toHaveBeenCalledWith(
       true,
@@ -377,33 +310,13 @@ describe('ObservabilityActions component', () => {
     );
   });
 
-  it('should refresh when adding an alert to an existing case', async () => {
-    const wrapper = await setup('nothing');
-    wrapper.find('[data-test-subj="alertsTableRowActionMore"]').hostNodes().simulate('click');
-    await waitFor(() => {
-      expect(
-        wrapper.find('[data-test-subj="add-to-existing-case-action"]').hostNodes().length
-      ).toBe(1);
-
-      wrapper.find('[data-test-subj="add-to-existing-case-action"]').hostNodes().simulate('click');
-      expect(refresh).toHaveBeenCalled();
-    });
-  });
-
-  it('should refresh when calling onSuccess of useCasesAddToExistingCaseModal', async () => {
+  it('should report telemetry when selecting an existing case', async () => {
     await setup('nothing');
 
-    // @ts-expect-error: The object will always be defined
-    mockKibana.services.cases.hooks.useCasesAddToExistingCaseModal.mock.calls[0][0].onSuccess();
-
-    expect(refresh).toHaveBeenCalled();
-  });
-
-  it('should report telemetry when adding alert to an existing case', async () => {
-    await setup('nothing');
-
-    // @ts-expect-error: The object will always be defined
-    mockKibana.services.cases.hooks.useCasesAddToExistingCaseModal.mock.calls[0][0].onSuccess();
+    const onSuccess =
+      mockKibana.services.cases.hooks.useCasesAddToExistingCaseModal.mock.calls[0]?.[0]?.onSuccess;
+    expect(onSuccess).toBeDefined();
+    onSuccess?.(caseForCallback, false);
 
     expect(mockTelemetryClient.reportAlertAddedToCase).toHaveBeenCalledWith(
       false,
@@ -418,10 +331,7 @@ describe('ObservabilityActions component', () => {
     const wrapper = await setup('nothing');
     wrapper.find('[data-test-subj="alertsTableRowActionMore"]').hostNodes().simulate('click');
 
-    expect(wrapper.find('[data-test-subj="add-to-new-case-action"]').hostNodes().length).toBe(0);
-    expect(wrapper.find('[data-test-subj="add-to-existing-case-action"]').hostNodes().length).toBe(
-      0
-    );
+    expect(wrapper.find('[data-test-subj="add-to-case-action"]').hostNodes().length).toBe(0);
   });
 
   it('should show a valid url when clicking  "View in app"', async () => {

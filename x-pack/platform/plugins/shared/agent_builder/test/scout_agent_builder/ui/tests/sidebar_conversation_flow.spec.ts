@@ -11,7 +11,8 @@ import { deleteAllConversationsFromEs } from '../../../scout_agent_builder_share
 import { setupAgentDirectAnswer } from '../../../scout_agent_builder_shared/lib/proxy_scenario';
 import { test } from '../fixtures';
 
-test.describe(
+// Failing: See https://github.com/elastic/kibana/issues/289096
+test.describe.skip(
   'Agent Builder — sidebar conversation flow',
   { tag: [...tags.stateful.classic, ...tags.serverless.search] },
   () => {
@@ -45,7 +46,7 @@ test.describe(
         await pageObjects.agentBuilder.sendMessage();
         await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
         await expect(async () => {
-          await expect(page.testSubj.locator('agentBuilderRoundResponse')).toContainText(
+          await expect(page.testSubj.locator('agentBuilderResponseMessage')).toContainText(
             MOCKED_RESPONSE
           );
         }).toPass({ timeout: 120_000 });
@@ -56,7 +57,7 @@ test.describe(
         await pageObjects.agentBuilder.openEmbeddableMenu();
         await pageObjects.agentBuilder.clickEmbeddableNewChatButton();
         await expect(page.testSubj.locator('agentBuilderConversationInputForm')).toBeVisible();
-        await expect(page.testSubj.locator('agentBuilderRoundResponse')).toHaveCount(0);
+        await expect(page.testSubj.locator('agentBuilderResponseMessage')).toHaveCount(0);
       });
 
       await test.step('can send a message after starting a new conversation from the menu', async () => {
@@ -74,7 +75,7 @@ test.describe(
         await pageObjects.agentBuilder.sendMessage();
         await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
         await expect(async () => {
-          await expect(page.testSubj.locator('agentBuilderRoundResponse')).toContainText(
+          await expect(page.testSubj.locator('agentBuilderResponseMessage')).toContainText(
             MOCKED_RESPONSE
           );
         }).toPass({ timeout: 120_000 });

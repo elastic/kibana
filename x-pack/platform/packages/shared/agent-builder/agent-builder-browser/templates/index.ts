@@ -6,9 +6,11 @@
  */
 
 export type {
-  ConversationTemplateTabRenderProps,
   ConversationTemplateTabDefinition,
   ConversationTemplateUIDefinition,
+  ConversationTemplateBriefCardRenderProps,
+  ConversationTemplateDetailsFlyoutRenderProps,
+  ConversationTemplateUIContext,
   ConversationTemplateServiceStartContract,
 } from './contract';
 export { TIMELINE_TAB_ID, BUILTIN_TAB_IDS } from './constants';

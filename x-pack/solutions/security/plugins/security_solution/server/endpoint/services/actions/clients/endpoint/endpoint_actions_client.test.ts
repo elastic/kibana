@@ -661,7 +661,7 @@ describe('EndpointActionsClient', () => {
         ).rejects.toThrow('kill-process `kill_descendants` parameter is not enabled');
       });
 
-      it('should throw error when endpoint does not support `kill_process_descendents` capability', async () => {
+      it('should throw error when endpoint does not support `kill_process_descendants` capability', async () => {
         const generator = new EndpointMetadataGenerator('seed');
 
         applyEsClientSearchMock({
@@ -690,7 +690,7 @@ describe('EndpointActionsClient', () => {
           index: metadataCurrentIndexPattern,
           response: generator.toEsSearchResponse([
             generator.toEsSearchHit(
-              generator.generate({ Endpoint: { capabilities: ['kill_process_descendents'] } })
+              generator.generate({ Endpoint: { capabilities: ['kill_process_descendants'] } })
             ),
           ]),
         });

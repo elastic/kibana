@@ -5,12 +5,38 @@
  * 2.0.
  */
 
-import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import React, { useState } from 'react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import type { EpisodeAction } from '../../actions/types';
 import { EpisodeFooterActionMenu } from './footer_action_menu';
+
+// EuiWrappingPopover portals to document.body via EuiPortal, which causes DOM
+// teardown errors in jsdom and leaks content between tests. Mock it as a simple
+// conditional renderer so the menu logic is tested without portal side-effects.
+jest.mock('@elastic/eui', () => {
+  const actual = jest.requireActual('@elastic/eui');
+  const MockWrappingPopover = ({
+    isOpen,
+    children,
+    'data-test-subj': testSubj,
+    className,
+  }: {
+    isOpen: boolean;
+    children: React.ReactNode;
+    'data-test-subj'?: string;
+    className?: string;
+  }) => (
+    <div
+      data-test-subj={testSubj}
+      className={isOpen ? `${className ?? ''} euiPopover-isOpen` : className}
+    >
+      {isOpen ? children : null}
+    </div>
+  );
+  return { ...actual, EuiWrappingPopover: MockWrappingPopover };
+});
 
 const mockEpisodes: AlertEpisode[] = [
   {
@@ -37,15 +63,42 @@ const makeAction = (id: string, overrides?: Partial<EpisodeAction>): EpisodeActi
 
 const mockOnSuccess = jest.fn();
 
-const renderMenu = (actions: EpisodeAction[]) =>
-  render(
-    <EpisodeFooterActionMenu
-      actions={actions}
-      episodes={mockEpisodes}
-      viewDetailsHref="/app/management/alertingV2/episodes/ep-1"
-      onSuccess={mockOnSuccess}
-    />
+/**
+ * TestWrapper renders a real anchor button and manages the isOpen state. It passes
+ * the anchor element ref to EpisodeFooterActionMenu after it mounts (matching the
+ * real flyout's PrimaryAction.onClick capture pattern).
+ */
+interface TestWrapperProps {
+  actions: EpisodeAction[];
+}
+const TestWrapper = ({ actions }: TestWrapperProps) => {
+  const [anchor, setAnchor] = useState<HTMLElement | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <>
+      <button
+        ref={setAnchor}
+        type="button"
+        data-test-subj="alertingV2EpisodeFlyoutTakeActionButton"
+        onClick={() => setIsOpen((prev) => !prev)}
+      />
+      {anchor && (
+        <EpisodeFooterActionMenu
+          anchor={anchor}
+          isOpen={isOpen}
+          onClose={() => setIsOpen(false)}
+          actions={actions}
+          episodes={mockEpisodes}
+          viewDetailsHref="/app/management/alertingV2/episodes/ep-1"
+          onSuccess={mockOnSuccess}
+        />
+      )}
+    </>
   );
+};
+
+const renderMenu = (actions: EpisodeAction[]) => render(<TestWrapper actions={actions} />);
 
 beforeEach(() => jest.clearAllMocks());
 
@@ -116,5 +169,34 @@ describe('EpisodeFooterActionMenu', () => {
     expect(screen.getByTestId('alertingV2EpisodeFlyoutTakeAction').className).not.toContain(
       'euiPopover-isOpen'
     );
+  });
+
+  it('lets an action own its menu entry and hands it a menu closer', async () => {
+    const renderMenuItem = jest.fn(({ closeMenu }) => (
+      <button type="button" data-test-subj="ownEntry" onClick={closeMenu}>
+        {'Own entry'}
+      </button>
+    ));
+    const assigneeAction = makeAction('ALERTING_V2_EDIT_EPISODE_ASSIGNEE', { renderMenuItem });
+
+    renderMenu([assigneeAction]);
+
+    fireEvent.click(screen.getByTestId('alertingV2EpisodeFlyoutTakeActionButton'));
+
+    const ownEntry = await screen.findByTestId('ownEntry');
+    expect(renderMenuItem).toHaveBeenCalledWith(
+      expect.objectContaining({ episodes: mockEpisodes, onSuccess: mockOnSuccess })
+    );
+    // The default descriptor item is bypassed, so `execute` never fires on click.
+    expect(
+      screen.queryByTestId('alertingV2EpisodeTakeAction-ALERTING_V2_EDIT_EPISODE_ASSIGNEE')
+    ).not.toBeInTheDocument();
+
+    fireEvent.click(ownEntry);
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('ownEntry')).not.toBeInTheDocument();
+    });
+    expect(assigneeAction.execute).not.toHaveBeenCalled();
   });
 });

@@ -75,13 +75,24 @@ describe('HomePage', () => {
   const mockServices = ({
     cloud = { isInTrial },
     canMonitorAllIndices = true,
-  }: { cloud?: object | null; canMonitorAllIndices?: boolean } = {}) => {
+    hasIndexManagement = true,
+  }: {
+    cloud?: object | null;
+    canMonitorAllIndices?: boolean;
+    hasIndexManagement?: boolean;
+  } = {}) => {
     mockUseKibana.mockReturnValue({
       services: {
         cloud,
         application: {
           navigateToApp,
           capabilities: { vectordbIndexStats: { canMonitorAllIndices } },
+        },
+        chrome: {
+          navLinks: {
+            has: (id: string) =>
+              id === 'management:index_management' ? hasIndexManagement : false,
+          },
         },
         docLinks: { links: { enterpriseSearch: { vectorDatabaseFullTextSearch: DOCS_URL } } },
       },
@@ -155,30 +166,30 @@ describe('HomePage', () => {
   });
 
   describe('the vectors stat', () => {
-    it('is shown to a caller that can monitor every index', () => {
-      render(<HomePage />);
-
-      expect(screen.getByTestId('homePageDataCard-vectors')).toBeInTheDocument();
-    });
-
-    it('is hidden from a caller that cannot monitor every index', () => {
-      mockServices({ canMonitorAllIndices: false });
-
+    it('is hidden while Elasticsearch cannot report dense vector counts on stateless', () => {
       render(<HomePage />);
 
       expect(screen.queryByTestId('homePageDataCard-vectors')).not.toBeInTheDocument();
       expect(screen.getByTestId('homePageDataCard-totalIndices')).toBeInTheDocument();
     });
+  });
 
-    it('is still shown when the caller may see the count but it could not be computed', () => {
-      mockUseDeploymentStats.mockReturnValue({
-        stats: { ...stats, vectorCount: null },
-        isLoading: false,
-      });
+  describe('the manage data action', () => {
+    it('is shown to a role that can reach Index Management', () => {
+      render(<HomePage />);
+
+      expect(screen.getByTestId('homePageDataCardDataManagement')).toBeInTheDocument();
+    });
+
+    it('is hidden from a role without Index Management', () => {
+      mockServices({ hasIndexManagement: false });
 
       render(<HomePage />);
 
-      expect(screen.getByTestId('homePageDataCard-vectors')).toBeInTheDocument();
+      expect(screen.queryByTestId('homePageDataCardDataManagement')).not.toBeInTheDocument();
+      // the data card itself, and its stats, stay visible
+      expect(screen.getByTestId('homePageDataCard')).toBeInTheDocument();
+      expect(screen.getByTestId('homePageDataCard-totalIndices')).toBeInTheDocument();
     });
   });
 

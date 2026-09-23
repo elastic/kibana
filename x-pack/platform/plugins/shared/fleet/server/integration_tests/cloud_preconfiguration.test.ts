@@ -192,6 +192,7 @@ describe('Fleet cloud preconfiguration', () => {
             agent: {
               download: {
                 sourceURI: 'https://artifacts.elastic.co/downloads/',
+                sources: ['https://artifacts.elastic.co/downloads/'],
               },
               features: {},
               monitoring: {

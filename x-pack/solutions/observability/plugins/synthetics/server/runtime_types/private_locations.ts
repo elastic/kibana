@@ -5,32 +5,9 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
-
-export const PrivateLocationAttributesCodec = t.intersection([
-  t.interface({
-    label: t.string,
-    id: t.string,
-    agentPolicyId: t.string,
-    isServiceManaged: t.boolean,
-  }),
-  t.partial({
-    tags: t.array(t.string),
-    geo: t.interface({
-      lat: t.number,
-      lon: t.number,
-    }),
-    namespace: t.string,
-    spaces: t.array(t.string),
-    isAgentSharding: t.boolean,
-  }),
-]);
-
-export const SyntheticsPrivateLocationsAttributesCodec = t.type({
-  locations: t.array(PrivateLocationAttributesCodec),
-});
-
-export type PrivateLocationAttributes = t.TypeOf<typeof PrivateLocationAttributesCodec>;
-export type SyntheticsPrivateLocationsAttributes = t.TypeOf<
-  typeof SyntheticsPrivateLocationsAttributesCodec
->;
+export {
+  PrivateLocationAttributesCodec,
+  SyntheticsPrivateLocationsAttributesCodec,
+  type PrivateLocationAttributes,
+  type SyntheticsPrivateLocationsAttributes,
+} from '../../common/runtime_types/zod/private_location_attributes';

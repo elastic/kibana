@@ -20,11 +20,11 @@ type ChromeStorybookStart = Pick<
   'getBadge$' | 'getBreadcrumbsBadges$' | 'getHelpExtension$'
 > & {
   help: Pick<InternalChromeStart['help'], 'getFeedbackHandler$' | 'getNewsfeedHandler$'>;
-  next: Pick<InternalChromeStart['next'], 'getFeedbackHandler$' | 'getNewsfeedHandler$'>;
   componentDeps: {
     basePath: Pick<InternalChromeStart['componentDeps']['basePath'], 'get' | 'prepend'>;
     legacyActionMenu$: InternalChromeStart['componentDeps']['legacyActionMenu$'];
     capabilities: Pick<InternalChromeStart['componentDeps']['capabilities'], 'navLinks'>;
+    docTitleParts$: InternalChromeStart['componentDeps']['docTitleParts$'];
   };
 };
 
@@ -50,12 +50,9 @@ export const createChromeStorybookStart = (): InternalChromeStart => {
       capabilities: {
         navLinks: { integrations: true },
       },
+      docTitleParts$: new BehaviorSubject<readonly string[]>(['Elastic']),
     },
     help: {
-      getFeedbackHandler$,
-      getNewsfeedHandler$,
-    },
-    next: {
       getFeedbackHandler$,
       getNewsfeedHandler$,
     },

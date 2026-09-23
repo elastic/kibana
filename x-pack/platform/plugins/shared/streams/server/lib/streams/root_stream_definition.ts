@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import type { Streams } from '@kbn/streams-schema';
+import type { FieldDefinition, Streams } from '@kbn/streams-schema';
 import {
   LOGS_ECS_STREAM_NAME,
   LOGS_ROOT_STREAM_NAME,
   ROOT_STREAM_NAMES,
 } from '@kbn/streams-schema';
+import { cloneDeep } from 'lodash';
 import { baseFields } from './component_templates/logs_layer';
 import { ecsBaseFields } from './component_templates/logs_ecs_layer';
 
@@ -33,7 +34,7 @@ export const createRootStreamDefinition = (
       processing: { steps: [], updated_at: now },
       wired: {
         routing: [],
-        fields: streamName === LOGS_ECS_STREAM_NAME ? ecsBaseFields : baseFields,
+        fields: getDefaultRootFields(streamName),
       },
     },
   };
@@ -41,4 +42,8 @@ export const createRootStreamDefinition = (
 
 export function hasSupportedStreamsRoot(streamName: string): boolean {
   return ROOT_STREAM_NAMES.some((root) => streamName === root || streamName.startsWith(`${root}.`));
+}
+
+export function getDefaultRootFields(streamName: string): FieldDefinition {
+  return cloneDeep(streamName === LOGS_ECS_STREAM_NAME ? ecsBaseFields : baseFields);
 }
