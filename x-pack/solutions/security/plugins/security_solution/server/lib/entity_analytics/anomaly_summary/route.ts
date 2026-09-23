@@ -164,6 +164,7 @@ export const registerAnomalySummaryRoutes = ({
             });
           }
 
+          const mitreDataClient = securitySolution.getMitreDataClient();
           const overview = await getEntityAnomalyOverview({
             entityId,
             entityType,
@@ -176,6 +177,7 @@ export const registerAnomalySummaryRoutes = ({
             ml,
             request,
             soClient,
+            mitreDataClient,
           });
 
           return response.ok({ body: { entityId, entityType, ...overview } });
@@ -279,6 +281,7 @@ export const registerAnomalySummaryRoutes = ({
             });
           }
 
+          const mitreDataClient = securitySolution.getMitreDataClient();
           const { anomalies, total } = await getEntityAnomalies({
             entityId,
             entityType,
@@ -296,6 +299,7 @@ export const registerAnomalySummaryRoutes = ({
             request,
             sort,
             soClient,
+            mitreDataClient,
           });
 
           return response.ok({

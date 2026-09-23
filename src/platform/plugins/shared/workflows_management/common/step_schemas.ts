@@ -22,7 +22,7 @@ import type {
   WorkflowsExtensionsServerPluginStart,
 } from '@kbn/workflows-extensions/server';
 
-type WorkflowsExtensions =
+export type WorkflowsExtensions =
   | WorkflowsExtensionsPublicPluginStart
   | WorkflowsExtensionsServerPluginStart;
 
@@ -61,15 +61,6 @@ class StepSchemas {
     stepTypeId: string
   ): PublicStepDefinition | ServerStepDefinition | undefined {
     return this.workflowsExtensions?.getStepDefinition(stepTypeId);
-  }
-
-  /**
-   * Helper function to check if a step definition is a public step definition
-   */
-  public isPublicStepDefinition(
-    stepDefinition: ServerStepDefinition | PublicStepDefinition
-  ): stepDefinition is PublicStepDefinition {
-    return 'label' in stepDefinition;
   }
 
   // Cache getters and setters

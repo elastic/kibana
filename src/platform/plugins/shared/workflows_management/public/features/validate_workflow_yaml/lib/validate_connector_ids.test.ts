@@ -8,6 +8,7 @@
  */
 
 import type { ConnectorTypeInfo } from '@kbn/workflows';
+import type { ConnectorIdItem } from '@kbn/workflows-yaml';
 import { validateConnectorIds } from './validate_connector_ids';
 import { stepSchemas } from '../../../../common/step_schemas';
 import type { ConnectorIdItem } from '../model/types';

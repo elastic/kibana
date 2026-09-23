@@ -18,6 +18,7 @@ import { CONTEXT_ENGINE_APP_ID } from '../../../common/features';
 import { searchDataStreams } from '../api/data_streams';
 import { CONTEXT_ENGINE_PATHS } from '../paths';
 import { CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ } from '../layout/context_engine_page_header';
+import { AI_INDEX_CREATED_LOCATION_STATE } from '../ai_index_created_location_state';
 import { CreateAiIndexPage } from './create_ai_index_page';
 
 jest.mock('../hooks/use_data_connectors', () => ({
@@ -286,32 +287,7 @@ describe('CreateAiIndexPage', () => {
 
     expect(services.application.navigateToApp).toHaveBeenCalledWith(CONTEXT_ENGINE_APP_ID, {
       path: '/ai_index/support-ticket-triage',
-    });
-  });
-
-  it('creates a data-stream-backed AI index when that storage type is selected', async () => {
-    const services = coreMock.createStart();
-    services.http.post.mockResolvedValue({});
-
-    renderWithProviders(services);
-
-    typeId(VALID_ID);
-    fireEvent.click(screen.getByTestId('contextAiIndexStorageType-data_stream'));
-    fireEvent.click(screen.getByTestId('contextCreateAiIndexButton'));
-
-    await waitFor(() => {
-      expect(services.http.post).toHaveBeenCalledWith(
-        '/api/context_engine/ai_index',
-        expect.objectContaining({
-          body: JSON.stringify({
-            id: VALID_ID,
-            dest: { type: 'data_stream', value: 'ai-index-ds-support-ticket-triage' },
-            automations: [],
-            sources: [],
-            traces: [],
-          }),
-        })
-      );
+      state: AI_INDEX_CREATED_LOCATION_STATE,
     });
   });
 

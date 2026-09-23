@@ -21,6 +21,7 @@ import * as i18n from '../../../../../attack_discovery/pages/results/take_action
 import { useKibana } from '../../../../../common/lib/kibana';
 import { AttacksEventTypes } from '../../../../../common/lib/telemetry';
 import type { AttacksActionTelemetrySource } from '../../../../../common/lib/telemetry';
+import { ATTACK_AI_ACTION_IDS } from '../../../../../common/constants/action_ids';
 
 export interface UseAttackViewInAiAssistantContextMenuItemsProps {
   /** The attack discovery object */
@@ -114,7 +115,7 @@ export const useAttackViewInAiAssistantContextMenuItems = ({
       return [
         {
           name: i18n.ADD_TO_CHAT,
-          key: 'viewInAgentBuilder',
+          key: ATTACK_AI_ACTION_IDS.addToChat,
           'data-test-subj': 'viewInAgentBuilder',
           disabled: isAddToChatDisabled,
           onClick: () => {
@@ -132,7 +133,7 @@ export const useAttackViewInAiAssistantContextMenuItems = ({
     return [
       {
         name: i18n.VIEW_IN_AI_ASSISTANT,
-        key: 'viewInAiAssistant',
+        key: ATTACK_AI_ACTION_IDS.viewInAiAssistant,
         'data-test-subj': 'viewInAiAssistant',
         disabled: viewInAiAssistantDisabled,
         onClick: () => {
