@@ -35,9 +35,11 @@
  *   JEST_CONFIGS_DEPS            — comma-separated Buildkite step keys this step depends on
  *   FTR_EXTRA_ARGS               — extra CLI args forwarded to FTR jobs via env
  *   GITHUB_PR_NUMBER             — PR number; activates PR-specific ci-stats source
- *   GITHUB_PR_MERGE_BASE         — merge-base commit; activates selective testing + merge-base source
- *   GITHUB_PR_LABELS             — comma-separated PR labels; activates selective testing when
- *                                  it contains the selective-tests label
+ *   GITHUB_PR_MERGE_BASE         — PR selective-testing and ci-stats base
+ *   BUILDKITE_MERGE_QUEUE_BASE_COMMIT — pinned merge-group base for selective testing
+ *   MERGE_QUEUE_MERGE_BASE       — live-main coverage base for ci-stats, not test selection
+ *   GITHUB_PR_LABELS             — comma-separated PR labels; ci:prevent-selective-testing
+ *                                  disables selective testing
  */
 
 /**

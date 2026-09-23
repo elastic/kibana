@@ -38,9 +38,10 @@ export function buildCiStatsSources(args: {
   ownBranch: string;
   pipelineSlug: string;
   prNumber: string | undefined;
-  selectiveMergeBase: string | undefined;
+  /** Reference commit for past test durations used to size and balance groups, not to select tests. */
+  historyBase: string | undefined;
 }): CiStatsSource[] {
-  const { trackedBranch, ownBranch, pipelineSlug, prNumber, selectiveMergeBase } = args;
+  const { trackedBranch, ownBranch, pipelineSlug, prNumber, historyBase } = args;
 
   const isMergeQueue = pipelineSlug === PIPELINES.MERGE_QUEUE;
 
@@ -52,7 +53,7 @@ export function buildCiStatsSources(args: {
     // using kibana-on-merge groups will provide a closer approximation, with a failure mode -
     // of too many ftr groups instead of potential timeouts.
     // merge-queue builds run on throwaway gh-readonly-queue/* branches, so their own
-    // branch has no history; they use merge-base and tracked-branch sources below.
+    // branch has no history; they use historyBase and tracked-branch sources below.
     ...(!prNumber &&
     !isMergeQueue &&
     pipelineSlug !== PIPELINES.ON_MERGE &&
@@ -62,12 +63,12 @@ export function buildCiStatsSources(args: {
           { branch: trackedBranch, jobName: pipelineSlug },
         ]
       : []),
-    // try to get times from the merge-base commit; for merge-queue builds this is
-    // MERGE_QUEUE_MERGE_BASE, which may only have been built by kibana-merge-queue
-    ...(selectiveMergeBase
+    // The timing-history base remains MERGE_QUEUE_MERGE_BASE on queue builds,
+    // and may have results only in kibana-merge-queue.
+    ...(historyBase
       ? [
-          { commit: selectiveMergeBase, jobName: PIPELINES.ON_MERGE },
-          { commit: selectiveMergeBase, jobName: PIPELINES.MERGE_QUEUE },
+          { commit: historyBase, jobName: PIPELINES.ON_MERGE },
+          { commit: historyBase, jobName: PIPELINES.MERGE_QUEUE },
         ]
       : []),
     // merge-queue builds report the target branch as their branch, so recent queue
