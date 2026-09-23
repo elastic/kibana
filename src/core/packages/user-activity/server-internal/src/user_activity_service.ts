@@ -48,6 +48,7 @@ export class UserActivityService
   private enabled = false;
   private filters: UserActivityFiltersType = [];
   private readonly injectedContextAsyncStorage: AsyncLocalStorage<InjectedContext>;
+  // set of SO types so we can know when to copy kibana.object to kibana.saved_object
   private savedObjectTypeNames = new Set<string>();
 
   constructor(private readonly coreContext: CoreContext) {
@@ -88,8 +89,6 @@ export class UserActivityService
   }
 
   start({ typeRegistry }: UserActivityStartDeps): InternalUserActivityServiceStart {
-    // Read the registry once: all saved object types are registered by the end
-    // of plugin setup, so the registry is complete at start time.
     this.savedObjectTypeNames = new Set(typeRegistry.getAllTypes().map((type) => type.name));
 
     return {
