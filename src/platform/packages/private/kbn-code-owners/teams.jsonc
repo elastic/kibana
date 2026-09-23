@@ -882,16 +882,6 @@
     ]
   },
   {
-    "id": "security-genai-research-and-development",
-    "name": "Security Genai Research And Development",
-    "areas": [
-      "security"
-    ],
-    "github": {
-      "team": "elastic/security-genai-research-and-development"
-    }
-  },
-  {
     "id": "security-generative-ai",
     "name": "Security Generative AI",
     "areas": [
