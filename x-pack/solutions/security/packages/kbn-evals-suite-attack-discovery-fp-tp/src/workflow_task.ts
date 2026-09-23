@@ -113,11 +113,21 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 const isTerminal = (status: ExecutionStatus): boolean => TerminalExecutionStatuses.includes(status);
 
 /**
- * Reads the workflow output (`workflow.output` step) when the execution record
- * carries it.
+ * Reads the workflow output. On the live stack the top-level `execution.output`
+ * is null — the workflow's result lives on the terminal `workflow.output` step
+ * (`emit_result`, stepType `workflow.output`), which the executions API returns
+ * with `includeOutput: true`. Fall back to that step when the record omits it.
  */
-export const readWorkflowOutput = (execution: WorkflowExecutionDto): WorkflowOutput | undefined =>
-  (execution as { output?: WorkflowOutput | null }).output ?? undefined;
+export const readWorkflowOutput = (execution: WorkflowExecutionDto): WorkflowOutput | undefined => {
+  const direct = (execution as { output?: WorkflowOutput | null }).output;
+  if (direct) return direct;
+  const outputStep = (execution.stepExecutions ?? []).find(
+    (step: WorkflowStepExecutionDto) => step.stepType === 'workflow.output' && step.output != null
+  );
+  return outputStep == null
+    ? undefined
+    : (outputStep.output as unknown as WorkflowOutput | undefined);
+};
 
 /**
  * Scans the agent step's execution records for a structured_output verdict.

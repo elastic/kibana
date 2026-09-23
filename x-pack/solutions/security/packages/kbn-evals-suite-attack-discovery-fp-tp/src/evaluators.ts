@@ -13,10 +13,31 @@ export interface PayloadConformanceExpectation {
   maxSummaryLength?: number;
 }
 
+/**
+ * The graded output's verdict. The real workflow emits the label as a plain
+ * string on `verdict` (both in the `ai.agent` step's `structured_output` and
+ * in the `workflow.output` step: `{"verdict": "true_positive", ...}`), while
+ * the object form (label/classification) was the schema-contract guess — the
+ * evaluators accept both so the wiring is robust to either shape.
+ */
+export type GradedVerdict = string | { label?: string; classification?: string } | undefined;
+
 interface Output {
-  verdict?: { label?: string; classification?: string; summary_markdown?: string };
+  verdict?: GradedVerdict;
   executionStatus?: string;
 }
+
+/** Extracts the canonical verdict label from either output shape. */
+export const verdictLabel = (verdict: GradedVerdict): string | undefined => {
+  if (verdict == null || typeof verdict === 'string') return verdict;
+  return verdict.label ?? verdict.classification;
+};
+
+/** Extracts summary_markdown when the verdict carries one (object form). */
+const verdictSummary = (verdict: GradedVerdict): string | undefined =>
+  typeof verdict === 'object' && verdict != null
+    ? (verdict as { summary_markdown?: string }).summary_markdown
+    : undefined;
 
 const asOutput = (output: unknown): Output => output as Output;
 
@@ -33,7 +54,7 @@ export const verdictAccuracy: Evaluator = {
   kind: 'CODE',
   direction: 'maximize',
   evaluate: async ({ output, expected }) => {
-    const predicted = asOutput(output).verdict?.label ?? asOutput(output).verdict?.classification;
+    const predicted = verdictLabel(asOutput(output).verdict);
     const golden = expectedLabel(expected);
     const correct = predicted != null && golden != null && predicted === golden;
 
@@ -65,15 +86,16 @@ export const payloadConformance: Evaluator = {
     const maxSummary =
       (expected as PayloadConformanceExpectation | undefined)?.maxSummaryLength ?? 8192;
 
-    const labelValid =
-      verdict != null &&
-      (verdict.label ?? verdict.classification) != null &&
-      (LABELS as readonly string[]).includes((verdict.label ?? verdict.classification) as string);
+    const label = verdictLabel(verdict);
+    const summary = verdictSummary(verdict);
+    const labelValid = label != null && (LABELS as readonly string[]).includes(label);
+    // String-form verdicts (the real workflow shape) carry the label only —
+    // their summary lives on the workflow output, not the graded verdict — so
+    // the summary bound applies only to the object form.
     const summaryValid =
-      verdict != null &&
-      typeof verdict.summary_markdown === 'string' &&
-      verdict.summary_markdown.trim().length > 0 &&
-      verdict.summary_markdown.length <= maxSummary;
+      typeof verdict === 'string'
+        ? true
+        : typeof summary === 'string' && summary.trim().length > 0 && summary.length <= maxSummary;
     const valid = labelValid && summaryValid;
 
     return {
@@ -82,7 +104,7 @@ export const payloadConformance: Evaluator = {
       metadata: {
         labelValid,
         summaryValid,
-        summaryLength: verdict?.summary_markdown?.length ?? null,
+        summaryLength: summary?.length ?? null,
         maxSummaryLength: maxSummary,
         executionStatus: asOutput(output).executionStatus,
       },
