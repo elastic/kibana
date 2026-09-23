@@ -19,7 +19,7 @@ const makeDeps = (listFn: jest.Mock) => {
     },
   };
 
-  const scopedClient = { list: listFn };
+  const scopedClient = { search: listFn };
   const conversations = {
     getScopedClient: jest.fn().mockResolvedValue(scopedClient),
   };
@@ -46,7 +46,7 @@ describe('registerGetInvestigationsCountRoute', () => {
     expect(routeConfig.security.authz.requiredPrivileges).toEqual(['alertzero_read']);
   });
 
-  it('calls client.list with the AlertZero thin agent ID and perPage 1', async () => {
+  it('calls client.search with the AlertZero thin agent ID and perPage 1', async () => {
     const list = jest.fn().mockResolvedValue({ results: [], total: 0 });
     const { handler, conversations } = makeDeps(list);
     const response = httpServerMock.createResponseFactory();

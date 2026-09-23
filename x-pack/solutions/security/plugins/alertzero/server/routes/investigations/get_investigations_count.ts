@@ -37,7 +37,7 @@ export const registerGetInvestigationsCountRoute = ({
         try {
           const conversations = getAgentBuilderConversations();
           const client = await conversations.getScopedClient({ request });
-          const { total } = await client.list({
+          const { total } = await client.search({
             agentId: ALERTZERO_THIN_AGENT_ID,
             perPage: 1,
           });
