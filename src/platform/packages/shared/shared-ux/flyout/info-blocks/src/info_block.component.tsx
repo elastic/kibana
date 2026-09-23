@@ -37,9 +37,8 @@ const styles = ({ euiTheme }: UseEuiTheme) => ({
 /**
  * A single title/value pair; one grid cell of an `InfoBlocks` panel.
  *
- * Renders a `dt`/`dd` pair, which is only valid inside a `dl`, and outside one the term and
- * definition roles do not map at all. `InfoBlocks` supplies that `dl`, so this stays internal to
- * the package rather than being exported alongside it.
+ * Renders a `dt`/`dd` pair. This component must be rendered inside a `dl` element,
+ * which is provided by the parent `InfoBlocks` component.
  */
 export const InfoBlock: FunctionComponent<InfoBlockProps> = ({
   title,
