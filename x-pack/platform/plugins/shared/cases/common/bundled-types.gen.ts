@@ -1789,7 +1789,7 @@ export const CaseResponseGetCase = lazySchema(() =>
     created_at: z.string().datetime(),
     created_by: CaseResponseCreatedByProperties,
     /**
-     * Custom field values for the case.
+     * Deprecated. Use `extended_fields` instead. Custom field values for the case.
      */
     customFields: z
       .array(
@@ -1827,7 +1827,8 @@ export const CaseResponseGetCase = lazySchema(() =>
         })
       )
       .optional()
-      .describe('Custom field values for the case.'),
+      .describe('Deprecated. Use `extended_fields` instead. Custom field values for the case.'),
+    extended_fields_labels: CaseExtendedFieldsLabels.optional(),
     description: z.string(),
     /**
       * The elapsed time from the creation of the case to its closure (in seconds). If the case has not been closed, the duration is set to null. If the case was closed after less than half a second, the duration is rounded down to zero.
