@@ -12,6 +12,7 @@ import type { CreateAlertingV2HostApp } from './locator_host';
 
 export type { CreateRuleOptionsFlyoutLegacyItem } from './create_rule_options_flyout';
 export type { AlertingV2PageProps } from './application/composable_pages';
+export type { PrivilegeCheck } from './application/privilege_check_context';
 
 export interface AlertingV2PublicStart {
   CreateRuleOptionsFlyout: ComponentType<CreateRuleOptionsFlyoutProps>;

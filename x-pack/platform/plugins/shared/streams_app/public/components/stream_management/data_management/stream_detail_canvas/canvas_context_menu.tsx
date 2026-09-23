@@ -9,8 +9,6 @@ import React, { useLayoutEffect, useRef } from 'react';
 import { css } from '@emotion/react';
 import { EuiContextMenuItem, EuiContextMenuPanel, EuiPanel, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useReactFlow } from '@xyflow/react';
-import { FIT_VIEW_DURATION, FIT_VIEW_PADDING } from './canvas_constants';
 
 export interface ContextMenuPosition {
   x: number;
@@ -55,7 +53,6 @@ export function CanvasContextMenu({
   onClose,
 }: CanvasContextMenuProps) {
   const { euiTheme } = useEuiTheme();
-  const { fitView } = useReactFlow();
   const menuRef = useRef<HTMLDivElement | null>(null);
 
   useLayoutEffect(() => {
@@ -87,18 +84,6 @@ export function CanvasContextMenu({
       : i18n.translate('xpack.streams.canvas.contextMenu.tidyUpLabel', {
           defaultMessage: 'Tidy up',
         });
-
-  const handleTidyUp = () => {
-    onTidyUp();
-    // Reframe only after a whole-graph tidy (pane) so the cleaned-up layout is
-    // comfortably in view; a node/selection tidy is scoped and leaves the
-    // viewport where it is.
-    if (target === 'pane') {
-      window.requestAnimationFrame(() =>
-        fitView({ padding: FIT_VIEW_PADDING, duration: FIT_VIEW_DURATION })
-      );
-    }
-  };
 
   return (
     <>
@@ -133,7 +118,7 @@ export function CanvasContextMenu({
                 key="tidyUp"
                 icon="grid"
                 data-test-subj="streamsCanvasContextMenuTidyUp"
-                onClick={handleTidyUp}
+                onClick={onTidyUp}
               >
                 {tidyUpLabel}
               </EuiContextMenuItem>,

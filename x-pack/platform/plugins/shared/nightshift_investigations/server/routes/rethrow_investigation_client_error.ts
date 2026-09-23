@@ -9,8 +9,8 @@ import { badRequest, conflict, notFound, serverUnavailable, tooManyRequests } fr
 import {
   InvestigationConflictError,
   InvestigationNotFoundError,
+  InvestigationMetadataMissingError,
   InvestigationQuotaDeniedError,
-  InvestigationSubjectMissingError,
   InvestigationUnavailableError,
   InvalidInvestigationContextError,
 } from '../client/errors';
@@ -19,7 +19,7 @@ export function rethrowInvestigationClientError(error: unknown): never {
   if (error instanceof InvestigationNotFoundError) {
     throw notFound(error.message);
   }
-  if (error instanceof InvestigationSubjectMissingError) {
+  if (error instanceof InvestigationMetadataMissingError) {
     throw badRequest(error.message);
   }
   if (error instanceof InvestigationConflictError) {

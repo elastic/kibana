@@ -6,18 +6,18 @@
  */
 
 import type { SavedObject } from '@kbn/core-saved-objects-api-server';
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
+import { optionalRouteId } from '../../zod_query';
 import type { RouteContext, SyntheticsRestApiRouteFactory } from '../../types';
 import { syntheticsParamType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import type { SyntheticsParams, SyntheticsParamsReadonly } from '../../../../common/runtime_types';
 
-const RequestParamsSchema = schema.object({
-  id: schema.maybe(schema.string()),
+const RequestParamsSchema = z.strictObject({
+  id: optionalRouteId,
 });
 
-type RequestParams = TypeOf<typeof RequestParamsSchema>;
+type RequestParams = z.infer<typeof RequestParamsSchema>;
 
 export const getSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
   SyntheticsParams[] | SyntheticsParamsReadonly[] | SyntheticsParams | SyntheticsParamsReadonly,

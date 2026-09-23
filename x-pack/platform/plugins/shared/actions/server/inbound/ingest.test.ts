@@ -8,10 +8,13 @@
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { z } from '@kbn/zod/v4';
 import { buildEventId, MAX_CONNECTOR_TYPE_ID_LENGTH } from '@kbn/connector-specs';
 
+import { CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
 import { computeIngestTokenHash } from './compute_ingest_token_hash';
+import { composeIngestToken } from './ingress_credential';
 import { INBOUND_EVENTS_DISABLED_MESSAGE, INBOUND_EVENTS_MAX_EMITTED_DEFAULT } from './constants';
 import { dispatchConnectorEvents } from './dispatch_connector_events';
 import { ingestInboundEvent } from './ingest';
@@ -51,12 +54,43 @@ describe('ingestInboundEvent', () => {
   const getDecryptedConnectorAttributes = jest.fn<Promise<RawAction>, [string, string]>();
 
   const connectorId = 'connector-1';
-  const token = 'ingest-token-value';
+  const credentialId = 'cred-1';
+  const token = composeIngestToken(credentialId, 'ingest-token-value');
   const spaceId = 'default';
   const ingestTokenHash = computeIngestTokenHash({
     connectorId,
     spaceId,
     token,
+  });
+
+  const mockConnectorGet = (config: Record<string, unknown> = { other: 'kept' }) => ({
+    id: connectorId,
+    type: 'action',
+    references: [],
+    attributes: {
+      actionTypeId: '.myConnector',
+      name: 'Test',
+      isMissingSecrets: false,
+      config,
+      secrets: { apiKey: 'should-not-reach-spoke' },
+    },
+  });
+
+  const mockCredentialGet = (
+    overrides: {
+      id?: string;
+      connectorId?: string;
+      ingestTokenHash?: string;
+    } = {}
+  ) => ({
+    id: overrides.id ?? credentialId,
+    type: CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE,
+    references: [],
+    attributes: {
+      connectorId: overrides.connectorId ?? connectorId,
+      ingestTokenHash: overrides.ingestTokenHash ?? ingestTokenHash,
+      createdAt: '2026-01-01T00:00:00.000Z',
+    },
   });
 
   const createFakeSpec = (handleEvents: jest.Mock) =>
@@ -90,22 +124,19 @@ describe('ingestInboundEvent', () => {
       actionTypeId: '.myConnector',
       name: 'Test',
       isMissingSecrets: false,
-      config: { ingestTokenHash },
+      config: {},
       secrets: {},
       apiKey: storedApiKey,
     });
     getUnsecuredSavedObjectsClient.mockResolvedValue(unsecuredSavedObjectsClient);
-    unsecuredSavedObjectsClient.get.mockResolvedValue({
-      id: connectorId,
-      type: 'action',
-      references: [],
-      attributes: {
-        actionTypeId: '.myConnector',
-        name: 'Test',
-        isMissingSecrets: false,
-        config: { ingestTokenHash, other: 'kept' },
-        secrets: { apiKey: 'should-not-reach-spoke' },
-      },
+    unsecuredSavedObjectsClient.get.mockImplementation(async (type, id) => {
+      if (type === CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE) {
+        if (id !== credentialId) {
+          throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+        }
+        return mockCredentialGet() as never;
+      }
+      return mockConnectorGet() as never;
     });
   });
 
@@ -196,17 +227,17 @@ describe('ingestInboundEvent', () => {
     getConnectorSpecMock.mockReturnValue(
       createFakeSpec(jest.fn()) as ReturnType<typeof getConnectorSpec>
     );
-    unsecuredSavedObjectsClient.get.mockResolvedValue({
-      id: connectorId,
-      type: 'action',
-      references: [],
-      attributes: {
-        actionTypeId: '.otherConnector',
-        name: 'Test',
-        isMissingSecrets: false,
-        config: { ingestTokenHash },
-        secrets: {},
-      },
+    unsecuredSavedObjectsClient.get.mockImplementation(async (type, id) => {
+      if (type === CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE) {
+        return mockCredentialGet() as never;
+      }
+      return {
+        ...mockConnectorGet(),
+        attributes: {
+          ...mockConnectorGet().attributes,
+          actionTypeId: '.otherConnector',
+        },
+      } as never;
     });
     const { response: res } = await run();
     expect(res.notFound).toHaveBeenCalled();
@@ -222,21 +253,15 @@ describe('ingestInboundEvent', () => {
     expectOutcome('debug', 'no_spec');
   });
 
-  it('returns 404 when the connector has no ingestTokenHash', async () => {
+  it('returns 404 when the ingest credential is missing', async () => {
     getConnectorSpecMock.mockReturnValue(
       createFakeSpec(jest.fn()) as ReturnType<typeof getConnectorSpec>
     );
-    unsecuredSavedObjectsClient.get.mockResolvedValue({
-      id: connectorId,
-      type: 'action',
-      references: [],
-      attributes: {
-        actionTypeId: '.myConnector',
-        name: 'Test',
-        isMissingSecrets: false,
-        config: {},
-        secrets: {},
-      },
+    unsecuredSavedObjectsClient.get.mockImplementation(async (type, id) => {
+      if (type === CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE) {
+        throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+      }
+      return mockConnectorGet() as never;
     });
     const { response: res } = await run();
     expect(res.notFound).toHaveBeenCalled();
@@ -251,21 +276,33 @@ describe('ingestInboundEvent', () => {
     const { response: res } = await run({ query: {} });
     expect(res.notFound).toHaveBeenCalled();
     expect(emitConnectorEvents).not.toHaveBeenCalled();
-    expectOutcome('debug', 'auth_fail');
-  });
-
-  it('returns 404 for a bad token', async () => {
-    getConnectorSpecMock.mockReturnValue(
-      createFakeSpec(jest.fn()) as ReturnType<typeof getConnectorSpec>
+    expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalledWith(
+      CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE,
+      expect.anything()
     );
-    const { response: res } = await run({ query: { token: 'wrong' } });
-    expect(res.notFound).toHaveBeenCalled();
-    expect(emitConnectorEvents).not.toHaveBeenCalled();
     expectOutcome('debug', 'auth_fail');
   });
 
-  it('returns 404 for the previous token after the stored hash is reminted', async () => {
-    const rotatedToken = 'rotated-ingest-token';
+  it.each(['wrong', 'opaque-preview-token'])(
+    'returns 404 without loading a credential for unparseable token %j',
+    async (badToken) => {
+      getConnectorSpecMock.mockReturnValue(
+        createFakeSpec(jest.fn()) as ReturnType<typeof getConnectorSpec>
+      );
+      const { response: res } = await run({ query: { token: badToken } });
+      expect(res.notFound).toHaveBeenCalled();
+      expect(emitConnectorEvents).not.toHaveBeenCalled();
+      expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalledWith(
+        CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE,
+        expect.anything()
+      );
+      expectOutcome('debug', 'auth_fail');
+    }
+  );
+
+  it('returns 404 for the previous token after rotate', async () => {
+    const rotatedCredentialId = 'cred-2';
+    const rotatedToken = composeIngestToken(rotatedCredentialId, 'rotated-secret');
     const rotatedHash = computeIngestTokenHash({
       connectorId,
       spaceId,
@@ -279,17 +316,17 @@ describe('ingestInboundEvent', () => {
     getConnectorSpecMock.mockReturnValue(
       createFakeSpec(handleEvents) as ReturnType<typeof getConnectorSpec>
     );
-    unsecuredSavedObjectsClient.get.mockResolvedValue({
-      id: connectorId,
-      type: 'action',
-      references: [],
-      attributes: {
-        actionTypeId: '.myConnector',
-        name: 'Test',
-        isMissingSecrets: false,
-        config: { ingestTokenHash: rotatedHash },
-        secrets: {},
-      },
+    unsecuredSavedObjectsClient.get.mockImplementation(async (type, id) => {
+      if (type === CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE) {
+        if (id === rotatedCredentialId) {
+          return mockCredentialGet({
+            id: rotatedCredentialId,
+            ingestTokenHash: rotatedHash,
+          }) as never;
+        }
+        throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+      }
+      return mockConnectorGet() as never;
     });
 
     const { response: rejected } = await run({ query: { token } });
@@ -320,7 +357,7 @@ describe('ingestInboundEvent', () => {
     expect(emitConnectorEvents).toHaveBeenCalled();
   });
 
-  it('returns 202 and emits on the happy path without secrets or ingestTokenHash', async () => {
+  it('returns 202 and emits on the happy path without secrets', async () => {
     const eventId = buildEventId('.myConnector', 'received');
     const handleEvents = jest.fn().mockResolvedValue({
       type: 'emit',
@@ -348,7 +385,6 @@ describe('ingestInboundEvent', () => {
       })
     );
     expect(handleEvents.mock.calls[0][0]).not.toHaveProperty('secrets');
-    expect(handleEvents.mock.calls[0][0].config).not.toHaveProperty('ingestTokenHash');
     expect(emitConnectorEvents).toHaveBeenCalledWith({
       eventId,
       payload: { body: { hello: 'world' } },
@@ -721,7 +757,7 @@ describe('ingestInboundEvent', () => {
       actionTypeId: '.myConnector',
       name: 'Test',
       isMissingSecrets: false,
-      config: { ingestTokenHash },
+      config: {},
       secrets: {},
     });
     getConnectorSpecMock.mockReturnValue(

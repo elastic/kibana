@@ -5,4 +5,13 @@
  * 2.0.
  */
 
-export { ConversationDetailsFlyout, type ConversationDetailsFlyoutProps } from './details_flyout';
+export {
+  ConversationDetailsFlyoutHeader,
+  type ConversationDetailsFlyoutHeaderProps,
+} from './flyout_header';
+export {
+  ConversationDetailsFlyoutFooter,
+  type ConversationDetailsFlyoutFooterProps,
+} from './flyout_footer';
+export { InvestigationHeaderBlocks, type InvestigationHeaderBlocksProps } from './header_blocks';
+export { OverviewTab } from './details_flyout_tab_contents';

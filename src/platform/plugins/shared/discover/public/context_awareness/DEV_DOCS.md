@@ -534,7 +534,7 @@ The `ScopedDiscoverEBTManager` is injected at scoped manager creation time.
 - **Mocks** are in `__mocks__/`. Use these when testing components that depend on the framework.
 - **When modifying framework internals**, run the existing test suite to catch regressions:
   ```
-  yarn test:jest src/platform/plugins/shared/discover/public/context_awareness/
+  pnpm test:jest src/platform/plugins/shared/discover/public/context_awareness/
   ```
 - **When adding extension points**, add consumption tests in the relevant Discover component tests, not in the framework tests. The framework tests verify the generic merging and resolution mechanics — extension point behavior is tested at the call site.
 
