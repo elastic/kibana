@@ -3886,8 +3886,6 @@ components:
                     maxLength: 160
                     nullable: true
                   - type: boolean
-        extended_fields_labels:
-          $ref: '#/components/schemas/case_extended_fields_labels'
         description:
           type: string
           example: A case description.

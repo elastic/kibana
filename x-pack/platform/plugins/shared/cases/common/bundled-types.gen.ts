@@ -496,7 +496,7 @@ export const CreateCaseRequest = lazySchema(() =>
       .max(10)
       .optional()
       .describe(
-        'Custom field values for a case. Any optional custom fields that are not specified in the request are set to null.\n'
+        'Deprecated. Use `extended_fields` instead. Custom field values for a case. Any optional custom fields that are not specified in the request are set to null. Values written here continue to work during the migration to `extended_fields`.\n'
       ),
     extended_fields: CaseExtendedFields.optional(),
     /**
@@ -772,7 +772,7 @@ export const CaseResponseProperties = lazySchema(() =>
     created_at: z.string().datetime(),
     created_by: CaseResponseCreatedByProperties,
     /**
-     * Custom field values for the case.
+     * Deprecated. Use `extended_fields` instead. Custom field values for the case.
      */
     customFields: z
       .array(
@@ -982,15 +982,28 @@ export const UpdateCaseRequest = lazySchema(() =>
               /**
                * The template identifier. Retrieve template ids with `GET /api/cases/templates`.
                */
-              id: z.string(),
+              id: z
+                .string()
+                .describe(
+                  'The template identifier. Retrieve template ids with `GET /api/cases/templates`.'
+                ),
               /**
       * The template version to apply. Required on update: switching a template is an explicit versioned action, so the version must be specified.
 
       */
-              version: z.number().int().min(1),
+              version: z
+                .number()
+                .int()
+                .min(1)
+                .describe(
+                  'The template version to apply. Required on update: switching a template is an explicit versioned action, so the version must be specified.\n'
+                ),
             })
             .nullable()
-            .optional(),
+            .optional()
+            .describe(
+              "The case template. Requires the `xpack.cases.templates.enabled` setting. Updating `template` is validation-only: switching the template validates the case's `extended_fields` against the new template's fields but does not inject template defaults (unlike create). Omit to leave the current template unchanged; set to `null` to clear it; set to `{ id, version }` to switch. Unlike create, switching a template on update is an explicit versioned action: both `id` and `version` are required — the server does not resolve a latest version here. After switching, use the get case fields API (`GET /api/cases/{case_id}/fields`) to see the fields the new template exposes.\n"
+            ),
           description: CaseDescription.optional(),
           extended_fields: CaseExtendedFields.optional(),
           /**
