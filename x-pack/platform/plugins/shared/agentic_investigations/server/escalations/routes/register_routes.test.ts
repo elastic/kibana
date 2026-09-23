@@ -13,6 +13,7 @@ import {
 } from '@kbn/agent-builder-common';
 import {
   ESCALATIONS_INTERNAL_URL,
+  ESCALATIONS_SUGGEST_USERS_URL,
   ESCALATION_BY_ID_URL,
 } from '../../../common/escalations/constants';
 import { ESCALATIONS_API_PRIVILEGE_MANAGE, ESCALATIONS_API_PRIVILEGE_READ } from '../constants';
@@ -32,6 +33,7 @@ interface RegisteredRoute {
     path: string;
     access?: string;
     security?: { authz?: { requiredPrivileges?: string[] } };
+    options?: { access?: string };
   };
   handler: Handler;
 }
@@ -43,6 +45,8 @@ const registerAndCollect = (service: Partial<EscalationsService>) => {
   const gets: RegisteredRoute[] = [];
   const posts: RegisteredRoute[] = [];
   const patches: RegisteredRoute[] = [];
+  // Unversioned posts (e.g. the suggest-users endpoint)
+  const plainPosts: RegisteredRoute[] = [];
 
   (router.versioned.get as jest.Mock).mockImplementation((config) => ({
     addVersion: (_version: unknown, handler: Handler) => gets.push({ config, handler }),
@@ -53,17 +57,22 @@ const registerAndCollect = (service: Partial<EscalationsService>) => {
   (router.versioned.patch as jest.Mock).mockImplementation((config) => ({
     addVersion: (_version: unknown, handler: Handler) => patches.push({ config, handler }),
   }));
+  (router.post as jest.Mock).mockImplementation((config, handler: Handler) =>
+    plainPosts.push({ config, handler })
+  );
 
   registerEscalationRoutes({
     router,
     logger: loggingSystemMock.createLogger(),
     getEscalationsService: () => service as EscalationsService,
+    getSpaceId: () => 'default',
+    getSecurity: jest.fn().mockResolvedValue(undefined),
   } as unknown as EscalationRouteDependencies);
 
   const byPath = (routes: RegisteredRoute[], path: string) =>
     routes.find(({ config }) => config.path === path)!;
 
-  return { router, gets, posts, patches, byPath };
+  return { router, gets, posts, patches, plainPosts, byPath };
 };
 
 describe('escalation routes', () => {
@@ -94,10 +103,20 @@ describe('escalation routes', () => {
     });
 
     it('marks all routes as internal', () => {
-      const { byPath, gets, posts, patches } = registerAndCollect({});
+      const { byPath, gets, posts, patches, plainPosts } = registerAndCollect({});
       expect(byPath(gets, ESCALATIONS_INTERNAL_URL).config.access).toBe('internal');
       expect(byPath(posts, ESCALATIONS_INTERNAL_URL).config.access).toBe('internal');
       expect(byPath(patches, ESCALATION_BY_ID_URL).config.access).toBe('internal');
+      expect(byPath(plainPosts, ESCALATIONS_SUGGEST_USERS_URL).config.options?.access).toBe(
+        'internal'
+      );
+    });
+
+    it('gates suggest-users on ESCALATIONS_API_PRIVILEGE_MANAGE', () => {
+      const { byPath, plainPosts } = registerAndCollect({});
+      expect(
+        byPath(plainPosts, ESCALATIONS_SUGGEST_USERS_URL).config.security?.authz?.requiredPrivileges
+      ).toEqual([ESCALATIONS_API_PRIVILEGE_MANAGE]);
     });
   });
 
