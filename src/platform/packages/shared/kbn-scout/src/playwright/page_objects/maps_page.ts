@@ -123,35 +123,33 @@ export class MapsPage {
     await this.saveAndReturnButton.click();
   }
 
-  /** Waits for loading indicators to clear on the minimized layer control (embedded/dashboard context). */
-  async waitForLayersToLoadMinimizedLayerControl() {
-    const expandButton = this.page.testSubj.locator('mapExpandLayerControlButton');
-    await expandButton.waitFor({ state: 'visible', timeout: DEFAULT_MAP_LOADING_TIMEOUT });
-    await expect(expandButton.locator('.euiLoadingSpinner')).toHaveCount(0, {
-      timeout: DEFAULT_MAP_LOADING_TIMEOUT,
-    });
-  }
-
-  /** Waits until Map layer TOC has entries and loading indicators are gone (FTR parity). */
+  /** Waits until map layers are loaded. Works in both standalone (expanded TOC) and minimized TOC contexts. */
   async waitForLayersToLoad() {
-    await this.mapLayerToc.waitFor({ state: 'visible', timeout: DEFAULT_MAP_LOADING_TIMEOUT });
-    // Maps uses EuiLoadingSpinner (role=progressbar) while a layer loads; there is no
-    // dedicated layer-loading data-test-subj, so wait for toggles + no progressbars.
-    await this.page.waitForFunction(
-      () => {
-        const toc = document.querySelector('[data-test-subj="mapLayerTOC"]');
-        if (!toc) {
-          return false;
-        }
-        const layerCount = toc.querySelectorAll(
-          '[data-test-subj^="layerTocActionsPanelToggleButton"]'
-        ).length;
-        const spinnerCount = toc.querySelectorAll('[role="progressbar"]').length;
-        return layerCount > 0 && spinnerCount === 0;
-      },
-      undefined,
-      { timeout: DEFAULT_MAP_LOADING_TIMEOUT }
-    );
+    if (await this.mapLayerToc.isVisible()) {
+      // Maps uses EuiLoadingSpinner (role=progressbar) while a layer loads; there is no
+      // dedicated layer-loading data-test-subj, so wait for toggles + no progressbars.
+      await this.page.waitForFunction(
+        () => {
+          const toc = document.querySelector('[data-test-subj="mapLayerTOC"]');
+          if (!toc) {
+            return false;
+          }
+          const layerCount = toc.querySelectorAll(
+            '[data-test-subj^="layerTocActionsPanelToggleButton"]'
+          ).length;
+          const spinnerCount = toc.querySelectorAll('[role="progressbar"]').length;
+          return layerCount > 0 && spinnerCount === 0;
+        },
+        undefined,
+        { timeout: DEFAULT_MAP_LOADING_TIMEOUT }
+      );
+    } else {
+      const expandButton = this.page.testSubj.locator('mapExpandLayerControlButton');
+      await expandButton.waitFor({ state: 'visible', timeout: DEFAULT_MAP_LOADING_TIMEOUT });
+      await expect(expandButton.locator('.euiLoadingSpinner')).toHaveCount(0, {
+        timeout: DEFAULT_MAP_LOADING_TIMEOUT,
+      });
+    }
   }
 
   async getLayerTocTooltipMsg(layerName: string): Promise<string> {

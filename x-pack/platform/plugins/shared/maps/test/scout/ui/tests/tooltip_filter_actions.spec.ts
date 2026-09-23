@@ -47,7 +47,7 @@ test.describe(
       await test.step('clicking create filter button adds a join filter', async () => {
         await page.testSubj.click('mapTooltipCreateFilterButton');
         await pageObjects.dashboard.waitForRenderComplete();
-        await pageObjects.maps.waitForLayersToLoadMinimizedLayerControl();
+        await pageObjects.maps.waitForLayersToLoad();
 
         const numFilters = await pageObjects.filterBar.getFilterCount();
         expect(numFilters).toBe(1);
