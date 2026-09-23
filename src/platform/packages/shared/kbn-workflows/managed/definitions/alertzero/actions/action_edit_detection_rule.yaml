@@ -73,7 +73,6 @@ triggers:
                   description: Fields to group events by before counting. Use [] to count all events.
                 cardinality:
                   type: array
-                  maxItems: 3
                   items:
                     type: object
                     properties:

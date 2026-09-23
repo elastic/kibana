@@ -482,7 +482,6 @@ steps:
                 maxItems: 5
               proposed_threshold_cardinality:
                 type: array
-                maxItems: 3
                 items:
                   type: object
                   properties:
@@ -802,11 +801,15 @@ steps:
 
       - match: threshold
         steps:
-          - name: propose_threshold
+          - name: incomplete_threshold_output
+            type: workflow.fail
             if: >-
-              ${{ steps.diagnose_rule.output.structured_output.proposed_threshold_value != nil
-                and steps.diagnose_rule.output.structured_output.proposed_threshold_field != nil
-                and steps.diagnose_rule.output.structured_output.proposed_threshold_cardinality != nil }}
+              ${{ steps.diagnose_rule.output.structured_output.proposed_threshold_value == nil
+                or steps.diagnose_rule.output.structured_output.proposed_threshold_field == nil
+                or steps.diagnose_rule.output.structured_output.proposed_threshold_cardinality == nil }}
+            with:
+              message: "diagnose_rule chose change_type=threshold but did not populate all required threshold fields"
+          - name: propose_threshold
             type: workflow.execute
             with:
               workflow-id: system-create-investigation-proposal
