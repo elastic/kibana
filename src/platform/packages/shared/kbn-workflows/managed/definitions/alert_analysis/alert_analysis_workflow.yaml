@@ -1017,7 +1017,11 @@ steps:
                 type: security.buildAlertEntityGraph
                 with:
                   alertId: "{{foreach.item._id}}"
-                  alertIndex: "{{foreach.item._index}}"
+                  # Executing-space alias only — never foreach.item._index. A Worker caller can
+                  # supply another space's Security alerts index; buildAlertEntityGraph has no
+                  # kibana.space_ids filter, so trusting caller _index would leak related-alert
+                  # metadata across spaces. Same-space alerts still resolve via this alias.
+                  alertIndex: ".alerts-security.alerts-{{ variables.spaceId }}"
                   # The alert itself is already in the prompt; the graph only needs to add the others.
                   include_seed: false
                   entity_fields:

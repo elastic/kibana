@@ -498,11 +498,13 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
   it('keeps the related-alert graph per alert and summarises it into the batch prompt', () => {
     const graphStep = findStepByName(workflow.steps, 'get_related_alerts') as {
       type: string;
-      with: { alertId: string; max_alerts: string };
+      with: { alertId: string; alertIndex: string; max_alerts: string };
     };
 
     expect(graphStep.type).toBe('security.buildAlertEntityGraph');
     expect(graphStep.with.alertId).toBe('{{foreach.item._id}}');
+    // Space-scoped alias — never foreach.item._index (caller could point at another space).
+    expect(graphStep.with.alertIndex).toBe('.alerts-security.alerts-{{ variables.spaceId }}');
     // Per alert, inside the batch loop: the outer foreach is classify_alert_batches (over
     // batches) and the inner foreach is collect_related_alerts (over the batch's alerts).
     // Two enclosing loops keep the related_summaries accumulator bounded to batch_size entries.
@@ -922,9 +924,8 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(alertsInput?.items?.required).toEqual(
       expect.arrayContaining(['_id', '_index', '@timestamp', 'kibana'])
     );
-    // Related-alert graph passes foreach.item._index as alertIndex — require a Security
-    // alerts alias/backing index so a schema-valid Worker payload cannot omit it or point
-    // the graph at an arbitrary ES index.
+    // Caller _index must still be a Security alerts alias/backing index (schema boundary);
+    // related-alert graph search uses the executing-space alias, not this field.
     expect(alertsInput?.items?.properties?._index?.maxLength).toBe(512);
     expect(alertsInput?.items?.properties?._index?.pattern).toBe(
       '^\\.(internal\\.)?(preview\\.)?alerts-security\\.alerts-[a-zA-Z0-9._-]+$'

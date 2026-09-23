@@ -24,13 +24,17 @@ const findStepWithOutput = (
   [...steps].reverse().find((step) => step.stepId === stepId && step.output != null);
 
 /**
- * Runtime regression for the managed Alert Analysis workflow without calledByWorker.
- * Proves the standalone / manual path still completes (skip analysis when there is no
- * connector or pending alerts) and does not take the Worker fail-loud empty-alerts gate.
- * Installation is async on plugin start, so we poll until the managed document is valid.
+ * Gate / skip-path runtime checks for the managed Alert Analysis workflow.
+ *
+ * These runs supply no alert event (and no connector), so analysis_enabled skips
+ * classification, tags, notes, and auto-close. They do not replace alert-bearing
+ * writeback coverage (eval suite / desk smoke with a connector). They do prove:
+ *   - the managed workflow is installed and runnable
+ *   - omitting calledByWorker does not hit the Worker empty-alerts fail gate
+ *   - calledByWorker + empty alerts fails that gate instead of completing empty
  */
 apiTest.describe(
-  'Alert Analysis managed workflow — standalone run',
+  'Alert Analysis managed workflow — Worker empty-alerts gate',
   { tag: [...tags.stateful.classic] },
   () => {
     let editorHeaders: Record<string, string>;
@@ -58,9 +62,9 @@ apiTest.describe(
     });
 
     apiTest(
-      'completes without calledByWorker and does not fail the empty-alerts Worker gate',
+      'skip-path run without calledByWorker completes and does not hit the empty-alerts fail gate',
       async ({ apiClient }) => {
-        // Omit calledByWorker entirely — same as a UI / rule-triggered run.
+        // Omit calledByWorker — empty manual inputs → no pending alerts → analysis skipped.
         const workflowExecutionId = await runWorkflow(
           apiClient,
           editorHeaders,
