@@ -74,6 +74,33 @@ const setSharedFields = (
   ) as Partial<LogExtractionConfig>;
 
 /**
+ * Fields that control log extraction volume and throughput behaviour. These are exclusive to the
+ * non-priority process — global overrides must not reach them, so the process-mode defaults
+ * (e.g. maxLogsPerWindowCapBehavior: 'drop') and the nonPriorityLogExtractionConfig layer are
+ * the only way to set them for non-priority.
+ */
+export const NON_PRIORITY_EXCLUSIVE_FIELDS = new Set<keyof LogExtractionConfig>([
+  'maxLogsPerPage',
+  'maxTimeWindowSize',
+  'maxLogsPerWindow',
+  'maxLogsPerWindowCapBehavior',
+  'docsLimit',
+  'timeout',
+]);
+
+const setGlobalOverridesForNonPriority = (
+  overrides: Partial<LogExtractionConfig>
+): Partial<LogExtractionConfig> =>
+  Object.fromEntries(
+    Object.entries(overrides).filter(
+      ([key, value]) =>
+        value !== null &&
+        value !== undefined &&
+        !NON_PRIORITY_EXCLUSIVE_FIELDS.has(key as keyof LogExtractionConfig)
+    )
+  ) as Partial<LogExtractionConfig>;
+
+/**
  * Converts a `NonPriorityLogExtractionTypeOverride` to the subset that belongs in
  * `LogExtractionConfig`. `samplingRate` is non-priority-specific and not part of
  * `LogExtractionConfig`, so it is stripped here and read separately by the caller.
@@ -93,16 +120,17 @@ const setNonPriorityFields = (
  * Shared base (all modes):
  *   code defaults → per-type code defaults → per-process defaults → globalOverrides
  *
+ * For non-priority, globalOverrides are filtered: NON_PRIORITY_EXCLUSIVE_FIELDS are stripped
+ * so that volume/throughput fields (maxLogsPerPage, maxTimeWindowSize, maxLogsPerWindow,
+ * maxLogsPerWindowCapBehavior, docsLimit, timeout) cannot be overridden by the shared API.
+ * The non-priority mode default is the floor; nonPriorityLogExtractionConfig is the ceiling.
+ *
  * Final layer for single / priority:
  *   all fields from typeOverride
  *
  * Final layer for non-priority:
  *   shared fields only from typeOverride (additionalIndexPatterns, excludedIndexPatterns),
  *   then nonPriorityOverride (when populated - not wired to any API yet)
- *
- * Keeping non-priority isolated ensures values set via the shared API (which writes to
- * `logExtractionConfig` / `typeOverride`) do not bleed into the non-priority process and
- * override its mode defaults (e.g. maxLogsPerWindowCapBehavior: 'drop').
  */
 export const getMergedConfig = (
   type: EntityType,
@@ -115,7 +143,9 @@ export const getMergedConfig = (
     ...LATEST_LOG_EXTRACTION_DEFAULTS,
     ...DEFAULT_CONFIG_BY_TYPE[type],
     ...DEFAULT_CONFIG_BY_MODE[extractionMode],
-    ...setFields(globalOverrides),
+    ...(extractionMode === EXTRACTION_MODE.nonPriority
+      ? setGlobalOverridesForNonPriority(globalOverrides)
+      : setFields(globalOverrides)),
   };
 
   const typeFields =

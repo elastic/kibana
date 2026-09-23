@@ -255,10 +255,39 @@ describe('getMergedConfig', () => {
       expect(merged.excludedIndexPatterns).toEqual(['exclude-*']);
     });
 
-    it('global override applies to non-priority (via shared base)', () => {
+    it('global override of non-exclusive fields (frequency) still reaches non-priority', () => {
       const merged = getMergedConfig('user', { frequency: '5m' }, undefined, 'nonPriority');
 
       expect(merged.frequency).toBe('5m');
+    });
+
+    it('global override of exclusive fields does not reach non-priority', () => {
+      const merged = getMergedConfig(
+        'user',
+        {
+          maxLogsPerWindowCapBehavior: 'defer',
+          maxLogsPerWindow: 999,
+          maxLogsPerPage: 999,
+          docsLimit: 999,
+        },
+        undefined,
+        'nonPriority'
+      );
+
+      // exclusive fields stay at their mode defaults / code defaults
+      expect(merged.maxLogsPerWindowCapBehavior).toBe('drop');
+      expect(merged.maxLogsPerWindow).not.toBe(999);
+      expect(merged.maxLogsPerPage).not.toBe(999);
+      expect(merged.docsLimit).not.toBe(999);
+    });
+
+    it('global override of exclusive fields still reaches single and priority modes', () => {
+      const overrides = { maxLogsPerWindowCapBehavior: 'defer' as const, maxLogsPerWindow: 999 };
+
+      expect(getMergedConfig('user', overrides, undefined, 'single').maxLogsPerWindowCapBehavior).toBe('defer');
+      expect(getMergedConfig('user', overrides, undefined, 'single').maxLogsPerWindow).toBe(999);
+      expect(getMergedConfig('user', overrides, undefined, 'priority').maxLogsPerWindowCapBehavior).toBe('defer');
+      expect(getMergedConfig('user', overrides, undefined, 'priority').maxLogsPerWindow).toBe(999);
     });
 
     it('priority still reads all typeOverride fields including maxLogsPerWindowCapBehavior', () => {
