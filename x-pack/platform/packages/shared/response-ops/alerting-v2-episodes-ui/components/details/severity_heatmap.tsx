@@ -165,6 +165,7 @@ export const AlertEpisodeSeverityHeatmap = ({ eventRows }: AlertEpisodeSeverityH
   return (
     <EuiPanel
       hasShadow={false}
+      hasBorder={false}
       paddingSize="none"
       data-test-subj="alertingV2EpisodeSeverityHeatmap"
     >

@@ -220,6 +220,7 @@ export const AlertEpisodeLifecycleHeatmap = ({ eventRows }: AlertEpisodeLifecycl
   return (
     <EuiPanel
       hasShadow={false}
+      hasBorder={false}
       paddingSize="none"
       data-test-subj="alertingV2EpisodeLifecycleHeatmap"
     >

@@ -292,8 +292,10 @@ export const EpisodesHistogram = ({
               /*
                * TODO: Replace these selectors with a proper prop on UnifiedHistogramChart (e.g. withLensActions={false})
                */
-              [data-test-subj='unifiedHistogramEditFlyoutVisualization'],
-              [data-test-subj='unifiedHistogramSaveVisualization'] {
+              .euiButtonGroup:has(
+                  [data-test-subj='unifiedHistogramEditFlyoutVisualization'],
+                  [data-test-subj='unifiedHistogramSaveVisualization']
+                ) {
                 display: none;
               }
             `}
