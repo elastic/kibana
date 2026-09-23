@@ -87,11 +87,14 @@ export function useMiDeploy({
 
       if (isInitialDeploy) {
         // Restrict each group to members not already tracked — an already-deployed instance
-        // must not get a second policy on a subsequent Deploy click (e.g. after navigating back).
+        // must not get a second policy on a subsequent Deploy click (e.g. after navigating back
+        // or after resume, where serviceStatuses is reset but policyIdsByInstance is hydrated).
         groupsToDeploy = deployGroups
           .map((group) => {
             const untrackedMembers = group.members.filter(
-              ({ instance }) => !(instance.instanceId in serviceStatuses)
+              ({ instance }) =>
+                !(instance.instanceId in serviceStatuses) &&
+                !(instance.instanceId in policyIdsByInstance)
             );
             if (untrackedMembers.length === 0) return null;
             return {
