@@ -71,6 +71,20 @@ describe('GithubApi#getIssueComments()', () => {
   });
 });
 
+describe('GithubApi#canPush()', () => {
+  afterEach(() => jest.restoreAllMocks());
+
+  it('reads the token permissions on the repository, in dry-run mode too', async () => {
+    const fetchMock = jest
+      .spyOn(global, 'fetch')
+      .mockResolvedValue(jsonResponse({ permissions: { push: false, pull: true } }));
+    const api = new GithubApi({ log, token: 'secret', dryRun: true, repo: 'elastic/sandbox' });
+
+    expect(await api.canPush()).toBe(false);
+    expect(String(fetchMock.mock.calls[0][0])).toBe('https://api.github.com/repos/elastic/sandbox');
+  });
+});
+
 describe('GithubApi writes', () => {
   afterEach(() => {
     jest.restoreAllMocks();

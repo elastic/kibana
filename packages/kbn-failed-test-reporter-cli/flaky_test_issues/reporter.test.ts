@@ -32,6 +32,7 @@ const TRACKING_REPO = 'elastic/kibana';
 const createGithubApi = (issues: GithubIssue[] = []) => {
   const api = {
     getRequestCount: jest.fn(() => 0),
+    canPush: jest.fn(async () => true),
     listIssues: jest.fn(async ({ state }: ListIssuesOptions) =>
       issues.filter((issue) => state === 'all' || issue.state === state)
     ),
@@ -484,6 +485,20 @@ describe('reportFlakySuiteIssues', () => {
         tracking: { repo: TRACKING_REPO, open: 1, closed: 2 },
       });
     });
+  });
+
+  it('refuses to file anything when the token cannot push, as labels would be dropped', async () => {
+    const github = createGithubApi();
+    github.canPush.mockResolvedValue(false);
+
+    await expect(run(github, { report: flakyReport([flakyTest()]) })).rejects.toThrow(
+      'cannot push to elastic/appex-qa-ai'
+    );
+    expect(github.createIssue).not.toHaveBeenCalled();
+
+    // a dry run writes nothing, so it does not need the access
+    const dry = await run(github, { report: flakyReport([flakyTest()]), dryRun: true });
+    expect(dry.counts.created).toBe(1);
   });
 
   it('reports would-be actions in a dry run', async () => {
