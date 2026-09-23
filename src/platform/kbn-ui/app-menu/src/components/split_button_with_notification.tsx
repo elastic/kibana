@@ -113,12 +113,7 @@ export const SplitButtonWithNotification = ({
                 }}
               >
                 <span css={{ pointerEvents: 'auto' }}>
-                  <EuiIconTip
-                    type="dot"
-                    size="m"
-                    color="primary"
-                    content={notificationTooltip}
-                  />
+                  <EuiIconTip type="dot" size="m" color="primary" content={notificationTooltip} />
                 </span>
               </div>
             )}
