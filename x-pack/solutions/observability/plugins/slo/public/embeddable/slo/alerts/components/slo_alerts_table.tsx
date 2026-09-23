@@ -16,7 +16,10 @@ import {
 import type { TimeRange } from '@kbn/es-query';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import type { AlertsTableImperativeApi } from '@kbn/response-ops-alerts-table/types';
-import { ObservabilityAlertsTable } from '@kbn/observability-plugin/public';
+import {
+  ObservabilityAlertsTable,
+  ObservabilityAlertsTableCellValue,
+} from '@kbn/observability-plugin/public';
 import type { EuiDataGridColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
@@ -78,6 +81,7 @@ interface Props {
   timeRange: TimeRange;
   onLoaded?: () => void;
   lastReloadRequestTime: number | undefined;
+  previewMode?: boolean;
 }
 
 /**
@@ -140,6 +144,7 @@ export function SloAlertsTable({
   timeRange,
   onLoaded,
   lastReloadRequestTime,
+  previewMode = false,
 }: Props) {
   const ref = useRef<AlertsTableImperativeApi>(null);
 
@@ -172,6 +177,26 @@ export function SloAlertsTable({
         cases,
         settings,
       }}
+      {...(previewMode && {
+        renderActionsCell: undefined, // explicitly send in undefined so that actions cell does not render
+        renderCellValue: (props) => {
+          return <ObservabilityAlertsTableCellValue {...props} allowLinks={false} />;
+        },
+        toolbarVisibility: {
+          showColumnSelector: false,
+          showDisplaySelector: false,
+          showSortSelector: false,
+          showKeyboardShortcuts: false,
+          showFullScreenSelector: false,
+          additionalControls: undefined,
+        },
+        hideBulkActions: true,
+        cellActionsOptions: {
+          visibleCellActions: 0,
+          getCellActionsForColumn: () => [],
+        },
+        columns: columns.map((column) => ({ ...column, actions: false, isResizable: false })),
+      })}
     />
   );
 }

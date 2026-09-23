@@ -121,6 +121,7 @@ export { Threshold } from './components/custom_threshold/components/threshold';
 export { builtInComparatorsWithInclusive } from './constants/comparators';
 
 export { ObservabilityAlertsTable } from './components/alerts_table/alerts_table_lazy';
+export { AlertsTableCellValue as ObservabilityAlertsTableCellValue } from './components/alerts_table/common/cell_value';
 export { AlertActions } from './components/alert_actions/alert_actions_lazy';
 export type {
   GetObservabilityAlertsTableProp,
