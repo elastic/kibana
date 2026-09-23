@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
+import type { CoreStart, KibanaRequest, Logger, SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers, SavedObjectsUtils } from '@kbn/core/server';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
@@ -17,11 +17,7 @@ import type {
   PutSandboxSecretsResponse,
 } from '../../common/sandbox_secrets';
 import { MAX_SANDBOX_SECRETS, validateSandboxSecretKey } from '../../common/sandbox_secrets';
-import {
-  NIGHTSHIFT_SECRETS_SO_ID,
-  NIGHTSHIFT_SECRETS_SO_TYPE,
-  type NightshiftSecretsAttributes,
-} from '../saved_objects';
+import { NIGHTSHIFT_SECRETS_SO_TYPE, type NightshiftSecretsAttributes } from '../saved_objects';
 import { MIN_REDACTABLE_SECRET_LENGTH } from '../tools/sandbox_bash/connector_credentials';
 import {
   SandboxSecretsConflictError,
@@ -103,19 +99,35 @@ export const createSandboxSecretsClient = ({
       .asScopedToNamespace(getSpaceId(request));
   };
 
-  const readDecryptedValues = async (request: KibanaRequest) => {
+  // A space is expected to hold a single secrets object; the oldest one wins if a race created more.
+  const findSecretsObject = async (
+    request: KibanaRequest
+  ): Promise<SavedObject<NightshiftSecretsAttributes> | undefined> => {
+    const { saved_objects: savedObjects } = await getSavedObjectsClient(
+      request
+    ).find<NightshiftSecretsAttributes>({
+      type: NIGHTSHIFT_SECRETS_SO_TYPE,
+      perPage: 1,
+      sortField: 'created_at',
+      sortOrder: 'asc',
+    });
+    return savedObjects[0];
+  };
+
+  const readDecryptedValues = async (request: KibanaRequest, id: string | undefined) => {
     const { encryptedSavedObjects } = getDeps();
     if (!canEncrypt || !encryptedSavedObjects) {
       throw new SandboxSecretsUnavailableError();
     }
+    if (!id) {
+      return {};
+    }
     try {
       const { attributes } = await encryptedSavedObjects
         .getClient({ includedHiddenTypes: [NIGHTSHIFT_SECRETS_SO_TYPE] })
-        .getDecryptedAsInternalUser<NightshiftSecretsAttributes>(
-          NIGHTSHIFT_SECRETS_SO_TYPE,
-          NIGHTSHIFT_SECRETS_SO_ID,
-          { namespace: SavedObjectsUtils.namespaceStringToId(getSpaceId(request)) }
-        );
+        .getDecryptedAsInternalUser<NightshiftSecretsAttributes>(NIGHTSHIFT_SECRETS_SO_TYPE, id, {
+          namespace: SavedObjectsUtils.namespaceStringToId(getSpaceId(request)),
+        });
       return attributes.values ?? {};
     } catch (err) {
       if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
@@ -127,25 +139,20 @@ export const createSandboxSecretsClient = ({
 
   return {
     listKeys: async (request) => {
-      try {
-        const { attributes, version } = await getSavedObjectsClient(
-          request
-        ).get<NightshiftSecretsAttributes>(NIGHTSHIFT_SECRETS_SO_TYPE, NIGHTSHIFT_SECRETS_SO_ID);
-        return { keys: attributes.keys ?? [], version, canEncrypt };
-      } catch (err) {
-        if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
-          return { keys: [], canEncrypt };
-        }
-        throw err;
+      const existing = await findSecretsObject(request);
+      if (!existing) {
+        return { keys: [], canEncrypt };
       }
+      return { keys: existing.attributes.keys ?? [], version: existing.version, canEncrypt };
     },
 
     replaceEntries: async (request, params) => {
       validateEntries(params);
 
+      const existing = await findSecretsObject(request);
       let existingValues: Record<string, string>;
       try {
-        existingValues = await readDecryptedValues(request);
+        existingValues = await readDecryptedValues(request, existing?.id);
       } catch (err) {
         if (err instanceof SandboxSecretsUnavailableError) throw err;
         if (!getDeps().encryptedSavedObjects?.isEncryptionError(err)) throw err;
@@ -168,7 +175,7 @@ export const createSandboxSecretsClient = ({
         const saved = await getSavedObjectsClient(request).create<NightshiftSecretsAttributes>(
           NIGHTSHIFT_SECRETS_SO_TYPE,
           { keys, values },
-          { id: NIGHTSHIFT_SECRETS_SO_ID, overwrite: true, version: params.version }
+          existing ? { id: existing.id, overwrite: true, version: params.version } : undefined
         );
         return { keys, version: saved.version };
       } catch (err) {
@@ -182,7 +189,8 @@ export const createSandboxSecretsClient = ({
     resolveForCommand: async (request, requestedKeys) => {
       let values: Record<string, string>;
       try {
-        values = await readDecryptedValues(request);
+        const existing = await findSecretsObject(request);
+        values = await readDecryptedValues(request, existing?.id);
       } catch (err) {
         return { errorMessage: `Failed to load sandbox secrets: ${err.message}` };
       }

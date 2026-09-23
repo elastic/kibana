@@ -14,13 +14,15 @@ import {
 } from '@kbn/core/server/mocks';
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import { NIGHTSHIFT_SECRETS_SO_ID, NIGHTSHIFT_SECRETS_SO_TYPE } from '../saved_objects';
+import { NIGHTSHIFT_SECRETS_SO_TYPE } from '../saved_objects';
 import { createSandboxSecretsClient } from './sandbox_secrets_client';
 import {
   SandboxSecretsConflictError,
   SandboxSecretsUnavailableError,
   SandboxSecretsValidationError,
 } from './errors';
+
+const STORED_ID = 'stored-secrets-id';
 
 const setup = ({
   canEncrypt = true,
@@ -35,12 +37,29 @@ const setup = ({
   const soClient = savedObjectsClientMock.create();
   soClient.asScopedToNamespace.mockReturnValue(soClient);
   savedObjects.getScopedClient.mockReturnValue(soClient);
+  soClient.find.mockResolvedValue({
+    page: 1,
+    per_page: 1,
+    total: storedValues ? 1 : 0,
+    saved_objects: storedValues
+      ? [
+          {
+            id: STORED_ID,
+            type: NIGHTSHIFT_SECRETS_SO_TYPE,
+            references: [],
+            version: 'v1',
+            score: 0,
+            attributes: { keys: Object.keys(storedValues) },
+          },
+        ]
+      : [],
+  });
 
   const getDecryptedAsInternalUser = jest.fn(async () => {
     if (!storedValues) {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(
         NIGHTSHIFT_SECRETS_SO_TYPE,
-        NIGHTSHIFT_SECRETS_SO_ID
+        STORED_ID
       );
     }
     return { attributes: { keys: Object.keys(storedValues), values: storedValues } };
@@ -76,36 +95,26 @@ describe('createSandboxSecretsClient', () => {
       const { client, soClient, getDecryptedAsInternalUser, request } = setup({
         storedValues: { A_KEY: 'value' },
       });
-      soClient.get.mockResolvedValue({
-        id: NIGHTSHIFT_SECRETS_SO_ID,
-        type: NIGHTSHIFT_SECRETS_SO_TYPE,
-        references: [],
-        version: 'v1',
-        attributes: { keys: ['A_KEY'] },
-      });
 
       await expect(client.listKeys(request)).resolves.toEqual({
         keys: ['A_KEY'],
         version: 'v1',
         canEncrypt: true,
       });
+      expect(soClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({ type: NIGHTSHIFT_SECRETS_SO_TYPE, perPage: 1 })
+      );
       expect(getDecryptedAsInternalUser).not.toHaveBeenCalled();
     });
 
     it('returns an empty list when nothing is stored', async () => {
-      const { client, soClient, request } = setup();
-      soClient.get.mockRejectedValue(
-        SavedObjectsErrorHelpers.createGenericNotFoundError(NIGHTSHIFT_SECRETS_SO_TYPE)
-      );
+      const { client, request } = setup();
 
       await expect(client.listKeys(request)).resolves.toEqual({ keys: [], canEncrypt: true });
     });
 
     it('scopes the saved objects client to the request space', async () => {
       const { client, soClient, savedObjects, request } = setup({ spaceId: 'team-a' });
-      soClient.get.mockRejectedValue(
-        SavedObjectsErrorHelpers.createGenericNotFoundError(NIGHTSHIFT_SECRETS_SO_TYPE)
-      );
 
       await client.listKeys(request);
 
@@ -123,7 +132,7 @@ describe('createSandboxSecretsClient', () => {
         storedValues: { KEEP: 'kept-value', REPLACE: 'old-value', DROP: 'dropped-value' },
       });
       soClient.create.mockResolvedValue({
-        id: NIGHTSHIFT_SECRETS_SO_ID,
+        id: STORED_ID,
         type: NIGHTSHIFT_SECRETS_SO_TYPE,
         references: [],
         version: 'v2',
@@ -146,9 +155,30 @@ describe('createSandboxSecretsClient', () => {
           keys: ['KEEP', 'REPLACE', 'ADD'],
           values: { KEEP: 'kept-value', REPLACE: 'new-value', ADD: 'x' },
         },
-        { id: NIGHTSHIFT_SECRETS_SO_ID, overwrite: true, version: 'v1' }
+        { id: STORED_ID, overwrite: true, version: 'v1' }
       );
       expect(JSON.stringify(result)).not.toContain('value');
+    });
+
+    it('creates a new object with a generated id when nothing is stored yet', async () => {
+      const { client, soClient, getDecryptedAsInternalUser, request } = setup();
+      soClient.create.mockResolvedValue({
+        id: 'generated-id',
+        type: NIGHTSHIFT_SECRETS_SO_TYPE,
+        references: [],
+        version: 'v1',
+        attributes: {},
+      });
+
+      await expect(
+        client.replaceEntries(request, { entries: [{ key: 'A_KEY', value: 'v' }] })
+      ).resolves.toEqual({ keys: ['A_KEY'], version: 'v1' });
+      expect(soClient.create).toHaveBeenCalledWith(
+        NIGHTSHIFT_SECRETS_SO_TYPE,
+        { keys: ['A_KEY'], values: { A_KEY: 'v' } },
+        undefined
+      );
+      expect(getDecryptedAsInternalUser).not.toHaveBeenCalled();
     });
 
     it('requires a value for keys that have none stored', async () => {
@@ -195,10 +225,7 @@ describe('createSandboxSecretsClient', () => {
     it('maps saved object version conflicts to a conflict error', async () => {
       const { client, soClient, request } = setup({ storedValues: {} });
       soClient.create.mockRejectedValue(
-        SavedObjectsErrorHelpers.createConflictError(
-          NIGHTSHIFT_SECRETS_SO_TYPE,
-          NIGHTSHIFT_SECRETS_SO_ID
-        )
+        SavedObjectsErrorHelpers.createConflictError(NIGHTSHIFT_SECRETS_SO_TYPE, STORED_ID)
       );
 
       await expect(
@@ -232,7 +259,7 @@ describe('createSandboxSecretsClient', () => {
       });
       expect(getDecryptedAsInternalUser).toHaveBeenCalledWith(
         NIGHTSHIFT_SECRETS_SO_TYPE,
-        NIGHTSHIFT_SECRETS_SO_ID,
+        STORED_ID,
         { namespace: 'team-a' }
       );
     });
@@ -246,7 +273,7 @@ describe('createSandboxSecretsClient', () => {
 
       expect(getDecryptedAsInternalUser).toHaveBeenCalledWith(
         NIGHTSHIFT_SECRETS_SO_TYPE,
-        NIGHTSHIFT_SECRETS_SO_ID,
+        STORED_ID,
         { namespace: undefined }
       );
     });
@@ -261,6 +288,14 @@ describe('createSandboxSecretsClient', () => {
       });
       expect(result).toEqual({ errorMessage: expect.stringContaining('Available secrets: A_KEY') });
       expect(JSON.stringify(result)).not.toContain('value-123');
+    });
+
+    it('reports no available secrets when nothing is stored', async () => {
+      const { client, request } = setup();
+
+      await expect(client.resolveForCommand(request, ['A_KEY'])).resolves.toEqual({
+        errorMessage: expect.stringContaining('Available secrets: none'),
+      });
     });
 
     it('reports an error when encryption is unavailable', async () => {

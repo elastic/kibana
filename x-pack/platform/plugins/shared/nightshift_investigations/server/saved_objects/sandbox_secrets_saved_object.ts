@@ -12,9 +12,6 @@ import { MAX_SANDBOX_SECRETS, MAX_SANDBOX_SECRET_KEY_LENGTH } from '../../common
 
 export const NIGHTSHIFT_SECRETS_SO_TYPE = 'nightshift-secrets';
 
-/** Each space holds at most one secrets object, always stored under this id. */
-export const NIGHTSHIFT_SECRETS_SO_ID = 'sandbox-secrets';
-
 export interface NightshiftSecretsAttributes {
   keys: string[];
   values: Record<string, string>;
