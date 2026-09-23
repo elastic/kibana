@@ -20,7 +20,7 @@ This is the data-flow companion to the `@kbn/eslint/no_unsafe_dynamic_http_path`
   http.delete('/api/dashboards/' + encodeURIComponent(id));
   ```
 
-- **Suppression**: for a verified false positive (a segment that is genuinely constant / not user-controllable), add on the line above the call:
+- **Suppression**: for a verified false positive (a segment that is genuinely constant / not user-controllable), add the suppression on the line immediately above the reported location (the `path` property write for a composed options object, otherwise the call):
   ```typescript
   // codeql[js/kibana/unsafe-dynamic-http-path] reason
   ```
