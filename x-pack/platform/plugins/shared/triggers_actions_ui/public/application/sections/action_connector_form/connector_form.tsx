@@ -50,6 +50,8 @@ interface Props {
   setResetForm?: (value: ResetForm) => void;
   /** Optional content rendered under Connector settings (e.g. inbound webhook URL). */
   settingsContent?: ReactNode;
+  /** The add modal creates and closes, so it cannot reveal a one-time ingest token. */
+  showInboundEvents?: boolean;
 }
 
 const ConnectorFormComponent: React.FC<Props> = ({
@@ -60,6 +62,7 @@ const ConnectorFormComponent: React.FC<Props> = ({
   onFormModifiedChange,
   setResetForm,
   settingsContent,
+  showInboundEvents = true,
 }) => {
   const { form } = useForm({
     defaultValue: connector,
@@ -108,6 +111,8 @@ const ConnectorFormComponent: React.FC<Props> = ({
         registerPreSubmitValidator={registerPreSubmitValidator}
         authMode={connector.authMode}
         settingsContent={settingsContent}
+        showInboundEvents={showInboundEvents}
+        savedIsInboundEventsEnabled={connector.isInboundEventsEnabled === true}
       />
       <EuiSpacer size="m" />
       <EncryptedFieldsCallout isEdit={isEdit} isMissingSecrets={connector.isMissingSecrets} />
