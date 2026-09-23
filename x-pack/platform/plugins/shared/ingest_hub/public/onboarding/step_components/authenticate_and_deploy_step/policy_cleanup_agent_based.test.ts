@@ -164,7 +164,7 @@ describe('updateAgentBasedPolicy — payload shape', () => {
   const vpcflow = makeService('vpcflow');
   const instance = makeInstance('inst-b', 'vpcflow');
 
-  it('sends correct package, existing namespace, enabled flag, and policy_ids', async () => {
+  it('sends correct package, existing namespace, and policy_ids', async () => {
     mockGetPackageInfo.mockResolvedValue({
       data: { item: { version: '2.5.0', vars: [], policy_templates: [] } },
     });

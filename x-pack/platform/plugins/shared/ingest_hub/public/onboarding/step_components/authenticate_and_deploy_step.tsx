@@ -274,8 +274,13 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
       if (deploymentId) {
         // Always include mechanisms when updating — if reusing an existing MI deployment SO
         // (existingId), this transitions it from ['managed_integration'] to ['ecf'].
+        // Clear connectorId and authMethod: those are MI-only fields and must not persist after
+        // the transition, otherwise getByConnectorId still returns this deployment for the old
+        // connector even though it no longer uses managed integrations.
         await updateDeployment(deploymentId, {
           mechanisms: ['ecf'],
+          connectorId: null,
+          authMethod: null,
           ...(!ecfStacksUnchanged ? { status: 'succeeded', ecfStacks } : {}),
         });
         if (!ecfStacksUnchanged) updateDetectAndReviewStep({ ecfStacks });

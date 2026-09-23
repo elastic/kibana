@@ -21,7 +21,14 @@ import type {
 } from '../../types/rest_spec/cloud_onboarding_deployment';
 
 function toResponseItem(deployment: CloudOnboardingDeployment) {
-  return deployment;
+  // Omit null optional fields — the response schema uses schema.maybe() (undefined-or-value),
+  // which does not accept null. Null is only used internally to clear a stored field.
+  const { connectorId, authMethod, ...rest } = deployment;
+  return {
+    ...rest,
+    ...(connectorId != null ? { connectorId } : {}),
+    ...(authMethod != null ? { authMethod } : {}),
+  };
 }
 
 export const createCloudOnboardingDeploymentHandler: FleetRequestHandler<

@@ -33,7 +33,8 @@ export type CloudOnboardingDeploymentServiceVars = Record<string, unknown>;
 export interface CloudOnboardingDeployment {
   id: string;
   provider: CloudProvider;
-  connectorId?: string;
+  /** Null after MI→ECF transition explicitly clears the connector association. */
+  connectorId?: string | null;
   mechanisms: DeploymentMethod[];
   deploymentId?: string;
   deploymentName?: string;
@@ -54,8 +55,8 @@ export interface CloudOnboardingDeployment {
   /** ECF CloudFormation stacks launched as part of this deployment. Written by the wizard after the user clicks Launch. */
   ecfStacks?: CloudOnboardingEcfStack[];
   // TODO: add agent-based auth methods
-  /** Authentication method used for managed integrations. */
-  authMethod?: CloudOnboardingDeploymentAuthMethod;
+  /** Authentication method used for managed integrations. Null after MI→ECF transition clears the field. */
+  authMethod?: CloudOnboardingDeploymentAuthMethod | null;
 }
 
 export type NewCloudOnboardingDeployment = Omit<CloudOnboardingDeployment, 'id'>;
@@ -73,5 +74,10 @@ export type CreateCloudOnboardingDeploymentInput = Omit<
 >;
 
 export type UpdateCloudOnboardingDeploymentInput = Partial<
-  Omit<CloudOnboardingDeployment, 'id' | 'provider' | 'connectorId' | 'globalRegion'>
->;
+  Omit<CloudOnboardingDeployment, 'id' | 'provider' | 'connectorId' | 'globalRegion' | 'authMethod'>
+> & {
+  /** Set to null to clear the connector association (e.g. on MI→ECF transition). */
+  connectorId?: null;
+  /** Set to null to clear the auth method (e.g. on MI→ECF transition). */
+  authMethod?: CloudOnboardingDeploymentAuthMethod | null;
+};
