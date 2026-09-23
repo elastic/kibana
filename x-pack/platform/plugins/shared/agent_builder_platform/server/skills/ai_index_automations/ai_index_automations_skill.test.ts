@@ -285,6 +285,17 @@ describe('aiIndexAutomationsSkill', () => {
       );
     });
 
+    it('keys each KI on the raw unit key, so keys that differ only in case or punctuation stay apart', async () => {
+      const kiId = stepNamed(template(), 'unit_context').with?.ki_id as string;
+      const keys = ['ABC', 'abc', 'A B', 'a-b', 'a_b'];
+      const ids = await Promise.all(
+        keys.map((key) => new Liquid().parseAndRender(kiId, { foreach: { item: [key] } }))
+      );
+
+      expect(kiId).toBe('unit-{{ foreach.item[0] }}');
+      expect(new Set(ids).size).toBe(keys.length);
+    });
+
     it('says a re-run regenerates every unit and replaces its KI by ki_id', () => {
       expect(unitTemplateYaml()).toMatch(/A re-run regenerates every unit/);
       expect(unitTemplateYaml()).toMatch(/`ki_id` is derived from the unit/);
@@ -886,10 +897,15 @@ describe('aiIndexAutomationsSkill', () => {
       expect(content).not.toMatch(/FROM <destination> METADATA _id\n\| MV_EXPAND tags/);
     });
 
-    it('cleans up by KI id, which is also the handle on a data stream', () => {
-      expect(content).toMatch(/an `elasticsearch\.esql\.query` selecting `id` for the\s+tag/);
-      expect(content).toMatch(/`ki_id` set to\s+each `id`/);
-      expect(content).not.toMatch(/`ki_id` set to\s+each `_id`/);
+    it('cleans up by KI ids read through the space-scoped tool, never a raw backing-store query', () => {
+      const prose = content.replace(/\s+/g, ' ');
+
+      expect(prose).toContain('Read the ids first with `platform.context_engine.query_ai_indices`');
+      expect(content).toMatch(/\| WHERE tags == "ce-pilot-<runId>"\n\| STATS BY id\n/);
+      expect(prose).toContain(
+        'a `foreach` over `consts.ki_ids` calling `context-engine.deleteKi` with `ki_id` set to each `id`'
+      );
+      expect(content).not.toMatch(/an `elasticsearch\.esql\.query` selecting `id`/);
     });
 
     it('confirms cleanup on the newest revision per id, since a data stream keeps deleted ones', () => {

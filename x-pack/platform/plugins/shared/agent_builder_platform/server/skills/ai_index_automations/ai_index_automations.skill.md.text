@@ -250,7 +250,6 @@ rest. `{%- for x in ... -%}` loops build the `content` block, and `{%- assign x 
 | `default: 'value'` | Fall back when a field is missing |
 | `last`, `first` | The last row of a result and the first column of it; how a cursor advances from a page |
 | `replace: '\\', '\\\\' \| replace: '"', '\\"'` | Escape a value being interpolated into an ES\|QL string literal: backslashes first, then quotes |
-| `slugify` | Normalise a value used in a `ki_id` |
 
 **Field names with spaces or capitals are backquoted inside the const**, not in the query: a const
 `unit_key: "`Product Key`"` is pasted into every `WHERE`, `STATS ... BY` and `KEEP` as written, so
@@ -553,13 +552,24 @@ time fails the same way and costs an attempt.
 
 **Clean up before you return.** The pilot wrote into the user's real index, so the tagged indicators
 are yours to remove and cleanup is not optional — a skipped one leaves junk that nobody else will
-know to look for. Run a second inline workflow: an `elasticsearch.esql.query` selecting `id` for the
-tag as above (`| STATS BY id`, so a KI with several revisions is deleted once), then a `foreach`
-over the results calling `context-engine.deleteKi` with `ki_id` set to each `id`.
+know to look for. Read the ids first with `platform.context_engine.query_ai_indices`, which
+applies the space filter, grouping by `id` so a KI with several revisions is deleted once:
 
-Then confirm. On an index the tag query returns nothing once the cleanup has run. On a data stream
-it still returns every revision, the deleted ones included, so check the newest revision per `id`
-instead:
+```esql
+FROM <destination>
+| MV_EXPAND tags
+| WHERE tags == "ce-pilot-<runId>"
+| STATS BY id
+```
+
+Then run a second inline workflow with those ids in its `consts` (`ki_ids: [...]`) and a `foreach`
+over `consts.ki_ids` calling `context-engine.deleteKi` with `ki_id` set to each `id`. Do not select
+the ids inside the cleanup workflow with an `elasticsearch.esql.query` step: it reads the backing
+store directly and skips the space filter the tool applies.
+
+Then confirm, with `platform.context_engine.query_ai_indices` again. On an index the tag query
+returns nothing once the cleanup has run. On a data stream it still returns every revision, the
+deleted ones included, so check the newest revision per `id` instead:
 
 ```esql
 FROM <destination>

@@ -258,7 +258,7 @@ that do not work and units that do not exist, and the pilot is a slow and expens
 that out. Before any proposal, run these through `platform.core.execute_esql`, and quote the
 results as evidence lines:
 
-1. **One sampling query per source in scope.** The row count and a handful of rows:
+1. **A row sample and a row count per source in scope.** A handful of rows and the row count:
    `FROM <index> METADATA _id | LIMIT 5` for the rows, `FROM <index> | STATS rows = COUNT(*)` for
    the count. Read the rows: a field that is null in all five sampled rows needs the step-2 probe
    before the proposal names it, and a field the proposal leans on that the sample never showed
@@ -270,8 +270,13 @@ results as evidence lines:
    when it does. A key populated on neither side is not a join; find the path that works (often
    the document `_id`, reached with `METADATA _id`) or drop the claim. A key populated on one side
    only is a one-way lookup, and the proposal says which way.
+3. **One unit count for a per-unit strategy.** When one KI is about a unit rather than the whole
+   index, count the units the Unit section quotes and the Cost estimate multiplies:
+   `FROM <index> | STATS units = COUNT_DISTINCT(<unit_key>)`. Units, not rows: 62,884 sales rows
+   can be 2,517 products.
 
-That is the whole budget: one query per source and one per claimed join. Do not profile the index
+That is the whole budget: a row sample and a row count per source, a populated count per side of
+each claimed join, and one unit count for a per-unit strategy. Do not profile the index
 here — distributions, top values and per-unit figures are what the automation is for. The point of
 these queries is that every sentence in the proposal about the data cites a number you observed,
 in the form the Evidence section below requires.
@@ -538,7 +543,7 @@ against data you cannot see.
 **Sources only, and nothing built yet.** This is the setup case. Do not go looking for signals: an
 index nobody has built cannot have been queried, and a probe that comes back empty only costs a
 turn. The analysis is of the data itself: what it contains (`platform.core.get_index_mapping`,
-then the sampling queries and join probes from "Ground the proposal in the data"), what questions
+then the sampling queries, join probes and unit count from "Ground the proposal in the data"), what questions
 it could answer, and which strategy fits, stated as the three answers. Start at Index/Table
 Metadata, and say that the proposal rests on the shape of the data rather than on observed
 retrieval — with the Evidence section carrying the counts that shape was read from.

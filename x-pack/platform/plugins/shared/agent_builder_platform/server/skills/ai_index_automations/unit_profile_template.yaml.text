@@ -118,7 +118,9 @@ steps:
               # reads backslash escapes inside a quoted argument, so '\\' is one backslash.
               unit_escaped: >-
                 {{ foreach.item[0] | replace: '\\', '\\\\' | replace: '"', '\\"' }}
-              ki_id: "unit-{{ foreach.item[0] | slugify }}"
+              # The raw key, never a slug: `slugify` folds `ABC` and `abc` into one id, and those
+              # units would overwrite each other. `ki_id` takes any string up to 512 characters.
+              ki_id: "unit-{{ foreach.item[0] }}"
               # What the profile is derived from: the unit index, and the catalog index when it
               # is a separate one. Written as JSON so the catalog entry can be conditional;
               # `assemble_ki` parses it back with `json_parse`.

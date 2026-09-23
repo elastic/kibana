@@ -256,17 +256,20 @@ describe('analyzeAndImproveSkill', () => {
 
     it('requires one sampling query per source and one probe per claimed join before proposing', () => {
       expect(content).toContain('## Ground the proposal in the data before writing it');
-      expect(content).toMatch(/\*\*One sampling query per source in scope\.\*\*/);
+      expect(content).toMatch(/\*\*A row sample and a row count per source in scope\.\*\*/);
       expect(content).toMatch(/\*\*One probe per join or identifier the proposal names\.\*\*/);
       expect(content).toMatch(/STATS total = COUNT\(\*\), populated = COUNT\(<field>\)/);
       expect(content).toMatch(/<index>\.<field>: <populated> of <total> populated/);
       expect(content).toMatch(/A key populated on neither side\s+is not a join/);
     });
 
-    it('bounds the grounding to one query per source and one per join, leaving profiling to the automation', () => {
-      expect(content).toMatch(
-        /one query per source and one per claimed join\. Do not profile the index/
+    it('budgets every query the proposal needs, the unit count included, and no profiling', () => {
+      expect(content.replace(/\s+/g, ' ')).toContain(
+        'That is the whole budget: a row sample and a row count per source, a populated count per side of each claimed join, and one unit count for a per-unit strategy. Do not profile the index'
       );
+      expect(content).toMatch(/\*\*One unit count for a per-unit strategy\.\*\*/);
+      expect(content).toMatch(/STATS units = COUNT_DISTINCT\(<unit_key>\)/);
+      expect(content).not.toMatch(/one query per source and one per claimed join/);
     });
 
     it('fixes the proposal shape, with Evidence and Cost required and Example questions optional', () => {
@@ -309,7 +312,7 @@ describe('analyzeAndImproveSkill', () => {
 
     it('sends the setup case through the grounding queries, with the evidence in the proposal', () => {
       expect(content).toMatch(
-        /then the sampling queries and join probes from "Ground the proposal in the data"/
+        /then the sampling queries, join probes and unit count from "Ground the proposal in the data"/
       );
       expect(content).toMatch(
         /with the Evidence section carrying the counts that shape was read from/
