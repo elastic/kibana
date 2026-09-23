@@ -45,10 +45,10 @@ interface PropagateArgs {
 interface SnapshotPlan {
   id: string;
   version?: string;
-  previousVars: NewPackagePolicy['vars'];
-  previousInputs: NewPackagePolicy['inputs'];
-  updatedVars: NewPackagePolicy['vars'];
-  updatedInputs: NewPackagePolicy['inputs'];
+  previousVars: PackagePolicySOAttributes['vars'];
+  previousInputs: PackagePolicySOAttributes['inputs'];
+  updatedVars: PackagePolicySOAttributes['vars'];
+  updatedInputs: PackagePolicySOAttributes['inputs'];
   writeVersion?: string;
 }
 
@@ -224,8 +224,8 @@ export const propagateRoleArnToPackagePolicies = async ({
 
   const writeSnapshot = (
     plan: SnapshotPlan,
-    vars: NewPackagePolicy['vars'],
-    inputs: NewPackagePolicy['inputs'],
+    vars: PackagePolicySOAttributes['vars'],
+    inputs: PackagePolicySOAttributes['inputs'],
     version?: string
   ) =>
     soClient.update<PackagePolicySOAttributes>(

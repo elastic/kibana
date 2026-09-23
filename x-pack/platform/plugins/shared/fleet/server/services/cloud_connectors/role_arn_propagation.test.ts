@@ -90,6 +90,23 @@ const mockListReturns = (items: unknown[]) => {
   });
 };
 
+const snapshotUpdateResponse = (id: string, version: string) => ({
+  id,
+  type: 'ingest-package-policies',
+  version,
+  attributes: {},
+  references: [],
+});
+
+const makeSnapshotFindResult = (attributes: Record<string, unknown>) => ({
+  id: 'a:prev',
+  type: 'ingest-package-policies',
+  version: 'Wz-prev',
+  score: 1,
+  references: [],
+  attributes: { latest_revision: false, ...attributes },
+});
+
 describe('propagateRoleArnToPackagePolicies', () => {
   const soClient = savedObjectsClientMock.create();
   const esClient = elasticsearchServiceMock.createInternalClient();
@@ -109,7 +126,7 @@ describe('propagateRoleArnToPackagePolicies', () => {
     (agentPolicyService.bumpAgentPoliciesByIds as jest.Mock).mockResolvedValue({});
     soClient.find.mockResolvedValue({ saved_objects: [], total: 0, page: 1, per_page: 100 });
     soClient.update.mockReset();
-    soClient.update.mockResolvedValue({ version: 'Wz-snapshot-after' });
+    soClient.update.mockResolvedValue(snapshotUpdateResponse('snapshot', 'Wz-snapshot-after'));
   });
 
   it('updates every referencing package policy with the new ARN', async () => {
@@ -433,29 +450,23 @@ describe('propagateRoleArnToPackagePolicies', () => {
     mockListReturns([makePolicy('a')]);
     soClient.find.mockResolvedValue({
       saved_objects: [
-        {
-          id: 'a:prev',
-          type: 'ingest-package-policies',
-          version: 'Wz-prev',
-          attributes: {
-            latest_revision: false,
-            vars: { account_type: { type: 'text', value: 'single-account' } },
-            inputs: [
-              {
-                type: 'cloudbeat/cis_aws',
-                enabled: true,
-                vars: { role_arn: { type: 'text', value: OLD_ARN } },
-                streams: [],
-              },
-            ],
-          },
-        },
+        makeSnapshotFindResult({
+          vars: { account_type: { type: 'text', value: 'single-account' } },
+          inputs: [
+            {
+              type: 'cloudbeat/cis_aws',
+              enabled: true,
+              vars: { role_arn: { type: 'text', value: OLD_ARN } },
+              streams: [],
+            },
+          ],
+        }),
       ],
       total: 1,
       page: 1,
       per_page: 100,
     });
-    soClient.update.mockResolvedValue({ id: 'a:prev', version: 'Wz-prev-after' });
+    soClient.update.mockResolvedValue(snapshotUpdateResponse('a:prev', 'Wz-prev-after'));
 
     const rollback = await propagateRoleArnToPackagePolicies({
       soClient,
@@ -465,14 +476,18 @@ describe('propagateRoleArnToPackagePolicies', () => {
     });
 
     const snapshotWrite = soClient.update.mock.calls.find(([, id]) => id === 'a:prev');
-    expect(snapshotWrite?.[2].inputs[0].vars.role_arn.value).toBe(NEW_ARN);
+    expect(snapshotWrite?.[2]).toMatchObject({
+      inputs: [{ vars: { role_arn: { value: NEW_ARN } } }],
+    });
     expect(snapshotWrite?.[3]).toEqual({ version: 'Wz-prev' });
 
     soClient.update.mockClear();
     await rollback!.revert();
 
     const snapshotRevert = soClient.update.mock.calls.find(([, id]) => id === 'a:prev');
-    expect(snapshotRevert?.[2].inputs[0].vars.role_arn.value).toBe(OLD_ARN);
+    expect(snapshotRevert?.[2]).toMatchObject({
+      inputs: [{ vars: { role_arn: { value: OLD_ARN } } }],
+    });
     expect(snapshotRevert?.[3]).toEqual({ version: 'Wz-prev-after' });
   });
 
@@ -480,23 +495,20 @@ describe('propagateRoleArnToPackagePolicies', () => {
     mockListReturns([makePolicy('a')]);
     soClient.find.mockResolvedValue({
       saved_objects: [
-        {
-          id: 'a:prev',
-          version: 'Wz-prev',
-          attributes: {
-            latest_revision: false,
-            inputs: [
-              {
-                type: 'cloudbeat/cis_aws',
-                enabled: true,
-                vars: { role_arn: { type: 'text', value: OLD_ARN } },
-                streams: [],
-              },
-            ],
-          },
-        },
+        makeSnapshotFindResult({
+          inputs: [
+            {
+              type: 'cloudbeat/cis_aws',
+              enabled: true,
+              vars: { role_arn: { type: 'text', value: OLD_ARN } },
+              streams: [],
+            },
+          ],
+        }),
       ],
       total: 1,
+      page: 1,
+      per_page: 100,
     });
     soClient.update.mockRejectedValue(new Error('snapshot boom'));
 
@@ -624,24 +636,21 @@ describe('propagateRoleArnToPackagePolicies', () => {
     mockListReturns([makePolicy('a', NEW_ARN)]);
     soClient.find.mockResolvedValue({
       saved_objects: [
-        {
-          id: 'a:prev',
-          version: 'Wz-prev',
-          attributes: {
-            is_managed: true,
-            latest_revision: false,
-            inputs: [
-              {
-                type: 'cloudbeat/cis_aws',
-                enabled: true,
-                vars: { role_arn: { type: 'text', value: OLD_ARN } },
-                streams: [],
-              },
-            ],
-          },
-        },
+        makeSnapshotFindResult({
+          is_managed: true,
+          inputs: [
+            {
+              type: 'cloudbeat/cis_aws',
+              enabled: true,
+              vars: { role_arn: { type: 'text', value: OLD_ARN } },
+              streams: [],
+            },
+          ],
+        }),
       ],
       total: 1,
+      page: 1,
+      per_page: 100,
     });
 
     let caught: CloudConnectorRoleArnPropagationError | undefined;

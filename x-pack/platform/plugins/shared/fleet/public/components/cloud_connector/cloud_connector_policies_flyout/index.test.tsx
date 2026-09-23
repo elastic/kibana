@@ -808,7 +808,9 @@ describe('CloudConnectorPoliciesFlyout', () => {
 
     const rerenderFlyout = (
       rerender: (ui: React.ReactElement) => void,
-      cloudConnectorVars: typeof defaultProps.cloudConnectorVars
+      cloudConnectorVars: React.ComponentProps<
+        typeof CloudConnectorPoliciesFlyout
+      >['cloudConnectorVars']
     ) => {
       rerender(
         <I18nProvider>

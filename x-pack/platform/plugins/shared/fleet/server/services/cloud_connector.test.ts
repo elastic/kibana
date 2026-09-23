@@ -1484,17 +1484,17 @@ describe('CloudConnectorService', () => {
           )
         );
 
-        let caught: unknown;
-        try {
-          await service.update(
+        const caught = await service
+          .update(
             mockSoClient,
             connectorId,
             { vars: { role_arn: { type: 'text', value: newArn } } },
             { esClient: mockEsClient }
+          )
+          .then(
+            () => new Error('Expected the update to reject'),
+            (err: Error) => err
           );
-        } catch (err) {
-          caught = err;
-        }
 
         expect(SavedObjectsErrorHelpers.isConflictError(caught)).toBe(true);
         expect(rollback.revert).toHaveBeenCalledTimes(1);
@@ -1535,17 +1535,17 @@ describe('CloudConnectorService', () => {
           )
         );
 
-        let caught: unknown;
-        try {
-          await service.update(
+        const caught = await service
+          .update(
             mockSoClient,
             connectorId,
             { vars: { role_arn: { type: 'text', value: newArn } } },
             { esClient: mockEsClient }
+          )
+          .then(
+            () => new Error('Expected the update to reject'),
+            (err: Error) => err
           );
-        } catch (err) {
-          caught = err;
-        }
 
         expect(SavedObjectsErrorHelpers.isConflictError(caught)).toBe(true);
         expect(rollback.revert).not.toHaveBeenCalled();
@@ -1915,17 +1915,17 @@ describe('CloudConnectorService', () => {
         propagateRoleArnToPackagePoliciesMock.mockResolvedValueOnce(rollback);
         mockSoClient.update.mockRejectedValueOnce(new Error('write-failed'));
 
-        let caught: unknown;
-        try {
-          await service.update(
+        const caught = await service
+          .update(
             mockSoClient,
             connectorId,
             { vars: { role_arn: { type: 'text', value: newArn } } },
             { esClient: mockEsClient }
+          )
+          .then(
+            () => new Error('Expected the update to reject'),
+            (err: Error) => err
           );
-        } catch (err) {
-          caught = err;
-        }
 
         expect(caught).toBeInstanceOf(CloudConnectorRoleArnPropagationError);
         const propagationError = caught as CloudConnectorRoleArnPropagationError;

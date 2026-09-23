@@ -249,7 +249,9 @@ export const updateCloudConnectorHandler: FleetRequestHandler<
       });
     }
     if (error instanceof FleetUnauthorizedError) {
-      logger.error(`Cloud connector ${cloudConnectorId} Role ARN update was not authorized`, error);
+      logger.warn(
+        `Cloud connector ${cloudConnectorId} Role ARN update was not authorized: ${error.message}`
+      );
       return response.customError({
         statusCode: 403,
         body: {
