@@ -572,7 +572,6 @@ export class TaskManagerPlugin
 
   public async stop() {
     this.licenseSubscriber?.cleanup();
-    this.uiamApiKeyProvisioningTask?.stop();
     this.claimNudgeService?.stop();
 
     // Stop polling for tasks

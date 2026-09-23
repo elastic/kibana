@@ -31,7 +31,6 @@ import {
 } from './lib/create_managed_configuration';
 import { BulkUpdateError } from './lib/errors';
 import { FillPoolResult } from './lib/fill_pool';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { executionContextServiceMock } from '@kbn/core/server/mocks';
 import { TaskCost } from './task';
 import type { TaskEventLogger } from './task';
@@ -42,7 +41,6 @@ import type { TaskManagerBackpressure } from './task_events';
 import { TaskEventType } from './task_events';
 import { EsApiKeyStrategy } from './api_key_strategy';
 import { resetInFlightTasksOwnedByThisNode } from './lib/task_reconciliation';
-import { ADJUST_THROUGHPUT_INTERVAL } from './lib/create_managed_configuration';
 import type { TaskManagerClaimNudgeService } from './claim_nudge/claim_nudge_service';
 import { taskExecutionControlServiceMock } from './execution_control/task_execution_control_service.mock';
 
