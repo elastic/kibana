@@ -9,7 +9,7 @@
 
 import { fromTermsLensApiToLensState, fromTermsLensStateToAPI } from './top_values';
 import type {
-  LastValueIndexPatternColumn,
+  LastValueOrderAggColumn,
   PercentileIndexPatternColumn,
   PercentileRanksIndexPatternColumn,
   TermsIndexPatternColumn,
@@ -562,7 +562,7 @@ describe('Top Values Transforms', () => {
             isBucketed: false,
             label: '',
             params: { sortField: 'timestamp', showArrayValues: false },
-          } as LastValueIndexPatternColumn,
+          } as LastValueOrderAggColumn,
         }),
         columns
       );
@@ -587,7 +587,7 @@ describe('Top Values Transforms', () => {
             isBucketed: false,
             label: '',
             params: { sortField: undefined, showArrayValues: false },
-          } as unknown as LastValueIndexPatternColumn,
+          } as LastValueOrderAggColumn,
         }),
         columns
       );
@@ -658,7 +658,7 @@ describe('Top Values Transforms', () => {
             isBucketed: false,
             label: '',
             params: { sortField: 'timestamp' },
-          } as LastValueIndexPatternColumn,
+          } as LastValueOrderAggColumn,
         },
         { label: '' }
       );
@@ -666,7 +666,7 @@ describe('Top Values Transforms', () => {
       const api = fromTermsLensStateToAPI(original, columns);
       const roundTripped = fromTermsLensApiToLensState(api, (index: number) => columns[index]?.id);
 
-      expect((roundTripped.params.orderAgg as LastValueIndexPatternColumn).params?.sortField).toBe(
+      expect((roundTripped.params.orderAgg as LastValueOrderAggColumn).params?.sortField).toBe(
         'timestamp'
       );
     });
@@ -683,7 +683,7 @@ describe('Top Values Transforms', () => {
             isBucketed: false,
             label: '',
             params: { sortField: undefined },
-          } as unknown as LastValueIndexPatternColumn,
+          } as LastValueOrderAggColumn,
         },
         { label: '' }
       );
@@ -692,7 +692,7 @@ describe('Top Values Transforms', () => {
       expect(api.rank_by).not.toHaveProperty('time_field');
 
       const roundTripped = fromTermsLensApiToLensState(api, (index: number) => columns[index]?.id);
-      const orderAgg = roundTripped.params.orderAgg as LastValueIndexPatternColumn;
+      const orderAgg = roundTripped.params.orderAgg as LastValueOrderAggColumn;
       // The `params` object survives the round trip (present, sortField undefined), which is what
       // keeps the Lens editor from crashing on load.
       expect(orderAgg.params).toEqual({ sortField: undefined });
