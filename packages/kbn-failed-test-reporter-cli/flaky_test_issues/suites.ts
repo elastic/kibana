@@ -19,7 +19,7 @@ import {
 /**
  * The flaky tests of one `describe` block of a test file. Issues are tracked per suite rather
  * than per test: the tests of a block share its fixtures and hooks, and that is what gets fixed.
- * Tests the report knows no suite title for form one suite per file.
+ * Tests for which the report has no suite title form a single suite per file.
  */
 export interface FlakySuite {
   filePath: string;
@@ -36,6 +36,10 @@ export interface FlakySuite {
 }
 
 const fileKey = (framework: string, filePath: string): string => `${framework}\n${filePath}`;
+
+/** The report records no title rather than a blank one; hand-made reports get the same treatment. */
+const suiteTitleOf = (entry: Pick<FlakyTestEntry, 'suiteTitle'>): string | undefined =>
+  entry.suiteTitle?.trim() || undefined;
 const suiteKey = (framework: string, filePath: string, suiteTitle: string | undefined): string =>
   `${fileKey(framework, filePath)}\n${suiteTitle ?? ''}`;
 
@@ -48,7 +52,7 @@ export const groupIntoSuites = (
 ): FlakySuite[] => {
   const byKey = new Map<string, FlakyTestEntry[]>();
   for (const entry of entries) {
-    const key = suiteKey(entry.framework, entry.filePath, entry.suiteTitle);
+    const key = suiteKey(entry.framework, entry.filePath, suiteTitleOf(entry));
     byKey.set(key, [...(byKey.get(key) ?? []), entry]);
   }
   // The per-pipeline stats are per file; the suites of one file share them
@@ -62,7 +66,7 @@ export const groupIntoSuites = (
     return {
       filePath: worst.filePath,
       framework: worst.framework,
-      suiteTitle: worst.suiteTitle,
+      suiteTitle: suiteTitleOf(worst),
       configPath: tests.find((test) => test.configPath)?.configPath,
       owners: unique(tests.flatMap((test) => test.owners)),
       tests,

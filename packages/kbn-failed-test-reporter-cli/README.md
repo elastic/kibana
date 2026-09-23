@@ -10,8 +10,8 @@ failing test. Run by `.buildkite/scripts/lifecycle/post_command.sh` after every 
 ## `node scripts/report_flaky_test_issues`
 
 Reads a flaky test report written by `node scripts/scout discover-flaky-tests`, groups the flaky
-tests into suites, one per framework, file and `describe` block (tests the report knows no suite
-title for form one suite per file), and files one `failed-test` issue per flaky suite that has
+tests into suites, one per framework, file and `describe` block (tests for which the report has no suite
+title form a single suite per file), and files one `failed-test` issue per flaky suite that has
 none yet. Run daily by
 the `kibana-report-flaky-tests` pipeline after the report is generated.
 

@@ -42,6 +42,19 @@ describe('groupIntoSuites', () => {
     ]);
   });
 
+  it('treats a blank suite title as none', () => {
+    const suites = groupIntoSuites([
+      flakyTest({ testId: 'a1', filePath: 'a.spec.ts', suiteTitle: '  ', failedBuilds: 2 }),
+      flakyTest({ testId: 'a2', filePath: 'a.spec.ts', suiteTitle: undefined, failedBuilds: 9 }),
+      flakyTest({ testId: 'a3', filePath: 'a.spec.ts', suiteTitle: ' titled ', failedBuilds: 1 }),
+    ]);
+
+    expect(suites.map((suite) => [suite.suiteTitle, suite.tests.map((t) => t.testId)])).toEqual([
+      [undefined, ['a2', 'a1']],
+      ['titled', ['a3']],
+    ]);
+  });
+
   it('describes a suite from its tests and picks up the per-pipeline stats of its file', () => {
     const byPipeline = [
       {
