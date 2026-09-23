@@ -205,6 +205,10 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   const showMiSection = !isAgentBased && miServiceIds.length > 0;
   const showAgentSection = isAgentBased && agentTargets.length > 0;
 
+  // Lock the deployment method toggle once any service has been deployed. Changing the method
+  // after a deploy would leave orphaned policies from the previous mechanism with no cleanup path.
+  const isMethodLocked = Object.keys(detectAndReviewStep.policyIdsByInstance ?? {}).length > 0;
+
   const handleNext = useCallback(async () => {
     const defaultNames: Record<string, string> = {
       unified: ECF_UNIFIED_STACK_NAME,
@@ -227,14 +231,13 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
       detectAndReviewStep.ecfStacks !== undefined &&
       JSON.stringify(ecfStacks) === JSON.stringify(detectAndReviewStep.ecfStacks);
 
-    // If MI services were previously deployed but are no longer selected (user switched to ECF-only
-    // or agent-based), stale MI policies need cleanup. handleDeploy detects live-stale entries and
-    // runs cleanup even when no new MI targets exist. onContinue is a no-op here so it won't
-    // navigate — cleanup completes before the rest of handleNext continues.
+    // If MI services were previously deployed but are no longer selected (e.g. user switched to
+    // ECF-only), stale MI policies need cleanup. handleDeploy detects live-stale entries and runs
+    // cleanup even when no new MI targets exist. onContinue is a no-op here so it won't navigate —
+    // cleanup completes before the rest of handleNext continues.
     const hasStaleMiPolicies =
-      !isAgentBased &&
-      (Object.keys(detectAndReviewStep.policyIdsByInstance ?? {}).length > 0 ||
-        Object.keys(detectAndReviewStep.pendingCleanupPolicyIds ?? {}).length > 0);
+      Object.keys(detectAndReviewStep.policyIdsByInstance ?? {}).length > 0 ||
+      Object.keys(detectAndReviewStep.pendingCleanupPolicyIds ?? {}).length > 0;
     if (hasStaleMiPolicies && miServiceIds.length === 0) {
       // Lock the Next button while cleanup runs — showMiSection is false here so isNextDisabled
       // does not consume the MI isDeploying state, leaving Next clickable without this guard.
@@ -359,7 +362,11 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
 
   return (
     <div data-test-subj="onboardingStep-authenticate-and-deploy">
-      <DeploymentMethodCard selectedMethod={deploymentMethod} onChange={setDeploymentMethod} />
+      <DeploymentMethodCard
+        selectedMethod={deploymentMethod}
+        onChange={setDeploymentMethod}
+        disabled={isMethodLocked}
+      />
 
       {showMiSection && <EuiHorizontalRule margin="l" />}
 

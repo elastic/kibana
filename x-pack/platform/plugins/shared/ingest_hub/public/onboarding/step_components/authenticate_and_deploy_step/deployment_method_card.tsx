@@ -79,9 +79,11 @@ const DEPLOYMENT_METHOD_OPTIONS: DeploymentMethodOption[] = [
 interface DeploymentMethodCardProps {
   selectedMethod: DeploymentMethod;
   onChange: (method: DeploymentMethod) => void;
+  /** When true, the Edit button is hidden — deployment method is locked after the first deploy. */
+  disabled?: boolean;
 }
 
-export function DeploymentMethodCard({ selectedMethod, onChange }: DeploymentMethodCardProps) {
+export function DeploymentMethodCard({ selectedMethod, onChange, disabled }: DeploymentMethodCardProps) {
   const { euiTheme } = useEuiTheme();
   const modalTitleId = useGeneratedHtmlId();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -136,18 +138,20 @@ export function DeploymentMethodCard({ selectedMethod, onChange }: DeploymentMet
               <strong>{selectedOption.name}.</strong> {selectedOption.tagline}
             </EuiText>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="xs"
-              onClick={openModal}
-              data-test-subj="deploymentMethodCard-editButton"
-            >
-              <FormattedMessage
-                id="xpack.ingestHub.authenticateAndDeployStep.deploymentMethodCard.editButton"
-                defaultMessage="Edit"
-              />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
+          {!disabled && (
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="xs"
+                onClick={openModal}
+                data-test-subj="deploymentMethodCard-editButton"
+              >
+                <FormattedMessage
+                  id="xpack.ingestHub.authenticateAndDeployStep.deploymentMethodCard.editButton"
+                  defaultMessage="Edit"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiPanel>
 

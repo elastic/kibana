@@ -473,14 +473,12 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
       };
       persistedAuthStepRef.current = next;
       setPersistedAuthenticateAndDeployStep(next);
-      const prevDetect = persistedDetectAndReviewStepRef.current;
       setDetectAndReviewStep({
         serviceStatuses: {},
         // Clear policyIdsByInstance on method switch — policies from the old mechanism are not
         // proof of deployment under the new one. Keeping them would cause isAlreadyDeployed to
         // return true for the new path, silently skipping the deploy.
         policyIdsByInstance: {},
-        pendingCleanupPolicyIds: prevDetect?.pendingCleanupPolicyIds,
         failedInstances: [],
         deployErrors: {},
       });
