@@ -318,7 +318,7 @@ export type AttachmentTimelineEvent =
 
 export interface RoundFeedbackEventData {
   round_id: string;
-  vote: 'up' | 'down';
+  vote: 'up' | 'down' | null;
   chips?: FeedbackChipId[];
   comment?: string;
   submitted_at: string;

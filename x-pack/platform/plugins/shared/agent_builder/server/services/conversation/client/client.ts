@@ -32,7 +32,6 @@ import {
   ConversationAccessControlMode,
   EventActorType,
   TimelineEventType,
-  feedbackEventId,
   isConversationAccessControlRole,
   normalizeConversationAccessControl,
   createBadRequestError,
@@ -796,10 +795,7 @@ class ConversationClientImpl implements ConversationClient {
           throw skipWrite(current);
         }
         const currentEvents = current.events ?? [];
-        const feedbackId = feedbackEventId(roundId);
-        const nonRoundEvents = currentEvents.filter(
-          (event) => !event.id.startsWith(roundPrefix) || event.id === feedbackId
-        );
+        const nonRoundEvents = currentEvents.filter((event) => !event.id.startsWith(roundPrefix));
         const existingIds = new Set(nonRoundEvents.map((event) => event.id));
         // Round-derived events for this round were just wiped, so they always pass; additive ids
         // collide only when a caller re-inserts an existing uuid, which we drop.
@@ -875,16 +871,9 @@ class ConversationClientImpl implements ConversationClient {
           throw createBadRequestError(`round not found: ${roundId}`);
         }
 
-        const currentEvents = current.events ?? [];
-        const withoutPrevious = currentEvents.filter((e) => e.id !== feedbackEventId(roundId));
-
-        if (feedback.vote === null) {
-          return { events: withoutPrevious };
-        }
-
         const now = new Date().toISOString();
         const newEvent: RoundFeedbackEvent = {
-          id: feedbackEventId(roundId),
+          id: uuidv4(),
           type: TimelineEventType.roundFeedback,
           created_at: now,
           actor: {
@@ -905,7 +894,7 @@ class ConversationClientImpl implements ConversationClient {
           },
         };
 
-        return { events: [...withoutPrevious, newEvent] };
+        return { events: [...(current.events ?? []), newEvent] };
       },
     });
   }

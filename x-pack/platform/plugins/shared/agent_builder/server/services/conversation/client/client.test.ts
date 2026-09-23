@@ -18,7 +18,6 @@ import {
   TimelineTriggerType,
   createAgentNotFoundError,
   createAgentUnavailableError,
-  feedbackEventId,
   isConversationWriteConflictError,
 } from '@kbn/agent-builder-common';
 import type { ConversationAccessControlEntry } from '@kbn/agent-builder-common/chat/access_control';
@@ -1617,9 +1616,8 @@ describe('ConversationClient', () => {
       const { events } = mockEsClient.index.mock.calls[0][0].document as {
         events: TimelineEvent[];
       };
-      const feedbackEvent = events.find((e) => e.id === feedbackEventId('round-1'));
+      const feedbackEvent = events.find((e) => e.type === TimelineEventType.roundFeedback);
       expect(feedbackEvent).toMatchObject({
-        id: feedbackEventId('round-1'),
         type: TimelineEventType.roundFeedback,
         data: expect.objectContaining({
           round_id: 'round-1',
@@ -1632,32 +1630,21 @@ describe('ConversationClient', () => {
       });
     });
 
-    it('removes the round_feedback event entirely on retract (vote: null)', async () => {
-      const priorFeedbackEvent: TimelineEvent = {
-        id: feedbackEventId('round-1'),
-        type: TimelineEventType.roundFeedback,
-        created_at: '2025-01-01T00:00:00.000Z',
-        actor: { type: EventActorType.user, id: 'user-1', username: 'test-user' },
-        data: {
-          round_id: 'round-1',
-          vote: 'up' as const,
-          submitted_at: '2025-01-01T00:00:00.000Z',
-        },
-      };
-      mockGetDocumentResponse(
-        createConversationDocument({
-          rounds: [round],
-          schemaVersion: CONVERSATION_SCHEMA_VERSION,
-          events: [priorFeedbackEvent],
-        })
-      );
+    it('appends a null-vote tombstone on retract instead of deleting the prior event', async () => {
+      mockGetDocumentResponse(createConversationDocument({ rounds: [round] }));
 
       await client.updateRoundFeedback('conversation-1', 'round-1', { vote: null });
 
       const { events } = mockEsClient.index.mock.calls[0][0].document as {
         events: TimelineEvent[];
       };
-      expect(events.every((e) => e.id !== feedbackEventId('round-1'))).toBe(true);
+      const tombstone = events.find(
+        (e) =>
+          e.type === TimelineEventType.roundFeedback &&
+          (e.data as { round_id: string }).round_id === 'round-1'
+      );
+      expect(tombstone).toBeDefined();
+      expect((tombstone!.data as { vote: unknown }).vote).toBeNull();
     });
 
     it('throws bad request when the round does not exist in the conversation', async () => {
