@@ -494,4 +494,31 @@ describe('FlyoutTemplate tabs', () => {
     expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('tabs` is set but no'));
     warnSpy.mockRestore();
   });
+
+  it('forwards a tab entry custom data attribute and className to the tab element', () => {
+    render(
+      <FlyoutTemplate
+        onClose={noop}
+        session="never"
+        tabs={[
+          { id: 'overview', label: 'Overview', 'data-foo': 'overviewTab', className: 'myTab' },
+          { id: 'metadata', label: 'Metadata' },
+        ]}
+      >
+        <FlyoutTemplate.Header title="Alert" />
+        <FlyoutTemplate.Body>
+          <FlyoutTemplate.Body.TabPanel tabId="overview">
+            <span>overview content</span>
+          </FlyoutTemplate.Body.TabPanel>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+
+    const tab = screen.getByRole('tab', { name: 'Overview' });
+    expect(tab).toHaveAttribute('data-foo', 'overviewTab');
+    expect(tab).toHaveClass('myTab');
+    // The entry's `id` remains the logical tab id; the template still owns the DOM id and the link to the panel.
+    expect(tab.id).not.toBe('overview');
+    expect(tab).toHaveAttribute('aria-controls', `${tab.id}-panel`);
+  });
 });
