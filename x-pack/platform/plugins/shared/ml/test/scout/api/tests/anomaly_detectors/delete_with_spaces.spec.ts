@@ -62,6 +62,8 @@ apiTest.describe(
           headers: { ...INTERNAL_API_HEADERS, ...cookieHeader },
         });
         expect(res).toHaveStatusCode(404);
+
+        await apiServices.ml.anomalyDetection.waitForJobToExist(jobId);
       }
     );
   }

@@ -111,25 +111,34 @@ apiTest.describe(
 
     apiTest('should filter results based on overall_score', async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asMlViewer();
-      const scoreThreshold = 5;
+      const url = `internal/ml/anomaly_detectors/${JOB_ID_1},${JOB_ID_2}/results/overall_buckets`;
+      const baseBody = { topN: 1, bucketSpan: '1h', start: 0, end: Date.now() };
 
-      const res = await apiClient.post(
-        `internal/ml/anomaly_detectors/${JOB_ID_1},${JOB_ID_2}/results/overall_buckets`,
-        {
-          headers: { ...INTERNAL_API_HEADERS, ...cookieHeader },
-          body: {
-            topN: 1,
-            bucketSpan: '1h',
-            start: 0,
-            end: Date.now(),
-            overall_score: scoreThreshold,
-          },
-          responseType: 'json',
-        }
+      const unfilteredRes = await apiClient.post(url, {
+        headers: { ...INTERNAL_API_HEADERS, ...cookieHeader },
+        body: baseBody,
+        responseType: 'json',
+      });
+
+      expect(unfilteredRes).toHaveStatusCode(200);
+      const scores = (unfilteredRes.body.overall_buckets as Array<{ overall_score: number }>).map(
+        (bucket) => bucket.overall_score
       );
+      expect(scores.length).toBeGreaterThan(0);
+
+      const scoreThreshold = Math.max(...scores) / 2;
+      expect(scoreThreshold).toBeGreaterThan(0);
+
+      const res = await apiClient.post(url, {
+        headers: { ...INTERNAL_API_HEADERS, ...cookieHeader },
+        body: { ...baseBody, overall_score: scoreThreshold },
+        responseType: 'json',
+      });
 
       expect(res).toHaveStatusCode(200);
-      for (const bucket of res.body.overall_buckets as Array<{ overall_score: number }>) {
+      const filteredBuckets = res.body.overall_buckets as Array<{ overall_score: number }>;
+      expect(filteredBuckets.length).toBeGreaterThan(0);
+      for (const bucket of filteredBuckets) {
         expect(bucket.overall_score).toBeGreaterThan(scoreThreshold);
       }
     });
