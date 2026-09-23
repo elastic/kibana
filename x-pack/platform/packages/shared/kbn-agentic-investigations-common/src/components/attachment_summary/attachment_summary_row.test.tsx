@@ -43,6 +43,21 @@ const renderRow = (
 
 // EUI's test-env mocks EuiIcon as a span whose text is its aria-label, so the icon and the label
 // both match a bare text query. Every label assertion goes through the label's own test subject.
+/** jsdom reports every width as 0; these are the two values the truncation check compares. */
+const mockLabelOverflow = ({
+  scrollWidth,
+  clientWidth,
+}: {
+  scrollWidth: number;
+  clientWidth: number;
+}) => {
+  const spies = [
+    jest.spyOn(HTMLElement.prototype, 'scrollWidth', 'get').mockReturnValue(scrollWidth),
+    jest.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockReturnValue(clientWidth),
+  ];
+  return () => spies.forEach((spy) => spy.mockRestore());
+};
+
 const expectLabel = (expected: string) =>
   expect(screen.getByTestId('attachmentSummaryRowLabel')).toHaveTextContent(expected);
 
@@ -98,6 +113,37 @@ describe('AttachmentSummaryRow', () => {
 
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
     expect(screen.queryByRole('link')).not.toBeInTheDocument();
+  });
+
+  it('shows the full label in a tooltip once it is cut off', async () => {
+    // jsdom lays nothing out, so the overflow that drives the tooltip has to be simulated.
+    const restore = mockLabelOverflow({ scrollWidth: 500, clientWidth: 100 });
+    try {
+      renderRow({ getLabel: () => 'A label long enough that the row will cut it short' });
+
+      await userEvent.hover(screen.getByTestId('attachmentSummaryRowLabel'));
+
+      expect(await screen.findByRole('tooltip')).toHaveTextContent(
+        'A label long enough that the row will cut it short'
+      );
+    } finally {
+      restore();
+    }
+  });
+
+  it('leaves a label that already fits without a tooltip or a tab stop', async () => {
+    const restore = mockLabelOverflow({ scrollWidth: 100, clientWidth: 100 });
+    try {
+      renderRow({ getLabel: () => 'Short' });
+      const labelElement = screen.getByTestId('attachmentSummaryRowLabel');
+
+      await userEvent.hover(labelElement);
+
+      expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
+      expect(labelElement).not.toHaveAttribute('tabindex');
+    } finally {
+      restore();
+    }
   });
 
   it('shows the attachment kind, not its raw type id, in a tooltip on the icon', async () => {

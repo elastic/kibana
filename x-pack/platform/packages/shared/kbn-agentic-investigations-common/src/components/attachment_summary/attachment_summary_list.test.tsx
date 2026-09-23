@@ -59,7 +59,7 @@ describe('AttachmentSummaryList', () => {
     renderList(makeAttachments(10));
 
     expect(screen.getAllByRole('listitem')).toHaveLength(5);
-    expect(screen.getByTestId('attachmentSummaryToggle')).toHaveTextContent('Show more (5)');
+    expect(screen.getByTestId('attachmentSummaryToggle')).toHaveTextContent('+ Show more (5)');
   });
 
   it('expands and collapses again', async () => {
@@ -69,13 +69,15 @@ describe('AttachmentSummaryList', () => {
     await userEvent.click(toggle);
 
     expect(screen.getAllByRole('listitem')).toHaveLength(10);
+    // Collapsing has no affordance of its own, so no '+' comes back on the way out.
     expect(toggle).toHaveTextContent('Show less');
+    expect(toggle).not.toHaveTextContent('+');
     expect(toggle).toHaveAttribute('aria-expanded', 'true');
 
     await userEvent.click(toggle);
 
     expect(screen.getAllByRole('listitem')).toHaveLength(5);
-    expect(toggle).toHaveTextContent('Show more (5)');
+    expect(toggle).toHaveTextContent('+ Show more (5)');
     expect(toggle).toHaveAttribute('aria-expanded', 'false');
   });
 
@@ -83,7 +85,7 @@ describe('AttachmentSummaryList', () => {
     renderList(makeAttachments(6), 2);
 
     expect(screen.getAllByRole('listitem')).toHaveLength(2);
-    expect(screen.getByTestId('attachmentSummaryToggle')).toHaveTextContent('Show more (4)');
+    expect(screen.getByTestId('attachmentSummaryToggle')).toHaveTextContent('+ Show more (4)');
   });
 
   it('points the toggle at the list it expands', () => {

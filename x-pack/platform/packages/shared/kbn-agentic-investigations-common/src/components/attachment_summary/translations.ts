@@ -16,8 +16,9 @@ export const ATTACHMENT_SUMMARY_SHOW_LESS = i18n.translate(
   { defaultMessage: 'Show less' }
 );
 
+/** The `+` is the expand affordance; collapsing has none, so "Show less" carries no counterpart. */
 export const attachmentSummaryShowMore = (count: number) =>
   i18n.translate('xpack.alertzero.attachmentSummary.showMore', {
-    defaultMessage: 'Show more ({count})',
+    defaultMessage: '+ Show more ({count})',
     values: { count },
   });

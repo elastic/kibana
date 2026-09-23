@@ -82,9 +82,8 @@ export const AttachmentSummaryList = memo<AttachmentSummaryListProps>(
             })}
           >
             <EuiButtonEmpty
-              size="s"
+              size="xs"
               flush="left"
-              iconType={isExpanded ? 'chevronSingleUp' : 'chevronSingleDown'}
               aria-expanded={isExpanded}
               aria-controls={listId}
               onClick={() => setIsExpanded((expanded) => !expanded)}
