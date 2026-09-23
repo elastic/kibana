@@ -129,10 +129,10 @@ describe('utils', () => {
       ).toBe(false);
     });
 
-    it('defaults to true when the configuration omits the field', () => {
+    it('defaults to false when the configuration omits the field', () => {
       const { extractObservables: _omit, ...withoutField } = casesConfigurationsMock;
       // @ts-expect-error testing omitted extractObservables
-      expect(getSpaceExtractObservables(withoutField)).toBe(true);
+      expect(getSpaceExtractObservables(withoutField)).toBe(false);
     });
   });
 

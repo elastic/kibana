@@ -18,6 +18,7 @@ import { flattenCaseSavedObject, transformNewCase } from '../../common/utils';
 import type { CasesClient, CasesClientArgs } from '..';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { Owner } from '../../../common/constants/types';
+import { OWNER_INFO } from '../../../common/constants/owners';
 import { isObservablesExtractionBlocked } from '../../../common/utils/case_settings';
 import type { CasePostRequest } from '../../../common/types/api';
 import { CasePostRequestRt } from '../../../common/types/api';
@@ -176,7 +177,9 @@ export const create = async (
           ...query.settings,
           extractObservables: isObservablesExtractionBlocked(query.owner)
             ? false
-            : configurations[0]?.extractObservables ?? true,
+            : configurations[0]?.extractObservables ??
+              OWNER_INFO[query.owner as Owner]?.features.observables.autoExtractDefault ??
+              false,
         },
       };
     }

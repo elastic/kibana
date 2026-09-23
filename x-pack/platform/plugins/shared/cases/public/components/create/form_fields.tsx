@@ -118,7 +118,9 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
       }
       setFieldValue(
         'extractObservables',
-        isObservablesExtractionBlocked(caseOwner) ? false : configuration.extractObservables ?? true
+        isObservablesExtractionBlocked(caseOwner)
+          ? false
+          : configuration.extractObservables ?? false
       );
     }, [caseOwner, configuration.extractObservables, configuration.id, getFields, setFieldValue]);
 

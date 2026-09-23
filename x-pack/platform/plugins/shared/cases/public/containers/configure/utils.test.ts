@@ -16,13 +16,13 @@ describe('Utils', () => {
       );
     });
 
-    it('returns the initial configuration if the owner is not found', () => {
+    it('returns a fallback configuration with the owner and its autoExtractDefault when the owner is not found', () => {
       expect(
         getConfigurationByOwner({
           configurations: [{ owner: 'foo' }, { owner: 'bar' }] as CasesConfigurationUI[],
           owner: 'foobar',
         })
-      ).toBe(initialConfiguration);
+      ).toEqual({ ...initialConfiguration, owner: 'foobar', extractObservables: false });
     });
 
     it('returns the expected configuration when searching by owner', () => {

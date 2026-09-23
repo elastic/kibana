@@ -6,6 +6,8 @@
  */
 import type { CasesConfigurationUI } from '../types';
 import { ConnectorTypes } from '../../../common';
+import { OWNER_INFO } from '../../../common/constants/owners';
+import type { Owner } from '../../../common/constants/types';
 
 export const initialConfiguration: CasesConfigurationUI = {
   closureType: 'close-by-user',
@@ -22,7 +24,7 @@ export const initialConfiguration: CasesConfigurationUI = {
   id: '',
   owner: '',
   observableTypes: [],
-  extractObservables: true,
+  extractObservables: false,
 };
 
 export const getConfigurationByOwner = ({
@@ -36,6 +38,11 @@ export const getConfigurationByOwner = ({
     return initialConfiguration;
   }
 
-  // fallback to configuration 0 which was what happened before
-  return configurations.find((element) => element.owner === owner) ?? initialConfiguration;
+  const ownerDefault = OWNER_INFO[owner as Owner]?.features.observables.autoExtractDefault ?? false;
+  const fallback: CasesConfigurationUI = {
+    ...initialConfiguration,
+    owner,
+    extractObservables: ownerDefault,
+  };
+  return configurations.find((element) => element.owner === owner) ?? fallback;
 };

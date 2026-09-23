@@ -26,9 +26,9 @@ import {
   getConnectorsFormSerializer,
 } from '../utils';
 
-/** Space-level extractObservables default; falls back to the advertised default-on when absent. */
+/** Space-level extractObservables default; falls back to the owner's autoExtractDefault when absent. */
 export const getSpaceExtractObservables = (configuration: CasesConfigurationUI): boolean =>
-  configuration.extractObservables ?? true;
+  configuration.extractObservables ?? false;
 
 export const getInitialCreateCaseSettings = (
   owner: string,
@@ -86,7 +86,7 @@ export const createFormDeserializer = (data: CasePostRequest): CaseFormFieldsSch
     connectorId: connector.id,
     fields: connector.fields,
     syncAlerts: settings.syncAlerts,
-    extractObservables: settings.extractObservables ?? true,
+    extractObservables: settings.extractObservables ?? false,
     customFields: customFieldsFormDeserializer(customFields) ?? {},
     ...(extendedFieldsFromResponse != null
       ? { [CASE_EXTENDED_FIELDS]: extendedFieldsFromResponse }
