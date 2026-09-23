@@ -11,7 +11,7 @@ import type { TimeRange } from '../use_time_range_param';
  * Builds an ES|QL query that counts entities that crossed into High or Critical
  * risk since the N-period boundary, using the risk score time-series history index.
  *
- * Levels are mapped to integers (Critical=4, High=3, Medium=2, Low=1, Unknown=0)
+ * Levels are mapped to integers (Critical=4, High=3, Moderate=2, Low=1, Unknown=0)
  * because MAX on the raw keyword sorts lexicographically (Unknown > Medium > Low > High > Critical).
  *
  * Uses the same two-step LAST() pattern as tile_risk_movers_query.ts:
@@ -48,7 +48,7 @@ export const buildNewlyHighCriticalCountQuery = (
     `| EVAL entity_name = COALESCE(host.name, user.name, service.name)`,
     `| EVAL risk_level = COALESCE(host.risk.calculated_level, user.risk.calculated_level, service.risk.calculated_level)`,
     `| WHERE entity_name IS NOT NULL`,
-    `| EVAL level_num = CASE(risk_level == "Critical", 4, risk_level == "High", 3, risk_level == "Medium", 2, risk_level == "Low", 1, 0)`,
+    `| EVAL level_num = CASE(risk_level == "Critical", 4, risk_level == "High", 3, risk_level == "Moderate", 2, risk_level == "Low", 1, 0)`,
     `| EVAL period = CASE(@timestamp <= NOW() - ${period}, "boundary", "current")`,
     `| STATS level_num = LAST(level_num, @timestamp) BY entity_name, period`,
     `| EVAL current_level_num  = CASE(period == "current",  level_num, null)`,
