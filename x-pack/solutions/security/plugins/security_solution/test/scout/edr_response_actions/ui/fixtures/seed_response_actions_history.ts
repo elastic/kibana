@@ -132,7 +132,7 @@ const indexResponseActionHost = ({
     ENDPOINT_EVENTS_INDEX,
     ENDPOINT_ALERTS_INDEX,
     ENDPOINT_DEVICE_INDEX,
-    1,
+    0,
     true,
     {},
     EndpointDocGenerator,
