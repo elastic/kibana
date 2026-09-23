@@ -186,19 +186,17 @@ function getCustomOrderAgg(
   }
 
   if (rankBy.operation === 'last_value') {
-    // `time_field` maps to the state `sortField` (the date field the last value is sorted by) and is
-    // read at render. It is optional on the API: when omitted, the render path falls back to the data
-    // view's default time field to sort, and the editor prompts the user to re-save to persist it.
-    // This solution was needed to avoid a breaking change in the API.
     const orderAgg: LastValueOrderAggColumn = {
       operationType: rankBy.operation,
       sourceField: rankBy.field,
       dataType: 'number',
       isBucketed: false,
       label: '',
-      params: {
-        ...(rankBy.time_field ? { sortField: rankBy.time_field } : {}),
-      },
+      // `time_field` maps to the state `sortField` (the date field the last value is sorted by) and is
+      // read at render. It is optional on the API: when omitted, the render path falls back to the data
+      // view's default time field to sort, and the editor prompts the user to re-save to persist it.
+      // This solution was needed to avoid a breaking change in the API.
+      ...(rankBy.time_field ? { params: { sortField: rankBy.time_field } } : {}),
     };
     return orderAgg;
   }

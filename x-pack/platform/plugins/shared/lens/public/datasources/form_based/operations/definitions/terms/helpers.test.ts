@@ -122,7 +122,7 @@ function getTermsWithLastValueOrderAgg(
         isBucketed: false,
         operationType: 'last_value',
         sourceField: 'bytes',
-        params: orderAggParams ?? {},
+        ...(orderAggParams ? { params: orderAggParams } : {}),
       },
     },
   };
@@ -797,6 +797,14 @@ describe('getOrderAggLastValueSortFieldStatus()', () => {
       status: 'wrong-type',
     });
   });
+
+  it('should not throw and resolve a default when the order-agg has no params (legacy state)', () => {
+    const column = getTermsWithLastValueOrderAgg();
+    expect(getOrderAggLastValueSortFieldStatus(column, indexPattern)).toEqual({
+      status: 'missing-with-default',
+      defaultField: 'timestamp',
+    });
+  });
 });
 
 describe('getOrderAggErrorMessages()', () => {
@@ -839,6 +847,19 @@ describe('getOrderAggErrorMessages()', () => {
     expect(errors).toHaveLength(1);
     expect(errors[0]).toEqual(
       expect.objectContaining({ uniqueId: TERMS_CUSTOM_RANK_LAST_VALUE_SORT_FIELD_INVALID_TYPE })
+    );
+  });
+
+  it('should not throw when the order-agg has no params (legacy state)', () => {
+    const layer = getLayer(getTermsWithLastValueOrderAgg());
+    // missing-with-default is a non-blocking warning, so no error is produced.
+    expect(getOrderAggErrorMessages(layer, 'col1', indexPattern)).toHaveLength(0);
+
+    const indexPatternWithoutDates = createMockedIndexPatternWithoutType('date');
+    const errors = getOrderAggErrorMessages(layer, 'col1', indexPatternWithoutDates);
+    expect(errors).toHaveLength(1);
+    expect(errors[0]).toEqual(
+      expect.objectContaining({ uniqueId: TERMS_CUSTOM_RANK_LAST_VALUE_NO_DATE_FIELD })
     );
   });
 });

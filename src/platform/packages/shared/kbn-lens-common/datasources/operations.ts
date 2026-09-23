@@ -70,7 +70,9 @@ export interface LastValueIndexPatternColumn extends FieldBasedIndexPatternColum
  * render path falls back to the data view's default date field.
  */
 export type LastValueOrderAggColumn = Omit<LastValueIndexPatternColumn, 'params'> & {
-  params: Partial<LastValueIndexPatternColumn['params']>;
+  // Optional because legacy API-authored order-aggs were persisted without a `params` key at all, and
+  // new ones omit it when no sort field is set.
+  params?: Partial<LastValueIndexPatternColumn['params']>;
 };
 
 export type MetricColumn<T> = FieldBasedIndexPatternColumn & {

@@ -300,7 +300,7 @@ describe('Top Values Transforms', () => {
       });
     });
 
-    it('should always emit a params object (with an undefined sortField) when time_field is omitted', () => {
+    it('should omit params when time_field is omitted (render falls back to the default date field)', () => {
       const result = fromTermsLensApiToLensState(
         buildTermsApiOperation({
           rank_by: {
@@ -318,10 +318,8 @@ describe('Top Values Transforms', () => {
         dataType: 'number',
         isBucketed: false,
         label: '',
-        params: { sortField: undefined },
       });
-      // The `params` object must be present (never absent) so the Lens editor does not crash on load.
-      expect(result.params.orderAgg).toHaveProperty('params');
+      expect(result.params.orderAgg).not.toHaveProperty('params');
     });
 
     it('should derive parentFormat from the number of fields', () => {
@@ -693,9 +691,9 @@ describe('Top Values Transforms', () => {
 
       const roundTripped = fromTermsLensApiToLensState(api, (index: number) => columns[index]?.id);
       const orderAgg = roundTripped.params.orderAgg as LastValueOrderAggColumn;
-      // The `params` object survives the round trip (present, sortField undefined), which is what
-      // keeps the Lens editor from crashing on load.
-      expect(orderAgg.params).toEqual({ sortField: undefined });
+      // Without a sort field the API omits `time_field`, so the rebuilt order-agg omits `params`.
+      // Consumers tolerate the absent `params`; render falls back to the default date field.
+      expect(orderAgg).not.toHaveProperty('params');
     });
   });
 });
