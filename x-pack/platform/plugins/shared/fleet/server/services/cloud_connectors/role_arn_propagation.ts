@@ -23,6 +23,7 @@ import { CloudConnectorRoleArnPropagationError } from '../../errors';
 import { agentPolicyService } from '../agent_policy';
 import { appContextService } from '../app_context';
 import {
+  getPackagePolicySavedObjectType,
   packagePolicyService,
   toPackagePolicyUpdate,
   _normalizePackagePolicyKuery,
@@ -99,10 +100,10 @@ const renderPolicyIds = (ids: string[]): string => {
  * `packagePolicy.vars`, input-level `vars`, or per-stream `vars` are silently skipped.
  *
  * Exit points (in source order):
- *   1. `return undefined` — no package policy references the connector (nothing to do).
- *   2. `return undefined` — policies reference the connector but none carry a `role_arn` variable.
- *   3. `throw`  — one or more referencing policies lack a `package` (cannot be updated).
- *   3b. `throw` — one or more policies (or `:prev` snapshots) are managed. `packagePolicyService.update`
+ *   1. `return undefined` — neither an active policy nor a `:prev` snapshot holds a `role_arn`
+ *      that needs rewriting for this connector.
+ *   2. `throw`  — one or more referencing policies lack a `package` (cannot be updated).
+ *   3. `throw` — one or more policies (or `:prev` snapshots) are managed. `packagePolicyService.update`
  *      rejects those only when the payload sets `is_managed`, so the fan-out also refuses them
  *      before any write.
  *   4. `return RoleArnPropagationRollback` — Phase 1 forward writes all succeeded and the
@@ -139,11 +140,6 @@ export const propagateRoleArnToPackagePolicies = async ({
     policies.push(...page);
   }
 
-  if (policies.length === 0) {
-    logger.debug(`No package policies reference connector ${connectorId}; nothing to fan out.`);
-    return undefined; // exit 1: nothing references this connector
-  }
-
   // ── Plan ────────────────────────────────────────────────────────────────────────────────────
   // Compute the pre/post snapshots in memory. Anything that doesn't actually change is dropped
   // here so Phases 1 and 2 only touch policies that need it.
@@ -164,6 +160,9 @@ export const propagateRoleArnToPackagePolicies = async ({
 
   const managedSnapshotIds: string[] = [];
   const PREVIOUS_REVISION_PAGE_SIZE = 100;
+  // Package policies (and their `:prev` snapshots) live under the legacy type while space
+  // awareness is off.
+  const packagePolicySavedObjectType = await getPackagePolicySavedObjectType();
 
   /**
    * `packagePolicyService.fetchAllItems` hides `latest_revision:false` objects. Package rollback
@@ -172,7 +171,7 @@ export const propagateRoleArnToPackagePolicies = async ({
    */
   const findPreviousRevisionSnapshots = async (): Promise<SnapshotPlan[]> => {
     const filter = _normalizePackagePolicyKuery(
-      PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      packagePolicySavedObjectType,
       `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.cloud_connector_id:${escapeSearchQueryPhrase(
         connectorId
       )} AND ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.latest_revision:false`
@@ -181,7 +180,7 @@ export const propagateRoleArnToPackagePolicies = async ({
     let page = 1;
     for (;;) {
       const response = await soClient.find<PackagePolicySOAttributes>({
-        type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        type: packagePolicySavedObjectType,
         page,
         perPage: PREVIOUS_REVISION_PAGE_SIZE,
         filter,
@@ -229,7 +228,7 @@ export const propagateRoleArnToPackagePolicies = async ({
     version?: string
   ) =>
     soClient.update<PackagePolicySOAttributes>(
-      PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      packagePolicySavedObjectType,
       plan.id,
       { vars, inputs },
       version !== undefined ? { version } : undefined
@@ -286,11 +285,13 @@ export const propagateRoleArnToPackagePolicies = async ({
 
   const snapshotPlans = await findPreviousRevisionSnapshots();
 
+  // A policy that moved off this connector can still have a `:prev` snapshot referencing it, so
+  // the snapshot lookup runs even when no active policy references the connector.
   if (plans.length === 0 && snapshotPlans.length === 0) {
     logger.debug(
-      `Connector ${connectorId} has ${policies.length} referencing package policies but none carry a role_arn variable; nothing to fan out.`
+      `Connector ${connectorId} has ${policies.length} referencing package policies and no rollback snapshots with a role_arn to rewrite; nothing to fan out.`
     );
-    return undefined; // exit 2: policies reference this connector but hold no role_arn to rewrite
+    return undefined; // exit 1: nothing holds a role_arn to rewrite
   }
 
   // packagePolicyService.update unconditionally rejects policies without a package. Attempting
@@ -384,15 +385,26 @@ export const propagateRoleArnToPackagePolicies = async ({
     // bulkUpdate resolves with per-object errors (for example an OCC conflict) instead of
     // rejecting. Awaiting the call without reading those results reports a successful fan-out
     // while some agents stay on the old compiled ARN.
-    const failed = (response?.saved_objects ?? []).filter(isSavedObjectErrorResult);
-    if (failed.length > 0) {
-      const detail = failed
-        .map((so) => `${so.id}: ${so.error?.message ?? 'unknown error'}`)
-        .join('; ');
+    // bumpAgentPoliciesByIds also drops ids its bulkGet could not read, without an error entry,
+    // so a requested id missing from the response was never bumped either.
+    const results = response?.saved_objects ?? [];
+    const failures = results
+      .filter(isSavedObjectErrorResult)
+      .map((so) => `${so.id}: ${so.error?.message ?? 'unknown error'}`);
+    const bumpedIds = new Set(
+      results.filter((so) => !isSavedObjectErrorResult(so)).map((so) => so.id)
+    );
+    const erroredIds = new Set(results.filter(isSavedObjectErrorResult).map((so) => so.id));
+    for (const id of ids) {
+      if (!bumpedIds.has(id) && !erroredIds.has(id)) {
+        failures.push(`${id}: not found or not readable`);
+      }
+    }
+    if (failures.length > 0) {
       throw new Error(
-        `Failed to bump ${failed.length} agent ${
-          failed.length === 1 ? 'policy' : 'policies'
-        } (${detail})`
+        `Failed to bump ${failures.length} agent ${
+          failures.length === 1 ? 'policy' : 'policies'
+        } (${failures.join('; ')})`
       );
     }
   };
