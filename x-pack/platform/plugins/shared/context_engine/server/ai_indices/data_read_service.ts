@@ -15,6 +15,7 @@ import type {
 } from '../../common/http_api/ai_indices';
 import { AiIndexAuditAction, aiIndexAuditEvent } from '../audit/audit_events';
 import { describeAiIndex } from './describe';
+import { AiIndexNotReadableError } from './errors';
 import { filterReadableAiIndices } from './filter_readable_ai_indices';
 import { queryAiIndices } from './query';
 import type { AiIndexService } from './service';
@@ -22,7 +23,7 @@ import type { AiIndexService } from './service';
 /** Caller-scoped AI-index reads. One instance per request; shared by HTTP routes and agent tools. */
 export interface AiIndexDataReadServiceApi {
   query(request: QueryAiIndicesRequest): Promise<QueryAiIndicesResponse>;
-  /** Throws `AiIndexNotFoundError` for an unknown id, `AiIndexNotReadableError` when the caller cannot read the backing store. */
+  /** Throws `AiIndexNotFoundError` for an unknown id, `AiIndexNotReadableError` when the caller cannot read the backing index. */
   describe(id: string): Promise<DescribeAiIndexResponse>;
   /**
    * The AI Indices registered in this space whose backing index the caller can read. An empty
@@ -56,9 +57,13 @@ export class AiIndexDataReadService implements AiIndexDataReadServiceApi {
   }
 
   async describe(id: string): Promise<DescribeAiIndexResponse> {
-    const { esClient, spaceId, auditLogger, aiIndexService } = this.deps;
+    const { esClient, spaceId, auditLogger, aiIndexService, logger } = this.deps;
     try {
       const aiIndex = await aiIndexService.get(id, spaceId);
+      const readable = await filterReadableAiIndices({ esClient, aiIndices: [aiIndex], logger });
+      if (readable.length === 0) {
+        throw new AiIndexNotReadableError(id);
+      }
       const response = await describeAiIndex({ esClient, aiIndex, spaceId });
       auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.DESCRIBE, id }));
       return { response };

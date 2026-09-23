@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { AiIndexHttpItem } from '../../common/http_api/ai_indices';
 import { filterReadableAiIndices } from './filter_readable_ai_indices';
 
@@ -88,11 +90,28 @@ describe('filterReadableAiIndices', () => {
 
     expect(result.map(({ id }) => id)).toEqual(['readable', 'missing']);
     expect(logger.debug.mock.calls.map(([message]) => message)).toEqual([
-      "AI index 'forbidden' left out of the list: unauthorized for user",
-      "AI index 'closed' left out of the list: index_closed_exception",
-      "AI index 'slow' left out of the list: timed out",
-      "AI index 'degraded' left out of the list: 1 shard(s) failed",
+      "AI index 'forbidden' is not readable: unauthorized for user",
+      "AI index 'closed' is not readable: index_closed_exception",
+      "AI index 'slow' is not readable: timed out",
+      "AI index 'degraded' is not readable: 1 shard(s) failed",
     ]);
+  });
+
+  // Elasticsearch refuses the whole `msearch` for a caller with no search privilege anywhere.
+  it('keeps nothing when the request itself is rejected as unauthorized', async () => {
+    msearch.mockRejectedValue(
+      new errors.ResponseError(
+        elasticsearchClientMock.createApiResponse({
+          statusCode: 403,
+          body: { error: { type: 'security_exception' } },
+        })
+      )
+    );
+
+    const result = await filterReadableAiIndices({ ...params, aiIndices: [aiIndex('a')] });
+
+    expect(result).toEqual([]);
+    expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('No AI index is readable'));
   });
 
   // `existing,missing` is a 404 as a whole, so it says nothing about `existing`.

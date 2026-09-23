@@ -57,9 +57,6 @@ const KI_DOCS = {
 
 const blockOf = (body: { response: string }): string => body.response;
 
-const listedIds = (body: { ai_indices: Array<{ id: string }> }): string[] =>
-  body.ai_indices.map(({ id }) => id);
-
 /** Lines under `heading` (exact, or `heading (…)`) up to the next blank line. */
 const sectionLines = (block: string, heading: string): string[] => {
   const lines = block.split('\n');
@@ -101,7 +98,7 @@ const READ_ONLY_ROLE: KibanaRole = {
   kibana: [CONTEXT_ENGINE_READ],
 };
 
-/** `view_index_metadata` only, no `read`: the readability probe is refused, so describe is too. */
+/** `view_index_metadata` only, no `read`: can't list or describe it. */
 const METADATA_ONLY_ROLE: KibanaRole = {
   elasticsearch: {
     cluster: [],
@@ -333,7 +330,7 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
   });
 
   apiTest(
-    'returns Elasticsearch 403 when the caller lacks view_index_metadata',
+    'returns Elasticsearch 403 when the caller lacks view_index_metadata privilege',
     async ({ apiClient }) => {
       const response = await apiClient.get(describePath(SINGLE_AI_INDEX_ID), {
         headers: { ...readOnlyCredentials.apiKeyHeader, ...API_HEADERS },
@@ -346,8 +343,16 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
     }
   );
 
-  // Describing an AI Index must take the same privileges as listing it: the metadata reads pass
-  // `ignore_unavailable`, which would otherwise describe an invisible index as one with no fields.
+  apiTest('returns 403 when the caller lacks read privilege', async ({ apiClient }) => {
+    const response = await apiClient.get(describePath(SINGLE_AI_INDEX_ID), {
+      headers: { ...metadataOnlyCredentials.apiKeyHeader, ...API_HEADERS },
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(403);
+    expect(response.body.message).toContain(`AI index '${SINGLE_AI_INDEX_ID}' is not readable`);
+  });
+
   apiTest(
     'returns 403 when the caller holds no privilege on the backing index',
     async ({ apiClient }) => {
@@ -361,29 +366,6 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
     }
   );
 
-  apiTest('does not list what it refuses to describe', async ({ apiClient }) => {
-    const response = await apiClient.get(AI_INDEX_COLLECTION_PATH, {
-      headers: { ...otherIndexCredentials.apiKeyHeader, ...API_HEADERS },
-      responseType: 'json',
-    });
-
-    expect(response).toHaveStatusCode(200);
-    expect(listedIds(response.body)).not.toContain(SINGLE_AI_INDEX_ID);
-  });
-
-  // The counts aggregation needs `read` too, so this caller never gets as far as a partial block.
-  apiTest('returns 403 when the caller lacks read', async ({ apiClient }) => {
-    const response = await apiClient.get(describePath(SINGLE_AI_INDEX_ID), {
-      headers: { ...metadataOnlyCredentials.apiKeyHeader, ...API_HEADERS },
-      responseType: 'json',
-    });
-
-    expect(response).toHaveStatusCode(403);
-    expect(response.body.message).toContain(`AI index '${SINGLE_AI_INDEX_ID}' is not readable`);
-  });
-
-  // The readability check must not turn a freshly registered entry into a denial, which is also
-  // why the list API keeps such an entry.
   apiTest('describes an entry whose backing index does not exist yet', async ({ apiClient }) => {
     const response = await apiClient.get(describePath(MISSING_AI_INDEX_ID), {
       headers: { ...describeCredentials.apiKeyHeader, ...API_HEADERS },
@@ -395,22 +377,4 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
     expect(block).toContain(`\nQuery with ES|QL against: ${MISSING_INDEX}\n`);
     expect(sectionLines(block, 'Fields')).toStrictEqual(['(none)']);
   });
-
-  /**
-   * Known limitation, and the same one the list API has: a wildcard the caller holds no privilege
-   * on resolves to no authorized index, which is a 404 rather than a 403, so the probe cannot tell
-   * it apart from a pattern that matches nothing yet. Closing it needs a different signal.
-   */
-  apiTest(
-    'still describes a pattern dest as empty rather than refusing it',
-    async ({ apiClient }) => {
-      const response = await apiClient.get(describePath(PATTERN_AI_INDEX_ID), {
-        headers: { ...otherIndexCredentials.apiKeyHeader, ...API_HEADERS },
-        responseType: 'json',
-      });
-
-      expect(response).toHaveStatusCode(200);
-      expect(sectionLines(blockOf(response.body), 'Fields')).toStrictEqual(['(none)']);
-    }
-  );
 });

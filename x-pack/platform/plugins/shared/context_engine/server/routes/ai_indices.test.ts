@@ -839,9 +839,7 @@ describe('ai indices routes', () => {
     });
 
     it('returns 403 when the caller cannot read the backing indices', async () => {
-      readService.describe.mockRejectedValue(
-        new AiIndexNotReadableError('a', 'unauthorized for user')
-      );
+      readService.describe.mockRejectedValue(new AiIndexNotReadableError('a'));
 
       await callRoute('GET', aiIndexDescribePath, { params: { aiIndexId: 'a' } });
 

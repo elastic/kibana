@@ -7,7 +7,6 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { AiIndexHttpItem, KiTypeCount } from '../../common/http_api/ai_indices';
-import { assertReadableAiIndex } from './assert_readable_ai_index';
 import { describeAiIndexAggregations } from './describe_aggregations';
 import { describeAiIndexFields } from './describe_fields';
 import { buildExampleQueries } from './example_queries';
@@ -75,16 +74,13 @@ const renderSections = (sections: string[][]): string =>
 
 /**
  * Free-form context block for an agent: registry entry, what backing indices expose, and how to
- * query them. Read as current user; counts are space-filtered. Throws `AiIndexNotReadableError`
- * when the caller cannot read the backing index.
+ * query them. Read as current user; counts are space-filtered.
  */
 export const describeAiIndex = async ({
   esClient,
   aiIndex,
   spaceId,
 }: DescribeAiIndexParams): Promise<string> => {
-  await assertReadableAiIndex({ esClient, aiIndex });
-
   const target = aiIndex.dest.value;
   const { fields, allFields, semanticFields, omittedFieldCount } = await describeAiIndexFields({
     esClient,

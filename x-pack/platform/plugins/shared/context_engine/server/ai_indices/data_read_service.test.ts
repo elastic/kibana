@@ -12,7 +12,7 @@ import type { AiIndexHttpItem } from '../../common/http_api/ai_indices';
 import { buildAiIndexSpaceFilter } from '../../common/space_filter';
 import { AiIndexDataReadService } from './data_read_service';
 import { describeAiIndex } from './describe';
-import { AiIndexNotFoundError } from './errors';
+import { AiIndexNotFoundError, AiIndexNotReadableError } from './errors';
 import { filterReadableAiIndices } from './filter_readable_ai_indices';
 
 jest.mock('./describe');
@@ -95,6 +95,10 @@ describe('AiIndexDataReadService', () => {
   });
 
   describe('describe', () => {
+    beforeEach(() => {
+      filterReadableAiIndicesMock.mockResolvedValue([aiIndex]);
+    });
+
     it('resolves the registry entry, describes it as the current user, and audit-logs success', async () => {
       aiIndexService.get.mockResolvedValue(aiIndex);
       describeAiIndexMock.mockResolvedValue(contextBlock);
@@ -103,6 +107,11 @@ describe('AiIndexDataReadService', () => {
 
       expect(result).toEqual({ response: contextBlock });
       expect(aiIndexService.get).toHaveBeenCalledWith('support', 'marketing');
+      expect(filterReadableAiIndicesMock).toHaveBeenCalledWith({
+        esClient,
+        aiIndices: [aiIndex],
+        logger,
+      });
       expect(describeAiIndexMock).toHaveBeenCalledWith({ esClient, aiIndex, spaceId: 'marketing' });
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -124,6 +133,21 @@ describe('AiIndexDataReadService', () => {
           message: 'Failed attempt to describe AI index [id=missing]',
           event: expect.objectContaining({ action: 'ai_index_describe', outcome: 'failure' }),
           error: { code: 'AiIndexNotFoundError', message: "AI index 'missing' not found" },
+        })
+      );
+    });
+
+    it('does not describe an entry the caller cannot read', async () => {
+      aiIndexService.get.mockResolvedValue(aiIndex);
+      filterReadableAiIndicesMock.mockResolvedValue([]);
+
+      await expect(service.describe('support')).rejects.toThrow(AiIndexNotReadableError);
+
+      expect(describeAiIndexMock).not.toHaveBeenCalled();
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({ action: 'ai_index_describe', outcome: 'failure' }),
+          error: expect.objectContaining({ code: 'AiIndexNotReadableError' }),
         })
       );
     });
