@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
 import type { PublicTriggerDefinition } from '@kbn/workflows-extensions/public';
+import { getConnectorTypeIdForTriggerEventId } from '../../common/triggers/connector_event_triggers';
 import { registerConnectorEventTriggersPublic } from './register_connector_event_triggers';
 
 describe('registerConnectorEventTriggersPublic', () => {
@@ -42,5 +44,27 @@ describe('registerConnectorEventTriggersPublic', () => {
         icon: expect.anything(),
       })
     );
+  });
+
+  it('uses each connector icon for the event triggers registered from that connector', () => {
+    const registerTriggerDefinition = jest.fn();
+
+    registerConnectorEventTriggersPublic({
+      inboundEventsEnabled: true,
+      registerTriggerDefinition,
+    });
+
+    const triggersWithBrandIcon = registerTriggerDefinition.mock.calls.flatMap(
+      ([definition]: [PublicTriggerDefinition]) => {
+        const connectorTypeId = getConnectorTypeIdForTriggerEventId(definition.id);
+        const brandIcon = connectorTypeId ? ConnectorIconsMap.get(connectorTypeId) : undefined;
+        return brandIcon ? [{ definition, brandIcon }] : [];
+      }
+    );
+
+    expect(triggersWithBrandIcon.length).toBeGreaterThan(0);
+    for (const { definition, brandIcon } of triggersWithBrandIcon) {
+      expect(definition.icon).toBe(brandIcon);
+    }
   });
 });

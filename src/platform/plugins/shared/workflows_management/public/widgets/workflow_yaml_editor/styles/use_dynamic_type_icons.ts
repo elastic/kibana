@@ -134,6 +134,41 @@ export const predefinedStepTypes = [
 export const FALLBACK_BOLT_DATA_URL =
   'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEzIDFMOS45OTkwNSA1SDEzQzEzLjQxNTIgNSAxMy43ODcgNS4yNTY1MiAxMy45MzQ2IDUuNjQ0NTNDMTQuMDgyMSA2LjAzMjYxIDEzLjk3NDQgNi40NzEyNCAxMy42NjQxIDYuNzQ3MDdMNC42NjQwOCAxNC43NDcxQzQuMzA1ODEgMTUuMDY1NSAzLjc3MjEgMTUuMDg1NSAzLjM5MTYyIDE0Ljc5MzlDMy4wMTExNCAxNC41MDI0IDIuODkxMTEgMTMuOTgxNSAzLjEwNTQ5IDEzLjU1MjdMNS4zODE4NiA5SDMuMDAwMDJDMi42MzEyMyA5IDIuMjkyMjEgOC43OTY4NCAyLjExODE5IDguNDcxNjhDMS45NDQyOSA4LjE0NjU2IDEuOTYzNDYgNy43NTIxIDIuMTY3OTkgNy40NDUzMUw2LjQ2NDg3IDFIMTMWk0zLjAwMDAyIDhINy4wMDAwMkw0LjAwMDAyIDE0TDEzIDZIOi4wMDAwMkwxMSAySDcuMDAwMDJMMy4wMDAwMiA4WiIvPgo8L3N2Zz4=';
 
+function isValidDataUrl(url: string): boolean {
+  return url.length > 50 && url.startsWith('data:') && url.includes('base64,');
+}
+
+/**
+ * Background declarations for a custom trigger inline icon. A resolved full-color mark
+ * clears the shared bolt mask so the logo is not clipped into the bolt silhouette.
+ */
+function getTriggerInlineIconBackground({
+  iconBase64,
+  monochromeBackground,
+  boltUrl,
+  isMonochrome,
+}: {
+  iconBase64: string;
+  monochromeBackground: string;
+  boltUrl: string;
+  isMonochrome: boolean;
+}): string {
+  const hasResolvedIcon = isValidDataUrl(iconBase64);
+  const triggerIconUrl = hasResolvedIcon ? iconBase64 : boltUrl || FALLBACK_BOLT_DATA_URL;
+  if (isMonochrome && hasResolvedIcon) {
+    return monochromeBackground;
+  }
+  if (hasResolvedIcon) {
+    return `
+    background-image: url("${triggerIconUrl}") !important;
+    mask-image: none !important;
+    -webkit-mask-image: none !important;
+    background-color: transparent !important;
+  `;
+  }
+  return `background-image: url("${triggerIconUrl}") !important;`;
+}
+
 function appendStyleToEditorScope(
   style: HTMLStyleElement,
   styleId: string,
@@ -526,12 +561,6 @@ async function injectDynamicShadowIcons(
   `;
   }
 
-  const isValidDataUrl = (url: string) =>
-    typeof url === 'string' &&
-    url.length > 50 &&
-    url.startsWith('data:') &&
-    url.includes('base64,');
-
   for (const connector of connectorTypes) {
     const isTriggerConnector = 'isTrigger' in connector && connector.isTrigger;
     const isBuiltInTriggerId = TriggerTypes.includes(connector.actionTypeId as TriggerType);
@@ -586,13 +615,12 @@ async function injectDynamicShadowIcons(
       }
 
       if (isTriggerConnector) {
-        const triggerIconUrl = isValidDataUrl(iconBase64)
-          ? iconBase64
-          : boltUrl || FALLBACK_BOLT_DATA_URL;
-        const triggerBgProp =
-          isMonochromeActionType(connector.actionTypeId) && isValidDataUrl(iconBase64)
-            ? bgProp
-            : `background-image: url("${triggerIconUrl}") !important;`;
+        const triggerBgProp = getTriggerInlineIconBackground({
+          iconBase64,
+          monochromeBackground: bgProp,
+          boltUrl,
+          isMonochrome: isMonochromeActionType(connector.actionTypeId),
+        });
         cssToInject += `
   .monaco-editor .type-inline-highlight.${CUSTOM_TRIGGER_INLINE_CLASS}.${className}::after,
   ${inlineScope}.type-inline-highlight.${CUSTOM_TRIGGER_INLINE_CLASS}.${className}::after,
