@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, screen } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import type { Investigation } from '../../types';
 import { ConversationCard } from './conversation_card';
@@ -62,5 +62,42 @@ describe('ConversationCard', () => {
     expect(screen.getByRole('button', { name: investigation.title })).not.toHaveAttribute(
       'aria-current'
     );
+  });
+
+  it('ages the card by when the proposal was raised, not when it last changed', () => {
+    const createdAt = new Date(Date.now() - 26 * 60 * 1000).toISOString();
+    renderWithKibanaRenderContext(
+      <ConversationCard
+        investigation={{ ...investigation, createdAt, updatedAt: new Date().toISOString() }}
+        hasBorder={false}
+        onClickCard={jest.fn()}
+        onClickAction={jest.fn()}
+        onOpenChat={jest.fn()}
+        onClickRecommendedAction={jest.fn()}
+      />
+    );
+
+    // `updatedAt` is now, so anything reading that field would say "in 0 seconds".
+    expect(screen.getByText('26 minutes ago')).toBeInTheDocument();
+  });
+
+  it('gives the exact time on hover, since "26 minutes ago" is not auditable', async () => {
+    renderWithKibanaRenderContext(
+      <ConversationCard
+        investigation={{ ...investigation, createdAt: '2024-03-05T14:30:00.000Z' }}
+        hasBorder={false}
+        onClickCard={jest.fn()}
+        onClickAction={jest.fn()}
+        onOpenChat={jest.fn()}
+        onClickRecommendedAction={jest.fn()}
+      />
+    );
+
+    fireEvent.mouseOver(screen.getByText(/ago$/));
+
+    // Asserted loosely: the exact rendering depends on the runner's locale data and
+    // time zone, but the date it names must be the one the proposal was raised on.
+    await waitFor(() => expect(screen.getByRole('tooltip')).toHaveTextContent(/2024/));
+    expect(screen.getByRole('tooltip')).toHaveTextContent(/March/);
   });
 });

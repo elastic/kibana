@@ -71,6 +71,7 @@ export const SandboxSettingsMenu: React.FC<SandboxSettingsMenuProps> = ({
         <EuiToolTip content={SETTINGS_BUTTON_LABEL} disableScreenReaderOutput>
           <EuiButtonIcon
             iconType="gear"
+            display="base"
             size="s"
             color="text"
             aria-label={SETTINGS_BUTTON_LABEL}

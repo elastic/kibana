@@ -234,6 +234,26 @@ export const OUTPUT_TYPES_FOR_OTEL_ONLY_POLICIES: Array<ValueOf<OutputType>> = [
 
 export const OUTPUT_HEALTH_DATA_STREAM = 'logs-fleet_server.output_health-default';
 
+/**
+ * Recommended sending_queue settings for outputs pointed at the managed OTLP endpoint.
+ * Source: https://www.elastic.co/docs/reference/opentelemetry/managed-inputs/managed-otlp-endpoint#otlp-client-configuration
+ * Applied automatically at SO creation time when isManagedOtlpEndpoint() matches.
+ */
+export const MANAGED_OTLP_EXPORTER_DEFAULTS = {
+  sending_queue: {
+    enabled: true,
+    sizer: 'bytes' as const,
+    queue_size: 50_000_000,
+    block_on_overflow: true,
+    batch: {
+      flush_timeout: '1s',
+      min_size: 1_000_000,
+      max_size: 4_000_000,
+      sizer: 'bytes' as const,
+    },
+  },
+};
+
 export const LOGSTASH_API_KEY_CLUSTER_PERMISSIONS = ['monitor', 'manage_own_api_key'];
 
 export const LOGSTASH_API_KEY_INDICES_PRIVILEGES = ['auto_configure', 'create_doc'];

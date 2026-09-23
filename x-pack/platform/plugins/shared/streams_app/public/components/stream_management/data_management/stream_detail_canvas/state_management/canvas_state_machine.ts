@@ -22,13 +22,13 @@ import {
   createSourcesMachineImplementations,
   sourcesStateMachine,
 } from '../../../../streams_layout/sources/state_machines/sources_state_machine';
-import type { SourcesUnitDefinition } from '../../../../streams_layout/sources/types';
+import { getUnitSources } from '../../../../streams_layout/sources/source_models';
 import {
-  createEmptyUnitDefinition,
-  mockUnitDefinitionRepository,
-  toSourcesUnitDefinition,
-  type UnitDefinitionRepository,
-} from '../../../../streams_layout/sources/unit_definition_repository';
+  createDefaultUnit,
+  type Unit,
+  type UnitRepository,
+} from '../../../../../services/unit_repository';
+import { getFormattedError } from '../../../../../util/errors';
 import {
   CANVAS_URL_STATE_KEY,
   canvasUrlSchema,
@@ -44,9 +44,6 @@ const defaultUrlState = {
   flyoutName: null,
   flyoutTab: null,
 };
-
-const toError = (error: unknown): Error =>
-  error instanceof Error ? error : new Error('The unit definition request failed.');
 
 export const canvasStateMachine = setup({
   types: {
@@ -81,7 +78,7 @@ export const canvasStateMachine = setup({
       if (event.type !== 'unit.changed') {
         return {};
       }
-      const nextUnit = toSourcesUnitDefinition(event.unitDefinition);
+      const nextUnit = event.unitDefinition;
       return {
         nextUnit,
         savingUnit: nextUnit,
@@ -93,7 +90,7 @@ export const canvasStateMachine = setup({
     storeNextUnit: assign(({ event }) =>
       event.type === 'unit.stage'
         ? {
-            nextUnit: toSourcesUnitDefinition(event.unitDefinition),
+            nextUnit: event.unitDefinition,
             error: undefined,
           }
         : {}
@@ -135,7 +132,7 @@ export const canvasStateMachine = setup({
         event.type === 'xstate.error.actor.loadUnitDefinition' ||
         event.type === 'xstate.error.actor.validateUnitDefinition' ||
         event.type === 'xstate.error.actor.persistUnitDefinition'
-          ? toError(event.error)
+          ? getFormattedError(event.error)
           : undefined,
     }),
     rollbackFailedSourceSave: assign(({ context }) =>
@@ -184,7 +181,7 @@ export const canvasStateMachine = setup({
           message:
             event.type === 'xstate.error.actor.validateUnitDefinition' ||
             event.type === 'xstate.error.actor.persistUnitDefinition'
-              ? toError(event.error).message
+              ? getFormattedError(event.error).message
               : 'Unable to save the source.',
           intent: context.savingSourceIntent,
         };
@@ -421,7 +418,7 @@ export const canvasStateMachine = setup({
     },
   },
   context: ({ spawn, self }) => {
-    const unitDefinition = createEmptyUnitDefinition();
+    const unitDefinition = createDefaultUnit();
     return {
       urlState: defaultUrlState,
       unit: unitDefinition,
@@ -450,9 +447,9 @@ export function createCanvasMachineImplementations({
   urlStateStorageContainer,
   apiKeyGenerationDeps,
   loadSourceEnvironment,
-  loadUnitDefinition = mockUnitDefinitionRepository.load,
+  loadUnitDefinition,
   validateUnitDefinition = validateCanvasUnitDefinition,
-  persistUnitDefinition = mockUnitDefinitionRepository.persist,
+  persistUnitDefinition,
 }: CanvasStateServiceDeps): MachineImplementationsFrom<typeof canvasStateMachine> {
   return {
     actors: {
@@ -490,13 +487,13 @@ function createSourcesMachineActor({
 function createLoadUnitDefinitionActor({
   loadUnitDefinition,
 }: {
-  loadUnitDefinition: UnitDefinitionRepository['load'];
+  loadUnitDefinition: UnitRepository['load'];
 }) {
   return fromPromise(async () => loadUnitDefinition());
 }
 
-async function validateCanvasUnitDefinition(unitDefinition: SourcesUnitDefinition): Promise<void> {
-  const sourceIds = unitDefinition.sources.map(({ id }) => id);
+async function validateCanvasUnitDefinition(unitDefinition: Unit): Promise<void> {
+  const sourceIds = getUnitSources(unitDefinition).map(({ id }) => id);
   if (new Set(sourceIds).size !== sourceIds.length) {
     throw new Error(
       i18n.translate('xpack.streams.streamDetailCanvas.duplicateSourceIdsErrorMessage', {
@@ -511,22 +508,18 @@ function createValidateUnitDefinitionActor({
 }: {
   validateUnitDefinition: NonNullable<CanvasStateServiceDeps['validateUnitDefinition']>;
 }) {
-  return fromPromise(async ({ input }: { input: SourcesUnitDefinition }) =>
-    validateUnitDefinition(input)
-  );
+  return fromPromise(async ({ input }: { input: Unit }) => validateUnitDefinition(input));
 }
 
 function createPersistUnitDefinitionActor({
   persistUnitDefinition,
 }: {
-  persistUnitDefinition: UnitDefinitionRepository['persist'];
+  persistUnitDefinition: UnitRepository['persist'];
 }) {
-  return fromPromise(
-    async ({ input }: { input: { unitDefinition: SourcesUnitDefinition; sourceId?: string } }) => ({
-      unitDefinition: await persistUnitDefinition(input.unitDefinition),
-      sourceId: input.sourceId,
-    })
-  );
+  return fromPromise(async ({ input }: { input: { unitDefinition: Unit; sourceId?: string } }) => ({
+    unitDefinition: await persistUnitDefinition(input.unitDefinition),
+    sourceId: input.sourceId,
+  }));
 }
 
 function createNotifyUnitFailureAction({ core }: Pick<CanvasStateServiceDeps, 'core'>) {
@@ -536,7 +529,7 @@ function createNotifyUnitFailureAction({ core }: Pick<CanvasStateServiceDeps, 'c
       event.type === 'xstate.error.actor.validateUnitDefinition' ||
       event.type === 'xstate.error.actor.persistUnitDefinition'
     ) {
-      core.notifications.toasts.addError(toError(event.error), {
+      core.notifications.toasts.addError(getFormattedError(event.error), {
         title: i18n.translate('xpack.streams.streamDetailCanvas.sourcesConfigurationErrorMessage', {
           defaultMessage: 'Unable to update the sources configuration',
         }),

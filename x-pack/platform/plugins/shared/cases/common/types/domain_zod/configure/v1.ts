@@ -70,6 +70,7 @@ export const ConfigurationBasicWithoutOwnerSchema = z.object({
   customFields: CustomFieldsConfigurationSchema,
   templates: TemplatesConfigurationSchema,
   observableTypes: ObservableTypesConfigurationSchema,
+  extractObservables: z.boolean(),
 });
 
 export const CasesConfigureBasicSchema = ConfigurationBasicWithoutOwnerSchema.extend({

@@ -62,6 +62,26 @@ describe('MonitorAddPage', () => {
     expect(getByLabelText(/Loading/)).toBeInTheDocument();
   });
 
+  it('does not redirect to getting started while locations are still loading', async () => {
+    const history = createMemoryHistory({
+      initialEntries: ['/add-monitor'],
+    });
+
+    const { getByLabelText } = render(<MonitorAddPage />, {
+      history,
+      state: {
+        serviceLocations: {
+          locations: [],
+          locationsLoaded: true,
+          loading: true,
+        },
+      },
+    });
+
+    expect(history.location.pathname).toBe('/add-monitor');
+    expect(getByLabelText(/Loading/)).toBeInTheDocument();
+  });
+
   it('redirects to getting started page when no locations are available', async () => {
     const useCloneMonitorSpy = jest
       .spyOn(useCloneMonitorModule, 'useCloneMonitor')

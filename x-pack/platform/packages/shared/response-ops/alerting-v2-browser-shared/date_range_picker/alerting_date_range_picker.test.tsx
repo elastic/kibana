@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { BehaviorSubject, of } from 'rxjs';
 import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -71,21 +70,9 @@ describe('AlertingDateRangePicker', () => {
     mockOnChange.mockClear();
     useNewDateRangePickerFlag = true;
     (data.query.timefilter.history.get as jest.Mock).mockReturnValue([]);
-    (core.featureFlags.getBooleanValue as jest.Mock).mockImplementation(
-      (key: string, fallback: boolean) => {
-        if (key === DATE_RANGE_PICKER_FEATURE_FLAG) {
-          return useNewDateRangePickerFlag;
-        }
-        return fallback;
-      }
-    );
-    (core.featureFlags.getBooleanValue$ as jest.Mock).mockImplementation(
-      (key: string, fallback: boolean) => {
-        if (key === DATE_RANGE_PICKER_FEATURE_FLAG) {
-          return new BehaviorSubject(useNewDateRangePickerFlag);
-        }
-        return of(fallback);
-      }
+    (core.featureFlags.useBooleanValue as jest.Mock).mockImplementation(
+      (key: string, fallback: boolean) =>
+        key === DATE_RANGE_PICKER_FEATURE_FLAG ? useNewDateRangePickerFlag : fallback
     );
   });
 

@@ -32,7 +32,7 @@ import { ConfirmDeployAgentPolicyModal } from './confirmation_modal';
 import { useAgentPolicies } from '../../agent_policies';
 import { useCreatePack } from '../use_create_pack';
 import { useUpdatePack } from '../use_update_pack';
-import { convertPackQueriesToSO, convertSOQueriesToPack } from './utils';
+import { convertPackQueriesToSO, convertSOQueriesToPack, storedQueryVersion } from './utils';
 import { deserializeSchedule, serializeSchedule } from './schedule_serializer';
 import { ScheduleSection } from '../../components/schedule_section';
 import { validateScheduleFormData } from '../../components/schedule_section/validation';
@@ -47,11 +47,19 @@ import { DescriptionField } from './description_field';
 import type { PackQueryFormData } from '../queries/use_pack_query_form';
 import { PackTypeSelectable } from './shards/pack_type_selectable';
 import { overflowCss } from '../utils';
+import { PackVersionField } from './pack_version_field';
+import { PackResultTypeField } from './pack_result_type_field';
+import { PackPlatformField } from './pack_platform_field';
+import { PackMigrationAdvisory } from './pack_migration_advisory';
+import { mapWireToResultType, type ResultType } from '../../../common/result_type';
 
-type PackFormData = Omit<PackItem, 'id' | 'queries'> & {
+type PackFormData = Omit<PackItem, 'id' | 'queries' | 'min_osquery_version' | 'result_type'> & {
   queries: PackQueryFormData[];
   pack_type: string;
   schedule?: ScheduleFormData;
+  /** V5: pack-level execution defaults. Stored as a 0-or-1 element array to match combo-box state. */
+  min_osquery_version?: string[];
+  result_type?: ResultType | '';
 };
 
 const euiAccordionCss = ({ euiTheme }: UseEuiTheme) => ({
@@ -132,15 +140,20 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     [isRruleSchedulingEnabled, defaultValue]
   );
 
-  const deserializer = (payload: PackItem) => {
+  const deserializer = (payload: PackItem): Omit<PackFormData, 'pack_type'> => {
     const defaultPolicyIds = filter(
       payload.policy_ids,
       (policyId) => payload.shards?.[policyId] == null
     );
 
-    // Strip rrule-era fields before spreading so a flag-off form never
-    // carries them into state or re-emits them on submit.
+    // Strip identity, query, and V5 fields whose form shapes differ from the
+    // wire, plus rrule-era fields when the flag is off so a flag-off form
+    // never carries them into state or re-emits them on submit.
     const {
+      id: _id,
+      queries: _queries,
+      min_osquery_version: payloadMinOsqueryVersion,
+      result_type: payloadResultType,
       schedule_type: payloadScheduleType,
       interval: payloadInterval,
       rrule_schedule: payloadRruleSchedule,
@@ -148,11 +161,21 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     } = payload;
 
     return {
-      ...(isRruleSchedulingEnabled ? payload : legacyPayload),
+      ...(isRruleSchedulingEnabled
+        ? {
+            ...legacyPayload,
+            schedule_type: payloadScheduleType,
+            interval: payloadInterval,
+            rrule_schedule: payloadRruleSchedule,
+          }
+        : legacyPayload),
       policy_ids: defaultPolicyIds ?? [],
       queries: convertPackQueriesToSO(payload.queries),
       shards: omit(payload.shards, '*') ?? {},
       schedule: deserializedSchedule,
+      min_osquery_version: payloadMinOsqueryVersion ? [payloadMinOsqueryVersion] : [],
+      result_type: payloadResultType ?? '',
+      platform: payload.platform ?? '',
     };
   };
 
@@ -169,6 +192,19 @@ const PackFormComponent: React.FC<PackFormProps> = ({
           queries: [],
           pack_type: 'policy',
           schedule: deserializedSchedule,
+          min_osquery_version: [],
+          // A brand-new pack starts with *no* pack-level result type.
+          //
+          // Persisting 'snapshot' by default made `packHasDefaults` true for
+          // every new pack, so every query flyout rendered the "Override pack
+          // defaults" toggle in the OFF position with all three controls
+          // disabled — a user wanting a differential query had to discover and
+          // flip a toggle to set a field that was previously plain. Pack-level
+          // defaults are opt-in: the toggle now appears only once a curator has
+          // actually set one. ('' is the field's first-class "No pack default"
+          // option.)
+          result_type: '' as const,
+          platform: '',
         },
   });
 
@@ -287,6 +323,9 @@ const PackFormComponent: React.FC<PackFormProps> = ({
         schedule_type: _scheduleType,
         interval: _interval,
         rrule_schedule: _rruleSchedule,
+        min_osquery_version: minOsqueryVersionArr,
+        result_type: resultTypeValue,
+        platform: platformValue,
         ...restPayload
       }: PackFormData) => {
         const mappedShards = !isEmpty(shards)
@@ -310,6 +349,25 @@ const PackFormComponent: React.FC<PackFormProps> = ({
             ? serializeSchedule(scheduleFormState)
             : {};
 
+        // V5: emit pack-level execution defaults.
+        //
+        // The update route reads `undefined` as "not in the request — preserve
+        // existing" and `null` as "explicit clear". Omitting an emptied field
+        // made pack defaults impossible to remove: the server kept the old
+        // value and it reappeared on reload.
+        //
+        // `null` is emitted only for a field that *was* stored and is now
+        // empty — a real clear. A field that was never set stays omitted, so
+        // editing a legacy pack does not write nulls for defaults it never had.
+        const clearOf = (stored: string | undefined) => (editMode && stored ? null : undefined);
+        const minOsqueryVersion =
+          Array.isArray(minOsqueryVersionArr) && minOsqueryVersionArr.length > 0
+            ? minOsqueryVersionArr[0]
+            : clearOf(defaultValue?.min_osquery_version);
+        const resultType = resultTypeValue || clearOf(defaultValue?.result_type);
+        // Empty combo-box selection means "no pack default", not "clear to empty".
+        const platform = platformValue || clearOf(defaultValue?.platform);
+
         return {
           ...restPayload,
           policy_ids: policies ?? [],
@@ -317,14 +375,21 @@ const PackFormComponent: React.FC<PackFormProps> = ({
           queries: convertSOQueriesToPack(payloadQueries, { includeId: editMode }),
           shards: getShards() ?? {},
           ...scheduleFields,
+          // V5: omit when `undefined` (preserve existing); emit `null` to clear.
+          ...(minOsqueryVersion !== undefined ? { min_osquery_version: minOsqueryVersion } : {}),
+          ...(resultType !== undefined ? { result_type: resultType } : {}),
+          ...(platform !== undefined ? { platform } : {}),
         };
       };
 
       try {
         if (editMode && defaultValue?.saved_object_id) {
-          await updateAsync({ id: defaultValue?.saved_object_id, ...serializer(values) });
+          await updateAsync({
+            id: defaultValue?.saved_object_id,
+            ...serializer(values),
+          } as Parameters<typeof updateAsync>[0]);
         } else {
-          await createAsync(serializer(values));
+          await createAsync(serializer(values) as Parameters<typeof createAsync>[0]);
         }
         // eslint-disable-next-line no-empty
       } catch (e) {}
@@ -332,6 +397,9 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     [
       createAsync,
       defaultValue?.saved_object_id,
+      defaultValue?.min_osquery_version,
+      defaultValue?.result_type,
+      defaultValue?.platform,
       dirtyFields.schedule,
       editMode,
       getShards,
@@ -389,6 +457,43 @@ const PackFormComponent: React.FC<PackFormProps> = ({
   // Pack content (name, description, queries) is immutable for both read-only
   // (readPacks-only) users and prebuilt Elastic packs.
   const isContentDisabled = isReadOnly || isPrebuilt;
+
+  // V5: show migration advisory when editing a legacy pack whose per-query
+  // execution values would be worth reviewing before a pack-level default is
+  // introduced.
+  const showMigrationAdvisory = useMemo(() => {
+    if (!editMode || !defaultValue) return false;
+    const queryList = Object.values(defaultValue.queries ?? {});
+    if (queryList.length === 0) return false;
+
+    // Non-uniform per-query version (needs at least two queries to differ).
+    const versions = new Set(queryList.map((q) => storedQueryVersion(q.version)));
+    if (versions.size > 1) return true;
+
+    // Per-query result type. Canonical `result_type` takes precedence (an
+    // API-created or previously-overridden query may carry it without any legacy
+    // booleans). Fall back to the wire-boolean pair for pre-V5 queries.
+    const resultTypes = new Set(
+      queryList.map(
+        (q) =>
+          q.result_type ??
+          mapWireToResultType({ snapshot: q.snapshot, removed: q.removed }) ??
+          'snapshot'
+      )
+    );
+
+    // Non-uniform values always warrant a heads-up.
+    if (resultTypes.size > 1) return true;
+
+    // A *uniformly* non-snapshot legacy pack is the case most at risk: setting
+    // any pack-level result type here changes nothing about how these queries
+    // run today, but it is the pack a curator is most likely to "tidy up" by
+    // picking Snapshot — so surface the advisory rather than staying silent
+    // because the values happen to agree.
+    if (!defaultValue.result_type && !resultTypes.has('snapshot')) return true;
+
+    return false;
+  }, [editMode, defaultValue]);
   const euiFieldProps = useMemo(() => ({ isDisabled: isContentDisabled }), [isContentDisabled]);
   // Scheduled agent policies / shards / Type stay editable for prebuilt packs
   // (a writePacks user may re-target them) — only a fully read-only user is
@@ -423,6 +528,9 @@ const PackFormComponent: React.FC<PackFormProps> = ({
   return (
     <>
       <FormProvider {...hooksForm}>
+        {showMigrationAdvisory && defaultValue?.saved_object_id && (
+          <PackMigrationAdvisory packId={defaultValue.saved_object_id} />
+        )}
         <EuiFlexGroup>
           <EuiFlexItem>
             <NameField euiFieldProps={euiFieldProps} />
@@ -430,9 +538,29 @@ const PackFormComponent: React.FC<PackFormProps> = ({
         </EuiFlexGroup>
         <EuiSpacer size="m" />
 
+        {/* Pack-level OS default sits between Name and Description, per the
+            Definition mock. It is a default that fans out onto queries which
+            do not set their own platform — not a pack-level gate. */}
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <PackPlatformField euiFieldProps={euiFieldProps} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="m" />
+
         <EuiFlexGroup>
           <EuiFlexItem>
             <DescriptionField euiFieldProps={euiFieldProps} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="m" />
+
+        <EuiFlexGroup alignItems="flexStart">
+          <EuiFlexItem>
+            <PackVersionField euiFieldProps={euiFieldProps} />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <PackResultTypeField euiFieldProps={euiFieldProps} />
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="m" />

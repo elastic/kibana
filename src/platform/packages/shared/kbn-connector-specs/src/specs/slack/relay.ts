@@ -23,6 +23,9 @@ const RELAY_MAX_BINDINGS_PAGE = 200;
 /** Marks results as coming from the connected bindings rather than a `conversations.list` call. */
 const RELAY_CHANNEL_SOURCE = 'relay-bindings' as const;
 
+const createChannelNotConnectedError = (channel: string): Error =>
+  new Error(`Channel ${channel} is not connected. Connect it in the Elastic Slack app settings.`);
+
 export interface SlackRelayConnection {
   client: RelayActionClient;
   tenantKey: string;
@@ -62,21 +65,21 @@ const getStatusCode = (error: unknown): number | undefined => {
 };
 
 /**
- * Restates the two Relay failures a rule author can act on. Anything else is a configuration or
- * upstream problem, so it passes through unchanged.
+ * Restates the Relay failures a rule author can act on. Status is enough: 403 is "not connected"
+ * whether the name was unbound or the walk ran out, 409 is uninstalled, 429 is throttled.
  */
 function toUserFacingError(error: unknown, channel?: string): unknown {
   switch (getStatusCode(error)) {
     case 403:
-      return new Error(
-        channel
-          ? `Channel ${channel} is not connected. Connect it in the Elastic Slack app settings, then try again.`
-          : 'This connector is not allowed to read the connected channels. Reconnect the Elastic Slack app, then try again.'
-      );
+      return channel
+        ? createChannelNotConnectedError(channel)
+        : new Error('Not allowed to read the connected channels. Reconnect the Elastic Slack app.');
     case 409:
       return new Error(
-        'The Elastic Slack app is no longer installed in this workspace. Reconnect it, then try again.'
+        'The Elastic Slack app is no longer installed in this workspace. Reconnect it.'
       );
+    case 429:
+      return new Error('Slack rate-limited this request. Try again shortly.');
     default:
       return error;
   }
@@ -84,7 +87,7 @@ function toUserFacingError(error: unknown, channel?: string): unknown {
 
 /** Posts through the Relay, returning the timestamp as `ts` so callers can thread on it as usual. */
 export async function relaySendMessage(
-  { client, tenantKey }: SlackRelayConnection,
+  connection: SlackRelayConnection,
   ctx: ActionContext,
   input: SlackSendMessageInput
 ): Promise<{ ok: true; channel: string; ts: string }> {
@@ -94,20 +97,25 @@ export async function relaySendMessage(
     );
   }
 
-  ctx.log.debug(`Slack sendMessage request through relay: channel=${input.channel}`);
+  const channel = input.channel.trim();
+  if (channel.length === 0 || channel === '#') {
+    throw new Error('Channel is required.');
+  }
+
+  ctx.log.debug(`Slack sendMessage request through relay: channel=${channel}`);
 
   try {
-    const { ref } = await client.trigger({
-      tenantKey,
-      channel: input.channel,
+    const { ref, channel: resolvedChannel } = await connection.client.trigger({
+      tenantKey: connection.tenantKey,
+      channel,
       message: input.text,
       ...(input.threadTs ? { threadTs: input.threadTs } : {}),
     });
 
-    return { ok: true, channel: input.channel, ts: ref };
+    return { ok: true, channel: resolvedChannel, ts: ref };
   } catch (error) {
     ctx.log.error(`Slack sendMessage through relay failed: ${(error as Error).message}`);
-    throw toUserFacingError(error, input.channel);
+    throw toUserFacingError(error, channel);
   }
 }
 
@@ -193,7 +201,7 @@ export async function relayResolveChannelId(
   let pagesFetched = 0;
 
   while (pagesFetched < input.maxPages) {
-    ctx.log.debug(`Slack resolveChannelId scan through relay (page ${pagesFetched + 1})`);
+    ctx.log.debug(`Slack connected-channel scan through relay (page ${pagesFetched + 1})`);
     const page = await fetchBindingsPage(connection, ctx, { cursor, limit: input.limit });
 
     const found = toChannels(page.bindings).find(({ name }) => {
@@ -206,7 +214,7 @@ export async function relayResolveChannelId(
     if (found) {
       return {
         ok: true,
-        found: true,
+        found: true as const,
         id: found.id,
         name: found.name,
         source: RELAY_CHANNEL_SOURCE,
@@ -224,7 +232,7 @@ export async function relayResolveChannelId(
 
   return {
     ok: true,
-    found: false,
+    found: false as const,
     id: undefined,
     name: nameNorm,
     source: RELAY_CHANNEL_SOURCE,

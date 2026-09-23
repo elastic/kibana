@@ -305,6 +305,8 @@ export class WorkersService {
         : {}),
       settings,
       settingsRevision,
+      // `installed` is any document at this id, including a user workflow that is not ours.
+      workflowId: status.installed && status.status !== 'not_managed' ? status.workflowId : null,
       skills: projectSkillsFromDefinition(definition, agentLookupCallback),
     };
   }

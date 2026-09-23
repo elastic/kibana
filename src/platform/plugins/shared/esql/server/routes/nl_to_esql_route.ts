@@ -116,7 +116,7 @@ export const registerNLtoESQLRoute = (
           logger,
           nlQuery: nlInstruction,
           additionalContext,
-          executeQuery: false,
+          execute: 'none',
           includeDatasets,
         });
 

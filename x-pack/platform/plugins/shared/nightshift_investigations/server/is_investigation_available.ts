@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { FeatureFlagsStart, KibanaRequest, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
+import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import { SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID } from '@kbn/significant-events-schema';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
@@ -17,6 +18,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 export const isInvestigationAvailable = async ({
   request,
+  featureFlags,
   agentBuilder,
   logger,
   searchInferenceEndpoints,
@@ -26,6 +28,7 @@ export const isInvestigationAvailable = async ({
   workflowsManagement,
 }: {
   request: KibanaRequest;
+  featureFlags: FeatureFlagsStart;
   agentBuilder?: AgentBuilderPluginStart;
   logger: Logger;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
@@ -34,6 +37,11 @@ export const isInvestigationAvailable = async ({
   workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
   workflowsManagement?: WorkflowsServerPluginSetup;
 }): Promise<boolean> => {
+  const isFlagEnabled = await featureFlags.getBooleanValue(NIGHTSHIFT_ENABLED_FLAG, false);
+  if (!isFlagEnabled) {
+    return false;
+  }
+
   if (!agentBuilder || !searchInferenceEndpoints || !workflowsExtensions || !workflowsManagement) {
     return false;
   }

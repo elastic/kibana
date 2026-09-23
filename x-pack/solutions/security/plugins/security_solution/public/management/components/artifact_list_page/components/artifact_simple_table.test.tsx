@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent } from '@testing-library/react';
+import { fireEvent, waitFor } from '@testing-library/react';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { Pagination } from '@elastic/eui';
 import {
@@ -18,9 +18,14 @@ import { useUserPrivileges as _useUserPrivileges } from '../../../../common/comp
 import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint/service/authz/mocks';
 import { artifactListPageLabels } from '../translations';
 import { ArtifactSimpleTable, type ArtifactSimpleTableProps } from './artifact_simple_table';
+import { TrustedAppsApiClient } from '../../../pages/trusted_apps/service/api_client';
 import { MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../../common/constants';
-import { GLOBAL_ARTIFACT_TAG } from '../../../../../common/endpoint/service/artifacts';
+import {
+  DISABLED_ARTIFACT_TAG,
+  GLOBAL_ARTIFACT_TAG,
+} from '../../../../../common/endpoint/service/artifacts';
 import { buildPerPolicyTag } from '../../../../../common/endpoint/service/artifacts/utils';
+import { NO_PRIVILEGE_FOR_MANAGEMENT_OF_GLOBAL_ARTIFACT_MESSAGE } from '../../../common/translations';
 import type { MenuItemPropsByPolicyId } from '../../artifact_entry_card';
 import { useArtifactAssignedPolicies as _useArtifactAssignedPolicies } from '../hooks/use_artifact_assigned_policies';
 
@@ -73,6 +78,7 @@ describe('ArtifactSimpleTable', () => {
       onChange,
       onAction,
       labels: artifactListPageLabels,
+      apiClient: new TrustedAppsApiClient(mockedContext.coreStart.http),
       sortableFields: ['name', 'updated_by', 'updated_at'],
       'data-test-subj': 'testTable',
     };
@@ -129,6 +135,54 @@ describe('ArtifactSimpleTable', () => {
     expect(renderResult.getByTestId('testTable-columnUpdatedAt')).toHaveTextContent(
       /Dec 5, 2025 @ 12:51:33/
     );
+  });
+
+  it('does not render the enabled column by default', () => {
+    render();
+
+    expect(renderResult.queryByTestId('testTable-columnEnabled')).not.toBeInTheDocument();
+  });
+
+  it('renders the enabled column after last updated when showEnabledColumn is true', () => {
+    render({ showEnabledColumn: true });
+
+    const columns = renderResult.getAllByRole('columnheader');
+    expect(columns.map((column) => column.textContent)).toEqual([
+      'Name',
+      'Policy assignment',
+      'Operating systems',
+      'Updated by',
+      'Last updated',
+      'Enabled',
+      'Actions',
+    ]);
+  });
+
+  it('renders the enabled switch on when the artifact has no disabled tag', () => {
+    render({
+      showEnabledColumn: true,
+      items: [generator.generate({ ...item, tags: [GLOBAL_ARTIFACT_TAG] })],
+    });
+
+    expect(renderResult.getByTestId('testTable-columnEnabled')).toBeChecked();
+  });
+
+  it('renders the enabled switch off when the artifact has the disabled tag', () => {
+    render({
+      showEnabledColumn: true,
+      items: [generator.generate({ ...item, tags: [GLOBAL_ARTIFACT_TAG, DISABLED_ARTIFACT_TAG] })],
+    });
+
+    expect(renderResult.getByTestId('testTable-columnEnabled')).not.toBeChecked();
+  });
+
+  it('disables the enabled switch when edit is not allowed', () => {
+    render({
+      showEnabledColumn: true,
+      allowCardEditAction: false,
+    });
+
+    expect(renderResult.getByTestId('testTable-columnEnabled')).toBeDisabled();
   });
 
   it('shows a loading state', () => {
@@ -198,6 +252,25 @@ describe('ArtifactSimpleTable', () => {
       'Updated by',
       'Last updated',
     ]);
+  });
+
+  it('shows the missing global privilege hint on hover when the actions menu is disabled', async () => {
+    useUserPrivilegesMock.mockReturnValue({
+      endpointPrivileges: getEndpointAuthzInitialStateMock({ canManageGlobalArtifacts: false }),
+    });
+    render({
+      items: [generator.generate({ ...item, tags: [GLOBAL_ARTIFACT_TAG] })],
+    });
+
+    fireEvent.mouseOver(
+      renderResult.getByTestId('testTable-rowActions-button').parentElement as HTMLElement
+    );
+
+    await waitFor(() => {
+      expect(renderResult.getByRole('tooltip')).toHaveTextContent(
+        NO_PRIVILEGE_FOR_MANAGEMENT_OF_GLOBAL_ARTIFACT_MESSAGE
+      );
+    });
   });
 
   it('invokes onChange when pagination changes', () => {

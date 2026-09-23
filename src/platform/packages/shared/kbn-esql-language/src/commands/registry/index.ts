@@ -44,6 +44,7 @@ import { mmrCommand } from './mmr';
 import { metricsInfoCommand } from './metrics_info';
 import { tsInfoCommand } from './ts_info';
 import { highlightCommand } from './highlight';
+import { denseVectorCommand } from './dense_vector';
 
 const esqlCommandRegistry = new CommandRegistry();
 
@@ -83,6 +84,7 @@ const baseCommands = [
   metricsInfoCommand,
   tsInfoCommand,
   highlightCommand,
+  denseVectorCommand,
 ];
 
 baseCommands.forEach((command) => {

@@ -130,6 +130,7 @@ export function Table<T extends UserContentCommonSchema>({
       <EuiButton
         color="danger"
         iconType="trash"
+        size="s"
         onClick={() => dispatch({ type: 'showConfirmDeleteItemsModal' })}
         data-test-subj="deleteSelectedItems"
       >
@@ -267,6 +268,7 @@ export function Table<T extends UserContentCommonSchema>({
     const showHint = !!searchQuery.error && searchQuery.error.containsForbiddenChars;
     return {
       onChange: onTableSearchChange,
+      compressed: true,
       toolsLeft: renderToolsLeft(),
       toolsRight: renderCreateButton(),
       query: searchQuery.query ?? undefined,

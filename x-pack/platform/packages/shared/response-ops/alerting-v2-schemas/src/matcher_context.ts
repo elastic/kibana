@@ -5,23 +5,15 @@
  * 2.0.
  */
 
-import type { z } from '@kbn/zod/v4';
 import type { AlertEpisodeStatus } from './alert_action_schema';
-import type { alertEventSeveritySchema } from './create_alert_event_data_schema';
-
-export interface MatcherContextRule {
-  id: string;
-  name: string;
-  tags: string[];
-}
+import type { AlertEventSeverity } from './severity';
 
 export interface MatcherContext {
   last_event_timestamp: string;
   group_hash: string;
   episode_id: string;
   episode_status: AlertEpisodeStatus;
-  severity?: z.infer<typeof alertEventSeveritySchema>;
-  rule?: MatcherContextRule;
+  severity?: AlertEventSeverity;
   data?: Record<string, unknown>;
 }
 
@@ -50,9 +42,6 @@ export const MATCHER_CONTEXT_FIELDS: MatcherContextFieldDescriptor[] = [
     description: 'Timestamp of the most recent event',
   },
   { path: 'severity', type: 'string', description: 'Episode severity when present' },
-  { path: 'rule.id', type: 'string', description: "The rule's saved object ID" },
-  { path: 'rule.name', type: 'string', description: "The rule's display name" },
-  { path: 'rule.tags', type: 'string[]', description: "The rule's tags array" },
   {
     path: 'data',
     type: 'object',

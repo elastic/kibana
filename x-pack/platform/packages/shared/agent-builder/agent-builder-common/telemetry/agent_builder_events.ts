@@ -6,6 +6,7 @@
  */
 
 import type { EventTypeOpts } from '@kbn/core/public';
+import type { ConversationOriginType } from '../chat/conversation';
 
 /**
  * Event type constants for Agent Builder telemetry events.
@@ -94,11 +95,17 @@ export interface ReportUiClickParams {
   element_kind: AgentBuilderUiClickElementKind;
 }
 
+export type TelemetryConversationOrigin = `${ConversationOriginType}`;
+
+const CONVERSATION_ORIGIN_DESCRIPTION =
+  'External system the conversation round came from (e.g. Slack). Unset when the round is not attributed to an external system, which includes rounds from the UI, from the API, and from sub-agent runs.';
+
 export interface ReportRoundCompleteParams {
   agent_id: string;
   attachments?: string[];
   conversation_id?: string;
   execution_id?: string;
+  origin?: TelemetryConversationOrigin;
   input_tokens: number;
   cached_input_tokens?: number;
   llm_calls: number;
@@ -124,6 +131,7 @@ export interface ReportRoundErrorParams {
   model_provider?: string;
   conversation_id?: string;
   execution_id?: string;
+  origin?: TelemetryConversationOrigin;
   agent_id: string;
   round_id?: string;
 }
@@ -245,6 +253,7 @@ export interface ReportToolCallSuccessParams {
   agent_id?: string;
   conversation_id?: string;
   execution_id?: string;
+  origin?: TelemetryConversationOrigin;
   model?: string;
   result_types: string[];
   duration_ms: number;
@@ -257,6 +266,7 @@ export interface ReportToolCallErrorParams {
   agent_id?: string;
   conversation_id?: string;
   execution_id?: string;
+  origin?: TelemetryConversationOrigin;
   model?: string;
   error_type: string;
   error_message: string;
@@ -921,6 +931,13 @@ const ROUND_COMPLETE_EVENT: AgentBuilderTelemetryEvent = {
         optional: true,
       },
     },
+    origin: {
+      type: 'keyword',
+      _meta: {
+        description: CONVERSATION_ORIGIN_DESCRIPTION,
+        optional: true,
+      },
+    },
     input_tokens: {
       type: 'integer',
       _meta: {
@@ -1095,6 +1112,13 @@ const ROUND_ERROR_SCHEMA: AgentBuilderTelemetryEvent['schema'] = {
       optional: true,
     },
   },
+  origin: {
+    type: 'keyword',
+    _meta: {
+      description: CONVERSATION_ORIGIN_DESCRIPTION,
+      optional: true,
+    },
+  },
   agent_id: {
     type: 'keyword',
     _meta: {
@@ -1131,6 +1155,13 @@ const TOOL_CALL_SUCCESS_EVENT: AgentBuilderTelemetryEvent = {
       type: 'keyword',
       _meta: {
         description: 'Agent execution ID',
+        optional: true,
+      },
+    },
+    origin: {
+      type: 'keyword',
+      _meta: {
+        description: CONVERSATION_ORIGIN_DESCRIPTION,
         optional: true,
       },
     },
@@ -1208,6 +1239,13 @@ const TOOL_CALL_ERROR_EVENT: AgentBuilderTelemetryEvent = {
       type: 'keyword',
       _meta: {
         description: 'Agent execution ID',
+        optional: true,
+      },
+    },
+    origin: {
+      type: 'keyword',
+      _meta: {
+        description: CONVERSATION_ORIGIN_DESCRIPTION,
         optional: true,
       },
     },

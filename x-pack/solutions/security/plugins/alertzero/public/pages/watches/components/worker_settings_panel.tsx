@@ -5,24 +5,45 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiSpacer, EuiSwitch, EuiText } from '@elastic/eui';
+import React, { useMemo } from 'react';
+import { css } from '@emotion/react';
+import {
+  EuiAccordion,
+  EuiBadge,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+  EuiSwitch,
+  EuiText,
+  EuiTitle,
+  useEuiTheme,
+} from '@elastic/eui';
 import {
   getAllowedAutonomyLevels,
   type Worker,
   type WorkerSettings,
   type WorkerSettingsWrite,
 } from '@kbn/alertzero-common';
-import { AutonomySlider } from './autonomy_slider';
+import type { CoreStart } from '@kbn/core/public';
+import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { AutonomyLevelControl } from './autonomy_level_control';
+import { getAutonomyLevelCards } from './autonomy_level_cards_data';
 import { ScheduleIntervalField } from './schedule_interval_field';
-import { SettingsSection } from './settings_section';
-import { WorkerSkillsTable } from './worker_skills_table';
+import { SettingRow } from './setting_row';
 import { getWorkerCustomSettingsComponent } from '../custom_settings/registry';
 import * as settingsI18n from '../settings_translations';
-import { workerName } from '../workers/translations';
+import { workerDescription, workerName } from '../workers/translations';
+import { workerScheduleCadenceLabel } from './worker_trigger_cadence';
 
 interface WorkerSettingsPanelProps {
   worker: Worker;
+  /** Accordion when a Watch has several Workers; a static panel when it has exactly one. */
+  isAccordion: boolean;
+  isExpanded: boolean;
+  onToggle: (workerId: string, isOpen: boolean) => void;
   enabled: boolean;
   settings: WorkerSettings;
   error?: string;
@@ -32,15 +53,22 @@ interface WorkerSettingsPanelProps {
   isSaving: boolean;
   onEnabledChange: (enabled: boolean) => void;
   onSettingsChange: (patch: WorkerSettingsWrite) => void;
+  /** Raised when this Worker's trigger control holds an amount that cannot be committed. */
+  onTriggerValidityChange?: (isValid: boolean) => void;
+  /** Bumped by the page on Discard so controls holding a flagged draft clear it. */
+  draftResetKey?: number;
 }
 
 /**
- * One Worker's settings. Every control, shared or Watch-owned, writes into the page draft; the
- * shared page decides what to render from the Worker's settings and declaration alone, so a new
- * Worker-specific field needs no change here.
+ * A single Worker's settings. The header doubles as the accordion button when a Watch has several
+ * Workers, so collapsed panels still summarise their state. Every control writes into the page
+ * draft; Save and Discard live on the page header.
  */
-export const WorkerSettingsPanel: React.FC<WorkerSettingsPanelProps> = ({
+export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
   worker,
+  isAccordion,
+  isExpanded,
+  onToggle,
   enabled,
   settings,
   error,
@@ -48,27 +76,188 @@ export const WorkerSettingsPanel: React.FC<WorkerSettingsPanelProps> = ({
   isSaving,
   onEnabledChange,
   onSettingsChange,
-}) => {
-  const CustomSettings = getWorkerCustomSettingsComponent(worker.id);
+  onTriggerValidityChange,
+  draftResetKey,
+}: WorkerSettingsPanelProps) {
+  const { euiTheme } = useEuiTheme();
+  const {
+    services: { application },
+  } = useKibana<CoreStart>();
+  const name = workerName(worker.id, worker.name);
+  const description = workerDescription(worker.id);
+  const autonomyLabel = settingsI18n.autonomyLevelName(settings.autonomy);
+  const scheduleLabel =
+    settings.scheduleInterval != null
+      ? workerScheduleCadenceLabel(settings.scheduleInterval)
+      : undefined;
   const controlsDisabled = settingsLocked || isSaving;
+  const executionsHref = worker.workflowId
+    ? application.getUrlForApp(WORKFLOWS_APP_ID, {
+        path: `/${encodeURIComponent(worker.workflowId)}?tab=executions`,
+      })
+    : undefined;
+  const CustomSettings = getWorkerCustomSettingsComponent(worker.id);
+  const autonomyIntro = getAutonomyLevelCards(worker.id)?.intro;
 
-  return (
-    <SettingsSection
-      title={workerName(worker.id, worker.name)}
-      subtitle={
-        settingsLocked
-          ? settingsI18n.WORKER_SETTINGS_UNAVAILABLE
-          : settingsI18n.WORKER_SECTION_SUBTITLE
+  const accordionHeaderStyles = useMemo(
+    () => css`
+      align-self: flex-start;
+      width: 100%;
+      min-width: 0;
+      padding: ${euiTheme.size.base};
+      text-align: left;
+    `,
+    [euiTheme]
+  );
+
+  const accordionHeaderActionStyles = useMemo(
+    () => css`
+      align-self: flex-start;
+      padding: ${euiTheme.size.base};
+    `,
+    [euiTheme]
+  );
+
+  const accordionArrowStyles = useMemo(
+    () => css`
+      align-self: flex-start;
+      margin-left: ${euiTheme.size.base};
+      margin-top: ${euiTheme.size.base};
+    `,
+    [euiTheme]
+  );
+
+  const accordionButtonStyles = useMemo(
+    () => css`
+      width: auto;
+
+      &,
+      &:hover,
+      &:focus,
+      &:hover *,
+      &:focus * {
+        text-decoration: none;
       }
-      data-test-subj={`alertZeroWatchWorkerSection-${worker.id}`}
-    >
-      <EuiSwitch
-        label={settingsI18n.ENABLED_SWITCH_LABEL}
-        checked={enabled}
-        disabled={controlsDisabled}
-        onChange={(event) => onEnabledChange(event.target.checked)}
-        data-test-subj={`alertZeroWorkerEnabledSwitch-${worker.id}`}
-      />
+    `,
+    []
+  );
+
+  const accordionBodyStyles = useMemo(
+    () => css`
+      padding: ${euiTheme.size.base};
+      /* Full-width rule under the header, mirroring the static single-Worker band. */
+      border-top: ${isExpanded ? euiTheme.border.thin : 'none'};
+    `,
+    [euiTheme, isExpanded]
+  );
+
+  const bandContentStyles = useMemo(
+    () => ({
+      description: css`
+        margin-top: calc(${euiTheme.size.xs} + 4px);
+        width: 100%;
+      `,
+    }),
+    [euiTheme]
+  );
+
+  const headerBandContent = (titleId: string, titleAs: 'span' | 'h2') => {
+    const TitleTag = titleAs;
+    return (
+      <div
+        css={css`
+          width: 100%;
+          min-width: 0;
+          text-align: left;
+        `}
+      >
+        <EuiFlexGroup
+          alignItems="center"
+          gutterSize="s"
+          responsive={false}
+          wrap={false}
+          css={css`
+            min-width: 0;
+          `}
+        >
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xs">
+              <TitleTag id={titleId} css={{ margin: 0 }}>
+                {name}
+              </TitleTag>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="hollow">{autonomyLabel}</EuiBadge>
+          </EuiFlexItem>
+          {scheduleLabel ? (
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="hollow" data-test-subj={`alertZeroWorkerScheduleBadge-${worker.id}`}>
+                {scheduleLabel}
+              </EuiBadge>
+            </EuiFlexItem>
+          ) : null}
+          {/* Carried on the band itself so a collapsed Worker still reports a failed save. */}
+          {error ? (
+            <EuiFlexItem grow={false}>
+              <EuiBadge
+                color="danger"
+                data-test-subj={`alertZeroWorkerHeaderSaveError-${worker.id}`}
+              >
+                {settingsI18n.WORKER_SETTINGS_SAVE_ERROR}
+              </EuiBadge>
+            </EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
+        {description ? (
+          <EuiText size="s" color="subdued" css={bandContentStyles.description}>
+            <p css={{ margin: 0 }}>{description}</p>
+          </EuiText>
+        ) : null}
+      </div>
+    );
+  };
+
+  const enabledSwitch = (
+    <EuiSwitch
+      label={settingsI18n.ENABLED_SWITCH_LABEL}
+      checked={enabled}
+      disabled={controlsDisabled}
+      onChange={(event) => onEnabledChange(event.target.checked)}
+      data-test-subj={`alertZeroWorkerEnabledSwitch-${worker.id}`}
+    />
+  );
+
+  const headerActions = (
+    <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap={false}>
+      {executionsHref ? (
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            size="s"
+            color="text"
+            iconType="external"
+            iconSide="right"
+            href={executionsHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={settingsI18n.viewExecutionsAriaLabel(name)}
+            data-test-subj={`alertZeroWorkerViewExecutions-${worker.id}`}
+          >
+            {settingsI18n.VIEW_EXECUTIONS}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      ) : null}
+      <EuiFlexItem grow={false}>{enabledSwitch}</EuiFlexItem>
+    </EuiFlexGroup>
+  );
+
+  const settingsBody = (
+    <>
+      {settingsLocked ? (
+        <EuiText size="s" color="subdued">
+          <p>{settingsI18n.WORKER_SETTINGS_UNAVAILABLE}</p>
+        </EuiText>
+      ) : null}
       {error ? (
         <>
           <EuiSpacer size="s" />
@@ -78,23 +267,37 @@ export const WorkerSettingsPanel: React.FC<WorkerSettingsPanelProps> = ({
         </>
       ) : null}
       <EuiSpacer size="m" />
-      <AutonomySlider
-        current={settings.autonomy}
-        levels={getAllowedAutonomyLevels(worker.id)}
-        isDisabled={controlsDisabled}
-        onChange={(autonomy) => onSettingsChange({ autonomy })}
-      />
+      <SettingRow
+        label={settingsI18n.AUTONOMY_SECTION_TITLE}
+        labelHelp={autonomyIntro}
+        data-test-subj={`alertZeroAutonomyRow-${worker.id}`}
+      >
+        <AutonomyLevelControl
+          workerId={worker.id}
+          current={settings.autonomy}
+          allowedAutonomyLevels={getAllowedAutonomyLevels(worker.id)}
+          isDisabled={controlsDisabled}
+          onChange={(autonomy) => onSettingsChange({ autonomy })}
+        />
+      </SettingRow>
       {/* Only schedule-driven Workers project an interval; its presence is the signal. */}
       {settings.scheduleInterval != null ? (
-        <>
-          <EuiSpacer size="m" />
+        <SettingRow
+          label={settingsI18n.TRIGGER_LABEL}
+          labelHelp={settingsI18n.TRIGGER_HELP_TEXT}
+          data-test-subj={`alertZeroTriggerRow-${worker.id}`}
+        >
           <ScheduleIntervalField
+            workerId={worker.id}
             current={settings.scheduleInterval}
             isDisabled={controlsDisabled}
             onChange={(scheduleInterval) => onSettingsChange({ scheduleInterval })}
+            onValidityChange={onTriggerValidityChange}
+            resetKey={draftResetKey}
           />
-        </>
+        </SettingRow>
       ) : null}
+      {/* Watch-owned settings for this Worker's `extras`; extras replaces whole-object on save. */}
       {CustomSettings ? (
         <CustomSettings
           worker={worker}
@@ -103,8 +306,83 @@ export const WorkerSettingsPanel: React.FC<WorkerSettingsPanelProps> = ({
           onExtrasChange={(extras) => onSettingsChange({ extras })}
         />
       ) : null}
-      <EuiSpacer size="m" />
-      <WorkerSkillsTable skills={worker.skills} />
-    </SettingsSection>
+    </>
   );
-};
+
+  const stopAccordionToggle = (event: React.MouseEvent | React.KeyboardEvent) => {
+    event.stopPropagation();
+  };
+
+  if (isAccordion) {
+    return (
+      <EuiPanel hasBorder hasShadow={false} paddingSize="none">
+        <EuiAccordion
+          id={`${worker.id}-settings`}
+          arrowDisplay="left"
+          paddingSize="none"
+          forceState={isExpanded ? 'open' : 'closed'}
+          onToggle={(isOpen) => onToggle(worker.id, isOpen)}
+          // `div` so the Worker name can be a real `h2` (a heading inside a `<button>` is
+          // invalid HTML). EUI keeps the arrow as the interactive control in this mode.
+          buttonElement="div"
+          buttonContentClassName="alertZeroWorkerAccordion__buttonContent"
+          buttonContent={
+            <div
+              css={accordionHeaderStyles}
+              data-test-subj={`alertZeroWorkerAccordionHeader-${worker.id}`}
+            >
+              {headerBandContent(`${worker.id}-heading`, 'h2')}
+            </div>
+          }
+          // Layout rides on EuiAccordion's props and our own nodes, not EUI's internal class
+          // names, which are not public contract.
+          buttonProps={{ css: accordionButtonStyles }}
+          arrowProps={{ css: accordionArrowStyles }}
+          extraAction={
+            <div
+              css={accordionHeaderActionStyles}
+              onClick={stopAccordionToggle}
+              onKeyDown={stopAccordionToggle}
+            >
+              {headerActions}
+            </div>
+          }
+          data-test-subj={`alertZeroWatchWorkerAccordion-${worker.id}`}
+          css={css`
+            .alertZeroWorkerAccordion__buttonContent {
+              flex: 1;
+              min-width: 0;
+              width: 100%;
+            }
+          `}
+        >
+          <div
+            css={accordionBodyStyles}
+            data-test-subj={`alertZeroWorkerSettingsBody-${worker.id}`}
+          >
+            {settingsBody}
+          </div>
+        </EuiAccordion>
+      </EuiPanel>
+    );
+  }
+
+  return (
+    <EuiPanel hasBorder hasShadow={false} paddingSize="none">
+      <div
+        css={css`
+          display: flex;
+          align-items: flex-start;
+          gap: ${euiTheme.size.m};
+          width: 100%;
+          padding: ${euiTheme.size.base};
+          border-bottom: ${euiTheme.border.thin};
+        `}
+      >
+        <div css={{ flex: 1, minWidth: 0 }}>{headerBandContent(`${worker.id}-heading`, 'h2')}</div>
+        <div css={{ flexShrink: 0 }}>{headerActions}</div>
+      </div>
+      <div css={{ padding: euiTheme.size.base }}>{settingsBody}</div>
+    </EuiPanel>
+  );
+});

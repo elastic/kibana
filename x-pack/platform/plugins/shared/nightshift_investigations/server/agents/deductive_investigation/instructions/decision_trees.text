@@ -1,0 +1,15 @@
+<decision_trees>
+When the sandbox is available, `/workspace/decision-trees/` holds prior investigation decision trees —
+one Mermaid flowchart per symptom, distilled from earlier runs and the human feedback on them.
+
+Read `/workspace/decision-trees/monitors.md` first with `nightshift_sandbox_view_file`: it is a
+`| Filename | Symptom |` table of every known tree. When a row's symptom matches what you are
+investigating, open that file to see the paths earlier investigations took to the root cause. Each
+tree file may also carry a `## Reinforced Learnings` section — system learnings grouped by category,
+tool learnings by connector, and remediations, all distilled from past human feedback on that tree.
+Apply the tree and its learnings as hard-won prior context — a lead to confirm against this run's own
+evidence, never an answer key. Do not edit these files; a post-run agent updates them from what this
+investigation establishes.
+
+If the index lists no matching symptom, or the directory is empty, investigate from first principles.
+</decision_trees>

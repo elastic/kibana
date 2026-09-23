@@ -1,9 +1,457 @@
 {
-  "sha1": "8e64fedc236411f59750695e9c94594151599ff2",
+  "sha1": "ab11681e29397db8cb07fed085a70821c6025170",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "04fc4fc86d29b75-7b12d59dc8db1da",
+      "title": "Lens form-based → ES|QL conversion query execution core: executes converted query: count of records",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
+        "line": 95,
+        "column": 7
+      }
+    },
+    {
+      "id": "04fc4fc86d29b75-41f4e305ad81f83",
+      "title": "Lens form-based → ES|QL conversion query execution core: executes converted query: average of a numeric field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
+        "line": 95,
+        "column": 7
+      }
+    },
+    {
+      "id": "04fc4fc86d29b75-601940b32c7d427",
+      "title": "Lens form-based → ES|QL conversion query execution core: executes converted query: multiple metrics",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
+        "line": 95,
+        "column": 7
+      }
+    },
+    {
+      "id": "04fc4fc86d29b75-ee1a02dad636f21",
+      "title": "Lens form-based → ES|QL conversion query execution core: executes converted query: unique count of a keyword field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
+        "line": 95,
+        "column": 7
+      }
+    },
+    {
+      "id": "04fc4fc86d29b75-f354037027dc138",
+      "title": "Lens form-based → ES|QL conversion query execution core: executes converted query: 95th percentile of a numeric field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
+        "line": 95,
+        "column": 7
+      }
+    },
+    {
+      "id": "04fc4fc86d29b75-d0c03da59a63680",
+      "title": "Lens form-based → ES|QL conversion query execution core: executes converted query: metric with KQL filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
+        "line": 95,
+        "column": 7
+      }
+    },
+    {
+      "id": "04fc4fc86d29b75-f47dd9810cf26e9",
+      "title": "Lens form-based → ES|QL conversion query execution core: executes converted query: metric with KQL filter containing escaped quotes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
+        "line": 95,
+        "column": 7
+      }
+    },
+    {
+      "id": "04fc4fc86d29b75-d1c6e5a25f5c36c",
+      "title": "Lens form-based → ES|QL conversion query execution core: executes converted query: no WHERE clause when the data view has no time field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
+        "line": 95,
+        "column": 7
+      }
+    },
+    {
+      "id": "04fc4fc86d29b75-f28e575f951a955",
+      "title": "Lens form-based → ES|QL conversion query execution core: executes converted query: preserves user-configured currency format in esAggsIdMap",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
+        "line": 95,
+        "column": 7
+      }
+    },
+    {
+      "id": "04fc4fc86d29b75-00a306681fa7937",
+      "title": "Lens form-based → ES|QL conversion query execution core: executes converted query: preserves user-configured bytes format in esAggsIdMap",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
+        "line": 95,
+        "column": 7
+      }
+    },
+    {
+      "id": "04fc4fc86d29b75-0186a19d19216d0",
+      "title": "Lens form-based → ES|QL conversion query execution date_histogram: executes converted query: date histogram (auto interval) with count",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
+        "line": 95,
+        "column": 7
+      }
+    },
+    {
+      "id": "04fc4fc86d29b75-79e3639ec863e0a",
+      "title": "Lens form-based → ES|QL conversion query execution date_histogram: executes converted query: date histogram (fixed interval) with average",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
+        "line": 95,
+        "column": 7
+      }
+    },
+    {
+      "id": "04fc4fc86d29b75-a97e6b9c7052a52",
+      "title": "Lens form-based → ES|QL conversion query execution date_histogram: executes converted query: date histogram falls back to auto when interval param is missing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
+        "line": 95,
+        "column": 7
+      }
+    },
+    {
+      "id": "04fc4fc86d29b75-e43b19bc3b64405",
+      "title": "Lens form-based → ES|QL conversion query execution date_histogram: executes converted query: date histogram (auto interval) falls back to 1 hour without a date range",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
+        "line": 95,
+        "column": 7
+      }
+    },
+    {
+      "id": "04fc4fc86d29b75-aa447e30a8c3d39",
+      "title": "Lens form-based → ES|QL conversion query execution date_histogram: executes converted query: date histogram (fixed 30m interval) with count",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
+        "line": 95,
+        "column": 7
+      }
+    },
+    {
+      "id": "04fc4fc86d29b75-b3167c222c13311",
+      "title": "Lens form-based → ES|QL conversion query execution date_histogram: executes converted query: date histogram (fixed 1d interval) with count",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
+        "line": 95,
+        "column": 7
+      }
+    },
+    {
+      "id": "04fc4fc86d29b75-201ab3af7f5f701",
+      "title": "Lens form-based → ES|QL conversion query execution top_n: executes converted query: top values ordered by metric column",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
+        "line": 95,
+        "column": 7
+      }
+    },
+    {
+      "id": "04fc4fc86d29b75-a559b7f7d513990",
+      "title": "Lens form-based → ES|QL conversion query execution top_n: executes converted query: top values ordered alphabetically",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
+        "line": 95,
+        "column": 7
+      }
+    },
+    {
+      "id": "04fc4fc86d29b75-b2e8cd29df4c56b",
+      "title": "Lens form-based → ES|QL conversion query execution top_n: executes converted query: top values sorted by metric alias when column roles are provided",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
+        "line": 95,
+        "column": 7
+      }
+    },
+    {
+      "id": "04fc4fc86d29b75-670430363a6ec35",
+      "title": "Lens form-based → ES|QL conversion query execution static_value: executes converted query: static value converts to EVAL after STATS",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
+        "line": 95,
+        "column": 7
+      }
+    },
+    {
+      "id": "04fc4fc86d29b75-b4501a718fd11d7",
+      "title": "Lens form-based → ES|QL conversion query execution static_value: executes converted query: static value without other metrics",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
+        "line": 95,
+        "column": 7
+      }
+    },
+    {
+      "id": "04fc4fc86d29b75-77f280dd3bdda45",
+      "title": "Lens form-based → ES|QL conversion query execution static_value: executes converted query: static value uses semantic role name from column roles",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
+        "line": 95,
+        "column": 7
+      }
+    },
+    {
+      "id": "04fc4fc86d29b75-ca7eb6a147dc726",
+      "title": "Lens form-based → ES|QL conversion query execution static_value: executes converted query: multiple static values use indexed names",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
+        "line": 95,
+        "column": 7
+      }
+    },
+    {
+      "id": "04fc4fc86d29b75-31e6b7751678c0e",
+      "title": "Lens form-based → ES|QL conversion query execution static_value: executes converted query: filtered max metric with column role gets semantic name and keeps label",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
+        "line": 95,
+        "column": 7
+      }
+    },
+    {
+      "id": "04fc4fc86d29b75-b93c0049b79b6dc",
+      "title": "Lens form-based → ES|QL conversion query execution static_value: executes converted query: static value with semantic role plus metric",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
+        "line": 95,
+        "column": 7
+      }
+    },
+    {
+      "id": "04fc4fc86d29b75-2c2dc95bcd25336",
+      "title": "Lens form-based → ES|QL conversion query execution duplicates: executes converted query: duplicate metric maps two source columns to one output",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
+        "line": 95,
+        "column": 7
+      }
+    },
+    {
+      "id": "04fc4fc86d29b75-8e05c68ca57cd17",
+      "title": "Lens form-based → ES|QL conversion query execution duplicates: executes converted query: duplicate metric maps three source columns to one output",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
+        "line": 95,
+        "column": 7
+      }
+    },
+    {
+      "id": "04fc4fc86d29b75-a3960d1f50deb1f",
+      "title": "Lens form-based → ES|QL conversion query execution duplicates: executes converted query: duplicate metrics preserve individual custom labels",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
+        "line": 95,
+        "column": 7
+      }
+    },
+    {
+      "id": "04fc4fc86d29b75-faeead0fb09697b",
+      "title": "Lens form-based → ES|QL conversion query execution duplicates: executes converted query: filtered metric stays separate from an identical bare metric",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
+        "line": 95,
+        "column": 7
+      }
+    },
+    {
+      "id": "04fc4fc86d29b75-37aebb2c521f561",
+      "title": "Lens form-based → ES|QL conversion query execution duplicates: executes converted query: aliased metric stays separate from an identical bare metric",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
+        "line": 95,
+        "column": 7
+      }
+    },
+    {
+      "id": "04fc4fc86d29b75-a8b681231b4cf0e",
+      "title": "Lens form-based → ES|QL conversion query execution duplicates: executes converted query: duplicate metric is emitted once alongside a bucket",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
+        "line": 95,
+        "column": 7
+      }
+    },
+    {
+      "id": "04fc4fc86d29b75-545af52c220df82",
+      "title": "Lens form-based → ES|QL conversion query execution duplicates: executes converted query: duplicate bucket maps two source columns to one output",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/esql_conversion_query_execution.spec.ts",
+        "line": 95,
+        "column": 7
+      }
+    },
     {
       "id": "b80703b0fc233d1-3c7d9567f5c8810",
       "title": "Lens metric trendline query execution executes trendline query: TS query with TBUCKET",

@@ -10,10 +10,13 @@ import { isResponseError } from '@kbn/es-errors';
 import { deleteKiStepCommonDefinition } from '../../common/step_types/delete_ki';
 import type { KiStepDependencies } from './helpers';
 import {
+  appendKiRevision,
   assertContextEngineEnabled,
   assertKiWritePrivilege,
-  findKiBackingIndex,
+  findKiRevision,
+  isKiDeleted,
   kiNotFoundError,
+  kiWriterFromContext,
   resolveAiIndex,
   withKiWriteTelemetry,
 } from './helpers';
@@ -45,19 +48,46 @@ export const getDeleteKiStepDefinition = ({
           setManaged(managed);
           const esClient = context.contextManager.getScopedEsClient();
 
-          const backingIndex = await findKiBackingIndex({
+          const revision = await findKiRevision({
             esClient,
             aiIndexId,
-            destValue: dest.value,
+            dest,
             kiId,
             abortSignal: context.abortSignal,
           });
+          if (!revision) {
+            throw kiNotFoundError(aiIndexId, kiId);
+          }
+
+          if (dest.type === 'data_stream') {
+            if (isKiDeleted(revision.source)) {
+              throw kiNotFoundError(aiIndexId, kiId);
+            }
+            const now = new Date().toISOString();
+            await appendKiRevision({
+              esClient,
+              destValue: dest.value,
+              kiId,
+              source: revision.source,
+              changes: {
+                updated_at: now,
+                governance: {
+                  provenance: {
+                    updated_by: kiWriterFromContext(context.contextManager.getContext()),
+                  },
+                  lifecycle: { status: 'deleted' },
+                },
+              },
+              abortSignal: context.abortSignal,
+            });
+            return { output: { id: kiId } };
+          }
 
           await esClient
             .delete(
               {
-                index: backingIndex,
-                id: kiId,
+                index: revision.index,
+                id: revision.documentId,
                 refresh: 'wait_for',
               },
               { signal: context.abortSignal }

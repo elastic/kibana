@@ -288,6 +288,13 @@ describe('getFieldSpecs', () => {
         {
           aggregatable: true,
           esTypes: ['keyword'],
+          name: 'ingest-agent-policies.download_source_ids',
+          searchable: true,
+          type: 'string',
+        },
+        {
+          aggregatable: true,
+          esTypes: ['keyword'],
           name: 'ingest-agent-policies.fleet_server_host_id',
           searchable: true,
           type: 'string',

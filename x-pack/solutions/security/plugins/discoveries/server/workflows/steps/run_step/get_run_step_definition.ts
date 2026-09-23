@@ -65,6 +65,7 @@ export const getRunStepDefinition = ({
           connector_id: connectorId,
           end,
           esql_query: esqlQuery,
+          feature_id: featureId,
           filter,
           // The engine does not apply the schema's zod defaults to
           // `context.input`, so the default is mirrored here (see the note above).
@@ -106,9 +107,11 @@ export const getRunStepDefinition = ({
         const effectiveConnectorId = connectorId
           ? connectorId
           : await resolveDefaultConnectorId({
+              featureId,
               inference: pluginsStart.inference,
               logger,
               request,
+              searchInferenceEndpoints: pluginsStart.searchInferenceEndpoints,
               uiSettingsClient,
             });
 

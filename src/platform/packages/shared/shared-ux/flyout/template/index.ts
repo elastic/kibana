@@ -30,4 +30,7 @@ export type {
   FlyoutFooterProps,
   FlyoutFooterPrimaryActionProps,
   FlyoutFooterSecondaryActionProps,
+  FlyoutFooterPrimaryActionMenuProps,
+  FlyoutFooterMenuPanel,
+  FlyoutFooterMenuItem,
 } from './src/types';

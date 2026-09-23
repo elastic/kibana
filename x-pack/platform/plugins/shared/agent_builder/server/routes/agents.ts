@@ -8,8 +8,10 @@
 import { schema } from '@kbn/config-schema';
 import path from 'node:path';
 import {
-  AgentAccessControlRole,
+  AGENT_ACCESS_CONTROL_MAX_ENTRIES,
+  AGENT_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH,
   AgentAccessControlMode,
+  AgentAccessControlRole,
   agentIdMaxLength,
 } from '@kbn/agent-builder-common';
 import { MAX_AI_INDEX_ID_LENGTH } from '@kbn/context-engine-plugin/common/constants';
@@ -170,34 +172,56 @@ const ACCESS_CONTROL_MODE_SCHEMA = schema.oneOf(
 );
 
 const ACCESS_CONTROL_ENTRIES_SCHEMA = schema.arrayOf(
-  schema.object({
-    type: schema.literal('user'),
-    name: schema.string({
-      minLength: 1,
-      maxLength: 1024,
-      meta: {
-        description: 'Case-sensitive Kibana username of the principal to grant access to.',
-      },
-    }),
-    role: schema.oneOf(
-      [
-        schema.literal(AgentAccessControlRole.User),
-        schema.literal(AgentAccessControlRole.Editor),
-        schema.literal(AgentAccessControlRole.Manager),
-      ],
-      {
-        meta: {
-          description:
-            'Role granted to the principal. Roles are hierarchical: `user` allows viewing, listing, reading, and running the agent; `editor` adds updating the agent and its access control; `manager` adds deleting the agent and managing access control.',
-        },
-      }
-    ),
-  }),
+  schema.object(
+    {
+      type: schema.literal('user'),
+      id: schema.maybe(
+        schema.string({
+          minLength: 1,
+          maxLength: AGENT_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH,
+          meta: {
+            availability: { stability: 'tech_preview', since: '9.6.0' },
+            description:
+              'Stable identifier of the user to grant access to (Kibana user profile uid). Preferred over `name`.',
+          },
+        })
+      ),
+      name: schema.maybe(
+        schema.string({
+          minLength: 1,
+          maxLength: AGENT_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH,
+          meta: {
+            description:
+              'Case-sensitive Kibana username of the user to grant access to. Still supported, but `id` is preferred for new grants because a username cannot distinguish same-named users across authentication realms.',
+          },
+        })
+      ),
+      role: schema.oneOf(
+        [
+          schema.literal(AgentAccessControlRole.User),
+          schema.literal(AgentAccessControlRole.Editor),
+          schema.literal(AgentAccessControlRole.Manager),
+        ],
+        {
+          meta: {
+            description:
+              'Role granted to the principal. Roles are hierarchical: `user` allows viewing, listing, reading, and running the agent; `editor` adds updating the agent configuration; `manager` adds deleting the agent and managing its access control.',
+          },
+        }
+      ),
+    },
+    {
+      validate: (entry) =>
+        entry.id === undefined && entry.name === undefined
+          ? 'Each ACL entry requires an `id` or a `name`'
+          : undefined,
+    }
+  ),
   {
-    maxSize: 100,
+    maxSize: AGENT_ACCESS_CONTROL_MAX_ENTRIES,
     meta: {
       description:
-        'Access-control entries to apply to the agent. Each entry has a `type` (currently only `user` is supported), a `name` (the principal username), and a `role`.',
+        'Access-control entries to apply to the agent. Each entry has a `type` (for example `user`), a `role`, and either an `id` (the principal user profile uid, preferred) or a deprecated `name` (username).',
     },
   }
 );
@@ -661,7 +685,7 @@ export function registerAgentRoutes({
         'Get the access control for a specific agent. Callers without permission to manage access control receive `permissions.update_access_control: false` and only their own entry. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).',
       options: {
         tags: ['agent', 'oas-tag:agent builder'],
-        availability: { since: '9.5.0' },
+        availability: { stability: 'tech_preview', since: '9.5.0' },
       },
     })
     .addVersion(
@@ -700,10 +724,10 @@ export function registerAgentRoutes({
       access: 'public',
       summary: "Update an agent's access control list",
       description:
-        'Replace the per-agent access-control entries. The agent owner, cluster admins, and anyone access control grants Manager can call this endpoint. Each call replaces the entire entries list — the most recent successful update wins. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).',
+        'Replace the per-agent access-control entries. Each entry grants one user a role on this agent. Identify the user by their Kibana user profile uid (`id`). Entries created before profile uids were adopted may use `name` (deprecated) instead. The agent owner, cluster admins, and anyone access control grants Manager can call this endpoint. Each call replaces the entire entries list — the most recent successful update wins. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).',
       options: {
         tags: ['agent', 'oas-tag:agent builder'],
-        availability: { since: '9.5.0' },
+        availability: { stability: 'tech_preview', since: '9.5.0' },
       },
     })
     .addVersion(

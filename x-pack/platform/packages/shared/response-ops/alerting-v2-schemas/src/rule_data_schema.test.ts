@@ -19,7 +19,6 @@ import {
   getNoDataEsqlQuery,
   getRootEsqlQuery,
   bulkGetRulesResponseSchema,
-  bulkGetRulesParamsSchema,
   bulkCreateRulesRequestSchema,
   bulkCreateRulesResponseSchema,
   updateRuleBodySchema,
@@ -29,7 +28,6 @@ import {
 import { tagsResponseSchema } from './common';
 import {
   FIND_MAX_RESULT_WINDOW,
-  ID_MAX_LENGTH,
   MAX_ARTIFACT_DATA_FIELDS,
   MAX_ARTIFACT_DATA_LENGTH,
   MAX_BULK_ITEMS,
@@ -1726,6 +1724,26 @@ describe('findRulesRequestSchema', () => {
     expect(findRulesRequestSchema.parse({})).toEqual({});
   });
 
+  it('accepts valid query params', () => {
+    expect(
+      findRulesRequestSchema.parse({
+        page: 2,
+        per_page: 50,
+        filter: 'kind: alert',
+        sort_field: 'name',
+        sort_order: 'asc',
+        search: 'cpu',
+      })
+    ).toEqual({
+      page: 2,
+      per_page: 50,
+      filter: 'kind: alert',
+      sort_field: 'name',
+      sort_order: 'asc',
+      search: 'cpu',
+    });
+  });
+
   it('coerces numeric strings for page and per_page', () => {
     expect(findRulesRequestSchema.parse({ page: '2', per_page: '50' })).toEqual({
       page: 2,
@@ -1755,58 +1773,9 @@ describe('findRulesRequestSchema', () => {
     expect(findRulesRequestSchema.safeParse({ page: 500 }).success).toBe(true);
     expect(findRulesRequestSchema.safeParse({ page: 501 }).success).toBe(false);
   });
-});
 
-describe('bulkGetRulesParamsSchema', () => {
-  it('accepts a single id', () => {
-    const result = bulkGetRulesParamsSchema.parse({ ids: ['rule-1'] });
-    expect(result).toEqual({ ids: ['rule-1'] });
-  });
-
-  it('accepts up to MAX_BULK_ITEMS ids', () => {
-    const ids = Array.from({ length: MAX_BULK_ITEMS }, (_, i) => `rule-${i}`);
-    expect(() => bulkGetRulesParamsSchema.parse({ ids })).not.toThrow();
-  });
-
-  it('preserves caller-provided id order (no sorting)', () => {
-    const ids = ['rule-z', 'rule-a', 'rule-m'];
-    const result = bulkGetRulesParamsSchema.parse({ ids });
-    expect(result.ids).toEqual(ids);
-  });
-
-  it('trims whitespace around ids', () => {
-    const result = bulkGetRulesParamsSchema.parse({ ids: ['  rule-1  '] });
-    expect(result.ids).toEqual(['rule-1']);
-  });
-
-  it('rejects a missing ids field', () => {
-    expect(() => bulkGetRulesParamsSchema.parse({})).toThrow();
-  });
-
-  it('rejects an empty ids array', () => {
-    expect(() => bulkGetRulesParamsSchema.parse({ ids: [] })).toThrow();
-  });
-
-  it('rejects more than MAX_BULK_ITEMS ids', () => {
-    const ids = Array.from({ length: MAX_BULK_ITEMS + 1 }, (_, i) => `rule-${i}`);
-    expect(() => bulkGetRulesParamsSchema.parse({ ids })).toThrow();
-  });
-
-  it('rejects an id longer than ID_MAX_LENGTH', () => {
-    const tooLong = 'a'.repeat(ID_MAX_LENGTH + 1);
-    expect(() => bulkGetRulesParamsSchema.parse({ ids: [tooLong] })).toThrow();
-  });
-
-  it('rejects an empty-string id', () => {
-    expect(() => bulkGetRulesParamsSchema.parse({ ids: [''] })).toThrow();
-  });
-
-  it('rejects a whitespace-only id (after trim it is empty)', () => {
-    expect(() => bulkGetRulesParamsSchema.parse({ ids: ['   '] })).toThrow();
-  });
-
-  it('rejects unknown top-level fields (strict)', () => {
-    expect(() => bulkGetRulesParamsSchema.parse({ ids: ['rule-1'], foo: 'bar' })).toThrow();
+  it('rejects unknown keys', () => {
+    expect(() => findRulesRequestSchema.parse({ unknown_key: 'kind: alert' })).toThrow();
   });
 });
 

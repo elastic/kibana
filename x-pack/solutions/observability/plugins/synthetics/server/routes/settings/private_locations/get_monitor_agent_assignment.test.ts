@@ -63,7 +63,7 @@ describe('getMonitorAgentAssignment route', () => {
     expect(validate).toEqual(
       expect.objectContaining({
         params: expect.objectContaining({
-          validate: expect.any(Function),
+          parse: expect.any(Function),
         }),
       })
     );

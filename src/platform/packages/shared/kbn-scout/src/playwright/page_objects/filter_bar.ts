@@ -160,9 +160,7 @@ export class FilterBar {
   }
 
   async getFilterEditorSelectedPhrases(): Promise<string[]> {
-    return this.page
-      .locator('[data-test-subj="filterParams"] .euiComboBoxPill')
-      .evaluateAll((elements) => elements.map((element) => element.textContent?.trim() ?? ''));
+    return this.page.components.comboBox('filterParamsComboBox').getSelectedOptions();
   }
 
   async closeFieldEditorModal() {

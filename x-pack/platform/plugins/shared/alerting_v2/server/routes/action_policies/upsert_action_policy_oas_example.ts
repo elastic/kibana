@@ -8,7 +8,6 @@
 import type { AlertingOasOperationObject } from '../oas_types';
 import { buildOasOperation } from '../oas_utils';
 import {
-  ACTION_POLICY_NOT_FOUND_RESPONSE,
   ACTION_POLICY_VERSION_CONFLICT_RESPONSE,
   CREATE_ACTION_POLICY_REQUEST,
   actionPolicyResponseExample,
@@ -32,7 +31,6 @@ export const upsertActionPolicyOasExamples = (): AlertingOasOperationObject =>
         'Created a new action policy'
       ),
       400: invalidActionPolicyDataResponse('upsert'),
-      404: ACTION_POLICY_NOT_FOUND_RESPONSE,
       409: ACTION_POLICY_VERSION_CONFLICT_RESPONSE,
     },
   });

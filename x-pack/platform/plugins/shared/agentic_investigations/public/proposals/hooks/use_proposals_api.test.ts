@@ -18,6 +18,7 @@ import {
   useDismissProposal,
 } from './use_proposals_api';
 import { PROPOSALS_INTERNAL_URL, AGENTIC_INVESTIGATIONS_API_VERSION } from '../../../common';
+import { queryKeys } from '../query_keys';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn(),
@@ -79,7 +80,7 @@ describe('retryOnTransientError', () => {
 });
 
 describe('usePendingProposals', () => {
-  it('calls GET on the proposals URL with status=pending and excludeExpired=true', async () => {
+  it('calls GET on the proposals URL filtered to proposals a human can still act on', async () => {
     const http = makeHttp();
     http.get.mockResolvedValue({ proposals: [], total: 0 });
     useKibanaMock.mockReturnValue({ services: { http } } as unknown as ReturnType<
@@ -93,7 +94,9 @@ describe('usePendingProposals', () => {
 
     expect(http.get).toHaveBeenCalledWith(PROPOSALS_INTERNAL_URL, {
       version: AGENTIC_INVESTIGATIONS_API_VERSION,
-      query: { status: 'pending', excludeExpired: true },
+      // `excludeSuperseded` drops the earlier attempts of a retried proposal,
+      // so a chain of failures appears once rather than once per attempt.
+      query: { status: 'pending', excludeExpired: true, excludeSuperseded: true },
     });
   });
 
@@ -111,7 +114,12 @@ describe('usePendingProposals', () => {
 
     expect(http.get).toHaveBeenCalledWith(PROPOSALS_INTERNAL_URL, {
       version: AGENTIC_INVESTIGATIONS_API_VERSION,
-      query: { status: 'pending', excludeExpired: true, conversationId: 'conv-42' },
+      query: {
+        status: 'pending',
+        excludeExpired: true,
+        excludeSuperseded: true,
+        conversationId: 'conv-42',
+      },
     });
   });
 
@@ -152,6 +160,24 @@ describe('useProposal', () => {
       version: AGENTIC_INVESTIGATIONS_API_VERSION,
     });
     expect(result.current.data).toEqual(mockProposal);
+  });
+
+  it('percent-encodes special characters in id when fetching', async () => {
+    const http = makeHttp();
+    http.get.mockResolvedValue({ id: 'org/repo#42', status: 'pending' });
+    useKibanaMock.mockReturnValue({ services: { http } } as unknown as ReturnType<
+      typeof useKibana
+    >);
+
+    const { Wrapper } = createWrapper();
+    const { result } = renderHook(() => useProposal('org/repo#42'), { wrapper: Wrapper });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(http.get).toHaveBeenCalledWith(
+      `${PROPOSALS_INTERNAL_URL}/org%2Frepo%2342`,
+      expect.any(Object)
+    );
   });
 
   it('does not fetch when id is undefined', () => {
@@ -203,7 +229,25 @@ describe('useApproveProposal', () => {
     });
   });
 
-  it('invalidates the proposals query cache on success', async () => {
+  it('percent-encodes special characters in id when approving', async () => {
+    const http = makeHttp();
+    http.post.mockResolvedValue({ id: 'org/repo#42', status: 'approved' });
+    useKibanaMock.mockReturnValue({ services: { http } } as unknown as ReturnType<
+      typeof useKibana
+    >);
+
+    const { Wrapper } = createWrapper();
+    const { result } = renderHook(() => useApproveProposal(), { wrapper: Wrapper });
+
+    await result.current.mutateAsync({ id: 'org/repo#42', body: {} });
+
+    expect(http.post).toHaveBeenCalledWith(
+      `${PROPOSALS_INTERNAL_URL}/org%2Frepo%2342/approve`,
+      expect.any(Object)
+    );
+  });
+
+  it('invalidates only the top-level proposals key on success (single call)', async () => {
     const http = makeHttp();
     http.post.mockResolvedValue({ id: 'p-1', status: 'approved' });
     useKibanaMock.mockReturnValue({ services: { http } } as unknown as ReturnType<
@@ -217,11 +261,8 @@ describe('useApproveProposal', () => {
     await result.current.mutateAsync({ id: 'p-1', body: {} });
 
     await waitFor(() => {
-      expect(invalidateSpy).toHaveBeenCalledWith(
-        expect.objectContaining({
-          queryKey: expect.arrayContaining(['agenticInvestigations', 'proposals']),
-        })
-      );
+      expect(invalidateSpy).toHaveBeenCalledTimes(1);
+      expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.proposals.all });
     });
   });
 
@@ -263,7 +304,7 @@ describe('useDismissProposal', () => {
     });
   });
 
-  it('invalidates the proposals query cache on success', async () => {
+  it('invalidates only the top-level proposals key on success (single call)', async () => {
     const http = makeHttp();
     http.post.mockResolvedValue({ id: 'p-1', status: 'dismissed' });
     useKibanaMock.mockReturnValue({ services: { http } } as unknown as ReturnType<
@@ -277,11 +318,8 @@ describe('useDismissProposal', () => {
     await result.current.mutateAsync({ id: 'p-1', body: { dismissReason: 'wrong' } });
 
     await waitFor(() => {
-      expect(invalidateSpy).toHaveBeenCalledWith(
-        expect.objectContaining({
-          queryKey: expect.arrayContaining(['agenticInvestigations', 'proposals']),
-        })
-      );
+      expect(invalidateSpy).toHaveBeenCalledTimes(1);
+      expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.proposals.all });
     });
   });
 

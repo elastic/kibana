@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import type { ServiceAccountAssumableBy, UiamProjectType } from '@kbn/core-security-server';
+import type { UiamProjectType } from '@kbn/core-security-server';
+
+import type { ServiceAccountAssumableBy } from '../uiam';
 
 export interface BuildAssumableByParams {
   organizationId: string;

@@ -9,7 +9,7 @@ import type { ToolConfirmationPolicyMode, ToolType } from '@kbn/agent-builder-co
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import type { LlmProxy } from '@kbn/ftr-llm-proxy';
 import type { ScoutPage } from '@kbn/scout';
-import { KibanaCodeEditorWrapper } from '@kbn/scout';
+import { euiSelectors, KibanaCodeEditorWrapper } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { subj } from '@kbn/test-subj-selector';
 import {
@@ -115,7 +115,7 @@ export class AgentBuilderApp {
     // has painted on resource-constrained CI runs.
     await this.page.waitForFunction(
       (expected: string) => {
-        const els = document.querySelectorAll('[data-test-subj="agentBuilderRoundResponse"]');
+        const els = document.querySelectorAll('[data-test-subj="agentBuilderResponseMessage"]');
         if (els.length === 0) {
           return false;
         }
@@ -149,13 +149,13 @@ export class AgentBuilderApp {
       response: expectedResponse,
       continueConversation: true,
     });
-    const existingCount = await this.page.testSubj.locator('agentBuilderRoundResponse').count();
+    const existingCount = await this.page.testSubj.locator('agentBuilderResponseMessage').count();
     await this.typeMessage(userMessage);
     await this.sendMessage();
     await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
     await this.page.waitForFunction(
       (prev) => {
-        const els = document.querySelectorAll('[data-test-subj="agentBuilderRoundResponse"]');
+        const els = document.querySelectorAll('[data-test-subj="agentBuilderResponseMessage"]');
         return els.length > prev;
       },
       existingCount,
@@ -216,12 +216,14 @@ export class AgentBuilderApp {
     return newTitle;
   }
 
-  async clickRetryButton() {
-    await this.page.testSubj.click('agentBuilderRoundErrorRetryButton');
+  /** The collapsed "An error occurred" line of a failed turn. */
+  async isErrorVisible() {
+    return this.page.testSubj.locator('agentBuilderExecutionFailedToggle').isVisible();
   }
 
-  async isErrorVisible() {
-    return this.page.testSubj.locator('agentBuilderRoundError').isVisible();
+  /** Expands the failed turn's error line to show the error details. */
+  async expandError() {
+    await this.page.testSubj.click('agentBuilderExecutionFailedToggle');
   }
 
   async navigateToToolsLanding() {
@@ -598,7 +600,7 @@ export class AgentBuilderApp {
     const deleteActionSelector = `agentBuilderAgentsListDelete-${agentId}`;
     await this.agentAction(agentId, deleteActionSelector).click();
     const modal = this.page.locator(
-      '.euiModal[role="alertdialog"][aria-labelledby^="agentDeleteModalTitle"]'
+      `${euiSelectors.modal.ROOT_SELECTOR}[role="alertdialog"][aria-labelledby^="agentDeleteModalTitle"]`
     );
     return {
       getTitle: async () => {

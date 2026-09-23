@@ -1,0 +1,24 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": ["server/**/*", "public/**/*", "test/scout*/**/*"],
+  "exclude": ["target/**/*"],
+  "kbn_references": [
+    "@kbn/config-schema",
+    "@kbn/core",
+    "@kbn/core-elasticsearch-server-utils",
+    "@kbn/core-plugins-server",
+    "@kbn/cps-server-utils",
+    "@kbn/es-errors",
+    "@kbn/es-query",
+    "@kbn/features-plugin",
+    "@kbn/nightshift-shared",
+    "@kbn/server-route-repository",
+    "@kbn/server-route-repository-client",
+    "@kbn/streams-schema",
+    "@kbn/zod",
+    "@kbn/scout"
+  ]
+}

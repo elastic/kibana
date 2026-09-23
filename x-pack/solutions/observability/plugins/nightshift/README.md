@@ -16,6 +16,6 @@ cascade-disabled with it.
 When the plugin does load, the app is gated on
 `GET /internal/significant_events/availability` — the single source of truth for whether
 Significant Events can run, aggregating the rollout flag
-(`streams.significantEventsAvailable`), project type, pricing tier, license and required
+(`nightshift.enabled`), project type, pricing tier, license and required
 plugins. When it reports unavailable the app is hidden from navigation and direct visits
 redirect to the Observability overview.

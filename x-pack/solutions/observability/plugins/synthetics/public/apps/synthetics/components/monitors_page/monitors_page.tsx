@@ -29,6 +29,10 @@ import { MonitorListContainer } from './management/monitor_list_container';
 import { useMonitorListBreadcrumbs } from './hooks/use_breadcrumbs';
 import { useMonitorList } from './hooks/use_monitor_list';
 import * as labels from './management/labels';
+import { AutoRefreshButton } from '../common/components/auto_refresh_button';
+import { LastRefreshed } from '../common/components/last_refreshed';
+import { RefreshButton } from '../common/components/refresh_button';
+import { MonitorsListingPage, SyntheticsHeaderToolbar } from '../common/app_header';
 
 export const MonitorManagementPage: React.FC = () => {
   useTrackPageview({ app: 'synthetics', path: 'monitors' });
@@ -93,7 +97,16 @@ export const MonitorManagementPage: React.FC = () => {
   }
 
   return (
-    <>
+    <MonitorsListingPage
+      selectedTab="management"
+      toolbar={
+        <SyntheticsHeaderToolbar>
+          <LastRefreshed />
+          <RefreshButton />
+          <AutoRefreshButton />
+        </SyntheticsHeaderToolbar>
+      }
+    >
       <Loader
         loading={enablementLoading || locationsLoading}
         error={Boolean(enablementError)}
@@ -106,6 +119,6 @@ export const MonitorManagementPage: React.FC = () => {
         <MonitorListContainer isEnabled={isEnabled} monitorListProps={monitorListProps} />
       </Loader>
       {showEmptyState && <EnablementEmptyState />}
-    </>
+    </MonitorsListingPage>
   );
 };

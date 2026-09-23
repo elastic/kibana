@@ -13,14 +13,13 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { ALERTZERO_PLUGIN_NAME } from '@kbn/alertzero-common';
 import { AppChromeLayout } from './components/app_chrome';
-import type { AlertZeroClientConfig, AlertZeroStartDependencies } from './types';
+import type { AlertZeroStartDependencies } from './types';
 import { AlertZeroRoutes } from './routes';
 
 interface RenderAppParams {
   coreStart: CoreStart;
   startDeps: AlertZeroStartDependencies;
   params: AppMountParameters;
-  config: AlertZeroClientConfig;
 }
 
 const rootStyle: React.CSSProperties = {
@@ -30,7 +29,7 @@ const rootStyle: React.CSSProperties = {
   minHeight: 0,
 };
 
-export const renderApp = ({ coreStart, startDeps, params, config }: RenderAppParams) => {
+export const renderApp = ({ coreStart, startDeps, params }: RenderAppParams) => {
   coreStart.chrome.docTitle.change(ALERTZERO_PLUGIN_NAME);
 
   const queryClient = new QueryClient({
@@ -48,7 +47,7 @@ export const renderApp = ({ coreStart, startDeps, params, config }: RenderAppPar
    * for `services.http` and `services.notifications`.
    */
   const App = () => (
-    <KibanaContextProvider services={{ ...coreStart, ...startDeps, alertZeroConfig: config }}>
+    <KibanaContextProvider services={{ ...coreStart, ...startDeps }}>
       <QueryClientProvider client={queryClient}>
         <Router history={params.history}>
           <div style={rootStyle}>

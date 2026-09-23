@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { getRuleIdFromRuleState, type RuleState } from '../../../types/rule_state';
+import { getPanelTitleSize } from '../panel_title_sizes';
 import { RelatedEpisodesRuleSubsection } from './rule_subsection';
 import { RelatedEpisodesGroupSubsection } from './group_subsection';
 import * as i18n from './translations';
@@ -49,10 +50,14 @@ export function AlertEpisodesRelated({
     <div>
       {showHeading ? (
         <>
-          <EuiTitle size="m" data-test-subj="alertingV2RelatedAlertEpisodesSection">
-            <h2>{i18n.RELATED_EPISODES_TITLE}</h2>
+          {/* Panel title when compressed, page section title otherwise. */}
+          <EuiTitle
+            size={compressed ? getPanelTitleSize(true) : 'm'}
+            data-test-subj="alertingV2RelatedAlertEpisodesSection"
+          >
+            <h2>{compressed ? i18n.RELATED_TITLE : i18n.RELATED_EPISODES_TITLE}</h2>
           </EuiTitle>
-          <EuiSpacer size="m" />
+          <EuiSpacer size={compressed ? 's' : 'm'} />
         </>
       ) : null}
       {groupHash ? (

@@ -7,9 +7,11 @@
 
 import {
   kiFieldsSchema,
+  kiPartialFieldsSchema,
   MAX_KI_ATTRIBUTES,
   MAX_KI_ATTRIBUTE_ARRAY_VALUES,
   MAX_KI_ATTRIBUTE_VALUE_LENGTH,
+  MAX_KI_REFERENCES,
 } from './ki';
 
 describe('kiFieldsSchema', () => {
@@ -81,6 +83,97 @@ describe('kiFieldsSchema', () => {
       type: 'index_metadata',
       title: 'title',
       attributes: { esql: ['FROM logs-* | LIMIT 1', 42] },
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it('accepts references with relation and description', () => {
+    const result = kiFieldsSchema.safeParse({
+      type: 'index_metadata',
+      title: 'title',
+      references: [
+        { uri: 'index://logs-*', relation: 'derived_from', description: 'profiled index' },
+        { uri: 'dashboard://a1b2' },
+      ],
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects a reference without a uri', () => {
+    const result = kiFieldsSchema.safeParse({
+      type: 'index_metadata',
+      title: 'title',
+      references: [{ relation: 'relates_to' }],
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects a reference with an unknown relation', () => {
+    const result = kiFieldsSchema.safeParse({
+      type: 'index_metadata',
+      title: 'title',
+      references: [{ uri: 'index://logs-*', relation: 'contradicts' }],
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects more than MAX_KI_REFERENCES references', () => {
+    const result = kiFieldsSchema.safeParse({
+      type: 'index_metadata',
+      title: 'title',
+      references: Array.from({ length: MAX_KI_REFERENCES + 1 }, (_, i) => ({
+        uri: `ki://idx/${i}`,
+      })),
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it('accepts an ISO 8601 expires_at', () => {
+    const result = kiFieldsSchema.safeParse({
+      type: 'index_metadata',
+      title: 'title',
+      expires_at: '2026-10-01T00:00:00Z',
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it('accepts an expires_at with a numeric timezone offset', () => {
+    const result = kiFieldsSchema.safeParse({
+      type: 'index_metadata',
+      title: 'title',
+      expires_at: '2027-01-01T01:00:00+01:00',
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects a null expires_at on create', () => {
+    const result = kiFieldsSchema.safeParse({
+      type: 'index_metadata',
+      title: 'title',
+      expires_at: null,
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it('accepts a null expires_at on update to clear the expiry', () => {
+    const result = kiPartialFieldsSchema.safeParse({ expires_at: null });
+
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects a non-ISO expires_at', () => {
+    const result = kiFieldsSchema.safeParse({
+      type: 'index_metadata',
+      title: 'title',
+      expires_at: 'next week',
     });
 
     expect(result.success).toBe(false);

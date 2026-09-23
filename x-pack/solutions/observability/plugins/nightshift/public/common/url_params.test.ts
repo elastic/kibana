@@ -8,7 +8,6 @@
 import {
   buildNightshiftEventFlyoutShareUrl,
   clearNightshiftEventIdParam,
-  clearNightshiftSeverityParam,
   getNightshiftEventIdFromSearch,
   getNightshiftSearchQueryFromSearch,
   getNightshiftSeverityFromSearch,
@@ -76,8 +75,5 @@ describe('url_params', () => {
     const params = new URLSearchParams();
     setNightshiftSeverityParam(params, '80-critical');
     expect(params.get(NIGHTSHIFT_SEVERITY_QUERY_PARAM)).toBe('80-critical');
-
-    clearNightshiftSeverityParam(params);
-    expect(params.has(NIGHTSHIFT_SEVERITY_QUERY_PARAM)).toBe(false);
   });
 });

@@ -5,70 +5,42 @@
  * 2.0.
  */
 
-import type { Example } from '@kbn/evals';
+import type { Client } from '@elastic/elasticsearch';
+import type { KbnClient } from '@kbn/kbn-client';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { BoundInferenceClient } from '@kbn/inference-common';
+import type { Evaluator, Example } from '@kbn/evals';
+import { leadSchema } from '@kbn/security-solution-plugin/common/entity_analytics/lead_generation/types';
+import type {
+  Lead,
+  Observation,
+  LeadEntity,
+  RelatedEntity,
+  LeadOrigin,
+  LeadGenerationStatus,
+  LeadChangesResponse,
+} from '@kbn/security-solution-plugin/common/entity_analytics/lead_generation/types';
+import type { LeadGenerationClient } from './clients/lead_generation_client';
 
 // ---------------------------------------------------------------------------
-// Minimal domain types (mirrors the common lead schemas without importing
-// server-side or plugin code into this test-only package)
+// Domain types re-exported from the real API contract (single source of
+// truth — see `common/entity_analytics/lead_generation/types.ts`)
 // ---------------------------------------------------------------------------
 
-export interface LeadEntity {
-  type: string;
-  name: string;
-  id: string;
-}
-
-export interface Observation {
-  entityId: string;
-  moduleId: string;
-  type: string;
-  score: number;
-  severity: 'low' | 'medium' | 'high' | 'critical';
-  confidence: number;
-  description: string;
-  metadata: Record<string, unknown>;
-}
-
-export interface Lead {
-  id: string;
-  title: string;
-  byline: string;
-  description: string;
-  entity: LeadEntity;
-  tags: string[];
-  priority: number;
-  chatRecommendations: string[];
-  timestamp: string;
-  staleness: 'fresh' | 'stale' | 'expired';
-  status: 'active' | 'dismissed' | 'expired';
-  observations: Observation[];
-  executionUuid: string;
-  sourceType: 'adhoc' | 'scheduled';
-}
-
-export interface LeadGenerationStatus {
-  isEnabled: boolean;
-  indexExists: boolean;
-  totalLeads: number;
-  lastRun: string | null;
-  connectorId?: string;
-  lastExecutionUuid?: string;
-  lastError?: string | null;
-}
+export { leadSchema };
+export type {
+  Lead,
+  Observation,
+  LeadEntity,
+  RelatedEntity,
+  LeadOrigin,
+  LeadGenerationStatus,
+  LeadChangesResponse,
+};
 
 // ---------------------------------------------------------------------------
-// Task input / output
+// Task output
 // ---------------------------------------------------------------------------
-
-/**
- * Input for a lead generation evaluation run. Currently the pipeline is
- * triggered with minimal configuration; future dataset examples may add
- * scenario-specific knobs (entity filters, time ranges, etc.).
- */
-export interface LeadGenerationTaskInput extends Record<string, unknown> {
-  /** Optionally cap the number of leads returned. Passed through to the API. */
-  maxLeads?: number;
-}
 
 /** Reference output stored in a dataset example for rubric evaluation. */
 export interface LeadGenerationTaskExpectedOutput {
@@ -91,12 +63,52 @@ export interface LeadGenerationTaskOutput {
 
 export type LeadGenerationDatasetMetadata = Record<string, unknown> & {
   Title?: string;
+  description?: string;
   scenario?: string;
   dataset_split?: unknown;
 };
 
+/** The pipeline has no per-run configuration, so examples carry no `input`. */
 export type LeadGenerationDatasetExample = Example<
-  LeadGenerationTaskInput,
+  Record<string, unknown>,
   LeadGenerationTaskExpectedOutput,
   LeadGenerationDatasetMetadata
 >;
+
+// ---------------------------------------------------------------------------
+// Scenario harness
+// ---------------------------------------------------------------------------
+
+export interface ScenarioContext {
+  esClient: Client;
+  kbnClient: KbnClient;
+  leadGenerationClient: LeadGenerationClient;
+  connectorId: string;
+  evaluationInferenceClient: BoundInferenceClient;
+  log: ToolingLog;
+  prefix: string;
+}
+
+export interface StepResult {
+  label: string;
+  leads: Lead[];
+  errors?: string[];
+  status?: LeadGenerationStatus;
+  changes?: LeadChangesResponse;
+}
+
+export interface ScenarioTaskOutput extends LeadGenerationTaskOutput {
+  steps: StepResult[];
+}
+
+export interface Scenario {
+  name: string;
+  description: string;
+  euids: readonly string[];
+  rubricCriteria?: string;
+  seed: (ctx: ScenarioContext) => Promise<void>;
+  run: (ctx: ScenarioContext) => Promise<StepResult[]>;
+  evaluators: (
+    ctx: ScenarioContext
+  ) => Array<Evaluator<LeadGenerationDatasetExample, ScenarioTaskOutput>>;
+}

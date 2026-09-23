@@ -372,6 +372,10 @@ const ROUTE_REQUEST_FIXTURES: Record<string, { params?: any; body?: any; query?:
   'GET:/api/workflows/executions/{executionId}/step/{stepExecutionId}': {
     params: { executionId: 'test-exec-id', stepExecutionId: 'test-step-exec-id' },
   },
+  'GET:/api/workflows/executions/{executionId}/steps': {
+    params: { executionId: 'test-exec-id' },
+    query: { page: 1, size: 100 },
+  },
   'GET:/api/workflows/workflow/{workflowId}/executions': {
     params: { workflowId: 'test-workflow-id' },
   },

@@ -18,8 +18,8 @@ import {
   normalizeFieldsToJsonSchema,
   resolveRef,
 } from '@kbn/workflows/spec/lib/field_conversion';
+import type { YamlValidationResult } from '@kbn/workflows-yaml';
 import { getPathFromAncestors } from '../../../../common/lib/yaml';
-import type { YamlValidationResult } from '../model/types';
 
 /**
  * Validates that default values in JSON Schema inputs match their property constraints

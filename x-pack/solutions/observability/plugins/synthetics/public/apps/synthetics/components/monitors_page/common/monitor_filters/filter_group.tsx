@@ -7,7 +7,6 @@
 
 import React, { useMemo } from 'react';
 import { EuiFilterGroup } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { useSelector } from 'react-redux-v7';
 import { useGetUrlParams } from '../../../../hooks';
 import { selectServiceLocationsState } from '../../../../state';
@@ -22,6 +21,13 @@ import { getSyntheticsFilterDisplayValues } from '../../../../utils/filters/filt
 import { useFilters } from './use_filters';
 import { FilterButton } from './filter_button';
 import { getRemoteOriginFieldLabel } from '../../../../utils/remote/remote_origin_copy';
+import {
+  LOCATION_LABEL,
+  PROJECT_LABEL,
+  SCHEDULE_LABEL,
+  TAGS_LABEL,
+  TYPE_LABEL,
+} from './filter_labels';
 
 const mixUrlValues = (
   values?: LabelWithCountValue[],
@@ -178,23 +184,3 @@ export const FilterGroup = ({
     </EuiFilterGroup>
   );
 };
-
-const TYPE_LABEL = i18n.translate('xpack.synthetics.monitorManagement.filter.typeLabel', {
-  defaultMessage: `Type`,
-});
-
-const PROJECT_LABEL = i18n.translate('xpack.synthetics.monitorManagement.filter.projectLabel', {
-  defaultMessage: `Project`,
-});
-
-const LOCATION_LABEL = i18n.translate('xpack.synthetics.monitorManagement.filter.locationLabel', {
-  defaultMessage: `Location`,
-});
-
-const TAGS_LABEL = i18n.translate('xpack.synthetics.monitorManagement.filter.tagsLabel', {
-  defaultMessage: `Tags`,
-});
-
-const SCHEDULE_LABEL = i18n.translate('xpack.synthetics.monitorManagement.filter.frequencyLabel', {
-  defaultMessage: `Frequency`,
-});

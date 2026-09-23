@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
+import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 
 import type { DataSourceType, DataSourceWithSecrets } from '../../common/datasource_types';
+import { authenticationStrings } from './create_data_source_flyout_authentication_i18n';
 
 /** S3 authentication modes (UI-only). */
 export type S3AuthenticationMode = 'anonymous' | 'access_and_secret_keys' | 'federated_identity';
@@ -30,131 +31,70 @@ export const DATA_SOURCE_TYPES_WITH_AUTHENTICATION: ReadonlySet<DataSourceType> 
 ]);
 
 export const getDefaultAuthenticationMode = (
-  dataSourceType: DataSourceType
+  dataSourceType: DataSourceType,
+  { enableFederatedIdentity }: { enableFederatedIdentity?: boolean } = {}
 ): CreateDataSourceAuthenticationMode => {
-  if (dataSourceType === 'azure') {
-    return 'credentials';
-  }
+  if (enableFederatedIdentity) return 'federated_identity';
+  if (dataSourceType === 'azure') return 'credentials';
   return 'access_and_secret_keys';
 };
+
+interface AuthOption {
+  value: CreateDataSourceAuthenticationMode;
+  text: string;
+  description: string;
+  recommended?: boolean;
+}
+
+/**
+ * Documentation page for each authentication method, as a key into
+ * `docLinks.links.dataFederation`. The pages describe the method itself, so they are the
+ * same regardless of data source type.
+ */
+export const AUTHENTICATION_DOC_LINK_KEYS = {
+  federated_identity: 'federatedIdentity',
+  access_and_secret_keys: 'staticCredentials',
+  credentials: 'staticCredentials',
+  anonymous: 'quickstart',
+} as const satisfies Record<
+  CreateDataSourceAuthenticationMode,
+  keyof DocLinksStart['links']['dataFederation']
+>;
 
 export const getCreateDataSourceAuthenticationOptions = (
   dataSourceType: DataSourceType,
   { enableFederatedIdentity }: { enableFederatedIdentity?: boolean } = {}
-): Array<{
-  value: CreateDataSourceAuthenticationMode;
-  text: string;
-}> => {
-  if (dataSourceType === 'azure') {
-    return [
-      {
-        value: 'credentials',
-        text: i18n.translate('xpack.dataFederation.createFlyout.authentication.azure.credentials', {
-          defaultMessage: 'Credentials',
-        }),
-      },
-      ...(enableFederatedIdentity
-        ? [
-            {
-              value: 'federated_identity' as const,
-              text: i18n.translate(
-                'xpack.dataFederation.createFlyout.authentication.federatedIdentity',
-                {
-                  defaultMessage: 'Federated Identity',
-                }
-              ),
-            },
-          ]
-        : []),
-      {
-        value: 'anonymous',
-        text: i18n.translate('xpack.dataFederation.createFlyout.authentication.anonymous', {
-          defaultMessage: 'Anonymous',
-        }),
-      },
-    ];
-  }
+): AuthOption[] => {
+  const federatedIdentity: AuthOption = {
+    value: 'federated_identity',
+    text: authenticationStrings.federatedIdentityLabel,
+    description: authenticationStrings.federatedIdentityDescription[dataSourceType],
+    recommended: true,
+  };
 
-  if (dataSourceType === 's3') {
-    return [
-      {
-        value: 'access_and_secret_keys',
-        text: i18n.translate(
-          'xpack.dataFederation.createFlyout.authentication.accessAndSecretKeys',
-          {
-            defaultMessage: 'Access and Secret Keys',
-          }
-        ),
-      },
-      ...(enableFederatedIdentity
-        ? [
-            {
-              value: 'federated_identity' as const,
-              text: i18n.translate(
-                'xpack.dataFederation.createFlyout.authentication.federatedIdentity',
-                {
-                  defaultMessage: 'Federated Identity',
-                }
-              ),
-            },
-          ]
-        : []),
-      {
-        value: 'anonymous',
-        text: i18n.translate('xpack.dataFederation.createFlyout.authentication.anonymous', {
-          defaultMessage: 'Anonymous',
-        }),
-      },
-    ];
-  }
+  // Azure names its stored-credentials method differently, but it plays the same role.
+  const storedCredentials: AuthOption =
+    dataSourceType === 'azure'
+      ? {
+          value: 'credentials',
+          text: authenticationStrings.azureCredentialsLabel,
+          description: authenticationStrings.storedCredentialsDescription.azure,
+        }
+      : {
+          value: 'access_and_secret_keys',
+          text: authenticationStrings.accessAndSecretKeysLabel,
+          description: authenticationStrings.storedCredentialsDescription[dataSourceType],
+        };
 
-  if (dataSourceType === 'gcs') {
-    return [
-      {
-        value: 'access_and_secret_keys',
-        text: i18n.translate(
-          'xpack.dataFederation.createFlyout.authentication.accessAndSecretKeys',
-          {
-            defaultMessage: 'Access and Secret Keys',
-          }
-        ),
-      },
-      ...(enableFederatedIdentity
-        ? [
-            {
-              value: 'federated_identity' as const,
-              text: i18n.translate(
-                'xpack.dataFederation.createFlyout.authentication.federatedIdentity',
-                {
-                  defaultMessage: 'Federated Identity',
-                }
-              ),
-            },
-          ]
-        : []),
-      {
-        value: 'anonymous',
-        text: i18n.translate('xpack.dataFederation.createFlyout.authentication.anonymous', {
-          defaultMessage: 'Anonymous',
-        }),
-      },
-    ];
-  }
+  const anonymous: AuthOption = {
+    value: 'anonymous',
+    text: authenticationStrings.anonymousLabel,
+    description: authenticationStrings.anonymousDescription[dataSourceType],
+  };
 
-  return [
-    {
-      value: 'access_and_secret_keys',
-      text: i18n.translate('xpack.dataFederation.createFlyout.authentication.accessAndSecretKeys', {
-        defaultMessage: 'Access and Secret Keys',
-      }),
-    },
-    {
-      value: 'anonymous',
-      text: i18n.translate('xpack.dataFederation.createFlyout.authentication.anonymous', {
-        defaultMessage: 'Anonymous',
-      }),
-    },
-  ];
+  return enableFederatedIdentity
+    ? [federatedIdentity, storedCredentials, anonymous]
+    : [storedCredentials, anonymous];
 };
 
 export const showsAuthenticationCredentialFields = (
@@ -172,21 +112,6 @@ export const showsAuthenticationCredentialFields = (
   }
   return mode === 'access_and_secret_keys';
 };
-
-export const createDataSourceFlyoutAuthenticationLabel = (): string =>
-  i18n.translate('xpack.dataFederation.createFlyout.authentication.label', {
-    defaultMessage: 'Preferred method',
-  });
-
-export const createDataSourceFlyoutAuthenticationTitle = (): string =>
-  i18n.translate('xpack.dataFederation.createFlyout.authentication.title', {
-    defaultMessage: 'Authentication',
-  });
-
-export const createDataSourceFlyoutAuthenticationHelpAriaLabel = (): string =>
-  i18n.translate('xpack.dataFederation.createFlyout.authentication.helpAriaLabel', {
-    defaultMessage: 'Open Cloud security documentation',
-  });
 
 /** Applies UI authentication mode to the payload submitted to the API. */
 export const applyAuthenticationModeToDataSource = (

@@ -5,15 +5,20 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 
-export const AlertConfigSchema = schema.object({
-  tls: schema.maybe(
-    schema.object({
-      enabled: schema.boolean(),
-    })
-  ),
-  status: schema.object({
-    enabled: schema.boolean(),
-  }),
-});
+export const AlertConfigSchema = z
+  .object({
+    tls: z
+      .object({
+        enabled: z.boolean(),
+      })
+      .strict()
+      .optional(),
+    status: z
+      .object({
+        enabled: z.boolean(),
+      })
+      .strict(),
+  })
+  .strict();

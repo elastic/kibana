@@ -8,25 +8,17 @@ import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 
 import type { PluginInitializerContext } from '@kbn/core/server';
+import { profilingElasticsearchConfigSchema } from './config';
 import type { ProfilingDataAccessPluginSetup, ProfilingDataAccessPluginStart } from './plugin';
 
 const configSchema = schema.object({
-  elasticsearch: schema.conditional(
-    schema.contextRef('dist'),
-    schema.literal(true),
-    schema.never(),
-    schema.maybe(
-      schema.object({
-        hosts: schema.string(),
-        username: schema.string(),
-        password: schema.string(),
-      })
-    )
-  ),
+  elasticsearch: profilingElasticsearchConfigSchema,
 });
 
 export type ProfilingConfig = TypeOf<typeof configSchema>;
 
+export { profilingElasticsearchConfigSchema };
+export type { ProfilingElasticsearchConfig } from './config';
 export type { ProfilingDataAccessPluginSetup, ProfilingDataAccessPluginStart };
 
 export async function plugin(initializerContext: PluginInitializerContext) {

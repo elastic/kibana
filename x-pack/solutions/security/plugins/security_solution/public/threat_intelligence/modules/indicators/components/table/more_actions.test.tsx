@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import type { Indicator } from '../../../../../../common/threat_intelligence/types/indicator';
 import { generateMockFileIndicator } from '../../../../../../common/threat_intelligence/types/indicator';
 import { TestProvidersComponent } from '../../../../mocks/test_providers';
 import { MoreActions } from './more_actions';
-import { MORE_ACTIONS_TEST_ID } from './test_ids';
+import { ADD_TO_BLOCK_LIST_TEST_ID, ADD_TO_CASE_TEST_ID, MORE_ACTIONS_TEST_ID } from './test_ids';
 
 describe('MoreActions', () => {
   it('should render an EuiContextMenuPanel', () => {
@@ -22,5 +22,24 @@ describe('MoreActions', () => {
       </TestProvidersComponent>
     );
     expect(getByTestId(MORE_ACTIONS_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('renders icons for both menu items', async () => {
+    const indicator: Indicator = generateMockFileIndicator();
+    render(
+      <TestProvidersComponent>
+        <MoreActions indicator={indicator} />
+      </TestProvidersComponent>
+    );
+
+    fireEvent.click(screen.getByTestId(MORE_ACTIONS_TEST_ID));
+    await screen.findByTestId('alertsTableActionsMenu');
+
+    expect(
+      screen.getByTestId(ADD_TO_CASE_TEST_ID).querySelector('[data-euiicon-type="briefcase"]')
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId(ADD_TO_BLOCK_LIST_TEST_ID).querySelector('[data-euiicon-type="stopSlash"]')
+    ).toBeInTheDocument();
   });
 });

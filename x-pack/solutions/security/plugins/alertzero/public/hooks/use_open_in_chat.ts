@@ -5,26 +5,73 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
-import { useHistory } from 'react-router-dom';
-import { CHATS_PATH, buildChatsPath } from '../pages/chats/path';
+import { useCallback, useMemo } from 'react';
+import { AGENTBUILDER_APP_ID } from '@kbn/agent-builder-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
 
 /**
- * Opens an investigation's chat on the AlertZero chats page.
+ * An investigation's chat is its Agent Builder conversation, so it opens in Agent Builder rather
+ * than in a host of our own: the embeddable conversation cannot be pointed at an existing
+ * conversation (it resolves one from `sessionTag` plus local storage), so embedding it here could
+ * only ever start a new, empty chat.
  *
- * Lives here rather than in `@kbn/agentic-investigations-common` because the route belongs to this
- * solution, and that package is shared across solutions.
- *
- * Navigates through the app's own history rather than `navigateToApp`, so Back returns to the
- * queue with its URL intact and reopens whichever flyout was showing.
+ * The agent-scoped route is built inline because Agent Builder's own `appPaths` helper is private
+ * to that plugin; this mirrors what its `openFullscreenConversation` does.
  */
-export const useOpenInChat = (): ((chatId?: string) => void) => {
-  const history = useHistory();
+const conversationPath = (conversationId: string, agentId?: string): string =>
+  agentId
+    ? `/agents/${encodeURIComponent(agentId)}/conversations/${encodeURIComponent(conversationId)}`
+    : // Without an agent id, Agent Builder's legacy route resolves the conversation's own agent
+      // and redirects to the canonical URL.
+      `/conversations/${encodeURIComponent(conversationId)}`;
 
-  return useCallback(
-    (chatId?: string) => {
-      history.push(chatId ? buildChatsPath(chatId) : CHATS_PATH);
+export interface OpenInChat {
+  /** `undefined` when there is no conversation to link to, so callers can omit the href. */
+  getChatHref: (conversationId?: string, agentId?: string) => string | undefined;
+  openChat: (conversationId?: string, agentId?: string) => void;
+}
+
+/**
+ * Href builder and navigate callback for a conversation's Agent Builder page.
+ *
+ * Both are returned because the control is a link: the href makes it openable in a new tab and
+ * readable on hover, while the click is intercepted so navigation stays in-app.
+ */
+export const useOpenInChat = (): OpenInChat => {
+  const {
+    services: { application },
+  } = useKibana<CoreStart>();
+
+  const getChatHref = useCallback(
+    (conversationId?: string, agentId?: string): string | undefined => {
+      if (!conversationId) {
+        return undefined;
+      }
+      // Throws when Agent Builder is not registered, which a disabled plugin makes possible even
+      // though it is a required dependency. A missing href degrades to a non-link, not a crash.
+      try {
+        return application.getUrlForApp(AGENTBUILDER_APP_ID, {
+          path: conversationPath(conversationId, agentId),
+        });
+      } catch {
+        return undefined;
+      }
     },
-    [history]
+    [application]
   );
+
+  const openChat = useCallback(
+    (conversationId?: string, agentId?: string) => {
+      if (!conversationId) {
+        return;
+      }
+      application.navigateToApp(AGENTBUILDER_APP_ID, {
+        path: conversationPath(conversationId, agentId),
+      });
+    },
+    [application]
+  );
+
+  return useMemo(() => ({ getChatHref, openChat }), [getChatHref, openChat]);
 };

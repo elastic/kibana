@@ -372,6 +372,17 @@ export function formatDateRange(start: Date, end: Date, precision: TimePrecision
 }
 
 /**
+ * Formats a date range as re-parseable input text at full millisecond precision.
+ *
+ * Input text is the source of truth for the applied range, so it must never be
+ * truncated to the display `timePrecision`: e.g. a calendar day selection must
+ * round-trip as `23:59:59.999`, not `23:59:59` or `23:59`.
+ */
+export function formatInputDateRange(start: Date, end: Date): string {
+  return formatDateRange(start, end, 'ms');
+}
+
+/**
  * Extracts the offset portion from a date math bound string, or
  * returns `null` for absolute dates and rounding-only expressions
  * that have no stable offset representation.

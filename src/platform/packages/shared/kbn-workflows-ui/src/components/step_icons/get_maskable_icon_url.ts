@@ -16,7 +16,7 @@ const SVG_URL = /\.svg(\?|$)/;
  * to, so the glyph picks up a theme tint instead of the fill baked into the file.
  * Returns `undefined` for anything else — EUI icon names, `token*`, components.
  *
- * Both URL shapes have to match: `@kbn/optimizer` inlines assets under 8kb as
+ * Both URL shapes have to match: `@kbn/rspack-optimizer` inlines assets under 8kb as
  * `data:` URLs, while other bundlers emit them as separate files. Matching only
  * `data:` left the built-in workflow glyphs as untintable `<img>` elements —
  * invisible on a dark canvas — wherever assets weren't inlined.

@@ -98,4 +98,19 @@ describe('<FormattedComboBox />', () => {
 
     expect(getByTestId('syntheticsFleetComboBoxCopyButton')).toBeDisabled();
   });
+
+  it('shows provided options as suggestions', () => {
+    const { getByTestId, getByText } = render(
+      <FormattedComboBox
+        selectedOptions={[]}
+        onChange={onChange}
+        options={[{ label: 'prod' }, { label: 'staging' }]}
+      />
+    );
+
+    fireEvent.click(getByTestId('comboBoxToggleListButton'));
+
+    expect(getByText('prod')).toBeInTheDocument();
+    expect(getByText('staging')).toBeInTheDocument();
+  });
 });

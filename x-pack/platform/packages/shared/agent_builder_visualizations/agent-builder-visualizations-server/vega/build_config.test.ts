@@ -194,6 +194,38 @@ describe('buildVegaConfig', () => {
       });
     });
 
+    it('reuses the recovered ES|QL as the trusted query when preserving ES|QL', async () => {
+      await buildVegaConfig({
+        nlQuery: 'make the bars blue',
+        existingSpec,
+        preserveESQL: true,
+        modelProvider,
+        logger,
+        events,
+        esClient,
+      });
+
+      expect(invoke.mock.calls[0][0]).toMatchObject({
+        esqlQuery: PROVIDED_ESQL,
+        existingEsql: PROVIDED_ESQL,
+      });
+    });
+
+    it('rejects preserving ES|QL when the spec has no ES|QL to recover', async () => {
+      await expect(
+        buildVegaConfig({
+          nlQuery: 'make the bars blue',
+          existingSpec: JSON.stringify({ mark: 'bar', data: { values: [{ a: 1 }] } }),
+          preserveESQL: true,
+          modelProvider,
+          logger,
+          events,
+          esClient,
+        })
+      ).rejects.toThrow('Preserving the ES|QL query requires an existing Vega spec');
+      expect(invoke).not.toHaveBeenCalled();
+    });
+
     it('prefers a valid provided ES|QL over the query embedded in the spec', async () => {
       const newEsql = 'FROM metrics-* | STATS avg = AVG(value)';
 

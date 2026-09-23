@@ -40,8 +40,9 @@ export const deleteKiStepCommonDefinition: CommonStepDefinition<
   documentation: {
     details: i18n.translate('xpack.contextEngine.workflows.steps.deleteKi.documentation.details', {
       defaultMessage:
-        'Deletes a knowledge indicator document from the backing store of the specified AI index. ' +
-        'The step fails when the KI does not exist in the AI index.',
+        'Deletes a knowledge indicator from the backing store of the specified AI index. On a ' +
+        'data stream backed AI index the KI is kept and marked deleted, and earlier revisions ' +
+        'remain. The step fails when the KI does not exist in the AI index.',
     }),
     examples: [
       `## Delete a knowledge indicator

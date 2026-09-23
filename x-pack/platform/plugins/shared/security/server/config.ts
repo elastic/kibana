@@ -322,19 +322,16 @@ export const ConfigSchema = schema.object({
     serverless: schema.boolean({ defaultValue: true }),
   }),
 
-  // Setting only allowed in the Serverless offering
-  serviceAccounts: offeringBasedSchema({
-    serverless: schema.object({
-      enabled: schema.boolean({ defaultValue: false }),
-      requestLifetime: schema.duration({
-        defaultValue: '10m',
-        validate(value) {
-          const milliseconds = value.asMilliseconds();
-          if (!Number.isFinite(milliseconds) || milliseconds <= 0) {
-            return 'the value must be a positive, finite duration.';
-          }
-        },
-      }),
+  serviceAccounts: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+    requestLifetime: schema.duration({
+      defaultValue: '10m',
+      validate(value) {
+        const milliseconds = value.asMilliseconds();
+        if (!Number.isFinite(milliseconds) || milliseconds <= 0) {
+          return 'the value must be a positive, finite duration.';
+        }
+      },
     }),
   }),
 

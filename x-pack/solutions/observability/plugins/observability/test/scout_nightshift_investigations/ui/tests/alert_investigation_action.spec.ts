@@ -109,5 +109,42 @@ test.describe(
         subject: { type: 'alert', id: alertId },
       });
     });
+
+    test('views a completed investigation from an alert row action', async ({
+      page,
+      pageObjects,
+    }) => {
+      await pageObjects.alertsTablePage.gotoWithAppState({
+        kuery: `kibana.alert.rule.uuid: "${ruleId}"`,
+        rangeFrom: 'now-1h',
+        rangeTo: 'now',
+      });
+      await expect
+        .poll(() => pageObjects.alertsTablePage.getRowCount(), { timeout: 30_000 })
+        .toBe(1);
+
+      await pageObjects.alertsTablePage.openActionsMenuForRow(0);
+      await pageObjects.alertsTablePage.clickViewInvestigation();
+
+      await expect
+        .poll(() => page.url())
+        .toContain(`/app/nightshift?investigationId=investigation-1`);
+      await expect(page.testSubj.locator('nightshiftInvestigationDetailFlyout')).toBeVisible();
+    });
+
+    test('views a completed investigation from the alert detail action menu', async ({
+      page,
+      pageObjects,
+    }) => {
+      await pageObjects.alertPage.goto(alertId);
+      await pageObjects.alertPage.openActionsMenu();
+
+      await pageObjects.alertPage.clickViewInvestigation();
+
+      await expect
+        .poll(() => page.url())
+        .toContain(`/app/nightshift?investigationId=investigation-1`);
+      await expect(page.testSubj.locator('nightshiftInvestigationDetailFlyout')).toBeVisible();
+    });
   }
 );

@@ -114,4 +114,29 @@ describe('generateEsql — doc-prefetch orchestration', () => {
       expect.anything()
     );
   });
+
+  it('defaults execute to data and forwards schema and none', async () => {
+    const { model } = createMockModel();
+    const logger = { debug: jest.fn() } as unknown as Logger;
+    const esClient = {} as ElasticsearchClient;
+    const base = { nlQuery: 'count log lines', index: 'logs-test', model, esClient, logger };
+
+    await generateEsql(base);
+    expect(mockGraphInvoke).toHaveBeenCalledWith(
+      expect.objectContaining({ execute: 'data' }),
+      expect.anything()
+    );
+
+    await generateEsql({ ...base, execute: 'none' });
+    expect(mockGraphInvoke).toHaveBeenCalledWith(
+      expect.objectContaining({ execute: 'none' }),
+      expect.anything()
+    );
+
+    await generateEsql({ ...base, execute: 'schema' });
+    expect(mockGraphInvoke).toHaveBeenCalledWith(
+      expect.objectContaining({ execute: 'schema' }),
+      expect.anything()
+    );
+  });
 });

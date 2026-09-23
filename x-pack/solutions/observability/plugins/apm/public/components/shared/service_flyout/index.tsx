@@ -8,7 +8,7 @@
 import { EuiFlyoutBody, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
 import { Global, css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Environment } from '../../../../common/environment_rt';
 import type { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { useTimeRange } from '../../../hooks/use_time_range';
@@ -114,6 +114,11 @@ export function ServiceFlyout({
   const [flyoutTransactionType, setFlyoutTransactionType] = useState(transactionType ?? '');
   const [refreshToken, setRefreshToken] = useState(Date.now());
 
+  // Local only — do not call refreshTimeRange() (app-wide timeRangeId / unrelated page fetchers).
+  const onRefresh = useCallback(() => {
+    setRefreshToken(Date.now());
+  }, []);
+
   const capabilities = useServiceFlyoutCapabilities({
     serviceName: service.name,
     environment: flyoutEnvironment,
@@ -129,6 +134,10 @@ export function ServiceFlyout({
   const [selectedTabId, setSelectedTabId] = useState<ServiceFlyoutTabId>(
     SERVICE_FLYOUT_DEFAULT_TAB_ID
   );
+
+  // One history key per flyout instance groups nested flyouts (transaction detail,
+  // full trace) into the same EUI back-button stack — same pattern as Discover.
+  const flyoutHistoryKey = useMemo(() => historyKey ?? Symbol('apmServiceFlyout'), [historyKey]);
 
   const { client: telemetryClient, source: telemetrySource } = telemetry;
   useEffect(() => {
@@ -171,15 +180,18 @@ export function ServiceFlyout({
           service,
           capabilities,
           indices,
+          flyoutHistoryKey,
           preferDocumentBasedCharts,
           filters: {
             environment: flyoutEnvironment,
             setEnvironment: setFlyoutEnvironment,
             rangeFrom: flyoutRange.rangeFrom,
             rangeTo: flyoutRange.rangeTo,
+            start,
+            end,
             setRange: setFlyoutRange,
             refreshToken,
-            onRefresh: () => setRefreshToken(Date.now()),
+            onRefresh,
             transactionType: flyoutTransactionType,
             setTransactionType: setFlyoutTransactionType,
             latencyAggregationType,
@@ -200,10 +212,10 @@ export function ServiceFlyout({
             ownFocus={false}
             size="m"
             paddingSize="m"
-            resizable
+            // No resizable — pixel-locked width re-clamps under a nested session="start".
             minWidth={660}
             session="start"
-            historyKey={historyKey}
+            historyKey={flyoutHistoryKey}
             flyoutMenuProps={{ title }}
             aria-labelledby={titleId}
           >

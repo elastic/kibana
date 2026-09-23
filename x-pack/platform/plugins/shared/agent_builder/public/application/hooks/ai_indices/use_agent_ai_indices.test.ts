@@ -55,7 +55,7 @@ describe('useAgentAiIndices', () => {
 
     await waitFor(() => {
       expect(mockAddErrorToast).toHaveBeenCalledWith({
-        title: 'Failed to fetch default AI indices',
+        title: 'Failed to fetch default AI Indices',
         text: 'boom',
       });
     });

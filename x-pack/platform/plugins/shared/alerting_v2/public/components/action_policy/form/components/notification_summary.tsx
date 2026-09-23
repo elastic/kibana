@@ -10,6 +10,7 @@ import type { GroupingMode, ThrottleStrategy } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
+import { formatInterval } from '../../format_interval';
 import { GROUPING_MODE_HELP_TEXT } from '../constants';
 import type { ActionPolicyFormState } from '../types';
 
@@ -19,51 +20,6 @@ interface DispatchSummaryInput {
   throttleStrategy: ThrottleStrategy;
   throttleInterval: string;
 }
-
-type DurationUnit = 's' | 'm' | 'h' | 'd';
-
-const isDurationUnit = (c: string): c is DurationUnit => ['s', 'm', 'h', 'd'].includes(c);
-
-const formatInterval = (raw: string): string => {
-  if (!raw) return '';
-  const unit = raw.charAt(raw.length - 1);
-  const value = parseInt(raw, 10);
-  if (Number.isNaN(value) || !isDurationUnit(unit)) return raw;
-  switch (unit) {
-    case 's':
-      return i18n.translate(
-        'xpack.alertingV2.actionPolicy.form.notificationSummary.duration.seconds',
-        {
-          defaultMessage: '{value, plural, one {# second} other {# seconds}}',
-          values: { value },
-        }
-      );
-    case 'm':
-      return i18n.translate(
-        'xpack.alertingV2.actionPolicy.form.notificationSummary.duration.minutes',
-        {
-          defaultMessage: '{value, plural, one {# minute} other {# minutes}}',
-          values: { value },
-        }
-      );
-    case 'h':
-      return i18n.translate(
-        'xpack.alertingV2.actionPolicy.form.notificationSummary.duration.hours',
-        {
-          defaultMessage: '{value, plural, one {# hour} other {# hours}}',
-          values: { value },
-        }
-      );
-    case 'd':
-      return i18n.translate(
-        'xpack.alertingV2.actionPolicy.form.notificationSummary.duration.days',
-        {
-          defaultMessage: '{value, plural, one {# day} other {# days}}',
-          values: { value },
-        }
-      );
-  }
-};
 
 /**
  * Human-readable outcome sentence for the current notification configuration.

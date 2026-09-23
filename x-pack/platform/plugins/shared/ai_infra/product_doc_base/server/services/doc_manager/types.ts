@@ -82,6 +82,8 @@ export interface DocumentationManagerAPI {
 export interface SecurityLabsStatusResponse {
   status: InstallationStatus;
   version?: string;
+  /** Last time the status was written, ISO 8601 */
+  updatedAt?: string;
   latestVersion?: string;
   isUpdateAvailable?: boolean;
   failureReason?: string;

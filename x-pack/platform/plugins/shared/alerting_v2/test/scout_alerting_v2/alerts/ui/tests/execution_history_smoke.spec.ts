@@ -69,7 +69,6 @@ test.describe('Execution history — smoke', { tag: '@local-stateful-classic' },
         name: policyName,
         description: 'Scout execution history UI smoke policy',
         destinations: [{ type: 'workflow', id: workflowId }],
-        matcher: { expression: `rule.id: "${ruleId}"` },
       })
     );
 

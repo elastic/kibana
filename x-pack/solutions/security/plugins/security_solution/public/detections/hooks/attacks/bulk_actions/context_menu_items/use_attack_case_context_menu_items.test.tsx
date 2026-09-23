@@ -17,22 +17,16 @@ const mockUseBulkAttackCaseItems = useBulkAttackCaseItems as jest.MockedFunction
 
 describe('useAttackCaseContextMenuItems', () => {
   const closePopover = jest.fn();
+  const title = 'Attack title';
 
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseBulkAttackCaseItems.mockReturnValue({
       items: [
         {
-          label: 'Add to new case',
-          key: 'attack-add-to-new-case',
-          'data-test-subj': 'attack-add-to-new-case',
-          disableOnQuery: true,
-          onClick: jest.fn(),
-        },
-        {
-          label: 'Add to existing case',
-          key: 'attack-add-to-existing-case',
-          'data-test-subj': 'attack-add-to-existing-case',
+          label: 'Add to case',
+          key: 'attack-add-to-case',
+          'data-test-subj': 'attack-add-to-case',
           disableOnQuery: true,
           onClick: jest.fn(),
         },
@@ -51,24 +45,17 @@ describe('useAttackCaseContextMenuItems', () => {
             markdownComment: 'markdown',
           },
         ],
-        title: 'Attack title',
         closePopover,
+        title,
       })
     );
 
     expect(result.current.items).toMatchInlineSnapshot(`
       Array [
         Object {
-          "data-test-subj": "attack-add-to-new-case",
-          "key": "attack-add-to-new-case",
-          "name": "Add to new case",
-          "onClick": [Function],
-          "panel": undefined,
-        },
-        Object {
-          "data-test-subj": "attack-add-to-existing-case",
-          "key": "attack-add-to-existing-case",
-          "name": "Add to existing case",
+          "data-test-subj": "attack-add-to-case",
+          "key": "attack-add-to-case",
+          "name": "Add to case",
           "onClick": [Function],
           "panel": undefined,
         },
@@ -86,13 +73,13 @@ describe('useAttackCaseContextMenuItems', () => {
             markdownComment: 'markdown',
           },
         ],
-        title: 'Attack title',
+        title,
       })
     );
 
     expect(mockUseBulkAttackCaseItems).toHaveBeenCalledWith({
       closePopover: undefined,
-      title: 'Attack title',
+      title,
     });
   });
 
@@ -106,15 +93,15 @@ describe('useAttackCaseContextMenuItems', () => {
             markdownComment: 'markdown',
           },
         ],
-        title: 'Attack title',
         telemetrySource: 'attacks_page_group_take_action',
+        title,
       })
     );
 
     expect(mockUseBulkAttackCaseItems).toHaveBeenCalledWith({
-      title: 'Attack title',
       closePopover: undefined,
       telemetrySource: 'attacks_page_group_take_action',
+      title,
     });
   });
 
@@ -128,14 +115,14 @@ describe('useAttackCaseContextMenuItems', () => {
             markdownComment: 'markdown',
           },
         ],
-        title: 'Attack title',
         closePopover,
+        title,
       })
     );
 
     expect(mockUseBulkAttackCaseItems).toHaveBeenCalledWith({
       closePopover,
-      title: 'Attack title',
+      title,
     });
   });
 
@@ -143,7 +130,7 @@ describe('useAttackCaseContextMenuItems', () => {
     const { result } = renderHook(() =>
       useAttackCaseContextMenuItems({
         attacksWithCase: [],
-        title: 'Attack title',
+        title,
       })
     );
 

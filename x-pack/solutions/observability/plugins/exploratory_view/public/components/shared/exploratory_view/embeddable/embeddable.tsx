@@ -9,7 +9,12 @@ import { i18n } from '@kbn/i18n';
 import type { Position } from '@elastic/charts';
 import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
-import type { LensPublicStart, UserMessage, XYVisualizationState } from '@kbn/lens-plugin/public';
+import type {
+  LensPublicStart,
+  UserMessage,
+  XYVisualizationState,
+  EmbeddableComponentProps,
+} from '@kbn/lens-plugin/public';
 import { observabilityFeatureId } from '@kbn/observability-shared-plugin/public';
 import styled from '@emotion/styled';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
@@ -19,6 +24,7 @@ import type { AllSeries } from '../../../..';
 import type { AppDataType, ReportViewType } from '../types';
 import { OperationTypeComponent } from '../series_editor/columns/operation_type_select';
 import type { DataViewState } from '../hooks/use_app_data_view';
+import type { AnnotationLayerConfig } from '../configurations/lens_attributes';
 import type { ReportConfigMap } from '../contexts/exploratory_view_config';
 import type { ActionTypes } from './use_actions';
 import { useActions } from './use_actions';
@@ -47,6 +53,7 @@ export interface ExploratoryEmbeddableProps {
   legendPosition?: Position;
   hideTicks?: boolean;
   onBrushEnd?: (param: { range: number[] }) => void;
+  onAnnotationClick?: EmbeddableComponentProps['onAnnotationClick'];
   onLoad?: (loading: boolean) => void;
   onBeforeBadgesRender?: (userMessages: UserMessage[]) => UserMessage[];
   caseOwner?: string;
@@ -63,6 +70,9 @@ export interface ExploratoryEmbeddableProps {
   dataTestSubj?: string;
   searchSessionId?: string;
   dslFilters?: QueryDslQueryContainer[];
+  // Query-driven annotation layers (e.g. alert markers), resolved against their
+  // own data view independent of `attributes`' main chart data.
+  annotationLayers?: AnnotationLayerConfig[];
 }
 
 export interface ExploratoryEmbeddableComponentProps extends ExploratoryEmbeddableProps {
@@ -84,6 +94,7 @@ export default function Embeddable(props: ExploratoryEmbeddableComponentProps) {
     legendPosition,
     lens,
     onBrushEnd,
+    onAnnotationClick,
     caseOwner = observabilityFeatureId,
     reportType,
     showCalculationMethod = false,
@@ -213,6 +224,7 @@ export default function Embeddable(props: ExploratoryEmbeddableComponentProps) {
         timeRange={timeRange}
         attributes={{ ...attributesJSON, title: '', description: '' }}
         onBrushEnd={onBrushEnd}
+        onAnnotationClick={onAnnotationClick}
         withDefaultActions={Boolean(withActions)}
         disabledActions={DISABLED_ACTIONS}
         extraActions={actions}

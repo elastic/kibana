@@ -10,6 +10,7 @@
 import React, { useCallback, useState } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiFlyout, EuiSwitch, useGeneratedHtmlId } from '@elastic/eui';
+import type { DiscoverSessionApiData } from '@kbn/as-code-discover-schema';
 import { ExportJsonFlyoutContent } from '@kbn/as-code-export-flyout-component';
 import { i18n } from '@kbn/i18n';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
@@ -19,10 +20,7 @@ import {
   DISCOVER_SESSION_API_BASE_PATH,
   DISCOVER_SESSION_API_VERSION,
 } from '../../../../../../common/constants';
-import type {
-  DiscoverSessionApiData,
-  DiscoverSessionSanitizeRequest,
-} from '../../../../../../server';
+import type { DiscoverSessionSanitizeRequest } from '../../../../../../server';
 
 interface ExportDiscoverSessionJsonFlyoutProps {
   canShowDevTools: boolean;

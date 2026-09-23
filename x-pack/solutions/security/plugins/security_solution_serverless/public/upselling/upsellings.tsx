@@ -12,6 +12,7 @@ import {
   UPGRADE_INVESTIGATION_GUIDE_INTERACTIONS,
   PREBUILT_RULE_CUSTOMIZATION,
   PREBUILT_RULE_CUSTOMIZATION_DESCRIPTION,
+  ENDPOINT_CUSTOM_YARA_SIGNATURES,
 } from '@kbn/security-solution-upselling/messages';
 import type {
   UpsellingMessageId,
@@ -194,6 +195,13 @@ export const upsellingMessages: UpsellingMessages = [
     message: PREBUILT_RULE_CUSTOMIZATION_DESCRIPTION(
       getProductTypeByPLI(ProductFeatureKey.prebuiltRuleCustomization) ?? '',
       'feature tier'
+    ),
+  },
+  {
+    id: 'endpoint_custom_yara_signatures',
+    pli: ProductFeatureKey.endpointCustomYaraSignatures,
+    message: ENDPOINT_CUSTOM_YARA_SIGNATURES(
+      getProductTypeByPLI(ProductFeatureKey.endpointCustomYaraSignatures) ?? ''
     ),
   },
 ];

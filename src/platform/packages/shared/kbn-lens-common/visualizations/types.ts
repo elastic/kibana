@@ -23,6 +23,7 @@ import type {
   BrushTriggerEvent,
   ClickTriggerEvent,
   MultiClickTriggerEvent,
+  AnnotationClickTriggerEvent,
 } from '@kbn/charts-plugin/public';
 import type { ChartSizeEvent } from '@kbn/chart-expressions-common';
 import type { Reference } from '@kbn/content-management-utils';
@@ -184,6 +185,7 @@ export type TriggerEvent =
   | BrushTriggerEvent
   | ClickTriggerEvent
   | MultiClickTriggerEvent
+  | AnnotationClickTriggerEvent
   | LensTableRowContextMenuEvent
   | LensAlertRulesEvent;
 
@@ -197,6 +199,7 @@ export interface ILensInterpreterRenderHandlers extends IInterpreterRenderHandle
     event:
       | ClickTriggerEvent
       | BrushTriggerEvent
+      | AnnotationClickTriggerEvent
       | LensEditEvent<LensEditSupportedActions>
       | LensTableRowContextMenuEvent
       | ChartSizeEvent

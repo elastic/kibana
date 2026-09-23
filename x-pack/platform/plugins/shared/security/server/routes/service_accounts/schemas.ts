@@ -5,14 +5,9 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { createServiceAccountParamsSchema } from '../../../common/service_accounts';
 
-import { serviceAccountNameSchema } from '../../../common/service_accounts';
-
-export const createServiceAccountBodySchema = z
-  .object({
-    name: serviceAccountNameSchema.min(1),
-  })
+export const createServiceAccountBodySchema = createServiceAccountParamsSchema
   // Rejects unknown keys, so callers cannot supply `assumable_by` or `role_assignments` — Kibana
   // derives both itself.
   .strict();

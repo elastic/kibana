@@ -6,7 +6,6 @@
  */
 
 import type { IRouter, Logger } from '@kbn/core/server';
-import type { AlertZeroConfig } from '../config';
 import type { AlertZeroSpaceIdResolver } from '../types';
 import type { WatchesService } from '../services/watches/watches_service';
 import type { WorkersService } from '../services/workers/workers_service';
@@ -16,16 +15,13 @@ import { registerListWatchesRoute } from './watches/list_watches';
 import { registerGetWatchRoute } from './watches/get_watch';
 import { registerListWorkersRoute } from './workers/list_workers';
 import { registerUpdateWorkerRoute } from './workers/update_worker';
-import { registerListInvestigationsRoute } from './investigations/list_investigations';
-import { registerGetInvestigationRoute } from './investigations/get_investigation';
-import { registerListInvestigationProposalsRoute } from './investigations/list_proposals';
-import { registerGetProposalsRoute } from './proposals/get_proposals';
+import { registerGetProposalsByCategoryRoute } from './proposals/get_proposals_by_category';
+import { registerGetClosedProposalsRoute } from './proposals/get_closed_proposals';
 import { registerListActionsRoute } from './actions/list_actions';
 
 export interface RouteDependencies {
   router: IRouter;
   logger: Logger;
-  config: AlertZeroConfig;
   getSpaceId: AlertZeroSpaceIdResolver;
   getWatchesService: () => WatchesService;
   getWorkersService: () => WorkersService;
@@ -38,9 +34,7 @@ export const registerRoutes = (deps: RouteDependencies): void => {
   registerGetWatchRoute(deps);
   registerListWorkersRoute(deps);
   registerUpdateWorkerRoute(deps);
-  registerListInvestigationsRoute(deps);
-  registerGetInvestigationRoute(deps);
-  registerListInvestigationProposalsRoute(deps);
-  registerGetProposalsRoute(deps);
+  registerGetProposalsByCategoryRoute(deps);
+  registerGetClosedProposalsRoute(deps);
   registerListActionsRoute(deps);
 };

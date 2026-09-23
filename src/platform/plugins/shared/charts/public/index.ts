@@ -55,6 +55,24 @@ export interface MultiClickTriggerEvent {
   data: MultiValueClickContext['data'];
 }
 
+export interface AnnotationClickDatum {
+  id: string;
+  type: 'point' | 'range';
+  time: string;
+  endTime?: string;
+  label?: string;
+  isGrouped?: boolean;
+  /** Query-driven extra fields (keys are the source field names, without a `field:` prefix). */
+  extras?: Record<string, unknown>;
+}
+
+export interface AnnotationClickTriggerEvent {
+  name: 'annotationClick';
+  data: {
+    annotations: AnnotationClickDatum[];
+  };
+}
+
 export type {
   CustomPaletteArguments,
   CustomPaletteState,

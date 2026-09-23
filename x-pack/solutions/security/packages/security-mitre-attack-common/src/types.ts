@@ -16,6 +16,30 @@ import type {
 /** Whether to include only active entities or all (including revoked / deprecated). */
 export type MitreEntityStatus = 'active' | 'all';
 
+export type MitreTacticSummary = Omit<MitreTactic, 'description'>;
+export type MitreTechniqueSummary = Omit<MitreTechnique, 'description'>;
+export type MitreSubtechniqueSummary = Omit<MitreSubtechnique, 'description'>;
+export type MitreEntitySummary =
+  | MitreTacticSummary
+  | MitreTechniqueSummary
+  | MitreSubtechniqueSummary;
+
+export interface MitreEntitySummaryBuckets {
+  tactics: MitreTacticSummary[];
+  techniques: MitreTechniqueSummary[];
+  subtechniques: MitreSubtechniqueSummary[];
+}
+
+/**
+ * The data portion returned to consumers after a MITRE entity fetch: the summary
+ * buckets plus the resolved framework version. Used by useMitreConfiguration()
+ * consumers that need the version alongside the entity lists.
+ */
+export interface MitreEntitySummaryCollection extends MitreEntitySummaryBuckets {
+  /** Resolved framework version, absent when no index data exists for the framework. */
+  frameworkVersion?: string;
+}
+
 /** Entities grouped by type but without the containing framework metadata. */
 export interface MitreEntityBuckets {
   tactics: MitreTactic[];

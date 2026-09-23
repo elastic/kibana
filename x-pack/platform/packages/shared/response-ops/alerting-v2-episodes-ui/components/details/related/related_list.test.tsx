@@ -14,8 +14,8 @@ import { RuleStateStatus } from '../../../types/rule_state';
 import { RelatedAlertEpisodesList } from './related_list';
 
 jest.mock('../../related/related_alert_episode', () => ({
-  RelatedAlertEpisode: ({ episode, ruleName }: { episode: AlertEpisode; ruleName: string }) => (
-    <div data-test-subj="mockRelatedAlertEpisode">{ruleName || episode['episode.id']}</div>
+  RelatedAlertEpisode: ({ episode, title }: { episode: AlertEpisode; title: React.ReactNode }) => (
+    <div data-test-subj="mockRelatedAlertEpisode">{title || episode['episode.id']}</div>
   ),
 }));
 
@@ -61,7 +61,7 @@ describe('RelatedAlertEpisodesList', () => {
     expect(screen.getAllByText('Test Rule')).toHaveLength(2);
   });
 
-  it('uses the episode id label when the rule is missing', () => {
+  it('uses the episode short id when the rule is missing', () => {
     render(
       <I18nProvider>
         <RelatedAlertEpisodesList
@@ -74,7 +74,9 @@ describe('RelatedAlertEpisodesList', () => {
       </I18nProvider>
     );
 
-    expect(screen.getByText('Episode ID: ep-missing-rule')).toBeInTheDocument();
+    // Short id instead of the full uuid, since there is no rule name to show.
+    expect(screen.getByText('Episode')).toBeInTheDocument();
+    expect(screen.getByTestId('relatedAlertEpisodeShortId')).toHaveTextContent('ep-miss');
   });
 
   it('renders nothing inside the list when rows is empty', () => {

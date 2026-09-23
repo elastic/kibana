@@ -199,6 +199,29 @@ describe('datatable cell renderer', () => {
       expect(screen.getByRole('button')).toHaveTextContent('formatted 123');
     });
 
+    it('renders a clickable dash for missing values', async () => {
+      const handleFilterClick = jest.fn();
+      const cellRenderer = makeCellRenderer({
+        columnConfig: {
+          columns: [{ columnId: 'a', type: 'lens_datatable_column', oneClickFilter: true }],
+          sortingColumnId: '',
+          sortingDirection: 'none',
+        },
+        formatters: { a: defaultFieldFormat },
+      });
+
+      renderCell({
+        cellRenderer,
+        context: { handleFilterClick, table: makeTable([{ a: null }]) },
+      });
+
+      expect(screen.getByRole('button')).toHaveTextContent('-');
+      expect(screen.queryByText('(null)')).not.toBeInTheDocument();
+
+      await userEvent.click(screen.getByRole('button'));
+      expect(handleFilterClick).toHaveBeenCalledWith('a', null, 0, 0);
+    });
+
     it('passes the correct colIndex to handleFilterClick for a non-first column', async () => {
       const handleFilterClick = jest.fn();
       const cellRenderer = makeCellRenderer({
@@ -382,7 +405,7 @@ describe('datatable cell renderer', () => {
           context: { table: makeTable([{ a: null }]) },
         });
 
-        expect(screen.getByText('(null)')).toBeInTheDocument();
+        expect(screen.getByText('-')).toBeInTheDocument();
         expect(setCellProps).not.toHaveBeenCalled();
         expect(screen.queryByTestId('lnsTableCellContentBadge')).not.toBeInTheDocument();
         expect(screen.getByTestId('lnsTableCellContent')).not.toHaveClass('lnsTableCell--colored');
@@ -473,7 +496,7 @@ describe('datatable cell renderer', () => {
             },
             convertToReact: (x: unknown) => {
               if (typeof x === 'number' && Number.isNaN(x)) {
-                return <span>(null)</span>;
+                return <span>{'-'}</span>;
               }
               return `formatted ${x}`;
             },
@@ -486,7 +509,7 @@ describe('datatable cell renderer', () => {
         context: { table: makeTable([{ a: Number.NaN }]) },
       });
 
-      expect(screen.getByText('(null)')).toBeInTheDocument();
+      expect(screen.getByText('-')).toBeInTheDocument();
       expect(screen.queryByTestId('lnsTableCellContentBadge')).not.toBeInTheDocument();
     });
 

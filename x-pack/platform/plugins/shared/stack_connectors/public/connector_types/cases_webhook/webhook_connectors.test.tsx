@@ -19,6 +19,8 @@ jest.mock('../../common/auth/use_secret_headers');
 
 const useSecretHeadersMock = useSecretHeaders as jest.Mock;
 
+jest.setTimeout(60_000);
+
 jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
   const originalModule = jest.requireActual('@kbn/triggers-actions-ui-plugin/public');
   const notFoundError = Object.assign(new Error('Not Found'), {

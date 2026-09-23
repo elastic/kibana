@@ -13,7 +13,7 @@ import type {
   SelectionOption,
   StepSelectionValues,
 } from '@kbn/workflows/types/v1';
-import type { StepPropertyItem } from '../../features/validate_workflow_yaml/model/types';
+import type { StepPropertyItem } from '@kbn/workflows-yaml';
 
 const searchOptionsCache = new Map<string, SelectionOption[]>();
 

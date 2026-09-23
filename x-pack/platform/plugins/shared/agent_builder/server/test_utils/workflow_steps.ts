@@ -57,6 +57,7 @@ export const createWorkflowStepConversationClientMock = (
     patchMetadata: jest.Mock;
     create: jest.Mock;
     exists: jest.Mock;
+    addCustomEvents: jest.Mock;
   }> = {}
 ) => {
   const get = overrides.get ?? jest.fn();
@@ -66,6 +67,7 @@ export const createWorkflowStepConversationClientMock = (
   const patchMetadata = overrides.patchMetadata ?? jest.fn();
   const create = overrides.create ?? jest.fn();
   const exists = overrides.exists ?? jest.fn().mockResolvedValue(false);
+  const addCustomEvents = overrides.addCustomEvents ?? jest.fn().mockResolvedValue([]);
   const getConversationClient = jest.fn().mockResolvedValue({
     get,
     bulkGet,
@@ -74,9 +76,20 @@ export const createWorkflowStepConversationClientMock = (
     patchMetadata,
     create,
     exists,
+    addCustomEvents,
   } as unknown as ConversationClient);
 
-  return { get, bulkGet, list, search, patchMetadata, create, exists, getConversationClient };
+  return {
+    get,
+    bulkGet,
+    list,
+    search,
+    patchMetadata,
+    create,
+    exists,
+    addCustomEvents,
+    getConversationClient,
+  };
 };
 
 export const createWorkflowStepAgentRegistryMock = (

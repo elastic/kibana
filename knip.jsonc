@@ -26,8 +26,6 @@
     "@eslint-community/eslint-plugin-eslint-comments",
     // @types/d3-color is used by @elastic/kibana-d3-color; knip can't trace this.
     "@types/d3-color",
-    // watchpack has no type declarations; knip cannot associate this package with its import.
-    "@types/watchpack",
     // used by our FTR; knip can't trace this.
     "geckodriver",
     // these are used as Cypress reporters via reporter_config.json; knip can't trace the
@@ -73,7 +71,11 @@
     // hoisting, so knip attributes the imports to it; the root declaration then looks unused on
     // CI's partial graph (it traces fine locally with the complete module graph).
     "http2-proxy",
-    "http2-wrapper"
+    "http2-wrapper",
+    // mongodb and mongodb-connection-string-url are loaded via dynamic import() in
+    // @kbn/connector-specs (the MongoDB connector); knip can't trace dynamic imports.
+    "mongodb",
+    "mongodb-connection-string-url"
   ],
   "workspaces": {
     ".": {
@@ -105,7 +107,6 @@
       },
       "webpack": {
         "config": [
-          "packages/kbn-optimizer/src/worker/webpack.config.ts",
           "src/platform/plugins/shared/console/packaging/webpack.config.js",
           "src/platform/packages/private/kbn-ui-shared-deps-npm/webpack.config.js",
           "src/platform/packages/private/kbn-ui-shared-deps-src/webpack.config.js",

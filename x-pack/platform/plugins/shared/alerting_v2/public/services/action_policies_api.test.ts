@@ -92,10 +92,10 @@ describe('ActionPoliciesApi', () => {
     it('forwards the trimmed matcher as a query parameter', async () => {
       http.get.mockResolvedValue([]);
 
-      await api.fetchRuleEventFields('  rule.id : "abc"  ');
+      await api.fetchRuleEventFields('  episode_id: "abc"  ');
 
       expect(http.get).toHaveBeenCalledWith('/internal/alerting/v2/suggestions/rule_event_fields', {
-        query: { matcher: 'rule.id : "abc"' },
+        query: { matcher: 'episode_id: "abc"' },
       });
     });
 

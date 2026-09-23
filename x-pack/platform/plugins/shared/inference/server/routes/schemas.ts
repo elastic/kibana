@@ -158,6 +158,7 @@ const promptSchema = schema.object({
                   schema.literal(ModelFamily.Claude),
                   schema.literal(ModelFamily.GPT),
                   schema.literal(ModelFamily.Gemini),
+                  schema.literal(ModelFamily.Unknown),
                 ]),
                 id: schema.maybe(schema.string()),
               }),

@@ -7,6 +7,7 @@
 
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { test, testData } from '../../fixtures';
 
 test.describe('Home page', { tag: tags.stateful.classic }, () => {
@@ -23,11 +24,9 @@ test.describe('Home page', { tag: tags.stateful.classic }, () => {
     await profilingHomePage.gotoWithTimeRange(rangeFrom, rangeTo);
     await profilingHomePage.expectTopNContent();
     // Since we're using loginAsAdmin(), the user has privileges and won't see the limitation message
-    // Instead, we should verify the page loads successfully. The default location is Stacktraces > Threads, so we can check for content specific to that tab.
+    // Instead, we should verify the page loads successfully. The default location is Stacktraces > Executables, so we can check for content specific to that tab.
     await expect(
-      profilingHomePage.page
-        .getByTestId('profilingPageTemplate')
-        .getByRole('heading', { name: 'Stacktraces' })
+      profilingHomePage.page.getByTestId(APP_HEADER_TEST_SUBJECTS.title).getByText('Stacktraces')
     ).toBeVisible();
   });
 

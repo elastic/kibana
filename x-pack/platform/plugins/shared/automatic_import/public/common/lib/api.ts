@@ -19,6 +19,7 @@ import type { LangSmithOptions } from './lang_smith';
 
 export const FLEET_PACKAGES_PATH = `/api/fleet/epm/packages`;
 export const AUTOMATIC_IMPORT_INTEGRATIONS_PATH = `/api/automatic_import/integrations`;
+export const AUTOMATIC_IMPORT_INTEGRATION_NAMES_PATH = `/api/automatic_import/integration_names`;
 
 const fleetDefaultHeaders = {
   'Elastic-Api-Version': '2023-10-31',
@@ -29,8 +30,20 @@ export interface RequestDeps {
   abortSignal?: AbortSignal;
 }
 
+export interface EpmPackageInstallationInfo {
+  install_source?: string;
+  version?: string;
+}
+
+export interface EpmPackageItem {
+  id: string;
+  type: string;
+  version?: string;
+  installationInfo?: EpmPackageInstallationInfo;
+}
+
 export interface EpmPackageResponse {
-  items: Array<{ id: string; type: string }>;
+  items: EpmPackageItem[];
   _meta?: {
     install_source: string;
     name: string;
@@ -103,6 +116,20 @@ export const getAllIntegrations = async ({
   abortSignal,
 }: RequestDeps): Promise<GetAllAutoImportIntegrationsResponse> =>
   http.get<GetAllAutoImportIntegrationsResponse>(AUTOMATIC_IMPORT_INTEGRATIONS_PATH, {
+    version: '1',
+    signal: abortSignal,
+  });
+
+export interface AutoImportIntegrationName {
+  integrationId: string;
+  title: string;
+}
+
+export const getAllIntegrationNames = async ({
+  http,
+  abortSignal,
+}: RequestDeps): Promise<AutoImportIntegrationName[]> =>
+  http.get<AutoImportIntegrationName[]>(AUTOMATIC_IMPORT_INTEGRATION_NAMES_PATH, {
     version: '1',
     signal: abortSignal,
   });

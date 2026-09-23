@@ -40,11 +40,10 @@ export class ProfilingDataAccessPlugin implements Plugin {
       : undefined;
 
     const services = registerServices({
-      createProfilingEsClient: ({ esClient: defaultEsClient, useDefaultAuth = false }) => {
-        const esClient =
-          profilingSpecificEsClient && !useDefaultAuth
-            ? profilingSpecificEsClient.asInternalUser
-            : defaultEsClient;
+      createProfilingEsClient: ({ esClient: defaultEsClient }) => {
+        const esClient = profilingSpecificEsClient
+          ? profilingSpecificEsClient.asInternalUser
+          : defaultEsClient;
 
         return createProfilingEsClient({ esClient });
       },

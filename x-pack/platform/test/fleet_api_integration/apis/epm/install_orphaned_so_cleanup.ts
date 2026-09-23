@@ -14,6 +14,8 @@ const PKG_NAME = 'all_assets';
 const PKG_VERSION = '0.1.0';
 // Archive ID of the tag SO embedded in all_assets 0.1.0 (kibana/tag/sample_tag.json)
 const TAG_ARCHIVE_ID = 'sample_tag';
+// Archive ID of the dashboard SO embedded in all_assets 0.1.0 (kibana/dashboard/sample_dashboard.json)
+const DASHBOARD_ARCHIVE_ID = 'sample_dashboard';
 const TEST_SPACE = 'fleet-orphan-test-space';
 
 export default function (providerContext: FtrProviderContext) {
@@ -61,7 +63,7 @@ export default function (providerContext: FtrProviderContext) {
    * Two orphans sharing the same originId trigger the ambiguous_conflict error on the
    * next import; the fix deletes them before the import runs.
    */
-  const injectOrphanedTag = async (soId: string, spaceId = 'default') => {
+  const injectOrphanedTag = async (soId: string, spaceId = 'default', managed = true) => {
     await es.index({
       index: '.kibana',
       // No namespace prefix — multiple-isolated types use 'tag:{id}' for all spaces.
@@ -73,7 +75,7 @@ export default function (providerContext: FtrProviderContext) {
         originId: TAG_ARCHIVE_ID,
         // Space membership for multiple-isolated types is encoded in the namespaces array.
         namespaces: [spaceId],
-        managed: false,
+        managed,
         references: [],
         updated_at: new Date().toISOString(),
         created_at: new Date().toISOString(),
@@ -91,6 +93,57 @@ export default function (providerContext: FtrProviderContext) {
 
   const orphanExists = async (soId: string) => {
     return es.exists({ index: '.kibana', id: `tag:${soId}` }).catch(() => false);
+  };
+
+  /**
+   * Injects a dashboard SO directly into .kibana_analytics with originId = DASHBOARD_ARCHIVE_ID.
+   *
+   * `dashboard` is also a `multiple-isolated` type (namespaceType: 'multiple-isolated'),
+   * so its ES _id format is `dashboard:{uuid}` and space membership is tracked via the
+   * `namespaces` array — identical to `tag`. Fleet rewrites dashboard ids to a v5 UUID
+   * and sets `originId` to the archive id when installing into additional spaces, which
+   * is the path most likely to produce orphans when an install fails mid-way.
+   *
+   * Note: dashboard SOs use `indexPattern: ANALYTICS_SAVED_OBJECT_INDEX`, so they live
+   * in `.kibana_analytics`, not `.kibana`.
+   */
+  const injectOrphanedDashboard = async (soId: string, spaceId = 'default', managed = true) => {
+    await es.index({
+      index: '.kibana_analytics',
+      id: `dashboard:${soId}`,
+      refresh: 'wait_for',
+      document: {
+        type: 'dashboard',
+        dashboard: {
+          title: `fleet-test-orphan-dashboard-${soId}`,
+          description: 'Orphaned dashboard from a failed Fleet install',
+          hits: 0,
+          kibanaSavedObjectMeta: { searchSourceJSON: '{}' },
+          optionsJSON: '{}',
+          panelsJSON: '[]',
+          timeRestore: false,
+          version: 1,
+        },
+        originId: DASHBOARD_ARCHIVE_ID,
+        namespaces: [spaceId],
+        managed,
+        references: [],
+        updated_at: new Date().toISOString(),
+        created_at: new Date().toISOString(),
+      },
+    });
+  };
+
+  const deleteOrphanedDashboard = async (soId: string) => {
+    await es
+      .delete({ index: '.kibana_analytics', id: `dashboard:${soId}`, refresh: 'wait_for' })
+      .catch((err: Error & { statusCode?: number }) => {
+        if (err?.statusCode !== 404) throw err;
+      });
+  };
+
+  const dashboardOrphanExists = async (soId: string) => {
+    return es.exists({ index: '.kibana_analytics', id: `dashboard:${soId}` }).catch(() => false);
   };
 
   describe('Orphaned multiple-isolated SO cleanup during package install', () => {
@@ -150,6 +203,19 @@ export default function (providerContext: FtrProviderContext) {
         await installPackage().expect(200);
 
         expect(await orphanExists('fleet-orphan-test-1')).to.be(false);
+      });
+
+      it('does not delete a user-copied tag SO (managed=false) that shares the same originId', async () => {
+        // A user copy of a package tag preserves originId but is managed=false.
+        // The cleanup step must not delete it — only Fleet-managed (managed=true) orphans
+        // are eligible for deletion. Note: the subsequent import with overwrite:true may
+        // still update the object's attributes; that is a pre-existing limitation.
+        await injectOrphanedTag('fleet-orphan-user-copy-1', 'default', false);
+
+        await installPackage().expect(200);
+
+        expect(await orphanExists('fleet-orphan-user-copy-1')).to.be(true);
+        await deleteOrphanedTag('fleet-orphan-user-copy-1');
       });
     });
 
@@ -221,6 +287,94 @@ export default function (providerContext: FtrProviderContext) {
         await installPackage(TEST_SPACE).expect(200);
 
         expect(await orphanExists('fleet-orphan-space-1')).to.be(false);
+      });
+    });
+
+    // Dashboard-specific tests: `dashboard` is a `multiple-isolated` type that Fleet
+    // rewrites to UUID ids in additional spaces.  Before Fix 1 (issue #210141), dashboard
+    // orphans were never cleaned up because `MULTIPLE_ISOLATED_KIBANA_SO_TYPES` excluded
+    // `dashboard`.  These tests verify the cleanup now runs for dashboards too.
+    describe('dashboard orphan cleanup (Fix 1 — issue #210141)', () => {
+      const DASHBOARD_SPACE = 'fleet-orphan-dashboard-space';
+
+      before(async () => {
+        if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
+        await createSpace(DASHBOARD_SPACE).expect(200);
+      });
+
+      after(async () => {
+        if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
+        await deleteSpace(DASHBOARD_SPACE);
+      });
+
+      afterEach(async () => {
+        if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
+        await uninstallPackage();
+        await deleteOrphanedDashboard('fleet-orphan-dash-1');
+        await deleteOrphanedDashboard('fleet-orphan-dash-2');
+        await deleteOrphanedDashboard('fleet-orphan-dash-default-1');
+      });
+
+      it('succeeds on a fresh install when two orphaned dashboard SOs share the same originId in a non-default space', async () => {
+        // Simulate two prior failed installs of all_assets into DASHBOARD_SPACE: each
+        // allocated a new UUID dashboard with originId=sample_dashboard but did not
+        // finish flushing refs. Without Fix 1, the next install raises ambiguous_conflict
+        // because the SO importer finds two destinations with the same origin.
+        await injectOrphanedDashboard('fleet-orphan-dash-1', DASHBOARD_SPACE);
+        await injectOrphanedDashboard('fleet-orphan-dash-2', DASHBOARD_SPACE);
+
+        const response = await installPackage(DASHBOARD_SPACE);
+        expect(response.status).to.be(200);
+      });
+
+      it('removes orphaned dashboard SOs in the target space during install', async () => {
+        await injectOrphanedDashboard('fleet-orphan-dash-1', DASHBOARD_SPACE);
+        await injectOrphanedDashboard('fleet-orphan-dash-2', DASHBOARD_SPACE);
+
+        await installPackage(DASHBOARD_SPACE).expect(200);
+
+        expect(await dashboardOrphanExists('fleet-orphan-dash-1')).to.be(false);
+        expect(await dashboardOrphanExists('fleet-orphan-dash-2')).to.be(false);
+      });
+
+      it('does not delete orphaned dashboard SOs that belong to a different space', async () => {
+        // Orphan lives in the default space; install targets DASHBOARD_SPACE. The cleanup
+        // must be namespace-scoped and must not delete objects from other spaces.
+        await injectOrphanedDashboard('fleet-orphan-dash-default-1');
+
+        await installPackage(DASHBOARD_SPACE).expect(200);
+
+        expect(await dashboardOrphanExists('fleet-orphan-dash-default-1')).to.be(true);
+      });
+
+      it('succeeds on reinstall when a dashboard orphan from a failed reinstall is present', async () => {
+        await installPackage(DASHBOARD_SPACE).expect(200);
+        await injectOrphanedDashboard('fleet-orphan-dash-1', DASHBOARD_SPACE);
+
+        const reinstallResponse = await installPackage(DASHBOARD_SPACE);
+        expect(reinstallResponse.status).to.be(200);
+      });
+
+      it('removes the orphaned dashboard SO left by a failed reinstall', async () => {
+        await installPackage(DASHBOARD_SPACE).expect(200);
+        await injectOrphanedDashboard('fleet-orphan-dash-1', DASHBOARD_SPACE);
+
+        await installPackage(DASHBOARD_SPACE).expect(200);
+
+        expect(await dashboardOrphanExists('fleet-orphan-dash-1')).to.be(false);
+      });
+
+      it('does not delete a user-copied dashboard SO (managed=false) that shares the same originId', async () => {
+        // A dashboard copied to a space via "Copy to spaces" preserves originId but is
+        // managed=false. The cleanup step must not delete it — only Fleet-managed
+        // (managed=true) orphans are eligible. Note: the subsequent import with overwrite:true
+        // may still update the object's attributes; that is a pre-existing limitation.
+        await injectOrphanedDashboard('fleet-orphan-dash-user-copy-1', DASHBOARD_SPACE, false);
+
+        await installPackage(DASHBOARD_SPACE).expect(200);
+
+        expect(await dashboardOrphanExists('fleet-orphan-dash-user-copy-1')).to.be(true);
+        await deleteOrphanedDashboard('fleet-orphan-dash-user-copy-1');
       });
     });
   });

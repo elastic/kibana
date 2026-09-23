@@ -13,7 +13,6 @@ import {
   ALERTING_V2_ACTION_POLICIES_READ_ROLE,
   apiTest,
   buildCreateActionPolicyData,
-  buildCreateRuleData,
   getActionPolicyUrl,
   NO_ACCESS_ROLE,
   testData,
@@ -102,15 +101,12 @@ apiTest.describe('Get action policy API', { tag: '@local-stateful-classic' }, ()
   );
 
   apiTest(
-    'get: returns the rule.id matcher for a rule-scoped policy',
+    'get: returns the tags matcher for a tag-scoped policy',
     async ({ apiClient, apiServices }) => {
-      const rule = await apiServices.alertingV2.rules.create(
-        buildCreateRuleData({ metadata: { name: 'rule-for-get-scoped' } })
-      );
-      const matcher = { expression: `rule.id: "${rule.id}"` };
+      const matcher = { tags: ['notify-get-scoped'] };
       const created = await apiServices.alertingV2.actionPolicies.create(
         buildCreateActionPolicyData({
-          name: 'rule-scoped-policy',
+          name: 'tag-scoped-policy',
           matcher,
         })
       );

@@ -6,110 +6,32 @@
  */
 
 import React from 'react';
-import {
-  EuiDescriptionList,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  type EuiDescriptionListProps,
-} from '@elastic/eui';
+import { EuiDescriptionList } from '@elastic/eui';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { getGroupingModeLabel, getThrottleStrategyLabel } from '../labels';
-import { BadgeList } from '../badge_list';
-import { DestinationRow } from './destination_row';
-import { MatcherSummary } from './matcher_summary';
-
-const EMPTY_VALUE = '-';
+import {
+  getDescriptionItem,
+  getMatcherItem,
+  getDispatchModeItem,
+  getGroupByItem,
+  getFrequencyItem,
+  getDestinationsItem,
+} from './definition_items';
 
 export interface ActionPolicyDefinitionListProps {
   policy: Partial<ActionPolicyResponse>;
 }
 
 export const ActionPolicyDefinitionList = ({ policy }: ActionPolicyDefinitionListProps) => {
-  const {
-    description,
-    matcher,
-    grouping_mode: groupingMode,
-    group_by: groupBy,
-    throttle,
-    destinations = [],
-  } = policy;
+  const groupByItem = getGroupByItem(policy);
 
-  const items: EuiDescriptionListProps['listItems'] = [
-    {
-      title: i18n.translate('xpack.alertingV2.actionPolicyDefinition.description', {
-        defaultMessage: 'Description',
-      }),
-      description: description || EMPTY_VALUE,
-    },
-  ];
-
-  items.push(
-    {
-      title: i18n.translate('xpack.alertingV2.actionPolicyDefinition.matcher', {
-        defaultMessage: 'Matcher',
-      }),
-      description: <MatcherSummary matcher={matcher} />,
-    },
-    {
-      title: i18n.translate('xpack.alertingV2.actionPolicyDefinition.dispatchMode', {
-        defaultMessage: 'Dispatch per',
-      }),
-      description: getGroupingModeLabel(groupingMode),
-    }
-  );
-
-  if (groupingMode === 'per_field' && groupBy && groupBy.length > 0) {
-    items.push({
-      title: i18n.translate('xpack.alertingV2.actionPolicyDefinition.groupBy', {
-        defaultMessage: 'Group by',
-      }),
-      description: <BadgeList items={groupBy} />,
-    });
-  }
-
-  items.push({
-    title: i18n.translate('xpack.alertingV2.actionPolicyDefinition.frequency', {
-      defaultMessage: 'Frequency',
-    }),
-    description: (
-      <>
-        {getThrottleStrategyLabel(throttle?.strategy, groupingMode)}
-        {throttle?.interval && (
-          <>
-            {' '}
-            <EuiText size="xs" color="subdued">
-              <FormattedMessage
-                id="xpack.alertingV2.actionPolicyDefinition.interval"
-                defaultMessage="Every {interval}"
-                values={{ interval: throttle.interval }}
-              />
-            </EuiText>
-          </>
-        )}
-      </>
-    ),
-  });
-
-  items.push({
-    title: i18n.translate('xpack.alertingV2.actionPolicyDefinition.destinations', {
-      defaultMessage: 'Destinations',
-    }),
-    description:
-      destinations.length === 0 ? (
-        EMPTY_VALUE
-      ) : (
-        <EuiFlexGroup direction="column" gutterSize="xs">
-          {destinations.map((destination) => (
-            <EuiFlexItem key={`${destination.type}-${destination.id}`}>
-              <DestinationRow destination={destination} />
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGroup>
-      ),
-  });
+  const items = [
+    getDescriptionItem(policy),
+    getMatcherItem(policy),
+    getDispatchModeItem(policy),
+    ...(groupByItem ? [groupByItem] : []),
+    getFrequencyItem(policy),
+    getDestinationsItem(policy),
+  ].filter((item): item is NonNullable<typeof item> => item !== null);
 
   return (
     <EuiDescriptionList

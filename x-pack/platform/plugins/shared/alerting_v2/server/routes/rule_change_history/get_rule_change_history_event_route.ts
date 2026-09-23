@@ -27,7 +27,7 @@ import { getRuleChangeHistoryEventOasExamples } from './get_rule_change_history_
 @injectable()
 export class GetRuleChangeHistoryEventRoute extends BaseAlertingRoute {
   static method = 'get' as const;
-  static path = `${ALERTING_V2_INTERNAL_RULE_CHANGE_HISTORY_API_PATH}/{eventId}`;
+  static path = `${ALERTING_V2_INTERNAL_RULE_CHANGE_HISTORY_API_PATH}/{event_id}`;
   static security: RouteSecurity = {
     authz: {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.rules.read],
@@ -71,7 +71,7 @@ export class GetRuleChangeHistoryEventRoute extends BaseAlertingRoute {
   protected async execute() {
     const result = await this.ruleChangesHistoryClient.getRuleChange({
       ruleId: this.request.params.id,
-      eventId: this.request.params.eventId,
+      eventId: this.request.params.event_id,
     });
     return this.ctx.response.ok({ body: result });
   }

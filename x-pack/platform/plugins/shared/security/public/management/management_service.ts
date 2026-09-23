@@ -20,6 +20,7 @@ import { apiKeysManagementApp } from './api_keys';
 import { applicationConnectionsManagementApp } from './application_connections';
 import { roleMappingsManagementApp } from './role_mappings';
 import { rolesManagementApp } from './roles';
+import { serviceAccountsManagementApp } from './service_accounts';
 import { usersManagementApp } from './users';
 import type { SecurityLicense } from '../../common';
 import type { ConfigType } from '../config';
@@ -52,11 +53,13 @@ export class ManagementService {
   private readonly userManagementEnabled: boolean;
   private readonly roleManagementEnabled: boolean;
   private readonly roleMappingManagementEnabled: boolean;
+  private readonly serviceAccountsEnabled: boolean;
 
   constructor(config: ConfigType) {
     this.userManagementEnabled = config.ui?.userManagementEnabled !== false;
     this.roleManagementEnabled = config.roleManagementEnabled !== false;
     this.roleMappingManagementEnabled = config.ui?.roleMappingManagementEnabled !== false;
+    this.serviceAccountsEnabled = config.serviceAccounts?.enabled === true;
   }
 
   setup({ getStartServices, management, authc, license, fatalErrors, buildFlavor }: SetupParams) {
@@ -81,6 +84,10 @@ export class ManagementService {
     }
 
     this.securitySection.registerApp(apiKeysManagementApp.create({ authc, getStartServices }));
+
+    if (this.serviceAccountsEnabled) {
+      this.securitySection.registerApp(serviceAccountsManagementApp.create({ getStartServices }));
+    }
 
     if (this.roleMappingManagementEnabled) {
       this.securitySection.registerApp(roleMappingsManagementApp.create({ getStartServices }));
@@ -119,6 +126,13 @@ export class ManagementService {
       if (this.isUIAMEnabled) {
         securityManagementAppsStatuses.push([
           securitySection.getApp(applicationConnectionsManagementApp.id)!,
+          features.showLinks,
+        ]);
+      }
+
+      if (this.serviceAccountsEnabled) {
+        securityManagementAppsStatuses.push([
+          securitySection.getApp(serviceAccountsManagementApp.id)!,
           features.showLinks,
         ]);
       }

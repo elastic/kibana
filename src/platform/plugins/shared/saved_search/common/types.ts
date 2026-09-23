@@ -102,6 +102,7 @@ export type SavedSearch = Partial<SavedSearchAttributes> & {
   searchSource: ISearchSource;
   id?: string;
   tags?: string[] | undefined;
+  tabTypeState?: DiscoverSessionTabTypeState;
 
   // Whether or not this saved search is managed by the system
   managed: boolean;

@@ -44,6 +44,12 @@ export const GCP_INPUT_FIELDS_TEST_SUBJECTS = {
   CLOUD_CONNECTOR_ID: 'gcpCredentialsCloudConnectorIdInput',
 };
 
+export const CLOUD_CONNECTOR_IAC_CHECK_TEST_SUBJECTS = {
+  CALLOUT: 'cloudConnectorIacCheckCallout',
+  UPDATE_STACK_BUTTON: 'cloudConnectorIacCheckUpdateStackButton',
+  IAC_CHECK_TEMPLATE_ERROR_CALLOUT: 'cloudConnectorIacCheckTemplateErrorCallout',
+};
+
 export const CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS = {
   FLYOUT: 'cloudConnectorPoliciesFlyout',
   CLOSE_BUTTON: 'cloudConnectorPoliciesFlyoutCloseButton',
@@ -61,4 +67,12 @@ export const CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS = {
   FOOTER_SAVE_BUTTON: 'cloudConnectorFooterSaveButton',
   DELETE_CONFIRM_MODAL: 'cloudConnectorDeleteConfirmModal',
   DELETE_MODAL_CALLOUT: 'cloudConnectorDeleteModalCallout',
+  IAC_SECTION: 'cloudConnectorIacSection',
+  IAC_DEPLOYMENT_ID_INPUT: 'cloudConnectorIacDeploymentIdInput',
+  IAC_VIEW_STACK_LINK: 'cloudConnectorIacViewStackLink',
+  IAC_UPGRADE_CALLOUT: 'cloudConnectorIacUpgradeCallout',
+  IAC_UPDATE_STACK_BUTTON: 'cloudConnectorIacUpdateStackButton',
+  IAC_REDEPLOY_BUTTON: 'cloudConnectorIacRedeployButton',
+  IAC_LAUNCH_BUTTON: 'cloudConnectorIacLaunchButton',
+  IAC_TEMPLATE_ERROR_CALLOUT: 'cloudConnectorIacTemplateErrorCallout',
 };

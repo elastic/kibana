@@ -33,7 +33,9 @@ export const RiskScoreUsefulLinksSection = () => {
       <EuiSpacer />
       <StyledList>
         <li>
-          <LinkAnchor id={SecurityPageName.entityAnalytics}>{i18n.EA_DASHBOARD_LINK}</LinkAnchor>
+          <LinkAnchor id={SecurityPageName.entityAnalyticsHomePage}>
+            {i18n.EA_DASHBOARD_LINK}
+          </LinkAnchor>
           <EuiSpacer size="s" />
         </li>
         <li>

@@ -99,7 +99,7 @@ export const LandingPage = () => {
   const {
     services: { featureFlags },
   } = useKibana<ObservabilityOnboardingAppServices>();
-  const isAddDataPageV2Enabled = featureFlags.getBooleanValue(IS_ADD_DATA_PAGE_V2_ENABLED, false);
+  const isAddDataPageV2Enabled = featureFlags.useBooleanValue(IS_ADD_DATA_PAGE_V2_ENABLED, false);
 
   if (isAddDataPageV2Enabled) {
     return <AddDataPageV2 />;

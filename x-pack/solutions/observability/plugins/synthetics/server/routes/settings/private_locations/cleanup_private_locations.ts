@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
+import { queryBoolean } from '../../zod_query';
 import { PRIVATE_LOCATION_WRITE_API } from '../../../feature';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
@@ -15,8 +16,8 @@ export const cleanupPrivateLocationRoute: SyntheticsRestApiRouteFactory = () => 
   method: 'PUT',
   path: SYNTHETICS_API_URLS.PRIVATE_LOCATIONS_CLEANUP,
   validate: {
-    query: schema.object({
-      hasAlreadyDoneCleanup: schema.maybe(schema.boolean()),
+    query: z.strictObject({
+      hasAlreadyDoneCleanup: queryBoolean.optional(),
     }),
   },
   requiredPrivileges: [PRIVATE_LOCATION_WRITE_API],

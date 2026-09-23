@@ -31,8 +31,11 @@ import {
   DISCOVER_CELL_ACTIONS_TRIGGER_ID,
   SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID,
 } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { isOfQueryType } from '@kbn/es-query';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { getAllowedSampleSize, getMaxAllowedSampleSize } from '../../utils/get_allowed_sample_size';
+import { buildDatatableFromTextBasedGrid } from '../../utils/build_datatable_from_text_based_grid';
+import { getGridRequestId } from '../../utils/get_grid_request_id';
 import { isEsqlMode } from '../initialize_fetch';
 import type { SearchEmbeddableApi, SearchEmbeddableStateManager } from '../types';
 import { DiscoverGridEmbeddable, type InlineEditing } from './saved_search_grid';
@@ -313,6 +316,29 @@ export function SearchEmbeddableGridComponent({
     [discoverServices.uiSettings, savedSearchQuery]
   );
 
+  const searchContext = useMemo(() => {
+    if (!isEsql) {
+      return undefined;
+    }
+    const table = buildDatatableFromTextBasedGrid({ rows, columnsMeta });
+    if (!table || !savedSearchQuery) {
+      return undefined;
+    }
+    return {
+      query: savedSearchQuery,
+      filterQuery:
+        fetchContext?.query && isOfQueryType(fetchContext.query) ? fetchContext.query : undefined,
+      table,
+      filters: fetchContext?.filters,
+      timeRange,
+      esqlVariables: fetchContext?.esqlVariables ?? esqlVariables,
+      searchSessionId: fetchContext?.searchSessionId,
+      projectRouting: fetchContext?.projectRouting,
+      isApproximate: fetchContext?.isApproximate,
+      requestId: getGridRequestId(rows),
+    };
+  }, [columnsMeta, esqlVariables, fetchContext, isEsql, rows, savedSearchQuery, timeRange]);
+
   return (
     <DiscoverGridEmbeddableMemoized
       {...onStateEditedProps}
@@ -361,6 +387,7 @@ export function SearchEmbeddableGridComponent({
       initialDocViewerTabId={initialDocViewerTabId}
       docViewerRef={docViewerRef}
       setExpandedDoc={setExpandedDoc}
+      searchContext={searchContext}
       flyoutMenuTrailingActions={flyoutMenuTrailingActions}
     />
   );

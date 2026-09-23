@@ -41,11 +41,13 @@ module.exports = (_, argv) => {
         'qs',
 
         /**
-         * babel runtime helpers referenced from entry chunks
-         * determined by running:
+         * babel runtime helpers referenced from entry chunks, derived from
+         * bundle stats:
          *
-         *  node scripts/build_kibana_platform_plugins --dist --profile
-         *  node scripts/find_babel_runtime_helpers_in_use.js
+         *  node scripts/build_kibana_platform_plugins --dist --profile-stats-only
+         *
+         * then inspect target/public/bundles/stats.json for
+         * @babel/runtime/helpers modules.
          */
         '@babel/runtime/helpers/assertThisInitialized',
         '@babel/runtime/helpers/classPrivateFieldGet',

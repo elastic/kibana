@@ -13,7 +13,7 @@ import type {
   ScoutTestConfig,
   SpaceSolutionView,
 } from '@kbn/scout';
-import type { DiscoverSessionApiDataInput } from '../../../../../server/api/schema';
+import type { DiscoverSessionApiDataInput } from '@kbn/as-code-discover-schema';
 import { LOGS } from './constants';
 
 interface SetupOptions {

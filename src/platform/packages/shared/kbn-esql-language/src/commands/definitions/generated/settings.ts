@@ -14,6 +14,7 @@ export enum EsqlSettingNames {
   PROJECT_ROUTING = 'project_routing',
   TIME_ZONE = 'time_zone',
   UNMAPPED_FIELDS = 'unmapped_fields',
+  WILDCARDS_MATCH_DATASETS = 'wildcards_match_datasets',
 }
 
 const approximation = {
@@ -46,7 +47,7 @@ const projectRouting = {
   description:
     'Limits the scope of a [cross-project search (CPS)](https://www.elastic.co/docs/reference/query-languages/esql/esql-cross-serverless-projects) to specific projects before query execution, based on a [Lucene query expression](docs-content://explore-analyze/cross-project-search/cross-project-search-project-routing.md) evaluated against project tags. Excluded projects are not queried, which can reduce cost and latency. ',
   serverlessOnly: true,
-  preview: true,
+  preview: false,
   snapshotOnly: false,
   ignoreAsSuggestion: false,
 };
@@ -73,4 +74,22 @@ const unmappedFields = {
   ignoreAsSuggestion: false,
 };
 
-export const settings = [approximation, columnMetadata, projectRouting, timeZone, unmappedFields];
+const wildcardsMatchDatasets = {
+  name: EsqlSettingNames.WILDCARDS_MATCH_DATASETS,
+  type: ['boolean'],
+  description:
+    'When enabled, a wildcard in `FROM` also matches registered datasets. Defaults to `false`, so a wildcard does not match a dataset and a dataset is reached by its exact name. Other abstractions a wildcard matches are unaffected.\n\nThe default itself is configurable. If a query does not specify a value, the `esql.query.settings.wildcards_match_datasets` cluster setting supplies it. If that cluster setting is not configured either, the value is `false`. ',
+  serverlessOnly: false,
+  preview: true,
+  snapshotOnly: false,
+  ignoreAsSuggestion: false,
+};
+
+export const settings = [
+  approximation,
+  columnMetadata,
+  projectRouting,
+  timeZone,
+  unmappedFields,
+  wildcardsMatchDatasets,
+];

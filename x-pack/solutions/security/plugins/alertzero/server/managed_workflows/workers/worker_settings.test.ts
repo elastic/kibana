@@ -81,8 +81,10 @@ describe('createWorkerSettingsRegistration', () => {
 
     it('rejects stored values missing the declared schedule interval', () => {
       // No defaulting of older development state: the document has to be reset.
+      // The autonomy level has to be one this worker allows, or the throw could be
+      // attributed to the wrong field.
       expect(() =>
-        registration.toSettings({ settingsVersion: 1, autonomyLevel: 'assisted' })
+        registration.toSettings({ settingsVersion: 1, autonomyLevel: 'manual' })
       ).toThrow(/scheduleInterval/);
     });
 
@@ -114,6 +116,28 @@ describe('createWorkerSettingsRegistration', () => {
           scheduleInterval: '24h',
         })
       ).toThrow(/settings are invalid: autonomy/);
+    });
+
+    it('reads a stored level this Worker no longer offers as the closest one it does', () => {
+      // Attack Discovery dropped its assisted gate; a document written while it existed must not
+      // strand the Worker as unreadable, and must not be read as MORE autonomous than stored.
+      expect(
+        registration.toSettings({
+          settingsVersion: 1,
+          autonomyLevel: 'assisted',
+          scheduleInterval: '24h',
+        })
+      ).toEqual({ workerId: AD_WORKER_ID, autonomy: 'manual', scheduleInterval: '24h' });
+    });
+
+    it('leaves a stored level this Worker does offer alone', () => {
+      expect(
+        registration.toSettings({
+          settingsVersion: 1,
+          autonomyLevel: 'supervised',
+          scheduleInterval: '24h',
+        })
+      ).toEqual({ workerId: AD_WORKER_ID, autonomy: 'supervised', scheduleInterval: '24h' });
     });
 
     it('rejects unsupported stored fields by name', () => {
@@ -148,14 +172,29 @@ describe('createWorkerSettingsRegistration', () => {
       });
     });
 
+    // `supervised` rather than `assisted`: this worker gates exactly one thing, so it
+    // allows only `manual` and `supervised`. The interval is what is under test here,
+    // but the patch still has to be one the worker would accept.
     it('leaves the interval untouched when only autonomy is patched', () => {
+      const applied = registration.applyPatch(
+        { settingsVersion: 1, autonomyLevel: 'manual', scheduleInterval: '15m' },
+        { autonomy: 'supervised' }
+      );
+
+      expect(applied).toEqual({
+        values: { settingsVersion: 1, autonomyLevel: 'supervised', scheduleInterval: '15m' },
+      });
+    });
+
+    it('rejects an autonomy patch outside the levels this Worker allows', () => {
+      // Attack Discovery has no assisted gate, so the patch is refused rather than stored.
       const applied = registration.applyPatch(
         { settingsVersion: 1, autonomyLevel: 'manual', scheduleInterval: '15m' },
         { autonomy: 'assisted' }
       );
 
-      expect(applied).toEqual({
-        values: { settingsVersion: 1, autonomyLevel: 'assisted', scheduleInterval: '15m' },
+      expect(applied).toMatchObject({
+        invalid: expect.stringContaining('autonomy'),
       });
     });
   });
@@ -189,6 +228,27 @@ describe('createWorkerSettingsRegistration', () => {
       ).toThrow(/extras/);
     });
 
+    it('reads a stored supervised level as assisted, the closest level it still offers', () => {
+      // Rule Tuning has no unattended level: the document written while it did stays readable.
+      expect(registration.toSettings({ ...storedDefaults, autonomyLevel: 'supervised' })).toEqual({
+        workerId: RULE_TUNING_WORKER_ID,
+        autonomy: 'assisted',
+        scheduleInterval: '2h',
+        extras: { analysisWindowDays: 14 },
+      });
+    });
+
+    it('persists the projected level on the next save, so the document heals', () => {
+      expect(
+        registration.applyPatch(
+          { ...storedDefaults, autonomyLevel: 'supervised' },
+          { scheduleInterval: '6h' }
+        )
+      ).toEqual({
+        values: { ...storedDefaults, autonomyLevel: 'assisted', scheduleInterval: '6h' },
+      });
+    });
+
     it('rejects stored extras missing a required field, naming it', () => {
       // No default repair: a document written before the field existed has to be reset.
       expect(() => registration.toSettings({ ...storedDefaults, extras: {} })).toThrow(
@@ -203,15 +263,16 @@ describe('createWorkerSettingsRegistration', () => {
     });
 
     it('replaces extras whole when the patch supplies them', () => {
+      // Seeded at a level this Worker allows (manual/assisted); the assertion is about extras.
       expect(
         registration.applyPatch(
-          { ...storedDefaults, autonomyLevel: 'supervised' },
+          { ...storedDefaults, autonomyLevel: 'assisted' },
           { extras: { analysisWindowDays: 7 } }
         )
       ).toEqual({
         values: {
           ...storedDefaults,
-          autonomyLevel: 'supervised',
+          autonomyLevel: 'assisted',
           extras: { analysisWindowDays: 7 },
         },
       });

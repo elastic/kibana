@@ -36,6 +36,8 @@ export {
 } from './seed';
 export type { SeedAd2ScenarioProfileOptions } from './seed';
 
+export { createAd2RunMarker, getAd2RunMarker } from './run_marker';
+
 export type {
   Ad2IndexedAlert,
   Ad2IndexedRawEvent,
@@ -43,5 +45,6 @@ export type {
   Ad2ScenarioStep,
   Ad2SeedPlan,
   Ad2SeedProfile,
+  Ad2SeedRunScope,
   Ad2SeedSummary,
 } from './types';

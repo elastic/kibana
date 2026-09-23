@@ -35,10 +35,10 @@ export const CONVERSATION_QUEUE_CATEGORIES: ReadonlyArray<{
 
 export const CONVERSATION_CATEGORY_COLORS: Record<
   RecommendedAction,
-  'danger' | 'warning' | 'accentSecondary' | 'accent'
+  'danger' | 'warning' | 'primary' | 'hollow'
 > = {
   respond: 'danger',
   investigate: 'warning',
-  configure: 'accentSecondary',
-  closed: 'accent',
+  configure: 'primary',
+  closed: 'hollow',
 };

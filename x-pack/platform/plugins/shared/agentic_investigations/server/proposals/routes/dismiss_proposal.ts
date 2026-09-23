@@ -14,12 +14,16 @@ import type { RouteDependencies } from '../types';
 import { handleRouteError } from './handle_route_error';
 import { INTERNAL_ACCESS, proposalIdParamsSchema } from './shared';
 
+/**
+ * Same bridge as approve, down the gate's negative branch, plus the annotation
+ * the gate cannot carry. See `approve_proposal.ts` for why the decision itself
+ * lands asynchronously.
+ */
 export const registerDismissProposalRoute = ({
   router,
   logger,
   getProposalsService,
   getSpaceId,
-  resolveUser,
 }: RouteDependencies) => {
   router.versioned
     .post({
@@ -42,11 +46,16 @@ export const registerDismissProposalRoute = ({
       },
       async (_context, request, response) => {
         try {
-          const proposal = await getProposalsService().dismiss(request.params.id, request.body, {
+          // The reason is why this route writes at all: the gate would discard
+          // it, and a dismissal without one tells an analyst nothing.
+          const proposal = await getProposalsService().releaseGate(request.params.id, {
+            approved: false,
+            dismissReason: request.body.dismissReason,
+            rationale: request.body.rationale,
             spaceId: getSpaceId(request),
             request,
-            user: await resolveUser(request),
           });
+
           return response.ok({ body: proposal });
         } catch (error) {
           return handleRouteError(error, response, logger);

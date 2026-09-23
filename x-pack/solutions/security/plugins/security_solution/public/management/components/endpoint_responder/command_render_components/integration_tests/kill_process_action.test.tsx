@@ -524,6 +524,11 @@ describe('When using the kill-process action from response actions console', () 
   });
 
   describe('and the `--kill-descendants` feature flag is disabled', () => {
+    beforeEach(() => {
+      mockedContext.setExperimentalFlag({ responseActionsEndpointKillProcessDescendants: false });
+      setConsoleCommands();
+    });
+
     it('should treat `--kill-descendants` as an unsupported argument', async () => {
       await render();
       await enterConsoleCommand(renderResult, user, 'kill-process --pid 123 --kill-descendants');

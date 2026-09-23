@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
+import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import { proposalAttachmentType } from './proposal_attachment_type';
 
 export const registerProposalAttachment = (agentBuilder: AgentBuilderPluginSetup): void => {

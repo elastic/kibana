@@ -158,7 +158,11 @@ export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
       aria-label={i18n.translate('unifiedFieldList.fieldTypeFilter.popoverAriaLabel', {
         defaultMessage: 'Field type filter',
       })}
-      panelProps={{ css: { width: euiTheme.base * 18 } }}
+      panelProps={{
+        css: { width: euiTheme.base * 18 },
+        // The panel is portaled out of the sidebar, so tests need a handle on it.
+        'data-test-subj': `${testSubj}Panel`,
+      }}
       panelPaddingSize="none"
       anchorPosition="rightUp"
       display="block"

@@ -57,8 +57,9 @@ export const runSubqueriesValidationSuite = (setup: Setup) => {
       it('should validate custom command validation inside deeply nested subqueries', async () => {
         const { expectErrors } = await setup();
 
+        // A nonempty source ensures Elasticsearch does not skip RERANK validation.
         await expectErrors(
-          'FROM index, (FROM other_index, (FROM a_index | RERANK "query" ON keywordField WITH {}))',
+          'FROM index, (FROM other_index, (ROW keywordField = "text" | RERANK "query" ON keywordField WITH {}))',
           ['"inference_id" parameter is required for RERANK.']
         );
       });

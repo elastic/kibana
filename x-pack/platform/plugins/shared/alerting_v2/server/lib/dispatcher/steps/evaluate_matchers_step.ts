@@ -65,11 +65,18 @@ export class EvaluateMatchersStep implements DispatcherStep {
           continue;
         }
 
-        context ??= createMatcherContext(episode, rule);
-        const kql = policyMatcher.toKql()!;
+        if (!policyMatcher.matchesTags(rule?.tags)) continue;
+
+        const expression = policyMatcher.expressionKql();
+        if (expression === null) {
+          matched.push({ episode, policy });
+          continue;
+        }
+
+        context ??= createMatcherContext(episode);
         let isMatch = false;
         try {
-          isMatch = evaluateKql(kql, context);
+          isMatch = evaluateKql(expression, context);
         } catch {
           logger.warn({
             message: 'Policy matcher failed to evaluate; treating as no-match',

@@ -50,6 +50,7 @@ const meta: Meta<Args> = {
     numInfoBlocks: 0,
     footer: true,
     secondaryActionIcon: true,
+    primaryActionKind: 'button',
     resizable: true,
     type: 'overlay',
     ownFocus: false,
@@ -111,6 +112,13 @@ const meta: Meta<Args> = {
     secondaryActionIcon: {
       name: 'Secondary action icon',
       control: { type: 'boolean' },
+      if: { arg: 'footer', truthy: true },
+      table: { category: 'Footer' },
+    },
+    primaryActionKind: {
+      name: 'Primary action',
+      control: { type: 'inline-radio' },
+      options: ['button', 'menu'],
       if: { arg: 'footer', truthy: true },
       table: { category: 'Footer' },
     },
@@ -305,6 +313,7 @@ export const MenuBarPagination: Story = {
     titleIcon: { table: { disable: true } },
     description: { table: { disable: true } },
     footer: { table: { disable: true } },
+    primaryActionKind: { table: { disable: true } },
     numTabs: { table: { disable: true } },
   },
   args: {
@@ -393,6 +402,7 @@ export const MenuBarHistory: Story = {
     description: { table: { disable: true } },
     numPages: { table: { disable: true } },
     footer: { table: { disable: true } },
+    primaryActionKind: { table: { disable: true } },
     numTabs: { table: { disable: true } },
   },
   args: {
@@ -566,6 +576,69 @@ const ThrowOnClick = () => {
       Throw error
     </EuiButton>
   );
+};
+
+/**
+ * The menu opens upward from a bottom-anchored footer, so the body carries enough content to
+ * show it overlapping real content rather than empty space.
+ */
+const FooterActionsRender = (args: Args): React.JSX.Element => (
+  <FlyoutTemplate onClose={action('onClose')} size="m" {...buildFlyoutProps(args)}>
+    {headerZone(args, 'Footer actions')}
+    {bodyZone(
+      <>
+        <EuiText size="s">
+          <p>
+            Use the <strong>Primary action</strong> control to switch the footer between a plain{' '}
+            <code>PrimaryAction</code> button and a <code>PrimaryActionMenu</code>.
+          </p>
+          <p>
+            With the menu selected, the trigger carries a chevron that points up while open. Picking
+            an item closes the menu; <em>More options</em> opens a nested panel instead, and its
+            back button returns to the first panel. Escape closes the menu without closing the
+            flyout, and focus returns to the trigger.
+          </p>
+        </EuiText>
+        <EuiSpacer size="m" />
+        {unstructuredBlocks(args.numUnstructuredBlocks)}
+        {bodyText(fillContent('Body content sits behind the menu when it opens.'))}
+      </>
+    )}
+    {footerZone(args)}
+  </FlyoutTemplate>
+);
+
+export const FooterActions: Story = {
+  argTypes: {
+    numLeadingActions: { table: { disable: true } },
+    numTrailingActions: { table: { disable: true } },
+    numPages: { table: { disable: true } },
+    paginationJump: { table: { disable: true } },
+    titleIcon: { table: { disable: true } },
+    description: { table: { disable: true } },
+    numMetaBlocks: { table: { disable: true } },
+    numBadges: { table: { disable: true } },
+    numInfoBlocks: { table: { disable: true } },
+    numUnstructuredBlocks: { table: { disable: true } },
+    footer: { table: { disable: true } },
+    numTabs: { table: { disable: true } },
+    headerIsCollapsed: { table: { disable: true } },
+    numSections: { table: { disable: true } },
+    numSubsections: { table: { disable: true } },
+    sectionIcon: { table: { disable: true } },
+    sectionAction: { table: { disable: true } },
+    sectionHasBorder: { table: { disable: true } },
+  },
+  args: {
+    primaryActionKind: 'menu',
+    footer: true,
+    secondaryActionIcon: true,
+    numLeadingActions: 0,
+    numTrailingActions: 0,
+    numUnstructuredBlocks: 0,
+    description: true,
+  },
+  render: FooterActionsRender,
 };
 
 /** Header and body each sit behind their own error boundary, so a throw in one spares the other. */

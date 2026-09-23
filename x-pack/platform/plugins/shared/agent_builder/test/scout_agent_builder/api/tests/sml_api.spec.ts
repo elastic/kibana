@@ -36,30 +36,29 @@ import { postConverse } from '../fixtures/converse_http';
 const SML_FIXTURE_NOW = '2024-06-01T12:00:00.000Z';
 
 /** An SML document as written to the index: bookkeeping lives under the flattened `attributes`. */
+const SML_CRAWLER = { uri: 'crawler://sml', metadata: { ingestion_method: 'crawled' as const } };
+
+// Ids are `${type}:${originId}` so search can rebuild the origin uri.
 const indexedDocument = ({
-  id,
   type,
+  originId,
   title,
-  originUri,
   content,
 }: {
-  id: string;
   type: string;
+  originId: string;
   title: string;
-  originUri: string;
   content: string;
 }): SmlDocument => ({
+  '@timestamp': SML_FIXTURE_NOW,
+  id: `${type}:${originId}`,
   type,
   title,
   content,
+  updated_at: SML_FIXTURE_NOW,
+  references: [{ uri: `${type}://${originId}`, relation: 'derived_from' }],
+  governance: { provenance: { created_by: SML_CRAWLER, updated_by: SML_CRAWLER } },
   permissions: { kibana: { privileges: [] } },
-  attributes: {
-    id,
-    origin: { uri: originUri },
-    created_at: SML_FIXTURE_NOW,
-    updated_at: SML_FIXTURE_NOW,
-    ingestion_method: 'crawled',
-  },
 });
 
 apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.classic] }, () => {
@@ -69,18 +68,22 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
   // Shared search-test entry: indexed once and reused by hit, wildcard,
   // and compact-shape assertions so the index is never empty
   const searchRunId = randomUUID();
-  const searchEntryId = `sml-autocomplete-${searchRunId}`;
   const searchOriginId = `sml-origin-${searchRunId}`;
+  const searchEntryId = `visualization:${searchOriginId}`;
   const searchIndexedTitle = `sml autocomplete pacific bluefin ${searchRunId}`;
 
-  const longTitleEntryId = `sml-multitoken-long-${searchRunId}`;
-  const shortTitleEntryId = `sml-multitoken-short-${searchRunId}`;
+  const longTitleOriginId = `sml-multitoken-long-${searchRunId}`;
+  const longTitleEntryId = `visualization:${longTitleOriginId}`;
+  const shortTitleOriginId = `sml-multitoken-short-${searchRunId}`;
+  const shortTitleEntryId = `visualization:${shortTitleOriginId}`;
 
   // "sales" is not a registered SML type, so the slash here is part of the title.
-  const slashTitleEntryId = `sml-slash-title-${searchRunId}`;
+  const slashTitleOriginId = `sml-slash-title-${searchRunId}`;
+  const slashTitleEntryId = `dashboard:${slashTitleOriginId}`;
   const slashTitle = `sales/marketing overview ${searchRunId}`;
 
-  const capitalizedTypeEntryId = `sml-capitalized-type-${searchRunId}`;
+  const capitalizedTypeOriginId = `sml-capitalized-type-${searchRunId}`;
+  const capitalizedTypeEntryId = `Workflow:${capitalizedTypeOriginId}`;
 
   apiTest.beforeAll(async ({ samlAuth, esClient, config }) => {
     const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
@@ -96,10 +99,9 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
       index: smlIndexName,
       id: searchEntryId,
       document: indexedDocument({
-        id: searchEntryId,
         type: 'visualization',
+        originId: searchOriginId,
         title: searchIndexedTitle,
-        originUri: `visualization://${searchOriginId}`,
         content: 'pacific bluefin tuna content for sml scout',
       }),
     });
@@ -108,10 +110,9 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
       index: smlIndexName,
       id: slashTitleEntryId,
       document: indexedDocument({
-        id: slashTitleEntryId,
         type: 'dashboard',
+        originId: slashTitleOriginId,
         title: slashTitle,
-        originUri: `dashboard://${slashTitleEntryId}`,
         content: 'sales and marketing overview for sml scout',
       }),
     });
@@ -120,10 +121,9 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
       index: smlIndexName,
       id: longTitleEntryId,
       document: indexedDocument({
-        id: longTitleEntryId,
         type: 'visualization',
+        originId: longTitleOriginId,
         title: `yellowfin tuna migration patterns across the pacific ${searchRunId}`,
-        originUri: `visualization://${longTitleEntryId}`,
         content: 'yellowfin long title for sml scout ranking',
       }),
     });
@@ -132,10 +132,9 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
       index: smlIndexName,
       id: shortTitleEntryId,
       document: indexedDocument({
-        id: shortTitleEntryId,
         type: 'visualization',
+        originId: shortTitleOriginId,
         title: `yellowfin ${searchRunId}`,
-        originUri: `visualization://${shortTitleEntryId}`,
         content: 'yellowfin short title for sml scout ranking',
       }),
     });
@@ -144,10 +143,9 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
       index: smlIndexName,
       id: capitalizedTypeEntryId,
       document: indexedDocument({
-        id: capitalizedTypeEntryId,
         type: 'Workflow',
+        originId: capitalizedTypeOriginId,
         title: `capitalized type entry ${searchRunId}`,
-        originUri: `workflow://${capitalizedTypeEntryId}`,
         content: 'capitalized type for sml scout',
       }),
     });
@@ -325,20 +323,19 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
     'POST /internal/agent_builder/sml/_attach attaches entry and emits attachment_added',
     async ({ apiClient, asAdmin, log, kbnClient }) => {
       const runId = randomUUID();
-      const entryId = `sml-scout-attach-${runId}`;
       const indexedTitle = `sml scout attach ${runId}`;
       const llmProxy = await createLlmProxy(log);
       const { id: connectorId } = await createGenAiConnectorForProxy(kbnClient, llmProxy);
+      const entryId = `connector:${connectorId}`;
 
       await sysEsClient.index({
         index: smlIndexName,
         id: entryId,
         refresh: 'wait_for',
         document: indexedDocument({
-          id: entryId,
           type: 'connector',
+          originId: connectorId,
           title: indexedTitle,
-          originUri: `connector://${connectorId}`,
           content: `attach content for ${runId}`,
         }),
       });

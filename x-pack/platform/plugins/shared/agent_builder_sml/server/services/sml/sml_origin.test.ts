@@ -5,16 +5,26 @@
  * 2.0.
  */
 
-import { getSmlOriginId } from './sml_origin';
+import {
+  getSmlOriginId,
+  getSmlOriginUri,
+  smlEntryId,
+  smlEntryIdFromOriginUri,
+  smlOriginUriFromEntryId,
+} from './sml_origin';
 
 const docWithOriginUri = (uri: string) => ({
-  attributes: {
-    id: 'entry-1',
-    origin: { uri },
-    created_at: '2024-01-01T00:00:00.000Z',
-    updated_at: '2024-01-01T00:00:00.000Z',
-    ingestion_method: 'crawled' as const,
-  },
+  references: [{ uri: 'category://sales' }, { uri, relation: 'derived_from' as const }],
+});
+
+describe('getSmlOriginUri', () => {
+  it('returns the derived_from reference', () => {
+    expect(getSmlOriginUri(docWithOriginUri('dashboard://dash-1'))).toBe('dashboard://dash-1');
+  });
+
+  it('returns an empty string without a derived_from reference', () => {
+    expect(getSmlOriginUri({ references: [{ uri: 'category://sales' }] })).toBe('');
+  });
 });
 
 describe('getSmlOriginId', () => {
@@ -40,8 +50,18 @@ describe('getSmlOriginId', () => {
     expect(getSmlOriginId(docWithOriginUri('dashboard://'))).toBe('');
   });
 
-  // `sml_service` falls back to `uri: ''` when a hit has no `attributes.origin.uri`.
   it('returns an empty string for an empty uri', () => {
     expect(getSmlOriginId(docWithOriginUri(''))).toBe('');
+  });
+});
+
+describe('entry ids', () => {
+  it('derives the entry id from type and origin id', () => {
+    expect(smlEntryId('dashboard', 'dash-1')).toBe('dashboard:dash-1');
+  });
+
+  it('round-trips between origin uri and entry id', () => {
+    expect(smlEntryIdFromOriginUri('esql://my-query:v2/step1')).toBe('esql:my-query:v2/step1');
+    expect(smlOriginUriFromEntryId('esql:my-query:v2/step1')).toBe('esql://my-query:v2/step1');
   });
 });

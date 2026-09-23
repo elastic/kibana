@@ -115,7 +115,7 @@ When responding to an on-demand request, return ONLY the requested analysis. Do 
    \`\`\`
    The EVAL <timeField> = <timeField> + <shift_ms> milliseconds line is critical — it shifts the previous period timestamps forward so both series land on the same time axis positions and can be overlaid for comparison. Use an interval appropriate to the time span (e.g. 5 minutes for a 30 min window, 1 hour for a 24 h window, 1 day for a week).
 3. Execute the FORK query with executeEsql and compare the two periods: highlight absolute values, differences, and what grew or shrank. Calculate percentage changes yourself in the response text.
-4. IMPORTANT: Immediately after the analysis, call createVisualization with the FORK query as the esql parameter, chartType "xy", and query "line chart with timestamp on the x-axis and period as the series breakdown, comparing Current period vs Previous period". This renders both periods as separate lines overlaid on the same time axis — do NOT skip this step.
+4. IMPORTANT: Immediately after the analysis, call createVisualization with target { "type": "lens", "chartType": "xy", "esql": <the FORK query> } and query "line chart with timestamp on the x-axis and period as the series breakdown, comparing Current period vs Previous period". This renders both periods as separate lines overlaid on the same time axis — do NOT skip this step.
 
 
 #### Field Statistics (only when asked)

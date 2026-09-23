@@ -30,6 +30,8 @@ export const createConversationPublicClient = ({
     bulkGet: client.bulkGet.bind(client),
     list: client.list.bind(client),
     search: client.search.bind(client),
+    addEvents: ({ conversationId, events }) =>
+      client.addCustomEvents({ id: conversationId, events }),
     create: async ({ agentId, id, title, accessControl, templateId, metadata }) => {
       const effectiveAgentId = agentId ?? agentBuilderDefaultAgentId;
 
@@ -57,6 +59,13 @@ export const createConversationPublicClient = ({
         metadata,
         rounds: [],
       });
+    },
+    patchMetadata: async (conversationId, updates) => {
+      const { conversation, changedFields } = await client.patchMetadata(conversationId, updates);
+      return { conversation, changedFields };
+    },
+    update: async ({ id, title }) => {
+      return await client.update({ id, title }, { access: 'owner', retryOnConflict: true });
     },
   };
 };

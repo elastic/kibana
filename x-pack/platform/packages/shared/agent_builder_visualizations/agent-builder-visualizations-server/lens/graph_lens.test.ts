@@ -171,17 +171,13 @@ describe('createVisualizationGraph', () => {
     expect(finalState.authoringNote).toBeNull();
   });
 
-  it('regenerates esql for edits and includes the existing query as context', async () => {
+  it.each([false, true])('applyChartRules=%s edits regenerate ES|QL', async (applyChartRules) => {
     mockedGenerateEsql.mockResolvedValue({
       query: 'FROM logs-* | WHERE response.code != 503 | STATS count = COUNT(*)',
     } as Awaited<ReturnType<typeof generateEsql>>);
 
-    const graph = await createVisualizationGraph(
-      createMockModel() as never,
-      logger,
-      events,
-      esClient
-    );
+    const model = createMockModel();
+    const graph = await createVisualizationGraph(model as never, logger, events, esClient);
     const parsedExistingConfig = {
       type: 'metric',
       data_source: {
@@ -197,6 +193,7 @@ describe('createVisualizationGraph', () => {
       schema: {},
       existingConfig: JSON.stringify(parsedExistingConfig),
       parsedExistingConfig,
+      applyChartRules,
       esqlQuery: '',
       currentAttempt: 0,
       actions: [],
@@ -213,6 +210,22 @@ describe('createVisualizationGraph', () => {
     );
     expect(finalState.esqlQuery).toBe(
       'FROM logs-* | WHERE response.code != 503 | STATS count = COUNT(*)'
+    );
+    const { chatModel } = await model.getDefaultModel();
+    expect(chatModel.invoke).toHaveBeenCalledWith(
+      expect.arrayContaining([['human', expect.stringContaining(finalState.esqlQuery)]])
+    );
+    expect(chatModel.invoke).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        [
+          'system',
+          expect.stringContaining(
+            applyChartRules
+              ? 'Reauthor the presentation.'
+              : 'preserve unrelated presentation settings'
+          ),
+        ],
+      ])
     );
   });
 
@@ -349,5 +362,56 @@ describe('createVisualizationGraph', () => {
     for (const layer of validated.layers ?? []) {
       expect(layer.data_source).toEqual({ type: 'esql', query: canonicalQuery });
     }
+  });
+
+  it.each([false, true])('applyChartRules=%s preserves layer queries', async (applyChartRules) => {
+    const firstQuery = 'FROM logs-* | STATS count = COUNT(*) BY bucket = BUCKET(@timestamp, 1h)';
+    const secondQuery = 'FROM metrics-* | STATS cpu = AVG(cpu) BY bucket = BUCKET(@timestamp, 1h)';
+    const parsedExistingConfig = {
+      type: 'xy',
+      layers: [
+        { type: 'series', data_source: { type: 'esql', query: firstQuery } },
+        { type: 'series', data_source: { type: 'esql', query: secondQuery } },
+      ],
+    } as unknown as VisualizationConfig;
+    const restyledConfig = asAuthoringResponse({
+      type: 'xy',
+      legend: { position: 'bottom' },
+      layers: [{ type: 'series' }, { type: 'series' }],
+    });
+
+    const model = createMockModel(restyledConfig);
+    const graph = await createVisualizationGraph(model as never, logger, events, esClient);
+
+    const finalState = await graph.invoke({
+      nlQuery: 'Move the legend below the plot',
+      index: undefined,
+      chartType: SupportedChartType.XY,
+      schema: {},
+      existingConfig: JSON.stringify(parsedExistingConfig),
+      parsedExistingConfig,
+      preserveESQL: true,
+      applyChartRules,
+      esqlQuery: firstQuery,
+      currentAttempt: 0,
+      actions: [],
+      validatedConfig: null,
+      error: null,
+    });
+
+    expect(mockedGenerateEsql).not.toHaveBeenCalled();
+    const validated = finalState.validatedConfig as {
+      layers?: Array<{ data_source?: { type: string; query: string } }>;
+    };
+    expect(validated.layers?.map((layer) => layer.data_source?.query)).toEqual([
+      firstQuery,
+      secondQuery,
+    ]);
+    const { chatModel } = await model.getDefaultModel();
+    expect(chatModel.invoke).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        ['human', expect.stringContaining(JSON.stringify(parsedExistingConfig))],
+      ])
+    );
   });
 });

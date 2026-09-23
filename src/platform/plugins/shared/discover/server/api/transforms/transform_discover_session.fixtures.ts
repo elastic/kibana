@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { DiscoverSessionApiData } from '@kbn/as-code-discover-schema';
 import {
   DataGridDensity,
   DiscoverTabType,
@@ -14,7 +15,6 @@ import {
 } from '@kbn/discover-session-constants';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server';
-import type { DiscoverSessionApiData } from '../schema';
 
 export const discoverSessionAttributes: DiscoverSessionAttributes = {
   title: 'all_props',

@@ -8,7 +8,7 @@
 import type { CoreStart, PluginInitializerContext } from '@kbn/core/public';
 import {
   OPEN_DASHBOARD_CHAT_ACTION_ID,
-  PRETTIFY_DASHBOARD_ACTION_ID,
+  ENHANCE_DASHBOARD_ACTION_ID,
 } from '@kbn/dashboard-plugin/public';
 import { AgentBuilderDashboardsPlugin } from './plugin';
 import type { AgentBuilderDashboardsPluginPublicStartDependencies } from './types';
@@ -34,12 +34,6 @@ describe('AgentBuilderDashboardsPlugin', () => {
         },
       },
       chrome: {},
-      notifications: {
-        toasts: {},
-      },
-      rendering: {
-        addContext: jest.fn(),
-      },
     } as unknown as CoreStart);
 
   const createStartDependencies = () =>
@@ -49,7 +43,6 @@ describe('AgentBuilderDashboardsPlugin', () => {
         getAgentBuilderAccess: jest.fn(),
       },
       dashboard: {},
-      files: {},
       share: {
         url: {
           locators: {
@@ -67,7 +60,7 @@ describe('AgentBuilderDashboardsPlugin', () => {
     openChat.mockClear();
   });
 
-  it('registers the lazy chat and prettify actions when Agent Builder is available', async () => {
+  it('registers the lazy chat and enhance actions when Agent Builder is available', async () => {
     const plugin = new AgentBuilderDashboardsPlugin({} as PluginInitializerContext);
 
     plugin.start(createCoreStart(true), createStartDependencies());
@@ -76,9 +69,9 @@ describe('AgentBuilderDashboardsPlugin', () => {
       OPEN_DASHBOARD_CHAT_ACTION_ID,
       expect.any(Function)
     );
-    // TODO: Temporarily disabled.
+    // TODO: temporarily disabled
     expect(registerActionAsync).not.toHaveBeenCalledWith(
-      PRETTIFY_DASHBOARD_ACTION_ID,
+      ENHANCE_DASHBOARD_ACTION_ID,
       expect.any(Function)
     );
 

@@ -229,6 +229,7 @@ Fired at the end of each successful conversation round.
 | `attachments` | keyword[] | no | Attachment types (e.g. `file`, `screenshot`), if any. |
 | `conversation_id` | keyword | no | Conversation ID. |
 | `execution_id` | keyword | no | Agent execution ID. |
+| `origin` | keyword | no | External system the conversation came from. See [Conversation origin](#conversation-origin). |
 | `input_tokens` | integer | yes | Input tokens consumed in this round. |
 | `cached_input_tokens` | integer | no | Input tokens served from cache in this round (subset of `input_tokens`), when reported by the provider. |
 | `llm_calls` | integer | yes | Number of LLM calls made during the round. |
@@ -256,6 +257,7 @@ Fired when a round fails with an unrecoverable error.
 | `agent_id` | keyword | yes | Normalized agent ID. |
 | `conversation_id` | keyword | no | Conversation ID. |
 | `execution_id` | keyword | no | Agent execution ID. |
+| `origin` | keyword | no | External system the conversation came from. See [Conversation origin](#conversation-origin). |
 | `round_id` | keyword | no | Round ID, if available. |
 | `model_provider` | keyword | no | LLM provider identifier. |
 | `error_type` | keyword | yes | Sanitized/normalized error type or code. |
@@ -269,10 +271,11 @@ Fired after a tool call completes successfully.
 |-------|------|----------|-------------|
 | `tool_id` | keyword | yes | Normalized tool ID. |
 | `tool_call_id` | keyword | yes | Unique tool call identifier. |
-| `source` | keyword | yes | Origin of the tool call (e.g. `default_agent`, `custom_agent`, `mcp`). |
+| `source` | keyword | yes | Where the tool call itself came from (e.g. `agent`, `user`, `mcp`). Distinct from `origin`. |
 | `agent_id` | keyword | no | Normalized agent ID. |
 | `conversation_id` | keyword | no | Conversation ID. |
 | `execution_id` | keyword | no | Agent execution ID. |
+| `origin` | keyword | no | External system the conversation came from. See [Conversation origin](#conversation-origin). |
 | `model` | keyword | no | LLM model that requested the tool call. |
 | `result_types` | keyword[] | yes | Types of result entries returned by the tool. |
 | `duration_ms` | integer | yes | Tool execution time in milliseconds. |
@@ -285,14 +288,27 @@ Fired when a tool call fails.
 |-------|------|----------|-------------|
 | `tool_id` | keyword | yes | Normalized tool ID. |
 | `tool_call_id` | keyword | yes | Unique tool call identifier. |
-| `source` | keyword | yes | Origin of the tool call. |
+| `source` | keyword | yes | Where the tool call itself came from. Distinct from `origin`. |
 | `agent_id` | keyword | no | Normalized agent ID. |
 | `conversation_id` | keyword | no | Conversation ID. |
 | `execution_id` | keyword | no | Agent execution ID. |
+| `origin` | keyword | no | External system the conversation came from. See [Conversation origin](#conversation-origin). |
 | `model` | keyword | no | LLM model that requested the tool call. |
 | `error_type` | keyword | yes | Sanitized/normalized error type or code. |
 | `error_message` | keyword | yes | Error message (truncated to 500 chars). |
 | `duration_ms` | integer | yes | Tool execution time in milliseconds. |
+
+### Conversation origin
+
+`agent_builder_round_complete`, `agent_builder_round_error`, `agent_builder_tool_call_success`
+and `agent_builder_tool_call_error` carry an optional `origin` field naming the external system
+that initiated the conversation. It mirrors `ConversationOriginType`, so `slack` is currently the
+only value.
+
+`origin` is **omitted entirely** when the round is not attributed to an external system. Rounds
+started from the Agent Builder UI or a direct call to the converse API carry no `origin`, and
+neither do rounds and tool calls from sub-agent runs, since a sub-agent opens its own execution
+without inheriting the parent's origin.
 
 ### Skill CRUD events
 

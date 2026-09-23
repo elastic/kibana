@@ -6,13 +6,7 @@
  */
 
 import type { QueryDslQueryContainer, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { SavedObjectsFindResponse } from '@kbn/core/server';
-import {
-  createMockEsClient,
-  createMockSavedObjectsClient,
-  createRuleSoAttributes,
-} from '../../test_utils';
-import type { RuleSavedObjectAttributes } from '../../../saved_objects';
+import { createMockEsClient } from '../../test_utils';
 import { MatcherSuggestionsService } from './matcher_suggestions_service';
 
 const buildSearchResponse = (
@@ -33,9 +27,8 @@ const buildSearchResponse = (
   },
 });
 
-describe('MatcherSuggestionsService.getDataFieldNames', () => {
+describe('MatcherSuggestionsService.getRuleEventFieldNames', () => {
   let esClient: ReturnType<typeof createMockEsClient>;
-  let soClient: ReturnType<typeof createMockSavedObjectsClient>;
   let service: MatcherSuggestionsService;
 
   const getSearchFilters = (): QueryDslQueryContainer[] => {
@@ -50,43 +43,44 @@ describe('MatcherSuggestionsService.getDataFieldNames', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     esClient = createMockEsClient();
-    soClient = createMockSavedObjectsClient();
-    service = new MatcherSuggestionsService(soClient, esClient);
+    service = new MatcherSuggestionsService(esClient);
   });
 
   it('queries with the original four filter clauses when no matcher is provided', async () => {
     esClient.search.mockResolvedValue(buildSearchResponse([{ data: { 'host.name': 'a' } }]));
 
-    await service.getDataFieldNames();
+    await service.getRuleEventFieldNames();
 
     const filters = getSearchFilters();
     expect(filters).toHaveLength(4);
+    expect(filters[0]).toEqual({ term: { type: 'alert' } });
+    expect(filters[1]).toEqual({ range: { '@timestamp': { gte: 'now-24h' } } });
+    expect(filters[2]).toEqual({ exists: { field: 'data' } });
+    expect(filters[3]).toMatchObject({ terms: { 'episode.status': expect.any(Array) } });
   });
 
   it('appends matcher-derived filters to bool.filter when a valid matcher is provided', async () => {
-    esClient.search.mockResolvedValue(buildSearchResponse([{ data: { 'host.name': 'a' } }]));
+    esClient.search.mockResolvedValue(buildSearchResponse([]));
 
-    await service.getDataFieldNames('rule.id : "abc"');
+    await service.getRuleEventFieldNames('episode_id: "abc"');
 
     const filters = getSearchFilters();
     expect(filters.length).toBeGreaterThan(4);
-    expect(JSON.stringify(filters)).toContain('rule.id');
-    expect(JSON.stringify(filters)).toContain('abc');
   });
 
   it('falls back to the original four filters when the matcher is malformed', async () => {
-    esClient.search.mockResolvedValue(buildSearchResponse([{ data: { 'host.name': 'a' } }]));
+    esClient.search.mockResolvedValue(buildSearchResponse([]));
 
-    await service.getDataFieldNames('rule.id :');
+    await service.getRuleEventFieldNames('not valid kql (((');
 
     const filters = getSearchFilters();
     expect(filters).toHaveLength(4);
   });
 
   it('falls back to the original four filters when every matcher clause is unsupported', async () => {
-    esClient.search.mockResolvedValue(buildSearchResponse([{ data: { 'host.name': 'a' } }]));
+    esClient.search.mockResolvedValue(buildSearchResponse([]));
 
-    await service.getDataFieldNames('rule.tags : "x"');
+    await service.getRuleEventFieldNames('unknown_field: "x"');
 
     const filters = getSearchFilters();
     expect(filters).toHaveLength(4);
@@ -95,12 +89,13 @@ describe('MatcherSuggestionsService.getDataFieldNames', () => {
   it('flattens, dedupes, sorts, and prefixes the data field names from response hits', async () => {
     esClient.search.mockResolvedValue(
       buildSearchResponse([
-        { data: { host: { name: 'a' }, count: 1 } },
-        { data: { host: { name: 'b' }, count: 2 } },
+        { data: { count: 3 } },
+        { data: { host: { name: 'my-host' } } },
+        { data: { count: 5 } },
       ])
     );
 
-    const result = await service.getDataFieldNames();
+    const result = await service.getRuleEventFieldNames();
 
     expect(result).toEqual(['data.count', 'data.host.name']);
   });
@@ -110,7 +105,7 @@ describe('MatcherSuggestionsService.getDataFieldNames', () => {
       meta: { body: { error: { type: 'index_not_found_exception' } } },
     });
 
-    const result = await service.getDataFieldNames();
+    const result = await service.getRuleEventFieldNames();
 
     expect(result).toEqual([]);
   });
@@ -119,122 +114,6 @@ describe('MatcherSuggestionsService.getDataFieldNames', () => {
     const error = new Error('boom');
     esClient.search.mockRejectedValue(error);
 
-    await expect(service.getDataFieldNames()).rejects.toBe(error);
-  });
-});
-
-describe('MatcherSuggestionsService.getSuggestions (saved-object-backed fields)', () => {
-  let esClient: ReturnType<typeof createMockEsClient>;
-  let soClient: ReturnType<typeof createMockSavedObjectsClient>;
-  let service: MatcherSuggestionsService;
-
-  const buildFindResponse = (
-    attributesList: Array<Partial<RuleSavedObjectAttributes>>,
-    ids?: string[]
-  ): SavedObjectsFindResponse<RuleSavedObjectAttributes> => ({
-    total: attributesList.length,
-    per_page: attributesList.length,
-    page: 1,
-    saved_objects: attributesList.map((attributes, i) => ({
-      id: ids?.[i] ?? `rule-${i}`,
-      type: 'alerting_v2_rule',
-      attributes: createRuleSoAttributes(attributes),
-      references: [],
-      score: 0,
-    })),
-  });
-
-  beforeEach(() => {
-    jest.resetAllMocks();
-    esClient = createMockEsClient();
-    soClient = createMockSavedObjectsClient();
-    service = new MatcherSuggestionsService(soClient, esClient);
-  });
-
-  describe('rule.name', () => {
-    it('sorts by the managed updated_at root field, not the camelCase updatedAt', async () => {
-      soClient.find.mockResolvedValue(buildFindResponse([{ metadata: { name: 'My rule' } }]));
-
-      await service.getSuggestions('rule.name', 'My');
-
-      expect(soClient.find).toHaveBeenCalledWith(
-        expect.objectContaining({ sortField: 'updated_at', sortOrder: 'desc' })
-      );
-    });
-
-    it('scopes the search to metadata.name when a query is provided', async () => {
-      soClient.find.mockResolvedValue(buildFindResponse([{ metadata: { name: 'My rule' } }]));
-
-      await service.getSuggestions('rule.name', 'My');
-
-      expect(soClient.find).toHaveBeenCalledWith(
-        expect.objectContaining({ search: 'My*', searchFields: ['metadata.name'] })
-      );
-    });
-
-    it('omits the search clause when no query is provided', async () => {
-      soClient.find.mockResolvedValue(buildFindResponse([{ metadata: { name: 'My rule' } }]));
-
-      await service.getSuggestions('rule.name', '');
-
-      const params = soClient.find.mock.calls[0][0];
-      expect(params).not.toHaveProperty('search');
-      expect(params).not.toHaveProperty('searchFields');
-    });
-
-    it('maps results to the rule name attribute', async () => {
-      soClient.find.mockResolvedValue(
-        buildFindResponse([{ metadata: { name: 'Rule A' } }, { metadata: { name: 'Rule B' } }])
-      );
-
-      const result = await service.getSuggestions('rule.name', '');
-
-      expect(result).toEqual(['Rule A', 'Rule B']);
-    });
-  });
-
-  describe('rule.tags', () => {
-    it('sorts by the managed updated_at root field', async () => {
-      soClient.find.mockResolvedValue(buildFindResponse([{ metadata: { name: 'r', tags: [] } }]));
-
-      await service.getSuggestions('rule.tags', '');
-
-      expect(soClient.find).toHaveBeenCalledWith(
-        expect.objectContaining({ sortField: 'updated_at', sortOrder: 'desc' })
-      );
-    });
-
-    it('collects, dedupes, sorts, and prefix-filters tags across rules', async () => {
-      soClient.find.mockResolvedValue(
-        buildFindResponse([
-          { metadata: { name: 'r1', tags: ['prod', 'team-a'] } },
-          { metadata: { name: 'r2', tags: ['prod', 'preview'] } },
-        ])
-      );
-
-      const result = await service.getSuggestions('rule.tags', 'pr');
-
-      expect(result).toEqual(['preview', 'prod']);
-    });
-  });
-
-  describe('rule.id', () => {
-    it('sorts by the managed updated_at root field', async () => {
-      soClient.find.mockResolvedValue(buildFindResponse([{}], ['abc']));
-
-      await service.getSuggestions('rule.id', '');
-
-      expect(soClient.find).toHaveBeenCalledWith(
-        expect.objectContaining({ sortField: 'updated_at', sortOrder: 'desc' })
-      );
-    });
-
-    it('maps to saved object ids and prefix-filters by query', async () => {
-      soClient.find.mockResolvedValue(buildFindResponse([{}, {}], ['abc-1', 'xyz-2']));
-
-      const result = await service.getSuggestions('rule.id', 'abc');
-
-      expect(result).toEqual(['abc-1']);
-    });
+    await expect(service.getRuleEventFieldNames()).rejects.toBe(error);
   });
 });

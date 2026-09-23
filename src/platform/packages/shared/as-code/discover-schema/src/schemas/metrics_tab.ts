@@ -18,7 +18,7 @@ import {
 
 const simpleAggregationSchema = z.enum(METRICS_GRID_SIMPLE_AGGREGATIONS);
 
-export const discoverSessionMetricsTabTypeStateSchema = z
+export const discoverSessionApiMetricsTabTypeStateSchema = z
   .object({
     type: z.literal(`${DiscoverTabType.Metrics}`).meta({
       description:

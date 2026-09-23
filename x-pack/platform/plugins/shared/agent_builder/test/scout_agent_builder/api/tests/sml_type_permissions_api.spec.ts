@@ -32,7 +32,8 @@ const SML_TEST_SEARCH_TOKEN = 'smltestfixturetoken';
 const SML_TEST_SPACE_ID = 'default';
 
 const SML_TEST_MALFORMED_KI_TYPE = 'sml_test_malformed';
-const MALFORMED_ENTRY_ID = `sml-test-malformed-${randomUUID().slice(0, 8)}`;
+const MALFORMED_ORIGIN_ID = `sml-test-malformed-${randomUUID().slice(0, 8)}`;
+const MALFORMED_ENTRY_ID = `${SML_TEST_MALFORMED_KI_TYPE}:${MALFORMED_ORIGIN_ID}`;
 
 const SML_CRAWLER_TASK_TYPE = 'agent_builder_sml:sml_crawler';
 const CRAWL_POLL_TIMEOUT_MS = 90_000;
@@ -108,12 +109,17 @@ const indexEntryWithCount = async (sysEsClient: Client, count: number): Promise<
         ],
       },
     },
-    attributes: {
-      id: MALFORMED_ENTRY_ID,
-      origin: { uri: `${SML_TEST_MALFORMED_KI_TYPE}://${MALFORMED_ENTRY_ID}` },
-      created_at: '2024-01-01T00:00:00.000Z',
-      updated_at: '2024-01-01T00:00:00.000Z',
-      ingestion_method: 'crawled',
+    '@timestamp': '2024-01-01T00:00:00.000Z',
+    id: MALFORMED_ENTRY_ID,
+    updated_at: '2024-01-01T00:00:00.000Z',
+    references: [
+      { uri: `${SML_TEST_MALFORMED_KI_TYPE}://${MALFORMED_ORIGIN_ID}`, relation: 'derived_from' },
+    ],
+    governance: {
+      provenance: {
+        created_by: { uri: 'crawler://sml', metadata: { ingestion_method: 'crawled' } },
+        updated_by: { uri: 'crawler://sml', metadata: { ingestion_method: 'crawled' } },
+      },
     },
   };
   await sysEsClient.index({

@@ -6,13 +6,15 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { KibanaResponseFactory, SavedObjectsClientContract } from '@kbn/core/server';
+import type { KibanaResponseFactory } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 
 import { iacProvisionerService } from '../../services';
-import type { IacProvisionerRenderIntegration } from '../../services/iac_provisioner';
+import {
+  buildIacProvisionerIntegrations,
+  isBuildError,
+} from '../../services/iac_provisioner_integrations';
 import { appContextService } from '../../services/app_context';
-import { getPackageInfo } from '../../services/epm/packages';
 import { isIacProvisionerEnabled } from '../../services/utils/iac_provisioner';
 import {
   reportIacProvisionerRenderCompleted,
@@ -26,98 +28,7 @@ import {
 import { getErrorMessage } from '../../errors/utils';
 import type { FleetRequestHandler } from '../../types';
 import type { RenderIacTemplateRequestSchema } from '../../types/rest_spec/iac_provisioner';
-import type { IacPolicyTemplateSelection } from '../../../common/types/rest_spec/iac_provisioner';
 import type { IacProvisionerRenderFlow } from '../../../common/telemetry/iac_provisioner_events';
-
-interface RequestedIntegration {
-  name: string;
-  policyTemplates: IacPolicyTemplateSelection[];
-}
-
-const isBuildError = (
-  result: IacProvisionerRenderIntegration | { errorMessage: string }
-): result is { errorMessage: string } => 'errorMessage' in result;
-
-/**
- * Merges duplicate package entries and unions enabledInputs per policy
- * template, then loads each package and validates that every requested
- * template and input exists on the manifest. The package version is taken
- * from the registry so callers do not have to supply it.
- */
-export const buildIacProvisionerIntegrations = async ({
-  savedObjectsClient,
-  requestedIntegrations,
-}: {
-  savedObjectsClient: SavedObjectsClientContract;
-  requestedIntegrations: RequestedIntegration[];
-}): Promise<IacProvisionerRenderIntegration[] | { errorMessage: string }> => {
-  const templatesByPackage = new Map<string, Map<string, Set<string>>>();
-  for (const { name, policyTemplates } of requestedIntegrations) {
-    const templates = templatesByPackage.get(name) ?? new Map<string, Set<string>>();
-    for (const { name: templateName, enabledInputs } of policyTemplates) {
-      const inputs = templates.get(templateName) ?? new Set<string>();
-      for (const input of enabledInputs) {
-        inputs.add(input);
-      }
-      templates.set(templateName, inputs);
-    }
-    templatesByPackage.set(name, templates);
-  }
-
-  const resolved = await Promise.all(
-    Array.from(templatesByPackage, async ([pkgName, policyTemplates]) => {
-      // Empty pkgVersion resolves to the installed version, falling back to
-      // the latest available: at connector-creation time the package may not
-      // be installed yet. skipArchive: registry info covers everything read
-      // here; without it each request downloads and unpacks the archive.
-      const packageInfo = await getPackageInfo({
-        savedObjectsClient,
-        pkgName,
-        pkgVersion: '',
-        skipArchive: true,
-      });
-
-      const resolvedPolicyTemplates: IacPolicyTemplateSelection[] = [];
-      for (const [templateName, enabledInputSet] of policyTemplates) {
-        const template = (packageInfo.policy_templates ?? []).find(
-          ({ name }) => name === templateName
-        );
-        if (!template) {
-          return {
-            errorMessage: `${pkgName} has no policy template named ${templateName}`,
-          };
-        }
-        const inputs = 'inputs' in template ? template.inputs ?? [] : [];
-        const declaredInputs = new Set(inputs.map(({ type }) => type));
-        const enabledInputs = Array.from(enabledInputSet);
-        const unknown = enabledInputs.filter((type) => !declaredInputs.has(type));
-        if (unknown.length) {
-          return {
-            errorMessage: `${pkgName} policy template ${templateName} has no inputs named ${unknown.join(
-              ', '
-            )}`,
-          };
-        }
-        resolvedPolicyTemplates.push({ name: templateName, enabledInputs });
-      }
-
-      return {
-        name: pkgName,
-        version: packageInfo.version,
-        policyTemplates: resolvedPolicyTemplates,
-      };
-    })
-  );
-
-  const firstError = resolved.find(isBuildError);
-  if (firstError) {
-    return firstError;
-  }
-
-  return resolved.filter(
-    (integration): integration is IacProvisionerRenderIntegration => !isBuildError(integration)
-  );
-};
 
 export const renderIacTemplateHandler: FleetRequestHandler<
   undefined,
@@ -144,13 +55,14 @@ export const renderIacTemplateHandler: FleetRequestHandler<
 
   const startTime = Date.now();
   try {
-    const integrations = await buildIacProvisionerIntegrations({
+    const built = await buildIacProvisionerIntegrations({
       savedObjectsClient: internalSoClient,
       requestedIntegrations,
     });
-    if (!Array.isArray(integrations)) {
-      return response.badRequest({ body: { message: integrations.errorMessage } });
+    if (isBuildError(built)) {
+      return response.badRequest({ body: { message: built.errorMessage } });
     }
+    const { integrations } = built;
 
     reportIacProvisionerRenderRequested({
       flow,

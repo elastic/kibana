@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import { internalTools } from '@kbn/agent-builder-common';
 import type {
   AskUserQuestionAnswer,
@@ -28,14 +27,20 @@ export interface DenormalizedAnswer {
   skipped?: boolean;
 }
 
+/**
+ * Renders an answered ask_user_question step as a tool call / tool result pair for the model.
+ * The prompt id is used as tool call id so the rendering is stable across prompts.
+ */
 export const materializeAskUserQuestionToolCall = ({
+  promptId,
   questions,
   answers,
 }: {
+  promptId: string;
   questions: AskUserQuestionItem[];
   answers: AskUserQuestionAnswer[];
 }): AskUserQuestionToolCallParts => ({
-  toolCallId: uuidv4(),
+  toolCallId: promptId,
   toolName: internalTools.askUserQuestion,
   args: { questions },
   content: JSON.stringify({ answers: denormalizeAnswers(questions, answers) }),

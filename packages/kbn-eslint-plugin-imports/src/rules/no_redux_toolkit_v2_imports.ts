@@ -24,7 +24,6 @@ const V2_TO_V1_ALIASES: Record<string, string> = {
 const INFRA_PATH_PATTERNS = [
   /kbn-ui-shared-deps-npm/,
   /kbn-ui-shared-deps-src/,
-  /kbn-optimizer/,
   /kbn-rspack-optimizer/,
 ];
 

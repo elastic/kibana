@@ -1441,6 +1441,8 @@ components:
       properties:
         ecs_mapping:
           $ref: '#/components/schemas/ECSMappingOrUndefined'
+        enabled:
+          $ref: '#/components/schemas/QueryEnabled'
         id:
           $ref: '#/components/schemas/QueryId'
         platform:
@@ -1449,6 +1451,8 @@ components:
           $ref: '#/components/schemas/Query'
         removed:
           $ref: '#/components/schemas/RemovedOrUndefined'
+        result_type:
+          $ref: '#/components/schemas/ResultType'
         snapshot:
           $ref: '#/components/schemas/SnapshotOrUndefined'
         version:
@@ -1497,8 +1501,12 @@ components:
               $ref: '#/components/schemas/EnabledOrUndefined'
             interval:
               $ref: '#/components/schemas/PackIntervalOrUndefined'
+            min_osquery_version:
+              $ref: '#/components/schemas/MinOsqueryVersion'
             name:
               $ref: '#/components/schemas/PackName'
+            platform:
+              $ref: '#/components/schemas/PackPlatform'
             policy_ids:
               $ref: '#/components/schemas/PolicyIdsOrUndefined'
             queries:
@@ -1509,6 +1517,8 @@ components:
                 properties:
                   ecs_mapping:
                     $ref: '#/components/schemas/ECSMappingArrayOrUndefined'
+                  enabled:
+                    $ref: '#/components/schemas/QueryEnabled'
                   id:
                     type: string
                   interval:
@@ -1519,6 +1529,8 @@ components:
                     type: string
                   removed:
                     type: boolean
+                  result_type:
+                    $ref: '#/components/schemas/ResultType'
                   rrule_schedule:
                     $ref: '#/components/schemas/RRuleScheduleConfigOrUndefined'
                   schedule_type:
@@ -1530,6 +1542,8 @@ components:
                   version:
                     type: string
               type: array
+            result_type:
+              $ref: '#/components/schemas/ResultType'
             rrule_schedule:
               $ref: '#/components/schemas/RRuleScheduleConfigOrUndefined'
             saved_object_id:
@@ -1832,12 +1846,18 @@ components:
           $ref: '#/components/schemas/EnabledOrUndefined'
         interval:
           $ref: '#/components/schemas/PackInterval'
+        min_osquery_version:
+          $ref: '#/components/schemas/MinOsqueryVersion'
         name:
           $ref: '#/components/schemas/PackName'
+        platform:
+          $ref: '#/components/schemas/PackPlatform'
         policy_ids:
           $ref: '#/components/schemas/PolicyIdsOrUndefined'
         queries:
           $ref: '#/components/schemas/ObjectQueries'
+        result_type:
+          $ref: '#/components/schemas/ResultType'
         rrule_schedule:
           $ref: '#/components/schemas/RRuleScheduleConfig'
         schedule_type:
@@ -1894,12 +1914,18 @@ components:
               $ref: '#/components/schemas/EnabledOrUndefined'
             interval:
               $ref: '#/components/schemas/PackInterval'
+            min_osquery_version:
+              $ref: '#/components/schemas/MinOsqueryVersion'
             name:
               $ref: '#/components/schemas/PackName'
+            platform:
+              $ref: '#/components/schemas/PackPlatform'
             policy_ids:
               $ref: '#/components/schemas/PolicyIdsOrUndefined'
             queries:
               $ref: '#/components/schemas/ObjectQueries'
+            result_type:
+              $ref: '#/components/schemas/ResultType'
             rrule_schedule:
               $ref: '#/components/schemas/RRuleScheduleConfig'
             saved_object_id:
@@ -2501,6 +2527,8 @@ components:
               $ref: '#/components/schemas/EnabledOrUndefined'
             interval:
               $ref: '#/components/schemas/PackIntervalOrUndefined'
+            min_osquery_version:
+              $ref: '#/components/schemas/MinOsqueryVersion'
             name:
               $ref: '#/components/schemas/PackName'
             namespaces:
@@ -2508,6 +2536,8 @@ components:
               items:
                 type: string
               type: array
+            platform:
+              $ref: '#/components/schemas/PackPlatform'
             policy_ids:
               $ref: '#/components/schemas/PolicyIdsOrUndefined'
             queries:
@@ -2515,6 +2545,8 @@ components:
             read_only:
               description: Whether the pack is read-only (true for prebuilt packs).
               type: boolean
+            result_type:
+              $ref: '#/components/schemas/ResultType'
             rrule_schedule:
               $ref: '#/components/schemas/RRuleScheduleConfigOrUndefined'
             saved_object_id:
@@ -2591,8 +2623,12 @@ components:
                 $ref: '#/components/schemas/EnabledOrUndefined'
               interval:
                 $ref: '#/components/schemas/PackIntervalOrUndefined'
+              min_osquery_version:
+                $ref: '#/components/schemas/MinOsqueryVersion'
               name:
                 $ref: '#/components/schemas/PackName'
+              platform:
+                $ref: '#/components/schemas/PackPlatform'
               policy_ids:
                 $ref: '#/components/schemas/PolicyIdsOrUndefined'
               queries:
@@ -2603,6 +2639,8 @@ components:
                   properties:
                     ecs_mapping:
                       $ref: '#/components/schemas/ECSMappingArrayOrUndefined'
+                    enabled:
+                      $ref: '#/components/schemas/QueryEnabled'
                     id:
                       type: string
                     interval:
@@ -2613,6 +2651,8 @@ components:
                       type: string
                     removed:
                       type: boolean
+                    result_type:
+                      $ref: '#/components/schemas/ResultType'
                     rrule_schedule:
                       $ref: '#/components/schemas/RRuleScheduleConfigOrUndefined'
                     schedule_type:
@@ -2627,6 +2667,8 @@ components:
               read_only:
                 description: Whether the pack is read-only (true for prebuilt packs).
                 type: boolean
+              result_type:
+                $ref: '#/components/schemas/ResultType'
               rrule_schedule:
                 $ref: '#/components/schemas/RRuleScheduleConfigOrUndefined'
               saved_object_id:
@@ -3064,6 +3106,16 @@ components:
           required:
             - sourceType
             - source
+    MinOsqueryVersion:
+      description: Minimum osquery version required to run this pack or query.
+        Formatted as a semver string, e.g. `"5.10.0"`.
+      example: 5.10.0
+      maxLength: 64
+      minLength: 1
+      type: string
+    MinOsqueryVersionOrUndefined:
+      $ref: '#/components/schemas/MinOsqueryVersion'
+      nullable: true
     ObjectQueries:
       additionalProperties:
         $ref: '#/components/schemas/ObjectQueriesItem'
@@ -3074,6 +3126,8 @@ components:
       properties:
         ecs_mapping:
           $ref: '#/components/schemas/ECSMappingOrUndefined'
+        enabled:
+          $ref: '#/components/schemas/QueryEnabled'
         id:
           $ref: '#/components/schemas/QueryId'
         interval:
@@ -3091,6 +3145,8 @@ components:
           $ref: '#/components/schemas/Query'
         removed:
           $ref: '#/components/schemas/RemovedOrUndefined'
+        result_type:
+          $ref: '#/components/schemas/ResultType'
         rrule_schedule:
           $ref: '#/components/schemas/RRuleScheduleConfigOrUndefined'
         saved_query_id:
@@ -3128,6 +3184,16 @@ components:
       description: The pack name.
       example: my_pack
       type: string
+    PackPlatform:
+      description: Pack-level platform restriction. To specify multiple platforms, use
+        commas. For example, `linux,darwin`.
+      example: linux,darwin
+      maxLength: 256
+      minLength: 1
+      type: string
+    PackPlatformOrUndefined:
+      $ref: '#/components/schemas/PackPlatform'
+      nullable: true
     PageOrUndefined:
       description: The page number to return. The default is 1.
       example: 1
@@ -3162,6 +3228,11 @@ components:
       description: The SQL query you want to run.
       example: select * from uptime;
       type: string
+    QueryEnabled:
+      description: Whether this query is enabled. When false, the query is omitted
+        from the Fleet policy. Default is true.
+      example: true
+      type: boolean
     QueryId:
       description: The ID of the query.
       example: 3c42c847-eb30-4452-80e0-728584042334
@@ -3175,6 +3246,25 @@ components:
       type: boolean
     RemovedOrUndefined:
       $ref: '#/components/schemas/Removed'
+      nullable: true
+    ResultType:
+      description: >
+        Controls the result document type emitted by osquerybeat for this pack
+        or query.
+
+        - `snapshot`: Full table snapshot on every scheduled run (default).
+
+        - `differential`: Rows added or removed since the previous run.
+
+        - `differential_added_only`: Only rows added since the previous run (no
+        removals).
+      enum:
+        - snapshot
+        - differential
+        - differential_added_only
+      type: string
+    ResultTypeOrUndefined:
+      $ref: '#/components/schemas/ResultType'
       nullable: true
     RRuleScheduleConfig:
       description: |
@@ -3422,12 +3512,18 @@ components:
           $ref: '#/components/schemas/EnabledOrUndefined'
         interval:
           $ref: '#/components/schemas/PackIntervalOrUndefined'
+        min_osquery_version:
+          $ref: '#/components/schemas/MinOsqueryVersionOrUndefined'
         name:
           $ref: '#/components/schemas/PackName'
+        platform:
+          $ref: '#/components/schemas/PackPlatformOrUndefined'
         policy_ids:
           $ref: '#/components/schemas/PolicyIdsOrUndefined'
         queries:
           $ref: '#/components/schemas/ObjectQueries'
+        result_type:
+          $ref: '#/components/schemas/ResultTypeOrUndefined'
         rrule_schedule:
           $ref: '#/components/schemas/RRuleScheduleConfigOrUndefined'
         schedule_type:
@@ -3481,12 +3577,18 @@ components:
               $ref: '#/components/schemas/EnabledOrUndefined'
             interval:
               $ref: '#/components/schemas/PackIntervalOrUndefined'
+            min_osquery_version:
+              $ref: '#/components/schemas/MinOsqueryVersion'
             name:
               $ref: '#/components/schemas/PackName'
+            platform:
+              $ref: '#/components/schemas/PackPlatform'
             policy_ids:
               $ref: '#/components/schemas/PolicyIdsOrUndefined'
             queries:
               $ref: '#/components/schemas/ObjectQueries'
+            result_type:
+              $ref: '#/components/schemas/ResultType'
             rrule_schedule:
               $ref: '#/components/schemas/RRuleScheduleConfigOrUndefined'
             saved_object_id:

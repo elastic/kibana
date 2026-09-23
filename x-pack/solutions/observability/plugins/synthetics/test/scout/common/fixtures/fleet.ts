@@ -136,6 +136,47 @@ export async function getAgentPolicyRevision(
 }
 
 /**
+ * `GET /api/fleet/agents/{id}` — Fleet's view of one enrolled agent.
+ */
+export async function getFleetAgent(
+  apiClient: ApiClientFixture,
+  headers: Record<string, string>,
+  agentId: string
+): Promise<{ policy_revision?: number | null; status?: string }> {
+  const res = await apiClient.get(`api/fleet/agents/${agentId}`, {
+    headers,
+    responseType: 'json',
+  });
+  expect(res).toHaveStatusCode(200);
+  return (res.body as { item: { policy_revision?: number | null; status?: string } }).item;
+}
+
+/** Revision the agent has actually applied (vs {@link getAgentPolicyRevision}). */
+export async function getFleetAgentPolicyRevision(
+  apiClient: ApiClientFixture,
+  headers: Record<string, string>,
+  agentId: string
+): Promise<number> {
+  return (await getFleetAgent(apiClient, headers, agentId)).policy_revision ?? 0;
+}
+
+export async function waitForFleetAgentOnline(
+  apiClient: ApiClientFixture,
+  headers: Record<string, string>,
+  agentId: string,
+  timeoutMs = 180_000
+): Promise<void> {
+  await tryForTime(
+    timeoutMs,
+    async () => {
+      const agent = await getFleetAgent(apiClient, headers, agentId);
+      expect(agent.status, `agent ${agentId} status`).toBe('online');
+    },
+    { intervalMs: 5_000 }
+  );
+}
+
+/**
  * Force-deletes a single Fleet package policy by id. Mirrors the FTR
  * `deletePackagePolicyDirectly` helper used to simulate a corrupted/missing
  * package policy before a reset.

@@ -134,6 +134,14 @@ export { useGetPackagesQuery, useGetPackageInfoByKeyQuery } from './hooks/use_re
 export { useGetSettingsQuery } from './hooks/use_request/settings';
 export { sendCreateAgentlessPolicy } from './hooks/use_request/agentless_policy';
 export {
+  sendUpdateCloudConnector,
+  sendVerifyCloudConnectorIacKey,
+} from './hooks/use_request/cloud_connector';
+export type {
+  IacRenderedTemplate,
+  IacTemplateLaunchedFor,
+} from './components/cloud_connector/components/iac_key_check';
+export {
   sendCreateCloudOnboardingDeployment,
   sendGetCloudOnboardingDeployment,
   sendUpdateCloudOnboardingDeployment,

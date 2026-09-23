@@ -6,11 +6,39 @@
  */
 
 export {
+  CheckDecidePrivilegesStepId,
+  checkDecidePrivilegesStepCommonDefinition,
+  checkDecidePrivilegesStepInputSchema,
+  checkDecidePrivilegesStepOutputSchema,
+} from './check_decide_privileges_step';
+
+export {
+  CloneProposalStepId,
+  cloneProposalStepCommonDefinition,
+  cloneProposalStepInputSchema,
+  cloneProposalStepOutputSchema,
+} from './clone_proposal_step';
+
+export {
   CreateProposalStepId,
   createProposalStepCommonDefinition,
   createProposalStepInputSchema,
   createProposalStepOutputSchema,
 } from './create_proposal_step';
+
+export {
+  GetLatestRevisionStepId,
+  getLatestRevisionStepCommonDefinition,
+  getLatestRevisionStepInputSchema,
+  getLatestRevisionStepOutputSchema,
+} from './get_latest_revision_step';
+
+export {
+  GetProposalStepId,
+  getProposalStepCommonDefinition,
+  getProposalStepInputSchema,
+  getProposalStepOutputSchema,
+} from './get_proposal_step';
 
 export {
   UpdateProposalStepId,

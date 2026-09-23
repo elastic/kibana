@@ -26,7 +26,7 @@ import { i18n } from '@kbn/i18n';
 export const strings = {
   getSwitchLanguageButtonText: () =>
     i18n.translate('kql.switchLanguage.buttonText', {
-      defaultMessage: 'Switch language button.',
+      defaultMessage: 'Switch language',
     }),
   getFilterLanguageLabel: () =>
     i18n.translate('kql.switchLanguage.filterLanguageLabel', {

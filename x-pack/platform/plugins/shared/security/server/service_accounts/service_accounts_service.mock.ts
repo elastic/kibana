@@ -14,11 +14,7 @@ export const serviceAccountsServiceMock = {
     backend: {
       create: jest.fn().mockResolvedValue({
         id: 'mock-service-account-id',
-        type: 'project' as const,
         name: 'mock-service-account-name',
-        organization_id: 'mock-organization-id',
-        role_assignments: {},
-        assumable_by: [],
       }),
       createFakeRequest: jest.fn().mockImplementation(async () =>
         httpServerMock.createFakeKibanaRequest({

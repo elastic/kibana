@@ -17,8 +17,9 @@ import {
 } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import { FormattedRelative } from '@kbn/i18n-react';
-import type { ListInvestigationItem, Severity } from '@kbn/nightshift-investigations-plugin/common';
+import type { ListInvestigationItem } from '@kbn/nightshift-investigations-plugin/common';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_constants';
+import { SEVERITY_DOT_COLOR } from '../common/severity';
 import { nightshiftBackgroundTransition } from '../common/transition';
 import {
   getInvestigationRunTimeLabel,
@@ -26,13 +27,6 @@ import {
 } from './investigation_list_presentation';
 
 const MAX_VISIBLE_ENTITY_CHIPS = 3;
-
-const SEVERITY_DOT_COLOR_KEY: Record<Severity, 'danger' | 'warning' | 'primary' | 'success'> = {
-  '80-critical': 'danger',
-  '60-high': 'warning',
-  '40-medium': 'primary',
-  '20-low': 'success',
-};
 
 export interface InvestigationListItemProps {
   investigation: ListInvestigationItem;
@@ -79,8 +73,8 @@ export function InvestigationListItem({
       status: investigation.status,
     });
 
-  const severityDotColorKey =
-    investigation.severity != null ? SEVERITY_DOT_COLOR_KEY[investigation.severity] : 'primary';
+  const severityDotColor =
+    investigation.severity != null ? SEVERITY_DOT_COLOR[investigation.severity] : 'primary';
 
   return (
     <div
@@ -172,7 +166,7 @@ export function InvestigationListItem({
         {/* entity chips */}
         <EntityChips
           entities={investigation.impact?.entities}
-          severityColorKey={severityDotColorKey}
+          severityColorKey={severityDotColor}
         />
       </EuiFlexGroup>
     </div>

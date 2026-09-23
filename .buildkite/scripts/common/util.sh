@@ -256,6 +256,8 @@ set_git_stack_merge_base() {
 # will add to the target branch when it lands. These are reported to ci-stats so
 # a single queue build can act as the metrics baseline for every commit it covers.
 set_merge_queue_git_info() {
+  local merge_queue_target_head
+
   MERGE_QUEUE_MERGE_BASE="$(buildkite-agent meta-data get merge-queue-merge-base --default '')"
   MERGE_QUEUE_COVERED_COMMITS="$(buildkite-agent meta-data get merge-queue-covered-commits --default '')"
 
@@ -265,7 +267,19 @@ set_merge_queue_git_info() {
       return 1
     fi
 
-    MERGE_QUEUE_MERGE_BASE="$(git merge-base HEAD FETCH_HEAD 2>/dev/null || true)"
+    merge_queue_target_head="$(git rev-parse FETCH_HEAD)"
+    MERGE_QUEUE_MERGE_BASE="$(git merge-base HEAD "$merge_queue_target_head" 2>/dev/null || true)"
+
+    if [[ ! "$MERGE_QUEUE_MERGE_BASE" && "$(git rev-parse --is-shallow-repository)" == "true" ]]; then
+      echo "Deepening shallow checkout to resolve merge queue git info"
+      if ! git fetch --unshallow origin "$MERGE_QUEUE_TARGET_BRANCH" "$BUILDKITE_COMMIT" 2>/dev/null; then
+        echo "Failed to deepen checkout to resolve merge queue git info" >&2
+        return 1
+      fi
+
+      MERGE_QUEUE_MERGE_BASE="$(git merge-base HEAD "$merge_queue_target_head" 2>/dev/null || true)"
+    fi
+
     if [[ ! "$MERGE_QUEUE_MERGE_BASE" ]]; then
       echo "Failed to resolve merge queue merge base" >&2
       return 1

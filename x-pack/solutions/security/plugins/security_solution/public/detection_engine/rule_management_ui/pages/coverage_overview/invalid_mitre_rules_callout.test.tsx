@@ -16,6 +16,11 @@ import type { CoverageOverviewDashboard } from '../../../rule_management/model/c
 
 jest.mock('./coverage_overview_dashboard_context');
 
+const mockUseMitreConfiguration = jest.fn();
+jest.mock('../../../../common/hooks/mitre/use_mitre_configuration', () => ({
+  useMitreConfiguration: (...args: unknown[]) => mockUseMitreConfiguration(...args),
+}));
+
 const emptyInvalidlyMappedRules: CoverageOverviewDashboard['invalidlyMappedRules'] = {
   enabledRules: [],
   disabledRules: [],
@@ -44,6 +49,11 @@ const renderCallout = ({
 };
 
 describe('CoverageOverviewInvalidMitreRulesCallout', () => {
+  beforeEach(() => {
+    // Default: no managed version available — falls back to the legacy constant.
+    mockUseMitreConfiguration.mockReturnValue({ frameworkVersion: undefined });
+  });
+
   it('renders nothing when there are no invalidly mapped rules', () => {
     const { container } = renderCallout({ invalidlyMappedRules: emptyInvalidlyMappedRules });
     expect(container).toBeEmptyDOMElement();
@@ -67,6 +77,21 @@ describe('CoverageOverviewInvalidMitreRulesCallout', () => {
     ).toBeInTheDocument();
     expect(screen.getByTestId('coverageOverviewInvalidMitreRulesViewButton')).toBeInTheDocument();
     expect(screen.queryByTestId('coverageOverviewInvalidMitreRulesModal')).not.toBeInTheDocument();
+  });
+
+  it('displays the managed framework version when available', () => {
+    mockUseMitreConfiguration.mockReturnValue({ frameworkVersion: '16.1' });
+
+    renderCallout({
+      invalidlyMappedRules: {
+        enabledRules: [{ id: 'rule-1', name: 'Enabled rule', invalidMitreIds: ['TA9999'] }],
+        disabledRules: [],
+      },
+    });
+
+    const callout = screen.getByTestId('coverageOverviewInvalidMitreRulesCallout');
+    // The managed adapter strips the leading 'v'; the component re-adds it at the display site.
+    expect(callout.textContent).toContain('currently supported version (v16.1)');
   });
 
   it('uses plural description when there are multiple invalid rules', () => {

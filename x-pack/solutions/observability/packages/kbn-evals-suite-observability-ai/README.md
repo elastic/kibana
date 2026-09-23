@@ -83,7 +83,7 @@ node scripts/evals init
 ```
 
 If you choose EIS/Cloud Connected Mode, `init` prints an export command for
-`KIBANA_TESTING_AI_CONNECTORS`. Run that export in your shell before `start`/`run`.
+`KIBANA_TESTING_INFERENCE_ENDPOINTS`. Run that export in your shell before `start`/`run`.
 
 ### 2) Start full eval stack
 

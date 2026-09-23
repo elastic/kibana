@@ -224,6 +224,7 @@ describe('useUnifiedWaterfallFetcher', () => {
       '2025-01-15T01:00:00.000Z',
       'tx-1',
       'test-service',
+      undefined,
     ]);
   });
 });

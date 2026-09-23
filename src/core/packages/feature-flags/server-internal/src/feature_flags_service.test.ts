@@ -12,7 +12,12 @@ import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import apm from 'elastic-apm-node';
-import { type Client, OpenFeature, type Provider } from '@openfeature/server-sdk';
+import {
+  type Client,
+  OpenFeature,
+  type Provider,
+  ServerProviderEvents,
+} from '@openfeature/server-sdk';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { configServiceMock } from '@kbn/config-mocks';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
@@ -72,6 +77,17 @@ describe('FeatureFlagsService Server', () => {
       expect(() => setProvider(fakeProvider)).toThrowErrorMatchingInlineSnapshot(
         `"A provider has already been set. This API cannot be called twice."`
       );
+    });
+
+    test('registers a handler to reevaluate flags when the provider is ready', () => {
+      const { setProvider } = featureFlagsService.setup({
+        http: httpServiceMock.createInternalSetupContract(),
+      });
+      const addHandlerSpy = jest.spyOn(OpenFeature, 'addHandler');
+      const fakeProvider = { metadata: { name: 'fake provider' } } as Provider;
+      setProvider(fakeProvider);
+      expect(addHandlerSpy).toHaveBeenCalledWith(ServerProviderEvents.Ready, expect.any(Function));
+      addHandlerSpy.mockRestore();
     });
   });
 
@@ -461,6 +477,37 @@ describe('FeatureFlagsService Server', () => {
         await expect(firstValueFrom(flag$)).resolves.toEqual(false);
         expect(observedValues).toEqual([false]);
       });
+    });
+
+    test('reevaluates subscribed flags when the provider becomes ready', async () => {
+      // setProvider is not called in this suite's beforeEach, so register it here.
+      const openFeatureAddHandlerSpy = jest.spyOn(OpenFeature, 'addHandler');
+      const { setProvider } = featureFlagsService.setup({
+        http: httpServiceMock.createInternalSetupContract(),
+      });
+      jest.spyOn(OpenFeature, 'setProviderAndWait').mockResolvedValue();
+      setProvider({ metadata: { name: 'fake provider' } } as Provider);
+
+      const getBooleanValueSpy = jest.spyOn(featureFlagsClient, 'getBooleanValue');
+      getBooleanValueSpy.mockResolvedValue(false);
+
+      const observedValues: boolean[] = [];
+      const flag$ = startContract.getBooleanValue$('my-flag', false);
+      flag$.subscribe((v) => observedValues.push(v));
+      await expect(firstValueFrom(flag$)).resolves.toEqual(false);
+      expect(observedValues).toEqual([false]);
+
+      const readyHandler = openFeatureAddHandlerSpy.mock.calls.find(
+        ([event]) => event === ServerProviderEvents.Ready
+      )?.[1];
+      expect(readyHandler).toBeDefined();
+
+      getBooleanValueSpy.mockResolvedValue(true);
+      await readyHandler!();
+      await expect(firstValueFrom(flag$)).resolves.toEqual(true);
+      expect(observedValues).toEqual([false, true]);
+
+      openFeatureAddHandlerSpy.mockRestore();
     });
   });
 

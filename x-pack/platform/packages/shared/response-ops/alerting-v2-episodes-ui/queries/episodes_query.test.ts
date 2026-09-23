@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { buildEpisodesKpisQuery, buildEpisodesHistogramQuery } from './episodes_query';
+import {
+  buildEpisodesKpisQuery,
+  buildEpisodesHistogramQuery,
+  isSourceEpisode,
+  type AlertEpisode,
+} from './episodes_query';
 
 describe('buildEpisodesKpisQuery', () => {
   const SPACE = 'default';
@@ -148,5 +153,17 @@ describe('buildEpisodesHistogramQuery', () => {
       'basic'
     );
     expect(output).toContain('user-xyz');
+  });
+});
+
+describe('isSourceEpisode', () => {
+  const nativeEpisode = { 'episode.id': 'ep-1' } as AlertEpisode;
+
+  it('is true when source_id is set', () => {
+    expect(isSourceEpisode({ ...nativeEpisode, source_id: 'classic-alerts' })).toBe(true);
+  });
+
+  it('is false for native v2 episodes', () => {
+    expect(isSourceEpisode(nativeEpisode)).toBe(false);
   });
 });

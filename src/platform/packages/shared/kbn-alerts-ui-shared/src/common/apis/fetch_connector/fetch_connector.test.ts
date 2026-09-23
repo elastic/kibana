@@ -79,4 +79,25 @@ describe('fetchConnector', () => {
 
     expect(result).toMatchObject({ authMode: 'per-user' });
   });
+
+  it('should map is_inbound_events_enabled from the API response to isInboundEventsEnabled', async () => {
+    http.get.mockResolvedValueOnce({
+      id: 'test-connector',
+      name: 'Test',
+      connector_type_id: '.dual',
+      is_preconfigured: false,
+      is_deprecated: false,
+      is_missing_secrets: false,
+      is_system_action: false,
+      referenced_by_count: 0,
+      is_connector_type_deprecated: false,
+      is_inbound_events_enabled: true,
+      secrets: {},
+      config: {},
+    });
+
+    const result = await fetchConnector('test-connector', { http });
+
+    expect(result).toMatchObject({ isInboundEventsEnabled: true });
+  });
 });

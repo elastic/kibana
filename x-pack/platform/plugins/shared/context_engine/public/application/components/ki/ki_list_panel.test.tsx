@@ -31,6 +31,7 @@ const aiIndex: GetAiIndexResponse = {
   dest: { type: 'index', value: 'ai-index-idx-sample-ki' },
   automations: [],
   sources: [{ type: 'connector', value: 'connector-1' }],
+  traces: [],
   date_created: '2026-01-01T00:00:00.000Z',
   date_modified: '2026-01-01T00:00:00.000Z',
 };

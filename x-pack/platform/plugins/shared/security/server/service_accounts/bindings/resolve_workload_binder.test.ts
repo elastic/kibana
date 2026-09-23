@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { resolveWorkloadBinder } from './resolve_workload_binder';
+import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+
+import { bestEffortUserProfileIdResolver, resolveWorkloadBinder } from './resolve_workload_binder';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 
 describe('resolveWorkloadBinder', () => {
@@ -121,5 +123,46 @@ describe('resolveWorkloadBinder', () => {
     ).resolves.toEqual({ type: 'service_account', serviceAccountId: 'elastic/kibana' });
 
     expect(resolveUserProfileId).not.toHaveBeenCalled();
+  });
+});
+
+describe('bestEffortUserProfileIdResolver', () => {
+  const request = httpServerMock.createKibanaRequest();
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+
+  beforeEach(() => {
+    logger = loggingSystemMock.createLogger();
+  });
+
+  it('resolves the profile the lookup reports', async () => {
+    const getCurrentUserProfileId = jest.fn().mockResolvedValue('profile-uid');
+
+    await expect(
+      bestEffortUserProfileIdResolver(getCurrentUserProfileId, request, logger)()
+    ).resolves.toBe('profile-uid');
+
+    expect(getCurrentUserProfileId).toHaveBeenCalledWith(request);
+  });
+
+  it('resolves undefined when the caller has no profile', async () => {
+    const getCurrentUserProfileId = jest.fn().mockResolvedValue(null);
+
+    await expect(
+      bestEffortUserProfileIdResolver(getCurrentUserProfileId, request, logger)()
+    ).resolves.toBeUndefined();
+  });
+
+  // The lookup reaches Elasticsearch on most of its paths, and losing attribution is worth far
+  // less than the operation the caller is entitled to perform.
+  it('swallows a rejected lookup rather than failing the operation behind it', async () => {
+    const getCurrentUserProfileId = jest.fn().mockRejectedValue(new Error('profile index down'));
+
+    await expect(
+      bestEffortUserProfileIdResolver(getCurrentUserProfileId, request, logger)()
+    ).resolves.toBeUndefined();
+
+    expect(logger.debug).toHaveBeenCalledWith(
+      expect.stringContaining('Could not resolve a user profile')
+    );
   });
 });

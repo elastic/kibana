@@ -11,6 +11,7 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 
 import { resumeSyncParentIfNeeded } from '../execution_functions/resume_sync_parent_if_needed';
+import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import type { InternalResumeWorkflowExecution } from '../types';
 import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
@@ -75,6 +76,7 @@ export async function handleConcurrencyBlockedExecution({
   spaceId,
   request,
   workflowExecutionRepository,
+  stepExecutionRepository,
   workflowTaskManager,
   internalResumeWorkflowExecution,
   logger,
@@ -83,6 +85,7 @@ export async function handleConcurrencyBlockedExecution({
   spaceId: string;
   request: KibanaRequest;
   workflowExecutionRepository: WorkflowExecutionRepository;
+  stepExecutionRepository?: StepExecutionRepository;
   workflowTaskManager: WorkflowTaskManager;
   internalResumeWorkflowExecution?: InternalResumeWorkflowExecution;
   logger: Logger;
@@ -112,8 +115,9 @@ export async function handleConcurrencyBlockedExecution({
     await resumeSyncParentIfNeeded({
       childExecution: execution,
       spaceId,
-      fakeRequest: request,
       internalResumeWorkflowExecution,
+      workflowExecutionRepository,
+      stepExecutionRepository,
       workflowTaskManager,
       logger,
     });

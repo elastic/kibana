@@ -85,7 +85,19 @@ describe('NightshiftPage', () => {
     expect(screen.getByTestId('nightshiftAppStub')).toBeInTheDocument();
   });
 
-  it('links to Streams settings with EBT tracking', async () => {
+  it('links to Significant Events management', async () => {
+    renderPage();
+    await openAppMenuOverflow();
+
+    const managementLink = await screen.findByTestId('nightshiftManagementLink');
+    expect(managementLink).toHaveAttribute('href', '/app/significant_events/streams');
+
+    await act(async () => fireEvent.click(managementLink));
+
+    expect(navigateToUrl).toHaveBeenCalledWith('/app/significant_events/streams');
+  });
+
+  it('links to Significant Events settings with EBT tracking', async () => {
     renderPage();
     await openAppMenuOverflow();
 

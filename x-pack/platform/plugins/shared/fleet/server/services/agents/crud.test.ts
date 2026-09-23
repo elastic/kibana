@@ -570,6 +570,19 @@ describe('Agents CRUD test', () => {
       expect(searchMock.mock.calls.at(-1)[0].sort).toEqual([{ policy_id: { order: 'desc' } }]);
     });
 
+    it('should omit the status runtime mapping when includeStatusRuntimeField is false', async () => {
+      searchMock.mockResolvedValueOnce(getEsResponse(['1'], 1, 'online'));
+      await getAgentsByKuery(esClientMock, soClientMock, {
+        showAgentless: true,
+        showInactive: false,
+        includeStatusRuntimeField: false,
+      });
+      expect(searchMock.mock.calls[0][0].runtime_mappings).not.toHaveProperty('status');
+      expect(searchMock.mock.calls[0][0].query).toEqual(
+        toElasticsearchQuery(_joinFilters(['active:true'])!)
+      );
+    });
+
     describe('status filters', () => {
       beforeEach(() => {
         searchMock.mockImplementationOnce(() => Promise.resolve(getEsResponse([], 0, 'online')));
@@ -631,6 +644,35 @@ describe('Agents CRUD test', () => {
 
         expect(searchMock.mock.calls.at(-1)[0].query).toEqual(
           toElasticsearchQuery(_joinFilters(['status:*'])!)
+        );
+      });
+
+      it('should exclude unenrolled via active:true when the status runtime field is skipped', async () => {
+        await getAgentsByKuery(esClientMock, soClientMock, {
+          showAgentless: true,
+          showInactive: true,
+          includeStatusRuntimeField: false,
+        });
+
+        expect(searchMock.mock.calls.at(-1)[0].runtime_mappings).not.toHaveProperty('status');
+        expect(searchMock.mock.calls.at(-1)[0].query).toEqual(
+          toElasticsearchQuery(_joinFilters(['active:true'])!)
+        );
+      });
+
+      it('should keep status filters and the runtime field when the kuery references status', async () => {
+        await getAgentsByKuery(esClientMock, soClientMock, {
+          showAgentless: true,
+          showInactive: false,
+          includeStatusRuntimeField: false,
+          kuery: 'status:online',
+        });
+
+        expect(searchMock.mock.calls.at(-1)[0].runtime_mappings).toHaveProperty('status');
+        expect(searchMock.mock.calls.at(-1)[0].query).toEqual(
+          toElasticsearchQuery(
+            _joinFilters(['status:online', 'NOT (status:inactive)', 'NOT status:unenrolled'])!
+          )
         );
       });
     });

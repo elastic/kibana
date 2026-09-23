@@ -34,7 +34,7 @@ export const createNavigationTree = async (
     link: 'agent_builder' as AppDeepLinkId,
   };
   const contextEngineLink = {
-    icon: 'sparkles',
+    icon: 'tableSparkles',
     link: 'context_engine' as AppDeepLinkId,
   };
 
@@ -79,9 +79,7 @@ export const createNavigationTree = async (
         link: securityLink(SecurityPageName.cloudSecurityPostureFindings),
       },
       defaultNavigationTree.cases(),
-      defaultNavigationTree.entityAnalytics(
-        services.experimentalFeatures.entityAnalyticsNewHomePageEnabled
-      ),
+      defaultNavigationTree.entityAnalytics(),
       defaultNavigationTree.explore(),
       defaultNavigationTree.investigations(),
       {

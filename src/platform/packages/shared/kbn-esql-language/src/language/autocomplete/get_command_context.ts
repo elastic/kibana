@@ -40,6 +40,13 @@ export const getCommandContext = async (
           (await callbacks?.getInferenceEndpoints?.('rerank'))?.inferenceEndpoints || [],
       };
       break;
+    // The multimodal step makes this task type depend on the command's `type` option.
+    case 'dense_vector':
+      context = {
+        inferenceEndpoints:
+          (await callbacks?.getInferenceEndpoints?.('text_embedding'))?.inferenceEndpoints || [],
+      };
+      break;
     case 'enrich':
       const policies = await helpers.getPolicies();
       const policiesMap = new Map(policies.map((policy) => [policy.name, policy]));

@@ -57,7 +57,7 @@ describe('createConversationEventsService', () => {
       expect(start.getDefinition('nonexistent')).toBeUndefined();
     });
 
-    it('list returns only types that were explicitly registered', () => {
+    it('list returns all explicitly registered types', () => {
       const service = createConversationEventsService();
       const setup = service.setup();
 

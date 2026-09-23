@@ -43,6 +43,9 @@ jobs:
               /(^|\/)translations\/[^/]+\.json$/,
               /(^|\/)docs\/openapi\//,
               /^oas_docs\/output\//,
+              /\.gen\.ts$/,
+              /(^|\/)generated\//,
+              /(^|\/)NOTICE\.txt$/,
             ];
 
             const pr = context.payload.pull_request;

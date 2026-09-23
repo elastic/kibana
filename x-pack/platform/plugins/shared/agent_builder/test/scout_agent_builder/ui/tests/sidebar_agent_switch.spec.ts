@@ -70,7 +70,7 @@ test.describe(
         await expect(
           page.testSubj.locator(`agentBuilderAgentOption-${CUSTOM_AGENT_ID}`)
         ).toHaveCount(0);
-        await expect(page.testSubj.locator('agentBuilderRoundResponse')).toHaveCount(0);
+        await expect(page.testSubj.locator('agentBuilderResponseMessage')).toHaveCount(0);
         await expect(page.testSubj.locator('agentBuilderConversationInputForm')).toBeVisible();
       });
 
@@ -96,7 +96,7 @@ test.describe(
         await pageObjects.agentBuilder.sendMessage();
         await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
         await expect(async () => {
-          await expect(page.testSubj.locator('agentBuilderRoundResponse')).toContainText(
+          await expect(page.testSubj.locator('agentBuilderResponseMessage')).toContainText(
             MOCKED_RESPONSE
           );
         }).toPass({ timeout: 120_000 });
@@ -127,7 +127,7 @@ test.describe(
           page.testSubj.locator(`agentBuilderAgentOption-${agentBuilderDefaultAgentId}`)
         ).toHaveCount(0);
         await expect(async () => {
-          await expect(page.testSubj.locator('agentBuilderRoundResponse')).toHaveCount(0);
+          await expect(page.testSubj.locator('agentBuilderResponseMessage')).toHaveCount(0);
         }).toPass({ timeout: 60_000 });
         await expect(page.testSubj.locator('agentBuilderConversationInputForm')).toBeVisible();
       });

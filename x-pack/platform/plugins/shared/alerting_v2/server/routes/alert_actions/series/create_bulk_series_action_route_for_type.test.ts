@@ -28,7 +28,7 @@ describe('createBulkSeriesActionRouteForType', () => {
     const RouteClass = makeRouteClass();
 
     expect(RouteClass.method).toBe('post');
-    expect(RouteClass.path).toBe('/api/alerting/v2/series/_bulk_snooze');
+    expect(RouteClass.path).toBe('/internal/alerting/v2/series/_bulk_snooze');
     expect(RouteClass.options?.summary).toBe('Bulk snooze alert episode series');
     expect(RouteClass.validate).toBeDefined();
     expect(RouteClass.validate).toEqual(

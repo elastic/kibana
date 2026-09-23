@@ -281,6 +281,7 @@ Limitations: only ES|QL rules are supported; requires relevant data in existing 
           savedObjectsClient,
           rulesClient,
           events,
+          mitreDataClient: startPlugins.mitreAttack?.getMitreDataClient?.(),
         });
 
         // Seed the graph with the existing rule when rewriting a query; otherwise create fresh.

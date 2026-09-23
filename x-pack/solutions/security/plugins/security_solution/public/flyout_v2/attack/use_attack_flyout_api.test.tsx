@@ -173,6 +173,7 @@ describe('useAttackFlyoutApi', () => {
     expect(children.props.value).toEqual({
       session: 'inherit',
       historyKey: documentFlyoutHistoryKey,
+      isChildFlyout: false,
     });
   });
 
@@ -209,6 +210,7 @@ describe('useAttackFlyoutApi', () => {
     expect(children.props.value).toEqual({
       session: 'inherit',
       historyKey: documentFlyoutHistoryKey,
+      isChildFlyout: false,
     });
   });
 

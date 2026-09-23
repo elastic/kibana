@@ -14,7 +14,6 @@ const KIBANA_ROOT = findKibanaRoot();
 
 // Allowlist (most temporary) of files permitted to use non-FIPS algorithms.
 const ALLOWED_UNSAFE_HASHES = [
-  { path: 'packages/kbn-optimizer/src/common/dll_manifest.ts', algorithms: ['sha1'] },
   {
     path: 'src/core/packages/test-helpers/so-type-serializer/src/get_migration_hash.ts',
     algorithms: ['sha1'],

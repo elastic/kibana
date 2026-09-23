@@ -8,13 +8,9 @@
  */
 
 import type { ReactNode } from 'react';
-import type { EuiBadgeProps } from '@elastic/eui';
+import type { FlyoutHeaderBadgeProps } from '../../types';
 
-/** Descriptor produced by resolving a `Header.Badge` part. */
-export interface HeaderBadgeDescriptor {
+/** Descriptor produced by resolving a `Header.Badge` part; the part's children become `label`. */
+export type HeaderBadgeDescriptor = Omit<FlyoutHeaderBadgeProps, 'children' | 'id'> & {
   label: ReactNode;
-  color?: EuiBadgeProps['color'];
-  iconType?: EuiBadgeProps['iconType'];
-  iconSide?: EuiBadgeProps['iconSide'];
-  'data-test-subj'?: string;
-}
+};

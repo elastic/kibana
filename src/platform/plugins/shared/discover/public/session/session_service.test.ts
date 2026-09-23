@@ -19,9 +19,9 @@ import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import { DiscoverTabType, UnifiedHistogramSuggestionType } from '@kbn/discover-session-constants';
 import { FilterStateStore } from '@kbn/es-query';
 import { cloneDeep } from 'lodash';
-import type { DiscoverSessionApiTab } from '@kbn/as-code-discover-schema';
-import type { DiscoverSessionApiData, DiscoverSessionApiResponse } from '../../server';
-import type { DiscoverSessionClient, DiscoverSessionGetResult } from './api_client';
+import type { DiscoverSessionApiTab, DiscoverSessionApiData } from '@kbn/as-code-discover-schema';
+import type { DiscoverSessionApiResponse } from '../../server';
+import type { DiscoverSessionClient, DiscoverSessionClientGetResult } from './api_client';
 import { createSessionService } from './session_service';
 
 const runtimeTab: DiscoverSessionTab = {
@@ -62,7 +62,7 @@ const apiResponse: DiscoverSessionApiResponse = {
   meta: { managed: false },
 };
 
-const apiGetResponse: DiscoverSessionGetResult = {
+const apiGetResponse: DiscoverSessionClientGetResult = {
   ...apiResponse,
   resolve: {
     outcome: 'conflict',

@@ -23,10 +23,11 @@ import {
   useEuiTheme,
   type EuiThemeComputed,
 } from '@elastic/eui';
-import type {
-  AgentAccessControl,
-  AgentAccessControlEntry,
-  AgentDefinition,
+import {
+  getAccessControlEntryKey,
+  type AgentAccessControl,
+  type AgentAccessControlEntry,
+  type AgentDefinition,
 } from '@kbn/agent-builder-common';
 import { AccessForm } from './access_form';
 import { AccessControlModeContextStrip } from './access_control_mode_context_strip';
@@ -51,8 +52,8 @@ interface AccessFlyoutProps {
 const entriesSignature = (entries: AgentAccessControlEntry[]): string =>
   JSON.stringify(
     [...entries]
-      .map((e) => ({ type: e.type, name: e.name, role: e.role }))
-      .sort((a, b) => `${a.type}:${a.name}`.localeCompare(`${b.type}:${b.name}`))
+      .map((e) => ({ key: getAccessControlEntryKey(e), role: e.role }))
+      .sort((a, b) => a.key.localeCompare(b.key))
   );
 
 const skeletonStyles = (euiTheme: EuiThemeComputed) => css`
@@ -114,7 +115,9 @@ export const AccessFlyout: React.FC<AccessFlyoutProps> = ({ agent, onClose }) =>
   const handleSave = () => {
     if (!draft) return;
     setSaveErrorMessage(null);
-    updateMutation.mutate({ entries: draft.entries });
+    updateMutation.mutate({
+      entries: draft.entries.map(({ added_at, ...entry }) => entry),
+    });
   };
 
   const renderBody = () => {
@@ -166,6 +169,7 @@ export const AccessFlyout: React.FC<AccessFlyoutProps> = ({ agent, onClose }) =>
         <AccessForm
           agent={agent}
           entries={draft.entries}
+          owner={agent.created_by}
           isDisabled={updateMutation.isLoading}
           onChange={(entries) => setDraft((prev) => (prev ? { ...prev, entries } : prev))}
         />

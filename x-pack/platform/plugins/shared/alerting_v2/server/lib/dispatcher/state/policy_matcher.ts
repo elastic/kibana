@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import { escapeQuotes } from '@kbn/es-query';
 import type { PolicyMatcherAttributes } from '../types';
-
-const buildClause = (field: string, values: string[]): string => {
-  if (values.length === 1) return `${field} : "${escapeQuotes(values[0])}"`;
-  return `(${values.map((v) => `${field} : "${escapeQuotes(v)}"`).join(' OR ')})`;
-};
 
 export class PolicyMatcher {
   private constructor(private readonly data: PolicyMatcherAttributes | null) {}
@@ -21,19 +15,25 @@ export class PolicyMatcher {
   }
 
   public isCatchAll(): boolean {
-    if (!this.data) return true;
-    const { tags, expression } = this.data;
-    return (!tags || tags.length === 0) && (!expression || !expression.trim());
+    return !this.hasTags() && this.expressionKql() === null;
   }
 
-  public toKql(): string | null {
-    if (!this.data || this.isCatchAll()) return null;
-    const { tags, expression } = this.data;
-    const parts: string[] = [];
+  public hasTags(): boolean {
+    return !!(this.data?.tags && this.data.tags.length > 0);
+  }
 
-    if (tags && tags.length > 0) parts.push(buildClause('rule.tags', tags));
-    if (expression && expression.trim()) parts.push(`(${expression.trim()})`);
+  public matchesTags(ruleTags?: readonly string[]): boolean {
+    if (!this.hasTags()) return true;
+    if (!ruleTags || ruleTags.length === 0) return false;
+    const ruleTagSet = new Set(ruleTags);
+    return this.data?.tags?.some((tag) => ruleTagSet.has(tag)) ?? false;
+  }
 
-    return parts.join(' AND ');
+  public expressionKql(): string | null {
+    if (!this.data) return null;
+    const { expression } = this.data;
+    if (!expression) return null;
+    const trimmed = expression.trim();
+    return trimmed || null;
   }
 }

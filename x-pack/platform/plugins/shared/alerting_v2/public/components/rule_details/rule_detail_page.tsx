@@ -23,7 +23,6 @@ import { CoreStart, useService } from '@kbn/core-di-browser';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useHistory } from 'react-router-dom';
 import { useRuleAutoAttach } from '@kbn/alerting-v2-browser-shared';
 import { UserCapabilities } from '../../services/user_capabilities';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
@@ -87,7 +86,6 @@ export const RuleDetailPage: React.FunctionComponent = () => {
   const smallMediaQuery = useEuiMaxBreakpoint('s');
   const largeMediaQuery = useEuiMinBreakpoint('m');
 
-  const history = useHistory();
   const { mutate: deleteRule, isLoading: isDeleting } = useDeleteRule();
   const { mutate: toggleRuleEnabled, isLoading: isToggling } = useToggleRuleEnabled();
   const { mutate: updateRuleApiKey, isLoading: isUpdatingApiKey } = useBulkUpdateRuleApiKey();
@@ -111,7 +109,7 @@ export const RuleDetailPage: React.FunctionComponent = () => {
       { id: rule.id, name: rule.metadata.name },
       {
         onSuccess: () => {
-          history.push('/');
+          rulesLocators.navigateSync({});
         },
       }
     );

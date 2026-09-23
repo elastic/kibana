@@ -167,6 +167,7 @@ describe('WorkflowDetailEditor', () => {
     store.dispatch(setYamlString(mockYaml));
     store.dispatch(
       _setComputedDataInternal({
+        yamlString: mockYaml,
         workflowDefinition: {
           version: '1',
           name: 'Test Workflow',

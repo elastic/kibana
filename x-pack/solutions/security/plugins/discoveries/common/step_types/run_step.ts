@@ -21,9 +21,9 @@ export const RunStepTypeId = 'security.attack-discovery.run';
  * Input schema for the Run step.
  *
  * All fields are optional. When `connector_id` is omitted, the server resolves
- * the configured default AI connector (`genAiSettings:defaultAIConnector`, with
- * an `inference.getDefaultConnector` fallback). Provide `connector_id` to
- * override the configured default.
+ * `feature_id` if given, then the configured default AI connector
+ * (`genAiSettings:defaultAIConnector`, with an `inference.getDefaultConnector`
+ * fallback). Provide `connector_id` to override both.
  */
 export const RunStepInputSchema = z.object({
   additional_context: z.string().optional(),
@@ -36,6 +36,18 @@ export const RunStepInputSchema = z.object({
   connector_id: z.string().optional(),
   end: z.string().optional(),
   esql_query: z.string().optional(),
+  /**
+   * Model Management > Feature settings feature id whose configured model this
+   * run should use. Lets a caller pick a tier without naming an endpoint, so a
+   * leaf step can state its own tier rather than having a `connector_id`
+   * threaded down to it through `workflow.execute` inputs.
+   *
+   * Consulted only when `connector_id` is omitted, and skipped when the id is
+   * not a registered `chat_completion` feature — resolution then continues to
+   * the configured default, which is what happens when the plugin owning the
+   * feature is disabled.
+   */
+  feature_id: z.string().max(256).optional(),
   filter: z.record(z.string(), z.unknown()).optional(),
   /**
    * Whether the generated discoveries are returned inline. Defaults to `true`.

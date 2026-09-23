@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { SandboxApiClient } from './grpc_client';
+import type { SandboxSession } from '@kbn/sandbox-plugin/server';
 
 /** How to query cluster telemetry from the sandbox. Names env vars; never embeds secrets. */
 export const renderElasticManifest = (connectorId: string): string =>
@@ -22,10 +22,14 @@ export const renderElasticManifest = (connectorId: string): string =>
     'Reference those variables directly and never hard-code their values. A command that omits',
     '`connector_id` gets no credentials and cannot reach Elasticsearch.',
     '',
-    'Readable indices: `logs-*`, `metrics-*`, `traces-*`.',
+    'Readable indices: `logs-*`, `metrics-*`, `traces-*`. List remote clusters with',
+    '`GET /_remote/info` (empty if none). Query a remote as `cluster:index`, e.g. `FROM *:logs-*`.',
     '',
     '```bash',
     '# connector_id must be set on every one of these commands',
+    'curl -s -H "Authorization: ApiKey $CONNECTOR_SECRET_PASSWORD" \\',
+    '  "$CONNECTOR_CONFIG_URL/_remote/info"',
+    '',
     'curl -s -H "Authorization: ApiKey $CONNECTOR_SECRET_PASSWORD" \\',
     '  -H "Content-Type: application/json" \\',
     '  "$CONNECTOR_CONFIG_URL/logs-*/_count"',
@@ -39,19 +43,17 @@ export const renderElasticManifest = (connectorId: string): string =>
   ].join('\n');
 
 export const writeElasticManifest = async ({
-  conversationId,
-  apiClient,
+  session,
   connectorId,
   logger,
 }: {
-  conversationId: string;
-  apiClient: SandboxApiClient;
+  session: SandboxSession;
   connectorId: string;
   logger: Logger;
 }): Promise<void> => {
-  logger.debug(`Writing Elasticsearch manifest for conversation ${conversationId}`);
+  logger.debug(`Writing Elasticsearch manifest`);
 
-  await apiClient.writeFiles(conversationId, [
+  await session.writeFiles([
     {
       path: '/workspace/elastic.md',
       content: Buffer.from(renderElasticManifest(connectorId), 'utf8'),

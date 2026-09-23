@@ -25,10 +25,10 @@ node scripts/evals init
 When `node scripts/evals init` finishes, copy the printed connector export into the same shell where you will run evals:
 
 ```bash
-export KIBANA_TESTING_AI_CONNECTORS="..."
+export KIBANA_TESTING_INFERENCE_ENDPOINTS="..."
 ```
 
-This makes EIS connector IDs available as Playwright projects, for example `eis-anthropic-claude-4-5-sonnet`.
+This makes EIS inference endpoint IDs available as Playwright projects, for example `eis-anthropic-claude-4-5-sonnet`.
 
 ### Optional: Configure Phoenix and Tracing
 

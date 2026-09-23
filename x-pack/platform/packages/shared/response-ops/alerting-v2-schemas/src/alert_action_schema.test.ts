@@ -102,12 +102,24 @@ describe('seriesAlertActionParamsSchema', () => {
     expect(() => seriesAlertActionParamsSchema.parse({ group_hash: 'group-1' })).not.toThrow();
     expect(() => seriesAlertActionParamsSchema.parse({ group_hash: '' })).toThrow();
   });
+
+  it('rejects unknown keys (strict mode)', () => {
+    expect(() =>
+      seriesAlertActionParamsSchema.parse({ group_hash: 'group-1', foo: 'bar' })
+    ).toThrow();
+  });
 });
 
 describe('episodeAlertActionParamsSchema', () => {
   it('accepts an episode_id and rejects an empty one', () => {
     expect(() => episodeAlertActionParamsSchema.parse({ episode_id: 'episode-1' })).not.toThrow();
     expect(() => episodeAlertActionParamsSchema.parse({ episode_id: '' })).toThrow();
+  });
+
+  it('rejects unknown keys (strict mode)', () => {
+    expect(() =>
+      episodeAlertActionParamsSchema.parse({ episode_id: 'episode-1', foo: 'bar' })
+    ).toThrow();
   });
 });
 

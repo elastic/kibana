@@ -1,6 +1,5 @@
 {
-  "sha1": "3fe2eaeb1b44a434b2d81620364528077182eacb",
-  "testChannels": [
+  "sha1": "947dfcaf8f49f45649440f99aa20160dae9ba855",  "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
@@ -260,7 +259,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/execution_history_smoke.spec.ts",
-        "line": 121,
+        "line": 120,
         "column": 24
       }
     }

@@ -1,0 +1,15 @@
+{
+  "type": "plugin",
+  "id": "@kbn/sandbox-plugin",
+  "owner": ["@elastic/nightshift-context-and-research-team"],
+  "group": "platform",
+  "visibility": "shared",
+  "description": "Sandbox plugin — remote sandboxed container service for AI agents",
+  "plugin": {
+    "id": "sandbox",
+    "browser": false,
+    "server": true,
+    "configPath": ["xpack", "sandbox"],
+    "optionalPlugins": ["spaces"]
+  }
+}

@@ -208,16 +208,8 @@ export const createVegaGraph = async (
           };
         }
         query = generated.query;
-        // Reuse the columns from the validation run; execute only if the query
-        // was validated without returning rows, since spec authoring needs them.
+        // Schema mode already returned columns, including the 0-row case.
         columns = generated.columns;
-        if (!columns) {
-          ({ columns } = await executeEsql({
-            query,
-            params: timeRangeParams,
-            esClient: esClient.asCurrentUser,
-          }));
-        }
       }
 
       action = { type: 'generate_esql', success: true, query, columns };

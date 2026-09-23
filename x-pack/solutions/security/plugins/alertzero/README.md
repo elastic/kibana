@@ -11,7 +11,8 @@ xpack.alertzero.enabled: true
 ```
 
 - **`xpack.alertzero.enabled`** — deployment-level plugin gate (default `false`). When false, the plugin registers no app, routes, or features; Security nav nodes for AlertZero are omitted automatically.
-- **`xpack.alertzero.ui.useMockData`** — optional presentation-source toggle (default `false`). Set to `true` to serve the mock Investigation catalog from `@kbn/alertzero-common` instead of real data — useful for demos and UI work without a live stack. Worker settings and Watch grouping are live either way.
+
+AlertZero reads live data only. To work on the UI without waiting for Workers to produce proposals, seed the queue with `scripts/seed_proposal_attachments.sh`, which writes real proposal documents and Agent Builder conversations into your local stack.
 
 Workers install when a user enables one or saves settings on one. There is no Watch-level enablement switch. Disable leaves the per-space Worker document and its settings in place. The only bulk cleanup is turning `xpack.alertzero.enabled` off and restarting — AlertZero then stops registering as a managed-workflow owner and orphan cleanup force-deletes its documents across every space.
 
@@ -53,7 +54,7 @@ Real data is served by default. Keep these in mind when running AlertZero in sha
 
 Skills are only projected from real data. At startup, AlertZero provisions the required Agent Builder agent in every space that has an installed watch before `ready()` runs reconciliation, so skills resolve correctly in non-default spaces on first request.
 
-`GET /internal/alertzero/skills` returns a per-space `WatchSkill[]` projected from live workflow definitions:
+There is no skills route. Skills ride along on each Worker returned by `GET /internal/alertzero/workers`, projected per space from live workflow definitions:
 
 - Each `ai.agent` step in a workflow's YAML contributes the skills it can invoke. The projection walks all step branches (if/else, cases, parallel branches) so nested agent steps are found.
 - If the step has a `configuration_overrides.skill_ids` list those IDs are used, even when the step's agent-id cannot be resolved from Agent Builder. Otherwise the agent's own `configuration.skill_ids` are used, plus any `baseConfiguration.skill_ids` from its type.
@@ -69,33 +70,32 @@ AlertZero is a **standalone Security-category app** (`/app/alertzero`) that **us
 - Platform footer stays as on Security `main`: Launchpad, Developer tools, Settings / stack management, collapse
 - **Discover** uses the platform `{ link: 'discover' }` destination (real `/app/discover`)
 - **Dashboards** uses Security’s real dashboards destination (same Throughline slot; no AlertZero stub)
-- **Chats** stays in-app and embeds Agent Builder
+- **Chat** is Agent Builder's own conversation page; AlertZero links out to it rather than hosting it
 - Watches keeps a **content-area** secondary nav (Workflows / Skills / … stubs)
-- Ask AlertZero FAB routes to Chats (hidden on `/chats`)
 
 ## Routes
 
 | UI route | Purpose |
 |----------|---------|
 | `/app/alertzero` | Brief — Investigation queue |
-| `/app/alertzero/chats` | Agent Builder embed (`sessionTag: alertzero`) |
 | `/app/discover` | Real Discover (via Security / AlertZero nav Discover item) |
 | `/app/security/dashboards` | Real Security dashboards (via Throughline Dashboards item) |
 | `/app/alertzero/alerts` | Placeholder — coming soon |
 | `/app/alertzero/attacks` | Placeholder — coming soon |
-| `/app/alertzero/records` | Placeholder — coming soon |
 | `/app/alertzero/threat-hunt` | Placeholder — coming soon |
 | `/app/alertzero/streams` | Placeholder — coming soon |
 | `/app/alertzero/watches` | Watch catalog (`system-security-watch-*`) |
 | `/app/alertzero/watches/:watchId` | Watch detail |
 | `/app/alertzero/watches/workflows` … `/guardrails` | Watches section stubs |
-| `/app/alertzero/investigations/:id` | Investigation inspector shell |
-| `/app/alertzero/investigations/:id/proposals/:proposalId` | Proposal detail shell |
 | `/app/alertzero/settings` | Settings stub (no dedicated nav item) |
+
+An investigation has no route of its own: it is a templated Agent Builder conversation, so its
+details open in Agent Builder's conversation flyout (`?selectedConversationId=` on the queue) and
+its chat opens at `/app/agent_builder/agents/{agentId}/conversations/{id}`.
 
 ### Security left-rail order (when AlertZero enabled)
 
-**AlertZero → Chats → Discover → Dashboards → Alerts → Attacks → Records → Threat hunt → Streams → Watches**, then the rest of Security’s existing destinations (including the platform **More** overflow — not an AlertZero stub).
+**AlertZero → Discover → Dashboards → Alerts → Attacks → Threat hunt → Streams → Watches**, then the rest of Security’s existing destinations (including the platform **More** overflow — not an AlertZero stub).
 
 ### Internal API (`/internal/alertzero/*`)
 
@@ -106,9 +106,6 @@ AlertZero is a **standalone Security-category app** (`/app/alertzero`) that **us
 | GET | `/internal/alertzero/workers` |
 | PATCH | `/internal/alertzero/workers/{workerId}` |
 | GET | `/internal/alertzero/skills` |
-| GET | `/internal/alertzero/investigations` |
-| GET | `/internal/alertzero/investigations/{id}` |
-| GET | `/internal/alertzero/investigations/{id}/proposals` |
 
 OpenAPI → Zod schemas live in `@kbn/alertzero-common`. Regenerate with:
 
@@ -237,11 +234,11 @@ AlertZero is not live. Declarations, schemas and template values may change with
 
 | Area | Where to land |
 |------|----------------|
-| Shared types, fixtures, OpenAPI | `@kbn/alertzero-common` |
+| Shared types and OpenAPI | `@kbn/alertzero-common` |
 | Managed Worker YAML, renderers, and template value types | `kbn-workflows/managed/definitions/alertzero` |
 | Worker settings defaults, validation, patches, and API projection | `plugins/alertzero/server/managed_workflows/workers` |
 | Investigation / Proposal conversation projection | Agent Builder / Conversations (optional dep) |
-| Live Watch projection (non-mock) | Workflows Management via `workflowsExtensions` |
+| Live Watch projection | Workflows Management via `workflowsExtensions` |
 | Skills projection | `server/services/utils/skills_projection_service.ts` + `server/services/watches/project_watch.ts` |
 | Brief / in-app pages | `plugins/alertzero/public` |
 | Solution nav nodes | `security_solution_ess` / `security_solution_serverless` navigation trees |
@@ -250,8 +247,8 @@ AlertZero is not live. Declarations, schemas and template values may change with
 
 - Platform chrome (header + Security footer utilities)
 - Throughline body order in Security nav; Discover → real Discover; Dashboards → real Security dashboards
-- Brief queue, Watches catalog/detail, Chats Agent Builder embed
-- Investigation shells + mock internal APIs
+- Brief queue, Watches catalog/detail
+- Investigation details and chat hosted by Agent Builder
 
 ## Non-goals (this PR)
 
@@ -274,11 +271,11 @@ node scripts/jest x-pack/solutions/security/packages/kbn-alertzero-common
 
 ### Page-load budget
 
-Keep `pageLoadAssetSize.alertzero` lean — prefer a thin plugin entry over raising the optimizer limit. Keep the app UI behind `import('./application')` in `public/plugin.ts`. The shared package (`@kbn/alertzero-common`) must use an **explicit export allow-list** in `index.ts` — never `export *` for schemas/samples. Star re-exports defeat optimizer tree-shaking and can pull Zod + mock catalogs into the page-load bundle even when the plugin only imports a few constants.
+Keep `pageLoadAssetSize.alertzero` lean — prefer a thin plugin entry over raising the optimizer limit. Keep the app UI behind `import('./application')` in `public/plugin.ts`. The shared package (`@kbn/alertzero-common`) must use an **explicit export allow-list** in `index.ts` — never `export *` for schemas. Star re-exports defeat optimizer tree-shaking and can pull Zod into the page-load bundle even when the plugin only imports a few constants.
 
 Measure with:
 
 ```bash
-node scripts/build_kibana_platform_plugins.js --filter alertzero --dist --no-cache --no-examples
-# inspect …/alertzero/target/public/metrics.json → "page load bundle size"
+node scripts/build_kibana_platform_plugins.js --dist --no-cache
+# inspect target/public/bundles/metrics.json → "page load bundle size" for alertzero
 ```

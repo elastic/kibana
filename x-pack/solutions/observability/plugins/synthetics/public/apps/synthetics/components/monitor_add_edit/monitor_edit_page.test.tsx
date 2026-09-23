@@ -18,7 +18,9 @@ import {
   PROFILES_MAP,
 } from '../../../../../common/constants/monitor_defaults';
 
-jest.mock('@kbn/observability-shared-plugin/public');
+jest.mock('@kbn/observability-shared-plugin/public', () => ({
+  ...jest.requireActual('@kbn/observability-shared-plugin/public'),
+}));
 
 jest.mock('../../hooks/use_monitor_name', () => ({
   ...jest.requireActual('../../hooks/use_monitor_name'),

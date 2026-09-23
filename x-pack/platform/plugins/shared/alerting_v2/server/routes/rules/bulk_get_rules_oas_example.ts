@@ -5,15 +5,11 @@
  * 2.0.
  */
 
-import type { BulkGetRulesParams, BulkGetRulesResponse } from '@kbn/alerting-v2-schemas';
+import type { BulkGetRulesResponse } from '@kbn/alerting-v2-schemas';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { buildOasOperation, invalidResponseExample } from '../oas_utils';
 import type { AlertingOasOperationObject } from '../oas_types';
-import { RULE_RESPONSE } from './rule_oas_shared_examples';
-
-export const BULK_GET_RULES_REQUEST: BulkGetRulesParams = {
-  ids: ['rule-1', 'rule-2'],
-};
+import { BULK_OPERATION_REQUEST, RULE_RESPONSE } from './rule_oas_shared_examples';
 
 export const BULK_GET_RULES_RESPONSE: BulkGetRulesResponse = {
   rules: [RULE_RESPONSE],
@@ -41,7 +37,7 @@ export const bulkGetRulesOasExamples = (): AlertingOasOperationObject =>
     requestBody: {
       name: 'bulkGetRulesRequest',
       summary: 'Fetch two rules by ID',
-      value: BULK_GET_RULES_REQUEST,
+      value: BULK_OPERATION_REQUEST,
     },
     responses: {
       200: {

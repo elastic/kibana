@@ -36,6 +36,7 @@ const commandOptionNameToLocation: Record<string, Location> = {
   'rerank:on': Location.RERANK,
   // HIGHLIGHT command: the query expression slot allows full-text functions
   highlight: Location.HIGHLIGHT_QUERY,
+  dense_vector: Location.DENSE_VECTOR,
 };
 
 /**

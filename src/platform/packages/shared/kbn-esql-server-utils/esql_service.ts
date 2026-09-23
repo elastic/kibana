@@ -220,12 +220,7 @@ export class EsqlService {
    */
   public async getViews(): Promise<EsqlViewsResult> {
     const { client } = this.options;
-    const response = await client.transport.request<{
-      views: Array<{ name: string; query: string }>;
-    }>({
-      method: 'GET',
-      path: '/_query/view',
-    });
+    const response = await client.esql.getView();
     return response ?? { views: [] };
   }
 

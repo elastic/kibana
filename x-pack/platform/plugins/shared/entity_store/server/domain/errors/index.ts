@@ -8,6 +8,7 @@
 export { EntityNotFoundError } from './entity_not_found';
 export { DocumentVersionConflictError } from './document_version_conflict';
 export { EntityStoreNotRunningError } from './entity_store_not_running';
+export { NonPriorityExtractionDisabledError } from './non_priority_extraction_disabled';
 export { BadCRUDRequestError } from './bad_crud_request_error';
 export { ChainResolutionError } from './chain_resolution_error';
 export { EntityHasAliasesError } from './entity_has_aliases_error';

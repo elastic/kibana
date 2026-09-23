@@ -12,7 +12,7 @@ cleanup() {
   echo "Stopping services..."
   pkill -f 'org.elasticsearch.bootstrap' 2>/dev/null || true
   pkill -f 'scripts/kibana' 2>/dev/null || true
-  pkill -f 'kbn-optimizer' 2>/dev/null || true
+  pkill -f 'kbn-rspack-optimizer' 2>/dev/null || true
   # Give processes a moment to exit
   sleep 3
   # Force-kill anything remaining

@@ -5,25 +5,16 @@
  * 2.0.
  */
 
-import {
-  EuiBadge,
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiText,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiBadge, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ReactNode } from 'react';
 import React from 'react';
+import { ItemRow } from './item_row';
 
 interface SourceRowProps {
-  /** Plain-text label, used for the remove action and as the default content. */
   label: string;
   typeLabel: string;
   icon: ReactNode;
-  /** Overrides how the label is rendered, e.g. as a code block. */
   children?: ReactNode;
   onRemove?: () => void;
   'data-test-subj'?: string;
@@ -43,34 +34,30 @@ export const SourceRow = ({
   });
 
   return (
-    <EuiPanel hasBorder paddingSize="m" data-test-subj={dataTestSubj}>
-      <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-        <EuiFlexItem grow={false}>{icon}</EuiFlexItem>
-        {/* minWidth: 0 lets the flex item shrink so long queries truncate instead of overflowing the panel */}
-        <EuiFlexItem css={{ minWidth: 0 }}>
-          <EuiText size="s" className="eui-textTruncate">
-            <strong>{children ?? label}</strong>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiBadge color="hollow" data-test-subj="contextSourceTypeBadge">
-            {typeLabel}
-          </EuiBadge>
-        </EuiFlexItem>
-        {onRemove && (
-          <EuiFlexItem grow={false}>
-            <EuiToolTip content={removeLabel} disableScreenReaderOutput>
-              <EuiButtonIcon
-                iconType="cross"
-                color="text"
-                onClick={onRemove}
-                aria-label={removeLabel}
-                data-test-subj="contextRemoveSourceButton"
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-    </EuiPanel>
+    <ItemRow
+      label={label}
+      icon={icon}
+      badge={
+        <EuiBadge color="hollow" data-test-subj="contextSourceTypeBadge">
+          {typeLabel}
+        </EuiBadge>
+      }
+      actions={
+        onRemove ? (
+          <EuiToolTip content={removeLabel} disableScreenReaderOutput>
+            <EuiButtonIcon
+              iconType="cross"
+              color="text"
+              onClick={onRemove}
+              aria-label={removeLabel}
+              data-test-subj="contextRemoveSourceButton"
+            />
+          </EuiToolTip>
+        ) : undefined
+      }
+      data-test-subj={dataTestSubj}
+    >
+      <strong>{children ?? label}</strong>
+    </ItemRow>
   );
 };

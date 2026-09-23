@@ -8,7 +8,6 @@
  */
 
 import React, { Fragment } from 'react';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
@@ -16,9 +15,15 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSpacer,
   EuiText,
+  EuiTextColor,
+  EuiTitle,
+  euiFontSize,
+  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { esqlKeyboardShortcuts } from '@kbn/esql-editor';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import { useCurrentDataView } from '../../state_management/redux';
@@ -35,9 +40,8 @@ export const DiscoverUninitialized = ({ onRefresh }: Props) => {
     currentDataView,
     switchToEsqlMetric: 'esql:uninitialized_query_in_esql_clicked',
   });
-  const shortcutsLabel = i18n.translate('discover.uninitialized.keyboardShortcutsLabel', {
-    defaultMessage: 'Keyboard shortcuts',
-  });
+  const euiThemeContext = useEuiTheme();
+  const { euiTheme } = euiThemeContext;
   const shortcutsLabelId = useGeneratedHtmlId();
 
   const startSearchingPrompt = (
@@ -101,26 +105,57 @@ export const DiscoverUninitialized = ({ onRefresh }: Props) => {
   }
 
   return (
-    <EuiText size="m" data-test-subj="discoverUninitialized">
-      <h3 id={shortcutsLabelId} data-test-subj="discoverUninitializedKeyboardShortcuts">
-        {shortcutsLabel}
-      </h3>
-      <EuiDescriptionList
-        aria-labelledby={shortcutsLabelId}
-        type="column"
-        columnWidths={['auto', 'auto']}
-        columnGutterSize="m"
-        compressed
-        listItems={esqlKeyboardShortcuts.map(({ keys, label }) => ({
-          title: label,
-          description: keys.map((key, index) => (
-            <Fragment key={`${key}-${index}`}>
-              {index > 0 ? ' ' : null}
-              <kbd>{key}</kbd>
-            </Fragment>
-          )),
-        }))}
-      />
-    </EuiText>
+    <div data-test-subj="discoverUninitialized">
+      <EuiTitle size="xxs">
+        <h3 id={shortcutsLabelId} data-test-subj="discoverUninitializedKeyboardShortcuts">
+          <EuiTextColor color="subdued">
+            <FormattedMessage
+              id="discover.uninitialized.editorKeyboardShortcutsTitle"
+              defaultMessage="Editor keyboard shortcuts"
+            />
+          </EuiTextColor>
+        </h3>
+      </EuiTitle>
+      <EuiSpacer size="m" />
+      <EuiText size="xs" color="subdued">
+        <EuiDescriptionList
+          aria-labelledby={shortcutsLabelId}
+          type="column"
+          columnWidths={['auto', 'auto']}
+          columnGutterSize="m"
+          rowGutterSize="s"
+          compressed
+          titleProps={{
+            css: css`
+              font-weight: ${euiTheme.font.weight.regular};
+            `,
+          }}
+          descriptionProps={{
+            css: css`
+              font-weight: ${euiTheme.font.weight.regular};
+            `,
+          }}
+          listItems={esqlKeyboardShortcuts.map(({ keys, label }) => ({
+            title: label,
+            description: keys.map((key, index) => (
+              <Fragment key={`${key}-${index}`}>
+                {index > 0 ? ' ' : null}
+                <kbd
+                  css={css`
+                    font-size: ${euiFontSize(euiThemeContext, 's').fontSize};
+                    font-weight: ${euiTheme.font.weight.medium};
+                    line-height: 1;
+                    padding-block: ${euiTheme.size.xxs};
+                    padding-inline: ${euiTheme.size.xs};
+                  `}
+                >
+                  {key}
+                </kbd>
+              </Fragment>
+            )),
+          }))}
+        />
+      </EuiText>
+    </div>
   );
 };

@@ -21,5 +21,9 @@ export const deleteConnectorById = async (client: ElasticsearchClient, id: strin
   return await client.transport.request<AcknowledgedResponseBase>({
     method: 'DELETE',
     path: `/_connector/${id}`,
+    querystring: {
+      hard: true,
+      delete_sync_jobs: true,
+    },
   });
 };

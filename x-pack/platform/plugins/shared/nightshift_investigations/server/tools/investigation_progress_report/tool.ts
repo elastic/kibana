@@ -7,7 +7,7 @@
 
 import { platformSignificantEventsTools, ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { BuiltinToolDefinition, ToolAvailabilityConfig } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import {
@@ -39,12 +39,15 @@ const toolDescription = dedent`
 
 export const createInvestigationProgressReportTool = ({
   logger,
+  availability,
 }: {
   logger: Logger;
+  availability: ToolAvailabilityConfig;
 }): BuiltinToolDefinition<typeof investigationStateSchema> => ({
   id: SIGNIFICANT_EVENTS_INVESTIGATION_PROGRESS_REPORT_TOOL_ID,
   type: ToolType.builtin,
   description: toolDescription,
+  availability,
   annotations: {
     title: 'Report Investigation Progress',
     readOnlyHint: true,

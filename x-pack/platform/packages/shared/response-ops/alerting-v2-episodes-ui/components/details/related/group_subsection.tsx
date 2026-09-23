@@ -14,7 +14,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { getRuleIdFromRuleState, type RuleState } from '../../../types/rule_state';
 import { RELATED_ALERT_EPISODES_PAGE_SIZE } from '../../../constants';
 import { useFetchEpisodeActions } from '../../../hooks/use_fetch_episode_actions';
-import { useFetchGroupActions } from '../../../hooks/use_fetch_group_actions';
+import { getGroupAction, useFetchGroupActions } from '../../../hooks/use_fetch_group_actions';
 import { useFetchSameGroupEpisodesQuery } from '../../../hooks/use_fetch_same_group_episodes_query';
 import { AlertEpisodeCardListSkeleton } from '../section_skeletons';
 import { RelatedAlertEpisodesList } from './related_list';
@@ -132,7 +132,7 @@ export function RelatedEpisodesGroupSubsection({
           rows={sameGroupRows}
           ruleState={ruleState}
           getEpisodeAction={(id) => sameGroupEpisodeActionsMap?.get(id)}
-          getGroupAction={(gh) => sameGroupGroupActionsMap?.get(gh)}
+          getGroupAction={(gh) => getGroupAction(sameGroupGroupActionsMap, ruleId, gh)}
           getEpisodeDetailsHref={getEpisodeDetailsHref}
           compressed={compressed}
         />

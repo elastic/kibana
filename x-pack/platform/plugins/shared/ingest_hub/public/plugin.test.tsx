@@ -166,7 +166,7 @@ describe('IngestHubPlugin', () => {
 
     describe('mount', () => {
       it('redirects to discover when feature flag is disabled', async () => {
-        (coreStart.featureFlags.getBooleanValue as jest.Mock).mockReturnValue(false);
+        (coreStart.featureFlags.getBooleanValue$ as jest.Mock).mockReturnValue(of(false));
         plugin.setup(coreSetup);
 
         const { mount } = coreSetup.application.register.mock.calls[0][0];

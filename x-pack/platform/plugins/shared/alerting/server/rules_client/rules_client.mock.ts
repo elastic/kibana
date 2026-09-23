@@ -23,8 +23,6 @@ import { alertingAuthorizationMock } from '../authorization/alerting_authorizati
 import { backfillClientMock } from '../backfill_client/backfill_client.mock';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import type { RulesClientContext } from './types';
-import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
-
 const create = () => {
   const kibanaVersion = 'v8.17.0';
   const taskManager = taskManagerMock.createStart();
@@ -69,7 +67,6 @@ const create = () => {
     connectorAdapterRegistry: new ConnectorAdapterRegistry(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
     minimumScheduleIntervalInMs: 0,
-    featureFlags: coreFeatureFlagsMock.createStart(),
     isServerless: false,
     analytics: { reportEvent: jest.fn() },
   };

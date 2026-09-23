@@ -15,12 +15,12 @@ import { toStoredTags } from '@kbn/as-code-shared-transforms';
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server';
 import type {
+  DiscoverSessionApiData,
   DiscoverSessionApiEsqlTab,
   DiscoverSessionApiTab,
 } from '@kbn/as-code-discover-schema';
 import { toStoredTab } from '../../../common/embeddable/transform_utils';
 import { getVisContextRequestData } from '../../../common/session/get_vis_context_request_data';
-import type { DiscoverSessionApiData } from '../schema';
 import { transformControlPanelsIn } from './transform_control_panels';
 import { fromApiTabTypeState } from '../../../common/session/tab_type_state';
 import { fromApiVisContext } from '../../../common/session/vis_context';

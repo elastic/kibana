@@ -28,6 +28,7 @@ import {
   CUSTOM_YARA_SIGNATURE_FIELD_TYPE,
 } from '../service/artifacts/constants';
 import { ENDPOINT_EVENTS_LOG_INDEX_FIELDS } from './common/alerts_ecs_fields';
+import { addDisabledArtifactTag } from '../service/artifacts/utils';
 
 /** Utility that removes null and undefined from a Type's property value */
 type NonNullableTypeProperties<T> = {
@@ -505,7 +506,7 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
       this.generateYaraRuleText(osMeta)
     ).join('\n\n');
 
-    return this.generate({
+    const item = this.generate({
       name: `YARA Signature ${this.randomString(5)}`,
       list_id: ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id,
       item_id: `generator_endpoint_yara_signature_${this.seededUUIDv4()}`,
@@ -520,6 +521,15 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
       ...overrides,
       os_types: osTypes as ExceptionListItemSchema['os_types'],
     });
+
+    if (!overrides.tags) {
+      // Add it only if caller does not override the tags
+      if (this.randomBoolean(1 / 3)) {
+        item.tags = addDisabledArtifactTag(item.tags);
+      }
+    }
+
+    return item;
   }
 
   generateCustomYaraSignatureForCreate(

@@ -27,6 +27,8 @@ import { useLicense } from '../../../../../../common/hooks/use_license';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import type { PolicyFormComponentCommonProps } from '../types';
 import { AdvancedPolicySchema } from '../../../../../../../common/endpoint/service/policy/advanced_policy_schema';
+import { CUSTOM_YARA_SIGNATURES_ADVANCED_KEYS } from '../../../../../../../common/endpoint/service/policy/custom_yara_signatures';
+import { useIsCustomYaraSignaturesAvailable } from '../hooks/use_is_custom_yara_signatures_available';
 
 function setValue(obj: Record<string, unknown>, value: string, path: string[]) {
   let newPolicyConfig = obj;
@@ -114,6 +116,8 @@ export const AdvancedSection = memo<AdvancedSectionProps>(
     const getTestId = useTestIdGenerator(dataTestSubj);
     const [showAdvancedPolicy, setShowAdvancedPolicy] = useState<boolean>(false);
     const isPlatinumPlus = useLicense().isPlatinumPlus();
+    const isEnterprise = useLicense().isEnterprise();
+    const { isAvailable: isCustomYaraSignaturesAvailable } = useIsCustomYaraSignaturesAvailable();
 
     const isEditMode = mode === 'edit';
 
@@ -178,17 +182,25 @@ export const AdvancedSection = memo<AdvancedSectionProps>(
 
             <EuiPanel data-test-subj={getTestId('settings')} paddingSize="s">
               {AdvancedPolicySchema.map(
-                (
-                  {
-                    key,
-                    documentation,
-                    first_supported_version: firstVersion,
-                    last_supported_version: lastVersion,
-                    license,
-                  },
-                  index
-                ) => {
+                ({
+                  key,
+                  documentation,
+                  first_supported_version: firstVersion,
+                  last_supported_version: lastVersion,
+                  license,
+                }) => {
                   if (!isPlatinumPlus && license === 'platinum') {
+                    return <React.Fragment key={key} />;
+                  }
+
+                  if (!isEnterprise && license === 'enterprise') {
+                    return <React.Fragment key={key} />;
+                  }
+
+                  if (
+                    CUSTOM_YARA_SIGNATURES_ADVANCED_KEYS.has(key) &&
+                    !isCustomYaraSignaturesAvailable
+                  ) {
                     return <React.Fragment key={key} />;
                   }
 

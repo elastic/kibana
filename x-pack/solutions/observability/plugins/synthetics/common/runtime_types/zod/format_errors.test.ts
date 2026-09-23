@@ -24,4 +24,35 @@ describe('formatZodErrors', () => {
       'Invalid field "url", must be a non-empty string. | Invalid value "undefined" supplied to "name"'
     );
   });
+
+  it('unwraps discriminated-union failures to Invalid value supplied to type', () => {
+    const schema = z.discriminatedUnion('type', [
+      z.object({ type: z.literal('http') }),
+      z.object({ type: z.literal('tcp') }),
+    ]);
+    const input = { type: 'invalid-data-steam' };
+    const result = schema.safeParse(input);
+    expect(result.success).toBe(false);
+    if (result.success) {
+      return;
+    }
+    expect(formatZodErrors(result.error, { input })).toEqual([
+      'Invalid value "invalid-data-steam" supplied to "type"',
+    ]);
+  });
+
+  it('keeps field-level union failures on the field path', () => {
+    const schema = z.object({
+      locations: z.array(z.union([z.object({ id: z.string() }), z.object({ label: z.string() })])),
+    });
+    const input = { locations: ['invalid-location'] };
+    const result = schema.safeParse(input);
+    expect(result.success).toBe(false);
+    if (result.success) {
+      return;
+    }
+    expect(formatZodErrors(result.error, { input })).toEqual([
+      'Invalid value "invalid-location" supplied to "locations"',
+    ]);
+  });
 });

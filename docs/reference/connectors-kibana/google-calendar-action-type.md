@@ -17,7 +17,10 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 
 ### Connector configuration [google-calendar-connector-configuration]
 
-Google Calendar connectors have the following configuration properties:
+Google Calendar connectors support the following authentication types:
+
+Quick Connect OAuth 2.0 (recommended) {applies_to}`serverless: preview` {applies_to}`stack: preview 9.6`
+:   Elastic’s managed OAuth flow for Google Calendar. Grants `calendar.readonly` access. No app setup is required — select this option and authorize access through Elastic.
 
 Bearer Token
 :   A Google OAuth 2.0 access token with Google Calendar API scopes. See **Get API credentials**.
@@ -77,7 +80,12 @@ such as proxies, certificates, or TLS settings. You can set configurations that 
 
 ## Get API credentials [google-calendar-api-credentials]
 
-### OAuth 2.0 authorization code (recommended for ongoing use)
+### Quick Connect OAuth 2.0
+
+No setup required. Select **Quick Connect OAuth 2.0** when creating the connector in {{kib}} and follow the 
+authorization prompt to grant Elastic access to your Google Calendar.
+
+### OAuth 2.0 authorization code
 
 Use this path when you select **OAuth 2.0 authorization code** in {{kib}}. Create a **Web application** OAuth client with
 **Authorized JavaScript origins** and **Authorized redirect URIs** (standard Google web-app OAuth pattern).

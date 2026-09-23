@@ -888,5 +888,13 @@ describe('findUserActions', () => {
         expect.objectContaining({ authors: ['testuser', 'otheruser'] })
       );
     });
+
+    it('passes sources to the finder service', async () => {
+      await find({ caseId: 'test-case', params: { sources: ['agent'] } }, client, clientArgs);
+
+      expect(clientArgs.services.userActionService.finder.find).toHaveBeenCalledWith(
+        expect.objectContaining({ sources: ['agent'] })
+      );
+    });
   });
 });

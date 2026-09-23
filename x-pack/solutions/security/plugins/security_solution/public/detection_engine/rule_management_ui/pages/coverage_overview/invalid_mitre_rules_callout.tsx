@@ -10,6 +10,7 @@ import { EuiButton, EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { MITRE_ATTACK_VERSION } from '../../../../../common/detection_engine/mitre/mitre_version';
 import { useKibana } from '../../../../common/lib/kibana';
+import { useMitreConfiguration } from '../../../../common/hooks/mitre/use_mitre_configuration';
 import { useCoverageOverviewDashboardContext } from './coverage_overview_dashboard_context';
 import { InvalidMitreRulesModal } from './invalid_mitre_rules_modal';
 import * as i18n from './translations';
@@ -20,6 +21,11 @@ const CoverageOverviewInvalidMitreRulesCalloutComponent = () => {
   const {
     state: { data },
   } = useCoverageOverviewDashboardContext();
+  const { frameworkVersion } = useMitreConfiguration();
+  // Normalize: the managed adapter strips the leading 'v' from the version string, so
+  // re-add it at the display site. Fall back to the legacy constant when the managed
+  // version is not yet available so the rendered string never regresses.
+  const displayVersion = frameworkVersion ? `v${frameworkVersion}` : MITRE_ATTACK_VERSION;
 
   const closeModal = useCallback(() => setIsModalOpen(false), []);
   const openModal = useCallback(() => setIsModalOpen(true), []);
@@ -46,7 +52,7 @@ const CoverageOverviewInvalidMitreRulesCalloutComponent = () => {
             defaultMessage="You have {count, plural, one {# rule that references} other {# rules that reference}} MITRE ATT&CK® IDs not present in the currently supported version ({version}). They may not appear correctly in the coverage matrix. {learnMoreLink}"
             values={{
               count: invalidCount,
-              version: MITRE_ATTACK_VERSION,
+              version: displayVersion,
               learnMoreLink: (
                 <EuiLink
                   href={docLinks.links.siem.remapMitreAttack}

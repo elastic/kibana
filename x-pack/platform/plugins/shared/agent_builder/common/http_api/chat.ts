@@ -54,6 +54,13 @@ export interface ChatRequestBodyPayload {
   trigger_mode?: ChatTriggerMode;
 }
 
+/** Response of `POST /internal/agent_builder/executions/{id}/abort`. */
+export interface AbortExecutionResponse {
+  acknowledged: boolean;
+  /** True when the run wound down and its `execution_aborted` event was saved before returning. */
+  terminal_persisted: boolean;
+}
+
 /**
  * Body payload for a user message request (`trigger_mode: 'never'`), which persists a message
  * on an existing conversation without executing the agent.

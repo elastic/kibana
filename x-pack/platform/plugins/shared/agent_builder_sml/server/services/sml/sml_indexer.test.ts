@@ -18,6 +18,7 @@ import type { SmlContext, SmlEntry, SmlIndexerOriginParams, SmlTypeDefinition } 
 
 jest.mock('./sml_storage', () => ({
   smlIndexName: '.test-sml-data',
+  INGESTION_METHOD_FIELD: 'governance.provenance.updated_by.metadata.ingestion_method',
 }));
 
 jest.mock('./sml_service', () => ({
@@ -25,11 +26,6 @@ jest.mock('./sml_service', () => ({
     (error: unknown) => (error as { statusCode?: number })?.statusCode === 404
   ),
 }));
-
-// Distinct mock id per call so tests can assert each bulk operation gets its
-// own _id. Reset in `beforeEach` so cross-test counts stay stable.
-let mockUuidCounter = 0;
-jest.mock('uuid', () => ({ v4: () => `mock-uuid-${++mockUuidCounter}` }));
 
 // Shared so a test can arrange the response before `createMockEsClient()` is called.
 const bulkMock = jest.fn();
@@ -39,6 +35,7 @@ const createMockEsClient = (): jest.Mocked<ElasticsearchClient> =>
     bulk: bulkMock,
     deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
     count: jest.fn().mockResolvedValue({ count: 0 }),
+    get: jest.fn().mockResolvedValue({ found: false }),
   } as unknown as jest.Mocked<ElasticsearchClient>);
 
 const createMockLogger = () => {
@@ -97,7 +94,6 @@ const createIndexerParams = (
 
 describe('createSmlIndexer', () => {
   beforeEach(() => {
-    mockUuidCounter = 0;
     bulkMock.mockReset();
     bulkMock.mockResolvedValue({ errors: false, items: [] });
   });
@@ -128,8 +124,8 @@ describe('createSmlIndexer', () => {
         query: {
           bool: {
             filter: [
-              { term: { 'attributes.origin.uri': 'lens://att-1' } },
-              { term: { 'attributes.ingestion_method': 'crawled' } },
+              { term: { id: 'lens:att-1' } },
+              { term: { 'governance.provenance.updated_by.metadata.ingestion_method': 'crawled' } },
             ],
           },
         },
@@ -138,7 +134,7 @@ describe('createSmlIndexer', () => {
       expect(getSmlEntry).not.toHaveBeenCalled();
     });
 
-    it('create action: calls getSmlEntry, deletes existing entry, indexes the new one with permissions from getPermissions hook', async () => {
+    it('create action: calls getSmlEntry and overwrites the entry with permissions from getPermissions hook', async () => {
       const smlEntry = {
         type: 'lens',
         title: 'My Viz',
@@ -178,23 +174,13 @@ describe('createSmlIndexer', () => {
         savedObjectsClient: {},
         logger: contextLogger,
       });
-      expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
-      expect(esClient.deleteByQuery).toHaveBeenCalledWith({
-        index: smlIndexName,
-        ignore_unavailable: true,
-        allow_no_indices: true,
-        query: { bool: { filter: [{ term: { 'attributes.origin.uri': 'lens://att-2' } }] } },
-        refresh: false,
-      });
+      expect(esClient.deleteByQuery).not.toHaveBeenCalled();
       expect(bulkMock).toHaveBeenCalledTimes(1);
       const bulkCall = bulkMock.mock.calls[0][0];
       expect(bulkCall.index).toBe(smlIndexName);
       expect(bulkCall.refresh).toBe('wait_for');
       expect(bulkCall.operations).toHaveLength(2);
-      // _id is a bare UUID (no `${type}:${origin}:...` prefix) so it cannot
-      // overflow ES's 512-byte _id limit no matter how long caller-supplied
-      // inputs are. Document carries `origin_id`/`type` as searchable fields.
-      expect(bulkCall.operations[0].index._id).toBe('mock-uuid-1');
+      expect(bulkCall.operations[0].index._id).toBe('lens:att-2');
       expect(bulkCall.operations[1]).toEqual({
         type: 'lens',
         title: 'My Viz',
@@ -207,12 +193,15 @@ describe('createSmlIndexer', () => {
             ],
           },
         },
-        attributes: {
-          id: 'mock-uuid-1',
-          origin: { uri: 'lens://att-2' },
-          created_at: expect.any(String),
-          updated_at: expect.any(String),
-          ingestion_method: 'crawled',
+        id: 'lens:att-2',
+        '@timestamp': expect.any(String),
+        updated_at: expect.any(String),
+        references: [{ uri: 'lens://att-2', relation: 'derived_from' }],
+        governance: {
+          provenance: {
+            created_by: { uri: 'crawler://sml', metadata: { ingestion_method: 'crawled' } },
+            updated_by: { uri: 'crawler://sml', metadata: { ingestion_method: 'crawled' } },
+          },
         },
       });
     });
@@ -260,7 +249,11 @@ describe('createSmlIndexer', () => {
         content: 'sales dashboard for Q3 with revenue and conversion metrics',
         description: 'Quarterly sales overview, executive audience',
         tags: ['sales', 'executive', 'quarterly'],
-        references: [{ uri: 'category://sales' }, { uri: 'dashboard://parent-1' }],
+        references: [
+          { uri: 'dashboard://dash-100', relation: 'derived_from' },
+          { uri: 'category://sales' },
+          { uri: 'dashboard://parent-1' },
+        ],
         permissions: {
           kibana: {
             privileges: [{ space: 'default', name: ['ai_index:dashboard/read'], count: 1 }],
@@ -269,24 +262,88 @@ describe('createSmlIndexer', () => {
         attributes: {
           owner_team: 'sales-ops',
           fields: [{ name: 'revenue', type: 'currency' }],
-          id: 'mock-uuid-1',
-          origin: { uri: 'dashboard://dash-100' },
-          user_id: 'user-7',
-          created_at: expect.any(String),
-          updated_at: expect.any(String),
-          ingestion_method: 'crawled',
+        },
+        id: 'dashboard:dash-100',
+        '@timestamp': expect.any(String),
+        updated_at: expect.any(String),
+        governance: {
+          provenance: {
+            created_by: { uri: 'user://user-7', metadata: { ingestion_method: 'crawled' } },
+            updated_by: { uri: 'user://user-7', metadata: { ingestion_method: 'crawled' } },
+          },
         },
       });
     });
 
-    it('producer attributes cannot override the SML bookkeeping keys', async () => {
+    it('skips an entry whose type differs from the attachment type', async () => {
+      const getSmlEntry = jest.fn().mockResolvedValue({ type: 'Lens', title: 'Viz', content: 'c' });
+      const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens', getSmlEntry }));
+      const logger = createMockLogger();
+      const esClient = createMockEsClient();
+      const indexer = createSmlIndexer({ registry, logger });
+
+      await indexer.indexAttachment(
+        createIndexerParams({
+          originId: 'att-2',
+          attachmentType: 'lens',
+          action: 'create',
+          esClient,
+        })
+      );
+
+      expect(esClient.deleteByQuery).not.toHaveBeenCalled();
+      expect(bulkMock).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining(
+          "the 'lens' type returned an entry with type 'Lens', which must match"
+        )
+      );
+    });
+
+    it('re-indexing keeps the original creation time and creator', async () => {
+      const smlEntry = { type: 'lens', title: 'My Viz', content: 'v2' };
+      const getSmlEntry = jest.fn().mockResolvedValue(smlEntry);
+      const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens', getSmlEntry }));
+      const logger = createMockLogger();
+      const esClient = createMockEsClient();
+      const createdBy = { uri: 'user://u-1', metadata: { ingestion_method: 'manual' } };
+      (esClient.get as jest.Mock).mockResolvedValue({
+        found: true,
+        _source: {
+          '@timestamp': '2025-01-01T00:00:00.000Z',
+          governance: { provenance: { created_by: createdBy } },
+        },
+      });
+      const indexer = createSmlIndexer({ registry, logger });
+
+      await indexer.indexAttachment(
+        createIndexerParams({
+          originId: 'att-2',
+          attachmentType: 'lens',
+          action: 'update',
+          esClient,
+        })
+      );
+
+      expect(esClient.get).toHaveBeenCalledWith(expect.objectContaining({ id: 'lens:att-2' }), {
+        ignore: [404],
+      });
+      const document = bulkMock.mock.calls[0][0].operations[1];
+      expect(document['@timestamp']).toBe('2025-01-01T00:00:00.000Z');
+      expect(document.governance.provenance.created_by).toEqual(createdBy);
+      expect(document.governance.provenance.updated_by).toEqual({
+        uri: 'crawler://sml',
+        metadata: { ingestion_method: 'crawled' },
+      });
+      expect(document.updated_at).not.toBe('2025-01-01T00:00:00.000Z');
+    });
+
+    it('producer attributes cannot override the SML bookkeeping fields', async () => {
       const smlEntry = {
         type: 'dashboard',
         title: 'Forged',
         content: 'c',
         attributes: {
-          // `origin.uri` gates deleteEntry and `ingestion_method` gates manual-entry
-          // protection, so a type writer must not be able to forge either.
           origin: { uri: 'dashboard://somebody-elses-origin' },
           ingestion_method: 'manual',
           id: 'forged-id',
@@ -311,14 +368,17 @@ describe('createSmlIndexer', () => {
         })
       );
 
-      const { attributes } = bulkMock.mock.calls[0][0].operations[1];
-      expect(attributes.origin).toEqual({ uri: 'dashboard://dash-1' });
-      expect(attributes.ingestion_method).toBe('crawled');
-      expect(attributes.id).toBe('mock-uuid-1');
-      expect(attributes.owner_team).toBe('sales-ops');
+      const document = bulkMock.mock.calls[0][0].operations[1];
+      expect(document.id).toBe('dashboard:dash-1');
+      expect(document.references[0]).toEqual({
+        uri: 'dashboard://dash-1',
+        relation: 'derived_from',
+      });
+      expect(document.governance.provenance.updated_by.metadata.ingestion_method).toBe('crawled');
+      expect(document.attributes.owner_team).toBe('sales-ops');
     });
 
-    it('update action: same as create (delete-then-write)', async () => {
+    it('update action: same as create (overwrite)', async () => {
       const smlEntry = { type: 'lens', title: 'Updated', content: 'new content' };
       const getSmlEntry = jest.fn().mockResolvedValue(smlEntry);
       const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens', getSmlEntry }));
@@ -336,7 +396,7 @@ describe('createSmlIndexer', () => {
       );
 
       expect(getSmlEntry).toHaveBeenCalledTimes(1);
-      expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
+      expect(esClient.deleteByQuery).not.toHaveBeenCalled();
       expect(bulkMock).toHaveBeenCalledTimes(1);
     });
 
@@ -690,8 +750,12 @@ describe('createSmlIndexer', () => {
             query: expect.objectContaining({
               bool: expect.objectContaining({
                 filter: expect.arrayContaining([
-                  { term: { 'attributes.origin.uri': 'lens://att-protected' } },
-                  { term: { 'attributes.ingestion_method': 'manual' } },
+                  { term: { id: 'lens:att-protected' } },
+                  {
+                    term: {
+                      'governance.provenance.updated_by.metadata.ingestion_method': 'manual',
+                    },
+                  },
                 ]),
               }),
             }),
@@ -730,7 +794,10 @@ describe('createSmlIndexer', () => {
         expect(esClient.count).not.toHaveBeenCalled();
         expect(getSmlEntry).toHaveBeenCalledTimes(1);
         expect(bulkMock).toHaveBeenCalledTimes(1);
-        expect(bulkMock.mock.calls[0][0].operations[1].attributes.ingestion_method).toBe('crawled');
+        expect(
+          bulkMock.mock.calls[0][0].operations[1].governance.provenance.updated_by.metadata
+            .ingestion_method
+        ).toBe('crawled');
       });
 
       it('delete action proceeds regardless of manual entries', async () => {
@@ -1162,7 +1229,7 @@ describe('createSmlIndexer', () => {
       // No ingestion_method term means both manual + crawled are removed.
       // Space guard is present because createDeleteParams defaults spaces to ['default'].
       expect(callArgs.query.bool.filter).toEqual([
-        { term: { 'attributes.origin.uri': 'lens://att-wipe-all' } },
+        { term: { id: 'lens:att-wipe-all' } },
         {
           nested: {
             path: 'permissions.kibana.privileges',
@@ -1185,8 +1252,8 @@ describe('createSmlIndexer', () => {
       expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
       const callArgs = (esClient.deleteByQuery as jest.Mock).mock.calls[0][0];
       expect(callArgs.query.bool.filter).toEqual([
-        { term: { 'attributes.origin.uri': 'lens://att-wipe-manual' } },
-        { term: { 'attributes.ingestion_method': 'manual' } },
+        { term: { id: 'lens:att-wipe-manual' } },
+        { term: { 'governance.provenance.updated_by.metadata.ingestion_method': 'manual' } },
         {
           nested: {
             path: 'permissions.kibana.privileges',
@@ -1209,8 +1276,8 @@ describe('createSmlIndexer', () => {
       expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
       const callArgs = (esClient.deleteByQuery as jest.Mock).mock.calls[0][0];
       expect(callArgs.query.bool.filter).toEqual([
-        { term: { 'attributes.origin.uri': 'lens://att-default-scope' } },
-        { term: { 'attributes.ingestion_method': 'crawled' } },
+        { term: { id: 'lens:att-default-scope' } },
+        { term: { 'governance.provenance.updated_by.metadata.ingestion_method': 'crawled' } },
         {
           nested: {
             path: 'permissions.kibana.privileges',
@@ -1256,9 +1323,7 @@ describe('createSmlIndexer', () => {
 
       const callArgs = (esClient.deleteByQuery as jest.Mock).mock.calls[0][0];
       // No space guard when spaces is empty — global delete.
-      expect(callArgs.query.bool.filter).toEqual([
-        { term: { 'attributes.origin.uri': 'lens://att-global' } },
-      ]);
+      expect(callArgs.query.bool.filter).toEqual([{ term: { id: 'lens:att-global' } }]);
     });
   });
 });

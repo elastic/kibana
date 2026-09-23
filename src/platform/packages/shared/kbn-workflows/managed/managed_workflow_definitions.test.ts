@@ -15,6 +15,10 @@ import {
   ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID,
   ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID,
   ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID,
+  ALERTZERO_ACTION_WORKFLOW_IDS,
+  ALERTZERO_ATTACK_DISCOVERY_WORKFLOW_IDS,
+  ALERTZERO_MANAGED_WORKER_WORKFLOW_IDS,
+  ALERTZERO_RULE_WORKFLOW_IDS,
   ALERTZERO_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID,
   ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID,
   ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID,
@@ -113,6 +117,17 @@ const managedTemplateDefinitionsById: Array<[string, RegistryTemplateManagedWork
       hasYamlTemplate(definitionEntry[1])
   );
 
+const alertZeroWorkflowIds = new Set<string>([
+  ...ALERTZERO_MANAGED_WORKER_WORKFLOW_IDS,
+  ...ALERTZERO_RULE_WORKFLOW_IDS,
+  ...ALERTZERO_ATTACK_DISCOVERY_WORKFLOW_IDS,
+  ...ALERTZERO_ACTION_WORKFLOW_IDS,
+]);
+
+const alertZeroDefinitionsById = managedDefinitionsById.filter(([id]) =>
+  alertZeroWorkflowIds.has(id)
+);
+
 function hasYamlTemplate(
   definition: ManagedWorkflowDefinition
 ): definition is YamlTemplateManagedWorkflowDefinition {
@@ -158,8 +173,8 @@ function createContentFingerprint(content: string): string {
 }
 
 it.each([
-  [ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID, FLOOR_ALERT_TRIAGE_YAML, '2:275b444e'],
-  [ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID, FLOOR_ATTACK_DISCOVERY_YAML, '3:17a26220'],
+  [ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID, FLOOR_ALERT_TRIAGE_YAML, '5:74170b32'],
+  [ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID, FLOOR_ATTACK_DISCOVERY_YAML, '4:ceae137f'],
   [
     ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
     HUNT_CONTINUOUS_THREAT_HUNT_YAML,
@@ -171,9 +186,9 @@ it.each([
     DETECTION_RULE_CREATION_YAML,
     '1:a6804a44',
   ],
-  [ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID, ACTION_ISOLATE_HOST_YAML, '1:f2aacd90'],
-  [ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID, ACTION_KILL_PROCESS_YAML, '1:1437f9a0'],
-  [ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID, ACTION_SUSPEND_PROCESS_YAML, '1:5f7bc458'],
+  [ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID, ACTION_ISOLATE_HOST_YAML, '2:f1a16332'],
+  [ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID, ACTION_KILL_PROCESS_YAML, '2:c01de0ea'],
+  [ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID, ACTION_SUSPEND_PROCESS_YAML, '2:d2860d37'],
 ] as const)(
   'requires bumping %s definition.version together with the imported YAML fingerprint',
   (workflowId, importedYaml, expectedFingerprint) => {
@@ -209,6 +224,63 @@ function assertWorkflowYamlIsValid(workflowId: string, yamlContent: string): voi
       `Managed workflow '${workflowId}' failed workflow schema validation: ${validationResult.error.message}`
     );
   }
+}
+
+const AI_AGENT_STEP_TYPE = 'ai.agent';
+/** Attack Discovery's custom LLM step, which names its tier as a `with.feature_id` input. */
+const ATTACK_DISCOVERY_RUN_STEP_TYPE = 'security.attack-discovery.run';
+const CONNECTOR_ID_BY_FEATURE = 'connector-id-by-feature';
+const FEATURE_ID = 'feature_id';
+const PLUGIN_ID = 'plugin-id';
+const AGGREGATE_BY = 'aggregate-by';
+/** Mirrors ALERTZERO_INFERENCE_PARENT_FEATURE_ID; @kbn/alertzero-common is not a dependency here. */
+const ALERTZERO_ROLLUP_ID = 'alertzero_parent';
+/**
+ * Mirrors the three ALERTZERO_*_INFERENCE_FEATURE_IDs, for the same reason as the rollup id above.
+ * Matching the exact set matters: an unregistered id resolves to the deployment default at runtime
+ * exactly as an absent one does, so accepting any string would let a typo through the guard.
+ */
+const ALERTZERO_TIER_IDS = new Set(['alertzero_fast', 'alertzero_reasoning', 'alertzero_agentic']);
+
+/**
+ * Collects steps of a given type from anywhere in a parsed workflow, walking the whole tree rather
+ * than the step containers known today so nesting added later (`foreach`, `if`/`else`, `parallel`
+ * branches, `switch` cases) is covered without touching this.
+ */
+function collectStepsOfType(
+  stepType: string,
+  node: unknown,
+  collected: Array<Record<string, unknown>> = []
+): Array<Record<string, unknown>> {
+  if (Array.isArray(node)) {
+    for (const item of node) {
+      collectStepsOfType(stepType, item, collected);
+    }
+    return collected;
+  }
+
+  if (node !== null && typeof node === 'object') {
+    const candidate = node as Record<string, unknown>;
+    if (candidate.type === stepType) {
+      collected.push(candidate);
+    }
+    for (const value of Object.values(candidate)) {
+      collectStepsOfType(stepType, value, collected);
+    }
+  }
+
+  return collected;
+}
+
+/** The tier a step names, whether it is an `ai.agent` field or a custom step's `with` input. */
+function getNamedTier(step: Record<string, unknown>, field: string): unknown {
+  if (field in step) {
+    return step[field];
+  }
+  const withInputs = step.with;
+  return withInputs !== null && typeof withInputs === 'object'
+    ? (withInputs as Record<string, unknown>)[field]
+    : undefined;
 }
 
 describe('managedWorkflowDefinitions', () => {
@@ -284,6 +356,64 @@ describe('managedWorkflowDefinitions', () => {
       // the token keys can cause this, and nothing else would catch it.
       expect(renderedYaml.match(UNREPLACED_TOKEN_PATTERN) ?? []).toEqual([]);
       assertWorkflowYamlIsValid(id, renderedYaml);
+    }
+  );
+
+  // An ai.agent step naming no model is accepted by the schema and runs on whatever the
+  // deployment-wide default is, so the operator's tier choice is silently ignored and nothing
+  // else fails. Requiring the pin here is deliberately stricter than the schema: a step that
+  // genuinely must take its connector elsewhere has to change this test, which puts the
+  // exception in front of a reviewer instead of leaving it invisible.
+  it.each(alertZeroDefinitionsById)(
+    '%s resolves every ai.agent step through an inference feature',
+    (id, definition) => {
+      const aiAgentSteps = collectStepsOfType(
+        AI_AGENT_STEP_TYPE,
+        parse(renderWorkflowYaml(definition))
+      );
+      const unpinnedStepNames = aiAgentSteps
+        .filter((step) => !ALERTZERO_TIER_IDS.has(step[CONNECTOR_ID_BY_FEATURE] as string))
+        .map((step) => (typeof step.name === 'string' ? step.name : '<unnamed>'));
+
+      expect(unpinnedStepNames).toEqual([]);
+    }
+  );
+
+  // Attack Discovery's LLM call is a custom step rather than `ai.agent`, so the guard above cannot
+  // see it: it names its tier as a `with.feature_id` input. Dropping or mistyping that input fails
+  // exactly as silently, and puts scheduled Attack Discovery back on the deployment-wide default.
+  it.each(alertZeroDefinitionsById)(
+    '%s resolves every Attack Discovery run step through an inference feature',
+    (id, definition) => {
+      const runSteps = collectStepsOfType(
+        ATTACK_DISCOVERY_RUN_STEP_TYPE,
+        parse(renderWorkflowYaml(definition))
+      );
+      const unpinnedStepNames = runSteps
+        .filter((step) => !ALERTZERO_TIER_IDS.has(getNamedTier(step, FEATURE_ID) as string))
+        .map((step) => (typeof step.name === 'string' ? step.name : '<unnamed>'));
+
+      expect(unpinnedStepNames).toEqual([]);
+    }
+  );
+
+  // Same failure mode as the tier pin: a step with no plugin-id falls back to the default Agent
+  // Builder attribution, so its spend leaves AlertZero's rollup without anything failing.
+  it.each(alertZeroDefinitionsById)(
+    '%s attributes every ai.agent step to a Worker and the AlertZero rollup',
+    (id, definition) => {
+      const aiAgentSteps = collectStepsOfType(
+        AI_AGENT_STEP_TYPE,
+        parse(renderWorkflowYaml(definition))
+      );
+      const unattributedStepNames = aiAgentSteps
+        .filter(
+          (step) =>
+            typeof step[PLUGIN_ID] !== 'string' || step[AGGREGATE_BY] !== ALERTZERO_ROLLUP_ID
+        )
+        .map((step) => (typeof step.name === 'string' ? step.name : '<unnamed>'));
+
+      expect(unattributedStepNames).toEqual([]);
     }
   );
 });

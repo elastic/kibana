@@ -340,6 +340,26 @@ describe('MetricVisComponent', function () {
       expect(screen.getByText(secondaryValue)).toBeInTheDocument();
     });
 
+    it('should show the secondary metric name on hover when the name is displayed as a tooltip', async () => {
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      await renderMetricChart({
+        config: {
+          ...config,
+          metric: { ...config.metric, secondaryNameVisibility: 'tooltip' },
+          dimensions: { ...config.dimensions, secondaryMetric: minPriceColumnId },
+        },
+      });
+
+      const secondaryLabel = table.columns.find((col) => col.id === minPriceColumnId)!.name;
+      const secondaryValue = screen.getByText(`number-${table.rows[0][minPriceColumnId]}`);
+
+      expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
+
+      await user.hover(secondaryValue);
+      const tooltip = await screen.findByRole('tooltip');
+      expect(tooltip).toHaveTextContent(secondaryLabel);
+    });
+
     it('should display progress bar if min and max provided', async () => {
       const { rerender } = await renderMetricChart({
         config: {

@@ -76,7 +76,7 @@ describe('DiscoverUninitialized', () => {
 
     expect(screen.getByTestId('discoverUninitialized')).toBeVisible();
     expect(screen.getByTestId('discoverUninitializedKeyboardShortcuts')).toBeVisible();
-    expect(screen.getByText('Keyboard shortcuts')).toBeVisible();
+    expect(screen.getByText('Editor keyboard shortcuts')).toBeVisible();
     expect(screen.getByText('Run query')).toBeVisible();
     expect(screen.getByText('Prettify query')).toBeVisible();
     expect(screen.queryByTestId('refreshDataButton')).not.toBeInTheDocument();

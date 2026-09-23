@@ -5,12 +5,10 @@
  * 2.0.
  */
 
+import type { EsqlEsqlColumnInfo, FieldValue } from '@elastic/elasticsearch/lib/api/types';
 import type { ImprovementAction } from './improvement_actions';
 
-/**
- * The type of backing store an AI index is attached to. `index` covers a
- * concrete index name or an index pattern (e.g. `foo`, `foo,bar`, `foo*`).
- */
+/** The type of backing store an AI index is attached to. */
 export type AiIndexType = 'data_stream' | 'index';
 
 export interface AiIndexDest {
@@ -23,6 +21,18 @@ export type AiIndexSourceType = 'esql' | 'connector';
 export interface AiIndexSource {
   type: AiIndexSourceType;
   value: string;
+}
+
+export type AiIndexTraceType = 'elastic_agent' | 'index' | 'esql';
+
+export interface AiIndexTrace {
+  type: AiIndexTraceType;
+  value: string;
+}
+
+/** A trace entry with its derived ES|QL query. Query is computed at read time, never stored. */
+export interface AiIndexTraceWithQuery extends AiIndexTrace {
+  query: string;
 }
 
 export type AiIndexAutomationType = 'workflow';
@@ -79,14 +89,16 @@ export interface AiIndexProperties {
   dest: AiIndexDest;
   automations: AiIndexAutomation[];
   sources: AiIndexSource[];
+  traces: AiIndexTrace[];
   feedback_analysis?: AiIndexFeedbackAnalysis;
 }
 
-export interface AiIndexHttpItem extends AiIndexProperties {
+export interface AiIndexHttpItem extends Omit<AiIndexProperties, 'traces'> {
   id: string;
   managed: boolean;
   date_created: string;
   date_modified: string;
+  traces: AiIndexTraceWithQuery[];
 }
 
 export type GetAiIndexResponse = AiIndexHttpItem;
@@ -122,4 +134,24 @@ export interface DeleteAiIndexResponse {
 export interface KiTypeCount {
   type: string;
   count: number;
+}
+
+export type AiIndexQueryParamValue = string | number | boolean;
+
+/** The query decides the target; the server injects the space filter and a row limit. */
+export interface QueryAiIndicesRequest {
+  query: string;
+  params?: Record<string, AiIndexQueryParamValue>;
+  /** Defaults to `DEFAULT_AI_INDEX_QUERY_LIMIT`. Capped at `MAX_AI_INDEX_QUERY_LIMIT`. */
+  limit?: number;
+}
+
+export interface QueryAiIndicesResponse {
+  columns: EsqlEsqlColumnInfo[];
+  values: FieldValue[][];
+}
+
+/** Free-form context block for an agent: what the index is, its fields, and how to query it. */
+export interface DescribeAiIndexResponse {
+  response: string;
 }

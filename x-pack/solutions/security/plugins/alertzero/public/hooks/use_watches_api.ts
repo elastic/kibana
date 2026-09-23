@@ -6,25 +6,11 @@
  */
 
 import { useQuery } from '@kbn/react-query';
-import { isHttpFetchError } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { API_VERSIONS, ALERTZERO_WATCHES_URL, buildWatchUrl } from '@kbn/alertzero-common';
 import type { GetWatchResponse, ListWatchesResponse } from '@kbn/alertzero-common';
+import { retryOnTransientError } from '@kbn/agentic-investigations-plugin/public';
 import { queryKeys } from '../query_keys';
-
-export const retryOnTransientError = (failureCount: number, error: unknown): boolean => {
-  if (failureCount >= 3) {
-    return false;
-  }
-  if (isHttpFetchError(error)) {
-    const status = error.response?.status;
-    if (status === 501) {
-      return false;
-    }
-    return !status || status >= 500;
-  }
-  return true;
-};
 
 export const useWatches = () => {
   const { services } = useKibana();

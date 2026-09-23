@@ -758,6 +758,15 @@ export function registerConnectorRoutes({
       const { connectorId } = request.params;
       const connectorResult = await fetchConnectorById(client.asCurrentUser, connectorId);
 
+      if (!connectorResult) {
+        return createError({
+          errorCode: ErrorCode.RESOURCE_NOT_FOUND,
+          message: `Connector with id ${connectorId} is not found.`,
+          response,
+          statusCode: 404,
+        });
+      }
+
       return response.ok({
         body: {
           connector: connectorResult,

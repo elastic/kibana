@@ -11,6 +11,7 @@ import {
   UserAtSpaceScenarios,
   ManageRuleSettingsOnlyUserAtSpace1,
   AllWithoutManageRuleSettingsUserAtSpace1,
+  SuperuserAtSpace1,
 } from '../../../../scenarios';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover, getTestRuleData } from '../../../../../common/lib';
@@ -75,25 +76,8 @@ export default function updateGapAutoFillSchedulerTests({ getService }: FtrProvi
             rule_types: [{ type: 'test.patternFiringAutoRecoverFalse', consumer: 'alertsFixture' }],
           };
 
-          const createResp = await supertestWithoutAuth
-            .post(url)
-            .set('kbn-xsrf', 'foo')
-            .auth(apiOptions.username, apiOptions.password)
-            .send(schedulerBody);
-
-          if (
-            ![
-              'superuser at space1',
-              'space_1_all at space1',
-              'space_1_all_alerts_none_actions at space1',
-              'space_1_all_with_restricted_fixture at space1',
-              'manage_rule_settings_only at space1',
-            ].includes(scenario.id)
-          ) {
-            expect(createResp.statusCode).to.eql(403);
-            return;
-          }
-
+          // Create as superuser so the update authorization check runs against a real scheduler
+          const createResp = await supertest.post(url).set('kbn-xsrf', 'foo').send(schedulerBody);
           expect(createResp.statusCode).to.eql(200);
           const schedulerId = createResp.body.id ?? createResp.body?.body?.id;
           expect(typeof schedulerId).to.be('string');
@@ -113,170 +97,172 @@ export default function updateGapAutoFillSchedulerTests({ getService }: FtrProvi
               rule_types: schedulerBody.rule_types,
             });
 
-          expect(updateResp.statusCode).to.eql(200);
-          expect(updateResp.body.name ?? updateResp.body?.body?.name).to.eql(
-            `${schedulerBody.name}-updated`
-          );
-        });
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+            case 'global_read at space1':
+              expect(updateResp.statusCode).to.eql(403);
+              break;
 
-        it('disables scheduler and removes system backfills synchronously', async () => {
-          if (
-            ![
-              'superuser at space1',
-              'space_1_all at space1',
-              'space_1_all_alerts_none_actions at space1',
-              'space_1_all_with_restricted_fixture at space1',
-              'manage_rule_settings_only at space1',
-            ].includes(scenario.id)
-          ) {
-            // Create scheduler as authorized user in order to ensure 403 for others
-            const createResp = await supertestWithoutAuth
-              .post(
-                `${getUrlPrefix(
-                  apiOptions.spaceId
-                )}/internal/alerting/rules/gaps/auto_fill_scheduler`
-              )
-              .set('kbn-xsrf', 'foo')
-              .auth(apiOptions.username, apiOptions.password)
-              .send({
-                name: 'should-fail',
-                schedule: { interval: '1h' },
-                gap_fill_range: 'now-60d',
-                max_backfills: 100,
-                num_retries: 1,
-                scope: ['test-scope'],
-                rule_types: [
-                  { type: 'test.patternFiringAutoRecoverFalse', consumer: 'alertsFixture' },
-                ],
-              });
-            expect(createResp.statusCode).to.eql(403);
-            return;
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
+            case 'manage_rule_settings_only at space1':
+              expect(updateResp.statusCode).to.eql(200);
+              expect(updateResp.body.name ?? updateResp.body?.body?.name).to.eql(
+                `${schedulerBody.name}-updated`
+              );
+              break;
+
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
           }
-
-          // Create a rule
-          const ruleResp = await supertest
-            .post(`${getUrlPrefix(apiOptions.spaceId)}/api/alerting/rule`)
-            .set('kbn-xsrf', 'foo')
-            .send(getRule())
-            .expect(200);
-          const ruleId = ruleResp.body.id;
-          objectRemover.add(apiOptions.spaceId, ruleId, 'rule', 'alerting');
-
-          // Report a gap
-          await supertest
-            .post(`${getUrlPrefix(apiOptions.spaceId)}/_test/report_gap`)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              ruleId,
-              start: gapStart,
-              end: gapEnd,
-              spaceId: apiOptions.spaceId,
-            })
-            .expect(200);
-
-          // Create the scheduler
-          const schedulerBody = {
-            name: `disable-update-${Date.now()}`,
-            schedule: { interval: '1m' },
-            gap_fill_range: 'now-60d',
-            max_backfills: 1000,
-            num_retries: 1,
-            scope: ['test-scope'],
-            rule_types: [{ type: 'test.patternFiringAutoRecoverFalse', consumer: 'alertsFixture' }],
-          };
-
-          const createResp = await supertestWithoutAuth
-            .post(
-              `${getUrlPrefix(apiOptions.spaceId)}/internal/alerting/rules/gaps/auto_fill_scheduler`
-            )
-            .set('kbn-xsrf', 'foo')
-            .auth(apiOptions.username, apiOptions.password)
-            .send(schedulerBody)
-            .expect(200);
-
-          const schedulerId = createResp.body.id ?? createResp.body?.body?.id;
-          expect(typeof schedulerId).to.be('string');
-
-          // Wait for a system backfill to appear
-          let capturedBackfillIds: string[] = [];
-          await retry.try(async () => {
-            const resp = await supertestWithoutAuth
-              .post(`${getUrlPrefix(apiOptions.spaceId)}/internal/alerting/rules/backfill/_find`)
-              .set('kbn-xsrf', 'foo')
-              .auth(apiOptions.username, apiOptions.password)
-              .query({
-                rule_ids: ruleId,
-                page: 1,
-                per_page: 100,
-                initiator: 'system',
-              });
-            expect(resp.statusCode).to.eql(200);
-            const data = resp.body?.data ?? [];
-            expect(Array.isArray(data)).to.be(true);
-            expect(data.length > 0).to.be(true);
-            capturedBackfillIds = data.map((d: any) => d.id).filter(Boolean);
-          });
-          expect(capturedBackfillIds.length > 0).to.be(true);
-
-          // Put to disable the scheduler
-          const putResp = await supertestWithoutAuth
-            .put(
-              `${getUrlPrefix(
-                apiOptions.spaceId
-              )}/internal/alerting/rules/gaps/auto_fill_scheduler/${schedulerId}`
-            )
-            .set('kbn-xsrf', 'foo')
-            .auth(apiOptions.username, apiOptions.password)
-            .send({
-              enabled: false,
-              name: schedulerBody.name,
-              schedule: schedulerBody.schedule,
-              gap_fill_range: schedulerBody.gap_fill_range,
-              max_backfills: schedulerBody.max_backfills,
-              num_retries: schedulerBody.num_retries,
-              rule_types: schedulerBody.rule_types,
-              scope: schedulerBody.scope,
-            })
-            .expect(200);
-
-          expect(putResp.body.enabled ?? putResp.body?.body?.enabled).to.be(false);
-
-          // Ensure system backfills are removed
-          await retry.try(async () => {
-            const resp = await supertestWithoutAuth
-              .post(`${getUrlPrefix(apiOptions.spaceId)}/internal/alerting/rules/backfill/_find`)
-              .set('kbn-xsrf', 'foo')
-              .auth(apiOptions.username, apiOptions.password)
-              .query({
-                rule_ids: ruleId,
-                page: 1,
-                per_page: 100,
-                initiator: 'system',
-              });
-            expect(resp.statusCode).to.eql(200);
-            const data = resp.body?.data ?? [];
-            expect(data.length).to.eql(0);
-          });
-
-          // Verify gaps no longer have in-progress intervals
-          await retry.try(async () => {
-            await supertest
-              .post(`${getUrlPrefix(apiOptions.spaceId)}/_test/event_log/refresh`)
-              .set('kbn-xsrf', 'foo')
-              .send({});
-            const gapsResp = await findGaps({
-              ruleId,
-              start: gapStart,
-              end: gapEnd,
-              spaceId: apiOptions.spaceId,
-            });
-            expect(gapsResp.statusCode).to.eql(200);
-            const gap = gapsResp.body.data[0];
-            expect(gap?.in_progress_intervals?.length ?? 0).to.eql(0);
-          });
         });
       });
     }
+
+    // Backfill removal on disable does not vary by role, so it runs once.
+    describe(`${SuperuserAtSpace1.id} (runs once)`, () => {
+      const { user, space } = SuperuserAtSpace1;
+      const apiOptions = {
+        spaceId: space.id,
+        username: user.username,
+        password: user.password,
+      };
+
+      afterEach(async () => {
+        await objectRemover.removeAll();
+        await supertest
+          .post(`${getUrlPrefix(apiOptions.spaceId)}/_test/gap_auto_fill_scheduler/_delete_all`)
+          .set('kbn-xsrf', 'foo')
+          .send({});
+      });
+
+      it('disables scheduler and removes system backfills synchronously', async () => {
+        // Create a rule
+        const ruleResp = await supertest
+          .post(`${getUrlPrefix(apiOptions.spaceId)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(getRule())
+          .expect(200);
+        const ruleId = ruleResp.body.id;
+        objectRemover.add(apiOptions.spaceId, ruleId, 'rule', 'alerting');
+
+        // Report a gap
+        await supertest
+          .post(`${getUrlPrefix(apiOptions.spaceId)}/_test/report_gap`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            ruleId,
+            start: gapStart,
+            end: gapEnd,
+            spaceId: apiOptions.spaceId,
+          })
+          .expect(200);
+
+        // Create the scheduler
+        const schedulerBody = {
+          name: `disable-update-${Date.now()}`,
+          schedule: { interval: '1m' },
+          gap_fill_range: 'now-60d',
+          max_backfills: 1000,
+          num_retries: 1,
+          scope: ['test-scope'],
+          rule_types: [{ type: 'test.patternFiringAutoRecoverFalse', consumer: 'alertsFixture' }],
+        };
+
+        const createResp = await supertestWithoutAuth
+          .post(
+            `${getUrlPrefix(apiOptions.spaceId)}/internal/alerting/rules/gaps/auto_fill_scheduler`
+          )
+          .set('kbn-xsrf', 'foo')
+          .auth(apiOptions.username, apiOptions.password)
+          .send(schedulerBody)
+          .expect(200);
+
+        const schedulerId = createResp.body.id ?? createResp.body?.body?.id;
+        expect(typeof schedulerId).to.be('string');
+
+        // Wait for a system backfill to appear
+        let capturedBackfillIds: string[] = [];
+        await retry.try(async () => {
+          const resp = await supertestWithoutAuth
+            .post(`${getUrlPrefix(apiOptions.spaceId)}/internal/alerting/rules/backfill/_find`)
+            .set('kbn-xsrf', 'foo')
+            .auth(apiOptions.username, apiOptions.password)
+            .query({
+              rule_ids: ruleId,
+              page: 1,
+              per_page: 100,
+              initiator: 'system',
+            });
+          expect(resp.statusCode).to.eql(200);
+          const data = resp.body?.data ?? [];
+          expect(Array.isArray(data)).to.be(true);
+          expect(data.length > 0).to.be(true);
+          capturedBackfillIds = data.map((d: any) => d.id).filter(Boolean);
+        });
+        expect(capturedBackfillIds.length > 0).to.be(true);
+
+        // Put to disable the scheduler
+        const putResp = await supertestWithoutAuth
+          .put(
+            `${getUrlPrefix(
+              apiOptions.spaceId
+            )}/internal/alerting/rules/gaps/auto_fill_scheduler/${schedulerId}`
+          )
+          .set('kbn-xsrf', 'foo')
+          .auth(apiOptions.username, apiOptions.password)
+          .send({
+            enabled: false,
+            name: schedulerBody.name,
+            schedule: schedulerBody.schedule,
+            gap_fill_range: schedulerBody.gap_fill_range,
+            max_backfills: schedulerBody.max_backfills,
+            num_retries: schedulerBody.num_retries,
+            rule_types: schedulerBody.rule_types,
+            scope: schedulerBody.scope,
+          })
+          .expect(200);
+
+        expect(putResp.body.enabled ?? putResp.body?.body?.enabled).to.be(false);
+
+        // Ensure system backfills are removed
+        await retry.try(async () => {
+          const resp = await supertestWithoutAuth
+            .post(`${getUrlPrefix(apiOptions.spaceId)}/internal/alerting/rules/backfill/_find`)
+            .set('kbn-xsrf', 'foo')
+            .auth(apiOptions.username, apiOptions.password)
+            .query({
+              rule_ids: ruleId,
+              page: 1,
+              per_page: 100,
+              initiator: 'system',
+            });
+          expect(resp.statusCode).to.eql(200);
+          const data = resp.body?.data ?? [];
+          expect(data.length).to.eql(0);
+        });
+
+        // Verify gaps no longer have in-progress intervals
+        await retry.try(async () => {
+          await supertest
+            .post(`${getUrlPrefix(apiOptions.spaceId)}/_test/event_log/refresh`)
+            .set('kbn-xsrf', 'foo')
+            .send({});
+          const gapsResp = await findGaps({
+            ruleId,
+            start: gapStart,
+            end: gapEnd,
+            spaceId: apiOptions.spaceId,
+          });
+          expect(gapsResp.statusCode).to.eql(200);
+          const gap = gapsResp.body.data[0];
+          expect(gap?.in_progress_intervals?.length ?? 0).to.eql(0);
+        });
+      });
+    });
 
     describe(AllWithoutManageRuleSettingsUserAtSpace1.id, () => {
       const { user, space } = AllWithoutManageRuleSettingsUserAtSpace1;

@@ -62,7 +62,7 @@ const setup = ({
     services: {
       context: { isServerless },
       featureFlags: {
-        getBooleanValue: jest.fn().mockImplementation((key: string) => {
+        useBooleanValue: jest.fn().mockImplementation((key: string) => {
           if (key === IS_VENDOR_ENDPOINTS_ENABLED) {
             return vendorEndpointsEnabled;
           }

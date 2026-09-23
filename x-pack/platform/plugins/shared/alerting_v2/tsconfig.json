@@ -30,6 +30,7 @@
     "@kbn/core-di",
     "@kbn/core-di-browser",
     "@kbn/core-di-server",
+    "@kbn/esql",
     "@kbn/esql-utils",
     "@kbn/response-ops-retry-service",
     "@kbn/core-application-browser",
@@ -93,6 +94,7 @@
     "@kbn/expressions-plugin",
     "@kbn/ui-actions-plugin",
     "@kbn/field-formats-plugin",
+    "@kbn/flyout-template",
     "@kbn/charts-plugin",
     "@kbn/unified-data-table",
     "@kbn/unified-histogram",
@@ -134,6 +136,8 @@
     "@kbn/es-types",
     "@kbn/announcement-banner",
     "@kbn/app-header",
+    "@kbn/flyout-template",
+    "@kbn/flyout-sections",
     "@kbn/core-chrome-browser-context-mocks",
     "@kbn/change-history",
     "@kbn/change-history-ui",
@@ -146,7 +150,8 @@
     "@kbn/security-authorization-core",
     "@kbn/security-plugin-types-server",
     "@kbn/core-test-helpers-model-versions",
-    "@kbn/content-list-common"
+    "@kbn/content-list-common",
+    "@kbn/core-ui-settings-server"
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"]
 }

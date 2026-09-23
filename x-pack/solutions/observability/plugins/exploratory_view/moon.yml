@@ -60,6 +60,7 @@ dependsOn:
   - '@kbn/chart-expressions-common'
   - '@kbn/scout-oblt'
   - '@kbn/app-header'
+  - '@kbn/event-annotation-common'
 tags:
   - plugin
   - prod

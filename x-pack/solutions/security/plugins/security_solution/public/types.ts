@@ -68,6 +68,7 @@ import type { InferencePublicStart } from '@kbn/inference-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { KqlPluginStart } from '@kbn/kql/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
+import type { MitreAttackPublicStart } from '@kbn/mitre-attack-plugin/public';
 import type { Logger } from '@kbn/logging';
 import type { CPSPluginStart } from '@kbn/cps/public';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
@@ -179,6 +180,7 @@ export interface StartPlugins {
   inference: InferencePublicStart;
   share?: SharePluginStart;
   agentBuilder?: AgentBuilderPluginStart;
+  mitreAttack?: MitreAttackPublicStart;
   cps?: CPSPluginStart;
   evals?: EvalsPublicStart;
 }

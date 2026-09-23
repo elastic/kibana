@@ -22,6 +22,7 @@ const ruleTuning: Worker = {
   lastRun: null,
   state: 'ok',
   settingsRevision: 1,
+  workflowId: `${SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID}-default`,
   settings: {
     workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
     autonomy: 'manual',

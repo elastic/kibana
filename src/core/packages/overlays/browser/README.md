@@ -138,3 +138,11 @@ For what each zone accepts — sections, subsections, accordions, tabs, header b
 
 - **`openFlyout`**: Traditional method that requires `toMountPoint`. Opens flyouts with `session="never"`. Content should include `EuiFlyoutHeader` and `EuiFlyoutBody`. Optionally include `EuiFlyoutFooter`.
 - **`openFlyoutTemplate`**: The recommended method for session-based flyouts. Opens flyouts with `session="start"` for full EUI Flyout System integration, rendered as a `FlyoutTemplate` from its props plus a component that composes its zones — no hand-composed `EuiFlyoutHeader`/`Body`/`Footer`.
+
+#### `onClose`
+
+The two methods hand the handler different arguments, and the difference is meaningful.
+
+`openFlyout` passes the `OverlayRef` and leaves the flyout open until something calls `close()` on it. A handler that never calls `close()` keeps the flyout open, which is how callers such as the Data View Field Editor block dismissal while there are unsaved changes.
+
+`openFlyoutTemplate` passes nothing and closes the flyout once the handler returns. Use it to react to a dismissal, not to gate one. Blocking dismissal needs a `beforeClose` affordance in the EUI Flyout Manager, tracked in [#290414](https://github.com/elastic/kibana/issues/290414). The deprecated `openSystemFlyout` behaves the same way.

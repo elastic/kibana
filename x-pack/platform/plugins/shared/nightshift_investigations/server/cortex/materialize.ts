@@ -6,6 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import type { SandboxSession } from '@kbn/sandbox-plugin/server';
 import {
   CORTEX_ENTITY_TYPE_BUCKETS,
   CORTEX_ENTITY_TYPES,
@@ -13,7 +14,6 @@ import {
   type CortexPage,
   type CortexPageSummary,
 } from '../../common/cortex';
-import type { SandboxApiClient } from '../tools/sandbox_bash/grpc_client';
 import type { CortexPageStore } from './page_store';
 
 export const CORTEX_WORKSPACE_ROOT = '/workspace/cortex';
@@ -79,13 +79,11 @@ const renderPage = (page: CortexPage): string => {
 };
 
 export const materializeCortex = async ({
-  apiClient,
-  conversationId,
+  session,
   store,
   logger,
 }: {
-  apiClient: SandboxApiClient;
-  conversationId: string;
+  session: SandboxSession;
   store: CortexPageStore;
   logger: Logger;
 }): Promise<void> => {
@@ -98,7 +96,7 @@ export const materializeCortex = async ({
     (page): page is CortexPage => page !== undefined
   );
 
-  await apiClient.mkdirs(conversationId, [
+  await session.mkdirs([
     CORTEX_WORKSPACE_ROOT,
     ...CORTEX_ENTITY_TYPES.map(
       (entityType) => `${CORTEX_WORKSPACE_ROOT}/${CORTEX_ENTITY_TYPE_BUCKETS[entityType]}`
@@ -108,19 +106,16 @@ export const materializeCortex = async ({
   // The sandbox has no rename, so this cannot be an atomic swap. Writing the pages first means a
   // failure part-way leaves the index missing rather than listing pages that were never written —
   // the agent then reads nothing instead of following links into empty files.
-  await apiClient.writeFiles(
-    conversationId,
+  await session.writeFiles(
     fullPages.map((page) => ({
       path: pagePath(page.entity_type, page.slug),
       content: Buffer.from(renderPage(page), 'utf8'),
     }))
   );
-  await apiClient.writeFiles(conversationId, [
+  await session.writeFiles([
     { path: `${CORTEX_WORKSPACE_ROOT}/README.md`, content: Buffer.from(README_CONTENT, 'utf8') },
     { path: `${CORTEX_WORKSPACE_ROOT}/INDEX.md`, content: Buffer.from(renderIndex(pages), 'utf8') },
   ]);
 
-  logger.info(
-    `Materialized ${fullPages.length} Cortex page(s) into sandbox conversation ${conversationId}`
-  );
+  logger.info(`Materialized ${fullPages.length} Cortex page(s) into sandbox`);
 };

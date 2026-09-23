@@ -11,7 +11,7 @@ import { IMPROVEMENT_ACTIONS } from '../../common/http_api/improvement_actions';
 import { recordImprovementsStepCommonDefinition } from '../../common/step_types/record_improvements';
 import { AiIndexNotFoundError } from '../ai_indices/errors';
 import { recordImprovements } from '../feedback_analysis/record_improvements';
-import { improvementAuditEvent } from '../routes/audit_events';
+import { improvementAuditEvent } from '../audit/audit_events';
 import type { FeedbackAnalysisStepDependencies } from './helpers';
 import { assertContextEngineEnabled, assertFeedbackLoopEnabled } from './helpers';
 

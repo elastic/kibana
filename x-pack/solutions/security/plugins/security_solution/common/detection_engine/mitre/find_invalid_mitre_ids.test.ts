@@ -6,15 +6,23 @@
  */
 
 import type { Threats } from '@kbn/securitysolution-io-ts-alerting-types';
-import { findInvalidMitreIds } from './find_invalid_mitre_ids';
+import { findInvalidMitreIds, buildValidMitreIdsFromBuckets } from './find_invalid_mitre_ids';
+import type { ValidMitreIdSets } from './find_invalid_mitre_ids';
 import { MITRE_ATTACK_FRAMEWORK } from './iterate_mitre_threat_entities';
 
 const MITRE_FRAMEWORK = MITRE_ATTACK_FRAMEWORK;
 
-// Valid IDs sampled from the bundled mitre_tactics_techniques.ts
+// IDs chosen to match entries in the bundled blob
 const VALID_TACTIC_ID = 'TA0005'; // Defense Evasion
 const VALID_TECHNIQUE_ID = 'T1548'; // Abuse Elevation Control Mechanism
 const VALID_SUBTECHNIQUE_ID = 'T1548.002'; // Bypass User Account Control
+
+/** Small id-set fixture containing just the IDs used in the tests below. */
+const validIds: ValidMitreIdSets = {
+  tactic: new Set([VALID_TACTIC_ID]),
+  technique: new Set([VALID_TECHNIQUE_ID]),
+  subtechnique: new Set([VALID_SUBTECHNIQUE_ID]),
+};
 
 const makeThreat = (overrides?: Partial<Threats[number]>): Threats[number] => ({
   framework: MITRE_FRAMEWORK,
@@ -27,13 +35,28 @@ const makeThreat = (overrides?: Partial<Threats[number]>): Threats[number] => ({
   ...overrides,
 });
 
+describe('buildValidMitreIdsFromBuckets', () => {
+  it('builds id sets from bucket arrays', () => {
+    const result = buildValidMitreIdsFromBuckets({
+      tactics: [{ id: 'TA0001' }, { id: 'TA0002' }],
+      techniques: [{ id: 'T1001' }],
+      subtechniques: [{ id: 'T1001.001' }],
+    });
+    expect(result.tactic.has('TA0001')).toBe(true);
+    expect(result.tactic.has('TA0002')).toBe(true);
+    expect(result.technique.has('T1001')).toBe(true);
+    expect(result.subtechnique.has('T1001.001')).toBe(true);
+    expect(result.tactic.has('TA9999')).toBe(false);
+  });
+});
+
 describe('findInvalidMitreIds', () => {
   it('returns empty array for undefined threats', () => {
-    expect(findInvalidMitreIds(undefined)).toEqual([]);
+    expect(findInvalidMitreIds(undefined, validIds)).toEqual([]);
   });
 
   it('returns empty array for empty threats array', () => {
-    expect(findInvalidMitreIds([])).toEqual([]);
+    expect(findInvalidMitreIds([], validIds)).toEqual([]);
   });
 
   it('returns empty array when all IDs are valid', () => {
@@ -55,7 +78,7 @@ describe('findInvalidMitreIds', () => {
         ],
       }),
     ];
-    expect(findInvalidMitreIds(threats)).toEqual([]);
+    expect(findInvalidMitreIds(threats, validIds)).toEqual([]);
   });
 
   it('reports an unknown tactic ID', () => {
@@ -68,7 +91,7 @@ describe('findInvalidMitreIds', () => {
         },
       }),
     ];
-    expect(findInvalidMitreIds(threats)).toEqual(['TA9999']);
+    expect(findInvalidMitreIds(threats, validIds)).toEqual(['TA9999']);
   });
 
   it('reports an unknown technique ID', () => {
@@ -83,7 +106,7 @@ describe('findInvalidMitreIds', () => {
         ],
       }),
     ];
-    expect(findInvalidMitreIds(threats)).toEqual(['T9999']);
+    expect(findInvalidMitreIds(threats, validIds)).toEqual(['T9999']);
   });
 
   it('reports an unknown subtechnique ID', () => {
@@ -105,7 +128,7 @@ describe('findInvalidMitreIds', () => {
         ],
       }),
     ];
-    expect(findInvalidMitreIds(threats)).toEqual(['T1548.999']);
+    expect(findInvalidMitreIds(threats, validIds)).toEqual(['T1548.999']);
   });
 
   it('reports all invalid IDs from mixed valid+invalid entries in traversal order', () => {
@@ -137,7 +160,7 @@ describe('findInvalidMitreIds', () => {
         ],
       }),
     ];
-    expect(findInvalidMitreIds(threats)).toEqual(['T1548.999', 'T9999']);
+    expect(findInvalidMitreIds(threats, validIds)).toEqual(['T1548.999', 'T9999']);
   });
 
   it('skips non-MITRE ATT&CK framework entries', () => {
@@ -148,12 +171,12 @@ describe('findInvalidMitreIds', () => {
         technique: [],
       },
     ];
-    expect(findInvalidMitreIds(threats)).toEqual([]);
+    expect(findInvalidMitreIds(threats, validIds)).toEqual([]);
   });
 
   it('handles threat entries with no techniques', () => {
     const threats: Threats = [makeThreat({ technique: [] })];
-    expect(findInvalidMitreIds(threats)).toEqual([]);
+    expect(findInvalidMitreIds(threats, validIds)).toEqual([]);
   });
 
   it('handles threat entries with no subtechniques', () => {
@@ -168,7 +191,7 @@ describe('findInvalidMitreIds', () => {
         ],
       }),
     ];
-    expect(findInvalidMitreIds(threats)).toEqual([]);
+    expect(findInvalidMitreIds(threats, validIds)).toEqual([]);
   });
 
   it('reports invalid IDs across multiple threat items', () => {
@@ -180,7 +203,7 @@ describe('findInvalidMitreIds', () => {
         tactic: { id: 'TA9999', name: 'Fake Tactic 2', reference: 'https://example.com' },
       }),
     ];
-    expect(findInvalidMitreIds(threats)).toEqual(['TA9998', 'TA9999']);
+    expect(findInvalidMitreIds(threats, validIds)).toEqual(['TA9998', 'TA9999']);
   });
 
   it('deduplicates invalid IDs that appear multiple times across threats', () => {
@@ -210,6 +233,6 @@ describe('findInvalidMitreIds', () => {
         ],
       }),
     ];
-    expect(findInvalidMitreIds(threats)).toEqual(['TA9999', 'T9999', 'T9999.001']);
+    expect(findInvalidMitreIds(threats, validIds)).toEqual(['TA9999', 'T9999', 'T9999.001']);
   });
 });

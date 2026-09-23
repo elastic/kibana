@@ -7,6 +7,7 @@
 
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { useDispatch } from 'react-redux-v7';
@@ -25,6 +26,11 @@ import { StepImage } from './step_screenshot/step_image';
 import { BreakdownLegend } from './step_timing_breakdown/breakdown_legend';
 import { NetworkTimingsBreakdown } from './network_timings_breakdown';
 import { MonitorTypeEnum } from '../../../../../common/runtime_types';
+import { MonitorBackPage, SyntheticsHeaderToolbar } from '../common/app_header';
+import { MonitorDetailsLocation } from '../monitor_details/monitor_details_location';
+import { StepRunDate } from './step_page_nav';
+import { StepDetailPageStepNav } from './step_number_nav';
+import { StepDetailsStatus } from './step_details_status';
 
 export const StepDetailPage = () => {
   const { checkGroupId, stepIndex } = useParams<{ checkGroupId: string; stepIndex: string }>();
@@ -61,8 +67,24 @@ export const StepDetailPage = () => {
     );
   }, [dispatch, stepIndex, checkGroupId, remoteName, stepTimestamp]);
 
+  const title = currentStep
+    ? `${currentStep.synthetics?.step?.index}. ${currentStep.synthetics?.step?.name}`
+    : i18n.translate('xpack.synthetics.stepDetailsRoute.titleShort', {
+        defaultMessage: 'Step details',
+      });
+
   return (
-    <>
+    <MonitorBackPage
+      title={title}
+      toolbar={
+        <SyntheticsHeaderToolbar>
+          <StepRunDate />
+          <MonitorDetailsLocation isDisabled={true} />
+          <StepDetailsStatus />
+          <StepDetailPageStepNav />
+        </SyntheticsHeaderToolbar>
+      }
+    >
       <ErrorCallOut step={currentStep} />
       {data?.details?.journey?.config_id && (
         <MonitorDetailsLinkPortal
@@ -133,6 +155,6 @@ export const StepDetailPage = () => {
           activeStep={currentStep}
         />
       )}
-    </>
+    </MonitorBackPage>
   );
 };

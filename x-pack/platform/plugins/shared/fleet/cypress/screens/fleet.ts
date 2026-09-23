@@ -197,7 +197,7 @@ export const SETTINGS_FLEET_SERVER_HOSTS = {
 };
 
 export const AGENT_POLICY_FORM = {
-  DOWNLOAD_SOURCE_SELECT: 'agentPolicyForm.downloadSource.select',
+  DOWNLOAD_SOURCE_SELECT: 'agentPolicyForm.downloadSource.select.0',
 };
 
 export const FLEET_AGENT_LIST_PAGE = {

@@ -33,6 +33,7 @@ import type { ClientPluginsStart } from '../../../../plugin';
 import { getAgentPoliciesAction, selectAgentPolicies } from '../../state/agent_policies';
 import { setIsPrivateLocationFlyoutVisible } from '../../state/private_locations/actions';
 import { selectPrivateLocationFlyoutVisible } from '../../state/private_locations/selectors';
+import { MonitorsListingPage } from '../common/app_header';
 
 export const GettingStartedPage = () => {
   const dispatch = useDispatch();
@@ -86,42 +87,46 @@ export const GettingStartedPage = () => {
     });
   }, [setScreenContext, hasNoLocations, locations]);
 
-  return !loading ? (
-    <Wrapper>
-      {hasNoLocations ? (
-        <GettingStartedOnPrem />
+  return (
+    <MonitorsListingPage paddingSize="none">
+      {!loading ? (
+        <Wrapper>
+          {hasNoLocations ? (
+            <GettingStartedOnPrem />
+          ) : (
+            <EuiEmptyPrompt
+              title={<h2>{CREATE_SINGLE_PAGE_LABEL}</h2>}
+              layout="horizontal"
+              color="plain"
+              body={
+                <>
+                  <EuiText size="s">
+                    {OR_LABEL}{' '}
+                    <EuiLink
+                      data-test-subj="syntheticsGettingStartedPageLink"
+                      href={history.createHref({
+                        pathname: MONITOR_ADD_ROUTE,
+                        search,
+                      })}
+                    >
+                      {SELECT_DIFFERENT_MONITOR}
+                    </EuiLink>
+                    {i18n.translate('xpack.synthetics.gettingStarted.createSingle.description', {
+                      defaultMessage: ' to get started with Elastic Synthetics Monitoring.',
+                    })}
+                  </EuiText>
+                  <EuiSpacer />
+                  <SimpleMonitorForm />
+                </>
+              }
+              footer={<GettingStartedLink />}
+            />
+          )}
+        </Wrapper>
       ) : (
-        <EuiEmptyPrompt
-          title={<h2>{CREATE_SINGLE_PAGE_LABEL}</h2>}
-          layout="horizontal"
-          color="plain"
-          body={
-            <>
-              <EuiText size="s">
-                {OR_LABEL}{' '}
-                <EuiLink
-                  data-test-subj="syntheticsGettingStartedPageLink"
-                  href={history.createHref({
-                    pathname: MONITOR_ADD_ROUTE,
-                    search,
-                  })}
-                >
-                  {SELECT_DIFFERENT_MONITOR}
-                </EuiLink>
-                {i18n.translate('xpack.synthetics.gettingStarted.createSingle.description', {
-                  defaultMessage: ' to get started with Elastic Synthetics Monitoring.',
-                })}
-              </EuiText>
-              <EuiSpacer />
-              <SimpleMonitorForm />
-            </>
-          }
-          footer={<GettingStartedLink />}
-        />
+        <LoadingState />
       )}
-    </Wrapper>
-  ) : (
-    <LoadingState />
+    </MonitorsListingPage>
   );
 };
 

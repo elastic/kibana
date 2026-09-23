@@ -10,6 +10,7 @@ import useSessionStorage from 'react-use/lib/useSessionStorage';
 import type {
   AwsStaticKeyCredentials,
   CloudOnboardingDeploymentAuthMethod,
+  IacRenderedTemplate,
 } from '@kbn/fleet-plugin/public';
 
 import type { AwsServiceMatrixEntry, DataFormat, DeploymentMethod } from './aws_service_matrix';
@@ -20,11 +21,28 @@ import { getOnboardingSessionKey } from './onboarding_session_storage';
 /** Method used when nothing is persisted. Read and compared against in exactly one place each. */
 const DEFAULT_DEPLOYMENT_METHOD: DeploymentMethod = 'managed_integration';
 
+/**
+ * Template details of the CloudFormation template the user launched for an existing Federated Identity
+ * during this step, waiting to be written to the connector once Deploy succeeds. Memory only: it
+ * describes a launch in this session, and a reload re-runs the check anyway.
+ */
+export interface PendingIacTemplate extends IacRenderedTemplate {
+  /** The identity the template was rendered for; the write is skipped if the selection changed. */
+  connectorId: string;
+  /**
+   * JSON of the integration set (as built by buildIacIntegrations, which sorts, so equal sets give
+   * equal strings) the template was rendered for; Deploy writes the details only when the set it
+   * deploys is the same.
+   */
+  integrationsKey: string;
+}
+
 export interface AuthenticateAndDeployStepState {
   connectorId?: string;
   connectorName?: string;
   staticKeys?: AwsStaticKeyCredentials;
   authMethod?: CloudOnboardingDeploymentAuthMethod;
+  pendingIacTemplate?: PendingIacTemplate;
 }
 
 export type ServiceChipState = 'instantiating' | 'detecting' | 'receiving' | 'error' | 'timeout';
@@ -111,6 +129,7 @@ interface OnboardingFlowState {
   authenticateAndDeployStep: AuthenticateAndDeployStepState;
   setConnectorId: (id: string | undefined, name?: string) => void;
   setStaticKeys: (keys: AwsStaticKeyCredentials | undefined) => void;
+  setPendingIacTemplate: (iac: PendingIacTemplate | undefined) => void;
   setAgentBasedDeployment: (state: Partial<AgentBasedDeploymentState>) => void;
   agentBasedDeployment: AgentBasedDeploymentState;
   deploymentMethod: DeploymentMethod;
@@ -153,21 +172,35 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
       : undefined
   );
 
-  // Ref holds the latest persisted value so setConnectorId/setStaticKeys can spread it
-  // without closing over the state value — keeping both callbacks stable across renders.
+  // Not persisted: see PendingIacTemplate.
+  const [pendingIacTemplate, setPendingIacTemplate] = useState<PendingIacTemplate | undefined>(
+    undefined
+  );
+
+  // Ref holds the latest persisted value so all writers of persistedAuthenticateAndDeployStep
+  // can spread it without closing over the state value, and each writer advances the ref
+  // synchronously before calling the setter so back-to-back calls in the same event-loop
+  // tick each see the accumulated state rather than a stale pre-render snapshot.
   const persistedAuthStepRef = useRef(persistedAuthenticateAndDeployStep);
   persistedAuthStepRef.current = persistedAuthenticateAndDeployStep;
 
   const setConnectorId = useCallback(
     (id: string | undefined, name?: string) => {
       setStaticKeysState(undefined);
-      setPersistedAuthenticateAndDeployStep({
+      // A rendered template belongs to the identity it was rendered for. The Fleet component
+      // re-emits the same id on every readiness change, so only a real change drops it.
+      if (persistedAuthStepRef.current?.connectorId !== id) {
+        setPendingIacTemplate(undefined);
+      }
+      const next = {
         ...persistedAuthStepRef.current,
         connectorId: id,
         connectorName: id ? name : undefined,
-        authMethod: id ? 'identity_federation' : undefined,
+        authMethod: id ? ('identity_federation' as const) : undefined,
         accessKeyId: undefined,
-      });
+      };
+      persistedAuthStepRef.current = next;
+      setPersistedAuthenticateAndDeployStep(next);
     },
     [setPersistedAuthenticateAndDeployStep]
   );
@@ -175,22 +208,24 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
   const setStaticKeys = useCallback(
     (keys: AwsStaticKeyCredentials | undefined) => {
       setStaticKeysState(keys);
-      setPersistedAuthenticateAndDeployStep({
+      // Static keys replace the identity, so a template rendered for it has no connector to land on.
+      setPendingIacTemplate(undefined);
+      const next = {
         ...persistedAuthStepRef.current,
         connectorId: undefined,
         connectorName: undefined,
-        authMethod: keys ? 'static_keys' : undefined,
+        authMethod: keys ? ('static_keys' as const) : undefined,
         accessKeyId: keys?.access_key_id,
-      });
+      };
+      persistedAuthStepRef.current = next;
+      setPersistedAuthenticateAndDeployStep(next);
     },
     [setPersistedAuthenticateAndDeployStep]
   );
 
-  // Single write using persistedAuthStepRef.current — prevents stale-closure races when two
-  // callers update the same ref within the same event-loop tick. Same pattern as setDataFormat.
   const setAgentBasedDeployment = useCallback(
     (update: Partial<AgentBasedDeploymentState>) => {
-      setPersistedAuthenticateAndDeployStep({
+      const next = {
         ...persistedAuthStepRef.current,
         ...(update.agentHostsMode !== undefined ? { agentHostsMode: update.agentHostsMode } : {}),
         ...(update.agentPolicyId !== undefined ? { agentPolicyId: update.agentPolicyId } : {}),
@@ -213,13 +248,21 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         ...(update.withSysMonitoring !== undefined
           ? { withSysMonitoring: update.withSysMonitoring }
           : {}),
-      });
+      };
+      // Sync the ref so back-to-back calls in the same event-loop tick each see
+      // the accumulated state rather than spreading a stale pre-render snapshot.
+      persistedAuthStepRef.current = next;
+      setPersistedAuthenticateAndDeployStep(next);
     },
     [setPersistedAuthenticateAndDeployStep]
   );
 
+  // Rendered-template details is only valid for the service set it was rendered for: a
+  // template launched for set A must not be recorded as the stack's digest after the user goes
+  // back and deploys set B. Any change to the selection drops it; the check re-renders anyway.
   const setSelectedServiceIds = useCallback(
     (ids: string[]) => {
+      setPendingIacTemplate(undefined);
       setPersistedServices({ ...persistedServices, selectedServiceIds: ids });
     },
     [persistedServices, setPersistedServices]
@@ -227,6 +270,8 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
 
   const setDataFormat = useCallback(
     (format: DataFormat) => {
+      // A format change empties the selection (see above): the template details goes with it.
+      setPendingIacTemplate(undefined);
       // Clear selection atomically with the format change in one write — two separate
       // setPersistedServices calls would race because each closes over the same persistedServices.
       setPersistedServices({ ...persistedServices, dataFormat: format, selectedServiceIds: [] });
@@ -352,13 +397,15 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
       // meaningless to the agentless path and a cloud connector is meaningless to the agent-based
       // path. Without this reset, failures from the abandoned method keep the "Deployment failed"
       // callout up and gate Next on a deploy the user is no longer attempting.
-      setPersistedAuthenticateAndDeployStep({
+      const next = {
         ...prev,
         deploymentMethod: method,
         agentPolicyId: undefined,
         agentPolicyName: undefined,
         withSysMonitoring: undefined,
-      });
+      };
+      persistedAuthStepRef.current = next;
+      setPersistedAuthenticateAndDeployStep(next);
       setPersistedDetectAndReviewStep({
         serviceStatuses: {},
         policyIdsByInstance: {},
@@ -374,6 +421,7 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
     connectorName: persistedAuthenticateAndDeployStep?.connectorName,
     staticKeys,
     authMethod: persistedAuthenticateAndDeployStep?.authMethod,
+    pendingIacTemplate,
   };
 
   const agentBasedDeployment: AgentBasedDeploymentState = {
@@ -401,6 +449,7 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         authenticateAndDeployStep,
         setConnectorId,
         setStaticKeys,
+        setPendingIacTemplate,
         setAgentBasedDeployment,
         agentBasedDeployment,
         deploymentMethod,

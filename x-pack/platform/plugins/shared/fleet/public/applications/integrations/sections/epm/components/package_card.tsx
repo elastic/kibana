@@ -83,6 +83,7 @@ export function PackageCard({
   hasDataStreams,
 }: PackageCardProps) {
   const theme = useEuiTheme();
+  const defaultPackageCardMinHeight = theme.euiTheme.base * 8;
   let releaseBadge: React.ReactNode | null = null;
   if (release && release !== 'ga' && showReleaseBadge) {
     releaseBadge = (
@@ -270,7 +271,7 @@ export function PackageCard({
             ${getLineClampStyles(titleLineClamp)}
           }
 
-          min-height: ${minCardHeight ? `${minCardHeight}px` : '127px'};
+          min-height: ${minCardHeight ? `${minCardHeight}px` : `${defaultPackageCardMinHeight}px`};
           border-color: ${isQuickstart ? theme.euiTheme.colors.accent : null};
           max-height: ${maxCardHeight ? `${maxCardHeight}px` : null};
           overflow: ${maxCardHeight ? 'hidden' : null};

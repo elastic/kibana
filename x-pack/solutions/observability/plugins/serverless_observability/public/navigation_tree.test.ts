@@ -44,6 +44,15 @@ describe('Navigation Tree', () => {
     });
   });
 
+  it('includes service accounts in Admin and Settings', () => {
+    const adminSettingsNode = getAdminSettingsNode({ core });
+    const accessSection = adminSettingsNode.children?.find((item) => item.id === 'access');
+
+    expect(accessSection?.children).toContainEqual(
+      expect.objectContaining({ link: 'management:service_accounts' })
+    );
+  });
+
   it('shows Nightshift first when significant events are available', () => {
     const navigation = createNavigationTree({
       core,
@@ -109,7 +118,7 @@ describe('Navigation Tree', () => {
 
     expect(aiAssistantNode).toBeDefined();
     expect(agentsNode).toBeUndefined();
-    expect(contextEngineNode).toMatchObject({ icon: 'sparkles', link: 'context_engine' });
+    expect(contextEngineNode).toMatchObject({ icon: 'tableSparkles', link: 'context_engine' });
   });
 
   it('shows Agents and hides AI Assistant when AI Assistant is disabled', () => {
@@ -126,7 +135,7 @@ describe('Navigation Tree', () => {
 
     expect(aiAssistantNode).toBeUndefined();
     expect(agentsNode).toBeDefined();
-    expect(contextEngineNode).toMatchObject({ icon: 'sparkles', link: 'context_engine' });
+    expect(contextEngineNode).toMatchObject({ icon: 'tableSparkles', link: 'context_engine' });
     expect(contextEngineIndex).toBe(agentsIndex + 1);
   });
 

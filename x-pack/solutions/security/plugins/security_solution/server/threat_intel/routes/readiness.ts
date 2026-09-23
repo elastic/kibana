@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { READINESS_API_PATH } from '../../../common/threat_intel';
+import { READINESS_API_PATH, readinessResponseSchema } from '../../../common/threat_intel';
 import { getThreatIntelReadiness } from '../services/readiness';
 import { resolveCurrentSpaceId } from '../lib/space_filter';
 import { THREAT_INTEL_READ_AUTHZ } from './lib/authz';
@@ -32,7 +32,9 @@ export const registerReadinessRoute = ({
     .addVersion(
       {
         version: '1',
-        validate: false,
+        validate: {
+          response: { 200: { body: () => readinessResponseSchema } },
+        },
       },
       async (context, request, response) => {
         const core = await context.core;

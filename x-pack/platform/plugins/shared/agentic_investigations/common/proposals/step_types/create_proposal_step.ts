@@ -9,10 +9,15 @@ import { i18n } from '@kbn/i18n';
 import type { BaseStepDefinition } from '@kbn/workflows';
 import { StepCategory } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
-import { proposalConfidenceSchema, proposalImpactSchema, proposalOriginSchema } from '../proposal';
+import {
+  proposalCategorySchema,
+  proposalConfidenceSchema,
+  proposalImpactSchema,
+  proposalOriginSchema,
+} from '../proposal';
 import { optionalStepInput } from './optional_step_input';
 
-export const CreateProposalStepId = 'investigations.createProposal' as const;
+export const CreateProposalStepId = 'proposals.createProposal' as const;
 
 export const createProposalStepInputSchema = z.object({
   conversationId: z.string().describe('Conversation this proposal belongs to.'),
@@ -27,7 +32,12 @@ export const createProposalStepInputSchema = z.object({
   actionInput: optionalStepInput(z.record(z.string(), z.unknown())).describe(
     'Inputs passed to the action workflow.'
   ),
-  impact: optionalStepInput(proposalImpactSchema).describe('Impact snapshotted at creation.'),
+  impact: optionalStepInput(proposalImpactSchema).describe(
+    'Impact snapshotted at creation. Takes precedence over the action workflow\u2019s own declared impact, since the caller knows the situation the proposal came out of.'
+  ),
+  category: optionalStepInput(proposalCategorySchema).describe(
+    'Grouping axis for the decision queue. Overrides the action workflow\u2019s own declared category, and is the only way a proposal with no action gets one \u2014 consumers group by it, so without it such a proposal has nowhere to appear.'
+  ),
   confidence: optionalStepInput(proposalConfidenceSchema).describe(
     'Confidence in the recommendation.'
   ),
@@ -41,11 +51,28 @@ export const createProposalStepInputSchema = z.object({
 
 export const createProposalStepOutputSchema = z.object({
   proposalId: z.string(),
+  /** Equal to `proposalId` here; carried by the gate so it can resolve the chain later. */
+  rootProposalId: z.string(),
   status: z.string(),
   /** Comes from the action's metadata, so absent on a proposal with no action. */
   category: z.string().optional(),
-  /** True when the proposal still needs a human decision. */
-  requiresDecision: z.boolean(),
+  /**
+   * Hold the decision for a human however the caller's autonomy resolved,
+   * either because the action declares `approvalPolicy: always-gate` or
+   * because its metadata did not resolve at all — an unreadable policy is
+   * taken as the restrictive one rather than the permissive one.
+   *
+   * Emitted already reduced to a boolean rather than as the policy itself:
+   * the gating workflow combines it with two other terms in a Liquid
+   * condition, and Liquid has neither operator precedence nor parentheses.
+   */
+  alwaysGate: z.boolean(),
+  /**
+   * The absolute deadline the caller's `expiresIn` resolved to. Emitted so a
+   * gating workflow can derive each attempt's remaining time from one fixed
+   * point rather than restarting the clock on every retry.
+   */
+  expiresAt: z.string().optional(),
 });
 
 export const createProposalStepCommonDefinition: BaseStepDefinition<
@@ -61,6 +88,7 @@ export const createProposalStepCommonDefinition: BaseStepDefinition<
       'Creates a proposal record for a human to approve or dismiss, optionally carrying an executable action.',
   }),
   category: StepCategory.Kibana,
+  stability: 'beta',
   inputSchema: createProposalStepInputSchema,
   outputSchema: createProposalStepOutputSchema,
   documentation: {
@@ -73,7 +101,7 @@ export const createProposalStepCommonDefinition: BaseStepDefinition<
     ),
     examples: [
       `- name: create_proposal
-  type: investigations.createProposal
+  type: proposals.createProposal
   with:
     conversationId: "{{ inputs.conversationId }}"
     comment: "Tune the noisy rule that produced this alert"

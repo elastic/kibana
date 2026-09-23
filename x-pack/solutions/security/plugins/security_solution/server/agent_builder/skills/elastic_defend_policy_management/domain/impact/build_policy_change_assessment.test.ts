@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { FleetPackagePolicyGenerator } from '../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
 import { policyFactory } from '../../../../../../common/endpoint/models/policy_config';
@@ -27,6 +28,8 @@ const capabilities = (
   endpointPolicyProtections: true,
   endpointTrustedDevices: true,
   trustedDevicesExperimental: true,
+  endpointCustomYaraSignatures: true,
+  customYaraSignaturesExperimental: true,
   endpointProtectionUpdates: true,
   endpointCustomNotification: true,
   serverless: false,
@@ -119,6 +122,34 @@ describe('buildPolicyChangeAssessment', () => {
     expect(assessment.globalBlockers).toEqual([
       { reason: 'endpoint_custom_notification_disabled' },
     ]);
+  });
+
+  it('reports the custom YARA signatures gate and marks the change ineligible while the flag is off', () => {
+    const stored = policyFactory();
+    stored.windows.memory_protection.custom_yara_signatures = false;
+
+    const assessment = buildPolicyChangeAssessment(
+      createPolicy(stored),
+      [
+        {
+          op: 'set_field',
+          path: 'windows.memory_protection.custom_yara_signatures',
+          value: true,
+        },
+      ],
+      {
+        ...capabilities(),
+        customYaraSignaturesExperimental: false,
+      }
+    );
+
+    expect(assessment.changes[0]?.registry.productFeatureGate).toBe(
+      ProductFeatureSecurityKey.endpointCustomYaraSignatures
+    );
+    expect(assessment.changes[0]?.eligibility).toEqual({
+      eligible: false,
+      reason: 'custom_yara_signatures_experimental_disabled',
+    });
   });
 
   it('adds one generic blocker when an unrelated eligible change retains an invalid Device Control state', () => {

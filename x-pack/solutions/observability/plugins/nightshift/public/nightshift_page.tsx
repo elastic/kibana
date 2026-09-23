@@ -31,9 +31,16 @@ export function NightshiftPage(): React.ReactElement | null {
   const settingsHref = application.getUrlForApp(SIGNIFICANT_EVENTS_APP_ID, {
     path: '/settings',
   });
+  const managementHref = application.getUrlForApp(SIGNIFICANT_EVENTS_APP_ID, {
+    path: '/streams',
+  });
   const navigateToSettings = useCallback(
     () => application.navigateToUrl(settingsHref),
     [application, settingsHref]
+  );
+  const navigateToManagement = useCallback(
+    () => application.navigateToUrl(managementHref),
+    [application, managementHref]
   );
 
   const { isAvailable, isLoading: isAvailabilityLoading } = useSignificantEventsAvailability();
@@ -70,7 +77,12 @@ export function NightshiftPage(): React.ReactElement | null {
         paddingSize: 'none',
       }}
     >
-      <NightshiftAppHeader onSettingsClick={navigateToSettings} settingsHref={settingsHref} />
+      <NightshiftAppHeader
+        onManagementClick={navigateToManagement}
+        managementHref={managementHref}
+        onSettingsClick={navigateToSettings}
+        settingsHref={settingsHref}
+      />
       <EuiPageTemplate.Section component="div" color="subdued" restrictWidth="900px">
         <NightshiftApp />
       </EuiPageTemplate.Section>

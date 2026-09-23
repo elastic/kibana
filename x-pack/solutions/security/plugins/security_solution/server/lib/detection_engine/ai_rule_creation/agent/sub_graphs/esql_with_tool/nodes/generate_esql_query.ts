@@ -71,7 +71,7 @@ Optimize for Elastic Security: Suggest additional filters, aggregations, or enha
       const esqlResponse = await generateEsql({
         nlQuery: state.userQuery,
         additionalInstructions,
-        executeQuery: false,
+        execute: 'none',
         maxRetries: 3,
         model: { chatModel: model as ScopedModel['chatModel'], inferenceClient, connector },
         esClient,

@@ -63,6 +63,7 @@ export {
   applyWorkerSettingsWrite,
   diffWorkerSettings,
   formatWorkerSettingsIssues,
+  projectStoredAutonomyLevel,
   touchesWorkerSettings,
 } from './contract';
 export {

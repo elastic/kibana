@@ -13,6 +13,9 @@ export const BY_POLICY_ARTIFACT_TAG_PREFIX = 'policy:';
 
 export const GLOBAL_ARTIFACT_TAG = `${BY_POLICY_ARTIFACT_TAG_PREFIX}all`;
 
+/** Tag that marks an artifact entry as disabled and excluded from the packed artifact. */
+export const DISABLED_ARTIFACT_TAG = 'disabled';
+
 export const IMPORTED_ARTIFACT_TAG = 'imported_artifact';
 
 export const ADVANCED_MODE_TAG = 'form_mode:advanced';

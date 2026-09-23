@@ -19,12 +19,6 @@ import * as i18n from './components/app_chrome/translations';
  */
 export const getAlertZeroDeepLinks = (): AppDeepLink[] => [
   {
-    id: SecurityPageName.alertZeroChats,
-    title: i18n.NAV_CHATS,
-    path: '/chats',
-    visibleIn: ['globalSearch', 'projectSideNav'],
-  },
-  {
     id: SecurityPageName.alerts,
     title: i18n.NAV_ALERTS,
     path: '/alerts',
@@ -34,12 +28,6 @@ export const getAlertZeroDeepLinks = (): AppDeepLink[] => [
     id: SecurityPageName.attacks,
     title: i18n.NAV_ATTACKS,
     path: '/attacks',
-    visibleIn: ['globalSearch', 'projectSideNav'],
-  },
-  {
-    id: SecurityPageName.alertZeroRecords,
-    title: i18n.NAV_RECORDS,
-    path: '/records',
     visibleIn: ['globalSearch', 'projectSideNav'],
   },
   {

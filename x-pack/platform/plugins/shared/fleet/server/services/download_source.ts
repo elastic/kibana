@@ -13,7 +13,9 @@ import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import {
   DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
   DEFAULT_DOWNLOAD_SOURCE_URI,
+  DEFAULT_DOWNLOAD_SOURCE_NAME,
   DEFAULT_DOWNLOAD_SOURCE_ID,
+  DEFAULT_DOWNLOAD_SOURCE_REFERENCE,
 } from '../constants';
 
 import type {
@@ -140,6 +142,11 @@ class DownloadSourceService {
     logger.debug(`Creating new download source`);
 
     validateFleetSavedObjectId(options?.id);
+    if (options?.id === DEFAULT_DOWNLOAD_SOURCE_REFERENCE) {
+      throw new DownloadSourceError(
+        `'${DEFAULT_DOWNLOAD_SOURCE_REFERENCE}' is a reserved download source ID and cannot be used.`
+      );
+    }
 
     const data: DownloadSourceSOAttributes = {
       ...omit(downloadSource, ['ssl', 'auth', 'secrets']),
@@ -476,7 +483,7 @@ class DownloadSourceService {
 
     if (!defaultDS) {
       const newDefaultDS: DownloadSourceBase = {
-        name: 'Elastic Artifacts',
+        name: DEFAULT_DOWNLOAD_SOURCE_NAME,
         is_default: true,
         host: DEFAULT_DOWNLOAD_SOURCE_URI,
       };

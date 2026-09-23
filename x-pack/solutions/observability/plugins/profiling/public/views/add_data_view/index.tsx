@@ -8,12 +8,9 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
-  EuiCallOut,
   EuiCode,
   EuiCodeBlock,
-  EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiLink,
   EuiLoadingSpinner,
   EuiPanel,
@@ -26,34 +23,16 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import major from 'semver/functions/major';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { useProfilingParams } from '../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../hooks/use_profiling_router';
 import { useProfilingRoutePath } from '../../hooks/use_profiling_route_path';
 import { AsyncStatus, useAsync } from '../../hooks/use_async';
 import { useProfilingDependencies } from '../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { ProfilingAppPageTemplate } from '../../components/profiling_app_page_template';
-
-export enum AddDataTabs {
-  Kubernetes = 'kubernetes',
-  Docker = 'docker',
-  Binary = 'binary',
-  Deb = 'deb',
-  RPM = 'rpm',
-  ElasticAgentIntegration = 'elasticAgentIntegration',
-  Symbols = 'symbols',
-}
-
-interface Step {
-  title: string;
-  content: string | React.ReactNode;
-}
-
-interface Tab {
-  key: string;
-  title: string;
-  steps?: Step[];
-  subTabs?: Tab[];
-}
+import { useProfilingSetupStatus } from '../../components/contexts/profiling_setup_status/use_profiling_setup_status';
+import type { AddDataTab } from './types';
+import { AddDataTabs } from './types';
 
 const supportedCPUArchitectures = ['x86_64', 'arm64'];
 
@@ -62,6 +41,7 @@ export function AddDataView() {
   const { selectedTab } = query;
   const profilingRouter = useProfilingRouter();
   const routePath = useProfilingRoutePath();
+  const profilingSetupStatus = useProfilingSetupStatus();
   const [selectedSubTabKey, setSelectedSubTabKey] = useState<string | undefined>();
 
   const {
@@ -83,7 +63,7 @@ export function AddDataView() {
   const stackVersion = data?.stackVersion;
   const majorVersion = stackVersion ? major(stackVersion).toString() : undefined;
 
-  const tabs: Tab[] = useMemo(
+  const tabs: AddDataTab[] = useMemo(
     () => [
       {
         key: AddDataTabs.Kubernetes,
@@ -513,32 +493,19 @@ EOF`}
     <ProfilingAppPageTemplate
       restrictWidth
       hideSearchBar
-      pageTitle={
-        <EuiFlexGroup direction="row" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="logoObservability" size="m" aria-hidden={true} />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            {i18n.translate('xpack.profiling.noDataPage.pageTitle', {
-              defaultMessage: 'Add profiling data',
-            })}
-          </EuiFlexItem>
-          {isLoading ? (
-            <EuiFlexItem>
-              <EuiLoadingSpinner />
-            </EuiFlexItem>
-          ) : null}
-        </EuiFlexGroup>
-      }
+      pageTitle={i18n.translate('xpack.profiling.noDataPage.pageTitle', {
+        defaultMessage: 'Add profiling data',
+      })}
+      suppressMenu={!profilingSetupStatus.profilingSetupStatus?.has_data}
     >
       {isLoading ? (
-        <></>
+        <EuiFlexItem>
+          <EuiLoadingSpinner />
+        </EuiFlexItem>
       ) : (
         <>
-          <EuiCallOut
+          <KbnWarningCallout
             announceOnMount
-            color="warning"
-            iconType="question"
             title={
               <FormattedMessage
                 id="xpack.profiling.tabs.debWarning"

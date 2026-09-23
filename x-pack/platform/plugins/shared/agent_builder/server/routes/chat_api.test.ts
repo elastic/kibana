@@ -122,15 +122,19 @@ describe('registerChatApiRoutes', () => {
     expect(result).toEqual({ status: 200, payload: conversation });
   });
 
-  it('404s when the experimental feature flag is disabled', async () => {
+  it('serves the sync route when the experimental feature flag is disabled', async () => {
     const { router, handlers } = captureHandlers();
-    const executeAgent = jest.fn();
+    const executeAgent = jest.fn().mockResolvedValue({ events$: of(conversationCreatedEvent) });
+    const conversation = { id: 'conv-1', events: [], rounds: [] };
+    const getScopedClient = jest
+      .fn()
+      .mockResolvedValue({ get: jest.fn().mockResolvedValue(conversation) });
 
     registerChatApiRoutes({
       router,
       getInternalServices: jest.fn().mockReturnValue({
         execution: { executeAgent },
-        conversations: { getScopedClient: jest.fn() },
+        conversations: { getScopedClient },
       }),
       coreSetup: {} as never,
       pluginsSetup: {},
@@ -144,9 +148,9 @@ describe('registerChatApiRoutes', () => {
       response
     );
 
-    expect(response.notFound).toHaveBeenCalled();
-    expect(result).toEqual({ status: 404 });
-    expect(executeAgent).not.toHaveBeenCalled();
+    expect(response.notFound).not.toHaveBeenCalled();
+    expect(executeAgent).toHaveBeenCalled();
+    expect(result).toEqual({ status: 200, payload: conversation });
   });
 
   it('returns a 500 when the run emits no conversation event', async () => {
@@ -281,9 +285,11 @@ describe('registerChatApiRoutes', () => {
     ]);
   });
 
-  it('404s the streaming route when the experimental feature flag is disabled', async () => {
+  it('serves the streaming route when the experimental feature flag is disabled', async () => {
     const { router, handlers } = captureHandlers();
-    const executeAgent = jest.fn();
+    const executeAgent = jest.fn().mockResolvedValue({ events$: of(conversationCreatedEvent) });
+    mockObservableIntoEventSourceStream.mockReset();
+    mockObservableIntoEventSourceStream.mockReturnValue('BODY');
 
     registerChatApiRoutes({
       router,
@@ -291,21 +297,28 @@ describe('registerChatApiRoutes', () => {
         execution: { executeAgent },
         conversations: { getScopedClient: jest.fn() },
       }),
-      coreSetup: {} as never,
+      coreSetup: {
+        getStartServices: jest.fn().mockResolvedValue([{}, { cloud: { isCloudEnabled: false } }]),
+      },
       pluginsSetup: {},
       logger: loggingSystemMock.createLogger(),
     } as never);
 
     const response = buildResponse();
+    const abortedSubject = new Subject<void>();
     const result = await handlers[`${chatApiPath}/converse/async`](
       activeContext(false),
-      { body: { agent_id: 'agent-1', input: 'Hello' } },
+      {
+        body: { agent_id: 'agent-1', input: 'Hello' },
+        events: { aborted$: abortedSubject.asObservable() },
+      },
       response
     );
 
-    expect(response.notFound).toHaveBeenCalled();
-    expect(result).toEqual({ status: 404 });
-    expect(executeAgent).not.toHaveBeenCalled();
+    expect(response.notFound).not.toHaveBeenCalled();
+    expect(executeAgent).toHaveBeenCalled();
+    expect(mockObservableIntoEventSourceStream).toHaveBeenCalledTimes(1);
+    expect(result).toEqual({ status: 200, payload: 'BODY' });
   });
 });
 

@@ -15,9 +15,9 @@ import {
   HTTPAuthorizationHeader,
   UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
 } from '@kbn/core-security-server';
-import type { ServiceAccount } from '@kbn/core-security-server';
 
 import type { UiamClientAuthentication } from './get_client_authentication';
+import type { UiamServiceAccount } from './service_account_types';
 import {
   type GrantUiamApiKeyRequestBody,
   type GrantUiamApiKeyResponse,
@@ -1281,7 +1281,7 @@ describe('UiamService', () => {
     };
 
     it('properly calls UIAM service to create a service account', async () => {
-      const mockResponse: ServiceAccount = {
+      const mockResponse: UiamServiceAccount = {
         id: 'service-account-id',
         type: 'project',
         name: 'nightshift-relay',
@@ -1534,6 +1534,130 @@ describe('UiamService', () => {
         expect.stringContaining('service-account-id')
       );
       for (const call of jest.mocked(exchangeLogger.error).mock.calls) {
+        expect(String(call[0])).not.toContain('secret-credential');
+      }
+    });
+  });
+
+  describe('#authenticateAsKibana', () => {
+    const authenticateLogger = loggingSystemMock.createLogger();
+
+    beforeEach(() => {
+      jest.mocked(authenticateLogger.debug).mockClear();
+      jest.mocked(authenticateLogger.error).mockClear();
+      uiamService = new UiamService(
+        authenticateLogger,
+        ConfigSchema.validate(
+          {
+            uiam: {
+              enabled: true,
+              url: 'https://uiam.service',
+              sharedSecret: 'secret',
+              ssl: { certificate: '/path/to/cert.pem', key: '/path/to/key.pem' },
+            },
+          },
+          { serverless: true }
+        ).uiam,
+        {
+          kibanaServerResourceURL: 'https://my-project.kb.us-east-1.cloud.es.io:9243',
+          kibanaVersion: '9.0.0',
+        }
+      );
+    });
+
+    it('authenticates with mTLS only and requests a token', async () => {
+      const uiamResponse = {
+        type: 'project',
+        project_id: 'project-1',
+        project_type: 'elasticsearch',
+        organization_id: 'org-1',
+        token: 'essu_kibana-token',
+      };
+      fetchSpy.mockResolvedValue({ ok: true, json: async () => uiamResponse });
+
+      await expect(uiamService.authenticateAsKibana()).resolves.toEqual(uiamResponse);
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/authentication/_authenticate?include_token=true',
+        {
+          method: 'POST',
+          headers: { 'User-Agent': 'Kibana/9.0.0' },
+          dispatcher: AGENT_MOCK,
+        }
+      );
+      expect(agentSpy).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          connect: expect.objectContaining({
+            cert: 'mocked file content for /path/to/cert.pem',
+            key: 'mocked file content for /path/to/key.pem',
+          }),
+        })
+      );
+
+      const [, { headers }] = fetchSpy.mock.calls[0];
+      expect(headers).not.toHaveProperty(ES_CLIENT_AUTHENTICATION_HEADER);
+      expect(headers).not.toHaveProperty('Authorization');
+      expect(headers).not.toHaveProperty('authorization');
+    });
+
+    it('passes the caller abort signal to the request', async () => {
+      fetchSpy.mockResolvedValue({ ok: true, json: async () => ({ type: 'project' }) });
+      const controller = new AbortController();
+
+      await uiamService.authenticateAsKibana(controller.signal);
+
+      expect(fetchSpy).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({ signal: controller.signal })
+      );
+    });
+
+    it('logs an abort by the caller at debug level rather than as a failure', async () => {
+      const controller = new AbortController();
+      controller.abort();
+      const abortError = new Error('This operation was aborted');
+      abortError.name = 'AbortError';
+      fetchSpy.mockRejectedValue(abortError);
+
+      await expect(uiamService.authenticateAsKibana(controller.signal)).rejects.toBe(abortError);
+
+      expect(authenticateLogger.error).not.toHaveBeenCalled();
+      expect(authenticateLogger.debug).toHaveBeenCalledWith(
+        expect.stringContaining('aborted by the caller')
+      );
+    });
+
+    it('reproduces the UIAM status code and payload when authentication fails', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 401,
+        headers: new Headers(),
+        json: async () => ({
+          error: {
+            code: 'UNAUTHENTICATED',
+            type: 'authentication',
+            message: 'Client certificate could not be verified',
+          },
+        }),
+      });
+
+      await expect(uiamService.authenticateAsKibana()).rejects.toMatchObject({
+        output: { statusCode: 401 },
+      });
+      expect(authenticateLogger.error).toHaveBeenCalledWith(
+        expect.stringContaining('HTTP status: 401')
+      );
+    });
+
+    it('logs and rethrows transport errors without their message', async () => {
+      fetchSpy.mockRejectedValue(new Error('secret-credential'));
+
+      await expect(uiamService.authenticateAsKibana()).rejects.toThrowError('secret-credential');
+      expect(authenticateLogger.error).toHaveBeenCalledWith(
+        expect.stringContaining('HTTP status: unavailable')
+      );
+      for (const call of jest.mocked(authenticateLogger.error).mock.calls) {
         expect(String(call[0])).not.toContain('secret-credential');
       }
     });

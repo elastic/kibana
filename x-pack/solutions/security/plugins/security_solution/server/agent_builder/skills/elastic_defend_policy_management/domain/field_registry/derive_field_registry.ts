@@ -14,12 +14,37 @@ import {
   type AdvancedPolicySchemaType,
 } from '../../../../../../common/endpoint/service/policy/advanced_policy_schema';
 import { PolicyOperatingSystem } from '../../../../../../common/endpoint/types';
+import { CUSTOM_YARA_SIGNATURES_ADVANCED_KEYS } from '../../../../../../common/endpoint/service/policy/custom_yara_signatures';
 import { isDerivedPath, isExcludedPath } from './path_rules';
-import type { FieldRegistryEntry, FieldRegistryKind, FieldRegistryTier } from './types';
+import type {
+  FieldRegistryEntry,
+  FieldRegistryKind,
+  FieldRegistryProductFeatureGate,
+  FieldRegistryTier,
+} from './types';
 import { UI_POLICY_SECTIONS } from './ui_policy_sections';
 
 const POLICY_OPERATING_SYSTEMS = new Set<string>(Object.values(PolicyOperatingSystem));
 const GLOBAL_MANIFEST_VERSION = 'global_manifest_version';
+const CUSTOM_YARA_SIGNATURES_LEAF = '.memory_protection.custom_yara_signatures';
+
+/**
+ * Fields the skill must not advertise as freely editable when their product feature is off.
+ * Custom YARA signatures are additionally gated by an experimental flag, which the eligibility
+ * context covers; this only records the product-feature dimension carried in the registry.
+ */
+const productFeatureGateFor = (path: string): FieldRegistryProductFeatureGate | undefined => {
+  if (path === GLOBAL_MANIFEST_VERSION) {
+    return ProductFeatureSecurityKey.endpointProtectionUpdates;
+  }
+  if (
+    path.endsWith(CUSTOM_YARA_SIGNATURES_LEAF) ||
+    CUSTOM_YARA_SIGNATURES_ADVANCED_KEYS.has(path)
+  ) {
+    return ProductFeatureSecurityKey.endpointCustomYaraSignatures;
+  }
+  return undefined;
+};
 
 const isPolicyOperatingSystem = (value: string): value is PolicyOperatingSystem =>
   POLICY_OPERATING_SYSTEMS.has(value);
@@ -91,15 +116,21 @@ const schemaAttributes = (
   license: row.license,
 });
 
+const gateAttributes = (
+  path: string
+): Pick<FieldRegistryEntry, 'productFeatureGate'> | Record<string, never> => {
+  const productFeatureGate = productFeatureGateFor(path);
+
+  return productFeatureGate === undefined ? {} : { productFeatureGate };
+};
+
 const createFactoryEntry = (path: string, defaultValue: unknown): FieldRegistryEntry => ({
   path,
   os: osForPath(path),
   kind: classifyKind(path),
   tier: deriveTier(path, true),
   defaultValue,
-  ...(path === GLOBAL_MANIFEST_VERSION
-    ? { productFeatureGate: ProductFeatureSecurityKey.endpointProtectionUpdates }
-    : {}),
+  ...gateAttributes(path),
   isDerived: isDerivedPath(path),
   excludeFromComparison: isExcludedPath(path),
   source: 'factory',
@@ -112,6 +143,7 @@ const createSchemaOnlyEntry = (row: AdvancedPolicySchemaType): FieldRegistryEntr
   kind: classifyKind(row.key),
   tier: deriveTier(row.key, false),
   ...schemaAttributes(row),
+  ...gateAttributes(row.key),
   isDerived: isDerivedPath(row.key),
   excludeFromComparison: isExcludedPath(row.key),
   source: 'advanced_schema',

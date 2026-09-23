@@ -272,9 +272,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
 
   // Derive var_group_selections from policy for StepConfigurePackagePolicy
   // Note: StepDefinePackagePolicy handles its own initialization and state management
-  const { enableVarGroups } = ExperimentalFeaturesService.get();
-  const varGroups =
-    enableVarGroups && packageInfo?.var_groups ? packageInfo?.var_groups : undefined;
+  const varGroups = packageInfo?.var_groups;
   // Options unsupported by the policy template the page is scoped to (e.g. opened
   // from the integrations browse page) are hidden from selectors and defaults
   const hiddenVarGroupOptions = useMemo(
@@ -920,7 +918,11 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   );
 
   return !addIntegrationFlyoutProps ? (
-    <CreatePackagePolicySinglePageLayout {...layoutProps} data-test-subj="createPackagePolicy">
+    <CreatePackagePolicySinglePageLayout
+      {...layoutProps}
+      useWidePageLayout={replaceDefineStepView?.useWidePageLayout}
+      data-test-subj="createPackagePolicy"
+    >
       <Suspense fallback={<Loading />}>
         <PliAuthBlockWrapper>
           <EuiErrorBoundary>

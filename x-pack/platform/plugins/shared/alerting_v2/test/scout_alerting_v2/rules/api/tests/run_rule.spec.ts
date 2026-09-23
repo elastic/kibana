@@ -34,14 +34,14 @@ apiTest.describe('Run rule API', { tag: '@local-stateful-classic' }, () => {
     await apiServices.alertingV2.rules.cleanUp();
   });
 
-  apiTest('run: returns 204 for an enabled rule', async ({ apiClient, apiServices }) => {
+  apiTest('run: returns 202 for an enabled rule', async ({ apiClient, apiServices }) => {
     const created = await apiServices.alertingV2.rules.create(
       buildCreateRuleData({ metadata: { name: 'rule-to-run' } })
     );
     const response = await apiClient.post(getRunRuleUrl(created.id), {
       headers: writerHeaders,
     });
-    expect(response).toHaveStatusCode(204);
+    expect(response).toHaveStatusCode(202);
   });
 
   apiTest('status: returns 404 when the rule does not exist', async ({ apiClient }) => {
@@ -69,7 +69,7 @@ apiTest.describe('Run rule API', { tag: '@local-stateful-classic' }, () => {
   );
 
   apiTest(
-    'authorization: returns 204 for a user with full alerting_v2 privileges',
+    'authorization: returns 202 for a user with full alerting_v2 privileges',
     async ({ apiClient, apiServices }) => {
       const created = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({ metadata: { name: 'writer-can-run' } })
@@ -77,7 +77,7 @@ apiTest.describe('Run rule API', { tag: '@local-stateful-classic' }, () => {
       const response = await apiClient.post(getRunRuleUrl(created.id), {
         headers: writerHeaders,
       });
-      expect(response).toHaveStatusCode(204);
+      expect(response).toHaveStatusCode(202);
     }
   );
 

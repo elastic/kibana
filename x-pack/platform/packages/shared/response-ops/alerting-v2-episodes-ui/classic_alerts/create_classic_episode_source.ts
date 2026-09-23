@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getRuleDetailsRoute, triggersActionsRoute } from '@kbn/rule-data-utils';
 import type { EpisodeDataSource } from '../types/episode_data_source';
 import { classicActionExtensions } from './action_extensions';
 import { fetchClassicAlertsAsEpisodes } from './apis/fetch_classic_episodes';
@@ -71,4 +72,7 @@ export const createClassicEpisodeSource = ({
   resolveRules: ({ services, ids }) => resolveClassicRules({ ids, services }),
 
   actionExtensions: classicActionExtensions,
+
+  // TODO: Update to observability rule details route once obs navigation changes land.
+  getRuleDetailsHref: (ruleId) => `${triggersActionsRoute}${getRuleDetailsRoute(ruleId)}`,
 });

@@ -298,10 +298,6 @@ export default function (program) {
         'Prevents setting default values for `elasticsearch.username` and `elasticsearch.password` in --dev mode'
       )
       .option(
-        '--extended-stack-trace',
-        'Collect more complete stack traces. See src/cli/dev.js for explanation.'
-      )
-      .option(
         '--no-uiam',
         'Prevents configuring Kibana with Universal Identity and Access Management (UIAM) support when running in serverless project mode.'
       )

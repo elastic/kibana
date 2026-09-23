@@ -121,6 +121,7 @@ jest.mock('../../../widgets/workflow_yaml_editor/lib/esql_validation/validate_es
   validateEsqlSteps: jest.fn(async () => [esqlResult]),
 }));
 
+import type { YamlValidationResult } from '@kbn/workflows-yaml';
 import { collectAllStepPropertyItems } from './collect_all_step_property_items';
 import { collectFullWorkflowYamlValidationResults } from './collect_full_workflow_yaml_validation_results';
 import { runWorkflowYamlValidations } from './run_workflow_yaml_validations';
@@ -128,9 +129,11 @@ import { validateConnectorIds } from './validate_connector_ids';
 import { validateGraphBuild } from './validate_graph_build';
 import { validateStepProperties } from './validate_step_properties';
 import { validateWorkflowInputs } from './validate_workflow_inputs';
+import { createMockWorkflowContextRegistry } from '../../../../common/lib/create_workflow_context_registry.mock';
 import { performComputation } from '../../../entities/workflows/store/workflow_detail/utils/computation';
 import { validateEsqlSteps } from '../../../widgets/workflow_yaml_editor/lib/esql_validation/validate_esql_steps';
-import type { YamlValidationResult } from '../model/types';
+
+const emptyRegistry = createMockWorkflowContextRegistry();
 
 const mockValidateEsqlSteps = validateEsqlSteps as jest.Mock;
 const mockCollectAllStepPropertyItems = collectAllStepPropertyItems as jest.Mock;
@@ -165,6 +168,7 @@ describe('collectFullWorkflowYamlValidationResults', () => {
       workflowDefinition: computed.workflowDefinition ?? undefined,
       graphBuildError: computed.graphBuildError,
       context: {
+        registry: emptyRegistry,
         connectorTypes: { status: 'ready', value: {} },
         connectorsManagementUrl: 'http://test/connectors',
         workflows: { workflows: {}, totalWorkflows: 0 },
@@ -196,6 +200,7 @@ describe('collectFullWorkflowYamlValidationResults', () => {
     { label: 'loading', connectorTypes: { status: 'loading' as const } },
     {
       label: 'failed',
+      registry: emptyRegistry,
       connectorTypes: { status: 'failed' as const, error: 'Connector request failed' },
     },
   ])('defers connector checks when metadata is $label', async ({ connectorTypes }) => {
@@ -211,6 +216,7 @@ describe('collectFullWorkflowYamlValidationResults', () => {
       workflowDefinition: computed.workflowDefinition ?? undefined,
       graphBuildError: computed.graphBuildError,
       context: {
+        registry: emptyRegistry,
         connectorTypes,
         connectorsManagementUrl: 'http://test/connectors',
         workflows: { workflows: {}, totalWorkflows: 0 },
@@ -241,6 +247,7 @@ describe('collectFullWorkflowYamlValidationResults', () => {
       workflowDefinition: computed.workflowDefinition ?? undefined,
       graphBuildError: computed.graphBuildError,
       context: {
+        registry: emptyRegistry,
         connectorTypes: { status: 'ready', value: {} },
         connectorsManagementUrl: 'http://test/connectors',
         workflows: { workflows: {}, totalWorkflows: 0 },
@@ -271,6 +278,7 @@ describe('collectFullWorkflowYamlValidationResults', () => {
       workflowDefinition: computed.workflowDefinition ?? undefined,
       graphBuildError: computed.graphBuildError,
       context: {
+        registry: emptyRegistry,
         connectorTypes: { status: 'ready', value: {} },
         connectorsManagementUrl: 'http://test/connectors',
         workflows: { workflows: {}, totalWorkflows: 0 },
@@ -303,6 +311,7 @@ describe('collectFullWorkflowYamlValidationResults', () => {
       workflowDefinition: computed.workflowDefinition ?? undefined,
       graphBuildError: computed.graphBuildError,
       context: {
+        registry: emptyRegistry,
         connectorTypes: { status: 'ready', value: {} },
         connectorsManagementUrl: 'http://test/connectors',
         workflows: { workflows: {}, totalWorkflows: 0 },

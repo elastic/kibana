@@ -7,11 +7,18 @@
 
 import { Container, ContainerModule } from 'inversify';
 import { Logger } from '@kbn/core-di';
-import { CoreStart, PluginInitializer, Request } from '@kbn/core-di-server';
+import {
+  CoreStart,
+  PluginInitializer,
+  Request,
+  SavedObjectsClientFactory,
+} from '@kbn/core-di-server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { configSchema } from '../config';
 import {
   EsServiceInternalToken,
@@ -22,6 +29,7 @@ import {
   QueryServiceScopedToken,
   QueryServiceScopedSpaceRoutingToken,
 } from '../lib/services/query_service/tokens';
+import { SpaceUiSettingsClientToken } from '../settings/tokens';
 import { bindServices } from './bind_services';
 
 describe('bindServices - Elasticsearch client routing', () => {
@@ -81,5 +89,34 @@ describe('bindServices - Elasticsearch client routing', () => {
     expect(elasticsearch.client.asScoped).toHaveBeenCalledWith(request, {
       projectRouting: 'space',
     });
+  });
+});
+
+describe('bindServices - SpaceUiSettingsClientToken', () => {
+  it('scopes the client to the request, not the internal repository', async () => {
+    const container = new Container();
+    const request = httpServerMock.createKibanaRequest();
+    const uiSettings = uiSettingsServiceMock.createStartContract();
+    const scopedSoClient = savedObjectsClientMock.create();
+    const savedObjectsClientFactory = jest.fn().mockReturnValue(scopedSoClient);
+
+    container.bind(Logger).toConstantValue(loggingSystemMock.createLogger());
+    container.bind(Request).toConstantValue(request);
+    container
+      .bind(CoreStart('elasticsearch'))
+      .toConstantValue(elasticsearchServiceMock.createStart());
+    container.bind(CoreStart('uiSettings')).toConstantValue(uiSettings);
+    container.bind(SavedObjectsClientFactory).toConstantValue(savedObjectsClientFactory);
+    container
+      .bind(PluginInitializer('config'))
+      .toConstantValue(coreMock.createPluginInitializerContext(configSchema.validate({})).config);
+
+    container.load(new ContainerModule((options) => bindServices(options)));
+
+    const client = await container.getAsync(SpaceUiSettingsClientToken);
+
+    expect(savedObjectsClientFactory).toHaveBeenCalledWith();
+    expect(uiSettings.asScopedToClient).toHaveBeenCalledWith(scopedSoClient);
+    expect(client).toBe(uiSettings.asScopedToClient.mock.results[0].value);
   });
 });

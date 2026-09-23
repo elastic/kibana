@@ -7,25 +7,8 @@
 
 import { z } from '@kbn/zod';
 import { ArrayFromString } from '@kbn/zod-helpers';
-import type { MitreFramework, MitreTactic, MitreTechnique, MitreSubtechnique } from './schema';
-
-// -------------------------------------------------------------------------
-// Summary types (description omitted for list responses)
-// -------------------------------------------------------------------------
-
-export type MitreTacticSummary = Omit<MitreTactic, 'description'>;
-export type MitreTechniqueSummary = Omit<MitreTechnique, 'description'>;
-export type MitreSubtechniqueSummary = Omit<MitreSubtechnique, 'description'>;
-export type MitreEntitySummary =
-  | MitreTacticSummary
-  | MitreTechniqueSummary
-  | MitreSubtechniqueSummary;
-
-export interface MitreEntitySummaryBuckets {
-  tactics: MitreTacticSummary[];
-  techniques: MitreTechniqueSummary[];
-  subtechniques: MitreSubtechniqueSummary[];
-}
+import type { MitreFramework, MitreEntityType } from './schema';
+import type { MitreEntityStatus, MitreEntitySummaryBuckets } from './types';
 
 // -------------------------------------------------------------------------
 // Request query schema
@@ -52,6 +35,16 @@ export const GetMitreEntitiesRequestQuery = z.object({
 
 export type GetMitreEntitiesRequestQueryInput = z.input<typeof GetMitreEntitiesRequestQuery>;
 export type GetMitreEntitiesRequestQueryOutput = z.output<typeof GetMitreEntitiesRequestQuery>;
+
+/**
+ * Client-side request params for GET /internal/mitre/entities. Mirrors GetMitreEntitiesRequestQuery before serialization.
+ */
+export interface GetMitreEntitiesRequestParams {
+  framework?: MitreFramework;
+  framework_version?: string;
+  types?: MitreEntityType[];
+  status?: MitreEntityStatus;
+}
 
 // -------------------------------------------------------------------------
 // Response type

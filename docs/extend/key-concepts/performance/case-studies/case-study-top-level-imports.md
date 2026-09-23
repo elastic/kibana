@@ -38,13 +38,13 @@ Of the most interest was `ml.chunk.23.js`, which was clocking in at `205k`.  Thi
 
 ### Profiling the build
 
-By running the build script with the `--profile` flag, I was able to generate both a Webpack stats file and three popular visualization tools to visualize the contents of the bundle:
+By running the build script with the `--profile` flag, I was able to generate a Webpack-compatible stats file and use popular visualization tools to visualize the contents of the bundle:
 
 ```bash
-node scripts/build_kibana_platform_plugins.js --profile --focus=ml
+node scripts/build_kibana_platform_plugins.js --profile --profile-focus=ml
 ```
 
-First, I looked at `ml.visualizer.html` in the `target/public` directory of the `ml` plugin.  This file contained an instance of the [Webpack Bundle Analyzer](https://chrisbateman.github.io/webpack-visualizer/):
+First, I loaded `target/public/bundles/stats.json` into the [Webpack Bundle Analyzer](https://chrisbateman.github.io/webpack-visualizer/):
 
 [![Webpack Bundle Analyzer showing the contents of the ml.chunk.23.js file](./assets/top_level_imports_mpv.png)](./assets/top_level_imports_mpv.png)
 

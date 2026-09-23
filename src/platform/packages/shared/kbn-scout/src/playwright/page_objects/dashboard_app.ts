@@ -8,10 +8,11 @@
  */
 
 import type { Download } from 'playwright-core';
+import { euiSelectors } from '../eui_components';
 import type { ScoutPage } from '..';
 import { expect } from '..';
 import { AppMenu } from './app_menu';
-import { RenderablePage } from './renderable_page';
+import { RenderablePage } from './utils/renderable_page';
 import { Toasts } from './toasts';
 
 type CommonlyUsedTimeRange =
@@ -362,8 +363,8 @@ export class DashboardApp {
   async closeLibraryFlyout() {
     await expect(this.savedObjectsFinderTable).toBeVisible();
     await this.page
-      .locator('.euiFlyout', { has: this.savedObjectsFinderTable })
-      .locator('[data-test-subj="euiFlyoutCloseButton"]')
+      .locator(euiSelectors.flyout.ROOT_SELECTOR, { has: this.savedObjectsFinderTable })
+      .locator(`[data-test-subj="${euiSelectors.flyout.CLOSE_BUTTON_TEST_SUBJ}"]`)
       .click();
     await expect(this.savedObjectsFinderTable).toBeHidden();
   }
@@ -1320,7 +1321,8 @@ export class DashboardApp {
   async createUrlDrilldown(
     name: string,
     url: string,
-    trigger: 'on_click_value' | 'on_select_range' | 'on_open_panel_menu' = 'on_click_value'
+    trigger: 'on_click_value' | 'on_select_range' | 'on_open_panel_menu' = 'on_click_value',
+    openInNewTab = false
   ) {
     await this.page.testSubj.click('drilldownFactoryItem-url_drilldown');
     await this.page.testSubj.locator('drilldownNameInput').fill(name);
@@ -1333,7 +1335,26 @@ export class DashboardApp {
     await this.page.keyboard.press(selectAll);
     await this.page.keyboard.type(url);
 
+    await this.page.testSubj.click('urlDrilldownAdditionalOptions');
+    const openInNewTabSwitch = this.page.testSubj.locator('urlDrilldownOpenInNewTab');
+    const isOpenInNewTab = (await openInNewTabSwitch.getAttribute('aria-checked')) === 'true';
+    if (isOpenInNewTab !== openInNewTab) {
+      await openInNewTabSwitch.click();
+    }
+
     await this.selectDrilldownTriggerAndSubmit(trigger);
+  }
+
+  /** Selects a tab while inline-editing a Discover embeddable. */
+  async selectDiscoverEmbeddableTab(tabLabel: string) {
+    await this.page.testSubj.click('discoverEmbeddableInlineEditSelectTabAction');
+    const tabPicker = this.page.testSubj.locator('discoverEmbeddableInlineEditSelectTabPopover');
+    await tabPicker.getByText(tabLabel, { exact: true }).click();
+  }
+
+  /** Applies pending inline edits to a Discover embeddable. */
+  async applyDiscoverEmbeddableInlineEdits() {
+    await this.page.testSubj.click('discoverEmbeddableInlineEditApplyButton');
   }
 
   // ============================================================

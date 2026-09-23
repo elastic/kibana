@@ -37,11 +37,12 @@ export const findUserActionsRoute = createCasesRoute({
       const casesClient = await caseContext.getCasesClient();
       const caseId = request.params.case_id;
       const query = request.query as Record<string, unknown>;
-      const { types, authors, ...restQuery } = query;
+      const { types, authors, sources, ...restQuery } = query;
       const options = decodeWithExcessOrThrow(UserActionInternalFindRequestRt)({
         ...restQuery,
         ...(types != null ? { types: castArray(types) } : {}),
         ...(authors != null ? { authors: castArray(authors) } : {}),
+        ...(sources != null ? { sources: castArray(sources) } : {}),
       });
 
       const userActionsResponse: userActionApiV1.UserActionFindResponse =

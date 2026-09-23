@@ -52,6 +52,7 @@ const TITLE_CASE_GLOSSARY = [
   'Ingest Hub',
   'Elastic Inference',
   'ES|QL Data Federation',
+  'ES|QL Views',
   'AlertZero',
 ] as const;
 

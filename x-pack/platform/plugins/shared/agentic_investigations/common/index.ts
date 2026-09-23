@@ -17,7 +17,6 @@ export {
 export {
   ACTION_WORKFLOW_TAG,
   PROPOSAL_ATTACHMENT_TYPE,
-  PROPOSAL_WITHOUT_ACTION,
   MAX_CHARTS_SUMMARY_BUCKETS,
   PROPOSALS_INDEX_NAME,
   PROPOSALS_INTERNAL_URL,
@@ -31,16 +30,17 @@ export {
   PROPOSAL_CHARTS_SUMMARY_URL,
   actionMetadataSchema,
   approveProposalRequestSchema,
+  boundedActionInput,
   createProposalRequestSchema,
   dismissProposalRequestSchema,
   dismissReasonSchema,
-  isDecided,
+  isAwaitingDecision,
   isExpired,
   listProposalsQuerySchema,
-  MAX_PROPOSALS_SIZE,
-  proposalsQuerySchema,
+  proposalFiltersSchema,
   proposalCategorySchema,
   proposalConfidenceSchema,
+  proposalDecisionSchema,
   proposalImpactSchema,
   proposalOriginSchema,
   proposalSchema,
@@ -49,20 +49,36 @@ export {
   proposalUserSchema,
 } from './proposals';
 
+export {
+  IMPACT_INDEX_NAME,
+  IMPACT_INTERNAL_URL,
+  IMPACT_UI_CAPABILITY_MANAGE,
+  IMPACT_UI_CAPABILITY_SHOW,
+  MAX_ENTITY_ID_LENGTH,
+  MAX_ENTITY_IDS,
+  MAX_ENTITY_NAME_LENGTH,
+  MAX_IMPACT_CONVERSATION_IDS,
+  MAX_IMPACT_ID_LENGTH,
+  attachImpactRequestSchema,
+  getImpactQuerySchema,
+  impactEntitiesSchema,
+  impactEntitySchema,
+  impactSchema,
+} from './impact';
+
 export type {
   ActionMetadata,
   ApproveProposalRequest,
   CreateProposalRequest,
   DismissProposalRequest,
   DismissReason,
-  ListByWindowQuery,
   ListProposalsQuery,
   ListProposalsResponse,
   Proposal,
-  ProposalsQuery,
-  ProposalsListResponse,
   ProposalCategory,
   ProposalConfidence,
+  ProposalDecision,
+  ProposalFilters,
   ProposalImpact,
   ProposalOrigin,
   ProposalChartsSummaryBucket,
@@ -72,3 +88,28 @@ export type {
   ProposalUser,
   ProposalWithMetadata,
 } from './proposals';
+
+export type { AttachImpactRequest, GetImpactQuery, Impact, ImpactEntity } from './impact';
+
+export {
+  ESCALATION_BY_ID_URL,
+  ESCALATION_LINKED_INVESTIGATIONS_FIELD,
+  ESCALATION_TEMPLATE_ID,
+  ESCALATIONS_INTERNAL_URL,
+  ESCALATIONS_SUGGEST_USERS_URL,
+  ESCALATIONS_UI_CAPABILITY_MANAGE,
+  INVESTIGATION_TEMPLATE_ID,
+  MAX_ESCALATION_LINKED_INVESTIGATIONS,
+  createEscalationRequestSchema,
+  escalationVisibilitySchema,
+  updateEscalationRequestSchema,
+} from './escalations';
+
+export type {
+  CreateEscalationRequest,
+  EscalationConversation,
+  EscalationConversationSummary,
+  EscalationVisibility,
+  ListEscalationsResponse,
+  UpdateEscalationRequest,
+} from './escalations';

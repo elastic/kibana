@@ -43,6 +43,7 @@ import type {
   GetCatalogResponse,
   GetExecutionLogsParams,
   GetExecutionParams,
+  GetExecutionStepsParams,
   GetLibraryHealthResponse,
   GetSchemaParams,
   GetWorkflowExecutionsParams,
@@ -269,6 +270,16 @@ export class WorkflowApi {
     params?: GetExecutionParams
   ): Promise<WorkflowExecutionDto> {
     return this.http.get(`${BASE}/executions/${encodeURIComponent(executionId)}`, {
+      query: params as HttpFetchQuery,
+      version: API_VERSION,
+    });
+  }
+
+  async getExecutionSteps(
+    executionId: string,
+    params?: GetExecutionStepsParams
+  ): Promise<WorkflowStepExecutionListDto> {
+    return this.http.get(`${BASE}/executions/${encodeURIComponent(executionId)}/steps`, {
       query: params as HttpFetchQuery,
       version: API_VERSION,
     });

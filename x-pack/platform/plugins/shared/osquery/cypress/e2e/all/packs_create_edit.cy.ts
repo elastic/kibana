@@ -153,7 +153,7 @@ describe.skip(
         inputQuery('select * from uptime;');
         cy.getBySel('timeout-input').clear().type('603');
         cy.getBySel('resultsTypeField').click();
-        cy.contains('Differential (Ignore removals)').click();
+        cy.contains('Differential (ignore removals)').click();
         cy.wait(500); // wait for the validation to trigger - cypress is way faster than users ;)
         cy.getBySel(FLYOUT_SAVED_QUERY_SAVE_BUTTON).click();
 
@@ -178,12 +178,12 @@ describe.skip(
         cy.get(customActionEditSavedQuerySelector('Query2')).click();
 
         cy.getBySel('resultsTypeField').contains('Differential').click();
-        cy.contains('Differential (Ignore removals)').click();
+        cy.contains('Differential (ignore removals)').click();
         cy.getBySel(FLYOUT_SAVED_QUERY_SAVE_BUTTON).click();
 
         cy.get(customActionEditSavedQuerySelector('Query3')).click();
 
-        cy.getBySel('resultsTypeField').contains('(Ignore removals)').click();
+        cy.getBySel('resultsTypeField').contains('(ignore removals)').click();
         cy.contains('Snapshot').click();
         cy.getBySel(FLYOUT_SAVED_QUERY_SAVE_BUTTON).click();
 

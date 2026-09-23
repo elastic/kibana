@@ -7,55 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const SECTION_TITLE = i18n.translate('xpack.alertzero.pendingProposals.sectionTitle', {
-  defaultMessage: 'Awaiting your decision',
-});
-
-export const LOADING = i18n.translate('xpack.alertzero.pendingProposals.loading', {
-  defaultMessage: 'Loading proposals',
-});
-
-export const LOAD_ERROR = i18n.translate('xpack.alertzero.pendingProposals.loadError', {
-  defaultMessage: 'Unable to load proposals',
-});
-
-export const EMPTY = i18n.translate('xpack.alertzero.pendingProposals.empty', {
-  defaultMessage: 'No proposals are awaiting a decision',
-});
-
-export const APPROVE = i18n.translate('xpack.alertzero.pendingProposals.approve', {
-  defaultMessage: 'Approve',
-});
-
 export const DISMISS = i18n.translate('xpack.alertzero.pendingProposals.dismiss', {
   defaultMessage: 'Dismiss',
 });
-
-export const EXPIRED = i18n.translate('xpack.alertzero.pendingProposals.expired', {
-  defaultMessage: 'Expired',
-});
-
-export const NO_ACTION = i18n.translate('xpack.alertzero.pendingProposals.noAction', {
-  defaultMessage: 'No automated action — carry this out yourself, then approve',
-});
-
-export const APPROVE_MODAL_TITLE = i18n.translate(
-  'xpack.alertzero.pendingProposals.approveModalTitle',
-  {
-    defaultMessage: 'Approve this action?',
-  }
-);
-
-export const APPROVE_CONFIRM = i18n.translate('xpack.alertzero.pendingProposals.approveConfirm', {
-  defaultMessage: 'Approve and run',
-});
-
-export const APPROVE_RUNS_AS_YOU = i18n.translate(
-  'xpack.alertzero.pendingProposals.approveRunsAsYou',
-  {
-    defaultMessage: 'The action runs under your identity and is attributed to you.',
-  }
-);
 
 export const CLOSE_INVESTIGATION_MODAL_TITLE = i18n.translate(
   'xpack.alertzero.pendingProposals.dismissModalTitle',
@@ -73,11 +27,3 @@ export const DISMISS_REASON_LABEL = i18n.translate(
   'xpack.alertzero.pendingProposals.dismissReasonLabel',
   { defaultMessage: 'Reason' }
 );
-
-export const CANCEL = i18n.translate('xpack.alertzero.pendingProposals.cancel', {
-  defaultMessage: 'Cancel',
-});
-
-export const DECISION_FAILED = i18n.translate('xpack.alertzero.pendingProposals.decisionFailed', {
-  defaultMessage: 'The decision could not be recorded. Reload the queue and try again.',
-});

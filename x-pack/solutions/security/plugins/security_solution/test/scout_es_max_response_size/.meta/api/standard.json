@@ -1,0 +1,24 @@
+{
+  "sha1": "ca4b56285652e4bdcf5bd5bc1fe50b7cb8b5325a",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "dbabd58652159c5-a6b465389e0ad0d",
+      "title": "New Terms rule with an oversized document fetch response counts every source document once in the suppressed alert when there are multiple new terms fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_es_max_response_size/api/tests/new_terms_rule_oversized_doc_fetch.spec.ts",
+        "line": 184,
+        "column": 33
+      }
+    }
+  ]
+}

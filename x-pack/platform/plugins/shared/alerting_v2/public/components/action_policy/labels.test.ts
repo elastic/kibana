@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getGroupingModeLabel, getThrottleStrategyLabel } from './labels';
+import { getFrequencyLabel, getGroupingModeLabel } from './labels';
 
 describe('getGroupingModeLabel', () => {
   it('returns the Episode label for per_episode', () => {
@@ -26,44 +26,72 @@ describe('getGroupingModeLabel', () => {
   });
 });
 
-describe('getThrottleStrategyLabel', () => {
-  it('returns the per-episode label for on_status_change when mode is per_episode', () => {
-    expect(getThrottleStrategyLabel('on_status_change', 'per_episode')).toBe('On status change');
-  });
-
-  it('returns the per-episode label for per_status_interval when mode is per_episode', () => {
-    expect(getThrottleStrategyLabel('per_status_interval', 'per_episode')).toBe(
-      'On status change + repeat at interval'
+describe('getFrequencyLabel', () => {
+  it('returns "On status change" for per_episode + on_status_change', () => {
+    expect(getFrequencyLabel({ strategy: 'on_status_change', interval: null }, 'per_episode')).toBe(
+      'On status change'
     );
   });
 
-  it('returns the aggregate label for time_interval when mode is all', () => {
-    expect(getThrottleStrategyLabel('time_interval', 'all')).toBe('At most once every...');
+  it('returns "On status change + repeat every N minutes" for per_episode + per_status_interval', () => {
+    expect(
+      getFrequencyLabel({ strategy: 'per_status_interval', interval: '5m' }, 'per_episode')
+    ).toBe('On status change + repeat every 5 minutes');
   });
 
-  it('returns the aggregate label for time_interval when mode is per_field', () => {
-    expect(getThrottleStrategyLabel('time_interval', 'per_field')).toBe('At most once every...');
+  it('returns "Every evaluation" for per_episode + every_time', () => {
+    expect(getFrequencyLabel({ strategy: 'every_time', interval: null }, 'per_episode')).toBe(
+      'Every evaluation'
+    );
   });
 
-  it('returns the per-episode every-time label when mode is per_episode', () => {
-    expect(getThrottleStrategyLabel('every_time', 'per_episode')).toBe('Every evaluation');
+  it('returns "At most once every N minutes" for all + time_interval', () => {
+    expect(getFrequencyLabel({ strategy: 'time_interval', interval: '5m' }, 'all')).toBe(
+      'At most once every 5 minutes'
+    );
   });
 
-  it('returns the aggregate every-time label when mode is all', () => {
-    expect(getThrottleStrategyLabel('every_time', 'all')).toBe('Every evaluation');
+  it('returns "At most once every N minutes" for per_field + time_interval', () => {
+    expect(getFrequencyLabel({ strategy: 'time_interval', interval: '5m' }, 'per_field')).toBe(
+      'At most once every 5 minutes'
+    );
+  });
+
+  it('returns "Every evaluation" for all + every_time', () => {
+    expect(getFrequencyLabel({ strategy: 'every_time', interval: null }, 'all')).toBe(
+      'Every evaluation'
+    );
   });
 
   it('returns the fallback for null or undefined strategy', () => {
-    expect(getThrottleStrategyLabel(null, 'per_episode')).toBe('Not configured');
-    expect(getThrottleStrategyLabel(undefined, 'all')).toBe('Not configured');
+    expect(getFrequencyLabel({ strategy: undefined, interval: null }, 'per_episode')).toBe(
+      'Not configured'
+    );
+    expect(getFrequencyLabel(null, 'all')).toBe('Not configured');
+    expect(getFrequencyLabel(undefined, 'per_episode')).toBe('Not configured');
   });
 
   it('returns the fallback when mode is null or undefined', () => {
-    expect(getThrottleStrategyLabel('on_status_change', null)).toBe('Not configured');
-    expect(getThrottleStrategyLabel('time_interval', undefined)).toBe('Not configured');
+    expect(getFrequencyLabel({ strategy: 'on_status_change', interval: null }, null)).toBe(
+      'Not configured'
+    );
+    expect(getFrequencyLabel({ strategy: 'time_interval', interval: '5m' }, undefined)).toBe(
+      'Not configured'
+    );
   });
 
   it('returns the fallback when strategy does not exist for the given mode', () => {
-    expect(getThrottleStrategyLabel('on_status_change', 'all')).toBe('Not configured');
+    expect(getFrequencyLabel({ strategy: 'on_status_change', interval: null }, 'all')).toBe(
+      'Not configured'
+    );
+  });
+
+  it('returns the fallback when interval is required but missing', () => {
+    expect(
+      getFrequencyLabel({ strategy: 'per_status_interval', interval: null }, 'per_episode')
+    ).toBe('Not configured');
+    expect(getFrequencyLabel({ strategy: 'time_interval', interval: null }, 'all')).toBe(
+      'Not configured'
+    );
   });
 });

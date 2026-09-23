@@ -311,5 +311,31 @@ describe('useSearchStrategy', () => {
       expect(mockEndTracking).toHaveBeenCalledTimes(1);
       expect(mockEndTracking).toHaveBeenCalledWith('aborted');
     });
+
+    it('forwards the executionContext option to data.search.search when provided', () => {
+      const executionContext = {
+        child: { type: 'security_solution', name: 'test_page', id: 'test_panel' },
+      };
+
+      const { result } = renderHook(() =>
+        useSearch<FactoryQueryTypes>(factoryQueryType, executionContext)
+      );
+      result.current({ request, abortSignal: new AbortController().signal }).subscribe();
+
+      expect(mockSearch).toHaveBeenCalledWith(
+        expect.any(Object),
+        expect.objectContaining({ executionContext })
+      );
+    });
+
+    it('omits the executionContext option when not provided (undefined is still forwarded)', () => {
+      const { result } = renderHook(() => useSearch<FactoryQueryTypes>(factoryQueryType));
+      result.current({ request, abortSignal: new AbortController().signal }).subscribe();
+
+      expect(mockSearch).toHaveBeenCalledWith(
+        expect.any(Object),
+        expect.objectContaining({ executionContext: undefined })
+      );
+    });
   });
 });

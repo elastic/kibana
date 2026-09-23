@@ -77,7 +77,10 @@ export const AssetCriticalityResultStep: React.FC<{
             id="xpack.securitySolution.entityAnalytics.assetCriticalityResultStep.successMessage"
           />
           <EuiSpacer size="s" />
-          <SecuritySolutionLinkButton deepLinkId={SecurityPageName.entityAnalytics} color="success">
+          <SecuritySolutionLinkButton
+            deepLinkId={SecurityPageName.entityAnalyticsHomePage}
+            color="success"
+          >
             {
               <FormattedMessage
                 defaultMessage="View asset criticality assignments."

@@ -51,4 +51,3 @@ export const HISTOGRAM_BREAKDOWN_COLUMNS: DatatableColumn[] = [
 ];
 export const HISTOGRAM_EPISODE_LIMIT = 10_000;
 export const DEFAULT_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
-export const FLYOUT_FOOTER_OFFSET = 80;

@@ -53,6 +53,7 @@ tags:
 fileGroups:
   src:
     - index.ts
+    - test_helpers.ts
     - common/**/*
     - public/**/*
     - server/**/*

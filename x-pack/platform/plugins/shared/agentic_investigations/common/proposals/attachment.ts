@@ -7,6 +7,3 @@
 
 /** Attachment type identifier registered with Agent Builder. */
 export const PROPOSAL_ATTACHMENT_TYPE = 'investigation_proposal' as const;
-
-/** Label shown when a proposal carries no action workflow. */
-export const PROPOSAL_WITHOUT_ACTION = 'No automated action' as const;

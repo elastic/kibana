@@ -9,13 +9,39 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+
+const mockEuiFlyout = jest.fn();
+
+// EUI's test-env `EuiFlyout` renders a stub that keeps only `data-test-subj`, `role`, and
+// `onKeyDown`, so a prop the root forwards is not observable in the DOM. Record the props and
+// delegate to that stub: forwarding is the template's half of the contract, rendering is EUI's.
+jest.mock('@elastic/eui', () => {
+  const actual = jest.requireActual('@elastic/eui');
+  const react = jest.requireActual('react');
+  return {
+    ...actual,
+    EuiFlyout: (props: Record<string, unknown>) => {
+      mockEuiFlyout(props);
+      return react.createElement(actual.EuiFlyout, props);
+    },
+  };
+});
+
+// eslint-disable-next-line import/order
 import { FlyoutTemplate } from './flyout_template';
 
 const noop = () => {};
 
 const renderTemplate = (ui: React.ReactElement) => render(ui);
 
+/** Props the template handed to `EuiFlyout` on the most recent render. */
+const forwardedProps = () => mockEuiFlyout.mock.calls[mockEuiFlyout.mock.calls.length - 1][0];
+
 describe('FlyoutTemplate', () => {
+  beforeEach(() => {
+    mockEuiFlyout.mockClear();
+  });
+
   it('renders header, body, and footer zones', () => {
     renderTemplate(
       <FlyoutTemplate onClose={noop} session="never" data-test-subj="myFlyout">
@@ -136,5 +162,84 @@ describe('FlyoutTemplate', () => {
       </div>
     );
     expect(container.firstChild).toBeEmptyDOMElement();
+  });
+
+  it('forwards a custom data attribute and className to EuiFlyout', () => {
+    renderTemplate(
+      <FlyoutTemplate
+        onClose={noop}
+        session="never"
+        className="myFlyoutClass"
+        data-foo="flyoutRoot"
+        data-test-subj="myFlyout"
+      >
+        <FlyoutTemplate.Header title="Title" />
+        <FlyoutTemplate.Body>
+          <span>body content</span>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+
+    expect(forwardedProps()).toMatchObject({
+      'data-foo': 'flyoutRoot',
+      className: 'myFlyoutClass',
+      'data-test-subj': 'myFlyout',
+    });
+  });
+
+  it('forwards EuiFlyout props the root does not name itself', () => {
+    renderTemplate(
+      <FlyoutTemplate
+        onClose={noop}
+        session="never"
+        maskProps={{ headerZindexLocation: 'above' }}
+        pushMinBreakpoint="l"
+        includeSelectorInFocusTrap=".myWidget"
+      >
+        <FlyoutTemplate.Body>
+          <span>body content</span>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+
+    expect(forwardedProps()).toMatchObject({
+      maskProps: { headerZindexLocation: 'above' },
+      pushMinBreakpoint: 'l',
+      includeSelectorInFocusTrap: '.myWidget',
+    });
+  });
+
+  it('keeps flyoutMenuDisplayMode template-owned', () => {
+    renderTemplate(
+      <FlyoutTemplate onClose={noop} session="never">
+        <FlyoutTemplate.Body>
+          <span>body content</span>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+
+    expect(forwardedProps().flyoutMenuDisplayMode).toBe('auto');
+  });
+
+  it('does not forward the template-owned tab props to EuiFlyout', () => {
+    renderTemplate(
+      <FlyoutTemplate
+        onClose={noop}
+        session="never"
+        tabs={[{ id: 'overview', label: 'Overview' }]}
+        defaultSelectedTabId="overview"
+        onTabChange={noop}
+      >
+        <FlyoutTemplate.Header title="Title" />
+        <FlyoutTemplate.Body>
+          <FlyoutTemplate.Body.TabPanel tabId="overview">content</FlyoutTemplate.Body.TabPanel>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+
+    const props = forwardedProps();
+    expect(props).not.toHaveProperty('tabs');
+    expect(props).not.toHaveProperty('defaultSelectedTabId');
+    expect(props).not.toHaveProperty('onTabChange');
   });
 });

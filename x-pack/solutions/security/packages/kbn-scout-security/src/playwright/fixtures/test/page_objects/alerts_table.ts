@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { euiSelectors } from '@kbn/scout';
 import type { ScoutPage, Locator } from '@kbn/scout';
 import { expect } from '../../../../../ui';
 
@@ -29,7 +30,9 @@ export class AlertsTablePage {
   constructor(private readonly page: ScoutPage) {
     this.detectionsAlertsWrapper = this.page.testSubj.locator('alerts-by-rule-table');
     this.alertsTable = this.page.testSubj.locator('alertsTableIsLoaded'); // Search for loaded Alerts table
-    this.alertRow = this.page.testSubj.locator('alertsTableIsLoaded').locator('div.euiDataGridRow');
+    this.alertRow = this.page.testSubj
+      .locator('alertsTableIsLoaded')
+      .locator(euiSelectors.dataGrid.ROW_SELECTOR);
     this.contextMenuButton = this.page.testSubj.locator('timeline-context-menu-button');
     this.actionsContextMenu = this.page.testSubj.locator('actions-context-menu');
     this.runWorkflowMenuItem = this.page.testSubj.locator('run-workflow-action');

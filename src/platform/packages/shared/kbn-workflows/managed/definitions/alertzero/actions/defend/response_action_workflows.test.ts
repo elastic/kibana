@@ -106,8 +106,8 @@ describe('AlertZero response-action workflows', () => {
     const stepByName = (name: string) => allSteps.find((step) => step.name === name);
     const requestSteps = allSteps.filter((step) => step.type === 'kibana.request');
 
-    it('declares contain catalog metadata so the action catalog can group it', () => {
-      expect(parsed.consts?.actionMetadata?.category).toBe('contain');
+    it('declares respond catalog metadata so the action catalog can group it', () => {
+      expect(parsed.consts?.actionMetadata?.category).toBe('respond');
     });
 
     it('space-scopes every kibana.request path', () => {

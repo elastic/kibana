@@ -6,23 +6,21 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { SandboxSession } from '@kbn/sandbox-plugin/server';
 import type { AgentConnector, ActionsClient } from './agent_connectors';
 import { listAgentConnectors } from './agent_connectors';
-import type { SandboxApiClient } from './grpc_client';
 import type { SandboxCallContext } from './tool_utils';
 
 const renderConnectorSection = (connector: AgentConnector): string =>
   `## ${connector.name} (connector-id: ${connector.id}, type: ${connector.actionTypeId})`;
 
 export const writeConnectorManifest = async ({
-  conversationId,
-  apiClient,
+  session,
   callContext,
   getActionsClient,
   logger,
 }: {
-  conversationId: string;
-  apiClient: SandboxApiClient;
+  session: SandboxSession;
   callContext: SandboxCallContext;
   getActionsClient: ((req: KibanaRequest) => Promise<ActionsClient>) | undefined;
   logger: Logger;
@@ -61,11 +59,9 @@ export const writeConnectorManifest = async ({
 
   const content = sections.join('\n') + '\n';
 
-  logger.debug(
-    `Writing connector manifest for conversation ${conversationId} (${connectors.length} connector(s))`
-  );
+  logger.debug(`Writing connector manifest (${connectors.length} connector(s))`);
 
-  await apiClient.writeFiles(conversationId, [
+  await session.writeFiles([
     { path: '/workspace/connectors.md', content: Buffer.from(content, 'utf8') },
   ]);
 };

@@ -5,43 +5,26 @@
  * 2.0.
  */
 
-import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { isInternalTool, ToolType } from '@kbn/agent-builder-common/tools';
 import type {
   SkillInvocationOrigin,
   SkillSolutionArea,
 } from '@kbn/agent-builder-common/telemetry/agent_builder_events';
-import {
-  AGENT_BUILDER_BUILTIN_AGENTS,
-  AGENT_BUILDER_BUILTIN_TOOLS,
-} from '@kbn/agent-builder-server/allow_lists';
+import { AGENT_BUILDER_BUILTIN_TOOLS } from '@kbn/agent-builder-server/allow_lists';
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
-import { toHashedId } from '@kbn/agent-builder-server';
+import {
+  toCustomHashedId,
+  toHashedId,
+  normalizeAgentIdForTelemetry,
+} from '@kbn/agent-builder-server/telemetry';
 
-const BUILTIN_AGENT_IDS = new Set([agentBuilderDefaultAgentId, ...AGENT_BUILDER_BUILTIN_AGENTS]);
 const BUILTIN_TOOL_IDS = new Set(AGENT_BUILDER_BUILTIN_TOOLS);
 
-const CUSTOM = 'custom';
-const CUSTOM_HASH_PREFIX = `${CUSTOM}-`;
 const PLUGIN_HASH_PREFIX = 'plugin-';
-export function toCustomHashedId(value: string): string {
-  return `${CUSTOM_HASH_PREFIX}${toHashedId(value)}`;
-}
+export { toCustomHashedId, normalizeAgentIdForTelemetry };
 
 function toPluginHashedId(value: string): string {
   return `${PLUGIN_HASH_PREFIX}${toHashedId(value)}`;
-}
-
-/**
- * Normalizes agent IDs for telemetry to protect user privacy.
- * Built-in agents are reported with their actual ID, custom agents are reported as a stable hashed
- * label (CUSTOM-<sha256_prefix>).
- */
-export function normalizeAgentIdForTelemetry(agentId?: string): string | undefined {
-  if (!agentId) {
-    return undefined;
-  }
-  return BUILTIN_AGENT_IDS.has(agentId) ? agentId : toCustomHashedId(agentId);
 }
 
 /**

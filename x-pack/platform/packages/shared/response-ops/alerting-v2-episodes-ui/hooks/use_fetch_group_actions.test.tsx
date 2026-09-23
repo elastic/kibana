@@ -42,7 +42,7 @@ describe('useFetchGroupActions', () => {
     expect(fetchGroupActionsMock).not.toHaveBeenCalled();
   });
 
-  it('fetches and builds groupActionsMap keyed by group_hash', async () => {
+  it('fetches and builds groupActionsMap keyed by rule and group hash', async () => {
     const rows: GroupActionRow[] = [
       {
         group_hash: 'gh-1',
@@ -68,7 +68,7 @@ describe('useFetchGroupActions', () => {
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    expect(result.current.data!.get('gh-1')).toEqual({
+    expect(result.current.data!.get('rule-1:gh-1')).toEqual({
       groupHash: 'gh-1',
       ruleId: 'rule-1',
       lastDeactivateAction: 'deactivate',
@@ -104,8 +104,8 @@ describe('useFetchGroupActions', () => {
       { wrapper }
     );
 
-    await waitFor(() => expect(result.current.data!.has('gh-2')).toBe(true));
-    expect(result.current.data!.get('gh-2')?.tags).toEqual(['solo']);
+    await waitFor(() => expect(result.current.data!.has(':gh-2')).toBe(true));
+    expect(result.current.data!.get(':gh-2')?.tags).toEqual(['solo']);
   });
 
   it('converts tags to empty array when row tags are null', async () => {
@@ -132,11 +132,11 @@ describe('useFetchGroupActions', () => {
       { wrapper }
     );
 
-    await waitFor(() => expect(result.current.data!.has('gh-3')).toBe(true));
-    expect(result.current.data!.get('gh-3')?.tags).toEqual([]);
+    await waitFor(() => expect(result.current.data!.has(':gh-3')).toBe(true));
+    expect(result.current.data!.get(':gh-3')?.tags).toEqual([]);
   });
 
-  it('keeps the last row when duplicate group hashes are returned', async () => {
+  it('keeps actions from different rules that share a group hash', async () => {
     const rows: GroupActionRow[] = [
       {
         group_hash: 'dup',
@@ -170,6 +170,8 @@ describe('useFetchGroupActions', () => {
       { wrapper }
     );
 
-    await waitFor(() => expect(result.current.data!.get('dup')?.ruleId).toBe('r2'));
+    await waitFor(() => expect(result.current.data?.size).toBe(2));
+    expect(result.current.data?.get('r1:dup')?.lastSnoozeAction).toBe('snooze');
+    expect(result.current.data?.get('r2:dup')?.lastDeactivateAction).toBe('deactivate');
   });
 });

@@ -10,10 +10,13 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { PropsWithChildren } from 'react';
 import React, { useEffect, useMemo, useState } from 'react';
-import { ConversationInputShell } from '@kbn/agent-builder-browser';
+import { ConversationInputShell, formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
 import { useConversationStream } from '../../../hooks/use_conversation_stream';
 import { useSubmitMessage } from '../../../hooks/use_submit_message';
+import { useSendUserMessage } from '../../../hooks/use_send_user_message';
+import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
+import { ChatTriggerMode } from '../../../../../common/http_api/chat';
 import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
 import { useValidateAgentId } from '../../../hooks/agents/use_validate_agent_id';
 import {
@@ -21,8 +24,8 @@ import {
   useConversationReadOnly,
   useConversationTitle,
   useHasActiveConversation,
-  useIsAwaitingPrompt,
 } from '../../../hooks/use_conversation';
+import { useIsAwaitingPrompt } from '../../../hooks/use_is_awaiting_prompt';
 import { MessageEditor, useMessageEditor, CommandBadgeSerializationError } from './message_editor';
 import { useToasts } from '../../../hooks/use_toasts';
 import { InputActions } from './input_actions';
@@ -98,7 +101,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
 }) => {
   const [hoveredImageName, setHoveredImageName] = useState<string | null>(null);
 
-  const { pendingMessage, error, isResuming, isResponseLoading } = useConversationStream();
+  const { isResponseLoading } = useConversationStream();
   const { isFetched } = useAgentBuilderAgents();
   const agentId = useAgentId();
   const conversationId = useConversationId();
@@ -118,7 +121,10 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
     autoSendInitialMessage,
     resetInitialMessage,
   } = useConversationContext();
-  const submitMessage = useSubmitMessage();
+  const { submitMessage, isCreatingConversation } = useSubmitMessage();
+  const [triggerMode, setTriggerMode] = useState<ChatTriggerMode>(ChatTriggerMode.Always);
+  const isExperimentalEnabled = useExperimentalFeatures();
+  const { mutateAsync: sendUserMessage, isLoading: isSendingUserMessage } = useSendUserMessage();
 
   const { uploadingNames, handlePasteFile, handleAfterInput, handleRemoveAttachment } =
     useImageUpload({
@@ -130,10 +136,13 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
   const isAgentIdValid = validateAgentId(agentId);
 
   const isAgentDeleted = !isAgentIdValid && isFetched && Boolean(agentId);
-  const isInputDisabled = isAgentDeleted || isAwaitingPrompt || isResuming;
+  const isInputDisabled =
+    isAgentDeleted || isAwaitingPrompt || isCreatingConversation || isSendingUserMessage;
   const isSubmitDisabled =
     messageEditorController.isEmpty ||
     isResponseLoading ||
+    isSendingUserMessage ||
+    isCreatingConversation ||
     !isAgentIdValid ||
     isAwaitingPrompt ||
     uploadingNames.size > 0;
@@ -145,8 +154,8 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
     flex-direction: column;
     height: 100%;
   `;
-  // Hide attachments if there's an error from current round or if message has been just sent
-  const shouldHideAttachments = Boolean(error) || isResponseLoading;
+  // Hide attachments while the message that carries them is being sent
+  const shouldHideAttachments = isResponseLoading;
 
   const shouldCollapseInput = isResponseLoading || hasActiveConversation;
 
@@ -215,6 +224,17 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
       }
       return;
     }
+    if (triggerMode === ChatTriggerMode.Never) {
+      sendUserMessage(content)
+        .then(() => {
+          messageEditorController.clear();
+          onSubmit?.();
+        })
+        .catch((sendError: unknown) => {
+          addErrorToast({ title: formatAgentBuilderErrorMessage(sendError) });
+        });
+      return;
+    }
     if (onSubmitOverride) {
       onSubmitOverride(content);
     } else {
@@ -259,12 +279,10 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
         <InputActions
           onSubmit={handleSubmit}
           isSubmitDisabled={isSubmitDisabled}
-          resetToPendingMessage={() => {
-            if (pendingMessage) {
-              messageEditorController.setContent(pendingMessage);
-            }
-          }}
-          agentId={agentId}
+          isSubmitting={isCreatingConversation || isSendingUserMessage}
+          showTriggerModeToggle={!isNewConversation && isExperimentalEnabled}
+          triggerMode={triggerMode}
+          onTriggerModeChange={setTriggerMode}
         />
       )}
     </InputContainer>

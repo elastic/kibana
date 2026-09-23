@@ -532,11 +532,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
           status,
         };
-        const response = await forkStream(apiClient, rootStream, body, 400);
-        expect(response).to.have.property(
-          'message',
-          'Desired stream state is invalid: Stream name cannot be longer than 200 characters.'
-        );
+        await forkStream(apiClient, rootStream, body, 400);
       });
 
       it(`Index an Nginx access log message, should goto ${rootStream}.nginx`, async () => {

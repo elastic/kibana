@@ -32,13 +32,13 @@ export const RuleOverviewSection: React.FC = () => {
       {rule.kind === 'alert' ? (
         <>
           <EuiSpacer size="l" />
-          <ArtifactsSection />
+          <ArtifactsSection rule={rule} />
         </>
       ) : null}
       {rule.kind === 'signal' ? (
         <>
           <EuiSpacer size="l" />
-          <SignalArtifactsSection />
+          <SignalArtifactsSection rule={rule} />
         </>
       ) : null}
     </div>

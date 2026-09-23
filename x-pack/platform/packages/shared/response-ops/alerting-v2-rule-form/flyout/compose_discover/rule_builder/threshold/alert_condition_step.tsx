@@ -59,15 +59,21 @@ import {
   isStatFieldValid,
   generateId,
   getAvailableMetricLabels,
+  reconcileSeverity,
+  isSeveritySupported,
+  hasReservedSeverityLabel,
+  getReservedSeverityLabelSources,
 } from './form_types';
 import { buildThresholdEsql, buildRecoveryBlock } from './build_esql';
 import { EvaluationExpressionField } from './evaluation_expression_field';
+import { SeveritySection } from './severity_section';
 import { splitQuery } from '../../use_heuristic_split';
 import { OPTIONAL_LABEL } from '../../../../form/optional_field_label';
 import {
   AGGREGATION_OPTIONS,
   COMPARATOR_OPTIONS,
   CONDITION_OPERATOR_OPTIONS,
+  SEVERITY_RESERVED_LABEL_NOTICE,
   STAT_FIELD_REQUIRED_ERROR,
   STAT_LABEL_REQUIRED_ERROR,
 } from './translations';
@@ -198,6 +204,26 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
     [thresholdValues, onThresholdValuesChange]
   );
 
+  const updateGroupByFields = useCallback(
+    (groupByFields: string[]) => {
+      // A group-by field named `severity` collides with the generated column, so clear severity.
+      onThresholdValuesChange({
+        ...thresholdValues,
+        groupByFields,
+        severity: reconcileSeverity(
+          thresholdValues.severity,
+          thresholdValues.alertConditions,
+          hasReservedSeverityLabel(
+            thresholdValues.stats,
+            thresholdValues.evaluations,
+            groupByFields
+          )
+        ),
+      });
+    },
+    [thresholdValues, onThresholdValuesChange]
+  );
+
   // ── Stat helpers ──
   const updateStat = useCallback(
     (index: number, updates: Partial<StatDefinition>) => {
@@ -236,6 +262,12 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
         ...thresholdValues,
         stats: next,
         alertConditions: updatedConditions,
+        // Renaming a stat to `severity` collides with the generated column, so severity clears.
+        severity: reconcileSeverity(
+          thresholdValues.severity,
+          updatedConditions,
+          hasReservedSeverityLabel(next, thresholdValues.evaluations, thresholdValues.groupByFields)
+        ),
         ...(thresholdValues.recovery && {
           recovery: { ...thresholdValues.recovery, conditions: updatedRecoveryConditions! },
         }),
@@ -335,6 +367,12 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
         ...thresholdValues,
         evaluations: next,
         alertConditions: updatedConditions,
+        // Renaming an evaluation to `severity` collides with the generated column, so it clears.
+        severity: reconcileSeverity(
+          thresholdValues.severity,
+          updatedConditions,
+          hasReservedSeverityLabel(thresholdValues.stats, next, thresholdValues.groupByFields)
+        ),
         ...(thresholdValues.recovery && {
           recovery: { ...thresholdValues.recovery, conditions: updatedRecoveryConditions! },
         }),
@@ -404,31 +442,58 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
     (index: number, updates: Partial<AlertCondition>) => {
       const next = [...thresholdValues.alertConditions];
       next[index] = { ...next[index], ...updates };
-      onThresholdValuesChange({ ...thresholdValues, alertConditions: next });
+      // Severity inherits the condition's comparator, so re-check it stays applicable. Its
+      // thresholds are independent of the condition threshold (no coupling).
+      onThresholdValuesChange({
+        ...thresholdValues,
+        alertConditions: next,
+        severity: reconcileSeverity(thresholdValues.severity, next),
+      });
     },
     [thresholdValues, onThresholdValuesChange]
   );
 
   const addCondition = useCallback(() => {
+    const next = [
+      ...thresholdValues.alertConditions,
+      { id: generateId(), ...DEFAULT_ALERT_CONDITION },
+    ];
     onThresholdValuesChange({
       ...thresholdValues,
-      alertConditions: [
-        ...thresholdValues.alertConditions,
-        { id: generateId(), ...DEFAULT_ALERT_CONDITION },
-      ],
+      alertConditions: next,
+      severity: reconcileSeverity(thresholdValues.severity, next),
     });
   }, [thresholdValues, onThresholdValuesChange]);
 
   const removeCondition = useCallback(
     (index: number) => {
-      const next = thresholdValues.alertConditions.filter((_, i) => i !== index);
+      const filtered = thresholdValues.alertConditions.filter((_, i) => i !== index);
+      const next = filtered.length ? filtered : [{ id: generateId(), ...DEFAULT_ALERT_CONDITION }];
       onThresholdValuesChange({
         ...thresholdValues,
-        alertConditions: next.length ? next : [{ id: generateId(), ...DEFAULT_ALERT_CONDITION }],
+        alertConditions: next,
+        severity: reconcileSeverity(thresholdValues.severity, next),
       });
     },
     [thresholdValues, onThresholdValuesChange]
   );
+
+  const updateSeverity = useCallback(
+    (severity: ThresholdFormValues['severity']) => {
+      onThresholdValuesChange({ ...thresholdValues, severity });
+    },
+    [thresholdValues, onThresholdValuesChange]
+  );
+
+  const severitySupported = isSeveritySupported(thresholdValues.alertConditions);
+  // A stat/evaluation/group-by field named `severity` collides with the generated column, so
+  // severity is not configurable until it is renamed. Track the exact source(s) to name them.
+  const reservedSeverityLabelSources = getReservedSeverityLabelSources(
+    thresholdValues.stats,
+    thresholdValues.evaluations,
+    thresholdValues.groupByFields
+  );
+  const severityLabelConflict = reservedSeverityLabelSources.length > 0;
 
   return (
     <>
@@ -527,13 +592,8 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
           compressed
           options={allFields.map((name) => ({ label: name }))}
           selectedOptions={thresholdValues.groupByFields.map((f) => ({ label: f }))}
-          onChange={(opts) =>
-            update(
-              'groupByFields',
-              opts.map((o) => o.label)
-            )
-          }
-          onCreateOption={(val) => update('groupByFields', [...thresholdValues.groupByFields, val])}
+          onChange={(opts) => updateGroupByFields(opts.map((o) => o.label))}
+          onCreateOption={(val) => updateGroupByFields([...thresholdValues.groupByFields, val])}
           placeholder={i18n.translate('xpack.alertingV2.ruleBuilder.groupByPlaceholder', {
             defaultMessage: 'Add group-by fields',
           })}
@@ -963,6 +1023,26 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
                   </EuiFlexItem>
                 )}
               </EuiFlexGroup>
+              {severitySupported &&
+                (severityLabelConflict ? (
+                  <>
+                    <EuiHorizontalRule margin="s" />
+                    <EuiCallOut
+                      announceOnMount
+                      size="s"
+                      color="primary"
+                      iconType="info"
+                      title={SEVERITY_RESERVED_LABEL_NOTICE(reservedSeverityLabelSources)}
+                      data-test-subj="ruleBuilderSeverityReservedLabelCallout"
+                    />
+                  </>
+                ) : (
+                  <SeveritySection
+                    severity={thresholdValues.severity}
+                    alertConditions={thresholdValues.alertConditions}
+                    onChange={updateSeverity}
+                  />
+                ))}
             </EuiPanel>
             <EuiSpacer size="s" />
           </React.Fragment>
@@ -979,6 +1059,24 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
           defaultMessage="Add condition"
         />
       </EuiButtonEmpty>
+
+      {/* ── Non-configurable severity notice ── */}
+      {!severitySupported && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiCallOut
+            announceOnMount
+            size="s"
+            color="primary"
+            iconType="info"
+            title={i18n.translate('xpack.alertingV2.ruleBuilder.severity.singleConditionOnly', {
+              defaultMessage:
+                'Severity is not configurable when multiple threshold conditions are defined.',
+            })}
+            data-test-subj="ruleBuilderSeverityDisabledCallout"
+          />
+        </>
+      )}
     </>
   );
 };

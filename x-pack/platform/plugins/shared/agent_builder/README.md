@@ -80,6 +80,15 @@ Tools can come from multiple sources:
 - workflow: A tool that executes a workflow.
 - mcp: A tool provided by an external MCP (Model Context Protocol) server.
 
+### HTTP API tools
+
+Agents reach the Elasticsearch and Kibana HTTP APIs through a set of internal tools:
+
+- `describe_api`: the parameter schema, method, and path of one operation.
+- `describe_api_type`: the full definition of a shared type `describe_api` only stubbed.
+- `execute_api`: the call itself, on behalf of the current user.
+- `discover_apis` (gated by `agentBuilder:apiDiscovery`): a searchable listing of every operation a target exposes.
+
 ### Registering a tool
 
 Please refer to the [Contributor guide](./CONTRIBUTOR_GUIDE.md) for info and examples details.

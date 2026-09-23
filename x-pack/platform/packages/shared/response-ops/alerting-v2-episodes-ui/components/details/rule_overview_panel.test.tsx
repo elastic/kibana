@@ -43,6 +43,70 @@ describe('AlertEpisodeRuleOverviewPanel', () => {
     expect(screen.getByTestId('alertingV2EpisodeDetailsRuleOverviewPanel')).toBeInTheDocument();
   });
 
+  it('renders the "Rule overview" heading by default, for the full details page', () => {
+    renderPanel(mockRule);
+
+    expect(screen.getByTestId('alertingV2EpisodeDetailsRuleOverviewHeading')).toHaveTextContent(
+      'Rule overview'
+    );
+  });
+
+  it('hides the heading when showTitle is false, for the flyout accordion', () => {
+    render(
+      <I18nProvider>
+        <AlertEpisodeRuleOverviewPanel
+          rule={mockRule}
+          ruleDetailsHref={mockRuleDetailsHref}
+          showTitle={false}
+        />
+      </I18nProvider>
+    );
+
+    expect(
+      screen.queryByTestId('alertingV2EpisodeDetailsRuleOverviewHeading')
+    ).not.toBeInTheDocument();
+    // The link stays inside the panel either way.
+    expect(screen.getByTestId('alertingV2EpisodeDetailsRuleOverviewPanel')).toContainElement(
+      screen.getByTestId('alertingV2EpisodeDetailsViewRuleDetailsButton')
+    );
+  });
+
+  it('scales the rule name and link down when compressed', () => {
+    const { container: normal } = renderPanel(mockRule);
+    const normalName = normal.querySelector('.euiText')?.className ?? '';
+
+    render(
+      <I18nProvider>
+        <AlertEpisodeRuleOverviewPanel
+          rule={mockRule}
+          ruleDetailsHref={mockRuleDetailsHref}
+          compressed
+        />
+      </I18nProvider>
+    );
+
+    // EuiText encodes its scale in the emotion class, so compressed must differ.
+    const compressedName =
+      screen.getAllByText('My rule').at(-1)?.closest('.euiText')?.className ?? '';
+    expect(compressedName).not.toBe('');
+    expect(compressedName).not.toBe(normalName);
+  });
+
+  it('renders the view-rule-details link inside the panel as a plain link', () => {
+    renderPanel(mockRule);
+
+    const link = screen.getByTestId('alertingV2EpisodeDetailsViewRuleDetailsButton');
+    // A link, not the empty button it used to be, so it picks up normal link color.
+    expect(link.tagName).toBe('A');
+    expect(link.className).toContain('euiLink');
+    expect(link.className).not.toContain('euiButtonEmpty');
+    // The eye icon is gone, replaced by the external affordance for leaving the flyout.
+    expect(link.querySelector('[data-euiicon-type="eye"]')).toBeNull();
+    expect(link.querySelector('[data-euiicon-type="external"]')).toBeInTheDocument();
+    // Top right of the panel rather than above it.
+    expect(screen.getByTestId('alertingV2EpisodeDetailsRuleOverviewPanel')).toContainElement(link);
+  });
+
   it('renders "Events" kind badge for Events rules', () => {
     renderPanel(mockRule);
 

@@ -13,7 +13,10 @@ import pMap from 'p-map';
 import { EXCEPTION_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 import { randomPolicyIdGenerator } from '../common/random_policy_id_generator';
 import { ExceptionsListItemGenerator } from '../../../common/endpoint/data_generators/exceptions_list_item_generator';
-import { isArtifactByPolicy } from '../../../common/endpoint/service/artifacts';
+import {
+  BY_POLICY_ARTIFACT_TAG_PREFIX,
+  isArtifactByPolicy,
+} from '../../../common/endpoint/service/artifacts';
 import { ensureArtifactListExists } from '../common/endpoint_artifact_services';
 
 export const cli = () => {
@@ -71,9 +74,16 @@ const createCustomYaraSignatures: RunFn = async ({ flags, log }) => {
 
       if (isArtifactByPolicy(body)) {
         const nmExceptions = generator.randomN(3) || 1;
-        body.tags = Array.from({ length: nmExceptions }, () => {
-          return `policy:${randomPolicyId()}`;
-        });
+        body.tags = [
+          // Existing tags that are not policy tags
+          ...body.tags.filter((tag) => !tag.startsWith(BY_POLICY_ARTIFACT_TAG_PREFIX)),
+
+          // New policy tags
+          ...Array.from(
+            { length: nmExceptions },
+            () => `${BY_POLICY_ARTIFACT_TAG_PREFIX}${randomPolicyId()}`
+          ),
+        ];
       }
       return kbn
         .request({

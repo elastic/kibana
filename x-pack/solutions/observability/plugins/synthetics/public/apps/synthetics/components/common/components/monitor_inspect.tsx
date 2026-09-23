@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
 
@@ -47,6 +47,12 @@ import {
   updateMonitorAPI,
 } from '../../../state/monitor_management/api';
 import { kibanaService } from '../../../../../utils/kibana_service';
+import {
+  FORMATTED_CONFIG_DESCRIPTION,
+  INSPECT_MONITOR_LABEL,
+  VALID_CONFIG_LABEL,
+  useRegisterInspectMonitorHeader,
+} from '../../monitor_add_edit/inspect_monitor_header';
 
 interface InspectorProps {
   isValid: boolean;
@@ -56,6 +62,7 @@ interface InspectorProps {
 
 export const MonitorInspect = ({ isValid, monitorFields, isEditFlow = false }: InspectorProps) => {
   const { isDev } = useSyntheticsSettingsContext();
+  const registerHeader = useRegisterInspectMonitorHeader();
 
   const [hideParams, setHideParams] = useState(() => !isDev);
   const [asJson, setAsJson] = useState(false);
@@ -72,6 +79,22 @@ export const MonitorInspect = ({ isValid, monitorFields, isEditFlow = false }: I
     setIsInspecting(() => !isInspecting);
     setIsFlyoutVisible(() => !isFlyoutVisible);
   };
+
+  useEffect(() => {
+    if (!registerHeader) {
+      return;
+    }
+    registerHeader({
+      open: () => {
+        setIsInspecting(true);
+        setIsFlyoutVisible(true);
+      },
+      isValid,
+    });
+    return () => {
+      registerHeader(null);
+    };
+  }, [isValid, registerHeader]);
 
   const { data, loading, error } = useFetcher(() => {
     if (isInspecting) {
@@ -160,17 +183,19 @@ export const MonitorInspect = ({ isValid, monitorFields, isEditFlow = false }: I
   }
   return (
     <>
-      <EuiToolTip content={isValid ? FORMATTED_CONFIG_DESCRIPTION : VALID_CONFIG_LABEL}>
-        <EuiButton
-          disabled={!isValid}
-          data-test-subj="syntheticsMonitorInspectShowFlyoutExampleButton"
-          onClick={onButtonClick}
-          iconType="inspect"
-          iconSide="left"
-        >
-          {INSPECT_MONITOR_LABEL}
-        </EuiButton>
-      </EuiToolTip>
+      {registerHeader ? null : (
+        <EuiToolTip content={isValid ? FORMATTED_CONFIG_DESCRIPTION : VALID_CONFIG_LABEL}>
+          <EuiButton
+            disabled={!isValid}
+            data-test-subj="syntheticsMonitorInspectShowFlyoutExampleButton"
+            onClick={onButtonClick}
+            iconType="inspect"
+            iconSide="left"
+          >
+            {INSPECT_MONITOR_LABEL}
+          </EuiButton>
+        </EuiToolTip>
+      )}
 
       {flyout}
     </>
@@ -326,19 +351,6 @@ const CONFIG_LABEL = i18n.translate('xpack.synthetics.monitorInspect.configLabel
   defaultMessage: 'Configuration',
 });
 
-const VALID_CONFIG_LABEL = i18n.translate(
-  'xpack.synthetics.monitorInspect.formattedConfigLabel.valid',
-  {
-    defaultMessage: 'Only valid form configurations can be inspected.',
-  }
-);
-
-const FORMATTED_CONFIG_DESCRIPTION = i18n.translate(
-  'xpack.synthetics.monitorInspect.formattedConfigLabel.description',
-  {
-    defaultMessage: 'View formatted configuration for this monitor.',
-  }
-);
 const CLOSE_LABEL = i18n.translate('xpack.synthetics.monitorInspect.closeLabel', {
   defaultMessage: 'Close',
 });
@@ -346,13 +358,6 @@ const CLOSE_LABEL = i18n.translate('xpack.synthetics.monitorInspect.closeLabel',
 export const SOURCE_CODE_LABEL = i18n.translate('xpack.synthetics.monitorInspect.sourceCodeLabel', {
   defaultMessage: 'Source code',
 });
-
-export const INSPECT_MONITOR_LABEL = i18n.translate(
-  'xpack.synthetics.monitorInspect.inspectLabel',
-  {
-    defaultMessage: 'Inspect configuration',
-  }
-);
 
 const HIDE_PARAMS = i18n.translate('xpack.synthetics.monitorInspect.hideParams', {
   defaultMessage: 'Hide parameter values',

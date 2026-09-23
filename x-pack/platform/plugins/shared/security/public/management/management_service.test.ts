@@ -24,6 +24,7 @@ import { applicationConnectionsManagementApp } from './application_connections';
 import { ManagementService } from './management_service';
 import { roleMappingsManagementApp } from './role_mappings';
 import { rolesManagementApp } from './roles';
+import { serviceAccountsManagementApp } from './service_accounts';
 import { usersManagementApp } from './users';
 import type { SecurityLicenseFeatures } from '../../common';
 import { licenseMock } from '../../common/licensing/index.mock';
@@ -99,6 +100,9 @@ describe('ManagementService', () => {
       expect(mockSection.registerApp).not.toHaveBeenCalledWith(
         expect.objectContaining({ id: applicationConnectionsManagementApp.id })
       );
+      expect(mockSection.registerApp).not.toHaveBeenCalledWith(
+        expect.objectContaining({ id: serviceAccountsManagementApp.id })
+      );
     });
 
     it('registers Application Connections app when UIAM is enabled', () => {
@@ -151,6 +155,34 @@ describe('ManagementService', () => {
       expect(mockServerlessSection.registerApp).not.toHaveBeenCalledWith(
         expect.objectContaining({ id: applicationConnectionsManagementApp.id })
       );
+    });
+
+    it('registers Service Accounts app when service accounts are enabled', () => {
+      const serviceAccountsSection = createManagementSectionMock();
+      const { fatalErrors, getStartServices } = coreMock.createSetup();
+      const { authc } = securityMock.createSetup();
+      const license = licenseMock.create();
+      const managementSetup = managementPluginMock.createSetupContract();
+      managementSetup.sections.section.security = serviceAccountsSection;
+
+      const service = new ManagementService(
+        createConfigMock({ serviceAccounts: { enabled: true } })
+      );
+      service.setup({
+        getStartServices,
+        license,
+        fatalErrors,
+        authc,
+        management: managementSetup,
+        buildFlavor: 'serverless',
+      });
+
+      expect(serviceAccountsSection.registerApp).toHaveBeenCalledWith({
+        id: serviceAccountsManagementApp.id,
+        mount: expect.any(Function),
+        order: 35,
+        title: 'Service accounts',
+      });
     });
 
     it('Users, Roles, and Role Mappings are not registered when their config settings are set to false', () => {
@@ -221,6 +253,7 @@ describe('ManagementService', () => {
       canManageSecurity?: boolean;
       buildFlavor?: BuildFlavor;
       isUIAMEnabled?: boolean;
+      serviceAccountsEnabled?: boolean;
     }
 
     function startService({
@@ -228,6 +261,7 @@ describe('ManagementService', () => {
       canManageSecurity = true,
       buildFlavor = 'traditional',
       isUIAMEnabled = false,
+      serviceAccountsEnabled = false,
     }: StartServiceOptions) {
       const { fatalErrors, getStartServices } = coreMock.createSetup();
 
@@ -243,6 +277,7 @@ describe('ManagementService', () => {
           roleMappingManagementEnabled: true,
         },
         roleManagementEnabled: true,
+        serviceAccounts: { enabled: serviceAccountsEnabled },
       } as unknown as ConfigType;
 
       const service = new ManagementService(config);
@@ -294,6 +329,7 @@ describe('ManagementService', () => {
           applicationConnectionsManagementApp.id,
           getMockedApp(applicationConnectionsManagementApp.id),
         ],
+        [serviceAccountsManagementApp.id, getMockedApp(serviceAccountsManagementApp.id)],
       ] as Array<[string, jest.Mocked<ManagementApp>]>);
       mockSection.getApp = jest.fn().mockImplementation((id) => mockApps.get(id));
 
@@ -306,6 +342,7 @@ describe('ManagementService', () => {
               role_mappings: canManageSecurity,
               api_keys: canManageSecurity,
               [applicationConnectionsManagementApp.id]: canManageSecurity,
+              [serviceAccountsManagementApp.id]: canManageSecurity,
             },
           },
           navLinks: {},
@@ -476,6 +513,39 @@ describe('ManagementService', () => {
           isUIAMEnabled: true,
         });
         expect(mockApps.get(applicationConnectionsManagementApp.id)!.enabled).toBe(false);
+      });
+    });
+
+    describe('Service Accounts app (feature flag)', () => {
+      it('is enabled when the feature flag, license, and capability allow it', () => {
+        const { mockApps } = startService({
+          initialFeatures: { showLinks: true },
+          buildFlavor: 'serverless',
+          serviceAccountsEnabled: true,
+        });
+
+        expect(mockApps.get(serviceAccountsManagementApp.id)!.enabled).toBe(true);
+      });
+
+      it('is disabled when the license hides security management links', () => {
+        const { mockApps } = startService({
+          initialFeatures: { showLinks: false },
+          buildFlavor: 'serverless',
+          serviceAccountsEnabled: true,
+        });
+
+        expect(mockApps.get(serviceAccountsManagementApp.id)!.enabled).toBe(false);
+      });
+
+      it('is disabled when the user lacks the management capability', () => {
+        const { mockApps } = startService({
+          initialFeatures: { showLinks: true },
+          buildFlavor: 'serverless',
+          serviceAccountsEnabled: true,
+          canManageSecurity: false,
+        });
+
+        expect(mockApps.get(serviceAccountsManagementApp.id)!.enabled).toBe(false);
       });
     });
   });

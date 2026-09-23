@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Update Attack Discovery Schedule Internal API endpoint
-  version: '2023-10-31'
+  version: '1'
 paths:
   /internal/attack_discovery/schedules/{id}:
     put:

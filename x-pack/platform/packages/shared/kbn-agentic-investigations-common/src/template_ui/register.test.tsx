@@ -16,24 +16,7 @@ import type {
   ConversationTemplateUIContext,
   ConversationTemplateUIDefinition,
 } from '@kbn/agent-builder-browser';
-import type { Investigation } from '../types';
 import { getInvestigationTabIds, registerAgenticInvestigationTemplateUI } from './register';
-
-const investigation: Investigation = {
-  id: 'conversation-1',
-  template_id: 'investigation',
-  title: 'Impossible travel — exec account',
-  createdAt: '2024-01-01T00:00:00Z',
-  updatedAt: '2024-01-01T00:00:00Z',
-  watch_id: 'watch-1',
-  watch_execution_id: 'exec-1',
-  status: 'open',
-  severity: 'high',
-  affectedSurface: 'cfo@corp',
-  summary: 'A second sign-in replayed the same session cookie.',
-  pendingProposalCount: 0,
-  events: [],
-};
 
 const conversation: Conversation = {
   id: 'conversation-1',
@@ -44,6 +27,11 @@ const conversation: Conversation = {
   updated_at: '2024-01-01T00:00:00Z',
   rounds: [],
   template_id: 'investigation',
+  metadata: {
+    status: 'open',
+    severity: 'high',
+    summary: 'A second sign-in replayed the same session cookie.',
+  },
 };
 
 const attachmentsService = {
@@ -60,11 +48,11 @@ const attachmentsService = {
 const createFakeService = () => {
   const tabs = new Map<string, ConversationTemplateTabDefinition>();
   const templates = new Map<string, ConversationTemplateUIDefinition>();
-  const openSidebarConversation = jest.fn();
+  const openFullscreenConversation = jest.fn();
   const context: ConversationTemplateUIContext = {
     attachmentsService,
-    openSidebarConversation,
-    openFullscreenConversation: jest.fn(),
+    openSidebarConversation: jest.fn(),
+    openFullscreenConversation,
   };
 
   const contract: ConversationTemplateServiceStartContract = {
@@ -84,7 +72,7 @@ const createFakeService = () => {
     getTemplateUIDefinition: (templateId) => templates.get(templateId),
   };
 
-  return { contract, openSidebarConversation };
+  return { contract, openFullscreenConversation };
 };
 
 /** Reads a registered flyout slot, failing the test rather than rendering `undefined`. */
@@ -109,19 +97,19 @@ const register = (
     templateId: 'investigation',
     name: 'Investigation',
     icon: 'securitySignalDetected',
-    loadInvestigation: jest.fn().mockResolvedValue(investigation),
     ...overrides,
   });
 
 describe('registerAgenticInvestigationTemplateUI', () => {
-  it('registers the overview, attachments and timeline tabs', () => {
+  it('registers the overview tab', () => {
     const { contract } = createFakeService();
 
     register(contract);
 
     expect(contract.getTab('investigation.overview')?.label).toBe('Overview');
-    expect(contract.getTab('investigation.attachments')?.label).toBe('Attachments');
-    expect(contract.getTab('investigation.timeline')?.label).toBe('Timeline');
+    expect(contract.getTemplateUIDefinition('investigation')?.tabs).toEqual([
+      'investigation.overview',
+    ]);
   });
 
   it('registers the template UI definition with a header and footer', () => {
@@ -156,79 +144,36 @@ describe('registerAgenticInvestigationTemplateUI', () => {
     expect(contract.getTab('observabilityInvestigation.overview')).toBeDefined();
   });
 
-  it('resolves each solution through its own loader', async () => {
-    const { contract } = createFakeService();
-    const observabilityInvestigation = { ...investigation, title: 'Latency spike' };
-    register(contract);
-    register(contract, {
-      templateId: 'observabilityInvestigation',
-      name: 'Observability investigation',
-      loadInvestigation: jest.fn().mockResolvedValue(observabilityInvestigation),
-    });
-    const Header = getSlot(contract, 'observabilityInvestigation', 'header');
-
-    renderWithKibanaRenderContext(
-      <Header
-        conversation={{ ...conversation, template_id: 'observabilityInvestigation' }}
-        isOpenedFromChat={false}
-      />
-    );
-
-    expect(await screen.findByText('Latency spike')).toBeInTheDocument();
-  });
-
-  it('shares one request between the slots of an open flyout', async () => {
-    const { contract } = createFakeService();
-    // Slots mount as their lazy chunk resolves, so the request has to still be in flight for the
-    // later ones to join it. A `mockResolvedValue` would settle before the footer mounts at all,
-    // which no HTTP request does.
-    const loadInvestigation = jest.fn(
-      () => new Promise<Investigation>((resolve) => setTimeout(() => resolve(investigation), 20))
-    );
-    register(contract, { loadInvestigation });
-    const Header = getSlot(contract, 'investigation', 'header');
-    const Footer = getSlot(contract, 'investigation', 'footer');
-
-    renderWithKibanaRenderContext(
-      <>
-        <Header conversation={conversation} isOpenedFromChat={false} />
-        <Footer conversation={conversation} isOpenedFromChat={false} />
-      </>
-    );
-    await screen.findByTestId('investigationFlyoutOpenChat');
-
-    expect(loadInvestigation).toHaveBeenCalledTimes(1);
-  });
-
-  it('renders the investigation title and status in the header slot', async () => {
+  // The header's title goes through `EuiTextTruncate`, which measures its container and so renders
+  // no matchable text under jsdom. These assert on the status/assignee tiles instead, which are
+  // plain text; `conversation_to_investigation.test.ts` covers the title mapping itself.
+  it("renders the status from the conversation's template metadata", async () => {
     const { contract } = createFakeService();
     register(contract);
     const Header = getSlot(contract, 'investigation', 'header');
 
     renderWithKibanaRenderContext(<Header conversation={conversation} isOpenedFromChat={false} />);
 
-    expect(await screen.findByText('Impossible travel — exec account')).toBeInTheDocument();
-    expect(screen.getByText('open')).toBeInTheDocument();
+    // Nothing is fetched, so the slot has no loading or error state to pass through first.
+    expect(await screen.findByText('open')).toBeInTheDocument();
   });
 
-  it('falls back to the conversation title when the investigation cannot be loaded', async () => {
+  it('still renders the header for a conversation carrying no template metadata', async () => {
     const { contract } = createFakeService();
-    register(contract, {
-      templateId: 'failing',
-      loadInvestigation: jest.fn().mockRejectedValue(new Error('boom')),
-    });
-    const Header = getSlot(contract, 'failing', 'header');
+    register(contract);
+    const Header = getSlot(contract, 'investigation', 'header');
 
     renderWithKibanaRenderContext(
-      <Header conversation={{ ...conversation, template_id: 'failing' }} isOpenedFromChat={false} />
+      <Header conversation={{ ...conversation, metadata: undefined }} isOpenedFromChat={false} />
     );
 
-    // Agent Builder points the flyout's `aria-labelledby` at the header, so it must not be empty.
-    expect(await screen.findByText('Impossible travel — exec account')).toBeInTheDocument();
+    // Agent Builder points the flyout's `aria-labelledby` at the header, so it must still render.
+    expect(await screen.findByTestId('investigationHeaderBlocks')).toBeInTheDocument();
+    expect(screen.getByText('Unassigned')).toBeInTheDocument();
   });
 
-  it('opens the sidebar conversation from the footer slot', async () => {
-    const { contract, openSidebarConversation } = createFakeService();
+  it('opens the conversation full screen from the footer slot', async () => {
+    const { contract, openFullscreenConversation } = createFakeService();
     register(contract);
     const Footer = getSlot(contract, 'investigation', 'footer');
 
@@ -236,6 +181,10 @@ describe('registerAgenticInvestigationTemplateUI', () => {
 
     fireEvent.click(await screen.findByTestId('investigationFlyoutOpenChat'));
 
-    expect(openSidebarConversation).toHaveBeenCalledWith('conversation-1');
+    // Scoped to the conversation's own agent: the Agent Builder conversation route is per-agent.
+    expect(openFullscreenConversation).toHaveBeenCalledWith({
+      conversationId: 'conversation-1',
+      agentId: 'agent',
+    });
   });
 });

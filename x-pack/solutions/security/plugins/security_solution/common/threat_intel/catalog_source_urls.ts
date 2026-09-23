@@ -18,13 +18,13 @@ export const CATALOG_SOURCE_URLS = {
   'kev:cisa-known-exploited-vulnerabilities':
     'https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json',
   'vendor_api:elastic-security-labs': 'https://www.elastic.co/security-labs/rss/feed.xml',
-  'rss:mandiant-research': 'https://cloud.google.com/security/blog/threat-intelligence/rss',
+  'rss:mandiant-research': 'https://cloudblog.withgoogle.com/topics/threat-intelligence/rss/',
   'rss:unit42': 'https://unit42.paloaltonetworks.com/feed/',
   'rss:talos': 'https://blog.talosintelligence.com/rss/',
   'rss:crowdstrike': 'https://www.crowdstrike.com/blog/feed/',
   'rss:cisa-alerts': 'https://www.cisa.gov/cybersecurity-advisories/all.xml',
   'text_indicator_list:maltrail-cobaltstrike':
-    'https://raw.githubusercontent.com/stamparm/maltrail/master/trails/static/malware/cobaltstrike.txt',
+    'https://raw.githubusercontent.com/stamparm/trails/main/malware/cobaltstrike.txt',
   'rss:aws-security': 'https://aws.amazon.com/blogs/security/feed/',
   'rss:aws-security-bulletins': 'https://aws.amazon.com/security/security-bulletins/rss/feed/',
   'rss:fortiguard-advisories': 'https://filestore.fortinet.com/fortiguard/rss/ir.xml',

@@ -56,6 +56,7 @@ describe('getStepIconType', () => {
     ['mail', 'email'],
     ['logoSlack', 'slack'],
     ['logoSlack', 'slack_api'],
+    ['logoSlack', 'slack2'],
     ['sparkles', 'inference'],
   ])('should return "%s" icon for the "%s" step type', (expectedIcon, nodeType) => {
     expect(getStepIconType(nodeType)).toBe(expectedIcon);

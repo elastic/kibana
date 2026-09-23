@@ -6,21 +6,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
 import type { useHistory } from 'react-router-dom';
-import { OutPortal } from 'react-reverse-portal';
-import { TestRunDetailsStatus } from './components/test_run_details_status';
 import type { RouteProps } from '../../routes';
-import { TestRunDate } from './components/test_run_date';
 import { TEST_RUN_DETAILS_ROUTE } from '../../../../../common/constants';
 import { TestRunDetails } from './test_run_details';
-import { MonitorDetailsLinkPortalNode } from '../monitor_add_edit/portals';
-import { MonitorDetailsLocation } from '../monitor_details/monitor_details_location';
 
 export const getTestRunDetailsRoute = (
-  history: ReturnType<typeof useHistory>,
-  syntheticsPath: string,
+  _history: ReturnType<typeof useHistory>,
+  _syntheticsPath: string,
   baseTitle: string
 ): RouteProps => {
   return {
@@ -31,19 +24,5 @@ export const getTestRunDetailsRoute = (
     path: TEST_RUN_DETAILS_ROUTE,
     component: TestRunDetails,
     dataTestSubj: 'syntheticsMonitorTestRunDetailsPage',
-    pageHeader: {
-      breadcrumbs: [
-        {
-          text: <OutPortal node={MonitorDetailsLinkPortalNode} />,
-        },
-      ],
-      pageTitle: (
-        <FormattedMessage
-          id="xpack.synthetics.testRunDetailsRoute.page.title"
-          defaultMessage="Test run details"
-        />
-      ),
-      rightSideItems: [<TestRunDate />, <TestRunDetailsStatus />, <MonitorDetailsLocation />],
-    },
   };
 };

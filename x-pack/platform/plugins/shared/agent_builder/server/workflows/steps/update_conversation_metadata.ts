@@ -11,10 +11,12 @@ import {
   updateConversationMetadataStepCommonDefinition,
   type UpdateConversationMetadataStepInput,
 } from '../../../common/workflows/steps/update_conversation_metadata';
+import { createConversationPublicClient } from '../../services/conversation/conversation_public_client';
 import type { ConversationStepDeps } from '../registry';
 
 export const updateConversationMetadataStepDefinition = ({
   getConversationClient,
+  getAgentRegistry,
   isExperimentalEnabled,
 }: ConversationStepDeps) =>
   createServerStepDefinition({
@@ -29,10 +31,14 @@ export const updateConversationMetadataStepDefinition = ({
             ),
           };
         }
-        const client = await getConversationClient(request);
+        const [client, agentRegistry] = await Promise.all([
+          getConversationClient(request),
+          getAgentRegistry(request),
+        ]);
+        const publicClient = createConversationPublicClient({ client, agentRegistry });
         const input = context.input as UpdateConversationMetadataStepInput;
 
-        const { conversation, changedFields } = await client.patchMetadata(
+        const { conversation, changedFields } = await publicClient.patchMetadata(
           input.conversation_id,
           input.updates
         );

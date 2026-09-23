@@ -29,9 +29,13 @@ jest.mock('@kbn/esql-server-utils', () => ({
   })),
 }));
 
-const { parseTimeFieldFromESQLQuery } = jest.requireMock('@kbn/esql-utils');
-const { getProjectRoutingFromEsqlQuery } = jest.requireMock('@kbn/esql-utils');
+const {
+  parseTimeFieldFromESQLQuery,
+  getIndexPatternFromESQLQuery,
+  getProjectRoutingFromEsqlQuery,
+} = jest.requireMock('@kbn/esql-utils');
 const { Parser } = jest.requireMock('@elastic/esql');
+const { EsqlService } = jest.requireMock('@kbn/esql-server-utils');
 
 function buildMocks() {
   const handler = jest.fn();
@@ -41,7 +45,6 @@ function buildMocks() {
     }),
   };
 
-  const featureFlags = { getBooleanValue: jest.fn().mockResolvedValue(false) };
   const esClient = {
     asCurrentUser: {
       fieldCaps: jest.fn().mockResolvedValue({ fields: { '@timestamp': {} } }),
@@ -50,7 +53,6 @@ function buildMocks() {
   };
   const core = {
     elasticsearch: { client: esClient },
-    featureFlags,
   };
   const requestHandlerContext = { core: Promise.resolve(core) };
   const response = {
@@ -122,6 +124,28 @@ describe('registerGetTimeFieldRoute', () => {
     expect(core.elasticsearch.client.asCurrentUser.fieldCaps).toHaveBeenCalledWith(
       expect.objectContaining({ project_routing: '_alias:linked' })
     );
+  });
+
+  it('returns @timestamp for a dataset source without using fieldCaps', async () => {
+    const { router, handler, requestHandlerContext, response, context } = buildMocks();
+    getIndexPatternFromESQLQuery.mockReturnValueOnce('my-dataset');
+    Parser.parse.mockReturnValueOnce({ root: { commands: [{ name: 'from', args: [] }] } });
+    EsqlService.mockImplementationOnce(() => ({
+      getViews: jest.fn().mockResolvedValue({ views: [] }),
+      getDatasets: jest.fn().mockResolvedValue({ datasets: [{ name: 'my-dataset' }] }),
+    }));
+
+    const core = await requestHandlerContext.core;
+    core.elasticsearch.client.asCurrentUser.esql.query.mockResolvedValueOnce({
+      columns: [{ name: '@timestamp' }],
+    });
+
+    registerGetTimeFieldRoute(router, context);
+
+    await handler(requestHandlerContext, { body: { query: 'FROM my-dataset' } }, response);
+
+    expect(response.ok).toHaveBeenCalledWith({ body: { timeField: '@timestamp' } });
+    expect(core.elasticsearch.client.asCurrentUser.fieldCaps).not.toHaveBeenCalled();
   });
 
   describe('nesting-depth guard', () => {

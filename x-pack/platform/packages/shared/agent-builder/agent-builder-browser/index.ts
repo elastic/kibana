@@ -7,6 +7,11 @@
 
 export { formatAgentBuilderErrorMessage } from './base/errors';
 export type {
+  AddConversationEventsParams,
+  AddConversationEventsResult,
+  ConversationsServiceStartContract,
+} from './conversations';
+export type {
   ToolServiceStartContract,
   ExecuteToolParams,
   ExecuteToolReturn,

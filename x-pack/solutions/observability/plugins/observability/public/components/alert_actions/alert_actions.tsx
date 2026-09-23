@@ -33,27 +33,49 @@ import { observabilityFeatureId } from '../..';
 
 function InvestigateAlertActionItem({
   alertId,
+  enabled,
   onActionExecuted,
 }: {
   alertId?: string;
+  enabled?: boolean;
   onActionExecuted: () => void;
 }) {
-  const { showInvestigateAction, handleInvestigate, isInvestigating, investigateActionLabel } =
-    useInvestigateAlert({
-      alertId,
-      onInvestigate: onActionExecuted,
-    });
+  const {
+    showInvestigateAction,
+    handleInvestigate,
+    isInvestigating,
+    investigateActionLabel,
+    viewInvestigationUrl,
+    viewInvestigationActionLabel,
+  } = useInvestigateAlert({
+    alertId,
+    enabled,
+    onInvestigate: onActionExecuted,
+  });
 
-  if (!showInvestigateAction) return null;
+  if (!showInvestigateAction && !viewInvestigationUrl) return null;
 
   return (
-    <EuiContextMenuItem
-      data-test-subj="investigateAlert"
-      disabled={isInvestigating}
-      onClick={handleInvestigate}
-    >
-      {investigateActionLabel}
-    </EuiContextMenuItem>
+    <>
+      {viewInvestigationUrl && (
+        <EuiContextMenuItem
+          data-test-subj="viewAlertInvestigation"
+          href={viewInvestigationUrl}
+          onClick={onActionExecuted}
+        >
+          {viewInvestigationActionLabel}
+        </EuiContextMenuItem>
+      )}
+      {showInvestigateAction && (
+        <EuiContextMenuItem
+          data-test-subj="investigateAlert"
+          disabled={isInvestigating}
+          onClick={handleInvestigate}
+        >
+          {investigateActionLabel}
+        </EuiContextMenuItem>
+      )}
+    </>
   );
 }
 
@@ -147,6 +169,7 @@ export function AlertActions(
     <InvestigateAlertActionItem
       key="investigateAlert"
       alertId={observabilityAlert.fields[ALERT_UUID]}
+      enabled={isPopoverOpen}
       onActionExecuted={closeActionsPopover}
     />,
 

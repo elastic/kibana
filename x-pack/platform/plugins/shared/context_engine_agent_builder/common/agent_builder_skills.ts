@@ -21,3 +21,6 @@ export const AI_INDEX_SOURCES_SKILL_ID = 'ai-index-sources' as const;
  * execution tools live, so a flow that only diagnoses an index must not ask for it.
  */
 export const AI_INDEX_AUTOMATIONS_SKILL_ID = 'ai-index-automations' as const;
+
+/** Reads Context Engine signals to diagnose failed or empty retrievals. */
+export const CONTEXT_ENGINE_SIGNALS_SKILL_ID = 'context-engine-signals' as const;

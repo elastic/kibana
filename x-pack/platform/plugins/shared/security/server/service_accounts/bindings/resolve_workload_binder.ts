@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { ServiceAccountWorkloadBinder } from '@kbn/core-security-server';
 
 import type { AuthenticatedUser } from '../../../common';
+import { getDetailedErrorMessage } from '../../errors';
 
 /** Elasticsearch's realm for its own service accounts. */
 const SERVICE_ACCOUNT_REALM_TYPE = '_service_account';
@@ -17,6 +19,30 @@ const SERVICE_ACCOUNT_REALM_TYPE = '_service_account';
  * is a kind that has a user behind it — for an API key that means a lookup of the key's creator.
  */
 export type ResolveUserProfileId = () => Promise<string | undefined>;
+
+/**
+ * Builds the lookup above so that it resolves `undefined` instead of rejecting. Attribution is
+ * worth an extra lookup, but never worth failing an operation the caller is otherwise entitled
+ * to perform, and the lookup reaches Elasticsearch on most of its paths.
+ */
+export const bestEffortUserProfileIdResolver =
+  (
+    getCurrentUserProfileId: (request: KibanaRequest) => Promise<string | null>,
+    request: KibanaRequest,
+    logger: Logger
+  ): ResolveUserProfileId =>
+  async () => {
+    try {
+      return (await getCurrentUserProfileId(request)) ?? undefined;
+    } catch (e) {
+      logger.debug(
+        `Could not resolve a user profile for the principal acting on a service account: ${getDetailedErrorMessage(
+          e
+        )}`
+      );
+      return undefined;
+    }
+  };
 
 /**
  * Records the most specific stable identifier for the principal that created the binding, so the

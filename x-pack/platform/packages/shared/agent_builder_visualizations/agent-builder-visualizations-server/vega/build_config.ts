@@ -14,12 +14,17 @@ import { buildServerESQLCallbacks } from '@kbn/esql-server-utils';
 import { createVegaGraph } from './graph';
 import { extractEsqlFromSpec } from './recover_esql';
 
-export interface BuildVegaConfigParams {
+interface BuildVegaConfigParams {
   nlQuery: string;
   index?: string;
   esql?: string;
   /** Existing serialized Vega spec to edit, if any. */
   existingSpec?: string;
+  /**
+   * Keep the ES|QL query recovered from `existingSpec` instead of regenerating
+   * one. The edit then only re-authors the spec around it.
+   */
+  preserveESQL?: boolean;
   /** Optional chart-type hint for the intended visual form (Vega authors free-form). */
   chartType?: SupportedChartType;
   modelProvider: ModelProvider;
@@ -28,7 +33,7 @@ export interface BuildVegaConfigParams {
   esClient: IScopedClusterClient;
 }
 
-export interface BuildVegaConfigResult {
+interface BuildVegaConfigResult {
   /** Serialized, render-ready Vega-Lite specification. */
   spec: string;
   /** Visualization / panel title from the authoring response schema. */
@@ -51,6 +56,7 @@ export const buildVegaConfig = async ({
   index,
   esql,
   existingSpec,
+  preserveESQL = false,
   chartType,
   modelProvider,
   logger,
@@ -88,6 +94,11 @@ export const buildVegaConfig = async ({
   if (existingEsql) {
     logger.debug('Recovered ES|QL from the existing Vega spec to seed this edit');
   }
+  if (preserveESQL && !existingEsql) {
+    throw new Error(
+      'Preserving the ES|QL query requires an existing Vega spec with a recoverable ES|QL query.'
+    );
+  }
 
   const graph = await createVegaGraph(modelProvider, logger, events, esClient);
 
@@ -97,7 +108,9 @@ export const buildVegaConfig = async ({
     existingSpec,
     existingEsql,
     chartType,
-    esqlQuery: providedEsql || '',
+    // Preserving ES|QL reuses the recovered query as the trusted query,
+    // so the graph skips regeneration and only re-authors the spec around it.
+    esqlQuery: providedEsql || (preserveESQL ? existingEsql : '') || '',
     currentAttempt: 0,
     actions: [],
     spec: null,

@@ -104,7 +104,7 @@ describe('GetRuleChangeHistoryEventRoute', () => {
       snapshot: { id: 'rule-1' },
     });
     const request = httpServerMock.createKibanaRequest({
-      params: { id: 'rule-1', eventId: 'event-1' },
+      params: { id: 'rule-1', event_id: 'event-1' },
     });
     const route = buildGetRoute(request as unknown as KibanaRequest, mocks);
 

@@ -9,10 +9,10 @@
 
 import type { Document } from 'yaml';
 import type { WorkflowYaml } from '@kbn/workflows';
+import type { YamlValidationResult } from '@kbn/workflows-yaml';
 import { collectTriggerConditionItems } from './collect_trigger_condition_items';
 import { validateTriggerConditionsForWorkflow } from '../../../../common/lib/validate_triggers';
 import { triggerSchemas } from '../../../trigger_schemas';
-import type { YamlValidationResult } from '../model/types';
 
 /**
  * Validates custom trigger conditions and returns editor-ready results with line/column.

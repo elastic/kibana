@@ -19,10 +19,11 @@ import {
   extractRawCredentialVars,
   getCredentialKeyFromVarName,
 } from '../../../../common/services/cloud_connectors';
+import { getEnabledInputsByPolicyTemplate } from '../../../../common/services/policy_template';
 import { type CloudConnectorFormProps } from '../types';
 
 import { updateInputVarsWithCredentials, isAwsCredentials } from '../utils';
-import { ORGANIZATION_ACCOUNT } from '../constants';
+import { AWS_PROVIDER, ORGANIZATION_ACCOUNT } from '../constants';
 
 import { CloudConnectorInputFields } from '../form/cloud_connector_input_fields';
 import { CloudConnectorNameField } from '../form/cloud_connector_name_field';
@@ -45,20 +46,11 @@ export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
 }) => {
   // The rendered template must cover every policy template the user enabled
   // in this policy, and only the inputs they actually turned on.
-  const enabledPolicyTemplates = useMemo(() => {
-    const byTemplate = new Map<string, string[]>();
-    for (const input of newPolicy?.inputs ?? []) {
-      if (!input.enabled || !input.policy_template || !input.type) {
-        continue;
-      }
-      const enabledInputs = byTemplate.get(input.policy_template) ?? [];
-      if (!enabledInputs.includes(input.type)) {
-        enabledInputs.push(input.type);
-      }
-      byTemplate.set(input.policy_template, enabledInputs);
-    }
-    return Array.from(byTemplate, ([name, enabledInputs]) => ({ name, enabledInputs }));
-  }, [newPolicy?.inputs]);
+  const inputs = newPolicy?.inputs;
+  const enabledPolicyTemplates = useMemo(
+    () => getEnabledInputsByPolicyTemplate({ inputs }),
+    [inputs]
+  );
 
   const {
     launchButtonProps,
@@ -68,6 +60,7 @@ export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
     templateAlreadyCurrent,
     iacConfirm,
   } = useCloudConnectorTemplate({
+    provider: AWS_PROVIDER,
     cloud,
     accountType,
     iacTemplateUrl,

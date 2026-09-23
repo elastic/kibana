@@ -6,6 +6,7 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
+import type { SandboxSession } from '@kbn/sandbox-plugin/server';
 import { materializeCortex } from './materialize';
 import type { CortexPageStore } from './page_store';
 
@@ -41,35 +42,27 @@ describe('materializeCortex', () => {
       pruneDuplicates: jest.fn().mockResolvedValue(0),
     };
 
-    const apiClient = {
+    const session = {
       mkdirs: jest.fn().mockResolvedValue([true]),
       writeFiles: jest.fn().mockResolvedValue([]),
-    };
+    } as unknown as SandboxSession;
 
-    await materializeCortex({
-      apiClient: apiClient as never,
-      conversationId: 'conv-1',
-      store,
-      logger: loggerMock.create(),
-    });
+    await materializeCortex({ session, store, logger: loggerMock.create() });
 
     expect(store.pruneDuplicates).toHaveBeenCalled();
-    expect(apiClient.mkdirs).toHaveBeenCalledWith(
-      'conv-1',
+    expect(session.mkdirs).toHaveBeenCalledWith(
       expect.arrayContaining(['/workspace/cortex', '/workspace/cortex/services'])
     );
     // Pages are written before the index, so a partial failure cannot leave an INDEX.md
     // advertising pages that were never written.
-    expect(apiClient.writeFiles).toHaveBeenNthCalledWith(
+    expect(session.writeFiles).toHaveBeenNthCalledWith(
       1,
-      'conv-1',
       expect.arrayContaining([
         expect.objectContaining({ path: '/workspace/cortex/services/checkout.md' }),
       ])
     );
-    expect(apiClient.writeFiles).toHaveBeenNthCalledWith(
+    expect(session.writeFiles).toHaveBeenNthCalledWith(
       2,
-      'conv-1',
       expect.arrayContaining([
         expect.objectContaining({ path: '/workspace/cortex/README.md' }),
         expect.objectContaining({ path: '/workspace/cortex/INDEX.md' }),
@@ -114,26 +107,21 @@ describe('materializeCortex', () => {
       pruneDuplicates: jest.fn().mockResolvedValue(0),
     } as never;
 
-    const apiClient = {
+    const session = {
       mkdirs: jest.fn().mockResolvedValue([true]),
       writeFiles: jest.fn().mockResolvedValue([]),
-    };
+    } as unknown as SandboxSession;
 
-    await materializeCortex({
-      apiClient: apiClient as never,
-      conversationId: 'conv-1',
-      store,
-      logger: loggerMock.create(),
-    });
+    await materializeCortex({ session, store, logger: loggerMock.create() });
 
     expect(store.get).not.toHaveBeenCalledWith('cortex_service_legacy');
 
-    const [, pageFiles] = apiClient.writeFiles.mock.calls[0];
+    const [pageFiles] = (session.writeFiles as jest.Mock).mock.calls[0];
     const paths = pageFiles.map((file: { path: string }) => file.path);
     expect(paths).toContain('/workspace/cortex/services/checkout.md');
     expect(paths).not.toContain('/workspace/cortex/services/legacy.md');
 
-    const [, indexFiles] = apiClient.writeFiles.mock.calls[1];
+    const [indexFiles] = (session.writeFiles as jest.Mock).mock.calls[1];
     const index = indexFiles.find((file: { path: string }) => file.path.endsWith('INDEX.md'));
     expect(index.content.toString('utf8')).not.toContain('Legacy');
   });

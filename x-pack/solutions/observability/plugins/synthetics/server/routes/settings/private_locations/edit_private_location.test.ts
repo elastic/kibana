@@ -6,7 +6,7 @@
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { editPrivateLocationRoute } from './edit_private_location';
+import { editPrivateLocationRoute, EditPrivateLocationSchema } from './edit_private_location';
 import { PrivateLocationRepository } from '../../../repositories/private_location_repository';
 import { updatePrivateLocationMonitors } from './helpers';
 import { getPrivateLocations } from '../../../synthetics_service/get_private_locations';
@@ -343,5 +343,17 @@ describe('editPrivateLocationRoute isAgentSharding', () => {
         ],
       })
     );
+  });
+});
+
+describe('EditPrivateLocationSchema', () => {
+  it('rejects unknown keys so a typo-only update cannot succeed as a no-op', () => {
+    expect(EditPrivateLocationSchema.safeParse({ isAgentShardng: true }).success).toBe(false);
+  });
+
+  it('accepts a known partial update', () => {
+    expect(EditPrivateLocationSchema.parse({ isAgentSharding: true })).toEqual({
+      isAgentSharding: true,
+    });
   });
 });

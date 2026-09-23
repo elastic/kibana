@@ -904,6 +904,13 @@ export interface ValidateWorkflowResponseDto {
   valid: boolean;
   diagnostics: WorkflowDiagnostic[];
   parsedWorkflow?: WorkflowYaml;
+  /**
+   * What the checks did not cover, each with the reason: a check either never
+   * ran or stopped at a budget part-way through. Reported separately from
+   * `diagnostics` because the absence of a diagnostic here means "not checked",
+   * not "nothing wrong".
+   */
+  notChecked?: string[];
 }
 
 export interface GetAvailableConnectorsResponse {

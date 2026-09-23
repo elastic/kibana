@@ -116,8 +116,14 @@ export const createChangePointDataSourceProfileProvider = (
           [SOURCE_COLUMN]: (props: DataGridCellValueElementProps) =>
             React.createElement(ChangePointSummaryCell, {
               ...props,
-              context,
+              context: {
+                typeColumnId: context.typeColumnId,
+                pvalueColumnId: context.pvalueColumnId,
+              },
               charts: services.charts,
+              data: services.data,
+              searchContext: params.searchContext,
+              isDataLoading: params.isDataLoading,
             }),
         };
 

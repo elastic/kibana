@@ -98,4 +98,5 @@ export interface EpisodeDataSource {
   resolveRules?: (params: ResolveSourceRulesParams) => Promise<RuleResponse[]>;
   actionExtensions?: Array<EpisodeActionExtension<any>>;
   createActions?: (deps: EpisodeActionsDeps) => EpisodeAction[];
+  getRuleDetailsHref?: (ruleId: string) => string | null;
 }

@@ -33,7 +33,7 @@ import type { MissingDashboard, RuleArtifactPayload } from '@kbn/alerting-v2-rul
 import { mapArtifacts } from '@kbn/alerting-v2-rule-form';
 import { useUpdateRule } from '../../../../hooks/use_update_rule';
 import { UserCapabilities } from '../../../../services/user_capabilities';
-import { useRule } from '../../rule_context';
+import type { RuleSummarySectionProps } from '../../../rule/types';
 import { ManageDashboardsPopover } from './manage_dashboards_popover';
 import { useDashboardArtifacts } from './use_dashboard_artifacts';
 
@@ -231,8 +231,7 @@ const DashboardsSubsectionHeader = ({ manageButton }: { manageButton: React.Reac
   </EuiFlexGroup>
 );
 
-export const DashboardArtifactsSubsection: React.FC = () => {
-  const rule = useRule();
+export const DashboardArtifactsSubsection: React.FC<RuleSummarySectionProps> = ({ rule }) => {
   const canWrite = useService(UserCapabilities).canWrite('rules');
   const http = useService(CoreStart('http'));
   const share = useService(PluginStart('share')) as SharePluginStart;
@@ -247,7 +246,7 @@ export const DashboardArtifactsSubsection: React.FC = () => {
   const [isManagePopoverOpen, setIsManagePopoverOpen] = useState(false);
   const confirmModalTitleId = useGeneratedHtmlId();
 
-  const canManage = Boolean(dashboard) && canWrite;
+  const canManage = Boolean(dashboard) && canWrite && Boolean(rule.id);
 
   const toggleManagePopover = useCallback(() => {
     setIsManagePopoverOpen((isOpen) => !isOpen);
@@ -266,7 +265,7 @@ export const DashboardArtifactsSubsection: React.FC = () => {
   }, []);
 
   const handleDeleteConfirm = useCallback(() => {
-    if (!artifactIdPendingDelete) {
+    if (!artifactIdPendingDelete || !rule.id) {
       return;
     }
 
@@ -290,6 +289,10 @@ export const DashboardArtifactsSubsection: React.FC = () => {
 
   const handleManageSave = useCallback(
     (artifacts: RuleArtifactPayload) => {
+      if (!rule.id) {
+        return;
+      }
+
       updateRule(
         {
           id: rule.id,
@@ -426,7 +429,7 @@ export const DashboardArtifactsSubsection: React.FC = () => {
                   href={entry.href}
                   artifactId={artifactIdByDashboardId.get(entry.id)}
                   isUpdating={isUpdating}
-                  canWrite={canWrite}
+                  canWrite={canManage}
                   onDelete={handleDeleteRequest}
                 />
                 <EuiSpacer size="s" />
@@ -438,7 +441,7 @@ export const DashboardArtifactsSubsection: React.FC = () => {
                   missingDashboard={missingDashboard}
                   artifactId={artifactIdByDashboardId.get(missingDashboard.id)}
                   isUpdating={isUpdating}
-                  canWrite={canWrite}
+                  canWrite={canManage}
                   onDelete={handleDeleteRequest}
                 />
                 <EuiSpacer size="s" />

@@ -293,6 +293,37 @@ describe('Metric Schema', () => {
       const validated = metricConfigSchema.parse(input);
       expect(validated).toMatchObject({ ...defaultValues, ...input });
     });
+
+    it('validates a tooltip secondary label placement', () => {
+      const input = {
+        ...baseMetricConfig,
+        metrics: [
+          {
+            type: 'primary',
+            operation: 'sum',
+            field: 'revenue',
+            empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
+          },
+          {
+            type: 'secondary',
+            operation: 'sum',
+            field: 'cost',
+            empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
+          },
+        ],
+        styling: {
+          secondary: {
+            label: { visible: true, placement: 'tooltip' },
+          },
+        },
+      } satisfies MetricInput;
+
+      const validated = metricConfigSchema.parse(input);
+      expect(validated.styling?.secondary?.label).toEqual({
+        visible: true,
+        placement: 'tooltip',
+      });
+    });
   });
 
   describe('breakdown configuration', () => {

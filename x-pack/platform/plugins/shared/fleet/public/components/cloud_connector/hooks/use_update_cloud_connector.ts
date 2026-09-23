@@ -10,11 +10,8 @@ import type { HttpStart, IHttpFetchError } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 
+import type { UpdateCloudConnectorRequest } from '../../../../common/types/rest_spec/cloud_connector';
 import { CLOUD_CONNECTOR_API_ROUTES } from '../../../constants';
-
-interface UpdateCloudConnectorRequest {
-  name?: string;
-}
 
 interface CloudConnector {
   id: string;
@@ -31,7 +28,11 @@ interface UpdateCloudConnectorResponse {
   item: CloudConnector;
 }
 
-const updateCloudConnector = async (
+/**
+ * Raw update request, exported for callers that must not toast (e.g. the silent optimistic
+ * `iac_key` write after a template render); `useUpdateCloudConnector` wraps it with toasts.
+ */
+export const updateCloudConnector = async (
   http: HttpStart,
   cloudConnectorId: string,
   data: UpdateCloudConnectorRequest

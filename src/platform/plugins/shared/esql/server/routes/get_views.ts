@@ -7,16 +7,44 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { schema } from '@kbn/config-schema';
 import type { IRouter, PluginInitializerContext } from '@kbn/core/server';
 import { VIEWS_ROUTE } from '@kbn/esql-types';
 import { EsqlService } from '@kbn/esql-server-utils';
 import { esqlRouteRequestCounter, getErrorStatusCode } from '../metrics';
 
+const getErrorBodyMessage = (error: unknown): string | undefined => {
+  if (typeof error !== 'object' || error === null || !('body' in error)) {
+    return;
+  }
+
+  const { body } = error as { body?: unknown };
+  if (typeof body !== 'object' || body === null || !('error' in body)) {
+    return;
+  }
+
+  const bodyError = (body as { error?: unknown }).error;
+  return typeof bodyError === 'string' ? bodyError : undefined;
+};
+
+const getManagementResponseStatusCode = (
+  error: unknown,
+  statusCode: number,
+  message: string
+): number => {
+  const errorDetails = `${message} ${getErrorBodyMessage(error) ?? ''}`.toLowerCase();
+  return statusCode === 400 && errorDetails.includes('no handler found') ? 501 : statusCode;
+};
+
 export const registerGetViewsRoute = (router: IRouter, { logger }: PluginInitializerContext) => {
   router.get(
     {
       path: VIEWS_ROUTE,
-      validate: {},
+      validate: {
+        query: schema.object({
+          strict: schema.boolean({ defaultValue: false }),
+        }),
+      },
       security: {
         authz: {
           enabled: false,
@@ -39,16 +67,24 @@ export const registerGetViewsRoute = (router: IRouter, { logger }: PluginInitial
           body: result,
         });
       } catch (error) {
+        const statusCode = getErrorStatusCode(error);
+        const message = error instanceof Error ? error.message : String(error);
+        const managementStatusCode = getManagementResponseStatusCode(error, statusCode, message);
         esqlRouteRequestCounter.add(1, {
           route: 'views',
           outcome: 'failure',
-          'http.response.status_code': getErrorStatusCode(error),
+          'http.response.status_code': request.query.strict ? managementStatusCode : statusCode,
         });
-        const message = error instanceof Error ? error.message : String(error);
         logger.get().error(`Failed to fetch ES|QL views: ${message}`, {
           tags: ['esql', 'views'],
           error: { stack_trace: error instanceof Error ? error.stack : undefined },
         });
+        if (request.query.strict) {
+          return response.customError({
+            statusCode: managementStatusCode,
+            body: { message },
+          });
+        }
         return response.ok({
           body: { views: [] },
         });

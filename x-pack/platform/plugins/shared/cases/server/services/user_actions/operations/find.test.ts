@@ -207,6 +207,97 @@ describe('UserActionsService: Finder', () => {
         );
       });
     });
+
+    describe('source filter', () => {
+      beforeEach(() => {
+        const userAction = createUserActionSO();
+        const soFindRes = createSOFindResponse([createUserActionFindSO(userAction)]);
+        mockFind(soFindRes);
+      });
+
+      it('applies source filter on source.type', async () => {
+        await finder.find({ caseId: '1', sources: ['agent'] });
+
+        expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith(
+          expect.objectContaining({
+            filter: expect.objectContaining({
+              type: 'function',
+              function: 'is',
+              arguments: expect.arrayContaining([
+                expect.objectContaining({
+                  value: 'cases-user-actions.attributes.source.type',
+                }),
+                expect.objectContaining({
+                  value: 'agent',
+                }),
+              ]),
+            }),
+          })
+        );
+      });
+
+      it('ORs multiple sources together on source.type', async () => {
+        await finder.find({ caseId: '1', sources: ['agent', 'user'] });
+
+        expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith(
+          expect.objectContaining({
+            filter: expect.objectContaining({
+              type: 'function',
+              function: 'or',
+              arguments: expect.arrayContaining([
+                expect.objectContaining({
+                  arguments: expect.arrayContaining([expect.objectContaining({ value: 'agent' })]),
+                }),
+                expect.objectContaining({
+                  arguments: expect.arrayContaining([expect.objectContaining({ value: 'user' })]),
+                }),
+              ]),
+            }),
+          })
+        );
+      });
+
+      it('matches user actions with no source.type when sources includes none', async () => {
+        await finder.find({ caseId: '1', sources: ['none'] });
+
+        expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith(
+          expect.objectContaining({
+            filter: expect.objectContaining({
+              type: 'function',
+              function: 'not',
+            }),
+          })
+        );
+      });
+
+      it('ORs typed sources with missing source.type when none is selected', async () => {
+        await finder.find({ caseId: '1', sources: ['agent', 'none'] });
+
+        expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith(
+          expect.objectContaining({
+            filter: expect.objectContaining({
+              type: 'function',
+              function: 'or',
+              arguments: expect.arrayContaining([
+                expect.objectContaining({
+                  arguments: expect.arrayContaining([expect.objectContaining({ value: 'agent' })]),
+                }),
+                expect.objectContaining({
+                  function: 'not',
+                }),
+              ]),
+            }),
+          })
+        );
+      });
+
+      it('does not apply source filter when sources is not provided', async () => {
+        await finder.find({ caseId: '1' });
+
+        const callFilter = unsecuredSavedObjectsClient.find.mock.calls[0][0].filter;
+        expect(callFilter).toBeUndefined();
+      });
+    });
   });
 
   describe('findAll', () => {

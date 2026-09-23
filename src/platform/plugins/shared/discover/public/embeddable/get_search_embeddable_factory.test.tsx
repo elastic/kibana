@@ -13,6 +13,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
+import { DiscoverTabType } from '@kbn/discover-session-constants';
 import { buildDataViewMock, deepMockedFields } from '@kbn/discover-utils/src/__mocks__';
 import type { PresentationContainer } from '@kbn/presentation-publishing';
 import type { PhaseEvent, PublishesUnifiedSearch } from '@kbn/presentation-publishing';
@@ -22,10 +23,12 @@ import { userEvent } from '@testing-library/user-event';
 
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { EmbeddableApiRegistration } from '@kbn/embeddable-plugin/public/react_embeddable_system/types';
+import { createProfileStateRegistry, METRICS_STATE_DEF } from '../../common/context_awareness';
 import { createDataViewDataSource } from '../../common/data_sources';
 import type { SearchEmbeddableState } from '../../common/embeddable/types';
 import { discoverServiceMock } from '../__mocks__/services';
 import { getSearchEmbeddableFactory } from './get_search_embeddable_factory';
+import { deserializeState } from './utils/serialization_utils';
 import type {
   SearchEmbeddableApi,
   SearchEmbeddablePanelApiState,
@@ -37,13 +40,20 @@ import {
   type ContextAwarenessToolkit,
 } from '../context_awareness';
 import { TEST_PROFILE_STATE_DEF } from '../context_awareness/__mocks__/profile_state';
-import { mockInitializeDrilldownsManager } from '@kbn/embeddable-plugin/public/mocks';
+import {
+  mockInitializeDrilldownsManager,
+  setStubKibanaServices,
+} from '@kbn/embeddable-plugin/public/mocks';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { initializeDrilldownsManager } from '@kbn/embeddable-plugin/public/drilldowns/drilldowns_manager';
 
-jest.mock('./utils/serialization_utils', () => ({}));
+jest.mock('./utils/serialization_utils', () => ({
+  deserializeState: jest.fn(),
+}));
 
 describe('saved search embeddable', () => {
+  setStubKibanaServices();
+
   const dataViewMock = buildDataViewMock({ name: 'the-data-view', fields: deepMockedFields });
 
   const getInitialRuntimeState = ({
@@ -73,11 +83,19 @@ describe('saved search embeddable', () => {
   };
 
   let runtimeState = getInitialRuntimeState();
+  const defaultProfileStateRegistry = discoverServiceMock.profileStateRegistry;
 
   beforeEach(() => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    require('./utils/serialization_utils').deserializeState = () => runtimeState;
+    jest.mocked(deserializeState).mockImplementation(async () => runtimeState);
     mockedEditableDashboardApi.setFocusedPanelId.mockClear();
+    mockedEditableDashboardApi.setViewMode.mockClear();
+    mockedEditableDashboardApi.isEditableByUser = true;
+    editableDashboardViewMode$.next('edit');
+    discoverServiceMock.capabilities.dashboard_v2 = { showWriteControls: true };
+  });
+
+  afterEach(() => {
+    discoverServiceMock.profileStateRegistry = defaultProfileStateRegistry;
   });
 
   const mockServices = {
@@ -137,6 +155,18 @@ describe('saved search embeddable', () => {
     return { search, resolveSearch: () => resolveSearch() };
   };
 
+  const createSearchErrorFnMock = (error: Error) => {
+    let rejectSearch = () => {};
+    const search = jest.fn(() => {
+      return new Observable((subscriber) => {
+        rejectSearch = () => {
+          subscriber.error(error);
+        };
+      });
+    });
+    return { search, rejectSearch: () => rejectSearch() };
+  };
+
   const finalizeApiMock = (
     api: EmbeddableApiRegistration<SearchEmbeddablePanelApiState, SearchEmbeddableApi>
   ) => ({
@@ -148,14 +178,17 @@ describe('saved search embeddable', () => {
     phase$: new BehaviorSubject<PhaseEvent | undefined>(undefined),
   });
 
+  const editableDashboardViewMode$ = new BehaviorSubject<'view' | 'edit'>('edit');
   const mockedEditableDashboardApi = {
     ...mockedDashboardApi,
     getAppContext: jest.fn().mockReturnValue({
       currentAppId: 'dashboard',
       getCurrentPath: jest.fn().mockReturnValue('/dashboard'),
     }),
+    isEditableByUser: true,
     setFocusedPanelId: jest.fn(),
-    viewMode$: new BehaviorSubject<'view' | 'edit'>('edit'),
+    setViewMode: jest.fn((viewMode: 'view' | 'edit') => editableDashboardViewMode$.next(viewMode)),
+    viewMode$: editableDashboardViewMode$,
   };
 
   const finalizeEditableApiMock = (
@@ -227,6 +260,64 @@ describe('saved search embeddable', () => {
 
       expect(discoverComponent.queryByTestId('dscFieldStatsEmbeddedContent')).toBeInTheDocument();
     });
+
+    it('should defer to the platform blocking panel when the query fails outside inline editing', async () => {
+      const searchError = new Error('Query failed');
+      const { search, rejectSearch } = createSearchErrorFnMock(searchError);
+      runtimeState = getInitialRuntimeState({ searchMock: search });
+      const { Component, api } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: mockInitializeDrilldownsManager,
+        initialState: { ref_id: 'id', overrides: {} },
+        finalizeApi: finalizeApiMock,
+        uuid,
+        parentApi: mockedDashboardApi,
+      });
+      await waitOneTick();
+      const discoverComponent = renderWithI18n(<Component />);
+
+      rejectSearch();
+      await waitOneTick();
+
+      expect(api.blockingError$.getValue()).toBe(searchError);
+      await waitFor(() => {
+        expect(discoverComponent.container).toBeEmptyDOMElement();
+      });
+    });
+
+    it('should keep a query failure non-blocking while inline editing so apply/discard stay reachable', async () => {
+      const searchError = new Error('Query failed');
+      const { search, rejectSearch } = createSearchErrorFnMock(searchError);
+      runtimeState = getInitialRuntimeState({
+        searchMock: search,
+        partialState: { savedObjectId: 'id' },
+      });
+
+      const { Component, api } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: mockInitializeDrilldownsManager,
+        initialState: { savedObjectId: 'id' },
+        finalizeApi: finalizeEditableApiMock,
+        uuid,
+        parentApi: mockedEditableDashboardApi,
+      });
+      await waitOneTick();
+      const discoverComponent = renderWithI18n(<Component />);
+
+      await act(async () => {
+        await api.onEdit?.();
+      });
+      rejectSearch();
+      await waitOneTick();
+
+      // there should be no blocking error in the inline editing mode
+      expect(api.blockingError$.getValue()).toBe(undefined);
+
+      await waitFor(() => {
+        expect(discoverComponent.getByTestId('embeddableError')).toBeInTheDocument();
+      });
+      expect(
+        discoverComponent.getByTestId('discoverEmbeddableInlineEditDiscardButton')
+      ).toBeInTheDocument();
+    });
   });
 
   describe('missing data view', () => {
@@ -286,6 +377,50 @@ describe('saved search embeddable', () => {
   });
 
   describe('search embeddable api', () => {
+    describe('applySerializedState', () => {
+      const initialTabTypeState: SearchEmbeddableRuntimeState['tabTypeState'] = {
+        type: DiscoverTabType.Metrics,
+        dimensions: ['initial.dimension'],
+        searchTerm: 'cpu',
+        counterAggregation: 'max',
+        gaugeAggregation: 'avg',
+        histogramPercentile: 'p99',
+      };
+
+      it.each([
+        {
+          type: DiscoverTabType.Metrics,
+          tabTypeState: { ...initialTabTypeState, dimensions: ['restored.dimension'] },
+        },
+        { type: DiscoverTabType.Default, tabTypeState: undefined },
+      ])('restores $type profile state in savedSearch$', async ({ tabTypeState }) => {
+        runtimeState = getInitialRuntimeState({
+          partialState: { tabTypeState: initialTabTypeState },
+        });
+
+        const { api } = await factory.buildEmbeddable({
+          initializeDrilldownsManager: mockInitializeDrilldownsManager,
+          initialState: byValueInitialState,
+          finalizeApi: (apiRegistration) => ({
+            ...finalizeApiMock(apiRegistration),
+            applySerializedState: apiRegistration.applySerializedState,
+          }),
+          uuid,
+          parentApi: mockedDashboardApi,
+        });
+        await waitOneTick();
+
+        expect(api.savedSearch$.getValue().tabTypeState).toEqual(initialTabTypeState);
+
+        runtimeState = getInitialRuntimeState({ partialState: { tabTypeState } });
+        await act(async () => {
+          await api.applySerializedState(byValueInitialState);
+        });
+
+        expect(api.savedSearch$.getValue().tabTypeState).toEqual(tabTypeState);
+      });
+    });
+
     it('should not fetch data if only a new input title is set', async () => {
       const { search, resolveSearch } = createSearchFnMock(1);
       runtimeState = getInitialRuntimeState({
@@ -486,6 +621,37 @@ describe('saved search embeddable', () => {
   });
 
   describe('deleted tab', () => {
+    const renderDeletedTabPrompt = async ({
+      viewMode,
+      isEditableByUser,
+    }: {
+      viewMode: 'view' | 'edit';
+      isEditableByUser: boolean;
+    }) => {
+      const { search } = createSearchFnMock(0);
+      runtimeState = getInitialRuntimeState({
+        searchMock: search,
+        partialState: {
+          savedObjectId: 'id',
+          selectedTabId: 'removed-tab',
+          tabs: [{ id: 'tab-1' }, { id: 'tab-2' }] as SearchEmbeddableRuntimeState['tabs'],
+        },
+      });
+      mockedEditableDashboardApi.isEditableByUser = isEditableByUser;
+      editableDashboardViewMode$.next(viewMode);
+
+      const { Component } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: mockInitializeDrilldownsManager,
+        initialState: { savedObjectId: 'id' },
+        finalizeApi: finalizeEditableApiMock,
+        uuid,
+        parentApi: mockedEditableDashboardApi,
+      });
+
+      await waitOneTick();
+      return renderWithI18n(<Component />);
+    };
+
     it('should render the deleted tab prompt when the selected tab no longer exists', async () => {
       const { search } = createSearchFnMock(0);
 
@@ -512,6 +678,45 @@ describe('saved search embeddable', () => {
       await waitFor(() => {
         expect(queryByTestId('discoverEmbeddableDeletedTabCallout')).toBeInTheDocument();
         expect(queryByTestId('discoverDocTable')).not.toBeInTheDocument();
+      });
+    });
+
+    it('should show editable guidance in dashboard view mode', async () => {
+      const component = await renderDeletedTabPrompt({ viewMode: 'view', isEditableByUser: true });
+
+      await waitFor(() => {
+        expect(component.getByTestId('discoverEmbeddableDeletedTabCallout')).toHaveTextContent(
+          'Edit the panel to fix it.'
+        );
+        expect(
+          component.getByTestId('discoverEmbeddableDeletedTabEditPanelLink')
+        ).toBeInTheDocument();
+        expect(component.queryByTestId('discoverDocTable')).not.toBeInTheDocument();
+      });
+    });
+
+    it('should show inline-edit guidance in dashboard edit mode', async () => {
+      const component = await renderDeletedTabPrompt({ viewMode: 'edit', isEditableByUser: true });
+
+      await waitFor(() => {
+        expect(component.getByTestId('discoverEmbeddableDeletedTabCallout')).toHaveTextContent(
+          'Edit this panel to choose a different tab'
+        );
+        expect(component.queryByTestId('discoverDocTable')).not.toBeInTheDocument();
+      });
+    });
+
+    it('should show read-only guidance in dashboard view mode', async () => {
+      const component = await renderDeletedTabPrompt({ viewMode: 'view', isEditableByUser: false });
+
+      await waitFor(() => {
+        expect(component.getByTestId('discoverEmbeddableDeletedTabCallout')).toHaveTextContent(
+          "Contact one of the dashboard's authors to fix it."
+        );
+        expect(
+          component.queryByTestId('discoverEmbeddableDeletedTabEditPanelLink')
+        ).not.toBeInTheDocument();
+        expect(component.queryByTestId('discoverDocTable')).not.toBeInTheDocument();
       });
     });
   });
@@ -686,6 +891,59 @@ describe('saved search embeddable', () => {
         ...TEST_PROFILE_STATE_DEF.defaultState,
         uiValue: 'success',
       });
+    });
+
+    it('should initialize profile state from the runtime tab state', async () => {
+      let capturedToolkit: ContextAwarenessToolkit | undefined;
+      const originalCreateScopedProfilesManager =
+        discoverServiceMock.profilesManager.createScopedProfilesManager.bind(
+          discoverServiceMock.profilesManager
+        );
+
+      discoverServiceMock.profileStateRegistry = createProfileStateRegistry();
+
+      jest
+        .spyOn(discoverServiceMock.profilesManager, 'createScopedProfilesManager')
+        .mockImplementationOnce((args) => {
+          capturedToolkit = args.toolkit;
+          return originalCreateScopedProfilesManager(args);
+        });
+
+      runtimeState = getInitialRuntimeState({
+        partialState: {
+          tabTypeState: {
+            type: DiscoverTabType.Metrics,
+            dimensions: ['host.name'],
+            searchTerm: 'cpu',
+            counterAggregation: 'max',
+            gaugeAggregation: 'avg',
+            histogramPercentile: 'p99',
+          },
+        },
+      });
+
+      const { api } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: mockInitializeDrilldownsManager,
+        initialState: { ref_id: 'id', overrides: {} },
+        finalizeApi: finalizeApiMock,
+        uuid,
+        parentApi: mockedDashboardApi,
+      });
+      await waitOneTick();
+
+      if (!capturedToolkit) {
+        throw new Error('Expected search embeddable to create a scoped profiles manager.');
+      }
+
+      expect(capturedToolkit.getStateAdapter(METRICS_STATE_DEF).getState()).toEqual({
+        ...METRICS_STATE_DEF.defaultState,
+        dimensions: ['host.name'],
+        searchTerm: 'cpu',
+        counterAggregation: 'max',
+        gaugeAggregation: 'avg',
+        histogramPercentile: 'p99',
+      });
+      expect(api.savedSearch$.getValue().tabTypeState).toEqual(runtimeState.tabTypeState);
     });
 
     it('should not expose addFilter through the toolkit when filters are disabled', async () => {

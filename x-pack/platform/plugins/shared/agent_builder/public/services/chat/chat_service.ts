@@ -13,8 +13,13 @@ import type { ChatEvent } from '@kbn/agent-builder-common';
 import { type PromptResponse } from '@kbn/agent-builder-common/agents';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
-import { publicApiPath, internalApiPath } from '../../../common/constants';
-import type { ChatRequestBodyPayload } from '../../../common/http_api/chat';
+import { chatApiPath, internalApiPath } from '../../../common/constants';
+import type {
+  AbortExecutionResponse,
+  ChatRequestBodyPayload,
+  ChatTriggerMode,
+} from '../../../common/http_api/chat';
+import type { ConversationWithPermissions } from '../../../common/http_api/conversations';
 import { unwrapAgentBuilderErrors } from '../utils/errors';
 import type { EventsService } from '../events';
 import { propagateEvents } from './propagate_events';
@@ -84,6 +89,31 @@ export class ChatService {
     });
   }
 
+  /**
+   * Append a user message to an existing conversation without running the agent.
+   */
+  sendUserMessage({
+    conversationId,
+    input,
+    attachments,
+    triggerMode,
+  }: {
+    conversationId: string;
+    input: string;
+    attachments?: AttachmentInput[];
+    triggerMode: ChatTriggerMode;
+  }): Promise<ConversationWithPermissions> {
+    const payload: ChatRequestBodyPayload = {
+      trigger_mode: triggerMode,
+      conversation_id: conversationId,
+      input,
+      attachments,
+    };
+    return this.http.post<ConversationWithPermissions>(`${chatApiPath}/converse`, {
+      body: JSON.stringify(payload),
+    });
+  }
+
   followExecution(executionId: string, signal?: AbortSignal): Observable<ChatEvent> {
     return defer(() => {
       return this.http.get(`${internalApiPath}/executions/${executionId}/follow`, {
@@ -98,13 +128,15 @@ export class ChatService {
     );
   }
 
-  async abort(executionId: string): Promise<void> {
-    await this.http.post(`${internalApiPath}/executions/${executionId}/abort`);
+  abort(executionId: string): Promise<AbortExecutionResponse> {
+    return this.http.post<AbortExecutionResponse>(
+      `${internalApiPath}/executions/${executionId}/abort`
+    );
   }
 
   private converse(signal: AbortSignal | undefined, payload: ConversePayload) {
     return defer(() => {
-      return this.http.post(`${publicApiPath}/converse/async`, {
+      return this.http.post(`${chatApiPath}/converse/async`, {
         signal,
         asResponse: true,
         rawResponse: true,

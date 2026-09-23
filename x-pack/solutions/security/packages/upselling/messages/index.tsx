@@ -86,3 +86,12 @@ export const SIEM_MIGRATION_MANAGER_LICENSE_BTN = i18n.translate(
     defaultMessage: 'Manage license',
   }
 );
+
+export const ENDPOINT_CUSTOM_YARA_SIGNATURES = (requiredProduct: string) =>
+  i18n.translate('securitySolutionPackages.endpointCustomYaraSignatures.upsell', {
+    defaultMessage:
+      'To apply custom YARA signatures, you must add {requiredProduct} to your project.',
+    values: {
+      requiredProduct,
+    },
+  });

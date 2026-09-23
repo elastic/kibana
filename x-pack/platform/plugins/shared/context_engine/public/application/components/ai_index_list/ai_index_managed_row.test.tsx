@@ -25,6 +25,7 @@ const buildManagedAiIndex = (overrides: Partial<AiIndexHttpItem> = {}): AiIndexH
   dest: { type: 'index', value: 'ai-index-idx-sml-data' },
   automations: [],
   sources: [],
+  traces: [],
   date_created: '2026-07-17T00:00:00.000Z',
   date_modified: '2026-07-17T00:00:00.000Z',
   ...overrides,

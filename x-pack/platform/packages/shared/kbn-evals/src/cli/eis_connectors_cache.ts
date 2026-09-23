@@ -9,7 +9,7 @@
  * TTL-based file cache for EIS (Elastic Inference Service) connector definitions.
  *
  * Stores the connector map at ~/.elastic/eis-connectors-cache.json as plain JSON
- * so that `evals start` can restore KIBANA_TESTING_AI_CONNECTORS without
+ * so that `evals start` can restore KIBANA_TESTING_INFERENCE_ENDPOINTS without
  * requiring a fresh `evals init` every shell session.
  *
  * The payload is deterministic and contains no secrets (secrets: {} is always

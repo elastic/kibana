@@ -408,6 +408,7 @@ export interface DocLinks {
     readonly queryESQLApproximateResults: string;
     readonly queryESQLMultiValueControls: string;
     readonly queryESQLMvIntersects: string;
+    readonly queryESQLViews: string;
   };
   readonly date: {
     readonly dateMath: string;

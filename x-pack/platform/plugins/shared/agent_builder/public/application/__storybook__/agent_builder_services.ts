@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EMPTY } from 'rxjs';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import {
   AttachmentType,
@@ -102,7 +103,7 @@ const defaultServices: AgentBuilderInternalService = {
   } as never,
   pluginsService: {} as never,
   oauthClientsService: {} as never,
-  startDependencies: {} as never,
+  startDependencies: { data: { search: { search: () => EMPTY } } } as never,
   accessChecker: {} as never,
   eventsService: { track: noOp } as never,
   isEarsEnabled: false,

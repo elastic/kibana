@@ -1,0 +1,23 @@
+{
+  "type": "plugin",
+  "id": "@kbn/esql-views-plugin",
+  "owner": [
+    "@elastic/kibana-management"
+  ],
+  "group": "platform",
+  "visibility": "private",
+  "description": "Manage ES|QL views in Stack Management",
+  "plugin": {
+    "id": "esqlViews",
+    "browser": true,
+    "server": true,
+    "configPath": [
+      "xpack",
+      "esqlViews"
+    ],
+    "requiredPlugins": [
+      "features",
+      "management"
+    ]
+  }
+}

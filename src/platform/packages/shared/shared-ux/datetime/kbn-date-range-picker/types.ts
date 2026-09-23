@@ -92,7 +92,8 @@ export interface TimeRangeTransformOptions {
    */
   roundRelativeTime?: boolean;
   /**
-   * Sub-minute precision applied when formatting absolute timestamps.
+   * Sub-minute precision applied when formatting absolute timestamps for display.
+   * Never affects the resolved range bounds.
    * @default 's'
    */
   timePrecision?: TimePrecision;
@@ -159,6 +160,9 @@ export interface DateRangePickerSettings {
    *
    * When set, a toggle is shown in the Settings panel. When omitted the
    * toggle is hidden and seconds are shown by default.
+   *
+   * Display only: the resolved range bounds always keep full millisecond
+   * precision, so selecting a day in the calendar still ends at `23:59:59.999`.
    */
   timePrecision?: TimePrecision;
   /**

@@ -18,6 +18,11 @@ export interface EpisodeActionMenuItemContext extends EpisodeActionContext {
   closeMenu?: () => void;
 }
 
+export interface EpisodeActionInlineControlContext extends EpisodeActionContext {
+  /** Disables the control, for instance while the hosting surface is still loading. */
+  isDisabled?: boolean;
+}
+
 export interface EpisodeAction {
   id: string;
   order: number;
@@ -32,6 +37,13 @@ export interface EpisodeAction {
    * the data table's bulk menu — fall back to `execute`.
    */
   renderMenuItem?: (ctx: EpisodeActionMenuItemContext) => ReactNode;
+  /**
+   * Optional renderer for surfaces that host the action as a standalone control
+   * rather than a menu entry, such as an info block in the details flyout header.
+   * The action owns both the anchor and the editing surface, so it can apply the
+   * change in place instead of routing through the modal `execute` opens.
+   */
+  renderInlineControl?: (ctx: EpisodeActionInlineControlContext) => ReactNode;
   showWhenDisabled?: (ctx: EpisodeActionContext) => boolean;
   disabledTooltip?: string;
 }

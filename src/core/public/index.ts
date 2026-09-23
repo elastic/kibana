@@ -227,8 +227,6 @@ export type {
   CoreAuthenticationService,
   CoreServiceAccountsService,
   ServiceAccount,
-  ServiceAccountAssumableBy,
-  ServiceAccountRoleAssignments,
   CreateServiceAccountParams,
   CoreSecurityDelegateContract,
 } from '@kbn/core-security-browser';

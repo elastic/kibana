@@ -9,7 +9,6 @@
 
 import React, { useMemo } from 'react';
 import type { FC } from 'react';
-import useObservable from 'react-use/lib/useObservable';
 import { EuiIconTip, EuiLoadingChart, mathWithUnits, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
@@ -18,15 +17,18 @@ import {
   getEntityKey,
   isChangePointTableRow,
 } from '@kbn/change-point-chart-viewer';
-import type { UnifiedChangePointGridProps } from '@kbn/change-point-chart-viewer';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
+import type { CellRenderersSearchContext } from '../../../types';
 import { ChangePointSummaryChart } from './change_point_summary_chart';
-import type { ChangePointChartSectionProps$ } from './change_point_context';
-import { SUMMARY_SERIES_STATUS, useChangePointSummarySeries } from './change_point_summary_series';
+import {
+  SUMMARY_SERIES_STATUS,
+  useChangePointSummarySeries,
+  type ChangePointSummaryFetchParams,
+} from './change_point_summary_series';
 
 export interface ChangePointSummaryCellContext {
-  chartSectionProps$: ChangePointChartSectionProps$;
   typeColumnId: string;
   pvalueColumnId: string;
 }
@@ -34,6 +36,9 @@ export interface ChangePointSummaryCellContext {
 interface ChangePointSummaryCellProps extends DataGridCellValueElementProps {
   context: ChangePointSummaryCellContext;
   charts: ChartsPluginStart;
+  data: DataPublicPluginStart;
+  searchContext?: CellRenderersSearchContext;
+  isDataLoading?: boolean;
 }
 
 const EMPTY_CELL_VALUE = '-';
@@ -51,8 +56,8 @@ const shouldRenderChangePointChart = (
 interface ChangePointSummaryCellInnerProps {
   row: DataGridCellValueElementProps['row'];
   charts: ChartsPluginStart;
-  fetchParams: UnifiedChangePointGridProps['fetchParams'];
-  data: UnifiedChangePointGridProps['services']['data'];
+  fetchParams: ChangePointSummaryFetchParams;
+  data: DataPublicPluginStart;
 }
 
 const seriesLoadErrorMessage = i18n.translate(
@@ -179,8 +184,12 @@ const ChangePointSummaryCellInner: FC<ChangePointSummaryCellInnerProps> = ({
  */
 export const ChangePointSummaryCell: FC<ChangePointSummaryCellProps> = ({
   row,
+  dataView,
   context,
   charts,
+  data,
+  searchContext,
+  isDataLoading,
 }) => {
   const { euiTheme } = useEuiTheme();
   const fallbackHeight = useMemo(
@@ -188,12 +197,16 @@ export const ChangePointSummaryCell: FC<ChangePointSummaryCellProps> = ({
     [euiTheme.size.l]
   );
 
-  const chartSectionProps = useObservable(
-    context.chartSectionProps$,
-    context.chartSectionProps$.getValue()
-  );
+  const fetchParams = useMemo((): ChangePointSummaryFetchParams | undefined => {
+    if (!searchContext?.table?.columns.length || !searchContext.query) {
+      return undefined;
+    }
+    return {
+      ...searchContext,
+      dataView,
+    };
+  }, [dataView, searchContext]);
 
-  const fetchParams = chartSectionProps?.fetchParams;
   const columnIds = useMemo(
     () =>
       fetchParams?.table?.columns.length
@@ -202,8 +215,10 @@ export const ChangePointSummaryCell: FC<ChangePointSummaryCellProps> = ({
     [fetchParams?.table]
   );
   let content: React.ReactNode;
-  if (!fetchParams || !columnIds) {
+  if (isDataLoading) {
     content = <EuiLoadingChart size="m" />;
+  } else if (!fetchParams || !columnIds) {
+    content = <ChangePointSummaryErrorIcon message={seriesLoadErrorMessage} />;
   } else if (
     !shouldRenderChangePointChart(
       row.flattened,
@@ -213,15 +228,13 @@ export const ChangePointSummaryCell: FC<ChangePointSummaryCellProps> = ({
     )
   ) {
     content = <ChangePointSummaryEmptyValue />;
-  } else if (!chartSectionProps?.services.data) {
-    content = <ChangePointSummaryErrorIcon message={seriesLoadErrorMessage} />;
   } else {
     content = (
       <ChangePointSummaryCellInner
         row={row}
         charts={charts}
         fetchParams={fetchParams}
-        data={chartSectionProps.services.data}
+        data={data}
       />
     );
   }

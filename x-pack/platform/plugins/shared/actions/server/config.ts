@@ -6,7 +6,7 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import { offeringBasedSchema, schema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/core/server';
 import { customHostSettingsSchema } from '@kbn/actions-utils';
 import {
@@ -61,6 +61,15 @@ const relaySSLConfigSchema = schema.object(
   },
   { validate: tlsCertRequiresKeyValidator('relay.ssl') }
 );
+
+function relayUiamRequiresMtlsValidator(rawConfig: {
+  ssl?: { certificate?: string; key?: string };
+  uiam?: { enabled?: boolean };
+}): string | undefined {
+  if (rawConfig.uiam?.enabled && !(rawConfig.ssl?.certificate && rawConfig.ssl?.key)) {
+    return 'must specify [relay.ssl.certificate] and [relay.ssl.key] when [relay.uiam.enabled] is set';
+  }
+}
 
 const MIN_QUEUED_MAX = 1;
 export const DEFAULT_QUEUED_MAX = 1000000;
@@ -153,15 +162,25 @@ export const configSchema = schema.object({
   responseTimeout: schema.duration({ defaultValue: '60s' }),
   customHostSettings: schema.maybe(schema.arrayOf(customHostSettingsSchema)),
   relay: schema.maybe(
-    schema.object({
-      url: schema.conditional(
-        schema.contextRef('dev'),
-        true,
-        schema.uri({ scheme: ['https', 'http'] }),
-        schema.uri({ scheme: ['https'] })
-      ),
-      ssl: schema.maybe(relaySSLConfigSchema),
-    })
+    schema.object(
+      {
+        url: schema.conditional(
+          schema.contextRef('dev'),
+          true,
+          schema.uri({ scheme: ['https', 'http'] }),
+          schema.uri({ scheme: ['https'] })
+        ),
+        ssl: schema.maybe(relaySSLConfigSchema),
+        // Serverless only: authenticate Relay requests with a per-request ephemeral UIAM token for
+        // Kibana's own identity, on top of mTLS. Requires `xpack.security.uiam` to be configured.
+        uiam: schema.maybe(
+          offeringBasedSchema({
+            serverless: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
+          })
+        ),
+      },
+      { validate: relayUiamRequiresMtlsValidator }
+    )
   ),
   microsoftGraphApiUrl: schema.string({ defaultValue: DEFAULT_MICROSOFT_GRAPH_API_URL }),
   microsoftGraphApiScope: schema.string({ defaultValue: DEFAULT_MICROSOFT_GRAPH_API_SCOPE }),

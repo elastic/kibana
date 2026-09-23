@@ -20,6 +20,8 @@ import { i18n } from '@kbn/i18n';
 
 import { sendGetAgents, useLink, useStartServices } from '../../hooks';
 import { AGENTS_PREFIX } from '../../constants';
+import { AGENT_TYPE_OPAMP } from '../../../common/constants';
+
 interface Props {
   policyId?: string;
   troubleshootLink: string;
@@ -128,7 +130,10 @@ export const ConfirmAgentEnrollment: React.FunctionComponent<Props> = ({
 
   const onButtonClick = () => {
     if (onClickViewAgents) onClickViewAgents();
-    const href = getHref('agent_list');
+    const href = getHref(
+      'agent_list',
+      isCollector ? { kuery: `${AGENTS_PREFIX}.type:${AGENT_TYPE_OPAMP}` } : {}
+    );
     application.navigateToUrl(href);
   };
 

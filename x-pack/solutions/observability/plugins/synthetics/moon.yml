@@ -74,6 +74,7 @@ dependsOn:
   - '@kbn/shared-ux-router'
   - '@kbn/alerts-as-data-utils'
   - '@kbn/exploratory-view-plugin'
+  - '@kbn/event-annotation-common'
   - '@kbn/observability-shared-plugin'
   - '@kbn/observability-utils-common'
   - '@kbn/core-http-server'
@@ -128,6 +129,7 @@ dependsOn:
   - '@kbn/content-management-utils'
   - '@kbn/presentation-publishing-schemas'
   - '@kbn/zod'
+  - '@kbn/router-to-openapispec'
   - '@kbn/maintenance-windows-plugin'
   - '@kbn/observability-agent-builder-plugin'
   - '@kbn/agent-builder-browser'
@@ -141,7 +143,8 @@ dependsOn:
   - '@kbn/cps-server-utils'
   - '@kbn/observability-utils-server'
   - '@kbn/ui-callout'
-  - '@kbn/securitysolution-io-ts-utils'
+  - '@kbn/app-header'
+  - '@kbn/app-menu'
 tags:
   - plugin
   - prod

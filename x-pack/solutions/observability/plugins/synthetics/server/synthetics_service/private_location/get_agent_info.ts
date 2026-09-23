@@ -37,9 +37,9 @@ interface AgentLocalMetadata {
  * agents, and dropping the overflow would silently exclude them as shard targets
  * and from health/capacity. Bounded on Fleet's `total` with a hard page cap so a
  * misbehaving paginator can't spin forever; stays within ES's default 10k
- * `from + size` window. `showInactive: false` lets Fleet drop long-unenrolled
- * agents, but its ~6-min inactivity threshold is far looser than our staleness
- * window, so health detection stays the caller's responsibility.
+ * `from + size` window. `includeStatusRuntimeField: false` skips Fleet's
+ * status runtime field and inactivity-timeout SO scan. Unenrolled agents
+ * stay excluded via stored `active`. Health is last_checkin.
  */
 export const getAgentInfo = async (
   server: SyntheticsServerSetup,
@@ -62,6 +62,7 @@ export const getAgentInfo = async (
         perPage,
         page,
         kuery: `policy_id:"${agentPolicyId}"`,
+        includeStatusRuntimeField: false,
       });
 
     if (agents.length === 0) {

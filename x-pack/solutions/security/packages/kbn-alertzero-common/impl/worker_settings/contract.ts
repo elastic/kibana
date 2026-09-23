@@ -7,6 +7,7 @@
 
 import { isEqual } from 'lodash';
 import { z } from '@kbn/zod/v4';
+import { WATCH_AUTONOMY_LEVELS } from '../../constants';
 import type { WatchAutonomyLevel, WorkerSettingsWrite } from '../schemas';
 import { WorkerScheduleInterval, WorkerSettings } from '../schemas';
 import type { WorkerSettingsDeclaration } from './types';
@@ -38,6 +39,34 @@ export const getDefaultAutonomyLevel = (
   declaration.allowedAutonomyLevels.includes('manual')
     ? 'manual'
     : declaration.allowedAutonomyLevels[0];
+
+const isWatchAutonomyLevel = (value: unknown): value is WatchAutonomyLevel =>
+  typeof value === 'string' && (WATCH_AUTONOMY_LEVELS as readonly string[]).includes(value);
+
+/**
+ * Reads a stored autonomy level down to the closest level the Worker still offers, so narrowing a
+ * declaration does not strand documents written under the wider set. Never projects upwards: with
+ * nothing at or below the stored level the value is returned as-is for validation to reject.
+ */
+export const projectStoredAutonomyLevel = (
+  declaration: WorkerSettingsDeclaration,
+  stored: unknown
+): unknown => {
+  if (!isWatchAutonomyLevel(stored) || declaration.allowedAutonomyLevels.includes(stored)) {
+    return stored;
+  }
+  const storedIndex = WATCH_AUTONOMY_LEVELS.indexOf(stored);
+  const atOrBelow = declaration.allowedAutonomyLevels.filter(
+    (level) => WATCH_AUTONOMY_LEVELS.indexOf(level) <= storedIndex
+  );
+  if (atOrBelow.length === 0) {
+    return stored;
+  }
+  // Declared order is not guaranteed, so rank by position on the shared scale.
+  return atOrBelow.reduce((highest, level) =>
+    WATCH_AUTONOMY_LEVELS.indexOf(level) > WATCH_AUTONOMY_LEVELS.indexOf(highest) ? level : highest
+  );
+};
 
 export const buildDefaultWorkerSettings = (
   declaration: WorkerSettingsDeclaration

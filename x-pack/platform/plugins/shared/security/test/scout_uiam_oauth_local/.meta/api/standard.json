@@ -1,0 +1,92 @@
+{
+  "sha1": "6e32d86f815b08d9fd97d3d5afe617b6f03d69e6",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "d24bb69b5ed3341-d10b4d0b6fe7218",
+      "title": "[NON-MKI] Inbound UIAM ephemeral token client authentication preserves the gateway secret for primary Elasticsearch authentication",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/tests/uiam_client_authentication.spec.ts",
+        "line": 15,
+        "column": 17
+      }
+    },
+    {
+      "id": "d24bb69b5ed3341-38695e0b5278f2e",
+      "title": "[NON-MKI] Inbound UIAM ephemeral token client authentication preserves the gateway secret for secondary Elasticsearch authentication",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/tests/uiam_client_authentication.spec.ts",
+        "line": 33,
+        "column": 21
+      }
+    },
+    {
+      "id": "d24bb69b5ed3341-a44cc055349b103",
+      "title": "[NON-MKI] Inbound UIAM ephemeral token client authentication preserves the gateway secret for direct UIAM calls",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/tests/uiam_client_authentication.spec.ts",
+        "line": 47,
+        "column": 12
+      }
+    },
+    {
+      "id": "d24bb69b5ed3341-ace88c6cac6439c",
+      "title": "[NON-MKI] Inbound UIAM ephemeral token client authentication preserves the gateway secret when granting an Elasticsearch API key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/tests/uiam_client_authentication.spec.ts",
+        "line": 61,
+        "column": 20
+      }
+    },
+    {
+      "id": "d24bb69b5ed3341-5d60d49cb71c19c",
+      "title": "[NON-MKI] Inbound UIAM ephemeral token client authentication does not replace missing client authentication with the Kibana secret",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/tests/uiam_client_authentication.spec.ts",
+        "line": 97,
+        "column": 66
+      }
+    },
+    {
+      "id": "d24bb69b5ed3341-87f4ff94804c5a7",
+      "title": "[NON-MKI] Inbound UIAM ephemeral token client authentication does not replace invalid client authentication with the Kibana secret",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/tests/uiam_client_authentication.spec.ts",
+        "line": 97,
+        "column": 66
+      }
+    }
+  ]
+}

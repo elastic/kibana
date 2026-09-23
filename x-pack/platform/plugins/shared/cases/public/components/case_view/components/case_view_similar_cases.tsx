@@ -31,9 +31,11 @@ export const CaseViewSimilarCases = ({ caseData }: CaseViewSimilarCasesProps) =>
     enabled: true,
   });
 
-  const tableOnChangeCallback = useCallback(({ page, sort }: EuiBasicTableOnChange) => {
-    setPageIndex(page.index);
-    setPageSize(page.size);
+  const tableOnChangeCallback = useCallback(({ page }: EuiBasicTableOnChange) => {
+    if (page) {
+      setPageIndex(page.index);
+      setPageSize(page.size);
+    }
   }, []);
 
   const pagination = useMemo(

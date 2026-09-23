@@ -82,7 +82,7 @@ export type SearchEmbeddableSerializedAttributes = Omit<
   SearchEmbeddablePublicState,
   'rows' | 'columnsMeta' | 'totalHitCount' | 'searchSource' | 'inspectorAdapters'
 > &
-  Pick<SerializableSavedSearch, 'serializedSearchSource'>;
+  Pick<SerializableSavedSearch, 'serializedSearchSource' | 'tabTypeState'>;
 
 export type SearchEmbeddableRuntimeState = SearchEmbeddableSerializedAttributes &
   SerializedTitles &

@@ -98,6 +98,7 @@ describe('TimelineModal', () => {
       expect(mockCapturedFlyoutSessionContext).toHaveBeenCalledWith({
         session: 'start',
         historyKey: timelineFlyoutHistoryKey,
+        isChildFlyout: false,
       });
     });
   });

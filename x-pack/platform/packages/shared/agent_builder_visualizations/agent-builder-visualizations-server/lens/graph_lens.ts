@@ -84,7 +84,7 @@ export const getEsqlDataSourceCarriers = (config: unknown): EsqlDataSourceCarrie
  * Handles both single-dataset configs (metric, gauge, tagcloud) and layers-based configs (XY).
  * For XY charts with multiple layers, returns all unique ESQL queries.
  */
-function getExistingEsqlQueries(config: VisualizationConfig | null): string[] {
+export function getExistingEsqlQueries(config: VisualizationConfig | null): string[] {
   if (!config) return [];
 
   const queries: string[] = [];
@@ -106,6 +106,12 @@ const VisualizationStateAnnotation = Annotation.Root({
   schema: Annotation<object>(),
   existingConfig: Annotation<string | undefined>(),
   parsedExistingConfig: Annotation<VisualizationConfig | null>(),
+  /**
+   * Preserve the existing ES|QL queries. Each layer keeps its existing
+   * `data_source` instead of receiving the single resolved query.
+   */
+  preserveESQL: Annotation<boolean>(),
+  applyChartRules: Annotation<boolean>(),
   // internal
   esqlQuery: Annotation<string>(),
   currentAttempt: Annotation<number>({ reducer: (_, newValue) => newValue, default: () => 0 }),
@@ -220,6 +226,9 @@ export const createVisualizationGraph = async (
       chartType: state.chartType,
       schema: state.schema,
       existingConfig: state.existingConfig,
+      parsedExistingConfig: state.parsedExistingConfig,
+      preserveESQL: state.preserveESQL,
+      applyChartRules: state.applyChartRules,
       additionalContext,
     });
 
@@ -230,13 +239,20 @@ export const createVisualizationGraph = async (
       const responseText = extractTextFromMessage(response);
       const { config: configResponse, authoringNote } = parseConfigAuthoringResponse(responseText);
 
-      // Pin the validated ES|QL query before config validation. ES|QL generation owns the query;
-      // config generation only binds columns from it.
-      if (esqlQuery) {
-        for (const carrier of getEsqlDataSourceCarriers(configResponse)) {
+      // Pin the ES|QL query before config validation. ES|QL generation owns the query,
+      // and config generation only binds columns from it. Preserving ES|QL keeps
+      // each layer's existing data_source instead, so layers with different queries keep them.
+      const existingCarriers = state.preserveESQL
+        ? getEsqlDataSourceCarriers(state.parsedExistingConfig)
+        : [];
+      getEsqlDataSourceCarriers(configResponse).forEach((carrier, index) => {
+        const existingDataSource = (existingCarriers[index] ?? existingCarriers[0])?.data_source;
+        if (existingDataSource) {
+          carrier.data_source = existingDataSource;
+        } else if (esqlQuery) {
           carrier.data_source = { type: 'esql', query: esqlQuery };
         }
-      }
+      });
 
       action = {
         type: 'generate_config',

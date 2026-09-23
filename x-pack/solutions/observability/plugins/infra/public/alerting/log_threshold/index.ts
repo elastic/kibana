@@ -6,4 +6,3 @@
  */
 
 export * from './log_threshold_rule_type';
-export { LazyAlertDropdownWrapper } from './components/lazy_alert_dropdown';

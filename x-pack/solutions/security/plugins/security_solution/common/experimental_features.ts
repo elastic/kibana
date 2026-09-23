@@ -78,7 +78,7 @@ export const allowedExperimentalValues = Object.freeze({
    * `kill_descendants` parameter option for the `kill-process` response action for Elastic Defend Endpoint
    * Release: 9.6
    */
-  responseActionsEndpointKillProcessDescendants: false,
+  responseActionsEndpointKillProcessDescendants: true,
 
   /**
    * Enables CCS prefixing of endpoint indices so a Defend agent shipping to a remote ES output
@@ -115,8 +115,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Entity Analytics: Disables the Risk Score AI Assistant tool.
    */
   riskScoreAssistantToolDisabled: false,
+
   /**
-   * Enables the new Entity Analytics home page experience.
+   * Retired no-op. The Entity Analytics homepage is always on. Kept so existing
+   * `xpack.securitySolution.enableExperimental` entries, including
+   * `disable:entityAnalyticsNewHomePageEnabled`, remain valid during upgrade.
    */
   entityAnalyticsNewHomePageEnabled: true,
 
@@ -158,6 +161,13 @@ export const allowedExperimentalValues = Object.freeze({
    * Disables the siem migrations feature
    */
   siemMigrationsDisabled: false,
+
+  /**
+   * Enables the v2 rule migration agent graph, which runs pre-built rule matching
+   * (security-team#18589) through a dedicated subgraph that generates its own semantic
+   * queries and calls pre-built rules search as a tool, instead of the v1 one-shot node.
+   */
+  ruleMigrationGraphv2: false,
 
   /**
    * Enables the Defend Insights Policy Response Failure feature

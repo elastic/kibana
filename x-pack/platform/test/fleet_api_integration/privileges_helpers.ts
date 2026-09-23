@@ -20,6 +20,8 @@ interface PrivilegeTestRoute {
   method: string;
   path: string | (() => string);
   send?: any;
+  /** Extra request headers, e.g. `elastic-api-version` for internal versioned routes. */
+  headers?: Record<string, string>;
   beforeEach?: () => any;
   afterEach?: () => any;
   scenarios: PrivilegeTestScenario[];
@@ -59,15 +61,18 @@ export function runPrivilegeTests(
         };
         it(`should return a ${scenario.statusCode} for user: ${scenario.user.username}`, async () => {
           const path = typeof route.path === 'function' ? route.path() : route.path;
+          const headers = route.headers ?? {};
           if (route.method === 'GET') {
             return supertestWithoutAuth
               .get(path)
+              .set(headers)
               .auth(scenario.user.username, scenario.user.password)
               .expect(expectFn);
           } else if (route.method === 'PUT') {
             return supertestWithoutAuth
               .put(path)
               .set('kbn-xsrf', 'xx')
+              .set(headers)
               .auth(scenario.user.username, scenario.user.password)
               .send(route.send)
               .expect(expectFn);
@@ -75,12 +80,14 @@ export function runPrivilegeTests(
             return supertestWithoutAuth
               .delete(path)
               .set('kbn-xsrf', 'xx')
+              .set(headers)
               .auth(scenario.user.username, scenario.user.password)
               .expect(expectFn);
           } else if (route.method === 'POST') {
             await supertestWithoutAuth
               .post(path)
               .set('kbn-xsrf', 'xx')
+              .set(headers)
               .auth(scenario.user.username, scenario.user.password)
               .send(route.send)
               .expect(expectFn);

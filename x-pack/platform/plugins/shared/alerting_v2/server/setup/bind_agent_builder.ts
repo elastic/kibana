@@ -27,7 +27,7 @@ import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../lib/services/logger_service/logger_service';
-import { SettingsServiceToken } from '../lib/services/settings_service/tokens';
+import { UiSettingsClientToken } from '../lib/services/settings_service/tokens';
 import type { AlertingServerSetupDependencies } from '../types';
 
 type AgentBuilderSetup = NonNullable<AlertingServerSetupDependencies['agentBuilder']>;
@@ -104,7 +104,7 @@ export function bindAgentBuilder({ bind }: ContainerModuleLoadOptions) {
     // current value of the `alerting:v2:enabled` global advanced setting on
     // every crawl, rather than a value captured once at setup.
     const getIsAlertingV2Enabled = () =>
-      container.get(SettingsServiceToken).get(ALERTING_V2_ENABLED_SETTING_ID);
+      container.get(UiSettingsClientToken).get<boolean>(ALERTING_V2_ENABLED_SETTING_ID);
 
     // SML types are registered inline (not via a token registry like attachments):
     // registration happens at setup, but their clients must be resolved lazily at

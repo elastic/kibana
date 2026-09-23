@@ -340,6 +340,7 @@ export class TaskRunner<
     fakeRequest,
     rule,
     effectiveApiKey,
+    uiamApiKeyId,
     validatedParams: params,
   }: RunRuleParams<Params>): Promise<RunRuleResult> {
     const { activeInstances, expiredInstances } = evaluatePerAlertSnoozeExpiry(
@@ -509,6 +510,9 @@ export class TaskRunner<
       taskInstance: this.taskInstance,
       ruleRunMetricsStore,
       apiKey: effectiveApiKey,
+      // Carry the UIAM key id so the connector tasks are visible to the API key invalidation
+      // task's in-use guard, which cannot see the encrypted key material itself.
+      uiamApiKeyId,
       // Mirror the rule run's own credential treatment onto the connector tasks: the request is
       // marked by getFakeKibanaRequest from the rule's persisted `uiamApiKeyExternal`, so asking
       // it here cannot drift from what the cluster client will decide for this very run.

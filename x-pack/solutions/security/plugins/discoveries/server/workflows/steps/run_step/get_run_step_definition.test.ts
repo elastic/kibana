@@ -287,11 +287,52 @@ describe('getRunStepDefinition', () => {
       await stepDefinition.handler(contextWithoutConnectorId as never);
 
       expect(mockResolveDefaultConnectorId).toHaveBeenCalledWith({
+        featureId: undefined,
         inference: undefined,
         logger: mockLogger,
         request: { headers: {} },
+        searchInferenceEndpoints: undefined,
         uiSettingsClient: mockUiSettingsClient,
       });
+    });
+
+    it('forwards feature_id so the step can name its tier instead of an endpoint', async () => {
+      const contextWithFeatureId = {
+        ...baseMockContext,
+        input: {
+          alert_retrieval_mode: 'custom_query' as const,
+          alert_retrieval_workflow_ids: [],
+          feature_id: 'alertzero_reasoning',
+          mode: 'sync' as const,
+          validation_workflow_id: '',
+        },
+      };
+
+      const stepDefinition = getStepDefinition();
+
+      await stepDefinition.handler(contextWithFeatureId as never);
+
+      expect(mockResolveDefaultConnectorId).toHaveBeenCalledWith(
+        expect.objectContaining({ featureId: 'alertzero_reasoning' })
+      );
+    });
+
+    // `connector_id` stays the top of the resolution order, so a caller that names
+    // an endpoint outright is never overridden by a tier.
+    it('does not resolve a tier when connector_id and feature_id are both provided', async () => {
+      const contextWithBoth = {
+        ...syncMockContext,
+        input: {
+          ...syncMockContext.input,
+          feature_id: 'alertzero_reasoning',
+        },
+      };
+
+      const stepDefinition = getStepDefinition();
+
+      await stepDefinition.handler(contextWithBoth as never);
+
+      expect(mockResolveDefaultConnectorId).not.toHaveBeenCalled();
     });
 
     it('uses the resolved default connector id for connector details when connector_id is omitted', async () => {

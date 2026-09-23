@@ -26,7 +26,7 @@ export const createNavigationTree = (core: CoreStart): NavigationTreeDefinition 
         link: 'agent_builder',
       },
       {
-        icon: 'sparkles',
+        icon: 'tableSparkles',
         link: 'context_engine',
       },
       ...getWorkflowsNavPanel(core),
@@ -66,6 +66,7 @@ export const createNavigationTree = (core: CoreStart): NavigationTreeDefinition 
             breadcrumbStatus: 'hidden',
             children: [
               { link: 'management:index_management', breadcrumbStatus: 'hidden' },
+              { link: 'management:esql_views', breadcrumbStatus: 'hidden' },
               { link: 'management:transform', breadcrumbStatus: 'hidden' },
               { link: 'management:ingest_pipelines', breadcrumbStatus: 'hidden' },
               { link: 'management:dataViews', breadcrumbStatus: 'hidden' },

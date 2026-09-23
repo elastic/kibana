@@ -12,3 +12,7 @@ export const INTERNAL_ACCESS = 'internal' as const;
 export const proposalIdParamsSchema = z.object({
   id: z.string().min(1).max(256),
 });
+
+export const reviseProposalParamsSchema = z.object({
+  proposalId: z.string().min(1).max(256),
+});

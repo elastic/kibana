@@ -9,7 +9,7 @@ applies_to:
 
 # Microsoft Teams connector [microsoft-teams-connector]
 
-The Microsoft Teams connector enables Workplace AI to send messages to channels and chats, search conversations, and browse teams, channels, and chats in Microsoft Teams using the Microsoft Graph API.
+The Microsoft Teams connector enables Workplace AI to send messages to channels and chats, search conversations, and browse teams, channels, and chats in Microsoft Teams using the Microsoft Graph API. It supports four authentication methods: Quick Connect OAuth 2.0 (recommended), bearer token, OAuth authorization code, and OAuth client credentials.
 
 ## Create connectors in {{kib}} [define-microsoft-teams-ui]
 
@@ -17,7 +17,16 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 
 ### Connector configuration [microsoft-teams-connector-configuration]
 
-Microsoft Teams connectors have the following configuration properties:
+Microsoft Teams connectors support three authentication methods:
+
+#### Quick Connect OAuth 2.0 (recommended)
+
+```{applies_to}
+serverless: preview
+stack: preview 9.6
+```
+
+Elastic's managed OAuth flow for Microsoft Teams. No app setup is required — select this option and authorize access to your Microsoft Teams workspace through Elastic. Provides delegated access (the connector acts as the authenticated user) with the same permissions as the OAuth authorization code method.
 
 #### Bearer token (delegated auth)
 
@@ -53,7 +62,7 @@ The Microsoft Teams connector has the following actions:
 
 **List joined teams**
 :   Returns the authenticated user's joined teams when using delegated auth, or the specified user's joined teams when `userId` is provided for app-only auth.
-    - `userId` (optional): User ID for app-only auth through client credentials. Omit when using delegated auth (bearer token or OAuth authorization code).
+    - `userId` (optional): User ID for app-only auth through client credentials. Omit when using delegated auth (Quick Connect OAuth 2.0, bearer token, or OAuth authorization code).
 
 **List channels**
 :   Returns channels for the specified team.
@@ -67,7 +76,7 @@ The Microsoft Teams connector has the following actions:
 
 **List chats**
 :   Returns chats for the authenticated user.
-    - `userId` (optional): User ID for app-only auth through client credentials. Omit when using delegated auth (bearer token or OAuth authorization code).
+    - `userId` (optional): User ID for app-only auth through client credentials. Omit when using delegated auth (Quick Connect OAuth 2.0, bearer token, or OAuth authorization code).
     - `top` (optional): Number of chats to return, up to 50.
 
 **List chat messages**
@@ -76,7 +85,7 @@ The Microsoft Teams connector has the following actions:
     - `top` (optional): Number of messages to return, up to 50.
 
 **Search messages**
-:   Searches for messages across Teams and chats using the Microsoft Graph Search API. It supports Keyword Query Language (KQL) syntax. Requires delegated authentication (bearer token or OAuth authorization code). Not supported with app-only (client credentials) auth.
+:   Searches for messages across Teams and chats using the Microsoft Graph Search API. It supports Keyword Query Language (KQL) syntax. Requires delegated authentication (Quick Connect OAuth 2.0, bearer token, or OAuth authorization code). Not supported with app-only (client credentials) auth.
     - `query` (required): Search query string (for example, `from:alice sent>2024-01-01`).
     - `from` (optional): Offset for pagination.
     - `size` (optional): Number of results to return, up to 25.
@@ -121,7 +130,9 @@ Use the [Action configuration settings](/reference/configuration-reference/alert
 
 ## Get API credentials [microsoft-teams-api-credentials]
 
-To use the Microsoft Teams connector, you need a Microsoft Azure AD application with the required Graph API permissions.
+### Quick Connect OAuth 2.0
+
+No setup required. Select **Quick Connect OAuth 2.0** when creating the connector in {{kib}} and follow the authorization prompt to grant Elastic access to your Microsoft Teams workspace.
 
 ### Bearer token (delegated auth)
 

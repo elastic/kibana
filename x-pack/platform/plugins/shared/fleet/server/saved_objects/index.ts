@@ -41,6 +41,7 @@ import {
   AgentPolicySchemaV5,
   AgentPolicySchemaV6,
   AgentPolicySchemaV7,
+  AgentPolicySchemaV8,
   EpmPackagesSchemaV6,
   EpmPackagesSchemaV7,
   EpmPackagesSchemaV8,
@@ -132,6 +133,7 @@ import {
   migratePackagePolicySetRequiresRootToV8150,
 } from './migrations/to_v8_15_0';
 import { backfillAgentPolicyToV4 } from './model_versions/agent_policy_v4';
+import { backfillAgentPolicyDownloadSourceIds } from './model_versions/agent_policy_download_source_ids_backfill';
 import { backfillOutputPolicyToV7 } from './model_versions/outputs';
 import { packagePolicyV17AdvancedFieldsForEndpointV818 } from './model_versions/security_solution/v17_advanced_package_policy_fields';
 import { backfillPackagePolicyLatestRevision } from './model_versions/package_policy_latest_revision_backfill';
@@ -362,6 +364,7 @@ export const getSavedObjectTypes = (
           data_output_id: { type: 'keyword' },
           monitoring_output_id: { type: 'keyword' },
           download_source_id: { type: 'keyword' },
+          download_source_ids: { type: 'keyword', ignore_above: 1024 },
           fleet_server_host_id: { type: 'keyword' },
           agent_features: {
             properties: {
@@ -541,6 +544,24 @@ export const getSavedObjectTypes = (
             create: AgentPolicySchemaV7.extends({}, { unknowns: 'ignore' }),
           },
         },
+        '13': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                download_source_ids: { type: 'keyword', ignore_above: 1024 },
+              },
+            },
+            {
+              type: 'data_backfill',
+              backfillFn: backfillAgentPolicyDownloadSourceIds,
+            },
+          ],
+          schemas: {
+            forwardCompatibility: AgentPolicySchemaV8.extends({}, { unknowns: 'ignore' }),
+            create: AgentPolicySchemaV8.extends({}, { unknowns: 'ignore' }),
+          },
+        },
       },
     },
     [AGENT_POLICY_SAVED_OBJECT_TYPE]: {
@@ -572,6 +593,7 @@ export const getSavedObjectTypes = (
           data_output_id: { type: 'keyword' },
           monitoring_output_id: { type: 'keyword' },
           download_source_id: { type: 'keyword' },
+          download_source_ids: { type: 'keyword', ignore_above: 1024 },
           fleet_server_host_id: { type: 'keyword' },
           agent_features: {
             properties: {
@@ -680,6 +702,24 @@ export const getSavedObjectTypes = (
           schemas: {
             forwardCompatibility: AgentPolicySchemaV7.extends({}, { unknowns: 'ignore' }),
             create: AgentPolicySchemaV7.extends({}, { unknowns: 'ignore' }),
+          },
+        },
+        '8': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                download_source_ids: { type: 'keyword', ignore_above: 1024 },
+              },
+            },
+            {
+              type: 'data_backfill',
+              backfillFn: backfillAgentPolicyDownloadSourceIds,
+            },
+          ],
+          schemas: {
+            forwardCompatibility: AgentPolicySchemaV8.extends({}, { unknowns: 'ignore' }),
+            create: AgentPolicySchemaV8.extends({}, { unknowns: 'ignore' }),
           },
         },
       },

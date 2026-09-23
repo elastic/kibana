@@ -70,6 +70,7 @@ export const listRuleExecutionsRequestSchema = z
       .default(EXECUTION_HISTORY_DEFAULT_PER_PAGE)
       .describe(`Number of results per page.`),
   })
+  .strict()
   .refine(({ page, per_page }) => page * per_page <= EXECUTION_HISTORY_MAX_RESULT_WINDOW, {
     message: `page * per_page cannot exceed ${EXECUTION_HISTORY_MAX_RESULT_WINDOW}.`,
     path: ['page'],
