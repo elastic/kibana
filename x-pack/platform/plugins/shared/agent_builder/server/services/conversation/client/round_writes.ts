@@ -78,12 +78,19 @@ const eventsForKnownRound = (
 };
 
 /**
- * A stored block absent from the caller's `rounds` is dropped only when its last execution ended
- * with an outcome (`execution_terminated`): a completed or paused round the caller deliberately
- * removed. Blocks with no terminal (in progress) and blocks whose last terminal is interrupted are
- * always carried through — a caller whose stored `rounds` predate the fold has never seen them.
+ * Whether a stored block absent from the caller's `rounds` was removed on purpose. It was when
+ * the caller could see the round: the stored document already materialised it in its `rounds`
+ * (`storedRoundIds`), or its last execution ended with an outcome (`execution_terminated`, a
+ * completed or paused round — always materialised). Blocks with no terminal (in progress) and
+ * interrupted blocks the stored `rounds` do not know about (a document written before interrupted
+ * executions folded into rounds) are carried through: the caller has never seen them.
  */
-const isRemovableBlock = (block: ConversationEvent[]): boolean =>
+const isRemovableBlock = (
+  roundId: string,
+  block: ConversationEvent[],
+  storedRoundIds: ReadonlySet<string>
+): boolean =>
+  storedRoundIds.has(roundId) ||
   lastExecutionTerminal(block)?.type === TimelineEventType.executionTerminated;
 
 /**
@@ -93,14 +100,18 @@ const isRemovableBlock = (block: ConversationEvent[]): boolean =>
  * Stored blocks are emitted at their stored position. A block whose round is in `rounds` follows
  * the per-round rule ({@link eventsForKnownRound}). A block whose round is *not* in `rounds` is
  * dropped only when {@link isRemovableBlock} — the caller's `rounds` is authoritative for the
- * completed or paused rounds it deliberately removed — and kept untouched otherwise. Rounds with
- * no stored block yet are appended in `rounds` order. Additive events are re-inserted by
- * `created_at`.
+ * rounds it could see (`storedRounds`, the document's rounds at write time) — and kept untouched
+ * otherwise. Rounds with no stored block yet are appended in `rounds` order. Additive events are
+ * re-inserted by `created_at`.
  */
-export const reconcileEvents = (merged: Conversation): ConversationEvent[] => {
+export const reconcileEvents = (
+  merged: Conversation,
+  storedRounds: ReadonlyArray<Pick<ConversationRound, 'id'>>
+): ConversationEvent[] => {
   const stored = merged.events ?? [];
   const additive = stored.filter((event) => !isRoundDerivedEventId(event.id));
   const roundsById = new Map(merged.rounds.map((round) => [round.id, round]));
+  const storedRoundIds = new Set(storedRounds.map((round) => round.id));
 
   const roundDerived: ConversationEvent[] = [];
   const blocks = storedRoundBlocks(stored);
@@ -108,7 +119,7 @@ export const reconcileEvents = (merged: Conversation): ConversationEvent[] => {
     const round = roundsById.get(roundId);
     if (round) {
       roundDerived.push(...eventsForKnownRound(round, block, merged));
-    } else if (!isRemovableBlock(block)) {
+    } else if (!isRemovableBlock(roundId, block, storedRoundIds)) {
       roundDerived.push(...block);
     }
   }
