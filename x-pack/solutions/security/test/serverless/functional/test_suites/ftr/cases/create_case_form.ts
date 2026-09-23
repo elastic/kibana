@@ -108,7 +108,7 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
 
         await header.waitUntilLoadingHasFinished();
 
-        await testSubjects.existOrFail('case-view-title');
+        await testSubjects.existOrFail('appHeaderTitle');
 
         // validate custom fields
         const summary = await testSubjects.find(`case-text-custom-field-${customFields[0].key}`);
