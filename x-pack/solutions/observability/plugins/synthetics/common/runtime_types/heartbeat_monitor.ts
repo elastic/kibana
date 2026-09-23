@@ -6,9 +6,10 @@
  */
 
 import * as t from 'io-ts';
+import { zodAsIoTs } from './zod_as_io_ts';
 import { ConfigKey } from './monitor_management/config_key';
 import { MonitorTypeCodec } from './monitor_management/monitor_configs';
-import { MonitorServiceLocationCodec } from './monitor_management/locations';
+import { MonitorServiceLocationCodec as monitorServiceLocationSchema } from './monitor_management/locations';
 // Type-only import; the runtime value edge is external_monitor -> heartbeat_monitor.
 import type { SelectedSyntheticsMonitor } from './external_monitor';
 
@@ -60,7 +61,7 @@ export const HeartbeatSyntheticsMonitorCodec = t.type({
   [ConfigKey.NAME]: t.string,
   [ConfigKey.MONITOR_TYPE]: MonitorTypeCodec,
   [ConfigKey.TAGS]: t.array(t.string),
-  [ConfigKey.LOCATIONS]: t.array(MonitorServiceLocationCodec),
+  [ConfigKey.LOCATIONS]: t.array(zodAsIoTs(monitorServiceLocationSchema)),
   origin: MonitorOriginCodec,
 });
 

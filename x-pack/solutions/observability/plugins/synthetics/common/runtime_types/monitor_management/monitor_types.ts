@@ -10,7 +10,10 @@ import { NonEmptyArray, NonEmptyString } from '@kbn/securitysolution-io-ts-types
 import { AlertConfigsCodec } from './alert_config';
 import type { secretKeys } from '../../constants/monitor_management';
 import { ConfigKey } from './config_key';
-import { MonitorServiceLocationCodec, ServiceLocationErrors } from './locations';
+import {
+  MonitorServiceLocationCodec as monitorServiceLocationSchema,
+  ServiceLocationErrors as serviceLocationErrorsSchema,
+} from './locations';
 import {
   MonitorTypeEnum,
   MonitorTypeCodec,
@@ -36,6 +39,8 @@ import {
 
 const MetadataCodec = zodAsIoTs(metadataSchema);
 const PrivateLocationCodec = zodAsIoTs(privateLocationSchema);
+const MonitorServiceLocationCodec = zodAsIoTs(monitorServiceLocationSchema);
+const ServiceLocationErrors = zodAsIoTs(serviceLocationErrorsSchema);
 const NameSpaceString = zodAsIoTs(nameSpaceSchema);
 const TimeoutString = zodAsIoTs(timeoutSchema);
 const InlineScriptString = zodAsIoTs(inlineScriptSchema);
