@@ -29738,7 +29738,6 @@
     "xpack.lens.xyChart.showCurrenTimeMarker": "Aktuelle Zeitmarkierung anzeigen",
     "xpack.lens.xyChart.showEnzones": "Teilweise Datenmarkierungen anzeigen",
     "xpack.lens.xyChart.splitSeries": "Breakdown",
-    "xpack.lens.xyChart.stackingOptions": "Stacking",
     "xpack.lens.xyChart.stackingOptionsPopoverAriaLabel": "Stacking-Optionen",
     "xpack.lens.xyChart.topAxisDisabledHelpText": "Diese Einstellung gilt nur, wenn die obere Achse aktiviert ist.",
     "xpack.lens.xyChart.topAxisLabel": "Obere Achse",

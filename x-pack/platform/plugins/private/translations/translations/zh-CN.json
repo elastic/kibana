@@ -29839,7 +29839,6 @@
     "xpack.lens.xyChart.showCurrenTimeMarker": "显示当前时间标记",
     "xpack.lens.xyChart.showEnzones": "显示部分数据标记",
     "xpack.lens.xyChart.splitSeries": "细目",
-    "xpack.lens.xyChart.stackingOptions": "堆叠",
     "xpack.lens.xyChart.stackingOptionsPopoverAriaLabel": "堆叠选项",
     "xpack.lens.xyChart.topAxisDisabledHelpText": "此设置仅在启用顶轴时应用。",
     "xpack.lens.xyChart.topAxisLabel": "顶轴",

@@ -29832,7 +29832,6 @@
     "xpack.lens.xyChart.showCurrenTimeMarker": "現在時刻マーカーを表示",
     "xpack.lens.xyChart.showEnzones": "部分データマーカーを表示",
     "xpack.lens.xyChart.splitSeries": "内訳",
-    "xpack.lens.xyChart.stackingOptions": "スタック",
     "xpack.lens.xyChart.stackingOptionsPopoverAriaLabel": "スタックのオプション",
     "xpack.lens.xyChart.topAxisDisabledHelpText": "この設定は、上の軸が有効であるときにのみ適用されます。",
     "xpack.lens.xyChart.topAxisLabel": "上の軸",
