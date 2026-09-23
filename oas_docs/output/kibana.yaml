@@ -22302,33 +22302,20 @@ paths:
                         sources:
                           description: Additional sources that provide context for the AI Index.
                           items:
-                            anyOf:
-                              - additionalProperties: false
-                                type: object
-                                properties:
-                                  type:
-                                    enum:
-                                      - esql
-                                    type: string
-                                  value:
-                                    description: An ES|QL query.
-                                    type: string
-                                required:
-                                  - type
-                                  - value
-                              - additionalProperties: false
-                                type: object
-                                properties:
-                                  type:
-                                    enum:
-                                      - connector
-                                    type: string
-                                  value:
-                                    description: A connector id.
-                                    type: string
-                                required:
-                                  - type
-                                  - value
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              type:
+                                enum:
+                                  - esql
+                                  - connector
+                                type: string
+                              value:
+                                description: An ES|QL query for `esql`, or a connector id for `connector`.
+                                type: string
+                            required:
+                              - type
+                              - value
                           type: array
                         traces:
                           description: Trace sources linked to this AI Index, each with its derived ES|QL query.
@@ -22439,7 +22426,7 @@ paths:
                       value:
                         description: The workflow id.
                         maxLength: 1024
-                        minLength: 0
+                        minLength: 1
                         type: string
                     required:
                       - type
@@ -22575,9 +22562,9 @@ paths:
                               - esql
                             type: string
                           value:
-                            description: The source value; an ES|QL query when `type` is `esql`.
+                            description: The source value; an ES|QL query when `type` is `esql`. Must be valid ES|QL.
                             maxLength: 10240
-                            minLength: 0
+                            minLength: 1
                             type: string
                         required:
                           - type
@@ -22700,7 +22687,7 @@ paths:
                     type: number
                 required:
                   - message
-          description: The request was invalid, for example a malformed `dest`, or an unresolvable connector source or trace.
+          description: The request was invalid, for example a malformed `dest`, an invalid ES|QL source, or an unresolvable connector source or trace.
         '409':
           content:
             application/json:
@@ -22743,8 +22730,9 @@ paths:
                 "id": "customer_support",
                 "description": "Knowledge about customer support cases.",
                 "dest": { "type": "data_stream", "value": "ai-index-ds-customer-support" },
-                "automations": [],
-                "sources": [{ "type": "esql", "value": "FROM support-cases | LIMIT 100" }]
+                "automations": [{ "type": "workflow", "value": "8f1c2d3e-4b5a-6c7d-8e9f-0a1b2c3d4e5f" }],
+                "sources": [{ "type": "esql", "value": "FROM support-cases | LIMIT 100" }],
+                "traces": [{ "type": "elastic_agent", "value": "elastic-ai-agent" }]
               }'
         - lang: Console
           source: |
@@ -22753,8 +22741,9 @@ paths:
               "id": "customer_support",
               "description": "Knowledge about customer support cases.",
               "dest": { "type": "data_stream", "value": "ai-index-ds-customer-support" },
-              "automations": [],
-              "sources": [{ "type": "esql", "value": "FROM support-cases | LIMIT 100" }]
+              "automations": [{ "type": "workflow", "value": "8f1c2d3e-4b5a-6c7d-8e9f-0a1b2c3d4e5f" }],
+              "sources": [{ "type": "esql", "value": "FROM support-cases | LIMIT 100" }],
+              "traces": [{ "type": "elastic_agent", "value": "elastic-ai-agent" }]
             }
       x-state: Experimental
       x-metaTags:
@@ -22789,7 +22778,7 @@ paths:
                   limit: 10
                   params:
                     type: faq
-                  query: FROM ai-index-* | WHERE type == ?type | KEEP title, type | LIMIT 10
+                  query: FROM ai-index-* | WHERE type == ?type | KEEP title, type, attributes | LIMIT 10
             schema:
               additionalProperties: false
               type: object
@@ -22821,18 +22810,22 @@ paths:
             application/json:
               examples:
                 queryAiIndicesResponseExample:
-                  description: Example response with column metadata and matching rows
+                  description: Example response with column metadata and matching rows. `flattened` columns such as `attributes` are returned as objects.
                   value:
                     columns:
                       - name: title
-                        type: keyword
+                        type: text
                       - name: type
                         type: keyword
+                      - name: attributes
+                        type: flattened
                     values:
                       - - How to reset a password
                         - faq
+                        - source: zendesk
                       - - Billing cycle explained
                         - faq
+                        - source: zendesk
               schema:
                 additionalProperties: false
                 type: object
@@ -22854,23 +22847,9 @@ paths:
                         - type
                     type: array
                   values:
-                    description: Row values, aligned positionally with `columns`. A multi-valued field is returned as an array.
+                    description: Row values, aligned positionally with `columns`, as Elasticsearch returns them. A multi-valued field is an array; `_source` and `flattened` columns are objects.
                     items:
                       items:
-                        anyOf:
-                          - anyOf:
-                              - type: string
-                              - type: number
-                              - type: boolean
-                          - items:
-                              anyOf:
-                                - type: string
-                                - type: number
-                                - type: boolean
-                              default: null
-                              nullable: true
-                            type: array
-                        default: null
                         nullable: true
                       type: array
                     type: array
@@ -22951,7 +22930,7 @@ paths:
               -H "kbn-xsrf: true" \
               -H "Content-Type: application/json" \
               -d '{
-                "query": "FROM ai-index-* | WHERE type == ?type | KEEP title, type | LIMIT 10",
+                "query": "FROM ai-index-* | WHERE type == ?type | KEEP title, type, attributes | LIMIT 10",
                 "params": { "type": "faq" },
                 "limit": 10
               }'
@@ -22959,7 +22938,7 @@ paths:
           source: |
             POST kbn:/api/context_engine/ai_index/_query
             {
-              "query": "FROM ai-index-* | WHERE type == ?type | KEEP title, type | LIMIT 10",
+              "query": "FROM ai-index-* | WHERE type == ?type | KEEP title, type, attributes | LIMIT 10",
               "params": { "type": "faq" },
               "limit": 10
             }
@@ -23280,33 +23259,20 @@ paths:
                   sources:
                     description: Additional sources that provide context for the AI Index.
                     items:
-                      anyOf:
-                        - additionalProperties: false
-                          type: object
-                          properties:
-                            type:
-                              enum:
-                                - esql
-                              type: string
-                            value:
-                              description: An ES|QL query.
-                              type: string
-                          required:
-                            - type
-                            - value
-                        - additionalProperties: false
-                          type: object
-                          properties:
-                            type:
-                              enum:
-                                - connector
-                              type: string
-                            value:
-                              description: A connector id.
-                              type: string
-                          required:
-                            - type
-                            - value
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        type:
+                          enum:
+                            - esql
+                            - connector
+                          type: string
+                        value:
+                          description: An ES|QL query for `esql`, or a connector id for `connector`.
+                          type: string
+                      required:
+                        - type
+                        - value
                     type: array
                   traces:
                     description: Trace sources linked to this AI Index, each with its derived ES|QL query.
@@ -23446,7 +23412,7 @@ paths:
                       value:
                         description: The workflow id.
                         maxLength: 1024
-                        minLength: 0
+                        minLength: 1
                         type: string
                     required:
                       - type
@@ -23577,9 +23543,9 @@ paths:
                               - esql
                             type: string
                           value:
-                            description: The source value; an ES|QL query when `type` is `esql`.
+                            description: The source value; an ES|QL query when `type` is `esql`. Must be valid ES|QL.
                             maxLength: 10240
-                            minLength: 0
+                            minLength: 1
                             type: string
                         required:
                           - type
@@ -23724,7 +23690,7 @@ paths:
                     type: number
                 required:
                   - message
-          description: The request was invalid, for example a malformed `dest`, or an unresolvable connector source or trace.
+          description: The request was invalid, for example a malformed `dest`, an invalid ES|QL source, or an unresolvable connector source or trace.
         '409':
           content:
             application/json:
@@ -23766,8 +23732,9 @@ paths:
               -d '{
                 "description": "Knowledge about customer support cases.",
                 "dest": { "type": "data_stream", "value": "ai-index-ds-customer-support" },
-                "automations": [],
-                "sources": [{ "type": "esql", "value": "FROM support-cases | LIMIT 100" }]
+                "automations": [{ "type": "workflow", "value": "8f1c2d3e-4b5a-6c7d-8e9f-0a1b2c3d4e5f" }],
+                "sources": [{ "type": "esql", "value": "FROM support-cases | LIMIT 100" }],
+                "traces": []
               }'
         - lang: Console
           source: |
@@ -23775,8 +23742,9 @@ paths:
             {
               "description": "Knowledge about customer support cases.",
               "dest": { "type": "data_stream", "value": "ai-index-ds-customer-support" },
-              "automations": [],
-              "sources": [{ "type": "esql", "value": "FROM support-cases | LIMIT 100" }]
+              "automations": [{ "type": "workflow", "value": "8f1c2d3e-4b5a-6c7d-8e9f-0a1b2c3d4e5f" }],
+              "sources": [{ "type": "esql", "value": "FROM support-cases | LIMIT 100" }],
+              "traces": []
             }
       x-state: Experimental
       x-metaTags:
