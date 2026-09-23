@@ -16,16 +16,10 @@ import { reportFailuresToFile } from './report_failures_to_file';
 import { getReportMessageIter } from './report_metadata';
 import { getRootMetadata, readTestReport } from './test_report';
 
-// For FTR reports only, at most one NEW GitHub issue is opened per report. `--bail` used to stop a
-// config at its first failure, so at most one new failure per run reached the reporter; a broken
-// FTR config can otherwise open an issue per test. Multiple distinct new FTR failures in one run
-// usually indicate a systemic/environmental failure (e.g. out of disk space). Existing tracked
-// issues are always updated regardless. Duplicate classname+name entries (e.g. retry artifacts)
-// are deduplicated for every test type and do not consume the slot.
-// See https://github.com/elastic/kibana/issues/278308.
-//
-// Jest and Cypress keep one issue per distinct new failure: a single XML file can legitimately
-// contain several independent failures, and capping those would drop GitHub tracking.
+// FTR runs on this branch with mochaOpts.bail disabled, so a single XML report can contain
+// multiple distinct, independent failures. All test types — FTR, Jest, and Cypress — get one
+// GitHub issue per distinct new failure. Duplicate classname+name entries (e.g. retry artifacts)
+// are deduplicated for every test type.
 //
 // Failures the FTR marked as cascading are excluded from GitHub regardless of test type: they are
 // trailing hooks/tests that ran after Mocha was aborted. Only the failure that caused the abort
@@ -61,8 +55,6 @@ export async function processJUnitReports(
     }
 
     const seenNewIssueKeys = new Set<string>();
-    let newIssueCreated = false;
-    let skippedNewFailures = 0;
     let cascadingFailures = 0;
 
     for (const failure of failures) {
@@ -121,21 +113,6 @@ export async function processJUnitReports(
         continue;
       }
 
-      // Cap new issues only for FTR. Jest/Cypress (and unrecognized types) keep one issue each.
-      const capNewIssues = failure.testType === 'ftr';
-      if (capNewIssues && newIssueCreated) {
-        skippedNewFailures += 1;
-        pushMessage(
-          'Skipped opening a new issue: only the first new FTR failure in a report opens a GitHub ' +
-            'issue, multiple new failures in one run usually indicate a systemic failure'
-        );
-        failure.failureCount = 0;
-        continue;
-      }
-
-      if (capNewIssues) {
-        newIssueCreated = true;
-      }
       const newIssue = await createFailureIssue(
         buildUrl,
         failure,
@@ -157,15 +134,6 @@ export async function processJUnitReports(
       log.info(
         `Ignored ${cascadingFailures} failure(s) in ${reportPath} that cascaded from an earlier ` +
           `Mocha abort. They are listed on the report of the failure that caused the abort.`
-      );
-    }
-
-    if (skippedNewFailures > 0) {
-      log.warning(
-        `Opened one new issue for the first new FTR failure and skipped ${skippedNewFailures} ` +
-          `additional new FTR failure(s) for ${reportPath}, likely a systemic failure. Existing ` +
-          `tracked issues were updated normally. All failures are still indexed to ES and ` +
-          `written to the failure report.`
       );
     }
 

@@ -95,7 +95,7 @@ beforeEach(() => {
   updateFailureIssue.mockResolvedValue({ newBody: 'body', newCount: 2 });
 });
 
-describe('processJUnitReports FTR one-new-issue cap', () => {
+describe('processJUnitReports FTR new-issue behaviour (bail disabled on this branch)', () => {
   it('reports the single FTR failure to GitHub as a new issue', async () => {
     getFailures.mockReturnValue([makeFtrFailure(0)]);
     const { params } = createParams();
@@ -106,15 +106,17 @@ describe('processJUnitReports FTR one-new-issue cap', () => {
     expect(updateFailureIssue).not.toHaveBeenCalled();
   });
 
-  it('reports only the first new FTR failure and skips the rest in the same report', async () => {
+  it('reports every distinct new FTR failure as a separate GitHub issue', async () => {
     const failures = [makeFtrFailure(0), makeFtrFailure(1)];
     getFailures.mockReturnValue(failures);
     const { params } = createParams();
 
     await processJUnitReports(['report.xml'], params);
 
-    expect(createFailureIssue).toHaveBeenCalledTimes(1);
+    // Both failures are independent (bail is disabled on 9.4), so both get an issue.
+    expect(createFailureIssue).toHaveBeenCalledTimes(2);
     expect(createFailureIssue.mock.calls[0][1]).toBe(failures[0]);
+    expect(createFailureIssue.mock.calls[1][1]).toBe(failures[1]);
     // ES indexing and file reporting still run over every failure — that's real signal we keep.
     expect(reportFailuresToEs).toHaveBeenCalledTimes(1);
     expect(reportFailuresToEs.mock.calls[0][1]).toHaveLength(2);
@@ -122,7 +124,7 @@ describe('processJUnitReports FTR one-new-issue cap', () => {
     expect(reportFailuresToFile.mock.calls[0][1]).toHaveLength(2);
   });
 
-  it('updates a tracked FTR failure and still creates an issue for the first new failure', async () => {
+  it('updates a tracked FTR failure and still creates issues for all new failures', async () => {
     const failures = [makeFtrFailure(0), makeFtrFailure(1)];
     getFailures.mockReturnValue(failures);
 
@@ -134,7 +136,7 @@ describe('processJUnitReports FTR one-new-issue cap', () => {
     expect(createFailureIssue).toHaveBeenCalledTimes(1);
   });
 
-  it('updates a tracked FTR failure even when a new issue was already created in the same report', async () => {
+  it('updates a tracked FTR failure alongside new issues for other failures', async () => {
     const failures = [makeFtrFailure(0), makeFtrFailure(1)];
     getFailures.mockReturnValue(failures);
 
@@ -146,7 +148,7 @@ describe('processJUnitReports FTR one-new-issue cap', () => {
     expect(updateFailureIssue).toHaveBeenCalledTimes(1);
   });
 
-  it('does not count duplicate FTR classname+name entries toward the new-issue cap', async () => {
+  it('deduplicates retry artifacts (same classname+name) and creates only one issue', async () => {
     const failures = [
       makeFtrFailure(0),
       makeFtrFailure(0, { failure: 'another failure entry for the same test' }),
@@ -160,7 +162,7 @@ describe('processJUnitReports FTR one-new-issue cap', () => {
     expect(updateFailureIssue).not.toHaveBeenCalled();
   });
 
-  it('does not consume the FTR report slot on likely-irrelevant failures', async () => {
+  it('does not open an issue for likely-irrelevant failures but opens one for real failures', async () => {
     const failures = [makeFtrFailure(0, { likelyIrrelevant: true }), makeFtrFailure(1)];
     getFailures.mockReturnValue(failures);
     const { params } = createParams();
@@ -171,7 +173,7 @@ describe('processJUnitReports FTR one-new-issue cap', () => {
     expect(createFailureIssue.mock.calls[0][1]).toBe(failures[1]);
   });
 
-  it('resets the FTR one-failure budget for each report path', async () => {
+  it('resets the issue budget independently for each report path', async () => {
     getFailures.mockReturnValueOnce([makeFtrFailure(0)]).mockReturnValueOnce([makeFtrFailure(1)]);
     const { params } = createParams();
 
@@ -243,7 +245,7 @@ describe('processJUnitReports cascading failures', () => {
     expect(updateFailureIssue).not.toHaveBeenCalled();
   });
 
-  it('does not consume the FTR new-issue slot', async () => {
+  it('does not open issues for cascading failures but opens one for each non-cascading failure', async () => {
     const { cascading } = makeCascade();
     const firstNew = makeFtrFailure(3);
     const secondNew = makeFtrFailure(4);
@@ -252,8 +254,10 @@ describe('processJUnitReports cascading failures', () => {
 
     await processJUnitReports(['report.xml'], params);
 
-    expect(createFailureIssue).toHaveBeenCalledTimes(1);
+    // Both non-cascading failures are independent on 9.4 (bail disabled), so both get an issue.
+    expect(createFailureIssue).toHaveBeenCalledTimes(2);
     expect(createFailureIssue.mock.calls[0][1]).toBe(firstNew);
+    expect(createFailureIssue.mock.calls[1][1]).toBe(secondNew);
   });
 
   it('still skips cascading Jest entries without capping other Jest failures', async () => {
