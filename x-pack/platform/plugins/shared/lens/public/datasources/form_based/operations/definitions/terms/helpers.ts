@@ -293,11 +293,9 @@ export type OrderAggLastValueSortFieldStatus =
  * render auto-fill, editor warnings, and blocking errors all reason about the same field.
  */
 export function getOrderAggLastValueSortFieldStatus(
-  layer: FormBasedLayer,
-  columnId: string,
+  column: GenericIndexPatternColumn | undefined,
   indexPattern: IndexPattern
 ): OrderAggLastValueSortFieldStatus {
-  const column = layer.columns[columnId];
   if (!isCustomLastValueOrderAgg(column)) {
     return { status: 'ok' };
   }
@@ -336,7 +334,7 @@ export function getOrderAggErrorMessages(
     return [];
   }
 
-  const status = getOrderAggLastValueSortFieldStatus(layer, columnId, indexPattern);
+  const status = getOrderAggLastValueSortFieldStatus(column, indexPattern);
   const sortField = column.params.orderAgg.params?.sortField ?? '';
 
   switch (status.status) {

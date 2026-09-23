@@ -635,7 +635,7 @@ export function getCustomRankLastValueSortFieldWarningMessages(
         return;
       }
 
-      const status = getOrderAggLastValueSortFieldStatus(layer, columnId, indexPattern);
+      const status = getOrderAggLastValueSortFieldStatus(column, indexPattern);
       if (status.status !== 'missing-with-default') {
         return;
       }

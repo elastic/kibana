@@ -337,11 +337,7 @@ export const termsOperation: OperationDefinition<
         // When a terms column is custom-ranked by a last_value order-agg with no sortField, fall
         // back to the data view's default date field so the chart still renders with a valid sort.
         if (isCustomLastValueOrderAgg(column)) {
-          const sortFieldStatus = getOrderAggLastValueSortFieldStatus(
-            layer,
-            columnId,
-            _indexPattern
-          );
+          const sortFieldStatus = getOrderAggLastValueSortFieldStatus(column, _indexPattern);
           if (sortFieldStatus.status === 'missing-with-default') {
             const { orderAgg: lastValueOrderAgg } = column.params;
             const orderAggWithDefaultSort: LastValueOrderAggColumn = {
