@@ -60,8 +60,9 @@ x-codeSamples:
           "id": "customer_support",
           "description": "Knowledge about customer support cases.",
           "dest": { "type": "data_stream", "value": "ai-index-ds-customer-support" },
-          "automations": [],
-          "sources": [{ "type": "esql", "value": "FROM support-cases | LIMIT 100" }]
+          "automations": [{ "type": "workflow", "value": "8f1c2d3e-4b5a-6c7d-8e9f-0a1b2c3d4e5f" }],
+          "sources": [{ "type": "esql", "value": "FROM support-cases | LIMIT 100" }],
+          "traces": [{ "type": "elastic_agent", "value": "elastic-ai-agent" }]
         }'
   - lang: Console
     source: |
@@ -70,6 +71,7 @@ x-codeSamples:
         "id": "customer_support",
         "description": "Knowledge about customer support cases.",
         "dest": { "type": "data_stream", "value": "ai-index-ds-customer-support" },
-        "automations": [],
-        "sources": [{ "type": "esql", "value": "FROM support-cases | LIMIT 100" }]
+        "automations": [{ "type": "workflow", "value": "8f1c2d3e-4b5a-6c7d-8e9f-0a1b2c3d4e5f" }],
+        "sources": [{ "type": "esql", "value": "FROM support-cases | LIMIT 100" }],
+        "traces": [{ "type": "elastic_agent", "value": "elastic-ai-agent" }]
       }

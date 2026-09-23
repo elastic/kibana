@@ -88,6 +88,7 @@ const signalTimeRangeSchema = schema.oneOf(
   }
 );
 
+// `oneOf` needs a tuple type, but `map()` returns a plain array.
 const improvementActionSchema = schema.oneOf(
   IMPROVEMENT_ACTIONS.map((action) => schema.literal(action)) as [Type<ImprovementAction>]
 );
@@ -270,9 +271,7 @@ export const createAiIndexBodySchema = schema.object({
   id: aiIndexIdSchema,
   ...aiIndexPropertiesSchema,
 });
-export const putAiIndexBodySchema = schema.object({
-  ...aiIndexPropertiesSchema,
-});
+export const putAiIndexBodySchema = schema.object(aiIndexPropertiesSchema);
 
 export const listKisQuerySchema = schema.object({
   size: schema.number({
@@ -368,16 +367,12 @@ const aiIndexAutomationResponseSchema = () =>
   });
 
 const aiIndexSourceResponseSchema = () =>
-  schema.oneOf([
-    schema.object({
-      type: schema.literal('esql'),
-      value: schema.string({ meta: { description: 'An ES|QL query.' } }),
+  schema.object({
+    type: schema.oneOf([schema.literal('esql'), schema.literal('connector')]),
+    value: schema.string({
+      meta: { description: 'An ES|QL query for `esql`, or a connector id for `connector`.' },
     }),
-    schema.object({
-      type: schema.literal('connector'),
-      value: schema.string({ meta: { description: 'A connector id.' } }),
-    }),
-  ]);
+  });
 
 const feedbackAnalysisResponseSchema = () =>
   schema.object({
@@ -484,12 +479,6 @@ export const listAiIndexResponseSchema = () =>
     }),
   });
 
-const esqlScalarSchema = () => schema.oneOf([schema.string(), schema.number(), schema.boolean()]);
-const esqlFieldValueSchema = () =>
-  schema.nullable(
-    schema.oneOf([esqlScalarSchema(), schema.arrayOf(schema.nullable(esqlScalarSchema()))])
-  );
-
 export const queryAiIndicesResponseSchema = () =>
   schema.object({
     columns: schema.arrayOf(
@@ -502,10 +491,10 @@ export const queryAiIndicesResponseSchema = () =>
       ),
       { meta: { description: 'Column metadata for the returned rows.' } }
     ),
-    values: schema.arrayOf(schema.arrayOf(esqlFieldValueSchema()), {
+    values: schema.arrayOf(schema.arrayOf(schema.any()), {
       meta: {
         description:
-          'Row values, aligned positionally with `columns`. A multi-valued field is returned as an array.',
+          'Row values, aligned positionally with `columns`, as Elasticsearch returns them. A multi-valued field is an array; `_source` and `flattened` columns are objects.',
       },
     }),
   });

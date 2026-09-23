@@ -5,7 +5,7 @@ requestBody:
         queryAiIndicesRequestExample:
           description: "Example ES|QL query with a named parameter and a row limit"
           value:
-            query: FROM ai-index-* | WHERE type == ?type | KEEP title, type | LIMIT 10
+            query: FROM ai-index-* | WHERE type == ?type | KEEP title, type, attributes | LIMIT 10
             params:
               type: faq
             limit: 10
@@ -15,16 +15,18 @@ responses:
       application/json:
         examples:
           queryAiIndicesResponseExample:
-            description: "Example response with column metadata and matching rows"
+            description: "Example response with column metadata and matching rows. `flattened` columns such as `attributes` are returned as objects."
             value:
               columns:
                 - name: title
-                  type: keyword
+                  type: text
                 - name: type
                   type: keyword
+                - name: attributes
+                  type: flattened
               values:
-                - ["How to reset a password", "faq"]
-                - ["Billing cycle explained", "faq"]
+                - ["How to reset a password", "faq", { source: zendesk }]
+                - ["Billing cycle explained", "faq", { source: zendesk }]
   400:
     content:
       application/json:
@@ -54,7 +56,7 @@ x-codeSamples:
         -H "kbn-xsrf: true" \
         -H "Content-Type: application/json" \
         -d '{
-          "query": "FROM ai-index-* | WHERE type == ?type | KEEP title, type | LIMIT 10",
+          "query": "FROM ai-index-* | WHERE type == ?type | KEEP title, type, attributes | LIMIT 10",
           "params": { "type": "faq" },
           "limit": 10
         }'
@@ -62,7 +64,7 @@ x-codeSamples:
     source: |
       POST kbn:/api/context_engine/ai_index/_query
       {
-        "query": "FROM ai-index-* | WHERE type == ?type | KEEP title, type | LIMIT 10",
+        "query": "FROM ai-index-* | WHERE type == ?type | KEEP title, type, attributes | LIMIT 10",
         "params": { "type": "faq" },
         "limit": 10
       }
