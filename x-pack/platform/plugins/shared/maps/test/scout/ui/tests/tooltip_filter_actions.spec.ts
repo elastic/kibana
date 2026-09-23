@@ -89,11 +89,9 @@ test.describe(
 
       // Assert we landed on Discover with filter from drilldown action
       await page.locator('.dscPage').waitFor({ state: 'visible' });
-      const hasFilter = await pageObjects.filterBar.hasFilter({
-        field: 'name',
-        value: 'charlie',
-      });
-      expect(hasFilter).toBe(true);
+      await expect
+        .poll(() => pageObjects.filterBar.hasFilter({ field: 'name', value: 'charlie' }))
+        .toBe(true);
     });
   }
 );
