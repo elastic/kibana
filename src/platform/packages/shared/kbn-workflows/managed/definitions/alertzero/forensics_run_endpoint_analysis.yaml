@@ -149,7 +149,7 @@ steps:
       - name: fetch_attack_discovery_alert
         type: elasticsearch.search
         with:
-          index: ".alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}*,.adhoc.alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}*"
+          index: ".alerts-security.attack.discovery.alerts-{{ workflow.spaceId }},.adhoc.alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}"
           ignore_unavailable: true
           size: 1
           _source:

@@ -111,10 +111,11 @@ describe('Endpoint analysis run', () => {
   });
 
   // A child execution inherits its parent's space, so the alert lookups stay scoped
-  // to the space of the Worker that dispatched the run.
+  // to the space of the Worker that dispatched the run. The two aliases are the
+  // complete set for that space; a trailing wildcard is not part of either name.
   it('scopes alert lookups to the dispatching space', () => {
-    expect(String(stepByName('fetch_attack_discovery_alert')?.with?.index)).toContain(
-      '{{ workflow.spaceId }}'
+    expect(stepByName('fetch_attack_discovery_alert')?.with?.index).toBe(
+      '.alerts-security.attack.discovery.alerts-{{ workflow.spaceId }},.adhoc.alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}'
     );
   });
 
