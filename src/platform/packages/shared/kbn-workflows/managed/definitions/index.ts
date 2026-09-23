@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CREATE_INVESTIGATION_PROPOSAL_WORKFLOW } from './agentic_investigations';
 import { SECURITY_ALERT_ANALYSIS_WORKFLOW } from './alert_analysis';
 import {
   ALERTZERO_ACTION_ADD_RULE_EXCEPTION_WORKFLOW,
@@ -45,8 +44,11 @@ import {
 } from './discoveries';
 import { NIGHTSHIFT_CORTEX_HYDRATE_WORKFLOW } from './nightshift_investigations/cortex_hydrate';
 import { NIGHTSHIFT_CORTEX_OPTIMIZE_WORKFLOW } from './nightshift_investigations/cortex_optimize';
+import { NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW } from './nightshift_investigations/decision_tree_hydrate';
+import { NIGHTSHIFT_DECISION_TREE_REINFORCE_WORKFLOW } from './nightshift_investigations/decision_tree_reinforce';
 import { DEDUCTIVE_INVESTIGATION_WORKFLOW } from './nightshift_investigations/deductive_investigation';
 import { SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW } from './nightshift_investigations/investigation';
+import { CREATE_PROPOSAL_WORKFLOW } from './proposals';
 import {
   SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW,
   SIGNIFICANT_EVENTS_DETECTION_WORKFLOW,
@@ -108,8 +110,10 @@ export {
 export { DEDUCTIVE_INVESTIGATION_WORKFLOW_ID } from './nightshift_investigations/deductive_investigation';
 export { NIGHTSHIFT_CORTEX_HYDRATE_WORKFLOW_ID } from './nightshift_investigations/cortex_hydrate';
 export { NIGHTSHIFT_CORTEX_OPTIMIZE_WORKFLOW_ID } from './nightshift_investigations/cortex_optimize';
+export { NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW_ID } from './nightshift_investigations/decision_tree_hydrate';
+export { NIGHTSHIFT_DECISION_TREE_REINFORCE_WORKFLOW_ID } from './nightshift_investigations/decision_tree_reinforce';
 export { SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID } from './nightshift_investigations/investigation';
-export { CREATE_INVESTIGATION_PROPOSAL_WORKFLOW_ID } from './agentic_investigations';
+export { CREATE_PROPOSAL_WORKFLOW_ID } from './proposals';
 export {
   ALERTZERO_COVERAGE_REVIEW_WORKFLOW_ID,
   ALERTZERO_COVERAGE_WORKER_WORKFLOW_ID,
@@ -176,6 +180,8 @@ export const managedWorkflowDefinitions = [
   SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW,
   NIGHTSHIFT_CORTEX_HYDRATE_WORKFLOW,
   NIGHTSHIFT_CORTEX_OPTIMIZE_WORKFLOW,
+  NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW,
+  NIGHTSHIFT_DECISION_TREE_REINFORCE_WORKFLOW,
   SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW,
   DEDUCTIVE_INVESTIGATION_WORKFLOW,
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW,
@@ -195,8 +201,8 @@ export const managedWorkflowDefinitions = [
   ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW,
   ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW,
   ALERTZERO_JOURNAL_NOTE_WORKFLOW,
-  // Generic proposal gate, owned by the agenticInvestigations plugin.
-  CREATE_INVESTIGATION_PROPOSAL_WORKFLOW,
+  // Generic proposal gate, owned by the proposals plugin.
+  CREATE_PROPOSAL_WORKFLOW,
   // AlertZero action catalog. The forensics handoff installs unconditionally even
   // though `context-engine.createKi` needs `contextEngine:enabled`: a definition is
   // inert until executed, and the setting is only read inside the step handler.
