@@ -69,6 +69,9 @@ export const putPublicFieldDefinitionRoute = createCasesRoute({
       // the identity-immutability guard prevents changing the name, so enforcing the limit on PUT
       // would permanently strand those definitions.
       const resolvedName = bodyResult.data.name ?? definitionValidation.name;
+      if (resolvedName.length === 0) {
+        return response.badRequest({ body: { message: 'Field name must not be empty' } });
+      }
 
       const input = {
         ...bodyResult.data,

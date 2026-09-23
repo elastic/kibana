@@ -55,8 +55,11 @@ export const postPublicFieldDefinitionRoute = createCasesRoute({
         return response.badRequest({ body: { message: definitionValidation.message } });
       }
 
-      // Resolve `name` from the YAML when the caller omitted it, then enforce the public limit.
+      // Resolve `name` from the YAML when the caller omitted it, then enforce the public limits.
       const resolvedName = bodyResult.data.name ?? definitionValidation.name;
+      if (resolvedName.length === 0) {
+        return response.badRequest({ body: { message: 'Field name must not be empty' } });
+      }
       if (resolvedName.length > MAX_FIELD_DEFINITION_NAME_LENGTH) {
         return response.badRequest({
           body: {
