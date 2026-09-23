@@ -145,9 +145,10 @@ describe('ActionPolicyForm', () => {
     expect(screen.queryByTestId('actionPolicyFormSection-policyDetails')).not.toBeInTheDocument();
   });
 
-  it('only collapses configured sections and keeps notification controls initially closed', async () => {
+  it('uses the flyout layout and only collapses configured sections', async () => {
     const user = userEvent.setup();
     renderForm(DEFAULT_FORM_STATE, {
+      layout: 'flyout',
       connectorCreation: { mode: 'new-tab', href: '/connectors' },
       collapsibleSections: {
         notificationControls: { initialIsOpen: false },
@@ -157,17 +158,19 @@ describe('ActionPolicyForm', () => {
 
     expect(screen.getByRole('heading', { name: 'Policy details' }).tagName).toBe('H3');
     expect(screen.getByRole('heading', { name: 'Policy scope' }).tagName).toBe('H3');
-    expect(screen.queryByTestId('actionPolicyFormSection-policyDetails')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('actionPolicyFormSection-policyScope')).not.toBeInTheDocument();
+    expect(screen.getByTestId('actionPolicyFormSection-policyDetails')).toContainElement(
+      screen.getByTestId(TEST_SUBJ.nameInput)
+    );
+    expect(screen.getByTestId('actionPolicyFormSection-policyScope')).toContainElement(
+      screen.getByTestId('ruleTagsSelector')
+    );
 
     const notificationControlsButton = within(
       screen.getByTestId('actionPolicyFormSection-notificationControls')
     )
       .getByText('Notification controls')
       .closest('button');
-    const destinationButton = within(
-      screen.getByTestId('actionPolicyFormSection-destination')
-    )
+    const destinationButton = within(screen.getByTestId('actionPolicyFormSection-destination'))
       .getByText('Destination')
       .closest('button');
 

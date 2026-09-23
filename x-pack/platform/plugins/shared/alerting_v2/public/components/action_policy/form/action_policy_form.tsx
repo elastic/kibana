@@ -11,7 +11,9 @@ import {
   EuiFormRow,
   EuiHorizontalRule,
   EuiSpacer,
+  EuiText,
   EuiTextArea,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -32,14 +34,21 @@ import type {
   ActionPolicyFormCollapsibleSection,
   ActionPolicyFormCollapsibleSectionConfig,
   ActionPolicyFormConfig,
+  ActionPolicyFormLayout,
   ActionPolicyFormState,
 } from './types';
+
+type ActionPolicyFormSectionId =
+  | 'policyDetails'
+  | 'policyScope'
+  | ActionPolicyFormCollapsibleSection;
 
 interface ActionPolicyFormSectionProps {
   children: ReactNode;
   config?: ActionPolicyFormCollapsibleSectionConfig;
   description: ReactNode;
-  id: ActionPolicyFormCollapsibleSection;
+  id: ActionPolicyFormSectionId;
+  layout?: ActionPolicyFormLayout;
   title: ReactNode;
 }
 
@@ -48,27 +57,44 @@ const ActionPolicyFormSection = ({
   config,
   description,
   id,
+  layout = 'page',
   title,
 }: ActionPolicyFormSectionProps) => {
-  if (!config) {
+  if (config) {
     return (
-      <EuiDescribedFormGroup fullWidth title={<h3>{title}</h3>} description={description}>
+      <FlyoutAccordion
+        title={title}
+        initialIsOpen={config.initialIsOpen}
+        hasBorder={false}
+        data-test-subj={`actionPolicyFormSection-${id}`}
+      >
+        {description}
+        <EuiSpacer size="m" />
         {children}
-      </EuiDescribedFormGroup>
+      </FlyoutAccordion>
+    );
+  }
+
+  if (layout === 'flyout') {
+    return (
+      <div data-test-subj={`actionPolicyFormSection-${id}`}>
+        <EuiTitle size="xs">
+          <h3>{title}</h3>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        <EuiText size="s" color="subdued">
+          {description}
+        </EuiText>
+        <EuiSpacer size="m" />
+        {children}
+      </div>
     );
   }
 
   return (
-    <FlyoutAccordion
-      title={title}
-      initialIsOpen={config.initialIsOpen}
-      hasBorder={false}
-      data-test-subj={`actionPolicyFormSection-${id}`}
-    >
-      {description}
-      <EuiSpacer size="m" />
+    <EuiDescribedFormGroup fullWidth title={<h3>{title}</h3>} description={description}>
       {children}
-    </FlyoutAccordion>
+    </EuiDescribedFormGroup>
   );
 };
 
@@ -81,18 +107,18 @@ export const ActionPolicyForm = ({ config }: ActionPolicyFormProps) => {
   const matcher = useWatch({ control, name: 'matcher' });
   const { data: dataFieldNames } = useFetchRuleEventFields(matcher?.expression ?? undefined);
   const collapsibleSections = config?.collapsibleSections;
+  const layout = config?.layout;
 
   return (
     <>
-      <EuiDescribedFormGroup
-        fullWidth
+      <ActionPolicyFormSection
+        id="policyDetails"
+        layout={layout}
         title={
-          <h3>
-            <FormattedMessage
-              id="xpack.alertingV2.actionPolicy.form.basicInfo.title"
-              defaultMessage="Policy details"
-            />
-          </h3>
+          <FormattedMessage
+            id="xpack.alertingV2.actionPolicy.form.basicInfo.title"
+            defaultMessage="Policy details"
+          />
         }
         description={
           <FormattedMessage
@@ -156,19 +182,18 @@ export const ActionPolicyForm = ({ config }: ActionPolicyFormProps) => {
             </EuiFormRow>
           )}
         />
-      </EuiDescribedFormGroup>
+      </ActionPolicyFormSection>
 
       <EuiHorizontalRule margin="l" />
 
-      <EuiDescribedFormGroup
-        fullWidth
+      <ActionPolicyFormSection
+        id="policyScope"
+        layout={layout}
         title={
-          <h3>
-            <FormattedMessage
-              id="xpack.alertingV2.actionPolicy.form.matchConditions.title"
-              defaultMessage="Policy scope"
-            />
-          </h3>
+          <FormattedMessage
+            id="xpack.alertingV2.actionPolicy.form.matchConditions.title"
+            defaultMessage="Policy scope"
+          />
         }
         description={<PolicyScopeDescription matcher={matcher} />}
       >
@@ -187,13 +212,14 @@ export const ActionPolicyForm = ({ config }: ActionPolicyFormProps) => {
             </>
           )}
         />
-      </EuiDescribedFormGroup>
+      </ActionPolicyFormSection>
 
       <EuiHorizontalRule margin="l" />
 
       <ActionPolicyFormSection
         id="notificationControls"
         config={collapsibleSections?.notificationControls}
+        layout={layout}
         title={
           <FormattedMessage
             id="xpack.alertingV2.actionPolicy.form.notificationControls.title"
@@ -212,6 +238,7 @@ export const ActionPolicyForm = ({ config }: ActionPolicyFormProps) => {
       <ActionPolicyFormSection
         id="destination"
         config={collapsibleSections?.destination}
+        layout={layout}
         title={
           <FormattedMessage
             id="xpack.alertingV2.actionPolicy.form.destination.title"

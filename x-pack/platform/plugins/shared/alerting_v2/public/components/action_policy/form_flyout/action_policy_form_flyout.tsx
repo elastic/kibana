@@ -77,6 +77,7 @@ export const ActionPolicyFormFlyout = ({
         <FormProvider {...methods}>
           <ActionPolicyForm
             config={{
+              layout: 'flyout',
               connectorCreation: {
                 mode: 'new-tab',
                 href: application.getUrlForApp('management', {

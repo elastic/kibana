@@ -17,6 +17,7 @@ import type {
 } from '@kbn/alerting-v2-rule-form';
 
 export type ActionPolicyFormCollapsibleSection = 'notificationControls' | 'destination';
+export type ActionPolicyFormLayout = 'page' | 'flyout';
 
 export interface ActionPolicyFormCollapsibleSectionConfig {
   readonly initialIsOpen?: boolean;
@@ -24,6 +25,7 @@ export interface ActionPolicyFormCollapsibleSectionConfig {
 
 export interface ActionPolicyFormConfig {
   readonly connectorCreation: ConnectorCreationConfig;
+  readonly layout?: ActionPolicyFormLayout;
   readonly collapsibleSections?: Partial<
     Record<ActionPolicyFormCollapsibleSection, ActionPolicyFormCollapsibleSectionConfig>
   >;
