@@ -262,13 +262,13 @@ interface EntityResolutionBase {
  *                   type/identifier (cannot build an identity).
  * - `resolved`    — a single high-confidence row with a usable `identity`.
  */
+export interface AmbiguousEntityResult {
+  matchCount: number;
+  candidateEntityIds: string[];
+}
 export type ResolveSingleEntityResult =
   | (EntityResolutionBase & { status: 'not_found' })
-  | (EntityResolutionBase & {
-      status: 'ambiguous';
-      matchCount: number;
-      candidateEntityIds: string[];
-    })
+  | (EntityResolutionBase & { status: 'ambiguous' } & AmbiguousEntityResult)
   | (EntityResolutionBase & { status: 'no_identity' })
   | (EntityResolutionBase & { status: 'resolved'; identity: EntityIdentity });
 

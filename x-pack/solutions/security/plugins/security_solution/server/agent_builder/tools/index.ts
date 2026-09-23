@@ -34,6 +34,18 @@ export {
   SECURITY_ADD_ENTITIES_TO_WATCHLIST_TOOL_ID,
   removeEntitiesFromWatchlistTool,
   SECURITY_REMOVE_ENTITIES_FROM_WATCHLIST_TOOL_ID,
+  getResolutionGroupTool,
+  SECURITY_GET_RESOLUTION_GROUP_TOOL_ID,
+  linkEntitiesTool,
+  SECURITY_LINK_ENTITIES_TOOL_ID,
+  unlinkEntitiesTool,
+  SECURITY_UNLINK_ENTITIES_TOOL_ID,
+  listResolutionRulesTool,
+  SECURITY_LIST_RESOLUTION_RULES_TOOL_ID,
+  enableResolutionRuleTool,
+  SECURITY_ENABLE_RESOLUTION_RULE_TOOL_ID,
+  disableResolutionRuleTool,
+  SECURITY_DISABLE_RESOLUTION_RULE_TOOL_ID,
 } from './entity_analytics';
 export {
   buildRedirectUrlTool,

@@ -176,7 +176,7 @@ Some Entity Analytics operations are intentionally **not performed in chat**: de
 2. Why (one short clause — "lives in the management UI", "needs a CSV upload", "the editing flyout exposes the full configuration").
 3. **Where to go** — the markdown link built from the \`security.build_redirect_url\` result.
 
-Do **not** call any *mutating* tool, do **not** prompt for confirmation, and do **not** claim the operation succeeded. The user clicks the link and performs the action themselves. (\`security.build_redirect_url\` is not a mutation — it only builds a link — and \`security.get_entity\` may be called first to resolve the entity for the resolution intent.)
+Do **not** call any *mutating* tool, do **not** prompt for confirmation, and do **not** claim the operation succeeded. The user clicks the link and performs the action themselves. (\`security.build_redirect_url\` is not a mutation — it only builds a link.)
 
 ### Entity Analytics — enable / disable & clear all data
 
@@ -187,9 +187,7 @@ Redirect when the user asks to:
 
 These are the global controls at the **top of the Entity Analytics management page**.
 
-Call \`security.build_redirect_url\` with \`path: '${
-  ENTITY_ANALYTICS_UI_PATHS.settings
-}'\` and render the returned \`url\`.
+Call \`security.build_redirect_url\` with \`path: '${ENTITY_ANALYTICS_UI_PATHS.settings}'\` and render the returned \`url\`.
 
 Example reply: "I can't enable or disable Entity Analytics from chat — that's the switch at the top of the [Entity Analytics management page](<url from build_redirect_url>), where you can also clear all entity data."
 
@@ -200,9 +198,7 @@ Redirect when the user asks to:
 - **configure** / **change settings** for risk scoring (alert filters, retainment, schedule, closed-alert handling, etc.)
 - **re-score now** / **force a re-score** / **run the risk engine** — the tab has a **Run** button that triggers the risk engine on demand
 
-Call \`security.build_redirect_url\` with \`path: '${
-  ENTITY_ANALYTICS_UI_PATHS.riskScore
-}'\` and render the returned \`url\`.
+Call \`security.build_redirect_url\` with \`path: '${ENTITY_ANALYTICS_UI_PATHS.riskScore}'\` and render the returned \`url\`.
 
 Example reply: "I can't change the risk scoring settings from chat — that's managed on the Risk Score page. Open the [Risk Score settings](<url from build_redirect_url>) to reconfigure scoring or trigger a re-score via the Run button."
 
@@ -213,56 +209,15 @@ Redirect when the user asks to:
 - **upload a CSV** of asset criticalities
 - **bulk-set** / **bulk-import** / **bulk-update** criticality across many entities
 
-Call \`security.build_redirect_url\` with \`path: '${
-  ENTITY_ANALYTICS_UI_PATHS.assetCriticality
-}'\` and render the returned \`url\`.
+Call \`security.build_redirect_url\` with \`path: '${ENTITY_ANALYTICS_UI_PATHS.assetCriticality}'\` and render the returned \`url\`.
 
 Example reply: "I can't import a criticality CSV from chat — that runs through the Asset Criticality page. Open the [Asset Criticality upload](<url from build_redirect_url>) to upload your file."
-
-### Entity resolution / merge
-
-Resolution has **two** redirect paths — pick by whether the ask is about **one** entity or **many**:
-
-**Single entity** — "merge **this** entity", "add **this host/user** to a resolution group", "resolve **that** entity". This opens the entity's **Resolution** panel ("Add entities to resolution group") in the entity details flyout, so you need the entity first:
-
-1. If you don't already have the entity's \`entity.type\` and \`entity.id\` from a prior \`security.get_entity\` call, call \`security.get_entity\` now (do **not** call any mutating tool).
-2. Call \`security.build_redirect_url\` with \`path: '${
-  ENTITY_ANALYTICS_UI_PATHS.entityResolutionHomePage
-}'\` and the \`flyout\` object for the entity's type below.
-
-   Substitute \`${ENTITY_ID}\` with the entity's \`entity.id\` (EUID) and \`${ENTITY_NAME}\` with \`entity.name\` when you have it (use the EUID as the name fallback when \`entity.name\` is unknown — do **not** omit name fields). Copy every other field **exactly** as shown. Do **not** invent \`flyoutParam\` for this intent.
-
-   Host — \`entityType: 'host'\`:
-
-${asIndentedJson(buildResolutionFlyoutTemplate('host'))}
-
-   User — \`entityType: 'user'\`:
-
-${asIndentedJson(buildResolutionFlyoutTemplate('user'))}
-
-   Service — \`entityType: 'service'\`:
-
-${asIndentedJson(buildResolutionFlyoutTemplate('service'))}
-
-3. Render the returned \`url\` as a markdown link.
-
-Example reply (host entity named \`myserver\`): "I can't merge entities from chat — open the [Resolution panel for myserver](<url from build_redirect_url>) to add it to a resolution group."
-
-**Bulk / CSV** — "**bulk**-link entities", "**import a CSV** of resolutions", "link **many** entities to resolution targets". This is the CSV import on the Entity Resolution management tab (no specific entity needed):
-
-- Call \`security.build_redirect_url\` with \`path: '${
-  ENTITY_ANALYTICS_UI_PATHS.entityResolutionBulk
-}'\` and render the returned \`url\`.
-
-Example reply: "I can't bulk-link entities from chat — that runs through a CSV import on the [Entity Resolution page](<url from build_redirect_url>)."
 
 ### Entity store / engine status
 
 Redirect when the user asks to **see the status** of the **entity store** / **entity engines** ("is the entity store running", "entity engine status", "show entity store health").
 
-Call \`security.build_redirect_url\` with \`path: '${
-  ENTITY_ANALYTICS_UI_PATHS.status
-}'\` and render the returned \`url\`.
+Call \`security.build_redirect_url\` with \`path: '${ENTITY_ANALYTICS_UI_PATHS.status}'\` and render the returned \`url\`.
 
 Example reply: "You can check that on the [Entity Store status page](<url from build_redirect_url>)."`;
 
@@ -320,3 +275,47 @@ User: "Open the watchlists page so I can pick one to edit."
 1. Call \`security.build_redirect_url\` with \`{ path: '${
   ENTITY_ANALYTICS_UI_PATHS.watchlists
 }' }\` (no \`flyout\`) and render the returned \`url\`: [Watchlists](<url from build_redirect_url>).`;
+
+export const RESOLUTION_UI_NAVIGATION_CONTENT = `## UI navigation
+
+### Open the resolution flyout — fallback, not a first choice
+
+\`security.get_resolution_group\` already answers "who is this resolved with" in chat, and \`security.link_entities\` / \`security.unlink_entities\` perform the merge itself — none of these need the UI when they succeed. Redirect to the flyout only when:
+
+- A **link** or **unlink** call couldn't resolve one or more of the entities given (\`unresolvedReferences\`) and you still have the target entity — open that entity's panel so the user can search for the rest. The flyout's "Add entities to resolution group" section has a search bar and browsable entity table for this.
+- The user explicitly asks to **see** / **open** the resolution panel in the UI ("show me the resolution panel for this host", "open the resolution flyout", "let me see this visually"), even though the chat tools could answer the same question.
+
+1. Use the entity you already have — its type and id — to fill the flyout below. If you don't have one, name what was not found and stop. Do **not** call \`security.build_redirect_url\` without a flyout.
+2. Call \`security.build_redirect_url\` with \`path: '${
+  ENTITY_ANALYTICS_UI_PATHS.entityResolutionHomePage
+}'\` and the \`flyout\` object for its type.
+
+   Substitute \`${ENTITY_ID}\` with the entity's \`entity.id\` (EUID) and \`${ENTITY_NAME}\` with \`entity.name\` when you have it (use \`entity.id\` as the name fallback when \`entity.name\` is unknown — do **not** omit name fields). Copy every other field **exactly** as shown.
+
+   Host — \`entityType: 'host'\`:
+
+${asIndentedJson(buildResolutionFlyoutTemplate('host'))}
+
+   User — \`entityType: 'user'\`:
+
+${asIndentedJson(buildResolutionFlyoutTemplate('user'))}
+
+   Service — \`entityType: 'service'\`:
+
+${asIndentedJson(buildResolutionFlyoutTemplate('service'))}
+
+3. Render the returned \`url\` as a markdown link.
+
+Example reply (user asked to see the panel for \`host:myserver\`): "Here's the [Resolution panel for host:myserver](<url from build_redirect_url>)."
+
+Example reply (link resolved \`host:server1\` but not \`jsmith.contractor\`): "I couldn't find an entity matching \`jsmith.contractor\`, so I linked what I could confirm. You can search for the rest in the [Resolution panel for host:server1](<url from build_redirect_url>)."
+
+### Bulk / CSV import — redirect, do not call a tool
+
+"**bulk**-link entities", "**import a CSV** of resolutions", "link **many** entities to resolution targets" — the tools in this skill cap \`entityIds\` at 100 per call; anything larger belongs in the CSV import on the Entity Resolution management tab. Decline and redirect; do **not** call \`security.link_entities\` / \`security.unlink_entities\` for this intent.
+
+Call \`security.build_redirect_url\` with \`path: '${
+  ENTITY_ANALYTICS_UI_PATHS.entityResolutionBulk
+}'\` and render the returned \`url\`.
+
+Example reply: "I can't bulk-link entities from chat — that runs through a CSV import on the [Entity Resolution page](<url from build_redirect_url>)."`;
