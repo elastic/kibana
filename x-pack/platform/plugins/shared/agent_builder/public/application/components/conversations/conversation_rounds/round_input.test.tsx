@@ -11,7 +11,7 @@ import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { useCurrentUser } from '../../../hooks/use_current_user';
 import { useUserProfiles } from '../../../hooks/use_user_profiles';
 import { RoundInput } from './round_input';
-import { RoundResponseActions } from './round_response/round_response_actions';
+import { ResponseActions } from './round_response/response_actions';
 import { RoundInputImages } from './round_input_images';
 
 jest.mock('../../../hooks/use_current_user', () => ({
@@ -22,8 +22,8 @@ jest.mock('../../../hooks/use_user_profiles', () => ({
   useUserProfiles: jest.fn(),
 }));
 
-jest.mock('./round_response/round_response_actions', () => ({
-  RoundResponseActions: jest.fn(() => <div data-test-subj="agentBuilderRoundInputActions" />),
+jest.mock('./round_response/response_actions', () => ({
+  ResponseActions: jest.fn(() => <div data-test-subj="agentBuilderRoundInputActions" />),
 }));
 
 jest.mock('./round_attachment_references', () => ({
@@ -36,7 +36,7 @@ jest.mock('./round_input_images', () => ({
 
 const mockUseCurrentUser = jest.mocked(useCurrentUser);
 const mockUseUserProfiles = jest.mocked(useUserProfiles);
-const MockRoundResponseActions = jest.mocked(RoundResponseActions);
+const MockResponseActions = jest.mocked(ResponseActions);
 const MockRoundInputImages = jest.mocked(RoundInputImages);
 
 const currentUser = {
@@ -55,7 +55,7 @@ const currentUser = {
 
 describe('RoundInput', () => {
   beforeEach(() => {
-    MockRoundResponseActions.mockClear();
+    MockResponseActions.mockClear();
     MockRoundInputImages.mockClear();
     mockUseCurrentUser.mockReturnValue({
       currentUser,
@@ -67,7 +67,7 @@ describe('RoundInput', () => {
     } as unknown as ReturnType<typeof useUserProfiles>);
   });
 
-  it('tells RoundResponseActions to copy the prompt, not the response', () => {
+  it('tells ResponseActions to copy the prompt, not the response', () => {
     render(
       <RoundInput
         input="hello agent"
@@ -76,7 +76,7 @@ describe('RoundInput', () => {
       />
     );
 
-    const [props] = MockRoundResponseActions.mock.calls[0];
+    const [props] = MockResponseActions.mock.calls[0];
     expect(props.content).toBe('hello agent');
     expect(props.copyTarget).toBe('prompt');
   });

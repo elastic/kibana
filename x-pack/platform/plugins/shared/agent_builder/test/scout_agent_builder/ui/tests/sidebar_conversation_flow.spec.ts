@@ -46,7 +46,7 @@ test.describe.skip(
         await pageObjects.agentBuilder.sendMessage();
         await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
         await expect(async () => {
-          await expect(page.testSubj.locator('agentBuilderRoundResponse')).toContainText(
+          await expect(page.testSubj.locator('agentBuilderResponseMessage')).toContainText(
             MOCKED_RESPONSE
           );
         }).toPass({ timeout: 120_000 });
@@ -57,7 +57,7 @@ test.describe.skip(
         await pageObjects.agentBuilder.openEmbeddableMenu();
         await pageObjects.agentBuilder.clickEmbeddableNewChatButton();
         await expect(page.testSubj.locator('agentBuilderConversationInputForm')).toBeVisible();
-        await expect(page.testSubj.locator('agentBuilderRoundResponse')).toHaveCount(0);
+        await expect(page.testSubj.locator('agentBuilderResponseMessage')).toHaveCount(0);
       });
 
       await test.step('can send a message after starting a new conversation from the menu', async () => {
@@ -75,7 +75,7 @@ test.describe.skip(
         await pageObjects.agentBuilder.sendMessage();
         await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
         await expect(async () => {
-          await expect(page.testSubj.locator('agentBuilderRoundResponse')).toContainText(
+          await expect(page.testSubj.locator('agentBuilderResponseMessage')).toContainText(
             MOCKED_RESPONSE
           );
         }).toPass({ timeout: 120_000 });

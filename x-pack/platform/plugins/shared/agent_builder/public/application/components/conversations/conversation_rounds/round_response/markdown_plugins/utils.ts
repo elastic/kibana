@@ -14,7 +14,7 @@ export type MutableNode = Node & {
   toolResultId?: string;
   chartType?: string;
   attachmentId?: string;
-  attachmentVersion?: string;
+  version?: string;
   path?: string;
   renderType?: string;
 };

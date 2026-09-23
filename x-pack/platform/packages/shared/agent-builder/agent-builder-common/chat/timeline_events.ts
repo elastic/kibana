@@ -421,6 +421,21 @@ export const executionTerminatedEventId = (roundId: string, executionIndex: numb
       }`;
 
 /**
+ * ID for a step event of any execution. Step ids are not uniform: the initial run numbers steps
+ * off the round id, a resume numbers them off its own execution id.
+ */
+export const executionStepEventId = (
+  roundId: string,
+  executionIndex: number,
+  sequence: number
+): string =>
+  executionIndex === 0
+    ? roundStepEventId(roundId, sequence)
+    : `${resumeExecutionId(roundId, executionIndex)}${
+        ROUND_DERIVED_EVENT_ID_SUFFIXES.stepPrefix
+      }${sequence}`;
+
+/**
  * Type names that are not covered by a `TimelineEventType` member but would still
  * produce ids colliding with round-derived ones.
  */

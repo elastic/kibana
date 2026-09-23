@@ -45,7 +45,7 @@ import {
   renderTagParser,
   createRenderRenderer,
 } from './markdown_plugins';
-import { useStepsFromPrevRounds } from '../../../../hooks/use_conversation';
+import { useStepsFromSavedTurns } from '../../../../hooks/use_steps_from_saved_turns';
 import { useConversationContext } from '../../../../context/conversation/conversation_context';
 import { ExternalLinkModal } from './external_link_modal';
 
@@ -64,7 +64,7 @@ interface Props {
  */
 export function ChatMessageText({
   content,
-  steps: stepsFromCurrentRound,
+  steps: stepsFromCurrentTurn,
   conversationAttachments,
   attachmentRefs,
   conversationId,
@@ -92,7 +92,7 @@ export function ChatMessageText({
 
   const { attachmentsService, renderersService, conversationsService, startDependencies } =
     useAgentBuilderServices();
-  const stepsFromPrevRounds = useStepsFromPrevRounds();
+  const stepsFromPreviousTurns = useStepsFromSavedTurns();
   const { isEmbeddedContext: isSidebar } = useConversationContext();
   const {
     services: { http, application, uiSettings },
@@ -124,10 +124,10 @@ export function ChatMessageText({
         http,
         uiSettings,
         startDependencies,
-        stepsFromCurrentRound,
-        stepsFromPrevRounds,
+        stepsFromCurrentTurn,
+        stepsFromPreviousTurns,
       }),
-    [application, http, uiSettings, startDependencies, stepsFromCurrentRound, stepsFromPrevRounds]
+    [application, http, uiSettings, startDependencies, stepsFromCurrentTurn, stepsFromPreviousTurns]
   );
 
   const renderAttachmentRenderer = useMemo(
