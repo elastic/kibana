@@ -279,7 +279,7 @@ interface TitleProps {
   compact?: boolean;
 }
 
-export const Title = React.memo<TitleProps>(({ title, titleOffset, size = 's', compact }) => {
+export const Title = React.memo<TitleProps>(({ title, titleOffset, size = 'xs', compact }) => {
   const editable = isEditableTitle(title);
   const text = asPlainText(editable ? title.text : title);
   const placeholder = asOptionalPlainText(editable ? title.placeholder : undefined);

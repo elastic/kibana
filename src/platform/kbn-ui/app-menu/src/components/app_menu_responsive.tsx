@@ -26,9 +26,9 @@ export const APPLICATION_LAYOUTS: Record<EuiBreakpointSize, AppMenuLayout> = {
 
 export const VIEWPORT_LAYOUTS: Record<EuiBreakpointSize, AppMenuLayout> = {
   xs: 'collapsed',
-  s: 'collapsed',
-  m: 'minimal',
-  l: 'minimal',
+  s: 'minimal',
+  m: 'expanded',
+  l: 'expanded',
   xl: 'expanded',
 };
 

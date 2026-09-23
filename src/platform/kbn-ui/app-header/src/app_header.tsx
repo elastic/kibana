@@ -10,6 +10,8 @@
 import type { ReactNode } from 'react';
 import React from 'react';
 import type { DistributiveOmit } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { AppMenuStaticItem } from '@kbn/ui-app-menu';
 import type { AppHeaderBack, AppHeaderConfig } from './types';
 import { AppHeaderShell } from './app_header_shell';
@@ -61,8 +63,6 @@ const getPublicAppHeaderViewProps = ({
   titleAppend,
   borderless,
 }: AppHeaderViewProps): AppHeaderViewProps => {
-  const secondaryContent = description ? { description } : metadata ? { metadata } : {};
-
   return {
     title,
     back,
@@ -71,7 +71,8 @@ const getPublicAppHeaderViewProps = ({
     menu,
     favorite,
     share,
-    ...secondaryContent,
+    description,
+    metadata,
     sticky,
     spacing,
     staticItems,
@@ -115,9 +116,28 @@ const AppHeaderViewInternal = React.memo<AppHeaderViewProps>(
       !share;
     const resolvedSpacing = spacing ?? (isSparse ? 'compact' : 'standard');
 
-    // Match the title size to the spacing: the shorter `compact` header uses an `xs` title, while the
-    // roomier standard/bleed headers use `s`.
-    const titleSize = resolvedSpacing === 'compact' ? 'xs' : 's';
+    // Page titles use EUI Heading 4 (`xs` = 16/24 semi-bold) in every spacing mode.
+    const titleSize = 'xs' as const;
+    const { euiTheme } = useEuiTheme();
+
+    const secondaryStack = css`
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: center;
+      column-gap: ${euiTheme.size.m};
+      row-gap: ${euiTheme.size.xs};
+      min-width: 0;
+    `;
+
+    const metadataRow = css`
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      column-gap: ${euiTheme.size.m};
+      row-gap: ${euiTheme.size.xs};
+      min-width: 0;
+    `;
 
     const show =
       title !== undefined ||
@@ -125,6 +145,8 @@ const AppHeaderViewInternal = React.memo<AppHeaderViewProps>(
       !!tabs?.length ||
       !!badges?.length ||
       !!menu?.items?.length ||
+      !!menu?.primaryActionItem ||
+      !!menu?.switch ||
       !!titleAppend ||
       !!share ||
       !!favorite ||
@@ -136,6 +158,9 @@ const AppHeaderViewInternal = React.memo<AppHeaderViewProps>(
     if (!show) {
       return null;
     }
+
+    const hasDescription = !!description;
+    const hasMetadata = !!metadata?.length;
 
     return (
       <AppHeaderShell
@@ -152,16 +177,23 @@ const AppHeaderViewInternal = React.memo<AppHeaderViewProps>(
         titleAppend={titleAppend}
         trailing={<AppMenu menu={menu} staticItems={staticItems} fallbackMenu={fallbackMenu} />}
         secondaryContent={
-          description ? (
+          hasDescription && hasMetadata ? (
+            <div css={secondaryStack}>
+              <div css={metadataRow} data-test-subj={APP_HEADER_TEST_SUBJECTS.metadata}>
+                <AppHeaderMetadata metadata={metadata} />
+              </div>
+              <AppHeaderDescription description={description} />
+            </div>
+          ) : hasDescription ? (
             <AppHeaderDescription description={description} />
-          ) : metadata?.length ? (
+          ) : hasMetadata ? (
             <AppHeaderMetadata metadata={metadata} />
           ) : undefined
         }
         secondaryContentTestSubj={
-          description
+          hasDescription
             ? APP_HEADER_TEST_SUBJECTS.description
-            : metadata?.length
+            : hasMetadata
             ? APP_HEADER_TEST_SUBJECTS.metadata
             : undefined
         }

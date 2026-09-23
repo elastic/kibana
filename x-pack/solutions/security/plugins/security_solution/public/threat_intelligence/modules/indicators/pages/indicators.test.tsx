@@ -19,9 +19,21 @@ import { mockTimeRange } from '../../../mocks/mock_indicators_filters_context';
 jest.mock('../../query_bar/hooks/use_filters');
 jest.mock('../hooks/use_indicators');
 jest.mock('../hooks/use_aggregated_indicators');
+jest.mock('@kbn/app-header', () => ({
+  AppHeader: ({ title }: { title: string }) => <h1>{title}</h1>,
+}));
+jest.mock('../../../../common/hooks/use_add_integrations_url', () => ({
+  useAddIntegrationsUrl: () => ({
+    href: '/app/integrations/browse/threat_intel',
+    onClick: jest.fn(),
+  }),
+}));
 
+jest.mock('../../../../common/components/search_bar', () => ({
+  SiemSearchBar: () => <div data-test-subj="SiemSearchBar" />,
+}));
 jest.mock('../../../../common/components/filters_global', () => ({
-  FiltersGlobal: () => <div data-test-subj="SiemSearchBar" />,
+  FiltersGlobal: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
 const stub = () => {};

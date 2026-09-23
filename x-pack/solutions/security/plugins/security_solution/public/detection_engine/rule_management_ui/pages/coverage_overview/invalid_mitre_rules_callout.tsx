@@ -12,6 +12,10 @@ import { MITRE_ATTACK_VERSION } from '../../../../../common/detection_engine/mit
 import { useKibana } from '../../../../common/lib/kibana';
 import { useCoverageOverviewDashboardContext } from './coverage_overview_dashboard_context';
 import { InvalidMitreRulesModal } from './invalid_mitre_rules_modal';
+import {
+  COVERAGE_PROTOTYPE_INVALID_RULE_COUNT,
+  COVERAGE_PROTOTYPE_INVALID_RULES,
+} from './prototype_coverage_colors';
 import * as i18n from './translations';
 
 const CoverageOverviewInvalidMitreRulesCalloutComponent = () => {
@@ -24,12 +28,14 @@ const CoverageOverviewInvalidMitreRulesCalloutComponent = () => {
   const closeModal = useCallback(() => setIsModalOpen(false), []);
   const openModal = useCallback(() => setIsModalOpen(true), []);
 
-  const { enabledRules = [], disabledRules = [] } = data?.invalidlyMappedRules ?? {};
-  const invalidCount = enabledRules.length + disabledRules.length;
-
-  if (invalidCount === 0) {
-    return null;
-  }
+  const realEnabled = data?.invalidlyMappedRules?.enabledRules ?? [];
+  const realDisabled = data?.invalidlyMappedRules?.disabledRules ?? [];
+  const realCount = realEnabled.length + realDisabled.length;
+  // Prototype fallback so the ATT&CK tab matches the print when the env has no invalid mappings.
+  const isPrototype = realCount === 0;
+  const enabledRules = isPrototype ? COVERAGE_PROTOTYPE_INVALID_RULES.enabledRules : realEnabled;
+  const disabledRules = isPrototype ? COVERAGE_PROTOTYPE_INVALID_RULES.disabledRules : realDisabled;
+  const invalidCount = isPrototype ? COVERAGE_PROTOTYPE_INVALID_RULE_COUNT : realCount;
 
   return (
     <>

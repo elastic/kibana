@@ -44,9 +44,12 @@ const renderCallout = ({
 };
 
 describe('CoverageOverviewInvalidMitreRulesCallout', () => {
-  it('renders nothing when there are no invalidly mapped rules', () => {
-    const { container } = renderCallout({ invalidlyMappedRules: emptyInvalidlyMappedRules });
-    expect(container).toBeEmptyDOMElement();
+  it('renders a prototype callout when there are no invalidly mapped rules', () => {
+    renderCallout({ invalidlyMappedRules: emptyInvalidlyMappedRules });
+
+    const callout = screen.getByTestId('coverageOverviewInvalidMitreRulesCallout');
+    expect(callout).toBeInTheDocument();
+    expect(callout.textContent).toContain('You have 125 rules that reference MITRE ATT&CK® IDs');
   });
 
   it('renders the callout with singular description when there is one invalid rule', () => {

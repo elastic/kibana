@@ -8,21 +8,17 @@
 import { i18n } from '@kbn/i18n';
 import { AI_VALUE_REPORT_LOCATOR } from '@kbn/deeplinks-analytics';
 import { SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_TITLE } from '@kbn/management-settings-ids';
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useKibana } from '../../common/lib/kibana';
 import type { AIValueReportParams } from '../../../common/locators/ai_value_report/locator';
 import type { TimeRange } from '../../common/store/inputs/model';
 import { useAIValueExportContext } from '../providers/ai_value/export_provider';
 
 interface UseDownloadAIValueReportParams {
-  anchorElement: HTMLElement | null;
   timeRange: TimeRange;
 }
 
-export const useDownloadAIValueReport = ({
-  anchorElement,
-  timeRange,
-}: UseDownloadAIValueReportParams) => {
+export const useDownloadAIValueReport = ({ timeRange }: UseDownloadAIValueReportParams) => {
   const { share: shareService, serverless, uiSettings } = useKibana().services;
   const isServerless = !!serverless;
   const aiValueExportContext = useAIValueExportContext();
@@ -44,24 +40,22 @@ export const useDownloadAIValueReport = ({
     return buildForwardedState({ timeRange: forwardedTimeRange });
   }, [forwardedTimeRange, buildForwardedState]);
 
+  // ESS share-menu export; serverless uses an in-page PDF export instead.
   const isExportEnabled =
-    forwardedState !== undefined &&
-    // exporting the report via the share service is only available in ESS
-    !isServerless &&
-    anchorElement !== null &&
-    shareService !== undefined;
+    forwardedState !== undefined && !isServerless && shareService !== undefined;
 
-  const toggleContextMenu = useMemo(() => {
-    if (!isExportEnabled) {
-      return () => {};
-    }
+  const openExportMenu = useCallback(
+    (anchorElement: HTMLElement) => {
+      if (!isExportEnabled || !forwardedState || !shareService) {
+        return;
+      }
 
-    return () => {
       const reportTitle =
         uiSettings?.get<string>(SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_TITLE) ??
         i18n.translate('xpack.securitySolution.reports.aiValue.pdfReportJobTitle', {
           defaultMessage: 'AI Value Report',
         });
+
       shareService.toggleShareContextMenu({
         isDirty: false,
         anchorElement,
@@ -88,11 +82,13 @@ export const useDownloadAIValueReport = ({
           },
         },
       });
-    };
-  }, [anchorElement, shareService, forwardedState, isExportEnabled, uiSettings]);
+    },
+    [forwardedState, isExportEnabled, shareService, uiSettings]
+  );
 
   return {
-    toggleContextMenu,
+    openExportMenu,
     isExportEnabled,
+    isServerless,
   };
 };

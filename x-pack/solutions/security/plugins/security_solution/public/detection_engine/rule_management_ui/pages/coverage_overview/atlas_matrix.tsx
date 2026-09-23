@@ -30,40 +30,16 @@ import {
   techniqueMatchesSelectedPlatforms,
 } from './atlas_platforms';
 import { coverageOverviewPanelWidth } from './constants';
-import { getPrototypeRuleCount } from './prototype_coverage_colors';
+import {
+  getPrototypeEnabledDisabledCounts,
+  getPrototypeRuleCountsByActivity,
+} from './prototype_coverage_colors';
 import { RuleActivityFilter } from './rule_activity_filter';
 import { CoverageOverviewLegend } from './shared_components/dashboard_legend';
 import { CoverageOverviewPanelRuleStats } from './shared_components/panel_rule_stats';
 import { useAtlasMatrix } from './use_atlas_matrix';
 import { useCoverageColors } from './use_coverage_colors';
 import * as i18n from './translations';
-
-const getPrototypeEnabledDisabledCounts = (techniqueIndex: number) => {
-  const total = getPrototypeRuleCount(techniqueIndex);
-  const enabledRules = Math.ceil((total * 2) / 3);
-  const disabledRules = total - enabledRules;
-  return { enabledRules, disabledRules, total };
-};
-
-const getPrototypeRuleCountsByActivity = (
-  techniqueIndex: number,
-  activity?: CoverageOverviewRuleActivity[]
-): number => {
-  const { enabledRules, disabledRules, total } = getPrototypeEnabledDisabledCounts(techniqueIndex);
-
-  if (!activity || activity.length === 0) {
-    return total;
-  }
-
-  let count = 0;
-  if (activity.includes(CoverageOverviewRuleActivity.Enabled)) {
-    count += enabledRules;
-  }
-  if (activity.includes(CoverageOverviewRuleActivity.Disabled)) {
-    count += disabledRules;
-  }
-  return count;
-};
 
 const AtlasTacticHeader = memo(function AtlasTacticHeader({ tactic }: { tactic: AtlasTactic }) {
   const { euiTheme } = useEuiTheme();

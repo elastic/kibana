@@ -132,6 +132,11 @@ export interface JobTableProps {
   jobs: SecurityJob[];
   mlNodesAvailable: boolean;
   onJobStateChange: (job: SecurityJob, latestTimestampMs: number, enable: boolean) => Promise<void>;
+  /**
+   * When set, the table stacks columns below this breakpoint so content can reflow inside a
+   * resizable flyout. Defaults to `false` (never responsive) to preserve the popover layout.
+   */
+  responsiveBreakpoint?: false | 'xs' | 's' | 'm' | 'l' | 'xl';
 }
 
 export const JobsTableComponent = ({
@@ -139,6 +144,7 @@ export const JobsTableComponent = ({
   jobs,
   onJobStateChange,
   mlNodesAvailable,
+  responsiveBreakpoint = false,
 }: JobTableProps) => {
   const [pageIndex, setPageIndex] = useState(0);
   const pageSize = 5;
@@ -167,7 +173,7 @@ export const JobsTableComponent = ({
       loading={isLoading}
       noItemsMessage={<NoItemsMessage />}
       pagination={pagination}
-      responsiveBreakpoint={false}
+      responsiveBreakpoint={responsiveBreakpoint}
       onChange={({ page }: { page: { index: number } }) => {
         setPageIndex(page.index);
       }}

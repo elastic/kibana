@@ -16,6 +16,29 @@ import { CoverageOverviewDashboardContextProvider } from './coverage_overview_da
 
 jest.mock('../../../../common/utils/route/spy_routes', () => ({ SpyRoute: () => null }));
 jest.mock('../../../rule_management/api/hooks/use_fetch_coverage_overview_query');
+jest.mock('@kbn/app-header', () => ({
+  AppHeader: ({
+    title,
+    tabs,
+  }: {
+    title: string;
+    tabs?: Array<{ id: string; label: string; onClick?: () => void; 'data-test-subj'?: string }>;
+  }) => (
+    <div>
+      <h1>{title}</h1>
+      {tabs?.map((tab) => (
+        <button
+          key={tab.id}
+          type="button"
+          data-test-subj={tab['data-test-subj']}
+          onClick={tab.onClick}
+        >
+          {tab.label}
+        </button>
+      ))}
+    </div>
+  ),
+}));
 
 // The invalid MITRE rules callout is gated behind the mitreAttackUpdatesUIEnabled
 // feature flag, which is off by default. Force it on for this test suite.
@@ -57,12 +80,10 @@ describe('CoverageOverviewDashboard', () => {
     expect(screen.queryByTestId('atlasCoveragePlatformFilter')).not.toBeInTheDocument();
   });
 
-  test('does NOT render the invalid MITRE rules callout when there are no invalidly mapped rules', () => {
+  test('renders a prototype invalid MITRE rules callout when there are no invalidly mapped rules', () => {
     renderCoverageOverviewDashboard();
 
-    expect(
-      screen.queryByTestId('coverageOverviewInvalidMitreRulesCallout')
-    ).not.toBeInTheDocument();
+    expect(screen.getByTestId('coverageOverviewInvalidMitreRulesCallout')).toBeInTheDocument();
   });
 
   test('renders the invalid MITRE rules callout when there are invalidly mapped rules', () => {

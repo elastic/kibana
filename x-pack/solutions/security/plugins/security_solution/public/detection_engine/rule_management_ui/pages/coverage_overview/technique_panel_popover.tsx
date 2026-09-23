@@ -33,10 +33,14 @@ import { useUserPrivileges } from '../../../../common/components/user_privileges
 
 export interface CoverageOverviewMitreTechniquePanelPopoverProps {
   technique: CoverageOverviewMitreTechnique;
+  techniqueIndex?: number;
+  usePrototype?: boolean;
 }
 
 const CoverageOverviewMitreTechniquePanelPopoverComponent = ({
   technique,
+  techniqueIndex = 0,
+  usePrototype = false,
 }: CoverageOverviewMitreTechniquePanelPopoverProps) => {
   const canEnableRules = useUserPrivileges().rulesPrivileges.enableDisable.edit;
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -76,6 +80,8 @@ const CoverageOverviewMitreTechniquePanelPopoverComponent = ({
       setIsPopoverOpen={setIsPopoverOpen}
       isPopoverOpen={isPopoverOpen}
       technique={technique}
+      techniqueIndex={techniqueIndex}
+      usePrototype={usePrototype}
       isExpanded={showExpandedCells}
       coveredSubtechniques={coveredSubtechniques}
     />

@@ -18,7 +18,6 @@ import {
 import { ListsDetailView, SharedLists } from './pages';
 import { SpyRoute } from '../common/utils/route/spy_routes';
 import { NotFoundPage } from '../app/404';
-import { useReadonlyHeader } from '../use_readonly_header';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 import {
   SecurityRoutePageWrapper,
@@ -43,8 +42,6 @@ const ExceptionsListDetailRoute = () => (
 );
 
 const ExceptionsContainerComponent: React.FC = () => {
-  useReadonlyHeader(i18n.READ_ONLY_BADGE_TOOLTIP);
-
   return (
     <Routes>
       <Route path={EXCEPTIONS_PATH} exact component={ExceptionsRoutes} />

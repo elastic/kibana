@@ -75,6 +75,10 @@ export const EXPORT_REPORT = i18n.translate('xpack.securitySolution.reports.aiVa
   defaultMessage: 'Export PDF',
 });
 
+export const SETTINGS = i18n.translate('xpack.securitySolution.reports.aiValue.settings', {
+  defaultMessage: 'Settings',
+});
+
 export const FILTERING_RATE = i18n.translate(
   'xpack.securitySolution.reports.aiValue.filteringRate',
   {

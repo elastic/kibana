@@ -8,23 +8,24 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { EuiSearchBarProps } from '@elastic/eui';
 import {
-  EuiButton,
   EuiButtonEmpty,
-  EuiButtonIcon,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
-  EuiPageHeader,
   EuiPagination,
   EuiPopover,
   EuiScreenReaderLive,
   EuiSpacer,
-  EuiText,
-  EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import styled from '@emotion/styled';
+import { css } from '@emotion/react';
+import { AppHeader } from '@kbn/app-header';
+import type { AppHeaderMenu, AppHeaderMetadataItems } from '@kbn/app-header';
+import { useNavigateTo } from '@kbn/security-solution-navigation';
+import { i18n as i18nCore } from '@kbn/i18n';
+import moment from 'moment';
 
 import type { ExceptionListFilter, NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
@@ -35,9 +36,13 @@ import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { useGetEndpointExceptionsPerPolicyOptIn } from '../../../management/hooks/artifacts/use_endpoint_per_policy_opt_in';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { AutoDownload } from '../../../common/components/auto_download/auto_download';
+import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
+import { ML_JOB_SETTINGS } from '../../../common/components/ml_popover/translations';
+import { MlJobSettingsFlyout } from '../../../common/components/ml_popover/ml_job_settings_flyout';
+import { useAddIntegrationsUrl } from '../../../common/hooks/use_add_integrations_url';
+import { useBoolState } from '../../../common/hooks/use_bool_state';
 import { useKibana } from '../../../common/lib/kibana';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
-
 import * as i18n from '../../translations/shared_list';
 import {
   CreateSharedListFlyout,
@@ -90,6 +95,158 @@ const ExceptionsTable = styled(EuiFlexGroup)`
   padding: ${({ theme }) => theme.euiTheme.size.l} 0;
 `;
 
+interface ExceptionsHeaderProps {
+  loading: boolean;
+  lastUpdated: number;
+  onImport: () => void;
+  onCreateSharedList: () => void;
+  onCreateExceptionItem: () => void;
+  onOpenMlJobSettings: () => void;
+}
+
+const ExceptionsHeader: React.FC<ExceptionsHeaderProps> = ({
+  loading,
+  lastUpdated,
+  onImport,
+  onCreateSharedList,
+  onCreateExceptionItem,
+  onOpenMlJobSettings,
+}) => {
+  const {
+    services: { application, docLinks },
+  } = useKibana();
+  const { href: addIntegrationsHref } = useAddIntegrationsUrl();
+  const { navigateTo } = useNavigateTo();
+
+  const rulesHref = application.getUrlForApp('security', { path: '/rules' });
+
+  const metadata = useMemo<AppHeaderMetadataItems>(() => {
+    if (loading) {
+      return [
+        {
+          type: 'text',
+          // Single label matches Rule Details metadata items (full phrase, no separate value).
+          label: i18nCore.translate(
+            'xpack.securitySolution.exceptions.sharedLists.headerUpdating',
+            { defaultMessage: 'Updating...' }
+          ),
+          'data-test-subj': 'exceptionsHeaderUpdated',
+        },
+      ];
+    }
+    const secondsAgo = (Date.now() - lastUpdated) / 1000;
+    const relative =
+      secondsAgo < 10
+        ? i18nCore.translate('xpack.securitySolution.exceptions.sharedLists.headerUpdatedNow', {
+            defaultMessage: 'now',
+          })
+        : moment(lastUpdated).fromNow();
+    return [
+      {
+        type: 'text',
+        label: i18nCore.translate(
+          'xpack.securitySolution.exceptions.sharedLists.headerUpdatedRelative',
+          {
+            defaultMessage: 'Updated {relative}',
+            values: { relative },
+          }
+        ),
+        'data-test-subj': 'exceptionsHeaderUpdated',
+      },
+    ];
+  }, [lastUpdated, loading]);
+
+  // Import + Create stay outside the kebab (same as Old rightSideItems).
+  // ML / integrations stay in overflow with Docs / Feedback.
+  const menu = useMemo<AppHeaderMenu>(() => {
+    const items: NonNullable<AppHeaderMenu['items']> = [
+      {
+        id: 'importExceptionList',
+        label: i18n.IMPORT_EXCEPTION_LIST_BUTTON,
+        iconType: 'download',
+        testId: 'importSharedExceptionList',
+        run: onImport,
+      },
+      {
+        id: 'addIntegrations',
+        label: i18nCore.translate(
+          'xpack.securitySolution.exceptions.sharedLists.addIntegrationsMenuItem',
+          { defaultMessage: 'Add integrations' }
+        ),
+        iconType: 'indexOpen',
+        href: addIntegrationsHref,
+        overflow: true,
+        testId: 'exceptionsHeaderAddIntegrations',
+        run: () => {
+          navigateTo({ url: addIntegrationsHref });
+        },
+      },
+      {
+        id: 'mlJobSettings',
+        label: ML_JOB_SETTINGS,
+        iconType: 'productML',
+        overflow: true,
+        testId: 'exceptionsHeaderMlJobSettings',
+        run: onOpenMlJobSettings,
+      },
+    ];
+
+    return {
+      items,
+      // Dropdown chevron on the right — matches Old / Figma Create shared exception list.
+      primaryActionItem: {
+        id: 'createException',
+        label: i18n.CREATE_BUTTON,
+        iconType: 'chevronSingleDown',
+        iconSide: 'right',
+        testId: 'manageExceptionListCreateButton',
+        items: [
+          {
+            id: 'createSharedList',
+            label: i18n.CREATE_SHARED_LIST_BUTTON,
+            testId: 'manageExceptionListCreateExceptionListButton',
+            run: onCreateSharedList,
+          },
+          {
+            id: 'createExceptionItem',
+            label: i18n.CREATE_BUTTON_ITEM_BUTTON,
+            testId: 'manageExceptionListCreateExceptionButton',
+            run: onCreateExceptionItem,
+          },
+        ],
+      },
+    };
+  }, [
+    addIntegrationsHref,
+    navigateTo,
+    onCreateExceptionItem,
+    onCreateSharedList,
+    onImport,
+    onOpenMlJobSettings,
+  ]);
+
+  return (
+    // [Chrome Next] Migrated header — parent supplies the Figma 16px page grid via bleed.
+    // Updated + subtitle sit on one row (AppHeader secondary stack is horizontal).
+    <AppHeader
+      title={i18n.ALL_EXCEPTIONS}
+      description={{
+        text: i18n.ALL_EXCEPTIONS_SUBTITLE,
+        learnMoreUrl: rulesHref,
+        iconOnly: true,
+        learnMoreAriaLabel: i18nCore.translate(
+          'xpack.securitySolution.exceptions.sharedLists.goToRulesAriaLabel',
+          { defaultMessage: 'Go to rules' }
+        ),
+      }}
+      metadata={metadata}
+      menu={menu}
+      docLink={docLinks.links.securitySolution.manageDetectionRules}
+      spacing="bleed"
+    />
+  );
+};
+
 export const SharedLists = React.memo(() => {
   const { edit: canEditExceptions, read: canReadExceptions } =
     useUserPrivileges().rulesPrivileges.exceptions;
@@ -106,9 +263,8 @@ export const SharedLists = React.memo(() => {
   const canWriteEndpointExceptions = useEndpointExceptionsCapability('crudEndpointExceptions');
 
   const {
-    services: { http, application, notifications, timelines },
+    services: { http, notifications },
   } = useKibana();
-  const { navigateToApp } = application;
   const { exportExceptionList, deleteExceptionList, duplicateExceptionList } = useApi(http);
 
   const [showReferenceErrorModal, setShowReferenceErrorModal] = useState(false);
@@ -472,18 +628,31 @@ export const SharedLists = React.memo(() => {
 
   const goToPage = (pageNumber: number) => setActivePage(pageNumber);
 
-  const [isCreatePopoverOpen, setIsCreatePopoverOpen] = useState(false);
   const [displayAddExceptionItemFlyout, setDisplayAddExceptionItemFlyout] = useState(false);
   const [displayCreateSharedListFlyout, setDisplayCreateSharedListFlyout] = useState(false);
 
-  const createButtonRef = useRef<HTMLButtonElement | null>(null);
+  const onCreateExceptionListOpenClick = useCallback(() => setDisplayCreateSharedListFlyout(true), []);
+  const onCreateExceptionItemClick = useCallback(() => setDisplayAddExceptionItemFlyout(true), []);
+  const onImportClick = useCallback(() => setDisplayImportListFlyout(true), []);
+  const [isMlJobSettingsFlyoutOpen, showMlJobSettingsFlyout, hideMlJobSettingsFlyout] =
+    useBoolState();
 
-  const onCreateButtonClick = () => setIsCreatePopoverOpen((isOpen) => !isOpen);
-  const onCloseCreatePopover = () => {
-    setDisplayAddExceptionItemFlyout(false);
-    setIsCreatePopoverOpen(false);
+  const { euiTheme } = useEuiTheme();
+
+  // Security section defaults to paddingSize "l" (24px). Figma uses 16px — same pattern as Rules.
+  const chromeNextPage = css`
+    margin: -${euiTheme.size.l};
+    padding: ${euiTheme.size.base};
+  `;
+
+  const headerProps: ExceptionsHeaderProps = {
+    loading,
+    lastUpdated,
+    onImport: onImportClick,
+    onCreateSharedList: onCreateExceptionListOpenClick,
+    onCreateExceptionItem: onCreateExceptionItemClick,
+    onOpenMlJobSettings: showMlJobSettingsFlyout,
   };
-  const onCreateExceptionListOpenClick = () => setDisplayCreateSharedListFlyout(true);
 
   const isReadOnly = canReadExceptions && !canEditExceptions;
 
@@ -499,99 +668,114 @@ export const SharedLists = React.memo(() => {
     }
   }, [isSearchingExceptions, hasNoExceptions, exceptionsLoaded, isLoadingExceptions]);
 
+  const pageBody = (
+    <div data-test-subj="allExceptionListsPanel">
+      {isEndpointExceptionsMovedFFEnabled &&
+        (endpointPerPolicyOptIn?.status === false ||
+          endpointPerPolicyOptIn?.reason === 'userOptedIn') && (
+          <EndpointExceptionsMovedCallout id="sharedListsPage" dismissable title="moved" />
+        )}
+
+      {!initLoading && (
+        <ListsSearchBar onSearch={handleSearch} onInputChange={handleInputChange} />
+      )}
+      <EuiSpacer size="m" />
+      {viewerStatus != null ? (
+        <EmptyViewerState
+          isReadOnly={isReadOnly}
+          title={i18n.NO_EXCEPTION_LISTS}
+          viewerStatus={viewerStatus}
+          buttonText={i18n.CREATE_SHARED_LIST_BUTTON}
+          body={i18n.NO_LISTS_BODY}
+          onEmptyButtonStateClick={onCreateExceptionListOpenClick}
+        />
+      ) : (
+        <>
+          <ExceptionsTableUtilityBar
+            totalExceptionLists={exceptionListsWithRuleRefs.length}
+            onRefresh={handleRefresh}
+            setSort={setSort}
+            sort={sort}
+            sortFields={SORT_FIELDS}
+          />
+          {exceptionListsWithRuleRefs.length > 0 && (
+            <ExceptionsTable data-test-subj="exceptionsTable" direction="column">
+              {exceptionListsWithRuleRefs.map((excList) => (
+                <EuiFlexItem key={excList.list_id}>
+                  <ExceptionsListCard
+                    data-test-subj="exceptionsListCard"
+                    readOnly={
+                      excList.list_id === ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
+                        ? !canWriteEndpointExceptions
+                        : isReadOnly
+                    }
+                    exceptionsList={excList}
+                    handleDelete={handleDelete}
+                    handleExport={handleExport}
+                    handleDuplicate={handleDuplicate}
+                  />
+                </EuiFlexItem>
+              ))}
+            </ExceptionsTable>
+          )}
+        </>
+      )}
+      {viewerStatus == null && (
+        <EuiFlexGroup>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup alignItems="flexStart">
+              <EuiFlexItem>
+                <EuiPopover
+                  aria-label={i18n.allExceptionsRowPerPage(rowSize)}
+                  button={rowSizeButton}
+                  isOpen={isRowSizePopoverOpen}
+                  closePopover={closeRowSizePopover}
+                >
+                  <EuiContextMenuPanel items={rowSizeItems} />
+                </EuiPopover>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem css={{ alignItems: 'flex-end' }}>
+            <EuiFlexGroup alignItems="flexEnd">
+              <EuiFlexItem>
+                <EuiPagination
+                  aria-label={'Custom pagination example'}
+                  pageCount={pagination.total ? Math.ceil(pagination.total / rowSize) : 0}
+                  activePage={activePage}
+                  onPageClick={goToPage}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
+
+      <AutoDownload
+        blob={exportDownload.blob}
+        name={`${exportDownload.name}.ndjson`}
+        onDownload={handleOnDownload}
+      />
+      <ReferenceErrorModal
+        cancelText={i18n.REFERENCE_MODAL_CANCEL_BUTTON}
+        confirmText={i18n.REFERENCE_MODAL_CONFIRM_BUTTON}
+        contentText={referenceModalState.contentText}
+        onCancel={handleCloseReferenceErrorModal}
+        onClose={handleCloseReferenceErrorModal}
+        onConfirm={handleReferenceDelete}
+        references={referenceModalState.rulesReferences}
+        showModal={showReferenceErrorModal}
+        titleText={i18n.REFERENCE_MODAL_TITLE}
+      />
+    </div>
+  );
+
   return (
     <>
       <EuiScreenReaderLive aria-live="assertive" aria-atomic="true" focusRegionOnTextChange>
         {screenReaderMessage}
       </EuiScreenReaderLive>
       <MissingDetectionsPrivilegesCallOut />
-      <EuiPageHeader
-        pageTitle={i18n.ALL_EXCEPTIONS}
-        description={
-          <EuiFlexGroup gutterSize="xs" direction="column">
-            <EuiFlexItem>
-              <EuiFlexGroup gutterSize="none" direction="row">
-                <EuiFlexItem grow={false}>
-                  <EuiText>{i18n.ALL_EXCEPTIONS_SUBTITLE}</EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiToolTip content="go-to-rules" disableScreenReaderOutput>
-                    <EuiButtonIcon
-                      iconType="external"
-                      aria-label="go-to-rules"
-                      color="primary"
-                      onClick={() =>
-                        navigateToApp('security', { openInNewTab: true, path: '/rules' })
-                      }
-                    />
-                  </EuiToolTip>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              {timelines.getLastUpdated({
-                showUpdating: loading,
-                updatedAt: lastUpdated,
-              })}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        }
-        rightSideItems={[
-          <EuiPopover
-            aria-label={i18n.CREATE_BUTTON}
-            data-test-subj="manageExceptionListCreateButton"
-            button={
-              canEditExceptions && (
-                <EuiButton
-                  buttonRef={(node: HTMLButtonElement | null) => {
-                    createButtonRef.current = node;
-                  }}
-                  iconType="chevronSingleDown"
-                  onClick={onCreateButtonClick}
-                >
-                  {i18n.CREATE_BUTTON}
-                </EuiButton>
-              )
-            }
-            isOpen={isCreatePopoverOpen}
-            closePopover={onCloseCreatePopover}
-          >
-            <EuiContextMenuPanel
-              items={[
-                <EuiContextMenuItem
-                  key={'createList'}
-                  data-test-subj="manageExceptionListCreateExceptionListButton"
-                  onClick={() => {
-                    onCloseCreatePopover();
-                    onCreateExceptionListOpenClick();
-                  }}
-                >
-                  {i18n.CREATE_SHARED_LIST_BUTTON}
-                </EuiContextMenuItem>,
-                <EuiContextMenuItem
-                  key={'createItem'}
-                  data-test-subj="manageExceptionListCreateExceptionButton"
-                  onClick={() => {
-                    onCloseCreatePopover();
-                    setDisplayAddExceptionItemFlyout(true);
-                  }}
-                >
-                  {i18n.CREATE_BUTTON_ITEM_BUTTON}
-                </EuiContextMenuItem>,
-              ]}
-            />
-          </EuiPopover>,
-          (canEditExceptions || canWriteEndpointExceptions) && (
-            <EuiButton
-              data-test-subj="importSharedExceptionList"
-              iconType={'download'}
-              onClick={() => setDisplayImportListFlyout(true)}
-            >
-              {i18n.IMPORT_EXCEPTION_LIST_BUTTON}
-            </EuiButton>
-          ),
-        ]}
-      />
 
       {displayCreateSharedListFlyout && (
         <CreateSharedListFlyout
@@ -601,8 +785,6 @@ export const SharedLists = React.memo(() => {
           addError={addError}
           handleCloseFlyout={() => {
             setDisplayCreateSharedListFlyout(false);
-            // Without requestAnimationFrame, the flyout's cleanup resets focus before we can move it to the button.
-            requestAnimationFrame(() => createButtonRef.current?.focus());
           }}
         />
       )}
@@ -631,106 +813,18 @@ export const SharedLists = React.memo(() => {
         />
       )}
 
-      <EuiHorizontalRule />
-      <div data-test-subj="allExceptionListsPanel">
-        {isEndpointExceptionsMovedFFEnabled &&
-          (endpointPerPolicyOptIn?.status === false ||
-            endpointPerPolicyOptIn?.reason === 'userOptedIn') && (
-            <EndpointExceptionsMovedCallout id="sharedListsPage" dismissable title="moved" />
-          )}
+      <MlJobSettingsFlyout
+        isOpen={isMlJobSettingsFlyoutOpen}
+        onClose={hideMlJobSettingsFlyout}
+      />
 
-        {!initLoading && (
-          <ListsSearchBar onSearch={handleSearch} onInputChange={handleInputChange} />
-        )}
-        <EuiSpacer size="m" />
-        {viewerStatus != null ? (
-          <EmptyViewerState
-            isReadOnly={isReadOnly}
-            title={i18n.NO_EXCEPTION_LISTS}
-            viewerStatus={viewerStatus}
-            buttonText={i18n.CREATE_SHARED_LIST_BUTTON}
-            body={i18n.NO_LISTS_BODY}
-            onEmptyButtonStateClick={onCreateExceptionListOpenClick}
-          />
-        ) : (
-          <>
-            <ExceptionsTableUtilityBar
-              totalExceptionLists={exceptionListsWithRuleRefs.length}
-              onRefresh={handleRefresh}
-              setSort={setSort}
-              sort={sort}
-              sortFields={SORT_FIELDS}
-            />
-            {exceptionListsWithRuleRefs.length > 0 && (
-              <ExceptionsTable data-test-subj="exceptionsTable" direction="column">
-                {exceptionListsWithRuleRefs.map((excList) => (
-                  <EuiFlexItem key={excList.list_id}>
-                    <ExceptionsListCard
-                      data-test-subj="exceptionsListCard"
-                      readOnly={
-                        excList.list_id === ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
-                          ? !canWriteEndpointExceptions
-                          : isReadOnly
-                      }
-                      exceptionsList={excList}
-                      handleDelete={handleDelete}
-                      handleExport={handleExport}
-                      handleDuplicate={handleDuplicate}
-                    />
-                  </EuiFlexItem>
-                ))}
-              </ExceptionsTable>
-            )}
-          </>
-        )}
-        {viewerStatus == null && (
-          <EuiFlexGroup>
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup alignItems="flexStart">
-                <EuiFlexItem>
-                  <EuiPopover
-                    aria-label={i18n.allExceptionsRowPerPage(rowSize)}
-                    button={rowSizeButton}
-                    isOpen={isRowSizePopoverOpen}
-                    closePopover={closeRowSizePopover}
-                  >
-                    <EuiContextMenuPanel items={rowSizeItems} />
-                  </EuiPopover>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            <EuiFlexItem css={{ alignItems: 'flex-end' }}>
-              <EuiFlexGroup alignItems="flexEnd">
-                <EuiFlexItem>
-                  <EuiPagination
-                    aria-label={'Custom pagination example'}
-                    pageCount={pagination.total ? Math.ceil(pagination.total / rowSize) : 0}
-                    activePage={activePage}
-                    onPageClick={goToPage}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        )}
-
-        <AutoDownload
-          blob={exportDownload.blob}
-          name={`${exportDownload.name}.ndjson`}
-          onDownload={handleOnDownload}
-        />
-        <ReferenceErrorModal
-          cancelText={i18n.REFERENCE_MODAL_CANCEL_BUTTON}
-          confirmText={i18n.REFERENCE_MODAL_CONFIRM_BUTTON}
-          contentText={referenceModalState.contentText}
-          onCancel={handleCloseReferenceErrorModal}
-          onClose={handleCloseReferenceErrorModal}
-          onConfirm={handleReferenceDelete}
-          references={referenceModalState.rulesReferences}
-          showModal={showReferenceErrorModal}
-          titleText={i18n.REFERENCE_MODAL_TITLE}
-        />
-      </div>
+      <SecuritySolutionPageWrapper>
+        <div css={chromeNextPage}>
+          <ExceptionsHeader {...headerProps} />
+          <EuiSpacer size="m" />
+          {pageBody}
+        </div>
+      </SecuritySolutionPageWrapper>
     </>
   );
 });

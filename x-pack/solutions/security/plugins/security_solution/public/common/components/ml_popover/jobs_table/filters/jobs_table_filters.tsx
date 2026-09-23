@@ -62,7 +62,7 @@ export const JobsTableFiltersComponent = ({
   }, [setShowElasticJobs, showCustomJobs, setShowCustomJobs]);
 
   return (
-    <EuiFlexGroup gutterSize="m" justifyContent="flexEnd">
+    <EuiFlexGroup gutterSize="m" justifyContent="flexEnd" wrap responsive={false}>
       <EuiFlexItem grow={true}>
         <EuiSearchBar
           data-test-subj="jobs-filter-bar"

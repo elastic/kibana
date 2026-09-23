@@ -12,12 +12,18 @@ import type { CoverageOverviewMitreTechnique } from '../../../rule_management/mo
 import { getTotalRuleCount } from '../../../rule_management/model/coverage_overview/mitre_technique';
 import { coverageOverviewPanelWidth } from './constants';
 import { useCoverageOverviewDashboardContext } from './coverage_overview_dashboard_context';
+import {
+  getPrototypeEnabledDisabledCounts,
+  getPrototypeRuleCountsByActivity,
+} from './prototype_coverage_colors';
 import { CoverageOverviewPanelRuleStats } from './shared_components/panel_rule_stats';
 import { useCoverageColors } from './use_coverage_colors';
 import * as i18n from './translations';
 
 export interface CoverageOverviewMitreTechniquePanelProps {
   technique: CoverageOverviewMitreTechnique;
+  techniqueIndex?: number;
+  usePrototype?: boolean;
   coveredSubtechniques: number;
   setIsPopoverOpen: (isOpen: boolean) => void;
   isPopoverOpen: boolean;
@@ -26,6 +32,8 @@ export interface CoverageOverviewMitreTechniquePanelProps {
 
 const CoverageOverviewMitreTechniquePanelComponent = ({
   technique,
+  techniqueIndex = 0,
+  usePrototype = false,
   coveredSubtechniques,
   setIsPopoverOpen,
   isPopoverOpen,
@@ -37,8 +45,17 @@ const CoverageOverviewMitreTechniquePanelComponent = ({
 
   const { getColorsForValue } = useCoverageColors();
 
-  const totalRuleCount = getTotalRuleCount(technique, filter.activity);
+  const totalRuleCount = usePrototype
+    ? getPrototypeRuleCountsByActivity(techniqueIndex, filter.activity)
+    : getTotalRuleCount(technique, filter.activity);
   const techniqueColors = getColorsForValue(totalRuleCount);
+  const prototypeStats = getPrototypeEnabledDisabledCounts(techniqueIndex);
+  const enabledRulesCount = usePrototype
+    ? prototypeStats.enabledRules
+    : technique.enabledRules.length;
+  const disabledRulesCount = usePrototype
+    ? prototypeStats.disabledRules
+    : technique.disabledRules.length;
 
   const handlePanelOnClick = useCallback(
     () => setIsPopoverOpen(!isPopoverOpen),
@@ -88,8 +105,8 @@ const CoverageOverviewMitreTechniquePanelComponent = ({
         {isExpanded && (
           <EuiFlexItem grow={false}>
             <CoverageOverviewPanelRuleStats
-              enabledRules={technique.enabledRules.length}
-              disabledRules={technique.disabledRules.length}
+              enabledRules={enabledRulesCount}
+              disabledRules={disabledRulesCount}
             />
           </EuiFlexItem>
         )}

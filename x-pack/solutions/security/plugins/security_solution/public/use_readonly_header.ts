@@ -16,22 +16,24 @@ import { useUserPrivileges } from './common/components/user_privileges';
  * if user only has read *Kibana* privileges, not individual data index
  * privileges
  */
-export function useReadonlyHeader(tooltip: string) {
+export function useReadonlyHeader(tooltip: string, { enabled = true }: { enabled?: boolean } = {}) {
   const { read, edit } = useUserPrivileges().rulesPrivileges.rules;
   const chrome = useKibana().services.chrome;
 
   useEffect(() => {
-    if (read && !edit) {
+    if (enabled && read && !edit) {
       chrome.setBadge({
         text: i18n.READ_ONLY_BADGE_TEXT,
         tooltip,
         iconType: 'readOnly',
       });
+    } else {
+      chrome.setBadge();
     }
 
     // remove the icon after the component unmounts
     return () => {
       chrome.setBadge();
     };
-  }, [chrome, tooltip, read, edit]);
+  }, [chrome, tooltip, read, edit, enabled]);
 }

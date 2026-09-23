@@ -44,6 +44,7 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
     testId,
     ebt,
     iconType,
+    iconSide,
     disableButton,
     href,
     target,
@@ -76,6 +77,10 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
   const hasItems = items && items.length > 0;
   const hasSplitItems = splitButtonItems && splitButtonItems.length > 0;
   const hasPopover = hasItems || hasSplitItems;
+  // Dropdown primary actions (items, no split) default the chevron to the right.
+  // Do not default `iconSide` in destructuring — that made `iconSide || 'right'` always 'left'.
+  const resolvedIconSide =
+    iconSide ?? (hasItems && !splitButtonProps ? 'right' : 'left');
   const anchorDomElementRef = useRef<HTMLElement | null>(null);
 
   const handleClick = (event: MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => {
@@ -152,7 +157,7 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
         {...commonProps}
         size="s"
         iconSize="m"
-        iconSide="left"
+        iconSide={resolvedIconSide}
         isSelected={isPopoverOpen}
         css={buttonCss}
         color="text"

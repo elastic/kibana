@@ -56,6 +56,18 @@ describe('global header', () => {
       ...mockUseKibana(),
       services: {
         ...mockUseKibana().services,
+        chrome: {
+          controls: {
+            aiButton: {
+              register: jest.fn(() => jest.fn()),
+            },
+          },
+          next: {
+            aiButton: {
+              register: jest.fn(() => jest.fn()),
+            },
+          },
+        },
         application: {
           capabilities: {
             ...mockUseKibana().services.application.capabilities,

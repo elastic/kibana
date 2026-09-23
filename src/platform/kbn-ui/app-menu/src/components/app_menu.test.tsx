@@ -153,8 +153,8 @@ describe('AppMenu', () => {
 
       render(<AppMenuComponent config={defaultConfig} />);
 
-      expect(screen.getByTestId(APP_MENU_TEST_SUBJECTS.overflowButton)).toBeInTheDocument();
-      expect(screen.queryByText('Item 1')).not.toBeInTheDocument();
+      // Viewport `m` is expanded — inline items are visible.
+      expect(screen.getByText('Item 1')).toBeInTheDocument();
     });
 
     it('should use viewport xl as wide when application measurement is unavailable', () => {
@@ -188,7 +188,7 @@ describe('AppMenu', () => {
   });
 
   describe('viewport breakpoint mapping', () => {
-    it('should render collapsed content at viewport s', () => {
+    it('should render minimal content at viewport s', () => {
       mockViewportBreakpoint = 's';
 
       render(<AppMenuComponent config={defaultConfig} breakpointSource="viewport" />);
@@ -197,7 +197,7 @@ describe('AppMenu', () => {
       expect(screen.queryByText('Item 1')).not.toBeInTheDocument();
     });
 
-    it('should render medium content at viewport m and l', () => {
+    it('should render expanded content at viewport m and l', () => {
       for (const breakpoint of ['m', 'l'] as const) {
         mockViewportBreakpoint = breakpoint;
 
@@ -205,8 +205,7 @@ describe('AppMenu', () => {
           <AppMenuComponent config={defaultConfig} breakpointSource="viewport" />
         );
 
-        expect(screen.getByTestId(APP_MENU_TEST_SUBJECTS.overflowButton)).toBeInTheDocument();
-        expect(screen.queryByText('Item 1')).not.toBeInTheDocument();
+        expect(screen.getByText('Item 1')).toBeInTheDocument();
 
         unmount();
       }

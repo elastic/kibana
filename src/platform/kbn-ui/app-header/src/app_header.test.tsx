@@ -307,9 +307,9 @@ describe('AppHeaderView', () => {
     expect(screen.getByTestId('tabsBar')).toBeInTheDocument();
   });
 
-  it('renders an s title for standard spacing and an xs title for compact spacing', () => {
+  it('renders an xs (Heading 4) title for standard and compact spacing', () => {
     const { unmount: unmountStandard } = render(<AppHeaderView title="Dashboard" />);
-    expect(screen.getByRole('heading', { level: 1 }).className).toMatch(/euiTitle-s/);
+    expect(screen.getByRole('heading', { level: 1 }).className).toMatch(/euiTitle-xs/);
     unmountStandard();
 
     render(<AppHeaderView title="Dashboard" spacing="compact" />);

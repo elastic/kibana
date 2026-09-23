@@ -47,8 +47,6 @@ const getPublicAppHeaderViewProps = ({
   docLink,
   showAddIntegrations,
 }: AppHeaderViewProps): AppHeaderViewProps => {
-  const secondaryContent = description ? { description } : metadata ? { metadata } : {};
-
   return {
     title,
     back,
@@ -57,7 +55,8 @@ const getPublicAppHeaderViewProps = ({
     menu,
     favorite,
     share,
-    ...secondaryContent,
+    description,
+    metadata,
     sticky,
     spacing,
     docLink,

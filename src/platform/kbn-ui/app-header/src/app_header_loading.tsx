@@ -40,7 +40,7 @@ export type AppHeaderLoadingViewProps = Pick<AppHeaderViewProps, 'back' | 'stick
 
 export const AppHeaderLoadingView = React.memo<AppHeaderLoadingViewProps>(
   ({ back, menu, sticky, spacing = 'standard' }) => {
-    const titleSize = spacing === 'compact' ? 'xs' : 's';
+    const titleSize = 'xs' as const;
 
     return (
       <AppHeaderShell

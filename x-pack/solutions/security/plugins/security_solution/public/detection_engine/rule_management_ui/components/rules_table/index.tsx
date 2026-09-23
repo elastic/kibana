@@ -25,7 +25,7 @@ import { MitreVersionUpgradedCallout } from './mitre_version_upgraded_callout';
  *   * Delete
  *   * Import/Export
  */
-export const AllRules = React.memo(() => {
+export const AllRules = React.memo<{ showTableToolbar?: boolean }>(({ showTableToolbar = true }) => {
   useSyncRulesTableSavedState();
   const [{ tabName }] = useRouteSpy();
 
@@ -35,8 +35,12 @@ export const AllRules = React.memo(() => {
         <MitreVersionUpgradedCallout />
         {tabName !== AllRulesTabs.monitoring && <RuleGapsCallout />}
         <GapSchedulerErrorsCallout />
-        <RulesTableToolbar />
-        <EuiSpacer />
+        {showTableToolbar && (
+          <>
+            <RulesTableToolbar />
+            <EuiSpacer />
+          </>
+        )}
         <RulesTables selectedTab={tabName as AllRulesTabs} />
       </>
     );
@@ -44,8 +48,12 @@ export const AllRules = React.memo(() => {
     return (
       <UpgradePrebuiltRulesTableContextProvider>
         <MitreVersionUpgradedCallout />
-        <RulesTableToolbar />
-        <EuiSpacer />
+        {showTableToolbar && (
+          <>
+            <RulesTableToolbar />
+            <EuiSpacer />
+          </>
+        )}
         <UpgradePrebuiltRulesTable />
       </UpgradePrebuiltRulesTableContextProvider>
     );

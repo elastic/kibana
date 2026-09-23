@@ -24,6 +24,11 @@ export const AppHeaderDescription = React.memo<{
   const { euiTheme } = useEuiTheme();
   const text = asPlainText(typeof description === 'string' ? description : description.text);
   const learnMoreUrl = typeof description === 'string' ? undefined : description.learnMoreUrl;
+  const iconOnly = typeof description === 'string' ? false : !!description.iconOnly;
+  const learnMoreAriaLabel =
+    typeof description === 'string'
+      ? learnMoreLinkText
+      : description.learnMoreAriaLabel ?? learnMoreLinkText;
 
   return (
     <EuiText
@@ -39,8 +44,13 @@ export const AppHeaderDescription = React.memo<{
         {learnMoreUrl && (
           <>
             {' '}
-            <EuiLink external href={learnMoreUrl} target="_blank">
-              {learnMoreLinkText}
+            <EuiLink
+              external
+              href={learnMoreUrl}
+              target="_blank"
+              aria-label={learnMoreAriaLabel}
+            >
+              {iconOnly ? null : learnMoreLinkText}
             </EuiLink>
           </>
         )}

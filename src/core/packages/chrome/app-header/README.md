@@ -218,8 +218,8 @@ Menu item text is coerced the same way in `@kbn/ui-app-menu`.
 
 ## Title size
 
-The title is `xs` with `compact` spacing and `s` with every other spacing mode. This is automatic —
-there is no size knob to set.
+The title is always EUI Heading 4 (`EuiTitle` size `xs`: 16px / 24px line-height, semi-bold). This is
+automatic — there is no size knob to set.
 
 ## Spacing
 

@@ -95,8 +95,8 @@ describe('AppMenuLoading', () => {
 
     render(<AppMenuLoading buttonCount={2} />);
 
-    // Viewport `m` is minimal: overflow + primary, not the two expanded icon slots.
-    expect(menuRectangles()).toHaveLength(2);
+    // Viewport `m` is expanded: buttonCount icon slots + primary.
+    expect(menuRectangles()).toHaveLength(3);
   });
 
   it('uses viewport mapping when breakpointSource is viewport', () => {
@@ -104,6 +104,7 @@ describe('AppMenuLoading', () => {
 
     render(<AppMenuLoading buttonCount={2} breakpointSource="viewport" />);
 
-    expect(menuRectangles()).toHaveLength(1);
+    // Viewport `s` is minimal: overflow + primary.
+    expect(menuRectangles()).toHaveLength(2);
   });
 });

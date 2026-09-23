@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { noop } from 'lodash';
 import { useKibana } from '../../common/lib/kibana';
 import { useAIValueExportContext } from '../providers/ai_value/export_provider';
 import { useDownloadAIValueReport } from './use_download_ai_value_report';
@@ -48,16 +47,13 @@ const mockKibana = (share: typeof shareServiceMock | undefined, serverless: bool
 
 type HookResult = ReturnType<typeof useDownloadAIValueReport>;
 const TestComponent = ({
-  anchorElement,
   timeRange,
   hookValueFn,
 }: {
-  anchorElement: HTMLElement | null;
   timeRange: TimeRange;
   hookValueFn: (value: HookResult) => void;
 }) => {
   const hookValue = useDownloadAIValueReport({
-    anchorElement,
     timeRange,
   });
 
@@ -77,11 +73,14 @@ describe('useDownloadAIValueReport', () => {
       buildForwardedState: buildForwardedStateMock,
     });
   });
-  let hookResult: HookResult = { isExportEnabled: true, toggleContextMenu: noop };
-  const callHook = (anchorElement: HTMLElement | null, timeRange: TimeRange) => {
+  let hookResult: HookResult = {
+    isExportEnabled: true,
+    isServerless: false,
+    openExportMenu: () => undefined,
+  };
+  const callHook = (timeRange: TimeRange) => {
     render(
       <TestComponent
-        anchorElement={anchorElement}
         timeRange={timeRange}
         hookValueFn={(value) => {
           hookResult = value;
@@ -92,28 +91,15 @@ describe('useDownloadAIValueReport', () => {
   describe('when it is used in serverless', () => {
     beforeEach(() => {
       mockKibana(shareServiceMock, true);
-      callHook(anchorElementMock, absoluteTimeRange);
+      callHook(absoluteTimeRange);
     });
     it('returns isExportEnabled false', () => {
       expect(hookResult.isExportEnabled).toBe(false);
     });
 
-    it('returns a noop toggleContextMenu', () => {
-      hookResult.toggleContextMenu();
-      expect(shareServiceMock.toggleShareContextMenu).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('when the anchor element is null', () => {
-    beforeEach(() => {
-      callHook(null, absoluteTimeRange);
-    });
-    it('returns isExportEnabled false', () => {
-      expect(hookResult.isExportEnabled).toBe(false);
-    });
-
-    it('returns a noop toggleContextMenu', () => {
-      hookResult.toggleContextMenu();
+    it('returns isServerless true and openExportMenu is a no-op', () => {
+      expect(hookResult.isServerless).toBe(true);
+      hookResult.openExportMenu(anchorElementMock);
       expect(shareServiceMock.toggleShareContextMenu).not.toHaveBeenCalled();
     });
   });
@@ -121,14 +107,14 @@ describe('useDownloadAIValueReport', () => {
   describe('when the there is not a forwardedState', () => {
     beforeEach(() => {
       useAIValueExportContextMock.mockReturnValue({});
-      callHook(anchorElementMock, absoluteTimeRange);
+      callHook(absoluteTimeRange);
     });
 
     it('returns isExportEnabled false', () => {
       expect(hookResult.isExportEnabled).toBe(false);
     });
-    it('returns a noop toggleContextMenu', () => {
-      hookResult.toggleContextMenu();
+    it('openExportMenu is a no-op', () => {
+      hookResult.openExportMenu(anchorElementMock);
       expect(shareServiceMock.toggleShareContextMenu).not.toHaveBeenCalled();
     });
   });
@@ -136,7 +122,7 @@ describe('useDownloadAIValueReport', () => {
   describe('when the shareService is not available', () => {
     beforeEach(() => {
       mockKibana(undefined, false);
-      callHook(anchorElementMock, absoluteTimeRange);
+      callHook(absoluteTimeRange);
     });
     it('returns isExportEnabled false', () => {
       expect(hookResult.isExportEnabled).toBe(false);
@@ -150,14 +136,14 @@ describe('useDownloadAIValueReport', () => {
         insight: 'insight',
         reportDataHash: 'hash',
       }));
-      callHook(anchorElementMock, absoluteTimeRange);
+      callHook(absoluteTimeRange);
     });
     it('returns isExportEnabled true', () => {
       expect(hookResult.isExportEnabled).toBe(true);
     });
 
     it('returns absolute timeRange values in locator params', () => {
-      hookResult.toggleContextMenu();
+      hookResult.openExportMenu(anchorElementMock);
       expect(
         shareServiceMock.toggleShareContextMenu.mock.calls[0][0].sharingData.locatorParams.params
           .timeRange.from
@@ -181,11 +167,11 @@ describe('useDownloadAIValueReport', () => {
         insight: 'insight',
         reportDataHash: 'hash',
       }));
-      callHook(anchorElementMock, relativeTimeRange);
+      callHook(relativeTimeRange);
     });
 
     it('returns relative timeRange values in locator params', () => {
-      hookResult.toggleContextMenu();
+      hookResult.openExportMenu(anchorElementMock);
       expect(
         shareServiceMock.toggleShareContextMenu.mock.calls[0][0].sharingData.locatorParams.params
           .timeRange.fromStr

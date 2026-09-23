@@ -13,7 +13,7 @@ import { APP_HEADER_TEST_SUBJECTS } from './test_subjects';
 
 /**
  * Approximate the real title line so the layout does not jump when content arrives.
- * EuiTitle size s/xs is ~24px tall.
+ * EuiTitle size xs (Heading 4) is 16/24 — ~24px tall.
  */
 const TITLE_WIDTH_PX = 200;
 

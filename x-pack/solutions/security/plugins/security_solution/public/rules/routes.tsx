@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
-import { Redirect, useLocation, useParams } from 'react-router-dom';
+import { Redirect, useLocation, useParams, matchPath } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
 import type { Capabilities } from '@kbn/core-capabilities-common';
@@ -192,7 +192,11 @@ const getRulesSubRoutes = (
 ];
 
 const RulesContainerComponent: React.FC = () => {
-  useReadonlyHeader(i18n.READ_ONLY_BADGE_TOOLTIP);
+  const { pathname } = useLocation();
+  // Rule details already surfaces enable/edit affordances; the chrome "Read only" badge is noise there.
+  const isRuleDetailsPage =
+    matchPath(pathname, { path: `${RULES_PATH}/id/:detailName`, exact: false }) != null;
+  useReadonlyHeader(i18n.READ_ONLY_BADGE_TOOLTIP, { enabled: !isRuleDetailsPage });
   const { capabilities } = useKibana().services.application;
   const deHealthUiFFEnabled = useIsExperimentalFeatureEnabled('deHealthUIEnabled');
   const ruleHealthUiFFEnabled = useIsExperimentalFeatureEnabled('ruleHealthUIEnabled');

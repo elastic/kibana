@@ -13,15 +13,48 @@ import { coverageOverviewPanelWidth } from './constants';
 import * as i18n from './translations';
 import { CoverageOverviewPanelRuleStats } from './shared_components/panel_rule_stats';
 import { getNumOfCoveredTechniques } from '../../../rule_management/model/coverage_overview/mitre_technique';
+import {
+  getPrototypeEnabledDisabledCounts,
+  getPrototypeRuleCount,
+} from './prototype_coverage_colors';
 
 export interface CoverageOverviewTacticPanelProps {
   tactic: CoverageOverviewMitreTactic;
+  usePrototype?: boolean;
 }
 
-const CoverageOverviewTacticPanelComponent = ({ tactic }: CoverageOverviewTacticPanelProps) => {
+const CoverageOverviewTacticPanelComponent = ({
+  tactic,
+  usePrototype = false,
+}: CoverageOverviewTacticPanelProps) => {
   const { euiTheme } = useEuiTheme();
 
-  const coveredTechniques = useMemo(() => getNumOfCoveredTechniques(tactic), [tactic]);
+  const realCoveredTechniques = useMemo(() => getNumOfCoveredTechniques(tactic), [tactic]);
+
+  const coveredTechniques = useMemo(() => {
+    if (!usePrototype) {
+      return realCoveredTechniques;
+    }
+    return tactic.techniques.filter((_, index) => getPrototypeRuleCount(index) > 0).length;
+  }, [realCoveredTechniques, tactic.techniques, usePrototype]);
+
+  const { enabledRulesCount, disabledRulesCount } = useMemo(() => {
+    if (!usePrototype) {
+      return {
+        enabledRulesCount: tactic.enabledRules.length,
+        disabledRulesCount: tactic.disabledRules.length,
+      };
+    }
+    return tactic.techniques.reduce(
+      (acc, _, index) => {
+        const counts = getPrototypeEnabledDisabledCounts(index);
+        acc.enabledRulesCount += counts.enabledRules;
+        acc.disabledRulesCount += counts.disabledRules;
+        return acc;
+      },
+      { enabledRulesCount: 0, disabledRulesCount: 0 }
+    );
+  }, [tactic.disabledRules.length, tactic.enabledRules.length, tactic.techniques, usePrototype]);
 
   const ProgressLabel = useMemo(
     () => (
@@ -71,8 +104,8 @@ const CoverageOverviewTacticPanelComponent = ({ tactic }: CoverageOverviewTactic
       />
       <EuiSpacer size="m" />
       <CoverageOverviewPanelRuleStats
-        enabledRules={tactic.enabledRules.length}
-        disabledRules={tactic.disabledRules.length}
+        enabledRules={enabledRulesCount}
+        disabledRules={disabledRulesCount}
       />
     </EuiPanel>
   );

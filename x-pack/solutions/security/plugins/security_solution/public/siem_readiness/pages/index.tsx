@@ -6,15 +6,10 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import {
-  EuiPageHeader,
-  EuiPageSection,
-  EuiSpacer,
-  EuiButtonEmpty,
-  EuiBetaBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiPageSection, EuiSpacer, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { AppHeader } from '@kbn/app-header';
+import type { AppHeaderBadge, AppHeaderMenu } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import { useHistory, useParams } from 'react-router-dom';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
@@ -33,10 +28,25 @@ import {
 const VALID_TABS: VisibilityTabId[] = ['coverage', 'quality', 'continuity', 'retention'];
 const DEFAULT_TAB: VisibilityTabId = 'coverage';
 
+const PAGE_TITLE = i18n.translate('xpack.securitySolution.siemReadiness.pageTitle', {
+  defaultMessage: 'SIEM Readiness',
+});
+
+const TECHNICAL_PREVIEW_BADGE = i18n.translate(
+  'xpack.securitySolution.siemReadiness.technicalPreviewBadgeLabel',
+  { defaultMessage: 'Technical Preview' }
+);
+
+const CONFIGURATIONS_LABEL = i18n.translate(
+  'xpack.securitySolution.siemReadiness.configurations',
+  { defaultMessage: 'Configurations' }
+);
+
 const SiemReadinessDashboard = () => {
   const history = useHistory();
   const { tab } = useParams<{ tab?: string }>();
   const { telemetry } = useKibana().services;
+  const { euiTheme } = useEuiTheme();
 
   // Persistent state for category filtering (shared with configuration panel)
   const [activeCategories, setActiveCategories] = useLocalStorage<MainCategories[]>(
@@ -63,43 +73,47 @@ const SiemReadinessDashboard = () => {
     [history, telemetry]
   );
 
+  const badges = useMemo<AppHeaderBadge[]>(
+    () => [
+      {
+        label: TECHNICAL_PREVIEW_BADGE,
+        color: 'hollow',
+        'data-test-subj': 'siemReadinessPreviewBadge',
+      },
+    ],
+    []
+  );
+
+  const menu = useMemo<AppHeaderMenu>(
+    () => ({
+      items: [
+        {
+          id: 'configurations',
+          label: CONFIGURATIONS_LABEL,
+          iconType: 'gear',
+          testId: 'configurationsButton',
+          run: () => setIsConfigModalVisible(true),
+        },
+      ],
+    }),
+    []
+  );
+
+  // Security section defaults to paddingSize "l" (24px). Figma uses 16px — same pattern as Rules.
+  // Route uses noPadding on the page wrapper; escape the section gutter and re-apply the 16px grid.
+  const chromeNextPage = css`
+    margin: -${euiTheme.size.l};
+    padding: ${euiTheme.size.base};
+  `;
+
   return (
-    <div>
-      <EuiPageHeader
-        pageTitle={
-          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-            <EuiFlexItem grow={false}>
-              {i18n.translate('xpack.securitySolution.siemReadiness.pageTitle', {
-                defaultMessage: 'SIEM Readiness',
-              })}
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBetaBadge
-                label={i18n.translate(
-                  'xpack.securitySolution.siemReadiness.technicalPreviewBadgeLabel',
-                  {
-                    defaultMessage: 'Technical Preview',
-                  }
-                )}
-                data-test-subj="siemReadinessPreviewBadge"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        }
-        bottomBorder={true}
-        rightSideItems={[
-          <EuiButtonEmpty
-            iconSide="right"
-            size="s"
-            iconType="gear"
-            onClick={() => setIsConfigModalVisible(true)}
-            data-test-subj="configurationsButton"
-          >
-            {i18n.translate('xpack.securitySolution.siemReadiness.configurations', {
-              defaultMessage: 'Configurations',
-            })}
-          </EuiButtonEmpty>,
-        ]}
+    <div css={chromeNextPage}>
+      {/* [Chrome Next] Migrated header — parent supplies the Figma 16px page grid via bleed. */}
+      <AppHeader
+        title={PAGE_TITLE}
+        badges={badges}
+        menu={menu}
+        spacing="bleed"
       />
       <EuiSpacer />
       <EuiPageSection paddingSize="none">

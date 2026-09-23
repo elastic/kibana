@@ -4,10 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiTab, EuiTabs, EuiText } from '@elastic/eui';
+import React, { useCallback, useMemo, useState } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { AppHeader } from '@kbn/app-header';
+import type { AppHeaderMenu, AppHeaderTab } from '@kbn/app-header';
+import { i18n as i18nCore } from '@kbn/i18n';
+import { useNavigateTo } from '@kbn/security-solution-navigation';
 import { CoverageOverviewLink } from '../../../../common/components/links_to_docs';
-import { HeaderPage } from '../../../../common/components/header_page';
+import { useAddIntegrationsUrl } from '../../../../common/hooks/use_add_integrations_url';
+import { useKibana } from '../../../../common/lib/kibana';
 
 import * as i18n from './translations';
 import { CoverageOverviewTacticPanel } from './tactic_panel';
@@ -27,11 +33,74 @@ const CoverageFrameworkTab = {
 
 type CoverageFrameworkTab = (typeof CoverageFrameworkTab)[keyof typeof CoverageFrameworkTab];
 
-const CoverageOverviewHeaderComponent = () => (
-  <HeaderPage title={i18n.COVERAGE_OVERVIEW_DASHBOARD_TITLE} />
-);
+interface CoverageOverviewHeaderProps {
+  selectedTab: CoverageFrameworkTab;
+  onSelectAttack: () => void;
+  onSelectAtlas: () => void;
+}
 
-const CoverageOverviewHeader = React.memo(CoverageOverviewHeaderComponent);
+const CoverageOverviewHeader: React.FC<CoverageOverviewHeaderProps> = ({
+  selectedTab,
+  onSelectAttack,
+  onSelectAtlas,
+}) => {
+  const { docLinks } = useKibana().services;
+  const { href: addIntegrationsHref } = useAddIntegrationsUrl();
+  const { navigateTo } = useNavigateTo();
+
+  const tabs = useMemo<AppHeaderTab[]>(
+    () => [
+      {
+        id: CoverageFrameworkTab.Attack,
+        label: i18n.ATTACK_FRAMEWORK_TAB,
+        isSelected: selectedTab === CoverageFrameworkTab.Attack,
+        onClick: onSelectAttack,
+        'data-test-subj': 'coverageOverviewAttackTab',
+      },
+      {
+        id: CoverageFrameworkTab.Atlas,
+        label: i18n.ATLAS_FRAMEWORK_TAB,
+        isSelected: selectedTab === CoverageFrameworkTab.Atlas,
+        onClick: onSelectAtlas,
+        'data-test-subj': 'coverageOverviewAtlasTab',
+      },
+    ],
+    [onSelectAttack, onSelectAtlas, selectedTab]
+  );
+
+  const menu = useMemo<AppHeaderMenu>(
+    () => ({
+      items: [
+        {
+          id: 'addIntegrations',
+          label: i18nCore.translate(
+            'xpack.securitySolution.coverageOverviewDashboard.addIntegrationsMenuItem',
+            { defaultMessage: 'Add integrations' }
+          ),
+          iconType: 'indexOpen',
+          href: addIntegrationsHref,
+          overflow: true,
+          testId: 'coverageOverviewHeaderAddIntegrations',
+          run: () => {
+            navigateTo({ url: addIntegrationsHref });
+          },
+        },
+      ],
+    }),
+    [addIntegrationsHref, navigateTo]
+  );
+
+  return (
+    // [Chrome Next] Migrated header — parent supplies the Figma 16px page grid via bleed.
+    <AppHeader
+      title={i18n.COVERAGE_OVERVIEW_DASHBOARD_TITLE}
+      tabs={tabs}
+      menu={menu}
+      docLink={docLinks.links.siem.mitreCoverage}
+      spacing="bleed"
+    />
+  );
+};
 
 const AttackTabDescription = () => (
   <EuiText color="subdued" size="s" data-test-subj="coverageOverviewAttackDescription">
@@ -53,6 +122,16 @@ const AttackCoverageMatrix = () => {
     state: { data },
   } = useCoverageOverviewDashboardContext();
 
+  const usePrototypeColors = useMemo(
+    () =>
+      !data?.mitreTactics.some((tactic) =>
+        tactic.techniques.some(
+          (technique) => technique.enabledRules.length > 0 || technique.disabledRules.length > 0
+        )
+      ),
+    [data?.mitreTactics]
+  );
+
   return (
     <EuiFlexGroup gutterSize="m" className="eui-xScroll" tabIndex={0}>
       {data?.mitreTactics.map((tactic) => (
@@ -63,12 +142,16 @@ const AttackCoverageMatrix = () => {
           gutterSize="s"
         >
           <EuiFlexItem grow={false}>
-            <CoverageOverviewTacticPanel tactic={tactic} />
+            <CoverageOverviewTacticPanel tactic={tactic} usePrototype={usePrototypeColors} />
           </EuiFlexItem>
 
           {tactic.techniques.map((technique, techniqueKey) => (
             <EuiFlexItem grow={false} key={`${technique.id}-${techniqueKey}`}>
-              <CoverageOverviewMitreTechniquePanelPopover technique={technique} />
+              <CoverageOverviewMitreTechniquePanelPopover
+                technique={technique}
+                techniqueIndex={techniqueKey}
+                usePrototype={usePrototypeColors}
+              />
             </EuiFlexItem>
           ))}
         </EuiFlexGroup>
@@ -82,6 +165,13 @@ const CoverageOverviewDashboardComponent = () => {
   const isMitreAttackUpdatesUIEnabled = useIsExperimentalFeatureEnabled(
     'mitreAttackUpdatesUIEnabled'
   );
+  const { euiTheme } = useEuiTheme();
+
+  // Security section defaults to paddingSize "l" (24px). Figma uses 16px — same pattern as Rules.
+  const chromeNextPage = css`
+    margin: -${euiTheme.size.l};
+    padding: ${euiTheme.size.base};
+  `;
 
   const onAttackTabClick = useCallback(() => {
     setSelectedTab(CoverageFrameworkTab.Attack);
@@ -93,43 +183,33 @@ const CoverageOverviewDashboardComponent = () => {
 
   const isAttackTab = selectedTab === CoverageFrameworkTab.Attack;
 
-  return (
+  const tabContent = isAttackTab ? (
     <>
-      <CoverageOverviewHeader />
-      <EuiTabs data-test-subj="coverageOverviewFrameworkTabs">
-        <EuiTab
-          onClick={onAttackTabClick}
-          isSelected={isAttackTab}
-          data-test-subj="coverageOverviewAttackTab"
-        >
-          {i18n.ATTACK_FRAMEWORK_TAB}
-        </EuiTab>
-        <EuiTab
-          onClick={onAtlasTabClick}
-          isSelected={!isAttackTab}
-          data-test-subj="coverageOverviewAtlasTab"
-        >
-          {i18n.ATLAS_FRAMEWORK_TAB}
-        </EuiTab>
-      </EuiTabs>
+      <AttackTabDescription />
       <EuiSpacer />
-      {isAttackTab ? (
-        <>
-          <AttackTabDescription />
-          <EuiSpacer />
-          {isMitreAttackUpdatesUIEnabled && <CoverageOverviewInvalidMitreRulesCallout />}
-          <CoverageOverviewFiltersPanel />
-          <EuiSpacer />
-          <AttackCoverageMatrix />
-        </>
-      ) : (
-        <>
-          <AtlasTabDescription />
-          <EuiSpacer />
-          <AtlasMatrix />
-        </>
-      )}
+      {isMitreAttackUpdatesUIEnabled && <CoverageOverviewInvalidMitreRulesCallout />}
+      <CoverageOverviewFiltersPanel />
+      <EuiSpacer />
+      <AttackCoverageMatrix />
     </>
+  ) : (
+    <>
+      <AtlasTabDescription />
+      <EuiSpacer />
+      <AtlasMatrix />
+    </>
+  );
+
+  return (
+    <div css={chromeNextPage}>
+      <CoverageOverviewHeader
+        selectedTab={selectedTab}
+        onSelectAttack={onAttackTabClick}
+        onSelectAtlas={onAtlasTabClick}
+      />
+      <EuiSpacer size="m" />
+      {tabContent}
+    </div>
   );
 };
 

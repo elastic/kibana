@@ -33,8 +33,8 @@ const BUTTON_ADD_DATA = i18n.translate('xpack.securitySolution.globalHeader.butt
 });
 
 /**
- * This component uses the reverse portal to add the Add Data, ML job settings, and AI Assistant buttons on the
- * right hand side of the Kibana global header
+ * This component uses the reverse portal to add the Add Data and ML job settings controls on the
+ * right hand side of the Kibana app header action menu.
  */
 export const GlobalHeader = React.memo(() => {
   const portalNode = useMemo(() => createHtmlPortalNode(), []);

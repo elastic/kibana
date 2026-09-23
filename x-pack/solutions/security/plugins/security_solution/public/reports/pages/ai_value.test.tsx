@@ -62,6 +62,37 @@ jest.mock('../components/ai_value/value_report_exporter', () => ({
     children(jest.fn()),
 }));
 
+jest.mock('@kbn/app-header', () => ({
+  AppHeader: ({
+    title,
+    menu,
+  }: {
+    title: string;
+    menu?: {
+      items?: Array<{
+        id: string;
+        label: string;
+        testId?: string;
+        disableButton?: boolean;
+      }>;
+    };
+  }) => (
+    <div data-test-subj="aiValueAppHeader">
+      <h1>{title}</h1>
+      {menu?.items?.map((item) => (
+        <button
+          key={item.id}
+          type="button"
+          data-test-subj={item.testId ?? item.id}
+          disabled={Boolean(item.disableButton)}
+        >
+          {item.label}
+        </button>
+      ))}
+    </div>
+  ),
+}));
+
 jest.mock('../../common/components/no_privileges', () => ({
   NoPrivileges: () => <div data-test-subj="no-privileges" />,
 }));
@@ -119,8 +150,9 @@ describe('AIValue', () => {
     mockUseHasSecurityCapability.mockReturnValue(true);
     mockUseAIValueExportContext.mockReturnValue({ isExportMode: false });
     mockUseDownloadAIValueReport.mockReturnValue({
-      toggleContextMenu: jest.fn(),
+      openExportMenu: jest.fn(),
       isExportEnabled: false,
+      isServerless: false,
     });
   });
 
@@ -137,7 +169,10 @@ describe('AIValue', () => {
     renderAIValue();
 
     expect(screen.getByTestId('aiValuePage')).toBeInTheDocument();
-    expect(screen.getByTestId('header-page')).toBeInTheDocument();
+    expect(screen.getByTestId('aiValueAppHeader')).toBeInTheDocument();
+    expect(screen.getByTestId('aiValueExportButton')).toBeInTheDocument();
+    expect(screen.getByTestId('aiValueSettingsButton')).toBeInTheDocument();
+    expect(screen.getByTestId('aiValueHeaderDatePicker')).toBeInTheDocument();
   });
 
   it('hides the header in export mode', () => {
@@ -146,13 +181,14 @@ describe('AIValue', () => {
     renderAIValue();
 
     expect(screen.getByTestId('aiValuePage')).toBeInTheDocument();
-    expect(screen.queryByTestId('header-page')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('aiValueAppHeader')).not.toBeInTheDocument();
   });
 
   it('disables export button when there is no report data even if export integration is available', () => {
     mockUseDownloadAIValueReport.mockReturnValue({
-      toggleContextMenu: jest.fn(),
+      openExportMenu: jest.fn(),
       isExportEnabled: true,
+      isServerless: false,
     });
 
     renderAIValue();

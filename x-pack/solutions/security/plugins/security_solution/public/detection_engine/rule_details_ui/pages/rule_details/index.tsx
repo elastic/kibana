@@ -19,8 +19,10 @@ import {
   EuiSpacer,
   EuiToolTip,
   EuiWindowEvent,
+  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { Filter } from '@kbn/es-query';
 import { Route, Routes } from '@kbn/shared-ux-router';
 
@@ -158,6 +160,7 @@ import { useDeprecatedRuleDetailsCallout } from '../../../rule_management/compon
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { FiltersGlobal } from '../../../../common/components/filters_global';
+import { RuleDetailsAppHeader } from './rule_details_app_header';
 
 const RULE_EXCEPTION_LIST_TYPES = [
   ExceptionListTypeEnum.DETECTION,
@@ -298,7 +301,7 @@ export const RuleDetailsPage = connector(
     const { dataView, status } = useDataView(PageScope.alerts);
 
     const loading = userInfoLoading || listsConfigLoading;
-    const { detailName: ruleId } = useParams<{
+    const { detailName: ruleId, tabName } = useParams<{
       detailName: string;
       tabName: string;
     }>();
@@ -672,6 +675,13 @@ export const RuleDetailsPage = connector(
     const isRuleEditButtonEnabled =
       canEditRules || canEditCustomHighlightedFields || canEditInvestigationGuides;
 
+    const { euiTheme } = useEuiTheme();
+    // Security section defaults to paddingSize "l" (24px). Figma uses 16px — same pattern as Rules.
+    const chromeNextPage = css`
+      margin: -${euiTheme.size.l};
+      padding: ${euiTheme.size.base};
+    `;
+
     return (
       <>
         <NeedAdminForUpdateRulesCallOut />
@@ -709,101 +719,33 @@ export const RuleDetailsPage = connector(
           <EuiWindowEvent event="resize" handler={noop} />
           <RuleCustomizationsContextProvider rule={rule}>
             <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
-              <Display show={!globalFullScreen}>
-                <HeaderPage
-                  border
-                  subtitle={subTitle}
-                  subtitle2={
-                    <EuiFlexGroup gutterSize="m" alignItems="center" justifyContent="flexStart">
-                      <ModifiedRuleBadge rule={rule} />
-                      <EuiFlexGroup alignItems="center" gutterSize="xs">
-                        <EuiFlexItem grow={false}>
-                          {ruleStatusI18n.STATUS}
-                          {':'}
-                        </EuiFlexItem>
-                        {ruleStatusInfo}
-                      </EuiFlexGroup>
-                    </EuiFlexGroup>
-                  }
-                  title={title}
-                  badgeOptions={badgeOptions}
-                >
-                  <EuiFlexGroup alignItems="center">
-                    <EuiFlexItem grow={false}>
-                      <EuiToolTip
-                        position="top"
-                        content={explainLackOfPermission(
-                          rule,
-                          hasMlPermissions,
-                          hasActionsPrivileges,
-                          canEnableDisableRules
-                        )}
-                      >
-                        <EuiFlexGroup>
-                          <RuleSwitch
-                            id={rule?.id ?? '-1'}
-                            isDisabled={
-                              !rule ||
-                              !isExistingRule ||
-                              !canEditRuleWithActions(rule, hasActionsPrivileges) ||
-                              !canEnableDisableRules ||
-                              (isMlRule(rule?.type) && !hasMlPermissions)
-                            }
-                            enabled={isRuleEnabled}
-                            startMlJobsIfNeeded={startMlJobsIfNeeded}
-                            onChange={handleOnChangeEnabledRule}
-                            ruleName={rule?.name}
-                          />
-                          <EuiFlexItem>{i18n.ENABLE_RULE}</EuiFlexItem>
-                        </EuiFlexGroup>
-                      </EuiToolTip>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                        {isAgentChatExperienceEnabled && rule != null ? (
-                          <EuiFlexItem grow={false}>
-                            <AddRuleAttachmentToChatButton rule={rule} pathway="rule_details" />
-                          </EuiFlexItem>
-                        ) : null}
-                        <EuiFlexItem grow={false}>
-                          <EditRuleSettingButtonLink
-                            ruleId={ruleId}
-                            disabled={
-                              !isExistingRule ||
-                              !isRuleEditButtonEnabled ||
-                              (isMlRule(rule?.type) && !hasMlPermissions)
-                            }
-                            disabledReason={explainLackOfPermission(
-                              rule,
-                              hasMlPermissions,
-                              hasActionsPrivileges,
-                              isRuleEditButtonEnabled
-                            )}
-                          />
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={false}>
-                          <RuleActionsOverflow
-                            rule={rule}
-                            ruleId={ruleId}
-                            isDisabled={!isExistingRule}
-                            canDuplicateRuleWithActions={canEditRuleWithActions(
-                              rule,
-                              hasActionsPrivileges
-                            )}
-                            showBulkDuplicateExceptionsConfirmation={showBulkDuplicateConfirmation}
-                            showManualRuleRunConfirmation={showManualRuleRunConfirmation}
-                            confirmDeletion={confirmDeletion}
-                          />
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </HeaderPage>
-                <TabNavigation navTabs={pageTabs} />
-                {ruleError}
-                <LegacyUrlConflictCallOut rule={rule} spacesApi={spacesApi} />
-              </Display>
-              <div>
+              <div css={!globalFullScreen ? chromeNextPage : undefined}>
+                <Display show={!globalFullScreen}>
+                  <RuleDetailsAppHeader
+                    rule={rule}
+                    ruleId={ruleId}
+                    isExistingRule={isExistingRule}
+                    ruleLoading={ruleLoading}
+                    pageTabs={pageTabs}
+                    tabName={tabName}
+                    canEnableDisableRules={canEnableDisableRules}
+                    canEditRules={canEditRules}
+                    hasMlPermissions={hasMlPermissions}
+                    hasActionsPrivileges={hasActionsPrivileges}
+                    isRuleEditButtonEnabled={isRuleEditButtonEnabled}
+                    isAgentChatExperienceEnabled={isAgentChatExperienceEnabled}
+                    startMlJobsIfNeeded={startMlJobsIfNeeded}
+                    refreshRule={refreshRule}
+                    onChangeEnabled={handleOnChangeEnabledRule}
+                    showBulkDuplicateExceptionsConfirmation={showBulkDuplicateConfirmation}
+                    showManualRuleRunConfirmation={showManualRuleRunConfirmation}
+                    confirmDeletion={confirmDeletion}
+                  />
+                  <EuiSpacer size="m" />
+                  {ruleError}
+                  <LegacyUrlConflictCallOut rule={rule} spacesApi={spacesApi} />
+                </Display>
+                <div>
                 <Routes>
                   <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.overview})`}>
                     <RuleFieldsSectionWrapper>
@@ -962,6 +904,7 @@ export const RuleDetailsPage = connector(
                     </>
                   </Route>
                 </Routes>
+              </div>
               </div>
             </SecuritySolutionPageWrapper>
           </RuleCustomizationsContextProvider>

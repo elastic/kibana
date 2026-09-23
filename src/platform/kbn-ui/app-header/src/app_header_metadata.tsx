@@ -24,10 +24,10 @@ const AppHeaderMetadataEntry = ({
   const label = asPlainText(item.label);
   const value = item.type === 'text' ? asOptionalPlainText(item.value) : undefined;
 
-  // Shared resting style for every metadata entry: subdued color, bold label.
+  // Shared resting style for every metadata entry: subdued color, regular weight.
   const labelStyles = css`
     color: ${euiTheme.colors.textSubdued};
-    font-weight: ${euiTheme.font.weight.bold};
+    font-weight: ${euiTheme.font.weight.regular};
   `;
   const firstItemOffset =
     isFirst && item.type !== 'health'
@@ -65,13 +65,9 @@ const AppHeaderMetadataEntry = ({
 
   if (item.type === 'health') {
     return (
-      <EuiHealth
-        color={item.color}
-        css={labelStyles}
-        data-test-subj={item['data-test-subj']}
-        textSize="xs"
-      >
-        {label}
+      <EuiHealth color={item.color} data-test-subj={item['data-test-subj']} textSize="xs">
+        {/* Span keeps subdued text styles off the health icon (warning stays yellow). */}
+        <span css={labelStyles}>{label}</span>
       </EuiHealth>
     );
   }
@@ -82,7 +78,7 @@ const AppHeaderMetadataEntry = ({
       {value !== undefined && (
         <span
           css={css`
-            font-weight: ${euiTheme.font.weight.medium};
+            font-weight: ${euiTheme.font.weight.regular};
           `}
         >
           {' '}

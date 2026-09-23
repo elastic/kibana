@@ -44,8 +44,12 @@ jest.mock('../../common/components/search_bar', () => ({
   SiemSearchBar: () => <div data-test-subj="mock_globalSearchBar" />,
 }));
 
-jest.mock('../../common/components/filters_global', () => ({
-  FiltersGlobal: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+jest.mock('@kbn/app-header', () => ({
+  AppHeader: ({ title }: { title: string }) => (
+    <div data-test-subj="detectionResponseAppHeader">
+      <h1>{title}</h1>
+    </div>
+  ),
 }));
 
 jest.mock('../../common/components/empty_prompt');
@@ -111,7 +115,9 @@ describe('DetectionResponse', () => {
     );
 
     expect(result.queryByTestId('detectionResponsePage')).toBeInTheDocument();
+    expect(result.queryByTestId('detectionResponseAppHeader')).toBeInTheDocument();
     expect(result.queryByTestId('mock_globalSearchBar')).toBeInTheDocument();
+    expect(result.queryByTestId('filters-global-container')).toBeInTheDocument();
     expect(result.queryByTestId('detectionResponseSections')).toBeInTheDocument();
     expect(result.queryByTestId('detectionResponseLoader')).not.toBeInTheDocument();
     expect(result.getByText('Detection & Response')).toBeInTheDocument();

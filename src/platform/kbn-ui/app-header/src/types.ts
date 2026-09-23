@@ -133,7 +133,7 @@ export type AppHeaderMetadataItems = readonly [
 
 export interface AppHeaderMetadataTextItem {
   type: 'text';
-  /** When `value` is set, this acts as the bold key (e.g. "Created by"). */
+  /** When `value` is set, this acts as the key (e.g. "Created by"). */
   label: string;
   /** Optional value rendered next to `label` in a subdued color. */
   value?: string;
@@ -228,13 +228,17 @@ export interface AppHeaderShareAction {
 
 /**
  * Plain-text page description. Use the object form to add a URL rendered with a fixed
- * "Learn more" label.
+ * "Learn more" label, or `iconOnly` for an icon-only external link (no label text).
  */
 export type AppHeaderDescription =
   | string
   | {
       text: string;
       learnMoreUrl: string;
+      /** When true, renders only the external icon (no "Learn more" text). */
+      iconOnly?: boolean;
+      /** Accessible label for the link. Defaults to "Learn more". */
+      learnMoreAriaLabel?: string;
     };
 
 interface AppHeaderConfigBase {
@@ -252,15 +256,10 @@ interface AppHeaderConfigBase {
   spacing?: AppHeaderSpacing;
 }
 
-type AppHeaderSecondaryContent =
-  | {
-      description?: AppHeaderDescription;
-      metadata?: never;
-    }
-  | {
-      description?: never;
-      metadata?: AppHeaderMetadataItems;
-    };
+type AppHeaderSecondaryContent = {
+  description?: AppHeaderDescription;
+  metadata?: AppHeaderMetadataItems;
+};
 
 export type AppHeaderConfig = AppHeaderConfigBase & AppHeaderSecondaryContent;
 

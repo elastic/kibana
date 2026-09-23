@@ -4,35 +4,39 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useRef, useMemo } from 'react';
+import React, { useState, useRef, useMemo, useCallback } from 'react';
 import {
-  EuiButtonEmpty,
   EuiContext,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSpacer,
+  useEuiTheme,
 } from '@elastic/eui';
 import type { DocLinks } from '@kbn/doc-links';
 import { css } from '@emotion/css';
+import { css as cssReact } from '@emotion/react';
+import { AppHeader } from '@kbn/app-header';
+import type { AppHeaderMenu } from '@kbn/app-header';
+import { useNavigation } from '@kbn/security-solution-navigation';
 import { useSyncTimerangeUrlParam } from '../../common/hooks/search_bar/use_sync_timerange_url_param';
 import { ValueReportExporter } from '../components/ai_value/value_report_exporter';
 import {
   EXPORT_REPORT,
   SAMPLE_REPORT_DATE_PICKER_DISABLED_TOOLTIP,
+  SETTINGS,
 } from '../components/ai_value/translations';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { SuperDatePicker } from '../../common/components/super_date_picker';
 import { AIValueReport } from '../components/ai_value';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
-import { HeaderPage } from '../../common/components/header_page';
 import * as i18n from './translations';
 import { NoPrivileges } from '../../common/components/no_privileges';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { PageLoader } from '../../common/components/page_loader';
 import { inputsSelectors } from '../../common/store';
 import { useHasSecurityCapability } from '../../helper_hooks';
-import { useKibana } from '../../common/lib/kibana';
 import { useDownloadAIValueReport } from '../hooks/use_download_ai_value_report';
 import {
   AIValueExportProvider,
@@ -58,6 +62,8 @@ const BaseComponent = () => {
   const isExportMode = exportContext?.isExportMode === true;
   const timerange = useDeepEqualSelector(inputsSelectors.valueReportTimeRangeSelector);
   const { from, to } = timerange;
+  const { euiTheme } = useEuiTheme();
+  const { navigateTo } = useNavigation();
 
   const { status } = useDataView();
 
@@ -70,51 +76,112 @@ const BaseComponent = () => {
   const [isSampleMode, setIsSampleMode] = useState(false);
   const exportPDFRef = useRef<(() => void) | null>(null);
 
-  const { serverless } = useKibana().services;
-  const isServerless = !!serverless;
-
-  const [exportButtonElement, setExportButtonElement] = useState<
-    HTMLAnchorElement | HTMLButtonElement | null
-  >(null);
-
   // since we do not have a search bar in the AI Value page, we need to sync the timerange
   useSyncTimerangeUrlParam();
 
-  const { toggleContextMenu, isExportEnabled } = useDownloadAIValueReport({
-    anchorElement: exportButtonElement,
+  const { openExportMenu, isExportEnabled, isServerless } = useDownloadAIValueReport({
     timeRange: timerange,
   });
 
-  const exportButton = useMemo(
-    () =>
-      isServerless ? (
-        <EuiButtonEmpty
-          className="exportPdfButton"
-          data-test-subj="aiValueExportButton"
-          iconType="export"
-          onClick={() => exportPDFRef.current?.()}
-          size="s"
-          aria-label={EXPORT_REPORT}
-          isDisabled={!hasReportData}
-        >
-          {EXPORT_REPORT}
-        </EuiButtonEmpty>
-      ) : (
-        <EuiButtonEmpty
-          className="exportPdfButton"
-          data-test-subj="aiValueExportButton"
-          iconType="export"
-          buttonRef={setExportButtonElement}
-          size="s"
-          aria-label={EXPORT_REPORT}
-          onClick={toggleContextMenu}
-          isDisabled={!hasReportData || !isExportEnabled}
-        >
-          {EXPORT_REPORT}
-        </EuiButtonEmpty>
-      ),
-    [isServerless, isExportEnabled, hasReportData, toggleContextMenu]
+  const goToValueReportSettings = useCallback(() => {
+    navigateTo({ appId: 'management', path: '/kibana/settings?query=defaultValueReport' });
+  }, [navigateTo]);
+
+  // Order matches Old/Figma: Export PDF → Settings → kebab → date picker.
+  // Export + Settings are visible items (not primary) so they sit left of the kebab;
+  // the date picker sits in a sticky sibling slot to the right of AppMenu.
+  const menu = useMemo<AppHeaderMenu>(
+    () => ({
+      items: [
+        {
+          id: 'exportReport',
+          label: EXPORT_REPORT,
+          iconType: 'export',
+          testId: 'aiValueExportButton',
+          disableButton: !hasReportData || (!isServerless && !isExportEnabled),
+          run: (params) => {
+            if (isServerless) {
+              exportPDFRef.current?.();
+              return;
+            }
+            if (params?.triggerElement) {
+              openExportMenu(params.triggerElement);
+            }
+          },
+        },
+        {
+          id: 'valueReportSettings',
+          label: SETTINGS,
+          iconType: 'gear',
+          testId: 'aiValueSettingsButton',
+          run: () => {
+            goToValueReportSettings();
+          },
+        },
+      ],
+    }),
+    [goToValueReportSettings, hasReportData, isExportEnabled, isServerless, openExportMenu]
   );
+
+  const datePicker = useMemo(
+    () =>
+      isSampleMode ? (
+        <EuiContext
+          i18n={{
+            mapping: {
+              'euiSuperUpdateButton.cannotUpdateTooltip': SAMPLE_REPORT_DATE_PICKER_DISABLED_TOOLTIP,
+            },
+          }}
+        >
+          <SuperDatePicker
+            id={InputsModelId.valueReport}
+            showUpdateButton="iconOnly"
+            width="auto"
+            compressed
+            disabled={isSourcererLoading || isDatePickerDisabled}
+          />
+        </EuiContext>
+      ) : (
+        <SuperDatePicker
+          id={InputsModelId.valueReport}
+          showUpdateButton="iconOnly"
+          width="auto"
+          compressed
+          disabled={isSourcererLoading || isDatePickerDisabled}
+        />
+      ),
+    [isSampleMode, isSourcererLoading, isDatePickerDisabled]
+  );
+
+  // Security section defaults to paddingSize "l" (24px). Figma uses 16px — same pattern as Rules.
+  const chromeNextPage = cssReact`
+    margin: -${euiTheme.size.l};
+    padding: ${euiTheme.size.base};
+  `;
+
+  // Flex row owns the full-bleed divider (same edge-to-edge border as AppHeader bleed).
+  // Date picker sits in-flow after the kebab with only `gap` — no reserved absolute slot.
+  const headerWithDatePicker = cssReact`
+    position: sticky;
+    top: 0;
+    z-index: ${euiTheme.levels.mask};
+    display: flex;
+    align-items: center;
+    gap: ${euiTheme.size.xs};
+    margin-inline: -${euiTheme.size.base};
+    margin-top: -${euiTheme.size.base};
+    padding-inline: ${euiTheme.size.base};
+    background: ${euiTheme.colors.backgroundBasePlain};
+    border-bottom: ${euiTheme.border.thin};
+    margin-bottom: -${euiTheme.border.width.thin};
+
+    [data-test-subj='appHeader'] {
+      flex: 1;
+      min-width: 0;
+      border-bottom: none;
+      margin-bottom: 0;
+    }
+  `;
 
   if (!hasSocManagementCapability) {
     return <NoPrivileges docLinkSelector={(docLinks: DocLinks) => docLinks.siem.privileges} />;
@@ -149,65 +216,43 @@ const BaseComponent = () => {
       // 6 lens components and 1 AI generated key insight
       data-shared-items-count="7"
     >
-      {!isExportMode && (
-        <HeaderPage
-          title={i18n.AI_VALUE_DASHBOARD}
-          rightSideItems={[
-            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false}>
-                {isSampleMode ? (
-                  <EuiContext
-                    i18n={{
-                      mapping: {
-                        'euiSuperUpdateButton.cannotUpdateTooltip':
-                          SAMPLE_REPORT_DATE_PICKER_DISABLED_TOOLTIP,
-                      },
-                    }}
-                  >
-                    <SuperDatePicker
-                      id={InputsModelId.valueReport}
-                      showUpdateButton="iconOnly"
-                      width="auto"
-                      compressed
-                      disabled={isSourcererLoading || isDatePickerDisabled}
-                    />
-                  </EuiContext>
-                ) : (
-                  <SuperDatePicker
-                    id={InputsModelId.valueReport}
-                    showUpdateButton="iconOnly"
-                    width="auto"
-                    compressed
-                    disabled={isSourcererLoading || isDatePickerDisabled}
-                  />
-                )}
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>{exportButton}</EuiFlexItem>
-            </EuiFlexGroup>,
-          ]}
-        />
-      )}
-      <EuiFlexGroup direction="column" data-test-subj="aiValueSections">
-        <EuiFlexItem>
-          <ValueReportExporter>
-            {(exportPDF) => {
-              // Store the export function in the ref
-              exportPDFRef.current = exportPDF;
+      <div css={chromeNextPage}>
+        {!isExportMode && (
+          <div css={headerWithDatePicker}>
+            {/* [Chrome Next] Migrated header — Export PDF → Settings → kebab → date picker. */}
+            <AppHeader
+              title={i18n.AI_VALUE_DASHBOARD}
+              menu={menu}
+              spacing="flush"
+              sticky={false}
+            />
+            <div data-test-subj="aiValueHeaderDatePicker">{datePicker}</div>
+          </div>
+        )}
+        {/* 16px between header and report body (Figma page grid). */}
+        {!isExportMode && <EuiSpacer size="m" />}
+        <EuiFlexGroup direction="column" data-test-subj="aiValueSections">
+          <EuiFlexItem>
+            <ValueReportExporter>
+              {(exportPDF) => {
+                // Store the export function in the ref
+                exportPDFRef.current = exportPDF;
 
-              return (
-                <AIValueReport
-                  from={from}
-                  to={to}
-                  setHasReportData={setHasReportData}
-                  setIsDatePickerDisabled={setIsDatePickerDisabled}
-                  setIsSampleMode={setIsSampleMode}
-                  isSourcererLoading={isSourcererLoading}
-                />
-              );
-            }}
-          </ValueReportExporter>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+                return (
+                  <AIValueReport
+                    from={from}
+                    to={to}
+                    setHasReportData={setHasReportData}
+                    setIsDatePickerDisabled={setIsDatePickerDisabled}
+                    setIsSampleMode={setIsSampleMode}
+                    isSourcererLoading={isSourcererLoading}
+                  />
+                );
+              }}
+            </ValueReportExporter>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </div>
     </SecuritySolutionPageWrapper>
   );
 };

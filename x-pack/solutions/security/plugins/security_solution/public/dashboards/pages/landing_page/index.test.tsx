@@ -27,6 +27,50 @@ jest.mock('@kbn/dashboard-plugin/public', () => ({
   DashboardListingTable: jest.fn(() => <span data-test-subj="dashboardsTable" />),
   DashboardTopNav: jest.fn(() => <span data-test-subj="dashboardTopNav" />),
 }));
+jest.mock('@kbn/app-header', () => ({
+  AppHeader: ({
+    title,
+    menu,
+  }: {
+    title: string;
+    menu?: {
+      primaryActionItem?: {
+        label: string;
+        href?: string;
+        disableButton?: boolean | (() => boolean);
+        testId?: string;
+        run?: () => void;
+      };
+    };
+  }) => {
+    const primary = menu?.primaryActionItem;
+    const disabled =
+      typeof primary?.disableButton === 'function'
+        ? primary.disableButton()
+        : Boolean(primary?.disableButton);
+    return (
+      <div>
+        <h1>{title}</h1>
+        {primary && (
+          <a
+            data-test-subj={primary.testId}
+            href={primary.href}
+            aria-disabled={disabled}
+            {...(disabled ? { disabled: true } : {})}
+            onClick={(ev) => {
+              ev.preventDefault();
+              if (!disabled) {
+                primary.run?.();
+              }
+            }}
+          >
+            {primary.label}
+          </a>
+        )}
+      </div>
+    );
+  },
+}));
 
 const mockUseContractComponents = jest.fn(() => ({}));
 jest.mock('../../../common/hooks/use_contract_component', () => ({

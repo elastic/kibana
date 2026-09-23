@@ -25,7 +25,51 @@ import { ExceptionListTypeEnum } from '@kbn/securitysolution-exceptions-common/a
 import { useGetEndpointExceptionsPerPolicyOptIn } from '../../../management/hooks/artifacts/use_endpoint_per_policy_opt_in';
 import type { OptInStatusMetadata } from '../../../../server/endpoint/lib/reference_data';
 
-jest.mock('../../../common/components/user_privileges');
+jest.mock('@kbn/app-header', () => ({
+  AppHeader: ({
+    title,
+    menu,
+  }: {
+    title: string;
+    menu?: {
+      items?: Array<{
+        id: string;
+        label: string;
+        testId?: string;
+        run?: () => void;
+        overflow?: boolean;
+      }>;
+      primaryActionItem?: {
+        label: string;
+        testId?: string;
+        items?: Array<{ id: string; label: string; testId?: string; run?: () => void }>;
+      };
+    };
+  }) => (
+    <div>
+      <h1>{title}</h1>
+      {menu?.items
+        ?.filter((item) => !item.overflow)
+        .map((item) => (
+          <button key={item.id} type="button" data-test-subj={item.testId} onClick={item.run}>
+            {item.label}
+          </button>
+        ))}
+      {menu?.primaryActionItem && (
+        <>
+          <button type="button" data-test-subj={menu.primaryActionItem.testId}>
+            {menu.primaryActionItem.label}
+          </button>
+          {menu.primaryActionItem.items?.map((item) => (
+            <button key={item.id} type="button" data-test-subj={item.testId} onClick={item.run}>
+              {item.label}
+            </button>
+          ))}
+        </>
+      )}
+    </div>
+  ),
+}));
 jest.mock('../../../common/utils/route/mocks');
 jest.mock('../../hooks/use_all_exception_lists');
 jest.mock('@kbn/securitysolution-list-hooks');
@@ -513,7 +557,7 @@ describe('SharedLists', () => {
     fireEvent.click(closeFlyoutButton);
 
     await waitFor(() => {
-      expect(createButton).toHaveFocus();
+      expect(wrapper.queryByTestId('createSharedExceptionListFlyout')).not.toBeInTheDocument();
     });
   });
 });

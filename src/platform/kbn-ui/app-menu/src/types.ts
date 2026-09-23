@@ -124,6 +124,13 @@ interface AppMenuItemBase {
    */
   iconType: IconType;
   /**
+   * Which side of the label the icon renders on.
+   * Defaults to `right` for primary action buttons with a popover (`items`),
+   * otherwise `left`. Prefer `right` with `chevronSingleDown` / `arrowDown`
+   * so dropdown triggers read correctly.
+   */
+  iconSide?: 'left' | 'right';
+  /**
    * A unique identifier for the item, used for testing purposes. Maps to `data-test-subj` attribute.
    */
   testId?: string;
