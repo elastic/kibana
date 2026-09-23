@@ -3010,7 +3010,7 @@ describe('Alerts Client', () => {
           maintenanceWindowsService.getMaintenanceWindows.mockReturnValue({
             maintenanceWindows: [
               ...getParamsByUpdateMaintenanceWindowIds.maintenanceWindows,
-              { id: 'mw3' } as unknown as MaintenanceWindow,
+              { id: 'mw3', scope: { alerting: { enabled: true } } } as unknown as MaintenanceWindow,
             ],
             maintenanceWindowsWithoutScopedQueryIds: [],
           });
@@ -3051,7 +3051,7 @@ describe('Alerts Client', () => {
           maintenanceWindowsService.getMaintenanceWindows.mockReturnValueOnce({
             maintenanceWindows: [
               ...getParamsByUpdateMaintenanceWindowIds.maintenanceWindows,
-              { id: 'mw3' } as unknown as MaintenanceWindow,
+              { id: 'mw3', scope: { alerting: { enabled: true } } } as unknown as MaintenanceWindow,
             ],
             maintenanceWindowsWithoutScopedQueryIds: [],
           });
