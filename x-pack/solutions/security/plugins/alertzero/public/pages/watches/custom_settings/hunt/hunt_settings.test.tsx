@@ -29,6 +29,7 @@ const huntWorker: Worker = {
   lastRun: null,
   state: 'ok',
   settingsRevision: 1,
+  workflowId: null,
   settings: {
     workerId: SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
     autonomy: 'manual',

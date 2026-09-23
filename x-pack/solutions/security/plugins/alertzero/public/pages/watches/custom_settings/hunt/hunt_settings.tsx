@@ -36,9 +36,7 @@ export const HuntSettings: WorkerCustomSettingsComponent = ({
   const extras = readHuntExtras(settings);
   const isAgentPickerEnabled = useIsExperimentalFeatureEnabled('workerAgentPickerEnabled');
 
-  // UI-only gate: hides the control from new selections. A Worker that already stored
-  // `extras.agentId` while the flag was on keeps executing on it — see the flag's doc comment
-  // in `common/experimental_features.ts`.
+  // UI-only gate — see the flag's doc comment in `common/experimental_features.ts`.
   if (!isAgentPickerEnabled) {
     return null;
   }

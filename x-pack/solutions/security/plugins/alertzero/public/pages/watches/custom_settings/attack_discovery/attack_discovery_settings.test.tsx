@@ -29,6 +29,7 @@ const attackDiscoveryWorker: Worker = {
   lastRun: null,
   state: 'ok',
   settingsRevision: 1,
+  workflowId: null,
   settings: {
     workerId: SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
     autonomy: 'manual',

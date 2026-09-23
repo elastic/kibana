@@ -7,10 +7,11 @@
 
 import { createConfig } from './create_config';
 
-const buildContext = (pluginConfig: { enabled: boolean; enableExperimental: string[] }) => ({
-  config: { get: () => pluginConfig },
-  logger: { get: () => ({ warn: jest.fn() }) },
-} as unknown as Parameters<typeof createConfig>[0]);
+const buildContext = (pluginConfig: { enabled: boolean; enableExperimental: string[] }) =>
+  ({
+    config: { get: () => pluginConfig },
+    logger: { get: () => ({ warn: jest.fn() }) },
+  } as unknown as Parameters<typeof createConfig>[0]);
 
 describe('createConfig', () => {
   it('attaches all-default experimentalFeatures when enableExperimental is empty', () => {

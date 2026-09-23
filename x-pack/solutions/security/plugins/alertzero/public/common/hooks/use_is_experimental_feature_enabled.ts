@@ -13,9 +13,7 @@ import { ExperimentalFeaturesService } from '../experimental_features_service';
  * provider) because `ExperimentalFeaturesService` is initialized synchronously in
  * `AlertZeroPlugin#setup`, before any Watch page can render.
  */
-export const useIsExperimentalFeatureEnabled = (
-  feature: keyof ExperimentalFeatures
-): boolean => {
+export const useIsExperimentalFeatureEnabled = (feature: keyof ExperimentalFeatures): boolean => {
   const experimentalFeatures = ExperimentalFeaturesService.get();
   return experimentalFeatures[feature] ?? false;
 };
