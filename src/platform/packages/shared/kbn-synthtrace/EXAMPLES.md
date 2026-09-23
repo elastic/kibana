@@ -777,6 +777,47 @@ Generates simple OpenTelemetry traces.
 node scripts/synthtrace otel_simple_trace --live
 ```
 
+#### `genai`
+
+Generates OpenTelemetry GenAI APM traces for testing the GenAI tab in the APM transaction/span flyout and in Discover's document viewer. Uses the OTel APM pipeline.
+
+Root SERVER spans that carry `gen_ai.*` attributes show the GenAI tab immediately in the **transaction** flyout (Services > Traces). Agent and RAG traces also wrap CLIENT GenAI exit spans under a SERVER transaction, so the tab appears in the **span** flyout when you expand the waterfall. `regular-http-service` is a plain HTTP service — the GenAI tab must not appear.
+
+OTel GenAI fields exercised:
+
+- `gen_ai.operation.name`: `chat` | `embeddings`
+- `gen_ai.system`: `openai` | `anthropic` | `aws.bedrock`
+- `gen_ai.request.{model, temperature, top_p, top_k, max_tokens, seed}`
+- `gen_ai.response.{model, id, finish_reasons}`
+- `gen_ai.usage.{input_tokens, output_tokens}`
+- EDOT extensions: `gen_ai.provider.name`, `gen_ai.input.messages` / `gen_ai.output.messages`, `gen_ai.system_instructions`, `gen_ai.conversation.id`
+
+The Elasticsearch flattened `attributes` mapping uses `ignore_above: 1024`. Messages at or under that length are indexed and render from the fields API. Longer values are dropped from the index (`_ignored`) and survive only in `_source`; APM and Discover recover them with a `_source` fallback.
+
+Services generated:
+
+- `genai-chat-service` — multi-turn OpenAI gpt-4o chat with input/output messages.
+- `genai-tool-service` — Anthropic Claude tool/function calling (`tool_calls` plus tool results).
+- `genai-embed-service` — OpenAI embeddings (`operation.name = embeddings`, no conversation).
+- `genai-minimal-service` — Amazon Bedrock Titan with only required `gen_ai.*` fields (optional sections stay hidden).
+- `genai-long-content-service` — longer messages to exercise the View more toggle.
+- `genai-agent-service` — SERVER transaction wrapping three CLIENT GenAI exit spans (plan → search → synthesize).
+- `genai-rag-service` — SERVER root plus embeddings and chat CLIENT spans in one trace.
+- `regular-http-service` — non-GenAI HTTP traffic; the GenAI tab must not appear.
+- `genai-realworld-service` — multi-turn developer assistant conversation with mixed markdown (headers, tables, code blocks) to test rendering fidelity.
+- `genai-maxlen-service` — every message's serialized JSON is exactly 1024 characters, the largest value Elasticsearch still indexes.
+- `genai-overlimit-service` — messages well over 1024 characters. Elasticsearch drops them from the index; only a `_source` fallback can surface the conversation.
+- `genai-partial-service` — mixed short and over-limit messages in the same array. `ignore_above` drops only the long elements, so the indexed value is a non-null **partial** array. Recovery must replace the whole field, not skip it because a value is present.
+
+**Usage:**
+
+```sh
+node scripts/synthtrace genai --live --clean
+node scripts/synthtrace genai --from=now-15m --to=now --clean
+```
+
+After ingesting, open **Observability > APM > Services**, pick a `genai-*` service, and open a trace. For Discover, query APM traces covering these services and open the **GenAI** tab in the document viewer. Over-limit conversations in ES|QL Discover require `METADATA _id, _index` so the tab can fetch `_source`.
+
 #### `apm_service_legacy_to_otel_metrics`
 
 Simulates a service migrating from classic Elastic APM to OTel instrumentation. The first half of the time range produces classic APM Java data (metrics + transactions), the second half produces OTel data with stable semconv `jvm.*` metrics in a dedicated OTel index. Both halves share the same `service.name`, so the APM Metrics tab must select the correct dashboard based on the latest agent data.

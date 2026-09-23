@@ -97,6 +97,20 @@ describe('SecurityRoutePageWrapper', () => {
     expect(mockRedirect).toHaveBeenCalled();
   });
 
+  it('should render children for the entity analytics bookmark when the app link is gone', () => {
+    mockUseLinkInfo.mockReturnValue(undefined);
+
+    const { getByTestId } = render(
+      <SecurityRoutePageWrapper pageName={SecurityPageName.entityAnalytics}>
+        <TestComponent />
+      </SecurityRoutePageWrapper>,
+      { wrapper: Wrapper }
+    );
+
+    expect(getByTestId(TEST_COMPONENT_SUBJ)).toBeInTheDocument();
+    expect(mockRedirect).not.toHaveBeenCalled();
+  });
+
   it('should render NoPrivilegesPage when unauthorized', () => {
     mockUseLinkInfo.mockReturnValue({ ...defaultLinkInfo, unauthorized: true });
 
@@ -108,6 +122,20 @@ describe('SecurityRoutePageWrapper', () => {
     );
 
     expect(getByTestId('noPrivilegesPage')).toBeInTheDocument();
+  });
+
+  it('should render children when the page handles its own unauthorized state', () => {
+    mockUseLinkInfo.mockReturnValue({ ...defaultLinkInfo, unauthorized: true });
+
+    const { getByTestId, queryByTestId } = render(
+      <SecurityRoutePageWrapper pageName={SecurityPageName.exploreLanding} skipLinkAuthorization>
+        <TestComponent />
+      </SecurityRoutePageWrapper>,
+      { wrapper: Wrapper }
+    );
+
+    expect(getByTestId(TEST_COMPONENT_SUBJ)).toBeInTheDocument();
+    expect(queryByTestId('noPrivilegesPage')).not.toBeInTheDocument();
   });
 
   it('should redirect when unavailable', () => {

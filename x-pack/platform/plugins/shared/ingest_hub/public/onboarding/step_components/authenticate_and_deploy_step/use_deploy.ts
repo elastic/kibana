@@ -7,6 +7,10 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
+import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import { sendUpdateCloudConnector, sendVerifyCloudConnectorIacKey } from '@kbn/fleet-plugin/public';
 
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
@@ -20,8 +24,15 @@ import {
   deployGroup,
 } from './deploy_groups';
 import type { DeployGroup } from './deploy_groups';
+import { buildIacIntegrations, toSOServiceVars } from './package_inputs';
+import { useOnboardingSO } from './use_onboarding_so';
 
-export { getRegionFieldName, buildStreamVars, buildPackageInputs } from './package_inputs';
+export {
+  getRegionFieldName,
+  buildStreamVars,
+  buildPackageInputs,
+  toSOServiceVars,
+} from './package_inputs';
 
 export interface UseDeployResult {
   namespace: string;
@@ -30,18 +41,23 @@ export interface UseDeployResult {
   failedInstances: string[];
   handleDeploy: (instanceIds?: string[]) => void;
   isAlreadyDeployed: boolean;
+  /** The reconciled instance groups Deploy will create policies for; drives the Federated Identity template set. */
+  deployGroups: DeployGroup[];
 }
 
 export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeployResult {
+  const { services } = useKibana<CoreStart>();
+  const { createDeployment, updateDeployment, persistDeploymentId } = useOnboardingSO();
   const {
     servicesStep,
     authenticateAndDeployStep,
-    deployAndDetectStep,
-    updateDeployAndDetectStep,
+    setPendingIacTemplate,
+    detectAndReviewStep,
+    updateDetectAndReviewStep,
     getLatestFailedInstances,
     awsServicesMap: servicesMap,
   } = useOnboardingFlow();
-  const { selectedServiceIds } = servicesStep;
+  const { selectedServiceIds, dataFormat } = servicesStep;
 
   const [serviceSettings] = useSessionStorage<ServiceSettingsPersistedState>(
     SERVICE_SETTINGS_SESSION_KEY,
@@ -54,7 +70,15 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
   // navigating Back and forward again clears the failure locally while serviceStatuses still holds
   // the 'error' chip, which opens the isDone gate on a deploy that never succeeded.
   const [failedInstances, setFailedInstances] = useState<string[]>(
-    () => deployAndDetectStep.failedInstances ?? []
+    () => detectAndReviewStep.failedInstances ?? []
+  );
+
+  const hasEcfServices = useMemo(
+    () =>
+      selectedServiceIds.some((id) =>
+        servicesMap?.get(id)?.deploymentMethods.some((dm) => dm.method === 'ecf')
+      ),
+    [selectedServiceIds, servicesMap]
   );
 
   const deployGroups: DeployGroup[] = useMemo(
@@ -67,16 +91,83 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
     [serviceSettings?.instances, selectedServiceIds, servicesMap]
   );
 
+  // The Existing Identity check renders the stack update without touching the connector; the
+  // template's details are written only once every integration it was rendered for is deployed,
+  // so a launch the user abandoned never marks the identity as upgraded. Written only when the
+  // identity AND the integration set match what was launched: enabled inputs live in session
+  // storage and can change after the launch without the flow context noticing, and the rendered
+  // key only covers the set it was rendered for. On a mismatch the details are left in place; the
+  // check on the new set blocks Deploy again if that set needs an update.
+  // Best-effort: a failed write is reported once and not retried from this step, which has no
+  // Deploy left to press after a successful run. The daily upgrade check then reports the
+  // identity as needing an update and the flyout's Update records the key.
+  const persistPendingIacTemplate = useCallback(async () => {
+    const { connectorId, pendingIacTemplate } = authenticateAndDeployStep;
+    if (!connectorId || !pendingIacTemplate || pendingIacTemplate.connectorId !== connectorId) {
+      return;
+    }
+    const deployedIntegrationsKey = JSON.stringify(
+      buildIacIntegrations(
+        deployGroups.flatMap((group) => group.members),
+        serviceSettings?.serviceVars ?? {}
+      )
+    );
+    if (pendingIacTemplate.integrationsKey !== deployedIntegrationsKey) {
+      return;
+    }
+    const {
+      iac_key: iacKey,
+      iac_blueprint_id: blueprintId,
+      iac_blueprint_version: version,
+    } = pendingIacTemplate;
+    try {
+      const { error } = await sendUpdateCloudConnector(connectorId, {
+        iac_key: iacKey,
+        iac_blueprint_id: blueprintId,
+        iac_blueprint_version: version,
+      });
+      if (error) {
+        throw error;
+      }
+      // One comparing re-check, as the flyout's Update does after its write: with the new key
+      // stored it answers `matches` and the server persists `up_to_date`. Without it the identity
+      // keeps advertising an upgrade until the daily task runs. Best-effort: a failed re-check is
+      // not a failed write, so it must not reach the toast below; the daily task covers it.
+      await sendVerifyCloudConnectorIacKey(connectorId, {}).catch(() => undefined);
+      setPendingIacTemplate(undefined);
+    } catch {
+      services.notifications.toasts.addWarning({
+        title: i18n.translate(
+          'xpack.ingestHub.authenticateAndDeployStep.iacTemplateWriteFailed.title',
+          { defaultMessage: 'Template details were not saved on the identity' }
+        ),
+        text: i18n.translate(
+          'xpack.ingestHub.authenticateAndDeployStep.iacTemplateWriteFailed.text',
+          {
+            defaultMessage:
+              "Your integrations were deployed, but Kibana could not record which CloudFormation template this identity uses, so it may be reported as needing an update. You can update it from the identity's details in Fleet.",
+          }
+        ),
+      });
+    }
+  }, [
+    authenticateAndDeployStep,
+    deployGroups,
+    serviceSettings?.serviceVars,
+    services,
+    setPendingIacTemplate,
+  ]);
+
   const isAlreadyDeployed = useMemo(
     () =>
       deployGroups.length > 0 &&
       deployGroups.every((group) =>
         group.members.every(({ instance }) => {
-          const status = deployAndDetectStep.serviceStatuses[instance.instanceId];
-          return status === 'receiving' || status === 'detecting';
+          const status = detectAndReviewStep.serviceStatuses[instance.instanceId];
+          return status === 'receiving' || status === 'detecting' || status === 'timeout';
         })
       ),
-    [deployGroups, deployAndDetectStep.serviceStatuses]
+    [deployGroups, detectAndReviewStep.serviceStatuses]
   );
 
   const nonAgentlessServices: AwsServiceMatrixEntry[] = useMemo(
@@ -103,7 +194,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
         groupsToDeploy = deployGroups
           .map((group) => {
             const untrackedMembers = group.members.filter(
-              ({ instance }) => !(instance.instanceId in deployAndDetectStep.serviceStatuses)
+              ({ instance }) => !(instance.instanceId in detectAndReviewStep.serviceStatuses)
             );
             if (untrackedMembers.length === 0) return null;
             return {
@@ -116,28 +207,34 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
         // Flat list of all instanceIds being deployed this run.
         const targets = groupsToDeploy.flatMap(({ instanceIds: ids }) => ids);
 
-        // Non-agentless services are shown as gray chips but never deployed.
+        // Non-managed-integration services are shown as gray chips (ECF deployed on a different path).
         const newNonAgentlessStatuses: Record<string, ServiceChipState> = {};
         for (const service of nonAgentlessServices) {
-          if (!(service.id in deployAndDetectStep.serviceStatuses)) {
+          if (!(service.id in detectAndReviewStep.serviceStatuses)) {
             newNonAgentlessStatuses[service.id] = 'instantiating';
           }
         }
 
         if (targets.length === 0 && Object.keys(newNonAgentlessStatuses).length === 0) {
           onContinue();
+          // Everything is already deployed: the only work left is a template-details write that failed
+          // last time.
+          await persistPendingIacTemplate();
           return;
         }
 
         const initialStatuses = buildInstanceStatuses(targets, []);
         if (targets.length > 0) setIsDeploying(true);
-        updateDeployAndDetectStep({
+        updateDetectAndReviewStep({
           isDeploying: targets.length > 0,
           serviceStatuses: { ...initialStatuses, ...newNonAgentlessStatuses },
         });
         onContinue();
 
-        if (targets.length === 0) return;
+        if (targets.length === 0) {
+          await persistPendingIacTemplate();
+          return;
+        }
       } else {
         // Retry: select any group that intersects the requested instanceIds.
         // A bundled group is re-run as a whole — retrying one bundled original re-runs its bundle.
@@ -150,11 +247,11 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
         // dropped — otherwise it would be set to 'instantiating' and never resolved.
         const deployedTargets = groupsToDeploy.flatMap(({ instanceIds: ids }) => ids);
         const retryStatuses = buildInstanceStatuses(deployedTargets, []);
-        const remainingFailed = deployAndDetectStep.failedInstances.filter(
+        const remainingFailed = detectAndReviewStep.failedInstances.filter(
           (id) => !deployedTargets.includes(id)
         );
         setIsDeploying(true);
-        updateDeployAndDetectStep({
+        updateDetectAndReviewStep({
           isDeploying: true,
           serviceStatuses: retryStatuses,
           failedInstances: remainingFailed,
@@ -164,6 +261,31 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
 
       const globalRegion = serviceSettings?.globalRegion ?? '';
       const storedServiceVars = serviceSettings?.serviceVars ?? {};
+
+      const { connectorId } = authenticateAndDeployStep;
+      let onboardingDeploymentId = detectAndReviewStep.onboardingDeploymentId;
+
+      if (isInitialDeploy && !onboardingDeploymentId) {
+        onboardingDeploymentId =
+          (await createDeployment({
+            provider: 'aws',
+            connectorId,
+            mechanisms: hasEcfServices ? ['managed_integration', 'ecf'] : ['managed_integration'],
+            services: selectedServiceIds,
+            serviceVars: toSOServiceVars(storedServiceVars, servicesMap ?? new Map()) as Record<
+              string,
+              Record<string, unknown>
+            >,
+            globalRegion,
+            dataFormat,
+            authMethod: connectorId ? 'identity_federation' : 'static_keys',
+          })) ?? undefined;
+        if (onboardingDeploymentId) {
+          // Enter edit mode: add ?deploymentId= to URL so the format selector is locked
+          // and any reload identifies this as a resumable deployment.
+          persistDeploymentId(onboardingDeploymentId);
+        }
+      }
 
       // Promise.allSettled preserves insertion order, so results[i] matches groupsToDeploy[i].
       const results = await Promise.allSettled(
@@ -183,16 +305,35 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
         failedInstances: newFailed,
         errorsByInstance,
       } = collectDeployResults(results, groupsToDeploy);
-      const newServiceStatuses = buildInstanceStatuses(deployedTargets, newFailed, 'receiving');
+      const newServiceStatuses = buildInstanceStatuses(deployedTargets, newFailed, 'detecting');
 
       // Merge with instances that failed in a prior run but weren't retried in this one.
       const deployedSet = new Set(deployedTargets);
       const previouslyFailed = getLatestFailedInstances().filter((id) => !deployedSet.has(id));
       const mergedFailed = [...previouslyFailed, ...newFailed];
 
+      // Update SO with deploy outcome (best-effort).
+      if (onboardingDeploymentId) {
+        await updateDeployment(onboardingDeploymentId, {
+          packagePolicyIds: [
+            ...new Set(
+              Object.values({
+                ...detectAndReviewStep.policyIdsByInstance,
+                ...policyIdsByInstance,
+              })
+            ),
+          ],
+          status: mergedFailed.length === 0 ? 'succeeded' : 'failed',
+        });
+      }
+
+      if (mergedFailed.length === 0) {
+        await persistPendingIacTemplate();
+      }
+
       setIsDeploying(false);
       setFailedInstances(mergedFailed);
-      updateDeployAndDetectStep({
+      updateDetectAndReviewStep({
         isDeploying: false,
         serviceStatuses: newServiceStatuses,
         policyIdsByInstance,
@@ -208,12 +349,30 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
       authenticateAndDeployStep,
       namespace,
       onContinue,
-      updateDeployAndDetectStep,
+      updateDetectAndReviewStep,
       getLatestFailedInstances,
-      deployAndDetectStep.serviceStatuses,
-      deployAndDetectStep.failedInstances,
+      detectAndReviewStep.serviceStatuses,
+      detectAndReviewStep.failedInstances,
+      detectAndReviewStep.onboardingDeploymentId,
+      detectAndReviewStep.policyIdsByInstance,
+      createDeployment,
+      updateDeployment,
+      persistDeploymentId,
+      selectedServiceIds,
+      dataFormat,
+      servicesMap,
+      hasEcfServices,
+      persistPendingIacTemplate,
     ]
   );
 
-  return { namespace, setNamespace, isDeploying, failedInstances, handleDeploy, isAlreadyDeployed };
+  return {
+    namespace,
+    setNamespace,
+    isDeploying,
+    failedInstances,
+    handleDeploy,
+    isAlreadyDeployed,
+    deployGroups,
+  };
 }

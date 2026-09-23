@@ -98,6 +98,9 @@ export {
   type InvestigationEvidenceCode,
   SIGNIFICANT_EVENT_STATUS_OPTIONS,
   SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS,
+  SIGNIFICANT_EVENTS_ALERT_SOURCE,
+  SIGNIFICANT_EVENTS_SEVERITY_MAP,
+  SIGNIFICANT_EVENTS_STATUS_MAP,
   INVESTIGATION_PROGRESS_UI_EVENT,
   INVESTIGATE_STEP_ID,
   MAX_HYPOTHESIS_EVIDENCE,
@@ -109,6 +112,9 @@ export {
   MAX_TRIGGER_FEEDBACK,
   investigationImpactEntitySchema,
   investigationImpactSchema,
+  investigationHypothesisSchema,
+  investigationRecommendationSchema,
+  investigationBlindSpotSchema,
   triggerFeedbackSchema,
   type BlastRadiusEntry,
   type CausalFeature,
@@ -166,7 +172,6 @@ export {
   SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
-  SIGNIFICANT_EVENTS_MEMORY_INFERENCE_FEATURE_ID,
 } from './src/inference_feature_ids';
 
 export type { KnowledgeIndicatorClientContract } from './src/knowledge_indicator_client';

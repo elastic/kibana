@@ -6,7 +6,6 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { notFound } from '@hapi/boom';
 import {
   DEFAULT_INVESTIGATION_TRIGGER_TYPE,
   EMITTED_INVESTIGATION_STATUSES,
@@ -14,8 +13,9 @@ import {
   INVESTIGATION_FAILED_TRIGGER_ID,
   INVESTIGATION_STARTED_TRIGGER_ID,
 } from '../../common/workflows/triggers';
-import { InvestigationNotFoundError } from '../client/investigations_client';
+import { MAX_KEYWORD_LENGTH } from '../../common';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
+import { rethrowInvestigationClientError } from './rethrow_investigation_client_error';
 
 export const emitLifecycleEventRoute = createNightshiftInvestigationsServerRoute({
   endpoint: 'POST /internal/nightshift/investigations/{id}/lifecycle_events',
@@ -32,7 +32,7 @@ export const emitLifecycleEventRoute = createNightshiftInvestigationsServerRoute
   },
   params: z.object({
     path: z.object({
-      id: z.string().min(1).max(500),
+      id: z.string().min(1).max(MAX_KEYWORD_LENGTH),
     }),
     body: z.object({
       status: z.enum(EMITTED_INVESTIGATION_STATUSES),
@@ -46,15 +46,9 @@ export const emitLifecycleEventRoute = createNightshiftInvestigationsServerRoute
 
     // Identity comes from the execution document, never from the request body, so a caller
     // cannot emit lifecycle events attributed to a subject it made up.
-    let execution;
-    try {
-      execution = await getInvestigationsClient(request).get(params.path.id);
-    } catch (error) {
-      if (error instanceof InvestigationNotFoundError) {
-        throw notFound(error.message);
-      }
-      throw error;
-    }
+    const execution = await getInvestigationsClient(request)
+      .get(params.path.id)
+      .catch(rethrowInvestigationClientError);
 
     const { subject, trigger_type, started_at: startedAt } = execution;
     if (!subject) {

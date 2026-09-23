@@ -11,6 +11,7 @@ import {
   useEuiOverflowScroll,
   useEuiScrollBar,
   useEuiTheme,
+  useResizeObserver,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -24,10 +25,9 @@ import { ConversationInput } from './conversation_input/conversation_input';
 import { ConversationRounds } from './conversation_rounds/conversation_rounds';
 import { NewConversationPrompt } from './new_conversation_prompt';
 import { useConversationId } from '../../context/conversation/use_conversation_id';
-import { useShouldStickToBottom } from '../../context/conversation/use_should_stick_to_bottom';
-import { useStreamingContext } from '../../context/streaming/streaming_context';
-import { useIsAnyConversationStreaming } from '../../hooks/use_is_any_conversation_streaming';
 import { useConversationScrollActions } from '../../hooks/use_conversation_scroll_actions';
+import { useOnRoundFromOtherParticipant } from '../../hooks/use_on_round_from_other_participant';
+import { useAnchoredRoundIndex } from '../../hooks/use_anchored_round';
 import { useConversationStatus } from '../../hooks/use_conversation';
 import { useSendPredefinedInitialMessage } from '../../hooks/use_initial_message';
 import {
@@ -36,8 +36,6 @@ import {
   fullWidthAndHeightStyles,
 } from './conversation.styles';
 import { ScrollButton } from './scroll_button';
-import { useAppLeave } from '../../context/app_leave_context';
-import { useNavigationAbort } from '../../hooks/use_navigation_abort';
 import { ErrorPrompt } from '../common/prompt/error_prompt';
 import { PROMPT_LAYOUT_VARIANTS } from '../common/prompt/layout';
 import { StartNewConversationButton } from './actions/start_new_conversation_button';
@@ -53,14 +51,10 @@ export const Conversation: React.FC<{}> = () => {
   const { euiTheme } = useEuiTheme();
   const conversationId = useConversationId();
   const hasActiveConversation = useHasActiveConversation();
-  const isAnyStreaming = useIsAnyConversationStreaming();
-  const { cancelAllStreams } = useStreamingContext();
   const conversationRounds = useConversationRounds();
   const lastRound = conversationRounds.at(-1);
   const { isFetched } = useConversationStatus();
   const { errorType } = useConversationError();
-  const shouldStickToBottom = useShouldStickToBottom();
-  const onAppLeave = useAppLeave();
   const { attachmentsService } = useAgentBuilderServices();
   const {
     attachments: stagedAttachments = [],
@@ -73,22 +67,22 @@ export const Conversation: React.FC<{}> = () => {
   const [dismissStaleAttachments, setDismissStaleAttachments] = useState(false);
   useSendPredefinedInitialMessage();
 
-  // Page-leave guard fires for any in-flight stream, not just this conversation's.
-  // On confirmed leave, cancel every stream so background mutations don't keep running.
-  useNavigationAbort({
-    onAppLeave,
-    isResponseLoading: isAnyStreaming,
-    cancelAll: cancelAllStreams,
+  const [scrollContainer, setScrollContainer] = useState<HTMLDivElement | null>(null);
+  const {
+    showScrollButton,
+    onMessageSent,
+    stopFollowingBottom,
+    smoothScrollToBottom,
+    stickToBottom,
+  } = useConversationScrollActions({
+    scrollContainer,
   });
 
-  const [scrollContainer, setScrollContainer] = useState<HTMLDivElement | null>(null);
-  const { showScrollButton, onMessageSent, smoothScrollToBottom, stickToBottom } =
-    useConversationScrollActions({
-      conversationId: conversationId || '',
-      scrollContainer,
-    });
+  // Observed, not read during render: a stale height makes the current round taller than the
+  // viewport, scrolling its input out of view.
+  const { height: scrollContainerHeight } = useResizeObserver(scrollContainer, 'height');
 
-  const scrollContainerHeight = scrollContainer?.clientHeight ?? 0;
+  const anchoredRoundIndex = useAnchoredRoundIndex();
 
   const stagedAttachmentIds = useMemo(() => {
     const ids = stagedAttachments.map((attachment) => attachment.id).filter(isString);
@@ -111,14 +105,16 @@ export const Conversation: React.FC<{}> = () => {
     setDismissStaleAttachments(false);
   }, [staleAttachments, conversationId]);
 
-  // Stick to bottom only when user returns to an existing conversation (conversationId is defined and changes)
+  useOnRoundFromOtherParticipant(stopFollowingBottom);
+
+  // Stick to bottom when opening a conversation, once its data has loaded
   useEffect(() => {
-    if (isFetched && conversationId && shouldStickToBottom) {
+    if (isFetched && conversationId) {
       requestAnimationFrame(() => {
         stickToBottom();
       });
     }
-  }, [stickToBottom, isFetched, conversationId, shouldStickToBottom]);
+  }, [stickToBottom, isFetched, conversationId]);
 
   const containerStyles = css`
     ${fullWidthAndHeightStyles}
@@ -185,7 +181,10 @@ export const Conversation: React.FC<{}> = () => {
             css={scrollableStyles}
           >
             <EuiFlexItem css={[conversationElementWidthStyles, conversationElementPaddingStyles]}>
-              <ConversationRounds scrollContainerHeight={scrollContainerHeight} />
+              <ConversationRounds
+                scrollContainerHeight={scrollContainerHeight}
+                anchoredRoundIndex={anchoredRoundIndex}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
           {showScrollButton && <ScrollButton onClick={smoothScrollToBottom} />}

@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { DESTINATION_NODE_TYPE, SOURCE_NODE_TYPE } from './types';
+
 /**
  * Background dot grid spacing (px). Column/row gaps are multiples of this so
  * nodes and connectors align to the same visual grid.
  */
 export const GRID_SIZE = 16;
 
-export const SNAP_SIZE = 8;
+export const SNAP_SIZE = 12;
 
 /** Center-to-center horizontal distance between successive layout columns (px). */
 export const COLUMN_GAP = 360;
@@ -20,11 +22,20 @@ export const COLUMN_GAP = 360;
 export const ROW_GAP = 120;
 
 /** Viewport zoom bounds for the canvas. */
-export const MIN_ZOOM = 0.4;
+export const MIN_ZOOM = 0.3;
 export const MAX_ZOOM = 2;
 
-/** Padding applied when fitting the graph into the viewport. */
-export const FIT_VIEW_PADDING = 0.2;
+/**
+ * Padding applied when fitting the graph into the viewport. Bottom padding is
+ * an absolute clearance so nodes stay above the floating toolbar; a fractional
+ * value is not enough once the toolbar is overlaid on the pane.
+ */
+export const FIT_VIEW_PADDING = {
+  top: 0.12,
+  left: 0.15,
+  right: 0.15,
+  bottom: '128px',
+} as const;
 
 /** Animation duration (ms) for the fit-to-screen control. */
 export const FIT_VIEW_DURATION = 400;
@@ -38,8 +49,19 @@ export const PAN_MARGIN = 500;
 
 /** Fixed card widths (px) for each node kind; the single source of truth used
  * by both the node components and the pan-bound estimate below. */
-export const SOURCE_NODE_WIDTH = 207;
+export const SOURCE_NODE_WIDTH = 246;
 export const DESTINATION_NODE_WIDTH = 184;
+
+/**
+ * Revisit whenever a card gains or loses a content row.
+ */
+export const SOURCE_NODE_HEIGHT = 74;
+export const DESTINATION_NODE_HEIGHT = 50;
+
+export const NODE_HEIGHT_BY_TYPE: Readonly<Record<string, number>> = {
+  [SOURCE_NODE_TYPE]: SOURCE_NODE_HEIGHT,
+  [DESTINATION_NODE_TYPE]: DESTINATION_NODE_HEIGHT,
+};
 
 /**
  * Fallback node footprint (px) used when computing the pan bounds before React

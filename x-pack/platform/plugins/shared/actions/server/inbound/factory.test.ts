@@ -39,6 +39,7 @@ describe('createInboundEventsClient (factory)', () => {
       inboundEventsEnabled: true,
       isActionTypeEnabled: jest.fn().mockReturnValue(true),
       maxEmitted: 25,
+      maxBodyBytes: 1024 * 1024,
       emitConnectorEvents,
       getStartServices,
       inMemoryConnectors: [],
@@ -50,9 +51,11 @@ describe('createInboundEventsClient (factory)', () => {
         inboundEventsEnabled: true,
         isActionTypeEnabled: expect.any(Function),
         maxEmitted: 25,
+        maxBodyBytes: 1024 * 1024,
         emitConnectorEvents,
         inMemoryConnectors: [],
         getUnsecuredSavedObjectsClient: expect.any(Function),
+        getDecryptedConnectorAttributes: expect.any(Function),
       })
     );
 

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { type FC, useCallback, useMemo } from 'react';
-import { EuiButton, EuiFlexGroup, EuiFormRow, EuiFlexItem, EuiTitle, EuiText } from '@elastic/eui';
+import React, { type FC, useCallback } from 'react';
+import { EuiFlexGroup, EuiFormRow, EuiFlexItem, EuiTitle, EuiText } from '@elastic/eui';
 import type { ProjectRouting } from '@kbn/es-query';
 import {
   type CPSProject,
@@ -17,26 +17,15 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
+import { ProjectScopeButton, useProjectScopeLabel } from '../../log_analysis_project_scope';
 import type { ProjectRoutingValidationError } from './validation';
 
 const projectScopeLabel = i18n.translate('xpack.infra.analysisSetup.projectScopeLabel', {
   defaultMessage: 'Project scope',
 });
 
-const allProjectsLabel = i18n.translate('xpack.infra.analysisSetup.projectScopeAllProjectsLabel', {
-  defaultMessage: 'All',
-});
-
-const loadingLabel = i18n.translate('xpack.infra.analysisSetup.projectScopeLoadingLabel', {
-  defaultMessage: 'Loading',
-});
-
 const unavailableLabel = i18n.translate('xpack.infra.analysisSetup.projectScopeUnavailableLabel', {
   defaultMessage: 'Project scope unavailable',
-});
-
-const noneLabel = i18n.translate('xpack.infra.analysisSetup.projectScopeNoneLabel', {
-  defaultMessage: 'None',
 });
 
 const missingProjectScopeLabel = i18n.translate(
@@ -45,35 +34,6 @@ const missingProjectScopeLabel = i18n.translate(
     defaultMessage: 'Select an explicit project scope for the job.',
   }
 );
-
-const getCustomProjectScopeLabel = (selectedCount: number, totalCount: number): string =>
-  i18n.translate('xpack.infra.analysisSetup.projectScopeCustomProjectsLabel', {
-    defaultMessage: '{selectedCount}/{totalCount} projects',
-    values: { selectedCount, totalCount },
-  });
-
-const getProjectCount = (originProject: CPSProject | null, linkedProjects: CPSProject[]): number =>
-  (originProject ? 1 : 0) + linkedProjects.length;
-
-const getProjectScopeButtonLabel = ({
-  projectRouting,
-  selectedProjectCount,
-  totalProjectCount,
-}: {
-  projectRouting: ProjectRouting;
-  selectedProjectCount: number;
-  totalProjectCount: number;
-}): string => {
-  if (projectRouting === undefined) {
-    return noneLabel;
-  }
-
-  if (projectRouting === PROJECT_ROUTING.ALL) {
-    return allProjectsLabel;
-  }
-
-  return getCustomProjectScopeLabel(selectedProjectCount, totalProjectCount);
-};
 
 export interface LoadedProjectScopeProjects {
   originProject: CPSProject | null;
@@ -106,40 +66,31 @@ const AnalysisSetupProjectScopeFormInner: FC<AnalysisSetupProjectScopeFormInnerP
     (routing?: ProjectRouting) => cpsManager.fetchProjects(routing),
     [cpsManager]
   );
+
   const { originProject, linkedProjects, isLoading, error } = useFetchProjects(
     fetchProjects,
     PROJECT_ROUTING.ALL
   );
+
   const {
-    originProject: routedOriginProject,
-    linkedProjects: routedLinkedProjects,
-    isLoading: isRoutingLoading,
-    error: routingError,
-  } = useFetchProjects(fetchProjects, projectRouting || PROJECT_ROUTING.ORIGIN);
-  const totalProjectCount = getProjectCount(originProject, linkedProjects);
-  const selectedProjectCount = getProjectCount(routedOriginProject, routedLinkedProjects);
-  const hasError = Boolean(error || routingError);
-  const isProjectScopeLoading = isLoading || isRoutingLoading;
-  const hasLinkedProjects = linkedProjects.length > 0;
-  const buttonLabel = useMemo(
-    () =>
-      getProjectScopeButtonLabel({
-        projectRouting,
-        selectedProjectCount,
-        totalProjectCount,
-      }),
-    [projectRouting, selectedProjectCount, totalProjectCount]
-  );
+    label: buttonLabel,
+    isLoading: isLabelLoading,
+    hasError: hasLabelError,
+    isCpsMultiProject,
+  } = useProjectScopeLabel({ cpsManager, projectRouting });
+
+  const hasError = Boolean(error) || hasLabelError;
+  const isProjectScopeLoading = isLoading || isLabelLoading;
+
   const openProjectScope = useCallback(() => {
     onOpenProjectScope({ originProject, linkedProjects });
   }, [linkedProjects, onOpenProjectScope, originProject]);
 
-  if (!isProjectScopeLoading && !hasError && !hasLinkedProjects && validationErrors.length === 0) {
+  if (isCpsMultiProject === false && !hasError && validationErrors.length === 0) {
     return null;
   }
 
   const isButtonLoading = isProjectScopeLoading || !isCpsManagerReady;
-  const isButtonDisabled = disabled || isButtonLoading || hasError;
 
   return (
     <EuiFlexGroup direction="column">
@@ -168,16 +119,14 @@ const AnalysisSetupProjectScopeFormInner: FC<AnalysisSetupProjectScopeFormInnerP
           isInvalid={hasError || validationErrors.length > 0}
           label={projectScopeLabel}
         >
-          <EuiButton
-            color="text"
+          <ProjectScopeButton
             data-test-subj="infraLogAnalysisSetupProjectScopeButton"
-            iconType="crossProjectSearch"
-            isDisabled={isButtonDisabled}
+            hasError={hasError}
+            isDisabled={disabled}
             isLoading={isButtonLoading}
+            label={buttonLabel}
             onClick={openProjectScope}
-          >
-            {hasError ? unavailableLabel : isButtonLoading ? loadingLabel : buttonLabel}
-          </EuiButton>
+          />
         </EuiFormRow>
       </EuiFlexItem>
     </EuiFlexGroup>

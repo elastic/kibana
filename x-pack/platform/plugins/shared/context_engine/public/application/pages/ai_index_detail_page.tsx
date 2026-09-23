@@ -17,18 +17,23 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useHistory, useLocation, useParams } from 'react-router-dom';
+import type { AiIndexCreatedLocationState } from '../ai_index_created_location_state';
 import { KI_SUMMARY_PAGE_SIZE } from '../../../common/constants';
 import {
+  AiIndexCreatedCallout,
   AutomationsPanel,
   DescriptionPanel,
+  TracesPanel,
+  LockedSectionPanel,
   SignalsPanel,
   SourcesPanel,
 } from '../components/ai_index_detail';
 import { KiListPanel } from '../components/ki';
 import { EditSourcesFlyout } from '../components/edit_sources_flyout';
 import { useAiIndex } from '../hooks/use_ai_index';
+import { useAiIndexOverviewSections } from '../hooks/use_ai_index_overview_sections';
 import { useKiList } from '../hooks/use_ki_list';
 import { useNavigation } from '../hooks/use_navigation';
 import { ContextEngineSubPageHeader } from '../layout/context_engine_page_header';
@@ -48,12 +53,40 @@ const managedBadgeLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.mana
   defaultMessage: 'Managed',
 });
 
+const automationsLockedAriaLabel = i18n.translate(
+  'xpack.contextEngine.aiIndexDetail.automations.lockedAriaLabel',
+  {
+    defaultMessage: 'Automations locked. Add a source above to unlock automations.',
+  }
+);
+
+const signalsLockedAriaLabel = i18n.translate(
+  'xpack.contextEngine.aiIndexDetail.signals.lockedAriaLabel',
+  {
+    defaultMessage: 'Signals locked. Create an automation above to start collecting signals.',
+  }
+);
+
 export const AiIndexDetailPage = () => {
   const { id } = useParams<{ id: string }>();
+  const location = useLocation<AiIndexCreatedLocationState | undefined>();
+  const history = useHistory<AiIndexCreatedLocationState | undefined>();
   const { aiIndex, isLoading, error, refetch } = useAiIndex(id);
   const { createContextEngineUrl, navigateToContextEngine } = useNavigation();
   const [isEditingSources, setIsEditingSources] = useState(false);
   const [selectedTab, setSelectedTab] = useState<DetailTabId>('overview');
+  const [showCreatedCallout, setShowCreatedCallout] = useState(
+    () => location.state?.aiIndexCreated === true
+  );
+
+  // Remove aiIndexCreated from location state after it has been shown
+  useEffect(() => {
+    if (!location.state?.aiIndexCreated) {
+      return;
+    }
+
+    history.replace({ ...location, state: undefined });
+  }, [location, history]);
 
   const { summary } = useKiList({
     aiIndexId: aiIndex?.id,
@@ -61,8 +94,11 @@ export const AiIndexDetailPage = () => {
     enabled: aiIndex !== undefined,
   });
 
-  const isManaged = aiIndex !== undefined && aiIndex.managed;
-  const hideEditControls = isLoading || isManaged;
+  const { hideEditControls, showAutomationsPanel, showSignalsSection, showSignalsPanel } =
+    useAiIndexOverviewSections({
+      aiIndex,
+      isLoading,
+    });
   const pageTitle = aiIndex?.id ?? id ?? '';
   const backHref = createContextEngineUrl(CONTEXT_ENGINE_PATHS.landing);
 
@@ -72,7 +108,7 @@ export const AiIndexDetailPage = () => {
         <EuiFlexItem grow={false}>
           <span data-test-subj="contextAiIndexDetailPageTitle">{pageTitle}</span>
         </EuiFlexItem>
-        {isManaged && (
+        {aiIndex?.managed && (
           <EuiFlexItem grow={false}>
             <EuiBadge color="hollow" data-test-subj="contextAiIndexDetailManagedBadge">
               {managedBadgeLabel}
@@ -81,7 +117,7 @@ export const AiIndexDetailPage = () => {
         )}
       </EuiFlexGroup>
     ),
-    [isManaged, pageTitle]
+    [aiIndex?.managed, pageTitle]
   );
 
   const pageContent = error ? (
@@ -133,11 +169,21 @@ export const AiIndexDetailPage = () => {
 
       {selectedTab === 'overview' && (
         <>
+          {showCreatedCallout && (
+            <AiIndexCreatedCallout onDismiss={() => setShowCreatedCallout(false)} />
+          )}
           <DescriptionPanel
             isLoading={isLoading}
             aiIndex={aiIndex}
             onSaved={refetch}
-            isManaged={isManaged}
+            isManaged={!!aiIndex?.managed}
+          />
+          <EuiSpacer size="m" />
+          <TracesPanel
+            isLoading={isLoading}
+            aiIndex={aiIndex}
+            onSaved={refetch}
+            isManaged={!!aiIndex?.managed}
           />
           <EuiSpacer size="m" />
           <SourcesPanel
@@ -148,14 +194,53 @@ export const AiIndexDetailPage = () => {
             isManaged={hideEditControls}
           />
           <EuiSpacer size="m" />
-          <AutomationsPanel
-            isLoading={isLoading}
-            aiIndex={aiIndex}
-            onSaved={refetch}
-            isManaged={isManaged}
-          />
+          {showAutomationsPanel ? (
+            <AutomationsPanel
+              isLoading={isLoading}
+              aiIndex={aiIndex}
+              onSaved={refetch}
+              isManaged={!!aiIndex?.managed}
+            />
+          ) : (
+            <LockedSectionPanel
+              data-test-subj="contextAutomationsLocked"
+              ariaLabel={automationsLockedAriaLabel}
+              title={
+                <FormattedMessage
+                  id="xpack.contextEngine.aiIndexDetail.automations.title"
+                  defaultMessage="Automations"
+                />
+              }
+              description={
+                <FormattedMessage
+                  id="xpack.contextEngine.aiIndexDetail.automations.lockedBody"
+                  defaultMessage="Add a source above to unlock automations."
+                />
+              }
+            />
+          )}
           <EuiSpacer size="m" />
-          <SignalsPanel isLoading={isLoading} aiIndex={aiIndex} />
+          {showSignalsSection &&
+            (showSignalsPanel ? (
+              <SignalsPanel isLoading={isLoading} aiIndex={aiIndex} />
+            ) : (
+              <LockedSectionPanel
+                data-test-subj="contextSignalsLocked"
+                ariaLabel={signalsLockedAriaLabel}
+                title={
+                  <FormattedMessage
+                    id="xpack.contextEngine.aiIndexDetail.signals.title"
+                    defaultMessage="Signals"
+                  />
+                }
+                description={
+                  <FormattedMessage
+                    id="xpack.contextEngine.aiIndexDetail.signals.lockedBody"
+                    defaultMessage="Create an automation above to start collecting signals."
+                  />
+                }
+              />
+            ))}
         </>
       )}
 

@@ -131,6 +131,7 @@ describe('useHuntingLeads', () => {
         sourceType: 'adhoc',
         topRelatedEntities: [],
         relatedEntityCounts: {},
+        origin: 'observations',
       },
     ];
 
@@ -159,6 +160,7 @@ describe('useHuntingLeads', () => {
       sourceType: 'adhoc',
       topRelatedEntities: [],
       relatedEntityCounts: {},
+      origin: 'observations',
     });
     expect(result.current.totalCount).toBe(1);
   });

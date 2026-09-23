@@ -35,7 +35,6 @@ export type TopNavMenuProps<QT extends Query | AggregateQuery = Query> = Omit<
   badges?: TopNavMenuBadgeProps[];
   showSearchBar?: boolean;
   showQueryInput?: boolean;
-  showDatePicker?: boolean;
   showFilterBar?: boolean;
   unifiedSearch?: UnifiedSearchPublicPluginStart;
   className?: string;

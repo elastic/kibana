@@ -17,8 +17,8 @@ import {
 } from '@kbn/agent-builder-common';
 import type {
   Runner,
+  RequestBoundRunToolParams,
   RunToolReturn,
-  ScopedRunnerRunToolsParams,
   ToolAvailabilityContext,
   InternalToolDefinition,
   ToolRegistry,
@@ -108,7 +108,7 @@ class ToolRegistryImpl implements ToolRegistry {
   async execute<
     TParams extends Record<string, unknown> = Record<string, unknown>,
     TResult = unknown
-  >(params: ScopedRunnerRunToolsParams<TParams>): Promise<RunToolReturn> {
+  >(params: RequestBoundRunToolParams<TParams>): Promise<RunToolReturn> {
     const { toolId, ...otherParams } = params;
     const tool = await this.get(toolId);
     if (!(await this.isAvailable(tool))) {

@@ -29,6 +29,7 @@ export class GraphPageObject extends FtrService {
 
   private readonly common = this.ctx.getPageObject('common');
   private readonly header = this.ctx.getPageObject('header');
+  private readonly appMenu = this.ctx.getPageObject('appMenu');
 
   async selectIndexPattern(pattern: string) {
     await this.testSubjects.click('graphDatasourceButton');
@@ -180,10 +181,14 @@ export class GraphPageObject extends FtrService {
     await this.testSubjects.click('graphCreateGraphPromptButton');
   }
 
+  async clickSettingsButton() {
+    await this.appMenu.clickMenuItem('graphSettingsButton');
+  }
+
   async newGraph() {
     this.log.debug('Click New Workspace');
     await this.retry.try(async () => {
-      await this.testSubjects.click('graphNewButton');
+      await this.appMenu.clickMenuItem('graphNewButton');
       await this.testSubjects.existOrFail('confirmModal', { timeout: 3000 });
     });
     await this.common.clickConfirmOnModal();
@@ -192,7 +197,7 @@ export class GraphPageObject extends FtrService {
 
   async saveGraph(name: string) {
     await this.retry.try(async () => {
-      await this.testSubjects.click('graphSaveButton');
+      await this.appMenu.clickMenuItem('graphSaveButton');
       await this.testSubjects.existOrFail('savedObjectTitle', { timeout: 3000 });
     });
     await this.testSubjects.setValue('savedObjectTitle', name);
@@ -220,8 +225,15 @@ export class GraphPageObject extends FtrService {
 
   async goToListingPage() {
     await this.retry.try(async () => {
-      await this.testSubjects.click('breadcrumb graphHomeBreadcrumb first');
-      await this.testSubjects.existOrFail('kibana-content-list-page-header', { timeout: 3000 });
+      if (await this.testSubjects.exists('appHeaderBack')) {
+        await this.testSubjects.click('appHeaderBack');
+      } else {
+        await this.testSubjects.click('breadcrumb graphHomeBreadcrumb first');
+      }
+      if (await this.testSubjects.exists('confirmModalConfirmButton', { timeout: 2000 })) {
+        await this.common.clickConfirmOnModal();
+      }
+      await this.testSubjects.existOrFail('contentListToolbar-searchBox', { timeout: 5000 });
     });
   }
 

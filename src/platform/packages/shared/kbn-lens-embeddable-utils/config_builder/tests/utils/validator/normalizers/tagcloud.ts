@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/*
+ * Test-only tag cloud (`lnsTagcloud`) attribute normalizer for strict SO ↔ API round-trip checks.
+ */
+
 import type { LensTagCloudState } from '@kbn/lens-common';
 
 import type { LensAttributes } from '../../../../types';

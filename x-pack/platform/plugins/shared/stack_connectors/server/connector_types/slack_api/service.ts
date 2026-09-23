@@ -197,7 +197,7 @@ export const createExternalService = (
 
     if (hasDisallowedChannel) {
       throw new Error(
-        `One or more provided channel names are not included in the allowed channels list`
+        `One or more provided channels are not included in the allowed channels list`
       );
     }
   };

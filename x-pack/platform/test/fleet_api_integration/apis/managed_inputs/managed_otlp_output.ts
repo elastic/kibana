@@ -12,11 +12,11 @@
  * provisions `xpack.cloud.managed_otlp.url` and the managed-bulk infrastructure, and its
  * comment anticipated this addition. Enabling `managedOtlpOutput` only in this config keeps
  * the flag scoped to where it is meaningful.
- *
  */
 
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
+import { GLOBAL_SETTINGS_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common/constants';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { cleanFleetIndices } from '../space_awareness/helpers';
@@ -33,15 +33,48 @@ export default function (providerContext: FtrProviderContext) {
 
     skipIfNoDockerRegistry(providerContext);
 
+    const getSecretById = (id: string) =>
+      es.get({
+        index: '.fleet-secrets',
+        id,
+      });
+
+    const deleteAllSecrets = async () => {
+      try {
+        await es.deleteByQuery({
+          index: '.fleet-secrets',
+          query: { match_all: {} },
+        });
+      } catch (_err) {
+        // index doesn't exist yet — safe to ignore
+      }
+    };
+
+    const seedFleetServerRequirements = async () => {
+      await kibanaServer.savedObjects.create({
+        type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+        id: 'fleet-default-settings',
+        attributes: {
+          output_secret_storage_requirements_met: true,
+          otlp_output_requirements_met: true,
+          use_space_awareness_migration_status: 'success',
+        },
+        overwrite: true,
+      });
+    };
+
     beforeEach(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await cleanFleetIndices(es);
       await supertest.post('/api/fleet/setup').set('kbn-xsrf', 'xxxx').send({}).expect(200);
+      await seedFleetServerRequirements();
+      await deleteAllSecrets();
     });
 
     afterEach(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await cleanFleetIndices(es);
+      await deleteAllSecrets();
     });
 
     describe('POST /api/fleet/outputs', () => {
@@ -188,6 +221,54 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(body.message).to.contain('[request body.otlp_exporter.tls.1.key_pem]');
       });
+
+      it('stores tls secrets as ESO secret refs and returns them on GET', async () => {
+        const { body } = await supertest
+          .post('/api/fleet/outputs')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `otlp-secrets-${uuidv4()}`,
+            type: 'otlp',
+            otlp_exporter: {
+              endpoint: 'https://otlp.example.com:4317',
+              protocol: 'grpc',
+            },
+            secrets: {
+              otlp_exporter: {
+                tls: {
+                  key_pem: 'test-tls-key-pem-value',
+                  tpm: {
+                    owner_auth: 'test-tpm-owner-auth-value',
+                    auth: 'test-tpm-auth-value',
+                  },
+                },
+              },
+            },
+          })
+          .expect(200);
+
+        const { item } = body;
+        const tlsKeyPemSecretId: string = item.secrets?.otlp_exporter?.tls?.key_pem?.id;
+        const ownerAuthSecretId: string = item.secrets?.otlp_exporter?.tls?.tpm?.owner_auth?.id;
+        const authSecretId: string = item.secrets?.otlp_exporter?.tls?.tpm?.auth?.id;
+
+        expect(tlsKeyPemSecretId).to.be.a('string');
+        expect(ownerAuthSecretId).to.be.a('string');
+        expect(authSecretId).to.be.a('string');
+
+        const tlsKeyPemSecret = await getSecretById(tlsKeyPemSecretId);
+        expect((tlsKeyPemSecret._source as Record<string, string>).value).to.be(
+          'test-tls-key-pem-value'
+        );
+
+        const ownerAuthSecret = await getSecretById(ownerAuthSecretId);
+        expect((ownerAuthSecret._source as Record<string, string>).value).to.be(
+          'test-tpm-owner-auth-value'
+        );
+
+        const authSecret = await getSecretById(authSecretId);
+        expect((authSecret._source as Record<string, string>).value).to.be('test-tpm-auth-value');
+      });
     });
 
     describe('PUT /api/fleet/outputs/{id}', () => {
@@ -259,6 +340,106 @@ export default function (providerContext: FtrProviderContext) {
           .expect(400);
 
         expect(body.message).to.contain('non-OTel inputs');
+      });
+
+      it('converts an ES output to OTLP and clears beats-specific fields', async () => {
+        const { body: createBody } = await supertest
+          .post('/api/fleet/outputs')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `es-to-otlp-${uuidv4()}`,
+            type: 'elasticsearch',
+            hosts: ['https://es.example.com:9200'],
+          })
+          .expect(200);
+
+        const { id } = createBody.item;
+
+        const { body: updateBody } = await supertest
+          .put(`/api/fleet/outputs/${id}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            type: 'otlp',
+            otlp_exporter: { endpoint: 'https://otlp.example.com:4317', protocol: 'grpc' },
+          })
+          .expect(200);
+
+        expect(updateBody.item.type).to.be('otlp');
+        expect(updateBody.item.otlp_exporter).to.eql({
+          endpoint: 'https://otlp.example.com:4317',
+          protocol: 'grpc',
+        });
+        expect(updateBody.item.hosts).to.be(null);
+      });
+
+      it('converts an OTLP output to ES and clears otlp_exporter', async () => {
+        const { body: createBody } = await supertest
+          .post('/api/fleet/outputs')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `otlp-to-es-${uuidv4()}`,
+            type: 'otlp',
+            otlp_exporter: { endpoint: 'https://otlp.example.com:4317', protocol: 'grpc' },
+          })
+          .expect(200);
+
+        const { id } = createBody.item;
+
+        const { body: updateBody } = await supertest
+          .put(`/api/fleet/outputs/${id}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            type: 'elasticsearch',
+            hosts: ['https://es.example.com:9200'],
+          })
+          .expect(200);
+
+        expect(updateBody.item.type).to.be('elasticsearch');
+        expect(updateBody.item.otlp_exporter).to.be(null);
+        expect(updateBody.item.hosts).to.eql(['https://es.example.com:9200']);
+      });
+    });
+
+    describe('DELETE /api/fleet/outputs/{id}', () => {
+      it('removes all associated ESO secrets when an OTLP output is deleted', async () => {
+        const { body: createBody } = await supertest
+          .post('/api/fleet/outputs')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `otlp-delete-secrets-${uuidv4()}`,
+            type: 'otlp',
+            otlp_exporter: { endpoint: 'https://otlp.example.com:4317', protocol: 'grpc' },
+            secrets: {
+              otlp_exporter: {
+                tls: {
+                  key_pem: 'to-be-deleted-key',
+                  tpm: { owner_auth: 'to-be-deleted-owner-auth', auth: 'to-be-deleted-auth' },
+                },
+              },
+            },
+          })
+          .expect(200);
+
+        const { id } = createBody.item;
+        const keyPemSecretId: string = createBody.item.secrets?.otlp_exporter?.tls?.key_pem?.id;
+        const ownerAuthSecretId: string =
+          createBody.item.secrets?.otlp_exporter?.tls?.tpm?.owner_auth?.id;
+        const authSecretId: string = createBody.item.secrets?.otlp_exporter?.tls?.tpm?.auth?.id;
+        expect(keyPemSecretId).to.be.a('string');
+        expect(ownerAuthSecretId).to.be.a('string');
+        expect(authSecretId).to.be.a('string');
+
+        await supertest.delete(`/api/fleet/outputs/${id}`).set('kbn-xsrf', 'xxxx').expect(200);
+
+        // All secrets must be cleaned up
+        for (const secretId of [keyPemSecretId, ownerAuthSecretId, authSecretId]) {
+          try {
+            await getSecretById(secretId);
+            throw new Error(`Expected ESO secret ${secretId} to be deleted alongside the output`);
+          } catch (err) {
+            expect(err.meta?.statusCode).to.be(404);
+          }
+        }
       });
     });
 
@@ -405,6 +586,309 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xxxx')
           .send({ name: policyName, namespace: 'default', data_output_id: otlpOutputId })
           .expect(400);
+      });
+    });
+
+    describe('policy compilation', () => {
+      beforeEach(async () => {
+        await supertest
+          .post(`/api/fleet/epm/packages/${DYNAMIC_PKG}/${DYNAMIC_PKG_VERSION}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ force: true })
+          .expect(200);
+      });
+
+      it('compiles an OTel-only policy with an OTLP data output into a valid otelcol block', async () => {
+        // Create the OTLP output (gRPC)
+        const { body: outputBody } = await supertest
+          .post('/api/fleet/outputs')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `otlp-compile-${uuidv4()}`,
+            type: 'otlp',
+            otlp_exporter: { endpoint: 'otlp.example.com:4317', protocol: 'grpc' },
+          })
+          .expect(200);
+        const otlpOutputId: string = outputBody.item.id;
+
+        // Create an OTel-only agent policy using the OTLP output, no agent monitoring
+        const { body: policyBody } = await supertest
+          .post('/api/fleet/agent_policies')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `otlp-compile-${uuidv4()}`,
+            namespace: 'default',
+            data_output_id: otlpOutputId,
+            monitoring_enabled: [],
+          })
+          .expect(200);
+        const policyId: string = policyBody.item.id;
+
+        // Add an OTel-only package policy
+        await supertest
+          .post('/api/fleet/package_policies')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `otel-pkg-${uuidv4()}`,
+            namespace: 'default',
+            policy_id: policyId,
+            package: { name: DYNAMIC_PKG, version: DYNAMIC_PKG_VERSION },
+            inputs: {
+              'otlpreceiver-otelcol': {
+                enabled: true,
+                streams: { 'test_otel_dynamic.otlpreceiver': { enabled: true, vars: {} } },
+              },
+            },
+          })
+          .expect(200);
+
+        // Compile the full policy — must succeed (was throwing before this fix)
+        const { body } = await supertest
+          .get(`/api/fleet/agent_policies/${policyId}/full`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+
+        const fullPolicy = body.item;
+        const exporterKey = `otlp/${otlpOutputId}`;
+
+        // Exporter: endpoint only — protocol is stripped; no SO metadata leaks in
+        expect(fullPolicy.exporters[exporterKey]).to.eql({
+          endpoint: 'otlp.example.com:4317',
+        });
+
+        // No beatsauth or other extensions for an OTLP-only policy; extensions is omitted when empty
+        expect(fullPolicy.extensions).to.be(undefined);
+
+        // forward/ connector is always empty — it's a built-in OTel bridge with no config of its own
+        expect(fullPolicy.connectors[`forward/${otlpOutputId}`]).to.eql({});
+
+        // outputs entry: type only — no name, is_default, created_at, or other SO fields
+        expect(fullPolicy.outputs[otlpOutputId]).to.eql({ type: 'otlp' });
+      });
+
+      it('does not include null HTTP-only fields in the compiled exporter after an HTTP→gRPC protocol switch', async () => {
+        // Create an HTTP output with several HTTP-exclusive fields set.
+        const { body: createBody } = await supertest
+          .post('/api/fleet/outputs')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `otlp-http-to-grpc-${uuidv4()}`,
+            type: 'otlp',
+            otlp_exporter: {
+              endpoint: 'https://otlp.example.com:4318',
+              protocol: 'http/protobuf',
+              encoding: 'proto',
+              traces_endpoint: '/v1/traces',
+              metrics_endpoint: '/v1/metrics',
+              logs_endpoint: '/v1/logs',
+              proxy_url: 'http://proxy.example.com:8080',
+            },
+          })
+          .expect(200);
+        const { id } = createBody.item;
+
+        // Switch to gRPC — removeOtlpHttpFields nulls out the HTTP-exclusive keys in the SO.
+        await supertest
+          .put(`/api/fleet/outputs/${id}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            type: 'otlp',
+            otlp_exporter: { endpoint: 'otlp.example.com:4317', protocol: 'grpc' },
+          })
+          .expect(200);
+
+        // GET-back: the SO null cleanup fields ARE returned by the API (SO persistence behavior —
+        // null means "unset" at the application layer but is stored and returned as-is).
+        const { body: getBody } = await supertest
+          .get(`/api/fleet/outputs/${id}`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+        expect(getBody.item.otlp_exporter.encoding).to.be(null);
+        expect(getBody.item.otlp_exporter.traces_endpoint).to.be(null);
+        expect(getBody.item.otlp_exporter.proxy_url).to.be(null);
+
+        // Wire up an OTel-only policy so we can compile a full policy.
+        const { body: policyBody } = await supertest
+          .post('/api/fleet/agent_policies')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `http-to-grpc-policy-${uuidv4()}`,
+            namespace: 'default',
+            data_output_id: id,
+            monitoring_enabled: [],
+          })
+          .expect(200);
+        const policyId: string = policyBody.item.id;
+
+        await supertest
+          .post('/api/fleet/package_policies')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `otel-pkg-${uuidv4()}`,
+            namespace: 'default',
+            policy_id: policyId,
+            package: { name: DYNAMIC_PKG, version: DYNAMIC_PKG_VERSION },
+            inputs: {
+              'otlpreceiver-otelcol': {
+                enabled: true,
+                streams: { 'test_otel_dynamic.otlpreceiver': { enabled: true, vars: {} } },
+              },
+            },
+          })
+          .expect(200);
+
+        const { body } = await supertest
+          .get(`/api/fleet/agent_policies/${policyId}/full`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+
+        const exporter = body.item.exporters[`otlp/${id}`];
+        expect(exporter).to.be.ok();
+
+        // HTTP-only cleanup fields must not appear in the compiled gRPC exporter — the OTel Collector
+        // strict decoder rejects unknown keys, and null is never a valid exporter config value.
+        const exporterKeys = Object.keys(exporter);
+        expect(exporterKeys).to.not.contain('encoding');
+        expect(exporterKeys).to.not.contain('traces_endpoint');
+        expect(exporterKeys).to.not.contain('metrics_endpoint');
+        expect(exporterKeys).to.not.contain('logs_endpoint');
+        expect(exporterKeys).to.not.contain('proxy_url');
+        expect(exporter.endpoint).to.be('otlp.example.com:4317');
+      });
+
+      it('does not include null gRPC-only fields in the compiled exporter after a gRPC→HTTP protocol switch', async () => {
+        // Create a gRPC output with gRPC-exclusive fields set.
+        const { body: createBody } = await supertest
+          .post('/api/fleet/outputs')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `otlp-grpc-to-http-${uuidv4()}`,
+            type: 'otlp',
+            otlp_exporter: {
+              endpoint: 'otlp.example.com:4317',
+              protocol: 'grpc',
+              balancer_name: 'round_robin',
+              wait_for_ready: true,
+            },
+          })
+          .expect(200);
+        const { id } = createBody.item;
+
+        // Switch to HTTP — removeOtlpGrpcFields nulls out the gRPC-exclusive keys in the SO.
+        await supertest
+          .put(`/api/fleet/outputs/${id}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            type: 'otlp',
+            otlp_exporter: { endpoint: 'https://otlp.example.com:4318', protocol: 'http/protobuf' },
+          })
+          .expect(200);
+
+        // GET-back: gRPC-exclusive fields come back as null from the SO.
+        const { body: getBody } = await supertest
+          .get(`/api/fleet/outputs/${id}`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+        expect(getBody.item.otlp_exporter.balancer_name).to.be(null);
+        expect(getBody.item.otlp_exporter.wait_for_ready).to.be(null);
+
+        // Wire up an OTel-only policy.
+        const { body: policyBody } = await supertest
+          .post('/api/fleet/agent_policies')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `grpc-to-http-policy-${uuidv4()}`,
+            namespace: 'default',
+            data_output_id: id,
+            monitoring_enabled: [],
+          })
+          .expect(200);
+        const policyId: string = policyBody.item.id;
+
+        await supertest
+          .post('/api/fleet/package_policies')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `otel-pkg-${uuidv4()}`,
+            namespace: 'default',
+            policy_id: policyId,
+            package: { name: DYNAMIC_PKG, version: DYNAMIC_PKG_VERSION },
+            inputs: {
+              'otlpreceiver-otelcol': {
+                enabled: true,
+                streams: { 'test_otel_dynamic.otlpreceiver': { enabled: true, vars: {} } },
+              },
+            },
+          })
+          .expect(200);
+
+        const { body } = await supertest
+          .get(`/api/fleet/agent_policies/${policyId}/full`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+
+        const exporter = body.item.exporters[`otlphttp/${id}`];
+        expect(exporter).to.be.ok();
+
+        // gRPC-only cleanup fields must not appear in the compiled HTTP exporter.
+        const exporterKeys = Object.keys(exporter);
+        expect(exporterKeys).to.not.contain('balancer_name');
+        expect(exporterKeys).to.not.contain('keepalive');
+        expect(exporterKeys).to.not.contain('wait_for_ready');
+        expect(exporter.endpoint).to.be('https://otlp.example.com:4318');
+      });
+
+      it('compiles an OTel-only policy with an HTTP/protobuf OTLP output using otlphttp exporter key', async () => {
+        const { body: outputBody } = await supertest
+          .post('/api/fleet/outputs')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `otlp-http-compile-${uuidv4()}`,
+            type: 'otlp',
+            otlp_exporter: { endpoint: 'https://otlp.example.com', protocol: 'http/protobuf' },
+          })
+          .expect(200);
+        const otlpOutputId: string = outputBody.item.id;
+
+        const { body: policyBody } = await supertest
+          .post('/api/fleet/agent_policies')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `otlp-http-compile-${uuidv4()}`,
+            namespace: 'default',
+            data_output_id: otlpOutputId,
+            monitoring_enabled: [],
+          })
+          .expect(200);
+        const policyId: string = policyBody.item.id;
+
+        await supertest
+          .post('/api/fleet/package_policies')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `otel-pkg-${uuidv4()}`,
+            namespace: 'default',
+            policy_id: policyId,
+            package: { name: DYNAMIC_PKG, version: DYNAMIC_PKG_VERSION },
+            inputs: {
+              'otlpreceiver-otelcol': {
+                enabled: true,
+                streams: { 'test_otel_dynamic.otlpreceiver': { enabled: true, vars: {} } },
+              },
+            },
+          })
+          .expect(200);
+
+        const { body } = await supertest
+          .get(`/api/fleet/agent_policies/${policyId}/full`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+
+        const fullPolicy = body.item;
+
+        // HTTP/protobuf uses otlphttp/<id> exporter key
+        expect(fullPolicy.exporters).to.have.property(`otlphttp/${otlpOutputId}`);
+        expect(fullPolicy.exporters).not.to.have.property(`otlp/${otlpOutputId}`);
       });
     });
   });

@@ -7,5 +7,5 @@
 
 export { AuthenticateAndDeployStep } from './authenticate_and_deploy_step';
 export { ServicesStep } from './services_step';
-export { DeployAndDetectStep } from './deploy_and_detect_step';
+export { DetectAndReviewStep } from './detect_and_review_step';
 export { ServiceSettingsStep } from './service_settings_step';

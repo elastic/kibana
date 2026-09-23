@@ -6,7 +6,8 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiCallOut, EuiLink, EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import { EuiLink, EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { AlertLifecycleStatusBadge } from '@kbn/alerts-ui-shared/src/alert_lifecycle_status_badge';
 import type { Cases } from '@kbn/cases-plugin/common';
 import { i18n } from '@kbn/i18n';
@@ -187,14 +188,13 @@ export const overviewColumns: Array<EuiBasicTableColumn<AlertOverviewField>> = [
                 );
               })}
               {ruleCriteria.length > 1 && (
-                <EuiCallOut
+                <KbnInfoCallout
                   announceOnMount
                   size="s"
                   title={i18n.translate(
                     'xpack.observability.columns.euiCallOut.multipleConditionsLabel',
                     { defaultMessage: 'Multiple conditions' }
                   )}
-                  iconType="warning"
                 />
               )}
             </div>

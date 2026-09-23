@@ -11,6 +11,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
+  EuiIcon,
   EuiLoadingChart,
   EuiPanel,
   EuiSpacer,
@@ -29,7 +30,7 @@ import { AlertingDateRangePicker } from '@kbn/alerting-v2-browser-shared';
 import { useRule } from '../../rule_context';
 import { useFetchRuleEvents } from '../../../../hooks/use_fetch_rule_events';
 import { getDiscoverHrefForRuleQuery } from '../../../../utils/discover_href_for_episode';
-import { paths } from '../../../../constants';
+import { useAlertingLocators } from '../../../../application/locator_context';
 import { AlertTimelineChart } from './alert_timeline_chart';
 import { AlertTimelineStatsRow } from './alert_timeline_stats_row';
 import { AlertTimelineViewAllButton } from './alert_timeline_view_all_button';
@@ -44,6 +45,7 @@ export const AlertTimelineSection: React.FC = () => {
   const http = useService(CoreStart('http'));
   const notifications = useService(CoreStart('notifications'));
   const featureFlags = useService(CoreStart('featureFlags'));
+  const { episodesLocators } = useAlertingLocators();
   const rule = useRule();
   const groupingFields = rule.grouping?.fields;
   const hasGroupingFields = (groupingFields?.length ?? 0) > 0;
@@ -93,30 +95,28 @@ export const AlertTimelineSection: React.FC = () => {
     [share, application.capabilities, uiSettings, windowStartMs, windowEndMs, rule.query]
   );
 
-  const viewAllHref = useMemo(
-    () =>
-      http.basePath.prepend(
-        paths.alertEpisodesListHref({
-          filters: { ruleId: rule.id, status: 'all' },
-          timeRange: {
-            from: new Date(windowStartMs).toISOString(),
-            to: new Date(windowEndMs).toISOString(),
-          },
-        })
-      ),
-    [http, rule.id, windowStartMs, windowEndMs]
+  const viewAllHref = episodesLocators.useUrl(
+    {
+      filters: { ruleId: rule.id, status: 'all' },
+      timeRange: {
+        from: new Date(windowStartMs).toISOString(),
+        to: new Date(windowEndMs).toISOString(),
+      },
+    },
+    undefined,
+    [rule.id, windowStartMs, windowEndMs]
   );
 
   const getEpisodeHref = useCallback(
-    (episodeId: string) => http.basePath.prepend(paths.alertEpisodeDetails(episodeId)),
-    [http]
+    (episodeId: string) => episodesLocators.getRedirectUrl({ episodeId }),
+    [episodesLocators]
   );
 
   const onEpisodeClick = useCallback(
     (episodeId: string) => {
-      application.navigateToUrl(getEpisodeHref(episodeId));
+      episodesLocators.navigateSync({ episodeId });
     },
-    [application, getEpisodeHref]
+    [episodesLocators]
   );
 
   return (
@@ -195,7 +195,9 @@ export const AlertTimelineSection: React.FC = () => {
         {!isLoading && isError && (
           <EuiEmptyPrompt
             color="danger"
-            iconType="warning"
+            icon={<EuiIcon type="warning" size="l" aria-hidden={true} />}
+            titleSize="xs"
+            paddingSize="m"
             data-test-subj="alertTimelineSectionError"
             title={
               <h4>
@@ -217,7 +219,9 @@ export const AlertTimelineSection: React.FC = () => {
 
         {!isLoading && !isError && timelineData.rows.length === 0 && (
           <EuiEmptyPrompt
-            iconType="bell"
+            icon={<EuiIcon type="bell" size="l" aria-hidden={true} />}
+            titleSize="xs"
+            paddingSize="m"
             data-test-subj="alertTimelineSectionEmpty"
             title={
               <h4>

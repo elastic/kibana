@@ -25,9 +25,13 @@ export const EVALS_EXPERIMENT_EXECUTION_CANCEL_URL =
   `${EVALS_INTERNAL_URL}/experiments/executions/{workflowExecutionId}/_cancel` as const;
 export const EVALS_EXPERIMENT_DATASET_EXAMPLES_URL =
   `${EVALS_INTERNAL_URL}/experiments/{experimentId}/datasets/{datasetId}/examples` as const;
+export const EVALS_EXPERIMENT_EXAMPLE_DETAILS_URL =
+  `${EVALS_EXPERIMENT_DATASET_EXAMPLES_URL}/{exampleId}/repetitions/{repetitionIndex}` as const;
 export const EVALS_EXAMPLE_SCORES_URL =
   `${EVALS_INTERNAL_URL}/examples/{exampleId}/scores` as const;
+export const EVALS_ONLINE_SCORES_URL = `${EVALS_INTERNAL_URL}/online_scores` as const;
 export const EVALS_TRACE_URL = `${EVALS_INTERNAL_URL}/traces/{traceId}` as const;
+export const EVALS_TRACE_EVIDENCE_URL = `${EVALS_TRACE_URL}/evidence` as const;
 export const EVALS_RESOLVE_INSTRUMENTATION_URL =
   `${EVALS_INTERNAL_URL}/traces/_resolve_instrumentation` as const;
 export const EVALS_EVALUATORS_URL = `${EVALS_INTERNAL_URL}/evaluators` as const;
@@ -40,6 +44,7 @@ export const EVALS_TRACING_PROJECT_TRACES_URL =
 export const EVALS_DATASETS_URL = `${EVALS_INTERNAL_URL}/datasets` as const;
 export const EVALS_DATASET_URL = `${EVALS_DATASETS_URL}/{datasetId}` as const;
 export const EVALS_DATASET_EXAMPLES_URL = `${EVALS_DATASET_URL}/examples` as const;
+export const EVALS_DATASET_COPY_URL = `${EVALS_DATASET_URL}/_copy` as const;
 export const EVALS_DATASET_EXAMPLE_URL = `${EVALS_DATASET_EXAMPLES_URL}/{exampleId}` as const;
 export const EVALS_DATASET_UPSERT_URL = `${EVALS_DATASETS_URL}/_upsert` as const;
 export const EVALS_DATASET_RESOLVE_URL = `${EVALS_DATASETS_URL}/_resolve` as const;
@@ -48,6 +53,7 @@ const EVALUATION_INDEX_PREFIX = '.evaluation' as const;
 
 export const EvaluationIndices = {
   SCORES: `${EVALUATION_INDEX_PREFIX}-scores`,
+  ONLINE_SCORES: `${EVALUATION_INDEX_PREFIX}-online-scores`,
   DATASETS: `${EVALUATION_INDEX_PREFIX}-datasets`,
   DATASET_EXAMPLES: `${EVALUATION_INDEX_PREFIX}-dataset-examples`,
   EVALUATORS: `${EVALUATION_INDEX_PREFIX}-evaluators`,
@@ -55,6 +61,12 @@ export const EvaluationIndices = {
 
 export const TRACES_INDEX_PATTERN = 'traces-*' as const;
 export const LOGS_INDEX_PATTERN = 'logs-*' as const;
+export const EVALS_EVIDENCE_LOG_EVENT_NAMES = {
+  OTEL_GENAI_USER_MESSAGE: 'gen_ai.user.message',
+  OTEL_GENAI_CHOICE: 'gen_ai.choice',
+  CLAUDE_CODE_USER_PROMPT: 'user_prompt',
+  CLAUDE_CODE_API_RESPONSE_BODY: 'api_response_body',
+} as const;
 
 export const API_VERSIONS = {
   internal: {
@@ -68,6 +80,8 @@ export const DATASET_UUID_NAMESPACE = 'f77b3ee3-7bc6-4bf8-9e43-d7fca9e69ae0' as 
 export const EVALUATOR_UUID_NAMESPACE = 'c1d6a0f2-8b4e-4a17-9c3d-5f2e7a9b0c41' as const;
 
 export const MAX_EXAMPLES_PER_DATASET = 10_000 as const;
+export const EXPERIMENT_EXAMPLE_PREVIEW_MAX_LENGTH = 2048 as const;
+export const MAX_DATASET_EXAMPLES_REQUEST_BYTES = 5 * 1024 * 1024;
 export const MAX_SCORES_PER_QUERY = 10_000 as const;
 
 export const MAX_TAGS_PER_DATASET = 20 as const;

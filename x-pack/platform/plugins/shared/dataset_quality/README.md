@@ -9,13 +9,13 @@ In order to make ongoing maintenance of log collection easy we want to introduce
 Kibana primarily uses Jest for unit testing. Each plugin or package defines a `jest.config.js` that extends a preset provided by the `@kbn/test` package. The following command runs all Data Set Quality unit tests:
 
 ```
-yarn jest --config x-pack/platform/plugins/shared/dataset_quality/jest.config.js
+pnpm exec jest --config x-pack/platform/plugins/shared/dataset_quality/jest.config.js
 ```
 
 You can also run a specific test by passing the filepath as an argument, e.g.:
 
 ```
-yarn jest --config x-pack/platform/plugins/shared/dataset_quality/jest.config.js x-pack/platform/plugins/shared/dataset_quality/server/routes/data_streams/get_data_streams/get_data_streams.test.ts
+pnpm exec jest --config x-pack/platform/plugins/shared/dataset_quality/jest.config.js x-pack/platform/plugins/shared/dataset_quality/server/routes/data_streams/get_data_streams/get_data_streams.test.ts
 ```
 
 ### API tests (Scout)
@@ -61,44 +61,49 @@ To unset the variable, and run the tests against the real endpoint again, execut
 unset FLEET_PACKAGE_REGISTRY_PORT
 ```
 
-### Functional Tests
+### UI tests (Scout)
+
+The UI tests are located in [`test/scout/ui`](./test/scout/ui/). Most specs carry both
+deployment tags and so cover stateful and serverless from a single file.
 
 #### Stateful
 
-##### FTR Server
+```sh
+# start server
+node scripts/scout.js start-server --arch stateful --domain classic
 
-```
-yarn test:ftr:server --config ./x-pack/solutions/observability/test/functional/apps/dataset_quality/config.ts
-```
-
-##### FTR Runner
-
-```
-yarn test:ftr:runner --config ./x-pack/solutions/observability/test/functional/apps/dataset_quality/config.ts --include ./x-pack/solutions/observability/test/functional/apps/dataset_quality/index.ts
-```
-
-##### Running Individual Tests
-
-```
-yarn test:ftr:runner --config ./x-pack/solutions/observability/test/functional/apps/dataset_quality/config.ts --include ./x-pack/solutions/observability/test/functional/apps/dataset_quality/$1
+# run tests
+node scripts/playwright test --config x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/playwright.config.ts --project local --grep "@local-stateful-classic"
 ```
 
 #### Serverless
 
-##### Server
+```sh
+# start server
+node scripts/scout.js start-server --arch serverless --domain observability_complete
 
-```
-yarn test:ftr:server --config ./x-pack/solutions/observability/test/serverless/functional/configs/config.ts
-```
-
-##### Runner
-
-```
-yarn test:ftr:runner --config ./x-pack/solutions/observability/test/serverless/functional/configs/config.ts --include ./x-pack/solutions/observability/test/serverless/functional/test_suites/dataset_quality/index.ts
+# run tests
+node scripts/playwright test --config x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/playwright.config.ts --project local --grep "@local-serverless-observability_complete"
 ```
 
-##### Running Individual Tests
+#### Serverless logs essentials
 
+Only `logs_essentials_filters.spec.ts` is tagged for this deployment; it asserts what the
+logs essentials project hides, so neither command above runs it.
+
+```sh
+# start server
+node scripts/scout.js start-server --arch serverless --domain observability_logs_essentials
+
+# run tests
+node scripts/playwright test --config x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/playwright.config.ts --project local --grep "@local-serverless-observability_logs_essentials"
 ```
-yarn test:ftr:runner --config ./x-pack/solutions/observability/test/serverless/functional/configs/config.ts --include ./x-pack/solutions/observability/test/serverless/functional/test_suites/dataset_quality/$1
+
+The `--grep` selects the deployment the running stack provides; without it Playwright runs
+every spec, including those tagged for a deployment the stack cannot serve.
+
+#### Running individual tests
+
+```sh
+node scripts/playwright test --config x-pack/platform/plugins/shared/dataset_quality/test/scout/ui/playwright.config.ts --project local --grep "<test or suite title>"
 ```
