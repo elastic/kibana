@@ -46,6 +46,7 @@ export const registerDecisionTreeAiIndex = (
     dest: { type: 'index', value: DECISION_TREE_AI_INDEX_DEST },
     automations: [],
     sources: [],
+    traces: [],
   });
 };
 

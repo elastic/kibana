@@ -37,7 +37,7 @@ export const installDecisionTreeReinforcementAgent = async ({
       // Private so Agent Builder users cannot converse with this mutating agent
       // and skip the post-execution prepare/eligibility step. The reinforce
       // workflow still runs it via `ai.agent` after `ensure`.
-      access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
+      access_control: { access_mode: AgentAccessControlMode.Private },
       configuration: {
         tools: [],
         skill_ids: [],

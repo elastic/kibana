@@ -370,7 +370,7 @@ describe('submit_optimizer_result', () => {
 
       const { result } = await runSubmit({
         store,
-        markdown: markdownFor('flowchart TD\n    S1([Checkout latency]) --> E1[Query logs]'),
+        markdown: markdownFor('flowchart TD\n    S1([Checkout latency]) --> X1((Connection leak))'),
       });
 
       expectRejected(result, /less than 50% of original size/);
