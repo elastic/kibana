@@ -26,7 +26,7 @@ import {
   type AgentHandlerContextMock,
 } from '../../../../test_utils/runner';
 import { prepareConversation as prepareConversationFromTimeline } from './prepare_conversation';
-import { eventsForContext, groupTimelineRounds } from './context_timeline';
+import { eventsForContext, groupTimelineRounds, roundResponse } from './context_timeline';
 import {
   TIMELINE_FIXTURE_AUTHOR,
   eventsNativeConversation,
@@ -740,10 +740,7 @@ describe('prepareConversation', () => {
       expect(rounds[0].steps[0]).toEqual(
         expect.objectContaining({ prompt_id: 'p1', answers: [{ choice: [0] }] })
       );
-      expect(rounds[0].terminated.data.outcome).toEqual({
-        type: 'responded',
-        response: { message: 'done' },
-      });
+      expect(roundResponse(rounds[0])).toEqual({ message: 'done' });
     });
 
     it('keeps processed attachment refs when the resume carried refs of its own', async () => {
@@ -1257,8 +1254,8 @@ describe('prepareConversation', () => {
     });
   });
 
-  describe('failed executions', () => {
-    it('processes the failed user message and carries the execution events through', async () => {
+  describe('interrupted executions', () => {
+    it('processes the interrupted round user message and carries the execution events through', async () => {
       const failedAt = '2026-01-01T00:01:00.000Z';
       const timeline = [
         ...timelineFromRounds([

@@ -29,6 +29,7 @@ import type {
 } from '@kbn/agent-builder-common';
 import {
   ConversationParentRelation,
+  ConversationRoundStatus,
   isConversationAlreadyExistsError,
   isEventsNativeVersion,
   isExecutionAbortReason,
@@ -410,9 +411,10 @@ export interface PersistExecutionInterruptionParams {
  *
  * - Fresh round: `replaceRoundEvents` with `user_message` (rebuilt with the inputs of the receipt
  *   write, its `data` upgraded to the processed input when known) + `execution_started` + steps +
- *   terminal + attachment events. No `status`, no `state`.
+ *   terminal + attachment events. `status: completed`, no `state`.
  * - HITL resume: `appendEvents` with `prompt_response(k)` + the `exec_k` projection + attachment
- *   events re-stamped with `exec_k`; the round stays `awaiting_prompt`.
+ *   events re-stamped with `exec_k`; the answered prompt is consumed: the round reads `completed`
+ *   with an `interruption`.
  *
  * Both writes carry the client's atomic terminal guard (`skipIfTerminalExistsFor`), so a landed
  * success write is never overwritten. Returns the written terminal event(s): `[]` when the write
@@ -445,10 +447,9 @@ export const persistExecutionInterruption = async (
         }
       : { type: 'failed', error: serializeExecutionError(toClientError(error)) };
 
-    const isResume = isPendingResumeConversation(conversation);
-    const roundId = isResume
-      ? conversation.rounds[conversation.rounds.length - 1].id
-      : params.roundId;
+    const pendingRound = getPendingResumeRound(conversation);
+    const isResume = pendingRound !== undefined;
+    const roundId = pendingRound?.id ?? params.roundId;
     const executionIndex = isResume ? nextResumeIndex(conversation, roundId) : 0;
     const executionId =
       executionIndex === 0
@@ -533,6 +534,7 @@ export const persistExecutionInterruption = async (
           id: conversation.id,
           roundId,
           events: [userMessage, ...executionEvents, ...attachmentEvents],
+          status: ConversationRoundStatus.completed,
           skipIfTerminalExistsFor: executionId,
           ...attachmentsUpdate,
           ...workspaceUpdate,
@@ -576,6 +578,7 @@ export const persistExecutionInterruption = async (
       {
         id: conversation.id,
         events: [promptResponse, ...executionEvents, ...resumeAttachmentEvents],
+        status: ConversationRoundStatus.completed,
         skipIfTerminalExistsFor: executionId,
         ...attachmentsUpdate,
         ...workspaceUpdate,

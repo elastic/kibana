@@ -1973,6 +1973,85 @@ describe('conversation model converters', () => {
       ]);
     });
 
+    describe('interrupted round blocks on a rounds-path write', () => {
+      const failedBlock = (conversation: Conversation): TimelineEvent[] => [
+        {
+          id: 'round-2::user_message',
+          type: TimelineEventType.userMessage,
+          created_at: '2025-08-04T07:42:30.000Z',
+          actor: { type: EventActorType.user, id: conversation.user.id },
+          data: { message: 'second' },
+        } as TimelineEvent,
+        {
+          id: 'round-2::execution_started',
+          type: TimelineEventType.executionStarted,
+          created_at: '2025-08-04T07:42:30.000Z',
+          actor: { type: EventActorType.agent, id: 'agent_id' },
+          execution_id: 'round-2::execution',
+          trigger_event_id: 'round-2::user_message',
+          data: { trigger_type: 'user_message' },
+        } as TimelineEvent,
+        {
+          id: 'round-2::execution_failed',
+          type: TimelineEventType.executionFailed,
+          created_at: '2025-08-04T07:42:31.000Z',
+          actor: { type: EventActorType.agent, id: 'agent_id' },
+          execution_id: 'round-2::execution',
+          trigger_event_id: 'round-2::user_message',
+          data: {
+            time_to_last_token: 0,
+            error: { code: AgentBuilderErrorCode.internalError, message: 'boom' },
+          },
+        } as TimelineEvent,
+      ];
+
+      it('keeps an interrupted block the stored rounds never materialised (stale rounds)', () => {
+        const conversation = eventsNativeStored();
+        // Document written before interrupted executions folded into rounds: `rounds` only
+        // knows round-1, the failed round-2 exists only as events.
+        conversation.events = [...conversation.events!, ...failedBlock(conversation)];
+
+        const updated = updateConversation({
+          conversation,
+          update: { id: conversation.id, rounds: [conversation.rounds[0]] },
+          space: 'space',
+          updateDate: new Date(updateDate),
+        });
+
+        expect(updated.events?.map((event) => event.id)).toEqual([
+          'round-1::user_message',
+          'round-1::execution_started',
+          'round-1::execution_terminated',
+          'round-2::user_message',
+          'round-2::execution_started',
+          'round-2::execution_failed',
+        ]);
+      });
+
+      it('drops a materialised interrupted round the caller removed', () => {
+        const conversation = eventsNativeStored();
+        conversation.events = [...conversation.events!, ...failedBlock(conversation)];
+        // Current document: the failed round-2 is materialised in the stored rounds.
+        conversation.rounds = eventsToRounds(conversation.events);
+        expect(conversation.rounds.map((round) => round.id)).toEqual(['round-1', 'round-2']);
+        expect(conversation.rounds[1].interruption?.type).toBe('failed');
+
+        const updated = updateConversation({
+          conversation,
+          update: { id: conversation.id, rounds: [conversation.rounds[0]] },
+          space: 'space',
+          updateDate: new Date(updateDate),
+        });
+
+        expect(updated.events?.map((event) => event.id)).toEqual([
+          'round-1::user_message',
+          'round-1::execution_started',
+          'round-1::execution_terminated',
+        ]);
+        expect(updated.rounds.map((round) => round.id)).toEqual(['round-1']);
+      });
+    });
+
     it('preserves additive events (reconcile/additive-survival)', () => {
       // This is the core new invariant. Step 2 will wire error production; the
       // machinery has to be ready to preserve additive events (ids without a

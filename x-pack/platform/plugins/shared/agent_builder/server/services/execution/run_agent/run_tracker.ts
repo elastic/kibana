@@ -38,7 +38,7 @@ export interface ToolExecutionBuffer {
 /** The part of the graph state persistence reads. */
 export type RunStateSnapshot = Pick<
   StateType,
-  'steps' | 'toolRenderState' | 'currentCycle' | 'errorCount'
+  'steps' | 'toolRenderState' | 'currentCycle' | 'errorCount' | 'pendingToolCallIds'
 >;
 
 export interface RunSeed {
@@ -75,12 +75,14 @@ const isRootGraphStateChunk = (
 
 const isStateSnapshot = (chunk: unknown): chunk is RunStateSnapshot => {
   if (typeof chunk !== 'object' || chunk === null) return false;
-  const { steps, toolRenderState, currentCycle, errorCount } = chunk as Partial<RunStateSnapshot>;
+  const { steps, toolRenderState, currentCycle, errorCount, pendingToolCallIds } =
+    chunk as Partial<RunStateSnapshot>;
   return (
     Array.isArray(steps) &&
     typeof toolRenderState === 'object' &&
     typeof currentCycle === 'number' &&
-    typeof errorCount === 'number'
+    typeof errorCount === 'number' &&
+    Array.isArray(pendingToolCallIds)
   );
 };
 
@@ -167,6 +169,7 @@ export class RunTracker implements ToolExecutionBuffer {
     toolRenderState: {},
     currentCycle: 0,
     errorCount: 0,
+    pendingToolCallIds: [],
   };
   private inherited: RunSeed['inherited'];
   private latest: RunStateSnapshot | undefined;
@@ -179,7 +182,15 @@ export class RunTracker implements ToolExecutionBuffer {
   }
 
   seed({ steps, toolRenderState = {}, inherited }: RunSeed): void {
-    this.seedState = { steps, toolRenderState, currentCycle: 0, errorCount: 0 };
+    // A HITL resume with pending calls goes straight to `executeTool`: until the first `values`
+    // chunk those calls are the ones in flight, so an interruption there must find them here.
+    this.seedState = {
+      steps,
+      toolRenderState,
+      currentCycle: 0,
+      errorCount: 0,
+      pendingToolCallIds: inherited?.pendingToolCallIds ?? [],
+    };
     this.inherited = inherited;
     this.latest = undefined;
   }

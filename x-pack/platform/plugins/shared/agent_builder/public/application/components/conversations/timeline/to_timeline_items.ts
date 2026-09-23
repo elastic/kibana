@@ -102,15 +102,9 @@ export const groupTimelineEvents = (
       case TimelineEventType.executionAborted: {
         if (!event.execution_id) break;
         const acc = getOrCreateAcc(event.execution_id, event.created_at, event.trigger_event_id);
-        const openPause = awaitingPromptEventId ? eventsById.get(awaitingPromptEventId) : undefined;
-        const openPauseExecutionId = openPause?.execution_id
-          ? resumeLinks.get(openPause.execution_id) ?? openPause.execution_id
-          : undefined;
-        acc.terminal =
-          openPause?.type === TimelineEventType.executionTerminated &&
-          openPauseExecutionId === acc.executionId
-            ? openPause
-            : event;
+        // An interrupted resume ends the turn: the answer already closed the prompt, so the
+        // interruption is the terminal the user sees, not the pause.
+        acc.terminal = event;
         break;
       }
 

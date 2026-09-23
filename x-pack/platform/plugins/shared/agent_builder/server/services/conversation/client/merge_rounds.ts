@@ -48,6 +48,8 @@ export const mergeRounds = (
     origin: previous.origin,
     author: previous.author,
     configuration_overrides: next.configuration_overrides ?? previous.configuration_overrides,
+    // The folded round is interrupted iff its last execution is.
+    ...(next.interruption ? { interruption: next.interruption } : {}),
   };
 
   return mergedRound;
@@ -107,12 +109,16 @@ export const applyResumeResolution = (
     if (isToolCallStep(step) && step.results.length === 0) {
       const resolved = resolvedByToolCallId.get(step.tool_call_id);
       if (resolved) {
+        // The resolving copy owns the mark: an earlier interrupted resume may have marked the
+        // pending call, and a later successful retry clears it.
+        const { interrupted, ...unmarked } = step;
         return {
-          ...step,
+          ...unmarked,
           results: resolved.results,
           ...(resolved.progression !== undefined
             ? { progression: [...(step.progression ?? []), ...resolved.progression] }
             : {}),
+          ...(resolved.interrupted ? { interrupted: true as const } : {}),
         };
       }
     }
