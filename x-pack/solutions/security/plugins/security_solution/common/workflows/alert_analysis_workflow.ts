@@ -150,21 +150,21 @@ export const AlertAnalysisWorkflowOutput = AlertAnalysisWorkflowOutputFields.sup
 
     if (false_positive_count !== expectedFalsePositive) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: 'custom',
         message: `false_positive_count (${false_positive_count}) does not match verdicts with classification false_positive (${expectedFalsePositive})`,
         path: ['false_positive_count'],
       });
     }
     if (true_positive_count !== expectedTruePositive) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: 'custom',
         message: `true_positive_count (${true_positive_count}) does not match verdicts with classification true_positive (${expectedTruePositive})`,
         path: ['true_positive_count'],
       });
     }
     if (inconclusive_count !== expectedInconclusive) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: 'custom',
         message: `inconclusive_count (${inconclusive_count}) does not match verdicts with classification inconclusive (${expectedInconclusive})`,
         path: ['inconclusive_count'],
       });
