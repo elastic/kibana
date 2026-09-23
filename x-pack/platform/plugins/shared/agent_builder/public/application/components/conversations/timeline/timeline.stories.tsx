@@ -16,8 +16,10 @@ import {
 } from '@elastic/eui';
 import type { Meta, StoryObj } from '@storybook/react';
 import type { ChatEvent, TimelineEvent } from '@kbn/agent-builder-common';
+import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { ConversationRoundStepType } from '@kbn/agent-builder-common';
 import { AgentBuilderStorybookProvider } from '../../../__storybook__/agent_builder_storybook_provider';
+import { STORY_INLINE_ATTACHMENT_TYPE } from '../../../__storybook__/agent_builder_services';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { Timeline } from './timeline';
 import { DevSseEmitter } from './dev_sse_emitter';
@@ -28,7 +30,10 @@ import { createUserMessageEvent } from './items/user_message_event.factory';
 import { createExecutionStartedEvent } from './items/execution_started.factory';
 import { createExecutionStepEvent } from './items/execution_step.factory';
 import { createExecutionTerminatedEvent } from './items/execution_terminated_event.factory';
+import { createAttachmentAddedEvent } from './items/attachment_added_event.factory';
+import { createVersionedAttachment } from './items/versioned_attachment.factory';
 import {
+  createAttachmentItem,
   createUserMessageItem,
   createCompletedTurnItem,
   createFailedTurnItem,
@@ -69,11 +74,44 @@ const seedEvents: TimelineEvent[] = [
     execution_id: 'seed-exec-1',
     trigger_event_id: 'seed-1',
   }),
+  // Added over the API with render_inline, so it draws as a card between the two turns.
+  createAttachmentAddedEvent({
+    id: 'seed-attachment-added',
+    created_at: '2026-09-03T11:17:45.000Z',
+    data: {
+      attachment_id: 'seed-attachment',
+      attachment_type: STORY_INLINE_ATTACHMENT_TYPE,
+      current_version: 1,
+      render_inline: true,
+      source: 'http_api',
+    },
+  }),
   createUserMessageEvent({
     id: 'seed-3',
     data: { message: 'Are there any anomalies in the last hour?' },
   }),
 ];
+
+const seedAttachments: VersionedAttachment[] = [
+  createVersionedAttachment({
+    id: 'seed-attachment',
+    type: STORY_INLINE_ATTACHMENT_TYPE,
+    versions: [
+      {
+        version: 1,
+        data: { text: 'Cluster has 4 standalone indices and 2 data streams as of this morning.' },
+        created_at: '2026-09-03T11:17:45.000Z',
+        content_hash: 'seed-hash-1',
+      },
+    ],
+  }),
+];
+
+const inlineAttachmentItem = createAttachmentItem({
+  key: 'story-attachment-added',
+  attachment: seedAttachments[0],
+  version: 1,
+});
 
 const meta: Meta<typeof Timeline> = {
   title: 'Conversations/Timeline/Timeline',
@@ -94,9 +132,11 @@ type Story = StoryObj<typeof Timeline>;
 
 export const FullConversation: Story = {
   args: {
+    conversationAttachments: seedAttachments,
     items: [
       createUserMessageItem(),
       createCompletedTurnItem(),
+      inlineAttachmentItem,
       createUserMessageItem({
         key: 'pending-1',
         isPending: true,
@@ -185,7 +225,10 @@ const InteractiveInner: React.FC<{ onReset: () => void }> = ({ onReset }) => {
 
   const events = [...seedEvents, ...liveState.events];
   const { attachmentsService } = useAgentBuilderServices();
-  const items = resolveTimelineItems(buildItems(events), { attachmentsService });
+  const items = resolveTimelineItems(buildItems(events), {
+    attachments: seedAttachments,
+    attachmentsService,
+  });
 
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
@@ -194,7 +237,7 @@ const InteractiveInner: React.FC<{ onReset: () => void }> = ({ onReset }) => {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiPanel hasBorder paddingSize="l">
-          <Timeline items={items} />
+          <Timeline items={items} conversationAttachments={seedAttachments} />
         </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
