@@ -602,12 +602,18 @@ steps:
 
           # Containment is proposed on the investigation, not returned as run output.
           # `executeAsync` so this run does not sit in the 72h approval gate; each
-          # proposal workflow parks on its own. Continue on failure so a single bad
-          # action cannot fail the run.
+          # proposal workflow parks on its own. `parallel` with `settled` keeps every
+          # dispatch's outcome: `foreach` would keep only the last one, and continuing
+          # on failure would clear a rejection. One rejection must not drop the rest,
+          # and must not be ignored when the indicator is retired.
           - name: propose_actions
-            type: foreach
+            type: parallel
             if: "${{ steps.forensic_analysis.error == null and steps.forensic_analysis.output.structured_output.propose == true }}"
             foreach: "${{ steps.forensic_analysis.output.structured_output.recommendedActions | default: [] }}"
+            mode: settled
+            concurrency:
+              # Matches recommendedActions maxItems.
+              max: 8
             steps:
               - name: propose_action
                 type: workflow.executeAsync
@@ -622,8 +628,6 @@ steps:
                     # the action declares, and for containment they are intrinsic to the action
                     # rather than to this run
                     confidence: "{{ foreach.item.confidence | default: '' }}"
-            on-failure:
-              continue: true
 
         else:
           - name: journal_no_host
@@ -709,6 +713,13 @@ steps:
     with:
       ids: "${{ steps.list_written_findings.output.attachments | map: 'id' }}"
 
+  # `0` when the step did not run: no host, the agent did not propose, or the
+  # list was empty. A later check treats only a real rejection as lost.
+  - name: resolve_proposal_dispatch
+    type: data.set
+    with:
+      failed: "${{ steps.propose_actions.output.failed | default: 0 }}"
+
   - name: resolve_run_outcome
     type: data.set
     with:
@@ -726,9 +737,15 @@ steps:
           and steps.resolve_written_findings.output.ids contains steps.finding_ids.output.iocs
           and steps.resolve_written_findings.output.ids contains steps.finding_ids.output.assessment)
           or steps.resolve_host.output.host_name == blank }}
+      # Findings can land while a proposal dispatch is rejected. That is not a
+      # finished run: the recommendation exists only in this agent output, so a
+      # later sweep would skip the agent and never queue it.
+      proposals_lost: >-
+        ${{ steps.forensic_analysis.output.structured_output.propose == true
+          and steps.resolve_proposal_dispatch.output.failed > 0 }}
 
   # Retiring the indicator so that the sweep stops picking it up.
-  # Do this before the four terminal writes which do NOT continue on failure.
+  # Do this before the terminal writes, which do not continue on failure.
   # Instead of swallowing these failures and reporting a falsely-completed
   # run, the we fail the run. The failure shows up in the execution record,
   # and the next sweep retries just the write. This is cheap since
@@ -741,13 +758,53 @@ steps:
     if: >-
       ${{ steps.resolve_request.output.has_request == true
         and steps.verify_investigation.output.metadata != null
-        and steps.resolve_run_outcome.output.settled == true }}
+        and steps.resolve_run_outcome.output.settled == true
+        and steps.resolve_run_outcome.output.proposals_lost != true }}
     with:
       ai_index_id: "{{ inputs.ai_index_id }}"
       ki_id: "{{ inputs.ki_id }}"
       ki:
         attributes:
           status: processed
+
+  # Findings are on the investigation, but at least one containment proposal
+  # never reached the queue. Say so, then retire the indicator. A note that
+  # fails must not block the retirement: the next sweep would skip the agent
+  # and mark the indicator processed with the proposal still missing.
+  - name: journal_proposals_lost
+    type: workflow.execute
+    if: >-
+      ${{ steps.resolve_request.output.has_request == true
+        and steps.verify_investigation.output.metadata != null
+        and steps.resolve_run_outcome.output.settled == true
+        and steps.resolve_run_outcome.output.proposals_lost == true }}
+    on-failure:
+      continue: true
+    with:
+      workflow-id: "{{ consts.journal_note }}"
+      inputs:
+        conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
+        message: >-
+          Endpoint analysis of `{{ steps.resolve_host.output.host_name }}` attached its findings,
+          but {{ steps.resolve_proposal_dispatch.output.failed }} containment proposal(s) did not
+          reach the approval queue. The indicator was retired and will not be retried.
+
+  - name: mark_proposals_failed
+    type: context-engine.updateKi
+    if: >-
+      ${{ steps.resolve_request.output.has_request == true
+        and steps.verify_investigation.output.metadata != null
+        and steps.resolve_run_outcome.output.settled == true
+        and steps.resolve_run_outcome.output.proposals_lost == true }}
+    with:
+      ai_index_id: "{{ inputs.ai_index_id }}"
+      ki_id: "{{ inputs.ki_id }}"
+      ki:
+        attributes:
+          status: failed
+          failure_reason: >-
+            Containment proposals did not reach the queue for investigation
+            {{ steps.resolve_request.output.investigation_id }}
 
   # The investigation needs to hear how this analysis ended — every other
   # problem path already narrates itself, but this one didn't, even though

@@ -23,6 +23,8 @@ interface YamlStep {
   else?: YamlStep[];
   if?: string;
   condition?: string;
+  mode?: string;
+  concurrency?: { max?: number };
   'on-failure'?: { continue?: boolean };
 }
 
@@ -266,11 +268,12 @@ describe('Endpoint analysis run', () => {
     });
 
     it('leaves no valid request on a status the sweep still selects', () => {
-      const statuses = ['mark_processed', 'mark_failed', 'mark_invalid'].map(
+      const statuses = ['mark_processed', 'mark_failed', 'mark_proposals_failed', 'mark_invalid'].map(
         (name) => (stepByName(name)?.with?.ki as { attributes?: { status?: string } })?.attributes
       );
       expect(statuses.map((attributes) => attributes?.status)).toEqual([
         'processed',
+        'failed',
         'failed',
         'invalid',
       ]);
@@ -509,6 +512,7 @@ describe('Endpoint analysis run', () => {
         'journal_fetch_alert_problem',
         'journal_invalid_request',
         'journal_no_host',
+        'journal_proposals_lost',
       ]);
       expect(definition.consts?.journal_note).toBe('system-alertzero-journal-note');
     });
@@ -704,6 +708,7 @@ describe('Endpoint analysis run', () => {
         'mark_failed',
         'mark_invalid',
         'mark_processed',
+        'mark_proposals_failed',
         'mark_unreachable',
       ]);
       for (const step of writes) {
@@ -912,6 +917,79 @@ describe('Endpoint analysis run', () => {
     // Naming a process selector is fine — that is which action to pick, and the
     // provenance of a value. Spelling out the object the action receives is the
     // restatement, and `endpoint_ids` / `agentId` were how it was written.
+    // A rejected dispatch used to be swallowed, and the findings alone then closed
+    // the indicator. The recommendation lives only in this run's agent output, so
+    // the next sweep would skip the agent and never queue it.
+    it('retires the indicator when a containment proposal is rejected', () => {
+      const dispatch = stepByName('propose_actions');
+      expect(dispatch?.type).toBe('parallel');
+      expect(dispatch?.mode).toBe('settled');
+      expect(dispatch?.concurrency?.max).toBe(8);
+      expect(dispatch?.['on-failure']).toBeUndefined();
+      expect(stepByName('propose_action')?.['on-failure']).toBeUndefined();
+
+      const lost = String(stepByName('resolve_run_outcome')?.with?.proposals_lost);
+      expect(
+        evaluate(lost, {
+          steps: {
+            forensic_analysis: { output: { structured_output: { propose: true } } },
+            resolve_proposal_dispatch: { output: { failed: 1 } },
+          },
+        })
+      ).toBe(true);
+      expect(
+        evaluate(lost, {
+          steps: {
+            forensic_analysis: { output: { structured_output: { propose: true } } },
+            resolve_proposal_dispatch: { output: { failed: 0 } },
+          },
+        })
+      ).toBe(false);
+      expect(
+        evaluate(lost, {
+          steps: {
+            forensic_analysis: { output: { structured_output: { propose: false } } },
+            resolve_proposal_dispatch: { output: { failed: 1 } },
+          },
+        })
+      ).toBe(false);
+
+      const processed = String(stepByName('mark_processed')?.if);
+      const retired = String(stepByName('mark_proposals_failed')?.if);
+      const ready = {
+        steps: {
+          resolve_request: { output: { has_request: true } },
+          verify_investigation: { output: { metadata: { id: 'inv-1' } } },
+          resolve_run_outcome: { output: { settled: true, proposals_lost: false } },
+        },
+      };
+      expect(evaluate(processed, ready)).toBe(true);
+      expect(evaluate(retired, ready)).toBe(false);
+      expect(
+        evaluate(processed, {
+          steps: {
+            ...ready.steps,
+            resolve_run_outcome: { output: { settled: true, proposals_lost: true } },
+          },
+        })
+      ).toBe(false);
+      expect(
+        evaluate(retired, {
+          steps: {
+            ...ready.steps,
+            resolve_run_outcome: { output: { settled: true, proposals_lost: true } },
+          },
+        })
+      ).toBe(true);
+
+      const names = allSteps.map(({ name }) => name);
+      expect(names.indexOf('journal_proposals_lost')).toBeLessThan(
+        names.indexOf('mark_proposals_failed')
+      );
+      expect(stepByName('journal_proposals_lost')?.['on-failure']).toEqual({ continue: true });
+      expect(stepByName('journal_proposals_lost')?.if).toBe(stepByName('mark_proposals_failed')?.if);
+    });
+
     it('points the agent at each entry inputSchema rather than a fixed shape', () => {
       const message = stepByName('forensic_analysis')?.with?.message as string;
       expect(message).toContain('inputSchema.properties.actionInput');
