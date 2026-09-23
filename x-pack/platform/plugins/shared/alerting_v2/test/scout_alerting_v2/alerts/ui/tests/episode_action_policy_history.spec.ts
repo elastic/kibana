@@ -29,7 +29,7 @@ test.describe(
         buildAlertEvent({
           rule: { id: RULE_ID, version: 1 },
           group_hash: GROUP_HASH,
-          episode: { id: EPISODE_ID, status: 'active' },
+          alert: { id: EPISODE_ID, status: 'active' },
           status: 'breached',
           '@timestamp': new Date().toISOString(),
         }),
