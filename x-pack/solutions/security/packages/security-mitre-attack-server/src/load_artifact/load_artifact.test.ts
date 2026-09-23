@@ -55,10 +55,11 @@ describe('loadMitreArtifact', () => {
     }
   });
 
-  it('every subtechnique technique_id equals its own id dot prefix', () => {
+  it('every subtechnique technique_id equals its own id without the last dot segment', () => {
     for (const entity of entities) {
       if (entity.type === 'subtechnique') {
-        expect(entity.technique_id).toBe(entity.id.split('.')[0]);
+        // ATT&CK 'T1003.001' -> 'T1003'; ATLAS 'AML.T0000.000' -> 'AML.T0000'.
+        expect(entity.technique_id).toBe(entity.id.slice(0, entity.id.lastIndexOf('.')));
       }
     }
   });
