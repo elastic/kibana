@@ -479,19 +479,25 @@ Piloting inside the loop above is authorized by the brief that started it, and i
 handful of documents that get deleted afterwards. Running the saved automation is not the same act:
 it writes indicators across the whole corpus and costs model calls on every document it touches.
 
-Saving with the save tool's `run` flag is not an exception to that. The run is named in the save
-confirmation, so approving the save approves the run, and no further question is owed — and the save
-tool then starts that run itself, in its own code, under the caller's privileges. It is not asking you
-to run anything afterwards.
+When the user has asked to save and run, call `platform.context_engine.save_automation` first, then
+call `platform.context_engine.run_automation` with the `workflowId` that `save_automation` returned.
+Each call shows its own confirmation dialog. `run_automation` fires the execution asynchronously and
+returns immediately with an `executionId` — the run continues after the call returns. Tell the user
+it has started and that they can ask you for a status update at any time.
 
-So when it reports that the run did not start, that is the answer, not a task. It ran with exactly the
-privileges you have, so starting the same workflow yourself fails the same way; and where the failure
-came after the run began, a second attempt doubles it. Report what it said and stop.
+When the user asks for a status update, call `platform.core.get_workflow_execution_status` with the
+`executionId` from `run_automation`. The `workflowUrl` in the result is a direct link to the
+workflow execution in the Workflows app.
+
+When `run_automation` reports that the run did not start, that is the answer, not a task. It ran
+with exactly the privileges you have, so starting the same workflow yourself fails the same way; and
+where the failure came after the run began, a second attempt doubles it. Report what it said and stop.
 
 What remains unauthorized is starting a run of your own accord on a workflow already saved: do not
-execute a saved workflow unless the run you are in has told you to.
-`platform.core.execute_workflow` starts one and `platform.core.get_workflow_execution_status` reports
-on it.
+execute a saved workflow unless the user has explicitly asked you to run it.
+`platform.core.execute_workflow` starts one directly and `platform.core.get_workflow_execution_status`
+reports on it, but prefer `platform.context_engine.run_automation` for automations attached to AI
+indices — it handles enabling a disabled workflow and returns the status check hint.
 
 ## Corpora larger than 10,000 documents
 
