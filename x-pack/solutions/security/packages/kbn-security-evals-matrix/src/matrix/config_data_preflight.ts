@@ -17,37 +17,55 @@ export function warnOnConfiguredNamesMissingFromData(
   aggregated: AggregatedModelScores[],
   log: ToolingLog
 ): void {
-  const evaluatorsInData = new Set<string>();
   const suitesInData = new Set<string>();
+  // Evaluator names actually observed for each suite, not one global pool —
+  // a column's allowlist must be checked against the suites it configures,
+  // otherwise an evaluator that only exists in an unrelated suite silently
+  // passes this preflight while the column itself computes from nothing.
+  const evaluatorsBySuite = new Map<string, Set<string>>();
 
   for (const model of aggregated) {
     for (const suite of model.suites) {
       suitesInData.add(suite.suiteId);
+      let evaluatorsForSuite = evaluatorsBySuite.get(suite.suiteId);
+      if (!evaluatorsForSuite) {
+        evaluatorsForSuite = new Set<string>();
+        evaluatorsBySuite.set(suite.suiteId, evaluatorsForSuite);
+      }
       for (const dataset of suite.datasets) {
         for (const evaluator of dataset.evaluators) {
-          evaluatorsInData.add(evaluator.evaluatorName);
+          evaluatorsForSuite.add(evaluator.evaluatorName);
         }
       }
     }
   }
 
   // The caller already fails on an empty result.
-  if (evaluatorsInData.size === 0) {
+  if (suitesInData.size === 0) {
     return;
   }
 
   for (const column of config.columns) {
+    const evaluatorsInScope = new Set<string>();
+    for (const suiteId of column.suites) {
+      for (const name of evaluatorsBySuite.get(suiteId) ?? []) {
+        evaluatorsInScope.add(name);
+      }
+    }
+
     const missingEvaluators = (column.evaluators ?? []).filter(
-      (name) => !evaluatorsInData.has(name)
+      (name) => !evaluatorsInScope.has(name)
     );
     const missingSuites = (column.suites ?? []).filter((id) => !suitesInData.has(id));
 
     if (missingEvaluators.length > 0) {
       log.warning(
-        `column '${column.id}' names evaluator(s) absent from every score document: ` +
+        `column '${column.id}' names evaluator(s) absent from its own suites' score documents: ` +
           `${missingEvaluators.join(', ')} -- the column still scores, but only over the ` +
           `evaluators that did match, so its value is an average of a subset. ` +
-          `Evaluators present: ${[...evaluatorsInData].sort().join(', ')}`
+          `Evaluators present in this column's suites: ${
+            evaluatorsInScope.size ? [...evaluatorsInScope].sort().join(', ') : '(none)'
+          }`
       );
     }
 

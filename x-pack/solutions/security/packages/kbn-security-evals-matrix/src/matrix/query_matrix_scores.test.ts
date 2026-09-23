@@ -304,6 +304,56 @@ describe('queryMatrixScores', () => {
     expect(datasets.map((d) => d.datasetId).sort()).toEqual(['d1', 'd2']);
   });
 
+  it("derives selfJudged/judgeModelIds from every shard's judge, not just the latest shard", async () => {
+    // Regression: the row used to read judge provenance from `latest` alone
+    // (the most recent shard by timestamp), so a sweep where an EARLIER shard
+    // was self-judged but the latest shard was not silently reported the row
+    // as clean — the opposite is just as possible and just as wrong.
+    const shardStats = (mean: number): ExperimentStats => ({
+      taskModel: { id: 'm1' },
+      evaluatorModel: { id: 'judge-b' },
+      totalRepetitions: 1,
+      stats: [
+        {
+          datasetId: 'd1',
+          datasetName: 'D1',
+          evaluatorName: 'correctness',
+          stats: { mean, median: mean, stdDev: 0, min: mean, max: mean, count: 10 },
+        },
+      ],
+    });
+
+    const listExperiments = jest.fn().mockResolvedValue([
+      experiment({
+        experiment_id: 'exp-s1',
+        execution_id: 'sweep-1-s1of2::suite-a::m1',
+        modelId: 'm1',
+        timestamp: '2026-06-10T00:00:00.000Z',
+        evaluator_model: { id: 'm1' }, // self-judged shard, older
+      }),
+      experiment({
+        experiment_id: 'exp-s2',
+        execution_id: 'sweep-1-s2of2::suite-a::m1',
+        modelId: 'm1',
+        timestamp: '2026-06-10T01:00:00.000Z',
+        evaluator_model: { id: 'judge-b' }, // independent judge, newer -> picked as `latest`
+      }),
+    ]);
+    const getExperimentStats = jest.fn().mockResolvedValue(shardStats(0.9));
+    const client = { listExperiments, getExperimentStats } as unknown as MatrixEvalsClient;
+
+    const result = await queryMatrixScores(client, log, {
+      suiteIds: ['suite-a'],
+      modelIds: ['m1'],
+      branch: 'main',
+      scoring: { excludeSelfJudged: false },
+    });
+
+    const suite = result[0].suites[0];
+    expect(suite.selfJudged).toBe(true);
+    expect(suite.judgeModelIds).toEqual(['judge-b', 'm1']);
+  });
+
   it('queries each (suite, model) pair through the route model_id filter', async () => {
     const { client, listExperiments, getExperimentStats } = createClient({
       m1: [experiment({ experiment_id: 'exp-m1', modelId: 'm1' })],

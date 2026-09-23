@@ -9,7 +9,7 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 import { buildMatrix } from '../../matrix/build_matrix';
 import { renderMatrix } from '../../matrix/render_matrix';
-import { branchBySuiteFromColumns, matrixScoreQuery } from './matrix';
+import { branchBySuiteFromColumns, matrixScoreQuery, sanitizeKbnUrlForLog } from './matrix';
 import { parseMatrixConfig } from '../../matrix/load_matrix_config';
 import type { AggregatedModelScores } from '../../matrix/query_matrix_scores';
 
@@ -259,5 +259,17 @@ describe('matrix command empty-result guard', () => {
         asOf: undefined,
       })
     ).not.toThrow();
+  });
+});
+
+describe('sanitizeKbnUrlForLog', () => {
+  it('strips userinfo, query, and fragment before logging a Kibana URL', () => {
+    expect(
+      sanitizeKbnUrlForLog('https://user:s3cret@kibana.example.com:5601/app?token=abc#frag')
+    ).toBe('https://kibana.example.com:5601/app');
+  });
+
+  it('falls back to a placeholder for an unparseable URL rather than logging it raw', () => {
+    expect(sanitizeKbnUrlForLog('not a url')).toBe('<unparseable-url>');
   });
 });

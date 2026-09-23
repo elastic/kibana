@@ -33,6 +33,67 @@ describe('parseMatrixConfig', () => {
     ).toThrow(/must not contain ':'/);
   });
 
+  it('rejects duplicate column ids (a duplicate would double-count toward coverage and Overall)', () => {
+    expect(() =>
+      parseMatrixConfig({
+        ...minimalConfig,
+        columns: [
+          { id: 'alert_triage', label: 'Alert Triage', suites: ['s1'] },
+          { id: 'alert_triage', label: 'Alert Triage Again', suites: ['s2'] },
+        ],
+      })
+    ).toThrow(/Duplicate column id "alert_triage"/);
+  });
+
+  it('rejects duplicate composite ids', () => {
+    expect(() =>
+      parseMatrixConfig({
+        ...minimalConfig,
+        composites: [
+          { id: 'combined', label: 'Combined', from: ['alert_triage'] },
+          { id: 'combined', label: 'Combined Again', from: ['alert_triage'] },
+        ],
+      })
+    ).toThrow(/Duplicate composite id "combined"/);
+  });
+
+  it('rejects a composite id that collides with a base column id', () => {
+    expect(() =>
+      parseMatrixConfig({
+        ...minimalConfig,
+        composites: [{ id: 'alert_triage', label: 'Collides', from: ['alert_triage'] }],
+      })
+    ).toThrow(/collides with a base column id/);
+  });
+
+  it('rejects duplicate model ids', () => {
+    expect(() =>
+      parseMatrixConfig({
+        ...minimalConfig,
+        models: [
+          { id: 'eis/foo', label: 'Foo' },
+          { id: 'eis/foo', label: 'Foo Again' },
+        ],
+      })
+    ).toThrow(/Duplicate model id "eis\/foo"/);
+  });
+
+  it('bounds the column-level branch array (CodeQL: unbounded schema.arrayOf is a DoS vector)', () => {
+    expect(() =>
+      parseMatrixConfig({
+        ...minimalConfig,
+        columns: [
+          {
+            id: 'alert_triage',
+            label: 'Alert Triage',
+            suites: ['s'],
+            branch: Array.from({ length: 1001 }, (_, i) => `branch-${i}`),
+          },
+        ],
+      })
+    ).toThrow(/array size is \[1001\], but cannot be greater than \[1000\]/);
+  });
+
   it('applies defaults for optional fields', () => {
     const config = parseMatrixConfig(minimalConfig);
 

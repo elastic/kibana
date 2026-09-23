@@ -8,7 +8,10 @@
 import type { ToolingLog } from '@kbn/tooling-log';
 import { parseMatrixConfig } from './load_matrix_config';
 import type { AggregatedModelScores } from './query_matrix_scores';
-import { warnOnDataAboutToLeaveLookback } from './config_data_preflight';
+import {
+  warnOnConfiguredNamesMissingFromData,
+  warnOnDataAboutToLeaveLookback,
+} from './config_data_preflight';
 
 const collectWarnings = () => {
   const warnings: string[] = [];
@@ -109,5 +112,88 @@ describe('warnOnDataAboutToLeaveLookback', () => {
     expect(warnings).toHaveLength(1);
     expect(warnings[0]).toContain('persona-matrix');
     expect(warnings[0]).toContain('10 day');
+  });
+});
+
+describe('warnOnConfiguredNamesMissingFromData', () => {
+  const configWithEvaluatorAllowlist = parseMatrixConfig({
+    columns: [
+      {
+        id: 'migrations-rules',
+        label: 'Rule Translation',
+        suites: ['security-automatic-migrations'],
+        evaluators: ['Rubric'],
+      },
+    ],
+    models: [{ id: 'model-a', label: 'A' }],
+  });
+
+  it("does not warn when the allowlisted evaluator exists in the column's own suite", () => {
+    const { warnings, log } = collectWarnings();
+    const aggregated: AggregatedModelScores[] = [
+      {
+        modelId: 'model-a',
+        suites: [
+          {
+            suiteId: 'security-automatic-migrations',
+            experimentId: 'e1',
+            datasets: [
+              {
+                datasetId: 'd',
+                datasetName: 'd',
+                evaluators: [{ evaluatorName: 'Rubric', mean: 0.8, count: 10 }],
+              },
+            ],
+          },
+        ],
+      },
+    ];
+
+    warnOnConfiguredNamesMissingFromData(configWithEvaluatorAllowlist, aggregated, log);
+
+    expect(warnings).toHaveLength(0);
+  });
+
+  it("still warns when the allowlisted evaluator exists only in an unrelated suite, not the column's own suite", () => {
+    // Regression: checking against one global evaluator pool let a column pass
+    // this preflight purely because SOME other suite happened to run an
+    // evaluator of the same name, even though the column's own suite never did.
+    const { warnings, log } = collectWarnings();
+    const aggregated: AggregatedModelScores[] = [
+      {
+        modelId: 'model-a',
+        suites: [
+          {
+            suiteId: 'security-automatic-migrations',
+            experimentId: 'e1',
+            datasets: [
+              {
+                datasetId: 'd',
+                datasetName: 'd',
+                evaluators: [{ evaluatorName: 'OtherEvaluator', mean: 0.8, count: 10 }],
+              },
+            ],
+          },
+          {
+            suiteId: 'persona-matrix',
+            experimentId: 'e2',
+            datasets: [
+              {
+                datasetId: 'd2',
+                datasetName: 'd2',
+                evaluators: [{ evaluatorName: 'Rubric', mean: 0.8, count: 10 }],
+              },
+            ],
+          },
+        ],
+      },
+    ];
+
+    warnOnConfiguredNamesMissingFromData(configWithEvaluatorAllowlist, aggregated, log);
+
+    expect(warnings).toHaveLength(1);
+    expect(warnings[0]).toContain('migrations-rules');
+    expect(warnings[0]).toContain('Rubric');
+    expect(warnings[0]).not.toContain('Rubric, OtherEvaluator');
   });
 });

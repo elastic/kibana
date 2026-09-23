@@ -35,6 +35,20 @@ import {
   warnOnDataAboutToLeaveLookback,
 } from '../../matrix/config_data_preflight';
 
+/**
+ * `KbnClient` accepts `https://user:pass@host` URLs, and the default itself
+ * uses that form. Never log a Kibana URL verbatim — strip userinfo, query,
+ * and fragment so credentials never land in local or CI logs.
+ */
+export const sanitizeKbnUrlForLog = (url: string): string => {
+  try {
+    const parsed = new URL(url);
+    return `${parsed.protocol}//${parsed.host}${parsed.pathname}`;
+  } catch {
+    return '<unparseable-url>';
+  }
+};
+
 const DEFAULT_OUT_DIR = 'target/llm_matrix';
 
 /** Builds the score aggregation query for a matrix run. */
@@ -273,9 +287,9 @@ export const matrixCmd: Command<void> = {
     }
 
     log.info(
-      `Querying matrix scores from ${evaluationsKbnUrl ?? DEFAULT_EVALUATIONS_KBN_URL} (branch: ${
-        branch ?? 'any'
-      })`
+      `Querying matrix scores from ${sanitizeKbnUrlForLog(
+        evaluationsKbnUrl ?? DEFAULT_EVALUATIONS_KBN_URL
+      )} (branch: ${branch ?? 'any'})`
     );
 
     const aggregated = await queryMatrixScores(

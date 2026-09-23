@@ -253,10 +253,16 @@ const cellHtml = (row: MatrixRow, column: MatrixDisplayColumn): string => {
   const cell =
     column.kind === 'overall' ? row.overall : row.cells[column.id] ?? { kind: 'missing' };
   switch (cell.kind) {
-    case 'score':
+    case 'score': {
+      // Self-judged scores must be visibly disclosed, not silently rendered
+      // identically to independently judged ones (MatrixCell.selfJudged).
+      const selfJudgedBadge = cell.selfJudged
+        ? ` <span class="sub-num" title="Scored by the same model being evaluated (allowed via allowSelfJudged)">SJ</span>`
+        : '';
       return column.kind === 'overall' && row.tier !== undefined
-        ? `<span class="ok-dot">✓</span> ${cell.value} <span class="sub-num" title="Tie tier ${row.tier}: rows sharing a tier are not distinguishable at the measured run-to-run noise level, so their relative order is not meaningful">T${row.tier}</span>`
-        : `<span class="ok-dot">✓</span> ${cell.value}`;
+        ? `<span class="ok-dot">✓</span> ${cell.value} <span class="sub-num" title="Tie tier ${row.tier}: rows sharing a tier are not distinguishable at the measured run-to-run noise level, so their relative order is not meaningful">T${row.tier}</span>${selfJudgedBadge}`
+        : `<span class="ok-dot">✓</span> ${cell.value}${selfJudgedBadge}`;
+    }
     case 'not-recommended':
       return `<span class="status err">⛔ fail</span>`;
     case 'excluded':
@@ -329,11 +335,11 @@ const renderTokenCost = (matrix: Matrix, config: MatrixConfig): string => {
   return `<details class="methodology tokencost" open><summary>Token cost per (model, column) — input + output means, native units (hover for in/out split)</summary><table class="tokencost"><thead>${header}</thead><tbody>${rows}</tbody></table></details>`;
 };
 
-const renderSummaryTable = (matrix: Matrix, config: MatrixConfig): string => {
-  const groupedColumns = matrix.displayColumns.map((col) => {
-    const source = col.kind === 'overall' ? undefined : config.columns.find((c) => c.id === col.id);
-    return { ...col, group: source?.group };
-  });
+const renderSummaryTable = (matrix: Matrix): string => {
+  // matrix.displayColumns already carries the correct group for both base and
+  // composite entries (see buildDisplayColumns); do not re-derive it here — a
+  // lookup scoped to config.columns alone silently drops composite groups.
+  const groupedColumns = matrix.displayColumns;
   const hasGroups = groupedColumns.some((col) => col.group);
 
   const groupHeader = hasGroups
@@ -518,6 +524,16 @@ const renderModelCard = (
     .join('\n');
 };
 
+/** Only render `href` for http(s) URLs; anything else (e.g. `javascript:`) renders as plain escaped text. */
+const isSafeHttpUrl = (url: string): boolean => {
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+  } catch {
+    return false;
+  }
+};
+
 /** Renders a self-contained HTML report, with per-prompt traces when `traces` is provided. */
 export const renderMatrixHtml = (
   matrix: Matrix,
@@ -527,12 +543,18 @@ export const renderMatrixHtml = (
 ): string => {
   const generatedAt = new Date().toISOString();
   const provenanceLine = [
-    `Generated ${generatedAt}`,
-    provenance.branch ? `branch \`${provenance.branch}\`` : undefined,
+    `Generated ${esc(generatedAt)}`,
+    provenance.branch ? `branch \`${esc(provenance.branch)}\`` : undefined,
     provenance.lookbackDays !== undefined ? `${provenance.lookbackDays}-day lookback` : undefined,
-    provenance.commitSha ? `commit \`${provenance.commitSha}\`` : undefined,
-    provenance.buildUrl ? `<a href="${esc(provenance.buildUrl)}">build</a>` : undefined,
-    provenance.fixtureFingerprint ? `fixtures \`${provenance.fixtureFingerprint}\`` : undefined,
+    provenance.commitSha ? `commit \`${esc(provenance.commitSha)}\`` : undefined,
+    provenance.buildUrl
+      ? isSafeHttpUrl(provenance.buildUrl)
+        ? `<a href="${esc(provenance.buildUrl)}">build</a>`
+        : `build ${esc(provenance.buildUrl)}`
+      : undefined,
+    provenance.fixtureFingerprint
+      ? `fixtures \`${esc(provenance.fixtureFingerprint)}\``
+      : undefined,
   ]
     .filter(Boolean)
     .join(' · ');
@@ -563,7 +585,7 @@ export const renderMatrixHtml = (
         .join('')}</ul></details>`
     : '';
 
-  const summaryTable = renderSummaryTable(matrix, config);
+  const summaryTable = renderSummaryTable(matrix);
   const tokenCostTable = renderTokenCost(matrix, config);
   const modelCards =
     (matrix.proprietary.length > 0

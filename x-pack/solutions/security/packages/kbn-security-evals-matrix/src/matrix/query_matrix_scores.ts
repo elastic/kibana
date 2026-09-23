@@ -203,6 +203,41 @@ export const scoresByPrefixToDatasets = (
   });
 };
 
+/** Every judge model on an experiment, whether reported singly (`evaluator_model`) or as a multi-judge run (`evaluator_models`). */
+const experimentJudges = (
+  experiment: EvaluationExperimentSummary
+): Array<{ id?: string } | undefined> =>
+  experiment.evaluator_models?.length ? experiment.evaluator_models : [experiment.evaluator_model];
+
+/** Derived judge provenance for a suite row, folding in every shard member's judges — not just `latest`'s. */
+interface DerivedRowJudgeInfo {
+  selfJudged?: boolean;
+  judgeModelId?: string;
+  judgeModelIds?: string[];
+}
+
+const deriveRowJudgeInfo = (
+  experiments: EvaluationExperimentSummary[],
+  taskModelId: string
+): DerivedRowJudgeInfo => {
+  const judgeIds = new Set<string>();
+  for (const experiment of experiments) {
+    for (const judge of experimentJudges(experiment)) {
+      if (judge?.id) {
+        judgeIds.add(judge.id);
+      }
+    }
+  }
+  if (judgeIds.size === 0) {
+    return {};
+  }
+  const selfJudged = [...judgeIds].some((id) => describeJudge(id, taskModelId).selfJudged);
+  if (judgeIds.size === 1) {
+    return { selfJudged, judgeModelId: [...judgeIds][0] };
+  }
+  return { selfJudged, judgeModelIds: [...judgeIds].sort() };
+};
+
 /** Selects the most recent experiment per task model within the lookback window. */
 export const pickLatestExperimentPerModel = (
   experiments: EvaluationExperimentSummary[],
@@ -231,9 +266,7 @@ export const pickLatestExperimentPerModel = (
         // `now` doubles as the upper bound so a matrix can be rendered as of a point in time.
         if (at <= now) {
           // Skip self-judged runs here so an older, independently judged run can be picked.
-          const judges = experiment.evaluator_models?.length
-            ? experiment.evaluator_models
-            : [experiment.evaluator_model];
+          const judges = experimentJudges(experiment);
           const rejectedSelfJudged =
             !allowSelfJudged &&
             judges.some((judge) => judge?.id && describeJudge(judge.id, modelId).selfJudged);
@@ -437,6 +470,11 @@ export const queryMatrixScores = async (
               .map((entry) => experimentStatsToDatasets(entry))
           );
           const examplePrefixes = prefixesBySuite[suiteId] ?? [];
+          // Hoisted out of the try block below: this suite's own exclusion counts,
+          // read after the try/catch to size `excludedSelfJudged` on the pushed row —
+          // reading the cross-suite `excludedByModel` accumulator there would carry
+          // an earlier suite's rejection counts onto this suite's row.
+          let suiteExcludedCounts: ExcludedScoreCounts | undefined;
           if (examplePrefixes.length > 0) {
             try {
               const scores = (
@@ -451,26 +489,31 @@ export const queryMatrixScores = async (
                 )
               ).flat();
               const before = datasets.length;
+              // excludedByModel accumulates across every suite for the final audit summary;
+              // reading it back for labeling here would attribute an earlier suite's
+              // rejections to this one (e.g. a later suite with zero mappable verdicts,
+              // no self-judged issue at all, rendering as "excluded:self-judged" from
+              // stale state). Assign to the suite-scoped variable instead.
               datasets.push(
                 ...scoresByPrefixToDatasets(scores, examplePrefixes, {
                   ...suiteScoring,
                   onExcluded: (counts) => {
                     if (counts.selfJudged + counts.nonEis + counts.unmappedVerdict > 0) {
+                      suiteExcludedCounts = counts;
                       excludedByModel.set(modelId, counts);
                     }
                   },
                 })
               );
-              const rejectedCounts = excludedByModel.get(modelId);
-              if (datasets.length === before && rejectedCounts) {
-                const judgeIssue = rejectedCounts.selfJudged + rejectedCounts.nonEis;
+              if (datasets.length === before && suiteExcludedCounts) {
+                const judgeIssue = suiteExcludedCounts.selfJudged + suiteExcludedCounts.nonEis;
                 const remedy =
                   judgeIssue === 0
                     ? `no score carried a mappable verdict — check that this suite's example ids match the column's examplePrefixes (a suite that writes a constant example id cannot be bucketed) before blaming the judge.`
                     : `Re-running this model will NOT fill these cells — fix the judge assignment first.`;
                 log.warning(
                   `All per-prefix scores rejected for model ${modelId} (suite ${suiteId}): ` +
-                    `${rejectedCounts.selfJudged} self-judged, ${rejectedCounts.nonEis} non-EIS judge, ${rejectedCounts.unmappedVerdict} unmapped verdict. ${remedy}`
+                    `${suiteExcludedCounts.selfJudged} self-judged, ${suiteExcludedCounts.nonEis} non-EIS judge, ${suiteExcludedCounts.unmappedVerdict} unmapped verdict. ${remedy}`
                 );
               }
 
@@ -503,7 +546,8 @@ export const queryMatrixScores = async (
             }
           }
 
-          const excludedSelfJudgedCount = excludedByModel.get(modelId)?.selfJudged;
+          const excludedSelfJudgedCount = suiteExcludedCounts?.selfJudged;
+          const rowJudgeInfo = deriveRowJudgeInfo(shards, modelId);
           model.suites.push({
             suiteId,
             experimentId: latest.experiment_id,
@@ -514,11 +558,7 @@ export const queryMatrixScores = async (
             executionIds: shards.map((s) => s.execution_id ?? s.experiment_id),
             timestamp: latest.timestamp,
             commitSha: latest.git_commit_sha ?? undefined,
-            selfJudged:
-              latest.evaluator_model?.id && latest.task_model?.id
-                ? describeJudge(latest.evaluator_model.id, latest.task_model.id).selfJudged
-                : undefined,
-            judgeModelId: latest.evaluator_model?.id ?? undefined,
+            ...rowJudgeInfo,
             excludedSelfJudged:
               datasets.length === 0 &&
               excludedSelfJudgedCount !== undefined &&

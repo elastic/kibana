@@ -82,6 +82,25 @@ describe('renderMatrix', () => {
     expect(openSourceCsv).not.toContain('GPT OSS 120B,7.6,,');
   });
 
+  it('discloses a self-judged score in CSV instead of rendering it identically to an independently judged one', () => {
+    const withSelfJudged = {
+      ...matrix,
+      proprietary: [
+        {
+          ...matrix.proprietary[0],
+          cells: {
+            ...matrix.proprietary[0].cells,
+            triage: { kind: 'score' as const, value: 9.2, selfJudged: true },
+          },
+        },
+      ],
+    };
+
+    const { proprietaryCsv } = renderMatrix(withSelfJudged, config);
+
+    expect(proprietaryCsv).toContain('9.2 (self-judged)');
+  });
+
   it('renders CSV with a header row and one row per model', () => {
     const { proprietaryCsv, openSourceCsv } = renderMatrix(matrix, config);
 

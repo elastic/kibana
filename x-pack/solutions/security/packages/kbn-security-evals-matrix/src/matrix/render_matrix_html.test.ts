@@ -51,8 +51,8 @@ const mockMatrix: Matrix = {
   ],
   composites: [],
   displayColumns: [
-    { id: 'alert', label: 'Alert Analysis', kind: 'base' },
-    { id: 'threat', label: 'Threat Hunting', kind: 'base' },
+    { id: 'alert', label: 'Alert Analysis', group: 'Agent Builder', kind: 'base' },
+    { id: 'threat', label: 'Threat Hunting', group: 'Agent Builder', kind: 'base' },
     { id: '__overall__', label: 'Overall', kind: 'overall' },
   ],
   overallLabel: 'Overall',
@@ -330,6 +330,48 @@ describe('renderMatrixHtml', () => {
     expect(html).toContain('abc123');
   });
 
+  it('escapes untrusted provenance strings before composing the provenance line', () => {
+    const html = renderMatrixHtml(mockMatrix, mockConfig, {
+      branch: '</p><img src=x onerror=alert(1)>',
+      commitSha: '"><script>alert(2)</script>',
+      fixtureFingerprint: '<i>fp</i>',
+    });
+    expect(html).not.toContain('<img src=x onerror=alert(1)>');
+    expect(html).not.toContain('<script>alert(2)</script>');
+    expect(html).not.toContain('<i>fp</i>');
+    expect(html).toContain('&lt;img');
+  });
+
+  it('only renders buildUrl as a clickable link when it is a safe http(s) URL', () => {
+    const safe = renderMatrixHtml(mockMatrix, mockConfig, {
+      buildUrl: 'https://buildkite.com/build/1',
+    });
+    expect(safe).toContain('<a href="https://buildkite.com/build/1">build</a>');
+
+    const unsafe = renderMatrixHtml(mockMatrix, mockConfig, {
+      buildUrl: 'javascript:alert(1)',
+    });
+    expect(unsafe).not.toContain('<a href="javascript:alert(1)">');
+    expect(unsafe).toContain('build javascript:alert(1)');
+  });
+
+  it('visibly discloses self-judged scores in the HTML cell, not just the in-memory cell', () => {
+    const selfJudgedMatrix: Matrix = {
+      ...mockMatrix,
+      proprietary: [
+        {
+          ...mockMatrix.proprietary[0],
+          cells: {
+            ...mockMatrix.proprietary[0].cells,
+            alert: { kind: 'score', value: 8.5, selfJudged: true },
+          },
+        },
+      ],
+    };
+    const html = renderMatrixHtml(selfJudgedMatrix, mockConfig);
+    expect(html).toContain('SJ');
+  });
+
   it('resolves traces via suite ID fallback when column ID does not match', () => {
     // Column ID is 'triage' but traces are keyed by suite ID 'security-alert-triage'
     const configWithSuite: MatrixConfig = {
@@ -375,6 +417,40 @@ describe('renderMatrixHtml', () => {
     const html = renderMatrixHtml(mockMatrix, mockConfig);
     expect(html).toContain('colspan="2"');
     expect(html).toContain('Agent Builder');
+  });
+
+  it('preserves a grouped header for composite columns (buildMatrix already sets displayColumns[].group)', () => {
+    // Regression: renderSummaryTable used to re-derive group from config.columns
+    // only, which returns undefined for a composite id and silently dropped its
+    // grouped header even though compositeSchema supports `group`.
+    const configWithGroupedComposite: MatrixConfig = {
+      ...mockConfig,
+      composites: [
+        { id: 'combined', label: 'Combined', group: 'Agent Builder', from: ['alert', 'threat'] },
+      ],
+    };
+    const matrixWithGroupedComposite: Matrix = {
+      ...mockMatrix,
+      composites: [{ id: 'combined', label: 'Combined', group: 'Agent Builder' }],
+      displayColumns: [
+        ...mockMatrix.displayColumns.slice(0, 2),
+        { id: 'combined', label: 'Combined', group: 'Agent Builder', kind: 'composite' },
+        { id: '__overall__', label: 'Overall', kind: 'overall' },
+      ],
+      proprietary: [
+        {
+          ...mockMatrix.proprietary[0],
+          cells: {
+            ...mockMatrix.proprietary[0].cells,
+            combined: { kind: 'score', value: 7.95 },
+          },
+        },
+      ],
+    };
+    const html = renderMatrixHtml(matrixWithGroupedComposite, configWithGroupedComposite);
+    // All three columns (alert, threat, combined) share the same group, so they
+    // render under one spanning header of colspan 3, not a broken/absent one.
+    expect(html).toContain('colspan="3"');
   });
 
   it('does not render a grouped header when no groups are present', () => {

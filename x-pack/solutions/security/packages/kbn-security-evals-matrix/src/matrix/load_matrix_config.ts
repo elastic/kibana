@@ -60,6 +60,7 @@ const columnSchema = schema.object({
       schema.string({ minLength: 1, maxLength: MAX_STRING_LENGTH }),
       schema.arrayOf(schema.string({ minLength: 1, maxLength: MAX_STRING_LENGTH }), {
         minSize: 1,
+        maxSize: MAX_ARRAY_SIZE,
       }),
     ])
   ),
@@ -212,7 +213,48 @@ export type MatrixColumnConfig = TypeOf<typeof columnSchema>;
 export type MatrixCompositeConfig = TypeOf<typeof compositeSchema>;
 export type MatrixModelConfig = TypeOf<typeof modelSchema>;
 
-export const parseMatrixConfig = (raw: unknown): MatrixConfig => matrixConfigSchema.validate(raw);
+export const parseMatrixConfig = (raw: unknown): MatrixConfig => {
+  const config = matrixConfigSchema.validate(raw);
+  assertNoDuplicateIds(config);
+  return config;
+};
+
+/**
+ * Column/composite ids share one namespace: both key `MatrixRow.cells` and are looked up
+ * by id when rendering. A duplicate silently overwrites the earlier cell while the id
+ * still appears twice in `config.columns`/`config.composites`, double-counting it toward
+ * coverage and the Overall aggregate. Model ids collide the same way in `matrix.proprietary`
+ * / `matrix.openSource`. Reject all three after schema validation, where the well-typed
+ * arrays are cheap to walk.
+ */
+const assertNoDuplicateIds = (config: MatrixConfig): void => {
+  const columnIds = new Set<string>();
+  for (const column of config.columns) {
+    if (columnIds.has(column.id)) {
+      throw new Error(`Duplicate column id "${column.id}".`);
+    }
+    columnIds.add(column.id);
+  }
+
+  const compositeIds = new Set<string>();
+  for (const composite of config.composites) {
+    if (compositeIds.has(composite.id)) {
+      throw new Error(`Duplicate composite id "${composite.id}".`);
+    }
+    if (columnIds.has(composite.id)) {
+      throw new Error(`Composite id "${composite.id}" collides with a base column id.`);
+    }
+    compositeIds.add(composite.id);
+  }
+
+  const modelIds = new Set<string>();
+  for (const model of config.models) {
+    if (modelIds.has(model.id)) {
+      throw new Error(`Duplicate model id "${model.id}".`);
+    }
+    modelIds.add(model.id);
+  }
+};
 
 /** Parses a `--model` CLI value of the form `id[:label][:open-source]`. */
 export const parseModelOverride = (raw: string): MatrixModelConfig => {

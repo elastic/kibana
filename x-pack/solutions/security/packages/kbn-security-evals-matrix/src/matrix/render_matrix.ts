@@ -47,7 +47,10 @@ export interface RenderedMatrix {
 const cellToString = (cell: MatrixCell, notRecommendedLabel: string): string => {
   switch (cell.kind) {
     case 'score':
-      return String(cell.value);
+      // Self-judged scores must carry their disclosure into every plain-text
+      // representation (CSV/Markdown), not just the in-memory MatrixCell —
+      // a reader comparing rows from a CSV export has no other signal.
+      return cell.selfJudged ? `${cell.value} (self-judged)` : String(cell.value);
     case 'not-recommended':
       return notRecommendedLabel;
     case 'excluded':
