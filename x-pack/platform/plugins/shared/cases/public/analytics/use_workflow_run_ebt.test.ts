@@ -14,8 +14,8 @@ import {
   CASE_WORKFLOW_ORIGIN_TYPE,
   OBSERVABLE_WORKFLOW_ORIGIN_TYPE,
   OBSERVABLES_WORKFLOW_ORIGIN_TYPE,
-  ALERT_WORKFLOW_ORIGIN_TYPE,
-  ALERTS_WORKFLOW_ORIGIN_TYPE,
+  ATTACHMENT_WORKFLOW_ORIGIN_TYPE,
+  ATTACHMENTS_WORKFLOW_ORIGIN_TYPE,
 } from '../../common/constants/workflow';
 import { useKibana } from '../common/lib/kibana';
 import { useCasesContext } from '../components/cases_context/use_cases_context';
@@ -96,7 +96,7 @@ describe('useWorkflowRunTriggeredEBT', () => {
     const { result } = renderHook(() => useWorkflowRunTriggeredEBT());
 
     act(() => {
-      result.current({ originType: ALERTS_WORKFLOW_ORIGIN_TYPE, caseCount: 3 });
+      result.current({ originType: ATTACHMENTS_WORKFLOW_ORIGIN_TYPE, caseCount: 3 });
     });
 
     expect(reportEvent).toHaveBeenCalledWith(
@@ -109,8 +109,8 @@ describe('useWorkflowRunTriggeredEBT', () => {
     CASE_WORKFLOW_ORIGIN_TYPE,
     OBSERVABLE_WORKFLOW_ORIGIN_TYPE,
     OBSERVABLES_WORKFLOW_ORIGIN_TYPE,
-    ALERT_WORKFLOW_ORIGIN_TYPE,
-    ALERTS_WORKFLOW_ORIGIN_TYPE,
+    ATTACHMENT_WORKFLOW_ORIGIN_TYPE,
+    ATTACHMENTS_WORKFLOW_ORIGIN_TYPE,
     UNATTRIBUTED_WORKFLOW_RUN_ORIGIN_TYPE,
   ])('accepts origin_type: %s', (originType) => {
     const { result } = renderHook(() => useWorkflowRunTriggeredEBT());

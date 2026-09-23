@@ -18,6 +18,7 @@ import { getPushedTelemetryData } from './queries/push';
 import { getUserActionsTelemetryData } from './queries/user_actions';
 import { getTemplatesTelemetryData } from './queries/templates';
 import { getFieldLibraryTelemetryData } from './queries/field_definitions';
+import { getWorkflowsTelemetryData } from './queries/workflows';
 
 jest.mock('./queries/alerts');
 jest.mock('./queries/cases');
@@ -29,6 +30,7 @@ jest.mock('./queries/push');
 jest.mock('./queries/user_actions');
 jest.mock('./queries/templates');
 jest.mock('./queries/field_definitions');
+jest.mock('./queries/workflows');
 
 const getAlertsMock = getAlertsTelemetryData as jest.Mock;
 const getCasesMock = getCasesTelemetryData as jest.Mock;
@@ -40,6 +42,7 @@ const getPushesMock = getPushedTelemetryData as jest.Mock;
 const getUserActionsMock = getUserActionsTelemetryData as jest.Mock;
 const getTemplatesMock = getTemplatesTelemetryData as jest.Mock;
 const getFieldLibraryMock = getFieldLibraryTelemetryData as jest.Mock;
+const getWorkflowsMock = getWorkflowsTelemetryData as jest.Mock;
 
 const preExistingAreas = {
   cases: getCasesMock,
@@ -50,6 +53,7 @@ const preExistingAreas = {
   pushes: getPushesMock,
   configuration: getConfigurationMock,
   casesSystemAction: getCasesSystemActionMock,
+  workflows: getWorkflowsMock,
 };
 
 const zeroCount = { total: 0, monthly: 0, weekly: 0, daily: 0 };
