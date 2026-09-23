@@ -46,7 +46,11 @@ export {
 } from './spec/examples';
 export type { WorkflowExampleEntry } from './spec/examples';
 export { StepCategory, StepCategories } from './spec/step_definition_types';
-export type { BaseStepDefinition, StepDocumentation } from './spec/step_definition_types';
+export type {
+  BaseStepDefinition,
+  StepDocumentation,
+  StepExecutionMode,
+} from './spec/step_definition_types';
 export * from './spec/deprecated_step_metadata';
 export * from './types/latest';
 export * from './types/utils';
