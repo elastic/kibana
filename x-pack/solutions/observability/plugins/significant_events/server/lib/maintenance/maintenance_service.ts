@@ -956,7 +956,7 @@ export const createSignificantEventsMaintenanceService = ({
           }
         }
 
-        const esClient = server.core.elasticsearch.client.asInternalUser;
+        const esClient = server.core.elasticsearch.client.asScoped(request).asCurrentUser;
         for (const name of [
           DETECTIONS_DATA_STREAM,
           EVENTS_DATA_STREAM,
