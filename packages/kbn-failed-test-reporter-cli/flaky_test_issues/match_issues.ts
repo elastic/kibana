@@ -12,11 +12,7 @@ import type { TestFramework } from '@kbn/scout-reporting';
 import { getLocationFromClassname } from '../failed_tests_reporter/get_failures';
 import type { GithubIssue } from '../failed_tests_reporter/github_api';
 import { getIssueMetadata } from '../failed_tests_reporter/issue_metadata';
-import {
-  readFlakySuiteIssueMetadata,
-  readSuiteFilePathFromTitle,
-  readSuiteFrameworkFromTitle,
-} from './issue_body';
+import { readFlakySuiteIssueMetadata } from './issue_body';
 import type { FlakySuite } from './suites';
 
 /**
@@ -26,11 +22,11 @@ import type { FlakySuite } from './suites';
  */
 export interface IssueDetails {
   issue: GithubIssue;
-  /** File a suite issue is about: from its `flaky-test-suite` metadata or a legacy title. */
+  /** File a suite issue is about, from its `flaky-test-suite` metadata. */
   suiteFilePath?: string;
   /** Suite of that file the issue is about; absent for issues about a whole file. */
   suiteTitle?: string;
-  /** Framework the suite issue is about; absent when neither metadata nor a legacy title names one. */
+  /** Framework the suite issue is about; absent when the metadata does not record one. */
   suiteFramework?: string;
   /** Scout test id from the `Test ID` row; the same id `discover-flaky-tests` reports. */
   scoutTestId?: string;
@@ -50,7 +46,7 @@ export interface IssueDetails {
 }
 
 export type IssueMatch =
-  /** An issue about the whole suite, `Flaky … test suite: <file>`. */
+  /** An issue about the whole suite, or about its whole file, by its `flaky-test-suite` metadata. */
   | 'suite'
   /** A per-test issue about one of the suite's flaky tests. */
   | 'test'
@@ -95,9 +91,9 @@ export const describeIssue = (issue: GithubIssue): IssueDetails => {
   const testType = metadataString(issue.body, 'test.type');
   return {
     issue,
-    suiteFilePath: suiteMetadata?.['suite.filePath'] ?? readSuiteFilePathFromTitle(issue.title),
+    suiteFilePath: suiteMetadata?.['suite.filePath'],
     suiteTitle: suiteMetadata?.['suite.title'],
-    suiteFramework: suiteMetadata?.['suite.framework'] ?? readSuiteFrameworkFromTitle(issue.title),
+    suiteFramework: suiteMetadata?.['suite.framework'],
     scoutTestId: issue.body.match(SCOUT_TEST_ID_ROW)?.[1],
     filePath: location
       ? undot(location)
@@ -201,7 +197,7 @@ export const compareMatches = (a: MatchedIssue, b: MatchedIssue): number =>
 
 /**
  * Issues about the suite, strongest evidence first: a suite issue (about this suite, or about the
- * whole file, as issues filed before suites were split by title are), then the Scout test id, then
+ * whole file, when it records no suite title), then the Scout test id, then
  * the test name together with the file (or, for Jest, the directory), then the test name together
  * with the file name alone (the file was moved), then any mention of the file.
  */

@@ -8,7 +8,7 @@
  */
 
 import Path from 'path';
-import type { FlakyTestReport, TestFramework } from '@kbn/scout-reporting';
+import type { FlakyTestReport } from '@kbn/scout-reporting';
 import { getIssueMetadata, updateIssueMetadata } from '../failed_tests_reporter/issue_metadata';
 import {
   BUILDKITE_ORG_URL,
@@ -28,12 +28,6 @@ import {
 } from './markdown';
 import type { FlakySuite } from './suites';
 
-/**
- * `Flaky <framework> test suite: <file>`, the title format of issues filed before the suite title
- * was used; `readSuiteFilePathFromTitle` still reads those. Current titles start with
- * `Flaky <framework> suite` and are recognised by their metadata instead.
- */
-const LEGACY_TITLE_PATTERN = /^Flaky\b.*\btest suite:\s*(\S+\.[jt]sx?)\s*$/;
 /** Namespace of the hidden `kibanaCiData` block at the end of the issue body and comments. */
 export const FLAKY_TEST_SUITE_METADATA_PREFIX = 'flaky-test-suite';
 
@@ -71,21 +65,6 @@ export interface FlakySuiteIssueMetadata {
   /** One snapshot per report that found the suite flaky, oldest first. */
   'report.history': FlakySuiteReportSnapshot[];
 }
-
-/** Suite file path named by a legacy issue title. */
-export const readSuiteFilePathFromTitle = (title: string): string | undefined =>
-  title.trim().match(LEGACY_TITLE_PATTERN)?.[1];
-
-/** `Flaky Jest test suite: <file>` names its framework by label; `Flaky test suite: <file>` does not. */
-const LEGACY_TITLE_FRAMEWORK_PATTERN = /^Flaky\s+(\S+)\s+test suite:/;
-
-/** Framework named by a legacy issue title, when it names one this reporter knows. */
-export const readSuiteFrameworkFromTitle = (title: string): TestFramework | undefined => {
-  const label = title.trim().match(LEGACY_TITLE_FRAMEWORK_PATTERN)?.[1];
-  return (Object.keys(FRAMEWORK_LABELS) as TestFramework[]).find(
-    (framework) => FRAMEWORK_LABELS[framework].short === label
-  );
-};
 
 const metadataValue = (body: string, key: keyof FlakySuiteIssueMetadata): unknown =>
   getIssueMetadata(body, key, undefined, FLAKY_TEST_SUITE_METADATA_PREFIX);

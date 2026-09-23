@@ -14,6 +14,7 @@ import type {
   FlakyTestReport,
 } from '@kbn/scout-reporting';
 import type { GithubIssue } from '../failed_tests_reporter/github_api';
+import { updateIssueMetadata } from '../failed_tests_reporter/issue_metadata';
 
 export const GENERATED_AT = new Date('2026-09-09T09:04:41.000Z');
 
@@ -122,3 +123,21 @@ export const githubIssue = (overrides: Partial<GithubIssue> & { number: number }
   state: 'open',
   ...overrides,
 });
+
+/** A suite issue about every suite of a file: `flaky-test-suite` metadata without a suite title. */
+export const fileWideIssue = (
+  number: number,
+  overrides: Partial<GithubIssue> & { filePath?: string; framework?: string } = {}
+): GithubIssue => {
+  const { filePath = SUITE_PATH, framework = 'playwright', ...issue } = overrides;
+  return githubIssue({
+    number,
+    title: `Flaky Scout suite: ${filePath}`,
+    body: updateIssueMetadata(
+      'Filed for the whole file',
+      { 'suite.filePath': filePath, 'suite.framework': framework },
+      'flaky-test-suite'
+    ),
+    ...issue,
+  });
+};

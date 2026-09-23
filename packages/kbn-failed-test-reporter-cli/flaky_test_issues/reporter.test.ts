@@ -21,7 +21,14 @@ import {
   type ReportFlakySuiteIssuesOptions,
 } from './reporter';
 import { groupIntoSuites } from './suites';
-import { flakyReport, flakyTest, GENERATED_AT, githubIssue, SUITE_PATH } from './test_fixtures';
+import {
+  fileWideIssue,
+  flakyReport,
+  flakyTest,
+  GENERATED_AT,
+  githubIssue,
+  SUITE_PATH,
+} from './test_fixtures';
 
 const log = new ToolingLog();
 const CLOSED_SINCE = new Date('2025-09-09T09:04:41.000Z');
@@ -296,11 +303,7 @@ describe('reportFlakySuiteIssues', () => {
 
     it('skips only the describe block a suite issue is about, unless it is about the whole file', async () => {
       // `suiteIssue` is about the fixture's `Default status alert` describe
-      const fileWide = githubIssue({
-        number: 44,
-        title: `Flaky Scout test suite: ${SUITE_PATH}`,
-        state: 'closed',
-      });
+      const fileWide = fileWideIssue(44, { state: 'closed' });
       const github = createGithubApi([suiteIssue(42), fileWide]);
       const report = flakyReport([
         flakyTest({ testId: 'a', failedBuilds: 40 }),
@@ -479,13 +482,7 @@ describe('reportFlakySuiteIssues', () => {
 
     it('treats an issue about the whole file as covering every test', async () => {
       const github = createGithubApi();
-      const tracking = trackingRepo([
-        githubIssue({
-          number: 125,
-          title: `Flaky Scout test suite: ${SUITE_PATH}`,
-          state: 'closed',
-        }),
-      ]);
+      const tracking = trackingRepo([fileWideIssue(125, { state: 'closed' })]);
       const report = flakyReport([
         trackedTest(),
         flakyTest({ testId: 'pw-2', title: 'another test' }),

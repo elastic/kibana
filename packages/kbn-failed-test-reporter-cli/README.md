@@ -45,8 +45,8 @@ indexed by the file names they mention (after restoring JUnit's `path·ts` spell
 directory in their classname and the Scout test id, so a suite is only compared with the issues
 that could be about it. The matching rules then decide which suite an issue is really about:
 
-- `suite`: it records the file in its `flaky-test-suite` metadata (or, for issues filed before
-  the suite title was used, is titled `Flaky <framework> test suite: <file>`);
+- `suite`: it records the file, and the suite title unless it is about the whole file, in its
+  `flaky-test-suite` metadata;
 - `test`: a per-test issue filed by `report_failed_tests` about one of the flaky tests, by the
   Scout test id, or by the test name together with the file (for Jest, the directory in the
   classname);

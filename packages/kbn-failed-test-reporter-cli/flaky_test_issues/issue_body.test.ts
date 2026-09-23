@@ -10,8 +10,6 @@
 import {
   flakySuiteIssueTitle,
   readFlakySuiteIssueMetadata,
-  readSuiteFilePathFromTitle,
-  readSuiteFrameworkFromTitle,
   renderFlakySuiteIssueBody,
 } from './issue_body';
 import { groupIntoSuites } from './suites';
@@ -151,31 +149,6 @@ describe('flakySuiteIssueTitle', () => {
         suiteTitle: undefined,
       })
     ).toBe('Flaky FTR suite: b.ts');
-  });
-});
-
-describe('readSuiteFrameworkFromTitle', () => {
-  it('maps the framework label of a legacy title back, and nothing without one', () => {
-    expect(readSuiteFrameworkFromTitle('Flaky Scout test suite: a/b/c.spec.ts')).toBe('playwright');
-    expect(readSuiteFrameworkFromTitle('Flaky Jest test suite: a.test.ts')).toBe('jest');
-    expect(readSuiteFrameworkFromTitle('Flaky FTR test suite: a.ts')).toBe('ftr');
-    expect(readSuiteFrameworkFromTitle('Flaky test suite: a.ts')).toBeUndefined();
-    expect(readSuiteFrameworkFromTitle('Flaky Foo test suite: a.ts')).toBeUndefined();
-    expect(readSuiteFrameworkFromTitle('Flaky Scout suite: a describe title')).toBeUndefined();
-  });
-});
-
-describe('readSuiteFilePathFromTitle', () => {
-  it('reads the file of a legacy title only', () => {
-    expect(readSuiteFilePathFromTitle('Flaky Scout test suite: a/b/c.spec.ts')).toBe(
-      'a/b/c.spec.ts'
-    );
-    expect(readSuiteFilePathFromTitle('  Flaky test suite:  x-pack/test/d.ts ')).toBe(
-      'x-pack/test/d.ts'
-    );
-    expect(readSuiteFilePathFromTitle('[Lens] Flaky Scout test suite: c.spec.ts')).toBeUndefined();
-    expect(readSuiteFilePathFromTitle('Flaky Scout test suite: two words')).toBeUndefined();
-    expect(readSuiteFilePathFromTitle('Failing test: Discover - should load')).toBeUndefined();
   });
 });
 
