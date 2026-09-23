@@ -1741,7 +1741,7 @@ export const FieldDefinitionWriteRequest = lazySchema(() =>
       /**
        * The application that owns this field definition.
        */
-      owner: z.string().min(1).max(50).describe('The application that owns this field definition.'),
+      owner: z.string().min(1).max(30).describe('The application that owns this field definition.'),
       /**
        * The field definition as a YAML string describing a single field (type, label, control, metadata).
        */
@@ -1800,7 +1800,7 @@ export const FieldDefinitionPutRequest = lazySchema(() =>
       /**
        * The application that owns this field definition.
        */
-      owner: z.string().min(1).max(50).describe('The application that owns this field definition.'),
+      owner: z.string().min(1).max(30).describe('The application that owns this field definition.'),
       /**
        * The field definition as a YAML string describing a single field (type, label, control, metadata).
        */
