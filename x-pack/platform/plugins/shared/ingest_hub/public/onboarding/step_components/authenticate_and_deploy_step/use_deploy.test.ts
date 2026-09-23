@@ -1913,6 +1913,8 @@ describe('useDeploy — cleanup orchestration', () => {
   });
 
   it('cleanup-only path: no new targets but pending cleanup → calls cleanup and returns without deploying', async () => {
+    // Mock a successful delete so cleanupFailed stays false and the success path executes.
+    mockCleanupManagedIntegrationsPolicies.mockResolvedValue({ toDelete: ['policy-A'], toUpdate: [] });
     setupMocks({
       selectedServiceIds: [],
       detectAndReviewStep: {
