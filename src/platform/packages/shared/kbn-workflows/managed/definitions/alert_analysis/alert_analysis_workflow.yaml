@@ -1594,10 +1594,24 @@ steps:
                       Execution: {{ execution.url }}
 
             else:
+              # Extract this batch's real alert IDs before merging model verdicts. A model
+              # can hallucinate an ID from a different batch; filtering to current-batch IDs
+              # ensures all_verdicts never contains cross-batch contamination.
+              - name: set_current_batch_alert_ids
+                type: data.set
+                with:
+                  current_batch_alert_ids: "${{ foreach.item | map: '_id' }}"
+
+              # Verdicts filtered to IDs present in this batch only.
+              - name: filter_verdicts_to_batch
+                type: data.set
+                with:
+                  batch_verdicts: "${{ steps.runAgent_step.output.structured_output.verdicts | where_exp: 'v', 'variables.current_batch_alert_ids contains v.id' }}"
+
               - name: collect_batch_verdicts
                 type: data.set
                 with:
-                  all_verdicts: "${{ variables.all_verdicts | concat: steps.runAgent_step.output.structured_output.verdicts }}"
+                  all_verdicts: "${{ variables.all_verdicts | concat: variables.batch_verdicts }}"
                   batch_input_tokens: "${{ variables.batch_input_tokens | plus: steps.runAgent_step.output.metadata.usage.inputTokens }}"
                   batch_output_tokens: "${{ variables.batch_output_tokens | plus: steps.runAgent_step.output.metadata.usage.outputTokens }}"
                   batch_llm_calls: "${{ variables.batch_llm_calls | plus: 1 }}"
@@ -2068,6 +2082,18 @@ steps:
             {{ variables.all_verdicts | size }} verdicts for {{ variables.pending_alert_count }} alerts
             in {{ variables.batch_llm_calls }} model call(s);
             {{ variables.auto_close_ids | size }} alert(s) matched the auto-close thresholds.
+
+  # ---------------------------------------------------------------------------
+  # Worker-path skip fallback: populate missing_alert_ids when analysis_enabled
+  # short-circuits (workflow disabled, no connector, or zero pending alerts) so the
+  # Worker knows which alert IDs were never analysed rather than seeing an empty list
+  # that looks like a successful zero-verdict run.
+  # ---------------------------------------------------------------------------
+  - name: set_missing_alert_ids_on_skip
+    condition: "${{ inputs.calledByWorker == true and variables.pending_alert_count > 0 and variables.output_verdicts.size == 0 }}"
+    type: data.set
+    with:
+      missing_alert_ids: "${{ variables.alert_set | reject_exp: 'a', variables.pending_filter_expr | map: '_id' }}"
 
   # ---------------------------------------------------------------------------
   # Emit structured output for callers (Worker path)

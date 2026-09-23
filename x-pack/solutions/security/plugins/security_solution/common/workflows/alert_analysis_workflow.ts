@@ -60,19 +60,27 @@ export type AlertAnalysisWorkflowSettings = z.infer<typeof AlertAnalysisWorkflow
 export const ALERT_ANALYSIS_CALLER_ALERT_INDEX_PATTERN =
   /^\.(internal\.)?(preview\.)?alerts-security\.alerts-[a-zA-Z0-9._-]+$/;
 
-export const AlertAnalysisCallerAlertItem = z.object({
-  _id: z.string().min(1).max(512),
-  _index: z.string().min(1).max(512).regex(ALERT_ANALYSIS_CALLER_ALERT_INDEX_PATTERN),
-  '@timestamp': z.string().min(1).max(64),
-  kibana: z.object({
-    alert: z.object({
-      rule: z.object({
-        uuid: z.string().min(1).max(512),
-        name: z.string().max(1024).optional(),
-      }),
-    }),
-  }),
-});
+export const AlertAnalysisCallerAlertItem = z
+  .object({
+    _id: z.string().min(1).max(512),
+    _index: z.string().min(1).max(512).regex(ALERT_ANALYSIS_CALLER_ALERT_INDEX_PATTERN),
+    '@timestamp': z.string().min(1).max(64).datetime(),
+    kibana: z
+      .object({
+        alert: z
+          .object({
+            rule: z
+              .object({
+                uuid: z.string().min(1).max(512),
+                name: z.string().max(1024).optional(),
+              })
+              .passthrough(),
+          })
+          .passthrough(),
+      })
+      .passthrough(),
+  })
+  .passthrough();
 export type AlertAnalysisCallerAlertItem = z.infer<typeof AlertAnalysisCallerAlertItem>;
 
 export const AlertAnalysisCallerAlerts = z.array(AlertAnalysisCallerAlertItem).max(1000);

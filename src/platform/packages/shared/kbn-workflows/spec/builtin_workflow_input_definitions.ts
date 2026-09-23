@@ -175,14 +175,17 @@ const securityAlertAnalysisCallerAlerts: JsonSchema = {
       kibana: {
         type: 'object',
         required: ['alert'],
+        additionalProperties: true,
         properties: {
           alert: {
             type: 'object',
             required: ['rule'],
+            additionalProperties: true,
             properties: {
               rule: {
                 type: 'object',
                 required: ['uuid'],
+                additionalProperties: true,
                 properties: {
                   uuid: {
                     type: 'string',
