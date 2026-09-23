@@ -68,6 +68,7 @@ export {
 } from './actions_form';
 export type {
   ActionDraft,
+  ConnectorCreationMode,
   InlineActionStepDefinition,
   InlineActionStepType,
   InlineWorkflowActionDraft,

@@ -23,6 +23,7 @@ export type {
   ActionDraft,
   ActionFormValue,
   ActionSource,
+  ConnectorCreationMode,
   ExistingWorkflowActionDraft,
   InlineActionStepType,
   InlineWorkflowActionDraft,

@@ -227,7 +227,7 @@ export const ActionPolicyForm = ({ config }: ActionPolicyFormProps) => {
       >
         <WorkflowSelector />
         <EuiSpacer size="m" />
-        <SimpleWorkflowBuilder />
+        <SimpleWorkflowBuilder connectorCreationMode={config?.connectorCreationMode} />
       </ActionPolicyFormSection>
     </>
   );

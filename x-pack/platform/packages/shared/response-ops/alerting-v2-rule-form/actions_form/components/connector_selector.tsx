@@ -22,11 +22,13 @@ import {
   type SingleStepConnector,
   useFetchConnectorsByType,
 } from '../hooks/use_fetch_connectors_by_type';
+import type { ConnectorCreationMode } from '../types';
 
 interface ConnectorSelectorProps {
   connectorTypeId: string;
   value: string | null;
   onChange: (connectorId: string | null) => void;
+  connectorCreationMode?: ConnectorCreationMode;
 }
 
 export const ConnectorSelector = ({ connectorTypeId, value, onChange }: ConnectorSelectorProps) => {

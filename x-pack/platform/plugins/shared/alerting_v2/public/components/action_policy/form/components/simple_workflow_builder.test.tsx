@@ -9,6 +9,7 @@ import React from 'react';
 import '@testing-library/jest-dom';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import type { ConnectorCreationMode } from '@kbn/alerting-v2-rule-form';
 import { I18nProvider } from '@kbn/i18n-react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { DEFAULT_FORM_STATE } from '../constants';
@@ -47,18 +48,30 @@ jest.mock('@kbn/core-di-browser', () => ({
 jest.mock('@kbn/alerting-v2-rule-form', () => ({
   INLINE_ACTION_STEP_DEFINITIONS: INLINE_DEFS,
   getInlineActionStepDefinition: (id: string) => INLINE_DEFS.find((d) => d.id === id),
-  InlineWorkflowEditor: ({ value }: { value: { id: string } }) => (
-    <div data-test-subj={`inlineWorkflowEditor-${value.id}`} />
+  InlineWorkflowEditor: ({
+    value,
+    connectorCreationMode,
+  }: {
+    value: { id: string };
+    connectorCreationMode?: ConnectorCreationMode;
+  }) => (
+    <div
+      data-test-subj={`inlineWorkflowEditor-${value.id}`}
+      data-connector-creation-mode={connectorCreationMode}
+    />
   ),
 }));
 
-const renderBuilder = (defaultValues: ActionPolicyFormState = DEFAULT_FORM_STATE) => {
+const renderBuilder = (
+  defaultValues: ActionPolicyFormState = DEFAULT_FORM_STATE,
+  connectorCreationMode?: ConnectorCreationMode
+) => {
   const TestComponent = () => {
     const methods = useForm<ActionPolicyFormState>({ defaultValues });
     return (
       <I18nProvider>
         <FormProvider {...methods}>
-          <SimpleWorkflowBuilder />
+          <SimpleWorkflowBuilder connectorCreationMode={connectorCreationMode} />
         </FormProvider>
       </I18nProvider>
     );
@@ -95,6 +108,18 @@ describe('SimpleWorkflowBuilder', () => {
     expect(editor).toBeInTheDocument();
     // The add buttons remain so more workflows can be created.
     expect(screen.getByTestId('simpleWorkflowAdd-slack')).toBeInTheDocument();
+  });
+
+  it('forwards the connector creation mode to inline workflow editors', async () => {
+    const user = userEvent.setup();
+    renderBuilder(DEFAULT_FORM_STATE, 'new-tab');
+
+    await user.click(screen.getByTestId('simpleWorkflowAdd-slack'));
+
+    expect(await screen.findByTestId(/inlineWorkflowEditor-/)).toHaveAttribute(
+      'data-connector-creation-mode',
+      'new-tab'
+    );
   });
 
   it('removes a draft when its remove button is clicked', async () => {

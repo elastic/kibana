@@ -22,6 +22,7 @@ import {
   INLINE_ACTION_STEP_DEFINITIONS,
   InlineWorkflowEditor,
   getInlineActionStepDefinition,
+  type ConnectorCreationMode,
   type InlineActionStepType,
   type InlineWorkflowActionDraft,
 } from '@kbn/alerting-v2-rule-form';
@@ -45,7 +46,11 @@ const buildDraft = (stepType: InlineActionStepType): InlineWorkflowActionDraft =
   };
 };
 
-export const SimpleWorkflowBuilder = () => {
+interface SimpleWorkflowBuilderProps {
+  connectorCreationMode?: ConnectorCreationMode;
+}
+
+export const SimpleWorkflowBuilder = ({ connectorCreationMode }: SimpleWorkflowBuilderProps) => {
   const { control } = useFormContext<ActionPolicyFormState>();
   const uiSettings = useService(CoreStart('uiSettings'));
   const isWorkflowsEnabled = uiSettings.get<boolean>(WORKFLOWS_UI_SETTING_ID);
@@ -121,7 +126,11 @@ export const SimpleWorkflowBuilder = () => {
                             </EuiFlexItem>
                           </EuiFlexGroup>
                           <EuiSpacer size="m" />
-                          <InlineWorkflowEditor value={draft} onChange={updateDraft} />
+                          <InlineWorkflowEditor
+                            value={draft}
+                            onChange={updateDraft}
+                            connectorCreationMode={connectorCreationMode}
+                          />
                         </EuiPanel>
                       </EuiFlexItem>
                     );

@@ -53,8 +53,17 @@ const INLINE_DEFS = [
 jest.mock('@kbn/alerting-v2-rule-form', () => ({
   INLINE_ACTION_STEP_DEFINITIONS: INLINE_DEFS,
   getInlineActionStepDefinition: (id: string) => INLINE_DEFS.find((d) => d.id === id),
-  InlineWorkflowEditor: ({ value }: { value: { id: string } }) => (
-    <div data-test-subj={`inlineWorkflowEditor-${value.id}`} />
+  InlineWorkflowEditor: ({
+    value,
+    connectorCreationMode,
+  }: {
+    value: { id: string };
+    connectorCreationMode?: string;
+  }) => (
+    <div
+      data-test-subj={`inlineWorkflowEditor-${value.id}`}
+      data-connector-creation-mode={connectorCreationMode}
+    />
   ),
   isActionValid: () => true,
   buildInlineWorkflowYaml: () => 'workflow: yaml',
@@ -137,6 +146,7 @@ describe('ActionPolicyForm', () => {
   });
 
   it('only collapses configured sections and keeps notification controls initially closed', async () => {
+    const user = userEvent.setup();
     renderForm(DEFAULT_FORM_STATE, {
       connectorCreationMode: 'flyout',
       collapsibleSections: {
@@ -163,6 +173,12 @@ describe('ActionPolicyForm', () => {
 
     expect(notificationControlsButton).toHaveAttribute('aria-expanded', 'false');
     await waitFor(() => expect(destinationButton).toHaveAttribute('aria-expanded', 'true'));
+
+    await user.click(screen.getByTestId('simpleWorkflowAdd-slack'));
+    expect(await screen.findByTestId(/inlineWorkflowEditor-/)).toHaveAttribute(
+      'data-connector-creation-mode',
+      'flyout'
+    );
   });
 
   it('shows required errors for name on blur', async () => {
