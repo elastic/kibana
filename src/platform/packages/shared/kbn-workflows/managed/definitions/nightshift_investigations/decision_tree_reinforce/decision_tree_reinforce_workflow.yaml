@@ -67,13 +67,6 @@ steps:
   - name: reinforce_decision_trees
     type: ai.agent
     agent-id: significant-events.decision-tree-reinforcement
-    # Keep connector-id-by-feature/plugin-id/aggregate-by/product-* in sync with
-    # @kbn/significant-events-schema inference_feature_ids.ts
-    # (SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID /
-    # SIGNIFICANT_EVENTS_DECISION_TREE_REINFORCE_INFERENCE_FEATURE_ID /
-    # SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID /
-    # SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_SOLUTION /
-    # SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_FEATURE).
     connector-id-by-feature: 'significant_events_investigation'
     plugin-id: 'significant_events_decision_tree_reinforce'
     aggregate-by: 'significant_events'
