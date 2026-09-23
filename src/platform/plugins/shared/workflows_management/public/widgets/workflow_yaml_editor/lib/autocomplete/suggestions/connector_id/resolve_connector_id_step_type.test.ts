@@ -107,16 +107,16 @@ describe('resolveConnectorIdStepType', () => {
 
   it('does not apply HITL channel mapping to non-HITL step types', () => {
     const focusedYamlPair = {
-      path: ['with', 'channels', 'slack', 'connector-id'],
+      path: ['with', 'channels', 'slack_api', 'connector-id'],
     } as StepPropInfo;
 
     expect(
       resolveConnectorIdStepType(
-        { ...waitForApprovalStep, stepType: 'slack' },
+        { ...waitForApprovalStep, stepType: 'http' },
         ['steps', 0, ...focusedYamlPair.path],
         focusedYamlPair
       )
-    ).toBe('slack');
+    ).toBe('http');
   });
 });
 
