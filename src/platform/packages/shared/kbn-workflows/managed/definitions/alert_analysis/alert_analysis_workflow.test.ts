@@ -794,7 +794,10 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
         alerts?: {
           items?: {
             required?: string[];
-            properties?: { '@timestamp'?: { format?: string; maxLength?: number } };
+            properties?: {
+              '@timestamp'?: { format?: string; maxLength?: number };
+              _index?: { maxLength?: number; pattern?: string };
+            };
           };
           maxItems?: number;
         };
@@ -802,7 +805,14 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     )?.alerts;
     expect(alertsInput?.maxItems).toBe(1000);
     expect(alertsInput?.items?.required).toEqual(
-      expect.arrayContaining(['_id', '@timestamp', 'kibana'])
+      expect.arrayContaining(['_id', '_index', '@timestamp', 'kibana'])
+    );
+    // Related-alert graph passes foreach.item._index as alertIndex — require a Security
+    // alerts alias/backing index so a schema-valid Worker payload cannot omit it or point
+    // the graph at an arbitrary ES index.
+    expect(alertsInput?.items?.properties?._index?.maxLength).toBe(512);
+    expect(alertsInput?.items?.properties?._index?.pattern).toBe(
+      '^\\.(internal\\.)?(preview\\.)?alerts-security\\.alerts-[a-zA-Z0-9._-]+$'
     );
     // Used as an ES date-math enrichment anchor — reject non-dates at the input boundary.
     expect(alertsInput?.items?.properties?.['@timestamp']?.format).toBe('date-time');
