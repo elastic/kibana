@@ -544,7 +544,17 @@ const followSameOriginRedirects = async (
       );
     }
 
-    const nextUrl = new URL(location, currentRequest.url);
+    let nextUrl: URL;
+    try {
+      nextUrl = new URL(location, currentRequest.url);
+    } catch {
+      discardResponseBody(response);
+      throw createHttpSelfFetchError(
+        'Kibana self HTTP call received a redirect with an invalid Location header.',
+        currentRequest,
+        response
+      );
+    }
     if (nextUrl.origin !== origin) {
       discardResponseBody(response);
       throw createHttpSelfFetchError(
