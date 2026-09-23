@@ -49,6 +49,10 @@ apiTest.describe(
 
     // Since 8.15 ES only allows creating a rollup job when the cluster already has rollup usage.
     apiTest('rejects job creation', async ({ apiClient, esClient }) => {
+      // Precondition: no rollup usage anywhere in the cluster, otherwise ES returns 200.
+      const rollupCaps = await esClient.rollup.getRollupIndexCaps({ index: '_all' });
+      expect(Object.keys(rollupCaps)).toStrictEqual([]);
+
       const indexName = await createSourceIndex(esClient, 'no-usage');
 
       const response = await rollupApi(apiClient, headers).createJob(
