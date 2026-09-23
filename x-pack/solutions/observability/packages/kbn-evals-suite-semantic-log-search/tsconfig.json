@@ -9,6 +9,7 @@
   "kbn_references": [
     "@kbn/agent-builder-common",
     "@kbn/core",
+    "@kbn/datemath",
     "@kbn/evals",
     "@kbn/repo-info",
     "@kbn/tooling-log"

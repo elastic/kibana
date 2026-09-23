@@ -19,12 +19,14 @@ const agentIdFor = (arm: Arm, connectorId: string): string => {
   return `eval_semlogs_${arm}_${connectorHash}_${Date.now().toString(36)}`;
 };
 
-// `baseline` uses the default agent and is never created here. Excluding it from the type makes
-// that a compile error rather than something an `else` branch can quietly undo by handing the
-// baseline arm a tool it is supposed to be without.
-type NonBaselineArm = Exclude<Arm, 'baseline'>;
+// Only the arms that get an agent of their own. `baseline` uses the default agent, and `groups` is
+// retrieval-only, because `get_log_groups` takes no question and so has nothing to ask an agent.
+// Naming them in the type makes an omission a compile error rather than something an `else` branch
+// can quietly undo by handing an arm a tool it is supposed to be without, which is how adding the
+// `groups` arm was caught.
+type AgentArm = Exclude<Arm, 'baseline' | 'groups'>;
 
-const TOOL_IDS_BY_ARM: Record<NonBaselineArm, string[]> = {
+const TOOL_IDS_BY_ARM: Record<AgentArm, string[]> = {
   keyword: [GET_LOGS_TOOL_ID],
   semantic: [GET_LOGS_SEMANTIC_TOOL_ID],
 };
@@ -33,7 +35,7 @@ interface CreateAgentParams {
   fetch: HttpHandler;
   log: ToolingLog;
   connectorId: string;
-  arm: NonBaselineArm;
+  arm: AgentArm;
 }
 
 /**

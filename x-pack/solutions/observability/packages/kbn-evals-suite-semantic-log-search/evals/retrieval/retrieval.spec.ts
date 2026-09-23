@@ -6,7 +6,7 @@
  */
 
 import { evaluate, tags } from '@kbn/evals';
-import { resolveCorpus } from '../../src/corpora';
+import { resolveCorpus, resolveCorpusWindow } from '../../src/corpora';
 import {
   assertCorpusIsLabelled,
   assertSemanticSearchAvailable,
@@ -17,7 +17,11 @@ import {
 import { datasetForArm } from '../../src/datasets';
 import { countSanityEvaluator, retrievalEvaluators } from '../../src/retrieval/evaluators';
 import { toKeywordFilter } from '../../src/retrieval/keyword_filter';
-import { executeGetLogs, executeGetLogsSemantic } from '../../src/retrieval/tool_client';
+import {
+  executeGetLogGroups,
+  executeGetLogs,
+  executeGetLogsSemantic,
+} from '../../src/retrieval/tool_client';
 import type { RetrievalTaskOutput } from '../../src/retrieval/types';
 import { ARMS } from '../../src/types';
 
@@ -25,65 +29,126 @@ import { ARMS } from '../../src/types';
 const corpus = resolveCorpus();
 
 /**
+ * The same corpus with its window resolved to absolute timestamps, set in `beforeAll` once seeding
+ * is done. Both arms read this rather than `corpus`, so they measure an identical window.
+ */
+let activeCorpus = corpus;
+
+/** Set in `beforeAll`; the ceiling for `countSanityEvaluator` and part of the run metadata. */
+let auditTotalDocuments = 0;
+
+/**
+ * The reranker saturates at one in-flight request, so the executor's default of 5 concurrent
+ * examples makes every latency measurement include time spent queueing behind the others. One at a
+ * time is slower to run and is the only way the numbers mean anything.
+ */
+const RETRIEVAL_CONCURRENCY = 1;
+
+/** Stamped on both experiments so a stored result can be interpreted without the run log. */
+const runMetadata = () => ({
+  corpusId: activeCorpus.id,
+  windowStart: activeCorpus.timeRange.start,
+  windowEnd: activeCorpus.timeRange.end,
+  auditedDocuments: auditTotalDocuments,
+  concurrency: RETRIEVAL_CONCURRENCY,
+});
+
+/**
  * Retrieval quality, measured with no model in the loop.
  *
- * Both arms call their tool through the tool execution API rather than an agent, so the only
- * variable between them is which one ranked the results. Reproducibility is not symmetric:
- * `get_logs` samples with a fixed seed, while the semantic arm inherits an unseeded ES|QL
- * `SAMPLE` once the corpus is large enough for sampling to engage. Compare the two arms within a
- * session rather than one arm across sessions.
+ * Both arms call their tool through the tool execution API rather than an agent, and both run over
+ * the window resolved once in `beforeAll`, so the only variable between them is which one ranked
+ * the results.
+ *
+ * Across runs they are still not comparable: the window follows the freshly seeded data, and the
+ * semantic arm inherits an unseeded ES|QL `SAMPLE` once a corpus is large enough for sampling to
+ * engage. Compare arms within a run.
  */
 evaluate.describe(
   'Semantic log search: retrieval',
   { tag: tags.serverless.observability.complete },
   () => {
-    /** Set in beforeAll; consumed by countSanityEvaluator in both arm callbacks. */
-    let auditTotalDocuments = 0;
-
     evaluate.beforeAll(async ({ esClient, log }) => {
-      let audit = await auditCorpus({ esClient, corpus, log });
-      if (seedCorpusIfNeeded(audit, corpus, log)) {
-        audit = await auditCorpus({ esClient, corpus, log });
+      // Seeding uses the profile's relative range, and writes up to the moment it finishes, so the
+      // window has to be resolved after it rather than before.
+      if (seedCorpusIfNeeded(await auditCorpus({ esClient, corpus, log }), corpus, log)) {
+        log.debug('Corpus was re-seeded; resolving the window against the new data');
       }
-      assertCorpusIsLabelled(audit, corpus);
+
+      activeCorpus = resolveCorpusWindow(corpus);
+
+      const audit = await auditCorpus({ esClient, corpus: activeCorpus, log });
+      assertCorpusIsLabelled(audit, activeCorpus);
       auditTotalDocuments = audit.totalDocuments;
-      await logRunManifest({ esClient, corpus, audit, log });
+      await logRunManifest({ esClient, corpus: activeCorpus, audit, log });
     });
 
     evaluate('keyword arm', async ({ executorClient, fetch, log, connector }) => {
       await executorClient.runExperiment(
         {
           name: 'retrieval-keyword',
-          datasets: [datasetForArm(ARMS.keyword, corpus)],
+          datasets: [datasetForArm(ARMS.keyword, activeCorpus)],
+          metadata: runMetadata(),
+          concurrency: RETRIEVAL_CONCURRENCY,
           task: async ({ input }): Promise<RetrievalTaskOutput> =>
             executeGetLogs({
               fetch,
               log,
               connectorId: connector.id,
-              corpus,
+              corpus: activeCorpus,
               kqlFilter: toKeywordFilter(input!.question),
             }),
         },
-        [...retrievalEvaluators(corpus), countSanityEvaluator(auditTotalDocuments)]
+        [...retrievalEvaluators(activeCorpus), countSanityEvaluator(auditTotalDocuments)]
+      );
+    });
+
+    // Same question as the other two arms, through the only query input this tool has. Paired with
+    // the keyword arm it isolates the output shape; paired with the semantic arm it isolates the
+    // ranking, since both then receive the question and differ only in how they use it.
+    evaluate('groups arm', async ({ executorClient, fetch, log, connector }) => {
+      await executorClient.runExperiment(
+        {
+          name: 'retrieval-groups',
+          datasets: [datasetForArm(ARMS.groups, activeCorpus)],
+          metadata: runMetadata(),
+          concurrency: RETRIEVAL_CONCURRENCY,
+          task: async ({ input }): Promise<RetrievalTaskOutput> =>
+            executeGetLogGroups({
+              fetch,
+              log,
+              connectorId: connector.id,
+              corpus: activeCorpus,
+              kqlFilter: toKeywordFilter(input!.question),
+            }),
+        },
+        [...retrievalEvaluators(activeCorpus), countSanityEvaluator(auditTotalDocuments)]
       );
     });
 
     evaluate('semantic arm', async ({ executorClient, fetch, log, connector }) => {
-      await assertSemanticSearchAvailable({ fetch, connectorId: connector.id, corpus, log });
+      await assertSemanticSearchAvailable({
+        fetch,
+        connectorId: connector.id,
+        corpus: activeCorpus,
+        log,
+      });
       await executorClient.runExperiment(
         {
           name: 'retrieval-semantic',
-          datasets: [datasetForArm(ARMS.semantic, corpus)],
+          datasets: [datasetForArm(ARMS.semantic, activeCorpus)],
+          metadata: runMetadata(),
+          concurrency: RETRIEVAL_CONCURRENCY,
           task: async ({ input }): Promise<RetrievalTaskOutput> =>
             executeGetLogsSemantic({
               fetch,
               log,
               connectorId: connector.id,
-              corpus,
+              corpus: activeCorpus,
               semanticFilter: input!.question,
             }),
         },
-        [...retrievalEvaluators(corpus), countSanityEvaluator(auditTotalDocuments)]
+        [...retrievalEvaluators(activeCorpus), countSanityEvaluator(auditTotalDocuments)]
       );
     });
   }

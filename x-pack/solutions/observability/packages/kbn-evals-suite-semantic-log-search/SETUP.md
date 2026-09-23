@@ -6,10 +6,15 @@ Practical guide for running semantic log search evaluations from scratch.
 
 - Node version from `.nvmrc` installed
 - `yarn kbn bootstrap` executed
-- A connector, for every run. The retrieval arms put no model in the loop, but they still execute
+- A connector id, for every run. The retrieval arms put no model in the loop, but they still execute
   the tools through the agent-builder API with a `connector_id`, and the eval CLI requires
-  `--model` / `--judge` to build its config. EIS connectors are only needed for the agent arms'
-  token and latency evaluators.
+  `--model` / `--judge` to build its config. A connector that cannot actually reach a model is
+  enough for the retrieval arms.
+- **A connector that works, for the agent arms.** They call `converse()`, so all three fail with a
+  401 if the connector has no usable credential. In practice that means EIS plus CCM enabled
+  (Step 0), because the repo's only other connector points at OpenRouter with a placeholder key.
+- `KIBANA_TESTING_AI_CONNECTORS` exported in **every** terminal that runs `evals scout` or
+  `evals run` (Step 2).
 
 ## Quick Start (Retrieval Evals Only)
 
@@ -60,9 +65,26 @@ Done! Run the following to export connectors to your shell:
   export KIBANA_TESTING_AI_CONNECTORS="eyJlaXMtYW50..."
 ```
 
-**You MUST copy and run this export command in the same terminal where you'll run Scout.**
+**This variable is needed by two separate processes, and missing it in the second one is the most
+confusing failure in this whole setup:**
 
-Alternatively, export from the cache:
+1. `node scripts/evals scout`, so Kibana preconfigures the connectors.
+2. **`node scripts/evals run`, so the eval harness knows the connectors exist.**
+
+`getAvailableConnectors()` (in `@kbn/gen-ai-functional-testing`, called from
+`createPlaywrightEvalsConfig`) reads this variable, and when it is absent it falls back to
+`config/kibana.dev.yml`. That file defines only `claude-sonnet-4-5-connector`, so the run aborts
+with:
+
+```
+Error: Evaluation connector id eis-anthropic-claude-4-5-sonnet was not found,
+pick one from claude-sonnet-4-5-connector
+```
+
+This message is about the harness's own environment, **not** about Kibana. You can be looking at 38
+connectors in Kibana and still get it. Export the variable in whatever terminal runs the evals.
+
+Export from the cache (works in any terminal):
 
 ```bash
 export KIBANA_TESTING_AI_CONNECTORS=$(cat ~/.elastic/eis-connectors-cache.json | python3 -c "import sys,json,base64; print(base64.b64encode(json.dumps(json.load(sys.stdin)['connectors']).encode()).decode())")
@@ -109,48 +131,172 @@ node scripts/synthtrace sigevents \
 
 ### Step 5: Run evals
 
-**Retrieval evals** (no LLM in the loop):
+Both commands below assume `KIBANA_TESTING_AI_CONNECTORS` is exported **in this terminal** (Step 2)
+and that CCM is enabled (Step 0 below, or the 401 entry in Troubleshooting). `--suite` works as
+well as `--config`; it rediscovers the config when the Buildkite metadata does not list the suite.
+
+**Retrieval evals** (no LLM in the loop, ~15 min at `concurrency: 1`):
 
 ```bash
 node scripts/evals run \
-  --config x-pack/solutions/observability/packages/kbn-evals-suite-semantic-log-search/playwright.config.ts \
-  --grep "retrieval" \
-  --model eis-anthropic-claude-4-5-sonnet \
-  --judge eis-anthropic-claude-4-5-sonnet
+  --suite semantic-log-search --grep "retrieval" \
+  --export-profile local \
+  --project eis-anthropic-claude-4-5-sonnet --judge eis-anthropic-claude-4-5-sonnet
 ```
 
-**Agent evals** (includes tokens/latency, requires EIS connectors):
+**Agent evals** (three arms through `converse()`, real model spend):
 
 ```bash
 node scripts/evals run \
-  --config x-pack/solutions/observability/packages/kbn-evals-suite-semantic-log-search/playwright.config.ts \
-  --model eis-anthropic-claude-4-5-sonnet \
-  --judge eis-anthropic-claude-4-5-sonnet
+  --suite semantic-log-search --grep "agent" \
+  --export-profile local \
+  --project eis-anthropic-claude-4-5-sonnet --judge eis-anthropic-claude-4-5-sonnet
 ```
+
+`--project` is an alias for `--model`. Drop `--grep` to run both suites in one go.
+
+**Which connector to pass.** Use an `eis-*` id. The other option the harness may offer,
+`claude-sonnet-4-5-connector`, comes from `config/kibana.dev.yml` and calls **OpenRouter**, which
+needs an OpenRouter key in `config.json` that the repo ships as `REPLACE_ME`. Unless you personally
+have one, EIS is the working path.
+
+### Step 0: Enable CCM (needed once per cluster, before the agent arms)
+
+Easy to miss, because retrieval passes without it and only the agent arms fail. The `eis-*`
+connectors are **hidden from Kibana until CCM is on**: before enabling it this cluster reported 1
+connector and 0 `chat_completion` endpoints; after, 38 and 40.
+
+```bash
+CCM_KEY=$(python3 -c "import json;print(json.load(open('$HOME/.elastic/eis-ccm-key.json'))['key'])")
+curl -X PUT -u elastic:changeme "http://localhost:9220/_inference/_ccm" \
+  -H 'Content-Type: application/json' -d "{\"api_key\": \"$CCM_KEY\"}"
+
+curl -s -u elastic:changeme "http://localhost:9220/_inference/_ccm"   # want {"enabled":true}
+```
+
+If `~/.elastic/eis-ccm-key.json` is missing, `node scripts/evals init` fetches it, with Vault
+access.
 
 ## Understanding Results
 
-At the end of the run, you'll see a metrics table:
-
-```
-╔═════════════════════════════════════════════════════════╤════╤═══════════════════════════════╤═══════════════════╤══════════════╗
-║ Dataset                                                 │  # │ Distinct Relevant Messages@10 │ Hard Negatives@10 │       Recall ║
-╟─────────────────────────────────────────────────────────┼────┼───────────────────────────────┼───────────────────┼──────────────╢
-║ semantic-log-search-sigevents_postgres_timeout-semantic │  5 │                    mean: 3.60 │        mean: 0.20 │   mean: 0.94 ║
-║ semantic-log-search-sigevents_postgres_timeout-keyword  │  5 │                    mean: 1.60 │        mean: 0.60 │   mean: 0.42 ║
-╚═════════════════════════════════════════════════════════╧════╧═══════════════════════════════╧═══════════════════╧══════════════╝
-```
+At the end of the run, you'll see a metrics table with one row group per arm.
 
 **Key metrics:**
 - **Precision@10**: Proportion of top 10 results that are relevant (higher is better)
-- **Recall**: Proportion of all relevant messages found (0-1, higher is better)
+- **Recall**: Proportion of the labelled relevant messages found (0-1, higher is better)
 - **Hard Negatives@10**: Trap messages (healthy logs with similar vocabulary) in top 10 (lower is better)
 - **Distinct Relevant Messages@10**: Unique relevant messages in top 10 (higher is better)
 - **Weighted Precision@10**: Precision weighted by document count (higher is better)
+- **Retrieval Latency**: Wall-clock fetch-to-parsed, in milliseconds (lower is better)
 
-**Expected results:**
-- `keyword` arm: Lower precision (~0.16), moderate recall (~0.42)
-- `semantic` arm: Better precision (~0.36), higher recall (~0.94), fewer hard negatives
+### One recorded run
+
+Means over the 8 queries of `sigevents_postgres_timeout`, one repetition, both arms in the same
+run. Provenance: ES and Kibana 9.6.0 (Scout, trial licence), 2,447 in-window documents of 2,632
+seeded, `.rerank-v1` already imported and deployed, connector `claude-sonnet-4-5-connector`.
+Treat these as one observation, not a baseline: see the reproducibility note in the
+[README](./README.md), and note that a cold reranker changes latency completely.
+
+| Metric | `keyword` | `semantic` |
+|---|---|---|
+| Precision@10 | 0.18 | **0.31** |
+| Recall | 0.59 | **0.91** |
+| Distinct Relevant Messages@10 | 1.75 | **3.13** |
+| Hard Negatives@10 (lower better) | 1.00 | **0.75** |
+| R-Precision | 0.41 | **0.71** |
+| nDCG@10 | 0.55 | **0.77** |
+| MRR | 0.77 | **1.00** |
+| Weighted Precision@10 | **0.66** | 0.39 |
+| Retrieval Latency (see caveat) | **78 ms** | 8,316 ms |
+| Count Sanity (0 = contract held) | 0 | 0 |
+
+> **Ignore the latency row.** It was measured at concurrency 5, so it includes queueing against a
+> reranker that saturates at one in-flight request, and it sits at an unknown point on the
+> inference cache curve. Repeat runs of this same corpus produced means of 8,316 ms, then
+> 2,315 ms, then 71.88 ms with identical quality scores, purely from cache warming. A cold,
+> never-before-asked question on this corpus measured **~10.9 s**. Read
+> [Measuring latency properly](#measuring-latency-properly) before quoting any figure.
+>
+> The quality columns are unaffected by any of this: they were stable across all three runs.
+
+Two results deserve attention rather than celebration:
+
+- **Weighted Precision inverts.** The semantic arm wins every rank-based metric and loses the
+  document-weighted one. That is consistent with it doing its job: it surfaces relevant *rare*
+  patterns, which by definition cover few documents, while the keyword arm ranks by frequency and
+  is therefore flattered by a document-weighted denominator. Its median (0.21) sits well below its
+  mean (0.39), so the distribution is skewed by a few high-coverage answers.
+- **Latency differs by two orders of magnitude**, 8.3 s against 78 ms, with the reranker already
+  warm. Per-query spread was 2.8 s to 15.4 s. Whatever the interactive budget turns out to be,
+  this is the number that has to move.
+
+## Measuring latency properly
+
+**Read this before quoting any latency figure. Repeating a run does not converge on the truth; it
+converges on the cache.**
+
+The reranker deployment carries an inference cache keyed on the (query, document) pairs it scores,
+and the suite asks the same questions over the same corpus every time. Measured on one cluster:
+
+| | Latency |
+|---|---|
+| A question the suite has already asked | **114 to 133 ms** |
+| A question never asked before | **10,752 to 10,977 ms** |
+
+That is roughly 90x, and the deployment stats confirm why: `cache_size: 738.1mb` with
+`cache_hit_count: 1342` of `inference_count: 2208`, so 61% of inferences never reached the model.
+A suite mean of 71.88 ms and a suite mean of 8,316 ms were both produced on this corpus, and
+neither is the cost of answering a user's question.
+
+Check where you are before believing a number:
+
+```bash
+curl -s -u elastic:changeme "http://localhost:9220/_ml/trained_models/.rerank-v1/_stats" | \
+  python3 -c "
+import sys,json; n=json.load(sys.stdin)['trained_model_stats'][0]['deployment_stats']['nodes'][0]
+print('inferences:', n.get('inference_count'), 'cache hits:', n.get('inference_cache_hit_count'))"
+```
+
+**To measure the cold path**, which is what a user experiences, either ask questions the cluster
+has not seen (edit the corpus queries, or add a unique token to each) or re-seed so the candidate
+text changes. Only the first run against fresh data is a cold measurement. If your Elasticsearch
+build lets you set `cache_size: 0` on the deployment, that is the cleaner lever.
+
+The suite pins `concurrency: 1` for the retrieval arms, which removes queueing between examples.
+Two further things it cannot control from code:
+
+**1. Stop the reranker scaling from zero.** `.rerank-v1-elasticsearch` ships with
+`min_number_of_allocations: 0`, so the first queries of a run pay allocation spin-up that has
+nothing to do with retrieval cost:
+
+```bash
+curl -X PUT -u elastic:changeme "http://localhost:9220/_inference/rerank/.rerank-v1-elasticsearch" \
+  -H 'Content-Type: application/json' \
+  -d '{"service":"elasticsearch","service_settings":{"model_id":".rerank-v1","num_threads":1,
+       "adaptive_allocations":{"enabled":true,"min_number_of_allocations":1,
+       "max_number_of_allocations":32}}}'
+```
+
+Confirm it is deployed, not merely defined. On a cold cluster the model is absent until first use,
+so this may report nothing until a query has run:
+
+```bash
+curl -s -u elastic:changeme "http://localhost:9220/_ml/trained_models/.rerank-v1/_stats" | \
+  python3 -c "import sys,json; s=json.load(sys.stdin)['trained_model_stats'][0]; print(s.get('deployment_stats',{}).get('state','not deployed'))"
+```
+
+**2. Repeat, and read the spread rather than the mean:**
+
+```bash
+node scripts/evals run --suite semantic-log-search --grep "retrieval" \
+  --repetitions 3 --project <connector-id> --judge <connector-id>
+```
+
+Two remaining limits to state alongside any figure you report. Latency is **not normalised by
+candidate count**: the cross-encoder scores every candidate, so a corpus yielding more patterns
+costs proportionally more, and the service does not report how many were scored. And a cold
+reranker changes the number entirely: the first call after an idle period can exceed 30 s, which is
+a model-loading cost rather than a query cost.
 
 ## Troubleshooting
 
@@ -161,9 +307,23 @@ You started Scout without the variable exported. You must:
 2. Export the variable in that same terminal
 3. Restart Scout
 
-### Connectors show 0 in Kibana
+### Connectors show 0, or only 1, in Kibana
 
-Same issue as above - Scout started before the export.
+Two different causes:
+
+- **0 connectors**: Scout started before the export. Fix as above.
+- **Exactly 1, a `.gen-ai` with a UUID id**: Scout got the variable, but **CCM is off**, so the 37
+  `eis-*` connectors are filtered out and only the `kibana.dev.yml` OpenRouter connector remains.
+  Enable CCM (Step 0). Verified on this stack: 1 connector and 0 `chat_completion` endpoints before,
+  38 and 40 after.
+
+```bash
+curl -s -u elastic:changeme "http://localhost:5620/api/actions/connectors" -H 'kbn-xsrf: true' | \
+  python3 -c "
+import sys,json
+d=json.load(sys.stdin)
+print(len(d),'connectors;','eis-*:',len([c for c in d if c['id'].startswith('eis-')]))"
+```
 
 ### "Model .rerank-v1 not available"
 
@@ -190,7 +350,45 @@ curl -X POST -u elastic:changeme "http://localhost:9220/_ml/trained_models/.rera
 
 ### Agent evals fail with "401 Unauthorized" or "Missing Authentication header"
 
-This means CCM (Cloud Connected Mode) is not enabled on Elasticsearch. EIS connectors require CCM.
+**Two different causes produce this identical message. Check which connector you ran with before
+doing anything, or you will spend an hour on the wrong one.**
+
+```bash
+curl -s -u elastic:changeme "http://localhost:5620/api/actions/connectors" -H 'kbn-xsrf: true' | \
+  python3 -c "
+import sys,json
+for c in json.load(sys.stdin):
+    print(c['connector_type_id'], c['id'], (c.get('config') or {}).get('apiUrl',''))"
+```
+
+**Cause 1: a `.gen-ai` connector pointing at OpenRouter, with the placeholder API key.**
+
+If the `apiUrl` is `https://openrouter.ai/...`, Elasticsearch and CCM are irrelevant: OpenRouter is
+rejecting the key. `config.json` ships `openrouter.apiKey` as `REPLACE_ME`, and the placeholder is
+a *present* secret, so Kibana reports `is_missing_secrets: false` and the failure only surfaces as
+a 401 at call time. Fix it by supplying the real key:
+
+```bash
+node scripts/evals init config    # prompts for "OpenRouter API key", writes it to config.json
+```
+
+The file is `x-pack/platform/packages/shared/kbn-evals/scripts/vault/config.json`, and it is
+gitignored, so you can also edit `openrouter.apiKey` in place. Retrieval arms are unaffected by
+this, because they never call a model, which is why they pass while the agent arms fail.
+
+**Cause 2: an EIS connector (`.inference`, `eis-*`) without CCM enabled.**
+
+EIS connectors need Cloud Connected Mode on Elasticsearch. Everything below applies to this case
+only. Note the ordering trap: while CCM is off, the `eis-*` connectors do not appear in Kibana at
+all, so you cannot select one to escape Cause 1 until CCM is on. Enable CCM first, then switch
+connector.
+
+### "Evaluation connector id eis-... was not found, pick one from claude-sonnet-4-5-connector"
+
+Nothing to do with Kibana, and it happens even when Kibana lists all 38 connectors. The **eval
+harness** builds its own list from `KIBANA_TESTING_AI_CONNECTORS`, and falls back to
+`config/kibana.dev.yml` when that is unset. Export the variable in the terminal running
+`node scripts/evals run`, not only in the one running Scout. See Step 2.
 
 **Check if CCM is enabled:**
 

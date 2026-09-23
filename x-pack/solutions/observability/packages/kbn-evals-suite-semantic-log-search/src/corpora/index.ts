@@ -12,6 +12,7 @@ import type { CorpusProfile } from './types';
 
 export type { CorpusProfile } from './types';
 export { allLabels } from './types';
+export { resolveCorpusWindow } from './window';
 
 /** All registered corpora, keyed by id. Registering one here subjects it to the invariant tests. */
 export const CORPORA: Readonly<Record<string, CorpusProfile>> = {

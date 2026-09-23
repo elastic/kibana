@@ -12,7 +12,7 @@ import { createArmAgent, deleteAgent } from '../../src/agent/agents';
 import { agentEvaluators } from '../../src/agent/evaluators';
 import type { AgentEvaluator } from '../../src/agent/evaluators';
 import type { AgentTaskOutput } from '../../src/agent/types';
-import { resolveCorpus } from '../../src/corpora';
+import { resolveCorpus, resolveCorpusWindow } from '../../src/corpora';
 import {
   assertCorpusIsLabelled,
   assertSemanticSearchAvailable,
@@ -26,6 +26,12 @@ import type { Arm } from '../../src/types';
 
 /** Resolved once at module load; all tests in this file use the same corpus. */
 const corpus = resolveCorpus();
+
+/**
+ * The same corpus with its window resolved to absolute timestamps, set in `beforeAll` once seeding
+ * is done. Every arm reads this, so all three answer questions over an identical window.
+ */
+let activeCorpus = corpus;
 
 // Phrased to hold for every question in the set, because the criteria evaluator is built once and
 // reused across all of them; anything question-specific belongs in a `note` on the query instead.
@@ -49,12 +55,14 @@ evaluate.describe(
     const agentIdsByArm = new Map<Arm, string>();
 
     evaluate.beforeAll(async ({ esClient, fetch, log, connector }) => {
-      let audit = await auditCorpus({ esClient, corpus, log });
-      if (seedCorpusIfNeeded(audit, corpus, log)) {
-        audit = await auditCorpus({ esClient, corpus, log });
-      }
-      assertCorpusIsLabelled(audit, corpus);
-      await logRunManifest({ esClient, corpus, audit, log });
+      // Seeding writes up to the moment it finishes, so the window is resolved after it.
+      seedCorpusIfNeeded(await auditCorpus({ esClient, corpus, log }), corpus, log);
+
+      activeCorpus = resolveCorpusWindow(corpus);
+
+      const audit = await auditCorpus({ esClient, corpus: activeCorpus, log });
+      assertCorpusIsLabelled(audit, activeCorpus);
+      await logRunManifest({ esClient, corpus: activeCorpus, audit, log });
 
       for (const arm of [ARMS.keyword, ARMS.semantic] as const) {
         agentIdsByArm.set(
@@ -92,13 +100,18 @@ evaluate.describe(
       await executorClient.runExperiment(
         {
           name: `agent-${arm}`,
-          datasets: [datasetForArm(arm, corpus)],
+          datasets: [datasetForArm(arm, activeCorpus)],
+          metadata: {
+            corpusId: activeCorpus.id,
+            windowStart: activeCorpus.timeRange.start,
+            windowEnd: activeCorpus.timeRange.end,
+          },
           task: async ({ input }): Promise<AgentTaskOutput> => {
             const response = await agentBuilderClient.converse({
               agentId,
-              input: `${input!.question}. Search the logs in "${corpus.target}" between ${
-                corpus.timeRange.start
-              } and ${corpus.timeRange.end}.`,
+              input: `${input!.question}. Search the logs in "${activeCorpus.target}" between ${
+                activeCorpus.timeRange.start
+              } and ${activeCorpus.timeRange.end}.`,
             });
 
             return {
@@ -109,7 +122,7 @@ evaluate.describe(
           },
         },
         [
-          ...agentEvaluators(corpus),
+          ...agentEvaluators(activeCorpus),
           evaluators.criteria(ANSWER_CRITERIA),
           inputTokens,
           outputTokens,
@@ -130,7 +143,12 @@ evaluate.describe(
     evaluate(
       'semantic arm',
       async ({ executorClient, agentBuilderClient, evaluators, fetch, connector, log }) => {
-        await assertSemanticSearchAvailable({ fetch, connectorId: connector.id, corpus, log });
+        await assertSemanticSearchAvailable({
+          fetch,
+          connectorId: connector.id,
+          corpus: activeCorpus,
+          log,
+        });
         await runArm({ arm: ARMS.semantic, executorClient, agentBuilderClient, evaluators });
       }
     );

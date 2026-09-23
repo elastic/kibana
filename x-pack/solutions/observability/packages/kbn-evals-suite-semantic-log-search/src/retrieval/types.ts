@@ -37,4 +37,10 @@ export interface RetrievalTaskOutput {
    * evaluator metadata so a score is readable against how much was discarded to produce it.
    */
   returnedBeforeCap: number;
+  /**
+   * Groups dropped for not being log groups, on the groups arm only. Absent elsewhere.
+   * A non-zero value means APM span exceptions reached the result, which both dilutes the
+   * comparison and makes the tool's own ordering unreliable, since it truncates before sorting.
+   */
+  droppedNonLogGroups?: number;
 }

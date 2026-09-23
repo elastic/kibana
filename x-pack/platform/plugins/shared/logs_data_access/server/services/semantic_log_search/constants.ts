@@ -67,6 +67,11 @@ export const ESQL_REQUEST_TIMEOUT_MS = 30_000;
  * Transport timeout for the inference rerank call, which is gated on ML model allocation rather
  * than query cost. A cold `.rerank-v1-elasticsearch` was measured importing its model for 21 s
  * before deployment even began, so it needs a larger budget than the ES|QL passes.
+ *
+ * This is not the binding limit on a cold endpoint. Elasticsearch waits 30 s for the deployment to
+ * start and then answers with `model_deployment_timeout_exception`, so raising this value cannot
+ * buy more time; it only keeps the client from giving up first. `toFailureResult` classifies that
+ * response as `inference_not_ready`, the same as a client timeout.
  */
 export const RERANK_REQUEST_TIMEOUT_MS = 60_000;
 

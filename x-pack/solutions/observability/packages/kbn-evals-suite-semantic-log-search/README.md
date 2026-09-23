@@ -11,6 +11,7 @@ allowed to use.
 | Arm | What it is | Where |
 |---|---|---|
 | `keyword` | `get_logs` with a KQL filter built from the question | `evals/retrieval` and `evals/agent` |
+| `groups` | `get_log_groups` with the same KQL filter as `keyword`, frequency-ordered | `evals/retrieval` only |
 | `semantic` | `get_logs_semantic` with `semanticFilter` set to the question | `evals/retrieval` and `evals/agent` |
 | `baseline` | The default agent, which has no log-specific tool | `evals/agent` only |
 
@@ -18,12 +19,69 @@ allowed to use.
 `converse`, which is where token cost, latency and answer quality become measurable. Each arm gets
 exactly one tool to isolate the retrieval comparison.
 
-**Reproducibility is not symmetric.** `get_logs` samples with a fixed seed, so the keyword arm
-repeats. The semantic arm inherits an unseeded ES|QL `SAMPLE`, so once a corpus is large enough for
-sampling to engage (the scale corpus, by design) two runs draw different documents and the counts
-are extrapolated estimates. Compare the two arms within a run rather than one arm across runs.
+**Arms are comparable within a run; runs are not comparable with each other.**
 
-**Candidate budget**: both arms receive the same number of patterns. Every registered corpus sets
+Profiles are authored as `timeRange: { start: 'now-2h', end: 'now' }`. `beforeAll` resolves that
+once, after any seeding, via `resolveCorpusWindow`, and every arm then queries the same absolute
+window. Before this, `now` was re-evaluated per request and seeded data aged out mid-run: three
+consecutive runs against one unchanged 2,632-document seed audited 2,593, then 2,447, then 2,333.
+
+Across runs, two things still move and neither is worth removing:
+
+1. **The window follows the data.** Each run resolves a fresh window, which is what keeps the
+   corpus in the hot tier instead of pinning to a date that would eventually age out.
+2. **Sampling is unseeded on one side.** `get_logs` samples with a fixed seed; ES|QL `SAMPLE` takes
+   none, so once a corpus is large enough for sampling to engage (the scale corpus, by design) the
+   semantic arm draws different documents each time and its counts are extrapolated estimates.
+
+Latency carries a third condition: it is only comparable at the same concurrency, and the retrieval
+specs pin `concurrency: 1` because the reranker saturates at one in-flight request. See
+[Measuring latency properly](./SETUP.md#measuring-latency-properly).
+
+### Why the `groups` arm exists
+
+Every arm receives the same question. Only the tool varies, so a difference between arms is
+attributable to the tool rather than to what each one was told. `get_log_groups` has no semantic
+parameter, so it receives the question through `kqlFilter`, built by the same `toKeywordFilter` the
+keyword arm uses.
+
+With the filter held constant, `groups` versus `semantic` isolates the **ranking**: frequency order
+against relevance order, over the same grouped output. That is the comparison that says what
+semantic understanding is worth.
+
+**`keyword` and `groups` return the same patterns, measurably.** Given the same KQL filter they were
+byte-identical on all 8 examples of one run, in content, order and count. Both derive their grouped
+list from the same `categorize_text` aggregation on `message`; `get_logs` simply wraps a histogram,
+`topValues` and raw samples around it. So there is no output-shape effect for a retrieval metric to
+detect, and the two arms are interchangeable for scoring purposes. The difference between them is
+what else an *agent* receives, which only the agent arms can measure.
+
+Keeping both is still worth it: identical scores are a strong signal that the shared filter is
+reaching both tools, and a divergence would mean one of them changed how it groups.
+
+An earlier version of this arm passed no question at all, on the theory that a pure frequency
+baseline was the cleaner control. It was not: it returned one fixed set of 20 of the corpus's 60
+groups for all 8 questions, so its scores measured the size of the pattern space rather than any
+retrieval behaviour. It did leave one finding worth keeping, recorded under Metrics: **Recall
+reached 0.79 without reading the question at all**, so Recall is close to saturated on this corpus
+and the ordering metrics are the ones carrying signal.
+
+Two limits, both in the tool rather than in this suite:
+
+- **Ordering is only reliable while no APM error data is present.** The handler truncates before it
+  sorts, so the result is the first N in concatenation order, then sorted by count, rather than the
+  top N by count. Span exceptions are concatenated first and can crowd out higher-count log groups.
+  The arm drops span exceptions and reports the count as `droppedNonLogGroups` in evaluator
+  metadata, so a non-zero value there means this is live.
+  https://github.com/elastic/kibana/blob/521fcde884e0/x-pack/solutions/observability/plugins/observability_agent_builder/server/tools/get_log_groups/handler.ts#L145
+- **Counts are exact only below roughly 20 000 matching documents.** Above that the tool samples and
+  uses `random_sampler` doc counts raw, without dividing back by the probability, which breaks the
+  `count` contract the document-weighted metrics rely on. `Count Sanity` cannot catch it, because
+  this tool sends no `totalCount` and both of its guards require one. **The scale corpus is
+  therefore unsupported for this arm.**
+  https://github.com/elastic/kibana/blob/b539ca309483/x-pack/solutions/observability/plugins/observability_agent_builder/server/tools/get_log_groups/get_categorized_logs.ts#L104
+
+**Candidate budget**: every arm receives the same number of patterns. Every registered corpus sets
 `maxPatterns: 20`, which is also the tool parameter's ceiling; the tool's own default, unused here,
 is 10. The semantic tool is server-side capped at that value; the keyword tool returns up to ~60
 categories and is capped client-side so Recall cannot be inflated by giving one arm more surface
@@ -99,9 +157,9 @@ Two consequences are worth stating plainly:
 - **Recall is measured against the labelled set, not against the corpus.** It is comparable between
   arms; it is not an absolute measure of coverage.
 - **Labels are applied to each pattern's sample message**, which is one arbitrary representative of
-  a group. `Weighted Precision@K` exists to counterbalance this: it weights each result by how many
-  documents it covers, so a pattern covering 40,000 documents does not count the same as one
-  covering 50.
+  a group. `Weighted Precision@K` weights each result by how many documents it covers, so a pattern
+  covering 40,000 documents does not count the same as one covering 50. Read the caveat under
+  [Metrics](#weighted-precision-is-a-diagnostic-not-a-target) before using it for anything.
 
 `src/ground_truth.test.ts` asserts that no label is a substring of another and that nothing is both
 relevant and a trap. Those two properties are what keep the metrics meaningful.
@@ -114,19 +172,56 @@ same `maxPatterns` candidate budget).
 | Metric | Direction | Notes |
 |---|---|---|
 | `Precision@K` | maximize | Divides by K (not by results returned); cannot be inflated by returning fewer patterns |
-| `Weighted Precision@K` | maximize | Precision weighted by documents covered per pattern; requires population-scale counts |
+| `Weighted Precision@K` | diagnostic | Precision weighted by documents covered per pattern. **Do not tune against it** (see below) |
 | `Recall` | maximize | Over the labelled set; no K cutoff because one pattern can carry several labels |
 | `Hard Negatives@K` | minimize | Lexical traps in the top K |
 | `Distinct Relevant Messages@K` | maximize | The metric the parent issue's acceptance criteria use |
 | `R-Precision` | maximize | Precision@R where R = number of correct answers; the right metric for literal queries (can reach 1.0) |
 | `nDCG@K` | maximize | Normalised DCG using graded relevance (grade 2 > grade 1 > 0) |
 | `MRR` | maximize | Reciprocal rank of the first relevant result |
-| `Top Relevance Score` | neutral | The reranker's logit for the top pattern; calibrates the "nothing relevant" threshold |
-| `Retrieval Latency` | minimize | Wall-clock fetch-to-parsed; the figure any later strategy has to be compared against |
-| `Count Sanity` | minimize | Flags counts that are too high (lifetime counters) or too low (raw sampled `doc_count`) |
+| `Top Relevance Score` | neutral | The reranker's logit for the top pattern; calibrates the "nothing relevant" threshold (see below) |
+| `Retrieval Latency` | minimize | Wall-clock fetch-to-parsed. Comparable only at equal concurrency, and not normalised by candidate count |
+| `Count Sanity` | minimize | Flags counts too high (lifetime counters) or too low (raw sampled `doc_count`). The low side is inert on the semantic arm (see below) |
 | `Used Log Tool` | neutral | Agent arms: verifies each arm is configured correctly |
 | `Relevant Messages Cited` | maximize | Agent arms: coverage of the answer, not its quality |
 | `Input Tokens` / `Output Tokens` / `Latency` / `Tool Calls` | minimize | From `@kbn/evals` trace-based evaluators |
+
+### Weighted Precision is a diagnostic, not a target
+
+It rewards covering log volume, which structurally penalises the behaviour the semantic strategy
+exists for. A relevant *rare* pattern contributes almost nothing to the numerator, while a single
+irrelevant high-frequency pattern loads the denominator. The keyword arm ranks by frequency and is
+therefore flattered by it: in one recorded run the semantic arm won every rank-based metric and
+lost this one, 0.39 against 0.66, with a median of 0.21 against a mean of 0.39.
+
+Keep reading it, because "does this surface volume-relevant material" is a real question. Do not
+optimise against it: doing so would optimise for frequency, which is what `get_logs` already does.
+`Distinct Relevant Messages@K` is the headline, because that is what the acceptance criteria state.
+
+### Count Sanity's low side cannot see the semantic arm
+
+The guard is meant to catch a strategy returning raw sampled `doc_count` instead of counts
+normalised back to population scale. It compares the summed pattern counts against `totalCount`,
+which works for `get_logs`, where `totalCount` is the documents the query matched. On the semantic
+arm `totalCount` is *derived from the returned patterns*, so the comparison becomes
+`sum < sum * 0.1` and can never fire.
+
+**Do not "fix" this by comparing against the corpus size.** That was tried and it reports every
+narrow question as broken: against a 2,611-document corpus, `message: hikaripool` matched 12
+documents whose counts summed to exactly 12, and `message: econnrefused` 100 of 100. Both correct
+and complete, both flagged. A narrow filter is supposed to match a small slice of the corpus.
+
+Closing this properly needs the probe total from the service, which it does not report. Until then
+the high side (counts exceeding the corpus) works for both arms and the low side covers the keyword
+arm only.
+
+### The reranker's scores are not calibrated around zero
+
+In the same run the top logit was **negative on most queries** (mean -1.18, median -0.88, range
+-4.12 to 1.07) while `MRR` was **1.00**, meaning the top result was relevant for every single
+query. A `score > 0` cutoff for the planned "nothing relevant matched" signal would therefore
+reject correct answers. That threshold has to be calibrated against this distribution, including
+negative values, rather than assumed to sit at zero.
 
 ## Running it
 
@@ -140,6 +235,16 @@ fails with the list of missing labels.
 The semantic arm additionally checks that the service can serve requests before running any
 experiment. If the service returns warnings and no patterns, the run fails with the service's own
 explanation. The `.rerank-v1-elasticsearch` check in `logRunManifest` is provenance, not a gate.
+
+**The agent arms need a working model connector; the retrieval arms do not.** The retrieval arms
+put no model in the loop, so they pass on a stack where no LLM is reachable. The agent arms call
+`converse()`, and if the connector cannot reach its provider all three fail with
+`401 Unauthorized ... Missing Authentication header` before scoring anything. The usual cause is
+the OpenRouter `.gen-ai` connector still carrying `config.json`'s `openrouter.apiKey` placeholder
+of `REPLACE_ME`; run `node scripts/evals init config` to supply the real key. A retrieval pass
+alongside an agent failure is therefore expected in that state, not a contradiction. See
+[the 401 entry in SETUP.md](./SETUP.md#agent-evals-fail-with-401-unauthorized-or-missing-authentication-header),
+which distinguishes this from the unrelated CCM case that produces the same message.
 
 ```bash
 # Boot the stack and run the suite (--judge is required even for retrieval-only runs)
@@ -199,5 +304,27 @@ node scripts/jest --config x-pack/solutions/observability/packages/kbn-evals-sui
   This is the parent issue's (`observability-dev#6117`) own named open question.
 - **Not registered for CI**: the suite is absent from `.buildkite/pipelines/evals/evals.suites.json`,
   so it has no tags, no `ciLabels`, no `slackChannel` and no `defaultModelGroups`. Local runs work,
-  because `--suite` rediscovers configs on a cache miss, but nothing runs this on a schedule and no
-  result is persisted anywhere. Any claim that rests on repeated measurement needs this first.
+  because `--suite` rediscovers configs on a cache miss, but nothing runs it on a schedule. Any
+  claim that rests on repeated measurement needs this first.
+
+## Where results go
+
+Every run persists full scores to the `.evaluation-scores` data stream in the cluster under test,
+with no flag required: one document per (example, evaluator), carrying the evaluator score and
+explanation, the task output and its latency, the model, and the git branch and commit SHA.
+
+```bash
+# Runs recorded, most recent first
+curl -s -u elastic:changeme "http://localhost:9220/.evaluation-scores/_search" \
+  -H 'Content-Type: application/json' -d '{"size":0,"aggs":{"runs":{"terms":{"field":"metadata.execution_id","size":20}}}}'
+```
+
+Note that it is a **data stream**, so `_cat/indices/*evaluation*` does not list it; the backing
+index is hidden. Use `_data_stream` or query `.evaluation-scores` directly. `node scripts/evals
+compare <run-a> <run-b>` reads from here, and `node scripts/evals clear-index` resets it.
+
+There is no HTML report. The terminal table is a summary of what this data stream already holds.
+
+`--export-profile` does **not** control this; it configures tracing targets. The agent arms'
+token, latency and tool-call evaluators come from trace data, so they need a reachable trace sink,
+which is separate from score persistence.
