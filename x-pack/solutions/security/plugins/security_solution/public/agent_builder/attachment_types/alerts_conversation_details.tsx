@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiText, useEuiTheme } from '@elastic/eui';
-import type { AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
+import type { ConversationDetailsRenderProps } from '@kbn/agent-builder-browser/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 
 export const ALERTS_CONVERSATION_DETAILS_TEST_ID =
@@ -17,7 +17,7 @@ export interface AlertsAttachmentData {
   alertIds?: string[];
 }
 
-type AlertsAttachment = Attachment<string, AlertsAttachmentData>;
+export type AlertsAttachment = Attachment<string, AlertsAttachmentData>;
 
 const toAlertIdStrings = (alertIds: unknown): string[] => {
   if (!Array.isArray(alertIds)) {
@@ -28,7 +28,7 @@ const toAlertIdStrings = (alertIds: unknown): string[] => {
 
 /** Renders `security.alerts` alert IDs in conversation-details contexts. */
 export const AlertsConversationDetailsContent: React.FC<
-  AttachmentRenderProps<AlertsAttachment>
+  ConversationDetailsRenderProps<AlertsAttachment>
 > = ({ attachment }) => {
   const { euiTheme } = useEuiTheme();
   const ids = toAlertIdStrings(attachment.data?.alertIds);
