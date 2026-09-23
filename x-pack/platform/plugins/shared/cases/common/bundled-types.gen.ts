@@ -1641,9 +1641,14 @@ export const FieldDefinitionResponse = lazySchema(() =>
         'The field name. Must match the `name` property in the YAML definition and is unique per owner (case-insensitive). Immutable after creation.\n'
       ),
     /**
-     * The field definition as a YAML string.
-     */
-    definition: z.string().max(30000).describe('The field definition as a YAML string.'),
+      * The field definition as a YAML string. New definitions are limited to 30 000 characters, but existing definitions created via internal tooling may be longer.
+
+      */
+    definition: z
+      .string()
+      .describe(
+        'The field definition as a YAML string. New definitions are limited to 30 000 characters, but existing definitions created via internal tooling may be longer.\n'
+      ),
     owner: Owner,
     /**
      * Optional human-readable description of the field's purpose.
@@ -1772,16 +1777,16 @@ export const FieldDefinitionPutRequest = lazySchema(() =>
   z
     .object({
       /**
-      * The field name, unique per owner (case-insensitive). Must match the `name` key inside the YAML definition. When omitted, the name is extracted from the definition YAML automatically. Immutable after creation.
+      * The field name, unique per owner (case-insensitive). Must match the `name` key inside the YAML definition. When omitted, the name is extracted from the definition YAML automatically. Immutable after creation. Unlike POST, the 50-character limit is not enforced on PUT so that definitions with legacy names that exceed the limit remain modifiable.
 
       */
       name: z
         .string()
         .min(1)
-        .max(50)
+        .max(1000)
         .optional()
         .describe(
-          'The field name, unique per owner (case-insensitive). Must match the `name` key inside the YAML definition. When omitted, the name is extracted from the definition YAML automatically. Immutable after creation.\n'
+          'The field name, unique per owner (case-insensitive). Must match the `name` key inside the YAML definition. When omitted, the name is extracted from the definition YAML automatically. Immutable after creation. Unlike POST, the 50-character limit is not enforced on PUT so that definitions with legacy names that exceed the limit remain modifiable.\n'
         ),
       owner: Owner,
       /**
