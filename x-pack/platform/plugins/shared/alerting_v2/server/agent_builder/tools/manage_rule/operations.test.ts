@@ -1029,15 +1029,12 @@ describe('executeRuleOperations', () => {
       });
     });
 
-    it('passes validation for a rule that alerts on no data', async () => {
+    it('fails validation for a rule that alerts on no data', async () => {
       const ops: RuleOperation[] = [{ operation: 'validate' }];
 
-      const result = await executeRuleOperations(
-        { ...validRule, no_data: { strategy: 'alert' } },
-        ops
-      );
-
-      expect(result.data.no_data).toEqual({ strategy: 'alert' });
+      await expect(
+        executeRuleOperations({ ...validRule, no_data: { strategy: 'alert' } }, ops)
+      ).rejects.toThrow('no_data.strategy "alert" is not currently supported.');
     });
   });
 

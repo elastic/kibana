@@ -306,7 +306,7 @@ evaluate.describe(
           name: 'alerting-v2: no-data strategy updates',
           description:
             'Composes an alert, then applies one no-data behavior per example: hold last ' +
-            'known status, resolve when quiet, alert on absence, or ignore missing data. ' +
+            'known status, resolve when quiet, or ignore missing data. ' +
             'Separate examples cover using the base query as the data-presence query and ' +
             'supplying an explicit no_data query.',
           examples: [
@@ -323,11 +323,6 @@ evaluate.describe(
             noDataExample({
               hostMetricsIndex,
               style: 'segmented',
-              strategy: 'alert',
-            }),
-            noDataExample({
-              hostMetricsIndex,
-              style: 'segmented',
               strategy: 'ignore',
             }),
             noDataExample({
@@ -339,11 +334,6 @@ evaluate.describe(
               hostMetricsIndex,
               style: 'single',
               strategy: 'resolve',
-            }),
-            noDataExample({
-              hostMetricsIndex,
-              style: 'single',
-              strategy: 'alert',
             }),
             noDataExample({
               hostMetricsIndex,

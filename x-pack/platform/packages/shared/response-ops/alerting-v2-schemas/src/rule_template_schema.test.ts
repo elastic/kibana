@@ -354,7 +354,7 @@ describe('rule template create-rule schema coupling', () => {
             },
             "alerting_rule_no_data_alert": Object {
               "additionalProperties": false,
-              "description": "Opens an alert episode when the rule finds no data for a group.",
+              "description": "Marks an existing alert episode \`active\` when the rule finds no data. It never opens an episode for a group that has not breached. Not accepted when creating or updating rules.",
               "properties": Object {
                 "query": Object {
                   "description": "Optional ES|QL query that checks whether a group has data. If omitted, \`query.base\` is used.",

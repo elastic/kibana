@@ -3695,7 +3695,7 @@ describe('RulesClient', () => {
       await expect(
         client.updateRule({
           id: 'rule-id-signal-z',
-          data: { no_data: { strategy: 'alert' } },
+          data: { no_data: { strategy: 'keep_last' } },
         })
       ).rejects.toMatchObject({
         output: { statusCode: 400 },

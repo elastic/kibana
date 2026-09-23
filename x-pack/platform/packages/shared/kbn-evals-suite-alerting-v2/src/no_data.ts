@@ -23,13 +23,13 @@ import {
   type QueryStyle,
 } from './rule_example_helpers';
 
+// `alert` is missing on purpose: the write API rejects it, so the agent cannot
+// save a rule that uses it.
 const NO_DATA_REQUESTS = {
   keep_last:
     'If a host goes quiet and stops sending metrics, keep whatever alert status it already had.',
   resolve:
     'If a host goes quiet and stops sending metrics, treat that as recovered instead of holding the old status.',
-  alert:
-    'If a host goes quiet and stops sending metrics, raise an alert for that host instead of holding the old status.',
   ignore:
     'Do not do anything special for missing data — only evaluate the hosts that are still reporting.',
 } as const;

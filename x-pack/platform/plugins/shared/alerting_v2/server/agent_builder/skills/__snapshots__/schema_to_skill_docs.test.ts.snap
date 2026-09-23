@@ -310,7 +310,7 @@ exports[`schema_to_skill_docs generateNoDataStrategyDoc matches the reviewed ski
 | \`ignore\` | Does not check whether a group still has data. Missing groups do not produce \`no_data\` events. |
 | \`keep_last\` | Holds the alert episode's current status when the rule finds no data. |
 | \`resolve\` | Closes the alert episode the first time the rule finds no data for a group. |
-| \`alert\` | Opens an alert episode when the rule finds no data for a group. |
+| \`alert\` | Marks an existing alert episode \`active\` when the rule finds no data. It never opens an episode for a group that has not breached. Not accepted when creating or updating rules. |
 
 Every strategy except \`ignore\` may carry its own presence query:
 \`no_data: { strategy: 'keep_last', query: 'FROM heartbeat-* | STATS count = COUNT(*) BY host.name | WHERE count >= 1' }\`.
@@ -581,7 +581,7 @@ Closes the alert episode the first time the rule finds no data for a group.
 
 #### \`strategy: \\"alert\\"\`
 
-Opens an alert episode when the rule finds no data for a group.
+Marks an existing alert episode \`active\` when the rule finds no data. It never opens an episode for a group that has not breached. Not accepted when creating or updating rules.
 
 | Field | Type | Required | Description |
 |---|---|---|---|

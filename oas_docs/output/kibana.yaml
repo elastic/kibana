@@ -149120,7 +149120,7 @@ components:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_no_data_alert'
     Kibana_HTTP_APIs_alerting_rule_no_data_alert:
       additionalProperties: false
-      description: Opens an alert episode when the rule finds no data for a group.
+      description: Marks an existing alert episode `active` when the rule finds no data. It never opens an episode for a group that has not breached. Not accepted when creating or updating rules.
       type: object
       properties:
         query:

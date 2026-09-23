@@ -30,20 +30,17 @@ describe('NoDataStrategySelect', () => {
       'Recover immediately'
     );
 
-    rerender(<NoDataStrategySelect value="alert" onChange={jest.fn()} />);
-    expect(screen.getByTestId('ruleV2NoDataStrategySelect')).toHaveTextContent('Alert on no data');
-
     rerender(<NoDataStrategySelect value="ignore" onChange={jest.fn()} />);
     expect(screen.getByTestId('ruleV2NoDataStrategySelect')).toHaveTextContent('Do nothing');
   });
 
-  it('offers the alert option', async () => {
+  it('does not offer the alert strategy the write API rejects', async () => {
     const user = userEvent.setup({ pointerEventsCheck: 0 });
     render(<NoDataStrategySelect value="keep_last" onChange={jest.fn()} />);
 
     await user.click(screen.getByTestId('ruleV2NoDataStrategySelect'));
 
-    expect(screen.getByText('Alert on no data')).toBeInTheDocument();
+    expect(screen.queryByText('Alert on no data')).not.toBeInTheDocument();
   });
 
   it('calls onChange with the selected strategy', async () => {

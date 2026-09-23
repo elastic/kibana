@@ -50,17 +50,6 @@ const RESOLVE_DESCRIPTION = i18n.translate(
   }
 );
 
-const ALERT_TITLE = i18n.translate('xpack.alertingV2.ruleForm.noDataStrategyField.alert.title', {
-  defaultMessage: 'Alert on no data',
-});
-
-const ALERT_DESCRIPTION = i18n.translate(
-  'xpack.alertingV2.ruleForm.noDataStrategyField.alert.description',
-  {
-    defaultMessage: 'Activate the alert episode when no data is received during a check.',
-  }
-);
-
 const IGNORE_TITLE = i18n.translate('xpack.alertingV2.ruleForm.noDataStrategyField.none.title', {
   defaultMessage: 'Do nothing',
 });
@@ -85,10 +74,11 @@ const buildOption = (value: NoDataStrategy, title: string, description: string) 
   ),
 });
 
+// `alert` is missing on purpose: the write API rejects it, so offering it here
+// would only produce a rule the user cannot save.
 const NO_DATA_STRATEGY_OPTIONS = [
   buildOption(noDataStrategy.keep_last, KEEP_LAST_TITLE, KEEP_LAST_DESCRIPTION),
   buildOption(noDataStrategy.resolve, RESOLVE_TITLE, RESOLVE_DESCRIPTION),
-  buildOption(noDataStrategy.alert, ALERT_TITLE, ALERT_DESCRIPTION),
   buildOption(noDataStrategy.ignore, IGNORE_TITLE, IGNORE_DESCRIPTION),
 ];
 

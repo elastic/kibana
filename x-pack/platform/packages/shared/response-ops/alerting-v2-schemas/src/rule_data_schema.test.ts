@@ -543,7 +543,7 @@ describe('createRuleDataSchema', () => {
       expect(result.success).toBe(false);
     });
 
-    it.each(['keep_last', 'resolve', 'alert'] as const)(
+    it.each(['keep_last', 'resolve'] as const)(
       'accepts strategy "%s" without a presence query',
       (strategy) => {
         const result = createRuleDataSchema.parse({
@@ -554,7 +554,7 @@ describe('createRuleDataSchema', () => {
       }
     );
 
-    it.each(['keep_last', 'resolve', 'alert'] as const)(
+    it.each(['keep_last', 'resolve'] as const)(
       'accepts strategy "%s" with a presence query',
       (strategy) => {
         const result = createRuleDataSchema.parse({
@@ -564,6 +564,14 @@ describe('createRuleDataSchema', () => {
         expect(result.no_data).toEqual({ strategy, query: 'FROM heartbeat-* | LIMIT 1' });
       }
     );
+
+    it.each([
+      ['without a presence query', { strategy: 'alert' }],
+      ['with a presence query', { strategy: 'alert', query: 'FROM heartbeat-* | LIMIT 1' }],
+    ])('rejects strategy "alert" %s', (_label, noData) => {
+      const result = createRuleDataSchema.safeParse({ ...validCreateData, no_data: noData });
+      expect(result.success).toBe(false);
+    });
 
     it('rejects an invalid ES|QL presence query', () => {
       const result = createRuleDataSchema.safeParse({
@@ -1103,13 +1111,18 @@ describe('updateRuleDataSchema', () => {
     expect(result.success).toBe(false);
   });
 
-  it.each(['ignore', 'keep_last', 'resolve', 'alert'] as const)(
+  it.each(['ignore', 'keep_last', 'resolve'] as const)(
     'accepts a no_data update to "%s"',
     (strategy) => {
       const result = updateRuleDataSchema.parse({ no_data: { strategy } });
       expect(result.no_data).toEqual({ strategy });
     }
   );
+
+  it('rejects a no_data update to "alert"', () => {
+    const result = updateRuleDataSchema.safeParse({ no_data: { strategy: 'alert' } });
+    expect(result.success).toBe(false);
+  });
 
   it('rejects recovery set to null (alert rules always store one)', () => {
     const result = updateRuleDataSchema.safeParse({ recovery: null });

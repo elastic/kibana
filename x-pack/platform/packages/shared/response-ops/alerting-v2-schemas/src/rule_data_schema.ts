@@ -228,6 +228,10 @@ export type Recovery = z.infer<typeof recoverySchema>;
 
 /** No data (alert rules only) */
 
+/**
+ * No-data strategy. `alert` is a valid stored and engine value, but the create
+ * and update APIs reject it (see {@link isNoDataStrategyWritable}).
+ */
 export const noDataStrategySchema = z.enum(['ignore', 'keep_last', 'resolve', 'alert']);
 export const noDataStrategy = noDataStrategySchema.enum;
 export type NoDataStrategy = z.infer<typeof noDataStrategySchema>;
@@ -271,7 +275,7 @@ export const noDataSchema = z
     ),
     classifyingNoDataSchema(
       noDataStrategy.alert,
-      'Opens an alert episode when the rule finds no data for a group.'
+      'Marks an existing alert episode `active` when the rule finds no data. It never opens an episode for a group that has not breached. Not accepted when creating or updating rules.'
     ),
   ])
   .describe(
@@ -570,6 +574,19 @@ export const isRecoveryConditionUsableWithBreach = (data: RuleLifecycleShape): b
   data.recovery?.strategy !== recoveryStrategy.condition || hasBreachCondition(data.query?.breach);
 
 /**
+ * `alert` is stored and executed, but the write APIs do not accept it yet: the
+ * engine only classifies groups that already have an episode, so the strategy
+ * cannot open one for a group that never breached.
+ */
+export const isNoDataStrategyWritable = (data: RuleLifecycleShape): boolean =>
+  data.no_data?.strategy !== noDataStrategy.alert;
+
+const rejectAlertNoDataStrategy = {
+  message: 'no_data.strategy "alert" is not currently supported.',
+  path: ['no_data', 'strategy'],
+};
+
+/**
  * Recovery transition thresholds are inert under `recovery.strategy: manual`,
  * so we reject any `state_transition.recovering` block. `count: 0` is not a
  * delay — the episode recovers immediately — so it must not be configured
@@ -611,6 +628,7 @@ const applyCreateRuleRefinements = <T extends z.ZodType<CreateRuleRefinementFiel
       message: 'recovery.strategy "condition" requires query.breach.',
       path: ['recovery', 'segment'],
     })
+    .refine(isNoDataStrategyWritable, rejectAlertNoDataStrategy)
     .refine(isRecoveryTransitionConsistentWithStrategy, {
       message: 'state_transition.recovering has no effect when recovery.strategy is "manual".',
       path: ['state_transition', 'recovering'],
@@ -679,7 +697,17 @@ export const updateRuleDataSchema = z
     grouping: groupingSchema.optional().nullable(),
     artifacts: artifactsSchema.optional().nullable(),
   })
-  .strict();
+  .strict()
+  .check((ctx) => {
+    if (!isNoDataStrategyWritable(ctx.value)) {
+      ctx.issues.push({
+        code: 'custom',
+        path: rejectAlertNoDataStrategy.path,
+        message: rejectAlertNoDataStrategy.message,
+        input: ctx.value.no_data,
+      });
+    }
+  });
 
 export type UpdateRuleData = z.infer<typeof updateRuleDataSchema>;
 

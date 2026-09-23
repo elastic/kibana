@@ -195,7 +195,7 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
   );
 
   apiTest(
-    'update: should switch no_data to the "alert" strategy',
+    'validation: rejects the "alert" no_data strategy',
     async ({ apiClient, apiServices }) => {
       const created = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({ metadata: { name: 'rule-no-data-alert' } })
@@ -206,11 +206,10 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
         body: { no_data: { strategy: 'alert' } },
       });
 
-      expect(response).toHaveStatusCode(200);
-      expect(response.body.no_data).toStrictEqual({ strategy: 'alert' });
+      expect(response).toHaveStatusCode(400);
 
       const persisted = await apiServices.alertingV2.rules.get(created.id);
-      expect(persisted.no_data).toStrictEqual({ strategy: 'alert' });
+      expect(persisted.no_data).toStrictEqual({ strategy: 'ignore' });
     }
   );
 
