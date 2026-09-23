@@ -54,11 +54,18 @@ apiTest.describe('Rollup jobs creation', { tag: ['@local-stateful-classic'] }, (
   });
 
   apiTest('creates a rollup job', async ({ apiClient }) => {
+    const jobId = uniqueJobId('crud-create');
+    const targetIndex = uniqueTargetIndex('crud-create');
     const response = await rollupApi(apiClient, headers).createJob(
-      getJobPayload(indexName, uniqueJobId('crud-create'), uniqueTargetIndex('crud-create'))
+      getJobPayload(indexName, jobId, targetIndex)
     );
 
     expect(response).toHaveStatusCode(200);
+    expect(response.body.config).toMatchObject({
+      id: jobId,
+      index_pattern: indexName,
+      rollup_index: targetIndex,
+    });
   });
 
   apiTest('lists a newly created job', async ({ apiClient }) => {

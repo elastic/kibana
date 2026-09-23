@@ -61,16 +61,8 @@ export const deleteRollupJobsMatching = async (esClient: EsClient, idPrefix: str
   for (const job of jobs) {
     const id = job.config?.id;
     if (!id || !id.startsWith(idPrefix)) continue;
-    try {
-      await esClient.rollup.stopJob({ id, wait_for_completion: true });
-    } catch {
-      // Not running or already gone — safe to skip.
-    }
-    try {
-      await esClient.rollup.deleteJob({ id });
-    } catch {
-      // Already deleted — safe to skip.
-    }
+    await esClient.rollup.stopJob({ id, wait_for_completion: true }, { ignore: [404] });
+    await esClient.rollup.deleteJob({ id }, { ignore: [404] });
   }
 };
 
