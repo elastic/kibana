@@ -30,11 +30,6 @@ rule-management,platform,Set up a notification so my team knows when disk usage 
 action-policy-management,platform,List my action policies and show which ones send Slack notifications,direct,action-policy-management,
 action-policy-management,platform,Create a notification policy that emails oncall when any production alert fires,direct,action-policy-management,
 rule-management,platform,Show me all the detection rules currently enabled in my security environment,distractor,find-security-rules,Distractor: listing rules sounds like rule-management but security detection rules belong to find-rules
-significant-events-memory,streams,Search the significant events knowledge base for what we know about the payments service architecture,direct,significant-events-memory,
-significant-events-memory,streams,Add a knowledge base entry describing the normal traffic patterns of our auth microservice,direct,significant-events-memory,
-significant-events-memory,streams,What does the system know about our Kafka cluster and its typical behavior?,indirect,significant-events-memory,
-significant-events-memory,streams,Update the memory with the fact that our order-service was migrated to Kubernetes last week,indirect,significant-events-memory,
-significant-events-memory,streams,Find recent significant events related to latency spikes in the checkout service,distractor,significant-events-management,AMBIGUOUS: knowledge base read vs event search are easy to confuse; distractor targets significant-events-management
 streams-management,streams,Show me the schema and field mappings for the logs.otel stream,direct,streams-management,
 streams-management,streams,Update the retention policy on the logs.ecs.android stream to 90 days,direct,streams-management,
 streams-management,streams,Some of my log events are being dropped at ingestion — what is going wrong with my pipeline?,indirect,streams-management,
@@ -44,7 +39,6 @@ significant-events-management,streams,Create a new significant event to record t
 significant-events-management,streams,Search for all significant events related to the payments service in the last 30 days,direct,significant-events-management,
 significant-events-management,streams,Log that we had a major database failover last Tuesday that affected the order processing pipeline,indirect,significant-events-management,
 significant-events-management,streams,Find all recorded incidents that impacted the auth service this quarter,indirect,significant-events-management,
-significant-events-management,streams,What does the system know about our database cluster's normal behavior patterns?,distractor,significant-events-memory,AMBIGUOUS: event search vs knowledge base read are structurally similar; distractor targets significant-events-memory
 knowledge-indicators-management,streams,Create a new knowledge indicator that tracks the p95 latency of the checkout service,direct,knowledge-indicators-management,
 knowledge-indicators-management,streams,List all existing knowledge indicators for the payments domain,direct,knowledge-indicators-management,
 knowledge-indicators-management,streams,I want the system to automatically flag unusual patterns in our auth service login rate,indirect,knowledge-indicators-management,

@@ -9,17 +9,22 @@ import { i18n } from '@kbn/i18n';
 import type { BaseStepDefinition } from '@kbn/workflows';
 import { StepCategory } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
-import { impactEntityIdsSchema } from '../impact';
+import { MAX_IMPACT_ID_LENGTH } from '../constants';
+import { impactEntitiesSchema } from '../impact';
 
 export const GetImpactStepId = 'investigations.getImpact' as const;
 
 export const getImpactStepInputSchema = z.object({
-  conversationId: z.string().describe('Conversation whose impact to read.'),
+  conversationId: z
+    .string()
+    .min(1)
+    .max(MAX_IMPACT_ID_LENGTH)
+    .describe('Conversation whose impact to read.'),
 });
 
 export const getImpactStepOutputSchema = z.object({
   id: z.string(),
-  entityIds: impactEntityIdsSchema,
+  entities: impactEntitiesSchema,
 });
 
 export const getImpactStepCommonDefinition: BaseStepDefinition<

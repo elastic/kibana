@@ -12,9 +12,9 @@ import type { LayerDescriptor } from '../../common/descriptor_types';
 import { SOURCE_DATA_REQUEST_ID, SOURCE_TYPES } from '../../common/constants';
 import type { ESQLSourceDescriptor } from '../../common/descriptor_types';
 import type { MapStore } from '../reducers/store';
-import { getLayerListRaw } from '../selectors/map_selectors';
+import { getLayerListRaw } from '../selectors/get_layer_list_raw';
 
-export function initializeEsql(store: MapStore) {
+export function initializeEsql(store: Pick<MapStore, 'getState' | 'subscribe'>) {
   const esql$ = new BehaviorSubject<AggregateQuery[]>([]);
   const approximationApplied$ = new BehaviorSubject<boolean | undefined>(undefined);
 

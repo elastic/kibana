@@ -4,6 +4,7 @@ plugins:
     - advanced_settings
     - agent_builder
     - agent_builder_dashboards
+    - agentic_investigations
     - alerting
     - alerting_v2
     - apm
@@ -16,6 +17,7 @@ plugins:
     - contentManagementExamples
     - content_management
     - context_engine
+    - context_engine_agent_builder
     - cross_cluster_replication
     - custom_branding
     - custom_content
@@ -66,6 +68,7 @@ plugins:
     - navigation
     - nightshift
     - nightshift_investigations
+    - nightshift_sources
     - notification_center
     - observability
     - observability_alerting
@@ -113,7 +116,6 @@ plugins:
     - workflows_management
   disabled:
     - data_views_as_code # Not yet registered for CI; added to unblock pipelines
-    - discoveries # Not yet registered for CI; added to unblock flaky test runner pipelines
     - links # Not yet registered for CI; added to unblock flaky test runner pipelines
 
 packages:

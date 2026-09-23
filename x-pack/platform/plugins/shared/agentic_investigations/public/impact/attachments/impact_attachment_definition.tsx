@@ -11,15 +11,15 @@ import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser/attachme
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { IMPACT_ATTACHMENT_TYPE } from '../../../common/impact/attachment';
-import type { Impact } from '../../../common/impact/impact';
+import type { Impact, ImpactEntity } from '../../../common/impact/impact';
 
 export type ImpactAttachment = Attachment<typeof IMPACT_ATTACHMENT_TYPE, Impact>;
 
-const EntityIds = ({ entityIds }: { entityIds: string[] }) => (
+const Entities = ({ entities }: { entities: ImpactEntity[] }) => (
   <EuiFlexGroup gutterSize="s" wrap responsive={false}>
-    {entityIds.map((id) => (
-      <EuiFlexItem key={id} grow={false}>
-        <EuiBadge color="hollow">{id}</EuiBadge>
+    {entities.map((entity) => (
+      <EuiFlexItem key={entity.id} grow={false}>
+        <EuiBadge color="hollow">{entity.name ?? entity.id}</EuiBadge>
       </EuiFlexItem>
     ))}
   </EuiFlexGroup>
@@ -34,9 +34,9 @@ export const createImpactAttachmentDefinition = (): AttachmentUIDefinition<Impac
 
   getIcon: () => 'warning',
 
-  renderInlineContent: ({ attachment }) => <EntityIds entityIds={attachment.data.entityIds} />,
+  renderInlineContent: ({ attachment }) => <Entities entities={attachment.data.entities} />,
 
   renderConversationDetailsContent: ({ attachment }) => (
-    <EntityIds entityIds={attachment.data.entityIds} />
+    <Entities entities={attachment.data.entities} />
   ),
 });

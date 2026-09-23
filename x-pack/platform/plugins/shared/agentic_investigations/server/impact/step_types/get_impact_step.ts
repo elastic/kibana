@@ -34,7 +34,7 @@ export const getGetImpactStepDefinition = ({
         return {
           output: {
             id: impact.id,
-            entityIds: impact.entityIds,
+            entities: impact.entities,
           },
         };
       } catch (error) {

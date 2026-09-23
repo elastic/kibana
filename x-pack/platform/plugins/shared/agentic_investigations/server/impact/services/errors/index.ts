@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+export { ImpactConflictError } from './impact_conflict_error';
+export { ImpactForbiddenError } from './impact_forbidden_error';
 export { ImpactNotFoundError } from './impact_not_found_error';
 export { ImpactInvalidRequestError } from './impact_invalid_request_error';
-export { ImpactForbiddenError } from './impact_forbidden_error';

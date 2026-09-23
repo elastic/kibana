@@ -9,20 +9,25 @@ import { i18n } from '@kbn/i18n';
 import type { BaseStepDefinition } from '@kbn/workflows';
 import { StepCategory } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
-import { impactEntityIdsSchema } from '../impact';
+import { MAX_IMPACT_ID_LENGTH } from '../constants';
+import { impactEntitiesSchema } from '../impact';
 
 export const AttachImpactStepId = 'investigations.attachImpact' as const;
 
 export const attachImpactStepInputSchema = z.object({
-  conversationId: z.string().describe('Conversation this impact belongs to.'),
-  entityIds: impactEntityIdsSchema.describe(
-    'Opaque ids of the entities this investigation is about. Merged onto any existing impact for the conversation.'
+  conversationId: z
+    .string()
+    .min(1)
+    .max(MAX_IMPACT_ID_LENGTH)
+    .describe('Conversation this impact belongs to.'),
+  entities: impactEntitiesSchema.describe(
+    'Entities this investigation is about. Merged by id onto any existing impact for the conversation. Each entity needs an id; name, type, featureId, and streamName are optional.'
   ),
 });
 
 export const attachImpactStepOutputSchema = z.object({
   id: z.string(),
-  entityIds: impactEntityIdsSchema,
+  entities: impactEntitiesSchema,
 });
 
 export const attachImpactStepCommonDefinition: BaseStepDefinition<
@@ -54,9 +59,10 @@ export const attachImpactStepCommonDefinition: BaseStepDefinition<
   type: investigations.attachImpact
   with:
     conversationId: "{{ inputs.conversationId }}"
-    entityIds:
-      - "{{ inputs.userId }}"
-      - "{{ inputs.hostId }}"`,
+    entities:
+      - id: "{{ inputs.userId }}"
+      - id: "{{ inputs.hostId }}"
+        name: "{{ inputs.hostName }}"`,
     ],
   },
 };
