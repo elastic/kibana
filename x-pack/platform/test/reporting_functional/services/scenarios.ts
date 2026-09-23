@@ -176,7 +176,9 @@ export function createScenarios(
     await testSubjects.missingOrFail('exportMenuItem-PDF');
     await testSubjects.missingOrFail('exportMenuItem-PNG');
     await testSubjects.missingOrFail('exportMenuItem-CSV');
-    await testSubjects.missingOrFail('generateReportButton');
+    // JSON export reuses generateReportButton for "Download JSON"; assert reporting-only controls.
+    await testSubjects.missingOrFail('shareReportingForm');
+    await testSubjects.missingOrFail('usePrintLayout');
   };
 
   return {
