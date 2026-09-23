@@ -14,6 +14,8 @@ interface WorkflowStep {
   name: string;
   type?: string;
   if?: string;
+  'product-solution'?: string;
+  'product-feature'?: string;
   with?: { method?: string; path?: string; body?: { status?: string } };
   'on-failure'?: unknown;
   steps?: WorkflowStep[];
@@ -92,6 +94,13 @@ describe('investigation lifecycle contracts', () => {
     expect(investigation.steps.some((step) => step.name === 'attach_to_significant_event')).toBe(
       false
     );
+  });
+
+  it('attributes agent calls to Significant Events', () => {
+    expect(requireStep('investigate')).toMatchObject({
+      'product-solution': 'observability',
+      'product-feature': 'significant_events',
+    });
   });
 
   it('space-scopes the path of every kibana.request step', () => {

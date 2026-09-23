@@ -48,6 +48,83 @@ describe('createInferenceEndpointExecutor', () => {
     );
   });
 
+  it('sets product and interaction attribution headers', async () => {
+    mockTransportRequest.mockResolvedValue(new PassThrough());
+
+    await executor.invoke({
+      body: {},
+      metadata: {
+        connectorTelemetry: {
+          pluginId: 'significant_events_discovery',
+          productSolution: 'observability',
+          productFeature: 'significant_events',
+          interactionId: 'execution-1',
+        },
+      },
+    });
+
+    expect(mockTransportRequest).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        headers: {
+          'X-Elastic-Product-Use-Case': 'significant_events_discovery',
+          'X-Elastic-Product-Solution': 'observability',
+          'X-Elastic-Product-Feature': 'significant_events',
+          'X-Elastic-Inference-Interaction-Id': 'execution-1',
+        },
+      })
+    );
+  });
+
+  it('omits empty product and interaction attribution headers', async () => {
+    mockTransportRequest.mockResolvedValue(new PassThrough());
+
+    await executor.invoke({
+      body: {},
+      metadata: {
+        connectorTelemetry: {
+          pluginId: 'significant_events_discovery',
+          productSolution: '',
+          productFeature: '',
+          interactionId: '',
+        },
+      },
+    });
+
+    expect(mockTransportRequest).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        headers: {
+          'X-Elastic-Product-Use-Case': 'significant_events_discovery',
+        },
+      })
+    );
+  });
+
+  it('sets an interaction header without product attribution', async () => {
+    mockTransportRequest.mockResolvedValue(new PassThrough());
+
+    await executor.invoke({
+      body: {},
+      metadata: {
+        connectorTelemetry: {
+          pluginId: 'alertzero',
+          interactionId: 'execution-1',
+        },
+      },
+    });
+
+    expect(mockTransportRequest).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        headers: {
+          'X-Elastic-Product-Use-Case': 'alertzero',
+          'X-Elastic-Inference-Interaction-Id': 'execution-1',
+        },
+      })
+    );
+  });
+
   it('sets the inference timeout to 3m when no timeout is provided', async () => {
     const stream = new PassThrough();
     mockTransportRequest.mockResolvedValue(stream);

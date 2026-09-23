@@ -391,6 +391,17 @@ describe('inferred feature identification route', () => {
     expect(ensureEnabled).toHaveBeenCalledWith({ request });
   });
 
+  it('normalizes a blank run id before identifying inferred features', async () => {
+    const { handlerParams } = makeInferredHandlerParams();
+    handlerParams.params.body.runId = '';
+
+    await inferredRoute.handler(handlerParams);
+
+    const { runId } = mockIdentifyInferredFeatures.mock.calls[0][0];
+    expect(runId).toEqual(expect.any(String));
+    expect(runId).not.toBe('');
+  });
+
   it('returns identification results when sync workflow bootstrap fails', async () => {
     const ensureEnabled = jest.fn().mockRejectedValue(new Error('workflow unavailable'));
     const { handlerParams, routeLogger, identifyResult } = makeInferredHandlerParams({

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { QueryLink } from '@kbn/significant-events-schema';
+import { MAX_ID_LENGTH, type QueryLink } from '@kbn/significant-events-schema';
+import { DeepStrict } from '@kbn/zod-helpers';
 import type { SignificantEventsMaintenanceState } from '../../../../../common/maintenance/state_machine';
 import { internalKIQueriesRoutes } from './route';
 
@@ -467,19 +468,11 @@ describe('getDiscoveryQueriesOccurrencesRoute stream resolution', () => {
 describe('generateQueriesRoute', () => {
   const generateRoute =
     internalKIQueriesRoutes['POST /internal/streams/{streamName}/queries/_generate'];
+  const strictGenerateParams = DeepStrict(generateRoute.params);
 
-  beforeEach(() => {
-    mockGenerateKIQueries.mockReset();
-    mockGenerateKIQueries.mockResolvedValue({
-      queries: [],
-      tokensUsed: { prompt: 0, completion: 0, total: 0 },
-      connectorId: 'test-connector',
-    });
-  });
-
-  it('passes a 300000 ms duration budget to query generation', async () => {
-    const handlerParams = {
-      params: { path: { streamName: 'logs.test' }, body: { connectorId: 'test-connector' } },
+  const makeGenerateHandlerParams = (body: Record<string, unknown>) =>
+    ({
+      params: { path: { streamName: 'logs.test' }, body },
       request: { events: { aborted$: { subscribe: jest.fn() } } },
       getScopedClients: jest.fn().mockResolvedValue({
         streamsClient: {},
@@ -504,7 +497,40 @@ describe('generateQueriesRoute', () => {
         get: jest.fn().mockReturnValue({ warn: jest.fn(), debug: jest.fn(), trace: jest.fn() }),
       },
       telemetry: {},
-    } as unknown as GenerateHandlerParams;
+    } as unknown as GenerateHandlerParams);
+
+  beforeEach(() => {
+    mockGenerateKIQueries.mockReset();
+    mockGenerateKIQueries.mockResolvedValue({
+      queries: [],
+      tokensUsed: { prompt: 0, completion: 0, total: 0 },
+      connectorId: 'test-connector',
+    });
+  });
+
+  it('retains valid run ids and rejects overlong run ids during route validation', () => {
+    const parsed = strictGenerateParams.safeParse({
+      path: { streamName: 'logs.test' },
+      body: { runId: 'run-1' },
+    });
+
+    expect(parsed.success).toBe(true);
+    if (parsed.success) {
+      expect(parsed.data.body?.runId).toBe('run-1');
+    }
+    expect(
+      strictGenerateParams.safeParse({
+        path: { streamName: 'logs.test' },
+        body: { runId: 'x'.repeat(MAX_ID_LENGTH + 1) },
+      }).success
+    ).toBe(false);
+  });
+
+  it('passes a 300000 ms duration budget to query generation', async () => {
+    const handlerParams = makeGenerateHandlerParams({
+      connectorId: 'test-connector',
+      runId: 'run-1',
+    });
 
     const result = await generateRoute.handler(handlerParams);
 
@@ -512,6 +538,7 @@ describe('generateQueriesRoute', () => {
       expect.objectContaining({
         streamName: 'logs.test',
         connectorId: 'test-connector',
+        runId: 'run-1',
         maxDurationMs: 300000,
       }),
       expect.any(Object)
@@ -521,6 +548,16 @@ describe('generateQueriesRoute', () => {
       tokensUsed: { prompt: 0, completion: 0, total: 0 },
       connectorId: 'test-connector',
     });
+  });
+
+  it('normalizes a blank run id before query generation', async () => {
+    await generateRoute.handler(
+      makeGenerateHandlerParams({ connectorId: 'test-connector', runId: '' })
+    );
+
+    const { runId } = mockGenerateKIQueries.mock.calls[0][0];
+    expect(runId).toEqual(expect.any(String));
+    expect(runId).not.toBe('');
   });
 });
 

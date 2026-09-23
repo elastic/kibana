@@ -12,6 +12,7 @@ import type { GeneratedSignificantEventQuery } from '@kbn/significant-events-sch
 import {
   SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
+  SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_SOLUTION,
 } from '@kbn/significant-events-schema';
 import {
   identifyKIQueries as identifyKIQueriesThroughAgent,
@@ -38,6 +39,7 @@ type KiDiscoveryToolset = KiExtractionContextTools | SemanticCodeSearchTools;
 interface Params {
   definition: Streams.all.Definition;
   connectorId: string;
+  runId: string;
   systemPrompt?: string;
   maxExistingQueriesForContext?: number;
   maxDurationMs?: number;
@@ -66,6 +68,7 @@ export async function identifyKIQueries(
   const {
     definition,
     connectorId,
+    runId,
     systemPrompt = significantEventsPrompt,
     maxExistingQueriesForContext,
     maxDurationMs,
@@ -119,6 +122,9 @@ export async function identifyKIQueries(
       connectorTelemetry: {
         pluginId: SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
         aggregateBy: SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
+        productSolution: SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_SOLUTION,
+        productFeature: SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
+        interactionId: runId,
       },
     },
   });

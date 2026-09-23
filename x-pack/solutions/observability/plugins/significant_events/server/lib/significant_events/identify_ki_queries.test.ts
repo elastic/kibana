@@ -82,13 +82,38 @@ describe('generateSignificantEventDefinitions (semantic code search wiring)', ()
   });
 
   it('does not pass tools or raise the step budget when no discovery tools are provided', async () => {
-    await identifyKIQueries({ definition, connectorId: 'c1', systemPrompt: 'SYSTEM' }, buildDeps());
+    await identifyKIQueries(
+      { definition, connectorId: 'c1', runId: 'run-1', systemPrompt: 'SYSTEM' },
+      buildDeps()
+    );
 
     const args = generateSignificantEventsMock.mock.calls[0][0];
     expect(args.additionalTools).toBeUndefined();
     expect(args.additionalToolCallbacks).toBeUndefined();
     expect(args.maxSteps).toBeUndefined();
     expect(args.systemPrompt).toBe('SYSTEM');
+  });
+
+  it('binds product attribution and the run id to the inference client', async () => {
+    const bindTo = jest.fn().mockReturnValue({});
+
+    await identifyKIQueries(
+      { definition, connectorId: 'c1', runId: 'run-1', systemPrompt: 'SYSTEM' },
+      buildDeps({ inferenceClient: { bindTo } as unknown as InferenceClient })
+    );
+
+    expect(bindTo).toHaveBeenCalledWith({
+      connectorId: 'c1',
+      metadata: {
+        connectorTelemetry: {
+          pluginId: 'significant_events_ki_query_generation',
+          aggregateBy: 'significant_events',
+          productSolution: 'observability',
+          productFeature: 'significant_events',
+          interactionId: 'run-1',
+        },
+      },
+    });
   });
 
   it('forwards reasoning diagnostics from the shared agent', async () => {
@@ -103,7 +128,7 @@ describe('generateSignificantEventDefinitions (semantic code search wiring)', ()
     });
 
     const result = await identifyKIQueries(
-      { definition, connectorId: 'c1', systemPrompt: 'SYSTEM' },
+      { definition, connectorId: 'c1', runId: 'run-1', systemPrompt: 'SYSTEM' },
       buildDeps()
     );
 
@@ -112,7 +137,13 @@ describe('generateSignificantEventDefinitions (semantic code search wiring)', ()
 
   it('forwards maxDurationMs to the shared agent', async () => {
     await identifyKIQueries(
-      { definition, connectorId: 'c1', systemPrompt: 'SYSTEM', maxDurationMs: 300000 },
+      {
+        definition,
+        connectorId: 'c1',
+        runId: 'run-1',
+        systemPrompt: 'SYSTEM',
+        maxDurationMs: 300000,
+      },
       buildDeps()
     );
 
@@ -124,7 +155,7 @@ describe('generateSignificantEventDefinitions (semantic code search wiring)', ()
     const semanticCodeSearchTools = makeCodeTools();
 
     await identifyKIQueries(
-      { definition, connectorId: 'c1', systemPrompt: 'SYSTEM' },
+      { definition, connectorId: 'c1', runId: 'run-1', systemPrompt: 'SYSTEM' },
       buildDeps({ semanticCodeSearchTools })
     );
 
@@ -149,7 +180,7 @@ describe('generateSignificantEventDefinitions (semantic code search wiring)', ()
     };
 
     await identifyKIQueries(
-      { definition, connectorId: 'c1', systemPrompt: 'SYSTEM' },
+      { definition, connectorId: 'c1', runId: 'run-1', systemPrompt: 'SYSTEM' },
       buildDeps({ kiExtractionContextTools })
     );
 

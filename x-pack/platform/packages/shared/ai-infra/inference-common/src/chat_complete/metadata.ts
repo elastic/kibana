@@ -24,6 +24,9 @@ export interface ChatCompleteMetadata {
 export interface ConnectorTelemetryMetadata {
   pluginId?: string;
   aggregateBy?: string;
+  productSolution?: string;
+  productFeature?: string;
+  interactionId?: string;
 }
 
 export interface ChatCompleteAnonymizationTarget {

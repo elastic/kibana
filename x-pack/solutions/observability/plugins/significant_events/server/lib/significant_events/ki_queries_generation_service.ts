@@ -34,6 +34,7 @@ import { createKiExtractionContextTools } from './ki_extraction_context_tools';
 export interface GenerateKIQueriesParams {
   streamName: string;
   connectorId?: string;
+  runId: string;
   maxExistingQueriesForContext?: number;
   maxDurationMs?: number;
   queryValidationTimeoutMs?: number;
@@ -66,6 +67,7 @@ export async function generateKIQueries(
   const {
     streamName,
     connectorId: connectorIdOverride,
+    runId,
     maxExistingQueriesForContext,
     maxDurationMs,
     queryValidationTimeoutMs,
@@ -137,6 +139,7 @@ export async function generateKIQueries(
     {
       definition,
       connectorId,
+      runId,
       maxExistingQueriesForContext,
       maxDurationMs,
       queryValidationTimeoutMs,

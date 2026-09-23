@@ -79,9 +79,13 @@ steps:
   - name: investigate
     type: ai.agent
     agent-id: significant-events.deductive-investigation
+    # Keep connector-id-by-feature/plugin-id/aggregate-by/product-* in sync with
+    # @kbn/significant-events-schema inference_feature_ids.ts.
     connector-id-by-feature: 'significant_events_investigation'
     plugin-id: 'significant_events_investigation'
     aggregate-by: 'significant_events'
+    product-solution: 'observability'
+    product-feature: 'significant_events'
     create-conversation: true
     public-conversation: true
     timeout: 1800s

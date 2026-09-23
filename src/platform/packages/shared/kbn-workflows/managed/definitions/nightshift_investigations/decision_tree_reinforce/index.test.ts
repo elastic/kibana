@@ -20,6 +20,8 @@ const workflow = parse(NIGHTSHIFT_DECISION_TREE_REINFORCE_WORKFLOW.yaml) as {
     type?: string;
     if?: string;
     'agent-id'?: string;
+    'product-solution'?: string;
+    'product-feature'?: string;
     'on-failure'?: unknown;
     with?: Record<string, string>;
   }>;
@@ -49,6 +51,10 @@ describe('decision tree reinforce workflow', () => {
   it('runs the reinforcement agent on the message the prepare step built', () => {
     const [, , reinforce] = workflow.steps;
     expect(reinforce['agent-id']).toBe('significant-events.decision-tree-reinforcement');
+    expect(reinforce).toMatchObject({
+      'product-solution': 'observability',
+      'product-feature': 'significant_events',
+    });
     expect(reinforce.with?.message).toBe('{{ steps.prepare_turn.output.message }}');
   });
 

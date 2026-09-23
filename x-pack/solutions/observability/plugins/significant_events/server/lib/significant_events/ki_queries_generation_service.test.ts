@@ -94,7 +94,7 @@ describe('generateKIQueries', () => {
     } as unknown as EbtTelemetryClient;
 
     await generateKIQueries(
-      { streamName: 'logs.test', connectorId: 'test-connector' },
+      { streamName: 'logs.test', connectorId: 'test-connector', runId: 'run-1' },
       makeDeps({ telemetry, logger })
     );
 
@@ -113,7 +113,7 @@ describe('generateKIQueries', () => {
     } as unknown as EbtTelemetryClient;
 
     const result = await generateKIQueries(
-      { streamName: 'logs.test', connectorId: 'test-connector' },
+      { streamName: 'logs.test', connectorId: 'test-connector', runId: 'run-1' },
       makeDeps({ telemetry, logger })
     );
 
@@ -138,18 +138,27 @@ describe('generateKIQueries', () => {
 
   it('forwards maxDurationMs to the query generation wrapper', async () => {
     await generateKIQueries(
-      { streamName: 'logs.test', connectorId: 'test-connector', maxDurationMs: 300000 },
+      {
+        streamName: 'logs.test',
+        connectorId: 'test-connector',
+        runId: 'run-1',
+        maxDurationMs: 300000,
+      },
       makeDeps({ logger })
     );
 
     expect(identifyKIQueriesMock.mock.calls[0][0]).toEqual(
-      expect.objectContaining({ maxDurationMs: 300000, connectorId: 'test-connector' })
+      expect.objectContaining({
+        maxDurationMs: 300000,
+        connectorId: 'test-connector',
+        runId: 'run-1',
+      })
     );
   });
 
   it('does not pass a system prompt', async () => {
     await generateKIQueries(
-      { streamName: 'logs.test', connectorId: 'test-connector' },
+      { streamName: 'logs.test', connectorId: 'test-connector', runId: 'run-1' },
       makeDeps({ logger })
     );
 

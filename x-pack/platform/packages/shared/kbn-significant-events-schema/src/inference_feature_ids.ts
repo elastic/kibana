@@ -8,6 +8,9 @@
 /** Parent feature for Streams Significant Events (Inference Feature Registry). */
 export const SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID = 'significant_events' as const;
 
+/** Product solution for Significant Events EIS attribution. */
+export const SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_SOLUTION = 'observability' as const;
+
 /** Knowledge Indicator feature extraction (KI extraction). */
 export const SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID =
   'significant_events_ki_extraction' as const;

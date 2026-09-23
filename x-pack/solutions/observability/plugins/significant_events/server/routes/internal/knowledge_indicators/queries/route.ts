@@ -7,6 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import pLimit from 'p-limit';
+import { v4 as uuidv4 } from 'uuid';
 import type {
   QueriesGetResponse,
   QueriesOccurrencesGetResponse,
@@ -623,6 +624,7 @@ const generateQueriesRoute = createServerRoute({
           .describe(
             'Optional connector ID override. When omitted the connector is resolved via the Inference Feature Registry.'
           ),
+        runId: z.string().max(MAX_ID_LENGTH).optional(),
         maxExistingQueriesForContext: z
           .number()
           .optional()
@@ -675,9 +677,11 @@ const generateQueriesRoute = createServerRoute({
     const { streamName } = params.path;
     const {
       connectorId,
+      runId,
       maxExistingQueriesForContext,
       queryValidationTimeoutMs = tuningConfig.query_validation_timeout_ms,
     } = params.body ?? {};
+    const resolvedRunId = runId?.trim() || uuidv4();
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
 
@@ -685,6 +689,7 @@ const generateQueriesRoute = createServerRoute({
       {
         streamName,
         connectorId,
+        runId: resolvedRunId,
         maxExistingQueriesForContext,
         maxDurationMs: QUERY_GENERATION_MAX_DURATION_MS,
         queryValidationTimeoutMs,
