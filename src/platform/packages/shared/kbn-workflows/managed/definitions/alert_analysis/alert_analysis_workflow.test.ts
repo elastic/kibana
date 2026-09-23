@@ -1926,6 +1926,59 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
     expect(rendered).toBe('Hosts look like malware. Users look like admins.');
   });
 
+  describe('batch_summary reconciliation', () => {
+    const { name: agentStepName } = findStepByType(workflow.steps, 'ai.agent') as { name: string };
+    const agentOutput = (batchSummary: string | null) => ({
+      [agentStepName]: { output: { structured_output: { batch_summary: batchSummary } } },
+    });
+
+    it('counts distinct matched verdict ids so a repeated id cannot hide a dropped alert', () => {
+      const collectStep = findStepByName(workflow.steps, 'collect_batch_verdicts') as {
+        with: { batch_matched_id_count: string };
+      };
+
+      const count = evaluateExpression(engine, collectStep.with.batch_matched_id_count, {
+        variables: { batch_verdicts: [{ id: 'a1' }, { id: 'a1' }, { id: 'a2' }] },
+      });
+
+      expect(count).toBe(2);
+    });
+
+    it('keeps a batch summary only when at least one verdict matched and the model returned one', () => {
+      const gate = findStepByName(workflow.steps, 'accumulate_batch_summary_gate') as {
+        condition: string;
+      };
+      const evaluate = (matched: number, batchSummary: string | null, calledByWorker = true) =>
+        evaluateExpression(engine, gate.condition, {
+          inputs: { calledByWorker },
+          variables: { batch_matched_id_count: matched },
+          steps: agentOutput(batchSummary),
+        });
+
+      expect(evaluate(2, 'Hosts look benign.')).toBe(true);
+      expect(evaluate(0, 'Describes another batch.')).toBe(false);
+      expect(evaluate(2, null)).toBe(false);
+      expect(evaluate(2, '')).toBe(false);
+      expect(evaluate(2, 'Hosts look benign.', false)).toBe(false);
+    });
+
+    it('marks a summary that covers only part of the batch', () => {
+      const entryStep = findStepByName(workflow.steps, 'build_batch_summary_entry') as {
+        with: { batch_summary_entry: string };
+      };
+      const render = (matched: number) =>
+        engine.parseAndRenderSync(entryStep.with.batch_summary_entry, {
+          variables: { batch_matched_id_count: matched, batch_alert_ids: ['a1', 'a2', 'a3'] },
+          steps: agentOutput('Hosts look benign.'),
+        });
+
+      expect(render(3)).toBe('Hosts look benign.');
+      expect(render(2)).toBe(
+        'Hosts look benign. (Covers 2 of 3 alerts in this batch; the rest returned no verdict.)'
+      );
+    });
+  });
+
   it('truncates generated_summary to the workflow.output 2000-char limit', () => {
     const summaryStep = findStepByName(workflow.steps, 'build_generated_summary') as {
       with: { generated_summary: string };
