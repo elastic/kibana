@@ -518,6 +518,81 @@ describe('When on integration detail', () => {
     });
   });
 
+  describe('and the AWS onboarding flow is enabled', () => {
+    const renderAwsDetail = async () => {
+      const baseResponse = mockedApi.responseProvider.epmGetInfo('nginx');
+      mockedApi.responseProvider.epmGetInfo.mockReturnValue({
+        ...baseResponse,
+        item: {
+          ...baseResponse.item,
+          name: 'aws',
+          title: 'AWS',
+          status: 'not_installed' as const,
+        },
+      });
+      testRenderer.startServices.featureFlags.useBooleanValue.mockReturnValue(true);
+      testRenderer.startServices.application.getUrlForApp.mockReturnValue(
+        '/mock/app/onboarding/aws'
+      );
+
+      await render();
+      // All those waitForApi call are needed to avoid flakyness because details conditionnaly refetch multiple time
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+    };
+
+    it(
+      'should link the Add button to the onboarding flow',
+      async () => {
+        await renderAwsDetail();
+        const addButton = (await renderResult.findByTestId(
+          'addIntegrationPolicyButton'
+        )) as HTMLAnchorElement;
+        expect(addButton.href).toEqual('http://localhost/mock/app/onboarding/aws');
+      },
+      TESTS_TIMEOUT
+    );
+
+    it(
+      'should start a new onboarding session when the Add button is clicked',
+      async () => {
+        await renderAwsDetail();
+        await act(async () => {
+          (await renderResult.findByTestId('addIntegrationPolicyButton')).click();
+        });
+
+        expect(testRenderer.startServices.application.navigateToApp).toHaveBeenCalledWith(
+          'onboarding',
+          { path: '/aws', state: { newSession: true } }
+        );
+      },
+      TESTS_TIMEOUT
+    );
+
+    it(
+      'should keep the Fleet flow when an agent policy is preselected',
+      async () => {
+        act(() =>
+          testRenderer.mountHistory.push(detailPageUrlPath, {
+            forAgentPolicyId: 'agent-policy-1',
+          })
+        );
+        await renderAwsDetail();
+        await act(async () => {
+          (await renderResult.findByTestId('addIntegrationPolicyButton')).click();
+        });
+
+        expect(testRenderer.startServices.application.navigateToApp).not.toHaveBeenCalledWith(
+          'onboarding',
+          expect.anything()
+        );
+      },
+      TESTS_TIMEOUT
+    );
+  });
+
   describe('and on the Policies Tab', () => {
     const policiesTabURLPath = pagePathGetters.integration_details_policies({ pkgkey })[1];
     beforeEach(async () => {

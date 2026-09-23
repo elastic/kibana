@@ -7,7 +7,7 @@
 
 import { proposalToInvestigation } from './proposal_to_investigation';
 import type { ProposalItem } from '../../../common/proposals/list';
-import type { ProposalWithMetadata } from '@kbn/agentic-investigations-plugin/common';
+import type { ProposalWithMetadata } from '@kbn/proposals-common';
 
 const baseProposal: ProposalItem = {
   id: 'prop-001',
@@ -59,7 +59,6 @@ describe('proposalToInvestigation', () => {
       ['respond', 'respond'],
       ['investigate', 'investigate'],
       ['configure', 'configure'],
-      ['tune', 'configure'], // legacy mapping
     ] as const)('category %s → bucket %s', (category, expected) => {
       const result = proposalToInvestigation({ ...baseProposal, category });
       expect(result.recommendedAction).toBe(expected);
