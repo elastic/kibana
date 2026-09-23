@@ -2208,6 +2208,53 @@ describe('ConversationClient', () => {
       });
     });
 
+    it('default (owner) denies a non-owner on a public conversation', async () => {
+      getTemplateMock.mockReturnValue(makeTemplate('tmpl-a', { x: { input_type: 'TEXT' } }));
+      mockGetDocumentResponse(
+        createConversationDocument({
+          userId: 'other-user',
+          username: 'other',
+          accessMode: ConversationAccessControlMode.Public,
+        })
+      );
+
+      await expect(client.patchMetadata('conversation-1', { x: 'value' })).rejects.toMatchObject({
+        message: expect.stringContaining('conversation-1'),
+      });
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+
+    it('explicit { access: converse } allows a non-owner on a public conversation', async () => {
+      const template = makeTemplate('tmpl-a', { x: { input_type: 'TEXT' } });
+      getTemplateMock.mockReturnValue(template);
+      // The document must carry a template_id so patchMetadata can resolve the template.
+      const doc = createConversationDocumentWithTemplate({
+        templateId: 'tmpl-a',
+        // Override user and access_mode to simulate a public conversation owned by someone else.
+      });
+      // Patch the access_control to be Public and userId to be a different user.
+      const publicOtherDoc = {
+        ...doc,
+        _source: {
+          ...doc._source,
+          user_id: 'other-user',
+          user_name: 'other',
+          access_control: { access_mode: ConversationAccessControlMode.Public },
+        },
+      };
+      mockGetDocumentResponse(publicOtherDoc as Document);
+      mockEsClient.index.mockResolvedValue({ _seq_no: 3, _primary_term: 1 });
+      mockGetDocumentResponseOnce(publicOtherDoc as Document);
+
+      const { changedFields } = await client.patchMetadata(
+        'conversation-1',
+        { x: 'value' },
+        { access: 'converse' }
+      );
+      expect(changedFields).toEqual(['x']);
+      expect(mockEsClient.index).toHaveBeenCalledTimes(1);
+    });
+
     describe('emitMetadataPatched via event emitter', () => {
       const template = makeTemplate('tmpl-cb', {
         status: {

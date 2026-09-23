@@ -20,6 +20,7 @@ import {
   ESCALATIONS_API_PRIVILEGE_MANAGE,
   ESCALATIONS_API_PRIVILEGE_READ,
 } from './escalations/constants';
+import { INVESTIGATIONS_API_PRIVILEGE_MANAGE } from './investigations/constants';
 import { registerEscalationRoutes } from './escalations/routes/register_routes';
 import { AgenticInvestigationsPlugin } from './plugin';
 
@@ -140,6 +141,20 @@ describe('AgenticInvestigationsPlugin', () => {
           includeIn: 'read',
           api: [ESCALATIONS_API_PRIVILEGE_READ],
           ui: [ESCALATIONS_UI_CAPABILITY_SHOW],
+        })
+      );
+    });
+
+    it('keeps investigations in a sub-feature with a manage privilege', () => {
+      const { features } = setupPlugin();
+      const { subFeatures } = registeredFeature(features);
+      const [investigationsAll] = subFeatures[1].privilegeGroups[0].privileges;
+
+      expect(investigationsAll).toEqual(
+        expect.objectContaining({
+          id: 'investigations_all',
+          includeIn: 'all',
+          api: [INVESTIGATIONS_API_PRIVILEGE_MANAGE],
         })
       );
     });

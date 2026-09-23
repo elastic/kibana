@@ -12,6 +12,7 @@ import {
   NotAnEscalationError,
   TooManyLinkedInvestigationsError,
 } from '../services/errors';
+import { WrongTemplateError } from '../../assignments/assignments_service';
 
 /**
  * Maps service errors to HTTP responses for escalation routes.
@@ -41,7 +42,7 @@ export const handleEscalationRouteError = (
     return response.badRequest({ body: { message: error.message } });
   }
 
-  if (error instanceof NotAnEscalationError) {
+  if (error instanceof NotAnEscalationError || error instanceof WrongTemplateError) {
     return response.notFound({ body: { message: error.message } });
   }
 

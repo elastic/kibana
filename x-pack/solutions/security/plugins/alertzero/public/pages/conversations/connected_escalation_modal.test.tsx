@@ -187,6 +187,17 @@ describe('ConnectedEscalationModal', () => {
     );
   });
 
+  it('includes the current user uid in assignees for a public escalation', () => {
+    renderModal({ mode: 'create' });
+
+    fireEvent.click(screen.getByTestId('escalationModalCreateEscalation'));
+
+    expect(createMutate).toHaveBeenCalledWith(
+      expect.objectContaining({ assignees: ['user-1'] }),
+      expect.any(Object)
+    );
+  });
+
   it('marks escalations already linked to the conversation as alreadyLinked', () => {
     mockUseListEscalations.mockReturnValue({
       data: {

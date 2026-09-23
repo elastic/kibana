@@ -153,9 +153,9 @@ describe('updateEscalationRequestSchema', () => {
     ).toThrow(/title and linked_investigations cannot be updated in the same request/);
   });
 
-  it('rejects an empty body (neither field provided)', () => {
+  it('rejects an empty body (no field provided)', () => {
     expect(() => updateEscalationRequestSchema.parse({})).toThrow(
-      /at least one of title or linked_investigations must be provided/
+      /at least one of title, linked_investigations, or status must be provided/
     );
   });
 
