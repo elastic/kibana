@@ -1527,6 +1527,53 @@ describe('slow-path handoff (#293046): waitForValidationPhase', () => {
     }
   });
 
+  // A permanent HTTP error (401/403/…) can never succeed on retry, unlike the
+  // expected not-yet-indexed 404 or a transient network error — surface it
+  // immediately instead of looping the full 10-minute budget and reporting a
+  // misleading `never became trackable`.
+  it('fails fast on a permanent HTTP error when no snapshot has been taken yet', async () => {
+    jest.useFakeTimers();
+    try {
+      const permanentError = Object.assign(new Error('Unauthorized'), {
+        response: { status: 403 },
+      });
+      const fetch = jest.fn().mockImplementation(async () => {
+        throw permanentError;
+      });
+      const pending = waitForValidationPhase({ fetch, executionId: 'exec-1' }).catch(
+        (error: Error) => error
+      );
+      const result = await pending;
+
+      expect(fetch).toHaveBeenCalledTimes(1);
+      expect(result).toBeInstanceOf(Error);
+      expect((result as Error).message).toMatch(/failed permanently/);
+      expect((result as Error).cause).toBe(permanentError);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('returns the earlier snapshot when a permanent HTTP error hits after one was taken', async () => {
+    jest.useFakeTimers();
+    try {
+      const fetch = jest
+        .fn()
+        .mockResolvedValueOnce(trackingWith(null))
+        .mockImplementation(async () => {
+          throw Object.assign(new Error('Forbidden'), { response: { status: 403 } });
+        });
+      const pending = waitForValidationPhase({ fetch, executionId: 'exec-1' });
+      // The first poll succeeds, the second throws a permanent error — but the
+      // loop's `sleep` between them only advances under fake timers.
+      const settled = await jest.advanceTimersByTimeAsync(5_000).then(() => pending);
+
+      expect(settled).toMatchObject({ generation: { workflow_id: 'wf-gen' } });
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
   it('throws when the execution never becomes trackable at all', async () => {
     jest.useFakeTimers();
     try {

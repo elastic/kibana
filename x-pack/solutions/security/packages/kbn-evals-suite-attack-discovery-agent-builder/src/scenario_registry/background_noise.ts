@@ -6,13 +6,33 @@
  */
 
 import { buildAlertDocument } from './build_documents';
-import type { Ad2IndexedAlert, Ad2ScenarioDefinition, Ad2ScenarioOs } from './types';
+import type {
+  Ad2IndexedAlert,
+  Ad2ScenarioDefinition,
+  Ad2ScenarioOs,
+  Ad2ScenarioStep,
+} from './types';
 
 interface BackgroundRule {
   readonly ruleName: string;
   readonly category: string;
   readonly dataset: string;
   readonly count: number;
+  /**
+   * Severity/risk of the alerts this rule emits. Several rules deliberately
+   * fire HIGH/CRITICAL with scores inside the signal band (71-96): a noise
+   * population entirely below the signal range turns
+   * `kibana.alert.risk_score >= 70` into a perfect answer key. The benign
+   * reading stays in each message — a high score on a benign occurrence is
+   * the rule's own rating, not a verdict on the activity.
+   */
+  /**
+   * Benign reading carried in the message itself, so a high severity above
+   * reads as the rule's own rating while the text explains the activity.
+   */
+  readonly message: string;
+  readonly severity: Ad2ScenarioStep['severity'];
+  readonly riskScore: number;
 }
 
 const BACKGROUND_RULES: readonly BackgroundRule[] = [
@@ -21,67 +41,109 @@ const BACKGROUND_RULES: readonly BackgroundRule[] = [
     category: 'Identity',
     dataset: 'okta.system',
     count: 12,
+    message:
+      'Okta sign-in from a new geographic location for bob.jenkins; travel exception on file',
+    severity: 'medium',
+    riskScore: 47,
   },
   {
     ruleName: 'Okta MFA Push Denied by User',
     category: 'Identity',
     dataset: 'okta.system',
     count: 8,
+    message: 'Okta MFA push denied by user; expected for an unrequested sign-in',
+    severity: 'low',
+    riskScore: 21,
   },
   {
     ruleName: 'Suspicious Cross-Region API Call',
     category: 'Cloud',
     dataset: 'aws.cloudtrail',
     count: 10,
+    message: 'Cross-region S3 replication job issued the API call from the backup service role',
+    severity: 'high',
+    riskScore: 78,
   },
   {
     ruleName: 'SSH Login from Corp Bastion',
     category: 'Network',
     dataset: 'system.auth',
     count: 10,
+    message: 'SSH session from the corporate bastion matched the on-call access pattern',
+    severity: 'low',
+    riskScore: 26,
   },
   {
     ruleName: 'New Local User Created',
     category: 'Endpoint Behavior Detection',
     dataset: 'endpoint.events.iam',
     count: 5,
+    message: 'Local service account created by configuration management (ansible, run 4471)',
+    severity: 'low',
+    riskScore: 33,
   },
-  { ruleName: 'Slack API Token Created', category: 'Identity', dataset: 'slack.audit', count: 8 },
+  {
+    ruleName: 'Slack API Token Created',
+    category: 'Identity',
+    dataset: 'slack.audit',
+    count: 8,
+    message: 'Slack API token created for the approved reporting integration',
+    severity: 'low',
+    riskScore: 24,
+  },
   {
     ruleName: 'GitHub OAuth Token Created',
     category: 'Identity',
     dataset: 'github.audit',
     count: 8,
+    message: 'GitHub OAuth token created for the org-approved CI application',
+    severity: 'medium',
+    riskScore: 43,
   },
   {
     ruleName: 'Endpoint Agent Heartbeat Missed',
     category: 'System',
     dataset: 'endpoint.status',
     count: 14,
+    message: 'Endpoint agent heartbeat missed during the nightly maintenance window',
+    severity: 'low',
+    riskScore: 18,
   },
   {
     ruleName: 'Anomalous Process Execution on Server',
     category: 'Endpoint Behavior Detection',
     dataset: 'endpoint.events.process',
     count: 10,
+    message: 'Scheduled integrity scan ran outside its usual window on the build server',
+    severity: 'critical',
+    riskScore: 97,
   },
   {
     ruleName: 'USB Mass Storage Connected',
     category: 'Endpoint Behavior Detection',
     dataset: 'endpoint.events.registry',
     count: 5,
+    message: 'Encrypted corporate backup drive connected to the imaging workstation',
+    severity: 'low',
+    riskScore: 21,
   },
   {
     ruleName: 'Anomalous DNS Query Volume',
     category: 'Network',
     dataset: 'endpoint.events.dns',
     count: 10,
+    message: 'DNS query volume spike traced to the marketing analytics batch export',
+    severity: 'high',
+    riskScore: 74,
   },
   {
     ruleName: 'Firewall Deny from Corp Range',
     category: 'Network',
     dataset: 'firewall.log',
     count: 10,
+    message: 'Firewall denied a connection from the guest Wi-Fi range per standing policy',
+    severity: 'medium',
+    riskScore: 39,
   },
 ] as const;
 
@@ -155,16 +217,23 @@ export const buildBackgroundNoiseAlerts = (
           counter,
           {
             ruleName: rule.ruleName,
-            severity: 'low',
-            riskScore: 21,
-            message: `Background test alert: ${rule.ruleName}`,
+            severity: rule.severity,
+            riskScore: rule.riskScore,
+            message: rule.message,
             processName: null,
             commandLine: null,
             eventType: null,
             context: null,
           },
           timestamp,
-          runMarker
+          runMarker,
+          // One rule identity per BACKGROUND RULE: these 110 alerts represent
+          // 12 noisy rules, so rule-based correlation has to see repeated hits
+          // from the same rule, not 110 single-hit rules. `ruleName` is the
+          // shared seed, so all alerts of one rule share
+          // `kibana.alert.rule.uuid`/`rule_id` while every ALERT id stays
+          // unique (it digests `counter`).
+          rule.ruleName
         )
       );
     }
@@ -190,8 +259,8 @@ export const buildLoudClusterAlerts = (
         number,
         {
           ruleName: 'Windows Defender Signature Update Failed',
-          severity: 'low',
-          riskScore: 15,
+          severity: 'medium',
+          riskScore: 47,
           message: 'Defender signature update failed; retry scheduled',
           processName: null,
           commandLine: null,
@@ -199,7 +268,10 @@ export const buildLoudClusterAlerts = (
           context: null,
         },
         timestamp,
-        runMarker
+        runMarker,
+        // All 40 hits come from ONE flaky rule, so they share a single rule
+        // identity; only the alert id varies per hit.
+        'defender-signature-update'
       )
     );
   }
