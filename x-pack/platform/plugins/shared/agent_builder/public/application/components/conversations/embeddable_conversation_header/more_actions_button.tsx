@@ -120,13 +120,11 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
         .replace(/^-|-$/g, '')
         .toLowerCase() || 'conversation';
     const payload = {
-      conversation_id: conversationId,
-      agent_id: agentId,
       agent: agent ?? undefined,
-      events: conversation?.events ?? [],
+      conversation,
     };
     triggerDownload(`${slug}.json`, JSON.stringify(payload, null, 2));
-  }, [closePopover, conversationTitle, conversationId, agentId, agent, conversation?.events]);
+  }, [closePopover, conversationTitle, agent, conversation]);
 
   const handleLoadTrace = useCallback(() => {
     closePopover();
@@ -224,6 +222,7 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
           </EuiContextMenuItem>,
         ]
       : []),
+    ...exportMenuItems,
   ];
 
   const menuItems = isEmbeddedContext ? embeddedContextMenuItems : exportMenuItems;

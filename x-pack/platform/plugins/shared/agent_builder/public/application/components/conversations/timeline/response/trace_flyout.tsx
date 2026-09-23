@@ -53,16 +53,19 @@ export const TraceFlyout: React.FC<TraceFlyoutProps> = ({ traceId, initialSpans,
   const traceSpansResult = useTraceSpans(isFromFile ? null : traceId ?? null, { fetchTrace });
 
   const spans = isFromFile ? initialSpans ?? [] : traceSpansResult.spans;
-  const durationMs = isFromFile ? 0 : traceSpansResult.durationMs;
+  const durationMs = isFromFile ? undefined : traceSpansResult.durationMs;
   const isLoading = isFromFile ? false : traceSpansResult.isLoading;
   const error = isFromFile ? null : traceSpansResult.error;
 
   const handleDownload = () => {
-    const slug = (traceId ?? 'trace')
-      .replace(/[^\p{L}\p{N}]+/gu, '-')
-      .replace(/^-|-$/g, '')
-      .toLowerCase();
-    triggerDownload(`${slug}.json`, JSON.stringify(spans, null, 2));
+    const slug = traceId
+      ? traceId
+          .replace(/[^\p{L}\p{N}]+/gu, '-')
+          .replace(/^-|-$/g, '')
+          .toLowerCase()
+      : 'trace';
+    const envelope = { ...(traceId ? { trace_id: traceId } : {}), spans };
+    triggerDownload(`trace-${slug}.json`, JSON.stringify(envelope, null, 2));
   };
 
   return (
