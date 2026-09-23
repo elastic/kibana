@@ -17,8 +17,22 @@ export const GEOJSON_FILE_TYPES = ['.json', '.geojson'];
 
 const SUPPORTED_CRS_LIST = ['EPSG:4326', 'urn:ogc:def:crs:OGC:1.3:CRS84'];
 
+interface GeoJsonCrs {
+  type?: string;
+  properties?: { name?: string };
+}
+type GeoJsonContainer = Feature | { crs?: GeoJsonCrs };
+type GeoJsonBatch = Omit<Batch, 'bytesUsed' | 'container' | 'data'> & {
+  container?: GeoJsonContainer;
+  data?: Feature[];
+  bytesUsed?: number;
+};
+
+const isFeature = (value: GeoJsonContainer): value is Feature =>
+  'geometry' in value && 'type' in value && value.type === 'Feature';
+
 export class GeoJsonImporter extends AbstractGeoFileImporter {
-  private _iterator?: AsyncIterator<Omit<Batch, 'data'> & { data: Feature[] }>;
+  private _iterator?: AsyncIterator<GeoJsonBatch>;
   private _prevBatchLastFeature?: Feature;
 
   protected async _readNext(prevTotalFeaturesRead: number, prevTotalBytesRead: number) {
@@ -48,7 +62,7 @@ export class GeoJsonImporter extends AbstractGeoFileImporter {
     if (this._iterator === undefined) {
       this._iterator = (await loadInBatches(this._getFile(), JSONLoader, jsonLoaderOptions))[
         Symbol.asyncIterator
-      ]();
+      ]() as AsyncIterator<GeoJsonBatch>;
     }
 
     if (!this._getIsActive() || !this._iterator) {
@@ -72,8 +86,13 @@ export class GeoJsonImporter extends AbstractGeoFileImporter {
     // Deprecated geojson specification supported crs
     // https://geojson.org/geojson-spec.html#named-crs
     // This importer only supports WGS 84 datum
-    if (typeof batch.container?.crs === 'object') {
-      const crs = batch.container.crs as { type?: string; properties?: { name?: string } };
+    if (
+      batch.container &&
+      typeof batch.container === 'object' &&
+      !isFeature(batch.container) &&
+      typeof batch.container.crs === 'object'
+    ) {
+      const crs = batch.container.crs;
       if (
         crs?.type === 'link' ||
         (crs?.type === 'name' && !SUPPORTED_CRS_LIST.includes(crs?.properties?.name ?? ''))
@@ -99,7 +118,7 @@ export class GeoJsonImporter extends AbstractGeoFileImporter {
     if (isLastBatch) {
       // Handle single feature geoJson
       if (featureIndex === 0 && features.length === 0) {
-        if (batch.container) {
+        if (batch.container && isFeature(batch.container)) {
           features.push(batch.container);
         }
       }
