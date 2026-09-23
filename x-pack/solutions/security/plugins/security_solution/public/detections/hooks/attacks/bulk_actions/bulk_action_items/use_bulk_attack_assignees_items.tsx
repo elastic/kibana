@@ -20,6 +20,7 @@ import type { AttacksActionTelemetrySource } from '../../../../../common/lib/tel
 import { useLicense } from '../../../../../common/hooks/use_license';
 import { ASSIGNEES_PANEL_WIDTH } from '../../../../../common/components/assignees/constants';
 import { BulkAlertAssigneesPanel } from '../../../../../common/components/toolbar/bulk_actions/alert_bulk_assignees';
+import { ATTACK_ASSIGNEE_ACTION_IDS } from '../../../../../common/constants/action_ids';
 import { useAttacksPrivileges } from '../use_attacks_privileges';
 import { extractRelatedDetectionAlertIds } from '../utils/extract_related_detection_alert_ids';
 import * as i18n from '../translations';
@@ -89,7 +90,7 @@ export const useBulkAttackAssigneesItems = ({
 
     return [
       {
-        key: 'manage-attack-assignees',
+        key: ATTACK_ASSIGNEE_ACTION_IDS.assign,
         'data-test-subj': 'attack-assignees-context-menu-item',
         name: i18n.ATTACK_ASSIGNEES_CONTEXT_MENU_ITEM_TITLE,
         panel: 2,
@@ -98,7 +99,7 @@ export const useBulkAttackAssigneesItems = ({
         disable: false,
       },
       {
-        key: 'remove-all-attack-assignees',
+        key: ATTACK_ASSIGNEE_ACTION_IDS.unassignAll,
         'data-test-subj': 'remove-attack-assignees-menu-item',
         name: i18n.REMOVE_ATTACK_ASSIGNEES_CONTEXT_MENU_TITLE,
         label: i18n.REMOVE_ATTACK_ASSIGNEES_CONTEXT_MENU_TITLE,
