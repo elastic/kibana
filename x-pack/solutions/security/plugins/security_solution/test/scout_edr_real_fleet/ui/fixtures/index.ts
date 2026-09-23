@@ -19,6 +19,7 @@ import { setupFleetForEndpoint } from '../../../../common/endpoint/data_loaders/
 import { deleteAllEndpointData } from '../../../../scripts/endpoint/common/delete_all_endpoint_data';
 import {
   createAndEnrollEndpointHost,
+  deleteMultipassVm,
   destroyEndpointHost,
   type CreateAndEnrollEndpointHostResponse,
 } from '../../../../scripts/endpoint/common/endpoint_host_services';
@@ -113,14 +114,20 @@ export const test = baseTest.extend<EdrRealFleetTestFixtures, EdrRealFleetWorker
           );
         };
 
-        const enrollHost = async (): Promise<CreateAndEnrollEndpointHostResponse> => {
+        const nextHostname = (): string =>
+          `test-host-ara-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
+
+        const enrollHost = async (
+          hostname: string
+        ): Promise<CreateAndEnrollEndpointHostResponse> => {
           log.info(
-            `[edr_real_fleet] creating and enrolling Endpoint host on policy ${agentPolicyId}`
+            `[edr_real_fleet] creating and enrolling Endpoint host ${hostname} on policy ${agentPolicyId}`
           );
           const enrolled = await createAndEnrollEndpointHost({
             kbnClient,
             log,
             agentPolicyId,
+            hostname,
             useClosestVersionMatch: true,
           });
 
@@ -138,12 +145,18 @@ export const test = baseTest.extend<EdrRealFleetTestFixtures, EdrRealFleetWorker
           }
         };
 
+        const firstHostname = nextHostname();
         let host: CreateAndEnrollEndpointHostResponse;
         try {
-          host = await enrollHost();
+          host = await enrollHost(firstHostname);
         } catch (error) {
           log.warning(`[edr_real_fleet] host setup failed, retrying once: ${error}`);
-          host = await enrollHost();
+          await deleteMultipassVm(firstHostname).catch((destroyError) => {
+            log.warning(
+              `[edr_real_fleet] destroy VM ${firstHostname} before retry failed: ${destroyError}`
+            );
+          });
+          host = await enrollHost(nextHostname());
         }
 
         created.host = host;
