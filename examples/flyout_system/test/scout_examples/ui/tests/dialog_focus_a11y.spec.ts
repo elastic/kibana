@@ -41,34 +41,41 @@ test.describe('Flyout System - dialog focus accessibility', { tag: tags.stateful
           })
           .toBe(true);
       });
+
+      test(`closing a ${form} flyout returns focus to its trigger with ownFocus ${ownFocus}`, async ({
+        page,
+        pageObjects,
+      }) => {
+        const app = pageObjects.flyoutSystem;
+        const session = app.session(form);
+        const trigger = app.trigger(form, session);
+
+        if (ownFocus) {
+          await app.ownFocusSwitch(session).click();
+        }
+
+        await test.step('close by the footer action', async () => {
+          const flyout = await app.openFlyout(form, session);
+          await app.footerCloseAction(form, session).click();
+          await expect(flyout).toHaveCount(0);
+          await expect(trigger).toBeFocused();
+        });
+
+        await test.step('close by the flyout close button', async () => {
+          const flyout = await app.openFlyout(form, session);
+          await app.closeButton(form, session).click();
+          await expect(flyout).toHaveCount(0);
+          await expect(trigger).toBeFocused();
+        });
+
+        await test.step('close by Escape', async () => {
+          const flyout = await app.openFlyout(form, session);
+          await page.keyboard.press('Escape');
+          await expect(flyout).toHaveCount(0);
+          await expect(trigger).toBeFocused();
+        });
+      });
     }
-
-    test(`closing a ${form} flyout returns focus to its trigger`, async ({ page, pageObjects }) => {
-      const app = pageObjects.flyoutSystem;
-      const session = app.session(form);
-      const trigger = app.trigger(form, session);
-
-      await test.step('close by the footer action', async () => {
-        const flyout = await app.openFlyout(form, session);
-        await app.footerCloseAction(form, session).click();
-        await expect(flyout).toHaveCount(0);
-        await expect(trigger).toBeFocused();
-      });
-
-      await test.step('close by the flyout close button', async () => {
-        const flyout = await app.openFlyout(form, session);
-        await app.closeButton(form, session).click();
-        await expect(flyout).toHaveCount(0);
-        await expect(trigger).toBeFocused();
-      });
-
-      await test.step('close by Escape', async () => {
-        const flyout = await app.openFlyout(form, session);
-        await page.keyboard.press('Escape');
-        await expect(flyout).toHaveCount(0);
-        await expect(trigger).toBeFocused();
-      });
-    });
 
     test(`closing a ${form} child flyout returns focus to the control that opened it`, async ({
       pageObjects,
