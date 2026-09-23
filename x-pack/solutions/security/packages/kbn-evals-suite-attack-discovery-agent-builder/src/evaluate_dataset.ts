@@ -17,6 +17,7 @@ import type { HttpHandler } from '@kbn/core/public';
 import type { AttackDiscoveryAgentBuilderChatClient } from './chat_client';
 import { attackDiscoveryFixtureIndex } from './fixtures';
 import type {
+  AttackDiscovery,
   AttackDiscoveryAgentBuilderExample,
   AttackDiscoveryAgentBuilderTaskOutput,
   AttackDiscoveryRetrievalEvidence,
@@ -1093,6 +1094,83 @@ export const buildWorkflow = ({
   };
 };
 
+/**
+ * Slow-path handoff handling (#293046): when generation exceeds the sync tool's
+ * 90s soft deadline, the converse returns `{ execution_uuid }` while the
+ * pipeline keeps running in the background. The validation phase is the LAST
+ * pipeline phase, so `tracking.validation` becomes non-null only once generation
+ * has produced output. Poll tracking until that happens (bounded), so the
+ * pipeline response read afterwards reflects the completed run instead of a
+ * mid-flight snapshot. A 404 means the execution has not been indexed into the
+ * event log yet — keep polling, the deadline handoff commonly wins that race.
+ */
+const WAIT_FOR_VALIDATION_PHASE_TIMEOUT_MS = 120_000;
+const WAIT_FOR_VALIDATION_PHASE_INTERVAL_MS = 5_000;
+
+/**
+ * Maps a pipeline `validated_discoveries` entry (snake_case API shape with
+ * `alert_ids`, plus `title`/`summary`-style prose fields) into the harness
+ * `AttackDiscovery` shape the insight-based evaluators consume. Only fields
+ * with an unambiguous equivalent are mapped; everything else is omitted
+ * rather than guessed.
+ */
+export const insightsFromValidatedDiscoveries = (
+  validated: unknown[] | null | undefined
+): AttackDiscovery[] | undefined => {
+  if (!Array.isArray(validated)) return undefined;
+  return validated.map((entry) => {
+    const d = (entry ?? {}) as Record<string, unknown>;
+    return {
+      title: typeof d.title === 'string' ? d.title : '',
+      alertIds: Array.isArray(d.alert_ids) ? (d.alert_ids as string[]) : [],
+    } as AttackDiscovery;
+  });
+};
+
+interface ExecutionTrackingResponse {
+  generation?: { workflow_id?: string } | null;
+  validation?: unknown;
+}
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+export const waitForValidationPhase = async ({
+  fetch,
+  executionId,
+}: {
+  fetch: HttpHandler;
+  executionId: string;
+}): Promise<ExecutionTrackingResponse> => {
+  const deadline = Date.now() + WAIT_FOR_VALIDATION_PHASE_TIMEOUT_MS;
+  let lastError: unknown;
+  for (;;) {
+    let tracking: ExecutionTrackingResponse | null = null;
+    try {
+      tracking = (await fetch(`/internal/attack_discovery/executions/${executionId}/tracking`, {
+        method: 'GET',
+        headers: { 'elastic-api-version': '1' },
+      })) as ExecutionTrackingResponse;
+    } catch (error) {
+      lastError = error;
+    }
+    if (tracking && tracking.validation != null) {
+      return tracking;
+    }
+    if (Date.now() >= deadline) {
+      if (tracking) {
+        // Timed out still waiting: return the last snapshot rather than failing
+        // the run — the caller reads whatever pipeline state exists, and the
+        // evaluators score that honestly.
+        return tracking;
+      }
+      throw new Error(
+        `Attack Discovery execution ${executionId} never became trackable within ${WAIT_FOR_VALIDATION_PHASE_TIMEOUT_MS}ms`,
+        { cause: lastError }
+      );
+    }
+    await sleep(WAIT_FOR_VALIDATION_PHASE_INTERVAL_MS);
+  }
+};
 const inspectWorkflow = async ({
   fetch,
   executionId,
@@ -1111,11 +1189,11 @@ const inspectWorkflow = async ({
   agentAlertRetrievalPopulation: number | null;
   retrievalScope: string | null;
   unscopedAgentAlertRetrievalRowCounts: number[];
-}): Promise<AttackDiscoveryAgentBuilderTaskOutput['workflow']> => {
-  const tracking = (await fetch(`/internal/attack_discovery/executions/${executionId}/tracking`, {
-    method: 'GET',
-    headers: { 'elastic-api-version': '1' },
-  })) as { generation?: { workflow_id?: string } | null };
+}): Promise<{
+  workflow: AttackDiscoveryAgentBuilderTaskOutput['workflow'];
+  pipeline: AttackDiscoveryPipelineResponse | null;
+}> => {
+  const tracking = await waitForValidationPhase({ fetch, executionId });
   const workflowId = tracking.generation?.workflow_id;
   const pipeline = workflowId
     ? ((await fetch(`/internal/attack_discovery/workflow/${workflowId}/execution/${executionId}`, {
@@ -1127,15 +1205,18 @@ const inspectWorkflow = async ({
   // Without a generation workflow there is no pipeline response to read, but the
   // agent's own retrieval (recorded in `steps`) is still observable — which is
   // the whole point of `buildWorkflow` taking a nullable pipeline.
-  return buildWorkflow({
+  return {
     pipeline,
-    adToolResult,
-    agentEsqlRowCounts,
-    adToolEsqlQuery,
-    agentAlertRetrievalPopulation,
-    retrievalScope,
-    unscopedAgentAlertRetrievalRowCounts,
-  });
+    workflow: buildWorkflow({
+      pipeline,
+      adToolResult,
+      agentEsqlRowCounts,
+      adToolEsqlQuery,
+      agentAlertRetrievalPopulation,
+      retrievalScope,
+      unscopedAgentAlertRetrievalRowCounts,
+    }),
+  };
 };
 
 const buildTask =
@@ -1174,28 +1255,42 @@ const buildTask =
       retrievalScope
     );
     const executionId = adToolResult?.executionUuid;
-    const workflow = executionId
+    const { workflow, pipeline } = executionId
       ? await inspectWorkflow({
-          fetch,
           executionId,
           adToolResult,
+          fetch,
           agentEsqlRowCounts,
           adToolEsqlQuery,
           agentAlertRetrievalPopulation,
           retrievalScope,
           unscopedAgentAlertRetrievalRowCounts,
         })
-      : buildWorkflow({
+      : {
+          workflow: buildWorkflow({
+            pipeline: null,
+            adToolResult,
+            agentEsqlRowCounts,
+            adToolEsqlQuery,
+            agentAlertRetrievalPopulation,
+            retrievalScope,
+            unscopedAgentAlertRetrievalRowCounts,
+          }),
           pipeline: null,
-          adToolResult,
-          agentEsqlRowCounts,
-          adToolEsqlQuery,
-          agentAlertRetrievalPopulation,
-          retrievalScope,
-          unscopedAgentAlertRetrievalRowCounts,
-        });
+        };
     return {
       ...response,
+      // Slow-path handoff (#293046): when the sync tool returns the
+      // `{ execution_uuid }` handoff at its 90s soft deadline, the converse
+      // response carries no insights even though generation completes in the
+      // background moments later. Fall back to the pipeline's validated
+      // discoveries (mapped to the harness `AttackDiscovery` shape) so
+      // insight-based evaluators (NoiseFalsePositive, AttackDiscoveryBasic)
+      // score the completed run rather than the handoff stub. A run whose
+      // discoveries were all hallucination-filtered legitimately yields an
+      // empty array — do not fabricate.
+      insights:
+        response.insights ?? insightsFromValidatedDiscoveries(pipeline?.validated_discoveries),
       // Redact transient execution UUIDs from steps and adToolResult before
       // they reach evaluators — these are per-run values that would pollute
       // score reports and make diff comparisons noisy.

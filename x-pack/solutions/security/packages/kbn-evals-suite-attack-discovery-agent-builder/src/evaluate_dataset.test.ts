@@ -15,7 +15,9 @@ import {
   extractRetrievalEvidence,
   extractUnscopedAlertRetrievalRowCounts,
   findAdToolResult,
+  insightsFromValidatedDiscoveries,
   trackedStageKeys,
+  waitForValidationPhase,
   trackedStages,
 } from './evaluate_dataset';
 import { createAdToolResultEvaluator } from './evaluators/ad_tool_result_evaluator';
@@ -1341,5 +1343,115 @@ describe('retrieval evidence persisted on the task output', () => {
     expect(workflow.retrievalEvidence.pipelineAlertRetrieval).toEqual([
       { alertsContextCount: 95, extractionStrategy: 'default_esql', alertsCount: null },
     ]);
+  });
+});
+
+describe('slow-path handoff (#293046): insights from pipeline validated discoveries', () => {
+  it('maps snake_case validated discoveries into harness AttackDiscovery shape', () => {
+    const insights = insightsFromValidatedDiscoveries([
+      { title: 'LSASS credential access chain', alert_ids: ['a1', 'a2'] },
+      { title: 'Cloud OAuth abuse', alert_ids: ['b1'] },
+    ]);
+
+    expect(insights).toEqual([
+      { title: 'LSASS credential access chain', alertIds: ['a1', 'a2'] },
+      { title: 'Cloud OAuth abuse', alertIds: ['b1'] },
+    ]);
+  });
+
+  it('returns undefined for a non-array (no fabrication when the pipeline has none)', () => {
+    expect(insightsFromValidatedDiscoveries(null)).toBeUndefined();
+    expect(insightsFromValidatedDiscoveries(undefined)).toBeUndefined();
+  });
+
+  it('maps a hallucination-filtered run to an EMPTY array, not undefined', () => {
+    // Empty array is a real measurement (all discoveries filtered); undefined
+    // would fall through the ?? chain and hide it.
+    expect(insightsFromValidatedDiscoveries([])).toEqual([]);
+  });
+});
+
+describe('slow-path handoff (#293046): waitForValidationPhase', () => {
+  const trackingWith = (validation: unknown) => ({
+    generation: { workflow_id: 'wf-gen' },
+    validation,
+  });
+
+  it('returns immediately when validation is already tracked', async () => {
+    const fetch = jest.fn().mockResolvedValue(trackingWith({ workflow_id: 'wf-val' }));
+    const tracking = await waitForValidationPhase({ fetch, executionId: 'exec-1' });
+
+    expect(tracking.generation?.workflow_id).toBe('wf-gen');
+    expect(fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('polls until validation appears (handoff race: generation still running)', async () => {
+    jest.useFakeTimers();
+    try {
+      const fetch = jest
+        .fn()
+        .mockResolvedValueOnce(trackingWith(null))
+        .mockResolvedValueOnce(trackingWith(null))
+        .mockResolvedValueOnce(trackingWith({ workflow_id: 'wf-val' }));
+      const pending = waitForValidationPhase({ fetch, executionId: 'exec-1' });
+      const settled = await jest.advanceTimersByTimeAsync(10_000).then(() => pending);
+
+      expect(fetch).toHaveBeenCalledTimes(3);
+      expect(settled.validation).toEqual({ workflow_id: 'wf-val' });
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('keeps polling through 404s (execution not indexed into the event log yet)', async () => {
+    jest.useFakeTimers();
+    try {
+      const fetch = jest
+        .fn()
+        .mockRejectedValueOnce(new Error('404'))
+        .mockResolvedValueOnce(trackingWith({ workflow_id: 'wf-val' }));
+      const pending = waitForValidationPhase({ fetch, executionId: 'exec-1' }).catch((e) => e);
+      const settled = await jest.advanceTimersByTimeAsync(5_000).then(() => pending);
+
+      expect(fetch).toHaveBeenCalledTimes(2);
+      expect(settled.validation).toEqual({ workflow_id: 'wf-val' });
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('returns the last snapshot rather than throwing when the timeout wins', async () => {
+    jest.useFakeTimers();
+    try {
+      const fetch = jest.fn().mockResolvedValue(trackingWith(null));
+      const pending = waitForValidationPhase({ fetch, executionId: 'exec-1' });
+      const settled = await jest.advanceTimersByTimeAsync(120_000).then(() => pending);
+
+      expect(settled.validation).toBeNull();
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('throws when the execution never becomes trackable at all', async () => {
+    jest.useFakeTimers();
+    try {
+      const fetch = jest.fn().mockImplementation(async () => {
+        throw new Error('connection refused');
+      });
+      // Attach the catch handler immediately so the rejection is never
+      // "unhandled" while fake timers advance — Node's process-level
+      // PromiseRejectionHandledWarning kills the Kibana jest runner.
+      const pending = waitForValidationPhase({ fetch, executionId: 'exec-1' }).catch(
+        (error: Error) => error
+      );
+      await jest.advanceTimersByTimeAsync(120_000);
+      const result = await pending;
+
+      expect(result).toBeInstanceOf(Error);
+      expect((result as Error).message).toMatch(/never became trackable/);
+    } finally {
+      jest.useRealTimers();
+    }
   });
 });
