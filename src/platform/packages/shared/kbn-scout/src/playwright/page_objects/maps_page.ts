@@ -185,7 +185,7 @@ export class MapsPage {
     if (await this.setViewForm.isVisible()) {
       // In embedded contexts (e.g. dashboard), the toggle button does not reliably
       // close the popover, so use Escape instead.
-      await this.page.keyboard.press('Escape');
+      await this.setViewForm.press('Escape');
       await this.setViewForm.waitFor({ state: 'hidden', timeout: DEFAULT_MAP_LOADING_TIMEOUT });
     }
   }
