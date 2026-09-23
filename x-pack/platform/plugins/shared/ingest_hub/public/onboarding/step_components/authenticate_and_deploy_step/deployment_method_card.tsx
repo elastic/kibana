@@ -83,7 +83,11 @@ interface DeploymentMethodCardProps {
   disabled?: boolean;
 }
 
-export function DeploymentMethodCard({ selectedMethod, onChange, disabled }: DeploymentMethodCardProps) {
+export function DeploymentMethodCard({
+  selectedMethod,
+  onChange,
+  disabled,
+}: DeploymentMethodCardProps) {
   const { euiTheme } = useEuiTheme();
   const modalTitleId = useGeneratedHtmlId();
   const [isModalOpen, setIsModalOpen] = useState(false);
