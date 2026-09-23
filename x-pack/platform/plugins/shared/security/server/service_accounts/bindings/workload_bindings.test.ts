@@ -77,6 +77,7 @@ describe('ServiceAccountWorkloadBindings', () => {
     });
 
     backend = {
+      roleLimits: { maxRoles: 50, maxRoleNameLength: 507 },
       create: jest.fn(),
       createFakeRequest: jest.fn().mockResolvedValue(mintedRequest),
       reauthenticateFakeRequest: jest.fn(),

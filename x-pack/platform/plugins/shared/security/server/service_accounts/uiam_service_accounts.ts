@@ -20,6 +20,7 @@ import { ensureManageSecurityPrivilege } from './manage_security_privilege';
 import { buildRoleAssignments } from './role_assignments';
 import { ServiceAccountTokenExchangeError } from './token_exchange_error';
 import type { CloudProjectContext, ServiceAccountsBackend } from './types';
+import { UIAM_SERVICE_ACCOUNT_ROLE_LIMITS } from './uiam_role_limits';
 import type { SecurityLicense } from '../../common';
 import {
   SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH,
@@ -96,6 +97,8 @@ export interface UiamServiceAccountsOptions {
 }
 
 export class UiamServiceAccounts implements ServiceAccountsBackend {
+  readonly roleLimits = UIAM_SERVICE_ACCOUNT_ROLE_LIMITS;
+
   private readonly logger: Logger;
   private readonly license: SecurityLicense;
   private readonly uiam: UiamServicePublic;
@@ -159,7 +162,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
       );
     }
 
-    const { name, roles } = parseCreateServiceAccountParams(params);
+    const { name, roles } = parseCreateServiceAccountParams(params, this.roleLimits);
 
     const authorization = getUiamAuthorizationHeaderFromRequest(request);
 

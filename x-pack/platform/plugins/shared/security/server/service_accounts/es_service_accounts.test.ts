@@ -15,14 +15,17 @@ import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
 import type { CheckPrivileges, CheckPrivilegesResponse } from '@kbn/security-plugin-types-server';
 
 import type { ServiceAccountCredentialStore } from './credentials';
-import { EsServiceAccounts } from './es_service_accounts';
-import { licenseMock } from '../../common/licensing/index.mock';
 import {
   ES_SERVICE_ACCOUNT_MAX_ROLES,
-  ES_SERVICE_ACCOUNT_TOKEN_MAX_LENGTH,
-  SERVICE_ACCOUNT_MAX_ROLES,
-  SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH,
-} from '../../common/service_accounts';
+  ES_SERVICE_ACCOUNT_ROLE_NAME_MAX_LENGTH,
+} from './es_role_limits';
+import { EsServiceAccounts } from './es_service_accounts';
+import {
+  UIAM_SERVICE_ACCOUNT_MAX_ROLES,
+  UIAM_SERVICE_ACCOUNT_ROLE_NAME_MAX_LENGTH,
+} from './uiam_role_limits';
+import { licenseMock } from '../../common/licensing/index.mock';
+import { ES_SERVICE_ACCOUNT_TOKEN_MAX_LENGTH } from '../../common/service_accounts';
 import { securityTelemetry } from '../otel/instrumentation';
 
 jest.mock('../otel/instrumentation', () => ({
@@ -208,6 +211,55 @@ describe('EsServiceAccounts', () => {
       );
     });
 
+    // The two backends cap roles differently, so UIAM's lower cap must not leak into this one.
+    it(`accepts more roles than UIAM allows, up to ${ES_SERVICE_ACCOUNT_MAX_ROLES}`, async () => {
+      mockHappyPath();
+      const roles = Array.from({ length: ES_SERVICE_ACCOUNT_MAX_ROLES }, (_, i) => `role-${i}`);
+      expect(roles.length).toBeGreaterThan(UIAM_SERVICE_ACCOUNT_MAX_ROLES);
+
+      await expect(
+        serviceAccounts.create(request, { ...createParams, roles })
+      ).resolves.toMatchObject({ roles });
+
+      expect(esClient.asCurrentUser.transport.request.mock.calls[1][0]).toEqual(
+        expect.objectContaining({ body: { roles } })
+      );
+    });
+
+    it(`rejects more than ${ES_SERVICE_ACCOUNT_MAX_ROLES} distinct roles with a 400 before writing anything`, async () => {
+      const roles = Array.from({ length: ES_SERVICE_ACCOUNT_MAX_ROLES + 1 }, (_, i) => `role-${i}`);
+
+      await expect(
+        serviceAccounts.create(request, { ...createParams, roles })
+      ).rejects.toMatchObject({
+        output: { statusCode: 400 },
+        message: expect.stringContaining('`roles`'),
+      });
+      expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
+    });
+
+    it(`accepts a longer role name than UIAM allows, up to ${ES_SERVICE_ACCOUNT_ROLE_NAME_MAX_LENGTH} characters`, async () => {
+      mockHappyPath();
+      const roles = ['a'.repeat(ES_SERVICE_ACCOUNT_ROLE_NAME_MAX_LENGTH)];
+      expect(roles[0].length).toBeGreaterThan(UIAM_SERVICE_ACCOUNT_ROLE_NAME_MAX_LENGTH);
+
+      await expect(
+        serviceAccounts.create(request, { ...createParams, roles })
+      ).resolves.toMatchObject({ roles });
+    });
+
+    it(`rejects a role name longer than ${ES_SERVICE_ACCOUNT_ROLE_NAME_MAX_LENGTH} characters with a 400 before writing anything`, async () => {
+      const roles = ['a'.repeat(ES_SERVICE_ACCOUNT_ROLE_NAME_MAX_LENGTH + 1)];
+
+      await expect(
+        serviceAccounts.create(request, { ...createParams, roles })
+      ).rejects.toMatchObject({
+        output: { statusCode: 400 },
+        message: expect.stringContaining('`roles.0`'),
+      });
+      expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
+    });
+
     it("rejects an omitted `roles` with a 400 rather than granting the creator's privileges", async () => {
       await expect(
         serviceAccounts.create(request, { name: 'nightshift-relay' } as never)
@@ -229,17 +281,16 @@ describe('EsServiceAccounts', () => {
       expect(credentialStore.set).not.toHaveBeenCalled();
     });
 
-    // Accounts can be written to this namespace without Kibana, and Kibana's own send-side caps
-    // were lowered after the first accounts were created, so an account wider than what Kibana
-    // sends still has to read as "taken".
+    // Accounts can be written to this namespace without Kibana, so an account as wide as
+    // Elasticsearch allows still has to read as "taken".
     it.each([
       [
-        'more roles than Kibana sends',
-        { roles: new Array(SERVICE_ACCOUNT_MAX_ROLES + 1).fill('viewer') },
+        'as many roles as Elasticsearch allows',
+        { roles: new Array(ES_SERVICE_ACCOUNT_MAX_ROLES).fill('viewer') },
       ],
       [
-        'a longer role name than Kibana sends',
-        { roles: ['a'.repeat(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH)] },
+        'as long a role name as Elasticsearch allows',
+        { roles: ['a'.repeat(ES_SERVICE_ACCOUNT_ROLE_NAME_MAX_LENGTH)] },
       ],
     ])('rejects with a 409 when the taken account holds %s', async (_, entry) => {
       esClient.asCurrentUser.transport.request.mockResolvedValueOnce(accountEntry(entry));
@@ -250,10 +301,17 @@ describe('EsServiceAccounts', () => {
       expect(esClient.asCurrentUser.transport.request).toHaveBeenCalledTimes(1);
     });
 
-    it('refuses an account with more roles than Elasticsearch itself allows', async () => {
-      esClient.asCurrentUser.transport.request.mockResolvedValueOnce(
-        accountEntry({ roles: new Array(ES_SERVICE_ACCOUNT_MAX_ROLES + 1).fill('viewer') })
-      );
+    it.each([
+      [
+        'more roles than Elasticsearch itself allows',
+        { roles: new Array(ES_SERVICE_ACCOUNT_MAX_ROLES + 1).fill('viewer') },
+      ],
+      [
+        'a longer role name than Elasticsearch itself allows',
+        { roles: ['a'.repeat(ES_SERVICE_ACCOUNT_ROLE_NAME_MAX_LENGTH + 1)] },
+      ],
+    ])('refuses an account with %s', async (_, entry) => {
+      esClient.asCurrentUser.transport.request.mockResolvedValueOnce(accountEntry(entry));
 
       await expect(serviceAccounts.create(request, createParams)).rejects.toMatchObject({
         output: { statusCode: 502 },

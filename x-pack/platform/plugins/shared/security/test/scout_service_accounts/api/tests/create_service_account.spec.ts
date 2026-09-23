@@ -37,8 +37,18 @@ const KIBANA_INDEX = '.kibana';
 /** Raw field path of an attribute on a saved object document, which nests them under the type. */
 const CREDENTIAL_ACCOUNT_FIELD = `${CREDENTIAL_TYPE}.serviceAccountId`;
 
+/**
+ * How many roles Elasticsearch allows on a user-managed service account, and so the most Kibana
+ * sends to it: `ES_SERVICE_ACCOUNT_MAX_ROLES`. UIAM's cap is far lower, so this also shows that
+ * the UIAM limit does not leak into this backend.
+ */
+const ES_MAX_ROLES = 1000;
+
 /** Unique per run, so a failed cleanup cannot make the next run collide. */
 const uniqueName = (prefix: string) => `${prefix}-${Date.now()}-${Math.floor(Math.random() * 1e6)}`;
+
+/** Distinct role names, since Kibana drops duplicates before it counts. */
+const distinctRoles = (count: number) => Array.from({ length: count }, (_, i) => `role-${i}`);
 
 apiTest.describe('Create Elasticsearch service accounts', { tag: LOCAL_ONLY }, () => {
   const created: string[] = [];
@@ -192,6 +202,58 @@ apiTest.describe('Create Elasticsearch service accounts', { tag: LOCAL_ONLY }, (
       expect(response.statusCode, `${JSON.stringify(body)} should be rejected`).toBe(400);
     }
   });
+
+  apiTest(
+    `creates an account with ${ES_MAX_ROLES} roles, the most Elasticsearch allows`,
+    async ({ apiClient, esClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
+      const name = uniqueName('max-roles');
+      created.push(name);
+      const roles = distinctRoles(ES_MAX_ROLES);
+
+      const response = await apiClient.post(CREATE_ENDPOINT, {
+        headers: { ...cookieHeader, ...REQUEST_HEADERS },
+        responseType: 'json',
+        body: { name, roles },
+      });
+
+      expect(response.statusCode).toBe(200);
+      expect(response.body).toMatchObject({ id: `${NAMESPACE}/${name}`, name, roles });
+
+      // Elasticsearch itself has to accept that many, not just Kibana's validation.
+      const account = await esClient.transport.request<Record<string, { roles: string[] }>>({
+        method: 'GET',
+        path: `/_security/service/${NAMESPACE}/${name}`,
+      });
+      expect(account[`${NAMESPACE}/${name}`].roles).toHaveLength(ES_MAX_ROLES);
+    }
+  );
+
+  apiTest(
+    `refuses more than ${ES_MAX_ROLES} roles without writing anything`,
+    async ({ apiClient, esClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
+      // Registered up front even though the request is expected to fail: if the limit ever
+      // regresses, the account it creates has to be cleaned up like any other.
+      const name = uniqueName('too-many-roles');
+      created.push(name);
+
+      const response = await apiClient.post(CREATE_ENDPOINT, {
+        headers: { ...cookieHeader, ...REQUEST_HEADERS },
+        responseType: 'json',
+        body: { name, roles: distinctRoles(ES_MAX_ROLES + 1) },
+      });
+
+      expect(response.statusCode).toBe(400);
+      expect(response.body.message).toContain('roles');
+
+      const account = await esClient.transport.request<Record<string, unknown>>({
+        method: 'GET',
+        path: `/_security/service/${NAMESPACE}/${name}`,
+      });
+      expect(account).toStrictEqual({});
+    }
+  );
 
   apiTest('refuses a name that is already taken', async ({ apiClient, samlAuth }) => {
     const { cookieHeader } = await samlAuth.asInteractiveUser('admin');

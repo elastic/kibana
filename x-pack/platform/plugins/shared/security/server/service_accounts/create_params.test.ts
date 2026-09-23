@@ -10,12 +10,15 @@ import Boom from '@hapi/boom';
 import type { CreateServiceAccountParams } from '@kbn/core-security-server';
 
 import { parseCreateServiceAccountParams } from './create_params';
-import { SERVICE_ACCOUNT_MAX_ROLES } from '../../common/service_accounts';
+
+/** Each backend passes its own limits. Small ones keep the boundary cases readable. */
+const limits = { maxRoles: 3, maxRoleNameLength: 8 };
+const { maxRoles, maxRoleNameLength } = limits;
 
 /** Returns the Boom error `parseCreateServiceAccountParams` threw, or fails the test. */
 const expectRejection = (params: CreateServiceAccountParams): Boom.Boom => {
   try {
-    parseCreateServiceAccountParams(params);
+    parseCreateServiceAccountParams(params, limits);
   } catch (e) {
     if (!Boom.isBoom(e)) {
       throw e;
@@ -28,16 +31,19 @@ const expectRejection = (params: CreateServiceAccountParams): Boom.Boom => {
 describe('parseCreateServiceAccountParams', () => {
   it('returns valid parameters unchanged', () => {
     expect(
-      parseCreateServiceAccountParams({ name: 'nightshift-relay', roles: ['viewer', 'editor'] })
+      parseCreateServiceAccountParams(
+        { name: 'nightshift-relay', roles: ['viewer', 'editor'] },
+        limits
+      )
     ).toEqual({ name: 'nightshift-relay', roles: ['viewer', 'editor'] });
   });
 
   it('drops duplicate roles, keeping first occurrences in order', () => {
     expect(
-      parseCreateServiceAccountParams({
-        name: 'nightshift-relay',
-        roles: ['viewer', 'editor', 'viewer'],
-      })
+      parseCreateServiceAccountParams(
+        { name: 'nightshift-relay', roles: ['viewer', 'editor', 'viewer'] },
+        limits
+      )
     ).toEqual({ name: 'nightshift-relay', roles: ['viewer', 'editor'] });
   });
 
@@ -68,19 +74,47 @@ describe('parseCreateServiceAccountParams', () => {
     expect(error.message).toContain('`roles`');
   });
 
+  it('accepts as many distinct roles as the cap allows', () => {
+    const roles = Array.from({ length: maxRoles }, (_, i) => `role-${i}`);
+
+    expect(parseCreateServiceAccountParams({ name: 'nightshift-relay', roles }, limits)).toEqual({
+      name: 'nightshift-relay',
+      roles,
+    });
+  });
+
   it('rejects more distinct roles than the cap allows', () => {
-    const roles = Array.from({ length: SERVICE_ACCOUNT_MAX_ROLES + 1 }, (_, i) => `role-${i}`);
+    const roles = Array.from({ length: maxRoles + 1 }, (_, i) => `role-${i}`);
     const error = expectRejection({ name: 'nightshift-relay', roles });
 
     expect(error.output.statusCode).toBe(400);
     expect(error.message).toContain('`roles`');
   });
 
+  it('accepts a role name as long as the limit allows', () => {
+    const roles = ['a'.repeat(maxRoleNameLength)];
+
+    expect(parseCreateServiceAccountParams({ name: 'nightshift-relay', roles }, limits)).toEqual({
+      name: 'nightshift-relay',
+      roles,
+    });
+  });
+
+  it('rejects a role name longer than the limit allows', () => {
+    const error = expectRejection({
+      name: 'nightshift-relay',
+      roles: ['a'.repeat(maxRoleNameLength + 1)],
+    });
+
+    expect(error.output.statusCode).toBe(400);
+    expect(error.message).toContain('`roles.0`');
+  });
+
   // The cap counts distinct roles, so a list that only overruns it through repetition is fine.
   it('applies the cap after dropping duplicates', () => {
-    const roles = new Array(SERVICE_ACCOUNT_MAX_ROLES + 1).fill('viewer');
+    const roles = new Array(maxRoles + 1).fill('viewer');
 
-    expect(parseCreateServiceAccountParams({ name: 'nightshift-relay', roles })).toEqual({
+    expect(parseCreateServiceAccountParams({ name: 'nightshift-relay', roles }, limits)).toEqual({
       name: 'nightshift-relay',
       roles: ['viewer'],
     });

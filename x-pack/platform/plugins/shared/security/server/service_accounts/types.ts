@@ -14,6 +14,7 @@ import type {
 
 import type { ServiceAccountWorkloadBindingsApi } from './bindings';
 import type { CreateServiceAccountFakeRequestParams } from './fake_requests';
+import type { ServiceAccountRoleLimits } from '../../common/service_accounts';
 
 /**
  * A backend capable of managing service accounts for the current runtime.
@@ -22,6 +23,9 @@ import type { CreateServiceAccountFakeRequestParams } from './fake_requests';
  * ones, so the route and contract layers stay backend-agnostic.
  */
 export interface ServiceAccountsBackend {
+  /** The limits this backend puts on the roles `create` accepts. */
+  readonly roleLimits: ServiceAccountRoleLimits;
+
   create(request: KibanaRequest, params: CreateServiceAccountParams): Promise<ServiceAccount>;
 
   /**

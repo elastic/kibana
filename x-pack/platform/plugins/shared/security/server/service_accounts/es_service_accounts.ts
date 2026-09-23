@@ -21,15 +21,18 @@ import { z } from '@kbn/zod';
 import { bestEffortUserProfileIdResolver, resolveWorkloadBinder } from './bindings';
 import { parseCreateServiceAccountParams } from './create_params';
 import type { ServiceAccountCredentialStore } from './credentials';
+import {
+  ES_SERVICE_ACCOUNT_MAX_ROLES,
+  ES_SERVICE_ACCOUNT_ROLE_LIMITS,
+  ES_SERVICE_ACCOUNT_ROLE_NAME_MAX_LENGTH,
+} from './es_role_limits';
 import { ensureManageSecurityPrivilege } from './manage_security_privilege';
 import type { ServiceAccountsBackend } from './types';
 import type { SecurityLicense } from '../../common';
 import {
-  ES_SERVICE_ACCOUNT_MAX_ROLES,
   ES_SERVICE_ACCOUNT_NAMESPACE,
   ES_SERVICE_ACCOUNT_TOKEN_MAX_LENGTH,
   ES_SERVICE_ACCOUNT_TOKEN_NAME,
-  SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH,
 } from '../../common/service_accounts';
 import { getDetailedErrorMessage } from '../errors';
 import { securityTelemetry } from '../otel/instrumentation';
@@ -45,13 +48,13 @@ const userManagedEntrySchema = z.object({ type: z.literal('user_managed') });
  * principal. Parsed separately from the discriminator above, so "this is not Kibana's account"
  * and "Kibana cannot read this account" stay different answers.
  *
- * Bounded by what Elasticsearch allows, not by what Kibana sends: an account written outside
- * Kibana, or before the send-side caps were lowered, can hold more, and it still has to read as
- * "taken" rather than as unreadable.
+ * Bounded by what Elasticsearch allows, the same limits Kibana sends with: an account written
+ * outside Kibana can hold that much, and it still has to read as "taken" rather than as
+ * unreadable.
  */
 const accountEntrySchema = z.object({
   roles: z
-    .array(z.string().min(1).max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH))
+    .array(z.string().min(1).max(ES_SERVICE_ACCOUNT_ROLE_NAME_MAX_LENGTH))
     .max(ES_SERVICE_ACCOUNT_MAX_ROLES),
   enabled: z.boolean(),
 });
@@ -91,6 +94,8 @@ export interface EsServiceAccountsOptions {
  * handed a short-lived token exchanged from it.
  */
 export class EsServiceAccounts implements ServiceAccountsBackend {
+  readonly roleLimits = ES_SERVICE_ACCOUNT_ROLE_LIMITS;
+
   private readonly logger: Logger;
   private readonly license: SecurityLicense;
   private readonly clusterClient: IClusterClient;
@@ -170,7 +175,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     }
 
     const namespace = ES_SERVICE_ACCOUNT_NAMESPACE;
-    const { name, roles } = parseCreateServiceAccountParams(params);
+    const { name, roles } = parseCreateServiceAccountParams(params, this.roleLimits);
     const serviceAccountId = `${namespace}/${name}`;
 
     const esClient = this.clusterClient.asScoped(request).asCurrentUser;

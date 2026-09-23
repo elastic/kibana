@@ -20,6 +20,10 @@ import type {
 
 import { SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS } from './fake_requests';
 import { ServiceAccountTokenExchangeError } from './token_exchange_error';
+import {
+  UIAM_SERVICE_ACCOUNT_MAX_ROLES,
+  UIAM_SERVICE_ACCOUNT_ROLE_NAME_MAX_LENGTH,
+} from './uiam_role_limits';
 import { UiamServiceAccounts } from './uiam_service_accounts';
 import type { SecurityLicense } from '../../common';
 import { licenseMock } from '../../common/licensing/index.mock';
@@ -315,6 +319,62 @@ describe('UiamServiceAccounts', () => {
         expect.stringContaining('UIAM reported the created service account [nightshift-relay]')
       );
       expect(mockUiam.createServiceAccount).toHaveBeenCalledTimes(1);
+    });
+
+    it(`accepts ${UIAM_SERVICE_ACCOUNT_MAX_ROLES} distinct roles, UIAM's cap`, async () => {
+      mockUiam.createServiceAccount.mockResolvedValue(validResponse);
+      const roles = Array.from({ length: UIAM_SERVICE_ACCOUNT_MAX_ROLES }, (_, i) => `role-${i}`);
+
+      await expect(
+        serviceAccounts.create(createMockRequest('Bearer essu_my_token'), {
+          ...createParams,
+          roles,
+        })
+      ).resolves.toEqual({ ...createdAccount, roles });
+
+      expect(mockUiam.createServiceAccount).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          role_assignments: {
+            organization: [expect.objectContaining({ application_roles: roles })],
+          },
+        }),
+        undefined
+      );
+    });
+
+    // UIAM encodes the roles into every token it mints, so it caps them far below Elasticsearch.
+    it(`rejects more than ${UIAM_SERVICE_ACCOUNT_MAX_ROLES} distinct roles with a 400 before calling UIAM`, async () => {
+      const roles = Array.from(
+        { length: UIAM_SERVICE_ACCOUNT_MAX_ROLES + 1 },
+        (_, i) => `role-${i}`
+      );
+
+      await expect(
+        serviceAccounts.create(createMockRequest('Bearer essu_my_token'), {
+          ...createParams,
+          roles,
+        })
+      ).rejects.toMatchObject({
+        output: { statusCode: 400 },
+        message: expect.stringContaining('`roles`'),
+      });
+
+      expect(mockUiam.createServiceAccount).not.toHaveBeenCalled();
+    });
+
+    it(`rejects a role name longer than ${UIAM_SERVICE_ACCOUNT_ROLE_NAME_MAX_LENGTH} characters with a 400 before calling UIAM`, async () => {
+      await expect(
+        serviceAccounts.create(createMockRequest('Bearer essu_my_token'), {
+          ...createParams,
+          roles: ['a'.repeat(UIAM_SERVICE_ACCOUNT_ROLE_NAME_MAX_LENGTH + 1)],
+        })
+      ).rejects.toMatchObject({
+        output: { statusCode: 400 },
+        message: expect.stringContaining('`roles.0`'),
+      });
+
+      expect(mockUiam.createServiceAccount).not.toHaveBeenCalled();
     });
 
     it('rejects an empty `roles` with a 400 rather than asking UIAM for "no roles"', async () => {

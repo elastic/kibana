@@ -8,12 +8,11 @@
 import { z } from '@kbn/zod';
 
 import {
-  SERVICE_ACCOUNT_MAX_ROLES,
   SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH,
   SERVICE_ACCOUNT_NAME_MAX_LENGTH,
   SERVICE_ACCOUNT_NAME_REGEX,
-  SERVICE_ACCOUNT_ROLE_NAME_MAX_LENGTH,
 } from './constants';
+import type { ServiceAccountRoleLimits } from './constants';
 
 export const serviceAccountIdSchema = z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH);
 
@@ -30,28 +29,28 @@ export const serviceAccountNameSchema = z
     'must begin with a letter or digit and may contain only letters, digits, hyphens and underscores'
   );
 
-export const serviceAccountRoleNameSchema = z
-  .string()
-  .min(1)
-  .max(SERVICE_ACCOUNT_ROLE_NAME_MAX_LENGTH);
-
 /**
- * The role list an account is created with. What Kibana reads back from a backend is bounded by
- * that backend's own limits instead, since accounts can be written there without Kibana.
+ * The role list an account is created with, held to one backend's `limits`. What Kibana reads
+ * back from a backend is bounded by that backend's own limits too, but validated separately,
+ * since accounts can be written there without Kibana.
  */
-export const serviceAccountRolesSchema = z
-  .array(serviceAccountRoleNameSchema)
-  .min(1)
-  .max(SERVICE_ACCOUNT_MAX_ROLES);
+export const getServiceAccountRolesSchema = ({
+  maxRoles,
+  maxRoleNameLength,
+}: ServiceAccountRoleLimits) =>
+  z.array(z.string().min(1).max(maxRoleNameLength)).min(1).max(maxRoles);
 
 /**
- * Parameters for creating a service account. Validated in two places: the route body, and again
- * inside each backend, since callers of the server contract never pass through the route.
+ * Parameters for creating a service account, with roles held to `limits`. Validated in two
+ * places: the route body, against the larger of the backends' limits, and again inside each backend
+ * against that backend's own limits, since callers of the server contract never pass through the
+ * route.
  *
  * `roles` is required and non-empty. There is no "derive them from the creator" default: see
  * `CreateServiceAccountParams` in `@kbn/core-security-common`.
  */
-export const createServiceAccountParamsSchema = z.object({
-  name: serviceAccountNameSchema,
-  roles: serviceAccountRolesSchema,
-});
+export const getCreateServiceAccountParamsSchema = (limits: ServiceAccountRoleLimits) =>
+  z.object({
+    name: serviceAccountNameSchema,
+    roles: getServiceAccountRolesSchema(limits),
+  });

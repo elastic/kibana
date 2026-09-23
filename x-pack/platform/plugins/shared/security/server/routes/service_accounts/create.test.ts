@@ -12,8 +12,16 @@ import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 
 import { defineCreateServiceAccountRoute } from './create';
-import { createServiceAccountBodySchema } from './schemas';
+import {
+  createServiceAccountBodySchema,
+  SERVICE_ACCOUNT_CREATE_MAX_BODY_BYTES,
+  SERVICE_ACCOUNT_ROLE_LIMITS,
+} from './schemas';
 import { SERVICE_ACCOUNT_NAME_MAX_LENGTH } from '../../../common/service_accounts';
+import {
+  ES_SERVICE_ACCOUNT_ROLE_LIMITS,
+  UIAM_SERVICE_ACCOUNT_ROLE_LIMITS,
+} from '../../service_accounts';
 import type { ServiceAccountsServiceStart } from '../../service_accounts';
 import { serviceAccountsServiceMock } from '../../service_accounts/service_accounts_service.mock';
 import { routeDefinitionParamsMock } from '../index.mock';
@@ -182,6 +190,60 @@ describe('Create service account route', () => {
 
     it('rejects an empty `roles`', () => {
       expect(issuePathsFor({ ...requestBody, roles: [] })).toContain('roles');
+    });
+
+    it.each([
+      ['UIAM', UIAM_SERVICE_ACCOUNT_ROLE_LIMITS],
+      ['Elasticsearch', ES_SERVICE_ACCOUNT_ROLE_LIMITS],
+    ])('never refuses what the %s backend accepts', (_, { maxRoles, maxRoleNameLength }) => {
+      expect(SERVICE_ACCOUNT_ROLE_LIMITS.maxRoles).toBeGreaterThanOrEqual(maxRoles);
+      expect(SERVICE_ACCOUNT_ROLE_LIMITS.maxRoleNameLength).toBeGreaterThanOrEqual(
+        maxRoleNameLength
+      );
+    });
+
+    // The route does not know which backend will handle the request, so it allows the larger
+    // backend's limits and leaves the smaller ones to the UIAM backend.
+    it(`accepts up to ${SERVICE_ACCOUNT_ROLE_LIMITS.maxRoles} roles and rejects one more`, () => {
+      const roles = Array.from(
+        { length: SERVICE_ACCOUNT_ROLE_LIMITS.maxRoles + 1 },
+        (_, i) => `role-${i}`
+      );
+
+      expect(
+        createServiceAccountBodySchema.safeParse({ ...requestBody, roles: roles.slice(0, -1) })
+          .success
+      ).toBe(true);
+      expect(issuePathsFor({ ...requestBody, roles })).toContain('roles');
+    });
+
+    it(`accepts role names up to ${SERVICE_ACCOUNT_ROLE_LIMITS.maxRoleNameLength} characters and rejects longer ones`, () => {
+      const { maxRoleNameLength } = SERVICE_ACCOUNT_ROLE_LIMITS;
+
+      expect(
+        createServiceAccountBodySchema.safeParse({
+          ...requestBody,
+          roles: ['a'.repeat(maxRoleNameLength)],
+        }).success
+      ).toBe(true);
+      expect(
+        issuePathsFor({ ...requestBody, roles: ['a'.repeat(maxRoleNameLength + 1)] })
+      ).toContain('roles.0');
+    });
+
+    // A 413 carries no field-level message, so the largest body the schema accepts must fit.
+    it('fits the largest valid body within the body size limit', () => {
+      const body = {
+        name: 'a'.repeat(SERVICE_ACCOUNT_NAME_MAX_LENGTH),
+        roles: Array.from({ length: SERVICE_ACCOUNT_ROLE_LIMITS.maxRoles }, (_, i) =>
+          `${i}`.padEnd(SERVICE_ACCOUNT_ROLE_LIMITS.maxRoleNameLength, 'a')
+        ),
+      };
+
+      expect(createServiceAccountBodySchema.safeParse(body).success).toBe(true);
+      expect(Buffer.byteLength(JSON.stringify(body))).toBeLessThan(
+        SERVICE_ACCOUNT_CREATE_MAX_BODY_BYTES
+      );
     });
 
     it('rejects unknown fields, so callers cannot smuggle in `assumable_by`', () => {

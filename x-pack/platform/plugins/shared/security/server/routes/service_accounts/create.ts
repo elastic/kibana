@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { createServiceAccountBodySchema } from './schemas';
+import { createServiceAccountBodySchema, SERVICE_ACCOUNT_CREATE_MAX_BODY_BYTES } from './schemas';
 import type { RouteDefinitionParams } from '..';
-import { SERVICE_ACCOUNT_CREATE_MAX_BODY_BYTES } from '../../../common/service_accounts';
 import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
