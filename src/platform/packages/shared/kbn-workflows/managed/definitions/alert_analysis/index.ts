@@ -19,8 +19,8 @@ export const SECURITY_ALERT_ANALYSIS_WORKFLOW_ID = 'system-security-alert-analys
 export const SECURITY_ALERT_ANALYSIS_WORKFLOW = {
   id: SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
   pluginId: 'securitySolution',
-  // Tip of the Worker-callable YAML (document auto_closed_ids as candidate ids).
-  version: 27,
+  // Tip of the Worker-callable YAML (Worker path bypasses already-analyzed dedup).
+  version: 28,
   billable: false,
   visibility: {
     selectors: ['rule_action'],

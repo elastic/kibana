@@ -569,6 +569,19 @@ steps:
         with:
           alert_set: "${{ inputs.alerts }}"
 
+  # Worker supplies an explicit alert set and expects a complete structured result for it.
+  # The standalone "already analyzed" tag filter would drop tagged alerts on retry (e.g.
+  # after a mid-run failure) and leave those ids out of workflow.output. Bypass dedup on
+  # the Worker path so every caller-supplied alert is re-analyzed and returned.
+  - name: bypass_dedup_for_worker
+    type: if
+    condition: "${{ inputs.calledByWorker == true }}"
+    steps:
+      - name: clear_pending_filter_for_worker
+        type: data.set
+        with:
+          pending_filter_expr: 'false'
+
   # Worker path with a missing or empty alerts input would otherwise skip analysis and
   # emit empty workflow.output with status completed — a miswired caller looks healthy.
   # Fail loud instead so the Worker treats the run as an error and retries / surfaces it.
