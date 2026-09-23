@@ -24,7 +24,10 @@ import type { ExecutionStreamingEvent, TimelineDisplayEvent } from '../../../../
 import { EXECUTION_STREAMING_EVENT_TYPE } from '../../../../services/events';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents';
 import { AgentPromptType } from '@kbn/agent-builder-common/agents';
-import { createExecutionPausedEvent } from './items/execution_paused_event.factory';
+import {
+  createExecutionPausedEvent,
+  createConfirmationPrompt,
+} from './items/execution_paused_event.factory';
 
 const makeEventsById = (events: TimelineDisplayEvent[]) => new Map(events.map((e) => [e.id, e]));
 
@@ -419,6 +422,99 @@ describe('groupTimelineEvents folding resumed executions', () => {
       expect(turn.status).toBe('completed');
       expect(turn.steps).toHaveLength(3);
       expect(turn.terminal).toBe(finalTerm);
+    }
+  });
+
+  const pausedRoundWithResume = (resumeExecutionId: string) => {
+    const user = createUserMessageEvent({ id: 'user-1' });
+    const started1 = createExecutionStartedEvent({
+      id: 'es-1',
+      execution_id: 'exec-1',
+      trigger_event_id: 'user-1',
+    });
+    const pausedTerm = createExecutionPausedEvent({
+      id: 'paused-term-1',
+      execution_id: 'exec-1',
+    });
+    const promptResponse = createPromptResponseEvent({
+      id: 'pr-1',
+      data: {
+        prompt_requested_event_id: 'paused-term-1',
+        responses: { 'prompt-1': { allow: true } },
+      },
+    });
+    const started2 = createExecutionStartedEvent({
+      id: 'es-2',
+      execution_id: resumeExecutionId,
+      trigger_event_id: 'pr-1',
+    });
+    return { pausedTerm, events: [user, started1, pausedTerm, promptResponse, started2] };
+  };
+
+  it('keeps the turn awaiting_prompt when the resume fails, so the user can answer again', () => {
+    const { pausedTerm, events: baseEvents } = pausedRoundWithResume('exec-2');
+    const failed = createExecutionFailedEvent({ id: 'ef-2', execution_id: 'exec-2' });
+
+    const events = [...baseEvents, failed];
+    const agentTurns = groupTimelineEvents(events, makeEventsById(events)).filter(
+      (item) => item.kind === 'agentTurn'
+    );
+
+    expect(agentTurns).toHaveLength(1);
+    const [turn] = agentTurns;
+    if (turn.kind === 'agentTurn') {
+      expect(turn.status).toBe('awaiting_prompt');
+      expect(turn.terminal).toBe(pausedTerm);
+      expect(turn.pendingPrompts).toEqual([createConfirmationPrompt()]);
+    }
+  });
+
+  it('keeps the turn awaiting_prompt when the resume is aborted', () => {
+    const { pausedTerm, events: baseEvents } = pausedRoundWithResume('exec-2');
+    const aborted = createExecutionAbortedEvent({ id: 'ea-2', execution_id: 'exec-2' });
+
+    const events = [...baseEvents, aborted];
+    const agentTurns = groupTimelineEvents(events, makeEventsById(events)).filter(
+      (item) => item.kind === 'agentTurn'
+    );
+
+    expect(agentTurns).toHaveLength(1);
+    const [turn] = agentTurns;
+    if (turn.kind === 'agentTurn') {
+      expect(turn.status).toBe('awaiting_prompt');
+      expect(turn.terminal).toBe(pausedTerm);
+      expect(turn.pendingPrompts).toEqual([createConfirmationPrompt()]);
+    }
+  });
+
+  it('completes the turn when a second answer succeeds after a failed resume', () => {
+    const { events: baseEvents } = pausedRoundWithResume('exec-2');
+    const failed = createExecutionFailedEvent({ id: 'ef-2', execution_id: 'exec-2' });
+    const promptResponse2 = createPromptResponseEvent({
+      id: 'pr-2',
+      data: {
+        prompt_requested_event_id: 'paused-term-1',
+        responses: { 'prompt-1': { allow: true } },
+      },
+    });
+    const started3 = createExecutionStartedEvent({
+      id: 'es-3',
+      execution_id: 'exec-3',
+      trigger_event_id: 'pr-2',
+    });
+    const finalTerm = createExecutionTerminatedEvent({ id: 'et-3', execution_id: 'exec-3' });
+
+    const events = [...baseEvents, failed, promptResponse2, started3, finalTerm];
+    const agentTurns = groupTimelineEvents(events, makeEventsById(events)).filter(
+      (item) => item.kind === 'agentTurn'
+    );
+
+    expect(agentTurns).toHaveLength(1);
+    const [turn] = agentTurns;
+    if (turn.kind === 'agentTurn') {
+      expect(turn.status).toBe('completed');
+      expect(turn.terminal).toBe(finalTerm);
+      expect(turn.pendingPrompts).toBeUndefined();
     }
   });
 });

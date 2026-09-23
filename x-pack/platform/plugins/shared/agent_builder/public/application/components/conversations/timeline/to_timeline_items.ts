@@ -91,12 +91,23 @@ export const groupTimelineEvents = (
         break;
       }
 
-      case TimelineEventType.executionTerminated:
+      case TimelineEventType.executionTerminated: {
+        if (!event.execution_id) break;
+        const acc = getOrCreateAcc(event.execution_id, event.created_at, event.trigger_event_id);
+        acc.terminal = event;
+        break;
+      }
+
       case TimelineEventType.executionFailed:
       case TimelineEventType.executionAborted: {
         if (!event.execution_id) break;
         const acc = getOrCreateAcc(event.execution_id, event.created_at, event.trigger_event_id);
-        acc.terminal = event;
+        const openPause = awaitingPromptEventId ? eventsById.get(awaitingPromptEventId) : undefined;
+        acc.terminal =
+          openPause?.type === TimelineEventType.executionTerminated &&
+          openPause.execution_id === acc.executionId
+            ? openPause
+            : event;
         break;
       }
 
