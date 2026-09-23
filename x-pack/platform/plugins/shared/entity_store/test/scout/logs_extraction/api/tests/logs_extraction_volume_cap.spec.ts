@@ -65,7 +65,7 @@ apiTest.describe('Entity Store volume cap', { tag: ENTITY_STORE_TAGS }, () => {
         },
       },
     });
-    await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+    const resetResponse = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
       headers: defaultHeaders,
       responseType: 'json',
       body: {
@@ -76,6 +76,7 @@ apiTest.describe('Entity Store volume cap', { tag: ENTITY_STORE_TAGS }, () => {
         },
       },
     });
+    expect(resetResponse).toHaveStatusCode(200);
   });
 
   // Defer: cap fires mid-window — caller uses lastSearchTimestamp to resume
