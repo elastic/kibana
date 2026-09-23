@@ -28,9 +28,7 @@ export const buildCompleteWorkerSettingsSchema = (
     shape.scheduleInterval = WorkerScheduleInterval;
   }
   if (declaration.extras) {
-    // No `defaultValue` means the Worker's extras are opt-in: the key may be absent entirely, both
-    // for a fresh install and for a document stored before the Worker declared any extras. An
-    // `extras` object that is present is still validated in full.
+    // Omitted `defaultValue` = opt-in extras; see `WorkerSettingsDeclaration` for the contract.
     shape.extras =
       declaration.extras.defaultValue === undefined
         ? declaration.extras.schema.optional()

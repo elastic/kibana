@@ -52,8 +52,7 @@ export const HuntSettings: WorkerCustomSettingsComponent = ({
         current={extras.agentId}
         isDisabled={isDisabled}
         onChange={(agentId) => {
-          // Drop the key rather than storing `undefined`: absent is what keeps the workflow on its
-          // own default agent, and an explicit undefined would serialize into the settings payload.
+          // Destructure-drop, not `{ agentId }`: an explicit `undefined` serializes into the payload.
           const { agentId: _dropped, ...rest } = extras;
           onExtrasChange(agentId === undefined ? rest : { ...rest, agentId });
         }}

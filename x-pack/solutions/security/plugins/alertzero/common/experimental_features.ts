@@ -11,11 +11,10 @@
  */
 export const allowedExperimentalValues = Object.freeze({
   /**
-   * Enables the per-Worker agent picker (Hunt, Rule Tuning, and Attack Discovery Watch
-   * settings). Gates the picker UI only: a Worker that already stored `extras.agentId`
-   * while this flag was on keeps executing on that agent after the flag is turned back
-   * off, since there is no UI to clear the setting while it is hidden. Default off while
-   * the feature ships dark.
+   * Enables the per-Worker agent picker in the Watch settings UI (currently the Hunt Watch).
+   * Gates the picker UI only: a Worker that already stored `extras.agentId` while this flag
+   * was on keeps executing on that agent after the flag is turned back off, since there is
+   * no UI to clear the setting while it is hidden. Default off while the feature ships dark.
    */
   workerAgentPickerEnabled: false,
 });
