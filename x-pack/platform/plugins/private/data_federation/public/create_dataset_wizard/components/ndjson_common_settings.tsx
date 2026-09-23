@@ -15,6 +15,7 @@ import {
   DEFAULT_DATETIME_FORMAT,
   type CreateDatasetFormValues,
 } from '../create_dataset_form_state';
+import { FormRowLabelWithInfo } from './form_row_label_with_info';
 
 const helpTextDefault = (valueLabel: string) => (
   <EuiText size="xs" color="subdued">
@@ -31,7 +32,12 @@ export function NdjsonCommonSettings({ control }: { control: Control<CreateDatas
   return (
     <div data-test-subj="createDatasetNdjsonCommonSettings">
       <EuiFormRow
-        label={createDatasetWizardStrings.settingsDatetimeFormatLabel}
+        label={
+          <FormRowLabelWithInfo
+            label={createDatasetWizardStrings.settingsDatetimeFormatLabel}
+            infoText={createDatasetWizardStrings.settingsDatetimeFormatNdjsonDescription}
+          />
+        }
         helpText={helpTextDefault(DEFAULT_DATETIME_FORMAT)}
         fullWidth
       >

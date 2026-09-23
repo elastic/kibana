@@ -60,6 +60,10 @@ export function StepReview() {
 
   return (
     <div data-test-subj="createDatasetWizardReviewStep">
+      <EuiTitle size="m">
+        <h2>{createDatasetWizardStrings.reviewStepLabel}</h2>
+      </EuiTitle>
+      <EuiSpacer size="m" />
       <ReviewSection
         title={createDatasetWizardStrings.datasetStepLabel}
         stepId="dataset"

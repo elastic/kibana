@@ -18,6 +18,7 @@ import {
   type CreateDatasetFormValues,
 } from '../create_dataset_form_state';
 import { ErrorModeSelect } from './error_mode_select';
+import { FormRowLabelWithInfo } from './form_row_label_with_info';
 import { FileExclusionsSelect } from './file_exclusions_select';
 import { PartitionDetectionSelect } from './partition_detection_select';
 
@@ -60,19 +61,37 @@ export function SharedAdvancedSettings({ control }: { control: Control<CreateDat
   return (
     <div data-test-subj="createDatasetSharedAdvancedSettings">
       <EuiFormRow
-        label={createDatasetWizardStrings.settingsFileExclusionsLabel}
+        label={
+          <FormRowLabelWithInfo
+            label={createDatasetWizardStrings.settingsFileExclusionsLabel}
+            infoText={createDatasetWizardStrings.settingsFileExclusionsDescription}
+          />
+        }
         helpText={fileExclusionsDefaultHelp}
         fullWidth
       >
         <FileExclusionsSelect control={control} />
       </EuiFormRow>
 
-      <EuiFormRow label={createDatasetWizardStrings.settingsPartitionDetectionLabel} fullWidth>
+      <EuiFormRow
+        label={
+          <FormRowLabelWithInfo
+            label={createDatasetWizardStrings.settingsPartitionDetectionLabel}
+            infoText={createDatasetWizardStrings.settingsPartitionDetectionDescription}
+          />
+        }
+        fullWidth
+      >
         <PartitionDetectionSelect control={control} />
       </EuiFormRow>
 
       <EuiFormRow
-        label={createDatasetWizardStrings.settingsPartitionPathLabel}
+        label={
+          <FormRowLabelWithInfo
+            label={createDatasetWizardStrings.settingsPartitionPathLabel}
+            infoText={createDatasetWizardStrings.settingsPartitionPathDescription}
+          />
+        }
         helpText={createDatasetWizardStrings.settingsPartitionPathHelp}
         fullWidth
       >
@@ -87,7 +106,12 @@ export function SharedAdvancedSettings({ control }: { control: Control<CreateDat
       </EuiFormRow>
 
       <EuiFormRow
-        label={createDatasetWizardStrings.settingsErrorModeLabel}
+        label={
+          <FormRowLabelWithInfo
+            label={createDatasetWizardStrings.settingsErrorModeLabel}
+            infoText={createDatasetWizardStrings.settingsErrorModeDescription}
+          />
+        }
         helpText={helpTextDefault('fail_fast')}
         fullWidth
       >
@@ -99,7 +123,12 @@ export function SharedAdvancedSettings({ control }: { control: Control<CreateDat
       </EuiFormRow>
 
       <EuiFormRow
-        label={createDatasetWizardStrings.settingsMaxErrorsLabel}
+        label={
+          <FormRowLabelWithInfo
+            label={createDatasetWizardStrings.settingsMaxErrorsLabel}
+            infoText={createDatasetWizardStrings.settingsMaxErrorsDescription}
+          />
+        }
         helpText={helpTextDefault(createDatasetWizardStrings.unbounded)}
         fullWidth
         isInvalid={Boolean(maxErrorsState.error)}
@@ -120,7 +149,12 @@ export function SharedAdvancedSettings({ control }: { control: Control<CreateDat
       </EuiFormRow>
 
       <EuiFormRow
-        label={createDatasetWizardStrings.settingsMaxErrorRatioLabel}
+        label={
+          <FormRowLabelWithInfo
+            label={createDatasetWizardStrings.settingsMaxErrorRatioLabel}
+            infoText={createDatasetWizardStrings.settingsMaxErrorRatioDescription}
+          />
+        }
         helpText={helpTextDefault('0.0')}
         fullWidth
         isInvalid={Boolean(maxErrorRatioState.error)}

@@ -187,6 +187,25 @@ describe('CreateDatasetWizardPage', () => {
     });
   });
 
+  it('auto-selects format from resource extension', async () => {
+    const { getByTestId, findByTestId } = renderWizard();
+
+    fireEvent.click(getByTestId('createDatasetDataSource'));
+    fireEvent.click(await findByTestId('createDatasetDataSource-source-1'));
+    fireEvent.change(getByTestId('createDatasetName'), {
+      target: { value: 'logs-dataset' },
+    });
+    fireEvent.change(getByTestId('createDatasetResource'), {
+      target: { value: 'bucket/access/**/*.parquet' },
+    });
+
+    // No manual format selection. The path extension should infer parquet and allow navigation.
+    fireEvent.click(getByTestId('nextButton'));
+    expect(
+      await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
+    ).toBeInTheDocument();
+  });
+
   it('requires format before leaving the dataset step', async () => {
     const { getByTestId, queryByTestId, findByTestId } = renderWizard();
 
@@ -223,7 +242,21 @@ describe('CreateDatasetWizardPage', () => {
       data_source: 'source-1',
       resource: 'bucket/*',
       description: '',
-      settings: { format: 'csv', partition_detection: 'hive' },
+      settings: {
+        format: 'csv',
+        partition_detection: 'hive',
+        // passthrough-only additional settings should be preserved unchanged on edit
+        target_split_size: '64mb',
+        split_probe_window: '16mb',
+        schema_sample_size: 5000,
+        segment_size: '32mb',
+        comment: '#',
+        multi_value_syntax: 'brackets',
+        max_field_size: 1048576,
+        region: 'us-east-1',
+        file_sort_by: ['mtime'],
+        file_order: 'desc',
+      },
     };
 
     const { getByTestId, queryByTestId } = render(
@@ -280,6 +313,18 @@ describe('CreateDatasetWizardPage', () => {
         expect.objectContaining({
           name: 'logs-dataset',
           resource: 'bucket/updated/*',
+          settings: expect.objectContaining({
+            target_split_size: '64mb',
+            split_probe_window: '16mb',
+            schema_sample_size: 5000,
+            segment_size: '32mb',
+            comment: '#',
+            multi_value_syntax: 'brackets',
+            max_field_size: 1048576,
+            region: 'us-east-1',
+            file_sort_by: ['mtime'],
+            file_order: 'desc',
+          }),
         })
       );
       expect(remove).not.toHaveBeenCalled();

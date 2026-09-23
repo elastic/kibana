@@ -11,6 +11,7 @@ import type { Control } from 'react-hook-form';
 
 import { createDatasetWizardStrings } from '../create_dataset_wizard_i18n';
 import type { CreateDatasetFormValues } from '../create_dataset_form_state';
+import { FormRowLabelWithInfo } from './form_row_label_with_info';
 import { LateMaterializationSelect } from './late_materialization_select';
 import { OptimizedReaderSelect } from './optimized_reader_select';
 
@@ -29,7 +30,12 @@ export function ParquetAdvancedSettings({
     <div data-test-subj="createDatasetParquetAdvancedSettings">
       <EuiSpacer size="m" />
       <EuiFormRow
-        label={createDatasetWizardStrings.settingsOptimizedReaderLabel}
+        label={
+          <FormRowLabelWithInfo
+            label={createDatasetWizardStrings.settingsOptimizedReaderLabel}
+            infoText={createDatasetWizardStrings.settingsOptimizedReaderDescription}
+          />
+        }
         helpText={helpTextDefault('true')}
         fullWidth
       >
@@ -37,7 +43,12 @@ export function ParquetAdvancedSettings({
       </EuiFormRow>
 
       <EuiFormRow
-        label={createDatasetWizardStrings.settingsLateMaterializationLabel}
+        label={
+          <FormRowLabelWithInfo
+            label={createDatasetWizardStrings.settingsLateMaterializationLabel}
+            infoText={createDatasetWizardStrings.settingsLateMaterializationDescription}
+          />
+        }
         helpText={helpTextDefault('true')}
         fullWidth
       >

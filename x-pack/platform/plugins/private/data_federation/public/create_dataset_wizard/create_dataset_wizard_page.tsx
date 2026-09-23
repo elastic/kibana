@@ -35,6 +35,35 @@ const { FormWizard, FormWizardStep } = Forms;
 
 const TIMESTAMP_LOGICAL_FIELD_NAME = '@timestamp';
 const TIMESTAMP_FIELD_ID = '__timestamp__';
+const passthroughAdditionalSettingsKeys = [
+  'target_split_size',
+  'split_probe_window',
+  'file_sort_by',
+  'file_order',
+  'schema_sample_size',
+  'segment_size',
+  'comment',
+  'multi_value_syntax',
+  'max_field_size',
+  'region',
+] as const;
+
+type PassthroughAdditionalSettingsKey = (typeof passthroughAdditionalSettingsKeys)[number];
+
+// todo: doublecheck this
+const pickPassthroughAdditionalSettings = (
+  settings: DataSetWithName['settings'] | undefined
+): Partial<NonNullable<DataSetWithName['settings']>> => {
+  if (!settings) return {};
+  const picked: Partial<NonNullable<DataSetWithName['settings']>> = {};
+  for (const key of passthroughAdditionalSettingsKeys) {
+    const value = (settings as Record<PassthroughAdditionalSettingsKey, unknown>)[key];
+    if (value !== undefined) {
+      (picked as Record<PassthroughAdditionalSettingsKey, unknown>)[key] = value;
+    }
+  }
+  return picked;
+};
 
 const wizardContentFromFormValues = (values: CreateDatasetFormValues): DatasetWizardContent => ({
   dataset: {
@@ -50,11 +79,6 @@ const wizardContentFromFormValues = (values: CreateDatasetFormValues): DatasetWi
 
 const MAX_WIDTH_NARROW_PX = 600;
 const MAX_WIDTH_WIDE_PX = 1024;
-
-const getWizardMaxWidth = (stepId: DatasetWizardSection): number => {
-  if (stepId === 'dataset' || stepId === 'settings') return MAX_WIDTH_NARROW_PX;
-  return MAX_WIDTH_WIDE_PX;
-};
 
 export function CreateDatasetWizardPage({
   dataSources,
@@ -77,7 +101,6 @@ export function CreateDatasetWizardPage({
   const datasetNameToEdit = initialDataSet?.name;
   const [saveError, setSaveError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-  const [activeStepId, setActiveStepId] = useState<DatasetWizardSection>('dataset');
   const formDefaultValues = useMemo(
     (): CreateDatasetFormValues =>
       initialDataSet ? dataSetToFormValues(initialDataSet) : emptyDatasetFormValues(),
@@ -118,13 +141,15 @@ export function CreateDatasetWizardPage({
       const desc = values.description?.trim();
       const settings = buildDatasetSettingsFromFormValues(values.settings);
       const mappings = buildDatasetMappings(values.mappings);
+      const passthroughSettings = pickPassthroughAdditionalSettings(initialDataSet?.settings);
+      const mergedSettings = { ...(settings ?? {}), ...passthroughSettings };
       const payload: DataSetWithName = {
         name: values.name.trim(),
         data_source: values.data_source.trim(),
         resource: values.resource.trim(),
         ...(desc ? { description: desc } : {}),
-        ...(settings ? { settings } : {}),
         ...(mappings ? { mappings } : {}),
+        ...(Object.keys(mergedSettings).length > 0 ? { settings: mergedSettings } : {}),
       };
       await datasetsClient.add(payload);
 
@@ -175,7 +200,9 @@ export function CreateDatasetWizardPage({
             <div
               style={{
                 width: '100%',
-                maxWidth: getWizardMaxWidth(activeStepId),
+                // Keep navigation controls (Next/Back/Save) aligned consistently across steps.
+                // Individual steps can still constrain their content width as needed.
+                maxWidth: MAX_WIDTH_WIDE_PX,
                 marginInline: 'auto',
               }}
             >
@@ -185,7 +212,6 @@ export function CreateDatasetWizardPage({
                 onSave={onSave}
                 isSaving={isSaving}
                 apiError={apiError}
-                onStepChange={(id) => setActiveStepId(id as DatasetWizardSection)}
                 texts={{
                   save: isEditMode
                     ? createDatasetWizardStrings.saveButton
@@ -197,7 +223,10 @@ export function CreateDatasetWizardPage({
                   label={createDatasetWizardStrings.datasetStepLabel}
                   isRequired
                 >
-                  <div data-test-subj="createDatasetWizardContent">
+                  <div
+                    data-test-subj="createDatasetWizardContent"
+                    style={{ maxWidth: MAX_WIDTH_NARROW_PX, marginInline: 'auto' }}
+                  >
                     <StepDataset
                       dataSources={dataSources}
                       existingDataSetNames={existingDataSetNames}
@@ -211,7 +240,10 @@ export function CreateDatasetWizardPage({
                   id="settings"
                   label={createDatasetWizardStrings.additionalStepLabel}
                 >
-                  <div data-test-subj="createDatasetWizardContent">
+                  <div
+                    data-test-subj="createDatasetWizardContent"
+                    style={{ maxWidth: MAX_WIDTH_NARROW_PX, marginInline: 'auto' }}
+                  >
                     <StepAdditional />
                   </div>
                 </FormWizardStep>

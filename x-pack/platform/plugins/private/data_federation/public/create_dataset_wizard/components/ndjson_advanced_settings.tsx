@@ -6,22 +6,15 @@
  */
 
 import React from 'react';
-import { EuiFieldNumber, EuiFieldText, EuiFormRow } from '@elastic/eui';
+import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
 import { useController } from 'react-hook-form';
 
 import { createDatasetWizardStrings } from '../create_dataset_wizard_i18n';
-import {
-  validateSchemaSampleSize,
-  type CreateDatasetFormValues,
-} from '../create_dataset_form_state';
+import { type CreateDatasetFormValues } from '../create_dataset_form_state';
+import { FormRowLabelWithInfo } from './form_row_label_with_info';
 
 export function NdjsonAdvancedSettings({ control }: { control: Control<CreateDatasetFormValues> }) {
-  const { field: schemaSampleSizeField, fieldState: schemaSampleSizeState } = useController({
-    name: 'settings.schema_sample_size',
-    control,
-    rules: { validate: validateSchemaSampleSize },
-  });
   const { field: datetimeFormatField } = useController({
     name: 'settings.datetime_format',
     control,
@@ -30,26 +23,12 @@ export function NdjsonAdvancedSettings({ control }: { control: Control<CreateDat
   return (
     <div data-test-subj="createDatasetNdjsonAdvancedSettings">
       <EuiFormRow
-        label={createDatasetWizardStrings.settingsSchemaSampleSizeLabel}
-        helpText={createDatasetWizardStrings.settingsSchemaSampleSizeHelp}
-        fullWidth
-        isInvalid={Boolean(schemaSampleSizeState.error)}
-        error={schemaSampleSizeState.error?.message}
-      >
-        <EuiFieldNumber
-          data-test-subj="createDatasetSettingsSchemaSampleSize"
-          fullWidth
-          min={1}
-          step={1}
-          isInvalid={Boolean(schemaSampleSizeState.error)}
-          value={schemaSampleSizeField.value}
-          onChange={(e) => schemaSampleSizeField.onChange(e.target.value)}
-          name={schemaSampleSizeField.name}
-          inputRef={schemaSampleSizeField.ref}
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        label={createDatasetWizardStrings.settingsDatetimeFormatLabel}
+        label={
+          <FormRowLabelWithInfo
+            label={createDatasetWizardStrings.settingsDatetimeFormatLabel}
+            infoText={createDatasetWizardStrings.settingsDatetimeFormatNdjsonAdvancedDescription}
+          />
+        }
         helpText={createDatasetWizardStrings.settingsDatetimeFormatHelp}
         fullWidth
       >

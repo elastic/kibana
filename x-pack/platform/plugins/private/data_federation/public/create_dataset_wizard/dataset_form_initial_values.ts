@@ -24,7 +24,6 @@ import {
   type DatasetErrorModeFormValue,
   type DatasetFormatFormValue,
   type DatasetModeFormValue,
-  type DatasetMultiValueSyntaxFormValue,
   type DatasetPartitionDetectionFormValue,
   type DatasetSchemaResolutionFormValue,
 } from './create_dataset_form_state';
@@ -102,8 +101,6 @@ const settingsToFormValues = (
     hive_partitioning: boolToFormValue(s.hive_partitioning),
     optimized_reader: boolToFormValue(s.optimized_reader),
     late_materialization: boolToFormValue(s.late_materialization),
-    // CSV/TSV + NDJSON
-    schema_sample_size: s.schema_sample_size !== undefined ? String(s.schema_sample_size) : '',
     // CSV/TSV core
     delimiter: s.delimiter ?? '',
     mode: (s.mode ?? '') as DatasetModeFormValue,
@@ -115,10 +112,7 @@ const settingsToFormValues = (
     column_prefix: s.column_prefix ?? DEFAULT_COLUMN_PREFIX,
     quote: s.quote ?? '',
     escape: s.escape ?? '',
-    comment: s.comment ?? '',
     trim_spaces: s.trim_spaces ?? false,
-    multi_value_syntax: (s.multi_value_syntax ?? '') as DatasetMultiValueSyntaxFormValue,
-    max_field_size: s.max_field_size !== undefined ? String(s.max_field_size) : '',
     // CSV/TSV error handling
     error_mode: (s.error_mode ?? '') as DatasetErrorModeFormValue,
     max_errors: s.max_errors !== undefined ? String(s.max_errors) : '',
