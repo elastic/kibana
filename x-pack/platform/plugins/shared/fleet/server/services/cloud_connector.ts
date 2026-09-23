@@ -63,6 +63,8 @@ import {
   getErrorMessage,
 } from '../errors';
 
+import { VERIFY_PERMISSIONS_TASK_ID } from '../tasks/agentless/verify_permissions_task_id';
+
 import { appContextService } from './app_context';
 import { propagateRoleArnToPackagePolicies } from './cloud_connectors';
 import { authorizeSharedConnectorRoleArnSpaces } from './cloud_connectors/role_arn_cross_space';
@@ -783,6 +785,24 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         : await commitConnectorUpdate();
 
       logger.info(`Successfully updated cloud connector ${cloudConnectorId}`);
+
+      // The verifier runs every 12h, so without this a new Role ARN could stay unverified for
+      // that long. Best effort: the connector is already saved as pending either way.
+      if (
+        updateAttributes.verification_status === 'pending' &&
+        appContextService.getExperimentalFeatures()?.enableOTelVerifier
+      ) {
+        appContextService
+          .getTaskManagerStart()
+          ?.runSoon(VERIFY_PERMISSIONS_TASK_ID)
+          .catch((runSoonError) =>
+            logger.debug(
+              `Could not run the permission verifier soon after updating connector ${cloudConnectorId}: ${getErrorMessage(
+                runSoonError
+              )}`
+            )
+          );
+      }
 
       const packagePolicyCount = await this.getPackagePolicyCount(soClient, cloudConnectorId);
 

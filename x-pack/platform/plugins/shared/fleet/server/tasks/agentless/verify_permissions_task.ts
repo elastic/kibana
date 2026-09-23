@@ -25,11 +25,13 @@ import { ensureInstalledPackage } from '../../services/epm/packages/install';
 import { throwIfAborted } from '../utils';
 
 import { VERIFICATION_TTL_MS } from './verifier_policy_cleanup';
+import {
+  VERIFY_PERMISSIONS_TASK_ID as TASK_ID,
+  VERIFY_PERMISSIONS_TASK_TYPE as TASK_TYPE,
+} from './verify_permissions_task_id';
 
-const TASK_TYPE = 'fleet:verify_permissions';
 const TASK_TITLE = 'OTel Verify Permission Task';
 const TASK_TIMEOUT = '1d';
-const TASK_ID = `${TASK_TYPE}:1.0.0`;
 const TASK_INTERVAL = '12h';
 export const VERIFY_PERMISSIONS_TASK = '[OTel Verify Permissions Task]';
 const ELIGIBILITY_WINDOW_MS = 5 * 60 * 1000;

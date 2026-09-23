@@ -1441,6 +1441,63 @@ describe('CloudConnectorService', () => {
         );
       });
 
+      describe('permission verifier', () => {
+        let runSoon: jest.Mock;
+
+        beforeEach(() => {
+          runSoon = jest.fn().mockResolvedValue({ id: 'fleet:verify_permissions:1.0.0' });
+          mockAppContextService.getTaskManagerStart = jest.fn().mockReturnValue({ runSoon });
+          mockAppContextService.getExperimentalFeatures = jest.fn().mockReturnValue({
+            useSpaceAwareness: false,
+            enableOTelVerifier: true,
+          });
+        });
+
+        const updateRoleArn = (roleArn: string) =>
+          service.update(
+            mockSoClient,
+            connectorId,
+            { vars: { role_arn: { type: 'text', value: roleArn } } },
+            { esClient: mockEsClient }
+          );
+
+        it('asks the verifier to run soon once the new Role ARN is saved', async () => {
+          await updateRoleArn(newArn);
+
+          expect(runSoon).toHaveBeenCalledWith('fleet:verify_permissions:1.0.0');
+        });
+
+        it('does not ask the verifier to run when the Role ARN did not change', async () => {
+          await updateRoleArn(oldArn);
+
+          expect(runSoon).not.toHaveBeenCalled();
+        });
+
+        it('does not ask the verifier to run when the connector write fails', async () => {
+          mockSoClient.update.mockRejectedValueOnce(new Error('connector write failed'));
+
+          await expect(updateRoleArn(newArn)).rejects.toThrow();
+          expect(runSoon).not.toHaveBeenCalled();
+        });
+
+        it('does not ask the verifier to run when it is disabled', async () => {
+          mockAppContextService.getExperimentalFeatures = jest.fn().mockReturnValue({
+            useSpaceAwareness: false,
+            enableOTelVerifier: false,
+          });
+
+          await updateRoleArn(newArn);
+
+          expect(runSoon).not.toHaveBeenCalled();
+        });
+
+        it('still saves the Role ARN when the verifier cannot be scheduled', async () => {
+          runSoon.mockRejectedValue(new Error('task is already running'));
+
+          await expect(updateRoleArn(newArn)).resolves.toBeDefined();
+        });
+      });
+
       it('merges a role-only payload into the vars read once the lock is held', async () => {
         const connectorWithSecret = (secretId: string, version: string) =>
           ({
