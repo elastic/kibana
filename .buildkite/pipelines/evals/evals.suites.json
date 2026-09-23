@@ -89,9 +89,9 @@
       "id": "significant-events",
       "name": "Significant Events",
       "slackChannel": "#significant-events-alerts",
-      "configPath": "x-pack/platform/packages/shared/kbn-evals-suite-significant-events/playwright.config.ts",
+      "configPath": "x-pack/solutions/observability/packages/kbn-evals-suite-significant-events/playwright.config.ts",
       "tags": [
-        "platform",
+        "observability",
         "significant-events"
       ],
       "ciLabels": [
@@ -142,6 +142,7 @@
       "name": "Nightshift Investigations",
       "slackChannel": "#nightshift-alerts",
       "configPath": "x-pack/platform/packages/shared/kbn-evals-suite-nightshift-investigations/playwright.config.ts",
+      "serverConfigSet": "evals_nightshift_investigations",
       "tags": [
         "platform",
         "nightshift-investigations"
