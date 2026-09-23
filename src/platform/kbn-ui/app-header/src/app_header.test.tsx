@@ -470,24 +470,6 @@ describe('AppHeaderView', () => {
     );
   });
 
-  it('renders tab append content after the label', () => {
-    render(
-      <AppHeaderView
-        tabs={[
-          {
-            id: 'detections',
-            label: 'Detections',
-            append: <span data-test-subj="customTabAppend">Dev</span>,
-            'data-test-subj': 'detectionsTab',
-          },
-        ]}
-      />
-    );
-
-    expect(screen.getByTestId('detectionsTab')).toHaveTextContent('Detections');
-    expect(screen.getByTestId('customTabAppend')).toHaveTextContent('Dev');
-  });
-
   it('renders tab badge and test subject metadata', () => {
     render(
       <AppHeaderView
@@ -498,12 +480,19 @@ describe('AppHeaderView', () => {
             badge: 3,
             'data-test-subj': 'alertsTab',
           },
+          {
+            id: 'detections',
+            label: 'Detections',
+            badge: { iconType: 'code' },
+            'data-test-subj': 'detectionsTab',
+          },
         ]}
       />
     );
 
     expect(screen.getByTestId('alertsTab')).toBeInTheDocument();
     expect(screen.getByText('3')).toBeInTheDocument();
+    expect(screen.getByTestId('detectionsTab').querySelector('[tabindex="0"]')).toBeNull();
   });
 
   it('renders tab actions in an ellipsis popover without triggering tab navigation', () => {

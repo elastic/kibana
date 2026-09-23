@@ -70,7 +70,9 @@ jest.mock('../../components/page_template', () => ({
       {tabs.map((tab) => (
         <div key={tab.id} data-test-subj={`app-header-tab-${tab.id}`}>
           {tab.label}
-          {tab.append}
+          {typeof tab.badge === 'object' && (
+            <span data-test-subj={`app-header-badge-${tab.id}`}>{tab.badge.iconType}</span>
+          )}
         </div>
       ))}
     </div>
@@ -147,15 +149,12 @@ describe('SignificantEventsPage developer mode', () => {
     expect(screen.queryByTestId('app-header-tab-detections')).not.toBeInTheDocument();
   });
 
-  it('shows the Detections tab with a Dev badge when developer mode is on', () => {
+  it('shows the Detections tab with a code icon badge when developer mode is on', () => {
     setup({ tab: 'streams', isDeveloperMode: true });
 
     const detectionsTab = screen.getByTestId('app-header-tab-detections');
     expect(detectionsTab).toBeInTheDocument();
-    expect(detectionsTab).toHaveTextContent('Dev');
-    expect(
-      detectionsTab.querySelector('[data-test-subj="nightshiftDeveloperModeBadge"]')
-    ).toBeInTheDocument();
+    expect(screen.getByTestId('app-header-badge-detections')).toHaveTextContent('code');
   });
 
   it('redirects /detections away when developer mode is off', () => {

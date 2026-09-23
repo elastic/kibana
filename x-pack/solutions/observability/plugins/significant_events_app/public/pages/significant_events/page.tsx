@@ -13,7 +13,6 @@ import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useKibana } from '../../hooks/use_kibana';
 import { useDeveloperMode } from '../../hooks/use_developer_mode';
-import { DeveloperModeBadge } from '../../components/developer_mode_badge/developer_mode_badge';
 import { getFormattedError } from '../../util/errors';
 import { useSignificantEventsAppParams } from '../../hooks/use_significant_events_app_params';
 import { useSignificantEventsAppRouter } from '../../hooks/use_significant_events_app_router';
@@ -171,7 +170,7 @@ export function SignificantEventsPage() {
         }),
         href: router.link('/{tab}', { path: { tab: 'detections' } }),
         isSelected: tab === 'detections',
-        append: <DeveloperModeBadge />,
+        badge: { iconType: 'code' },
       },
       {
         id: 'significant_events',

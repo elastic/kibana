@@ -106,31 +106,18 @@ const TabActions = ({ actions }: { actions: AppHeaderTabActions }) => {
 
 const renderTabAppend = (tab: AppHeaderTab) => {
   const badge = renderTabBadge(tab.badge);
-  const extra = tab.append;
-  const showActions = Boolean(tab.actions && tab.isSelected);
-  const parts = [badge, extra].filter(
-    (part) => part !== undefined && part !== null && part !== false
-  );
 
-  if (!showActions && parts.length === 0) {
-    return undefined;
-  }
-
-  if (!showActions && parts.length === 1) {
-    return parts[0];
+  // Tab actions are only surfaced for the selected tab.
+  if (!tab.actions || !tab.isSelected) {
+    return badge;
   }
 
   return (
     <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
       {badge !== undefined && <EuiFlexItem grow={false}>{badge}</EuiFlexItem>}
-      {extra !== undefined && extra !== null && extra !== false && (
-        <EuiFlexItem grow={false}>{extra}</EuiFlexItem>
-      )}
-      {showActions && tab.actions && (
-        <EuiFlexItem grow={false}>
-          <TabActions actions={tab.actions} />
-        </EuiFlexItem>
-      )}
+      <EuiFlexItem grow={false}>
+        <TabActions actions={tab.actions} />
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

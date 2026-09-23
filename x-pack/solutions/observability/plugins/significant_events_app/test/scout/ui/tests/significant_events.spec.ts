@@ -8,6 +8,7 @@
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { OBSERVABILITY_NIGHTSHIFT_DEVELOPER_MODE } from '@kbn/management-settings-ids';
 import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import { test } from '../fixtures';
 
@@ -36,14 +37,16 @@ test.describe(
       });
     });
 
-    test.beforeEach(async ({ browserAuth }) => {
+    test.beforeEach(async ({ browserAuth, kbnClient }) => {
+      await kbnClient.uiSettings.update({ [OBSERVABILITY_NIGHTSHIFT_DEVELOPER_MODE]: false });
       await browserAuth.loginAsAdmin();
     });
 
-    test.afterAll(async ({ apiServices, config }) => {
+    test.afterAll(async ({ apiServices, config, kbnClient }) => {
       if (config.isCloud) {
         return;
       }
+      await kbnClient.uiSettings.unset(OBSERVABILITY_NIGHTSHIFT_DEVELOPER_MODE);
       await apiServices.core.settings({
         'feature_flags.overrides': {
           [NIGHTSHIFT_ENABLED_FLAG]: null,
