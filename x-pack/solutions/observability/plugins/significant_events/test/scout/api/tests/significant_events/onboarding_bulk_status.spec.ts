@@ -75,6 +75,7 @@ apiTest.describe(
           expect(response.statusCode).toBe(403);
         } finally {
           await apiServices.significantEventsTest.enableSignificantEvents();
+          await apiServices.significantEventsTest.resumeSignificantEvents();
         }
       }
     );

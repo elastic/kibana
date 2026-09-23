@@ -20,6 +20,7 @@ import {
   SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
+import { MAINTENANCE_FEATURE_FLAG_ACTOR } from '../../../common/maintenance/actors';
 import type { GetScopedClients } from '../../routes/types';
 import { createSignificantEventsMaintenanceService } from './maintenance_service';
 import {
@@ -28,24 +29,58 @@ import {
 } from './saved_object';
 
 const REQUEST = { headers: {} } as KibanaRequest;
+// The credential-less request system sweeps build for themselves.
+const SYSTEM_REQUEST = expect.objectContaining({
+  isFakeRequest: true,
+  auth: { isAuthenticated: false },
+});
 
 // A minimal, stateful saved-objects client: `get` throws NotFound until `create`
-// stores the doc, then returns it. Enough to exercise the read/write/idempotency paths.
+// stores the doc, then returns it with a version that every write bumps. `create`
+// without overwrite and `update` with a stale version throw a conflict, like ES.
 function makeSoClient() {
-  const store = new Map<string, Record<string, unknown>>();
+  const store = new Map<string, { attributes: Record<string, unknown>; version?: string }>();
   const key = (type: string, id: string) => `${type}:${id}`;
+  let nextVersion = 1;
+  const put = (type: string, id: string, attributes: Record<string, unknown>) =>
+    store.set(key(type, id), { attributes, version: String(nextVersion++) });
   return {
     get: jest.fn(async (type: string, id: string) => {
-      const attributes = store.get(key(type, id));
-      if (!attributes) {
+      const stored = store.get(key(type, id));
+      if (!stored) {
         throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
       }
-      return { id, type, references: [], attributes };
+      return { id, type, references: [], ...stored };
     }),
     create: jest.fn(
-      async (type: string, attributes: Record<string, unknown>, options: { id: string }) => {
-        store.set(key(type, options.id), attributes);
+      async (
+        type: string,
+        attributes: Record<string, unknown>,
+        options: { id: string; overwrite?: boolean }
+      ) => {
+        if (options.overwrite === false && store.has(key(type, options.id))) {
+          throw SavedObjectsErrorHelpers.createConflictError(type, options.id);
+        }
+        put(type, options.id, attributes);
         return { id: options.id, type, references: [], attributes };
+      }
+    ),
+    update: jest.fn(
+      async (
+        type: string,
+        id: string,
+        attributes: Record<string, unknown>,
+        options?: { version?: string }
+      ) => {
+        const stored = store.get(key(type, id));
+        if (!stored) {
+          throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+        }
+        if (options?.version !== undefined && options.version !== stored.version) {
+          throw SavedObjectsErrorHelpers.createConflictError(type, id);
+        }
+        put(type, id, { ...stored.attributes, ...attributes });
+        return { id, type, references: [], attributes };
       }
     ),
   };
@@ -152,6 +187,8 @@ function makeService(params?: {
   spacesGetAllThrows?: boolean;
   /** Space ids returned by SpacesClient.getAll (default: default only). */
   spaceIds?: string[];
+  /** Space ids the internal client finds (default: same as `spaceIds`). */
+  internalSpaceIds?: string[];
   /** Global continuous-onboarding toggle before pause (default: off). */
   continuousOnboardingEnabled?: boolean;
   /** Per-space scheduled-discovery toggle before pause (default: off). */
@@ -188,9 +225,22 @@ function makeService(params?: {
       : undefined
   );
 
+  const spacesRepository = {
+    find: jest.fn(async () => ({
+      saved_objects: (params?.internalSpaceIds ?? params?.spaceIds ?? ['default']).map((id) => ({
+        id,
+      })),
+    })),
+  };
+  const internalClient = { asScopedToNamespace: jest.fn() };
+  internalClient.asScopedToNamespace.mockReturnValue(internalClient);
+
   const savedObjects = {
-    createInternalRepository: jest.fn(() => soClient),
+    createInternalRepository: jest.fn((types: string[]) =>
+      types.includes('space') ? spacesRepository : soClient
+    ),
     getScopedClient: jest.fn(),
+    getUnsafeInternalClient: jest.fn(() => internalClient),
   };
 
   const server = {
@@ -198,6 +248,7 @@ function makeService(params?: {
       savedObjects,
       uiSettings: {
         asScopedToClient: jest.fn(() => spaceUiSettingsClient),
+        globalAsScopedToClient: jest.fn(() => globalUiSettingsClient),
       },
     },
     workflowsManagement: params?.management ? { management: params.management } : undefined,
@@ -220,18 +271,19 @@ function makeService(params?: {
     getSignificantEventsAlertingContext: async () => ({ alertingV2RulesClient: v2RulesClient }),
     globalUiSettingsClient,
     uiSettingsClient: spaceUiSettingsClient,
-  })) as unknown as GetScopedClients;
+  }));
 
   const service = createSignificantEventsMaintenanceService({
     logger: loggerMock.create(),
     server,
-    getScopedClients,
+    getScopedClients: getScopedClients as unknown as GetScopedClients,
   });
 
   return {
     service,
     soClient,
     savedObjects,
+    getScopedClients,
     v2RulesClient,
     getRuleBackedQueryLinks,
     globalUiSettingsClient,
@@ -555,18 +607,20 @@ describe('SignificantEventsMaintenanceService', () => {
       });
     });
 
-    it('enumerates spaces via SpacesClient.getAll', async () => {
+    it("enumerates spaces with the caller's SpacesClient, not the internal client", async () => {
       const { api, updateWorkflow } = makeManagementApi();
       const { service } = makeService({
         management: api,
         spaceIds: ['default', 'space-a'],
+        internalSpaceIds: ['default', 'space-a', 'space-b'],
       });
 
       await service.pause({ request: REQUEST });
 
-      // Scheduled workflow documents are space-suffixed; both spaces should be hit.
+      // Scheduled workflow documents are space-suffixed; only the caller's spaces are hit.
       const disabledDocumentIds = updateWorkflow.mock.calls.map((call) => call[0] as string);
       expect(disabledDocumentIds.some((id) => id.includes('space-a'))).toBe(true);
+      expect(disabledDocumentIds.some((id) => id.includes('space-b'))).toBe(false);
     });
 
     it('records restore flags when settings were enabled even if set(false) fails', async () => {
@@ -608,12 +662,77 @@ describe('SignificantEventsMaintenanceService', () => {
     });
   });
 
-  describe('reassertPausedWorkflows', () => {
+  describe('pauseOnFlagOff', () => {
+    it('pauses every space through internal clients, records the restore snapshot, and leaves rules running', async () => {
+      const { api, updateWorkflow } = makeManagementApi();
+      const { service, soClient, getScopedClients, v2RulesClient } = makeService({
+        management: api,
+        ruleBackedRuleIds: ['rule-1'],
+        spaceIds: ['default'],
+        internalSpaceIds: ['default', 'space-a'],
+        continuousOnboardingEnabled: true,
+        scheduledDiscoveryEnabled: true,
+      });
+      // No user behind a flag flip: anything user-scoped fails.
+      getScopedClients.mockRejectedValue(new Error('missing authentication credentials'));
+
+      await service.pauseOnFlagOff();
+
+      expect(updateWorkflow).toHaveBeenCalledWith(
+        `${SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID}-space-a`,
+        { enabled: false },
+        'space-a',
+        SYSTEM_REQUEST
+      );
+      expect(v2RulesClient?.bulkDisableRules).not.toHaveBeenCalled();
+      expect(soClient.create.mock.calls.at(-1)?.[1]).toEqual(
+        expect.objectContaining({
+          state: 'paused',
+          updatedBy: MAINTENANCE_FEATURE_FLAG_ACTOR,
+          disabledRuleIds: [],
+          pausedSettings: expect.objectContaining({ continuousOnboardingWasEnabled: true }),
+          lastSummary: expect.objectContaining({ partialFailures: [] }),
+        })
+      );
+    });
+
+    it('does not sweep when already paused or when another node claims the pause first', async () => {
+      // Every sweep cancels in-flight executions, so no cancel call means no sweep.
+      const { api, cancelAllActiveWorkflowExecutions: sweepSignal } = makeManagementApi();
+      const { service, soClient } = makeService({ management: api });
+
+      // Another node created the state document between our read and our claim.
+      soClient.create.mockImplementationOnce(async (type: string, _attrs, options) => {
+        throw SavedObjectsErrorHelpers.createConflictError(type, options.id);
+      });
+      await service.pauseOnFlagOff();
+      expect(sweepSignal).not.toHaveBeenCalled();
+
+      // Another node updated the (enabled) state document between our read and our claim.
+      await service.pause({ request: REQUEST });
+      await service.resume({ request: REQUEST });
+      sweepSignal.mockClear();
+      soClient.update.mockImplementationOnce(async (type: string, id: string) => {
+        throw SavedObjectsErrorHelpers.createConflictError(type, id);
+      });
+      await service.pauseOnFlagOff();
+      expect(sweepSignal).not.toHaveBeenCalled();
+
+      // Already paused (by a user or an earlier flip).
+      await service.pause({ request: REQUEST });
+      sweepSignal.mockClear();
+      await service.pauseOnFlagOff();
+
+      expect(sweepSignal).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('reassertPause', () => {
     it('is a no-op when not paused', async () => {
       const { api, updateWorkflow } = makeManagementApi();
       const { service } = makeService({ management: api });
 
-      await service.reassertPausedWorkflows({ request: REQUEST });
+      await service.reassertPause();
 
       expect(updateWorkflow).not.toHaveBeenCalled();
     });
@@ -632,17 +751,61 @@ describe('SignificantEventsMaintenanceService', () => {
         definition: { id },
       }));
 
-      await service.reassertPausedWorkflows({ request: REQUEST });
+      await service.reassertPause();
 
       expect(updateWorkflow).toHaveBeenCalledWith(
         expect.any(String),
         { enabled: false },
         expect.any(String),
-        REQUEST
+        SYSTEM_REQUEST
       );
       const status = await service.getStatus({ request: REQUEST });
       expect(status.state).toBe('paused');
       expect(status.updatedAt).toBeDefined();
+    });
+
+    it('re-asserts across every space with a credential-less request', async () => {
+      const { api, updateWorkflow, getWorkflow } = makeManagementApi();
+      const { service, soClient, getScopedClients, globalUiSettingsClient, spaceUiSettingsClient } =
+        makeService({
+          management: api,
+          spaceIds: ['default'],
+          internalSpaceIds: ['default', 'space-a'],
+        });
+
+      await service.pause({ request: REQUEST });
+      updateWorkflow.mockClear();
+      globalUiSettingsClient.set.mockClear();
+      spaceUiSettingsClient.set.mockClear();
+
+      // The system request has no credentials, so anything user-scoped fails.
+      getScopedClients.mockRejectedValue(new Error('missing authentication credentials'));
+      getWorkflow.mockImplementation(async (id: string) => ({
+        id,
+        enabled: true,
+        definition: { id },
+      }));
+
+      await service.reassertPause();
+
+      const lastWrite = soClient.create.mock.calls.at(-1)?.[1] as {
+        lastSummary?: { partialFailures: unknown[] };
+      };
+      expect(lastWrite.lastSummary?.partialFailures).toEqual([]);
+      expect(updateWorkflow).toHaveBeenCalledWith(
+        `${SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID}-space-a`,
+        { enabled: false },
+        'space-a',
+        SYSTEM_REQUEST
+      );
+      expect(globalUiSettingsClient.set).toHaveBeenCalledWith(
+        OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED,
+        false
+      );
+      expect(spaceUiSettingsClient.set).toHaveBeenCalledWith(
+        OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
+        false
+      );
     });
 
     it('persists sweep failures on lastSummary so status shows a degraded pause', async () => {
@@ -654,7 +817,7 @@ describe('SignificantEventsMaintenanceService', () => {
       // Simulate install leaving workflows enabled while management is unhealthy.
       api.getWorkflow.mockRejectedValue(new Error('workflows down'));
 
-      await service.reassertPausedWorkflows({ request: REQUEST });
+      await service.reassertPause();
 
       const lastWrite = soClient.create.mock.calls.at(-1)?.[1] as {
         lastSummary?: { partialFailures: Array<{ target: string; error: string }> };
@@ -677,9 +840,7 @@ describe('SignificantEventsMaintenanceService', () => {
       // rather than triggering a second "we failed to persist" write.
       soClient.create.mockRejectedValueOnce(new Error('so write failed'));
 
-      await expect(service.reassertPausedWorkflows({ request: REQUEST })).rejects.toThrow(
-        'so write failed'
-      );
+      await expect(service.reassertPause()).rejects.toThrow('so write failed');
       expect(soClient.create.mock.calls.length).toBe(writesAfterPause + 1);
     });
   });
