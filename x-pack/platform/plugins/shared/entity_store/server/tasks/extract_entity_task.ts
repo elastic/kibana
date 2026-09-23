@@ -35,7 +35,6 @@ import {
   EngineDescriptorClient,
   EntityStoreGlobalStateClient,
 } from '../domain/saved_objects';
-import { EntityStoreGlobalStateTypeName } from '../domain/saved_objects/global_state/types';
 import { wrapTaskRun } from '../telemetry/traces';
 import { entityStoreMetrics } from '../monitor/metrics';
 import { shouldDeleteOrphanedEntityStoreTask } from './should_delete_orphaned_task';
@@ -108,10 +107,7 @@ async function bootstrapNonPriorityTask({
   try {
     const [coreStart, pluginsStart] = await core.getStartServices();
 
-    const soClient = coreStart.savedObjects.createInternalRepository([
-      EngineDescriptorTypeName,
-      EntityStoreGlobalStateTypeName,
-    ]);
+    const soClient = coreStart.savedObjects.createInternalRepository([EngineDescriptorTypeName]);
     const engineDescriptorClient = new EngineDescriptorClient(
       soClient as unknown as SavedObjectsClientContract,
       namespace,
@@ -119,7 +115,7 @@ async function bootstrapNonPriorityTask({
       true
     );
     const globalStateClient = new EntityStoreGlobalStateClient(
-      soClient as unknown as SavedObjectsClientContract,
+      coreStart.savedObjects.getUnsafeInternalClient().asScopedToNamespace(namespace),
       namespace,
       logger
     );

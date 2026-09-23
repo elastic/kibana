@@ -48,8 +48,6 @@ type StatusEngine = Omit<
   | 'logExtractionConfig'
   | 'nonPriorityLogExtractionConfig'
   | 'nonPriorityLogExtractionState'
-  | 'nonPriorityStatus'
-  | 'nonPriorityError'
 > &
   LegacyEngineDescriptorV1;
 
@@ -75,8 +73,6 @@ function toPublicEngine(
     logExtractionConfig,
     nonPriorityLogExtractionConfig,
     nonPriorityLogExtractionState,
-    nonPriorityStatus,
-    nonPriorityError,
     ...rest
   } = engine;
   const {

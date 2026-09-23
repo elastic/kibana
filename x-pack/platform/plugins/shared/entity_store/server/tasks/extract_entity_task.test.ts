@@ -330,7 +330,12 @@ describe('bootstrapNonPriorityTask', () => {
         getStartServices: jest.fn().mockResolvedValue([
           {
             featureFlags: {},
-            savedObjects: { createInternalRepository: jest.fn().mockReturnValue(soClient) },
+            savedObjects: {
+              createInternalRepository: jest.fn().mockReturnValue(soClient),
+              getUnsafeInternalClient: jest.fn().mockReturnValue({
+                asScopedToNamespace: jest.fn().mockReturnValue(soClient),
+              }),
+            },
           },
           { taskManager: { ensureScheduled: mockEnsureScheduled } },
         ]),
