@@ -28,6 +28,7 @@ On PR updates, review only the new changes and stay high-signal — not nitpicky
 ## Review process
 
 1. Start with the workflow-provided PR context artifacts under `/tmp/gh-aw/agent/`, especially `pr-diff.txt`, `pr-files.json`, `pr-metadata.json`, `pr-issue-comments.json`, `pr-review-comments.json`, and `pr-reviews.json`.
+   - The repository is checked out in the working directory at the PR **base** SHA. Use it (`ls`, `grep`, `cat`, `Read`) for docs, the skill files, sibling specs, `playwright.config.ts` files, fixtures, and page objects — it is much faster than GitHub tools. It does **not** contain the PR's changes: for any file the PR adds or modifies, read `pr-diff.txt` or fetch it with `get_file_contents` at the PR head ref.
 2. From `pr-files.json` (or `pr-diff.txt`), determine whether any in-scope files (see **Scope** above) changed. If none changed, stop and call `noop` with `No Scout files changed`.
 3. From `pr-metadata.json`, check the PR title prefix and labels. If this is a backport (label `backport` or title prefix like `[9.x]`), stop and call `noop` with `Backport PR — skipping`.
 4. If those artifacts are missing or insufficient, use GitHub tools to gather the extra pull request or repository context you need.

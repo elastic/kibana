@@ -35,6 +35,13 @@ engine:
     ANTHROPIC_DEFAULT_SONNET_MODEL: anthropic/claude-sonnet-4.6
     CLAUDE_CODE_EFFORT_LEVEL: high
     CLAUDE_CODE_SUBAGENT_MODEL: opus[1m]
+# Check out the trusted base commit (never the PR head in a pull_request_target job) so the agent
+# can read docs, skills, sibling specs, and playwright configs locally. PR changes come from the
+# prefetched diff / GitHub tools. Dispatch runs resolve the selected PR base SHA through prefetch.
+# PR events use the base SHA from their event payload.
+checkout:
+  ref: ${{ github.event.pull_request.base.sha || needs.prefetch_pr_context.outputs.base_sha }}
+  fetch-depth: 1
 # Activation rules:
 # - Manual runs always activate.
 # - reviewer:skip-ai suppresses PR event activations.
@@ -154,6 +161,12 @@ Using the imported reviewer instructions:
 - Run in follow-up response mode when `workflow_dispatch` includes a comment id and event type from the Reviewer Comment Dispatcher.
 - This reviewer's own gh-aw workflow id is `reviewer-scout`. Use it as "this reviewer's own workflow id" when matching review threads to resolve.
 
+## Environment
+
+- Kibana is checked out in the working directory at the PR **base** commit as a shallow clone (`fetch-depth: 1`): every file at that commit is on disk, but there is no history, so `git log`, `git blame`, and diffs against older commits won't work. Read the skill (`.agents/skills/scout-best-practices-reviewer/SKILL.md`), the Scout docs (`docs/extend/testing/*.md`), sibling specs, `playwright.config.ts` files, fixtures, and page objects from here with `ls`, `grep`, and `Read` instead of GitHub tools.
+- Kibana is not bootstrapped (no `node_modules`), so Jest, type checks, ESLint, and Scout runs are not possible — this is a static review. Network access is limited to GitHub, `elastic.co`, and the model provider.
+- The prefetched artifacts under `/tmp/gh-aw/agent/` (`pr-diff.txt`, `pr-files.json`, `pr-metadata.json`, `pr-issue-comments.json`, `pr-review-comments.json`, `pr-reviews.json`) are the source of truth for what the PR changes.
+
 ## Critical checks
 
 Work through the multi-step **Critical checks** defined in the skill's `SKILL.md` one by one, in order. Report any Critical-check hits **before** ordinary findings. Format each Critical-check finding title as a level-3 heading:
@@ -170,6 +183,7 @@ Then append a GitHub `> [!IMPORTANT]` alert at the **bottom** of that finding (a
 ```
 
 For dispatched follow-up runs, use this context:
+
 - PR number: `${{ github.event.inputs.pr_number }}`
 - Comment id: `${{ github.event.inputs.comment_id }}`
 - Comment event type: `${{ github.event.inputs.comment_type }}`
