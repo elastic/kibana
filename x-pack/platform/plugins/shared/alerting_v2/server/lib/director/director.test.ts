@@ -93,7 +93,7 @@ describe('DirectorService', () => {
         group_hash: 'hash-1',
         status: 'breached',
         type: 'alert',
-        episode: undefined,
+        alert: undefined,
       });
 
       mockEsClient.esql.query.mockResolvedValue(createLatestAlertEventStateResponse([]));
@@ -112,7 +112,7 @@ describe('DirectorService', () => {
       const alertEvent = createAlertEvent({
         group_hash: 'hash-1',
         status: 'breached',
-        episode: undefined,
+        alert: undefined,
       });
 
       mockEsClient.esql.query.mockResolvedValue(createLatestAlertEventStateResponse([]));
@@ -136,7 +136,7 @@ describe('DirectorService', () => {
       const alertEvent = createAlertEvent({
         group_hash: 'hash-1',
         status: 'breached',
-        episode: undefined,
+        alert: undefined,
       });
 
       mockEsClient.esql.query.mockResolvedValue(
@@ -171,7 +171,7 @@ describe('DirectorService', () => {
       const alertEvent = createAlertEvent({
         group_hash: 'hash-1',
         status: 'breached',
-        episode: undefined,
+        alert: undefined,
       });
 
       mockEsClient.esql.query.mockResolvedValue(
@@ -205,7 +205,7 @@ describe('DirectorService', () => {
       const alertEvent = createAlertEvent({
         group_hash: 'hash-1',
         status: 'breached',
-        episode: undefined,
+        alert: undefined,
       });
 
       mockEsClient.esql.query.mockResolvedValue(
@@ -239,7 +239,7 @@ describe('DirectorService', () => {
       const alertEvent = createAlertEvent({
         group_hash: 'hash-1',
         status: 'recovered',
-        episode: undefined,
+        alert: undefined,
       });
 
       mockEsClient.esql.query.mockResolvedValue(
@@ -273,7 +273,7 @@ describe('DirectorService', () => {
       const alertEvent = createAlertEvent({
         group_hash: 'hash-1',
         status: 'recovered',
-        episode: undefined,
+        alert: undefined,
       });
 
       mockEsClient.esql.query.mockResolvedValue(
@@ -308,7 +308,7 @@ describe('DirectorService', () => {
       const alertEvent = createAlertEvent({
         group_hash: 'hash-1',
         status: 'no_data',
-        episode: undefined,
+        alert: undefined,
       });
 
       mockEsClient.esql.query.mockResolvedValue(
@@ -342,7 +342,7 @@ describe('DirectorService', () => {
       const alertEvent = createAlertEvent({
         group_hash: 'hash-1',
         status: 'no_data',
-        episode: undefined,
+        alert: undefined,
       });
 
       mockEsClient.esql.query.mockResolvedValue(
@@ -373,8 +373,8 @@ describe('DirectorService', () => {
 
     it('processes multiple alert events correctly', async () => {
       const alertEvents = [
-        createAlertEvent({ group_hash: 'hash-1', status: 'breached', episode: undefined }),
-        createAlertEvent({ group_hash: 'hash-2', status: 'recovered', episode: undefined }),
+        createAlertEvent({ group_hash: 'hash-1', status: 'breached', alert: undefined }),
+        createAlertEvent({ group_hash: 'hash-2', status: 'recovered', alert: undefined }),
       ];
 
       mockEsClient.esql.query.mockResolvedValue(
@@ -421,7 +421,7 @@ describe('DirectorService', () => {
       const alertEvent = createAlertEvent({
         group_hash: 'hash-1',
         status: 'breached',
-        episode: undefined,
+        alert: undefined,
       });
 
       mockEsClient.esql.query.mockResolvedValue(
@@ -452,7 +452,7 @@ describe('DirectorService', () => {
       const alertEvent = createAlertEvent({
         group_hash: 'hash-1',
         status: 'breached',
-        episode: undefined,
+        alert: undefined,
       });
 
       mockEsClient.esql.query.mockResolvedValue(
@@ -520,7 +520,7 @@ describe('DirectorService', () => {
       const alertEvent = createAlertEvent({
         group_hash: 'hash-1',
         status: 'breached',
-        episode: undefined,
+        alert: undefined,
       });
 
       mockEsClient.esql.query.mockResolvedValue(
@@ -558,7 +558,7 @@ describe('DirectorService', () => {
       const alertEvent = createAlertEvent({
         group_hash: 'hash-1',
         status: 'breached',
-        episode: undefined,
+        alert: undefined,
       });
 
       mockEsClient.esql.query.mockResolvedValue(
@@ -589,9 +589,9 @@ describe('DirectorService', () => {
 
     it('aggregates newEpisodeCount only for fresh episodes across a mixed batch', async () => {
       const alertEvents = [
-        createAlertEvent({ group_hash: 'hash-new', status: 'breached', episode: undefined }),
-        createAlertEvent({ group_hash: 'hash-existing', status: 'breached', episode: undefined }),
-        createAlertEvent({ group_hash: 'hash-inactive', status: 'breached', episode: undefined }),
+        createAlertEvent({ group_hash: 'hash-new', status: 'breached', alert: undefined }),
+        createAlertEvent({ group_hash: 'hash-existing', status: 'breached', alert: undefined }),
+        createAlertEvent({ group_hash: 'hash-inactive', status: 'breached', alert: undefined }),
       ];
 
       mockEsClient.esql.query.mockResolvedValue(
@@ -640,7 +640,7 @@ describe('DirectorService', () => {
         const alertEvent = createAlertEvent({
           group_hash: 'hash-1',
           status: 'recovered',
-          episode: undefined,
+          alert: undefined,
         });
 
         mockEsClient.esql.query.mockResolvedValue(
@@ -679,7 +679,7 @@ describe('DirectorService', () => {
         const alertEvent = createAlertEvent({
           group_hash: 'hash-1',
           status: 'breached',
-          episode: undefined,
+          alert: undefined,
         });
 
         mockEsClient.esql.query.mockResolvedValue(
@@ -722,7 +722,7 @@ describe('DirectorService', () => {
         const alertEvent = createAlertEvent({
           group_hash: 'hash-1',
           status: 'recovered',
-          episode: undefined,
+          alert: undefined,
         });
 
         mockEsClient.esql.query.mockResolvedValue(
@@ -762,7 +762,7 @@ describe('DirectorService', () => {
         const alertEvent = createAlertEvent({
           group_hash: 'hash-1',
           status: 'breached',
-          episode: undefined,
+          alert: undefined,
         });
 
         mockEsClient.esql.query.mockResolvedValue(
@@ -799,7 +799,7 @@ describe('DirectorService', () => {
         const alertEvent = createAlertEvent({
           group_hash: 'hash-1',
           status: 'recovered',
-          episode: undefined,
+          alert: undefined,
         });
 
         mockEsClient.esql.query.mockResolvedValue(
@@ -837,7 +837,7 @@ describe('DirectorService', () => {
         const alertEvent = createAlertEvent({
           group_hash: 'hash-1',
           status: 'breached',
-          episode: undefined,
+          alert: undefined,
         });
 
         mockEsClient.esql.query.mockResolvedValue(
@@ -871,11 +871,11 @@ describe('DirectorService', () => {
         // The lock is per-group_hash. Groups without an activate stay
         // under strategy control.
         const alertEvents = [
-          createAlertEvent({ group_hash: 'locked-group', status: 'recovered', episode: undefined }),
+          createAlertEvent({ group_hash: 'locked-group', status: 'recovered', alert: undefined }),
           createAlertEvent({
             group_hash: 'engine-group',
             status: 'recovered',
-            episode: undefined,
+            alert: undefined,
           }),
         ];
 
