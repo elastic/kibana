@@ -17,7 +17,11 @@ import {
   createBadRequestError,
   isEventsNativeVersion,
 } from '@kbn/agent-builder-common';
-import type { ConversationRoundAuthor, CurrentUser } from '@kbn/agent-builder-common';
+import type {
+  ConversationRoundAuthor,
+  CurrentUser,
+  UserIdAndName,
+} from '@kbn/agent-builder-common';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import type { ExecutionConversationOrigin } from '@kbn/agent-builder-server/execution';
@@ -34,6 +38,7 @@ import type { ConversationWithPermissions } from '../../../common/http_api/conve
 import type { ConversationEventBus } from '../../workflows/triggers/conversation_event_bus';
 import { createScopedConversationEventEmitter } from '../../workflows/triggers/conversation_event_bus';
 import type { ConversationEventsServiceStart } from '../conversation_events';
+import type { AuditLogService } from '../../audit/audit_log_service';
 
 export interface AppendUserMessageOptions {
   request: KibanaRequest;
@@ -43,11 +48,22 @@ export interface AppendUserMessageOptions {
 }
 
 export interface ConversationService {
-  getScopedClient(options: { request: KibanaRequest }): Promise<ConversationClient>;
+  /**
+   * `requester` is a principal resolved earlier from the original request. A Task Manager run
+   * authenticates with a derived credential that no longer reports the original realm, so a
+   * service account would otherwise come back untyped and without an id. Only the identity is
+   * taken from it; privileges stay those of the live credential.
+   */
+  getScopedClient(options: {
+    request: KibanaRequest;
+    requester?: UserIdAndName;
+  }): Promise<ConversationClient>;
   getConversationRoundAuthor(options: {
     request: KibanaRequest;
     origin?: ExecutionConversationOrigin;
+    requester?: UserIdAndName;
   }): Promise<ConversationRoundAuthor | undefined>;
+  getCurrentUser(options: { request: KibanaRequest }): Promise<CurrentUser>;
   appendUserMessage(options: AppendUserMessageOptions): Promise<ConversationWithPermissions>;
 }
 
@@ -60,6 +76,7 @@ interface ConversationServiceDeps {
   attachments: AttachmentServiceStart;
   eventBus?: ConversationEventBus;
   conversationEvents: ConversationEventsServiceStart;
+  auditLogService?: AuditLogService;
 }
 
 export class ConversationServiceImpl implements ConversationService {
@@ -71,6 +88,7 @@ export class ConversationServiceImpl implements ConversationService {
   private readonly attachments: AttachmentServiceStart;
   private readonly eventBus?: ConversationEventBus;
   private readonly conversationEvents: ConversationEventsServiceStart;
+  private readonly auditLogService?: AuditLogService;
 
   constructor({
     logger,
@@ -81,6 +99,7 @@ export class ConversationServiceImpl implements ConversationService {
     attachments,
     eventBus,
     conversationEvents,
+    auditLogService,
   }: ConversationServiceDeps) {
     this.logger = logger;
     this.security = security;
@@ -90,14 +109,22 @@ export class ConversationServiceImpl implements ConversationService {
     this.attachments = attachments;
     this.eventBus = eventBus;
     this.conversationEvents = conversationEvents;
+    this.auditLogService = auditLogService;
   }
 
-  async getScopedClient({ request }: { request: KibanaRequest }): Promise<ConversationClient> {
-    const user = await this.getCurrentUser({ request });
+  async getScopedClient({
+    request,
+    requester,
+  }: {
+    request: KibanaRequest;
+    requester?: UserIdAndName;
+  }): Promise<ConversationClient> {
+    const user = await this.resolveUser({ request, requester });
     const esClient = this.getScopedEsClient(request).asInternalUser;
     const space = getCurrentSpaceId({ request, spaces: this.spaces });
     const agentRegistry = await this.agents.getRegistry({ request });
     const eventBus = this.eventBus;
+    const auditLogService = this.auditLogService;
 
     return createClient({
       user,
@@ -107,6 +134,9 @@ export class ConversationServiceImpl implements ConversationService {
       agentRegistry,
       conversationEvents: this.conversationEvents,
       eventEmitter: eventBus ? createScopedConversationEventEmitter(eventBus, request) : undefined,
+      onConversationCreated: auditLogService
+        ? (params) => auditLogService.logConversationCreated(request, params)
+        : undefined,
     });
   }
 
@@ -164,37 +194,51 @@ export class ConversationServiceImpl implements ConversationService {
 
   /**
    * Returns the author of a conversation round: the origin's own author if it provides one,
-   * otherwise the authenticated Kibana user's profile id. Every round is attributed, whatever the
-   * conversation's access mode, since authorship cannot be reconstructed once a conversation is
-   * shared. No author is assigned when the user has no profile id (e.g. some API key callers) —
-   * the username is not a stable identifier and must not be stored as one.
+   * otherwise the authenticated principal's id: a profile uid for a user, the account
+   * principal for a service account.
    */
   async getConversationRoundAuthor({
     request,
     origin,
+    requester,
   }: {
     request: KibanaRequest;
     origin?: ExecutionConversationOrigin;
+    requester?: UserIdAndName;
   }): Promise<ConversationRoundAuthor | undefined> {
     if (origin?.author) {
       return origin.author;
     }
 
-    const user = await this.getCurrentUser({ request });
+    const user = requester ?? (await this.getCurrentUser({ request }));
 
     if (user.id === undefined) {
       return undefined;
     }
 
-    return { id: user.id, username: user.username };
+    return { id: user.id, username: user.username, type: user.type };
   }
 
-  private async getCurrentUser({ request }: { request: KibanaRequest }): Promise<CurrentUser> {
+  async getCurrentUser({ request }: { request: KibanaRequest }): Promise<CurrentUser> {
     return getUserFromRequest({
       request,
       security: this.security,
       esClient: this.getScopedEsClient(request).asCurrentUser,
     });
+  }
+
+  private async resolveUser({
+    request,
+    requester,
+  }: {
+    request: KibanaRequest;
+    requester?: UserIdAndName;
+  }): Promise<CurrentUser> {
+    const current = await this.getCurrentUser({ request });
+    if (!requester) {
+      return current;
+    }
+    return { ...current, id: requester.id, username: requester.username, type: requester.type };
   }
 
   private getScopedEsClient(request: KibanaRequest) {

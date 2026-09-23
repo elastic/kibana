@@ -27,6 +27,7 @@ import {
 } from '@kbn/agent-builder-common';
 import {
   agentActor,
+  currentUserActor,
   executionStartedEvent,
   interruptedExecutionToEvents,
   lastTerminatedExecutionIndex,
@@ -34,6 +35,7 @@ import {
   resumeExecutionStartedEvent,
   isRoundDerivedEventId,
   roundsToEvents,
+  userMessageActor,
   userMessageEvent,
 } from './rounds_to_events';
 
@@ -551,5 +553,79 @@ describe('lastTerminatedExecutionIndex', () => {
     ];
     expect(lastTerminatedExecutionIndex({ events }, 'r1')).toBe(-1);
     expect(lastTerminatedExecutionIndex({ events: undefined }, 'r1')).toBe(-1);
+  });
+});
+
+describe('service account attribution', () => {
+  const serviceAccount = {
+    id: 'service_account:kibana/automation',
+    username: 'kibana/automation',
+    type: 'service_account' as const,
+  };
+
+  describe('userMessageActor', () => {
+    it('marks a service account author without changing the actor type', () => {
+      const actor = userMessageActor(undefined, { author: serviceAccount });
+
+      expect(actor).toEqual({
+        type: EventActorType.user,
+        id: 'service_account:kibana/automation',
+        username: 'kibana/automation',
+        principal_type: 'service_account',
+      });
+    });
+
+    it('marks a service account owner on the fallback branch', () => {
+      const conversation = baseConversation([]);
+
+      const actor = userMessageActor({ ...conversation, user: serviceAccount }, {});
+
+      expect(actor).toEqual(
+        expect.objectContaining({
+          type: EventActorType.user,
+          id: 'service_account:kibana/automation',
+          principal_type: 'service_account',
+        })
+      );
+    });
+
+    it('omits the principal type for a user', () => {
+      const actor = userMessageActor(undefined, {
+        author: { id: 'user-1', username: 'alice', type: 'user' },
+      });
+
+      expect(actor).not.toHaveProperty('principal_type');
+    });
+
+    it('does not mark an external author as a service account', () => {
+      const origin = {
+        type: ConversationOriginType.Slack,
+        external_conversation_id: 'thread-1',
+      };
+
+      const actor = userMessageActor(undefined, { author: serviceAccount, origin });
+
+      expect(actor.type).toBe(EventActorType.external);
+      expect(actor).not.toHaveProperty('principal_type');
+    });
+  });
+
+  describe('currentUserActor', () => {
+    it('marks a service account', () => {
+      expect(currentUserActor({ ...serviceAccount, isAdmin: false })).toEqual({
+        type: EventActorType.user,
+        id: 'service_account:kibana/automation',
+        username: 'kibana/automation',
+        principal_type: 'service_account',
+      });
+    });
+
+    it('falls back to the username when the principal has no stable id', () => {
+      expect(currentUserActor({ username: 'alice', isAdmin: false })).toEqual({
+        type: EventActorType.user,
+        id: 'alice',
+        username: 'alice',
+      });
+    });
   });
 });

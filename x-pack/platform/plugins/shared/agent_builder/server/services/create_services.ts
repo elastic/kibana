@@ -206,6 +206,11 @@ export class ServiceManager {
       trackingService,
     });
 
+    const auditLogService = new AuditLogService({
+      security,
+      logger: logger.get('audit'),
+    });
+
     const conversations = new ConversationServiceImpl({
       logger: logger.get('conversations'),
       security,
@@ -215,6 +220,7 @@ export class ServiceManager {
       attachments,
       eventBus: conversationEventBus,
       conversationEvents,
+      auditLogService,
     });
 
     const runnerFactory = new RunnerFactoryImpl({
@@ -249,11 +255,6 @@ export class ServiceManager {
       elasticsearch,
       spaces,
       conversations,
-    });
-
-    const auditLogService = new AuditLogService({
-      security,
-      logger: logger.get('audit'),
     });
 
     const taskHandler = createTaskHandler({

@@ -15,6 +15,7 @@ import type {
   InteractivityConfig,
   ExecutionAbortReason,
   SerializedExecutionError,
+  UserIdAndName,
 } from '@kbn/agent-builder-common';
 import type { AgentExecutionParams } from '@kbn/agent-builder-server/execution';
 
@@ -45,6 +46,14 @@ const storageSettings = {
       }),
       parent_execution_id: types.keyword({}),
       space_id: types.keyword({}),
+      requester: types.object({
+        dynamic: false,
+        properties: {
+          id: types.keyword({}),
+          username: types.keyword({}),
+          type: types.keyword({}),
+        },
+      }),
       agent_params: types.object({ dynamic: false, properties: {} }),
       error: types.object({
         dynamic: false,
@@ -76,6 +85,7 @@ export interface AgentExecutionProperties {
   interactivity?: InteractivityConfig;
   parent_execution_id?: string;
   space_id: string;
+  requester?: UserIdAndName;
   agent_params: AgentExecutionParams;
   error?: SerializedExecutionError;
   abort_reason?: ExecutionAbortReason;

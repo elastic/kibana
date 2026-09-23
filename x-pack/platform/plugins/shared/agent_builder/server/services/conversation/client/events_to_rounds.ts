@@ -179,6 +179,7 @@ export const authorAndOrigin = (
     id: actor.id,
     ...(actor.username ? { username: actor.username } : {}),
     ...(actor.full_name ? { full_name: actor.full_name } : {}),
+    ...(actor.principal_type ? { type: actor.principal_type } : {}),
   };
   return { author, ...(actor.origin ? { origin: actor.origin } : {}) };
 };

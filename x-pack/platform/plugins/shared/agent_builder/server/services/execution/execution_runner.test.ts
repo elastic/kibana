@@ -496,6 +496,56 @@ describe('handleAgentExecution', () => {
       expect(getConversationRoundAuthor).toHaveBeenCalledTimes(1);
       expect(executeAgentMock).toHaveBeenCalledWith(expect.objectContaining({ author }));
     });
+
+    it('resolves identity from the execution requester, not from the run-time request', async () => {
+      const requester = {
+        id: 'service_account:kibana/automation',
+        username: 'kibana/automation',
+        type: 'service_account' as const,
+      };
+      const conversation = createEmptyConversation({
+        id: 'conversation-1',
+        agent_id: 'test-agent',
+      });
+      const conversationClient = createConversationClientMock();
+      conversationClient.get.mockResolvedValue(conversation);
+      conversationClient.update.mockResolvedValue(conversation);
+      executeAgentMock.mockReturnValue(
+        of({
+          type: ChatEventType.roundComplete,
+          data: { round: createRound({}) },
+        } as RoundCompleteEvent)
+      );
+      resolveServicesMock.mockResolvedValue({
+        conversationClient,
+        selectedConnectorId: 'connector-1',
+        modelProvider: createModelProviderMock(),
+      } as never);
+      const getConversationRoundAuthor = jest.fn().mockResolvedValue(requester);
+      const deps = createDeps({ conversationClient, getConversationRoundAuthor });
+
+      const events$ = await handleAgentExecution({
+        execution: {
+          executionId: 'execution-1',
+          executionMode: AgentExecutionMode.conversation,
+          requester,
+          agentParams: {
+            agentId: 'test-agent',
+            conversationId: 'conversation-1',
+            nextInput: { message: 'Hello' },
+          },
+        } as never,
+        deps,
+        request: { headers: {} } as never,
+        abortSignal: new AbortController().signal,
+      });
+      await lastValueFrom(events$.pipe(toArray()));
+
+      expect(resolveServicesMock).toHaveBeenCalledWith(expect.objectContaining({ requester }));
+      expect(getConversationRoundAuthor).toHaveBeenCalledWith(
+        expect.objectContaining({ requester })
+      );
+    });
   });
 
   describe('converse span user identity', () => {

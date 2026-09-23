@@ -17,6 +17,7 @@ import type {
   ChatEvent,
   ExecutionAbortReason,
   InteractivityConfig,
+  UserIdAndName,
 } from '@kbn/agent-builder-common';
 import {
   agentBuilderDefaultAgentId,
@@ -107,6 +108,19 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
         }
       : params;
 
+    // Resolved here, from the request that carries the caller's own credential: a Task Manager run
+    // authenticates with a derived key that no longer reports who the caller was.
+    const {
+      id: requesterId,
+      username,
+      type,
+    } = await this.deps.conversationService.getCurrentUser({ request });
+    const requester: UserIdAndName = {
+      ...(requesterId ? { id: requesterId } : {}),
+      username,
+      ...(type ? { type } : {}),
+    };
+
     let execution: AgentExecution;
     try {
       execution = await executionClient.create({
@@ -114,6 +128,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
         executionId,
         agentId,
         spaceId,
+        requester,
         agentParams: validatedParams,
         parentExecutionId: params.parentExecutionId,
         metadata,

@@ -33,7 +33,13 @@ const createService = ({
   agents = {},
   attachments = { getTypeDefinition: jest.fn() },
   eventBus,
-}: { agents?: object; attachments?: object; eventBus?: object } = {}) => {
+  auditLogService,
+}: {
+  agents?: object;
+  attachments?: object;
+  eventBus?: object;
+  auditLogService?: object;
+} = {}) => {
   return new ConversationServiceImpl({
     logger: loggingSystemMock.createLogger(),
     security: {} as never,
@@ -46,6 +52,7 @@ const createService = ({
     attachments: attachments as never,
     conversationEvents: { getDefinition: jest.fn(), list: jest.fn().mockReturnValue([]) },
     ...(eventBus ? { eventBus: eventBus as never } : {}),
+    ...(auditLogService ? { auditLogService: auditLogService as never } : {}),
   });
 };
 
@@ -78,6 +85,27 @@ describe('ConversationServiceImpl', () => {
       expect(createClientMock.mock.calls[0][0].eventEmitter).toBeUndefined();
     });
 
+    it('audits a created conversation against the request', async () => {
+      const auditLogService = { logConversationCreated: jest.fn() };
+      await createService({ agents, auditLogService }).getScopedClient({ request });
+
+      const { onConversationCreated } = createClientMock.mock.calls[0][0];
+      const user = { id: 'profile-1', username: 'jane' };
+      onConversationCreated!({ conversationId: 'conv-1', agentId: 'agent-1', user });
+
+      expect(auditLogService.logConversationCreated).toHaveBeenCalledWith(request, {
+        conversationId: 'conv-1',
+        agentId: 'agent-1',
+        user,
+      });
+    });
+
+    it('leaves onConversationCreated undefined without an audit log service', async () => {
+      await createService({ agents }).getScopedClient({ request });
+
+      expect(createClientMock.mock.calls[0][0].onConversationCreated).toBeUndefined();
+    });
+
     it.each([true, false])('passes isAdmin=%s through to the client', async (isAdmin) => {
       const user = { id: 'profile-1', username: 'jane', isAdmin };
       getUserFromRequestMock.mockResolvedValue(user);
@@ -85,6 +113,25 @@ describe('ConversationServiceImpl', () => {
       await createService({ agents }).getScopedClient({ request });
 
       expect(createClientMock).toHaveBeenCalledWith(expect.objectContaining({ user }));
+    });
+
+    it('takes identity from the requester and privileges from the live credential', async () => {
+      getUserFromRequestMock.mockResolvedValue({
+        username: 'kibana/automation',
+        type: 'user',
+        isAdmin: true,
+      });
+      const requester = {
+        id: 'service_account:kibana/automation',
+        username: 'kibana/automation',
+        type: 'service_account' as const,
+      };
+
+      await createService({ agents }).getScopedClient({ request, requester });
+
+      expect(createClientMock).toHaveBeenCalledWith(
+        expect.objectContaining({ user: { ...requester, isAdmin: true } })
+      );
     });
 
     it('uses the internal client for conversation storage', async () => {
@@ -137,6 +184,38 @@ describe('ConversationServiceImpl', () => {
       const author = await service.getConversationRoundAuthor({ request });
 
       expect(author).toEqual({ id: 'profile-1', username: 'jane' });
+    });
+
+    it('takes the author from the requester without resolving the request', async () => {
+      const service = createService();
+      const requester = {
+        id: 'service_account:kibana/automation',
+        username: 'kibana/automation',
+        type: 'service_account' as const,
+      };
+
+      const author = await service.getConversationRoundAuthor({ request, requester });
+
+      expect(author).toEqual(requester);
+      expect(getUserFromRequestMock).not.toHaveBeenCalled();
+    });
+
+    it('types a service account author', async () => {
+      const service = createService();
+      getUserFromRequestMock.mockResolvedValue({
+        id: 'service_account:kibana/automation',
+        username: 'kibana/automation',
+        type: 'service_account',
+        isAdmin: false,
+      });
+
+      const author = await service.getConversationRoundAuthor({ request });
+
+      expect(author).toEqual({
+        id: 'service_account:kibana/automation',
+        username: 'kibana/automation',
+        type: 'service_account',
+      });
     });
 
     it('does not assign an author when the user has no profile id', async () => {

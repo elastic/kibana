@@ -136,7 +136,44 @@ describe('round-trip fidelity: eventsToRounds(roundsToEvents(round)) === round',
     expect(reconstructed.author).toEqual({ id: 'user-1', username: 'alice' });
   });
 
+  it('preserves a service account author', () => {
+    const round = baseRound({
+      author: {
+        id: 'service_account:kibana/automation',
+        username: 'kibana/automation',
+        type: 'service_account',
+      },
+    });
+    expect(roundTrip([round])).toEqual([round]);
+  });
+
+  it('attributes an authorless round to a service account owner', () => {
+    const { author, ...noAuthor } = baseRound();
+    const conversation: Conversation = {
+      ...conversationWith([noAuthor as ConversationRound]),
+      user: {
+        id: 'service_account:kibana/automation',
+        username: 'kibana/automation',
+        type: 'service_account',
+      },
+    };
+
+    const [reconstructed] = eventsToRounds(roundsToEvents(conversation));
+
+    expect(reconstructed.author).toEqual({
+      id: 'service_account:kibana/automation',
+      username: 'kibana/automation',
+      type: 'service_account',
+    });
+  });
+
   describe('accepted, documented losses', () => {
+    it('drops an explicit `type: user` author, which is the default anyway', () => {
+      const round = baseRound({ author: { id: 'user-1', username: 'alice', type: 'user' } });
+
+      expect(roundTrip([round])[0].author).toEqual({ id: 'user-1', username: 'alice' });
+    });
+
     it('drops an in-progress round (the run has no terminal event yet)', () => {
       expect(roundTrip([baseRound({ status: ConversationRoundStatus.inProgress })])).toEqual([]);
     });

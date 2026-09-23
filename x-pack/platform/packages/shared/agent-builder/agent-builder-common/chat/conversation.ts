@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { UserIdAndName } from '../base/users';
+import type { UserIdAndName, UserPrincipalType } from '../base/users';
 import type { ToolOrigin, ToolType } from '../tools/definition';
 import type { ToolResult } from '../tools/tool_result';
 import type { ExecutionStatus, SerializedExecutionError } from '../agents/execution_status';
@@ -494,6 +494,8 @@ export interface ConversationRoundAuthor {
   username?: string;
   /** Optional display name. */
   full_name?: string;
+  /** The kind of Kibana principal. Absent for external authors and for pre-existing rounds. */
+  type?: UserPrincipalType;
 }
 
 export const getConversationRoundAuthorDisplayName = (

@@ -10,6 +10,7 @@ import type {
   ConversationRound,
   ConversationRoundAuthor,
   ConversationRoundStep,
+  CurrentUser,
   EventActor,
   ExecutionInterruption,
   ExecutionInterruptionType,
@@ -18,6 +19,7 @@ import type {
   ExecutionRunSummary,
   RoundInput,
   TimelineEvent,
+  UserPrincipalType,
 } from '@kbn/agent-builder-common';
 import {
   ConversationRoundStatus,
@@ -181,6 +183,9 @@ const executionRunSummary = (round: ConversationRound): ExecutionRunSummary => (
     : {}),
 });
 
+const principalType = (type: UserPrincipalType | undefined) =>
+  type === 'service_account' ? { principal_type: type } : {};
+
 /** Actor for a round's `user_message`: the round author (external or user), else the owner. */
 export const userMessageActor = (
   conversation: Pick<Conversation, 'user'> | undefined,
@@ -192,6 +197,7 @@ export const userMessageActor = (
       id: round.author.id,
       ...(round.author.username ? { username: round.author.username } : {}),
       ...(round.author.full_name ? { full_name: round.author.full_name } : {}),
+      ...(round.origin ? {} : principalType(round.author.type)),
       ...(round.origin ? { origin: round.origin } : {}),
     };
   }
@@ -201,6 +207,7 @@ export const userMessageActor = (
       type: round.origin ? EventActorType.external : EventActorType.user,
       id: conversation.user.id ?? conversation.user.username,
       ...(conversation.user.username ? { username: conversation.user.username } : {}),
+      ...(round.origin ? {} : principalType(conversation.user.type)),
       ...(round.origin ? { origin: round.origin } : {}),
     };
   }
@@ -211,6 +218,14 @@ export const userMessageActor = (
     ...(round.origin ? { origin: round.origin } : {}),
   };
 };
+
+/** Actor for events the current principal appends directly, outside a round. */
+export const currentUserActor = (user: CurrentUser): EventActor => ({
+  type: EventActorType.user,
+  id: user.id ?? user.username,
+  ...(user.username ? { username: user.username } : {}),
+  ...principalType(user.type),
+});
 
 /** Actor for a run's lifecycle events. */
 export const agentActor = (conversation: Pick<Conversation, 'agent_id'>): EventActor => ({

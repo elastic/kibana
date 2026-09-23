@@ -978,6 +978,26 @@ describe('conversation model converters', () => {
   });
 
   describe('toEs', () => {
+    it('keeps the owner principal type across writes', () => {
+      const conversation = {
+        id: 'conv-1',
+        agent_id: 'agent_id',
+        title: 'conv_title',
+        created_at: creationDate,
+        updated_at: creationDate,
+        rounds: [],
+        user: {
+          id: 'service_account:kibana/automation',
+          username: 'kibana/automation',
+          type: 'service_account' as const,
+        },
+      };
+
+      const serialized = toEs(conversation as never, 'space');
+
+      expect(serialized.user_type).toBe('service_account');
+    });
+
     it('persists the per-user lists and clears the legacy read and pinned booleans', () => {
       const serialized = toEs(
         {
@@ -1318,6 +1338,43 @@ describe('conversation model converters', () => {
   });
 
   describe('createRequestToEs', () => {
+    it('records the owner principal type', () => {
+      const serialized = createRequestToEs({
+        conversation: { agent_id: 'agent_id', title: 'conv_title', rounds: [] },
+        space: 'space',
+        currentUser: {
+          id: 'service_account:kibana/automation',
+          username: 'kibana/automation',
+          type: 'service_account',
+        },
+        creationDate: new Date(creationDate),
+      });
+
+      expect(serialized.user_id).toBe('service_account:kibana/automation');
+      expect(serialized.user_type).toBe('service_account');
+    });
+
+    it('records no principal type for an owner override that has none', () => {
+      const serialized = createRequestToEs({
+        conversation: {
+          agent_id: 'agent_id',
+          title: 'conv_title',
+          rounds: [],
+          user: { id: 'user_id', username: 'user_name' },
+        },
+        space: 'space',
+        currentUser: {
+          id: 'service_account:kibana/automation',
+          username: 'kibana/automation',
+          type: 'service_account',
+        },
+        creationDate: new Date(creationDate),
+      });
+
+      expect(serialized.user_id).toBe('user_id');
+      expect(serialized.user_type).toBeUndefined();
+    });
+
     it('creates an unpinned, unread conversation with empty per-user lists', () => {
       const serialized = createRequestToEs({
         conversation: { agent_id: 'agent_id', title: 'conv_title', rounds: [] },
