@@ -29,7 +29,7 @@ import {
   probeHttp,
   isExportProfileImplicitLocal,
 } from './profiles';
-import { readCachedEisConnectors } from './eis_connectors_cache';
+import { getEisCacheStatus, readCachedEisConnectors } from './eis_connectors_cache';
 import { parseSpaceIds } from '../utils/space_ids';
 import {
   runConfigInit,
@@ -319,6 +319,20 @@ export const resolveEvalRunContext = async ({
         'base64'
       );
       log.info('EIS connectors loaded from cache (~/.elastic/eis-connectors-cache.json)');
+    } else {
+      const status = getEisCacheStatus();
+      const reason =
+        status === 'missing'
+          ? 'is missing'
+          : status === 'expired'
+          ? 'is expired (>7 days old)'
+          : 'is malformed';
+      throw createFlagError(
+        `This eval requires EIS connectors, but KIBANA_TESTING_INFERENCE_ENDPOINTS is not set and ` +
+          `the EIS connectors cache at ~/.elastic/eis-connectors-cache.json ${reason}. ` +
+          `Without it, eis-* connector IDs cannot be resolved and every inference call will 404. ` +
+          `Run \`node scripts/evals init\` to refresh the cache, or set KIBANA_TESTING_INFERENCE_ENDPOINTS explicitly.`
+      );
     }
   }
 

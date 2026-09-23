@@ -33,24 +33,41 @@ const CACHE_DIR = path.join(os.homedir(), '.elastic');
 const CACHE_PATH = path.join(CACHE_DIR, 'eis-connectors-cache.json');
 const TTL_MS = 168 * 60 * 60 * 1000; // 7 days
 
-export const readCachedEisConnectors = (): Record<string, object> | undefined => {
+export type EisCacheStatus = 'fresh' | 'expired' | 'missing' | 'malformed';
+
+export const getEisCacheStatus = (cachePath: string = CACHE_PATH): EisCacheStatus => {
   try {
-    if (!fs.existsSync(CACHE_PATH)) {
-      return undefined;
+    if (!fs.existsSync(cachePath)) {
+      return 'missing';
     }
 
-    const raw = fs.readFileSync(CACHE_PATH, 'utf-8');
+    const raw = fs.readFileSync(cachePath, 'utf-8');
     const cached: CachedEisConnectors = JSON.parse(raw);
 
     if (!cached.connectors || !cached.fetched_at_ms) {
-      return undefined;
+      return 'malformed';
     }
 
-    const age = Date.now() - cached.fetched_at_ms;
-    if (age > TTL_MS) {
-      return undefined;
+    if (Date.now() - cached.fetched_at_ms > TTL_MS) {
+      return 'expired';
     }
 
+    return 'fresh';
+  } catch {
+    return 'malformed';
+  }
+};
+
+export const readCachedEisConnectors = (
+  cachePath: string = CACHE_PATH
+): Record<string, object> | undefined => {
+  if (getEisCacheStatus(cachePath) !== 'fresh') {
+    return undefined;
+  }
+
+  try {
+    const raw = fs.readFileSync(cachePath, 'utf-8');
+    const cached: CachedEisConnectors = JSON.parse(raw);
     return cached.connectors;
   } catch {
     return undefined;
