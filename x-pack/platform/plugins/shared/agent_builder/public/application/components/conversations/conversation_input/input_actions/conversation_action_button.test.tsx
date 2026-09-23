@@ -20,8 +20,8 @@ const mockedUseConversationStream = jest.mocked(useConversationStream);
 const defaultStreamState = {
   canCancel: false,
   cancel: jest.fn(),
+  isCancelling: false,
   pendingMessage: undefined,
-  error: undefined,
   isResuming: false,
   isResponseLoading: false,
   sendMessage: jest.fn(),
@@ -34,61 +34,47 @@ describe('ConversationActionButton', () => {
   });
 
   it('renders the submit button when not streaming', () => {
-    render(
-      <ConversationActionButton
-        onSubmit={jest.fn()}
-        isSubmitDisabled={false}
-        resetToPendingMessage={jest.fn()}
-      />
-    );
+    render(<ConversationActionButton onSubmit={jest.fn()} isSubmitDisabled={false} />);
     expect(screen.getByTestId('agentBuilderConversationInputSubmitButton')).toBeInTheDocument();
   });
 
   it('calls onSubmit when submit button is clicked', () => {
     const onSubmit = jest.fn();
-    render(
-      <ConversationActionButton
-        onSubmit={onSubmit}
-        isSubmitDisabled={false}
-        resetToPendingMessage={jest.fn()}
-      />
-    );
+    render(<ConversationActionButton onSubmit={onSubmit} isSubmitDisabled={false} />);
     fireEvent.click(screen.getByTestId('agentBuilderConversationInputSubmitButton'));
     expect(onSubmit).toHaveBeenCalledTimes(1);
   });
 
   it('disables submit button when isSubmitDisabled is true', () => {
     const onSubmit = jest.fn();
-    render(
-      <ConversationActionButton
-        onSubmit={onSubmit}
-        isSubmitDisabled={true}
-        resetToPendingMessage={jest.fn()}
-      />
-    );
+    render(<ConversationActionButton onSubmit={onSubmit} isSubmitDisabled={true} />);
     const button = screen.getByTestId('agentBuilderConversationInputSubmitButton');
     expect(button).toBeDisabled();
     fireEvent.click(button);
     expect(onSubmit).not.toHaveBeenCalled();
   });
 
+  it('shows the cancel button loading and disabled while the server stops the run', () => {
+    mockedUseConversationStream.mockReturnValue({
+      ...defaultStreamState,
+      canCancel: true,
+      isCancelling: true,
+    } as never);
+
+    render(<ConversationActionButton onSubmit={jest.fn()} isSubmitDisabled={false} />);
+
+    expect(screen.getByTestId('agentBuilderConversationInputCancelButton')).toBeDisabled();
+  });
+
   it('renders the cancel button when streaming (canCancel: true)', () => {
     const cancel = jest.fn();
-    const resetToPendingMessage = jest.fn();
     mockedUseConversationStream.mockReturnValue({
       ...defaultStreamState,
       canCancel: true,
       cancel,
     } as never);
 
-    render(
-      <ConversationActionButton
-        onSubmit={jest.fn()}
-        isSubmitDisabled={false}
-        resetToPendingMessage={resetToPendingMessage}
-      />
-    );
-
+    render(<ConversationActionButton onSubmit={jest.fn()} isSubmitDisabled={false} />);
     expect(
       screen.queryByTestId('agentBuilderConversationInputSubmitButton')
     ).not.toBeInTheDocument();
@@ -97,6 +83,5 @@ describe('ConversationActionButton', () => {
 
     fireEvent.click(cancelButton);
     expect(cancel).toHaveBeenCalledTimes(1);
-    expect(resetToPendingMessage).toHaveBeenCalledTimes(1);
   });
 });
