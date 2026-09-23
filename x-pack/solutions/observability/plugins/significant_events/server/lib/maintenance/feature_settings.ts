@@ -134,7 +134,7 @@ export const createFeatureSettingsController = ({
     previous: PausedFeatureSettings | undefined;
     failures: SignificantEventsMaintenanceFailure[];
   }): Promise<PausedFeatureSettings> => {
-    const uiSettings = getUiSettingsClients({ request, access });
+    const uiSettingsClients = getUiSettingsClients({ request, access });
     const next: PausedFeatureSettings = {
       continuousOnboardingWasEnabled: previous?.continuousOnboardingWasEnabled ?? false,
       scheduledDiscoveryEnabledSpaceIds: [
@@ -143,7 +143,7 @@ export const createFeatureSettingsController = ({
     };
 
     try {
-      const globalClient = await uiSettings.global();
+      const globalClient = await uiSettingsClients.global();
       let continuousEnabled = false;
       try {
         continuousEnabled = Boolean(
@@ -182,7 +182,7 @@ export const createFeatureSettingsController = ({
 
     for (const spaceId of spaceIds) {
       try {
-        const spaceClient = await uiSettings.space(spaceId);
+        const spaceClient = await uiSettingsClients.space(spaceId);
         let scheduledEnabled = false;
         try {
           scheduledEnabled = Boolean(
@@ -240,11 +240,11 @@ export const createFeatureSettingsController = ({
     if (!pausedSettings) {
       return;
     }
-    const uiSettings = getUiSettingsClients({ request, access: 'user' });
+    const uiSettingsClients = getUiSettingsClients({ request, access: 'user' });
 
     if (pausedSettings.continuousOnboardingWasEnabled) {
       try {
-        const globalClient = await uiSettings.global();
+        const globalClient = await uiSettingsClients.global();
         await globalClient.set(OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED, true);
       } catch (error) {
         failures.push({
@@ -256,7 +256,7 @@ export const createFeatureSettingsController = ({
 
     for (const spaceId of pausedSettings.scheduledDiscoveryEnabledSpaceIds) {
       try {
-        const spaceClient = await uiSettings.space(spaceId);
+        const spaceClient = await uiSettingsClients.space(spaceId);
         await spaceClient.set(
           OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
           true
@@ -303,9 +303,9 @@ export const createFeatureSettingsController = ({
     failures: SignificantEventsMaintenanceFailure[];
   }): Promise<void> => {
     // Re-assert runs without a user request (e.g. after a feature-flag flip).
-    const uiSettings = getUiSettingsClients({ request, access: 'system' });
+    const uiSettingsClients = getUiSettingsClients({ request, access: 'system' });
     try {
-      const globalClient = await uiSettings.global();
+      const globalClient = await uiSettingsClients.global();
       await globalClient.set(OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED, false);
     } catch (error) {
       failures.push({
@@ -316,7 +316,7 @@ export const createFeatureSettingsController = ({
 
     for (const spaceId of spaceIds) {
       try {
-        const spaceClient = await uiSettings.space(spaceId);
+        const spaceClient = await uiSettingsClients.space(spaceId);
         await spaceClient.set(
           OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
           false
