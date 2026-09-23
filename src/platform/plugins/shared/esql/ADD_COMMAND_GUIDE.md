@@ -267,9 +267,9 @@ Currently, we support 3 highlighting libraries: Monaco, HighlightJS, and PrismJS
 - [ ] Add command to [highlightjs-esql](https://github.com/elastic/highlightjs-esql) | [npm](https://www.npmjs.com/package/@elastic/highlightjs-esql)
   - [ ] [Release](https://github.com/elastic/monaco-esql?tab=readme-ov-file#releasing) a new version
 - [ ] Update [EUI's](https://github.com/elastic/eui) prismjs-esql version
-  - [ ] `yarn upgrade @elastic/prismjs-esql@<version>`
+  - [ ] `pnpm upgrade @elastic/prismjs-esql@<version>`
 - [ ] Update Kibana monaco-esql version
-  - [ ] `yarn upgrade @elastic/monaco-esql@<version>`
+  - [ ] `pnpm upgrade @elastic/monaco-esql@<version>`
 
 ### Example PR's ⭐
 

@@ -50,7 +50,7 @@ import {
   horizontalAlignmentSchema,
   metricValuePositionSchema,
   leftRightAlignmentSchema,
-  placementSchema,
+  labelPlacementSchema,
 } from '../alignments';
 import { simpleOrientationSchema } from '../enums';
 
@@ -305,11 +305,15 @@ const metricStylingSchema = z
              * Label placement relative to the secondary metric value. Possible values:
              * - 'before': Label appears before the value
              * - 'after': Label appears after the value
+             * - 'tooltip': Label is hidden inline and shown in a tooltip on hover
              */
-            placement: placementSchema.default(DEFAULT_SECONDARY_LABEL_PLACEMENT).optional().meta({
-              description:
-                'Label placement relative to the secondary metric value (before or after). Ignored when the label is not visible.',
-            }),
+            placement: labelPlacementSchema
+              .default(DEFAULT_SECONDARY_LABEL_PLACEMENT)
+              .optional()
+              .meta({
+                description:
+                  'How the secondary metric name is shown: before the value, after the value, or in a tooltip. Ignored when the label is not visible.',
+              }),
           })
           .strict()
           .optional(),
@@ -577,6 +581,7 @@ export const metricConfigSchema = z.union([metricConfigSchemaNoESQL, metricConfi
 });
 
 export type MetricConfig = z.output<typeof metricConfigSchema>;
+export type MetricConfigInput = z.input<typeof metricConfigSchema>;
 export type MetricConfigNoESQL = z.output<typeof metricConfigSchemaNoESQL>;
 export type MetricConfigESQL = z.output<typeof metricConfigSchemaESQL>;
 

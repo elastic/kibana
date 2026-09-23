@@ -8,8 +8,8 @@
  */
 
 import type { ConnectorTypeInfo } from '@kbn/workflows';
+import type { ConnectorIdItem } from '@kbn/workflows-yaml';
 import { validateConnectorIds } from './validate_connector_ids';
-import type { ConnectorIdItem } from '../model/types';
 
 describe('validateConnectorIds', () => {
   const mockConnectorInstance = {
@@ -127,6 +127,66 @@ describe('validateConnectorIds', () => {
         owner: 'connector-id-validation',
         beforeMessage: '✓ testyng',
       });
+    });
+
+    it('should accept the wildcard only on a trigger connector-id', () => {
+      const results = validateConnectorIds(
+        [
+          createConnectorIdItem({
+            key: '*',
+            connectorType: '.inboundWebhook',
+            yamlPath: ['triggers', 0, 'connector-id'],
+          }),
+        ],
+        mockConnectorTypes,
+        ''
+      );
+
+      expect(results).toEqual([
+        expect.objectContaining({
+          severity: 'info',
+          message: null,
+          beforeMessage: 'All connectors of this type',
+          hoverMessage:
+            'This trigger starts the workflow for events from every connector instance of this type.',
+        }),
+      ]);
+    });
+
+    it('should reject the wildcard on a connector action step', () => {
+      const results = validateConnectorIds(
+        [createConnectorIdItem({ key: '*', connectorType: '.slack' })],
+        mockConnectorTypes,
+        ''
+      );
+
+      expect(results).toEqual([
+        expect.objectContaining({
+          severity: 'error',
+          ruleId: 'connectorNotFound',
+        }),
+      ]);
+    });
+
+    it('should reject the wildcard on a HITL channel connector-id', () => {
+      const results = validateConnectorIds(
+        [
+          createConnectorIdItem({
+            key: '*',
+            connectorType: '.slack',
+            yamlPath: ['steps', 0, 'with', 'channels', 'slack', 'connector-id'],
+          }),
+        ],
+        mockConnectorTypes,
+        ''
+      );
+
+      expect(results).toEqual([
+        expect.objectContaining({
+          severity: 'error',
+          ruleId: 'connectorNotFound',
+        }),
+      ]);
     });
   });
 

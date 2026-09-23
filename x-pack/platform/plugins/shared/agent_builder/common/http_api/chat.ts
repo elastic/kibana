@@ -19,6 +19,15 @@ import type { ChatCompletionReasoningEffort } from '@kbn/inference-common';
 import type { ConversationWithPermissions } from './conversations';
 
 /**
+ * Whether a chat request executes the agent. `never` appends the user message to an existing
+ * conversation and returns, leaving the execution options unused.
+ */
+export enum ChatTriggerMode {
+  Always = 'always',
+  Never = 'never',
+}
+
+/**
  * Body payload for the public agent_builder converse endpoints (`/api/agent_builder/converse`, `/converse/async`).
  */
 export interface ChatRequestBodyPayload {
@@ -41,6 +50,24 @@ export interface ChatRequestBodyPayload {
   reasoning_level?: ChatCompletionReasoningEffort;
   /** Force a specific execution mode. When omitted, the server auto-detects. */
   _execution_mode?: 'local' | 'task_manager';
+  /** Use `never` to persist a message without executing the agent. */
+  trigger_mode?: ChatTriggerMode;
+}
+
+/** Response of `POST /internal/agent_builder/executions/{id}/abort`. */
+export interface AbortExecutionResponse {
+  acknowledged: boolean;
+  /** True when the run wound down and its `execution_aborted` event was saved before returning. */
+  terminal_persisted: boolean;
+}
+
+/**
+ * Body payload for a user message request (`trigger_mode: 'never'`), which persists a message
+ * on an existing conversation without executing the agent.
+ */
+export interface UserMessagePayload extends Pick<ChatRequestBodyPayload, 'input' | 'attachments'> {
+  trigger_mode: ChatTriggerMode.Never;
+  conversation_id: string;
 }
 
 export type ChatResponse = Omit<

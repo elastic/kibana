@@ -95,6 +95,7 @@ export default function ({ getService }: FtrProviderContext) {
             queryActivity: ['all', 'read', 'minimal_all', 'minimal_read'],
             maintenanceWindow: ['all', 'read', 'minimal_all', 'minimal_read'],
             streams: ['all', 'read', 'minimal_all', 'minimal_read'],
+            nightshift: ['all', 'read', 'minimal_all', 'minimal_read'],
             dataQuality: ['all', 'read', 'minimal_all', 'minimal_read'],
             manageReporting: ['all', 'read', 'minimal_all', 'minimal_read'],
             alerting_v2_rules: ['all', 'read', 'minimal_all', 'minimal_read'],
@@ -433,6 +434,7 @@ export default function ({ getService }: FtrProviderContext) {
             uptime: [
               'all',
               'can_manage_private_locations',
+              'can_manage_rules',
               'can_read_param_values',
               'can_run_test_manually',
               'elastic_managed_locations_enabled',
@@ -624,6 +626,7 @@ export default function ({ getService }: FtrProviderContext) {
             maintenanceWindow: ['all', 'read', 'minimal_all', 'minimal_read'],
             queryActivity: ['all', 'read', 'minimal_all', 'minimal_read'],
             streams: ['all', 'read', 'minimal_all', 'minimal_read'],
+            nightshift: ['all', 'read', 'minimal_all', 'minimal_read', 'manage-engines'],
             alerting_v2_rules: ['all', 'read', 'minimal_all', 'minimal_read'],
             alerting_v2_alerts: ['all', 'read', 'minimal_all', 'minimal_read'],
             alerting_v2_action_policies: ['all', 'read', 'minimal_all', 'minimal_read'],

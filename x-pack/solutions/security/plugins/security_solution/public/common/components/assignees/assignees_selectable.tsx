@@ -48,7 +48,8 @@ export interface AssigneesSelectableProps {
  */
 export const AssigneesSelectable: FC<AssigneesSelectableProps> = memo(
   ({ searchInputId, assignedUserIds, showUnassignedOption, onSelectionChange }) => {
-    const { data: currentUserProfile } = useGetCurrentUserProfile();
+    const { data: currentUserProfile, isLoading: isLoadingCurrentUserProfile } =
+      useGetCurrentUserProfile();
     const existingIds = useMemo(
       () => new Set(removeNoAssigneesSelection(assignedUserIds)),
       [assignedUserIds]
@@ -65,6 +66,13 @@ export const AssigneesSelectable: FC<AssigneesSelectableProps> = memo(
     });
 
     const searchResultProfiles = useMemo(() => {
+      // The current user is hoisted to the top of the list once their profile resolves, which
+      // re-orders every other option. Publishing options before then would move a row out from
+      // under a pointer that is already over it.
+      if (isLoadingCurrentUserProfile) {
+        return [];
+      }
+
       const sortedUsers = bringCurrentUserToFrontAndSort(currentUserProfile, userProfiles) ?? [];
 
       if (showUnassignedOption && isEmpty(searchTerm)) {
@@ -72,7 +80,13 @@ export const AssigneesSelectable: FC<AssigneesSelectableProps> = memo(
       }
 
       return sortedUsers;
-    }, [currentUserProfile, searchTerm, showUnassignedOption, userProfiles]);
+    }, [
+      currentUserProfile,
+      isLoadingCurrentUserProfile,
+      searchTerm,
+      showUnassignedOption,
+      userProfiles,
+    ]);
 
     /**
      * Holds user profiles of currently selected users
@@ -107,7 +121,8 @@ export const AssigneesSelectable: FC<AssigneesSelectableProps> = memo(
       []
     );
 
-    const isLoading = isLoadingUserProfiles || isLoadingSuggestedUsers;
+    const isLoading =
+      isLoadingCurrentUserProfile || isLoadingUserProfiles || isLoadingSuggestedUsers;
 
     return (
       <div data-test-subj={ASSIGNEES_SELECTABLE_TEST_ID}>

@@ -77,6 +77,7 @@ dependsOn:
   - '@kbn/resizable-layout'
   - '@kbn/rule-data-utils'
   - '@kbn/core-chrome-browser'
+  - '@kbn/recently-accessed'
   - '@kbn/core-plugins-server'
   - '@kbn/shared-ux-button-toolbar'
   - '@kbn/shared-ux-toolbar-selector'
@@ -135,7 +136,6 @@ dependsOn:
   - '@kbn/as-code-data-views-schema'
   - '@kbn/as-code-data-views-transforms'
   - '@kbn/as-code-export-flyout-component'
-  - '@kbn/as-code-filters-schema'
   - '@kbn/as-code-filters-transforms'
   - '@kbn/as-code-shared-schemas'
   - '@kbn/as-code-shared-telemetry'
@@ -154,8 +154,6 @@ dependsOn:
   - '@kbn/presentation-util-plugin'
   - '@kbn/core-saved-objects-common'
   - '@kbn/as-code-filters-constants'
-  - '@kbn/data-service-server'
-  - '@kbn/es-query-server'
   - '@kbn/core-analytics-browser-mocks'
   - '@kbn/core-http-server-mocks'
   - '@kbn/reporting-public'
@@ -168,6 +166,13 @@ dependsOn:
   - '@kbn/core-security-server'
   - '@kbn/core-http-server'
   - '@kbn/ui-callout'
+  - '@kbn/field-formats-common'
+  - '@kbn/discover-session-constants'
+  - '@kbn/as-code-discover-schema'
+  - '@kbn/core-http-browser'
+  - '@kbn/core-http-browser-mocks'
+  - '@kbn/discover-session-constants'
+  - '@kbn/esql-browser'
 tags:
   - plugin
   - prod

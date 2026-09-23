@@ -6,7 +6,55 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { arrayOrSingleSchema, optionalWithDescription } from './common';
+import { arrayOrSingleSchema, durationSchema, optionalWithDescription } from './common';
+import { MAX_DURATION_LENGTH } from './constants';
+
+describe('durationSchema', () => {
+  it.each(['250ms', '30s', '5m', '1h', '7d', '52w', '365d'])('accepts "%s"', (value) => {
+    expect(durationSchema.parse(value)).toBe(value);
+  });
+
+  it('rejects a duration above the maximum', () => {
+    expect(durationSchema.safeParse('366d').success).toBe(false);
+  });
+
+  it('rejects a malformed duration without echoing it', () => {
+    const result = durationSchema.safeParse('not-a-duration');
+
+    expect(result.success).toBe(false);
+    expect(result.error!.issues).toEqual([
+      {
+        code: 'custom',
+        message: 'Invalid duration. Expected format like "5m", "1h", "30s", "250ms"',
+        path: [],
+      },
+    ]);
+  });
+
+  it('accepts a well-formed duration at the exact length limit', () => {
+    const value = `${'0'.repeat(MAX_DURATION_LENGTH - 2)}5m`;
+
+    expect(value).toHaveLength(MAX_DURATION_LENGTH);
+    expect(durationSchema.parse(value)).toBe(value);
+  });
+
+  it('rejects an over-long value on length alone, without running format validation', () => {
+    const value = 'x'.repeat(MAX_DURATION_LENGTH + 1);
+    const result = durationSchema.safeParse(value);
+
+    expect(result.success).toBe(false);
+    expect(result.error!.issues).toEqual([
+      {
+        origin: 'string',
+        code: 'too_big',
+        maximum: 32,
+        inclusive: true,
+        path: [],
+        message: 'Too big: expected string to have <=32 characters',
+      },
+    ]);
+  });
+});
 
 describe('optionalWithDescription', () => {
   it('makes a required schema optional', () => {
