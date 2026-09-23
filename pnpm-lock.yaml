@@ -2031,7 +2031,7 @@ importers:
         version: link:src/platform/packages/private/kbn-esql-editor
       '@kbn/esql-language':
         specifier: workspace:*
-        version: link:src/platform/packages/shared/kbn-esql-language
+        version: link:src/platform/packages/shared/esql/kbn-esql-language
       '@kbn/esql-language-inspector-plugin':
         specifier: workspace:*
         version: link:examples/esql_ast_inspector
@@ -2040,13 +2040,13 @@ importers:
         version: link:src/platform/packages/shared/kbn-esql-resource-browser
       '@kbn/esql-server-utils':
         specifier: workspace:*
-        version: link:src/platform/packages/shared/kbn-esql-server-utils
+        version: link:src/platform/packages/shared/esql/kbn-esql-server-utils
       '@kbn/esql-types':
         specifier: workspace:*
-        version: link:src/platform/packages/shared/kbn-esql-types
+        version: link:src/platform/packages/shared/esql/kbn-esql-types
       '@kbn/esql-utils':
         specifier: workspace:*
-        version: link:src/platform/packages/shared/kbn-esql-utils
+        version: link:src/platform/packages/shared/esql/kbn-esql-utils
       '@kbn/esql-ux-example-plugin':
         specifier: workspace:*
         version: link:examples/esql_ux_example
@@ -7977,17 +7977,17 @@ importers:
 
   src/platform/packages/shared/kbn-esql-composer: {}
 
-  src/platform/packages/shared/kbn-esql-language: {}
+  src/platform/packages/shared/esql/kbn-esql-language: {}
 
   src/platform/packages/shared/kbn-esql-resource-browser: {}
 
   src/platform/packages/shared/kbn-esql-resource-browser/.storybook: {}
 
-  src/platform/packages/shared/kbn-esql-server-utils: {}
+  src/platform/packages/shared/esql/kbn-esql-server-utils: {}
 
-  src/platform/packages/shared/kbn-esql-types: {}
+  src/platform/packages/shared/esql/kbn-esql-types: {}
 
-  src/platform/packages/shared/kbn-esql-utils: {}
+  src/platform/packages/shared/esql/kbn-esql-utils: {}
 
   src/platform/packages/shared/kbn-eval-kql: {}
 

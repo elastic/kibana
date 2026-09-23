@@ -15,7 +15,7 @@ project:
   description: Moon project for @kbn/esql-types
   channel: ''
   owner: '@elastic/kibana-discover'
-  sourceRoot: src/platform/packages/shared/kbn-esql-types
+  sourceRoot: src/platform/packages/shared/esql/kbn-esql-types
 dependsOn:
   - '@kbn/licensing-types'
   - '@kbn/core-pricing-common'

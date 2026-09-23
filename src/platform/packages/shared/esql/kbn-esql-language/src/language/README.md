@@ -187,11 +187,11 @@ Both the validation and autocomplete engine are covered by extensive suites of t
 
 #### Running the tests
 
-All the tests can be run using the `pnpm exec jest:tests src/platform/packages/shared/kbn-esql-language/path/to/test/file` command at the root of the repository.
+All the tests can be run using the `pnpm exec jest:tests src/platform/packages/shared/esql/kbn-esql-language/path/to/test/file` command at the root of the repository.
 
 To run all autocomplete and validation tests you can specifically run
 
-`pnpm test:jest src/platform/packages/shared/kbn-esql-language/`
+`pnpm test:jest src/platform/packages/shared/esql/kbn-esql-language/`
 
 #### Ongoing refactor
 
@@ -213,7 +213,7 @@ The newer pattern is
 
 ##### The new way
 
-Validation test logic is found in `src/platform/packages/shared/kbn-esql-language/src/language/validation/__tests__`.
+Validation test logic is found in `src/platform/packages/shared/esql/kbn-esql-language/src/language/validation/__tests__`.
 
 Unit test wrappers live in `*.test.ts` files. Reusable suite logic lives in matching `*_suite.ts` files so the same tests can also run as Jest integration tests.
 
@@ -236,9 +236,9 @@ describe('TS <sources> [ <aggregates> [ BY <grouping> ]]', () => {
 
 `expectErrors` is created in the `setup()` factory. It has a very similar API to `testErrorsAndWarnings` however it is not itself a Jest test case. It is simply an assertion that is wrapped in a test case defined with the standard `test` or `it` function.
 
-The integration wrapper lives in `src/platform/packages/shared/kbn-esql-language/src/language/validation/integration_tests/validation_suites.test.ts`. It reuses the shared validation suites and checks client-side false positives against Elasticsearch. Run it with:
+The integration wrapper lives in `src/platform/packages/shared/esql/kbn-esql-language/src/language/validation/integration_tests/validation_suites.test.ts`. It reuses the shared validation suites and checks client-side false positives against Elasticsearch. Run it with:
 
-`node scripts/jest_integration --config src/platform/packages/shared/kbn-esql-language/jest.integration.config.js`
+`node scripts/jest_integration --config src/platform/packages/shared/esql/kbn-esql-language/jest.integration.config.js`
 
 ##### The old way
 
@@ -250,7 +250,7 @@ testErrorsAndWarnings(`ROW var = NOT 5 LIKE "?a"`, [
 ]);
 ```
 
-and are found in `src/platform/packages/shared/kbn-esql-language/src/language/validation/validation.test.ts`.
+and are found in `src/platform/packages/shared/esql/kbn-esql-language/src/language/validation/validation.test.ts`.
 
 `testErrorsAndWarnings` supports `skip` and `only` modifiers e.g. `testErrorsAndWarnings.only('...')`.
 
@@ -264,7 +264,7 @@ It accepts
 
 ##### The new way
 
-The new tests are found in `src/platform/packages/shared/kbn-esql-language/src/autocomplete/__tests__`.
+The new tests are found in `src/platform/packages/shared/esql/kbn-esql-language/src/autocomplete/__tests__`.
 
 They look like this.
 
@@ -301,7 +301,7 @@ So, that allows you to customize the [trigger kind](https://microsoft.github.io/
 
 ##### The old way
 
-All the legacy autocomplete tests are found in `src/platform/packages/shared/kbn-esql-language/src/autocomplete/autocomplete.test.ts`.
+All the legacy autocomplete tests are found in `src/platform/packages/shared/esql/kbn-esql-language/src/autocomplete/autocomplete.test.ts`.
 
 They look like this
 
