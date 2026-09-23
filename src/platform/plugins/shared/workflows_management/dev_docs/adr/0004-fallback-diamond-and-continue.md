@@ -61,4 +61,4 @@ The user-facing label "Add error handling" (from the mockup) is retired in favou
 - The fallback lane is the only graph element with two distinct rendered shapes driven by a YAML key value.
 - Spec 02 must test both fixtures independently — the terminating shape and the rejoining shape — against separate expected layouts.
 - Any workflow with an existing `on-failure.fallback` will suddenly render a lane after spec 02 lands (it currently renders nothing). This is a read-only graph change, but it is a visible one.
-- The `ExitTryBlock` re-throw behaviour means "insert after a fallback lane" has the same dead-end problem as "insert after a block" (ADR-0001 D6): when `continue` is absent, there is no node to hang a port on. This is a known limitation recorded in [`workflow-visual-builder.md`](../workflow-visual-builder.md).
+- The `ExitTryBlock` re-throw behaviour means "insert after a fallback lane" has the same dead-end problem as "insert after a block" (ADR-0001 D6): when `continue` is absent, there is no node to hang a port on. This is a known limitation recorded in [`workflow_visual_builder.md`](../workflow_visual_builder.md).

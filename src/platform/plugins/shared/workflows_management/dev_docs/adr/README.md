@@ -30,7 +30,7 @@ What becomes easier, what becomes harder, what constraints this imposes on futur
 
 1. A **spec** is scratch: written locally in `kbn-workflows-ui/src/components/workflow_graph/specs/`, git-ignored, never committed — but it is its PR's description, so it is reviewed where review happens. Written to be read by a reviewer, not only by its author.
 2. A **grilling session** on a spec resolves open decisions and produces **ADRs** here — committed, numbered, immutable once accepted, superseded (never edited) when a decision changes.
-3. When a spec **lands**, its distillation (what now exists, the contract, the invariants) is merged into [`workflow-visual-builder.md`](../workflow-visual-builder.md) in the same PR, and the spec file is deleted. That document is the only place describing current state. The PR description survives on GitHub as the historical record of intent; `workflow-visual-builder.md` is the record of outcome.
+3. When a spec **lands**, its distillation (what now exists, the contract, the invariants) is merged into [`workflow_visual_builder.md`](../workflow_visual_builder.md) in the same PR, and the spec file is deleted. That document is the only place describing current state. The PR description survives on GitHub as the historical record of intent; `workflow_visual_builder.md` is the record of outcome.
 
 ## Index
 

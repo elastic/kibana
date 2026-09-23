@@ -30,5 +30,5 @@ The deliverable is nine stacked specs, one per PR, each grilled and landing inde
 ## Consequences
 
 - Nine stacked PRs, each independently reviewable and deployable behind a flag.
-- Each landed spec distils into [`workflow-visual-builder.md`](../workflow-visual-builder.md) in the same PR — the living state of implementation is always accurate.
+- Each landed spec distils into [`workflow_visual_builder.md`](../workflow_visual_builder.md) in the same PR — the living state of implementation is always accurate.
 - The step-config panel, data-reference picker and template recommendations remain unscoped; they are not blocked by this work.
