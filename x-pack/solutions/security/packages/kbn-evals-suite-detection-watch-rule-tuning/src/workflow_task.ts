@@ -71,6 +71,11 @@ export interface ExceptionEntry {
 export interface RuleTuningProposal {
   change_type?: ChangeType;
   summary?: string;
+  /** Proposal-card fields required on every oneOf branch since #291921. */
+  title?: string;
+  fp_pattern?: string;
+  reasoning?: string;
+  confidence?: 'low' | 'medium' | 'high';
   exception_entries?: ExceptionEntry[];
   proposed_query?: string;
   proposed_risk_score?: number;
