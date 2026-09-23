@@ -12,6 +12,21 @@ const runMarker = createAd2RunMarker('full-profile-dataset-test');
 const example = buildFullProfileDiscriminationDataset(runMarker).examples[0];
 
 describe('full profile discrimination dataset', () => {
+  // The evals client resolves upstream datasets BY NAME
+  // (`getDatasetByName` -> `resolveDataset` in the kbn-evals executor). With a
+  // constant name, a cached dataset from a previous run — bound to the
+  // PREVIOUS run marker in its question, retrievalScope and forbidden IDs — is
+  // consumed before this run's examples are visible, and the eval scores this
+  // run's seed against last run's marker (observed live for rep 0). The name
+  // must therefore be run-specific so a stale entry can never match.
+  it('binds the dataset identity to this run marker', () => {
+    const name = buildFullProfileDiscriminationDataset(runMarker).name;
+    expect(name).toContain(runMarker);
+
+    const otherMarker = createAd2RunMarker(`other-${runMarker}`);
+    expect(buildFullProfileDiscriminationDataset(otherMarker).name).not.toBe(name);
+  });
+
   // `.alerts-security.alerts-default` is a shared index and
   // `AD2_SCENARIO_SEED_LABEL` is generation-wide — every concurrent
   // scenario-registry run carries it. The run marker is the only bound that

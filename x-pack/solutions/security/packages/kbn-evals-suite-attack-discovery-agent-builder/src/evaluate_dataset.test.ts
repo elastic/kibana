@@ -1539,7 +1539,7 @@ describe('slow-path handoff (#293046): waitForValidationPhase', () => {
       const pending = waitForValidationPhase({ fetch, executionId: 'exec-1' }).catch(
         (error: Error) => error
       );
-      await jest.advanceTimersByTimeAsync(180_000);
+      await jest.advanceTimersByTimeAsync(WAIT_FOR_VALIDATION_PHASE_TIMEOUT_MS);
       const result = await pending;
 
       expect(result).toBeInstanceOf(Error);
@@ -1547,5 +1547,13 @@ describe('slow-path handoff (#293046): waitForValidationPhase', () => {
     } finally {
       jest.useRealTimers();
     }
+  });
+
+  // The budget is a safety valve, not a model-fit knob: the default must be
+  // generous enough that slow models (OSS models on eval cells) are not
+  // falsely truncated, and per-environment override must be honored when set
+  // to a finite number (and ignored when set to garbage).
+  it('defaults to a 10-minute safety valve', () => {
+    expect(WAIT_FOR_VALIDATION_PHASE_TIMEOUT_MS).toBeGreaterThanOrEqual(600_000);
   });
 });

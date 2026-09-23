@@ -1106,7 +1106,18 @@ export const buildWorkflow = ({
  * Budget: 90s soft deadline + observed ~80s generation tail, with headroom —
  * a 170s completion would miss a 120s budget (observed in run-29 rep 1).
  */
-const WAIT_FOR_VALIDATION_PHASE_TIMEOUT_MS = 180_000;
+// Safety valve only — the loop exits on the validation workflow's terminal
+// status, not on this deadline; a wedged run must not hang the suite. The
+// default is deliberately generous (10 min) so slow models (OSS models on
+// eval cells routinely exceed 180s) are not falsely truncated; the observed
+// gpt-5.2 tail is 90s deadline + ~80s generation. Override per environment
+// (e.g. known-fast stacks) with AD2_VALIDATION_WAIT_TIMEOUT_MS.
+const DEFAULT_WAIT_FOR_VALIDATION_PHASE_TIMEOUT_MS = 600_000;
+const WAIT_FOR_VALIDATION_PHASE_TIMEOUT_MS = Number.isFinite(
+  Number(process.env.AD2_VALIDATION_WAIT_TIMEOUT_MS)
+)
+  ? Number(process.env.AD2_VALIDATION_WAIT_TIMEOUT_MS)
+  : DEFAULT_WAIT_FOR_VALIDATION_PHASE_TIMEOUT_MS;
 const WAIT_FOR_VALIDATION_PHASE_INTERVAL_MS = 5_000;
 
 export { WAIT_FOR_VALIDATION_PHASE_TIMEOUT_MS, WAIT_FOR_VALIDATION_PHASE_INTERVAL_MS };
