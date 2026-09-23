@@ -280,6 +280,54 @@ describe('FlyoutTemplate header blocks', () => {
     expect(region).toHaveTextContent('Risk');
   });
 
+  it('forwards a custom data attribute and an EuiBadge prop through the Badge part', () => {
+    renderHeader(
+      <FlyoutTemplate.Header.Badge
+        data-foo="badgeFoo"
+        data-test-subj="badgeUrgent"
+        title="Needs attention"
+      >
+        Urgent
+      </FlyoutTemplate.Header.Badge>
+    );
+
+    const badge = screen.getByTestId('badgeUrgent');
+    expect(badge).toHaveAttribute('data-foo', 'badgeFoo');
+    expect(badge).toHaveAttribute('title', 'Needs attention');
+  });
+
+  it('forwards a custom data attribute through the MetaBlock part', () => {
+    renderHeader(
+      <FlyoutTemplate.Header.MetaBlock
+        title="Last updated"
+        data-foo="metaFoo"
+        data-test-subj="metaUpdated"
+      >
+        Dec 3, 2025
+      </FlyoutTemplate.Header.MetaBlock>
+    );
+
+    const block = screen.getByTestId('metaUpdated');
+    expect(block).toHaveAttribute('data-foo', 'metaFoo');
+    expect(block).toHaveTextContent('Last updated');
+  });
+
+  it('forwards a custom data attribute through the InfoBlock part', () => {
+    renderHeader(
+      <FlyoutTemplate.Header.InfoBlock
+        title="Risk score"
+        data-foo="infoFoo"
+        data-test-subj="infoRisk"
+      >
+        90
+      </FlyoutTemplate.Header.InfoBlock>
+    );
+
+    const block = screen.getByTestId('infoRisk');
+    expect(block).toHaveAttribute('data-foo', 'infoFoo');
+    expect(block).toHaveTextContent('Risk score');
+  });
+
   it('hides the blocks from assistive tech when the header is collapsed', () => {
     renderHeader(
       <>
