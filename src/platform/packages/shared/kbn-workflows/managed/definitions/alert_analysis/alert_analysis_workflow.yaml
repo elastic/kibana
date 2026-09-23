@@ -504,17 +504,6 @@ steps:
               auto_close_enabled: "${{ inputs.autoCloseEnabled }}"
 
   # ---------------------------------------------------------------------------
-  # Pre-compute connector_configured helper
-  # ---------------------------------------------------------------------------
-  # The analysis_enabled guard cannot use parentheses (the YAML template parser reads
-  # `(` as range syntax). Pre-computing the two-connector OR here keeps the guard a
-  # simple `and` chain with no operator-precedence risk.
-  - name: set_connector_configured
-    type: data.set
-    with:
-      connector_configured: "${{ variables.connector_id != '' or variables.connector_id_by_feature != '' }}"
-
-  # ---------------------------------------------------------------------------
   # Select the alerts to analyze
   # ---------------------------------------------------------------------------
   # The pending set is never materialised into a variable: it is a `reject_exp` applied
@@ -563,7 +552,8 @@ steps:
   # Worker path with a missing or empty alerts input would otherwise skip analysis and
   # emit empty workflow.output with status completed — a miswired caller looks healthy.
   # Fail loud instead so the Worker treats the run as an error and retries / surfaces it.
-  # Split into two gates: parentheses are illegal in workflow conditions (range syntax).
+  # Split into two gates so a missing `alerts` and an empty array each get a distinct
+  # workflow.fail message (parentheses are fine — groupedExpressions is enabled).
   - name: require_caller_alerts_present
     type: if
     condition: "${{ inputs.calledByWorker == true and inputs.alerts == null }}"
@@ -644,11 +634,11 @@ steps:
   # Enrichment, the AI agent calls and auto-close only run when this space has the workflow
   # enabled, a connector configured, and at least one alert left to analyze. A disabled or
   # unconfigured space no-ops, which is why enabled-by-default with an empty connector is
-  # safe. The guard is a parens-free `and` because the workflow template parser reads `(`
-  # as range syntax.
+  # safe. Parentheses group the two-connector OR — createWorkflowLiquidEngine enables
+  # groupedExpressions, so this is valid Liquid (not range syntax).
   - name: analysis_enabled
     type: if
-    condition: "${{ variables.workflow_enabled and variables.connector_configured and variables.pending_alert_count > 0 }}"
+    condition: "${{ variables.workflow_enabled and (variables.connector_id != '' or variables.connector_id_by_feature != '') and variables.pending_alert_count > 0 }}"
     steps:
 
       # Logged inside the guard so a space with the workflow disabled does not claim, on every rule
