@@ -236,7 +236,14 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
       (Object.keys(detectAndReviewStep.policyIdsByInstance ?? {}).length > 0 ||
         Object.keys(detectAndReviewStep.pendingCleanupPolicyIds ?? {}).length > 0);
     if (hasStaleMiPolicies && miServiceIds.length === 0) {
-      await handleDeploy();
+      // Lock the Next button while cleanup runs — showMiSection is false here so isNextDisabled
+      // does not consume the MI isDeploying state, leaving Next clickable without this guard.
+      setIsSavingSO(true);
+      try {
+        await handleDeploy();
+      } finally {
+        setIsSavingSO(false);
+      }
     }
 
     // ECF-only: handleDeploy never runs for new deploys, so create the SO here then navigate.

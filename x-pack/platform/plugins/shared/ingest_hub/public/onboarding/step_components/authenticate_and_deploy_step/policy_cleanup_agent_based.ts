@@ -84,7 +84,11 @@ async function updateAgentBasedPolicy(
   } = opts;
 
   const members = resolveSurvivingMembers(survivingInstanceIds, instances, servicesMap);
-  if (!members) return;
+  if (!members) {
+    throw new Error(
+      `Cannot update agent-based policy ${policyId}: one or more surviving instance IDs could not be resolved — leaving it pending for retry.`
+    );
+  }
 
   const packageName = members[0].service.packageName;
 
@@ -92,12 +96,14 @@ async function updateAgentBasedPolicy(
   let existingName: string | undefined;
   let existingNamespace: string | undefined;
   let existingVersion: string | undefined;
+  let existingEnabled: boolean | undefined;
   try {
     const existing = await sendGetOnePackagePolicy(policyId);
     if (existing.error) throw existing.error;
     existingName = existing.data?.item?.name;
     existingNamespace = existing.data?.item?.namespace;
     existingVersion = existing.data?.item?.package?.version;
+    existingEnabled = existing.data?.item?.enabled;
   } catch {
     throw new Error(
       `Cannot safely update agent-based policy ${policyId}: failed to fetch existing metadata.`
@@ -145,7 +151,7 @@ async function updateAgentBasedPolicy(
 
   await sendUpdatePackagePolicy(policyId, {
     name: policyName,
-    enabled: true,
+    enabled: existingEnabled ?? true,
     namespace: policyNamespace,
     package: { name: packageName, version: pkgVersion },
     ...(vars ? { vars } : {}),

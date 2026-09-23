@@ -84,15 +84,17 @@ export function resolveSurvivingMembers(
   servicesMap: Map<string, AwsServiceMatrixEntry>
 ): Array<{ instance: ServiceInstance; service: AwsServiceMatrixEntry }> | null {
   const instanceById = new Map(instances.map((i) => [i.instanceId, i]));
-  const members = survivingInstanceIds
-    .map((id) => {
-      // Fall back to a synthetic base instance (instanceId === serviceId) when session-storage
-      // instances are absent — e.g. the user skipped Step 2 or sessions don't overlap.
-      const inst = instanceById.get(id) ?? { instanceId: id, serviceId: id, name: id, isDuplicate: false };
-      const service = servicesMap.get(inst.serviceId);
-      if (!service) return null;
-      return { instance: inst, service };
-    })
-    .filter((m): m is { instance: ServiceInstance; service: AwsServiceMatrixEntry } => m !== null);
+  const rawMembers = survivingInstanceIds.map((id) => {
+    // Fall back to a synthetic base instance (instanceId === serviceId) when session-storage
+    // instances are absent — e.g. the user skipped Step 2 or sessions don't overlap.
+    const inst = instanceById.get(id) ?? { instanceId: id, serviceId: id, name: id, isDuplicate: false };
+    const service = servicesMap.get(inst.serviceId);
+    if (!service) return null;
+    return { instance: inst, service };
+  });
+  // Fail the whole resolution if any ID couldn't be matched — a partial update risks silently
+  // dropping surviving services from the shared policy.
+  if (rawMembers.some((m) => m === null)) return null;
+  const members = rawMembers as Array<{ instance: ServiceInstance; service: AwsServiceMatrixEntry }>;
   return members.length > 0 ? members : null;
 }

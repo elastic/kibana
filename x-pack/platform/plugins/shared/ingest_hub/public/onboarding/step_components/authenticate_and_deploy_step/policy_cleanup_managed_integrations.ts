@@ -78,7 +78,11 @@ async function updateManagedIntegrationsPolicy(
   } = opts;
 
   const members = resolveSurvivingMembers(survivingInstanceIds, instances, servicesMap);
-  if (!members) return;
+  if (!members) {
+    throw new Error(
+      `Cannot update managed-integration policy ${policyId}: one or more surviving instance IDs could not be resolved — leaving it pending for retry.`
+    );
+  }
 
   const packageName = members[0].service.packageName;
 

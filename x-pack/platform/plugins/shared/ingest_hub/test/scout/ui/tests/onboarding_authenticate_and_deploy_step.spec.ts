@@ -135,15 +135,34 @@ test.describe('Onboarding Authenticate and Deploy step', { tag: tags.stateful.cl
     // Intercept DELETE to detect misrouted cleanup — DELETE must NOT fire for the
     // partial-survival case. The handler fulfills so the test doesn't hang if it does fire.
     let deleteObserved = false;
+    let createObserved = false;
+    // Intercept the collection endpoint first so creation POSTs are caught before the item
+    // handler below (Playwright routes match in registration order).
+    await page.route(
+      (url) => /\/api\/fleet\/managed_integrations$/.test(url.pathname),
+      (route) => {
+        if (route.request().method() === 'POST') createObserved = true;
+        route.fulfill({ status: 200, contentType: 'application/json', body: '{"item":{}}' });
+      }
+    );
     await page.route(
       (url) => /\/api\/fleet\/managed_integrations\//.test(url.pathname),
       (route) => {
         const method = route.request().method();
         if (method === 'DELETE') deleteObserved = true;
+        // Return a Fleet-shaped item so sendGetAgentlessPolicy and sendUpdateAgentlessPolicy
+        // can read/write metadata without dereferencing undefined.
         route.fulfill({
           status: 200,
           contentType: 'application/json',
-          body: '{}',
+          body: JSON.stringify({
+            item: {
+              name: 'mock-shared-policy',
+              namespace: 'default',
+              package: { name: 'aws' },
+              cloud_connector: null,
+            },
+          }),
         });
       }
     );
@@ -170,6 +189,7 @@ test.describe('Onboarding Authenticate and Deploy step', { tag: tags.stateful.cl
     await updateRequestPromise;
     await expect(deployButton).toBeHidden();
     expect(deleteObserved).toBe(false);
+    expect(createObserved).toBe(false);
   });
 
   test('agent-based cleanup: removing a service updates the shared package policy for the surviving service (PUT, not DELETE)', async ({
@@ -200,9 +220,20 @@ test.describe('Onboarding Authenticate and Deploy step', { tag: tags.stateful.cl
         })
     );
 
-    // sendDeletePackagePolicy sends POST to /api/fleet/package_policies/delete (not HTTP DELETE).
+    // Intercept the exact collection endpoint first to catch unexpected creation POSTs.
+    let createObserved = false;
     await page.route(
-      (url) => /\/api\/fleet\/package_policies/.test(url.pathname),
+      (url) => /\/api\/fleet\/package_policies$/.test(url.pathname),
+      (route) => {
+        if (route.request().method() === 'POST') createObserved = true;
+        route.fulfill({ status: 200, contentType: 'application/json', body: '{"item":{}}' });
+      }
+    );
+
+    // sendDeletePackagePolicy sends POST to /api/fleet/package_policies/delete (not HTTP DELETE).
+    // GET and PUT return a Fleet-shaped item so Fleet's client can dereference metadata.
+    await page.route(
+      (url) => /\/api\/fleet\/package_policies\//.test(url.pathname),
       (route) => {
         if (
           route.request().method() === 'POST' &&
@@ -210,7 +241,19 @@ test.describe('Onboarding Authenticate and Deploy step', { tag: tags.stateful.cl
         ) {
           deleteObserved = true;
         }
-        route.fulfill({ status: 200, contentType: 'application/json', body: '{}' });
+        route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            item: {
+              name: 'shared-pkg-policy-name',
+              enabled: true,
+              namespace: 'default',
+              package: { name: 'aws', version: '7.1.1' },
+              cloud_connector_id: null,
+            },
+          }),
+        });
       }
     );
 
@@ -256,6 +299,7 @@ test.describe('Onboarding Authenticate and Deploy step', { tag: tags.stateful.cl
     await updateRequestPromise; // PUT — shared policy updated with elb inputs only
     await expect(page.testSubj.locator('onboardingStep-detect-and-review')).toBeVisible();
     expect(deleteObserved).toBe(false);
+    expect(createObserved).toBe(false);
   });
 
   test('deploy fires POST /api/fleet/managed_integrations and shows success state', async ({
