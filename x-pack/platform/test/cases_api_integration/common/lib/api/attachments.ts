@@ -337,3 +337,49 @@ export const findAttachments = async ({
 
   return body;
 };
+
+// -----------------------------V2 Unified Attachments API----------------------------
+
+export const deleteAttachmentV2 = async ({
+  supertest,
+  caseId,
+  attachmentId,
+  expectedHttpCode = 204,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: SuperTest.Agent;
+  caseId: string;
+  attachmentId: string;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<{} | Error> => {
+  const { body } = await supertest
+    .delete(`${getSpaceUrlPrefix(auth.space)}${CASES_URL}/${caseId}/attachments/${attachmentId}`)
+    .set('kbn-xsrf', 'true')
+    .auth(auth.user.username, auth.user.password)
+    .expect(expectedHttpCode)
+    .send();
+
+  return body;
+};
+
+export const deleteAllAttachmentsV2 = async ({
+  supertest,
+  caseId,
+  expectedHttpCode = 204,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: SuperTest.Agent;
+  caseId: string;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<{} | Error> => {
+  const { body } = await supertest
+    .delete(`${getSpaceUrlPrefix(auth.space)}${CASES_URL}/${caseId}/attachments`)
+    .set('kbn-xsrf', 'true')
+    .auth(auth.user.username, auth.user.password)
+    .expect(expectedHttpCode)
+    .send();
+
+  return body;
+};
