@@ -8,7 +8,11 @@
 import type { EsClient } from '@kbn/scout';
 import type { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import { FF_ENABLE_ENTITY_STORE_V2, type GetEntityMaintainersResponse } from '../../../../common';
+import {
+  API_VERSIONS,
+  FF_ENABLE_ENTITY_STORE_V2,
+  type GetEntityMaintainersResponse,
+} from '../../../../common';
 import type { EntityStoreStatusResponseBody } from '../../../../server/routes/apis/status';
 import { hashEuid } from '../../../../common/domain/euid';
 import type { EntityType } from '../../../../common';
@@ -257,6 +261,24 @@ export const uninstallEntityStoreSuite = async ({
   expect(uninstallResponse.statusCode).toBe(200);
   await clearEntityStoreIndices(esClient);
 
+  await kbnClient.uiSettings.unset(FF_ENABLE_ENTITY_STORE_V2);
+};
+
+export const uninstallEntityStoreSuiteWithKbnClient = async ({
+  esClient,
+  kbnClient,
+}: {
+  esClient: EsClient;
+  kbnClient: KbnClientFixture;
+}) => {
+  await kbnClient.request({
+    method: 'POST',
+    path: ENTITY_STORE_ROUTES.public.UNINSTALL,
+    headers: { 'elastic-api-version': API_VERSIONS.public.v1 },
+    body: {},
+    ignoreErrors: [404],
+  });
+  await clearEntityStoreIndices(esClient);
   await kbnClient.uiSettings.unset(FF_ENABLE_ENTITY_STORE_V2);
 };
 

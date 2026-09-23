@@ -79,7 +79,13 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
     );
   });
 
-  apiTest.afterAll(async ({ esClient }) => {
+  apiTest.afterAll(async ({ apiClient, esClient }) => {
+    const resetMaxLogsPerPageResponse = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+      headers: defaultHeaders,
+      responseType: 'json',
+      body: { logExtraction: { maxLogsPerPage: LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT } },
+    });
+    expect(resetMaxLogsPerPageResponse.statusCode).toBe(200);
     await teardownLogsTestDataStream(esClient);
   });
 

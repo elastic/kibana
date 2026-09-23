@@ -374,7 +374,16 @@ apiTest.describe('Entity Store logs extraction broken mapping', { tag: ENTITY_ST
     );
   });
 
-  apiTest.afterAll(async ({ esClient }) => {
+  apiTest.afterAll(async ({ apiClient, esClient }) => {
+    const resetAdditionalIndexPatternsResponse = await apiClient.put(
+      ENTITY_STORE_ROUTES.public.UPDATE,
+      {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: { logExtraction: { additionalIndexPatterns: [] } },
+      }
+    );
+    expect(resetAdditionalIndexPatternsResponse.statusCode).toBe(200);
     await cleanupBrokenMappingArtifacts(esClient);
   });
 
