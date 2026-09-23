@@ -15,8 +15,10 @@ import { MonitorsTable } from './components/monitors_table';
 
 export const OverviewGridCompactView = ({
   setFlyoutConfigCallback,
+  previewMode = false,
 }: {
   setFlyoutConfigCallback: (params: FlyoutParamProps) => void;
+  previewMode?: boolean;
 }) => {
   const { field: groupField } = useSelector(selectOverviewGroupBy);
   const monitorsSortedByStatus = useMonitorsSortedByStatus();
@@ -25,6 +27,7 @@ export const OverviewGridCompactView = ({
     <MonitorsTable
       items={monitorsSortedByStatus}
       setFlyoutConfigCallback={setFlyoutConfigCallback}
+      previewMode={previewMode}
     />
   ) : (
     <GridItemsByGroup setFlyoutConfigCallback={setFlyoutConfigCallback} view="compactView" />

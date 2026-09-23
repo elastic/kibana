@@ -34,10 +34,13 @@ import { getLatestDownSummary } from '../get_latest_down_summary';
 export const MonitorStatusCol = ({
   monitor,
   openFlyout,
+  previewMode = false,
 }: {
   monitor: OverviewStatusMetaData;
   openFlyout: (monitor: OverviewStatusMetaData) => void;
+  previewMode?: boolean;
 }) => {
+  console.log({ previewMode });
   const timestamp = monitor.timestamp ? parseTimestamp(monitor.timestamp) : null;
   // Per-user, per-space display preference set from the overview's display
   // options popover; controls whether the "Checked …" label (and its tooltip)
@@ -79,7 +82,7 @@ export const MonitorStatusCol = ({
               monitor={monitor}
               status={displayStatus}
               isBrowserType={monitor.type === MonitorTypeEnum.BROWSER}
-              onClickBadge={() => openFlyout(monitor)}
+              onClickBadge={() => (previewMode ? null : openFlyout(monitor))}
             />
           </EuiFlexItem>
           {isStaleLastRun ? (
