@@ -8,7 +8,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import type { DiscoverSessionApiDataInput } from '../../../../../server/api/schema';
+import type { DiscoverSessionApiDataInput } from '@kbn/as-code-discover-schema';
 import { spaceTest, tags } from '../fixtures';
 
 spaceTest.describe('Discover — adhoc data views', { tag: tags.deploymentAgnostic }, () => {

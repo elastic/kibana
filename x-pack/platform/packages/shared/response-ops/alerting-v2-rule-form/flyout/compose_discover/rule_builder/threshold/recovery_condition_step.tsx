@@ -32,6 +32,7 @@ import {
   DEFAULT_RECOVERY_CONDITION,
   deriveRecoveryConditions,
   generateId,
+  reconcileAlertConditionMetrics,
 } from './form_types';
 import { COMPARATOR_OPTIONS, CONDITION_OPERATOR_OPTIONS } from './translations';
 import { buildRecoveryBlock } from './build_esql';
@@ -111,22 +112,27 @@ export const BuilderRecoveryForm: React.FC<CustomRecoveryRenderProps> = () => {
   const addRecoveryCondition = useCallback(() => {
     if (!recoveryConfig) return;
     updateRecovery({
-      conditions: [
-        ...recoveryConfig.conditions,
-        { id: generateId(), ...DEFAULT_RECOVERY_CONDITION },
-      ],
+      conditions: reconcileAlertConditionMetrics(
+        [...recoveryConfig.conditions, { id: generateId(), ...DEFAULT_RECOVERY_CONDITION }],
+        builderState.stats,
+        builderState.evaluations
+      ),
     });
-  }, [recoveryConfig, updateRecovery]);
+  }, [recoveryConfig, updateRecovery, builderState.stats, builderState.evaluations]);
 
   const removeRecoveryCondition = useCallback(
     (index: number) => {
       if (!recoveryConfig) return;
-      const next = recoveryConfig.conditions.filter((_, i) => i !== index);
+      const filtered = recoveryConfig.conditions.filter((_, i) => i !== index);
       updateRecovery({
-        conditions: next.length ? next : [{ id: generateId(), ...DEFAULT_RECOVERY_CONDITION }],
+        conditions: reconcileAlertConditionMetrics(
+          filtered.length ? filtered : [{ id: generateId(), ...DEFAULT_RECOVERY_CONDITION }],
+          builderState.stats,
+          builderState.evaluations
+        ),
       });
     },
-    [recoveryConfig, updateRecovery]
+    [recoveryConfig, updateRecovery, builderState.stats, builderState.evaluations]
   );
 
   if (!recoveryConfig) return null;

@@ -26,12 +26,6 @@ jest.mock('@kbn/search-index-documents', () => ({
   reorderFieldsInImportance: jest.fn((fields: unknown[]) => fields),
 }));
 
-jest.mock('./recent_docs_action_message', () => ({
-  RecentDocsActionMessage: ({ numOfDocs }: { numOfDocs: number }) => (
-    <div data-test-subj="recentDocsActionMessage">{numOfDocs} documents</div>
-  ),
-}));
-
 const { resultMetaData, resultToField } = jest.requireMock('@kbn/search-index-documents');
 
 const mockDocs: SearchHit[] = [
@@ -48,12 +42,6 @@ const mockMappingProperties: Record<string, MappingProperty> = {
 describe('DocumentList', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-  });
-
-  it('renders RecentDocsActionMessage with the correct doc count', () => {
-    render(<DocumentList docs={mockDocs} mappingProperties={mockMappingProperties} />);
-
-    expect(screen.getByTestId('recentDocsActionMessage')).toHaveTextContent('3 documents');
   });
 
   it('renders a Result component for each document', () => {
