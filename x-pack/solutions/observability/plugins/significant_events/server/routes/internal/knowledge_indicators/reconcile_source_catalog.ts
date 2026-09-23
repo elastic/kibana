@@ -8,12 +8,16 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
 import type { SourcesClient } from '@kbn/nightshift-sources-plugin/server';
+import type { WorkflowExecutionListItemDto } from '@kbn/workflows';
+import { isTerminalStatus } from '@kbn/workflows';
 import type { SignificantEventsMaintenanceService } from '../../../lib/maintenance/maintenance_service';
 import type { KnowledgeIndicatorClient } from '../../../lib/knowledge_indicators/knowledge_indicator_client/knowledge_indicator_client';
+import { parseStreamNameFromConcurrencyKey } from '../../../lib/workflows/onboarding_workflow_client';
 import { listAllSources } from '../../utils/list_all_sources';
 
-interface OnboardingCancel {
+interface OnboardingClient {
   cancel: (args: { streamName: string; request: KibanaRequest }) => Promise<unknown>;
+  getRecentExecutions?: () => Promise<WorkflowExecutionListItemDto[]>;
 }
 
 type CatalogKiClient = Pick<
@@ -37,7 +41,7 @@ export async function retireSourceKnowledge({
 }: {
   sourceId: string;
   kiClient: Pick<CatalogKiClient, 'deleteOwnedRules' | 'deleteAllQueries' | 'deleteIndicators'>;
-  onboardingClient?: OnboardingCancel;
+  onboardingClient?: OnboardingClient;
   request: KibanaRequest;
 }): Promise<void> {
   if (onboardingClient) {
@@ -63,7 +67,7 @@ export async function reconcileSourceCatalog({
 }: {
   sourcesClient: SourcesClient;
   kiClient: CatalogKiClient;
-  onboardingClient?: OnboardingCancel;
+  onboardingClient?: OnboardingClient;
   maintenanceService: Pick<SignificantEventsMaintenanceService, 'getState'>;
   request: KibanaRequest;
 }): Promise<{ sources: NightshiftSource[]; reconcileIds: string[] }> {
@@ -86,11 +90,27 @@ export async function reconcileSourceCatalog({
 
   const reconcileIds = await kiClient.getStreamNamesToReconcile();
   const survivingReconcileIds: string[] = [];
+  const retiredIds = new Set<string>();
   for (const sourceId of reconcileIds) {
     if (catalogIds.has(sourceId)) {
       survivingReconcileIds.push(sourceId);
       continue;
     }
+    retiredIds.add(sourceId);
+    await retireSourceKnowledge({ sourceId, kiClient, onboardingClient, request });
+  }
+
+  // A deleted source can still have a run that has not written a rule or indicator yet.
+  const executions = (await onboardingClient?.getRecentExecutions?.()) ?? [];
+  for (const execution of executions) {
+    if (!execution.concurrencyGroupKey || isTerminalStatus(execution.status)) {
+      continue;
+    }
+    const sourceId = parseStreamNameFromConcurrencyKey(execution.concurrencyGroupKey);
+    if (!sourceId || catalogIds.has(sourceId) || retiredIds.has(sourceId)) {
+      continue;
+    }
+    retiredIds.add(sourceId);
     await retireSourceKnowledge({ sourceId, kiClient, onboardingClient, request });
   }
 

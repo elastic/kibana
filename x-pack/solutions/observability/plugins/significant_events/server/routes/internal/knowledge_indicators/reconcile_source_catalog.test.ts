@@ -8,6 +8,7 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
 import type { SourcesClient } from '@kbn/nightshift-sources-plugin/server';
+import { ExecutionStatus } from '@kbn/workflows';
 import { reconcileSourceCatalog } from './reconcile_source_catalog';
 
 const request = {} as KibanaRequest;
@@ -130,5 +131,37 @@ describe('reconcileSourceCatalog', () => {
     expect(kiClient.deleteAllQueries).toHaveBeenCalledWith('gone-source');
     expect(kiClient.deleteIndicators).toHaveBeenCalledWith('gone-source');
     expect(kiClient.deleteOwnedRules).not.toHaveBeenCalledWith('enabled-source');
+  });
+
+  it('cancels a running execution for a deleted source that has no knowledge yet', async () => {
+    const kiClient = makeKiClient([]);
+    const getRecentExecutions = jest.fn().mockResolvedValue([
+      {
+        status: ExecutionStatus.RUNNING,
+        concurrencyGroupKey: 'streams-ki-onboarding-gone-source',
+      },
+      {
+        status: ExecutionStatus.COMPLETED,
+        concurrencyGroupKey: 'streams-ki-onboarding-finished-source',
+      },
+      {
+        status: ExecutionStatus.RUNNING,
+        concurrencyGroupKey: 'streams-ki-onboarding-enabled-source',
+      },
+    ]);
+
+    await reconcileSourceCatalog({
+      sourcesClient: makeSourcesClient([makeSource({ id: 'enabled-source' })]),
+      kiClient,
+      onboardingClient: { cancel, getRecentExecutions },
+      maintenanceService: { getState: jest.fn().mockResolvedValue('enabled') },
+      request,
+    });
+
+    expect(cancel).toHaveBeenCalledWith({ streamName: 'gone-source', request });
+    expect(cancel).not.toHaveBeenCalledWith({ streamName: 'finished-source', request });
+    expect(cancel).not.toHaveBeenCalledWith({ streamName: 'enabled-source', request });
+    expect(kiClient.deleteOwnedRules).toHaveBeenCalledWith('gone-source');
+    expect(kiClient.deleteIndicators).toHaveBeenCalledWith('gone-source');
   });
 });
