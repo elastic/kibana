@@ -11,8 +11,10 @@
     "browser": true,
     "server": true,
     "configPath": "dev_comments",
-    "requiredPlugins": [],
+    "requiredPlugins": [
+      "developerToolbar"
+    ],
     "requiredBundles": [],
-    "optionalPlugins": ["developerToolbar"]
+    "optionalPlugins": []
   }
 }
