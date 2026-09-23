@@ -371,8 +371,8 @@ importers:
         specifier: 2.0.2
         version: 2.0.2
       '@elastic/monaco-esql':
-        specifier: 4.25.0
-        version: 4.25.0(monaco-editor@0.44.0)
+        specifier: 4.26.0
+        version: 4.26.0(monaco-editor@0.44.0)
       '@elastic/node-crypto':
         specifier: 1.2.3
         version: 1.2.3
@@ -4268,8 +4268,8 @@ importers:
         specifier: 1.5.1
         version: 1.5.1
       bitmap-sdf:
-        specifier: 1.0.3
-        version: 1.0.3
+        specifier: 1.0.4
+        version: 1.0.4
       blurhash:
         specifier: 2.0.5
         version: 2.0.5
@@ -4289,8 +4289,8 @@ importers:
         specifier: 7.0.2
         version: 7.0.2
       canvg:
-        specifier: 3.0.11
-        version: 3.0.11
+        specifier: 4.0.3
+        version: 4.0.3
       chalk:
         specifier: 4.1.2
         version: 4.1.2
@@ -10898,8 +10898,8 @@ packages:
   '@elastic/esql-ast@4.25.0':
     resolution: {integrity: sha512-ChyULZBOPv1yZn0Bg3KiucXc660rsUTJ/Sa9VauvgbAtFzFNzpe9Pxl1LfK5rc4nsIxhVUVnOYUrktatcXVyag==}
 
-  '@elastic/esql-definitions@4.25.0':
-    resolution: {integrity: sha512-4/rn0qt1y5O/pLVLwGlGYOKUiG68uF2kOWNwphot8CLbQP7umgpr9E1kwFHM1eVRn2lc4/HFqS5Gng+XcrUBPQ==}
+  '@elastic/esql-definitions@4.27.0':
+    resolution: {integrity: sha512-I3Xq0CFT0X5vHwC+eDlgXls/bISxTonJFOXcZGwxL1VxBZbSqpQPZS7Tf4zt6V8PGbsaRJY8yzJhVOgaFOMKsA==}
 
   '@elastic/esql-grammar@4.22.0':
     resolution: {integrity: sha512-mcapI2ONGgzebyI10DJ8ssl71AVcd6hp4q69mH32JocgzZ0p7DfEZm8VjtFEL+0s0XhjJR7cv3A85Qhh2/d3og==}
@@ -10970,8 +10970,8 @@ packages:
     engines: {node: '>=20'}
     hasBin: true
 
-  '@elastic/monaco-esql@4.25.0':
-    resolution: {integrity: sha512-PG6BX/MjlLtCbEbLTwlg+tLPAu/xCyWVryXlsC87AUDrg+3Kiuzio8jvknyDkVQ00OeIkGrQVWiYyyW2utVBBQ==}
+  '@elastic/monaco-esql@4.26.0':
+    resolution: {integrity: sha512-o9XFrTRZrDGhuGhnL1I8J5U9JiPKL/+aJP6vpYfx9hxMbepExcTvTvlKfOlSx1sAC9p/jAyiKFf1OpzUc8HynQ==}
     peerDependencies:
       monaco-editor: '>=0.30.0'
 
@@ -16519,8 +16519,8 @@ packages:
   bind-event-listener@3.0.0:
     resolution: {integrity: sha512-PJvH288AWQhKs2v9zyfYdPzlPqf5bXbGMmhmUIY9x4dAUGIWgomO771oBQNwJnMQSnUIXhKu6sgzpBRXTlvb8Q==}
 
-  bitmap-sdf@1.0.3:
-    resolution: {integrity: sha512-ojYySSvWTx21cbgntR942zgEgqj38wHctN64vr4vYRFf3GKVmI23YlA94meWGkFslidwLwGCsMy2laJ3g/94Sg==}
+  bitmap-sdf@1.0.4:
+    resolution: {integrity: sha512-1G3U4n5JE6RAiALMxu0p1XmeZkTeCwGKykzsLTCqVzfSDaN6S7fKnkIkfejogz+iwqBWc0UYAIKnKHNN7pSfDg==}
 
   bl@4.1.0:
     resolution: {integrity: sha512-1W07cM9gS6DcLperZfFSj+bWLtaPGSOHWhPiGzXmvVJbRLdG82sH/Kn8EtW1VqWVA54AKf2h5k5BbnIbwF3h6w==}
@@ -16789,9 +16789,9 @@ packages:
   caniuse-lite@1.0.30001810:
     resolution: {integrity: sha512-TITQPUkaz+aVk5GL6NhOdwk1aEaNTSDPsGFWrTuhKGtjTF70jL/Oht2W4c6rXUe5fu7Ie19VIahAXHIIiWWNeg==}
 
-  canvg@3.0.11:
-    resolution: {integrity: sha512-5ON+q7jCTgMp9cjpu4Jo6XbvfYwSB2Ow3kzHKfIyJfaCAOHLbdKPQqGKgfED/R5B+3TFFfe8pegYA+b423SRyA==}
-    engines: {node: '>=10.0.0'}
+  canvg@4.0.3:
+    resolution: {integrity: sha512-fKzMoMBwus3CWo1Uy8XJc4tqqn98RoRrGV6CsIkaNiQT5lOeHuMh4fOt+LXLzn2Wqtr4p/c2TOLz4xtu4oBlFA==}
+    engines: {node: '>=12.0.0'}
 
   case-sensitive-paths-webpack-plugin@2.4.0:
     resolution: {integrity: sha512-roIFONhcxog0JSSWbvVAh3OocukmSgpqOH6YpMkCvav/ySIV3JKg4Dc8vYtQjYi/UxpNE36r/9v+VqTQqgkYmw==}
@@ -16945,9 +16945,6 @@ packages:
 
   cjs-module-lexer@2.2.1:
     resolution: {integrity: sha512-Ca8swihM+/4yKecYHY52kgJd300hi2lADU/a1RxNTRe+RJ9jvqQlESpbz9DnG9mowez8qwXHB8qYdIUw9e+F5Q==}
-
-  clamp@1.0.1:
-    resolution: {integrity: sha512-kgMuFyE78OC6Dyu3Dy7vcx4uy97EIbVxJB/B0eJ3bUNAkwdNcxYzgKltnyADiYwsR7SEqkkUPsEUT//OVS6XMA==}
 
   classcat@5.0.5:
     resolution: {integrity: sha512-JhZUT7JFcQy/EzW605k/ktHtncoo9vnyW/2GspNYwFlN1C/WmjuV/xtS04e9SOkL2sTdw0VAZ2UGCcQ9lR6p6w==}
@@ -23489,9 +23486,6 @@ packages:
   regenerate@1.4.2:
     resolution: {integrity: sha512-zrceR/XhGYU/d/opr2EKO7aRHUeiBI8qjtfHqADTwZd6Szfy16la6kqD0MIUs5z5hx6AaKa+PixpPrR289+I0A==}
 
-  regenerator-runtime@0.13.11:
-    resolution: {integrity: sha512-kY1AZVr2Ra+t+piVaJ4gxaFaReZVH40AKNo7UCX6W+dEwBo/2oZJzqfuN1qLq1oL45o56cPaTXELwrTh8Fpggg==}
-
   regex-recursion@6.0.2:
     resolution: {integrity: sha512-0YCaSCq2VRIebiaUviZNs0cBz1kg5kVS2UKUfNIx8YVs1cN3AV7NTctO5FOKBA+UT2BPJIWZauYHPqJODG50cg==}
 
@@ -27783,13 +27777,13 @@ snapshots:
 
   '@elastic/esql-ast@4.25.0':
     dependencies:
-      '@elastic/esql-definitions': 4.25.0
+      '@elastic/esql-definitions': 4.27.0
       '@elastic/esql-grammar': 4.22.0
       '@elastic/esql-promql-grammar': 4.22.0
       '@elastic/esql-types': 4.22.0
       tslib: 2.8.1
 
-  '@elastic/esql-definitions@4.25.0': {}
+  '@elastic/esql-definitions@4.27.0': {}
 
   '@elastic/esql-grammar@4.22.0':
     dependencies:
@@ -27799,7 +27793,7 @@ snapshots:
   '@elastic/esql-parser@4.25.0':
     dependencies:
       '@elastic/esql-ast': 4.25.0
-      '@elastic/esql-definitions': 4.25.0
+      '@elastic/esql-definitions': 4.27.0
       '@elastic/esql-promql-grammar': 4.22.0
       '@elastic/esql-traversal': 4.25.0
       '@elastic/esql-types': 4.22.0
@@ -27823,7 +27817,7 @@ snapshots:
   '@elastic/esql@4.25.0':
     dependencies:
       '@elastic/esql-ast': 4.25.0
-      '@elastic/esql-definitions': 4.25.0
+      '@elastic/esql-definitions': 4.27.0
       '@elastic/esql-grammar': 4.22.0
       '@elastic/esql-parser': 4.25.0
       '@elastic/esql-promql-grammar': 4.22.0
@@ -27923,9 +27917,9 @@ snapshots:
 
   '@elastic/micro-jq@2.0.2': {}
 
-  '@elastic/monaco-esql@4.25.0(monaco-editor@0.44.0)':
+  '@elastic/monaco-esql@4.26.0(monaco-editor@0.44.0)':
     dependencies:
-      '@elastic/esql-definitions': 4.25.0
+      '@elastic/esql-definitions': 4.27.0
       monaco-editor: 0.44.0
 
   '@elastic/node-crypto@1.2.3': {}
@@ -28013,7 +28007,7 @@ snapshots:
 
   '@elastic/prismjs-esql@4.25.0':
     dependencies:
-      '@elastic/esql-definitions': 4.25.0
+      '@elastic/esql-definitions': 4.27.0
 
   '@elastic/react-search-ui-views@1.24.2(@types/react@18.2.79)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)':
     dependencies:
@@ -34148,9 +34142,7 @@ snapshots:
 
   bind-event-listener@3.0.0: {}
 
-  bitmap-sdf@1.0.3:
-    dependencies:
-      clamp: 1.0.1
+  bitmap-sdf@1.0.4: {}
 
   bl@4.1.0:
     dependencies:
@@ -34496,13 +34488,10 @@ snapshots:
 
   caniuse-lite@1.0.30001810: {}
 
-  canvg@3.0.11:
+  canvg@4.0.3:
     dependencies:
-      '@babel/runtime': 7.29.7
       '@types/raf': 3.4.3
-      core-js: 3.50.0
       raf: 3.4.1
-      regenerator-runtime: 0.13.11
       rgbcolor: 1.0.1
       stackblur-canvas: 2.7.0
       svg-pathdata: 6.0.3
@@ -34681,8 +34670,6 @@ snapshots:
   cjs-module-lexer@1.4.3: {}
 
   cjs-module-lexer@2.2.1: {}
-
-  clamp@1.0.1: {}
 
   classcat@5.0.5: {}
 
@@ -42671,8 +42658,6 @@ snapshots:
       regenerate: 1.4.2
 
   regenerate@1.4.2: {}
-
-  regenerator-runtime@0.13.11: {}
 
   regex-recursion@6.0.2:
     dependencies:
