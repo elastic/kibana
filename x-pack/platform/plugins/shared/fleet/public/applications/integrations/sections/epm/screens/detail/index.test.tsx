@@ -530,7 +530,7 @@ describe('When on integration detail', () => {
           status: 'not_installed' as const,
         },
       });
-      testRenderer.startServices.featureFlags.getBooleanValue.mockReturnValue(true);
+      testRenderer.startServices.featureFlags.useBooleanValue.mockReturnValue(true);
       testRenderer.startServices.application.getUrlForApp.mockReturnValue(
         '/mock/app/onboarding/aws'
       );

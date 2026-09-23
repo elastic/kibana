@@ -46,7 +46,7 @@ const HIDDEN_TILE_NAMES = new Set([
 export function useOnboardingOverride() {
   const { featureFlags, application } = useStartServices();
   const { getHref } = useLink();
-  const isOnboardingEnabled = featureFlags.getBooleanValue(ONBOARDING_ENABLED_FLAG, false);
+  const isOnboardingEnabled = featureFlags.useBooleanValue(ONBOARDING_ENABLED_FLAG, false);
 
   const onboardingUrl = useMemo(
     () => application.getUrlForApp(ONBOARDING_APP_ID, { path: ONBOARDING_AWS_PATH }),
