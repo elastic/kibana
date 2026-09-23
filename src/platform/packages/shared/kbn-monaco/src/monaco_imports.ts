@@ -73,4 +73,6 @@ export {
   type MenuItem,
 } from 'monaco-editor/platform/actions/common/actions.js';
 
+export { HoverParticipantRegistry } from 'monaco-editor/editor/contrib/hover/browser/hoverTypes.js';
+
 export { monaco };

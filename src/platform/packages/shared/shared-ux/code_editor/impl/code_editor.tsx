@@ -38,6 +38,7 @@ import {
   usePlaceholder,
   useFitToContent,
   ReBroadcastMouseDownEvents,
+  usePersistHoverContentWidget,
 } from './mods';
 import { styles } from './editor.styles';
 
@@ -302,12 +303,21 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       allowFullScreen,
     });
 
+  const persistHoverContentWidget = usePersistHoverContentWidget();
+  const wireHoverContentPersistence = useCallback(
+    (editor: monaco.editor.IStandaloneCodeEditor) => {
+      return persistHoverContentWidget(editor);
+    },
+    [persistHoverContentWidget]
+  );
+
   const isReadOnly = options?.readOnly ?? false;
 
   const [_editor, setEditor] = useState<monaco.editor.IStandaloneCodeEditor | null>(null);
   const isSuggestionMenuOpen = useRef(false);
   const editorHint = useRef<HTMLDivElement>(null);
   const textboxMutationObserver = useRef<MutationObserver | null>(null);
+  const hoverContentPersistenceSubscription = useRef<monaco.IDisposable | undefined>(undefined);
 
   const [isHintActive, setIsHintActive] = useState(true);
 
@@ -585,6 +595,9 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
         });
       }
 
+      hoverContentPersistenceSubscription.current?.dispose();
+      hoverContentPersistenceSubscription.current = wireHoverContentPersistence(editor);
+
       if (enableCustomContextMenu) {
         registerContextMenuActions({
           editor,
@@ -606,6 +619,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       registerContextMenuActions,
       isReadOnly,
       customContextMenuActions,
+      wireHoverContentPersistence,
     ]
   );
 
@@ -620,6 +634,9 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       // Clear the stored editor reference before it gets disposed, to avoid downstream
       // effects/hooks attempting to call into a disposed editor instance.
       setEditor(null);
+
+      hoverContentPersistenceSubscription.current?.dispose();
+      hoverContentPersistenceSubscription.current = undefined;
 
       const model = editor.getModel();
       model?.dispose();
@@ -729,6 +746,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
               ...options,
               hover: {
                 sticky: true,
+                hidingDelay: 100,
                 ...options?.hover,
               },
               // Explicit links prop always takes precedence over any value passed in options

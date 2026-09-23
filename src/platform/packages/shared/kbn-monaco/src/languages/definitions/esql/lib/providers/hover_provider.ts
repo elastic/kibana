@@ -16,7 +16,11 @@ import { getDecorationHoveredMessages, monacoPositionToOffset } from '../shared/
 import type { ESQLDependencies } from './types';
 
 export function getHoverProvider(deps?: ESQLDependencies): monaco.languages.HoverProvider {
-  let lastHoveredWord: string;
+  // Keyed by model rather than kept as a single value: this provider is registered once per
+  // language and shared by every ES|QL editor, so one editor hovering a word would otherwise
+  // suppress another editor's telemetry for that same word. Keyed weakly on the model so the
+  // entry disappears with it — and on the real model, never the per-call safe proxy since that's minted on each call.
+  const lastHoveredWordByModel = new WeakMap<monaco.editor.ITextModel, string>();
 
   return {
     provideHover: (async (model, position, token) => {
@@ -34,10 +38,10 @@ export function getHoverProvider(deps?: ESQLDependencies): monaco.languages.Hove
           // we only want to track the hover event if the word changed.
           if (
             hoveredWord &&
-            hoveredWord.word !== lastHoveredWord &&
+            hoveredWord.word !== lastHoveredWordByModel.get(model) &&
             resolvedDeps?.telemetry?.onDecorationHoverShown
           ) {
-            lastHoveredWord = hoveredWord.word;
+            lastHoveredWordByModel.set(model, hoveredWord.word);
 
             const hoverMessages = getDecorationHoveredMessages(hoveredWord, position, safeModel);
             if (hoverMessages.length) {
