@@ -97,6 +97,22 @@ describe('createCommentUserActionBuilder', () => {
 
       expect(screen.getByText('edited comment')).toBeInTheDocument();
     });
+
+    it('renders correctly when editing a comment whose attachment saved object is missing', async () => {
+      // The `update` row does not read the live attachment, so it must not depend on
+      // whether the attachment is still in `attachments` (see #19036).
+      const userAction = getUserAction('comment', UserActionActions.update);
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        attachments: [],
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
+
+      expect(screen.getByText('edited comment')).toBeInTheDocument();
+    });
   });
 
   describe('deletions', () => {
@@ -331,6 +347,108 @@ describe('createCommentUserActionBuilder', () => {
       renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
 
       expect(screen.getByText('removed event')).toBeInTheDocument();
+    });
+  });
+
+  describe('un-hides the create row when the attachment saved object is missing', () => {
+    it('renders a deleted comment as an event-only row without its text', async () => {
+      const userAction = getUserAction('comment', UserActionActions.create, {
+        commentId: basicCase.comments[0].id,
+        payload: {
+          comment: {
+            type: 'comment',
+            data: { content: 'a comment' },
+            owner: 'securitySolution',
+          },
+        },
+      });
+
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        attachments: [],
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      renderWithTestingProviders(
+        <CommentRenderingProvider value={utils}>
+          <EuiCommentList comments={createdUserAction} />
+        </CommentRenderingProvider>
+      );
+
+      // The immutable "added a comment" event stays, but the deleted comment's
+      // body is not resurrected.
+      expect(await screen.findByText('added a comment')).toBeInTheDocument();
+      expect(screen.queryByText('a comment')).not.toBeInTheDocument();
+    });
+
+    it('renders a single-alert create row from the payload', async () => {
+      const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+      unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
+      unifiedAttachmentTypeRegistry.register({
+        ...getStackAlertAttachmentType(),
+        id: SECURITY_ALERT_ATTACHMENT_TYPE,
+      });
+
+      const userAction = getAlertUserAction({
+        payload: {
+          comment: {
+            type: SECURITY_ALERT_ATTACHMENT_TYPE,
+            attachmentId: 'alert-id-1',
+            metadata: { index: 'index-id-1', rule: { id: 'rule-id-1', name: 'Awesome rule' } },
+            owner: 'securitySolution',
+          },
+        },
+      });
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        unifiedAttachmentTypeRegistry,
+        attachments: [],
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
+
+      expect(screen.getByTestId('alerts-user-action-alert-comment-id')).toHaveTextContent(
+        'added an alert from Awesome rule'
+      );
+    });
+
+    it('renders a multiple-alerts create row from the payload', async () => {
+      const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+      unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
+      unifiedAttachmentTypeRegistry.register({
+        ...getStackAlertAttachmentType(),
+        id: SECURITY_ALERT_ATTACHMENT_TYPE,
+      });
+
+      const userAction = getMultipleAlertsUserAction({
+        payload: {
+          comment: {
+            type: SECURITY_ALERT_ATTACHMENT_TYPE,
+            attachmentId: ['alert-id-1', 'alert-id-2'],
+            metadata: {
+              index: ['index-id-1', 'index-id-2'],
+              rule: { id: 'rule-id-1', name: 'Awesome rule' },
+            },
+            owner: 'securitySolution',
+          },
+        },
+      });
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        unifiedAttachmentTypeRegistry,
+        attachments: [],
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
+
+      expect(screen.getByTestId('alerts-user-action-alert-comment-id')).toHaveTextContent(
+        'added 2 alerts from Awesome rule'
+      );
     });
   });
 

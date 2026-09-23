@@ -38,21 +38,13 @@ export const TypeFilter = React.memo<TypeFilterProps>(
     const togglePopover = useCallback(() => setIsPopoverOpen((prevValue) => !prevValue), []);
     const closePopover = useCallback(() => setIsPopoverOpen(false), []);
 
-    const allCount =
-      userActionsStats && userActionsStats.total > 0
-        ? userActionsStats.total -
-          userActionsStats.totalCommentDeletions -
-          userActionsStats.totalHiddenCommentUpdates
-        : 0;
-    const commentsCount = Math.max(
-      (userActionsStats?.totalCommentCreations ?? 0) -
-        (userActionsStats?.totalCommentDeletions ?? 0),
-      0
-    );
-    const historyCount =
-      userActionsStats && userActionsStats.totalOtherActions > 0
-        ? userActionsStats.totalOtherActions
-        : 0;
+    // Deleted/edited attachment rows now render from the user action payload,
+    // so the badges count every row (no hidden-row subtraction). History owns
+    // comment edits + deletions, keeping All = Comments + History.
+    const total = userActionsStats?.total ?? 0;
+    const commentsCount = userActionsStats?.totalCommentCreations ?? 0;
+    const allCount = total;
+    const historyCount = Math.max(total - commentsCount, 0);
 
     const options = useMemo<TypeOption[]>(
       () => [

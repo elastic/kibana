@@ -59,12 +59,14 @@ describe('FilterActivity ', () => {
       />
     );
 
-    expect(screen.getByTestId('user-actions-filter-activity-button-all')).toHaveTextContent('16');
+    // All = total (20). Comments = creations (5). History = total - creations (15).
+    // Deleted/edited comment rows now render, so nothing is subtracted.
+    expect(screen.getByTestId('user-actions-filter-activity-button-all')).toHaveTextContent('20');
     expect(screen.getByTestId('user-actions-filter-activity-button-comments')).toHaveTextContent(
-      '2'
+      '5'
     );
     expect(screen.getByTestId('user-actions-filter-activity-button-history')).toHaveTextContent(
-      '9'
+      '15'
     );
   });
 
@@ -114,14 +116,14 @@ describe('FilterActivity ', () => {
 
     expect(screen.getByLabelText(`${userActionsStats.total} active filters`)).toBeInTheDocument();
     expect(
-      screen.getByLabelText(
-        `${
-          userActionsStats.totalCommentCreations - userActionsStats.totalCommentDeletions
-        } available filters`
-      )
+      screen.getByLabelText(`${userActionsStats.totalCommentCreations} available filters`)
     ).toBeInTheDocument();
     expect(
-      screen.getByLabelText(`${userActionsStats.totalOtherActions} available filters`)
+      screen.getByLabelText(
+        `${
+          userActionsStats.total - userActionsStats.totalCommentCreations
+        } available filters`
+      )
     ).toBeInTheDocument();
   });
 
