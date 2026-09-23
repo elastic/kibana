@@ -2475,6 +2475,108 @@ export const PayloadUserComment = lazySchema(() =>
 );
 export type PayloadUserComment = z.infer<typeof PayloadUserComment>;
 
+/**
+ * The payload for a workflow user action, recorded when a user runs a workflow from a case.
+ */
+export const PayloadWorkflow = lazySchema(() =>
+  z.object({
+    /**
+     * Identifies the workflow that was run.
+     */
+    workflow: z
+      .object({
+        /**
+         * The workflow ID.
+         */
+        id: z.string().describe('The workflow ID.'),
+        /**
+         * The workflow name at the time the run was triggered.
+         */
+        name: z.string().describe('The workflow name at the time the run was triggered.'),
+        /**
+         * The execution ID returned by the Workflows engine.
+         */
+        executionId: z.string().describe('The execution ID returned by the Workflows engine.'),
+      })
+      .describe('Identifies the workflow that was run.'),
+    /**
+     * The context from which the workflow was triggered.
+     */
+    origin: z
+      .union([
+        z.object({
+          type: z.literal('cases.case'),
+          /**
+           * The case ID.
+           */
+          id: z.string().describe('The case ID.'),
+        }),
+        z.object({
+          type: z.literal('cases.observable'),
+          /**
+           * The observable ID.
+           */
+          id: z.string().describe('The observable ID.'),
+          /**
+           * The observable type key.
+           */
+          typeKey: z.string().optional().describe('The observable type key.'),
+          /**
+           * The observable value.
+           */
+          value: z.string().optional().describe('The observable value.'),
+        }),
+        z.object({
+          type: z.literal('cases.observables'),
+          /**
+           * The case ID.
+           */
+          id: z.string().describe('The case ID.'),
+          /**
+           * The number of selected observables.
+           */
+          count: z.number().optional().describe('The number of selected observables.'),
+        }),
+        z.object({
+          type: z.literal('cases.attachment'),
+          /**
+           * The attachment target ID.
+           */
+          id: z.string().describe('The attachment target ID.'),
+          /**
+           * The normalized registered attachment type.
+           */
+          attachmentType: z.string().describe('The normalized registered attachment type.'),
+          /**
+           * The Elasticsearch index the target document lives in.
+           */
+          index: z
+            .string()
+            .optional()
+            .describe('The Elasticsearch index the target document lives in.'),
+        }),
+        z.object({
+          type: z.literal('cases.attachments'),
+          /**
+           * The case ID.
+           */
+          id: z.string().describe('The case ID.'),
+          /**
+           * The normalized registered attachment type.
+           */
+          attachmentType: z.string().describe('The normalized registered attachment type.'),
+          /**
+           * The number of selected attachment targets.
+           */
+          count: z.number().optional().describe('The number of selected attachment targets.'),
+        }),
+      ])
+      .optional()
+      .describe('The context from which the workflow was triggered.'),
+  })
+);
+export type PayloadWorkflow = z.infer<typeof PayloadWorkflow>;
+
 export const UserActionsFindResponseProperties = lazySchema(() =>
   z.object({
     action: Actions,
@@ -2502,6 +2604,7 @@ export const UserActionsFindResponseProperties = lazySchema(() =>
       PayloadTags,
       PayloadTitle,
       PayloadUserComment,
+      PayloadWorkflow,
     ]),
     version: z.string(),
     /**
@@ -2525,6 +2628,7 @@ export const UserActionsFindResponseProperties = lazySchema(() =>
         'status',
         'tags',
         'title',
+        'workflow',
       ])
       .describe('The type of action.'),
   })
