@@ -43,6 +43,7 @@ import {
   ATTACK_DISCOVERY_SKILL_REPORT_WORKFLOW,
   ATTACK_DISCOVERY_VALIDATE_WORKFLOW,
 } from './discoveries';
+import { INFERENCE_PII_ANONYMIZATION_WORKFLOW } from './inference_pii_anonymization';
 import { NIGHTSHIFT_CORTEX_HYDRATE_WORKFLOW } from './nightshift_investigations/cortex_hydrate';
 import { NIGHTSHIFT_CORTEX_OPTIMIZE_WORKFLOW } from './nightshift_investigations/cortex_optimize';
 import { DEDUCTIVE_INVESTIGATION_WORKFLOW } from './nightshift_investigations/deductive_investigation';
@@ -143,6 +144,10 @@ export {
   THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID,
   THREAT_INTEL_WORKFLOW_IDS,
 } from './threat_intel';
+export {
+  INFERENCE_PII_ANONYMIZATION_WORKFLOW_ID,
+  INFERENCE_PII_ANONYMIZATION_WORKFLOW,
+} from './inference_pii_anonymization';
 
 // Registering the AD workflow definitions in the managed-workflows registry is
 // FF-off safe: membership only makes a definition *discoverable by id* (which the
@@ -213,4 +218,7 @@ export const managedWorkflowDefinitions = [
   THREAT_INTEL_INGEST_FEEDS_WORKFLOW,
   THREAT_INTEL_ENRICH_REPORT_WORKFLOW,
   THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW,
+  // Inference PII anonymization: registry membership only; installed per-space by
+  // inference_workflows at start() when workflowDrivenEnabled is true.
+  INFERENCE_PII_ANONYMIZATION_WORKFLOW,
 ] as const;
