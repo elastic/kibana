@@ -68,8 +68,7 @@ spaceTest.describe(
         expect(await readRowHeight(page, dataGrid)).toStrictEqual(AUTO_ROW_HEIGHT);
 
         // A fresh tab resolves the profile from scratch, so it starts from the default again.
-        await unifiedTabs.createNewTab();
-        await discover.waitUntilTabIsLoaded();
+        await discover.createNewTabAndSearch();
         expect(await readRowHeight(page, dataGrid)).toStrictEqual(LOGS_PROFILE_ROW_HEIGHT);
 
         await unifiedTabs.selectTab(0);
@@ -151,8 +150,7 @@ spaceTest.describe(
 
         await timestampColor.selectOption('accent');
 
-        await unifiedTabs.createNewTab();
-        await discover.waitUntilTabIsLoaded();
+        await discover.createNewTabAndSearch();
         await unifiedTabs.closeTab(0);
         await expect.poll(() => getStoredTabs(page)).toContain('closedAt');
 
