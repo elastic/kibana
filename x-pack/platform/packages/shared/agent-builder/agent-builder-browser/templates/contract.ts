@@ -61,6 +61,8 @@ export interface ConversationTemplateUIContext {
   openFullscreenConversation: (options: {
     conversationId: string;
     agentId: string;
+    /** Opens the conversation with its details flyout already open. */
+    openDetails?: boolean;
   }) => Promise<void>;
 }
 
