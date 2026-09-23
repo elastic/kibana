@@ -33,13 +33,13 @@ describe('decodeScope', () => {
     const scope = decodeScope({
       alertingEnabled: false,
       alerting: null,
-      alertingV2: { kql: 'episode_id: "x"' },
+      alertingV2: { enabled: true, kql: 'episode_id: "x"' },
     });
     expect(scope).toEqual({
       alerting: { enabled: false },
-      alertingV2: { kql: 'episode_id: "x"' },
+      alertingV2: { enabled: true, kql: 'episode_id: "x"' },
     });
-    expect(scope.alerting.enabled).toBe(false);
+    expect(scope.alerting?.enabled).toBe(false);
   });
 
   test('empty alerting filter (MV4 bug) is treated as no filter', () => {
@@ -64,11 +64,11 @@ describe('decodeScope', () => {
       decodeScope({
         alertingEnabled: true,
         alerting: { kql: 'test', filters: [], dsl: '{}' },
-        alertingV2: { kql: 'episode_id: "y"' },
+        alertingV2: { enabled: true, kql: 'episode_id: "y"' },
       })
     ).toEqual({
       alerting: { enabled: true, kql: 'test', filters: [], dsl: '{}' },
-      alertingV2: { kql: 'episode_id: "y"' },
+      alertingV2: { enabled: true, kql: 'episode_id: "y"' },
     });
   });
 
