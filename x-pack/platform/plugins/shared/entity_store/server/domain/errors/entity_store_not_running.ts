@@ -6,7 +6,8 @@
  */
 
 export class EntityStoreNotRunningError extends Error {
-  constructor() {
-    super(`Entity Store has not been started`);
+  constructor(message = `Entity Store has not been started`) {
+    super(message);
+    this.name = 'EntityStoreNotRunningError';
   }
 }
