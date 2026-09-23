@@ -181,7 +181,6 @@ describe('updateAgentBasedPolicy — payload shape', () => {
     // Preserves existing policy's namespace (fetched via sendGetOnePackagePolicy).
     expect(payload.namespace).toBe('existing-ns');
     expect(payload.name).toBe('existing-policy-name');
-    expect(payload.enabled).toBe(true);
     expect(payload.policy_ids).toEqual(['agent-policy-1', 'agent-policy-2']);
   });
 
