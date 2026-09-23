@@ -806,11 +806,11 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
 
       for (const engine of response.body.engines) {
         // process health fields must be present (even when null) so callers can detect errors
-        expect(engine).toHaveProperty('nonPriorityStatus');
-        expect(engine).toHaveProperty('nonPriorityError');
+        expect('nonPriorityStatus' in engine).toBe(true);
+        expect('nonPriorityError' in engine).toBe(true);
         // internal config and cursor state must never appear in the public response
-        expect(engine).not.toHaveProperty('nonPriorityLogExtractionConfig');
-        expect(engine).not.toHaveProperty('nonPriorityLogExtractionState');
+        expect('nonPriorityLogExtractionConfig' in engine).toBe(false);
+        expect('nonPriorityLogExtractionState' in engine).toBe(false);
       }
     }
   );
