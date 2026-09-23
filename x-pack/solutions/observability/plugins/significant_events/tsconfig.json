@@ -72,7 +72,6 @@
     "@kbn/security-plugin",
     "@kbn/cloud-plugin",
     "@kbn/scout-oblt",
-    "@kbn/core-http-server-mocks",
     "@kbn/apm-utils",
     "@kbn/datemath",
     "@kbn/core-http-server-utils",

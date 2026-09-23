@@ -19,7 +19,6 @@ import { internalKIKeepAliveRoutes } from './internal/knowledge_indicators/keep_
 import { internalKIOnboardingRoutes } from './internal/knowledge_indicators/onboarding/route';
 import { internalKIQueriesRoutes } from './internal/knowledge_indicators/queries/route';
 import { internalKIQueryOccurrencesRoutes } from './internal/knowledge_indicators/query_occurrences/route';
-import { internalKIResetKisRoutes } from './internal/knowledge_indicators/reset_kis/route';
 import { internalMaintenanceRoutes } from './internal/maintenance/route';
 import { internalRunQuotaRoutes } from './internal/run_quotas/route';
 import { internalCostRoutes } from './internal/cost/route';
@@ -43,7 +42,6 @@ export const significantEventsRouteRepository = {
   ...internalKIOnboardingRoutes,
   ...internalKIQueriesRoutes,
   ...internalKIQueryOccurrencesRoutes,
-  ...internalKIResetKisRoutes,
   ...internalMaintenanceRoutes,
   ...internalRunQuotaRoutes,
   ...internalCostRoutes,

@@ -17,9 +17,9 @@ export interface SignificantEventsAlertingContext {
   readonly alertsReader: ISignificantEventsAlertsReader;
   readonly rulesClient: IRulesManagementClient;
   /**
-   * The raw alerting v2 rules client. Exposed for the maintenance (pause/resume)
-   * flow, which toggles `enabled` directly on v2 signal rules; regular rule CRUD
-   * goes through `rulesClient`.
+   * The raw alerting v2 rules client. Exposed for maintenance, which toggles or
+   * deletes v2 signal rules directly; regular rule CRUD goes through
+   * `rulesClient`.
    */
   readonly alertingV2RulesClient: RulesClientApi;
 }
