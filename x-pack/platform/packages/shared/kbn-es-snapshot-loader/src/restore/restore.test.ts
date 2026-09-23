@@ -190,7 +190,7 @@ describe('restoreIndices', () => {
     expect(esClient.cluster.health).toHaveBeenCalledWith(
       {
         index: 'temp-logs-a,temp-logs-b',
-        wait_for_active_shards: 1,
+        wait_for_active_shards: 'all',
         timeout: '120s',
       },
       { ignore: [408], requestTimeout: 130_000 }
