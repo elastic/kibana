@@ -11,7 +11,10 @@ import { GENERAL_CASES_OWNER } from '../../../common';
 import { CASE_EXTENDED_FIELDS } from '../../../common/constants';
 import type { ActionConnector } from '../../../common/types/domain';
 import { getInitialCaseValue } from '../../../common/utils/get_initial_case_value';
-import { getCaseSettings } from '../../../common/utils/case_settings';
+import {
+  getCaseSettings,
+  isObservablesExtractionBlocked,
+} from '../../../common/utils/case_settings';
 import { getNoneConnector } from '../../../common/utils/connectors';
 import type { CasesConfigurationUI } from '../../containers/types';
 import type { CaseFormFieldsSchemaProps } from '../case_form_fields/schema';
@@ -34,7 +37,9 @@ export const getInitialCreateCaseSettings = (
   const { syncAlerts } = getCaseSettings(owner);
   return {
     syncAlerts,
-    extractObservables: getSpaceExtractObservables(configuration),
+    extractObservables: isObservablesExtractionBlocked(owner)
+      ? false
+      : getSpaceExtractObservables(configuration),
   };
 };
 

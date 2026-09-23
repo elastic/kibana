@@ -70,7 +70,9 @@ const transformTemplateCaseFieldsToCaseFormFields = (
     ...caseFields,
     settings: {
       syncAlerts: templateSettings?.syncAlerts ?? ownerSettings.syncAlerts,
-      extractObservables: templateSettings?.extractObservables ?? ownerSettings.extractObservables,
+      extractObservables: isObservablesExtractionBlocked(owner)
+        ? false
+        : templateSettings?.extractObservables ?? ownerSettings.extractObservables,
     },
     customFields: transFormedCustomFields as CaseUI['customFields'],
   });
@@ -114,8 +116,10 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
       if (field && !field.isPristine) {
         return;
       }
-      const fallback = isObservablesExtractionBlocked(caseOwner) ? false : true;
-      setFieldValue('extractObservables', configuration.extractObservables ?? fallback);
+      setFieldValue(
+        'extractObservables',
+        isObservablesExtractionBlocked(caseOwner) ? false : configuration.extractObservables ?? true
+      );
     }, [caseOwner, configuration.extractObservables, configuration.id, getFields, setFieldValue]);
 
     const defaultTemplate = useMemo(

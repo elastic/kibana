@@ -16,6 +16,7 @@ import {
 import { getInitialCaseValue } from '../../../common/utils/get_initial_case_value';
 import { ConnectorTypes, CaseSeverity, CustomFieldTypes } from '../../../common/types/domain';
 import { GENERAL_CASES_OWNER } from '../../../common';
+import { OBSERVABILITY_OWNER } from '../../../common/constants/owners';
 import { CASE_EXTENDED_FIELDS } from '../../../common/constants';
 import { casesConfigurationsMock } from '../../containers/configure/mock';
 import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
@@ -143,6 +144,15 @@ describe('utils', () => {
           extractObservables: false,
         })
       ).toEqual({ syncAlerts: true, extractObservables: false });
+    });
+
+    it('returns false for extractObservables when the owner has observables disabled, regardless of space config', () => {
+      expect(
+        getInitialCreateCaseSettings(OBSERVABILITY_OWNER, {
+          ...casesConfigurationsMock,
+          extractObservables: true,
+        })
+      ).toEqual({ syncAlerts: false, extractObservables: false });
     });
   });
 
