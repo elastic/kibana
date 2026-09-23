@@ -46,9 +46,9 @@ export function NightshiftPage(): React.ReactElement | null {
     [application, managementHref]
   );
 
-  const { canConfigure } = getNightshiftCapabilities(application.capabilities.nightshift);
+  const { canManage } = getNightshiftCapabilities(application.capabilities.nightshift);
   const canManageSandboxSecrets =
-    canConfigure && nightshiftInvestigations?.investigationsClient != null;
+    canManage && nightshiftInvestigations?.investigationsClient != null;
   const [isSandboxSecretsFlyoutOpen, setIsSandboxSecretsFlyoutOpen] = useState(false);
   const openSandboxSecretsFlyout = useCallback(() => setIsSandboxSecretsFlyoutOpen(true), []);
   const closeSandboxSecretsFlyout = useCallback(() => setIsSandboxSecretsFlyoutOpen(false), []);

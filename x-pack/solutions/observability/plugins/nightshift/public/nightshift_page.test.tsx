@@ -140,13 +140,13 @@ describe('NightshiftPage', () => {
           ...overrides,
           application: {
             ...services.application,
-            capabilities: { nightshift: { configure: true } },
+            capabilities: { nightshift: { manage: true } },
           },
         },
       });
     };
 
-    it('hides the sandbox secrets link without the configure privilege', async () => {
+    it('hides the sandbox secrets link without the manage privilege', async () => {
       renderPage();
       await openAppMenuOverflow();
 
@@ -154,7 +154,7 @@ describe('NightshiftPage', () => {
       expect(screen.queryByTestId('nightshiftSandboxSecretsLink')).not.toBeInTheDocument();
     });
 
-    it('opens the sandbox secrets flyout for users who can configure Nightshift', async () => {
+    it('opens the sandbox secrets flyout for users who can manage Nightshift', async () => {
       withServices({ nightshiftInvestigations: { investigationsClient: { fetch: jest.fn() } } });
       renderPage();
       await openAppMenuOverflow();

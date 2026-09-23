@@ -60,7 +60,7 @@ const putSandboxSecretsRoute = createNightshiftInvestigationsServerRoute({
     description:
       'Replaces the sandbox secrets of the current space. Entries without a value keep their stored value; keys not listed are removed.',
   },
-  security: { authz: { requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.configure] } },
+  security: { authz: { requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage] } },
   params: z.object({
     body: z.object({
       entries: z

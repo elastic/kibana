@@ -5,24 +5,15 @@
  * 2.0.
  */
 
-import {
-  NIGHTSHIFT_FEATURE_ID,
-  NIGHTSHIFT_MANAGE_ENGINES_SUB_FEATURE_ID,
-} from '@kbn/nightshift-shared';
+import { NIGHTSHIFT_FEATURE_ID } from '@kbn/nightshift-shared';
 import type { ApiClientFixture, ApiClientResponse, KibanaRole } from '@kbn/scout';
 import { COMMON_HEADERS } from './constants';
 
 const SANDBOX_SECRETS_PATH = 'internal/nightshift/sandbox_secrets';
 
-export const NIGHTSHIFT_CONFIGURE_ROLE: KibanaRole = {
+export const NIGHTSHIFT_MANAGE_ROLE: KibanaRole = {
   elasticsearch: { cluster: [], indices: [] },
-  kibana: [
-    {
-      base: [],
-      feature: { [NIGHTSHIFT_FEATURE_ID]: ['all', NIGHTSHIFT_MANAGE_ENGINES_SUB_FEATURE_ID] },
-      spaces: ['*'],
-    },
-  ],
+  kibana: [{ base: [], feature: { [NIGHTSHIFT_FEATURE_ID]: ['all'] }, spaces: ['*'] }],
 };
 
 export const NIGHTSHIFT_READ_ROLE: KibanaRole = {

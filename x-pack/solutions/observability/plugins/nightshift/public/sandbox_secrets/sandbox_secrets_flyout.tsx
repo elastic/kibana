@@ -158,67 +158,72 @@ function SandboxSecretsForm({
             </p>
           </EuiText>
         )}
-        {rows.map((row) => {
-          const keyError = showErrors ? getKeyError(row, rows) : undefined;
-          const valueError = showErrors ? getValueError(row) : undefined;
-          const removeLabel = i18n.translate('xpack.nightshift.sandboxSecrets.removeAriaLabel', {
-            defaultMessage: 'Remove secret {key}',
-            values: { key: row.key },
-          });
-          return (
-            <EuiFlexGroup
-              key={row.id}
-              gutterSize="s"
-              alignItems="flexStart"
-              data-test-subj="nightshiftSandboxSecretRow"
-            >
-              <EuiFlexItem>
-                <EuiFormRow label={keyLabel} isInvalid={!!keyError} error={keyError}>
-                  <EuiFieldText
-                    value={row.key}
-                    isInvalid={!!keyError}
-                    disabled={isDisabled}
-                    onChange={(e) => updateRow(row.id, { key: e.target.value })}
-                    data-test-subj="nightshiftSandboxSecretKey"
-                  />
-                </EuiFormRow>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiFormRow label={valueLabel} isInvalid={!!valueError} error={valueError}>
-                  <EuiFieldPassword
-                    type="dual"
-                    value={row.value}
-                    autoComplete="new-password"
-                    placeholder={hasStoredValue(row) ? storedValuePlaceholder : newValuePlaceholder}
-                    isInvalid={!!valueError}
-                    disabled={isDisabled}
-                    onChange={(e) => updateRow(row.id, { value: e.target.value })}
-                    data-test-subj="nightshiftSandboxSecretValue"
-                  />
-                </EuiFormRow>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiFormRow hasEmptyLabelSpace>
-                  <EuiToolTip content={removeLabel} disableScreenReaderOutput>
-                    <EuiButtonIcon
-                      iconType="trash"
-                      color="danger"
+        <EuiFlexGroup direction="column" gutterSize="m">
+          {rows.map((row) => {
+            const keyError = showErrors ? getKeyError(row, rows) : undefined;
+            const valueError = showErrors ? getValueError(row) : undefined;
+            const removeLabel = i18n.translate('xpack.nightshift.sandboxSecrets.removeAriaLabel', {
+              defaultMessage: 'Remove secret {key}',
+              values: { key: row.key },
+            });
+            return (
+              <EuiFlexGroup
+                key={row.id}
+                gutterSize="s"
+                alignItems="flexStart"
+                data-test-subj="nightshiftSandboxSecretRow"
+              >
+                <EuiFlexItem>
+                  <EuiFormRow label={keyLabel} isInvalid={!!keyError} error={keyError}>
+                    <EuiFieldText
+                      value={row.key}
+                      isInvalid={!!keyError}
                       disabled={isDisabled}
-                      aria-label={removeLabel}
-                      onClick={() =>
-                        setRows((current) => current.filter(({ id }) => id !== row.id))
-                      }
-                      data-test-subj="nightshiftSandboxSecretRemove"
+                      onChange={(e) => updateRow(row.id, { key: e.target.value })}
+                      data-test-subj="nightshiftSandboxSecretKey"
                     />
-                  </EuiToolTip>
-                </EuiFormRow>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          );
-        })}
+                  </EuiFormRow>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiFormRow label={valueLabel} isInvalid={!!valueError} error={valueError}>
+                    <EuiFieldPassword
+                      type="dual"
+                      value={row.value}
+                      autoComplete="new-password"
+                      placeholder={
+                        hasStoredValue(row) ? storedValuePlaceholder : newValuePlaceholder
+                      }
+                      isInvalid={!!valueError}
+                      disabled={isDisabled}
+                      onChange={(e) => updateRow(row.id, { value: e.target.value })}
+                      data-test-subj="nightshiftSandboxSecretValue"
+                    />
+                  </EuiFormRow>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiFormRow hasEmptyLabelSpace>
+                    <EuiToolTip content={removeLabel} disableScreenReaderOutput>
+                      <EuiButtonIcon
+                        iconType="trash"
+                        color="danger"
+                        size="m"
+                        disabled={isDisabled}
+                        aria-label={removeLabel}
+                        onClick={() =>
+                          setRows((current) => current.filter(({ id }) => id !== row.id))
+                        }
+                        data-test-subj="nightshiftSandboxSecretRemove"
+                      />
+                    </EuiToolTip>
+                  </EuiFormRow>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            );
+          })}
+        </EuiFlexGroup>
         <EuiSpacer size="s" />
         <EuiButtonEmpty
-          iconType="plusInCircle"
+          iconType="plus"
           size="s"
           disabled={isDisabled || rows.length >= MAX_SANDBOX_SECRETS}
           onClick={() =>

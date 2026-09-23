@@ -78,6 +78,7 @@ export function NightshiftAppHeader({
                 iconType: 'lock',
                 run: () => onSandboxSecretsClick(),
                 testId: 'nightshiftSandboxSecretsLink',
+                overflow: true,
               },
             ]
           : []),
@@ -102,6 +103,7 @@ export function NightshiftAppHeader({
             void onSettingsClick();
           },
           testId: 'nightshiftSettingsLink',
+          overflow: true,
         },
       ],
     }),

@@ -9,7 +9,7 @@ import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import {
   apiTest,
-  NIGHTSHIFT_CONFIGURE_ROLE,
+  NIGHTSHIFT_MANAGE_ROLE,
   NIGHTSHIFT_READ_ROLE,
   getSandboxSecrets,
   putSandboxSecrets,
@@ -24,15 +24,13 @@ apiTest.describe(
   '/internal/nightshift/sandbox_secrets',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    let configureCookie: Record<string, string>;
+    let manageCookie: Record<string, string>;
     let readCookie: Record<string, string>;
 
     apiTest.beforeAll(async ({ apiServices, samlAuth }) => {
       await apiServices.spaces.create({ id: SPACE_ID, name: SPACE_ID });
       await apiServices.spaces.create({ id: OTHER_SPACE_ID, name: OTHER_SPACE_ID });
-      ({ cookieHeader: configureCookie } = await samlAuth.asInteractiveUser(
-        NIGHTSHIFT_CONFIGURE_ROLE
-      ));
+      ({ cookieHeader: manageCookie } = await samlAuth.asInteractiveUser(NIGHTSHIFT_MANAGE_ROLE));
       ({ cookieHeader: readCookie } = await samlAuth.asInteractiveUser(NIGHTSHIFT_READ_ROLE));
     });
 
@@ -42,11 +40,11 @@ apiTest.describe(
     });
 
     apiTest('stores secrets and only ever returns their keys', async ({ apiClient }) => {
-      const empty = await getSandboxSecrets(apiClient, configureCookie, SPACE_ID);
+      const empty = await getSandboxSecrets(apiClient, manageCookie, SPACE_ID);
       expect(empty).toHaveStatusCode(200);
       expect(empty.body.keys).toStrictEqual([]);
 
-      const created = await putSandboxSecrets(apiClient, configureCookie, SPACE_ID, {
+      const created = await putSandboxSecrets(apiClient, manageCookie, SPACE_ID, {
         entries: [
           { key: 'GITHUB_TOKEN', value: GITHUB_TOKEN },
           { key: 'OTHER_KEY', value: 'other-value' },
@@ -56,27 +54,27 @@ apiTest.describe(
       expect(created.body.keys).toStrictEqual(['GITHUB_TOKEN', 'OTHER_KEY']);
       expect(JSON.stringify(created.body)).not.toContain(GITHUB_TOKEN);
 
-      const listed = await getSandboxSecrets(apiClient, configureCookie, SPACE_ID);
+      const listed = await getSandboxSecrets(apiClient, manageCookie, SPACE_ID);
       expect(listed).toHaveStatusCode(200);
       expect(listed.body.keys).toStrictEqual(['GITHUB_TOKEN', 'OTHER_KEY']);
       expect(listed.body.canEncrypt).toBe(true);
       expect(JSON.stringify(listed.body)).not.toContain(GITHUB_TOKEN);
 
       // Omitting a value keeps it; omitting a key removes it.
-      const kept = await putSandboxSecrets(apiClient, configureCookie, SPACE_ID, {
+      const kept = await putSandboxSecrets(apiClient, manageCookie, SPACE_ID, {
         entries: [{ key: 'GITHUB_TOKEN' }],
         version: listed.body.version,
       });
       expect(kept).toHaveStatusCode(200);
       expect(kept.body.keys).toStrictEqual(['GITHUB_TOKEN']);
 
-      const stale = await putSandboxSecrets(apiClient, configureCookie, SPACE_ID, {
+      const stale = await putSandboxSecrets(apiClient, manageCookie, SPACE_ID, {
         entries: [{ key: 'GITHUB_TOKEN' }],
         version: listed.body.version,
       });
       expect(stale).toHaveStatusCode(409);
 
-      const cleared = await putSandboxSecrets(apiClient, configureCookie, SPACE_ID, {
+      const cleared = await putSandboxSecrets(apiClient, manageCookie, SPACE_ID, {
         entries: [],
       });
       expect(cleared).toHaveStatusCode(200);
@@ -84,28 +82,28 @@ apiTest.describe(
     });
 
     apiTest('rejects new keys without a value and reserved keys', async ({ apiClient }) => {
-      const missingValue = await putSandboxSecrets(apiClient, configureCookie, SPACE_ID, {
+      const missingValue = await putSandboxSecrets(apiClient, manageCookie, SPACE_ID, {
         entries: [{ key: 'NO_VALUE' }],
       });
       expect(missingValue).toHaveStatusCode(400);
 
-      const reserved = await putSandboxSecrets(apiClient, configureCookie, SPACE_ID, {
+      const reserved = await putSandboxSecrets(apiClient, manageCookie, SPACE_ID, {
         entries: [{ key: 'CONNECTOR_TOKEN', value: 'x' }],
       });
       expect(reserved).toHaveStatusCode(400);
     });
 
     apiTest('keeps secrets isolated per space', async ({ apiClient }) => {
-      const created = await putSandboxSecrets(apiClient, configureCookie, SPACE_ID, {
+      const created = await putSandboxSecrets(apiClient, manageCookie, SPACE_ID, {
         entries: [{ key: 'SPACE_SCOPED', value: 'space-value' }],
       });
       expect(created).toHaveStatusCode(200);
 
-      const other = await getSandboxSecrets(apiClient, configureCookie, OTHER_SPACE_ID);
+      const other = await getSandboxSecrets(apiClient, manageCookie, OTHER_SPACE_ID);
       expect(other).toHaveStatusCode(200);
       expect(other.body.keys).toStrictEqual([]);
 
-      await putSandboxSecrets(apiClient, configureCookie, SPACE_ID, { entries: [] });
+      await putSandboxSecrets(apiClient, manageCookie, SPACE_ID, { entries: [] });
     });
 
     apiTest('lets read-only users list keys but not change secrets', async ({ apiClient }) => {
