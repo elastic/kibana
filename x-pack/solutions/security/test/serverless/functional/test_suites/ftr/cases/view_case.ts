@@ -281,12 +281,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await svlCases.api.deleteAllCaseItems();
       });
 
-      beforeEach(async function () {
-        // TODO: these assertions count two separate `user-actions-list` elements; the redesign
-        // uses a single list with `ShowMoreActivities`. Rewrite for the redesign pagination model.
-        this.skip();
-      });
-
       it('initially renders user actions list correctly', async () => {
         await testSubjects.missingOrFail('cases-show-more-user-actions');
 
@@ -312,23 +306,27 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await header.waitUntilLoadingHasFinished();
 
+        // show-more button appears inside the single list when there are more items than the page size
         await testSubjects.existOrFail('cases-show-more-user-actions');
 
-        const userActionsLists = await find.allByCssSelector(
-          '[data-test-subj="user-actions-list"]'
-        );
-
-        expect(userActionsLists).length(2);
-
-        expect(await userActionsLists[0].findAllByCssSelector('li')).length(10);
-
-        expect(await userActionsLists[1].findAllByCssSelector('li')).length(4);
+        const countBefore = (
+          await (
+            await find.byCssSelector('[data-test-subj="user-actions-list"]')
+          ).findAllByCssSelector('li')
+        ).length;
 
         await testSubjects.click('cases-show-more-user-actions');
 
         await header.waitUntilLoadingHasFinished();
 
-        expect(await userActionsLists[0].findAllByCssSelector('li')).length(20);
+        // more items are loaded into the same single list
+        const countAfter = (
+          await (
+            await find.byCssSelector('[data-test-subj="user-actions-list"]')
+          ).findAllByCssSelector('li')
+        ).length;
+
+        expect(countAfter).to.be.greaterThan(countBefore);
       });
     });
 
