@@ -40,3 +40,6 @@ This is the data-flow companion to the `@kbn/eslint/no_unsafe_dynamic_http_path`
 - `+=` accumulation reports on the same terms as `+`: `let p = '/api/things/'; p += id;` is reported, matching `'/api/things/' + id`, while appending a literal or an encoded segment is not.
 - Literal segments are safe, so `` `/api/x/${1}` `` is not reported, matching the ESLint rule's handling of literals.
 - Known gap: a path whose only dynamic part is a bare variable that was never constructed (`http.get(props.href)`) is not reported.
+- Known gap: a value introduced by a callback or by a later mutation of a `concat` argument is not reported. `[BASE].map(() => id).join('/')` is missed, and so is `const extra = []; extra.push(id); [BASE].concat(extra).join('/')`, because both arrays hold only safe elements when they are created.
+- Known gap: `+=` carries the appended value, not the value already in the variable. ``let p = `/api/${id}`; p += '/status';`` is not reported, while the reverse order is.
+- For the object overload, a `path` that arrives through a spread is reported even when a later property overrides it. The alert names code that does build an unencoded path, so it stays.
