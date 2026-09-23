@@ -21,6 +21,7 @@ import type { Feature } from '@kbn/significant-events-schema';
 import { upperFirst } from 'lodash';
 import React, { useMemo } from 'react';
 import { useDeveloperMode } from '../../../hooks/use_developer_mode';
+import { DeveloperModeBadge } from '../../developer_mode_badge/developer_mode_badge';
 import { InfoPanel } from '../../info_panel';
 import { getConfidenceColor } from '../utils/get_confidence_color';
 
@@ -157,7 +158,7 @@ export function KnowledgeIndicatorFeatureDetailsContent({ feature, onOpenInDisco
       {isDeveloperMode && (
         <>
           <EuiFlexItem data-test-subj="significantEventsAppFeatureDetailsFlyoutMeta">
-            <InfoPanel title={META_LABEL}>
+            <InfoPanel title={META_LABEL} headerRightContent={<DeveloperModeBadge />}>
               {hasMeta ? (
                 <EuiCodeBlock language="json" paddingSize="s" fontSize="s" isCopyable>
                   {JSON.stringify(feature.meta ?? {}, null, 2)}
@@ -168,7 +169,7 @@ export function KnowledgeIndicatorFeatureDetailsContent({ feature, onOpenInDisco
             </InfoPanel>
           </EuiFlexItem>
           <EuiFlexItem data-test-subj="significantEventsAppFeatureDetailsFlyoutRawDocument">
-            <InfoPanel title={RAW_DOCUMENT_LABEL}>
+            <InfoPanel title={RAW_DOCUMENT_LABEL} headerRightContent={<DeveloperModeBadge />}>
               <EuiCodeBlock language="json" paddingSize="s" fontSize="s" isCopyable>
                 {JSON.stringify(feature, null, 2)}
               </EuiCodeBlock>

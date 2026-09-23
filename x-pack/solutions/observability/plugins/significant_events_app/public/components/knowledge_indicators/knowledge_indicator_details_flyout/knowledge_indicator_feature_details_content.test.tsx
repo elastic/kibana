@@ -55,9 +55,15 @@ describe('KnowledgeIndicatorFeatureDetailsContent', () => {
     expect(screen.getByTestId('significantEventsAppFeatureDetailsFlyoutMeta')).toHaveTextContent(
       'Inferred from logs'
     );
+    expect(screen.getByTestId('significantEventsAppFeatureDetailsFlyoutMeta')).toHaveTextContent(
+      'Dev'
+    );
     expect(
       screen.getByTestId('significantEventsAppFeatureDetailsFlyoutRawDocument')
     ).toHaveTextContent('feature-uuid');
+    expect(
+      screen.getByTestId('significantEventsAppFeatureDetailsFlyoutRawDocument')
+    ).toHaveTextContent('Dev');
 
     mockUseDeveloperMode.mockReturnValue({
       isDeveloperMode: false,
