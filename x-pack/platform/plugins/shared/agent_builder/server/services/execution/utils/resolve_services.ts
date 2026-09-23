@@ -7,6 +7,7 @@
 
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { UserIdAndName } from '@kbn/agent-builder-common';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
@@ -23,6 +24,7 @@ export const resolveServices = async ({
   connectorId,
   telemetryMetadata,
   request,
+  requester,
   logger,
   inference,
   conversationService,
@@ -35,6 +37,7 @@ export const resolveServices = async ({
   connectorId?: string;
   telemetryMetadata?: ConnectorTelemetryMetadata;
   request: KibanaRequest;
+  requester?: UserIdAndName;
   logger: Logger;
   inference: InferenceServerStart;
   conversationService: ConversationService;
@@ -78,7 +81,7 @@ export const resolveServices = async ({
     searchInferenceEndpoints,
   });
 
-  const conversationClient = await conversationService.getScopedClient({ request });
+  const conversationClient = await conversationService.getScopedClient({ request, requester });
 
   return {
     conversationClient,

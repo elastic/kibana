@@ -16,6 +16,7 @@ import type {
   RoundModelUsageStats,
 } from './conversation';
 import type { RoundState } from './round_state';
+import type { UserPrincipalType } from '../base/users';
 
 /**
  * The projection format that new writes are stamped at.
@@ -59,6 +60,11 @@ export interface EventActor {
   username?: string;
   /** Optional display name. */
   full_name?: string;
+  /**
+   * For a `user` actor, what kind of principal it is. Kept separate from `type` so a service
+   * account's messages stay ordinary user messages wherever the timeline is read back.
+   */
+  principal_type?: UserPrincipalType;
   /** For external actors, the origin the event came from (which system). */
   origin?: ConversationRoundOrigin;
 }

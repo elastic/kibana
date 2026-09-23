@@ -203,6 +203,7 @@ const handleConversationExecution = async ({
     connectorId,
     telemetryMetadata,
     request,
+    requester: execution.requester,
     ...deps,
   });
 
@@ -221,6 +222,7 @@ const handleConversationExecution = async ({
   const author = await deps.conversationService.getConversationRoundAuthor({
     request,
     origin,
+    requester: execution.requester,
   });
 
   const roundId = uuidv4();
@@ -656,6 +658,7 @@ const handleStandaloneExecution = async ({
     connectorId: execution.agentParams.connectorId,
     telemetryMetadata,
     request,
+    requester: execution.requester,
     ...deps,
   });
 

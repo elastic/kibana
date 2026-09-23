@@ -48,6 +48,20 @@ describe('AgentExecutionClient', () => {
       );
     });
 
+    it('persists the requester', async () => {
+      const requester = {
+        id: 'service_account:kibana/automation',
+        username: 'kibana/automation',
+        type: 'service_account' as const,
+      };
+
+      await client.create({ ...createParams, requester });
+
+      expect(mockStorageClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({ document: expect.objectContaining({ requester }) })
+      );
+    });
+
     it('propagates document conflicts to the caller', async () => {
       const conflict = Object.assign(new Error('version conflict'), {
         meta: { statusCode: 409 },

@@ -6,6 +6,7 @@
  */
 
 import type { EcsEvent } from '@kbn/core/server';
+import type { UserIdAndName } from '@kbn/agent-builder-common';
 import type { AuditEvent } from '@kbn/security-plugin/server';
 import type { ArrayElement } from '@kbn/utility-types';
 
@@ -35,6 +36,7 @@ export enum AgentBuilderAuditAction {
   SKILL_CREATE = 'agent_builder_skill_create',
   SKILL_UPDATE = 'agent_builder_skill_update',
   SKILL_DELETE = 'agent_builder_skill_delete',
+  CONVERSATION_CREATE = 'agent_builder_conversation_create',
 }
 
 type VerbsTuple = [string, string, string];
@@ -49,6 +51,7 @@ const eventVerbs: Record<AgentBuilderAuditAction, VerbsTuple> = {
   [AgentBuilderAuditAction.SKILL_CREATE]: ['create', 'creating', 'created'],
   [AgentBuilderAuditAction.SKILL_UPDATE]: ['update', 'updating', 'updated'],
   [AgentBuilderAuditAction.SKILL_DELETE]: ['delete', 'deleting', 'deleted'],
+  [AgentBuilderAuditAction.CONVERSATION_CREATE]: ['create', 'creating', 'created'],
 };
 
 const eventTypes: Record<AgentBuilderAuditAction, ArrayElement<EcsEvent['type']> | undefined> = {
@@ -61,6 +64,7 @@ const eventTypes: Record<AgentBuilderAuditAction, ArrayElement<EcsEvent['type']>
   [AgentBuilderAuditAction.SKILL_CREATE]: AUDIT_TYPE.CREATION,
   [AgentBuilderAuditAction.SKILL_UPDATE]: AUDIT_TYPE.CHANGE,
   [AgentBuilderAuditAction.SKILL_DELETE]: AUDIT_TYPE.DELETION,
+  [AgentBuilderAuditAction.CONVERSATION_CREATE]: AUDIT_TYPE.CREATION,
 };
 
 interface CommonAuditEventParams {
@@ -188,6 +192,59 @@ export function toolAuditEvent({
       type: type ? [type] : undefined,
       outcome: outcome ?? (error ? AUDIT_OUTCOME.FAILURE : AUDIT_OUTCOME.SUCCESS),
     },
+    error: error && {
+      code: error.name,
+      message: error.message,
+    },
+  };
+}
+
+export interface ConversationAuditEventParams extends CommonAuditEventParams {
+  conversationId?: string;
+  agentId?: string;
+  /**
+   * The principal the event is attributed to when the audit logger cannot resolve one from the
+   * request, as with an un-enriched fake request.
+   */
+  user?: UserIdAndName;
+}
+
+export function conversationAuditEvent({
+  action,
+  conversationId,
+  agentId,
+  user,
+  outcome,
+  error,
+}: ConversationAuditEventParams): AuditEvent {
+  let doc = 'a conversation';
+  if (conversationId && agentId) {
+    doc = `conversation [id=${conversationId}, agent=${agentId}]`;
+  } else if (conversationId) {
+    doc = `conversation [id=${conversationId}]`;
+  } else if (agentId) {
+    doc = `conversation [agent=${agentId}]`;
+  }
+
+  const subject = user?.type === 'service_account' ? 'Service account' : 'User';
+  const [present, progressive, past] = eventVerbs[action];
+  const message = error
+    ? `Failed attempt to ${present} ${doc}`
+    : outcome === 'unknown'
+    ? `${subject} is ${progressive} ${doc}`
+    : `${subject} has ${past} ${doc}`;
+
+  const type = eventTypes[action];
+
+  return {
+    message,
+    event: {
+      action,
+      category: [AUDIT_CATEGORY.DATABASE],
+      type: type ? [type] : undefined,
+      outcome: outcome ?? (error ? AUDIT_OUTCOME.FAILURE : AUDIT_OUTCOME.SUCCESS),
+    },
+    ...(user ? { user: { ...(user.id ? { id: user.id } : {}), name: user.username } } : {}),
     error: error && {
       code: error.name,
       message: error.message,

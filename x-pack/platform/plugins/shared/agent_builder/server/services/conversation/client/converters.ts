@@ -100,6 +100,7 @@ export const fromEsWithoutRounds = (
     user: {
       id: document._source.user_id,
       username: document._source.user_name,
+      type: document._source.user_type,
     },
     title: document._source.title,
     created_at: document._source.created_at,
@@ -403,6 +404,7 @@ export const toEs = (
     agent_id: conversation.agent_id,
     user_id: conversation.user.id,
     user_name: conversation.user.username,
+    user_type: conversation.user.type,
     space,
     title: conversation.title,
     created_at: conversation.created_at,
@@ -514,7 +516,7 @@ export const createRequestToEs = ({
   const forEvents: Conversation = {
     id: '',
     agent_id: conversation.agent_id,
-    user: { id: effectiveUser.id, username: effectiveUser.username },
+    user: { id: effectiveUser.id, username: effectiveUser.username, type: effectiveUser.type },
     title: conversation.title,
     created_at: createdAt,
     updated_at: createdAt,
@@ -530,6 +532,7 @@ export const createRequestToEs = ({
     agent_id: conversation.agent_id,
     user_id: effectiveUser.id,
     user_name: effectiveUser.username,
+    user_type: effectiveUser.type,
     space,
     title: conversation.title,
     created_at: createdAt,

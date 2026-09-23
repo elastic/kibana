@@ -21,6 +21,7 @@ import type {
   InteractivityConfigInput,
   SerializedExecutionError,
   ExecutionAbortReason,
+  UserIdAndName,
 } from '@kbn/agent-builder-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type {
@@ -150,6 +151,13 @@ interface BaseAgentExecution {
    * Canonical interactivity config for this execution, snapshotted at creation.
    */
   interactivity?: InteractivityConfig;
+  /**
+   * The principal that requested the execution, resolved from the scheduling request. A Task
+   * Manager run authenticates with a derived credential that no longer reports the original realm,
+   * so this is what attributes the run to a principal without a user profile, such as a service
+   * account. Absent on executions created before it was recorded.
+   */
+  requester?: UserIdAndName;
 }
 
 /**

@@ -68,6 +68,7 @@ jest.mock('./task/heartbeat_reporter', () => ({
 
 const mockTaskManagerSchedule = jest.fn();
 const mockTaskManagerEnsureScheduled = jest.fn();
+const mockGetCurrentUser = jest.fn();
 
 import { createAgentExecutionService } from './execution_service';
 import { ABORT_WAIT_FOR_TERMINAL_TIMEOUT_MS } from './constants';
@@ -111,7 +112,7 @@ describe('AgentExecutionService', () => {
     elasticsearch,
     taskManager,
     inference: {} as any,
-    conversationService: {} as any,
+    conversationService: { getCurrentUser: mockGetCurrentUser } as any,
     agentService: {} as any,
     runAgent: jest.fn(),
     attachmentsService,
@@ -123,6 +124,12 @@ describe('AgentExecutionService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockGetCurrentUser.mockResolvedValue({
+      id: 'profile-1',
+      username: 'jane',
+      type: 'user',
+      isAdmin: false,
+    });
     (attachmentsService.validateAttachmentInputs as jest.Mock).mockImplementation(
       async (attachments) =>
         attachments?.map((attachment: { type: string; data: unknown }) => ({
@@ -180,6 +187,50 @@ describe('AgentExecutionService', () => {
         }),
         { request, cloneApiKey: true }
       );
+    });
+  });
+
+  describe('requester attribution', () => {
+    it('pins the scheduling principal on the execution', async () => {
+      mockGetCurrentUser.mockResolvedValue({
+        id: 'service_account:kibana/automation',
+        username: 'kibana/automation',
+        type: 'service_account',
+        isAdmin: false,
+      });
+      const request = httpServerMock.createKibanaRequest();
+
+      await service.executeAgent({
+        mode: AgentExecutionMode.conversation,
+        request,
+        params: { agentId: 'agent-1', nextInput: { message: 'hello' } },
+        useTaskManager: true,
+      });
+
+      expect(mockGetCurrentUser).toHaveBeenCalledWith({ request });
+      expect(mockExecutionClient.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          requester: {
+            id: 'service_account:kibana/automation',
+            username: 'kibana/automation',
+            type: 'service_account',
+          },
+        })
+      );
+    });
+
+    it('records identity only, never privileges', async () => {
+      mockGetCurrentUser.mockResolvedValue({ username: 'jane', isAdmin: true });
+      const request = httpServerMock.createKibanaRequest();
+
+      await service.executeAgent({
+        mode: AgentExecutionMode.conversation,
+        request,
+        params: { agentId: 'agent-1', nextInput: { message: 'hello' } },
+        useTaskManager: true,
+      });
+
+      expect(mockExecutionClient.create.mock.calls[0][0].requester).toEqual({ username: 'jane' });
     });
   });
 
