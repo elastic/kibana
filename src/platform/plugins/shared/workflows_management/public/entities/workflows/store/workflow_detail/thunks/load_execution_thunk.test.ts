@@ -240,6 +240,47 @@ describe('loadExecutionThunk', () => {
     expect(result.payload).toBe(execution);
   });
 
+  it('should settle a superseded request that fails without touching the store or toasting', async () => {
+    store.dispatch(setExecution({ ...mockExecution, id: 'exec-b' }));
+    store.dispatch(setStepExecutionPages([loadedPage]));
+    mockGetExecution.mockRejectedValue(new Error('network down'));
+
+    const result = await store.dispatch(loadExecutionThunk({ id: 'exec-a', isStale: () => true }));
+
+    expect(result.meta.requestStatus).toBe('fulfilled');
+    expect(result.payload).toBe(store.getState().detail.execution);
+    expect(store.getState().detail.execution?.id).toBe('exec-b');
+    expect(mockServices.notifications.toasts.addError).not.toHaveBeenCalled();
+  });
+
+  it('should refetch a page appended during the poll that saw the run finish', async () => {
+    const runningRows = [
+      { id: 's2', stepId: 's2', status: ExecutionStatus.RUNNING },
+    ] as WorkflowExecutionDto['stepExecutions'];
+    const finalRows = [
+      { id: 's2', stepId: 's2', status: ExecutionStatus.COMPLETED },
+    ] as WorkflowExecutionDto['stepExecutions'];
+    store.dispatch(setExecution({ ...mockExecution, status: ExecutionStatus.RUNNING }));
+    store.dispatch(setStepExecutionPages([loadedPage]));
+    mockGetExecution.mockResolvedValue(mockExecution); // now terminal
+    mockGetExecutionSteps.mockImplementation(async (_id: string, { page }: { page: number }) => {
+      if (page === 1) {
+        // "Show more" lands while this poll is still in flight, with rows fetched before the run finished.
+        store.dispatch(setStepExecutionPages([loadedPage, runningRows]));
+        return { results: loadedPage, total: 2, page, size: WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE };
+      }
+      return { results: finalRows, total: 2, page, size: WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE };
+    });
+
+    await store.dispatch(loadExecutionThunk({ id: 'exec-1' }));
+
+    expect(mockGetExecutionSteps).toHaveBeenCalledWith('exec-1', {
+      page: 2,
+      size: WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE,
+    });
+    expect(store.getState().detail.stepExecutionPages).toEqual([loadedPage, finalRows]);
+  });
+
   it('should handle HTTP error with body message', async () => {
     const error = {
       body: { message: 'Execution not found' },

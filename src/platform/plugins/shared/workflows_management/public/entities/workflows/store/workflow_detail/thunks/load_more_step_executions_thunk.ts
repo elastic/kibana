@@ -9,6 +9,7 @@
 
 import { createAsyncThunk } from 'redux-toolkit-v1';
 import { i18n } from '@kbn/i18n';
+import { isTerminalStatus } from '@kbn/workflows';
 import { WorkflowApi } from '@kbn/workflows-ui';
 import { WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE } from '../../../../../../common';
 import type { WorkflowsServices } from '../../../../../types';
@@ -29,17 +30,25 @@ export const loadMoreStepExecutionsThunk = createAsyncThunk<
   async ({ id }, { getState, dispatch, rejectWithValue, extra: { services } }) => {
     const { http, notifications } = services;
     const api = new WorkflowApi(http);
-    const page = getState().detail.stepExecutionPages.length + 1;
+    const { execution: executionAtRequest, stepExecutionPages: pagesAtRequest } = getState().detail;
+    const page = pagesAtRequest.length + 1;
+    const wasFinished =
+      executionAtRequest !== undefined && isTerminalStatus(executionAtRequest.status);
+    const fetchPage = () =>
+      api.getExecutionSteps(id, { page, size: WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE });
     try {
-      const stepsPage = await api.getExecutionSteps(id, {
-        page,
-        size: WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE,
-      });
+      let stepsPage = await fetchPage();
 
       // The user may have switched execution while this page was in flight.
       const { execution, stepExecutionPages } = getState().detail;
       if (execution?.id !== id || stepExecutionPages.length !== page - 1) {
         return;
+      }
+
+      // The run finished while the page was in flight, so polling has stopped and nothing else
+      // will refresh it: fetch it once more to pick up the final statuses.
+      if (!wasFinished && isTerminalStatus(execution.status)) {
+        stepsPage = await fetchPage();
       }
 
       dispatch(setStepExecutionPages([...stepExecutionPages, stepsPage.results]));

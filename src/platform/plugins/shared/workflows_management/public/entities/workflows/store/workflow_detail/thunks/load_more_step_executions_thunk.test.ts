@@ -98,6 +98,36 @@ describe('loadMoreStepExecutionsThunk', () => {
     );
   });
 
+  it('should refetch the page once when the run finished while it was in flight', async () => {
+    const runningRows = [
+      { id: 's2', stepId: 's2', status: ExecutionStatus.RUNNING },
+    ] as WorkflowExecutionDto['stepExecutions'];
+    store.dispatch(setExecution({ ...mockExecution, status: ExecutionStatus.RUNNING }));
+    store.dispatch(setStepExecutionPages([firstPage]));
+    mockGetExecutionSteps
+      .mockImplementationOnce(async () => {
+        // The final poll lands while this page is in flight.
+        store.dispatch(setExecution(mockExecution));
+        return {
+          results: runningRows,
+          total: 2,
+          page: 2,
+          size: WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE,
+        };
+      })
+      .mockResolvedValueOnce({
+        results: secondPage,
+        total: 2,
+        page: 2,
+        size: WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE,
+      });
+
+    await store.dispatch(loadMoreStepExecutionsThunk({ id: 'exec-1' }));
+
+    expect(mockGetExecutionSteps).toHaveBeenCalledTimes(2);
+    expect(store.getState().detail.stepExecutionPages).toEqual([firstPage, secondPage]);
+  });
+
   it('should drop the page when the execution changed while it was in flight', async () => {
     mockGetExecutionSteps.mockImplementation(async () => {
       store.dispatch(setExecution({ ...mockExecution, id: 'exec-2' }));

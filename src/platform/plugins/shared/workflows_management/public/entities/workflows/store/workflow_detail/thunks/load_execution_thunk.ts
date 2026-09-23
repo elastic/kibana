@@ -88,10 +88,27 @@ export const loadExecutionThunk = createAsyncThunk<
       // but only while the store still holds this run.
       const { execution: currentExecution, stepExecutionPages: currentPages } = getState().detail;
       const fetchedPages = stepPages.map((page) => page.results);
-      const pages =
-        currentExecution?.id === id
-          ? [...fetchedPages, ...currentPages.slice(fetchedPages.length)]
-          : fetchedPages;
+      const appendedPages =
+        currentExecution?.id === id ? currentPages.slice(fetchedPages.length) : [];
+
+      // This poll saw the run finish, so it is the last one. Pages appended while it was in
+      // flight were fetched before the final flush and would otherwise keep stale statuses.
+      // (A run already known to be finished has final pages; nothing to refetch.)
+      const sawRunFinish = !keepLoadedPages && isTerminalStatus(execution.status);
+      const finalAppendedPages =
+        appendedPages.length > 0 && sawRunFinish
+          ? (
+              await Promise.all(
+                appendedPages.map((_, index) =>
+                  api.getExecutionSteps(id, {
+                    page: fetchedPages.length + index + 1,
+                    size: WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE,
+                  })
+                )
+              )
+            ).map((page) => page.results)
+          : appendedPages;
+      const pages = [...fetchedPages, ...finalAppendedPages];
 
       const response: WorkflowExecutionDto = { ...execution, stepExecutions: pages.flat() };
       dispatch(setExecution(response));
@@ -106,6 +123,10 @@ export const loadExecutionThunk = createAsyncThunk<
       }
       return response;
     } catch (error) {
+      // A superseded request's failure is not this execution's problem: settle quietly.
+      if (isStale?.()) {
+        return getState().detail.execution;
+      }
       // Extract error message from HTTP error body if available
       const errorMessage = error.body?.message || error.message || 'Failed to load execution';
 
