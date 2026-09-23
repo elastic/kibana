@@ -28,6 +28,8 @@ tags:
 fileGroups:
   src:
     - '**/*.ts'
+    - '**/*.d.ts'
+    - '**/*.text'
     - '!target/**/*'
   jest-config:
     - jest.config.js
