@@ -33,6 +33,7 @@ export interface GetIconBase64Params {
 const DEFAULT_CONNECTOR_DATA_URL = HardcodedIconDataUrls.default;
 
 const triggerIconDataUrlCache = new Map<string, string>();
+const stepIconDataUrlCache = new Map<string, Promise<string>>();
 
 function defaultFallbackForStep(params: GetIconBase64Params): string {
   if (params.fromRegistry) {
@@ -41,10 +42,43 @@ function defaultFallbackForStep(params: GetIconBase64Params): string {
   return DEFAULT_CONNECTOR_DATA_URL;
 }
 
+async function resolveStepIconDataUrl(
+  params: GetIconBase64Params,
+  colorMode: EuiThemeColorModeStandard
+): Promise<string> {
+  const { actionTypeId, icon } = params;
+  try {
+    if (actionTypeId === 'elasticsearch') {
+      return getDataUrlFromReactComponent(ElasticsearchLogo, DEFAULT_CONNECTOR_DATA_URL, colorMode);
+    }
+    if (actionTypeId === 'kibana') {
+      return getDataUrlFromReactComponent(KibanaLogo, DEFAULT_CONNECTOR_DATA_URL, colorMode);
+    }
+    const hardcodedIcon = HardcodedIconDataUrls[actionTypeId];
+    if (hardcodedIcon) {
+      return hardcodedIcon;
+    }
+    const connectorSpecIcon = getConnectorSpecIcon(actionTypeId);
+    if (connectorSpecIcon) {
+      return await resolveIconToDataUrl(
+        connectorSpecIcon,
+        defaultFallbackForStep(params),
+        colorMode
+      );
+    }
+    if (icon) {
+      return await resolveIconToDataUrl(icon, defaultFallbackForStep(params), colorMode);
+    }
+    return defaultFallbackForStep(params);
+  } catch {
+    return defaultFallbackForStep(params);
+  }
+}
+
 /**
- * Get data URL for a workflow icon (trigger or step/connector). Uses a cache for triggers so
- * repeated calls reuse the same URL. Fallback for triggers is the bolt icon; for steps it
- * depends on fromRegistry and actionTypeId.
+ * Get data URL for a workflow icon (trigger or step/connector). Caches both kinds so repeated
+ * calls reuse the same URL instead of re-running the lazy import and React render. Fallback for
+ * triggers is the bolt icon; for steps it depends on fromRegistry and actionTypeId.
  */
 export async function getIconBase64(params: GetIconBase64Params): Promise<string> {
   const { actionTypeId, icon, kind, colorMode = 'LIGHT' } = params;
@@ -72,28 +106,19 @@ export async function getIconBase64(params: GetIconBase64Params): Promise<string
     }
   }
 
-  try {
-    if (actionTypeId === 'elasticsearch') {
-      return getDataUrlFromReactComponent(ElasticsearchLogo, DEFAULT_CONNECTOR_DATA_URL, colorMode);
-    }
-    if (actionTypeId === 'kibana') {
-      return getDataUrlFromReactComponent(KibanaLogo, DEFAULT_CONNECTOR_DATA_URL, colorMode);
-    }
-    const hardcodedIcon = HardcodedIconDataUrls[actionTypeId];
-    if (hardcodedIcon) {
-      return hardcodedIcon;
-    }
-    const connectorSpecIcon = getConnectorSpecIcon(actionTypeId);
-    if (connectorSpecIcon) {
-      return resolveIconToDataUrl(connectorSpecIcon, defaultFallbackForStep(params), colorMode);
-    }
-    if (icon) {
-      return resolveIconToDataUrl(icon, defaultFallbackForStep(params), colorMode);
-    }
-    return defaultFallbackForStep(params);
-  } catch {
-    return defaultFallbackForStep(params);
+  if (!actionTypeId) {
+    return resolveStepIconDataUrl(params, colorMode);
   }
+  // The in-flight promise is cached, not just the URL: the YAML editor re-runs icon injection
+  // several times per mount, and each uncached step pays a lazy import plus a React render.
+  const cacheKey = `${actionTypeId}:${colorMode}:${params.fromRegistry ? 'registry' : 'catalog'}`;
+  const cached = stepIconDataUrlCache.get(cacheKey);
+  if (cached !== undefined) {
+    return cached;
+  }
+  const resolution = resolveStepIconDataUrl(params, colorMode);
+  stepIconDataUrlCache.set(cacheKey, resolution);
+  return resolution;
 }
 
 /** Sync bolt fallback data URL for default trigger styling (e.g. when async resolution is not needed). */
