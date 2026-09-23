@@ -25,5 +25,4 @@ tags:
 fileGroups:
   src:
     - scripts/**/*
-    - node_modules/**/*
 tasks: {}
