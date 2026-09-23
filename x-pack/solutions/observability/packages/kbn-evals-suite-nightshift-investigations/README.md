@@ -1,6 +1,6 @@
 # @kbn/evals-suite-nightshift-investigations
 
-Evaluation suite for [Nightshift investigations](../../../plugins/shared/nightshift_investigations).
+Evaluation suite for [Nightshift investigations](../../plugins/nightshift_investigations).
 
 The default smoke eval checks seed data loading and score ingestion. An explicitly selected
 trace-only eval runs the real manual investigation workflow on file-based questions and persists
@@ -308,8 +308,8 @@ as `nightshift-investigations`.
 ## Validation
 
 ```bash
-node scripts/jest x-pack/platform/packages/shared/kbn-evals-suite-nightshift-investigations
-node scripts/type_check --project x-pack/platform/packages/shared/kbn-evals-suite-nightshift-investigations/tsconfig.json
+node scripts/jest x-pack/solutions/observability/packages/kbn-evals-suite-nightshift-investigations
+node scripts/type_check --project x-pack/solutions/observability/packages/kbn-evals-suite-nightshift-investigations/tsconfig.json
 node scripts/check.js --scope=local
 ```
 

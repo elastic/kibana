@@ -29,7 +29,7 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: tags.stateful.
         readFileSync(
           join(
             REPO_ROOT,
-            'x-pack/platform/plugins/shared/nightshift_investigations/server/agents/deductive_investigation/instructions/deductive_investigator.md.text'
+            'x-pack/solutions/observability/plugins/nightshift_investigations/server/agents/deductive_investigation/instructions/deductive_investigator.md.text'
           ),
           'utf8'
         )

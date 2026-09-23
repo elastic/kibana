@@ -5482,7 +5482,7 @@ importers:
         version: link:x-pack/platform/plugins/shared/ml/evals
       '@kbn/evals-suite-nightshift-investigations':
         specifier: workspace:*
-        version: link:x-pack/platform/packages/shared/kbn-evals-suite-nightshift-investigations
+        version: link:x-pack/solutions/observability/packages/kbn-evals-suite-nightshift-investigations
       '@kbn/evals-suite-observability-ai':
         specifier: workspace:*
         version: link:x-pack/solutions/observability/packages/kbn-evals-suite-observability-ai
@@ -8998,8 +8998,6 @@ importers:
 
   x-pack/platform/packages/shared/kbn-evals-suite-alerting-v2: {}
 
-  x-pack/platform/packages/shared/kbn-evals-suite-nightshift-investigations: {}
-
   x-pack/platform/packages/shared/kbn-evals-suite-smoke-tests: {}
 
   x-pack/platform/packages/shared/kbn-evals-suite-streams: {}
@@ -9505,6 +9503,8 @@ importers:
   x-pack/solutions/observability/packages/kbn-alerts-grouping: {}
 
   x-pack/solutions/observability/packages/kbn-apm-embeddable-common: {}
+
+  x-pack/solutions/observability/packages/kbn-evals-suite-nightshift-investigations: {}
 
   x-pack/solutions/observability/packages/kbn-evals-suite-observability-ai: {}
 
