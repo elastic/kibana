@@ -183,8 +183,8 @@ describe('AlertZeroPlugin feature-flag gating', () => {
       plugin.start(coreStart, {
         spaces: undefined,
         workflowsExtensions,
+        proposals: { getProposalsService: jest.fn().mockReturnValue({}) },
         agenticInvestigations: {
-          getProposalsService: jest.fn().mockReturnValue({}),
           getImpactClient: jest.fn(),
         },
       } as never);
@@ -205,8 +205,8 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         spaces: undefined,
         workflowsExtensions: { initManagedWorkflowsClient: jest.fn() },
         agentBuilder,
+        proposals: { getProposalsService: jest.fn().mockReturnValue({}) },
         agenticInvestigations: {
-          getProposalsService: jest.fn().mockReturnValue({}),
           getImpactClient: jest.fn(),
         },
       } as never);

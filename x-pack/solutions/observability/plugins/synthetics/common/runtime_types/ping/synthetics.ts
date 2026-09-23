@@ -6,8 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { ObserverCodec } from './observer';
-import { ErrorStateCodec } from './error_state';
+import { zodAsIoTs } from '../zod_as_io_ts';
 import {
   FullScreenshotType as ZodFullScreenshotType,
   RefResultType as ZodRefResultType,
@@ -15,6 +14,11 @@ import {
   ScreenshotImageBlobType as ZodScreenshotImageBlobType,
   ScreenshotRefImageDataType as ZodScreenshotRefImageDataType,
 } from '../zod/ping';
+import { ErrorStateCodec as errorStateSchema } from './error_state';
+import { ObserverCodec as observerSchema } from './observer';
+
+const ObserverCodec = zodAsIoTs(observerSchema);
+const ErrorStateCodec = zodAsIoTs(errorStateSchema);
 
 /**
  * This type has some overlap with the Ping type, but it helps avoid runtime type
