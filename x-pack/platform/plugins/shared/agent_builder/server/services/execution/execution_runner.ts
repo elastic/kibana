@@ -192,10 +192,10 @@ const handleConversationExecution = async ({
     conversationOperation,
   } = execution.agentParams;
 
-  // A record written before the execution service resolved the conversation and reserved the
-  // round carries none of the three. It cannot be run: nothing has been written for it and its
-  // round has no id, so it fails here, before any write, and the caller sends the request again.
-  if (!conversationId || !roundId || !conversationOperation) {
+  const { owner } = execution;
+
+  // A record written before the execution service resolved all of these cannot be run.
+  if (!conversationId || !roundId || !conversationOperation || !owner) {
     throw createInternalError('Execution is missing required conversation parameters');
   }
 
@@ -203,7 +203,7 @@ const handleConversationExecution = async ({
     deps;
 
   // Resolve scoped services
-  const { conversationClient, modelProvider, selectedConnectorId } = await resolveServices({
+  const { modelProvider, selectedConnectorId } = await resolveServices({
     agentId,
     connectorId,
     telemetryMetadata,
@@ -211,10 +211,12 @@ const handleConversationExecution = async ({
     ...deps,
   });
 
-  const author = await deps.conversationService.getConversationRoundAuthor({
+  const conversationClient = await deps.conversationService.getScopedClientAsUser({
     request,
-    origin,
+    user: { ...owner, isAdmin: false },
   });
+
+  const author = conversationClient.getAuthor(origin?.author);
 
   // The execution service resolved the conversation, created it when it was new and wrote the
   // opening user message before this run was dispatched: the run reads the stored document and is

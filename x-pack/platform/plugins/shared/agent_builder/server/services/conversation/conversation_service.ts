@@ -11,8 +11,7 @@ import type {
   SecurityServiceStart,
   ElasticsearchServiceStart,
 } from '@kbn/core/server';
-import type { ConversationRoundAuthor, CurrentUser } from '@kbn/agent-builder-common';
-import type { ExecutionConversationOrigin } from '@kbn/agent-builder-server/execution';
+import type { CurrentUser } from '@kbn/agent-builder-common';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { getUserFromRequest } from '../utils';
 import { getCurrentSpaceId } from '../../utils/spaces';
@@ -25,10 +24,10 @@ import type { ConversationEventsServiceStart } from '../conversation_events';
 
 export interface ConversationService {
   getScopedClient(options: { request: KibanaRequest }): Promise<ConversationClient>;
-  getConversationRoundAuthor(options: {
+  getScopedClientAsUser(options: {
     request: KibanaRequest;
-    origin?: ExecutionConversationOrigin;
-  }): Promise<ConversationRoundAuthor | undefined>;
+    user: CurrentUser;
+  }): Promise<ConversationClient>;
   /** The authenticated Kibana user, used to attribute what they write. */
   getCurrentUser(options: { request: KibanaRequest }): Promise<CurrentUser>;
 }
@@ -71,7 +70,26 @@ export class ConversationServiceImpl implements ConversationService {
   }
 
   async getScopedClient({ request }: { request: KibanaRequest }): Promise<ConversationClient> {
-    const user = await this.getCurrentUser({ request });
+    return this.createScopedClient({ request, user: await this.getCurrentUser({ request }) });
+  }
+
+  async getScopedClientAsUser({
+    request,
+    user,
+  }: {
+    request: KibanaRequest;
+    user: CurrentUser;
+  }): Promise<ConversationClient> {
+    return this.createScopedClient({ request, user });
+  }
+
+  private async createScopedClient({
+    request,
+    user,
+  }: {
+    request: KibanaRequest;
+    user: CurrentUser;
+  }): Promise<ConversationClient> {
     const esClient = this.getScopedEsClient(request).asInternalUser;
     const space = getCurrentSpaceId({ request, spaces: this.spaces });
     const agentRegistry = await this.agents.getRegistry({ request });
@@ -86,33 +104,6 @@ export class ConversationServiceImpl implements ConversationService {
       conversationEvents: this.conversationEvents,
       eventEmitter: eventBus ? createScopedConversationEventEmitter(eventBus, request) : undefined,
     });
-  }
-
-  /**
-   * Returns the author of a conversation round: the origin's own author if it provides one,
-   * otherwise the authenticated Kibana user's profile id. Every round is attributed, whatever the
-   * conversation's access mode, since authorship cannot be reconstructed once a conversation is
-   * shared. No author is assigned when the user has no profile id (e.g. some API key callers) —
-   * the username is not a stable identifier and must not be stored as one.
-   */
-  async getConversationRoundAuthor({
-    request,
-    origin,
-  }: {
-    request: KibanaRequest;
-    origin?: ExecutionConversationOrigin;
-  }): Promise<ConversationRoundAuthor | undefined> {
-    if (origin?.author) {
-      return origin.author;
-    }
-
-    const user = await this.getCurrentUser({ request });
-
-    if (user.id === undefined) {
-      return undefined;
-    }
-
-    return { id: user.id, username: user.username };
   }
 
   async getCurrentUser({ request }: { request: KibanaRequest }): Promise<CurrentUser> {

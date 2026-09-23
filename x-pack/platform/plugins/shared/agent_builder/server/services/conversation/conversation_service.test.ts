@@ -7,7 +7,6 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { ConversationOriginType } from '@kbn/agent-builder-common';
 import { getUserFromRequest } from '../utils';
 import { createClient } from './client';
 import { ConversationServiceImpl } from './conversation_service';
@@ -81,6 +80,15 @@ describe('ConversationServiceImpl', () => {
       expect(createClientMock).toHaveBeenCalledWith(expect.objectContaining({ user }));
     });
 
+    it('acts as the given user, without resolving the request identity', async () => {
+      const owner = { id: 'profile-alice', username: 'alice', isAdmin: false };
+
+      await createService({ agents }).getScopedClientAsUser({ request, user: owner });
+
+      expect(getUserFromRequestMock).not.toHaveBeenCalled();
+      expect(createClientMock).toHaveBeenCalledWith(expect.objectContaining({ user: owner }));
+    });
+
     it('uses the internal client for conversation storage', async () => {
       await createService({ agents }).getScopedClient({ request });
 
@@ -90,56 +98,6 @@ describe('ConversationServiceImpl', () => {
       expect(getUserFromRequestMock).toHaveBeenCalledWith(
         expect.objectContaining({ esClient: asCurrentUser })
       );
-    });
-  });
-
-  describe('getConversationRoundAuthor', () => {
-    it('prefers the external origin author over the Kibana user', async () => {
-      const service = createService();
-      const externalAuthor = { id: 'U123', username: 'jane', full_name: 'Jane Doe' };
-
-      const author = await service.getConversationRoundAuthor({
-        request,
-        origin: {
-          type: ConversationOriginType.Slack,
-          external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
-          author: externalAuthor,
-        },
-      });
-
-      expect(author).toEqual(externalAuthor);
-      expect(getUserFromRequestMock).not.toHaveBeenCalled();
-    });
-
-    it('attributes rounds from an external origin without author to the current Kibana user', async () => {
-      const service = createService();
-
-      const author = await service.getConversationRoundAuthor({
-        request,
-        origin: {
-          type: ConversationOriginType.Slack,
-          external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
-        },
-      });
-
-      expect(author).toEqual({ id: 'profile-1', username: 'jane' });
-    });
-
-    it('attributes rounds to the current Kibana user', async () => {
-      const service = createService();
-
-      const author = await service.getConversationRoundAuthor({ request });
-
-      expect(author).toEqual({ id: 'profile-1', username: 'jane' });
-    });
-
-    it('does not assign an author when the user has no profile id', async () => {
-      const service = createService();
-      getUserFromRequestMock.mockResolvedValue({ username: 'jane', isAdmin: false });
-
-      const author = await service.getConversationRoundAuthor({ request });
-
-      expect(author).toBeUndefined();
     });
   });
 });

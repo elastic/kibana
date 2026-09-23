@@ -42,13 +42,13 @@ const buildDeps = () => {
   } as unknown as SpacesPluginStart;
 
   const conversationClient = {
+    getAuthor: jest.fn().mockReturnValue({ id: 'profile-1', username: 'jane' }),
     get: jest.fn(),
     update: jest.fn().mockResolvedValue(undefined),
     appendEvents: jest.fn().mockResolvedValue(undefined),
   };
   const conversationsService = {
     getScopedClient: jest.fn().mockResolvedValue(conversationClient),
-    getConversationRoundAuthor: jest.fn().mockResolvedValue({ id: 'profile-1', username: 'jane' }),
   };
   const attachmentsService = {
     getTypeDefinition: jest.fn().mockReturnValue({
@@ -169,9 +169,7 @@ describe('createAttachmentPublicClient', () => {
         snapshot: [],
         produced: [expect.objectContaining({ id: created.id })],
       });
-      expect(deps.conversationsService.getConversationRoundAuthor).toHaveBeenCalledWith({
-        request: deps.request,
-      });
+      expect(deps.conversationClient.getAuthor).toHaveBeenCalled();
       expect(request.events).toEqual([
         expect.objectContaining({
           type: 'attachment_added',
@@ -213,7 +211,7 @@ describe('createAttachmentPublicClient', () => {
       // Audit-hostile guardrail: an API-key caller with no profile id must not be silently
       // attributed to the conversation owner — the mutation was not performed by them.
       const deps = buildDeps();
-      deps.conversationsService.getConversationRoundAuthor.mockResolvedValue(undefined);
+      deps.conversationClient.getAuthor.mockReturnValue(undefined);
       deps.conversationClient.get.mockResolvedValue({
         id: 'c1',
         user: { id: 'owner-1', username: 'owner' },

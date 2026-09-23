@@ -1066,6 +1066,32 @@ describe('ConversationClient', () => {
   // Reads-by-id go through `esClient.get` (no space filter), so cross-space isolation is enforced
   // in application code inside `getDocument`. These tests lock in that guarantee, which used to
   // come for free from the DSL `createSpaceDslFilter`.
+  describe('getAuthor', () => {
+    const createClientForUser = (user: { id?: string; username: string }) =>
+      createClient({
+        space: testSpace,
+        logger: loggerMock.create(),
+        esClient: mockRawEsClient as unknown as ElasticsearchClient,
+        agentRegistry: agentRegistry as unknown as AgentRegistry,
+        conversationEvents: mockConversationEvents,
+        user: { ...user, isAdmin: false },
+      });
+
+    it('prefers the origin author over the client user', () => {
+      const originAuthor = { id: 'U123', username: 'jane', full_name: 'Jane Doe' };
+
+      expect(client.getAuthor(originAuthor)).toEqual(originAuthor);
+    });
+
+    it('attributes the round to the client user', () => {
+      expect(client.getAuthor()).toEqual({ id: 'user-1', username: 'test-user' });
+    });
+
+    it('assigns no author when the user has no profile id', () => {
+      expect(createClientForUser({ username: 'test-user' }).getAuthor()).toBeUndefined();
+    });
+  });
+
   describe('space isolation for reads-by-id', () => {
     const createClientInSpace = (space: string) =>
       createClient({

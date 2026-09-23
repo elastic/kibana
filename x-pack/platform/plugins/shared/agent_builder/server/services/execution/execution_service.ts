@@ -127,6 +127,8 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
 
     const executionClient = this.createExecutionClient();
 
+    const owner = await this.deps.conversationService.getCurrentUser({ request });
+
     const conversationParams =
       args.mode === AgentExecutionMode.conversation
         ? await this.validateAttachments(args.params, request)
@@ -151,6 +153,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
         executionId,
         agentId,
         spaceId,
+        owner: { id: owner.id, username: owner.username },
         agentParams:
           conversationParams && target
             ? {
@@ -211,10 +214,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
         receivedAt,
         eventId: roundUserMessageEventId(roundId),
         input: conversationParams.nextInput,
-        author: await this.deps.conversationService.getConversationRoundAuthor({
-          request,
-          origin: conversationParams.origin,
-        }),
+        author: target.conversationClient.getAuthor(conversationParams.origin?.author),
         ...(conversationParams.origin ? { origin: { type: conversationParams.origin.type } } : {}),
       });
     }
@@ -317,7 +317,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     });
 
     const user = await this.deps.conversationService.getCurrentUser({ request });
-    const author = await this.deps.conversationService.getConversationRoundAuthor({ request });
+    const author = conversationClient.getAuthor();
 
     await persistUserMessage({
       conversation,

@@ -69,6 +69,7 @@ export const createConversationClientMock = (): ConversationClientMock => {
     replaceRoundEvents: jest.fn(),
     updateRoundFeedback: jest.fn(),
     markRead: jest.fn(),
+    getAuthor: jest.fn().mockReturnValue(undefined),
     setPinned: jest.fn(),
     list: jest.fn(),
     bulkGet: jest.fn(),
@@ -83,7 +84,7 @@ export const createConversationClientMock = (): ConversationClientMock => {
 export const createConversationServiceMock = (): ConversationServiceMock => {
   return {
     getScopedClient: jest.fn().mockImplementation(async () => createConversationClientMock()),
-    getConversationRoundAuthor: jest.fn().mockResolvedValue(undefined),
+    getScopedClientAsUser: jest.fn().mockImplementation(async () => createConversationClientMock()),
     getCurrentUser: jest.fn().mockResolvedValue({ id: 'user-1', username: 'alice' }),
   };
 };

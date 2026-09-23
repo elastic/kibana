@@ -22,6 +22,7 @@ import type {
   InteractivityConfigInput,
   SerializedExecutionError,
   ExecutionAbortReason,
+  UserIdAndName,
 } from '@kbn/agent-builder-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type {
@@ -162,6 +163,8 @@ interface BaseAgentExecution {
   agentId: string;
   /** Id of the space the execution was performed in. */
   spaceId: string;
+  /** The user the request that created this execution authenticated as. */
+  owner?: UserIdAndName;
   /** Error details, present when status is 'failed'. */
   error?: SerializedExecutionError;
   /** Why the execution was aborted, present when status is 'aborted' and the origin recorded it. */

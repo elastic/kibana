@@ -29,6 +29,7 @@ type CreateExecutionParams = Pick<
   | 'executionMode'
   | 'interactivity'
   | 'parentExecutionId'
+  | 'owner'
 >;
 
 /** What a status update records alongside the status. */
@@ -61,6 +62,7 @@ const fromEs = (source: AgentExecutionProperties): AgentExecution => {
     ...(source.interactivity ? { interactivity: source.interactivity } : {}),
     ...(source.parent_execution_id ? { parentExecutionId: source.parent_execution_id } : {}),
     spaceId: source.space_id,
+    ...(source.owner ? { owner: source.owner } : {}),
     agentParams: source.agent_params,
     eventCount: source.event_count ?? 0,
     events: source.events ?? [],
@@ -153,6 +155,7 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
     executionMode,
     interactivity,
     parentExecutionId,
+    owner,
   }: CreateExecutionParams): Promise<AgentExecution> {
     if (metadata) {
       for (const key of Object.keys(metadata)) {
@@ -173,6 +176,7 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
       ...(interactivity ? { interactivity } : {}),
       parent_execution_id: parentExecutionId,
       space_id: spaceId,
+      ...(owner ? { owner } : {}),
       agent_params: agentParams,
       event_count: 0,
       events: [],

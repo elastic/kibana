@@ -120,7 +120,6 @@ describe('AgentExecutionService', () => {
   const conversationClient = createConversationClientMock();
   const conversationService = {
     getScopedClient: jest.fn().mockImplementation(async () => conversationClient),
-    getConversationRoundAuthor: jest.fn().mockResolvedValue(undefined),
     getCurrentUser: jest.fn().mockResolvedValue({ id: 'user-1', username: 'alice' }),
   };
 
@@ -188,6 +187,7 @@ describe('AgentExecutionService', () => {
         expect.objectContaining({
           agentId: 'agent-1',
           spaceId: 'default',
+          owner: { id: 'user-1', username: 'alice' },
           agentParams: expect.objectContaining({
             agentId: 'agent-1',
             nextInput: { message: 'hello' },

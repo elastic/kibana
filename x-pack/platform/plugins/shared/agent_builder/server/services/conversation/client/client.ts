@@ -15,6 +15,7 @@ import { OccWriter, isElasticsearchWriteConflict } from '@kbn/occ';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type {
   ConversationOrigin,
+  ConversationRoundAuthor,
   ConversationRoundFeedback,
   FeedbackChipId,
 } from '@kbn/agent-builder-common';
@@ -164,6 +165,7 @@ export interface ConversationClient {
     conversationId: string,
     updates: Record<string, unknown>
   ): Promise<{ conversation: Conversation; changedFields: string[] }>;
+  getAuthor(originAuthor?: ConversationRoundAuthor): ConversationRoundAuthor | undefined;
 }
 
 /**
@@ -1046,6 +1048,16 @@ class ConversationClientImpl implements ConversationClient {
     }
 
     return { conversation: result, changedFields };
+  }
+
+  getAuthor(originAuthor?: ConversationRoundAuthor): ConversationRoundAuthor | undefined {
+    if (originAuthor) {
+      return originAuthor;
+    }
+
+    return this.user.id === undefined
+      ? undefined
+      : { id: this.user.id, username: this.user.username };
   }
 
   private async getDocument(conversationId: string): Promise<Document | undefined> {
