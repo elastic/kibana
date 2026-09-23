@@ -293,7 +293,15 @@ export const useAvailablePackages = ({
         continue;
       }
       const filteredCategories = [...new Set(filteredMembers.flatMap((m) => m.categories))];
-      result.push({ ...card, groupMembers: filteredMembers, categories: filteredCategories });
+      const filteredSearchableContent = filteredMembers
+        .flatMap((m) => [m.name, m.title, m.description ?? ''])
+        .join(' ');
+      result.push({
+        ...card,
+        groupMembers: filteredMembers,
+        categories: filteredCategories,
+        searchableContent: filteredSearchableContent,
+      });
     }
     return result.sort((a, b) => a.title.localeCompare(b.title));
   }, [allCards, isAgentlessEnabled, onlyAgentlessFilter]);
@@ -322,7 +330,15 @@ export const useAvailablePackages = ({
         continue;
       }
       const filteredCategories = [...new Set(filteredMembers.flatMap((m) => m.categories))];
-      result.push({ ...card, groupMembers: filteredMembers, categories: filteredCategories });
+      const filteredSearchableContent = filteredMembers
+        .flatMap((m) => [m.name, m.title, m.description ?? ''])
+        .join(' ');
+      result.push({
+        ...card,
+        groupMembers: filteredMembers,
+        categories: filteredCategories,
+        searchableContent: filteredSearchableContent,
+      });
     }
     return result.sort((a, b) => a.title.localeCompare(b.title));
   }, [cards, selectedCategory, selectedSubCategory]);

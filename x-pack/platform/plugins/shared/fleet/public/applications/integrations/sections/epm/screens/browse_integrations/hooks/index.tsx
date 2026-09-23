@@ -42,9 +42,18 @@ function applyCardFilter(
       }
       continue;
     }
-    // Recompute categories from the surviving members so sidebar counts stay accurate.
+    // Recompute categories and searchableContent from surviving members so sidebar
+    // counts and downstream search indexes only reflect the active variants.
     const filteredCategories = [...new Set(filteredMembers.flatMap((m) => m.categories))];
-    result.push({ ...card, groupMembers: filteredMembers, categories: filteredCategories });
+    const filteredSearchableContent = filteredMembers
+      .flatMap((m) => [m.name, m.title, m.description ?? ''])
+      .join(' ');
+    result.push({
+      ...card,
+      groupMembers: filteredMembers,
+      categories: filteredCategories,
+      searchableContent: filteredSearchableContent,
+    });
   }
   return result;
 }
@@ -168,6 +177,19 @@ export function useBrowseIntegrationHook({
     // members here because all collection variants should remain visible inside the flyout.
     if (!urlFilters.showContent) {
       cards = cards.filter((card) => card.type !== 'content');
+    }
+
+    // Re-validate collection cards against the search term after member-level filtering.
+    // The search index is built from allCards, so a collection may pass search because of
+    // a member later removed by a setup-method or signal filter. applyCardFilter rebuilds
+    // searchableContent from survivors; check that the updated text still matches.
+    if (searchTerm) {
+      const tokens = searchTerm.trim().toLowerCase().split(/\s+/);
+      cards = cards.filter((card) => {
+        if (!card.isCollectionCard) return true;
+        const content = (card.searchableContent ?? '').toLowerCase();
+        return tokens.some((token) => content.includes(token));
+      });
     }
 
     return cards;
