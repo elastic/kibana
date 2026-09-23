@@ -193,8 +193,6 @@ export const useFeedback = (
             .then(() => {
               patchCache({
                 vote: 'down',
-                chips: [],
-                comment: '',
                 submitted_at: new Date().toISOString(),
               });
               services.analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.FeedbackSubmitted, {
@@ -233,8 +231,6 @@ export const useFeedback = (
             .then(() => {
               patchCache({
                 vote: 'up',
-                chips: [],
-                comment: '',
                 submitted_at: new Date().toISOString(),
               });
               services.analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.FeedbackSubmitted, {

@@ -868,7 +868,7 @@ class ConversationClientImpl implements ConversationClient {
         const roundIndex = current.rounds.findIndex((r) => r.id === roundId);
 
         if (roundIndex === -1) {
-          throw createConversationNotFoundError({ conversationId });
+          throw createBadRequestError(`round not found: ${roundId}`);
         }
 
         const round = current.rounds[roundIndex];
@@ -881,11 +881,13 @@ class ConversationClientImpl implements ConversationClient {
                 ...round,
                 feedback: {
                   vote: feedback.vote,
-                  chips: feedback.chips ?? [],
-                  comment: feedback.comment ?? '',
+                  ...(feedback.chips !== undefined ? { chips: feedback.chips } : {}),
+                  ...(feedback.comment !== undefined ? { comment: feedback.comment } : {}),
                   submitted_at: new Date().toISOString(),
-                  connector_id: round.model_usage?.connector_id,
-                  model: round.model_usage?.model,
+                  ...(round.model_usage?.connector_id
+                    ? { connector_id: round.model_usage.connector_id }
+                    : {}),
+                  ...(round.model_usage?.model ? { model: round.model_usage.model } : {}),
                 } satisfies ConversationRoundFeedback,
               };
 

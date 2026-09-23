@@ -51,15 +51,6 @@ const copyLabels = {
 
 const ADD_TO_DATASET_METADATA_SOURCE = 'agent_builder';
 
-// Round feedback is not modelled in the events timeline yet — it lives only on the
-// round (`ConversationRoundFeedback`) and is dropped when rounds are projected from
-// events, so a vote can't round-trip and a submitted vote would silently vanish on
-// the next projection. Hide the control until feedback becomes a first-class
-// timeline event. Typed `boolean` (not the `false` literal) so the gated render
-// paths don't read as statically unreachable.
-// TODO(agent-builder): re-enable once round feedback is captured as a timeline event.
-const ROUND_FEEDBACK_ENABLED: boolean = false;
-
 interface RoundResponseActionsProps {
   content: string;
   isVisible: boolean;
@@ -144,10 +135,7 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
   const showAddToDatasetButton = isExperimentalEnabled && addToDatasetAction !== null;
   const isEditable = !isReadOnly && !isConversationReadOnlyLoading;
   const showFeedback =
-    ROUND_FEEDBACK_ENABLED &&
-    Boolean(rawRound) &&
-    rawRound?.status === ConversationRoundStatus.completed &&
-    isEditable;
+    Boolean(rawRound) && rawRound?.status === ConversationRoundStatus.completed && isEditable;
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>

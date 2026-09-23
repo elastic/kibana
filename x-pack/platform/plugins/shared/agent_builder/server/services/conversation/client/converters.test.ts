@@ -2181,8 +2181,38 @@ describe('conversation model converters', () => {
       });
 
       expect(updated.schema_version).toBe(CONVERSATION_SCHEMA_VERSION);
-      expect(updated.rounds).toBe(passedThroughRounds);
       expect(updated.rounds[0].response?.message).toBe('stored truth');
+    });
+
+    it('carries round feedback into caller-supplied rounds that lack it (step-only appendEvents with feedback)', () => {
+      const base = eventsNativeStored();
+      const storedFeedback = {
+        vote: 'up' as const,
+        submitted_at: '2024-01-01T00:00:00.000Z',
+      };
+      const conversation: Conversation = {
+        ...base,
+        rounds: base.rounds.map((r) =>
+          r.id === 'round-1' ? { ...r, feedback: storedFeedback } : r
+        ),
+      };
+      const callerRounds = [{ ...base.rounds[0], response: { message: 'updated response' } }];
+
+      const updated = updateConversation({
+        conversation,
+        update: {
+          id: conversation.id,
+          events: conversation.events!,
+          rounds: callerRounds,
+        } as Parameters<typeof updateConversation>[0]['update'] & {
+          events: TimelineEvent[];
+        },
+        space: 'space',
+        updateDate: new Date(updateDate),
+      });
+
+      expect(updated.rounds[0].response?.message).toBe('updated response');
+      expect(updated.rounds[0].feedback).toEqual(storedFeedback);
     });
 
     it('promotes a legacy conversation to events-native when a caller supplies events (appendEvents on a legacy doc)', () => {
@@ -2211,6 +2241,43 @@ describe('conversation model converters', () => {
 
       expect(updated.schema_version).toBe(CONVERSATION_SCHEMA_VERSION);
       expect(updated.events?.map((event) => event.id)).toEqual(['seed::user_message']);
+    });
+
+    it('carries round feedback across an appendEvents update (feedback survives eventsToRounds)', () => {
+      const base = eventsNativeStored();
+      const storedFeedback = {
+        vote: 'up' as const,
+        submitted_at: '2024-01-01T00:00:00.000Z',
+      };
+      const conversation: Conversation = {
+        ...base,
+        rounds: base.rounds.map((r) =>
+          r.id === 'round-1' ? { ...r, feedback: storedFeedback } : r
+        ),
+      };
+
+      const appended: TimelineEvent = {
+        id: 'appended::user_message',
+        type: TimelineEventType.userMessage,
+        created_at: roundCreationDate,
+        actor: { type: EventActorType.user, id: 'user_id', username: 'user_name' },
+        data: { message: 'follow-up question' },
+      };
+
+      const updated = updateConversation({
+        conversation,
+        update: {
+          id: conversation.id,
+          events: [...conversation.events!, appended],
+        } as Parameters<typeof updateConversation>[0]['update'] & {
+          events: TimelineEvent[];
+        },
+        space: 'space',
+        updateDate: new Date(updateDate),
+      });
+
+      const round = updated.rounds?.find((r) => r.id === 'round-1');
+      expect(round?.feedback).toEqual(storedFeedback);
     });
 
     it('keeps events-native docs stamped with the native marker on update', () => {
