@@ -22,7 +22,7 @@ import type {
   ListEscalationsResponse,
   UpdateEscalationRequest,
 } from '../../../common';
-import { retryOnTransientError } from '../../proposals/hooks/use_proposals_api';
+import { retryOnTransientError } from '../../retry_on_transient_error';
 import { escalationQueryKeys } from '../query_keys';
 
 /**
