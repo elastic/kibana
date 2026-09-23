@@ -57,6 +57,15 @@ export const EditDatafeedTab: FC<EditDatafeedTabProps> = ({
     };
   }, [jobBucketSpan]);
 
+  const maxConsecutiveExtractionFailuresDefault = useMemo(() => {
+    const frequencySeconds = parseInterval(datafeedFrequency || defaults.frequency)?.asSeconds();
+    if (!frequencySeconds) {
+      return 1;
+    }
+    const secondsInDay = 24 * 60 * 60;
+    return Math.max(1, Math.floor(secondsInDay / frequencySeconds));
+  }, [datafeedFrequency, defaults.frequency]);
+
   const onQueryChange = (query: string) => {
     setDatafeed({ datafeedQuery: query });
   };
@@ -205,12 +214,13 @@ export const EditDatafeedTab: FC<EditDatafeedTabProps> = ({
           helpText={
             <FormattedMessage
               id="xpack.ml.jobsList.editJobFlyout.datafeed.maxConsecutiveExtractionFailuresHelpText"
-              defaultMessage="The datafeed stops automatically after this many consecutive real-time extraction failures. When never set, it defaults to approximately one day of searches. Set to -1 to retry indefinitely."
+              defaultMessage="The number of consecutive real-time extraction failures after which the datafeed stops itself. By default this is the number of searches the datafeed runs in a day (based on its frequency), so a persistently failing datafeed stops after about a day. Set to -1 to retry indefinitely."
             />
           }
         >
           <EuiFieldNumber
             value={datafeedMaxConsecutiveExtractionFailures}
+            placeholder={String(maxConsecutiveExtractionFailuresDefault)}
             onChange={onMaxConsecutiveExtractionFailuresChange}
             disabled={datafeedRunning}
           />
