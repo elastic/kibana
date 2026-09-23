@@ -36,6 +36,10 @@ describe('createImpactAttachmentType', () => {
     expect(attachmentType.id).toBe(SecurityAgentBuilderAttachments.impact);
   });
 
+  it('raises maxContentLength above the default so full entity lists are not truncated', () => {
+    expect(attachmentType.maxContentLength).toBe(64_000);
+  });
+
   describe('validate', () => {
     it('accepts a payload with a mix of hosts and users', async () => {
       const result = await attachmentType.validate({
