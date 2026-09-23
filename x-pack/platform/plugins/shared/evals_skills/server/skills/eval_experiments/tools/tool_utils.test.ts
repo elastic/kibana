@@ -13,7 +13,7 @@ import {
   buildWorkflowLink,
   evalExperimentConfigSchema,
   toGenerateParams,
-} from './common';
+} from './tool_utils';
 
 const baseConfig = {
   target: 'agent' as const,

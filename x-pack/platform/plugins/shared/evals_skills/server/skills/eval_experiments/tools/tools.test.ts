@@ -11,7 +11,7 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server';
 import { EVALS_EXPERIMENT_WORKFLOW_TAG } from '@kbn/evals-plugin/common';
 import type { EvalExperimentsToolDeps } from './deps';
-import { listEvalDatasetsTool } from './list_eval_datasets';
+import { listEvalDatasetsTool } from '../../common/list_eval_datasets';
 import { listEvaluatorsTool } from './list_evaluators';
 import { listEvalTargetsTool } from './list_eval_targets';
 import { listConnectorsTool } from './list_eval_connectors';

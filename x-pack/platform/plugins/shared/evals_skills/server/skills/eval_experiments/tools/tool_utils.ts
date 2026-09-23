@@ -7,8 +7,6 @@
 
 import { z } from '@kbn/zod/v4';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import { getToolResultId } from '@kbn/agent-builder-server';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server';
 import {
   APP_PATH,
@@ -21,13 +19,17 @@ import type {
   GenerateExperimentParams,
   GeneratedExperimentRun,
 } from '@kbn/evals-plugin/server';
+import { LIST_EVAL_DATASETS_TOOL_ID } from '../../common/list_eval_datasets';
+import { errorResult } from '../../common/tool_results';
+
+export { errorResult, otherResult } from '../../common/tool_results';
 
 export const EVALS_TOOLS_NAMESPACE = 'platform.evals';
 
 const evalsTool = (name: string) => `${EVALS_TOOLS_NAMESPACE}.${name}`;
 
-export const evalsTools = {
-  listDatasets: evalsTool('list_datasets'),
+export const evalsExperimentTools = {
+  listDatasets: LIST_EVAL_DATASETS_TOOL_ID,
   listEvaluators: evalsTool('list_evaluators'),
   listTargets: evalsTool('list_targets'),
   listConnectors: evalsTool('list_connectors'),
@@ -246,23 +248,6 @@ export const buildWorkflowLink = (
   const spaceSegment = spaceId && spaceId !== DEFAULT_SPACE_ID ? `/s/${spaceId}` : '';
   return `${serverBasePath}${spaceSegment}/app/workflows/${encodeURIComponent(workflowId)}`;
 };
-
-export const otherResult = (data: Record<string, unknown>): ToolHandlerStandardReturn => ({
-  results: [{ type: ToolResultType.other, tool_result_id: getToolResultId(), data }],
-});
-
-export const errorResult = (
-  message: string,
-  metadata?: Record<string, unknown>
-): ToolHandlerStandardReturn => ({
-  results: [
-    {
-      type: ToolResultType.error,
-      tool_result_id: getToolResultId(),
-      data: { message, ...(metadata ? { metadata } : {}) },
-    },
-  ],
-});
 
 /**
  * Normalizes an unknown thrown value into a friendly error result. Config errors

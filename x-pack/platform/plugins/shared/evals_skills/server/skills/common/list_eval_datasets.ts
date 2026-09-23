@@ -10,9 +10,16 @@ import { ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { DatasetMaturity, MAX_TAG_LENGTH, MAX_TAGS_PER_DATASET } from '@kbn/evals-common';
 import { MAX_NAME_LENGTH } from '@kbn/evals-plugin/common';
-import { errorResult, evalsTools, otherResult, toErrorResult } from './common';
+import type { EvalsSkillsStartDependencies } from '../../types';
 import { hasReadEvalsPrivilege } from './check_privileges';
-import type { EvalExperimentsToolDeps } from './deps';
+import { errorResult, otherResult, toErrorResult } from './tool_results';
+
+export const LIST_EVAL_DATASETS_TOOL_ID = 'platform.evals.list_datasets';
+
+/** Services the shared list-datasets tool needs. Both eval skills satisfy this. */
+export interface ListEvalDatasetsToolDeps {
+  getStartDependencies: () => Promise<EvalsSkillsStartDependencies>;
+}
 
 const schema = z.object({
   search: z
@@ -43,15 +50,15 @@ const schema = z.object({
 });
 
 /**
- * Lists the evaluation datasets available to compose an experiment against.
+ * Lists evaluation datasets visible in the active space.
  */
 export const listEvalDatasetsTool = (
-  deps: EvalExperimentsToolDeps
+  deps: ListEvalDatasetsToolDeps
 ): BuiltinSkillBoundedTool<typeof schema> => ({
-  id: evalsTools.listDatasets,
+  id: LIST_EVAL_DATASETS_TOOL_ID,
   type: ToolType.builtin,
   description:
-    'List evaluation datasets (id, name, description, tags, maturity, example count). Use this to discover which dataset_ids to evaluate against when composing an experiment, optionally narrowing by tag or curation level.',
+    'List evaluation datasets (id, name, description, tags, maturity, example count). Optionally narrow by name, tag, or curation level.',
   schema,
   handler: async ({ search, tags, maturity, limit }, { request, spaceId }) => {
     try {

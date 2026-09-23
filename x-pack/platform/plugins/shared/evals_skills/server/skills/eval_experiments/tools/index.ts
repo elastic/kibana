@@ -7,7 +7,7 @@
 
 import type { SkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import type { EvalExperimentsToolDeps } from './deps';
-import { listEvalDatasetsTool } from './list_eval_datasets';
+import { listEvalDatasetsTool } from '../../common/list_eval_datasets';
 import { listEvaluatorsTool } from './list_evaluators';
 import { listEvalTargetsTool } from './list_eval_targets';
 import { listConnectorsTool } from './list_eval_connectors';
@@ -15,7 +15,7 @@ import { previewEvalExperimentTool } from './preview_eval_experiment';
 import { saveEvalExperimentTool } from './save_eval_experiment';
 import { runEvalExperimentTool } from './run_eval_experiment';
 
-export { evalsTools } from './common';
+export { evalsExperimentTools as evalsTools } from './tool_utils';
 export type { EvalExperimentsToolDeps } from './deps';
 
 /**
