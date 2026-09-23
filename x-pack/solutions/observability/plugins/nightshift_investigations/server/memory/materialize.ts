@@ -197,18 +197,12 @@ export const materializeMemory = async ({
   // returns nothing even when the catalog has pages. Fall back to browse so
   // hydrate still seeds the workspace.
   if (mode === 'search' && candidates.length === 0) {
-    logger.info(
-      `Memory search query ${JSON.stringify(
-        trimmedQuery
-      )} matched 0 page(s) — falling back to browse`
-    );
+    logger.info('Memory search matched 0 page(s) — falling back to browse');
     searchFallback = true;
     mode = 'browse';
     candidates = await store.retrieve({ size: keepCount * 10 });
   } else if (mode === 'search') {
-    logger.info(
-      `Memory search query ${JSON.stringify(trimmedQuery)} matched ${candidates.length} page(s)`
-    );
+    logger.info(`Memory search matched ${candidates.length} page(s)`);
   } else {
     logger.info(`Memory browse loaded ${candidates.length} page(s)`);
   }

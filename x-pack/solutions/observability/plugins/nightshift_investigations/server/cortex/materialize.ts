@@ -120,9 +120,7 @@ export const materializeCortex = async ({
 
   logger.info(
     fullPages.length > 0
-      ? `Materialized ${fullPages.length} Cortex page(s) into sandbox: ${fullPages
-          .map((page) => page.id)
-          .join(', ')}`
+      ? `Materialized ${fullPages.length} Cortex page(s) into sandbox`
       : 'Materialized 0 Cortex page(s) into sandbox — store.list returned no live pages'
   );
 };
