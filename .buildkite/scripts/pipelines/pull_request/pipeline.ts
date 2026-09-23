@@ -660,7 +660,6 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
     if (
       // Scout suite: changes to its own Scout tests must still trigger it.
       (await doAnyChangesMatch([
-        /^x-pack\/platform\/plugins\/shared\/fleet/,
         /^fleet_packages\.json/,
         /^x-pack\/solutions\/security\/plugins\/security_solution\/public\/management/,
         /^x-pack\/solutions\/security\/plugins\/security_solution\/server\/endpoint/,

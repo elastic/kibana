@@ -102,26 +102,55 @@ export const test = baseTest.extend<EdrRealFleetTestFixtures, EdrRealFleetWorker
           throw new Error('Endpoint package policy has no agent policy id');
         }
 
-        log.info(
-          `[edr_real_fleet] creating and enrolling Endpoint host on policy ${agentPolicyId}`
-        );
-        created.host = await createAndEnrollEndpointHost({
-          kbnClient,
-          log,
-          agentPolicyId,
-          useClosestVersionMatch: true,
-        });
+        const destroyHost = async (hostToDestroy: CreateAndEnrollEndpointHostResponse) => {
+          await destroyEndpointHost(kbnClient, hostToDestroy).catch((destroyError) => {
+            log.warning(`[edr_real_fleet] destroyEndpointHost failed: ${destroyError}`);
+          });
+          await deleteAllEndpointData(esClient, log, [hostToDestroy.agentId]).catch(
+            (deleteError) => {
+              log.warning(`[edr_real_fleet] deleteAllEndpointData failed: ${deleteError}`);
+            }
+          );
+        };
 
-        log.info(`[edr_real_fleet] waiting for agent ${created.host.agentId} to stream data`);
-        await waitForEndpointToStreamData(
-          kbnClient,
-          created.host.agentId,
-          ENDPOINT_STREAM_TIMEOUT_MS
-        );
+        const enrollHost = async (): Promise<CreateAndEnrollEndpointHostResponse> => {
+          log.info(
+            `[edr_real_fleet] creating and enrolling Endpoint host on policy ${agentPolicyId}`
+          );
+          const enrolled = await createAndEnrollEndpointHost({
+            kbnClient,
+            log,
+            agentPolicyId,
+            useClosestVersionMatch: true,
+          });
+
+          try {
+            log.info(`[edr_real_fleet] waiting for agent ${enrolled.agentId} to stream data`);
+            await waitForEndpointToStreamData(
+              kbnClient,
+              enrolled.agentId,
+              ENDPOINT_STREAM_TIMEOUT_MS
+            );
+            return enrolled;
+          } catch (streamError) {
+            await destroyHost(enrolled);
+            throw streamError;
+          }
+        };
+
+        let host: CreateAndEnrollEndpointHostResponse;
+        try {
+          host = await enrollHost();
+        } catch (error) {
+          log.warning(`[edr_real_fleet] host setup failed, retrying once: ${error}`);
+          host = await enrollHost();
+        }
+
+        created.host = host;
 
         await use({
-          agentId: created.host.agentId,
-          hostname: created.host.hostname,
+          agentId: host.agentId,
+          hostname: host.hostname,
         });
       } finally {
         if (created.host) {

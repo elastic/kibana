@@ -36,11 +36,18 @@ test.describe('Automated response actions', { tag: ['@local-stateful-classic'] }
     );
 
     await pageObjects.alertsTablePage.navigate();
-    await expect(
-      pageObjects.alertsTablePage.alertsTable.getByTestId('ruleName').filter({ hasText: ruleName })
-    ).toBeVisible({ timeout: ALERT_TIMEOUT_MS });
+    const matchingRuleNames = pageObjects.alertsTablePage.alertsTable
+      .getByTestId('ruleName')
+      .filter({ hasText: ruleName });
+    await expect
+      .poll(async () => matchingRuleNames.count(), { timeout: ALERT_TIMEOUT_MS })
+      .toBeGreaterThan(0);
 
-    await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
+    // One rule can emit several sshd alerts; open the first loaded row (same as Cypress `.first()`).
+    const firstRow = pageObjects.alertsTablePage.alertsTable.locator(
+      '[data-gridcell-row-index="0"]'
+    );
+    await firstRow.getByTestId('expand-event').click();
     await pageObjects.alertResponse.openResponseDetails();
 
     await expect(pageObjects.alertResponse.details).toContainText(
