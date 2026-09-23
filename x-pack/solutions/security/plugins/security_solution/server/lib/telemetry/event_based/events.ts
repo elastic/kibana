@@ -1655,12 +1655,6 @@ export const TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_STATS_EVENT: EventTypeOpts<Health
           description: 'Circuit breaker metrics such as execution time and memory usage.',
         },
       },
-      descriptorVersion: {
-        type: 'integer',
-        _meta: {
-          description: 'Version of the query descriptor that produced this event.',
-        },
-      },
       status: {
         type: 'keyword',
         _meta: {
