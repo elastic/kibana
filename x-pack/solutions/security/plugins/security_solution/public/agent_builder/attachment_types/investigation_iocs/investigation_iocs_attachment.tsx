@@ -29,6 +29,12 @@ export const createInvestigationIocsAttachmentDefinition =
   (): AttachmentUIDefinition<InvestigationIocsAttachment> => ({
     getLabel: (attachment) => attachment?.data?.attachmentLabel ?? DEFAULT_LABEL,
     getIcon: () => 'flag',
+    // The investigation details flyout skips attachment types that omit this hook.
+    renderConversationDetailsContent: ({ attachment }) => (
+      <React.Suspense fallback={<EuiSkeletonText lines={4} />}>
+        <LazyInvestigationIocsInlineContent attachment={attachment} isSidebar={false} />
+      </React.Suspense>
+    ),
     renderInlineContent: (props: AttachmentRenderProps<InvestigationIocsAttachment>) => (
       <React.Suspense fallback={<EuiSkeletonText lines={4} />}>
         <LazyInvestigationIocsInlineContent {...props} />

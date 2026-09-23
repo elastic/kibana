@@ -37,4 +37,16 @@ describe('createInvestigationTimelineAttachmentDefinition', () => {
   it('registers an inline renderer', () => {
     expect(typeof definition.renderInlineContent).toBe('function');
   });
+
+  it('registers a conversation details renderer so the flyout Attachments tab does not skip it', () => {
+    expect(typeof definition.renderConversationDetailsContent).toBe('function');
+  });
+
+  it('renders the lazy inline content in the conversation details flyout', () => {
+    const element = definition.renderConversationDetailsContent?.({
+      attachment: makeAttachment({ events: [] }),
+    });
+
+    expect(element).toBeDefined();
+  });
 });
