@@ -118,12 +118,6 @@ export const SplitButtonWithNotification = ({
                     size="m"
                     color="primary"
                     content={notificationTooltip}
-                    iconProps={{
-                      onClick:
-                        isDisabled || isLoading || isMainButtonLoading
-                          ? undefined
-                          : (onClick as MouseEventHandler),
-                    }}
                   />
                 </span>
               </div>
