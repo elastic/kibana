@@ -111,7 +111,6 @@ export const PerOsDeviceControlNotifyUserOption = memo<PerOsDeviceControlNotifyU
         color="subdued"
         paddingSize="s"
         hasShadow={false}
-        hasBorder={true}
         data-test-subj={getTestId()}
         css={osRowPanelCss}
       >

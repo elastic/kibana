@@ -47,10 +47,9 @@ export const OS_CONTROL_WIDTH = '22rem';
  * drift; they previously used different spacing (a `marginTop` token versus an `EuiSpacer`),
  * which read as a misalignment between cards.
  *
- * The panels use `EuiPanel`'s `subdued` surface with a border. The palette has no shade between
- * `subdued` and the next step up, so the border, not a darker fill, is what separates the panel
- * from the card. Everything about their appearance comes from `EuiPanel` props; only the top
- * margin lives here.
+ * The panels use `EuiPanel`'s `subdued` surface for that separation. Everything about their
+ * appearance comes from `EuiPanel` props; the only thing this helper contributes is the top
+ * margin.
  */
 export const osRowPanelCss = ({ euiTheme }: UseEuiTheme) => ({
   marginTop: euiTheme.size.m,

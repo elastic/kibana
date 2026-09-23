@@ -187,7 +187,6 @@ export const PerOsNotifyUserOption = memo<PerOsNotifyUserOptionProps>(
         color="subdued"
         paddingSize="s"
         hasShadow={false}
-        hasBorder={true}
         data-test-subj={getTestId()}
         css={osRowPanelCss}
       >
