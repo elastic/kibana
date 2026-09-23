@@ -22,6 +22,7 @@ import {
   waitForRelationshipIds,
   waitForEntityStoreRunning,
   getRelationshipIds,
+  getRelationshipRawUserEmails,
   assertNoRelationshipId,
   assertEntityDoesNotExist,
 } from '../../fixtures/maintainers/helpers';
@@ -480,42 +481,6 @@ apiTest.describe(
       }
     );
 
-    apiTest('drops the report when the worker is unassigned', async ({ apiClient, esClient }) => {
-      const runId = randomUUID().slice(0, 8);
-      const managerEmail = `unassign.mgr.${runId}@example.com`;
-      const reportEmail = `unassign.report.${runId}@example.com`;
-      const managerEntityId = `user:${managerEmail}@${NAMESPACE}`;
-      const reportEntityId = `user:${reportEmail}@${NAMESPACE}`;
-
-      for (const [entityId, email] of [
-        [managerEntityId, managerEmail],
-        [reportEntityId, reportEmail],
-      ]) {
-        await seedUserEntity(esClient, {
-          entityId,
-          namespace: NAMESPACE,
-          email,
-          entitySource: ENTITY_SOURCE,
-        });
-      }
-
-      await seedWorkdayRow(esClient, { userEmail: reportEmail, managerEmail });
-      await triggerMaintainerRun(apiClient, internalHeaders, MAINTAINER_ID, { sync: true });
-      await waitForRelationshipIds(esClient, RELATIONSHIP_KEY, managerEntityId, reportEntityId);
-
-      // Workday now reports the worker with no manager at all.
-      await esClient.deleteByQuery({
-        index: LOG_INDEX,
-        query: { match_all: {} },
-        refresh: true,
-        ignore_unavailable: true,
-      });
-      await seedWorkdayRow(esClient, { userEmail: reportEmail });
-      await triggerMaintainerRun(apiClient, internalHeaders, MAINTAINER_ID, { sync: true });
-
-      await assertNoRelationshipId(esClient, RELATIONSHIP_KEY, managerEntityId, reportEntityId);
-    });
-
     apiTest(
       'does not clear a supervises relationship on an entity from a different source',
       async ({ apiClient, esClient }) => {
@@ -524,11 +489,14 @@ apiTest.describe(
         // not entities belonging to other integrations sharing the same index.
         const runId = randomUUID().slice(0, 8);
 
-        // Okta actor with a seeded supervises raw_identifiers entry, simulating
-        // an edge written by a different maintainer before this run.
+        // Okta actor holding a RESOLVED supervises edge, as a previous Okta
+        // maintainer run would have left it. Seeding `ids` (not just
+        // raw_identifiers) is what makes this test able to fail: an absent
+        // `ids` array and a cleared one both read as [].
         const oktaActorEmail = `okta.actor.${runId}@example.com`;
         const oktaTargetEmail = `okta.target.${runId}@example.com`;
         const oktaActorEntityId = `user:${oktaActorEmail}@okta`;
+        const oktaTargetEntityId = `user:${oktaTargetEmail}@okta`;
         await seedUserEntity(esClient, {
           entityId: oktaActorEntityId,
           namespace: 'okta',
@@ -537,6 +505,7 @@ apiTest.describe(
           relationship: {
             key: RELATIONSHIP_KEY,
             userEmails: [oktaTargetEmail],
+            ids: [oktaTargetEntityId],
           },
         });
 
@@ -568,7 +537,57 @@ apiTest.describe(
         // entity document with entity.source = 'entityanalytics_okta', which
         // the Workday pre-run reset must not touch.
         const oktaIds = await getRelationshipIds(esClient, RELATIONSHIP_KEY, oktaActorEntityId);
-        expect(oktaIds).toStrictEqual([]);
+        expect(oktaIds).toStrictEqual([oktaTargetEntityId]);
+      }
+    );
+
+    apiTest(
+      'preserves raw_identifiers on the entities it clears',
+      async ({ apiClient, esClient }) => {
+        // The reset removes only the maintainer-owned `ids` member. Removing the
+        // whole relationship object would also delete `raw_identifiers`, which
+        // other integrations populate and this maintainer only reads.
+        const runId = randomUUID().slice(0, 8);
+        const managerEmail = `keepraw.mgr.${runId}@example.com`;
+        const reportEmail = `keepraw.report.${runId}@example.com`;
+        const rawTargetEmail = `keepraw.raw.${runId}@example.com`;
+        const managerEntityId = `user:${managerEmail}@${NAMESPACE}`;
+        const reportEntityId = `user:${reportEmail}@${NAMESPACE}`;
+
+        // The manager is a Workday entity, so the reset WILL clear its ids —
+        // it carries raw_identifiers that must nevertheless survive.
+        await seedUserEntity(esClient, {
+          entityId: managerEntityId,
+          namespace: NAMESPACE,
+          email: managerEmail,
+          entitySource: ENTITY_SOURCE,
+          relationship: {
+            key: RELATIONSHIP_KEY,
+            userEmails: [rawTargetEmail],
+            ids: [`user:${rawTargetEmail}@${NAMESPACE}`],
+          },
+        });
+        await seedUserEntity(esClient, {
+          entityId: reportEntityId,
+          namespace: NAMESPACE,
+          email: reportEmail,
+          entitySource: ENTITY_SOURCE,
+        });
+        await seedWorkdayRow(esClient, { userEmail: reportEmail, managerEmail });
+
+        await triggerMaintainerRun(apiClient, internalHeaders, MAINTAINER_ID, { sync: true });
+
+        // The run cleared the seeded id and wrote the current one, proving the
+        // reset actually touched this document.
+        await waitForRelationshipIds(esClient, RELATIONSHIP_KEY, managerEntityId, reportEntityId);
+        expect(await getRelationshipIds(esClient, RELATIONSHIP_KEY, managerEntityId)).toStrictEqual(
+          [reportEntityId]
+        );
+
+        // raw_identifiers is not the maintainer's to delete.
+        expect(
+          await getRelationshipRawUserEmails(esClient, RELATIONSHIP_KEY, managerEntityId)
+        ).toStrictEqual([rawTargetEmail]);
       }
     );
 

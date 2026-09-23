@@ -129,6 +129,14 @@ interface SeedUserEntityOptions {
     userIds?: string[];
     userNames?: string[];
     hostNames?: string[];
+    /**
+     * Resolved EUIDs seeded under `entity.relationships.<key>.ids`, as a
+     * maintainer would have written them on an earlier run. Needed by tests
+     * that must observe an existing relationship being preserved or cleared —
+     * seeding only `raw_identifiers` leaves `ids` absent, which reads the same
+     * as "cleared" and makes such assertions unable to fail.
+     */
+    ids?: string[];
   };
 }
 
@@ -165,9 +173,16 @@ export const seedUserEntity = async (
   if (relationship?.hostNames?.length) {
     rawIdentifiers.host = { name: relationship.hostNames };
   }
+  const relationshipBag: Record<string, unknown> = {};
+  if (Object.keys(rawIdentifiers).length > 0) {
+    relationshipBag.raw_identifiers = rawIdentifiers;
+  }
+  if (relationship?.ids?.length) {
+    relationshipBag.ids = relationship.ids;
+  }
   const relationships =
-    relationship && Object.keys(rawIdentifiers).length > 0
-      ? { [relationship.key]: { raw_identifiers: rawIdentifiers } }
+    relationship && Object.keys(relationshipBag).length > 0
+      ? { [relationship.key]: relationshipBag }
       : undefined;
 
   await esClient.index({
@@ -352,6 +367,29 @@ export const getRelationshipIds = async (
   if (!source) return [];
   const idsPath = relationshipIdsPath(relationshipKey);
   return normalizeKeywordList(getNestedValue(source, idsPath) ?? source[idsPath]);
+};
+
+/**
+ * Reads `entity.relationships.<key>.raw_identifiers.user.email` for an entity.
+ *
+ * The reset clears only the maintainer-owned `ids`; sibling fields like this one
+ * belong to other integrations and must survive it.
+ */
+export const getRelationshipRawUserEmails = async (
+  esClient: EsClient,
+  relationshipKey: string,
+  entityId: string
+): Promise<string[]> => {
+  await esClient.indices.refresh({ index: LATEST_ALIAS });
+  const response = await esClient.search({
+    index: LATEST_ALIAS,
+    query: { bool: { filter: [{ term: { 'entity.id': entityId } }] } },
+    size: 1,
+  });
+  const source = response.hits.hits[0]?._source as Record<string, unknown> | undefined;
+  if (!source) return [];
+  const path = `entity.relationships.${relationshipKey}.raw_identifiers.user.email`;
+  return normalizeKeywordList(getNestedValue(source, path) ?? source[path]);
 };
 
 /** Asserts that `entity.relationships.<key>.ids` does NOT contain the given target EUID. */

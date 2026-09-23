@@ -7,8 +7,6 @@
 
 import { randomUUID } from 'crypto';
 
-import { errors as esErrors } from '@elastic/elasticsearch';
-
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { EntityUpdateClient, EntityMetadataClient } from '@kbn/entity-store/server';
@@ -24,6 +22,8 @@ import {
   buildActorPageFilter,
   buildLookbackFilter,
 } from './build_actor_discovery_query';
+import { runPreRunReset } from './run_pre_run_reset';
+import { isIndexNotFound, errMsg } from './es_errors';
 import { buildTargetsPerActorQuery } from './build_targets_per_actor_query';
 import { parseTargetsPerActorRows } from './parse_targets_per_actor_rows';
 import {
@@ -53,27 +53,6 @@ interface CompositeAggregations {
 interface EsqlQueryResult {
   columns: Array<{ name: string; type: string }>;
   values: unknown[][];
-}
-
-/**
- * Detects the index-not-found case the engine recovers from gracefully (Step 1
- * runs against `logs-{integration}-{namespace}` data streams that don't exist
- * until the integration ships at least one document).
- *
- * Uses the typed `ResponseError` from `@elastic/elasticsearch` rather than
- * duck-typing two error shapes — the contract is anchored to the client we
- * actually depend on, so a future client upgrade that changes internal
- * representation surfaces as a compile-time signal rather than silent
- * failure.
- */
-function isIndexNotFound(err: unknown): boolean {
-  return (
-    err instanceof esErrors.ResponseError && err.body?.error?.type === 'index_not_found_exception'
-  );
-}
-
-function errMsg(err: unknown): string {
-  return err instanceof Error ? err.message : JSON.stringify(err);
 }
 
 function mergeRelTypeApplied(
@@ -167,37 +146,6 @@ async function fetchTargetsForActors(
 }
 
 /**
- * Clears every relationship key the config writes, for the configured entity
- * source. Returns the total number of entity documents updated, or throws on
- * transport failure (caller handles the error and skips the integration).
- */
-async function clearConfiguredRelationships(
-  config: RelationshipIntegrationConfig,
-  entitySource: string,
-  crudClient: EntityUpdateClient,
-  signal: AbortSignal | undefined
-): Promise<number> {
-  const relationshipKeys =
-    config.kind === 'bucketed'
-      ? [
-          config.bucketTargetByThreshold.aboveThresholdRelationship,
-          config.bucketTargetByThreshold.belowThresholdRelationship,
-        ]
-      : [config.relationshipKey];
-
-  let totalCleared = 0;
-  for (const relationshipKey of relationshipKeys) {
-    const { updated } = await crudClient.clearRelationshipIds({
-      entitySource,
-      relationshipKey,
-      signal,
-    });
-    totalCleared += updated;
-  }
-  return totalCleared;
-}
-
-/**
  * Runs Step 1 + Step 2 + write for one integration end-to-end. Writes each
  * page's records to the entity store immediately after parsing, so the engine
  * never holds more than one page of records in memory at a time.
@@ -255,32 +203,26 @@ async function runIntegration(
     docsFailed: 0,
   };
 
-  if (config.resetRelationshipsBeforeRun) {
-    const { entitySource } = config.resetRelationshipsBeforeRun;
-    try {
-      const totalCleared = await clearConfiguredRelationships(
-        config,
-        entitySource,
-        crudClient,
-        signal
-      );
-      logger.info(
-        `${logPrefix} Pre-run reset cleared relationships on ${totalCleared} ${entitySource} entities`
-      );
-    } catch (err) {
-      // Populating on top of a half-cleared state is worse than leaving the
-      // previous run's data in place, so skip this integration entirely.
-      logger.error(`${logPrefix} Relationship reset failed, skipping integration: ${errMsg(err)}`);
-      return {
-        buckets: 0,
-        recordsCount: 0,
-        write: totalWriteResult,
-        metadata: totalMetadataResult,
-        outcome: 'error',
-        iterations: 0,
-        truncated: false,
-      };
-    }
+  const resetOutcome = await runPreRunReset(
+    config,
+    esClient,
+    logger,
+    namespace,
+    crudClient,
+    signal,
+    transportOpts,
+    logPrefix
+  );
+  if (resetOutcome !== 'proceed') {
+    return {
+      buckets: 0,
+      recordsCount: 0,
+      write: totalWriteResult,
+      metadata: totalMetadataResult,
+      outcome: resetOutcome,
+      iterations: 0,
+      truncated: false,
+    };
   }
 
   try {

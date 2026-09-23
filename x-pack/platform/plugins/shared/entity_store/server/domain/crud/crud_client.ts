@@ -46,6 +46,11 @@ import { type WorkflowEmitTarget, WorkflowEventPublisher } from './workflow_even
 
 const RETRY_ON_CONFLICT = 3;
 
+// Poll cadence for the background update-by-query behind `clearRelationshipIds`,
+// matching the history-snapshot client's settings for the same helper.
+const CLEAR_RELATIONSHIPS_POLL_INTERVAL_MS = 30 * 1000;
+const CLEAR_RELATIONSHIPS_POLL_MIN_INTERVAL_MS = 5 * 1000;
+
 // `fields` is merged last, so reserve builder-owned paths to prevent caller overrides.
 const RESERVED_CREATE_FROM_SOURCE_FIELDS: ReadonlySet<string> = new Set([
   'entity.id',
@@ -523,6 +528,12 @@ export class CRUDClient {
    * Clears `entity.relationships.<relationshipKey>.ids` for every entity from
    * `entitySource`. Intended for snapshot-source maintainers that repopulate the
    * relationship from a full scan immediately afterwards.
+   *
+   * Runs as a background task and polls until it completes: this is a
+   * full-index mutation, so on a large tenant a synchronous update-by-query can
+   * exceed the client's request timeout and abandon the reset half-applied.
+   * `forever: true` defers to the caller's own budget (the maintainer's 1h task
+   * timeout) and to `signal` for cancellation.
    */
   public async clearRelationshipIds({
     entitySource,
@@ -539,6 +550,12 @@ export class CRUDClient {
       entitySource,
       relationshipKey,
       signal,
+      waitForTask: {
+        logger: this.logger,
+        minTimeout: CLEAR_RELATIONSHIPS_POLL_MIN_INTERVAL_MS,
+        maxTimeout: CLEAR_RELATIONSHIPS_POLL_INTERVAL_MS,
+        forever: true,
+      },
     });
   }
 
