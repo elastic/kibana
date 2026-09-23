@@ -1761,6 +1761,61 @@ export const FieldDefinitionWriteRequest = lazySchema(() =>
 export type FieldDefinitionWriteRequest = z.infer<typeof FieldDefinitionWriteRequest>;
 
 /**
+  * The body for updating a reusable field definition.
+
+Identity constraints: the `name` property must match the `name` key in the YAML `definition`. When `name` is omitted, the server extracts it from the `definition` YAML automatically. A field's `name` and YAML `type` are immutable — an attempt to change either returns `409` with `attributes.code = "field_identity_immutable"` and `attributes.changed` listing which identity attributes were modified.
+
+Note: unlike the POST endpoint, the `definition` field has no enforced character limit on PUT. This allows existing field definitions whose stored YAML was created through internal tooling before the public API existed (and may exceed 30 000 characters) to remain modifiable.
+
+  */
+export const FieldDefinitionPutRequest = lazySchema(() =>
+  z
+    .object({
+      /**
+      * The field name, unique per owner (case-insensitive). Must match the `name` key inside the YAML definition. When omitted, the name is extracted from the definition YAML automatically. Immutable after creation.
+
+      */
+      name: z
+        .string()
+        .min(1)
+        .max(50)
+        .optional()
+        .describe(
+          'The field name, unique per owner (case-insensitive). Must match the `name` key inside the YAML definition. When omitted, the name is extracted from the definition YAML automatically. Immutable after creation.\n'
+        ),
+      owner: Owner,
+      /**
+       * The field definition as a YAML string describing a single field (type, label, control, metadata).
+       */
+      definition: z
+        .string()
+        .describe(
+          'The field definition as a YAML string describing a single field (type, label, control, metadata).'
+        ),
+      /**
+       * Optional human-readable description of the field's purpose.
+       */
+      description: z
+        .string()
+        .max(1000)
+        .optional()
+        .describe("Optional human-readable description of the field's purpose."),
+      /**
+      * When true, this field is rendered in every case for this owner, regardless of the template used. Global fields cannot be demoted (set to false) while they are linked to an active v1 custom field in the Cases configuration.
+
+      */
+      isGlobal: z
+        .boolean()
+        .optional()
+        .describe(
+          'When true, this field is rendered in every case for this owner, regardless of the template used. Global fields cannot be demoted (set to false) while they are linked to an active v1 custom field in the Cases configuration.\n'
+        ),
+    })
+    .strict()
+);
+export type FieldDefinitionPutRequest = z.infer<typeof FieldDefinitionPutRequest>;
+
+/**
   * The fields a caller may apply to a case's `extended_fields`. When no template is in scope, this is the owner's global (library-wide) fields; when a template is applied, it also includes that template's fields. Migrated legacy custom fields appear here as `global` fields, so existing automations can look up the exact key to write.
 
   */
