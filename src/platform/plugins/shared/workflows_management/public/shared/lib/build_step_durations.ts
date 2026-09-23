@@ -53,10 +53,7 @@ export const buildStepDurations = (
   steps: Record<string, StepInfo>
 ): Map<string, StepDuration> => {
   // Accumulate totals, using the allow-list to drop wrapper docs.
-  const acc = new Map<
-    string,
-    { totalMs: number; runs: number; minMs: number; maxMs: number }
-  >();
+  const acc = new Map<string, { totalMs: number; runs: number; minMs: number; maxMs: number }>();
 
   for (const exec of stepExecutions) {
     const { stepId, stepType, executionTimeMs } = exec;

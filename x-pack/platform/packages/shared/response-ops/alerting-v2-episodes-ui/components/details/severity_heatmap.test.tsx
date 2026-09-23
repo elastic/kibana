@@ -85,7 +85,7 @@ describe('AlertEpisodeSeverityHeatmap', () => {
     renderHeatmap([createEventRow()]);
 
     expect(screen.getByTestId('alertingV2EpisodeSeverityHeatmap')).toBeInTheDocument();
-    expect(screen.getByText('Severity Timeline')).toBeInTheDocument();
+    expect(screen.getByText('Severity timeline')).toBeInTheDocument();
     expect(screen.getByTestId('mockSeverityHeatmapChart')).toBeInTheDocument();
   });
 

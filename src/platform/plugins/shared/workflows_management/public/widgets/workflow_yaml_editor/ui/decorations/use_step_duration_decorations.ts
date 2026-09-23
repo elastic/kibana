@@ -8,10 +8,10 @@
  */
 
 import { useEuiTheme } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { useEffect, useMemo, useRef } from 'react';
 import { useSelector } from 'react-redux-v7';
+import { i18n } from '@kbn/i18n';
 import { monaco } from '@kbn/monaco';
 import {
   selectEditorWorkflowLookup,
@@ -108,7 +108,14 @@ export const useStepDurationDecorations = (editor: monaco.editor.IStandaloneCode
     }
 
     decorationsCollection?.set(decorations);
-  }, [decorationsCollection, isActive, stepDurations, workflowLookup, denominator, highlightedStepId]);
+  }, [
+    decorationsCollection,
+    isActive,
+    stepDurations,
+    workflowLookup,
+    denominator,
+    highlightedStepId,
+  ]);
 
   // Effect 2 — manage lane width, monotonically per execution id.
   // We track the widest width seen for the current execution id and never shrink it, so a live
