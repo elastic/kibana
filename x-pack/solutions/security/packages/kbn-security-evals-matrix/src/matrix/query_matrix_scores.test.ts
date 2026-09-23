@@ -911,6 +911,7 @@ describe('queryMatrixScores with examplePrefixes', () => {
     // An arm's-length judge in the same opted-out suite must not be flagged.
     const armsLength = build() as unknown as {
       listExperiments: jest.Mock;
+      getExperimentScores: jest.Mock;
     };
     armsLength.listExperiments.mockResolvedValue([
       {
@@ -919,6 +920,15 @@ describe('queryMatrixScores with examplePrefixes', () => {
         timestamp: new Date().toISOString(),
         task_model: { id: 'm1' },
         evaluator_model: { id: 'some-other-judge' },
+      },
+    ]);
+    // The graded docs themselves come from the arm's-length judge, not from m1.
+    armsLength.getExperimentScores.mockResolvedValue([
+      {
+        example: { id: 'alert-analysis-a', index: 0, dataset: { id: 'd1', name: 'D1' } },
+        task: { model: { id: 'm1' }, trace_id: 't' },
+        evaluator: { name: 'correctness', score: 0.6, model: { id: 'some-other-judge' } },
+        metadata: {},
       },
     ]);
     const independent = await queryMatrixScores(armsLength as unknown as MatrixEvalsClient, log, {
@@ -939,6 +949,66 @@ describe('queryMatrixScores with examplePrefixes', () => {
     });
     expect(prefixIds(unconfigured)).toContain('prefix:alert-analysis');
     expect(unconfigured[0].suites[0].selfJudged).toBe(true);
+  });
+
+  it('derives prefix-row provenance from admitted docs, not from all shard judges', async () => {
+    // Round-5 regression: a mixed-judge shard under excludeSelfJudged keeps the independent
+    // verdicts but used to re-derive provenance from ALL experiment judges, flagging the row
+    // self-judged even though no admitted document was.
+    const shardStats = {
+      taskModel: { id: 'm1' },
+      evaluatorModel: { id: 'eis-judge-b' },
+      totalRepetitions: 1,
+      stats: [
+        {
+          datasetId: 'd1',
+          datasetName: 'D1',
+          evaluatorName: 'correctness',
+          stats: { mean: 0.8, median: 0.8, stdDev: 0, min: 0.8, max: 0.8, count: 2 },
+        },
+      ],
+    };
+    const mixedDocs = [
+      {
+        example: { id: 'alert-analysis-a', index: 0, dataset: { id: 'd1', name: 'D1' } },
+        task: { model: { id: 'm1' }, trace_id: 't1' },
+        evaluator: { name: 'correctness', score: 0.8, model: { id: 'eis-judge-b' } },
+        metadata: {},
+      },
+      {
+        example: { id: 'alert-analysis-b', index: 1, dataset: { id: 'd1', name: 'D1' } },
+        task: { model: { id: 'm1' }, trace_id: 't2' },
+        evaluator: { name: 'correctness', score: 0.6, model: { id: 'm1' } }, // self-judged, dropped
+        metadata: {},
+      },
+    ];
+    const client = {
+      listExperiments: jest.fn().mockResolvedValue([
+        {
+          experiment_id: 'e1',
+          execution_id: 'x1',
+          timestamp: new Date().toISOString(),
+          task_model: { id: 'm1' },
+          evaluator_model: { id: 'eis-judge-b' },
+          evaluator_models: [{ id: 'eis-judge-b' }, { id: 'm1' }],
+        },
+      ]),
+      getExperimentStats: jest.fn().mockResolvedValue(shardStats),
+      getExperimentScores: jest.fn().mockResolvedValue(mixedDocs),
+    } as unknown as MatrixEvalsClient;
+
+    const result = await queryMatrixScores(client, log, {
+      suiteIds: ['suite-a'],
+      modelIds: ['m1'],
+      prefixesBySuite: { 'suite-a': ['alert-analysis'] },
+      scoring: { excludeSelfJudged: true },
+      scoringBySuite: { 'suite-a': { excludeSelfJudged: true } },
+    });
+
+    const suite = result[0].suites[0];
+    // Admitted documents are all eis-judge-b graded; the dropped m1-judged doc must not flag the row.
+    expect(suite.selfJudged).toBe(false);
+    expect(suite.judgeModelId).toBe('eis-judge-b');
   });
 
   it('does not fetch per-example scores when no prefixes requested', async () => {

@@ -709,3 +709,65 @@ describe('renderMatrixHtml saturation disclosure', () => {
     expect(html).not.toContain('non-discriminating evaluator');
   });
 });
+
+describe('renderMatrixHtml prefix variant discovery', () => {
+  const prefixConfig: MatrixConfig = {
+    ...mockConfig,
+    columns: [
+      {
+        id: 'alert',
+        label: 'Alert Analysis',
+        group: 'Agent Builder',
+        suites: ['suite-1'],
+        weight: 1,
+        examplePrefixes: ['alert-analysis-'],
+      },
+    ],
+    models: [{ id: 'test-model', label: 'Test Model', openSource: false }],
+  };
+  const prefixMatrix: Matrix = {
+    ...mockMatrix,
+    displayColumns: [
+      { id: 'alert', label: 'Alert Analysis', group: 'Agent Builder', kind: 'base' },
+      { id: '__overall__', label: 'Overall', kind: 'overall' },
+    ],
+    proprietary: [
+      {
+        modelId: 'test-model',
+        modelLabel: 'Test Model',
+        openSource: false,
+        cells: { alert: { kind: 'score', value: 8.5 } },
+        overall: { kind: 'score', value: 8.5 },
+        coverage: { covered: 1, total: 1 },
+      },
+    ],
+  };
+
+  it('renders a card for every fetched variant, not only -a/-b/-c suffixes', () => {
+    // Regression: variant discovery hard-coded ['-a','-b','-c']; a '-d' example was fetched
+    // into traces but silently omitted from the report.
+    const traces: MatrixTraceData = {
+      'test-model:alert-analysis-a': { steps: 1, scores: {} } as never,
+      'test-model:alert-analysis-d': { steps: 1, scores: {} } as never,
+    };
+    const html = renderMatrixHtml(prefixMatrix, prefixConfig, {}, traces);
+    expect(html).toContain('alert-analysis-a');
+    expect(html).toContain('alert-analysis-d');
+  });
+
+  it('renders an exact-prefix example id with no letter suffix', () => {
+    const traces: MatrixTraceData = {
+      'test-model:alert-analysis-': { steps: 1, scores: {} } as never,
+    };
+    const html = renderMatrixHtml(prefixMatrix, prefixConfig, {}, traces);
+    expect(html).toContain('alert-analysis-');
+  });
+
+  it("does not render another column prefix as this column's variant", () => {
+    const traces: MatrixTraceData = {
+      'test-model:threat-hunting-a': { steps: 1, scores: {} } as never,
+    };
+    const html = renderMatrixHtml(prefixMatrix, prefixConfig, {}, traces);
+    expect(html).not.toContain('threat-hunting-a');
+  });
+});

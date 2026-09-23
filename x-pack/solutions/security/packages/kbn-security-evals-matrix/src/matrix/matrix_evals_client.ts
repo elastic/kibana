@@ -49,22 +49,38 @@ export class MatrixEvalsClient extends EvalsClient {
     filters: ListExperimentsFilters = {}
   ): Promise<EvaluationExperimentSummary[]> {
     const { suiteId, taskModelId, branch, limit = MAX_LIST_EXPERIMENTS } = filters;
-    const { data } = await this.matrixKbnClient.request({
-      path: EVALS_EXPERIMENTS_URL,
-      method: 'GET',
-      headers: VERSIONED_HEADERS,
-      query: {
-        suite_id: suiteId,
-        model_id: taskModelId,
-        branch,
-        page: 1,
-        per_page: Math.min(limit, MAX_LIST_EXPERIMENTS),
-      },
-    });
-    const { experiments } = GetEvaluationExperimentsResponse.parse(data);
-    return branch
-      ? experiments.filter(({ git_branch: gitBranch }) => gitBranch === branch)
-      : experiments;
+    // Page until `limit` experiments are collected or the listing is exhausted. The route caps
+    // `per_page` at MAX_LIST_EXPERIMENTS, so a fixed `page: 1` silently truncated discovery once
+    // more than one page of runs existed for a suite/model — `--as-of` could then no longer
+    // reproduce a historical matrix.
+    const perPage = MAX_LIST_EXPERIMENTS;
+    const all: EvaluationExperimentSummary[] = [];
+    let page = 1;
+    while (all.length < limit) {
+      const { data } = await this.matrixKbnClient.request({
+        path: EVALS_EXPERIMENTS_URL,
+        method: 'GET',
+        headers: VERSIONED_HEADERS,
+        query: {
+          suite_id: suiteId,
+          model_id: taskModelId,
+          branch,
+          page,
+          per_page: perPage,
+        },
+      });
+      const { experiments, total = 0 } = GetEvaluationExperimentsResponse.parse(data);
+      if (branch) {
+        all.push(...experiments.filter(({ git_branch: gitBranch }) => gitBranch === branch));
+      } else {
+        all.push(...experiments);
+      }
+      if (experiments.length < perPage || all.length >= total) {
+        break;
+      }
+      page += 1;
+    }
+    return all.slice(0, limit);
   }
 
   /**

@@ -14,6 +14,8 @@ import { wilsonInterval, type ConfidenceInterval } from './trajectory_agreement'
 export interface JudgeVerdict {
   modelId: string;
   judgeId: string;
+  /** Suite that produced the verdict; keeps example ids reused across suites from pairing. */
+  suiteId?: string;
   example: string;
   repetition: number;
   evaluator: string;
@@ -54,7 +56,7 @@ const NON_VERDICT_EVALUATORS = new Set(['Input Tokens', 'Output Tokens', 'Latenc
 const passed = (score: number): boolean => score > 0.5;
 
 const cellKey = (v: JudgeVerdict): string =>
-  `${v.example}\u0000${v.repetition}\u0000${v.evaluator}`;
+  `${v.suiteId ?? ''}\u0000${v.example}\u0000${v.repetition}\u0000${v.evaluator}`;
 
 /**
  * Compares the two judges with the most overlap, pairing verdicts by (example, repetition, evaluator).

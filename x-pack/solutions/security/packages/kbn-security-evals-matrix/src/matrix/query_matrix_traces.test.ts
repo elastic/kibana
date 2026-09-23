@@ -255,6 +255,7 @@ describe('queryMatrixTraces example fetching', () => {
       {
         modelId: 'model-x',
         judgeId: 'judge-x',
+        suiteId: 'suite-1',
         example: 'example-1',
         repetition: 0,
         evaluator: 'Correctness',

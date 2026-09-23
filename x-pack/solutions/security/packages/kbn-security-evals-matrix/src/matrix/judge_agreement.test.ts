@@ -59,6 +59,27 @@ describe('judgeAgreementForModel', () => {
     expect(row.verdictAgreement).toBe(1);
   });
 
+  it('does not pair the same example id reused across different suites', () => {
+    // Regression: cells were keyed only by (example, repetition, evaluator), so two suites
+    // reusing an example id fabricated agreement pairs that never existed.
+    const verdicts = [
+      { ...verdict('gemini', 'ex-1', 0, 'Relevance', 1), suiteId: 'suite-a' },
+      { ...verdict('sonnet', 'ex-1', 0, 'Relevance', 0), suiteId: 'suite-b' },
+    ];
+    const row = judgeAgreementForModel(verdicts, 'model-a');
+    expect(row.pairs).toBe(0);
+  });
+
+  it('still pairs matching cells that carry the same suite id', () => {
+    const verdicts = [
+      { ...verdict('gemini', 'ex-1', 0, 'Relevance', 1), suiteId: 'suite-a' },
+      { ...verdict('sonnet', 'ex-1', 0, 'Relevance', 1), suiteId: 'suite-a' },
+    ];
+    const row = judgeAgreementForModel(verdicts, 'model-a');
+    expect(row.pairs).toBe(1);
+    expect(row.verdictAgreement).toBe(1);
+  });
+
   it('reports how many cells only one judge scored', () => {
     const verdicts = [
       verdict('gemini', 'ex-1', 0, 'Relevance', 1),

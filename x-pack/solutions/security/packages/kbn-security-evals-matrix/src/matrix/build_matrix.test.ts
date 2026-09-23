@@ -1135,6 +1135,22 @@ describe('errored-evaluator guard', () => {
 
     expect(overall.kind).not.toBe('score');
   });
+
+  // Round-5: only evaluators an axis actually scores from can suppress that axis cell.
+  it('does not suppress the capability axis when only a judged evaluator errored', () => {
+    const matrix = buildMatrix(withDatasets(survivingSaturatedOnly, ['Factuality']), guardConfig);
+    // capability only counts contract evaluators, so a Factuality outage must not touch it:
+    // it still publishes from the surviving contract checks.
+    expect(matrix.proprietary[0].capability?.kind).toBe('score');
+    // judgedQuality excludes contract evaluators, so Factuality's outage suppresses it. The
+    // per-column guard fires as insufficient-evaluators; the axis aggregate reports no score.
+    expect(matrix.proprietary[0].judgedQuality?.kind).not.toBe('score');
+  });
+
+  it('still suppresses the capability axis when a contract evaluator errored', () => {
+    const matrix = buildMatrix(withDatasets(survivingSaturatedOnly, ['SkillInvoked']), guardConfig);
+    expect(matrix.proprietary[0].capability?.kind).not.toBe('score');
+  });
 });
 
 describe('buildMatrix round-4 review findings', () => {

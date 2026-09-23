@@ -18,7 +18,8 @@ import type { JudgeVerdict } from './judge_agreement';
 /** Converts one score document into a judge verdict, when it carries an identifiable judge + score. */
 const verdictFromScoreDoc = (
   score: EvaluationScoreDocument,
-  modelId: string
+  modelId: string,
+  suiteId?: string
 ): JudgeVerdict | undefined => {
   const example = score.example?.id;
   const evaluator = score.evaluator?.name;
@@ -30,6 +31,7 @@ const verdictFromScoreDoc = (
   return {
     modelId,
     judgeId,
+    suiteId,
     example,
     repetition: score.task?.repetition_index ?? 0,
     evaluator,
@@ -252,7 +254,7 @@ const processExampleBatch = (
 
   if (judgeVerdictsOut) {
     for (const score of relevant) {
-      const verdict = verdictFromScoreDoc(score, modelId);
+      const verdict = verdictFromScoreDoc(score, modelId, suiteId);
       if (verdict) judgeVerdictsOut.push(verdict);
     }
   }

@@ -258,7 +258,18 @@ const axisCell = (
       computeColumnMean(modelScores, column, config.excludeEvaluators, includeEvaluator),
       column,
       config,
-      { erroredOutEvaluators: columnErroredOutEvaluators(modelScores, column) }
+      // Only evaluators this axis actually scores from can suppress the axis cell; a judged
+      // evaluator outage must not mark the deterministic capability axis unmeasured (and vice
+      // versa), so the errored set is filtered by the same predicate as the mean.
+      {
+        erroredOutEvaluators: columnErroredOutEvaluators(modelScores, column).filter((name) =>
+          includeEvaluator({
+            evaluatorName: name,
+            mean: 0,
+            count: 0,
+          } as AggregatedEvaluatorScore)
+        ),
+      }
     ),
     weight: config.overall.mode === 'weighted' ? column.weight : 1,
   }));

@@ -442,17 +442,21 @@ const renderModelCard = (
               : '<span class="status err">missing</span>';
 
           const column = config.columns.find((c) => c.id === col.id);
-          // One card per a/b/c variant that has a trace.
+          // One card per fetched example matching a column prefix — the suffix set is open, so
+          // enumerate actual trace keys instead of hard-coding -a/-b/-c variants.
           const variantTraces: Array<{ label: string; trace: MatrixTraceEntry | undefined }> = [];
           if (column?.examplePrefixes?.length) {
-            for (const p of column.examplePrefixes) {
-              for (const suffix of ['-a', '-b', '-c']) {
-                const key = traceKey(row.modelId, `${p}${suffix}`);
-                if (traces?.[key] !== undefined) {
-                  variantTraces.push({ label: `${p}${suffix}`, trace: traces[key] });
-                }
+            const modelKeyPrefix = `${traceKey(row.modelId, '')}`;
+            const matchingKeys = Object.keys(traces ?? {}).filter((key) =>
+              key.startsWith(modelKeyPrefix)
+            );
+            for (const key of matchingKeys) {
+              const example = key.slice(modelKeyPrefix.length);
+              if (column.examplePrefixes.some((p) => example.startsWith(p))) {
+                variantTraces.push({ label: example, trace: traces?.[key] });
               }
             }
+            variantTraces.sort((a, b) => a.label.localeCompare(b.label));
           }
           const fallbackTrace =
             traces?.[traceKey(row.modelId, col.id)] ??

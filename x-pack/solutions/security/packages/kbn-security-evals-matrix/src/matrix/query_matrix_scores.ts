@@ -225,6 +225,17 @@ interface DerivedRowJudgeInfo {
   judgeModelIds?: string[];
 }
 
+const judgeInfoFromIds = (judgeIds: Set<string>, taskModelId: string): DerivedRowJudgeInfo => {
+  if (judgeIds.size === 0) {
+    return {};
+  }
+  const selfJudged = [...judgeIds].some((id) => describeJudge(id, taskModelId).selfJudged);
+  if (judgeIds.size === 1) {
+    return { selfJudged, judgeModelId: [...judgeIds][0] };
+  }
+  return { selfJudged, judgeModelIds: [...judgeIds].sort() };
+};
+
 const deriveRowJudgeInfo = (
   experiments: EvaluationExperimentSummary[],
   taskModelId: string
@@ -237,14 +248,7 @@ const deriveRowJudgeInfo = (
       }
     }
   }
-  if (judgeIds.size === 0) {
-    return {};
-  }
-  const selfJudged = [...judgeIds].some((id) => describeJudge(id, taskModelId).selfJudged);
-  if (judgeIds.size === 1) {
-    return { selfJudged, judgeModelId: [...judgeIds][0] };
-  }
-  return { selfJudged, judgeModelIds: [...judgeIds].sort() };
+  return judgeInfoFromIds(judgeIds, taskModelId);
 };
 
 /** Selects the most recent experiment per task model within the lookback window. */
@@ -523,6 +527,7 @@ export const queryMatrixScores = async (
           // Set only for `examplePrefixes` suites whose synthetic prefix datasets all failed the
           // judge policy; those columns ignore the pre-aggregated stats datasets entirely.
           let noPrefixDatasetSurvived = false;
+          let prefixScores: EvaluationScoreDocument[] = [];
           if (examplePrefixes.length > 0) {
             try {
               const scores = (
@@ -536,6 +541,7 @@ export const queryMatrixScores = async (
                   )
                 )
               ).flat();
+              prefixScores = scores;
               const before = datasets.length;
               // excludedByModel accumulates across every suite for the final audit summary;
               // reading it back for labeling here would attribute an earlier suite's
@@ -599,7 +605,37 @@ export const queryMatrixScores = async (
           }
 
           const excludedSelfJudgedCount = suiteExcludedCounts?.selfJudged;
-          const rowJudgeInfo = deriveRowJudgeInfo(shards, modelId);
+          // For prefix suites, `shards` carry every judge that ever graded the shard — including
+          // self-judged ones the per-document filter below then excluded. Provenance must reflect
+          // the documents actually admitted, so collect judge ids from the surviving prefix docs.
+          const admittedJudgeIds = new Set<string>();
+          if (examplePrefixes.length > 0 && noPrefixDatasetSurvived === false) {
+            // Admission mirrors scoresByPrefixToDatasets' per-document policy for this suite
+            // (suiteScoring already resolves per-suite override -> global -> undefined; the
+            // flags are truthiness-checked exactly like scoresByPrefixToDatasets does).
+            const forbidSelfJudged = suiteScoring?.excludeSelfJudged === true;
+            const requireEis = suiteScoring?.requireEisJudge === true;
+            const admittedDocs = prefixScores.filter((doc) => {
+              const judgeId = doc.evaluator?.model?.id;
+              if (typeof judgeId !== 'string') {
+                return false;
+              }
+              if (forbidSelfJudged && describeJudge(judgeId, modelId).selfJudged) {
+                return false;
+              }
+              return !(requireEis && !isEisBacked(judgeId));
+            });
+            for (const doc of admittedDocs) {
+              const judgeId = doc.evaluator?.model?.id;
+              if (typeof judgeId === 'string') {
+                admittedJudgeIds.add(judgeId);
+              }
+            }
+          }
+          const rowJudgeInfo =
+            examplePrefixes.length > 0 && noPrefixDatasetSurvived === false
+              ? judgeInfoFromIds(admittedJudgeIds, modelId)
+              : deriveRowJudgeInfo(shards, modelId);
           model.suites.push({
             suiteId,
             experimentId: latest.experiment_id,
