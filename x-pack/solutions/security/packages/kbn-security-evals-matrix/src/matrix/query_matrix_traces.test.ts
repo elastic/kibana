@@ -789,11 +789,17 @@ describe('aliasTraceKeys', () => {
 });
 
 describe('aliasJudgeVerdicts', () => {
-  const verdict = (modelId: string, judgeId = 'judge-x', score = 0.7): JudgeVerdict => ({
+  const verdict = (
+    modelId: string,
+    judgeId = 'judge-x',
+    score = 0.7,
+    example = 'example-1',
+    repetition = 0
+  ): JudgeVerdict => ({
     modelId,
     judgeId,
-    example: 'example-1',
-    repetition: 0,
+    example,
+    repetition,
     evaluator: 'Correctness',
     score,
   });
@@ -838,5 +844,26 @@ describe('aliasJudgeVerdicts', () => {
     );
 
     expect(verdicts.map((v) => v.modelId)).toEqual(['provider/slug', 'row-a', 'row-b']);
+  });
+
+  it('mirrors every verdict cell of an aliased run, not one per judge', () => {
+    // Regression: deduping by (modelId, judgeId) alone copied at most one verdict per
+    // judge onto the row, discarding the run's remaining examples/repetitions and
+    // starving judge-agreement pairing of its sample.
+    const verdicts = [
+      verdict('provider/slug', 'judge-x', 1, 'ex-1', 0),
+      verdict('provider/slug', 'judge-x', 0, 'ex-2', 0),
+      verdict('provider/slug', 'judge-x', 1, 'ex-3', 1),
+    ];
+
+    aliasJudgeVerdicts(verdicts, new Map([['row', ['provider/slug']]]));
+
+    const mirrored = verdicts.filter((v) => v.modelId === 'row');
+    expect(mirrored).toHaveLength(3);
+    expect(mirrored.map((v) => [v.example, v.repetition])).toEqual([
+      ['ex-1', 0],
+      ['ex-2', 0],
+      ['ex-3', 1],
+    ]);
   });
 });
