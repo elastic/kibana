@@ -6,27 +6,64 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFlyoutBody, EuiFlyoutHeader, EuiFlyoutResizable, EuiTitle } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiFlyoutResizable,
+  EuiSpacer,
+  EuiTitle,
+  EuiToolTip,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 import { createEsTraceFetcher, TraceWaterfall, useTraceSpans } from '@kbn/llm-trace-waterfall';
+import type { TraceSpan } from '@kbn/llm-trace-waterfall';
 import { useKibana } from '../../../../hooks/use_kibana';
+import { triggerDownload } from '../../../../utils/download';
 
-const title = i18n.translate('xpack.agentBuilder.response.traceFlyout.title', {
-  defaultMessage: 'Trace',
-});
+const labels = {
+  title: i18n.translate('xpack.agentBuilder.response.traceFlyout.title', {
+    defaultMessage: 'Trace',
+  }),
+  download: i18n.translate('xpack.agentBuilder.response.traceFlyout.download', {
+    defaultMessage: 'Download trace',
+  }),
+  fromFileCallout: i18n.translate('xpack.agentBuilder.response.traceFlyout.fromFileCallout', {
+    defaultMessage: 'Viewing a trace loaded from a file.',
+  }),
+};
 
 interface TraceFlyoutProps {
-  traceId: string;
+  traceId?: string;
+  initialSpans?: TraceSpan[];
   onClose: () => void;
 }
 
-export const TraceFlyout: React.FC<TraceFlyoutProps> = ({ traceId, onClose }) => {
+export const TraceFlyout: React.FC<TraceFlyoutProps> = ({ traceId, initialSpans, onClose }) => {
   const { services } = useKibana();
   const { data } = services.plugins;
   const fetchTrace = useMemo(() => createEsTraceFetcher(data.search.search), [data.search.search]);
-  const traceSpansResult = useTraceSpans(traceId, { fetchTrace });
+
+  const isFromFile = Boolean(initialSpans);
+  const traceSpansResult = useTraceSpans(isFromFile ? null : traceId ?? null, { fetchTrace });
+
+  const spans = isFromFile ? initialSpans ?? [] : traceSpansResult.spans;
+  const durationMs = isFromFile ? 0 : traceSpansResult.durationMs;
+  const isLoading = isFromFile ? false : traceSpansResult.isLoading;
+  const error = isFromFile ? null : traceSpansResult.error;
+
+  const handleDownload = () => {
+    const slug = (traceId ?? 'trace')
+      .replace(/[^\p{L}\p{N}]+/gu, '-')
+      .replace(/^-|-$/g, '')
+      .toLowerCase();
+    triggerDownload(`${slug}.json`, JSON.stringify(spans, null, 2));
+  };
 
   return (
     <EuiFlyoutResizable
@@ -48,20 +85,45 @@ export const TraceFlyout: React.FC<TraceFlyoutProps> = ({ traceId, onClose }) =>
       `}
     >
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="s">
-          <h2 id="agentBuilderTraceFlyoutTitle" style={{ wordBreak: 'break-all' }}>
-            {title}: {traceId}
-          </h2>
-        </EuiTitle>
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+          <EuiFlexItem>
+            <EuiTitle size="s">
+              <h2 id="agentBuilderTraceFlyoutTitle" style={{ wordBreak: 'break-all' }}>
+                {labels.title}
+                {traceId ? `: ${traceId}` : ''}
+              </h2>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiToolTip content={labels.download} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType="download"
+                aria-label={labels.download}
+                onClick={handleDownload}
+                color="text"
+                size="s"
+                data-test-subj="traceFlyoutDownloadButton"
+              />
+            </EuiToolTip>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <div style={{ height: '100%', padding: 16 }}>
+          {isFromFile && (
+            <>
+              <EuiCallOut announceOnMount size="s" color="primary" iconType="document">
+                {labels.fromFileCallout}
+              </EuiCallOut>
+              <EuiSpacer size="m" />
+            </>
+          )}
           <TraceWaterfall
-            spans={traceSpansResult.spans}
-            traceId={traceId}
-            durationMs={traceSpansResult.durationMs}
-            isLoading={traceSpansResult.isLoading}
-            error={traceSpansResult.error}
+            spans={spans}
+            traceId={traceId ?? ''}
+            durationMs={durationMs}
+            isLoading={isLoading}
+            error={error}
           />
         </div>
       </EuiFlyoutBody>

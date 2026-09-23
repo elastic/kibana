@@ -49,11 +49,15 @@ const labels = {
 interface ExecutionMetadataPopoverProps {
   executionTerminatedEvent: ExecutionTerminatedEvent;
   steps?: ConversationRoundStep[];
+  conversationId?: string;
+  agentId?: string;
 }
 
 export const ExecutionMetadataPopover: React.FC<ExecutionMetadataPopoverProps> = ({
   executionTerminatedEvent,
   steps,
+  conversationId,
+  agentId,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isJsonFlyoutOpen, setIsJsonFlyoutOpen] = useState(false);
@@ -149,6 +153,8 @@ export const ExecutionMetadataPopover: React.FC<ExecutionMetadataPopoverProps> =
         <ExecutionJsonFlyout
           executionTerminatedEvent={executionTerminatedEvent}
           steps={steps}
+          conversationId={conversationId}
+          agentId={agentId}
           onClose={closeJsonFlyout}
         />
       )}
