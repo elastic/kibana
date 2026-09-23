@@ -94,8 +94,8 @@ export function SettingsTab() {
   const canConfigureEngines = canManage && canConfigure;
   const canEditSettings = canConfigureEngines && canSaveAdvancedSettings;
   const { isDeveloperMode, setDeveloperMode, isSaving: isDeveloperModeSaving } = useDeveloperMode();
-  // Slack app routes are gated on the Streams feature privilege, not Nightshift.
-  const canManageSlack = core.application.capabilities.streams?.manage === true;
+  /* Slack app and destructive reset routes use the Streams feature privilege, not Nightshift. */
+  const canManageStreams = core.application.capabilities.streams?.manage === true;
 
   // Pause turns these Settings toggles off (and Resume restores only those that
   // were previously on). While paused, the toggles are not editable.
@@ -325,7 +325,7 @@ export function SettingsTab() {
           <EuiSpacer />
         </>
       )}
-      <MaintenanceSection canManage={canConfigureEngines} />
+      <MaintenanceSection canManage={canConfigureEngines} canReset={canManageStreams} />
 
       <EuiSpacer />
 
@@ -948,7 +948,7 @@ export function SettingsTab() {
         </>
       )}
 
-      {isAppsEnabled && <AppsSection canEdit={canManageSlack} />}
+      {isAppsEnabled && <AppsSection canEdit={canManageStreams} />}
 
       {isConfirmingZeroMatch && (
         <EuiConfirmModal
