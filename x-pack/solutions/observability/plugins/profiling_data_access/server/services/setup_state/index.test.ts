@@ -47,17 +47,15 @@ describe('getSetupState', () => {
   const internalProfilingClient = { name: 'internal-profiling-client' };
   const currentProfilingClient = { name: 'current-profiling-client' };
 
-  const createProfilingEsClient = jest.fn(
-    ({ esClient: scopedClient }: { esClient: unknown; useDefaultAuth?: boolean }) => {
-      if (scopedClient === internalEsClient) {
-        return internalProfilingClient as any;
-      }
-      if (scopedClient === currentEsClient) {
-        return currentProfilingClient as any;
-      }
-      throw new Error('Unexpected scoped ES client');
+  const createProfilingEsClient = jest.fn(({ esClient: scopedClient }: { esClient: unknown }) => {
+    if (scopedClient === internalEsClient) {
+      return internalProfilingClient as any;
     }
-  );
+    if (scopedClient === currentEsClient) {
+      return currentProfilingClient as any;
+    }
+    throw new Error('Unexpected scoped ES client');
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();
