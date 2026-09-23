@@ -115,9 +115,11 @@ const indexResponseActionHost = ({
   kbnClient,
   numResponseActions,
   alertIds,
+  isServerless,
 }: Omit<SeedResponseActionsHistoryParams, 'spaceId' | 'config'> & {
   numResponseActions: number;
   alertIds?: string[];
+  isServerless: boolean;
 }): Promise<IndexedHostsAndAlertsResponse> => {
   return indexHostsAndAlerts(
     esClient,
@@ -137,7 +139,7 @@ const indexResponseActionHost = ({
     true,
     numResponseActions,
     alertIds,
-    false
+    isServerless
   );
 };
 
@@ -158,8 +160,10 @@ const hostIdentity = (
 /**
  * Indexes the same mix the Cypress history spec used: two manual response
  * actions on one host, and one rule-triggered action on another host.
- * Response actions live in a deployment-wide index, so callers should scope
- * the history page to `agentIds`.
+ * `indexEndpointHostDocs` adds `randomN(5)` actions when the requested count
+ * is not 1, so the manual host can have more than two rows. Response actions
+ * live in a deployment-wide index, so callers should scope the history page
+ * to `agentIds`.
  */
 export const seedResponseActionsHistory = async ({
   esClient,
@@ -174,26 +178,46 @@ export const seedResponseActionsHistory = async ({
   let manual: IndexedHostsAndAlertsResponse | undefined;
   let automated: IndexedHostsAndAlertsResponse | undefined;
   let alerts: IndexedEndpointRuleAlerts | undefined;
-  let cleaned = false;
+  let cleanupStarted = false;
 
   const cleanup = async (): Promise<void> => {
-    if (cleaned) {
+    if (cleanupStarted) {
       return;
     }
-    cleaned = true;
+    cleanupStarted = true;
+
+    // A failure deleting one host must not skip the others. These deletes also
+    // remove Fleet agents and policies from the shared deployment.
+    const deletions: Array<Promise<unknown>> = [];
+    if (automated) {
+      deletions.push(deleteIndexedHostsAndAlerts(systemEsClient, kbnClient, automated));
+    }
+    if (manual) {
+      deletions.push(deleteIndexedHostsAndAlerts(systemEsClient, kbnClient, manual));
+    }
+    if (alerts) {
+      deletions.push(alerts.cleanup());
+    }
+
+    const results = await Promise.allSettled(deletions);
+    const failures = results.flatMap((result) =>
+      result.status === 'rejected' ? [result.reason] : []
+    );
 
     try {
-      if (automated) {
-        await deleteIndexedHostsAndAlerts(systemEsClient, kbnClient, automated);
-      }
-      if (manual) {
-        await deleteIndexedHostsAndAlerts(systemEsClient, kbnClient, manual);
-      }
-      if (alerts) {
-        await alerts.cleanup();
-      }
-    } finally {
       await systemEsClient.close();
+    } catch (error) {
+      failures.push(error);
+    }
+
+    const errors = failures.map((failure) =>
+      failure instanceof Error ? failure : new Error(String(failure))
+    );
+    if (errors.length === 1) {
+      throw errors[0];
+    }
+    if (errors.length > 1) {
+      throw new AggregateError(errors, 'Failed to clean up seeded response action history');
     }
   };
 
@@ -216,12 +240,14 @@ export const seedResponseActionsHistory = async ({
       esClient: systemEsClient,
       kbnClient,
       numResponseActions: 2,
+      isServerless: config.serverless,
     });
     automated = await indexResponseActionHost({
       esClient: systemEsClient,
       kbnClient,
       numResponseActions: 1,
       alertIds: [alertId],
+      isServerless: config.serverless,
     });
 
     const manualHost = hostIdentity(manual);

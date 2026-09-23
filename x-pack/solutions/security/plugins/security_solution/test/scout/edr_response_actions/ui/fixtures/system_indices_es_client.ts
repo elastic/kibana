@@ -20,6 +20,15 @@ const systemIndicesSuperuser = {
 /**
  * Returns an ES client that can create restricted indices such as `.fleet-agents`.
  * Scout's `elastic` superuser is denied `indices:admin/auto_create` on those indices.
+ *
+ * - On stateful: provisions the shared `@kbn/es` `system_indices_superuser` account.
+ *   Teardown leaves that account in place; other suites on the deployment use it.
+ * - On locally-managed serverless: the user is preconfigured by `@kbn/es`, so no
+ *   role or user mutations are performed.
+ * - On Cloud serverless (MKI): the file-realm user does not exist and cannot be
+ *   provisioned. Do not call this on Cloud serverless targets.
+ *
+ * Same helper as entity store's `createSystemIndicesEsClient`.
  */
 export const createSystemIndicesEsClient = async (
   esClient: Client,

@@ -28,6 +28,7 @@ const requireSeededHistory = (
 spaceTest.describe(
   'Response actions history page',
   {
+    // Stateful only. The Cypress spec was `@brokenInServerless` for this role.
     tag: tags.stateful.classic,
   },
   () => {
@@ -100,8 +101,10 @@ spaceTest.describe(
           await responseActionsHistory.toggleTypeFilter(TRIGGERED_BY_RULE);
           await responseActionsHistory.ruleLinkForHost(history.automatedHostname).click();
           await expect(page).toHaveURL(new RegExp(`/id/${history.ruleId}`));
-          // Solution navigation uses the project header. Rule details confirms the
-          // link landed on the rules page through its page header.
+          // Solution navigation uses the project header, so this checks that the
+          // rules page mounted. The seeded id is the generator literal
+          // `generated_rule_id`, not a saved rule. The Cypress breadcrumb check
+          // had the same limit.
           await expect(page.testSubj.locator('header-page')).toBeVisible();
         });
       }
