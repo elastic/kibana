@@ -36,8 +36,9 @@
  *   FTR_EXTRA_ARGS               — extra CLI args forwarded to FTR jobs via env
  *   GITHUB_PR_NUMBER             — PR number; activates PR-specific ci-stats source
  *   GITHUB_PR_MERGE_BASE         — PR selective-testing and ci-stats base
- *   BUILDKITE_MERGE_QUEUE_BASE_COMMIT — pinned merge-group base for selective testing
- *   MERGE_QUEUE_MERGE_BASE       — live-main coverage base for ci-stats, not test selection
+ *   BUILDKITE_MERGE_QUEUE_BASE_COMMIT — commit the merge group is built on (for single-PR
+ *                                       squash groups, the parent of HEAD); selective-testing base
+ *   MERGE_QUEUE_MERGE_BASE       — merge base with main, below earlier queued PRs; ci-stats only
  *   GITHUB_PR_LABELS             — comma-separated PR labels; ci:prevent-selective-testing
  *                                  disables selective testing
  */
