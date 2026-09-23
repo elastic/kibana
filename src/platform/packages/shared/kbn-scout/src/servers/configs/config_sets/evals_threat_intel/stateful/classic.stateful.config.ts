@@ -11,17 +11,12 @@ import { servers as evalsTracingConfig } from '../../evals_tracing/stateful/clas
 import type { ScoutServerConfig } from '../../../../../types';
 
 /**
- * Custom Scout stateful server configuration for Threat Intel enrichment evals.
+ * Scout config for Threat Intel enrichment evals.
  *
- * Extends the tracing config (EIS connectors + eval tracing) and:
- *   - Enables `xpack.alertzero.enabled` so the `/internal/threat_intel/*`
- *     enrichment routes are registered (supply gates on AlertZero).
- *   - Disables `searchInferenceEndpoints` so `resolveScopedModel` takes its
- *     `genAiSettings:defaultAIConnector` fallback path. The suite points that
- *     setting at the per-project connector, which is how each model in the
- *     EIS/LiteLLM matrix actually gets exercised. With the registry present the
- *     route would deliberately refuse the global-default fallback and return a
- *     no_connector error.
+ * Extends the tracing config and enables AlertZero (plus its required soft-off
+ * deps) so `/internal/threat_intel/*` registers. Disables
+ * `searchInferenceEndpoints` so `resolveScopedModel` uses the
+ * `genAiSettings:defaultAIConnector` fallback the suite points at each model.
  *
  * Usage:
  *   node scripts/scout start-server --arch stateful --domain classic --serverConfigSet evals_threat_intel
@@ -33,6 +28,8 @@ export const servers: ScoutServerConfig = {
     serverArgs: [
       ...evalsTracingConfig.kbnTestServer.serverArgs,
       '--xpack.alertzero.enabled=true',
+      '--xpack.agenticInvestigations.enabled=true',
+      '--xpack.proposals.enabled=true',
       '--xpack.searchInferenceEndpoints.enabled=false',
     ],
   },
