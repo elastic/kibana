@@ -123,7 +123,6 @@ steps:
               filters would go. Start with FROM {{ consts.source_index }}.
             - esql_example: the same query with real example values substituted in place of the
               placeholders, including a small LIMIT so it is cheap to run.
-            - params: list of the template's parameters, each with name/type/example.
             - returns: short description of what the query returns.
 
         ES|QL correctness rules for esql_template and esql_example — both are executed by the
@@ -135,8 +134,8 @@ steps:
           which fail at runtime on a boolean. For a rate, divide that count by the total with
           `EVAL rate = TO_DOUBLE(count_true) / total`.
         - Only use AVG()/SUM() on genuinely numeric fields.
-        - Give each ?param a correct type (keyword, long, double, date, boolean) with a matching
-          example value. Date literals are strict ISO-8601, e.g. "2024-01-01T00:00:00.000Z".
+        - In esql_example, give each ?param a value of the field's type (keyword, long, double,
+          date, boolean). Date literals are strict ISO-8601, e.g. "2024-01-01T00:00:00.000Z".
         - Keep esql_example runnable and cheap: end it with a small `| LIMIT n`.
       schema:
         type: object
@@ -182,28 +181,12 @@ steps:
                   type: string
                 esql_example:
                   type: string
-                params:
-                  type: array
-                  items:
-                    type: object
-                    properties:
-                      name:
-                        type: string
-                      type:
-                        type: string
-                      example:
-                        type: string
-                    required:
-                      - name
-                      - type
-                      - example
                 returns:
                   type: string
               required:
                 - question_type
                 - esql_template
                 - esql_example
-                - params
                 - returns
         required:
           - display_name
@@ -230,6 +213,13 @@ steps:
           Key fields:
           {%- for kf in steps.generate_index_profile.output.content.key_fields %}
           - {{ kf.field }}: {{ kf.meaning }}
+          {%- endfor %}
+
+          Joins:
+          {%- for join in steps.generate_index_profile.output.content.joins %}
+          - {{ join }}
+          {%- else %}
+          - none; this index stands alone.
           {%- endfor %}
 
           Does not contain:

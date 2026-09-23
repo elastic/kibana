@@ -194,7 +194,7 @@ Choosing the strategy is this skill's job, and a strategy is three answers, stat
 2. **What one KI carries** for that unit — the orientation and the access patterns, plus the
    grounded figures that separate it from its siblings.
 3. **How units are found and refreshed** — the discovery query, the corpus filter, and whether a
-   unit is re-profiled every run, only when its source changed, or never.
+   unit is re-profiled on every run, or never for immutable facts.
 
 The `strategy_catalog` reference attached to this skill has the six named strategies (Index/Table
 Metadata, Bottom-Up, Selective / Outlier, Atomic Facts, Cumulative / Wiki-style, Detection /
@@ -289,7 +289,7 @@ proposals for the same index read the same way:
 - **Carries** — what one KI carries: the orientation and the access patterns, and the grounded
   figures that separate it from its siblings.
 - **Found and refreshed** — the discovery query, the corpus filter, and whether a unit is
-  re-profiled every run, only when its source changed, or never.
+  re-profiled on every run, or never for immutable facts.
 - **Evidence** — required. The sampling and probe lines from the section above, one per line, and
   for an existing index the counted findings with their denominators and windows. Every claim the
   proposal makes about the data points at a line here; a proposal with an empty Evidence section

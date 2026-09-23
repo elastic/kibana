@@ -64,15 +64,8 @@ written by the template that owns the strategy:
 | `attributes.unit` | The value of `unit_key` this KI is about. | `unit-profile-template` |
 | `attributes.doc_count` | How many source rows the unit profile aggregated. | `unit-profile-template` |
 | `attributes.distinct_breakdown` | How many distinct values of the breakdown field the unit has. | `unit-profile-template` |
-| `attributes.source_updated_at` | The unit's latest freshness value at write time, which the freshness check compares on the next run. | `unit-profile-template` |
 | `attributes.prevalence` | For a targeted KI, the count, denominator and window of the finding behind it, as one string. | `targeted-ki-writer` |
 | `attributes.topics` | The themes a document KI covers, for facet filtering. | `document-template` |
-
-Lifecycle — expiry is the top-level `expires_at` above; the one lifecycle attribute is:
-
-| Field | Purpose |
-|---|---|
-| `attributes.excluded` | Soft exclude: the KI exists but agents skip it. |
 
 No KI carries a self-reported quality number. Whether a KI is correct and complete is judged at
 the pilot inspection step in `ai-index-automations`, by reading what the pilot wrote against the
@@ -97,11 +90,10 @@ Every entry carries `relation: derived_from`. Values that are not identifiers st
 
 | Field | Purpose |
 |---|---|
-| `attributes.source_query` | The ES\|QL that selected the grounding rows. String or array of strings. |
 | `attributes.error_text` | For a `constraint` or `disambiguation` KI written from a `query_error`, the error message as observed. |
 
 A targeted KI carries at least one `trace://` or `conversation://` reference, or an
-`attributes.source_query` or `attributes.error_text`. A systemic KI references its source index:
+`attributes.error_text`. A systemic KI references its source index:
 every generated template writes `index://`, the unit profile adds its catalog index when that is
 a separate one, and the document template adds `doc://` because its unit is a document.
 

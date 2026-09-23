@@ -128,7 +128,6 @@ steps:
             - question_type: a short label for the kind of question.
             - esql_template: a parameterized ES|QL query using named `?param` placeholders.
             - esql_example: the same query with real values substituted and a small LIMIT.
-            - params: the named parameters used, each with name/type/example.
             - returns: a short description of what the query returns.
 
             At least one pattern retrieves this exact document; the others reach the documents
@@ -175,21 +174,9 @@ steps:
                       type: string
                     esql_example:
                       type: string
-                    params:
-                      type: array
-                      items:
-                        type: object
-                        properties:
-                          name:
-                            type: string
-                          type:
-                            type: string
-                          example:
-                            type: string
-                        required: ["name", "type", "example"]
                     returns:
                       type: string
-                  required: ["question_type", "esql_template", "esql_example", "params", "returns"]
+                  required: ["question_type", "esql_template", "esql_example", "returns"]
             required:
               ["display_name", "summary", "topics", "answers_questions", "when_to_use", "access_patterns"]
 

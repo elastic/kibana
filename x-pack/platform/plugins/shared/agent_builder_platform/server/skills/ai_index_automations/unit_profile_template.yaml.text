@@ -6,11 +6,10 @@ version: "1"
 #
 # The `consts` are the three strategy choices from `analyze-and-improve`, written down:
 #   - the unit: `unit_index` and `unit_key` say what one KI is about;
-#   - what one KI carries: `breakdown_field`, the `catalog_index` record, and the metrics in
-#     `unit_totals`;
+#   - what one KI carries: `breakdown_field`, the `activity_field` range, the `catalog_index`
+#     record, and the metrics in `unit_totals`;
 #   - how units are found and refreshed: the discovery query pages through `unit_index` in
-#     `batch_size` batches on a keyword cursor, and `freshness_field` decides whether a unit is
-#     re-profiled or skipped on a re-run.
+#     `batch_size` batches on a keyword cursor, and every unit it finds is profiled on every run.
 #
 # To adapt it:
 #   1. Set every value in `consts`. Field names that contain spaces or capitals go in backticks
@@ -25,37 +24,30 @@ version: "1"
 #      limit on `page_units` to 1.
 #
 # `unit_totals` returns one row and `unit_metrics` reads it by column position, so the order of
-# the STATS columns and the order of the lines in `unit_metrics` have to stay in step. The same
-# holds for `discover_units` and `unit_context`.
+# the STATS columns and the order of the lines in `unit_metrics` have to stay in step.
 #
-# Re-runs replace each unit's KI, because `ki_id` is derived from the unit, and skip a unit whose
-# `freshness_field` has not moved since the stored KI was written. To accumulate instead —
+# A re-run regenerates every unit and replaces its KI, because `ki_id` is derived from the unit.
+# Narrow `discovery_filter` to re-profile only some units. To accumulate instead —
 # enriching a profile over successive runs rather than overwriting it — read the stored indicator
 # first and write with `context-engine.updateKi`, which fails when the indicator does not yet
 # exist and so needs the create above it to have run.
 name: Unit profile KI automation
 description: >
   Generates one Knowledge Indicator per distinct unit found in a source index, paged on a keyword
-  cursor, each grounded in per-unit ES|QL aggregations and an optional catalog record, skipping
-  units whose source has not changed, written into a Context Engine AI index.
+  cursor, each grounded in per-unit ES|QL aggregations and an optional catalog record, written
+  into a Context Engine AI index.
 enabled: true
 
 consts:
   # The Context Engine AI index the indicators are written into.
   ai_index_id: my-ai-index
-  # The backing index of that AI index, read to find a unit's existing KI for the freshness check.
-  # It is the `dest.value` of the AI index: `ai-index-idx-<ai_index_id>` for an index destination,
-  # where the lookup's `_id` is the KI id.
-  # On a data stream `_id` is per revision: match `id` instead and keep the newest revision
-  # (`INLINE STATS latest = MAX(@timestamp) BY id | WHERE @timestamp == latest`).
-  destination_index: ai-index-idx-my-ai-index
   # The index the units are discovered in and their activity is aggregated from.
   unit_index: my-source-index
   # The keyword field holding the unit identity — one KI is produced per distinct value.
   unit_key: my_unit_field
-  # A date field in `unit_index` whose maximum per unit marks when the unit last changed. A unit
-  # whose stored KI carries the same value is skipped on a re-run.
-  freshness_field: my_date_field
+  # A date field in `unit_index`. Its minimum and maximum per unit bound the unit's activity, which
+  # the prompt, the description and the content report.
+  activity_field: my_date_field
   # A second field whose per-unit distribution characterises the unit.
   breakdown_field: my_breakdown_field
   # An index holding one record per unit (a catalog row, a case header). Set both to the values
@@ -68,8 +60,6 @@ consts:
   # Units per discovery page. Each profiled unit costs a model call. The page cap is the
   # `max-iterations` on `page_units` below; together they bound the units one run can profile.
   batch_size: 50
-  # Internal: an empty list for Liquid `default` filters. Leave it.
-  empty_array: []
 
 tags:
   - unit-profile
@@ -98,8 +88,8 @@ steps:
       limit: 200
       on-limit: continue
     steps:
-      # One page of units above the cursor. The KEEP order is the positional contract read below:
-      # the unit key is first so the cursor can advance from the last row with `last | first`.
+      # One page of units above the cursor, one row per unit with the key as its only column, so
+      # the cursor advances from the last row with `last | first`. `unit_totals` does the counting.
       - name: discover_units
         type: elasticsearch.esql.query
         with:
@@ -107,10 +97,10 @@ steps:
             FROM {{ consts.unit_index }}
             | WHERE {{ consts.unit_key }} IS NOT NULL AND {{ consts.unit_key }} > "{{ variables.cursor | replace: '\\', '\\\\' | replace: '"', '\\"' }}"
             {{ consts.discovery_filter }}
-            | STATS doc_count = COUNT(*), last_seen = MAX({{ consts.freshness_field }}) BY {{ consts.unit_key }}
+            | STATS BY {{ consts.unit_key }}
             | SORT {{ consts.unit_key }} ASC
             | LIMIT {{ consts.batch_size }}
-            | KEEP {{ consts.unit_key }}, doc_count, last_seen
+            | KEEP {{ consts.unit_key }}
 
       - name: loop_units
         type: foreach
@@ -119,7 +109,7 @@ steps:
         iteration-on-failure:
           continue: true
         steps:
-          # Positions follow the KEEP in `discover_units`.
+          # `foreach.item[0]` is the unit key, the one column `discover_units` keeps.
           - name: unit_context
             type: data.set
             with:
@@ -128,8 +118,6 @@ steps:
               # reads backslash escapes inside a quoted argument, so '\\' is one backslash.
               unit_escaped: >-
                 {{ foreach.item[0] | replace: '\\', '\\\\' | replace: '"', '\\"' }}
-              unit_doc_count: "{{ foreach.item[1] }}"
-              unit_last_seen: "{{ foreach.item[2] }}"
               ki_id: "unit-{{ foreach.item[0] | slugify }}"
               # What the profile is derived from: the unit index, and the catalog index when it
               # is a separate one. Written as JSON so the catalog entry can be conditional;
@@ -140,42 +128,6 @@ steps:
                 , {"uri": "index://{{ consts.catalog_index }}", "relation": "derived_from"}
                 {%- endif -%}]
 
-          # The stored KI, if any. Fails on the first run when the backing index does not exist
-          # yet, and `on-failure.continue` turns that into an empty result.
-          - name: read_existing_ki
-            type: elasticsearch.esql.query
-            on-failure:
-              continue: true
-            with:
-              query: |
-                FROM {{ consts.destination_index }} METADATA _id
-                | WHERE _id == "{{ steps.unit_context.output.ki_id }}"
-                | EVAL source_updated_at = FIELD_EXTRACT(attributes, "source_updated_at")
-                | KEEP _id, source_updated_at
-                | LIMIT 1
-
-          # Current when a KI exists and its `source_updated_at` equals the unit's latest
-          # `freshness_field`. Both are strings here, which is why the write below stores the
-          # value exactly as ES|QL returned it.
-          - name: freshness
-            type: data.set
-            with:
-              cache_is_current: >-
-                {%- assign rows = steps.read_existing_ki.output.values | default: consts.empty_array -%}
-                {%- assign count = rows | size -%}
-                {%- if count > 0 and rows[0][1] == steps.unit_context.output.unit_last_seen -%}
-                true
-                {%- else -%}
-                false
-                {%- endif -%}
-
-          - name: skip_unchanged_unit
-            type: if
-            condition: 'steps.freshness.output.cache_is_current : "true"'
-            steps:
-              - name: continue_past_unchanged_unit
-                type: loop.continue
-
           # Grounding 1: totals over every row referencing the unit.
           - name: unit_totals
             type: elasticsearch.esql.query
@@ -185,8 +137,8 @@ steps:
                 | WHERE {{ consts.unit_key }} == "{{ steps.unit_context.output.unit_escaped }}"
                 | STATS doc_count = COUNT(*),
                         distinct_breakdown = COUNT_DISTINCT({{ consts.breakdown_field }}),
-                        first_seen = MIN({{ consts.freshness_field }}),
-                        last_seen = MAX({{ consts.freshness_field }})
+                        first_seen = MIN({{ consts.activity_field }}),
+                        last_seen = MAX({{ consts.activity_field }})
 
           - name: unit_metrics
             type: data.set
@@ -271,7 +223,6 @@ steps:
                   template.
                 - esql_example: the same query with "{{ steps.unit_context.output.unit }}"
                   substituted in and a small LIMIT so it is cheap to run.
-                - params: the named parameters used, each with name/type/example.
                 - returns: a short description of what the query returns.
 
                 ES|QL correctness rules — esql_template and esql_example are both executed by the
@@ -290,8 +241,6 @@ steps:
               schema:
                 type: object
                 properties:
-                  display_name:
-                    type: string
                   summary:
                     type: string
                     description: "What distinguishes this unit from its siblings, in numbers"
@@ -314,22 +263,10 @@ steps:
                           type: string
                         esql_example:
                           type: string
-                        params:
-                          type: array
-                          items:
-                            type: object
-                            properties:
-                              name:
-                                type: string
-                              type:
-                                type: string
-                              example:
-                                type: string
-                            required: ["name", "type", "example"]
                         returns:
                           type: string
-                      required: ["question_type", "esql_template", "esql_example", "params", "returns"]
-                required: ["display_name", "summary", "notable_values", "when_to_use", "access_patterns"]
+                      required: ["question_type", "esql_template", "esql_example", "returns"]
+                required: ["summary", "notable_values", "when_to_use", "access_patterns"]
 
           # Built once so verify_ki and create_ki see exactly the same document.
           - name: assemble_ki
@@ -388,8 +325,6 @@ steps:
                   distinct_breakdown: "${{ steps.unit_metrics.output.distinct_breakdown }}"
                   unit_key: "{{ consts.unit_key }}"
                   unit: "{{ steps.unit_context.output.unit }}"
-                  # Read back by `read_existing_ki` on the next run; equal means skip.
-                  source_updated_at: "{{ steps.unit_context.output.unit_last_seen }}"
 
           - name: verify_ki
             type: context-engine.verifyKi
@@ -405,8 +340,7 @@ steps:
             steps:
               # `ki_id` is derived from the unit, so a re-run replaces that unit's profile rather
               # than writing a second KI. On a data-stream destination the same id appends a newer
-              # revision instead, and the freshness lookup above must then match `id` and take the
-              # newest revision (see `destination_index`).
+              # revision instead.
               - name: create_ki
                 type: context-engine.createKi
                 with:

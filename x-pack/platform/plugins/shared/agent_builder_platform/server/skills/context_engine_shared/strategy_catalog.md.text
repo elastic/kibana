@@ -15,8 +15,8 @@ Every strategy answers:
    when to use) and access patterns (the parameterized queries that reach the live data), plus
    whatever grounded figures separate this unit from its siblings.
 3. **How units are found and refreshed** — the discovery query that lists the units, the corpus
-   filter that bounds it, and whether a unit is re-profiled every run, only when its source changed,
-   or never (immutable facts).
+   filter that bounds it, and whether a unit is re-profiled on every run, or never for immutable
+   facts.
 
 State a strategy as those three answers. When findings fit one of the examples below, name it and
 the three answers are already known. When they do not — a support case with a root-cause structure
@@ -32,7 +32,7 @@ are these same three choices, so an analysis stated this way is already the temp
 | **Bottom-Up** | One document | `document` | Summary, the questions the document answers, a query that reaches it by id | Every run over the filtered slice; new documents added | Dense, bounded corpora: knowledge bases, case records, articles, product docs. |
 | **Selective / Outlier** | One significant document in a stream | `event` | What happened, why it is notable, how to find the neighbours | Every run; only documents the significance verdict accepts | Log and event streams where most records are noise but outliers matter. |
 | **Atomic Facts** | One claim inside a document | `fact` | The claim, its source span, the query to the document | Immutable; no `expires_at` | Information-dense documents (contracts, papers) where one KI per document loses precision. |
-| **Cumulative / Wiki-style** | One recurring entity | `entity` | A profile grounded in aggregations over every document referencing it, from one or several indices, with the numbers that separate it from siblings | Per unit, skipped when the source has not changed | Entities recurring across many documents: customers, products, hosts, cases. |
+| **Cumulative / Wiki-style** | One recurring entity | `entity` | A profile grounded in aggregations over every document referencing it, from one or several indices, with the numbers that separate it from siblings | Every run, replacing each unit | Entities recurring across many documents: customers, products, hosts, cases. |
 | **Detection / Feature** | One named condition / one inventory entry | `detection`, `feature` | A complete runnable query with a severity, thresholds quoting the observed baseline / a subtype and a stable slug | Every run | Observability data needing runnable detection conditions and structured inventory. |
 
 Quick guide: logs and metrics → Index Metadata plus Selective/Outlier plus Detection/Feature;

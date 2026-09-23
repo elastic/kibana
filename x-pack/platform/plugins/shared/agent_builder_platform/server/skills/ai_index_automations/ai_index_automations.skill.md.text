@@ -50,8 +50,9 @@ Whatever the strategy, a generated workflow has to:
   `connector-id` to `.google-gemini-3.5-flash-chat_completion`. That is the default model for
   every prompt step in every automation this skill produces: the templates carry it, and a
   workflow you assemble outside the templates carries it too, on each `ai.prompt` and `ai.agent`
-  step. Use a different connector only when the user names one; they can change it after the
-  save, in the workflow editor, without your involvement.
+  step. Use a different connector only when the user names one, and look its id up with
+  `platform.workflows.get_connectors`; they can change it after the save, in the workflow editor,
+  without your involvement.
 - **Retry every `ai.prompt`**: `on-failure.retry` with three attempts, exponential delay and
   jitter. Rate limits, transient connector errors and a structured output that failed to parse
   once are the ordinary failures of a model call, and without the retry each one costs the unit
@@ -203,6 +204,19 @@ indicator per document, where the alternative is losing every indicator after th
     continue: true
 ```
 
+```yaml
+on-failure:
+  retry:
+    max-attempts: 3
+    delay: '5s'
+  fallback:
+    - name: handle_error
+      type: console
+      with:
+        message: 'Step failed'
+  continue: true
+```
+
 **A `while` pages through a corpus the row cap would truncate.** Its `condition` is KQL, checked
 after each pass (the first pass always runs), and `max-iterations` caps the passes. State crosses
 passes through `data.set`: every key a `data.set` writes is readable as `variables.<key>` for the
@@ -221,23 +235,6 @@ count the condition reads.
   steps: [] # ...
 ```
 
-**`loop.continue` skips the rest of an iteration**, inside a `foreach` or `while` body. It is how
-the unit template skips a unit whose source has not changed: an `if` on the freshness check, with
-`loop.continue` as its only step. `loop.break` ends the loop outright.
-
-```yaml
-on-failure:
-  retry:
-    max-attempts: 3
-    delay: '5s'
-  fallback:
-    - name: handle_error
-      type: console
-      with:
-        message: 'Step failed'
-  continue: true
-```
-
 **Liquid references and the filters the templates rely on.** `{{ steps.<name>.output.<field> }}`
 reads a step's output — only `output` is reachable, never a step's inputs. `{{ consts.<name> }}`,
 `{{ inputs.<name> }}`, `{{ variables.<name> }}`, `{{ foreach.item }}` and `{{ event }}` reach the
@@ -249,13 +246,11 @@ rest. `{%- for x in ... -%}` loops build the `content` block, and `{%- assign x 
 | `json` | Serialise a value — how a whole step output reaches a prompt, and how a list reaches `foreach` |
 | `json_parse` | Turn a JSON string back into a value; how the unit template's `references`, built as a string with a conditional entry, reach the KI as a list |
 | `map: 'field'` | Pull one field out of a list of objects; how `attributes.esql` collects the runnable examples |
-| `join: ', '` | Flatten a list into a string |
 | `size` | Length, for a `data.set` a condition can read |
 | `default: 'value'` | Fall back when a field is missing |
 | `last`, `first` | The last row of a result and the first column of it; how a cursor advances from a page |
 | `replace: '\\', '\\\\' \| replace: '"', '\\"'` | Escape a value being interpolated into an ES\|QL string literal: backslashes first, then quotes |
 | `slugify` | Normalise a value used in a `ki_id` |
-| `times`, `round` | Format a number for a description |
 
 **Field names with spaces or capitals are backquoted inside the const**, not in the query: a const
 `unit_key: "`Product Key`"` is pasted into every `WHERE`, `STATS ... BY` and `KEEP` as written, so
@@ -292,7 +287,7 @@ grounding is the rest.
 **Index/Table Metadata** (`type: index_metadata`) — template **`index-metadata-template`**. Fetch
 the mapping, sample documents, aggregate the distributions the profile will make claims about, then
 an `ai.prompt` producing purpose, what the index does not contain, key fields, joins, when-to-use,
-and access patterns (each with a question type, an ES|QL template, a runnable example, params and
+and access patterns (each with a question type, an ES|QL template, a runnable example and what it
 returns). Sinks with `ki_id` set to the index name. Adapting it is the `consts` block plus one
 aggregation per field the profile should be grounded on. For several indices, wrap the whole thing
 in a `foreach` over the index names.
@@ -305,17 +300,16 @@ inside its `content` instead of one per record.
 
 **Cumulative / Wiki-style** (`type: entity`) — template **`unit-profile-template`**. A `while`
 pages through the units in `batch_size` batches on a keyword cursor, so a corpus above the row cap
-is walked rather than truncated; inside it a `foreach` handles one page. Per unit: read the stored
-indicator's `source_updated_at` and `loop.continue` past the unit when its `freshness_field` has
-not moved, then aggregations over every document referencing it, its record from a second
-`catalog_index`, an `ai.prompt` synthesising a profile, and a sink keyed on the unit. The
-`consts` are the three strategy answers: `unit_index` and `unit_key` are the unit, the metrics and
-`catalog_index` are what one KI carries, `discovery_filter`, `batch_size` and `freshness_field`
-are how units are found and refreshed. The per-unit metrics are the part to extend, because
-sibling indicators are near-identical to a retriever unless their descriptions carry numbers that
-separate them; add a grounding query per further index the profile should draw on. To accumulate
-across runs rather than replace, read the stored indicator and merge through
-`context-engine.updateKi`.
+is walked rather than truncated; inside it a `foreach` handles one page. Per unit: aggregations
+over every document referencing it, its record from a second `catalog_index`, an `ai.prompt`
+synthesising a profile, and a sink keyed on the unit. A re-run regenerates every unit and replaces
+its indicator; narrow `discovery_filter` to re-profile only some. The `consts` are the three
+strategy answers: `unit_index` and `unit_key` are the unit, the metrics, the `activity_field` range
+and `catalog_index` are what one KI carries, `discovery_filter` and `batch_size` are how units are
+found and refreshed. The per-unit metrics are the part to extend, because sibling indicators are
+near-identical to a retriever unless their descriptions carry numbers that separate them; add a
+grounding query per further index the profile should draw on. To accumulate across runs rather than
+replace, read the stored indicator and merge through `context-engine.updateKi`.
 
 **Targeted KIs** (`type: constraint`, `workaround`, `disambiguation`, `task_recipe`) — template
 **`targeted-ki-writer`**. No model call: the KIs are written verbatim from a `kis` list in `consts`,
@@ -496,7 +490,7 @@ you nothing and buys a chain of follow-up calls. Pass `stepType` with an exact i
 
 The types these automations use are a closed set: `elasticsearch.esql.query`,
 `elasticsearch.search`, `elasticsearch.request`, `ai.prompt`, `foreach`, `while`, `if`,
-`loop.continue`, `data.set` and `console`, alongside the `context-engine` steps written out above,
+`data.set` and `console`, alongside the `context-engine` steps written out above,
 which no lookup can return at all. Every one of them appears in the templates already wired up
 correctly, so a lookup is worth a call only for a step type you are adding that no template uses.
 

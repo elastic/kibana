@@ -13,6 +13,7 @@ import {
   KI_SHAPES_REFERENCE_NAME,
   STRATEGY_CATALOG_REFERENCE_NAME,
   kiShapesReference,
+  strategyCatalogReference,
 } from '../context_engine_shared';
 import { analyzeAndImproveSkill } from './analyze_and_improve_skill';
 
@@ -181,6 +182,17 @@ describe('analyzeAndImproveSkill', () => {
       expect(content).toMatch(/\*\*How units are found and refreshed\*\*/);
       expect(content).toMatch(/as worked examples of those three answers/);
       expect(content).toMatch(/unsure means Index\/Table Metadata/);
+    });
+
+    it('offers only the refresh cadences the templates implement', () => {
+      // The templates regenerate every unit on a re-run, so an incremental refresh is not a choice.
+      for (const text of [content, strategyCatalogReference.content]) {
+        expect(text).toMatch(/re-profiled on every run, or never for\s+immutable\s+facts/);
+        expect(text).not.toMatch(/only when its source changed|source has not changed/);
+      }
+      expect(strategyCatalogReference.content).toMatch(
+        /\| \*\*Cumulative \/ Wiki-style\*\* \|[^\n]*\| Every run, replacing each unit \|/
+      );
     });
 
     it('makes prevalence a requirement on every finding', () => {
@@ -384,6 +396,10 @@ describe('analyzeAndImproveSkill', () => {
       }
       expect(shapes).toMatch(/\| `attributes\.unit_key` \|[^|]*\| `unit-profile-template` \|/);
       expect(shapes).toMatch(/\| `attributes\.prevalence` \|[^|]*\| `targeted-ki-writer` \|/);
+    });
+
+    it('lists no unit attribute that only a freshness check read', () => {
+      expect(shapes).not.toMatch(/source_fingerprint|source_updated_at|freshness/);
     });
 
     it('casts an attribute a template actually writes in its ES|QL example', () => {
