@@ -512,6 +512,7 @@ steps:
                       properties:
                         actionId:
                           type: string
+                          minLength: 1
                           maxLength: 256
                           description: >
                             workflowId from `security.alertzero.actions.list`. Must match a catalog

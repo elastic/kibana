@@ -889,6 +889,13 @@ describe('Endpoint analysis run', () => {
         'confidence',
       ]);
       expect(recommendation?.required).toEqual(['actionId', 'actionInput', 'confidence']);
+      // A blank id is schema-valid without this, and the proposal workflow treats a
+      // blank actionWorkflowId as a no-action card an analyst can approve.
+      expect(recommendation?.properties?.actionId).toMatchObject({
+        type: 'string',
+        minLength: 1,
+        maxLength: 256,
+      });
     });
 
     // Confidence is per recommendation, not per run: one reconstruction can be certain
