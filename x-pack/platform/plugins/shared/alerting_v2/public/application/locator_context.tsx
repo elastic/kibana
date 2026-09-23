@@ -33,7 +33,9 @@ export interface AlertingV2Locators {
   ruleLibraryLocators: LocatorPublic<WithOptionalHost<AlertingV2RuleLibraryLocatorParams>>;
   episodesLocators: LocatorPublic<WithOptionalHost<AlertingV2EpisodesLocatorParams>>;
   actionPolicyLocators: LocatorPublic<WithOptionalHost<AlertingV2ActionPoliciesLocatorParams>>;
-  executionHistoryLocators: LocatorPublic<WithOptionalHost<AlertingV2ExecutionHistoryLocatorParams>>;
+  executionHistoryLocators: LocatorPublic<
+    WithOptionalHost<AlertingV2ExecutionHistoryLocatorParams>
+  >;
 }
 
 const LocatorContext = createContext<AlertingV2Locators | null>(null);

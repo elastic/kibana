@@ -133,5 +133,4 @@ describe('bindLocatorsToHost', () => {
       undefined
     );
   });
-
 });

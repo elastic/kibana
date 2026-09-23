@@ -13,10 +13,7 @@ import {
   CENTRALIZED_ACTION_POLICIES_BANNER_DISMISSED_STORAGE_KEY,
 } from './centralized_action_policies_banner';
 import { createMockLocators, MockLocatorProvider } from '../../test_utils/test_providers';
-import {
-  AlertingV2ActionPoliciesLocatorDefinition,
-  createAlertingV2HostApp,
-} from '../../locators';
+import { AlertingV2ActionPoliciesLocatorDefinition, createAlertingV2HostApp } from '../../locators';
 
 const TEST_HOST = createAlertingV2HostApp('test-app', {
   rules: '/alerting/rules',
