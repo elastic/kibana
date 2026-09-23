@@ -28,7 +28,7 @@ export const chatPayloadSchema = conversePayloadSchema.extends({
       defaultValue: ChatTriggerMode.Always,
       meta: {
         description:
-          'Use never to append a user message to an existing conversation without executing the agent. Only conversation_id, input and attachments are read; the execution options are ignored.',
+          'Use never to append a user message without executing the agent. The message is added to the conversation named by conversation_id, or to a conversation created for it when conversation_id is omitted. Only conversation_id, input and attachments are read; the execution options are ignored.',
       },
     }
   ),
@@ -56,7 +56,7 @@ export function registerChatApiRoutes({
       access: 'public',
       summary: 'Send chat message',
       description:
-        'Send a message to an agent and receive the full conversation, including its event timeline. This synchronous endpoint waits for the agent to finish before returning. With trigger_mode: never, appends a user message without execution and returns the updated conversation; the execution options are ignored.',
+        'Send a message to an agent and receive the full conversation, including its event timeline. This synchronous endpoint waits for the agent to finish before returning. With trigger_mode: never, appends a user message without execution and returns the conversation it was added to, creating one when conversation_id is omitted; the execution options are ignored.',
       options: {
         timeout: {
           idleSocket: AGENT_SOCKET_TIMEOUT_MS,
@@ -108,7 +108,7 @@ export function registerChatApiRoutes({
       access: 'public',
       summary: 'Send chat message (streaming)',
       description:
-        'Send a message to an agent and stream the response as server-sent events as the agent works.',
+        'Send a message to an agent and stream the response as server-sent events as the agent works. With trigger_mode: never, the message is appended without execution and the stream carries the conversation events alone.',
       options: {
         timeout: {
           idleSocket: AGENT_SOCKET_TIMEOUT_MS,

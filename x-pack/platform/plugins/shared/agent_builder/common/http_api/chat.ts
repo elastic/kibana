@@ -55,15 +55,6 @@ export interface AbortExecutionResponse {
   terminal_persisted: boolean;
 }
 
-/**
- * Body payload for a user message request (`trigger_mode: 'never'`), which persists a message
- * on an existing conversation without executing the agent.
- */
-export interface UserMessagePayload extends Pick<ChatRequestBodyPayload, 'input' | 'attachments'> {
-  trigger_mode: ChatTriggerMode.Never;
-  conversation_id: string;
-}
-
 export type ChatResponse = Omit<
   ConversationRound,
   'id' | 'input' | 'pending_prompts' | 'response' | 'state'
