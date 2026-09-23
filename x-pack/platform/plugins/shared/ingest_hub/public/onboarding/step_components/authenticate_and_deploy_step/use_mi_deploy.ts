@@ -80,6 +80,10 @@ export function useMiDeploy({
 
       let groupsToDeploy: DeployGroup[];
       let cleanupOps: PolicyCleanupOps = { toDelete: [], toUpdate: [] };
+      // Instance IDs whose cleanup succeeded this run. Used to drop stale entries from the
+      // persisted policyIdsByInstance — filtering by deleted policyId alone misses toUpdate cases
+      // where the policy survives with fewer inputs but the removed instance should not reappear.
+      const cleanedInstanceIds = new Set<string>();
 
       if (isInitialDeploy) {
         // Restrict each group to members not already tracked — an already-deployed instance
@@ -164,6 +168,7 @@ export function useMiDeploy({
           const cleanedLiveStale = Object.keys(liveStalePolicyIds).filter((id) =>
             succeededIds.has(liveStalePolicyIds[id])
           );
+          for (const id of cleanedLiveStale) cleanedInstanceIds.add(id);
           // Prune stale instances before clearing the staging area (removeDeployInstances
           // must come first so its write isn't overwritten).
           removeDeployInstances(cleanedLiveStale);
@@ -190,7 +195,7 @@ export function useMiDeploy({
           ) {
             const deletedIds = new Set(cleanupOps.toDelete);
             const survivingEntries = Object.entries(policyIdsByInstance).filter(
-              ([, pid]) => !deletedIds.has(pid)
+              ([iid, pid]) => !cleanedInstanceIds.has(iid) && !deletedIds.has(pid)
             );
             await updateDeployment(onboardingDeploymentId, {
               services: selectedServiceIds,
@@ -243,9 +248,11 @@ export function useMiDeploy({
             ...cleanupOps.toDelete,
             ...cleanupOps.toUpdate.map((u) => u.policyId),
           ]);
-          removeDeployInstances(
-            Object.keys(retryLiveStale).filter((id) => retrySucceeded.has(retryLiveStale[id]))
+          const retryCleanedLiveStale = Object.keys(retryLiveStale).filter((id) =>
+            retrySucceeded.has(retryLiveStale[id])
           );
+          for (const id of retryCleanedLiveStale) cleanedInstanceIds.add(id);
+          removeDeployInstances(retryCleanedLiveStale);
           updateDetectAndReviewStep({
             pendingCleanupPolicyIds: Object.fromEntries(
               Object.entries(pendingCleanupPolicyIds ?? {}).filter(
@@ -323,7 +330,7 @@ export function useMiDeploy({
           Object.entries({
             ...policyIdsByInstance,
             ...newPolicyIdsByInstance,
-          }).filter(([, pid]) => !deletedPolicyIds.has(pid))
+          }).filter(([iid, pid]) => !cleanedInstanceIds.has(iid) && !deletedPolicyIds.has(pid))
         );
         await updateDeployment(currentOnboardingDeploymentId, {
           services: selectedServiceIds,
