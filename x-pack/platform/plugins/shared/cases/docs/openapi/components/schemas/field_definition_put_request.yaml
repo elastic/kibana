@@ -1,6 +1,6 @@
 title: Field definition PUT request
 description: >
-  The body for updating a reusable field definition.
+  The body for updating a field definition.
 
 
   Identity constraints: the `name` property must match the `name` key in the YAML `definition`.
@@ -55,5 +55,5 @@ properties:
     type: boolean
     description: >
       When true, this field is rendered in every case for this owner, regardless of the template
-      used. Global fields cannot be demoted (set to false) while they are linked to an active v1
+      used. Global fields cannot be demoted (set to false) while they are linked to an active
       custom field in the Cases configuration.

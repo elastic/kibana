@@ -1,8 +1,8 @@
 get:
-  summary: Get all reusable field definitions
+  summary: Get all field definitions
   operationId: getCaseFieldDefinitionsDefaultSpace
   description: >
-    Returns a paginated list of reusable field definitions (field library entries) for the given
+    Returns a paginated list of field definitions (field library entries) for the given
     owner. Requires the Cases feature to be enabled in the space.
   x-state: Technical preview
   tags:
@@ -31,26 +31,13 @@ get:
       required: false
       schema:
         type: boolean
-    - in: query
-      name: page
-      description: The page number to return. Defaults to 1.
-      required: false
-      schema:
-        type: integer
-        minimum: 1
-        default: 1
-    - in: query
-      name: perPage
-      description: The number of results per page. Defaults to 20, maximum 100.
-      required: false
-      schema:
-        type: integer
-        minimum: 1
-        maximum: 100
-        default: 20
+    - $ref: '../components/parameters/page_index.yaml'
+    - $ref: '../components/parameters/page_size.yaml'
     - in: query
       name: sortField
-      description: The field to sort by.
+      description: >
+        The field to sort by. When omitted, results are sorted by `fieldDefinitionId` ascending
+        and `sortOrder` is ignored.
       required: false
       schema:
         type: string
@@ -107,10 +94,10 @@ get:
             response403:
               $ref: '../components/examples/response_403.yaml'
 post:
-  summary: Create a reusable field definition
+  summary: Create a field definition
   operationId: createCaseFieldDefinitionDefaultSpace
   description: >
-    Creates a reusable field definition in the field library. You must have the "Manage templates"
+    Creates a field definition in the field library. You must have the "Manage templates"
     sub-privilege for the Cases feature of the owning solution. Requires the Cases feature to be
     enabled in the space. Use `dry_run=true` to validate the request without writing anything.
   x-state: Technical preview

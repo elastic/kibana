@@ -1,6 +1,6 @@
 title: Field definition write request
 description: >
-  The body for creating or updating a reusable field definition.
+  The body for creating or updating a field definition.
 
 
   Resource limits (enforced on write; a violation returns `400`): an owner may have at most 200
@@ -52,5 +52,5 @@ properties:
     type: boolean
     description: >
       When true, this field is rendered in every case for this owner, regardless of the template
-      used. Global fields cannot be demoted (set to false) while they are linked to an active v1
+      used. Global fields cannot be demoted (set to false) while they are linked to an active
       custom field in the Cases configuration.

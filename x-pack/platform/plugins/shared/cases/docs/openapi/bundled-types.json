@@ -1751,9 +1751,9 @@
     },
     "/api/cases/field_definitions": {
       "get": {
-        "summary": "Get all reusable field definitions",
+        "summary": "Get all field definitions",
         "operationId": "getCaseFieldDefinitionsDefaultSpace",
-        "description": "Returns a paginated list of reusable field definitions (field library entries) for the given owner. Requires the Cases feature to be enabled in the space.\n",
+        "description": "Returns a paginated list of field definitions (field library entries) for the given owner. Requires the Cases feature to be enabled in the space.\n",
         "x-state": "Technical preview",
         "tags": [
           "cases"
@@ -1791,32 +1791,15 @@
             }
           },
           {
-            "in": "query",
-            "name": "page",
-            "description": "The page number to return. Defaults to 1.",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "default": 1
-            }
+            "$ref": "#/components/parameters/page_index"
           },
           {
-            "in": "query",
-            "name": "perPage",
-            "description": "The number of results per page. Defaults to 20, maximum 100.",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 100,
-              "default": 20
-            }
+            "$ref": "#/components/parameters/page_size"
           },
           {
             "in": "query",
             "name": "sortField",
-            "description": "The field to sort by.",
+            "description": "The field to sort by. When omitted, results are sorted by `fieldDefinitionId` ascending and `sortOrder` is ignored.\n",
             "required": false,
             "schema": {
               "type": "string",
@@ -1906,9 +1889,9 @@
         }
       },
       "post": {
-        "summary": "Create a reusable field definition",
+        "summary": "Create a field definition",
         "operationId": "createCaseFieldDefinitionDefaultSpace",
-        "description": "Creates a reusable field definition in the field library. You must have the \"Manage templates\" sub-privilege for the Cases feature of the owning solution. Requires the Cases feature to be enabled in the space. Use `dry_run=true` to validate the request without writing anything.\n",
+        "description": "Creates a field definition in the field library. You must have the \"Manage templates\" sub-privilege for the Cases feature of the owning solution. Requires the Cases feature to be enabled in the space. Use `dry_run=true` to validate the request without writing anything.\n",
         "x-state": "Technical preview",
         "tags": [
           "cases"
@@ -2036,9 +2019,9 @@
     },
     "/api/cases/field_definitions/{field_definition_id}": {
       "get": {
-        "summary": "Get a reusable field definition by ID",
+        "summary": "Get a field definition by ID",
         "operationId": "getCaseFieldDefinitionDefaultSpace",
-        "description": "Returns a single reusable field definition by its ID. Requires the Cases feature to be enabled in the space.\n",
+        "description": "Returns a single field definition by its ID. Requires the Cases feature to be enabled in the space.\n",
         "x-state": "Technical preview",
         "tags": [
           "cases"
@@ -2112,9 +2095,9 @@
         }
       },
       "put": {
-        "summary": "Update editable attributes of a reusable field definition",
+        "summary": "Update a field definition",
         "operationId": "updateCaseFieldDefinitionDefaultSpace",
-        "description": "Updates editable attributes of a reusable field definition. Server-managed attributes (`displayOrder`, `legacyKey`) are preserved. You must have the \"Manage templates\" sub-privilege for the Cases feature of the owning solution. A field's `name` and YAML `type` are immutable after creation — an attempt to change either returns `409` with `attributes.code = \"field_identity_immutable\"` and `attributes.changed` listing which identity attributes were modified. Setting `isGlobal` to `false` when the field is linked to an active v1 custom field in the Cases configuration returns `409`; otherwise demotion is allowed. Requires the Cases feature to be enabled in the space. Use `dry_run=true` to validate the request without writing anything.\n",
+        "description": "Updates editable attributes of a field definition. Server-managed attributes (`displayOrder`, `legacyKey`) are preserved. You must have the \"Manage templates\" sub-privilege for the Cases feature of the owning solution. A field's `name` and YAML `type` are immutable after creation — an attempt to change either returns `409` with `attributes.code = \"field_identity_immutable\"` and `attributes.changed` listing which identity attributes were modified. Setting `isGlobal` to `false` when the field is linked to an active custom field in the Cases configuration returns `409`; otherwise demotion is allowed. Requires the Cases feature to be enabled in the space. Use `dry_run=true` to validate the request without writing anything.\n",
         "x-state": "Technical preview",
         "tags": [
           "cases"
@@ -2304,9 +2287,9 @@
         }
       },
       "delete": {
-        "summary": "Delete a reusable field definition",
+        "summary": "Delete a field definition",
         "operationId": "deleteCaseFieldDefinitionDefaultSpace",
-        "description": "Deletes a reusable field definition. You must have the \"Manage templates\" sub-privilege for the Cases feature of the owning solution. A field definition cannot be deleted while it is referenced by an active template or linked to an active v1 custom field in the Cases configuration. Requires the Cases feature to be enabled in the space.\n",
+        "description": "Deletes a field definition. You must have the \"Manage templates\" sub-privilege for the Cases feature of the owning solution. A field definition cannot be deleted while it is referenced by an active template or linked to an active custom field in the Cases configuration. Requires the Cases feature to be enabled in the space.\n",
         "x-state": "Technical preview",
         "tags": [
           "cases"
@@ -5910,7 +5893,7 @@
       },
       "field_definition_response": {
         "title": "Field definition response",
-        "description": "A reusable field definition from the field library. The `legacyKey` attribute, which is a server-managed link to a migrated v1 custom field, is not included in the public API response.\n",
+        "description": "A field definition from the field library. The `legacyKey` attribute, which is a server-managed link to a migrated custom field, is not included in the public API response.\n",
         "type": "object",
         "required": [
           "fieldDefinitionId",
@@ -5989,7 +5972,7 @@
       },
       "field_definition_write_request": {
         "title": "Field definition write request",
-        "description": "The body for creating or updating a reusable field definition.\n\nResource limits (enforced on write; a violation returns `400`): an owner may have at most 200 field definitions per space. The `definition` string may not exceed 30000 characters.\n\nIdentity constraints: the `name` property must match the `name` key in the YAML `definition`. When `name` is omitted, the server extracts it from the `definition` YAML automatically. Once created, a field's `name` and YAML `type` are immutable — they determine the key under which case values are stored. An attempt to change either returns `409` with `attributes.code = \"field_identity_immutable\"` and `attributes.changed` listing which identity attributes were modified.\n",
+        "description": "The body for creating or updating a field definition.\n\nResource limits (enforced on write; a violation returns `400`): an owner may have at most 200 field definitions per space. The `definition` string may not exceed 30000 characters.\n\nIdentity constraints: the `name` property must match the `name` key in the YAML `definition`. When `name` is omitted, the server extracts it from the `definition` YAML automatically. Once created, a field's `name` and YAML `type` are immutable — they determine the key under which case values are stored. An attempt to change either returns `409` with `attributes.code = \"field_identity_immutable\"` and `attributes.changed` listing which identity attributes were modified.\n",
         "type": "object",
         "additionalProperties": false,
         "required": [
@@ -6022,13 +6005,13 @@
           },
           "isGlobal": {
             "type": "boolean",
-            "description": "When true, this field is rendered in every case for this owner, regardless of the template used. Global fields cannot be demoted (set to false) while they are linked to an active v1 custom field in the Cases configuration.\n"
+            "description": "When true, this field is rendered in every case for this owner, regardless of the template used. Global fields cannot be demoted (set to false) while they are linked to an active custom field in the Cases configuration.\n"
           }
         }
       },
       "field_definition_put_request": {
         "title": "Field definition PUT request",
-        "description": "The body for updating a reusable field definition.\n\nIdentity constraints: the `name` property must match the `name` key in the YAML `definition`. When `name` is omitted, the server extracts it from the `definition` YAML automatically. A field's `name` and YAML `type` are immutable — an attempt to change either returns `409` with `attributes.code = \"field_identity_immutable\"` and `attributes.changed` listing which identity attributes were modified.\n\nUnlike the POST endpoint, PUT allows an unchanged `definition` to be submitted even if it exceeds 30 000 characters, so that field definitions created through internal tooling remain modifiable. When the submitted `definition` differs from the stored value, the 30 000-character limit is enforced. A hard upper bound of 1 000 000 characters always applies regardless of whether the definition is changed.\n",
+        "description": "The body for updating a field definition.\n\nIdentity constraints: the `name` property must match the `name` key in the YAML `definition`. When `name` is omitted, the server extracts it from the `definition` YAML automatically. A field's `name` and YAML `type` are immutable — an attempt to change either returns `409` with `attributes.code = \"field_identity_immutable\"` and `attributes.changed` listing which identity attributes were modified.\n\nUnlike the POST endpoint, PUT allows an unchanged `definition` to be submitted even if it exceeds 30 000 characters, so that field definitions created through internal tooling remain modifiable. When the submitted `definition` differs from the stored value, the 30 000-character limit is enforced. A hard upper bound of 1 000 000 characters always applies regardless of whether the definition is changed.\n",
         "type": "object",
         "additionalProperties": false,
         "required": [
@@ -6061,7 +6044,7 @@
           },
           "isGlobal": {
             "type": "boolean",
-            "description": "When true, this field is rendered in every case for this owner, regardless of the template used. Global fields cannot be demoted (set to false) while they are linked to an active v1 custom field in the Cases configuration.\n"
+            "description": "When true, this field is rendered in every case for this owner, regardless of the template used. Global fields cannot be demoted (set to false) while they are linked to an active custom field in the Cases configuration.\n"
           }
         }
       },

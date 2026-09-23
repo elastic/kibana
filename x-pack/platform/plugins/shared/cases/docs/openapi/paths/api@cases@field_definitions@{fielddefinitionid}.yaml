@@ -1,8 +1,8 @@
 get:
-  summary: Get a reusable field definition by ID
+  summary: Get a field definition by ID
   operationId: getCaseFieldDefinitionDefaultSpace
   description: >
-    Returns a single reusable field definition by its ID. Requires the Cases feature to be enabled
+    Returns a single field definition by its ID. Requires the Cases feature to be enabled
     in the space.
   x-state: Technical preview
   tags:
@@ -47,16 +47,16 @@ get:
             response404:
               $ref: '../components/examples/response_404.yaml'
 put:
-  summary: Update editable attributes of a reusable field definition
+  summary: Update a field definition
   operationId: updateCaseFieldDefinitionDefaultSpace
   description: >
-    Updates editable attributes of a reusable field definition. Server-managed attributes
+    Updates editable attributes of a field definition. Server-managed attributes
     (`displayOrder`, `legacyKey`) are preserved. You must have the "Manage templates" sub-privilege
     for the Cases feature of the owning solution. A field's `name` and YAML `type` are immutable
     after creation — an attempt to change either returns `409` with
     `attributes.code = "field_identity_immutable"` and `attributes.changed` listing which identity
     attributes were modified. Setting `isGlobal` to `false` when the field is linked to an active
-    v1 custom field in the Cases configuration returns `409`; otherwise demotion is allowed.
+    custom field in the Cases configuration returns `409`; otherwise demotion is allowed.
     Requires the Cases feature to be enabled in the space. Use `dry_run=true` to validate the
     request without writing anything.
   x-state: Technical preview
@@ -180,12 +180,12 @@ put:
             response409:
               $ref: '../components/examples/response_409.yaml'
 delete:
-  summary: Delete a reusable field definition
+  summary: Delete a field definition
   operationId: deleteCaseFieldDefinitionDefaultSpace
   description: >
-    Deletes a reusable field definition. You must have the "Manage templates" sub-privilege for the
+    Deletes a field definition. You must have the "Manage templates" sub-privilege for the
     Cases feature of the owning solution. A field definition cannot be deleted while it is referenced
-    by an active template or linked to an active v1 custom field in the Cases configuration.
+    by an active template or linked to an active custom field in the Cases configuration.
     Requires the Cases feature to be enabled in the space.
   x-state: Technical preview
   tags:
