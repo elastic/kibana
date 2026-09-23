@@ -20,10 +20,7 @@ interface Props {
   onSuccess: () => void;
 }
 
-export const CreateActionPolicyFormFlyout = ({
-  onClose,
-  onSuccess,
-}: Props) => {
+export const CreateActionPolicyFormFlyout = ({ onClose, onSuccess }: Props) => {
   const { toasts } = useService(CoreStart('notifications'));
   const { mutateAsync: createPolicy, isLoading: isCreatingPolicy } = useCreateActionPolicy();
   const { createInlineWorkflows, rollbackWorkflows } = useCreateInlineWorkflows();
