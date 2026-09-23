@@ -438,6 +438,7 @@ const generateLlmSummary = async ({
   const structuredModel = chatModel.withStructuredOutput(llmCompactionSchema, {
     name: 'compact_conversation',
   });
+  const { model_context: _modelContext, ...nextInputWithoutModelContext } = conversation.nextInput;
 
   const toolLines = programmatic.tool_calls_summary
     .map((tc) => `- ${tc.tool_id}(${tc.params_summary})`)
@@ -454,7 +455,13 @@ const generateLlmSummary = async ({
     prior?: CompactionSummary
   ): Promise<BaseMessage[]> => {
     const history = await prepareMessages({
-      conversation: { ...conversation, timeline: chunk.flatMap((round) => round.events) },
+      conversation: {
+        ...conversation,
+        timeline: chunk.flatMap((round) => round.events),
+        // Before-agent context is ephemeral for the active model call. It must not be folded into
+        // the persisted compaction summary and replayed on later rounds.
+        nextInput: nextInputWithoutModelContext,
+      },
       compactionSummary: prior,
       resultTransformer,
     });

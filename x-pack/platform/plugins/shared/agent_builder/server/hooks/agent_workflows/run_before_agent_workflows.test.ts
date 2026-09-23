@@ -231,6 +231,30 @@ describe('runBeforeAgentWorkflows', () => {
     });
   });
 
+  it('ignores a malformed non-string model_context', async () => {
+    const context = createContext();
+    const { workflowApi, getInternalServices } = createDeps();
+    executeWorkflowMock.mockResolvedValue({
+      success: true,
+      execution: {
+        execution_id: 'exec-malformed-context',
+        status: ExecutionStatus.COMPLETED,
+        workflow_id: 'wf-1',
+        started_at: '2026-01-01T00:00:00.000Z',
+        output: { model_context: 123 },
+      },
+    });
+
+    await expect(
+      runBeforeAgentWorkflows({
+        context,
+        workflowApi,
+        getInternalServices,
+        logger,
+      })
+    ).resolves.toBeUndefined();
+  });
+
   it('throws workflowAborted when output requests abort', async () => {
     const context = createContext();
     const { workflowApi, getInternalServices } = createDeps();

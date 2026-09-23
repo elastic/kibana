@@ -129,7 +129,8 @@ export async function runBeforeAgentWorkflows({
       currentNextInput = { ...currentNextInput, message: output.new_prompt };
     }
 
-    const modelContext = output.model_context?.trim();
+    const modelContext =
+      typeof output.model_context === 'string' ? output.model_context.trim() : undefined;
     if (modelContext) {
       currentNextInput = {
         ...currentNextInput,

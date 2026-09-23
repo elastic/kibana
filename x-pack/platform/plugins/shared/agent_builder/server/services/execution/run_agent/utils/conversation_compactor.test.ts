@@ -328,6 +328,8 @@ describe('compactConversation', () => {
       createMockRound('r5', 200),
     ];
     const conversation = createMockConversation(rounds);
+    conversation.nextInput.model_context =
+      '<system_update>ephemeral workflow context</system_update>';
 
     const budget: ContextBudget = {
       totalBudget: 500,
@@ -346,6 +348,10 @@ describe('compactConversation', () => {
 
     expect(result.compactionTriggered).toBe(true);
     expect(chatModel.withStructuredOutput).toHaveBeenCalled();
+    const structuredModel = chatModel.withStructuredOutput.mock.results[0].value;
+    expect(JSON.stringify(structuredModel.invoke.mock.calls[0][0])).not.toContain(
+      'ephemeral workflow context'
+    );
   });
 
   it('should merge programmatic and LLM fields in the summary', async () => {
