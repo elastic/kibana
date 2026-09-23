@@ -24,6 +24,7 @@ interface EditDatafeedTabProps {
   datafeedQuery: string;
   datafeedQueryDelay: string;
   datafeedFrequency: string;
+  datafeedOriginalFrequency: string;
   datafeedScrollSize: number;
   datafeedMaxConsecutiveExtractionFailures: number | '';
   datafeedProjectRouting: string | undefined;
@@ -36,6 +37,7 @@ export const EditDatafeedTab: FC<EditDatafeedTabProps> = ({
   datafeedQuery,
   datafeedQueryDelay,
   datafeedFrequency,
+  datafeedOriginalFrequency,
   datafeedScrollSize,
   datafeedMaxConsecutiveExtractionFailures,
   datafeedProjectRouting,
@@ -58,13 +60,17 @@ export const EditDatafeedTab: FC<EditDatafeedTabProps> = ({
   }, [jobBucketSpan]);
 
   const maxConsecutiveExtractionFailuresDefault = useMemo(() => {
-    const frequencySeconds = parseInterval(datafeedFrequency || defaults.frequency)?.asSeconds();
+    // Mirror the frequency ES will actually use: the edited value if set, otherwise the
+    // datafeed's original frequency (which is preserved on save when the field is cleared),
+    // falling back to the computed default only when no frequency is configured at all.
+    const effectiveFrequency = datafeedFrequency || datafeedOriginalFrequency || defaults.frequency;
+    const frequencySeconds = parseInterval(effectiveFrequency)?.asSeconds();
     if (!frequencySeconds) {
       return 1;
     }
     const secondsInDay = 24 * 60 * 60;
     return Math.max(1, Math.floor(secondsInDay / frequencySeconds));
-  }, [datafeedFrequency, defaults.frequency]);
+  }, [datafeedFrequency, datafeedOriginalFrequency, defaults.frequency]);
 
   const onQueryChange = (query: string) => {
     setDatafeed({ datafeedQuery: query });

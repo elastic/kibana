@@ -480,6 +480,7 @@ export class EditJobFlyoutUI extends Component {
               datafeedQuery={datafeedQuery}
               datafeedQueryDelay={datafeedQueryDelay}
               datafeedFrequency={datafeedFrequency}
+              datafeedOriginalFrequency={this._initialJobFormState?.datafeedFrequency ?? ''}
               datafeedScrollSize={datafeedScrollSize}
               datafeedMaxConsecutiveExtractionFailures={datafeedMaxConsecutiveExtractionFailures}
               jobBucketSpan={jobBucketSpan}
