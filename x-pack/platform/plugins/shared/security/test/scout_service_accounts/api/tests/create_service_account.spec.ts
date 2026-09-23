@@ -44,6 +44,13 @@ const CREDENTIAL_ACCOUNT_FIELD = `${CREDENTIAL_TYPE}.serviceAccountId`;
  */
 const ES_MAX_ROLES = 1000;
 
+/**
+ * The longest role name Elasticsearch accepts on a user-managed service account, and so the
+ * longest Kibana sends to it: `ES_SERVICE_ACCOUNT_ROLE_NAME_MAX_LENGTH`. Elasticsearch has a
+ * larger general limit that this API does not use, so only a real cluster shows which one applies.
+ */
+const ES_MAX_ROLE_NAME_LENGTH = 507;
+
 /** Unique per run, so a failed cleanup cannot make the next run collide. */
 const uniqueName = (prefix: string) => `${prefix}-${Date.now()}-${Math.floor(Math.random() * 1e6)}`;
 
@@ -244,6 +251,56 @@ apiTest.describe('Create Elasticsearch service accounts', { tag: LOCAL_ONLY }, (
         headers: { ...cookieHeader, ...REQUEST_HEADERS },
         responseType: 'json',
         body: { name, roles: distinctRoles(ES_MAX_ROLES + 1) },
+      });
+
+      expect(response.statusCode).toBe(400);
+      expect(response.body.message).toContain('roles');
+
+      const account = await esClient.transport.request<Record<string, unknown>>({
+        method: 'GET',
+        path: `/_security/service/${NAMESPACE}/${name}`,
+      });
+      expect(account).toStrictEqual({});
+    }
+  );
+
+  apiTest(
+    `creates an account with a ${ES_MAX_ROLE_NAME_LENGTH}-character role name, the longest Elasticsearch allows`,
+    async ({ apiClient, esClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
+      const name = uniqueName('max-role-name');
+      created.push(name);
+      const roles = ['a'.repeat(ES_MAX_ROLE_NAME_LENGTH)];
+
+      const response = await apiClient.post(CREATE_ENDPOINT, {
+        headers: { ...cookieHeader, ...REQUEST_HEADERS },
+        responseType: 'json',
+        body: { name, roles },
+      });
+
+      expect(response.statusCode).toBe(200);
+
+      const account = await esClient.transport.request<Record<string, { roles: string[] }>>({
+        method: 'GET',
+        path: `/_security/service/${NAMESPACE}/${name}`,
+      });
+      expect(account[`${NAMESPACE}/${name}`].roles).toStrictEqual(roles);
+    }
+  );
+
+  apiTest(
+    `refuses a role name longer than ${ES_MAX_ROLE_NAME_LENGTH} characters without writing anything`,
+    async ({ apiClient, esClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
+      // Registered up front even though the request is expected to fail: if the limit ever
+      // regresses, the account it creates has to be cleaned up like any other.
+      const name = uniqueName('long-role-name');
+      created.push(name);
+
+      const response = await apiClient.post(CREATE_ENDPOINT, {
+        headers: { ...cookieHeader, ...REQUEST_HEADERS },
+        responseType: 'json',
+        body: { name, roles: ['a'.repeat(ES_MAX_ROLE_NAME_LENGTH + 1)] },
       });
 
       expect(response.statusCode).toBe(400);

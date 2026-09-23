@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { createServiceAccountBodySchema, SERVICE_ACCOUNT_CREATE_MAX_BODY_BYTES } from './schemas';
+import {
+  getCreateServiceAccountBodySchema,
+  getCreateServiceAccountMaxBodyBytes,
+  getServiceAccountRoleLimits,
+} from './schemas';
 import type { RouteDefinitionParams } from '..';
 import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
@@ -17,7 +21,12 @@ const unavailable = (reason: string) => ({
 export function defineCreateServiceAccountRoute({
   router,
   getServiceAccountsService,
+  buildFlavor,
 }: RouteDefinitionParams) {
+  // The route has authorization disabled, so the body is parsed before the backend's privilege
+  // check runs. Holding it to the active backend's limits keeps that parse as small as it can be.
+  const roleLimits = getServiceAccountRoleLimits(buildFlavor);
+
   router.post(
     {
       path: '/internal/security/service_account',
@@ -29,10 +38,10 @@ export function defineCreateServiceAccountRoute({
             "forwarded access token, or Elasticsearch via the caller's `manage_security` cluster privilege",
         },
       },
-      validate: { body: createServiceAccountBodySchema },
+      validate: { body: getCreateServiceAccountBodySchema(roleLimits) },
       options: {
         access: 'internal',
-        body: { maxBytes: SERVICE_ACCOUNT_CREATE_MAX_BODY_BYTES },
+        body: { maxBytes: getCreateServiceAccountMaxBodyBytes(roleLimits) },
       },
     },
     createLicensedRouteHandler(async (context, request, response) => {

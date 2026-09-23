@@ -74,5 +74,9 @@ describe('service account schemas', () => {
       expect(schema.safeParse(['a', 'b']).success).toBe(true);
       expect(schema.safeParse(['a', 'b', 'c']).success).toBe(false);
     });
+
+    it('drops duplicates before counting, keeping first occurrences in order', () => {
+      expect(schema.parse(['b', 'a', 'b', 'a'])).toEqual(['b', 'a']);
+    });
   });
 });

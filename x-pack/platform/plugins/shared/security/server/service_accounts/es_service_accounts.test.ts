@@ -20,10 +20,7 @@ import {
   ES_SERVICE_ACCOUNT_ROLE_NAME_MAX_LENGTH,
 } from './es_role_limits';
 import { EsServiceAccounts } from './es_service_accounts';
-import {
-  UIAM_SERVICE_ACCOUNT_MAX_ROLES,
-  UIAM_SERVICE_ACCOUNT_ROLE_NAME_MAX_LENGTH,
-} from './uiam_role_limits';
+import { UIAM_SERVICE_ACCOUNT_MAX_ROLES } from './uiam_role_limits';
 import { licenseMock } from '../../common/licensing/index.mock';
 import { ES_SERVICE_ACCOUNT_TOKEN_MAX_LENGTH } from '../../common/service_accounts';
 import { securityTelemetry } from '../otel/instrumentation';
@@ -238,10 +235,9 @@ describe('EsServiceAccounts', () => {
       expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
     });
 
-    it(`accepts a longer role name than UIAM allows, up to ${ES_SERVICE_ACCOUNT_ROLE_NAME_MAX_LENGTH} characters`, async () => {
+    it(`accepts a role name of ${ES_SERVICE_ACCOUNT_ROLE_NAME_MAX_LENGTH} characters, the most Elasticsearch allows`, async () => {
       mockHappyPath();
       const roles = ['a'.repeat(ES_SERVICE_ACCOUNT_ROLE_NAME_MAX_LENGTH)];
-      expect(roles[0].length).toBeGreaterThan(UIAM_SERVICE_ACCOUNT_ROLE_NAME_MAX_LENGTH);
 
       await expect(
         serviceAccounts.create(request, { ...createParams, roles })

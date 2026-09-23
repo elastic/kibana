@@ -15,10 +15,11 @@ import type { ServiceAccountRoleLimits } from '../../common/service_accounts';
 export const ES_SERVICE_ACCOUNT_MAX_ROLES = 1000;
 
 /**
- * The longest role name Elasticsearch accepts. Like {@link ES_SERVICE_ACCOUNT_MAX_ROLES}, it bounds
- * both what Kibana sends and what it reads back.
+ * The longest role name Elasticsearch accepts on a user-managed service account, the
+ * `NativeRealmValidationUtil.MAX_NAME_LENGTH` its create request and store validate against. Like
+ * {@link ES_SERVICE_ACCOUNT_MAX_ROLES}, it bounds both what Kibana sends and what it reads back.
  */
-export const ES_SERVICE_ACCOUNT_ROLE_NAME_MAX_LENGTH = 1024;
+export const ES_SERVICE_ACCOUNT_ROLE_NAME_MAX_LENGTH = 507;
 
 export const ES_SERVICE_ACCOUNT_ROLE_LIMITS: ServiceAccountRoleLimits = {
   maxRoles: ES_SERVICE_ACCOUNT_MAX_ROLES,

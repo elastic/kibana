@@ -33,18 +33,25 @@ export const serviceAccountNameSchema = z
  * The role list an account is created with, held to one backend's `limits`. What Kibana reads
  * back from a backend is bounded by that backend's own limits too, but validated separately,
  * since accounts can be written there without Kibana.
+ *
+ * Duplicate roles are dropped first, keeping first occurrences in order, so that the limit counts
+ * distinct roles on every entry point. Elasticsearch would drop duplicates silently and UIAM has
+ * not said what it does, so neither is relied on.
  */
 export const getServiceAccountRolesSchema = ({
   maxRoles,
   maxRoleNameLength,
 }: ServiceAccountRoleLimits) =>
-  z.array(z.string().min(1).max(maxRoleNameLength)).min(1).max(maxRoles);
+  z.preprocess(
+    // Only touches what is already an array: anything else is left for the schema to describe.
+    (roles) => (Array.isArray(roles) ? Array.from(new Set(roles)) : roles),
+    z.array(z.string().min(1).max(maxRoleNameLength)).min(1).max(maxRoles)
+  );
 
 /**
  * Parameters for creating a service account, with roles held to `limits`. Validated in two
- * places: the route body, against the larger of the backends' limits, and again inside each backend
- * against that backend's own limits, since callers of the server contract never pass through the
- * route.
+ * places: the route body, and again inside the backend, since callers of the server contract never
+ * pass through the route. Both use the backend's own limits.
  *
  * `roles` is required and non-empty. There is no "derive them from the creator" default: see
  * `CreateServiceAccountParams` in `@kbn/core-security-common`.

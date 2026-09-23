@@ -5,39 +5,49 @@
  * 2.0.
  */
 
+import type { BuildFlavor } from '@kbn/config/src/types';
+
 import type { ServiceAccountRoleLimits } from '../../../common/service_accounts';
-import { getCreateServiceAccountParamsSchema } from '../../../common/service_accounts';
+import {
+  getCreateServiceAccountParamsSchema,
+  SERVICE_ACCOUNT_NAME_MAX_LENGTH,
+} from '../../../common/service_accounts';
 import {
   ES_SERVICE_ACCOUNT_ROLE_LIMITS,
   UIAM_SERVICE_ACCOUNT_ROLE_LIMITS,
 } from '../../service_accounts';
 
-const BACKEND_ROLE_LIMITS = [UIAM_SERVICE_ACCOUNT_ROLE_LIMITS, ES_SERVICE_ACCOUNT_ROLE_LIMITS];
+/**
+ * The role limits of the backend this build creates service accounts with. The build flavor fixes
+ * the backend: serverless builds use UIAM and every other build uses Elasticsearch, the same
+ * choice `ServiceAccountsService#start` makes.
+ */
+export const getServiceAccountRoleLimits = (buildFlavor: BuildFlavor): ServiceAccountRoleLimits =>
+  buildFlavor === 'serverless' ? UIAM_SERVICE_ACCOUNT_ROLE_LIMITS : ES_SERVICE_ACCOUNT_ROLE_LIMITS;
+
+/** Two quotes and a comma around each role. */
+const ROLE_FRAMING_BYTES = 3;
+/** The keys, braces and quotes around the name and the role list. */
+const BODY_FRAMING_BYTES = 64;
 
 /**
- * The role limits a create request is held to. The route is registered before Kibana knows which
- * backend will handle requests, so it takes the larger of the backends' limits and never refuses
- * what a backend would accept. The backend that handles the request then enforces its own.
+ * The largest create body a request within `limits` can produce, used as the route's body cap so
+ * that such a request gets a 400 naming the field rather than a 413 with no field-level message.
+ *
+ * Each role name character is counted as two bytes. Elasticsearch accepts only printable ASCII in
+ * role names, and the widest of those in JSON are `"` and `\`, which escape to two bytes. The name
+ * is limited to ASCII letters, digits, hyphens and underscores, so one byte each.
  */
-export const SERVICE_ACCOUNT_ROLE_LIMITS: ServiceAccountRoleLimits = {
-  maxRoles: Math.max(...BACKEND_ROLE_LIMITS.map(({ maxRoles }) => maxRoles)),
-  maxRoleNameLength: Math.max(
-    ...BACKEND_ROLE_LIMITS.map(({ maxRoleNameLength }) => maxRoleNameLength)
-  ),
-};
+export const getCreateServiceAccountMaxBodyBytes = ({
+  maxRoles,
+  maxRoleNameLength,
+}: ServiceAccountRoleLimits): number =>
+  maxRoles * (2 * maxRoleNameLength + ROLE_FRAMING_BYTES) +
+  SERVICE_ACCOUNT_NAME_MAX_LENGTH +
+  BODY_FRAMING_BYTES;
 
-/**
- * Cap on the size of a create request body, which holds a name bounded by
- * `SERVICE_ACCOUNT_NAME_MAX_LENGTH` plus a role list bounded by
- * {@link SERVICE_ACCOUNT_ROLE_LIMITS}. Those add up to about 1 MB, so a request within the
- * field-level bounds meets this limit, whose 413 carries no field-level message, only if its role
- * names need heavy JSON escaping.
- */
-export const SERVICE_ACCOUNT_CREATE_MAX_BODY_BYTES = 2 * 1024 * 1024;
-
-export const createServiceAccountBodySchema = getCreateServiceAccountParamsSchema(
-  SERVICE_ACCOUNT_ROLE_LIMITS
-)
-  // Rejects unknown keys, so callers cannot supply `assumable_by` or `role_assignments` — Kibana
-  // derives both itself.
-  .strict();
+export const getCreateServiceAccountBodySchema = (limits: ServiceAccountRoleLimits) =>
+  getCreateServiceAccountParamsSchema(limits)
+    // Rejects unknown keys, so callers cannot supply `assumable_by` or `role_assignments`. Kibana
+    // derives both itself.
+    .strict();
