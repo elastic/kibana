@@ -1147,25 +1147,50 @@ describe('Response actions history', () => {
 
         const outputCommand = RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[command];
         const outputs = await expandRows();
+        const expectedResult =
+          command === 'kill-process'
+            ? [
+                expect.stringMatching(
+                  new RegExp(
+                    `Host-agent-a: ${outputCommand} failed` +
+                      'Execution completed .*' +
+                      `Host-agent-b: ${outputCommand} failed` +
+                      'Execution completed .*'
+                  )
+                ),
+                expect.stringMatching(
+                  new RegExp(
+                    `Host-agent-a: ${outputCommand} failed` +
+                      'Execution completed .*' +
+                      `Host-agent-b: ${outputCommand} failed` +
+                      'Execution completed .*'
+                  )
+                ),
+              ]
+            : [
+                expect.stringMatching(
+                  new RegExp(
+                    `Host-agent-a: ${outputCommand} failed` +
+                      'Execution completed .*' +
+                      'The following errors were encountered:An unknown error occurred' +
+                      `Host-agent-b: ${outputCommand} failed` +
+                      'Execution completed .*' +
+                      'The following errors were encountered:An unknown error occurred'
+                  )
+                ),
+                expect.stringMatching(
+                  new RegExp(
+                    `Host-agent-a: ${outputCommand} failed` +
+                      'Execution completed .*' +
+                      'The following errors were encountered:An unknown error occurred' +
+                      `Host-agent-b: ${outputCommand} failed` +
+                      'Execution completed .*' +
+                      'The following errors were encountered:An unknown error occurred'
+                  )
+                ),
+              ];
 
-        expect(outputs.map((n) => n.textContent)).toEqual([
-          expect.stringMatching(
-            new RegExp(
-              `Host-agent-a: ${outputCommand} failed` +
-                'Execution completed .*' +
-                `Host-agent-b: ${outputCommand} failed` +
-                'Execution completed .*'
-            )
-          ),
-          expect.stringMatching(
-            new RegExp(
-              `Host-agent-a: ${outputCommand} failed` +
-                'Execution completed .*' +
-                `Host-agent-b: ${outputCommand} failed` +
-                'Execution completed .*'
-            )
-          ),
-        ]);
+        expect(outputs.map((n) => n.textContent)).toEqual(expectedResult);
         expect(
           renderResult.getAllByTestId(`${testPrefix}-column-status`).map((n) => n.textContent)
         ).toEqual(['Failed', 'Failed']);

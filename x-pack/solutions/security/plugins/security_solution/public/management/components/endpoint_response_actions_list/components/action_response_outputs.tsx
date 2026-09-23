@@ -86,7 +86,10 @@ export const ActionResponseOutputs = memo<ActionResponseOutputsProps>(
             // With `kill-process` we still want to show the returned content even
             // during a failure. This accommodates for when the parent PID was not able
             // to be killed, but descendants (at least some) were killed.
-            if ((isCompleted && wasSuccessful) || isKillProcessAction(action)) {
+            if (
+              (isCompleted && wasSuccessful) ||
+              (isKillProcessAction(action) && action.agentType === 'endpoint')
+            ) {
               if (isGetFileAction(action)) {
                 hostOutput = (
                   <ResponseActionFileDownloadLink
