@@ -64,6 +64,8 @@ describe('CloudConnectorService', () => {
     mockAppContextService.getExperimentalFeatures = jest.fn().mockReturnValue({
       useSpaceAwareness: false,
     });
+    const withLock = jest.fn((_lockId: string, callback: () => Promise<unknown>) => callback());
+    mockAppContextService.getLockManagerService = jest.fn().mockReturnValue({ withLock });
 
     mockSoClient = createSavedObjectClientMock();
     mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
@@ -1386,6 +1388,56 @@ describe('CloudConnectorService', () => {
             connectorId,
             newRoleArn: newArn,
           })
+        );
+        expect(mockAppContextService.getLockManagerService).toHaveBeenCalled();
+        const { withLock } = (mockAppContextService.getLockManagerService as jest.Mock).mock
+          .results[0].value;
+        expect(withLock).toHaveBeenCalledWith(
+          `fleet-cloud-connector-role-arn-${connectorId}`,
+          expect.any(Function)
+        );
+      });
+
+      it('does not fan out when the connector already stores this Role ARN once the lock is held', async () => {
+        mockSoClient.get
+          .mockResolvedValueOnce({
+            id: connectorId,
+            version: 'Wz-cc-version',
+            attributes: {
+              name: 'Test',
+              namespace: '*',
+              cloudProvider: 'aws',
+              vars: { role_arn: { type: 'text', value: oldArn } },
+              created_at: '2026-01-01T00:00:00Z',
+              updated_at: '2026-01-01T00:00:00Z',
+            },
+          } as SavedObject)
+          .mockResolvedValueOnce({
+            id: connectorId,
+            version: 'Wz-already',
+            attributes: {
+              name: 'Test',
+              namespace: '*',
+              cloudProvider: 'aws',
+              vars: { role_arn: { type: 'text', value: newArn } },
+              created_at: '2026-01-01T00:00:00Z',
+              updated_at: '2026-01-01T00:00:00Z',
+            },
+          } as SavedObject);
+
+        await service.update(
+          mockSoClient,
+          connectorId,
+          { vars: { role_arn: { type: 'text', value: newArn } } },
+          { esClient: mockEsClient }
+        );
+
+        expect(propagateRoleArnToPackagePoliciesMock).not.toHaveBeenCalled();
+        expect(mockSoClient.update).toHaveBeenCalledWith(
+          CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+          connectorId,
+          expect.not.objectContaining({ verification_status: 'pending' }),
+          { version: 'Wz-already' }
         );
       });
 

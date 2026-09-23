@@ -6,6 +6,7 @@
  */
 
 import type { AuthenticatedUser } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { savedObjectsClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 
@@ -899,5 +900,41 @@ describe('propagateRoleArnToPackagePolicies', () => {
     );
     // Only `a` was successfully written and reverted; `b` must not be clobbered.
     expect(revertCalls.map(([, , id]) => id)).toEqual(['a']);
+  });
+
+  it('does not revert any policy when a concurrent update already stored this Role ARN', async () => {
+    // Two saves of the same Role ARN. B loses the OCC write because A already stored it.
+    // Reverting B's other policies (or A's policy) would leave one connector's policies on
+    // different credentials.
+    mockListReturns([makePolicy('a'), makePolicy('b')]);
+    (packagePolicyService.update as jest.Mock).mockImplementation(async (_so, _es, id: string) => {
+      if (id === 'b') {
+        throw SavedObjectsErrorHelpers.createConflictError('ingest-package-policies', 'b');
+      }
+      return { id, version: `Wz${id}-after` };
+    });
+    (packagePolicyService.get as jest.Mock).mockImplementation(async (_so, id: string) => {
+      if (id === 'b') {
+        return makePolicy('b', NEW_ARN);
+      }
+      return makePolicy(id);
+    });
+
+    const rollback = await propagateRoleArnToPackagePolicies({
+      soClient,
+      esClient,
+      connectorId: CONNECTOR_ID,
+      newRoleArn: NEW_ARN,
+    });
+
+    const revertedToOld = (packagePolicyService.update as jest.Mock).mock.calls.filter(
+      ([, , , update]) => update.inputs[0].vars?.role_arn?.value === OLD_ARN
+    );
+    expect(revertedToOld).toEqual([]);
+    await rollback?.revert();
+    const revertedAfterConnectorFailure = (
+      packagePolicyService.update as jest.Mock
+    ).mock.calls.filter(([, , , update]) => update.inputs[0].vars?.role_arn?.value === OLD_ARN);
+    expect(revertedAfterConnectorFailure).toEqual([]);
   });
 });

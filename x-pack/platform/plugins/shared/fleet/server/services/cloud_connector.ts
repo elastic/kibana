@@ -15,6 +15,9 @@ import {
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { LockAcquisitionError } from '@kbn/lock-manager';
+
+import pRetry from 'p-retry';
 
 import { isIamRoleArn } from '../../common/services/cloud_connectors';
 import {
@@ -519,11 +522,20 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
       }
 
       let roleArnRollback: RoleArnPropagationRollback | undefined;
+      let connectorVersion = existingCloudConnector.version;
       if (roleArnChanged) {
         if (!esClient) {
           logger.error(
             `Role ARN change requested for connector ${cloudConnectorId} but no esClient was provided; cannot fan out.`
           );
+          throw new CloudConnectorCreateError(
+            'Role ARN update is not supported from this code path (missing esClient for package-policy fan-out).'
+          );
+        }
+      }
+
+      async function fanOutRoleArnChange() {
+        if (!esClient) {
           throw new CloudConnectorCreateError(
             'Role ARN update is not supported from this code path (missing esClient for package-policy fan-out).'
           );
@@ -621,76 +633,115 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         updateAttributes.verification_failed_at = null;
       }
 
-      let updatedSavedObject;
-      try {
-        // OCC: the fan-out can take long enough for a concurrent connector edit to land. Without
-        // the version from the opening get(), that edit is silently overwritten — and we would
-        // keep the policies on the new ARN while another writer already changed the connector.
-        updatedSavedObject =
-          existingCloudConnector.version !== undefined
+      async function commitConnectorUpdate() {
+        try {
+          // OCC: the fan-out can take long enough for a concurrent connector edit to land. Without
+          // the version from the opening get(), that edit is silently overwritten — and we would
+          // keep the policies on the new ARN while another writer already changed the connector.
+          return connectorVersion !== undefined
             ? await soClient.update<CloudConnectorSOAttributes>(
                 CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
                 cloudConnectorId,
                 updateAttributes,
-                { version: existingCloudConnector.version }
+                { version: connectorVersion }
               )
             : await soClient.update<CloudConnectorSOAttributes>(
                 CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
                 cloudConnectorId,
                 updateAttributes
               );
-      } catch (writeError) {
-        // A concurrent request that already committed this same ARN has no rollback plan of its
-        // own (its fan-out was a no-op). Reverting ours would put policies back on the old ARN
-        // while the connector stays on the new one.
-        let skipRoleArnRevert = false;
-        if (roleArnRollback && SavedObjectsErrorHelpers.isConflictError(writeError)) {
-          try {
-            const current = await soClient.get<CloudConnectorSOAttributes>(
-              CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
-              cloudConnectorId
-            );
-            const committedRoleArn = (current.attributes.vars as AwsCloudConnectorVars | undefined)
-              ?.role_arn?.value;
-            if (committedRoleArn === newRoleArn) {
-              skipRoleArnRevert = true;
-              logger.warn(
-                `Connector ${cloudConnectorId} write conflicted, but the stored role ARN is already the requested value; leaving the fan-out in place.`
+        } catch (writeError) {
+          // A concurrent request that already committed this same ARN has no rollback plan of its
+          // own (its fan-out was a no-op). Reverting ours would put policies back on the old ARN
+          // while the connector stays on the new one.
+          let skipRoleArnRevert = false;
+          if (roleArnRollback && SavedObjectsErrorHelpers.isConflictError(writeError)) {
+            try {
+              const current = await soClient.get<CloudConnectorSOAttributes>(
+                CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+                cloudConnectorId
               );
-            }
-          } catch (readError) {
-            logger.error(
-              `Could not re-read connector ${cloudConnectorId} after a version conflict; reverting the role ARN fan-out.`,
-              readError
-            );
-          }
-        }
-        if (roleArnRollback && !skipRoleArnRevert) {
-          logger.error(
-            `Connector ${cloudConnectorId} write failed after successful role ARN fan-out; reverting policies.`,
-            writeError
-          );
-          try {
-            await roleArnRollback.revert();
-          } catch (revertError) {
-            logger.error(
-              `Revert after failed connector write also failed for ${cloudConnectorId}`,
-              revertError
-            );
-            // Prefer the structured policy-id lists over the bare SO write error — without
-            // them operators cannot tell which policies are still on the new ARN.
-            if (revertError instanceof CloudConnectorRoleArnPropagationError) {
-              const writeMessage =
-                writeError instanceof Error ? writeError.message : String(writeError);
-              throw new CloudConnectorRoleArnPropagationError(
-                `Cloud connector write failed (${writeMessage}); role ARN rollback also failed: ${revertError.message}`,
-                revertError.detail
+              const committedRoleArn = (
+                current.attributes.vars as AwsCloudConnectorVars | undefined
+              )?.role_arn?.value;
+              if (committedRoleArn === newRoleArn) {
+                skipRoleArnRevert = true;
+                logger.warn(
+                  `Connector ${cloudConnectorId} write conflicted, but the stored role ARN is already the requested value; leaving the fan-out in place.`
+                );
+              }
+            } catch (readError) {
+              logger.error(
+                `Could not re-read connector ${cloudConnectorId} after a version conflict; reverting the role ARN fan-out.`,
+                readError
               );
             }
           }
+          if (roleArnRollback && !skipRoleArnRevert) {
+            logger.error(
+              `Connector ${cloudConnectorId} write failed after successful role ARN fan-out; reverting policies.`,
+              writeError
+            );
+            try {
+              await roleArnRollback.revert();
+            } catch (revertError) {
+              logger.error(
+                `Revert after failed connector write also failed for ${cloudConnectorId}`,
+                revertError
+              );
+              // Prefer the structured policy-id lists over the bare SO write error — without
+              // them operators cannot tell which policies are still on the new ARN.
+              if (revertError instanceof CloudConnectorRoleArnPropagationError) {
+                const writeMessage =
+                  writeError instanceof Error ? writeError.message : String(writeError);
+                throw new CloudConnectorRoleArnPropagationError(
+                  `Cloud connector write failed (${writeMessage}); role ARN rollback also failed: ${revertError.message}`,
+                  revertError.detail
+                );
+              }
+            }
+          }
+          throw writeError;
         }
-        throw writeError;
       }
+
+      const updatedSavedObject = roleArnChanged
+        ? await pRetry(
+            () =>
+              appContextService
+                .getLockManagerService()!
+                .withLock(`fleet-cloud-connector-role-arn-${cloudConnectorId}`, async () => {
+                  const locked = await soClient.get<CloudConnectorSOAttributes>(
+                    CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+                    cloudConnectorId
+                  );
+                  connectorVersion = locked.version ?? connectorVersion;
+                  const lockedRoleArn = (
+                    locked.attributes.vars as AwsCloudConnectorVars | undefined
+                  )?.role_arn?.value;
+                  if (lockedRoleArn !== newRoleArn) {
+                    await fanOutRoleArnChange();
+                  } else {
+                    logger.info(
+                      `Connector ${cloudConnectorId} already stores the requested Role ARN; leaving its policies unchanged.`
+                    );
+                  }
+                  return commitConnectorUpdate();
+                }),
+            {
+              onFailedAttempt: (error) => {
+                if (!(error instanceof LockAcquisitionError)) {
+                  throw error;
+                }
+              },
+              minTimeout: 100,
+              factor: 2,
+              maxTimeout: 2_000,
+              retries: 100,
+              maxRetryTime: 60_000,
+            }
+          )
+        : await commitConnectorUpdate();
 
       logger.info(`Successfully updated cloud connector ${cloudConnectorId}`);
 
