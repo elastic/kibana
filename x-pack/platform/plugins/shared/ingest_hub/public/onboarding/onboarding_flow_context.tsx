@@ -473,9 +473,11 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
       };
       persistedAuthStepRef.current = next;
       setPersistedAuthenticateAndDeployStep(next);
+      const prevDetect = persistedDetectAndReviewStepRef.current;
       setDetectAndReviewStep({
         serviceStatuses: {},
-        policyIdsByInstance: {},
+        policyIdsByInstance: prevDetect?.policyIdsByInstance ?? {},
+        pendingCleanupPolicyIds: prevDetect?.pendingCleanupPolicyIds,
         failedInstances: [],
         deployErrors: {},
       });

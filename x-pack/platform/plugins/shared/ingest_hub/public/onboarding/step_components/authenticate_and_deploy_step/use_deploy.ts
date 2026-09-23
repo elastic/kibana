@@ -336,6 +336,44 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
         const remainingFailed = detectAndReviewStep.failedInstances.filter(
           (id) => !deployedTargets.includes(id)
         );
+
+        // Cleanup must run on retry too — pending/live-stale policies are not bound to initial deploys.
+        const retryActiveIds = new Set(deployGroups.flatMap((g) => g.instanceIds));
+        const retryLiveStale: Record<string, string> = {};
+        for (const [iid, pid] of Object.entries(detectAndReviewStep.policyIdsByInstance)) {
+          if (!retryActiveIds.has(iid)) retryLiveStale[iid] = pid;
+        }
+        const retryPending: Record<string, string> = {
+          ...retryLiveStale,
+          ...(detectAndReviewStep.pendingCleanupPolicyIds ?? {}),
+        };
+        if (Object.keys(retryPending).length > 0) {
+          cleanupOps = await cleanupManagedIntegrationsPolicies({
+            pendingCleanupPolicyIds: retryPending,
+            currentPolicyIdsByInstance: detectAndReviewStep.policyIdsByInstance,
+            instances: serviceSettings?.instances ?? [],
+            storedServiceVars: serviceSettings?.serviceVars ?? {},
+            globalRegion: serviceSettings?.globalRegion ?? '',
+            namespace,
+            authenticateAndDeployStep,
+            servicesMap: servicesMap ?? new Map(),
+          });
+          const retrySucceeded = new Set([
+            ...cleanupOps.toDelete,
+            ...cleanupOps.toUpdate.map((u) => u.policyId),
+          ]);
+          removeDeployInstances(
+            Object.keys(retryLiveStale).filter((id) => retrySucceeded.has(retryLiveStale[id]))
+          );
+          updateDetectAndReviewStep({
+            pendingCleanupPolicyIds: Object.fromEntries(
+              Object.entries(detectAndReviewStep.pendingCleanupPolicyIds ?? {}).filter(
+                ([, policyId]) => !retrySucceeded.has(policyId)
+              )
+            ),
+          });
+        }
+
         setIsDeploying(true);
         updateDetectAndReviewStep({
           isDeploying: true,

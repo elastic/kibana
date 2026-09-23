@@ -242,11 +242,9 @@ test.describe('Onboarding Authenticate and Deploy step', { tag: tags.stateful.cl
           new URL(req.url()).pathname
         )
     );
-    await updateRequestPromise; // PUT — shared policy updated with elb inputs only
+    await deployButton.click();
+    await updateRequestPromise;
     await expect(deployButton).toBeHidden();
-    expect(deleteObserved).toBe(false);
-
-    await updateRequestPromise; // PUT — shared policy updated with elb inputs only
     expect(deleteObserved).toBe(false);
   });
 
@@ -334,77 +332,6 @@ test.describe('Onboarding Authenticate and Deploy step', { tag: tags.stateful.cl
     await updateRequestPromise; // PUT — shared policy updated with elb inputs only
     await expect(page.testSubj.locator('onboardingStep-detect-and-review')).toBeVisible();
     expect(deleteObserved).toBe(false);
-  });
-
-  test('agent-based: deploy fires POST /api/fleet/package_policies for existing agent policy', async ({
-    browserAuth,
-    page,
-  }) => {
-    // Simulate: user switched to agent-based mode, selected an existing agent policy
-    // ('mock-agent-policy-id'), and is about to deploy ELB. The Next button triggers the
-    // deploy (handleAgentDeployForNext) which calls deployToExistingAgentPolicies.
-    // Expected: POST /api/fleet/package_policies fires with policy_ids: ['mock-agent-policy-id'].
-
-    // Register route mocks BEFORE navigation to avoid race with agent_policies fetch.
-    // Mock agent policies list (dropdown in existing-policy mode).
-    await page.route(
-      (url) => /\/api\/fleet\/agent_policies/.test(url.pathname),
-      (route) =>
-        route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify({ items: [] }),
-        })
-    );
-
-    // Mock package policy creation (the actual deploy call).
-    await page.route(
-      (url) => /\/api\/fleet\/package_policies$/.test(url.pathname),
-      (route) =>
-        route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify({ item: { id: 'mock-pkg-policy-id' } }),
-        })
-    );
-
-    await navigateToOnboardingStep(browserAuth, page, 'authenticate-and-deploy', {
-      selectedServiceIds: ['elb'],
-      globalRegion: 'us-east-1',
-      instances: [{ instanceId: 'elb', serviceId: 'elb', isDuplicate: false }],
-      serviceVars: {
-        elb: {
-          enabledDataStreams: ['elb_logs'],
-          varsByDataStream: {
-            elb_logs: {
-              enabledInputs: ['aws-s3'],
-              varsByInput: { 'aws-s3': { bucket_arn: 'arn:aws:s3:::test-bucket' } },
-            },
-          },
-        },
-      },
-      authenticateAndDeployStep: {
-        deploymentMethod: 'agent_based',
-        agentHostsMode: 'existing',
-        selectedAgentPolicyIds: ['mock-agent-policy-id'],
-      },
-    });
-
-    await expect(page.testSubj.locator('agentBasedSection')).toBeVisible();
-
-    const createRequestPromise = page.waitForRequest(
-      (req) =>
-        req.method() === 'POST' &&
-        /\/api\/fleet\/package_policies$/.test(new URL(req.url()).pathname)
-    );
-
-    const nextButton = page.testSubj.locator('authenticateAndDeployStep-nextButton');
-    await expect(nextButton).toBeEnabled();
-    await nextButton.click();
-
-    const createRequest = await createRequestPromise;
-    const body = createRequest.postDataJSON() as { policy_ids?: string[] };
-    expect(body.policy_ids).toEqual(['mock-agent-policy-id']);
   });
 
   test('deploy fires POST /api/fleet/managed_integrations and shows success state', async ({

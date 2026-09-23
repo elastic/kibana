@@ -58,7 +58,9 @@ const BASE_OPTS = {
 beforeEach(() => {
   jest.clearAllMocks();
   mockGetPackageInfo.mockResolvedValue({ data: { item: { version: '3.0.0', vars: [] } } });
-  mockGetAgentlessPolicy.mockResolvedValue({ item: { name: 'existing-agentless-name' } });
+  mockGetAgentlessPolicy.mockResolvedValue({
+    item: { name: 'existing-agentless-name', package: { version: '2.5.0' } },
+  });
   mockDeleteAgentless.mockResolvedValue({});
   mockUpdateAgentless.mockResolvedValue({});
 });
@@ -120,7 +122,7 @@ describe('cleanupManagedIntegrationsPolicies', () => {
       pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },
       currentPolicyIdsByInstance: { 'inst-b': 'policy-1' },
     });
-    expect(mockGetPackageInfo).toHaveBeenCalledWith('aws');
+    expect(mockGetPackageInfo).toHaveBeenCalledWith('aws', '2.5.0');
   });
 
   it('swallows individual update failures and does not include them in returned ops', async () => {

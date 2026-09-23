@@ -59,7 +59,7 @@ beforeEach(() => {
   jest.clearAllMocks();
   mockGetPackageInfo.mockResolvedValue({ data: { item: { version: '3.0.0', vars: [] } } });
   mockGetOnePackagePolicy.mockResolvedValue({
-    data: { item: { name: 'existing-policy-name', namespace: 'existing-ns' } },
+    data: { item: { name: 'existing-policy-name', namespace: 'existing-ns', package: { version: '2.5.0' } } },
   });
   mockDeletePackagePolicy.mockResolvedValue({});
   mockUpdatePackagePolicy.mockResolvedValue({});
@@ -113,7 +113,7 @@ describe('cleanupAgentBasedPolicies', () => {
       currentPolicyIdsByInstance: { 'inst-b': 'policy-1' },
       selectedAgentPolicyIds: ['agent-policy-1'],
     });
-    expect(mockGetPackageInfo).toHaveBeenCalledWith('aws');
+    expect(mockGetPackageInfo).toHaveBeenCalledWith('aws', '2.5.0');
   });
 
   it('swallows individual update failures — does not reject the whole call', async () => {

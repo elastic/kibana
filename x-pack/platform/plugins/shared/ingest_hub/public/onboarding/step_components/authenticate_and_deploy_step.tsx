@@ -232,8 +232,9 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     // runs cleanup even when no new MI targets exist. onContinue is a no-op here so it won't
     // navigate — cleanup completes before the rest of handleNext continues.
     const hasStaleMiPolicies =
-      Object.keys(detectAndReviewStep.policyIdsByInstance ?? {}).length > 0 ||
-      Object.keys(detectAndReviewStep.pendingCleanupPolicyIds ?? {}).length > 0;
+      !isAgentBased &&
+      (Object.keys(detectAndReviewStep.policyIdsByInstance ?? {}).length > 0 ||
+        Object.keys(detectAndReviewStep.pendingCleanupPolicyIds ?? {}).length > 0);
     if (hasStaleMiPolicies && miServiceIds.length === 0) {
       await handleDeploy();
     }
