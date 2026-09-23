@@ -96,6 +96,13 @@ apiTest.describe(
         );
         expect(updateWithLegacyTagResponse).toHaveStatusCode(200);
 
+        const afterLegacyTagUpdate = await getRuleSavedObjectAttributes(esClient, createdRuleId);
+        expect(afterLegacyTagUpdate.uiamApiKey).toBeUndefined();
+        expect(afterLegacyTagUpdate.tags).toStrictEqual([
+          'existing-tag',
+          'Missing Universal Api Key',
+        ]);
+
         await waitForSuccessfulEventLogEntry(apiClient, createdRuleId, headers);
 
         const afterLegacyTagExecution = await getRuleSavedObjectAttributes(esClient, createdRuleId);
@@ -110,6 +117,13 @@ apiTest.describe(
           { headers }
         );
         expect(restoreUiamKeyResponse).toHaveStatusCode(204);
+
+        const afterUiamKeyRestoration = await getRuleSavedObjectAttributes(esClient, createdRuleId);
+        expect(typeof afterUiamKeyRestoration.uiamApiKey).toBe('string');
+        expect(afterUiamKeyRestoration.tags).toStrictEqual([
+          'existing-tag',
+          'Missing Elastic Cloud API Key',
+        ]);
 
         await waitForSuccessfulEventLogEntry(apiClient, createdRuleId, headers);
 
