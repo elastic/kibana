@@ -12,6 +12,13 @@ import { mockHandlerArguments } from '../../_mock_handler_arguments';
 import { verifyAccessAndContext } from '../../verify_access_and_context';
 import { actionsClientMock } from '../../../actions_client/actions_client.mock';
 import { createMockConnectorFindResult } from '../../../application/connector/mocks';
+import { actionsConfigMock } from '../../../actions_config.mock';
+
+const actionsConfigUtils = (inboundEventsEnabled = false) => {
+  const utils = actionsConfigMock.create();
+  utils.isInboundEventsEnabled.mockReturnValue(inboundEventsEnabled);
+  return utils;
+};
 
 jest.mock('../../verify_access_and_context', () => ({
   verifyAccessAndContext: jest.fn(),
@@ -27,7 +34,7 @@ describe('getAllConnectorsIncludingSystemRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    getAllConnectorsIncludingSystemRoute(router, licenseState);
+    getAllConnectorsIncludingSystemRoute(router, licenseState, actionsConfigUtils());
 
     const [config, handler] = router.get.mock.calls[0];
 
@@ -90,7 +97,7 @@ describe('getAllConnectorsIncludingSystemRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    getAllConnectorsIncludingSystemRoute(router, licenseState);
+    getAllConnectorsIncludingSystemRoute(router, licenseState, actionsConfigUtils());
 
     const [config, handler] = router.get.mock.calls[0];
 
@@ -114,7 +121,7 @@ describe('getAllConnectorsIncludingSystemRoute', () => {
       throw new Error('OMG');
     });
 
-    getAllConnectorsIncludingSystemRoute(router, licenseState);
+    getAllConnectorsIncludingSystemRoute(router, licenseState, actionsConfigUtils());
 
     const [config, handler] = router.get.mock.calls[0];
 
