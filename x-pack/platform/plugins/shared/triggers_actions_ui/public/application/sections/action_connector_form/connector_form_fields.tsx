@@ -6,7 +6,7 @@
  */
 
 import type { ReactNode } from 'react';
-import React, { memo, Suspense } from 'react';
+import React, { memo, Suspense, useContext } from 'react';
 
 import { EuiTitle, EuiSpacer, EuiErrorBoundary } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -17,6 +17,7 @@ import { SectionLoading } from '../../components/section_loading';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { readClusterInboundEventsEnabled } from '../../lib/inbound_ingress';
 import { useKibana } from '../../../common/lib/kibana';
+import { ConnectorContext } from '../../context/connector_context';
 import { ConnectorFormFieldsGlobal } from './connector_form_fields_global';
 import { InboundEventsFormSection, OutboundSectionTitle } from './inbound_events_form_section';
 
@@ -43,10 +44,14 @@ const ConnectorFormFieldsComponent: React.FC<ConnectorFormFieldsProps> = ({
   showInboundEvents = true,
 }) => {
   const services = useKibana().services;
+  const connectorContext = useContext(ConnectorContext);
   const {
     application: { capabilities },
   } = services;
-  const isClusterInboundEventsEnabled = readClusterInboundEventsEnabled(services);
+  const isClusterInboundEventsEnabled = readClusterInboundEventsEnabled(
+    services,
+    connectorContext?.services
+  );
   const canSave = hasSaveActionsCapability(capabilities);
   const FieldsComponent = actionTypeModel?.actionConnectorFields ?? null;
   const actionTypeId = actionTypeModel?.id;

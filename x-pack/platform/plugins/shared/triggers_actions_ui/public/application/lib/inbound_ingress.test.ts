@@ -25,7 +25,7 @@ jest.mock('@kbn/connector-specs', () => {
 });
 
 describe('inbound ingress helpers', () => {
-  it('reads the cluster flag only when the host context provides the actions plugin', () => {
+  it('reads the cluster flag from connector services before the host actions contract', () => {
     expect(readClusterInboundEventsEnabled({})).toBe(false);
     expect(readClusterInboundEventsEnabled({ actions: {} })).toBe(false);
     expect(readClusterInboundEventsEnabled({ actions: { isInboundEventsEnabled: false } })).toBe(
@@ -34,6 +34,13 @@ describe('inbound ingress helpers', () => {
     expect(readClusterInboundEventsEnabled({ actions: { isInboundEventsEnabled: true } })).toBe(
       true
     );
+    expect(readClusterInboundEventsEnabled({}, { isInboundEventsEnabled: true })).toBe(true);
+    expect(
+      readClusterInboundEventsEnabled(
+        { actions: { isInboundEventsEnabled: true } },
+        { isInboundEventsEnabled: false }
+      )
+    ).toBe(false);
   });
 
   it('treats connectors with inbound events as inbound ingress', () => {

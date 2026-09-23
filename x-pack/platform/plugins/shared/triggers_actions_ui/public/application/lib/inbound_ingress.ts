@@ -12,10 +12,22 @@ import {
 } from '@kbn/connector-specs';
 import type { ActionConnector } from '../../types';
 
-/** Embedded flyouts render inside the host app context, which often has no actions plugin contract. */
-export const readClusterInboundEventsEnabled = (services: {
-  actions?: { isInboundEventsEnabled?: boolean };
-}): boolean => services.actions?.isInboundEventsEnabled === true;
+/**
+ * Prefer the flag copied from the actions setup contract onto connector services.
+ * Embedded hosts such as Workflows have no actions start contract, so reading
+ * `services.actions` there is always false.
+ */
+export const readClusterInboundEventsEnabled = (
+  services: {
+    actions?: { isInboundEventsEnabled?: boolean };
+  },
+  connectorServices?: { isInboundEventsEnabled?: boolean }
+): boolean => {
+  if (typeof connectorServices?.isInboundEventsEnabled === 'boolean') {
+    return connectorServices.isInboundEventsEnabled;
+  }
+  return services.actions?.isInboundEventsEnabled === true;
+};
 
 export const getInboundIngestToken = (connector: ActionConnector): string | undefined => {
   if (!('secrets' in connector) || connector.secrets == null) {

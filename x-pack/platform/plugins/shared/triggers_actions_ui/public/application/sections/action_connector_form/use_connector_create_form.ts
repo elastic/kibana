@@ -6,7 +6,7 @@
  */
 
 import type { ReactNode } from 'react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import type { ConnectorFormSchema } from '@kbn/alerts-ui-shared';
 import { useActionTypeModel } from '@kbn/alerts-ui-shared/src/common/hooks/use_action_type_model';
@@ -18,6 +18,7 @@ import {
   readClusterInboundEventsEnabled,
 } from '../../lib/inbound_ingress';
 import { useKibana } from '../../../common/lib/kibana';
+import { ConnectorContext } from '../../context/connector_context';
 import { useCreateConnector } from '../../hooks/use_create_connector';
 import type { ConnectorFormState } from './connector_form';
 
@@ -45,13 +46,17 @@ export const useConnectorCreateForm = ({
   initialConnector,
 }: UseConnectorCreateFormParams) => {
   const services = useKibana().services;
+  const connectorContext = useContext(ConnectorContext);
   const {
     application: { capabilities },
     http,
     docLinks,
     uiSettings,
   } = services;
-  const isClusterInboundEventsEnabled = readClusterInboundEventsEnabled(services);
+  const isClusterInboundEventsEnabled = readClusterInboundEventsEnabled(
+    services,
+    connectorContext?.services
+  );
   const {
     isLoading: isSavingConnector,
     createConnector,

@@ -6,7 +6,7 @@
  */
 
 import type { ReactNode } from 'react';
-import React, { memo, useCallback, useEffect, useRef, useMemo, useState } from 'react';
+import React, { memo, useCallback, useContext, useEffect, useRef, useMemo, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import type { IconType } from '@elastic/eui';
 import {
@@ -41,6 +41,7 @@ import type { ConnectorFormState } from '../connector_form';
 import { ConnectorForm } from '../connector_form';
 import { useUpdateConnector } from '../../../hooks/use_edit_connector';
 import { useKibana } from '../../../../common/lib/kibana';
+import { ConnectorContext } from '../../../context/connector_context';
 import { hasSaveActionsCapability } from '../../../lib/capabilities';
 import { getSpecConnectorTestExecutionParams } from '../../../lib/get_spec_connector_test_execution_params';
 import { TestConnectorForm } from '../test_connector_form';
@@ -183,13 +184,17 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
   const confirmModalTitleId = useGeneratedHtmlId();
 
   const services = useKibana().services;
+  const connectorContext = useContext(ConnectorContext);
   const {
     docLinks,
     http,
     uiSettings,
     application: { capabilities },
   } = services;
-  const isClusterInboundEventsEnabled = readClusterInboundEventsEnabled(services);
+  const isClusterInboundEventsEnabled = readClusterInboundEventsEnabled(
+    services,
+    connectorContext?.services
+  );
 
   const isMounted = useRef(false);
   const canSave = hasSaveActionsCapability(capabilities);
