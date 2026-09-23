@@ -30,10 +30,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     await header.waitUntilLoadingHasFinished();
 
     await retry.waitFor('the configuration page to load', async () => {
-      return (
-        (await testSubjects.exists('case-configure-title')) ||
-        (await testSubjects.exists('cases-redesign-settings-panel'))
-      );
+      return testSubjects.exists('cases-redesign-settings-panel');
     });
   };
 
@@ -76,8 +73,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
     // With the templates feature flag pinned ON for this suite, custom fields and
     // templates are managed on the dedicated v2 templates / field-library pages,
-    // not inline on the Case Settings page. The legacy in-page flow is covered by
-    // the flag-OFF stateful `configure_legacy.ts` suite.
+    // not inline on the Case Settings page. The legacy in-page flow was covered by
+    // `configure_legacy.ts`, which was removed when the legacy UI was deleted.
     describe('Templates page (v2)', function () {
       before(async () => {
         await navigateToConfigure();

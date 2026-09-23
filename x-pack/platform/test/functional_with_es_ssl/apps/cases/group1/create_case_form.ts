@@ -44,37 +44,15 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
 
       await cases.common.waitForCaseViewToLoad();
 
-      if (await cases.common.isRedesignEnabled()) {
-        // Redesign moves the title to the app header and the attributes into the sidebar.
-        const redesignTitle = await testSubjects.find('appHeaderTitle');
-        expect(await redesignTitle.getVisibleText()).to.contain(caseTitle);
+      const title = await testSubjects.find('appHeaderTitle');
+      expect(await title.getVisibleText()).to.contain(caseTitle);
 
-        const redesignDescription = await testSubjects.find('description');
-        expect(await redesignDescription.getVisibleText()).to.contain('test description');
+      const description = await testSubjects.find('description');
+      expect(await description.getVisibleText()).to.contain('test description');
 
-        await testSubjects.existOrFail('case-tags');
-        await testSubjects.existOrFail('cases-categories');
-        await testSubjects.existOrFail('case-view-sidebar-connectors');
-        return;
-      }
-
-      // validate title
-      const title = await find.byCssSelector('[data-test-subj="editable-title-header-value"]');
-      expect(await title.getVisibleText()).equal(caseTitle);
-
-      // validate description
-      const description = await testSubjects.find('scrollable-markdown');
-      expect(await description.getVisibleText()).equal('test description');
-
-      // validate tag exists
-      await testSubjects.existOrFail('tag-tagme');
-
-      // validate category exists
-      await testSubjects.existOrFail('category-viewer-new');
-
-      // validate no connector added
-      const button = await find.byCssSelector('[data-test-subj*="case-callout"] button');
-      expect(await button.getVisibleText()).equal('Add connector');
+      await testSubjects.existOrFail('case-tags');
+      await testSubjects.existOrFail('cases-categories');
+      await testSubjects.existOrFail('case-view-sidebar-connectors');
     });
 
     it('displays errors correctly while creating a case', async () => {
@@ -134,20 +112,12 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
         await header.waitUntilLoadingHasFinished();
         await cases.common.waitForCaseViewToLoad();
 
-        if (await cases.common.isRedesignEnabled()) {
-          // Redesign moves the title to the app header and assignees into the sidebar panel.
-          const redesignTitle = await testSubjects.find('appHeaderTitle');
-          expect(await redesignTitle.getVisibleText()).to.contain(caseTitle);
+        const title = await testSubjects.find('appHeaderTitle');
+        expect(await title.getVisibleText()).to.contain(caseTitle);
 
-          await testSubjects.existOrFail('case-view-assignees-field-panel');
-          await testSubjects.existOrFail('case-user-profile-avatar-cases_all_user');
-          await testSubjects.existOrFail('case-user-profile-avatar-cases_all_user2');
-          return;
-        }
-
-        await testSubjects.existOrFail('case-view-title');
-        await testSubjects.existOrFail('user-profile-assigned-user-cases_all_user-remove-group');
-        await testSubjects.existOrFail('user-profile-assigned-user-cases_all_user2-remove-group');
+        await testSubjects.existOrFail('case-view-assignees-field-panel');
+        await testSubjects.existOrFail('case-user-profile-avatar-cases_all_user');
+        await testSubjects.existOrFail('case-user-profile-avatar-cases_all_user2');
       });
     });
 

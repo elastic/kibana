@@ -37,10 +37,7 @@ export function CasesNavigationProvider({ getPageObject, getService }: FtrProvid
       await this.navigateToApp(app, 'cases-app');
       await this.clickHeaderMenuItem('configure-case-button');
       await retry.waitFor('the configuration page to load', async () => {
-        return (
-          (await testSubjects.exists('case-configure-title')) ||
-          (await testSubjects.exists('cases-redesign-settings-panel'))
-        );
+        return testSubjects.exists('cases-redesign-settings-panel');
       });
     },
 

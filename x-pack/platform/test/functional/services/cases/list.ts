@@ -56,8 +56,9 @@ export function CasesTableServiceProvider(
     });
   };
 
-  // Matches a single element per case in both the legacy table (`cases-table-row-{id}`) and the
-  // redesign card list (`cases-list-item-clickable-{id}`), so row counts work in either design.
+  // Matches a single element per case in both view modes: the table view (`cases-table-row-{id}`)
+  // and the card list (`cases-list-item-clickable-{id}`), so row counts work regardless of which
+  // view the test leaves the list in.
   const CASE_ROWS_SELECTOR =
     '[data-test-subj^="cases-table-row-"],[data-test-subj^="cases-list-item-clickable-"]';
 

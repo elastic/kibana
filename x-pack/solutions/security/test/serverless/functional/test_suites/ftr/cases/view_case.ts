@@ -47,26 +47,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       createOneCaseBeforeDeleteAllAfter(getPageObject, getService, owner);
 
       it('should show the case view page correctly', async () => {
-        if (await cases.common.isRedesignEnabled()) {
-          await testSubjects.existOrFail('appHeaderTitle');
-
-          await testSubjects.existOrFail('case-view-tab-title-activity');
-          await testSubjects.existOrFail('case-view-tab-title-attachments');
-          await testSubjects.existOrFail('description');
-
-          await testSubjects.existOrFail('case-view-activity');
-
-          await testSubjects.existOrFail('case-view-assignees-field-panel');
-          await testSubjects.existOrFail('sidebar-severity');
-          await testSubjects.existOrFail('case-view-participants-field-panel');
-          await testSubjects.existOrFail('case-tags');
-          await testSubjects.existOrFail('cases-categories');
-          await testSubjects.existOrFail('case-view-sidebar-connectors');
-          return;
-        }
-
-        await testSubjects.existOrFail('case-view-title');
-        await testSubjects.existOrFail('header-page-supplements');
+        await testSubjects.existOrFail('appHeaderTitle');
 
         await testSubjects.existOrFail('case-view-tab-title-activity');
         await testSubjects.existOrFail('case-view-tab-title-attachments');
@@ -74,13 +55,12 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await testSubjects.existOrFail('case-view-activity');
 
-        await testSubjects.existOrFail('case-view-assignees');
+        await testSubjects.existOrFail('case-view-assignees-field-panel');
         await testSubjects.existOrFail('sidebar-severity');
-        await testSubjects.existOrFail('case-view-user-list-reporter');
-        await testSubjects.existOrFail('case-view-user-list-participants');
-        await testSubjects.existOrFail('case-view-tag-list');
+        await testSubjects.existOrFail('case-view-participants-field-panel');
+        await testSubjects.existOrFail('case-tags');
         await testSubjects.existOrFail('cases-categories');
-        await testSubjects.existOrFail('sidebar-connectors');
+        await testSubjects.existOrFail('case-view-sidebar-connectors');
       });
     });
 
@@ -117,12 +97,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         const category = uuidv4();
         await cases.common.addCategory(category);
 
-        // Legacy renders a dedicated viewer; the redesign edits the value in place, so we rely on the
-        // user action below to confirm the update landed.
-        if (!(await cases.common.isRedesignEnabled())) {
-          await testSubjects.existOrFail('category-viewer-' + category);
-        }
-
         // validate user action
         await find.byCssSelector('[data-test-subj*="category-update-action"]');
       });
@@ -130,9 +104,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       it('deletes a category from a case', async () => {
         await cases.common.removeCategory();
 
-        if (!(await cases.common.isRedesignEnabled())) {
-          await testSubjects.existOrFail('no-categories');
-        }
         // validate user action
         await find.byCssSelector('[data-test-subj*="category-delete-action"]');
       });
@@ -141,28 +112,14 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         const tag = uuidv4();
         await cases.common.addTag(tag);
 
-        // Legacy renders a dedicated tag element; the redesign edits the value in place, so we rely on
-        // the user action below to confirm the update landed.
-        if (!(await cases.common.isRedesignEnabled())) {
-          await testSubjects.existOrFail('tag-' + tag);
-        }
-
         // validate user action
         await find.byCssSelector('[data-test-subj*="tags-add-action"]');
       });
 
       it('deletes a tag from a case', async () => {
-        if (await cases.common.isRedesignEnabled()) {
-          // Clearing the combo box persists the removal immediately; there is no confirm step.
-          await comboBox.clear('case-tags');
-          await header.waitUntilLoadingHasFinished();
-        } else {
-          await testSubjects.click('tag-list-edit-button');
-          // find the tag button and click the close button
-          const button = await find.byCssSelector('[data-test-subj="comboBoxInput"] button');
-          await button.click();
-          await testSubjects.click('edit-tags-submit');
-        }
+        // Clearing the combo box persists the removal immediately; there is no confirm step.
+        await comboBox.clear('case-tags');
+        await header.waitUntilLoadingHasFinished();
 
         // validate user action
         await find.byCssSelector('[data-test-subj*="tags-delete-action"]');
@@ -175,12 +132,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           await find.byCssSelector(
             '[data-test-subj*="status-update-action"] [data-test-subj="case-status-badge-in-progress"]'
           );
-          // validates dropdown tag (legacy renders the status badge inside the action-bar dropdown)
-          if (!(await cases.common.isRedesignEnabled())) {
-            await testSubjects.existOrFail(
-              'case-view-status-dropdown > case-status-badge-popover-button-in-progress'
-            );
-          }
         });
       });
 

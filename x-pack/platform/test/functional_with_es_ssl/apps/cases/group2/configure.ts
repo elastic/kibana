@@ -12,10 +12,8 @@ import type { FtrProviderContext } from '../../../ftr_provider_context';
  * Flag-agnostic Configure-page coverage.
  *
  * Closure options and connectors render on the Case Settings page regardless of
- * the `xpack.cases.templates.enabled` flag. The legacy in-page custom-fields /
- * templates sections (only rendered when the flag is OFF) are covered in
- * `configure_legacy.ts`, and the new v2 templates / field-library pages (only
- * reachable when the flag is ON) are covered in `configure_templates_v2.ts`.
+ * the `xpack.cases.templates.enabled` flag. The v2 templates / field-library pages
+ * (only reachable when the flag is ON) are covered in `configure_templates_v2.ts`.
  */
 export default ({ getPageObject, getService }: FtrProviderContext) => {
   const common = getPageObject('common');
