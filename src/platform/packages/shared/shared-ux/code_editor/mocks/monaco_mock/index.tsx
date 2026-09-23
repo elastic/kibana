@@ -197,6 +197,7 @@ export const MockedMonacoEditor = ({
         value={value ?? ''}
         readOnly={editContextEnabled}
         aria-hidden={editContextEnabled}
+        aria-roledescription="editor"
         onKeyDown={mockedEditorInstance?.__helpers__.onTextareaKeyDown}
         onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
           onChange?.(e.target.value, {} as unknown as monaco.editor.IModelContentChangedEvent);
