@@ -18,6 +18,7 @@ import {
 } from '../failed_tests_reporter/github_api';
 import { flakySuiteIssueTitle, renderFlakySuiteIssueBody } from './issue_body';
 import {
+  addIssueToIndex,
   candidateIssues,
   compareMatches,
   describeIssue,
@@ -271,6 +272,8 @@ export const reportFlakySuiteIssues = async (
     try {
       const created = await github.createIssue(title, body, issueLabels(suite, githubRepo));
       log.info(`created #${created.number} ${created.html_url}: ${describeSuite(suite)}`);
+      // Later suites of this run match against it too, an untitled suite's issue covers its file
+      addIssueToIndex(index, describeIssue({ ...created, title, body, labels: [], state: 'open' }));
       record({
         action: 'created',
         ...ref,

@@ -193,6 +193,33 @@ describe('reportFlakySuiteIssues', () => {
       ]);
     });
 
+    it('lets an issue filed for the untitled tests of a file cover its describe blocks in the same run', async () => {
+      const github = createGithubApi();
+      const report = flakyReport([
+        flakyTest({
+          testId: 'top',
+          title: 'top-level test',
+          suiteTitle: undefined,
+          failedBuilds: 40,
+        }),
+        flakyTest({ testId: 'in-a', title: 'nested test', suiteTitle: 'A', failedBuilds: 9 }),
+      ]);
+
+      const summary = await run(github, { report });
+
+      // the untitled suite's issue is about the whole file, as on the next run
+      expect(github.createIssue).toHaveBeenCalledTimes(1);
+      expect(summary.actions.map(({ action, suiteTitle }) => [action, suiteTitle])).toEqual([
+        ['created', undefined],
+        ['skipped', 'A'],
+      ]);
+      expect(summary.actions[1]).toMatchObject({
+        reason: 'tracked',
+        issue: { number: 900 },
+        match: 'suite',
+      });
+    });
+
     it('creates at most --max-new-issues, worst suites first, and skips the rest', async () => {
       const github = createGithubApi();
       const report = flakyReport([

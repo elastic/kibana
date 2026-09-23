@@ -119,32 +119,35 @@ const addTo = (index: Map<string, IssueDetails[]>, key: string, details: IssueDe
   }
 };
 
+/** Adds one issue to the index, e.g. one filed during the run, so later suites can match it. */
+export const addIssueToIndex = (index: IssueIndex, details: IssueDetails): void => {
+  const { text, filePath, suiteFilePath, jestDirectory, scoutTestId } = details;
+  const fileNames = new Set(text.match(SOURCE_FILE_NAME) ?? []);
+  for (const named of [filePath, suiteFilePath]) {
+    if (named) {
+      fileNames.add(Path.basename(named));
+    }
+  }
+  for (const fileName of fileNames) {
+    addTo(index.byFileName, fileName, details);
+  }
+  if (jestDirectory) {
+    addTo(index.byJestDirectory, jestDirectory, details);
+  }
+  if (scoutTestId) {
+    addTo(index.byScoutTestId, scoutTestId, details);
+  }
+};
+
 export const indexIssues = (issues: readonly IssueDetails[]): IssueIndex => {
   const index: IssueIndex = {
     byFileName: new Map(),
     byJestDirectory: new Map(),
     byScoutTestId: new Map(),
   };
-
   for (const details of issues) {
-    const { text, filePath, suiteFilePath, jestDirectory, scoutTestId } = details;
-    const fileNames = new Set(text.match(SOURCE_FILE_NAME) ?? []);
-    for (const named of [filePath, suiteFilePath]) {
-      if (named) {
-        fileNames.add(Path.basename(named));
-      }
-    }
-    for (const fileName of fileNames) {
-      addTo(index.byFileName, fileName, details);
-    }
-    if (jestDirectory) {
-      addTo(index.byJestDirectory, jestDirectory, details);
-    }
-    if (scoutTestId) {
-      addTo(index.byScoutTestId, scoutTestId, details);
-    }
+    addIssueToIndex(index, details);
   }
-
   return index;
 };
 
