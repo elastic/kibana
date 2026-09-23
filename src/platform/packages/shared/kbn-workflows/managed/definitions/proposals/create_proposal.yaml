@@ -1,5 +1,5 @@
 version: '1'
-name: Create investigation proposal
+name: Create proposal
 description: >
   Creates a proposal, gates it on a human decision unless the caller already
   resolved autonomy, records that decision, and runs the proposed action
@@ -13,7 +13,7 @@ description: >
   approver on a fresh gate.
 enabled: true
 tags:
-  - agentic-investigation-proposals
+  - proposals
 
 consts:
   # Must stay equal to `max-iterations.limit` on the loop below.

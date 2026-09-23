@@ -32,7 +32,7 @@ export const registerDismissProposalRoute = ({
       // worker, so it is gated exactly like approval.
       access: INTERNAL_ACCESS,
       security: { authz: { requiredPrivileges: [PROPOSALS_API_PRIVILEGE_MANAGE] } },
-      summary: 'Dismiss an investigation proposal',
+      summary: 'Dismiss a proposal',
     })
     .addVersion(
       {

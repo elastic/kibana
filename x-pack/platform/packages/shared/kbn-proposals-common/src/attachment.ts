@@ -6,4 +6,4 @@
  */
 
 /** Attachment type identifier registered with Agent Builder. */
-export const PROPOSAL_ATTACHMENT_TYPE = 'investigation_proposal' as const;
+export const PROPOSAL_ATTACHMENT_TYPE = 'platform.proposal' as const;

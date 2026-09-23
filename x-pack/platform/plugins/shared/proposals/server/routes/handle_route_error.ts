@@ -42,6 +42,6 @@ export const handleRouteError = (
   }
 
   const message = error instanceof Error ? error.message : String(error);
-  logger.error(`Investigation proposals route failed: ${message}`);
+  logger.error(`Proposals route failed: ${message}`);
   return response.customError({ statusCode: 500, body: { message } });
 };

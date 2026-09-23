@@ -8,25 +8,25 @@
 import { i18n } from '@kbn/i18n';
 
 export const APPROVAL_MODAL_TRANSLATIONS = Object.freeze({
-  warningLabel: i18n.translate('xpack.alertzero.approvalModal.warningLabel', {
+  warningLabel: i18n.translate('xpack.proposals.approvalModal.warningLabel', {
     defaultMessage: 'APPROVAL REQUIRED',
   }),
-  actionImpactTitle: i18n.translate('xpack.alertzero.approvalModal.actionImpactTitle', {
+  actionImpactTitle: i18n.translate('xpack.proposals.approvalModal.actionImpactTitle', {
     defaultMessage: 'Impact',
   }),
-  approve: i18n.translate('xpack.alertzero.approvalModal.approve', {
+  approve: i18n.translate('xpack.proposals.approvalModal.approve', {
     defaultMessage: 'Approve',
   }),
-  dismiss: i18n.translate('xpack.alertzero.approvalModal.dismiss', {
+  dismiss: i18n.translate('xpack.proposals.approvalModal.dismiss', {
     defaultMessage: 'Dismiss',
   }),
-  noAction: i18n.translate('xpack.alertzero.approvalModal.noAction', {
+  noAction: i18n.translate('xpack.proposals.approvalModal.noAction', {
     defaultMessage: 'No automated action',
   }),
-  modalAriaLabel: i18n.translate('xpack.alertzero.approvalModal.ariaLabel', {
+  modalAriaLabel: i18n.translate('xpack.proposals.approvalModal.ariaLabel', {
     defaultMessage: 'Approval required modal',
   }),
-  alwaysAllowAriaLabel: i18n.translate('xpack.alertzero.approvalModal.alwaysAllow.ariaLabel', {
+  alwaysAllowAriaLabel: i18n.translate('xpack.proposals.approvalModal.alwaysAllow.ariaLabel', {
     defaultMessage: 'Always allow this action',
   }),
 });

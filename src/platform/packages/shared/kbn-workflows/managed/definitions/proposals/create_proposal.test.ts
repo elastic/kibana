@@ -9,7 +9,7 @@
 
 import { parse } from 'yaml';
 import type { z } from '@kbn/zod/v4';
-import CREATE_INVESTIGATION_PROPOSAL_YAML from './create_investigation_proposal.yaml';
+import CREATE_PROPOSAL_YAML from './create_proposal.yaml';
 import {
   DataSetStepSchema,
   IfStepSchema,
@@ -53,7 +53,7 @@ interface ParsedWorkflow {
   steps: WorkflowStep[];
 }
 
-const workflow = parse(CREATE_INVESTIGATION_PROPOSAL_YAML) as ParsedWorkflow;
+const workflow = parse(CREATE_PROPOSAL_YAML) as ParsedWorkflow;
 
 const findStep = (steps: WorkflowStep[], name: string): WorkflowStep | undefined => {
   for (const step of steps) {

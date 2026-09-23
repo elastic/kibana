@@ -65,7 +65,7 @@ const registerAndCollect = (service: Partial<ProposalsService>) => {
   return { posts, gets, byPath };
 };
 
-describe('investigation proposals routes', () => {
+describe('proposals routes', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });

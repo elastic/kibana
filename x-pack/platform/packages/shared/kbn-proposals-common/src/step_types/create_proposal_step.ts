@@ -81,7 +81,7 @@ export const createProposalStepCommonDefinition: BaseStepDefinition<
 > = {
   id: CreateProposalStepId,
   label: i18n.translate('xpack.proposals.steps.createProposal.label', {
-    defaultMessage: 'Create investigation proposal',
+    defaultMessage: 'Create proposal',
   }),
   description: i18n.translate('xpack.proposals.steps.createProposal.description', {
     defaultMessage:

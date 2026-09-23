@@ -20,7 +20,7 @@ import {
 } from '../fixtures';
 
 apiTest.describe(
-  'POST /internal/investigations/proposals/{proposalId}/revisions',
+  'POST /internal/proposals/{proposalId}/revisions',
   // `agenticInvestigations.enabled` defaults to false and is turned on only by
   // this suite's local config, so the cloud half of `stateful.classic` would
   // exercise an unregistered route and still pass.

@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { CREATE_INVESTIGATION_PROPOSAL_WORKFLOW_ID } from '@kbn/workflows/managed';
+import { CREATE_PROPOSAL_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
@@ -31,13 +31,13 @@ export const initializeManagedWorkflows = async ({
   let canReconcile = true;
 
   try {
-    await client.install(CREATE_INVESTIGATION_PROPOSAL_WORKFLOW_ID, {
+    await client.install(CREATE_PROPOSAL_WORKFLOW_ID, {
       spaceId: GLOBAL_WORKFLOW_SPACE_ID,
     });
   } catch (error) {
     canReconcile = false;
     logger.error(
-      `Failed to install managed workflow "${CREATE_INVESTIGATION_PROPOSAL_WORKFLOW_ID}": ${
+      `Failed to install managed workflow "${CREATE_PROPOSAL_WORKFLOW_ID}": ${
         error instanceof Error ? error.message : String(error)
       }`
     );

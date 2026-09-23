@@ -24,7 +24,7 @@ export const registerGetProposalRoute = ({
       path: PROPOSAL_BY_ID_URL,
       access: INTERNAL_ACCESS,
       security: { authz: { requiredPrivileges: [PROPOSALS_API_PRIVILEGE_READ] } },
-      summary: 'Get an investigation proposal',
+      summary: 'Get a proposal',
     })
     .addVersion(
       {

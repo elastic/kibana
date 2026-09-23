@@ -9,8 +9,8 @@ import type { ApiClientFixture, ApiClientResponse } from '@kbn/scout';
 import type { Client } from '@elastic/elasticsearch';
 import { COMMON_HEADERS } from './constants';
 
-const PROPOSALS_PATH = 'internal/investigations/proposals';
-const PROPOSALS_INDEX_ALIAS = '.kibana-investigation-proposals';
+const PROPOSALS_PATH = 'internal/proposals';
+const PROPOSALS_INDEX_ALIAS = '.kibana-proposals';
 const PROPOSALS_WRITE_INDEX = `${PROPOSALS_INDEX_ALIAS}-000001`;
 
 const IMPACT_RANK: Record<string, number> = { critical: 0, high: 1, medium: 2, low: 3 };

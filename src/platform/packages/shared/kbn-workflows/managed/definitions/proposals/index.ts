@@ -7,7 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  CREATE_INVESTIGATION_PROPOSAL_WORKFLOW,
-  CREATE_INVESTIGATION_PROPOSAL_WORKFLOW_ID,
-} from './create_investigation_proposal';
+export { CREATE_PROPOSAL_WORKFLOW, CREATE_PROPOSAL_WORKFLOW_ID } from './create_proposal';

@@ -11,12 +11,12 @@
  * system index registration. `anonymization` ships
  * `.kibana-anonymization-profiles` on the same reasoning.
  */
-export const PROPOSALS_INDEX_NAME = '.kibana-investigation-proposals' as const;
+export const PROPOSALS_INDEX_NAME = '.kibana-proposals' as const;
 
 /** Shared by every route, so a caller versions the whole surface at once. */
 export const PROPOSALS_API_VERSION = '1' as const;
 
-export const PROPOSALS_INTERNAL_URL = '/internal/investigations/proposals' as const;
+export const PROPOSALS_INTERNAL_URL = '/internal/proposals' as const;
 export const PROPOSAL_BY_ID_URL = `${PROPOSALS_INTERNAL_URL}/{id}` as const;
 export const PROPOSAL_APPROVE_URL = `${PROPOSALS_INTERNAL_URL}/{id}/approve` as const;
 export const PROPOSAL_DISMISS_URL = `${PROPOSALS_INTERNAL_URL}/{id}/dismiss` as const;
@@ -53,4 +53,4 @@ export const PROPOSALS_UI_CAPABILITY_SHOW = 'showProposals' as const;
 export const PROPOSALS_UI_CAPABILITY_DECIDE = 'decideProposals' as const;
 
 /** Channel recorded on the workflow resume, for audit. */
-export const PROPOSALS_RESUME_CHANNEL = 'investigation_proposals_api' as const;
+export const PROPOSALS_RESUME_CHANNEL = 'proposals_api' as const;

@@ -61,7 +61,7 @@ All checks **fail closed**, including when the `security` plugin is absent entir
 
 ### Model
 
-- A **proposal** is a recommendation awaiting a human decision. It lives in `.kibana-investigation-proposals` and points at the conversation it belongs to.
+- A **proposal** is a recommendation awaiting a human decision. It lives in `.kibana-proposals` and points at the conversation it belongs to.
 - An **action proposal** additionally references a managed **action workflow** (`actionWorkflowId`) plus its `actionInput`. Approving it runs that workflow.
 - A **non-action proposal** carries only its `comment` — instructions the analyst carries out themselves before approving. It is always gated: autonomy governs whether an action may run unattended, and there is no action here to govern, so `autoApprove` is ignored.
 - Proposals are immutable once **decided**. An undecided proposal can still be **revised**: `revise()` supersedes the current head with a new revision that carries the correction, and the gate decides whichever revision is live when the analyst answers. The predecessor is marked `superseded` and hidden from the queue by `excludeSuperseded`, so a chain shows one live row at a time.
@@ -140,9 +140,9 @@ flowchart TB
 
     subgraph proposals["proposals (this plugin)"]
         steps["proposals.createProposal<br/>proposals.updateProposal<br/>proposals.checkDecidePrivileges<br/>proposals.getProposal<br/>proposals.cloneProposal"]
-        api["Internal HTTP API<br/>/internal/investigations/proposals"]
+        api["Internal HTTP API<br/>/internal/proposals"]
         service["ProposalsService<br/><i>the only writer</i>"]
-        gate["system-create-investigation-proposal<br/><i>managed gate workflow</i>"]
+        gate["system-create-proposal<br/><i>managed gate workflow</i>"]
     end
 
     subgraph platform["Workflows platform"]
@@ -151,7 +151,7 @@ flowchart TB
         catalog["Action workflow catalog<br/><i>tagged `action`</i>"]
     end
 
-    index[(".kibana-investigation-proposals")]
+    index[(".kibana-proposals")]
 
     worker -->|"ai.agent"| agent
     agent -->|"reads the catalog<br/>to pick an action"| catalog
@@ -253,7 +253,7 @@ Call the gate workflow; do not write proposals directly.
 - name: propose_action
   type: workflow.execute
   with:
-    workflow-id: system-create-investigation-proposal
+    workflow-id: system-create-proposal
     inputs:
       conversationId: '{{ steps.investigate.output.conversation_id }}'
       comment: 'Tune the noisy rule that produced this alert'
@@ -308,14 +308,14 @@ See `definitions/alertzero/actions/action_create_detection_rule.yaml` for a work
 
 ### API
 
-All routes are internal and versioned (`/internal/investigations/proposals`, version `1`):
+All routes are internal and versioned (`/internal/proposals`, version `1`):
 
-- `GET /internal/investigations/proposals` — list (filter by `status`, `decision`, `conversationId`, `excludeSuperseded`, `excludeExpired`; paged with `from` and `size`)
-- `GET /internal/investigations/proposals/{id}` — read one, with action metadata resolved
-- `POST /internal/investigations/proposals/{id}/approve` — release the gate positively
-- `POST /internal/investigations/proposals/{id}/dismiss` — annotate the reason, then release the gate negatively
-- `POST /internal/investigations/proposals/{proposalId}/revisions` — supersede the current head with a corrected revision, which becomes the proposal the gate decides
-- `GET /internal/investigations/proposals/charts-summary` — aggregate counts for the queue's charts
+- `GET /internal/proposals` — list (filter by `status`, `decision`, `conversationId`, `excludeSuperseded`, `excludeExpired`; paged with `from` and `size`)
+- `GET /internal/proposals/{id}` — read one, with action metadata resolved
+- `POST /internal/proposals/{id}/approve` — release the gate positively
+- `POST /internal/proposals/{id}/dismiss` — annotate the reason, then release the gate negatively
+- `POST /internal/proposals/{proposalId}/revisions` — supersede the current head with a corrected revision, which becomes the proposal the gate decides
+- `GET /internal/proposals/charts-summary` — aggregate counts for the queue's charts
 
 Reads and the chart summary need `read_proposals`; both decisions and a revision need `manage_proposals`.
 
@@ -372,15 +372,15 @@ Registering the owner is not optional. The startup sweep `cleanupUnregisteredOrp
 
 ## Index naming
 
-`.kibana-investigation-proposals` is permanent. `.kibana*` is already granted to the `kibana_system` role, so the index needs no Elasticsearch-side system index registration — a dedicated prefix such as `.proposals` would. `anonymization` ships `.kibana-anonymization-profiles` on the same reasoning.
+`.kibana-proposals` is permanent. `.kibana*` is already granted to the `kibana_system` role, so the index needs no Elasticsearch-side system index registration — a dedicated prefix such as `.proposals` would. `anonymization` ships `.kibana-anonymization-profiles` on the same reasoning.
 
 ## Testing the gate workflow
 
 Three layers, because no single one reaches the whole thing.
 
-**YAML shape** — `kbn-workflows/managed/definitions/proposals/create_investigation_proposal.test.ts` parses the definition and asserts how the loop is wired: that the privilege check precedes every write, that each settle branch breaks, that no condition mixes `and` with `or`. Cheap and fast, but it only sees structure.
+**YAML shape** — `kbn-workflows/managed/definitions/proposals/create_proposal.test.ts` parses the definition and asserts how the loop is wired: that the privilege check precedes every write, that each settle branch breaks, that no condition mixes `and` with `or`. Cheap and fast, but it only sees structure.
 
-**Loop behaviour** — `integration_tests/create_investigation_proposal.test.ts` runs the **shipped YAML through the real execution engine**, with Elasticsearch replaced by a Map and the real `ProposalsService` behind it:
+**Loop behaviour** — `integration_tests/create_proposal.test.ts` runs the **shipped YAML through the real execution engine**, with Elasticsearch replaced by a Map and the real `ProposalsService` behind it:
 
 ```bash
 node scripts/jest_integration --config x-pack/platform/plugins/shared/proposals/integration_tests/jest.integration.config.js
@@ -417,9 +417,9 @@ The point of the exercise is the identity behaviour: a rule created by an approv
 
 **Steps:**
 
-1. Start Kibana. On start this plugin installs `system-create-investigation-proposal` globally, and `alertzero` installs `system-alertzero-action-create-rule` and `system-alertzero-action-edit-rule`. Confirm all three appear in Workflows management, and that the log contains no `orphan_cleanup` deletion for them.
+1. Start Kibana. On start this plugin installs `system-create-proposal` globally, and `alertzero` installs `system-alertzero-action-create-rule` and `system-alertzero-action-edit-rule`. Confirm all three appear in Workflows management, and that the log contains no `orphan_cleanup` deletion for them.
 2. Trigger the gate workflow directly with `conversationId`, `actionWorkflowId: system-alertzero-action-create-rule`, and an `actionInput` carrying `name`, `description`, `query` and `index`.
-3. Confirm the record: `GET .kibana-investigation-proposals/_search` should show `status: pending` with **no `decision` field**, `category: tune`, the `actionWorkflowId`, and a `workflowExecutionId` pointing at a gate execution that is `waiting_for_input`.
+3. Confirm the record: `GET .kibana-proposals/_search` should show `status: pending` with **no `decision` field**, `category: tune`, the `actionWorkflowId`, and a `workflowExecutionId` pointing at a gate execution that is `waiting_for_input`.
 4. Approve from the AlertZero app (`/app/alertzero`) — under "Awaiting your decision" on the landing page, or the investigation's Proposals tab.
 5. Assert the outcome: the proposal reaches `decision: approved` with `status: succeeded`; a **disabled** rule with that name exists (`security.createRule` always creates rules disabled); **`created_by` on the rule is the approver**, not whoever triggered the gate; and the `waitForApproval` step execution carries `hitl.respondedBy`.
 6. Repeat in a non-default space. Space scoping is invisible in `default`: every query filters on `spaceId`, and a missing filter would only show up elsewhere.

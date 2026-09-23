@@ -7,10 +7,7 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ExecutionStatus } from '@kbn/workflows';
-import {
-  CREATE_INVESTIGATION_PROPOSAL_WORKFLOW_ID,
-  getManagedWorkflowDefinition,
-} from '@kbn/workflows/managed';
+import { CREATE_PROPOSAL_WORKFLOW_ID, getManagedWorkflowDefinition } from '@kbn/workflows/managed';
 import { WorkflowRunFixture } from '@kbn/workflows-execution-engine/test_helpers';
 import type { Proposal } from '@kbn/proposals-common';
 import type { ProposalDocument, ProposalsStorageClient } from '../server/storage/proposals_storage';
@@ -30,9 +27,9 @@ import { registerStepDefinitionsForTest } from './register_step_definitions_for_
  * test next to the definition in `@kbn/workflows` is what closes that gap.
  */
 export const gateWorkflowYaml = (): string => {
-  const definition = getManagedWorkflowDefinition(CREATE_INVESTIGATION_PROPOSAL_WORKFLOW_ID);
+  const definition = getManagedWorkflowDefinition(CREATE_PROPOSAL_WORKFLOW_ID);
   if (!definition || !('yaml' in definition) || typeof definition.yaml !== 'string') {
-    throw new Error(`Managed definition ${CREATE_INVESTIGATION_PROPOSAL_WORKFLOW_ID} has no yaml`);
+    throw new Error(`Managed definition ${CREATE_PROPOSAL_WORKFLOW_ID} has no yaml`);
   }
   return definition.yaml;
 };

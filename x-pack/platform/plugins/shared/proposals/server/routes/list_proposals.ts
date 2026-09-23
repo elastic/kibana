@@ -25,7 +25,7 @@ export const registerListProposalsRoute = ({
       path: PROPOSALS_INTERNAL_URL,
       access: INTERNAL_ACCESS,
       security: { authz: { requiredPrivileges: [PROPOSALS_API_PRIVILEGE_READ] } },
-      summary: 'List investigation proposals',
+      summary: 'List proposals',
     })
     .addVersion(
       {

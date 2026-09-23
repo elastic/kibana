@@ -30,7 +30,7 @@ export const registerReviseProposalRoute = ({
       path: PROPOSAL_REVISIONS_URL,
       access: INTERNAL_ACCESS,
       security: { authz: { requiredPrivileges: [PROPOSALS_API_PRIVILEGE_MANAGE] } },
-      summary: 'Revise an investigation proposal',
+      summary: 'Revise a proposal',
     })
     .addVersion(
       {

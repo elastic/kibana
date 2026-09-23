@@ -34,7 +34,7 @@ export const registerApproveProposalRoute = ({
       path: PROPOSAL_APPROVE_URL,
       access: INTERNAL_ACCESS,
       security: { authz: { requiredPrivileges: [PROPOSALS_API_PRIVILEGE_MANAGE] } },
-      summary: 'Approve an investigation proposal',
+      summary: 'Approve a proposal',
     })
     .addVersion(
       {

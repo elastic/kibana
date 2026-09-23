@@ -8,16 +8,16 @@
  */
 
 import { PROPOSALS_MANAGED_WORKFLOW_PLUGIN_ID, PROPOSALS_WORKFLOW_MANAGEMENT } from './constants';
-import CREATE_INVESTIGATION_PROPOSAL_YAML from './create_investigation_proposal.yaml';
+import CREATE_PROPOSAL_YAML from './create_proposal.yaml';
 import type { ManagedWorkflowDefinition } from '../../types';
 
-export const CREATE_INVESTIGATION_PROPOSAL_WORKFLOW_ID = 'system-create-investigation-proposal';
+export const CREATE_PROPOSAL_WORKFLOW_ID = 'system-create-proposal';
 
-export const CREATE_INVESTIGATION_PROPOSAL_WORKFLOW = {
+export const CREATE_PROPOSAL_WORKFLOW = {
   billable: false,
-  id: CREATE_INVESTIGATION_PROPOSAL_WORKFLOW_ID,
+  id: CREATE_PROPOSAL_WORKFLOW_ID,
   management: PROPOSALS_WORKFLOW_MANAGEMENT,
   pluginId: PROPOSALS_MANAGED_WORKFLOW_PLUGIN_ID,
   version: 1,
-  yaml: CREATE_INVESTIGATION_PROPOSAL_YAML,
+  yaml: CREATE_PROPOSAL_YAML,
 } as const satisfies ManagedWorkflowDefinition;

@@ -39,7 +39,7 @@ const formatProposalForAgent = (data: ProposalAttachmentData): string => {
     'No automated action — analyst carries this out themselves';
 
   const lines: string[] = [
-    `## Investigation proposal: ${label}`,
+    `## Proposal: ${label}`,
     `Status: ${data.status}`,
     data.expired ? 'EXPIRED: the decision deadline has passed' : '',
     '',
@@ -64,7 +64,7 @@ const formatProposalForAgent = (data: ProposalAttachmentData): string => {
 };
 
 /**
- * Server-side attachment type definition for investigation proposals.
+ * Server-side attachment type definition for proposals.
  *
  * `isReadonly: true` prevents the agent from creating or updating proposal
  * attachments with `attachment_add` / `attachment_update` — they are created
@@ -91,8 +91,8 @@ export const proposalAttachmentType: AttachmentTypeDefinition = {
   }),
 
   getAgentDescription: () =>
-    'An investigation proposal is a structured recommendation from the security agent that ' +
-    'requires a human decision before any action is taken.\n\n' +
+    'A proposal is a structured recommendation from an agent that requires a human decision ' +
+    'before any action is taken.\n\n' +
     'Rules:\n' +
     "- Never approve, dismiss, or re-create a proposal yourself — that is exclusively the analyst's decision.\n" +
     '- Whenever you mention or summarise a proposal in your response, render it inline with ' +
