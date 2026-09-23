@@ -49,11 +49,11 @@ Each positive example carries a partial Lens Config API gold (`config`): chart `
 
 ### What a gold `config` can assert
 
-The gold is split between two evaluators. Chart Type vs Intent (LLM) reads `type`, `layers[].type`, and `spec.mark` and asks a judge whether the produced chart form satisfies the prompt, with the gold as a reference for intent. Config vs Intent (code) walks every other leaf and turns it into one deterministic assertion. Keys the gold does not mention are never checked, so the gold only needs to spell out what the prompt actually pins down.
+The gold is split between two evaluators. Chart Type vs Intent (LLM) reads `type`, `layers[].type`, `spec.mark`, and `spec.layer[].mark` and asks a judge whether the produced chart form satisfies the prompt, with the gold as a reference for intent. Config vs Intent (code) walks every other leaf and turns it into one deterministic assertion. Keys the gold does not mention are never checked, so the gold only needs to spell out what the prompt actually pins down.
 
 | Gold leaf | Evaluator | How it is compared | Example |
 | --- | --- | --- | --- |
-| root `type` / `layers[].type` / `spec.mark` | Chart Type vs Intent (LLM) | judge decides whether the produced form is the kind of chart the user asked for; `['a', 'b']` lists acceptable alternatives. A `type` anywhere else (e.g. Vega `encoding.x.type`) is an ordinary string leaf | `type: 'xy'`, `layers[0].type: ['bar', 'bar_horizontal']`, Vega `mark: 'point'` |
+| root `type` / `layers[].type` / `spec.mark` / `spec.layer[].mark` | Chart Type vs Intent (LLM) | judge decides whether the produced form is the kind of chart the user asked for; `['a', 'b']` lists acceptable alternatives. A `type` anywhere else (e.g. Vega `encoding.x.type`) is an ordinary string leaf | `type: 'xy'`, `layers[0].type: ['bar', 'bar_horizontal']`, Vega `mark: 'point'` |
 | `{ column }` / `{ field }` | Config vs Intent | resolved through the ES\|QL alias map, so wording differs freely | gold `y: [{ column: 'Request Count' }]` matches actual `y: [{ column: 'count' }]` when both alias `COUNT(*)` |
 | any other string | Config vs Intent | strict equality, case-sensitive | `title: 'Total Requests'` |
 | number / boolean / null | Config vs Intent | strict equality | `sampling: 1`, `ignore_global_filters: false` |

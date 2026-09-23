@@ -19,14 +19,16 @@ export const VISUALIZATION_CONFIG_VS_INTENT_EVALUATOR_NAME = 'Visualization Conf
 
 const COLUMN_KEYS = new Set(['column', 'field']);
 const LAYER_PATH = /^layers\[\d+\]$/;
+const SPEC_LAYER_PATH = /^spec\.layer\[\d+\]$/;
 
 // `data_source` is scored by the ES|QL evaluators. The chart form the Chart Type vs
-// Intent judge owns is the root `type`, `layers[].type`, and Vega `spec.mark`; a `type`
-// anywhere else (e.g. `spec.encoding.x.type`) is an ordinary leaf.
+// Intent judge owns is the root `type`, `layers[].type`, and the Vega `spec.mark` /
+// `spec.layer[].mark`; a `type` anywhere else (e.g. `spec.encoding.x.type`) is an
+// ordinary leaf.
 const isSkippedKey = (path: string, key: string): boolean =>
   key === 'data_source' ||
   (key === 'type' && (path === '' || LAYER_PATH.test(path))) ||
-  (key === 'mark' && path === 'spec');
+  (key === 'mark' && (path === 'spec' || SPEC_LAYER_PATH.test(path)));
 
 interface MatchReport {
   checked: number;
@@ -45,7 +47,8 @@ const mergeReports = (target: MatchReport, source: MatchReport): void => {
  * visualization and scores the fraction of gold leaf assertions that hold.
  * Leaves are `column` / `field` bindings (alias-tolerant) and string / number /
  * boolean / null values (strict equality). The chart form (root `type`,
- * `layers[].type`, `spec.mark`) is left to the Chart Type vs Intent judge.
+ * `layers[].type`, `spec.mark`, `spec.layer[].mark`) is left to the Chart Type
+ * vs Intent judge.
  * Keys absent from gold are never checked, so
  * titles, styling, and alias wording are ignored unless the gold spells them out.
  */

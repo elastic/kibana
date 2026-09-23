@@ -27,6 +27,8 @@ export interface ActualChartForm {
   renderer?: VisualizationRenderer;
   layerTypes: string[];
   mark?: string;
+  /** Marks of a layered Vega-Lite spec (`layer[].mark`). */
+  layerMarks?: string[];
 }
 
 // A type alias (not an interface) so it satisfies the tool callback's Record<string, unknown> response.
@@ -173,33 +175,44 @@ export function describeActualChartForm(visualization: ExtractedVisualization): 
     isRecord(layer) && typeof layer.type === 'string' ? [layer.type] : []
   );
 
+  const { mark, layerMarks } = readVegaMarks(config.spec);
   return {
     chartType: visualization.chartType,
     renderer: visualization.renderer,
     layerTypes,
-    mark: readVegaMark(config.spec),
+    mark,
+    ...(layerMarks.length === 0 ? {} : { layerMarks }),
   };
 }
 
-function readVegaMark(spec: unknown): string | undefined {
-  if (typeof spec !== 'string') {
+const markOf = (node: unknown): string | undefined => {
+  if (!isRecord(node)) {
     return undefined;
+  }
+  if (typeof node.mark === 'string') {
+    return node.mark;
+  }
+  return isRecord(node.mark) && typeof node.mark.type === 'string' ? node.mark.type : undefined;
+};
+
+function readVegaMarks(spec: unknown): { mark?: string; layerMarks: string[] } {
+  if (typeof spec !== 'string') {
+    return { layerMarks: [] };
   }
   try {
     const parsed: unknown = JSON.parse(spec);
     if (!isRecord(parsed)) {
-      return undefined;
+      return { layerMarks: [] };
     }
-    if (typeof parsed.mark === 'string') {
-      return parsed.mark;
-    }
-    if (isRecord(parsed.mark) && typeof parsed.mark.type === 'string') {
-      return parsed.mark.type;
-    }
+    const layerMarks = (Array.isArray(parsed.layer) ? parsed.layer : []).flatMap((layer) => {
+      const layerMark = markOf(layer);
+      return layerMark === undefined ? [] : [layerMark];
+    });
+    return { mark: markOf(parsed), layerMarks };
   } catch {
     // Not JSON; no mark to report.
+    return { layerMarks: [] };
   }
-  return undefined;
 }
 
 /**

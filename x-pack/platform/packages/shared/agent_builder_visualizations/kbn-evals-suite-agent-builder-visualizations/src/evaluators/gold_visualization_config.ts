@@ -45,7 +45,12 @@ export interface GoldChartForm {
   chartType?: string | string[];
   layerTypes?: Array<string | string[]>;
   mark?: string | string[];
+  /** Marks of a layered Vega-Lite spec (`spec.layer[].mark`). */
+  layerMarks?: Array<string | string[]>;
 }
+
+const readMark = (node: Record<string, unknown>): string | string[] | undefined =>
+  asStringOrStringArray(node.mark) ?? asStringOrStringArray(asRecord(node.mark).type);
 
 export function extractGoldChartForm(expected: unknown): GoldChartForm | undefined {
   const output = asRecord(expected);
@@ -56,15 +61,25 @@ export function extractGoldChartForm(expected: unknown): GoldChartForm | undefin
     return layerType === undefined ? [] : [layerType];
   });
   const spec = asRecord(config.spec);
-  const mark = asStringOrStringArray(spec.mark) ?? asStringOrStringArray(asRecord(spec.mark).type);
+  const mark = readMark(spec);
+  const layerMarks = (Array.isArray(spec.layer) ? spec.layer : []).flatMap((layer) => {
+    const layerMark = readMark(asRecord(layer));
+    return layerMark === undefined ? [] : [layerMark];
+  });
 
-  if (chartType === undefined && layerTypes.length === 0 && mark === undefined) {
+  if (
+    chartType === undefined &&
+    layerTypes.length === 0 &&
+    mark === undefined &&
+    layerMarks.length === 0
+  ) {
     return undefined;
   }
   return {
     ...(chartType === undefined ? {} : { chartType }),
     ...(layerTypes.length === 0 ? {} : { layerTypes }),
     ...(mark === undefined ? {} : { mark }),
+    ...(layerMarks.length === 0 ? {} : { layerMarks }),
   };
 }
 
