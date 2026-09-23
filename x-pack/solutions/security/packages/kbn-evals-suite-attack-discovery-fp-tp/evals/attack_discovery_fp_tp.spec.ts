@@ -53,7 +53,14 @@ interface AttackDiscoveryExample extends Example {
 }
 
 const corpusDataset = (name: CorpusName): EvaluationDataset => {
-  const examples = loadCorpusExamples(name) as AttackDiscoveryExample[];
+  const all = loadCorpusExamples(name) as AttackDiscoveryExample[];
+  // Live-run cap: a full 1,017-case sweep cannot complete inside the eval runner's
+  // 30-min test timeout (run7 timed out at ~case 433 of guide-sanity alone). A
+  // deterministic head slice per corpus completes and yields honest per-corpus
+  // verdicts; raise MAX_EXAMPLES_PER_CORPUS (or set it above any corpus size) for
+  // a full sweep on a longer timeout.
+  const max = Number(process.env.FP_TP_MAX_EXAMPLES_PER_CORPUS ?? 20);
+  const examples = Number.isFinite(max) && max > 0 ? all.slice(0, max) : all;
   return {
     name: `security: attack-discovery-fp-tp ${name}`,
     description: `${examples.length} labeled ${name} cases graded against the review verdict.`,
