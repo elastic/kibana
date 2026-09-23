@@ -184,6 +184,8 @@ triggers:
 
 # Structured output emitted by the `emit_workflow_output` step at the end of each run.
 # Always present, even when analysis is skipped (empty arrays / zero counts).
+# On the standalone path, Worker-gated fields (verdicts, summaries, impact entities, etc.)
+# stay empty even when tags/notes ran — see the emit_workflow_output step comment.
 # Declared in JSON Schema object form, not the legacy `- name: / type:` list. The legacy
 # converter hardcodes array items to `anyOf: [string, number, boolean]`
 # (field_conversion.ts), so an array of objects cannot be expressed in it: `verdicts` would
