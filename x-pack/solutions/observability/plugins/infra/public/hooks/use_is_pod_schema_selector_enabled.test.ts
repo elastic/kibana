@@ -8,8 +8,8 @@
 import { renderHook } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import {
-  INFRA_POD_SCHEMA_SELECTOR_DEFAULT,
-  INFRA_POD_SCHEMA_SELECTOR_FEATURE_FLAG,
+  OBSERVABILITY_INFRA_POD_SCHEMA_SELECTOR_ENABLED_DEFAULT,
+  OBSERVABILITY_INFRA_POD_SCHEMA_SELECTOR_ENABLED_FEATURE_FLAG,
 } from '../../common/pod_schema_selector_feature_flag';
 import { useIsPodSchemaSelectorEnabled } from './use_is_pod_schema_selector_enabled';
 import { useKibanaContextForPlugin } from './use_kibana';
@@ -50,8 +50,8 @@ describe('useIsPodSchemaSelectorEnabled', () => {
 
     expect(result.current).toBe(false);
     expect(useBooleanValue).toHaveBeenCalledWith(
-      INFRA_POD_SCHEMA_SELECTOR_FEATURE_FLAG,
-      INFRA_POD_SCHEMA_SELECTOR_DEFAULT
+      OBSERVABILITY_INFRA_POD_SCHEMA_SELECTOR_ENABLED_FEATURE_FLAG,
+      OBSERVABILITY_INFRA_POD_SCHEMA_SELECTOR_ENABLED_DEFAULT
     );
   });
 
