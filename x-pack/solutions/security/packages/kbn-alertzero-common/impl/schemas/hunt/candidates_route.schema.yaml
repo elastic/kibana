@@ -28,6 +28,8 @@ paths:
                   maxItems: 10
                   items:
                     type: string
+                    minLength: 1
+                    maxLength: 512
                 limit:
                   type: integer
                   minimum: 1

@@ -29,10 +29,15 @@ interface StoredReportSource {
 const isHuntIoc = (ioc: { type?: string; value?: string }): ioc is HuntIoc =>
   typeof ioc.value === 'string' && ioc.value.length > 0 && HuntIocType.safeParse(ioc.type).success;
 
+/** Matches the OpenAPI `text` maxLength on hunt_behavior / hunt_coordinator. */
+export const MAX_HUNT_REPORT_TEXT_CHARS = 200_000;
+
 /**
  * Loads the hunt inputs for one report from `.kibana-threat-reports`, scoped to
  * the acting space. Returns null when the report is not visible there. IOC
  * kinds Tier 1 cannot map to an ECS field (for example `user`) are dropped.
+ * Report body text is clamped to the same maxLength the HTTP schemas enforce,
+ * so a large stored `content.body_text` cannot bypass the Tier 2 input bound.
  */
 export const loadReportHuntContext = async ({
   esClient,
@@ -57,12 +62,16 @@ export const loadReportHuntContext = async ({
   const source = response.hits.hits[0]?._source;
   if (!source) return null;
 
-  const text = source.content?.body_text;
+  const rawText = source.content?.body_text;
+  const text =
+    typeof rawText === 'string' && rawText.length > 0
+      ? rawText.slice(0, MAX_HUNT_REPORT_TEXT_CHARS)
+      : undefined;
   return {
     iocs: (source.extracted?.iocs ?? [])
       .filter(isHuntIoc)
       .map(({ type, value }) => ({ type, value })),
     techniques: source.extracted?.ttps?.techniques ?? [],
-    ...(typeof text === 'string' && text.length > 0 ? { text } : {}),
+    ...(text !== undefined ? { text } : {}),
   };
 };

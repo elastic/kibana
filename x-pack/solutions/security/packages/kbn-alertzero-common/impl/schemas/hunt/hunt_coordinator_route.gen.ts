@@ -28,12 +28,14 @@ export const HuntCoordinatorStatusEnum = HuntCoordinatorStatus.enum;
 export const HuntCoordinatorRequestBody = lazySchema(() =>
   z
     .object({
-      report_id: z.string().optional(),
+      report_id: z.string().min(1).max(512).optional(),
       /**
        * Run id supplied by the Worker fan-out so every child of one sweep shares it, which is what the packaging barrier and the conclusion dedupe key off. The route mints one only when the caller has no sweep to tie the run to.
        */
       run_id: z
         .string()
+        .min(1)
+        .max(128)
         .optional()
         .describe(
           'Run id supplied by the Worker fan-out so every child of one sweep shares it, which is what the packaging barrier and the conclusion dedupe key off. The route mints one only when the caller has no sweep to tie the run to.'
@@ -50,19 +52,19 @@ export const HuntCoordinatorRequestBody = lazySchema(() =>
           'One of the HuntTechnology values to pin the hunt to that technology\'s index scope. Omit it, or send null or an empty string (a workflow renders an unset input as ""), and the coordinator resolves every known technology and hunts the ones whose required indices exist in the space. Any other value is a 400. Kept a plain string because a workflow caller cannot omit the key.'
         ),
       text: z.string().max(200000).optional(),
-      iocs: z.array(HuntIoc).optional(),
-      techniques: z.array(z.string()).optional(),
+      iocs: z.array(HuntIoc).max(100).optional(),
+      techniques: z.array(z.string().min(1).max(32)).max(100).optional(),
       time_range: z
         .object({
-          from: z.string(),
-          to: z.string(),
+          from: z.string().min(1).max(64),
+          to: z.string().min(1).max(64),
         })
         .optional(),
-      size: z.number().int().min(1).optional(),
-      max_assets: z.number().int().min(1).optional(),
+      size: z.number().int().min(1).max(100).optional(),
+      max_assets: z.number().int().min(1).max(200).optional(),
       llm_confidence_threshold: z.number().min(0).max(1).optional(),
       tier2_when: z.enum(['on_hits', 'always', 'never']).optional(),
-      max_tier2_sample_events: z.number().int().min(1).optional(),
+      max_tier2_sample_events: z.number().int().min(1).max(50).optional(),
       trigger: z.enum(['manual', 'scheduled']),
     })
     .strict()

@@ -28,12 +28,15 @@ paths:
                   maxLength: 200000
                 report_id:
                   type: string
+                  minLength: 1
+                  maxLength: 512
                 llm_confidence_threshold:
                   type: number
                   minimum: 0
                   maximum: 1
                 iocs:
                   type: array
+                  maxItems: 100
                   items:
                     $ref: '#/components/schemas/HuntBehaviorIoc'
                 article_context:
@@ -145,8 +148,12 @@ components:
       properties:
         type:
           type: string
+          minLength: 1
+          maxLength: 64
         value:
           type: string
+          minLength: 1
+          maxLength: 2048
 
     HuntBehaviorArticleContext:
       type: object
@@ -156,37 +163,53 @@ components:
       properties:
         matched_indices:
           type: array
+          maxItems: 50
           items:
             type: string
+            maxLength: 512
         affected_hosts:
           type: array
+          maxItems: 50
           items:
             type: string
+            maxLength: 512
         affected_users:
           type: array
+          maxItems: 50
           items:
             type: string
+            maxLength: 512
         sample_events:
           type: array
+          maxItems: 50
           items:
             type: string
+            maxLength: 2048
         time_range:
           type: object
           required: [from, to]
           properties:
             from:
               type: string
+              minLength: 1
+              maxLength: 64
             to:
               type: string
+              minLength: 1
+              maxLength: 64
         proposed_atomic_rules:
           type: array
+          maxItems: 50
           items:
             type: object
             required: [rule_name, ioc_type, ioc_value]
             properties:
               rule_name:
                 type: string
+                maxLength: 512
               ioc_type:
                 type: string
+                maxLength: 64
               ioc_value:
                 type: string
+                maxLength: 2048

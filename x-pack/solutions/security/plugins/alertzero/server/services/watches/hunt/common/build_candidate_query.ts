@@ -128,12 +128,14 @@ export const buildCandidateQuery = async (
       query: { bool: { filter: filterClauses } },
     });
   } catch (err) {
+    // Fail closed by throwing: an empty 200 would look like "no reports to hunt"
+    // and hide a broken reports index from the Worker / operator.
     logger.error(
       `build_candidate_query: ES search failed, refusing to select candidates. ${
         (err as Error).message
       }`
     );
-    return { ids: [], skipped: [], total: 0, truncated: false };
+    throw err;
   }
 
   const hits = response.hits.hits ?? [];

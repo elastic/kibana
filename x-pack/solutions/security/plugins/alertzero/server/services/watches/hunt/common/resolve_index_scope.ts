@@ -99,11 +99,13 @@ export const resolveIndexScope = async ({
     }
   }
 
-  const hasResolvedRequired = requiredResults.some(([, present]) => present);
+  // Every required pattern must resolve; `.some` would mark a multi-required
+  // technology `ok`/`degraded` while still listing a missing required pattern.
+  const hasAllRequired = requiredResults.every(([, present]) => present);
   const missingOptionalCount = optionalResults.filter(([, present]) => !present).length;
 
   let status: ResolvedIndexScope['status'];
-  if (!hasResolvedRequired) {
+  if (!hasAllRequired) {
     status = 'blocked';
   } else if (missingOptionalCount > 0) {
     status = 'degraded';

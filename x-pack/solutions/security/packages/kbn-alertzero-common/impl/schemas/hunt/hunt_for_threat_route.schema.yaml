@@ -27,23 +27,32 @@ paths:
                   $ref: '../components/hunt.schema.yaml#/components/schemas/HuntTechnology'
                 iocs:
                   type: array
+                  maxItems: 100
                   items:
                     $ref: '../components/hunt.schema.yaml#/components/schemas/HuntIoc'
                 techniques:
                   type: array
+                  maxItems: 100
                   items:
                     type: string
+                    minLength: 1
+                    maxLength: 32
                 timeRange:
                   type: object
                   required: [from, to]
                   properties:
                     from:
                       type: string
+                      minLength: 1
+                      maxLength: 64
                     to:
                       type: string
+                      minLength: 1
+                      maxLength: 64
                 size:
                   type: integer
                   minimum: 1
+                  maximum: 100
       responses:
         '200':
           description: Successful response

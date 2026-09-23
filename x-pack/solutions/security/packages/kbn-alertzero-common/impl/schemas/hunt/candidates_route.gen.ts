@@ -26,7 +26,7 @@ export const CandidateSkipReasonEnum = CandidateSkipReason.enum;
 export const CandidatesRequestBody = lazySchema(() =>
   z
     .object({
-      reportIds: z.array(z.string()).max(10).optional(),
+      reportIds: z.array(z.string().min(1).max(512)).max(10).optional(),
       limit: z.number().int().min(1).max(10).optional(),
     })
     .strict()

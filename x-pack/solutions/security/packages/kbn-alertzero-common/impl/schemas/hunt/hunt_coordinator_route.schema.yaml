@@ -26,8 +26,12 @@ paths:
               properties:
                 report_id:
                   type: string
+                  minLength: 1
+                  maxLength: 512
                 run_id:
                   type: string
+                  minLength: 1
+                  maxLength: 128
                   description: >-
                     Run id supplied by the Worker fan-out so every child of one
                     sweep shares it, which is what the packaging barrier and the
@@ -50,26 +54,36 @@ paths:
                   maxLength: 200000
                 iocs:
                   type: array
+                  maxItems: 100
                   items:
                     $ref: '../components/hunt.schema.yaml#/components/schemas/HuntIoc'
                 techniques:
                   type: array
+                  maxItems: 100
                   items:
                     type: string
+                    minLength: 1
+                    maxLength: 32
                 time_range:
                   type: object
                   required: [from, to]
                   properties:
                     from:
                       type: string
+                      minLength: 1
+                      maxLength: 64
                     to:
                       type: string
+                      minLength: 1
+                      maxLength: 64
                 size:
                   type: integer
                   minimum: 1
+                  maximum: 100
                 max_assets:
                   type: integer
                   minimum: 1
+                  maximum: 200
                 llm_confidence_threshold:
                   type: number
                   minimum: 0
@@ -80,6 +94,7 @@ paths:
                 max_tier2_sample_events:
                   type: integer
                   minimum: 1
+                  maximum: 50
                 trigger:
                   type: string
                   enum: [manual, scheduled]

@@ -216,6 +216,37 @@ describe('huntCoordinator', () => {
     );
   });
 
+  it('skips Tier 2 on_hits when only optional indices matched (no confirmed hit)', async () => {
+    const { huntForThreat: mockT1 } = jest.requireMock('./tier1/hunt_for_threat');
+    const { huntBehavior: mockT2 } = jest.requireMock('./tier2/hunt_behavior');
+    mockT2.mockClear();
+    mockT1.mockResolvedValueOnce({
+      status: 'environment_hits_found',
+      hasConfirmedHit: false,
+      searchedIocs: 1,
+      searchedTechniques: 0,
+      resolvedIocs: [],
+      resolvedTechniques: [],
+      timeRange: { from: 'now-24h', to: 'now' },
+      counts: { totalHits: 3, returnedHits: 3, affectedHosts: 0, affectedUsers: 0 },
+      hits: [],
+      affectedAssets: { hosts: [], users: [], services: [] },
+      perIndex: [{ index: '.alerts-security.alerts-default', hitCount: 3, required: false }],
+    });
+    const mockModel = {} as import('@kbn/agent-builder-server').ScopedModel;
+
+    const result = await huntCoordinator(esClient, mockModel, logger, {
+      spaceId: 'default',
+      trigger: 'scheduled',
+      runId: 'run-optional-only',
+      text: 'report text',
+      tier2_when: 'on_hits',
+    });
+
+    expect(result.tier2_skipped_reason).toBe('no_environment_hits');
+    expect(mockT2).not.toHaveBeenCalled();
+  });
+
   it('fails the run when Tier 2 throws', async () => {
     const { huntForThreat: mockT1 } = jest.requireMock('./tier1/hunt_for_threat');
     const { huntBehavior: mockT2 } = jest.requireMock('./tier2/hunt_behavior');
