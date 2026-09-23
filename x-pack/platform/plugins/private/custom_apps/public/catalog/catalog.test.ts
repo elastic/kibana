@@ -22,6 +22,7 @@ describe('customAppCatalog', () => {
     expect(extended.filter((name) => !base.includes(name)).sort()).toEqual([
       'Chart',
       'KbnLensPanel',
+      'KbnTimeFilter',
     ]);
   });
 

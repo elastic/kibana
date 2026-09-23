@@ -13,11 +13,15 @@ import type { ISearchGeneric } from '@kbn/search-types';
 /**
  * Catalog components receive only their resolved A2UI props, which is right for
  * pure UI but leaves Kibana-backed components with no way to reach services or
- * the page time range. This context is that channel — deliberately narrow, so
- * the surface a generated document can touch stays small.
+ * page-level state. This context is that channel — deliberately narrow, so the
+ * surface a generated document can touch stays small.
+ *
+ * The time range lives here rather than in a surface's data model because it is
+ * shared: one filter panel sets it and every query panel reads it.
  */
 export interface CustomAppServices {
   timeRange: TimeRange;
+  setTimeRange: (next: TimeRange) => void;
   search: ISearchGeneric;
   http: HttpStart;
 }

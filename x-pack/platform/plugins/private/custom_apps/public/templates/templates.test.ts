@@ -63,6 +63,29 @@ describe.each(CUSTOM_APP_TEMPLATES.map((t) => [t.name, t] as const))(
         expect(serialized).toContain(`"${query.path}`);
       }
     });
+
+    const componentsOf = (panelId: string) => {
+      const created = definition.surfaces[panelId]?.[0] as {
+        createSurface?: { components?: Array<{ component: string }> };
+      };
+      return (created?.createSurface?.components ?? []).map((c) => c.component);
+    };
+
+    it('renders its own title rather than relying on page chrome', () => {
+      // The top bar carries actions only, so an app with no heading of its own
+      // would render with nothing identifying it.
+      const headings = Object.keys(definition.surfaces).flatMap(componentsOf);
+      expect(headings).toContain('Text');
+      const serialized = JSON.stringify(definition.surfaces);
+      expect(serialized).toContain('"variant":"heading1"');
+    });
+
+    it('owns its time filter, exactly once', () => {
+      const pickers = Object.keys(definition.surfaces)
+        .flatMap(componentsOf)
+        .filter((name) => name === 'KbnTimeFilter');
+      expect(pickers).toHaveLength(1);
+    });
   }
 );
 

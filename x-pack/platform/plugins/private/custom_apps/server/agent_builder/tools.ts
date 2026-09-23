@@ -13,7 +13,11 @@ import { z } from '@kbn/zod/v4';
 import dedent from 'dedent';
 import euiCatalogSchema from '@kbn/a2ui-eui-catalog/catalog.json';
 import { describeCatalog } from '../../common/describe_catalog';
-import { CHART_SCHEMA, KBN_LENS_PANEL_SCHEMA } from '../../common/kbn_components_schema';
+import {
+  CHART_SCHEMA,
+  KBN_LENS_PANEL_SCHEMA,
+  KBN_TIME_FILTER_SCHEMA,
+} from '../../common/kbn_components_schema';
 import { PLUGIN_ID } from '../../common/constants';
 import { createCustomApp, InvalidCustomAppError, listCustomApps } from '../custom_app_service';
 
@@ -22,6 +26,7 @@ const fullCatalog = {
   components: {
     ...euiCatalogSchema.components,
     Chart: CHART_SCHEMA,
+    KbnTimeFilter: KBN_TIME_FILTER_SCHEMA,
     KbnLensPanel: KBN_LENS_PANEL_SCHEMA,
   },
 } as unknown as Parameters<typeof describeCatalog>[0];

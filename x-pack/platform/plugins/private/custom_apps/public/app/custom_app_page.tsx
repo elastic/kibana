@@ -12,7 +12,6 @@ import {
   EuiCallOut,
   EuiLoadingSpinner,
   EuiPageTemplate,
-  EuiSuperDatePicker,
 } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -28,6 +27,7 @@ import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../../common/constant
 import type { CustomAppClient } from './custom_app_client';
 import { CustomAppGrid } from './custom_app_grid';
 import { PanelEditorFlyout } from './panel_editor_flyout';
+import { AppEditorFlyout } from './app_editor_flyout';
 import { createActionHandler } from './handle_action';
 
 export interface CustomAppPageProps {
@@ -64,6 +64,7 @@ export function CustomAppPage({ core, data, client, appId, onNavigateToList }: C
   const [definition, setDefinition] = useState<CustomAppDefinition | undefined>();
   const [isEditing, setIsEditing] = useState(false);
   const [editingPanelId, setEditingPanelId] = useState<string | undefined>();
+  const [isAppEditorOpen, setIsAppEditorOpen] = useState(false);
   const [loadError, setLoadError] = useState<string | undefined>();
   const [isSaving, setIsSaving] = useState(false);
   // One time range for the whole page; every chart panel reads it from context.
@@ -83,6 +84,11 @@ export function CustomAppPage({ core, data, client, appId, onNavigateToList }: C
       cancelled = true;
     };
   }, [client, appId]);
+
+  // The header no longer shows the title, so keep the breadcrumb honest.
+  useEffect(() => {
+    if (definition?.title) core.chrome.docTitle.change(definition.title);
+  }, [core, definition?.title]);
 
   const onAction = useMemo(
     () =>
@@ -194,18 +200,14 @@ export function CustomAppPage({ core, data, client, appId, onNavigateToList }: C
 
   return (
     <EuiPageTemplate grow offset={0}>
+      {/*
+        No title, description or time picker here — those are panels inside the
+        app so they can be edited like any other content. The bar carries only
+        the actions that operate *on* the app.
+      */}
       <EuiPageTemplate.Header
-        pageTitle={definition.title}
-        description={definition.description}
+        paddingSize="s"
         rightSideItems={[
-          <EuiSuperDatePicker
-            key="time"
-            start={timeRange.from}
-            end={timeRange.to}
-            onTimeChange={({ start, end }) => setTimeRange({ from: start, to: end })}
-            showUpdateButton={false}
-            width="auto"
-          />,
           isEditing ? (
             <EuiButton
               key="save"
@@ -227,6 +229,13 @@ export function CustomAppPage({ core, data, client, appId, onNavigateToList }: C
               Add panel
             </EuiButton>
           ) : null,
+          <EuiButtonEmpty
+            key="editApp"
+            iconType="editorCodeBlock"
+            onClick={() => setIsAppEditorOpen(true)}
+          >
+            Edit app
+          </EuiButtonEmpty>,
           isEditing ? (
             <EuiButtonEmpty
               key="done"
@@ -252,7 +261,7 @@ export function CustomAppPage({ core, data, client, appId, onNavigateToList }: C
         <SampleDataCallout core={core} />
 
         <CustomAppServicesProvider
-          services={{ timeRange, search: data.search.search, http: core.http }}
+          services={{ timeRange, setTimeRange, search: data.search.search, http: core.http }}
         >
           <CustomAppGrid
             definition={definition}
@@ -264,6 +273,18 @@ export function CustomAppPage({ core, data, client, appId, onNavigateToList }: C
           />
         </CustomAppServicesProvider>
       </EuiPageTemplate.Section>
+
+      {isAppEditorOpen && (
+        <AppEditorFlyout
+          definition={definition}
+          onClose={() => setIsAppEditorOpen(false)}
+          onApply={(next) => {
+            setDefinition(next);
+            setIsAppEditorOpen(false);
+            setIsEditing(true);
+          }}
+        />
+      )}
 
       {editingPanelId && (
         <PanelEditorFlyout

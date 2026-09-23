@@ -59,13 +59,18 @@ export function CustomAppPanel({
         overflow: hidden;
       `}
     >
+      {/*
+        A title-less panel (the header and filter panels, say) should read as
+        plain content, so its chrome collapses entirely outside edit mode —
+        where the drag handle still has to exist.
+      */}
       <EuiFlexGroup
         ref={dragHandleRef}
         alignItems="center"
         gutterSize="xs"
         responsive={false}
         css={css`
-          padding: ${euiTheme.size.s};
+          padding: ${title || isEditing ? euiTheme.size.s : 0};
           border-bottom: ${title || isEditing ? euiTheme.border.thin : 'none'};
           cursor: ${isEditing ? 'grab' : 'default'};
           flex-grow: 0;

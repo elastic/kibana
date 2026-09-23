@@ -7,7 +7,7 @@
 
 import type { A2uiMessage, ComponentDefinition, JsonValue } from '@kbn/a2ui-renderer';
 import type { CustomAppDefinition } from '../../common/app_definition';
-import { ACTION_RUN_WORKFLOW, SAMPLE_DATA_INDEX } from '../../common/constants';
+import { SAMPLE_DATA_INDEX } from '../../common/constants';
 
 export interface CustomAppTemplate {
   id: string;
@@ -17,8 +17,6 @@ export interface CustomAppTemplate {
 }
 
 const CATALOG_ID = 'elastic/kibana-eui/v1';
-
-/** Every template reads the logs sample data set, so the queries share a source. */
 const FROM = `FROM ${SAMPLE_DATA_INDEX}`;
 
 const surface = (
@@ -29,35 +27,52 @@ const surface = (
   { version: 'v1.0', createSurface: { surfaceId, catalogId: CATALOG_ID, dataModel, components } },
 ];
 
+/**
+ * The title, description and time picker are panels rather than page chrome, so
+ * everything a reader sees can be edited the same way. The top bar carries only
+ * actions that operate on the app itself.
+ */
 const webTraffic = (): CustomAppDefinition => ({
   version: 1,
   title: 'Web traffic',
-  description: 'Request volume, status mix and top pages, all from ES|QL over the sample logs.',
+  description: 'An in-depth view of the sample web logs, built entirely from ES|QL.',
   layout: {
-    kpis: { type: 'panel', id: 'kpis', row: 0, column: 0, width: 48, height: 7 },
-    overTime: { type: 'panel', id: 'overTime', row: 7, column: 0, width: 30, height: 15 },
-    status: { type: 'panel', id: 'status', row: 7, column: 30, width: 18, height: 15 },
-    topPages: { type: 'panel', id: 'topPages', row: 22, column: 0, width: 48, height: 14 },
+    header: { type: 'panel', id: 'header', row: 0, column: 0, width: 34, height: 5 },
+    filters: { type: 'panel', id: 'filters', row: 0, column: 34, width: 14, height: 5 },
+    kpis: { type: 'panel', id: 'kpis', row: 5, column: 0, width: 48, height: 6 },
+    overTime: { type: 'panel', id: 'overTime', row: 11, column: 0, width: 32, height: 16 },
+    status: { type: 'panel', id: 'status', row: 11, column: 32, width: 16, height: 16 },
+    topPages: { type: 'panel', id: 'topPages', row: 27, column: 0, width: 28, height: 16 },
+    countries: { type: 'panel', id: 'countries', row: 27, column: 28, width: 20, height: 16 },
+    fileTypes: { type: 'panel', id: 'fileTypes', row: 43, column: 0, width: 24, height: 15 },
+    platforms: { type: 'panel', id: 'platforms', row: 43, column: 24, width: 24, height: 15 },
+    errors: { type: 'panel', id: 'errors', row: 58, column: 0, width: 48, height: 15 },
   },
   panels: {
-    kpis: { title: 'Overview' },
+    header: {},
+    filters: {},
+    kpis: { title: 'At a glance' },
     overTime: { title: 'Requests over time' },
     status: { title: 'Response codes' },
     topPages: { title: 'Busiest pages' },
+    countries: { title: 'Destinations' },
+    fileTypes: { title: 'Bandwidth by file type' },
+    platforms: { title: 'Client platforms' },
+    errors: { title: 'Pages returning errors' },
   },
   queries: {
     kpis: [
       {
         path: '/totals',
         shape: 'first',
-        query: `${FROM} | STATS requests = COUNT(*), bytes = SUM(bytes), errors = COUNT(CASE(response.keyword != "200", 1, null)) | EVAL error_rate = ROUND(100.0 * errors / requests, 1)`,
+        query: `${FROM} | STATS requests = COUNT(*), visitors = COUNT_DISTINCT(clientip), bytes = SUM(bytes), errors = COUNT(CASE(response.keyword != "200", 1, null)) | EVAL error_rate = ROUND(100.0 * errors / requests, 1)`,
       },
     ],
     overTime: [
       {
         path: '/series',
         shape: 'rows',
-        query: `${FROM} | STATS requests = COUNT(*) BY time = BUCKET(@timestamp, 1 day) | SORT time | LIMIT 200`,
+        query: `${FROM} | STATS requests = COUNT(*) BY time = BUCKET(@timestamp, 1 day), status = response.keyword | SORT time | LIMIT 500`,
       },
     ],
     status: [
@@ -71,19 +86,69 @@ const webTraffic = (): CustomAppDefinition => ({
       {
         path: '/pages',
         shape: 'rows',
-        query: `${FROM} | STATS requests = COUNT(*), bytes = SUM(bytes) BY page = url.keyword | SORT requests DESC | LIMIT 10`,
+        query: `${FROM} | STATS requests = COUNT(*), avg_bytes = ROUND(AVG(bytes)) BY page = url.keyword | SORT requests DESC | LIMIT 10`,
+      },
+    ],
+    countries: [
+      {
+        path: '/countries',
+        shape: 'rows',
+        query: `${FROM} | STATS requests = COUNT(*) BY country = geo.dest | SORT requests DESC | LIMIT 8`,
+      },
+    ],
+    fileTypes: [
+      {
+        path: '/types',
+        shape: 'rows',
+        query: `${FROM} | WHERE extension.keyword != "" | STATS bytes = SUM(bytes) BY type = extension.keyword | SORT bytes DESC | LIMIT 6`,
+      },
+    ],
+    platforms: [
+      {
+        path: '/platforms',
+        shape: 'rows',
+        query: `${FROM} | STATS requests = COUNT(*) BY os = machine.os.keyword | SORT requests DESC | LIMIT 6`,
+      },
+    ],
+    errors: [
+      {
+        path: '/errors',
+        shape: 'rows',
+        query: `${FROM} | WHERE response.keyword != "200" | STATS errors = COUNT(*) BY page = url.keyword, status = response.keyword | SORT errors DESC | LIMIT 12`,
       },
     ],
   },
   surfaces: {
+    header: surface('header', [
+      { id: 'root', component: 'Column', children: ['title', 'subtitle'], gap: 'xs' },
+      { id: 'title', component: 'Text', text: 'Web traffic', variant: 'heading1' },
+      {
+        id: 'subtitle',
+        component: 'Text',
+        text: 'Sample web logs, every panel driven by an **ES|QL** query. Edit this panel to change the title.',
+        color: 'subdued',
+      },
+    ]),
+    filters: surface('filters', [
+      { id: 'root', component: 'Column', children: ['label', 'picker'], gap: 'xs' },
+      { id: 'label', component: 'Text', text: 'Time range', variant: 'caption', color: 'subdued' },
+      { id: 'picker', component: 'KbnTimeFilter', showUpdateButton: false, fullWidth: true },
+    ]),
     kpis: surface('kpis', [
-      { id: 'root', component: 'Row', children: ['req', 'bytes', 'errs'], gap: 'l' },
+      { id: 'root', component: 'Row', children: ['req', 'vis', 'bytes', 'errs'], gap: 'l' },
       {
         id: 'req',
         component: 'Stat',
         title: { call: 'formatNumber', args: { value: { path: '/totals/requests' } } },
         description: 'Requests',
         color: 'primary',
+      },
+      {
+        id: 'vis',
+        component: 'Stat',
+        title: { call: 'formatNumber', args: { value: { path: '/totals/visitors' } } },
+        description: 'Unique visitors',
+        color: 'accent',
       },
       {
         id: 'bytes',
@@ -107,10 +172,11 @@ const webTraffic = (): CustomAppDefinition => ({
       {
         id: 'root',
         component: 'Chart',
-        chartType: 'area',
+        chartType: 'bar',
         rows: { path: '/series' },
         x: 'time',
         y: 'requests',
+        breakdown: 'status',
         xTitle: 'Time',
         yTitle: 'Requests',
       },
@@ -133,171 +199,62 @@ const webTraffic = (): CustomAppDefinition => ({
         component: 'Table',
         caption: 'Pages by request volume',
         rows: { path: '/pages' },
+        compressed: true,
         columns: [
           { field: 'page', name: 'Page' },
           { field: 'requests', name: 'Requests', align: 'right' },
-          { field: 'bytes', name: 'Bytes', align: 'right' },
+          { field: 'avg_bytes', name: 'Avg bytes', align: 'right' },
         ],
       },
     ]),
-  },
-});
-
-const errorTriage = (): CustomAppDefinition => ({
-  version: 1,
-  title: 'Error triage',
-  description: 'Where the non-200 responses are coming from, with a remediation form.',
-  layout: {
-    intro: { type: 'panel', id: 'intro', row: 0, column: 0, width: 48, height: 6 },
-    byStatus: { type: 'panel', id: 'byStatus', row: 6, column: 0, width: 24, height: 15 },
-    worstPages: { type: 'panel', id: 'worstPages', row: 6, column: 24, width: 24, height: 15 },
-    remediate: { type: 'panel', id: 'remediate', row: 21, column: 0, width: 48, height: 16 },
-  },
-  panels: {
-    intro: { title: 'Before you start' },
-    byStatus: { title: 'Errors over time' },
-    worstPages: { title: 'Pages with the most errors' },
-    remediate: { title: 'Remediate' },
-  },
-  queries: {
-    byStatus: [
-      {
-        path: '/series',
-        shape: 'rows',
-        query: `${FROM} | WHERE response.keyword != "200" | STATS errors = COUNT(*) BY time = BUCKET(@timestamp, 1 day), status = response.keyword | SORT time | LIMIT 300`,
-      },
-    ],
-    worstPages: [
-      {
-        path: '/pages',
-        shape: 'rows',
-        query: `${FROM} | WHERE response.keyword != "200" | STATS errors = COUNT(*) BY page = url.keyword | SORT errors DESC | LIMIT 8`,
-      },
-    ],
-    remediate: [
-      {
-        path: '/hosts',
-        shape: 'rows',
-        query: `${FROM} | WHERE response.keyword != "200" | STATS errors = COUNT(*) BY host = host.keyword | SORT errors DESC | LIMIT 5`,
-      },
-    ],
-  },
-  surfaces: {
-    intro: surface('intro', [
-      { id: 'root', component: 'Column', children: ['callout', 'body'], gap: 's' },
-      {
-        id: 'callout',
-        component: 'Callout',
-        title: 'These panels follow the time picker above',
-        color: 'primary',
-        iconType: 'clock',
-      },
-      {
-        id: 'body',
-        component: 'Text',
-        text: 'Every panel here runs an **ES|QL** query against the sample web logs. Narrow the time range to see the charts and tables update together.',
-      },
-    ]),
-    byStatus: surface('byStatus', [
+    countries: surface('countries', [
       {
         id: 'root',
         component: 'Chart',
         chartType: 'bar',
-        rows: { path: '/series' },
-        x: 'time',
-        y: 'errors',
-        breakdown: 'status',
-        xTitle: 'Time',
-        yTitle: 'Errors',
+        rows: { path: '/countries' },
+        x: 'country',
+        y: 'requests',
+        xTitle: 'Country',
+        yTitle: 'Requests',
       },
     ]),
-    worstPages: surface('worstPages', [
-      {
-        id: 'root',
-        component: 'Table',
-        caption: 'Pages returning the most non-200 responses',
-        rows: { path: '/pages' },
-        columns: [
-          { field: 'page', name: 'Page' },
-          { field: 'errors', name: 'Errors', align: 'right' },
-        ],
-      },
-    ]),
-    remediate: surface(
-      'remediate',
-      [
-        { id: 'root', component: 'Column', children: ['hint', 'hosts', 'note', 'go'], gap: 'm' },
-        {
-          id: 'hint',
-          component: 'Text',
-          text: 'Hosts are ranked by error count for the selected time range.',
-          variant: 'caption',
-          color: 'subdued',
-        },
-        {
-          id: 'hosts',
-          component: 'Table',
-          caption: 'Hosts by error count',
-          rows: { path: '/hosts' },
-          compressed: true,
-          columns: [
-            { field: 'host', name: 'Host' },
-            { field: 'errors', name: 'Errors', align: 'right' },
-          ],
-        },
-        {
-          id: 'note',
-          component: 'TextField',
-          label: 'What are you changing?',
-          value: { path: '/form/note' },
-          placeholder: 'e.g. roll back the 6.3.2 artifact',
-        },
-        {
-          id: 'go',
-          component: 'Button',
-          label: 'Run remediation workflow',
-          variant: 'primary',
-          iconType: 'play',
-          disabled: { call: 'isEmpty', args: { value: { path: '/form/note' } } },
-          action: {
-            event: {
-              name: ACTION_RUN_WORKFLOW,
-              context: { workflowId: 'remediate-errors', note: { path: '/form/note' } },
-            },
-          },
-        },
-      ],
-      { form: { note: '' } }
-    ),
-  },
-});
-
-const blank = (): CustomAppDefinition => ({
-  version: 1,
-  title: 'Untitled app',
-  description: 'A single panel with one ES|QL query to build from.',
-  layout: {
-    panel1: { type: 'panel', id: 'panel1', row: 0, column: 0, width: 30, height: 14 },
-  },
-  panels: { panel1: { title: 'Requests over time' } },
-  queries: {
-    panel1: [
-      {
-        path: '/series',
-        shape: 'rows',
-        query: `${FROM} | STATS requests = COUNT(*) BY time = BUCKET(@timestamp, 1 day) | SORT time | LIMIT 100`,
-      },
-    ],
-  },
-  surfaces: {
-    panel1: surface('panel1', [
+    fileTypes: surface('fileTypes', [
       {
         id: 'root',
         component: 'Chart',
-        chartType: 'line',
-        rows: { path: '/series' },
-        x: 'time',
+        chartType: 'bar',
+        rows: { path: '/types' },
+        x: 'type',
+        y: 'bytes',
+        xTitle: 'File type',
+        yTitle: 'Bytes',
+      },
+    ]),
+    platforms: surface('platforms', [
+      {
+        id: 'root',
+        component: 'Chart',
+        chartType: 'bar',
+        rows: { path: '/platforms' },
+        x: 'os',
         y: 'requests',
+        xTitle: 'Operating system',
+        yTitle: 'Requests',
+      },
+    ]),
+    errors: surface('errors', [
+      {
+        id: 'root',
+        component: 'Table',
+        caption: 'Pages returning non-200 responses, by status code',
+        rows: { path: '/errors' },
+        compressed: true,
+        columns: [
+          { field: 'page', name: 'Page' },
+          { field: 'status', name: 'Status' },
+          { field: 'errors', name: 'Errors', align: 'right' },
+        ],
       },
     ]),
   },
@@ -307,19 +264,8 @@ export const CUSTOM_APP_TEMPLATES: CustomAppTemplate[] = [
   {
     id: 'web-traffic',
     name: 'Web traffic',
-    description: 'KPI tiles, a time series, a status breakdown and a table — all ES|QL.',
+    description:
+      'Ten panels over the sample web logs: KPI tiles, time series, breakdowns and tables — all ES|QL.',
     build: webTraffic,
-  },
-  {
-    id: 'error-triage',
-    name: 'Error triage',
-    description: 'Errors over time and by page, plus a form that triggers a workflow.',
-    build: errorTriage,
-  },
-  {
-    id: 'blank',
-    name: 'Blank app',
-    description: 'One panel and one ES|QL query to start from.',
-    build: blank,
   },
 ];

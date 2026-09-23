@@ -65,3 +65,16 @@ export const CHART_SCHEMA = {
   },
   required: ['component', 'rows', 'x', 'y'],
 } as const;
+
+export const KBN_TIME_FILTER_SCHEMA = {
+  type: 'object',
+  description:
+    "The app's time range picker. Place it in its own panel near the top; every ES|QL query in the app is filtered by whatever it is set to. Include exactly one per app.",
+  properties: {
+    component: { const: 'KbnTimeFilter' },
+    showUpdateButton: { type: 'boolean', default: true },
+    compressed: { type: 'boolean', default: false },
+    fullWidth: { type: 'boolean', default: false },
+  },
+  required: ['component'],
+} as const;
