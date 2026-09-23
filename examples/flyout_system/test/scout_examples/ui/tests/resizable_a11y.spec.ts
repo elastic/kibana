@@ -85,18 +85,26 @@ test.describe(
         const app = pageObjects.flyoutSystem;
         const session = app.session(form);
         const flyout = await app.openFlyout(form, session);
+        const startWidth = (await flyout.boundingBox())?.width ?? 0;
+        expect(startWidth).toBeGreaterThan(FLYOUT_MIN_WIDTH);
 
         await app.closeButton(form, session).focus();
         await page.keyTo(app.resizeHandleSelector(form, session), 'Tab', MAX_TAB_STOPS);
+        await expect(app.resizeHandle(form, session)).toBeFocused();
 
-        // Shrink past the minimum width to test the clamp.
-        for (let i = 0; i < 60; i++) {
+        // Overshoot the minimum so the clamp, not the press count, decides the final width.
+        const presses = Math.ceil((startWidth - FLYOUT_MIN_WIDTH) / KEYBOARD_OFFSET) + 5;
+        for (let i = 0; i < presses; i++) {
           await page.keyboard.press('ArrowRight');
         }
 
-        const width = (await flyout.boundingBox())?.width ?? 0;
         // Account for 1px sub-pixel rounding.
-        expect(width).toBeGreaterThanOrEqual(FLYOUT_MIN_WIDTH - 1);
+        await expect
+          .poll(async () => (await flyout.boundingBox())?.width ?? 0)
+          .toBeLessThanOrEqual(FLYOUT_MIN_WIDTH + 1);
+        expect((await flyout.boundingBox())?.width ?? 0).toBeGreaterThanOrEqual(
+          FLYOUT_MIN_WIDTH - 1
+        );
       });
 
       test(`a resized ${form} flyout keeps its dialog semantics`, async ({ page, pageObjects }) => {
