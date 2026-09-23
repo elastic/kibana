@@ -66,8 +66,8 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { IUiSettingsClient, SettingsStart } from '@kbn/core-ui-settings-browser';
-import type { Subscription } from 'rxjs';
-import { from, map } from 'rxjs';
+import type { Observable, Subscription } from 'rxjs';
+import { BehaviorSubject, distinctUntilChanged, from, map } from 'rxjs';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { LogsSharedClientStartExports } from '@kbn/logs-shared-plugin/public';
@@ -152,8 +152,31 @@ export interface ApmInternalServices {
   callApmApi: APMClientV2;
 }
 
-export const [getApmInternalServices, setApmInternalServices] =
+const [getApmInternalServices, publishApmInternalServices] =
   createGetterSetter<ApmInternalServices>('ApmInternalServices', false);
+
+export { getApmInternalServices };
+
+const cpsManager$ = new BehaviorSubject<ICPSManager | undefined>(undefined);
+
+/**
+ * Publishes the internal services and notifies `apmCpsManager$` subscribers.
+ */
+export const setApmInternalServices = (services: ApmInternalServices): void => {
+  publishApmInternalServices(services);
+  cpsManager$.next(services.cpsManager);
+};
+
+/** Reads the currently published CPS manager, which is only set while the APM CPS flag is enabled. */
+export const getApmCpsManager = (): ICPSManager | undefined => cpsManager$.getValue();
+
+/**
+ * Emits the published CPS manager, so consumers that rendered before the CPS flag resolved
+ * resubscribe to it instead of caching its absence for their whole lifetime.
+ */
+export const apmCpsManager$: Observable<ICPSManager | undefined> = cpsManager$.pipe(
+  distinctUntilChanged()
+);
 
 export interface ApmPluginStartDeps {
   alerting?: AlertingPluginPublicStart;

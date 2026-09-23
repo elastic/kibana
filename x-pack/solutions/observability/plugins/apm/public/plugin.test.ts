@@ -9,7 +9,7 @@ import type { Observable } from 'rxjs';
 import { BehaviorSubject, of } from 'rxjs';
 import { coreMock } from '@kbn/core/public/mocks';
 import { cpsPluginMock } from '@kbn/cps/public/mocks';
-import type { CPSAppAccessResolver } from '@kbn/cps-utils';
+import type { CPSAppAccessResolver, ICPSManager } from '@kbn/cps-utils';
 import { ProjectRoutingAccess } from '@kbn/cps-utils';
 import {
   OBSERVABILITY_APM_CPS_ENABLED_DEFAULT,
@@ -18,7 +18,7 @@ import {
 import type { ITelemetryClient } from './services/telemetry';
 import { TelemetryService } from './services/telemetry';
 import type { ApmPluginStartDeps } from './plugin';
-import { ApmPlugin, getApmInternalServices } from './plugin';
+import { ApmPlugin, apmCpsManager$, getApmInternalServices } from './plugin';
 
 describe('ApmPlugin', () => {
   const callApmApi = jest.fn();
@@ -98,6 +98,9 @@ describe('ApmPlugin', () => {
   it('follows the flag when it changes after start', () => {
     const isCpsEnabled$ = new BehaviorSubject(false);
     const { cps, registerAppAccess } = startPlugin(isCpsEnabled$);
+    // Subscribed while CPS is off, like a service flyout mounted before the flag flips.
+    const published: Array<ICPSManager | undefined> = [];
+    const subscription = apmCpsManager$.subscribe((cpsManager) => published.push(cpsManager));
 
     expect(getApmInternalServices()?.cpsManager).toBeUndefined();
 
@@ -110,6 +113,9 @@ describe('ApmPlugin', () => {
 
     expect(resolvedAccess(registerAppAccess, 2)).toBe(ProjectRoutingAccess.DISABLED);
     expect(getApmInternalServices()?.cpsManager).toBeUndefined();
+
+    subscription.unsubscribe();
+    expect(published).toEqual([undefined, cps.cpsManager, undefined]);
   });
 
   it('stops following the flag on stop', () => {
