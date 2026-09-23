@@ -18,7 +18,10 @@ created_by:
     $ref: 'user_properties.yaml'
 customFields:
   type: array
-  description: Custom fields configuration details.
+  deprecated: true
+  description: >
+    Deprecated. Custom fields are superseded by the field library and the case `extended_fields`.
+    Custom fields configuration details.
   items:
     type: object
     properties:

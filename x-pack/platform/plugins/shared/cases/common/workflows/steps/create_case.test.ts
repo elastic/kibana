@@ -62,8 +62,41 @@ describe('create_case common step definition', () => {
     expect(InputSchema.safeParse(invalidInput).success).toBe(false);
   });
 
+  it('accepts extended_fields on create case input', () => {
+    const inputWithExtendedFields = {
+      ...createCaseRequestFixture,
+      extended_fields: {
+        priority_as_keyword: 'high',
+        ticket_number_as_integer: '4287',
+      },
+    };
+
+    expect(InputSchema.safeParse(inputWithExtendedFields).success).toBe(true);
+  });
+
+  it('accepts a template reference on create case input', () => {
+    const inputWithTemplate = {
+      ...createCaseRequestFixture,
+      template: { id: 'triage_template', version: 3 },
+    };
+
+    expect(InputSchema.safeParse(inputWithTemplate).success).toBe(true);
+  });
+
   it('accepts valid output payload', () => {
     expect(OutputSchema.safeParse({ case: createCaseResponseFixture }).success).toBe(true);
+  });
+
+  it('accepts extended_fields and extended_fields_labels on the output payload', () => {
+    const responseWithExtendedFields = {
+      case: {
+        ...createCaseResponseFixture,
+        extended_fields: { priority_as_keyword: 'high' },
+        extended_fields_labels: { priority_as_keyword: 'Priority' },
+      },
+    };
+
+    expect(OutputSchema.safeParse(responseWithExtendedFields).success).toBe(true);
   });
 
   it('rejects invalid output payload', () => {
