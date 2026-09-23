@@ -1547,26 +1547,78 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
     });
   });
 
-  it('caps impacted_entities at 50 and flags truncation', () => {
-    const capStep = findStepByName(workflow.steps, 'cap_impacted_entities') as {
-      with: { impacted_entities_truncated: string; impacted_entities: string };
+  it('pre-caps unique host/user lists before entity loops and flags truncation from uncapped counts', () => {
+    const hostPlan = findStepByName(workflow.steps, 'plan_host_entity_iteration') as {
+      with: { host_names_for_entities: string; entity_name_count: string };
     };
+    const userPlan = findStepByName(workflow.steps, 'plan_user_entity_iteration') as {
+      with: {
+        impacted_entities_truncated: string;
+        user_entity_budget: string;
+      };
+    };
+    const userSlice = findStepByName(workflow.steps, 'slice_user_names_for_entities') as {
+      with: { user_names_for_entities: string };
+    };
+    const hostLoop = findStepByName(workflow.steps, 'build_host_entities') as {
+      foreach: string;
+    };
+    const userLoop = findStepByName(workflow.steps, 'build_user_entities') as {
+      foreach: string;
+    };
+    const capStep = findStepByName(workflow.steps, 'cap_impacted_entities') as {
+      with: { impacted_entities: string };
+    };
+
+    expect(hostLoop.foreach).toContain('host_names_for_entities');
+    expect(userLoop.foreach).toContain('user_names_for_entities');
+
+    const hostNamesAll = Array.from({ length: 40 }, (_, i) => `host-${i}`);
+    const userNamesAll = Array.from({ length: 30 }, (_, i) => `user-${i}`);
+
+    const entityNameCount = evaluateExpression(engine, hostPlan.with.entity_name_count, {
+      variables: { host_names_all: hostNamesAll, user_names_all: userNamesAll },
+    });
+    expect(entityNameCount).toBe(70);
+
+    const hostNamesForEntities = evaluateExpression(engine, hostPlan.with.host_names_for_entities, {
+      variables: { host_names_all: hostNamesAll },
+    }) as string[];
+    expect(hostNamesForEntities).toHaveLength(40);
+
+    const truncatedFlag = engine.parseAndRenderSync(userPlan.with.impacted_entities_truncated, {
+      variables: { entity_name_count: 70 },
+    });
+    expect(truncatedFlag.trim()).toBe('true');
+
+    const userBudget = evaluateExpression(engine, userPlan.with.user_entity_budget, {
+      variables: { host_names_for_entities: hostNamesForEntities },
+    });
+    expect(userBudget).toBe(10);
+
+    const userNamesForEntities = evaluateExpression(
+      engine,
+      userSlice.with.user_names_for_entities,
+      {
+        variables: {
+          user_names_all: userNamesAll,
+          user_entity_budget: userBudget,
+        },
+      }
+    ) as string[];
+    expect(userNamesForEntities).toHaveLength(10);
+    expect(userNamesForEntities[0]).toBe('user-0');
+    expect(userNamesForEntities[9]).toBe('user-9');
+
+    // Safety net still slices any materialized list to 50.
     const entities = Array.from({ length: 55 }, (_, i) => ({
       entity_type: 'host',
       name: `host-${i}`,
     }));
-
-    const truncatedFlag = engine.parseAndRenderSync(capStep.with.impacted_entities_truncated, {
-      variables: { impacted_entities: entities },
-    });
     const capped = evaluateExpression(engine, capStep.with.impacted_entities, {
       variables: { impacted_entities: entities },
     }) as unknown[];
-
-    expect(truncatedFlag.trim()).toBe('true');
     expect(capped).toHaveLength(50);
-    expect(capped[0]).toEqual({ entity_type: 'host', name: 'host-0' });
-    expect(capped[49]).toEqual({ entity_type: 'host', name: 'host-49' });
   });
 
   it('applies autoCloseEnabled only when the caller explicitly provides it', () => {
