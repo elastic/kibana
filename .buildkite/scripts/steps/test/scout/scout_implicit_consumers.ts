@@ -51,8 +51,9 @@ const IMPLICIT_REGISTRY_CONSUMERS: readonly ImplicitConsumerRule[] = [
   },
   {
     reason:
-      'Workflow triggers are registered into workflows_extensions at runtime. Changes to these files would not select the trigger-approval tests by default.',
+      'Workflow triggers are registered into workflows_extensions at runtime, and their approved schema hashes cover the shared schemas their event payloads embed. Changes to these files would not select the trigger-approval tests by default.',
     patterns: [
+      '**/response-ops/alerting-v2-schemas/**/*.{ts,tsx}',
       '**/common/triggers/**/*.{ts,tsx}',
       '**/common/workflows/triggers/**/*.{ts,tsx}',
       '**/common/workflow/triggers/**/*.{ts,tsx}',

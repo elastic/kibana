@@ -52,6 +52,20 @@ describe('expandWithImplicitConsumers — workflow trigger catalog', () => {
     expect(expanded.has(WORKFLOWS_EXTENSIONS_MODULE)).toBe(true);
   });
 
+  it('adds workflows_extensions when shared schemas embedded in trigger payloads change', () => {
+    const log = createMockLog();
+    const expanded = expandWithImplicitConsumers(
+      new Set(['@kbn/alerting-v2-schemas']),
+      [
+        'x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts',
+        'x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/index.ts',
+      ],
+      log
+    );
+
+    expect(expanded.has(WORKFLOWS_EXTENSIONS_MODULE)).toBe(true);
+  });
+
   it('does not add workflows_extensions for unrelated plugin changes', () => {
     const log = createMockLog();
     const expanded = expandWithImplicitConsumers(
