@@ -8,10 +8,9 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { HttpStart } from '@kbn/core-http-browser';
-import type { AttachmentUIDefinition, HeaderBadge } from '@kbn/agent-builder-browser/attachments';
+import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser/attachments';
 import type { AttachmentNavigationDeps } from '../navigation';
 import { buildThreatReportLookupEsql } from '../navigation';
-import { severityBadgeColor } from '../shared/severity';
 import {
   buildDiscoverActionButton,
   joinSubtitle,
@@ -28,11 +27,6 @@ const DEFAULT_LABEL = i18n.translate('xpack.alertzero.agentBuilder.attachments.t
 const OPEN_REPORT_LABEL = i18n.translate(
   'xpack.alertzero.agentBuilder.attachments.threat.openInDiscover',
   { defaultMessage: 'Open report in Discover' }
-);
-
-const TYPE_BADGE_LABEL = i18n.translate(
-  'xpack.alertzero.agentBuilder.attachments.threat.typeBadge',
-  { defaultMessage: 'Threat report' }
 );
 
 /**
@@ -62,19 +56,13 @@ export const createThreatAttachmentDefinition = ({
   getLabel: (attachment) =>
     attachment?.data?.attachmentLabel ?? attachment?.data?.title ?? DEFAULT_LABEL,
   getIcon: () => 'document',
+  // Severity and type live in the card body; the header stays title + source · id only.
   getHeader: ({ attachment }) => {
     const data = attachment?.data;
-    const badges: HeaderBadge[] = [
-      { label: TYPE_BADGE_LABEL, color: 'hollow', iconType: 'document' },
-    ];
-    if (data?.severity) {
-      badges.push({ label: data.severity, color: severityBadgeColor(data.severity) });
-    }
     const subtitle = joinSubtitle(data?.source, data?.report_id);
     return {
       icon: 'document',
       ...(subtitle ? { subtitle } : {}),
-      badges,
     };
   },
   renderInlineContent: (props) => (

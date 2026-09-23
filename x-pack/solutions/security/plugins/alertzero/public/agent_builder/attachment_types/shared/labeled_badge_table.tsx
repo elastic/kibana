@@ -6,15 +6,9 @@
  */
 
 import React from 'react';
-import {
-  EuiBasicTable,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  type EuiBasicTableColumn,
-} from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiBasicTable, EuiText, type EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { BadgeRow, TableFrame } from './primitives';
 
 export interface LabeledBadgeTableRow {
   id: string;
@@ -25,77 +19,72 @@ export interface LabeledBadgeTableRow {
 export interface LabeledBadgeTableProps {
   rows: LabeledBadgeTableRow[];
   caption?: string;
+  /** Width of the label column; defaults to the flyout table's 30%. */
   labelWidth?: string;
   testSubj?: string;
 }
-
-const wrappingCellCss = css`
-  overflow-wrap: anywhere;
-`;
 
 const DEFAULT_CAPTION = i18n.translate(
   'xpack.alertzero.agentBuilder.attachments.shared.labeledBadgeTableCaption',
   { defaultMessage: 'Labeled indicator table' }
 );
 
+const FIELD_COLUMN = i18n.translate('xpack.alertzero.agentBuilder.attachments.shared.labelColumn', {
+  defaultMessage: 'Field',
+});
+
+const VALUE_COLUMN = i18n.translate(
+  'xpack.alertzero.agentBuilder.attachments.shared.valuesColumn',
+  { defaultMessage: 'Value' }
+);
+
 /**
- * Two-column type/values table shape shared by the IOC, TTP, and anchor
- * sections across all three Hunt Watch attachment renderers. Mirrors
- * Security Solution's `investigation_iocs_inline_content.tsx` table shape
- * (plugin-internal, cannot be imported, so copied here).
+ * Field / Value table, styled like the Security flyout "Table" tab (compressed rows, bold
+ * small headers, 30% field column) and framed in a bordered rounded panel so it reads as one
+ * block inside the attachment card. Each row's values wrap as compact badges.
  */
 export const LabeledBadgeTable: React.FC<LabeledBadgeTableProps> = ({
   rows,
   caption = DEFAULT_CAPTION,
-  labelWidth = '10em',
+  labelWidth = '30%',
   testSubj,
 }) => {
   const columns: Array<EuiBasicTableColumn<LabeledBadgeTableRow>> = [
     {
       field: 'label',
-      name: i18n.translate('xpack.alertzero.agentBuilder.attachments.shared.labelColumn', {
-        defaultMessage: 'Type',
-      }),
+      name: (
+        <EuiText size="xs">
+          <strong>{FIELD_COLUMN}</strong>
+        </EuiText>
+      ),
       width: labelWidth,
       render: (label: string) => (
-        <EuiText size="s" color="subdued" css={wrappingCellCss}>
+        <EuiText size="xs" css={{ overflowWrap: 'anywhere' }}>
           {label}
         </EuiText>
       ),
     },
     {
       field: 'values',
-      name: i18n.translate('xpack.alertzero.agentBuilder.attachments.shared.valuesColumn', {
-        defaultMessage: 'Values',
-      }),
-      render: (values: React.ReactNode) => (
-        <EuiFlexGroup
-          gutterSize="xs"
-          alignItems="center"
-          responsive={false}
-          wrap
-          css={wrappingCellCss}
-        >
-          {React.Children.map(values, (child, index) => (
-            <EuiFlexItem grow={false} key={index} css={{ minWidth: 0, maxWidth: '100%' }}>
-              {child}
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGroup>
+      name: (
+        <EuiText size="xs">
+          <strong>{VALUE_COLUMN}</strong>
+        </EuiText>
       ),
+      render: (values: React.ReactNode) => <BadgeRow>{values}</BadgeRow>,
     },
   ];
 
   return (
-    <EuiBasicTable
-      tableCaption={caption}
-      items={rows}
-      columns={columns}
-      itemId="id"
-      tableLayout="auto"
-      responsiveBreakpoint={false}
-      compressed
-      data-test-subj={testSubj}
-    />
+    <TableFrame testSubj={testSubj}>
+      <EuiBasicTable
+        tableCaption={caption}
+        items={rows}
+        columns={columns}
+        itemId="id"
+        tableLayout="fixed"
+        responsiveBreakpoint={false}
+      />
+    </TableFrame>
   );
 };

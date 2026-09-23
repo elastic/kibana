@@ -6,21 +6,20 @@
  */
 
 import React, { useState } from 'react';
-import { css } from '@emotion/react';
 import { groupBy } from 'lodash';
 import {
   EuiBadge,
-  EuiBasicTable,
   EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiPanel,
   EuiPopover,
   EuiSkeletonText,
   EuiSpacer,
   EuiText,
+  EuiTitle,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import { KbnInfoCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
@@ -32,11 +31,14 @@ import type { AttachmentNavigationDeps } from '../navigation';
 import { buildDiscoverThreatReportNestedIocUrl } from '../navigation';
 import { IocBadge, discoverAction } from '../shared/ioc_badge';
 import {
-  SectionHeading,
-  CompactStat,
+  Section,
+  SectionStack,
+  MetaCard,
   HollowBadgeList,
+  BadgeRow,
   AttachmentEmptyState,
   buildMitreTechniqueUrl,
+  clampTwoLines,
 } from '../shared/primitives';
 import { LabeledBadgeTable } from '../shared/labeled_badge_table';
 import { DIAMOND_VERTICES, severityBadgeColor } from '../shared/severity';
@@ -67,14 +69,6 @@ const isHttpExternalUrl = (url: string): boolean => {
     return false;
   }
 };
-
-const clampedSummaryStyles = css`
-  overflow-wrap: anywhere;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-`;
 
 const fetchThreatReport = async ({
   http,
@@ -119,9 +113,9 @@ const IocOverflowBadge: React.FC<{ hiddenCount: number; children: React.ReactNod
       closePopover={() => setIsOpen(false)}
       panelPaddingSize="s"
     >
-      <EuiFlexGroup gutterSize="xs" wrap responsive={false} css={{ maxWidth: 320 }}>
-        {children}
-      </EuiFlexGroup>
+      <div css={{ maxWidth: 360 }}>
+        <BadgeRow>{children}</BadgeRow>
+      </div>
     </EuiPopover>
   );
 };
@@ -151,14 +145,17 @@ const IocTypeValues: React.FC<{
     });
     const tooltipContent = [ioc.tier, ioc.severity].filter(Boolean).join(', ');
     const badge = (
-      <span data-test-subj={`alertzeroThreatAttachmentIocLink-${type}-${index}`}>
-        <IocBadge value={ioc.value ?? ''} index={index} action={discoverAction(href)} />
-      </span>
+      <IocBadge
+        value={ioc.value ?? ''}
+        index={index}
+        action={discoverAction(href)}
+        testSubj={`alertzeroThreatAttachmentIocLink-${type}-${index}`}
+      />
     );
     return (
-      <EuiFlexItem grow={false} key={`${ioc.value}-${index}`}>
+      <React.Fragment key={`${ioc.value}-${index}`}>
         {tooltipContent ? <EuiToolTip content={tooltipContent}>{badge}</EuiToolTip> : badge}
-      </EuiFlexItem>
+      </React.Fragment>
     );
   };
 
@@ -166,53 +163,46 @@ const IocTypeValues: React.FC<{
     <>
       {visible.map(renderBadge)}
       {hidden.length > 0 && (
-        <EuiFlexItem grow={false} key={`${type}-overflow`}>
-          <IocOverflowBadge hiddenCount={hidden.length}>
-            {hidden.map((ioc, index) => renderBadge(ioc, IOC_VISIBLE_LIMIT + index))}
-          </IocOverflowBadge>
-        </EuiFlexItem>
+        <IocOverflowBadge key={`${type}-overflow`} hiddenCount={hidden.length}>
+          {hidden.map((ioc, index) => renderBadge(ioc, IOC_VISIBLE_LIMIT + index))}
+        </IocOverflowBadge>
       )}
     </>
   );
 };
 
-interface DiamondVertexRow {
-  vertex: (typeof DIAMOND_VERTICES)[number];
-  signal?: string;
-  summary?: string;
-}
-
 const renderExternalReferencesSection = (liveData: ThreatReportApiResponse): React.ReactNode => {
   const externalRefsWithUrl = liveData.content?.external_references?.filter(
-    (ref) => typeof ref.url === 'string' && isHttpExternalUrl(ref.url)
+    (ref): ref is typeof ref & { url: string } =>
+      typeof ref.url === 'string' && isHttpExternalUrl(ref.url)
   );
   if (!externalRefsWithUrl?.length) {
     return null;
   }
   return (
-    <div key="external-refs">
-      <SectionHeading>
-        {i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.externalReferences', {
-          defaultMessage: 'External references',
-        })}
-      </SectionHeading>
-      <EuiText size="s">
-        <ul>
-          {externalRefsWithUrl.map((ref, index) => (
-            <li key={`${ref.url}-${index}`}>
-              <EuiLink
-                href={ref.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                data-test-subj={THREAT_EXTERNAL_REF_LINK_TEST_ID}
-              >
-                {ref.source_name || ref.external_id || ref.url}
-              </EuiLink>
-            </li>
-          ))}
-        </ul>
-      </EuiText>
-    </div>
+    <Section
+      key="external-refs"
+      title={i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.externalReferences', {
+        defaultMessage: 'External references',
+      })}
+    >
+      <BadgeRow>
+        {externalRefsWithUrl.map((ref, index) => (
+          <EuiBadge
+            key={`${ref.url}-${index}`}
+            color="hollow"
+            href={ref.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            iconType="external"
+            iconSide="right"
+            data-test-subj={THREAT_EXTERNAL_REF_LINK_TEST_ID}
+          >
+            {ref.source_name || ref.external_id || ref.url}
+          </EuiBadge>
+        ))}
+      </BadgeRow>
+    </Section>
   );
 };
 
@@ -220,29 +210,38 @@ const renderIocsSection = (
   liveData: ThreatReportApiResponse,
   navigation: AttachmentNavigationDeps
 ): React.ReactNode => {
-  if (!liveData.extracted?.iocs?.length) {
+  const iocs = liveData.extracted?.iocs ?? [];
+  if (!iocs.length) {
     return null;
   }
-  const iocsByType = groupBy(liveData.extracted.iocs, (ioc) => ioc.type);
+  const iocsByType = groupBy(iocs, (ioc) => ioc.type);
   return (
-    <div key="iocs">
-      <SectionHeading>
-        {i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.iocs', {
-          defaultMessage: 'Indicators',
-        })}
-      </SectionHeading>
+    <Section
+      key="iocs"
+      title={i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.iocs', {
+        defaultMessage: 'Indicators',
+      })}
+      aside={
+        <EuiText size="xs" color="subdued">
+          {i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.iocCount', {
+            defaultMessage: '{count, plural, one {# indicator} other {# indicators}}',
+            values: { count: iocs.length },
+          })}
+        </EuiText>
+      }
+    >
       <LabeledBadgeTable
         testSubj="alertzeroThreatAttachmentIocTable"
         caption={i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.iocTableCaption', {
           defaultMessage: 'Indicators of compromise by type',
         })}
-        rows={Object.entries(iocsByType).map(([type, iocs]) => ({
+        rows={Object.entries(iocsByType).map(([type, group]) => ({
           id: type,
           label: type,
-          values: <IocTypeValues type={type} iocs={iocs} navigation={navigation} />,
+          values: <IocTypeValues type={type} iocs={group} navigation={navigation} />,
         }))}
       />
-    </div>
+    </Section>
   );
 };
 
@@ -255,56 +254,126 @@ const renderTtpsGeoCategoriesSection = (liveData: ThreatReportApiResponse): Reac
     return null;
   }
 
-  const listItems: Array<{ title: string; description: React.ReactElement }> = [];
+  const rows: Array<{ id: string; label: string; values: React.ReactNode }> = [];
   if (tactics.length) {
-    listItems.push({
-      title: i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.tactics', {
+    rows.push({
+      id: 'tactics',
+      label: i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.tactics', {
         defaultMessage: 'Tactics',
       }),
-      description: <HollowBadgeList items={tactics} />,
+      values: <HollowBadgeList items={tactics} />,
     });
   }
   if (techniques.length) {
-    listItems.push({
-      title: i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.techniques', {
+    rows.push({
+      id: 'techniques',
+      label: i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.techniques', {
         defaultMessage: 'Techniques',
       }),
-      description: <HollowBadgeList items={techniques} getHref={buildMitreTechniqueUrl} />,
+      values: <HollowBadgeList items={techniques} getHref={buildMitreTechniqueUrl} />,
     });
   }
   if (regions.length) {
-    listItems.push({
-      title: i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.regions', {
+    rows.push({
+      id: 'regions',
+      label: i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.regions', {
         defaultMessage: 'Regions',
       }),
-      description: <HollowBadgeList items={regions} />,
+      values: <HollowBadgeList items={regions} />,
     });
   }
   if (categories.length) {
-    listItems.push({
-      title: i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.categories', {
+    rows.push({
+      id: 'categories',
+      label: i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.categories', {
         defaultMessage: 'Categories',
       }),
-      description: <HollowBadgeList items={categories} />,
+      values: <HollowBadgeList items={categories} />,
     });
   }
   return (
-    <div key="ttps-geo-categories">
-      <EuiDescriptionList type="column" compressed listItems={listItems} />
-    </div>
+    <Section
+      key="ttps-geo-categories"
+      title={i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.context', {
+        defaultMessage: 'Context',
+      })}
+    >
+      <LabeledBadgeTable
+        rows={rows}
+        caption={i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.contextCaption', {
+          defaultMessage: 'Tactics, techniques, regions and categories',
+        })}
+      />
+    </Section>
+  );
+};
+
+/** Known signal strengths map to a colour; anything else stays neutral but is still shown. */
+const DIAMOND_SIGNAL_COLOR: Record<string, string> = {
+  strong: 'success',
+  high: 'success',
+  moderate: 'warning',
+  medium: 'warning',
+  weak: 'hollow',
+  low: 'hollow',
+  none: 'hollow',
+};
+
+const DIAMOND_VERTEX_LABELS: Record<(typeof DIAMOND_VERTICES)[number], string> = {
+  adversary: i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.vertexAdversary', {
+    defaultMessage: 'Adversary',
+  }),
+  capability: i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.vertexCapability', {
+    defaultMessage: 'Capability',
+  }),
+  infrastructure: i18n.translate(
+    'xpack.alertzero.agentBuilder.attachments.threat.vertexInfrastructure',
+    { defaultMessage: 'Infrastructure' }
+  ),
+  victim: i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.vertexVictim', {
+    defaultMessage: 'Victim',
+  }),
+};
+
+const DiamondVertexCard: React.FC<{
+  vertex: (typeof DIAMOND_VERTICES)[number];
+  signal?: string;
+  summary?: string;
+}> = ({ vertex, signal, summary }) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <MetaCard
+      label={DIAMOND_VERTEX_LABELS[vertex]}
+      testSubj={`alertzeroThreatAttachmentDiamond-${vertex}`}
+    >
+      <div>
+        {signal ? (
+          <EuiBadge color={DIAMOND_SIGNAL_COLOR[signal.toLowerCase()] ?? 'hollow'}>
+            {signal}
+          </EuiBadge>
+        ) : (
+          <EuiText size="xs" color="subdued">
+            {i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.vertexNoSignal', {
+              defaultMessage: 'No signal',
+            })}
+          </EuiText>
+        )}
+      </div>
+      {summary && (
+        <EuiToolTip content={summary} display="block" position="bottom">
+          <EuiText size="xs" css={[clampTwoLines, { marginTop: euiTheme.size.xs }]} tabIndex={0}>
+            {summary}
+          </EuiText>
+        </EuiToolTip>
+      )}
+    </MetaCard>
   );
 };
 
 const renderDiamondSection = (liveData: ThreatReportApiResponse): React.ReactNode => {
   const diamond = liveData.extracted?.diamond;
-  const diamondRows: DiamondVertexRow[] = diamond
-    ? DIAMOND_VERTICES.filter((vertex) => diamond[vertex] != null).map((vertex) => ({
-        vertex,
-        signal: diamond[vertex]?.signal,
-        summary: diamond[vertex]?.summary,
-      }))
-    : [];
-  if (!diamondRows.length) {
+  const vertices = diamond ? DIAMOND_VERTICES.filter((vertex) => diamond[vertex] != null) : [];
+  if (!vertices.length) {
     return null;
   }
 
@@ -316,84 +385,63 @@ const renderDiamondSection = (liveData: ThreatReportApiResponse): React.ReactNod
     'xpack.alertzero.agentBuilder.attachments.threat.diamondNotSuitable',
     { defaultMessage: 'Not suitable' }
   );
-  return (
-    <div key="diamond">
-      <SectionHeading>
-        {i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.diamond', {
-          defaultMessage: 'Diamond model',
-        })}
-      </SectionHeading>
-      <EuiBasicTable<DiamondVertexRow>
-        compressed
-        tableLayout="auto"
-        responsiveBreakpoint={false}
-        tableCaption={i18n.translate(
-          'xpack.alertzero.agentBuilder.attachments.threat.diamondTableCaption',
-          { defaultMessage: 'Diamond model signals' }
+
+  const aside =
+    diamond?.signal_count != null || diamond?.suitable != null ? (
+      <BadgeRow>
+        {diamond?.signal_count != null && (
+          <EuiBadge color="hollow">
+            {i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.diamondSignalCount', {
+              defaultMessage: '{count} signals',
+              values: { count: diamond.signal_count },
+            })}
+          </EuiBadge>
         )}
-        items={diamondRows}
-        columns={[
-          {
-            field: 'vertex',
-            name: i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.vertex', {
-              defaultMessage: 'Vertex',
-            }),
-            width: '9em',
-          },
-          {
-            field: 'signal',
-            name: i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.signal', {
-              defaultMessage: 'Signal',
-            }),
-            width: '6em',
-            render: (signal?: string) =>
-              signal ? <EuiBadge color="hollow">{signal}</EuiBadge> : null,
-          },
-          {
-            field: 'summary',
-            name: i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.summary', {
-              defaultMessage: 'Summary',
-            }),
-            render: (summary?: string) =>
-              summary ? (
-                <EuiToolTip content={summary} display="block" position="left">
-                  <span tabIndex={0} css={clampedSummaryStyles}>
-                    {summary}
-                  </span>
-                </EuiToolTip>
-              ) : null,
-          },
-        ]}
-      />
-      {(diamond?.signal_count != null || diamond?.suitable != null) && (
-        <>
-          <EuiSpacer size="xs" />
-          <EuiFlexGroup gutterSize="xs" responsive={false}>
-            {diamond?.signal_count != null && (
-              <EuiFlexItem grow={false}>
-                <EuiBadge color="hollow">
-                  {i18n.translate(
-                    'xpack.alertzero.agentBuilder.attachments.threat.diamondSignalCount',
-                    {
-                      defaultMessage: '{count} signals',
-                      values: { count: diamond.signal_count },
-                    }
-                  )}
-                </EuiBadge>
-              </EuiFlexItem>
-            )}
-            {diamond?.suitable != null && (
-              <EuiFlexItem grow={false}>
-                <EuiBadge color="hollow">
-                  {diamond.suitable ? suitableBadge : notSuitableBadge}
-                </EuiBadge>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        </>
-      )}
-    </div>
+        {diamond?.suitable != null && (
+          <EuiBadge color={diamond.suitable ? 'success' : 'hollow'}>
+            {diamond.suitable ? suitableBadge : notSuitableBadge}
+          </EuiBadge>
+        )}
+      </BadgeRow>
+    ) : undefined;
+
+  return (
+    <Section
+      key="diamond"
+      title={i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.diamond', {
+        defaultMessage: 'Diamond model',
+      })}
+      aside={aside}
+    >
+      <EuiFlexGroup gutterSize="s" responsive={false} wrap>
+        {vertices.map((vertex) => (
+          <EuiFlexItem key={vertex} css={{ minWidth: 140 }}>
+            <DiamondVertexCard
+              vertex={vertex}
+              signal={diamond?.[vertex]?.signal}
+              summary={diamond?.[vertex]?.summary}
+            />
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+    </Section>
   );
+};
+
+/** Known hunt statuses get a label; anything else is shown as-is. */
+const HUNT_STATUS_LABELS: Record<string, string> = {
+  environment_hits_found: i18n.translate(
+    'xpack.alertzero.agentBuilder.attachments.threat.huntStatusHitsFound',
+    { defaultMessage: 'Environment hits found' }
+  ),
+  no_environment_hits: i18n.translate(
+    'xpack.alertzero.agentBuilder.attachments.threat.huntStatusNoHits',
+    { defaultMessage: 'No environment hits' }
+  ),
+  no_searchable_terms: i18n.translate(
+    'xpack.alertzero.agentBuilder.attachments.threat.huntStatusNoTerms',
+    { defaultMessage: 'No searchable terms' }
+  ),
 };
 
 const renderEvidenceSection = (liveData: ThreatReportApiResponse): React.ReactNode => {
@@ -412,6 +460,15 @@ const renderEvidenceSection = (liveData: ThreatReportApiResponse): React.ReactNo
       }),
     });
   }
+  if (corroboratedRank != null) {
+    stats.push({
+      title: corroboratedRank,
+      description: i18n.translate(
+        'xpack.alertzero.agentBuilder.attachments.threat.corroboratedRank',
+        { defaultMessage: 'Corroborated rank' }
+      ),
+    });
+  }
   if (liveData.evidence?.alert_hits_total != null) {
     stats.push({
       title: liveData.evidence.alert_hits_total,
@@ -422,19 +479,19 @@ const renderEvidenceSection = (liveData: ThreatReportApiResponse): React.ReactNo
   }
   if (liveData.evidence?.last_hunt_status != null) {
     stats.push({
-      title: liveData.evidence.last_hunt_status,
+      title: (
+        <EuiBadge
+          color={
+            liveData.evidence.last_hunt_status === 'environment_hits_found' ? 'warning' : 'hollow'
+          }
+        >
+          {HUNT_STATUS_LABELS[liveData.evidence.last_hunt_status] ??
+            liveData.evidence.last_hunt_status}
+        </EuiBadge>
+      ),
       description: i18n.translate(
         'xpack.alertzero.agentBuilder.attachments.threat.lastHuntStatus',
         { defaultMessage: 'Last hunt status' }
-      ),
-    });
-  }
-  if (corroboratedRank != null) {
-    stats.push({
-      title: corroboratedRank,
-      description: i18n.translate(
-        'xpack.alertzero.agentBuilder.attachments.threat.corroboratedRank',
-        { defaultMessage: 'Corroborated rank' }
       ),
     });
   }
@@ -451,20 +508,25 @@ const renderEvidenceSection = (liveData: ThreatReportApiResponse): React.ReactNo
     return null;
   }
   return (
-    <div key="evidence">
-      <SectionHeading>
-        {i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.evidence', {
-          defaultMessage: 'Evidence',
-        })}
-      </SectionHeading>
-      <EuiFlexGroup gutterSize="m" wrap responsive={false}>
-        {stats.map((stat, index) => (
-          <EuiFlexItem grow={false} key={index}>
-            <CompactStat title={stat.title} description={stat.description} />
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGroup>
-    </div>
+    <Section
+      key="evidence"
+      title={i18n.translate('xpack.alertzero.agentBuilder.attachments.threat.evidence', {
+        defaultMessage: 'Evidence',
+      })}
+    >
+      <LabeledBadgeTable
+        testSubj="alertzeroThreatAttachmentEvidenceTable"
+        caption={i18n.translate(
+          'xpack.alertzero.agentBuilder.attachments.threat.evidenceTableCaption',
+          { defaultMessage: 'Threat report evidence' }
+        )}
+        rows={stats.map((stat) => ({
+          id: stat.description,
+          label: stat.description,
+          values: <EuiText size="xs">{stat.title}</EuiText>,
+        }))}
+      />
+    </Section>
   );
 };
 
@@ -486,25 +548,28 @@ const ThreatHeadline = ({
   return (
     <div key="headline" data-test-subj={testSubj}>
       {title && (
-        <EuiText size="s">
-          <strong>{title}</strong>
-        </EuiText>
+        <EuiTitle size="xs">
+          <h3 css={{ overflowWrap: 'anywhere' }}>{title}</h3>
+        </EuiTitle>
       )}
       {(severity || source) && (
-        <EuiFlexGroup gutterSize="s" wrap responsive={false}>
-          {severity && (
-            <EuiFlexItem grow={false}>
-              <EuiBadge color={severityBadgeColor(severity)}>{severity}</EuiBadge>
-            </EuiFlexItem>
-          )}
-          {source && (
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs" color="subdued">
-                {source}
-              </EuiText>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
+        <>
+          <EuiSpacer size="xs" />
+          <EuiFlexGroup gutterSize="s" alignItems="center" wrap responsive={false}>
+            {severity && (
+              <EuiFlexItem grow={false}>
+                <EuiBadge color={severityBadgeColor(severity)}>{severity}</EuiBadge>
+              </EuiFlexItem>
+            )}
+            {source && (
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs" color="subdued">
+                  {source}
+                </EuiText>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        </>
       )}
     </div>
   );
@@ -512,6 +577,7 @@ const ThreatHeadline = ({
 
 const renderHeadlineSection = (liveData: ThreatReportApiResponse): React.ReactNode => (
   <ThreatHeadline
+    key="headline"
     title={liveData.content?.title}
     severity={liveData.severity?.level}
     source={liveData.source?.name}
@@ -532,28 +598,18 @@ const renderEnrichedSections = ({
 
   const sections = [
     renderHeadlineSection(liveData),
-    renderExternalReferencesSection(liveData),
     renderIocsSection(liveData, navigation),
     renderTtpsGeoCategoriesSection(liveData),
     renderDiamondSection(liveData),
     renderEvidenceSection(liveData),
+    renderExternalReferencesSection(liveData),
   ].filter((section): section is React.ReactElement => section != null);
 
   if (sections.length === 0) {
     return null;
   }
 
-  return (
-    <>
-      <EuiSpacer size="s" />
-      {sections.map((section, index) => (
-        <React.Fragment key={index}>
-          {index > 0 && <EuiSpacer size="s" />}
-          {section}
-        </React.Fragment>
-      ))}
-    </>
-  );
+  return <SectionStack>{sections}</SectionStack>;
 };
 
 export interface ThreatAttachmentInlineContentProps
@@ -609,17 +665,16 @@ const ThreatAttachmentInlineContentInner: React.FC<ThreatAttachmentInlineContent
     <EuiPanel
       hasShadow={false}
       hasBorder={false}
-      paddingSize="s"
+      paddingSize="m"
       data-test-subj={THREAT_ATTACHMENT_TEST_ID}
     >
       {isLoading ? (
-        <EuiSkeletonText lines={2} />
+        <EuiSkeletonText lines={3} />
       ) : (
         <>
           {useLive && renderEnrichedSections({ liveData, navigation })}
           {!useLive && (
             <>
-              <EuiSpacer size="s" />
               <KbnInfoCallout
                 announceOnMount
                 size="s"
@@ -640,10 +695,13 @@ const ThreatAttachmentInlineContentInner: React.FC<ThreatAttachmentInlineContent
               />
               {hasAnyField && (
                 <>
-                  <EuiSpacer size="s" />
+                  <EuiSpacer size="m" />
                   <EuiDescriptionList
                     compressed
                     type="column"
+                    columnWidths={['7em', '1fr']}
+                    columnGutterSize="s"
+                    rowGutterSize="s"
                     data-test-subj={THREAT_ATTACHMENT_CAPTURED_FIELDS_TEST_ID}
                     listItems={(
                       [
@@ -677,7 +735,14 @@ const ThreatAttachmentInlineContentInner: React.FC<ThreatAttachmentInlineContent
                       .filter(
                         (entry): entry is [string, NonNullable<React.ReactNode>] => entry[1] != null
                       )
-                      .map(([title, description]) => ({ title, description }))}
+                      .map(([title, description]) => ({
+                        title: (
+                          <EuiText size="xs" color="subdued">
+                            {title}
+                          </EuiText>
+                        ),
+                        description,
+                      }))}
                   />
                 </>
               )}

@@ -61,15 +61,15 @@ export const createSignificantSecurityEventAttachmentDefinition = ({
     return title;
   },
   getIcon: () => 'securitySignalDetected',
+  // Severity / status / confidence live in the card body; the header stays title + subtitle.
   getHeader: ({ attachment }) => {
     const data = attachment?.data;
     const parsed = parseSignificantSecurityEventData(data);
-    const { subtitle, badges } = buildSignificantSecurityEventHeadline(parsed, data);
+    const { subtitle } = buildSignificantSecurityEventHeadline(parsed, data);
 
     return {
       icon: 'securitySignalDetected',
       ...(subtitle ? { subtitle } : {}),
-      badges,
     };
   },
   renderInlineContent: (props) => (

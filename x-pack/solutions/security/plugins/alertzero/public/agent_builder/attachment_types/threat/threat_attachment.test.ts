@@ -26,13 +26,12 @@ describe('createThreatAttachmentDefinition', () => {
     expect(definition.getHeader?.({ attachment } as never)).toEqual({
       icon: 'document',
       subtitle: 'r-1',
-      badges: [{ label: 'Threat report', color: 'hollow', iconType: 'document' }],
     });
     expect(definition.renderInlineContent).toBeDefined();
     expect(definition.getActionButtons?.({ attachment } as never)).toEqual([]);
   });
 
-  it('overrides the label and adds a severity badge and name-then-id subtitle when set', () => {
+  it('overrides the label and builds a name-then-id subtitle without header badges', () => {
     const definition = createThreatAttachmentDefinition({ http, navigation });
     const attachment = {
       data: {
@@ -47,10 +46,6 @@ describe('createThreatAttachmentDefinition', () => {
     expect(definition.getHeader?.({ attachment } as never)).toEqual({
       icon: 'document',
       subtitle: 'Feed A · r-1',
-      badges: [
-        { label: 'Threat report', color: 'hollow', iconType: 'document' },
-        { label: 'high', color: 'danger' },
-      ],
     });
   });
 

@@ -26,7 +26,7 @@ describe('createHuntCorrelationAttachmentDefinition', () => {
     self_match_excluded: true,
   };
 
-  it('renders the default shape with a pluralized subtitle and a below-threshold badge', () => {
+  it('renders the default shape with a pluralized subtitle and no header badges', () => {
     const definition = createHuntCorrelationAttachmentDefinition({ navigation });
     const attachment = { data: baseData } as unknown as HuntCorrelationAttachment;
 
@@ -35,12 +35,11 @@ describe('createHuntCorrelationAttachmentDefinition', () => {
     expect(definition.getHeader?.({ attachment } as never)).toEqual({
       icon: 'link',
       subtitle: '1 anchor · 2 related reports',
-      badges: [{ label: 'Below threshold', color: 'hollow' }],
     });
     expect(definition.renderInlineContent).toBeDefined();
   });
 
-  it('overrides the label, uses singular grammar, and badges above-threshold scores', () => {
+  it('overrides the label and keeps the header free of threshold badges', () => {
     const definition = createHuntCorrelationAttachmentDefinition({ navigation });
     const singularData = {
       ...baseData,
@@ -56,17 +55,16 @@ describe('createHuntCorrelationAttachmentDefinition', () => {
     expect(definition.getHeader?.({ attachment } as never)).toEqual({
       icon: 'link',
       subtitle: '1 anchor · 2 related reports',
-      badges: [{ label: 'Above threshold', color: 'success' }],
     });
   });
 
-  it('omits the badge when there are no diamond scores', () => {
+  it('never adds header badges, even without diamond scores', () => {
     const definition = createHuntCorrelationAttachmentDefinition({ navigation });
     const attachment = {
       data: { ...baseData, diamond_scores: [] },
     } as unknown as HuntCorrelationAttachment;
 
-    expect(definition.getHeader?.({ attachment } as never)?.badges).toEqual([]);
+    expect(definition.getHeader?.({ attachment } as never)?.badges).toBeUndefined();
   });
 
   it('returns Open related reports in Discover for unique report ids when share is available', () => {

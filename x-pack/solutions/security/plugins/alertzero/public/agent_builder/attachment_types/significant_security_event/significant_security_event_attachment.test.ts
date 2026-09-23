@@ -32,7 +32,7 @@ describe('createSignificantSecurityEventAttachmentDefinition', () => {
     evaluation_record_ref: 'eval-1',
   };
 
-  it('renders the default shape from title, with the hunt finding badge and icon', () => {
+  it('renders the default shape from title and subtitle, without header badges', () => {
     const definition = createSignificantSecurityEventAttachmentDefinition({ navigation });
     const attachment = { data: baseData } as unknown as SignificantSecurityEventAttachment;
 
@@ -41,12 +41,6 @@ describe('createSignificantSecurityEventAttachmentDefinition', () => {
     expect(definition.getHeader?.({ attachment } as never)).toEqual({
       icon: 'securitySignalDetected',
       subtitle: 'From ti-report-1 · lateral-movement-detector',
-      badges: [
-        { label: 'Hunt finding', color: 'primary' },
-        { label: 'high', color: 'danger' },
-        { label: 'open', color: 'hollow' },
-        { label: '80%', color: 'hollow' },
-      ],
     });
     expect(definition.renderInlineContent).toBeDefined();
   });
@@ -91,7 +85,6 @@ describe('createSignificantSecurityEventAttachmentDefinition', () => {
 
     expect(definition.getHeader?.({ attachment: {} as never })).toEqual({
       icon: 'securitySignalDetected',
-      badges: [{ label: 'Hunt finding', color: 'primary' }],
     });
   });
 

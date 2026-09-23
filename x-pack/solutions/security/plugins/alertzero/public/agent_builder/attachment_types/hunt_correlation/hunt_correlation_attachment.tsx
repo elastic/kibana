@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { AttachmentUIDefinition, HeaderBadge } from '@kbn/agent-builder-browser/attachments';
+import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser/attachments';
 import type { AttachmentNavigationDeps } from '../navigation';
 import { lazyInlineContent } from '../shared/attachment_definition_helpers';
 import {
@@ -43,18 +43,14 @@ export const createHuntCorrelationAttachmentDefinition = ({
 }): AttachmentUIDefinition<HuntCorrelationAttachment> => ({
   getLabel: (attachment) => attachment?.data?.attachmentLabel ?? DEFAULT_LABEL,
   getIcon: () => 'link',
+  // Threshold state is shown in the card body; the header stays title + subtitle.
   getHeader: ({ attachment }) => {
     const parsed = parseHuntCorrelationData(attachment?.data);
-    const { subtitle, thresholdLabel, allAboveThreshold } = buildHuntCorrelationSummary(parsed);
-
-    const badges: HeaderBadge[] = thresholdLabel
-      ? [{ label: thresholdLabel, color: allAboveThreshold ? 'success' : 'hollow' }]
-      : [];
+    const { subtitle } = buildHuntCorrelationSummary(parsed);
 
     return {
       icon: 'link',
       subtitle,
-      badges,
     };
   },
   renderInlineContent: (props) => (

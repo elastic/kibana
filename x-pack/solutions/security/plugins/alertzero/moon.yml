@@ -56,7 +56,6 @@ dependsOn:
   - '@kbn/share-plugin'
   - '@kbn/utility-types'
   - '@kbn/es-query'
-  - '@kbn/cloud-security-posture'
   - '@kbn/security-solution-distribution-bar'
   - '@kbn/core-application-browser'
   - '@kbn/test-jest-helpers'
