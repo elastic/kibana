@@ -9,7 +9,7 @@
 
 export { dataTableSchema, dataTableLimitsSchema, documentsDisplayModeSchema } from './data_table';
 export { viewModeSchema } from './view_mode';
-export { discoverSessionApiPanelOverridesSchema } from './panel_overrides';
+export { discoverSessionApiEmbeddableOverridesSchema } from './embeddable_overrides';
 export {
   discoverSessionApiClassicTabBaseSchema,
   discoverSessionApiEsqlTabBaseSchema,
@@ -21,7 +21,10 @@ export {
   discoverSessionApiControlPanelsSchema,
 } from './control_panel';
 export { discoverSessionApiMetricsTabTypeStateSchema } from './metrics_tab';
-export { panelTabSchema } from './panel_tab';
+export {
+  discoverSessionApiEmbeddableByValueConfigSchema,
+  discoverSessionApiEmbeddableByReferenceConfigSchema,
+} from './embeddable';
 export {
   discoverSessionApiDefaultTabTypeStateSchema,
   discoverSessionApiClassicTabSchema,

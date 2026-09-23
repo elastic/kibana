@@ -19,7 +19,7 @@ import {
   fromStoredSearchEmbeddableByValue,
   fromStoredGrid,
   fromStoredRowHeight,
-  toDiscoverSessionPanelOverrides,
+  toDiscoverSessionEmbeddableOverrides,
   fromStoredSort,
   fromStoredTab,
   toStoredSearchEmbeddable,
@@ -27,7 +27,7 @@ import {
   toStoredSearchEmbeddableByValue,
   toStoredGrid,
   toStoredHeight,
-  fromDiscoverSessionPanelOverrides,
+  fromDiscoverSessionEmbeddableOverrides,
   toStoredSort,
   toStoredTab,
 } from './transform_utils';
@@ -757,7 +757,7 @@ describe('search embeddable transform utils', () => {
           },
         },
       };
-      const result = toDiscoverSessionPanelOverrides(storedState);
+      const result = toDiscoverSessionEmbeddableOverrides(storedState);
       expect(result).toEqual({
         sort: [{ name: '@timestamp', direction: 'desc' }],
         column_order: ['message', '@timestamp'],
@@ -783,7 +783,7 @@ describe('search embeddable transform utils', () => {
         columns: ['message'],
         grid: { columns: {} },
       };
-      const result = toDiscoverSessionPanelOverrides(storedState);
+      const result = toDiscoverSessionEmbeddableOverrides(storedState);
       expect(result).toEqual({
         sort: [{ name: '@timestamp', direction: 'desc' }],
         column_order: ['message'],
@@ -804,7 +804,7 @@ describe('search embeddable transform utils', () => {
         rowHeight: 5,
         headerRowHeight: 2,
       };
-      const result = toDiscoverSessionPanelOverrides(storedState);
+      const result = toDiscoverSessionEmbeddableOverrides(storedState);
       expect(result.row_height).toBe(5);
       expect(result.header_row_height).toBe(2);
     });
@@ -814,7 +814,7 @@ describe('search embeddable transform utils', () => {
         rowHeight: -1,
         headerRowHeight: -1,
       };
-      const result = toDiscoverSessionPanelOverrides(storedState);
+      const result = toDiscoverSessionEmbeddableOverrides(storedState);
       expect(result.row_height).toBe('auto');
       expect(result.header_row_height).toBe('auto');
     });
@@ -835,7 +835,7 @@ describe('search embeddable transform utils', () => {
         wrap_lines: false,
         default_rendered_nodes: 2,
       };
-      const result = fromDiscoverSessionPanelOverrides(apiState);
+      const result = fromDiscoverSessionEmbeddableOverrides(apiState);
       expect(result).toEqual({
         sort: [['@timestamp', 'desc']],
         columns: ['message', '@timestamp'],
@@ -858,7 +858,7 @@ describe('search embeddable transform utils', () => {
         sort: [{ name: '@timestamp', direction: 'desc' as const }],
         column_order: ['message'],
       };
-      const result = fromDiscoverSessionPanelOverrides(apiState);
+      const result = fromDiscoverSessionEmbeddableOverrides(apiState);
       expect(result).toEqual({
         sort: [['@timestamp', 'desc']],
         columns: ['message'],
@@ -875,7 +875,7 @@ describe('search embeddable transform utils', () => {
         row_height: 'auto' as const,
         header_row_height: 'auto' as const,
       };
-      const result = fromDiscoverSessionPanelOverrides(apiState);
+      const result = fromDiscoverSessionEmbeddableOverrides(apiState);
       expect(result.rowHeight).toBe(-1);
       expect(result.headerRowHeight).toBe(-1);
     });
@@ -885,7 +885,7 @@ describe('search embeddable transform utils', () => {
         row_height: 5,
         header_row_height: 2,
       };
-      const result = fromDiscoverSessionPanelOverrides(apiState);
+      const result = fromDiscoverSessionEmbeddableOverrides(apiState);
       expect(result.rowHeight).toBe(5);
       expect(result.headerRowHeight).toBe(2);
     });
@@ -908,8 +908,8 @@ describe('search embeddable transform utils', () => {
           },
         },
       };
-      const overrides = toDiscoverSessionPanelOverrides(storedState);
-      const back = fromDiscoverSessionPanelOverrides(overrides);
+      const overrides = toDiscoverSessionEmbeddableOverrides(storedState);
+      const back = fromDiscoverSessionEmbeddableOverrides(overrides);
       expect(back.sort).toEqual(storedState.sort);
       expect(back.columns).toEqual(storedState.columns);
       expect(back.rowHeight).toBe(storedState.rowHeight);
