@@ -479,7 +479,7 @@ Piloting inside the loop above is authorized by the brief that started it, and i
 handful of documents that get deleted afterwards. Running the saved automation is not the same act:
 it writes indicators across the whole corpus and costs model calls on every document it touches.
 
-When the user has asked to save and run, call `platform.context_engine.save_automation` first, then
+To save, make sure you called `platform.context_engine.save_automation` first, then
 call `platform.context_engine.run_automation` with the `workflowId` that `save_automation` returned.
 Each call shows its own confirmation dialog. `run_automation` fires the execution asynchronously and
 returns immediately with an `executionId` — the run continues after the call returns. Tell the user
