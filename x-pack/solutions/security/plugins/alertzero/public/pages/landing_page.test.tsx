@@ -14,11 +14,11 @@ import { createMemoryHistory } from 'history';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { useWorkers } from '../hooks/use_workers_api';
-import { useProposalsByCategoryCount, useClosedProposalsCount } from '../hooks/use_proposals_api';
+import { useInvestigationsCount } from '../hooks/use_investigations_api';
 import { LandingPage } from './landing_page';
 
 jest.mock('../hooks/use_workers_api');
-jest.mock('../hooks/use_proposals_api');
+jest.mock('../hooks/use_investigations_api');
 
 // ConversationsPage has complex deps; stub it to keep the test focused on routing logic.
 jest.mock('./conversations', () => ({
@@ -32,8 +32,7 @@ jest.mock('../components/layout/alertzero_page_section', () => ({
 jest.mock('../hooks/use_alertzero_doc_title', () => ({ useAlertZeroDocTitle: jest.fn() }));
 
 const mockUseWorkers = useWorkers as jest.Mock;
-const mockUseProposalsByCategoryCount = useProposalsByCategoryCount as jest.Mock;
-const mockUseClosedProposalsCount = useClosedProposalsCount as jest.Mock;
+const mockUseInvestigationsCount = useInvestigationsCount as jest.Mock;
 
 type QueryOverrides = Partial<{
   data: unknown;
@@ -50,8 +49,8 @@ const workersResult = (workers: Array<{ enabled: boolean }>, overrides: QueryOve
   ...overrides,
 });
 
-const proposalsResult = (total: number, overrides: QueryOverrides = {}) => ({
-  data: { proposals: [], total },
+const investigationsResult = (total: number, overrides: QueryOverrides = {}) => ({
+  data: total,
   isLoading: false,
   isFetching: false,
   error: undefined,
@@ -75,8 +74,7 @@ const wrap = (ui: React.ReactElement) => {
 const renderPage = () => render(wrap(<LandingPage />));
 
 beforeEach(() => {
-  mockUseProposalsByCategoryCount.mockReturnValue(proposalsResult(0));
-  mockUseClosedProposalsCount.mockReturnValue(proposalsResult(0));
+  mockUseInvestigationsCount.mockReturnValue(investigationsResult(0));
   mockUseWorkers.mockReturnValue(workersResult([]));
 });
 
@@ -85,7 +83,6 @@ afterEach(() => jest.clearAllMocks());
 describe('LandingPage', () => {
   it('shows onboarding when there are no workers and no investigations', () => {
     mockUseWorkers.mockReturnValue(workersResult([]));
-    mockUseProposalsByCategoryCount.mockReturnValue(proposalsResult(0));
 
     renderPage();
 
@@ -95,7 +92,6 @@ describe('LandingPage', () => {
 
   it('shows onboarding when all workers are disabled and there are no investigations', () => {
     mockUseWorkers.mockReturnValue(workersResult([{ enabled: false }, { enabled: false }]));
-    mockUseProposalsByCategoryCount.mockReturnValue(proposalsResult(0));
 
     renderPage();
 
@@ -104,7 +100,6 @@ describe('LandingPage', () => {
 
   it('shows the queue when at least one worker is enabled', () => {
     mockUseWorkers.mockReturnValue(workersResult([{ enabled: false }, { enabled: true }]));
-    mockUseProposalsByCategoryCount.mockReturnValue(proposalsResult(0));
 
     renderPage();
 
@@ -113,33 +108,7 @@ describe('LandingPage', () => {
   });
 
   it('shows the queue when investigations exist even with no workers enabled', () => {
-    mockUseWorkers.mockReturnValue(workersResult([]));
-    mockUseProposalsByCategoryCount.mockImplementation((category: string) =>
-      proposalsResult(category === 'investigate' ? 3 : 0)
-    );
-
-    renderPage();
-
-    expect(screen.getByTestId('conversations-page')).toBeInTheDocument();
-    expect(screen.queryByText('Get started with AlertZero')).not.toBeInTheDocument();
-  });
-
-  it('shows the queue when respond proposals exist', () => {
-    mockUseWorkers.mockReturnValue(workersResult([]));
-    mockUseProposalsByCategoryCount.mockImplementation((category: string) =>
-      proposalsResult(category === 'respond' ? 1 : 0)
-    );
-
-    renderPage();
-
-    expect(screen.getByTestId('conversations-page')).toBeInTheDocument();
-  });
-
-  it('shows the queue when configure proposals exist', () => {
-    mockUseWorkers.mockReturnValue(workersResult([]));
-    mockUseProposalsByCategoryCount.mockImplementation((category: string) =>
-      proposalsResult(category === 'configure' ? 2 : 0)
-    );
+    mockUseInvestigationsCount.mockReturnValue(investigationsResult(3));
 
     renderPage();
 
@@ -157,10 +126,10 @@ describe('LandingPage', () => {
     expect(document.querySelector('[class*="euiLoadingSpinner"]')).toBeInTheDocument();
   });
 
-  it('shows the queue immediately when workers loaded with an enabled worker even if proposals are still loading', () => {
+  it('shows the queue immediately when workers loaded with an enabled worker even if investigations are still loading', () => {
     mockUseWorkers.mockReturnValue(workersResult([{ enabled: true }]));
-    mockUseProposalsByCategoryCount.mockReturnValue(
-      proposalsResult(0, { isLoading: true, data: undefined })
+    mockUseInvestigationsCount.mockReturnValue(
+      investigationsResult(0, { isLoading: true, data: undefined })
     );
 
     renderPage();
@@ -173,10 +142,11 @@ describe('LandingPage', () => {
     mockUseWorkers.mockReturnValue({
       data: undefined,
       isLoading: false,
+      isFetching: false,
       error: new Error('network error'),
     });
-    mockUseProposalsByCategoryCount.mockReturnValue(
-      proposalsResult(0, { isLoading: true, data: undefined })
+    mockUseInvestigationsCount.mockReturnValue(
+      investigationsResult(0, { isLoading: true, data: undefined })
     );
 
     renderPage();
@@ -185,9 +155,9 @@ describe('LandingPage', () => {
     expect(document.querySelector('[class*="euiLoadingSpinner"]')).not.toBeInTheDocument();
   });
 
-  it('shows a loading spinner while proposals are loading', () => {
-    mockUseProposalsByCategoryCount.mockReturnValue(
-      proposalsResult(0, { isLoading: true, data: undefined })
+  it('shows a loading spinner while investigations are loading', () => {
+    mockUseInvestigationsCount.mockReturnValue(
+      investigationsResult(0, { isLoading: true, data: undefined })
     );
 
     renderPage();
@@ -198,10 +168,10 @@ describe('LandingPage', () => {
   });
 
   it('shows a spinner when stale cached zeros are being refetched in the background', () => {
-    // Simulates an established user whose cached data shows empty workers/proposals
+    // Simulates an established user whose cached data shows empty workers/investigations
     // but React Query is in a background refetch (isLoading=false, isFetching=true).
     mockUseWorkers.mockReturnValue(workersResult([], { isFetching: true }));
-    mockUseProposalsByCategoryCount.mockReturnValue(proposalsResult(0, { isFetching: true }));
+    mockUseInvestigationsCount.mockReturnValue(investigationsResult(0, { isFetching: true }));
 
     renderPage();
 
@@ -225,32 +195,11 @@ describe('LandingPage', () => {
     expect(screen.queryByTestId('conversations-page')).not.toBeInTheDocument();
   });
 
-  it('shows the queue when closed proposals exist even with no workers enabled', () => {
-    mockUseWorkers.mockReturnValue(workersResult([]));
-    mockUseClosedProposalsCount.mockReturnValue(proposalsResult(5));
-
-    renderPage();
-
-    expect(screen.getByTestId('conversations-page')).toBeInTheDocument();
-    expect(screen.queryByText('Get started with AlertZero')).not.toBeInTheDocument();
-  });
-
-  it('shows a loading spinner while closed proposals are loading', () => {
-    mockUseClosedProposalsCount.mockReturnValue(
-      proposalsResult(0, { isLoading: true, data: undefined })
-    );
-
-    renderPage();
-
-    expect(screen.queryByText('Get started with AlertZero')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('conversations-page')).not.toBeInTheDocument();
-    expect(document.querySelector('[class*="euiLoadingSpinner"]')).toBeInTheDocument();
-  });
-
   it('falls through to the queue on workers fetch error', () => {
     mockUseWorkers.mockReturnValue({
       data: undefined,
       isLoading: false,
+      isFetching: false,
       error: new Error('network error'),
     });
 
@@ -259,24 +208,11 @@ describe('LandingPage', () => {
     expect(screen.getByTestId('conversations-page')).toBeInTheDocument();
   });
 
-  it('falls through to the queue on proposals fetch error', () => {
-    mockUseWorkers.mockReturnValue(workersResult([]));
-    mockUseProposalsByCategoryCount.mockReturnValue({
+  it('falls through to the queue on investigations fetch error', () => {
+    mockUseInvestigationsCount.mockReturnValue({
       data: undefined,
       isLoading: false,
-      error: new Error('network error'),
-    });
-
-    renderPage();
-
-    expect(screen.getByTestId('conversations-page')).toBeInTheDocument();
-  });
-
-  it('falls through to the queue on closed proposals fetch error', () => {
-    mockUseWorkers.mockReturnValue(workersResult([]));
-    mockUseClosedProposalsCount.mockReturnValue({
-      data: undefined,
-      isLoading: false,
+      isFetching: false,
       error: new Error('network error'),
     });
 

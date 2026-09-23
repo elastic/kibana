@@ -8,7 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { useWorkers } from '../hooks/use_workers_api';
-import { useProposalsByCategoryCount, useClosedProposalsCount } from '../hooks/use_proposals_api';
+import { useInvestigationsCount } from '../hooks/use_investigations_api';
 import { ConversationsPage } from './conversations';
 import { OnboardingPage } from './onboarding';
 
@@ -20,41 +20,23 @@ export const LandingPage: React.FC = () => {
 
   const queryEnabled = decision === null;
   const workers = useWorkers();
-  const respond = useProposalsByCategoryCount('respond', queryEnabled);
-  const investigate = useProposalsByCategoryCount('investigate', queryEnabled);
-  const configure = useProposalsByCategoryCount('configure', queryEnabled);
-  const closed = useClosedProposalsCount(queryEnabled);
+  const investigations = useInvestigationsCount(queryEnabled);
 
   // Positive signals short-circuit before isLoading/isFetching so a known
   // result renders the queue immediately without waiting for sibling queries.
   const hasEnabledWorker = workers.data?.workers.some((w) => w.enabled) ?? false;
-  const hasProposals =
-    (respond.data?.total ?? 0) > 0 ||
-    (investigate.data?.total ?? 0) > 0 ||
-    (configure.data?.total ?? 0) > 0 ||
-    (closed.data?.total ?? 0) > 0;
-  const hasAnyError =
-    workers.error != null ||
-    respond.error != null ||
-    investigate.error != null ||
-    configure.error != null ||
-    closed.error != null;
+  const hasInvestigations = (investigations.data ?? 0) > 0;
+  const hasAnyError = workers.error != null || investigations.error != null;
 
-  const showQueue = decision === 'queue' || hasAnyError || hasEnabledWorker || hasProposals;
+  const showQueue = decision === 'queue' || hasAnyError || hasEnabledWorker || hasInvestigations;
 
   // isFetching covers background refetches of stale cached empty results that
   // would otherwise fall through to onboarding before the fresh response lands.
   const isUnresolved =
     workers.isLoading ||
     workers.isFetching ||
-    respond.isLoading ||
-    respond.isFetching ||
-    investigate.isLoading ||
-    investigate.isFetching ||
-    configure.isLoading ||
-    configure.isFetching ||
-    closed.isLoading ||
-    closed.isFetching;
+    investigations.isLoading ||
+    investigations.isFetching;
 
   // Only latch once data is fresh (not fetching). Stale positive cache renders
   // the queue optimistically but must not permanently lock the decision before
