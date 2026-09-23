@@ -180,6 +180,15 @@ describe('Connector Model Versions', () => {
   });
 
   describe('version 4', () => {
+    it('decrypts with the v3 registration before reading apiKey', () => {
+      expect(encryptedSavedObjects.createModelVersion).toHaveBeenCalledWith(
+        expect.objectContaining({
+          inputType: actionEncryptedRegistrationV3,
+          outputType: actionEncryptedRegistrationV3,
+        })
+      );
+    });
+
     const version4 = versions['4'] as SavedObjectsFullModelVersion;
     const context: SavedObjectModelTransformationContext = {
       log: {
@@ -273,6 +282,36 @@ describe('Connector Model Versions', () => {
         attributes: {
           ...mockDocument.attributes,
           hasInboundEventIdentity: true,
+        },
+      });
+    });
+
+    it('does not treat an empty apiKey as inbound identity', () => {
+      const backfillChange = version4.changes.find((change) => change.type === 'data_backfill');
+      const backfillFn =
+        backfillChange && backfillChange.type === 'data_backfill'
+          ? backfillChange.backfillFn
+          : undefined;
+      const mockDocument = {
+        id: 'empty-identity',
+        type: 'action',
+        attributes: {
+          actionTypeId: '.webhook',
+          name: 'Webhook Connector with empty identity fields',
+          isMissingSecrets: false,
+          config: {},
+          secrets: '{}',
+          apiKey: '',
+          uiamApiKey: null,
+        },
+        references: [],
+      };
+
+      expect(backfillFn!(mockDocument, context)).toEqual({
+        ...mockDocument,
+        attributes: {
+          ...mockDocument.attributes,
+          hasInboundEventIdentity: false,
         },
       });
     });
