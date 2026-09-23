@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { firstValueFrom } from 'rxjs';
 import { ENABLE_IAC_PROVISIONER_FLAG } from '../../../common/constants';
 import { AWS_CLOUD_PROVIDER } from '../../../common/types/models/cloud_connector';
 import type { CloudProvider } from '../../../common/types/models/cloud_connector';
@@ -43,7 +44,7 @@ export const isIacProvisionerEnabled = async (): Promise<boolean> => {
     return false;
   }
 
-  return await featureFlags.getBooleanValue(ENABLE_IAC_PROVISIONER_FLAG, false);
+  return await firstValueFrom(featureFlags.getBooleanValue$(ENABLE_IAC_PROVISIONER_FLAG, false));
 };
 
 // Providers the IaC Provisioner has blueprints for. Adding one here is not enough on its own:
