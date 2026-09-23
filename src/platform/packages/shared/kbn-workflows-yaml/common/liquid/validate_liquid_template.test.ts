@@ -130,46 +130,52 @@ steps:
       expect(validate('Hello { not liquid } world')).toEqual([]);
     });
 
-    it('should not return errors for pure ${{ }} conditional expressions', () => {
+    it('should not return errors for pure ${{ }} expressions (Liquid after leading $)', () => {
       // Use string concatenation to avoid JS template-literal interpolation on ${{ }}
       const dollar = '$';
-      const yamlString =
-        'name: test\nvalue: "' +
-        dollar +
-        '{{ inputs.flag != null ? inputs.flag : variables.flag }}"';
+      const yamlString = 'name: test\nvalue: "' + dollar + '{{ inputs.flag != null }}"';
       expect(validate(yamlString)).toEqual([]);
     });
 
     it('should not return errors for ${{ }} mixed with valid Liquid in the same value', () => {
       const dollar = '$';
       const yamlString =
-        'name: test\nvalue: "' +
-        dollar +
-        "{{ inputs.flag != null ? inputs.flag : false }} {{ other | default: 'x' }}\"";
+        'name: test\nvalue: "' + dollar + "{{ inputs.flag != null }} {{ other | default: 'x' }}\"";
       expect(validate(yamlString)).toEqual([]);
     });
 
-    it('should still catch invalid Liquid when ${{ }} and {{ }} coexist in the same value', () => {
+    it('should catch unknownFilter inside ${{ }} (same as runtime evaluateExpression)', () => {
       const dollar = '$';
-      const yamlString =
-        'name: test\nvalue: "' +
-        dollar +
-        '{{ inputs.flag != null ? inputs.flag : false }} {{ var | unknownFilter }}"';
+      const yamlString = 'message: "' + dollar + '{{ name | unknownFilter }}"';
       const result = validate(yamlString);
       expect(result).toHaveLength(1);
       expect(result[0].message).toContain('unknownFilter');
     });
 
-    it('should report error columns past a leading ${{ }} (same-length blanking preserves offsets)', () => {
+    it('should catch ternaries inside ${{ }} (engine has no ternary; fails at runtime too)', () => {
+      const dollar = '$';
+      const yamlString = 'message: "' + dollar + '{{ inputs.flag != null ? inputs.flag : false }}"';
+      const result = validate(yamlString);
+      expect(result.length).toBeGreaterThanOrEqual(1);
+    });
+
+    it('should still catch invalid Liquid when ${{ }} and {{ }} coexist in the same value', () => {
+      const dollar = '$';
+      const yamlString =
+        'name: test\nvalue: "' + dollar + '{{ inputs.flag != null }} {{ var | unknownFilter }}"';
+      const result = validate(yamlString);
+      expect(result).toHaveLength(1);
+      expect(result[0].message).toContain('unknownFilter');
+    });
+
+    it('should report error columns past a leading ${{ }}', () => {
       // value: "${{ a != null }} {{ name | unknownFilter }}"
-      //         ^quote        ^dynamic expr ends          ^Liquid error should land here, not at col 1
       const dollar = '$';
       const dynamicExpr = dollar + '{{ a != null }}';
       const yamlString = 'value: "' + dynamicExpr + ' {{ name | unknownFilter }}"';
       const result = validate(yamlString);
       expect(result).toHaveLength(1);
       expect(result[0].message).toContain('unknownFilter');
-      // "value: \"" is 8 chars; dynamicExpr length must be skipped before the Liquid error.
       const valueStartColumn = 'value: "'.length + 1; // 1-based column of first char inside quotes
       expect(result[0].startColumn).toBeGreaterThan(valueStartColumn + dynamicExpr.length);
     });
