@@ -47,6 +47,9 @@ const ES_MAX_ROLES = 1000;
 /** Unique per run, so a failed cleanup cannot make the next run collide. */
 const uniqueName = (prefix: string) => `${prefix}-${Date.now()}-${Math.floor(Math.random() * 1e6)}`;
 
+/** A sorted copy, for comparing role lists whose order Elasticsearch does not preserve. */
+const sorted = (values: string[]) => [...values].sort();
+
 /** Distinct role names, since Kibana drops duplicates before it counts. */
 const distinctRoles = (count: number) => Array.from({ length: count }, (_, i) => `role-${i}`);
 
@@ -166,15 +169,14 @@ apiTest.describe('Create Elasticsearch service accounts', { tag: LOCAL_ONLY }, (
         roles: ['viewer', 'editor'],
       });
 
-      const account = await esClient.transport.request<Record<string, unknown>>({
+      const account = await esClient.transport.request<Record<string, { roles: string[] }>>({
         method: 'GET',
         path: `/_security/service/${NAMESPACE}/${name}`,
       });
-      expect(account[`${NAMESPACE}/${name}`]).toMatchObject({
-        type: 'user_managed',
-        roles: ['viewer', 'editor'],
-        enabled: true,
-      });
+      const { roles, ...rest } = account[`${NAMESPACE}/${name}`];
+      expect(rest).toMatchObject({ type: 'user_managed', enabled: true });
+      // Elasticsearch does not keep the roles in the order they were sent.
+      expect(sorted(roles)).toStrictEqual(['editor', 'viewer']);
 
       const credentials = await esClient.transport.request<{ tokens: Record<string, unknown> }>({
         method: 'GET',
@@ -225,7 +227,7 @@ apiTest.describe('Create Elasticsearch service accounts', { tag: LOCAL_ONLY }, (
         method: 'GET',
         path: `/_security/service/${NAMESPACE}/${name}`,
       });
-      expect(account[`${NAMESPACE}/${name}`].roles).toHaveLength(ES_MAX_ROLES);
+      expect(sorted(account[`${NAMESPACE}/${name}`].roles)).toStrictEqual(sorted(roles));
     }
   );
 
