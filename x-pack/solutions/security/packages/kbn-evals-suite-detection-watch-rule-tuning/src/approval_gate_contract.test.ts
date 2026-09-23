@@ -20,7 +20,7 @@
  * The upstream architecture this file pins (post-#290665):
  *   - the single `waitForApproval` step is gone; a `propose_tuning` switch opens one
  *     investigation proposal per change type (`propose_query` / `propose_risk_score` /
- *     `propose_exception` through `system-create-investigation-proposal` with an action,
+ *     `propose_exception` through `system-create-proposal` with an action,
  *     `propose_manual` — the default arm — with none), each with `autoApprove: false`;
  *   - `record_proposal_action_decision` derives two INDEPENDENT axes: `applied` from the
  *     action arms' `status == 'succeeded'`, and `approved` / `dismissed` from the gate's
@@ -283,7 +283,7 @@ describe('rule-tuning approval gate contract', () => {
         /expression: "\{\{ steps.diagnose_rule.output.structured_output.change_type \}\}"/
       );
       expect(blockOf('propose_query')).toContain(
-        'workflow-id: system-create-investigation-proposal'
+        'workflow-id: system-create-proposal'
       );
       expect(blockOf('propose_query')).toContain(
         'actionWorkflowId: system-alertzero-action-edit-rule'

@@ -25,12 +25,12 @@ import {
 } from './constants';
 
 /**
- * The `system-create-investigation-proposal` managed workflow. Since the proposal
+ * The `system-create-proposal` managed workflow. Since the proposal
  * decision moved behind a proposal record (rule_tuning_review.yaml now fans out
  * `propose_*` children instead of parking on a review-level gate), this child
  * execution hosts the actual `waitForApproval` gate.
  */
-const CREATE_INVESTIGATION_PROPOSAL_WORKFLOW_ID = 'system-create-investigation-proposal';
+const CREATE_INVESTIGATION_PROPOSAL_WORKFLOW_ID = 'system-create-proposal';
 
 /**
  * Proposals decision API (agentic_investigations plugin). Approve/dismiss are the
@@ -127,7 +127,7 @@ const nonTerminalQuery = { statuses: [...NonTerminalExecutionStatuses] };
  *
  * Post-proposal-gate, the review no longer parks `waiting_for_input` itself: it runs
  * `propose_query`/`propose_risk_score`/`propose_exception`/`propose_manual` — each a
- * `workflow.execute` child of `system-create-investigation-proposal` — and settles into
+ * `workflow.execute` child of `system-create-proposal` — and settles into
  * `waiting_for_child` until the proposal's gate is decided. (The optional manual-autonomy
  * entry gate `propose_entry` can also park the review, but its `autonomy_level` defaults
  * to `assisted`, so the harness normally never hits it.)
@@ -136,7 +136,7 @@ export const isAwaitingProposalChild = (status: ExecutionStatus): boolean =>
   status === ExecutionStatus.WAITING_FOR_CHILD;
 
 /**
- * True while a `system-create-investigation-proposal` child execution is parked on its
+ * True while a `system-create-proposal` child execution is parked on its
  * `waitForApproval` gate — the actual approval surface this harness answers.
  */
 export const isAwaitingApproval = (status: ExecutionStatus): boolean =>
@@ -707,7 +707,7 @@ export interface RuleTuningApprovalRequest {
   workflowExecutionId: string;
   /** The review child execution currently parked in `waiting_for_child`. */
   reviewExecutionId: string;
-  /** The `system-create-investigation-proposal` child execution hosting the gate. */
+  /** The `system-create-proposal` child execution hosting the gate. */
   proposalChildExecutionId: string;
   /** The pending proposal record this harness will approve or dismiss. */
   proposalRecord: ProposalRecord;

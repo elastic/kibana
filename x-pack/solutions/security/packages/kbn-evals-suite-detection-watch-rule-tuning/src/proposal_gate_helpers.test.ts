@@ -9,7 +9,7 @@
  * Unit contract for the proposal-gate harness helpers in `workflow_task.ts`.
  *
  * The review no longer parks `waiting_for_input` itself: it settles into
- * `waiting_for_child` while a `system-create-investigation-proposal` child hosts the
+ * `waiting_for_child` while a `system-create-proposal` child hosts the
  * actual `waitForApproval` gate. These tests pin that contract, because a status-string
  * regression here looks exactly like an infrastructure hang — every run sits parked until
  * the next task's stale-cancel kills it and no fixture ever scores.
