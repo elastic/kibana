@@ -18,6 +18,7 @@ import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import { registerRoutes } from '@kbn/server-route-repository';
 import type { KibanaRequest } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import type { AvailabilityConfig } from '@kbn/agent-builder-server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import type { NightshiftInvestigationsConfig } from './config';
 import { NightshiftInvestigationsClient } from './client/investigations_client';
@@ -26,6 +27,8 @@ import { installInvestigationWorkflow } from './lib/managed_workflows/install_in
 import { installCortexWorkflows } from './lib/managed_workflows/install_cortex_workflows';
 import { installDecisionTreeWorkflows } from './lib/managed_workflows/install_decision_tree_workflows';
 import { installInvestigationAgent } from './lib/install_investigation_agent';
+import { installDeductiveInvestigationAgent } from './lib/install_deductive_investigation_agent';
+import { createInvestigationAvailability } from './create_investigation_availability';
 import { nightshiftInvestigationsRouteRepository } from './routes';
 import { isInvestigationAvailable } from './is_investigation_available';
 import { ensureInvestigationAgentStepDefinition } from './step_definitions/ensure_investigation_agent';
@@ -90,6 +93,7 @@ export class NightshiftInvestigationsPlugin
   private featureFlags?: CoreStart['featureFlags'];
   private actionsStart?: ActionsPluginStart;
   private security?: CoreStart['security'];
+  private investigationAvailability?: AvailabilityConfig;
   private cortexEnabled = false;
   private investigationQuotaCallback?: InvestigationQuotaCallback;
   private decisionTreesEnabled = false;
@@ -159,6 +163,7 @@ export class NightshiftInvestigationsPlugin
       plugins.agentBuilder.tools.register(
         createInvestigationProgressReportTool({
           logger: this.logger.get('investigation_progress_report_tool'),
+          availability: this.getInvestigationAvailability(),
         })
       );
 
@@ -231,7 +236,10 @@ export class NightshiftInvestigationsPlugin
         );
         // `agentBuilder` is only available from `start()`, so the step resolves it lazily.
         plugins.workflowsExtensions.registerStepDefinition(
-          ensureInvestigationAgentStepDefinition(() => this.agentBuilder)
+          ensureInvestigationAgentStepDefinition({
+            getAgentBuilder: () => this.agentBuilder,
+            getAgentAvailability: () => this.getInvestigationAvailability(),
+          })
         );
         if (this.cortexEnabled) {
           plugins.workflowsExtensions.registerStepDefinition(
@@ -340,11 +348,28 @@ export class NightshiftInvestigationsPlugin
     // agent exists wherever an investigation runs. This narrower install exists so the agent is
     // visible and editable in the Agent Builder UI before the first investigation ever runs.
     if (plugins.agentBuilder) {
+      const { agentBuilder } = plugins;
       void installInvestigationAgent({
-        agentBuilder: plugins.agentBuilder,
+        agentBuilder,
         spaceId: DEFAULT_SPACE_ID,
+        availability: this.getInvestigationAvailability(),
       }).catch((err) => {
         this.logger.error(`Failed to install investigation agent in default space: ${err.message}`);
+      });
+
+      // Availability for a persisted agent is held in memory and only registered by `ensure`, so
+      // an agent that is merely persisted is listed with no gate at all. The deductive agent is
+      // otherwise only ensured once an investigation runs, which cannot happen while the feature
+      // is off — without this call it would stay visible after a restart with `nightshift.enabled`
+      // disabled.
+      void installDeductiveInvestigationAgent({
+        agentBuilder,
+        spaceId: DEFAULT_SPACE_ID,
+        availability: this.getInvestigationAvailability(),
+      }).catch((err) => {
+        this.logger.error(
+          `Failed to install deductive investigation agent in default space: ${err.message}`
+        );
       });
     }
 
@@ -378,6 +403,31 @@ export class NightshiftInvestigationsPlugin
     };
   }
 
+  /**
+   * Created once and reused so every `agents.ensure` call for these agent ids registers the same
+   * gate. Dependencies are read lazily because the tool and the workflow step are registered at
+   * setup, while availability is only evaluated once a request arrives.
+   */
+  private getInvestigationAvailability = (): AvailabilityConfig => {
+    this.investigationAvailability ??= createInvestigationAvailability({
+      getDeps: () => {
+        if (!this.featureFlags) {
+          return undefined;
+        }
+        return {
+          featureFlags: this.featureFlags,
+          agentBuilder: this.agentBuilder,
+          logger: this.logger,
+          searchInferenceEndpoints: this.searchInferenceEndpoints,
+          spaces: this.spaces,
+          workflowsExtensions: this.workflowsExtensionsStart,
+          workflowsManagement: this.workflowsManagement,
+        };
+      },
+    });
+    return this.investigationAvailability;
+  };
+
   private getInvestigationsClient = (request: KibanaRequest, spaceId?: string) => {
     if (!this.featureFlags) {
       throw new Error('featureFlags is not available — plugin start() has not been called');
@@ -392,6 +442,7 @@ export class NightshiftInvestigationsPlugin
       logger: this.logger,
       spaceIdOverride: spaceId,
       agentBuilder: this.agentBuilder,
+      agentAvailability: this.getInvestigationAvailability(),
       investigationQuotaCallback: this.investigationQuotaCallback,
       investigationRepository: this.createInvestigationRepository(request, resolvedSpaceId),
       isAvailable: () =>
