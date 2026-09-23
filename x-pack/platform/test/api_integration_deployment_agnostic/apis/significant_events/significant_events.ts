@@ -18,6 +18,7 @@ import {
   pauseMaintenance,
   resumeMaintenance,
 } from './helpers/requests';
+import { createTestSource, deleteTestSource } from './helpers/test_source';
 import {
   deleteStream,
   disableStreams,
@@ -74,28 +75,37 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('updates the queries', async () => {
-        const esqlQuery = `FROM ${STREAM_NAME}, ${STREAM_NAME}.* | WHERE KQL("message: 'OOM Error'")`;
-        const response = await bulkQueries(apiClient, STREAM_NAME, [
-          {
-            index: {
-              id: 'aaa',
-              title: 'OOM Error',
-              description: '',
-              esql: { query: esqlQuery },
+        const source = await createTestSource(
+          roleScopedSupertest,
+          'Wired query source',
+          `FROM ${STREAM_NAME}`
+        );
+        try {
+          const esqlQuery = `FROM ${source.viewName} | WHERE KQL("message: 'OOM Error'")`;
+          const response = await bulkQueries(apiClient, source.id, [
+            {
+              index: {
+                id: 'aaa',
+                title: 'OOM Error',
+                description: '',
+                esql: { query: esqlQuery },
+              },
             },
-          },
-        ]);
-        expect(response).to.have.property('acknowledged', true);
+          ]);
+          expect(response).to.have.property('acknowledged', true);
 
-        const { queries } = await getQueries(apiClient, STREAM_NAME);
-        expect(queries.length).to.eql(1);
-        expect(queries[0]).to.eql({
-          id: 'aaa',
-          type: 'match',
-          title: 'OOM Error',
-          description: '',
-          esql: { query: esqlQuery },
-        });
+          const { queries } = await getQueries(apiClient, source.id);
+          expect(queries.length).to.eql(1);
+          expect(queries[0]).to.eql({
+            id: 'aaa',
+            type: 'match',
+            title: 'OOM Error',
+            description: '',
+            esql: { query: esqlQuery },
+          });
+        } finally {
+          await deleteTestSource(roleScopedSupertest, source.id);
+        }
       });
 
       it('deletes all queries on stream and its children', async () => {
@@ -121,16 +131,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ...emptyAssets,
         });
         expect(response).to.have.property('acknowledged', true);
-        await bulkQueries(apiClient, STREAM_NAME, [
+        const parentSource = await createTestSource(
+          roleScopedSupertest,
+          'Wired parent query source',
+          `FROM ${STREAM_NAME}`
+        );
+        const parentQuery = `FROM ${parentSource.viewName} | WHERE KQL("message:\\"irrelevant\\"")`;
+        await bulkQueries(apiClient, parentSource.id, [
           {
             index: {
               id: 'logs.otel.queries-test.query1',
               title: 'should not be deleted',
               description: '',
-              esql: {
-                query:
-                  'FROM logs.otel.queries-test,logs.otel.queries-test.* | WHERE KQL("message:\\"irrelevant\\"")',
-              },
+              esql: { query: parentQuery },
             },
           },
         ]);
@@ -166,16 +179,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ...emptyAssets,
         });
         expect(response).to.have.property('acknowledged', true);
-        await bulkQueries(apiClient, 'logs.otel.queries-test.child', [
+        const childSource = await createTestSource(
+          roleScopedSupertest,
+          'Wired child query source',
+          'FROM logs.otel.queries-test.child'
+        );
+        const childQuery = `FROM ${childSource.viewName} | WHERE KQL("message:\\"irrelevant\\"")`;
+        await bulkQueries(apiClient, childSource.id, [
           {
             index: {
               id: 'logs.otel.queries-test.child.query1',
               title: 'must be deleted',
               description: '',
-              esql: {
-                query:
-                  'FROM logs.otel.queries-test.child,logs.otel.queries-test.child.* | WHERE KQL("message:\\"irrelevant\\"")',
-              },
+              esql: { query: childQuery },
             },
           },
         ]);
@@ -185,16 +201,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ...emptyAssets,
         });
         expect(response).to.have.property('acknowledged', true);
-        await bulkQueries(apiClient, 'logs.otel.queries-test.child.first', [
+        const grandchildSource = await createTestSource(
+          roleScopedSupertest,
+          'Wired grandchild query source',
+          'FROM logs.otel.queries-test.child.first'
+        );
+        const grandchildQuery = `FROM ${grandchildSource.viewName} | WHERE KQL("message:\\"irrelevant\\"")`;
+        await bulkQueries(apiClient, grandchildSource.id, [
           {
             index: {
               id: 'logs.otel.queries-test.child.first.query1',
               title: 'must be deleted',
               description: '',
-              esql: {
-                query:
-                  'FROM logs.otel.queries-test.child.first,logs.otel.queries-test.child.first.* | WHERE KQL("message:\\"irrelevant\\"")',
-              },
+              esql: { query: grandchildQuery },
             },
           },
           {
@@ -202,24 +221,37 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               id: 'logs.otel.queries-test.child.first.query2',
               title: 'must be deleted',
               description: '',
-              esql: {
-                query:
-                  'FROM logs.otel.queries-test.child.first,logs.otel.queries-test.child.first.* | WHERE KQL("message:\\"irrelevant\\"")',
-              },
+              esql: { query: grandchildQuery },
             },
           },
         ]);
 
         await deleteStream(apiClient, 'logs.otel.queries-test.child');
 
-        // the parent stream keeps its query while the deleted child subtree's queries are gone
-        const { queries: parentQueries } = await getQueries(apiClient, STREAM_NAME);
+        // Queries are stored under the source id. Deleting the child stream
+        // leaves those queries and their rules in place.
+        const { queries: parentQueries } = await getQueries(apiClient, parentSource.id);
         expect(parentQueries).to.have.length(1);
         expect(parentQueries[0].id).to.eql('logs.otel.queries-test.query1');
 
-        const rules = await alertingApi.searchRulesV2(roleAuthc);
-        expect(rules.body.items).to.have.length(1);
-        expect(rules.body.items[0].metadata.name).to.eql('should not be deleted (match count)');
+        const { queries: childQueries } = await getQueries(apiClient, childSource.id);
+        expect(childQueries).to.have.length(1);
+        const { queries: grandchildQueries } = await getQueries(apiClient, grandchildSource.id);
+        expect(grandchildQueries).to.have.length(2);
+
+        const rules = await alertingApi.searchRulesV2(roleAuthc, {
+          search: 'should not be deleted',
+          per_page: 100,
+        });
+        const parentRules = rules.body.items.filter(
+          (item: { metadata: { name: string } }) =>
+            item.metadata.name === 'should not be deleted (match count)'
+        );
+        expect(parentRules).to.have.length(1);
+
+        await deleteTestSource(roleScopedSupertest, parentSource.id);
+        await deleteTestSource(roleScopedSupertest, childSource.id);
+        await deleteTestSource(roleScopedSupertest, grandchildSource.id);
       });
     });
 
@@ -272,36 +304,44 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('updates the queries', async () => {
         const indexName = 'classic-stream-queries';
-        const esqlQuery = `FROM ${indexName} | WHERE KQL("message: 'OOM Error'")`;
         const clean = await createDataStream(indexName, { dsl: { data_retention: '77d' } });
         await putStream(apiClient, indexName, classicPutBody);
+        const source = await createTestSource(
+          roleScopedSupertest,
+          'Classic query source',
+          `FROM ${indexName}`
+        );
+        const esqlQuery = `FROM ${source.viewName} | WHERE KQL("message: 'OOM Error'")`;
 
-        const initialQueries = await getQueries(apiClient, indexName);
-        expect(initialQueries.queries.length).to.eql(0);
+        try {
+          const initialQueries = await getQueries(apiClient, source.id);
+          expect(initialQueries.queries.length).to.eql(0);
 
-        await bulkQueries(apiClient, indexName, [
-          {
-            index: {
-              id: 'aaa',
-              title: 'OOM Error',
-              description: '',
-              esql: { query: esqlQuery },
+          await bulkQueries(apiClient, source.id, [
+            {
+              index: {
+                id: 'aaa',
+                title: 'OOM Error',
+                description: '',
+                esql: { query: esqlQuery },
+              },
             },
-          },
-        ]);
+          ]);
 
-        const { queries } = await getQueries(apiClient, indexName);
-        expect(queries.length).to.eql(1);
-        expect(queries[0]).to.eql({
-          id: 'aaa',
-          type: 'match',
-          title: 'OOM Error',
-          description: '',
-          esql: { query: esqlQuery },
-        });
-
-        await clean();
-        await deleteStream(apiClient, indexName);
+          const { queries } = await getQueries(apiClient, source.id);
+          expect(queries.length).to.eql(1);
+          expect(queries[0]).to.eql({
+            id: 'aaa',
+            type: 'match',
+            title: 'OOM Error',
+            description: '',
+            esql: { query: esqlQuery },
+          });
+        } finally {
+          await deleteTestSource(roleScopedSupertest, source.id);
+          await clean();
+          await deleteStream(apiClient, indexName);
+        }
       });
     });
 
