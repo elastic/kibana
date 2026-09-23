@@ -1180,6 +1180,25 @@ describe('useTemplateFormSync', () => {
       expect(mockSetFieldValue).toHaveBeenCalledWith('extractObservables', true);
     });
 
+    it('forces extractObservables to false for a blocked owner when the template omits the key', () => {
+      // Observability owner has observables disabled. A template that declares only `syncAlerts`
+      // must not fall through to the space default (true) — it must stay false.
+      mockUseFormData.mockReturnValue([{ templateId: 'template-obs', owner: 'observability' }]);
+      mockUseGetTemplate.mockReturnValue({
+        data: {
+          templateId: 'template-obs',
+          templateVersion: 1,
+          definition: { name: 'Obs', fields: [], settings: { syncAlerts: false } },
+        },
+        isLoading: false,
+      });
+
+      renderHook(() => useTemplateFormSync(innerForm, new Set()));
+
+      expect(mockSetFieldValue).toHaveBeenCalledWith('syncAlerts', false);
+      expect(mockSetFieldValue).toHaveBeenCalledWith('extractObservables', false);
+    });
+
     it('resets undeclared settings keys when switching to a template with a partial settings block', () => {
       // A declares both `true`; B declares only `syncAlerts`. B's omitted `extractObservables` must
       // reset to the space default rather than inheriting A's value.

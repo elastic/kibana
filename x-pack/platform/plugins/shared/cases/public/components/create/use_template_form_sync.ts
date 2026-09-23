@@ -24,6 +24,7 @@ import { useGetSupportedActionConnectors } from '../../containers/configure/use_
 import { useGetAllCaseConfigurations } from '../../containers/configure/use_get_all_case_configurations';
 import { getConfigurationByOwner } from '../../containers/configure/utils';
 import { getSpaceExtractObservables } from './utils';
+import { isObservablesExtractionBlocked } from '../../../common/utils/case_settings';
 
 /**
  * Values a template applies by default and reverts to when it stops applying them. Sync alerts
@@ -213,6 +214,11 @@ export const useTemplateFormSync = (
       owner: caseOwner,
     })
   );
+  // Apply the owner-level gate: blocked owners (e.g. Observability) never extract observables,
+  // regardless of the space configuration or what a partial template settings block omits.
+  const effectiveExtractObservables = isObservablesExtractionBlocked(caseOwner ?? '')
+    ? false
+    : spaceExtractObservables;
   const appliedRef = useRef<string | undefined>(undefined);
   // Track whether the applied template set the connector / settings, so switching or clearing only
   // reverts what a template actually changed (preserving the configuration's default connector).
@@ -237,7 +243,7 @@ export const useTemplateFormSync = (
         // so we don't commit a provisional spaceExtractObservables value during loading.
         setFieldValue('syncAlerts', DEFAULT_SYNC_ALERTS);
         if (!isLoadingConfigurations) {
-          setFieldValue('extractObservables', spaceExtractObservables);
+          setFieldValue('extractObservables', effectiveExtractObservables);
           didApplySettingsRef.current = false;
         }
         // else: keep didApplySettingsRef.current = true; re-run after loading completes.
@@ -284,7 +290,7 @@ export const useTemplateFormSync = (
       definition.settings,
       setFieldValue,
       didApplySettingsRef,
-      spaceExtractObservables
+      effectiveExtractObservables
     );
 
     // Wait for field definitions, supported connectors, AND case configurations to load before
@@ -328,7 +334,7 @@ export const useTemplateFormSync = (
     connectors,
     isLoadingConnectors,
     isLoadingConfigurations,
-    spaceExtractObservables,
+    effectiveExtractObservables,
   ]);
 
   return { template, isLoading };

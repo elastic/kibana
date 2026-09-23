@@ -357,7 +357,7 @@ export default ({ getService }: FtrProviderContext): void => {
             owner: 'securitySolutionFixture',
             settings: {
               syncAlerts: false,
-              extractObservables: false,
+              extractObservables: true,
             },
             severity: 'low',
             status: 'open',
@@ -838,7 +838,7 @@ export default ({ getService }: FtrProviderContext): void => {
               owner: 'securitySolutionFixture',
               settings: {
                 syncAlerts: false,
-                extractObservables: false,
+                extractObservables: true,
               },
               severity: 'low',
               status: 'open',
@@ -881,7 +881,7 @@ export default ({ getService }: FtrProviderContext): void => {
               owner: 'securitySolutionFixture',
               settings: {
                 syncAlerts: false,
-                extractObservables: false,
+                extractObservables: true,
               },
               severity: 'low',
               status: 'open',
@@ -1343,7 +1343,7 @@ export default ({ getService }: FtrProviderContext): void => {
               owner: 'securitySolutionFixture',
               settings: {
                 syncAlerts: false,
-                extractObservables: false,
+                extractObservables: true,
               },
               severity: 'low',
               status: 'open',
@@ -1386,7 +1386,7 @@ export default ({ getService }: FtrProviderContext): void => {
               owner: 'securitySolutionFixture',
               settings: {
                 syncAlerts: false,
-                extractObservables: false,
+                extractObservables: true,
               },
               severity: 'low',
               status: 'open',
@@ -1429,7 +1429,7 @@ export default ({ getService }: FtrProviderContext): void => {
               owner: 'securitySolutionFixture',
               settings: {
                 syncAlerts: false,
-                extractObservables: false,
+                extractObservables: true,
               },
               severity: 'low',
               status: 'open',
