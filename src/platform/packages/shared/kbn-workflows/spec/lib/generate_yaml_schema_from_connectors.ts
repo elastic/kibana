@@ -285,24 +285,34 @@ function hasObjectLevelChecks(schema: z.ZodObject): boolean {
 }
 
 /**
- * Placeholder for a templated field while replaying object-level checks. Any property access
- * throws so refinements that depend on the unresolved value — including operations that are valid
- * on both arrays and strings, such as `.length` — are skipped, while checks that never touch the
- * field still run.
+ * Placeholder for a templated field while replaying object-level checks.
+ *
+ * The target is an array so brand checks like `Array.isArray(value)` still return true (a proxy
+ * around `{}` would make them return false and reject the template). Traps beyond `get` also
+ * throw — `Object.keys`, `in`, and similar reflective ops do not go through `get`, and must not
+ * silently observe an empty placeholder. Property access (e.g. `.length`, `.every`) still throws
+ * so those refinements are skipped while checks that never touch the field keep running.
  */
 function unresolvedTemplatePlaceholder(fieldKey: string): unknown {
-  return new Proxy(
-    {},
-    {
-      get(_target, prop) {
-        throw new TypeError(
-          `Cannot evaluate object check against templated field "${fieldKey}" (accessed .${String(
+  const throwUnresolved = (_target: unknown, prop?: PropertyKey): never => {
+    throw new TypeError(
+      prop === undefined
+        ? `Cannot evaluate object check against templated field "${fieldKey}"`
+        : `Cannot evaluate object check against templated field "${fieldKey}" (accessed .${String(
             prop
           )})`
-        );
-      },
-    }
-  );
+    );
+  };
+
+  return new Proxy([] as unknown[], {
+    get: (target, prop) => throwUnresolved(target, prop),
+    has: (target, prop) => throwUnresolved(target, prop),
+    ownKeys: (target) => throwUnresolved(target),
+    getOwnPropertyDescriptor: (target, prop) => throwUnresolved(target, prop),
+    set: (target, prop) => throwUnresolved(target, prop),
+    deleteProperty: (target, prop) => throwUnresolved(target, prop),
+    defineProperty: (target, prop) => throwUnresolved(target, prop),
+  });
 }
 
 function withUnresolvedTemplates(

@@ -546,6 +546,34 @@ describe('generateYamlSchemaFromConnectors', () => {
         expect(parseWith({ ids: ['a'], max: 2 }).success).toBe(true);
       });
 
+      it('does not reject templates via Array.isArray brand checks on the placeholder', () => {
+        // Array.isArray does not go through the Proxy get trap. A placeholder around `{}` would
+        // make Array.isArray return false and reject a valid templated workflow; the placeholder
+        // must brand as an array so the check passes (or throw on deeper access).
+        const arrayBrand: ConnectorContractUnion = {
+          summary: 'ArrayBrand',
+          description: null,
+          type: 'array.brand.step',
+          paramsSchema: z
+            .object({ ids: z.array(z.string()) })
+            .refine((v) => Array.isArray(v.ids), 'ids must be an array'),
+          outputSchema: z.unknown(),
+        };
+        const schema = generateYamlSchemaFromConnectors([arrayBrand]);
+        expect(
+          schema.safeParse({
+            ...BASE_WORKFLOW,
+            steps: [
+              {
+                name: 's',
+                type: 'array.brand.step',
+                with: { ids: '${{ workflow.inputs.ids }}' },
+              },
+            ],
+          }).success
+        ).toBe(true);
+      });
+
       it('still enforces the refinement for ordinary array values', () => {
         expect(parseRefined({ ids: ['a'], name: 'x' }).success).toBe(true);
         expect(parseRefined({ ids: [''], name: 'x' }).success).toBe(false);
