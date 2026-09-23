@@ -90,9 +90,6 @@ export function validateLiquidTemplate(
       if (key === 'key') return;
       if (!node.range) return;
       if (typeof node.value !== 'string') return;
-      // Typed expressions (`${{ ... }}`) are Liquid after the leading `$` (literal text).
-      // Do not blank them: Liquid already accepts `!=` / `and` / filters, and blanking would
-      // hide real authoring errors (unknownFilter, ternaries) that fail at evaluateExpression.
       if (!node.value.includes(LIQUID_OUTPUT_PATTERN) && !node.value.includes(LIQUID_TAG_PATTERN))
         return;
 
