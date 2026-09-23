@@ -76,6 +76,8 @@ export const customAppDefinitionSchema = z.object({
   version: z.literal(1),
   title: z.string().min(1),
   description: z.string().optional(),
+  /** Adds this app to the left navigation menu as a link under Custom apps. */
+  showInNav: z.boolean().optional(),
   layout: z.record(z.string(), layoutWidgetSchema),
   panels: z.record(
     z.string(),
@@ -102,6 +104,7 @@ export interface CustomAppListItem {
   title: string;
   description?: string;
   updatedAt?: string;
+  showInNav?: boolean;
 }
 
 /**

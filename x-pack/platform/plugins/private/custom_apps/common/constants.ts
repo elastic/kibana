@@ -36,3 +36,15 @@ export const ACTION_NAVIGATE = 'kbn.navigate';
 /** Writes a value into the dispatching panel's own data model. */
 export const ACTION_SET_DATA = 'kbn.setData';
 export const SUPPORTED_ACTIONS = [ACTION_RUN_WORKFLOW, ACTION_NAVIGATE, ACTION_SET_DATA] as const;
+
+/**
+ * Custom apps get their own navigation group rather than joining Analytics, so
+ * apps a user builds sit apart from the stock Kibana ones. The order is below
+ * Analytics (1000) so the group appears above it.
+ */
+export const CUSTOM_APPS_CATEGORY = {
+  id: 'customApps',
+  label: 'Custom apps',
+  euiIconType: 'apps',
+  order: 500,
+} as const;

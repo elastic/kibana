@@ -79,6 +79,14 @@ export async function updateCustomApp(
   return { id, definition };
 }
 
+function safeShowInNav(appJSON: string): boolean {
+  try {
+    return JSON.parse(appJSON)?.showInNav === true;
+  } catch {
+    return false;
+  }
+}
+
 export async function listCustomApps(client: SavedObjectsClientContract) {
   const found = await client.find<CustomAppAttributes>({
     type: CUSTOM_APP_SAVED_OBJECT_TYPE,
@@ -89,5 +97,8 @@ export async function listCustomApps(client: SavedObjectsClientContract) {
     title: object.attributes.title,
     description: object.attributes.description,
     updatedAt: object.updated_at,
+    // Parsed rather than mapped so the stored document stays the single source
+    // of truth; the listing is small enough that the cost does not matter.
+    showInNav: safeShowInNav(object.attributes.appJSON),
   }));
 }

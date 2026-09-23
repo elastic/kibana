@@ -39,6 +39,8 @@ export interface CustomAppPageProps {
   client: CustomAppClient;
   appId: string;
   onNavigateToList: () => void;
+  /** Saving may change whether this app appears in the navigation. */
+  onAppsChanged: () => void;
 }
 
 function nextPanelId(definition: CustomAppDefinition): string {
@@ -62,7 +64,14 @@ function bottomRow(layout: GridLayoutData): number {
   return max;
 }
 
-export function CustomAppPage({ core, data, client, appId, onNavigateToList }: CustomAppPageProps) {
+export function CustomAppPage({
+  core,
+  data,
+  client,
+  appId,
+  onNavigateToList,
+  onAppsChanged,
+}: CustomAppPageProps) {
   const [saved, setSaved] = useState<CustomAppDefinition | undefined>();
   const [definition, setDefinition] = useState<CustomAppDefinition | undefined>();
   const [isEditing, setIsEditing] = useState(false);
@@ -123,6 +132,7 @@ export function CustomAppPage({ core, data, client, appId, onNavigateToList }: C
     try {
       await client.update(appId, definition);
       setSaved(definition);
+      onAppsChanged();
       core.notifications.toasts.addSuccess('Custom app saved');
     } catch (error) {
       core.notifications.toasts.addDanger({
@@ -132,7 +142,7 @@ export function CustomAppPage({ core, data, client, appId, onNavigateToList }: C
     } finally {
       setIsSaving(false);
     }
-  }, [client, appId, definition, core]);
+  }, [client, appId, definition, core, onAppsChanged]);
 
   /**
    * `GridLayout` echoes its layout back on every render, so writing it into

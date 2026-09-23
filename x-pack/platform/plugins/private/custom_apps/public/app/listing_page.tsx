@@ -26,9 +26,10 @@ export interface ListingPageProps {
   core: CoreStart;
   client: CustomAppClient;
   onOpen: (id: string) => void;
+  onAppsChanged: () => void;
 }
 
-export function ListingPage({ core, client, onOpen }: ListingPageProps) {
+export function ListingPage({ core, client, onOpen, onAppsChanged }: ListingPageProps) {
   const [items, setItems] = useState<CustomAppListItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -58,6 +59,7 @@ export function ListingPage({ core, client, onOpen }: ListingPageProps) {
       setIsCreateOpen(false);
       try {
         const created = await client.create(template.build());
+        onAppsChanged();
         onOpen(created.id);
       } catch (error) {
         core.notifications.toasts.addDanger({
@@ -66,13 +68,14 @@ export function ListingPage({ core, client, onOpen }: ListingPageProps) {
         });
       }
     },
-    [client, core, onOpen]
+    [client, core, onOpen, onAppsChanged]
   );
 
   const remove = useCallback(
     async (id: string) => {
       try {
         await client.delete(id);
+        onAppsChanged();
         await refresh();
       } catch (error) {
         core.notifications.toasts.addDanger({
@@ -81,7 +84,7 @@ export function ListingPage({ core, client, onOpen }: ListingPageProps) {
         });
       }
     },
-    [client, core, refresh]
+    [client, core, refresh, onAppsChanged]
   );
 
   return (

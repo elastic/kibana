@@ -23,10 +23,12 @@ function CustomAppsRouter({
   core,
   data,
   history,
+  onAppsChanged,
 }: {
   core: CoreStart;
   data: DataPublicPluginStart;
   history: AppMountParameters['history'];
+  onAppsChanged: () => void;
 }) {
   const [client] = useState(() => new CustomAppClient(core.http));
   const [appId, setAppId] = useState<string | undefined>(() =>
@@ -50,20 +52,22 @@ function CustomAppsRouter({
       client={client}
       appId={appId}
       onNavigateToList={openList}
+      onAppsChanged={onAppsChanged}
     />
   ) : (
-    <ListingPage core={core} client={client} onOpen={openApp} />
+    <ListingPage core={core} client={client} onOpen={openApp} onAppsChanged={onAppsChanged} />
   );
 }
 
 export function renderApp(
   core: CoreStart,
   data: DataPublicPluginStart,
+  onAppsChanged: () => void,
   { element, history }: AppMountParameters
 ) {
   ReactDOM.render(
     <KibanaRenderContextProvider {...core}>
-      <CustomAppsRouter core={core} data={data} history={history} />
+      <CustomAppsRouter core={core} data={data} history={history} onAppsChanged={onAppsChanged} />
     </KibanaRenderContextProvider>,
     element
   );

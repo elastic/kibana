@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -17,6 +17,7 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiSpacer,
+  EuiSwitch,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
@@ -39,12 +40,28 @@ export function AppEditorFlyout({ definition, onClose, onApply }: AppEditorFlyou
   const [draft, setDraft] = useState(() => JSON.stringify(definition, null, 2));
   const [error, setError] = useState<string | undefined>();
 
-  const apply = () => {
-    let parsed: unknown;
+  /**
+   * Parsed from the editor text rather than held separately, so the switch and
+   * the JSON can never disagree. While the text is unparseable the switch has
+   * nothing to reflect and is disabled.
+   */
+  const parsed = useMemo(() => {
     try {
-      parsed = JSON.parse(draft);
-    } catch (e) {
-      setError(`Invalid JSON: ${(e as Error).message}`);
+      return JSON.parse(draft) as CustomAppDefinition;
+    } catch {
+      return undefined;
+    }
+  }, [draft]);
+
+  const setShowInNav = (showInNav: boolean) => {
+    if (!parsed) return;
+    setDraft(JSON.stringify({ ...parsed, showInNav }, null, 2));
+    setError(undefined);
+  };
+
+  const apply = () => {
+    if (!parsed) {
+      setError('Invalid JSON: the document could not be parsed.');
       return;
     }
 
@@ -74,6 +91,18 @@ export function AppEditorFlyout({ definition, onClose, onApply }: AppEditorFlyou
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
+        <EuiSwitch
+          label="Show this app in the navigation menu"
+          checked={parsed?.showInNav === true}
+          disabled={!parsed}
+          onChange={(e) => setShowInNav(e.target.checked)}
+        />
+        <EuiSpacer size="xs" />
+        <EuiText size="xs" color="subdued">
+          <p>Adds a link under Custom apps in the left navigation. Takes effect once you save.</p>
+        </EuiText>
+        <EuiSpacer size="m" />
+
         {error && (
           <>
             <EuiCallOut announceOnMount color="danger" size="s" title="This document is not valid">
