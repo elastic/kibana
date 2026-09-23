@@ -63,24 +63,28 @@ describe('create_case common step definition', () => {
   });
 
   it('accepts extended_fields on create case input', () => {
+    const extendedFields = {
+      priority_as_keyword: 'high',
+      ticket_number_as_integer: '4287',
+    };
     const inputWithExtendedFields = {
       ...createCaseRequestFixture,
-      extended_fields: {
-        priority_as_keyword: 'high',
-        ticket_number_as_integer: '4287',
-      },
+      extended_fields: extendedFields,
     };
 
-    expect(InputSchema.safeParse(inputWithExtendedFields).success).toBe(true);
+    expect(InputSchema.parse(inputWithExtendedFields)).toMatchObject({
+      extended_fields: extendedFields,
+    });
   });
 
   it('accepts a template reference on create case input', () => {
+    const template = { id: 'triage_template', version: 3 };
     const inputWithTemplate = {
       ...createCaseRequestFixture,
-      template: { id: 'triage_template', version: 3 },
+      template,
     };
 
-    expect(InputSchema.safeParse(inputWithTemplate).success).toBe(true);
+    expect(InputSchema.parse(inputWithTemplate)).toMatchObject({ template });
   });
 
   it('accepts valid output payload', () => {
@@ -88,15 +92,18 @@ describe('create_case common step definition', () => {
   });
 
   it('accepts extended_fields and extended_fields_labels on the output payload', () => {
+    const extended_fields = { priority_as_keyword: 'high' };
+    const extended_fields_labels = { priority_as_keyword: 'Priority' };
     const responseWithExtendedFields = {
       case: {
         ...createCaseResponseFixture,
-        extended_fields: { priority_as_keyword: 'high' },
-        extended_fields_labels: { priority_as_keyword: 'Priority' },
+        extended_fields,
+        extended_fields_labels,
       },
     };
 
-    expect(OutputSchema.safeParse(responseWithExtendedFields).success).toBe(true);
+    const result = OutputSchema.parse(responseWithExtendedFields);
+    expect(result.case).toMatchObject({ extended_fields, extended_fields_labels });
   });
 
   it('rejects invalid output payload', () => {

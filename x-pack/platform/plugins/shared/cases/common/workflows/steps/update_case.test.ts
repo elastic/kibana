@@ -52,21 +52,23 @@ describe('update_case common step definition', () => {
   });
 
   it('accepts extended_fields in update case input', () => {
+    const extended_fields = { priority_as_keyword: 'high' };
     expect(
-      InputSchema.safeParse({
+      InputSchema.parse({
         case_id: caseIdFixture,
-        updates: { extended_fields: { priority_as_keyword: 'high' } },
-      }).success
-    ).toBe(true);
+        updates: { extended_fields },
+      })
+    ).toMatchObject({ updates: { extended_fields } });
   });
 
   it('accepts a template switch in update case input', () => {
+    const template = { id: 'triage_template', version: 3 };
     expect(
-      InputSchema.safeParse({
+      InputSchema.parse({
         case_id: caseIdFixture,
-        updates: { template: { id: 'triage_template', version: 3 } },
-      }).success
-    ).toBe(true);
+        updates: { template },
+      })
+    ).toMatchObject({ updates: { template } });
   });
 
   it('rejects a template switch without a version in update case input', () => {
