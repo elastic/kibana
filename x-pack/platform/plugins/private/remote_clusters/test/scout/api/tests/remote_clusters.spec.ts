@@ -11,6 +11,7 @@ import { expect } from '@kbn/scout/api';
 import { REMOTE_CLUSTERS_ADMIN_ROLE } from '../../common/fixtures/constants';
 import {
   getOwnTransportAddress,
+  getPersistedClusterSettings,
   removeCluster,
   seedSniffCluster,
 } from '../../common/fixtures/remote_cluster_settings';
@@ -69,7 +70,7 @@ apiTest.describe('Remote clusters API', { tag: ['@local-stateful-classic'] }, ()
     expect(ownedInResponse).toStrictEqual([]);
   });
 
-  apiTest('adds a remote cluster', async ({ apiClient }) => {
+  apiTest('adds a remote cluster', async ({ apiClient, esClient }) => {
     const response = await apiClient.post(API_BASE_PATH, {
       headers: { ...COMMON_HEADERS, ...credentials.apiKeyHeader },
       responseType: 'json',
@@ -83,6 +84,11 @@ apiTest.describe('Remote clusters API', { tag: ['@local-stateful-classic'] }, ()
 
     expect(response).toHaveStatusCode(200);
     expect(response.body).toStrictEqual({ acknowledged: true });
+    expect(await getPersistedClusterSettings(esClient, CLUSTER_NAME)).toStrictEqual({
+      mode: 'sniff',
+      seeds: [nodeSeed],
+      skip_unavailable: 'true',
+    });
   });
 
   // Proves `manage` is required, not just sufficient.
@@ -131,7 +137,7 @@ apiTest.describe('Remote clusters API', { tag: ['@local-stateful-classic'] }, ()
   });
 
   apiTest('updates an existing remote cluster', async ({ apiClient, esClient }) => {
-    await seedSniffCluster(esClient, CLUSTER_NAME, { seeds: [nodeSeed] });
+    await seedSniffCluster(esClient, CLUSTER_NAME, { seeds: [nodeSeed], skipUnavailable: true });
 
     const response = await apiClient.put(`${API_BASE_PATH}/${CLUSTER_NAME}`, {
       headers: { ...COMMON_HEADERS, ...credentials.apiKeyHeader },
@@ -153,6 +159,12 @@ apiTest.describe('Remote clusters API', { tag: ['@local-stateful-classic'] }, ()
       mode: 'sniff',
       securityModel: 'certificate',
       nodeConnections: 3,
+    });
+    expect(await getPersistedClusterSettings(esClient, CLUSTER_NAME)).toStrictEqual({
+      mode: 'sniff',
+      seeds: [nodeSeed],
+      skip_unavailable: 'false',
+      node_connections: '3',
     });
   });
 

@@ -69,6 +69,23 @@ export const removeCluster = (esClient: EsClient, name: string) =>
     },
   });
 
+// ES echoes persistent settings back as strings and omits unset fields.
+interface PersistedRemoteClusterSettings {
+  mode?: string;
+  seeds?: string[];
+  skip_unavailable?: string;
+  node_connections?: string;
+}
+
+/** Read the persistent settings ES stores for a remote cluster. */
+export const getPersistedClusterSettings = async (
+  esClient: EsClient,
+  name: string
+): Promise<PersistedRemoteClusterSettings | undefined> => {
+  const { persistent } = await esClient.cluster.getSettings();
+  return persistent?.cluster?.remote?.[name];
+};
+
 /**
  * Resolve the transport address of the cluster's own node, so a remote cluster can be seeded
  * with a reachable address and actually report as connected. Scout does not pin the ES
