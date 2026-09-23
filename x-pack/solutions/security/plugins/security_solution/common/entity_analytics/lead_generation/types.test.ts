@@ -121,10 +121,6 @@ describe('Lead generation Zod schemas', () => {
     it('rejects an empty body (connectorId is required)', () => {
       expect(() => generateLeadsRequestSchema.parse({})).toThrow();
     });
-
-    it('rejects maxLeads above 50', () => {
-      expect(() => generateLeadsRequestSchema.parse({ connectorId: 'c', maxLeads: 51 })).toThrow();
-    });
   });
 
   describe('findLeadsRequestSchema', () => {

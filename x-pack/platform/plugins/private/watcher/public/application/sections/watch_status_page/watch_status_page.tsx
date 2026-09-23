@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useRef, useState } from 'react';
-import { EuiBadge, EuiSpacer, EuiToolTip } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -61,15 +61,6 @@ const systemWatchBadgeTooltip = i18n.translate(
   {
     defaultMessage: 'You cannot deactivate or delete a system watch.',
   }
-);
-
-// TODO: Remove this once non-clickable badges are focusable in AppHeader - tracked in https://github.com/elastic/kibana-team/issues/4062
-const renderSystemWatchBadge = ({ badgeText }: { badgeText: string }) => (
-  <EuiToolTip content={systemWatchBadgeTooltip}>
-    <span tabIndex={0}>
-      <EuiBadge color="hollow">{badgeText}</EuiBadge>
-    </span>
-  </EuiToolTip>
 );
 
 export const WatchStatusPage = ({
@@ -198,7 +189,7 @@ export const WatchStatusPage = ({
           ? [
               {
                 label: systemWatchBadgeLabel,
-                renderCustomBadge: renderSystemWatchBadge,
+                tooltip: systemWatchBadgeTooltip,
               },
             ]
           : undefined

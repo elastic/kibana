@@ -13,6 +13,7 @@ import type {
   ChatEvent,
   ExecutionStatus,
   InteractivityConfig,
+  ExecutionAbortReason,
   SerializedExecutionError,
 } from '@kbn/agent-builder-common';
 import type { AgentExecutionParams } from '@kbn/agent-builder-server/execution';
@@ -52,6 +53,12 @@ const storageSettings = {
           message: types.text({}),
         },
       }),
+      abort_reason: types.object({
+        dynamic: false,
+        properties: {
+          source: types.keyword({}),
+        },
+      }),
       event_count: types.long({}),
       events: types.object({ dynamic: false, properties: {} }),
       metadata: types.flattened(),
@@ -71,6 +78,7 @@ export interface AgentExecutionProperties {
   space_id: string;
   agent_params: AgentExecutionParams;
   error?: SerializedExecutionError;
+  abort_reason?: ExecutionAbortReason;
   event_count?: number;
   events?: ChatEvent[];
   metadata?: Record<string, string>;

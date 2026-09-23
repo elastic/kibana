@@ -133,8 +133,6 @@ export type {
   CoreAuditService,
   CoreServiceAccountsService,
   ServiceAccount,
-  ServiceAccountAssumableBy,
-  ServiceAccountRoleAssignments,
   CreateServiceAccountParams,
   AuditEvent,
   AuditHttp,
@@ -274,8 +272,12 @@ export type {
   LoggerConfigType,
   AppenderConfigType,
   PluginAppenderConfigType,
+  FileAppenderPluginConfig,
+  LogFileWriteError,
+  LogFileWriteErrorHandler,
   OtelAppenderPluginConfig,
   OtelAttributesTransform,
+  RollingFileAppenderPluginConfig,
 } from '@kbn/core-logging-server';
 export type { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from '@kbn/logging';
 export type { Ecs, EcsEvent } from '@elastic/ecs';

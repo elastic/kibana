@@ -215,8 +215,13 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
   }, []);
 
   const onOpenExecutionList = useCallback(() => {
+    if (isExecutionListOpen || selectedExecutionId) {
+      setIsExecutionListOpen(false);
+      setSelectedExecution(null);
+      return;
+    }
     setIsExecutionListOpen(true);
-  }, []);
+  }, [isExecutionListOpen, selectedExecutionId, setSelectedExecution]);
 
   const onCloseExecutionList = useCallback(() => {
     setIsExecutionListOpen(false);

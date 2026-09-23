@@ -10,16 +10,23 @@ import type { TimeRange } from '@kbn/es-query';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { HttpStart } from '@kbn/core-http-browser';
+import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { CoreStart } from '@kbn/core/public';
 import type { EpisodesFilterState } from '@kbn/alerting-v2-common-queries';
 import { useSpaceId } from './use_space_id';
 import { useCurrentUserProfile } from './use_current_user_profile';
 import { buildEpisodesKpisQuery } from '../queries/episodes_query';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
-import { fetchFromSource } from '../utils/fetch_from_sources';
+import {
+  EMPTY_SOURCE_ERRORS,
+  fetchFromV2AndSource,
+  type EpisodeSourceError,
+} from '../utils/fetch_from_sources';
+import { buildAlertEventsTimeRangeFilter } from '../utils/build_alert_events_time_range_filter';
 import { useAdditionalEpisodesDataSource } from '../context/episode_data_source_context';
 import { mergeKpis } from '../utils/merge_kpis';
 import { queryKeys } from '../query_keys';
+import { useToastSourceErrors } from './use_toast_source_errors';
 
 export interface EpisodesKpisData {
   alertsCount: number;
@@ -45,15 +52,22 @@ export interface UseEpisodesKpisQueryOptions {
     spaces: SpacesPluginStart;
     userProfile: CoreStart['userProfile'];
     http: HttpStart;
+    notifications?: NotificationsStart;
   };
   filterState?: EpisodesFilterState;
   timeRange?: TimeRange;
+}
+
+interface EpisodesKpisQueryData {
+  row?: EpisodesKpisRow;
+  sourceErrors: EpisodeSourceError[];
 }
 
 export interface UseEpisodesKpisQueryResult {
   data: EpisodesKpisData | undefined;
   isLoading: boolean;
   isError: boolean;
+  sourceErrors: EpisodeSourceError[];
 }
 
 export const useEpisodesKpisQuery = ({
@@ -77,7 +91,7 @@ export const useEpisodesKpisQuery = ({
     data,
     isLoading: isKpisLoading,
     error,
-  } = useQuery<EpisodesKpisRow[], Error, EpisodesKpisData | undefined>({
+  } = useQuery<EpisodesKpisQueryData, Error>({
     queryKey: queryKeys.kpis(
       spaceId,
       filterState,
@@ -86,36 +100,27 @@ export const useEpisodesKpisQuery = ({
       additionalEpisodesDataSource?.id
     ),
     queryFn: async ({ signal }) => {
-      const [v2Rows, sourceKpis] = await Promise.all([
-        executeEsqlQuery<EpisodesKpisRow>({
-          expressions: services.expressions,
-          query: buildEpisodesKpisQuery(spaceId, currentUserUid, filterState),
-          input: {
-            type: 'kibana_context' as const,
-            esqlVariables: [],
-            ...(timeRange ? { timeRange } : {}),
-          },
-          abortSignal: signal,
-        }),
-        fetchFromSource(additionalEpisodesDataSource, (source) =>
-          source.fetchKpis?.({ services, filterState, timeRange, abortSignal: signal })
-        ),
-      ]);
+      const timeRangeFilter = buildAlertEventsTimeRangeFilter(timeRange);
+      const { v2, additional, errors } = await fetchFromV2AndSource({
+        v2: () =>
+          executeEsqlQuery<EpisodesKpisRow>({
+            expressions: services.expressions,
+            query: buildEpisodesKpisQuery(spaceId, currentUserUid, filterState),
+            input: {
+              type: 'kibana_context' as const,
+              esqlVariables: [],
+              ...(timeRangeFilter ? { filters: [timeRangeFilter] } : {}),
+            },
+            abortSignal: signal,
+          }),
+        source: additionalEpisodesDataSource,
+        fromSource: (source) =>
+          source.fetchKpis?.({ services, filterState, timeRange, abortSignal: signal }),
+      });
 
-      const merged = mergeKpis([v2Rows[0], ...sourceKpis.results]);
-
-      return merged ? [merged] : [];
-    },
-    select: (rows) => {
-      const row = rows[0];
-      if (!row) return undefined;
       return {
-        alertsCount: row.alerts_count ?? 0,
-        firingRules: row.firing_rules ?? 0,
-        assignedToMe: row.assigned_to_me ?? 0,
-        unassigned: row.unassigned ?? 0,
-        acknowledged: row.acknowledged ?? 0,
-        snoozed: row.snoozed ?? 0,
+        row: mergeKpis([v2?.[0], ...additional]),
+        sourceErrors: errors,
       };
     },
     // Wait until the profile query settles (resolved or `null`) so the KPIs
@@ -124,9 +129,23 @@ export const useEpisodesKpisQuery = ({
     enabled: !isCurrentUserLoading,
   });
 
+  const sourceErrors = data?.sourceErrors ?? EMPTY_SOURCE_ERRORS;
+  useToastSourceErrors(sourceErrors, services.notifications?.toasts, 'kpis');
+
+  const row = data?.row;
   return {
-    data,
+    data: row
+      ? {
+          alertsCount: row.alerts_count ?? 0,
+          firingRules: row.firing_rules ?? 0,
+          assignedToMe: row.assigned_to_me ?? 0,
+          unassigned: row.unassigned ?? 0,
+          acknowledged: row.acknowledged ?? 0,
+          snoozed: row.snoozed ?? 0,
+        }
+      : undefined,
     isLoading: isCurrentUserLoading || isKpisLoading,
     isError: !!error,
+    sourceErrors,
   };
 };

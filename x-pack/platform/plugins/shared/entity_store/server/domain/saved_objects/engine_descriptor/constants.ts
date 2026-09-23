@@ -45,6 +45,13 @@ export const EngineDescriptor = z.object({
   logExtractionState: EngineLogExtractionState,
   /** Per entity-type log extraction overrides. Optional: descriptors written before model version 8 do not have the field. */
   logExtractionConfig: LogExtractionTypeOverride.optional(),
+  /** Non-priority process cursor. Absent before model version 9, null when the non-priority process
+   * is not running. Both mean no cursor: extraction starts from now - lookbackPeriod. */
+  nonPriorityLogExtractionState: EngineLogExtractionState.nullish(),
+  /** Kept separate from `status` and `error` so the two processes do not overwrite each other, and
+   * so a non-priority failure cannot mark the whole engine errored. */
+  nonPriorityStatus: EngineStatus.nullish(),
+  nonPriorityError: EngineError.nullish(),
   error: EngineError.nullable().default(null),
   versionState: VersionState,
 });

@@ -456,6 +456,32 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
   oasOperationObject?: OASOperationObjectProvider;
 
   /**
+   * Stable identifier for this operation in generated OAS documents.
+   *
+   * When omitted, the ID is derived from the method and the path, which yields
+   * names like `put-foo-id`. SDK and CLI code generators turn the ID into
+   * command and method names, so set it explicitly on public APIs where the
+   * derived name would read poorly.
+   *
+   * Prefer kebab-case `verb-resource` names such as `create-dashboard`. That
+   * keeps CLI command names consistent across resources.
+   *
+   * IDs must be unique across the generated document. A duplicate raises an
+   * error during OAS generation.
+   *
+   * @example
+   * ```ts
+   * router.put({
+   *  path: '/api/dashboards/{id}',
+   *  access: 'public',
+   *  summary: `Upsert a dashboard`,
+   *  operationId: 'upsert-dashboard',
+   * })
+   * ```
+   */
+  operationId?: string;
+
+  /**
    * Whether this route should be treated as "invisible" and excluded from router
    * OAS introspection.
    *
