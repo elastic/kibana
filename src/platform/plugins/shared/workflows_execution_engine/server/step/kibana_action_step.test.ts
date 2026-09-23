@@ -7,10 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { KibanaRequest } from '@kbn/core/server';
+import {
+  markExternalUiamCredential,
+  UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
+} from '@kbn/core-security-server';
 import type { KibanaGraphNode } from '@kbn/workflows/graph/types';
 import { KibanaActionStepImpl } from './kibana_action_step';
 import { CallKibanaApiResponseTooLargeError } from '../lib/call_kibana_api';
-import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '../trigger_events/event_context/event_chain_context';
+import { WorkflowTemplatingEngine } from '../templating_engine';
+import {
+  EVENT_CHAIN_DEPTH_HEADER,
+  EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '../trigger_events/event_context/event_chain_context';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
@@ -29,11 +39,11 @@ describe('KibanaActionStepImpl', () => {
   let workflowLogger: { logInfo: jest.Mock; logError: jest.Mock; logWarn: jest.Mock };
   const mockGetBooleanValue = jest.fn().mockResolvedValue(true);
 
-  const createStep = (withValue: any, stepType = 'kibana.request') => {
+  const createStep = (withValue: any, stepType = 'kibana.request', maxStepSize = 1000) => {
     const node = {
       stepId: 'request',
       stepType,
-      configuration: { type: stepType, with: withValue, 'max-step-size': 1000 },
+      configuration: { type: stepType, with: withValue, 'max-step-size': maxStepSize },
     } as unknown as KibanaGraphNode;
     return new KibanaActionStepImpl(
       node,
@@ -43,13 +53,20 @@ describe('KibanaActionStepImpl', () => {
     );
   };
 
-  const jsonResponse = (body: unknown, status = 200): Response => {
-    const bytes = new TextEncoder().encode(typeof body === 'string' ? body : JSON.stringify(body));
+  const streamResponse = (
+    body: string | Uint8Array,
+    {
+      status = 200,
+      contentType = 'application/json',
+      cancel = jest.fn(),
+    }: { status?: number; contentType?: string | null; cancel?: jest.Mock } = {}
+  ): Response => {
+    const bytes = typeof body === 'string' ? new TextEncoder().encode(body) : body;
     return {
       ok: status >= 200 && status < 300,
       status,
       headers: {
-        get: (name: string) => (name.toLowerCase() === 'content-type' ? 'application/json' : null),
+        get: (name: string) => (name.toLowerCase() === 'content-type' ? contentType : null),
       },
       body: {
         getReader: () => {
@@ -62,13 +79,16 @@ describe('KibanaActionStepImpl', () => {
               done = true;
               return { done: false, value: bytes };
             },
-            cancel: jest.fn(),
+            cancel,
             releaseLock: jest.fn(),
           };
         },
       },
     } as unknown as Response;
   };
+
+  const jsonResponse = (body: unknown, status = 200): Response =>
+    streamResponse(typeof body === 'string' ? body : JSON.stringify(body), { status });
 
   beforeEach(() => {
     global.fetch = jest
@@ -249,6 +269,52 @@ describe('KibanaActionStepImpl', () => {
       mockGetBooleanValue.mockResolvedValue(false);
     });
 
+    it('forwards only Core-generated UIAM attestation headers', async () => {
+      const getInternalCallerAttestationHeaders = jest.fn().mockReturnValue({
+        [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: 'valid-attestation',
+      });
+      contextManager.getCoreStart().security.authc.apiKeys.uiam = {
+        getInternalCallerAttestationHeaders,
+      };
+      contextManager.getFakeRequest.mockReturnValue({
+        headers: { authorization: 'ApiKey essu_internal_key' },
+      } as unknown as KibanaRequest);
+      step = createStep({
+        request: {
+          method: 'GET',
+          path: '/api/status',
+          headers: {
+            Authorization: 'ApiKey forged_key',
+            [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: 'forged-attestation',
+            [EVENT_CHAIN_DEPTH_HEADER]: '999',
+          },
+        },
+      });
+
+      await (step as any)._run();
+
+      const headers = new Headers((global.fetch as jest.Mock).mock.calls[0][1].headers);
+      expect(headers.get('authorization')).toBe('ApiKey essu_internal_key');
+      expect(headers.get(UIAM_INTERNAL_CALLER_ATTESTATION_HEADER)).toBe('valid-attestation');
+      expect(headers.get(EVENT_CHAIN_DEPTH_HEADER)).toBeNull();
+      expect(getInternalCallerAttestationHeaders).toHaveBeenCalledTimes(1);
+
+      (global.fetch as jest.Mock).mockClear();
+      getInternalCallerAttestationHeaders.mockClear();
+      const externalRequest = {
+        headers: { authorization: 'ApiKey essu_user_created_key' },
+        isFakeRequest: true,
+      } as unknown as KibanaRequest;
+      markExternalUiamCredential(externalRequest);
+      contextManager.getFakeRequest.mockReturnValue(externalRequest);
+
+      await (step as any)._run();
+
+      const externalHeaders = new Headers((global.fetch as jest.Mock).mock.calls[0][1].headers);
+      expect(externalHeaders.get(UIAM_INTERNAL_CALLER_ATTESTATION_HEADER)).toBeNull();
+      expect(getInternalCallerAttestationHeaders).not.toHaveBeenCalled();
+    });
+
     it('uses global fetch and never the self-client adapter', async () => {
       step = createStep({ request: { method: 'POST', path: '/api/test', body: { x: 1 } } });
       await (step as any)._run();
@@ -267,6 +333,13 @@ describe('KibanaActionStepImpl', () => {
         expect.objectContaining({ method: 'GET' })
       );
       expect(contextManager.callKibanaApi).not.toHaveBeenCalled();
+    });
+
+    it('rejects invalid HTTP methods before calling fetch', async () => {
+      step = createStep({ method: 'POSTs', path: '/api/status' });
+      const result = await (step as any)._run();
+      expect(result.error.message).toContain('Invalid HTTP method "POSTs"');
+      expect(global.fetch).not.toHaveBeenCalled();
     });
 
     it('extracts fetcher options and does not include them in the request body', async () => {
@@ -512,7 +585,8 @@ describe('KibanaActionStepImpl', () => {
       expect(requestBody.title).toBe('Test Case');
     });
 
-    it('forwards authentication and origin headers on the outbound request', async () => {
+    it('forwards authentication, origin, and workflow execution headers on the outbound request', async () => {
+      (runtime as any).workflowExecution = { id: 'workflow-run-helper' };
       step = createStep({ request: { method: 'GET', path: '/api/status' } });
       await (step as any)._run();
       const headers = (global.fetch as jest.Mock).mock.calls[0][1].headers as Record<
@@ -522,6 +596,7 @@ describe('KibanaActionStepImpl', () => {
       expect(headers.Authorization).toBe('ApiKey test-key');
       expect(headers['kbn-xsrf']).toBe('true');
       expect(headers[X_ELASTIC_INTERNAL_ORIGIN_REQUEST]).toBe('Kibana');
+      expect(headers[EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER]).toBe('workflow-run-helper');
     });
 
     it('sends form_data as multipart FormData', async () => {
@@ -535,57 +610,111 @@ describe('KibanaActionStepImpl', () => {
       expect(fetchOptions.method).toBe('POST');
     });
 
-    it('returns an empty object for 204 responses', async () => {
+    it('preserves binary multipart content and its MIME type', async () => {
+      const content = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0xff, 0xfe]);
+      const input = new WorkflowTemplatingEngine().render(
+        {
+          path: '/api/cases/case-id/files',
+          form_data: {
+            file: {
+              content: '${{ screenshot | base64_decode_bytes }}',
+              filename: 'screenshot.png',
+              content_type: 'image/png',
+            },
+          },
+        },
+        { screenshot: content.toString('base64') }
+      );
+      step = createStep(input);
+      await (step as any)._run();
+
+      const formData = (global.fetch as jest.Mock).mock.calls[0][1].body as FormData;
+      const file = formData.get('file') as Blob;
+      expect(file.type).toBe('image/png');
+      expect(Buffer.from(await file.arrayBuffer())).toEqual(content);
+    });
+
+    it('returns empty output with and without debug details for 204 responses', async () => {
       (global.fetch as jest.Mock).mockResolvedValue({
         ok: true,
         status: 204,
         headers: { get: () => null },
         body: null,
       });
-      step = createStep({ request: { method: 'DELETE', path: '/api/cases/1' } });
-      const result = await (step as any)._run();
-      expect(result.error).toBeUndefined();
-      expect(result.output).toEqual({});
-    });
-
-    it('returns a Buffer for non-text responses', async () => {
-      const bytes = new Uint8Array([1, 2, 3]);
-      (global.fetch as jest.Mock).mockResolvedValue({
-        ok: true,
-        status: 200,
-        headers: { get: () => 'application/octet-stream' },
-        body: {
-          getReader: () => {
-            let done = false;
-            return {
-              read: async () => {
-                if (done) {
-                  return { done: true, value: undefined };
-                }
-                done = true;
-                return { done: false, value: bytes };
-              },
-              cancel: jest.fn(),
-              releaseLock: jest.fn(),
-            };
-          },
-        },
+      const withoutDebugStep = createStep({
+        request: { method: 'DELETE', path: '/api/cases/1' },
       });
-      step = createStep({ request: { method: 'GET', path: '/api/export' } });
-      const result = await (step as any)._run();
-      expect(Buffer.isBuffer(result.output)).toBe(true);
-      expect(result.output.equals(Buffer.from([1, 2, 3]))).toBe(true);
+      expect((await (withoutDebugStep as any)._run()).output).toEqual({});
+
+      const withDebugStep = createStep({
+        request: { method: 'DELETE', path: '/api/cases/1' },
+        debug: true,
+      });
+      const result = await (withDebugStep as any)._run();
+      expect(result.error).toBeUndefined();
+      expect(result.output).toEqual({
+        _debug: { fullUrl: 'https://localhost:5601/api/cases/1', method: 'DELETE' },
+      });
     });
 
-    it('enforces max-step-size on the response body', async () => {
-      const oversized = 'x'.repeat(2000);
-      (global.fetch as jest.Mock).mockImplementation(() =>
-        Promise.resolve(jsonResponse(oversized))
+    it.each([
+      ['application/json', '{"id":"case-1","title":"Test"}', { id: 'case-1', title: 'Test' }],
+      ['text/plain', 'Hello plain text', 'Hello plain text'],
+    ])(
+      'parses %s responses without changing their body shape',
+      async (contentType, body, expected) => {
+        (global.fetch as jest.Mock).mockResolvedValue(streamResponse(body, { contentType }));
+        const responseStep = createStep({ request: { method: 'GET', path: '/api/response' } });
+        const result = await (responseStep as any)._run();
+        expect(result.error).toBeUndefined();
+        expect(result.output).toEqual(expected);
+        expect(Buffer.isBuffer(result.output)).toBe(false);
+      }
+    );
+
+    it.each([
+      'image/png',
+      'application/pdf',
+      'application/octet-stream',
+      'image/png; charset=binary',
+      'application/x-custom-format',
+      null,
+    ])('returns exact bytes for binary response content type %s', async (contentType) => {
+      const bytes = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0xff, 0xfe]);
+      (global.fetch as jest.Mock).mockResolvedValue(streamResponse(bytes, { contentType }));
+      const binaryResponseStep = createStep({ request: { method: 'GET', path: '/api/export' } });
+      const result = await (binaryResponseStep as any)._run();
+      expect(result.error).toBeUndefined();
+      expect(Buffer.isBuffer(result.output)).toBe(true);
+      expect(result.output).toEqual(Buffer.from(bytes));
+    });
+
+    it.each(['application/json', 'image/png'])(
+      'enforces max-step-size and cancels oversized %s responses',
+      async (contentType) => {
+        const cancel = jest.fn();
+        (global.fetch as jest.Mock).mockResolvedValue(
+          streamResponse(new Uint8Array(2000), { contentType, cancel })
+        );
+        const oversizedResponseStep = createStep(
+          { request: { method: 'GET', path: '/api/large' } },
+          'kibana.request',
+          100
+        );
+        const result = await (oversizedResponseStep as any)._run();
+        expect(result.error.type).toBe('StepSizeLimitExceeded');
+        expect(cancel).toHaveBeenCalled();
+      }
+    );
+
+    it('truncates oversized error response bodies', async () => {
+      (global.fetch as jest.Mock).mockResolvedValue(
+        streamResponse('E'.repeat(2 * 1024 * 1024), { status: 500 })
       );
-      step = createStep({ request: { method: 'GET', path: '/api/large' } });
+      step = createStep({ request: { method: 'GET', path: '/api/broken' } });
       const result = await (step as any)._run();
-      expect(result.error).toBeDefined();
-      expect(result.error.message).toContain('size limit');
+      expect(result.error.message.length).toBeLessThan(1.5 * 1024 * 1024);
+      expect(result.error.message).toContain('... [truncated]');
     });
 
     it('handles multiple fetcher options together', async () => {
