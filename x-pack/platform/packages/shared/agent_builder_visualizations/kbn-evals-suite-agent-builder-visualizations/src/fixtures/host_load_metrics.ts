@@ -42,9 +42,7 @@ export function buildHostLoadEvents({
     return infra
       .host(HOST_NAME)
       .load()
-      .overrides({
-        'system.load': systemLoad as { 1: number; cores: number },
-      })
+      .overrides({ 'system.load': systemLoad })
       .timestamp(startMs + stepMs * i);
   });
 }
