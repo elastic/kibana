@@ -668,7 +668,7 @@ export function getCustomRankLastValueSortFieldWarningMessages(
           <>
             <FormattedMessage
               id="xpack.lens.indexPattern.terms.customRankLastValueMissingSortField"
-              defaultMessage="{name} ranks top values by their last value, but no sort field is set, so {field} is used by default. Edit in Lens editor to fix the error."
+              defaultMessage="{name} ranks top values by their last value, but no sort field is set, so {field} is used by default. Edit in the Lens editor to set a sort field."
               values={{
                 name: <strong>{columnName}</strong>,
                 field: <strong>{defaultField}</strong>,
