@@ -90,7 +90,8 @@ export const openAfterDismissingOtherFlyouts = (
 
   // Push flyouts share one inline offset on the app scroll container, which EUI captures on mount
   // and restores on unmount, so mounting on top of a closing flyout captures the outgoing offset.
-  // The dismissed flyout unmounts on the next render; the second frame covers the system flyout
-  // service, which clears a stranded offset on a frame of its own.
+  // Flyouts mounted via React state unmount on the next render (before the first frame); flyouts
+  // mounted via the overlay service (Inspector, ES|QL controls) unmount asynchronously in a
+  // microtask. Two frames give both paths time to clear before the new flyout mount
   requestAnimationFrame(() => requestAnimationFrame(open));
 };

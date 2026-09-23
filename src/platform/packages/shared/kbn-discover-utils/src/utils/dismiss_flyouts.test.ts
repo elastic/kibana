@@ -15,7 +15,11 @@ const FLYOUT_TEST_SUBJS: Record<string, string> = {
   [DiscoverFlyouts.lensEdit]: 'lnsEditOnFlyFlyout',
 };
 
-// Mounts a flyout that, like EUI, unmounts on the render after its close button is clicked.
+const afterFrames = (frames: number, fn: () => void) =>
+  frames <= 0 ? fn() : requestAnimationFrame(() => afterFrames(frames - 1, fn));
+
+// Mounts a flyout that unmounts a few frames after its close button is clicked, covering the
+// slowest path we have to wait for: flyouts owned by the overlay service.
 const mountFlyout = (flyout: DiscoverFlyouts) => {
   const root = document.createElement('div');
   root.dataset.testSubj = FLYOUT_TEST_SUBJS[flyout];
@@ -27,9 +31,7 @@ const mountFlyout = (flyout: DiscoverFlyouts) => {
   } else {
     closeButton.dataset.testSubj = 'euiFlyoutCloseButton';
   }
-  closeButton.addEventListener('click', () => {
-    requestAnimationFrame(() => root.remove());
-  });
+  closeButton.addEventListener('click', () => afterFrames(3, () => root.remove()));
 
   root.appendChild(closeButton);
   document.body.appendChild(root);
