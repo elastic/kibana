@@ -31,6 +31,8 @@ interface ConversationCardProps {
   onOpenChat: (id: Investigation['id']) => void;
   /** URL for this card's chat, so its control renders as a link. */
   chatHref?: string;
+  /** When true escalation actions are shown. Requires the manage escalations capability. */
+  canManageEscalations?: boolean;
 }
 
 export const ConversationCard = memo<ConversationCardProps>(
@@ -43,6 +45,7 @@ export const ConversationCard = memo<ConversationCardProps>(
     onClickCard,
     onOpenChat,
     chatHref,
+    canManageEscalations,
   }) => {
     const { euiTheme } = useEuiTheme();
 
@@ -101,6 +104,7 @@ export const ConversationCard = memo<ConversationCardProps>(
                   onClickAction={onClickAction}
                   onOpenChat={() => onOpenChat(investigation.id)}
                   chatHref={chatHref}
+                  canManageEscalations={canManageEscalations}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
