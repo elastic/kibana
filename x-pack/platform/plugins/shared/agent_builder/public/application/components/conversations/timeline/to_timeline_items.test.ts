@@ -487,6 +487,38 @@ describe('groupTimelineEvents folding resumed executions', () => {
     }
   });
 
+  it('keeps the turn awaiting_prompt when the resume of a second pause fails', () => {
+    const { events: baseEvents } = pausedRoundWithResume('exec-2');
+    const pausedTerm2 = createExecutionPausedEvent({ id: 'paused-term-2', execution_id: 'exec-2' });
+    const promptResponse2 = createPromptResponseEvent({
+      id: 'pr-2',
+      data: {
+        prompt_requested_event_id: 'paused-term-2',
+        responses: { 'prompt-1': { allow: true } },
+      },
+    });
+    const started3 = createExecutionStartedEvent({
+      id: 'es-3',
+      execution_id: 'exec-3',
+      trigger_event_id: 'pr-2',
+    });
+    const failed = createExecutionFailedEvent({ id: 'ef-3', execution_id: 'exec-3' });
+
+    const events = [...baseEvents, pausedTerm2, promptResponse2, started3, failed];
+    const agentTurns = groupTimelineEvents(events, makeEventsById(events)).filter(
+      (item) => item.kind === 'agentTurn'
+    );
+
+    expect(agentTurns).toHaveLength(1);
+    const [turn] = agentTurns;
+    if (turn.kind === 'agentTurn') {
+      expect(turn.key).toBe('exec-1');
+      expect(turn.status).toBe('awaiting_prompt');
+      expect(turn.terminal).toBe(pausedTerm2);
+      expect(turn.pendingPrompts).toEqual([createConfirmationPrompt()]);
+    }
+  });
+
   it('completes the turn when a second answer succeeds after a failed resume', () => {
     const { events: baseEvents } = pausedRoundWithResume('exec-2');
     const failed = createExecutionFailedEvent({ id: 'ef-2', execution_id: 'exec-2' });

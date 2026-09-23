@@ -103,9 +103,12 @@ export const groupTimelineEvents = (
         if (!event.execution_id) break;
         const acc = getOrCreateAcc(event.execution_id, event.created_at, event.trigger_event_id);
         const openPause = awaitingPromptEventId ? eventsById.get(awaitingPromptEventId) : undefined;
+        const openPauseExecutionId = openPause?.execution_id
+          ? resumeLinks.get(openPause.execution_id) ?? openPause.execution_id
+          : undefined;
         acc.terminal =
           openPause?.type === TimelineEventType.executionTerminated &&
-          openPause.execution_id === acc.executionId
+          openPauseExecutionId === acc.executionId
             ? openPause
             : event;
         break;
