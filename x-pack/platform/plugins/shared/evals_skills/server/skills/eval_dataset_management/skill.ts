@@ -11,15 +11,16 @@ import { getEvalDatasetManagementInlineTools } from './tools';
 import type { EvalDatasetManagementToolDeps } from './tools/deps';
 
 /**
- * Agent Builder skill that helps compose, preview, save, and run evaluation
- * experiments (for agents and tools) via the evals workflow engine.
+ * Agent Builder skill that finds, creates, copies, replaces, and deletes
+ * evaluation datasets in the active space.
  */
 export const createEvalDatasetManagementSkill = (deps: EvalDatasetManagementToolDeps) =>
   defineSkillType({
     id: 'eval-dataset-management',
     name: 'eval-dataset-management',
     basePath: 'skills/platform/evals',
-    description: 'Manage evaluation datasets: create, update, delete, and curate them.',
+    description:
+      'Manage evaluation datasets: find and inspect them, create them, replace their examples, copy them, and delete them.',
     content: EVAL_DATASET_MANAGEMENT_SKILL_CONTENT,
     getInlineTools: () => getEvalDatasetManagementInlineTools(deps),
   });

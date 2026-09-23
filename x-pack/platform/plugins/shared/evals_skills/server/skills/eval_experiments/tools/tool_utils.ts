@@ -19,24 +19,10 @@ import type {
   GenerateExperimentParams,
   GeneratedExperimentRun,
 } from '@kbn/evals-plugin/server';
-import { LIST_EVAL_DATASETS_TOOL_ID } from '../../common/list_eval_datasets';
-import { errorResult } from '../../common/tool_results';
+import { errorResult, toErrorResult as toGenericErrorResult } from '../../common/tool_results';
 
+export { evalsExperimentTools } from '../../common/tool_ids';
 export { errorResult, otherResult } from '../../common/tool_results';
-
-export const EVALS_TOOLS_NAMESPACE = 'platform.evals';
-
-const evalsTool = (name: string) => `${EVALS_TOOLS_NAMESPACE}.${name}`;
-
-export const evalsExperimentTools = {
-  listDatasets: LIST_EVAL_DATASETS_TOOL_ID,
-  listEvaluators: evalsTool('list_evaluators'),
-  listTargets: evalsTool('list_targets'),
-  listConnectors: evalsTool('list_connectors'),
-  previewExperiment: evalsTool('preview_experiment'),
-  saveExperiment: evalsTool('save_experiment'),
-  runExperiment: evalsTool('run_experiment'),
-} as const;
 
 /**
  * A configuration error caused by invalid tool input. Surfaced back to the agent
@@ -258,9 +244,8 @@ export const toErrorResult = (
   genericPrefix: string,
   metadata?: Record<string, unknown>
 ): ToolHandlerStandardReturn => {
-  const message = error instanceof Error ? error.message : String(error);
   if (error instanceof EvalExperimentConfigError) {
-    return errorResult(message, metadata);
+    return errorResult(error.message, metadata);
   }
-  return errorResult(`${genericPrefix}: ${message}`, metadata);
+  return toGenericErrorResult(error, genericPrefix, metadata);
 };

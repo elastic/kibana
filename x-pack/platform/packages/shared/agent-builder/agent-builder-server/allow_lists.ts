@@ -226,6 +226,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
 
   // Evals
   'eval-experiment-authoring',
+  'eval-dataset-management',
 
   // Security Solution
   'entity-analytics-leads',

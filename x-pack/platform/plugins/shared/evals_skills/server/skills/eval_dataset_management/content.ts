@@ -5,44 +5,66 @@
  * 2.0.
  */
 
+import { MAX_EXAMPLES_PER_DATASET } from '@kbn/evals-common';
+import { evalsDatasetTools } from './tools/tool_utils';
+
 /**
- * Guidance shown to the agent when the eval-dataset-management skill is loaded. It
- * documents the tools and the recommended discover -> preview -> save/run flow.
+ * Guidance shown to the agent when the eval-dataset-management skill is loaded.
+ * It documents the tools and the recommended discover -> preview -> write flow.
  */
 export const EVAL_DATASET_MANAGEMENT_SKILL_CONTENT = `## When to Use This Skill
 
 Use this skill when the user wants to **manage evaluation datasets** with the
-Evaluations (evals) feature: creating, updating, deleting, and curating them.
+Evaluations (evals) feature: finding and inspecting them, creating them, replacing
+their examples, copying them, or deleting them.
+
+Do **not** use this skill to compose or run evaluation experiments.
 
 ## Core Concepts
 
-The target is either:
-- \`target: 'inference'\` — invoke the model connector(s) directly, with no agent in the loop.
-- \`target: 'agent'\` — run an Agent Builder agent via converse. Requires an \`agent_id\`.
+A **dataset** has a name unique in the space, a description, optional tags, an optional
+maturity (\`raw\`, \`cleaned\`, or \`golden\`), and examples.
 
-Experiments run as **workflows**. You never hand-write the workflow YAML — the preview/save/run
-tools generate valid YAML deterministically from the configuration.
+An **example** is \`{ input, output, metadata? }\`. \`input\` is what gets sent to the
+target. \`output\` is the expected output. A dataset holds at most ${MAX_EXAMPLES_PER_DATASET}
+examples.
 
-## Gathering the Configuration (ask, don't assume)
+Datasets belong to the current space and may also be shared with other spaces.
 
-Every experiment requires the inputs below. **Never** fill any of them with a guess or a default,
-and never silently auto-pick the first (or only) candidate a discovery tool returns:
+## Building Examples
 
-- **Target** — \`target: 'inference'\` (direct model invocation) or \`target: 'agent'\` plus the
-  \`agent_id\` to evaluate. Never infer this from context: if the user has not said which one they
-  want, ask, and offer both.
-- **Model(s) under evaluation** — one or more \`connector_ids\` (two or more = cross-model).
-- **Dataset(s)** — one or more \`dataset_ids\`.
-- **Evaluator(s)** — one or more, plus a judge \`connector_id\` for every \`needsJudgeConnector: true\` evaluator.
+Build examples from whatever the user points at: this conversation, Elasticsearch or
+ES|QL results, traces, or Agent Builder conversations, using the other tools available
+to you. Never invent an expected \`output\` the user has not provided or approved.
 
-If the user has not **explicitly** specified one of these, stop and ask before continuing. When you
-ask: call the matching discovery tool, present up to **5** concrete options (each as \`name (id)\`),
-and invite the user to type a different value or ask to see more. If a discovery tool returns exactly
-one candidate, propose it explicitly and ask the user to confirm — do not assume it. Only proceed to
-preview/save/run once every input above has been confirmed by the user.
+## Ask, Don't Assume
 
+Never guess a dataset name, which dataset to change, or which one to delete, and never
+silently auto-pick the first (or only) candidate a discovery tool returns.
 
+Resolve datasets with \`${evalsDatasetTools.listDatasets}\`. When you ask the user to
+choose, present up to **5** options as \`name (id)\` and invite them to type a different
+value or ask to see more. If the tool returns exactly one candidate, propose it and wait
+for the user to confirm.
 
-## Dataset Management Rules
+## Recommended Flow
 
+1. **Discover** with \`${evalsDatasetTools.listDatasets}\` (id, name, description, tags,
+   maturity, example count). Use \`${evalsDatasetTools.getDataset}\` to read a dataset's
+   examples before changing it.
+2. **Draft** a short bulleted preview before any write: name, description, tags, maturity,
+   example count, and the first few examples. For an upsert, say which examples will be
+   added and which existing ones will be removed.
+3. **Write**. Each of these asks the user to confirm before it runs:
+   - \`${evalsDatasetTools.createDataset}\` - create a dataset. Fails if the name already exists in this space.
+   - \`${evalsDatasetTools.upsertDataset}\` - create or replace by **name**. Replaces the whole example set: any existing example missing from the payload is removed.
+   - \`${evalsDatasetTools.copyDataset}\` - copy a dataset under a new name.
+   - \`${evalsDatasetTools.deleteDataset}\` - remove a dataset from this space.
+
+## Rules
+
+- Prefer \`${evalsDatasetTools.createDataset}\` for a new dataset. \`${evalsDatasetTools.upsertDataset}\` replaces the full example set, so read the current examples first and include every one that should be kept.
+- If \`${evalsDatasetTools.getDataset}\` reports \`examples_omitted\` greater than 0, that list is incomplete. Do not send it to \`${evalsDatasetTools.upsertDataset}\`. Upsert only with the complete example set.
+- Deleting a dataset shared with other spaces only detaches it from the current space. Pass \`intent: 'delete'\` only when the user wants it destroyed, and \`intent: 'unshare'\` only when they want it removed from this space and kept elsewhere. Omit \`intent\` to let the dataset's spaces decide.
+- Summaries use a short **bulleted list**, not a markdown table.
 `;

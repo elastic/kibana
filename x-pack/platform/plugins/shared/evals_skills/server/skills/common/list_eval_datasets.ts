@@ -12,9 +12,8 @@ import { DatasetMaturity, MAX_TAG_LENGTH, MAX_TAGS_PER_DATASET } from '@kbn/eval
 import { MAX_NAME_LENGTH } from '@kbn/evals-plugin/common';
 import type { EvalsSkillsStartDependencies } from '../../types';
 import { hasReadEvalsPrivilege } from './check_privileges';
+import { LIST_EVAL_DATASETS_TOOL_ID } from './tool_ids';
 import { errorResult, otherResult, toErrorResult } from './tool_results';
-
-export const LIST_EVAL_DATASETS_TOOL_ID = 'platform.evals.list_datasets';
 
 /** Services the shared list-datasets tool needs. Both eval skills satisfy this. */
 export interface ListEvalDatasetsToolDeps {
