@@ -20,7 +20,7 @@ jest.mock('./authenticate_and_deploy_step/use_deploy', () => ({
 }));
 
 jest.mock('./authenticate_and_deploy_step/deployment_method_card', () => ({
-  DeploymentMethodCard: () => null,
+  DeploymentMethodCard: jest.fn(() => null),
 }));
 
 jest.mock('./authenticate_and_deploy_step/managed_integrations_section', () => ({
@@ -724,6 +724,61 @@ describe('AuthenticateAndDeployStep', () => {
       // persistDeploymentId must not fire again (URL/context already set).
       expect(mockPersist).not.toHaveBeenCalled();
       expect(onContinue).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  // Regression: isMethodLocked only checked policyIdsByInstance; removeDeployInstance moves IDs
+  // into pendingCleanupPolicyIds, so after the last instance is removed the lock would lift while
+  // orphaned policies still awaited cleanup. The user could then switch to agent-based, causing
+  // hasStaleMiPolicies to be gated out (!isAgentBased) and old MI policies to be left behind.
+  describe('deployment method lock', () => {
+    function getMockDeploymentMethodCard(): jest.Mock {
+      return jest.requireMock('./authenticate_and_deploy_step/deployment_method_card')
+        .DeploymentMethodCard;
+    }
+
+    it('remains locked when policyIdsByInstance is empty but pendingCleanupPolicyIds is not', () => {
+      mockUseOnboardingFlow.mockReturnValue({
+        servicesStep: { selectedServiceIds: ['guardduty'], dataFormat: 'json' },
+        awsServicesMap: awsServicesMapWithMI,
+        deploymentMethod: 'managed_integration',
+        setDeploymentMethod: jest.fn(),
+        detectAndReviewStep: {
+          serviceStatuses: {},
+          policyIdsByInstance: {},
+          pendingCleanupPolicyIds: { 'inst-a': 'policy-123' },
+          onboardingDeploymentId: undefined,
+        },
+        updateDetectAndReviewStep: jest.fn(),
+      });
+
+      renderStep();
+
+      const mock = getMockDeploymentMethodCard();
+      const lastCall = mock.mock.calls[mock.mock.calls.length - 1];
+      expect(lastCall[0].disabled).toBe(true);
+    });
+
+    it('is unlocked when both policyIdsByInstance and pendingCleanupPolicyIds are empty', () => {
+      mockUseOnboardingFlow.mockReturnValue({
+        servicesStep: { selectedServiceIds: ['guardduty'], dataFormat: 'json' },
+        awsServicesMap: awsServicesMapWithMI,
+        deploymentMethod: 'managed_integration',
+        setDeploymentMethod: jest.fn(),
+        detectAndReviewStep: {
+          serviceStatuses: {},
+          policyIdsByInstance: {},
+          pendingCleanupPolicyIds: {},
+          onboardingDeploymentId: undefined,
+        },
+        updateDetectAndReviewStep: jest.fn(),
+      });
+
+      renderStep();
+
+      const mock = getMockDeploymentMethodCard();
+      const lastCall = mock.mock.calls[mock.mock.calls.length - 1];
+      expect(lastCall[0].disabled).toBe(false);
     });
   });
 });

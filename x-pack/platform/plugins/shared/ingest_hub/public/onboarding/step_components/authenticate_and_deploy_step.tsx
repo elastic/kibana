@@ -205,9 +205,14 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   const showMiSection = !isAgentBased && miServiceIds.length > 0;
   const showAgentSection = isAgentBased && agentTargets.length > 0;
 
-  // Lock the deployment method toggle once any service has been deployed. Changing the method
-  // after a deploy would leave orphaned policies from the previous mechanism with no cleanup path.
-  const isMethodLocked = Object.keys(detectAndReviewStep.policyIdsByInstance ?? {}).length > 0;
+  // Lock the deployment method toggle once any service has been deployed, or while cleanup is still
+  // pending. Changing the method would leave orphaned policies with no cleanup path. pendingCleanup
+  // must be included: removeDeployInstance moves IDs out of policyIdsByInstance into
+  // pendingCleanupPolicyIds, so after all instances are removed the lock would otherwise lift while
+  // stale policies still exist.
+  const isMethodLocked =
+    Object.keys(detectAndReviewStep.policyIdsByInstance ?? {}).length > 0 ||
+    Object.keys(detectAndReviewStep.pendingCleanupPolicyIds ?? {}).length > 0;
 
   const handleNext = useCallback(async () => {
     const defaultNames: Record<string, string> = {
