@@ -8,6 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
 import { hasRequiredFields, detectRerankCapability } from './capabilities';
+import { RERANK_ENDPOINT } from './constants';
 
 describe('capabilities', () => {
   describe('hasRequiredFields', () => {
@@ -99,7 +100,7 @@ describe('capabilities', () => {
         },
       } as unknown as ElasticsearchClient;
 
-      const result = await detectRerankCapability(mockEsClient);
+      const result = await detectRerankCapability(mockEsClient, RERANK_ENDPOINT);
 
       expect(result).toBe(true);
       expect(mockEsClient.inference.get).toHaveBeenCalledWith({
@@ -121,7 +122,7 @@ describe('capabilities', () => {
         },
       } as unknown as ElasticsearchClient;
 
-      const result = await detectRerankCapability(mockEsClient);
+      const result = await detectRerankCapability(mockEsClient, RERANK_ENDPOINT);
 
       expect(result).toBe(false);
     });
@@ -145,7 +146,7 @@ describe('capabilities', () => {
         },
       } as unknown as ElasticsearchClient;
 
-      await expect(detectRerankCapability(mockEsClient)).rejects.toThrow();
+      await expect(detectRerankCapability(mockEsClient, RERANK_ENDPOINT)).rejects.toThrow();
     });
 
     it('returns false when endpoints array is empty', async () => {
@@ -157,7 +158,7 @@ describe('capabilities', () => {
         },
       } as unknown as ElasticsearchClient;
 
-      const result = await detectRerankCapability(mockEsClient);
+      const result = await detectRerankCapability(mockEsClient, RERANK_ENDPOINT);
 
       expect(result).toBe(false);
     });
@@ -169,7 +170,7 @@ describe('capabilities', () => {
         },
       } as unknown as ElasticsearchClient;
 
-      const result = await detectRerankCapability(mockEsClient);
+      const result = await detectRerankCapability(mockEsClient, RERANK_ENDPOINT);
 
       expect(result).toBe(false);
     });

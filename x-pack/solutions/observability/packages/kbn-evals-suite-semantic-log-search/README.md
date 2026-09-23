@@ -34,8 +34,13 @@ Across runs, two things still move and neither is worth removing:
    none, so once a corpus is large enough for sampling to engage (the scale corpus, by design) the
    semantic arm draws different documents each time and its counts are extrapolated estimates.
 
-Latency carries a third condition: it is only comparable at the same concurrency, and the retrieval
-specs pin `concurrency: 1` because the reranker saturates at one in-flight request. See
+Latency carries two further conditions. It is only comparable at the same concurrency (the
+retrieval specs pin `concurrency: 1`) and at the same **allocation count**, because rerank
+cost divides by it: identical input measured 2,311 ms at one allocation and 875 ms at three, and
+`adaptive_allocations` moves the number mid-run on its own. The semantic arm logs the count once it
+finishes, which is the earliest it can be known: the reranker deploys on its first call, and that
+arm is the only one that makes one. It is also endpoint-specific, since the same candidates took
+147 ms through a hosted reranker. See
 [Measuring latency properly](./SETUP.md#measuring-latency-properly).
 
 ### Why the `groups` arm exists
@@ -102,7 +107,7 @@ The suite supports multiple corpora. Each corpus is defined in `src/corpora/` as
 | Id | Description |
 |---|---|
 | `sigevents_postgres_timeout` | Small corpus (~2h of `postgres_timeout`, < 50k docs). Exercises the single-pass CATEGORIZE branch. |
-| `sigevents_postgres_timeout_scale` | Scale corpus (same labels, `baseRate=10`, > 50k docs). Exercises the two-pass head/rare CATEGORIZE branch that production runs. |
+| `sigevents_postgres_timeout_scale` | Scale corpus (same labels, `baseRate=25`, measured 63,627 docs). Exercises the two-pass sampled head/rare CATEGORIZE branch. Verify the manifest reports > 50,000 before trusting a result. |
 | `sigevents_fraud_check_redis_herring` | Redis/fraud corpus with different message classes and semantic traps. |
 
 **Why two postgres_timeout profiles?** The service's `collectCandidates` picks one of two code
@@ -179,8 +184,8 @@ same `maxPatterns` candidate budget).
 | `R-Precision` | maximize | Precision@R where R = number of correct answers; the right metric for literal queries (can reach 1.0) |
 | `nDCG@K` | maximize | Normalised DCG using graded relevance (grade 2 > grade 1 > 0) |
 | `MRR` | maximize | Reciprocal rank of the first relevant result |
-| `Top Relevance Score` | neutral | The reranker's logit for the top pattern; calibrates the "nothing relevant" threshold (see below) |
-| `Retrieval Latency` | minimize | Wall-clock fetch-to-parsed. Comparable only at equal concurrency, and not normalised by candidate count |
+| `Top Relevance Score` | neutral | The reranker's score for the top pattern; calibrates the "nothing relevant" threshold (see below). Scale belongs to the configured endpoint, so it is meaningless across endpoints |
+| `Retrieval Latency` | minimize | Wall-clock fetch-to-parsed. Comparable only at equal concurrency, equal allocation count and the same rerank endpoint. Not normalised by candidate count, and candidate *text length* is what the cost actually tracks |
 | `Count Sanity` | minimize | Flags counts too high (lifetime counters) or too low (raw sampled `doc_count`). The low side is inert on the semantic arm (see below) |
 | `Used Log Tool` | neutral | Agent arms: verifies each arm is configured correctly |
 | `Relevant Messages Cited` | maximize | Agent arms: coverage of the answer, not its quality |
@@ -234,7 +239,10 @@ fails with the list of missing labels.
 
 The semantic arm additionally checks that the service can serve requests before running any
 experiment. If the service returns warnings and no patterns, the run fails with the service's own
-explanation. The `.rerank-v1-elasticsearch` check in `logRunManifest` is provenance, not a gate.
+explanation. The `.rerank-v1-elasticsearch` check in `logRunManifest` is provenance, not a gate,
+and it records the suite's assumption about Kibana's default, not a read of it. Kibana takes the
+endpoint from `xpack.logsDataAccess.semanticLogSearch.rerankInferenceId`, so a Kibana configured
+otherwise ranks through an endpoint the manifest never inspected.
 
 **The agent arms need a working model connector; the retrieval arms do not.** The retrieval arms
 put no model in the loop, so they pass on a stack where no LLM is reachable. The agent arms call

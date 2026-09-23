@@ -12,6 +12,7 @@ import {
   assertSemanticSearchAvailable,
   auditCorpus,
   logRunManifest,
+  readRerankAllocations,
   seedCorpusIfNeeded,
 } from '../../src/corpus_audit';
 import { datasetForArm } from '../../src/datasets';
@@ -126,7 +127,7 @@ evaluate.describe(
       );
     });
 
-    evaluate('semantic arm', async ({ executorClient, fetch, log, connector }) => {
+    evaluate('semantic arm', async ({ executorClient, esClient, fetch, log, connector }) => {
       await assertSemanticSearchAvailable({
         fetch,
         connectorId: connector.id,
@@ -149,6 +150,14 @@ evaluate.describe(
             }),
         },
         [...retrievalEvaluators(activeCorpus), countSanityEvaluator(auditTotalDocuments)]
+      );
+
+      // Read after the arm, not in `beforeAll`: the reranker deploys on its first call, and this is
+      // the only arm that makes one, so before this point the answer is always "not deployed".
+      const allocations = await readRerankAllocations(esClient);
+      log.info(
+        `Reranker allocations after the semantic arm: ${allocations ?? 'not deployed'}. ` +
+          `Rerank latency divides by this, so quote it with any latency figure.`
       );
     });
   }

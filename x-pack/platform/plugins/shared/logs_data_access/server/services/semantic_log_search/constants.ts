@@ -7,8 +7,21 @@
 
 export const DEFAULT_MAX_PATTERNS = 10;
 
-/** The preconfigured RERANK inference endpoint available in ES 9.3+. */
+/**
+ * The RERANK inference endpoint preconfigured in ES 9.3+, and the default for
+ * `xpack.logsDataAccess.semanticLogSearch.rerankInferenceId`. Runtime code reads the configured id,
+ * not this constant.
+ */
 export const RERANK_ENDPOINT = '.rerank-v1-elasticsearch';
+
+/**
+ * Characters an inference id may contain. Allowlisted rather than denylisted because the configured
+ * id is interpolated into the `_inference/rerank/<id>` request path, as `schema.ts` does for `target`.
+ */
+export const RERANK_INFERENCE_ID_PATTERN = /^[a-zA-Z0-9._-]+$/;
+
+/** Upper bound on the configured inference id: a guard against unbounded strings, not a limit ES imposes. */
+export const MAX_RERANK_INFERENCE_ID_LENGTH = 256;
 
 /**
  * ECMA-262 maximum time value; `new Date(v).toISOString()` throws `RangeError` beyond it.
@@ -39,17 +52,34 @@ export const MAX_KQL_FILTER_LENGTH = 4096;
 export const DEFAULT_RANK_WINDOW = 500;
 
 /**
- * Maximum characters of pattern + sample text per candidate sent to the rerank endpoint.
- * The cross-encoder truncates at its own token limit, so bytes beyond this are transferred and tokenised for nothing.
- * https://github.com/elastic/kibana/blob/8c87186f8d59/x-pack/platform/plugins/shared/agent_builder/common/step_types/rerank_step.ts#L23
+ * Maximum characters of candidate text sent to the rerank endpoint, per candidate.
+ * Set to where `.rerank-v1` stops reading (`max_sequence_length: 512`, `span: -1`); beyond that,
+ * text is transferred and tokenised for nothing. Was 2000, on the mistaken claim that it sat below
+ * that point.
  */
-export const MAX_RERANK_INPUT_LENGTH = 2000;
+export const MAX_RERANK_INPUT_LENGTH = 1200;
+
+/**
+ * Lower bound on any candidate's rerank text, which `RERANK_INPUT_TOTAL_CHAR_BUDGET` yields to.
+ * A large candidate set would otherwise split the budget into fragments too short to rank on, and
+ * dropping candidates instead would lose the rare patterns this search exists to surface.
+ */
+export const MIN_RERANK_INPUT_LENGTH = 80;
+
+/**
+ * Target total characters across all candidates in one rerank call, which is what bounds the
+ * call's latency: cost is roughly 0.8 ms per input character divided by the endpoint's allocation
+ * count. Retune against a latency target with that arithmetic; measurements are in the eval suite's
+ * SETUP.md.
+ */
+export const RERANK_INPUT_TOTAL_CHAR_BUDGET = 12_000;
 
 /**
  * Maximum characters of a pattern's representative sample returned to the caller.
  * Raw log lines and stack traces run to multiple KB, so an unbounded sample would put an
- * unbounded response behind a bounded request. Matches `MAX_RERANK_INPUT_LENGTH`, which already
- * truncates the text the reranker sees, so capping here cannot change ranking.
+ * unbounded response behind a bounded request. Larger than `MAX_RERANK_INPUT_LENGTH` on purpose:
+ * the response may carry more of the line than the reranker read. It applies before the rerank text
+ * is built, so it is an upper bound on that too and cannot change ranking.
  */
 export const MAX_SAMPLE_LENGTH = 2000;
 
@@ -64,14 +94,18 @@ export const PROBE_TIMEOUT_MS = 5_000;
 export const ESQL_REQUEST_TIMEOUT_MS = 30_000;
 
 /**
- * Transport timeout for the inference rerank call, which is gated on ML model allocation rather
- * than query cost. A cold `.rerank-v1-elasticsearch` was measured importing its model for 21 s
- * before deployment even began, so it needs a larger budget than the ES|QL passes.
+ * Transport timeout for the inference rerank call. Sized for the default local endpoint, where the
+ * call is gated on ML model allocation rather than query cost: a cold `.rerank-v1-elasticsearch`
+ * was measured importing its model for 21 s before deployment even began, so it needs a larger
+ * budget than the ES|QL passes.
  *
- * This is not the binding limit on a cold endpoint. Elasticsearch waits 30 s for the deployment to
- * start and then answers with `model_deployment_timeout_exception`, so raising this value cannot
- * buy more time; it only keeps the client from giving up first. `toFailureResult` classifies that
- * response as `inference_not_ready`, the same as a client timeout.
+ * This is not the binding limit on a cold local endpoint. Elasticsearch waits 30 s for the
+ * deployment to start and then answers with `model_deployment_timeout_exception`, so raising this
+ * value cannot buy more time; it only keeps the client from giving up first. `toFailureResult`
+ * classifies that response as `inference_not_ready`, the same as a client timeout.
+ *
+ * A hosted endpoint has no local deployment to wait for and needs far less, but the budget is
+ * shared: `rerankInferenceId` is configurable, so it has to suit the slowest endpoint in use.
  */
 export const RERANK_REQUEST_TIMEOUT_MS = 60_000;
 

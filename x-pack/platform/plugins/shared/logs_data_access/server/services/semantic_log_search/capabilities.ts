@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { isNotFoundError } from '@kbn/es-errors';
-import { RERANK_ENDPOINT, REQUIRED_FIELDS } from './constants';
+import { REQUIRED_FIELDS } from './constants';
 
 /**
  * Checks that the target exposes every field required by runtime semantic search.
@@ -30,10 +30,13 @@ export async function hasRequiredFields(
   });
 }
 
-/** Returns true when the default RERANK inference endpoint is available (preconfigured in ES 9.3+). */
-export async function detectRerankCapability(esClient: ElasticsearchClient): Promise<boolean> {
+/** Returns true when the configured RERANK inference endpoint is available on the cluster. */
+export async function detectRerankCapability(
+  esClient: ElasticsearchClient,
+  inferenceId: string
+): Promise<boolean> {
   try {
-    const response = await esClient.inference.get({ inference_id: RERANK_ENDPOINT });
+    const response = await esClient.inference.get({ inference_id: inferenceId });
     return (response.endpoints?.length ?? 0) > 0;
   } catch (error) {
     // Only a genuine 404 means the endpoint is absent. Authorization (403) and transport (503)

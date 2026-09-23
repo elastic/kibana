@@ -50,11 +50,21 @@ if (result.status === 'success') {
 Before running the query the service performs two checks:
 
 1. **`hasRequiredFields`** — verifies `message` and `@timestamp` exist on the target via field caps. Returns `{ status: 'unavailable', reason: 'missing_fields' }` when absent.
-2. **`detectRerankCapability`** — checks that the `.rerank-v1-elasticsearch` inference endpoint is available (preconfigured in ES 9.3+). Returns `{ status: 'unavailable', reason: 'inference_unavailable' }` when absent.
+2. **`detectRerankCapability`** — checks that the configured `rerank` inference endpoint is available. Returns `{ status: 'unavailable', reason: 'inference_unavailable' }` when absent. A configured endpoint that does not exist is reported the same way, since the result type cannot distinguish them; the server log names the endpoint so an operator can tell a typo from a cluster without reranking.
+
+### Configuration
+
+| Setting | Default | Purpose |
+|---|---|---|
+| `xpack.logsDataAccess.semanticLogSearch.rerankInferenceId` | `.rerank-v1-elasticsearch` | Inference endpoint used to rank log patterns. |
+
+The default runs locally and is preconfigured by Elasticsearch in 9.3+, so the feature needs no setup. Pointing it at another `rerank` endpoint trades that for speed — a hosted (EIS) reranker measured 147 ms against 2,311 ms for the same 17 candidates — at two costs: a hosted endpoint sends log message text out of the cluster, and `relevanceScore` is per-model, so scores are not comparable across endpoints.
 
 ### Strategy
 
 The only implemented ranking path is ES|QL `CATEGORIZE` + `RERANK`. Pre-indexed strategies (`semantic_text`, `pattern_text`) and pattern expansion are not implemented.
+
+Rerank latency is linear in the **total characters** sent, not in the number of candidates: roughly 0.8 ms per character divided by the endpoint's allocation count. `RERANK_INPUT_TOTAL_CHAR_BUDGET` therefore bounds a query's cost, and `buildRerankInputs` spends that budget by trimming the longest candidates rather than dropping any — a dropped candidate is a pattern the caller can never see, which is the failure this feature exists to avoid.
 
 ### Security invariants
 

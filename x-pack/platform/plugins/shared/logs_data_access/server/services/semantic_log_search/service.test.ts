@@ -17,6 +17,7 @@ import {
   MAX_PATTERNS,
   MAX_TARGET_LENGTH,
 } from './constants';
+import { searchDeps } from './test_helpers';
 
 const createEsClient = ({
   fields = {
@@ -68,7 +69,7 @@ describe('semantic log search service', () => {
   it('returns successful patterns through the runtime strategy', async () => {
     const { esClient } = createEsClient();
 
-    const result = await search(createParams(esClient), loggerMock.create());
+    const result = await search(createParams(esClient), searchDeps());
 
     expect(result).toEqual({ status: 'success', patterns: [] });
   });
@@ -80,7 +81,7 @@ describe('semantic log search service', () => {
       },
     });
 
-    const result = await search(createParams(esClient), loggerMock.create());
+    const result = await search(createParams(esClient), searchDeps());
 
     expect(result).toEqual({ status: 'unavailable', reason: 'missing_fields' });
     expect(inferenceGet).not.toHaveBeenCalled();
@@ -90,10 +91,46 @@ describe('semantic log search service', () => {
   it('returns inference_unavailable without running ES|QL', async () => {
     const { esClient, esqlQuery } = createEsClient({ rerankAvailable: false });
 
-    const result = await search(createParams(esClient), loggerMock.create());
+    const result = await search(createParams(esClient), searchDeps());
 
     expect(result).toEqual({ status: 'unavailable', reason: 'inference_unavailable' });
     expect(esqlQuery).not.toHaveBeenCalled();
+  });
+
+  it('checks the configured endpoint for availability, not the default', async () => {
+    const { esClient, inferenceGet } = createEsClient();
+
+    await search(createParams(esClient), {
+      logger: loggerMock.create(),
+      rerankInferenceId: '.jina-reranker-v3',
+    });
+
+    expect(inferenceGet).toHaveBeenCalledWith({ inference_id: '.jina-reranker-v3' });
+  });
+
+  it('names the configured endpoint in the log when it is absent, so a typo is diagnosable', async () => {
+    // The tool response carries a fixed reason whose warning tells the model not to retry, so a
+    // misconfigured id is indistinguishable from a cluster without reranking except here.
+    const logger = loggerMock.create();
+    const { esClient } = createEsClient({ rerankAvailable: false });
+
+    const result = await search(createParams(esClient), {
+      logger,
+      rerankInferenceId: '.rerank-v1-elasticsaerch',
+    });
+
+    expect(result).toEqual({ status: 'unavailable', reason: 'inference_unavailable' });
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('.rerank-v1-elasticsaerch'));
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('rerankInferenceId'));
+  });
+
+  it('stays quiet when the default endpoint is the one missing, which is not a misconfiguration', async () => {
+    const logger = loggerMock.create();
+    const { esClient } = createEsClient({ rerankAvailable: false });
+
+    await search(createParams(esClient), searchDeps(logger));
+
+    expect(logger.warn).not.toHaveBeenCalled();
   });
 
   it('returns execution error when the field capability check fails', async () => {
@@ -101,7 +138,7 @@ describe('semantic log search service', () => {
     const { esClient, fieldCaps } = createEsClient();
     fieldCaps.mockRejectedValue(new Error('forbidden'));
 
-    const result = await search(createParams(esClient), logger);
+    const result = await search(createParams(esClient), searchDeps(logger));
 
     expect(result).toEqual({ status: 'error', reason: 'execution' });
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('capability check'));
@@ -115,7 +152,7 @@ describe('semantic log search service', () => {
     const abortError = Object.assign(new Error('aborted'), { name: 'AbortError' });
     fieldCaps.mockRejectedValue(abortError);
 
-    const result = await search(createParams(esClient), logger);
+    const result = await search(createParams(esClient), searchDeps(logger));
 
     expect(result).toEqual({ status: 'error', reason: 'cancelled' });
     expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('cancelled'));
@@ -160,7 +197,7 @@ describe('semantic log search service', () => {
 
     const result = await search(
       createParams(esClient, overrides as Partial<SemanticLogSearchParams>),
-      loggerMock.create()
+      searchDeps()
     );
 
     expect(result).toEqual({ status: 'error', reason: 'invalid_params' });
@@ -190,7 +227,7 @@ describe('semantic log search service', () => {
   ])('accepts the legitimate target %s and forwards it to Elasticsearch', async (target) => {
     const { esClient, esqlQuery } = createEsClient();
 
-    const result = await search(createParams(esClient, { target }), loggerMock.create());
+    const result = await search(createParams(esClient, { target }), searchDeps());
 
     // The schema accepts this target; ES|QL query runs (empty mock response → success)
     expect(result.status).toBe('success');
@@ -206,7 +243,7 @@ describe('semantic log search service', () => {
   it('trims whitespace from target before forwarding to the ES|QL strategy', async () => {
     const { esClient, esqlQuery } = createEsClient();
 
-    await search(createParams(esClient, { target: '  logs-*  ' }), loggerMock.create());
+    await search(createParams(esClient, { target: '  logs-*  ' }), searchDeps());
 
     expect(esqlQuery).toHaveBeenCalled();
     const [{ query }] = esqlQuery.mock.calls[0];

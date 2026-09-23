@@ -4,10 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { PluginInitializerContext } from '@kbn/core/server';
+import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
+import type { LogsDataAccessConfig } from './config';
+import { configSchema } from './config';
 import type { LogsDataAccessPluginSetup, LogsDataAccessPluginStart } from './plugin';
 
 export type { LogsDataAccessPluginSetup, LogsDataAccessPluginStart };
+
+// Not exposed to the browser: the rerank inference id is only ever used server-side.
+export const config: PluginConfigDescriptor<LogsDataAccessConfig> = {
+  schema: configSchema,
+};
 
 export type {
   LogsRatesMetrics,

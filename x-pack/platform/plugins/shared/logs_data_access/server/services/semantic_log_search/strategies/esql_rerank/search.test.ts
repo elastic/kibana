@@ -16,6 +16,7 @@ import {
   MAX_RERANK_INPUT_LENGTH,
   RERANK_REQUEST_TIMEOUT_MS,
 } from '../../constants';
+import { searchDeps } from '../../test_helpers';
 
 // ---------------------------------------------------------------------------
 // Test helpers
@@ -103,7 +104,7 @@ describe('searchWithEsqlRerank', () => {
     it('sends time-range as reserved named params on the probe query', async () => {
       const { esClient, esqlQuery } = buildMockClient({ totalDocs: 0 });
 
-      await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, loggerMock.create());
+      await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, searchDeps());
 
       // First call is the count probe.
       const probeRequest = esqlQuery.mock.calls[0][0];
@@ -118,7 +119,7 @@ describe('searchWithEsqlRerank', () => {
     it('returns success with empty patterns when count = 0', async () => {
       const { esClient } = buildMockClient({ totalDocs: 0 });
 
-      const result = await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, loggerMock.create());
+      const result = await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, searchDeps());
 
       expect(result).toEqual({ status: 'success', patterns: [] });
     });
@@ -133,7 +134,7 @@ describe('searchWithEsqlRerank', () => {
         inference: { rerank: jest.fn() },
       } as unknown as ElasticsearchClient;
 
-      const result = await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, logger);
+      const result = await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, searchDeps(logger));
 
       expect(result).toEqual({ status: 'error', reason: 'scope_too_large' });
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('scope too large'));
@@ -147,7 +148,7 @@ describe('searchWithEsqlRerank', () => {
         inference: { rerank: jest.fn() },
       } as unknown as ElasticsearchClient;
 
-      const result = await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, loggerMock.create());
+      const result = await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, searchDeps());
 
       expect(result).toEqual({ status: 'error', reason: 'scope_too_large' });
     });
@@ -161,7 +162,7 @@ describe('searchWithEsqlRerank', () => {
         inference: { rerank: jest.fn() },
       } as unknown as ElasticsearchClient;
 
-      const result = await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, loggerMock.create());
+      const result = await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, searchDeps());
 
       expect(result).toEqual({ status: 'error', reason: 'cancelled' });
     });
@@ -172,7 +173,7 @@ describe('searchWithEsqlRerank', () => {
         inference: { rerank: jest.fn() },
       } as unknown as ElasticsearchClient;
 
-      const result = await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, loggerMock.create());
+      const result = await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, searchDeps());
 
       expect(result).toEqual({ status: 'error', reason: 'execution' });
     });
@@ -182,7 +183,7 @@ describe('searchWithEsqlRerank', () => {
 
       await searchWithEsqlRerank(
         { esClient, ...BASE_PARAMS, kqlFilter: 'service.name:"checkout"' },
-        loggerMock.create()
+        searchDeps()
       );
 
       const probeQuery = esqlQuery.mock.calls[0][0].query;
@@ -195,7 +196,7 @@ describe('searchWithEsqlRerank', () => {
       // 10 000 docs → getSampleProbability returns 1 → no SAMPLE.
       const { esClient, esqlQuery } = buildMockClient({ totalDocs: 10_000 });
 
-      await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, loggerMock.create());
+      await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, searchDeps());
 
       const headQuery = esqlQuery.mock.calls[1][0].query;
       expect(headQuery).not.toContain('SAMPLE');
@@ -204,7 +205,7 @@ describe('searchWithEsqlRerank', () => {
     it('sends the categorize query with the correct STATS columns', async () => {
       const { esClient, esqlQuery } = buildMockClient({ totalDocs: 10_000 });
 
-      await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, loggerMock.create());
+      await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, searchDeps());
 
       const headQuery = esqlQuery.mock.calls[1][0].query;
       expect(headQuery).toContain('STATS count = COUNT(*)');
@@ -219,7 +220,7 @@ describe('searchWithEsqlRerank', () => {
 
       await searchWithEsqlRerank(
         { esClient, ...BASE_PARAMS, kqlFilter: 'service.name:"checkout" | DROP message' },
-        loggerMock.create()
+        searchDeps()
       );
 
       const headQuery = esqlQuery.mock.calls[1][0].query;
@@ -234,7 +235,7 @@ describe('searchWithEsqlRerank', () => {
         rerankResult: [{ index: 0, relevance_score: 3.46 }],
       });
 
-      await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, loggerMock.create());
+      await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, searchDeps());
 
       expect(rerank).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -242,6 +243,25 @@ describe('searchWithEsqlRerank', () => {
           query: 'connection failures',
           input: expect.arrayContaining([expect.any(String)]),
         }),
+        expect.any(Object)
+      );
+    });
+
+    it('reranks through the configured endpoint, not the preconfigured default', async () => {
+      const headResponse = makePatternResponse([{ pattern: 'Connection timed out', count: 50 }]);
+      const { esClient, rerank } = buildMockClient({
+        totalDocs: 10_000,
+        headResponse,
+        rerankResult: [{ index: 0, relevance_score: 0.42 }],
+      });
+
+      await searchWithEsqlRerank(
+        { esClient, ...BASE_PARAMS },
+        { logger: loggerMock.create(), rerankInferenceId: '.jina-reranker-v3' }
+      );
+
+      expect(rerank).toHaveBeenCalledWith(
+        expect.objectContaining({ inference_id: '.jina-reranker-v3' }),
         expect.any(Object)
       );
     });
@@ -260,7 +280,7 @@ describe('searchWithEsqlRerank', () => {
         ],
       });
 
-      const result = await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, loggerMock.create());
+      const result = await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, searchDeps());
 
       expect(result.status).toBe('success');
       if (result.status === 'success') {
@@ -290,7 +310,7 @@ describe('searchWithEsqlRerank', () => {
 
       const result = await searchWithEsqlRerank(
         { esClient, ...BASE_PARAMS, maxPatterns: 2 },
-        loggerMock.create()
+        searchDeps()
       );
 
       expect(result.status).toBe('success');
@@ -302,7 +322,7 @@ describe('searchWithEsqlRerank', () => {
     it('returns success with empty patterns when categorize returns no rows', async () => {
       const { esClient } = buildMockClient({ totalDocs: 10_000, headResponse: emptyResponse });
 
-      const result = await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, loggerMock.create());
+      const result = await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, searchDeps());
 
       expect(result).toEqual({ status: 'success', patterns: [] });
     });
@@ -315,7 +335,7 @@ describe('searchWithEsqlRerank', () => {
     it('emits a SAMPLE clause on the head pass', async () => {
       const { esClient, esqlQuery } = buildMockClient({ totalDocs: LARGE_TOTAL });
 
-      await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, loggerMock.create());
+      await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, searchDeps());
 
       const headQuery = esqlQuery.mock.calls[1][0].query;
       expect(headQuery).toContain('SAMPLE');
@@ -324,7 +344,7 @@ describe('searchWithEsqlRerank', () => {
     it('applies a noise threshold filter after STATS on the head pass', async () => {
       const { esClient, esqlQuery } = buildMockClient({ totalDocs: LARGE_TOTAL });
 
-      await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, loggerMock.create());
+      await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, searchDeps());
 
       // Head pass applies WHERE count > noiseThreshold = ceil(0.01 × 100_000 × 0.5) = 500.
       const headQuery = esqlQuery.mock.calls[1][0].query;
@@ -338,7 +358,7 @@ describe('searchWithEsqlRerank', () => {
         headResponse,
       });
 
-      await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, loggerMock.create());
+      await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, searchDeps());
 
       const rareQuery = esqlQuery.mock.calls[2][0].query;
       expect(rareQuery).toContain('NOT MATCH(message, "Error pattern tokens"');
@@ -349,7 +369,7 @@ describe('searchWithEsqlRerank', () => {
       const headResponse = makePatternResponse([{ pattern: 'Common error', count: 600 }]);
       const { esClient, esqlQuery } = buildMockClient({ totalDocs: LARGE_TOTAL, headResponse });
 
-      await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, loggerMock.create());
+      await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, searchDeps());
 
       const rareQuery = esqlQuery.mock.calls[2][0].query;
       expect(rareQuery).toContain('SORT count ASC');
@@ -375,7 +395,7 @@ describe('searchWithEsqlRerank', () => {
 
       const esqlQuery = esClient.esql.query as jest.Mock;
 
-      const result = await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, loggerMock.create());
+      const result = await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, searchDeps());
 
       expect(result.status).toBe('success');
       // Fallback is DESC — no NOT MATCH exclusions.
@@ -393,7 +413,7 @@ describe('searchWithEsqlRerank', () => {
         rerankResult: [{ index: 0, relevance_score: 1.0 }],
       });
 
-      const result = await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, loggerMock.create());
+      const result = await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, searchDeps());
 
       expect(result.status).toBe('success');
       if (result.status === 'success') {
@@ -411,7 +431,7 @@ describe('searchWithEsqlRerank', () => {
         rerankResult: [{ index: 0, relevance_score: 1.0 }],
       });
 
-      const result = await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, loggerMock.create());
+      const result = await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, searchDeps());
 
       expect(result.status).toBe('success');
       if (result.status === 'success') {
@@ -439,7 +459,7 @@ describe('searchWithEsqlRerank', () => {
         inference: { rerank: jest.fn() },
       } as unknown as ElasticsearchClient;
 
-      const result = await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, loggerMock.create());
+      const result = await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, searchDeps());
 
       expect(result).toEqual({ status: 'error', reason: 'execution' });
     });
@@ -458,7 +478,7 @@ describe('searchWithEsqlRerank', () => {
         inference: { rerank: jest.fn() },
       } as unknown as ElasticsearchClient;
 
-      const result = await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, loggerMock.create());
+      const result = await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, searchDeps());
 
       expect(result).toEqual({ status: 'error', reason: 'timeout' });
     });
@@ -478,7 +498,7 @@ describe('searchWithEsqlRerank', () => {
         inference: { rerank: jest.fn().mockRejectedValue(timeoutError) },
       } as unknown as ElasticsearchClient;
 
-      const result = await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, loggerMock.create());
+      const result = await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, searchDeps());
 
       expect(result).toEqual({ status: 'error', reason: 'inference_not_ready' });
     });
@@ -496,7 +516,7 @@ describe('searchWithEsqlRerank', () => {
         inference: { rerank: jest.fn() },
       } as unknown as ElasticsearchClient;
 
-      const result = await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, loggerMock.create());
+      const result = await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, searchDeps());
 
       expect(result).toEqual({ status: 'error', reason: 'cancelled' });
     });
@@ -514,7 +534,7 @@ describe('searchWithEsqlRerank', () => {
         inference: { rerank: jest.fn() },
       } as unknown as ElasticsearchClient;
 
-      const result = await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, logger);
+      const result = await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, searchDeps(logger));
 
       expect(result).toEqual({ status: 'error', reason: 'execution' });
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('verification_exception'));
@@ -538,7 +558,7 @@ describe('searchWithEsqlRerank', () => {
 
       const result = await searchWithEsqlRerank(
         { esClient, ...BASE_PARAMS, abortSignal: abortController.signal },
-        loggerMock.create()
+        searchDeps()
       );
 
       expect(result).toEqual({ status: 'error', reason: 'execution' });
@@ -550,7 +570,7 @@ describe('searchWithEsqlRerank', () => {
 
       await searchWithEsqlRerank(
         { esClient, ...BASE_PARAMS, abortSignal: abortController.signal },
-        loggerMock.create()
+        searchDeps()
       );
 
       expect(esqlQuery.mock.calls[0][1]).toEqual(
@@ -593,13 +613,13 @@ describe('searchWithEsqlRerank', () => {
         rerankResult: [{ index: 0, relevance_score: 1.0 }],
       });
 
-      await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, loggerMock.create());
+      await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, searchDeps());
 
       const rerankArgs = rerank.mock.calls[0][0];
       expect(rerankArgs.input).toHaveLength(DEFAULT_RANK_WINDOW);
     });
 
-    it('passes top_n: maxPatterns and return_documents: false to the rerank call', async () => {
+    it('passes top_n at the top level and return_documents inside task_settings', async () => {
       const headResponse = makePatternResponse([
         { pattern: 'Error A', count: 100 },
         { pattern: 'Error B', count: 50 },
@@ -610,11 +630,14 @@ describe('searchWithEsqlRerank', () => {
         rerankResult: [{ index: 0, relevance_score: 1.0 }],
       });
 
-      await searchWithEsqlRerank({ esClient, ...BASE_PARAMS, maxPatterns: 3 }, loggerMock.create());
+      await searchWithEsqlRerank({ esClient, ...BASE_PARAMS, maxPatterns: 3 }, searchDeps());
 
       const rerankArgs = rerank.mock.calls[0][0];
       expect(rerankArgs.top_n).toBe(3);
-      expect(rerankArgs.return_documents).toBe(false);
+      // A top-level `return_documents` is rejected by every non-`elasticsearch` inference service,
+      // so its location is load-bearing for pointing the service at a hosted reranker.
+      expect(rerankArgs.return_documents).toBeUndefined();
+      expect(rerankArgs.task_settings).toEqual({ return_documents: false });
     });
 
     it('truncates per-candidate input to MAX_RERANK_INPUT_LENGTH', async () => {
@@ -637,7 +660,7 @@ describe('searchWithEsqlRerank', () => {
         rerankResult: [{ index: 0, relevance_score: 1.0 }],
       });
 
-      await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, loggerMock.create());
+      await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, searchDeps());
 
       const rerankArgs = rerank.mock.calls[0][0];
       expect(rerankArgs.input[0].length).toBeLessThanOrEqual(MAX_RERANK_INPUT_LENGTH);
@@ -651,7 +674,7 @@ describe('searchWithEsqlRerank', () => {
         rerankResult: [{ index: 0, relevance_score: 1.0 }],
       });
 
-      await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, loggerMock.create());
+      await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, searchDeps());
 
       expect(rerank.mock.calls[0][1]).toEqual(
         expect.objectContaining({ requestTimeout: RERANK_REQUEST_TIMEOUT_MS })
@@ -667,7 +690,7 @@ describe('searchWithEsqlRerank', () => {
       timeoutError.name = 'TimeoutError';
       esClient.inference.rerank = jest.fn().mockRejectedValue(timeoutError);
 
-      const result = await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, loggerMock.create());
+      const result = await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, searchDeps());
 
       expect(result).toEqual({ status: 'error', reason: 'inference_not_ready' });
     });
@@ -685,7 +708,7 @@ describe('searchWithEsqlRerank', () => {
         inference: { rerank: jest.fn() },
       } as unknown as ElasticsearchClient;
 
-      const result = await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, loggerMock.create());
+      const result = await searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, searchDeps());
 
       expect(result).toEqual({ status: 'error', reason: 'timeout' });
     });
@@ -694,7 +717,7 @@ describe('searchWithEsqlRerank', () => {
   it('uses a short timeout on the probe and the full timeout on categorize passes', () => {
     const { esClient, esqlQuery } = buildMockClient({ totalDocs: 0 });
 
-    return searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, loggerMock.create()).then(() => {
+    return searchWithEsqlRerank({ esClient, ...BASE_PARAMS }, searchDeps()).then(() => {
       // Probe uses PROBE_TIMEOUT_MS (5_000).
       expect(esqlQuery.mock.calls[0][1]).toEqual(
         expect.objectContaining({ requestTimeout: 5_000 })

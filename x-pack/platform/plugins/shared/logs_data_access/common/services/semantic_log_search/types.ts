@@ -23,10 +23,15 @@ export interface LogPattern {
   /** A representative document: _id, _index, @timestamp and selected fields */
   sample: Record<string, unknown>;
   /**
-   * Reranker relevance score (logit, not normalized to 0-1).
-   * Empirically observed on `.rerank-v1-elasticsearch`: relevant patterns scored
-   * around +3.46, irrelevant ones around -5.65 to -6.12. If the inference endpoint
-   * changes, the scale may shift. Only present when the search strategy uses RERANK.
+   * Reranker relevance score. Only present when the search strategy uses RERANK.
+   *
+   * Uncalibrated and specific to the endpoint that produced it, so it ranks within one response and
+   * means nothing across responses or across endpoints. Measured on the default
+   * `.rerank-v1-elasticsearch`, which returns logits: relevant patterns around +3.46, irrelevant
+   * ones around -5.65 to -6.12. A hosted reranker on the same candidates returned +0.14 for the
+   * top hit and negative values below it — a different scale entirely, and
+   * `xpack.logsDataAccess.semanticLogSearch.rerankInferenceId` lets an operator choose one. Do not
+   * compare these numbers to a fixed threshold.
    */
   relevanceScore?: number;
 }

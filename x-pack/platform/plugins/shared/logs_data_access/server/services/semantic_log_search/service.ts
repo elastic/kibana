@@ -6,7 +6,6 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { Logger } from '@kbn/logging';
 import type {
   SemanticLogSearchService,
   SemanticLogSearchParams,
@@ -18,15 +17,18 @@ import {
 } from '../../../common/services/semantic_log_search/constants';
 import type { RegisterServicesParams } from '../register_services';
 import { hasRequiredFields, detectRerankCapability } from './capabilities';
+import { RERANK_ENDPOINT } from './constants';
 import { searchWithEsqlRerank } from './strategies';
 import { semanticLogSearchInputSchema } from './schema';
 import { errorResult, unavailableResult, toFailureResult, SEARCH_PHASE } from './results';
+import type { SemanticLogSearchDeps } from './types';
 
 /** Search for log patterns matching a natural language query. */
 export async function search(
   params: SemanticLogSearchParams,
-  logger: Logger
+  deps: SemanticLogSearchDeps
 ): Promise<SemanticLogSearchResult> {
+  const { logger, rerankInferenceId } = deps;
   const { esClient, abortSignal } = params;
 
   const validation = semanticLogSearchInputSchema.safeParse(params);
@@ -45,7 +47,16 @@ export async function search(
     if (!(await hasRequiredFields(esClient, input.target))) {
       return unavailableResult(UNAVAILABLE_REASON.MISSING_FIELDS);
     }
-    if (!(await detectRerankCapability(esClient))) {
+    if (!(await detectRerankCapability(esClient, rerankInferenceId))) {
+      // The tool response cannot tell these apart — it carries a fixed reason whose warning tells
+      // the model not to retry — so the distinction is drawn here, where an operator will see it.
+      if (rerankInferenceId !== RERANK_ENDPOINT) {
+        logger.warn(
+          `Semantic log search is configured to use the inference endpoint "${rerankInferenceId}", ` +
+            `which this cluster does not have. Check xpack.logsDataAccess.semanticLogSearch.rerankInferenceId; ` +
+            `the default "${RERANK_ENDPOINT}" is preconfigured by Elasticsearch.`
+        );
+      }
       return unavailableResult(UNAVAILABLE_REASON.INFERENCE_UNAVAILABLE);
     }
   } catch (error) {
@@ -56,16 +67,20 @@ export async function search(
     });
   }
 
-  return searchWithEsqlRerank(input, logger);
+  return searchWithEsqlRerank(input, deps);
 }
 
 /** Creates the runtime semantic log search service. */
 export function createSemanticLogSearchService(
   params: RegisterServicesParams
 ): SemanticLogSearchService {
-  const { logger } = params;
+  const { logger, config } = params;
+  const deps: SemanticLogSearchDeps = {
+    logger,
+    rerankInferenceId: config.semanticLogSearch.rerankInferenceId,
+  };
 
   return {
-    search: (searchParams) => search(searchParams, logger),
+    search: (searchParams) => search(searchParams, deps),
   };
 }

@@ -14,8 +14,33 @@ import type { CorpusProfile } from './corpora';
 import { allLabels } from './corpora';
 import { executeGetLogsSemantic } from './retrieval/tool_client';
 
-/** The RERANK inference endpoint preconfigured in ES 9.3+; checked for run manifest only. */
+/**
+ * The RERANK inference endpoint preconfigured in ES 9.3+; checked for run manifest only.
+ *
+ * This is the eval's assumption about the server's default, not a read of it. Kibana takes the
+ * endpoint from `xpack.logsDataAccess.semanticLogSearch.rerankInferenceId`, so a run against a
+ * Kibana configured otherwise will rank through an endpoint this manifest never inspected.
+ */
 const RERANK_ENDPOINT = '.rerank-v1-elasticsearch';
+
+/** The local model behind the default endpoint. Its deployment stats are where allocations live. */
+const RERANK_MODEL_ID = '.rerank-v1';
+
+/**
+ * Allocation count of the local reranker's deployment, or undefined when it is not deployed.
+ * Quote it with any latency figure: rerank cost divides by it, and `adaptive_allocations` moves it
+ * mid-run on its own. Call it after a rerank has happened, since the model deploys on first use.
+ */
+export const readRerankAllocations = async (esClient: Client): Promise<number | undefined> => {
+  try {
+    const stats = await esClient.ml.getTrainedModelsStats({ model_id: RERANK_MODEL_ID });
+    return stats.trained_model_stats?.[0]?.deployment_stats?.number_of_allocations;
+  } catch {
+    // Absent, undeployed or unauthorized, all recorded the same way: the manifest reports what
+    // this run could see, not what the cluster has.
+    return undefined;
+  }
+};
 
 export interface LabelAudit {
   label: string;
@@ -50,6 +75,11 @@ const SAMPLES_PER_LABEL = 20;
  * count comes from a `match_phrase` on the label's tokens and is then confirmed against sampled
  * `_source` values with the same predicate the evaluators use. A label that phrase-matches but
  * never matches as a substring counts as missing, because the evaluators would never score it.
+ *
+ * `ignore_unavailable` is what lets this run before the corpus exists. The audit is called first to
+ * decide whether `seedCorpusIfNeeded` has to seed, so on a freshly started stack the target is
+ * absent and a bare query answers `index_not_found_exception`. A missing target is zero documents,
+ * which is exactly the answer that triggers seeding.
  */
 export const auditCorpus = async ({ esClient, corpus, log }: AuditParams): Promise<CorpusAudit> => {
   const { target, timeRange } = corpus;
@@ -60,6 +90,7 @@ export const auditCorpus = async ({ esClient, corpus, log }: AuditParams): Promi
     corpusLabels.map(async (label): Promise<LabelAudit> => {
       const response = await esClient.search<{ message?: string }>({
         index: target,
+        ignore_unavailable: true,
         size: SAMPLES_PER_LABEL,
         track_total_hits: true,
         query: {
@@ -82,6 +113,7 @@ export const auditCorpus = async ({ esClient, corpus, log }: AuditParams): Promi
 
   const totals = await esClient.count({
     index: target,
+    ignore_unavailable: true,
     query: { bool: { filter: [timeRangeFilter] } },
   });
 

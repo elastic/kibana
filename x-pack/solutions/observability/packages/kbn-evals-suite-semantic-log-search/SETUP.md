@@ -259,23 +259,163 @@ print('inferences:', n.get('inference_count'), 'cache hits:', n.get('inference_c
 
 **To measure the cold path**, which is what a user experiences, either ask questions the cluster
 has not seen (edit the corpus queries, or add a unique token to each) or re-seed so the candidate
-text changes. Only the first run against fresh data is a cold measurement. If your Elasticsearch
-build lets you set `cache_size: 0` on the deployment, that is the cleaner lever.
+text changes. Only the first run against fresh data is a cold measurement.
+
+### Where the time actually goes
+
+Measured directly against a 47,000-document window, phase by phase:
+
+| Phase | Time | Share |
+|---|---|---|
+| Count probe | 111 ms | 3% |
+| `CATEGORIZE` (33 patterns) | 242 ms | 6% |
+| **Rerank** | **3,921 ms** | **92%** |
+
+The ES|QL side is ~350 ms and effectively free. Latency is the cross-encoder, and the cost model,
+measured on 17 real candidates with cache-busting queries, is:
+
+```
+rerank ms ≈ 0.8 × (total input characters) ÷ allocations
+```
+
+**Characters, not candidates.** That is the one sentence to keep. A candidate is one pattern, not
+one document (47,000 documents collapsed to 33 candidates here), but candidate count is not what
+the cost scales with once you hold text length fixed.
+
+| chars/candidate | 128 | 256 | 512 | 1,024 | 2,000 | 4,000 |
+|---|---|---|---|---|---|---|
+| ms/candidate (1 allocation) | 122 | 216 | 419 | 954 | 1,061 | 1,059 |
+
+The plateau past ~1,024 is `.rerank-v1`'s own `max_sequence_length: 512` with `span: -1`: longer
+text is transferred, tokenised, then discarded. The service caps per-candidate text at
+`MAX_RERANK_INPUT_LENGTH` and the whole call at `RERANK_INPUT_TOTAL_CHAR_BUDGET`, spending that
+budget by trimming the longest candidates rather than dropping any.
+
+**This corpus cannot exercise either cap.** Samples measure 118 characters at the median, 253 at the
+maximum, so the budget never binds and the trimming path never runs outside its unit tests. A corpus
+of JSON lines or stack traces would be needed to measure it, and none exists yet.
+
+Three things that look like levers and are not, all measured so they do not get re-proposed:
+
+| Idea | Result |
+|---|---|
+| Split the call into concurrent batches to use more allocations | **No effect.** At a fixed 3 allocations: one request 875 ms, 2-way 873, 4-way 840. Elasticsearch already spreads one multi-document request across allocations. A first run appeared to show a 2x win; that was `adaptive_allocations` ramping 1 → 3 underneath the test |
+| Raise `num_threads` | **5%.** 1 allocation × 4 threads measured 2,202 ms against 2,312 at 1 thread |
+| Reduce candidate count | Rejected on quality grounds, not performance; see below. Trimming text degrades a candidate; dropping one removes a pattern the caller can never see |
+
+**Why the candidate count is not reduced**, since it is the obvious thing to try:
+
+| Option | Why not |
+|---|---|
+| Lexical prefilter, then rerank a shortlist | Ranking candidates by word overlap with the question drops exactly the messages that share no words with it, which is the capability under test. `cannot_reach_dependency` exists to catch this, and four of the eight grade-2 labels for `connection_failures` never contain the word "connection". It would cap semantic recall at keyword recall: 0.91 down to 0.59 |
+| Raise the 1% noise threshold | Drops **rare** patterns, and the pattern an incident question reaches for is usually rare. Protecting those is what the two-pass head/rare path is for |
+| Lower the `CATEGORIZE` similarity threshold | Query-independent, so semantically safe, but fewer and broader groups mean less precise answers. Measurable if anyone wants the trade |
+| Bi-encoder shortlist, then cross-encoder | The standard two-stage design, and the only semantically safe reduction. Blocked upstream: `DENSE_VECTOR` is snapshot-gated and needs `TEXT_EMBEDDING` over non-constant fields (`elasticsearch#144633`, open). Cosine spread on short log lines also measured 0.018, which may be too flat to shortlist on |
 
 The suite pins `concurrency: 1` for the retrieval arms, which removes queueing between examples.
 Two further things it cannot control from code:
 
-**1. Stop the reranker scaling from zero.** `.rerank-v1-elasticsearch` ships with
-`min_number_of_allocations: 0`, so the first queries of a run pay allocation spin-up that has
-nothing to do with retrieval cost:
+**1. Record the allocation count, because you cannot pin it.**
+
+`.rerank-v1-elasticsearch` ships with `min_number_of_allocations: 0`, and **it cannot be
+reconfigured**: it is a default endpoint, and both `PUT` and `PUT .../_update` are rejected.
+
+```
+400 status_exception: Default endpoint [.rerank-v1-elasticsearch] cannot be updated
+```
+
+This matters more than the cache, because allocation count divides the latency. Measured on
+identical input:
+
+| allocations | total (17 candidates, 3,139 chars) |
+|---|---|
+| 1 | 2,311 ms |
+| 3 | 875 ms |
+
+`adaptive_allocations` scales on queue depth, so a `concurrency: 1` eval never builds a queue and
+the deployment sits low, but it does **not** stay at 1. Concurrent load took it to 3, and it decayed
+back afterwards on its own. So the number moves during a run without the suite asking.
+**A latency figure without an allocation count beside it cannot be compared with another one.**
+
+The semantic arm logs the count when it finishes, which is the earliest point it exists: the model
+deploys on its first inference call, and that arm is the only one that makes one, so anything read
+in `beforeAll` reports `not deployed` however warm the cluster looks.
 
 ```bash
-curl -X PUT -u elastic:changeme "http://localhost:9220/_inference/rerank/.rerank-v1-elasticsearch" \
-  -H 'Content-Type: application/json' \
-  -d '{"service":"elasticsearch","service_settings":{"model_id":".rerank-v1","num_threads":1,
-       "adaptive_allocations":{"enabled":true,"min_number_of_allocations":1,
-       "max_number_of_allocations":32}}}'
+curl -s -u elastic:changeme "http://localhost:9220/_ml/trained_models/.rerank-v1/_stats" | \
+  python3 -c "
+import sys,json; d=json.load(sys.stdin)['trained_model_stats'][0]['deployment_stats']
+print('allocations:', d.get('number_of_allocations'), '| state:', d.get('state'))"
 ```
+
+Pinning allocations requires a **custom** inference endpoint rather than the default one. Since the
+service now reads `xpack.logsDataAccess.semanticLogSearch.rerankInferenceId`, you can create one and
+point Kibana at it. See the next section.
+
+### Running the semantic arm against a different reranker
+
+The same 17 candidates, same cluster, same query:
+
+| endpoint | median |
+|---|---|
+| `.rerank-v1-elasticsearch` (local CPU, 1 allocation) | 2,311 ms |
+| `.jina-reranker-v3` (EIS) | **147 ms** |
+| `.jina-reranker-v2-base-multilingual` (EIS) | 163 ms |
+
+Top-3 were the same three documents on both test queries. So most of the latency this suite reports
+is a cross-encoder on a laptop CPU, not the retrieval pipeline.
+
+To measure that, put the setting in **`config/kibana.yml`** and restart the stack:
+
+```yaml
+xpack.logsDataAccess.semanticLogSearch.rerankInferenceId: .jina-reranker-v3
+```
+
+**Not `config/kibana.dev.yml`.** The Scout stack starts Kibana with `--no-dev-config`
+(`kbn-test/src/functional_tests/start_servers/start_servers.ts:57`), so that file is ignored here
+even though a `yarn start` dev server reads it. `node scripts/scout start-server` has no flag for
+passing extra Kibana arguments either.
+
+Confirm the setting actually took effect rather than assuming it did, by checking that the local
+model's counter does **not** move across the run:
+
+```bash
+curl -s -u elastic:changeme "http://localhost:9220/_ml/trained_models/.rerank-v1/_stats" | \
+  python3 -c "
+import sys,json; n=json.load(sys.stdin)['trained_model_stats'][0]['deployment_stats']['nodes'][0]
+print('inference_count:', n.get('inference_count'))"
+```
+
+A flat counter plus sub-second latencies means the run went through the hosted endpoint. A rising
+counter means the config was not picked up and the result is just another local-endpoint run.
+
+Four caveats, all of which affect how a result should be read:
+
+- **The hosted endpoints only exist here because the Scout eval config boots Elasticsearch with
+  `xpack.inference.elastic.url` pointed at the EIS **QA** environment.** On a cluster without EIS
+  they are absent, and `detectRerankCapability` will report `inference_unavailable`. If that happens
+  after a config change, check the Kibana log, which names the endpoint it could not find.
+- **A hosted endpoint sends log message text out of the cluster**, to a region-pinned service
+  (`.jina-reranker-v3` reports `aws / eu-west-1`). That is why the default is local and this is
+  opt-in.
+- **`relevanceScore` is not comparable across endpoints.** The local model returns logits (−5.28 for
+  an irrelevant candidate); the hosted one returned +0.14 for a top hit and negatives below it.
+  Recall and MRR are comparable because they depend only on ordering; raw scores are not.
+- **Latency is not comparable either**, unless you also record allocations for the local run. A
+  hosted endpoint has no local deployment, so there is nothing to scale and nothing to warm.
+
+Verify the endpoint answers before blaming the eval, with the exact request shape the service sends:
+
+```bash
+curl -s -u elastic:changeme -X POST \
+  "http://localhost:9220/_inference/rerank/.jina-reranker-v3" \
+  -H 'Content-Type: application/json' \
+  -d '{"query":"database connection failures","input":["could not connect: Connection refused","Claim intake completed"],"top_n":2,"task_settings":{"return_documents":false}}'
+```
+
+`return_documents` must be inside `task_settings`. As a top-level field it is rejected with
+`validation_exception` by every non-`elasticsearch` inference service, which is what used to make
+the endpoint impossible to repoint.
 
 Confirm it is deployed, not merely defined. On a cold cluster the model is absent until first use,
 so this may report nothing until a query has run:

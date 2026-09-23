@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/logging';
 import type {
   LogPattern,
   SemanticLogSearchParams,
@@ -14,31 +13,22 @@ import type {
 import {
   DEFAULT_MAX_PATTERNS,
   DEFAULT_RANK_WINDOW,
-  MAX_RERANK_INPUT_LENGTH,
-  RERANK_ENDPOINT,
   RERANK_REQUEST_TIMEOUT_MS,
 } from '../../constants';
+import type { SemanticLogSearchDeps } from '../../types';
 import { ERROR_REASON } from '../../../../../common/services/semantic_log_search/constants';
 import { errorResult, SEARCH_PHASE, toFailureResult } from '../../results';
 import { collectCandidates, selectRerankCandidates } from './collect_candidates';
-import { MESSAGE_FIELD } from './columns';
+import { buildRerankInputs } from './rerank_input';
 import type { CountProbeResult, EsqlSearchScope } from './run_queries';
 import { runCountProbe } from './run_queries';
-
-function toRerankInput(pattern: LogPattern): string {
-  const sampleMessage =
-    typeof pattern.sample?.[MESSAGE_FIELD] === 'string'
-      ? String(pattern.sample[MESSAGE_FIELD])
-      : '';
-  const full = sampleMessage ? `${pattern.pattern} ${sampleMessage}` : pattern.pattern;
-  return full.length > MAX_RERANK_INPUT_LENGTH ? full.slice(0, MAX_RERANK_INPUT_LENGTH) : full;
-}
 
 /** Searches for log patterns matching a natural-language query using CATEGORIZE + inference RERANK. */
 export async function searchWithEsqlRerank(
   params: SemanticLogSearchParams,
-  logger: Logger
+  deps: SemanticLogSearchDeps
 ): Promise<SemanticLogSearchResult> {
+  const { logger, rerankInferenceId } = deps;
   const {
     esClient,
     target,
@@ -99,18 +89,21 @@ export async function searchWithEsqlRerank(
   try {
     const rerankResponse = await esClient.inference.rerank(
       {
-        inference_id: RERANK_ENDPOINT,
+        inference_id: rerankInferenceId,
         query: nlQuery,
-        input: capped.map(toRerankInput),
+        input: buildRerankInputs(capped),
         top_n: maxPatterns,
         // We never read the echoed text; suppress it to avoid transferring the full input back.
-        return_documents: false,
+        // Must stay inside `task_settings`: as a top-level field, non-`elasticsearch` inference
+        // services reject it with `validation_exception`.
+        task_settings: { return_documents: false },
       },
       { signal: abortSignal, requestTimeout: RERANK_REQUEST_TIMEOUT_MS }
     );
 
     // TODO: derive a "nothing relevant matched" signal from the top relevance_score and surface it
-    // as a tool warning. Needs a calibrated threshold; measure with the eval suite before shipping.
+    // as a tool warning. Needs a threshold per endpoint rather than one constant, since the score
+    // scale belongs to whichever endpoint `rerankInferenceId` names.
     const ranked = rerankResponse.rerank
       .slice()
       .sort((a, b) => b.relevance_score - a.relevance_score)

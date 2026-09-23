@@ -24,9 +24,12 @@ import { MESSAGE_CLASSES, QUERIES } from './sigevents_postgres_timeout';
  * different documents and the counts are extrapolated estimates. Expect run-to-run movement in
  * the document-weighted metrics that is not a change in ranking quality.
  *
- * `baseRate=10` over a 2-hour window is calibrated to cross the threshold, not guaranteed to:
- * confirm that `logRunManifest` reports more than 50 000 documents before reading anything into a
- * result from this corpus, and raise `baseRate` or widen the window if it does not.
+ * `baseRate=25` over a 2-hour window is what actually crosses the threshold: measured at 63 627
+ * in-window documents, giving a sampling probability of 0.5. The profile shipped `baseRate=10` for
+ * a while, which yields only about 24 900 documents, so `getSampleProbability` returned 1 and the
+ * corpus silently ran the single-pass path it exists to avoid. Roughly 2 500 documents arrive per
+ * `baseRate` unit on this scenario, so confirm `logRunManifest` reports more than 50 000 before
+ * reading anything into a result from this corpus rather than trusting the number here.
  *
  * This profile and the small one write the same labels to the same data stream, so an audit
  * cannot tell them apart and switching between them needs a re-seed. The `--clean` in
@@ -45,7 +48,7 @@ export const sigeventsPostgresTimeoutScale: CorpusProfile = {
   setupCommand: `node scripts/synthtrace sigevents \\
   --target=http://elastic:changeme@localhost:9220 \\
   --kibana=http://elastic:changeme@localhost:5620 \\
-  --scenarioOpts="scenario=postgres_timeout,seed=42,baseRate=10" \\
+  --scenarioOpts="scenario=postgres_timeout,seed=42,baseRate=25" \\
   --from=now-2h --to=now --clean`,
 
   messageClasses: MESSAGE_CLASSES,
