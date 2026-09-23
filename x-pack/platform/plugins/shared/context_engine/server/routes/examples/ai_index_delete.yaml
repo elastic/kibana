@@ -4,11 +4,13 @@ responses:
       application/json:
         examples:
           deleteAiIndexResponseExample:
+            summary: "AI Index deleted"
             description: "Example response after the AI Index entry is deleted"
             value:
               acknowledged: true
               errors: []
           deleteAiIndexPartialFailureExample:
+            summary: "Deleted with a cleanup error"
             description: "The entry was deleted but a best-effort cleanup step failed"
             value:
               acknowledged: true
@@ -19,6 +21,7 @@ responses:
       application/json:
         examples:
           notFoundExample:
+            summary: "AI Index not found"
             description: "No AI Index with the given id exists in the current space"
             value:
               statusCode: 404
@@ -29,6 +32,7 @@ responses:
       application/json:
         examples:
           managedExample:
+            summary: "Managed AI Index"
             description: "The AI Index is managed by a plugin and cannot be deleted"
             value:
               statusCode: 409

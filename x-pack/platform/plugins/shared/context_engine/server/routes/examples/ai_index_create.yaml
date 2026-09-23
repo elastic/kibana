@@ -3,6 +3,7 @@ requestBody:
     application/json:
       examples:
         createAiIndexRequestExample:
+          summary: "Create an AI Index"
           description: "Example request to create an AI Index attached to a data stream"
           value:
             id: customer_support
@@ -27,6 +28,7 @@ responses:
       application/json:
         examples:
           createAiIndexResponseExample:
+            summary: "AI Index created"
             description: "Example response after the AI Index is created"
             value:
               status: created
@@ -35,6 +37,7 @@ responses:
       application/json:
         examples:
           invalidDestExample:
+            summary: "Invalid dest"
             description: "The dest value does not follow the naming convention"
             value:
               statusCode: 400
@@ -45,6 +48,7 @@ responses:
       application/json:
         examples:
           forbiddenTraceExample:
+            summary: "Index trace lookup denied"
             description: "The caller lacks Elasticsearch index privileges to look up an index trace"
             value:
               statusCode: 403
@@ -55,6 +59,7 @@ responses:
       application/json:
         examples:
           alreadyExistsExample:
+            summary: "AI Index already exists"
             description: "An AI Index with the same id already exists"
             value:
               statusCode: 409

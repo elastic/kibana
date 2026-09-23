@@ -3,6 +3,7 @@ requestBody:
     application/json:
       examples:
         queryAiIndicesRequestExample:
+          summary: "Query with a parameter and a limit"
           description: "Example ES|QL query with a named parameter and a row limit"
           value:
             query: FROM ai-index-* | WHERE type == ?type | KEEP title, type, attributes | LIMIT 10
@@ -15,6 +16,7 @@ responses:
       application/json:
         examples:
           queryAiIndicesResponseExample:
+            summary: "Columns and rows"
             description: "Example response with column metadata and matching rows. `flattened` columns such as `attributes` are returned as objects."
             value:
               columns:
@@ -32,6 +34,7 @@ responses:
       application/json:
         examples:
           invalidQueryExample:
+            summary: "Unknown column"
             description: "The ES|QL query references a column that does not exist"
             value:
               statusCode: 400
@@ -42,6 +45,7 @@ responses:
       application/json:
         examples:
           forbiddenExample:
+            summary: "Missing index privileges"
             description: "The caller lacks Elasticsearch index privileges"
             value:
               statusCode: 403

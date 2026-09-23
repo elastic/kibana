@@ -4,6 +4,7 @@ responses:
       application/json:
         examples:
           getAiIndexResponseExample:
+            summary: "An AI Index"
             description: "Example response returning an AI Index by id"
             value:
               id: customer_support
@@ -31,6 +32,7 @@ responses:
       application/json:
         examples:
           notFoundExample:
+            summary: "AI Index not found"
             description: "No AI Index with the given id exists in the current space"
             value:
               statusCode: 404

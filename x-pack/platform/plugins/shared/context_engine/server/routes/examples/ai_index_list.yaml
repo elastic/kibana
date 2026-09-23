@@ -4,6 +4,7 @@ responses:
       application/json:
         examples:
           listAiIndicesResponseExample:
+            summary: "AI Indices the caller can read"
             description: "Example response listing the AI Indices the caller can read"
             value:
               ai_indices:

@@ -90,7 +90,13 @@ const signalTimeRangeSchema = schema.oneOf(
 
 // `oneOf` needs a tuple type, but `map()` returns a plain array.
 const improvementActionSchema = schema.oneOf(
-  IMPROVEMENT_ACTIONS.map((action) => schema.literal(action)) as [Type<ImprovementAction>]
+  IMPROVEMENT_ACTIONS.map((action) => schema.literal(action)) as [Type<ImprovementAction>],
+  {
+    meta: {
+      description:
+        'Add, edit, or remove a Knowledge Indicator (`*_ki`), a workflow automation (`*_workflow`), or a source (`*_source`).',
+    },
+  }
 );
 
 export const feedbackAnalysisSchema = schema.object(
@@ -119,7 +125,10 @@ export const feedbackAnalysisSchema = schema.object(
           },
         }),
       },
-      { defaultValue: { interval: DEFAULT_FEEDBACK_ANALYSIS_INTERVAL } }
+      {
+        defaultValue: { interval: DEFAULT_FEEDBACK_ANALYSIS_INTERVAL },
+        meta: { description: 'When the analysis runs.' },
+      }
     ),
     signal_time_range: signalTimeRangeSchema,
     signal_filter: schema.maybe(
@@ -143,6 +152,10 @@ export const feedbackAnalysisSchema = schema.object(
   {
     validate: ({ schedule, signal_time_range: signalTimeRange }) =>
       validateSignalWindowCoversInterval(schedule.interval, signalTimeRange),
+    meta: {
+      description:
+        'The recurring feedback analysis, which reads agent signals and proposes improvement actions for the AI Index.',
+    },
   }
 );
 
@@ -187,22 +200,25 @@ const aiIndexTraceSchema = schema.oneOf([
   }),
 ]);
 
-const aiIndexDestSchema = schema.object({
-  type: schema.oneOf([schema.literal('data_stream'), schema.literal('index')], {
-    meta: {
-      description:
-        'The type of the backing store. `data_stream` for a data stream, or `index` for an index.',
-    },
-  }),
-  value: schema.string({
-    minLength: 1,
-    maxLength: MAX_AI_INDEX_DEST_VALUE_LENGTH,
-    meta: {
-      description:
-        'The data stream or index (e.g. `ai-index-ds-foo`, `ai-index-idx-foo`) the AI Index is attached to. Must name a single data stream or index (no wildcards or comma-separated lists), match `type`, and start with `ai-index-ds-` (for `data_stream`) or `ai-index-idx-` (for `index`). The rest of the value must be a valid AI index id. System indices are not allowed.',
-    },
-  }),
-});
+const aiIndexDestSchema = schema.object(
+  {
+    type: schema.oneOf([schema.literal('data_stream'), schema.literal('index')], {
+      meta: {
+        description:
+          'The type of the backing store. `data_stream` for a data stream, or `index` for an index.',
+      },
+    }),
+    value: schema.string({
+      minLength: 1,
+      maxLength: MAX_AI_INDEX_DEST_VALUE_LENGTH,
+      meta: {
+        description:
+          'The data stream or index (e.g. `ai-index-ds-foo`, `ai-index-idx-foo`) the AI Index is attached to. Must name a single data stream or index (no wildcards or comma-separated lists), match `type`, and start with `ai-index-ds-` (for `data_stream`) or `ai-index-idx-` (for `index`). The rest of the value must be a valid AI Index id. System indices are not allowed.',
+      },
+    }),
+  },
+  { meta: { description: 'The data stream or index that backs the AI Index.' } }
+);
 
 const aiIndexAutomationSchema = schema.object({
   type: schema.literal('workflow'),
@@ -264,7 +280,7 @@ const aiIndexPropertiesSchema = {
     defaultValue: [],
     meta: {
       description:
-        'Trace sources linked to this AI index. A write replaces the whole array. Defaults to an empty array when omitted.',
+        'Trace sources linked to this AI Index. A write replaces the whole array. Defaults to an empty array when omitted.',
     },
   }),
 };
@@ -341,7 +357,7 @@ export const deleteAiIndexQuerySchema = schema.object({
     defaultValue: false,
     meta: {
       description:
-        'When true, also delete the backing data stream/index, which removes its Knowledge Indicators. Skipped when another AI index still uses the same dest. Defaults to false.',
+        'When true, also delete the backing data stream/index, which removes its Knowledge Indicators. Skipped when another AI Index still uses the same dest. Defaults to false.',
     },
   }),
   delete_automations: schema.boolean({
@@ -353,14 +369,17 @@ export const deleteAiIndexQuerySchema = schema.object({
 });
 
 const aiIndexDestResponseSchema = () =>
-  schema.object({
-    type: schema.oneOf([schema.literal('data_stream'), schema.literal('index')], {
-      meta: { description: 'The type of the backing store.' },
-    }),
-    value: schema.string({
-      meta: { description: 'The data stream or index the AI Index is attached to.' },
-    }),
-  });
+  schema.object(
+    {
+      type: schema.oneOf([schema.literal('data_stream'), schema.literal('index')], {
+        meta: { description: 'The type of the backing store.' },
+      }),
+      value: schema.string({
+        meta: { description: 'The data stream or index the AI Index is attached to.' },
+      }),
+    },
+    { meta: { description: 'The data stream or index that backs the AI Index.' } }
+  );
 
 const aiIndexAutomationResponseSchema = () =>
   schema.object({
@@ -370,61 +389,78 @@ const aiIndexAutomationResponseSchema = () =>
 
 const aiIndexSourceResponseSchema = () =>
   schema.object({
-    type: schema.oneOf([schema.literal('esql'), schema.literal('connector')]),
+    type: schema.oneOf([schema.literal('esql'), schema.literal('connector')], {
+      meta: { description: '`esql` for an ES|QL query, or `connector` for a data connector.' },
+    }),
     value: schema.string({
       meta: { description: 'An ES|QL query for `esql`, or a connector id for `connector`.' },
     }),
   });
 
 const feedbackAnalysisResponseSchema = () =>
-  schema.object({
-    enabled: schema.boolean({
-      meta: { description: 'Whether the recurring feedback analysis is desired to run.' },
-    }),
-    agent_id: schema.maybe(
-      schema.string({ meta: { description: 'Agent Builder agent id that runs the analysis.' } })
-    ),
-    schedule: schema.maybe(
-      schema.object({
-        interval: schema.string({
-          meta: { description: 'How often to analyze, for example `1h`.' },
-        }),
-      })
-    ),
-    signal_time_range: schema.maybe(
-      schema.oneOf([
-        schema.object({
-          type: schema.literal('relative'),
-          from: schema.string({
-            meta: { description: 'Date math relative to now, for example `now-30d`.' },
+  schema.object(
+    {
+      enabled: schema.boolean({
+        meta: { description: 'Whether the recurring feedback analysis is desired to run.' },
+      }),
+      agent_id: schema.maybe(
+        schema.string({ meta: { description: 'Agent Builder agent id that runs the analysis.' } })
+      ),
+      schedule: schema.maybe(
+        schema.object(
+          {
+            interval: schema.string({
+              meta: { description: 'How often to analyze, for example `1h`.' },
+            }),
+          },
+          { meta: { description: 'When the analysis runs.' } }
+        )
+      ),
+      signal_time_range: schema.maybe(
+        schema.oneOf([
+          schema.object({
+            type: schema.literal('relative'),
+            from: schema.string({
+              meta: { description: 'Date math relative to now, for example `now-30d`.' },
+            }),
           }),
-        }),
-        schema.object({
-          type: schema.literal('absolute'),
-          from: schema.string({
-            meta: { description: 'ISO 8601 date to analyze signals since.' },
+          schema.object({
+            type: schema.literal('absolute'),
+            from: schema.string({
+              meta: { description: 'ISO 8601 date to analyze signals since.' },
+            }),
           }),
-        }),
-      ])
-    ),
-    signal_filter: schema.maybe(
-      schema.string({ meta: { description: 'KQL narrowing which signals the analysis reads.' } })
-    ),
-    allowed_actions: schema.maybe(
-      // codeql[js/kibana/unbounded-array-in-schema] Response schema: validates server output, not request input
-      schema.arrayOf(improvementActionSchema, {
-        meta: { description: 'Improvement actions the analysis may propose.' },
-      })
-    ),
-  });
+        ])
+      ),
+      signal_filter: schema.maybe(
+        schema.string({ meta: { description: 'KQL narrowing which signals the analysis reads.' } })
+      ),
+      allowed_actions: schema.maybe(
+        // codeql[js/kibana/unbounded-array-in-schema] Response schema: validates server output, not request input
+        schema.arrayOf(improvementActionSchema, {
+          meta: { description: 'Improvement actions the analysis may propose.' },
+        })
+      ),
+    },
+    {
+      meta: {
+        description:
+          'The recurring feedback analysis, which reads agent signals and proposes improvement actions for the AI Index.',
+      },
+    }
+  );
 
 const aiIndexTraceWithQueryResponseSchema = () =>
   schema.object({
-    type: schema.oneOf([
-      schema.literal('elastic_agent'),
-      schema.literal('index'),
-      schema.literal('esql'),
-    ]),
+    type: schema.oneOf(
+      [schema.literal('elastic_agent'), schema.literal('index'), schema.literal('esql')],
+      {
+        meta: {
+          description:
+            '`elastic_agent` for an Agent Builder agent, `index` for an index or data stream name or pattern, or `esql` for an ES|QL query.',
+        },
+      }
+    ),
     value: schema.string({ meta: { description: 'The trace source value.' } }),
     query: schema.string({
       meta: { description: 'The ES|QL query derived from this trace source at read time.' },
@@ -467,14 +503,20 @@ export const aiIndexHttpItemResponseSchema = () =>
   });
 
 export const createAiIndexResponseSchema = () =>
-  schema.object({
-    status: schema.literal('created'),
-  });
+  schema.object(
+    {
+      status: schema.literal('created'),
+    },
+    { meta: { description: 'Confirms that the AI Index was created.' } }
+  );
 
 export const updateAiIndexResponseSchema = () =>
-  schema.object({
-    status: schema.literal('updated'),
-  });
+  schema.object(
+    {
+      status: schema.literal('updated'),
+    },
+    { meta: { description: 'Confirms that the AI Index was updated.' } }
+  );
 
 export const listAiIndexResponseSchema = () =>
   schema.object({

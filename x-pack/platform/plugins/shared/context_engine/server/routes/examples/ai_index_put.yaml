@@ -3,6 +3,7 @@ requestBody:
     application/json:
       examples:
         putAiIndexRequestExample:
+          summary: "Create or replace an AI Index"
           description: "Example request to create or fully replace an AI Index"
           value:
             description: Knowledge about customer support cases.
@@ -24,6 +25,7 @@ responses:
       application/json:
         examples:
           putAiIndexUpdatedExample:
+            summary: "AI Index updated"
             description: "Example response after an existing AI Index is replaced"
             value:
               status: updated
@@ -32,6 +34,7 @@ responses:
       application/json:
         examples:
           putAiIndexCreatedExample:
+            summary: "AI Index created"
             description: "Example response after a new AI Index is created"
             value:
               status: created
@@ -40,6 +43,7 @@ responses:
       application/json:
         examples:
           invalidDestExample:
+            summary: "Invalid dest"
             description: "The dest value does not follow the naming convention"
             value:
               statusCode: 400
@@ -50,6 +54,7 @@ responses:
       application/json:
         examples:
           forbiddenTraceExample:
+            summary: "Index trace lookup denied"
             description: "The caller lacks Elasticsearch index privileges to look up an index trace"
             value:
               statusCode: 403
@@ -60,6 +65,7 @@ responses:
       application/json:
         examples:
           managedExample:
+            summary: "Managed AI Index"
             description: "The AI Index is managed by a plugin and cannot be replaced"
             value:
               statusCode: 409

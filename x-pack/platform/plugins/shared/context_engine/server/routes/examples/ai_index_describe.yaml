@@ -4,6 +4,7 @@ responses:
       application/json:
         examples:
           describeAiIndexResponseExample:
+            summary: "Context block for an agent"
             description: "Example response with a context block for an agent"
             value:
               response: |-
@@ -63,6 +64,7 @@ responses:
       application/json:
         examples:
           tooLargeExample:
+            summary: "Response too large"
             description: "The field metadata for the backing indices exceeded the size limit"
             value:
               statusCode: 400
@@ -73,6 +75,7 @@ responses:
       application/json:
         examples:
           forbiddenExample:
+            summary: "Missing index privileges"
             description: "The caller lacks Elasticsearch index privileges"
             value:
               statusCode: 403
@@ -83,6 +86,7 @@ responses:
       application/json:
         examples:
           notFoundExample:
+            summary: "AI Index not found"
             description: "No AI Index with the given id exists in the current space"
             value:
               statusCode: 404
