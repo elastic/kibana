@@ -72,11 +72,17 @@ export const createDiscoveryCountCapEvaluator = (): Evaluator<
       };
     }
 
-    const discoveryCount =
-      output.adToolResult?.discoveryCount ??
-      output.workflow.validatedDiscoveryCount ??
-      output.insights?.length ??
-      0;
+    // The cap guards against EXCESS, so every observable count is held to it:
+    // taking the first non-null would let a run report 7 via the tool count
+    // while rendering 15 insights (12-cap) and pass. The max of the available
+    // sources is the honest worst case.
+    const observedCounts = [
+      output.adToolResult?.discoveryCount,
+      output.workflow.validatedDiscoveryCount,
+      output.insights?.length,
+    ].filter((count): count is number => typeof count === 'number');
+
+    const discoveryCount = observedCounts.length > 0 ? Math.max(...observedCounts) : 0;
 
     if (discoveryCount > maxDiscoveryCount) {
       return {

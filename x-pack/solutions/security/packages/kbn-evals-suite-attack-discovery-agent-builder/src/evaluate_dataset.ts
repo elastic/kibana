@@ -1109,6 +1109,8 @@ export const buildWorkflow = ({
 const WAIT_FOR_VALIDATION_PHASE_TIMEOUT_MS = 180_000;
 const WAIT_FOR_VALIDATION_PHASE_INTERVAL_MS = 5_000;
 
+export { WAIT_FOR_VALIDATION_PHASE_TIMEOUT_MS, WAIT_FOR_VALIDATION_PHASE_INTERVAL_MS };
+
 /**
  * Maps a pipeline `validated_discoveries` entry (snake_case API shape with
  * `alert_ids`, plus `title`/`summary`-style prose fields) into the harness
@@ -1135,12 +1137,43 @@ export const insightsFromValidatedDiscoveries = (
   });
 };
 
+interface ExecutionTrackingWorkflowSnapshot {
+  workflow_id?: string;
+  workflow_run_id?: string;
+}
+
 interface ExecutionTrackingResponse {
-  generation?: { workflow_id?: string } | null;
-  validation?: unknown;
+  generation?: ExecutionTrackingWorkflowSnapshot | null;
+  validation?: ExecutionTrackingWorkflowSnapshot | null;
 }
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/**
+ * A non-null `tracking.validation` means the validation phase has STARTED (the
+ * product writes the workflow tracking into the event log before the workflow
+ * runs — see `writeValidationStartedEvent`), not that it has finished. Reading
+ * the pipeline at that point can snapshot it mid-validation, where
+ * `validated_discoveries` is absent or incomplete. Probing the validation
+ * workflow run itself is the product's own completion signal
+ * (`pollForWorkflowCompletion` reads the same engine status); the run's status
+ * must reach a terminal value before the single pipeline snapshot below is
+ * safe to take.
+ */
+const VALIDATION_TERMINAL_STATUSES = new Set(['completed', 'failed', 'cancelled']);
+
+// workflow_run_id -> terminal status observed. Cached so a timed-out poll does
+// not re-probe the same run.
+const validationRunTerminal = new Map<string, boolean>();
+
+const isValidationFinished = (validation: unknown): boolean => {
+  if (validation == null || typeof validation !== 'object') return false;
+  const runId = (validation as ExecutionTrackingWorkflowSnapshot).workflow_run_id;
+  // A snapshot without a run id carries nothing beyond non-null to observe, so
+  // treat "tracked" as done (the pre-fix behavior for that legacy shape).
+  if (typeof runId !== 'string' || runId.length === 0) return true;
+  return validationRunTerminal.get(runId) === true;
+};
 
 export const waitForValidationPhase = async ({
   fetch,
@@ -1151,25 +1184,48 @@ export const waitForValidationPhase = async ({
 }): Promise<ExecutionTrackingResponse> => {
   const deadline = Date.now() + WAIT_FOR_VALIDATION_PHASE_TIMEOUT_MS;
   let lastError: unknown;
+  let lastTracking: ExecutionTrackingResponse | null = null;
   for (;;) {
-    let tracking: ExecutionTrackingResponse | null = null;
+    let tracking: ExecutionTrackingResponse | null = lastTracking;
     try {
       tracking = (await fetch(`/internal/attack_discovery/executions/${executionId}/tracking`, {
         method: 'GET',
         headers: { 'elastic-api-version': '1' },
       })) as ExecutionTrackingResponse;
+      lastTracking = tracking;
     } catch (error) {
       lastError = error;
     }
     if (tracking && tracking.validation != null) {
-      return tracking;
+      if (isValidationFinished(tracking.validation)) {
+        return tracking;
+      }
+      // Validation has started but its workflow run is still in flight. Probe
+      // the run status the product's own poller reads; once terminal, the next
+      // loop pass returns the (re-fetched) tracking snapshot.
+      const runId = tracking.validation.workflow_run_id;
+      if (runId) {
+        try {
+          const run = (await fetch(`/api/workflows/executions/${encodeURIComponent(runId)}`, {
+            method: 'GET',
+            headers: { 'elastic-api-version': '2023-10-31' },
+          })) as { status?: string } | null;
+          if (run?.status && VALIDATION_TERMINAL_STATUSES.has(run.status)) {
+            validationRunTerminal.set(runId, true);
+          }
+        } catch {
+          // Status probe is best-effort: a 404 (run not indexed yet) or a
+          // transient failure just means "not terminal yet" — keep polling.
+        }
+      }
     }
     if (Date.now() >= deadline) {
-      if (tracking) {
-        // Timed out still waiting: return the last snapshot rather than failing
-        // the run — the caller reads whatever pipeline state exists, and the
-        // evaluators score that honestly.
-        return tracking;
+      if (lastTracking) {
+        // Timed out still waiting: return the LAST SUCCESSFUL snapshot rather
+        // than failing the run — a final failed GET must not discard an
+        // earlier usable generation snapshot. The caller reads whatever
+        // pipeline state exists, and the evaluators score that honestly.
+        return lastTracking;
       }
       throw new Error(
         `Attack Discovery execution ${executionId} never became trackable within ${WAIT_FOR_VALIDATION_PHASE_TIMEOUT_MS}ms`,

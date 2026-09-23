@@ -53,16 +53,42 @@ const buildBulkResponse = (
  */
 const buildBulk = (rejectedCall: 1 | 2 | undefined) => {
   let call = 0;
-  return jest.fn().mockImplementation(({ operations }: { operations: unknown[] }) => {
-    call += 1;
-    const count = operations.length / 2;
-    const opKey = call === 2 ? 'create' : 'index';
-    return Promise.resolve(
-      call === rejectedCall
-        ? buildBulkResponse(count, [REJECTED_DOCUMENT], opKey)
-        : buildBulkResponse(count, [], opKey)
-    );
-  });
+  return jest
+    .fn()
+    .mockImplementation(({ operations }: { operations: Array<Record<string, unknown>> }) => {
+      call += 1;
+      const count = operations.length / 2;
+      // Read the op the caller actually submitted — the submitted op IS the
+      // contract under test (raw events go to data streams, which reject
+      // `index`). Simulating the data-stream rejection for a submitted `index`
+      // op keeps the mock honest: reverting production to `index` now turns
+      // these tests red instead of passing vacuously through a call-count key.
+      const opKey =
+        operations.length > 0 && Object.prototype.hasOwnProperty.call(operations[0], 'create')
+          ? 'create'
+          : 'index';
+      if (call === 2 && opKey !== 'create') {
+        // Data streams reject non-create writes outright; mirror that instead of
+        // answering `create`-shaped success for an `index` request.
+        return Promise.resolve(
+          buildBulkResponse(
+            count,
+            [
+              {
+                id: REJECTED_DOCUMENT.id,
+                reason: 'only write ops with an op_type of create are allowed in data streams',
+              },
+            ],
+            'index'
+          )
+        );
+      }
+      return Promise.resolve(
+        call === rejectedCall
+          ? buildBulkResponse(count, [REJECTED_DOCUMENT], opKey)
+          : buildBulkResponse(count, [], opKey)
+      );
+    });
 };
 
 const buildEsClient = (bulk: jest.Mock): EsClient => ({ bulk } as unknown as EsClient);
@@ -103,6 +129,29 @@ describe('seedAd2ScenarioProfile', () => {
     expect(summary.alertCount).toBe(AD2_DENSE_TARGET_ALERTS);
     expect(summary.runMarker).toBe(DENSE_MARKER);
     expect(bulk).toHaveBeenCalledTimes(2);
+  });
+
+  // The raw-event write must submit `create` ops: raw events go to data
+  // streams, which reject `index` outright. Asserting the SUBMITTED op (not
+  // the call number) is what makes reverting production to `index` a red
+  // test instead of a vacuous green.
+  it('submits create ops for the raw-event bulk request', async () => {
+    const bulk = buildBulk(undefined);
+
+    await seedAd2ScenarioProfile(buildEsClient(bulk), buildFetch(), {
+      profile: 'dense',
+      runMarker: DENSE_MARKER,
+    });
+
+    const rawEventOperations = (bulk as jest.Mock).mock.calls[1][0].operations as Array<
+      Record<string, unknown>
+    >;
+    expect(rawEventOperations.length).toBeGreaterThan(0);
+    // Flat op form: the action descriptor and the document alternate, so every
+    // even position carries exactly the `create` action.
+    for (let i = 0; i < rawEventOperations.length; i += 2) {
+      expect(Object.keys(rawEventOperations[i])).toEqual(['create']);
+    }
   });
 });
 

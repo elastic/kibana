@@ -18,6 +18,7 @@ import {
   insightsFromValidatedDiscoveries,
   trackedStageKeys,
   waitForValidationPhase,
+  WAIT_FOR_VALIDATION_PHASE_TIMEOUT_MS,
   trackedStages,
 } from './evaluate_dataset';
 import { createAdToolResultEvaluator } from './evaluators/ad_tool_result_evaluator';
@@ -1405,6 +1406,51 @@ describe('slow-path handoff (#293046): waitForValidationPhase', () => {
     expect(fetch).toHaveBeenCalledTimes(1);
   });
 
+  // A non-null `tracking.validation` means the validation phase has STARTED,
+  // not finished (the product writes the tracking before the workflow runs).
+  // Returning at that point reads the pipeline mid-validation, where
+  // `validated_discoveries` can be absent. The poller must hold until the
+  // validation workflow run itself reports a terminal status.
+  it('keeps polling while the validation workflow run is still in flight, then returns once it is terminal', async () => {
+    jest.useFakeTimers();
+    try {
+      const fetch = jest
+        .fn()
+        // tracking polls: validation tracked, run still going
+        .mockResolvedValueOnce(trackingWith({ workflow_id: 'wf-val', workflow_run_id: 'run-1' }))
+        // run status probe: still running
+        .mockResolvedValueOnce({ status: 'running' })
+        // tracking poll again
+        .mockResolvedValueOnce(trackingWith({ workflow_id: 'wf-val', workflow_run_id: 'run-1' }))
+        // run status probe: terminal
+        .mockResolvedValueOnce({ status: 'completed' })
+        // final tracking poll returns the same snapshot
+        .mockResolvedValue(trackingWith({ workflow_id: 'wf-val', workflow_run_id: 'run-1' }));
+      const pending = waitForValidationPhase({ fetch, executionId: 'exec-1' });
+      const settled = await jest.advanceTimersByTimeAsync(15_000).then(() => pending);
+
+      expect(settled.validation).toMatchObject({ workflow_run_id: 'run-1' });
+      const trackingCalls = fetch.mock.calls.filter((c: unknown[]) =>
+        String(c[0]).includes('/tracking')
+      );
+      expect(trackingCalls.length).toBeGreaterThanOrEqual(3);
+      // The run-status endpoint was consulted, not just the tracking snapshot.
+      expect(
+        fetch.mock.calls.some((c: unknown[]) => String(c[0]).includes('/api/workflows/executions/'))
+      ).toBe(true);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('returns a tracking snapshot whose validation has no run id (nothing beyond non-null is observable)', async () => {
+    const fetch = jest.fn().mockResolvedValue(trackingWith({ workflow_id: 'wf-val' }));
+    const tracking = await waitForValidationPhase({ fetch, executionId: 'exec-1' });
+
+    expect(tracking.validation).toEqual({ workflow_id: 'wf-val' });
+    expect(fetch).toHaveBeenCalledTimes(1);
+  });
+
   it('polls until validation appears (handoff race: generation still running)', async () => {
     jest.useFakeTimers();
     try {
@@ -1445,9 +1491,37 @@ describe('slow-path handoff (#293046): waitForValidationPhase', () => {
     try {
       const fetch = jest.fn().mockResolvedValue(trackingWith(null));
       const pending = waitForValidationPhase({ fetch, executionId: 'exec-1' });
-      const settled = await jest.advanceTimersByTimeAsync(180_000).then(() => pending);
+      const settled = await jest
+        .advanceTimersByTimeAsync(WAIT_FOR_VALIDATION_PHASE_TIMEOUT_MS)
+        .then(() => pending);
 
       expect(settled.validation).toBeNull();
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  // A final failed GET (e.g. a transient 404 at the deadline) must not discard
+  // an earlier usable snapshot: the loop retains the last successful response
+  // across iterations, so the deadline path returns it instead of throwing
+  // `never became trackable` and aborting the whole eval run.
+  it('returns the earlier snapshot when the last tracking GET fails at the deadline', async () => {
+    jest.useFakeTimers();
+    try {
+      const fetch = jest
+        .fn()
+        .mockResolvedValueOnce(trackingWith(null))
+        .mockImplementation(async () => {
+          throw new Error('404 not indexed');
+        });
+      const pending = waitForValidationPhase({ fetch, executionId: 'exec-1' }).catch(
+        (error: Error) => error
+      );
+      await jest.advanceTimersByTimeAsync(WAIT_FOR_VALIDATION_PHASE_TIMEOUT_MS);
+      const settled = await pending;
+
+      expect(settled).not.toBeInstanceOf(Error);
+      expect(settled).toMatchObject({ generation: { workflow_id: 'wf-gen' } });
     } finally {
       jest.useRealTimers();
     }

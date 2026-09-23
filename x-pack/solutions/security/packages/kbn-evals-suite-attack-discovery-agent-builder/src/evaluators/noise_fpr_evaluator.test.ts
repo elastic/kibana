@@ -86,6 +86,31 @@ describe('noise FPR evaluators', () => {
     expect(result.score).toBe(0);
   });
 
+  // The cap guards against excess, so EVERY observable count is held to it —
+  // not just the first non-null one. A run reporting 7 via the tool count while
+  // rendering 15 agent-authored insights must fail the 12 cap.
+  it('DiscoveryCountCap takes the largest available count, not the first (tool count under cap, insights over)', async () => {
+    const evaluator = createDiscoveryCountCapEvaluator();
+    const output = baseOutput();
+    output.adToolResult = { status: 'completed', discoveryCount: 7 };
+    output.insights = Array.from({ length: 15 }, (_, i) => ({
+      title: `Insight ${i}`,
+      summaryMarkdown: 'summary',
+      detailsMarkdown: 'details',
+      alertIds: [`alert-${i}`],
+    }));
+
+    const result = await evaluator.evaluate({
+      input: {} as never,
+      output,
+      expected: { expectedToolPath: [], expectedWorkflowStages: [], maxDiscoveryCount: 12 },
+      metadata: { alertCount: 178, fixture: 'full-profile' },
+    });
+
+    expect(result.score).toBe(0);
+    expect(result.metadata).toMatchObject({ discoveryCount: 15, maxDiscoveryCount: 12 });
+  });
+
   it('MinValidatedDiscovery passes when validated discoveries meet the floor', async () => {
     const evaluator = createMinValidatedDiscoveryEvaluator();
     const result = await evaluator.evaluate({
