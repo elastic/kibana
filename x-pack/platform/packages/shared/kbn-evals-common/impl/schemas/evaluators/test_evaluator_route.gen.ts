@@ -38,7 +38,11 @@ export const TestEvaluatorResponse = lazySchema(() =>
         /**
          * Whether a higher score is an improvement (`maximize`), a lower score is an improvement (`minimize`), or the score cannot be compared across arms at all (`neutral`).
          */
-        direction: z.enum(['maximize', 'minimize', 'neutral']),
+        direction: z
+          .enum(['maximize', 'minimize', 'neutral'])
+          .describe(
+            'Whether a higher score is an improvement (`maximize`), a lower score is an improvement (`minimize`), or the score cannot be compared across arms at all (`neutral`).'
+          ),
         model: Model.optional(),
       }),
       scores: z

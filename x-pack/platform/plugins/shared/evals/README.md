@@ -178,7 +178,7 @@ Other plugins can contribute their own production feature as an additional targe
 
 All routes are internal (`elastic-api-version: 1`). Read routes require the `read_evals` privilege; write routes require `manage_evals`.
 
-- **Experiments** — list, detail, scores, dataset-level examples, and statistical comparison of two experiments
+- **Experiments** — list, detail, scores, and statistical comparison of two experiments. Dataset-level examples are returned as one unpaginated group with eager score and evaluator details but without complete inputs or outputs. Input/output previews are bounded to 2,048 characters, and complete input and output are retrieved for one example repetition on demand.
 - **Experiment execution (Workflows)** — launch a run, save it as a reusable workflow, preview the generated YAML, list run templates, and poll or cancel a run. Requires an Enterprise license; otherwise returns `501`.
 - **Datasets** — full CRUD for datasets and their examples, plus a bulk upsert endpoint. The listing accepts `tags` and `maturity` filters and returns facet counts for both (see [Dataset tags and maturity](#dataset-tags-and-maturity)). Supports remote forwarding to a configured golden-cluster Kibana.
 - **Evaluators** — `/internal/evals/evaluators` lists every evaluator available in the space and creates, reads, updates, or deletes user-defined ones. Built-in names cannot be created, updated, or deleted, and cannot be used for a draft; each returns `409`. Four action routes operate on traces, and they do not all sit under the same path segment:
