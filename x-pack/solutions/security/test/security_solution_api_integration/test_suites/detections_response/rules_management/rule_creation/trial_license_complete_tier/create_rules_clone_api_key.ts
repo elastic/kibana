@@ -48,7 +48,7 @@ export default ({ getService }: FtrProviderContext) => {
       await deleteAllRules(supertest, log);
     });
 
-    const createRuleWithApiKeyAuth = async (cloneHeaderValue?: string) => {
+    const createRuleWithApiKeyAuth = async (cloneHeaderValue?: string, enabled: boolean = true) => {
       // A key created without role descriptors inherits the creating user's privileges
       const apiKey = await es.security.createApiKey({ name: `de-borrowed-key-${Date.now()}` });
 
@@ -62,9 +62,7 @@ export default ({ getService }: FtrProviderContext) => {
         void request.set(ALERTING_CLONE_API_KEY_HEADER, cloneHeaderValue);
       }
 
-      const { body: rule } = await request
-        .send(getCustomQueryRuleParams({ enabled: true }))
-        .expect(200);
+      const { body: rule } = await request.send(getCustomQueryRuleParams({ enabled })).expect(200);
 
       return { rule, apiKey };
     };
@@ -90,6 +88,32 @@ export default ({ getService }: FtrProviderContext) => {
       expect(await getApiKeyCreatedByUser(rule.id)).toBe(true);
 
       await es.security.invalidateApiKey({ ids: [apiKey.id] });
+    });
+
+    // A rule created disabled stores no API key and a null ownership. Enabling it later must
+    // still honor the borrowed-key declaration and clone a framework-managed key, instead of
+    // persisting the caller credential. This is the install-disabled-then-enable path Agent
+    // Builder / AlertZero uses.
+    it('stores a framework-managed API key when a rule created disabled is later enabled with the header set', async () => {
+      const { rule, apiKey } = await createRuleWithApiKeyAuth('true', false);
+
+      // Disabled create mints no key: ownership is null, not false
+      expect(await getApiKeyCreatedByUser(rule.id)).toBe(null);
+
+      await supertestWithoutAuth
+        .patch(DETECTION_ENGINE_RULES_URL)
+        .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '2023-10-31')
+        .set('Authorization', `ApiKey ${apiKey.encoded}`)
+        .set(ALERTING_CLONE_API_KEY_HEADER, 'true')
+        .send({ rule_id: rule.rule_id, enabled: true })
+        .expect(200);
+
+      expect(await getApiKeyCreatedByUser(rule.id)).toBe(false);
+
+      // The borrowed caller key going away must not affect the rule: it runs on its own cloned key
+      await es.security.invalidateApiKey({ ids: [apiKey.id] });
+      await waitForRuleSuccess({ supertest, log, id: rule.id });
     });
   });
 };
