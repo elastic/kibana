@@ -185,6 +185,16 @@ describe('DENSE_VECTOR Autocomplete', () => {
         mockCallbacks
       );
     });
+
+    // A backtick-quoted target name may contain a comma; a text-based comma scan would
+    // false-positive here and drop the WITH continuation. The AST-based check avoids this.
+    test('still offers WITH after a target whose quoted name contains a comma', async () => {
+      await expectDenseVectorSuggestions(
+        'from a | dense_vector `my,vec` = textField ',
+        { contains: [withCompleteItem.text] },
+        mockCallbacks
+      );
+    });
   });
 
   describe('suffix = "..." ON form', () => {

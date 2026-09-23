@@ -147,11 +147,17 @@ export async function autocomplete(
       }
 
       // The user may type a comma after a named target even though autocomplete won't offer one.
-      if (
-        denseVectorCommand.targetField !== undefined &&
-        getTextAfterCommandKeyword(query, denseVectorCommand, cursorPosition).includes(',')
-      ) {
-        return [newLineCompleteItem, pipeCompleteItem];
+      // Strip backtick-quoted identifiers before scanning for a comma so that a target name
+      // such as `my,vec` does not trigger the guard when there is no actual list separator.
+      if (denseVectorCommand.targetField !== undefined) {
+        const textAfterKeyword = getTextAfterCommandKeyword(
+          query,
+          denseVectorCommand,
+          cursorPosition
+        );
+        if (textAfterKeyword.replace(/`[^`]*`/g, '').includes(',')) {
+          return [newLineCompleteItem, pipeCompleteItem];
+        }
       }
 
       const suggestions = await suggestFields(getFieldListExpressions(denseVectorCommand), {
