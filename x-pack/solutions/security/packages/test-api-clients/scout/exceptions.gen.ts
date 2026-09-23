@@ -23,6 +23,10 @@ import { encodePathParams, replaceParams } from '@kbn/openapi-common/shared';
 import { stringify as stringifyQuery } from 'query-string';
 
 import type {
+  BulkDeleteExceptionListsRequestBodyInput,
+  BulkDeleteExceptionListsResponse,
+} from '@kbn/securitysolution-exceptions-common/api/bulk_delete_exception_list/bulk_delete_exception_list.gen';
+import type {
   CreateExceptionListRequestBodyInput,
   CreateExceptionListResponse,
 } from '@kbn/securitysolution-exceptions-common/api/create_exception_list/create_exception_list.gen';
@@ -117,6 +121,48 @@ export interface ScoutApiRequestOptions<
 }
 
 const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => ({
+  /**
+      * Perform a bulk action on exception lists. Currently supports the `delete` action,
+which deletes multiple exception lists by their saved object `id`. Lists that are
+referenced by one or more detection rules cannot be deleted; unlink the list from
+all rules before retrying.
+
+The reference check is provided by the Security Solution plugin and requires the
+caller to have detection rule read access. A caller who holds the `exceptions` Kibana
+privilege but lacks detection rule read access will receive a per-list error for every
+list in the request, even when no rules reference those lists, because
+the endpoint cannot verify the absence of references. The list is not deleted in
+that case.
+
+The reference check searches only within the caller's current Kibana space. A rule
+in another space that references a space-agnostic list is not detected and does not
+block the deletion. Cross-space reference checking is deferred to a future release.
+
+      */
+  async bulkDeleteExceptionLists<TResponseType extends ScoutResponseType = 'json'>(
+    props: BulkDeleteExceptionListsProps,
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<
+    ApiClientResponse<ScoutResponseBody<TResponseType, BulkDeleteExceptionListsResponse>>
+  > {
+    const basePath =
+      options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
+    const path = `${basePath}/api/exception_lists/_bulk_action`;
+
+    return apiClient.post<ScoutResponseBody<TResponseType, BulkDeleteExceptionListsResponse>>(
+      path,
+      {
+        headers: {
+          'kbn-xsrf': 'true',
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+          [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+          ...options.headers,
+        },
+        body: props.body,
+        responseType: options.responseType ?? 'json',
+      }
+    );
+  },
   /**
       * An exception list groups exception items and can be associated with detection rules. You can assign exception lists to multiple detection rules.
 > info
@@ -534,6 +580,9 @@ export function SecuritySolutionScoutApiServiceProvider(apiClient: ApiClientFixt
   return securitySolutionScoutApiServiceFactory(apiClient);
 }
 
+export interface BulkDeleteExceptionListsProps {
+  body: BulkDeleteExceptionListsRequestBodyInput;
+}
 export interface CreateExceptionListProps {
   body: CreateExceptionListRequestBodyInput;
 }
