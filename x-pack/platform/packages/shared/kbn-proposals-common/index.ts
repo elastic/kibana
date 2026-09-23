@@ -38,6 +38,8 @@ export {
   isAwaitingDecision,
   isExpired,
   listProposalsQuerySchema,
+  MAX_PROPOSALS_PAGE_OFFSET,
+  MAX_PROPOSALS_PAGE_SIZE,
   proposalFiltersSchema,
   proposalCategorySchema,
   proposalConfidenceSchema,
