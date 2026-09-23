@@ -108,7 +108,7 @@ export async function overwriteRules({
   });
 
   const successIds = new Set(successfulIds);
-  const { errors: toggleErrors, failedIds } = await toggleImportedEnabled({
+  const { errors: toggleErrors, failedIds } = await toggleState({
     rulesClient,
     pending,
     enableIds: toEnable.filter((id) => successIds.has(id)),
@@ -138,7 +138,7 @@ export async function overwriteRules({
   return { successes, errors };
 }
 
-const toggleImportedEnabled = async ({
+const toggleState = async ({
   rulesClient,
   pending,
   enableIds,
@@ -151,52 +151,46 @@ const toggleImportedEnabled = async ({
 }): Promise<{ errors: ImportRuleError[]; failedIds: Set<string> }> => {
   const errors: ImportRuleError[] = [];
   const failedIds = new Set<string>();
+  const fail = (id: string, message: string) => {
+    if (failedIds.has(id)) {
+      return;
+    }
+    failedIds.add(id);
+    const source = pending.get(id);
+    if (source != null) {
+      errors.push(createRuleImportErrorObject({ ruleId: source.rule_id, message }));
+    }
+  };
 
   if (enableIds.length > 0) {
-    const { errors: enableErrors, taskIdsFailedToBeEnabled } = await rulesClient.bulkEnableRules({
-      ids: enableIds,
-    });
-    for (const err of enableErrors) {
-      failedIds.add(err.rule.id);
-      const source = pending.get(err.rule.id);
-      if (source != null) {
-        errors.push(
-          createRuleImportErrorObject({
-            ruleId: source.rule_id,
-            message: err.message,
-          })
-        );
+    try {
+      const { errors: enableErrors, taskIdsFailedToBeEnabled } = await rulesClient.bulkEnableRules({
+        ids: enableIds,
+      });
+      for (const err of enableErrors) {
+        fail(err.rule.id, err.message);
       }
-    }
-    // Track tasks that failed to enable from TM.bulkEnable().
-    for (const id of taskIdsFailedToBeEnabled) {
-      if (!failedIds.has(id)) {
-        failedIds.add(id);
-        const source = pending.get(id);
-        if (source != null) {
-          errors.push(
-            createRuleImportErrorObject({
-              ruleId: source.rule_id,
-              message: 'Failed to enable task',
-            })
-          );
-        }
+      for (const id of taskIdsFailedToBeEnabled) {
+        fail(id, 'Failed to enable task');
+      }
+    } catch (e) {
+      const message = e instanceof Error ? e.message : String(e);
+      for (const id of enableIds) {
+        fail(id, message);
       }
     }
   }
 
   if (disableIds.length > 0) {
-    const { errors: disableErrors } = await rulesClient.bulkDisableRules({ ids: disableIds });
-    for (const err of disableErrors) {
-      failedIds.add(err.rule.id);
-      const source = pending.get(err.rule.id);
-      if (source != null) {
-        errors.push(
-          createRuleImportErrorObject({
-            ruleId: source.rule_id,
-            message: err.message,
-          })
-        );
+    try {
+      const { errors: disableErrors } = await rulesClient.bulkDisableRules({ ids: disableIds });
+      for (const err of disableErrors) {
+        fail(err.rule.id, err.message);
+      }
+    } catch (e) {
+      const message = e instanceof Error ? e.message : String(e);
+      for (const id of disableIds) {
+        fail(id, message);
       }
     }
   }

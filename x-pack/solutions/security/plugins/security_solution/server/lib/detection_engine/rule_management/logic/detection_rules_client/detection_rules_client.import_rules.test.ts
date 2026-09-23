@@ -792,4 +792,126 @@ describe('detectionRulesClient.importRules', () => {
       }),
     ]);
   });
+
+  it('overwrite branch: a rejected bulk enable only fails its rules and continues disable and create', async () => {
+    const toEnable = {
+      ...getRulesSchemaMock(),
+      id: 'enable-id',
+      rule_id: 'enable-rule',
+      enabled: false,
+    };
+    const toDisable = {
+      ...getRulesSchemaMock(),
+      id: 'disable-id',
+      rule_id: 'disable-rule',
+      enabled: true,
+    };
+    const unchanged = {
+      ...getRulesSchemaMock(),
+      id: 'unchanged-id',
+      rule_id: 'unchanged-rule',
+      enabled: true,
+    };
+    (findInstalledRulesBySignatureIds as jest.Mock).mockResolvedValueOnce({
+      'enable-rule': toEnable,
+      'disable-rule': toDisable,
+      'unchanged-rule': unchanged,
+    });
+    rulesClient.bulkUpdateRules.mockResolvedValueOnce({
+      successfulIds: [toEnable.id, toDisable.id, unchanged.id],
+      errors: [],
+      total: 3,
+    });
+    rulesClient.bulkEnableRules.mockRejectedValueOnce(new Error('enable exploded'));
+    rulesClient.bulkCreateRules.mockImplementationOnce(async (args) => ({
+      successfulIds: args.rules.map((rule) => (rule.options as { id: string }).id),
+      errors: [],
+      total: args.rules.length,
+    }));
+
+    const { successes, errors } = await subject.importRules({
+      allowMissingConnectorSecrets: false,
+      overwriteRules: true,
+      rules: [
+        { ...getImportRulesSchemaMock(), rule_id: 'enable-rule', enabled: true },
+        { ...getImportRulesSchemaMock(), rule_id: 'disable-rule', enabled: false },
+        { ...getImportRulesSchemaMock(), rule_id: 'unchanged-rule', enabled: true },
+        { ...getImportRulesSchemaMock(), rule_id: 'new-rule', enabled: false },
+      ],
+    });
+
+    expect(rulesClient.bulkDisableRules).toHaveBeenCalledWith({ ids: [toDisable.id] });
+    expect(rulesClient.bulkCreateRules).toHaveBeenCalledTimes(1);
+    expect(successes.map(({ rule_id: ruleId }) => ruleId).sort()).toEqual([
+      'disable-rule',
+      'new-rule',
+      'unchanged-rule',
+    ]);
+    expect(errors).toEqual([
+      expect.objectContaining({
+        error: expect.objectContaining({ ruleId: 'enable-rule', message: 'enable exploded' }),
+      }),
+    ]);
+  });
+
+  it('overwrite branch: a rejected bulk disable only fails its rules and preserves other work', async () => {
+    const toEnable = {
+      ...getRulesSchemaMock(),
+      id: 'enable-id',
+      rule_id: 'enable-rule',
+      enabled: false,
+    };
+    const toDisable = {
+      ...getRulesSchemaMock(),
+      id: 'disable-id',
+      rule_id: 'disable-rule',
+      enabled: true,
+    };
+    const unchanged = {
+      ...getRulesSchemaMock(),
+      id: 'unchanged-id',
+      rule_id: 'unchanged-rule',
+      enabled: true,
+    };
+    (findInstalledRulesBySignatureIds as jest.Mock).mockResolvedValueOnce({
+      'enable-rule': toEnable,
+      'disable-rule': toDisable,
+      'unchanged-rule': unchanged,
+    });
+    rulesClient.bulkUpdateRules.mockResolvedValueOnce({
+      successfulIds: [toEnable.id, toDisable.id, unchanged.id],
+      errors: [],
+      total: 3,
+    });
+    rulesClient.bulkDisableRules.mockRejectedValueOnce(new Error('disable exploded'));
+    rulesClient.bulkCreateRules.mockImplementationOnce(async (args) => ({
+      successfulIds: args.rules.map((rule) => (rule.options as { id: string }).id),
+      errors: [],
+      total: args.rules.length,
+    }));
+
+    const { successes, errors } = await subject.importRules({
+      allowMissingConnectorSecrets: false,
+      overwriteRules: true,
+      rules: [
+        { ...getImportRulesSchemaMock(), rule_id: 'enable-rule', enabled: true },
+        { ...getImportRulesSchemaMock(), rule_id: 'disable-rule', enabled: false },
+        { ...getImportRulesSchemaMock(), rule_id: 'unchanged-rule', enabled: true },
+        { ...getImportRulesSchemaMock(), rule_id: 'new-rule', enabled: false },
+      ],
+    });
+
+    expect(rulesClient.bulkEnableRules).toHaveBeenCalledWith({ ids: [toEnable.id] });
+    expect(rulesClient.bulkCreateRules).toHaveBeenCalledTimes(1);
+    expect(successes.map(({ rule_id: ruleId }) => ruleId).sort()).toEqual([
+      'enable-rule',
+      'new-rule',
+      'unchanged-rule',
+    ]);
+    expect(errors).toEqual([
+      expect.objectContaining({
+        error: expect.objectContaining({ ruleId: 'disable-rule', message: 'disable exploded' }),
+      }),
+    ]);
+  });
 });
