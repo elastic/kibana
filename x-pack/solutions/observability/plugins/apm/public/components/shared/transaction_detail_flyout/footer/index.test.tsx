@@ -54,6 +54,7 @@ describe('TransactionDetailFlyoutFooter', () => {
     expect(button).toHaveTextContent('Open traces in Discover');
     expect(button).toHaveAttribute('data-ebt-action', 'openInDiscover');
     expect(button).toHaveAttribute('data-ebt-element', 'transactionDetailFlyoutFooter');
+    expect(button).toHaveAttribute('data-ebt-detail', 'traces');
   });
 
   it('disables the Discover button while links are loading', () => {
