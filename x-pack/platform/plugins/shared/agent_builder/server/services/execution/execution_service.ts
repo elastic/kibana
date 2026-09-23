@@ -193,6 +193,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
 
           return {
             executionId,
+            ...(conversation ? { conversationId: conversation.id } : {}),
             events$: this.followExecution(executionId),
           };
         }
@@ -247,16 +248,22 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       ? await this.executeWithScheduledTask({ executionId, agentId, request })
       : await this.executeLocally({ execution, request, interactivity });
 
+    if (!conversation) {
+      return result;
+    }
+
+    const resolved = { ...result, conversationId: conversation.id };
+
     // The conversation this request created is already stored, so its id is reported before the
     // run starts — a task-manager run is only queued at this point.
-    if (conversation?.operation === 'CREATE' && conversationParams?.storeConversation !== false) {
+    if (conversation.operation === 'CREATE' && conversationParams?.storeConversation !== false) {
       return {
-        ...result,
+        ...resolved,
         events$: concat(of(createConversationIdSetEvent(conversation.id)), result.events$),
       };
     }
 
-    return result;
+    return resolved;
   }
 
   /**
@@ -349,6 +356,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     const stored = await conversationClient.get(conversation.id);
 
     return {
+      conversationId: stored.id,
       events$: of(
         ...(created ? [createConversationIdSetEvent(stored.id)] : []),
         created ? createConversationCreatedEvent(stored) : createConversationUpdatedEvent(stored)

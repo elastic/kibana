@@ -221,6 +221,7 @@ apiTest.describe(
 
       const conversationId = getConversationId(callbackRequests);
       expect(conversationId.length).toBeGreaterThan(0);
+      expect(accepted.conversation_id).toBe(conversationId);
 
       conversationIds.add(conversationId);
     });

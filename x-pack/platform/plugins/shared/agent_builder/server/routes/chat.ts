@@ -17,6 +17,7 @@ import {
   agentBuilderDefaultAgentId,
   CONVERSATION_ID_MAX_LENGTH,
   createBadRequestError,
+  createInternalError,
   ConversationAccessControlMode,
   ConversationOriginType,
 } from '@kbn/agent-builder-common';
@@ -559,16 +560,21 @@ export function registerChatRoutes({
 
         const spaceId = (await ctx.agentBuilder).spaces.getSpaceId();
 
-        const { executionId } = await executeAgent({
+        const { executionId, conversationId } = await executeAgent({
           payload,
           request,
           executionService,
           executionOptions: resolveExecutionOptions(payload, spaceId),
         });
 
+        if (!conversationId) {
+          throw createInternalError('Chat execution did not resolve a conversation');
+        }
+
         return response.accepted<ChatCallbackAcceptedResponse>({
           body: {
             execution_id: executionId,
+            conversation_id: conversationId,
           },
         });
       })

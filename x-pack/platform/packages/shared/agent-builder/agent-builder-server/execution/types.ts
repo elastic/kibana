@@ -211,6 +211,8 @@ export type AgentExecution = ConversationAgentExecution | StandaloneAgentExecuti
 export interface ExecuteAgentResult {
   /** The unique execution ID. */
   executionId: string;
+  /** The conversation the run writes to, resolved before the run was dispatched. */
+  conversationId?: string;
   /**
    * Observable of events for this execution.
    * - Local mode: the live agent event stream (multicasted).
@@ -225,7 +227,7 @@ export interface ExecuteAgentResult {
  * nothing to address; a caller that always needs one runs the agent through
  * {@link AgentExecutionService.executeAgent}.
  */
-export type MaybeExecuteAgentResult = Pick<ExecuteAgentResult, 'events$'> &
+export type MaybeExecuteAgentResult = Pick<ExecuteAgentResult, 'events$' | 'conversationId'> &
   Partial<Pick<ExecuteAgentResult, 'executionId'>>;
 
 /**

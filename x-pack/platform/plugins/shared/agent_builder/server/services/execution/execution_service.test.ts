@@ -321,7 +321,7 @@ describe('AgentExecutionService', () => {
         });
       });
 
-      const { events$ } = await service.executeAgent({
+      const { events$, conversationId } = await service.executeAgent({
         mode: AgentExecutionMode.conversation,
         request,
         params: { agentId: 'agent-1', nextInput: { message: 'hello' } },
@@ -339,7 +339,7 @@ describe('AgentExecutionService', () => {
 
       // The request created the conversation, so its id is reported before the run's own events.
       expect(receivedEvents).toEqual([
-        { type: ChatEventType.conversationIdSet, data: { conversation_id: expect.any(String) } },
+        { type: ChatEventType.conversationIdSet, data: { conversation_id: conversationId } },
         fakeEvent,
       ]);
     });
@@ -353,7 +353,7 @@ describe('AgentExecutionService', () => {
       conversationClient.get.mockResolvedValue(existing);
       mockHandleAgentExecution.mockResolvedValue(eventsSubject.asObservable());
 
-      const { events$ } = await service.executeAgent({
+      const { events$, conversationId } = await service.executeAgent({
         mode: AgentExecutionMode.conversation,
         request,
         params: {
@@ -371,6 +371,9 @@ describe('AgentExecutionService', () => {
       await new Promise((resolve) => setTimeout(resolve, 10));
 
       expect(receivedEvents).toEqual([]);
+      // Reported on the result whether or not the event was emitted, so a caller that never
+      // reads the stream still learns the conversation.
+      expect(conversationId).toBe(existing.id);
     });
   });
 
