@@ -10,6 +10,10 @@
 import { parse } from 'yaml';
 import { SECURITY_ALERT_ANALYSIS_WORKFLOW } from '.';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
+import {
+  builtinWorkflowInputDefinitions,
+  SECURITY_ALERT_ANALYSIS_CALLER_ALERTS_INPUT_DEFINITION_ID,
+} from '../../../spec/builtin_workflow_input_definitions';
 import { WorkflowSchema } from '../../../spec/schema';
 
 type Step = Record<string, unknown>;
@@ -830,20 +834,28 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(manualTrigger?.inputs?.properties).toHaveProperty('alerts');
     expect(manualTrigger?.inputs?.properties).toHaveProperty('calledByWorker');
 
-    const alertsInput = (
+    const alertsRef = (
       manualTrigger?.inputs?.properties as {
-        alerts?: {
-          items?: {
-            required?: string[];
-            properties?: {
-              '@timestamp'?: { format?: string; maxLength?: number };
-              _index?: { maxLength?: number; pattern?: string };
-            };
-          };
-          maxItems?: number;
-        };
+        alerts?: { $ref?: string };
       }
     )?.alerts;
+    expect(alertsRef?.$ref).toBe(
+      `#/kibana/definitions/${SECURITY_ALERT_ANALYSIS_CALLER_ALERTS_INPUT_DEFINITION_ID}`
+    );
+
+    // Shape lives in the builtin registry (alerting-v2 style), not inline in the YAML.
+    const alertsInput = builtinWorkflowInputDefinitions[
+      SECURITY_ALERT_ANALYSIS_CALLER_ALERTS_INPUT_DEFINITION_ID
+    ] as {
+      items?: {
+        required?: string[];
+        properties?: {
+          '@timestamp'?: { format?: string; maxLength?: number };
+          _index?: { maxLength?: number; pattern?: string };
+        };
+      };
+      maxItems?: number;
+    };
     expect(alertsInput?.maxItems).toBe(1000);
     expect(alertsInput?.items?.required).toEqual(
       expect.arrayContaining(['_id', '_index', '@timestamp', 'kibana'])

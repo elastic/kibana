@@ -28,6 +28,24 @@ describe('builtinWorkflowInputDefinitions', () => {
     expect(schema.properties?.rules?.type).toBe('object');
   });
 
+  it('registers securityAlertAnalysisCallerAlerts as a bounded alert-document array', () => {
+    const schema = builtinWorkflowInputDefinitions.securityAlertAnalysisCallerAlerts;
+    expect(schema.type).toBe('array');
+    expect(schema.maxItems).toBe(1000);
+    const items = schema.items as {
+      required?: string[];
+      properties?: Record<string, { type?: string; format?: string; pattern?: string }>;
+    };
+    expect(items?.required).toEqual(
+      expect.arrayContaining(['_id', '_index', '@timestamp', 'kibana'])
+    );
+    expect(items?.properties?._id?.type).toBe('string');
+    expect(items?.properties?._index?.pattern).toBe(
+      '^\\.(internal\\.)?(preview\\.)?alerts-security\\.alerts-[a-zA-Z0-9._-]+$'
+    );
+    expect(items?.properties?.['@timestamp']?.format).toBe('date-time');
+  });
+
   it('registers alertingV2NotificationGroup with severity on episode items', () => {
     const schema = builtinWorkflowInputDefinitions.alertingV2NotificationGroup;
     const episodeItems = schema.properties?.episodes?.items as {
@@ -83,6 +101,7 @@ describe('builtinWorkflowInputDefinitions', () => {
         definitions: {
           customType: { type: 'string' },
           alertingV2NotificationGroup: expect.objectContaining({ type: 'object' }),
+          securityAlertAnalysisCallerAlerts: expect.objectContaining({ type: 'array' }),
         },
       },
     });

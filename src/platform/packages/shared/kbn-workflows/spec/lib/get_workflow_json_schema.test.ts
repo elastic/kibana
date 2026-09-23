@@ -86,6 +86,10 @@ describe('getWorkflowJsonSchema', () => {
               episodes: expect.any(Object),
             }),
           }),
+          securityAlertAnalysisCallerAlerts: expect.objectContaining({
+            type: 'array',
+            maxItems: 1000,
+          }),
         },
       },
     });
