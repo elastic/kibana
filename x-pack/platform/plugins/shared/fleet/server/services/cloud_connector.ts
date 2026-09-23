@@ -534,21 +534,22 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         );
       }
 
+      // Role ARN edits (API or flyout) may send only `{ role_arn }`, including a retry that
+      // does not change the value. A wholesale replace would orphan `external_id`'s Fleet
+      // secret and break later auth. Merge those role-only payloads; other vars updates stay
+      // a full replace (package-policy create/update depends on that contract).
+      const incomingVarKeys = incomingAwsVars ? Object.keys(incomingAwsVars) : [];
+      const isRoleOnlyPayload =
+        isAws &&
+        typeof newRoleArn === 'string' &&
+        incomingVarKeys.length > 0 &&
+        incomingVarKeys.every((key) => key === 'role_arn');
+      const mergeIncomingVars = (storedVars: CloudConnectorSOAttributes['vars'] | undefined) =>
+        isRoleOnlyPayload && storedVars
+          ? { ...storedVars, ...cloudConnectorUpdate.vars }
+          : cloudConnectorUpdate.vars;
       if (cloudConnectorUpdate.vars) {
-        // Role ARN edits (API or flyout) may send only `{ role_arn }`, including a retry that
-        // does not change the value. A wholesale replace would orphan `external_id`'s Fleet
-        // secret and break later auth. Merge those role-only payloads; other vars updates stay
-        // a full replace (package-policy create/update depends on that contract).
-        const incomingVarKeys = incomingAwsVars ? Object.keys(incomingAwsVars) : [];
-        const isRoleOnlyPayload =
-          isAws &&
-          typeof newRoleArn === 'string' &&
-          incomingVarKeys.length > 0 &&
-          incomingVarKeys.every((key) => key === 'role_arn');
-        updateAttributes.vars =
-          isRoleOnlyPayload && existingCloudConnector.attributes.vars
-            ? { ...existingCloudConnector.attributes.vars, ...cloudConnectorUpdate.vars }
-            : cloudConnectorUpdate.vars;
+        updateAttributes.vars = mergeIncomingVars(existingCloudConnector.attributes.vars);
       }
 
       let roleArnRollback: RoleArnPropagationRollback | undefined;
@@ -564,13 +565,15 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         }
       }
 
-      async function fanOutRoleArnChange(targetRoleArn: string) {
+      async function fanOutRoleArnChange(
+        targetRoleArn: string,
+        sharedNamespaces: string[] | undefined
+      ) {
         if (!esClient) {
           throw new CloudConnectorCreateError(
             'Role ARN update is not supported from this code path (missing esClient for package-policy fan-out).'
           );
         }
-        const sharedNamespaces = existingCloudConnector.namespaces;
         const isSharedAcrossSpaces =
           !!sharedNamespaces &&
           (sharedNamespaces.includes(ALL_SPACES_ID) ||
@@ -745,12 +748,18 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
                     CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
                     cloudConnectorId
                   );
+                  // Another request may have rotated `external_id` or shared the connector into
+                  // another space since the opening read; the write and the fan-out follow the
+                  // connector as it is now.
                   connectorVersion = locked.version ?? connectorVersion;
+                  if (cloudConnectorUpdate.vars) {
+                    updateAttributes.vars = mergeIncomingVars(locked.attributes.vars);
+                  }
                   const lockedRoleArn = (
                     locked.attributes.vars as AwsCloudConnectorVars | undefined
                   )?.role_arn?.value;
                   if (lockedRoleArn !== newRoleArn) {
-                    await fanOutRoleArnChange(newRoleArn);
+                    await fanOutRoleArnChange(newRoleArn, locked.namespaces);
                   } else {
                     logger.info(
                       `Connector ${cloudConnectorId} already stores the requested Role ARN; leaving its policies unchanged.`

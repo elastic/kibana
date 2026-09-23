@@ -1441,6 +1441,47 @@ describe('CloudConnectorService', () => {
         );
       });
 
+      it('merges a role-only payload into the vars read once the lock is held', async () => {
+        const connectorWithSecret = (secretId: string, version: string) =>
+          ({
+            id: connectorId,
+            version,
+            attributes: {
+              name: 'Test',
+              namespace: '*',
+              cloudProvider: 'aws',
+              vars: {
+                role_arn: { type: 'text', value: oldArn },
+                external_id: { type: 'password', value: { isSecretRef: true, id: secretId } },
+              },
+              created_at: '2026-01-01T00:00:00Z',
+              updated_at: '2026-01-01T00:00:00Z',
+            },
+          } as SavedObject);
+        mockSoClient.get
+          .mockResolvedValueOnce(connectorWithSecret('secret-retired', 'Wz-opening'))
+          .mockResolvedValueOnce(connectorWithSecret('secret-rotated', 'Wz-locked'));
+
+        await service.update(
+          mockSoClient,
+          connectorId,
+          { vars: { role_arn: { type: 'text', value: newArn } } },
+          { esClient: mockEsClient }
+        );
+
+        expect(mockSoClient.update).toHaveBeenCalledWith(
+          CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+          connectorId,
+          expect.objectContaining({
+            vars: {
+              role_arn: { type: 'text', value: newArn },
+              external_id: { type: 'password', value: { isSecretRef: true, id: 'secret-rotated' } },
+            },
+          }),
+          { version: 'Wz-locked' }
+        );
+      });
+
       it('passes the connector OCC version on the post-fan-out write', async () => {
         await service.update(
           mockSoClient,
@@ -1837,6 +1878,34 @@ describe('CloudConnectorService', () => {
           expect(propagateRoleArnToPackagePoliciesMock).toHaveBeenCalledTimes(3);
           expect(mockSoClient.asScopedToNamespace).toHaveBeenCalledWith('space-b');
           expect(mockSoClient.asScopedToNamespace).toHaveBeenCalledWith('space-c');
+        });
+
+        it('authorizes and fans out to the spaces the connector is in once the lock is held', async () => {
+          const connectorIn = (namespaces: string[]) =>
+            ({
+              id: connectorId,
+              version: 'Wz-cc-version',
+              namespaces,
+              attributes: {
+                name: 'Test',
+                namespace: '*',
+                cloudProvider: 'aws',
+                vars: { role_arn: { type: 'text', value: oldArn } },
+                created_at: '2026-01-01T00:00:00Z',
+                updated_at: '2026-01-01T00:00:00Z',
+              },
+            } as SavedObject);
+          mockSoClient.get
+            .mockResolvedValueOnce(connectorIn(['default']))
+            .mockResolvedValueOnce(connectorIn(['default', 'space-b']));
+
+          await updateSharedRole();
+
+          expect(atSpaces).toHaveBeenCalledWith(['default', 'space-b'], {
+            kibana: ['api:fleet-agent-policies-all', 'api:integrations-all'],
+          });
+          expect(mockSoClient.asScopedToNamespace).toHaveBeenCalledWith('space-b');
+          expect(propagateRoleArnToPackagePoliciesMock).toHaveBeenCalledTimes(2);
         });
 
         it('does not authorize other spaces when the connector lives in only the current one', async () => {
