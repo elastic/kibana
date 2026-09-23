@@ -252,13 +252,11 @@ export function CustomAppPage({
               Add panel
             </EuiButton>
           ) : null,
-          <EuiButtonEmpty
-            key="editApp"
-            iconType="editorCodeBlock"
-            onClick={() => setIsAppEditorOpen(true)}
-          >
-            Edit app
-          </EuiButtonEmpty>,
+          isEditing ? (
+            <EuiButtonEmpty key="settings" iconType="gear" onClick={() => setIsAppEditorOpen(true)}>
+              Settings
+            </EuiButtonEmpty>
+          ) : null,
           isEditing ? (
             <EuiButtonEmpty
               key="done"

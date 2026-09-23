@@ -79,7 +79,7 @@ export function AppEditorFlyout({ definition, onClose, onApply }: AppEditorFlyou
     <EuiFlyout onClose={onClose} size="l" aria-labelledby="customAppEditorTitle">
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2 id="customAppEditorTitle">Edit app</h2>
+          <h2 id="customAppEditorTitle">Settings</h2>
         </EuiTitle>
         <EuiSpacer size="xs" />
         <EuiText size="s" color="subdued">
