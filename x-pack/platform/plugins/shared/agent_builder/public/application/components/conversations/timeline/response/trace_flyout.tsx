@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   EuiButtonIcon,
   EuiCallOut,
@@ -52,12 +52,15 @@ export const TraceFlyout: React.FC<TraceFlyoutProps> = ({ traceId, initialSpans,
   const isFromFile = Boolean(initialSpans);
   const traceSpansResult = useTraceSpans(isFromFile ? null : traceId ?? null, { fetchTrace });
 
-  const spans = isFromFile ? initialSpans ?? [] : traceSpansResult.spans;
+  const spans = useMemo(
+    () => (isFromFile ? initialSpans ?? [] : traceSpansResult.spans),
+    [isFromFile, initialSpans, traceSpansResult.spans]
+  );
   const durationMs = isFromFile ? undefined : traceSpansResult.durationMs;
   const isLoading = isFromFile ? false : traceSpansResult.isLoading;
   const error = isFromFile ? null : traceSpansResult.error;
 
-  const handleDownload = () => {
+  const handleDownload = useCallback(() => {
     const slug = traceId
       ? traceId
           .replace(/[^\p{L}\p{N}]+/gu, '-')
@@ -66,7 +69,7 @@ export const TraceFlyout: React.FC<TraceFlyoutProps> = ({ traceId, initialSpans,
       : 'trace';
     const envelope = { ...(traceId ? { trace_id: traceId } : {}), spans };
     triggerDownload(`trace-${slug}.json`, JSON.stringify(envelope, null, 2));
-  };
+  }, [traceId, spans]);
 
   return (
     <EuiFlyoutResizable
@@ -123,7 +126,7 @@ export const TraceFlyout: React.FC<TraceFlyoutProps> = ({ traceId, initialSpans,
           )}
           <TraceWaterfall
             spans={spans}
-            traceId={traceId ?? ''}
+            traceId={traceId}
             durationMs={durationMs}
             isLoading={isLoading}
             error={error}

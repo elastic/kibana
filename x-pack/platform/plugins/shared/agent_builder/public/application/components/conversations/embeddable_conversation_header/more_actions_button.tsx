@@ -79,11 +79,7 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
 
   const { conversation } = useConversation();
   const { title: conversationTitle } = useConversationTitle();
-  const {
-    agent,
-    isLoading: isAgentLoading,
-    error: agentError,
-  } = useAgentBuilderAgentById(agentId ?? undefined);
+  const { agent, isLoading: isAgentLoading, error: agentError } = useAgentBuilderAgentById(agentId);
 
   const {
     openFilePicker,

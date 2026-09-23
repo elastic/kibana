@@ -16,10 +16,7 @@ export const normalizeTraceId = (raw: string | string[] | null | undefined): str
 const readFileAsText = (file: File): Promise<string> =>
   new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onloadend = () => {
-      if (typeof reader.result === 'string') resolve(reader.result);
-      else reject(new Error('FileReader did not return a string'));
-    };
+    reader.onload = () => resolve(reader.result as string);
     reader.onerror = () => reject(reader.error ?? new Error('FileReader failed'));
     reader.readAsText(file);
   });
