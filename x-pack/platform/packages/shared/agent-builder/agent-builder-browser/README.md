@@ -13,7 +13,10 @@ validation; the browser controls rendering.
 // In your plugin's setup():
 setupDeps.agentBuilder.conversationEvents.register({
   type: 'my_plugin.note',
-  payloadSchema: z.object({ title: z.string().optional(), text: z.string() }),
+  payloadSchema: z.object({
+    title: z.string().max(256).optional(),
+    text: z.string().max(1000),
+  }),
 });
 ```
 
@@ -23,6 +26,7 @@ Split the renderer component into its own file so it is loaded lazily — only w
 this type first appears in the timeline, not at plugin startup.
 
 **`my_note_renderer.tsx`** — the async chunk:
+
 ```tsx
 import React from 'react';
 
@@ -38,6 +42,7 @@ export default MyNoteRenderer; // default export required for React.lazy()
 ```
 
 **`my_note_definition.ts`** — the definition, imported during `start()`:
+
 ```tsx
 import React, { Suspense, lazy } from 'react';
 import { EuiSkeletonText } from '@elastic/eui';
@@ -49,7 +54,10 @@ const MyNoteRenderer = lazy(() => import('./my_note_renderer'));
 
 export const myNoteDefinition: ConversationEventUIDefinition = {
   type: 'my_plugin.note',
-  payloadSchema: z.object({ title: z.string().optional(), text: z.string() }),
+  payloadSchema: z.object({
+    title: z.string().max(256).optional(),
+    text: z.string().max(1000),
+  }),
   render: (event) => (
     <Suspense fallback={<EuiSkeletonText lines={2} />}>
       <MyNoteRenderer data={event.data} />
@@ -60,6 +68,7 @@ export const myNoteDefinition: ConversationEventUIDefinition = {
 ```
 
 **`plugin.ts`** — registration:
+
 ```ts
 // In your plugin's start():
 startDeps.agentBuilder.conversationEvents.register(myNoteDefinition);
@@ -74,7 +83,4 @@ startDeps.agentBuilder.conversationEvents.register(myNoteDefinition);
   - Must not contain `::` (the internal id-generation delimiter).
   - Must not be one of the reserved words (`execution`, `step`).
   - Must not shadow a built-in timeline event type (`user_message`, `agent_message`, etc.).
-- **Payload schema is validated at render time** with `safeParse`. A malformed payload shows a
-  `RenderError` callout instead of mounting the renderer, so a bad event cannot crash the chat.
 - **`getHeader` is optional.** Omit them for events that don't need header rendered.
-- **The `conversationEvents` key on the start contract** is the stored-event type registry.
