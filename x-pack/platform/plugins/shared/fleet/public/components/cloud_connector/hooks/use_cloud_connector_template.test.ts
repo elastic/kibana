@@ -145,7 +145,7 @@ describe('useCloudConnectorTemplate', () => {
 
       expect(mockedSendRenderIacTemplate).toHaveBeenCalledWith({
         provider: 'aws',
-        workflow: 'federated_identity',
+        workflow: 'workload_identity_federation',
         flow: 'cloud_connector',
         integrations: [{ name: 'cloud_security_posture', policyTemplates: POLICY_TEMPLATES }],
       });
@@ -173,7 +173,7 @@ describe('useCloudConnectorTemplate', () => {
 
       expect(mockedSendRenderIacTemplate).toHaveBeenCalledWith({
         provider: 'aws',
-        workflow: 'federated_identity',
+        workflow: 'workload_identity_federation',
         flow: 'cloud_connector',
         integrations: [{ name: 'aws', policyTemplates }],
       });
@@ -599,7 +599,7 @@ describe('useCloudConnectorTemplate', () => {
 
         expect(mockedSendRenderIacTemplate).toHaveBeenCalledWith({
           provider: 'aws',
-          workflow: 'federated_identity',
+          workflow: 'workload_identity_federation',
           flow: 'cloud_connector',
           integrations,
         });

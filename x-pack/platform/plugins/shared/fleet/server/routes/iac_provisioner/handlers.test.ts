@@ -84,7 +84,7 @@ const cspmSelection = {
 const renderBody = (overrides: Record<string, unknown> = {}) => ({
   provider: 'aws',
   flow: 'cloud_connector',
-  workflow: 'federated_identity',
+  workflow: 'workload_identity_federation',
   integrations: [cspmSelection],
   ...overrides,
 });
@@ -137,7 +137,7 @@ describe('renderIacTemplateHandler', () => {
 
     expect(mockedRenderTemplate).toHaveBeenCalledWith({
       provider: 'aws',
-      workflow: 'federated_identity',
+      workflow: 'workload_identity_federation',
       integrations: [
         {
           name: 'cloud_security_posture',
@@ -289,7 +289,7 @@ describe('renderIacTemplateHandler', () => {
     expect(mockedGetPackageInfo).toHaveBeenCalledTimes(3);
     expect(mockedRenderTemplate).toHaveBeenCalledWith({
       provider: 'aws',
-      workflow: 'federated_identity',
+      workflow: 'workload_identity_federation',
       integrations: [
         {
           name: 'aws',

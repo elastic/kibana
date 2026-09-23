@@ -186,7 +186,7 @@ describe('getIacKeyOutcome', () => {
     expect(result).toBe('matches');
     expect(mockedRender).toHaveBeenCalledWith({
       provider: 'aws',
-      workflow: 'federated_identity',
+      workflow: 'workload_identity_federation',
       integrations: RESOLVED_AWS.integrations,
       templateSha: 'sha256:stored',
     });

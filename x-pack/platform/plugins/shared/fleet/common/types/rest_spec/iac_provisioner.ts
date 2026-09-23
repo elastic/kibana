@@ -8,8 +8,12 @@
 import type { IacProvisionerRenderFlow } from '../../telemetry/iac_provisioner_events';
 import type { AWS_CLOUD_PROVIDER } from '../models/cloud_connector';
 
-/** IaCP workflow name for the AWS federated-identity connector. */
-export const IAC_FEDERATED_IDENTITY_WORKFLOW = 'federated_identity' as const;
+/**
+ * IaCP workflow name for the AWS Identity Federation connector. Selects the
+ * `aws/workload_identity_federation` blueprint lineage (Elastic Workload
+ * Identity); the former `federated_identity` lineage was withdrawn from IaCP.
+ */
+export const IAC_WORKLOAD_IDENTITY_FEDERATION_WORKFLOW = 'workload_identity_federation' as const;
 
 /**
  * Upper bound on packages per render. Each entry costs a registry fetch, so the cap bounds abuse;
@@ -47,7 +51,7 @@ export interface RenderIacTemplateRequest {
    * up the matching blueprint lineage and always renders the newest
    * supported version.
    */
-  workflow: typeof IAC_FEDERATED_IDENTITY_WORKFLOW;
+  workflow: typeof IAC_WORKLOAD_IDENTITY_FEDERATION_WORKFLOW;
   /** The Kibana flow requesting the render; reported in telemetry. */
   flow: IacProvisionerRenderFlow;
   integrations: RenderIacTemplateIntegration[];

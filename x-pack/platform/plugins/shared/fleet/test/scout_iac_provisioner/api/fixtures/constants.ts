@@ -18,7 +18,7 @@ export const RENDER_TEMPLATE_PATH = 'internal/fleet/iac_provisioner/render_templ
 export const VALID_RENDER_BODY = {
   provider: 'aws',
   flow: 'cloud_connector',
-  workflow: 'federated_identity',
+  workflow: 'workload_identity_federation',
   integrations: [
     {
       name: 'this_package_does_not_exist',

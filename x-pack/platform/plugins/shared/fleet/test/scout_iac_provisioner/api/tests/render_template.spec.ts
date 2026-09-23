@@ -65,7 +65,7 @@ apiTest.describe(
         headers: { ...testData.COMMON_HEADERS, ...cookieHeader },
         body: {
           provider: 'aws',
-          workflow: 'federated_identity',
+          workflow: 'workload_identity_federation',
           integrations: VALID_RENDER_BODY.integrations,
         },
         responseType: 'json',
