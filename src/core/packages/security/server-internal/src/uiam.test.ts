@@ -16,10 +16,13 @@ import {
 import { createCoreUiamService } from './uiam';
 
 const SHARED_SECRET = 'shared-secret';
-const UIAM_CREDENTIAL = new HTTPAuthorizationHeader('ApiKey', 'essu_internal_key');
-const VALID_ATTESTATION = deriveInternalCallerAttestation(SHARED_SECRET, UIAM_CREDENTIAL);
 
-describe('createCoreUiamService', () => {
+// `ApiKey` and `Bearer` both carry UIAM credentials, and every rule below applies to each
+// identically. Parameterized rather than picked, so neither scheme can quietly drift.
+describe.each(['ApiKey', 'Bearer'] as const)('createCoreUiamService (%s)', (scheme) => {
+  const UIAM_CREDENTIAL = new HTTPAuthorizationHeader(scheme, 'essu_internal_key');
+  const VALID_ATTESTATION = deriveInternalCallerAttestation(SHARED_SECRET, UIAM_CREDENTIAL);
+
   let uiam: ReturnType<typeof createCoreUiamService>;
 
   beforeEach(() => {
@@ -28,7 +31,7 @@ describe('createCoreUiamService', () => {
 
   describe('getElasticsearchClientAuthentication', () => {
     it('returns undefined for a non-UIAM credential, whatever its source', () => {
-      const credential = new HTTPAuthorizationHeader('ApiKey', 'regular_key');
+      const credential = new HTTPAuthorizationHeader(scheme, 'regular_key');
       expect(
         uiam.getElasticsearchClientAuthentication({ credentialSource: 'internal', credential })
       ).toBeUndefined();
@@ -102,7 +105,7 @@ describe('createCoreUiamService', () => {
           requestHeaders: {
             [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: deriveInternalCallerAttestation(
               SHARED_SECRET,
-              new HTTPAuthorizationHeader('ApiKey', 'essu_another_internal_key')
+              new HTTPAuthorizationHeader(scheme, 'essu_another_internal_key')
             ),
           },
         })
@@ -122,5 +125,28 @@ describe('createCoreUiamService', () => {
     it('never derives an attestation equal to the shared secret', () => {
       expect(VALID_ATTESTATION).not.toBe(SHARED_SECRET);
     });
+  });
+});
+
+describe('createCoreUiamService attestation binding', () => {
+  // The attestation covers the serialized header, scheme included, so the same credentials under a
+  // different scheme are a different credential and the attestation must not carry over.
+  it('does not accept an attestation minted for the same credentials under another scheme', () => {
+    const uiam = createCoreUiamService(SHARED_SECRET);
+    const apiKey = new HTTPAuthorizationHeader('ApiKey', 'essu_internal_key');
+    const bearer = new HTTPAuthorizationHeader('Bearer', 'essu_internal_key');
+
+    expect(
+      uiam.getElasticsearchClientAuthentication({
+        credentialSource: 'inbound',
+        credential: bearer,
+        requestHeaders: {
+          [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: deriveInternalCallerAttestation(
+            SHARED_SECRET,
+            apiKey
+          ),
+        },
+      })
+    ).toBeUndefined();
   });
 });
