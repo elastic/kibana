@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { Redirect, useHistory, useParams } from 'react-router-dom';
+import { Redirect, useHistory, useLocation, useParams } from 'react-router-dom';
 
 import { useQuery } from '@kbn/react-query';
 
@@ -18,6 +18,7 @@ import { RedirectLoading } from './redirect_loading';
 export const LegacyConversationRedirect: React.FC = () => {
   const { conversationId } = useParams<{ conversationId?: string }>();
   const history = useHistory();
+  const { search } = useLocation();
   const { agentId: lastAgentId, isReady: isLastAgentIdReady } = useLastAgentId();
 
   const { conversationsService } = useAgentBuilderServices();
@@ -37,16 +38,20 @@ export const LegacyConversationRedirect: React.FC = () => {
 
   useEffect(() => {
     if (conversation?.agent_id && conversationId) {
-      history.replace(
-        appPaths.agent.conversations.byId({
+      history.replace({
+        pathname: appPaths.agent.conversations.byId({
           agentId: conversation.agent_id,
           conversationId,
-        })
-      );
+        }),
+        search,
+      });
     } else if (isError && conversationId) {
-      history.replace(appPaths.agent.conversations.byId({ agentId: lastAgentId, conversationId }));
+      history.replace({
+        pathname: appPaths.agent.conversations.byId({ agentId: lastAgentId, conversationId }),
+        search,
+      });
     }
-  }, [conversation, conversationId, isError, lastAgentId, history]);
+  }, [conversation, conversationId, isError, lastAgentId, history, search]);
 
   if (isNewConversation) {
     return <Redirect to={appPaths.agent.root({ agentId: lastAgentId })} />;

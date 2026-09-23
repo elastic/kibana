@@ -20,5 +20,6 @@
     "@kbn/flyout-info-blocks",
     "@kbn/react-hooks",
     "@kbn/test-jest-helpers",
+    "@kbn/ui-ai-components",
   ]
 }

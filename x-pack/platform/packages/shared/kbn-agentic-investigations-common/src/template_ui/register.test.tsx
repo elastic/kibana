@@ -181,9 +181,11 @@ describe('registerAgenticInvestigationTemplateUI', () => {
     fireEvent.click(await screen.findByTestId('investigationFlyoutOpenChat'));
 
     // Scoped to the conversation's own agent: the Agent Builder conversation route is per-agent.
+    // openDetails: true instructs Agent Builder to pre-open the conversation details flyout.
     expect(openFullscreenConversation).toHaveBeenCalledWith({
       conversationId: 'conversation-1',
       agentId: 'agent',
+      openDetails: true,
     });
   });
 });
