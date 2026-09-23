@@ -27,6 +27,7 @@ reasoning from memory:
 | Load | For |
 |---|---|
 | `context-engine-signals` | Reading the evidence: which retrievals failed, how often, and what agents were reaching for. Load before making any claim that rests on signals. |
+| `agent-builder-traces` | Reading the raw OTel traces behind a signal: the actual user prompt, the full tool-call sequence, and the model response. Load when a `trace_id` is available and you need to understand what exactly was asked and what came back. |
 | `ai-index-sources` | Choosing and configuring the data an index draws on, and the corpus filter that bounds it. Load when a change is to a source, or to rule a source problem in or out. |
 | `ai-index-automations` | Reading, drafting and changing the workflows that generate indicators. Load when a change names a workflow step, or when an index needs an automation it does not have. |
 
@@ -241,6 +242,21 @@ in `field.path=value` notation — `service.name=checkout`,
 `error.type=timeout (312/1,204)`. When derived from specific documents, record the minimal
 covering set of source ids: enough to trace every claim, no more.
 
+## Reading raw traces
+
+Signals are derived from raw OTel spans. When you need to go deeper — to read the actual user
+prompt that drove a retrieval, the full tool-call sequence in a conversation, or the model response
+that followed an empty retrieval — **load `agent-builder-traces`** before querying. It handles
+locating the right index and provides the `traces_esql` tool that resolves the space automatically.
+
+When a signal carries a `trace_id`, use it to pull the full span sequence for that call and read
+what the agent actually asked for and what it got back. That is the evidence that turns "retrieval
+returned empty" into "the agent asked for entity X with tag Y and nothing matched" — and from there
+into a precise workflow change.
+
+Load `agent-builder-traces` only when you need message content or the full call sequence. For
+counting failures and computing rates, `context-engine-signals` is enough and cheaper.
+
 ## Where the evidence lives
 
 Signals — one classified retrieval each, in `context-engine-signals-*` — are what any claim about a
@@ -263,6 +279,27 @@ When a run hands you a pre-selected set of signals, that set is the corpus every
 from: it has already been scoped to this index and window, and it is what your output will be
 reconciled against. Query the indices yourself for the denominator, and otherwise only when no
 signals came with the run.
+
+### When there are no signals
+
+A run whose window holds no signals is still worth doing, and is the one case the rules above do
+not cover. Nothing has queried the index, or nothing that did was traced. That settles only what
+you cannot say: nothing about what agents asked for, what came back, or which retrievals failed.
+
+The index itself is still there to read, and most of what makes it good or bad is visible without a
+single retrieval:
+
+- **Indicators against their source.** A KI whose claim the source data no longer supports is
+  wrong whether or not anyone has hit it.
+- **Automations against their output.** An automation that has produced nothing, or whose
+  indicators all predate its last edit, is not doing its job.
+- **Sources against coverage.** A source no indicator draws on is either unused or unreachable.
+- **The description against the indicators.** An index promising coverage its KIs do not hold is
+  one that will fail the first agent to trust it.
+
+Propose from those, and say in the rationale what you read, since there are no signal ids to cite.
+An empty answer is still better than a padded one — but "no signals" is not by itself a reason to
+return nothing, and an index nobody has queried yet is exactly when a bad setup is cheapest to fix.
 
 ## Reading what the index does today
 

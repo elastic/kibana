@@ -4,17 +4,16 @@ Server-side plugin for the Context Engine.
 
 ## AI Indices API
 
-AI Indices attach a logical name to a single user index or data stream. AI Index records are stored in a hidden Kibana system index
+AI indices attach a logical name to an existing user index pattern or data
+stream. AI index records are stored in a hidden Kibana system index
 (`.contextengine-ai-indices`), separate from the backing data.
 
 | Method   | Path                                                            | Description                          |
 | -------- | --------------------------------------------------------------- | ------------------------------------ |
-| `PUT`    | `/api/context_engine/ai_index/{id}`                               | Create or update an AI Index         |
-| `GET`    | `/api/context_engine/ai_index/{id}`                               | Get an AI Index by id                |
-| `GET`    | `/api/context_engine/ai_index`                                    | List AI Indices available to the caller (max 100) |
-| `POST`   | `/api/context_engine/ai_index/_query`                             | Run ES\|QL against AI Indices        |
-| `GET`    | `/api/context_engine/ai_index/{id}/_describe`                     | Describe an AI Index for querying    |
-| `DELETE` | `/api/context_engine/ai_index/{id}`                               | Delete an AI Index                   |
+| `PUT`    | `/api/context_engine/ai_index/{id}`                               | Create or update an AI index         |
+| `GET`    | `/api/context_engine/ai_index/{id}`                               | Get an AI index by id                |
+| `GET`    | `/api/context_engine/ai_index`                                    | List AI indices (max 100)            |
+| `DELETE` | `/api/context_engine/ai_index/{id}`                               | Delete an AI index                   |
 | `PUT`    | `/internal/context_engine/ai_index/{id}/feedback_analysis`        | Update the feedback analysis config  |
 
 Notes:
@@ -40,7 +39,7 @@ Notes:
     instance id (from Stack Management → Connectors). See
     [Connector sources](#connector-sources) below.
   Required, may be empty.
-- Deleting an AI Index deletes **only** the AI Index entry. Backing indices
+- Deleting an AI index deletes **only** the AI index entry. Backing indices
   are left untouched and must be removed with the Delete index API if desired.
 - `feedback_analysis` configures this index's feedback loop. See
   [Feedback analysis configuration](#feedback-analysis-configuration) below.
@@ -222,8 +221,8 @@ space and `/s/{spaceId}/api/agent_builder/mcp` is another space.
 ## Feedback analysis configuration
 
 Signal *generation* is global — one background task, one advanced setting.
-Signal *analysis* is per AI Index, because the improvement it proposes targets
-that index's KI pipeline. The configuration therefore lives on the AI Index
+Signal *analysis* is per AI index, because the improvement it proposes targets
+that index's KI pipeline. The configuration therefore lives on the AI index
 record:
 
 ```json
@@ -267,9 +266,14 @@ record:
   observe-only: the run still reports what it found but may not propose a
   change.
 
+Only `enabled` is exposed in the UI. Every other field is a per-index override
+of something that already has a server-side default, so the detail page sets
+none of them and an index wanting different values is configured through this
+route.
+
 The dedicated `PUT .../feedback_analysis` route replaces only this block,
-leaving the rest of the record untouched. Unlike a full AI Index replace it is
-permitted on **managed** AI Indices: their definition is owned by the plugin
+leaving the rest of the record untouched. Unlike a full AI index replace it is
+permitted on **managed** AI indices: their definition is owned by the plugin
 that registers them, but which agent analyzes them and how often is operator
 preference. Without that carve-out, the indices that ship by default would be
 the only ones that could never be analyzed.
@@ -281,7 +285,7 @@ in to the Context Engine — i.e. its spec declares `contextEngine` in
 `supportedFeatureIds`. The value stored on the source is the connector
 **instance id** (not the connector type). Human-readable names are resolved
 at render time via the Actions API, so renaming a connector in Stack
-Management does not leave a stale label on the AI Index.
+Management does not leave a stale label on the AI index.
 
 Which connector types are eligible is derived at runtime from the Actions
 plugin's connector-types registry:
@@ -297,14 +301,17 @@ No changes to the Context Engine plugin are required.
 ## Signals
 
 Signals are observations classified from Agent Builder traces and stored in the
-per-space `context-engine-signals-<space>` index. The AI Index detail page
-renders a read-only **Signals** panel: a preaggregated grouped-by-tag list, a
-drill-down into a group's individual signals (each with a trace waterfall in a
-flyout), and an "Analyze & improve" button that opens Agent Builder when a chat
-opener has been registered.
+per-space `context-engine-signals-<space>` index.
 
-The panel is backed by two internal, read-only routes (reads run as the current
-user against the current space's signals index):
+They have no panel on the AI index detail page. A `SignalsPanel` component
+exists — a grouped-by-tag list, a drill-down into a group's individual signals
+with a trace waterfall per signal, and an "Analyze & improve" button — but
+nothing renders it. It was a view of the evidence behind suggestions, and those
+are now shown in the panel they would change (see
+[Improvements](#improvements)), which left it without an audience of its own.
+
+Its routes are still served — two internal, read-only ones, where reads run as
+the current user against the current space's signals index:
 
 | Method | Path                                      | Description                                            |
 | ------ | ----------------------------------------- | ------------------------------------------------------ |
@@ -312,7 +319,7 @@ user against the current space's signals index):
 | `GET`  | `/internal/context_engine/signals`        | The individual signals for a `tag` (paginated)         |
 
 Both routes are gated by the same `contextEngine:enabled` advanced setting as
-the AI Index API (they return 404 while it is off).
+the AI index API (they return 404 while it is off).
 
 ### Self-referential exclusion
 
@@ -339,26 +346,63 @@ the same guidance in its instructions goes unmarked.
 
 ## Improvements
 
-An **improvement** is a proposed change to one AI Index's KI pipeline, derived
-from that index's signals. They live in the `context-engine-improvements` index,
-exposed to the server as
-`ContextEnginePluginStart.getImprovementsService(esClient, spaceId)` and written
-by an analysis run (see [Feedback analysis runs](#feedback-analysis-runs)). The
-review UI that applies them comes later.
+An **improvement** is a proposed change to one AI index's KI pipeline, derived
+from that index's signals. They live in the single global
+`context-engine-improvements` index, exposed to the server as
+`ContextEnginePluginStart.getImprovementsService(esClient)` and written by an
+analysis run (see [Feedback analysis runs](#feedback-analysis-runs)).
 
-Improvements are **scoped to the space of the AI Index they target**, which is
-the space the service is constructed for. Every read filters on it and every
-write stamps it, so `list`, `get`, `transition` and `deleteByAiIndex` cannot
-reach another space's rows, and the same AI Index id in two spaces keeps two
-independent sets of improvements. Documents written before the store was
-space-scoped carry no `space` and are treated as belonging to the default
-space.
+### Reviewing them
+
+Suggestions are shown in the panel whose part of the AI index they would change
+— source proposals under **Sources**, automation proposals under
+**Automations** — rather than in a queue of their own. A proposal to add a
+source is a question about the sources, and answering it means looking at what
+is already configured. Each panel filters one cached list client-side, so the
+panels between them cost a single request, and a panel with nothing to review
+renders as it did before.
+
+Approving is the authorization boundary: both the store access and the change it
+materializes run on the approving user's own Elasticsearch client and request,
+so an approval can never effect something the reviewer could not do themselves.
+Rejecting asks why first — the reason is optional, but when given it is recorded
+on `resolution.reason`, which is what later runs read to avoid re-proposing the
+same thing.
+
+The panels are backed by four internal routes, all gated by the
+`contextEngine:feedbackLoopEnabled` setting on top of `contextEngine:enabled`:
+
+| Method | Path                                                                    | Description                                        |
+| ------ | ----------------------------------------------------------------------- | -------------------------------------------------- |
+| `GET`  | `/internal/context_engine/ai_index/{id}/improvements`                   | Open suggestions for an AI index, paginated        |
+| `POST` | `/internal/context_engine/ai_index/{id}/improvements/{impId}/approve`   | Apply the change and record it as applied          |
+| `POST` | `/internal/context_engine/ai_index/{id}/improvements/{impId}/reject`    | Record it as rejected, with an optional `reason`   |
+| `POST` | `/internal/context_engine/ai_index/{id}/feedback_analysis/_run`         | Start one analysis run off-schedule                |
+
+One run analyzes an index at a time. The workflow declares
+`concurrency: { key: <per index>, strategy: drop, max: 1 }`, so the engine
+refuses an overlapping run whether it came from the schedule or from this route.
+It refuses quietly: a dropped run is still given an execution document and its
+id is still returned, only marked `skipped`. `_run` therefore reads the
+execution back — an mget by id, so the skip is visible immediately — and answers
+`409` rather than reporting a run that was thrown away.
+
+KI proposals (`add_ki`, `edit_ki`, `remove_ki`) currently have no panel. The
+loop is not expected to propose them, and the apply path for them exists either
+way.
+
+Unlike signals, the store is **global rather than per-space**: an improvement
+targets an AI index's KI pipeline, and the AI index registry has no space
+dimension. Two consequences are accepted deliberately — the analysis reads
+signals across all spaces, so an improvement's rationale can cite evidence from
+a space the reviewer cannot open; and a single index means one
+`deleteByAiIndex` cleans up completely when an AI index is deleted.
 
 The lifecycle is an **append log** rather than a mutable status field, so the
 record of what the loop did to a user's index survives every transition:
 
 - `improvement_id` is the stable lineage key, derived idempotently from
-  `hash(space + ai_index_id + change_fingerprint)`. The fingerprint describes the
+  `hash(ai_index_id + change_fingerprint)`. The fingerprint describes the
   proposed fix (e.g. `remove_workflow:<workflow_id>`) and contains no free text,
   so a re-run over the same latent problem appends a revision instead of
   creating a near-duplicate row.
@@ -379,7 +423,7 @@ record of what the loop did to a user's index survives every transition:
 - OCC only guards a lineage that already has a head. The first revision of a
   brand-new `improvement_id` has nothing to guard it, so two runs writing the
   same new improvement concurrently can both append a head. Analysis runs for
-  one AI Index are therefore expected to be serialized. Should it happen anyway,
+  one AI index are therefore expected to be serialized. Should it happen anyway,
   it is self-healing rather than permanent: a head lookup returns every head of
   a lineage and the next `write` or `transition` retires all of them, so the
   lineage converges back to a single head.
@@ -399,8 +443,7 @@ halves:
 - **The caller** creates the index on the first write, and Elasticsearch applies
   the template's mappings to it. Every subsequent read and write is authorized
   against that caller too, so `getImprovementsService` takes the client to act
-  through, alongside the space to scope to, and callers pass a request-scoped
-  client.
+  through and callers pass a request-scoped one.
 
 This is what keeps the store off the internal user. Applying mappings lazily per
 operation instead — the usual storage-adapter pattern — would need `manage` on
@@ -438,6 +481,16 @@ The briefing is handed over as the agent's `message`. It instructs the agent to
 load the `analyze-and-improve` skill before reading anything, so the run carries
 the analysis playbook whichever agent the index is configured with.
 
+**Signals are evidence, not a precondition.** A run analyzes whether or not the
+window held any: an indicator its source contradicts, an automation producing
+nothing, a source nothing covers are all visible without a failed retrieval, and
+an index nobody has queried yet is when a bad setup is cheapest to fix. The
+briefing says which kind of run it is, and asks for grounding either way — signal
+ids when there are groups, and what was actually read when there are not, which
+is why `signal_ids` is optional on a proposal and its provenance can be empty.
+The agent is skipped only for `can_analyze: false`: an index with no signals, no
+indicators, no sources and no automations, where there is nothing to read at all.
+
 The briefing does not carry prior proposals, only how many there are and where
 they stand. A run cannot be handed the history that matters to it, because until
 it has read the signals it does not know what it is about to suggest, and an
@@ -460,15 +513,10 @@ turned analysis on. The conversation it creates is private to that user, Agent
 Builder's default: a run reads the index's data under the owner's privileges,
 and its rounds quote what it read.
 
-The instance is installed in the space of the AI index it analyzes, so enable,
-disable and delete address that space's schedule and no other. The workflow
-document id has to carry the space itself: it is the ES `_id` and is unique per
-index regardless of the document's `spaceId`, so suffixing it with the AI index
-id alone would point two spaces holding the same id at one shared document. The
-space is folded in as a hash rather than appended, because space ids and AI
-index ids both allow hyphens (`<space>-<aiIndexId>` would make `('a-b', 'c')`
-and `('a', 'b-c')` collide) and space ids have no length cap while the `_id`
-does.
+A managed workflow instance is keyed by `(workflowId, spaceId)`, but an AI index
+is global and writable from any space, so the instance is installed in the
+default space rather than the caller's. Enable, disable and delete therefore
+address the same instance whichever space the write came from.
 
 The workflow carries a `concurrency` guard keyed on the AI index with
 `strategy: drop`, so two runs for one index never overlap.
@@ -516,10 +564,8 @@ with no restriction by signal type. A signal's type governs how it is
    scope it. It reaches the run's total but forms no pattern, since patterns are
    keyed on fields it does not have.
 
-**Only the AI index's own space is read.** Signals live one index per space, so
-a run reads `context-engine-signals-<space>` for the space its AI index belongs
-to and nothing else, which keeps an improvement's evidence inside the space its
-reviewer can open. The space is recorded on each improvement's
+**Every space is read**, because an AI index is global while signals are
+per-space. The spaces a run drew from are recorded on each improvement's
 `provenance.signal_spaces`.
 
 Signals are folded into ranked patterns — grouped by tag, target index and tool,

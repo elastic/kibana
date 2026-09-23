@@ -17,6 +17,11 @@ import { TracesPanel } from './traces_panel';
 
 const mockUseAgentBuilderAgents = jest.fn();
 const mockUseSearchDataStreams = jest.fn();
+const mockPutFeedbackAnalysis = jest.fn();
+const mockRunFeedbackAnalysis = jest.fn();
+const mockFeedbackLoopEnabled = jest.fn();
+const mockUseKibana = jest.fn();
+const mockToasts = { addSuccess: jest.fn(), addError: jest.fn(), addWarning: jest.fn() };
 
 jest.mock('../../hooks/use_agent_builder_agents', () => ({
   useAgentBuilderAgents: () => mockUseAgentBuilderAgents(),
@@ -26,7 +31,24 @@ jest.mock('../../hooks/use_search_data_streams', () => ({
   useSearchDataStreams: () => mockUseSearchDataStreams(),
 }));
 
-const aiIndex: GetAiIndexResponse = {
+jest.mock('../../api/ai_indices', () => ({
+  ...jest.requireActual('../../api/ai_indices'),
+  putAiIndexFeedbackAnalysis: (...args: unknown[]) => mockPutFeedbackAnalysis(...args),
+}));
+
+jest.mock('../../api/improvements', () => ({
+  runFeedbackAnalysis: (...args: unknown[]) => mockRunFeedbackAnalysis(...args),
+}));
+
+jest.mock('../../hooks/use_feedback_loop_enabled', () => ({
+  useFeedbackLoopEnabled: () => mockFeedbackLoopEnabled(),
+}));
+
+jest.mock('../../hooks/use_kibana', () => ({
+  useKibana: () => mockUseKibana(),
+}));
+
+const buildAiIndex = (overrides: Partial<GetAiIndexResponse> = {}): GetAiIndexResponse => ({
   id: 'my-ai-index',
   managed: false,
   dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
@@ -35,7 +57,10 @@ const aiIndex: GetAiIndexResponse = {
   traces: [],
   date_created: '2026-01-01T00:00:00.000Z',
   date_modified: '2026-01-01T00:00:00.000Z',
-};
+  ...overrides,
+});
+
+const aiIndex = buildAiIndex();
 
 const renderWithProviders = (
   ui: React.ReactElement,
@@ -53,12 +78,41 @@ const renderWithProviders = (
   );
 };
 
+const renderPanel = ({
+  aiIndex: panelAiIndex = buildAiIndex(),
+  isLoading = false,
+}: { aiIndex?: GetAiIndexResponse; isLoading?: boolean } = {}) => {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+  });
+  return render(
+    <I18nProvider>
+      <EuiProvider>
+        <QueryClientProvider client={queryClient}>
+          <TracesPanel
+            isLoading={isLoading}
+            aiIndex={panelAiIndex}
+            onSaved={jest.fn()}
+            isManaged={false}
+          />
+        </QueryClientProvider>
+      </EuiProvider>
+    </I18nProvider>
+  );
+};
+
 const EMPTY_FALLBACK = /No agent traces configured/;
 const PICK_HINT =
   /Point this index at an Elastic agent from Agent Builder, or a data stream carrying OTel GenAI spans/;
 
 describe('TracesPanel', () => {
   beforeEach(() => {
+    mockFeedbackLoopEnabled.mockReturnValue(false);
+    mockPutFeedbackAnalysis.mockResolvedValue({});
+    mockRunFeedbackAnalysis.mockResolvedValue({ execution_id: 'execution-1' });
+    mockUseKibana.mockReturnValue({
+      services: { http: {}, notifications: { toasts: mockToasts } },
+    });
     mockUseAgentBuilderAgents.mockReturnValue({
       agents: [{ id: 'agent-1', name: 'Loyalty Support Agent' }],
       isLoading: false,
@@ -168,6 +222,9 @@ describe('TracesPanel', () => {
     const onSaved = jest.fn();
     const testServices = coreMock.createStart();
     testServices.http.put.mockResolvedValue({ status: 'updated' });
+    mockUseKibana.mockReturnValue({
+      services: { http: testServices.http, notifications: { toasts: mockToasts } },
+    });
 
     renderWithProviders(
       <TracesPanel
@@ -217,6 +274,9 @@ describe('TracesPanel', () => {
     const onSaved = jest.fn();
     const testServices = coreMock.createStart();
     testServices.http.put.mockResolvedValue({ status: 'updated' });
+    mockUseKibana.mockReturnValue({
+      services: { http: testServices.http, notifications: { toasts: mockToasts } },
+    });
 
     renderWithProviders(
       <TracesPanel isLoading={false} aiIndex={aiIndex} onSaved={onSaved} isManaged={false} />,
@@ -258,6 +318,9 @@ describe('TracesPanel', () => {
     const onSaved = jest.fn();
     const testServices = coreMock.createStart();
     testServices.http.put.mockResolvedValue({ status: 'updated' });
+    mockUseKibana.mockReturnValue({
+      services: { http: testServices.http, notifications: { toasts: mockToasts } },
+    });
 
     renderWithProviders(
       <TracesPanel
@@ -308,6 +371,9 @@ describe('TracesPanel', () => {
     const onSaved = jest.fn();
     const testServices = coreMock.createStart();
     testServices.http.put.mockRejectedValue(new Error('save failed'));
+    mockUseKibana.mockReturnValue({
+      services: { http: testServices.http, notifications: { toasts: mockToasts } },
+    });
 
     renderWithProviders(
       <TracesPanel
@@ -347,6 +413,9 @@ describe('TracesPanel', () => {
 
   it('discards draft changes when editing is cancelled', async () => {
     const testServices = coreMock.createStart();
+    mockUseKibana.mockReturnValue({
+      services: { http: testServices.http, notifications: { toasts: mockToasts } },
+    });
 
     renderWithProviders(
       <TracesPanel
@@ -375,6 +444,9 @@ describe('TracesPanel', () => {
 
   it('re-opens the editor with the original trace after cancel', async () => {
     const testServices = coreMock.createStart();
+    mockUseKibana.mockReturnValue({
+      services: { http: testServices.http, notifications: { toasts: mockToasts } },
+    });
 
     renderWithProviders(
       <TracesPanel
@@ -402,6 +474,9 @@ describe('TracesPanel', () => {
   it('shows a loading state on the Save button while the PUT is in flight', async () => {
     const testServices = coreMock.createStart();
     testServices.http.put.mockImplementation(() => new Promise(() => {}));
+    mockUseKibana.mockReturnValue({
+      services: { http: testServices.http, notifications: { toasts: mockToasts } },
+    });
 
     renderWithProviders(
       <TracesPanel
@@ -428,6 +503,9 @@ describe('TracesPanel', () => {
     const onSaved = jest.fn();
     const testServices = coreMock.createStart();
     testServices.http.put.mockResolvedValue({ status: 'updated' });
+    mockUseKibana.mockReturnValue({
+      services: { http: testServices.http, notifications: { toasts: mockToasts } },
+    });
 
     renderWithProviders(
       <TracesPanel
@@ -474,6 +552,9 @@ describe('TracesPanel', () => {
   it('returns to the read-only view showing the saved trace', async () => {
     const testServices = coreMock.createStart();
     testServices.http.put.mockResolvedValue({ status: 'updated' });
+    mockUseKibana.mockReturnValue({
+      services: { http: testServices.http, notifications: { toasts: mockToasts } },
+    });
 
     const PanelWithRefetch = () => {
       const [currentAiIndex, setCurrentAiIndex] = useState(aiIndex);
@@ -513,6 +594,104 @@ describe('TracesPanel', () => {
         'Loyalty Support Agent'
       );
       expect(screen.getByTestId('contextSourceTypeBadge')).toHaveTextContent('Elastic agent');
+    });
+  });
+
+  describe('automatic improvements', () => {
+    it('turns analysis on for this index', async () => {
+      mockFeedbackLoopEnabled.mockReturnValue(true);
+      renderPanel();
+
+      fireEvent.click(screen.getByTestId('contextTracesAutoImproveSwitch'));
+
+      await waitFor(() =>
+        expect(mockPutFeedbackAnalysis).toHaveBeenCalledWith(
+          {},
+          {
+            aiIndexId: 'my-ai-index',
+            feedbackAnalysis: expect.objectContaining({ enabled: true }),
+          }
+        )
+      );
+    });
+
+    it('turns it back off', async () => {
+      mockFeedbackLoopEnabled.mockReturnValue(true);
+      renderPanel({ aiIndex: buildAiIndex({ feedback_analysis: { enabled: true } } as any) });
+
+      fireEvent.click(screen.getByTestId('contextTracesAutoImproveSwitch'));
+
+      await waitFor(() =>
+        expect(mockPutFeedbackAnalysis).toHaveBeenCalledWith(
+          {},
+          {
+            aiIndexId: 'my-ai-index',
+            feedbackAnalysis: expect.objectContaining({ enabled: false }),
+          }
+        )
+      );
+    });
+
+    it('offers no manual run until analysis is on, since there is no workflow to run', () => {
+      mockFeedbackLoopEnabled.mockReturnValue(true);
+      renderPanel();
+      expect(screen.queryByTestId('contextImprovementsRunNowButton')).not.toBeInTheDocument();
+    });
+
+    it('offers one once it is', async () => {
+      mockFeedbackLoopEnabled.mockReturnValue(true);
+      renderPanel({ aiIndex: buildAiIndex({ feedback_analysis: { enabled: true } } as any) });
+
+      fireEvent.click(screen.getByTestId('contextImprovementsRunNowButton'));
+
+      await waitFor(() =>
+        expect(mockRunFeedbackAnalysis).toHaveBeenCalledWith({}, { aiIndexId: 'my-ai-index' })
+      );
+    });
+
+    it('says a run is already going rather than claiming this one started', async () => {
+      mockFeedbackLoopEnabled.mockReturnValue(true);
+      mockRunFeedbackAnalysis.mockRejectedValue(
+        Object.assign(new Error('Feedback analysis is already running'), {
+          body: { statusCode: 409 },
+        })
+      );
+
+      renderPanel({ aiIndex: buildAiIndex({ feedback_analysis: { enabled: true } } as any) });
+
+      fireEvent.click(screen.getByTestId('contextImprovementsRunNowButton'));
+
+      await waitFor(() => expect(mockToasts.addWarning).toHaveBeenCalled());
+      expect(mockToasts.addError).not.toHaveBeenCalled();
+      expect(mockToasts.addSuccess).not.toHaveBeenCalled();
+    });
+
+    it('reports a run that genuinely failed as an error', async () => {
+      mockFeedbackLoopEnabled.mockReturnValue(true);
+      mockRunFeedbackAnalysis.mockRejectedValue(new Error('workflows unavailable'));
+
+      renderPanel({ aiIndex: buildAiIndex({ feedback_analysis: { enabled: true } } as any) });
+
+      fireEvent.click(screen.getByTestId('contextImprovementsRunNowButton'));
+
+      await waitFor(() => expect(mockToasts.addError).toHaveBeenCalled());
+      expect(mockToasts.addWarning).not.toHaveBeenCalled();
+    });
+
+    it('leaves agent, interval and signal window to their server-side defaults', () => {
+      mockFeedbackLoopEnabled.mockReturnValue(true);
+      renderPanel({ aiIndex: buildAiIndex({ feedback_analysis: { enabled: true } } as any) });
+
+      expect(screen.queryByTestId('contextImprovementsIntervalSelect')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('contextImprovementsSignalWindowSelect')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('contextFeedbackAgentSelect')).not.toBeInTheDocument();
+    });
+
+    it('is absent while the feedback loop is off, though traces stay selectable', () => {
+      mockFeedbackLoopEnabled.mockReturnValue(false);
+      renderPanel();
+
+      expect(screen.queryByTestId('contextTracesAutoImproveSwitch')).not.toBeInTheDocument();
     });
   });
 });
