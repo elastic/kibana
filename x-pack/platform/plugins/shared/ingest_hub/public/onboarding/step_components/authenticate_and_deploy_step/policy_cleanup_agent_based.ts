@@ -96,14 +96,12 @@ async function updateAgentBasedPolicy(
   let existingName: string | undefined;
   let existingNamespace: string | undefined;
   let existingVersion: string | undefined;
-  let existingEnabled: boolean | undefined;
   try {
     const existing = await sendGetOnePackagePolicy(policyId);
     if (existing.error) throw existing.error;
     existingName = existing.data?.item?.name;
     existingNamespace = existing.data?.item?.namespace;
     existingVersion = existing.data?.item?.package?.version;
-    existingEnabled = existing.data?.item?.enabled;
   } catch {
     throw new Error(
       `Cannot safely update agent-based policy ${policyId}: failed to fetch existing metadata.`
@@ -149,9 +147,12 @@ async function updateAgentBasedPolicy(
   const policyName = existingName ?? `${packageName.replace(/[^a-zA-Z0-9_-]/g, '_')}-${Date.now()}`;
   const policyNamespace = existingNamespace ?? namespace;
 
+  // Simplified-schema PUT: inputs is a record (keyed by `<ptName>-<inputType>`).
+  // The legacy schema accepts `enabled` at the top level but requires inputs as an array.
+  // The simplified schema accepts record inputs but rejects unknown top-level keys like `enabled`.
+  // Use simplified consistently — `enabled` is intentionally omitted.
   await sendUpdatePackagePolicy(policyId, {
     name: policyName,
-    enabled: existingEnabled ?? true,
     namespace: policyNamespace,
     package: { name: packageName, version: pkgVersion },
     ...(vars ? { vars } : {}),

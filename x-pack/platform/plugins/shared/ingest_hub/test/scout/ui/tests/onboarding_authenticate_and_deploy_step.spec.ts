@@ -210,14 +210,31 @@ test.describe('Onboarding Authenticate and Deploy step', { tag: tags.stateful.cl
 
     // Register route mocks BEFORE navigation to avoid race with agent_policies fetch.
     let deleteObserved = false;
+    let agentPolicyDeleteObserved = false;
+    // Intercept agent-policy DELETE (Fleet uses POST /api/fleet/agent_policies/delete) separately
+    // so the list mock below doesn't silently swallow that destructive call.
+    await page.route(
+      (url) => /\/api\/fleet\/agent_policies\/delete$/.test(url.pathname),
+      (route) => {
+        agentPolicyDeleteObserved = true;
+        route.fulfill({ status: 200, contentType: 'application/json', body: '{"id":""}' });
+      }
+    );
     await page.route(
       (url) => /\/api\/fleet\/agent_policies/.test(url.pathname),
-      (route) =>
+      (route) => {
+        if (route.request().method() !== 'GET') {
+          // Any non-GET to the agent_policies namespace that slips past the /delete interceptor
+          // above is unexpected — fulfill with an error so the test surface is visible.
+          route.fulfill({ status: 405, contentType: 'application/json', body: '{}' });
+          return;
+        }
         route.fulfill({
           status: 200,
           contentType: 'application/json',
           body: JSON.stringify({ items: [] }),
-        })
+        });
+      }
     );
 
     // Intercept the exact collection endpoint first to catch unexpected creation POSTs.
@@ -300,6 +317,8 @@ test.describe('Onboarding Authenticate and Deploy step', { tag: tags.stateful.cl
     await expect(page.testSubj.locator('onboardingStep-detect-and-review')).toBeVisible();
     expect(deleteObserved).toBe(false);
     expect(createObserved).toBe(false);
+    // The agent policy itself must never be deleted — enrolled agents would become orphaned.
+    expect(agentPolicyDeleteObserved).toBe(false);
   });
 
   test('deploy fires POST /api/fleet/managed_integrations and shows success state', async ({
