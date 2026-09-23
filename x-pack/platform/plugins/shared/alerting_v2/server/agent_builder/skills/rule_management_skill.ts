@@ -108,7 +108,7 @@ ${generateRuleOperationsDoc()}
 
 ## ES|QL Query Guidance
 
-- A rule has exactly one query shape: a \`base\` query plus an optional \`breach\` segment appended to it.
+- A rule defines a \`base\` query plus an optional \`breach\` segment appended to it.
   \`{ base: "FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name", breach: { segment: "WHERE avg_cpu > 0.9" } }\`
   Omit \`breach\` to treat every row returned by \`base\` as a breach:
   \`{ base: "FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name | WHERE avg_cpu > 0.9" }\`

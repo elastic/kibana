@@ -89,7 +89,7 @@ export const noDataExample = ({
         : 'The first-turn set_query uses a single complete `query.base` with no `query.breach` segment.',
       needsPresenceQuery(style, strategy)
         ? 'The rule carries a `no_data.query` ES|QL query that counts documents per host.name, distinct from the breach query.'
-        : 'The rule carries no `no_data.query` — the `base` query is the data-presence query.',
+        : 'The rule carries no `no_data.query`.',
       `The final rule sets \`no_data.strategy\` to \`${strategy}\`.`,
       'The no-data change is applied with manage_rule against the existing attachment (not a new rule), and the final manage_rule call ends with a validate operation.',
       PERSIST_VIA_ATTACHMENT_CRITERION,

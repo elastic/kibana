@@ -72,12 +72,12 @@ export const recoveryExample = ({
         : 'The first-turn set_query uses a single complete `query.base` with no `query.breach` segment.',
       ...(strategy === 'condition'
         ? [
-            'The second-turn set_recovery uses `strategy: condition` with a `segment` appended to the shared base whose threshold is average `system.cpu.total.norm.pct` below 0.5 (not merely dropping back under 0.9).',
+            'The second-turn set_query includes a `recovery` object with `strategy: condition` and a `segment` appended to the shared base whose threshold is average `system.cpu.total.norm.pct` below 0.5 (not merely dropping back under 0.9).',
           ]
         : []),
       ...(strategy === 'query'
         ? [
-            'The second-turn set_recovery uses `strategy: query` with a full ES|QL `query` whose threshold is average `system.cpu.total.norm.pct` below 0.5 (not merely dropping back under 0.9).',
+            'The second-turn set_query includes a `recovery` object with `strategy: query` and a full ES|QL `query` whose threshold is average `system.cpu.total.norm.pct` below 0.5 (not merely dropping back under 0.9).',
           ]
         : []),
       'The recovery change is applied with manage_rule against the existing attachment (not a new rule), and the final manage_rule call ends with a validate operation.',
