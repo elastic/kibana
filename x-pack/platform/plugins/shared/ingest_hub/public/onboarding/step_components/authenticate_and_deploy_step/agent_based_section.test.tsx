@@ -74,11 +74,7 @@ interface OnboardingFlowOptions {
   agentPolicyId?: string;
   agentPolicyName?: string;
   selectedAgentPolicyIds?: string[];
-  agentCredentialMethod?:
-    | 'direct_access_keys'
-    | 'temporary_keys'
-    | 'shared_credentials'
-    | 'assume_role';
+  agentCredentialMethod?: 'static_keys' | 'temporary_keys' | 'shared_credentials' | 'assume_role';
   withSysMonitoring?: boolean;
   setAgentBasedDeployment?: jest.Mock;
   /** Persisted role ARN — seeds isCredentialReady:true for assume_role */
@@ -94,7 +90,7 @@ function setupMocks({
   agentPolicyId = undefined,
   agentPolicyName = undefined,
   selectedAgentPolicyIds = [],
-  agentCredentialMethod = 'direct_access_keys',
+  agentCredentialMethod = 'static_keys',
   withSysMonitoring = undefined,
   setAgentBasedDeployment = jest.fn(),
   roleArn = undefined,
@@ -483,12 +479,12 @@ describe('AgentBasedSection', () => {
 
   // §A — Resume credential gate and callout
   describe('Next readiness — resume in existing mode', () => {
-    it('direct_access_keys: Next is disabled on resume until credentials entered', async () => {
+    it('static_keys: Next is disabled on resume until credentials entered', async () => {
       const onNextReadyChange = jest.fn();
       setupMocks({
         agentHostsMode: 'existing',
         selectedAgentPolicyIds: ['p1'],
-        agentCredentialMethod: 'direct_access_keys',
+        agentCredentialMethod: 'static_keys',
         isEditMode: true,
       });
       renderSection({ onNextReadyChange });
@@ -595,7 +591,7 @@ describe('AgentBasedSection', () => {
       setupMocks({
         agentHostsMode: 'existing',
         selectedAgentPolicyIds: [],
-        agentCredentialMethod: 'direct_access_keys',
+        agentCredentialMethod: 'static_keys',
         isEditMode: true,
       });
       renderSection({ onNextReadyChange });
@@ -609,7 +605,7 @@ describe('AgentBasedSection', () => {
       setupMocks({
         agentHostsMode: 'existing',
         selectedAgentPolicyIds: ['p1'],
-        agentCredentialMethod: 'direct_access_keys',
+        agentCredentialMethod: 'static_keys',
         isEditMode: true,
       });
       renderSection();
@@ -624,7 +620,7 @@ describe('AgentBasedSection', () => {
       setupMocks({
         agentHostsMode: 'existing',
         selectedAgentPolicyIds: ['p1'],
-        agentCredentialMethod: 'direct_access_keys',
+        agentCredentialMethod: 'static_keys',
         isEditMode: true,
       });
       renderSection();
@@ -643,7 +639,7 @@ describe('AgentBasedSection', () => {
       setupMocks({
         agentHostsMode: 'existing',
         selectedAgentPolicyIds: ['p1'],
-        agentCredentialMethod: 'direct_access_keys',
+        agentCredentialMethod: 'static_keys',
         isEditMode: false,
       });
       renderSection();

@@ -41,6 +41,7 @@ import useSessionStorage from 'react-use/lib/useSessionStorage';
 import {
   buildAgentBasedTargets,
   deployToExistingAgentPolicies,
+  deployNewAgentPolicy,
   buildAgentBasedInstanceStatuses,
   extractErrorMessage,
 } from './agent_based_deploy';
@@ -54,6 +55,7 @@ const mockUseOnboardingFlow = useOnboardingFlow as jest.Mock;
 const mockUseSessionStorage = useSessionStorage as jest.Mock;
 const mockBuildAgentBasedTargets = buildAgentBasedTargets as jest.Mock;
 const mockDeployToExistingAgentPolicies = deployToExistingAgentPolicies as jest.Mock;
+const mockDeployNewAgentPolicy = deployNewAgentPolicy as jest.Mock;
 const mockBuildAgentBasedInstanceStatuses = buildAgentBasedInstanceStatuses as jest.Mock;
 const mockExtractErrorMessage = extractErrorMessage as jest.Mock;
 
@@ -396,6 +398,44 @@ describe('useAgentBasedDeploy — SO persistence', () => {
 
     expect(mockCreateDeployment).toHaveBeenCalledWith(
       expect.objectContaining({ agentPolicyIds: ['policy-x', 'policy-y'] })
+    );
+  });
+
+  it('create payload includes agentPolicyIds for pre-created new-policy mode so mid-deploy tab-close hydrates back into existing mode', async () => {
+    mockCreateDeployment.mockResolvedValue('so-id-precreated');
+    // agentHostsMode is 'new' but agentPolicyId is already set (flyout created it on a prior Next).
+    mockUseOnboardingFlow.mockReturnValue({
+      servicesStep: { selectedServiceIds: ['serviceA'], dataFormat: 'ecs' as const },
+      authenticateAndDeployStep: {},
+      detectAndReviewStep: { policyIdsByInstance: {} },
+      updateDetectAndReviewStep: jest.fn(),
+      getLatestFailedInstances: jest.fn().mockReturnValue([]),
+      awsServicesMap: new Map(),
+      agentBasedDeployment: {
+        agentHostsMode: 'new' as const,
+        agentPolicyId: 'pre-created-policy-id',
+        selectedAgentPolicyIds: [],
+      },
+      setAgentBasedDeployment: jest.fn(),
+    });
+    mockBuildAgentBasedTargets.mockReturnValue([groupA]);
+    mockDeployNewAgentPolicy.mockResolvedValue({
+      packagePolicyIdsByInstance: { serviceA: 'pkg-A' },
+      failedInstances: [],
+      errorsByInstance: {},
+      agentPolicyId: 'pre-created-policy-id',
+      agentPolicyName: 'AWS Agent Policy 1',
+    });
+
+    const { result } = renderHook(() => useAgentBasedDeploy());
+    await act(async () => {
+      await result.current.handleDeploy();
+    });
+
+    // The create payload must include agentPolicyIds wrapping the pre-created id so a
+    // mid-deploy tab-close hydrates as existing mode, not new-policy mode.
+    expect(mockCreateDeployment).toHaveBeenCalledWith(
+      expect.objectContaining({ agentPolicyIds: ['pre-created-policy-id'] })
     );
   });
 

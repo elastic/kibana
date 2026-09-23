@@ -57,7 +57,7 @@ interface PersistedAuthenticateAndDeployStep {
   selectedAgentPolicyIds?: string[]; // for existing-policy mode
   // Agent-based credential method — persisted so switching steps preserves the selection.
   agentCredentialMethod?:
-    | 'direct_access_keys'
+    | 'static_keys'
     | 'temporary_keys'
     | 'shared_credentials'
     | 'assume_role';
@@ -97,7 +97,7 @@ export interface AgentBasedDeploymentState {
   agentPolicyName?: string;
   selectedAgentPolicyIds: string[];
   agentCredentialMethod:
-    | 'direct_access_keys'
+    | 'static_keys'
     | 'temporary_keys'
     | 'shared_credentials'
     | 'assume_role';
@@ -393,7 +393,7 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
     selectedAgentPolicyIds:
       persistedAuthenticateAndDeployStep?.selectedAgentPolicyIds ?? ([] as string[]),
     agentCredentialMethod:
-      persistedAuthenticateAndDeployStep?.agentCredentialMethod ?? 'direct_access_keys',
+      persistedAuthenticateAndDeployStep?.agentCredentialMethod ?? 'static_keys',
     sharedCredentialFile: persistedAuthenticateAndDeployStep?.sharedCredentialFile,
     credentialProfileName: persistedAuthenticateAndDeployStep?.credentialProfileName,
     roleArn: persistedAuthenticateAndDeployStep?.roleArn,

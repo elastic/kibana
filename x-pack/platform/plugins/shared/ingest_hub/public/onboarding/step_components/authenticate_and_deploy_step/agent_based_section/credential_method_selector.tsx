@@ -14,44 +14,45 @@ import type { CloudOnboardingDeploymentAuthMethod } from '@kbn/fleet-plugin/publ
 // ── Credential method type ────────────────────────────────────────────────────
 
 export type AgentCredentialMethod =
-  | 'direct_access_keys'
+  | 'static_keys'
   | 'temporary_keys'
   | 'shared_credentials'
   | 'assume_role';
 
 /**
  * Maps an agent credential method to its SO authMethod value.
- * direct_access_keys → 'static_keys' (same credential shape as MI static keys).
- * Others map verbatim to the new literals added in authMethod model version 2.
+ * All agent methods now match the SO literals directly — no conversion needed.
+ * identity_federation is a managed-integration-only method, so it falls back to static_keys.
  */
 export function toSOAuthMethod(
   method: AgentCredentialMethod | undefined
 ): CloudOnboardingDeploymentAuthMethod {
-  if (method === 'direct_access_keys' || method === undefined) return 'static_keys';
+  if (method === undefined) return 'static_keys';
   return method;
 }
 
 /**
  * Inverse of toSOAuthMethod — used when hydrating session storage on resume.
- * static_keys → 'direct_access_keys' (matches the context default at onboarding_flow_context.tsx:385).
- * undefined → 'direct_access_keys' (safe default).
+ * identity_federation is MI-only, so it maps to static_keys.
+ * undefined → 'static_keys' (safe default).
+ * 'direct_access_keys' accepted as a backward-compat alias for sessions written before the rename.
  */
 export function fromSOAuthMethod(
-  authMethod: CloudOnboardingDeploymentAuthMethod | undefined
+  authMethod: CloudOnboardingDeploymentAuthMethod | string | undefined
 ): AgentCredentialMethod {
   if (
     authMethod === 'identity_federation' ||
-    authMethod === 'static_keys' ||
+    authMethod === 'direct_access_keys' || // backward compat: pre-rename session storage
     authMethod === undefined
   ) {
-    return 'direct_access_keys';
+    return 'static_keys';
   }
-  return authMethod;
+  return authMethod as AgentCredentialMethod;
 }
 
 export const CREDENTIAL_OPTIONS = [
   {
-    value: 'direct_access_keys' as AgentCredentialMethod,
+    value: 'static_keys' as AgentCredentialMethod,
     text: i18n.translate(
       'xpack.ingestHub.authenticateAndDeployStep.agentBasedSection.credentialMethod.directAccessKeys',
       { defaultMessage: 'Direct access keys' }

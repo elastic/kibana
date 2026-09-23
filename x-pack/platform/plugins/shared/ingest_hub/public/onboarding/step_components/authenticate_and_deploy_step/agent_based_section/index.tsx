@@ -128,7 +128,7 @@ export function AgentBasedSection({
           : persistedCredentialProfileName;
       const resolvedArn = overrides?.arn !== undefined ? overrides.arn : persistedRoleArn;
 
-      if (method === 'direct_access_keys' && resolvedStatic) {
+      if (method === 'static_keys' && resolvedStatic) {
         onCredentialsChange({ method, ...resolvedStatic });
       } else if (method === 'temporary_keys' && resolvedTemp) {
         onCredentialsChange({ method, ...resolvedTemp });
@@ -372,12 +372,12 @@ export function AgentBasedSection({
 
               {/* Credential fields */}
               <Suspense fallback={<EuiLoadingSpinner />}>
-                {credentialMethod === 'direct_access_keys' && (
+                {credentialMethod === 'static_keys' && (
                   <LazyAwsStaticKeysForm
                     onReadyChange={setIsCredentialReady}
                     onFieldsChange={(creds) => {
                       setStaticKeyCreds(creds ?? undefined);
-                      notifyCredentialChange('direct_access_keys', {
+                      notifyCredentialChange('static_keys', {
                         staticCreds: creds ?? undefined,
                       });
                     }}

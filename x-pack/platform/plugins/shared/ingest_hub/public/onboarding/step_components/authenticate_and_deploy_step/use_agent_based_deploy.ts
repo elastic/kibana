@@ -153,11 +153,15 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
               globalRegion,
               dataFormat,
               authMethod: toSOAuthMethod(agentCredentialMethod),
-              // For existing-policy mode, the target policy ids are known before the deploy starts.
-              // Persisting them on create means a mid-deploy tab-close leaves a record that hydrates
-              // back into existing mode rather than incorrectly creating a new agent policy.
+              // Persist agentPolicyIds on create so a mid-deploy tab-close leaves a record that
+              // hydrates back into existing mode rather than incorrectly creating a new agent policy.
+              // - existing mode: target ids are the user-selected set.
+              // - pre-created new-policy mode (agentPolicyId already set by flyout): wrap the
+              //   singular id so resume sees it and routes to existing mode, not new-policy mode.
               ...(agentHostsMode === 'existing' && selectedAgentPolicyIds?.length
                 ? { agentPolicyIds: selectedAgentPolicyIds }
+                : agentPolicyId
+                ? { agentPolicyIds: [agentPolicyId] }
                 : {}),
             })) ?? undefined;
           if (onboardingDeploymentId) persistDeploymentId(onboardingDeploymentId);
