@@ -198,9 +198,9 @@ describe('When using `getActionDetailsById()', () => {
       ],
       total: 1,
     });
-    (
-      endpointAppContextService.getEndpointMetadataService as jest.Mock
-    ).mockReturnValue({ getHostMetadataList });
+    (endpointAppContextService.getEndpointMetadataService as jest.Mock).mockReturnValue({
+      getHostMetadataList,
+    });
     // Origin Fleet knows nothing about the linked-project agent
     (
       endpointAppContextService.getInternalFleetServices().agent.getByIds as jest.Mock
