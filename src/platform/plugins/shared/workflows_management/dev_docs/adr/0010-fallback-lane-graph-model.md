@@ -21,14 +21,19 @@ Definition updated in `CONTEXT.md`.
 
 ### 2. Asymmetric lane sets for the failure/spine pair
 
+> **⚠️ Decision 2 superseded by ADR-0012.** The reserved-lane model filters out failure edges
+> (`!e.isFailure && !e.isRejoin`) before `buildLaneSets` runs, so failure targets never enter
+> the lane-set builder. The `failureHead` parameter no longer exists on `buildLaneSets`. The
+> rest of ADR-0010 (decisions 1, 3–8) remains in force.
+
 In the fallback lane with `continue: true`, the lane leaves rejoin the spine, so the spine head is
 reachable from the failure lane. Without special handling, `buildLaneSets` classifies the spine head
 as a join → spine lane is empty → the fork is skipped (measured: the lane stays wherever dagre put
 it, which is the −cross side).
 
-Fix: `buildLaneSets` gains a `failureHead` parameter. A node shared between the failure lane and
-the spine lane belongs to the **spine** lane, not to "no lane". Gated on the fork having a failure
-edge so `if`/`switch`/`parallel` behaviour is untouched.
+Fix (original): `buildLaneSets` gained a `failureHead` parameter. A node shared between the failure
+lane and the spine lane belongs to the **spine** lane, not to "no lane". Gated on the fork having a
+failure edge so `if`/`switch`/`parallel` behaviour is untouched.
 
 ### 3. Edge declaration order encodes lane side
 

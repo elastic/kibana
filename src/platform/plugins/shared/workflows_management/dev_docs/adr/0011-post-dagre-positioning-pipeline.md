@@ -1,11 +1,17 @@
 
 # ADR-0011 — Post-dagre positioning pipeline
 
-**Status:** Accepted
+**Status:** Superseded by ADR-0012 (reserved side lanes)
 **Date:** 2026-09-18
 **Deciders:** @elastic/workflows-eng
 
 Supersedes ADR-0008 (post-dagre fork and trigger lane order).
+
+> **Note:** The 6-step pipeline documented here — in particular `anchorFallbackOwnersSpeculative`
+> (pass 3) — is superseded by the reserved-lane model in ADR-0012. The symbol
+> `anchorFallbackOwnersSpeculative` no longer exists in the codebase. The pipeline now has 5 passes
+> and omits the speculative anchoring step; owner straightness is now a structural consequence of
+> the reserved-lane model (100%, vs 74.1% for speculative anchoring).
 
 ## Context
 

@@ -45,5 +45,6 @@ What becomes easier, what becomes harder, what constraints this imposes on futur
 | [0007](0007-structural-child-slots.md) | Structural child slots and per-slot enumerator | Accepted |
 | [0008](0008-post-dagre-lane-order.md) | Post-dagre fork and trigger lane order | Superseded by ADR-0011 |
 | [0009](0009-alignment-ignored-edges.md) | `alignmentIgnoredEdges`: excluding failure edges from cross-axis alignment | Accepted |
-| [0010](0010-fallback-lane-graph-model.md) | Fallback lane graph model | Accepted |
-| [0011](0011-post-dagre-positioning-pipeline.md) | Post-dagre positioning pipeline | Accepted |
+| [0010](0010-fallback-lane-graph-model.md) | Fallback lane graph model | Accepted (Decision 2 superseded by ADR-0012) |
+| [0011](0011-post-dagre-positioning-pipeline.md) | Post-dagre positioning pipeline | Superseded by ADR-0012 |
+| [0012](0012-reserved-side-lanes.md) | Reserved side lanes | Accepted |

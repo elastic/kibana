@@ -5,6 +5,12 @@
 **Date:** 2026-09-18
 **Deciders:** @elastic/workflows-eng
 
+> **Note (ADR-0012):** The workflow pipeline no longer passes `alignmentIgnoredEdges` to `dagLayout`.
+> The reserved-lane model (ADR-0012) gives the fallback owner exactly one spine successor in dagre's
+> view, so the barycentre pass centres the owner correctly without excluding the failure edge. The
+> `alignmentIgnoredEdges` option remains in `apply_dagre.ts` as a generic API affordance; removing
+> it is a cleanup deferred to a future PR.
+
 ## Context
 
 `dagLayout` runs a barycentre pass inside `alignDagreCrossAxisInPlace` to centre each node over its

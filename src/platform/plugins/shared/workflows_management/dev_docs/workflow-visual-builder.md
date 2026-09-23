@@ -28,7 +28,7 @@ foundations now in place (specs 00 and 01):
 |---|---|---|---|
 | Shared step-child traversal (prerequisite) | ✅ Implemented | 00 | ADR-0003, ADR-0007 |
 | Fork and trigger lane order preserved after layout | ✅ Implemented | 01 | ADR-0008 |
-| Fallback lane graph model (read-only) | ✅ Implemented | 02 | ADR-0004, ADR-0010, ADR-0011 |
+| Fallback lane graph model (read-only) | ✅ Implemented | 02 | ADR-0004, ADR-0010, ADR-0012 |
 | Connection ports (visible anchors, hover `+`, red fallback dot) | ❌ Not implemented | 03 | — |
 | Insert step from a flow port | ❌ Not implemented | 04 | ADR-0002, ADR-0005, ADR-0006 |
 | Node action menu (`⋮` — Edit / Duplicate / Add fallback steps / Delete) | ❌ Not implemented | 05 | — |

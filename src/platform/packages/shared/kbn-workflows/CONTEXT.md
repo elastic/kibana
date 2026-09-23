@@ -34,12 +34,19 @@ rank band — lanes occupying disjoint ranks may interleave on the cross axis. L
 disjoint intervals.
 
 A lane is not a set of nodes: nodes reachable from more than one sibling lane (joins) belong to no
-lane — except that a node shared between a fallback lane and its own spine lane belongs to the
-spine lane, because a `continue` rejoin means the lane feeds the spine rather than branching
-beside it. `bypass lane node` and `fallback lane` are specialisations.
+lane. `bypass lane node` and `fallback lane` are specialisations.
 
 **isMerge (edge property)**
-An _edge_ tag, not a node type. Set to `true` on edges whose target has in-degree > 1 **and** whose source is a bypass-lane node or a fallback-lane leaf (i.e., edges that participate in the fan-in matching a synthetic fork bus). Computed in `use_workflow_layout.ts`; drives `buildMergeBusPath` routing. There is no join node in the logical graph — `transform_workflow_to_graph.ts` wires branch leaves directly to the next sibling via `exitIds = dedupeIds(branchExits)`. Widening this to plain in-degree > 1 is deferred (ADR-0011).
+An _edge_ tag, not a node type. Set to `true` on edges whose target has in-degree > 1 **and** whose source is a bypass-lane node or a fallback-lane leaf (i.e., edges that participate in the fan-in matching a synthetic fork bus). Computed in `use_workflow_layout.ts`; drives `buildMergeBusPath` routing. There is no join node in the logical graph — `transform_workflow_to_graph.ts` wires branch leaves directly to the next sibling via `exitIds = dedupeIds(branchExits)`. Widening this to plain in-degree > 1 is deferred (ADR-0012; the nested-`continue` rejoin is the motivating shape, tracked in [security-team#19542](https://github.com/elastic/security-team/issues/19542)).
+
+**container step**
+A step whose body renders as a group box on the canvas. The set is `CONTAINER_STEP_TYPES = new Set(['foreach', 'while'])`. The React Flow node type literal `'foreachGroup'` is a legacy misnomer: it also covers `while` steps.
+
+**container members vs container descendants**
+`ForeachGroup.innerNodes` holds **members** — the direct children of the container's body. A nested container (a `foreach` inside a `foreach`) contributes its *container node* to the parent's `innerNodes` and pushes its own body as a **sibling** entry in `foreachGroups` (see `transform_workflow_to_graph.ts`). Any layout pass that moves a container must carry **all descendants** transitively (the `containerDescendants` closure from `buildContainerDescendants`), not just members. Carrying only members moves the nested container node while leaving its body behind, displacing grandchildren by the shift delta and rendering them outside their box.
+
+**fork head**
+A direct target of a source node with two or more outgoing spine edges, where the target is *not* reachable from any sibling target. Fork heads are mutually exclusive branch heads and are aligned onto a shared main-axis rank by §3.5 of `layout_graph_with_lanes.ts`. A node that *is* reachable from a sibling target is a **transitive successor** of that sibling and must not be aligned — aligning it collapses two ranks and destroys the non-overlap guarantee.
 
 ---
 
