@@ -82,7 +82,7 @@ describe('LinkedActionPoliciesStep', () => {
     expect(screen.getByText('Action policies')).toBeInTheDocument();
     expect(
       screen.getByText(
-        'Match action policies with rule tags above, or link an existing action policy.'
+        'These policies match this rule by catch-all or tag. Policies with a query condition may also match at dispatch time based on alert data.'
       )
     ).toBeInTheDocument();
   });
