@@ -62,7 +62,11 @@ export default ({ getService }: FtrProviderContext) => {
         void request.set(ALERTING_CLONE_API_KEY_HEADER, cloneHeaderValue);
       }
 
-      const { body: rule } = await request.send(getCustomQueryRuleParams({ enabled })).expect(200);
+      // A short interval so the survival checks below can wait for an execution that starts
+      // after the caller key is invalidated; the default (100m) would never run a second time.
+      const { body: rule } = await request
+        .send(getCustomQueryRuleParams({ enabled, interval: '5s' }))
+        .expect(200);
 
       return { rule, apiKey };
     };
@@ -77,9 +81,12 @@ export default ({ getService }: FtrProviderContext) => {
 
       expect(await getApiKeyCreatedByUser(rule.id)).toBe(false);
 
-      // The borrowed caller key going away must not affect the rule: it runs on its own cloned key
+      // The borrowed caller key going away must not affect the rule: it runs on its own cloned key.
+      // `afterDate` is required — without it the helper accepts the execution that already
+      // succeeded before invalidation, which proves nothing about the cloned credential.
       await es.security.invalidateApiKey({ ids: [apiKey.id] });
-      await waitForRuleSuccess({ supertest, log, id: rule.id });
+      const afterInvalidation = new Date();
+      await waitForRuleSuccess({ supertest, log, id: rule.id, afterDate: afterInvalidation });
     });
 
     it('persists the caller API key on the rule when the header is not set', async () => {
@@ -111,9 +118,10 @@ export default ({ getService }: FtrProviderContext) => {
 
       expect(await getApiKeyCreatedByUser(rule.id)).toBe(false);
 
-      // The borrowed caller key going away must not affect the rule: it runs on its own cloned key
+      // As above: only an execution that starts after invalidation proves the cloned key runs it
       await es.security.invalidateApiKey({ ids: [apiKey.id] });
-      await waitForRuleSuccess({ supertest, log, id: rule.id });
+      const afterInvalidation = new Date();
+      await waitForRuleSuccess({ supertest, log, id: rule.id, afterDate: afterInvalidation });
     });
   });
 };
