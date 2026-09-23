@@ -1508,12 +1508,18 @@ steps:
                 properties:
                   verdicts:
                     type: array
+                    # Cap at consts.batch_size: a batch never has more than 50 real alerts, so
+                    # more than 50 verdicts is hallucination/injection. Without this bound a
+                    # 10 MB response can inflate all_verdicts across up to 20 batches.
+                    maxItems: 50
                     description: One verdict per alert in the batch, in the order the alerts were given.
                     items:
                       type: object
                       properties:
                         id:
                           type: string
+                          # Matches alerts items._id maxLength — the model must echo a real id.
+                          maxLength: 512
                           description: The alert id, copied verbatim from the <alert id="..."> block being classified
                         classification:
                           type: string
@@ -2085,6 +2091,13 @@ steps:
   # When the guard short-circuits (workflow disabled, no connector, zero pending alerts),
   # the accumulators are still at their initialised values ([] / 0) and the output is
   # well-formed — callers receive an empty verdict list rather than a missing output.
+  #
+  # STANDALONE PATH CAVEAT: output_verdicts / generated_summary / impacted_entities /
+  # missing_alert_ids / connector_id (resolved) are only accumulated when
+  # calledByWorker == true. On a standalone (alert-trigger) run those fields stay at
+  # their empty-init values even though tags/notes/auto-close may have run.
+  # auto_closed_ids IS populated on both paths. Do not treat standalone workflow.output
+  # as a complete analysis summary — there is no Worker consumer of it today.
   - name: emit_workflow_output
     type: workflow.output
     status: completed

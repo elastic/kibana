@@ -86,8 +86,9 @@ export const AlertAnalysisImpactedEntity = z.object({
 export type AlertAnalysisImpactedEntity = z.infer<typeof AlertAnalysisImpactedEntity>;
 
 // Structured output block emitted by the workflow when invoked by a caller (Worker path).
-// Also available on the standalone path — accumulators are always initialised so the output
-// is well-formed even when the analysis_enabled guard short-circuits.
+// On the standalone (alert-trigger) path the step still fires, but Worker-gated accumulators
+// (verdicts, generated_summary, impacted_entities, missing_alert_ids, resolved connector_id)
+// stay at empty-init — do not treat that payload as a complete analysis summary.
 // Object schema is exported separately so contract-sync tests can read `.shape` after
 // `.superRefine()` wraps the refined schema.
 export const AlertAnalysisWorkflowOutputFields = z.object({
