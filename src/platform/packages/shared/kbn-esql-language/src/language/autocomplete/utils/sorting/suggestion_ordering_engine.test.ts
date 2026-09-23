@@ -67,6 +67,43 @@ describe('SuggestionOrderingEngine', () => {
     expect(statsByResult[1].label).toBe('keyword');
   });
 
+  it('should rank the required query text above the optional prefix keyword in HIGHLIGHT', () => {
+    const suggestions = [
+      createSuggestion('prefix = "..."', SuggestionCategory.LANGUAGE_KEYWORD),
+      createSuggestion('The text to highlight', SuggestionCategory.CONSTANT_VALUE),
+    ];
+
+    const evalResult = engine.sort([...suggestions], { command: 'EVAL' });
+    expect(evalResult[0].label).toBe('prefix = "..."');
+
+    const highlightResult = engine.sort([...suggestions], { command: 'HIGHLIGHT' });
+    expect(highlightResult[0].label).toBe('The text to highlight');
+    expect(highlightResult[1].label).toBe('prefix = "..."');
+  });
+
+  it('should rank the comma above the command terminators in both DENSE_VECTOR field lists', () => {
+    const suggestions = [
+      createSuggestion('\n', SuggestionCategory.NEW_LINE),
+      createSuggestion('|', SuggestionCategory.PIPE),
+      createSuggestion(',', SuggestionCategory.COMMA),
+      createSuggestion('WITH', SuggestionCategory.LANGUAGE_KEYWORD),
+    ];
+
+    const evalResult = engine.sort([...suggestions], { command: 'EVAL' });
+    expect(evalResult.map(({ label }) => label)).toEqual(['WITH', '\n', '|', ',']);
+
+    const expectedOrder = ['WITH', ',', '\n', '|'];
+
+    const fieldListResult = engine.sort([...suggestions], { command: 'DENSE_VECTOR' });
+    expect(fieldListResult.map(({ label }) => label)).toEqual(expectedOrder);
+
+    const onListResult = engine.sort([...suggestions], {
+      command: 'DENSE_VECTOR',
+      location: 'ON',
+    });
+    expect(onListResult.map(({ label }) => label)).toEqual(expectedOrder);
+  });
+
   it('should boost aggregate functions in STATS context', () => {
     const suggestions = [
       createSuggestion('abs', SuggestionCategory.FUNCTION_SCALAR),

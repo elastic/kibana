@@ -9,6 +9,7 @@
 
 import { coreMock } from '@kbn/core/public/mocks';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
 import type { Setup as PluginSetup, Start as PluginStart } from '.';
 import { InspectorViewRegistry } from './view_registry';
 import { plugin as pluginInitializer } from '.';
@@ -58,7 +59,7 @@ const createPlugin = async () => {
     coreStart,
     plugin,
     setup,
-    doStart: async () => await plugin.start(coreStart, { share }),
+    doStart: async (cps?: CPSPluginStart) => await plugin.start(coreStart, { share, cps }),
   };
 };
 

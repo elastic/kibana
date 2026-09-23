@@ -8,19 +8,22 @@
 import { z } from '@kbn/zod/v4';
 import { MAX_TAG_LENGTH, MAX_TAGS } from '@kbn/alerting-v2-constants';
 import { validateDuration, validateMaxDuration } from './validation';
-import { MAX_DURATION } from './constants';
+import { MAX_DURATION, MAX_DURATION_LENGTH } from './constants';
 
-const durationSchema = z.string().superRefine((value, ctx) => {
-  const formatError = validateDuration(value);
-  if (formatError) {
-    ctx.addIssue({ code: z.ZodIssueCode.custom, message: formatError });
-    return;
-  }
-  const maxError = validateMaxDuration(value, MAX_DURATION);
-  if (maxError) {
-    ctx.addIssue({ code: z.ZodIssueCode.custom, message: maxError });
-  }
-});
+const durationSchema = z
+  .string()
+  .max(MAX_DURATION_LENGTH, { abort: true })
+  .superRefine((value, ctx) => {
+    const formatError = validateDuration(value);
+    if (formatError) {
+      ctx.addIssue({ code: 'custom', message: formatError });
+      return;
+    }
+    const maxError = validateMaxDuration(value, MAX_DURATION);
+    if (maxError) {
+      ctx.addIssue({ code: 'custom', message: maxError });
+    }
+  });
 
 /**
  * Shared schema for tag arrays used across alerting v2 (rule metadata, action policies,
@@ -28,6 +31,15 @@ const durationSchema = z.string().superRefine((value, ctx) => {
  * `MAX_TAGS` tags allowed.
  */
 const tagsSchema = z.array(z.string().min(1).max(MAX_TAG_LENGTH)).max(MAX_TAGS);
+
+/** Response shape of the tag endpoints: the unique tags, wrapped in an object. */
+export const tagsResponseSchema = z
+  .object({
+    tags: z.array(z.string()).describe('The list of unique tags.'),
+  })
+  .describe('Wrapped tags response.');
+
+export type TagsResponse = z.infer<typeof tagsResponseSchema>;
 
 /** Make a schema optional while preserving its `.describe()` metadata. */
 const optionalWithDescription = <T extends z.ZodType>(schema: T) => {

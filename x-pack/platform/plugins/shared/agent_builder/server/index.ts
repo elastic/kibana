@@ -20,7 +20,7 @@ export type {
   ToolsSetup,
   ToolsStart,
   ConversationsStart,
-  ReadOnlyConversationClient,
+  ConversationPublicClient,
 } from './types';
 
 export type { ConversationListOptions } from '@kbn/agent-builder-common';

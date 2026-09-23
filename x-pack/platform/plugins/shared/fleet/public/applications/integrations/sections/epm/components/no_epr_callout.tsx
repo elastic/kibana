@@ -9,7 +9,8 @@ import React, { type FunctionComponent } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiCallOut, EuiLink } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { useStartServices } from '../../../../../hooks';
 
@@ -53,11 +54,7 @@ export const NoEprCallout: FunctionComponent<{ statusCode?: number }> = ({
     );
   }
 
-  return (
-    <EuiCallOut title={titleMessage} iconType="info" color={'warning'}>
-      <p>{descriptionMessage}</p>
-    </EuiCallOut>
-  );
+  return <KbnWarningCallout title={titleMessage} text={descriptionMessage} />;
 };
 
 function ProxyLink() {

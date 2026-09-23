@@ -18,7 +18,6 @@ import { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { getRouteConfig } from '../get_route_config';
 import { read } from './read';
 import { getReadResponseBodySchema } from './schemas';
-import { getUseGASchemas } from '../get_use_ga_schemas';
 
 export function registerReadRoute(
   router: VersionedRouter<RequestHandlerContext>,
@@ -30,6 +29,9 @@ export function registerReadRoute(
   const readRoute = router.get({
     path: `${basePath}/{id}`,
     summary: `Get a dashboard`,
+    // Only the public route carries a curated ID. The dashboard-app route is
+    // internal and keeps its derived one.
+    ...(isDashboardAppRequest ? {} : { operationId: 'get-dashboard' }),
     ...routeConfig,
     description: 'Returns the complete state of a dashboard by ID.',
   });
@@ -82,12 +84,10 @@ export function registerReadRoute(
       telemetryHandler(req, { usageCounter, trackAgentic: true }, async () => {
         try {
           const { core } = await ctx.resolve(['core']);
-          const useGASchemas = await getUseGASchemas(core);
           const { body, resolveHeaders } = await read(
             core.savedObjects.client,
             getCachedDashboardStateSchema(),
             req.params.id,
-            useGASchemas,
             req.serverTiming,
             isDashboardAppRequest
           );

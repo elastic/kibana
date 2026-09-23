@@ -27,20 +27,31 @@ export const ExportExceptionListRequestQuery = lazySchema(() =>
     /**
      * Exception list's internal `id` (UUID) returned on create; use with `list_id` and `namespace_type` for an unambiguous target.
      */
-    id: ExceptionListId,
+    id: ExceptionListId.describe(
+      "Exception list's internal `id` (UUID) returned on create; use with `list_id` and `namespace_type` for an unambiguous target."
+    ),
     /**
      * Human-readable `list_id` of the exception list to export, as shown in the UI and API responses.
      */
-    list_id: ExceptionListHumanId,
+    list_id: ExceptionListHumanId.describe(
+      'Human-readable `list_id` of the exception list to export, as shown in the UI and API responses.'
+    ),
     /**
       * `single` exports a list in the current Kibana space; `agnostic` exports a global (space-agnostic) list.
 
       */
-    namespace_type: ExceptionNamespaceType,
+    namespace_type: ExceptionNamespaceType.describe(
+      '`single` exports a list in the current Kibana space; `agnostic` exports a global (space-agnostic) list.\n'
+    ),
     /**
      * Determines whether to include expired exceptions in the exported list. Expiration date defined by `expire_time`.
      */
-    include_expired_exceptions: z.enum(['true', 'false']).default('true'),
+    include_expired_exceptions: z
+      .enum(['true', 'false'])
+      .default('true')
+      .describe(
+        'Determines whether to include expired exceptions in the exported list. Expiration date defined by `expire_time`.'
+      ),
   })
 );
 export type ExportExceptionListRequestQuery = z.infer<typeof ExportExceptionListRequestQuery>;

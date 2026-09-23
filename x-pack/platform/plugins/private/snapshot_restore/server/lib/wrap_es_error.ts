@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
+
 const extractCausedByChain = (causedBy: any = {}, accumulator: any[] = []): any => {
   const { reason, caused_by } = causedBy;
 
@@ -19,6 +21,21 @@ const extractCausedByChain = (causedBy: any = {}, accumulator: any[] = []): any 
   return accumulator;
 };
 
+// A proxy in front of ES can answer with a non-JSON body (e.g. an HTML error page); treat it as an empty body
+// so the wrapper still returns a response instead of throwing.
+const parseEsBody = (esBody: unknown): Partial<estypes.ErrorResponseBase> => {
+  if (typeof esBody !== 'string') {
+    return typeof esBody === 'object' && esBody !== null ? esBody : {};
+  }
+
+  try {
+    const parsed: unknown = JSON.parse(esBody);
+    return typeof parsed === 'object' && parsed !== null ? parsed : {};
+  } catch (e) {
+    return {};
+  }
+};
+
 /**
  * Wraps an error thrown by the ES JS client into a Boom error response and returns it
  *
@@ -28,9 +45,10 @@ const extractCausedByChain = (causedBy: any = {}, accumulator: any[] = []): any 
  */
 export const wrapEsError = (err: any, statusCodeToMessageMap: any = {}) => {
   const { statusCode, response } = err;
+  // Errors thrown by the ES client carry the ES response body under `meta.body`, not `response`
+  const esBody = response ?? err.meta?.body ?? {};
 
-  const { error: { root_cause = [], caused_by = {} } = {} } =
-    typeof response === 'string' ? JSON.parse(response) : response;
+  const { error: { root_cause = [], caused_by = {} } = {} } = parseEsBody(esBody);
 
   // If no custom message if specified for the error's status code, just
   // wrap the error as a Boom error response, include the additional information from ES, and return it

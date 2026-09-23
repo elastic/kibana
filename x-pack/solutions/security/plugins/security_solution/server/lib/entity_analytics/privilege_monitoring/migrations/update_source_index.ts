@@ -20,6 +20,7 @@ export const MAX_PER_PAGE = 10_000;
 export const updatePrivilegedMonitoringSourceIndex = async ({
   logger,
   getStartServices,
+  spaceId,
 }: EntityAnalyticsMigrationsParams) => {
   const [core, { security, encryptedSavedObjects }] = await getStartServices();
 
@@ -28,7 +29,7 @@ export const updatePrivilegedMonitoringSourceIndex = async ({
   const shouldRunMigration = shouldRunSourceMigrationFactory({
     esClient: internalEsClient,
   });
-  const shouldRun = await shouldRunMigration('*');
+  const shouldRun = await shouldRunMigration(spaceId ?? '*');
   if (!shouldRun) {
     logger.info('Skipping migration for Privileged Monitoring Entity Source.');
     return;
@@ -39,7 +40,7 @@ export const updatePrivilegedMonitoringSourceIndex = async ({
   const savedObjectsResponse = await soClientGlobal.find<MonitoringEntitySource>({
     type: monitoringEntitySourceTypeName,
     perPage: MAX_PER_PAGE,
-    namespaces: ['*'],
+    namespaces: spaceId ? [spaceId] : ['*'],
   });
 
   await asyncForEach(savedObjectsResponse.saved_objects, async (savedObject) => {
@@ -78,5 +79,5 @@ export const updatePrivilegedMonitoringSourceIndex = async ({
   const deleteUsersWithSourceIndex = deleteUsersWithSourceIndexFactory({
     esClient: internalEsClient,
   });
-  await deleteUsersWithSourceIndex('*');
+  await deleteUsersWithSourceIndex(spaceId ?? '*');
 };

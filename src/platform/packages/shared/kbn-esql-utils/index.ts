@@ -78,10 +78,12 @@ export {
   hasChangePointCommand,
   getChangePointOutputColumnNames,
   getChangePointSeriesColumns,
+  getChangePointByColumns,
   buildChangePointLineDataQuery,
   appendEntityFiltersToChangePointLineEsql,
   formatEsqlIdentifier,
   formatEsqlLiteral,
+  formatEsqlEntityPredicate,
   isComputedColumn,
   getQuerySummary,
   getColumnsWithHighlights,
@@ -100,6 +102,14 @@ export {
   isSingleSource,
   type ESQLSourceKind,
   ensureApproximationLicense,
+  createEsqlViewsManagementClient,
+  EsqlViewsClientError,
+  type EsqlViewsClient,
+  getESQLSourceInfo,
+  type ESQLSourceInfo,
+  type ESQLSourceInfoColumn,
+  clearESQLSourceInfoCache,
+  buildEsqlSourceCacheKey,
 } from './src';
 
 export { ENABLE_ESQL, GROUP_NOT_SET_VALUE } from './constants';

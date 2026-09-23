@@ -11,10 +11,7 @@ import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import type { AlertEvent } from '../../../resources/datastreams/alert_events';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import { EsServiceInternalToken } from '../../services/es_service/tokens';
-import {
-  LoggerServiceToken,
-  type LoggerServiceContract,
-} from '../../services/logger_service/logger_service';
+import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 import { resolveRuleEventId } from '../build_alert_events';
 import { RULE_EXECUTION_COUNTERS } from '../metrics/counters';
 import { guardedMapStep } from '../stream_utils';
@@ -32,14 +29,12 @@ const IDS_QUERY_CHUNK_SIZE = 10_000;
 export class FilterDuplicateEventsStep implements RuleExecutionStep {
   public readonly name = 'filter_duplicate_events';
 
-  constructor(
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
-    @inject(EsServiceInternalToken) private readonly esClient: ElasticsearchClient
-  ) {}
+  constructor(@inject(EsServiceInternalToken) private readonly esClient: ElasticsearchClient) {}
 
   public executeStream(streamState: PipelineStateStream): PipelineStateStream {
     return guardedMapStep(streamState, ['rule', 'alertEventsBatch'], async (state) => {
-      const { rule, alertEventsBatch } = state;
+      const { alertEventsBatch } = state;
+      const logger = state.logger.withLabels({ step: this.name });
 
       const candidateIds = new Map<AlertEvent, string>();
       for (const event of alertEventsBatch) {
@@ -51,7 +46,7 @@ export class FilterDuplicateEventsStep implements RuleExecutionStep {
         return { type: 'continue', state };
       }
 
-      const existingIds = await this.fetchExistingIds([...candidateIds.values()]);
+      const existingIds = await this.fetchExistingIds([...candidateIds.values()], logger);
 
       if (existingIds.size === 0) {
         return { type: 'continue', state };
@@ -63,9 +58,7 @@ export class FilterDuplicateEventsStep implements RuleExecutionStep {
       });
 
       const removedCount = alertEventsBatch.length - filteredBatch.length;
-      this.logger.debug({
-        message: `[${this.name}] Dropped ${removedCount} duplicate rule event(s) for rule ${rule.id}`,
-      });
+      logger.debug({ message: `Dropped ${removedCount} duplicate rule event(s)` });
 
       return {
         type: 'continue',
@@ -77,7 +70,10 @@ export class FilterDuplicateEventsStep implements RuleExecutionStep {
     });
   }
 
-  private async fetchExistingIds(ids: string[]): Promise<Set<string>> {
+  private async fetchExistingIds(
+    ids: string[],
+    logger: LoggerServiceContract
+  ): Promise<Set<string>> {
     const existingIds = new Set<string>();
 
     for (let offset = 0; offset < ids.length; offset += IDS_QUERY_CHUNK_SIZE) {
@@ -96,9 +92,9 @@ export class FilterDuplicateEventsStep implements RuleExecutionStep {
           }
         }
       } catch (error) {
-        this.logger.warn({
+        logger.warn({
           code: ALERTING_LOG_CODES.RULE_EXECUTION_DEDUP_PRECHECK_FAILED,
-          message: `[${this.name}] ids pre-check failed (chunk offset=${offset}). Relying on _id collision at write time for this chunk.`,
+          message: `ids pre-check failed (chunk offset=${offset}). Relying on _id collision at write time for this chunk.`,
           error,
         });
       }

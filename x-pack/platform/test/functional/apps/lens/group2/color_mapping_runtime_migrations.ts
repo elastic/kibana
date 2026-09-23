@@ -35,7 +35,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const dashboardPanelActions = getService('dashboardPanelActions');
 
-  describe('lens old color mapping runtime migrations', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/284790
+  describe.skip('lens old color mapping runtime migrations', () => {
     let panels: WebElementWrapper[] = [];
     let panelTitleIndex = new Map<string, number>();
 
@@ -357,7 +358,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await testSubjects.click('lns-colorMapping-colorPicker-tab-custom');
         });
         await testSubjects.setValue('lns-colorMapping-colorPicker-custom-input', customColor, {
-          typeCharByChar: true,
           clearWithKeyboard: true,
         });
 

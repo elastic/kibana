@@ -94,8 +94,48 @@ export const getEvaluatorViewTraceAriaLabel = (evaluatorName: string) =>
     values: { evaluatorName },
   });
 
+export const getJudgedByLabel = (modelId: string) =>
+  i18n.translate('xpack.evals.exampleScoresTable.judgedByLabel', {
+    defaultMessage: 'judged by {modelId}',
+    values: { modelId },
+  });
+
 export const getEvaluatorAccordionAriaLabel = (evaluatorName: string) =>
   i18n.translate('xpack.evals.exampleScoresTable.evaluatorAccordionAriaLabel', {
     defaultMessage: 'Toggle details for evaluator {evaluatorName}',
     values: { evaluatorName },
+  });
+
+export const VIEW_FULL_INPUT_BUTTON_LABEL = i18n.translate(
+  'xpack.evals.exampleScoresTable.viewFullInputButtonLabel',
+  {
+    defaultMessage: 'View full input',
+  }
+);
+
+export const VIEW_FULL_OUTPUT_BUTTON_LABEL = i18n.translate(
+  'xpack.evals.exampleScoresTable.viewFullOutputButtonLabel',
+  {
+    defaultMessage: 'View full output',
+  }
+);
+
+export const HIDE_FULL_INPUT_ARIA_LABEL = i18n.translate(
+  'xpack.evals.exampleScoresTable.hideFullInputAriaLabel',
+  {
+    defaultMessage: 'Hide full input',
+  }
+);
+
+export const HIDE_FULL_OUTPUT_ARIA_LABEL = i18n.translate(
+  'xpack.evals.exampleScoresTable.hideFullOutputAriaLabel',
+  {
+    defaultMessage: 'Hide full output',
+  }
+);
+
+export const getDetailsLoadErrorMessage = (errorMessage: string) =>
+  i18n.translate('xpack.evals.exampleScoresTable.detailsLoadErrorMessage', {
+    defaultMessage: 'Failed to load details: {errorMessage}',
+    values: { errorMessage },
   });

@@ -76,6 +76,45 @@ steps:
         - exit_status: '*'
           limit: 1
 
+  # Exercises real LLM interactions against the new ES snapshot to catch ES-side
+  # inference changes that break them. Soft-fails for now: results are visible on the
+  # build but do not block snapshot promotion.
+  - group: Agent Builder LLM Smoke Tests
+    key: agent-builder-smoke-tests
+    depends_on:
+      - build
+    steps:
+      - command: |
+          mkdir -p target
+          .buildkite/scripts/steps/test/discover_eis_models.sh || echo '{"models":[]}' > target/eis_models.json
+          .buildkite/scripts/steps/test/scout/configs.sh
+          .buildkite/scripts/steps/test/annotate_llm_smoke_judgements.sh
+        env:
+          FTR_GEN_AI: '1'
+          FTR_EIS_CCM: '1'
+          KBN_BOOTSTRAP_NO_PREBUILT: 'true'
+          SCOUT_CONFIG: 'x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/playwright.config.ts'
+          SCOUT_CONFIG_GROUP_TYPE: 'scout-agent-builder-smoke-tests'
+          SCOUT_SERVER_RUN_FLAGS: '--arch stateful --domain classic'
+        label: Agent Builder Scout Smoke Tests
+        key: scout-agent-builder-smoke-tests
+        soft_fail: true
+        timeout_in_minutes: 50
+        parallelism: 1
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+          preemptible: true
+        artifact_paths:
+          - 'target/eis_models.json'
+          - 'target/llm_smoke_judgements.jsonl'
+        retry:
+          automatic:
+            - exit_status: '-1'
+              limit: 3
+
   - command: .buildkite/scripts/steps/es_snapshots/trigger_promote.sh
     label: Trigger promotion
     timeout_in_minutes: 10

@@ -9,22 +9,21 @@ import { inject, injectable } from 'inversify';
 import { getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { appendLimitToQuery } from '@kbn/esql-utils';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
+import { isMaximumResponseSizeExceededError } from '@kbn/es-errors';
 import { PluginInitializer } from '@kbn/core-di-server';
 import type { PluginInitializerContext } from '@kbn/core/server';
 import { isEsqlUserError } from '../../errors/esql_user_error';
+import { toQueryResponseSizeExceededError } from '../../errors/query_response_size_exceeded_error';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import type { PipelineStateStream, RuleExecutionStep } from '../types';
 import { getQueryPayload } from '../get_query_payload';
 import { injectDeduplicationMetadata } from '../deduplication_query';
-import {
-  LoggerServiceToken,
-  type LoggerServiceContract,
-} from '../../services/logger_service/logger_service';
+import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 import { QueryServiceScopedSpaceRoutingToken } from '../../services/query_service/tokens';
 import { guardedExpandStep, withAtLeastOne } from '../stream_utils';
-import { RULE_EXECUTION_COUNTERS } from '../metrics/counters';
-import type { PluginConfig } from '../../../config';
+import { RULE_EXECUTION_COUNTERS, type RuleExecutionCounter } from '../metrics/counters';
+import { type PluginConfig, getQueryRowLimit } from '../../../config';
 
 type EsqlRowBatch = Record<string, unknown>[];
 
@@ -32,16 +31,18 @@ type EsqlRowBatch = Record<string, unknown>[];
 export class ExecuteRuleQueryStep implements RuleExecutionStep {
   public readonly name = 'execute_rule_query';
 
-  private readonly maxAlertsPerRun: number;
+  private readonly queryRowLimit: number;
+  private readonly maxQueryResponseSize: number;
 
   constructor(
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
     @inject(QueryServiceScopedSpaceRoutingToken)
     private readonly queryService: QueryServiceContract,
     @inject(PluginInitializer('config'))
     pluginConfigAccessor: PluginInitializerContext<PluginConfig>['config']
   ) {
-    this.maxAlertsPerRun = pluginConfigAccessor.get<PluginConfig>().rules.run.alerts.max;
+    const config = pluginConfigAccessor.get<PluginConfig>();
+    this.queryRowLimit = getQueryRowLimit(config);
+    this.maxQueryResponseSize = config.rules.run.query.maxResponseSize.getValueInBytes();
   }
 
   /**
@@ -50,13 +51,14 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
    * A query the parser cannot transform runs unchanged; its rows then have no
    * `_id` and are written without deduplication.
    */
-  private withDeduplicationMetadata(query: string, ruleId: string): string {
+  private withDeduplicationMetadata(query: string, logger: LoggerServiceContract): string {
     try {
       return injectDeduplicationMetadata(query);
     } catch (error) {
-      this.logger.warn({
+      logger.warn({
         code: ALERTING_LOG_CODES.RULE_EXECUTION_DEDUP_METADATA_INJECTION_FAILED,
-        message: `[${this.name}] Could not inject deduplication metadata into query for rule ${ruleId}. Executing the original query.`,
+        message:
+          'Could not inject deduplication metadata into the rule query. Executing the original query.',
         error,
       });
       return query;
@@ -68,11 +70,9 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
 
     return guardedExpandStep(streamState, ['rule'], async function* (state) {
       const { input, rule } = state;
+      const logger = state.logger.withLabels({ step: step.name });
 
-      const effectiveQuery = step.withDeduplicationMetadata(
-        getBreachEsqlQuery(rule.query),
-        input.ruleId
-      );
+      const effectiveQuery = step.withDeduplicationMetadata(getBreachEsqlQuery(rule.query), logger);
       const lookbackWindow = rule.schedule.lookback ?? rule.schedule.every;
       const timeField = rule.time_field;
 
@@ -82,9 +82,9 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
         lookbackWindow,
       });
 
-      const boundedQuery = appendLimitToQuery(effectiveQuery, step.maxAlertsPerRun);
+      const boundedQuery = appendLimitToQuery(effectiveQuery, step.queryRowLimit);
 
-      step.logger.debug({
+      logger.debug({
         message: 'Executing ES|QL query',
         labels: { rule_id: input.ruleId, step: step.name },
       });
@@ -95,20 +95,48 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
           filter: queryPayload.filter,
           params: queryPayload.params,
           abortSignal: input.executionContext.signal,
+          maxResponseSize: step.maxQueryResponseSize,
         });
 
+        let totalRows = 0;
+        let loggedRowsDropped = false;
+
         for await (const batch of withAtLeastOne<EsqlRowBatch>(esqlRowBatchStream, [])) {
+          totalRows += batch.length;
+
+          const counters: Partial<Record<RuleExecutionCounter, number>> = {
+            [RULE_EXECUTION_COUNTERS.rowsReturnedByQuery]: batch.length,
+          };
+
+          if (!loggedRowsDropped && totalRows >= step.queryRowLimit) {
+            loggedRowsDropped = true;
+            counters[RULE_EXECUTION_COUNTERS.rowsDroppedByLimit] = 1;
+            logger.debug({
+              message: `ES|QL query results truncated at the ${step.queryRowLimit}-row limit; some rows may have been dropped`,
+              labels: { rule_id: input.ruleId, step: step.name },
+            });
+          }
+
           yield {
             type: 'continue',
             state: { ...state, queryPayload, esqlRowBatch: batch },
-            meta: {
-              counters: {
-                [RULE_EXECUTION_COUNTERS.rowsReturnedByQuery]: batch.length,
-              },
-            },
+            meta: { counters },
           };
         }
       } catch (error) {
+        if (isMaximumResponseSizeExceededError(error)) {
+          const sizeError = toQueryResponseSizeExceededError(
+            error,
+            'breach',
+            step.maxQueryResponseSize
+          );
+          logger.warn({
+            message: sizeError.message,
+            code: ALERTING_LOG_CODES.RULE_EXECUTION_QUERY_RESPONSE_SIZE_EXCEEDED,
+            labels: { rule_id: input.ruleId, space_id: input.spaceId, step: step.name },
+          });
+          throw createTaskRunError(sizeError, TaskErrorSource.USER);
+        }
         if (isEsqlUserError(error)) {
           throw createTaskRunError(error as Error, TaskErrorSource.USER);
         }

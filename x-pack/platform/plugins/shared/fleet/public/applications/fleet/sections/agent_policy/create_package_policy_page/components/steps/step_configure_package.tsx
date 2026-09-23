@@ -7,7 +7,6 @@
 
 import React, { useMemo } from 'react';
 import {
-  EuiCallOut,
   EuiHorizontalRule,
   EuiFlexGroup,
   EuiFlexItem,
@@ -15,6 +14,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
@@ -158,7 +158,7 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
               <React.Fragment key={policyTemplate.name}>
                 {isPolicyTemplateDeprecated && (
                   <>
-                    <EuiCallOut
+                    <KbnWarningCallout
                       announceOnMount
                       data-test-subj="deprecatedPolicyTemplateCallout"
                       title={i18n.translate(
@@ -168,12 +168,9 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
                           values: { title: policyTemplate.title },
                         }
                       )}
-                      color="warning"
-                      iconType="warning"
                       size="s"
-                    >
-                      <p>{policyTemplate.deprecated?.description}</p>
-                    </EuiCallOut>
+                      text={policyTemplate.deprecated?.description}
+                    />
                     <EuiSpacer size="m" />
                   </>
                 )}

@@ -32,7 +32,7 @@ describe('useGetCategories', () => {
     });
 
     await waitFor(() =>
-      expect(spyOnGetCategories).toBeCalledWith({
+      expect(spyOnGetCategories).toHaveBeenCalledWith({
         signal: abortCtrl.signal,
         owner: [SECURITY_SOLUTION_OWNER],
       })
@@ -54,6 +54,6 @@ describe('useGetCategories', () => {
       ),
     });
 
-    await waitFor(() => expect(addError).toBeCalled());
+    await waitFor(() => expect(addError).toHaveBeenCalled());
   });
 });

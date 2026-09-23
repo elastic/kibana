@@ -20,16 +20,15 @@ import { DatasetsTabContent } from './datasets_tab_content';
 import type { DataFederationKibanaServices } from './types';
 import { useLoadList } from './use_load_list';
 
-const DOCS_LINK =
-  'https://www.elastic.co/docs/reference/query-languages/esql/esql-data-federation' as const;
-
 const DATASETS_PATH = '/datasets' as const;
 const DATA_SOURCES_PATH = '/data_sources' as const;
 
 export const Main: FunctionComponent = () => {
   const {
-    services: { dataSourcesClient, datasetsClient },
+    services: { dataSourcesClient, datasetsClient, docLinks },
   } = useKibana<DataFederationKibanaServices>();
+
+  const dataFederationLinks = docLinks.links.dataFederation;
 
   const history = useHistory();
   const { pathname } = useLocation();
@@ -108,7 +107,20 @@ export const Main: FunctionComponent = () => {
         badges={[{ label: mainTranslations.experimental }]}
         tabs={tabs}
         spacing="bleed"
-        docLink={DOCS_LINK}
+        docLink={dataFederationLinks.overview}
+        menu={{
+          items: [
+            {
+              id: 'quickstart',
+              label: mainTranslations.quickstartLink,
+              iconType: 'rocket',
+              href: dataFederationLinks.quickstart,
+              target: '_blank',
+              overflow: true,
+              order: 3,
+            },
+          ],
+        }}
       />
       <EuiSpacer size="l" />
 

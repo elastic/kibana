@@ -16,7 +16,6 @@ import type { ActionPolicySavedObjectAttributes } from '../../../saved_objects';
 import { ACTION_POLICY_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import type { AlertingServerStartDependencies } from '../../../types';
 import { EncryptedSavedObjectsClientToken } from '../../dispatcher/steps/dispatch_step_tokens';
-import { escapeTermsInclude } from '../../escape_terms_include';
 import { spaceIdToNamespace } from '../../space_id_to_namespace';
 import { ActionPolicySavedObjectsClientToken } from './tokens';
 import type {
@@ -245,32 +244,5 @@ export class ActionPolicySavedObjectService implements ActionPolicySavedObjectSe
       sortField,
       sortOrder,
     });
-  }
-
-  public async getDistinctTags(params?: { search?: string }): Promise<string[]> {
-    const search = params?.search;
-    const result = await this.client.find<
-      ActionPolicySavedObjectAttributes,
-      { tags: { buckets: Array<{ key: string }> } }
-    >({
-      type: ACTION_POLICY_SAVED_OBJECT_TYPE,
-      perPage: 0,
-      aggs: {
-        tags: {
-          terms: {
-            field: `${ACTION_POLICY_SAVED_OBJECT_TYPE}.attributes.tags`,
-            size: 100,
-            order: { _key: 'asc' },
-            ...(search ? { include: `${escapeTermsInclude(search)}.*` } : {}),
-          },
-        },
-      },
-    });
-
-    return (
-      result.aggregations?.tags.buckets
-        .map((bucket) => bucket.key)
-        .filter((key) => key.length > 0) ?? []
-    );
   }
 }

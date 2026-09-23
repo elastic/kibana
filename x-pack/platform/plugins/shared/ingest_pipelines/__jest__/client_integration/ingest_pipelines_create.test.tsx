@@ -13,6 +13,9 @@ import userEvent from '@testing-library/user-event';
 import { createMemoryHistory } from 'history';
 import { Route, Router } from '@kbn/shared-ux-router';
 
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
+
 import { API_BASE_PATH } from '../../common/constants';
 import { PipelinesCreate } from '../../public/application/sections/pipelines_create';
 import { getCreatePath, ROUTES } from '../../public/application/services/navigation';
@@ -67,8 +70,9 @@ describe('<PipelinesCreate />', () => {
   test('should render the correct page header', async () => {
     await renderPipelinesCreate(httpSetup);
 
-    expect(screen.getByTestId('pageTitle')).toHaveTextContent('Create pipeline');
-    expect(screen.getByTestId('documentationLink')).toHaveTextContent('Create pipeline docs');
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Create pipeline');
+    await openAppMenuOverflow();
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.menuDocumentation)).toBeInTheDocument();
   });
 
   test('should toggle the version field', async () => {

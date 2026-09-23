@@ -28,7 +28,12 @@ describe('alertEpisodeSchema', () => {
   it('accepts null on nullable fields', () => {
     const result = alertEpisodeSchema.safeParse({
       ...baseEpisode,
+      triggered_at: null,
+      last_ack_action: null,
       last_assignee_uid: null,
+      last_snooze_action: null,
+      snooze_expiry: null,
+      last_tags: null,
       episode_data: null,
       severity: null,
     });

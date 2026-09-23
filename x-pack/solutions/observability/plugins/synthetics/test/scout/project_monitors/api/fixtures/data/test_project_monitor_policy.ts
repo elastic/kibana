@@ -79,7 +79,7 @@ export const getTestProjectSyntheticsPolicyLightweight = (
           vars: {
             __ui: {
               type: 'yaml',
-              value: '{"is_tls_enabled":true}',
+              value: null,
             },
             'check.request.body': {
               type: 'yaml',
@@ -139,12 +139,12 @@ export const getTestProjectSyntheticsPolicyLightweight = (
             },
             max_redirects: {
               type: 'integer',
-              value: '0',
+              value: null,
             },
             ...commonVars,
             mode: {
               type: 'text',
-              value: 'any',
+              value: null,
             },
             name: {
               type: 'text',
@@ -156,6 +156,15 @@ export const getTestProjectSyntheticsPolicyLightweight = (
             },
             password: {
               type: 'password',
+              value: null,
+            },
+            // synthetics package 1.12.0+ (elastic/integrations#21116)
+            kerberos: {
+              type: 'text',
+              value: null,
+            },
+            ntlm: {
+              type: 'text',
               value: null,
             },
             processors: {
@@ -251,9 +260,7 @@ export const getTestProjectSyntheticsPolicyLightweight = (
             },
           },
           compiled_stream: {
-            __ui: {
-              is_tls_enabled: true,
-            },
+            __ui: null,
             type: 'http',
             name,
             id,
@@ -262,7 +269,7 @@ export const getTestProjectSyntheticsPolicyLightweight = (
             urls: 'http://localhost:9200',
             schedule: '@every 60m',
             timeout: '80s',
-            max_redirects: 0,
+            max_redirects: null,
             max_attempts: 2,
             tags: ['tag2', 'tag2'],
             proxy_url: 'testGlobalParamOverwrite',
@@ -286,7 +293,6 @@ export const getTestProjectSyntheticsPolicyLightweight = (
             'check.request.body': 'testGlobalParamValue',
             ipv4: true,
             ipv6: true,
-            mode: 'any',
             processors: [
               {
                 add_fields: {
@@ -588,6 +594,9 @@ export const getTestProjectSyntheticsPolicy = (
             tags: { type: 'yaml' },
             username: { type: 'text' },
             password: { type: 'password' },
+            // synthetics package 1.12.0+ (elastic/integrations#21116)
+            kerberos: { type: 'text' },
+            ntlm: { type: 'text' },
             'response.include_headers': { type: 'bool' },
             'response.include_body': { type: 'text' },
             'response.include_body_max_bytes': { type: 'text' },
@@ -711,7 +720,7 @@ export const getTestProjectSyntheticsPolicy = (
           data_stream: getDataStream('browser'),
           vars: {
             __ui: {
-              value: '{"script_source":{"is_generated_script":false,"file_name":""}}',
+              value: null,
               type: 'yaml',
             },
             enabled: { value: true, type: 'bool' },
@@ -755,10 +764,10 @@ export const getTestProjectSyntheticsPolicy = (
                 },
               ]),
             },
-            screenshots: { value: 'on', type: 'text' },
+            screenshots: { value: null, type: 'text' },
             synthetics_args: { value: null, type: 'text' },
             ignore_https_errors: { value: false, type: 'bool' },
-            certificate_error_spki_allowlist: { type: 'yaml' },
+            certificate_error_spki_allowlist: { value: null, type: 'yaml' },
             'throttling.config': {
               value: JSON.stringify({ download: 5, upload: 3, latency: 20 }),
               type: 'text',
@@ -780,9 +789,7 @@ export const getTestProjectSyntheticsPolicy = (
           },
           id: `synthetics/browser-browser-4b6abc6c-118b-4d93-a489-1135500d09f1-${projectId}-default-d70a46e0-22ea-11ed-8c6b-09a2d21dfbc3`,
           compiled_stream: {
-            __ui: {
-              script_source: { is_generated_script: false, file_name: '' },
-            },
+            __ui: null,
             type: 'browser',
             name: 'check if title is present',
             id,
@@ -797,7 +804,6 @@ export const getTestProjectSyntheticsPolicy = (
             'source.project.content':
               'UEsDBBQACAAIAON5qVQAAAAAAAAAAAAAAAAfAAAAZXhhbXBsZXMvdG9kb3MvYmFzaWMuam91cm5leS50c22Q0WrDMAxF3/sVF7MHB0LMXlc6RvcN+wDPVWNviW0sdUsp/fe5SSiD7UFCWFfHujIGlpnkybwxFTZfoY/E3hsaLEtwhs9RPNWKDU12zAOxkXRIbN4tB9d9pFOJdO6EN2HMqQguWN9asFBuQVMmJ7jiWNII9fIXrbabdUYr58l9IhwhQQZCYORCTFFUC31Btj21NRc7Mq4Nds+4bDD/pNVgT9F52Jyr2Fa+g75LAPttg8yErk+S9ELpTmVotlVwnfNCuh2lepl3+JflUmSBJ3uggt1v9INW/lHNLKze9dJe1J3QJK8pSvWkm6aTtCet5puq+x63+AFQSwcIAPQ3VfcAAACcAQAAUEsBAi0DFAAIAAgA43mpVAD0N1X3AAAAnAEAAB8AAAAAAAAAAAAgAKSBAAAAAGV4YW1wbGVzL3RvZG9zL2Jhc2ljLmpvdXJuZXkudHNQSwUGAAAAAAEAAQBNAAAARAEAAAAA',
             playwright_options: { headless: true, chromiumSandbox: false },
-            screenshots: 'on',
             'filter_journeys.match': 'check if title is present',
             params: {
               testGlobalParam: 'testGlobalParamValue',

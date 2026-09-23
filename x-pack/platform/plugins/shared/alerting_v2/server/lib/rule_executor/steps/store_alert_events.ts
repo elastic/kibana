@@ -10,28 +10,26 @@ import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import type { PipelineStateStream, RuleExecutionStep } from '../types';
 import { StorageServiceInternalToken } from '../../services/storage_service/tokens';
 import type { StorageServiceContract } from '../../services/storage_service/storage_service';
-import {
-  LoggerServiceToken,
-  type LoggerServiceContract,
-} from '../../services/logger_service/logger_service';
+import type { AlertEvent } from '../../../resources/datastreams/alert_events';
 import { resolveRuleEventId } from '../build_alert_events';
 import { guardedMapStep } from '../stream_utils';
-import type { AlertEvent } from '../../../resources/datastreams/alert_events';
 
 @injectable()
 export class StoreAlertEventsStep implements RuleExecutionStep {
   public readonly name = 'store_alert_events';
 
   constructor(
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
     @inject(StorageServiceInternalToken) private readonly storageService: StorageServiceContract
   ) {}
 
   public executeStream(streamState: PipelineStateStream): PipelineStateStream {
     return guardedMapStep(streamState, ['alertEventsBatch'], async (state) => {
-      this.logger.debug({
-        message: `[${this.name}] Storing alert events batch to ${ALERT_EVENTS_DATA_STREAM}`,
+      const logger = state.logger.withLabels({
+        step: this.name,
+        resource: ALERT_EVENTS_DATA_STREAM,
       });
+
+      logger.debug({ message: 'Storing alert events batch' });
 
       const bulkResult = await this.storageService.bulkIndexDocs({
         index: ALERT_EVENTS_DATA_STREAM,
@@ -39,9 +37,7 @@ export class StoreAlertEventsStep implements RuleExecutionStep {
         getDocumentId: (doc) => resolveRuleEventId(doc as AlertEvent),
       });
 
-      this.logger.debug({
-        message: `[${this.name}] Bulk-indexed alert events batch (attempted=${bulkResult.attempted}, persisted=${bulkResult.docs.length})`,
-      });
+      logger.debug({ message: 'Bulk-indexed alert events batch' });
 
       return {
         type: 'continue',

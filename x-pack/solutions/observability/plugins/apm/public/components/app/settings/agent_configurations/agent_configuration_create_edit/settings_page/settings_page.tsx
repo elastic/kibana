@@ -301,7 +301,7 @@ export function SettingsPage({
                 <>
                   <EuiCallOut
                     announceOnMount={false}
-                    iconType="iInCircle"
+                    iconType="info"
                     title={i18n.translate(
                       'xpack.apm.agentConfig.settingsPage.otelCentralConfigDocumentation.title',
                       {

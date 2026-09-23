@@ -15,12 +15,18 @@ import { MAX_AI_INDEX_AUTOMATIONS } from '../../../../common/constants';
 import type { AiIndexAutomation, GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
 import type { UseAutomationsEditorResult } from '../../hooks/use_automations_editor';
 import { useAutomationsEditor } from '../../hooks/use_automations_editor';
+import type { UseSuggestAutomationResult } from '../../hooks/use_suggest_automation';
+import { useSuggestAutomation } from '../../hooks/use_suggest_automation';
 import type { WorkflowSummary } from '../../hooks/use_workflow_summaries';
 import { useWorkflowSummaries } from '../../hooks/use_workflow_summaries';
 import { AutomationsPanel } from './automations_panel';
 
 jest.mock('../../hooks/use_automations_editor', () => ({
   useAutomationsEditor: jest.fn(),
+}));
+
+jest.mock('../../hooks/use_suggest_automation', () => ({
+  useSuggestAutomation: jest.fn(),
 }));
 
 jest.mock('../../hooks/use_workflow_summaries', () => ({
@@ -35,6 +41,7 @@ jest.mock('@kbn/workflows-ui', () => ({
 }));
 
 const mockUseAutomationsEditor = jest.mocked(useAutomationsEditor);
+const mockUseSuggestAutomation = jest.mocked(useSuggestAutomation);
 const mockUseWorkflowSummaries = jest.mocked(useWorkflowSummaries);
 
 const editorResult = (
@@ -54,9 +61,22 @@ const editorResult = (
   ...overrides,
 });
 
-const summariesResult = (summaries: Array<[string, WorkflowSummary]> = [], isLoading = false) => ({
+const suggestResult = (
+  overrides: Partial<UseSuggestAutomationResult> = {}
+): UseSuggestAutomationResult => ({
+  canSuggest: false,
+  suggestAutomation: jest.fn(),
+  ...overrides,
+});
+
+const summariesResult = (
+  summaries: Array<[string, WorkflowSummary]> = [],
+  isLoading = false,
+  missingReadPrivilege = false
+) => ({
   summaries: new Map(summaries),
   isLoading,
+  missingReadPrivilege,
 });
 
 const aiIndex: GetAiIndexResponse = {
@@ -65,6 +85,7 @@ const aiIndex: GetAiIndexResponse = {
   dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
   automations: [],
   sources: [{ type: 'esql', value: 'FROM My view' }],
+  traces: [],
   date_created: '2026-01-01T00:00:00.000Z',
   date_modified: '2026-01-01T00:00:00.000Z',
 };
@@ -104,6 +125,7 @@ const oneAutomation: AiIndexAutomation[] = [{ type: 'workflow', value: 'wf-1' }]
 describe('AutomationsPanel', () => {
   beforeEach(() => {
     mockUseAutomationsEditor.mockReturnValue(editorResult());
+    mockUseSuggestAutomation.mockReturnValue(suggestResult());
     mockUseWorkflowSummaries.mockReturnValue(summariesResult());
   });
 
@@ -161,6 +183,24 @@ describe('AutomationsPanel', () => {
     expect(screen.getByTestId('contextCreateAutomationButton')).toBeInTheDocument();
   });
 
+  it('shows the suggest automation control when agent builder is available', () => {
+    const suggestAutomation = jest.fn();
+    mockUseSuggestAutomation.mockReturnValue(
+      suggestResult({ canSuggest: true, suggestAutomation })
+    );
+
+    renderPanel();
+
+    fireEvent.click(screen.getByTestId('contextSuggestAutomationButton'));
+    expect(suggestAutomation).toHaveBeenCalledTimes(1);
+  });
+
+  it('hides the suggest automation control when agent builder is unavailable', () => {
+    renderPanel();
+
+    expect(screen.queryByTestId('contextSuggestAutomationButton')).not.toBeInTheDocument();
+  });
+
   it('opens the created workflow in the Workflows app', async () => {
     const createAndAttach = jest.fn().mockResolvedValue('wf-created');
     mockUseAutomationsEditor.mockReturnValue(editorResult({ createAndAttach }));
@@ -216,6 +256,17 @@ describe('AutomationsPanel', () => {
     const row = screen.getByTestId('contextAiIndexAutomationRow');
     expect(row).toHaveTextContent('My workflow');
     expect(row).not.toHaveTextContent('wf-1');
+  });
+
+  it('shows a missing-privilege callout when the user lacks the workflows read privilege', () => {
+    mockUseWorkflowSummaries.mockReturnValue(summariesResult([], false, true));
+
+    renderPanel();
+
+    expect(screen.getByTestId('contextAutomationsMissingPrivilegeCallout')).toBeInTheDocument();
+    expect(screen.getByTestId('contextAutomationsMissingPrivilegeCallout')).toHaveTextContent(
+      'You need the Workflows read privilege to see automation details.'
+    );
   });
 
   it('swaps the Edit button for Save and Cancel while editing', () => {

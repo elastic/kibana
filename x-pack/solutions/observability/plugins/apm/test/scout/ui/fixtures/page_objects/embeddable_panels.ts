@@ -27,7 +27,7 @@ export class EmbeddablePanels {
   }
 
   getRenderCompletePanels(): Locator {
-    return this.getEmbeddablePanels().locator(RENDER_COMPLETE_SELECTOR);
+    return this.scope.locator(EMBEDDABLE_PANEL_SELECTOR + RENDER_COMPLETE_SELECTOR);
   }
 
   getPanelsWithErrors(): Locator {

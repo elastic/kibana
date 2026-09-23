@@ -22,6 +22,8 @@ export const RULE_EXECUTION_COUNTERS = {
   newEpisodesGenerated: 'newEpisodesGenerated',
   rowsReturnedByQuery: 'rowsReturnedByQuery',
   ruleEventsDeduplicated: 'ruleEventsDeduplicated',
+  groupsDroppedByLimit: 'groupsDroppedByLimit',
+  rowsDroppedByLimit: 'rowsDroppedByLimit',
 } as const;
 
 /**

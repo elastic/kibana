@@ -27,12 +27,14 @@ dependsOn:
   - '@kbn/transpiler-config'
   - '@kbn/core-ui-settings-common'
   - '@kbn/repo-packages'
+  - '@kbn/projects-solutions-groups'
   - '@kbn/ci-stats-reporter'
 tags:
   - shared-server
   - package
   - dev
-  - group-undefined
+  - group-platform
+  - private
   - jest-unit-tests
 fileGroups:
   src:

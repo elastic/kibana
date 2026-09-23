@@ -1,8 +1,7 @@
 {
-  "sha1": "274730216e5046499b7b2dcdfec876ab5e7f26f7",
+  "sha1": "30df5b4faee891eef9cedba5055067a60e8be961",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -108,8 +107,24 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/timelines/ui/parallel_tests/timeline_super.spec.ts",
-        "line": 36,
+        "line": 41,
         "column": 7
+      }
+    },
+    {
+      "id": "e2028bd2bf19523-21ad8ca29a62b82",
+      "title": "Super Timeline — Timelines list entry point allows selecting a mixed KQL + EQL selection and opens the Super Timeline",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/timelines/ui/parallel_tests/timeline_super.spec.ts",
+        "line": 65,
+        "column": 30
       }
     }
   ]

@@ -41,25 +41,21 @@ export interface DiscoverServerPluginStart {
 
 export { config } from './config';
 export type {
-  DiscoverSessionClassicTab,
-  DiscoverSessionEsqlTab,
-  DiscoverSessionTab,
-  DiscoverSessionPanelOverrides,
   DiscoverSessionEmbeddableByValueProps,
   DiscoverSessionEmbeddableByReferenceProps,
   DiscoverSessionEmbeddableByValueState,
   DiscoverSessionEmbeddableByReferenceState,
   DiscoverSessionEmbeddableState,
 } from './embeddable';
-export { discoverSessionApiResponseSchema, discoverSessionApiDataSchema } from './api/schema';
+export { discoverSessionApiResponseSchema } from './api/schema';
 export { transformDiscoverSessionIn, transformDiscoverSessionOut } from './api/transforms';
 export type {
-  DiscoverSessionApiClassicTab,
-  DiscoverSessionApiEsqlTab,
   DiscoverSessionApiResponse,
-  DiscoverSessionApiTab,
-  DiscoverSessionApiData,
+  DiscoverSessionSanitizeResponse,
+  DiscoverSessionWarning,
+  DiscoverSessionGetResponse,
 } from './api/schema';
+export type { DiscoverSessionSanitizeRequest } from './api/session_sanitize';
 
 export const plugin = async (context: PluginInitializerContext) => {
   const { DiscoverServerPlugin } = await import('./plugin');

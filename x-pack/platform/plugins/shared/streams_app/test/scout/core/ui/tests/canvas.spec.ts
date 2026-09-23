@@ -40,15 +40,22 @@ test.describe(
         });
       }
 
-      // Give one stream processing so its destination renders the processing glyph.
-      await apiServices.streams.updateStreamProcessors(PROCESSING_STREAM, {
-        steps: [
-          {
-            action: 'set',
-            to: 'canvas_test_field',
-            value: 'canvas_test_value',
+      // Give one stream native processing so the canvas includes both plain and configured examples.
+      const { stream } = await apiServices.streams.getStreamDefinition(PROCESSING_STREAM);
+      await apiServices.streams.updateStream(PROCESSING_STREAM, {
+        ingest: {
+          ...stream.ingest,
+          processing: {
+            processors: [
+              {
+                set: {
+                  field: 'canvas_test_field',
+                  value: 'canvas_test_value',
+                },
+              },
+            ],
           },
-        ],
+        },
       });
     });
 
@@ -82,6 +89,7 @@ test.describe(
       // Both seeded streams render as their own destination node.
       await expect(streams.getCanvasDestinationNode(PLAIN_STREAM)).toBeVisible();
       await expect(streams.getCanvasDestinationNode(PROCESSING_STREAM)).toBeVisible();
+      await expect(streams.canvasEmptyState).toHaveCount(0);
     });
 
     test('renders a minimap that collapses and reopens', async ({ pageObjects: { streams } }) => {
@@ -110,6 +118,34 @@ test.describe(
       await expect(streams.canvasContextMenu).toHaveCount(0);
       // Tidying records a history step, so undo becomes available.
       await expect(streams.canvasUndo).toBeEnabled();
+    });
+
+    test('keeps the viewport where the user left it when tidying up', async ({
+      pageObjects: { streams },
+    }) => {
+      await streams.zoomInCanvas();
+      const transform = await streams.getCanvasViewportTransform();
+
+      // Tidy up relayouts the nodes and must leave the camera alone.
+      await streams.tidyUpCanvasFromPane();
+      await expect(streams.canvasUndo).toBeEnabled();
+
+      expect(await streams.getCanvasViewportTransform()).toBe(transform);
+    });
+
+    test('keeps the viewport where the user left it when opening a node flyout', async ({
+      page,
+      pageObjects: { streams },
+    }) => {
+      await streams.zoomInCanvas();
+      const transform = await streams.getCanvasViewportTransform();
+
+      await streams.clickCanvasNode(streams.getCanvasDestinationNode(PLAIN_STREAM));
+      await expect(page.testSubj.locator('streamsCanvasFlyout')).toBeVisible();
+
+      // The flyout is an overlay, so the canvas is neither resized nor
+      // remounted and the viewport should be untouched.
+      expect(await streams.getCanvasViewportTransform()).toBe(transform);
     });
 
     test('renders the canvas toolbar with undo/redo and add-node placeholders', async ({
@@ -143,14 +179,18 @@ test.describe(
       await streams.tidyUpCanvasFromPane();
       await expect(streams.canvasUndo).toBeEnabled();
 
-      await streams.getCanvasDestinationNode(PLAIN_STREAM).click({ modifiers: ['Shift'] });
+      await streams.clickCanvasNode(streams.getCanvasDestinationNode(PLAIN_STREAM), {
+        modifiers: ['Shift'],
+      });
       await page.keyboard.press('Control+z');
       await expect(streams.canvasUndo).toBeDisabled();
     });
 
     test('undoes a keyboard-driven node reposition', async ({ page, pageObjects: { streams } }) => {
       // Selecting + focusing a node lets the arrow keys reposition it.
-      await streams.getCanvasDestinationNode(PLAIN_STREAM).click({ modifiers: ['Shift'] });
+      await streams.clickCanvasNode(streams.getCanvasDestinationNode(PLAIN_STREAM), {
+        modifiers: ['Shift'],
+      });
       await page.keyboard.press('ArrowRight');
 
       // The keyboard move records a history step even though no pointer drag ran,
@@ -160,11 +200,26 @@ test.describe(
       await expect(streams.canvasUndo).toBeDisabled();
     });
 
-    test('shows the processing glyph only on destinations with processing', async ({
+    test('shows the processing button only on destinations with processing', async ({
       pageObjects: { streams },
     }) => {
-      await expect(streams.getCanvasProcessingGlyph(PROCESSING_STREAM)).toBeVisible();
-      await expect(streams.getCanvasProcessingGlyph(PLAIN_STREAM)).toHaveCount(0);
+      await expect(streams.getCanvasProcessingButton(PROCESSING_STREAM)).toBeVisible();
+      await expect(streams.getCanvasProcessingButton(PLAIN_STREAM)).toHaveCount(0);
+    });
+
+    test('opens the processing tab when the processing button is clicked', async ({
+      page,
+      pageObjects: { streams },
+    }) => {
+      await streams.getCanvasProcessingButton(PROCESSING_STREAM).click();
+
+      const flyout = page.testSubj.locator('streamsCanvasFlyout');
+
+      await expect(flyout).toBeVisible();
+      await expect(flyout.getByTestId('streamsCanvasFlyoutTab-processing')).toHaveAttribute(
+        'aria-selected',
+        'true'
+      );
     });
 
     test('shows a flyout for classic streams when a destination node is clicked', async ({

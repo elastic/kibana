@@ -28,7 +28,8 @@ const sourceRow = (id: string) => ({
 describe('FilterDuplicateEventsStep', () => {
   let step: FilterDuplicateEventsStep;
   let esClient: ReturnType<typeof createMockEsClient>;
-  let logger: ReturnType<typeof createLoggerService>['mockLogger'];
+  let loggerService: ReturnType<typeof createLoggerService>['loggerService'];
+  let mockLogger: ReturnType<typeof createLoggerService>['mockLogger'];
 
   const mockExisting = (ids: string[]) => {
     esClient.search.mockResolvedValue({
@@ -37,10 +38,9 @@ describe('FilterDuplicateEventsStep', () => {
   };
 
   beforeEach(() => {
-    const loggerMocks = createLoggerService();
-    logger = loggerMocks.mockLogger;
+    ({ loggerService, mockLogger } = createLoggerService());
     esClient = createMockEsClient();
-    step = new FilterDuplicateEventsStep(loggerMocks.loggerService, esClient);
+    step = new FilterDuplicateEventsStep(esClient);
   });
 
   it('drops events whose deterministic id already exists and emits the deduplicated counter', async () => {
@@ -121,10 +121,16 @@ describe('FilterDuplicateEventsStep', () => {
     const state = createRulePipelineState({
       rule: createRuleResponse(),
       alertEventsBatch: [event],
+      logger: loggerService,
     });
     const [result] = await collectStreamResults(step.executeStream(createPipelineStream([state])));
 
     expect(result.state.alertEventsBatch).toEqual([event]);
-    expect(logger.warn).toHaveBeenCalled();
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('ids pre-check failed'),
+      expect.objectContaining({
+        labels: expect.objectContaining({ code: 'RULE_EXECUTION_DEDUP_PRECHECK_FAILED' }),
+      })
+    );
   });
 });

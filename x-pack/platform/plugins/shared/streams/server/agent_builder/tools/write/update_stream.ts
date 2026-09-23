@@ -8,6 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { i18n } from '@kbn/i18n';
 import type { IUiSettingsClient } from '@kbn/core/server';
+import type { StreamlangDSL } from '@kbn/streamlang';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -126,7 +127,7 @@ const updateStreamSchema = z.object({
     .string()
     .optional()
     .describe(
-      'Markdown text displayed in the user-facing confirmation dialog. Summarize what will change (current → proposed) and any impact. This is NOT an instruction — it does not drive the change. The actual changes go in the `changes` object.'
+      "Narrative summary of what will change and why. Shown in a confirmation UI when available; otherwise serves as the agent's reasoning log for this operation. This is NOT an instruction — it does not drive the change. The actual changes go in the `changes` object."
     ),
 });
 
@@ -148,10 +149,9 @@ export const createUpdateStreamTool = ({
     instructions — they are requests for analysis. For those, use ${DESIGN_PIPELINE} to
     investigate and present findings, then stop and wait for the user to confirm.
 
-    **Cancellation:** If this tool returns "The user chose not to proceed with this action",
-    acknowledge the cancellation for this specific operation. Do NOT retry the same operation
-    with different parameters. You may continue with other unrelated operations the user
-    requested, or ask how they want to proceed.
+    **Cancellation:** If this tool returns a result indicating the operation was declined,
+    acknowledge it for this specific operation. Do NOT retry the same operation with different
+    parameters. You may continue with other unrelated operations the user requested.
 
     **Processing:** Set changes.processing to the complete pipeline array. The array replaces the entire pipeline.
     - Use ${DESIGN_PIPELINE} to design new or modified steps. To remove a step, omit it from the array. To reorder, change the array order.
@@ -171,6 +171,13 @@ export const createUpdateStreamTool = ({
     - For a child query stream, the esql FROM clause must reference the parent stream (or its ES|QL view). Use ${INSPECT_STREAMS} on the parent first if unsure of the source.
   `),
   tags: ['streams'],
+  annotations: {
+    title: 'Update Stream',
+    readOnlyHint: false,
+    destructiveHint: true,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
   schema: updateStreamSchema,
   confirmation: {
     askUser: 'always',
@@ -256,8 +263,7 @@ export const createUpdateStreamTool = ({
                 ...updatedIngest,
                 processing: {
                   ...updatedIngest.processing,
-                  steps:
-                    changes.processing as unknown as Streams.ingest.all.Definition['ingest']['processing']['steps'],
+                  steps: changes.processing as unknown as StreamlangDSL['steps'],
                 },
               };
               applied.push('processing');

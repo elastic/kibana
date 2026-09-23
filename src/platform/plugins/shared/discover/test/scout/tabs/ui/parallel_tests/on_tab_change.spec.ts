@@ -33,7 +33,7 @@ const LOGSTASH_TIME_RANGE = {
 const QUERY_WITH_TIME_FIELD =
   'FROM kibana_sample_data_flights | WHERE timestamp >= ?_tstart AND timestamp <= ?_tend | LIMIT 50';
 const QUERY_WITHOUT_TIME_FIELD = 'FROM kibana_sample_data_flights';
-const DEFAULT_ESQL_QUERY = 'FROM logstash-*';
+const DEFAULT_ESQL_QUERY = 'FROM logstash-* | SORT @timestamp DESC';
 
 const expectDisabledAllTimeState = async (
   pageObjects: PageObjects,
@@ -107,8 +107,7 @@ spaceTest.describe('Discover tabs - on tab change', { tag: '@local-stateful-clas
       });
 
       await spaceTest.step('tab 1: open DocViewer and keep the default Table tab', async () => {
-        await unifiedTabs.createNewTab();
-        await discover.waitUntilTabIsLoaded();
+        await discover.createNewTabAndSearch();
 
         await expect(docViewer.getFlyout()).toBeHidden();
         await docViewer.openAndWaitForFlyout({ rowIndex: 1 });
@@ -147,8 +146,7 @@ spaceTest.describe('Discover tabs - on tab change', { tag: '@local-stateful-clas
     await spaceTest.step('open a Lens edit flyout in an ES|QL tab', async () => {
       await discover.selectTextBaseLang();
       await discover.waitUntilTabIsLoaded();
-      await unifiedTabs.createNewTab();
-      await discover.waitUntilTabIsLoaded();
+      await discover.createNewTabAndSearch();
 
       await discover.openLensEditFlyout();
       await expect(discover.getLensEditFlyout()).toBeVisible();
@@ -165,7 +163,7 @@ spaceTest.describe('Discover tabs - on tab change', { tag: '@local-stateful-clas
       await expect(discover.getLensEditFlyout()).toBeVisible();
 
       await unifiedTabs.createNewTab();
-      await discover.waitUntilTabIsLoaded();
+      await expect(discover.getUninitializedPrompt()).toBeVisible();
       await expect(discover.getLensEditFlyout()).toBeHidden();
     });
   });
@@ -186,12 +184,11 @@ spaceTest.describe('Discover tabs - on tab change', { tag: '@local-stateful-clas
 
     await spaceTest.step('tab 1: run a flights query with explicit time-field params', async () => {
       await unifiedTabs.createNewTab();
-      await discover.waitUntilTabIsLoaded();
-      await expectDisabledAllTimeState(pageObjects, 'enabled');
+      await expect(discover.getUninitializedPrompt()).toBeVisible();
 
+      await discover.codeEditor.setCodeEditorValue(QUERY_WITH_TIME_FIELD);
       await datePicker.setAbsoluteRange(FLIGHTS_TIME_RANGE_DISPLAY);
-      await discover.waitUntilTabIsLoaded();
-      await discover.writeAndSubmitEsqlQuery(QUERY_WITH_TIME_FIELD);
+      await discover.submitQueryAndWait();
       await expectCurrentEsqlTabState(pageObjects, {
         disabledAllTime: 'enabled',
         query: QUERY_WITH_TIME_FIELD,
@@ -202,8 +199,7 @@ spaceTest.describe('Discover tabs - on tab change', { tag: '@local-stateful-clas
 
     await spaceTest.step('tab 2: run a flights query without a time field', async () => {
       await unifiedTabs.createNewTab();
-      await discover.waitUntilTabIsLoaded();
-      await expectDisabledAllTimeState(pageObjects, 'enabled');
+      await expect(discover.getUninitializedPrompt()).toBeVisible();
 
       await discover.writeAndSubmitEsqlQuery(QUERY_WITHOUT_TIME_FIELD);
       await expectCurrentEsqlTabState(pageObjects, {

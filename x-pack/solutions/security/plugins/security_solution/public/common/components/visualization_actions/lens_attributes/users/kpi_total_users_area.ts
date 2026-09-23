@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getLatestEntitiesIndexName } from '@kbn/entity-store/common';
+import { getEntitiesAlias, ENTITY_LATEST } from '@kbn/entity-store/common';
 import { UNIQUE_COUNT } from '../../translations';
 import type { LensAttributes, GetLensAttributes } from '../../types';
 
@@ -95,7 +95,7 @@ const getLegacyKpiTotalUsersAreaLensAttributes = (): LensAttributes => {
 };
 
 const getEntityStoreV2KpiTotalUsersAreaLensAttributes = (spaceId?: string): LensAttributes => {
-  const indexTitle = getLatestEntitiesIndexName(spaceId ?? 'default');
+  const indexTitle = getEntitiesAlias(ENTITY_LATEST, spaceId ?? 'default');
 
   return {
     description: '',

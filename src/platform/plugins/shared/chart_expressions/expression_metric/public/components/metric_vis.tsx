@@ -9,7 +9,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/react';
-import { useResizeObserver, useEuiScrollBar, EuiIcon, useEuiTheme } from '@elastic/eui';
+import { useResizeObserver, useEuiScrollBar, EuiIcon, useEuiTheme, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Chart, Metric, Settings, isMetricElementEvent } from '@elastic/charts';
 import type {
@@ -61,6 +61,16 @@ const getIcon =
   (type: string) =>
   ({ width, height, color }: { width: number; height: number; color: string }) =>
     <EuiIcon type={type} fill={color} css={{ width, height }} aria-hidden="true" />;
+
+const SecondaryMetricLabelTooltip: NonNullable<SecondaryMetricProps['labelTooltip']> = ({
+  children,
+  label,
+  placement,
+}) => (
+  <EuiToolTip content={label} position={placement} data-test-subj="mtrVisSecondaryNameTooltip">
+    {children}
+  </EuiToolTip>
+);
 
 export interface MetricVisComponentProps {
   data: Datatable;
@@ -218,16 +228,16 @@ export const MetricVis = ({
     let secondaryMetricProps: SecondaryMetricProps | undefined;
     const { secondaryMetric } = config.dimensions;
     if (secondaryMetric) {
-      // When baseline is 'primary' but the primary value is non-numeric at runtime,
-      // reset the label to use the column name
-      const isNumericBaseline = Number.isFinite(config.metric.secondaryTrend.baseline);
-      const isCompareToPrimaryInvalid = !isNumericBaseline && typeof value !== 'number';
+      const { secondaryNameVisibility } = config.metric;
+      const isLabelHidden = secondaryNameVisibility === 'hidden';
+      const labelPosition = isLabelHidden ? 'before' : secondaryNameVisibility;
 
       const secondaryMetricInfo = getSecondaryMetricInfo({
         row,
         columns: data.columns,
         secondaryMetric,
-        secondaryLabel: isCompareToPrimaryInvalid ? undefined : config.metric.secondaryLabel,
+        secondaryLabel: config.metric.secondaryLabel,
+        showLabel: !isLabelHidden,
         trendConfig: buildTrendConfig(config.metric.secondaryTrend, value),
         staticColor: config.metric.secondaryColor,
       });
@@ -239,8 +249,9 @@ export const MetricVis = ({
         badgeTextColor: secondaryMetricInfo.badgeTextColor,
         ariaDescription: secondaryMetricInfo.description,
         icon: secondaryMetricInfo.icon,
-        labelPosition: config.metric.secondaryLabelPosition,
+        labelPosition,
         badgeBorderColor: highContrastMode ? { mode: 'auto' } : { mode: 'none' },
+        labelTooltip: SecondaryMetricLabelTooltip,
       };
     }
 

@@ -22,6 +22,12 @@ jest.mock('../../kibana_services', () => ({
       basePath: { prepend: (path: string) => `/foo/${path}` },
     },
     getBasePath: jest.fn(() => 'path'),
+    application: {
+      getUrlForApp: (appId: string, { path }: { path: string }) => `/app/${appId}${path}`,
+    },
+    history: {
+      location: { hash: '#/tutorial/apm' },
+    },
     chrome: {
       setBreadcrumbs: mockSetBreadcrumbs,
     },

@@ -10,24 +10,21 @@
 import React, { useMemo } from 'react';
 
 import { EuiPageTemplate, type EuiPageTemplateProps } from '@elastic/eui';
-import type { RenderingService } from '@kbn/core-rendering-browser';
-import type { OverlayStart } from '@kbn/core/public';
-import { BrowserRouter as Router } from '@kbn/shared-ux-router';
+import type { AppMountParameters, OverlayStart } from '@kbn/core/public';
+import { Router } from '@kbn/shared-ux-router';
 
 import { FlyoutWithComponent } from './_flyout_with_component';
 import { FlyoutWithOverlays } from './_flyout_with_overlays';
-import { NonSessionFlyouts } from './_non_session_flyouts';
 
 interface AppDeps {
-  basename: string;
+  history: AppMountParameters['history'];
   overlays: OverlayStart;
-  rendering: RenderingService;
 }
 
-type AppContentDeps = Pick<AppDeps, 'overlays' | 'rendering'>;
+type AppContentDeps = Pick<AppDeps, 'overlays'>;
 
 // Component that uses router hooks (must be inside Router context)
-const AppContent: React.FC<AppContentDeps> = ({ overlays, rendering }) => {
+const AppContent: React.FC<AppContentDeps> = ({ overlays }) => {
   const panelled: EuiPageTemplateProps['panelled'] = undefined;
   const restrictWidth: EuiPageTemplateProps['restrictWidth'] = false;
   const bottomBorder: EuiPageTemplateProps['bottomBorder'] = 'extended';
@@ -52,19 +49,15 @@ const AppContent: React.FC<AppContentDeps> = ({ overlays, rendering }) => {
       <EuiPageTemplate.Section grow={false} alignment="top">
         <FlyoutWithOverlays historyKey={historyKey} overlays={overlays} />
       </EuiPageTemplate.Section>
-
-      <EuiPageTemplate.Section grow={false} alignment="top">
-        <NonSessionFlyouts overlays={overlays} rendering={rendering} />
-      </EuiPageTemplate.Section>
     </EuiPageTemplate>
   );
 };
 
 // Main App component that provides Router context
-export const App = ({ basename, overlays, rendering }: AppDeps) => {
+export const App = ({ history, overlays }: AppDeps) => {
   return (
-    <Router basename={basename}>
-      <AppContent overlays={overlays} rendering={rendering} />
+    <Router history={history}>
+      <AppContent overlays={overlays} />
     </Router>
   );
 };

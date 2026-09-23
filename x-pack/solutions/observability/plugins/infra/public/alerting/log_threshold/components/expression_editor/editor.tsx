@@ -5,15 +5,9 @@
  * 2.0.
  */
 
-import {
-  EuiButton,
-  EuiCallOut,
-  EuiLink,
-  EuiLoadingSpinner,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiLink, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import type { FC, PropsWithChildren } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
 import useMount from 'react-use/lib/useMount';
@@ -140,24 +134,22 @@ export const SourceStatusWrapper: FC<PropsWithChildren<unknown>> = ({ children }
           <EuiSpacer size="m" />
         </div>
       ) : hasFailedLoading ? (
-        <EuiCallOut
+        <KbnDangerCallout
           announceOnMount
           title={i18n.translate('xpack.infra.logs.alertFlyout.sourceStatusError', {
             defaultMessage: 'Sorry, there was a problem loading field information',
           })}
-          color="danger"
-          iconType="warning"
-        >
-          <EuiButton
-            data-test-subj="infraSourceStatusWrapperTryAgainButton"
-            onClick={load}
-            iconType="refresh"
-          >
-            {i18n.translate('xpack.infra.logs.alertFlyout.sourceStatusErrorTryAgain', {
-              defaultMessage: 'Try again',
-            })}
-          </EuiButton>
-        </EuiCallOut>
+          actionProps={{
+            primary: {
+              'data-test-subj': 'infraSourceStatusWrapperTryAgainButton',
+              onClick: load,
+              iconType: 'refresh',
+              children: i18n.translate('xpack.infra.logs.alertFlyout.sourceStatusErrorTryAgain', {
+                defaultMessage: 'Try again',
+              }),
+            },
+          }}
+        />
       ) : (
         children
       )}
@@ -337,15 +329,16 @@ export const Editor: React.FC<RuleTypeParamsExpressionProps<PartialRuleParams, L
       {shouldShowGroupByOptimizationWarning && (
         <>
           <EuiSpacer size="l" />
-          <EuiCallOut announceOnMount color="warning">
-            {i18n.translate('xpack.infra.logs.alertFlyout.groupByOptimizationWarning', {
+          <KbnWarningCallout
+            announceOnMount
+            title={i18n.translate('xpack.infra.logs.alertFlyout.groupByOptimizationWarning', {
               defaultMessage:
                 'When setting a "group by" we highly recommend using the "{comparator}" comparator for your threshold. This can lead to significant performance improvements.',
               values: {
                 comparator: Comparator.GT,
               },
             })}
-          </EuiCallOut>
+          />
         </>
       )}
       <EuiSpacer size="l" />

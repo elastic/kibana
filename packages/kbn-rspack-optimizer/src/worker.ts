@@ -11,7 +11,7 @@
  * RSPack Worker Process
  *
  * This script runs RSPack in a separate child process, similar to how
- * @kbn/optimizer runs webpack in worker threads. This allows the main
+ * @kbn/rspack-optimizer runs webpack in worker threads. This allows the main
  * process to cleanly terminate the build by killing this worker.
  *
  * Communication with parent process via IPC:
@@ -21,6 +21,7 @@
  */
 
 import { DEFAULT_THEME_TAGS } from '@kbn/core-ui-settings-common';
+import type { KibanaGroup } from '@kbn/projects-solutions-groups';
 import { runBuild, formatSize } from './run_build';
 import type { ThemeTag } from './types';
 
@@ -34,6 +35,9 @@ interface StartMessage {
     dist?: boolean;
     examples?: boolean;
     themeTags?: ThemeTag[];
+    pluginPaths?: string[];
+    pluginScanDirs?: string[];
+    allowlistPluginGroups?: readonly KibanaGroup[];
     hmr?: boolean;
     basePath?: string;
   };
@@ -63,14 +67,19 @@ async function handleStart(options: StartMessage['options']) {
       dist: options.dist,
       examples: options.examples,
       themeTags: options.themeTags ?? [...DEFAULT_THEME_TAGS],
+      pluginPaths: options.pluginPaths,
+      pluginScanDirs: options.pluginScanDirs,
+      allowlistPluginGroups: options.allowlistPluginGroups,
       hmr: options.hmr,
       basePath: options.basePath,
       log,
     });
 
     if (result.success) {
-      const entryLabel = result.entryCount === 1 ? 'entry' : 'entries';
-      const summary = `${result.entryCount} ${entryLabel}, ${formatSize(result.totalSize ?? 0)}`;
+      const bundleLabel = result.bundleCount === 1 ? 'bundle' : 'bundles';
+      const summary = `${result.bundleCount ?? 0} ${bundleLabel}, ${formatSize(
+        result.totalSize ?? 0
+      )}`;
       process.send?.({ type: 'done', success: true, summary });
     } else {
       process.send?.({ type: 'done', success: false, errors: result.errors });
