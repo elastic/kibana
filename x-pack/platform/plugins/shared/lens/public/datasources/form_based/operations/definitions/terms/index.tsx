@@ -31,7 +31,7 @@ import type {
   DataType,
   GenericIndexPatternColumn,
   IncompleteColumn,
-  LastValueOrderAggColumn,
+  LastValueIndexPatternColumn,
   TermsIndexPatternColumn,
   IndexPatternField,
 } from '@kbn/lens-common';
@@ -334,18 +334,22 @@ export const termsOperation: OperationDefinition<
       const def = operationDefinitionMap?.[orderAggColumn?.operationType];
       if (def && 'toEsAggsFn' in def) {
         let resolvedOrderAggColumn = orderAggColumn;
-        // When a terms column is custom-ranked by a last_value order-agg with no sortField, fall
-        // back to the data view's default date field so the chart still renders with a valid sort.
         if (isCustomLastValueOrderAgg(column)) {
-          const sortFieldStatus = getOrderAggLastValueSortFieldStatus(column, _indexPattern);
-          if (sortFieldStatus.status === 'missing-with-default') {
-            const { orderAgg: lastValueOrderAgg } = column.params;
-            const orderAggWithDefaultSort: LastValueOrderAggColumn = {
-              ...lastValueOrderAgg,
-              params: { ...lastValueOrderAgg.params, sortField: sortFieldStatus.defaultField },
-            };
-            resolvedOrderAggColumn = orderAggWithDefaultSort;
-          }
+          const status = getOrderAggLastValueSortFieldStatus(column, _indexPattern);
+          const { orderAgg: lastValueOrderAgg } = column.params;
+          const resolvedOrderAgg: LastValueIndexPatternColumn = {
+            ...lastValueOrderAgg,
+            params: {
+              ...lastValueOrderAgg.params,
+              sortField:
+                status.status === 'missing-with-default'
+                  ? status.defaultField
+                  : lastValueOrderAgg.params?.sortField ?? '',
+              // required on the strict metric type; an order-agg never reads it at render.
+              showArrayValues: lastValueOrderAgg.params?.showArrayValues ?? false,
+            },
+          };
+          resolvedOrderAggColumn = resolvedOrderAgg;
         }
         orderAgg = [
           {

@@ -306,10 +306,12 @@ export const lastValueOperation: OperationDefinition<
         defaultMessage: 'Sort by date field',
       });
 
+    const sortField = currentColumn.params?.sortField;
+    const showArrayValues = Boolean(currentColumn.params?.showArrayValues);
+
     const dateFields = getDateFields(indexPattern);
     const isSortFieldInvalid =
-      getInvalidSortFieldMessages(currentColumn.params?.sortField ?? '', '', indexPattern).length >
-      0;
+      getInvalidSortFieldMessages(sortField ?? '', '', indexPattern).length > 0;
 
     const usingTopValues = Object.keys(layer.columns).some(
       (_columnId) => layer.columns[_columnId].operationType === 'terms'
@@ -336,7 +338,7 @@ export const lastValueOperation: OperationDefinition<
                   'When you show array values, you are unable to use this field to rank top values.',
               }
             )}
-            isInvalid={currentColumn.params?.showArrayValues && usingTopValues}
+            isInvalid={showArrayValues && usingTopValues}
             display="rowCompressed"
             fullWidth
             data-test-subj="lns-indexPattern-lastValue-showArrayValues"
@@ -360,9 +362,9 @@ export const lastValueOperation: OperationDefinition<
                   </EuiText>
                 }
                 compressed={true}
-                checked={Boolean(currentColumn.params?.showArrayValues)}
+                checked={showArrayValues}
                 disabled={isScriptedField(currentColumn.sourceField, indexPattern)}
-                onChange={() => setShowArrayValues(!currentColumn.params?.showArrayValues)}
+                onChange={() => setShowArrayValues(!showArrayValues)}
               />
             </EuiToolTip>
           </EuiFormRow>
@@ -407,13 +409,11 @@ export const lastValueOperation: OperationDefinition<
               } as LastValueIndexPatternColumn);
             }}
             selectedOptions={
-              (currentColumn.params?.sortField
+              (sortField
                 ? [
                     {
-                      label:
-                        indexPattern.getFieldByName(currentColumn.params.sortField)?.displayName ||
-                        currentColumn.params.sortField,
-                      value: currentColumn.params.sortField,
+                      label: indexPattern.getFieldByName(sortField)?.displayName || sortField,
+                      value: sortField,
                     },
                   ]
                 : []) as unknown as EuiComboBoxOptionOption[]

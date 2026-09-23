@@ -63,11 +63,14 @@ export interface LastValueIndexPatternColumn extends FieldBasedIndexPatternColum
 }
 
 /**
- * A `last_value` column used as a terms order-agg (rank-by).
+ * Transport shape of a `last_value` column nested at `terms.params.orderAgg` (a custom rank-by).
  *
- * Unlike a standalone last_value metric — whose `sortField` is always set by the editor and required via API -
- * an order-agg authored through the API can omit it: the sort field is optional on the API and the terms
- * render path falls back to the data view's default date field.
+ * This models ONLY the order-agg position, never a standalone `last_value` metric.
+ * - A standalone metric always has `params.sortField` (set by the editor's `buildColumn`
+ *  and required by the API), so it uses `LastValueIndexPatternColumn`.
+ * - An order-agg, however, can be authored through the API (or persisted by an older/broken SO)
+ *  with `sortField` or the whole `params` object absent. The terms render path fills in the data
+ *  view's default date field at that boundary.
  */
 export type LastValueOrderAggColumn = Omit<LastValueIndexPatternColumn, 'params'> & {
   // Optional because legacy API-authored order-aggs were persisted without a `params` key at all, and
