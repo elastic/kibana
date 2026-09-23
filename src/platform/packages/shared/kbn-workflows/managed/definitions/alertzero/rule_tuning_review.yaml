@@ -190,7 +190,7 @@ steps:
       ${{ inputs.autonomy_level == 'manual'
         and steps.create_investigation.output.conversation_id != null }}
     with:
-      workflow-id: system-create-investigation-proposal
+      workflow-id: system-create-proposal
       inputs:
         conversationId: "{{ steps.create_investigation.output.conversation_id }}"
         comment: |-
@@ -742,7 +742,7 @@ steps:
           - name: propose_query
             type: workflow.execute
             with:
-              workflow-id: system-create-investigation-proposal
+              workflow-id: system-create-proposal
               inputs:
                 conversationId: "{{ steps.create_investigation.output.conversation_id }}"
                 comment: "{{ steps.compose_proposal.output.comment }}"
@@ -761,7 +761,7 @@ steps:
           - name: propose_risk_score
             type: workflow.execute
             with:
-              workflow-id: system-create-investigation-proposal
+              workflow-id: system-create-proposal
               inputs:
                 conversationId: "{{ steps.create_investigation.output.conversation_id }}"
                 comment: "{{ steps.compose_proposal.output.comment }}"
@@ -781,7 +781,7 @@ steps:
           - name: propose_exception
             type: workflow.execute
             with:
-              workflow-id: system-create-investigation-proposal
+              workflow-id: system-create-proposal
               inputs:
                 conversationId: "{{ steps.create_investigation.output.conversation_id }}"
                 comment: "{{ steps.compose_proposal.output.comment }}"
@@ -852,7 +852,7 @@ steps:
       - name: propose_manual
         type: workflow.execute
         with:
-          workflow-id: system-create-investigation-proposal
+          workflow-id: system-create-proposal
           inputs:
             conversationId: "{{ steps.create_investigation.output.conversation_id }}"
             comment: "{{ steps.compose_proposal.output.comment }}"
