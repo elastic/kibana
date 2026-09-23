@@ -1913,9 +1913,40 @@ steps:
           # Build one entity row per unique host, then per unique user, collecting
           # per-entity verdict counts. The Worker passes this to the security.impact
           # attachment so the Investigation shows what the alert batch touched.
+          #
+          # Cap the unique-name lists BEFORE the loops: a 1000-alert batch can have
+          # ~2000 unique host+user names, and each iteration rescans all verdicts.
+          # Hosts take the first up-to-50 slots; users get the remainder. Truncation
+          # is computed from the uncapped counts.
+          - name: collect_unique_entity_names
+            type: data.set
+            with:
+              host_names_all: "${{ variables.output_verdicts | map: 'host_name' | uniq }}"
+              user_names_all: "${{ variables.output_verdicts | map: 'user_name' | uniq }}"
+
+          - name: plan_host_entity_iteration
+            type: data.set
+            with:
+              entity_name_count: "${{ variables.host_names_all.size | plus: variables.user_names_all.size }}"
+              host_names_for_entities: "${{ variables.host_names_all | slice: 0, 50 }}"
+
+          # Budget/truncation need the capped host list from the previous step — Liquid cannot
+          # read a sibling key from the same data.set `with` block.
+          - name: plan_user_entity_iteration
+            type: data.set
+            with:
+              impacted_entities_truncated: >-
+                {% if variables.entity_name_count > 50 %}true{% else %}false{% endif %}
+              user_entity_budget: "${{ 50 | minus: variables.host_names_for_entities.size }}"
+
+          - name: slice_user_names_for_entities
+            type: data.set
+            with:
+              user_names_for_entities: "${{ variables.user_names_all | slice: 0, variables.user_entity_budget }}"
+
           - name: build_host_entities
             type: foreach
-            foreach: "${{ variables.output_verdicts | map: 'host_name' | uniq }}"
+            foreach: "${{ variables.host_names_for_entities }}"
             steps:
               - name: build_host_entity
                 type: data.set
@@ -1935,7 +1966,7 @@ steps:
 
           - name: build_user_entities
             type: foreach
-            foreach: "${{ variables.output_verdicts | map: 'user_name' | uniq }}"
+            foreach: "${{ variables.user_names_for_entities }}"
             steps:
               - name: build_user_entity
                 type: data.set
@@ -1953,14 +1984,11 @@ steps:
                 with:
                   impacted_entities: "${{ variables.impacted_entities | push: variables.current_entity }}"
 
-          # Cap at 50 entities so the security.impact attachment schema (max: 50) never
-          # rejects the payload. Batches with many unique hosts + users can exceed 50 even
-          # under normal conditions; truncated records whether rows were dropped.
+          # Safety slice — lists were already capped above; keep ≤50 if a future change
+          # reorders host/user budgeting.
           - name: cap_impacted_entities
             type: data.set
             with:
-              impacted_entities_truncated: >-
-                {% if variables.impacted_entities.size > 50 %}true{% else %}false{% endif %}
               impacted_entities: "${{ variables.impacted_entities | slice: 0, 50 }}"
 
       # -----------------------------------------------------------------------
