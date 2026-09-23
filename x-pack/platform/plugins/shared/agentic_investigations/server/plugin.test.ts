@@ -12,6 +12,7 @@ import {
   AGENTIC_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER_ID,
   AGENTIC_INVESTIGATIONS_PLUGIN_ID,
 } from '../common/constants';
+import { IMPACT_UI_CAPABILITY_MANAGE, IMPACT_UI_CAPABILITY_SHOW } from '../common/impact/constants';
 import {
   PROPOSALS_UI_CAPABILITY_DECIDE,
   PROPOSALS_UI_CAPABILITY_SHOW,
@@ -31,6 +32,12 @@ import {
   PROPOSALS_API_PRIVILEGE_READ,
 } from './proposals/constants';
 import { registerRoutes } from './proposals/routes/register_routes';
+import { registerImpactRoutes } from './impact/routes/register_routes';
+import { IMPACT_API_PRIVILEGE_MANAGE, IMPACT_API_PRIVILEGE_READ } from './impact/constants';
+import {
+  ESCALATIONS_API_PRIVILEGE_MANAGE,
+  ESCALATIONS_API_PRIVILEGE_READ,
+} from './escalations/constants';
 
 jest.mock('./proposals/managed_workflows/initialize_managed_workflows', () => ({
   initializeManagedWorkflows: jest.fn().mockResolvedValue(undefined),
@@ -38,6 +45,10 @@ jest.mock('./proposals/managed_workflows/initialize_managed_workflows', () => ({
 
 jest.mock('./proposals/routes/register_routes', () => ({
   registerRoutes: jest.fn(),
+}));
+
+jest.mock('./impact/routes/register_routes', () => ({
+  registerImpactRoutes: jest.fn(),
 }));
 
 const createContext = () =>
@@ -130,26 +141,60 @@ describe('AgenticInvestigationsPlugin', () => {
       );
     });
 
-    it('grants the proposals capabilities from the top-level all privilege', () => {
+    it('grants proposal and impact capabilities from the top-level all privilege', () => {
       const { features } = setupPlugin();
       const { privileges } = registeredFeature(features);
 
       expect(privileges.all.api).toEqual([
         PROPOSALS_API_PRIVILEGE_READ,
         PROPOSALS_API_PRIVILEGE_MANAGE,
+        IMPACT_API_PRIVILEGE_READ,
+        IMPACT_API_PRIVILEGE_MANAGE,
       ]);
       expect(privileges.all.ui).toEqual([
         PROPOSALS_UI_CAPABILITY_SHOW,
         PROPOSALS_UI_CAPABILITY_DECIDE,
+        IMPACT_UI_CAPABILITY_SHOW,
+        IMPACT_UI_CAPABILITY_MANAGE,
       ]);
     });
 
-    it('withholds manage and decide from read, so a reader cannot decide', () => {
+    it('withholds manage and decide from read, so a reader cannot decide or attach impact', () => {
       const { features } = setupPlugin();
       const { privileges } = registeredFeature(features);
 
-      expect(privileges.read.api).toEqual([PROPOSALS_API_PRIVILEGE_READ]);
-      expect(privileges.read.ui).toEqual([PROPOSALS_UI_CAPABILITY_SHOW]);
+      expect(privileges.read.api).toEqual([
+        PROPOSALS_API_PRIVILEGE_READ,
+        IMPACT_API_PRIVILEGE_READ,
+      ]);
+      expect(privileges.read.ui).toEqual([PROPOSALS_UI_CAPABILITY_SHOW, IMPACT_UI_CAPABILITY_SHOW]);
+    });
+
+    it('registers only the escalations sub-feature', () => {
+      const { features } = setupPlugin();
+      const { subFeatures } = registeredFeature(features);
+
+      expect(subFeatures).toEqual([
+        expect.objectContaining({
+          privilegeGroups: [
+            expect.objectContaining({
+              groupType: 'mutually_exclusive',
+              privileges: [
+                expect.objectContaining({
+                  id: 'escalations_all',
+                  includeIn: 'all',
+                  api: [ESCALATIONS_API_PRIVILEGE_READ, ESCALATIONS_API_PRIVILEGE_MANAGE],
+                }),
+                expect.objectContaining({
+                  id: 'escalations_read',
+                  includeIn: 'read',
+                  api: [ESCALATIONS_API_PRIVILEGE_READ],
+                }),
+              ],
+            }),
+          ],
+        }),
+      ]);
     });
 
     it('registers as a managed workflow owner, or the startup sweep deletes our workflows', () => {
@@ -190,6 +235,7 @@ describe('AgenticInvestigationsPlugin', () => {
       setupPlugin();
 
       expect(registerRoutes).toHaveBeenCalledTimes(1);
+      expect(registerImpactRoutes).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -202,12 +248,15 @@ describe('AgenticInvestigationsPlugin', () => {
       expect(initializeManagedWorkflows).toHaveBeenCalledTimes(1);
     });
 
-    it('exposes the proposals service for in-process callers', () => {
+    it('exposes proposals, a request-scoped impact client, and escalations for in-process callers', () => {
       const { plugin } = setupPlugin();
 
       const { contract } = startPlugin(plugin);
 
       expect(contract.getProposalsService()).toBeDefined();
+      expect(contract.getImpactClient).toEqual(expect.any(Function));
+      expect(contract.getProposalPrivileges()).toBeDefined();
+      expect(contract.getEscalationsService()).toBeDefined();
     });
   });
 
