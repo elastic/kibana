@@ -28,7 +28,7 @@ const getResponseActionStatusSchema = z.object({
     .string()
     .uuid()
     .describe(
-      'The response action ID to look up. Use the action ID returned by a prior isolate, release, scan, or running-processes action in this conversation.'
+      'Any known response-action ID — from a prior action mentioned in this conversation or from Response Actions history in the UI.'
     ),
 });
 

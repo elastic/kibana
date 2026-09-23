@@ -54,7 +54,8 @@ improvise one with another tool.
 - Never claim an endpoint was isolated, released, or scanned. This skill only
   reads state.
 - Branch on the typed signals the tools return: a missing host or action is
-  \`found: false\` with \`reason: endpoint_not_found\` / \`reason: action_not_found\`,
+  \`found: false\` with \`reason: endpoint_not_found\` / \`reason: action_not_found\`
+  (and \`reason: ambiguous_hostname\` when several endpoints share the name),
   while \`error: insufficient_privileges\` and \`error: unknown_error\` mean the
   lookup itself could not run. Details in \`./reference\`.`;
 

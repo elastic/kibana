@@ -322,7 +322,7 @@ describe('getEndpointStatusTool', () => {
             id: `live-${i}`,
             status: 'online',
           })),
-          total: 500,
+          total: 5000,
         }),
       };
 
@@ -341,7 +341,7 @@ describe('getEndpointStatusTool', () => {
         expect(data.found).toBe(false);
         expect(data.reason).toBe('ambiguous_hostname');
         expect(data.truncated).toBe(true);
-        // Fleet's `total: 500` is deliberately NOT surfaced: it counts agents
+        // Fleet's `total` is deliberately NOT surfaced: it counts agents
         // before space filtering, so exposing it would report how many matching
         // records exist in other Spaces. `truncated` alone carries the signal
         // the agent needs — "there were more than I examined".

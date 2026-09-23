@@ -21,7 +21,8 @@ export type { HostInfo };
  */
 export const MAX_HOSTNAME_LENGTH = 256;
 export const MAX_HOSTNAME_FILTER_LENGTH = 256;
-export const DEFAULT_PAGE_SIZE = 20;
+/** Fleet agent IDs are UUIDs/ULIDs; generous bound for schema validation. */
+export const MAX_AGENT_ID_LENGTH = 64;
 
 /**
  * Endpoints returned per page by `list_endpoints`. The tool exposes a `page`
@@ -69,16 +70,19 @@ export const MAX_AGENT_STATE_ENTRIES = MAX_OUTPUT_AGENTS;
 export const MAX_ACTION_ERRORS = 20;
 
 /**
+ * Cumulative character budget for a single action's `outputs` summary. The
+ * per-dimension caps above still allow the dimensions to sum to well over a
+ * megabyte, so the accumulated summary is measured as it is built and further
+ * agents are dropped once the budget is exceeded (`summaryTruncated`).
+ */
+export const MAX_OUTPUT_TOTAL_CHARS = 64_000;
+
+/**
  * Typed error codes for all response-action tools. Keeping a closed union lets
  * the AI agent branch on the failure cause and gives the frontend a stable
  * contract instead of free-text messages.
  */
-export type ResponseActionErrorType =
-  | 'insufficient_privileges'
-  | 'endpoint_not_found'
-  | 'action_not_found'
-  | 'feature_disabled'
-  | 'unknown_error';
+export type ResponseActionErrorType = 'insufficient_privileges' | 'unknown_error';
 
 /**
  * Builds a typed error result. The optional `extra` fields are merged at the
@@ -127,7 +131,7 @@ export function insufficientPrivilegesResult(privilege: string) {
  *
  * - endpoint_not_found: the host name was resolved to zero fleet agents.
  */
-export type HostLookupReason = 'endpoint_not_found';
+export type HostLookupReason = 'endpoint_not_found' | 'ambiguous_hostname';
 
 /**
  * Shared return shape for the endpoint-status tool when the host could not be
@@ -138,7 +142,7 @@ export interface EndpointNotFoundResult {
   /**
    * Stable marker letting the frontend identify response-action tool
    * results without colliding with the many other skills that also return
-   * `ToolResultType.other` (see `isResponseActionResult` type guard).
+   * `ToolResultType.other`.
    */
   kind: 'response_action_result';
   hostName: string;
@@ -253,7 +257,15 @@ export function summarizeActionOutputs(outputs: unknown): ActionOutputsSummary |
   const agentIds = Object.keys(byAgent);
   const includedAgentIds = agentIds.slice(0, MAX_OUTPUT_AGENTS);
 
-  const agents: ActionOutputAgentSummary[] = includedAgentIds.map((agentId) => {
+  // Cumulative budget across the whole summary: the per-agent and per-entry
+  // caps still allow the dimensions to sum to far more than one summary
+  // should weigh, so agents are dropped once the serialized total exceeds
+  // `MAX_OUTPUT_TOTAL_CHARS`.
+  let runningSize = 0;
+  let summaryTruncated = false;
+
+  const agents: ActionOutputAgentSummary[] = [];
+  for (const agentId of includedAgentIds) {
     const raw = byAgent[agentId];
     const record = (raw ?? {}) as Record<string, unknown>;
     const entries = Array.isArray(record.entries) ? (record.entries as unknown[]) : undefined;
@@ -281,7 +293,7 @@ export function summarizeActionOutputs(outputs: unknown): ActionOutputsSummary |
 
     const totalEntries = entries?.length ?? 0;
 
-    return {
+    const summary: ActionOutputAgentSummary = {
       agentId,
       ...bounded,
       ...(keptEntries
@@ -295,14 +307,23 @@ export function summarizeActionOutputs(outputs: unknown): ActionOutputsSummary |
         : {}),
       ...(truncatedFields.length ? { truncatedFields } : {}),
     };
-  });
+
+    runningSize += JSON.stringify(summary).length;
+    if (runningSize > MAX_OUTPUT_TOTAL_CHARS) {
+      summaryTruncated = true;
+      break;
+    }
+
+    agents.push(summary);
+  }
+
+  const agentsTruncated = agentIds.length - agents.length;
 
   return {
     agents,
     totalAgents: agentIds.length,
-    ...(agentIds.length > includedAgentIds.length
-      ? { agentsTruncated: agentIds.length - includedAgentIds.length }
-      : {}),
+    ...(summaryTruncated ? { summaryTruncated: true as const } : {}),
+    ...(agentsTruncated > 0 ? { agentsTruncated } : {}),
   };
 }
 
@@ -404,6 +425,8 @@ export interface ActionOutputsSummary {
   agents: ActionOutputAgentSummary[];
   totalAgents: number;
   agentsTruncated?: number;
+  /** Set when the cumulative `MAX_OUTPUT_TOTAL_CHARS` budget was exceeded. */
+  summaryTruncated?: true;
 }
 
 /**

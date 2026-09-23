@@ -81,7 +81,7 @@ export const getActionDetailsById = async <T extends ActionDetails = ActionDetai
   }
 
   // get host metadata info with queried agents
-  const agentsHostInfo =
+  let agentsHostInfo =
     normalizedActionRequest.agentType === 'endpoint'
       ? await getAgentHostNamesWithIds({
           endpointService,
@@ -89,6 +89,39 @@ export const getActionDetailsById = async <T extends ActionDetails = ActionDetai
           agentIds: normalizedActionRequest.agents,
         })
       : {};
+
+  // Origin-only enrichment leaves linked-project agents with empty names.
+  // Under CPS, fall back to the request-scoped metadata index for those.
+  if (scoped && normalizedActionRequest.agentType === 'endpoint') {
+    const unresolvedAgentIds = normalizedActionRequest.agents.filter(
+      (agentId) => !agentsHostInfo[agentId]
+    );
+
+    if (unresolvedAgentIds.length) {
+      const kuery = `united.agent.agent.id: (${unresolvedAgentIds
+        .map((id) => `"${id}"`)
+        .join(' OR ')})`;
+      const metadata = await endpointService
+        .getEndpointMetadataService(spaceId)
+        .getHostMetadataList({ page: 0, pageSize: unresolvedAgentIds.length, kuery }, scoped);
+
+      agentsHostInfo = unresolvedAgentIds.reduce(
+        (acc, agentId) => {
+          const match = (metadata.data ?? []).find(
+            (entry) => entry.metadata?.agent?.id === agentId
+          );
+          const hostname = match?.metadata?.host?.hostname;
+
+          if (hostname) {
+            acc[agentId] = hostname;
+          }
+
+          return acc;
+        },
+        { ...agentsHostInfo }
+      );
+    }
+  }
 
   return createActionDetailsRecord<T>(normalizedActionRequest, actionResponses, agentsHostInfo);
 };

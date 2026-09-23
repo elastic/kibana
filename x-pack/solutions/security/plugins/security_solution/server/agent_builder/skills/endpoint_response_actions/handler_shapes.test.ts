@@ -37,6 +37,7 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
     };
     mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
       agent: mockAgentService,
+      ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
     })) as jest.Mock;
   });
 

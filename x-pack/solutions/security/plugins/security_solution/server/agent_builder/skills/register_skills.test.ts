@@ -64,6 +64,22 @@ describe('registerSkills - endpoint response actions', () => {
     expect(registeredSkillIds(agentBuilder)).toContain(ENDPOINT_RESPONSE_ACTIONS_SKILL_ID);
   });
 
+  it('does not register the endpoint-response-actions skill when the flag is disabled', async () => {
+    const agentBuilder = createAllowListEnforcingAgentBuilder();
+
+    await expect(
+      registerSkills({
+        ...buildOpts(agentBuilder),
+        experimentalFeatures: {
+          ...buildOpts(agentBuilder).experimentalFeatures,
+          endpointResponseActionsSkill: false,
+        },
+      })
+    ).resolves.toBeUndefined();
+
+    expect(registeredSkillIds(agentBuilder)).not.toContain(ENDPOINT_RESPONSE_ACTIONS_SKILL_ID);
+  });
+
   it('uses a skill id that is on the agent-builder built-in allow-list', () => {
     // Guards against drift between the id this plugin registers and the Agent
     // Builder team's manually maintained `AGENT_BUILDER_BUILTIN_SKILLS`. An

@@ -21,6 +21,13 @@ import {
   responseActionErrorResult,
 } from '../types';
 
+/**
+ * ES `from + size` cannot exceed `max_result_window` (10,000). Pages beyond
+ * this bound would make the underlying search throw, so they are rejected
+ * with a typed error instead.
+ */
+export const MAX_LIST_ENDPOINTS_PAGE = 199;
+
 const listEndpointsSchema = z.object({
   hostNameFilter: z
     .string()
@@ -68,6 +75,15 @@ export const listEndpointsTool = (
           : undefined;
 
         const page = (params.page as number | undefined) ?? 0;
+
+        if (page > MAX_LIST_ENDPOINTS_PAGE) {
+          return responseActionErrorResult(
+            'unknown_error',
+            `The endpoint inventory is capped at the first ${
+              (MAX_LIST_ENDPOINTS_PAGE + 1) * LIST_ENDPOINTS_PAGE_SIZE
+            } endpoints. Narrow the list with the hostNameFilter once a hostname is known instead of paging further.`
+          );
+        }
 
         // Request-scoped services so this read fans out to linked projects
         // under CPS. Without them the query is origin-only and a deployment

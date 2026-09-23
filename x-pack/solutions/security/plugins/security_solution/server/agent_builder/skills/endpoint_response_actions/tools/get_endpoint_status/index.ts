@@ -18,6 +18,7 @@ import { GET_ENDPOINT_STATUS_TOOL_ID } from '../..';
 import {
   endpointNotFoundData,
   insufficientPrivilegesResult,
+  MAX_AGENT_ID_LENGTH,
   MAX_HOSTNAME_LENGTH,
   responseActionErrorResult,
 } from '../types';
@@ -32,7 +33,7 @@ const getEndpointStatusSchema = z.object({
   agentId: z
     .string()
     .min(1)
-    .max(MAX_HOSTNAME_LENGTH)
+    .max(MAX_AGENT_ID_LENGTH)
     .optional()
     .describe(
       'The endpoint/agent ID, when the hostname resolves to more than one endpoint. Pass it with the hostName to select one specific host; omit it otherwise.'

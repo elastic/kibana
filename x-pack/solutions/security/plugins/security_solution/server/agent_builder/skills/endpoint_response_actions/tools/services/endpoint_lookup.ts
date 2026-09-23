@@ -23,11 +23,14 @@ import { resolveAgentTypeFromPackages } from '../types';
 export const LOOKUP_PAGE_SIZE = 25;
 
 /**
- * Hard cap on pages walked per hostname (100 candidate records). A host with
- * more records than this cannot be resolved by hostname alone — the lookup
- * reports the truncation instead of answering from a partial set.
+ * Hard cap on pages walked per hostname (500 candidate records). With the
+ * per-page batched space check this is effectively unreachable for any real
+ * host; it exists so a pathological hostname cannot turn into unbounded
+ * Fleet/metadata queries. Beyond the cap the lookup reports ambiguity among
+ * the visible candidates rather than a cross-space count (see
+ * `resolveByHostName`).
  */
-export const MAX_LOOKUP_PAGES = 4;
+export const MAX_LOOKUP_PAGES = 20;
 
 /** Ambiguity candidates returned to the model, newest/most-live first. */
 export const MAX_AMBIGUOUS_CANDIDATES = 10;
@@ -90,6 +93,8 @@ interface FleetCandidate {
 interface MetadataCandidate {
   metadata?: { agent?: { id?: string } };
   host_status?: string;
+  /** HostInfo `last_checkin` — ISO timestamp used for the recency tiebreak. */
+  last_checkin?: string;
 }
 
 /**
@@ -211,27 +216,44 @@ export function createEndpointLookupService(
       return { items: response?.agents ?? [], total: response?.total };
     });
 
-    const visible: NormalizedCandidate[] = [];
-    for (const candidate of items) {
-      try {
-        await fleetServices.ensureInCurrentSpace({ agentIds: [candidate.id] });
-        visible.push({
-          agentId: candidate.id,
-          isLive: candidate.status === 'online',
-          status: candidate.status ?? 'unknown',
-          packages: candidate.packages,
-          enrolledAt: candidate.enrolled_at,
-        });
-      } catch (e) {
-        // A not-found means the agent is not visible in the caller's space:
-        // skip it, but do not fail the whole lookup. Anything else (e.g. a
-        // transient Fleet/ES failure) is a real error and must propagate
+    // Batched per page: the underlying Fleet API takes agentIds[], so one call
+    // per page keeps the space check cheap enough to walk many pages.
+    const pageIds = items.map((candidate) => candidate.id);
+    let visibleIds: Set<string>;
+    try {
+      await fleetServices.ensureInCurrentSpace({ agentIds: pageIds });
+      visibleIds = new Set(pageIds);
+    } catch (e) {
+      if (!(e instanceof NotFoundError)) {
+        // A transient Fleet/ES failure is a real error and must propagate
         // rather than be misreported as "host not found".
-        if (!(e instanceof NotFoundError)) {
-          throw e;
+        throw e;
+      }
+
+      // At least one agent on the page is not visible in the caller's space.
+      // Re-check one-by-one to keep the individually visible ones.
+      visibleIds = new Set();
+      for (const candidate of items) {
+        try {
+          await fleetServices.ensureInCurrentSpace({ agentIds: [candidate.id] });
+          visibleIds.add(candidate.id);
+        } catch (perAgentError) {
+          if (!(perAgentError instanceof NotFoundError)) {
+            throw perAgentError;
+          }
         }
       }
     }
+
+    const visible: NormalizedCandidate[] = items
+      .filter((candidate) => visibleIds.has(candidate.id))
+      .map((candidate) => ({
+        agentId: candidate.id,
+        isLive: candidate.status === 'online',
+        status: candidate.status ?? 'unknown',
+        packages: candidate.packages,
+        enrolledAt: candidate.enrolled_at,
+      }));
 
     // `truncated` is safe to keep: it says only "there were more pages", which
     // the caller already learns from the space-filtered candidate list being
@@ -275,10 +297,15 @@ export function createEndpointLookupService(
     const candidates = items
       .map((entry) => ({
         agentId: entry.metadata?.agent?.id,
-        // Metadata `host_status` is the HostStatus enum (`healthy`), not
-        // Fleet's agent-level `online`.
-        isLive: entry.host_status === HostStatus.HEALTHY,
+        // Metadata `host_status` is the HostStatus enum, not Fleet's
+        // agent-level `online`. Only records that are definitively gone
+        // (offline / inactive / unenrolled) count as not live; `updating` and
+        // `unhealthy` are still potentially-reachable machines.
+        isLive: ![HostStatus.OFFLINE, HostStatus.INACTIVE, HostStatus.UNENROLLED].includes(
+          entry.host_status as HostStatus
+        ),
         status: entry.host_status as string,
+        enrolledAt: entry.last_checkin,
       }))
       .filter((candidate): candidate is NormalizedCandidate => Boolean(candidate.agentId));
 
@@ -303,24 +330,16 @@ export function createEndpointLookupService(
         ...metadata.candidates.filter((c) => !fleetIds.has(c.agentId)),
       ];
 
-      // An incomplete candidate set is treated the same way as a genuine
-      // duplicate for the same reason: an unexamined record could be another
-      // live machine. This check MUST precede the empty-merge return below —
-      // when every fetched candidate was filtered out by Space visibility the
-      // merge is empty, but a visible agent may still exist on a page that was
-      // never walked, so asserting `not_found` here would be a false negative.
+      // Space isolation first: when the walk hit the hard cap and nothing
+      // visible was found, answer `not_found`. Spaces are a security boundary —
+      // reporting "we found records but cannot show them" (or a cross-space
+      // count) would leak that matching records exist in other Spaces. A
+      // false-negative for a visible agent living beyond the cap is accepted
+      // for that isolation; the cap is high enough (500 records) that real
+      // hostnames never reach it.
       const truncated = fleet.truncated || metadata.truncated;
 
       if (!merged.length) {
-        if (truncated) {
-          return {
-            kind: 'ambiguous',
-            candidates: [],
-            truncated: true,
-            ...totalCandidatesOf(fleet, metadata),
-          };
-        }
-
         return { kind: 'not_found' };
       }
 
@@ -338,9 +357,11 @@ export function createEndpointLookupService(
       // one silently would report, or isolate, the wrong host, so surface the
       // ambiguity instead of guessing.
       //
-      // An incomplete candidate set is treated the same way for the same
-      // reason: an unexamined record could be another live machine, so the
-      // lookup refuses to answer rather than resolving from a partial page.
+      // An incomplete candidate set is treated the same way as a genuine
+      // duplicate for the same reason: an unexamined record could be another
+      // live machine. This applies only when at least one visible candidate
+      // was found — the zero-visibility case is answered `not_found` above so
+      // cross-space existence never leaks.
       const live = sorted.filter((c) => c.isLive);
 
       if (truncated || live.length > 1) {

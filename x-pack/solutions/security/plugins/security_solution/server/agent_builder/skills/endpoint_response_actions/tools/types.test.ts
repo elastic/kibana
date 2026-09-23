@@ -24,11 +24,11 @@ import { ToolResultType } from '@kbn/agent-builder-common';
 
 describe('response action error helpers', () => {
   it('responseActionErrorResult returns a typed error envelope', () => {
-    const result = responseActionErrorResult('action_not_found', 'Action missing');
+    const result = responseActionErrorResult('unknown_error', 'Action missing');
 
     expect(result.results[0].type).toBe(ToolResultType.error);
     expect(result.results[0].data).toEqual({
-      error: 'action_not_found',
+      error: 'unknown_error',
       message: 'Action missing',
     });
   });
