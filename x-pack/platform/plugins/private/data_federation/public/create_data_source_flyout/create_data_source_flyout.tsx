@@ -47,7 +47,6 @@ import {
 } from './create_data_source_flyout_authentication';
 import { CreateDataSourceFlyoutAuthenticationFields } from './create_data_source_flyout_authentication_fields';
 import { CreateDataSourceFlyoutAuthenticationSelect } from './create_data_source_flyout_authentication_select';
-import { CreateDataSourceFlyoutTypeSettingsBlock } from './create_data_source_flyout_type_settings';
 import { FlyoutErrorBanner } from './flyout_error_banner';
 
 import {
@@ -223,7 +222,7 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
     );
 
   const onSubmit = async (data: CreateDataSourceFlyoutFormValues) => {
-        setSaveError(undefined);
+    setSaveError(undefined);
     setIsSaving(true);
     try {
       const message = await handleSave(data);
@@ -309,11 +308,13 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
               inputRef={descriptionField.ref}
             />
           </EuiFormRow>
+          {/*
           <CreateDataSourceFlyoutTypeSettingsBlock
             control={control}
             dataSourceType={dataSourceType}
             unregister={unregister}
           />
+          */}
           <EuiHorizontalRule margin="m" />
           <CreateDataSourceFlyoutAuthenticationSelect
             authenticationMode={authenticationMode}
