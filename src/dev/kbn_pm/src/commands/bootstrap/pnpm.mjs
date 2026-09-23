@@ -55,7 +55,7 @@ export function ensurePnpmAvailable(log) {
           corepack enable
           corepack prepare pnpm@${required} --activate
 
-        then re-run 'pnpm kbn bootstrap'.
+        then re-run 'pnpm kbn bootstrap' (or 'node scripts/kbn bootstrap').
       `
     );
     process.exit(1);
