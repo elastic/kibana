@@ -55,28 +55,32 @@ apiTest.describe('Entity Store volume cap', { tag: ENTITY_STORE_TAGS }, () => {
   });
 
   apiTest.afterAll(async ({ apiClient, esClient }) => {
-    await esClient.deleteByQuery({
-      index: LOGS_TEST_INDEX,
-      refresh: true,
-      query: {
-        bool: {
-          should: CAP_HOST_NAME_PREFIXES.map((prefix) => ({ prefix: { 'host.name': prefix } })),
-          minimum_should_match: 1,
+    try {
+      await esClient.deleteByQuery({
+        index: LOGS_TEST_INDEX,
+        refresh: true,
+        ignore_unavailable: true,
+        query: {
+          bool: {
+            should: CAP_HOST_NAME_PREFIXES.map((prefix) => ({ prefix: { 'host.name': prefix } })),
+            minimum_should_match: 1,
+          },
         },
-      },
-    });
-    const resetResponse = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
-      headers: defaultHeaders,
-      responseType: 'json',
-      body: {
-        logExtraction: {
-          maxLogsPerPage: LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT,
-          maxLogsPerWindow: LOG_EXTRACTION_MAX_LOGS_PER_WINDOW_DEFAULT,
-          maxLogsPerWindowCapBehavior: LOG_EXTRACTION_CAP_BEHAVIOR_DEFAULT,
+      });
+    } finally {
+      const resetResponse = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: {
+          logExtraction: {
+            maxLogsPerPage: LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT,
+            maxLogsPerWindow: LOG_EXTRACTION_MAX_LOGS_PER_WINDOW_DEFAULT,
+            maxLogsPerWindowCapBehavior: LOG_EXTRACTION_CAP_BEHAVIOR_DEFAULT,
+          },
         },
-      },
-    });
-    expect(resetResponse).toHaveStatusCode(200);
+      });
+      expect(resetResponse).toHaveStatusCode(200);
+    }
   });
 
   // Defer: cap fires mid-window — caller uses lastSearchTimestamp to resume

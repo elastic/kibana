@@ -27,6 +27,12 @@ import {
   UPDATES_INDEX,
   ENTRA_SOURCE_INDEX,
 } from './constants';
+import {
+  LOG_EXTRACTION_DOCS_LIMIT_DEFAULT,
+  LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT,
+  LOG_EXTRACTION_MAX_LOGS_PER_WINDOW_DEFAULT,
+  LOG_EXTRACTION_CAP_BEHAVIOR_DEFAULT,
+} from '../../../../server/domain/saved_objects';
 
 type ApiWorkerFixtures = Parameters<Parameters<typeof apiTest>[2]>[0];
 export type ApiClientFixture = ApiWorkerFixtures['apiClient'];
@@ -202,6 +208,23 @@ export const installEntityStoreSuite = async ({
 
   const installResponse = await installAllEntityTypes(apiClient, defaultHeaders);
   expect([200, 201]).toContain(installResponse.statusCode);
+
+  // Always normalize mutable extraction config so each suite starts from the same baseline,
+  // including the already-installed (200) path that preserves previous settings.
+  const resetConfigResponse = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+    headers: defaultHeaders,
+    responseType: 'json',
+    body: {
+      logExtraction: {
+        docsLimit: LOG_EXTRACTION_DOCS_LIMIT_DEFAULT,
+        maxLogsPerPage: LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT,
+        maxLogsPerWindow: LOG_EXTRACTION_MAX_LOGS_PER_WINDOW_DEFAULT,
+        maxLogsPerWindowCapBehavior: LOG_EXTRACTION_CAP_BEHAVIOR_DEFAULT,
+        additionalIndexPatterns: [],
+      },
+    },
+  });
+  expect(resetConfigResponse.statusCode).toBe(200);
 
   const stopResponse = await stopAllEntityTypes(apiClient, defaultHeaders);
   expect(stopResponse.statusCode).toBe(200);
