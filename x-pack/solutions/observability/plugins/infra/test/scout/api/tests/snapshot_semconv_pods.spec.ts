@@ -21,6 +21,11 @@ const SEMCONV_CPU_WITH_LIMIT = 0.46;
 const SEMCONV_CPU_WITHOUT_LIMIT = 0.32;
 const SEMCONV_MEMORY_WITH_LIMIT = 0.55;
 const SEMCONV_MEMORY_WITHOUT_LIMIT = 0.4;
+// Matches SemconvPod network counters (`NETWORK_IO_STEP` every 30s generator tick).
+const SEMCONV_NETWORK_IO_STEP = 100_000;
+const SEMCONV_NETWORK_GENERATOR_INTERVAL_SEC = 30;
+const SEMCONV_NETWORK_BYTES_PER_SEC_PER_INTERFACE =
+  SEMCONV_NETWORK_IO_STEP / SEMCONV_NETWORK_GENERATOR_INTERVAL_SEC;
 
 apiTest.describe(
   'API /api/metrics/snapshot (semconv pods)',
@@ -125,8 +130,10 @@ apiTest.describe(
         if (rx == null || tx == null) {
           throw new Error(`Expected rx/tx values for uid "${fixture.uid}"`);
         }
-        expect(rx).toBeGreaterThan(0);
-        expect(tx).toBeGreaterThan(0);
+        const interfaceCount = fixture.interfaces?.length ?? 1;
+        const expectedNetworkRate = SEMCONV_NETWORK_BYTES_PER_SEC_PER_INTERFACE * interfaceCount;
+        expect(rx).toBeCloseTo(expectedNetworkRate, 2);
+        expect(tx).toBeCloseTo(expectedNetworkRate, 2);
       }
     });
 
