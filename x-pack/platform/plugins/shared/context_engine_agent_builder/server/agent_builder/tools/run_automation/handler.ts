@@ -56,7 +56,9 @@ export const runAutomationHandler = async ({
 
   const serverBasePath = (await getCoreStart()).http.basePath.serverBasePath;
   const spaceSegment = spaceId && spaceId !== 'default' ? `/s/${spaceId}` : '';
-  const workflowUrl = `${serverBasePath}${spaceSegment}/app/workflows/${encodeURIComponent(params.workflowId)}`;
+  const workflowUrl = `${serverBasePath}${spaceSegment}/app/workflows/${encodeURIComponent(
+    params.workflowId
+  )}`;
 
   if (!runResult.started) {
     return { ...runResult, workflowUrl };

@@ -200,7 +200,6 @@ describe('save_automation tool', () => {
     expect(getWorkflowMock).not.toHaveBeenCalled();
   });
 
-
   describe('overwrite confirmation', () => {
     it('says an existing workflow is being replaced when yaml targets one by id', async () => {
       const tool = createTool();

@@ -71,7 +71,8 @@ export const createRunAutomationTool = ({
       if (!workflowId) {
         return {
           title: 'Run workflow automation',
-          message: 'Run this automation over the full corpus? This costs a model call per document.',
+          message:
+            'Run this automation over the full corpus? This costs a model call per document.',
           confirm_text: 'Run automation',
           cancel_text: 'Cancel',
         };
