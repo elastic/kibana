@@ -10,9 +10,13 @@ paths:
       operationId: Correlate
       description: >-
         Runs the anchors correlation leg. `no_match` and `unavailable` are
-        both successful outcomes. `unavailable` never blocks the Tier 1
-        finding, and packaging still mints contain Proposals on a Tier 1 hit;
-        correlation evidence is optional context, not a mint gate.
+        both successful outcomes and never block minting on a Tier 1 hit.
+        When status is `matched`, packaging uses related report IDs for
+        cross-Investigation Proposal reuse: for each eligible host, reuse
+        an open contain Proposal already targeting that endpoint on a
+        related report's Investigation, else mint. Same-conversation
+        idempotency stays uuidv5 over (conversationId, endpointId).
+        `no_match` and `unavailable` mint on this Investigation only.
       summary: Correlate a report against others by shared anchors
       tags:
         - AlertZero API
