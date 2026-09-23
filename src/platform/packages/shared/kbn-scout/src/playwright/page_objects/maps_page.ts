@@ -27,7 +27,6 @@ export class MapsPage {
   public readonly documentsItem;
   public readonly fullScreenModeButton;
   public readonly exitFullScreenButton;
-  private readonly mapLayerToc;
   private readonly layerTocTooltip;
   private readonly appMenu: AppMenu;
   private readonly mapContainer;
@@ -50,7 +49,6 @@ export class MapsPage {
     this.fullScreenModeButton = this.page.testSubj.locator('mapsFullScreenMode');
     this.exitFullScreenButton = this.page.testSubj.locator('exitFullScreenModeButton');
     this.appMenu = new AppMenu(this.page);
-    this.mapLayerToc = this.page.testSubj.locator('mapLayerTOC');
     this.layerTocTooltip = this.page.testSubj.locator('layerTocTooltip');
     this.mapContainer = this.page.testSubj.locator('mapContainer');
     this.setViewForm = this.page.testSubj.locator('mapSetViewForm');
@@ -128,7 +126,17 @@ export class MapsPage {
   /** Waits until map layers are loaded. Works in both standalone (expanded TOC) and minimized TOC contexts. */
   async waitForLayersToLoad() {
     await this.mapContainer.waitFor({ state: 'visible', timeout: DEFAULT_MAP_LOADING_TIMEOUT });
-    if (await this.mapLayerToc.isVisible()) {
+
+    // Wait until one of the two TOC states has rendered before branching; an immediate
+    // isVisible() snapshot after mapContainer can race with the TOC appearing.
+    const mapLayerToc = this.page.testSubj.locator('mapLayerTOC');
+    const expandButton = this.page.testSubj.locator('mapExpandLayerControlButton');
+    await mapLayerToc.or(expandButton).first().waitFor({
+      state: 'visible',
+      timeout: DEFAULT_MAP_LOADING_TIMEOUT,
+    });
+
+    if (await mapLayerToc.isVisible()) {
       // Maps uses EuiLoadingSpinner (role=progressbar) while a layer loads; there is no
       // dedicated layer-loading data-test-subj, so wait for toggles + no progressbars.
       await this.page.waitForFunction(
@@ -147,7 +155,6 @@ export class MapsPage {
         { timeout: DEFAULT_MAP_LOADING_TIMEOUT }
       );
     } else {
-      const expandButton = this.page.testSubj.locator('mapExpandLayerControlButton');
       await expandButton.waitFor({ state: 'visible', timeout: DEFAULT_MAP_LOADING_TIMEOUT });
       await expect(expandButton.locator('.euiLoadingSpinner')).toHaveCount(0, {
         timeout: DEFAULT_MAP_LOADING_TIMEOUT,
