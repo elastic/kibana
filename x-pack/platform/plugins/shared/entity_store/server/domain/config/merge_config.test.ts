@@ -284,9 +284,13 @@ describe('getMergedConfig', () => {
     it('global override of exclusive fields still reaches single and priority modes', () => {
       const overrides = { maxLogsPerWindowCapBehavior: 'defer' as const, maxLogsPerWindow: 999 };
 
-      expect(getMergedConfig('user', overrides, undefined, 'single').maxLogsPerWindowCapBehavior).toBe('defer');
+      expect(
+        getMergedConfig('user', overrides, undefined, 'single').maxLogsPerWindowCapBehavior
+      ).toBe('defer');
       expect(getMergedConfig('user', overrides, undefined, 'single').maxLogsPerWindow).toBe(999);
-      expect(getMergedConfig('user', overrides, undefined, 'priority').maxLogsPerWindowCapBehavior).toBe('defer');
+      expect(
+        getMergedConfig('user', overrides, undefined, 'priority').maxLogsPerWindowCapBehavior
+      ).toBe('defer');
       expect(getMergedConfig('user', overrides, undefined, 'priority').maxLogsPerWindow).toBe(999);
     });
 
