@@ -1765,7 +1765,7 @@ export type FieldDefinitionWriteRequest = z.infer<typeof FieldDefinitionWriteReq
 
 Identity constraints: the `name` property must match the `name` key in the YAML `definition`. When `name` is omitted, the server extracts it from the `definition` YAML automatically. A field's `name` and YAML `type` are immutable — an attempt to change either returns `409` with `attributes.code = "field_identity_immutable"` and `attributes.changed` listing which identity attributes were modified.
 
-Note: unlike the POST endpoint, the `definition` field has no enforced character limit on PUT. This allows existing field definitions whose stored YAML was created through internal tooling before the public API existed (and may exceed 30 000 characters) to remain modifiable.
+Unlike the POST endpoint, PUT allows an unchanged `definition` to be submitted even if it exceeds 30 000 characters, so that field definitions created through internal tooling remain modifiable. When the submitted `definition` differs from the stored value, the 30 000-character limit is enforced. A hard upper bound of 1 000 000 characters always applies regardless of whether the definition is changed.
 
   */
 export const FieldDefinitionPutRequest = lazySchema(() =>
@@ -1789,6 +1789,7 @@ export const FieldDefinitionPutRequest = lazySchema(() =>
        */
       definition: z
         .string()
+        .max(1000000)
         .describe(
           'The field definition as a YAML string describing a single field (type, label, control, metadata).'
         ),
