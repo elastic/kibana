@@ -210,14 +210,23 @@ apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, ()
       );
 
       // Create only indices that don't already exist so we only clean up what we own.
+      // Only swallow resource_already_exists_exception (status 400); any other error
+      // (permission denied, template error, etc.) indicates a broken test environment
+      // and should fail the test immediately rather than silently skipping creation and
+      // producing a false-positive exists===false assertion.
       const testIndices: string[] = [];
       await Promise.all(
         [expiredIndex, withinRetentionIndex, recentIndex, expiredLegacyIndex].map(async (idx) => {
           try {
             await esClient.indices.create({ index: idx });
             testIndices.push(idx);
-          } catch {
-            // Already exists — not owned by this test, leave it alone.
+          } catch (err) {
+            if (
+              (err as { meta?: { body?: { error?: { type?: string } } } })?.meta?.body?.error
+                ?.type !== 'resource_already_exists_exception'
+            ) {
+              throw err;
+            }
           }
         })
       );
