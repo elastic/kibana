@@ -11,6 +11,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObject } from '@kbn/core/server';
 import type { ErrorToastOptions, ToastInputFields } from '@kbn/core-notifications-browser';
+import type { FieldSpec, DataViewAttributes } from '@kbn/data-views-types';
 
 // Re-export all types from @kbn/data-views-types for backward compatibility
 export type {
@@ -37,9 +38,6 @@ export type {
 } from '@kbn/data-views-types';
 
 export { DataViewType } from '@kbn/data-views-types';
-
-// Re-export types needed by this module
-import type { FieldSpec, DataViewAttributes } from '@kbn/data-views-types';
 
 export type { QueryDslQueryContainer };
 export type { SavedObject };
