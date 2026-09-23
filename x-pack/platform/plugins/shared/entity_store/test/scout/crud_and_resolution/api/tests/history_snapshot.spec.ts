@@ -20,6 +20,7 @@ import {
   forceLogExtraction,
   normalizeKeywordList,
   setupLogsTestDataStream,
+  stopEntityTypes,
   startEntityTypes,
   teardownLogsTestDataStream,
 } from '../../../common/fixtures/helpers';
@@ -50,8 +51,13 @@ apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, ()
     );
   });
 
-  apiTest.afterAll(async ({ esClient }) => {
-    await teardownLogsTestDataStream(esClient);
+  apiTest.afterAll(async ({ apiClient, esClient }) => {
+    try {
+      const stopResponse = await stopEntityTypes(apiClient, defaultHeaders, ['host']);
+      expect(stopResponse.statusCode).toBe(200);
+    } finally {
+      await teardownLogsTestDataStream(esClient);
+    }
   });
 
   apiTest(
