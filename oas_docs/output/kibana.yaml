@@ -45201,6 +45201,9 @@ paths:
                     type: number
                   perPage:
                     type: number
+                  sharedWithOtherSpaces:
+                    description: Whether the cloud connector is shared with other spaces. When true, `total` counts only the package policies in the current space.
+                    type: boolean
                   total:
                     type: number
                 required:
