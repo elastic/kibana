@@ -63,6 +63,7 @@ type SupportedMappingPropertyType = AllMappingPropertyType &
     | 'flattened'
     | 'object'
     | 'flattened'
+    | 'alias'
   );
 
 type MappingPropertyObjectType = Required<ObjectMapping, 'type'>;
