@@ -16,8 +16,9 @@ components:
 
     FpCountThreshold:
       type: integer
-      # Floor of 2 mirrors the sweep: a single-FP group makes ES|QL return alert_ids as a
-      # scalar, which would fail the review's array input schema.
+      # Not 1. The sweep collects each rule's alert ids with ES|QL VALUES(), and a rule with
+      # exactly one FP alert gets back a bare string instead of a one-item list. The review
+      # step only accepts a list, so a floor of 2 keeps that case from arising.
       minimum: 2
       maximum: 100
       description: >-
