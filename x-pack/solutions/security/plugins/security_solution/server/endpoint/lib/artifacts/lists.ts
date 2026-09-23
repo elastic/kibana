@@ -255,6 +255,7 @@ async function translateToYaraRules(
   const translatedItems: TranslatedYaraRule[] = [];
 
   for (const exception of exceptions) {
+    // Sequential: libyara WASM is a process singleton and is not safe for concurrent ccall.
     const translatedItem = await translateOneYaraException(exception, logger);
     if (translatedItem !== undefined) {
       translatedItems.push(translatedItem);
