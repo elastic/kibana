@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EvaluatorDetailFlyout } from './evaluator_detail_flyout';
 import { useEvaluator } from '../../hooks/use_evaluators_api';
@@ -156,6 +156,42 @@ describe('EvaluatorDetailFlyout', () => {
     expect(screen.getByTestId('evalsEvaluatorDetailVersion')).toHaveValue('1.0.0');
     // Still showing 1.2.0's content, and crucially not an empty shell.
     expect(screen.getByText('Judge only the tone.')).toBeInTheDocument();
+  });
+
+  it('marks the body as pending while it belongs to a version other than the selected one', () => {
+    renderFlyout();
+
+    fireEvent.change(screen.getByTestId('evalsEvaluatorDetailVersion'), {
+      target: { value: '1.0.0' },
+    });
+
+    // The header names 1.0.0 while 1.2.0 is still rendered, so the body cannot be
+    // presented as the selected definition.
+    expect(screen.getByTestId('evalsEvaluatorDetailPending')).toBeInTheDocument();
+    expect(screen.getByText('Judge only the tone.').closest('[aria-busy]')).toHaveAttribute(
+      'aria-busy',
+      'true'
+    );
+  });
+
+  it('presents nothing as pending once the selected version is the one rendered', () => {
+    renderFlyout();
+
+    expect(screen.queryByTestId('evalsEvaluatorDetailPending')).not.toBeInTheDocument();
+  });
+
+  it('puts the selector back to what is on screen when the fetch fails', async () => {
+    renderFlyout({ error: new Error('Version not found') });
+
+    fireEvent.change(screen.getByTestId('evalsEvaluatorDetailVersion'), {
+      target: { value: '1.0.0' },
+    });
+
+    // Leaving it on 1.0.0 would label 1.2.0's prompt as a version that never loaded.
+    await waitFor(() =>
+      expect(screen.getByTestId('evalsEvaluatorDetailVersion')).toHaveValue('1.2.0')
+    );
+    expect(screen.queryByTestId('evalsEvaluatorDetailPending')).not.toBeInTheDocument();
   });
 
   it('offers no version picker when nothing has been edited yet', () => {

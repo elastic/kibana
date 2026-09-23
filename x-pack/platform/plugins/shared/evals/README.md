@@ -254,7 +254,9 @@ Every saved change writes a new immutable version; saving without changing anyth
 | `minor` | The judge's instructions: prompts, or the criteria attached to a score | Scores may shift, but still line up |
 | `major` | The scores themselves (added, removed, renamed, retyped, or relabelled) or the required evidence and reference data keys | Earlier runs no longer line up |
 
-A major is therefore a mechanical statement that results before and after cannot be compared, not an opinion about how large the edit was. Reordering scores or evidence is presentational and never raises the level on its own.
+A major is therefore a mechanical statement that results before and after cannot be compared, not an opinion about how large the edit was.
+
+Order matters in one place only. Evidence and reference data keys are sets of requirements, so their order is normalized and reordering them alone writes no version at all. Score order is part of the definition a reader sees and the order the judge is asked for them, so reordering scores is a `minor` — the set of scores is unchanged, which is why it is not a `major`.
 - **Tracing** — browse tracing projects with metrics, drill into individual traces with a waterfall view
 - **Remotes** — configure remote Kibana instances for cross-cluster dataset management
 

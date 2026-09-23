@@ -81,34 +81,6 @@ paths:
                       scores:
                         type: array
                         items:
-                          type: object
-                          required:
-                            - name
-                          properties:
-                            name:
-                              type: string
-                              maxLength: 256
-                            score:
-                              type: number
-                              nullable: true
-                            label:
-                              type: string
-                              maxLength: 1024
-                            explanation:
-                              type: string
-                              maxLength: 8192
-                            metadata:
-                              type: object
-                              additionalProperties: true
+                          $ref: './evaluate_route.schema.yaml#/components/schemas/EvaluateResultScore'
                       error:
-                        type: object
-                        required:
-                          - message
-                        properties:
-                          code:
-                            type: string
-                            enum:
-                              - evidence_unmet
-                          message:
-                            type: string
-                            maxLength: 8192
+                        $ref: './evaluate_route.schema.yaml#/components/schemas/EvaluateResultError'

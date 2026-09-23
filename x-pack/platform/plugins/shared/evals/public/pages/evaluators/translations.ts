@@ -247,6 +247,11 @@ export const VERSION_HISTORY_HELP = i18n.translate(
       'Every saved change keeps its own version. Pick one to see how it was defined. A new major version means the scores or required inputs changed, so results from earlier versions no longer compare.',
   }
 );
+export const LOADING_VERSION = (version: string) =>
+  i18n.translate('xpack.evals.evaluators.loadingVersionDescription', {
+    defaultMessage: 'Loading {version}…',
+    values: { version },
+  });
 export const CURRENT_VERSION_OPTION = (version: string) =>
   i18n.translate('xpack.evals.evaluators.currentVersionDropDownOptionLabel', {
     defaultMessage: '{version} (current)',

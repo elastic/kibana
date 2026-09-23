@@ -63,10 +63,6 @@ export const executeEvaluators = async ({
     throw new EvaluationExecutionError('multi-turn evaluation is not yet supported', 'badRequest');
   }
 
-  if (subject.traces.length !== 1) {
-    throw new EvaluationExecutionError('single-turn mode requires exactly one trace', 'badRequest');
-  }
-
   for (const { definition, connectorId } of evaluators) {
     if (definition.kind === 'llm' && !connectorId) {
       throw new EvaluationExecutionError(

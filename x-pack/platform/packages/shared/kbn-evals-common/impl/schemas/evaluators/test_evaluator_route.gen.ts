@@ -17,6 +17,7 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 
 import { UserDefinedEvaluatorDraft, EvaluationSubject, Model } from '../common_attributes.gen';
+import { EvaluateResultScore, EvaluateResultError } from './evaluate_route.gen';
 
 export const TestEvaluatorRequestBody = lazySchema(() =>
   z.object({
@@ -45,23 +46,8 @@ export const TestEvaluatorResponse = lazySchema(() =>
           ),
         model: Model.optional(),
       }),
-      scores: z
-        .array(
-          z.object({
-            name: z.string().max(256),
-            score: z.number().nullable().optional(),
-            label: z.string().max(1024).optional(),
-            explanation: z.string().max(8192).optional(),
-            metadata: z.object({}).catchall(z.unknown()).optional(),
-          })
-        )
-        .optional(),
-      error: z
-        .object({
-          code: z.literal('evidence_unmet').optional(),
-          message: z.string().max(8192),
-        })
-        .optional(),
+      scores: z.array(EvaluateResultScore).optional(),
+      error: EvaluateResultError.optional(),
     }),
   })
 );

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiBadge,
   EuiButton,
@@ -153,6 +153,21 @@ export const EvaluatorDetailFlyout: React.FC<EvaluatorDetailFlyoutProps> = ({
   const { data, isLoading, error } = useEvaluator(evaluatorName, selectedVersion);
   const evaluator = data?.evaluator;
 
+  // The previous definition stays on screen while the chosen one loads, so the two can
+  // disagree for a moment. While they do, the body is not the selected version and must
+  // not be read as it. No selection means the current version, which is what loads first.
+  const isShowingOtherVersion =
+    Boolean(evaluator) && Boolean(selectedVersion) && selectedVersion !== evaluator?.version;
+
+  useEffect(() => {
+    // A failed fetch would otherwise leave the selector naming a version that never
+    // loaded, beside a body from a different one. Falling back to what is rendered keeps
+    // the label honest; that version is already cached, so nothing flickers.
+    if (error && evaluator && selectedVersion && selectedVersion !== evaluator.version) {
+      setSelectedVersion(evaluator.version);
+    }
+  }, [error, evaluator, selectedVersion]);
+
   // `versions` is newest-first, so the head is the one an experiment would pick up.
   const [currentVersion] = evaluator?.versions ?? [];
   const versionOptions = (evaluator?.versions ?? []).map((version) => ({
@@ -203,6 +218,13 @@ export const EvaluatorDetailFlyout: React.FC<EvaluatorDetailFlyoutProps> = ({
                   <EuiBadge color="hollow">{`${i18n.VERSION_LABEL} ${evaluator.version}`}</EuiBadge>
                 )}
               </EuiFlexItem>
+              {isShowingOtherVersion ? (
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs" color="subdued" data-test-subj="evalsEvaluatorDetailPending">
+                    <EuiLoadingSpinner size="s" /> {i18n.LOADING_VERSION(selectedVersion ?? '')}
+                  </EuiText>
+                </EuiFlexItem>
+              ) : null}
             </>
           ) : null}
         </EuiFlexGroup>
@@ -223,7 +245,9 @@ export const EvaluatorDetailFlyout: React.FC<EvaluatorDetailFlyoutProps> = ({
         {isLoading && !evaluator ? <EuiLoadingSpinner size="l" /> : null}
 
         {evaluator ? (
-          <>
+          // Dimmed while it belongs to a version other than the selected one, so nothing
+          // here reads as the definition the header names.
+          <div css={{ opacity: isShowingOtherVersion ? 0.5 : 1 }} aria-busy={isShowingOtherVersion}>
             <EuiText size="s">
               <p>{evaluator.description}</p>
             </EuiText>
@@ -268,7 +292,7 @@ export const EvaluatorDetailFlyout: React.FC<EvaluatorDetailFlyoutProps> = ({
                 {i18n.BUILT_IN_DETAILS_NOTE}
               </EuiText>
             )}
-          </>
+          </div>
         ) : null}
       </EuiFlyoutBody>
 
