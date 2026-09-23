@@ -8,6 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EvaluationResult, Evaluator, Example, TaskOutput } from '@kbn/evals';
 import type { ExtractedVisualization } from '../extract_visualization';
+import { skippedResult } from '../evaluator_utils';
 import { substituteEsqlBindParams } from './esql_bind_params';
 import { isNumericColumn, type EsqlColumn } from './esql_column_types';
 
@@ -158,7 +159,9 @@ const describeFailure = (check: BindingCheck): string =>
  * CODE evaluator: executes each visualization's ES|QL and checks that every
  * column the Lens config (or Vega encoding) binds to exists in the result, and
  * that measure roles bind numeric columns. Catches configs that parse against
- * the schema but reference columns the query never produces.
+ * the schema but reference columns the query never produces. A chart that
+ * binds no column at all scores 0; only a Vega spec without a top-level
+ * `encoding` is left unscored.
  */
 export function createColumnBindingIntegrityEvaluator<
   TExample extends Example = Example,
@@ -202,15 +205,19 @@ export function createColumnBindingIntegrityEvaluator<
         visualizations.map(async (visualization, index) => {
           const bindings = collectColumnBindings(visualization);
           if (bindings.length === 0) {
-            // Nothing to resolve (e.g. a layered Vega spec); leave it to Config Validity.
+            // A Vega spec without top-level `encoding` (layered / concat) may still bind
+            // columns we do not parse, so it is left out of the score. Anything else
+            // that binds no column at all is a broken chart, not a pass.
+            const unscorable = visualization.renderer === 'vega';
+            const renderer = visualization.renderer ?? 'lens';
             return {
               index,
-              score: 1,
+              score: unscorable ? undefined : 0,
               checkedBindings: 0,
               resolvedBindings: 0,
               bindings: [] as BindingCheck[],
-              failures: [] as string[],
-              note: 'no column bindings found',
+              failures: unscorable ? [] : [`${renderer} visualization binds no columns`],
+              note: unscorable ? 'no encoding fields found; left to Config Validity' : undefined,
             };
           }
           try {
@@ -240,7 +247,15 @@ export function createColumnBindingIntegrityEvaluator<
         })
       );
 
-      const score = details.reduce((sum, detail) => sum + detail.score, 0) / details.length;
+      const scores = details.flatMap((detail) =>
+        detail.score === undefined ? [] : [detail.score]
+      );
+      if (scores.length === 0) {
+        return skippedResult(
+          'No column bindings to resolve (Vega spec without top-level encoding).'
+        );
+      }
+      const score = scores.reduce((sum, value) => sum + value, 0) / scores.length;
       const failures = details.flatMap((detail) => detail.failures);
       const checked = details.reduce((sum, detail) => sum + detail.checkedBindings, 0);
       const resolved = details.reduce((sum, detail) => sum + detail.resolvedBindings, 0);
