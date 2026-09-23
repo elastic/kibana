@@ -27,6 +27,8 @@ import {
   getFilter,
   getExistsFilter,
   comparePreviousColumnFilter,
+  getDateFields,
+  getDefaultDateFieldName,
 } from './helpers';
 import { isRuntimeField, isScriptedField } from './terms/helpers';
 import { FormRow } from './shared_components/form_row';
@@ -107,39 +109,6 @@ function getInvalidSortFieldMessages(
     ];
   }
   return [];
-}
-
-function isTimeFieldNameDateField(indexPattern: IndexPattern) {
-  return (
-    indexPattern.timeFieldName &&
-    indexPattern.fields.find(
-      (field) => field.name === indexPattern.timeFieldName && field.type === 'date'
-    )
-  );
-}
-
-function getDateFields(indexPattern: IndexPattern): IndexPatternField[] {
-  const dateFields = indexPattern.fields.filter((field) => field.type === 'date');
-  if (isTimeFieldNameDateField(indexPattern)) {
-    dateFields.sort(({ name: nameA }, { name: nameB }) => {
-      if (nameA === indexPattern.timeFieldName) {
-        return -1;
-      }
-      if (nameB === indexPattern.timeFieldName) {
-        return 1;
-      }
-      return 0;
-    });
-  }
-  return dateFields;
-}
-
-// Resolves the date field a last value column should sort by when none is set: the data view's
-// default time field when it is a date, otherwise the first available date field.
-export function getDefaultDateFieldName(indexPattern: IndexPattern): string | undefined {
-  return isTimeFieldNameDateField(indexPattern)
-    ? indexPattern.timeFieldName
-    : indexPattern.fields.find((field) => field.type === 'date')?.name;
 }
 
 function setDefaultShowArrayValues(

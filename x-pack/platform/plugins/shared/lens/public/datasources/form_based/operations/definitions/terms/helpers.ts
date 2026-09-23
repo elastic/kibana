@@ -30,7 +30,7 @@ import type {
 import { isColumnOfType } from '@kbn/lens-common';
 import { operationDefinitionMap } from '..';
 import { filtersDefaultLabel } from '../filters/filters';
-import { getDefaultDateFieldName } from '../last_value';
+import { getDefaultDateFieldName } from '../helpers';
 import { isReferenced } from '../../layer_helpers';
 
 import type { FieldBasedOperationErrorMessage } from '..';
