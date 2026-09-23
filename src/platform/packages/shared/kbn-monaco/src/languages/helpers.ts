@@ -52,6 +52,10 @@ export async function createInterruptibleLanguageProvider<T>(
   provider: () => T | PromiseLike<T>,
   cancellationToken: monaco.CancellationToken
 ): Promise<T> {
+  if (cancellationToken.isCancellationRequested) {
+    throw new Error('AbortedDueToCancellationRequest');
+  }
+
   const cancellation = listenForCancellation(cancellationToken);
 
   try {
