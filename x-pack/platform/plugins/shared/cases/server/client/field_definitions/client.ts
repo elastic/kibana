@@ -357,6 +357,23 @@ export const createFieldDefinitionsSubClient = (
           }
         }
 
+        // Promotion guard: when isGlobal transitions from false/undefined to true, assign
+        // a new displayOrder (max existing global order + 1). This mirrors the create path
+        // and ensures promoted definitions appear last rather than landing at undefined/0,
+        // which would collide with another definition's position after a demotion/re-promotion
+        // cycle.
+        let resolvedInput = input;
+        if (!fieldDef.attributes.isGlobal && input.isGlobal === true) {
+          const globalDefs = await fieldDefinitionsService.getFieldDefinitions(input.owner, {
+            isGlobal: true,
+          });
+          const maxOrder = globalDefs.fieldDefinitions.reduce(
+            (max, { displayOrder }) => Math.max(max, displayOrder ?? -1),
+            -1
+          );
+          resolvedInput = { ...input, displayOrder: maxOrder + 1 };
+        }
+
         // No per-owner name-uniqueness check on update: the identity guard above
         // guarantees the name cannot change, and the persisted name is already
         // unique for the owner.
@@ -365,7 +382,7 @@ export const createFieldDefinitionsSubClient = (
         // links this definition (and, in doing so, writes to it — e.g. a legacyKey repair)
         // between the isDefinitionActivelyLinked read and this write now surfaces as a 409
         // instead of silently committing the demotion past the guard.
-        return fieldDefinitionsService.updateFieldDefinition(id, input, {
+        return fieldDefinitionsService.updateFieldDefinition(id, resolvedInput, {
           version: fieldDef.version,
         });
       }

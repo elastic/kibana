@@ -94,12 +94,7 @@ export const putPublicFieldDefinitionRoute = createCasesRoute({
         if (error.output.statusCode === 409) {
           const attributes = getTypedApiErrorAttributes(error);
           return response.conflict({
-            body: {
-              statusCode: 409,
-              error: 'Conflict',
-              message: error.message,
-              ...(attributes ? { attributes } : {}),
-            },
+            body: attributes ? { message: error.message, attributes } : { message: error.message },
           });
         }
         if (error.output.statusCode === 404) {
