@@ -1763,7 +1763,7 @@ finishes and then call this operation once.
           props.params
         ),
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'POST',
         body: props.body,
@@ -1782,7 +1782,7 @@ finishes and then call this operation once.
           props.params
         ),
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'POST',
         body: props.body,
