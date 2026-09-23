@@ -52,10 +52,14 @@ import fs from 'fs';
 import path from 'path';
 import YAML, { LineCounter } from 'yaml';
 import type { ESQLCallbacks } from '@kbn/esql-types';
-import { VARIABLE_REGEX_GLOBAL } from '@kbn/workflows-yaml';
+import {
+  collectAllVariables,
+  createStepContextResolver,
+  validateVariables,
+  VARIABLE_REGEX_GLOBAL,
+} from '@kbn/workflows-yaml';
 import { collectAllConnectorIds } from './collect_all_connector_ids';
 import { collectAllStepPropertyItems } from './collect_all_step_property_items';
-import { collectAllVariables } from './collect_all_variables';
 import { validateConnectorIds } from './validate_connector_ids';
 import { validateIfConditions } from './validate_if_conditions';
 import { validateJsonSchemaDefaults } from './validate_json_schema_defaults';
@@ -63,15 +67,15 @@ import { validateLiquidTemplate } from './validate_liquid_template';
 import { validateStepNameUniqueness } from './validate_step_name_uniqueness';
 import { validateStepProperties } from './validate_step_properties';
 import { validateTriggerConditions } from './validate_trigger_conditions';
-import { validateVariables } from './validate_variables';
 import { validateWorkflowInputs } from './validate_workflow_inputs';
 import { validateWorkflowOutputsInYaml } from './validate_workflow_outputs_in_yaml';
+import { createMockWorkflowContextRegistry } from '../../../../common/lib/create_workflow_context_registry.mock';
 import { createFakeMonacoModel } from '../../../../common/mocks/monaco_model';
 import { getPropertyHandler } from '../../../../common/schema';
 import { performComputation } from '../../../entities/workflows/store/workflow_detail/utils/computation';
 import { validateEsqlSteps } from '../../../widgets/workflow_yaml_editor/lib/esql_validation/validate_esql_steps';
 
-// ─── Constants ───────────────────────────────────────────────────────────────
+const emptyRegistry = createMockWorkflowContextRegistry();
 
 const WARMUP_ITERATIONS = 5;
 
@@ -245,7 +249,7 @@ function runPerStepBenchmarks(yamlContent: string, config: BenchmarkConfig, cali
   }, iterations);
 
   timings.validateLiquidTemplate = benchmarkSync(() => {
-    validateLiquidTemplate(yamlContent, yamlDocument);
+    validateLiquidTemplate(yamlContent, yamlDocument, lineCounter);
   }, iterations);
 
   timings.collectAllConnectorIds = benchmarkSync(() => {
@@ -277,12 +281,23 @@ function runPerStepBenchmarks(yamlContent: string, config: BenchmarkConfig, cali
 
   if (workflowGraph && workflowDefinition) {
     timings.collectAllVariables = benchmarkSync(() => {
-      collectAllVariables(mockModel, yamlDocument, workflowGraph);
+      collectAllVariables(yamlContent, yamlDocument, lineCounter, workflowGraph);
     }, iterations);
 
-    const variableItems = collectAllVariables(mockModel, yamlDocument, workflowGraph);
+    const variableItems = collectAllVariables(
+      yamlContent,
+      yamlDocument,
+      lineCounter,
+      workflowGraph
+    );
     timings[`validateVariables (${variableItems.length} vars)`] = benchmarkSync(() => {
-      validateVariables(variableItems, workflowGraph, workflowDefinition, yamlDocument, mockModel);
+      validateVariables(
+        createStepContextResolver(emptyRegistry, workflowDefinition, workflowGraph, yamlDocument),
+        variableItems,
+        workflowDefinition,
+        yamlDocument,
+        yamlContent
+      );
     }, iterations);
 
     timings.validateTriggerConditions = benchmarkSync(() => {
@@ -342,7 +357,7 @@ async function runE2EBenchmark(
     record('validateStepNameUniqueness', performance.now() - start);
 
     start = performance.now();
-    validateLiquidTemplate(yamlContent, yamlDocument);
+    validateLiquidTemplate(yamlContent, yamlDocument, lc);
     record('validateLiquidTemplate', performance.now() - start);
 
     start = performance.now();
@@ -378,11 +393,17 @@ async function runE2EBenchmark(
 
     if (workflowGraph && workflowDefinition) {
       start = performance.now();
-      const variableItems = collectAllVariables(model, yamlDocument, workflowGraph);
+      const variableItems = collectAllVariables(yamlContent, yamlDocument, lc, workflowGraph);
       record('collectAllVariables', performance.now() - start);
 
       start = performance.now();
-      validateVariables(variableItems, workflowGraph, workflowDefinition, yamlDocument, model);
+      validateVariables(
+        createStepContextResolver(emptyRegistry, workflowDefinition, workflowGraph, yamlDocument),
+        variableItems,
+        workflowDefinition,
+        yamlDocument,
+        yamlContent
+      );
       record('validateVariables', performance.now() - start);
 
       start = performance.now();
