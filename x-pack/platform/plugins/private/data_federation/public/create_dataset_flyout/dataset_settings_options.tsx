@@ -123,6 +123,8 @@ export const HEADER_ROW_SUPER_SELECT_OPTIONS = () => [
   { value: 'false' as const, label: createDatasetFlyoutStrings.settingsHeaderRowFalse() },
 ];
 
+export const TRIM_SPACES_SUPER_SELECT_OPTIONS = HEADER_ROW_SUPER_SELECT_OPTIONS;
+
 export const MULTI_VALUE_SYNTAX_SUPER_SELECT_OPTIONS = () => [
   { value: 'none' as const, label: createDatasetFlyoutStrings.settingsMultiValueSyntaxNone() },
   {

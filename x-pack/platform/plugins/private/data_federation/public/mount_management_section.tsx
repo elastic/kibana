@@ -11,6 +11,7 @@ import type { CoreStart } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import type { IndexManagementPluginStart } from '@kbn/index-management-shared-types';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import { DeveloperToolbarItem } from '@kbn/developer-toolbar';
 import { Router } from '@kbn/shared-ux-router';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
@@ -63,14 +64,14 @@ export const mountManagementSection = (
   };
 
   const flowPreviewModeStore = createFlowPreviewModeStore();
-  const unregisterFlowPreviewSwitch = coreStart.chrome.setBreadcrumbsAppendExtension({
-    content: <FlowPreviewModeSwitch store={flowPreviewModeStore} />,
-  });
 
   ReactDOM.render(
     coreStart.rendering.addContext(
       <KibanaContextProvider services={services}>
         <FlowPreviewModeProvider store={flowPreviewModeStore}>
+          <DeveloperToolbarItem id="Preview other creation flows">
+            <FlowPreviewModeSwitch store={flowPreviewModeStore} />
+          </DeveloperToolbarItem>
           <Router history={history}>
             <Main />
           </Router>
@@ -81,7 +82,6 @@ export const mountManagementSection = (
   );
 
   return () => {
-    unregisterFlowPreviewSwitch();
     ReactDOM.unmountComponentAtNode(element);
   };
 };

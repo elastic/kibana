@@ -12,6 +12,7 @@ import {
   DATASET_WIZARD_FLOW_VARIANT_1,
   DATASET_WIZARD_FLOW_VARIANT_3,
   DATASET_WIZARD_FLOW_VARIANT_3_9_6,
+  DATASET_WIZARD_FLOW_VARIANT_3_9_6_OLD_FIELD_ORDER,
   DATASET_WIZARD_FLOW_VARIANT_4,
 } from './dataset_wizard_flow_variant';
 import {
@@ -184,7 +185,7 @@ describe('dataset_wizard_step_validation', () => {
     );
   });
 
-  it('validates the partition settings with step 1 in flow 3 9.6', () => {
+  it('validates the partition settings with step 2 in flow 3 9.6', () => {
     const values = {
       ...emptyDatasetWizardFormValues(),
       settings: applySettingsForFormat(emptyCreateDatasetSettingsFormValues(), 'parquet'),
@@ -194,12 +195,37 @@ describe('dataset_wizard_step_validation', () => {
       'data_source',
       'name',
       'resource',
-      'settings.partition_detection',
       'settings.format',
     ]);
     expect(
       getWizardStepFields(ADDITIONAL_SETTINGS_STEP, values, DATASET_WIZARD_FLOW_VARIANT_3_9_6)
-    ).not.toEqual(expect.arrayContaining(['settings.partition_path']));
+    ).toEqual(expect.arrayContaining(['settings.partition_detection', 'settings.partition_path']));
+  });
+
+  it('validates the partition settings with step 1 in flow 3 9.6 old field order', () => {
+    const values = {
+      ...emptyDatasetWizardFormValues(),
+      settings: applySettingsForFormat(emptyCreateDatasetSettingsFormValues(), 'parquet'),
+    };
+
+    expect(
+      getWizardStepFields(LOGISTICS_STEP, values, DATASET_WIZARD_FLOW_VARIANT_3_9_6_OLD_FIELD_ORDER)
+    ).toEqual([
+      'data_source',
+      'name',
+      'resource',
+      'settings.partition_detection',
+      'settings.format',
+    ]);
+    expect(
+      getWizardStepFields(
+        ADDITIONAL_SETTINGS_STEP,
+        values,
+        DATASET_WIZARD_FLOW_VARIANT_3_9_6_OLD_FIELD_ORDER
+      )
+    ).not.toEqual(
+      expect.arrayContaining(['settings.partition_detection', 'settings.partition_path'])
+    );
     expect(
       getWizardStepFields(ADDITIONAL_SETTINGS_STEP, values, DATASET_WIZARD_FLOW_VARIANT_3)
     ).toEqual(expect.arrayContaining(['settings.partition_path']));
@@ -248,7 +274,10 @@ describe('dataset_wizard_step_validation', () => {
     };
 
     expect(
-      isFlow396DefineSchemaMissingFieldMappings(defineSchemaValues, DATASET_WIZARD_FLOW_VARIANT_3_9_6)
+      isFlow396DefineSchemaMissingFieldMappings(
+        defineSchemaValues,
+        DATASET_WIZARD_FLOW_VARIANT_3_9_6
+      )
     ).toBe(true);
     expect(
       isFlow396DefineSchemaMissingFieldMappings(withMappedField, DATASET_WIZARD_FLOW_VARIANT_3_9_6)

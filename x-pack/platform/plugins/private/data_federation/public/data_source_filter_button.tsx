@@ -54,7 +54,7 @@ export const DataSourceFilterButton: FunctionComponent<DataSourceFilterButtonPro
         button={
           <EuiFilterButton
             data-test-subj="dataSetsSetsDataSourceFilter"
-            iconType="arrowDown"
+            iconType="chevronSingleDown"
             onClick={() => setIsOpen((open) => !open)}
             isSelected={isOpen}
             numFilters={dataSourceNames.length}

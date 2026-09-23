@@ -108,7 +108,7 @@ const DatasetsTableActionsCell: FunctionComponent<DatasetsTableActionsCellProps>
               disableScreenReaderOutput
             >
               <EuiButtonIcon
-                iconType="boxesHorizontal"
+                iconType="boxesVertical"
                 color="text"
                 aria-label={mainTranslations.columns.dataSets.moreActions}
                 onClick={() => setIsPopoverOpen((isOpen) => !isOpen)}

@@ -20,6 +20,11 @@ export const DATASET_WIZARD_FLOW_VARIANT_2 = 'flow_2';
 export const DATASET_WIZARD_FLOW_VARIANT_3 = 'flow_3';
 /** Active development flow — new wizard work belongs here. */
 export const DATASET_WIZARD_FLOW_VARIANT_3_9_6 = 'flow_3_9_6';
+/**
+ * Snapshot of Flow 3 9.6 field order. Shares the current 9.6 wizard until the
+ * active flow's field order changes. Not a default.
+ */
+export const DATASET_WIZARD_FLOW_VARIANT_3_9_6_OLD_FIELD_ORDER = 'flow_3_9_6_old_field_order';
 /** Frozen flow — do not change wizard behavior without explicit approval. */
 export const DATASET_WIZARD_FLOW_VARIANT_4 = 'flow_4';
 
@@ -28,6 +33,7 @@ export type DatasetWizardFlowVariant =
   | typeof DATASET_WIZARD_FLOW_VARIANT_2
   | typeof DATASET_WIZARD_FLOW_VARIANT_3
   | typeof DATASET_WIZARD_FLOW_VARIANT_3_9_6
+  | typeof DATASET_WIZARD_FLOW_VARIANT_3_9_6_OLD_FIELD_ORDER
   | typeof DATASET_WIZARD_FLOW_VARIANT_4;
 
 export const DATASET_WIZARD_FLOW_VARIANTS: DatasetWizardFlowVariant[] = [
@@ -35,6 +41,7 @@ export const DATASET_WIZARD_FLOW_VARIANTS: DatasetWizardFlowVariant[] = [
   DATASET_WIZARD_FLOW_VARIANT_2,
   DATASET_WIZARD_FLOW_VARIANT_3,
   DATASET_WIZARD_FLOW_VARIANT_3_9_6,
+  DATASET_WIZARD_FLOW_VARIANT_3_9_6_OLD_FIELD_ORDER,
   DATASET_WIZARD_FLOW_VARIANT_4,
 ];
 
@@ -44,15 +51,22 @@ export const isDatasetWizardFlowVariant = (value: string): value is DatasetWizar
 export const isDatasetWizardFlow3 = (flowVariant: DatasetWizardFlowVariant): boolean =>
   flowVariant === DATASET_WIZARD_FLOW_VARIANT_3 ||
   flowVariant === DATASET_WIZARD_FLOW_VARIANT_3_9_6 ||
+  flowVariant === DATASET_WIZARD_FLOW_VARIANT_3_9_6_OLD_FIELD_ORDER ||
   flowVariant === DATASET_WIZARD_FLOW_VARIANT_4;
 
-/** True only for the active Flow 3 9.6 variant (`flow_3_9_6`), not classic Flow 3 or Flow 4. */
+/** True for Flow 3 9.6 and its old-field-order copy, not classic Flow 3 or Flow 4. */
 export const isDatasetWizardFlow396 = (flowVariant: DatasetWizardFlowVariant): boolean =>
+  flowVariant === DATASET_WIZARD_FLOW_VARIANT_3_9_6 ||
+  flowVariant === DATASET_WIZARD_FLOW_VARIANT_3_9_6_OLD_FIELD_ORDER;
+
+/**
+ * The Flow 3 9.6 variant still being changed. The old-field-order copy keeps the
+ * behavior it was copied from.
+ */
+export const isActiveDatasetWizardFlow396 = (flowVariant: DatasetWizardFlowVariant): boolean =>
   flowVariant === DATASET_WIZARD_FLOW_VARIANT_3_9_6;
 
-export const getDatasetWizardFormMaxWidth = (
-  flowVariant: DatasetWizardFlowVariant
-): number =>
+export const getDatasetWizardFormMaxWidth = (flowVariant: DatasetWizardFlowVariant): number =>
   isDatasetWizardFlow396(flowVariant)
     ? DATASET_WIZARD_FORM_MAX_WIDTH_FLOW_3_9_6
     : DATASET_WIZARD_FORM_MAX_WIDTH;

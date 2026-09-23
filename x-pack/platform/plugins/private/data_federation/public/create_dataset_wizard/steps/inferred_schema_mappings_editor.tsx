@@ -23,7 +23,10 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import type { FieldSourceNameChange, MappedFieldsEditorProps } from '@kbn/index-management-shared-types';
+import type {
+  FieldSourceNameChange,
+  MappedFieldsEditorProps,
+} from '@kbn/index-management-shared-types';
 import type { Control } from 'react-hook-form';
 import { useController, useWatch } from 'react-hook-form';
 import { debounce } from 'lodash';
@@ -38,6 +41,7 @@ import {
   pruneAutomaticFieldSourceNames,
 } from '../automatic_field_types_utils';
 import {
+  isActiveDatasetWizardFlow396,
   isDatasetWizardFlow396,
   type DatasetWizardFlowVariant,
 } from '../dataset_wizard_flow_variant';
@@ -145,6 +149,7 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
   inferredFields,
 }) => {
   const isFlow396 = isDatasetWizardFlow396(flowVariant);
+  const isActiveFlow396 = isActiveDatasetWizardFlow396(flowVariant);
   const { euiTheme } = useEuiTheme();
   /** Holds the header row still while the button gives way to the inline add form. */
   const mappedFieldsHeaderCss = css`
@@ -249,10 +254,7 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
     ({ getData }) => {
       const nextMappings = (getData() ?? {}) as Record<string, unknown>;
       const nextFieldTypes = mappingsToAutomaticFieldTypes(nextMappings);
-      const fieldTypesChanged = !areStringRecordsEqual(
-        nextFieldTypes,
-        latestFieldTypesRef.current
-      );
+      const fieldTypesChanged = !areStringRecordsEqual(nextFieldTypes, latestFieldTypesRef.current);
 
       if (fieldTypesChanged) {
         latestFieldTypesRef.current = nextFieldTypes;
@@ -479,7 +481,9 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
             },
             sourceNameField: {
               label: datasetWizardStrings.mappedFieldOriginalNameLabel(),
-              helpText: datasetWizardStrings.mappedFieldOriginalNameHelp(),
+              helpText: isActiveFlow396
+                ? datasetWizardStrings.mappedFieldOriginalNameHelpFlow396()
+                : datasetWizardStrings.mappedFieldOriginalNameHelp(),
               requiredErrorMessage: datasetWizardStrings.mappedFieldPathRequiredError(),
             },
           }
@@ -510,7 +514,8 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
           margin-block-start: ${euiTheme.size.m};
         }
 
-        [data-test-subj='documentFields'] .euiSpacer--s:has(+ * [data-test-subj='createFieldForm']) {
+        [data-test-subj='documentFields']
+          .euiSpacer--s:has(+ * [data-test-subj='createFieldForm']) {
           display: none;
         }
       `}

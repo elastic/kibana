@@ -25,6 +25,7 @@ import { EMPTY_SETTINGS_CUSTOM_JSON } from '../create_dataset_flyout/settings_cu
 import { AutoDetectedSuffix } from './auto_detected_suffix';
 import {
   DATASET_WIZARD_FLOW_VARIANT_1,
+  isActiveDatasetWizardFlow396,
   isDatasetWizardFlow3,
   isDatasetWizardFlow396,
   type DatasetWizardFlowVariant,
@@ -36,9 +37,7 @@ import { keepResourceOwnedSettings } from './resource_settings_fields';
 
 const FORMAT_VALUES: DatasetFormatFormValue[] = ['csv', 'tsv', 'parquet', 'ndjson', 'orc'];
 
-export const isKnownDatasetFormat = (
-  value: string
-): value is Exclude<DatasetFormatFormValue, ''> =>
+export const isKnownDatasetFormat = (value: string): value is Exclude<DatasetFormatFormValue, ''> =>
   FORMAT_VALUES.includes(value as Exclude<DatasetFormatFormValue, ''>);
 
 type FormatSelectionSource = 'none' | 'auto' | 'manual';
@@ -152,7 +151,11 @@ export const useDatasetFormatSelection = ({
   );
 
   const syncFormatFromResource = useCallback(() => {
-    const inferredFormat = inferFormatFromResource(resource);
+    const inferredFromResource = inferFormatFromResource(resource);
+    const inferredFormat =
+      inferredFromResource === 'orc' && isActiveDatasetWizardFlow396(flowVariant)
+        ? ''
+        : inferredFromResource;
     const resourceChanged = syncedResourceRef.current !== resource;
 
     if (!resourceChanged) {
@@ -219,7 +222,12 @@ export const useDatasetFormatSelection = ({
   ]);
 
   useEffect(() => {
-    if (!enabled || !isDatasetWizardFlow3(flowVariant) || showDefaultsAsPlaceholders || !hasFormatSelected) {
+    if (
+      !enabled ||
+      !isDatasetWizardFlow3(flowVariant) ||
+      showDefaultsAsPlaceholders ||
+      !hasFormatSelected
+    ) {
       previousErrorModeRef.current = errorMode;
       return;
     }
@@ -268,27 +276,30 @@ export const useDatasetFormatSelection = ({
         ? ` ${datasetWizardStrings.formatAutoDetectedSuffix()}`
         : null;
 
-    return FORMAT_SUPER_SELECT_OPTIONS().map((option) => {
-      const isSelectedAutoDetected = option.value === format && option.value === autoDetectedFormat;
+    return FORMAT_SUPER_SELECT_OPTIONS()
+      .filter((option) => option.value !== 'orc' || !isActiveDatasetWizardFlow396(flowVariant))
+      .map((option) => {
+        const isSelectedAutoDetected =
+          option.value === format && option.value === autoDetectedFormat;
 
-      if (!isSelectedAutoDetected) {
-        return option;
-      }
+        if (!isSelectedAutoDetected) {
+          return option;
+        }
 
-      return {
-        ...option,
-        inputDisplay: (
-          <>
-            {option.inputDisplay}{' '}
-            {flowVariant === DATASET_WIZARD_FLOW_VARIANT_1 ? (
-              autoDetectedSuffix
-            ) : (
-              <AutoDetectedSuffix />
-            )}
-          </>
-        ),
-      };
-    });
+        return {
+          ...option,
+          inputDisplay: (
+            <>
+              {option.inputDisplay}{' '}
+              {flowVariant === DATASET_WIZARD_FLOW_VARIANT_1 ? (
+                autoDetectedSuffix
+              ) : (
+                <AutoDetectedSuffix />
+              )}
+            </>
+          ),
+        };
+      });
   }, [autoDetectedFormat, flowVariant, format]);
 
   return {

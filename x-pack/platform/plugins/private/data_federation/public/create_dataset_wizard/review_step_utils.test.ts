@@ -13,12 +13,10 @@ import {
   DATASET_WIZARD_FLOW_VARIANT_2,
   DATASET_WIZARD_FLOW_VARIANT_3,
   DATASET_WIZARD_FLOW_VARIANT_3_9_6,
+  DATASET_WIZARD_FLOW_VARIANT_3_9_6_OLD_FIELD_ORDER,
 } from './dataset_wizard_flow_variant';
 import { emptyDatasetWizardFormValues } from './dataset_wizard_form_state';
-import {
-  getResourceOwnedSettingsFieldIds,
-  getReviewAdditionalSettingsExcludeFieldIds,
-} from './resource_settings_fields';
+import { getReviewAdditionalSettingsExcludeFieldIds } from './resource_settings_fields';
 import {
   buildDatasetPayloadFromWizardValues,
   buildDatasetRequestBody,
@@ -241,7 +239,7 @@ describe('review_step_utils', () => {
     );
   });
 
-  it('summarizes the partition settings with the resource in flow 3 9.6', () => {
+  it('summarizes the partition settings with the format settings in flow 3 9.6', () => {
     const values = {
       ...emptyDatasetWizardFormValues(),
       name: 'dataset-obs-prod-s3',
@@ -274,6 +272,51 @@ describe('review_step_utils', () => {
           displayValue: 'Parquet',
           badge: 'modified',
         }),
+      ])
+    );
+    expect(logisticsRows.map(({ label }) => label)).not.toContain('Partition detection');
+    expect(logisticsRows.map(({ label }) => label)).not.toContain('Partition path');
+    expect(settingsRows).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          label: 'Partition detection',
+          displayValue: 'Hive',
+          badge: 'modified',
+        }),
+      ])
+    );
+    expect(settingsRows.map(({ label }) => label)).not.toContain('Format');
+    expect(settingsRows.map(({ label }) => label)).not.toContain('Partition path');
+  });
+
+  it('summarizes the partition settings with the resource in flow 3 9.6 old field order', () => {
+    const values = {
+      ...emptyDatasetWizardFormValues(),
+      name: 'dataset-obs-prod-s3',
+      data_source: 'obs-prod-s3',
+      resource: 's3://obs-logs-prod/**/*.parquet',
+      settings: {
+        ...applySettingsForFormat(emptyCreateDatasetSettingsFormValues(), 'parquet'),
+        partition_detection: 'hive' as const,
+        partition_path: 'year/month',
+      },
+    };
+
+    const logisticsRows = getReviewLogisticsRows(
+      values,
+      [s3DataSource],
+      DATASET_WIZARD_FLOW_VARIANT_3_9_6_OLD_FIELD_ORDER
+    );
+    const settingsRows = getReviewSettingsRows(
+      values.settings,
+      values.resource,
+      undefined,
+      getReviewAdditionalSettingsExcludeFieldIds(DATASET_WIZARD_FLOW_VARIANT_3_9_6_OLD_FIELD_ORDER),
+      DATASET_WIZARD_FLOW_VARIANT_3_9_6_OLD_FIELD_ORDER
+    );
+
+    expect(logisticsRows).toEqual(
+      expect.arrayContaining([
         expect.objectContaining({
           label: 'Partition detection',
           displayValue: 'Hive',
@@ -282,12 +325,11 @@ describe('review_step_utils', () => {
       ])
     );
     expect(logisticsRows.map(({ label }) => label)).not.toContain('Partition path');
-    expect(settingsRows.map(({ label }) => label)).not.toContain('Format');
     expect(settingsRows.map(({ label }) => label)).not.toContain('Partition detection');
     expect(settingsRows.map(({ label }) => label)).not.toContain('Partition path');
   });
 
-  it('summarizes a partition path with the resource only when detection is template', () => {
+  it('summarizes a partition path with the format settings only when detection is template', () => {
     const values = {
       ...emptyDatasetWizardFormValues(),
       name: 'dataset-obs-prod-s3',
@@ -301,7 +343,18 @@ describe('review_step_utils', () => {
     };
 
     expect(
-      getReviewLogisticsRows(values, [s3DataSource], DATASET_WIZARD_FLOW_VARIANT_3_9_6)
+      getReviewLogisticsRows(values, [s3DataSource], DATASET_WIZARD_FLOW_VARIANT_3_9_6).map(
+        ({ label }) => label
+      )
+    ).not.toContain('Partition detection');
+    expect(
+      getReviewSettingsRows(
+        values.settings,
+        values.resource,
+        undefined,
+        getReviewAdditionalSettingsExcludeFieldIds(DATASET_WIZARD_FLOW_VARIANT_3_9_6),
+        DATASET_WIZARD_FLOW_VARIANT_3_9_6
+      )
     ).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ label: 'Partition detection', displayValue: 'Template' }),
@@ -323,11 +376,18 @@ describe('review_step_utils', () => {
       },
     };
 
-    expect(
-      getReviewLogisticsRows(values, [s3DataSource], DATASET_WIZARD_FLOW_VARIANT_3_9_6).map(
-        ({ label }) => label
-      )
-    ).not.toContain('Partition path');
+    const labels = [
+      ...getReviewLogisticsRows(values, [s3DataSource], DATASET_WIZARD_FLOW_VARIANT_3_9_6),
+      ...getReviewSettingsRows(
+        values.settings,
+        values.resource,
+        undefined,
+        getReviewAdditionalSettingsExcludeFieldIds(DATASET_WIZARD_FLOW_VARIANT_3_9_6),
+        DATASET_WIZARD_FLOW_VARIANT_3_9_6
+      ),
+    ].map(({ label }) => label);
+
+    expect(labels).not.toContain('Partition path');
   });
 
   it('sends the default partition path when template detection has none', () => {

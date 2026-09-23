@@ -138,7 +138,7 @@ export const SchemaInferenceModeCards: FunctionComponent<SchemaInferenceModeCard
           css={advancedSettingsToggleCss}
           flush="left"
           size="xs"
-          iconType={isAdvancedSettingsOpen ? 'arrowDown' : 'arrowRight'}
+          iconType={isAdvancedSettingsOpen ? 'chevronSingleDown' : 'chevronSingleRight'}
           iconSide="right"
           aria-expanded={isAdvancedSettingsOpen}
           aria-controls={schemaResolutionFieldsId}

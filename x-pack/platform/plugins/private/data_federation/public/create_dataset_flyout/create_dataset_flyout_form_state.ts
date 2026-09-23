@@ -37,6 +37,7 @@ export interface CreateDatasetSettingsFormValues {
   delimiter: string;
   mode: DatasetModeFormValue;
   header_row: DatasetBooleanFormValue;
+  skip_rows: string;
   // CSV/TSV advanced
   null_value: string;
   encoding: string;
@@ -44,6 +45,7 @@ export interface CreateDatasetSettingsFormValues {
   escape: string;
   comment: string;
   column_prefix: string;
+  trim_spaces: DatasetBooleanFormValue;
   datetime_format: string;
   multi_value_syntax: DatasetMultiValueSyntaxFormValue;
   max_field_size: string;
@@ -51,6 +53,7 @@ export interface CreateDatasetSettingsFormValues {
   error_mode: DatasetErrorModeFormValue;
   max_errors: string;
   max_error_ratio: string;
+  file_exclusions: string;
   // Limits and performance
   segment_size: string;
   optimized_reader: DatasetBooleanFormValue;
@@ -74,18 +77,21 @@ export const emptyCreateDatasetSettingsFormValues = (): CreateDatasetSettingsFor
   delimiter: '',
   mode: '',
   header_row: '',
+  skip_rows: '',
   null_value: '',
   encoding: '',
   quote: '',
   escape: '',
   comment: '',
   column_prefix: '',
+  trim_spaces: '',
   datetime_format: '',
   multi_value_syntax: '',
   max_field_size: '',
   error_mode: '',
   max_errors: '',
   max_error_ratio: '',
+  file_exclusions: '',
   segment_size: '',
   optimized_reader: '',
   late_materialization: '',
@@ -169,6 +175,26 @@ export const validatePartitionPath = (
   return true;
 };
 
+export const SKIP_ROWS_MAX = 1000;
+
+export const validateSkipRows = (value: string): true | string => {
+  if (!value?.trim()) return true;
+  const parsed = parseNonNegativeInteger(value);
+  if (parsed === undefined || parsed > SKIP_ROWS_MAX) {
+    return createDatasetFlyoutStrings.settingsSkipRowsInvalid();
+  }
+  return true;
+};
+
+const parseFileExclusions = (value: string): string[] | undefined => {
+  const patterns = value
+    .split('\n')
+    .map((pattern) => pattern.trim())
+    .filter(Boolean);
+
+  return patterns.length > 0 ? patterns : undefined;
+};
+
 export const validateMaxFieldSize = (value: string): true | string => {
   if (!value?.trim()) return true;
   const parsed = parseNonNegativeInteger(value);
@@ -198,6 +224,9 @@ export const buildDatasetSettingsFromFormValues = (
     applied.partition_path = settings.partition_path;
   }
 
+  const fileExclusions = parseFileExclusions(settings.file_exclusions);
+  if (fileExclusions) applied.file_exclusions = fileExclusions;
+
   const { format } = settings;
   const isCsvTsv = format === 'csv' || format === 'tsv';
   const isNdjson = format === 'ndjson';
@@ -222,6 +251,12 @@ export const buildDatasetSettingsFromFormValues = (
 
     const headerRow = parseBooleanFormValue(settings.header_row);
     if (headerRow !== undefined) applied.header_row = headerRow;
+
+    const skipRows = parseNonNegativeInteger(settings.skip_rows);
+    if (skipRows !== undefined && skipRows <= SKIP_ROWS_MAX) applied.skip_rows = skipRows;
+
+    const trimSpaces = parseBooleanFormValue(settings.trim_spaces);
+    if (trimSpaces !== undefined) applied.trim_spaces = trimSpaces;
 
     const nullValue = mapNullValueToApi(settings.null_value);
     if (nullValue !== undefined) applied.null_value = nullValue;
@@ -252,7 +287,5 @@ export const buildDatasetSettingsFromFormValues = (
     applyErrorHandlingSettings();
   }
 
-  return omitDatasetSettingsNotSentToEs(
-    Object.keys(applied).length > 0 ? applied : undefined
-  );
+  return omitDatasetSettingsNotSentToEs(Object.keys(applied).length > 0 ? applied : undefined);
 };

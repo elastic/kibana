@@ -18,8 +18,16 @@ import type {
 import { DatasetSettingsAdvancedViewToggle } from './dataset_settings_advanced_view_toggle';
 import { DatasetSettingsFieldsLayout } from './dataset_settings_fields_layout';
 import { getFlow3AdvancedFields, getFlow3CommonFields } from './dataset_settings_flow3_layout';
+import {
+  getActiveFlow396AdvancedFields,
+  getActiveFlow396CommonFields,
+} from '../create_dataset_wizard/flow_396_settings_layout';
 import { DatasetSettingsSectionAccordion } from './dataset_settings_section_accordion';
-import type { DatasetSettingsFieldId } from './dataset_settings_visibility';
+import {
+  isFieldVisibleForErrorMode,
+  isFieldVisibleForFormat,
+  type DatasetSettingsFieldId,
+} from './dataset_settings_visibility';
 import type { DatasetWizardFormValues } from '../create_dataset_wizard/dataset_wizard_form_state';
 import { datasetWizardStepFieldsMaxWidthCss } from '../create_dataset_wizard/dataset_wizard_layout';
 
@@ -35,6 +43,13 @@ export interface DatasetSettingsFlow3SettingsPanelProps {
   hasPanelBackground?: boolean;
   /** Settings another step asks for, so this one leaves them out. */
   excludeFieldIds?: readonly DatasetSettingsFieldId[];
+  /**
+   * Fields the shared layout would put with common settings, rendered in advanced
+   * settings for this panel only.
+   */
+  promoteToAdvancedFieldIds?: readonly DatasetSettingsFieldId[];
+  /** Active Flow 3 9.6 uses its own common and advanced lists. */
+  useActiveFlow396Layout?: boolean;
 }
 
 export const DatasetSettingsFlow3SettingsPanel: FunctionComponent<
@@ -49,26 +64,45 @@ export const DatasetSettingsFlow3SettingsPanel: FunctionComponent<
   testSubjPrefix = 'datasetWizard',
   hasPanelBackground = true,
   excludeFieldIds = [],
+  promoteToAdvancedFieldIds = [],
+  useActiveFlow396Layout = false,
 }) => {
   const errorMode = useWatch({ control, name: 'settings.error_mode' }) as DatasetErrorModeFormValue;
 
   const fieldsCompressed = hasPanelBackground;
+  const fieldsVariant = hasPanelBackground ? 'settings' : 'step';
 
-  const commonFields = useMemo(
-    () =>
-      getFlow3CommonFields(format, errorMode).filter(
-        (fieldId) => !excludeFieldIds.includes(fieldId)
-      ),
-    [errorMode, excludeFieldIds, format]
-  );
+  const commonFields = useMemo(() => {
+    const fields = useActiveFlow396Layout
+      ? getActiveFlow396CommonFields(format)
+      : getFlow3CommonFields(format, errorMode).filter(
+          (fieldId) => !promoteToAdvancedFieldIds.includes(fieldId)
+        );
 
-  const advancedFields = useMemo(
-    () =>
-      getFlow3AdvancedFields(format, errorMode).filter(
+    return fields.filter((fieldId) => !excludeFieldIds.includes(fieldId));
+  }, [errorMode, excludeFieldIds, format, promoteToAdvancedFieldIds, useActiveFlow396Layout]);
+
+  const advancedFields = useMemo(() => {
+    if (useActiveFlow396Layout) {
+      return getActiveFlow396AdvancedFields(format, errorMode).filter(
         (fieldId) => !excludeFieldIds.includes(fieldId)
+      );
+    }
+
+    const promoted = promoteToAdvancedFieldIds.filter(
+      (fieldId) =>
+        isFieldVisibleForFormat(fieldId, format) &&
+        isFieldVisibleForErrorMode(fieldId, errorMode) &&
+        !excludeFieldIds.includes(fieldId)
+    );
+
+    return [
+      ...promoted,
+      ...getFlow3AdvancedFields(format, errorMode).filter(
+        (fieldId) => !excludeFieldIds.includes(fieldId) && !promoted.includes(fieldId)
       ),
-    [errorMode, excludeFieldIds, format]
-  );
+    ];
+  }, [errorMode, excludeFieldIds, format, promoteToAdvancedFieldIds, useActiveFlow396Layout]);
 
   const commonSettingsAccordionId = useGeneratedHtmlId({
     prefix: 'datasetWizardFlow3CommonSettingsAccordion',
@@ -94,33 +128,37 @@ export const DatasetSettingsFlow3SettingsPanel: FunctionComponent<
       testSubjPrefix={testSubjPrefix}
       constrainWidth={hasPanelBackground}
       compressed={fieldsCompressed}
+      variant={fieldsVariant}
     />
   );
 
   return (
     <>
       {hasPanelBackground ? <EuiSpacer size="l" /> : null}
-      <DatasetSettingsSectionAccordion
-        id={commonSettingsAccordionId}
-        title={commonSettingsTitle}
-        borders={hasPanelBackground ? 'horizontal' : 'none'}
-        contentLayout={hasPanelBackground ? 'panel' : 'indentedFullWidth'}
-        initialIsOpen
-        dataTestSubj={`${testSubjPrefix}Flow3CommonSettingsAccordion`}
-        panelDataTestSubj={`${testSubjPrefix}Flow3CommonSettingsPanel`}
-        fieldsDataTestSubj={`${testSubjPrefix}Flow3CommonSettingsFields`}
-        fieldsContainerCss={stepFieldsMaxWidthCss}
-      >
-        <DatasetSettingsFieldsLayout
-          control={control}
-          fields={commonFields}
-          testSubjPrefix={testSubjPrefix}
-          columns={1}
-          rowSpacerSize="m"
-          constrainWidth={hasPanelBackground}
-          compressed={fieldsCompressed}
-        />
-      </DatasetSettingsSectionAccordion>
+      {commonFields.length > 0 ? (
+        <DatasetSettingsSectionAccordion
+          id={commonSettingsAccordionId}
+          title={commonSettingsTitle}
+          borders={hasPanelBackground ? 'horizontal' : 'none'}
+          contentLayout={hasPanelBackground ? 'panel' : 'indentedFullWidth'}
+          initialIsOpen
+          dataTestSubj={`${testSubjPrefix}Flow3CommonSettingsAccordion`}
+          panelDataTestSubj={`${testSubjPrefix}Flow3CommonSettingsPanel`}
+          fieldsDataTestSubj={`${testSubjPrefix}Flow3CommonSettingsFields`}
+          fieldsContainerCss={stepFieldsMaxWidthCss}
+        >
+          <DatasetSettingsFieldsLayout
+            control={control}
+            fields={commonFields}
+            testSubjPrefix={testSubjPrefix}
+            columns={1}
+            rowSpacerSize="m"
+            constrainWidth={hasPanelBackground}
+            compressed={fieldsCompressed}
+            variant={fieldsVariant}
+          />
+        </DatasetSettingsSectionAccordion>
+      ) : null}
       {advancedFields.length > 0 ? (
         <DatasetSettingsSectionAccordion
           id={advancedSettingsAccordionId}

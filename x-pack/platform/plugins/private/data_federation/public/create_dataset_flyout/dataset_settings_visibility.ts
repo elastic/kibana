@@ -29,13 +29,16 @@ export type DatasetSettingsFieldId =
   | 'comment'
   | 'encoding'
   | 'header_row'
+  | 'skip_rows'
   | 'column_prefix'
+  | 'trim_spaces'
   | 'null_value'
   | 'datetime_format'
   | 'multi_value_syntax'
   | 'error_mode'
   | 'max_errors'
   | 'max_error_ratio'
+  | 'file_exclusions'
   | 'max_field_size'
   | 'segment_size'
   | 'optimized_reader'
@@ -75,13 +78,16 @@ const FIELD_VISIBILITY: Record<DatasetSettingsFieldId, Exclude<DatasetFormatForm
   comment: ['csv', 'tsv'],
   encoding: ['csv', 'tsv'],
   header_row: ['csv', 'tsv'],
+  skip_rows: ['csv', 'tsv'],
   column_prefix: ['csv', 'tsv'],
+  trim_spaces: ['csv', 'tsv'],
   null_value: ['csv', 'tsv'],
   datetime_format: ['csv', 'tsv', 'ndjson'],
   multi_value_syntax: ['csv', 'tsv'],
   error_mode: ['csv', 'tsv', 'ndjson', 'parquet', 'orc'],
   max_errors: ['csv', 'tsv', 'ndjson', 'parquet', 'orc'],
   max_error_ratio: ['csv', 'tsv', 'ndjson', 'parquet', 'orc'],
+  file_exclusions: ['csv', 'tsv', 'ndjson', 'parquet', 'orc'],
   max_field_size: ['csv', 'tsv'],
   segment_size: ['ndjson'],
   optimized_reader: ['parquet'],

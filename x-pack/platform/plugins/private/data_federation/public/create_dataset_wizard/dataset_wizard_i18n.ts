@@ -333,16 +333,21 @@ export const datasetWizardStrings = {
     }),
 
   defineSchemaFieldMappingsRequiredDescription: () =>
-    i18n.translate('xpack.dataFederation.datasetWizard.defineSchemaFieldMappingsRequiredDescription', {
-      defaultMessage:
-        'Map at least one field, unmapped fields will not be inferred at query time, so nothing will be available to query until you add mappings.',
-    }),
+    i18n.translate(
+      'xpack.dataFederation.datasetWizard.defineSchemaFieldMappingsRequiredDescription',
+      {
+        defaultMessage:
+          'Map at least one field, unmapped fields will not be inferred at query time, so nothing will be available to query until you add mappings.',
+      }
+    ),
 
   inferSchemaFieldMappingsOptionalDescription: () =>
-    i18n.translate('xpack.dataFederation.datasetWizard.inferSchemaFieldMappingsOptionalDescription', {
-      defaultMessage:
-        "Schema will be inferred at query time for fields you don't map.",
-    }),
+    i18n.translate(
+      'xpack.dataFederation.datasetWizard.inferSchemaFieldMappingsOptionalDescription',
+      {
+        defaultMessage: "Schema will be inferred at query time for fields you don't map.",
+      }
+    ),
 
   saveAndContinueButton: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.saveAndContinueButton', {
@@ -500,22 +505,16 @@ export const datasetWizardStrings = {
     ),
 
   settingsCustomJsonInvalidTypeErrorMessage: (key: string, type: string) =>
-    i18n.translate(
-      'xpack.dataFederation.datasetWizard.settingsCustomJsonInvalidTypeErrorMessage',
-      {
-        defaultMessage: '{key} must be a {type}.',
-        values: { key, type },
-      }
-    ),
+    i18n.translate('xpack.dataFederation.datasetWizard.settingsCustomJsonInvalidTypeErrorMessage', {
+      defaultMessage: '{key} must be a {type}.',
+      values: { key, type },
+    }),
 
   settingsCustomJsonInvalidEnumErrorMessage: (key: string, allowed: string) =>
-    i18n.translate(
-      'xpack.dataFederation.datasetWizard.settingsCustomJsonInvalidEnumErrorMessage',
-      {
-        defaultMessage: '{key} must be one of {allowed}.',
-        values: { key, allowed },
-      }
-    ),
+    i18n.translate('xpack.dataFederation.datasetWizard.settingsCustomJsonInvalidEnumErrorMessage', {
+      defaultMessage: '{key} must be one of {allowed}.',
+      values: { key, allowed },
+    }),
 
   settingsCustomJsonInvalidMinimumErrorMessage: (key: string, min: number) =>
     i18n.translate(
@@ -740,6 +739,12 @@ export const datasetWizardStrings = {
   mappedFieldOriginalNameHelp: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.mappedFieldOriginalNameHelp', {
       defaultMessage: 'If field name is different in your files, you can set it up.',
+    }),
+
+  mappedFieldOriginalNameHelpFlow396: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.mappedFieldOriginalNameHelpFlow396', {
+      defaultMessage:
+        'Name as it appears in your source files, when different from the field name.',
     }),
 
   timestampMappingPathPlaceholder: () =>

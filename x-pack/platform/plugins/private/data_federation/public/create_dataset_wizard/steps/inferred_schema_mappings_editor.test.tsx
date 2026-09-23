@@ -86,12 +86,8 @@ const FakeMappedFieldsEditor: FunctionComponent<MappedFieldsEditorProps> = ({
       <div data-test-subj="fakeInlineOptionalDateFormatField">
         {JSON.stringify(inlineOptionalDateFormatField ?? null)}
       </div>
-      <div data-test-subj="fakeSourceNameField">
-        {JSON.stringify(sourceNameField ?? null)}
-      </div>
-      <div data-test-subj="fakeRenameFieldField">
-        {JSON.stringify(renameFieldField ?? null)}
-      </div>
+      <div data-test-subj="fakeSourceNameField">{JSON.stringify(sourceNameField ?? null)}</div>
+      <div data-test-subj="fakeRenameFieldField">{JSON.stringify(renameFieldField ?? null)}</div>
       {fieldsDescription ? (
         <div data-test-subj="fakeMappedFieldsDescription">{fieldsDescription}</div>
       ) : null}
@@ -110,16 +106,16 @@ const FakeMappedFieldsEditor: FunctionComponent<MappedFieldsEditorProps> = ({
       {isCreateFieldFormOpen ? (
         <div data-test-subj="createFieldForm">
           <div data-test-subj="fakeCreateFieldFormPanel">
-          <button type="button" data-test-subj="fakeConfirmAddField" onClick={confirmManualField}>
-            Confirm field
-          </button>
-          <button
-            type="button"
-            data-test-subj="cancelButton"
-            onClick={() => setIsCreateFieldFormOpen(false)}
-          >
-            Cancel
-          </button>
+            <button type="button" data-test-subj="fakeConfirmAddField" onClick={confirmManualField}>
+              Confirm field
+            </button>
+            <button
+              type="button"
+              data-test-subj="cancelButton"
+              onClick={() => setIsCreateFieldFormOpen(false)}
+            >
+              Cancel
+            </button>
           </div>
         </div>
       ) : null}
@@ -350,9 +346,7 @@ describe('InferredSchemaMappingsEditor', () => {
   });
 
   it('orders timestamp mapping, schema mode cards, then field mappings in flow 3 9.6', () => {
-    const { getByTestId } = render(
-      <TestHarness flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6} />
-    );
+    const { getByTestId } = render(<TestHarness flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6} />);
 
     const timestampSection = getByTestId('datasetWizardTimestampMappingSection');
     const schemaModeCards = getByTestId('datasetWizardSchemaInferenceModeCards');
@@ -488,9 +482,7 @@ describe('InferredSchemaMappingsEditor', () => {
   });
 
   it('restricts mapped field types in flow 3 9.6', () => {
-    const { getByTestId } = render(
-      <TestHarness flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6} />
-    );
+    const { getByTestId } = render(<TestHarness flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6} />);
 
     expect(getByTestId('fakeAllowedRootFieldTypes').textContent).toBe(
       JSON.stringify(DATASET_WIZARD_FLOW_396_MAPPED_FIELD_TYPES)
@@ -498,38 +490,32 @@ describe('InferredSchemaMappingsEditor', () => {
   });
 
   it('does not close create field form on outside click in flow 3 9.6', () => {
-    const { getByTestId } = render(
-      <TestHarness flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6} />
-    );
+    const { getByTestId } = render(<TestHarness flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6} />);
 
     expect(getByTestId('fakeCloseCreateFieldOnOutsideClick').textContent).toBe('false');
   });
 
   it('passes inline optional date format labels in flow 3 9.6', () => {
-    const { getByTestId } = render(
-      <TestHarness flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6} />
-    );
+    const { getByTestId } = render(<TestHarness flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6} />);
 
-    expect(JSON.parse(getByTestId('fakeInlineOptionalDateFormatField').textContent ?? 'null')).toEqual(
-      {
-        label: 'Format (optional)',
-        placeholder: 'Select or enter a format',
-        presets: [
-          { value: 'ISO-8601', label: 'ISO-8601' },
-          { value: 'strict_date_optional_time', label: 'strict_date_optional_time' },
-          { value: 'yyyy-MM-dd', label: 'yyyy-MM-dd' },
-          { value: 'yyyy-MM-dd HH:mm:ss', label: 'yyyy-MM-dd HH:mm:ss' },
-        ],
-        defaultPresetValue: 'ISO-8601',
-        defaultPresetLiteral: 'ISO-8601',
-      }
-    );
+    expect(
+      JSON.parse(getByTestId('fakeInlineOptionalDateFormatField').textContent ?? 'null')
+    ).toEqual({
+      label: 'Format (optional)',
+      placeholder: 'Select or enter a format',
+      presets: [
+        { value: 'ISO-8601', label: 'ISO-8601' },
+        { value: 'strict_date_optional_time', label: 'strict_date_optional_time' },
+        { value: 'yyyy-MM-dd', label: 'yyyy-MM-dd' },
+        { value: 'yyyy-MM-dd HH:mm:ss', label: 'yyyy-MM-dd HH:mm:ss' },
+      ],
+      defaultPresetValue: 'ISO-8601',
+      defaultPresetLiteral: 'ISO-8601',
+    });
   });
 
   it('uses mapped field rename and source copy in flow 3 9.6', () => {
-    const { getByTestId } = render(
-      <TestHarness flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6} />
-    );
+    const { getByTestId } = render(<TestHarness flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6} />);
 
     expect(JSON.parse(getByTestId('fakeRenameFieldField').textContent ?? 'null')).toEqual({
       label: 'Field name',
@@ -537,7 +523,7 @@ describe('InferredSchemaMappingsEditor', () => {
     });
     expect(JSON.parse(getByTestId('fakeSourceNameField').textContent ?? 'null')).toEqual({
       label: 'Original field name (optional)',
-      helpText: 'If field name is different in your files, you can set it up.',
+      helpText: 'Name as it appears in your source files, when different from the field name.',
       requiredErrorMessage: 'Enter a path.',
     });
   });

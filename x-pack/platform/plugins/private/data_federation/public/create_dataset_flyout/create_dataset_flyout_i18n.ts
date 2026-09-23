@@ -232,9 +232,12 @@ export const createDatasetFlyoutStrings = {
     }),
 
   settingsSchemaSampleSizeOptionalLabel: () =>
-    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsSchemaSampleSizeOptionalLabel', {
-      defaultMessage: 'Schema sample size (optional)',
-    }),
+    i18n.translate(
+      'xpack.dataFederation.createDatasetFlyout.settingsSchemaSampleSizeOptionalLabel',
+      {
+        defaultMessage: 'Schema sample size (optional)',
+      }
+    ),
 
   settingsSchemaSampleSizePlaceholder: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsSchemaSampleSizePlaceholder', {
@@ -306,9 +309,12 @@ export const createDatasetFlyoutStrings = {
     }),
 
   settingsSchemaResolutionOptionalLabel: () =>
-    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsSchemaResolutionOptionalLabel', {
-      defaultMessage: 'Schema resolution (optional)',
-    }),
+    i18n.translate(
+      'xpack.dataFederation.createDatasetFlyout.settingsSchemaResolutionOptionalLabel',
+      {
+        defaultMessage: 'Schema resolution (optional)',
+      }
+    ),
 
   settingsSchemaResolutionHelp: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsSchemaResolutionHelp', {
@@ -524,6 +530,12 @@ export const createDatasetFlyoutStrings = {
       defaultMessage: 'The character used to quote fields.',
     }),
 
+  settingsQuoteDescription: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsQuoteDescription', {
+      defaultMessage:
+        'The quote character, or "none" to turn quoting off. An explicit value overrides the mode preset. Must be a single character (or one of \\t, \\n, \\r, \\\\).',
+    }),
+
   settingsEscapeLabel: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsEscapeLabel', {
       defaultMessage: 'Escape character',
@@ -537,6 +549,12 @@ export const createDatasetFlyoutStrings = {
   settingsEscapeHelp: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsEscapeHelp', {
       defaultMessage: 'The character used to escape special characters.',
+    }),
+
+  settingsEscapeDescription: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsEscapeDescription', {
+      defaultMessage:
+        'The escape character, or "none" to turn escaping off. An explicit value overrides the mode preset. Must be a single character (or one of \\t, \\n, \\r, \\\\).',
     }),
 
   settingsCommentLabel: () =>
@@ -567,6 +585,53 @@ export const createDatasetFlyoutStrings = {
   settingsColumnPrefixHelp: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsColumnPrefixHelp', {
       defaultMessage: 'Prefix for generated column names when no header row is present.',
+    }),
+
+  settingsSkipRowsLabel: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsSkipRowsLabel', {
+      defaultMessage: 'Skip rows',
+    }),
+
+  settingsSkipRowsPlaceholder: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsSkipRowsPlaceholder', {
+      defaultMessage: 'e.g. 0',
+    }),
+
+  settingsSkipRowsDescription: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsSkipRowsDescription', {
+      defaultMessage:
+        'Number of leading rows to skip before reading data. Blank and comment lines do not count.',
+    }),
+
+  settingsSkipRowsInvalid: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsSkipRowsInvalid', {
+      defaultMessage: 'Enter a whole number from 0 to 1000.',
+    }),
+
+  settingsTrimSpacesLabel: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsTrimSpacesLabel', {
+      defaultMessage: 'Trim spaces',
+    }),
+
+  settingsTrimSpacesPlaceholder: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsTrimSpacesPlaceholder', {
+      defaultMessage: 'Select trim spaces',
+    }),
+
+  settingsTrimSpacesDescription: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsTrimSpacesDescription', {
+      defaultMessage: 'Remove surrounding ASCII whitespace from string field values.',
+    }),
+
+  settingsFileExclusionsLabel: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsFileExclusionsLabel', {
+      defaultMessage: 'File exclusions',
+    }),
+
+  settingsFileExclusionsDescription: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsFileExclusionsDescription', {
+      defaultMessage:
+        'Patterns naming objects to drop from wildcard discovery. Default skips files starting with _ or . and _temporary/ and _delta_log/ directories. Setting replaces the default list entirely.',
     }),
 
   settingsDatetimeFormatLabel: () =>

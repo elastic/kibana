@@ -20,6 +20,7 @@ import { DATASET_WIZARD_STEP_FIELDS_MAX_WIDTH } from '../dataset_wizard_constant
 import {
   DATASET_WIZARD_FLOW_VARIANT_3,
   DATASET_WIZARD_FLOW_VARIANT_3_9_6,
+  DATASET_WIZARD_FLOW_VARIANT_3_9_6_OLD_FIELD_ORDER,
   type DatasetWizardFlowVariant,
 } from '../dataset_wizard_flow_variant';
 import { LogisticsStep } from './logistics_step';
@@ -84,33 +85,74 @@ describe('LogisticsStep', () => {
     );
   });
 
-  it('asks for the partition settings beside the resource in flow 3 9.6', () => {
+  it('omits the type text placeholders in flow 3 9.6', () => {
     render(<TestHarness flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6} />);
+
+    expect(screen.getByTestId('datasetWizardDescription')).not.toHaveAttribute(
+      'placeholder',
+      'Type text'
+    );
+    expect(screen.getByTestId('datasetWizardResource')).not.toHaveAttribute(
+      'placeholder',
+      'Type text'
+    );
+  });
+
+  it('keeps the type text placeholders in flow 3 9.6 old field order', () => {
+    render(<TestHarness flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6_OLD_FIELD_ORDER} />);
+
+    expect(screen.getByTestId('datasetWizardDescription')).toHaveAttribute(
+      'placeholder',
+      'Type text'
+    );
+    expect(screen.getByTestId('datasetWizardResource')).toHaveAttribute('placeholder', 'Type text');
+  });
+
+  it('leaves the partition settings off the resource step in flow 3 9.6', () => {
+    render(
+      <TestHarness flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6} partitionDetection="template" />
+    );
+
+    expect(screen.queryByTestId('datasetWizardSettingsPartitionDetection')).toBeNull();
+    expect(screen.queryByTestId('datasetWizardSettingsPartitionPath')).toBeNull();
+  });
+
+  it('asks for the partition settings beside the resource in flow 3 9.6 old field order', () => {
+    render(<TestHarness flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6_OLD_FIELD_ORDER} />);
 
     expect(screen.getByTestId('datasetWizardSettingsPartitionDetection')).toBeInTheDocument();
     expect(screen.queryByTestId('datasetWizardSettingsPartitionPath')).toBeNull();
   });
 
-  it('asks for a partition path only when detection is template in flow 3 9.6', () => {
+  it('asks for a partition path only when detection is template in flow 3 9.6 old field order', () => {
     render(
-      <TestHarness flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6} partitionDetection="template" />
+      <TestHarness
+        flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6_OLD_FIELD_ORDER}
+        partitionDetection="template"
+      />
     );
 
     expect(screen.getByTestId('datasetWizardSettingsPartitionPath')).toBeInTheDocument();
   });
 
-  it('marks the partition settings as optional', () => {
+  it('marks the partition settings as optional in flow 3 9.6 old field order', () => {
     render(
-      <TestHarness flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6} partitionDetection="template" />
+      <TestHarness
+        flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6_OLD_FIELD_ORDER}
+        partitionDetection="template"
+      />
     );
 
     expect(screen.getByText('Partition detection (optional)')).toBeInTheDocument();
     expect(screen.getByText('Partition path (optional)')).toBeInTheDocument();
   });
 
-  it('renders the partition settings on one row in flow 3 9.6', () => {
+  it('renders the partition settings on one row in flow 3 9.6 old field order', () => {
     render(
-      <TestHarness flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6} partitionDetection="template" />
+      <TestHarness
+        flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6_OLD_FIELD_ORDER}
+        partitionDetection="template"
+      />
     );
 
     const partitionDetection = screen.getByTestId('datasetWizardSettingsPartitionDetection');
@@ -121,9 +163,12 @@ describe('LogisticsStep', () => {
     expect(flexGroup).toBe(partitionPath.closest('.euiFlexGroup'));
   });
 
-  it('sizes the partition settings like the fields around them', () => {
+  it('sizes the partition settings like the fields around them in flow 3 9.6 old field order', () => {
     render(
-      <TestHarness flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6} partitionDetection="template" />
+      <TestHarness
+        flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6_OLD_FIELD_ORDER}
+        partitionDetection="template"
+      />
     );
 
     ['datasetWizardSettingsPartitionDetection', 'datasetWizardSettingsPartitionPath'].forEach(
@@ -136,8 +181,13 @@ describe('LogisticsStep', () => {
     );
   });
 
-  it('names the partition detection default once the format is known', () => {
-    render(<TestHarness flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6} format="parquet" />);
+  it('names the partition detection default once the format is known in flow 3 9.6 old field order', () => {
+    render(
+      <TestHarness
+        flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6_OLD_FIELD_ORDER}
+        format="parquet"
+      />
+    );
 
     const field = screen.getByTestId('datasetWizardSettingsPartitionDetection');
     /** Where defaults are shown, the description moves to a screen reader only help text. */
@@ -160,9 +210,14 @@ describe('LogisticsStep', () => {
   });
 
   it.each(['csv', 'tsv', 'ndjson', 'parquet', 'orc'] as const)(
-    'shows the partition settings for %s in flow 3 9.6',
+    'shows the partition settings for %s in flow 3 9.6 old field order',
     (format) => {
-      render(<TestHarness flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6} format={format} />);
+      render(
+        <TestHarness
+          flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6_OLD_FIELD_ORDER}
+          format={format}
+        />
+      );
 
       expect(screen.getByTestId('datasetWizardSettingsPartitionDetection')).toBeInTheDocument();
       expect(screen.queryByTestId('datasetWizardSettingsPartitionPath')).toBeNull();
@@ -173,6 +228,42 @@ describe('LogisticsStep', () => {
     render(<TestHarness flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6} />);
 
     expect(screen.getByTestId('datasetWizardSettingsFormat')).toBeInTheDocument();
+  });
+
+  it('omits orc from the format options in flow 3 9.6', async () => {
+    render(<TestHarness flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6} />);
+
+    fireEvent.click(screen.getByTestId('datasetWizardSettingsFormat'));
+
+    await waitFor(() => {
+      expect(screen.getByRole('option', { name: /Parquet/ })).toBeInTheDocument();
+    });
+    expect(screen.queryByRole('option', { name: /ORC/ })).toBeNull();
+  });
+
+  it('keeps orc in the format options in flow 3 9.6 old field order', async () => {
+    render(<TestHarness flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6_OLD_FIELD_ORDER} />);
+
+    fireEvent.click(screen.getByTestId('datasetWizardSettingsFormat'));
+
+    await waitFor(() => {
+      expect(screen.getByRole('option', { name: /ORC/ })).toBeInTheDocument();
+    });
+  });
+
+  it('does not auto-detect orc from the resource URI in flow 3 9.6', async () => {
+    render(<TestHarness flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6} />);
+
+    fireEvent.change(screen.getByTestId('datasetWizardResource'), {
+      target: { value: 's3://bucket/data.orc' },
+    });
+    fireEvent.blur(screen.getByTestId('datasetWizardResource'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('datasetWizardSettingsFormat')).toHaveTextContent(
+        'Select a format'
+      );
+    });
   });
 
   it('auto-detects the format from the resource URI on blur in flow 3 9.6', async () => {

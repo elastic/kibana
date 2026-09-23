@@ -13,6 +13,7 @@ import {
   DATASET_WIZARD_FLOW_VARIANT_2,
   DATASET_WIZARD_FLOW_VARIANT_3,
   DATASET_WIZARD_FLOW_VARIANT_3_9_6,
+  DATASET_WIZARD_FLOW_VARIANT_3_9_6_OLD_FIELD_ORDER,
   DATASET_WIZARD_FLOW_VARIANT_4,
   getDatasetWizardFormMaxWidth,
   hasDatasetWizardPreviewResultsStep,
@@ -35,6 +36,9 @@ describe('dataset_wizard_flow_variant', () => {
     expect(buildCreateDatasetWizardPath(DATASET_WIZARD_FLOW_VARIANT_3_9_6)).toBe(
       '/create?flow=flow_3_9_6'
     );
+    expect(buildCreateDatasetWizardPath(DATASET_WIZARD_FLOW_VARIANT_3_9_6_OLD_FIELD_ORDER)).toBe(
+      '/create?flow=flow_3_9_6_old_field_order'
+    );
     expect(buildCreateDatasetWizardPath(DATASET_WIZARD_FLOW_VARIANT_4)).toBe('/create?flow=flow_4');
     expect(buildCloneDatasetWizardPath('my-dataset')).toBe('/clone/my-dataset?flow=flow_3_9_6');
     expect(buildEditDatasetWizardPath('my-dataset')).toBe('/edit/my-dataset?flow=flow_3_9_6');
@@ -50,6 +54,9 @@ describe('dataset_wizard_flow_variant', () => {
     );
     expect(parseWizardFlowVariantFromSearch('?flow=flow_3_9_6')).toBe(
       DATASET_WIZARD_FLOW_VARIANT_3_9_6
+    );
+    expect(parseWizardFlowVariantFromSearch('?flow=flow_3_9_6_old_field_order')).toBe(
+      DATASET_WIZARD_FLOW_VARIANT_3_9_6_OLD_FIELD_ORDER
     );
     expect(parseWizardFlowVariantFromSearch('?flow=flow_4')).toBe(DATASET_WIZARD_FLOW_VARIANT_4);
   });
@@ -69,6 +76,9 @@ describe('dataset_wizard_flow_variant', () => {
     expect(resolveWizardFlowVariant('?flow=flow_2')).toBe(DATASET_WIZARD_FLOW_VARIANT_2);
     expect(resolveWizardFlowVariant('?flow=flow_3')).toBe(DATASET_WIZARD_FLOW_VARIANT_3);
     expect(resolveWizardFlowVariant('?flow=flow_3_9_6')).toBe(DATASET_WIZARD_FLOW_VARIANT_3_9_6);
+    expect(resolveWizardFlowVariant('?flow=flow_3_9_6_old_field_order')).toBe(
+      DATASET_WIZARD_FLOW_VARIANT_3_9_6_OLD_FIELD_ORDER
+    );
     expect(resolveWizardFlowVariant('?flow=flow_4')).toBe(DATASET_WIZARD_FLOW_VARIANT_4);
     expect(resolveWizardFlowVariant('', DATASET_WIZARD_FLOW_VARIANT_3)).toBe(
       DATASET_WIZARD_FLOW_VARIANT_3
@@ -78,13 +88,15 @@ describe('dataset_wizard_flow_variant', () => {
   it('identifies flow 3', () => {
     expect(isDatasetWizardFlow3(DATASET_WIZARD_FLOW_VARIANT_3)).toBe(true);
     expect(isDatasetWizardFlow3(DATASET_WIZARD_FLOW_VARIANT_3_9_6)).toBe(true);
+    expect(isDatasetWizardFlow3(DATASET_WIZARD_FLOW_VARIANT_3_9_6_OLD_FIELD_ORDER)).toBe(true);
     expect(isDatasetWizardFlow3(DATASET_WIZARD_FLOW_VARIANT_4)).toBe(true);
     expect(isDatasetWizardFlow3(DATASET_WIZARD_FLOW_VARIANT_1)).toBe(false);
     expect(isDatasetWizardFlow3(DATASET_WIZARD_FLOW_VARIANT_2)).toBe(false);
   });
 
-  it('identifies flow 3 9.6 only', () => {
+  it('identifies flow 3 9.6 and its old-field-order copy', () => {
     expect(isDatasetWizardFlow396(DATASET_WIZARD_FLOW_VARIANT_3_9_6)).toBe(true);
+    expect(isDatasetWizardFlow396(DATASET_WIZARD_FLOW_VARIANT_3_9_6_OLD_FIELD_ORDER)).toBe(true);
     expect(isDatasetWizardFlow396(DATASET_WIZARD_FLOW_VARIANT_3)).toBe(false);
     expect(isDatasetWizardFlow396(DATASET_WIZARD_FLOW_VARIANT_4)).toBe(false);
     expect(isDatasetWizardFlow396(DATASET_WIZARD_FLOW_VARIANT_1)).toBe(false);
@@ -103,6 +115,9 @@ describe('dataset_wizard_flow_variant', () => {
     expect(hasDatasetWizardPreviewResultsStep(DATASET_WIZARD_FLOW_VARIANT_3)).toBe(true);
     expect(hasDatasetWizardPreviewResultsStep(DATASET_WIZARD_FLOW_VARIANT_4)).toBe(true);
     expect(hasDatasetWizardPreviewResultsStep(DATASET_WIZARD_FLOW_VARIANT_3_9_6)).toBe(false);
+    expect(
+      hasDatasetWizardPreviewResultsStep(DATASET_WIZARD_FLOW_VARIANT_3_9_6_OLD_FIELD_ORDER)
+    ).toBe(false);
     expect(hasDatasetWizardPreviewResultsStep(DATASET_WIZARD_FLOW_VARIANT_1)).toBe(false);
     expect(hasDatasetWizardPreviewResultsStep(DATASET_WIZARD_FLOW_VARIANT_2)).toBe(false);
   });
@@ -112,6 +127,9 @@ describe('dataset_wizard_flow_variant', () => {
       Math.round(DATASET_WIZARD_FORM_MAX_WIDTH * 1.2)
     );
     expect(getDatasetWizardFormMaxWidth(DATASET_WIZARD_FLOW_VARIANT_3_9_6)).toBe(
+      DATASET_WIZARD_FORM_MAX_WIDTH_FLOW_3_9_6
+    );
+    expect(getDatasetWizardFormMaxWidth(DATASET_WIZARD_FLOW_VARIANT_3_9_6_OLD_FIELD_ORDER)).toBe(
       DATASET_WIZARD_FORM_MAX_WIDTH_FLOW_3_9_6
     );
     expect(getDatasetWizardFormMaxWidth(DATASET_WIZARD_FLOW_VARIANT_3)).toBe(

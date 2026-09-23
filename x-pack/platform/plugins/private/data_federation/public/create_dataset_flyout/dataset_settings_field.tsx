@@ -7,7 +7,7 @@
 
 import type { FunctionComponent } from 'react';
 import React from 'react';
-import { EuiFieldNumber, EuiFieldText, EuiFormRow } from '@elastic/eui';
+import { EuiComboBox, EuiFieldNumber, EuiFieldText, EuiFormRow } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
 import { useController } from 'react-hook-form';
 
@@ -25,6 +25,7 @@ import {
   OPTIMIZED_READER_SUPER_SELECT_OPTIONS,
   PARTITION_DETECTION_SUPER_SELECT_OPTIONS,
   PARTITION_PATH_PRESETS,
+  TRIM_SPACES_SUPER_SELECT_OPTIONS,
   SCHEMA_RESOLUTION_SUPER_SELECT_OPTIONS,
 } from './dataset_settings_options';
 import { useSettingFieldText } from './dataset_settings_default_hints';
@@ -33,6 +34,7 @@ import { SettingsEnumField } from './settings_enum_field';
 import { SettingsPresetComboBox } from './settings_preset_combo_box';
 import {
   validateMaxErrorRatio,
+  validateSkipRows,
   validateMaxErrors,
   validatePartitionPath,
   SCHEMA_SAMPLE_SIZE_MAX,
@@ -58,6 +60,48 @@ export interface DatasetSettingsFieldProps {
   inlineDescriptionTip?: boolean;
   disabled?: boolean;
 }
+
+const FileExclusionsField: FunctionComponent<{
+  control: Control<CreateDatasetFormValues>;
+  testSubj: string;
+  isCompressed?: boolean;
+}> = ({ control, testSubj, isCompressed = true }) => {
+  const { field } = useController({ name: 'settings.file_exclusions', control });
+  const fieldText = useSettingFieldText('settings.file_exclusions', {
+    label: createDatasetFlyoutStrings.settingsFileExclusionsLabel(),
+    description: createDatasetFlyoutStrings.settingsFileExclusionsDescription(),
+  });
+  const selectedOptions = field.value
+    ? field.value
+        .split('\n')
+        .filter(Boolean)
+        .map((label) => ({ label }))
+    : [];
+
+  return (
+    <EuiFormRow label={fieldText.label} helpText={fieldText.helpText} fullWidth>
+      <EuiComboBox
+        data-test-subj={testSubj}
+        fullWidth
+        compressed={isCompressed}
+        noSuggestions
+        placeholder={selectedOptions.length === 0 ? fieldText.placeholder : undefined}
+        selectedOptions={selectedOptions}
+        onChange={(options) => {
+          field.onChange(options.map((option) => option.label).join('\n'));
+        }}
+        onCreateOption={(searchValue) => {
+          const pattern = searchValue.trim();
+          if (!pattern || selectedOptions.some((option) => option.label === pattern)) {
+            return;
+          }
+
+          field.onChange([...selectedOptions.map((option) => option.label), pattern].join('\n'));
+        }}
+      />
+    </EuiFormRow>
+  );
+};
 
 export const DatasetSettingsField: FunctionComponent<DatasetSettingsFieldProps> = ({
   control,
@@ -187,6 +231,7 @@ export const DatasetSettingsField: FunctionComponent<DatasetSettingsFieldProps> 
           control={control}
           name="settings.quote"
           label={createDatasetFlyoutStrings.settingsQuoteLabel()}
+          description={createDatasetFlyoutStrings.settingsQuoteDescription()}
           helpText={createDatasetFlyoutStrings.settingsQuoteHelp()}
           placeholder={createDatasetFlyoutStrings.settingsQuotePlaceholder()}
           testSubj={`${testSubjPrefix}SettingsQuote`}
@@ -199,6 +244,7 @@ export const DatasetSettingsField: FunctionComponent<DatasetSettingsFieldProps> 
           control={control}
           name="settings.escape"
           label={createDatasetFlyoutStrings.settingsEscapeLabel()}
+          description={createDatasetFlyoutStrings.settingsEscapeDescription()}
           helpText={createDatasetFlyoutStrings.settingsEscapeHelp()}
           placeholder={createDatasetFlyoutStrings.settingsEscapePlaceholder()}
           testSubj={`${testSubjPrefix}SettingsEscape`}
@@ -230,6 +276,21 @@ export const DatasetSettingsField: FunctionComponent<DatasetSettingsFieldProps> 
           isCompressed={isCompressed}
         />
       );
+    case 'skip_rows':
+      return (
+        <NumberSettingsField
+          control={control}
+          name="settings.skip_rows"
+          label={createDatasetFlyoutStrings.settingsSkipRowsLabel()}
+          description={createDatasetFlyoutStrings.settingsSkipRowsDescription()}
+          placeholder={createDatasetFlyoutStrings.settingsSkipRowsPlaceholder()}
+          testSubj={`${testSubjPrefix}SettingsSkipRows`}
+          min={0}
+          max={1000}
+          rules={{ validate: validateSkipRows }}
+          isCompressed={isCompressed}
+        />
+      );
     case 'header_row':
       return (
         <SettingsEnumField
@@ -240,6 +301,27 @@ export const DatasetSettingsField: FunctionComponent<DatasetSettingsFieldProps> 
           placeholder={createDatasetFlyoutStrings.settingsHeaderRowPlaceholder()}
           options={HEADER_ROW_SUPER_SELECT_OPTIONS()}
           data-test-subj={`${testSubjPrefix}SettingsHeaderRow`}
+          isCompressed={isCompressed}
+        />
+      );
+    case 'trim_spaces':
+      return (
+        <SettingsEnumField
+          control={control}
+          name="settings.trim_spaces"
+          label={createDatasetFlyoutStrings.settingsTrimSpacesLabel()}
+          description={createDatasetFlyoutStrings.settingsTrimSpacesDescription()}
+          placeholder={createDatasetFlyoutStrings.settingsTrimSpacesPlaceholder()}
+          options={TRIM_SPACES_SUPER_SELECT_OPTIONS()}
+          data-test-subj={`${testSubjPrefix}SettingsTrimSpaces`}
+          isCompressed={isCompressed}
+        />
+      );
+    case 'file_exclusions':
+      return (
+        <FileExclusionsField
+          control={control}
+          testSubj={`${testSubjPrefix}SettingsFileExclusions`}
           isCompressed={isCompressed}
         />
       );

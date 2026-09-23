@@ -51,6 +51,7 @@ export interface DatasetSettingsAdvancedViewToggleProps {
   testSubjPrefix: string;
   constrainWidth?: boolean;
   compressed?: boolean;
+  variant?: 'settings' | 'step';
 }
 
 export const DatasetSettingsAdvancedViewToggle: FunctionComponent<
@@ -65,6 +66,7 @@ export const DatasetSettingsAdvancedViewToggle: FunctionComponent<
   testSubjPrefix,
   constrainWidth = true,
   compressed,
+  variant = 'settings',
 }) => {
   const prevSettingsDigestRef = useRef<string | null>(null);
 
@@ -165,6 +167,7 @@ export const DatasetSettingsAdvancedViewToggle: FunctionComponent<
       rowSpacerSize="m"
       constrainWidth={constrainWidth}
       compressed={compressed}
+      variant={variant}
     />
   );
 };

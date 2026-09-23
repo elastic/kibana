@@ -47,6 +47,9 @@ export const datasetSchema = schema.object({
         ])
       ),
       partition_path: optionalString,
+      file_exclusions: schema.maybe(
+        schema.arrayOf(schema.string({ maxLength: 1024 }), { maxSize: 100 })
+      ),
       hive_partitioning: schema.maybe(schema.boolean()),
       // CSV/TSV + NDJSON
       schema_sample_size: schema.maybe(
@@ -58,6 +61,7 @@ export const datasetSchema = schema.object({
         schema.oneOf([schema.literal('quoted'), schema.literal('escaped'), schema.literal('plain')])
       ),
       header_row: schema.maybe(schema.boolean()),
+      skip_rows: schema.maybe(schema.number({ min: 0, max: 1000 })),
       null_value: optionalString,
       encoding: optionalString,
       // CSV/TSV error handling
@@ -75,6 +79,7 @@ export const datasetSchema = schema.object({
       escape: optionalString,
       comment: optionalString,
       column_prefix: optionalString,
+      trim_spaces: schema.maybe(schema.boolean()),
       datetime_format: optionalString,
       multi_value_syntax: schema.maybe(
         schema.oneOf([schema.literal('none'), schema.literal('brackets')])

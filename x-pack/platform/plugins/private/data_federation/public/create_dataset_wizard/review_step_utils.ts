@@ -34,6 +34,7 @@ import {
   DATASET_WIZARD_FLOW_VARIANT_1,
   DATASET_WIZARD_FLOW_VARIANT_2,
   hasDatasetWizardRegionField,
+  isActiveDatasetWizardFlow396,
   isDatasetWizardFlow3,
   isDatasetWizardFlow396,
   type DatasetWizardFlowVariant,
@@ -121,8 +122,7 @@ const getEffectiveWizardSettings = (
 
 const getReviewFlow396LogisticsSettingBadge = (
   flowVariant: DatasetWizardFlowVariant
-): ReviewSettingBadge | undefined =>
-  isDatasetWizardFlow396(flowVariant) ? 'modified' : undefined;
+): ReviewSettingBadge | undefined => (isDatasetWizardFlow396(flowVariant) ? 'modified' : undefined);
 
 const getReviewFormatRow = (
   format: Exclude<DatasetWizardFormValues['settings']['format'], ''>,
@@ -285,6 +285,14 @@ export const getReviewSettingsRows = (
       continue;
     }
     if (!isFieldVisibleForErrorMode(fieldId, effectiveSettings.error_mode)) {
+      continue;
+    }
+    // Active Flow 3 9.6 only asks for a path when detection is Template.
+    if (
+      isActiveDatasetWizardFlow396(flowVariant) &&
+      fieldId === 'partition_path' &&
+      effectiveSettings.partition_detection !== 'template'
+    ) {
       continue;
     }
 

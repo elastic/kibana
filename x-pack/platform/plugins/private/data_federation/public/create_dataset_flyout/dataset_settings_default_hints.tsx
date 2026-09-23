@@ -15,16 +15,27 @@ import type { DatasetFormatFormValue } from './create_dataset_flyout_form_state'
 import { getDefaultSettingsForFormat } from './dataset_settings_defaults';
 import { NULL_VALUE_EMPTY_STRING_PRESET } from './dataset_settings_options';
 import { formatSettingsFieldDisplayValue } from './dataset_settings_value_labels';
-import type { DatasetSettingsFieldId } from './dataset_settings_visibility';
+import {
+  isFieldVisibleForFormat,
+  type DatasetSettingsFieldId,
+} from './dataset_settings_visibility';
 import { bytesToDisplayValue, pickBestByteSizeUnit } from './max_field_size_utils';
 
 /** Elasticsearch stops at the first error unless a budget is configured. */
 const MAX_ERRORS_DEFAULT_LITERAL = 'unbounded';
 
+/** Defaults named in help text that stay out of the shared format-default table. */
+const HINT_ONLY_DEFAULTS: Partial<Record<DatasetSettingsFieldId, string>> = {
+  skip_rows: '0',
+  trim_spaces: 'false',
+};
+
 export const getSettingDefaultValue = (
   fieldId: DatasetSettingsFieldId,
   format: Exclude<DatasetFormatFormValue, ''>
-): string | undefined => getDefaultSettingsForFormat(format)[fieldId];
+): string | undefined =>
+  getDefaultSettingsForFormat(format)[fieldId] ??
+  (isFieldVisibleForFormat(fieldId, format) ? HINT_ONLY_DEFAULTS[fieldId] : undefined);
 
 /**
  * Defaults Elasticsearch documents but that have no equivalent form value, so

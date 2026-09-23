@@ -13,14 +13,15 @@ import type {
 } from '../create_dataset_flyout/create_dataset_flyout_form_state';
 import type { DatasetSettingsFieldId } from '../create_dataset_flyout/dataset_settings_visibility';
 import {
+  isActiveDatasetWizardFlow396,
   isDatasetWizardFlow396,
   type DatasetWizardFlowVariant,
 } from './dataset_wizard_flow_variant';
 import { FLOW_396_ADDITIONAL_SETTINGS_EXCLUDED_FIELD_IDS } from './schema_mapping_settings_fields';
 
 /**
- * Settings that describe the resource path rather than the contents of the files, so they are
- * asked for beside the resource instead of among the format settings.
+ * Settings asked for beside the resource. Flow 3 9.6 (old field order) still does this for the
+ * partition fields. Active Flow 3 9.6 asks for them in advanced settings instead.
  */
 const RESOURCE_OWNED_SETTINGS_FIELD_IDS: readonly DatasetSettingsFieldId[] = [
   'partition_detection',
@@ -30,7 +31,9 @@ const RESOURCE_OWNED_SETTINGS_FIELD_IDS: readonly DatasetSettingsFieldId[] = [
 export const getResourceOwnedSettingsFieldIds = (
   flowVariant: DatasetWizardFlowVariant
 ): readonly DatasetSettingsFieldId[] =>
-  isDatasetWizardFlow396(flowVariant) ? RESOURCE_OWNED_SETTINGS_FIELD_IDS : [];
+  isDatasetWizardFlow396(flowVariant) && !isActiveDatasetWizardFlow396(flowVariant)
+    ? RESOURCE_OWNED_SETTINGS_FIELD_IDS
+    : [];
 
 /** Fields summarized on other review columns (logistics / schema mappings). */
 export const getReviewAdditionalSettingsExcludeFieldIds = (

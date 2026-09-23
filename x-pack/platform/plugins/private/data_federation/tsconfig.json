@@ -20,6 +20,7 @@
     "@kbn/shared-ux-router",
     "@kbn/features-plugin",
     "@kbn/kibana-react-plugin",
+    "@kbn/developer-toolbar",
     "@kbn/app-header",
     "@kbn/ui-callout",
     "@kbn/index-management-plugin",

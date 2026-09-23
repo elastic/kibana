@@ -32,6 +32,8 @@ export interface DatasetSettingsFile {
   schema_resolution?: 'first_file_wins' | 'strict' | 'union_by_name';
   /** Path template, only read when partition_detection is 'template'. */
   partition_path?: string;
+  /** Globs dropped from wildcard discovery. Replaces the API default list when set. */
+  file_exclusions?: string[];
   /** Legacy toggle superseded by partition_detection; still accepted on read. */
   hive_partitioning?: boolean;
 
@@ -42,6 +44,8 @@ export interface DatasetSettingsFile {
   delimiter?: string;
   mode?: 'quoted' | 'escaped' | 'plain';
   header_row?: boolean;
+  /** Leading content records to drop before the header row. 0–1000. */
+  skip_rows?: number;
 
   // CSV/TSV — advanced
   null_value?: string;
@@ -50,6 +54,7 @@ export interface DatasetSettingsFile {
   escape?: string;
   comment?: string;
   column_prefix?: string;
+  trim_spaces?: boolean;
   datetime_format?: string;
   multi_value_syntax?: 'none' | 'brackets';
   max_field_size?: number;

@@ -107,9 +107,15 @@ describe('DatasetsTable', () => {
     expect(onCreate).toHaveBeenLastCalledWith('flow_3_9_6');
 
     fireEvent.click(getByTestId('dataSetsSetsCreateButton'));
-    fireEvent.click(getByTestId('dataSetsSetsCreateFlow4Button'));
+    fireEvent.click(getByTestId('dataSetsSetsCreateFlow396OldFieldOrderButton'));
 
     expect(onCreate).toHaveBeenCalledTimes(4);
+    expect(onCreate).toHaveBeenLastCalledWith('flow_3_9_6_old_field_order');
+
+    fireEvent.click(getByTestId('dataSetsSetsCreateButton'));
+    fireEvent.click(getByTestId('dataSetsSetsCreateFlow4Button'));
+
+    expect(onCreate).toHaveBeenCalledTimes(5);
     expect(onCreate).toHaveBeenLastCalledWith('flow_4');
   });
 

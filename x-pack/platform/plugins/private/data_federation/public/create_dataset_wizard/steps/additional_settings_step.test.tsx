@@ -21,7 +21,9 @@ import {
   DATASET_WIZARD_FLOW_VARIANT_2,
   DATASET_WIZARD_FLOW_VARIANT_3,
   DATASET_WIZARD_FLOW_VARIANT_3_9_6,
+  DATASET_WIZARD_FLOW_VARIANT_3_9_6_OLD_FIELD_ORDER,
   DATASET_WIZARD_FLOW_VARIANT_4,
+  isDatasetWizardFlow396,
   type DatasetWizardFlowVariant,
 } from '../dataset_wizard_flow_variant';
 import { NULL_VALUE_EMPTY_STRING_PRESET } from '../../create_dataset_flyout/dataset_settings_options';
@@ -75,7 +77,7 @@ const TestHarness = ({
       resource,
       settings: {
         ...emptyDatasetWizardFormValues().settings,
-        ...(flowVariant === DATASET_WIZARD_FLOW_VARIANT_3_9_6 && inferredFormat
+        ...(isDatasetWizardFlow396(flowVariant) && inferredFormat
           ? { format: inferredFormat }
           : {}),
       },
@@ -534,7 +536,7 @@ describe('AdditionalSettingsStep', () => {
       expect(queryByTestId('datasetWizardSettingsFormat')).toBeNull();
     });
 
-    it('omits schema resolution from optional settings for orc in flow 3 9.6', async () => {
+    it('omits schema resolution and common settings for orc in flow 3 9.6', async () => {
       const { getByTestId, queryByTestId } = render(
         <TestHarness
           resource="s3://bucket/data.orc"
@@ -543,9 +545,10 @@ describe('AdditionalSettingsStep', () => {
       );
 
       await waitFor(() => {
-        expect(getByTestId('datasetWizardFlow3CommonSettingsFields')).toBeInTheDocument();
+        expect(getByTestId('datasetWizardFlow3AdvancedSettingsAccordion')).toBeInTheDocument();
       });
 
+      expect(queryByTestId('datasetWizardFlow3CommonSettingsFields')).toBeNull();
       expect(queryByTestId('datasetWizardSettingsSchemaResolution')).toBeNull();
     });
 
@@ -622,9 +625,8 @@ describe('AdditionalSettingsStep', () => {
       expect(delimiterHelp.textContent).toBe(', by default.');
       expect(delimiterHelp.querySelector('code')?.textContent).toBe(',');
 
-      // The stored value is a byte count, which is not what the help text quotes.
-      const maxFieldSizeHelp = getVisibleHelpText(getByTestId('datasetWizardSettingsMaxFieldSize'));
-      expect(maxFieldSizeHelp.querySelector('code')?.textContent).toBe('10mb');
+      const skipRowsHelp = getVisibleHelpText(getByTestId('datasetWizardSettingsSkipRows'));
+      expect(skipRowsHelp.querySelector('code')?.textContent).toBe('0');
 
       // An empty default has no literal worth quoting.
       const nullValueHelp = getVisibleHelpText(getByTestId('datasetWizardSettingsNullValue'));
@@ -808,11 +810,157 @@ describe('AdditionalSettingsStep', () => {
       });
     });
 
-    it('leaves the partition settings to the resource step in flow 3 9.6', async () => {
+    it('puts csv settings in common and advanced for flow 3 9.6', async () => {
+      const { getByTestId, queryByTestId } = render(
+        <TestHarness resource="s3://bucket/data.csv" flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6} />
+      );
+
+      await waitFor(() => {
+        expect(getByTestId('datasetWizardSettingsDelimiter')).toBeInTheDocument();
+      });
+
+      fireEvent.click(getByTestId('datasetWizardFlow3AdvancedSettingsAccordion'));
+
+      const commonFields = getByTestId('datasetWizardFlow3CommonSettingsFields');
+      const advancedFields = getByTestId('datasetWizardFlow3AdvancedSettingsFields');
+
+      ['Delimiter', 'Quote mode', 'Header row', 'Skip rows', 'Datetime format', 'Null value', 'Encoding'].forEach(
+        (label) => {
+          expect(commonFields).toHaveTextContent(label);
+        }
+      );
+      [
+        'Error mode',
+        'File exclusions',
+        'Partition detection',
+        'Quote character',
+        'Escape character',
+        'Column prefix',
+        'Trim spaces',
+      ].forEach((label) => {
+        expect(advancedFields).toHaveTextContent(label);
+      });
+
+      expect(
+        within(getByTestId('datasetWizardSettingsFileExclusions')).queryByPlaceholderText('Type text')
+      ).toBeNull();
+      expect(queryByTestId('datasetWizardSettingsComment')).toBeNull();
+      expect(queryByTestId('datasetWizardSettingsMultiValueSyntax')).toBeNull();
+      expect(queryByTestId('datasetWizardSettingsMaxFieldSize')).toBeNull();
+      expect(commonFields).not.toHaveTextContent('Error mode');
+    });
+
+    it('keeps only datetime format in common settings for ndjson in flow 3 9.6', async () => {
+      const { getByTestId, queryByTestId } = render(
+        <TestHarness
+          resource="s3://bucket/data.ndjson"
+          flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6}
+        />
+      );
+
+      await waitFor(() => {
+        expect(getByTestId('datasetWizardSettingsDatetimeFormat')).toBeInTheDocument();
+      });
+
+      expect(
+        getByTestId('datasetWizardSettingsDatetimeFormat').closest(
+          '[data-test-subj="datasetWizardFlow3CommonSettingsFields"]'
+        )
+      ).toBeTruthy();
+      expect(queryByTestId('datasetWizardSettingsSegmentSize')).toBeNull();
+
+      fireEvent.click(getByTestId('datasetWizardFlow3AdvancedSettingsAccordion'));
+
+      expect(
+        getByTestId('datasetWizardSettingsErrorMode').closest(
+          '[data-test-subj="datasetWizardFlow3AdvancedSettingsFields"]'
+        )
+      ).toBeTruthy();
+    });
+
+    it('asks for partition detection in advanced settings in flow 3 9.6', async () => {
       const { getByTestId, queryByTestId } = render(
         <TestHarness
           resource="s3://bucket/data.parquet"
           flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6}
+        />
+      );
+
+      await waitFor(() => {
+        expect(getByTestId('datasetWizardFlow3AdvancedSettingsAccordion')).toBeInTheDocument();
+      });
+
+      fireEvent.click(getByTestId('datasetWizardFlow3AdvancedSettingsAccordion'));
+
+      await waitFor(() => {
+        expect(getByTestId('datasetWizardSettingsPartitionDetection')).toBeInTheDocument();
+      });
+
+      expect(
+        getByTestId('datasetWizardSettingsPartitionDetection').closest(
+          '[data-test-subj="datasetWizardFlow3AdvancedSettingsFields"]'
+        )
+      ).toBeTruthy();
+      expect(queryByTestId('datasetWizardFlow3CommonSettingsFields')).toBeNull();
+      expect(queryByTestId('datasetWizardSettingsPartitionPath')).toBeNull();
+    });
+
+    it('asks for a partition path in advanced settings only when detection is template', async () => {
+      const Harness = () => {
+        const syncedResourceRef = useRef<string | null>(null);
+        const { control, getValues, setValue } = useForm<DatasetWizardFormValues>({
+          defaultValues: {
+            ...emptyDatasetWizardFormValues(),
+            resource: 's3://bucket/data.parquet',
+            settings: {
+              ...emptyDatasetWizardFormValues().settings,
+              format: 'parquet',
+              partition_detection: 'template',
+            },
+          },
+        });
+
+        return (
+          <TestProviders>
+            <AdditionalSettingsStep
+              control={control}
+              getValues={getValues}
+              setValue={setValue}
+              resource="s3://bucket/data.parquet"
+              syncedResourceRef={syncedResourceRef}
+              isEditMode={false}
+              flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6}
+            />
+          </TestProviders>
+        );
+      };
+
+      const { getByTestId } = render(<Harness />);
+
+      await waitFor(() => {
+        expect(getByTestId('datasetWizardFlow3AdvancedSettingsAccordion')).toBeInTheDocument();
+      });
+
+      fireEvent.click(getByTestId('datasetWizardFlow3AdvancedSettingsAccordion'));
+
+      await waitFor(() => {
+        expect(getByTestId('datasetWizardSettingsPartitionPath')).toBeInTheDocument();
+      });
+
+      expect(
+        getByTestId('datasetWizardSettingsPartitionPath').closest(
+          '[data-test-subj="datasetWizardFlow3AdvancedSettingsFields"]'
+        )
+      ).toBeTruthy();
+      expect(screen.getByText('Partition detection (optional)')).toBeInTheDocument();
+      expect(screen.getByText('Partition path (optional)')).toBeInTheDocument();
+    });
+
+    it('leaves the partition settings to the resource step in flow 3 9.6 old field order', async () => {
+      const { getByTestId, queryByTestId } = render(
+        <TestHarness
+          resource="s3://bucket/data.parquet"
+          flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6_OLD_FIELD_ORDER}
         />
       );
 
@@ -833,7 +981,7 @@ describe('AdditionalSettingsStep', () => {
       );
 
       await waitFor(() => {
-        expect(getByTestId('datasetWizardFlow3CommonSettingsFields')).toBeInTheDocument();
+        expect(getByTestId('datasetWizardFlow3AdvancedSettingsAccordion')).toBeInTheDocument();
       });
 
       expect(queryByTestId('datasetWizardSettingsSchemaResolution')).toBeNull();

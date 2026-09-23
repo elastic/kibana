@@ -95,7 +95,7 @@ const CommandToggleLabel = ({ isOpen }: { isOpen: boolean }) => (
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
       <EuiIcon
-        type={isOpen ? 'arrowUp' : 'arrowDown'}
+        type={isOpen ? 'chevronSingleUp' : 'chevronSingleDown'}
         size="s"
         color="primary"
         aria-hidden={true}

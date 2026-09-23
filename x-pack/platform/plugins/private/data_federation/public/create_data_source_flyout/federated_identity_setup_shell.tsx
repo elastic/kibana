@@ -49,7 +49,7 @@ export function FederatedIdentitySetupShell({
         label: i18n.translate('xpack.dataFederation.createFlyout.federated.setupMethod.manual', {
           defaultMessage: 'Manual',
         }),
-        icon: 'console',
+        icon: 'commandLine',
         testSubj: `${testSubjPrefix}SetupMethod-manual`,
       },
     ],

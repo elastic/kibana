@@ -9,15 +9,18 @@ import type { FunctionComponent, MutableRefObject } from 'react';
 import React, { useMemo } from 'react';
 import { EuiCallOut, EuiForm, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import type { Control, UseFormGetValues, UseFormSetValue } from 'react-hook-form';
+import { useWatch } from 'react-hook-form';
 
 import { DatasetSettingsAccordions } from '../../create_dataset_flyout/dataset_settings_accordions';
 import { DatasetSettingsCommonPanel } from '../../create_dataset_flyout/dataset_settings_common_panel';
 import { DatasetSettingsFlow3SettingsPanel } from '../../create_dataset_flyout/dataset_settings_flow3_settings_panel';
 import { DatasetSettingDefaultHintsProvider } from '../../create_dataset_flyout/dataset_settings_default_hints';
 import type { DatasetFormatFormValue } from '../../create_dataset_flyout/create_dataset_flyout_form_state';
+import type { DatasetSettingsFieldId } from '../../create_dataset_flyout/dataset_settings_visibility';
 import { datasetWizardStrings } from '../dataset_wizard_i18n';
 import {
   hasDatasetWizardRegionField,
+  isActiveDatasetWizardFlow396,
   isDatasetWizardFlow3,
   isDatasetWizardFlow396,
   type DatasetWizardFlowVariant,
@@ -28,6 +31,11 @@ import { getResourceOwnedSettingsFieldIds } from '../resource_settings_fields';
 import { FLOW_396_ADDITIONAL_SETTINGS_EXCLUDED_FIELD_IDS } from '../schema_mapping_settings_fields';
 import { isKnownDatasetFormat, useDatasetFormatSelection } from '../use_dataset_format_selection';
 import { WizardRegionField } from '../wizard_region_field';
+
+const ACTIVE_FLOW_396_ADVANCED_PARTITION_FIELDS: readonly DatasetSettingsFieldId[] = [
+  'partition_detection',
+  'partition_path',
+];
 
 export interface AdditionalSettingsStepProps {
   control: Control<DatasetWizardFormValues>;
@@ -53,18 +61,28 @@ export const AdditionalSettingsStep: FunctionComponent<AdditionalSettingsStepPro
   onRegionManualChange,
 }) => {
   const isFlow396 = isDatasetWizardFlow396(flowVariant);
+  const isActiveFlow396 = isActiveDatasetWizardFlow396(flowVariant);
   const showFormatField = !isFlow396;
   const showDefaultsAsPlaceholders = isFlow396;
+  const partitionDetection = useWatch({ control, name: 'settings.partition_detection' });
   const resourceSettingsFieldIds = useMemo(
     () => getResourceOwnedSettingsFieldIds(flowVariant),
     [flowVariant]
   );
-  const excludedSettingsFieldIds = useMemo(
-    () =>
-      isFlow396
-        ? [...resourceSettingsFieldIds, ...FLOW_396_ADDITIONAL_SETTINGS_EXCLUDED_FIELD_IDS]
-        : resourceSettingsFieldIds,
-    [isFlow396, resourceSettingsFieldIds]
+  const excludedSettingsFieldIds = useMemo(() => {
+    const excluded: DatasetSettingsFieldId[] = isFlow396
+      ? [...resourceSettingsFieldIds, ...FLOW_396_ADDITIONAL_SETTINGS_EXCLUDED_FIELD_IDS]
+      : [...resourceSettingsFieldIds];
+
+    if (isActiveFlow396 && partitionDetection !== 'template') {
+      excluded.push('partition_path');
+    }
+
+    return excluded;
+  }, [isActiveFlow396, isFlow396, partitionDetection, resourceSettingsFieldIds]);
+  const promoteToAdvancedFieldIds = useMemo(
+    () => (isActiveFlow396 ? ACTIVE_FLOW_396_ADVANCED_PARTITION_FIELDS : []),
+    [isActiveFlow396]
   );
   const {
     formatField,
@@ -179,6 +197,8 @@ export const AdditionalSettingsStep: FunctionComponent<AdditionalSettingsStepPro
                 testSubjPrefix="datasetWizard"
                 hasPanelBackground={!isFlow396}
                 excludeFieldIds={excludedSettingsFieldIds}
+                promoteToAdvancedFieldIds={promoteToAdvancedFieldIds}
+                useActiveFlow396Layout={isActiveFlow396}
               />
             ) : (
               <>

@@ -46,8 +46,12 @@ export const getDatasetSettingsFieldLabel = (fieldId: DatasetSettingsFieldId): s
       return createDatasetFlyoutStrings.settingsEncodingLabel();
     case 'header_row':
       return createDatasetFlyoutStrings.settingsHeaderRowLabel();
+    case 'skip_rows':
+      return createDatasetFlyoutStrings.settingsSkipRowsLabel();
     case 'column_prefix':
       return createDatasetFlyoutStrings.settingsColumnPrefixLabel();
+    case 'trim_spaces':
+      return createDatasetFlyoutStrings.settingsTrimSpacesLabel();
     case 'null_value':
       return createDatasetFlyoutStrings.settingsNullValueLabel();
     case 'datetime_format':
@@ -60,6 +64,8 @@ export const getDatasetSettingsFieldLabel = (fieldId: DatasetSettingsFieldId): s
       return createDatasetFlyoutStrings.settingsMaxErrorsLabel();
     case 'max_error_ratio':
       return createDatasetFlyoutStrings.settingsMaxErrorRatioLabel();
+    case 'file_exclusions':
+      return createDatasetFlyoutStrings.settingsFileExclusionsLabel();
     case 'max_field_size':
       return createDatasetFlyoutStrings.settingsMaxFieldSizeLabel();
     case 'segment_size':
@@ -91,16 +97,11 @@ export const formatSettingsFieldDisplayValue = (
     case 'schema_resolution':
       return lookupOptionLabel(value, SCHEMA_RESOLUTION_SUPER_SELECT_OPTIONS()) ?? value;
     case 'header_row':
+    case 'trim_spaces':
+      return lookupOptionLabel(value, HEADER_ROW_SUPER_SELECT_OPTIONS()) ?? value;
     case 'optimized_reader':
     case 'late_materialization':
-      return (
-        lookupOptionLabel(
-          value,
-          fieldId === 'header_row'
-            ? HEADER_ROW_SUPER_SELECT_OPTIONS()
-            : OPTIMIZED_READER_SUPER_SELECT_OPTIONS()
-        ) ?? value
-      );
+      return lookupOptionLabel(value, OPTIMIZED_READER_SUPER_SELECT_OPTIONS()) ?? value;
     case 'mode':
       return lookupOptionLabel(value, MODE_SUPER_SELECT_OPTIONS()) ?? value;
     case 'error_mode':

@@ -15,6 +15,7 @@ import {
   DATASET_WIZARD_FLOW_VARIANT_2,
   DATASET_WIZARD_FLOW_VARIANT_3,
   DATASET_WIZARD_FLOW_VARIANT_3_9_6,
+  DATASET_WIZARD_FLOW_VARIANT_3_9_6_OLD_FIELD_ORDER,
   DATASET_WIZARD_FLOW_VARIANT_4,
   type DatasetWizardFlowVariant,
 } from './create_dataset_wizard/dataset_wizard_flow_variant';
@@ -71,6 +72,11 @@ export const AddDatasetMenuButton: FunctionComponent<AddDatasetMenuButtonProps> 
             'data-test-subj': 'dataSetsSetsCreateFlow396Button',
           },
           {
+            name: mainTranslations.columns.dataSets.addFlow396OldFieldOrderLabel,
+            onClick: () => handleSelectFlow(DATASET_WIZARD_FLOW_VARIANT_3_9_6_OLD_FIELD_ORDER),
+            'data-test-subj': 'dataSetsSetsCreateFlow396OldFieldOrderButton',
+          },
+          {
             name: mainTranslations.columns.dataSets.addFlow4Label,
             onClick: () => handleSelectFlow(DATASET_WIZARD_FLOW_VARIANT_4),
             'data-test-subj': 'dataSetsSetsCreateFlow4Button',
@@ -98,7 +104,7 @@ export const AddDatasetMenuButton: FunctionComponent<AddDatasetMenuButtonProps> 
     <EuiButton
       fill
       color="primary"
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="right"
       data-test-subj="dataSetsSetsCreateButton"
       onClick={togglePopover}

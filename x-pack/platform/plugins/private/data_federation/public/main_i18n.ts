@@ -229,6 +229,12 @@ export const mainTranslations = {
       addFlow396Label: i18n.translate('xpack.dataFederation.setsAddFlow396Label', {
         defaultMessage: 'Flow 3 9.6',
       }),
+      addFlow396OldFieldOrderLabel: i18n.translate(
+        'xpack.dataFederation.setsAddFlow396OldFieldOrderLabel',
+        {
+          defaultMessage: 'Flow 3 9.6 (old field order)',
+        }
+      ),
       addFlow4Label: i18n.translate('xpack.dataFederation.setsAddFlow4Label', {
         defaultMessage: 'Flow 4',
       }),

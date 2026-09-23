@@ -9,19 +9,18 @@ import type { FunctionComponent, PropsWithChildren } from 'react';
 import React, { createContext, useCallback, useContext } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
-import { css } from '@emotion/react';
 import type { EuiSwitchEvent } from '@elastic/eui';
-import { EuiSwitch, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { EuiSwitch } from '@elastic/eui';
 
 import { mainTranslations } from './main_i18n';
 
 /**
- * Prototype-only state backing the breadcrumbs switch. While off, the wizard is
+ * Prototype-only state backing the developer-toolbar switch. While off, the wizard is
  * pinned to Flow 3 9.6; turning it on re-exposes the frozen flow variants so
  * they can still be compared side by side.
  *
- * Kibana renders breadcrumb extensions in its own React tree, so the switch
- * cannot read this through context. The store is shared by instance instead.
+ * The toolbar renders in its own React tree, so the switch cannot read this through
+ * context. The store is shared by instance instead.
  */
 export type FlowPreviewModeStore = BehaviorSubject<boolean>;
 
@@ -50,7 +49,6 @@ export interface FlowPreviewModeSwitchProps {
 }
 
 export const FlowPreviewModeSwitch: FunctionComponent<FlowPreviewModeSwitchProps> = ({ store }) => {
-  const { euiTheme } = useEuiTheme();
   const isEnabled = useFlowPreviewValue(store);
 
   const onChange = useCallback(
@@ -61,18 +59,12 @@ export const FlowPreviewModeSwitch: FunctionComponent<FlowPreviewModeSwitchProps
   );
 
   return (
-    <EuiToolTip content={mainTranslations.flowPreview.switchLabel}>
-      <EuiSwitch
-        compressed
-        showLabel={false}
-        label={mainTranslations.flowPreview.switchLabel}
-        checked={isEnabled}
-        onChange={onChange}
-        css={css`
-          margin-inline-start: ${euiTheme.size.m};
-        `}
-        data-test-subj="dataFederationFlowPreviewSwitch"
-      />
-    </EuiToolTip>
+    <EuiSwitch
+      compressed
+      label={mainTranslations.flowPreview.switchLabel}
+      checked={isEnabled}
+      onChange={onChange}
+      data-test-subj="dataFederationFlowPreviewSwitch"
+    />
   );
 };

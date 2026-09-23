@@ -15,14 +15,13 @@ import type { DataSource } from '../../../common';
 import { DATA_SOURCE_TYPES_TO_HELP_TEXT } from '../../../common';
 import type { DatasetFormatFormValue } from '../../create_dataset_flyout/create_dataset_flyout_form_state';
 import { DatasetSettingDefaultHintsProvider } from '../../create_dataset_flyout/dataset_settings_default_hints';
-import {
-  DatasetSettingsFieldsLayout,
-} from '../../create_dataset_flyout/dataset_settings_fields_layout';
+import { DatasetSettingsFieldsLayout } from '../../create_dataset_flyout/dataset_settings_fields_layout';
 import { DataSourceSuperSelect } from '../data_source_super_select';
 import { DatasetFormatField } from '../dataset_format_field';
 import { ExistingDataSourceAuthNotice } from '../existing_data_source_auth_notice';
 import { datasetWizardStrings } from '../dataset_wizard_i18n';
 import {
+  isActiveDatasetWizardFlow396,
   isDatasetWizardFlow3,
   isDatasetWizardFlow396,
   isDatasetWizardFlow4,
@@ -88,6 +87,7 @@ const LogisticsStepFieldsContent: FunctionComponent<LogisticsStepFieldsContentPr
   onUserSelectedExistingDataSource,
 }) => {
   const isFlow396 = isDatasetWizardFlow396(flowVariant);
+  const isActiveFlow396 = isActiveDatasetWizardFlow396(flowVariant);
 
   const { field: dataSourceField, fieldState: dataSourceFieldState } = useController({
     name: 'data_source',
@@ -130,8 +130,7 @@ const LogisticsStepFieldsContent: FunctionComponent<LogisticsStepFieldsContentPr
     () => getResourceOwnedSettingsFieldIds(flowVariant),
     [flowVariant]
   );
-  const partitionDetection =
-    useWatch({ control, name: 'settings.partition_detection' }) ?? '';
+  const partitionDetection = useWatch({ control, name: 'settings.partition_detection' }) ?? '';
   const visibleResourceSettingsFieldIds = useMemo(
     () => getVisibleResourceOwnedSettingsFieldIds(flowVariant, partitionDetection),
     [flowVariant, partitionDetection]
@@ -181,9 +180,7 @@ const LogisticsStepFieldsContent: FunctionComponent<LogisticsStepFieldsContentPr
   );
 
   const showExistingDataSourceAuthNotice =
-    isFlow396 &&
-    Boolean(dataSourceField.value?.trim()) &&
-    !suppressExistingDataSourceAuthNotice;
+    isFlow396 && Boolean(dataSourceField.value?.trim()) && !suppressExistingDataSourceAuthNotice;
 
   const onResourceBlur = useCallback(() => {
     resourceField.onBlur();
@@ -286,7 +283,9 @@ const LogisticsStepFieldsContent: FunctionComponent<LogisticsStepFieldsContentPr
             <EuiFieldText
               data-test-subj="datasetWizardDescription"
               fullWidth
-              placeholder={datasetWizardStrings.descriptionPlaceholder()}
+              placeholder={
+                isActiveFlow396 ? undefined : datasetWizardStrings.descriptionPlaceholder()
+              }
               value={descriptionField.value}
               onChange={(e) => descriptionField.onChange(e.target.value)}
               name={descriptionField.name}
@@ -304,7 +303,7 @@ const LogisticsStepFieldsContent: FunctionComponent<LogisticsStepFieldsContentPr
             <EuiFieldText
               data-test-subj="datasetWizardResource"
               fullWidth
-              placeholder={datasetWizardStrings.resourcePlaceholder()}
+              placeholder={isActiveFlow396 ? undefined : datasetWizardStrings.resourcePlaceholder()}
               autoComplete="off"
               isInvalid={Boolean(resourceFieldState.error)}
               value={resourceField.value}

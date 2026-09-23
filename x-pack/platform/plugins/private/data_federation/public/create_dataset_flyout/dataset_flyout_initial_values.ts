@@ -84,6 +84,7 @@ const settingsToFlyoutFormValues = (
     delimiter: s.delimiter ?? '',
     mode: (s.mode ?? '') as DatasetModeFormValue,
     header_row: boolToFormValue(s.header_row),
+    skip_rows: s.skip_rows !== undefined ? String(s.skip_rows) : '',
     // CSV/TSV advanced
     null_value: mapNullValueToForm(s.null_value),
     encoding: s.encoding ?? '',
@@ -91,6 +92,7 @@ const settingsToFlyoutFormValues = (
     escape: s.escape ?? '',
     comment: s.comment ?? '',
     column_prefix: s.column_prefix ?? '',
+    trim_spaces: boolToFormValue(s.trim_spaces),
     datetime_format: s.datetime_format ?? '',
     multi_value_syntax: (s.multi_value_syntax ?? '') as DatasetMultiValueSyntaxFormValue,
     max_field_size: s.max_field_size !== undefined ? String(s.max_field_size) : '',
@@ -98,6 +100,7 @@ const settingsToFlyoutFormValues = (
     error_mode: (s.error_mode ?? '') as DatasetErrorModeFormValue,
     max_errors: s.max_errors !== undefined ? String(s.max_errors) : '',
     max_error_ratio: s.max_error_ratio !== undefined ? String(s.max_error_ratio) : '',
+    file_exclusions: s.file_exclusions?.join('\n') ?? '',
     segment_size: s.segment_size ?? '',
     optimized_reader: boolToFormValue(s.optimized_reader),
     late_materialization: boolToFormValue(s.late_materialization),
