@@ -12,15 +12,20 @@ responses:
                 Query with ES|QL against: ai-index-ds-customer-support
 
                 Fields
+                @timestamp: date, searchable, aggregatable
                 content: text, searchable
                 content.semantic: semantic_text, searchable
                 description: text, searchable
+                description.semantic: semantic_text, searchable
                 tags: keyword, searchable, aggregatable
                 title: text, searchable
+                title.semantic: semantic_text, searchable
                 type: keyword, searchable, aggregatable
 
                 Semantic fields
                 content.semantic
+                description.semantic
+                title.semantic
 
                 Knowledge item types
                 "faq": 12
@@ -72,7 +77,7 @@ responses:
             value:
               statusCode: 403
               error: Forbidden
-              message: "security_exception\n\tRoot causes:\n\t\tsecurity_exception: action [indices:data/read/field_caps] is unauthorized for user [jdoe] with effective roles [viewer] on indices [ai-index-ds-customer-support], this action is granted by the index privileges [read,view_index_metadata,manage,all]"
+              message: "security_exception\n\tRoot causes:\n\t\tsecurity_exception: action [indices:admin/mappings/get] is unauthorized for user [jdoe] with effective roles [support_reader] on indices [ai-index-ds-customer-support], this action is granted by the index privileges [view_index_metadata,manage,all]"
   404:
     content:
       application/json:

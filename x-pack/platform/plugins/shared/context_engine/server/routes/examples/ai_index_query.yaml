@@ -30,11 +30,11 @@ responses:
       application/json:
         examples:
           invalidQueryExample:
-            description: "The ES|QL query could not be parsed"
+            description: "The ES|QL query references a column that does not exist"
             value:
               statusCode: 400
               error: Bad Request
-              message: "parsing_exception\n\tRoot causes:\n\t\tparsing_exception: line 1:1: mismatched input 'SELECT' expecting {'explain', 'from', 'row', 'show'}"
+              message: "verification_exception\n\tRoot causes:\n\t\tverification_exception: Found 1 problem\nline 1:46: Unknown column [titel], did you mean [title]?"
   403:
     content:
       application/json:
@@ -44,7 +44,7 @@ responses:
             value:
               statusCode: 403
               error: Forbidden
-              message: "security_exception\n\tRoot causes:\n\t\tsecurity_exception: action [indices:data/read/esql] is unauthorized for user [jdoe] with effective roles [viewer] on indices [ai-index-ds-customer-support], this action is granted by the index privileges [read,all]"
+              message: "security_exception\n\tRoot causes:\n\t\tsecurity_exception: action [indices:data/read/esql] is unauthorized for user [jdoe] with effective roles [support_reader], this action is granted by the index privileges [read_cross_cluster,read,all]"
 x-codeSamples:
   - lang: curl
     source: |
