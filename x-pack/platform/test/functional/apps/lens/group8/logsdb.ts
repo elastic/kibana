@@ -368,8 +368,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
               // go back to Lens to not break the wrapping function
               await common.navigateToApp('lens');
-              // restore the logsdb data view so the afterEach removeLayer cleanup works
               await lens.switchDataPanelIndexPattern(logsdbDataView);
+              // configure a dimension so the afterEach removeLayer cleanup works reliably
+              await lens.configureDimension({
+                dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+                operation: 'date_histogram',
+                field: '@timestamp',
+              });
             });
           });
         });
