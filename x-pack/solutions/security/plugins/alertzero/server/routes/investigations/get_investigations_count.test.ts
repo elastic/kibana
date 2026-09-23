@@ -23,10 +23,11 @@ const makeDeps = (listFn: jest.Mock) => {
   const conversations = {
     getScopedClient: jest.fn().mockResolvedValue(scopedClient),
   };
+  const logger = loggingSystemMock.createLogger();
 
   registerGetInvestigationsCountRoute({
     router: router as unknown as RouteDependencies['router'],
-    logger: loggingSystemMock.createLogger(),
+    logger,
     getAgentBuilderConversations: () => conversations,
   } as unknown as RouteDependencies);
 
@@ -37,7 +38,7 @@ const makeDeps = (listFn: jest.Mock) => {
     response: ReturnType<typeof httpServerMock.createResponseFactory>
   ) => Promise<unknown>;
 
-  return { handler, routeConfig, conversations, scopedClient };
+  return { handler, routeConfig, conversations, scopedClient, logger };
 };
 
 describe('registerGetInvestigationsCountRoute', () => {
@@ -68,16 +69,17 @@ describe('registerGetInvestigationsCountRoute', () => {
     expect(response.ok).toHaveBeenCalledWith({ body: { total: 7 } });
   });
 
-  it('returns 500 when the client throws', async () => {
+  it('logs the error and returns a generic 500 when the client throws', async () => {
     const list = jest.fn().mockRejectedValue(new Error('ES unavailable'));
-    const { handler } = makeDeps(list);
+    const { handler, logger } = makeDeps(list);
     const response = httpServerMock.createResponseFactory();
 
     await handler({}, httpServerMock.createKibanaRequest(), response);
 
+    expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('Failed to count'));
     expect(response.customError).toHaveBeenCalledWith({
       statusCode: 500,
-      body: { message: 'ES unavailable' },
+      body: { message: 'Failed to count investigations' },
     });
   });
 });

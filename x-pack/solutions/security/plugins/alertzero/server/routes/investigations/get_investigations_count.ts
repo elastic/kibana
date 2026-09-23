@@ -16,6 +16,7 @@ import type { RouteDependencies } from '../register_routes';
 
 export const registerGetInvestigationsCountRoute = ({
   router,
+  logger,
   getAgentBuilderConversations,
 }: RouteDependencies) => {
   router.versioned
@@ -43,9 +44,10 @@ export const registerGetInvestigationsCountRoute = ({
           });
           return response.ok({ body: { total } });
         } catch (err) {
+          logger.error(`Failed to count investigations: ${err}`);
           return response.customError({
             statusCode: 500,
-            body: { message: err instanceof Error ? err.message : String(err) },
+            body: { message: 'Failed to count investigations' },
           });
         }
       }
