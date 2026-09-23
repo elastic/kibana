@@ -226,6 +226,10 @@ steps:
               esql: "${{ steps.summarize_document.output.content.access_patterns | map: 'esql_example' }}"
               source_doc_id: "{{ steps.document_context.output.doc_id }}"
               topics: "${{ steps.summarize_document.output.content.topics }}"
+            references:
+              - uri: "index://{{ consts.source_index }}"
+                relation: derived_from
+                description: "Document {{ steps.document_context.output.doc_id }} in {{ consts.source_index }}"
 
       - name: verify_ki
         type: context-engine.verifyKi

@@ -6,7 +6,7 @@
  */
 
 import { isAllowedBuiltinSkill } from '@kbn/agent-builder-server/allow_lists';
-import { contextEngineAiIndexTools, platformCoreTools } from '@kbn/agent-builder-common/tools';
+import { contextEngineAiIndexTools } from '@kbn/agent-builder-common/tools';
 import { kiRetrievalSkill } from './ki_retrieval_skill';
 
 describe('kiRetrievalSkill', () => {
@@ -52,7 +52,7 @@ describe('kiRetrievalSkill', () => {
 
     expect(toolIds).toEqual([
       contextEngineAiIndexTools.queryAiIndices,
-      platformCoreTools.listIndices,
+      contextEngineAiIndexTools.listAiIndices,
     ]);
   });
 });

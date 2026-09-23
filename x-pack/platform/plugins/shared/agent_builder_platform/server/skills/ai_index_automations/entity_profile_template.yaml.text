@@ -236,6 +236,10 @@ steps:
               esql: "${{ steps.profile_entity.output.content.access_patterns | map: 'esql_example' }}"
               doc_count: "${{ steps.entity_metrics.output.doc_count }}"
               distinct_breakdown: "${{ steps.entity_metrics.output.distinct_breakdown }}"
+            references:
+              - uri: "index://{{ consts.source_index }}"
+                relation: derived_from
+                description: "Records where {{ consts.entity_field }} is {{ steps.entity_context.output.entity }}"
 
       - name: verify_ki
         type: context-engine.verifyKi

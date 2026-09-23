@@ -13,8 +13,10 @@ Each AI index is queried through an ES|QL view named `v-ai-index-<id>`. The view
 current, active, unexpired KIs of that AI index and drops its governance fields, so lifecycle
 handling never belongs in your query. `v-ai-index-*` reaches every AI index you can read.
 
-The AI INDICES section of your instructions lists the views available to this agent. Views are
-not indices, so `platform.core.list_indices` does not show them.
+The AI INDICES section of your instructions lists the views available to this agent. When that
+section is absent, `platform.context_engine.list_ai_indices` returns the AI indices you can read
+in this space, each with its view as `esql_target`. Views are not indices, so
+`platform.core.list_indices` does not show them.
 
 A view already exposes `_id`, `_index` and `_score`. Never add `METADATA` to a query against a
 view: the directive only works inside the view definition and fails outside it.
@@ -190,7 +192,7 @@ Replace `type == "index_metadata"` with any combination of `type` or `tags` filt
 ## Suggested retrieval flow
 
 1. **Discover** — read the AI INDICES section of your instructions for the views available to
-   this agent.
+   this agent, or call `platform.context_engine.list_ai_indices` when there is none.
 2. **Orient** — run a `STATS ki_count = COUNT(*) BY type` aggregation to see what categories
    of KIs are available. You may want to sample a few KIs — potentially per type if type names
    are ambiguous (`WHERE type == "..." | LIMIT 2`) — before running your full query. Remember

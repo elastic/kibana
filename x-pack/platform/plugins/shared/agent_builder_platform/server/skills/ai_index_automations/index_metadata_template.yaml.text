@@ -246,6 +246,10 @@ steps:
           esql: "${{ steps.generate_index_profile.output.content.access_patterns | map: 'esql_example' }}"
           key_fields: "{{ steps.generate_index_profile.output.content.key_fields | json }}"
           when_to_use: "{{ steps.generate_index_profile.output.content.when_to_use }}"
+        references:
+          - uri: "index://{{ consts.source_index }}"
+            relation: derived_from
+            description: "The index this profile describes"
 
   - name: verify_ki
     type: context-engine.verifyKi
