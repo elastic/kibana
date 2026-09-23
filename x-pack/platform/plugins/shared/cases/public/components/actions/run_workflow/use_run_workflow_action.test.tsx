@@ -192,6 +192,5 @@ describe('useRunWorkflowAction', () => {
       expect(typeof modalProps.filterWorkflow).toBe('function');
       expect(typeof modalProps.sortWorkflow).toBe('function');
     });
-
   });
 });
