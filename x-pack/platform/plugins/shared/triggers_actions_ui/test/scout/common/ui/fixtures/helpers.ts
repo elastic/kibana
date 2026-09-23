@@ -100,7 +100,6 @@ export const searchRulesList = async (page: ScoutPage, searchText: string) => {
 
 export const openRulesListAndSearch = async (page: ScoutPage, searchText: string) => {
   await page.gotoApp('rules');
-  await page.testSubj.click('rulesTab');
   await expect(page.testSubj.locator('rulesList')).toBeVisible();
   const clearFilters = page.testSubj.locator('rules-list-clear-filter');
   if (await clearFilters.isVisible()) {

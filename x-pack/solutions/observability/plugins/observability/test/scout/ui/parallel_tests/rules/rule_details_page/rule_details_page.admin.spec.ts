@@ -47,7 +47,7 @@ test.describe(
     }) => {
       // Navigate to rules page
       await pageObjects.rulesPage.goto();
-      await expect(pageObjects.rulesPage.pageTitle).toBeVisible();
+      await expect(pageObjects.rulesPage.rulesTableContainer).toBeVisible();
 
       // Click on the rule in the table
       const rulesTable = pageObjects.rulesPage.rulesTable;

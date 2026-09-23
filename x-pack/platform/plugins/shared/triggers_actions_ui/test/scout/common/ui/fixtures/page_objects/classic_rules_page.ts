@@ -7,6 +7,7 @@
 
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { triggersActionsRoute } from '@kbn/rule-data-utils';
+import { AppMenu } from '@kbn/scout';
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout';
 
 export const CLASSIC_RULES_LIST_URL_RE = new RegExp(`${triggersActionsRoute}/?(?:\\?|#|$)`);
@@ -83,7 +84,6 @@ export class ClassicRulesPage {
 
   async openListAndSearch(kbnUrl: KibanaUrl, ruleName: string): Promise<void> {
     await this.goto(kbnUrl);
-    await this.rulesTab.click();
     await this.rulesList.waitFor({ state: 'visible' });
     const clearFilters = this.page.testSubj.locator('rules-list-clear-filter');
     if (await clearFilters.isVisible()) {
@@ -131,8 +131,13 @@ export class ClassicRulesPage {
     await this.cancelButton.click();
   }
 
+  /**
+   * Navigates to Logs via the app menu's "Logs" item. The classic Logs tab
+   * only renders when alerting v2 isn't loaded; with it loaded, Logs moves
+   * into the overflow menu.
+   */
   async clickLogsTab(): Promise<void> {
-    await this.logsTab.click();
+    await new AppMenu(this.page).clickItem('rulesLogsLink');
     await this.page.waitForURL(CLASSIC_RULES_LOGS_URL_RE);
   }
 

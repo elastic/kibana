@@ -19,7 +19,7 @@ test.describe(
       // Navigate to the rules list page
       await pageObjects.rulesPage.goto();
       // Verify we're on the rules page
-      await expect(pageObjects.rulesPage.pageTitle).toBeVisible();
+      await expect(pageObjects.rulesPage.rulesTableContainer).toBeVisible();
     });
 
     test('should navigate to logs tab and display event log table', async ({ pageObjects }) => {
