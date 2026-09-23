@@ -185,6 +185,53 @@ describe('parseMatrixConfig', () => {
     ).toThrow();
   });
 
+  it('throws when a composite references an unknown source', () => {
+    expect(() =>
+      parseMatrixConfig({
+        ...minimalConfig,
+        composites: [{ id: 'ab', label: 'AB', from: ['nope'] }],
+      })
+    ).toThrow(/references unknown or not-yet-defined source \"nope\"/);
+  });
+
+  it('throws when a composite forward-references a later composite', () => {
+    // `computeComposite` fills `cells` in declaration order, so a later id is not resolvable.
+    expect(() =>
+      parseMatrixConfig({
+        ...minimalConfig,
+        composites: [
+          { id: 'first', label: 'First', from: ['second'] },
+          { id: 'second', label: 'Second', from: ['alert_triage'] },
+        ],
+      })
+    ).toThrow(/references unknown or not-yet-defined source \"second\"/);
+  });
+
+  it('throws when a model id is reused as another model matchId alias', () => {
+    // Model identity spans `id` and `matchIds`; a shared identifier merges two rows' scores.
+    expect(() =>
+      parseMatrixConfig({
+        ...minimalConfig,
+        models: [
+          { id: 'eis/foo', label: 'Foo' },
+          { id: 'eis/bar', label: 'Bar', matchIds: ['eis/foo'] },
+        ],
+      })
+    ).toThrow(/is used by more than one model row/);
+  });
+
+  it('throws when two models share a matchId alias', () => {
+    expect(() =>
+      parseMatrixConfig({
+        ...minimalConfig,
+        models: [
+          { id: 'eis/foo', label: 'Foo', matchIds: ['alias'] },
+          { id: 'eis/bar', label: 'Bar', matchIds: ['alias'] },
+        ],
+      })
+    ).toThrow(/is used by more than one model row/);
+  });
+
   it('allows overriding the evaluator exclusion list (including emptying it)', () => {
     expect(
       parseMatrixConfig({ ...minimalConfig, excludeEvaluators: [] }).excludeEvaluators

@@ -121,6 +121,34 @@ describe('matrixScoreQuery', () => {
 
     expect(options.branchBySuite).toEqual({ shared: 'same-branch' });
   });
+  it('rejects a conflict when a column omits `branch` and the other overrides it', () => {
+    // Regression: a column without `branch` used to be skipped entirely, so its implicit
+    // global-branch read never conflicted with a sibling column's explicit override.
+    expect(() =>
+      matrixScoreQuery(
+        parseMatrixConfig({
+          columns: [
+            { id: 'a', label: 'A', suites: ['shared'] },
+            { id: 'b', label: 'B', suites: ['shared'], branch: 'branch-two' },
+          ],
+          models: [{ id: 'model-a', label: 'Model A' }],
+        }),
+        { suiteIds: ['shared'], modelIds: ['model-a'], branch: 'main', asOf: undefined }
+      )
+    ).toThrow(/Conflicting branch overrides for suite \"shared\"/);
+  });
+
+  it('maps a column without `branch` onto the global branch', () => {
+    const options = matrixScoreQuery(
+      parseMatrixConfig({
+        columns: [{ id: 'triage', label: 'Triage', suites: ['suite-a'] }],
+        models: [{ id: 'model-a', label: 'Model A' }],
+      }),
+      { suiteIds: ['suite-a'], modelIds: ['model-a'], branch: 'main', asOf: undefined }
+    );
+
+    expect(options.branchBySuite).toEqual({ 'suite-a': 'main' });
+  });
 });
 
 describe('matrix command empty-result guard', () => {

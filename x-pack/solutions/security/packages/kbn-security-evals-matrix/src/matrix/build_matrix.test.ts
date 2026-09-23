@@ -362,6 +362,73 @@ describe('buildMatrix', () => {
       expect(row.cells.overall_score).toEqual({ kind: 'score', value: 9 });
     });
 
+    it('withholds a composite when base coverage is below minCoverage', () => {
+      // Regression: `overall` was gated by minCoverage but the composite was not, so a
+      // composite (which ranking prefers over Overall once composites are configured)
+      // could still publish and rank a row that Overall itself refused to score.
+      const gated: MatrixConfig = { ...compositeConfig, minCoverage: 2 };
+      const matrix = buildMatrix(
+        // Only one of the three base columns scored.
+        [{ modelId: 'm1', suites: [suite('s1', 0.8)] }],
+        gated
+      );
+      const row = matrix.proprietary[0];
+
+      expect(row.cells.group_score).toEqual({
+        kind: 'insufficient-coverage',
+        covered: 1,
+        required: 2,
+      });
+      expect(row.cells.overall_score).toEqual({
+        kind: 'insufficient-coverage',
+        covered: 1,
+        required: 2,
+      });
+    });
+
+    it('publishes the composite when base coverage meets minCoverage', () => {
+      const gated: MatrixConfig = { ...compositeConfig, minCoverage: 2 };
+      const matrix = buildMatrix(
+        [{ modelId: 'm1', suites: [suite('s1', 0.8), suite('s2', 0.6)] }],
+        gated
+      );
+
+      expect(matrix.proprietary[0].cells.group_score).toEqual({ kind: 'score', value: 7 });
+    });
+
+    it('assigns tiers from the composite, not the Overall cell', () => {
+      // Regression: tiers were derived from `overall.value` while rows were sorted by the
+      // composite, so a row's tier could disagree with its rank position.
+      const tiered: MatrixConfig = parseMatrixConfig({
+        overall: { runStdev: 0.01, mode: 'weighted' },
+        columns: [
+          { id: 'c1', label: 'C1', suites: ['s1'], weight: 3 },
+          { id: 'c2', label: 'C2', suites: ['s2'], weight: 1 },
+        ],
+        composites: [{ id: 'group_score', label: 'Group', from: ['c1', 'c2'] }],
+        models: [
+          { id: 'model-a', label: 'A' },
+          { id: 'model-b', label: 'B' },
+        ],
+      });
+
+      const matrix = buildMatrix(
+        [
+          // A: composite 6, weighted Overall 8.
+          { modelId: 'model-a', provider: 'p', suites: [suite('s1', 1.0), suite('s2', 0.2)] },
+          // B: composite 8, weighted Overall 7.
+          { modelId: 'model-b', provider: 'p', suites: [suite('s1', 0.6), suite('s2', 1.0)] },
+        ],
+        tiered
+      );
+
+      const tiers = Object.fromEntries(matrix.proprietary.map((r) => [r.modelId, r.tier]));
+      // Ranking puts B first (composite 8 > 6); the composite drop is what must split tiers.
+      expect(matrix.proprietary[0].modelId).toBe('model-b');
+      expect(tiers['model-b']).toBe(1);
+      expect(tiers['model-a']).toBeGreaterThan(1);
+    });
+
     it('builds display columns in layout order and suppresses the legacy overall', () => {
       const matrix = buildMatrix(
         [{ modelId: 'm1', suites: [suite('s1', 0.8), suite('s2', 0.6)] }],

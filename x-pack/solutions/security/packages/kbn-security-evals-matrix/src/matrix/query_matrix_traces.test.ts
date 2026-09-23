@@ -15,6 +15,7 @@ import {
   queryMatrixTraces,
 } from './query_matrix_traces';
 import type { MatrixTraceData } from './trace_types';
+import type { JudgeVerdict } from './judge_agreement';
 
 const doc = (evaluatorName: string | undefined, score: number | null): EvaluationScoreDocument =>
   ({
@@ -180,6 +181,85 @@ describe('queryMatrixTraces example fetching', () => {
     expect(log.warning).toHaveBeenCalledWith(
       expect.stringContaining('Example-scores route ignores execution filters')
     );
+  });
+
+  it('counts an example resolved via a complete fallback as present, not missing', async () => {
+    // Newest doc has a score but no `task.output` (incomplete); an older complete doc exists.
+    const incomplete = {
+      example: { id: 'example-1' },
+      evaluator: { name: 'Correctness', score: 1 },
+      metadata: { execution_id: 'exec-a' },
+      task: { model: { id: 'model-x' }, repetition_index: 0 },
+    } as unknown as EvaluationScoreDocument;
+
+    const client = {
+      getExperimentScores: jest.fn(
+        async () => [{ example: { id: 'example-1' } }] as EvaluationScoreDocument[]
+      ),
+      getExampleScores: jest.fn(async () => [incomplete, completeDoc('exec-a')]),
+    };
+    const log = { debug: jest.fn(), warning: jest.fn() };
+
+    const traces = await queryMatrixTraces(
+      client as never,
+      log as never,
+      aggregatedFor('exec-a') as never
+    );
+
+    // Regression: this used to return `complete === false`, so the caller reported the
+    // example as missing even though a complete fallback trace had been installed.
+    expect(log.warning).not.toHaveBeenCalledWith(
+      expect.stringContaining('No complete score documents found')
+    );
+    expect(log.warning).not.toHaveBeenCalledWith(
+      expect.stringContaining('Trace coverage incomplete')
+    );
+    expect(traces['model-x:example-1']).toBeDefined();
+  });
+
+  it('collects judge verdicts from the raw score documents it reads', async () => {
+    const judged = {
+      example: { id: 'example-1' },
+      evaluator: { name: 'Correctness', score: 0.7, model: { id: 'judge-x' } },
+      metadata: { execution_id: 'exec-a' },
+      task: {
+        model: { id: 'model-x' },
+        output: { messages: [{ message: 'done' }] },
+        repetition_index: 0,
+      },
+    } as unknown as EvaluationScoreDocument;
+
+    const client = {
+      getExperimentScores: jest.fn(
+        async () => [{ example: { id: 'example-1' } }] as EvaluationScoreDocument[]
+      ),
+      getExampleScores: jest.fn(async () => [judged]),
+    };
+    const log = { debug: jest.fn(), warning: jest.fn() };
+    const judgeVerdicts: JudgeVerdict[] = [];
+
+    await queryMatrixTraces(
+      client as never,
+      log as never,
+      aggregatedFor('exec-a') as never,
+      undefined,
+      0,
+      new Map(),
+      judgeVerdicts
+    );
+
+    // The CLI passes this array into renderReliabilityHtml; empty here would silently drop
+    // the judge-agreement section from the reliability report.
+    expect(judgeVerdicts).toEqual([
+      {
+        modelId: 'model-x',
+        judgeId: 'judge-x',
+        example: 'example-1',
+        repetition: 0,
+        evaluator: 'Correctness',
+        score: 0.7,
+      },
+    ]);
   });
 
   it('reports runaway tool loops above the configured threshold', async () => {
