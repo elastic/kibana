@@ -139,7 +139,12 @@ export const ChartSectionTemplate = ({
 
           {(rightSide.length > 0 || toolbar?.additionalControls?.prependRight) && (
             <EuiFlexItem grow={false} data-toolbar-section="right">
-              <EuiFlexGroup direction="row" gutterSize="none" responsive={false}>
+              <EuiFlexGroup
+                direction="row"
+                gutterSize="none"
+                responsive={false}
+                alignItems="center"
+              >
                 {toolbar?.additionalControls?.prependRight && (
                   <EuiFlexItem grow={false}>{toolbar.additionalControls.prependRight}</EuiFlexItem>
                 )}

@@ -109,8 +109,7 @@ describe.each([
     expect(params.internalResumeWorkflowExecution).toHaveBeenCalledWith(
       'parent',
       'default',
-      undefined,
-      params.fakeRequest
+      undefined
     );
     expect(drainConcurrencyQueueSlots).toHaveBeenCalledWith(
       expect.objectContaining({ concurrencyGroupKey: 'group' })
@@ -146,7 +145,7 @@ describe.each([
       parentResumes: params.internalResumeWorkflowExecution.mock.calls,
       queueDrains: jest.mocked(drainConcurrencyQueueSlots).mock.calls,
     }).toEqual({
-      parentResumes: [['parent', 'default', undefined, params.fakeRequest]],
+      parentResumes: [['parent', 'default', undefined]],
       queueDrains: [[expect.objectContaining({ concurrencyGroupKey: 'group' })]],
     });
   });

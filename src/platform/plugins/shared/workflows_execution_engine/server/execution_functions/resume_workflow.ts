@@ -18,7 +18,6 @@ import type { WorkflowsMeteringService } from '../metering';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import {
-  getWorkflowOriginalRequest,
   withWorkflowExecutionIdentity,
 } from '../service_account_execution';
 import type {
@@ -172,8 +171,8 @@ async function resumeWorkflowWithRequest({
     workflowRunId,
     spaceId,
     logger,
-    fakeRequest: getWorkflowOriginalRequest(fakeRequest),
     workflowExecutionRepository,
+    stepExecutionRepository,
     internalResumeWorkflowExecution,
     workflowTaskManager,
     meteringService,
@@ -196,7 +195,6 @@ export const resumeWorkflow = async (
   if (isTerminalStatus(execution.status)) {
     await handlePostExecutionLoop({
       ...params,
-      fakeRequest: getWorkflowOriginalRequest(params.fakeRequest),
       workflowTaskManager: new WorkflowTaskManager(params.dependencies.taskManager),
       cloudSetup: params.dependencies.cloudSetup,
     });
@@ -229,8 +227,7 @@ export const resumeWorkflow = async (
       });
       await handlePostExecutionLoop({
         ...params,
-        fakeRequest: getWorkflowOriginalRequest(params.fakeRequest),
-        workflowTaskManager: new WorkflowTaskManager(params.dependencies.taskManager),
+          workflowTaskManager: new WorkflowTaskManager(params.dependencies.taskManager),
         cloudSetup: params.dependencies.cloudSetup,
       });
     }

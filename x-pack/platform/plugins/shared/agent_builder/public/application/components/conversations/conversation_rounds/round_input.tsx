@@ -24,7 +24,7 @@ import type {
 } from '@kbn/agent-builder-common/attachments';
 import { AttachmentType, ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { useRoundInputAuthor } from '../../../hooks/use_round_input_author';
-import { RoundResponseActions } from './round_response/round_response_actions';
+import { ResponseActions } from './round_response/response_actions';
 import { RoundAttachmentReferences } from './round_attachment_references';
 import { RoundInputText } from './round_input_text';
 import { RoundInputAvatar } from './round_input_avatar';
@@ -138,7 +138,7 @@ export const RoundInput = ({
             excludeTypes={EXCLUDE_IMAGE_TYPES}
           />
           <EuiFlexItem grow={false}>
-            <RoundResponseActions content={input} isVisible={isHovering} copyTarget="prompt" />
+            <ResponseActions content={input} isVisible={isHovering} copyTarget="prompt" />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
