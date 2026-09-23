@@ -378,6 +378,12 @@ describe('getInitialESQLQuery', () => {
     expect(getInitialESQLQuery(dataView)).toBe('TS *:metrics-* | SORT @timestamp DESC');
   });
 
+  it('should still use TS command for a targeted index with a selector in TSDB mode', () => {
+    const dataView = getDataView('logs-*::data', getTSDBFields(), '@timestamp');
+
+    expect(getInitialESQLQuery(dataView)).toBe('TS logs-*::data | SORT @timestamp DESC');
+  });
+
   it('should use FROM command when the index pattern is * even in TSDB mode', () => {
     const dataView = getDataView('*', getTSDBFields(), '@timestamp');
 
@@ -388,6 +394,23 @@ describe('getInitialESQLQuery', () => {
     const dataView = getDataView('logs-*, * ,metrics-*', getTSDBFields(), '@timestamp');
 
     expect(getInitialESQLQuery(dataView)).toBe('FROM logs-*, * ,metrics-* | SORT @timestamp DESC');
+  });
+
+  it.each(['remote_cluster:*', 'my-remote:*', 'remote_cluster:*::failures'])(
+    'should use FROM command when %s matches every index of a remote cluster even in TSDB mode',
+    (indexPattern) => {
+      const dataView = getDataView(indexPattern, getTSDBFields(), '@timestamp');
+
+      expect(getInitialESQLQuery(dataView)).toBe(`FROM ${indexPattern} | SORT @timestamp DESC`);
+    }
+  );
+
+  it('should use FROM command when a remote cluster wildcard is one of several index patterns', () => {
+    const dataView = getDataView('remote_cluster:*,metrics-*', getTSDBFields(), '@timestamp');
+
+    expect(getInitialESQLQuery(dataView)).toBe(
+      'FROM remote_cluster:*,metrics-* | SORT @timestamp DESC'
+    );
   });
 
   it('should use FROM command in TSDB mode when filters are given', () => {
@@ -435,11 +458,31 @@ describe('getInitialESQLQuery', () => {
 
   describe('source command per data view shape', () => {
     // All patterns are targeted, so only the TSDB fields and the filters decide the source command.
-    const shapes = [
-      ['no TSDB indices', 'logs-a*,logs-b*', getClassicFields, 'FROM'],
-      ['a single TSDB index', 'metrics-apm.internal-default', getTSDBFields, 'TS'],
-      ['several TSDB indices', 'metrics-a*,metrics-b*', getTSDBFields, 'TS'],
-      ['a mix of TSDB and classic indices', 'traces-apm*,metrics-apm*', getMixedTSDBFields, 'TS'],
+    const dataViewCases = [
+      {
+        description: 'no TSDB indices',
+        indexPattern: 'logs-a*,logs-b*',
+        getFields: getClassicFields,
+        expectedCommand: 'FROM',
+      },
+      {
+        description: 'a single TSDB index',
+        indexPattern: 'metrics-apm.internal-default',
+        getFields: getTSDBFields,
+        expectedCommand: 'TS',
+      },
+      {
+        description: 'several TSDB indices',
+        indexPattern: 'metrics-a*,metrics-b*',
+        getFields: getTSDBFields,
+        expectedCommand: 'TS',
+      },
+      {
+        description: 'a mix of TSDB and classic indices',
+        indexPattern: 'traces-apm*,metrics-apm*',
+        getFields: getMixedTSDBFields,
+        expectedCommand: 'TS',
+      },
     ] as const;
 
     const filters: Filter[] = [
@@ -449,9 +492,9 @@ describe('getInitialESQLQuery', () => {
       },
     ];
 
-    it.each(shapes)(
-      'should use the expected command for a data view with %s and no filters',
-      (_shape, indexPattern, getFields, expectedCommand) => {
+    it.each(dataViewCases)(
+      'should use the expected command for a data view with $description and no filters',
+      ({ indexPattern, getFields, expectedCommand }) => {
         const dataView = getDataView(indexPattern, getFields(), '@timestamp');
 
         expect(getInitialESQLQuery(dataView)).toBe(
@@ -460,9 +503,9 @@ describe('getInitialESQLQuery', () => {
       }
     );
 
-    it.each(shapes)(
-      'should use FROM command for a data view with %s and filters',
-      (_shape, indexPattern, getFields) => {
+    it.each(dataViewCases)(
+      'should use FROM command for a data view with $description and filters',
+      ({ indexPattern, getFields }) => {
         const dataView = getDataView(indexPattern, getFields(), '@timestamp');
 
         expect(getInitialESQLQuery(dataView, undefined, filters)).toBe(

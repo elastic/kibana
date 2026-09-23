@@ -25,12 +25,7 @@ import {
 } from '../../../../../../common/constants';
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { buildDataTableRecord } from '@kbn/discover-utils';
-import {
-  buildDataViewMock,
-  dataViewMockWithTimeField,
-  esHitsMock,
-} from '@kbn/discover-utils/src/__mocks__';
-import { fieldList } from '@kbn/data-views-plugin/common';
+import { dataViewMockWithTimeField, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import { mockControlState } from '../../../../../__mocks__/esql_controls';
@@ -966,91 +961,6 @@ describe('tab_state actions', () => {
       expect(storageSetSpy).toHaveBeenCalledWith(DISCOVER_QUERY_MODE_KEY, {
         currentMode: 'esql',
         defaultMode: 'classic',
-      });
-    });
-
-    // Mixed APM-style data view: `system.cpu.usage` makes it TSDB, while `transaction.type` only
-    // exists on the classic trace indices.
-    const tsdbDataViewId = 'apm-data-view-id';
-    const buildTsdbDataView = () =>
-      buildDataViewMock({
-        id: tsdbDataViewId,
-        name: 'apm',
-        title: 'traces-apm*,metrics-apm*',
-        fields: fieldList([
-          {
-            name: '@timestamp',
-            type: 'date',
-            scripted: false,
-            searchable: true,
-            aggregatable: true,
-          },
-          {
-            name: 'system.cpu.usage',
-            type: 'number',
-            timeSeriesMetric: 'gauge',
-            scripted: false,
-            searchable: true,
-            aggregatable: true,
-          },
-          {
-            name: 'transaction.type',
-            type: 'string',
-            scripted: false,
-            searchable: true,
-            aggregatable: true,
-          },
-        ]),
-        timeFieldName: '@timestamp',
-      });
-
-    it('should use the FROM command for a TSDB data view when filters are present', async () => {
-      const { internalState, tabId, getCurrentTab } = await setup();
-      const dataView = buildTsdbDataView();
-
-      internalState.dispatch(
-        internalStateActions.setAppState({
-          tabId,
-          appState: {
-            filters: [
-              {
-                meta: { key: 'transaction.type' },
-                query: { match_phrase: { 'transaction.type': 'request' } },
-              },
-            ],
-            dataSource: { type: DataSourceType.DataView, dataViewId: tsdbDataViewId },
-          },
-        })
-      );
-
-      internalState.dispatch(
-        internalStateActions.transitionFromDataViewToESQL({ tabId, dataView })
-      );
-
-      expect(getCurrentTab().appState.query).toStrictEqual({
-        esql: 'FROM traces-apm*,metrics-apm* | SORT @timestamp DESC | WHERE `transaction.type` : "request"',
-      });
-    });
-
-    it('should keep the TS command for a TSDB data view when there are no filters', async () => {
-      const { internalState, tabId, getCurrentTab } = await setup();
-      const dataView = buildTsdbDataView();
-
-      internalState.dispatch(
-        internalStateActions.setAppState({
-          tabId,
-          appState: {
-            dataSource: { type: DataSourceType.DataView, dataViewId: tsdbDataViewId },
-          },
-        })
-      );
-
-      internalState.dispatch(
-        internalStateActions.transitionFromDataViewToESQL({ tabId, dataView })
-      );
-
-      expect(getCurrentTab().appState.query).toStrictEqual({
-        esql: 'TS traces-apm*,metrics-apm* | SORT @timestamp DESC',
       });
     });
   });
