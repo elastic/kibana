@@ -334,29 +334,38 @@ async function injectDynamicConnectorIcons(
 
   const suggestPrefix = '.monaco-editor .suggest-widget .monaco-list .monaco-list-row';
 
-  for (const connector of Object.values(connectorTypes)) {
+  // Resolved up front and concurrently: the whole stylesheet is injected in one write, so a
+  // sequential pass would withhold every rule behind the slowest icon in the catalog.
+  const resolvedIcons = await Promise.all(
+    Object.values(connectorTypes).map(async (connector) => {
+      const isTrigger = 'isTrigger' in connector && connector.isTrigger;
+
+      let iconBase64: string | undefined;
+      try {
+        iconBase64 = await getIconBase64({
+          ...connector,
+          kind: isTrigger ? 'trigger' : 'step',
+          colorMode,
+        });
+      } catch {
+        if (isTrigger) {
+          iconBase64 = getTriggerBoltFallbackDataUrl();
+        }
+      }
+      if (!iconBase64 && isTrigger) {
+        iconBase64 = getTriggerBoltFallbackDataUrl();
+      }
+      return { connector, iconBase64 };
+    })
+  );
+
+  for (const { connector, iconBase64 } of resolvedIcons) {
     const connectorType = connector.actionTypeId.startsWith('.')
       ? connector.actionTypeId.slice(1)
       : connector.actionTypeId;
 
     const displayName = connector.displayName;
 
-    let iconBase64: string | undefined;
-    const isTrigger = 'isTrigger' in connector && connector.isTrigger;
-    try {
-      iconBase64 = await getIconBase64({
-        ...connector,
-        kind: isTrigger ? 'trigger' : 'step',
-        colorMode,
-      });
-    } catch {
-      if (isTrigger) {
-        iconBase64 = getTriggerBoltFallbackDataUrl();
-      }
-    }
-    if (!iconBase64 && isTrigger) {
-      iconBase64 = getTriggerBoltFallbackDataUrl();
-    }
     if (iconBase64) {
       let selector = '';
       if (connectorType === 'elasticsearch') {
@@ -532,28 +541,41 @@ async function injectDynamicShadowIcons(
     url.startsWith('data:') &&
     url.includes('base64,');
 
-  for (const connector of connectorTypes) {
-    const isTriggerConnector = 'isTrigger' in connector && connector.isTrigger;
-    const isBuiltInTriggerId = TriggerTypes.includes(connector.actionTypeId as TriggerType);
+  // Resolved up front and concurrently: the whole stylesheet is injected in one write, so a
+  // sequential pass would withhold every rule behind the slowest icon in the catalog.
+  const resolvedIcons = await Promise.all(
+    connectorTypes.map(async (connector) => {
+      const isTriggerConnector = 'isTrigger' in connector && connector.isTrigger;
+      const isBuiltInTriggerId = TriggerTypes.includes(connector.actionTypeId as TriggerType);
 
-    let iconBase64: string | undefined;
-    try {
-      iconBase64 = await getIconBase64({
-        ...connector,
-        kind: isTriggerConnector ? 'trigger' : 'step',
-        colorMode,
-      });
-    } catch {
-      if (isTriggerConnector && boltUrl) {
-        iconBase64 = boltUrl;
-      } else if (isBuiltInTriggerId) {
-        iconBase64 =
-          HardcodedIconDataUrls[connector.actionTypeId] || boltUrl || FALLBACK_BOLT_DATA_URL;
+      let iconBase64: string | undefined;
+      try {
+        iconBase64 = await getIconBase64({
+          ...connector,
+          kind: isTriggerConnector ? 'trigger' : 'step',
+          colorMode,
+        });
+      } catch {
+        if (isTriggerConnector && boltUrl) {
+          iconBase64 = boltUrl;
+        } else if (isBuiltInTriggerId) {
+          iconBase64 =
+            HardcodedIconDataUrls[connector.actionTypeId] || boltUrl || FALLBACK_BOLT_DATA_URL;
+        }
       }
-    }
-    if (isTriggerConnector && iconBase64 !== undefined && !isValidDataUrl(iconBase64) && boltUrl) {
-      iconBase64 = boltUrl;
-    }
+      if (
+        isTriggerConnector &&
+        iconBase64 !== undefined &&
+        !isValidDataUrl(iconBase64) &&
+        boltUrl
+      ) {
+        iconBase64 = boltUrl;
+      }
+      return { connector, isTriggerConnector, iconBase64 };
+    })
+  );
+
+  for (const { connector, isTriggerConnector, iconBase64 } of resolvedIcons) {
     if (iconBase64 !== undefined) {
       const connectorType = connector.actionTypeId.startsWith('.')
         ? connector.actionTypeId.slice(1)
