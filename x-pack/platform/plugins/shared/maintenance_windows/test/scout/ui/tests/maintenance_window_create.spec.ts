@@ -41,6 +41,8 @@ const FREQUENCY_SELECT = 'customRecurringScheduleFrequencySelect';
 const SUBMIT_BUTTON = 'create-submit';
 const TOAST_TITLE = 'euiToastHeader__title';
 const MULTIPLE_SOLUTIONS_WARNING = 'maintenanceWindowMultipleSolutionsRemovedWarning';
+const TABLE_LOADED_CSS =
+  '.euiBasicTable[data-test-subj="maintenance-windows-table"]:not(.euiBasicTable-loading)';
 
 interface MaintenanceWindowFindResponse {
   data: Array<{ id: string; title: string }>;
@@ -82,6 +84,35 @@ const deleteMaintenanceWindows = async (kbnClient: KbnClient, ids: string[]) => 
       })
     )
   );
+};
+
+const openEditFlowByTitle = async (
+  page: ScoutPage,
+  kbnUrl: { get: (p: string) => string },
+  name: string
+) => {
+  await page.goto(kbnUrl.get(MAINTENANCE_WINDOWS_APP_PATH));
+  await page.locator(TABLE_LOADED_CSS).waitFor();
+  const searchBox = page.locator('.euiFieldSearch:not(.euiSelectableTemplateSitewide__search)');
+  await searchBox.fill(name);
+  // The pre-search table is already loaded, so wait for the search request itself: acting on the
+  // stale table lets the re-render close the actions popover.
+  const searchResponse = page.waitForResponse(
+    (response) =>
+      response.url().includes('/maintenance_window/_find') &&
+      new URL(response.url()).searchParams.get('search') === name
+  );
+  await searchBox.press('Enter');
+  await searchResponse;
+  await page.locator(TABLE_LOADED_CSS).waitFor();
+
+  const row = page.testSubj
+    .locator('maintenance-windows-table')
+    .locator('tbody tr', { hasText: name });
+  await expect(row).toHaveCount(1);
+  await row.locator('[data-test-subj="table-actions-popover"]').click();
+  await page.testSubj.click('table-actions-edit');
+  await expect(page.testSubj.locator(CREATE_FORM)).toBeVisible();
 };
 
 test.describe('Maintenance window create form', { tag: tags.stateful.classic }, () => {
@@ -127,7 +158,29 @@ test.describe('Maintenance window create form', { tag: tags.stateful.classic }, 
     await page.testSubj.locator('recurringScheduleAfterXOccurenceInput').fill('5');
 
     await page.testSubj.click(SUBMIT_BUTTON);
-    // Custom recurring schedules trigger a confirm modal before save.
+    // Alerts defaults ON so the MW is created immediately without the confirmation modal.
+
+    await expect(page.testSubj.locator(TOAST_TITLE)).toContainText(
+      `Created maintenance window '${name}'`
+    );
+  });
+
+  test('shows confirmation modal when Alerts is toggled off before submitting', async ({
+    page,
+  }) => {
+    const name = getUniqueMaintenanceWindowName('No Scope Maintenance Window');
+    createdMaintenanceWindowTitles.push(name);
+
+    await page.testSubj.click(CREATE_BUTTON);
+    await expect(page.testSubj.locator(CREATE_FORM)).toBeVisible();
+
+    await page.testSubj.locator(NAME_INPUT).fill(name);
+
+    // Turn Alerts off so there is no scope selected.
+    await page.testSubj.click('maintenanceWindowScopedQuerySwitch');
+
+    await page.testSubj.click(SUBMIT_BUTTON);
+    // No scope is selected, so the "save without scope" confirmation modal appears.
     await page.testSubj.click('confirmModalConfirmButton');
 
     await expect(page.testSubj.locator(TOAST_TITLE)).toContainText(
@@ -144,10 +197,7 @@ test.describe('Maintenance window create form', { tag: tags.stateful.classic }, 
 
     await page.testSubj.locator(NAME_INPUT).fill(name);
 
-    // The "Filter alerts" switch is rendered as an EuiSwitch nested inside
-    // a panel that carries the data-test-subj. The clickable element is the
-    // inner button.
-    await page.testSubj.locator('maintenanceWindowScopedQuerySwitch').locator('button').click();
+    // Alerts toggle is ON by default — the filter panel is already expanded.
     await expect(page.testSubj.locator('maintenanceWindowScopeQuery')).toBeVisible();
 
     // Without a scope query, the multi-solution warning callout is not shown.
@@ -165,6 +215,46 @@ test.describe('Maintenance window create form', { tag: tags.stateful.classic }, 
 
     await expect(page.testSubj.locator(TOAST_TITLE)).toContainText(
       `Created maintenance window '${name}'`
+    );
+  });
+
+  test('creates with Episodes scope and verifies the filter is restored on edit', async ({
+    page,
+    kbnUrl,
+  }) => {
+    const name = getUniqueMaintenanceWindowName('Episodes Scope Maintenance Window');
+    createdMaintenanceWindowTitles.push(name);
+
+    await page.testSubj.click(CREATE_BUTTON);
+    await expect(page.testSubj.locator(CREATE_FORM)).toBeVisible();
+
+    await page.testSubj.locator(NAME_INPUT).fill(name);
+
+    // Enable the Episodes card — it is OFF by default.
+    await page.testSubj.click('alertingV2ScopedQuerySwitch');
+    await expect(page.testSubj.locator('maintenanceWindowAlertingV2FilterInput')).toBeVisible();
+
+    // Enter a KQL episode filter. The QueryStringInput renders with the supplied dataTestSubj
+    // directly on the text input element (it replaces the default 'queryInput' test-subj).
+    const episodeInput = page.testSubj.locator('maintenanceWindowAlertingV2FilterInput');
+    await episodeInput.fill('episode_id: "test-episode"');
+    await episodeInput.press('Enter');
+
+    await page.testSubj.click(SUBMIT_BUTTON);
+
+    await expect(page.testSubj.locator(TOAST_TITLE)).toContainText(
+      `Created maintenance window '${name}'`
+    );
+
+    // Navigate to the edit form and verify the Episodes scope is hydrated correctly.
+    await openEditFlowByTitle(page, kbnUrl, name);
+
+    // Episodes toggle must be ON.
+    await expect(page.testSubj.locator('alertingV2ScopedQuerySwitch')).toBeChecked();
+
+    // Episodes KQL must be restored.
+    await expect(page.testSubj.locator('maintenanceWindowAlertingV2FilterInput')).toHaveValue(
+      'episode_id: "test-episode"'
     );
   });
 });
