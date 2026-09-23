@@ -25,6 +25,24 @@ export const getVegaEmbeddableSchema = (getDrilldownsSchema: GetDrilldownsSchema
         ...serializedTitlesSchema.shape,
         ...serializedTimeRangeSchema.shape,
         ...getDrilldownsSchema(VEGA_SUPPORTED_TRIGGERS).shape,
+        query: z
+          .object({
+            language: z.string().max(32),
+            query: z.string().max(10_000),
+          })
+          .optional()
+          .meta({
+            description:
+              'Panel-level KQL or Lucene query. Applied together with the dashboard query.',
+          }),
+        filters: z
+          .array(z.looseObject({}))
+          .max(100)
+          .optional()
+          .meta({
+            description:
+              'Panel-level filters. Applied together with the dashboard filters.',
+          }),
         spec: z
           .discriminatedUnion('format', [
             z.object({

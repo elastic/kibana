@@ -37,6 +37,9 @@ export const createVegaEditorMenuManager = (
     api,
     editorType: VEGA_EMBEDDABLE_TYPE,
     flyoutType,
+    // The add-panel flow builds this menu before the panel API exists. The button stays in the
+    // flyout chrome, and `renderEditor` attaches the API once the panel is created.
+    showFiltersAction: true,
     title: 'Vega',
     supportedMenus: ['options', 'help', 'filters'],
     menuActionIds: {

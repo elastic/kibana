@@ -23,6 +23,8 @@ export interface ActiveEditorMenu {
 export interface EditorFiltersBodyProps {
   closeFlyout: () => void;
   menuManager: EditorMenuManager;
+  /** Panel API, including writable unified search when the filters button is shown. */
+  api: unknown;
 }
 
 export interface EditorMenuDescriptor {
@@ -47,6 +49,11 @@ export interface EditorMenuManager {
   readonly activeMenu$: PublishingSubject<ActiveEditorMenu | null>;
   close: (menu: ActiveEditorMenu) => void;
   returnToEditor: () => void;
+  /**
+   * Points the filters action at a panel API that did not exist when the menu was built.
+   * The add-panel flow opens the editor flyout before the panel is created.
+   */
+  setPanelApi: (api: unknown) => void;
   dispose: () => void;
 }
 
@@ -64,4 +71,9 @@ export interface InitializeEditorMenuManagerParams {
   readonly menuActionIds?: Partial<Record<EditorMenuItem, string>>;
   /** Panel API forwarded to editor-menu actions. */
   readonly api?: unknown;
+  /**
+   * Include the filters button before a writable unified-search API exists.
+   * `setPanelApi` supplies that API once the panel is created.
+   */
+  readonly showFiltersAction?: boolean;
 }

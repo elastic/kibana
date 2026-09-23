@@ -18,8 +18,8 @@ import type {
   EmbeddablePublicDefinition,
   HasDrilldowns,
 } from '@kbn/embeddable-plugin/public';
-import { BehaviorSubject, combineLatest, EMPTY, map, merge, skip, switchMap, tap } from 'rxjs';
-import type { AggregateQuery, Query } from '@kbn/es-query';
+import { BehaviorSubject, combineLatest, map, merge, skip, switchMap, tap } from 'rxjs';
+import { isOfQueryType, type AggregateQuery, type Filter, type Query } from '@kbn/es-query';
 import { parse } from 'hjson';
 import { ON_APPLY_FILTER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import {
@@ -39,6 +39,7 @@ import {
   type PublishesWritableDescription,
   type PublishesWritableTitle,
   type PublishesEsql,
+  type PublishesWritableUnifiedSearch,
   type PublishesProjectRoutingOverrides,
   type PublishesRendered,
   type HasSupportedTriggers,
@@ -58,6 +59,7 @@ import type { VegaEvent } from '../types';
 import type { VegaPluginStartDependencies, VegaVisualizationDependencies } from '../plugin';
 import type { VegaParser } from '../data_model/vega_parser';
 import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
+import { getDataViews } from '../services';
 import { extractProjectRoutingOverrides } from '../lib/extract_project_routing_overrides';
 import { getEsqlQueriesFromSpec } from '../lib/spec_uses_esql';
 import { reportVegaRender } from '../lib/vega_render_telemetry';
@@ -85,6 +87,36 @@ interface VegaRenderInput {
   visData: VegaParser;
 }
 
+const isAppliedQuery = (query: Query | AggregateQuery | undefined): query is Query => {
+  if (!isOfQueryType(query)) return false;
+  if (typeof query.query === 'string') return query.query.trim().length > 0;
+  return Object.keys(query.query).length > 0;
+};
+
+/** Parent dashboard search plus a non-empty panel query and panel filters. */
+const mergePanelSearch = (
+  parentQuery: Query | AggregateQuery | undefined,
+  parentFilters: Filter[] | undefined,
+  panelQuery: Query | AggregateQuery | undefined,
+  panelFilters: Filter[] | undefined
+): { query: Query | Query[] | undefined; filters: Filter[] } => {
+  const filters = [...(parentFilters ?? []), ...(panelFilters ?? [])];
+  if (!isAppliedQuery(panelQuery)) {
+    return { query: parentQuery as Query | undefined, filters };
+  }
+  if (isOfQueryType(parentQuery)) {
+    return { query: [parentQuery, panelQuery], filters };
+  }
+  return { query: panelQuery, filters };
+};
+
+const persistedPanelQuery = (
+  query: Query | AggregateQuery | undefined
+): VegaByValueState['query'] => {
+  if (!query || !isOfQueryType(query) || typeof query.query !== 'string') return undefined;
+  return { language: query.language, query: query.query };
+};
+
 /**
  * By-value state for the dedicated Dashboard Vega panel.
  *
@@ -102,6 +134,7 @@ export type VegaEmbeddableApi = DefaultEmbeddableApi<VegaByValueState> &
   PublishesWritableDescription &
   PublishesWritableTitle &
   PublishesEsql &
+  PublishesWritableUnifiedSearch &
   PublishesProjectRoutingOverrides &
   PublishesDataViews &
   PublishesRendered & {
@@ -130,13 +163,23 @@ export const vegaEmbeddableFactory = (
     const timeRangeManager = initializeTimeRangeManager(initialState);
     const drilldownsManager = initializeDrilldownsManager(uuid, initialState);
     const spec$ = new BehaviorSubject(initialState.spec);
+    const query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(initialState.query);
+    const filters$ = new BehaviorSubject<Filter[] | undefined>(
+      initialState.filters as Filter[] | undefined
+    );
+    const setQuery = (query: Query | undefined) => {
+      query$.next(query);
+    };
+    const setFilters = (filters: Filter[] | undefined) => {
+      filters$.next(filters);
+    };
     const esql$ = new BehaviorSubject<AggregateQuery[]>([]);
     const approximationApplied$ = new BehaviorSubject<boolean | undefined>(undefined);
     const projectRoutingOverrides$ = new BehaviorSubject<ProjectRoutingOverrides>(undefined);
     const dataViews$ = new BehaviorSubject<DataView[] | undefined>(undefined);
 
     // A spec change is parsed once for all derived subjects. `switchMap` is used instead
-    // of `tap` for dataViews$ because `extractIndexPatternsFromSpec` is async.
+    // of `tap` for dataViews$ because resolving data views is async.
     const specSubscription = spec$
       .pipe(
         map((spec) => {
@@ -151,7 +194,13 @@ export const vegaEmbeddableFactory = (
           esql$.next(spec ? getEsqlQueriesFromSpec(spec).map((esql) => ({ esql })) : []);
           projectRoutingOverrides$.next(spec ? extractProjectRoutingOverrides(spec) : undefined);
         }),
-        switchMap((spec) => (spec ? extractIndexPatternsFromSpec(spec) : EMPTY))
+        switchMap(async (spec) => {
+          const fromSpec = spec ? await extractIndexPatternsFromSpec(spec) : [];
+          if (fromSpec.length > 0) return fromSpec;
+          // Visualize's search bar uses the default data view when the spec names none.
+          const defaultDataView = await getDataViews().getDefault();
+          return defaultDataView ? [defaultDataView] : [];
+        })
       )
       .subscribe((dataViews) => dataViews$.next(dataViews));
 
@@ -169,6 +218,8 @@ export const vegaEmbeddableFactory = (
         ...titleManager.getLatestState(),
         ...timeRangeManager.getLatestState(),
         ...drilldownsManager.getLatestState(),
+        query: persistedPanelQuery(query$.getValue()),
+        filters: filters$.getValue() as VegaByValueState['filters'],
         spec: spec$.getValue(),
       }),
       anyStateChange$: merge(
@@ -178,18 +229,30 @@ export const vegaEmbeddableFactory = (
         spec$.pipe(
           skip(1),
           map((): void => undefined)
+        ),
+        query$.pipe(
+          skip(1),
+          map((): void => undefined)
+        ),
+        filters$.pipe(
+          skip(1),
+          map((): void => undefined)
         )
       ),
       getComparators: () => ({
         ...titleComparators,
         ...timeRangeComparators,
         ...drilldownsManager.comparators,
+        query: 'deepEquality',
+        filters: 'deepEquality',
         spec: 'deepEquality',
       }),
       applySerializedState: (nextState) => {
         titleManager.reinitializeState(nextState);
         timeRangeManager.reinitializeState(nextState);
         drilldownsManager.reinitializeState(nextState);
+        query$.next(nextState.query);
+        filters$.next(nextState.filters as Filter[] | undefined);
         spec$.next(nextState.spec);
       },
     });
@@ -200,6 +263,7 @@ export const vegaEmbeddableFactory = (
       isNewPanel,
       menuManager,
     }: VegaEditorRenderParams) => {
+      menuManager.setPanelApi(api);
       const initialSpec = spec$.getValue();
       return (
         <VegaEditorFlyout
@@ -225,6 +289,10 @@ export const vegaEmbeddableFactory = (
       ...titleManager.api,
       ...timeRangeManager.api,
       ...drilldownsManager.api,
+      query$,
+      setQuery,
+      filters$,
+      setFilters,
       ...stateApi,
       blockingError$,
       dataLoading$,
@@ -290,9 +358,14 @@ export const vegaEmbeddableFactory = (
       rendered$.next(true);
     };
 
-    const fetchSubscription = combineLatest([spec$, fetch$(api)])
+    const fetchSubscription = combineLatest([
+      spec$,
+      fetch$(api),
+      query$,
+      filters$,
+    ])
       .pipe(
-        switchMap(async ([spec, data]) => {
+        switchMap(async ([spec, data, panelQuery, panelFilters]) => {
           abortController.abort();
           abortController = new AbortController();
           const { signal } = abortController;
@@ -316,10 +389,16 @@ export const vegaEmbeddableFactory = (
               abortSignal: signal,
               inspectorAdapters,
             });
+            const panelSearch = mergePanelSearch(
+              data.query,
+              data.filters,
+              panelQuery,
+              panelFilters
+            );
             const visData = await requestHandler({
               timeRange,
-              query: data.query as Query,
-              filters: data.filters,
+              query: panelSearch.query,
+              filters: panelSearch.filters,
               visParams: {
                 spec: spec.format === 'json' ? JSON.stringify(spec.value) : spec.value,
               },

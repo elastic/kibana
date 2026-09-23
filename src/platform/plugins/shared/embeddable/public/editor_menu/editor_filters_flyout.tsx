@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { BehaviorSubject } from 'rxjs';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -15,20 +16,40 @@ import {
   EuiFlexItem,
   EuiFlyoutBody,
   EuiFlyoutFooter,
-  EuiSkeletonText,
 } from '@elastic/eui';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { isOfQueryType, type Filter, type Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import type { EditorMenuManager } from './types';
+import {
+  apiPublishesDataViews,
+  apiPublishesWritableUnifiedSearch,
+  useStateFromPublishingSubject,
+} from '@kbn/presentation-publishing';
+import { PanelLevelFilters } from '@kbn/unified-search-plugin/public';
+import type { EditorFiltersBodyProps } from './types';
 
-interface EditorFiltersFlyoutProps {
-  closeFlyout: () => void;
-  menuManager: EditorMenuManager;
-}
+const readQuery = (api: unknown): Query | undefined => {
+  if (!apiPublishesWritableUnifiedSearch(api)) return undefined;
+  const published = api.query$.getValue();
+  return isOfQueryType(published) ? published : undefined;
+};
 
 export const EditorFiltersFlyout = ({
+  api,
   closeFlyout,
   menuManager,
-}: EditorFiltersFlyoutProps): React.ReactElement => {
+}: EditorFiltersBodyProps): React.ReactElement => {
+  const [query, setQuery] = useState<Query | undefined>(() => readQuery(api));
+  const [filters, setFilters] = useState<Filter[]>(() =>
+    apiPublishesWritableUnifiedSearch(api) ? api.filters$.getValue() ?? [] : []
+  );
+  const fallbackDataViews$ = useMemo(
+    () => new BehaviorSubject<DataView[] | undefined>(undefined),
+    []
+  );
+  const dataViews$ = apiPublishesDataViews(api) ? api.dataViews$ : fallbackDataViews$;
+  const dataViews = useStateFromPublishingSubject(dataViews$) ?? [];
+
   useEffect(() => {
     const editor = document.getElementById(menuManager.flyoutId);
     editor?.setAttribute('inert', '');
@@ -41,10 +62,13 @@ export const EditorFiltersFlyout = ({
       }
     };
     const onOutsidePointer = (event: Event) => {
-      const filters = document.getElementById(`${menuManager.flyoutId}-filters`);
-      if (event.target instanceof Node && !filters?.contains(event.target)) {
-        event.stopImmediatePropagation();
-      }
+      const target = event.target;
+      if (!(target instanceof Node)) return;
+      const filtersFlyout = document.getElementById(`${menuManager.flyoutId}-filters`);
+      if (filtersFlyout?.contains(target)) return;
+      // Query suggestions and the filter editor render in an EUI portal outside the flyout.
+      if (target instanceof Element && target.closest('[data-euiportal="true"]')) return;
+      event.stopImmediatePropagation();
     };
     const pointerEvents = ['mousedown', 'mouseup', 'click', 'touchstart', 'touchend'] as const;
     pointerEvents.forEach((event) => window.addEventListener(event, onOutsidePointer, true));
@@ -58,30 +82,38 @@ export const EditorFiltersFlyout = ({
     };
   }, [closeFlyout, menuManager]);
 
+  const save = () => {
+    if (apiPublishesWritableUnifiedSearch(api)) {
+      api.setQuery(query);
+      api.setFilters(filters.length > 0 ? filters : undefined);
+    }
+    closeFlyout();
+  };
+
   return (
     <>
       <EuiFlyoutBody data-test-subj="editorFiltersFlyoutBody">
-        <EuiSkeletonText
-          lines={3}
-          data-test-subj="editorFiltersFlyoutLoading"
-          aria-label={i18n.translate('embeddableApi.editorMenu.filtersLoadingAriaLabel', {
-            defaultMessage: 'Loading filters',
-          })}
+        <PanelLevelFilters
+          query={query}
+          filters={filters}
+          dataViews={dataViews}
+          onQueryChange={setQuery}
+          onFiltersChange={setFilters}
         />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={closeFlyout}>
+            <EuiButtonEmpty onClick={closeFlyout} data-test-subj="editorFiltersFlyoutCancel">
               {i18n.translate('embeddableApi.editorMenu.cancelFiltersButtonLabel', {
                 defaultMessage: 'Cancel',
               })}
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton fill onClick={closeFlyout}>
-              {i18n.translate('embeddableApi.editorMenu.applyFiltersButtonLabel', {
-                defaultMessage: 'Apply',
+            <EuiButton fill onClick={save} data-test-subj="editorFiltersFlyoutSave">
+              {i18n.translate('embeddableApi.editorMenu.saveFiltersButtonLabel', {
+                defaultMessage: 'Save',
               })}
             </EuiButton>
           </EuiFlexItem>

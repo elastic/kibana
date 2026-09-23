@@ -69,6 +69,7 @@ describe('AddVegaEmbeddableAction', () => {
     expect(flyoutProps?.flyoutMenuProps?.trailingActions).toEqual([
       expect.objectContaining({ iconType: 'gear' }),
       expect.objectContaining({ iconType: 'question' }),
+      expect.objectContaining({ 'aria-label': 'Edit filters', iconType: 'filter' }),
     ]);
 
     const loading = loadContent({ ariaLabelledBy: 'vega-title', closeFlyout: jest.fn() });

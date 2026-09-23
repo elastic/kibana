@@ -124,6 +124,34 @@ describe('initializeEditorMenuManager', () => {
     );
   });
 
+  it('shows edit filters before a panel API exists and opens them once the API is attached', () => {
+    const manager = initializeEditorMenuManager({
+      editorType: 'test',
+      showFiltersAction: true,
+      supportedMenus: ['filters'],
+      title: 'Test editor',
+    });
+    render(
+      <>
+        {manager.flyoutMenuProps?.trailingActions?.map((action) => {
+          const onClick = action.onClick as unknown as React.MouseEventHandler<HTMLButtonElement>;
+          return (
+            <button key={action['aria-label']} onClick={onClick}>
+              {action['aria-label']}
+            </button>
+          );
+        })}
+      </>
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Edit filters' }));
+    expect(mockOpenSystemFlyout).not.toHaveBeenCalled();
+
+    manager.setPanelApi(writableSearchApi);
+    fireEvent.click(screen.getByRole('button', { name: 'Edit filters' }));
+    expect(mockOpenSystemFlyout).toHaveBeenCalledTimes(1);
+  });
+
   it('omits edit filters when the panel cannot write unified search', () => {
     initialize(['options', 'filters'], undefined, null);
     expect(screen.queryByRole('button', { name: 'Edit filters' })).not.toBeInTheDocument();

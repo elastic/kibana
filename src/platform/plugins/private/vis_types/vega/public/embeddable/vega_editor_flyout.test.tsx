@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import { BehaviorSubject } from 'rxjs';
 import { createPortal } from 'react-dom';
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -135,12 +136,11 @@ describe('VegaEditorFlyout', () => {
     const onPreview = jest.fn();
     const onSave = jest.fn();
     const menuManager = initializeEditorMenuManager({
-      // The Vega panel does not publish this, so the editor hides the button. These tests cover
-      // the filters flyout for a panel that can write unified search.
+      // Stand-in for the panel's writable unified search API.
       api: {
-        filters$: {},
-        query$: {},
-        timeRange$: {},
+        filters$: new BehaviorSubject(undefined),
+        query$: new BehaviorSubject(undefined),
+        timeRange$: new BehaviorSubject(undefined),
         setFilters: (): void => undefined,
         setQuery: (): void => undefined,
         setTimeRange: (): void => undefined,
@@ -313,7 +313,7 @@ describe('VegaEditorFlyout', () => {
 
   it.each(
     (['push', 'overlay'] as const).flatMap((type) =>
-      ['Back', 'Cancel', 'Apply', 'Close filters', 'Escape'].map((action) => ({ type, action }))
+      ['Back', 'Cancel', 'Save', 'Close filters', 'Escape'].map((action) => ({ type, action }))
     )
   )(
     'returns from $type filters with $action without ending the edit session',
@@ -344,8 +344,8 @@ describe('VegaEditorFlyout', () => {
         await user.click(filtersButton);
         const filters = await screen.findByTestId('editorFiltersFlyout');
         expect(within(filters).getByText('Panel level filters')).toBeVisible();
-        expect(await within(filters).findByRole('button', { name: 'Apply' })).toBeEnabled();
-        expect(within(filters).getByTestId('editorFiltersFlyoutLoading')).toBeVisible();
+        expect(await within(filters).findByRole('button', { name: 'Save' })).toBeEnabled();
+        expect(within(filters).getByText('No query applied')).toBeVisible();
         await waitFor(() => expect(screen.queryByRole('textbox')).not.toBeInTheDocument());
         expect(editor.closest('[inert]')).not.toBeNull();
         expect(screen.queryByText('Reformat as HJSON')).not.toBeInTheDocument();

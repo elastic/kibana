@@ -10,7 +10,7 @@
 import React, { useState, useCallback } from 'react';
 import { css } from '@emotion/react';
 import type { EuiButtonIconProps } from '@elastic/eui';
-import { EuiFlexItem, EuiButtonIcon, EuiPopover, EuiToolTip } from '@elastic/eui';
+import { EuiButton, EuiFlexItem, EuiButtonIcon, EuiPopover, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Filter } from '@kbn/es-query';
 import type { SuggestionsAbstraction } from '@kbn/kql/public';
@@ -34,6 +34,8 @@ interface AddFilterPopoverProps extends WithCloseFilterEditorConfirmModalProps {
   onFiltersUpdated?: (filters: Filter[]) => void;
   isDisabled?: boolean;
   buttonProps?: Partial<EuiButtonIconProps>;
+  /** Renders a labeled button instead of the search bar's icon button. */
+  showLabel?: boolean;
   suggestionsAbstraction?: SuggestionsAbstraction;
 }
 
@@ -50,6 +52,7 @@ const AddFilterPopoverComponent = React.memo(function AddFilterPopover({
   onFiltersUpdated,
   buttonProps,
   isDisabled,
+  showLabel = false,
   onCloseFilterPopover,
   onLocalFilterUpdate,
   onLocalFilterCreate,
@@ -57,7 +60,19 @@ const AddFilterPopoverComponent = React.memo(function AddFilterPopover({
 }: AddFilterPopoverProps) {
   const [showAddFilterPopover, setShowAddFilterPopover] = useState(false);
 
-  const button = (
+  const openPopover = () => setShowAddFilterPopover((isOpen) => !isOpen);
+  const button = showLabel ? (
+    <EuiButton
+      iconType="plusInCircle"
+      color="primary"
+      size="s"
+      data-test-subj="addFilter"
+      onClick={openPopover}
+      disabled={isDisabled}
+    >
+      {strings.getAddFilterButtonLabel()}
+    </EuiButton>
+  ) : (
     <EuiToolTip content={strings.getAddFilterButtonLabel()} disableScreenReaderOutput>
       <EuiButtonIcon
         display="base"
@@ -65,7 +80,7 @@ const AddFilterPopoverComponent = React.memo(function AddFilterPopover({
         color="text"
         aria-label={strings.getAddFilterButtonLabel()}
         data-test-subj="addFilter"
-        onClick={() => setShowAddFilterPopover((isOpen) => !isOpen)}
+        onClick={openPopover}
         size="s"
         disabled={isDisabled}
         {...buttonProps}

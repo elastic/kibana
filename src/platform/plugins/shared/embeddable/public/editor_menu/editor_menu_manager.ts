@@ -67,12 +67,14 @@ export const initializeEditorMenuManager = ({
   api,
   menuActionIds,
   menuLabels,
+  showFiltersAction = false,
   supportedMenus,
   title,
 }: InitializeEditorMenuManagerParams): EditorMenuManager => {
   const flyoutId = htmlIdGenerator('embeddableEditor')();
   const historyKey = Symbol('embeddableEditor');
   const activeMenu$ = new BehaviorSubject<ActiveEditorMenu | null>(null);
+  let panelApi = api;
   let filtersButton: HTMLElement | undefined;
   let filtersOverlay: OverlayRef | undefined;
   let filtersBody: React.ReactElement | undefined;
@@ -116,6 +118,7 @@ export const initializeEditorMenuManager = ({
   const mountFiltersBody = (Body: React.ComponentType<EditorFiltersBodyProps>) => {
     if (disposed) return;
     const element = React.createElement(Body, {
+      api: panelApi,
       closeFlyout: returnFromFilters,
       menuManager: manager,
     });
@@ -139,7 +142,7 @@ export const initializeEditorMenuManager = ({
         if (disposed) return;
         return action.execute({
           anchor,
-          api,
+          api: panelApi,
           editor,
           trigger: triggers[EMBEDDABLE_EDITOR_MENU_TRIGGER],
         } as EditorMenuActionContext & ActionExecutionMeta);
@@ -208,7 +211,7 @@ export const initializeEditorMenuManager = ({
     });
   };
   const openFilters = (anchor: HTMLElement) => {
-    if (disposed || filtersOverlay) return;
+    if (disposed || filtersOverlay || !apiPublishesWritableUnifiedSearch(panelApi ?? null)) return;
     filtersButton = anchor;
     activeMenu$.next(null);
     openFiltersFlyout();
@@ -217,7 +220,12 @@ export const initializeEditorMenuManager = ({
     .slice()
     // Same contract as EditFiltersAction.isCompatible, evaluated here so the button is known
     // before that action module loads.
-    .filter((menu) => menu !== 'filters' || apiPublishesWritableUnifiedSearch(api ?? null))
+    .filter(
+      (menu) =>
+        menu !== 'filters' ||
+        showFiltersAction ||
+        apiPublishesWritableUnifiedSearch(panelApi ?? null)
+    )
     .sort((first, second) => MENU_CHROME[second].order - MENU_CHROME[first].order)
     .map((menu) => {
       const label = menuLabels?.[menu] ?? defaultMenuLabel(menu);
@@ -249,6 +257,9 @@ export const initializeEditorMenuManager = ({
       if (disposed) return;
       activeMenu$.next(null);
       if (filtersButton?.isConnected) filtersButton.focus({ preventScroll: true });
+    },
+    setPanelApi: (nextApi) => {
+      panelApi = nextApi;
     },
     dispose: () => {
       disposed = true;
