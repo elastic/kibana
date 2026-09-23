@@ -214,7 +214,12 @@ export const compactConversation = async ({
     const base = existingSummary
       ? applyExistingSummary(processedConversation, existingSummary, covered)
       : processedConversation;
-    const truncation = applyHardTruncation(base, uncovered, tokensByRoundId, contextBudget);
+    const truncation = applyHardTruncation(
+      base,
+      uncovered,
+      tokensByRoundId,
+      roundsBudget(contextBudget, existingSummary)
+    );
     return {
       processedConversation: truncation.conversation,
       summary: existingSummary,
@@ -266,7 +271,12 @@ export const compactConversation = async ({
   let afterTokens = tokensOf(remaining) + result.summary.token_count;
   let compacted = result.processedConversation;
   if (afterTokens > contextBudget.historyBudget) {
-    const truncation = applyHardTruncation(compacted, remaining, tokensByRoundId, contextBudget);
+    const truncation = applyHardTruncation(
+      compacted,
+      remaining,
+      tokensByRoundId,
+      roundsBudget(contextBudget, result.summary)
+    );
     compacted = truncation.conversation;
     afterTokens = truncation.tokens + result.summary.token_count;
     logger.debug('Applied hard truncation after summarization');
@@ -489,23 +499,31 @@ const generateLlmSummary = async ({
 };
 
 /**
+ * The history budget left for raw rounds once the summary (rendered alongside them) is accounted
+ * for.
+ */
+const roundsBudget = (budget: ContextBudget, summary: CompactionSummary | undefined): number =>
+  budget.historyBudget - (summary?.token_count ?? 0);
+
+/**
  * Drops the oldest of `candidates` (the rounds still on the timeline, in order) until their
- * tokens fit the history budget, never below the `PRESERVED_RECENT_ROUNDS` floor. At the floor the
- * prompt may still exceed the budget.
+ * tokens fit `budget` (the history budget minus the summary they are rendered with, see
+ * {@link roundsBudget}), never below the `PRESERVED_RECENT_ROUNDS` floor. At the floor the prompt
+ * may still exceed the budget.
  */
 const applyHardTruncation = (
   conversation: ProcessedConversation,
   candidates: Round[],
   tokensByRoundId: ReadonlyMap<string, number>,
-  budget: ContextBudget
+  budget: number
 ): { conversation: ProcessedConversation; tokens: number } => {
   let tokens = candidates.reduce((total, round) => total + (tokensByRoundId.get(round.id) ?? 0), 0);
-  if (tokens <= budget.historyBudget) {
+  if (tokens <= budget) {
     return { conversation, tokens };
   }
   const floor = Math.max(0, candidates.length - PRESERVED_RECENT_ROUNDS);
   const dropped = new Set<string>();
-  for (let index = 0; index < floor && tokens > budget.historyBudget; index++) {
+  for (let index = 0; index < floor && tokens > budget; index++) {
     dropped.add(candidates[index].id);
     tokens -= tokensByRoundId.get(candidates[index].id) ?? 0;
   }

@@ -1238,5 +1238,30 @@ describe('compactConversation', () => {
       expect(result.summary).toBe(anchored);
       expect(roundIds(result.processedConversation.timeline)).toEqual(['C', 'D']);
     });
+
+    it('hard truncation reserves the tokens of the summary rendered with the rounds', async () => {
+      // covered ['A'], uncovered [X, B, C, D, E] at 12k each (60k) against a 50k history budget
+      // with a 15k summary. Rounds alone: dropping X (48k) would fit; with the summary rendered
+      // alongside (35k left for rounds) X, B and C must go.
+      invoke.mockRejectedValueOnce(new Error('llm down'));
+      const anchored = summary({
+        covered_round_ids: ['A'],
+        summarized_round_count: 1,
+        token_count: 15_000,
+      });
+      const result = await compactConversation({
+        ...options,
+        processedConversation: conversationOf([
+          ...axbcTimeline(),
+          ...timelineFromRounds([completed('D', 4), completed('E', 5)]),
+        ]),
+        existingSummary: anchored,
+        perRoundTokenCounts: [1, 12_000, 12_000, 12_000, 12_000, 12_000],
+      });
+
+      expect(result.compactionTriggered).toBe(false);
+      expect(result.summary).toBe(anchored);
+      expect(roundIds(result.processedConversation.timeline)).toEqual(['D', 'E']);
+    });
   });
 });
