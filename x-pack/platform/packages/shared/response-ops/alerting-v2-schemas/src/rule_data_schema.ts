@@ -864,22 +864,6 @@ export type RuleTagsResponse = z.infer<typeof ruleTagsResponseSchema>;
 export const ruleIdSchema = entityIdSchema.describe(`A rule identifier. ${ENTITY_ID_NOTE}`);
 
 /**
- * Request body schema for `POST /api/alerting/v2/rules/_bulk_get`.
- */
-export const bulkGetRulesParamsSchema = z
-  .object({
-    ids: z
-      .array(ruleIdSchema)
-      .min(1)
-      .max(MAX_BULK_ITEMS)
-      .describe('Rule identifiers to retrieve. The response preserved this order.'),
-  })
-  .strict()
-  .meta({ id: 'alerting_bulk_get_rules_request' });
-
-export type BulkGetRulesParams = z.infer<typeof bulkGetRulesParamsSchema>;
-
-/**
  * Response schema for `POST /api/alerting/v2/rules/_bulk_get`.
  */
 export const bulkGetRulesResponseSchema = z

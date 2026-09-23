@@ -14,9 +14,4 @@ export {
   type ConversationDetailsFlyoutFooterProps,
 } from './flyout_footer';
 export { InvestigationHeaderBlocks, type InvestigationHeaderBlocksProps } from './header_blocks';
-export {
-  AttachmentsTab,
-  type AttachmentsTabProps,
-  OverviewTab,
-  TimelineTab,
-} from './details_flyout_tab_contents';
+export { OverviewTab } from './details_flyout_tab_contents';
