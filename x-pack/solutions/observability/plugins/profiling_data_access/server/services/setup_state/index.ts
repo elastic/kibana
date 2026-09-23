@@ -34,11 +34,9 @@ export async function getSetupState({
 > {
   const kibanaInternalProfilingESClient = createProfilingEsClient({
     esClient: esClient.asInternalUser,
-    useDefaultAuth: false,
   });
   const profilingESClient = createProfilingEsClient({
     esClient: esClient.asCurrentUser,
-    useDefaultAuth: false,
   });
 
   if (isServerless) {
