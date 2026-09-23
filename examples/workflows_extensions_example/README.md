@@ -161,9 +161,11 @@ require the relevant Workflows privileges and `manage_security`. Execution uses 
 Workflows execute privilege. The endpoints accept an existing account ID; create the account
 through Security's normal API first.
 
-This dynamic definition uses `versionStrategy: 'on_adopt'`: it is installed under the setup
-user's credentials, not automatically at plugin startup. Requestless startup code does not
-gain authority to create or change its binding.
+This dynamic definition uses `versionStrategy: 'auto'`. Initial installation uses the setup
+user's credentials. On startup, the owning plugin upgrades installed instances from the
+registered definition, preserving their template values and verified SA binding. No user
+request or SA security-administration privilege is needed for that upgrade. Creating,
+changing, or removing the binding still requires an authorized request.
 
 The Workflows service-account Scout suite covers installation, actual SA execution,
 authorized rebinding, rejection of unauthorized installation/rebinding/removal, and cleanup:

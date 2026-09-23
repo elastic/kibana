@@ -69,7 +69,7 @@ steps:
 `,
   management: {
     lifecycle: 'dynamic',
-    versionStrategy: 'on_adopt',
+    versionStrategy: 'auto',
     enablement: 'restorable',
   },
 } as const satisfies ManagedWorkflowDefinition<ServiceAccountWorkflowTemplateValues>;

@@ -41,6 +41,7 @@ import type {
   WriteWorkflowDocumentWithOccParams,
 } from './workflow_occ_types';
 import {
+  ensureManagedWorkflowUpgradePreservesBinding,
   ensureWorkflowServiceAccountMutationAuthorized,
   withWorkflowBindingChange,
 } from './workflow_service_account_binding';
@@ -272,6 +273,17 @@ export class WorkflowCrudService {
 
       return { seqNo: response._seq_no, primaryTerm: response._primary_term };
     };
+    if (options?.managedWorkflowUpgrade) {
+      if (!bindings) throw new Error('Service account bindings are unavailable.');
+      await ensureManagedWorkflowUpgradePreservesBinding({
+        bindings,
+        workflowId: id,
+        document,
+        previous,
+        options,
+      });
+      return write();
+    }
     if (!accountId && !previous?.definition?.settings?.run_as) return write();
     if (!bindings) throw new Error('Service account bindings are unavailable.');
     return withWorkflowBindingChange({

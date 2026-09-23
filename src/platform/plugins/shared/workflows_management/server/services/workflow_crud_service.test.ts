@@ -3021,3 +3021,200 @@ describe('bound workflow deletion errors', () => {
     expect(deleteDocuments).toHaveBeenCalledTimes(2);
   });
 });
+
+describe('trusted managed service account upgrades', () => {
+  afterEach(() => jest.restoreAllMocks());
+
+  const setup = () => {
+    const core = {
+      ...coreMock.createStart(),
+      security: securityServiceMock.createStart(),
+      elasticsearch: elasticsearchServiceMock.createStart(),
+    };
+    const bindings = core.security.serviceAccounts;
+    bindings.isEnabled.mockReturnValue(true);
+    bindings.getWorkloadBinding.mockResolvedValue({
+      pluginId: 'workflowsExecutionEngine',
+      workloadType: 'workflow',
+      workloadId: 'system-test',
+      spaceId: 'default',
+      serviceAccountId: 'account-a',
+      boundBy: { type: 'user', username: 'installer' },
+      boundAt: '2026-09-22',
+    });
+    const { deps, client } = makeDeps(undefined, {
+      getCoreStart: () => core,
+      getServiceAccountBindings: () => bindings,
+    });
+    const service = new WorkflowCrudService(deps);
+    const previous = makeSource({
+      managed: true,
+      managedBy: 'ownerPlugin',
+      originManagedWorkflowId: 'system-test',
+      managedVersion: 1,
+      managedTemplateValues: { serviceAccountId: 'account-a' },
+      definition: {
+        version: '1',
+        name: 'Managed v1',
+        enabled: true,
+        triggers: [{ type: 'manual' }],
+        steps: [],
+        settings: { run_as: 'account-a' },
+      },
+    });
+    const read = jest.spyOn(service, 'getWorkflowDocumentSource').mockResolvedValue(previous);
+    const document = { ...previous, name: 'Managed v2', managedVersion: 2 };
+    const params = {
+      document,
+      ifSeqNo: 5,
+      ifPrimaryTerm: 1,
+      managedWorkflowUpgrade: { pluginId: 'ownerPlugin', definitionId: 'system-test' },
+    };
+    const write = () => service.writeWorkflowDocumentWithOcc('system-test', 'default', params);
+    return { core, bindings, client, service, previous, document, params, read, write };
+  };
+
+  it('upgrades with OCC and preserves the verified binding without user or SA credentials', async () => {
+    const { core, bindings, client, document, write } = setup();
+    await expect(write()).resolves.toEqual(document);
+    expect(client.index).toHaveBeenCalledWith({
+      id: 'system-test',
+      document,
+      if_seq_no: 5,
+      if_primary_term: 1,
+      refresh: true,
+    });
+    expect(bindings.getWorkloadBinding).toHaveBeenCalledWith({
+      workloadType: 'workflow',
+      workloadId: 'system-test',
+      spaceId: 'default',
+    });
+    expect(bindings.bindWorkload).not.toHaveBeenCalled();
+    expect(bindings.unbindWorkload).not.toHaveBeenCalled();
+    expect(bindings.withScopedRequestForWorkload).not.toHaveBeenCalled();
+    expect(core.elasticsearch.client.asScoped).not.toHaveBeenCalled();
+  });
+
+  it.each(['account-b', undefined])(
+    'rejects changing the run_as identity to %s',
+    async (accountId) => {
+      const { document, client, bindings, write } = setup();
+      if (!document.definition) throw new Error('Missing test definition');
+      document.definition = { ...document.definition, settings: { run_as: accountId } };
+      await expect(write()).rejects.toThrow('preserve');
+      expect(client.index).not.toHaveBeenCalled();
+      expect(bindings.bindWorkload).not.toHaveBeenCalled();
+      expect(bindings.unbindWorkload).not.toHaveBeenCalled();
+    }
+  );
+
+  it.each(['missing', 'different', 'disabled'] as const)('rejects a %s binding', async (state) => {
+    const { bindings, client, write } = setup();
+    if (state === 'disabled') bindings.isEnabled.mockReturnValue(false);
+    else if (state === 'missing') bindings.getWorkloadBinding.mockResolvedValue(null);
+    else {
+      const binding = await bindings.getWorkloadBinding({
+        workloadType: 'workflow',
+        workloadId: 'system-test',
+        spaceId: 'default',
+      });
+      if (!binding) throw new Error('Missing test binding');
+      bindings.getWorkloadBinding.mockResolvedValue({ ...binding, serviceAccountId: 'account-b' });
+    }
+    await expect(write()).rejects.toThrow();
+    expect(client.index).not.toHaveBeenCalled();
+    expect(bindings.bindWorkload).not.toHaveBeenCalled();
+    expect(bindings.unbindWorkload).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    { managed: false },
+    { managedBy: 'otherPlugin' },
+    { originManagedWorkflowId: 'system-other' },
+    { spaceId: 'other-space' },
+    { deleted_at: '2026-09-23' },
+    { managedTemplateValues: { serviceAccountId: 'account-a', extra: 'untrusted' } },
+  ])('rejects changed managed metadata %j', async (changed) => {
+    const { document, client, write } = setup();
+    Object.assign(document, changed);
+    await expect(write()).rejects.toThrow('preserve');
+    expect(client.index).not.toHaveBeenCalled();
+  });
+
+  it('rejects a stored workflow owned by another plugin', async () => {
+    const { previous, client, write } = setup();
+    previous.managedBy = 'otherPlugin';
+    await expect(write()).rejects.toThrow('preserve');
+    expect(client.index).not.toHaveBeenCalled();
+  });
+
+  it('does not create a missing workflow or binding', async () => {
+    const { read, client, bindings, write } = setup();
+    read.mockResolvedValue(null);
+    await expect(write()).rejects.toThrow('preserve');
+    expect(client.index).not.toHaveBeenCalled();
+    expect(bindings.bindWorkload).not.toHaveBeenCalled();
+  });
+
+  it('cannot authorize a request-scoped managed edit', async () => {
+    const { service, params, client } = setup();
+    await expect(
+      service.writeWorkflowDocumentWithOcc('system-test', 'default', {
+        ...params,
+        request: httpServerMock.createKibanaRequest(),
+      })
+    ).rejects.toThrow();
+    expect(client.index).not.toHaveBeenCalled();
+  });
+
+  it('keeps the normal requestless mutation gate without the trusted upgrade context', async () => {
+    const { service, params, client } = setup();
+    await expect(
+      service.writeWorkflowDocumentWithOcc('system-test', 'default', {
+        ...params,
+        managedWorkflowUpgrade: undefined,
+      })
+    ).rejects.toThrow('authenticated request');
+    expect(client.index).not.toHaveBeenCalled();
+  });
+
+  it('accepts legacy missing template values as empty values', async () => {
+    const { previous, document, write } = setup();
+    previous.managedTemplateValues = undefined;
+    document.managedTemplateValues = null;
+    await expect(write()).resolves.toEqual(document);
+  });
+
+  it('rejects creating a binding for a previously unbound managed workflow', async () => {
+    const { previous, client, bindings, write } = setup();
+    if (!previous.definition) throw new Error('Missing test definition');
+    previous.definition = { ...previous.definition, settings: {} };
+    await expect(write()).rejects.toThrow('preserve');
+    expect(client.index).not.toHaveBeenCalled();
+    expect(bindings.bindWorkload).not.toHaveBeenCalled();
+  });
+
+  it.each([{}, { ifSeqNo: 5 }, { ifPrimaryTerm: 1 }])(
+    'requires both OCC fields: %j',
+    async (occ) => {
+      const { service, params, document, client } = setup();
+      await expect(
+        service.indexWorkflowDocument('system-test', document, {
+          managedWorkflowUpgrade: params.managedWorkflowUpgrade,
+          ...occ,
+        })
+      ).rejects.toThrow('preserve');
+      expect(client.index).not.toHaveBeenCalled();
+    }
+  );
+
+  it('does not compensate or rebind if another document write wins OCC', async () => {
+    const { client, bindings, write } = setup();
+    const conflict = new Error('OCC conflict');
+    client.index.mockRejectedValue(conflict);
+    await expect(write()).rejects.toBe(conflict);
+    expect(client.index).toHaveBeenCalledTimes(1);
+    expect(bindings.bindWorkload).not.toHaveBeenCalled();
+    expect(bindings.unbindWorkload).not.toHaveBeenCalled();
+  });
+});

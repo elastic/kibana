@@ -21,7 +21,14 @@ export interface VersionedWorkflowDocument {
   primaryTerm: number;
 }
 
+/** Internal context supplied only by the registered managed-definition lifecycle. */
+export interface ManagedWorkflowUpgrade {
+  pluginId: string;
+  definitionId: string;
+}
+
 export interface IndexWorkflowDocumentOptions {
+  managedWorkflowUpgrade?: ManagedWorkflowUpgrade;
   previousDocument?: WorkflowProperties;
   request?: KibanaRequest;
   create?: boolean;
@@ -30,6 +37,7 @@ export interface IndexWorkflowDocumentOptions {
 }
 
 export interface WriteWorkflowDocumentWithOccParams {
+  managedWorkflowUpgrade?: ManagedWorkflowUpgrade;
   previousDocument?: WorkflowProperties;
   request?: KibanaRequest;
   document: WorkflowProperties;

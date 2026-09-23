@@ -12,6 +12,9 @@ import isEqual from 'lodash/isEqual';
 import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 
+import type { IndexWorkflowDocumentOptions } from './workflow_occ_types';
+import type { WorkflowProperties } from '../storage/workflow_storage';
+
 type Bindings = WorkflowsExecutionEnginePluginStart['serviceAccountBindings'];
 
 export const ensureWorkflowServiceAccountMutationAuthorized = async (
@@ -122,5 +125,55 @@ export const withWorkflowBindingChange = async <T>({
       }
     }
     throw error;
+  }
+};
+
+/** Authorizes an owning-plugin definition upgrade that leaves the existing delegation unchanged. */
+export const ensureManagedWorkflowUpgradePreservesBinding = async ({
+  bindings,
+  workflowId,
+  document,
+  previous,
+  options,
+}: {
+  bindings: Bindings;
+  workflowId: string;
+  document: WorkflowProperties;
+  previous: WorkflowProperties | null;
+  options: IndexWorkflowDocumentOptions;
+}): Promise<void> => {
+  const upgrade = options.managedWorkflowUpgrade;
+  const accountId = previous?.definition?.settings?.run_as;
+  if (
+    !upgrade ||
+    options.request ||
+    options.create ||
+    options.ifSeqNo == null ||
+    options.ifPrimaryTerm == null ||
+    !accountId ||
+    accountId !== document.definition?.settings?.run_as ||
+    !previous?.managed ||
+    !document.managed ||
+    previous.deleted_at ||
+    document.deleted_at ||
+    previous.managedBy !== upgrade.pluginId ||
+    document.managedBy !== upgrade.pluginId ||
+    previous.originManagedWorkflowId !== upgrade.definitionId ||
+    document.originManagedWorkflowId !== upgrade.definitionId ||
+    previous.spaceId !== document.spaceId ||
+    !isEqual(previous.managedTemplateValues ?? null, document.managedTemplateValues ?? null)
+  ) {
+    throw Boom.forbidden(
+      'Automatic managed workflow upgrades must preserve the installed owner, template values, and service account identity.'
+    );
+  }
+  if (!bindings.isEnabled()) throw Boom.forbidden('Service account execution is disabled.');
+  const binding = await bindings.getWorkloadBinding({
+    workloadType: 'workflow',
+    workloadId: workflowId,
+    spaceId: document.spaceId,
+  });
+  if (binding?.serviceAccountId !== accountId) {
+    throw Boom.forbidden('The managed workflow service account binding is missing or has changed.');
   }
 };

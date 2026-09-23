@@ -331,6 +331,18 @@ export class ManagedWorkflowsService {
       {
         document: documentWithVersion,
         request,
+        // Only registered code upgrades may reuse an existing delegation without a user request.
+        ...(!request &&
+        definition.management.versionStrategy === 'auto' &&
+        existing.definition?.settings?.run_as &&
+        this.areTemplateValuesEqual(existing.managedTemplateValues, managedTemplateValues)
+          ? {
+              managedWorkflowUpgrade: {
+                pluginId: registeredPluginId,
+                definitionId: definition.id,
+              },
+            }
+          : {}),
         ifSeqNo: existingDocument.seqNo,
         ifPrimaryTerm: existingDocument.primaryTerm,
       }
