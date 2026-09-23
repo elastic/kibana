@@ -368,6 +368,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
               // go back to Lens to not break the wrapping function
               await common.navigateToApp('lens');
+              // restore the logsdb data view so the afterEach removeLayer cleanup works
+              await lens.switchDataPanelIndexPattern(logsdbDataView);
             });
           });
         });
