@@ -9,6 +9,7 @@ import { buildLogsExtractionEsqlQuery } from './logs_extraction_query_builder';
 import { getEntityDefinition } from '../../../common/domain/definitions/registry';
 import { EntityType } from '../../../common/domain/definitions/entity_schema';
 import { validateQuery } from '@kbn/esql-language';
+import { EXTRACTION_MODE } from '../../../common/domain/definitions/entity_schema';
 
 describe('buildLogsExtractionEsqlQuery', () => {
   Object.values(EntityType.enum).forEach((type) => {
@@ -79,40 +80,70 @@ describe('buildLogsExtractionEsqlQuery', () => {
     await expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
   });
 
-  describe('extractionMode guard: query output must not change across flag states until priority logic is added', () => {
+  describe('single-mode guard: the process split must not reach the single process', () => {
     it.each(Object.values(EntityType.enum))(
-      '%s: extractionMode=single output is byte-identical to default',
+      '%s: single mode renders no extraction gate',
       (type) => {
-        const baseParams = {
+        const query = buildLogsExtractionEsqlQuery({
           indexPatterns: ['test-index-*'],
           latestIndex: 'latest-index',
           entityDefinition: getEntityDefinition(type, 'default'),
           docsLimit: 10000,
           fromDateISO: '2022-01-01T00:00:00.000Z',
           toDateISO: '2022-01-01T23:59:59.999Z',
-        };
-        expect(buildLogsExtractionEsqlQuery({ ...baseParams, extractionMode: 'single' })).toBe(
-          buildLogsExtractionEsqlQuery(baseParams)
-        );
+        });
+        // The gate is the only clause the dual-process modes add to the source WHERE, so an unchanged
+        // source clause is what keeps the single process byte-identical.
+        const sourceClause = query.split('| EVAL')[0];
+        expect(sourceClause).not.toContain('event.kind');
       }
     );
+  });
 
-    it.each(Object.values(EntityType.enum))(
-      '%s: extractionMode=priority output is byte-identical to single (no priority query logic yet)',
-      (type) => {
-        const baseParams = {
-          indexPatterns: ['test-index-*'],
-          latestIndex: 'latest-index',
-          entityDefinition: getEntityDefinition(type, 'default'),
-          docsLimit: 10000,
-          fromDateISO: '2022-01-01T00:00:00.000Z',
-          toDateISO: '2022-01-01T23:59:59.999Z',
-        };
-        expect(buildLogsExtractionEsqlQuery({ ...baseParams, extractionMode: 'priority' })).toBe(
-          buildLogsExtractionEsqlQuery({ ...baseParams, extractionMode: 'single' })
-        );
-      }
-    );
+  describe('user extraction modes', () => {
+    const buildForMode = (extractionMode: 'single' | 'priority' | 'nonPriority') =>
+      buildLogsExtractionEsqlQuery({
+        indexPatterns: ['test-index-*'],
+        latestIndex: 'latest-index',
+        entityDefinition: getEntityDefinition('user', 'default', extractionMode),
+        docsLimit: 10000,
+        fromDateISO: '2022-01-01T00:00:00.000Z',
+        toDateISO: '2022-01-01T23:59:59.999Z',
+      });
+
+    const sourceClauseOf = (query: string) => query.split('| EVAL')[0];
+
+    it('priority gates on asset documents', () => {
+      expect(sourceClauseOf(buildForMode(EXTRACTION_MODE.priority))).toContain(
+        'AND (MV_CONTAINS(TO_STRING(event.kind), "asset"))'
+      );
+    });
+
+    /**
+     * A document with no `event.kind` belongs to the non-priority process, so the gate has to let
+     * it through. In ES|QL, `NOT (MV_CONTAINS(event.kind, "asset"))` is neither true nor false when
+     * the field is missing, and the document is dropped. The `IS NULL` part is what keeps it.
+     *
+     * This checks the generated ES|QL text on purpose. Running the condition through our in-memory
+     * evaluator would report the document as matching either way, and so would not catch the bug.
+     */
+    it('nonPriority gates on the complement, including documents without event.kind', () => {
+      expect(sourceClauseOf(buildForMode(EXTRACTION_MODE.nonPriority))).toContain(
+        'AND (TO_STRING(event.kind) IS NULL OR NOT (MV_CONTAINS(TO_STRING(event.kind), "asset")))'
+      );
+    });
+
+    it('both modes differ from single only in the source WHERE clause', () => {
+      const single = buildForMode('single');
+      const afterSourceClause = (query: string) => query.slice(sourceClauseOf(query).length);
+
+      expect(afterSourceClause(buildForMode(EXTRACTION_MODE.priority))).toBe(
+        afterSourceClause(single)
+      );
+      expect(afterSourceClause(buildForMode(EXTRACTION_MODE.nonPriority))).toBe(
+        afterSourceClause(single)
+      );
+    });
   });
 
   it('inserts whenConditionTrueSetFieldsAfterStats EVAL after LOOKUP and before merge EVAL', () => {

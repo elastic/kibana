@@ -9,36 +9,15 @@ import type { InvestigationStatus } from '@kbn/nightshift-investigations-plugin/
 import { getInvestigationTimeLabel } from './investigation_presentation';
 
 /**
- * Returns the headline text for an investigation list row or flyout header.
- * Prefers the AI-generated `summary` (post-run diagnosis) over `subject.summary`
- * (pre-run description of what is being investigated).
- */
-export const getInvestigationPrimaryText = (investigation: {
-  investigation_id: string;
-  summary?: string;
-  subject?: { id: string; summary?: string };
-}): string =>
-  investigation.summary?.trim() ||
-  investigation.subject?.summary?.trim() ||
-  investigation.subject?.id ||
-  investigation.investigation_id;
-
-/**
- * Returns a secondary subtitle for the row, shown under the headline.
- * When the AI summary is the headline, shows `subject.summary` as context for
- * what entity/subject was investigated. Falls back to nothing when there is no
- * secondary text worth showing.
+ * Returns a secondary subtitle for the row, shown under the `title` headline: the AI-generated
+ * `summary` (post-run diagnosis) once it exists, else `subject.summary` (pre-run description of
+ * what is being investigated), else nothing.
  */
 export const getInvestigationSubtitleText = (investigation: {
-  investigation_id: string;
   summary?: string;
-  subject?: { id: string; summary?: string };
-}): string | undefined => {
-  const hasAiSummary = Boolean(investigation.summary?.trim());
-  const subjectSummary = investigation.subject?.summary?.trim();
-  // Only show subject.summary as subtitle when the AI summary is taking the headline slot.
-  return hasAiSummary && subjectSummary ? subjectSummary : undefined;
-};
+  subject?: { summary?: string };
+}): string | undefined =>
+  investigation.summary?.trim() || investigation.subject?.summary?.trim() || undefined;
 
 /**
  * Wrapper around `getInvestigationTimeLabel` that handles the optional `started_at` from

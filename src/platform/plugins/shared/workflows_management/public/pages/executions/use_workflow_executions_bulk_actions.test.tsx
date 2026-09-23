@@ -28,6 +28,7 @@ import { createStartServicesMock } from '../../mocks';
 import { getTestProvider } from '../../shared/mocks/test_providers';
 
 const mockRunWorkflow = jest.fn();
+const mockTestWorkflow = jest.fn();
 const mockGetExecution = jest.fn();
 const mockUseWorkflowsCapabilities = jest.fn(() => ({
   canExecuteWorkflow: true,
@@ -38,6 +39,7 @@ jest.mock('@kbn/workflows-ui', () => {
   return {
     ...actual,
     useRunWorkflow: () => ({ mutateAsync: mockRunWorkflow }),
+    useTestWorkflow: () => ({ mutateAsync: mockTestWorkflow }),
     useWorkflowsApi: () => ({ getExecution: mockGetExecution }),
     useWorkflowsCapabilities: () => mockUseWorkflowsCapabilities(),
   };
@@ -68,6 +70,7 @@ describe('useWorkflowExecutionsBulkActions', () => {
     jest.clearAllMocks();
     mockUseWorkflowsCapabilities.mockReturnValue({ canExecuteWorkflow: true });
     mockRunWorkflow.mockResolvedValue({ workflowExecutionId: 'new-exec' });
+    mockTestWorkflow.mockResolvedValue({ workflowExecutionId: 'new-test-exec' });
     mockGetExecution.mockResolvedValue({ context: {} });
     mockCopyToClipboard.mockReturnValue(true);
   });
@@ -247,6 +250,7 @@ describe('useWorkflowExecutionsBulkActions', () => {
     expect(onRefresh).toHaveBeenCalledTimes(1);
     expect(mockNavigateToApp).not.toHaveBeenCalled();
     expect(services.notifications.toasts.addSuccess).toHaveBeenCalled();
+    expect(mockTestWorkflow).not.toHaveBeenCalled();
   });
 });
 
@@ -256,6 +260,7 @@ describe('useWorkflowExecutionRerun', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockRunWorkflow.mockResolvedValue({ workflowExecutionId: 'new-exec' });
+    mockTestWorkflow.mockResolvedValue({ workflowExecutionId: 'new-test-exec' });
     mockGetExecution.mockResolvedValue({ context: {} });
   });
 
@@ -272,6 +277,7 @@ describe('useWorkflowExecutionRerun', () => {
         workflowId: 'wf-1',
         executionId: 'exec-1',
         context: { inputs: { foo: 'bar' }, event: { type: 'alert' } },
+        isTestRun: false,
       });
     });
 
@@ -282,6 +288,33 @@ describe('useWorkflowExecutionRerun', () => {
     });
     expect(mockSetSelectedExecution).toHaveBeenCalledWith('new-exec');
     expect(services.notifications.toasts.addSuccess).toHaveBeenCalled();
+    expect(mockTestWorkflow).not.toHaveBeenCalled();
+  });
+
+  it('re-runs a test execution through testWorkflow', async () => {
+    const services = createStartServicesMock();
+
+    const { result } = renderHook(
+      () => useWorkflowExecutionRerun({ setSelectedExecution: mockSetSelectedExecution }),
+      { wrapper: getTestProvider({ services }) }
+    );
+
+    await act(async () => {
+      await result.current({
+        workflowId: 'wf-1',
+        executionId: 'exec-1',
+        context: { inputs: { foo: 'bar' } },
+        isTestRun: true,
+      });
+    });
+
+    expect(mockGetExecution).not.toHaveBeenCalled();
+    expect(mockTestWorkflow).toHaveBeenCalledWith({
+      workflowId: 'wf-1',
+      inputs: { foo: 'bar' },
+    });
+    expect(mockRunWorkflow).not.toHaveBeenCalled();
+    expect(mockSetSelectedExecution).toHaveBeenCalledWith('new-test-exec');
   });
 
   it('fetches the execution to recover context when only an executionId is given', async () => {

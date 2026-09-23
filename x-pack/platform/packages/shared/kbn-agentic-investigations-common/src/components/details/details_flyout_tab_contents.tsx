@@ -8,21 +8,16 @@
 import React, { memo, useState } from 'react';
 import {
   EuiButtonEmpty,
-  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
   EuiBasicTable,
   EuiText,
-  EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
 import type { Investigation } from '../../types';
 import { DetailsBlock } from './detail_block';
 import { DETAILS_FLYOUT_LABELS } from './translations';
-import { TimelineEventList } from '../timeline';
-
-export type FlyoutTab = 'overview' | 'attachments' | 'timeline';
 
 const getColumns = () => {
   const cellContent = (value: string) => (
@@ -107,39 +102,3 @@ export const OverviewTab = memo<{ investigation: Investigation }>(({ investigati
   );
 });
 OverviewTab.displayName = 'OverviewTab';
-
-export const AttachmentsTab = memo(() => (
-  <EuiEmptyPrompt
-    iconType="paperClip"
-    title={<h3>{DETAILS_FLYOUT_LABELS.attachments.emptyTitle}</h3>}
-    body={
-      <EuiText size="s" color="subdued">
-        <p>{DETAILS_FLYOUT_LABELS.attachments.emptyBody}</p>
-      </EuiText>
-    }
-  />
-));
-AttachmentsTab.displayName = 'AttachmentsTab';
-
-export const TimelineTab = memo<{ events: Investigation['events'] }>(({ events }) => (
-  <EuiFlexGroup direction="column" gutterSize="s">
-    <EuiFlexItem>
-      <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xs">
-            <h3>{DETAILS_FLYOUT_LABELS.sections.timeline}</h3>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued">
-            <span>{events.length}</span>
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFlexItem>
-    <EuiFlexItem>
-      <TimelineEventList events={events} />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-));
-TimelineTab.displayName = 'TimelineTab';

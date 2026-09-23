@@ -108,3 +108,21 @@ export const ENDPOINT_EXCEPTIONS_LABELS = {
     />
   ),
 };
+
+export const CUSTOM_YARA_SIGNATURES_LABELS = {
+  artifactsSummaryApiError: (error: string) =>
+    i18n.translate(
+      'xpack.securitySolution.endpoint.fleetCustomExtension.customYaraSignaturesSummary.error',
+      {
+        defaultMessage:
+          'There was an error trying to fetch custom YARA signatures stats: "{error}"',
+        values: { error },
+      }
+    ),
+  cardTitle: (
+    <FormattedMessage
+      id="xpack.securitySolution.endpoint.customYaraSignatures.fleetIntegration.title"
+      defaultMessage="Custom YARA signatures"
+    />
+  ),
+};
