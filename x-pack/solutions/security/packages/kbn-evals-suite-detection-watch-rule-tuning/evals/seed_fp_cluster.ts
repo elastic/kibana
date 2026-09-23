@@ -437,7 +437,27 @@ export const seedRuleAndFpAlerts = async (
   );
   const seededUuid: string = rule?.id ?? uniqueRuleId;
 
-  // 2. Index the closed-FP alert cluster against the rule's real uuid.
+  // 2. Ensure `kibana.alert.workflow_tags` is mapped before seeding.
+  //    The seed writes it as an empty array, so dynamic mapping never creates the
+  //    field; the worker's ES|QL harvest (rule_tuning_worker.yaml) references the
+  //    column and fails with `Unknown column` against an unmapped field, silently
+  //    harvesting zero candidates.
+  await esClient.indices.putMapping({
+    index: ALERTS_INDEX,
+    properties: {
+      kibana: {
+        properties: {
+          alert: {
+            properties: {
+              workflow_tags: { type: 'keyword' },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  // 3. Index the closed-FP alert cluster against the rule's real uuid.
   const entities = ENTITY_PROFILES[fixture.id] ?? [];
   if (entities.length === 0) {
     throw new Error(`No entity profile for fixture ${fixture.id}`);
