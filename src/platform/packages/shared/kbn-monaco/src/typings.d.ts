@@ -13,6 +13,7 @@ declare module 'monaco-editor/languages/definitions/css/css.js';
 declare module 'monaco-editor/languages/definitions/yaml/yaml.js';
 declare module 'monaco-editor/editor/editor.worker.start.js';
 declare module 'monaco-editor/internal/common/workers.js';
+declare module 'monaco-editor/editor/contrib/hover/browser/hoverTypes.js';
 
 // Monaco internal services
 declare module 'monaco-editor/editor/standalone/browser/standaloneServices.js' {

@@ -14,6 +14,8 @@ export { monaco, jsonDefaults } from './src/monaco_imports';
 /* eslint-disable-next-line @kbn/eslint/module_migration */
 import * as BarePluginApi from 'monaco-editor/editor/editor.api.js';
 
+import { HoverParticipantRegistry as hoverParticipantRegistry } from './src/monaco_imports';
+
 export * from './src/languages/definitions';
 export { getWorker } from './src/languages/worker_factory';
 
@@ -32,3 +34,22 @@ export {
   setClipboardContextMenuLabels,
   type ClipboardContextMenuLabels,
 } from './src/common/clipboard_context_menu_actions';
+
+/**
+ * A hover participant instance. Only the members we actually reach for are described —
+ * Monaco declares `hideCopyButton` as optional on its own `IEditorHoverParticipant`.
+ */
+export interface IEditorHoverParticipant {
+  hideCopyButton?: boolean;
+}
+
+/**
+ * Typed explicitly rather than re-exported directly: the deep `hoverTypes.js` import resolves
+ * to an untyped module, so without this annotation consumers of this package land on `any`.
+ * Participants are registered as classes, so `getAll()` hands back constructors, not instances.
+ */
+export const HoverParticipantRegistry: {
+  getAll(): Array<{
+    prototype: IEditorHoverParticipant;
+  }>;
+} = hoverParticipantRegistry;

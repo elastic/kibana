@@ -28,7 +28,12 @@
  */
 
 import type { monaco as monacoEditor } from '@kbn/monaco';
-import { defaultThemesResolvers, initializeSupportedLanguages, monaco } from '@kbn/monaco';
+import {
+  defaultThemesResolvers,
+  initializeSupportedLanguages,
+  monaco,
+  HoverParticipantRegistry,
+} from '@kbn/monaco';
 import { EuiPortal, type EuiPortalProps, useEuiTheme } from '@elastic/eui';
 import * as React from 'react';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
@@ -258,6 +263,11 @@ export function MonacoEditor({
         lastKnownValueRef.current = nextValue;
         onChangeHandler(nextValue, event);
       }
+    });
+
+    // Disable copy button for all hover participants
+    HoverParticipantRegistry.getAll().forEach((ctor) => {
+      ctor.prototype.hideCopyButton = true;
     });
   };
 

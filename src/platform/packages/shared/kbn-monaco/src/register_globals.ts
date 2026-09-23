@@ -32,10 +32,8 @@ declare module 'monaco-editor/editor/editor.api' {
               value?: {
                 // these methods are not documented in monaco but are available on the vscode upstream,
                 // see https://github.com/microsoft/vscode/blob/main/src/vs/editor/contrib/suggest/browser/suggestWidget.ts#L149-L150
-                // these methods map to an event listener registrar that returns a disposable (see https://github.com/microsoft/vscode/blob/main/src/vs/base/common/event.ts#L46)
-                // so we type them to return a disposable
-                onDidHide?: (cb: () => void) => monaco.IDisposable;
-                onDidShow?: (cb: () => void) => monaco.IDisposable;
+                onDidHide?: monaco.Emitter<void>['event'];
+                onDidShow?: monaco.Emitter<void>['event'];
               };
             };
           })
@@ -46,6 +44,20 @@ declare module 'monaco-editor/editor/editor.api' {
             // which is not documented in monaco but is available on the vscode upstream,
             // see https://github.com/microsoft/vscode/blob/main/src/vs/editor/contrib/message/browser/messageController.ts#L62
             showMessage?: (message: string, position: monaco.Position | null) => void;
+          })
+        | undefined;
+      getContribution(id: 'editor.contrib.contentHover'):
+        | (editor.IEditorContribution & {
+            // add type augmentations for methods on the contentHover contribution,
+            // which is not documented in monaco but is available on the vscode upstream,
+            // see https://github.com/microsoft/vscode/blob/main/src/vs/editor/contrib/hover/browser/contentHoverController.ts#L41C64-L46
+            shouldKeepOpenOnEditorMouseMoveOrLeave: boolean;
+            hideContentHover: () => void;
+            readonly _onHoverContentsChanged?: monaco.Emitter<void>;
+            readonly isHoverVisible: boolean | undefined;
+            readonly _contentWidget?: {
+              getDomNode: () => HTMLElement;
+            };
           })
         | undefined;
     }

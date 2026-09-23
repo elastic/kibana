@@ -102,8 +102,7 @@ describe('Inline completion provider', () => {
 
       await expect(resultPromise).resolves.toEqual({ items: [] });
 
-      // Settle hanging callbacks so Jest does not detect open handles.
-      await Promise.all(settleHangs);
+      settleHangs.forEach((resolveHang) => resolveHang(undefined));
     });
   });
 });
