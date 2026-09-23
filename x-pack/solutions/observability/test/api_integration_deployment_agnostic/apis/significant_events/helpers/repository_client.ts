@@ -5,15 +5,15 @@
  * 2.0.
  */
 import type { SignificantEventsRouteRepository } from '@kbn/significant-events-plugin/server';
-import type { CustomRoleScopedSupertestProvider } from '../../../services/custom_role_scoped_supertest';
-import type { RoleScopedSupertestProvider } from '../../../services/role_scoped_supertest';
-import type { RepositorySupertestClient } from '../../../../common/utils/server_route_repository/create_admin_service_from_repository';
+import type { CustomRoleScopedSupertestProvider } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/services/custom_role_scoped_supertest';
+import type { RoleScopedSupertestProvider } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/services/role_scoped_supertest';
+import type { RepositorySupertestClient } from '@kbn/test-suites-xpack-platform/common/utils/server_route_repository/create_admin_service_from_repository';
 import {
   getAdminApiClient,
   getCustomRoleApiClient,
   getEditorApiClient,
   getViewerApiClient,
-} from '../../../../common/utils/server_route_repository/create_admin_service_from_repository';
+} from '@kbn/test-suites-xpack-platform/common/utils/server_route_repository/create_admin_service_from_repository';
 
 export type SignificantEventsSupertestRepositoryClient =
   RepositorySupertestClient<SignificantEventsRouteRepository>;

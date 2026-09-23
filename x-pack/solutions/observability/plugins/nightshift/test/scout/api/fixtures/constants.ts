@@ -6,7 +6,7 @@
  */
 
 import { NIGHTSHIFT_FEATURE_ID, NIGHTSHIFT_SOURCE_VIEW_PREFIX } from '@kbn/nightshift-shared';
-import type { KibanaRole } from '@kbn/scout';
+import type { KibanaRole } from '@kbn/scout-oblt';
 
 export const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',

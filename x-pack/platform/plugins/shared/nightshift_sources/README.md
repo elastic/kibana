@@ -158,5 +158,5 @@ node scripts/jest x-pack/platform/plugins/shared/nightshift_sources
 node scripts/jest x-pack/platform/packages/shared/kbn-nightshift-shared
 node scripts/type_check --project x-pack/platform/plugins/shared/nightshift_sources/tsconfig.json
 node scripts/scout run-tests --arch stateful --domain classic \
-  --config x-pack/platform/plugins/shared/nightshift_sources/test/scout/api/playwright.config.ts
+  --config x-pack/solutions/observability/plugins/nightshift/test/scout/api/playwright.config.ts
 ```

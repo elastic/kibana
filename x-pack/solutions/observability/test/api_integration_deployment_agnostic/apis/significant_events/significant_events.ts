@@ -8,6 +8,12 @@
 import expect from '@kbn/expect';
 import type { IngestStreamLifecycle, Streams } from '@kbn/streams-schema';
 import { isDslLifecycle, isIlmLifecycle, emptyAssets } from '@kbn/streams-schema';
+import {
+  deleteStream,
+  disableStreams,
+  enableStreams,
+  putStream,
+} from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/apis/streams/helpers/requests';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { SignificantEventsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
@@ -18,12 +24,6 @@ import {
   pauseMaintenance,
   resumeMaintenance,
 } from './helpers/requests';
-import {
-  deleteStream,
-  disableStreams,
-  enableStreams,
-  putStream,
-} from '../streams/helpers/requests';
 import type { RoleCredentials } from '../../services';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {

@@ -86,6 +86,9 @@ dependsOn:
   - '@kbn/apm-api-shared'
   - '@kbn/apm-types-shared'
   - '@kbn/app-header'
+  - '@kbn/significant-events-plugin'
+  - '@kbn/significant-events-schema'
+  - '@kbn/nightshift-shared'
 tags:
   - test-helper
   - package

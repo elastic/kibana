@@ -14,7 +14,6 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
   // they live in this dedicated feature-flag config. snapshot_restore is stateful-only and is
   // therefore omitted here.
   describe('apis', () => {
-    loadTestFile(require.resolve('../../apis/significant_events'));
     loadTestFile(require.resolve('../../apis/streams/content'));
   });
 }

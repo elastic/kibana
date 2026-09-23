@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { apiTest } from '@kbn/scout';
+export { apiTest } from '@kbn/scout-oblt';
 export {
   NIGHTSHIFT_MANAGER_ROLE,
   NIGHTSHIFT_READ_ONLY_NO_ES_ROLE,

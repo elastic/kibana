@@ -12,7 +12,7 @@ import type {
   NightshiftSource,
   UpdateSourceRequest,
 } from '@kbn/nightshift-shared';
-import type { ApiClientFixture, ApiClientResponse, EsClient } from '@kbn/scout';
+import type { ApiClientFixture, ApiClientResponse, EsClient } from '@kbn/scout-oblt';
 import { COMMON_HEADERS, SOURCES_PATH, TEST_INDEX_PREFIX } from './constants';
 
 type CookieHeader = Record<string, string>;

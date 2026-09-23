@@ -6,9 +6,9 @@
  */
 
 import { randomUUID } from 'crypto';
-import { expect } from '@kbn/scout/api';
-import { tags } from '@kbn/scout';
-import type { RoleSessionCredentials } from '@kbn/scout';
+import { expect } from '@kbn/scout-oblt/api';
+import { tags } from '@kbn/scout-oblt';
+import type { RoleSessionCredentials } from '@kbn/scout-oblt';
 import { getNightshiftSourceViewName, type NightshiftSource } from '@kbn/nightshift-shared';
 import {
   NIGHTSHIFT_MANAGER_ROLE,

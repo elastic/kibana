@@ -9,16 +9,16 @@ import expect from '@kbn/expect';
 import type { Streams } from '@kbn/streams-schema';
 import type { BaseFeature } from '@kbn/significant-events-schema';
 import { emptyAssets } from '@kbn/streams-schema';
-import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
-import type { SignificantEventsSupertestRepositoryClient } from './helpers/repository_client';
-import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
-import { upsertFeature, listFeatures, bulkFeatures, deleteFeature } from './helpers/requests';
 import {
   deleteStream,
   disableStreams,
   enableStreams,
   putStream,
-} from '../streams/helpers/requests';
+} from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/apis/streams/helpers/requests';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { SignificantEventsSupertestRepositoryClient } from './helpers/repository_client';
+import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
+import { upsertFeature, listFeatures, bulkFeatures, deleteFeature } from './helpers/requests';
 
 const STREAM_NAME = 'logs.otel';
 const SECOND_STREAM_NAME = 'logs.otel.features-cross-stream-test';

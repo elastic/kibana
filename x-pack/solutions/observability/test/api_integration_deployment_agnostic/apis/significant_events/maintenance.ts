@@ -6,12 +6,15 @@
  */
 
 import expect from '@kbn/expect';
+import {
+  disableStreams,
+  enableStreams,
+} from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/apis/streams/helpers/requests';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { RoleCredentials } from '../../services';
 import type { SignificantEventsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
 import { getMaintenanceStatus, pauseMaintenance, resumeMaintenance } from './helpers/requests';
-import { disableStreams, enableStreams } from '../streams/helpers/requests';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
