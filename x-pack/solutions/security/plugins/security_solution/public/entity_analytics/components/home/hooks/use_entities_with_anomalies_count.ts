@@ -16,7 +16,7 @@ import { useErrorToast } from '../../../../common/hooks/use_error_toast';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useRiskEngineStatus } from '../../../api/hooks/use_risk_engine_status';
 import { useResolvedLatestEntitiesIndexName } from '../../../../common/hooks/use_resolved_latest_entities_index_name';
-import { buildEntitiesWithAnomaliesCountQuery } from '../queries/tile_anomaly_count_query';
+import { buildEntitiesWithAnomaliesCountQuery } from '../queries/entities_with_anomalies_query';
 import type { TimeRange } from '../use_time_range_param';
 import {
   getEntityFilterESQL,

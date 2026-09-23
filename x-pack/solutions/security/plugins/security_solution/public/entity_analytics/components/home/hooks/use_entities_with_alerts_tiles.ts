@@ -16,7 +16,7 @@ import { useErrorToast } from '../../../../common/hooks/use_error_toast';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useRiskEngineStatus } from '../../../api/hooks/use_risk_engine_status';
 import { useResolvedLatestEntitiesIndexName } from '../../../../common/hooks/use_resolved_latest_entities_index_name';
-import { buildAlertBasedTilesQuery } from '../queries/alert_based_tiles_query';
+import { buildAlertBasedTilesQuery } from '../queries/entities_with_alerts_query';
 import type { TimeRange } from '../use_time_range_param';
 import {
   getEntityFilterESQL,
@@ -31,7 +31,7 @@ interface AlertBasedTilesResult {
   watchlistedEntityIds: string[];
 }
 
-const parseResponse = (raw: ESQLSearchResponse): AlertBasedTilesResult => {
+export const parseAlertBasedTilesResponse = (raw: ESQLSearchResponse): AlertBasedTilesResult => {
   const row = raw.values?.[0];
   if (!row) return { alertsCount: 0, alertsEntityIds: [], watchlistedCount: 0, watchlistedEntityIds: [] };
 
@@ -109,7 +109,7 @@ export const useAlertBasedTiles = ({
           { abortSignal: signal, strategy: 'esql_async' }
         )
       );
-      return parseResponse(raw.rawResponse as unknown as ESQLSearchResponse);
+      return parseAlertBasedTilesResponse(raw.rawResponse as unknown as ESQLSearchResponse);
     },
     {
       enabled: isEnabled && Boolean(query),

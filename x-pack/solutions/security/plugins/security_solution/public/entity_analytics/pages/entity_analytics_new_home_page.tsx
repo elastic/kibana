@@ -71,7 +71,7 @@ const combineFilters = (
 // exceeds it once the grouping aggregation is added. Cap at 500 IDs; the tile count
 // reflects the true total while the table shows at most 500 (sorted risk-desc by the table).
 const MAX_CARD_FILTER_TERMS = 500;
-const toTermsFilter = (ids: string[]): QueryDslQueryContainer | null => {
+export const toTermsFilter = (ids: string[]): QueryDslQueryContainer | null => {
   if (ids.length === 0) return null;
   const capped = ids.length > MAX_CARD_FILTER_TERMS ? ids.slice(0, MAX_CARD_FILTER_TERMS) : ids;
   return { terms: { 'entity.id': capped } };
