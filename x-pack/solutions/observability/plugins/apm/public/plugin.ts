@@ -66,8 +66,8 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { IUiSettingsClient, SettingsStart } from '@kbn/core-ui-settings-browser';
-import { from } from 'rxjs';
-import { map } from 'rxjs';
+import type { Observable, Subscription } from 'rxjs';
+import { BehaviorSubject, distinctUntilChanged, from, map } from 'rxjs';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { LogsSharedClientStartExports } from '@kbn/logs-shared-plugin/public';
@@ -152,8 +152,31 @@ export interface ApmInternalServices {
   callApmApi: APMClientV2;
 }
 
-export const [getApmInternalServices, setApmInternalServices] =
+const [getApmInternalServices, publishApmInternalServices] =
   createGetterSetter<ApmInternalServices>('ApmInternalServices', false);
+
+export { getApmInternalServices };
+
+const cpsManager$ = new BehaviorSubject<ICPSManager | undefined>(undefined);
+
+/**
+ * Publishes the internal services and notifies `apmCpsManager$` subscribers.
+ */
+export const setApmInternalServices = (services: ApmInternalServices): void => {
+  publishApmInternalServices(services);
+  cpsManager$.next(services.cpsManager);
+};
+
+/** Reads the currently published CPS manager, which is only set while the APM CPS flag is enabled. */
+export const getApmCpsManager = (): ICPSManager | undefined => cpsManager$.getValue();
+
+/**
+ * Emits the published CPS manager, so consumers that rendered before the CPS flag resolved
+ * resubscribe to it instead of caching its absence for their whole lifetime.
+ */
+export const apmCpsManager$: Observable<ICPSManager | undefined> = cpsManager$.pipe(
+  distinctUntilChanged()
+);
 
 export interface ApmPluginStartDeps {
   alerting?: AlertingPluginPublicStart;
@@ -242,6 +265,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
   private telemetry: TelemetryService;
   private kibanaVersion: string;
   private isServerlessEnv: boolean;
+  private cpsEnabledSubscription?: Subscription;
   constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.initializerContext = initializerContext;
     this.telemetry = new TelemetryService();
@@ -545,24 +569,28 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         telemetryClient: this.telemetry.start(),
       }),
     });
-    const isCpsEnabled = core.featureFlags.getBooleanValue(
-      OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
-      OBSERVABILITY_APM_CPS_ENABLED_DEFAULT
-    );
 
-    const ApmInternalServices: ApmInternalServices = {
+    const apmInternalServices: ApmInternalServices = {
       callApmApi: plugins.apmShared.callApmApi,
     };
 
-    if (isCpsEnabled) {
-      plugins.cps?.cpsManager?.registerAppAccess('apm', () => ProjectRoutingAccess.EDITABLE);
-      setApmInternalServices({
-        ...ApmInternalServices,
-        cpsManager: plugins.cps?.cpsManager,
+    this.cpsEnabledSubscription = core.featureFlags
+      .getBooleanValue$(
+        OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
+        OBSERVABILITY_APM_CPS_ENABLED_DEFAULT
+      )
+      .subscribe((isCpsEnabled) => {
+        // Registering DISABLED matches the access the CPS manager resolves for an unregistered app,
+        // so the picker follows the flag when it is turned off after having been on.
+        plugins.cps?.cpsManager?.registerAppAccess('apm', () =>
+          isCpsEnabled ? ProjectRoutingAccess.EDITABLE : ProjectRoutingAccess.DISABLED
+        );
+        setApmInternalServices({
+          ...apmInternalServices,
+          cpsManager: isCpsEnabled ? plugins.cps?.cpsManager : undefined,
+        });
       });
-    } else {
-      setApmInternalServices(ApmInternalServices);
-    }
+
     if (plugins.agentBuilder) {
       registerServiceMapAttachment(plugins.agentBuilder.attachments);
       registerServiceMapContextAttachment(plugins.agentBuilder.attachments);
@@ -610,5 +638,9 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         tabs: [{ title: 'APM Agents', Component: getLazyApmAgentsTabExtension() }],
       });
     }
+  }
+
+  public stop() {
+    this.cpsEnabledSubscription?.unsubscribe();
   }
 }
