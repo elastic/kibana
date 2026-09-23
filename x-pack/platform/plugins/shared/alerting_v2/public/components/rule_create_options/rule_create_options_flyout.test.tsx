@@ -12,6 +12,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { RuleCreateOptionsFlyout } from './rule_create_options_flyout';
 
 let mockAreAgentBuilderSkillsAvailable = true;
+let mockAlertingV2ExperimentalFeaturesEnabled = true;
 let mockAgentBuilderSkillsRequirements = {
   hasAgentBuilderCapability: true,
   isExperimentalFeaturesEnabled: true,
@@ -20,6 +21,10 @@ let mockAgentBuilderSkillsRequirements = {
 jest.mock('../../hooks/use_are_agent_builder_skills_available', () => ({
   useAreAgentBuilderSkillsAvailable: () => mockAreAgentBuilderSkillsAvailable,
   useAgentBuilderSkillsRequirements: () => mockAgentBuilderSkillsRequirements,
+}));
+
+jest.mock('../../hooks/use_alerting_v2_experimental_features', () => ({
+  useAlertingV2ExperimentalFeatures: () => mockAlertingV2ExperimentalFeaturesEnabled,
 }));
 
 const onClose = jest.fn();
@@ -43,6 +48,7 @@ describe('RuleCreateOptionsFlyout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockAreAgentBuilderSkillsAvailable = true;
+    mockAlertingV2ExperimentalFeaturesEnabled = true;
     mockAgentBuilderSkillsRequirements = {
       hasAgentBuilderCapability: true,
       isExperimentalFeaturesEnabled: true,
