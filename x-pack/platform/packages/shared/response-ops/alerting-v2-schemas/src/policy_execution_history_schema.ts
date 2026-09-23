@@ -14,9 +14,6 @@ import {
   EXECUTION_HISTORY_DEFAULT_PER_PAGE,
   EXECUTION_HISTORY_MAX_RESULT_WINDOW,
   EXECUTION_HISTORY_MAX_RULE_ID_FILTER,
-  EXECUTION_HISTORY_DEFAULT_PAGE,
-  EXECUTION_HISTORY_DEFAULT_SORT,
-  EXECUTION_HISTORY_DEFAULT_SORT_ORDER,
 } from './constants';
 
 /**
@@ -69,7 +66,7 @@ const sharedFilterFields = {
 export const listPolicyExecutionHistoryRequestSchema = z
   .object({
     page: queryIntSchema({ min: 1, max: EXECUTION_HISTORY_MAX_RESULT_WINDOW })
-      .default(EXECUTION_HISTORY_DEFAULT_PAGE)
+      .default(1)
       .describe('Page number (1-indexed). Defaults to 1.'),
     per_page: queryIntSchema({ min: 0, max: EXECUTION_HISTORY_MAX_PER_PAGE })
       .default(EXECUTION_HISTORY_DEFAULT_PER_PAGE)
@@ -93,12 +90,12 @@ export const listPolicyExecutionHistoryRequestSchema = z
       ),
     sort: z
       .enum(['dispatched_at'])
-      .default(EXECUTION_HISTORY_DEFAULT_SORT)
-      .describe(`Sort field. Defaults to ${EXECUTION_HISTORY_DEFAULT_SORT}.`),
+      .default('dispatched_at')
+      .describe('Sort field. Defaults to "dispatched_at".'),
     sort_order: z
       .enum(['asc', 'desc'])
-      .default(EXECUTION_HISTORY_DEFAULT_SORT_ORDER)
-      .describe(`Sort direction. Defaults to ${EXECUTION_HISTORY_DEFAULT_SORT_ORDER}`),
+      .default('desc')
+      .describe('Sort direction. Defaults to "desc".'),
     ...sharedFilterFields,
   })
   .strict()

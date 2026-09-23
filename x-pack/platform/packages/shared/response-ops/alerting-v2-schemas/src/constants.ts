@@ -114,9 +114,6 @@ export const VERSION_MAX_LENGTH = 256;
 /** Maximum number of execution-history events returned per page (rule + action policy streams). */
 export const EXECUTION_HISTORY_MAX_PER_PAGE = 100;
 
-/** Default page when `page` value is omitted. */
-export const EXECUTION_HISTORY_DEFAULT_PAGE = 1;
-
 /** Default number of execution-history events returned per page when `per_page` is omitted. */
 export const EXECUTION_HISTORY_DEFAULT_PER_PAGE = 20;
 
@@ -130,12 +127,6 @@ export const EXECUTION_HISTORY_MAX_RESULT_WINDOW = 10_000;
  * filter.
  */
 export const EXECUTION_HISTORY_MAX_RULE_ID_FILTER = 50;
-
-/** Default property to sort by */
-export const EXECUTION_HISTORY_DEFAULT_SORT = 'dispatched_at';
-
-/** Default sort order */
-export const EXECUTION_HISTORY_DEFAULT_SORT_ORDER = 'desc';
 
 /** Maximum number of rule templates returned per page. */
 export const RULE_TEMPLATE_MAX_PER_PAGE = 100;
