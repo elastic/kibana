@@ -1619,6 +1619,221 @@ export const TemplateDryRunResponse = lazySchema(() =>
 export type TemplateDryRunResponse = z.infer<typeof TemplateDryRunResponse>;
 
 /**
+  * A field definition from the field library. The `legacyKey` attribute, which is a server-managed link to a migrated custom field, is not included in the public API response.
+
+  */
+export const FieldDefinitionResponse = lazySchema(() =>
+  z.object({
+    /**
+      * Unique server-assigned identifier for the field definition (UUID). May be UUIDv4 for definitions created through the public API, or UUIDv5 for definitions created by internal migration processes.
+
+      */
+    fieldDefinitionId: z
+      .string()
+      .max(36)
+      .describe(
+        'Unique server-assigned identifier for the field definition (UUID). May be UUIDv4 for definitions created through the public API, or UUIDv5 for definitions created by internal migration processes.\n'
+      ),
+    /**
+      * The field name. Must match the `name` property in the YAML definition and is unique per owner (case-insensitive). Immutable after creation.
+
+      */
+    name: z
+      .string()
+      .describe(
+        'The field name. Must match the `name` property in the YAML definition and is unique per owner (case-insensitive). Immutable after creation.\n'
+      ),
+    /**
+      * The field definition as a YAML string. New definitions are limited to 30 000 characters, but existing definitions created via internal tooling may be longer.
+
+      */
+    definition: z
+      .string()
+      .describe(
+        'The field definition as a YAML string. New definitions are limited to 30 000 characters, but existing definitions created via internal tooling may be longer.\n'
+      ),
+    /**
+     * The application that owns this field definition.
+     */
+    owner: z.string().max(50).describe('The application that owns this field definition.'),
+    /**
+     * Optional human-readable description of the field's purpose.
+     */
+    description: z
+      .string()
+      .optional()
+      .describe("Optional human-readable description of the field's purpose."),
+    /**
+      * When true, this field is rendered in every case regardless of which template the case uses.
+
+      */
+    isGlobal: z
+      .boolean()
+      .optional()
+      .describe(
+        'When true, this field is rendered in every case regardless of which template the case uses.\n'
+      ),
+    /**
+      * Position of a global field in the case details view. Assigned by the server and changed via the Field Library reorder controls.
+
+      */
+    displayOrder: z
+      .number()
+      .int()
+      .min(0)
+      .optional()
+      .describe(
+        'Position of a global field in the case details view. Assigned by the server and changed via the Field Library reorder controls.\n'
+      ),
+  })
+);
+export type FieldDefinitionResponse = z.infer<typeof FieldDefinitionResponse>;
+
+/**
+ * A paginated list of reusable field definitions.
+ */
+export const GetCaseFieldDefinitionsResponse = lazySchema(() =>
+  z.object({
+    fieldDefinitions: z.array(FieldDefinitionResponse),
+    /**
+     * The current page number.
+     */
+    page: z.number().int().min(1).describe('The current page number.'),
+    /**
+     * The number of items per page.
+     */
+    perPage: z.number().int().min(1).max(100).describe('The number of items per page.'),
+    /**
+     * The total number of field definitions matching the query (before pagination).
+     */
+    total: z
+      .number()
+      .int()
+      .min(0)
+      .describe('The total number of field definitions matching the query (before pagination).'),
+  })
+);
+export type GetCaseFieldDefinitionsResponse = z.infer<typeof GetCaseFieldDefinitionsResponse>;
+
+/**
+  * The body for creating or updating a field definition.
+
+Resource limits (enforced on write; a violation returns `400`): an owner may have at most 200 field definitions per space. The `definition` string may not exceed 30000 characters.
+
+Identity constraints: the `name` property must match the `name` key in the YAML `definition`. When `name` is omitted, the server extracts it from the `definition` YAML automatically. Once created, a field's `name` and YAML `type` are immutable — they determine the key under which case values are stored. An attempt to change either returns `409` with `attributes.code = "field_identity_immutable"` and `attributes.changed` listing which identity attributes were modified.
+
+  */
+export const FieldDefinitionWriteRequest = lazySchema(() =>
+  z
+    .object({
+      /**
+      * The field name, unique per owner (case-insensitive). Must match the `name` key inside the YAML definition. When omitted, the name is extracted from the definition YAML automatically. Immutable after creation.
+
+      */
+      name: z
+        .string()
+        .min(1)
+        .max(50)
+        .optional()
+        .describe(
+          'The field name, unique per owner (case-insensitive). Must match the `name` key inside the YAML definition. When omitted, the name is extracted from the definition YAML automatically. Immutable after creation.\n'
+        ),
+      /**
+       * The application that owns this field definition.
+       */
+      owner: z.string().min(1).max(30).describe('The application that owns this field definition.'),
+      /**
+       * The field definition as a YAML string describing a single field (type, label, control, metadata).
+       */
+      definition: z
+        .string()
+        .max(30000)
+        .describe(
+          'The field definition as a YAML string describing a single field (type, label, control, metadata).'
+        ),
+      /**
+       * Optional human-readable description of the field's purpose.
+       */
+      description: z
+        .string()
+        .max(1000)
+        .optional()
+        .describe("Optional human-readable description of the field's purpose."),
+      /**
+      * When true, this field is rendered in every case for this owner, regardless of the template used. Global fields cannot be demoted (set to false) while they are linked to an active custom field in the Cases configuration.
+
+      */
+      isGlobal: z
+        .boolean()
+        .optional()
+        .describe(
+          'When true, this field is rendered in every case for this owner, regardless of the template used. Global fields cannot be demoted (set to false) while they are linked to an active custom field in the Cases configuration.\n'
+        ),
+    })
+    .strict()
+);
+export type FieldDefinitionWriteRequest = z.infer<typeof FieldDefinitionWriteRequest>;
+
+/**
+  * The body for updating a field definition.
+
+Identity constraints: the `name` property must match the `name` key in the YAML `definition`. When `name` is omitted, the server extracts it from the `definition` YAML automatically. A field's `name` and YAML `type` are immutable — an attempt to change either returns `409` with `attributes.code = "field_identity_immutable"` and `attributes.changed` listing which identity attributes were modified.
+
+Unlike the POST endpoint, PUT allows an unchanged `definition` to be submitted even if it exceeds 30 000 characters, so that field definitions created through internal tooling remain modifiable. When the submitted `definition` differs from the stored value, the 30 000-character limit is enforced. A hard upper bound of 1 000 000 characters always applies regardless of whether the definition is changed.
+
+  */
+export const FieldDefinitionPutRequest = lazySchema(() =>
+  z
+    .object({
+      /**
+      * The field name, unique per owner (case-insensitive). Must match the `name` key inside the YAML definition. When omitted, the name is extracted from the definition YAML automatically. Immutable after creation. Unlike POST, the 50-character limit is not enforced on PUT so that definitions with legacy names that exceed the limit remain modifiable.
+
+      */
+      name: z
+        .string()
+        .min(1)
+        .max(1000)
+        .optional()
+        .describe(
+          'The field name, unique per owner (case-insensitive). Must match the `name` key inside the YAML definition. When omitted, the name is extracted from the definition YAML automatically. Immutable after creation. Unlike POST, the 50-character limit is not enforced on PUT so that definitions with legacy names that exceed the limit remain modifiable.\n'
+        ),
+      /**
+       * The application that owns this field definition.
+       */
+      owner: z.string().min(1).max(30).describe('The application that owns this field definition.'),
+      /**
+       * The field definition as a YAML string describing a single field (type, label, control, metadata).
+       */
+      definition: z
+        .string()
+        .max(1000000)
+        .describe(
+          'The field definition as a YAML string describing a single field (type, label, control, metadata).'
+        ),
+      /**
+       * Optional human-readable description of the field's purpose.
+       */
+      description: z
+        .string()
+        .max(1000)
+        .optional()
+        .describe("Optional human-readable description of the field's purpose."),
+      /**
+      * When true, this field is rendered in every case for this owner, regardless of the template used. Global fields cannot be demoted (set to false) while they are linked to an active custom field in the Cases configuration.
+
+      */
+      isGlobal: z
+        .boolean()
+        .optional()
+        .describe(
+          'When true, this field is rendered in every case for this owner, regardless of the template used. Global fields cannot be demoted (set to false) while they are linked to an active custom field in the Cases configuration.\n'
+        ),
+    })
+    .strict()
+);
+export type FieldDefinitionPutRequest = z.infer<typeof FieldDefinitionPutRequest>;
+
+/**
   * The fields a caller may apply to a case's `extended_fields`. When no template is in scope, this is the owner's global (library-wide) fields; when a template is applied, it also includes that template's fields. Migrated legacy custom fields appear here as `global` fields, so existing automations can look up the exact key to write.
 
   */
