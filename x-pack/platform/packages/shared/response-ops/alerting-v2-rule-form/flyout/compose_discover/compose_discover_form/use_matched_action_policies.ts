@@ -15,6 +15,8 @@ interface UseMatchedActionPoliciesParams {
   tags?: string[];
 }
 
+export const MATCHED_ACTION_POLICIES_QUERY_KEY = ['matchedActionPolicies'] as const;
+
 export interface UseMatchedActionPoliciesResult {
   isLoading: boolean;
   error: Error | null;
@@ -31,7 +33,7 @@ export const useMatchedActionPolicies = ({
   const body = { rule: tags?.length ? { tags } : {} };
 
   const { isLoading, error, data } = useQuery({
-    queryKey: ['matchedActionPolicies', tags],
+    queryKey: [...MATCHED_ACTION_POLICIES_QUERY_KEY, tags],
     queryFn: () =>
       http.fetch<MatchActionPoliciesResponse>(ALERTING_V2_INTERNAL_ACTION_POLICY_MATCH_API_PATH, {
         method: 'POST',

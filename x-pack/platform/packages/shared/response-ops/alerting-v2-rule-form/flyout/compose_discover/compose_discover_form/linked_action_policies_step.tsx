@@ -6,6 +6,7 @@
  */
 
 import {
+  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
@@ -18,12 +19,16 @@ import {
 import type { HttpStart } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout } from '@kbn/ui-callout';
-import React from 'react';
+import { useQueryClient } from '@kbn/react-query';
+import React, { useState } from 'react';
 import { useWatch } from 'react-hook-form';
 import type { FormValues } from '../../../form/types';
 import { MatchedPolicyReason } from './matched_policy_reason';
 import { useActionPolicyConnectorTypes } from './use_action_policy_connector_types';
-import { useMatchedActionPolicies } from './use_matched_action_policies';
+import {
+  MATCHED_ACTION_POLICIES_QUERY_KEY,
+  useMatchedActionPolicies,
+} from './use_matched_action_policies';
 import { WorkflowConnectorIcons } from './workflow_connector_icons';
 
 const actionPoliciesTitle = i18n.translate(
@@ -61,11 +66,17 @@ const getEditLabel = (name: string) =>
 
 interface Props {
   http: HttpStart;
+  CreateActionPolicyFormFlyout?: React.ComponentType<{
+    onClose: () => void;
+    onSuccess: () => void;
+  }>;
 }
 
-export const LinkedActionPoliciesStep = ({ http }: Props) => {
+export const LinkedActionPoliciesStep = ({ http, CreateActionPolicyFormFlyout }: Props) => {
   const metadata = useWatch<FormValues, 'metadata'>({ name: 'metadata' });
   const tags = metadata?.tags;
+  const queryClient = useQueryClient();
+  const [isCreateFlyoutOpen, setIsCreateFlyoutOpen] = useState(false);
 
   const { isLoading, error, items } = useMatchedActionPolicies({ http, tags });
   const ruleTags = tags ?? [];
@@ -149,6 +160,32 @@ export const LinkedActionPoliciesStep = ({ http }: Props) => {
             })}
           </EuiFlexGroup>
         ))}
+
+      {CreateActionPolicyFormFlyout && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiButton
+            iconType="plus"
+            onClick={() => setIsCreateFlyoutOpen(true)}
+            data-test-subj="createActionPolicyButton"
+          >
+            {i18n.translate(
+              'xpack.responseOps.alertingV2RuleForm.linkedActionPolicies.createButton',
+              { defaultMessage: 'Create action policy' }
+            )}
+          </EuiButton>
+        </>
+      )}
+
+      {CreateActionPolicyFormFlyout && isCreateFlyoutOpen && (
+        <CreateActionPolicyFormFlyout
+          onClose={() => setIsCreateFlyoutOpen(false)}
+          onSuccess={() => {
+            setIsCreateFlyoutOpen(false);
+            queryClient.invalidateQueries({ queryKey: MATCHED_ACTION_POLICIES_QUERY_KEY });
+          }}
+        />
+      )}
     </>
   );
 };

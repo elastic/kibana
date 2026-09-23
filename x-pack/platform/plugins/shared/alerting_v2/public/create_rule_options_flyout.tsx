@@ -32,6 +32,7 @@ import {
 } from './hooks/use_are_agent_builder_skills_available';
 import { RulesApi } from './services/rules_api';
 import { CREATE_WITH_AGENT_INITIAL_PROMPT, AGENT_BUILDER_NEW_CONVERSATION_PATH } from './constants';
+import { CreateActionPolicyFormFlyout } from './components/action_policy/form_flyout/create_action_policy_form_flyout';
 
 export interface CreateRuleOptionsFlyoutLegacyItem {
   id: string;
@@ -124,7 +125,10 @@ const CreateRuleOptionsFlyoutInner = ({
       import('@kbn/alerting-v2-rule-form'),
     ]);
     return {
-      services,
+      services: {
+        ...services,
+        createActionPolicyFormFlyout: CreateActionPolicyFormFlyout,
+      },
       ComposeDiscoverFlyout: mod.ComposeDiscoverFlyout,
     };
   }, []);
