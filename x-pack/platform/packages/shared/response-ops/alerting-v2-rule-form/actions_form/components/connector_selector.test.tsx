@@ -6,13 +6,15 @@
  */
 
 import '@testing-library/jest-dom';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import React from 'react';
 import { ConnectorSelector } from './connector_selector';
 
 const mockGetAddConnectorFlyout = jest.fn(() => <div data-test-subj="addConnectorFlyout" />);
+const mockInvalidateQueries = jest.fn();
+const mockSetQueryData = jest.fn();
 
 jest.mock('@kbn/core-di-browser', () => ({
   useService: (token: unknown) => {
@@ -35,7 +37,10 @@ jest.mock('../hooks/use_fetch_connectors_by_type', () => ({
 }));
 
 jest.mock('@kbn/react-query', () => ({
-  useQueryClient: () => ({ setQueryData: jest.fn() }),
+  useQueryClient: () => ({
+    invalidateQueries: mockInvalidateQueries,
+    setQueryData: mockSetQueryData,
+  }),
 }));
 
 const renderSelector = (
@@ -75,6 +80,20 @@ describe('ConnectorSelector', () => {
       'rel',
       'noopener noreferrer'
     );
+  });
+
+  it('refreshes connectors whenever the selector is opened', () => {
+    renderSelector();
+
+    const selector = screen.getByTestId('singleStepWorkflowConnectorSelect');
+    fireEvent.focus(selector);
+    expect(mockInvalidateQueries).toHaveBeenCalledWith({
+      queryKey: ['alertingV2', 'actionForm', 'connectors'],
+    });
+
+    fireEvent.blur(selector);
+    fireEvent.focus(selector);
+    expect(mockInvalidateQueries).toHaveBeenCalledTimes(2);
   });
 
   it('opens the connector flyout by default', async () => {

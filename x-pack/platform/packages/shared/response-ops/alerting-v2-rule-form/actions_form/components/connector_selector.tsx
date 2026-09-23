@@ -124,6 +124,7 @@ export const ConnectorSelector = ({
             }
           )}
           selectedOptions={selected}
+          onFocus={() => queryClient.invalidateQueries({ queryKey: ALL_CONNECTORS_KEY })}
           onChange={(next) => onChange(next[0]?.value ?? null)}
           options={options}
         />
