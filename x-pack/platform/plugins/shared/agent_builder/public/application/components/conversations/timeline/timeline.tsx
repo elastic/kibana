@@ -10,6 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import moment from 'moment';
 import type { AgentDefinition, VersionedAttachment } from '@kbn/agent-builder-common';
 import { UserMessageEvent } from './items/user_message_event';
+import { AttachmentEvent } from './items/attachment_event';
 import { AgentTurn } from './agent_turn';
 import { ConversationDateDivider } from './conversation_date_divider';
 import type { TimelineItem } from './types';
@@ -60,6 +61,11 @@ export const Timeline: React.FC<TimelineProps> = ({
                   conversationAttachments={conversationAttachments}
                   isResuming={isResuming && index === items.length - 1}
                 />
+              );
+              break;
+            case 'attachment':
+              content = (
+                <AttachmentEvent item={item} conversationAttachments={conversationAttachments} />
               );
               break;
             default:
