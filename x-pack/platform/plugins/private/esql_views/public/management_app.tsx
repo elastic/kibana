@@ -6,25 +6,50 @@
  */
 
 import type { FunctionComponent } from 'react';
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
+import type { IToasts } from '@kbn/core/public';
+import type { EsqlView } from '@kbn/esql-types';
 import type { EsqlViewsClient } from '@kbn/esql-utils';
 import { PLUGIN_NAME } from '../common';
+import { DeleteViewsModal } from './delete_views_modal';
 import { EsqlViewsTable } from './esql_views_table';
 import { translations } from './translations';
+import type { DiscoverEsqlLocator } from './types';
+import { useDeleteEsqlViews } from './use_delete_esql_views';
 import { useEsqlViews } from './use_esql_views';
 
 interface ManagementAppProps {
   client: EsqlViewsClient;
+  discoverLocator?: DiscoverEsqlLocator;
   documentationUrl: string;
+  toasts: IToasts;
 }
 
 export const ManagementApp: FunctionComponent<ManagementAppProps> = ({
   client,
+  discoverLocator,
   documentationUrl,
+  toasts,
 }) => {
   const { error, isLoading, reload, status, views } = useEsqlViews(client);
+  const [selectedViews, setSelectedViews] = useState<EsqlView[]>([]);
+
+  const onDeleted = useCallback(() => {
+    setSelectedViews([]);
+    reload();
+  }, [reload]);
+
+  const { viewsPendingDelete, isDeleting, requestDelete, cancelDelete, confirmDelete } =
+    useDeleteEsqlViews({ client, toasts, onDeleted });
+
+  const openInDiscover = useCallback(
+    (view: EsqlView) => {
+      discoverLocator?.navigateSync({ query: { esql: `FROM ${view.name}` } });
+    },
+    [discoverLocator]
+  );
 
   let content: React.ReactNode;
 
@@ -72,7 +97,17 @@ export const ManagementApp: FunctionComponent<ManagementAppProps> = ({
     );
   } else {
     content = (
-      <EsqlViewsTable views={views} error={error} isLoading={isLoading} onReload={reload} />
+      <EsqlViewsTable
+        views={views}
+        error={error}
+        isLoading={isLoading}
+        isDiscoverAvailable={discoverLocator !== undefined}
+        selectedViews={selectedViews}
+        onSelectionChange={setSelectedViews}
+        onReload={reload}
+        onDelete={requestDelete}
+        onOpenInDiscover={openInDiscover}
+      />
     );
   }
 
@@ -88,6 +123,14 @@ export const ManagementApp: FunctionComponent<ManagementAppProps> = ({
       />
       <EuiSpacer size="l" />
       {content}
+      {viewsPendingDelete.length > 0 && (
+        <DeleteViewsModal
+          views={viewsPendingDelete}
+          isDeleting={isDeleting}
+          onCancel={cancelDelete}
+          onConfirm={confirmDelete}
+        />
+      )}
     </div>
   );
 };

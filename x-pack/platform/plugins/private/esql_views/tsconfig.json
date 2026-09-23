@@ -12,11 +12,14 @@
     "@kbn/app-header",
     "@kbn/config-schema",
     "@kbn/core",
+    "@kbn/deeplinks-analytics",
     "@kbn/esql-types",
     "@kbn/esql-utils",
     "@kbn/features-plugin",
     "@kbn/i18n",
-    "@kbn/management-plugin"
+    "@kbn/management-plugin",
+    "@kbn/share-plugin",
+    "@kbn/utility-types"
   ],
   "exclude": [
     "target/**/*"

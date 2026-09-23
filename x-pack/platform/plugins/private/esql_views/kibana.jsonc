@@ -17,7 +17,8 @@
     ],
     "requiredPlugins": [
       "features",
-      "management"
+      "management",
+      "share"
     ]
   }
 }

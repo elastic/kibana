@@ -73,4 +73,70 @@ export const translations = {
   noSearchResultsTitle: i18n.translate('xpack.esqlViews.managementPage.noSearchResultsTitle', {
     defaultMessage: 'No views match your search',
   }),
+  actionsColumn: i18n.translate('xpack.esqlViews.managementPage.actionsColumn', {
+    defaultMessage: 'Actions',
+  }),
+  selectRow: i18n.translate('xpack.esqlViews.managementPage.selectRow', {
+    defaultMessage: 'Select this row',
+  }),
+  openInDiscoverAction: i18n.translate('xpack.esqlViews.managementPage.openInDiscoverAction', {
+    defaultMessage: 'Open in Discover',
+  }),
+  openInDiscoverActionDescription: i18n.translate(
+    'xpack.esqlViews.managementPage.openInDiscoverActionDescription',
+    {
+      defaultMessage: 'Open this view in Discover',
+    }
+  ),
+  deleteAction: i18n.translate('xpack.esqlViews.managementPage.deleteAction', {
+    defaultMessage: 'Delete',
+  }),
+  allActions: i18n.translate('xpack.esqlViews.managementPage.allActions', {
+    defaultMessage: 'All actions',
+  }),
+  allActionsForView: (name: string) =>
+    i18n.translate('xpack.esqlViews.managementPage.allActionsForView', {
+      defaultMessage: 'All actions for view "{name}"',
+      values: { name },
+    }),
+  bulkDeleteButton: (count: number) =>
+    i18n.translate('xpack.esqlViews.managementPage.bulkDeleteButton', {
+      defaultMessage: 'Delete {count, plural, one {# view} other {# views}}',
+      values: { count },
+    }),
+  deleteModalTitle: (count: number, name: string) =>
+    i18n.translate('xpack.esqlViews.managementPage.deleteModal.title', {
+      defaultMessage: '{count, plural, one {Delete view "{name}"?} other {Delete # views?}}',
+      values: { count, name },
+    }),
+  deleteModalBody: (count: number) =>
+    i18n.translate('xpack.esqlViews.managementPage.deleteModal.body', {
+      defaultMessage:
+        '{count, plural, one {This permanently deletes the view from Elasticsearch. Any query that references this view will fail, including queries in dashboards, alerts, and other saved objects.} other {This permanently deletes # views from Elasticsearch. Any query that references these views will fail, including queries in dashboards, alerts, and other saved objects.}}',
+      values: { count },
+    }),
+  deleteModalCancelButton: i18n.translate(
+    'xpack.esqlViews.managementPage.deleteModal.cancelButton',
+    {
+      defaultMessage: 'Cancel',
+    }
+  ),
+  deleteModalConfirmButton: i18n.translate(
+    'xpack.esqlViews.managementPage.deleteModal.confirmButton',
+    {
+      defaultMessage: 'Delete',
+    }
+  ),
+  deleteSuccess: (count: number, name: string) =>
+    i18n.translate('xpack.esqlViews.managementPage.deleteSuccess', {
+      defaultMessage:
+        '{count, plural, one {View "{name}" was deleted.} other {# views were deleted.}}',
+      values: { count, name },
+    }),
+  deleteError: (count: number, name: string) =>
+    i18n.translate('xpack.esqlViews.managementPage.deleteError', {
+      defaultMessage:
+        '{count, plural, one {Failed to delete view "{name}".} other {Failed to delete # views.}}',
+      values: { count, name },
+    }),
 };
