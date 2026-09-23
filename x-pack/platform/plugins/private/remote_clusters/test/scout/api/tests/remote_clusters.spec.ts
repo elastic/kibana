@@ -94,7 +94,7 @@ apiTest.describe('Remote clusters API', { tag: ['@local-stateful-classic'] }, ()
   // Proves `manage` is required, not just sufficient.
   apiTest(
     'rejects a write from a role without the manage cluster privilege',
-    async ({ apiClient, requestAuth }) => {
+    async ({ apiClient, requestAuth, esClient }) => {
       const monitorOnly = await requestAuth.getApiKeyForCustomRole(
         REMOTE_CLUSTERS_MONITOR_ONLY_ROLE
       );
@@ -111,11 +111,12 @@ apiTest.describe('Remote clusters API', { tag: ['@local-stateful-classic'] }, ()
       });
 
       expect(response).toHaveStatusCode(403);
+      expect(await getPersistedClusterSettings(esClient, CLUSTER_NAME)).toBeUndefined();
     }
   );
 
   apiTest('rejects a cluster whose name already exists', async ({ apiClient, esClient }) => {
-    await seedSniffCluster(esClient, CLUSTER_NAME, { seeds: [nodeSeed] });
+    await seedSniffCluster(esClient, CLUSTER_NAME, { seeds: [nodeSeed], skipUnavailable: true });
 
     const response = await apiClient.post(API_BASE_PATH, {
       headers: { ...COMMON_HEADERS, ...credentials.apiKeyHeader },
@@ -133,6 +134,11 @@ apiTest.describe('Remote clusters API', { tag: ['@local-stateful-classic'] }, ()
       statusCode: 409,
       error: 'Conflict',
       message: 'There is already a remote cluster with that name.',
+    });
+    expect(await getPersistedClusterSettings(esClient, CLUSTER_NAME)).toStrictEqual({
+      mode: 'sniff',
+      seeds: [nodeSeed],
+      skip_unavailable: 'true',
     });
   });
 
@@ -219,6 +225,7 @@ apiTest.describe('Remote clusters API', { tag: ['@local-stateful-classic'] }, ()
 
     expect(response).toHaveStatusCode(200);
     expect(response.body).toStrictEqual({ itemsDeleted: [CLUSTER_NAME], errors: [] });
+    expect(await getPersistedClusterSettings(esClient, CLUSTER_NAME)).toBeUndefined();
   });
 
   apiTest('deletes multiple remote clusters in one request', async ({ apiClient, esClient }) => {
@@ -233,8 +240,11 @@ apiTest.describe('Remote clusters API', { tag: ['@local-stateful-classic'] }, ()
 
     expect(response).toHaveStatusCode(200);
     expect(response.body.errors).toStrictEqual([]);
-    // The order isn't guaranteed, so assert on membership rather than on the array itself.
-    expect(response.body.itemsDeleted).toStrictEqual(expect.arrayContaining(EXTRA_CLUSTER_NAMES));
+    // The order isn't guaranteed, so compare sorted copies.
+    expect([...response.body.itemsDeleted].sort()).toStrictEqual([...EXTRA_CLUSTER_NAMES].sort());
+    for (const name of EXTRA_CLUSTER_NAMES) {
+      expect(await getPersistedClusterSettings(esClient, name)).toBeUndefined();
+    }
   });
 
   apiTest('reports clusters that could not be deleted', async ({ apiClient }) => {

@@ -1,5 +1,5 @@
 {
-  "sha1": "fcad158f0f7f9f3361714d3be2a3b1c594053368",
+  "sha1": "0a2f833d5c644a41556df70d8fc4e86e26ce1a80",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -65,8 +65,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/remote_clusters/test/scout/api/tests/remote_clusters.spec.ts",
-        "line": 127,
-        "column": 15
+        "line": 135,
+        "column": 24
       }
     },
     {
@@ -78,8 +78,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/remote_clusters/test/scout/api/tests/remote_clusters.spec.ts",
-        "line": 165,
-        "column": 24
+        "line": 172,
+        "column": 23
       }
     },
     {
@@ -91,8 +91,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/remote_clusters/test/scout/api/tests/remote_clusters.spec.ts",
-        "line": 207,
-        "column": 28
+        "line": 215,
+        "column": 9
       }
     },
     {
@@ -104,8 +104,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/remote_clusters/test/scout/api/tests/remote_clusters.spec.ts",
-        "line": 221,
-        "column": 86
+        "line": 229,
+        "column": 5
       }
     },
     {
@@ -117,8 +117,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/remote_clusters/test/scout/api/tests/remote_clusters.spec.ts",
-        "line": 236,
-        "column": 5
+        "line": 250,
+        "column": 82
       }
     }
   ]
