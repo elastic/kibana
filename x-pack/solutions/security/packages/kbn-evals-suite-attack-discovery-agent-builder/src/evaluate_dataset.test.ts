@@ -1349,13 +1349,33 @@ describe('retrieval evidence persisted on the task output', () => {
 describe('slow-path handoff (#293046): insights from pipeline validated discoveries', () => {
   it('maps snake_case validated discoveries into harness AttackDiscovery shape', () => {
     const insights = insightsFromValidatedDiscoveries([
-      { title: 'LSASS credential access chain', alert_ids: ['a1', 'a2'] },
-      { title: 'Cloud OAuth abuse', alert_ids: ['b1'] },
+      {
+        title: 'LSASS credential access chain',
+        summary_markdown: 'summary A',
+        details_markdown: 'details A',
+        alert_ids: ['a1', 'a2'],
+      },
+      {
+        title: 'Cloud OAuth abuse',
+        summary_markdown: 'summary B',
+        details_markdown: 'details B',
+        alert_ids: ['b1'],
+      },
     ]);
 
     expect(insights).toEqual([
-      { title: 'LSASS credential access chain', alertIds: ['a1', 'a2'] },
-      { title: 'Cloud OAuth abuse', alertIds: ['b1'] },
+      {
+        title: 'LSASS credential access chain',
+        summaryMarkdown: 'summary A',
+        detailsMarkdown: 'details A',
+        alertIds: ['a1', 'a2'],
+      },
+      {
+        title: 'Cloud OAuth abuse',
+        summaryMarkdown: 'summary B',
+        detailsMarkdown: 'details B',
+        alertIds: ['b1'],
+      },
     ]);
   });
 

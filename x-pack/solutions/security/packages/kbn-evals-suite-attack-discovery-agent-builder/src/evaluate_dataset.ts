@@ -1122,6 +1122,12 @@ export const insightsFromValidatedDiscoveries = (
     const d = (entry ?? {}) as Record<string, unknown>;
     return {
       title: typeof d.title === 'string' ? d.title : '',
+      // The evaluator's shape contract (AttackDiscoveryBasic) requires
+      // non-empty summaryMarkdown and detailsMarkdown; the pipeline persists
+      // snake_case fields. Missing strings become '' so the evaluator scores
+      // the shape honestly instead of us fabricating content.
+      summaryMarkdown: typeof d.summary_markdown === 'string' ? d.summary_markdown : '',
+      detailsMarkdown: typeof d.details_markdown === 'string' ? d.details_markdown : '',
       alertIds: Array.isArray(d.alert_ids) ? (d.alert_ids as string[]) : [],
     } as AttackDiscovery;
   });
