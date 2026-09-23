@@ -191,35 +191,45 @@ describe('SavedObjectInvestigationSweepRepository', () => {
       });
     });
 
-    it('records per-investigation failures and stops when a batch makes no progress', async () => {
+    it('advances past a failed page and still deletes older investigations', async () => {
       const { repository, savedObjects } = createRepository();
-      savedObjects.find.mockResolvedValue(
-        findResponse([foundInvestigation({ id: 'inv-1', namespaces: ['team-a'] })])
-      );
-      savedObjects.bulkDelete.mockResolvedValue({
-        statuses: [
-          {
-            id: 'inv-1',
-            type: TYPE,
-            success: false,
-            error: { statusCode: 500, error: 'Internal Server Error', message: 'delete failed' },
-          },
-        ],
-      });
+      savedObjects.find
+        .mockResolvedValueOnce(
+          findResponse([foundInvestigation({ id: 'inv-1', namespaces: ['team-a'] })])
+        )
+        .mockResolvedValueOnce(
+          findResponse([foundInvestigation({ id: 'inv-2', namespaces: ['team-b'] })])
+        )
+        .mockResolvedValueOnce(
+          findResponse([foundInvestigation({ id: 'inv-1', namespaces: ['team-a'] })])
+        )
+        .mockResolvedValueOnce(findResponse([]));
+      const failedStatus = {
+        id: 'inv-1',
+        type: TYPE,
+        success: false,
+        error: { statusCode: 500, error: 'Internal Server Error', message: 'delete failed' },
+      } as const;
+      savedObjects.bulkDelete
+        .mockResolvedValueOnce({ statuses: [failedStatus] })
+        .mockResolvedValueOnce({ statuses: [{ id: 'inv-2', type: TYPE, success: true }] })
+        .mockResolvedValueOnce({ statuses: [failedStatus] });
 
       await expect(repository.deleteAllAcrossSpaces()).resolves.toEqual({
-        deleted: 0,
+        deleted: 1,
         failures: [{ id: 'inv-1', spaceId: 'team-a', error: 'delete failed' }],
       });
-      expect(savedObjects.find).toHaveBeenCalledTimes(1);
-      expect(savedObjects.bulkDelete).toHaveBeenCalledTimes(1);
+      expect(savedObjects.find.mock.calls.map(([query]) => query.page)).toEqual([1, 2, 1, 2]);
+      expect(savedObjects.bulkDelete).toHaveBeenCalledTimes(3);
     });
 
     it('treats already-missing investigations as resolved', async () => {
       const { repository, savedObjects } = createRepository();
-      savedObjects.find.mockResolvedValueOnce(
-        findResponse([foundInvestigation({ id: 'inv-1', namespaces: ['team-a'] })])
-      );
+      savedObjects.find
+        .mockResolvedValueOnce(
+          findResponse([foundInvestigation({ id: 'inv-1', namespaces: ['team-a'] })])
+        )
+        .mockResolvedValueOnce(findResponse([]));
       savedObjects.bulkDelete.mockResolvedValueOnce({
         statuses: [
           {

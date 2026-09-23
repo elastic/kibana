@@ -14,10 +14,11 @@ const createClient = () =>
     findStreamNamesWithOwnedRules: jest.fn().mockResolvedValue(['logs.web', 'logs.orphan']),
     getStreamToQueryLinksMap: jest.fn().mockResolvedValue({
       'logs.web': [{ rule_backed: true, rule_id: 'linked-rule' }, { rule_backed: false }],
+      'logs.orphan': [],
     }),
-    getFeatures: jest.fn(async (streamName: string) => ({
-      hits: streamName === 'logs.web' ? [{ id: 'feature-1' }, { id: 'feature-2' }] : [],
-    })),
+    getFeatures: jest.fn().mockResolvedValue({
+      hits: [{ id: 'feature-1' }, { id: 'feature-2' }],
+    }),
     findOwnedRuleIds: jest.fn(async (streamName: string) =>
       streamName === 'logs.orphan' ? ['orphan-rule'] : ['linked-rule', 'owned-rule']
     ),
@@ -33,13 +34,15 @@ describe('collectResetSnapshot', () => {
       storedQueries: 2,
       ruleIds: ['linked-rule', 'owned-rule', 'orphan-rule'],
     });
-    expect(client.getStreamToQueryLinksMap).toHaveBeenCalledWith(['logs.web'], {
+    expect(client.getStreamToQueryLinksMap).toHaveBeenCalledWith(['logs.web', 'logs.orphan'], {
       includeExpired: true,
     });
-    expect(client.getFeatures).toHaveBeenCalledWith('logs.web', {
+    expect(client.getStreamToQueryLinksMap).toHaveBeenCalledTimes(1);
+    expect(client.getFeatures).toHaveBeenCalledWith(['logs.web', 'logs.orphan'], {
       includeExcluded: true,
       includeExpired: true,
     });
+    expect(client.getFeatures).toHaveBeenCalledTimes(1);
     expect(failures).toEqual([]);
   });
 
@@ -63,7 +66,7 @@ describe('collectResetSnapshot', () => {
       error: 'knowledge indicator stream missing',
     });
     expect(failures).toContainEqual({
-      target: 'snapshot:queries:logs.orphan',
+      target: 'snapshot:queries',
       error: 'query stream missing',
     });
   });

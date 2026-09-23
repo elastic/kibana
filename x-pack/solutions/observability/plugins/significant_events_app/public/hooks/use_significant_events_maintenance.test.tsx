@@ -72,10 +72,20 @@ describe('useSignificantEventsMaintenanceActions reset', () => {
         text: expect.stringContaining('2 knowledge indicators'),
       })
     );
-    expect(invalidateQueries).toHaveBeenCalledWith({ type: 'active' });
+    for (const queryKey of [
+      ['significantEvents'],
+      ['detections'],
+      ['features'],
+      ['discoveryQueries'],
+      ['significantEventLifecycle'],
+    ]) {
+      expect(invalidateQueries).toHaveBeenCalledWith({ queryKey, type: 'active' });
+    }
+    expect(invalidateQueries).not.toHaveBeenCalledWith({ type: 'active' });
     expect(invalidateQueries).toHaveBeenCalledWith({
       queryKey: ['significantEventsMaintenanceStatus'],
     });
+    expect(invalidateQueries).toHaveBeenCalledTimes(6);
   });
 
   it('uses warning feedback for partial reset failures', async () => {

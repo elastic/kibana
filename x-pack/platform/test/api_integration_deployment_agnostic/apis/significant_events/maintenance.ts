@@ -161,8 +161,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         });
 
-        // Remove the stored query revision directly so the v2 rule remains owned only by its
-        // stream tag. Reset must discover and delete this orphan independently of KI reads.
+        /* Remove the query revision so Reset must discover its orphan rule from the stream tag. */
         await esClient.deleteByQuery({
           index: '.significant_events-knowledge_indicators',
           refresh: true,

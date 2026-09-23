@@ -193,13 +193,17 @@ function makeService(params?: {
   );
   const getStreamNamesWithKnowledgeIndicators = jest.fn(async () => params?.indicatorStreams ?? []);
   const findStreamNamesWithOwnedRules = jest.fn(async () => params?.ownedRuleStreams ?? []);
-  const getStreamToQueryLinksMap = jest.fn(async ([streamName]: string[]) => ({
-    [streamName]: params?.queryLinksByStream?.[streamName] ?? [],
-  }));
-  const getFeatures = jest.fn(async (streamName: string) => ({
-    hits: Array.from({ length: params?.featureCountsByStream?.[streamName] ?? 0 }, (_, index) => ({
-      id: `${streamName}-${index}`,
-    })),
+  const getStreamToQueryLinksMap = jest.fn(async (streamNames: string[]) =>
+    Object.fromEntries(
+      streamNames.map((streamName) => [streamName, params?.queryLinksByStream?.[streamName] ?? []])
+    )
+  );
+  const getFeatures = jest.fn(async (streamNames: string | string[]) => ({
+    hits: (Array.isArray(streamNames) ? streamNames : [streamNames]).flatMap((streamName) =>
+      Array.from({ length: params?.featureCountsByStream?.[streamName] ?? 0 }, (_, index) => ({
+        id: `${streamName}-${index}`,
+      }))
+    ),
   }));
   const findOwnedRuleIds = jest.fn(
     async (streamName: string) => params?.ownedRuleIdsByStream?.[streamName] ?? []
@@ -231,6 +235,12 @@ function makeService(params?: {
       count: streamDocuments.get(index) ?? 0,
     })),
   };
+  const initializeClient = jest.fn(async (name: string) => {
+    if (!streamDocuments.has(name)) {
+      streamDocuments.set(name, 0);
+    }
+    return {};
+  });
   const deleteAllInvestigations = params?.investigations
     ? jest.fn(async () => params.investigations!)
     : undefined;
@@ -262,6 +272,8 @@ function makeService(params?: {
   const server = {
     core: {
       savedObjects,
+      dataStreams: { initializeClient },
+      elasticsearch: { client: { asInternalUser: esClient } },
       uiSettings: {
         asScopedToClient: jest.fn(() => spaceUiSettingsClient),
       },
@@ -314,6 +326,8 @@ function makeService(params?: {
     getStreamToQueryLinksMap,
     getFeatures,
     findOwnedRuleIds,
+    initializeClient,
+    getScopedClients,
     streamDocuments,
     esClient,
     deleteAllInvestigations,
@@ -758,7 +772,7 @@ describe('SignificantEventsMaintenanceService', () => {
       expect(esClient.indices.createDataStream).toHaveBeenCalledWith({
         name: DETECTIONS_DATA_STREAM,
       });
-      expect(esClient.indices.createDataStream).toHaveBeenCalledWith({
+      expect(esClient.indices.createDataStream).not.toHaveBeenCalledWith({
         name: KNOWLEDGE_INDICATORS_DATA_STREAM,
       });
       expect(esClient.indices.createDataStream).not.toHaveBeenCalledWith({
@@ -771,6 +785,12 @@ describe('SignificantEventsMaintenanceService', () => {
       expect(cancelAllActiveWorkflowExecutions.mock.invocationCallOrder[0]).toBeLessThan(
         deleteAllInvestigations!.mock.invocationCallOrder[0]
       );
+      expect(soClient.create.mock.calls[0][1]).toEqual(
+        expect.objectContaining({ state: 'paused', updatedBy: 'marco' })
+      );
+      expect(soClient.create.mock.invocationCallOrder[0]).toBeLessThan(
+        esClient.indices.deleteDataStream.mock.invocationCallOrder[0]
+      );
       expect(soClient.create).toHaveBeenLastCalledWith(
         SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
         expect.objectContaining({
@@ -781,6 +801,30 @@ describe('SignificantEventsMaintenanceService', () => {
         }),
         { id: SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID, overwrite: true }
       );
+    });
+
+    it('initializes missing registered streams and reports a clean zero-count reset', async () => {
+      const { api } = makeManagementApi();
+      const { service, initializeClient, esClient, streamDocuments } = makeService({
+        management: api,
+        dataStreams: {},
+      });
+
+      const summary = await service.reset({ request: REQUEST });
+
+      expect(initializeClient.mock.calls.map(([name]) => name)).toEqual([
+        DETECTIONS_DATA_STREAM,
+        EVENTS_DATA_STREAM,
+        KNOWLEDGE_INDICATORS_DATA_STREAM,
+      ]);
+      expect(esClient.indices.createDataStream).not.toHaveBeenCalled();
+      expect(summary.deleted?.dataStreams).toBe(0);
+      expect(summary.partialFailures).toEqual([]);
+      expect([...streamDocuments.keys()]).toEqual([
+        DETECTIONS_DATA_STREAM,
+        EVENTS_DATA_STREAM,
+        KNOWLEDGE_INDICATORS_DATA_STREAM,
+      ]);
     });
 
     it('restores non-settings workflows after a paused reset but leaves settings-backed workflows off', async () => {
@@ -919,6 +963,19 @@ describe('SignificantEventsMaintenanceService', () => {
       expect(second.partialFailures).toEqual([]);
     });
 
+    it('fails before destructive work when reset intent cannot be persisted', async () => {
+      const { api, updateWorkflow } = makeManagementApi();
+      const { service, soClient, esClient } = makeService({ management: api });
+      soClient.create.mockRejectedValueOnce(new Error('reset intent write failed'));
+
+      await expect(service.reset({ request: REQUEST })).rejects.toThrow(
+        'reset intent write failed'
+      );
+
+      expect(updateWorkflow).not.toHaveBeenCalled();
+      expect(esClient.indices.deleteDataStream).not.toHaveBeenCalled();
+    });
+
     it('throws when the final maintenance state write fails after destructive side effects', async () => {
       const { api } = makeManagementApi();
       const { service, soClient, esClient } = makeService({
@@ -929,7 +986,9 @@ describe('SignificantEventsMaintenanceService', () => {
           [KNOWLEDGE_INDICATORS_DATA_STREAM]: 0,
         },
       });
-      soClient.create.mockRejectedValueOnce(new Error('reset state write failed'));
+      soClient.create
+        .mockResolvedValueOnce({} as never)
+        .mockRejectedValueOnce(new Error('reset state write failed'));
 
       await expect(service.reset({ request: REQUEST })).rejects.toThrow('reset state write failed');
       expect(esClient.indices.deleteDataStream).toHaveBeenCalledWith(

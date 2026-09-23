@@ -848,6 +848,34 @@ export const createSignificantEventsMaintenanceService = ({
         const existing = await readState();
         const failures: SignificantEventsMaintenanceFailure[] = [];
         const deleted = emptyDeletedCounts();
+
+        if (normalizeState(existing?.state) !== 'paused') {
+          try {
+            await writeState({
+              state: 'paused',
+              updatedAt: new Date().toISOString(),
+              updatedBy,
+              disabledWorkflows: existing?.disabledWorkflows ?? [],
+              disabledRuleIds: existing?.disabledRuleIds ?? [],
+              pausedSettings: existing?.pausedSettings,
+              lastSummary: {
+                state: 'paused',
+                executionsCancelled: 0,
+                workflowsDisabled: existing?.disabledWorkflows.length ?? 0,
+                rulesDisabled: existing?.disabledRuleIds.length ?? 0,
+                partialFailures: [],
+              },
+            });
+          } catch (writeError) {
+            log.error(
+              `Significant Events reset failed before cleanup: could not persist paused intent: ${toMessage(
+                writeError
+              )}`
+            );
+            throw writeError;
+          }
+        }
+
         const spaceIds = await getAllSpaceIds(request, failures);
         const mgmt = server.workflowsManagement?.management;
         const recoveryByKey = new Map<string, MaintenanceWorkflowTarget>();
@@ -928,73 +956,69 @@ export const createSignificantEventsMaintenanceService = ({
           }
         }
 
-        if (!scopedClients) {
+        const esClient = server.core.elasticsearch.client.asInternalUser;
+        for (const name of [
+          DETECTIONS_DATA_STREAM,
+          EVENTS_DATA_STREAM,
+          KNOWLEDGE_INDICATORS_DATA_STREAM,
+        ]) {
           try {
-            scopedClients = await getScopedClients({ request });
+            await server.core.dataStreams.initializeClient(name);
           } catch (error) {
-            failures.push({ target: 'data-streams', error: toMessage(error) });
+            failures.push({ target: `data-stream:${name}:initialize`, error: toMessage(error) });
+          }
+
+          let exists = false;
+          try {
+            exists = await esClient.indices.exists({ index: name });
+          } catch (error) {
+            failures.push({ target: `data-stream:${name}`, error: toMessage(error) });
+          }
+
+          let documentCount: number | undefined;
+          if (exists) {
+            try {
+              documentCount = (await esClient.count({ index: name })).count;
+            } catch (error) {
+              failures.push({ target: `data-stream:${name}:count`, error: toMessage(error) });
+            }
+          }
+
+          let needsCreate = !exists;
+          if (exists && (documentCount === undefined || documentCount > 0)) {
+            try {
+              await esClient.indices.deleteDataStream({ name }, { ignore: [404] });
+              needsCreate = true;
+              if (documentCount !== undefined && documentCount > 0) {
+                deleted.dataStreams += 1;
+              }
+            } catch (error) {
+              failures.push({ target: `data-stream:${name}:delete`, error: toMessage(error) });
+            }
+          }
+
+          if (needsCreate) {
+            try {
+              await esClient.indices.createDataStream({ name });
+            } catch (error) {
+              failures.push({ target: `data-stream:${name}:create`, error: toMessage(error) });
+            }
           }
         }
 
-        const esClient = scopedClients?.scopedClusterClient.asInternalUser;
-        if (esClient) {
-          for (const name of [
-            DETECTIONS_DATA_STREAM,
-            EVENTS_DATA_STREAM,
-            KNOWLEDGE_INDICATORS_DATA_STREAM,
-          ]) {
-            let exists = false;
-            try {
-              exists = await esClient.indices.exists({ index: name });
-            } catch (error) {
-              failures.push({ target: `data-stream:${name}`, error: toMessage(error) });
-            }
-
-            let documentCount: number | undefined;
-            if (exists) {
-              try {
-                documentCount = (await esClient.count({ index: name })).count;
-              } catch (error) {
-                failures.push({ target: `data-stream:${name}:count`, error: toMessage(error) });
-              }
-            }
-
-            let needsCreate = !exists;
-            if (exists && (documentCount === undefined || documentCount > 0)) {
-              try {
-                await esClient.indices.deleteDataStream({ name }, { ignore: [404] });
-                needsCreate = true;
-                if (documentCount !== undefined && documentCount > 0) {
-                  deleted.dataStreams += 1;
-                }
-              } catch (error) {
-                failures.push({ target: `data-stream:${name}:delete`, error: toMessage(error) });
-              }
-            }
-
-            if (needsCreate) {
-              try {
-                await esClient.indices.createDataStream({ name });
-              } catch (error) {
-                failures.push({ target: `data-stream:${name}:create`, error: toMessage(error) });
-              }
-            }
+        try {
+          if (await esClient.indices.exists({ index: DISCOVERIES_DATA_STREAM })) {
+            await esClient.indices.deleteDataStream(
+              { name: DISCOVERIES_DATA_STREAM },
+              { ignore: [404] }
+            );
+            deleted.dataStreams += 1;
           }
-
-          try {
-            if (await esClient.indices.exists({ index: DISCOVERIES_DATA_STREAM })) {
-              await esClient.indices.deleteDataStream(
-                { name: DISCOVERIES_DATA_STREAM },
-                { ignore: [404] }
-              );
-              deleted.dataStreams += 1;
-            }
-          } catch (error) {
-            failures.push({
-              target: `data-stream:${DISCOVERIES_DATA_STREAM}:delete`,
-              error: toMessage(error),
-            });
-          }
+        } catch (error) {
+          failures.push({
+            target: `data-stream:${DISCOVERIES_DATA_STREAM}:delete`,
+            error: toMessage(error),
+          });
         }
 
         const remainingWorkflows: MaintenanceWorkflowTarget[] = [];

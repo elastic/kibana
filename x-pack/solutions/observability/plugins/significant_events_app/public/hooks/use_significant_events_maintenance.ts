@@ -18,6 +18,13 @@ import { useKibana } from './use_kibana';
 import { getFormattedError } from '../util/errors';
 
 const MAINTENANCE_STATUS_QUERY_KEY = ['significantEventsMaintenanceStatus'] as const;
+const RESET_QUERY_KEYS = [
+  ['significantEvents'],
+  ['detections'],
+  ['features'],
+  ['discoveryQueries'],
+  ['significantEventLifecycle'],
+] as const;
 
 const PAUSE_SUCCESS_TOAST_TITLE = i18n.translate(
   'xpack.significantEventsApp.maintenance.pauseSuccessToastTitle',
@@ -224,7 +231,11 @@ export const useSignificantEventsMaintenanceActions = () => {
       } else {
         toasts.addSuccess({ title: RESET_SUCCESS_TOAST_TITLE, text: deletedText });
       }
-      await queryClient.invalidateQueries({ type: 'active' });
+      await Promise.all(
+        RESET_QUERY_KEYS.map((queryKey) =>
+          queryClient.invalidateQueries({ queryKey, type: 'active' })
+        )
+      );
     },
     onError: (error) => {
       toasts.addError(getFormattedError(error), { title: RESET_ERROR_TOAST_TITLE });

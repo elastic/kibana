@@ -41,32 +41,35 @@ export const collectResetSnapshot = async (
   let knowledgeIndicators = 0;
   let storedQueries = 0;
 
-  for (const streamName of streamNames) {
+  if (streamNames.length > 0) {
     try {
-      const { [streamName]: queryLinks = [] } = await kiClient.getStreamToQueryLinksMap(
-        [streamName],
-        { includeExpired: true }
-      );
-      storedQueries += queryLinks.length;
-      for (const link of queryLinks) {
-        if (link.rule_backed && link.rule_id) {
-          ruleIds.add(link.rule_id);
+      const queryLinksByStream = await kiClient.getStreamToQueryLinksMap(streamNames, {
+        includeExpired: true,
+      });
+      for (const queryLinks of Object.values(queryLinksByStream)) {
+        storedQueries += queryLinks.length;
+        for (const link of queryLinks) {
+          if (link.rule_backed && link.rule_id) {
+            ruleIds.add(link.rule_id);
+          }
         }
       }
     } catch (error) {
-      failures.push({ target: `snapshot:queries:${streamName}`, error: toMessage(error) });
+      failures.push({ target: 'snapshot:queries', error: toMessage(error) });
     }
 
     try {
-      const { hits } = await kiClient.getFeatures(streamName, {
+      const { hits } = await kiClient.getFeatures(streamNames, {
         includeExcluded: true,
         includeExpired: true,
       });
-      knowledgeIndicators += hits.length;
+      knowledgeIndicators = hits.length;
     } catch (error) {
-      failures.push({ target: `snapshot:features:${streamName}`, error: toMessage(error) });
+      failures.push({ target: 'snapshot:features', error: toMessage(error) });
     }
+  }
 
+  for (const streamName of streamNames) {
     try {
       for (const ruleId of await kiClient.findOwnedRuleIds(streamName)) {
         ruleIds.add(ruleId);

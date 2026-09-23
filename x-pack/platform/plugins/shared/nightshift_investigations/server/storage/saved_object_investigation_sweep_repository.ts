@@ -90,10 +90,11 @@ export class SavedObjectInvestigationSweepRepository implements InvestigationSwe
 
   async deleteAllAcrossSpaces(): Promise<DeleteAllInvestigationsResult> {
     let deleted = 0;
+    let page = 1;
     const failures = new Map<string, DeleteAllInvestigationsResult['failures'][number]>();
 
     while (true) {
-      const { results } = await this.findAcrossSpaces({ page: 1, perPage: DELETE_BATCH_SIZE });
+      const { results } = await this.findAcrossSpaces({ page, perPage: DELETE_BATCH_SIZE });
       if (results.length === 0) {
         break;
       }
@@ -105,7 +106,7 @@ export class SavedObjectInvestigationSweepRepository implements InvestigationSwe
         bySpace.set(spaceId, ids);
       }
 
-      let deletedThisBatch = 0;
+      let resolvedThisBatch = 0;
       for (const [spaceId, ids] of bySpace) {
         try {
           const { statuses } = await this.savedObjects.bulkDelete(
@@ -116,9 +117,10 @@ export class SavedObjectInvestigationSweepRepository implements InvestigationSwe
             const key = `${status.id}@${spaceId}`;
             if (status.success) {
               deleted += 1;
-              deletedThisBatch += 1;
+              resolvedThisBatch += 1;
               failures.delete(key);
             } else if (status.error?.statusCode === 404) {
+              resolvedThisBatch += 1;
               failures.delete(key);
             } else {
               failures.set(key, {
@@ -136,9 +138,7 @@ export class SavedObjectInvestigationSweepRepository implements InvestigationSwe
         }
       }
 
-      if (deletedThisBatch === 0) {
-        break;
-      }
+      page = resolvedThisBatch === 0 ? page + 1 : 1;
     }
 
     return { deleted, failures: [...failures.values()] };
