@@ -66,6 +66,20 @@ describe('useWorkflowSummaries', () => {
     expect(mockMgetWorkflows).toHaveBeenCalledWith({ ids: ['wf-1', 'wf-2'] });
   });
 
+  it('sets missingReadPrivilege true when the API rejects with a 403 response', async () => {
+    const error = Object.assign(new Error('Forbidden'), {
+      response: { status: 403 } as Response,
+    });
+    mockMgetWorkflows.mockRejectedValue(error);
+
+    const { result } = renderSummaries(['wf-1']);
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.missingReadPrivilege).toBe(true);
+    expect(result.current.summaries.size).toBe(0);
+  });
+
   it('keeps the resolved summaries while a changed set of ids is fetched', async () => {
     const { result, rerender } = renderSummaries(['wf-1']);
 

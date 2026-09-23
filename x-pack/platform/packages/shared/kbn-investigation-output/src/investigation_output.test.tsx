@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { InvestigationState } from '@kbn/significant-events-schema';
 import { InvestigationOutput } from './investigation_output';
@@ -51,7 +52,13 @@ const finalState: InvestigationState = {
     {
       title: 'Roll back the deployment that introduced the regression',
       confidence: 0.95,
+      description: 'Restore the last known-good checkout deployment.',
       code: 'kubectl rollout undo deployment/checkout-service',
+    },
+    {
+      title: 'Add a connection-pool saturation alert',
+      confidence: 0.7,
+      description: 'Alert before queued checkout requests begin to time out.',
     },
   ],
   blind_spots: [
@@ -59,6 +66,11 @@ const finalState: InvestigationState = {
       title: 'No profiling data available',
       confidence: 0.7,
       description: 'Could not confirm whether a leak compounded the exhaustion.',
+    },
+    {
+      title: 'No database query samples available',
+      confidence: 0.6,
+      description: 'Could not rule out a slower query path after the deployment.',
     },
   ],
 };
@@ -143,7 +155,7 @@ describe('InvestigationOutput', () => {
     expect(screen.queryByTestId('investigationOutputFinalResults')).not.toBeInTheDocument();
   });
 
-  it('renders the final state with the confirmed hypothesis and the final results appended, always visible', () => {
+  it('renders structured final findings without numeric confidence', () => {
     renderWithI18n(<InvestigationOutput status="complete" state={finalState} />);
 
     expect(screen.getByText('Investigation complete')).toBeInTheDocument();
@@ -154,35 +166,66 @@ describe('InvestigationOutput', () => {
     expect(finalResults).toHaveTextContent(
       'A deploy at 14:02 introduced a connection leak in the checkout service.'
     );
-    expect(finalResults).toHaveTextContent('Next steps');
+    expect(finalResults).toHaveTextContent('Proposed actions');
     expect(finalResults).toHaveTextContent(
       'Roll back the deployment that introduced the regression'
     );
+    expect(finalResults).toHaveTextContent('Recommended');
     expect(finalResults).toHaveTextContent('Blind spots');
+    expect(finalResults).toHaveTextContent('2 identified');
     expect(finalResults).toHaveTextContent('No profiling data available');
+    expect(finalResults).toHaveTextContent('Most impactful');
+    expect(finalResults).not.toHaveTextContent('95%');
   });
 
-  it('honours the emphasis and inline code the agent wrote, without showing the markers', () => {
+  it('renders titles as plain text while preserving markdown in descriptions', async () => {
+    const user = userEvent.setup();
+    const recommendationTitle =
+      '**Block the attacker IPs** via `hosts.deny` and [runbook](https://example.com)';
+    const blindSpotTitle = 'No `apm-*` indices';
     const stateWithMarkdown: InvestigationState = {
       ...finalState,
       recommendations: [
         {
-          title: '**Block the attacker IPs** at the firewall via `hosts.deny`',
+          title: recommendationTitle,
           confidence: 0.9,
+          description: 'Follow the **response procedure** in the [runbook](https://example.com).',
         },
       ],
       blind_spots: [
-        { title: 'No `apm-*` indices', confidence: 0.8, description: 'Needed for _tracing_.' },
+        { title: blindSpotTitle, confidence: 0.8, description: 'Needed for _tracing_.' },
       ],
     };
 
     renderWithI18n(<InvestigationOutput status="complete" state={stateWithMarkdown} />);
 
     const finalResults = screen.getByTestId('investigationOutputFinalResults');
-    expect(finalResults).toHaveTextContent('Block the attacker IPs at the firewall via hosts.deny');
-    expect(finalResults).not.toHaveTextContent('**');
-    expect(finalResults).toHaveTextContent('No apm-* indices');
-    expect(finalResults).toHaveTextContent('Needed for tracing.');
+    expect(finalResults).toHaveTextContent(recommendationTitle);
+    expect(finalResults).toHaveTextContent(blindSpotTitle);
+    expect(screen.queryByRole('link', { name: 'runbook' })).not.toBeInTheDocument();
+
+    const recommendationButton = screen.getByText(recommendationTitle).closest('button');
+    expect(recommendationButton).not.toBeNull();
+    if (!recommendationButton) {
+      throw new Error('Expected recommendation title to be rendered inside a button');
+    }
+    expect(recommendationButton.querySelector('a, div, p, button, strong, code')).toBeNull();
+    await user.click(recommendationButton);
+
+    const dialog = screen.getByRole('dialog');
+    expect(screen.getByText('response procedure').tagName).toBe('STRONG');
+    expect(screen.getByRole('link', { name: 'runbook' })).toBeInTheDocument();
+    fireEvent.keyDown(dialog, { key: 'Escape' });
+
+    const blindSpotButton = screen.getByText(blindSpotTitle).closest('button');
+    expect(blindSpotButton).not.toBeNull();
+    if (!blindSpotButton) {
+      throw new Error('Expected blind-spot title to be rendered inside a button');
+    }
+    expect(blindSpotButton.querySelector('a, div, p, button, strong, code')).toBeNull();
+    await user.click(blindSpotButton);
+
+    expect(screen.getByText('tracing').tagName).toBe('EM');
   });
 
   it('renders a recovered blind spot once when its title and description are the same sentence', () => {
@@ -196,23 +239,128 @@ describe('InvestigationOutput', () => {
 
     const blindSpots = screen.getByTestId('investigationOutputBlindSpots');
     expect(blindSpots.textContent?.match(/No GeoIP enrichment/g)).toHaveLength(1);
+    expect(screen.queryByRole('button', { name: gap })).not.toBeInTheDocument();
   });
 
-  it('renders recommendations and blind spots as separate sections, with code as a snippet', () => {
+  it.each(['', '   '])(
+    'does not make a blind spot expandable when its description is empty',
+    (description) => {
+      const title = 'No profiling data available';
+      const stateWithEmptyDescription: InvestigationState = {
+        ...finalState,
+        blind_spots: [{ title, confidence: 0.8, description }],
+      };
+
+      renderWithI18n(<InvestigationOutput status="complete" state={stateWithEmptyDescription} />);
+
+      expect(screen.getByText(title)).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: title })).not.toBeInTheDocument();
+    }
+  );
+
+  it.each([
+    ['description', { description: '   ' }],
+    ['code', { code: '   ' }],
+  ] as const)(
+    'does not make a recommendation interactive when its %s is whitespace-only',
+    (_field, details) => {
+      const title = 'Restart the checkout service';
+      const stateWithWhitespaceDetails: InvestigationState = {
+        ...finalState,
+        recommendations: [{ title, confidence: 0.8, ...details }],
+      };
+
+      renderWithI18n(<InvestigationOutput status="complete" state={stateWithWhitespaceDetails} />);
+
+      expect(screen.getByText(title).closest('button')).toBeNull();
+    }
+  );
+
+  it('omits whitespace-only fields from mixed recommendation details', async () => {
+    const user = userEvent.setup();
+    const stateWithMixedDetails: InvestigationState = {
+      ...finalState,
+      recommendations: [
+        {
+          title: 'Restart the checkout service',
+          confidence: 0.9,
+          description: 'Restart every checkout instance.',
+          code: '   ',
+        },
+        {
+          title: 'Roll back the checkout service',
+          confidence: 0.8,
+          description: '   ',
+          code: 'kubectl rollout undo deployment/checkout-service',
+        },
+      ],
+    };
+
+    renderWithI18n(<InvestigationOutput status="complete" state={stateWithMixedDetails} />);
+
+    await user.click(screen.getByRole('button', { name: /Restart the checkout service/ }));
+    expect(screen.getByRole('dialog')).toHaveTextContent('Restart every checkout instance.');
+    expect(screen.getByRole('dialog').querySelector('pre')).not.toBeInTheDocument();
+    fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' });
+
+    await user.click(screen.getByRole('button', { name: /Roll back the checkout service/ }));
+    expect(screen.getByRole('dialog')).toHaveTextContent(
+      'kubectl rollout undo deployment/checkout-service'
+    );
+    expect(screen.getByRole('dialog').querySelector('pre')).toBeInTheDocument();
+  });
+
+  it('opens recommendation details with a click and blind-spot details from a collapsed accordion', async () => {
+    const user = userEvent.setup();
     renderWithI18n(<InvestigationOutput status="complete" state={finalState} />);
 
     const recommendations = screen.getByTestId('investigationOutputRecommendations');
     expect(recommendations).toHaveTextContent(
       'Roll back the deployment that introduced the regression'
     );
-    expect(recommendations).toHaveTextContent('kubectl rollout undo deployment/checkout-service');
+    const action = screen.getByRole('button', {
+      name: /Roll back the deployment that introduced the regression/,
+    });
+    expect(action.querySelector('a, div, p, button')).toBeNull();
+    await user.click(action);
+    expect(screen.getByRole('dialog')).toHaveTextContent(
+      'kubectl rollout undo deployment/checkout-service'
+    );
+    expect(screen.getByRole('dialog')).toHaveTextContent(
+      'Restore the last known-good checkout deployment.'
+    );
 
     const blindSpots = screen.getByTestId('investigationOutputBlindSpots');
     expect(blindSpots).toHaveTextContent('No profiling data available');
+    const firstBlindSpot = screen.getByRole('button', { name: /No profiling data available/ });
+    expect(firstBlindSpot).toHaveAttribute('aria-expanded', 'false');
+
+    await user.click(firstBlindSpot);
+
+    expect(firstBlindSpot).toHaveAttribute('aria-expanded', 'true');
     expect(blindSpots).toHaveTextContent(
       'Could not confirm whether a leak compounded the exhaustion.'
     );
     expect(recommendations).not.toContainElement(blindSpots);
+  });
+
+  it('opens recommendation details with the keyboard and returns focus on close', async () => {
+    const user = userEvent.setup();
+    renderWithI18n(<InvestigationOutput status="complete" state={finalState} />);
+
+    const action = screen.getByRole('button', {
+      name: /Roll back the deployment that introduced the regression/,
+    });
+    action.focus();
+    await user.keyboard('{Enter}');
+
+    const dialog = screen.getByRole('dialog');
+    expect(dialog).toHaveTextContent('Roll back the deployment that introduced the regression');
+
+    fireEvent.keyDown(dialog, { key: 'Escape' });
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(action).toHaveFocus();
   });
 
   it('renders the conclusion on its own when no recommendations or blind spots were reported', () => {
@@ -238,6 +386,18 @@ describe('InvestigationOutput', () => {
     };
 
     renderWithI18n(<InvestigationOutput status="complete" state={withoutFinalResults} />);
+
+    expect(screen.queryByTestId('investigationOutputFinalResults')).not.toBeInTheDocument();
+  });
+
+  it('renders no final results block for a whitespace-only conclusion', () => {
+    const withoutVisibleFinalResults: InvestigationState = {
+      summary: finalState.summary,
+      hypotheses: finalState.hypotheses,
+      conclusion: '   ',
+    };
+
+    renderWithI18n(<InvestigationOutput status="complete" state={withoutVisibleFinalResults} />);
 
     expect(screen.queryByTestId('investigationOutputFinalResults')).not.toBeInTheDocument();
   });

@@ -49,6 +49,10 @@ export interface VisPanelResolutionRequest extends PanelResolutionRequestBase {
    * renderer.
    */
   renderer?: VisualizationRenderer;
+  /** Keep the panel's existing ES|QL query and column bindings instead of regenerating them. */
+  preserveESQL?: boolean;
+  /** Reauthor the presentation from the chart rules instead of applying only the requested changes. */
+  applyChartRules?: boolean;
 }
 
 const visPanelConfigSchema = z.record(z.string().max(256), z.unknown()).check((ctx) => {
@@ -123,7 +127,7 @@ const panelRequestBaseSchema = z.object({
     .max(256)
     .optional()
     .describe(
-      '(optional) Index, alias, or datastream to target. If not provided, the tool will attempt to discover the best index to use.'
+      'Exact index, alias, or datastream identified for this panel. Pass it whenever known, because each panel is generated independently without dashboard context. Omit only when the source is unknown and discovery is needed.'
     ),
   esql: z
     .string()
@@ -186,6 +190,18 @@ export const editPanelRequestInputSchema = panelRequestBaseSchema
       .optional()
       .describe(
         '(optional) Change the existing panel to this chart type. Omit it to let the visualization resolver interpret the edit using the existing configuration.'
+      ),
+    preserveESQL: z
+      .boolean()
+      .optional()
+      .describe(
+        '(optional) Set true to keep the existing ES|QL query of the panel instead of regenerating it, e.g. when the edit only changes presentation (title, legend, axes, colors, number formats, thresholds) or chart type. Omit it when the edit changes what the panel measures.'
+      ),
+    applyChartRules: z
+      .boolean()
+      .optional()
+      .describe(
+        '(optional) Lens only. Set true to apply all presentation defaults, replacing custom styling. Omit it to change only the requested settings. Independent of preserveESQL, so enhancement can accompany a query change.'
       ),
   });
 

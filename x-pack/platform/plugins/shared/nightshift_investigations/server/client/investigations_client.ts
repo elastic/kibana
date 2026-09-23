@@ -14,6 +14,7 @@ import {
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import type { AgentAvailabilityConfig } from '@kbn/agent-builder-server/agents';
 import { investigationStateSchema } from '@kbn/significant-events-schema';
 import { assertNever } from '@kbn/std';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
@@ -30,8 +31,6 @@ import type {
   ListInvestigationItem,
   ListInvestigationsRequest,
   ListInvestigationsResponse,
-  SeverityCountsRequest,
-  SeverityCountsResponse,
   UpdateInvestigationRequest,
   StartInvestigationRequest,
   StartInvestigationResponse,
@@ -57,7 +56,7 @@ import {
   InvestigationNotFoundError,
   InvestigationQuotaDeniedError,
   InvalidInvestigationContextError,
-  InvestigationSubjectMissingError,
+  InvestigationMetadataMissingError,
   InvestigationUnavailableError,
 } from './errors';
 import { evaluateInvestigationQuota } from './evaluate_investigation_quota';
@@ -146,6 +145,7 @@ const isInvestigationWorkflowExecution = (execution: {
 
 interface ExecutionInvestigationMetadata {
   subject?: InvestigationSubject;
+  title?: string;
   triggerType: InvestigationTriggerType;
   concurrencyKey?: string;
 }
@@ -184,6 +184,7 @@ const toSubject = ({
  */
 const LIST_INVESTIGATION_ITEM_FIELDS = {
   investigation_id: [],
+  title: ['title'],
   status: ['status'],
   created_at: ['created_at'],
   started_at: ['started_at'],
@@ -207,6 +208,7 @@ type ListInvestigationRecord = ProjectedInvestigationRecord<
 
 const toListInvestigationItem = (record: ListInvestigationRecord): ListInvestigationItem => ({
   investigation_id: record.id,
+  title: record.title,
   status: record.status,
   created_at: record.created_at,
   started_at: record.started_at,
@@ -256,6 +258,8 @@ const parseExecutionInvestigationMetadata = (
 
   return {
     subject: recoverSubjectFromInput(inputs),
+    // A required workflow input, so the engine has already rejected a run without one.
+    title: asString(inputs?.title),
     triggerType: recoverTriggerTypeFromInput(inputs) ?? DEFAULT_INVESTIGATION_TRIGGER_TYPE,
     concurrencyKey,
   };
@@ -312,6 +316,8 @@ export interface NightshiftInvestigationsClientDeps {
    */
   spaceIdOverride?: string;
   agentBuilder?: AgentBuilderPluginStart;
+  /** Passed through to `agents.ensure` so a pre-installed agent is hidden while unavailable. */
+  agentAvailability: AgentAvailabilityConfig;
   investigationQuotaCallback?: InvestigationQuotaCallback;
   investigationRepository: InvestigationRepository;
   isAvailable: () => Promise<boolean>;
@@ -324,6 +330,7 @@ export class NightshiftInvestigationsClient {
   private readonly logger: Logger;
   private readonly spaceIdOverride?: string;
   private readonly agentBuilder?: AgentBuilderPluginStart;
+  private readonly agentAvailability: AgentAvailabilityConfig;
   private readonly investigationQuotaCallback?: InvestigationQuotaCallback;
   private readonly investigationRepository: InvestigationRepository;
   private readonly checkAvailability: () => Promise<boolean>;
@@ -335,6 +342,7 @@ export class NightshiftInvestigationsClient {
     this.logger = deps.logger;
     this.spaceIdOverride = deps.spaceIdOverride;
     this.agentBuilder = deps.agentBuilder;
+    this.agentAvailability = deps.agentAvailability;
     this.investigationQuotaCallback = deps.investigationQuotaCallback;
     this.investigationRepository = deps.investigationRepository;
     this.checkAvailability = deps.isAvailable;
@@ -384,6 +392,7 @@ export class NightshiftInvestigationsClient {
 
   async start({
     subject,
+    title,
     trigger_type,
     message,
     stream_names,
@@ -438,10 +447,15 @@ export class NightshiftInvestigationsClient {
     // below executes the *stored* workflow definition, which predates that step until the managed
     // install has upgraded it — and that install is fire-and-forget. Deliberately without the
     // step's visibility retry: the workflow owns that, and this request path should not pay for it.
-    await installAgentForSubject(subject)({ agentBuilder: this.agentBuilder, spaceId });
+    await installAgentForSubject(subject)({
+      agentBuilder: this.agentBuilder,
+      spaceId,
+      availability: this.agentAvailability,
+    });
 
     const inputs = {
       message: prepared.message,
+      title,
       stream_names: stream_names ?? [],
       ...(concurrency_key ? { concurrency_key } : {}),
       context: {
@@ -468,6 +482,7 @@ export class NightshiftInvestigationsClient {
     await this.create({
       investigationId: executionId,
       subject: resolvedSubject,
+      title,
       triggerType: trigger_type,
       concurrencyKey: concurrency_key,
     }).catch((error) => {
@@ -487,11 +502,13 @@ export class NightshiftInvestigationsClient {
   async create({
     investigationId,
     subject,
+    title,
     triggerType,
     concurrencyKey,
   }: {
     investigationId: string;
     subject: InvestigationSubject;
+    title: string;
     triggerType: InvestigationTriggerType;
     concurrencyKey?: string;
   }): Promise<void> {
@@ -502,6 +519,7 @@ export class NightshiftInvestigationsClient {
     await this.createIgnoringConflict({
       id: investigationId,
       attributes: {
+        title,
         status: 'pending',
         ...toSubjectFields(subject),
         trigger_type: triggerType,
@@ -560,12 +578,12 @@ export class NightshiftInvestigationsClient {
       return;
     }
 
-    const { subject, triggerType, concurrencyKey } = parseExecutionInvestigationMetadata(
+    const { subject, title, triggerType, concurrencyKey } = parseExecutionInvestigationMetadata(
       execution.context
     );
 
-    if (!subject) {
-      throw new InvestigationSubjectMissingError(investigationId);
+    if (!subject || !title) {
+      throw new InvestigationMetadataMissingError(investigationId);
     }
 
     if (concurrencyKey) {
@@ -575,6 +593,7 @@ export class NightshiftInvestigationsClient {
     await this.createIgnoringConflict({
       id: investigationId,
       attributes: {
+        title,
         status: 'running',
         ...toSubjectFields(subject),
         trigger_type: triggerType,
@@ -775,39 +794,5 @@ export class NightshiftInvestigationsClient {
       size: result.size,
       total: result.total,
     };
-  }
-
-  /**
-   * Severity facet counts under the given filters, for the homepage tiles.
-   *
-   * Separate from `list()` because the counts are independent of pagination and sort — bundling
-   * them would recompute an identical aggregation on every page change.
-   */
-  async getSeverityCounts({
-    statuses,
-    subject_types,
-    query,
-    concurrency_key,
-    created_after,
-    created_before,
-    started_after,
-    started_before,
-    completed_after,
-    completed_before,
-  }: SeverityCountsRequest = {}): Promise<SeverityCountsResponse> {
-    const severityCounts = await this.investigationRepository.countBySeverity({
-      statuses,
-      subjectTypes: subject_types,
-      query,
-      concurrencyKey: concurrency_key,
-      createdAfter: created_after,
-      createdBefore: created_before,
-      startedAfter: started_after,
-      startedBefore: started_before,
-      completedAfter: completed_after,
-      completedBefore: completed_before,
-    });
-
-    return { severity_counts: severityCounts };
   }
 }

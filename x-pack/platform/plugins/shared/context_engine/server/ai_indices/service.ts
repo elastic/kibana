@@ -22,6 +22,8 @@ import type {
   AiIndexHttpItem,
   AiIndexProperties,
 } from '../../common/http_api/ai_indices';
+import { isIndexPattern } from '../../common/ai_index_dest';
+import { AI_INDEX_ID_PATTERN } from '../../common/validation';
 import { createSpaceDslFilter } from '../utils/space_filter';
 import {
   InvalidAiIndexDestError,
@@ -33,6 +35,7 @@ import {
 } from './errors';
 import type { AiIndexDocument, AiIndexStorageClient, StoredAiIndexDocument } from './storage';
 import { buildManagedAiIndexDocId, createAiIndexStorageClient } from './storage';
+import { buildTraceQueries } from './trace_queries';
 import { createAiIndexIdentityDslFilter } from '../utils/ai_index_identity_filter';
 
 /** Resolves the identity a pre-upgrade document carries implicitly, in its `_id` and its absence of a space. */
@@ -52,6 +55,7 @@ const toAiIndexItem = (document: AiIndexDocument): AiIndexHttpItem => ({
   dest: document.dest,
   automations: document.automations,
   sources: document.sources,
+  traces: buildTraceQueries(document.traces ?? [], document.space),
   date_created: document.date_created,
   date_modified: document.date_modified,
 });
@@ -453,14 +457,20 @@ export class AiIndexService {
   }
 
   /**
-   * The dest value must follow the type-specific naming convention and match
-   * the declared `type`. A managed entry may also use the dot-prefixed form,
-   * which is reserved for Kibana-internal backing stores.
+   * The dest value must name a single index or data stream, follow the
+   * type-specific naming convention, and match the declared `type`. A managed
+   * entry may also use the dot-prefixed form, which is reserved for
+   * Kibana-internal backing stores.
    */
   private async assertValidDest(
     { type, value }: AiIndexDest,
     { managed = false }: { managed?: boolean } = {}
   ): Promise<void> {
+    if (isIndexPattern(value)) {
+      throw new InvalidAiIndexDestError(
+        `dest.value '${value}' is not allowed: it must name a single index or data stream, not a pattern`
+      );
+    }
     if (type === 'data_stream') {
       await this.assertValidDataStreamDest(value, managed);
     } else {
@@ -472,39 +482,52 @@ export class AiIndexService {
     return managed ? [basePrefix, `.${basePrefix}`] : [basePrefix];
   }
 
-  /**
-   * Every expression in the dest value must start with one of the type-specific
-   * prefixes.
-   */
-  private assertDestValueHasPrefix(value: string, prefixes: string[]): void {
-    const invalid = value
-      .split(',')
-      .find((expression) => !prefixes.some((prefix) => expression.startsWith(prefix)));
-    if (invalid !== undefined) {
+  /** The dest value must be a type-specific prefix followed by a valid AI index id. */
+  private assertDestValueFormat(value: string, prefixes: string[]): void {
+    const prefix = prefixes.find((candidate) => value.startsWith(candidate));
+    if (prefix === undefined) {
       throw new InvalidAiIndexDestError(
-        `dest.value '${value}' is not allowed: every expression must start with '${prefixes[0]}'`
+        `dest.value '${value}' is not allowed: it must start with '${prefixes[0]}'`
+      );
+    }
+    if (!AI_INDEX_ID_PATTERN.test(value.slice(prefix.length))) {
+      throw new InvalidAiIndexDestError(
+        `dest.value '${value}' is not allowed: the part after '${prefix}' must be a valid AI index id`
       );
     }
   }
 
-  private async assertValidDataStreamDest(value: string, managed: boolean): Promise<void> {
-    const prefixes = this.allowedDestPrefixes(DATA_STREAM_PREFIX, managed);
-    this.assertDestValueHasPrefix(value, prefixes);
-
-    let indices: estypes.IndicesResolveIndexResolveIndexItem[] = [];
-    let dataStreams: estypes.IndicesResolveIndexResolveIndexDataStreamsItem[] = [];
+  /** Resolves the dest name, rejecting aliases since they cannot be a single write target. */
+  private async resolveDest(value: string): Promise<{
+    indices: estypes.IndicesResolveIndexResolveIndexItem[];
+    dataStreams: estypes.IndicesResolveIndexResolveIndexDataStreamsItem[];
+  }> {
+    let resolved: estypes.IndicesResolveIndexResponse;
     try {
-      const resolved = await this.esClient.indices.resolveIndex({
+      resolved = await this.esClient.indices.resolveIndex({
         name: value,
         expand_wildcards: ['open', 'hidden', 'closed'],
       });
-      indices = resolved.indices;
-      dataStreams = resolved.data_streams;
     } catch (error) {
-      if (!(isResponseError(error) && error.statusCode === 404)) {
-        throw error;
+      if (isResponseError(error) && error.statusCode === 404) {
+        return { indices: [], dataStreams: [] };
       }
+      throw error;
     }
+
+    if (resolved.aliases.length > 0) {
+      throw new InvalidAiIndexDestError(
+        `dest.value '${value}' is not allowed: '${resolved.aliases[0].name}' is an alias`
+      );
+    }
+    return { indices: resolved.indices, dataStreams: resolved.data_streams };
+  }
+
+  private async assertValidDataStreamDest(value: string, managed: boolean): Promise<void> {
+    const prefixes = this.allowedDestPrefixes(DATA_STREAM_PREFIX, managed);
+    this.assertDestValueFormat(value, prefixes);
+
+    const { indices, dataStreams } = await this.resolveDest(value);
 
     if (indices.length > 0) {
       throw new InvalidAiIndexDestError(
@@ -524,22 +547,9 @@ export class AiIndexService {
 
   private async assertValidIndexDest(value: string, managed: boolean): Promise<void> {
     const prefixes = this.allowedDestPrefixes(INDEX_PREFIX, managed);
-    this.assertDestValueHasPrefix(value, prefixes);
+    this.assertDestValueFormat(value, prefixes);
 
-    let indices: estypes.IndicesResolveIndexResolveIndexItem[] = [];
-    let dataStreams: estypes.IndicesResolveIndexResolveIndexDataStreamsItem[] = [];
-    try {
-      const resolved = await this.esClient.indices.resolveIndex({
-        name: value,
-        expand_wildcards: ['open', 'hidden', 'closed'],
-      });
-      indices = resolved.indices;
-      dataStreams = resolved.data_streams;
-    } catch (error) {
-      if (!(isResponseError(error) && error.statusCode === 404)) {
-        throw error;
-      }
-    }
+    const { indices, dataStreams } = await this.resolveDest(value);
 
     if (dataStreams.length > 0) {
       throw new InvalidAiIndexDestError(
