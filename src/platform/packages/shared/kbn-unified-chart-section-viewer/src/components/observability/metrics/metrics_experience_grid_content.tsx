@@ -23,10 +23,7 @@ import type { ExemplarsAvailabilityResult } from './hooks/use_exemplars_availabi
 import { getEsqlQuery } from './utils/get_esql_query';
 import { PAGE_SIZE } from '../../../common/constants';
 import { isLegacyHistogram } from '../../../common/utils/legacy_histogram';
-import {
-  EXEMPLARS_PROBE_FAILED_USER_MESSAGES,
-  LEGACY_HISTOGRAM_USER_MESSAGES,
-} from '../../../common/utils/user_messages';
+import { LEGACY_HISTOGRAM_USER_MESSAGES } from '../../../common/utils/user_messages';
 import { MetricsGrid } from './metrics_grid';
 import { Pagination } from '../../pagination';
 import { usePagination } from './hooks';
@@ -88,29 +85,15 @@ export const MetricsExperienceGridContent = ({
     [filteredFieldsCount]
   );
 
-  // Memoized so each chart sees a stable `userMessages` identity: it feeds a shallow
-  // `React.memo` and the Lens props dependency list.
-  const probeFailedMessages = useMemo(
-    () => (exemplarsAvailability.hasProbeFailed ? EXEMPLARS_PROBE_FAILED_USER_MESSAGES : undefined),
-    [exemplarsAvailability.hasProbeFailed]
-  );
-  const legacyHistogramMessages = useMemo(
-    () =>
-      probeFailedMessages
-        ? [...LEGACY_HISTOGRAM_USER_MESSAGES, ...probeFailedMessages]
-        : LEGACY_HISTOGRAM_USER_MESSAGES,
-    [probeFailedMessages]
-  );
-
   const getUserMessages = useCallback(
     (metricItem: ParsedMetricItem) =>
       isLegacyHistogram(
         firstNonNullable(metricItem.fieldTypes),
         firstNonNullable(metricItem.metricTypes)
       )
-        ? legacyHistogramMessages
-        : probeFailedMessages,
-    [legacyHistogramMessages, probeFailedMessages]
+        ? LEGACY_HISTOGRAM_USER_MESSAGES
+        : undefined,
+    []
   );
 
   const duplicateMetricNames = useMemo(() => getDuplicateMetricNames(metricItems), [metricItems]);
