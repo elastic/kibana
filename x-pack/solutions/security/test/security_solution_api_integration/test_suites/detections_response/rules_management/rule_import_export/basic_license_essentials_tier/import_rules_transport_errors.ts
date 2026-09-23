@@ -62,6 +62,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .set('elastic-api-version', '2023-10-31')
         .set('Content-Type', 'multipart/form-data; boundary=boundary')
         .send('--boundary--')
+        // TODO: Missing `file` currently 500s; This should return 400 instead which is correct response here.
         .expect(500);
 
       expect(body).toMatchObject({
