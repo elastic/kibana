@@ -1,0 +1,93 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renderFlakySuiteIssueBody renders a multi-test suite with distinct failures, a skipped note and related issues 1`] = `
+"3 tests in the \`Default status alert\` suite appear to be flaky:
+
+| Test | Flaky branches | Dashboard |
+|---|---|---|
+| does not keep a hidden histogram after visiting Dashboard | **\`main\` 10% (20 / 200)**<br>**\`9.2\` 5% (3 / 64)** | [dashboard](https://appex-qa.kb.europe-west1.gcp.cloud.es.io/s/scout/app/dashboards#/view/a06c26f6-23ac-479d-acb5-5a8b234793a8?_g=(filters:!((meta:(alias:'Test%20ID',disabled:!f,negate:!f),query:(bool:(must:!((match_phrase:(test.id:'a'))))))))) |
+| reverts breakdown, interval, and visibility on a saved session | **\`main\` 10% (49 / 509)** | [dashboard](https://appex-qa.kb.europe-west1.gcp.cloud.es.io/s/scout/app/dashboards#/view/a06c26f6-23ac-479d-acb5-5a8b234793a8?_g=(filters:!((meta:(alias:'Test%20ID',disabled:!f,negate:!f),query:(bool:(must:!((match_phrase:(test.id:'b'))))))))) |
+| persists hide/show of the histogram on a saved session | **\`main\` 10% (49 / 509)** | [dashboard](https://appex-qa.kb.europe-west1.gcp.cloud.es.io/s/scout/app/dashboards#/view/a06c26f6-23ac-479d-acb5-5a8b234793a8?_g=(filters:!((meta:(alias:'Test%20ID',disabled:!f,negate:!f),query:(bool:(must:!((match_phrase:(test.id:'c'))))))))) |
+
+Latest run on \`main\` was skipped (2026-09-09).
+
+### Suite
+
+| Field | Value |
+|---|---|
+| **File** | [\`x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/default_status_alert.spec.ts\`](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/default_status_alert.spec.ts) |
+| **Framework** | Scout (Playwright) |
+| **Config** | [\`x-pack/solutions/observability/plugins/synthetics/test/scout/ui/playwright.config.ts\`](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/synthetics/test/scout/ui/playwright.config.ts) |
+| **Owners** | \`elastic/obs-ux-management-team\`, \`elastic/kibana-data-discovery\`, \`elastic/other-team\` |
+
+### Failures
+
+*does not keep a hidden histogram after visiting Dashboard* (2 of the 3 sampled failures):
+
+\`\`\`text
+Error: expect(locator).toBeVisible() failed
+
+Locator: chart | pipe
+\`\`\`
+
+*reverts breakdown, interval, and visibility on a saved session* (1 of the 3 sampled failures):
+
+\`\`\`text
+TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.
+\`\`\`
+
+#### Failures by Branch
+
+| Branch | Failed builds | Last failure |
+|---|---|---|
+| 🔴 \`main\` | 49 / 509 (10%) | 2026-09-09 06:12 UTC |
+| 🔴 \`9.2\` | 3 / 64 (5%) | 2026-09-07 11:40 UTC |
+| ✅ \`9.1\` | 0 / 58 |  |
+
+Possibly related: #7, #8.
+
+<!-- kibanaCiData = {\\"flaky-test-suite\\":{\\"suite.filePath\\":\\"x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/default_status_alert.spec.ts\\",\\"suite.title\\":\\"Default status alert\\",\\"suite.framework\\":\\"playwright\\",\\"suite.testIds\\":[\\"a\\",\\"b\\",\\"c\\"],\\"report.generatedAt\\":\\"2026-09-09T09:04:41.000Z\\",\\"report.count\\":1,\\"report.history\\":[{\\"generatedAt\\":\\"2026-09-09T09:04:41.000Z\\",\\"builds\\":264,\\"failedBuilds\\":23}]}} -->"
+`;
+
+exports[`renderFlakySuiteIssueBody renders a single-test suite 1`] = `
+"1 test in the \`Default status alert\` suite appears to be flaky:
+
+| Test | Flaky branches | Dashboard |
+|---|---|---|
+| creates default alert, triggers on down status, and recovers | **\`main\` 10% (49 / 509)** | [dashboard](https://appex-qa.kb.europe-west1.gcp.cloud.es.io/s/scout/app/dashboards#/view/a06c26f6-23ac-479d-acb5-5a8b234793a8?_g=(filters:!((meta:(alias:'Test%20ID',disabled:!f,negate:!f),query:(bool:(must:!((match_phrase:(test.id:'playwright:default_status_alert:creates%20default%20alert'))))))))) |
+
+### Suite
+
+| Field | Value |
+|---|---|
+| **File** | [\`x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/default_status_alert.spec.ts\`](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/default_status_alert.spec.ts) |
+| **Framework** | Scout (Playwright) |
+| **Config** | [\`x-pack/solutions/observability/plugins/synthetics/test/scout/ui/playwright.config.ts\`](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/synthetics/test/scout/ui/playwright.config.ts) |
+| **Owners** | \`elastic/obs-ux-management-team\` |
+
+### Failures
+
+One sampled failure:
+
+\`\`\`text
+Error: Timed out 30000ms waiting for expect(locator).toBeVisible()
+\`\`\`
+
+#### Failures by Branch
+
+| Branch | Failed builds | Last failure |
+|---|---|---|
+| 🔴 \`main\` | 49 / 509 (10%) | 2026-09-09 06:12 UTC |
+
+#### Failures by Pipeline
+
+Where it failed 2–9 Sep 2026, across all pipelines and branches:
+
+| Pipeline | Failed builds | Branches | Sample failure |
+|---|---|---|---|
+| [\`kibana-pull-request\`](https://buildkite.com/elastic/kibana-pull-request) | 70 / 661 (11%) | 64 | [#498441](https://buildkite.com/elastic/kibana-pull-request/builds/498441) · 2026-09-08 16:05 UTC |
+| [\`kibana-on-merge\`](https://buildkite.com/elastic/kibana-on-merge) | 49 / 509 (10%) | 1 | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345) · 2026-09-09 06:12 UTC |
+| [\`kibana-elasticsearch-snapshot-verify\`](https://buildkite.com/elastic/kibana-elasticsearch-snapshot-verify) | 1 / 5 (20%) | 1 | 2026-09-09 06:12 UTC |
+
+<!-- kibanaCiData = {\\"flaky-test-suite\\":{\\"suite.filePath\\":\\"x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/default_status_alert.spec.ts\\",\\"suite.title\\":\\"Default status alert\\",\\"suite.framework\\":\\"playwright\\",\\"suite.testIds\\":[\\"playwright:default_status_alert:creates default alert\\"],\\"report.generatedAt\\":\\"2026-09-09T09:04:41.000Z\\",\\"report.count\\":1,\\"report.history\\":[{\\"generatedAt\\":\\"2026-09-09T09:04:41.000Z\\",\\"builds\\":509,\\"failedBuilds\\":49}]}} -->"
+`;
