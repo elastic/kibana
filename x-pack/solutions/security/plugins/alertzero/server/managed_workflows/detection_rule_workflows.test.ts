@@ -279,7 +279,7 @@ describe('detection rule workflows', () => {
         ['propose_query'],
         ['propose_risk_score'],
         ['propose_exception'],
-        ['propose_threshold'],
+        ['incomplete_threshold_output', 'propose_threshold'],
         ['propose_schedule'],
       ]);
       // The manual proposal is the default arm, so an unrecognised change type
@@ -287,7 +287,8 @@ describe('detection rule workflows', () => {
       expect((fork.default ?? []).map(({ name }) => name)).toEqual(['propose_manual']);
 
       expect(entry.if).toContain('steps.create_investigation.output.conversation_id != null');
-      // The switch already guards the arms.
+      // The switch already guards the arms; propose_threshold also has a step-level
+      // guard (incomplete_threshold_output) verified by the case-arm assertion above.
       for (const proposal of [action, settings, exception, threshold, schedule, manual]) {
         expect(proposal).not.toHaveProperty('if');
       }
