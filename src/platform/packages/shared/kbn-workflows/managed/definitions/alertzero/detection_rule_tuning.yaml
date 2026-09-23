@@ -21,11 +21,14 @@ consts:
     scheduleInterval: "__WORKER_SCHEDULE_INTERVAL__"
     extras:
       analysisWindowDays: __WORKER_ANALYSIS_WINDOW_DAYS__
+      fpCountThreshold: __WORKER_FP_COUNT_THRESHOLD__
+      fpRateThresholdPct: __WORKER_FP_RATE_THRESHOLD_PCT__
 steps:
   # Async: the sweep joins on its review gates and can park for up to 72h.
   # A synchronous call would park this worker run with it and stack every later
-  # scheduled run behind a pending gate. FP count / rate still live as consts on
-  # the sweep; the analysis window is a per-space Worker setting forwarded here.
+  # scheduled run behind a pending gate. The analysis window and both FP
+  # thresholds are per-space Worker settings forwarded here; the sweep keeps its
+  # own consts only as fallbacks for a manual run.
   - name: run_rule_tuning
     type: workflow.executeAsync
     with:
@@ -33,3 +36,5 @@ steps:
       inputs:
         autonomy_level: "{{ consts.worker_settings.autonomy }}"
         analysis_window_days: __WORKER_ANALYSIS_WINDOW_DAYS__
+        min_fp_count: __WORKER_FP_COUNT_THRESHOLD__
+        min_fp_rate_pct: __WORKER_FP_RATE_THRESHOLD_PCT__

@@ -43,9 +43,9 @@ const EXPECTED_WORKER_SETTINGS: Record<RegisteredWorkerId, ExpectedWorkerSetting
   'system-security-hunt-continuous-threat-hunt': { settingsVersion: 1, triggerTypes: ['manual'] },
   // Keeps manual alongside the schedule so a sweep can be kicked on demand.
   'system-security-detection-rule-tuning': {
-    settingsVersion: 1,
+    settingsVersion: 2,
     scheduleInterval: '2h',
-    extras: { analysisWindowDays: 14 },
+    extras: { analysisWindowDays: 7, fpCountThreshold: 10, fpRateThresholdPct: 50 },
     triggerTypes: ['scheduled', 'manual'],
   },
   'system-security-detection-rule-creation': { settingsVersion: 1, triggerTypes: ['manual'] },

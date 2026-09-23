@@ -139,6 +139,9 @@ const huntWorker = createWorker({
   watchIds: [SYSTEM_SECURITY_WATCH_HUNT_ID],
 });
 
+/** Complete Rule Tuning extras; cases vary the window and keep the FP thresholds at default. */
+const RULE_TUNING_EXTRAS = { analysisWindowDays: 14, fpCountThreshold: 10, fpRateThresholdPct: 50 };
+
 const detectionWorkers: Worker[] = [
   createWorker({
     id: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
@@ -148,7 +151,7 @@ const detectionWorkers: Worker[] = [
       workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
       autonomy: 'manual',
       scheduleInterval: '2h',
-      extras: { analysisWindowDays: 14 },
+      extras: RULE_TUNING_EXTRAS,
     },
   }),
   createWorker({
@@ -647,7 +650,10 @@ describe('WatchDetailPage', () => {
     await waitFor(() => expect(mutateAsync).toHaveBeenCalledTimes(1));
     expect(mutateAsync).toHaveBeenCalledWith({
       workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
-      patch: { settings: { extras: { analysisWindowDays: 7 } }, settingsRevision: 1 },
+      patch: {
+        settings: { extras: { ...RULE_TUNING_EXTRAS, analysisWindowDays: 7 } },
+        settingsRevision: 1,
+      },
     });
   });
 
@@ -667,7 +673,10 @@ describe('WatchDetailPage', () => {
     await waitFor(() => expect(mutateAsync).toHaveBeenCalledTimes(1));
     expect(mutateAsync).toHaveBeenCalledWith({
       workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
-      patch: { settings: { extras: { analysisWindowDays: 21 } }, settingsRevision: null },
+      patch: {
+        settings: { extras: { ...RULE_TUNING_EXTRAS, analysisWindowDays: 21 } },
+        settingsRevision: null,
+      },
     });
   });
 
@@ -809,7 +818,10 @@ describe('WatchDetailPage', () => {
     // Uninstalled Worker: the draft's revision is null and is sent as such.
     expect(mutateAsync).toHaveBeenCalledWith({
       workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
-      patch: { settings: { extras: { analysisWindowDays: 7 } }, settingsRevision: null },
+      patch: {
+        settings: { extras: { ...RULE_TUNING_EXTRAS, analysisWindowDays: 7 } },
+        settingsRevision: null,
+      },
     });
   });
 

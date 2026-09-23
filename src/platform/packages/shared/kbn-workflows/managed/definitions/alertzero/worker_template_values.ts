@@ -46,14 +46,42 @@ export const renderScheduledWorkerYaml = (
 export interface RuleTuningWorkerTemplateValues extends ScheduledWorkerTemplateValues {
   extras: {
     analysisWindowDays: number;
+    fpCountThreshold: number;
+    fpRateThresholdPct: number;
   };
 }
+
+/**
+ * Fails closed on a field the stored values do not carry. Boot reconcile re-renders installed
+ * documents from their persisted values without migrating them, so an un-upgraded copy must stop
+ * here rather than ship a workflow whose sweep input reads `undefined`.
+ */
+const requireNumericExtra = (
+  extras: RuleTuningWorkerTemplateValues['extras'],
+  field: keyof RuleTuningWorkerTemplateValues['extras']
+): string => {
+  const value = extras?.[field];
+  if (typeof value !== 'number' || !Number.isFinite(value)) {
+    throw new Error(
+      `Rule Tuning worker settings are missing "extras.${field}"; the stored values predate it`
+    );
+  }
+  return String(value);
+};
 
 export const renderRuleTuningWorkerYaml = (
   yaml: string,
   values: RuleTuningWorkerTemplateValues
-): string =>
-  renderScheduledWorkerYaml(yaml, values).replaceAll(
-    '__WORKER_ANALYSIS_WINDOW_DAYS__',
-    String(values.extras.analysisWindowDays)
-  );
+): string => {
+  const { extras } = values;
+  return renderScheduledWorkerYaml(yaml, values)
+    .replaceAll(
+      '__WORKER_ANALYSIS_WINDOW_DAYS__',
+      requireNumericExtra(extras, 'analysisWindowDays')
+    )
+    .replaceAll('__WORKER_FP_COUNT_THRESHOLD__', requireNumericExtra(extras, 'fpCountThreshold'))
+    .replaceAll(
+      '__WORKER_FP_RATE_THRESHOLD_PCT__',
+      requireNumericExtra(extras, 'fpRateThresholdPct')
+    );
+};

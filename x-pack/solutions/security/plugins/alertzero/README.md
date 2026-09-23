@@ -212,7 +212,7 @@ Tests to update:
 `enabled` sits beside `settings`; `autonomy` and `scheduleInterval` are the shared fields inside it. Anything else lives under `settings.extras`, owned by the Worker's Watch team and closed per Worker. A PATCH is the editable subset of the read body plus the revision GET returned:
 
 ```json
-{ "enabled": true, "settingsRevision": 3, "settings": { "autonomy": "manual", "scheduleInterval": "2h", "extras": { "analysisWindowDays": 14 } } }
+{ "enabled": true, "settingsRevision": 3, "settings": { "autonomy": "manual", "scheduleInterval": "2h", "extras": { "analysisWindowDays": 7, "fpCountThreshold": 10, "fpRateThresholdPct": 50 } } }
 ```
 
 Shared fields are per-field: omitted keeps the stored value, supplied replaces it. `extras` is whole-object: omitted keeps the stored object; supplied must be the complete valid object for that Worker and replaces it. No deep merge, no special `null`. Unknown keys, another Worker's fields, a replacement missing a required field, or an autonomy level the Worker does not allow are rejected with a 400 naming the field.
@@ -223,12 +223,24 @@ Adding a field to an existing Worker touches only Watch-owned code (Rule Tuning'
 2. **Declaration** — add its fresh-install default to `extras.defaultValue` in `impl/worker_settings/<watch>.ts`.
 3. **Template** — forward `values.extras.<field>` in the Worker's `yamlTemplate` renderer and YAML and bump the definition `version`; the setting is done only when the saved value reaches the run.
 4. **Control** — build a real control in the Worker's own folder under `public/pages/watches/custom_settings/<worker>/` (Rule Tuning lives in `custom_settings/rule_tuning/`), registered by Worker id in `custom_settings/registry.ts`. It receives `settings` and `onExtrasChange(extras)` and hands back the complete `extras` object. It never calls an API and there is no form generator or app-load completeness check; cover it with a component test.
+5. **Migration** — the extras schema is closed and required, so a stored document written before the field fails the read. Bump the Worker's entry in `WORKER_SETTINGS_VERSIONS` and add a step under that Worker's `WORKER_SETTINGS_MIGRATIONS` entry, keyed by the version it reads, both in `server/managed_workflows/workers/worker_settings.ts`. Steps run lazily inside `parseWorkerValues`, so a read projects the upgraded shape and the next settings save persists it; a version with no step to leave it throws and the Worker projects as `unavailable`. See [Settings migrations](#settings-migrations).
 
 The shared Watch page renders the interval control from the presence of `scheduleInterval`, offers only the Worker's `allowedAutonomyLevels` (one level renders as a fixed value), and mounts the registered custom component. Every edit, including Enabled, changes a draft. Save validates all dirty Workers, then writes Worker by Worker with the revision each draft started from; failed Workers keep draft and error; Discard drops unsaved edits without undoing successful writes.
 
+### Settings migrations
+
+Stored template values carry a `settingsVersion` per Worker. `WORKER_SETTINGS_MIGRATIONS` in `server/managed_workflows/workers/worker_settings.ts` holds a chain per Worker, keyed by the stored version each step reads; `parseWorkerValues` runs the chain before validating, so it applies on every read and every PATCH.
+
+- A read projects the upgraded shape without rewriting the document. The next settings save persists it, because `applyPatch` re-stamps the current version.
+- A step only fills what the new shape adds. A value the analyst set is never rewritten, so a Worker configured under an older default keeps that value rather than picking up the new one.
+- A version this build does not recognise — a newer one, or one with no step to leave it — throws. The Worker projects as `unavailable` and the stored document is left untouched, which is the reject-on-rollback direction from [security-team#19312](https://github.com/elastic/security-team/issues/19312).
+- Values stored before versions were stamped are treated as version 1.
+
+Rule Tuning v1 → v2 (`extras` gained `fpCountThreshold` and `fpRateThresholdPct`) is the worked example.
+
 ### Pre-customer state
 
-AlertZero is not live. Declarations, schemas and template values may change without a compatibility path or migration. Persisted settings must validate against the current shape; when documents from earlier development builds do not, the fix is a clean reset of the affected per-space Worker documents, coordinated with the Watch teams.
+AlertZero is not live. Declarations and schemas may still change in ways no migration chain covers; when documents from earlier development builds do not validate even after migration, the fix is a clean reset of the affected per-space Worker documents, coordinated with the Watch teams.
 
 ## Working-group contribution map
 

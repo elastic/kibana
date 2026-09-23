@@ -201,11 +201,12 @@ describe('createWorkerSettingsRegistration', () => {
 
   describe('Worker-specific settings — detection rule tuning', () => {
     const registration = createWorkerSettingsRegistration(RULE_TUNING_WORKER_ID);
+    const defaultExtras = { analysisWindowDays: 7, fpCountThreshold: 10, fpRateThresholdPct: 50 };
     const storedDefaults = {
-      settingsVersion: 1,
+      settingsVersion: 2,
       autonomyLevel: 'manual',
       scheduleInterval: '2h',
-      extras: { analysisWindowDays: 14 },
+      extras: defaultExtras,
     };
 
     it('stores extras nested and projects them under settings.extras', () => {
@@ -214,14 +215,14 @@ describe('createWorkerSettingsRegistration', () => {
         workerId: RULE_TUNING_WORKER_ID,
         autonomy: 'manual',
         scheduleInterval: '2h',
-        extras: { analysisWindowDays: 14 },
+        extras: defaultExtras,
       });
     });
 
     it('rejects stored values missing extras', () => {
       expect(() =>
         registration.toSettings({
-          settingsVersion: 1,
+          settingsVersion: 2,
           autonomyLevel: 'assisted',
           scheduleInterval: '2h',
         })
@@ -234,7 +235,7 @@ describe('createWorkerSettingsRegistration', () => {
         workerId: RULE_TUNING_WORKER_ID,
         autonomy: 'assisted',
         scheduleInterval: '2h',
-        extras: { analysisWindowDays: 14 },
+        extras: defaultExtras,
       });
     });
 
@@ -250,7 +251,7 @@ describe('createWorkerSettingsRegistration', () => {
     });
 
     it('rejects stored extras missing a required field, naming it', () => {
-      // No default repair: a document written before the field existed has to be reset.
+      // No default repair inside a version: only a migration step fills a field that was added.
       expect(() => registration.toSettings({ ...storedDefaults, extras: {} })).toThrow(
         /extras\.analysisWindowDays/
       );
@@ -267,13 +268,13 @@ describe('createWorkerSettingsRegistration', () => {
       expect(
         registration.applyPatch(
           { ...storedDefaults, autonomyLevel: 'assisted' },
-          { extras: { analysisWindowDays: 7 } }
+          { extras: { ...defaultExtras, analysisWindowDays: 21 } }
         )
       ).toEqual({
         values: {
           ...storedDefaults,
           autonomyLevel: 'assisted',
-          extras: { analysisWindowDays: 7 },
+          extras: { ...defaultExtras, analysisWindowDays: 21 },
         },
       });
     });
@@ -288,7 +289,7 @@ describe('createWorkerSettingsRegistration', () => {
       expect(
         expectInvalid(
           registration.applyPatch(storedDefaults, {
-            extras: { analysisWindowDays: 14, previewDepth: 3 },
+            extras: { ...defaultExtras, previewDepth: 3 },
           })
         )
       ).toMatch(/extras.*previewDepth/);
@@ -296,8 +297,116 @@ describe('createWorkerSettingsRegistration', () => {
 
     it.each([7.5, 0, 31])('rejects a stored analysis window of %s', (analysisWindowDays) => {
       expect(() =>
-        registration.toSettings({ ...storedDefaults, extras: { analysisWindowDays } })
+        registration.toSettings({
+          ...storedDefaults,
+          extras: { ...defaultExtras, analysisWindowDays },
+        })
       ).toThrow(/extras\.analysisWindowDays/);
+    });
+
+    it.each([1, 101, 10.5])('rejects a stored FP count threshold of %s', (fpCountThreshold) => {
+      expect(() =>
+        registration.toSettings({
+          ...storedDefaults,
+          extras: { ...defaultExtras, fpCountThreshold },
+        })
+      ).toThrow(/extras\.fpCountThreshold/);
+    });
+
+    it.each([-1, 101, 50.5])('rejects a stored FP rate threshold of %s', (fpRateThresholdPct) => {
+      expect(() =>
+        registration.toSettings({
+          ...storedDefaults,
+          extras: { ...defaultExtras, fpRateThresholdPct },
+        })
+      ).toThrow(/extras\.fpRateThresholdPct/);
+    });
+
+    it.each(['fpCountThreshold', 'fpRateThresholdPct'] as const)(
+      'rejects an extras replacement missing %s, naming it',
+      (missing) => {
+        const extras: Record<string, number> = { ...defaultExtras };
+        delete extras[missing];
+
+        expect(expectInvalid(registration.applyPatch(storedDefaults, { extras }))).toContain(
+          `extras.${missing}`
+        );
+      }
+    );
+  });
+
+  // v1 stored only `analysisWindowDays`; local dev installs still hold those documents.
+  describe('settings migration — detection rule tuning v1 to v2', () => {
+    const registration = createWorkerSettingsRegistration(RULE_TUNING_WORKER_ID);
+    const storedV1 = {
+      settingsVersion: 1,
+      autonomyLevel: 'assisted',
+      scheduleInterval: '6h',
+      extras: { analysisWindowDays: 14 },
+    };
+
+    it('fills the two new thresholds with their defaults and keeps the stored window', () => {
+      expect(registration.toSettings(storedV1)).toEqual({
+        workerId: RULE_TUNING_WORKER_ID,
+        autonomy: 'assisted',
+        scheduleInterval: '6h',
+        // 14 was the v1 default; a migration cannot tell it apart from a value the analyst set,
+        // so it is preserved rather than moved to the new default of 7.
+        extras: { analysisWindowDays: 14, fpCountThreshold: 10, fpRateThresholdPct: 50 },
+      });
+    });
+
+    it('persists the migrated shape at the current version on the next save', () => {
+      expect(registration.applyPatch(storedV1, { autonomy: 'manual' })).toEqual({
+        values: {
+          settingsVersion: 2,
+          autonomyLevel: 'manual',
+          scheduleInterval: '6h',
+          extras: { analysisWindowDays: 14, fpCountThreshold: 10, fpRateThresholdPct: 50 },
+        },
+      });
+    });
+
+    it('fills every extras field when the document predates extras entirely', () => {
+      expect(
+        registration.toSettings({
+          settingsVersion: 1,
+          autonomyLevel: 'manual',
+          scheduleInterval: '2h',
+        })
+      ).toEqual({
+        workerId: RULE_TUNING_WORKER_ID,
+        autonomy: 'manual',
+        scheduleInterval: '2h',
+        extras: { analysisWindowDays: 7, fpCountThreshold: 10, fpRateThresholdPct: 50 },
+      });
+    });
+
+    it('treats an unstamped document as v1 and migrates it', () => {
+      expect(
+        registration.toSettings({
+          autonomyLevel: 'manual',
+          scheduleInterval: '2h',
+          extras: { analysisWindowDays: 21 },
+        })
+      ).toEqual({
+        workerId: RULE_TUNING_WORKER_ID,
+        autonomy: 'manual',
+        scheduleInterval: '2h',
+        extras: { analysisWindowDays: 21, fpCountThreshold: 10, fpRateThresholdPct: 50 },
+      });
+    });
+
+    it('still rejects a value the migrated shape does not accept', () => {
+      expect(() =>
+        registration.toSettings({ ...storedV1, extras: { analysisWindowDays: 99 } })
+      ).toThrow(/extras\.analysisWindowDays/);
+    });
+
+    it('rejects a newer version than this build knows, leaving the document alone', () => {
+      expect(() => registration.toSettings({ ...storedV1, settingsVersion: 3 })).toThrow(
+        /Unsupported settings version.*3/
+      );
     });
   });
 

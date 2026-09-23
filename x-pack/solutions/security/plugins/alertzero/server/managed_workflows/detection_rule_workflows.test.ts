@@ -99,9 +99,75 @@ describe('detection rule workflows', () => {
       expect(calls[0].with?.['workflow-id']).toBe(ALERTZERO_RULE_TUNING_WORKER_WORKFLOW_ID);
       expect(calls[0].with?.inputs).toEqual({
         autonomy_level: '{{ consts.worker_settings.autonomy }}',
-        analysis_window_days: 14,
+        analysis_window_days: 7,
+        min_fp_count: 10,
+        min_fp_rate_pct: 50,
       });
     });
+
+    // The sweep's own consts are fallbacks for a manual run, so a saved setting only
+    // takes effect if the wrapper renders it into the dispatch inputs.
+    it('forwards the saved analysis window and both FP thresholds to the sweep', () => {
+      const definition = getManagedWorkflowDefinition(
+        ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID
+      );
+      if (!definition || !('yamlTemplate' in definition) || !definition.yamlTemplate) {
+        throw new Error('Rule Tuning worker definition has no YAML template');
+      }
+
+      const rendered = parse(
+        definition.yamlTemplate({
+          settingsVersion: 2,
+          autonomyLevel: 'assisted',
+          scheduleInterval: '6h',
+          extras: { analysisWindowDays: 21, fpCountThreshold: 4, fpRateThresholdPct: 80 },
+        })
+      ) as WorkflowYaml;
+      const [dispatch] = flattenSteps(rendered.steps as unknown as NestedStep[]);
+
+      expect(dispatch.with?.inputs).toEqual({
+        autonomy_level: '{{ consts.worker_settings.autonomy }}',
+        analysis_window_days: 21,
+        min_fp_count: 4,
+        min_fp_rate_pct: 80,
+      });
+      // The same values are readable off the worker's own consts block.
+      expect((rendered.consts as Record<string, Record<string, unknown>>).worker_settings).toEqual({
+        settingsVersion: 2,
+        autonomy: 'assisted',
+        scheduleInterval: '6h',
+        extras: { analysisWindowDays: 21, fpCountThreshold: 4, fpRateThresholdPct: 80 },
+      });
+    });
+
+    // Boot reconcile re-renders installed documents from persisted values without migrating them,
+    // so an un-upgraded copy has to stop here rather than install `min_fp_count: undefined`.
+    it.each(['analysisWindowDays', 'fpCountThreshold', 'fpRateThresholdPct'] as const)(
+      'refuses to render stored values missing %s',
+      (missing) => {
+        const definition = getManagedWorkflowDefinition(
+          ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID
+        );
+        if (!definition || !('yamlTemplate' in definition) || !definition.yamlTemplate) {
+          throw new Error('Rule Tuning worker definition has no YAML template');
+        }
+        const extras: Record<string, number> = {
+          analysisWindowDays: 7,
+          fpCountThreshold: 10,
+          fpRateThresholdPct: 50,
+        };
+        delete extras[missing];
+
+        expect(() =>
+          definition.yamlTemplate?.({
+            settingsVersion: 2,
+            autonomyLevel: 'manual',
+            scheduleInterval: '2h',
+            extras,
+          })
+        ).toThrow(`extras.${missing}`);
+      }
+    );
   });
 
   describe('detection rule workflow definitions', () => {

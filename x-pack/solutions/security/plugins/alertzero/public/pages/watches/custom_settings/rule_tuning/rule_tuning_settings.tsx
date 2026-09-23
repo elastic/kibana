@@ -6,14 +6,15 @@
  */
 
 import React from 'react';
-import { EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import {
   RULE_TUNING_DEFAULT_EXTRAS,
   RuleTuningWorkerExtras,
   type WorkerSettings,
 } from '@kbn/alertzero-common';
 import { AnalysisWindowDaysField } from './analysis_window_days_field';
-import * as i18n from './translations';
+import { FpCountThresholdField } from './fp_count_threshold_field';
+import { FpRateThresholdPctField } from './fp_rate_threshold_pct_field';
 import type { WorkerCustomSettingsComponent } from '../types';
 
 /** The server projects complete extras; fall back to the defaults rather than crash a render. */
@@ -23,8 +24,9 @@ const readRuleTuningExtras = (settings: WorkerSettings): RuleTuningWorkerExtras 
 };
 
 /**
- * Detection Watch controls for the Rule Tuning Worker. Every change hands the complete `extras`
- * object back to the page draft; adding a field means adding its control and spreading it here.
+ * Detection Watch controls for the Rule Tuning Worker, rendered as a flat list. Every change hands
+ * the complete `extras` object back to the page draft; adding a field means adding its control and
+ * spreading it here.
  */
 export const RuleTuningSettings: WorkerCustomSettingsComponent = ({
   settings,
@@ -36,14 +38,20 @@ export const RuleTuningSettings: WorkerCustomSettingsComponent = ({
   return (
     <>
       <EuiSpacer size="m" />
-      <EuiTitle size="xxs">
-        <h3>{i18n.TUNING_THRESHOLDS_TITLE}</h3>
-      </EuiTitle>
-      <EuiSpacer size="s" />
       <AnalysisWindowDaysField
         current={extras.analysisWindowDays}
         isDisabled={isDisabled}
         onChange={(analysisWindowDays) => onExtrasChange({ ...extras, analysisWindowDays })}
+      />
+      <FpCountThresholdField
+        current={extras.fpCountThreshold}
+        isDisabled={isDisabled}
+        onChange={(fpCountThreshold) => onExtrasChange({ ...extras, fpCountThreshold })}
+      />
+      <FpRateThresholdPctField
+        current={extras.fpRateThresholdPct}
+        isDisabled={isDisabled}
+        onChange={(fpRateThresholdPct) => onExtrasChange({ ...extras, fpRateThresholdPct })}
       />
     </>
   );

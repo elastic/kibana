@@ -86,22 +86,75 @@ describe('AlertZero schema smoke tests', () => {
         workerId: 'system-security-detection-rule-tuning',
         autonomy: 'manual',
         scheduleInterval: '2h',
-        extras: { analysisWindowDays: 14 },
+        extras: { analysisWindowDays: 7, fpCountThreshold: 10, fpRateThresholdPct: 50 },
       }).success
     ).toBe(true);
     expect(WorkerSettingsWrite.safeParse({ extras: { anything: true } }).success).toBe(true);
   });
 
   it('closes the Detection-owned Rule Tuning extras', () => {
+    const complete = { analysisWindowDays: 7, fpCountThreshold: 10, fpRateThresholdPct: 50 };
+
     expect(RuleTuningWorkerExtras.safeParse({}).success).toBe(false);
-    expect(RuleTuningWorkerExtras.safeParse({ analysisWindowDays: 14, extra: 1 }).success).toBe(
-      false
-    );
-    expect(RuleTuningWorkerExtras.safeParse({ analysisWindowDays: 14 }).success).toBe(true);
+    expect(RuleTuningWorkerExtras.safeParse({ ...complete, extra: 1 }).success).toBe(false);
+    expect(RuleTuningWorkerExtras.safeParse(complete).success).toBe(true);
   });
 
+  it.each(['analysisWindowDays', 'fpCountThreshold', 'fpRateThresholdPct'] as const)(
+    'rejects Rule Tuning extras missing %s',
+    (missing) => {
+      const complete: Record<string, number> = {
+        analysisWindowDays: 7,
+        fpCountThreshold: 10,
+        fpRateThresholdPct: 50,
+      };
+      delete complete[missing];
+
+      expect(RuleTuningWorkerExtras.safeParse(complete).success).toBe(false);
+    }
+  );
+
   it.each([7.5, 0, 31])('rejects analysisWindowDays %s', (analysisWindowDays) => {
-    expect(RuleTuningWorkerExtras.safeParse({ analysisWindowDays }).success).toBe(false);
+    expect(
+      RuleTuningWorkerExtras.safeParse({
+        analysisWindowDays,
+        fpCountThreshold: 10,
+        fpRateThresholdPct: 50,
+      }).success
+    ).toBe(false);
+  });
+
+  it.each([1.5, 1, 101])('rejects fpCountThreshold %s', (fpCountThreshold) => {
+    expect(
+      RuleTuningWorkerExtras.safeParse({
+        analysisWindowDays: 7,
+        fpCountThreshold,
+        fpRateThresholdPct: 50,
+      }).success
+    ).toBe(false);
+  });
+
+  it.each([50.5, -1, 101])('rejects fpRateThresholdPct %s', (fpRateThresholdPct) => {
+    expect(
+      RuleTuningWorkerExtras.safeParse({
+        analysisWindowDays: 7,
+        fpCountThreshold: 10,
+        fpRateThresholdPct,
+      }).success
+    ).toBe(false);
+  });
+
+  it.each([
+    [2, 100],
+    [100, 0],
+  ])('accepts fpCountThreshold %s and fpRateThresholdPct %s at the bounds', (count, rate) => {
+    expect(
+      RuleTuningWorkerExtras.safeParse({
+        analysisWindowDays: 7,
+        fpCountThreshold: count,
+        fpRateThresholdPct: rate,
+      }).success
+    ).toBe(true);
   });
 
   it('rejects leftover top-level settings fields on the update body', () => {
