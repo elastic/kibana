@@ -76,9 +76,8 @@ const isAggregatableKeyword = (fields: AiIndexField[], path: string): boolean =>
 
 /**
  * Space- and lifecycle-filtered `terms` counts on `type` / `tags`; each skipped unless an
- * aggregatable keyword. Data stream revisions are not collapsed. Shard failures error out rather
- * than return undercounts. A 403 (caller lacks `read` on the backing indices) yields no counts
- * instead of failing the whole describe.
+ * aggregatable keyword. Shard failures error out rather than return undercounts. A 403 (caller
+ * lacks `read` on the backing indices) yields no counts instead of failing the whole describe.
  */
 export const describeAiIndexAggregations = async ({
   esClient,

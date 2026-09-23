@@ -22,7 +22,6 @@ import type { AiIndexField } from './types';
 
 const CONFLICT_FIELD_TYPE = 'conflict';
 const SEMANTIC_TEXT_TYPE = 'semantic_text';
-/** Dropped by the retrieval view, so never advertised. */
 const GOVERNANCE_FIELD = 'governance';
 const isGovernanceField = (path: string): boolean =>
   path === GOVERNANCE_FIELD || path.startsWith(`${GOVERNANCE_FIELD}.`);
