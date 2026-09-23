@@ -188,18 +188,25 @@ export const collectQueryAttempts = (steps: ConverseStep[]): QueryAttempt[] =>
 
 const isFinalizedValidationResult = (
   result: unknown
-): result is { data: { finalized: true; finalized_queries: AcceptedQuery[] } } =>
+): result is {
+  data: { target_id: string; finalized: true; finalized_queries: AcceptedQuery[] };
+} =>
   typeof result === 'object' &&
   result !== null &&
   'data' in result &&
   typeof result.data === 'object' &&
   result.data !== null &&
+  'target_id' in result.data &&
+  typeof result.data.target_id === 'string' &&
   'finalized' in result.data &&
   result.data.finalized === true &&
   'finalized_queries' in result.data &&
   Array.isArray(result.data.finalized_queries);
 
-export const getFinalizedQueries = (steps: ConverseStep[]): AcceptedQuery[] => {
+export const getFinalizedQueries = (
+  steps: ConverseStep[],
+  expectedTargetId: string
+): AcceptedQuery[] => {
   const validationStep = steps
     .filter(
       (step) =>
@@ -212,6 +219,11 @@ export const getFinalizedQueries = (steps: ConverseStep[]): AcceptedQuery[] => {
   const validationResult = validationStep?.results?.find(isFinalizedValidationResult);
   if (!validationResult) {
     throw new Error('KI query generation agent did not finalize validate_queries');
+  }
+  if (validationResult.data.target_id !== expectedTargetId) {
+    throw new Error(
+      `KI query generation agent finalized for unexpected target "${validationResult.data.target_id}"`
+    );
   }
   return validationResult.data.finalized_queries;
 };
@@ -234,7 +246,7 @@ export async function runKIQueryGenerationAgent({
     conversationId: conversation.id,
     input: userMessage,
   });
-  const queries = getFinalizedQueries(result.steps);
+  const queries = getFinalizedQueries(result.steps, target.id);
   return {
     queries,
     queryAttempts: collectQueryAttempts(result.steps),

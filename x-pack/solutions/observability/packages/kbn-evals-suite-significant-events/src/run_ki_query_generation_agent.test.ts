@@ -130,70 +130,92 @@ describe('collectQueryAttempts', () => {
 });
 
 describe('getFinalizedQueries', () => {
+  const finalizedQuery = {
+    type: 'match',
+    title: 'Detects errors',
+    description: 'desc',
+    esql: { query: 'FROM logs' },
+    category: 'error',
+    severity_score: 70,
+    features: [{ id: 'f1', run_id: 'r1' }],
+  };
+
   it('returns a finalized batch', () => {
     expect(
-      getFinalizedQueries([
-        {
-          type: 'tool_call',
-          tool_id: SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID,
-          results: [
-            {
-              type: 'other',
-              data: {
-                finalized: true,
-                finalized_queries: [
-                  {
-                    type: 'match',
-                    title: 'Detects errors',
-                    description: 'desc',
-                    esql: { query: 'FROM logs' },
-                    category: 'error',
-                    severity_score: 70,
-                    features: [{ id: 'f1', run_id: 'r1' }],
-                  },
-                ],
+      getFinalizedQueries(
+        [
+          {
+            type: 'tool_call',
+            tool_id: SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID,
+            results: [
+              {
+                type: 'other',
+                data: {
+                  target_id: 'logs.test',
+                  finalized: true,
+                  finalized_queries: [finalizedQuery],
+                },
               },
-            },
-          ],
-        },
-      ])
-    ).toEqual([
-      {
-        type: 'match',
-        title: 'Detects errors',
-        description: 'desc',
-        esql: { query: 'FROM logs' },
-        category: 'error',
-        severity_score: 70,
-        features: [{ id: 'f1', run_id: 'r1' }],
-      },
-    ]);
+            ],
+          },
+        ],
+        'logs.test'
+      )
+    ).toEqual([finalizedQuery]);
+  });
+
+  it('rejects a batch finalized for another target', () => {
+    expect(() =>
+      getFinalizedQueries(
+        [
+          {
+            type: 'tool_call',
+            tool_id: SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID,
+            results: [
+              {
+                type: 'other',
+                data: {
+                  target_id: 'logs.other',
+                  finalized: true,
+                  finalized_queries: [finalizedQuery],
+                },
+              },
+            ],
+          },
+        ],
+        'logs.test'
+      )
+    ).toThrow('KI query generation agent finalized for unexpected target "logs.other"');
   });
 
   it('does not fall back when the latest validation is not finalized', () => {
     expect(() =>
-      getFinalizedQueries([
-        {
-          type: 'tool_call',
-          tool_id: SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID,
-          params: { queries: [{}] },
-          results: [
-            {
-              type: 'other',
-              data: {
-                finalized: true,
-                finalized_queries: [{}],
+      getFinalizedQueries(
+        [
+          {
+            type: 'tool_call',
+            tool_id: SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID,
+            params: { queries: [{}] },
+            results: [
+              {
+                type: 'other',
+                data: {
+                  target_id: 'logs.test',
+                  finalized: true,
+                  finalized_queries: [{}],
+                },
               },
-            },
-          ],
-        },
-        {
-          type: 'tool_call',
-          tool_id: SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID,
-          params: { queries: [{}] },
-          results: [{ type: 'other', data: { finalized: false, queries: [] } }],
-        },
-      ])
+            ],
+          },
+          {
+            type: 'tool_call',
+            tool_id: SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID,
+            params: { queries: [{}] },
+            results: [{ type: 'other', data: { finalized: false, queries: [] } }],
+          },
+        ],
+        'logs.test'
+      )
     ).toThrow('did not finalize validate_queries');
   });
 });
