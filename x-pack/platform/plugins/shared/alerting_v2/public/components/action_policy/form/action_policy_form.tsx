@@ -5,23 +5,13 @@
  * 2.0.
  */
 
-import {
-  EuiDescribedFormGroup,
-  EuiFieldText,
-  EuiFormRow,
-  EuiHorizontalRule,
-  EuiSpacer,
-  EuiText,
-  EuiTextArea,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFieldText, EuiFormRow, EuiHorizontalRule, EuiSpacer, EuiTextArea } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { FlyoutAccordion } from '@kbn/flyout-sections';
-import type { ReactNode } from 'react';
 import React from 'react';
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { useFetchRuleEventFields } from '../../../hooks/use_fetch_rule_event_fields';
+import { ActionPolicyFormSection } from './components/action_policy_form_section';
 import { AdvancedMatchingAccordion } from './components/advanced_matching_accordion';
 import { NotificationControlsSection } from './components/notification_controls_section';
 import { NotificationSummary } from './components/notification_summary';
@@ -30,73 +20,7 @@ import { PolicyScopeDescription } from './components/policy_scope_description';
 import { RuleTagsSelector } from './components/rule_tags_selector';
 import { SimpleWorkflowBuilder } from './components/simple_workflow_builder';
 import { WorkflowSelector } from './components/workflow_selector';
-import type {
-  ActionPolicyFormCollapsibleSection,
-  ActionPolicyFormCollapsibleSectionConfig,
-  ActionPolicyFormConfig,
-  ActionPolicyFormLayout,
-  ActionPolicyFormState,
-} from './types';
-
-type ActionPolicyFormSectionId =
-  | 'policyDetails'
-  | 'policyScope'
-  | ActionPolicyFormCollapsibleSection;
-
-interface ActionPolicyFormSectionProps {
-  children: ReactNode;
-  config?: ActionPolicyFormCollapsibleSectionConfig;
-  description: ReactNode;
-  id: ActionPolicyFormSectionId;
-  layout?: ActionPolicyFormLayout;
-  title: ReactNode;
-}
-
-const ActionPolicyFormSection = ({
-  children,
-  config,
-  description,
-  id,
-  layout = 'page',
-  title,
-}: ActionPolicyFormSectionProps) => {
-  if (config) {
-    return (
-      <FlyoutAccordion
-        title={title}
-        initialIsOpen={config.initialIsOpen}
-        hasBorder={false}
-        data-test-subj={`actionPolicyFormSection-${id}`}
-      >
-        {description}
-        <EuiSpacer size="m" />
-        {children}
-      </FlyoutAccordion>
-    );
-  }
-
-  if (layout === 'flyout') {
-    return (
-      <div data-test-subj={`actionPolicyFormSection-${id}`}>
-        <EuiTitle size="xs">
-          <h3>{title}</h3>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiText size="s" color="subdued">
-          {description}
-        </EuiText>
-        <EuiSpacer size="m" />
-        {children}
-      </div>
-    );
-  }
-
-  return (
-    <EuiDescribedFormGroup fullWidth title={<h3>{title}</h3>} description={description}>
-      {children}
-    </EuiDescribedFormGroup>
-  );
-};
+import type { ActionPolicyFormConfig, ActionPolicyFormState } from './types';
 
 interface ActionPolicyFormProps {
   config?: ActionPolicyFormConfig;
