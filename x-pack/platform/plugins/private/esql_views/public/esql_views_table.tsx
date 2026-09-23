@@ -28,7 +28,10 @@ export const getQueryPreview = (query: string): string => {
     : normalizedQuery;
 };
 
-const QueryPreview: FunctionComponent<{ query: string }> = ({ query }) => {
+const QueryPreview: FunctionComponent<{ query: string; viewName: string }> = ({
+  query,
+  viewName,
+}) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   return (
@@ -37,7 +40,7 @@ const QueryPreview: FunctionComponent<{ query: string }> = ({ query }) => {
       button={
         <button
           type="button"
-          aria-label={translations.showFullQuery}
+          aria-label={translations.showFullQueryForView(viewName)}
           data-test-subj="esqlViewsQueryCell"
           onClick={() => setIsPopoverOpen((isOpen) => !isOpen)}
           css={{
@@ -117,7 +120,9 @@ export const EsqlViewsTable: FunctionComponent<EsqlViewsTableProps> = ({
       {
         field: 'query',
         name: translations.queryColumn,
-        render: (query: string) => <QueryPreview query={query} />,
+        render: (query: string, view: EsqlView) => (
+          <QueryPreview query={query} viewName={view.name} />
+        ),
         'data-test-subj': 'esqlViewsQueryColumn',
       },
     ],

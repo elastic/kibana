@@ -53,9 +53,11 @@ export const translations = {
   queryColumn: i18n.translate('xpack.esqlViews.managementPage.queryColumn', {
     defaultMessage: 'Query',
   }),
-  showFullQuery: i18n.translate('xpack.esqlViews.managementPage.showFullQuery', {
-    defaultMessage: 'Show full query',
-  }),
+  showFullQueryForView: (viewName: string) =>
+    i18n.translate('xpack.esqlViews.managementPage.showFullQueryForView', {
+      defaultMessage: 'Show full query for {viewName}',
+      values: { viewName },
+    }),
   fullQueryPopover: i18n.translate('xpack.esqlViews.managementPage.fullQueryPopover', {
     defaultMessage: 'Full ES|QL query',
   }),

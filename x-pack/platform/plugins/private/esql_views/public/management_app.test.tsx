@@ -86,6 +86,7 @@ describe('ManagementApp', () => {
 
     const queryCell = await screen.findByTestId('esqlViewsQueryCell');
     expect(queryCell).not.toHaveTextContent('full_query_end');
+    expect(queryCell).toHaveAccessibleName('Show full query for long-query-view');
     expect(screen.queryByTestId('esqlViewsQueryPopover')).not.toBeInTheDocument();
 
     fireEvent.click(queryCell);
@@ -104,9 +105,9 @@ describe('ManagementApp', () => {
           query: 'FROM logs-*',
         },
         {
-          name: 'orders-view',
-          description: 'Customer orders',
-          query: 'FROM orders-*',
+          name: 'sales-view',
+          description: 'Customer purchases',
+          query: 'FROM transactions-*',
         },
       ],
     });
@@ -114,14 +115,16 @@ describe('ManagementApp', () => {
     renderApp(client);
     await screen.findByText('logs-view');
 
-    fireEvent.change(screen.getByTestId('esqlViewsSearch'), {
-      target: { value: 'orders' },
-    });
+    const searchInput = screen.getByTestId('esqlViewsSearch');
+    for (const searchTerm of ['sales', 'purchases', 'transactions']) {
+      fireEvent.change(searchInput, { target: { value: searchTerm } });
 
-    await waitFor(() => {
-      expect(screen.queryByText('logs-view')).not.toBeInTheDocument();
-    });
-    expect(screen.getByText('orders-view')).toBeInTheDocument();
+      await waitFor(() => expect(screen.queryByText('logs-view')).not.toBeInTheDocument());
+      expect(screen.getByText('sales-view')).toBeInTheDocument();
+
+      fireEvent.change(searchInput, { target: { value: '' } });
+      await screen.findByText('logs-view');
+    }
   });
 
   it('distinguishes an empty search result from an empty views list', async () => {
