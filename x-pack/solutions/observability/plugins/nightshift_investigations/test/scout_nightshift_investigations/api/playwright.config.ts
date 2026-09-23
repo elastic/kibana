@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createPlaywrightConfig } from '@kbn/scout';
+import { createPlaywrightConfig } from '@kbn/scout-oblt';
 
 export default createPlaywrightConfig({
   testDir: './tests',

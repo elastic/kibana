@@ -15,7 +15,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/nightshift_investigations/test/scout_nightshift_investigations/api/tests/ensure_investigation.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/ensure_investigation.spec.ts",
         "line": 30,
         "column": 7
       }
@@ -31,7 +31,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/nightshift_investigations/test/scout_nightshift_investigations/api/tests/ensure_investigation.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/ensure_investigation.spec.ts",
         "line": 39,
         "column": 67
       }
@@ -47,7 +47,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/nightshift_investigations/test/scout_nightshift_investigations/api/tests/ensure_investigation.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/ensure_investigation.spec.ts",
         "line": 53,
         "column": 27
       }
@@ -63,7 +63,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/nightshift_investigations/test/scout_nightshift_investigations/api/tests/ensure_investigation.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/ensure_investigation.spec.ts",
         "line": 54,
         "column": 67
       }
@@ -79,7 +79,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/nightshift_investigations/test/scout_nightshift_investigations/api/tests/follow_investigation.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/follow_investigation.spec.ts",
         "line": 23,
         "column": 13
       }
@@ -95,7 +95,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/nightshift_investigations/test/scout_nightshift_investigations/api/tests/follow_investigation.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/follow_investigation.spec.ts",
         "line": 26,
         "column": 56
       }
@@ -111,7 +111,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/nightshift_investigations/test/scout_nightshift_investigations/api/tests/get_investigation_availability.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/get_investigation_availability.spec.ts",
         "line": 25,
         "column": 7
       }
@@ -127,7 +127,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/nightshift_investigations/test/scout_nightshift_investigations/api/tests/get_investigation_availability.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/get_investigation_availability.spec.ts",
         "line": 30,
         "column": 25
       }
@@ -143,7 +143,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/nightshift_investigations/test/scout_nightshift_investigations/api/tests/get_investigation_availability.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/get_investigation_availability.spec.ts",
         "line": 40,
         "column": 17
       }
@@ -159,7 +159,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/nightshift_investigations/test/scout_nightshift_investigations/api/tests/get_investigation.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/get_investigation.spec.ts",
         "line": 50,
         "column": 7
       }
@@ -175,7 +175,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/nightshift_investigations/test/scout_nightshift_investigations/api/tests/get_investigation.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/get_investigation.spec.ts",
         "line": 53,
         "column": 13
       }
@@ -191,7 +191,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/nightshift_investigations/test/scout_nightshift_investigations/api/tests/get_investigation.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/get_investigation.spec.ts",
         "line": 83,
         "column": 14
       }
@@ -207,7 +207,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/nightshift_investigations/test/scout_nightshift_investigations/api/tests/list_investigations.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/list_investigations.spec.ts",
         "line": 82,
         "column": 7
       }
@@ -223,7 +223,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/nightshift_investigations/test/scout_nightshift_investigations/api/tests/list_investigations.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/list_investigations.spec.ts",
         "line": 89,
         "column": 14
       }
@@ -239,7 +239,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/nightshift_investigations/test/scout_nightshift_investigations/api/tests/list_investigations.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/list_investigations.spec.ts",
         "line": 98,
         "column": 14
       }
@@ -255,7 +255,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/nightshift_investigations/test/scout_nightshift_investigations/api/tests/list_investigations.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/list_investigations.spec.ts",
         "line": 122,
         "column": 56
       }
@@ -271,7 +271,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/nightshift_investigations/test/scout_nightshift_investigations/api/tests/list_investigations.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/list_investigations.spec.ts",
         "line": 130,
         "column": 24
       }
@@ -287,7 +287,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/nightshift_investigations/test/scout_nightshift_investigations/api/tests/list_investigations.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/list_investigations.spec.ts",
         "line": 146,
         "column": 24
       }
@@ -303,7 +303,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/nightshift_investigations/test/scout_nightshift_investigations/api/tests/list_investigations.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/list_investigations.spec.ts",
         "line": 159,
         "column": 85
       }
@@ -319,7 +319,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/nightshift_investigations/test/scout_nightshift_investigations/api/tests/list_investigations.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/list_investigations.spec.ts",
         "line": 175,
         "column": 94
       }
@@ -335,7 +335,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/nightshift_investigations/test/scout_nightshift_investigations/api/tests/list_investigations.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/list_investigations.spec.ts",
         "line": 195,
         "column": 59
       }
@@ -351,7 +351,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/nightshift_investigations/test/scout_nightshift_investigations/api/tests/list_investigations.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/list_investigations.spec.ts",
         "line": 198,
         "column": 89
       }
@@ -367,7 +367,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/nightshift_investigations/test/scout_nightshift_investigations/api/tests/list_investigations.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/list_investigations.spec.ts",
         "line": 214,
         "column": 13
       }
@@ -383,7 +383,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/nightshift_investigations/test/scout_nightshift_investigations/api/tests/list_investigations.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/list_investigations.spec.ts",
         "line": 218,
         "column": 14
       }
@@ -399,7 +399,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/nightshift_investigations/test/scout_nightshift_investigations/api/tests/list_investigations.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/list_investigations.spec.ts",
         "line": 223,
         "column": 16
       }
@@ -415,7 +415,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/nightshift_investigations/test/scout_nightshift_investigations/api/tests/list_investigations.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/list_investigations.spec.ts",
         "line": 229,
         "column": 7
       }
@@ -431,7 +431,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/nightshift_investigations/test/scout_nightshift_investigations/api/tests/space_isolation.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/space_isolation.spec.ts",
         "line": 51,
         "column": 13
       }
@@ -447,7 +447,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/nightshift_investigations/test/scout_nightshift_investigations/api/tests/space_isolation.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/space_isolation.spec.ts",
         "line": 62,
         "column": 16
       }
@@ -463,7 +463,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/nightshift_investigations/test/scout_nightshift_investigations/api/tests/space_isolation.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/space_isolation.spec.ts",
         "line": 65,
         "column": 11
       }
@@ -479,7 +479,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/nightshift_investigations/test/scout_nightshift_investigations/api/tests/space_isolation.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/space_isolation.spec.ts",
         "line": 74,
         "column": 7
       }
@@ -495,7 +495,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/nightshift_investigations/test/scout_nightshift_investigations/api/tests/space_isolation.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/space_isolation.spec.ts",
         "line": 96,
         "column": 43
       }
@@ -511,7 +511,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/nightshift_investigations/test/scout_nightshift_investigations/api/tests/space_isolation.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/space_isolation.spec.ts",
         "line": 109,
         "column": 16
       }
@@ -527,7 +527,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/nightshift_investigations/test/scout_nightshift_investigations/api/tests/start_investigation.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/start_investigation.spec.ts",
         "line": 25,
         "column": 47
       }
@@ -543,7 +543,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/nightshift_investigations/test/scout_nightshift_investigations/api/tests/start_investigation.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/start_investigation.spec.ts",
         "line": 34,
         "column": 74
       }
@@ -559,7 +559,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/nightshift_investigations/test/scout_nightshift_investigations/api/tests/start_investigation.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/start_investigation.spec.ts",
         "line": 39,
         "column": 23
       }
@@ -575,7 +575,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/nightshift_investigations/test/scout_nightshift_investigations/api/tests/start_investigation.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/start_investigation.spec.ts",
         "line": 50,
         "column": 28
       }
@@ -591,7 +591,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/nightshift_investigations/test/scout_nightshift_investigations/api/tests/start_investigation.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/start_investigation.spec.ts",
         "line": 62,
         "column": 58
       }
@@ -607,7 +607,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/nightshift_investigations/test/scout_nightshift_investigations/api/tests/start_investigation.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/start_investigation.spec.ts",
         "line": 75,
         "column": 27
       }
@@ -623,7 +623,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/nightshift_investigations/test/scout_nightshift_investigations/api/tests/update_investigation.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/update_investigation.spec.ts",
         "line": 33,
         "column": 65
       }
@@ -639,7 +639,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/nightshift_investigations/test/scout_nightshift_investigations/api/tests/update_investigation.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/update_investigation.spec.ts",
         "line": 36,
         "column": 32
       }
@@ -655,7 +655,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/nightshift_investigations/test/scout_nightshift_investigations/api/tests/update_investigation.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/update_investigation.spec.ts",
         "line": 40,
         "column": 76
       }
@@ -671,7 +671,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/nightshift_investigations/test/scout_nightshift_investigations/api/tests/update_investigation.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/update_investigation.spec.ts",
         "line": 45,
         "column": 81
       }
@@ -687,7 +687,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/nightshift_investigations/test/scout_nightshift_investigations/api/tests/update_investigation.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/update_investigation.spec.ts",
         "line": 52,
         "column": 68
       }
@@ -703,7 +703,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/nightshift_investigations/test/scout_nightshift_investigations/api/tests/update_investigation.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/update_investigation.spec.ts",
         "line": 113,
         "column": 92
       }
@@ -719,7 +719,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/nightshift_investigations/test/scout_nightshift_investigations/api/tests/update_investigation.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/update_investigation.spec.ts",
         "line": 122,
         "column": 87
       }
@@ -735,7 +735,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/nightshift_investigations/test/scout_nightshift_investigations/api/tests/update_investigation.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/update_investigation.spec.ts",
         "line": 137,
         "column": 7
       }
@@ -751,7 +751,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/nightshift_investigations/test/scout_nightshift_investigations/api/tests/update_investigation.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/update_investigation.spec.ts",
         "line": 147,
         "column": 16
       }
@@ -767,7 +767,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/nightshift_investigations/test/scout_nightshift_investigations/api/tests/update_investigation.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/update_investigation.spec.ts",
         "line": 165,
         "column": 16
       }

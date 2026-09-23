@@ -6,7 +6,7 @@
  */
 
 import { randomInt, randomUUID } from 'crypto';
-import type { ApiClientFixture, ApiClientResponse, KbnClient } from '@kbn/scout';
+import type { ApiClientFixture, ApiClientResponse, KbnClient } from '@kbn/scout-oblt';
 import { COMMON_HEADERS } from './constants';
 
 const SO_TYPE = 'nightshift-investigation';

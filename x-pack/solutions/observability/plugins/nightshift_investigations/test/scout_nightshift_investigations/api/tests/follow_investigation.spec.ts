@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout/api';
-import { tags } from '@kbn/scout';
+import { expect } from '@kbn/scout-oblt/api';
+import { tags } from '@kbn/scout-oblt';
 import {
   apiTest,
   COMMON_HEADERS,
