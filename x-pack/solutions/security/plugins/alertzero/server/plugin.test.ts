@@ -67,7 +67,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
       const features = { registerKibanaFeature: jest.fn() };
       const workflowsExtensions = { registerManagedWorkflowOwner: jest.fn() };
 
-      plugin.setup(
+      const result = plugin.setup(
         coreSetup as never,
         {
           features,
@@ -76,6 +76,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         } as never
       );
 
+      expect(result).toEqual({ enabled: false });
       expect(registerOwner).not.toHaveBeenCalled();
       expect(features.registerKibanaFeature).not.toHaveBeenCalled();
       expect(registerRoutes).not.toHaveBeenCalled();
@@ -105,7 +106,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
       const features = { registerKibanaFeature: jest.fn() };
       const workflowsExtensions = { registerManagedWorkflowOwner: jest.fn() };
 
-      plugin.setup(
+      const result = plugin.setup(
         coreSetup as never,
         {
           features,
@@ -115,6 +116,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         } as never
       );
 
+      expect(result).toEqual({ enabled: true });
       expect(registerOwner).toHaveBeenCalledWith({ workflowsExtensions });
       expect(features.registerKibanaFeature).toHaveBeenCalledWith(
         expect.objectContaining({

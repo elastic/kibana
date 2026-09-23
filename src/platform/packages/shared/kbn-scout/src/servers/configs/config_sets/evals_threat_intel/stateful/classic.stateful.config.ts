@@ -14,8 +14,8 @@ import type { ScoutServerConfig } from '../../../../../types';
  * Custom Scout stateful server configuration for Threat Intel enrichment evals.
  *
  * Extends the tracing config (EIS connectors + eval tracing) and:
- *   - Enables the `threatIntelSupplyEnabled` experimental feature flag so the
- *     `/internal/threat_intel/*` enrichment routes are registered.
+ *   - Enables `xpack.alertzero.enabled` so the `/internal/threat_intel/*`
+ *     enrichment routes are registered (supply gates on AlertZero).
  *   - Disables `searchInferenceEndpoints` so `resolveScopedModel` takes its
  *     `genAiSettings:defaultAIConnector` fallback path. The suite points that
  *     setting at the per-project connector, which is how each model in the
@@ -32,7 +32,7 @@ export const servers: ScoutServerConfig = {
     ...evalsTracingConfig.kbnTestServer,
     serverArgs: [
       ...evalsTracingConfig.kbnTestServer.serverArgs,
-      `--xpack.securitySolution.enableExperimental=${JSON.stringify(['threatIntelSupplyEnabled'])}`,
+      '--xpack.alertzero.enabled=true',
       '--xpack.searchInferenceEndpoints.enabled=false',
     ],
   },
