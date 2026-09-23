@@ -118,7 +118,6 @@ export class AgenticInvestigationsPlugin
         plugins.agentBuilder.conversations.getScopedClient({ request }),
     });
 
-
     const getImpactClient = createImpactClient({
       getImpactService: () => this.requireImpactService(),
       getSpaceId: (request) => this.getSpaceId(request),
