@@ -536,7 +536,7 @@ export const CASES_TEMPLATE_DELETED_EVENT_TYPE = 'cases_template_deleted' as con
 
 /**
  * Fired once per successful workflow execution started from within a case surface — case detail,
- * observables table, alerts table, or the cases-list bulk action. `origin_type` identifies which
+ * observables table, attachments (such as alerts), or the cases-list bulk action. `origin_type` identifies which
  * surface fired the run; `case_count` is 1 for single-case surfaces and >1 for the bulk-list
  * action. Never includes workflow IDs, names, tag values, case IDs, observable values, or inputs.
  */

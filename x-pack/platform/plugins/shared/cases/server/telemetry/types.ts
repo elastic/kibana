@@ -384,8 +384,8 @@ export interface CasesTelemetry {
       case: number;
       observable: number;
       observables: number;
-      alert: number;
-      alerts: number;
+      attachment: number;
+      attachments: number;
       unattributed: number;
     };
     /** Number of case configurations that have at least one workflow tag set. */

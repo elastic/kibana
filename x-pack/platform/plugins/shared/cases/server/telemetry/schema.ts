@@ -468,14 +468,18 @@ export const casesSchema: CasesTelemetrySchema = {
             'Runs triggered from the observables table with a multi-observable selection',
         },
       },
-      alert: {
-        type: 'long',
-        _meta: { description: 'Runs triggered from the alerts table for a single alert' },
-      },
-      alerts: {
+      attachment: {
         type: 'long',
         _meta: {
-          description: 'Runs triggered from the alerts table with a multi-alert selection',
+          description:
+            'Runs triggered from a single attachment row (for example an alert or event) in a case',
+        },
+      },
+      attachments: {
+        type: 'long',
+        _meta: {
+          description:
+            'Runs triggered from a bulk attachment selection (for example alerts) in a case',
         },
       },
       unattributed: {
