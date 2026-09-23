@@ -37,7 +37,6 @@ import type {
   AbortExecutionResult,
   AgentExecutionService,
   AgentExecution,
-  ConversationExecutionParams,
   ExecuteAgentParams,
   ExecuteAgentResult,
   MaybeExecuteAgentResult,
@@ -64,7 +63,6 @@ import {
   getConversation,
   isPendingResumeConversation,
   persistUserMessage,
-  type ConversationWithOperation,
 } from './utils/conversations';
 import {
   createConversationCreatedEvent,
@@ -72,7 +70,6 @@ import {
   createConversationUpdatedEvent,
 } from './utils/events';
 import { userMessageActor } from '../conversation/client/rounds_to_events';
-import type { ConversationClient } from '../conversation';
 
 export interface AgentExecutionServiceDeps extends AgentExecutionDeps {
   elasticsearch: ElasticsearchServiceStart;
@@ -88,12 +85,6 @@ export const createAgentExecutionService = (
 };
 
 const noop = () => {};
-
-/** A resolved conversation and the client scoped to the request that resolved it. */
-interface ConversationTarget {
-  conversation: ConversationWithOperation;
-  conversationClient: ConversationClient;
-}
 
 class AgentExecutionServiceImpl implements AgentExecutionService {
   private readonly deps: AgentExecutionServiceDeps;
@@ -127,7 +118,8 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
 
     const executionClient = this.createExecutionClient();
 
-    const owner = await this.deps.conversationService.getCurrentUser({ request });
+    const conversationClient = await this.deps.conversationService.getScopedClient({ request });
+    const owner = conversationClient.getUser();
 
     const conversationParams =
       args.mode === AgentExecutionMode.conversation
@@ -139,8 +131,19 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
 
     // Resolving up front keeps conversation creation and the message write on the request node,
     // before a Task Manager run is scheduled.
-    const target = conversationParams
-      ? await this.resolveConversation({ request, agentId, params: conversationParams })
+    const conversation = conversationParams
+      ? await getConversation({
+          agentId,
+          conversationId: conversationParams.conversationId,
+          autoCreateConversationWithId: conversationParams.autoCreateConversationWithId,
+          conversationClient,
+          accessControl: conversationParams.accessControl,
+          readOnly: conversationParams.readOnly,
+          origin: conversationParams.origin
+            ? { external_conversation_id: conversationParams.origin.external_conversation_id }
+            : undefined,
+          subagentCreation: conversationParams.subagentCreation,
+        })
       : undefined;
 
     // Reserved for the round this run opens, so its events are named after it.
@@ -155,14 +158,14 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
         spaceId,
         owner: { id: owner.id, username: owner.username },
         agentParams:
-          conversationParams && target
+          conversationParams && conversation
             ? {
                 ...conversationParams,
                 // The conversation is resolved, and created when it was new, before the run is
                 // dispatched — so the run reads it rather than resolving it again.
-                conversationId: target.conversation.id,
+                conversationId: conversation.id,
                 autoCreateConversationWithId: true,
-                conversationOperation: target.conversation.operation,
+                conversationOperation: conversation.operation,
                 roundId,
               }
             : validatedParams,
@@ -204,17 +207,17 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     // A resume continues a round that is already open, so it does not write a new message.
     if (
       conversationParams &&
-      target &&
+      conversation &&
       conversationParams.storeConversation !== false &&
-      !isPendingResumeConversation(target.conversation)
+      !isPendingResumeConversation(conversation)
     ) {
       await persistUserMessage({
-        conversation: target.conversation,
-        conversationClient: target.conversationClient,
+        conversation,
+        conversationClient,
         receivedAt,
         eventId: roundUserMessageEventId(roundId),
         input: conversationParams.nextInput,
-        author: target.conversationClient.getAuthor(conversationParams.origin?.author),
+        author: conversationClient.getAuthor(conversationParams.origin?.author),
         ...(conversationParams.origin ? { origin: { type: conversationParams.origin.type } } : {}),
       });
     }
@@ -246,13 +249,10 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
 
     // The conversation this request created is already stored, so its id is reported before the
     // run starts — a task-manager run is only queued at this point.
-    if (
-      target?.conversation.operation === 'CREATE' &&
-      conversationParams?.storeConversation !== false
-    ) {
+    if (conversation?.operation === 'CREATE' && conversationParams?.storeConversation !== false) {
       return {
         ...result,
-        events$: concat(of(createConversationIdSetEvent(target.conversation.id)), result.events$),
+        events$: concat(of(createConversationIdSetEvent(conversation.id)), result.events$),
       };
     }
 
@@ -286,10 +286,18 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     const validatedParams = await this.validateAttachments(args.params, request);
     const receivedAt = new Date();
 
-    const { conversation, conversationClient } = await this.resolveConversation({
-      request,
+    const conversationClient = await this.deps.conversationService.getScopedClient({ request });
+    const conversation = await getConversation({
       agentId: validatedParams.agentId ?? agentBuilderDefaultAgentId,
-      params: validatedParams,
+      conversationId: validatedParams.conversationId,
+      autoCreateConversationWithId: validatedParams.autoCreateConversationWithId,
+      conversationClient,
+      accessControl: validatedParams.accessControl,
+      readOnly: validatedParams.readOnly,
+      origin: validatedParams.origin
+        ? { external_conversation_id: validatedParams.origin.external_conversation_id }
+        : undefined,
+      subagentCreation: validatedParams.subagentCreation,
     });
 
     if (validatedParams.storeConversation === false) {
@@ -316,7 +324,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       actor: ATTACHMENT_REF_ACTOR.user,
     });
 
-    const user = await this.deps.conversationService.getCurrentUser({ request });
+    const user = conversationClient.getUser();
     const author = conversationClient.getAuthor();
 
     await persistUserMessage({
@@ -660,38 +668,6 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       : params;
   }
 
-  /** Resolves, and when asked creates, the conversation a request targets. */
-  private async resolveConversation({
-    request,
-    agentId,
-    params,
-  }: {
-    request: KibanaRequest;
-    agentId: string;
-    params: ConversationExecutionParams;
-  }): Promise<ConversationTarget> {
-    const conversationClient = await this.deps.conversationService.getScopedClient({ request });
-    const conversation = await getConversation({
-      agentId,
-      conversationId: params.conversationId,
-      autoCreateConversationWithId: params.autoCreateConversationWithId,
-      conversationClient,
-      accessControl: params.accessControl,
-      readOnly: params.readOnly,
-      origin: params.origin
-        ? { external_conversation_id: params.origin.external_conversation_id }
-        : undefined,
-      subagentCreation: params.subagentCreation,
-    });
-
-    return { conversation, conversationClient };
-  }
-
-  /**
-   * The `trigger_mode: 'never'` tail: persist the message and report the conversation, leaving
-   * the execution options unused. Emits the same conversation events an execution would, so
-   * callers read the conversation id the one way.
-   */
   private createExecutionClient(): AgentExecutionClient {
     return createAgentExecutionClient({
       logger: this.logger.get('execution-client'),

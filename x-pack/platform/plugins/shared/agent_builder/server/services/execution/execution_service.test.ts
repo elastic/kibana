@@ -120,7 +120,6 @@ describe('AgentExecutionService', () => {
   const conversationClient = createConversationClientMock();
   const conversationService = {
     getScopedClient: jest.fn().mockImplementation(async () => conversationClient),
-    getCurrentUser: jest.fn().mockResolvedValue({ id: 'user-1', username: 'alice' }),
   };
 
   const service = createAgentExecutionService({

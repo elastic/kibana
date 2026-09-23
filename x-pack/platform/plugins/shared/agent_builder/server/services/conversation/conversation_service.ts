@@ -28,8 +28,6 @@ export interface ConversationService {
     request: KibanaRequest;
     user: CurrentUser;
   }): Promise<ConversationClient>;
-  /** The authenticated Kibana user, used to attribute what they write. */
-  getCurrentUser(options: { request: KibanaRequest }): Promise<CurrentUser>;
 }
 
 interface ConversationServiceDeps {
@@ -106,7 +104,7 @@ export class ConversationServiceImpl implements ConversationService {
     });
   }
 
-  async getCurrentUser({ request }: { request: KibanaRequest }): Promise<CurrentUser> {
+  private async getCurrentUser({ request }: { request: KibanaRequest }): Promise<CurrentUser> {
     return getUserFromRequest({
       request,
       security: this.security,
