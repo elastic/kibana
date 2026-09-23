@@ -914,7 +914,8 @@ describe('Endpoint analysis run', () => {
     // restatement, and `endpoint_ids` / `agentId` were how it was written.
     it('points the agent at each entry inputSchema rather than a fixed shape', () => {
       const message = stepByName('forensic_analysis')?.with?.message as string;
-      expect(message).toContain('inputSchema');
+      expect(message).toContain('inputSchema.properties.actionInput');
+      expect(message).toContain('not against `inputSchema` itself');
       expect(message).not.toContain('endpoint_ids');
       expect(message).not.toContain('agentId');
     });

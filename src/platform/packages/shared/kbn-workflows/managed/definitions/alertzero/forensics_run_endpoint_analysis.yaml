@@ -300,17 +300,19 @@ steps:
                   `recommendedActions` from that catalog. Recommend only what you can tie to the timeline
                   and indicators you returned.
 
-                Each catalog entry carries an `inputSchema`: the JSON Schema of the inputs that action
-                accepts. Set `actionInput` to an object satisfying that entry's `inputSchema`. It is the
-                contract — read it per action rather than assuming a shape from the action's description,
-                from another entry, or from what an action required previously. Fill every property it
-                marks required, and take the values only from the evidence: Elastic Defend `agent.id`
-                for endpoint ids, telemetry pids and entity_ids for process selectors.
+                Each catalog entry carries an `inputSchema`: the JSON Schema of that action's manual
+                trigger. The proposal checks `actionInput` against `inputSchema.properties.actionInput`,
+                not against `inputSchema` itself. Set `actionInput` to an object that satisfies that
+                inner schema. Do not wrap it in another `actionInput` key. Read that inner schema per
+                action rather than assuming a shape from the action's description, from another entry,
+                or from what an action required previously. Fill every property it marks required, and
+                take the values only from the evidence: Elastic Defend `agent.id` for endpoint ids,
+                telemetry pids and entity_ids for process selectors.
 
                 Rules
                 - Pick the most specific catalog action the evidence supports. Prefer kill/suspend when a process
                   entity_id or pid is present; isolate when only the host is known.
-                - If the evidence cannot fill what an entry's `inputSchema` requires, drop that action. Set
+                - If the evidence cannot fill what an entry's `inputSchema.properties.actionInput` requires, drop that action. Set
                   propose=false when that leaves nothing. Never guess an id, pid, path, or command that is
                   not in the evidence.
                 - Cite hosts, process/path, tactics, and why this action now in rationale.
@@ -530,17 +532,19 @@ steps:
                             How sure the agent is that this action targets the right host or process
                             and that the evidence justifies taking it now.
                         # Deliberately unconstrained: this schema is fixed before the turn begins,
-                        # but each action's real input contract (`inputSchema` on its catalog entry)
-                        # is only known after the model calls `security.alertzero.actions.list`, and
-                        # varies per action. Restating a shape here would either not fit every action
-                        # (e.g. a required `endpoint_ids` for one that takes none) or drift from the
-                        # real schema over time. `assertActionInputValid` validates the input against
-                        # the real `inputSchema` when the proposal is created instead.
+                        # but each action's real input contract (`inputSchema.properties.actionInput`
+                        # on its catalog entry) is only known after the model calls
+                        # `security.alertzero.actions.list`, and varies per action. Restating a shape
+                        # here would either not fit every action (e.g. a required `endpoint_ids` for
+                        # one that takes none) or drift from the real schema over time.
+                        # `assertActionInputValid` validates the input against that inner schema when
+                        # the proposal is created instead.
                         actionInput:
                           type: object
                           additionalProperties: true
                           description: >
-                            Input for the catalog action, shaped to satisfy that entry's `inputSchema`.
+                            Input for the catalog action, shaped to satisfy that entry's
+                            `inputSchema.properties.actionInput`. Do not wrap it in another `actionInput`.
 
           # Timeline and IoCs are attached to the investigation; the forensic agent
           # run itself is ephemeral (no conversation), so its ES|QL transcript never
