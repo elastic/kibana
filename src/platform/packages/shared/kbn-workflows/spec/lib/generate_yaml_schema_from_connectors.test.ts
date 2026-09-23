@@ -681,6 +681,48 @@ describe('generateYamlSchemaFromConnectors', () => {
           }).success
         ).toBe(false);
       });
+
+      it('does not re-require omitted optional fields when replaying object checks', () => {
+        // Scout workflows omit optional with.* fields. The check-only replay used to rebuild a
+        // shape of required z.any() keys, so omitting optionals failed with
+        // "expected nonoptional, received undefined" after the widened parse had already succeeded.
+        const optionalRefined: ConnectorContractUnion = {
+          summary: 'OptionalRefined',
+          description: null,
+          type: 'optional.refined.obj.step',
+          paramsSchema: z
+            .object({
+              ids: z.array(z.string()).optional(),
+              name: z.string().optional(),
+              tags: z.array(z.string()).optional(),
+            })
+            .superRefine((v, ctx) => {
+              if (v.ids?.some((id) => id.length === 0)) {
+                ctx.addIssue({ code: 'custom', message: 'ids must be non-empty', path: ['ids'] });
+              }
+            }),
+          outputSchema: z.unknown(),
+        };
+        const schema = generateYamlSchemaFromConnectors([optionalRefined]);
+        expect(
+          schema.safeParse({
+            ...BASE_WORKFLOW,
+            steps: [{ name: 's', type: 'optional.refined.obj.step', with: {} }],
+          }).success
+        ).toBe(true);
+        expect(
+          schema.safeParse({
+            ...BASE_WORKFLOW,
+            steps: [{ name: 's', type: 'optional.refined.obj.step', with: { name: 'only-name' } }],
+          }).success
+        ).toBe(true);
+        expect(
+          schema.safeParse({
+            ...BASE_WORKFLOW,
+            steps: [{ name: 's', type: 'optional.refined.obj.step', with: { ids: [''] } }],
+          }).success
+        ).toBe(false);
+      });
     });
   });
 });

@@ -346,15 +346,12 @@ function deferChecksForTemplateValues(
 
   // Field schemas already ran in `widened`. Re-parsing through `paramsSchema` would re-apply
   // non-idempotent field transforms (e.g. `.transform(v => v + '!')`) and can reject values the
-  // original schema accepts. `z.any()` fields + the original object checks validate the output
-  // shape without touching the fields again. Passthrough keeps keys that `widened` already
-  // accepted via catchall — a plain `z.object` would strip them before checks run and from
-  // `result.data` written back to `ctx.value`.
+  // original schema accepts. An empty passthrough object + the original object checks validates
+  // the already-parsed output without re-running field schemas or re-requiring keys that were
+  // legitimately omitted (a shape of `z.any()` per key would treat every key as required).
+  // Passthrough keeps catchall keys that `widened` already accepted.
   const objectChecks = asReplayableChecks(paramsSchema.def.checks ?? []);
-  const anyShape = Object.fromEntries(
-    Object.keys(paramsSchema.shape as Record<string, z.ZodType>).map((key) => [key, z.any()])
-  ) as z.ZodRawShape;
-  const checksOnlyObject = () => z.object(anyShape).passthrough();
+  const checksOnlyObject = () => z.object({}).passthrough();
   const outputChecksOnly = checksOnlyObject().check(...objectChecks);
 
   // Use `.check()` (not `superRefine`) so successful overwrites can replace `ctx.value`;
