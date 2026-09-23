@@ -25,8 +25,6 @@ jest.mock('../../containers/use_post_observables');
 jest.mock('../../containers/use_delete_observables');
 
 jest.mock('../workflows/use_cases_workflow_executor', () => ({
-  // Partial mock — only stubs useCasesWorkflowExecutor; useOptionalCasesWorkflowExecutor is
-  // undefined here. If a future test renders a tree that calls the optional hook, add it.
   useCasesWorkflowExecutor: jest.fn().mockReturnValue(jest.fn()),
 }));
 

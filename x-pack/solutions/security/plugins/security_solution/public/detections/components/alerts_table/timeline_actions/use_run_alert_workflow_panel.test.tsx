@@ -316,6 +316,7 @@ describe('useRunAlertWorkflowPanel', () => {
       await waitFor(() => {
         const panelProps = mockRunWorkflowPanelProps[mockRunWorkflowPanelProps.length - 1];
         expect(panelProps?.runWorkflow).toBeUndefined();
+        expect(panelProps?.showSuccessToast).toBe(true);
       });
     });
 
@@ -333,6 +334,7 @@ describe('useRunAlertWorkflowPanel', () => {
       await waitFor(() => {
         const panelProps = mockRunWorkflowPanelProps[mockRunWorkflowPanelProps.length - 1];
         expect(panelProps?.runWorkflow).toBe(mockExecutor);
+        expect(panelProps?.showSuccessToast).toBe(false);
       });
     });
 

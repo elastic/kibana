@@ -13,7 +13,6 @@ import {
   ATTACHMENT_WORKFLOW_ORIGIN_TYPE,
 } from '../../../common/types/domain/user_action/workflow/constants';
 import { useCaseAttachmentWorkflowContext } from './case_attachment_workflow_context';
-import { useOptionalCasesWorkflowExecutor } from './use_cases_workflow_executor';
 
 export interface UseCaseAttachmentWorkflowRunParams {
   attachmentType: string;
@@ -24,14 +23,17 @@ export interface UseCaseAttachmentWorkflowRunParams {
 }
 
 /**
- * Returns a Cases-routed executor for a registered attachment surface inside a case.
+ * Returns a Cases-routed executor for a registered attachment surface inside a case, or
+ * `undefined` outside one. The executor owns the success toast, so pass
+ * `showSuccessToast={executor === undefined}` to `RunWorkflowPanel`.
  */
 export const useCaseAttachmentWorkflowRun = ({
   attachmentType,
   attachmentId,
   attachmentIds,
 }: UseCaseAttachmentWorkflowRunParams): RunWorkflowExecutor | undefined => {
-  const caseId = useCaseAttachmentWorkflowContext()?.caseId;
+  const context = useCaseAttachmentWorkflowContext();
+  const caseId = context?.caseId;
 
   const origin = useMemo((): CaseWorkflowRunOrigin | undefined => {
     if (caseId === undefined) {
@@ -59,5 +61,9 @@ export const useCaseAttachmentWorkflowRun = ({
     return undefined;
   }, [attachmentId, attachmentIds, attachmentType, caseId]);
 
-  return useOptionalCasesWorkflowExecutor({ caseId, origin });
+  return useMemo(
+    () =>
+      context === undefined || origin === undefined ? undefined : context.createExecutor(origin),
+    [context, origin]
+  );
 };

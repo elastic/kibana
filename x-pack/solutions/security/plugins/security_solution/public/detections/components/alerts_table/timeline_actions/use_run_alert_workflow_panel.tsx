@@ -87,6 +87,7 @@ export const AlertWorkflowsPanel = ({
     <RunWorkflowPanel
       inputs={inputs}
       runWorkflow={caseRunWorkflow}
+      showSuccessToast={caseRunWorkflow === undefined}
       visibility={ALERT_WORKFLOW_VISIBILITY}
       sortWorkflow={sortAlertWorkflow}
       filterWorkflow={isAlertWorkflow}

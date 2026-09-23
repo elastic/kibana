@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
 import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import type { RunWorkflowExecutor } from '@kbn/workflows-ui';
 import type { CaseWorkflowRunOrigin } from '../../../common/types/api';
@@ -15,39 +15,13 @@ import { runCaseWorkflow } from './api';
 import { buildViewExecutionText, getWorkflowExecutionPath } from './use_run_workflow_on_cases';
 import * as i18n from './translations';
 
-type Http = ReturnType<typeof useHttp>;
-type Toasts = ReturnType<typeof useToasts>;
-
-/**
- * Single source of truth for the Cases-routed execution call. Deliberately not a
- * hook so both hooks below can memoise over it without duplicating the request,
- * the activity-failed toast, or the response mapping.
- */
-const createCasesWorkflowExecutor =
-  ({
-    http,
-    toasts,
-    caseId,
-    origin,
-  }: {
-    http: Http;
-    toasts: Toasts;
-    caseId: string;
-    origin: CaseWorkflowRunOrigin;
-  }): RunWorkflowExecutor =>
-  async ({ workflowId, inputs }) => {
-    const response = await runCaseWorkflow({
-      http,
-      workflowId,
-      body: { caseIds: [caseId], inputs, origin },
-    });
-
-    if (response.activityStatus === 'failed') {
-      toasts.addWarning({ title: i18n.WORKFLOW_ACTIVITY_FAILED });
-    }
-
-    return { workflowExecutionId: response.workflowExecutionId };
-  };
+export interface CasesWorkflowExecutorDeps {
+  http: ReturnType<typeof useHttp>;
+  toasts: ReturnType<typeof useToasts>;
+  getAppUrl: ReturnType<typeof useAppUrl>['getAppUrl'];
+  rendering: ReturnType<typeof useKibana>['services']['rendering'];
+  refreshCaseViewPage: () => void;
+}
 
 export interface UseCasesWorkflowExecutorParams {
   caseId: string;
@@ -55,80 +29,72 @@ export interface UseCasesWorkflowExecutorParams {
 }
 
 /**
- * Returns a stable `RunWorkflowExecutor` that routes execution through the
- * Cases-owned endpoint, ensuring authorization, audit logging, and activity
- * recording are all handled server-side.
- *
- * The executor owns the success or activity-write warning toast so the caller
- * can suppress the panel's built-in success toast.
+ * Builds the executor shared by every Cases-routed run surface. It owns the success or
+ * activity-write warning toast, so callers must suppress the panel's built-in success toast.
  */
-export const useCasesWorkflowExecutor = ({
-  caseId,
-  origin,
-}: UseCasesWorkflowExecutorParams): RunWorkflowExecutor => {
+export const createCasesWorkflowExecutor =
+  (
+    { http, toasts, getAppUrl, rendering, refreshCaseViewPage }: CasesWorkflowExecutorDeps,
+    { caseId, origin }: UseCasesWorkflowExecutorParams
+  ): RunWorkflowExecutor =>
+  async ({ workflowId, inputs }) => {
+    const response = await runCaseWorkflow({
+      http,
+      workflowId,
+      body: {
+        caseIds: [caseId],
+        inputs,
+        origin,
+      },
+    });
+
+    const executionHref = response.workflowExecutionId
+      ? getAppUrl({ path: getWorkflowExecutionPath(workflowId, response.workflowExecutionId) })
+      : undefined;
+
+    const text =
+      executionHref && rendering ? buildViewExecutionText(executionHref, rendering) : undefined;
+
+    if (response.activityStatus === 'failed') {
+      toasts.addWarning({ title: i18n.WORKFLOW_ACTIVITY_FAILED, text });
+    } else {
+      toasts.addSuccess({ title: i18n.RUN_WORKFLOW_STARTED(1), text });
+    }
+    refreshCaseViewPage();
+
+    return { workflowExecutionId: response.workflowExecutionId };
+  };
+
+/**
+ * Collects the services `createCasesWorkflowExecutor` needs. Must be called inside the Cases
+ * React tree, because refreshing the case view uses the Cases query client.
+ */
+export const useCasesWorkflowExecutorDeps = (): CasesWorkflowExecutorDeps => {
   const http = useHttp();
   const toasts = useToasts();
   const { getAppUrl } = useAppUrl(WORKFLOWS_APP_ID);
   const { rendering } = useKibana().services;
   const refreshCaseViewPage = useRefreshCaseViewPage();
 
-  return useCallback(
-    async ({ workflowId, inputs }) => {
-      const response = await runCaseWorkflow({
-        http,
-        workflowId,
-        body: {
-          caseIds: [caseId],
-          inputs,
-          origin,
-        },
-      });
-
-      const executionHref = response.workflowExecutionId
-        ? getAppUrl({ path: getWorkflowExecutionPath(workflowId, response.workflowExecutionId) })
-        : undefined;
-
-      const text =
-        executionHref && rendering ? buildViewExecutionText(executionHref, rendering) : undefined;
-
-      if (response.activityStatus === 'failed') {
-        toasts.addWarning({ title: i18n.WORKFLOW_ACTIVITY_FAILED, text });
-      } else {
-        toasts.addSuccess({ title: i18n.RUN_WORKFLOW_STARTED(1), text });
-      }
-      refreshCaseViewPage();
-
-      return { workflowExecutionId: response.workflowExecutionId };
-    },
-    [caseId, getAppUrl, http, origin, refreshCaseViewPage, rendering, toasts]
+  return useMemo(
+    () => ({ http, toasts, getAppUrl, rendering, refreshCaseViewPage }),
+    [getAppUrl, http, refreshCaseViewPage, rendering, toasts]
   );
 };
 
-export interface UseOptionalCasesWorkflowExecutorParams {
-  caseId: string | undefined;
-  origin: CaseWorkflowRunOrigin | undefined;
-}
-
 /**
- * Same executor as `useCasesWorkflowExecutor`, but for attachment surfaces that
- * may render outside a case (e.g. the alerts page or a flyout).
- *
- * Returns `undefined` when `caseId` or `origin` is absent — the caller should
- * pass the result to `RunWorkflowPanel`'s `runWorkflow` prop, which falls back
- * to its built-in generic executor when `undefined` is received.
+ * Returns a stable `RunWorkflowExecutor` that routes execution through the
+ * Cases-owned endpoint, ensuring authorization, audit logging, and activity
+ * recording are all handled server-side.
  */
-export const useOptionalCasesWorkflowExecutor = ({
+export const useCasesWorkflowExecutor = ({
   caseId,
   origin,
-}: UseOptionalCasesWorkflowExecutorParams): RunWorkflowExecutor | undefined => {
-  const http = useHttp();
-  const toasts = useToasts();
+}: UseCasesWorkflowExecutorParams): RunWorkflowExecutor => {
+  const deps = useCasesWorkflowExecutorDeps();
 
   return useMemo(
-    () =>
-      caseId === undefined || origin === undefined
-        ? undefined
-        : createCasesWorkflowExecutor({ http, toasts, caseId, origin }),
-    [caseId, http, origin, toasts]
+    () => createCasesWorkflowExecutor(deps, { caseId, origin }),
+    [caseId, deps, origin]
   );
 };

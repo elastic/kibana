@@ -12,17 +12,22 @@ import {
   useCaseAttachmentWorkflowContext,
 } from './case_attachment_workflow_context';
 
+jest.mock('../../common/lib/kibana');
+jest.mock('../case_view/use_on_refresh_case_view_page', () => ({
+  useRefreshCaseViewPage: () => jest.fn(),
+}));
+
 describe('useCaseAttachmentWorkflowContext', () => {
   it('returns undefined when rendered outside a CaseAttachmentWorkflowProvider', () => {
     const { result } = renderHook(() => useCaseAttachmentWorkflowContext());
     expect(result.current).toBeUndefined();
   });
 
-  it('returns the context value when rendered inside a CaseAttachmentWorkflowProvider', () => {
+  it('returns the case id and an executor factory inside a CaseAttachmentWorkflowProvider', () => {
     const wrapper = ({ children }: { children: React.ReactNode }) => (
       <CaseAttachmentWorkflowProvider caseId="case-1">{children}</CaseAttachmentWorkflowProvider>
     );
     const { result } = renderHook(() => useCaseAttachmentWorkflowContext(), { wrapper });
-    expect(result.current).toEqual({ caseId: 'case-1' });
+    expect(result.current).toEqual({ caseId: 'case-1', createExecutor: expect.any(Function) });
   });
 });

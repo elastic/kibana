@@ -214,6 +214,7 @@ describe('useRunDocumentWorkflowPanel', () => {
       });
       const panelProps = mockRunWorkflowPanelProps[mockRunWorkflowPanelProps.length - 1];
       expect(panelProps?.runWorkflow).toBe(mockCaseRunWorkflow);
+      expect(panelProps?.showSuccessToast).toBe(false);
     });
 
     it('passes undefined as runWorkflow when the attachment hook returns undefined', async () => {
@@ -231,6 +232,7 @@ describe('useRunDocumentWorkflowPanel', () => {
       });
       const panelProps = mockRunWorkflowPanelProps[mockRunWorkflowPanelProps.length - 1];
       expect(panelProps?.runWorkflow).toBeUndefined();
+      expect(panelProps?.showSuccessToast).toBe(true);
     });
   });
 

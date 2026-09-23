@@ -70,6 +70,7 @@ export const DocumentWorkflowsPanel = ({
     <RunWorkflowPanel
       inputs={inputs}
       runWorkflow={caseRunWorkflow}
+      showSuccessToast={caseRunWorkflow === undefined}
       sortWorkflow={sortManualWorkflow}
       onClose={onClose}
       onExecute={onExecute}

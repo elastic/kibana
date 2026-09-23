@@ -14,13 +14,20 @@ import { useCaseAttachmentWorkflowRun } from './use_case_attachment_workflow_run
 import * as api from './api';
 
 jest.mock('../../common/lib/kibana');
+const mockRefreshCaseViewPage = jest.fn();
+jest.mock('../case_view/use_on_refresh_case_view_page', () => ({
+  useRefreshCaseViewPage: () => mockRefreshCaseViewPage,
+}));
 
 const mockRunCaseWorkflow = jest.spyOn(api, 'runCaseWorkflow');
 
 describe('useCaseAttachmentWorkflowRun', () => {
   const mockHttp = {} as HttpStart;
   const mockToasts = notificationServiceMock.createStartContract().toasts;
-  const { useHttp, useToasts } = jest.requireMock('../../common/lib/kibana');
+  const mockGetAppUrl = jest
+    .fn()
+    .mockReturnValue('/app/workflows/workflow-1?tab=executions&executionId=exec-1');
+  const { useAppUrl, useHttp, useKibana, useToasts } = jest.requireMock('../../common/lib/kibana');
   const wrapper = ({ children }: { children: React.ReactNode }) => (
     <CaseAttachmentWorkflowProvider caseId="case-1">{children}</CaseAttachmentWorkflowProvider>
   );
@@ -29,6 +36,8 @@ describe('useCaseAttachmentWorkflowRun', () => {
     jest.clearAllMocks();
     useHttp.mockReturnValue(mockHttp);
     useToasts.mockReturnValue(mockToasts);
+    useAppUrl.mockReturnValue({ getAppUrl: mockGetAppUrl });
+    useKibana.mockReturnValue({ services: { rendering: {} } });
     mockRunCaseWorkflow.mockResolvedValue({
       workflowExecutionId: 'exec-1',
       activityStatus: 'succeeded',
@@ -109,5 +118,52 @@ describe('useCaseAttachmentWorkflowRun', () => {
         }),
       })
     );
+  });
+
+  it('owns the success toast with an execution link and refreshes the case view', async () => {
+    const { result } = renderHook(
+      () =>
+        useCaseAttachmentWorkflowRun({
+          attachmentType: 'security.alert',
+          attachmentId: 'alert-1',
+        }),
+      { wrapper }
+    );
+
+    await act(async () => {
+      await result.current?.({ workflowId: 'workflow-1', inputs: {} });
+    });
+
+    expect(mockGetAppUrl).toHaveBeenCalledWith({
+      path: '/workflow-1?tab=executions&executionId=exec-1',
+    });
+    expect(mockToasts.addSuccess).toHaveBeenCalledWith(
+      expect.objectContaining({ text: expect.anything() })
+    );
+    expect(mockToasts.addWarning).not.toHaveBeenCalled();
+    expect(mockRefreshCaseViewPage).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows only the activity warning toast when the activity write fails', async () => {
+    mockRunCaseWorkflow.mockResolvedValueOnce({
+      workflowExecutionId: 'exec-1',
+      activityStatus: 'failed',
+    });
+    const { result } = renderHook(
+      () =>
+        useCaseAttachmentWorkflowRun({
+          attachmentType: 'security.alert',
+          attachmentIds: ['alert-1', 'alert-2'],
+        }),
+      { wrapper }
+    );
+
+    await act(async () => {
+      await result.current?.({ workflowId: 'workflow-1', inputs: {} });
+    });
+
+    expect(mockToasts.addWarning).toHaveBeenCalledTimes(1);
+    expect(mockToasts.addSuccess).not.toHaveBeenCalled();
+    expect(mockRefreshCaseViewPage).toHaveBeenCalledTimes(1);
   });
 });
