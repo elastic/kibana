@@ -177,7 +177,7 @@ export class SavedQueryManagementComponentService extends FtrService {
 
   async savedQueryExist(title: string) {
     await this.clickMenuButtonByTestSubject('saved-query-management-load-button');
-    const exists = await this.testSubjects.exists(`~load-saved-query-${title}-button`);
+    const exists = await this.testSubjects.waitForExists(`~load-saved-query-${title}-button`);
     await this.closeSavedQueryManagementComponent();
     return exists;
   }

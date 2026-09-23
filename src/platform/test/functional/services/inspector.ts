@@ -93,7 +93,7 @@ export class InspectorService extends FtrService {
           }
         }
         await this.testSubjects.click(openButton);
-        await this.testSubjects.exists('inspectorPanel');
+        await this.testSubjects.existOrFail('inspectorPanel', { timeout: 10000 });
       });
     }
   }
@@ -251,7 +251,7 @@ export class InspectorService extends FtrService {
    * Opens inspector requests view
    */
   public async openInspectorRequestsView(): Promise<void> {
-    if (!(await this.testSubjects.exists('inspectorViewChooser'))) return;
+    if (!(await this.testSubjects.waitForExists('inspectorViewChooser', { timeout: 1000 }))) return;
     await this.openInspectorView('Requests');
   }
 

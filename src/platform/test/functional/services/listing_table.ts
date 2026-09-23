@@ -400,19 +400,21 @@ export class ListingTableService extends FtrService {
    */
   public async clickItemLink(appName: AppName, name: string) {
     const legacySubj = `${PREFIX_MAP[appName]}ListingTitleLink-${name.split(' ').join('-')}`;
-    if (await this.testSubjects.exists(legacySubj)) {
-      await this.testSubjects.click(legacySubj);
-      return;
-    }
-    // Content List item links carry no per-item subject; match on exact text.
-    const links = await this.testSubjects.findAll(CONTENT_LIST_ITEM_LINK);
-    for (const link of links) {
-      if ((await link.getVisibleText()).trim() === name) {
-        await link.click();
+    await this.retry.tryForTime(10000, async () => {
+      if (await this.testSubjects.exists(legacySubj)) {
+        await this.testSubjects.click(legacySubj);
         return;
       }
-    }
-    throw new Error(`No listing row found with name "${name}".`);
+      // Content List item links carry no per-item subject; match on exact text.
+      const links = await this.testSubjects.findAll(CONTENT_LIST_ITEM_LINK);
+      for (const link of links) {
+        if ((await link.getVisibleText()).trim() === name) {
+          await link.click();
+          return;
+        }
+      }
+      throw new Error(`No listing row found with name "${name}".`);
+    });
   }
 
   /**

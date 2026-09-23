@@ -52,7 +52,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
     it('should create a new es query rule', async () => {
       await testSubjects.click('queryFormType_searchSource');
-      await testSubjects.exists('selectDataViewExpression');
+      await testSubjects.existOrFail('selectDataViewExpression');
       const input = await testSubjects.find('ruleDetailsNameInput');
       await input.clearValueWithKeyboard();
       await testSubjects.setValue('ruleDetailsNameInput', ruleName);
@@ -82,11 +82,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         expect(areConsumersEqual).toBe(true);
       });
 
-      await retry.try(async () => {
-        await testSubjects.click('rulePageFooterSaveButton');
-        const doesConfirmModalExist = await testSubjects.exists('confirmModalConfirmButton');
-        expect(doesConfirmModalExist).toBe(true);
-      });
+      await testSubjects.click('rulePageFooterSaveButton');
+      await testSubjects.existOrFail('confirmModalConfirmButton');
       await testSubjects.click('confirmModalConfirmButton');
       const name = await testSubjects.getVisibleText('appHeaderTitle');
       expect(name).toEqual(ruleName);

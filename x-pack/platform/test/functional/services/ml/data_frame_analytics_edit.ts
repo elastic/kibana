@@ -213,7 +213,9 @@ export function MachineLearningDataFrameAnalyticsEditProvider(
     },
 
     async closeEditJobFlyout() {
-      if (await testSubjects.exists('mlAnalyticsEditFlyoutCancelButton')) {
+      if (
+        await testSubjects.waitForExists('mlAnalyticsEditFlyoutCancelButton', { timeout: 1000 })
+      ) {
         await testSubjects.click('mlAnalyticsEditFlyoutCancelButton');
         await this.assertAnalyticsEditFlyoutMissing();
       }

@@ -81,7 +81,7 @@ export class ElasticChartService extends FtrService {
     match: number = 0
   ): Promise<WebElementWrapper> {
     if (dataTestSubj) {
-      if (!(await this.testSubjects.exists(dataTestSubj))) {
+      if (!(await this.testSubjects.waitForExists(dataTestSubj, { timeout }))) {
         throw Error(`Failed to find an elastic-chart with testSubject '${dataTestSubj}'`);
       }
 

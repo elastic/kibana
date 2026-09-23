@@ -49,7 +49,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await testSubjects.click('observability.rules.custom_threshold-SelectOption');
       const ruleType = await testSubjects.getVisibleText('ruleDefinitionHeaderRuleTypeName');
       expect(ruleType).toEqual('Custom threshold');
-      await testSubjects.exists('selectDataViewExpression');
+      await testSubjects.existOrFail('selectDataViewExpression');
     });
 
     it('should create a new custom threshold rule', async () => {
@@ -82,11 +82,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         expect(areConsumersEqual).toBe(true);
       });
 
+      await testSubjects.click('rulePageFooterSaveButton');
+      await testSubjects.existOrFail('confirmModalConfirmButton');
+      await testSubjects.click('confirmModalConfirmButton');
       await retry.try(async () => {
-        await testSubjects.click('rulePageFooterSaveButton');
-        const doesConfirmModalExist = await testSubjects.exists('confirmModalConfirmButton');
-        expect(doesConfirmModalExist).toBe(true);
-        await testSubjects.click('confirmModalConfirmButton');
         const name = await testSubjects.getVisibleText('appHeaderTitle');
         expect(name).toEqual(ruleName);
       });

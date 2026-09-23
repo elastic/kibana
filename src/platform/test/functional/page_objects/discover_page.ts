@@ -851,6 +851,8 @@ export class DiscoverPageObject extends FtrService {
   public async selectTextBaseLang() {
     // Button may be directly in toolbar or hidden in overflow menu; retry both paths.
     await this.retry.tryForTime(10000, async () => {
+      if (await this.testSubjects.exists('select-classic-mode-btn')) return;
+
       // Check if the button is directly visible (with brief wait for page render)
       if (
         await this.testSubjects.waitForExists('select-text-based-language-btn', { timeout: 1000 })
@@ -867,6 +869,12 @@ export class DiscoverPageObject extends FtrService {
           // Ignore if query bar is not present
         }
         await this.testSubjects.click('app-menu-overflow-button');
+        await this.testSubjects.existOrFail('app-menu-popover', { timeout: 1000 });
+
+        if (await this.testSubjects.exists('select-classic-mode-btn')) {
+          await this.testSubjects.click('app-menu-overflow-button');
+          return;
+        }
 
         if (
           await this.testSubjects.waitForExists('select-text-based-language-btn', { timeout: 2000 })

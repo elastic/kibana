@@ -933,7 +933,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
     async openStyleSettingsFlyout() {
       // Close dimension editor flyout
-      if (await this.isDimensionEditorOpen()) {
+      if (
+        await testSubjects.waitForExists('lns-indexPattern-dimensionContainerClose', {
+          timeout: 1000,
+        })
+      ) {
         await this.closeDimensionEditor();
       }
 
@@ -945,7 +949,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async openLegendSettingsFlyout() {
       // Close dimension editor flyout
-      if (await this.isDimensionEditorOpen()) {
+      if (
+        await testSubjects.waitForExists('lns-indexPattern-dimensionContainerClose', {
+          timeout: 1000,
+        })
+      ) {
         await this.closeDimensionEditor();
       }
 

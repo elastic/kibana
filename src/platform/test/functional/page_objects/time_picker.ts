@@ -86,8 +86,10 @@ export class TimePickerPageObject extends FtrService {
     await this.testSubjects.find('noDataPopoverDismissButton');
   }
 
-  async ensureHiddenNoDataPopover() {
-    const isVisible = await this.testSubjects.exists('noDataPopoverDismissButton');
+  async ensureHiddenNoDataPopover(timeout = 0) {
+    const isVisible = await this.testSubjects.waitForExists('noDataPopoverDismissButton', {
+      timeout,
+    });
     if (isVisible) {
       await this.testSubjects.click('noDataPopoverDismissButton');
       await this.testSubjects.waitForDeleted('noDataPopoverDismissButton');

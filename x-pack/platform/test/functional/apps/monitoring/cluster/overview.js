@@ -201,7 +201,7 @@ export default function ({ getService, getPageObjects }) {
           await setupMode.clickSetupModeBtn();
           await PageObjects.timePicker.startAutoRefresh(1);
 
-          expect(await testSubjects.exists('alertsBadge')).to.be(true);
+          await testSubjects.existOrFail('alertsBadge', { timeout: 10000 });
           await PageObjects.timePicker.pauseAutoRefresh();
           await setupMode.clickExitSetupModeBtn();
         });

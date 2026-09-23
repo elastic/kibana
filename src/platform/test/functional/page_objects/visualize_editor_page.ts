@@ -117,7 +117,11 @@ export class VisualizeEditorPageObject extends FtrService {
    */
   public async clickBucket(bucketName: string, type = 'buckets') {
     await this.retry.try(async () => {
-      if (!(await this.testSubjects.exists(`visEditorAdd_${type}_${bucketName}`))) {
+      if (
+        !(await this.testSubjects.waitForExists(`visEditorAdd_${type}_${bucketName}`, {
+          timeout: 1000,
+        }))
+      ) {
         await this.testSubjects.click(`visEditorAdd_${type}`);
       }
       await this.testSubjects.click(`visEditorAdd_${type}_${bucketName}`);

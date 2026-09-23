@@ -30,15 +30,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should open context menu', async () => {
       expect(await PageObjects.console.isContextMenuOpen()).to.be(false);
       await PageObjects.console.clickContextMenu();
-      expect(PageObjects.console.isContextMenuOpen()).to.be.eql(true);
+      await testSubjects.existOrFail('consoleMenu');
+      await PageObjects.console.clickContextMenu();
+      await testSubjects.missingOrFail('consoleMenu');
     });
 
     it('should have options to copy to language, open documentation, and auto indent', async () => {
       await PageObjects.console.clickContextMenu();
-      expect(PageObjects.console.isContextMenuOpen()).to.be.eql(true);
-      expect(PageObjects.console.isCopyToLanguageButtonVisible()).to.be.eql(true);
-      expect(PageObjects.console.isOpenDocumentationButtonVisible()).to.be.eql(true);
-      expect(PageObjects.console.isAutoIndentButtonVisible()).to.be.eql(true);
+      await testSubjects.existOrFail('consoleMenuCopyAsButton');
+      expect(await PageObjects.console.isContextMenuOpen()).to.be.eql(true);
+      expect(await PageObjects.console.isCopyToLanguageButtonVisible()).to.be.eql(true);
+      expect(await PageObjects.console.isOpenDocumentationButtonVisible()).to.be.eql(true);
+      expect(await PageObjects.console.isAutoIndentButtonVisible()).to.be.eql(true);
+      await PageObjects.console.clickContextMenu();
+      await testSubjects.missingOrFail('consoleMenu');
     });
 
     describe('Copy as', () => {

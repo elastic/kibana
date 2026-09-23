@@ -346,7 +346,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           // drilldown creates filter pills for control selections
           expect(await filterBar.hasFilter('geo.src', 'CN, US')).to.be(true);
-          expect(await filterBar.hasFilter('bytes', '1,000 to 15,000')).to.be(true);
+          await retry.waitFor('range slider control filter to be applied', () =>
+            filterBar.hasFilter('bytes', '1,000 to 15,000')
+          );
 
           // control filter pills impact destination dashboard controls
           const controlIds = await dashboardControls.getAllControlIds();
