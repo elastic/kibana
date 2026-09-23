@@ -14,6 +14,7 @@ import {
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
   ALERT_STATUS_UNTRACKED,
+  ALERT_TRACKED,
   ALERT_UUID,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
@@ -78,14 +79,6 @@ const makeHit = ({
     [ALERT_RULE_UUID]: ruleId,
     [ALERT_RULE_EXECUTION_UUID]: executionUuid,
     [TIMESTAMP]: '2023-03-28T12:27:28.159Z',
-  },
-});
-
-const makeExecutionHit = (executionUuid: string) => ({
-  _index: '.alerts-test-000001',
-  _id: 'x',
-  fields: {
-    [ALERT_RULE_EXECUTION_UUID]: [executionUuid],
   },
 });
 
@@ -270,27 +263,20 @@ describe('get_tracked_alerts', () => {
   });
 
   describe('getTrackedAlerts', () => {
-    it('fetches tracked alerts via execution uuid query', async () => {
-      const search = jest
-        .fn()
-        .mockResolvedValueOnce({
-          hits: [makeExecutionHit('exec-1'), makeExecutionHit('exec-2')],
-        })
-        .mockResolvedValueOnce({
-          hits: [
-            makeHit({
-              uuid: 'uuid-1',
-              instanceId: 'alert-1',
-              status: ALERT_STATUS_ACTIVE,
-              executionUuid: 'exec-1',
-            }),
-          ],
-        });
+    it('fetches tracked alerts via tracked field query', async () => {
+      const search = jest.fn().mockResolvedValueOnce({
+        hits: [
+          makeHit({
+            uuid: 'uuid-1',
+            instanceId: 'alert-1',
+            status: ALERT_STATUS_ACTIVE,
+            executionUuid: 'exec-1',
+          }),
+        ],
+      });
 
       const result = await getTrackedAlerts({
         ruleId,
-        lookBackWindow: 20,
-        maxAlertLimit: 1000,
         ...makeStateFromUuids(['uuid-1']),
         search,
         logger,
@@ -298,7 +284,7 @@ describe('get_tracked_alerts', () => {
         logTags,
       });
 
-      expect(search).toHaveBeenCalledTimes(2);
+      expect(search).toHaveBeenCalledTimes(1);
       expect(result.all['uuid-1']).toBeDefined();
       expect(result.active['uuid-1']).toBeDefined();
       expect(logger.warn).not.toHaveBeenCalled();
@@ -307,9 +293,6 @@ describe('get_tracked_alerts', () => {
     it('fetches missing alerts by id when state has extra uuids', async () => {
       const search = jest
         .fn()
-        .mockResolvedValueOnce({
-          hits: [makeExecutionHit('exec-1')],
-        })
         .mockResolvedValueOnce({
           hits: [
             makeHit({
@@ -335,8 +318,6 @@ describe('get_tracked_alerts', () => {
 
       const result = await getTrackedAlerts({
         ruleId,
-        lookBackWindow: 20,
-        maxAlertLimit: 1000,
         ...makeStateFromUuids(['uuid-1', 'uuid-2']),
         search,
         logger,
@@ -344,10 +325,9 @@ describe('get_tracked_alerts', () => {
         logTags,
       });
 
-      expect(search).toHaveBeenCalledTimes(3);
+      expect(search).toHaveBeenCalledTimes(2);
 
-      // Verify the reconciliation query filters by ids
-      expect(search.mock.calls[2][0]).toEqual(
+      expect(search.mock.calls[1][0]).toEqual(
         expect.objectContaining({
           size: 1,
           seq_no_primary_term: true,
@@ -373,26 +353,19 @@ describe('get_tracked_alerts', () => {
     });
 
     it('does not fetch missing alerts when all state uuids are tracked', async () => {
-      const search = jest
-        .fn()
-        .mockResolvedValueOnce({
-          hits: [makeExecutionHit('exec-1')],
-        })
-        .mockResolvedValueOnce({
-          hits: [
-            makeHit({
-              uuid: 'uuid-1',
-              instanceId: 'alert-1',
-              status: ALERT_STATUS_ACTIVE,
-              executionUuid: 'exec-1',
-            }),
-          ],
-        });
+      const search = jest.fn().mockResolvedValueOnce({
+        hits: [
+          makeHit({
+            uuid: 'uuid-1',
+            instanceId: 'alert-1',
+            status: ALERT_STATUS_ACTIVE,
+            executionUuid: 'exec-1',
+          }),
+        ],
+      });
 
       await getTrackedAlerts({
         ruleId,
-        lookBackWindow: 20,
-        maxAlertLimit: 1000,
         ...makeStateFromUuids(['uuid-1']),
         search,
         logger,
@@ -400,31 +373,24 @@ describe('get_tracked_alerts', () => {
         logTags,
       });
 
-      expect(search).toHaveBeenCalledTimes(2);
+      expect(search).toHaveBeenCalledTimes(1);
       expect(logger.warn).not.toHaveBeenCalled();
     });
 
     it('handles empty state uuids', async () => {
-      const search = jest
-        .fn()
-        .mockResolvedValueOnce({
-          hits: [makeExecutionHit('exec-1')],
-        })
-        .mockResolvedValueOnce({
-          hits: [
-            makeHit({
-              uuid: 'uuid-1',
-              instanceId: 'alert-1',
-              status: ALERT_STATUS_ACTIVE,
-              executionUuid: 'exec-1',
-            }),
-          ],
-        });
+      const search = jest.fn().mockResolvedValueOnce({
+        hits: [
+          makeHit({
+            uuid: 'uuid-1',
+            instanceId: 'alert-1',
+            status: ALERT_STATUS_ACTIVE,
+            executionUuid: 'exec-1',
+          }),
+        ],
+      });
 
       const result = await getTrackedAlerts({
         ruleId,
-        lookBackWindow: 20,
-        maxAlertLimit: 1000,
         activeAlertsFromState: {},
         recoveredAlertsFromState: {},
         search,
@@ -433,20 +399,18 @@ describe('get_tracked_alerts', () => {
         logTags,
       });
 
-      expect(search).toHaveBeenCalledTimes(2);
+      expect(search).toHaveBeenCalledTimes(1);
       expect(result.all['uuid-1']).toBeDefined();
       expect(logger.warn).not.toHaveBeenCalled();
     });
 
-    it('handles no execution uuids found with no state alerts', async () => {
+    it('handles no tracked alerts found with no state alerts', async () => {
       const search = jest.fn().mockResolvedValueOnce({
         hits: [],
       });
 
       const result = await getTrackedAlerts({
         ruleId,
-        lookBackWindow: 20,
-        maxAlertLimit: 1000,
         activeAlertsFromState: {},
         recoveredAlertsFromState: {},
         search,
@@ -460,7 +424,7 @@ describe('get_tracked_alerts', () => {
       expect(logger.warn).not.toHaveBeenCalled();
     });
 
-    it('fetches missing alerts when no execution UUIDs found but state has alerts', async () => {
+    it('fetches missing alerts when no tracked alerts found but state has alerts', async () => {
       const search = jest
         .fn()
         .mockResolvedValueOnce({
@@ -481,8 +445,6 @@ describe('get_tracked_alerts', () => {
 
       const result = await getTrackedAlerts({
         ruleId,
-        lookBackWindow: 20,
-        maxAlertLimit: 1000,
         ...makeStateFromUuids(['uuid-1']),
         search,
         logger,
@@ -496,20 +458,13 @@ describe('get_tracked_alerts', () => {
       expect(logger.warn).toHaveBeenCalled();
     });
 
-    it('correctly passes query parameters for execution query', async () => {
-      const search = jest
-        .fn()
-        .mockResolvedValueOnce({
-          hits: [makeExecutionHit('exec-1')],
-        })
-        .mockResolvedValueOnce({
-          hits: [],
-        });
+    it('correctly passes query parameters for tracked alerts query', async () => {
+      const search = jest.fn().mockResolvedValueOnce({
+        hits: [],
+      });
 
       await getTrackedAlerts({
         ruleId,
-        lookBackWindow: 15,
-        maxAlertLimit: 500,
         activeAlertsFromState: {},
         recoveredAlertsFromState: {},
         search,
@@ -519,27 +474,12 @@ describe('get_tracked_alerts', () => {
       });
 
       expect(search.mock.calls[0][0]).toEqual({
-        size: 15,
-        query: {
-          bool: {
-            must: [{ term: { [ALERT_RULE_UUID]: ruleId } }],
-          },
-        },
-        collapse: {
-          field: ALERT_RULE_EXECUTION_UUID,
-        },
-        _source: false,
-        sort: [{ [TIMESTAMP]: { order: 'desc' } }],
-      });
-
-      expect(search.mock.calls[1][0]).toEqual({
-        size: 1000,
+        size: 10000,
         seq_no_primary_term: true,
         query: {
           bool: {
-            must: [{ term: { [ALERT_RULE_UUID]: ruleId } }],
+            must: [{ term: { [ALERT_RULE_UUID]: ruleId } }, { term: { [ALERT_TRACKED]: true } }],
             must_not: [{ term: { [ALERT_STATUS]: ALERT_STATUS_UNTRACKED } }],
-            filter: [{ terms: { [ALERT_RULE_EXECUTION_UUID]: ['exec-1'] } }],
           },
         },
       });
@@ -550,17 +490,12 @@ describe('get_tracked_alerts', () => {
       const search = jest
         .fn()
         .mockResolvedValueOnce({
-          hits: [makeExecutionHit('exec-1')],
-        })
-        .mockResolvedValueOnce({
           hits: [],
         })
         .mockRejectedValueOnce(searchError);
 
       const result = await getTrackedAlerts({
         ruleId,
-        lookBackWindow: 20,
-        maxAlertLimit: 1000,
         ...makeStateFromUuids(['uuid-1']),
         search,
         logger,
@@ -587,9 +522,6 @@ describe('get_tracked_alerts', () => {
       const search = jest
         .fn()
         .mockResolvedValueOnce({
-          hits: [makeExecutionHit('exec-1')],
-        })
-        .mockResolvedValueOnce({
           hits: [],
         })
         .mockResolvedValueOnce({
@@ -611,8 +543,6 @@ describe('get_tracked_alerts', () => {
 
       const result = await getTrackedAlerts({
         ruleId,
-        lookBackWindow: 20,
-        maxAlertLimit: 1000,
         ...makeStateFromUuids(['uuid-1', 'uuid-2', 'uuid-3']),
         search,
         logger,
@@ -620,13 +550,12 @@ describe('get_tracked_alerts', () => {
         logTags,
       });
 
-      expect(search).toHaveBeenCalledTimes(3);
+      expect(search).toHaveBeenCalledTimes(2);
 
-      expect(search.mock.calls[2][0].size).toBe(3);
+      expect(search.mock.calls[1][0].size).toBe(3);
 
       expect(result.active['uuid-1']).toBeDefined();
       expect(result.recovered['uuid-2']).toBeDefined();
-      // uuid-3 was not found in ES either — just not in tracked
       expect(result.all['uuid-3']).toBeUndefined();
 
       expect(logger.warn).toHaveBeenCalledWith(
