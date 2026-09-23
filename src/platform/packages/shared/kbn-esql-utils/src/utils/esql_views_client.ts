@@ -20,6 +20,7 @@ import {
 } from '@kbn/esql-types';
 
 interface ErrorResponseBody {
+  errorType?: string;
   message?: string;
   statusCode?: number;
 }
@@ -36,6 +37,7 @@ export class EsqlViewsClientError extends Error {
   constructor(
     message: string,
     public readonly statusCode?: number,
+    public readonly errorType?: string,
     public readonly originalError?: Error
   ) {
     super(message);
@@ -67,12 +69,13 @@ const normalizeError = (error: unknown): EsqlViewsClientError => {
     return new EsqlViewsClientError(
       body?.message ?? error.message,
       error.response?.status ?? body?.statusCode,
+      body?.errorType,
       error
     );
   }
 
   const originalError = error instanceof Error ? error : new Error(String(error));
-  return new EsqlViewsClientError(originalError.message, undefined, originalError);
+  return new EsqlViewsClientError(originalError.message, undefined, undefined, originalError);
 };
 
 const runRequest = async <Response>(request: () => Promise<Response>): Promise<Response> => {
@@ -119,7 +122,11 @@ export const createEsqlViewsManagementClient = (http: HttpStart): EsqlViewsClien
       return upsertView(request);
     }
 
-    throw new EsqlViewsClientError(`An ES|QL view named "${request.name}" already exists`, 409);
+    throw new EsqlViewsClientError(
+      `An ES|QL view named "${request.name}" already exists`,
+      409,
+      'resource_already_exists_exception'
+    );
   };
 
   const updateView = (request: UpsertEsqlViewRequest) => upsertView(request);

@@ -10,9 +10,27 @@ import { EuiProvider } from '@elastic/eui';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import type { EsqlViewsResult } from '@kbn/esql-types';
-import type { EsqlViewsClient } from '@kbn/esql-utils';
+import { EsqlViewsClientError, type EsqlViewsClient } from '@kbn/esql-utils';
 import { getQueryPreview } from './esql_views_table';
 import { ManagementApp } from './management_app';
+
+jest.mock('@kbn/esql/public', () => ({
+  ESQLLangEditor: ({
+    dataTestSubj,
+    onTextLangQueryChange,
+    query,
+  }: {
+    dataTestSubj?: string;
+    onTextLangQueryChange: (nextQuery: { esql: string }) => void;
+    query: { esql: string };
+  }) => (
+    <textarea
+      data-test-subj={dataTestSubj}
+      onChange={({ target }) => onTextLangQueryChange({ esql: target.value })}
+      value={query.esql}
+    />
+  ),
+}));
 
 const documentationUrl = 'https://www.elastic.co/docs/reference/query-languages/esql/esql-views';
 
@@ -27,11 +45,19 @@ const createClient = (): jest.Mocked<EsqlViewsClient> => ({
   deleteViews: jest.fn(),
 });
 
-const renderApp = (client: EsqlViewsClient) =>
+const renderApp = (
+  client: EsqlViewsClient,
+  { canCreate = true, canEdit = true }: { canCreate?: boolean; canEdit?: boolean } = {}
+) =>
   render(
     <EuiProvider>
       <MockAppHeaderProvider>
-        <ManagementApp client={client} documentationUrl={documentationUrl} />
+        <ManagementApp
+          canCreate={canCreate}
+          canEdit={canEdit}
+          client={client}
+          documentationUrl={documentationUrl}
+        />
       </MockAppHeaderProvider>
     </EuiProvider>
   );
@@ -72,7 +98,186 @@ describe('ManagementApp', () => {
     );
     expect(screen.getByPlaceholderText('Search views')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Reload' })).toBeInTheDocument();
+    expect(screen.getByRole('columnheader', { name: 'Actions' })).toBeInTheDocument();
     expect(client.getViews).toHaveBeenCalledWith(expect.any(AbortSignal));
+  });
+
+  it('hides create and edit actions without their capabilities', async () => {
+    const client = createClient();
+    client.getViews.mockResolvedValue({
+      views: [{ name: 'logs-view', query: 'FROM logs-*' }],
+    });
+
+    renderApp(client, { canCreate: false, canEdit: false });
+
+    await screen.findByText('logs-view');
+    expect(screen.queryByTestId('esqlViewsCreateButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('esqlViewsActionsButton')).not.toBeInTheDocument();
+  });
+
+  it('validates fields while creating a view and refetches after saving', async () => {
+    const client = createClient();
+    client.getViews.mockResolvedValueOnce({ views: [] }).mockResolvedValueOnce({
+      views: [
+        {
+          name: 'sales-view',
+          description: 'Sales transactions',
+          query: 'FROM transactions-*',
+        },
+      ],
+    });
+    client.createView.mockResolvedValue({ acknowledged: true });
+
+    renderApp(client);
+
+    await screen.findByText('No ES|QL views found');
+    fireEvent.click(screen.getByTestId('esqlViewsCreateButton'));
+
+    expect(screen.getByRole('heading', { name: 'ES|QL view details' })).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('e.g. my-dataset')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'Unique name for use in queries. All lowercase, dash, underscore, and numbers are supported'
+      )
+    ).toBeInTheDocument();
+    expect(screen.getByText('Description (optional)')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Type text')).toBeInTheDocument();
+    expect(screen.getByText('A brief description to help identify this view.')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'ES|QL query' })).toBeInTheDocument();
+    expect(
+      screen.getByText('You can write a custom query, or use a recent or starred one.')
+    ).toBeInTheDocument();
+    expect(screen.getByTestId('esqlViewQueryEditor')).toHaveValue(
+      'FROM kibana_sample_data_ecommerce | WHERE KQL("term")'
+    );
+
+    const nameInput = screen.getByTestId('esqlViewNameInput');
+    fireEvent.change(nameInput, { target: { value: 'Sales view' } });
+    expect(
+      screen.getByText('Use lowercase letters, numbers, hyphens, and underscores only.')
+    ).toBeInTheDocument();
+
+    fireEvent.change(nameInput, { target: { value: 'sales-view' } });
+    fireEvent.change(screen.getByTestId('esqlViewDescriptionInput'), {
+      target: { value: 'Sales transactions' },
+    });
+    fireEvent.change(screen.getByTestId('esqlViewQueryEditor'), {
+      target: { value: 'FROM transactions-*' },
+    });
+    fireEvent.click(screen.getByTestId('esqlViewSaveButton'));
+
+    await waitFor(() =>
+      expect(client.createView).toHaveBeenCalledWith({
+        name: 'sales-view',
+        description: 'Sales transactions',
+        query: 'FROM transactions-*',
+      })
+    );
+    expect(await screen.findByText('sales-view')).toBeInTheDocument();
+    expect(client.getViews).toHaveBeenCalledTimes(2);
+    expect(screen.queryByTestId('esqlViewFormFlyout')).not.toBeInTheDocument();
+  });
+
+  it('edits a view with an immutable name and refetches after saving', async () => {
+    const client = createClient();
+    client.getViews
+      .mockResolvedValueOnce({
+        views: [{ name: 'legacy.view', description: 'Logs', query: 'FROM logs-*' }],
+      })
+      .mockResolvedValueOnce({
+        views: [
+          {
+            name: 'legacy.view',
+            description: 'Production logs',
+            query: 'FROM production-logs-*',
+          },
+        ],
+      });
+    client.updateView.mockResolvedValue({ acknowledged: true });
+
+    renderApp(client);
+
+    await screen.findByText('legacy.view');
+    fireEvent.click(screen.getByRole('button', { name: 'Actions for legacy.view' }));
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Edit' }));
+
+    expect(screen.getByTestId('esqlViewNameInput')).toHaveAttribute('readonly');
+    fireEvent.change(screen.getByTestId('esqlViewDescriptionInput'), {
+      target: { value: 'Production logs' },
+    });
+    fireEvent.change(screen.getByTestId('esqlViewQueryEditor'), {
+      target: { value: 'FROM production-logs-*' },
+    });
+    fireEvent.click(screen.getByTestId('esqlViewSaveButton'));
+
+    await waitFor(() =>
+      expect(client.updateView).toHaveBeenCalledWith({
+        name: 'legacy.view',
+        description: 'Production logs',
+        query: 'FROM production-logs-*',
+      })
+    );
+    expect(await screen.findByText('Production logs')).toBeInTheDocument();
+    expect(client.getViews).toHaveBeenCalledTimes(2);
+  });
+
+  it('shows a stable name conflict with the exact Elasticsearch error in a tooltip', async () => {
+    const client = createClient();
+    client.getViews.mockResolvedValue({ views: [] });
+    client.createView.mockRejectedValue(
+      new EsqlViewsClientError(
+        'an index or data stream exists with the same name',
+        400,
+        'resource_already_exists_exception'
+      )
+    );
+
+    renderApp(client);
+
+    await screen.findByText('No ES|QL views found');
+    fireEvent.click(screen.getByTestId('esqlViewsCreateButton'));
+    fireEvent.change(screen.getByTestId('esqlViewNameInput'), {
+      target: { value: 'sales-view' },
+    });
+    fireEvent.change(screen.getByTestId('esqlViewQueryEditor'), {
+      target: { value: 'ROW value = 1' },
+    });
+    fireEvent.click(screen.getByTestId('esqlViewSaveButton'));
+
+    expect(
+      await screen.findByText('This name is already used by another Elasticsearch resource.')
+    ).toBeInTheDocument();
+
+    const tooltipAnchor = screen
+      .getByTestId('esqlViewNameConflictDetails')
+      .querySelector('.euiToolTipAnchor');
+    if (!tooltipAnchor) {
+      throw new Error('Expected the conflict details tooltip anchor');
+    }
+    fireEvent.mouseOver(tooltipAnchor);
+    expect(
+      await screen.findByText('an index or data stream exists with the same name')
+    ).toBeInTheDocument();
+  });
+
+  it('blocks saving a query with invalid ES|QL syntax', async () => {
+    const client = createClient();
+    client.getViews.mockResolvedValue({ views: [] });
+
+    renderApp(client);
+
+    await screen.findByText('No ES|QL views found');
+    fireEvent.click(screen.getByTestId('esqlViewsCreateButton'));
+    fireEvent.change(screen.getByTestId('esqlViewNameInput'), {
+      target: { value: 'invalid-query-view' },
+    });
+    fireEvent.change(screen.getByTestId('esqlViewQueryEditor'), {
+      target: { value: 'ROW value =' },
+    });
+    fireEvent.click(screen.getByTestId('esqlViewSaveButton'));
+
+    expect(await screen.findByText(/Fix the ES\|QL syntax:/)).toBeInTheDocument();
+    expect(client.createView).not.toHaveBeenCalled();
   });
 
   it('shows the full query in a popover when the preview is clicked', async () => {

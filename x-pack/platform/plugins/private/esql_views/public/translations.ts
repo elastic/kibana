@@ -41,6 +41,20 @@ export const translations = {
   reloadButton: i18n.translate('xpack.esqlViews.managementPage.reloadButton', {
     defaultMessage: 'Reload',
   }),
+  createViewButtonLabel: i18n.translate('xpack.esqlViews.managementPage.createViewButtonLabel', {
+    defaultMessage: 'Create view',
+  }),
+  actionsColumn: i18n.translate('xpack.esqlViews.managementPage.actionsColumn', {
+    defaultMessage: 'Actions',
+  }),
+  actionsForViewAriaLabel: (viewName: string) =>
+    i18n.translate('xpack.esqlViews.managementPage.actionsForViewAriaLabel', {
+      defaultMessage: 'Actions for {viewName}',
+      values: { viewName },
+    }),
+  editViewButtonLabel: i18n.translate('xpack.esqlViews.managementPage.editViewButtonLabel', {
+    defaultMessage: 'Edit',
+  }),
   tableCaption: i18n.translate('xpack.esqlViews.managementPage.tableCaption', {
     defaultMessage: 'ES|QL views',
   }),
@@ -72,5 +86,107 @@ export const translations = {
   }),
   noSearchResultsTitle: i18n.translate('xpack.esqlViews.managementPage.noSearchResultsTitle', {
     defaultMessage: 'No views match your search',
+  }),
+  createFlyoutTitle: i18n.translate('xpack.esqlViews.managementPage.createFlyoutTitle', {
+    defaultMessage: 'Create ES|QL view',
+  }),
+  editFlyoutTitle: i18n.translate('xpack.esqlViews.managementPage.editFlyoutTitle', {
+    defaultMessage: 'Edit ES|QL view',
+  }),
+  viewDetailsTitle: i18n.translate('xpack.esqlViews.managementPage.viewDetailsTitle', {
+    defaultMessage: 'ES|QL view details',
+  }),
+  viewNameLabel: i18n.translate('xpack.esqlViews.managementPage.viewNameLabel', {
+    defaultMessage: 'Name',
+  }),
+  viewNamePlaceholder: i18n.translate('xpack.esqlViews.managementPage.viewNamePlaceholder', {
+    defaultMessage: 'e.g. my-dataset',
+  }),
+  viewNameDescription: i18n.translate('xpack.esqlViews.managementPage.viewNameDescription', {
+    defaultMessage:
+      'Unique name for use in queries. All lowercase, dash, underscore, and numbers are supported',
+  }),
+  viewDescriptionLabel: i18n.translate('xpack.esqlViews.managementPage.viewDescriptionLabel', {
+    defaultMessage: 'Description (optional)',
+  }),
+  viewDescriptionPlaceholder: i18n.translate(
+    'xpack.esqlViews.managementPage.viewDescriptionPlaceholder',
+    {
+      defaultMessage: 'Type text',
+    }
+  ),
+  viewDescriptionDescription: i18n.translate(
+    'xpack.esqlViews.managementPage.viewDescriptionDescription',
+    {
+      defaultMessage: 'A brief description to help identify this view.',
+    }
+  ),
+  viewQueryTitle: i18n.translate('xpack.esqlViews.managementPage.viewQueryTitle', {
+    defaultMessage: 'ES|QL query',
+  }),
+  viewQueryDescription: i18n.translate('xpack.esqlViews.managementPage.viewQueryDescription', {
+    defaultMessage: 'You can write a custom query, or use a recent or starred one.',
+  }),
+  nameRequiredErrorMessage: i18n.translate(
+    'xpack.esqlViews.managementPage.nameRequiredErrorMessage',
+    {
+      defaultMessage: 'Enter a name.',
+    }
+  ),
+  nameInvalidFormatErrorMessage: i18n.translate(
+    'xpack.esqlViews.managementPage.nameInvalidFormatErrorMessage',
+    {
+      defaultMessage: 'Use lowercase letters, numbers, hyphens, and underscores only.',
+    }
+  ),
+  nameTooLongErrorMessage: i18n.translate(
+    'xpack.esqlViews.managementPage.nameTooLongErrorMessage',
+    {
+      defaultMessage: 'Name cannot be longer than 255 characters.',
+    }
+  ),
+  descriptionTooLongErrorMessage: i18n.translate(
+    'xpack.esqlViews.managementPage.descriptionTooLongErrorMessage',
+    {
+      defaultMessage: 'Description cannot be longer than 1,000 characters.',
+    }
+  ),
+  queryRequiredErrorMessage: i18n.translate(
+    'xpack.esqlViews.managementPage.queryRequiredErrorMessage',
+    {
+      defaultMessage: 'Enter an ES|QL query.',
+    }
+  ),
+  queryTooLongErrorMessage: i18n.translate(
+    'xpack.esqlViews.managementPage.queryTooLongErrorMessage',
+    {
+      defaultMessage: 'Query cannot be longer than 1,000,000 characters.',
+    }
+  ),
+  querySyntaxErrorMessage: (details: string) =>
+    i18n.translate('xpack.esqlViews.managementPage.querySyntaxErrorMessage', {
+      defaultMessage: 'Fix the ES|QL syntax: {details}',
+      values: { details },
+    }),
+  nameConflictErrorMessage: i18n.translate(
+    'xpack.esqlViews.managementPage.nameConflictErrorMessage',
+    {
+      defaultMessage: 'This name is already used by another Elasticsearch resource.',
+    }
+  ),
+  errorDetailsAriaLabel: i18n.translate('xpack.esqlViews.managementPage.errorDetailsAriaLabel', {
+    defaultMessage: 'Show Elasticsearch error details',
+  }),
+  saveErrorTitle: i18n.translate('xpack.esqlViews.managementPage.saveErrorTitle', {
+    defaultMessage: 'Unable to save ES|QL view',
+  }),
+  createButtonLabel: i18n.translate('xpack.esqlViews.managementPage.createButtonLabel', {
+    defaultMessage: 'Create',
+  }),
+  saveButtonLabel: i18n.translate('xpack.esqlViews.managementPage.saveButtonLabel', {
+    defaultMessage: 'Save',
+  }),
+  cancelButtonLabel: i18n.translate('xpack.esqlViews.managementPage.cancelButtonLabel', {
+    defaultMessage: 'Cancel',
   }),
 };

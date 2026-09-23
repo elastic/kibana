@@ -10,13 +10,17 @@ import React, { useMemo, useState } from 'react';
 import type { EuiBasicTableColumn, EuiInMemoryTableProps } from '@elastic/eui';
 import {
   EuiButton,
+  EuiButtonIcon,
   EuiCallOut,
   EuiCode,
   EuiCodeBlock,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
   EuiEmptyPrompt,
   EuiInMemoryTable,
   EuiPopover,
   EuiSpacer,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { EsqlView } from '@kbn/esql-types';
 import { translations } from './translations';
@@ -88,10 +92,56 @@ const QueryPreview: FunctionComponent<{ query: string; viewName: string }> = ({
   );
 };
 
+const ViewActions: FunctionComponent<{
+  onEdit: (view: EsqlView) => void;
+  view: EsqlView;
+}> = ({ onEdit, view }) => {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const actionsLabel = translations.actionsForViewAriaLabel(view.name);
+
+  return (
+    <EuiPopover
+      aria-label={actionsLabel}
+      anchorPosition="downRight"
+      button={
+        <EuiToolTip content={actionsLabel} disableScreenReaderOutput>
+          <EuiButtonIcon
+            aria-label={actionsLabel}
+            color="text"
+            data-test-subj="esqlViewsActionsButton"
+            iconType="boxesVertical"
+            onClick={() => setIsPopoverOpen((isOpen) => !isOpen)}
+          />
+        </EuiToolTip>
+      }
+      closePopover={() => setIsPopoverOpen(false)}
+      isOpen={isPopoverOpen}
+      panelPaddingSize="none"
+    >
+      <EuiContextMenuPanel
+        items={[
+          <EuiContextMenuItem
+            data-test-subj="esqlViewsEditButton"
+            icon="pencil"
+            key="edit"
+            onClick={() => {
+              setIsPopoverOpen(false);
+              onEdit(view);
+            }}
+          >
+            {translations.editViewButtonLabel}
+          </EuiContextMenuItem>,
+        ]}
+      />
+    </EuiPopover>
+  );
+};
+
 interface EsqlViewsTableProps {
   views: EsqlView[];
   error?: Error;
   isLoading: boolean;
+  onEdit?: (view: EsqlView) => void;
   onReload: () => void;
 }
 
@@ -99,6 +149,7 @@ export const EsqlViewsTable: FunctionComponent<EsqlViewsTableProps> = ({
   views,
   error,
   isLoading,
+  onEdit,
   onReload,
 }) => {
   const [isSearchActive, setIsSearchActive] = useState(false);
@@ -127,8 +178,22 @@ export const EsqlViewsTable: FunctionComponent<EsqlViewsTableProps> = ({
         ),
         'data-test-subj': 'esqlViewsQueryColumn',
       },
+      ...(onEdit
+        ? [
+            {
+              name: translations.actionsColumn,
+              actions: [
+                {
+                  render: (view: EsqlView) => <ViewActions onEdit={onEdit} view={view} />,
+                },
+              ],
+              width: '80px',
+              'data-test-subj': 'esqlViewsActionsColumn',
+            },
+          ]
+        : []),
     ],
-    []
+    [onEdit]
   );
 
   const search = useMemo<EuiInMemoryTableProps<EsqlView>['search']>(
