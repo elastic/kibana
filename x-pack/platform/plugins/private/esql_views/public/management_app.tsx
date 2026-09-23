@@ -13,7 +13,7 @@ import type { EsqlViewsClient } from '@kbn/esql-utils';
 import { PLUGIN_NAME } from '../common';
 import { EsqlViewsTable } from './esql_views_table';
 import { translations } from './translations';
-// import { useEsqlViews } from './use_esql_views';
+import { useEsqlViews } from './use_esql_views';
 
 interface ManagementAppProps {
   client: EsqlViewsClient;
@@ -24,12 +24,7 @@ export const ManagementApp: FunctionComponent<ManagementAppProps> = ({
   client,
   documentationUrl,
 }) => {
-  // const { error, isLoading, reload, status, views } = useEsqlViews(client);
-  const error = new Error('Test error');
-  const isLoading = false;
-  const status = 'success';
-  const views = [];
-  const reload = () => {};
+  const { error, isLoading, reload, status, views } = useEsqlViews(client);
 
   let content: React.ReactNode;
 
