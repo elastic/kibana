@@ -9,8 +9,10 @@ import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import type { NightshiftInvestigationsRepositoryClient } from '@kbn/nightshift-investigations-plugin/public';
-import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
+import type {
+  NightshiftInvestigationsRepositoryClient,
+  InvestigationLocator,
+} from '@kbn/nightshift-investigations-plugin/public';
 import { useInvestigateAlert } from './use_investigate_alert';
 import { useKibana } from '../utils/kibana_react';
 import { setInvestigationsClient } from '../services/investigations_client';
@@ -21,9 +23,11 @@ const useKibanaMock = useKibana as jest.Mock;
 const fetchMock = jest.fn();
 const addSuccess = jest.fn();
 const addDanger = jest.fn();
-const getUrlForApp = jest.fn(
-  (_appId: string, { path }: { path: string }) => `/app/nightshift${path}`
-);
+const mockLocator = {
+  getRedirectUrl: jest.fn(({ investigationId }: { investigationId: string }) =>
+    investigationId ? `/app/nightshift?investigationId=${investigationId}` : ''
+  ),
+} as unknown as InvestigationLocator;
 
 let queryClient: QueryClient;
 
@@ -66,7 +70,13 @@ describe('useInvestigateAlert', () => {
     useKibanaMock.mockReturnValue({
       services: {
         http: { basePath: { get: () => '' } },
-        application: { getUrlForApp },
+        share: {
+          url: {
+            locators: {
+              get: jest.fn(() => mockLocator),
+            },
+          },
+        },
         notifications: { toasts: { addSuccess, addDanger } },
       },
     });
@@ -114,7 +124,11 @@ describe('useInvestigateAlert', () => {
 
     await waitFor(() => expect(result.current.investigateActionLabel).toBe('Investigating'));
     expect(result.current.isInvestigating).toBe(true);
-    expect(result.current.viewInvestigationUrl).toBe('/app/nightshift?investigationId=inv-running');
+    await waitFor(() =>
+      expect(result.current.viewInvestigationUrl).toBe(
+        '/app/nightshift?investigationId=inv-running'
+      )
+    );
     await act(() => result.current.handleInvestigate());
     expect(fetchMock).not.toHaveBeenCalledWith(
       'POST /internal/nightshift/investigations',
@@ -139,8 +153,8 @@ describe('useInvestigateAlert', () => {
     expect(result.current.viewInvestigationUrl).toBe(
       '/app/nightshift?investigationId=inv-completed'
     );
-    expect(getUrlForApp).toHaveBeenCalledWith(NIGHTSHIFT_APP_ID, {
-      path: '?investigationId=inv-completed',
+    expect(mockLocator.getRedirectUrl).toHaveBeenCalledWith({
+      investigationId: 'inv-completed',
     });
   });
 
@@ -159,7 +173,11 @@ describe('useInvestigateAlert', () => {
     const { result } = renderInvestigateAlert();
 
     await waitFor(() => expect(result.current.investigateActionLabel).toBe('Investigating'));
-    expect(result.current.viewInvestigationUrl).toBe('/app/nightshift?investigationId=inv-running');
+    await waitFor(() =>
+      expect(result.current.viewInvestigationUrl).toBe(
+        '/app/nightshift?investigationId=inv-running'
+      )
+    );
   });
 
   it('returns the completed investigation link without write availability', async () => {
