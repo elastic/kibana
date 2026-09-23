@@ -308,6 +308,11 @@ outputs:
       minimum: 0
     auto_closed_ids:
       type: array
+      description: >
+        Alert ids that qualified for FP auto-close and were submitted to
+        kibana.SetAlertsStatus. Not a confirmation that every id is closed:
+        the close step uses conflicts: proceed, so version-conflicted docs can
+        remain open while still appearing here. Treat as attempted/candidate ids.
       items:
         type: string
         maxLength: 512
@@ -1953,6 +1958,8 @@ steps:
       # a list of ids, so the whole execution closes in two calls rather than two per alert.
       # auto_close_ids is accumulated inside apply_verdicts using foreach.item._id (the real
       # alert id, never the model's echo), so a fabricated model id cannot close an unrelated alert.
+      # Emitted as workflow.output.auto_closed_ids = ids submitted to SetAlertsStatus — not a
+      # confirmed-closed list (conflicts: proceed can leave individual docs open).
 
       - name: check_auto_close_conditions
         type: if
@@ -2023,6 +2030,8 @@ steps:
       true_positive_count: "${{ variables.output_verdicts | where: 'classification', 'true_positive' | size }}"
       inconclusive_count: "${{ variables.output_verdicts | where: 'classification', 'inconclusive' | size }}"
       auto_closed_ids: "${{ variables.auto_close_ids }}"
+      # Candidate / submitted ids (see outputs.auto_closed_ids description) — not reconciled
+      # against SetAlertsStatus per-doc success; that step returns opaque update_by_query counts.
       grouped_counts_summary: "{{ variables.grouped_counts_summary }}"
       # Empty string on the standalone / skip path — honest signal that no call was made.
       generated_summary: "{{ variables.generated_summary }}"
