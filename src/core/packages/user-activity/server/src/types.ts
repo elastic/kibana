@@ -79,7 +79,7 @@ export interface UserActivityEvent {
   /** Descriptive action name, e.g., 'view_dashboard', 'edit_case', 'save_search' */
   action: UserActivityActionId;
   /** Event types {@link UserActivityEventType}. ECS defines `event.type` as an array. */
-  type: UserActivityEventType[];
+  type: readonly UserActivityEventType[];
   /** ECS event outcome; use with {@link UserActivityEventOutcome}. Defaults to `'unknown'` when omitted. */
   outcome?: UserActivityEventOutcome;
   /** ISO8601 timestamp of the event start time. */

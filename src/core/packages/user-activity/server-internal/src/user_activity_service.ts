@@ -111,7 +111,7 @@ export class UserActivityService
 
     this.logger.info(message, {
       message,
-      event: { ...event, outcome: event.outcome ?? 'unknown' },
+      event: { ...event, type: [...event.type], outcome: event.outcome ?? 'unknown' },
       object,
       ...(metadata ? { metadata } : {}),
       ...(error ? { error } : {}),
