@@ -31,7 +31,7 @@ import type {
   DataType,
   GenericIndexPatternColumn,
   IncompleteColumn,
-  LastValueIndexPatternColumn,
+  LastValueOrderAggColumn,
   TermsIndexPatternColumn,
   IndexPatternField,
 } from '@kbn/lens-common';
@@ -344,7 +344,7 @@ export const termsOperation: OperationDefinition<
           );
           if (sortFieldStatus.status === 'missing-with-default') {
             const { orderAgg: lastValueOrderAgg } = column.params;
-            const orderAggWithDefaultSort: LastValueIndexPatternColumn = {
+            const orderAggWithDefaultSort: LastValueOrderAggColumn = {
               ...lastValueOrderAgg,
               params: { ...lastValueOrderAgg.params, sortField: sortFieldStatus.defaultField },
             };

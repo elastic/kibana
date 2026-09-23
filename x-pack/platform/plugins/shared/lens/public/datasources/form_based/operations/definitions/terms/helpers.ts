@@ -21,6 +21,7 @@ import type {
   IndexPattern,
   IndexPatternField,
   LastValueIndexPatternColumn,
+  LastValueOrderAggColumn,
   PercentileIndexPatternColumn,
   PercentileRanksIndexPatternColumn,
   TermsIndexPatternColumn,
@@ -250,10 +251,10 @@ export function getDisallowedTermsMessage(
 
 /**
  * A terms column ordered by a custom `last_value` order-agg, narrowed so that `params.orderAgg` is a
- * `LastValueIndexPatternColumn`.
+ * `LastValueOrderAggColumn`.
  */
 export type TermsColumnWithLastValueOrderAgg = TermsIndexPatternColumn & {
-  params: TermsIndexPatternColumn['params'] & { orderAgg: LastValueIndexPatternColumn };
+  params: TermsIndexPatternColumn['params'] & { orderAgg: LastValueOrderAggColumn };
 };
 
 /**

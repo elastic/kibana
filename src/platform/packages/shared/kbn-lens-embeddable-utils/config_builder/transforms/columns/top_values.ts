@@ -10,7 +10,7 @@
 import {
   LENS_DOCUMENT_FIELD_NAME,
   type FieldBasedIndexPatternColumn,
-  type LastValueIndexPatternColumn,
+  type LastValueOrderAggColumn,
   type PercentileIndexPatternColumn,
   type PercentileRanksIndexPatternColumn,
   type TermsIndexPatternColumn,
@@ -48,7 +48,7 @@ function isCountOrderAgg(
 
 function isLastValueOrderAgg(
   orderAgg: FieldBasedIndexPatternColumn
-): orderAgg is LastValueIndexPatternColumn {
+): orderAgg is LastValueOrderAggColumn {
   return orderAgg.operationType === 'last_value';
 }
 
@@ -190,13 +190,15 @@ function getCustomOrderAgg(
     // read at render. It is optional on the API: when omitted, the render path falls back to the data
     // view's default time field to sort, and the editor prompts the user to re-save to persist it.
     // This solution was needed to avoid a breaking change in the API.
-    const orderAgg: FieldBasedIndexPatternColumn & { params?: { sortField?: string } } = {
+    const orderAgg: LastValueOrderAggColumn = {
       operationType: rankBy.operation,
       sourceField: rankBy.field,
       dataType: 'number',
       isBucketed: false,
       label: '',
-      params: { sortField: rankBy.time_field }, // always emit a `params` object (empty when `time_field` is absent) to avoid crashing the Lens editor on load
+      params: {
+        ...(rankBy.time_field ? { sortField: rankBy.time_field } : {}),
+      },
     };
     return orderAgg;
   }
