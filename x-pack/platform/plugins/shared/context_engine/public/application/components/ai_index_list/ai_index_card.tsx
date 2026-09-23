@@ -84,37 +84,44 @@ export const AiIndexCard = ({ aiIndex, href, onDeleteClick }: AiIndexCardProps) 
       <EuiFlexGroup direction="column" gutterSize="m">
         <EuiFlexItem grow={false}>
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
-            <EuiFlexItem className="eui-textTruncate">
-              <EuiTitle size="xs">
-                <h4>
-                  <EuiFlexGroup gutterSize="s" alignItems="baseline" responsive={false}>
-                    <EuiFlexItem className="eui-textTruncate">
-                      <EuiLink
-                        href={href}
-                        ref={titleLinkRef}
-                        className="eui-textTruncate"
-                        data-test-subj="contextAiIndexCardTitleLink"
-                        {...getEbtProps({
-                          element: CONTEXT_ENGINE_UI_EBT.element.aiIndexListPageCard,
-                          action: CONTEXT_ENGINE_UI_EBT.action.aiIndexList.OPEN_CARD,
-                        })}
-                      >
-                        {aiIndex.id}
-                      </EuiLink>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiText
-                        component="span"
-                        size="xs"
-                        color="subdued"
-                        data-test-subj="contextAiIndexCardType"
-                      >
-                        {AI_INDEX_TYPE_LABEL[aiIndex.dest.type]}
-                      </EuiText>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </h4>
-              </EuiTitle>
+            <EuiFlexItem>
+              <EuiFlexGroup gutterSize="s" alignItems="baseline" responsive={false}>
+                <EuiFlexItem>
+                  {/* Must stay wrappable: `1fr` grid tracks size to the card's min-content width. */}
+                  <EuiTextBlockTruncate
+                    lines={1}
+                    className="eui-textBreakWord"
+                    title={aiIndex.id}
+                    data-test-subj="contextAiIndexCardTitle"
+                  >
+                    <EuiTitle size="xs">
+                      <h4>
+                        <EuiLink
+                          href={href}
+                          ref={titleLinkRef}
+                          data-test-subj="contextAiIndexCardTitleLink"
+                          {...getEbtProps({
+                            element: CONTEXT_ENGINE_UI_EBT.element.aiIndexListPageCard,
+                            action: CONTEXT_ENGINE_UI_EBT.action.aiIndexList.OPEN_CARD,
+                          })}
+                        >
+                          {aiIndex.id}
+                        </EuiLink>
+                      </h4>
+                    </EuiTitle>
+                  </EuiTextBlockTruncate>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText
+                    component="span"
+                    size="xs"
+                    color="subdued"
+                    data-test-subj="contextAiIndexCardType"
+                  >
+                    {AI_INDEX_TYPE_LABEL[aiIndex.dest.type]}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiPopover
@@ -192,7 +199,9 @@ export const AiIndexCard = ({ aiIndex, href, onDeleteClick }: AiIndexCardProps) 
         {aiIndex.description !== undefined && (
           <EuiFlexItem grow={false}>
             <EuiText size="s" color="subdued" data-test-subj="contextAiIndexCardDescription">
-              <EuiTextBlockTruncate lines={2}>{aiIndex.description}</EuiTextBlockTruncate>
+              <EuiTextBlockTruncate lines={2} className="eui-textBreakWord">
+                {aiIndex.description}
+              </EuiTextBlockTruncate>
             </EuiText>
           </EuiFlexItem>
         )}

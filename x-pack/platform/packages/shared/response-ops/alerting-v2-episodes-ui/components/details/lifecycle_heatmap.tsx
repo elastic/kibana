@@ -24,6 +24,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { ALERT_EPISODE_STATUS, type AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
 import type { EpisodeEventRow } from '@kbn/alerting-v2-common-queries';
+import { getPanelTitleSize } from './panel_title_sizes';
 import * as i18n from './translations';
 
 interface AlertEpisodeLifecycleHeatmapServices {
@@ -128,9 +129,14 @@ interface HeatmapTableDatum {
 
 export interface AlertEpisodeLifecycleHeatmapProps {
   eventRows: EpisodeEventRow[];
+  /** Renders the title one step smaller, for narrow hosts like the details flyout. */
+  compressed?: boolean;
 }
 
-export const AlertEpisodeLifecycleHeatmap = ({ eventRows }: AlertEpisodeLifecycleHeatmapProps) => {
+export const AlertEpisodeLifecycleHeatmap = ({
+  eventRows,
+  compressed,
+}: AlertEpisodeLifecycleHeatmapProps) => {
   const { euiTheme } = useEuiTheme();
   const { services } = useKibana<AlertEpisodeLifecycleHeatmapServices>();
   const baseTheme = services.charts.theme.useChartsBaseTheme();
@@ -223,7 +229,7 @@ export const AlertEpisodeLifecycleHeatmap = ({ eventRows }: AlertEpisodeLifecycl
       paddingSize="none"
       data-test-subj="alertingV2EpisodeLifecycleHeatmap"
     >
-      <EuiTitle size="xxs">
+      <EuiTitle size={getPanelTitleSize(compressed)}>
         <h2>{i18n.LIFECYCLE_HEATMAP_TITLE}</h2>
       </EuiTitle>
       <EuiSpacer size="m" />
