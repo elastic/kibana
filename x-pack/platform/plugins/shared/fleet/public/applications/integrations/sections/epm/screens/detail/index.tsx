@@ -69,6 +69,11 @@ import { PermissionsError } from '../../../../layouts';
 
 import { wrapTitleWithDeprecated } from '../../components/utils';
 
+import {
+  AWS_ONBOARDING_PACKAGE_NAME,
+  useOnboardingOverride,
+} from '../home/hooks/use_onboarding_override';
+
 import { DeferredAssetsWarning } from './assets/deferred_assets_warning';
 
 import { getInstallPkgRouteOptions } from './utils';
@@ -170,6 +175,7 @@ export function Detail() {
   const userCanInstallPackages = canInstallPackages && permissionCheck?.success;
 
   const services = useStartServices();
+  const { isOnboardingEnabled, navigateToOnboarding, onboardingUrl } = useOnboardingOverride();
   const { spaceId } = useFleetStatus();
   const agentPolicyIdFromContext = getAgentPolicyId();
   // edit readme state
@@ -227,6 +233,15 @@ export function Detail() {
         ? AddIntegrationButtonDisabledReason.MISSING_SECURITY
         : AddIntegrationButtonDisabledReason.MISSING_PRIVILEGES
       : undefined;
+
+  /** The AWS onboarding flow replaces the Fleet add-integration wizard for the AWS package while
+   ** the flag is on. A preselected agent policy stays on the Fleet flow, which is the only one
+   ** that can honour it.
+   */
+  const isAwsOnboardingEntry =
+    isOnboardingEnabled &&
+    packageInfo?.name === AWS_ONBOARDING_PACKAGE_NAME &&
+    !agentPolicyIdFromContext;
 
   const [prereleaseIntegrationsEnabled, setPrereleaseIntegrationsEnabled] = React.useState<
     boolean | undefined
@@ -522,6 +537,12 @@ export function Detail() {
   const handleAddIntegrationPolicyClick = useCallback<ReactEventHandler>(
     (ev) => {
       ev.preventDefault();
+
+      if (isAwsOnboardingEntry) {
+        navigateToOnboarding();
+        return;
+      }
+
       // The object below, given to `createHref` is explicitly accessing keys of `location` in order
       // to ensure that dependencies to this `useCallback` is set correctly (because `location` is mutable)
       const currentPath = history.createHref({
@@ -579,6 +600,8 @@ export function Detail() {
       returnAppId,
       returnPath,
       services.application,
+      isAwsOnboardingEntry,
+      navigateToOnboarding,
     ]
   );
 
@@ -691,13 +714,17 @@ export function Detail() {
                           <EuiFlexItem grow={false}>
                             <AddIntegrationButton
                               disabledReason={addIntegrationDisabledReason}
-                              href={getHref('add_integration_to_policy', {
-                                pkgkey,
-                                ...(integration ? { integration } : {}),
-                                ...(agentPolicyIdFromContext
-                                  ? { agentPolicyId: agentPolicyIdFromContext }
-                                  : {}),
-                              })}
+                              href={
+                                isAwsOnboardingEntry
+                                  ? onboardingUrl
+                                  : getHref('add_integration_to_policy', {
+                                      pkgkey,
+                                      ...(integration ? { integration } : {}),
+                                      ...(agentPolicyIdFromContext
+                                        ? { agentPolicyId: agentPolicyIdFromContext }
+                                        : {}),
+                                    })
+                              }
                               packageName={wrapTitleWithDeprecated({
                                 packageInfo,
                                 integrationInfo,
@@ -743,6 +770,8 @@ export function Detail() {
       integrationInfo,
       handleAddIntegrationPolicyClick,
       onVersionChange,
+      isAwsOnboardingEntry,
+      onboardingUrl,
     ]
   );
 

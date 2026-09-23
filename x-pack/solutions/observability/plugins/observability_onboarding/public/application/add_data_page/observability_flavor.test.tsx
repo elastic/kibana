@@ -28,6 +28,17 @@ jest.mock('@kbn/fleet-plugin/public', () => ({
   useGetSettingsQuery: () => ({ data: undefined }),
 }));
 
+const plainLeftClick = (overrides: Partial<React.MouseEvent> = {}) =>
+  ({
+    button: 0,
+    metaKey: false,
+    altKey: false,
+    ctrlKey: false,
+    shiftKey: false,
+    preventDefault: jest.fn(),
+    ...overrides,
+  } as unknown as React.MouseEvent);
+
 const makeCollectionCard = (groupId: string, memberCount: number) => ({
   id: `collection:${groupId}`,
   name: groupId,
@@ -172,7 +183,33 @@ describe('useObservabilityCuratedCategories', () => {
     const tiles = result.current.flatMap((category) => category.tiles);
     const aws = tiles.find((tile) => tile.id === 'aws');
     expect(aws?.href).toBe('/app/onboarding/aws');
-    expect(aws?.onClick).toBeUndefined();
+
+    const event = plainLeftClick();
+    aws?.onClick?.(event);
+    expect(event.preventDefault).toHaveBeenCalled();
+    expect(services.application.navigateToApp).toHaveBeenCalledWith('onboarding', {
+      path: '/aws',
+      state: { newSession: true },
+    });
+  });
+
+  it('leaves a modified click on the AWS tile to the browser so it opens in a new tab', () => {
+    const services = buildServices({
+      featureFlagValues: { [IS_INGEST_HUB_ONBOARDING_ENABLED]: true },
+    });
+    const { result } = renderHook(
+      () => useObservabilityCuratedCategories({ onOpenCollection: jest.fn() }),
+      {
+        wrapper: createWrapper(services),
+      }
+    );
+    const tiles = result.current.flatMap((category) => category.tiles);
+    const aws = tiles.find((tile) => tile.id === 'aws');
+
+    const event = plainLeftClick({ metaKey: true });
+    aws?.onClick?.(event);
+    expect(event.preventDefault).not.toHaveBeenCalled();
+    expect(services.application.navigateToApp).not.toHaveBeenCalled();
   });
 
   it('wires EPR-backed tiles to the integrations detail page', () => {
