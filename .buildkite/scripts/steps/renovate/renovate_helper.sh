@@ -3,6 +3,9 @@
 set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
+# Renovate generates the lockfile with --ignore-pnpmfile, so bootstrap must be
+# allowed to rewrite pnpm-lock.yaml (CI defaults to --frozen-lockfile).
+export BOOTSTRAP_NO_FROZEN_LOCKFILE=1
 .buildkite/scripts/bootstrap.sh
 
 GH_AW_WORKFLOW_PATH=".github/workflows/validate-agentic-workflow-locks.yml"
@@ -35,13 +38,13 @@ regenerate_gh_aw_locks() {
   gh aw lint
 }
 
-echo --- Deduplicate pnpm-lock.yaml
-cmd="node scripts/deduplicate_dependencies.js && yarn kbn bootstrap && node scripts/deduplicate_dependencies.js"
+echo --- Regenerate pnpm-lock.yaml with .pnpmfile.cjs
+cmd="node scripts/deduplicate_dependencies.js && yarn kbn bootstrap --no-frozen-lockfile --no-prebuilt && node scripts/deduplicate_dependencies.js"
 eval "$cmd"
 
 commit_message_parts=()
 if [[ -n "$(git status --porcelain -- . ':!:config/node.options' ':!config/kibana.yml')" ]]; then
-  commit_message_parts+=("pnpm dedupe")
+  commit_message_parts+=("pnpm lockfile")
 fi
 
 if has_gh_aw_version_change; then

@@ -100,7 +100,6 @@ describe('scripts/generate_plugin', () => {
       "kibana/fooTestPlugin/common/index.js",
       "kibana/fooTestPlugin/kibana.json",
       "kibana/fooTestPlugin/node_modules/.modules.yaml",
-      "kibana/fooTestPlugin/node_modules/.package-map.json",
       "kibana/fooTestPlugin/node_modules/.pnpm-workspace-state-v1.json",
       "kibana/fooTestPlugin/package.json",
       "kibana/fooTestPlugin/pnpm-lock.yaml",

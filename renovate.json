@@ -822,6 +822,7 @@
       "matchDepNames": [
         "@apidevtools/swagger-parser",
         "@redocly/cli",
+        "bump-cli",
         "openapi-types",
         "ajv",
         "ajv-draft-04",

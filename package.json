@@ -11,7 +11,7 @@
     "dashboarding"
   ],
   "private": true,
-  "version": "9.5.4",
+  "version": "9.5.5",
   "branch": "9.5",
   "types": "./kibana.d.ts",
   "tsdocMetadata": "./build/tsdoc-metadata.json",
@@ -75,7 +75,7 @@
   },
   "engines": {
     "node": "24.21.0",
-    "pnpm": "~11.21.0",
+    "pnpm": "~11.27.0",
     "yarn": "1.22.22"
   },
   "resolutions": {
@@ -1510,7 +1510,7 @@
     "mime": "2.6.0",
     "mime-types": "2.1.35",
     "minimatch": "10.2.4",
-    "moment": "2.30.1",
+    "moment": "2.31.0",
     "moment-duration-format": "2.3.2",
     "moment-timezone": "0.6.1",
     "monaco-editor": "0.44.0",
@@ -1851,6 +1851,7 @@
     "@kbn/mock-idp-plugin": "workspace:*",
     "@kbn/mock-idp-utils": "workspace:*",
     "@kbn/moon": "workspace:*",
+    "@kbn/oas-docs": "workspace:*",
     "@kbn/observability-synthetics-test-data": "workspace:*",
     "@kbn/openapi-bundler": "workspace:*",
     "@kbn/openapi-generator": "workspace:*",
@@ -2098,11 +2099,12 @@
     "backport": "11.0.2",
     "browserslist": "4.28.8",
     "buildkite-test-collector": "1.8.1",
+    "bump-cli": "2.10.0",
     "cache-manager": "7.0.0",
     "cache-manager-fs-hash": "2.0.0",
     "callsites": "4.2.0",
     "chance": "1.1.13",
-    "chromedriver": "152.0.2",
+    "chromedriver": "152.0.3",
     "clarify": "2.2.0",
     "clean-webpack-plugin": "4.0.0",
     "cli-progress": "3.12.0",
