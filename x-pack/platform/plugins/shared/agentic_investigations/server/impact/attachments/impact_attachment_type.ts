@@ -32,26 +32,27 @@ const formatImpactForAgent = (data: Impact): string => {
  * `attachment_add` / `attachment_update`. Producers persist the Impact document;
  * nothing in this plugin stamps the attachment onto a conversation yet.
  */
-export const impactAttachmentType: AttachmentTypeDefinition = {
-  id: IMPACT_ATTACHMENT_TYPE,
-  isReadonly: true,
-  validate: (input) => {
-    const result = impactSchema.safeParse(input);
-    if (result.success) {
-      return { valid: true, data: result.data };
-    }
-    return { valid: false, error: result.error.message };
-  },
-  format: (attachment) => ({
-    getRepresentation: () => ({
-      type: 'text',
-      value: formatImpactForAgent(attachment.data as Impact),
+export const impactAttachmentType: AttachmentTypeDefinition<typeof IMPACT_ATTACHMENT_TYPE, Impact> =
+  {
+    id: IMPACT_ATTACHMENT_TYPE,
+    isReadonly: true,
+    validate: (input) => {
+      const result = impactSchema.safeParse(input);
+      if (result.success) {
+        return { valid: true, data: result.data };
+      }
+      return { valid: false, error: result.error.message };
+    },
+    format: (attachment) => ({
+      getRepresentation: () => ({
+        type: 'text',
+        value: formatImpactForAgent(attachment.data),
+      }),
     }),
-  }),
-  getAgentDescription: () =>
-    'Investigation impact is the set of entities (users, hosts, services) an investigation is about.\n\n' +
-    'Rules:\n' +
-    '- Treat entity ids as opaque; do not invent labels or additional entities.\n' +
-    '- Whenever you mention impact in your response, render it inline with ' +
-    '`<render_attachment id="ATTACHMENT_ID" />` (replace ATTACHMENT_ID with the actual id).',
-};
+    getAgentDescription: () =>
+      'Investigation impact is the set of entities (users, hosts, services) an investigation is about.\n\n' +
+      'Rules:\n' +
+      '- Treat entity ids as opaque; do not invent labels or additional entities.\n' +
+      '- Whenever you mention impact in your response, render it inline with ' +
+      '`<render_attachment id="ATTACHMENT_ID" />` (replace ATTACHMENT_ID with the actual id).',
+  };

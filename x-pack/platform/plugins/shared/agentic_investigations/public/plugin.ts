@@ -6,6 +6,7 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { registerImpactAttachmentTypes } from './impact/attachments';
 import { registerImpactPublicStepDefinitions } from './impact/step_types';
 import type {
   AgenticInvestigationsPublicPluginSetup,
@@ -37,13 +38,10 @@ export class AgenticInvestigationsPublicPlugin
 
   start(
     _core: CoreStart,
-    startDeps: AgenticInvestigationsPublicStartDependencies
+    { agentBuilder }: AgenticInvestigationsPublicStartDependencies
   ): AgenticInvestigationsPublicPluginStart {
-    if (startDeps.agentBuilder) {
-      const agentBuilder = startDeps.agentBuilder;
-      void import('./impact/attachments').then(({ registerImpactAttachmentTypes }) => {
-        registerImpactAttachmentTypes(agentBuilder);
-      });
+    if (agentBuilder) {
+      registerImpactAttachmentTypes(agentBuilder);
     }
     return {};
   }
