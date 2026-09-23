@@ -8,7 +8,7 @@
  */
 import { z } from '@kbn/zod/v4';
 import { isEmpty } from 'lodash';
-import { MESSAGE_NON_EMPTY } from '../constants';
+import { MESSAGE_NON_EMPTY, MESSAGE_SCHEMA_MAX_LENGTH } from '../constants';
 
 export const ConfigSchema = z
   .object({
@@ -71,10 +71,14 @@ const responderTypes = z.enum(['team', 'user', 'escalation', 'schedule']);
  */
 export const CreateAlertParamsSchema = z
   .object({
+    /**
+     * The max length here should be 130 according to Opsgenie's docs but we will truncate the message if it is longer than 130
+     * so we'll not impose that limit on the schema otherwise it'll get rejected prematurely (for example after Mustache expansion).
+     */
     message: z
       .string()
       .min(1)
-      .max(130)
+      .max(MESSAGE_SCHEMA_MAX_LENGTH)
       .superRefine((message, ctx) => {
         if (isEmpty(message.trim())) {
           ctx.addIssue({

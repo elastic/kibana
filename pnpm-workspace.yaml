@@ -237,6 +237,7 @@ packages:
   - 'examples/user_profile_examples'
   - 'examples/v8_profiler_examples'
   - 'examples/workflows_extensions_example'
+  - 'oas_docs'
   - 'packages/kbn-api-contracts'
   - 'packages/kbn-babel-preset'
   - 'packages/kbn-capture-oas-snapshot-cli'
@@ -1526,3 +1527,6 @@ packages:
   - 'x-pack/solutions/workplaceai/plugins/workplace_ai_app'
   - 'x-pack/solutions/workplaceai/test'
 # END GENERATED PACKAGES
+
+# Keep a last field entry, because a trailing comment might be removed by some parsers. 
+lockfile: true

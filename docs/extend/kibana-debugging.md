@@ -44,7 +44,7 @@ elastic:
 APM [Real User Monitoring agent](apm-agent-rum-js://reference/index.md) is not available in the {{kib}} distributables, however the agent can be enabled by setting `ELASTIC_APM_ACTIVE` to `true`. flags
 
 ```
-ELASTIC_APM_ACTIVE=true yarn start
+ELASTIC_APM_ACTIVE=true pnpm start
 // activates both Node.js and RUM agent
 ```
 Once the agent is active, it will trace all incoming HTTP requests to {{kib}}, monitor for errors, and collect process-level metrics. The collected data will be sent to the APM Server and is viewable in the APM UI in {{kib}}.
@@ -96,7 +96,7 @@ The easiest and recommended way of running Kibana with the APM agent locally is 
 8. Start Kibana with APM active using:
 
     ```bash
-    yarn start
+    pnpm start
     ```
 
 9. After Kibana starts up, navigate to the APM app, where you should see some transactions.
