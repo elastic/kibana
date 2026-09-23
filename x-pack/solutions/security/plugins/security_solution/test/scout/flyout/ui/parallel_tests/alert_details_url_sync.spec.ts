@@ -10,18 +10,21 @@ import { expect } from '@kbn/scout-security/ui';
 
 const RIGHT = 'right';
 
-// Failing: See https://github.com/elastic/kibana/issues/256433
-spaceTest.describe.skip(
+spaceTest.describe(
   'Expandable flyout state sync',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
     let ruleName: string;
+
+    spaceTest.setTimeout(5 * 60_000);
+
     spaceTest.beforeEach(async ({ browserAuth, apiServices, scoutSpace }) => {
       ruleName = `${CUSTOM_QUERY_RULE.name}_${scoutSpace.id}_${Date.now()}`;
       await apiServices.detectionRule.createCustomQueryRule({
         ...CUSTOM_QUERY_RULE,
         name: ruleName,
       });
+      await apiServices.detectionAlerts.waitForAlerts(ruleName, 1, 120_000);
       await browserAuth.loginAsPlatformEngineer();
     });
 
@@ -36,7 +39,7 @@ spaceTest.describe.skip(
       const urlBeforeAlertDetails = page.url();
       expect(urlBeforeAlertDetails).not.toContain(RIGHT);
 
-      await pageObjects.alertsTablePage.waitForDetectionsAlertsWrapper();
+      await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
       await pageObjects.alertsTablePage.alertsTable.scrollIntoViewIfNeeded();
       await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
 
@@ -47,7 +50,7 @@ spaceTest.describe.skip(
       await expect(headerTitle).toHaveText(ruleName);
 
       await page.reload();
-      await pageObjects.alertsTablePage.waitForDetectionsAlertsWrapper();
+      await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
 
       const urlAfterReload = page.url();
       expect(urlAfterReload).toContain(RIGHT);
