@@ -34,6 +34,23 @@ describe('verdictAccuracy', () => {
     expect(result.score).toBe(1);
   });
 
+  // REAL WORKFLOW SHAPE (smoke4, execution f9ab02c9): the graded output carries
+  // the label as a plain string, e.g. `{"verdict": "true_positive", ...}`.
+  it('accepts the real workflow shape: verdict as a plain string label', async () => {
+    const result = await verdictAccuracy.evaluate(
+      params({ verdict: 'true_positive', executionStatus: 'completed' }, { label: 'true_positive' })
+    );
+    expect(result.score).toBe(1);
+    expect(result.label).toBe('true_positive');
+  });
+
+  it('scores 0 for a mismatched string verdict', async () => {
+    const result = await verdictAccuracy.evaluate(
+      params({ verdict: 'false_positive' }, { label: 'true_positive' })
+    );
+    expect(result.score).toBe(0);
+  });
+
   it('scores 0 on a mismatched verdict', async () => {
     const result = await verdictAccuracy.evaluate(
       params({ verdict: { label: 'false_positive' } }, { label: 'true_positive' })
@@ -58,6 +75,17 @@ describe('payloadConformance', () => {
     },
     executionStatus: 'completed',
   };
+
+  // REAL WORKFLOW SHAPE: label as plain string on `verdict` (summary lives on
+  // the workflow output object; when graded from the emit_result step, the
+  // string label alone satisfies the label check — summary conformance applies
+  // to the object form).
+  it('scores 1 on a string label from the real workflow shape', async () => {
+    const result = await payloadConformance.evaluate(
+      params({ verdict: 'true_positive', executionStatus: 'completed' }, {})
+    );
+    expect(result.score).toBe(1);
+  });
 
   it('scores 1 on an enum label plus present summary', async () => {
     expect((await payloadConformance.evaluate(params(good, {}))).score).toBe(1);
