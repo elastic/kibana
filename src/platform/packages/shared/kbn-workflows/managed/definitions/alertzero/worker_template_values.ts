@@ -52,9 +52,17 @@ export interface RuleTuningWorkerTemplateValues extends ScheduledWorkerTemplateV
 }
 
 /**
- * Fails closed on a field the stored values do not carry. Boot reconcile re-renders installed
- * documents from their persisted values without migrating them, so an un-upgraded copy must stop
- * here rather than ship a workflow whose sweep input reads `undefined`.
+ * Reads one `extras` value, refusing to render when it is missing.
+ *
+ * A missing field would otherwise be substituted as the text `undefined`, and
+ * `min_fp_count: undefined` is valid YAML — so the workflow would install cleanly and then
+ * misbehave at run time.
+ *
+ * Only one caller can reach here with a field missing. On startup the platform re-installs every
+ * managed workflow by passing whatever is stored straight to this template, skipping the schema
+ * check that the settings read and save paths run first. A document written before these settings
+ * existed arrives intact; throwing leaves it that way instead of overwriting it with a broken
+ * render.
  */
 const requireNumericExtra = (
   extras: RuleTuningWorkerTemplateValues['extras'],
@@ -63,7 +71,8 @@ const requireNumericExtra = (
   const value = extras?.[field];
   if (typeof value !== 'number' || !Number.isFinite(value)) {
     throw new Error(
-      `Rule Tuning worker settings are missing "extras.${field}"; the stored values predate it`
+      `Rule Tuning worker settings are missing "extras.${field}". The stored document predates ` +
+        `this setting and has to be reset.`
     );
   }
   return String(value);

@@ -30,9 +30,6 @@ steps:
   # thresholds are per-space Worker settings read off consts.worker_settings, the
   # single place the rendered values live; the sweep keeps its own consts only as
   # fallbacks for a manual run.
-  # `${{ }}` preserves the value's type so the editor does not type-check the
-  # template source against the child's integer bounds, matching how
-  # floor_attack_discovery.yaml forwards its settings.
   - name: run_rule_tuning
     type: workflow.executeAsync
     with:
