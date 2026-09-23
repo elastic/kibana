@@ -277,14 +277,13 @@ export function StreamDetailEnrichmentContentImpl() {
                 initialSize={40}
                 minSize="480px"
                 tabIndex={0}
-                paddingSize="s"
+                paddingSize="m"
                 css={[verticalFlexCss, fullHeightCss]}
               >
                 <EuiFlexGroup
                   direction="column"
                   gutterSize="m"
                   css={css`
-                    padding: ${euiTheme.size.xs} ${euiTheme.size.xxs} ${euiTheme.size.l} 0;
                     height: 100%;
                   `}
                 >
@@ -342,8 +341,15 @@ export function StreamDetailEnrichmentContentImpl() {
                 initialSize={60}
                 minSize="300px"
                 tabIndex={0}
-                paddingSize="m"
-                css={[verticalFlexCss, fullHeightCss]}
+                paddingSize="none"
+                css={[
+                  verticalFlexCss,
+                  fullHeightCss,
+                  // Reduced top padding compensates for the height of the playground tabs.
+                  css`
+                    padding: ${euiTheme.size.s} ${euiTheme.size.base} ${euiTheme.size.base};
+                  `,
+                ]}
               >
                 <MemoSimulationPlayground schemaEditorFields={schemaEditorFields} />
               </EuiResizablePanel>
