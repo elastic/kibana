@@ -75,7 +75,15 @@ If this branch adds or changes the setting, read the implementation on this bran
 git grep -n -- '<setting.key>' HEAD -- '*.ts' '*.tsx'
 ```
 
-For a removal, recover the registration from the merge base. Use `upstream/main` if `origin` is your fork:
+For a removal, recover the registration from the merge base against the same main ref you fetched above.
+
+If `origin` is your fork:
+
+```bash
+git grep -n -- '<setting.key>' "$(git merge-base HEAD upstream/main)" -- '*.ts' '*.tsx'
+```
+
+If `origin` is `elastic/kibana`:
 
 ```bash
 git grep -n -- '<setting.key>' "$(git merge-base HEAD origin/main)" -- '*.ts' '*.tsx'
