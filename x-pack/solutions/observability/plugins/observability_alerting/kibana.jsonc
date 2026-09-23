@@ -11,6 +11,6 @@
     "server": false,
     "requiredPlugins": ["alertingVTwo", "triggersActionsUi"],
     "optionalPlugins": ["nightshiftInvestigations"],
-    "requiredBundles": ["alertingVTwo"],
+    "requiredBundles": ["alertingVTwo", "observability"],
   },
 }
