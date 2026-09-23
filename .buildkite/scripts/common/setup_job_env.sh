@@ -168,19 +168,6 @@ EOF
 
     # Optional: GCS service account credentials for snapshot restoration (e.g. AI Insights)
     export GCS_CREDENTIALS="$(jq -c '.gcsDatasetAccessCredentials // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
-
-    # Optional: shared sandbox-api (mTLS) for suites that execute code.
-    # CI starts Scout directly rather than through an evals profile, so map the block here.
-    # Only the suite whose server config set runs code in the sandbox gets these credentials.
-    if [[ "${EVAL_SERVER_CONFIG_SET:-}" == "evals_nightshift_investigations" &&
-      "$(jq -r 'has("sandbox")' <<<"$KBN_EVALS_CONFIG_JSON")" == "true" ]]; then
-      export SANDBOX_API_HOST="$(jq -r '.sandbox.host // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
-      export SANDBOX_API_PORT="$(jq -r '.sandbox.port // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
-      export SANDBOX_API_KEY="$(jq -r '.sandbox.apiKey // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
-      export SANDBOX_CLIENT_CERT="$(jq -r '.sandbox.ssl.certificate // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
-      export SANDBOX_CLIENT_KEY="$(jq -r '.sandbox.ssl.key // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
-      export SANDBOX_CA_CERT="$(jq -r '.sandbox.ssl.certificateAuthorities // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
-    fi
   fi
 }
 

@@ -318,8 +318,8 @@ Registered in [`evals.suites.json`](../../../../../.buildkite/pipelines/evals/ev
 as `nightshift-investigations`.
 
 - **What runs:** every eval — smoke and trace-only investigations. The ci-prod Vault config must
-  hold the `sandbox` block; `.buildkite/scripts/common/setup_job_env.sh` exports it as
-  `SANDBOX_*`, and Buildkite agents must be able to reach the sandbox-api host.
+  hold the `sandbox` block; `.buildkite/scripts/steps/evals/run_suite.sh` exports it as
+  `SANDBOX_*` for this suite only, and Buildkite agents must be able to reach the sandbox-api host.
 - **On a PR:** add the `evals:nightshift-investigations` label. Without a `models:` label the
   suite uses its pinned `defaultModelGroups` connector; the investigations run the real agent, so
   add a `models:` label to choose which model investigates.
