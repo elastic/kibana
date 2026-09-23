@@ -13,27 +13,13 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
+import { getMitreEntityDisplayName } from '@kbn/security-mitre-attack-common';
 import type { BuildThreatDescription } from './types';
-import type {
-  MitreSubTechnique,
-  MitreTactic,
-  MitreTechnique,
-} from '../../../../../common/detection_engine/mitre/types';
 import ListTreeIcon from './assets/list_tree_icon.svg';
 import * as i18n from './translations';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-
-const lazyMitreConfiguration = () => {
-  /**
-   * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
-   * See https://webpack.js.org/api/module-methods/#magic-comments
-   */
-  return import(
-    /* webpackChunkName: "lazy_mitre_configuration" */
-    '../../../../../common/detection_engine/mitre/mitre_tactics_techniques'
-  );
-};
+import { useMitreConfiguration } from '../../../../common/hooks/mitre/use_mitre_configuration';
 
 const threatEuiFlexGroupStyles = css`
   .euiFlexItem {
@@ -75,36 +61,26 @@ export const ThreatEuiFlexGroup = ({
   'data-test-subj': dataTestSubj = 'threat',
 }: BuildThreatDescription) => {
   const { euiTheme } = useEuiTheme();
-  const [techniquesOptions, setTechniquesOptions] = useState<MitreTechnique[]>([]);
-  const [tacticsOptions, setTacticsOptions] = useState<MitreTactic[]>([]);
-  const [subtechniquesOptions, setSubtechniquesOptions] = useState<MitreSubTechnique[]>([]);
-
-  useEffect(() => {
-    async function getMitre() {
-      const mitreConfig = await lazyMitreConfiguration();
-      setSubtechniquesOptions(mitreConfig.subtechniques);
-      setTechniquesOptions(mitreConfig.techniques);
-      setTacticsOptions(mitreConfig.tactics);
-    }
-    getMitre();
-  }, []);
+  const { tactics, techniques, subtechniques, isLoading, isError } = useMitreConfiguration();
 
   const isMitreAttackUpdatesUIEnabled = useIsExperimentalFeatureEnabled(
     'mitreAttackUpdatesUIEnabled'
   );
 
-  // Wait for the lazy MITRE dataset before deciding an id is unsupported, otherwise
-  // every entry would briefly render a false-positive warning on mount. Also gated
-  // on the feature flag so we don't surface any warnings when it's disabled.
-  const showUnsupportedWarnings = isMitreAttackUpdatesUIEnabled && tacticsOptions.length > 0;
+  // Wait for the MITRE dataset before deciding an id is unsupported, otherwise
+  // every entry would briefly render a false-positive warning on mount. The `tactics.length > 0`
+  // guard handles the case where the managed source hasn't finished populating yet:
+  // `ensureInitialized()` may be false, returning an empty 200 with isLoading:false and
+  // isError:false. Also gated on the feature flag so we don't surface any warnings when
+  // it's disabled.
+  const showUnsupportedWarnings =
+    isMitreAttackUpdatesUIEnabled && !isLoading && !isError && tactics.length > 0;
 
   return (
     <EuiFlexGroup direction="column" data-test-subj={dataTestSubj} css={threatEuiFlexGroupStyles}>
       {threat.map((singleThreat, index) => {
         const threatTactic = singleThreat?.tactic;
-        const tactic = threatTactic
-          ? tacticsOptions.find((t) => t.id === threatTactic.id)
-          : undefined;
+        const tactic = threatTactic ? tactics.find((t) => t.id === threatTactic.id) : undefined;
         const tacticUnsupported = showUnsupportedWarnings && threatTactic != null && tactic == null;
         return (
           <EuiFlexItem key={`${threatTactic?.name ?? 'threat'}-${index}`}>
@@ -116,7 +92,9 @@ export const ThreatEuiFlexGroup = ({
                     href={threatTactic.reference}
                     target="_blank"
                   >
-                    {tactic != null ? tactic.label : `${threatTactic.name} (${threatTactic.id})`}
+                    {tactic != null
+                      ? getMitreEntityDisplayName(tactic)
+                      : getMitreEntityDisplayName(threatTactic)}
                   </EuiLink>
                 </EuiFlexItem>
                 {tacticUnsupported && (
@@ -132,7 +110,7 @@ export const ThreatEuiFlexGroup = ({
                   if (technique == null) {
                     return null;
                   }
-                  const myTechnique = techniquesOptions.find((t) => t.id === technique.id);
+                  const myTechnique = techniques.find((t) => t.id === technique.id);
                   const techniqueUnsupported = showUnsupportedWarnings && myTechnique == null;
                   return (
                     <EuiFlexItem key={myTechnique?.id ?? techniqueIndex}>
@@ -147,8 +125,8 @@ export const ThreatEuiFlexGroup = ({
                             css={techniqueLinkItemStyles}
                           >
                             {myTechnique != null
-                              ? myTechnique.label
-                              : `${technique.name} (${technique.id})`}
+                              ? getMitreEntityDisplayName(myTechnique)
+                              : getMitreEntityDisplayName(technique)}
                           </EuiButtonEmpty>
                         </EuiFlexItem>
                         {techniqueUnsupported && (
@@ -163,7 +141,7 @@ export const ThreatEuiFlexGroup = ({
                             if (subtechnique == null) {
                               return null;
                             }
-                            const mySubtechnique = subtechniquesOptions.find(
+                            const mySubtechnique = subtechniques.find(
                               (t) => t.id === subtechnique.id
                             );
                             const subtechniqueUnsupported =
@@ -184,8 +162,8 @@ export const ThreatEuiFlexGroup = ({
                                       css={techniqueLinkItemStyles}
                                     >
                                       {mySubtechnique != null
-                                        ? mySubtechnique.label
-                                        : `${subtechnique.name} (${subtechnique.id})`}
+                                        ? getMitreEntityDisplayName(mySubtechnique)
+                                        : getMitreEntityDisplayName(subtechnique)}
                                     </EuiButtonEmpty>
                                   </EuiFlexItem>
                                   {subtechniqueUnsupported && (

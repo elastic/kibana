@@ -67,9 +67,10 @@ export const ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW = {
   id: ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  // Bumped for `create_investigation` binding the Worker agent: the investigation
-  // now opens against the same agent that diagnoses, instead of the default.
-  version: 23,
+  // Bumped for `create_investigation` binding the Worker agent (on top of
+  // upstream's own bump to 22): the investigation now opens against the same
+  // agent that diagnoses, instead of the default.
+  version: 24,
   yaml: RULE_TUNING_REVIEW_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 

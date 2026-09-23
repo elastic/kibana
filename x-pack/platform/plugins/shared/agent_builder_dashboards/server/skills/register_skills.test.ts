@@ -35,8 +35,8 @@ describe('registerSkills', () => {
     expect(skill.content).toContain('at least one and at most two of those primary time-series XY');
   });
 
-  it('delegates prettify presentation defaults to the chart author', () => {
-    expect(skill.content).toContain('Improving an Existing Dashboard (Prettify)');
+  it('delegates enhance presentation defaults to the chart author', () => {
+    expect(skill.content).toContain('Improving an Existing Dashboard (Enhance)');
     expect(skill.content).toContain('applyChartRules: true');
     expect(skill.content).toContain('for every existing ES|QL Lens panel');
     expect(skill.content).toContain('preserveESQL: true');
@@ -48,7 +48,7 @@ describe('registerSkills', () => {
     expect(skill.content).not.toContain('CHART RULES FOR');
   });
 
-  it('assesses the dashboard and asks which prettify mode to apply', () => {
+  it('assesses the dashboard and asks which enhance mode to apply', () => {
     expect(skill.content).toContain(
       `Call \`${platformCoreTools.getIndexMapping}\` once per distinct index pattern`
     );
@@ -62,7 +62,7 @@ describe('registerSkills', () => {
     );
   });
 
-  it('separates appearance-only and content prettify modes', () => {
+  it('separates appearance-only and content enhance modes', () => {
     expect(skill.content).toContain('**Appearance mode.** Keep every panel ID');
     expect(skill.content).toContain(
       'Do not add, remove, or recreate panels, add controls, or change queries'

@@ -33,9 +33,12 @@ export const ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW = {
   id: ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  // Bumped for the forwarded `agent_id` input: `yamlTemplate`/`yaml` changes are
-  // invisible to the managed-definition hash, so without this an existing install
-  // keeps the old YAML and the review never receives the Worker's picked agent.
+  // Bumped for two folded-in changes: the `assisted` autonomy value removed and
+  // `reviews_failed` output dropped by upstream, and the forwarded `agent_id` input
+  // added here. `yamlTemplate`/`yaml` changes are invisible to the managed-definition
+  // hash, so without this an existing install keeps the old YAML — stale autonomy
+  // enum, a `reviews_failed` output nothing emits, and no `agent_id` reaching the
+  // review.
   version: 4,
   yaml: ATTACK_DISCOVERY_RUNNER_YAML,
 } as const satisfies ManagedWorkflowDefinition;
@@ -45,8 +48,10 @@ export const ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW = {
   id: ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  // Bumped for the `agent_id` input consumed by `open_investigation`.
-  version: 3,
+  // Bumped for the `agent_id` input consumed by `open_investigation`, on top of
+  // upstream's bump to 4 for the FP/TP verdict and forensics-escalation handoff
+  // changes (#291940, #291942).
+  version: 5,
   yaml: ATTACK_DISCOVERY_REVIEW_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
