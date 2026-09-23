@@ -189,6 +189,18 @@ describe('applyResumeResolution — interrupted copies', () => {
     expect((merged.steps[0] as { interrupted?: true }).interrupted).toBe(true);
   });
 
+  it('clears an inherited mark when the resolving copy is unmarked (failed resume, then a successful retry)', () => {
+    const previous = baseRound({
+      id: 'r',
+      steps: [{ ...toolCallStep('tc1', []), interrupted: true } as ConversationRoundStep],
+    });
+    const next = baseRound({ id: 'r', steps: [toolCallStep('tc1', [{ ok: true }])] });
+    const merged = applyResumeResolution(previous, next, new Map());
+    expect(merged.steps).toHaveLength(1);
+    expect(merged.steps[0]).not.toHaveProperty('interrupted');
+    expect((merged.steps[0] as { results: unknown[] }).results).toEqual([{ ok: true }]);
+  });
+
   it('does not mark when the copy is an unmarked empty return', () => {
     const previous = baseRound({ id: 'r', steps: [toolCallStep('tc1', [])] });
     const next = baseRound({ id: 'r', steps: [toolCallStep('tc1', [])] });

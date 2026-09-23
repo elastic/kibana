@@ -418,6 +418,55 @@ describe('eventsToRounds — interrupted executions', () => {
     expect((byId.get('tc2') as { interrupted?: true }).interrupted).toBeUndefined();
   });
 
+  it('a successful retry after an interrupted resume clears the mark on the resolved call (legacy history)', () => {
+    // Before interrupted executions folded into rounds, a failed resume left the round awaiting
+    // the prompt and the user answered again: exec_0 paused, exec_1 failed, exec_2 completed.
+    const T2 = '2026-01-01T00:02:00.000Z';
+    const pausedTerminal = executionEvents({
+      roundId: 'r1',
+      executionId: 'r1::execution',
+      triggerEventId: 'r1::user_message',
+      triggerType: TimelineTriggerType.userMessage,
+      steps: [toolStep('tc1', [])],
+      outcome: { type: 'prompt_requested', prompts: [] },
+      createdAt: T0,
+    });
+    const terminated = pausedTerminal[pausedTerminal.length - 1] as TimelineEvent & {
+      data: Record<string, unknown>;
+    };
+    terminated.data = { ...terminated.data, state: pauseState(['tc1']) };
+    const [round] = eventsToRounds([
+      userMessage('r1', T0),
+      ...pausedTerminal,
+      promptResponse('r1', 1, 'r1::execution_terminated', T1),
+      ...interruptedExecutionEvents({
+        roundId: 'r1',
+        executionId: 'r1::execution::1',
+        triggerEventId: 'r1::prompt_response::1',
+        triggerType: TimelineTriggerType.promptResponse,
+        steps: [],
+        interruption: { type: 'failed', error: boom },
+        createdAt: T1,
+      }),
+      promptResponse('r1', 2, 'r1::execution_terminated', T2),
+      ...executionEvents({
+        roundId: 'r1',
+        executionId: 'r1::execution::2',
+        triggerEventId: 'r1::prompt_response::2',
+        triggerType: TimelineTriggerType.promptResponse,
+        steps: [toolStep('tc1', [{ ok: true }])],
+        outcome: { type: 'responded', response: { message: 'done' } },
+        createdAt: T2,
+      }),
+    ]);
+    expect(round.status).toBe(ConversationRoundStatus.completed);
+    expect(round.interruption).toBeUndefined();
+    expect(round.response.message).toBe('done');
+    expect(round.steps).toHaveLength(1);
+    expect(round.steps[0]).not.toHaveProperty('interrupted');
+    expect((round.steps[0] as { results: unknown[] }).results).toEqual([{ ok: true }]);
+  });
+
   it('a setup-window failure (no exec_k steps) marks every paused call', () => {
     const pausedTerminal = executionEvents({
       roundId: 'r1',
