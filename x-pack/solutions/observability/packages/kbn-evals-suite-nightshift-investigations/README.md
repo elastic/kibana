@@ -84,9 +84,18 @@ The default [synthetic file](evals/investigation/synthetic.json) contains two pu
 incidents. Their questions contain all evidence and request a sandbox calculation, so no telemetry
 connector, Elasticsearch identity, customer dataset, reference answer or snapshot is required.
 The selected model runs the product manual-investigation route; the runner polls its status and
-reads the saved report and conversation. Raw conversation rounds and tool arguments/results are
-retained without grader-specific formatting or truncation. Each persisted score links the agent's
-conversation trace; the placeholder has a separate evaluator trace.
+reads the saved report and conversation. Scores store the report, execution status, conversation
+round count, and investigation/conversation/trace identifiers. Conversation rounds and tool payloads
+stay in the product conversation and full agent traces rather than being duplicated in each score,
+whose ingestion request has a 5 MiB limit. Acceptance fetches the saved conversation separately and
+checks every round against the exported trace. Each score links the agent's conversation trace;
+the placeholder has a separate evaluator trace.
+
+Reports above 512 KiB are represented in the score by their summary, conclusion and severity,
+with `report_truncated: true`; summary and conclusion are limited to 10,000 characters in that
+fallback. Full report evidence remains available through the investigation and agent trace.
+Independently, error text above 10,000 characters keeps that prefix plus a truncation marker and
+remains an execution failure. Ordinary reports are preserved unchanged.
 
 The `evals_nightshift_investigations` server config extends `evals_tracing` only for `trace-only`.
 It enables the investigation engine, its `streams.significantEventsAvailable` feature flag and
@@ -134,6 +143,14 @@ investigation, conversation and trace IDs for sharing. Inspect them in the evalu
 `?dataset_id=<dataset-id>&example_id=<example-index>&trace_id=<agent-trace-id>`.
 Historical full-grader runs are not acceptance evidence for this runner. Graders, native trace
 metrics, automatic provisioning and generalized CI defaults are deferred.
+
+Known acceptance limitation: Agent Builder replaces non-MCP tool results above its 2 MiB storage
+limit with a preview in the saved conversation, while the execution trace retains the full result.
+The strict trace oracle currently requires exact equality between those representations, so a
+completed investigation with a valid storage preview still fails acceptance. Precise validation of
+that preview is deferred to [#292859](https://github.com/elastic/kibana/issues/292859);
+the suite does not skip the comparison or treat the failure as a pass. This is separate from the
+bounded score representation, which prevents conversation size from overflowing score ingestion.
 
 Stop and restart the managed stack after changing any `SANDBOX_*` variable or certificate/key
 file contents. The native CLI does not detect those startup inputs; automatic freshness detection

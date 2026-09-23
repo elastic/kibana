@@ -171,9 +171,9 @@ export const ensureScout = async ({
   serverConfigSet = 'evals_tracing',
   env,
 }: EnsureScoutOptions): Promise<void> => {
-  const scoutEnv: Record<string, string> = { ...env };
+  const scoutEnv: Record<string, string> = {};
   for (const name of ['NIGHTSHIFT_DATASETS', 'NIGHTSHIFT_CONCURRENCY']) {
-    const value = scoutEnv[name] ?? process.env[name];
+    const value = env?.[name] ?? process.env[name];
     if (value) scoutEnv[name] = value;
   }
   if (gcsCredentials) {

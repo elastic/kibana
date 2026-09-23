@@ -14,7 +14,86 @@ const example = {
   metadata: { case_id: 'timeouts' },
 };
 
-it('executes the manual investigation and preserves the raw report and complete conversation', async () => {
+it('keeps multi-megabyte conversation evidence out of the persisted score output', async () => {
+  const conversation = {
+    rounds: [
+      {
+        trace_id: 'agent-trace',
+        steps: [
+          {
+            type: ConversationRoundStepType.toolCall,
+            results: Array.from({ length: 4 }, () => ({
+              type: ToolResultType.other,
+              data: { content: 'é'.repeat(900_000) },
+            })),
+          },
+        ],
+      },
+    ],
+  };
+  expect(Buffer.byteLength(JSON.stringify(conversation))).toBeGreaterThan(5 * 1024 * 1024);
+  const fetch = jest
+    .fn()
+    .mockResolvedValueOnce({ investigation_id: 'large-investigation' })
+    .mockResolvedValueOnce({
+      status: 'completed',
+      conversation_id: 'large-conversation',
+      conclusion: 'The report remains available.',
+    })
+    .mockResolvedValueOnce(conversation);
+
+  const output = await runInvestigation(fetch, example);
+
+  expect(output).not.toHaveProperty('conversation');
+  expect(output).toMatchObject({
+    investigation_id: 'large-investigation',
+    conversation_id: 'large-conversation',
+    conversation_round_count: 1,
+    traceId: 'agent-trace',
+    structured_report: { conclusion: 'The report remains available.' },
+  });
+  expect(Buffer.byteLength(JSON.stringify(output))).toBeLessThan(1024 * 1024);
+  expect(conversation.rounds[0].steps[0].results[0].data.content).toHaveLength(900_000);
+});
+
+it('bounds an oversized report and failure message while retaining evidence identifiers', async () => {
+  const fetch = jest
+    .fn()
+    .mockResolvedValueOnce({ investigation_id: 'large-report' })
+    .mockResolvedValueOnce({
+      status: 'failed',
+      conversation_id: 'partial-conversation',
+      summary: 'Partial report',
+      conclusion: 'The report is stored on the investigation.',
+      hypotheses: Array.from({ length: 50 }, () => ({
+        candidate: 'é'.repeat(10_000),
+        confidence: 0.5,
+        status: 'investigating',
+      })),
+      error: 'x'.repeat(6 * 1024 * 1024),
+    })
+    .mockRejectedValueOnce(new Error('Workflow unavailable'))
+    .mockResolvedValueOnce({ rounds: [{ trace_id: 'partial-trace', steps: [] }] });
+
+  const output = await runInvestigation(fetch, example);
+
+  expect(output).toMatchObject({
+    investigation_id: 'large-report',
+    conversation_id: 'partial-conversation',
+    traceId: 'partial-trace',
+    workflow_status: 'failed',
+    report_truncated: true,
+    structured_report: {
+      summary: 'Partial report',
+      conclusion: 'The report is stored on the investigation.',
+    },
+  });
+  expect(output.structured_report).not.toHaveProperty('hypotheses');
+  expect(output.execution_error).toBeTruthy();
+  expect(Buffer.byteLength(JSON.stringify(output))).toBeLessThan(1024 * 1024);
+});
+
+it('executes the manual investigation and preserves the report and references to its conversation', async () => {
   const conversation = {
     rounds: [
       {
@@ -60,7 +139,7 @@ it('executes the manual investigation and preserves the raw report and complete 
     workflow_status: 'completed',
     structured_report: { conclusion: 'Synthetic timeouts increased.' },
     traceId: 'agent-trace',
-    conversation,
+    conversation_round_count: 1,
   });
   expect(result.execution_error).toBeUndefined();
 });
@@ -90,7 +169,7 @@ it.each([
       investigation_id: 'failed-investigation',
       conversation_id: 'partial-conversation',
       structured_report: { conclusion: 'Partial evidence' },
-      conversation,
+      conversation_round_count: 1,
       traceId: 'partial-trace',
     });
     const placeholder = await ungradedPlaceholder.evaluate({
@@ -109,6 +188,16 @@ it('reports an investigation start failure as execution evidence', async () => {
     example
   );
   expect(output.execution_error).toBe('Service unavailable');
+  expect(output.investigation_id).toBeUndefined();
+});
+
+it('bounds a start failure even when no investigation was created', async () => {
+  const output = await runInvestigation(
+    jest.fn().mockRejectedValue(new Error('x'.repeat(6 * 1024 * 1024))),
+    example
+  );
+  expect(output.execution_error).toContain('[truncated]');
+  expect(Buffer.byteLength(JSON.stringify(output))).toBeLessThan(1024 * 1024);
   expect(output.investigation_id).toBeUndefined();
 });
 
@@ -160,7 +249,7 @@ it('bounds polling and retains partial conversation evidence when an investigati
       conversation_id: 'slow-conversation',
       workflow_status: 'running',
       traceId: 'partial-trace',
-      conversation: { rounds: [{ trace_id: 'partial-trace', steps: [] }] },
+      conversation_round_count: 1,
       execution_error: 'Investigation did not reach a terminal status within 20 minutes',
     });
   } finally {

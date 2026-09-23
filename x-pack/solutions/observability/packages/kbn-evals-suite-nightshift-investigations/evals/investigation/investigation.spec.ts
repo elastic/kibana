@@ -13,6 +13,7 @@ import { tags } from '@kbn/evals';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { GenAISemConvAttributes } from '@kbn/inference-tracing';
+import type { ConversationRound } from '@kbn/agent-builder-common';
 import { evaluate } from '../../src/evaluate';
 import { loadInvestigationDataset } from './datasets';
 import { ungradedPlaceholder } from './placeholder';
@@ -104,9 +105,14 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: tags.stateful.
           expect(
             output.structured_report?.conclusion || output.structured_report?.summary
           ).toBeTruthy();
-          expect(output.conversation?.rounds.length).toBeGreaterThan(0);
+          const conversation = await fetch<{ rounds: ConversationRound[] }>(
+            `/api/agent_builder/conversations/${encodeURIComponent(output.conversation_id ?? '')}`,
+            { headers: { 'elastic-api-version': '2023-10-31' } }
+          );
+          expect(conversation.rounds.length).toBeGreaterThan(0);
+          expect(conversation.rounds).toHaveLength(output.conversation_round_count ?? 0);
           if (!process.env.NIGHTSHIFT_EXAMPLES_FILE && !process.env.NIGHTSHIFT_DATASET_ID) {
-            assertSuccessfulSandboxCommand(output.conversation?.rounds ?? []);
+            assertSuccessfulSandboxCommand(conversation.rounds);
           }
           expect(output.traceId).toMatch(/^[a-f0-9]{32}$/);
           expect(run.traceId).toBe(output.traceId);
@@ -131,10 +137,9 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: tags.stateful.
           });
           expect(score.evaluator.trace_id).not.toBe(output.traceId);
 
-          const agentTraceIds =
-            output.conversation?.rounds.flatMap(({ trace_id: traceId }) =>
-              typeof traceId === 'string' ? [traceId] : traceId ?? []
-            ) ?? [];
+          const agentTraceIds = conversation.rounds.flatMap(({ trace_id: traceId }) =>
+            typeof traceId === 'string' ? [traceId] : traceId ?? []
+          );
           await expect(async () => {
             const spans = await traceEsClient.search<{ attributes: GenAISemConvAttributes }>({
               index: 'traces-*',
@@ -148,7 +153,7 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: tags.stateful.
                 question: output.query,
                 conversationId: output.conversation_id,
                 systemInstructions,
-                rounds: output.conversation?.rounds ?? [],
+                rounds: conversation.rounds,
               }
             );
           }).toPass({ timeout: 60_000 });
