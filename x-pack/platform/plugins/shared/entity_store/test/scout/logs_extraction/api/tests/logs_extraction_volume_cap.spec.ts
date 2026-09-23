@@ -35,6 +35,7 @@ const HOST_TIMESTAMPS = [
   '2026-06-10T10:04:00Z',
   '2026-06-10T10:05:00Z',
 ];
+const CAP_HOST_NAME_PREFIXES = ['cap-defer-host-', 'cap-drop-host-', 'cap-disabled-host-'] as const;
 
 apiTest.describe('Entity Store volume cap', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
@@ -51,6 +52,30 @@ apiTest.describe('Entity Store volume cap', { tag: ENTITY_STORE_TAGS }, () => {
       ...INTERNAL_HEADERS,
     };
     await clearInstalledEntityStoreDocuments(esClient);
+  });
+
+  apiTest.afterAll(async ({ apiClient, esClient }) => {
+    await esClient.deleteByQuery({
+      index: LOGS_TEST_INDEX,
+      refresh: true,
+      query: {
+        bool: {
+          should: CAP_HOST_NAME_PREFIXES.map((prefix) => ({ prefix: { 'host.name': prefix } })),
+          minimum_should_match: 1,
+        },
+      },
+    });
+    await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+      headers: defaultHeaders,
+      responseType: 'json',
+      body: {
+        logExtraction: {
+          maxLogsPerPage: LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT,
+          maxLogsPerWindow: LOG_EXTRACTION_MAX_LOGS_PER_WINDOW_DEFAULT,
+          maxLogsPerWindowCapBehavior: LOG_EXTRACTION_CAP_BEHAVIOR_DEFAULT,
+        },
+      },
+    });
   });
 
   // Defer: cap fires mid-window — caller uses lastSearchTimestamp to resume

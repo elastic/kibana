@@ -202,6 +202,16 @@ export const installEntityStoreSuite = async ({
   const stopResponse = await stopAllEntityTypes(apiClient, defaultHeaders);
   expect(stopResponse.statusCode).toBe(200);
 
+  const initMaintainersResponse = await apiClient.post(
+    ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_INIT,
+    {
+      headers: internalHeaders,
+      responseType: 'json',
+      body: {},
+    }
+  );
+  expect(initMaintainersResponse.statusCode).toBe(200);
+
   const maintainersResponse = await apiClient.get(
     ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_GET,
     {
