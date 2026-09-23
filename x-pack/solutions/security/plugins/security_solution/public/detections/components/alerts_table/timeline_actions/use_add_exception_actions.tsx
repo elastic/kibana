@@ -13,11 +13,7 @@ import { ACTION_ADD_ENDPOINT_EXCEPTION, ACTION_ADD_EXCEPTION } from '../translat
 import type { AlertTableContextMenuItem } from '../types';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useAlertsPrivileges } from '../../../containers/detection_engine/alerts/use_alerts_privileges';
-
-export const ALERT_EXCEPTION_ACTION_IDS = {
-  addEndpointException: 'add-endpoint-exception-menu-item',
-  addRuleException: 'add-exception-menu-item',
-} as const;
+import { ALERT_EXCEPTION_ACTION_IDS } from '../../../../common/constants/action_ids';
 
 export interface UseExceptionActionProps {
   isEndpointAlert: boolean;

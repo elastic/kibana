@@ -130,12 +130,13 @@ export const registerInternalTools = async ({
     tools.push(createTodoTool({ todoStateManager }));
   }
 
-  // HTTP API introspection/invocation — FF-gated.
-  if (experimentalFeatures.apiTools) {
+  // HTTP API introspection/invocation — always on, except discovery, which is FF-gated.
+  const discoveryEnabled = experimentalFeatures.apiDiscovery;
+  tools.push(createDescribeApiTool({ discoveryEnabled }));
+  tools.push(createDescribeApiTypeTool({ discoveryEnabled }));
+  tools.push(createExecuteApiTool({ selfClient, discoveryEnabled }));
+  if (discoveryEnabled) {
     tools.push(createDiscoverApisTool());
-    tools.push(createDescribeApiTool());
-    tools.push(createDescribeApiTypeTool());
-    tools.push(createExecuteApiTool({ selfClient }));
   }
 
   // run_subagent + send_message + sleep — experimental; reserved for top-level

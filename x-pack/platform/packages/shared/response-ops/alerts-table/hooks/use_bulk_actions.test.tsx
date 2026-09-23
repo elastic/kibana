@@ -279,6 +279,43 @@ describe('bulk action hooks', () => {
       );
     });
 
+    it('should not create attachments when the case owner is unavailable', () => {
+      const getAttachmentsResult = jest.fn();
+      mockOpenExistingCase.mockImplementationOnce(({ getAttachments }) => {
+        getAttachmentsResult(getAttachments({ theCase: { id: caseId } }));
+      });
+
+      const { result } = renderHook(
+        () =>
+          useBulkAddToCaseActions({
+            refresh,
+            clearSelection,
+            http,
+            notifications,
+            casesService: mockCasesService,
+          }),
+        { wrapper }
+      );
+
+      result.current[0].onClick?.(
+        [
+          {
+            _id: 'alert0',
+            _index: 'idx0',
+            data: [],
+            ecs: { _id: 'alert0', _index: 'idx0' },
+          },
+        ],
+        false,
+        jest.fn(),
+        jest.fn(),
+        jest.fn()
+      );
+
+      expect(getAttachmentsResult).toHaveBeenCalledWith([]);
+      expect(mockCasesService.helpers.groupAlertsByRule).not.toHaveBeenCalled();
+    });
+
     it('should not show the bulk actions when the user does not have write access', async () => {
       mockCasesService.helpers.canUseCases = jest
         .fn()
