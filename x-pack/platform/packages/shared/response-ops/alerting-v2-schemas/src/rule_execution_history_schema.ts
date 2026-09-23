@@ -74,8 +74,7 @@ export const listRuleExecutionsRequestSchema = z
     page: queryIntSchema({ min: 1, max: EXECUTION_HISTORY_MAX_RESULT_WINDOW })
       .default(1)
       .describe(`Page number.`),
-    // Allows 0 for count-only reads (per_page=0).
-    per_page: queryIntSchema({ min: 0, max: EXECUTION_HISTORY_MAX_PER_PAGE }) // TODO check if min 0 is correct here, from task: which also gives rule executions a count-only read it does not have today
+    per_page: queryIntSchema({ min: 0, max: EXECUTION_HISTORY_MAX_PER_PAGE })
       .default(EXECUTION_HISTORY_DEFAULT_PER_PAGE)
       .describe(`Number of results per page. Pass 0 for a count-only read.`),
   })
