@@ -88,8 +88,6 @@ const signalTimeRangeSchema = schema.oneOf(
   }
 );
 
-// Derived from the taxonomy rather than re-listed, so a new action cannot be
-// added to the vocabulary and silently stay unconfigurable here.
 const improvementActionSchema = schema.oneOf(
   IMPROVEMENT_ACTIONS.map((action) => schema.literal(action)) as [Type<ImprovementAction>]
 );
@@ -192,7 +190,7 @@ const aiIndexDestSchema = schema.object({
   type: schema.oneOf([schema.literal('data_stream'), schema.literal('index')], {
     meta: {
       description:
-        'The type of the backing store. `data_stream` for a data stream, or `index` for an index or index pattern.',
+        'The type of the backing store. `data_stream` for a data stream, or `index` for an index.',
     },
   }),
   value: schema.string({
@@ -200,7 +198,7 @@ const aiIndexDestSchema = schema.object({
     maxLength: MAX_AI_INDEX_DEST_VALUE_LENGTH,
     meta: {
       description:
-        'The data stream or index (e.g. `ai-index-ds-foo`, `ai-index-idx-foo*`) the AI Index is attached to. Must match `type` and start with `ai-index-ds-` (for `data_stream`) or `ai-index-idx-` (for `index`). System indices are not allowed.',
+        'The data stream or index (e.g. `ai-index-ds-foo`, `ai-index-idx-foo`) the AI Index is attached to. Must name a single data stream or index (no wildcards or comma-separated lists), match `type`, and start with `ai-index-ds-` (for `data_stream`) or `ai-index-idx-` (for `index`). The rest of the value must be a valid AI index id. System indices are not allowed.',
     },
   }),
 });

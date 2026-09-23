@@ -20,8 +20,10 @@ responses:
                   value: FROM support-cases | LIMIT 100
               traces:
                 - type: elastic_agent
-                  value: support_agent
-                  query: FROM traces-* | WHERE agent.id == "support_agent"
+                  value: elastic-ai-agent
+                  query: |-
+                    FROM traces-agent_builder.otel-default
+                    | WHERE attributes.gen_ai.agent.id IN ("elastic-ai-agent")
               date_created: "2026-09-22T12:00:00.000Z"
               date_modified: "2026-09-22T12:00:00.000Z"
   404:

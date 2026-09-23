@@ -6,26 +6,63 @@ responses:
           describeAiIndexResponseExample:
             description: "Example response with a context block for an agent"
             value:
-              response: |
-                AI Index: customer_support
+              response: |-
+                AI index: customer_support
                 Knowledge about customer support cases.
+                Query with ES|QL against: ai-index-ds-customer-support
 
-                Query target: FROM ai-index-ds-customer-support
+                Fields
+                content: text, searchable
+                content.semantic: semantic_text, searchable
+                description: text, searchable
+                tags: keyword, searchable, aggregatable
+                title: text, searchable
+                type: keyword, searchable, aggregatable
 
-                Fields: title (keyword), content (semantic_text), type (keyword), tags (keyword)
+                Semantic fields
+                content.semantic
 
-                Example queries:
-                  FROM ai-index-ds-customer-support | WHERE type == "faq" | LIMIT 10
+                Knowledge item types
+                "faq": 12
+                "runbook": 4
+
+                Tags
+                "billing": 7
+                "password": 5
+
+                Example queries (adapt field names for non-canonical indices)
+
+                Full text search, lexical and semantic fused together (?query)
+                FROM ai-index-ds-customer-support METADATA _id, _index, _score
+                | FORK
+                    ( WHERE MATCH(title, ?query) OR MATCH(description, ?query) OR MATCH(content, ?query) | SORT _score DESC | LIMIT 20 )
+                    ( WHERE MATCH(title.semantic, ?query) OR MATCH(description.semantic, ?query) OR MATCH(content.semantic, ?query) | SORT _score DESC | LIMIT 20 )
+                | FUSE
+                | SORT _score DESC, _id ASC
+                | KEEP title, description, content, type, tags
+                | LIMIT 5
+
+                Filter by knowledge item type and tag (?type, ?tag; tags is multi-valued, so MATCH)
+                FROM ai-index-ds-customer-support
+                | WHERE type == ?type AND MATCH(tags, ?tag)
+                | KEEP title, description, content, type, tags
+                | LIMIT 20
+
+                Count by type
+                FROM ai-index-ds-customer-support
+                | STATS count = COUNT(*) BY type
+                | SORT count DESC
+                | LIMIT 20
   400:
     content:
       application/json:
         examples:
           tooLargeExample:
-            description: "The description response exceeded the size limit"
+            description: "The field metadata for the backing indices exceeded the size limit"
             value:
               statusCode: 400
               error: Bad Request
-              message: "Describe response exceeded the maximum size of 1048576 bytes"
+              message: "Field metadata for the AI index exceeded the maximum allowed size of 20MB. Point the AI index at fewer or smaller indices."
   403:
     content:
       application/json:
@@ -35,7 +72,7 @@ responses:
             value:
               statusCode: 403
               error: Forbidden
-              message: "security_exception: action [indices:admin/mappings/fields/get] is unauthorized"
+              message: "security_exception\n\tRoot causes:\n\t\tsecurity_exception: action [indices:data/read/field_caps] is unauthorized for user [jdoe] with effective roles [viewer] on indices [ai-index-ds-customer-support], this action is granted by the index privileges [read,view_index_metadata,manage,all]"
   404:
     content:
       application/json:

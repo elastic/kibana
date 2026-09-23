@@ -42,7 +42,7 @@ responses:
             value:
               statusCode: 400
               error: Bad Request
-              message: "dest.value 'support-cases' is not allowed: every expression must start with 'ai-index-ds-'"
+              message: "dest.value 'support-cases' is not allowed: it must start with 'ai-index-ds-'"
   409:
     content:
       application/json:
@@ -52,7 +52,7 @@ responses:
             value:
               statusCode: 409
               error: Conflict
-              message: "AI index 'customer_support' is managed and cannot be modified"
+              message: "AI index 'customer_support' is managed and cannot be modified via the API"
 x-codeSamples:
   - lang: curl
     source: |

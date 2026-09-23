@@ -34,7 +34,7 @@ responses:
             value:
               statusCode: 400
               error: Bad Request
-              message: "parsing_exception: line 1:1: mismatched input 'SELECT' expecting {'explain', 'from', 'row', 'show'}"
+              message: "parsing_exception\n\tRoot causes:\n\t\tparsing_exception: line 1:1: mismatched input 'SELECT' expecting {'explain', 'from', 'row', 'show'}"
   403:
     content:
       application/json:
@@ -44,7 +44,7 @@ responses:
             value:
               statusCode: 403
               error: Forbidden
-              message: "security_exception: action [indices:data/read/esql] is unauthorized"
+              message: "security_exception\n\tRoot causes:\n\t\tsecurity_exception: action [indices:data/read/esql] is unauthorized for user [jdoe] with effective roles [viewer] on indices [ai-index-ds-customer-support], this action is granted by the index privileges [read,all]"
 x-codeSamples:
   - lang: curl
     source: |

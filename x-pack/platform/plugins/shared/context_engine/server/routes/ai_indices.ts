@@ -422,10 +422,6 @@ export const registerAiIndexRoutes = ({
               body: listAiIndexResponseSchema,
               description: 'The AI Indices available to the caller in the current space.',
             },
-            403: {
-              body: errorResponseSchema,
-              description: 'Elasticsearch rejected the read; the caller lacks index privileges.',
-            },
           },
         },
         options: {

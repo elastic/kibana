@@ -18,7 +18,7 @@ requestBody:
                 value: FROM support-cases | LIMIT 100
             traces:
               - type: elastic_agent
-                value: support_agent
+                value: elastic-ai-agent
 responses:
   201:
     content:
@@ -37,7 +37,7 @@ responses:
             value:
               statusCode: 400
               error: Bad Request
-              message: "dest.value 'support-cases' is not allowed: every expression must start with 'ai-index-ds-'"
+              message: "dest.value 'support-cases' is not allowed: it must start with 'ai-index-ds-'"
   409:
     content:
       application/json:

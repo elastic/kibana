@@ -33,7 +33,7 @@ responses:
             value:
               statusCode: 409
               error: Conflict
-              message: "AI index 'customer_support' is managed and cannot be modified"
+              message: "AI index 'customer_support' is managed and cannot be modified via the API"
 x-codeSamples:
   - lang: curl
     source: |
