@@ -525,16 +525,20 @@ describe('enable()', () => {
 
     await clientWithBorrowedKey.enableRule({ id: '1' });
 
+    // Asserts the decrypted read succeeded: on the SOC fallback `attributes` would come from a
+    // different fixture, and the test could pass without exercising the borrowed-key path.
+    expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
     expect(rulesClientParams.cloneAPIKey).toHaveBeenCalledWith('Alerting: myType/name');
     expect(rulesClientParams.getAuthenticationAPIKey).not.toHaveBeenCalled();
-    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
       RULE_SAVED_OBJECT_TYPE,
+      '1',
       expect.objectContaining({
         enabled: true,
         apiKey: Buffer.from('cloned:cloned-secret').toString('base64'),
         apiKeyCreatedByUser: false,
       }),
-      expect.anything()
+      { version: '123' }
     );
   });
 
