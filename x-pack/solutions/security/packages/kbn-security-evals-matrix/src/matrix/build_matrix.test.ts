@@ -1151,6 +1151,60 @@ describe('errored-evaluator guard', () => {
     const matrix = buildMatrix(withDatasets(survivingSaturatedOnly, ['SkillInvoked']), guardConfig);
     expect(matrix.proprietary[0].capability?.kind).not.toBe('score');
   });
+
+  // Regression (round-7): the axis dropped columns with no numeric mean BEFORE consulting
+  // the errored-evaluator set, so an outage that left one column scoreless (no numeric mean
+  // at all) was filtered away and another healthy column published the axis alone.
+  it('suppresses the axis when an outage leaves a column with no numeric mean', () => {
+    // Two columns; the first (suite-a) errored its only judged evaluator, so it has no
+    // scores at all; the second (suite-b) scored fine. judgedQuality must not publish
+    // from suite-b alone.
+    const cfg: MatrixConfig = parseMatrixConfig({
+      showOverall: false,
+      columns: [
+        { id: 'broken', label: 'Broken', suites: ['suite-a'] },
+        { id: 'healthy', label: 'Healthy', suites: ['suite-b'] },
+      ],
+      models: [{ id: 'model-partial', label: 'Partial Model' }],
+    });
+    const aggregatedRows: AggregatedModelScores[] = [
+      {
+        modelId: 'model-partial',
+        provider: 'openrouter',
+        suites: [
+          {
+            suiteId: 'suite-a',
+            experimentId: 'e-a',
+            datasets: [
+              {
+                datasetId: 'd-a',
+                datasetName: 'DA',
+                evaluators: [],
+                erroredOutEvaluators: ['Factuality'],
+              },
+            ],
+          },
+          {
+            suiteId: 'suite-b',
+            experimentId: 'e-b',
+            datasets: [
+              {
+                datasetId: 'd-b',
+                datasetName: 'DB',
+                evaluators: [{ evaluatorName: 'Relevance', mean: 0.9, count: 3 }],
+              },
+            ],
+          },
+        ],
+      },
+    ];
+
+    const matrix = buildMatrix(aggregatedRows, cfg);
+    expect(matrix.proprietary[0].judgedQuality).toEqual({
+      kind: 'insufficient-evaluators',
+      evaluators: ['Factuality'],
+    });
+  });
 });
 
 describe('buildMatrix round-4 review findings', () => {

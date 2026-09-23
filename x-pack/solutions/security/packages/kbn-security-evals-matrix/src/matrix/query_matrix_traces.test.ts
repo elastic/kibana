@@ -155,8 +155,10 @@ describe('queryMatrixTraces example fetching', () => {
       0,
       new Map([['openrouter-model-x', ['model-x']]])
     );
-    expect(traces['model-x:example-1']).toBeDefined();
-    expect(traces['openrouter-model-x:example-1']).toEqual(traces['model-x:example-1']);
+    expect(traces['model-x:direct:suite-1:example-1']).toBeDefined();
+    expect(traces['openrouter-model-x:direct:suite-1:example-1']).toEqual(
+      traces['model-x:direct:suite-1:example-1']
+    );
   });
 
   it('arms the legacy fallback when a later response reveals unfiltered scores', async () => {
@@ -215,7 +217,7 @@ describe('queryMatrixTraces example fetching', () => {
     expect(log.warning).not.toHaveBeenCalledWith(
       expect.stringContaining('Trace coverage incomplete')
     );
-    expect(traces['model-x:example-1']).toBeDefined();
+    expect(traces['model-x:direct:suite-1:example-1']).toBeDefined();
   });
 
   it('collects judge verdicts from the raw score documents it reads', async () => {
@@ -425,7 +427,7 @@ describe('queryMatrixTraces example fetching', () => {
       executionId: 'exec-a',
       modelId: 'model-x',
     });
-    expect(Object.keys(traces)).toContain('model-x:example-1');
+    expect(Object.keys(traces)).toContain('model-x:direct:suite-1:example-1');
   });
 
   it('detects an unfiltered (legacy) server and reuses the shared fetch across runs', async () => {
@@ -450,7 +452,7 @@ describe('queryMatrixTraces example fetching', () => {
       traceCache as never
     );
     expect(client.getExampleScores).not.toHaveBeenCalled();
-    expect(traces['model-x:example-1']).toMatchObject({
+    expect(traces['model-x:direct:suite-1:example-1']).toMatchObject({
       scores: { Correctness: 1 },
       repetitions: 1,
     });
@@ -472,7 +474,7 @@ describe('queryMatrixTraces example fetching', () => {
       },
     ];
     const traces = await queryMatrixTraces(client as never, logStub as never, aggregated as never);
-    expect(Object.keys(traces)).toContain('model-x:example-1');
+    expect(Object.keys(traces)).toContain('model-x:direct:suite-1:example-1');
     expect(Object.keys(traces)).not.toContain('model-x:prefix:example-1');
   });
 
@@ -585,6 +587,87 @@ describe('queryMatrixTraces example fetching', () => {
     expect(executions).toEqual(['exec-a', 'exec-b']);
   });
 
+  // Regression (round-7): direct entries were keyed only by (model, example), so two
+  // selected suites reusing an example ID overwrote each other — the last suite processed
+  // won and the other's trace (and reliability reps) vanished.
+  it('keeps per-suite direct cells when two suites reuse an example ID', async () => {
+    const suiteDoc = (suiteId: string): EvaluationScoreDocument =>
+      ({
+        example: { id: 'shared-example' },
+        evaluator: { name: 'Correctness', score: 1 },
+        metadata: { execution_id: `exec-${suiteId}` },
+        task: {
+          model: { id: 'model-x' },
+          output: { steps: [{ type: 'tool_call', tool_id: `tool-${suiteId}` }] },
+          repetition_index: 0,
+        },
+      } as unknown as EvaluationScoreDocument);
+
+    const client = {
+      getExperimentScores: jest.fn(
+        async (_experimentId: string, filters?: { suiteId?: string }) =>
+          [{ example: { id: 'shared-example' } }] as EvaluationScoreDocument[]
+      ),
+      getExampleScores: jest.fn(async (_exampleId: string, filters?: { executionId?: string }) => [
+        suiteDoc(filters?.executionId === 'exec-s2' ? 's2' : 's1'),
+      ]),
+    };
+    const log = { debug: jest.fn(), warning: jest.fn() };
+    const aggregated = [
+      {
+        modelId: 'model-x',
+        suites: [
+          { suiteId: 's1', experimentId: 'exec-s1', datasets: [], evaluators: [] },
+          { suiteId: 's2', experimentId: 'exec-s2', datasets: [], evaluators: [] },
+        ],
+      },
+    ];
+
+    const traces = await queryMatrixTraces(client as never, log as never, aggregated as never);
+
+    expect(traces['model-x:direct:s1:shared-example']).toBeDefined();
+    expect(traces['model-x:direct:s2:shared-example']).toBeDefined();
+    expect(traces['model-x:direct:s1:shared-example'].toolTrail).toEqual(['tool-s1']);
+    expect(traces['model-x:direct:s2:shared-example'].toolTrail).toEqual(['tool-s2']);
+    // No bare (model, example) key may shadow the suite-scoped cells.
+    expect(traces['model-x:shared-example']).toBeUndefined();
+  });
+
+  // Regression (round-7): the server-fetch path populated only repTrails, dropping
+  // repAnswers and pathContract — so a normal --html run without --trace-cache could
+  // not report answer similarity and classified every cell via the legacy prefix
+  // heuristic, even though the same score documents carry all three fields.
+  it('populates repAnswers and pathContract on the server-fetch path, not just the cache path', async () => {
+    const rankableDoc: EvaluationScoreDocument = {
+      example: { id: 'example-1', metadata: { pathContract: 'rankable' } },
+      evaluator: { name: 'Correctness', score: 1 },
+      metadata: { execution_id: 'exec-a' },
+      task: {
+        model: { id: 'model-x' },
+        output: { steps: [{ type: 'tool_call', tool_id: 'search' }] },
+        repetition_index: 0,
+      },
+    } as unknown as EvaluationScoreDocument;
+
+    const client = {
+      getExperimentScores: jest.fn(
+        async () => [{ example: { id: 'example-1' } }] as EvaluationScoreDocument[]
+      ),
+      getExampleScores: jest.fn(async () => [rankableDoc]),
+    };
+    const log = { debug: jest.fn(), warning: jest.fn() };
+    const traces = await queryMatrixTraces(
+      client as never,
+      log as never,
+      aggregatedFor('exec-a') as never
+    );
+
+    const cell = traces['model-x:direct:suite-1:example-1'];
+    expect(cell.repTrails).toEqual([['search']]);
+    expect(cell.pathContract).toBe('rankable');
+    expect(cell.repAnswers).toEqual(['']);
+  });
+
   it('bounds example-fetch concurrency and overlaps work across runs', async () => {
     let inFlight = 0;
     let maxInFlight = 0;
@@ -626,7 +709,7 @@ describe('queryMatrixTraces example fetching', () => {
       log as never,
       aggregatedFor('exec-a') as never
     );
-    expect(Object.keys(traces)).toContain('model-x:example-1');
+    expect(Object.keys(traces)).toContain('model-x:direct:suite-1:example-1');
     expect(log.warning).toHaveBeenCalledWith(expect.stringContaining('Trace coverage incomplete'));
     expect(log.warning).toHaveBeenCalledWith(expect.stringContaining('example-2'));
     expect(log.warning).toHaveBeenCalledWith(expect.stringContaining('model-x'));
@@ -651,7 +734,7 @@ describe('queryMatrixTraces example fetching', () => {
       aggregatedFor('exec-a') as never
     );
     expect(getExampleScores).toHaveBeenCalledTimes(2);
-    expect(Object.keys(traces)).toContain('model-x:example-1');
+    expect(Object.keys(traces)).toContain('model-x:direct:suite-1:example-1');
   });
 
   it('enumerates experiments concurrently in phase 1', async () => {

@@ -9,7 +9,7 @@ import type { Matrix, MatrixRow, MatrixDisplayColumn, TokenCostModel } from './b
 import type { MatrixColumnConfig, MatrixConfig } from './load_matrix_config';
 import type { MatrixProvenance } from './render_matrix';
 import type { MatrixTraceData, MatrixTraceEntry, TraceStep } from './trace_types';
-import { traceKey } from './trace_types';
+import { traceKey, parseDirectTraceKey } from './trace_types';
 
 const REPORT_CSS = `
   :root {
@@ -455,7 +455,10 @@ const renderModelCard = (
               key.startsWith(modelKeyPrefix)
             );
             for (const key of matchingKeys) {
-              const example = key.slice(modelKeyPrefix.length);
+              // Direct example keys are suite-scoped (`model:suite:example`); other
+              // keys (`model:prefix:<p>`, `model:<colId>`) carry the id verbatim.
+              const example =
+                parseDirectTraceKey(key)?.exampleId ?? key.slice(modelKeyPrefix.length);
               // Same bucketing rule as the score path (scoresByPrefixToDatasets): an
               // example belongs to a prefix when it IS the prefix or extends it with a
               // hyphen. A bare startsWith also claims a longer sibling prefix's

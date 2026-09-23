@@ -143,6 +143,31 @@ describe('renderReliabilityHtml', () => {
     expect(html).toContain('uncommitted changes present');
   });
 
+  // Regression (round-7): the provenance line omitted the effective lookback and asOf
+  // cutoff, so a historical artifact could be mistaken for a current-window report.
+  it('discloses the lookback window and asOf cutoff in provenance', () => {
+    const html = renderReliabilityHtml(
+      matrix,
+      {},
+      { lookbackDays: 30, asOf: Date.UTC(2026, 8, 23) }
+    );
+    expect(html).toContain('30-day lookback');
+    expect(html).toContain('as of 2026-09-23 (later runs excluded)');
+  });
+
+  // Regression (round-7): direct trace keys are suite-scoped; two suites reusing an
+  // example ID must yield two cells for the right model, not one garbled cell.
+  it('parses suite-scoped direct trace keys into model and example', () => {
+    const html = renderReliabilityHtml(matrix, {
+      'measured:direct:s1:example-a': { repTrails: [['search'], ['search']] },
+      'measured:direct:s2:example-a': { repTrails: [['search'], ['search']] },
+      'measured:direct:s1:example-b': { repTrails: [['search'], ['load_skill']] },
+    });
+    // Pooled across 3 cells (example-a twice via s1/s2, example-b once): 2 of 3 pairs identical.
+    expect(html).toContain('<strong>67%</strong>');
+    expect(html).toContain('3 pairs');
+  });
+
   describe('judge agreement column', () => {
     const verdict = (
       modelId: string,

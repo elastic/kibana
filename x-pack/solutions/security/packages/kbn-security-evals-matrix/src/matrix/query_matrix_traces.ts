@@ -10,7 +10,7 @@ import type { EvaluationScoreDocument } from '@kbn/evals-common';
 import type { MatrixEvalsClient } from './matrix_evals_client';
 import type { AggregatedModelScores } from './query_matrix_scores';
 import type { MatrixTraceData, MatrixTraceEntry, TraceStep } from './trace_types';
-import { traceKey } from './trace_types';
+import { directTraceKey, parseDirectTraceKey, traceKey } from './trace_types';
 import type { PathContract } from './trajectory_agreement';
 import { answersFromDocs, pathContractFromDocs, trailsFromDocs } from './trajectory_agreement';
 import type { JudgeVerdict } from './judge_agreement';
@@ -215,18 +215,26 @@ export const overlayRepeatedCacheTrails = (
     const sep = combo.indexOf('\0');
     const modelId = combo.slice(0, sep);
     const exampleId = combo.slice(sep + 1);
-    const key = traceKey(modelId, exampleId);
-    const measured = {
-      repTrails: cell.trails,
-      repAnswers: cell.answers,
-      pathContract: cell.pathContract,
-      repExecutionIds: [cell.executionId],
-    };
-    const existing = traces[key];
-    if (existing) {
-      Object.assign(existing, measured);
-    } else {
-      traces[key] = measured;
+    // Overlay onto every suite-scoped direct cell for this (model, example); the
+    // cache keys carry no suite id, so all matching suites receive the reps.
+    const matching = Object.keys(traces).filter((key) => {
+      const parsed = parseDirectTraceKey(key);
+      return parsed && parsed.modelId === modelId && parsed.exampleId === exampleId;
+    });
+    const keys = matching.length > 0 ? matching : [traceKey(modelId, exampleId)];
+    for (const key of keys) {
+      const measured = {
+        repTrails: cell.trails,
+        repAnswers: cell.answers,
+        pathContract: cell.pathContract,
+        repExecutionIds: [cell.executionId],
+      };
+      const existing = traces[key];
+      if (existing) {
+        Object.assign(existing, measured);
+      } else {
+        traces[key] = measured;
+      }
     }
   }
 };
@@ -272,10 +280,23 @@ const processExampleBatch = (
 
   // Only the direct example key carries `repTrails`: the prefix and suite keys
   // alias `entry`, so trails there would be counted once per alias.
+  // The direct key includes the suite id: two selected suites can reuse an example
+  // ID, and a bare (model, example) key would let the last-processed suite's trace
+  // overwrite the other's (losing both an HTML column's trace and reliability reps).
   if (exampleId) {
     const trails = trailsFromDocs(relevant);
-    traces[traceKey(modelId, exampleId)] =
-      trails.length > 0 ? { ...entry, repTrails: trails } : entry;
+    // The reliability path needs answers and the declared path contract alongside
+    // the trails; without them a no-cache run falls back to the legacy prefix
+    // heuristic and cannot report answer similarity (see overlayRepeatedCacheTrails).
+    traces[directTraceKey(modelId, suiteId, exampleId)] =
+      trails.length > 0
+        ? {
+            ...entry,
+            repTrails: trails,
+            repAnswers: answersFromDocs(relevant),
+            pathContract: pathContractFromDocs(relevant),
+          }
+        : entry;
   }
   // One trace per matching category prefix, using the same boundary-dash
   // matching as scoresByPrefixToDatasets. Exact matches are skipped because
@@ -301,9 +322,17 @@ const processExampleBatch = (
       fallbackEntry.scores = exampleScoresByEvaluator(relevant.filter(isCompleteScore));
       const fid = firstComplete.example?.id;
       if (fid) {
-        const trails = trailsFromDocs(relevant.filter(isCompleteScore));
-        traces[traceKey(modelId, fid)] =
-          trails.length > 0 ? { ...fallbackEntry, repTrails: trails } : fallbackEntry;
+        const completeDocs = relevant.filter(isCompleteScore);
+        const trails = trailsFromDocs(completeDocs);
+        traces[directTraceKey(modelId, suiteId, fid)] =
+          trails.length > 0
+            ? {
+                ...fallbackEntry,
+                repTrails: trails,
+                repAnswers: answersFromDocs(completeDocs),
+                pathContract: pathContractFromDocs(completeDocs),
+              }
+            : fallbackEntry;
       }
       if (traces[suiteTraceKey] === undefined) {
         traces[suiteTraceKey] = fallbackEntry;

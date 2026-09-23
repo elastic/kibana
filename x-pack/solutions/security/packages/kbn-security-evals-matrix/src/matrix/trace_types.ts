@@ -56,3 +56,34 @@ export type MatrixTraceData = Record<string, MatrixTraceEntry>;
 
 /** Builds the trace-data lookup key; unambiguous only because config ids are colon-free. */
 export const traceKey = (modelId: string, columnId: string): string => `${modelId}:${columnId}`;
+
+/**
+ * Key for a direct per-example trace cell. Suite-scoped and marked with the
+ * literal `direct` segment: two selected suites can reuse an example ID, so the
+ * (model, example) pair alone is not a unique cell, and unmarked keys already
+ * carry other meanings (`model:prefix:<p>`, `model:<suiteId>`). The parser
+ * splits on colons, so suite and example ids must stay colon-free — the same
+ * constraint `traceKey` already documents for config ids.
+ */
+export const directTraceKey = (modelId: string, suiteId: string, exampleId: string): string =>
+  `${modelId}:direct:${suiteId}:${exampleId}`;
+
+/** Splits a `directTraceKey` back into its model, suite and example ids. */
+export const parseDirectTraceKey = (
+  key: string
+): { modelId: string; suiteId: string; exampleId: string } | undefined => {
+  if (!key.includes(':direct:')) {
+    return undefined;
+  }
+  const first = key.indexOf(':');
+  const second = key.indexOf(':', first + 1);
+  const third = key.indexOf(':', second + 1);
+  if (first < 1 || second < 0 || third < 0) {
+    return undefined;
+  }
+  return {
+    modelId: key.slice(0, first),
+    suiteId: key.slice(second + 1, third),
+    exampleId: key.slice(third + 1),
+  };
+};

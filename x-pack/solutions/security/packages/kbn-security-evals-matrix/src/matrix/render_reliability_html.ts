@@ -8,6 +8,7 @@
 import type { Matrix, MatrixCell, MatrixRow } from './build_matrix';
 import type { MatrixProvenance } from './render_matrix';
 import type { MatrixTraceData } from './trace_types';
+import { parseDirectTraceKey } from './trace_types';
 import {
   judgeAgreementForModel,
   type JudgeAgreementRow,
@@ -48,15 +49,18 @@ export const reliabilityCellsFromTraces = (traces: MatrixTraceData = {}): Trajec
     if (!trace.repTrails) {
       return [];
     }
-    const split = key.indexOf(':');
-    if (split < 1) {
+    // Direct keys are suite-scoped (`model:suite:example`); fall back to the legacy
+    // two-segment shape for data written before the suite segment was added.
+    const parsed = parseDirectTraceKey(key);
+    const model = parsed?.modelId ?? key.slice(0, key.indexOf(':'));
+    const example = parsed?.exampleId ?? key.slice(key.indexOf(':') + 1);
+    if (!model || !example) {
       return [];
     }
-    const example = key.slice(split + 1);
     const { probe, source } = resolveProbe(example, trace.pathContract);
     return [
       {
-        model: key.slice(0, split),
+        model,
         example,
         trails: trace.repTrails,
         answers: trace.repAnswers,
@@ -195,6 +199,10 @@ export const renderReliabilityHtml = (
   const prov = [
     `Generated ${generated}`,
     provenance.branch ? `branch ${provenance.branch}` : undefined,
+    provenance.lookbackDays !== undefined ? `${provenance.lookbackDays}-day lookback` : undefined,
+    provenance.asOf !== undefined
+      ? `as of ${new Date(provenance.asOf).toISOString().slice(0, 10)} (later runs excluded)`
+      : undefined,
     provenance.commitSha ? `commit ${provenance.commitSha}` : undefined,
     provenance.dirtyWorkingTree ? 'uncommitted changes present' : undefined,
   ]

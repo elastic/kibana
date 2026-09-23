@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { traceKey } from './trace_types';
+import { directTraceKey, parseDirectTraceKey, traceKey } from './trace_types';
 
 describe('traceKey', () => {
   it('joins the model and column ids with a colon', () => {
@@ -34,5 +34,26 @@ describe('traceKey', () => {
     ]);
 
     expect(keys.size).toBe(3);
+  });
+});
+
+describe('directTraceKey / parseDirectTraceKey', () => {
+  it('round-trips model, suite and example ids', () => {
+    const key = directTraceKey('model-x', 'suite-1', 'example-1');
+    expect(parseDirectTraceKey(key)).toEqual({
+      modelId: 'model-x',
+      suiteId: 'suite-1',
+      exampleId: 'example-1',
+    });
+  });
+
+  it('keeps the same example under two suites distinct', () => {
+    expect(directTraceKey('m', 's1', 'shared')).not.toBe(directTraceKey('m', 's2', 'shared'));
+  });
+
+  it('does not collide with the prefix-scoped and suite-level two-segment keys', () => {
+    expect(parseDirectTraceKey(traceKey('m', 'prefix:alert'))).toBeUndefined();
+    expect(parseDirectTraceKey(traceKey('m', 'suite-1'))).toBeUndefined();
+    expect(parseDirectTraceKey('no-separator')).toBeUndefined();
   });
 });

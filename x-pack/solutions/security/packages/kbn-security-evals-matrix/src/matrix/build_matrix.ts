@@ -268,40 +268,34 @@ const axisCell = (
   let weightedSum = 0;
   let totalWeight = 0;
   let hasAnyData = false;
-  let suppressed: string[] = [];
   // The axis predicate is the authoritative filter for this aggregation (see
   // `excludeEvaluators` param doc); compute the mean once and skip unmeasured columns.
-  const columnMeans = config.columns
-    .map((column) => ({
-      column,
-      mean: computeColumnMean(modelScores, column, excludeEvaluators, includeEvaluator),
-    }))
-    .filter((entry) => entry.mean !== undefined);
-  for (const { column, mean } of columnMeans) {
-    if (mean === undefined) {
-      return { kind: 'missing' };
-    }
-    hasAnyData = true;
-    // Only evaluators this axis actually scores from can suppress the axis cell; a judged
-    // evaluator outage must not mark the deterministic capability axis unmeasured (and vice
-    // versa), so the errored set is filtered by the same predicate as the mean.
-    suppressed = [
-      ...suppressed,
-      ...columnErroredOutEvaluators(modelScores, column).filter((name) =>
-        includeEvaluator({
-          evaluatorName: name,
-          mean: 0,
-          count: 0,
-        } as AggregatedEvaluatorScore)
-      ),
-    ];
-    const scale = column.scale ?? config.defaultScale;
-    const weight = config.overall.mode === 'weighted' ? column.weight : 1;
-    weightedSum += mean * scale * weight;
-    totalWeight += weight;
-  }
+  // Error checks run BEFORE the undefined-mean filter: an outage that leaves a column
+  // with no numeric mean at all is exactly the case the guard exists for, and filtering
+  // first would let another healthy column publish the axis from partial evidence.
+  const columnEntries = config.columns.map((column) => ({
+    column,
+    mean: computeColumnMean(modelScores, column, excludeEvaluators, includeEvaluator),
+    errored: columnErroredOutEvaluators(modelScores, column).filter((name) =>
+      includeEvaluator({
+        evaluatorName: name,
+        mean: 0,
+        count: 0,
+      } as AggregatedEvaluatorScore)
+    ),
+  }));
+  const suppressed = [...new Set(columnEntries.flatMap((entry) => entry.errored))];
   if (suppressed.length > 0) {
     return { kind: 'insufficient-evaluators', evaluators: suppressed };
+  }
+  for (const { column, mean } of columnEntries) {
+    if (mean !== undefined) {
+      hasAnyData = true;
+      const scale = column.scale ?? config.defaultScale;
+      const weight = config.overall.mode === 'weighted' ? column.weight : 1;
+      weightedSum += mean * scale * weight;
+      totalWeight += weight;
+    }
   }
   if (!hasAnyData || totalWeight === 0) {
     return { kind: 'missing' };
