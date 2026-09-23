@@ -7,24 +7,39 @@
 
 import { schema } from '@kbn/config-schema';
 import { validateEmptyStrings } from '../../../../../validate_empty_strings';
+import {
+  CONNECTOR_CONFIG_KEY_MAX_LENGTH,
+  CONNECTOR_ID_MAX_LENGTH,
+  CONNECTOR_NAME_MAX_LENGTH,
+} from '../../../../..';
 
 export const updateConnectorParamsSchema = schema.object({
   id: schema.string({
+    maxLength: CONNECTOR_ID_MAX_LENGTH,
     meta: { description: 'An identifier for the connector.' },
   }),
 });
 
 const updateConnectorBodyFields = {
   name: schema.string({
+    maxLength: CONNECTOR_NAME_MAX_LENGTH,
     validate: validateEmptyStrings,
     meta: { description: 'The display name for the connector.' },
   }),
-  config: schema.recordOf(schema.string(), schema.any({ validate: validateEmptyStrings }), {
-    defaultValue: {},
-  }),
-  secrets: schema.recordOf(schema.string(), schema.any({ validate: validateEmptyStrings }), {
-    defaultValue: {},
-  }),
+  config: schema.recordOf(
+    schema.string({ maxLength: CONNECTOR_CONFIG_KEY_MAX_LENGTH }),
+    schema.any({ validate: validateEmptyStrings }),
+    {
+      defaultValue: {},
+    }
+  ),
+  secrets: schema.recordOf(
+    schema.string({ maxLength: CONNECTOR_CONFIG_KEY_MAX_LENGTH }),
+    schema.any({ validate: validateEmptyStrings }),
+    {
+      defaultValue: {},
+    }
+  ),
 };
 
 const isInboundEventsEnabledUpdateField = {

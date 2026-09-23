@@ -14,6 +14,7 @@ import { verifyAccessAndContext } from '../../verify_access_and_context';
 import {
   getUpdateConnectorBodySchema,
   updateConnectorBodySchema,
+  updateConnectorParamsSchema,
 } from '../../../../common/routes/connector/apis/update';
 import { createMockConnector } from '../../../application/connector/mocks';
 import { actionsConfigMock } from '../../../actions_config.mock';
@@ -282,6 +283,26 @@ describe('updateConnectorRoute', () => {
     };
     expect(() => updateConnectorBodySchema.validate(body)).toThrowErrorMatchingInlineSnapshot(
       `"[name]: value '' is not valid"`
+    );
+  });
+
+  test('rejects names, ids, and config keys past the max length', () => {
+    expect(() =>
+      updateConnectorBodySchema.validate({
+        name: 'a'.repeat(1025),
+        config: {},
+        secrets: {},
+      })
+    ).toThrow(/maximum length/);
+    expect(() =>
+      updateConnectorBodySchema.validate({
+        name: 'ok',
+        config: { ['a'.repeat(1025)]: true },
+        secrets: {},
+      })
+    ).toThrow(/maximum length/);
+    expect(() => updateConnectorParamsSchema.validate({ id: 'a'.repeat(37) })).toThrow(
+      /maximum length/
     );
   });
 

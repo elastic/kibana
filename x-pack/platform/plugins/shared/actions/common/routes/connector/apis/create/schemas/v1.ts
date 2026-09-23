@@ -6,9 +6,14 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { MAX_CONNECTOR_TYPE_ID_LENGTH } from '@kbn/connector-specs';
 import { validateEmptyStrings } from '../../../../../validate_empty_strings';
 import { validateConnectorId } from '../../../../../validate_connector_id';
-import { CONNECTOR_ID_MAX_LENGTH } from '../../../../..';
+import {
+  CONNECTOR_CONFIG_KEY_MAX_LENGTH,
+  CONNECTOR_ID_MAX_LENGTH,
+  CONNECTOR_NAME_MAX_LENGTH,
+} from '../../../../..';
 
 export const createConnectorRequestParamsSchema = schema.maybe(
   schema.object({
@@ -25,19 +30,29 @@ export const createConnectorRequestParamsSchema = schema.maybe(
 
 const createConnectorRequestBodyFields = {
   name: schema.string({
+    maxLength: CONNECTOR_NAME_MAX_LENGTH,
     validate: validateEmptyStrings,
     meta: { description: 'The display name for the connector.' },
   }),
   connector_type_id: schema.string({
+    maxLength: MAX_CONNECTOR_TYPE_ID_LENGTH,
     validate: validateEmptyStrings,
     meta: { description: 'The type of connector.' },
   }),
-  config: schema.recordOf(schema.string(), schema.any({ validate: validateEmptyStrings }), {
-    defaultValue: {},
-  }),
-  secrets: schema.recordOf(schema.string(), schema.any({ validate: validateEmptyStrings }), {
-    defaultValue: {},
-  }),
+  config: schema.recordOf(
+    schema.string({ maxLength: CONNECTOR_CONFIG_KEY_MAX_LENGTH }),
+    schema.any({ validate: validateEmptyStrings }),
+    {
+      defaultValue: {},
+    }
+  ),
+  secrets: schema.recordOf(
+    schema.string({ maxLength: CONNECTOR_CONFIG_KEY_MAX_LENGTH }),
+    schema.any({ validate: validateEmptyStrings }),
+    {
+      defaultValue: {},
+    }
+  ),
 };
 
 const isInboundEventsEnabledCreateField = {

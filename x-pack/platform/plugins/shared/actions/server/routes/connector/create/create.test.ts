@@ -321,6 +321,33 @@ describe('createConnectorRoute', () => {
     ).toThrowErrorMatchingInlineSnapshot(`"[config.foo]: value '' is not valid"`);
   });
 
+  test('rejects names and config keys past the max length', () => {
+    expect(() =>
+      createConnectorRequestBodySchemaV1.validate({
+        name: 'a'.repeat(1025),
+        connector_type_id: '.webhook',
+        config: {},
+        secrets: {},
+      })
+    ).toThrow(/maximum length/);
+    expect(() =>
+      createConnectorRequestBodySchemaV1.validate({
+        name: 'ok',
+        connector_type_id: 'a'.repeat(65),
+        config: {},
+        secrets: {},
+      })
+    ).toThrow(/maximum length/);
+    expect(() =>
+      createConnectorRequestBodySchemaV1.validate({
+        name: 'ok',
+        connector_type_id: '.webhook',
+        config: { ['a'.repeat(1025)]: 'value' },
+        secrets: {},
+      })
+    ).toThrow(/maximum length/);
+  });
+
   it('rejects create when OAuth URLs fail allowedHosts validation (validation error)', async () => {
     const { handler } = setupRoute();
 
