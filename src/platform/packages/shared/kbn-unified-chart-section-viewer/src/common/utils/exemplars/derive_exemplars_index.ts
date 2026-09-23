@@ -13,11 +13,8 @@ import {
   METRICS_INDEX_PREFIX,
 } from '../../constants';
 
-/**
- * Characters that mark a source as something other than one concrete index: wildcards,
- * comma lists, cross-cluster prefixes (`remote:index`), source selectors
- * (`index::failures`) and whitespace. None of these map onto a single exemplars stream.
- */
+// Wildcards, comma lists, cross-cluster prefixes (`remote:idx`), source selectors
+// (`idx::failures`) and whitespace: none of these name one concrete data stream.
 const NON_CONCRETE_SOURCE_CHARS = ['*', ',', ':', ' ', '\t', '\n', '\r'];
 
 const isConcreteSource = (metricsIndex: string): boolean =>
@@ -39,8 +36,7 @@ export const deriveExemplarsIndex = (metricsIndex: string): string | undefined =
   const suffix = metricsIndex.slice(METRICS_INDEX_PREFIX.length);
   const namespaceSeparatorIndex = suffix.indexOf('-');
 
-  // Require the full `metrics-<dataset>-<namespace>` shape: without a namespace the
-  // derived name cannot match the `exemplars-*.otel-*` template pattern.
+  // Without a namespace the derived name cannot match the `exemplars-*.otel-*` template.
   if (namespaceSeparatorIndex <= 0 || namespaceSeparatorIndex === suffix.length - 1) {
     return undefined;
   }

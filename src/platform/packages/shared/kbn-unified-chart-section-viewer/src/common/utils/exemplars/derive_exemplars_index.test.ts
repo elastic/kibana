@@ -23,13 +23,10 @@ describe('deriveExemplarsIndex', () => {
   });
 
   it('returns undefined for a non-OTel dataset', () => {
-    // `exemplars-system.cpu-default` matches no template and does not exist,
-    // so deriving it would produce a query that 400s.
     expect(deriveExemplarsIndex('metrics-system.cpu-default')).toBeUndefined();
   });
 
   it('returns undefined when the dataset contains but does not end with the .otel marker', () => {
-    // `.includes` would accept `generic.otelfoo`; `.endsWith` correctly rejects it.
     expect(deriveExemplarsIndex('metrics-generic.otelfoo-default')).toBeUndefined();
   });
 

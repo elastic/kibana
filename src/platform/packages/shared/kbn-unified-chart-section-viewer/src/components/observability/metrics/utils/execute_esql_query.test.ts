@@ -119,7 +119,7 @@ describe('executeEsqlQuery', () => {
 
   it('labels the request with the supplied executionContextName', async () => {
     await executeEsqlQuery({
-      esqlQuery: 'FROM exemplars-* | LIMIT 0',
+      esqlQuery: 'FROM exemplars-*.otel-* | STATS BY metric_name',
       search: mockSearch,
       dataView: dataViewWithAtTimefieldMock,
       uiSettings: mockUiSettings,

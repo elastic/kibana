@@ -12,8 +12,7 @@ import type { ParsedMetricItem } from '../../../types';
 import { createExemplarsQuery } from './create_exemplars_query';
 
 const mockMetric: ParsedMetricItem = {
-  // METRICS_INFO returns the `metrics.`-prefixed ES|QL field name. The query builder
-  // strips this prefix when writing the `metric_name` string value in the WHERE clause.
+  // METRICS_INFO returns the `metrics.`-prefixed field name; the builder strips the prefix.
   metricName: 'metrics.http.server.request.duration',
   indexName: 'metrics-generic.otel-default',
   units: ['ms'],
@@ -172,26 +171,11 @@ FROM exemplars-generic.otel-default
     });
   });
 
-  // AC 5: breaking down by a dimension must not change which exemplars are fetched.
-  // `createExemplarsQuery` takes no `splitAccessors`, so the guard is that the emitted
-  // query never carries an aggregation to break down by.
-  describe('AC 5 regression guard: no breakdown reaches the query', () => {
-    it('emits no STATS or BY clause', () => {
-      const query = createExemplarsQuery({ metricItem: mockMetric });
+  it('never aggregates, so a grid breakdown cannot change which exemplars are fetched', () => {
+    const query = createExemplarsQuery({ metricItem: mockMetric });
 
-      expect(query).not.toMatch(/\bSTATS\b/);
-      expect(query).not.toMatch(/\bBY\b/);
-      expect(query).not.toMatch(/\bTBUCKET\b/);
-    });
-
-    it('emits the same query regardless of which dimensions the grid is broken down by', () => {
-      // The grid's breakdown selection lives in `selectedDimensions`, which this builder
-      // deliberately has no parameter for. `dimensionFields` is the metric's declared
-      // dimension set (used only for column projection) and is breakdown-independent.
-      const first = createExemplarsQuery({ metricItem: mockMetric });
-      const second = createExemplarsQuery({ metricItem: mockMetric });
-
-      expect(first).toBe(second);
-    });
+    expect(query).not.toContain('STATS');
+    expect(query).not.toContain(' BY ');
+    expect(query).not.toContain('TBUCKET');
   });
 });
