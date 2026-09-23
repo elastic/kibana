@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
 import {
   CREATE_THREAT_REPORT_API_PATH,
-  MAX_URL_LENGTH,
-  SEVERITY_LEVELS,
+  createThreatReportBodySchema,
+  createThreatReportResponseSchema,
+  CREATE_THREAT_REPORT_MAX_BODY_BYTES,
   type SeverityLevel,
 } from '../../../common/threat_intel';
 import { createThreatReport } from '../services';
@@ -17,35 +17,6 @@ import { resolveCurrentSpaceId } from '../lib/space_filter';
 import { THREAT_INTEL_WRITE_AUTHZ } from './lib/authz';
 import { rejectUntilBootstrapped } from './lib/bootstrap_ready';
 import type { RouteRegistrationDeps } from '.';
-
-// A large bounded plain-text body can exceed Kibana's default 1 MiB body cap.
-// Match the same ceiling used by the extract_iocs route.
-const CREATE_THREAT_REPORT_MAX_BODY_BYTES = 10 * 1024 * 1024;
-
-const createThreatReportBodySchema = schema.object({
-  title: schema.string({ minLength: 1, maxLength: 1024 }),
-  body_text: schema.string({ minLength: 1, maxLength: 5_000_000 }),
-  source_name: schema.string({ minLength: 1, maxLength: 256 }),
-  // Provenance only. Stored as metadata on the supplied report; it is never
-  // fetched. Kibana does not turn this URL into a report.
-  source_url: schema.maybe(
-    schema.uri({
-      scheme: ['http', 'https'],
-      validate: (value) =>
-        value.length > MAX_URL_LENGTH ? `must be ${MAX_URL_LENGTH} characters or fewer` : undefined,
-    })
-  ),
-  severity: schema.maybe(
-    schema.string({
-      maxLength: 32,
-      validate: (value) =>
-        (SEVERITY_LEVELS as readonly string[]).includes(value)
-          ? undefined
-          : `must be one of: ${SEVERITY_LEVELS.join(', ')}`,
-    })
-  ),
-  language: schema.maybe(schema.string({ maxLength: 32 })),
-});
 
 /**
  * Internal route for the `create_threat_report` domain action — the canonical
@@ -73,7 +44,10 @@ export const registerCreateThreatReportRoute = ({
     .addVersion(
       {
         version: '1',
-        validate: { request: { body: createThreatReportBodySchema } },
+        validate: {
+          request: { body: createThreatReportBodySchema },
+          response: { 200: { body: () => createThreatReportResponseSchema } },
+        },
       },
       async (context, request, response) => {
         const notReady = await rejectUntilBootstrapped(getBootstrapReady, response);

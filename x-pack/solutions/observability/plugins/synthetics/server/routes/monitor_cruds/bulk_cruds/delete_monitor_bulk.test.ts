@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { z } from '@kbn/zod';
 import { deleteSyntheticsMonitorBulkRoute } from './delete_monitor_bulk';
 
 jest.mock('../services/delete_monitor_api', () => ({
@@ -25,9 +26,14 @@ const mockRouteContext = () =>
 
 describe('deleteSyntheticsMonitorBulkRoute', () => {
   const route = deleteSyntheticsMonitorBulkRoute();
+  const bodySchema = (route.validation as { request: { body: z.ZodType } }).request.body;
 
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  it('rejects unknown keys so a dry_run typo cannot proceed as a real delete', () => {
+    expect(bodySchema.safeParse({ ids: ['mon-1'], dry_run: true }).success).toBe(false);
   });
 
   it('returns the forbidden response from execute instead of a 200 body', async () => {

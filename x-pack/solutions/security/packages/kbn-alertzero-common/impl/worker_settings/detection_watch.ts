@@ -8,14 +8,14 @@
 /**
  * Detection Watch Worker settings, owned by the Detection Watch team. Adding a Rule Tuning setting
  * means: add the field to `RuleTuningWorkerExtras` in `detection_watch_settings.schema.yaml`, add
- * its default here, forward it in the Rule Tuning workflow template, and build its control in the
- * Watch page's Detection custom settings component. Nothing outside Detection-owned code changes.
+ * its default here, forward it in the Rule Tuning workflow template, and build its control under
+ * the Watch page's `custom_settings/rule_tuning/`. Nothing outside Detection-owned code changes.
  */
 
 import {
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
-  WATCH_AUTONOMY_LEVELS,
+  WATCH_AUTONOMY_REVIEW_GATED,
 } from '../../constants';
 import { RuleTuningWorkerExtras } from '../schemas';
 import type { WorkerSettingsDeclaration } from './types';
@@ -31,12 +31,12 @@ export const RULE_TUNING_DEFAULT_EXTRAS: RuleTuningWorkerExtras = {
 
 export const RULE_TUNING_SETTINGS: WorkerSettingsDeclaration<RuleTuningWorkerExtras> = {
   workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
-  allowedAutonomyLevels: WATCH_AUTONOMY_LEVELS,
+  allowedAutonomyLevels: WATCH_AUTONOMY_REVIEW_GATED,
   scheduleInterval: { defaultValue: '2h' },
   extras: { schema: RuleTuningWorkerExtras, defaultValue: RULE_TUNING_DEFAULT_EXTRAS },
 };
 
 export const RULE_CREATION_SETTINGS: WorkerSettingsDeclaration = {
   workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
-  allowedAutonomyLevels: WATCH_AUTONOMY_LEVELS,
+  allowedAutonomyLevels: WATCH_AUTONOMY_REVIEW_GATED,
 };
