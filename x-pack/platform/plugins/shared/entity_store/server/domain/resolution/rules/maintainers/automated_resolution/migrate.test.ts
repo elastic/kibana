@@ -142,7 +142,7 @@ describe('automated-resolution state migration', () => {
     });
   });
 
-  it('resets the SID watermark on a v2 upgrade and leaves the CrowdStrike rule state in place', () => {
+  it('resets the SID and CrowdStrike watermarks on a v2 upgrade', () => {
     const output = migrate(FIXTURES['v2-sid-backfill'], logger);
 
     expect(output.version).toBe(AUTOMATED_RESOLUTION_STATE_VERSION);
@@ -153,7 +153,7 @@ describe('automated-resolution state migration', () => {
       skippedAmbiguousBuckets: 0,
       ...ZEROED_STATS,
     });
-    expect(output.rules[CROWDSTRIKE_RULE].lastProcessedTimestamp).toBe('2026-09-10T00:00:00Z');
+    expect(output.rules[CROWDSTRIKE_RULE].lastProcessedTimestamp).toBeNull();
   });
 
   it('resets the email watermark once when version is missing from per-rule state', () => {

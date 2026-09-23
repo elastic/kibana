@@ -30,7 +30,7 @@ export interface PerRuleState extends EntityMaintainerState {
 //
 // `version` tracks one-time upgrades of this state blob (see migrate.ts):
 //   2 — reset email watermark
-//   3 — reset SID watermark
+//   3 — reset SID watermarks (windows + CrowdStrike)
 export interface AutomatedResolutionState extends EntityMaintainerState {
   version: number;
   rules: Record<string, PerRuleState>;

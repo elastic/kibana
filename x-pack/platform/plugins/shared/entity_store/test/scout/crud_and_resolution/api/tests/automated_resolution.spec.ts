@@ -861,7 +861,14 @@ apiTest.describe('Automated resolution integration tests', { tag: ENTITY_STORE_T
   apiTest(
     'SID bridge links a local entity created by extraction to Active Directory',
     async ({ apiClient, esClient }) => {
-      await setupLogsTestDataStream(esClient);
+      // Own stream/template so teardown cannot clobber history_snapshot's shared
+      // logs-entity-store-tests-default if this config ever runs with workers > 1.
+      const sidExtractionLogs = {
+        index: 'logs-entity-store-tests-sid-extraction',
+        template: 'entity-store-test-logs-override-sid-extraction',
+        indexPattern: 'logs-entity-store-tests-sid-extraction',
+      };
+      await setupLogsTestDataStream(esClient, sidExtractionLogs);
       try {
         const sid = 'S-1-5-21-111-222-333-1104';
         const userName = 'sidjane';
@@ -870,12 +877,16 @@ apiTest.describe('Automated resolution integration tests', { tag: ENTITY_STORE_T
         const adEntity = `user:${userName}@active_directory`;
         const timestamp = new Date().toISOString();
 
-        await ingestDoc(esClient, {
-          '@timestamp': timestamp,
-          event: { kind: 'event', category: ['authentication'], module: 'system' },
-          user: { name: userName, id: sid },
-          host: { id: hostId, name: 'sid-workstation' },
-        });
+        await ingestDoc(
+          esClient,
+          {
+            '@timestamp': timestamp,
+            event: { kind: 'event', category: ['authentication'], module: 'system' },
+            user: { name: userName, id: sid },
+            host: { id: hostId, name: 'sid-workstation' },
+          },
+          sidExtractionLogs.index
+        );
 
         const fromDateISO = new Date(Date.now() - 60_000).toISOString();
         const toDateISO = new Date(Date.now() + 60_000).toISOString();
@@ -921,7 +932,7 @@ apiTest.describe('Automated resolution integration tests', { tag: ENTITY_STORE_T
         await triggerMaintainerRun(apiClient, internalHeaders);
         await waitForResolution(esClient, localEntity, adEntity);
       } finally {
-        await teardownLogsTestDataStream(esClient);
+        await teardownLogsTestDataStream(esClient, sidExtractionLogs);
       }
     }
   );

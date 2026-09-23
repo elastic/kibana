@@ -76,8 +76,13 @@ const sanitizeRule = (value: unknown, logger: Logger): PerRuleState => {
 
 // 2 — email watermark (case-insensitive match)
 const EMAIL_WATERMARK_RESET_VERSION = 2;
-// 3 — SID watermark (`local` entities created while the rule scanned empty feeders)
-const SID_LOCAL_NAMESPACE_WATERMARK_RESET_VERSION = 3;
+// 3 — SID watermarks: `local` entities created while windows scanned empty
+// feeders, and CrowdStrike same-namespace SID buckets the old guard declined
+const SID_WATERMARK_RESET_VERSION = 3;
+const SID_WATERMARK_RESET_RULE_IDS = [
+  RESOLUTION_RULE_IDS.WINDOWS_SID_BRIDGE,
+  RESOLUTION_RULE_IDS.CROWDSTRIKE_SID_BRIDGE,
+] as const;
 
 const sanitizeRules = (value: unknown, logger: Logger): Record<string, PerRuleState> => {
   if (!isRecord(value)) {
@@ -123,7 +128,6 @@ export function migrate(input: unknown, logger: Logger): AutomatedResolutionStat
 
   const rules = sanitizeRules(source.rules, logger);
   const emailRuleId = RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH;
-  const sidRuleId = RESOLUTION_RULE_IDS.WINDOWS_SID_BRIDGE;
 
   // Move the legacy flat state into the email rule slot — unless it was already
   // migrated, in which case keep the newer progress (idempotent / crash-retry safe).
@@ -144,18 +148,21 @@ export function migrate(input: unknown, logger: Logger): AutomatedResolutionStat
     };
   }
 
-  // The SID rule kept advancing its watermark over empty `windows`/`system`
-  // scans after the IdP gate change. `local` entities created in that window
-  // sit behind it and would never be considered without a one-time reset.
-  if (
-    storedVersion < SID_LOCAL_NAMESPACE_WATERMARK_RESET_VERSION &&
-    Object.hasOwn(rules, sidRuleId)
-  ) {
-    const sidState = rules[sidRuleId];
-    rules[sidRuleId] = {
-      lastProcessedTimestamp: null,
-      lastRun: sanitizeLastRun(sidState.lastRun),
-    };
+  // The SID rules kept advancing their watermarks: windows over empty
+  // `windows`/`system` scans after the IdP gate change, CrowdStrike over
+  // same-namespace SID buckets the old guard declined. Those entities sit
+  // behind the watermark and would never be re-examined without a reset.
+  if (storedVersion < SID_WATERMARK_RESET_VERSION) {
+    for (const ruleId of SID_WATERMARK_RESET_RULE_IDS) {
+      if (!Object.hasOwn(rules, ruleId)) {
+        continue;
+      }
+      const ruleState = rules[ruleId];
+      rules[ruleId] = {
+        lastProcessedTimestamp: null,
+        lastRun: sanitizeLastRun(ruleState.lastRun),
+      };
+    }
   }
 
   return { version: AUTOMATED_RESOLUTION_STATE_VERSION, rules };
