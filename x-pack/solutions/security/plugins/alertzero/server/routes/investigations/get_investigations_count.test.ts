@@ -7,7 +7,7 @@
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { ALERTZERO_THIN_AGENT_ID } from '@kbn/alertzero-common';
+import { TEMPLATE_ID_INVESTIGATION } from '@kbn/alertzero-common';
 import type { RouteDependencies } from '../register_routes';
 import { registerGetInvestigationsCountRoute } from './get_investigations_count';
 
@@ -47,7 +47,7 @@ describe('registerGetInvestigationsCountRoute', () => {
     expect(routeConfig.security.authz.requiredPrivileges).toEqual(['alertzero_read']);
   });
 
-  it('calls client.search with the AlertZero thin agent ID and perPage 1', async () => {
+  it('calls client.search with the investigation template_id filter and perPage 1', async () => {
     const list = jest.fn().mockResolvedValue({ results: [], total: 0 });
     const { handler, conversations } = makeDeps(list);
     const response = httpServerMock.createResponseFactory();
@@ -56,7 +56,10 @@ describe('registerGetInvestigationsCountRoute', () => {
     await handler({}, request, response);
 
     expect(conversations.getScopedClient).toHaveBeenCalledWith({ request });
-    expect(list).toHaveBeenCalledWith({ agentId: ALERTZERO_THIN_AGENT_ID, perPage: 1 });
+    expect(list).toHaveBeenCalledWith({
+      filter: `template_id: "${TEMPLATE_ID_INVESTIGATION}"`,
+      perPage: 1,
+    });
   });
 
   it('returns { total } from the list response', async () => {

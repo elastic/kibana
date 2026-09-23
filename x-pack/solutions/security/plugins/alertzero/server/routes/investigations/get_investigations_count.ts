@@ -7,9 +7,9 @@
 
 import {
   API_VERSIONS,
-  ALERTZERO_THIN_AGENT_ID,
   ALERTZERO_INVESTIGATIONS_COUNT_URL,
   INTERNAL_API_ACCESS,
+  TEMPLATE_ID_INVESTIGATION,
 } from '@kbn/alertzero-common';
 import { ALERTZERO_API_PRIVILEGE_READ } from '../../../common/constants';
 import type { RouteDependencies } from '../register_routes';
@@ -30,7 +30,7 @@ export const registerGetInvestigationsCountRoute = ({
       },
       summary: 'Count AlertZero investigations',
       description:
-        'Returns the number of conversations belonging to the AlertZero thin agent in the current space.',
+        'Returns the number of investigation-templated conversations in the current space.',
     })
     .addVersion(
       { version: API_VERSIONS.internal.v1, validate: false },
@@ -39,7 +39,7 @@ export const registerGetInvestigationsCountRoute = ({
           const conversations = getAgentBuilderConversations();
           const client = await conversations.getScopedClient({ request });
           const { total } = await client.search({
-            agentId: ALERTZERO_THIN_AGENT_ID,
+            filter: `template_id: "${TEMPLATE_ID_INVESTIGATION}"`,
             perPage: 1,
           });
           return response.ok({ body: { total } });
