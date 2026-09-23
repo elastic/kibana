@@ -15,6 +15,10 @@ import type { ParsedMetricItem } from '../../../types';
 
 /** Column holding the exemplar timestamp. Also the sort and time-filter field. */
 const TIMESTAMP_FIELD = '@timestamp';
+/** Shared field storing the OTel metric name (e.g. `http.server.request.duration`). */
+const METRIC_NAME_FIELD = 'metric_name';
+/** Shared field storing the exemplar value, always a double. */
+const VALUE_FIELD = 'value';
 /**
  * Trace correlation columns. `trace_id` and `span_id` are mapped to ECS-compliant
  * equivalents `trace.id` and `span.id`, but referencing the native field names skips
@@ -65,11 +69,11 @@ export function createExemplarsQuery({
 
   // TODO(elasticsearch#154786): swap `FROM <index>` for `TS_EXEMPLARS` when available.
   const query = esql.from(exemplarsIndex);
-  const escapedMetricName = sanitazeESQLInput(metricName);
 
-  // Rows where the metric column is null belong to a different metric in the same
-  // exemplars stream.
-  query.pipe(`WHERE ${escapedMetricName} IS NOT NULL`);
+  // ES stores the OTel metric name in `metric_name` without the `metrics.` mapping
+  // prefix that Kibana's ES|QL field names carry (e.g. `metrics.foo` → `"foo"`).
+  const exemplarMetricName = metricName.replace(/^metrics\./, '').replace(/"/g, '\\"');
+  query.pipe(`WHERE ${METRIC_NAME_FIELD} == "${exemplarMetricName}"`);
 
   for (const statement of whereStatements) {
     const trimmed = statement.trim();
@@ -78,10 +82,11 @@ export function createExemplarsQuery({
     }
   }
 
-  const baseColumns = [TIMESTAMP_FIELD, metricName, TRACE_ID_FIELD, SPAN_ID_FIELD];
+  const baseColumns = [TIMESTAMP_FIELD, METRIC_NAME_FIELD, VALUE_FIELD, TRACE_ID_FIELD, SPAN_ID_FIELD];
   const keepColumns = [
     TIMESTAMP_FIELD,
-    escapedMetricName,
+    METRIC_NAME_FIELD,
+    VALUE_FIELD,
     TRACE_ID_FIELD,
     SPAN_ID_FIELD,
     ...dimensionFields

@@ -12,8 +12,8 @@ import type { ParsedMetricItem } from '../../../types';
 import { createExemplarsQuery } from './create_exemplars_query';
 
 const mockMetric: ParsedMetricItem = {
-  // METRICS_INFO already returns the `metrics.`-prefixed field name, and the exemplars
-  // stream maps the very same field. Prefixing again would produce `metrics.metrics.*`.
+  // METRICS_INFO returns the `metrics.`-prefixed ES|QL field name. The query builder
+  // strips this prefix when writing the `metric_name` string value in the WHERE clause.
   metricName: 'metrics.http.server.request.duration',
   indexName: 'metrics-generic.otel-default',
   units: ['ms'],
@@ -30,8 +30,8 @@ describe('createExemplarsQuery', () => {
     expect(createExemplarsQuery({ metricItem: mockMetric })).toBe(
       `
 FROM exemplars-generic.otel-default
-  | WHERE \`metrics.http.server.request.duration\` IS NOT NULL
-  | KEEP @timestamp, \`metrics.http.server.request.duration\`, trace_id, span_id, \`attributes.http.route\`, \`resource.attributes.service.name\`
+  | WHERE metric_name == "http.server.request.duration"
+  | KEEP @timestamp, metric_name, value, trace_id, span_id, \`attributes.http.route\`, \`resource.attributes.service.name\`
   | SORT @timestamp DESC
   | LIMIT 500
 `.trim()
@@ -52,10 +52,10 @@ FROM exemplars-generic.otel-default
     ).toBe(
       `
 FROM exemplars-generic.otel-default
-  | WHERE \`metrics.http.server.request.duration\` IS NOT NULL
+  | WHERE metric_name == "http.server.request.duration"
   | WHERE attributes.http.route == "/orders"
   | WHERE attributes.http.response.status_code >= 500
-  | KEEP @timestamp, \`metrics.http.server.request.duration\`, trace_id, span_id, \`attributes.http.route\`, \`resource.attributes.service.name\`
+  | KEEP @timestamp, metric_name, value, trace_id, span_id, \`attributes.http.route\`, \`resource.attributes.service.name\`
   | SORT @timestamp DESC
   | LIMIT 500
 `.trim()
@@ -66,8 +66,8 @@ FROM exemplars-generic.otel-default
     expect(createExemplarsQuery({ metricItem: { ...mockMetric, dimensionFields: [] } })).toBe(
       `
 FROM exemplars-generic.otel-default
-  | WHERE \`metrics.http.server.request.duration\` IS NOT NULL
-  | KEEP @timestamp, \`metrics.http.server.request.duration\`, trace_id, span_id
+  | WHERE metric_name == "http.server.request.duration"
+  | KEEP @timestamp, metric_name, value, trace_id, span_id
   | SORT @timestamp DESC
   | LIMIT 500
 `.trim()
@@ -83,35 +83,35 @@ FROM exemplars-generic.otel-default
     ).toBe(
       `
 FROM exemplars-generic.otel-default
-  | WHERE \`metrics.http.server.request.duration\` IS NOT NULL
-  | KEEP @timestamp, \`metrics.http.server.request.duration\`, trace_id, span_id
+  | WHERE metric_name == "http.server.request.duration"
+  | KEEP @timestamp, metric_name, value, trace_id, span_id
   | SORT @timestamp DESC
   | LIMIT 25
 `.trim()
     );
   });
 
-  it('escapes identifiers that contain backticks', () => {
+  it('escapes double quotes in the metric name string value', () => {
     expect(
       createExemplarsQuery({
         metricItem: {
           ...mockMetric,
-          metricName: 'metrics.odd`name',
+          metricName: 'metrics.odd"name',
           dimensionFields: [{ name: 'attributes.odd`dimension' }],
         },
       })
     ).toBe(
       `
 FROM exemplars-generic.otel-default
-  | WHERE \`metrics.odd\`\`name\` IS NOT NULL
-  | KEEP @timestamp, \`metrics.odd\`\`name\`, trace_id, span_id, \`attributes.odd\`\`dimension\`
+  | WHERE metric_name == "odd\\"name"
+  | KEEP @timestamp, metric_name, value, trace_id, span_id, \`attributes.odd\`\`dimension\`
   | SORT @timestamp DESC
   | LIMIT 500
 `.trim()
     );
   });
 
-  it('does not repeat a dimension that collides with a trace correlation column', () => {
+  it('does not repeat a dimension that collides with a shared exemplar column', () => {
     const query = createExemplarsQuery({
       metricItem: {
         ...mockMetric,
@@ -120,7 +120,7 @@ FROM exemplars-generic.otel-default
     });
 
     expect(query).toContain(
-      'KEEP @timestamp, `metrics.http.server.request.duration`, trace_id, span_id, `attributes.http.route`'
+      'KEEP @timestamp, metric_name, value, trace_id, span_id, `attributes.http.route`'
     );
   });
 

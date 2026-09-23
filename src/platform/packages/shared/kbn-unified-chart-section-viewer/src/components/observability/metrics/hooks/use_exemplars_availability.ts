@@ -36,7 +36,10 @@ import { MetricsExecutionContextName } from '../utils/execution_context_enums';
  * TODO(elasticsearch#154786): this is also the natural place to hang the eventual
  * `TS_EXEMPLARS` capability check.
  */
-export const EXEMPLARS_PROBE_QUERY = 'FROM exemplars-*.otel-* | KEEP metrics.* | LIMIT 0';
+// `STATS BY metric_name` returns one row per distinct metric name present in the stream.
+// This replaces the old `KEEP metrics.* | LIMIT 0` column-introspection approach, which
+// depended on per-metric columns that no longer exist after elasticsearch#159849.
+export const EXEMPLARS_PROBE_QUERY = 'FROM exemplars-*.otel-* | STATS BY metric_name';
 
 export interface UseExemplarsAvailabilityParams {
   fetchParams: ChartSectionProps['fetchParams'];
@@ -57,23 +60,12 @@ export interface ExemplarsAvailabilityResult {
    * flight, when the flag is off, and if the probe failed.
    */
   availableMetrics: Set<string>;
-  /**
-   * `true` only when the probe request itself failed. Distinguishes "could not ask"
-   * from "asked and this metric has no exemplars", which should not look like an error.
-   */
-  hasProbeFailed: boolean;
 }
 
-// Module-scope sentinels: consumers rebuild Lens props off these values' identity, so a
+// Module-scope sentinel: consumers rebuild Lens props off this value's identity, so a
 // fresh object per render would re-trigger a rebuild on every render.
 const NOTHING_AVAILABLE: ExemplarsAvailabilityResult = Object.freeze({
   availableMetrics: new Set<string>(),
-  hasProbeFailed: false,
-});
-
-const PROBE_FAILED: ExemplarsAvailabilityResult = Object.freeze({
-  availableMetrics: new Set<string>(),
-  hasProbeFailed: true,
 });
 
 /**
@@ -124,16 +116,15 @@ export const useExemplarsAvailability = ({
         uiSettings,
         profileId,
       });
-      return { availableMetrics, hasProbeFailed: false };
+      return { availableMetrics };
     } catch (error) {
       if (isSuppressedFetchError(error)) {
         // An abort is the normal unmount / refetch path, not a probe failure. Reporting
-        // it would page on navigation, and flagging it would raise the failure warning
-        // for a request nobody was waiting on.
+        // it would page on navigation.
         return undefined;
       }
       reportError({ error, source: 'useFetchExemplars', labels: { profile_id: profileId } });
-      return PROBE_FAILED;
+      return undefined;
     }
   }, [isExemplarsEnabled, dataView, metricItems, search, uiSettings, profileId, reportError]);
 
@@ -211,12 +202,24 @@ const fetchMetricsWithExemplars = async ({
     executionContextName: MetricsExecutionContextName.EXEMPLARS,
   });
 
-  return new Set(extractColumnNames(rawResponse));
+  return new Set(extractMetricNames(rawResponse));
 };
 
-// `ExecuteEsqlResult.rawResponse` is typed as `object`, so narrow before reading columns.
-const hasColumns = (response: object): response is Pick<ESQLSearchResponse, 'columns'> =>
-  Array.isArray((response as Partial<ESQLSearchResponse>).columns);
+const hasColumnsAndValues = (
+  response: object
+): response is Pick<ESQLSearchResponse, 'columns' | 'values'> =>
+  Array.isArray((response as Partial<ESQLSearchResponse>).columns) &&
+  Array.isArray((response as Partial<ESQLSearchResponse>).values);
 
-const extractColumnNames = (response: object): string[] =>
-  hasColumns(response) ? response.columns.map(({ name }) => name) : [];
+// Extracts distinct metric names from the STATS BY probe response and normalises them to
+// the `metrics.*` field-name prefix used in ES|QL (e.g. `"http.server.duration"` →
+// `"metrics.http.server.duration"`) so they match `metricItem.metricName` at call sites.
+const extractMetricNames = (response: object): string[] => {
+  if (!hasColumnsAndValues(response)) return [];
+  const colIdx = response.columns.findIndex(({ name }) => name === 'metric_name');
+  if (colIdx === -1) return [];
+  return response.values
+    .map((row) => row[colIdx])
+    .filter((v): v is string => typeof v === 'string')
+    .map((name) => `metrics.${name}`);
+};

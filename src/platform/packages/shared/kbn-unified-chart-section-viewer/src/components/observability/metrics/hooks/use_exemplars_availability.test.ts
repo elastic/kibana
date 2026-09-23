@@ -41,11 +41,15 @@ const mockUseFeatureFlag = useFeatureFlag as jest.MockedFunction<typeof useFeatu
 
 const TEST_PROFILE_ID = 'metrics-data-source-profile';
 
-const METRICS_WITH_EXEMPLARS = [
-  'metrics.http.server.request.duration',
-  'metrics.orders.created',
-  'metrics.orders.rejected',
+// Raw `metric_name` values as returned by the STATS BY probe (no `metrics.` prefix).
+const METRICS_WITH_EXEMPLARS_RAW = [
+  'http.server.request.duration',
+  'orders.created',
+  'orders.rejected',
 ];
+// Normalised values with the `metrics.` prefix added by the extractor, matching
+// `metricItem.metricName` so the `availableMetrics.has()` guard works correctly.
+const METRICS_WITH_EXEMPLARS = METRICS_WITH_EXEMPLARS_RAW.map((n) => `metrics.${n}`);
 
 const createMockDataView = () =>
   ({
@@ -105,12 +109,12 @@ const createParams = (
  */
 const flushProbe = () => act(async () => new Promise((resolve) => setTimeout(resolve, 0)));
 
-/** Shape of the `LIMIT 0` probe response: column metadata only, no rows. */
-const probeResponse = (columnNames: string[]) => ({
+/** Shape of the `STATS BY metric_name` probe response: one row per distinct metric name. */
+const probeResponse = (metricNames: string[]) => ({
   documents: [],
   rawResponse: {
-    columns: columnNames.map((name) => ({ name, type: 'double' })),
-    values: [],
+    columns: [{ name: 'metric_name', type: 'keyword' }],
+    values: metricNames.map((name) => [name]),
   },
   requestParams: { query: EXEMPLARS_PROBE_QUERY },
 });
@@ -146,7 +150,6 @@ describe('useExemplarsAvailability', () => {
 
       await flushProbe();
       expect(result.current.availableMetrics.size).toBe(0);
-      expect(result.current.hasProbeFailed).toBe(false);
     });
   });
 
@@ -159,19 +162,18 @@ describe('useExemplarsAvailability', () => {
     expect(mockUseFeatureFlag).toHaveBeenCalledWith(FEATURE_FLAGS.IS_EXEMPLARS_ENABLED, false);
   });
 
-  it('populates availableMetrics from the probe response columns', async () => {
-    mockExecuteEsqlQuery.mockResolvedValue(probeResponse(METRICS_WITH_EXEMPLARS));
+  it('populates availableMetrics from the probe response rows, normalised with metrics. prefix', async () => {
+    mockExecuteEsqlQuery.mockResolvedValue(probeResponse(METRICS_WITH_EXEMPLARS_RAW));
     const params = createParams();
 
     const { result } = renderHook(() => useExemplarsAvailability(params));
 
     await waitFor(() => expect(result.current.availableMetrics.size).toBe(3));
     expect([...result.current.availableMetrics]).toEqual(METRICS_WITH_EXEMPLARS);
-    expect(result.current.hasProbeFailed).toBe(false);
   });
 
-  it('sends the wildcard column probe without a time range or filters', async () => {
-    mockExecuteEsqlQuery.mockResolvedValue(probeResponse(METRICS_WITH_EXEMPLARS));
+  it('sends the STATS BY metric_name probe without a time range or filters', async () => {
+    mockExecuteEsqlQuery.mockResolvedValue(probeResponse(METRICS_WITH_EXEMPLARS_RAW));
     const params = createParams();
 
     renderHook(() => useExemplarsAvailability(params));
@@ -179,7 +181,7 @@ describe('useExemplarsAvailability', () => {
     await flushProbe();
     expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
     expect(mockExecuteEsqlQuery).toHaveBeenCalledWith({
-      esqlQuery: 'FROM exemplars-*.otel-* | KEEP metrics.* | LIMIT 0',
+      esqlQuery: 'FROM exemplars-*.otel-* | STATS BY metric_name',
       search: params.services.data.search.search,
       dataView: params.fetchParams.dataView,
       uiSettings: params.services.uiSettings,
@@ -195,7 +197,6 @@ describe('useExemplarsAvailability', () => {
     const { result } = renderHook(() => useExemplarsAvailability(params));
 
     expect(result.current.availableMetrics.size).toBe(0);
-    expect(result.current.hasProbeFailed).toBe(false);
   });
 
   it('reports nothing as available when the probe returns no metric columns', async () => {
@@ -207,7 +208,6 @@ describe('useExemplarsAvailability', () => {
     await flushProbe();
     expect(mockExecuteEsqlQuery).toHaveBeenCalled();
     expect(result.current.availableMetrics.size).toBe(0);
-    expect(result.current.hasProbeFailed).toBe(false);
   });
 
   it('does not request the probe when there is no data view', async () => {
@@ -240,15 +240,14 @@ describe('useExemplarsAvailability', () => {
   describe('when the probe fails', () => {
     const probeError = new Error('verification_exception: Unknown index');
 
-    it('flags the failure, reports it to APM and does not throw', async () => {
+    it('reports the failure to APM and does not throw', async () => {
       mockExecuteEsqlQuery.mockRejectedValue(probeError);
       const params = createParams();
 
       const { result } = renderHook(() => useExemplarsAvailability(params));
 
-      await waitFor(() => expect(result.current.hasProbeFailed).toBe(true));
+      await waitFor(() => expect(mockReportError).toHaveBeenCalledTimes(1));
       expect(result.current.availableMetrics.size).toBe(0);
-      expect(mockReportError).toHaveBeenCalledTimes(1);
       expect(mockReportError).toHaveBeenCalledWith({
         error: probeError,
         source: 'useFetchExemplars',
@@ -259,12 +258,12 @@ describe('useExemplarsAvailability', () => {
     it('evicts the cache so a later mount retries', async () => {
       mockExecuteEsqlQuery
         .mockRejectedValueOnce(probeError)
-        .mockResolvedValueOnce(probeResponse(METRICS_WITH_EXEMPLARS));
+        .mockResolvedValueOnce(probeResponse(METRICS_WITH_EXEMPLARS_RAW));
       const firstParams = createParams();
       const secondParams = createParams();
 
-      const first = renderHook(() => useExemplarsAvailability(firstParams));
-      await waitFor(() => expect(first.result.current.hasProbeFailed).toBe(true));
+      renderHook(() => useExemplarsAvailability(firstParams));
+      await waitFor(() => expect(mockReportError).toHaveBeenCalledTimes(1));
 
       const second = renderHook(() => useExemplarsAvailability(secondParams));
       await waitFor(() => expect(second.result.current.availableMetrics.size).toBe(3));
@@ -286,12 +285,12 @@ describe('useExemplarsAvailability', () => {
       await flushProbe();
       expect(mockExecuteEsqlQuery).toHaveBeenCalled();
       expect(mockReportError).not.toHaveBeenCalled();
-      expect(result.current.hasProbeFailed).toBe(false);
+      expect(result.current.availableMetrics.size).toBe(0);
     });
   });
 
   it('deduplicates the probe across concurrent mounts', async () => {
-    mockExecuteEsqlQuery.mockResolvedValue(probeResponse(METRICS_WITH_EXEMPLARS));
+    mockExecuteEsqlQuery.mockResolvedValue(probeResponse(METRICS_WITH_EXEMPLARS_RAW));
     const firstParams = createParams();
     const secondParams = createParams();
 
