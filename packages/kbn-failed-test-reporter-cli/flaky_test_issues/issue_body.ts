@@ -44,8 +44,6 @@ const MAX_TITLE_LENGTH = 256;
 
 export interface FlakySuiteIssueContext {
   report: FlakyTestReport;
-  /** Dashboard with the live numbers, linked under the tests table when given. */
-  dashboardUrl?: string;
   /** Numbers of issues that mention the suite's file without being about it. */
   relatedIssues?: number[];
 }
@@ -164,15 +162,6 @@ const opening = (suite: FlakySuite): string => {
     `${plural(count, 'test')} in the ${inlineCode(subject)} suite ` +
     `${count === 1 ? 'appears' : 'appear'} to be flaky:`
   );
-};
-
-/** Remarks under the tests table, only when they apply. */
-const notes = (suite: FlakySuite, ctx: FlakySuiteIssueContext): string | undefined => {
-  const lines = [
-    skippedNote(suite),
-    ctx.dashboardUrl && `[Dashboard with latest stats](${ctx.dashboardUrl}).`,
-  ].filter((line): line is string => typeof line === 'string');
-  return lines.length > 0 ? lines.join(' ') : undefined;
 };
 
 const blobLink = (repoRelativePath: string): string =>
@@ -356,11 +345,11 @@ export const renderFlakySuiteIssueBody = (
   const sections = [
     opening(suite),
     testsTable(suite.tests, {
-      withTestId: true,
+      withDashboardLinks: true,
       maxRows: MAX_TEST_ROWS,
       minFailRate: ctx.report.thresholds.minFailRate,
     }),
-    notes(suite, ctx),
+    skippedNote(suite),
     '### Suite',
     suiteDetails(suite),
     '### Failures',

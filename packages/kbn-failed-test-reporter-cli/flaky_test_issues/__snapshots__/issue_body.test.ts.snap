@@ -3,11 +3,11 @@
 exports[`renderFlakySuiteIssueBody renders a multi-test suite with distinct failures, a skipped note and related issues 1`] = `
 "3 tests in the \`Default status alert\` suite appear to be flaky:
 
-| Test | Flaky rate by branch | Test ID |
+| Test | Flaky rate by branch | Dashboard |
 |---|---|---|
-| does not keep a hidden histogram after visiting Dashboard | **\`main\` 10% (20 / 200)**<br>**\`9.2\` 5% (3 / 64)** | a |
-| reverts breakdown, interval, and visibility on a saved session | **\`main\` 10% (49 / 509)** | b |
-| persists hide/show of the histogram on a saved session | **\`main\` 10% (49 / 509)** | c |
+| does not keep a hidden histogram after visiting Dashboard | **\`main\` 10% (20 / 200)**<br>**\`9.2\` 5% (3 / 64)** | [dashboard](https://appex-qa.kb.europe-west1.gcp.cloud.es.io/s/scout/app/dashboards#/view/a06c26f6-23ac-479d-acb5-5a8b234793a8?_g=(filters:!((meta:(alias:'Test%20ID',disabled:!f,negate:!f),query:(bool:(must:!((match_phrase:(test.id:'a'))))))))) |
+| reverts breakdown, interval, and visibility on a saved session | **\`main\` 10% (49 / 509)** | [dashboard](https://appex-qa.kb.europe-west1.gcp.cloud.es.io/s/scout/app/dashboards#/view/a06c26f6-23ac-479d-acb5-5a8b234793a8?_g=(filters:!((meta:(alias:'Test%20ID',disabled:!f,negate:!f),query:(bool:(must:!((match_phrase:(test.id:'b'))))))))) |
+| persists hide/show of the histogram on a saved session | **\`main\` 10% (49 / 509)** | [dashboard](https://appex-qa.kb.europe-west1.gcp.cloud.es.io/s/scout/app/dashboards#/view/a06c26f6-23ac-479d-acb5-5a8b234793a8?_g=(filters:!((meta:(alias:'Test%20ID',disabled:!f,negate:!f),query:(bool:(must:!((match_phrase:(test.id:'c'))))))))) |
 
 Latest run on \`main\` was skipped (2026-09-09).
 
@@ -51,14 +51,12 @@ Possibly related: #7, #8.
 <!-- kibanaCiData = {\\"flaky-test-suite\\":{\\"suite.filePath\\":\\"x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/default_status_alert.spec.ts\\",\\"suite.title\\":\\"Default status alert\\",\\"suite.framework\\":\\"playwright\\",\\"suite.testIds\\":[\\"a\\",\\"b\\",\\"c\\"],\\"report.generatedAt\\":\\"2026-09-09T09:04:41.000Z\\",\\"report.count\\":1,\\"report.history\\":[{\\"generatedAt\\":\\"2026-09-09T09:04:41.000Z\\",\\"builds\\":264,\\"failedBuilds\\":23}]}} -->"
 `;
 
-exports[`renderFlakySuiteIssueBody renders a single-test suite with a dashboard link 1`] = `
+exports[`renderFlakySuiteIssueBody renders a single-test suite 1`] = `
 "1 test in the \`Default status alert\` suite appears to be flaky:
 
-| Test | Flaky rate by branch | Test ID |
+| Test | Flaky rate by branch | Dashboard |
 |---|---|---|
-| creates default alert, triggers on down status, and recovers | **\`main\` 10% (49 / 509)** | playwright:default_status_alert:creates default alert |
-
-[Dashboard with latest stats](https://dashboard.example).
+| creates default alert, triggers on down status, and recovers | **\`main\` 10% (49 / 509)** | [dashboard](https://appex-qa.kb.europe-west1.gcp.cloud.es.io/s/scout/app/dashboards#/view/a06c26f6-23ac-479d-acb5-5a8b234793a8?_g=(filters:!((meta:(alias:'Test%20ID',disabled:!f,negate:!f),query:(bool:(must:!((match_phrase:(test.id:'playwright:default_status_alert:creates%20default%20alert'))))))))) |
 
 ### Suite
 

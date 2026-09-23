@@ -14,6 +14,7 @@ import {
   formatFailureMessage,
   formatBranchRates,
   formatPercent,
+  testDashboardUrl,
   testsTable,
 } from './markdown';
 import { flakyTest } from './test_fixtures';
@@ -76,21 +77,36 @@ describe('formatBranchRates', () => {
   });
 });
 
+describe('testDashboardUrl', () => {
+  it('filters the Scout dashboard on the test id, as a rison string', () => {
+    expect(testDashboardUrl('06fc533cda37130-a089b9a7d2f8995')).toBe(
+      "https://appex-qa.kb.europe-west1.gcp.cloud.es.io/s/scout/app/dashboards#/view/a06c26f6-23ac-479d-acb5-5a8b234793a8?_g=(filters:!((meta:(alias:'Test%20ID',disabled:!f,negate:!f),query:(bool:(must:!((match_phrase:(test.id:'06fc533cda37130-a089b9a7d2f8995'))))))))"
+    );
+    // quotes and bangs are rison-escaped, spaces URL-encoded
+    expect(testDashboardUrl("it's a test!")).toContain("test.id:'it!'s%20a%20test!!'");
+  });
+});
+
 describe('testsTable', () => {
   it('caps the rows and says how many tests are left', () => {
     const tests = Array.from({ length: 4 }, (_, index) =>
       flakyTest({ testId: `t${index}`, title: `test | ${index}` })
     );
-    const rendered = testsTable(tests, { withTestId: true, maxRows: 2, minFailRate: 0.03 });
+    const rendered = testsTable(tests, {
+      withDashboardLinks: true,
+      maxRows: 2,
+      minFailRate: 0.03,
+    });
 
     expect(rendered.split('\n')).toHaveLength(6);
-    expect(rendered).toContain('| Test | Flaky rate by branch | Test ID |');
-    expect(rendered).toContain('| test \\| 0 | **`main` 10% (49 / 509)** | t0 |');
-    expect(rendered).toContain('| t1 |');
-    expect(rendered).toContain('and 2 more flaky tests in this file.');
-    expect(testsTable(tests, { withTestId: false, maxRows: 10, minFailRate: 0.03 })).not.toContain(
-      'Test ID'
+    expect(rendered).toContain('| Test | Flaky rate by branch | Dashboard |');
+    expect(rendered).toContain(
+      `| test \\| 0 | **\`main\` 10% (49 / 509)** | [dashboard](${testDashboardUrl('t0')}) |`
     );
+    expect(rendered).toContain('and 2 more flaky tests in this file.');
+    expect(
+      testsTable(tests, { withDashboardLinks: false, maxRows: 10, minFailRate: 0.03 })
+    ).not.toContain('Dashboard');
   });
 });
 

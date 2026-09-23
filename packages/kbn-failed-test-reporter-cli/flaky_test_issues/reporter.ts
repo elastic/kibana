@@ -62,7 +62,6 @@ export interface ReportFlakySuiteIssuesOptions {
   /** Suite issues created per run, worst suites first; the rest is reported as skipped. */
   maxNewIssues: number;
   dryRun: boolean;
-  dashboardUrl?: string;
 }
 
 export interface IssueRef {
@@ -258,7 +257,6 @@ export const reportFlakySuiteIssues = async (
     const title = flakySuiteIssueTitle(suite);
     const body = renderFlakySuiteIssueBody(suite, {
       report,
-      dashboardUrl: options.dashboardUrl,
       relatedIssues: related.map(({ issue }) => issue.number),
     });
     try {

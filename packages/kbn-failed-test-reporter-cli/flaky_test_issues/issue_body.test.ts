@@ -174,7 +174,7 @@ describe('renderFlakySuiteIssueBody', () => {
       [
         '1 test in the `Default status alert` suite appears to be flaky:',
         '',
-        '| Test | Flaky rate by branch | Test ID |',
+        '| Test | Flaky rate by branch | Dashboard |',
       ].join('\n')
     );
     const multi = multiTestReport();
@@ -198,11 +198,9 @@ describe('renderFlakySuiteIssueBody', () => {
     );
   });
 
-  it('renders a single-test suite with a dashboard link', () => {
+  it('renders a single-test suite', () => {
     const { suite, report } = singleTestReport();
-    expect(
-      renderFlakySuiteIssueBody(suite, { report, dashboardUrl: 'https://dashboard.example' })
-    ).toMatchSnapshot();
+    expect(renderFlakySuiteIssueBody(suite, { report })).toMatchSnapshot();
   });
 
   it('renders a multi-test suite with distinct failures, a skipped note and related issues', () => {

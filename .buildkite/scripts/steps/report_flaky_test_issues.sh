@@ -24,7 +24,6 @@ FLAKY_TESTS_GITHUB_REPO="${FLAKY_TESTS_GITHUB_REPO:-}"
 FLAKY_TESTS_CLOSED_ISSUES_DAYS="${FLAKY_TESTS_CLOSED_ISSUES_DAYS:-365}"
 FLAKY_TESTS_MAX_NEW_ISSUES="${FLAKY_TESTS_MAX_NEW_ISSUES:-10}"
 FLAKY_TESTS_TRACKING_REPO="${FLAKY_TESTS_TRACKING_REPO:-elastic/kibana}"
-FLAKY_TESTS_DASHBOARD_URL="${FLAKY_TESTS_DASHBOARD_URL:-}"
 
 REPORT_DIR="target/flaky_tests"
 # Uploaded by the discover-flaky-tests step; keep the paths in sync
@@ -69,9 +68,6 @@ args=(
   --max-new-issues "$FLAKY_TESTS_MAX_NEW_ISSUES"
   --tracking-repo "$FLAKY_TESTS_TRACKING_REPO"
 )
-if [[ -n "$FLAKY_TESTS_DASHBOARD_URL" ]]; then
-  args+=(--dashboard-url "$FLAKY_TESTS_DASHBOARD_URL")
-fi
 if [[ ${#DRY_RUN_ARGS[@]} -gt 0 ]]; then
   args+=("${DRY_RUN_ARGS[@]}")
 fi

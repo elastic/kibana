@@ -62,7 +62,6 @@ export function runReportFlakyTestIssuesCli() {
       if (!Number.isInteger(maxNewIssues) || maxNewIssues < 0) {
         throw createFlagError('--max-new-issues must be a non-negative integer');
       }
-      const dashboardUrl = flagsReader.string('dashboard-url');
       const closedSince = new Date(Date.now() - closedSinceDays * MS_PER_DAY);
 
       log.info(`Reading flaky test report from ${inputPath}`);
@@ -95,7 +94,6 @@ export function runReportFlakyTestIssuesCli() {
         closedSince,
         maxNewIssues,
         dryRun,
-        dashboardUrl,
       });
 
       Fs.mkdirSync(Path.dirname(summaryPath), { recursive: true });
@@ -134,7 +132,6 @@ export function runReportFlakyTestIssuesCli() {
           'tracking-repo',
           'closed-since-days',
           'max-new-issues',
-          'dashboard-url',
         ],
         boolean: ['dry-run'],
         default: {
@@ -153,7 +150,6 @@ export function runReportFlakyTestIssuesCli() {
           --tracking-repo       owner/name whose failed-test issues cover a suite once every one of its tests has one; never written to, empty disables [default: ${DEFAULT_TRACKING_REPO}]
           --closed-since-days   Only closed issues updated within this many days count as tracking a suite [default: ${DEFAULT_CLOSED_SINCE_DAYS}]
           --max-new-issues      Issues created per run, worst suites first [default: ${DEFAULT_MAX_NEW_ISSUES}]
-          --dashboard-url       Dashboard with the live numbers, linked from new issues
           --dry-run             Read issues and log what would be filed without writing
         `,
       },

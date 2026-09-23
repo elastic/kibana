@@ -26,6 +26,19 @@ export const FRAMEWORK_LABELS: Record<TestFramework, { short: string; long: stri
 
 export const KIBANA_BLOB_URL = 'https://github.com/elastic/kibana/blob/main';
 export const BUILDKITE_ORG_URL = 'https://buildkite.com/elastic';
+/** The Scout dashboard of a single test: its flaky rate, failures and runs over time. */
+export const SCOUT_TEST_DASHBOARD_URL =
+  'https://appex-qa.kb.europe-west1.gcp.cloud.es.io/s/scout/app/dashboards#/view/a06c26f6-23ac-479d-acb5-5a8b234793a8';
+
+/** A rison string literal: single quotes, with `!` and `'` escaped by `!`. */
+const risonString = (value: string): string => `'${value.replace(/!/g, '!!').replace(/'/g, "!'")}'`;
+
+/** The Scout dashboard filtered on one test id. */
+export const testDashboardUrl = (testId: string): string =>
+  encodeURI(
+    `${SCOUT_TEST_DASHBOARD_URL}?_g=(filters:!((meta:(alias:'Test ID',disabled:!f,negate:!f),` +
+      `query:(bool:(must:!((match_phrase:(test.id:${risonString(testId)}))))))))`
+  );
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -129,14 +142,17 @@ export const formatBranchRates = (
     .join('<br>');
 };
 
-/** Rows of the per-test table, `Test ID` column optional; the suite's tests come ranked. */
+/**
+ * Rows of the per-test table, with a link to each test's dashboard unless told otherwise; the
+ * suite's tests come ranked.
+ */
 export const testsTable = (
   tests: readonly FlakyTestEntry[],
   {
-    withTestId,
+    withDashboardLinks,
     maxRows,
     minFailRate,
-  }: { withTestId: boolean; maxRows: number; minFailRate: number }
+  }: { withDashboardLinks: boolean; maxRows: number; minFailRate: number }
 ): string => {
   const header = ['Test', 'Flaky rate by branch'];
   const rows = tests
@@ -144,11 +160,11 @@ export const testsTable = (
     .map((test) => [
       test.title,
       formatBranchRates(test, minFailRate),
-      ...(withTestId ? [test.testId] : []),
+      ...(withDashboardLinks ? [`[dashboard](${testDashboardUrl(test.testId)})`] : []),
     ]);
   const rest = tests.length - maxRows;
   return [
-    table(withTestId ? [...header, 'Test ID'] : header, rows),
+    table(withDashboardLinks ? [...header, 'Dashboard'] : header, rows),
     ...(rest > 0 ? [`and ${plural(rest, 'more flaky test')} in this file.`] : []),
   ].join('\n\n');
 };
