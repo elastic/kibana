@@ -133,6 +133,10 @@ export interface ProposalGateFixture {
   timeOutGate: () => Promise<void>;
   /** Flips what `proposals.checkDecidePrivileges` reports. */
   setCanDecide: (canDecide: boolean) => void;
+  /** Replaces what the action workflow declares, e.g. to make it `always-gate`. */
+  setActionMetadata: (actionMetadata: Record<string, unknown>) => void;
+  /** Makes the action workflow unreadable, as a transient API failure would. */
+  failActionLookup: () => void;
 }
 
 export const createProposalGateFixture = (): ProposalGateFixture => {
@@ -233,6 +237,12 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
     },
     setCanDecide: (value) => {
       canDecide = value;
+    },
+    setActionMetadata: (actionMetadata) => {
+      workflowsApi.getWorkflow.mockResolvedValue({ definition: { consts: { actionMetadata } } });
+    },
+    failActionLookup: () => {
+      workflowsApi.getWorkflow.mockRejectedValue(new Error('workflows API unavailable'));
     },
   };
 };
