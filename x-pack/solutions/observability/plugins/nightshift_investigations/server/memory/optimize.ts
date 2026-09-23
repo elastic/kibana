@@ -639,8 +639,8 @@ export const applyMemoryEdits = async ({
       )} content=${JSON.stringify(previewText(extra.content))} ` +
         `tags=${extra.tags.join(',') || '(none)'}`
     );
-    if (looksLikeSecret(`${extra.title}\n${extra.content}`)) {
-      logger.warn(`Skipped extraction "${extra.slug}" — content looks like a secret`);
+    if (looksLikeSecret(`${extra.title}\n${extra.content}\n${task}`)) {
+      logger.warn(`Skipped extraction "${extra.slug}" — content or recall context looks secret`);
       summary.safetySkipCount += 1;
       consumedExtracts.add(index);
       continue;
@@ -791,7 +791,7 @@ const mergeMemoryGroup = async ({
     logger.warn('Memory merge aborted — synthesis returned an empty title or content');
     return { merged: false, archivedSourceCount: 0, writeFailureCount: 0 };
   }
-  if (looksLikeSecret(`${synthesis.title}\n${content}`)) {
+  if (looksLikeSecret(`${synthesis.title}\n${content}\n${synthesis.context}`)) {
     logger.warn('Memory merge aborted — synthesised content looks like a secret');
     return { merged: false, archivedSourceCount: 0, writeFailureCount: 0 };
   }
@@ -805,7 +805,7 @@ const mergeMemoryGroup = async ({
   const nowSec = now();
   const avoid = new Set(sources.map((page) => page.id));
   const base = canonicalizeSlug(synthesis.title) || 'merged';
-  let slug = `${base}-merged`;
+  let slug: string | undefined;
   for (let attempt = 0; attempt < 6; attempt++) {
     const candidate =
       attempt === 0 ? base : attempt === 1 ? `${base}-merged` : `${base}-merged-${attempt}`;
@@ -820,9 +820,13 @@ const mergeMemoryGroup = async ({
     slug = candidate;
     break;
   }
+  if (!slug) {
+    logger.warn('Memory merge aborted — no free canonical slug found');
+    return { merged: false, archivedSourceCount: 0, writeFailureCount: 0 };
+  }
 
   const mergedFrom = unionStrings(
-    sources.map((page) => page.id),
+    sources.flatMap((page) => [page.id, ...(page.merged_from ?? [])]),
     extract ? [toMemoryKiId(extract.slug)] : []
   );
   let impressions = 0;
@@ -847,7 +851,7 @@ const mergeMemoryGroup = async ({
         sources.flatMap((page) => page.categories),
         extract?.categories
       ),
-      references: [],
+      references: unionStrings(sources.flatMap((page) => page.references)),
       status: sources.some((page) => page.status === 'established') ? 'established' : 'tentative',
       source: `Merged from memories: ${mergedFrom.join(', ')}`,
       merged_from: mergedFrom,

@@ -11,6 +11,7 @@ import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { SandboxPluginStart, SandboxSession } from '@kbn/sandbox-plugin/server';
+import { NIGHTSHIFT_DEDUCTIVE_INVESTIGATION_AGENT_ID } from '../agents/deductive_investigation';
 import { runMemoryOptimize } from '../memory/register_memory';
 import { teeWorkflowLogger } from '../lib/tee_workflow_logger';
 import type { NightshiftTelemetryClient } from '../telemetry';
@@ -155,7 +156,17 @@ export const memoryOptimizeStepDefinition = ({
         throw error;
       }
 
-      if (summary) {
+      if (!summary && context.input.agent_id === NIGHTSHIFT_DEDUCTIVE_INVESTIGATION_AGENT_ID) {
+        telemetry.reportSemanticMemoryOptimized({
+          agent_id: context.input.agent_id,
+          ...(context.input.conversation_id
+            ? { conversation_id: context.input.conversation_id }
+            : {}),
+          ...(context.input.round_id ? { round_id: context.input.round_id } : {}),
+          workflow_execution_id: workflowExecutionId,
+          outcome: 'failure',
+        });
+      } else if (summary) {
         telemetry.reportSemanticMemoryOptimized({
           agent_id: context.input.agent_id ?? 'unknown',
           ...(context.input.conversation_id

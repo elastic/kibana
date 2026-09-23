@@ -170,6 +170,8 @@ describe('applyMemoryEdits', () => {
       conversions: 1,
       last_impression_time: '2026-01-01T00:00:00.000Z',
     };
+    source.merged_from = ['memory_original-kafka-lag'];
+    source.references = ['https://runbooks.example/kafka-lag'];
     const store = createStore({
       get: jest
         .fn()
@@ -206,8 +208,10 @@ describe('applyMemoryEdits', () => {
         slug: 'checkout-kafka-lag',
         context: 'checkout latency kafka consumer lag',
         status: 'established',
-        source: 'Merged from memories: memory_kafka-lag, memory_checkout-kafka',
-        merged_from: ['memory_kafka-lag', 'memory_checkout-kafka'],
+        source:
+          'Merged from memories: memory_kafka-lag, memory_original-kafka-lag, memory_checkout-kafka',
+        merged_from: ['memory_kafka-lag', 'memory_original-kafka-lag', 'memory_checkout-kafka'],
+        references: ['https://runbooks.example/kafka-lag'],
         user: 'nightshift-optimizer',
         telemetry: expect.objectContaining({ impressions: 2, conversions: 1 }),
       })
@@ -262,6 +266,81 @@ describe('applyMemoryEdits', () => {
     expect(summary).toEqual(
       expect.objectContaining({ mergeAttemptCount: 1, mergeSuccessCount: 0 })
     );
+  });
+
+  it('does not merge when synthesis returns a secret-bearing context', async () => {
+    const source = page('memory_kafka-lag', 'Kafka consumer lag');
+    source.context = 'why is checkout slow';
+    const store = createStore({
+      get: jest.fn().mockResolvedValue(source),
+    });
+
+    await applyMemoryEdits({
+      store,
+      recalledIds: [source.id],
+      recalledMemories: [source],
+      labels: { useful: [], harmful: [] },
+      extractions: [
+        {
+          slug: 'checkout-kafka',
+          title: 'Kafka consumer lag',
+          content: 'Same fact.',
+          tags: [],
+          categories: [],
+        },
+      ],
+      context: 'why is checkout slow?',
+      synthesizeMemoryGroup: async () => ({
+        title: 'Merged',
+        content: 'Body',
+        context: 'kafka lag api_key=sk-live-not-a-real-key',
+      }),
+      logger: loggerMock.create(),
+    });
+
+    expect(store.upsert).not.toHaveBeenCalled();
+    expect(store.archive).not.toHaveBeenCalled();
+  });
+
+  it('does not overwrite a live page when every canonical slug candidate is occupied', async () => {
+    const source = page('memory_source', 'Source memory');
+    source.context = 'source context';
+    const store = createStore({
+      get: jest
+        .fn()
+        .mockImplementation(async (id: string) =>
+          id === source.id ? source : page(id, 'Occupied canonical page')
+        ),
+    });
+
+    const summary = await applyMemoryEdits({
+      store,
+      recalledIds: [source.id],
+      recalledMemories: [source],
+      labels: { useful: [], harmful: [] },
+      extractions: [
+        {
+          slug: 'duplicate-source',
+          title: 'Source memory',
+          content: 'Same fact.',
+          tags: [],
+          categories: [],
+        },
+      ],
+      context: 'source context',
+      synthesizeMemoryGroup: async () => ({
+        title: 'Occupied canonical page',
+        content: 'Merged body.',
+        context: 'merged source context',
+      }),
+      logger: loggerMock.create(),
+    });
+
+    expect(summary).toEqual(
+      expect.objectContaining({ mergeAttemptCount: 1, mergeSuccessCount: 0 })
+    );
+    expect(store.upsert).not.toHaveBeenCalled();
+    expect(store.archive).not.toHaveBeenCalled();
   });
 
   it('merges a catalog overlap and sums decayed telemetry', async () => {
@@ -365,6 +444,30 @@ describe('applyMemoryEdits', () => {
 
     expect(store.upsert).not.toHaveBeenCalled();
     expect(store.retrieve).not.toHaveBeenCalled();
+    expect(summary.safetySkipCount).toBe(1);
+  });
+
+  it('does not persist a secret-bearing user task as recall context', async () => {
+    const store = createStore();
+
+    const summary = await applyMemoryEdits({
+      store,
+      recalledIds: [],
+      labels: { useful: [], harmful: [] },
+      extractions: [
+        {
+          slug: 'checkout-fact',
+          title: 'Checkout environment fact',
+          content: 'Checkout runs in the production cluster.',
+          tags: [],
+          categories: [],
+        },
+      ],
+      context: 'Investigate checkout with api_key=sk-live-not-a-real-key',
+      logger: loggerMock.create(),
+    });
+
+    expect(store.upsert).not.toHaveBeenCalled();
     expect(summary.safetySkipCount).toBe(1);
   });
 });

@@ -260,6 +260,25 @@ describe('createMemoryPageStore', () => {
     });
   });
 
+  it('throws when a counter bulk write contains item errors', async () => {
+    const esClient = {
+      mget: jest.fn().mockResolvedValue({
+        docs: [{ _id: 'agent-1:memory_kafka-lag', found: true, _source: source }],
+      }),
+      bulk: jest.fn().mockResolvedValue({ errors: true }),
+    };
+    const store = createMemoryPageStore({
+      esClient: esClient as never,
+      logger,
+      agentId: 'agent-1',
+      now: () => T0,
+    });
+
+    await expect(
+      store.applyCounterUpdates([{ id: 'memory_kafka-lag', addImp: 1, addConv: 1 }])
+    ).rejects.toThrow('Memory counter bulk update failed');
+  });
+
   it('skips archived pages in counter updates', async () => {
     const esClient = {
       mget: jest.fn().mockResolvedValue({

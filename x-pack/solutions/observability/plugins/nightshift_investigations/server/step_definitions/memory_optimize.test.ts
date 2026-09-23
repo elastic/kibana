@@ -258,4 +258,32 @@ describe('memoryOptimizeStepDefinition', () => {
       outcome: 'failure',
     });
   });
+
+  it('reports a failure outcome when the target agent cannot resolve a model', async () => {
+    runMemoryOptimizeMock.mockResolvedValueOnce(undefined);
+    const definition = memoryOptimizeStepDefinition({
+      getAgentBuilder,
+      getSandboxStart: () => makeSandboxStart(),
+      logger: loggerMock.create(),
+      telemetry: telemetry as never,
+    });
+
+    await definition.handler(
+      createContext({
+        prompt: 'why?',
+        response: 'because',
+        agent_id: 'significant-events.deductive-investigation',
+        conversation_id: 'conv-1',
+        round_id: 'round-1',
+      })
+    );
+
+    expect(telemetry.reportSemanticMemoryOptimized).toHaveBeenCalledWith({
+      agent_id: 'significant-events.deductive-investigation',
+      conversation_id: 'conv-1',
+      round_id: 'round-1',
+      workflow_execution_id: 'workflow-exec-1',
+      outcome: 'failure',
+    });
+  });
 });

@@ -260,10 +260,9 @@ describe('materializeMemory', () => {
       JSON.parse(indexWrite.content.toString('utf8')).entries.map((e: { id: string }) => e.id)
     ).toEqual(['memory_a', 'memory_b']);
     expect(notification).toBe(
-      [
-        'Semantic memories materialized this turn:',
-        '- `/workspace/memories/memory_b.md` — Bravo',
-      ].join('\n')
+      ['Semantic memories materialized this turn:', '- `/workspace/memories/memory_b.md`'].join(
+        '\n'
+      )
     );
     expect(notification).not.toContain('memory_a.md');
     expect(summary).toEqual({

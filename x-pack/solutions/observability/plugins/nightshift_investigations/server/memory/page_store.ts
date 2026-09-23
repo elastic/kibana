@@ -577,7 +577,7 @@ export const createMemoryPageStore = ({
             .join(', ')
       );
       if (bulk.errors) {
-        logger.warn('Memory counter bulk update reported item errors');
+        throw new Error('Memory counter bulk update failed for one or more items');
       }
     },
 
