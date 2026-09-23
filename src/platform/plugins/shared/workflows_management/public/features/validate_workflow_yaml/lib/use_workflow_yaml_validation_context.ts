@@ -16,6 +16,7 @@ import type {
   WorkflowYamlValidationContext,
 } from './collect_full_workflow_yaml_validation_results';
 import { useGetPropertyHandler } from './property_handlers/use_get_property_handler';
+import { createWorkflowContextRegistry } from '../../../../common/lib/create_workflow_context_registry';
 import { useAvailableConnectors } from '../../../entities/connectors/model/use_available_connectors';
 import {
   selectConnectorsLoadState,
@@ -42,7 +43,12 @@ export function useWorkflowYamlValidationContext(): WorkflowYamlValidationContex
   const connectorsData = useAvailableConnectors();
   const connectorsLoadState = useSelector(selectConnectorsLoadState);
   const workflows = useSelector(selectWorkflows);
-  const { application, http, data, licensing, featureFlags } = useKibana().services;
+  const { application, http, data, licensing, featureFlags, workflowsExtensions } =
+    useKibana().services;
+  const registry = useMemo(
+    () => createWorkflowContextRegistry(workflowsExtensions),
+    [workflowsExtensions]
+  );
   const warnIgnoredKibanaFetcher =
     featureFlags?.getBooleanValue(WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG, false) ?? false;
   const esqlCallbacks = useWorkflowEsqlCallbacks({
@@ -57,6 +63,7 @@ export function useWorkflowYamlValidationContext(): WorkflowYamlValidationContex
 
   return useMemo(
     () => ({
+      registry,
       connectorTypes: getConnectorTypesValidationState(connectorsData, connectorsLoadState),
       connectorsManagementUrl: application.getUrlForApp('management', {
         deepLinkId: 'triggersActionsConnectors',
@@ -72,6 +79,7 @@ export function useWorkflowYamlValidationContext(): WorkflowYamlValidationContex
       connectorsData,
       connectorsLoadState,
       getPropertyHandler,
+      registry,
       warnIgnoredKibanaFetcher,
       workflows,
     ]
