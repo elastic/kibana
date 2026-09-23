@@ -137,11 +137,11 @@ export const useHeaderCollapse = ({
     if (collapseBudget <= 0) {
       next = false;
     } else if (wasCollapsed) {
-      // The overflow guard gates entry only. Collapsing shrinks the header, which grows the body
-      // and shrinks its scroll range, so re-testing the guard while collapsed judges the state
-      // against geometry the collapse itself produced: it reports "cannot collapse", expands,
-      // which restores the scroll range and re-collapses, and the header oscillates. Leaving
-      // collapse is therefore driven by scroll position alone.
+      // The overflow guard is only checked before collapsing.
+      // When the header collapses, the body grows and its scrollable range shrinks.
+      // If we checked the guard again while collapsed, it would see the smaller scroll range,
+      // incorrectly think it can't collapse, and expand again. This would cause an endless loop
+      // of collapsing and expanding. Therefore, expanding is based purely on the scroll position.
       next = scrollTop > EXPAND_AT;
     } else {
       next = scrollHeight - clientHeight > collapseBudget + EXPAND_AT && scrollTop >= COLLAPSE_AT;
@@ -149,12 +149,13 @@ export const useHeaderCollapse = ({
 
     if (next === wasCollapsed) return;
 
-    // The region is about to become `aria-hidden` and `inert`, which the browser answers by
-    // blurring any focused descendant — focus would land on `<body>`, outside the flyout's focus
-    // trap. Moving it has to happen here, before the state flips: once the attributes are on the
-    // element there is no focused node left to find. The scroll container is the natural
-    // destination, being both focusable and the thing the user was already scrolling. Content the
-    // region portals elsewhere is outside this check, so it has to dismiss itself on collapse.
+    // When the region collapses, it becomes `aria-hidden` and `inert`. This causes the
+    // browser to blur any focused elements inside it, moving focus to the `<body>` element
+    // (outside the flyout's focus trap). We need to move focus before this happens, since we
+    // won't be able to find the focused node once it's blurred. The scroll container is a
+    // good place to move focus, since it's focusable and the user is already scrolling it.
+    // Elements rendered outside this region using React portals won't be caught by this check,
+    // so they should close automatically on collapse.
     if (next && collapsibleNodeRef.current?.contains(document.activeElement)) {
       scroller.focus();
     }
