@@ -18,7 +18,7 @@ export const buildFullProfileDiscriminationDataset = (runMarker: string) => {
   });
 
   return {
-    name: 'attack-discovery-agent-builder: full profile (noise discrimination)',
+    name: `attack-discovery-agent-builder: full profile (noise discrimination) [${runMarker}]`,
     description:
       'Live-retrieval eval over portable-seeder full profile: seven signal chains plus background noise and a 40-alert Defender cluster. On-demand only — not part of weekly golden-path CI.',
     examples: [
