@@ -28,12 +28,14 @@ describe('buildEntitiesWithAnomaliesCountQuery', () => {
     expect(query).toContain('record_score >= 1');
   });
 
-  it('deduplicates via STATS BY entity.id before the LOOKUP JOIN', () => {
+  it('deduplicates via STATS BY derived_euids before the LOOKUP JOIN, then renames to entity.id', () => {
     const query = buildEntitiesWithAnomaliesCountQuery(mockEuid, '.entities-v1');
-    const statsIdx = query.indexOf('| STATS BY entity.id');
+    const statsIdx = query.indexOf('| STATS BY derived_euids');
+    const renameIdx = query.indexOf('| RENAME derived_euids AS `entity.id`');
     const joinIdx = query.indexOf('| LOOKUP JOIN .entities-v1');
     expect(statsIdx).toBeGreaterThan(-1);
-    expect(joinIdx).toBeGreaterThan(statsIdx);
+    expect(renameIdx).toBeGreaterThan(statsIdx);
+    expect(joinIdx).toBeGreaterThan(renameIdx);
   });
 
   it('combines entity type EUIDs with nested MV_APPEND', () => {

@@ -34,19 +34,21 @@ export const buildAlertEuidPipeline = (euid: EntityStoreEuid): string[] => {
     parts.push(`| EVAL ${euid.esql.getEuidEvaluation(entityType, `${entityType}_euid`)}`);
   }
 
-  // Build derived_euids as a multi-value field so a user+host alert contributes both
-  // entities on the fallback path — COALESCE(a,b,c) would drop all but the first non-null.
-  // Produces: MV_APPEND(user_euid, MV_APPEND(host_euid, service_euid))
-  // Nulls from absent entity types survive but are filtered by the WHERE below.
+  // Pick the first non-null EUID across the stamped fast-path and the three derived paths.
+  // MV_APPEND of two computed scalars does not reliably produce a multi-value field in all
+  // ES|QL versions, so we use COALESCE over individual scalar columns instead. Multi-entity
+  // alerts (with both user + host context) will contribute via whichever EUID is first
+  // non-null; full multi-entity support can be added later via MV_EXPAND over separate fields.
   const euidVars = ENTITY_TYPES.map((t) => `${t}_euid`);
-  const nestedMvAppend = euidVars
-    .slice(0, -1)
-    .reduceRight((inner, v) => `MV_APPEND(${v}, ${inner})`, euidVars[euidVars.length - 1]);
-  parts.push(`| EVAL derived_euids = ${nestedMvAppend}`);
-  parts.push('| EVAL entity_ids = COALESCE(`kibana.alert.entity.id`, derived_euids)');
-  parts.push('| MV_EXPAND entity_ids');
-  parts.push('| EVAL entity.id = entity_ids');
-  parts.push('| WHERE entity.id IS NOT NULL');
+  parts.push(
+    `| EVAL _ea_entity_id = COALESCE(\`kibana.alert.entity.id\`, ${euidVars.join(', ')})`
+  );
+  parts.push('| MV_EXPAND _ea_entity_id');
+  parts.push('| WHERE _ea_entity_id IS NOT NULL');
+  // Rename only after STATS to avoid STATS BY grouping on the mapped entity.id field
+  // in the alerts index rather than our computed EUID column.
+  parts.push('| STATS BY _ea_entity_id');
+  parts.push('| RENAME _ea_entity_id AS `entity.id`');
 
   return parts;
 };

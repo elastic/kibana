@@ -44,10 +44,6 @@ export const buildAlertBasedTilesQuery = (
   parts.push(`| WHERE @timestamp >= NOW() - ${timeRange}`);
   parts.push(...buildAlertEuidPipeline(euid));
 
-  // Deduplicate to one row per entity before the LOOKUP JOIN — reduces join cardinality
-  // from O(alerts) to O(distinct entities). @timestamp is intentionally dropped here;
-  // no rename dance needed because the JOIN's own @timestamp is never used downstream.
-  parts.push(`| STATS BY entity.id`);
   parts.push(`| LOOKUP JOIN ${entitiesIndexName} ON entity.id`);
   // Discard entity IDs that have no entity-latest record (unrecognised identifiers).
   parts.push(`| WHERE entity.name IS NOT NULL`);

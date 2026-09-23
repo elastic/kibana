@@ -46,12 +46,11 @@ export const buildEntitiesWithAnomaliesCountQuery = (
     .reduceRight((inner, v) => `MV_APPEND(${v}, ${inner})`, euidVars[euidVars.length - 1]);
   parts.push(`| EVAL derived_euids = ${nestedMvAppend}`);
   parts.push(`| MV_EXPAND derived_euids`);
-  parts.push(`| EVAL entity.id = derived_euids`);
-  parts.push(`| WHERE entity.id IS NOT NULL`);
-
-  // Deduplicate to one row per entity before the LOOKUP JOIN — reduces join cardinality
-  // from O(anomaly records) to O(distinct entities). @timestamp dropped here; no rename needed.
-  parts.push(`| STATS BY entity.id`);
+  parts.push(`| WHERE derived_euids IS NOT NULL`);
+  // STATS BY on a temp column avoids grouping on the mapped entity.id field in the anomalies
+  // index rather than our computed EUID. RENAME after STATS produces entity.id for the JOIN.
+  parts.push(`| STATS BY derived_euids`);
+  parts.push(`| RENAME derived_euids AS \`entity.id\``);
   parts.push(`| LOOKUP JOIN ${entitiesIndexName} ON entity.id`);
 
   parts.push(`| WHERE entity.name IS NOT NULL`);

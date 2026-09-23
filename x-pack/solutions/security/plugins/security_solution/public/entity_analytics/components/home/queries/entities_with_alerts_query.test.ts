@@ -21,12 +21,14 @@ describe('buildAlertBasedTilesQuery', () => {
     expect(query).toContain('FROM .alerts-security.alerts-my-space');
   });
 
-  it('deduplicates via STATS BY entity.id before the LOOKUP JOIN', () => {
+  it('deduplicates via STATS BY _ea_entity_id before the LOOKUP JOIN, then renames to entity.id', () => {
     const query = buildAlertBasedTilesQuery(mockEuid, '.entities-v1', 'default');
-    const statsIdx = query.indexOf('| STATS BY entity.id');
+    const statsIdx = query.indexOf('| STATS BY _ea_entity_id');
+    const renameIdx = query.indexOf('| RENAME _ea_entity_id AS `entity.id`');
     const joinIdx = query.indexOf('| LOOKUP JOIN .entities-v1');
     expect(statsIdx).toBeGreaterThan(-1);
-    expect(joinIdx).toBeGreaterThan(statsIdx);
+    expect(renameIdx).toBeGreaterThan(statsIdx);
+    expect(joinIdx).toBeGreaterThan(renameIdx);
   });
 
   it('outputs all four STATS columns for tile 1 and tile 5', () => {

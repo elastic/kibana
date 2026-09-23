@@ -16,25 +16,19 @@ const mockEuid = {
 } as unknown as EntityStoreEuid;
 
 describe('buildAlertEuidPipeline', () => {
-  it('combines all three entity type EUIDs with nested MV_APPEND', () => {
+  it('picks the first non-null EUID via COALESCE over the stamped field and all three derived EUIDs', () => {
     const pipeline = buildAlertEuidPipeline(mockEuid);
     expect(pipeline).toContain(
-      '| EVAL derived_euids = MV_APPEND(user_euid, MV_APPEND(host_euid, service_euid))'
+      '| EVAL _ea_entity_id = COALESCE(`kibana.alert.entity.id`, user_euid, host_euid, service_euid)'
     );
   });
 
-  it('uses COALESCE to prefer the stamped kibana.alert.entity.id over derived_euids', () => {
+  it('expands _ea_entity_id, filters nulls, deduplicates, then renames to entity.id for the JOIN', () => {
     const pipeline = buildAlertEuidPipeline(mockEuid);
-    expect(pipeline).toContain(
-      '| EVAL entity_ids = COALESCE(`kibana.alert.entity.id`, derived_euids)'
-    );
-  });
-
-  it('expands entity_ids, assigns to entity.id, and filters nulls', () => {
-    const pipeline = buildAlertEuidPipeline(mockEuid);
-    expect(pipeline).toContain('| MV_EXPAND entity_ids');
-    expect(pipeline).toContain('| EVAL entity.id = entity_ids');
-    expect(pipeline).toContain('| WHERE entity.id IS NOT NULL');
+    expect(pipeline).toContain('| MV_EXPAND _ea_entity_id');
+    expect(pipeline).toContain('| WHERE _ea_entity_id IS NOT NULL');
+    expect(pipeline).toContain('| STATS BY _ea_entity_id');
+    expect(pipeline).toContain('| RENAME _ea_entity_id AS `entity.id`');
   });
 
   it('includes optional field evaluation EVALs when the euid provides them', () => {
@@ -54,7 +48,7 @@ describe('buildAlertEuidPipeline', () => {
     const pipeline = buildAlertEuidPipeline(mockEuid);
     // Each entity type produces exactly one EVAL (the euid assignment), not two
     const evalLines = pipeline.filter((l) => l.startsWith('| EVAL'));
-    // 3 euid EVALs + 1 derived_euids + 1 entity_ids + 1 entity.id = 6
-    expect(evalLines).toHaveLength(6);
+    // 3 euid EVALs + 1 _ea_entity_id = 4
+    expect(evalLines).toHaveLength(4);
   });
 });
