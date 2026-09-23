@@ -47,7 +47,7 @@
       "dataFormat": "ecs",
       "authMethod": "static_keys",
       "packagePolicyIds": ["pkg-policy-id-1", "pkg-policy-id-2"],
-      "agentPolicyIds": ["agent-policy-id-1"],
+      "agentPolicyId": "agent-policy-id-1",
       "apiKeyId": "api-key-id-1"
     },
     {
@@ -58,8 +58,6 @@
       "attemptCount": 1,
       "globalRegion": "us-east-1",
       "dataFormat": "ecs",
-      "authMethod": "assume_role",
-      "agentPolicyIds": ["agent-policy-id-2", "agent-policy-id-3"],
       "packagePolicyIds": ["pkg-policy-id-3"]
     }
   ]

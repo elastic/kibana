@@ -35,16 +35,11 @@ export function toSOAuthMethod(
  * Inverse of toSOAuthMethod — used when hydrating session storage on resume.
  * identity_federation is MI-only, so it maps to static_keys.
  * undefined → 'static_keys' (safe default).
- * 'direct_access_keys' accepted as a backward-compat alias for sessions written before the rename.
  */
 export function fromSOAuthMethod(
-  authMethod: CloudOnboardingDeploymentAuthMethod | string | undefined
+  authMethod: CloudOnboardingDeploymentAuthMethod | undefined
 ): AgentCredentialMethod {
-  if (
-    authMethod === 'identity_federation' ||
-    authMethod === 'direct_access_keys' || // backward compat: pre-rename session storage
-    authMethod === undefined
-  ) {
+  if (authMethod === 'identity_federation' || authMethod === undefined) {
     return 'static_keys';
   }
   return authMethod as AgentCredentialMethod;
