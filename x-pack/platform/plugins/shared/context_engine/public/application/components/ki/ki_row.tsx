@@ -92,7 +92,6 @@ export const KiRow = ({ aiIndexId, ki }: KiRowProps) => {
         ...getEbtProps({
           element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPage,
           action: CONTEXT_ENGINE_UI_EBT.action.kiList.TOGGLE_ROW,
-          detail: ki.id,
         }),
       }}
       onToggle={setIsOpen}

@@ -94,9 +94,6 @@ const ebtAction = {
     DISCOVER_CAP_REACHED: 'open_ki_discover_cap_reached',
     TOGGLE_ROW: 'toggle_row',
   },
-  flyout: {
-    CLOSE: 'close',
-  },
 } as const;
 
 export const CONTEXT_ENGINE_UI_EBT = {

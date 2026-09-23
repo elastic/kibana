@@ -68,7 +68,6 @@ export const KiListPanel = ({ aiIndex: { id: aiIndexId, dest } }: KiListPanelPro
           ...getEbtProps({
             element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPage,
             action: CONTEXT_ENGINE_UI_EBT.action.kiList.FILTER_TYPE,
-            detail: type,
           }),
         })
       ),

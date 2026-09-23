@@ -34,18 +34,21 @@ const withDefaultEbt = (
   ...props,
 });
 
-const renderSelector = (props: Omit<React.ComponentProps<typeof TraceSelector>, 'ebtElement'>) => {
+const renderWithProps = (props: React.ComponentProps<typeof TraceSelector>) => {
   const services = coreMock.createStart();
   return render(
     <I18nProvider>
       <EuiProvider>
         <KibanaContextProvider services={services}>
-          <TraceSelector {...withDefaultEbt(props)} />
+          <TraceSelector {...props} />
         </KibanaContextProvider>
       </EuiProvider>
     </I18nProvider>
   );
 };
+
+const renderSelector = (props: Omit<React.ComponentProps<typeof TraceSelector>, 'ebtElement'>) =>
+  renderWithProps(withDefaultEbt(props));
 
 describe('TraceSelector', () => {
   beforeEach(() => {
@@ -110,5 +113,35 @@ describe('TraceSelector', () => {
     fireEvent.click(screen.getByText('logs-genai-default'));
 
     expect(onChange).toHaveBeenCalledWith({ type: 'index', value: 'logs-genai-default' });
+  });
+
+  it('propagates the given ebtElement to the toggle buttons and the active field', () => {
+    const nonDefaultEbtElement = CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPage;
+    renderWithProps({
+      value: undefined,
+      onChange: jest.fn(),
+      ebtElement: nonDefaultEbtElement,
+    });
+
+    const elasticAgentToggle = screen.getByTestId('contextTraceToggle-elastic_agent');
+    expect(elasticAgentToggle).toHaveAttribute('data-ebt-element', nonDefaultEbtElement);
+    expect(elasticAgentToggle).toHaveAttribute(
+      'data-ebt-action',
+      CONTEXT_ENGINE_UI_EBT.action.traces.TOGGLE_ELASTIC_AGENT
+    );
+
+    const indexToggle = screen.getByTestId('contextTraceToggle-index');
+    expect(indexToggle).toHaveAttribute('data-ebt-element', nonDefaultEbtElement);
+    expect(indexToggle).toHaveAttribute(
+      'data-ebt-action',
+      CONTEXT_ENGINE_UI_EBT.action.traces.TOGGLE_DATA_STREAM
+    );
+
+    const agentComboBox = screen.getByTestId('contextTraceAgentComboBox');
+    expect(agentComboBox).toHaveAttribute('data-ebt-element', nonDefaultEbtElement);
+    expect(agentComboBox).toHaveAttribute(
+      'data-ebt-action',
+      CONTEXT_ENGINE_UI_EBT.action.traces.SELECT_AGENT
+    );
   });
 });

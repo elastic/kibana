@@ -129,7 +129,6 @@ export const SignalRow = ({ signal, onViewDetails }: SignalRowProps) => {
             {...getEbtProps({
               element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPage,
               action: CONTEXT_ENGINE_UI_EBT.action.signals.VIEW_SIGNAL,
-              detail: signal.signal_id,
             })}
           >
             {i18n.translate('xpack.contextEngine.aiIndexDetail.signals.viewDetailsButton', {
