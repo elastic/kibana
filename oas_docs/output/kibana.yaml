@@ -45404,6 +45404,7 @@ paths:
                   type: string
                 connectorId:
                   maxLength: 255
+                  nullable: true
                   type: string
                 deploymentId:
                   description: CFN stack ARN (or equivalent); provided by the client after manual deployment.
@@ -45442,7 +45443,7 @@ paths:
                   maxItems: 10
                   type: array
                 mechanisms:
-                  description: Delivery mechanisms active in this deployment; replaces the stored array.
+                  description: Delivery mechanisms active in this deployment. Replaces the stored mechanisms array.
                   items:
                     description: 'Delivery mechanism: managed_integration, ecf, or agent_based.'
                     enum:
@@ -45459,12 +45460,13 @@ paths:
                   maxItems: 100
                   type: array
                 services:
-                  description: Updated service list; replaces the stored services array.
+                  description: Updated service list. Replaces the stored services array.
                   items:
                     maxLength: 255
                     minLength: 1
                     type: string
                   maxItems: 1000
+                  minItems: 1
                   type: array
                 serviceVars:
                   additionalProperties:
