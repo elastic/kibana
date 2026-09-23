@@ -273,19 +273,10 @@ export const UpdateCloudOnboardingDeploymentRequestSchema = {
         meta: { description: 'ECF CloudFormation stacks to record for this deployment.' },
       })
     ),
-    connectorId: schema.maybe(
-      schema.literal(null, {
-        meta: {
-          description:
-            'Set to null to clear the connector association (e.g. on MI→ECF transition).',
-        },
-      })
-    ),
+    connectorId: schema.maybe(schema.literal(null)),
     authMethod: schema.maybe(
       schema.nullable(
-        schema.oneOf([schema.literal('identity_federation'), schema.literal('static_keys')], {
-          meta: { description: 'Authentication method; set to null to clear on MI→ECF transition.' },
-        })
+        schema.oneOf([schema.literal('identity_federation'), schema.literal('static_keys')])
       )
     ),
   }),
