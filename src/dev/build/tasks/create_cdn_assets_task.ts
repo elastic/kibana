@@ -96,6 +96,9 @@ export const CreateCdnAssets: Task = {
       resolve(buildSource, 'node_modules/@kbn/ui-shared-deps-src/shared_built_assets'),
       resolve(bundles, 'kbn-ui-shared-deps-src')
     );
+    // All bundles (core + plugins) are in the unified output directory.
+    // Copy into the CDN bundles root so URLs like /bundles/kibana.bundle.js
+    // and /bundles/chunks/<hash>.js resolve correctly.
     await copyAll(resolve(buildSource, 'target/public/bundles'), resolve(bundles));
     await copyAll(
       resolve(buildSource, 'node_modules/@kbn/monaco/target_workers'),

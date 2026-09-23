@@ -21,5 +21,7 @@ export type {
   FollowExecutionOptions,
   FindExecutionsFilter,
   FindExecutionsOptions,
+  AbortExecutionOptions,
+  AbortExecutionResult,
   AgentExecutionService,
 } from './types';

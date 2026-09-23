@@ -24,7 +24,7 @@ export const command = {
   async run({ args }) {
     const quiet = args.getBooleanValue('quiet') ?? false;
 
-    await run('node', ['scripts/build_rspack_bundles.js', '--shared-only', '--watch'], {
+    await run('node', ['scripts/build_kibana_platform_plugins.js', '--shared-only', '--watch'], {
       pipe: !quiet,
     });
   },

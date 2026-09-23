@@ -49,10 +49,6 @@ export interface BuildOptions {
 }
 
 export async function buildDistributables(log: ToolingLog, options: BuildOptions): Promise<void> {
-  if (process.env.KBN_USE_RSPACK === undefined) {
-    process.env.KBN_USE_RSPACK = 'true';
-  }
-
   if (options.tarZstd) {
     try {
       await execa('zstd', ['--version']);
@@ -92,7 +88,7 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     await globalRun(Tasks.BuildPackages);
     await globalRun(Tasks.AssertPackageEntryPoints);
     await globalRun(Tasks.ReplaceFavicon);
-    await globalRun(Tasks.BuildRspackBundles);
+    await globalRun(Tasks.BuildBundles);
     await globalRun(Tasks.CreatePackageJson);
     await globalRun(Tasks.InstallDependencies);
     await globalRun(Tasks.GeneratePackagesOptimizedAssets);

@@ -53,17 +53,19 @@ describe('CreateCdnAssets', () => {
     mockedCopyAll.mockResolvedValue(undefined);
   });
 
-  it('copies unified Rspack bundles from target/public/bundles', async () => {
+  it('copies unified bundles from target/public/bundles into the CDN bundles root', async () => {
     await CreateCdnAssets.run(config, log, mockedBuild);
 
-    const expectedRspackSource = resolve(buildSource, 'target/public/bundles');
-    expect(mockedCopyAll).toHaveBeenCalledWith(
-      expectedRspackSource,
-      expect.stringMatching(/[/\\]bundles$/)
+    const buildSha = config.getBuildShaShort();
+    const expectedDest = resolve(
+      config.resolveFromRepo('build', 'cdn-assets'),
+      buildSha,
+      'bundles'
     );
-    expect(mockedCopyAll).not.toHaveBeenCalledWith(
-      resolve(buildSource, 'node_modules/@kbn/core/target/public'),
-      expect.anything()
+
+    expect(mockedCopyAll).toHaveBeenCalledWith(
+      resolve(buildSource, 'target/public/bundles'),
+      expectedDest
     );
   });
 });

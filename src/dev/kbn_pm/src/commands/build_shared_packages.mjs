@@ -32,7 +32,7 @@ export const command = {
     const watch = args.getBooleanValue('watch') ?? false;
 
     log.info('building shared packages with Rspack');
-    const rspackArgs = ['scripts/build_rspack_bundles.js', '--shared-only'];
+    const rspackArgs = ['scripts/build_kibana_platform_plugins.js', '--shared-only'];
     if (dist) rspackArgs.push('--dist');
     if (watch) rspackArgs.push('--watch');
     if (!cache) rspackArgs.push('--no-cache');

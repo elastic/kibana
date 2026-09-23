@@ -46,6 +46,16 @@ export function createSharedNpmConfig({
         'util',
         'url',
         'qs',
+
+        /**
+         * babel runtime helpers referenced from entry chunks, derived from
+         * bundle stats:
+         *
+         *  node scripts/build_kibana_platform_plugins --dist --profile-stats-only
+         *
+         * then inspect target/public/bundles/stats.json for
+         * @babel/runtime/helpers modules.
+         */
         '@babel/runtime/helpers/assertThisInitialized',
         '@babel/runtime/helpers/classPrivateFieldGet',
         '@babel/runtime/helpers/classPrivateFieldSet',

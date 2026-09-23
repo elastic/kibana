@@ -202,6 +202,7 @@ describe('proposals.createProposal step', () => {
       id: 'proposal-1',
       status: 'pending',
       category: 'tune',
+      action: { name: 'Create rule' },
       expiresAt: '2026-09-04T00:00:00.000Z',
     });
     const { definition } = createDefinition(create);
@@ -224,11 +225,70 @@ describe('proposals.createProposal step', () => {
     expect(resolveUser).toHaveBeenCalledWith(FAKE_REQUEST);
     expect(result.output).toEqual({
       proposalId: 'proposal-1',
+      rootProposalId: 'proposal-1',
       status: 'pending',
       category: 'tune',
-      requiresDecision: true,
+      alwaysGate: false,
       expiresAt: '2026-09-04T00:00:00.000Z',
     });
+  });
+
+  it('should report alwaysGate when the action refuses to be auto-approved', async () => {
+    const create = jest.fn().mockResolvedValue({
+      id: 'p',
+      status: 'pending',
+      action: { name: 'Isolate host', approvalPolicy: 'always-gate' },
+    });
+    const { definition } = createDefinition(create);
+
+    const result = await definition.handler(
+      createContext({
+        conversationId: 'conv-1',
+        comment: 'Isolate the host',
+        actionWorkflowId: 'system-alertzero-action-isolate-host',
+      })
+    );
+
+    expect(result.output?.alwaysGate).toBe(true);
+  });
+
+  it.each([
+    ['autonomy-dependent', { name: 'Create rule', approvalPolicy: 'autonomy-dependent' }],
+    ['no declared policy', { name: 'Create rule' }],
+  ])('should leave alwaysGate false for an action with %s', async (_label, action) => {
+    // Only `always-gate` overrides the caller; a resolved action that declares
+    // anything else leaves the decision to the autonomy already resolved.
+    const create = jest.fn().mockResolvedValue({ id: 'p', status: 'pending', action });
+    const { definition } = createDefinition(create);
+
+    const result = await definition.handler(
+      createContext({
+        conversationId: 'conv-1',
+        comment: 'Tune the noisy rule',
+        actionWorkflowId: 'system-alertzero-action-create-rule',
+      })
+    );
+
+    expect(result.output?.alwaysGate).toBe(false);
+  });
+
+  it('should fail closed on alwaysGate when the action metadata did not resolve', async () => {
+    // `create` swallows a workflow read failure and invalid `actionMetadata`
+    // alike, so both reach the handler as no metadata at all. Reading that as
+    // "no always-gate policy" would run an action whose author forbade it on
+    // nothing more than a transient lookup error.
+    const create = jest.fn().mockResolvedValue({ id: 'p', status: 'pending', action: undefined });
+    const { definition } = createDefinition(create);
+
+    const result = await definition.handler(
+      createContext({
+        conversationId: 'conv-1',
+        comment: 'Tune the noisy rule',
+        actionWorkflowId: 'system-alertzero-action-create-rule',
+      })
+    );
+
+    expect(result.output?.alwaysGate).toBe(true);
   });
 
   it('should pass a blank optional input to the service as an omission', async () => {
@@ -275,21 +335,6 @@ describe('proposals.createProposal step', () => {
     );
 
     expect(result.output?.expiresAt).toBe('2026-09-04T00:00:00.000Z');
-  });
-
-  it('should report requiresDecision from the decision rather than the status', async () => {
-    // An approved proposal is briefly `executing`, and a status check would
-    // call that "still awaiting".
-    const create = jest
-      .fn()
-      .mockResolvedValue({ id: 'p', status: 'executing', decision: 'approved' });
-    const { definition } = createDefinition(create);
-
-    const result = await definition.handler(
-      createContext({ conversationId: 'conv-1', comment: 'Tune the noisy rule' })
-    );
-
-    expect(result.output?.requiresDecision).toBe(false);
   });
 
   it('should pass the caller impact straight through for the service to prefer', async () => {
@@ -561,6 +606,12 @@ describe('proposals.getProposal step', () => {
       id: 'proposal-1',
       status: 'failed',
       decision: 'approved',
+      decidedBy: {
+        username: 'analyst',
+        fullName: 'Alice Analyst',
+        email: null,
+        profileUid: 'uid-1',
+      },
       supersededBy: 'proposal-2',
       expiresAt: '2026-09-04T00:00:00.000Z',
       actionWorkflowId: 'system-alertzero-action-create-rule',
@@ -573,10 +624,24 @@ describe('proposals.getProposal step', () => {
     expect(result.output).toEqual({
       status: 'failed',
       decision: 'approved',
+      decidedBy: {
+        username: 'analyst',
+        fullName: 'Alice Analyst',
+        email: null,
+        profileUid: 'uid-1',
+      },
       supersededBy: 'proposal-2',
       expiresAt: '2026-09-04T00:00:00.000Z',
       actionWorkflowId: 'system-alertzero-action-create-rule',
     });
+  });
+
+  it('should leave decidedBy undefined when the stored proposal has no decider', async () => {
+    const get = jest.fn().mockResolvedValue({ status: 'pending' });
+
+    const result = await getDefinition(get).handler(createContext({ proposalId: 'proposal-1' }));
+
+    expect(result.output?.decidedBy).toBeUndefined();
   });
 
   it('should assert read rather than manage', async () => {

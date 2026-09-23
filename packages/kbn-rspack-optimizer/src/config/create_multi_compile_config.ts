@@ -21,25 +21,28 @@ export const KIBANA_COMPILER = 'kibana';
 
 export async function createMultiCompileConfig(
   options: SingleCompileConfigOptions
-): Promise<Configuration[]> {
+): Promise<{ configs: Configuration[]; bundleCount: number }> {
   const sharedConfigs = createSharedCompileConfigs(options);
   const { npmManifest } = resolveSharedAssetPaths(
     options.repoRoot,
     options.outputRoot ?? options.repoRoot
   );
-  const kibanaConfig = await createSingleCompileConfig({
+  const { config: kibanaConfig, bundleCount } = await createSingleCompileConfig({
     ...options,
     dllManifestPath: npmManifest,
   });
 
-  return [
-    ...sharedConfigs,
-    {
-      ...kibanaConfig,
-      name: KIBANA_COMPILER,
-      dependencies: [SHARED_SRC_COMPILER, MONACO_WORKERS_COMPILER],
-    },
-  ];
+  return {
+    bundleCount,
+    configs: [
+      ...sharedConfigs,
+      {
+        ...kibanaConfig,
+        name: KIBANA_COMPILER,
+        dependencies: [SHARED_SRC_COMPILER, MONACO_WORKERS_COMPILER],
+      },
+    ],
+  };
 }
 
 export function createSharedCompileConfigs({

@@ -66,7 +66,8 @@ describe('shared Rspack configs', () => {
   });
 
   it('creates an ordered four-compiler graph', async () => {
-    const configs = await createMultiCompileConfig({ repoRoot, outputRoot });
+    const { configs, bundleCount } = await createMultiCompileConfig({ repoRoot, outputRoot });
+    expect(bundleCount).toBeGreaterThan(0);
 
     expect(
       configs.map(({ name, dependencies }) => ({
