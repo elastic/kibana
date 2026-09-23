@@ -11,11 +11,7 @@ import type { CoreSetup, CoreStart, IRouter, KibanaRequest, Logger } from '@kbn/
 import { type ConversationRound, isToolCallStep } from '@kbn/agent-builder-common';
 import type { ElasticConsolePluginStart, ElasticConsoleStartDependencies } from '../types';
 import { createConversationClient } from '../lib/conversation_storage';
-import {
-  conversationSchemaVersion,
-  eventsFromRounds,
-  hydrateRounds,
-} from '../lib/timeline';
+import { conversationSchemaVersion, eventsFromRounds, hydrateRounds } from '../lib/timeline';
 import { isElasticConsoleEnabled } from './is_enabled';
 
 /**
