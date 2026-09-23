@@ -41,7 +41,8 @@ export interface SpacesServiceSetup {
 
   /**
    * Registers a handler that runs when a space is deleted, before its saved objects and the
-   * space document are removed.
+   * space document are removed. Handlers must be idempotent: a failed or concurrent deletion
+   * runs them again for the same space.
    * @param handler the handler to run.
    */
   registerSpaceDeleteHandler(handler: SpaceDeleteHandler): void;

@@ -39,6 +39,7 @@ const LEGACY_URL_ALIAS_TYPE = 'legacy-url-alias';
 
 /**
  * Runs when a space is deleted, before its saved objects and the space itself are removed.
+ * A failed or concurrent deletion can run it again for the same space, so it must be idempotent.
  * @param spaceId the id of the space being deleted.
  */
 export type SpaceDeleteHandler = (spaceId: string) => Promise<void>;
