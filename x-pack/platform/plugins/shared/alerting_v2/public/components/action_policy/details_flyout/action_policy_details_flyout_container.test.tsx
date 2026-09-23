@@ -201,7 +201,6 @@ const buildPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPolic
     destinations: [{ type: 'connector', id: 'c-1' }],
     grouping_mode: 'per_episode',
     enabled: true,
-    tags: ['t1'],
     matcher: undefined,
     group_by: undefined,
     throttle: undefined,

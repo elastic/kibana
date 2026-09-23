@@ -12,7 +12,6 @@ import type {
   Conversation,
   ChatAgentEvent,
   AgentConfigurationOverrides,
-  ConversationAction,
   AgentExecutionMode,
   ConversationRoundAuthor,
   InteractivityConfigInput,
@@ -43,7 +42,6 @@ export const executeAgent$ = ({
   reasoningLevel,
   browserApiTools,
   configurationOverrides,
-  action,
   executionMode,
   interactivity,
   parentExecutionId,
@@ -67,7 +65,6 @@ export const executeAgent$ = ({
   reasoningLevel?: ChatCompletionReasoningEffort;
   browserApiTools?: BrowserApiToolMetadata[];
   configurationOverrides?: AgentConfigurationOverrides;
-  action?: ConversationAction;
   executionMode?: AgentExecutionMode;
   interactivity?: InteractivityConfigInput;
   parentExecutionId?: string;
@@ -97,7 +94,6 @@ export const executeAgent$ = ({
         configurationOverrides,
         structuredOutput,
         outputSchema,
-        action,
         executionId,
         roundId,
       },

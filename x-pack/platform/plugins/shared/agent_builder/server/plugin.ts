@@ -220,6 +220,7 @@ export class AgentBuilderPlugin
           attachmentsService: services.attachments,
           coreStart,
           spaces: startDeps.spaces,
+          source: 'workflow',
         });
       },
       isExperimentalEnabled: this.isExperimentalEnabled,
@@ -455,6 +456,7 @@ export class AgentBuilderPlugin
             attachmentsService: attachments,
             coreStart,
             spaces,
+            source: 'server_api',
           }),
       },
       conversationTemplates,

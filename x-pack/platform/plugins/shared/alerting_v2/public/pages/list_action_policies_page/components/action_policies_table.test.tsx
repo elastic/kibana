@@ -134,15 +134,6 @@ jest.mock('../../../hooks/use_fetch_workflow', () => ({
   useFetchWorkflow: (...args: unknown[]) => mockUseFetchWorkflow(...args),
 }));
 
-let mockTagNames: string[] = [];
-const mockUseFetchTags = jest.fn();
-jest.mock('../../../hooks/use_fetch_tags', () => ({
-  useFetchTags: (params?: { search?: string }) => {
-    mockUseFetchTags(params);
-    return { data: mockTagNames, isLoading: false };
-  },
-}));
-
 jest.mock('../../../hooks/use_bulk_get_user_profiles', () => ({
   useBulkGetUserProfiles: () => ({ data: undefined, isLoading: false }),
 }));
@@ -183,7 +174,6 @@ const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPoli
   destinations: [{ type: 'workflow', id: 'workflow-1' }],
   matcher: null,
   group_by: null,
-  tags: null,
   grouping_mode: null,
   throttle: { strategy: undefined, interval: null },
   snoozed_until: null,
@@ -208,7 +198,6 @@ describe('ActionPoliciesTable', () => {
     mockCapabilities = WRITE_CAPABILITIES;
     mockAgentBuilderShow = true;
     mockExperimentalFeaturesEnabled = true;
-    mockTagNames = [];
 
     mockBulkGet.mockResolvedValue([]);
     mockSettingsClientGet.mockReturnValue('[mock formatted date]');
@@ -322,7 +311,6 @@ describe('ActionPoliciesTable', () => {
       expect(columnHeaders).toEqual(
         expect.arrayContaining([
           'Name',
-          'Tags',
           'Destinations',
           'Last updated',
           'Updated by',
@@ -420,134 +408,6 @@ describe('ActionPoliciesTable', () => {
       await waitFor(() => {
         expect(lastFindItemsFilters().enabled).toBeUndefined();
       });
-    });
-  });
-
-  describe('Tags filter', () => {
-    const openTagsFilter = async () => {
-      await waitFor(() =>
-        expect(screen.getByTestId('actionPoliciesTagsFilter')).toBeInTheDocument()
-      );
-      fireEvent.click(screen.getByTestId('actionPoliciesTagsFilter'));
-    };
-
-    const lastFindItemsFilters = () => {
-      const calls = mockFindItems.mock.calls;
-      return calls[calls.length - 1][0].filters;
-    };
-
-    beforeEach(() => {
-      mockTagNames = ['critical', 'staging', 'production'];
-    });
-
-    it('renders the Tags filter button in the toolbar', async () => {
-      renderTable();
-
-      await waitFor(() =>
-        expect(screen.getByTestId('actionPoliciesTagsFilter')).toBeInTheDocument()
-      );
-    });
-
-    it('calls findItems with the selected tag when a tag is chosen', async () => {
-      renderTable();
-
-      await openTagsFilter();
-      fireEvent.click(await screen.findByText('critical'));
-
-      await waitFor(() => {
-        expect(lastFindItemsFilters().tag).toMatchObject({ include: ['critical'] });
-      });
-    });
-
-    it('calls findItems with multiple tags when several are selected', async () => {
-      renderTable();
-
-      await openTagsFilter();
-      fireEvent.click(await screen.findByText('critical'));
-      await waitFor(() =>
-        expect(lastFindItemsFilters().tag).toMatchObject({ include: ['critical'] })
-      );
-
-      await openTagsFilter();
-      fireEvent.click(await screen.findByText('staging'));
-
-      await waitFor(() => {
-        expect(lastFindItemsFilters().tag).toMatchObject({
-          include: expect.arrayContaining(['critical', 'staging']),
-        });
-      });
-    });
-
-    it('calls findItems without tag filter after deselecting the active tag', async () => {
-      renderTable();
-
-      await openTagsFilter();
-      fireEvent.click(await screen.findByText('critical'));
-      await waitFor(() =>
-        expect(lastFindItemsFilters().tag).toMatchObject({ include: ['critical'] })
-      );
-
-      await openTagsFilter();
-      fireEvent.click(await screen.findByText('critical'));
-
-      await waitFor(() => {
-        expect(lastFindItemsFilters().tag).toBeUndefined();
-      });
-    });
-
-    it('sends the debounced popover search to the tags API', async () => {
-      renderTable();
-
-      await openTagsFilter();
-      fireEvent.change(await screen.findByTestId('actionPoliciesTagsFilterSearch'), {
-        target: { value: 'prod' },
-      });
-
-      await waitFor(() => {
-        expect(mockUseFetchTags).toHaveBeenCalledWith({ search: 'prod' });
-      });
-    });
-
-    it('keeps a selected tag listed once it falls outside the returned tags', async () => {
-      renderTable();
-
-      await openTagsFilter();
-      fireEvent.click(await screen.findByText('critical'));
-      await waitFor(() =>
-        expect(lastFindItemsFilters().tag).toMatchObject({ include: ['critical'] })
-      );
-
-      // A search returns tags that no longer include the selected one.
-      mockTagNames = ['production'];
-      await openTagsFilter();
-      fireEvent.change(await screen.findByTestId('actionPoliciesTagsFilterSearch'), {
-        target: { value: 'pro' },
-      });
-
-      await waitFor(() => {
-        expect(screen.getByText('production')).toBeInTheDocument();
-        expect(screen.getByText('critical')).toBeInTheDocument();
-      });
-    });
-
-    it('shows the cap guidance only when the tags cap is reached', async () => {
-      mockTagNames = Array.from({ length: 20 }, (_, i) => `tag-${i}`);
-      renderTable();
-
-      await openTagsFilter();
-
-      expect(await screen.findByTestId('actionPoliciesTagsFilterCapGuidance')).toBeInTheDocument();
-    });
-
-    it('does not show the cap guidance below the tags cap', async () => {
-      renderTable();
-
-      await openTagsFilter();
-      await waitFor(() =>
-        expect(screen.getByTestId('actionPoliciesTagsFilterSearch')).toBeInTheDocument()
-      );
-
-      expect(screen.queryByTestId('actionPoliciesTagsFilterCapGuidance')).not.toBeInTheDocument();
     });
   });
 
