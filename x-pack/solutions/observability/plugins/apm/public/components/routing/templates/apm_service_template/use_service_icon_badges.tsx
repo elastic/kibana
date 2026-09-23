@@ -48,9 +48,10 @@ function getServerlessTitle(serverlessType?: ServerlessType): string {
 
 function useServiceIconCandidates({
   serviceName,
+  environment,
   start,
   end,
-}: Pick<Props, 'serviceName' | 'start' | 'end'>) {
+}: Pick<Props, 'serviceName' | 'environment' | 'start' | 'end'>) {
   const isDarkMode = useKibanaIsDarkMode();
 
   const { data: icons, status: iconsFetchStatus } = useFetcher(
@@ -59,12 +60,12 @@ function useServiceIconCandidates({
         return callApmApi('GET /internal/apm/services/{serviceName}/metadata/icons', {
           params: {
             path: { serviceName },
-            query: { start, end },
+            query: { start, end, environment },
           },
         });
       }
     },
-    [serviceName, start, end]
+    [serviceName, environment, start, end]
   );
 
   const isLoading = !icons && iconsFetchStatus === FETCH_STATUS.LOADING;
@@ -128,7 +129,12 @@ export function useServiceIconBadges({
   start,
   end,
 }: Props): AppHeaderBadge[] {
-  const { candidates, isLoading } = useServiceIconCandidates({ serviceName, start, end });
+  const { candidates, isLoading } = useServiceIconCandidates({
+    serviceName,
+    environment,
+    start,
+    end,
+  });
 
   return useMemo(() => {
     if (isLoading) {

@@ -6,6 +6,7 @@
  */
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { ContainerType, ServerlessType } from '@kbn/apm-types';
+import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { rangeSchema } from '../../default_api_types';
 
@@ -21,7 +22,7 @@ export const serviceMetadataIconsRoute = defineRoute<ServiceMetadataIcons>()({
   params: lazySchema(() =>
     z.object({
       path: z.object({ serviceName: z.string() }),
-      query: rangeSchema,
+      query: rangeSchema.merge(environmentSchema),
     })
   ),
 });

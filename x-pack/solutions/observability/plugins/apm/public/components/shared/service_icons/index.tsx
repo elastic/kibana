@@ -89,12 +89,12 @@ export function ServiceIcons({ start, end, serviceName, environment, size = 'm' 
         return callApmApi('GET /internal/apm/services/{serviceName}/metadata/icons', {
           params: {
             path: { serviceName },
-            query: { start, end },
+            query: { start, end, environment },
           },
         });
       }
     },
-    [serviceName, start, end]
+    [serviceName, start, end, environment]
   );
 
   const { data: details, status: detailsFetchStatus } = useFetcher(
