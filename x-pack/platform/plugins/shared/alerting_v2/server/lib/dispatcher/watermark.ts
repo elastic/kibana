@@ -11,7 +11,8 @@ import type { DispatcherPipelineInput, DispatcherPipelineResult } from './types'
  * Derives the next persisted watermark from a tick's outcome.
  *
  * Rules (applied in order):
- * - Aborted before StoreActionsStep (recordedEpisodes undefined): no advance.
+ * - Aborted before StoreActionsStep (recordedEpisodes undefined), or
+ *   inline_stats_too_large (scan query rejected): no advance.
  * - No actions: window fully consumed. Advance to windowEnd.
  * - Truncated (row count === EPISODE_QUERY_LIMIT): advance to the last fetched
  *   episode's timestamp (the truncation edge); the deferred tail is re-read next tick.

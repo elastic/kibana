@@ -8,6 +8,16 @@
 import type { DiagnosticResult } from '@elastic/elasticsearch';
 import { errors } from '@elastic/elasticsearch';
 import type { AlertEventSeverity } from '@kbn/alerting-v2-schemas';
+import { FetchEpisodesStep, parseAlertEpisodes } from './fetch_episodes_step';
+import { createQueryService } from '../../services/query_service/query_service.mock';
+import { createLoggerService } from '../../services/logger_service/logger_service.mock';
+import { createDispatchableAlertEventsResponse } from '../fixtures/dispatcher';
+import {
+  createAlertEpisode,
+  createDispatcherPipelineState,
+  createStepLogger,
+} from '../fixtures/test_utils';
+import { EPISODE_QUERY_LIMIT } from '../queries';
 
 const makeSubPlanError = () =>
   new errors.ResponseError({
@@ -19,15 +29,6 @@ const makeSubPlanError = () =>
       },
     },
   } as DiagnosticResult);
-import { FetchEpisodesStep, parseAlertEpisodes } from './fetch_episodes_step';
-import { createQueryService } from '../../services/query_service/query_service.mock';
-import { createDispatchableAlertEventsResponse } from '../fixtures/dispatcher';
-import {
-  createAlertEpisode,
-  createDispatcherPipelineState,
-  createStepLogger,
-} from '../fixtures/test_utils';
-import { EPISODE_QUERY_LIMIT } from '../queries';
 
 const logger = createStepLogger();
 
@@ -145,6 +146,27 @@ describe('FetchEpisodesStep', () => {
     const result = await step.execute(state, logger);
 
     expect(result).toEqual({ type: 'halt', reason: 'inline_stats_too_large' });
+  });
+
+  it('logs the held watermark, its lag, and the force-advance threshold on a sub-plan error', async () => {
+    const { queryService, mockEsClient } = createQueryService();
+    const { loggerService, mockLogger } = createLoggerService();
+    const step = new FetchEpisodesStep(queryService);
+
+    mockEsClient.esql.query.mockRejectedValueOnce(makeSubPlanError());
+
+    // Default input: startedAt=08:00, eventWatermark=07:30, windowStart=07:20, windowEnd=07:35.
+    await step.execute(createDispatcherPipelineState(), loggerService);
+
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      'ES rejected the INLINE STATS pre-fetch query for ' +
+        '[2026-01-22T07:20:00.000Z, 2026-01-22T07:35:00.000Z] (sub-plan too large). ' +
+        'Watermark held at 2026-01-22T07:30:00.000Z (lag: 1800000ms); the escape hatch ' +
+        'force-advances on its first fire after lag exceeds 15m.',
+      expect.objectContaining({
+        labels: expect.objectContaining({ code: 'DISPATCHER_INLINE_STATS_TOO_LARGE' }),
+      })
+    );
   });
 
   it('propagates a 400 with a different reason (not sub-plan)', async () => {
