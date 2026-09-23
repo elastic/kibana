@@ -30,6 +30,8 @@ import { useUpdateRule } from './use_update_rule';
 
 const templateToSyntheticRule = (template: RuleTemplateResponse): RuleApiResponse => ({
   ...template.rule,
+  // `null` is the write-side way to say "no delays"; a rule read back never carries it.
+  state_transition: template.rule.state_transition ?? undefined,
   id: '',
   enabled: false,
   created_by: null,

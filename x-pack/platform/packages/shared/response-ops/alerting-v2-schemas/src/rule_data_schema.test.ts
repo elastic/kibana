@@ -385,6 +385,34 @@ describe('createRuleDataSchema', () => {
       expect(result.success).toBe(false);
     });
 
+    // The parser drops a command it cannot read, so these compose to bare
+    // `base` — a rule where every row matches — unless the segment is parsed
+    // on its own.
+    it.each(['foo bar', 'FROM other', 'WHERE'])(
+      'rejects the breach segment %p, which the parser cannot read',
+      (segment) => {
+        const result = createRuleDataSchema.safeParse({
+          ...validCreateData,
+          query: { base: 'FROM metrics-*', breach: { segment } },
+        });
+
+        expect(result.success).toBe(false);
+        expect(result.error?.issues.map(({ path }) => path)).toEqual([
+          ['query', 'breach', 'segment'],
+        ]);
+      }
+    );
+
+    it('reports an invalid base once, without repeating it from the composition', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        query: { base: 'FROM |', breach: { segment: 'WHERE cpu > 0.9' } },
+      });
+
+      expect(result.success).toBe(false);
+      expect(result.error?.issues.map(({ path }) => path)).toEqual([['query', 'base']]);
+    });
+
     it('rejects unknown keys inside query (strict)', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
@@ -788,6 +816,24 @@ describe('createRuleDataSchema', () => {
       }
     );
 
+    it.each(['pending', 'recovering'] as const)(
+      'rejects an empty %s phase, which would gate nothing',
+      (phase) => {
+        const result = createRuleDataSchema.safeParse({
+          ...validCreateData,
+          state_transition: { [phase]: {} },
+        });
+
+        expect(result.success).toBe(false);
+        expect(result.error?.issues).toEqual([
+          expect.objectContaining({
+            path: ['state_transition', phase],
+            message: 'A state transition phase must set count or timeframe.',
+          }),
+        ]);
+      }
+    );
+
     it('rejects unknown keys inside state_transition (strict)', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
@@ -1009,6 +1055,50 @@ describe('createRuleDataSchema', () => {
 
       expect(result.success).toBe(false);
     });
+  });
+
+  describe('lifecycle configuration', () => {
+    it.each(['recovery', 'no_data'] as const)(
+      'reports a missing "%s" on its own field',
+      (missing) => {
+        const { [missing]: _, ...data } = validCreateData;
+        const result = createRuleDataSchema.safeParse(data);
+
+        expect(result.success).toBe(false);
+        expect(result.error?.issues).toEqual([
+          expect.objectContaining({
+            path: [missing],
+            message: 'Alert rules must set both recovery and no_data.',
+          }),
+        ]);
+      }
+    );
+
+    it('reports both lifecycle fields when an alert rule sets neither', () => {
+      const { recovery: _recovery, no_data: _noData, ...data } = validCreateData;
+      const result = createRuleDataSchema.safeParse(data);
+
+      expect(result.success).toBe(false);
+      expect(result.error?.issues.map(({ path }) => path)).toEqual([['recovery'], ['no_data']]);
+    });
+
+    it.each(['recovery', 'no_data'] as const)(
+      'reports a signal rule carrying "%s" on that field',
+      (field) => {
+        const result = createRuleDataSchema.safeParse({
+          ...validSignalCreateData,
+          [field]: validCreateData[field],
+        });
+
+        expect(result.success).toBe(false);
+        expect(result.error?.issues).toEqual([
+          expect.objectContaining({
+            path: [field],
+            message: 'Signal rules cannot set recovery or no_data.',
+          }),
+        ]);
+      }
+    );
   });
 
   describe('required fields', () => {
@@ -1573,7 +1663,9 @@ describe('ES|QL query length cap', () => {
     });
 
     expect(result.success).toBe(false);
-    expect(parseErrors).not.toHaveBeenCalled();
+    // The segment is still parsed on its own, against the placeholder source.
+    expect(parseErrors).toHaveBeenCalledTimes(1);
+    expect(parseErrors).toHaveBeenCalledWith('FROM _\n| WHERE cpu > 0.9');
     expect(parse).not.toHaveBeenCalled();
   });
 

@@ -899,7 +899,6 @@ describe('executeRuleOperations', () => {
       schedule: { every: '5m', lookback: '10m' },
       query: { base: 'FROM metrics-* | STATS COUNT(*)' },
       time_field: '@timestamp',
-      state_transition: null,
     };
 
     it('passes validation for a complete rule', async () => {

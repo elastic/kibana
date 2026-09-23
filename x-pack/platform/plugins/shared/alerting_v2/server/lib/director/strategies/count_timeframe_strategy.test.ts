@@ -89,10 +89,6 @@ describe('CountTimeframeStrategy', () => {
     it('returns false when stateTransition is undefined', () => {
       expect(strategy.canHandle(createRuleResponse({ state_transition: undefined }))).toBe(false);
     });
-
-    it('returns false when stateTransition is null', () => {
-      expect(strategy.canHandle(createRuleResponse({ state_transition: null }))).toBe(false);
-    });
   });
 
   describe('without stateTransition config (falls back to basic)', () => {

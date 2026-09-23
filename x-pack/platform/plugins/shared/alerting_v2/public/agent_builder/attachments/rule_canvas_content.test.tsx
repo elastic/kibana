@@ -62,7 +62,6 @@ const createAttachment = (
     schedule: { every: '5m' },
     time_field: '@timestamp',
     query: { base: 'FROM logs-*' },
-    state_transition: null,
     enabled: overrides.enabled,
     ...(overrides.dataId ? { id: overrides.dataId } : {}),
   } as any,

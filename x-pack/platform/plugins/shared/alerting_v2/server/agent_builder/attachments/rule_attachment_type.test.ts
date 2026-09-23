@@ -34,7 +34,6 @@ const baseRuleData: RuleAttachmentData = {
   query: { base: 'FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name' },
   recovery: { strategy: 'no_breach' },
   no_data: { strategy: 'ignore' },
-  state_transition: null,
   created_by: 'elastic',
   created_at: '2026-04-01T00:00:00.000Z',
   updated_by: 'elastic',

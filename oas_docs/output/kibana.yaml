@@ -149308,9 +149308,7 @@ components:
         schedule:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_schedule'
         state_transition:
-          allOf:
-            - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_state_transition'
-          nullable: true
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_state_transition'
         time_field:
           default: '@timestamp'
           description: Document field Kibana uses with `schedule.lookback` to time-filter `query.base`.

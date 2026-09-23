@@ -9,6 +9,7 @@ import { z } from '@kbn/zod/v4';
 import { DEFAULT_TIME_FIELD } from '@kbn/alerting-v2-constants';
 import {
   validateEsqlQuery,
+  validateEsqlQuerySegment,
   validateMinDuration,
   composeEsqlQuery,
   validateComposedEsqlQuery,
@@ -124,15 +125,25 @@ export const scheduleSchema = z
 /**
  * Appendable ES|QL segment (e.g. `WHERE …`). Conceptually a bare command,
  * but a leading `|` is also tolerated — `composeEsqlQuery` strips it before
- * splicing the segment onto `base`. We only enforce structural bounds here
- * (length, non-empty). Full parser validation only runs when the segment is
- * composed with its `base` via `composeEsqlQuery`.
+ * splicing the segment onto `base`. Parsed on its own rather than only as part
+ * of the composed query, because the parser silently drops a command it cannot
+ * read: an unparseable segment composes to bare `base`, which would store a
+ * rule where every row matches.
  */
 export const esqlQuerySegmentSchema = z
   .string()
   .min(1)
   .max(MAX_ESQL_QUERY_LENGTH, { abort: true })
-  .refine((s) => s.trim().length > 0, { message: 'Segment must not be whitespace-only' });
+  .refine((s) => s.trim().length > 0, {
+    message: 'Segment must not be whitespace-only',
+    abort: true,
+  })
+  .superRefine((value, ctx) => {
+    const error = validateEsqlQuerySegment(value);
+    if (error) {
+      ctx.addIssue({ code: 'custom', message: error });
+    }
+  });
 
 const breachSchema = z
   .object({
@@ -146,6 +157,15 @@ const breachSchema = z
   )
   .meta({ id: 'alerting_rule_breach' });
 
+/**
+ * Composing re-parses both parts, so it repeats the error of whichever part is
+ * already invalid. The composition checks stand down once one has reported.
+ */
+const hasIssueOn = (
+  issues: ReadonlyArray<{ path?: PropertyKey[] }>,
+  ...fields: string[]
+): boolean => issues.some((issue) => fields.some((field) => issue.path?.[0] === field));
+
 export const querySchema = z
   .object({
     base: esqlQuerySchema.describe(
@@ -155,16 +175,16 @@ export const querySchema = z
   })
   .strict()
   .check((ctx) => {
-    if (ctx.value.breach) {
-      const breachError = validateComposedEsqlQuery(ctx.value.base, ctx.value.breach.segment);
-      if (breachError) {
-        ctx.issues.push({
-          code: 'custom',
-          path: ['breach', 'segment'],
-          message: breachError,
-          input: ctx.value.breach.segment,
-        });
-      }
+    if (!ctx.value.breach || hasIssueOn(ctx.issues, 'base', 'breach')) return;
+
+    const breachError = validateComposedEsqlQuery(ctx.value.base, ctx.value.breach.segment);
+    if (breachError) {
+      ctx.issues.push({
+        code: 'custom',
+        path: ['breach', 'segment'],
+        message: breachError,
+        input: ctx.value.breach.segment,
+      });
     }
   })
   .describe(
@@ -384,12 +404,25 @@ const stateTransitionPhaseSchema = ({
     })
     .strict()
     .check((ctx) => {
-      if (ctx.value.operator != null && (ctx.value.count == null || ctx.value.timeframe == null)) {
+      const { count, timeframe, operator } = ctx.value;
+
+      // A phase exists to hold a threshold; an empty one reads as configured
+      // but gates nothing, and the stored shape has no way to express it.
+      if (count == null && timeframe == null) {
+        ctx.issues.push({
+          code: 'custom',
+          message: 'A state transition phase must set count or timeframe.',
+          input: ctx.value,
+        });
+        return;
+      }
+
+      if (operator != null && (count == null || timeframe == null)) {
         ctx.issues.push({
           code: 'custom',
           path: ['operator'],
           message: 'operator is only allowed when both count and timeframe are set.',
-          input: ctx.value.operator,
+          input: operator,
         });
       }
     })
@@ -552,6 +585,9 @@ export const isStateTransitionAllowed = (data: {
   state_transition?: unknown;
 }): boolean => data.kind === 'alert' || data.state_transition == null;
 
+/** The two objects that describe an alert rule's episode lifecycle. */
+const LIFECYCLE_FIELDS = ['recovery', 'no_data'] as const;
+
 /** Signal rules have no episodes, so there is nothing for recovery or no-data to transition. */
 export const isLifecycleConfigAllowedForKind = (data: RuleLifecycleShape): boolean =>
   data.kind !== 'signal' || (data.recovery == null && data.no_data == null);
@@ -616,13 +652,32 @@ const applyCreateRuleRefinements = <T extends z.ZodType<CreateRuleRefinementFiel
       message: 'state_transition is only allowed when kind is "alert".',
       path: ['state_transition'],
     })
-    .refine(isLifecycleConfigAllowedForKind, {
-      message: 'Signal rules cannot set recovery or no_data.',
-      path: ['recovery'],
-    })
-    .refine(isLifecycleConfigPresentForKind, {
-      message: 'Alert rules must set both recovery and no_data.',
-      path: ['recovery'],
+    .check((ctx) => {
+      const allowed = isLifecycleConfigAllowedForKind(ctx.value);
+      const present = isLifecycleConfigPresentForKind(ctx.value);
+      if (allowed && present) return;
+
+      // One issue per offending field, so an alert rule that only forgot
+      // `no_data` is not told to look at `recovery`.
+      for (const field of LIFECYCLE_FIELDS) {
+        const set = ctx.value[field] != null;
+        if (!allowed && set) {
+          ctx.issues.push({
+            code: 'custom',
+            path: [field],
+            message: 'Signal rules cannot set recovery or no_data.',
+            input: ctx.value[field],
+          });
+        }
+        if (!present && !set) {
+          ctx.issues.push({
+            code: 'custom',
+            path: [field],
+            message: 'Alert rules must set both recovery and no_data.',
+            input: ctx.value[field],
+          });
+        }
+      }
     })
     .refine(isRecoveryConditionUsableWithBreach, {
       message: 'recovery.strategy "condition" requires query.breach.',
@@ -636,6 +691,7 @@ const applyCreateRuleRefinements = <T extends z.ZodType<CreateRuleRefinementFiel
     .check((ctx) => {
       const { query, recovery } = ctx.value;
       if (query == null || recovery?.strategy !== recoveryStrategy.condition) return;
+      if (hasIssueOn(ctx.issues, 'query', 'recovery')) return;
 
       const error = validateComposedEsqlQuery(query.base, recovery.segment);
       if (error) {
@@ -744,6 +800,9 @@ export const ruleResponseMetadataSchema = metadataSchema
  */
 export const ruleResponseSchema = createRuleDataBaseSchema
   .extend({
+    // `null` clears the field on write; the server stores that as absent, so a
+    // response never carries it.
+    state_transition: stateTransitionSchema.optional(),
     id: z.string().describe('Unique rule identifier.'),
     metadata: ruleResponseMetadataSchema,
     enabled: z.boolean().describe('Whether the rule is enabled.'),
