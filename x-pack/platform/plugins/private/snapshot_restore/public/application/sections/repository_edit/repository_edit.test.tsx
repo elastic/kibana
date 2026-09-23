@@ -13,6 +13,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { createMemoryHistory } from 'history';
 import { Router } from '@kbn/shared-ux-router';
 import { i18n } from '@kbn/i18n';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 
 import { textService } from '../../services/text';
 import { breadcrumbService, docTitleService } from '../../services/navigation';
@@ -104,6 +105,15 @@ jest.mock('../../app_context', () => {
   return {
     ...actual,
     useToastNotifications: () => mockToastNotifications,
+    useCore: () => ({
+      docLinks: {
+        links: {
+          snapshotRestore: {
+            guide: 'https://doc-link',
+          },
+        },
+      },
+    }),
     useServices: () => ({
       i18n: {
         translate: (_key: string, { defaultMessage }: { defaultMessage: string }) => defaultMessage,
@@ -154,20 +164,22 @@ describe('<RepositoryEdit />', () => {
       initialEntries: [`/edit_repository/${mockDecodedRepositoryName}`],
     });
     render(
-      <I18nProvider>
-        <Router history={history}>
-          <RepositoryEdit
-            history={history}
-            location={history.location}
-            match={{
-              params: { name: mockDecodedRepositoryName },
-              isExact: true,
-              path: '',
-              url: '',
-            }}
-          />
-        </Router>
-      </I18nProvider>
+      <MockAppHeaderProvider>
+        <I18nProvider>
+          <Router history={history}>
+            <RepositoryEdit
+              history={history}
+              location={history.location}
+              match={{
+                params: { name: mockDecodedRepositoryName },
+                isExact: true,
+                path: '',
+                url: '',
+              }}
+            />
+          </Router>
+        </I18nProvider>
+      </MockAppHeaderProvider>
     );
 
     expect(screen.queryByTestId('repositoryFormToggleDefault')).not.toBeInTheDocument();
@@ -195,20 +207,22 @@ describe('<RepositoryEdit />', () => {
       initialEntries: [`/edit_repository/${mockDecodedRepositoryName}`],
     });
     render(
-      <I18nProvider>
-        <Router history={history}>
-          <RepositoryEdit
-            history={history}
-            location={history.location}
-            match={{
-              params: { name: mockDecodedRepositoryName },
-              isExact: true,
-              path: '',
-              url: '',
-            }}
-          />
-        </Router>
-      </I18nProvider>
+      <MockAppHeaderProvider>
+        <I18nProvider>
+          <Router history={history}>
+            <RepositoryEdit
+              history={history}
+              location={history.location}
+              match={{
+                params: { name: mockDecodedRepositoryName },
+                isExact: true,
+                path: '',
+                url: '',
+              }}
+            />
+          </Router>
+        </I18nProvider>
+      </MockAppHeaderProvider>
     );
 
     expect(screen.getByTestId('repositoryFormToggleDefault')).toBeDisabled();
@@ -235,20 +249,22 @@ describe('<RepositoryEdit />', () => {
       initialEntries: [`/edit_repository/${mockDecodedRepositoryName}`],
     });
     render(
-      <I18nProvider>
-        <Router history={history}>
-          <RepositoryEdit
-            history={history}
-            location={history.location}
-            match={{
-              params: { name: mockDecodedRepositoryName },
-              isExact: true,
-              path: '',
-              url: '',
-            }}
-          />
-        </Router>
-      </I18nProvider>
+      <MockAppHeaderProvider>
+        <I18nProvider>
+          <Router history={history}>
+            <RepositoryEdit
+              history={history}
+              location={history.location}
+              match={{
+                params: { name: mockDecodedRepositoryName },
+                isExact: true,
+                path: '',
+                url: '',
+              }}
+            />
+          </Router>
+        </I18nProvider>
+      </MockAppHeaderProvider>
     );
 
     fireEvent.click(screen.getByTestId('repositoryFormToggleDefault'));
@@ -280,20 +296,22 @@ describe('<RepositoryEdit />', () => {
       initialEntries: [`/edit_repository/${mockDecodedRepositoryName}`],
     });
     render(
-      <I18nProvider>
-        <Router history={history}>
-          <RepositoryEdit
-            history={history}
-            location={history.location}
-            match={{
-              params: { name: mockDecodedRepositoryName },
-              isExact: true,
-              path: '',
-              url: '',
-            }}
-          />
-        </Router>
-      </I18nProvider>
+      <MockAppHeaderProvider>
+        <I18nProvider>
+          <Router history={history}>
+            <RepositoryEdit
+              history={history}
+              location={history.location}
+              match={{
+                params: { name: mockDecodedRepositoryName },
+                isExact: true,
+                path: '',
+                url: '',
+              }}
+            />
+          </Router>
+        </I18nProvider>
+      </MockAppHeaderProvider>
     );
 
     fireEvent.click(screen.getByTestId('repositoryFormToggleDefault'));
@@ -322,20 +340,22 @@ describe('<RepositoryEdit />', () => {
       initialEntries: [`/edit_repository/${mockDecodedRepositoryName}`],
     });
     render(
-      <I18nProvider>
-        <Router history={history}>
-          <RepositoryEdit
-            history={history}
-            location={history.location}
-            match={{
-              params: { name: mockDecodedRepositoryName },
-              isExact: true,
-              path: '',
-              url: '',
-            }}
-          />
-        </Router>
-      </I18nProvider>
+      <MockAppHeaderProvider>
+        <I18nProvider>
+          <Router history={history}>
+            <RepositoryEdit
+              history={history}
+              location={history.location}
+              match={{
+                params: { name: mockDecodedRepositoryName },
+                isExact: true,
+                path: '',
+                url: '',
+              }}
+            />
+          </Router>
+        </I18nProvider>
+      </MockAppHeaderProvider>
     );
 
     fireEvent.click(screen.getByTestId('repositoryFormToggleDefault'));
@@ -369,20 +389,22 @@ describe('<RepositoryEdit />', () => {
       initialEntries: [`/edit_repository/${mockDecodedRepositoryName}`],
     });
     render(
-      <I18nProvider>
-        <Router history={history}>
-          <RepositoryEdit
-            history={history}
-            location={history.location}
-            match={{
-              params: { name: mockDecodedRepositoryName },
-              isExact: true,
-              path: '',
-              url: '',
-            }}
-          />
-        </Router>
-      </I18nProvider>
+      <MockAppHeaderProvider>
+        <I18nProvider>
+          <Router history={history}>
+            <RepositoryEdit
+              history={history}
+              location={history.location}
+              match={{
+                params: { name: mockDecodedRepositoryName },
+                isExact: true,
+                path: '',
+                url: '',
+              }}
+            />
+          </Router>
+        </I18nProvider>
+      </MockAppHeaderProvider>
     );
 
     fireEvent.click(screen.getByTestId('repositoryFormToggleDefault'));

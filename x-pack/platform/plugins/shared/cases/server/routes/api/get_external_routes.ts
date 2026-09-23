@@ -31,6 +31,8 @@ import { getAllAlertsAttachedToCaseRoute } from './comments/get_alerts';
 import { findUserActionsRoute } from './user_actions/find_user_actions';
 import { postFileRoute } from './files/post_file';
 import { getPublicTemplateRoutes } from './templates';
+import { findAttachmentsRoute } from './attachments/find_attachments';
+import { getAttachmentRoute } from './attachments/get_attachment';
 import { deleteAttachmentRoute } from './attachments/delete_attachment';
 import { deleteAllAttachmentsRoute } from './attachments/delete_all_attachments';
 
@@ -67,6 +69,8 @@ export const getExternalRoutes = ({
     postCaseConfigureRoute,
     getAllAlertsAttachedToCaseRoute,
     postFileRoute,
+    findAttachmentsRoute,
+    getAttachmentRoute,
     deleteAttachmentRoute,
     deleteAllAttachmentsRoute,
     ...getPublicTemplateRoutes(config),
