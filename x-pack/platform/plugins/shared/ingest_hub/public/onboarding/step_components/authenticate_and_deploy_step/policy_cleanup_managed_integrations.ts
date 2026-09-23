@@ -86,13 +86,15 @@ async function updateManagedIntegrationsPolicy(
 
   const packageName = members[0].service.packageName;
 
-  // Fetch existing policy to preserve its name and package version (avoids timestamp-based name
-  // churn and implicit package upgrades during a cleanup-only PUT).
+  // Fetch existing policy to preserve its name, namespace, and package version (avoids
+  // timestamp-based name churn, namespace drift, and implicit package upgrades on a cleanup PUT).
   let existingName: string | undefined;
+  let existingNamespace: string | undefined;
   let existingVersion: string | undefined;
   try {
     const existing = await sendGetAgentlessPolicy(policyId);
     existingName = existing.item?.name;
+    existingNamespace = existing.item?.namespace;
     existingVersion = existing.item?.package?.version;
   } catch {
     throw new Error(
@@ -138,10 +140,11 @@ async function updateManagedIntegrationsPolicy(
   const vars = buildPackageVars(globalRegion, staticKeys, pkgVarNames);
 
   const policyName = existingName ?? `${packageName.replace(/[^a-zA-Z0-9_-]/g, '_')}-${Date.now()}`;
+  const policyNamespace = existingNamespace ?? namespace;
 
   await sendUpdateAgentlessPolicy(policyId, {
     name: policyName,
-    namespace,
+    namespace: policyNamespace,
     package: { name: packageName, version: pkgVersion },
     ...(vars ? { vars } : {}),
     inputs,

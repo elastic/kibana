@@ -281,7 +281,11 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
           mechanisms: ['ecf'],
           connectorId: null,
           authMethod: null,
-          ...(!ecfStacksUnchanged ? { status: 'succeeded', ecfStacks } : {}),
+          // Always mark succeeded — the deployment is ECF-only now regardless of whether
+          // the stack metadata changed. Without this, a formerly-failed MI+ECF SO that had
+          // MI removed would remain 'failed' even though ECF stacks are in place.
+          status: 'succeeded',
+          ...(!ecfStacksUnchanged ? { ecfStacks } : {}),
         });
         if (!ecfStacksUnchanged) updateDetectAndReviewStep({ ecfStacks });
         if (!existingId) persistDeploymentId(deploymentId);
