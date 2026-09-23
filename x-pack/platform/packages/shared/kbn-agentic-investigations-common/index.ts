@@ -36,6 +36,17 @@ export { OverviewTab } from './src/components/details/details_flyout_tab_content
 export { DetailsBlock } from './src/components/details/detail_block';
 
 export {
+  AttachmentSummarySection,
+  type AttachmentSummarySectionProps,
+  AttachmentSummaryList,
+  type AttachmentSummaryListProps,
+  selectSummaryAttachments,
+  type SummaryAttachment,
+  SUMMARY_ATTACHMENT_TYPES,
+  type SummaryAttachmentType,
+} from './src/components/attachment_summary';
+
+export {
   registerAgenticInvestigationTemplateUI,
   type RegisterAgenticInvestigationTemplateUIOptions,
   getInvestigationTabIds,
