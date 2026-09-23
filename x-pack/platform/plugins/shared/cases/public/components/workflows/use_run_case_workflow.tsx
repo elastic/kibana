@@ -49,6 +49,9 @@ export const createCaseWorkflowComparator = (
     const aHasTag = (a.definition?.tags ?? []).some((tag) => configuredTags.has(tag));
     const bHasTag = (b.definition?.tags ?? []).some((tag) => configuredTags.has(tag));
     const tagRank = Number(bHasTag) - Number(aHasTag);
+    // Tags are the primary sort key: if only one workflow has a configured tag, it wins
+    // outright and triggers are irrelevant. If both or neither have one (tagRank === 0),
+    // the tie must be broken by the `cases.*` trigger check below.
     if (tagRank !== 0) return tagRank;
 
     // The @kbn/workflows trigger-type union only knows built-in types; cases.* trigger
