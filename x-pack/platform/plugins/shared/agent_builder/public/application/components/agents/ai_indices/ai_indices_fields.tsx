@@ -110,8 +110,6 @@ export const AiIndicesFields: React.FC<AiIndicesFieldsProps> = ({
     [aiIndices, inheritedIdSet]
   );
 
-  // Stacked rather than appended beside the name: the append slot cannot shrink, so a long
-  // description would push the name out of the row. Clamped because rows size to their content.
   const renderOption = useCallback(
     (
       { label, value: description }: EuiComboBoxOptionOption<string>,
