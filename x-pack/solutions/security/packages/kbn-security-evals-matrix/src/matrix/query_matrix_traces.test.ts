@@ -950,3 +950,31 @@ describe('aliasJudgeVerdicts', () => {
     ]);
   });
 });
+
+describe('round 7 regression: alias mirroring follows newest run', () => {
+  it('overwrites a stale primary-ID direct trace when the alias run is newer', () => {
+    const traces: MatrixTraceData = {
+      'eis/model:alert-analysis-a': { steps: [], scores: { primary: 1 }, suiteId: 's1' },
+      'provider/slug:alert-analysis-a': { steps: [], scores: { alias: 9 }, suiteId: 's1' },
+    };
+    aliasTraceKeys(
+      traces,
+      new Map([['eis/model', ['provider/slug']]]),
+      new Map([['eis/model', new Map([['s1', 'provider/slug']])]])
+    );
+    expect(traces['eis/model:alert-analysis-a'].scores).toEqual({ alias: 9 });
+  });
+
+  it('keeps first-key-wins when the alias run is not the winner', () => {
+    const traces: MatrixTraceData = {
+      'eis/model:alert-analysis-a': { steps: [], scores: { primary: 1 }, suiteId: 's1' },
+      'provider/slug:alert-analysis-a': { steps: [], scores: { alias: 9 }, suiteId: 's1' },
+    };
+    aliasTraceKeys(
+      traces,
+      new Map([['eis/model', ['provider/slug']]]),
+      new Map([['eis/model', new Map([['s1', 'eis/model']])]])
+    );
+    expect(traces['eis/model:alert-analysis-a'].scores).toEqual({ primary: 1 });
+  });
+});

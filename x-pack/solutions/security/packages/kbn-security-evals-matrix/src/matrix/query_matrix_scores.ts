@@ -68,6 +68,9 @@ export interface AggregatedSuiteScores {
   judgeModelIds?: string[];
   /** Scores withheld for self-judging; set only when the withholding emptied the suite. */
   excludedSelfJudged?: number;
+  /** Scores rejected because the judge was not EIS-backed; set only when the rejection
+   * emptied the suite's prefix datasets (mirrors `excludedSelfJudged`). */
+  excludedNonEis?: number;
   datasets: AggregatedDatasetScores[];
 }
 
@@ -665,6 +668,15 @@ export const queryMatrixScores = async (
               excludedSelfJudgedCount !== undefined &&
               excludedSelfJudgedCount > 0
                 ? excludedSelfJudgedCount
+                : undefined,
+            // A prefix column whose every doc failed the EIS-judge policy must render as
+            // `excluded:non-eis-judge`, not ordinary missing data — the run happened, the
+            // judge assignment is what needs fixing.
+            excludedNonEis:
+              (examplePrefixes.length > 0 ? noPrefixDatasetSurvived : datasets.length === 0) &&
+              (suiteExcludedCounts?.nonEis ?? 0) > 0 &&
+              (excludedSelfJudgedCount ?? 0) === 0
+                ? suiteExcludedCounts?.nonEis
                 : undefined,
             datasets,
           });

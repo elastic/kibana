@@ -383,16 +383,25 @@ export const aliasJudgeVerdicts = (
  */
 export const aliasTraceKeys = (
   traces: MatrixTraceData,
-  modelAliases: ReadonlyMap<string, readonly string[]>
+  modelAliases: ReadonlyMap<string, readonly string[]>,
+  /**
+   * Per (row, suite) the identity whose suite run `buildMatrix` selected as newest —
+   * computed by `newestIdentityBySuite`. Direct example keys carry a `suiteId` tag, so a
+   * mirror from the winning identity OVERWRITES a stale primary-ID trace; mirroring from
+   * a non-winner (or untagged aggregate keys) stays first-key-wins.
+   */
+  winnerBySuite?: ReadonlyMap<string, ReadonlyMap<string, string>>
 ): void => {
   for (const [rowId, aliases] of modelAliases) {
+    const winners = winnerBySuite?.get(rowId);
     for (const alias of aliases) {
       if (alias !== rowId) {
         const prefix = `${alias}:`;
         for (const [key, entry] of Object.entries(traces)) {
           if (key.startsWith(prefix)) {
             const rowKey = traceKey(rowId, key.slice(prefix.length));
-            if (traces[rowKey] === undefined) {
+            const aliasWins = entry.suiteId ? winners?.get(entry.suiteId) === alias : false;
+            if (traces[rowKey] === undefined || aliasWins) {
               traces[rowKey] = entry;
             }
           }
@@ -713,7 +722,36 @@ export const queryMatrixTraces = async (
 
   log.debug(`Matrix traces resolved ${Object.keys(traces).length} trace entries`);
   overlayRepeatedCacheTrails(traces, traceCache);
-  aliasTraceKeys(traces, modelAliases);
+  // Which identity (primary id or alias) holds the newest run per (row, suite): trace
+  // mirroring must follow the same latest-run selection `buildMatrix` applies to scores,
+  // or the row keeps a stale primary-ID trace while its scores came from the alias.
+  const winnerBySuite = new Map<string, Map<string, string>>();
+  for (const [rowId, aliases] of modelAliases) {
+    const identities = [rowId, ...aliases.filter((alias) => alias !== rowId)];
+    const bySuite = new Map<string, { identity: string; timestamp: string }>();
+    const identityScores = aggregated.filter((modelScores) =>
+      identities.includes(modelScores.modelId)
+    );
+    for (const modelScores of identityScores) {
+      for (const suite of modelScores.suites) {
+        const prior = bySuite.get(suite.suiteId);
+        if (!prior || (suite.timestamp ?? '') > prior.timestamp) {
+          bySuite.set(suite.suiteId, {
+            identity: modelScores.modelId,
+            timestamp: suite.timestamp ?? '',
+          });
+        }
+      }
+    }
+    const winners = new Map<string, string>();
+    for (const [suiteId, { identity }] of bySuite) {
+      winners.set(suiteId, identity);
+    }
+    if (winners.size > 0) {
+      winnerBySuite.set(rowId, winners);
+    }
+  }
+  aliasTraceKeys(traces, modelAliases, winnerBySuite);
   if (judgeVerdictsOut) {
     aliasJudgeVerdicts(judgeVerdictsOut, modelAliases);
   }

@@ -318,7 +318,9 @@ const renderTokenCost = (matrix: Matrix, config: MatrixConfig): string => {
       cell.inputTokens && cell.outputTokens
         ? ` title="in ${Math.round(cell.inputTokens.mean).toLocaleString()} / out ${Math.round(
             cell.outputTokens.mean
-          ).toLocaleString()} (min ${Math.round(cell.totalMean).toLocaleString()})"`
+          ).toLocaleString()} (in min ${Math.round(
+            cell.inputTokens.min
+          ).toLocaleString()}, out min ${Math.round(cell.outputTokens.min).toLocaleString()})"`
         : '';
     return `<td class="cell ok cost"${title}>${fmt(cell.totalMean)}</td>`;
   };
@@ -563,6 +565,16 @@ export const renderMatrixHtml = (
   const provenanceLine = [
     `Generated ${esc(generatedAt)}`,
     provenance.branch ? `branch \`${esc(provenance.branch)}\`` : undefined,
+    provenance.branchBySuite && Object.keys(provenance.branchBySuite).length > 0
+      ? `suite branches ${esc(
+          Object.entries(provenance.branchBySuite)
+            .map(([suite, branchValue]) => {
+              const value = Array.isArray(branchValue) ? branchValue.join('|') : branchValue;
+              return `${suite}->${value}`;
+            })
+            .join(', ')
+        )}`
+      : undefined,
     provenance.lookbackDays !== undefined ? `${provenance.lookbackDays}-day lookback` : undefined,
     provenance.asOf !== undefined
       ? `as of ${esc(new Date(provenance.asOf).toISOString().slice(0, 10))} (later runs excluded)`

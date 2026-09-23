@@ -387,11 +387,15 @@ export const matrixCmd: Command<void> = {
       }
     }
 
+    // The suite->branch map actually used by the query; a mixed-branch matrix must
+    // disclose which suites were read from which branch in every artifact.
+    const branchBySuite = branchBySuiteFromColumns(config, branch);
     const rendered = renderMatrix(
       matrix,
       config,
       {
         branch,
+        ...(Object.keys(branchBySuite).length > 0 ? { branchBySuite } : {}),
         lookbackDays,
         asOf,
         suiteIds,
@@ -422,6 +426,7 @@ export const matrixCmd: Command<void> = {
         config,
         {
           branch,
+          ...(Object.keys(branchBySuite).length > 0 ? { branchBySuite } : {}),
           lookbackDays,
           asOf,
           suiteIds,
@@ -440,6 +445,7 @@ export const matrixCmd: Command<void> = {
         traces,
         {
           branch,
+          ...(Object.keys(branchBySuite).length > 0 ? { branchBySuite } : {}),
           lookbackDays,
           asOf,
           commitSha: process.env.BUILDKITE_COMMIT ?? localGit.sha,

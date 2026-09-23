@@ -1426,3 +1426,125 @@ describe('buildMatrix round-6 review findings', () => {
     expect(matrix.proprietary[0].cells.c2).toEqual({ kind: 'not-recommended' });
   });
 });
+
+describe('round 7 review findings', () => {
+  const suite = (suiteId: string, mean: number) => ({
+    suiteId,
+    experimentId: `e-${suiteId}`,
+    datasets: [{ datasetId: 'd', datasetName: 'd', evaluators: [evaluator(mean)] }],
+  });
+  const erroredSuite = (suiteId: string, errored: string[]) => ({
+    suiteId,
+    experimentId: `e-${suiteId}`,
+    datasets: [
+      {
+        datasetId: 'd',
+        datasetName: 'd',
+        evaluators: [evaluator(0.8)],
+        erroredOutEvaluators: errored,
+      },
+    ],
+  });
+
+  it('rejects duplicate layout ids', () => {
+    const cfg: MatrixConfig = parseMatrixConfig({
+      columns: [{ id: 'c1', label: 'C1', suites: ['s1'] }],
+      models: [{ id: 'm1', label: 'M1' }],
+      layout: ['c1', 'c1'],
+    });
+    expect(() => buildMatrix([{ modelId: 'm1', suites: [suite('s1', 0.5)] }], cfg)).toThrow(
+      /layout.*duplicate id: "c1"/
+    );
+  });
+
+  it('propagates an evaluator outage into the composite instead of averaging the healthy column', () => {
+    const cfg: MatrixConfig = parseMatrixConfig({
+      showOverall: false,
+      columns: [
+        { id: 'c1', label: 'C1', suites: ['s1'] },
+        { id: 'c2', label: 'C2', suites: ['s2'] },
+      ],
+      composites: [{ id: 'group', label: 'Group', from: ['c1', 'c2'] }],
+      models: [{ id: 'm1', label: 'M1' }],
+    });
+    const matrix = buildMatrix(
+      [
+        {
+          modelId: 'm1',
+          suites: [erroredSuite('s1', ['Relevance']), suite('s2', 0.9)],
+        },
+      ],
+      cfg
+    );
+    expect(matrix.proprietary[0].cells.c1).toMatchObject({ kind: 'insufficient-evaluators' });
+    expect(matrix.proprietary[0].cells.group).toMatchObject({ kind: 'insufficient-evaluators' });
+  });
+
+  it('does not let an unselected errored evaluator suppress the judged-quality axis', () => {
+    const cfg: MatrixConfig = parseMatrixConfig({
+      columns: [{ id: 'c1', label: 'C1', suites: ['s1'], evaluators: ['Relevance'] }],
+      models: [{ id: 'm1', label: 'M1' }],
+    });
+    const matrix = buildMatrix(
+      [
+        {
+          modelId: 'm1',
+          suites: [erroredSuite('s1', ['Relevance', 'Factuality'])],
+        },
+      ],
+      cfg
+    );
+    // Factuality is outside the column allowlist, but Relevance errored too — the base
+    // cell is insufficient. Use a column allowlisting Relevance while only Factuality errored.
+    const matrix2 = buildMatrix(
+      [
+        {
+          modelId: 'm1',
+          suites: [
+            {
+              suiteId: 's1',
+              experimentId: 'e1',
+              datasets: [
+                {
+                  datasetId: 'd',
+                  datasetName: 'd',
+                  evaluators: [{ evaluatorName: 'Relevance', mean: 0.8, count: 4 }],
+                  erroredOutEvaluators: ['Factuality'],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+      cfg
+    );
+    expect(matrix2.proprietary[0].cells.c1).toMatchObject({ kind: 'score' });
+    expect(matrix2.proprietary[0].judgedQuality).toMatchObject({ kind: 'score' });
+    expect(matrix.proprietary[0].cells.c1).toMatchObject({
+      kind: 'insufficient-evaluators',
+      evaluators: ['Relevance'],
+    });
+  });
+
+  it('computes saturation from resolved logical rows, not raw alias identities', () => {
+    const cfg: MatrixConfig = parseMatrixConfig({
+      overall: { mode: 'weighted', excludeSaturatedEvaluators: true },
+      columns: [{ id: 'c1', label: 'C1', suites: ['s1'] }],
+      models: [{ id: 'eis/model', label: 'M', matchIds: ['provider/slug'] }],
+    });
+    const mk = (id: string, mean: number, timestamp?: string) => ({
+      modelId: id,
+      suites: [timestamp ? { ...suite('s1', mean), timestamp } : suite('s1', mean)],
+    });
+    // provider/slug ran later; its suite wins the merge, c1 reads its run.
+    const matrix = buildMatrix(
+      [
+        mk('eis/model', 0.7, '2026-09-01T00:00:00Z'),
+        mk('provider/slug', 1, '2026-09-02T00:00:00Z'),
+      ],
+      cfg
+    );
+    expect(matrix.evaluatorSaturation.every((e) => !e.saturated)).toBe(true);
+    expect(matrix.proprietary[0].cells.c1).toMatchObject({ kind: 'score', value: 10 });
+  });
+});

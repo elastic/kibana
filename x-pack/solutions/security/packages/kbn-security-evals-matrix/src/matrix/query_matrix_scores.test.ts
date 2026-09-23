@@ -1210,3 +1210,43 @@ describe('round 6 regression: admission and accumulation fixes', () => {
     });
   });
 });
+
+describe('round 7 regression: non-EIS exclusion surfaces as excluded, not missing', () => {
+  it('marks the suite record excluded-non-eis when every prefix score failed requireEisJudge', async () => {
+    const log = new ToolingLog() as unknown as SomeDevLog;
+    const doc = {
+      example: { id: 'alert-analysis-a', index: 0, dataset: { id: 'd1', name: 'D1' } },
+      task: { model: { id: 'm1' }, trace_id: 't' },
+      evaluator: { name: 'correctness', score: 0.6, model: { id: 'mystery-judge' } },
+      metadata: {},
+    };
+    const client = {
+      listExperiments: jest.fn().mockResolvedValue([
+        {
+          experiment_id: 'e1',
+          execution_id: 'x1',
+          timestamp: new Date().toISOString(),
+          task_model: { id: 'm1' },
+        },
+      ]),
+      getExperimentStats: jest.fn().mockResolvedValue({
+        taskModel: { id: 'm1' },
+        evaluatorModel: { id: 'judge' },
+        totalRepetitions: 1,
+        stats: [],
+      }),
+      getExperimentScores: jest.fn().mockResolvedValue([doc]),
+    } as unknown as MatrixEvalsClient;
+
+    const rows = await queryMatrixScores(client, log, {
+      suiteIds: ['suite-a'],
+      modelIds: ['m1'],
+      prefixesBySuite: { 'suite-a': ['alert-analysis'] },
+      scoring: { requireEisJudge: true, excludeSelfJudged: true },
+    });
+
+    const suite = rows[0].suites[0];
+    expect(suite.excludedNonEis).toBe(1);
+    expect(suite.excludedSelfJudged).toBeUndefined();
+  });
+});

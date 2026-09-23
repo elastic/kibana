@@ -822,3 +822,63 @@ describe('round 6 regression: prompt cards and trace bucketing', () => {
     expect(siblingIdx).toBeGreaterThan(-1);
   });
 });
+
+describe('round 7 regression: tooltip mins and suite-scoped variants', () => {
+  const cfg = {
+    ...mockConfig,
+    tokenCost: {
+      inputEvaluator: 'Input Tokens',
+      outputEvaluator: 'Output Tokens',
+    },
+  } as never;
+
+  it('labels per-direction minima, not the total mean, in the token-cost tooltip', () => {
+    const matrix: Matrix = {
+      ...mockMatrix,
+      tokenCost: {
+        models: [
+          {
+            modelId: 'test-model',
+            modelLabel: 'Test Model',
+            openSource: false,
+            cells: [
+              {
+                columnId: 'alert',
+                inputTokens: { mean: 900, min: 100, max: 2000, count: 5 },
+                outputTokens: { mean: 300, min: 50, max: 600, count: 5 },
+                totalMean: 1200,
+              },
+            ],
+          },
+        ],
+      },
+    };
+    const html = renderMatrixHtml(matrix, cfg);
+    expect(html).toContain('in min 100');
+    expect(html).toContain('out min 50');
+    expect(html).not.toContain('min 1,200');
+  });
+
+  it("does not render another suite's example under a column scoped elsewhere", () => {
+    const prefixCfg = {
+      ...mockConfig,
+      columns: [
+        {
+          ...mockConfig.columns[0],
+          examplePrefixes: ['alert-analysis'],
+          suites: ['suite-1'],
+        },
+      ],
+    };
+    const traces = {
+      // Direct keys are suite-scoped (`model:suite:example`); a run of the same example
+      // id under a DIFFERENT suite must not surface in the suite-1 column's cards.
+      'test-model:suite-2:alert-analysis-a': {
+        steps: 1,
+        scores: {},
+      },
+    } as never;
+    const html = renderMatrixHtml(mockMatrix, prefixCfg, {}, traces);
+    expect(html).not.toContain('alert-analysis-a');
+  });
+});

@@ -399,3 +399,22 @@ describe('renderMatrix provenance', () => {
     expect(markdown).toContain(`Generated ${JSON.parse(json).generatedAt}`);
   });
 });
+
+describe('round 7 regression: provenance suite branches', () => {
+  it('discloses the effective suite-to-branch mapping in markdown and json', () => {
+    const cfg = parseMatrixConfig({
+      columns: [{ id: 'c1', label: 'C1', suites: ['s1'] }],
+      models: [{ id: 'm1', label: 'M1' }],
+    });
+    const built = buildMatrix(
+      [{ modelId: 'm1', suites: [{ suiteId: 's1', experimentId: 'e1', datasets: [] }] }],
+      cfg
+    );
+    const rendered = renderMatrix(built, cfg, {
+      branch: 'main',
+      branchBySuite: { s1: 'feature-x' },
+    });
+    expect(rendered.markdown).toContain('suite branches: s1->feature-x');
+    expect(JSON.parse(rendered.json).provenance.branchBySuite).toEqual({ s1: 'feature-x' });
+  });
+});

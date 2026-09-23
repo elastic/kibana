@@ -13,6 +13,9 @@ import type { MatrixTraceData } from './trace_types';
 export interface MatrixProvenance {
   /** Branch filter applied to the query (undefined = any branch). */
   branch?: string;
+  /** Effective suite-to-branch mapping actually used by the score query, when any column
+   * overrode the global branch. A mixed-branch matrix must not claim a single `branch`. */
+  branchBySuite?: Record<string, string | string[]>;
   /** Lookback window in days used to select experiments. */
   lookbackDays?: number;
   /** Epoch-ms cutoff the matrix was rendered at, when not "now". */
@@ -137,6 +140,14 @@ export const renderMatrix = (
   const provenanceLine = [
     `Generated ${generatedAt}`,
     provenance.branch ? `branch \`${provenance.branch}\`` : undefined,
+    provenance.branchBySuite && Object.keys(provenance.branchBySuite).length > 0
+      ? `suite branches: ${Object.entries(provenance.branchBySuite)
+          .map(([suite, branchValue]) => {
+            const value = Array.isArray(branchValue) ? branchValue.join('|') : branchValue;
+            return `${suite}->${value}`;
+          })
+          .join(', ')}`
+      : undefined,
     provenance.lookbackDays !== undefined ? `${provenance.lookbackDays}-day lookback` : undefined,
     provenance.asOf !== undefined
       ? `as of ${new Date(provenance.asOf).toISOString().slice(0, 10)} (later runs excluded)`

@@ -216,8 +216,14 @@ const buildCell = (
   {
     selfJudged = false,
     excludedSelfJudged = 0,
+    excludedNonEis = 0,
     erroredOutEvaluators = [],
-  }: { selfJudged?: boolean; excludedSelfJudged?: number; erroredOutEvaluators?: string[] } = {}
+  }: {
+    selfJudged?: boolean;
+    excludedSelfJudged?: number;
+    excludedNonEis?: number;
+    erroredOutEvaluators?: string[];
+  } = {}
 ): MatrixCell => {
   // Checked before the `mean === undefined` branch: a cell-relevant evaluator that errored on
   // every example produces no numeric score at all, so `mean` is undefined even though the run
@@ -232,9 +238,14 @@ const buildCell = (
   }
 
   if (mean === undefined) {
-    return excludedSelfJudged > 0
-      ? { kind: 'excluded', reason: 'self-judged', docs: excludedSelfJudged }
-      : { kind: 'missing' };
+    if (excludedSelfJudged > 0) {
+      return { kind: 'excluded', reason: 'self-judged', docs: excludedSelfJudged };
+    }
+    // A run whose every score came from a non-EIS judge must not read as "never ran".
+    if (excludedNonEis > 0) {
+      return { kind: 'excluded', reason: 'non-eis-judge', docs: excludedNonEis };
+    }
+    return { kind: 'missing' };
   }
 
   const scale = column.scale ?? config.defaultScale;
@@ -273,18 +284,35 @@ const axisCell = (
   // Error checks run BEFORE the undefined-mean filter: an outage that leaves a column
   // with no numeric mean at all is exactly the case the guard exists for, and filtering
   // first would let another healthy column publish the axis from partial evidence.
+  // Only evaluators this axis actually scores from can suppress the axis cell: the errored
+  // set is filtered by the same effective selection as `computeColumnMean` (column
+  // allowlist OR global exclusion list), so an errored-but-unselected evaluator must not
+  // mark the axis insufficient-evaluators.
   const columnEntries = config.columns.map((column) => ({
     column,
     mean: computeColumnMean(modelScores, column, excludeEvaluators, includeEvaluator),
-    errored: columnErroredOutEvaluators(modelScores, column).filter((name) =>
-      includeEvaluator({
-        evaluatorName: name,
-        mean: 0,
-        count: 0,
-      } as AggregatedEvaluatorScore)
+    errored: columnErroredOutEvaluators(modelScores, column).filter(
+      (name) =>
+        (column.evaluators ? column.evaluators.includes(name) : true) &&
+        includeEvaluator({
+          evaluatorName: name,
+          mean: 0,
+          count: 0,
+        } as AggregatedEvaluatorScore)
     ),
   }));
   const suppressed = [...new Set(columnEntries.flatMap((entry) => entry.errored))];
+  const columnMeans = columnEntries.filter((entry) => entry.mean !== undefined);
+  for (const { column, mean } of columnMeans) {
+    if (mean === undefined) {
+      return { kind: 'missing' };
+    }
+    hasAnyData = true;
+    const scale = column.scale ?? config.defaultScale;
+    const weight = config.overall.mode === 'weighted' ? column.weight : 1;
+    weightedSum += mean * scale * weight;
+    totalWeight += weight;
+  }
   if (suppressed.length > 0) {
     return { kind: 'insufficient-evaluators', evaluators: suppressed };
   }
@@ -314,16 +342,18 @@ const aggregateCells = (
   // A self-judged contributor is disclosed on the aggregate: a composite or Overall that hides the
   // flagged base column would otherwise read as an ordinary independently judged score.
   let selfJudged = false;
+  // An evaluator outage on any contributing source must propagate: averaging the healthy
+  // sources would publish a partial aggregate that looks complete, defeating the outage
+  // guard on the base cell.
+  let outage: string[] = [];
 
   for (const { cell, weight } of sources) {
     if (cell && cell.kind !== 'missing' && cell.kind !== 'excluded') {
       hasAnyData = true;
 
-      if (
-        cell.kind === 'not-recommended' ||
-        cell.kind === 'insufficient-coverage' ||
-        cell.kind === 'insufficient-evaluators'
-      ) {
+      if (cell.kind === 'insufficient-evaluators') {
+        outage = [...outage, ...cell.evaluators];
+      } else if (cell.kind === 'not-recommended' || cell.kind === 'insufficient-coverage') {
         if (cell.kind === 'not-recommended') {
           if (cell.selfJudged) {
             selfJudged = true;
@@ -342,6 +372,9 @@ const aggregateCells = (
     }
   }
 
+  if (outage.length > 0) {
+    return { kind: 'insufficient-evaluators', evaluators: outage };
+  }
   if (!hasAnyData || totalWeight === 0) {
     return { kind: 'missing' };
   }
@@ -403,6 +436,15 @@ const buildDisplayColumns = (config: MatrixConfig): MatrixDisplayColumn[] => {
           })
         ),
       ];
+  // A duplicate layout id would publish the same score twice in CSV/Markdown/HTML;
+  // column and composite declarations already reject duplicates, so layout must too.
+  const seenLayout = new Set<string>();
+  for (const col of declared) {
+    if (seenLayout.has(col.id)) {
+      throw new Error(`Matrix config "layout" contains duplicate id: "${col.id}"`);
+    }
+    seenLayout.add(col.id);
+  }
 
   return config.showOverall
     ? [...declared, { id: OVERALL_COLUMN_ID, label: config.overall.label, kind: 'overall' }]
@@ -549,6 +591,9 @@ const buildMatrixRow = (
       excludedSelfJudged: modelScores.suites
         .filter((suite) => columnSuites.has(suite.suiteId))
         .reduce((total, suite) => total + (suite.excludedSelfJudged ?? 0), 0),
+      excludedNonEis: modelScores.suites
+        .filter((suite) => columnSuites.has(suite.suiteId))
+        .reduce((total, suite) => total + (suite.excludedNonEis ?? 0), 0),
       erroredOutEvaluators: columnErroredOutEvaluators(modelScores, column),
     };
     cells[column.id] = buildCell(
@@ -706,8 +751,17 @@ export const buildMatrix = (
     return matches.length === 1 ? matches[0] : mergeMatchedScores(modelConfig.id, matches);
   };
 
+  // Saturation must be judged on the data that actually feeds the matrix rows: the resolved
+  // logical-model rows (primary + matchIds merged, newest suite run selected), not the raw
+  // query result, which still contains separate alias identities and every dataset each
+  // suite returned. An unselected dataset or duplicate alias could otherwise mark an
+  // evaluator saturated and drop it from Overall even though it discriminates on the
+  // configured columns.
+  const resolvedForSaturation = config.models
+    .map((modelConfig) => resolveScores(modelConfig))
+    .filter((entry): entry is AggregatedModelScores => entry !== undefined);
   const saturation = config.overall.excludeSaturatedEvaluators
-    ? detectSaturatedEvaluators(aggregated)
+    ? detectSaturatedEvaluators(resolvedForSaturation)
     : [];
   const saturatedNames = saturatedEvaluatorNames(saturation);
   const excludeEvaluators = config.excludeEvaluators;
