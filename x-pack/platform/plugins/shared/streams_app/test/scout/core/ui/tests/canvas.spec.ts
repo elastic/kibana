@@ -275,8 +275,11 @@ test.describe(
       await expect(attachmentsTab).toHaveAttribute('aria-selected', 'true');
     });
 
-    test("flyout doesn't show processing tab unless enabled", async ({ page }) => {
-      await page.testSubj.click('streamsCanvasDestinationNode');
+    test("flyout doesn't show processing tab unless enabled", async ({
+      page,
+      pageObjects: { streams },
+    }) => {
+      await streams.clickCanvasNode(streams.getCanvasDestinationNode(PLAIN_STREAM));
 
       const flyout = page.testSubj.locator('streamsCanvasFlyout');
       await expect(flyout).toBeVisible();

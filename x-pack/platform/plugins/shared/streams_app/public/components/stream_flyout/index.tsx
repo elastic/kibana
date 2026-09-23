@@ -45,7 +45,6 @@ import { StreamDeleteModal } from '../stream_delete_modal';
 import { StreamProcessing } from './stream_processing';
 import {
   useCanvasEvents,
-  useCanvasUnitDefinition,
   useCanvasUrlRef,
 } from '../stream_management/data_management/stream_detail_canvas/state_management';
 
@@ -162,8 +161,7 @@ const TAB_PAGES: Record<StreamFlyoutTabId, (props: StreamFlyoutPageProps) => Rea
 function StreamFlyoutContent({ name, onClose, refreshStreams }: StreamFlyoutProps) {
   const { loading, definition } = useStreamFlyoutDetail();
   const { flyoutTab } = useCanvasUrlRef();
-  const unit = useCanvasUnitDefinition();
-  const { selectTab, stageUnit: updateUnit } = useCanvasEvents();
+  const { selectTab } = useCanvasEvents();
   const { quality, isQualityLoading } = useDataSetQuality(name, definition);
   const selectedTab = isStreamFlyoutTabId(flyoutTab) ? flyoutTab : DEFAULT_TAB;
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -182,10 +180,19 @@ function StreamFlyoutContent({ name, onClose, refreshStreams }: StreamFlyoutProp
     },
   } = useKibana();
 
-  const streamUiMeta = useMemo(
-    () => (unit?.ui_metadata[name] ?? {}) as Record<string, boolean>,
-    [unit, name]
+  const hasProcessingEnabled = useMemo(
+    () =>
+      definition &&
+      Streams.ingest.all.GetResponse.is(definition) &&
+      'processors' in definition.stream.ingest.processing,
+    [definition]
   );
+
+  const [showProcessing, setShowProcessing] = useState(hasProcessingEnabled);
+
+  // showProcessing is nullish to start, but then we can either toggle it on or off
+  // once data has been loaded.
+  const isProcessingEnabled = showProcessing ?? hasProcessingEnabled;
 
   const canDeleteStream =
     definition &&
@@ -206,19 +213,17 @@ function StreamFlyoutContent({ name, onClose, refreshStreams }: StreamFlyoutProp
 
   const renderTabs = useMemo(
     () =>
-      TABS.filter(({ id }) => id !== 'processing' || streamUiMeta.processing).map(
-        ({ id, label }) => (
-          <EuiTab
-            isSelected={id === selectedTab}
-            key={id}
-            onClick={() => selectTab(id)}
-            data-test-subj={`streamsCanvasFlyoutTab-${id}`}
-          >
-            {label}
-          </EuiTab>
-        )
-      ),
-    [selectTab, selectedTab, streamUiMeta]
+      TABS.filter(({ id }) => id !== 'processing' || isProcessingEnabled).map(({ id, label }) => (
+        <EuiTab
+          isSelected={id === selectedTab}
+          key={id}
+          onClick={() => selectTab(id)}
+          data-test-subj={`streamsCanvasFlyoutTab-${id}`}
+        >
+          {label}
+        </EuiTab>
+      )),
+    [selectTab, selectedTab, isProcessingEnabled]
   );
 
   const page = useMemo(
@@ -286,13 +291,15 @@ function StreamFlyoutContent({ name, onClose, refreshStreams }: StreamFlyoutProp
       <EuiContextMenuItem
         data-test-subj="canvasFlyoutStreamMenu-processingToggle"
         key="processing-toggle"
-        icon={streamUiMeta.processing ? 'minus' : 'plus'}
+        icon={isProcessingEnabled ? 'minus' : 'plus'}
         onClick={() => {
-          const updated = {
-            ...unit,
-            ui_metadata: { ...unit.ui_metadata, [name]: { processing: !streamUiMeta.processing } },
-          };
-          updateUnit(updated);
+          const showing = !isProcessingEnabled;
+          setShowProcessing(showing);
+          if (showing) {
+            selectTab('processing');
+          } else {
+            selectTab('overview');
+          }
         }}
       >
         {i18n.translate('xpack.streams.flyout.tab.toggleProcessing', {
@@ -301,7 +308,7 @@ function StreamFlyoutContent({ name, onClose, refreshStreams }: StreamFlyoutProp
             other {Add processing}
           }`,
           values: {
-            processing: !!streamUiMeta.processing,
+            processing: isProcessingEnabled,
           },
         })}
       </EuiContextMenuItem>
