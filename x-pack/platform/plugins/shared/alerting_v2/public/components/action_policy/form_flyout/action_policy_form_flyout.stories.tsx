@@ -114,43 +114,48 @@ const NestedActionPolicyFormFlyoutStory = () => {
   const [isParentOpen, setIsParentOpen] = useState(true);
   const [isActionPolicyOpen, setIsActionPolicyOpen] = useState(false);
 
+  const closeParentFlyout = () => {
+    setIsActionPolicyOpen(false);
+    setIsParentOpen(false);
+  };
+
   return (
     <StoryEnvironment>
       {isParentOpen ? (
-        <>
-          <EuiFlyout
-            ownFocus
-            size="m"
-            onClose={() => setIsParentOpen(false)}
-            aria-labelledby={PARENT_FLYOUT_TITLE_ID}
-          >
-            <EuiFlyoutHeader hasBorder>
-              <EuiTitle size="m">
-                <h2 id={PARENT_FLYOUT_TITLE_ID}>Create rule</h2>
-              </EuiTitle>
-            </EuiFlyoutHeader>
-            <EuiFlyoutBody>
-              <EuiText>
-                <p>
-                  This flyout represents the Rule Form. Open the Action Policy Form without closing
-                  it.
-                </p>
-              </EuiText>
-            </EuiFlyoutBody>
-            <EuiFlyoutFooter>
-              <EuiButton fill onClick={() => setIsActionPolicyOpen(true)}>
-                Create action policy
-              </EuiButton>
-            </EuiFlyoutFooter>
-          </EuiFlyout>
-
+        <EuiFlyout
+          ownFocus
+          size={540}
+          minWidth={480}
+          resizable
+          session="start"
+          onClose={closeParentFlyout}
+          aria-labelledby={PARENT_FLYOUT_TITLE_ID}
+        >
+          <EuiFlyoutHeader hasBorder>
+            <EuiTitle size="m">
+              <h2 id={PARENT_FLYOUT_TITLE_ID}>Create rule</h2>
+            </EuiTitle>
+          </EuiFlyoutHeader>
+          <EuiFlyoutBody>
+            <EuiText>
+              <p>
+                This flyout represents the Rule Form. Open the Action Policy Form without closing
+                it.
+              </p>
+            </EuiText>
+          </EuiFlyoutBody>
+          <EuiFlyoutFooter>
+            <EuiButton fill onClick={() => setIsActionPolicyOpen(true)}>
+              Create action policy
+            </EuiButton>
+          </EuiFlyoutFooter>
           {isActionPolicyOpen && (
             <ActionPolicyFormFlyout
               onClose={() => setIsActionPolicyOpen(false)}
               onSave={action('Create action policy from rule form')}
             />
           )}
-        </>
+        </EuiFlyout>
       ) : (
         <EuiButton fill onClick={() => setIsParentOpen(true)}>
           Open rule form flyout
