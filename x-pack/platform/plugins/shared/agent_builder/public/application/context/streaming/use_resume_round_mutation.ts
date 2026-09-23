@@ -162,7 +162,6 @@ export const useResumeRoundMutation = ({
           }
         });
 
-        clearActiveStream(vars.conversationId);
         await releaseLocalContent({
           refetch: streamActions.refetchConversation,
           executionId: timelineExecutionId,
