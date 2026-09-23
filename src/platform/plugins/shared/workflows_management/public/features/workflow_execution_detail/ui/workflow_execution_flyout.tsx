@@ -40,7 +40,7 @@ import {
 } from '@elastic/eui';
 import type { Criteria, EuiBasicTableColumn } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
@@ -766,19 +766,13 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
     const showTagsRow = showRunModeBadge || workflowTags.length > 0;
     const stepTestTargetName = runModeInfo?.stepTestTargetName ?? '';
 
-    // Widen the flyout DOM element when the step detail panel is open (FlyoutPanels pattern).
-    // Width is a hard constant — content must not flex the panels.
-    useLayoutEffect(() => {
-      const el = document.querySelector<HTMLElement>(`.${FLYOUT_CLASSNAME}`);
-      if (!el) return;
-      const totalWidth = Math.min(
-        selectedStepExecutionId ? EXECUTION_PANEL_WIDTH + STEP_DETAIL_WIDTH : EXECUTION_PANEL_WIDTH,
-        window.innerWidth * 0.9
-      );
-      el.style.width = `${totalWidth}px`;
-      el.style.minWidth = `${totalWidth}px`;
-      el.style.maxWidth = `${totalWidth}px`;
-    }, [selectedStepExecutionId]);
+    // Widen the flyout when the step detail panel is open (FlyoutPanels pattern).
+    // Width is a hard constant — content must not flex the panels. It must go through the flyout's
+    // own `size` prop: an imperative style write loses to EUI's container-relative `inline-size`,
+    // which lands on the first commit (the EuiFlyout `container` component default).
+    const flyoutWidth = selectedStepExecutionId
+      ? EXECUTION_PANEL_WIDTH + STEP_DETAIL_WIDTH
+      : EXECUTION_PANEL_WIDTH;
 
     return (
       <EuiFlyout
@@ -788,6 +782,7 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
         })}
         onClose={onClose}
         type="push"
+        size={flyoutWidth}
         paddingSize="none"
         hideCloseButton
         className={FLYOUT_CLASSNAME}
