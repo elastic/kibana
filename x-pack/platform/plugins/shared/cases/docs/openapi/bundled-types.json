@@ -1791,10 +1791,27 @@
             }
           },
           {
-            "$ref": "#/components/parameters/page_index"
+            "in": "query",
+            "name": "page",
+            "description": "The page number to return. Defaults to 1.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            }
           },
           {
-            "$ref": "#/components/parameters/page_size"
+            "in": "query",
+            "name": "per_page",
+            "description": "The number of results per page. Defaults to 20, maximum 100.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            }
           },
           {
             "in": "query",
@@ -5905,7 +5922,7 @@
           "fieldDefinitionId": {
             "type": "string",
             "maxLength": 36,
-            "description": "Unique server-assigned identifier for the field definition (UUIDv4)."
+            "description": "Unique server-assigned identifier for the field definition (UUID). May be UUIDv4 for definitions created through the public API, or UUIDv5 for definitions created by internal migration processes.\n"
           },
           "name": {
             "type": "string",
@@ -5916,7 +5933,9 @@
             "description": "The field definition as a YAML string. New definitions are limited to 30 000 characters, but existing definitions created via internal tooling may be longer.\n"
           },
           "owner": {
-            "$ref": "#/components/schemas/owner"
+            "type": "string",
+            "maxLength": 50,
+            "description": "The application that owns this field definition."
           },
           "description": {
             "type": "string",
@@ -5985,7 +6004,10 @@
             "description": "The field name, unique per owner (case-insensitive). Must match the `name` key inside the YAML definition. When omitted, the name is extracted from the definition YAML automatically. Immutable after creation.\n"
           },
           "owner": {
-            "$ref": "#/components/schemas/owner"
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 50,
+            "description": "The application that owns this field definition."
           },
           "definition": {
             "type": "string",
@@ -6021,7 +6043,10 @@
             "description": "The field name, unique per owner (case-insensitive). Must match the `name` key inside the YAML definition. When omitted, the name is extracted from the definition YAML automatically. Immutable after creation. Unlike POST, the 50-character limit is not enforced on PUT so that definitions with legacy names that exceed the limit remain modifiable.\n"
           },
           "owner": {
-            "$ref": "#/components/schemas/owner"
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 50,
+            "description": "The application that owns this field definition."
           },
           "definition": {
             "type": "string",

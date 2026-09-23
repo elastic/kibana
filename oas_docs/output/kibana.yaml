@@ -21683,8 +21683,23 @@ paths:
           required: false
           schema:
             type: boolean
-        - $ref: '#/components/parameters/Cases_page_index'
-        - $ref: '#/components/parameters/Cases_page_size'
+        - description: The page number to return. Defaults to 1.
+          in: query
+          name: page
+          required: false
+          schema:
+            default: 1
+            minimum: 1
+            type: integer
+        - description: 'The number of results per page. Defaults to 20, maximum 100.'
+          in: query
+          name: per_page
+          required: false
+          schema:
+            default: 20
+            maximum: 100
+            minimum: 1
+            type: integer
         - description: The field to sort by.
           in: query
           name: sortField
@@ -146473,7 +146488,10 @@ components:
           minLength: 1
           type: string
         owner:
-          $ref: '#/components/schemas/Cases_owner'
+          description: The application that owns this field definition.
+          maxLength: 50
+          minLength: 1
+          type: string
       required:
         - owner
         - definition
@@ -146496,7 +146514,10 @@ components:
           minimum: 0
           type: integer
         fieldDefinitionId:
-          description: Unique server-assigned identifier for the field definition (UUIDv4).
+          description: >
+            Unique server-assigned identifier for the field definition (UUID). May be UUIDv4 for
+            definitions created through the public API, or UUIDv5 for definitions created by internal
+            migration processes.
           maxLength: 36
           type: string
         isGlobal:
@@ -146508,7 +146529,9 @@ components:
             The field name. Must match the `name` property in the YAML definition and is unique per owner (case-insensitive). Immutable after creation.
           type: string
         owner:
-          $ref: '#/components/schemas/Cases_owner'
+          description: The application that owns this field definition.
+          maxLength: 50
+          type: string
       required:
         - fieldDefinitionId
         - name
@@ -146552,7 +146575,10 @@ components:
           minLength: 1
           type: string
         owner:
-          $ref: '#/components/schemas/Cases_owner'
+          description: The application that owns this field definition.
+          maxLength: 50
+          minLength: 1
+          type: string
       required:
         - owner
         - definition

@@ -362,17 +362,17 @@ export const createFieldDefinitionsSubClient = (
         }
 
         // Promotion guard: when isGlobal transitions from false/undefined to true, assign
-        // a new displayOrder (max existing global order + 1). This mirrors the create path
-        // and ensures promoted definitions appear last rather than landing at undefined/0,
-        // which would collide with another definition's position after a demotion/re-promotion
-        // cycle.
+        // a new displayOrder so the promoted definition appears last. The effective position of
+        // each existing global is `displayOrder ?? sortIndex` — mirroring sortGlobalFieldDefinitions
+        // — so legacy globals with unset orders are not treated as occupying position -1 (which
+        // would give the promoted definition order 0 and place it first).
         let resolvedInput = input;
         if (!fieldDef.attributes.isGlobal && input.isGlobal === true) {
           const globalDefs = await fieldDefinitionsService.getFieldDefinitions(input.owner, {
             isGlobal: true,
           });
           const maxOrder = globalDefs.fieldDefinitions.reduce(
-            (max, { displayOrder }) => Math.max(max, displayOrder ?? -1),
+            (max, { displayOrder }, index) => Math.max(max, displayOrder ?? index),
             -1
           );
           resolvedInput = { ...input, displayOrder: maxOrder + 1 };

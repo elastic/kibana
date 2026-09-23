@@ -31,7 +31,10 @@ properties:
       Immutable after creation. Unlike POST, the 50-character limit is not enforced on PUT so that
       definitions with legacy names that exceed the limit remain modifiable.
   owner:
-    $ref: 'owner.yaml'
+    type: string
+    minLength: 1
+    maxLength: 50
+    description: The application that owns this field definition.
   definition:
     type: string
     maxLength: 1000000

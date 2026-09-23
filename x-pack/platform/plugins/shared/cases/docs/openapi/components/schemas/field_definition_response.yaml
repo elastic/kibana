@@ -12,7 +12,10 @@ properties:
   fieldDefinitionId:
     type: string
     maxLength: 36
-    description: Unique server-assigned identifier for the field definition (UUIDv4).
+    description: >
+      Unique server-assigned identifier for the field definition (UUID). May be UUIDv4 for
+      definitions created through the public API, or UUIDv5 for definitions created by internal
+      migration processes.
   name:
     type: string
     description: >
@@ -24,7 +27,9 @@ properties:
       The field definition as a YAML string. New definitions are limited to 30 000 characters, but
       existing definitions created via internal tooling may be longer.
   owner:
-    $ref: 'owner.yaml'
+    type: string
+    maxLength: 50
+    description: The application that owns this field definition.
   description:
     type: string
     description: Optional human-readable description of the field's purpose.

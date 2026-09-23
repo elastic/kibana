@@ -31,8 +31,23 @@ get:
       required: false
       schema:
         type: boolean
-    - $ref: '../components/parameters/page_index.yaml'
-    - $ref: '../components/parameters/page_size.yaml'
+    - in: query
+      name: page
+      description: The page number to return. Defaults to 1.
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    - in: query
+      name: per_page
+      description: The number of results per page. Defaults to 20, maximum 100.
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
     - in: query
       name: sortField
       description: The field to sort by.

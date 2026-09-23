@@ -28,7 +28,10 @@ properties:
       definition. When omitted, the name is extracted from the definition YAML automatically.
       Immutable after creation.
   owner:
-    $ref: 'owner.yaml'
+    type: string
+    minLength: 1
+    maxLength: 50
+    description: The application that owns this field definition.
   definition:
     type: string
     maxLength: 30000
