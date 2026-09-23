@@ -76,7 +76,7 @@ const renderSections = (sections: string[][]): string =>
 /**
  * Free-form context block for an agent: registry entry, what backing indices expose, and how to
  * query them. Read as current user; counts are space-filtered. Throws `AiIndexNotReadableError`
- * when the caller cannot read the backing store, so a describe cannot reach further than a list.
+ * when the caller cannot read the backing index.
  */
 export const describeAiIndex = async ({
   esClient,

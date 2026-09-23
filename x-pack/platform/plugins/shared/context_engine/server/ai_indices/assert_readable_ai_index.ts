@@ -16,7 +16,9 @@ export interface AssertReadableAiIndexParams {
   aiIndex: AiIndexHttpItem;
 }
 
-/** Throws `AiIndexNotReadableError` unless the caller can read the backing store — `ignore_unavailable` on the metadata reads would otherwise silently swallow a refusal. */
+/** Throws `AiIndexNotReadableError` unless the caller can read the backing index.
+ * `ignore_unavailable` on the metadata reads would otherwise silently swallow a refusal.
+ */
 export const assertReadableAiIndex = async ({
   esClient,
   aiIndex,
