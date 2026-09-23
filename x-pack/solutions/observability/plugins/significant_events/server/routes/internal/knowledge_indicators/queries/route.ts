@@ -39,7 +39,7 @@ import {
 } from '../../../../lib/significant_events/fetch_query_occurrences_from_alerts';
 import { searchModeSchema } from '../../../utils/search_mode';
 import { assertValidDateRange, makeIsoDateFromString } from '../../../utils/iso_date_param';
-import { resolveStreamNames } from '../../../utils/resolve_stream_names';
+import { resolveSourceIds } from '../../../utils/resolve_source_ids';
 import type { PersistQueriesResult } from '../../../../lib/significant_events/persist_queries';
 import { persistQueries } from '../../../../lib/significant_events/persist_queries';
 import { queryFromLink } from '../../../../lib/knowledge_indicators/knowledge_indicator_client/serializers';
@@ -79,7 +79,7 @@ const baseRequestParamsSchema = z.object({
       z.array(z.string().max(MAX_ID_LENGTH))
     )
     .optional()
-    .describe('Stream names to filter significant events'),
+    .describe('Source ids to filter significant events'),
 });
 
 const requestParamsSchema = baseRequestParamsSchema.extend({
@@ -127,7 +127,7 @@ const promoteUnbackedQueriesRoute = createServerRoute({
     await assertNotPaused({ maintenanceService, request });
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
-    const sourceIds = await resolveStreamNames(undefined, sourcesClient);
+    const sourceIds = await resolveSourceIds(undefined, sourcesClient);
 
     return kiClient.promoteUnbackedQueries({
       queryIds: params?.body?.queryIds,
@@ -188,7 +188,7 @@ const demoteBackedQueriesRoute = createServerRoute({
       return acc;
     }, {});
 
-    const catalogIds = new Set(await resolveStreamNames(undefined, sourcesClient));
+    const catalogIds = new Set(await resolveSourceIds(undefined, sourcesClient));
 
     let demoted = 0;
 
@@ -478,7 +478,7 @@ const getDiscoveryQueriesRoute = createServerRoute({
     } = params.query;
     assertValidDateRange(from, to);
 
-    const resolvedStreamNames = await resolveStreamNames(streamNames, scopedClients.sourcesClient);
+    const sourceIds = await resolveSourceIds(streamNames, scopedClients.sourcesClient);
 
     const [kiClient, { alertsReader }] = await Promise.all([
       scopedClients.getKnowledgeIndicatorClient(),
@@ -486,7 +486,7 @@ const getDiscoveryQueriesRoute = createServerRoute({
     ]);
     const queryLinks = await fetchQueryLinks(
       {
-        streamNames: resolvedStreamNames,
+        streamNames: sourceIds,
         query,
         filters: { ruleUnbacked: toRuleUnbackedFilter(status) },
         searchMode,
@@ -554,7 +554,7 @@ const getDiscoveryQueriesOccurrencesRoute = createServerRoute({
     const { from, to, bucketSize, query, streamNames } = params.query;
     assertValidDateRange(from, to);
 
-    const resolvedStreamNames = await resolveStreamNames(streamNames, scopedClients.sourcesClient);
+    const sourceIds = await resolveSourceIds(streamNames, scopedClients.sourcesClient);
 
     const [kiClient, { alertsReader }] = await Promise.all([
       scopedClients.getKnowledgeIndicatorClient(),
@@ -570,7 +570,7 @@ const getDiscoveryQueriesOccurrencesRoute = createServerRoute({
         to,
         bucketSize,
         query,
-        streamNames: resolvedStreamNames,
+        streamNames: sourceIds,
         alertsReader,
         spaceId: await getSpaceId(request),
       },

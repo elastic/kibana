@@ -19,7 +19,7 @@ import { searchModeSchema } from '../../../utils/search_mode';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { StatusError } from '../../../../lib/errors/status_error';
-import { resolveStreamNames } from '../../../utils/resolve_stream_names';
+import { resolveSourceIds } from '../../../utils/resolve_source_ids';
 import type { KIBulkOperation } from '../../../../lib/knowledge_indicators';
 
 const MAX_INPUT_STRING_LENGTH = 255;
@@ -219,7 +219,7 @@ export const listAllFeaturesRoute = createServerRoute({
       licensing: scopedClients.licensing,
     });
 
-    const streamNames = await resolveStreamNames(undefined, scopedClients.sourcesClient);
+    const sourceIds = await resolveSourceIds(undefined, scopedClients.sourcesClient);
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
     const {
@@ -228,8 +228,8 @@ export const listAllFeaturesRoute = createServerRoute({
       include_excluded: includeExcluded,
     } = params?.query ?? {};
     const { hits: features } = query
-      ? await kiClient.findFeatures(streamNames, query, { searchMode, includeExcluded })
-      : await kiClient.getFeatures(streamNames, { includeExcluded });
+      ? await kiClient.findFeatures(sourceIds, query, { searchMode, includeExcluded })
+      : await kiClient.getFeatures(sourceIds, { includeExcluded });
 
     return { features };
   },

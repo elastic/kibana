@@ -13,7 +13,7 @@ import { createSignificantEventsTracedEsClient } from '../../../../lib/significa
 import { fetchQueryOccurrencesFromAlerts } from '../../../../lib/significant_events/fetch_query_occurrences_from_alerts';
 import { searchModeSchema } from '../../../utils/search_mode';
 import { assertValidDateRange, makeIsoDateFromString } from '../../../utils/iso_date_param';
-import { resolveStreamNames } from '../../../utils/resolve_stream_names';
+import { resolveSourceIds } from '../../../utils/resolve_source_ids';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 
@@ -40,7 +40,7 @@ const readQueryOccurrencesRoute = createServerRoute({
           z.array(z.string().max(MAX_STREAM_NAME_LENGTH)),
         ])
         .optional()
-        .describe('Stream names to filter results by'),
+        .describe('Source ids to filter results by'),
       rule_uuid: z
         .union([
           z
@@ -91,7 +91,7 @@ const readQueryOccurrencesRoute = createServerRoute({
     } = params.query;
     assertValidDateRange(from, to);
 
-    const resolvedStreamNames = await resolveStreamNames(streamNames, scopedClients.sourcesClient);
+    const sourceIds = await resolveSourceIds(streamNames, scopedClients.sourcesClient);
 
     const [kiClient, { alertsReader }] = await Promise.all([
       scopedClients.getKnowledgeIndicatorClient(),
@@ -103,7 +103,7 @@ const readQueryOccurrencesRoute = createServerRoute({
         to,
         bucketSize,
         query,
-        streamNames: resolvedStreamNames,
+        streamNames: sourceIds,
         ruleUuids,
         searchMode,
         alertsReader,

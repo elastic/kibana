@@ -16,11 +16,11 @@ export interface StreamsWithIndicatorsResponse {
 }
 
 /**
- * Lists every stream the sync sweep must reconcile (see
- * `getStreamNamesToReconcile`). Deliberately independent of the extraction
- * `_eligible` endpoint: the sweep runs regardless of extraction interval,
- * exclusions, or the continuous-extraction toggle. The response shape mirrors
- * the foreach idiom used by the managed sync workflow YAML.
+ * Lists every enabled source the sync sweep must reconcile. Independent of
+ * `_eligible`: the sweep runs regardless of extraction interval, exclusions,
+ * or the continuous-extraction toggle. The response key stays `streamName`
+ * so the managed sync workflow YAML can keep reading it. The value is the
+ * source id.
  */
 export const streamsWithIndicatorsRoute = createServerRoute({
   endpoint: 'GET /internal/streams/_knowledge_indicators/_streams_with_indicators',
@@ -57,12 +57,12 @@ export const streamsWithIndicatorsRoute = createServerRoute({
       maintenanceService,
       request,
     });
-    const enabledIds = new Set(
+    const enabledSourceIds = new Set(
       sources.filter((source) => source.enabled).map((source) => source.id)
     );
-    const streamNames = reconcileIds.filter((sourceId) => enabledIds.has(sourceId));
+    const sourceIds = reconcileIds.filter((sourceId) => enabledSourceIds.has(sourceId));
 
-    return { streams: streamNames.map((streamName) => ({ streamName })) };
+    return { streams: sourceIds.map((sourceId) => ({ streamName: sourceId })) };
   },
 });
 
