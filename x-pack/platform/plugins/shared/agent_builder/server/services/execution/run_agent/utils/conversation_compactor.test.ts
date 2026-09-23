@@ -28,6 +28,7 @@ import type { ProcessedConversation } from './prepare_conversation';
 import {
   abortedExec0Timeline,
   failedExec0Timeline,
+  processedCustomEventFixture,
   roundsOfTimeline,
   timelineFromRounds,
   type ProcessedConversationRound,
@@ -773,6 +774,35 @@ describe('compactConversation', () => {
       expect(result.compactionTriggered).toBe(false);
       expect(result.summary).toBeUndefined();
       expect(roundIds(result.processedConversation.timeline)).toEqual(['r3', 'r4']);
+    });
+  });
+
+  describe('custom events', () => {
+    const note = (id: string, minute: number) =>
+      processedCustomEventFixture({ id, created_at: at(minute), representation: `note ${id}` });
+    const entryIds = (timeline: ProcessedTimelineEvent[]) =>
+      Array.from(new Set(timeline.map((event) => event.id.split('::')[0])));
+
+    it('drops a custom event older than the cut and keeps the newer one when summarizing', async () => {
+      // n1 sits between r1 and r2 (older than r3, the first kept round); n2 sits between r3 and r4
+      const timeline = [
+        ...timelineFromRounds([roundAt('r1', 0, 2000, 3)]),
+        note('n1', 1),
+        ...timelineFromRounds([roundAt('r2', 2, 2000, 3), roundAt('r3', 3, 200)]),
+        note('n2', 4),
+        ...timelineFromRounds([roundAt('r4', 5, 200)]),
+      ];
+      const conversation = conversationOf(timeline);
+
+      const result = await compact({
+        processedConversation: conversation,
+        perRoundTokenCounts: countsFor(conversation),
+        chatModel: createMockChatModel(),
+        contextBudget: { totalBudget: 500_000, historyBudget: 400_000, triggerThreshold: 100 },
+        logger: mockLogger,
+      });
+
+      expect(entryIds(result.processedConversation.timeline)).toEqual(['r3', 'n2', 'r4']);
     });
   });
 
