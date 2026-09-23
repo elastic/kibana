@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import type { GeneratedSignificantEventQuery } from '@kbn/significant-events-schema';
-import { normalizeEsqlSafe, replaceFromSources } from '@kbn/streams-schema';
+import type { GeneratedSignificantEventQuery, QueryLink } from '@kbn/significant-events-schema';
+import {
+  getFromSources,
+  hasSameEsql,
+  normalizeEsqlSafe,
+  replaceFromSources,
+} from '@kbn/streams-schema';
 import { HIGH_SEVERITY_THRESHOLD } from '@kbn/significant-events-schema';
 import { v4 } from 'uuid';
 import type { KnowledgeIndicatorClient, KIBulkOperation } from '../knowledge_indicators';
@@ -27,6 +32,12 @@ function isRuleEligible(query: GeneratedSignificantEventQuery): boolean {
   );
 }
 
+/** True when the query's FROM clause is exactly the source view. */
+function readsOnlyFromView(esql: string, viewName: string): boolean {
+  const sources = getFromSources(esql);
+  return sources.length === 1 && sources[0] === viewName;
+}
+
 export async function persistQueries(
   sourceId: string,
   queries: GeneratedSignificantEventQuery[],
@@ -41,13 +52,23 @@ export async function persistQueries(
     return { persistedQueries: [], skippedQueries: [] };
   }
 
-  // Canonicalize FROM onto the source view so a stored query and an incoming one that differ
-  // only by source list still collide. No-op when the FROM already matches, or when there is none.
+  // Canonicalize FROM onto the source view so two queries that differ only by source list
+  // still collide. A stored query that collides but still reads another index is rewritten
+  // onto the view; skipping it would leave the rule on the pre-cutover FROM.
   const dedupKey = (esql: string) => normalizeEsqlSafe(replaceFromSources(esql, [viewName]));
 
-  const { [sourceId]: existingLinks } = await kiClient.getStreamToQueryLinksMap([sourceId]);
+  const { [sourceId]: existingLinks = [] } = await kiClient.getStreamToQueryLinksMap([sourceId]);
   const existingById = new Map(existingLinks.map((link) => [link.query.id, link]));
-  const existingEsqls = new Set(existingLinks.map((link) => dedupKey(link.query.esql.query)));
+  const linksByDedupKey = new Map<string, QueryLink[]>();
+  for (const link of existingLinks) {
+    const key = dedupKey(link.query.esql.query);
+    const group = linksByDedupKey.get(key);
+    if (group) {
+      group.push(link);
+    } else {
+      linksByDedupKey.set(key, [link]);
+    }
+  }
   const ruleBackedIds = new Set(
     existingLinks.filter((link) => link.rule_backed).map((link) => link.query.id)
   );
@@ -66,18 +87,69 @@ export async function persistQueries(
   const ruleEligibleExpiresAt = new Map<string, string | undefined>();
   const persistedQueries: PersistedQuery[] = [];
   const skippedQueries: GeneratedSignificantEventQuery[] = [];
+  const seenIncomingKeys = new Set<string>();
+
+  const queueViewRewrite = (link: QueryLink, rewritten: string): void => {
+    const persisted: PersistedQuery = {
+      id: link.query.id,
+      type: link.query.type,
+      title: link.query.title,
+      description: link.query.description,
+      esql: { query: rewritten },
+      severity_score: link.query.severity_score ?? 0,
+      features: link.query.features ?? [],
+      ...(link.query.evidence ? { evidence: link.query.evidence } : {}),
+    };
+    const expiresAt = resolveExpiresAt(link.query.id);
+    if (link.rule_backed) {
+      ruleEligibleQueries.push(persisted);
+      ruleEligibleExpiresAt.set(link.query.id, expiresAt);
+    } else {
+      standardOps.push({
+        index: {
+          query: { ...persisted, expires_at: expiresAt, rule_backed: false },
+        },
+      });
+    }
+    persistedQueries.push(persisted);
+  };
 
   for (const query of queries) {
     const { replaces, ...indexFields } = query;
 
     const normalizedEsql = dedupKey(query.esql.query);
+    const storedMatches = linksByDedupKey.get(normalizedEsql);
 
-    if (existingEsqls.has(normalizedEsql)) {
+    if (storedMatches) {
+      const firstIncoming = !seenIncomingKeys.has(normalizedEsql);
+      seenIncomingKeys.add(normalizedEsql);
+      let rewrote = false;
+      if (firstIncoming) {
+        for (const link of storedMatches) {
+          const storedEsql = link.query.esql.query;
+          if (readsOnlyFromView(storedEsql, viewName)) {
+            continue;
+          }
+          const rewritten = replaceFromSources(storedEsql, [viewName]);
+          if (hasSameEsql(storedEsql, rewritten)) {
+            continue;
+          }
+          queueViewRewrite(link, rewritten);
+          rewrote = true;
+        }
+      }
+      if (!rewrote) {
+        skippedQueries.push(query);
+      }
+      continue;
+    }
+
+    if (seenIncomingKeys.has(normalizedEsql)) {
       skippedQueries.push(query);
       continue;
     }
 
-    existingEsqls.add(normalizedEsql);
+    seenIncomingKeys.add(normalizedEsql);
 
     if (replaces && existingById.has(replaces)) {
       const queryId = replaces;

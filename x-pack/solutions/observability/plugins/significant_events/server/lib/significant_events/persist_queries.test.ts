@@ -10,6 +10,7 @@ import type {
   QueryLink,
   StreamQuery,
 } from '@kbn/significant-events-schema';
+import { replaceFromSources } from '@kbn/streams-schema';
 import { persistQueries } from './persist_queries';
 import type { KnowledgeIndicatorClient } from '../knowledge_indicators';
 
@@ -102,11 +103,14 @@ describe('persistQueries', () => {
   });
 
   it('skips queries whose normalized ES|QL matches an existing stored query', async () => {
-    const existing = makeLink({ id: 'q1', esql: 'FROM logs | WHERE body.text:"error"' });
+    const existing = makeLink({
+      id: 'q1',
+      esql: `FROM ${VIEW_NAME} | WHERE body.text:"error"`,
+    });
     const { kiClient } = createMocks([existing]);
 
     const duplicate = makeGeneratedQuery({
-      esql: { query: 'FROM  logs  |  WHERE  body.text:"error"' },
+      esql: { query: `FROM  ${VIEW_NAME}  |  WHERE  body.text:"error"` },
     });
 
     await persistQueries('logs.test', [duplicate], persistDeps(kiClient));
@@ -138,12 +142,14 @@ describe('persistQueries', () => {
   it('deduplicates commutative AND reorderings against existing', async () => {
     const existing = makeLink({
       id: 'q1',
-      esql: 'FROM logs | WHERE body.text:"timeout" AND body.text:"connection"',
+      esql: `FROM ${VIEW_NAME} | WHERE body.text:"timeout" AND body.text:"connection"`,
     });
     const { kiClient } = createMocks([existing]);
 
     const reordered = makeGeneratedQuery({
-      esql: { query: 'FROM logs | WHERE body.text:"connection" AND body.text:"timeout"' },
+      esql: {
+        query: `FROM ${VIEW_NAME} | WHERE body.text:"connection" AND body.text:"timeout"`,
+      },
     });
 
     await persistQueries('logs.test', [reordered], persistDeps(kiClient));
@@ -152,26 +158,56 @@ describe('persistQueries', () => {
     expect(kiClient.syncQueries).not.toHaveBeenCalled();
   });
 
-  it('deduplicates when the stored FROM differs from the stream sources', async () => {
-    const existing = makeLink({
-      id: 'q1',
-      esql: 'FROM logs.test | WHERE body.text:"error"',
-    });
+  it('rewrites a stored query onto the source view when the duplicate still reads another index', async () => {
+    const storedEsql = 'FROM logs.test | WHERE body.text:"error"';
+    const existing = makeLink({ id: 'q1', esql: storedEsql, ruleBacked: false });
     const { kiClient } = createMocks([existing]);
 
     const duplicate = makeGeneratedQuery({
-      esql: { query: 'FROM logs.test, logs.test.* | WHERE body.text:"error"' },
+      esql: { query: `FROM ${VIEW_NAME} | WHERE body.text:"error"` },
     });
 
-    const { skippedQueries } = await persistQueries(
+    const { persistedQueries, skippedQueries } = await persistQueries(
       'logs.test',
       [duplicate],
       persistDeps(kiClient)
     );
 
-    expect(skippedQueries).toHaveLength(1);
-    expect(kiClient.bulk).not.toHaveBeenCalled();
+    const rewritten = replaceFromSources(storedEsql, [VIEW_NAME]);
+    expect(skippedQueries).toHaveLength(0);
+    expect(persistedQueries).toEqual([
+      expect.objectContaining({ id: 'q1', esql: { query: rewritten } }),
+    ]);
+    expect(kiClient.bulk).toHaveBeenCalledWith('logs.test', [
+      expect.objectContaining({
+        index: expect.objectContaining({
+          query: expect.objectContaining({ id: 'q1', esql: { query: rewritten } }),
+        }),
+      }),
+    ]);
     expect(kiClient.syncQueries).not.toHaveBeenCalled();
+  });
+
+  it('rewrites a rule-backed stored query through syncQueries so the rule moves onto the view', async () => {
+    const storedEsql = 'FROM logs.test | WHERE body.text:"error"';
+    const existing = makeLink({ id: 'q1', esql: storedEsql, ruleBacked: true });
+    const { kiClient } = createMocks([existing]);
+
+    const duplicate = makeGeneratedQuery({
+      esql: { query: `FROM ${VIEW_NAME} | WHERE body.text:"error"` },
+    });
+
+    await persistQueries('logs.test', [duplicate], persistDeps(kiClient));
+
+    expect(kiClient.bulk).not.toHaveBeenCalled();
+    expect(kiClient.syncQueries).toHaveBeenCalledTimes(1);
+    const queriesArg = (kiClient.syncQueries as jest.Mock).mock.calls[0][1];
+    expect(queriesArg).toEqual([
+      expect.objectContaining({
+        id: 'q1',
+        esql: { query: replaceFromSources(storedEsql, [VIEW_NAME]) },
+      }),
+    ]);
   });
 
   it('routes replaces for non-rule-backed queries to bulk with rule_backed: false', async () => {
@@ -233,13 +269,13 @@ describe('persistQueries', () => {
   it('skips replaces when the replacement ES|QL matches the existing query exactly', async () => {
     const existing = makeLink({
       id: 'q1',
-      esql: 'FROM logs | WHERE body.text:"error"',
+      esql: `FROM ${VIEW_NAME} | WHERE body.text:"error"`,
     });
     const { kiClient } = createMocks([existing]);
 
     const noOpReplace = makeGeneratedQuery({
       replaces: 'q1',
-      esql: { query: 'FROM logs | WHERE body.text:"error"' },
+      esql: { query: `FROM ${VIEW_NAME} | WHERE body.text:"error"` },
     });
 
     await persistQueries('logs.test', [noOpReplace], persistDeps(kiClient));
