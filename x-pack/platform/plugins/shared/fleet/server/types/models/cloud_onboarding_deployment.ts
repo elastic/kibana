@@ -43,6 +43,7 @@ export const CloudOnboardingDeploymentSchemaV1 = schema.object({
     )
   ),
   packagePolicyIds: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+  policyIdsByInstance: schema.maybe(schema.recordOf(schema.string(), schema.string())),
   agentPolicyId: schema.maybe(schema.string()),
   apiKeyId: schema.maybe(schema.string()),
   /** ECF CloudFormation stacks launched for this deployment, one entry per template family. */

@@ -142,6 +142,14 @@ const CloudOnboardingDeploymentItemSchema = schema.object({
       },
     })
   ),
+  policyIdsByInstance: schema.maybe(
+    schema.recordOf(schema.string(), schema.string(), {
+      meta: {
+        description:
+          'instanceId → policyId mapping persisted after deploy. Hydrated into the wizard on resume to enable cleanup of stale policies when services are removed.',
+      },
+    })
+  ),
   apiKeyId: schema.maybe(
     schema.string({
       meta: {
@@ -258,6 +266,9 @@ export const UpdateCloudOnboardingDeploymentRequestSchema = {
     agentPolicyId: schema.maybe(schema.string({ maxLength: 255 })),
     packagePolicyIds: schema.maybe(
       schema.arrayOf(schema.string({ maxLength: 255 }), { maxSize: 100 })
+    ),
+    policyIdsByInstance: schema.maybe(
+      schema.recordOf(schema.string({ maxLength: 255 }), schema.string({ maxLength: 255 }))
     ),
     apiKeyId: schema.maybe(schema.string({ maxLength: 255 })),
     mechanisms: schema.maybe(
