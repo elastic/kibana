@@ -12,6 +12,7 @@ import {
   CONNECTOR_ID_MAX_LENGTH,
   type ConnectorContractUnion,
   generateYamlSchemaFromConnectors,
+  TEMPLATE_EXPRESSION_MAX_LENGTH,
 } from '../..';
 
 const BASE_WORKFLOW = {
@@ -216,6 +217,470 @@ describe('generateYamlSchemaFromConnectors', () => {
 
       expect(result.success).toBe(false);
       expect(elapsed).toBeLessThan(500);
+    });
+  });
+
+  describe('withTemplateStringSupport (array field widening)', () => {
+    const arrayConnector: ConnectorContractUnion = {
+      summary: 'Notifier',
+      description: null,
+      type: 'notify',
+      paramsSchema: z.object({
+        recipients: z.array(z.string()),
+        subject: z.string(),
+      }),
+      outputSchema: z.unknown(),
+    };
+
+    const parse = (withValue: unknown) =>
+      generateYamlSchemaFromConnectors([arrayConnector]).safeParse({
+        ...BASE_WORKFLOW,
+        steps: [{ name: 'step', type: 'notify', with: withValue }],
+      });
+
+    it('accepts a ${{ expr }} template for an array param', () => {
+      expect(
+        parse({ recipients: '${{ workflow.inputs.recipients }}', subject: 'hi' }).success
+      ).toBe(true);
+    });
+
+    // Only `${{ … }}` survives as an array at runtime: WorkflowTemplatingEngine returns the raw
+    // evaluated value for that form only, and renders everything else to a string. Accepting any
+    // of the shapes below would let YAML be saved that hands the connector a string — or, for the
+    // multi-expression forms, throws "The provided expression is invalid" mid-execution, because
+    // evaluateExpression slices from the first `{{` to the last `}}`.
+    it.each([
+      ['a plain string', 'not-a-template'],
+      ['a bare {{ expr }} template (renders to a string, not an array)', '{{ recipients }}'],
+      ['text before the expression', 'prefix-${{ expr }}'],
+      ['text after the expression', '${{ expr }}-suffix'],
+      ['two concatenated expressions', '${{ a }}-${{ b }}'],
+      ['an expression with literal text between two others', '${{ a }} literal ${{ b }}'],
+      ['leading whitespace (the runtime check does not trim)', '  ${{ expr }}'],
+      ['trailing whitespace (the runtime check does not trim)', '${{ expr }}  '],
+      ['an empty expression body', '${{}}'],
+      ['a whitespace-only expression body', '${{   }}'],
+    ])('rejects %s for an array param', (_label, recipients) => {
+      expect(parse({ recipients, subject: 'hi' }).success).toBe(false);
+    });
+
+    it('rejects a template string exceeding TEMPLATE_EXPRESSION_MAX_LENGTH', () => {
+      const long = `\${{ ${'x'.repeat(TEMPLATE_EXPRESSION_MAX_LENGTH)} }}`;
+      expect(parse({ recipients: long, subject: 'hi' }).success).toBe(false);
+    });
+
+    it('does not widen non-array fields — string params remain string-only', () => {
+      expect(parse({ recipients: ['a@b.com'], subject: '{{ not-widened }}' }).success).toBe(true);
+      // A real Liquid expression is still valid as a string value, but a plain array is not
+      expect(parse({ recipients: ['a@b.com'], subject: ['array', 'not', 'ok'] }).success).toBe(
+        false
+      );
+    });
+
+    it('widens optional array params and preserves optionality', () => {
+      const connector: ConnectorContractUnion = {
+        summary: 'Opt',
+        description: null,
+        type: 'opt.step',
+        paramsSchema: z.object({ tags: z.array(z.string()).optional() }),
+        outputSchema: z.unknown(),
+      };
+      const schema = generateYamlSchemaFromConnectors([connector]);
+      // template string accepted
+      expect(
+        schema.safeParse({
+          ...BASE_WORKFLOW,
+          steps: [{ name: 's', type: 'opt.step', with: { tags: '${{ workflow.inputs.tags }}' } }],
+        }).success
+      ).toBe(true);
+      // omitting the optional field is still valid
+      expect(
+        schema.safeParse({
+          ...BASE_WORKFLOW,
+          steps: [{ name: 's', type: 'opt.step', with: {} }],
+        }).success
+      ).toBe(true);
+    });
+
+    it('widens default-wrapped array params without making them required', () => {
+      const connector: ConnectorContractUnion = {
+        summary: 'Def',
+        description: null,
+        type: 'def.step',
+        // Mirrors a real shipped connector: InferenceRerankParamsSchema declares
+        // `input: z.array(z.string()).default([])` as a top-level param.
+        paramsSchema: z.object({ tags: z.array(z.string()).default([]), query: z.string() }),
+        outputSchema: z.unknown(),
+      };
+      const schema = generateYamlSchemaFromConnectors([connector]);
+      expect(
+        schema.safeParse({
+          ...BASE_WORKFLOW,
+          steps: [
+            {
+              name: 's',
+              type: 'def.step',
+              with: { tags: '${{ workflow.inputs.tags }}', query: 'q' },
+            },
+          ],
+        }).success
+      ).toBe(true);
+
+      // Widening must not strip `.default()`. If it did, every existing workflow that omits a
+      // defaulted array param would stop validating — including on update, since this schema
+      // gates persistence and not just editor feedback.
+      const omitted = schema.safeParse({
+        ...BASE_WORKFLOW,
+        steps: [{ name: 's', type: 'def.step', with: { query: 'q' } }],
+      });
+      expect(omitted.success).toBe(true);
+      expect(omitted.data).toMatchObject({ steps: [{ with: { tags: [] } }] });
+    });
+
+    it('preserves factory-backed defaults across repeated parses', () => {
+      // Zod v4 evaluates `def.defaultValue` on every read. Capturing that value once while
+      // rebuilding the field would freeze a single factory result into every subsequent parse.
+      let callCount = 0;
+      const connector: ConnectorContractUnion = {
+        summary: 'FactoryDef',
+        description: null,
+        type: 'factory.def.step',
+        paramsSchema: z.object({
+          tags: z.array(z.string()).default(() => {
+            callCount += 1;
+            return [`tag-${callCount}`];
+          }),
+          query: z.string(),
+        }),
+        outputSchema: z.unknown(),
+      };
+      const schema = generateYamlSchemaFromConnectors([connector]);
+      const parseOmitted = () =>
+        schema.safeParse({
+          ...BASE_WORKFLOW,
+          steps: [{ name: 's', type: 'factory.def.step', with: { query: 'q' } }],
+        });
+
+      const first = parseOmitted();
+      const second = parseOmitted();
+      expect(first.success).toBe(true);
+      expect(second.success).toBe(true);
+      expect(first.data).toMatchObject({ steps: [{ with: { tags: ['tag-1'] } }] });
+      expect(second.data).toMatchObject({ steps: [{ with: { tags: ['tag-2'] } }] });
+    });
+
+    describe.each([
+      ['.optional().default()', () => z.array(z.string()).optional().default(['fallback'])],
+      ['.default().optional()', () => z.array(z.string()).default(['fallback']).optional()],
+      ['stacked defaults', () => z.array(z.string()).default(['inner']).default(['outer'])],
+    ])('array params wrapped in %s', (_label, buildField) => {
+      const paramsSchema = z.object({ tags: buildField() });
+      const connector: ConnectorContractUnion = {
+        summary: 'Wrapped',
+        description: null,
+        type: 'wrapped.step',
+        paramsSchema,
+        outputSchema: z.unknown(),
+      };
+      const schema = generateYamlSchemaFromConnectors([connector]);
+      const parseWith = (withValue: unknown) =>
+        schema.safeParse({
+          ...BASE_WORKFLOW,
+          steps: [{ name: 's', type: 'wrapped.step', with: withValue }],
+        });
+
+      it('is widened to accept a template', () => {
+        // Stacked wrappers must still be unwrapped down to the array, otherwise the field is
+        // silently skipped and the template string is reported as a type error.
+        expect(parseWith({ tags: '${{ workflow.inputs.tags }}' }).success).toBe(true);
+      });
+
+      it('resolves an omitted value exactly as the original schema does', () => {
+        // Widening must replay the wrapper stack verbatim: `.optional()` and `.default()` are not
+        // commutative in general, so coalescing them could change what an omitted param resolves
+        // to. Comparing against the untouched schema pins the behaviour without hard-coding it.
+        const result = parseWith({});
+        expect(result.success).toBe(true);
+        expect(result.data).toMatchObject({ steps: [{ with: paramsSchema.parse({}) }] });
+      });
+    });
+
+    it('preserves the object unknownKeys policy of the original paramsSchema', () => {
+      // A strict paramsSchema should still reject unknown keys after widening.
+      const connector: ConnectorContractUnion = {
+        summary: 'Strict',
+        description: null,
+        type: 'strict.step',
+        paramsSchema: z.strictObject({ ids: z.array(z.string()) }),
+        outputSchema: z.unknown(),
+      };
+      const schema = generateYamlSchemaFromConnectors([connector]);
+      expect(
+        schema.safeParse({
+          ...BASE_WORKFLOW,
+          steps: [
+            {
+              name: 's',
+              type: 'strict.step',
+              with: { ids: '${{ workflow.inputs.ids }}', unknown_key: 'bad' },
+            },
+          ],
+        }).success
+      ).toBe(false);
+    });
+
+    it('preserves refinements attached after .optional() on an array param', () => {
+      // In Zod v4, `.optional().refine(...)` keeps the ZodOptional type with checks on the
+      // wrapper. Unwrap/rewrap must copy those checks or ordinary empty arrays slip through.
+      const connector: ConnectorContractUnion = {
+        summary: 'OptionalRefined',
+        description: null,
+        type: 'optional.refined.step',
+        paramsSchema: z.object({
+          tags: z
+            .array(z.string())
+            .optional()
+            .refine((v) => v === undefined || v.length > 0, 'tags must be non-empty when set'),
+        }),
+        outputSchema: z.unknown(),
+      };
+      const schema = generateYamlSchemaFromConnectors([connector]);
+      const parseWith = (withValue: unknown) =>
+        schema.safeParse({
+          ...BASE_WORKFLOW,
+          steps: [{ name: 's', type: 'optional.refined.step', with: withValue }],
+        });
+
+      expect(parseWith({}).success).toBe(true);
+      expect(parseWith({ tags: ['a'] }).success).toBe(true);
+      expect(parseWith({ tags: [] }).success).toBe(false);
+      expect(parseWith({ tags: '${{ workflow.inputs.tags }}' }).success).toBe(true);
+    });
+
+    describe('connectors whose paramsSchema has object-level refinements', () => {
+      // `.every()` rather than `.length`: an object-level refinement is written against the
+      // declared field types, so widening `ids` to `array | string` hands it a string. Array-only
+      // APIs then throw a TypeError that escapes safeParse and fails the whole request, which a
+      // `.length` refinement would hide because strings have a length too.
+      const refinedConnector: ConnectorContractUnion = {
+        summary: 'Refined',
+        description: null,
+        type: 'refined.step',
+        paramsSchema: z
+          .object({ ids: z.array(z.string()), name: z.string() })
+          .refine((v) => v.ids.every((id) => id.length > 0), 'ids must all be non-empty'),
+        outputSchema: z.unknown(),
+      };
+
+      const parseRefined = (withValue: unknown) =>
+        generateYamlSchemaFromConnectors([refinedConnector]).safeParse({
+          ...BASE_WORKFLOW,
+          steps: [{ name: 's', type: 'refined.step', with: withValue }],
+        });
+
+      it('builds the schema without throwing', () => {
+        expect(() => generateYamlSchemaFromConnectors([refinedConnector])).not.toThrow();
+      });
+
+      it('accepts a template without running the refinement against it', () => {
+        // The refinement can only be evaluated once the expression is rendered, so a templated
+        // value has to skip it rather than be fed to an array-typed callback.
+        expect(() => parseRefined({ ids: '${{ workflow.inputs.ids }}', name: 'x' })).not.toThrow();
+        expect(parseRefined({ ids: '${{ workflow.inputs.ids }}', name: 'x' }).success).toBe(true);
+      });
+
+      it('still enforces object checks that do not depend on templated fields', () => {
+        // A template on `ids` must not disable unrelated refinements — otherwise invalid sibling
+        // params (e.g. an disallowed mode) can be persisted.
+        const crossField: ConnectorContractUnion = {
+          summary: 'CrossField',
+          description: null,
+          type: 'cross.field.step',
+          paramsSchema: z
+            .object({
+              ids: z.array(z.string()),
+              mode: z.enum(['a', 'b']),
+            })
+            .refine((v) => v.mode === 'a', 'mode must be a')
+            .refine((v) => v.ids.every((id) => id.length > 0), 'ids must all be non-empty'),
+          outputSchema: z.unknown(),
+        };
+        const schema = generateYamlSchemaFromConnectors([crossField]);
+        const parseWith = (withValue: unknown) =>
+          schema.safeParse({
+            ...BASE_WORKFLOW,
+            steps: [{ name: 's', type: 'cross.field.step', with: withValue }],
+          });
+
+        expect(parseWith({ ids: '${{ workflow.inputs.ids }}', mode: 'b' }).success).toBe(false);
+        expect(parseWith({ ids: '${{ workflow.inputs.ids }}', mode: 'a' }).success).toBe(true);
+      });
+
+      it('does not evaluate .length refinements against the template source string', () => {
+        // Strings and arrays both have `.length`, so a check that only throws on array-only APIs
+        // would still run against the expression text. A long `${{ … }}` must not be rejected
+        // (or accepted) based on character length vs the eventual array length.
+        const lengthBound: ConnectorContractUnion = {
+          summary: 'LengthBound',
+          description: null,
+          type: 'length.bound.step',
+          paramsSchema: z
+            .object({
+              ids: z.array(z.string()),
+              max: z.number(),
+            })
+            .refine((v) => v.ids.length <= v.max, 'ids too long'),
+          outputSchema: z.unknown(),
+        };
+        const schema = generateYamlSchemaFromConnectors([lengthBound]);
+        const parseWith = (withValue: unknown) =>
+          schema.safeParse({
+            ...BASE_WORKFLOW,
+            steps: [{ name: 's', type: 'length.bound.step', with: withValue }],
+          });
+
+        // Expression text is longer than max=5 characters; must still accept (check skipped).
+        expect(parseWith({ ids: '${{ workflow.inputs.ids }}', max: 5 }).success).toBe(true);
+        // Ordinary arrays are still enforced.
+        expect(parseWith({ ids: ['a', 'b', 'c'], max: 2 }).success).toBe(false);
+        expect(parseWith({ ids: ['a'], max: 2 }).success).toBe(true);
+      });
+
+      it('still enforces the refinement for ordinary array values', () => {
+        expect(parseRefined({ ids: ['a'], name: 'x' }).success).toBe(true);
+        expect(parseRefined({ ids: [''], name: 'x' }).success).toBe(false);
+      });
+
+      it('still reports ordinary field errors at the offending field', () => {
+        // Monaco markers and the template-error suppression in parseWorkflowYamlToJSON both key
+        // off the issue path, so deferring the refinements must not collapse it to the step root.
+        const result = parseRefined({ ids: ['a'] });
+        expect(result.success).toBe(false);
+        expect(result.error?.issues.some((issue) => issue.path.includes('name'))).toBe(true);
+      });
+
+      it('preserves the unknownKeys policy of a strict refined paramsSchema', () => {
+        const strictRefined: ConnectorContractUnion = {
+          summary: 'StrictRefined',
+          description: null,
+          type: 'strict.refined.step',
+          paramsSchema: z
+            .strictObject({ ids: z.array(z.string()) })
+            .refine((v) => v.ids.every((id) => id.length > 0), 'ids must all be non-empty'),
+          outputSchema: z.unknown(),
+        };
+        const schema = generateYamlSchemaFromConnectors([strictRefined]);
+        expect(
+          schema.safeParse({
+            ...BASE_WORKFLOW,
+            steps: [
+              {
+                name: 's',
+                type: 'strict.refined.step',
+                with: { ids: '${{ workflow.inputs.ids }}', unknown_key: 'bad' },
+              },
+            ],
+          }).success
+        ).toBe(false);
+      });
+
+      it('does not re-apply non-idempotent field transforms when running object checks', () => {
+        // Deferred checks must run against the already-parsed field output. Feeding that output
+        // back through paramsSchema would transform `name` a second time (`x` → `x!` → `x!!`) and
+        // reject a value the original schema accepts.
+        const refinedWithTransform: ConnectorContractUnion = {
+          summary: 'TransformedRefined',
+          description: null,
+          type: 'transformed.refined.step',
+          paramsSchema: z
+            .object({
+              ids: z.array(z.string()),
+              name: z.string().transform((v) => `${v}!`),
+            })
+            .refine((v) => v.name === 'x!', 'name must be x!'),
+          outputSchema: z.unknown(),
+        };
+        const schema = generateYamlSchemaFromConnectors([refinedWithTransform]);
+        const result = schema.safeParse({
+          ...BASE_WORKFLOW,
+          steps: [
+            {
+              name: 's',
+              type: 'transformed.refined.step',
+              with: { ids: ['a'], name: 'x' },
+            },
+          ],
+        });
+        expect(result.success).toBe(true);
+        expect(result.data).toMatchObject({
+          steps: [{ with: { ids: ['a'], name: 'x!' } }],
+        });
+      });
+
+      it('preserves object-level overwrite output for non-templated values', () => {
+        // Deferred checks used to run via superRefine and discard result.data, so `.overwrite()`
+        // on the original paramsSchema never reached the parse output.
+        const withOverwrite: ConnectorContractUnion = {
+          summary: 'Overwrite',
+          description: null,
+          type: 'overwrite.step',
+          paramsSchema: z
+            .object({ ids: z.array(z.string()) })
+            .overwrite((v) => ({ ...v, ids: v.ids.map((id) => id.toUpperCase()) })),
+          outputSchema: z.unknown(),
+        };
+        const schema = generateYamlSchemaFromConnectors([withOverwrite]);
+        const result = schema.safeParse({
+          ...BASE_WORKFLOW,
+          steps: [{ name: 's', type: 'overwrite.step', with: { ids: ['a', 'b'] } }],
+        });
+        expect(result.success).toBe(true);
+        expect(result.data).toMatchObject({
+          steps: [{ with: { ids: ['A', 'B'] } }],
+        });
+      });
+
+      it('preserves passthrough keys when replaying object-level checks', () => {
+        // The check-only replay schema must be loose: a plain z.object would strip catchall keys
+        // before refinements run and from the data written back to ctx.value.
+        const passthroughRefined: ConnectorContractUnion = {
+          summary: 'PassthroughRefined',
+          description: null,
+          type: 'passthrough.refined.step',
+          paramsSchema: z
+            .object({ ids: z.array(z.string()) })
+            .passthrough()
+            .refine((v) => v.extra === 'ok', 'extra must be ok'),
+          outputSchema: z.unknown(),
+        };
+        const schema = generateYamlSchemaFromConnectors([passthroughRefined]);
+        const result = schema.safeParse({
+          ...BASE_WORKFLOW,
+          steps: [
+            {
+              name: 's',
+              type: 'passthrough.refined.step',
+              with: { ids: ['a'], extra: 'ok' },
+            },
+          ],
+        });
+        expect(result.success).toBe(true);
+        expect(result.data).toMatchObject({
+          steps: [{ with: { ids: ['a'], extra: 'ok' } }],
+        });
+        expect(
+          schema.safeParse({
+            ...BASE_WORKFLOW,
+            steps: [
+              {
+                name: 's',
+                type: 'passthrough.refined.step',
+                with: { ids: ['a'], extra: 'nope' },
+              },
+            ],
+          }).success
+        ).toBe(false);
+      });
     });
   });
 });

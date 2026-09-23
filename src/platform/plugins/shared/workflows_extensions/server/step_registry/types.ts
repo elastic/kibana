@@ -326,6 +326,10 @@ export function createPollServerStepDefinition<
     definition.policy = PollStepDefaults.policy;
   }
 
+  if (!definition.supportedExecutionModes) {
+    definition.supportedExecutionModes = ['async'];
+  }
+
   return definition;
 }
 
