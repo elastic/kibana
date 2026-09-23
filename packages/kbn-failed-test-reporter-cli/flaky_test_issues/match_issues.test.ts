@@ -292,12 +292,22 @@ describe('findMatchingIssues', () => {
         }),
       })
     );
-    const cypressIssue = describeIssue(
+    const untypedIssue = describeIssue(
       githubIssue({
         number: 52,
         body: updateIssueMetadata(`| Location | ${SUITE_PATH} |`, {
           'test.class': 'Security Solution Cypress.cypress/e2e',
           'test.name': 'A loads',
+        }),
+      })
+    );
+    const cypressIssue = describeIssue(
+      githubIssue({
+        number: 53,
+        body: updateIssueMetadata(`| Location | ${SUITE_PATH} |`, {
+          'test.class': 'Security Solution Cypress.cypress/e2e',
+          'test.name': 'A loads',
+          'test.type': 'cypress',
         }),
       })
     );
@@ -308,8 +318,11 @@ describe('findMatchingIssues', () => {
     ]);
     expect(findMatchingIssues(jest, [jestIssueForA]).map(({ match }) => match)).toEqual(['test']);
     // no test.type recorded: the name still counts, as before
-    expect(findMatchingIssues(playwright, [cypressIssue]).map(({ match }) => match)).toEqual([
+    expect(findMatchingIssues(playwright, [untypedIssue]).map(({ match }) => match)).toEqual([
       'test',
+    ]);
+    expect(findMatchingIssues(playwright, [cypressIssue]).map(({ match }) => match)).toEqual([
+      'file',
     ]);
   });
 

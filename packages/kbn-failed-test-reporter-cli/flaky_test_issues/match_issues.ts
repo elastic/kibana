@@ -42,7 +42,7 @@ export interface IssueDetails {
   testName?: string;
   /**
    * Framework of a per-test issue, from the `test.type` the failed-test reporter records
-   * (`scout` is Playwright); absent for Cypress issues and hand-written ones.
+   * (`scout` is Playwright); absent for hand-written issues and those filed before it was recorded.
    */
   testFramework?: TestFramework;
   /** Title and body with JUnit's `·` restored to `.`, so file paths can be looked up in it. */
@@ -82,6 +82,7 @@ const TEST_TYPE_FRAMEWORKS: Record<string, TestFramework> = {
   jest: 'jest',
   ftr: 'ftr',
   scout: 'playwright',
+  cypress: 'cypress',
 };
 
 /** Extracts the matching keys of an issue once, so every suite can be checked cheaply. */
