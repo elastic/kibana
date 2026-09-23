@@ -46,6 +46,8 @@ export interface RoleArnFieldProps {
   onChange: (nextValue: string) => void;
   /** Number of package policies referencing this identity; `undefined` means still loading. */
   affectedPackagePolicyCount: number | undefined;
+  /** The identity is shared with other spaces, whose policies the count does not include. */
+  sharedWithOtherSpaces?: boolean;
 }
 
 export const RoleArnField: React.FC<RoleArnFieldProps> = ({
@@ -53,6 +55,7 @@ export const RoleArnField: React.FC<RoleArnFieldProps> = ({
   storedValue,
   onChange,
   affectedPackagePolicyCount,
+  sharedWithOtherSpaces = false,
 }) => {
   const isInvalid = useMemo(() => isIamRoleArnInvalid(value), [value]);
   // An identity cannot give up its role, so an emptied field is an error rather than "unchanged":
@@ -99,6 +102,12 @@ export const RoleArnField: React.FC<RoleArnFieldProps> = ({
                   <FormattedMessage
                     id="xpack.fleet.cloudConnector.policiesFlyout.roleArnCalloutUnknownCount"
                     defaultMessage="This identity is used by other integrations. Saving changes how each of them authenticates to AWS. Agents will switch to the new role on their next policy check-in. If the new role is not trusted or lacks the required permissions, all of them stop collecting."
+                  />
+                ) : sharedWithOtherSpaces ? (
+                  <FormattedMessage
+                    id="xpack.fleet.cloudConnector.policiesFlyout.roleArnCalloutSharedSpaces"
+                    defaultMessage="This identity is used by {count, plural, one {# package policy} other {# package policies}} in this space, and it is shared with other spaces. Saving also changes the policies that use it in other spaces. Agents will switch to the new role on their next policy check-in. If the new role is not trusted or lacks the required permissions, all of them stop collecting."
+                    values={{ count: affectedPackagePolicyCount }}
                   />
                 ) : (
                   <FormattedMessage

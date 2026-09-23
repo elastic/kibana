@@ -58,6 +58,7 @@ jest.mock('../../services', () => ({
     getById: jest.fn(),
     update: jest.fn(),
     delete: jest.fn(),
+    isSharedWithOtherSpaces: jest.fn(),
   },
   packagePolicyService: {
     list: jest.fn(),
@@ -1757,6 +1758,7 @@ describe('Cloud Connector API', () => {
       };
 
       mockCloudConnectorService.getById.mockResolvedValue(mockCloudConnector);
+      mockCloudConnectorService.isSharedWithOtherSpaces.mockResolvedValueOnce(false);
 
       mockPackagePolicyService.list.mockResolvedValue({
         items: [
@@ -1841,7 +1843,36 @@ describe('Cloud Connector API', () => {
           total: 2,
           page: 1,
           perPage: 10,
+          sharedWithOtherSpaces: false,
         },
+      });
+    });
+
+    it('reports when the connector is shared with other spaces, so the count covers this space only', async () => {
+      mockCloudConnectorService.getById.mockResolvedValue({} as CloudConnector);
+      mockCloudConnectorService.isSharedWithOtherSpaces.mockResolvedValueOnce(true);
+      mockPackagePolicyService.list.mockResolvedValue({
+        items: [],
+        total: 0,
+        page: 1,
+        perPage: 10,
+      } as any);
+
+      await getCloudConnectorUsageHandler(
+        context,
+        httpServerMock.createKibanaRequest({
+          params: { cloudConnectorId: 'connector-123' },
+          query: {},
+        }),
+        response
+      );
+
+      expect(mockCloudConnectorService.isSharedWithOtherSpaces).toHaveBeenCalledWith(
+        expect.any(Object),
+        'connector-123'
+      );
+      expect(response.ok).toHaveBeenCalledWith({
+        body: expect.objectContaining({ total: 0, sharedWithOtherSpaces: true }),
       });
     });
 

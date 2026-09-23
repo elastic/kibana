@@ -80,6 +80,21 @@ describe('RoleArnField', () => {
     );
   });
 
+  it('says the count covers this space only when the identity is shared with other spaces', () => {
+    renderWithI18n(
+      <RoleArnField
+        value="arn:aws:iam::123456789012:role/New"
+        storedValue="arn:aws:iam::123456789012:role/Old"
+        onChange={noop}
+        affectedPackagePolicyCount={0}
+        sharedWithOtherSpaces
+      />
+    );
+    const text = screen.getByTestId(ROLE_ARN_FIELD_TEST_SUBJECTS.CALLOUT).textContent;
+    expect(text).toMatch(/0 package policies in this space/);
+    expect(text).toMatch(/policies that use it in other spaces/);
+  });
+
   it('renders a neutral warning when the count is not yet known', () => {
     renderWithI18n(
       <RoleArnField

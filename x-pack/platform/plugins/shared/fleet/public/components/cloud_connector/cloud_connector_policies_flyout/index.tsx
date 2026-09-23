@@ -562,6 +562,7 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
               storedValue={existingRoleArn}
               onChange={setEditedRoleArn}
               affectedPackagePolicyCount={usageData?.total}
+              sharedWithOtherSpaces={usageData?.sharedWithOtherSpaces}
             />
             <EuiSpacer size="m" />
           </>

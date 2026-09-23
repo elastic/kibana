@@ -371,6 +371,10 @@ export const getCloudConnectorUsageHandler: FleetRequestHandler<
       total: result?.total || 0,
       page,
       perPage,
+      sharedWithOtherSpaces: await cloudConnectorService.isSharedWithOtherSpaces(
+        internalSoClient,
+        cloudConnectorId
+      ),
     };
     return response.ok({ body });
   } catch (error) {

@@ -668,6 +668,34 @@ describe('CloudConnectorPoliciesFlyout', () => {
       );
     });
 
+    it('warns that policies in other spaces change too when the identity is shared', () => {
+      mockUseCloudConnectorUsage.mockReturnValue({
+        data: {
+          items: mockUsageData,
+          total: mockUsageData.length,
+          page: 1,
+          perPage: 10,
+          sharedWithOtherSpaces: true,
+        },
+        isLoading: false,
+        error: null,
+      } as unknown as ReturnType<typeof useCloudConnectorUsage>);
+      renderFlyout({
+        provider: 'aws',
+        cloudConnectorVars: {
+          role_arn: { value: 'arn:aws:iam::123456789012:role/Existing' },
+        },
+      });
+
+      fireEvent.change(screen.getByTestId(ROLE_ARN_FIELD_TEST_SUBJECTS.INPUT), {
+        target: { value: 'arn:aws:iam::123456789012:role/NewRole' },
+      });
+
+      expect(screen.getByTestId(ROLE_ARN_FIELD_TEST_SUBJECTS.CALLOUT).textContent).toMatch(
+        /in this space.*other spaces/
+      );
+    });
+
     it('does not render RoleArnField for non-AWS connectors', () => {
       renderFlyout({
         provider: 'azure',

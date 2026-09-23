@@ -904,6 +904,27 @@ describe('CloudConnectorService', () => {
     });
   });
 
+  describe('isSharedWithOtherSpaces', () => {
+    const connectorIn = (namespaces: string[] | undefined) =>
+      ({
+        id: 'cc-1',
+        namespaces,
+        attributes: { name: 'Test', cloudProvider: 'aws' },
+      } as SavedObject);
+
+    it.each([
+      [['default'], false],
+      [undefined, false],
+      [['default', 'space-b'], true],
+      [['*'], true],
+    ])('returns %p -> %p', async (namespaces, expected) => {
+      mockSoClient.get.mockResolvedValue(connectorIn(namespaces));
+
+      await expect(service.isSharedWithOtherSpaces(mockSoClient, 'cc-1')).resolves.toBe(expected);
+      expect(mockSoClient.get).toHaveBeenCalledWith(CLOUD_CONNECTOR_SAVED_OBJECT_TYPE, 'cc-1');
+    });
+  });
+
   describe('getById', () => {
     const mockSavedObject = {
       id: 'cloud-connector-123',

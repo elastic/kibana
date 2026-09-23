@@ -12,7 +12,6 @@ import {
   type KibanaRequest,
   type Logger,
 } from '@kbn/core/server';
-import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { LockAcquisitionError } from '@kbn/lock-manager';
@@ -67,7 +66,10 @@ import { VERIFY_PERMISSIONS_TASK_ID } from '../tasks/agentless/verify_permission
 
 import { appContextService } from './app_context';
 import { propagateRoleArnToPackagePolicies } from './cloud_connectors';
-import { authorizeSharedConnectorRoleArnSpaces } from './cloud_connectors/role_arn_cross_space';
+import {
+  authorizeSharedConnectorRoleArnSpaces,
+  isConnectorSharedAcrossSpaces,
+} from './cloud_connectors/role_arn_cross_space';
 import type { RoleArnPropagationRollback } from './cloud_connectors';
 import { validatePolicyNamespaceForSpace } from './spaces/policy_namespaces';
 import { extractSecretIdsFromCloudConnectorVars } from './secrets/cloud_connector';
@@ -459,6 +461,18 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
     }
   }
 
+  /** Whether the connector is shared with spaces other than one, so a per-space count is partial. */
+  async isSharedWithOtherSpaces(
+    soClient: SavedObjectsClientContract,
+    cloudConnectorId: string
+  ): Promise<boolean> {
+    const { namespaces } = await soClient.get<CloudConnectorSOAttributes>(
+      CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+      cloudConnectorId
+    );
+    return isConnectorSharedAcrossSpaces(namespaces);
+  }
+
   async update(
     soClient: SavedObjectsClientContract,
     cloudConnectorId: string,
@@ -576,11 +590,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
             'Role ARN update is not supported from this code path (missing esClient for package-policy fan-out).'
           );
         }
-        const isSharedAcrossSpaces =
-          !!sharedNamespaces &&
-          (sharedNamespaces.includes(ALL_SPACES_ID) ||
-            new Set(sharedNamespaces.filter((spaceId) => spaceId.length > 0)).size > 1);
-        if (isSharedAcrossSpaces) {
+        if (isConnectorSharedAcrossSpaces(sharedNamespaces)) {
           const currentSpaceId = soClient.getCurrentNamespace() ?? DEFAULT_SPACE_ID;
           const spaceIds = await authorizeSharedConnectorRoleArnSpaces({
             currentSpaceId,

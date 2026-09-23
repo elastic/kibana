@@ -27,6 +27,12 @@ const roleArnSharedSpacesUnauthorizedMessage = (): string =>
 const sharedSpacesUnauthorized = (): FleetUnauthorizedError =>
   new FleetUnauthorizedError(roleArnSharedSpacesUnauthorizedMessage());
 
+/** True when the connector is visible in more than one space, including all spaces. */
+export const isConnectorSharedAcrossSpaces = (namespaces: string[] | undefined): boolean => {
+  const spaceIds = (namespaces ?? []).filter((spaceId) => spaceId.length > 0);
+  return spaceIds.includes(ALL_SPACES_ID) || new Set(spaceIds).size > 1;
+};
+
 /** Current space first so a later space's failure reverts the caller's space before the others. */
 const orderCurrentSpaceFirst = (spaceIds: string[], currentSpaceId: string): string[] => {
   if (!spaceIds.includes(currentSpaceId)) {
