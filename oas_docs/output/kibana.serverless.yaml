@@ -21342,8 +21342,10 @@ paths:
               schema:
                 oneOf:
                   - description: Identity-immutable conflict — name or type was changed.
+                    type: object
                     properties:
                       attributes:
+                        type: object
                         properties:
                           changed:
                             items:
@@ -21356,7 +21358,6 @@ paths:
                         required:
                           - code
                           - changed
-                        type: object
                       error:
                         type: string
                       message:
@@ -21368,7 +21369,6 @@ paths:
                       - error
                       - message
                       - attributes
-                    type: object
                   - $ref: '#/components/schemas/Cases_response_4xx'
           description: |
             A field's name or type cannot be changed after creation, or a global field cannot be demoted while linked to an active custom field.
