@@ -13,7 +13,7 @@ cd x-pack/solutions/security/test/security_solution_cypress
 
 set +e
 
-yarn cypress:cloud_security_posture:run:serverless; status=$?; yarn junit:merge || :
+pnpm cypress:cloud_security_posture:run:serverless; status=$?; pnpm junit:merge || :
 
 # Scout reporter
 upload_scout_cypress_events "Cypress tests"

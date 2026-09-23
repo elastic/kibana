@@ -20,7 +20,12 @@ import {
   AGENT_BUILDER_BUILTIN_AGENTS,
   AGENT_BUILDER_BUILTIN_TOOLS,
 } from '@kbn/agent-builder-server/allow_lists';
-import { DATA_STREAM_NAMESPACE_ATTR, isAgentBuilderSpan } from './agent_builder_context';
+import {
+  DATA_STREAM_NAMESPACE_ATTR,
+  getPrivacySettingsFromContext,
+  isAgentBuilderSpan,
+} from './agent_builder_context';
+import type { TracingPrivacySettings } from './privacy_settings';
 import { normalizeAgentIdForTelemetry, toHashedId } from '../telemetry/utils';
 
 const BUILTIN_TOOL_IDS: Set<string> = new Set(AGENT_BUILDER_BUILTIN_TOOLS);
@@ -31,20 +36,9 @@ const BUILTIN_AGENT_IDS: Set<string> = new Set([
 
 const SHOULD_TRACK_ATTR = '_agent_builder_should_track';
 
-export interface TracingPrivacySettings {
-  enabled: boolean;
-  includeUserPrompts: boolean;
-  includeLlmResponses: boolean;
-  includeToolDetails: boolean;
-  includeSystemPrompt: boolean;
-  includeRealNames: boolean;
-  includeRealIds: boolean;
-}
-
 interface AgentBuilderSpanProcessorOpts {
   exporter: tracing.SpanExporter;
   scheduledDelayMillis: number;
-  getSettings: () => TracingPrivacySettings;
 }
 
 /**
@@ -256,33 +250,31 @@ function applyMessageAttributePrivacy(
  */
 export class AgentBuilderSpanProcessor implements tracing.SpanProcessor {
   private readonly batchProcessor: tracing.SpanProcessor;
-  private readonly getSettings: () => TracingPrivacySettings;
+  private readonly spanSettings = new WeakMap<object, TracingPrivacySettings>();
 
   constructor(opts: AgentBuilderSpanProcessorOpts) {
     this.batchProcessor = new tracing.BatchSpanProcessor(opts.exporter, {
       scheduledDelayMillis: opts.scheduledDelayMillis,
     });
-    this.getSettings = opts.getSettings;
   }
 
-  async onStart(span: tracing.Span, parentContext: api.Context): Promise<void> {
-    const settings = this.getSettings();
-    if (!settings.enabled) {
+  onStart(span: tracing.Span, parentContext: api.Context): void {
+    if (!isAgentBuilderSpan(span, parentContext)) {
       return;
     }
-    if (isAgentBuilderSpan(span, parentContext)) {
-      span.setAttribute(SHOULD_TRACK_ATTR, true);
-      this.batchProcessor.onStart(span, parentContext);
+    const settings = getPrivacySettingsFromContext(parentContext);
+    if (!settings) {
+      return;
     }
+    this.spanSettings.set(span, settings);
+    span.setAttribute(SHOULD_TRACK_ATTR, true);
+    this.batchProcessor.onStart(span, parentContext);
   }
 
   onEnd(span: tracing.ReadableSpan): void {
-    if (!span.attributes[SHOULD_TRACK_ATTR]) {
-      return;
-    }
-
-    const settings = this.getSettings();
-    if (!settings.enabled) {
+    const settings = this.spanSettings.get(span);
+    this.spanSettings.delete(span);
+    if (!settings?.enabled) {
       return;
     }
 

@@ -77,7 +77,7 @@ Run Agent Builder evaluations against a local Kibana instance using these steps:
 **1. Start Kibana without base path**
 
 ```bash
-yarn start --no-base-path
+pnpm start --no-base-path
 ```
 
 > The APM synthrace client fixture requires Kibana to run without a base path.
