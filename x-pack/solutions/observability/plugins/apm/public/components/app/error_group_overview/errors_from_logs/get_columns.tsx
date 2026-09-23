@@ -48,7 +48,7 @@ export function getColumns({
             content={
               <OpenInDiscover
                 indexType="logs"
-                indexPattern={logsIndexPattern}
+                indexPattern={item.index ?? logsIndexPattern}
                 variant="link"
                 label={message}
                 dataTestSubj="apmErrorsFromLogsDiscoverLink"
@@ -58,8 +58,9 @@ export function getColumns({
                   traceId: item.traceId,
                   spanId: item.spanId,
                   exceptionsOnly: true,
-                  // Narrow by `_id`: exception.message and exception.type are both optional on
-                  // these documents, so neither can reliably identify a single row.
+                  // Narrow by `_id` scoped to the source index: document IDs are unique
+                  // only within an index, so using the concrete index avoids false matches
+                  // in rolled-over or custom log indices.
                   documentId: item.id,
                   sortDirection: 'DESC',
                 }}

@@ -86,7 +86,7 @@ export function ErrorGroupOverview() {
                  time-series charts inside this section (FailedTransactionRate and
                  ErrorDistribution). Both live here so the provider need not be hoisted. */}
             <ChartPointerEventContextProvider>
-              <EuiFlexGroup direction="column" gutterSize="s">
+              <EuiFlexGroup direction="row" gutterSize="s" wrap>
                 <EuiFlexItem>
                   <FailedTransactionRateChart kuery={kuery} />
                 </EuiFlexItem>
