@@ -14,7 +14,9 @@ import {
   EuiFormRow,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHighlight,
   EuiText,
+  EuiTextBlockTruncate,
 } from '@elastic/eui';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { AiIndexHttpItem } from '@kbn/context-engine-plugin/common/http_api/ai_indices';
@@ -23,6 +25,9 @@ import { useAgentAiIndicesById } from '../../../hooks/ai_indices/use_agent_ai_in
 import { useListAiIndices } from '../../../hooks/ai_indices/use_list_ai_indices';
 import { labels } from '../../../utils/i18n';
 import { AiIndicesWarningsPanel } from './ai_indices_warnings_panel';
+
+/** Matches the clamp the Context Engine applies to AI Index descriptions elsewhere. */
+const OPTION_TEXT_LINES = 2;
 
 export const useAiIndices = (agentId?: string) => {
   const {
@@ -102,14 +107,47 @@ export const AiIndicesFields: React.FC<AiIndicesFieldsProps> = ({
         .map(({ id, description }) => ({
           key: id,
           label: id,
-          append: description ? (
-            <EuiText size="xs" color="subdued">
-              {description}
-            </EuiText>
-          ) : undefined,
+          value: description,
           'data-test-subj': `agentBuilderAiIndexOption-${id}`,
         })),
     [aiIndices, inheritedIdSet]
+  );
+
+  // The description is stacked under the name rather than appended beside it: the append slot
+  // cannot shrink, so a long description would push the name out of the row. Rows size to their
+  // content, so both are clamped to keep a verbose index from filling the whole list.
+  const renderOption = useCallback(
+    (
+      { label, value: description }: EuiComboBoxOptionOption<string>,
+      searchValue: string,
+      contentClassName: string
+    ) => (
+      <EuiFlexGroup direction="column" gutterSize="xs" className={contentClassName}>
+        <EuiText size="s">
+          <strong>
+            <EuiTextBlockTruncate
+              lines={OPTION_TEXT_LINES}
+              title={label}
+              data-test-subj={`agentBuilderAiIndexOptionName-${label}`}
+            >
+              <EuiHighlight search={searchValue}>{label}</EuiHighlight>
+            </EuiTextBlockTruncate>
+          </strong>
+        </EuiText>
+        {description && (
+          <EuiText size="xs" color="subdued">
+            <EuiTextBlockTruncate
+              lines={OPTION_TEXT_LINES}
+              title={description}
+              data-test-subj={`agentBuilderAiIndexOptionDescription-${label}`}
+            >
+              <EuiHighlight search={searchValue}>{description}</EuiHighlight>
+            </EuiTextBlockTruncate>
+          </EuiText>
+        )}
+      </EuiFlexGroup>
+    ),
+    []
   );
 
   // Configured but not listed for this user: deleted, unreadable, or not registered in this space.
@@ -208,6 +246,8 @@ export const AiIndicesFields: React.FC<AiIndicesFieldsProps> = ({
             options={options}
             selectedOptions={selectedOptions}
             onChange={handleChange}
+            renderOption={renderOption}
+            rowHeight="auto"
             isLoading={isLoading}
             isDisabled={isFormDisabled}
             data-test-subj="agentBuilderAdditionalAiIndices"
