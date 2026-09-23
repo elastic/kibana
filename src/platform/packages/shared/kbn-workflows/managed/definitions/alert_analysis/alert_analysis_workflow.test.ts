@@ -228,11 +228,10 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(guard.type).toBe('if');
     // A disabled space or a space with no connector must skip enrichment, the AI agent calls, and
     // auto-close (fixes enabled-with-no-connector and moves the on/off decision to run time), and
-    // an execution whose alerts were all analyzed already must not call the model at all. The guard
-    // is a parens-free `and` chain; `connector_configured` is pre-computed by set_connector_configured
-    // to avoid the `(` range-syntax pitfall with the two-connector OR.
+    // an execution whose alerts were all analyzed already must not call the model at all.
+    // Parentheses group the two-connector OR (groupedExpressions is enabled on the engine).
     expect(guard.condition).toBe(
-      '${{ variables.workflow_enabled and variables.connector_configured and variables.pending_alert_count > 0 }}'
+      "${{ variables.workflow_enabled and (variables.connector_id != '' or variables.connector_id_by_feature != '') and variables.pending_alert_count > 0 }}"
     );
 
     // Everything expensive lives under the guard — including the "about to analyze N alerts" log,
@@ -750,8 +749,7 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
   it('initialises connector_id_by_feature to empty string so the standalone path is unchanged', () => {
     // Both paths invoke the same underlying workflow. The empty initialiser means that when no
     // caller supplies connectorIdByFeature, the variable exists but is "" — the analysis_enabled
-    // guard sees connector_configured = (connector_id != '' or '' != '') = (connector_id != ''),
-    // which matches the pre-Worker guard behaviour.
+    // guard's OR collapses to (connector_id != ''), matching pre-Worker guard behaviour.
     const initStep = findStepByName(workflow.steps, 'set_workflow_variables') as {
       with: { connector_id_by_feature: string; investigation_conversation_id: string };
     };
@@ -1027,19 +1025,15 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(JSON.stringify(workflow.steps)).not.toMatch(ternaryInExpression);
   });
 
-  it('pre-computes connector_configured to keep the analysis_enabled guard a simple and chain', () => {
-    const helperStep = findStepByName(workflow.steps, 'set_connector_configured') as {
-      type: string;
-      with: { connector_configured: string };
+  it('uses parenthesized connector OR on analysis_enabled (groupedExpressions)', () => {
+    const guard = findStepByName(workflow.steps, 'analysis_enabled') as {
+      condition: string;
     };
-    expect(helperStep).toBeDefined();
-    expect(helperStep.type).toBe('data.set');
-    expect(helperStep.with.connector_configured).toBe(
-      "${{ variables.connector_id != '' or variables.connector_id_by_feature != '' }}"
+    expect(guard.condition).toContain(
+      "(variables.connector_id != '' or variables.connector_id_by_feature != '')"
     );
-    // Must run before analysis_enabled so the guard sees the computed value
-    const ancestors = findStepAncestors(workflow.steps, 'set_connector_configured') ?? [];
-    expect(ancestors.map((a) => a.name)).not.toContain('analysis_enabled');
+    // No pre-compute helper — parentheses are legal with groupedExpressions: true.
+    expect(findStepByName(workflow.steps, 'set_connector_configured')).toBeUndefined();
   });
 
   it('emits workflow.output at the top level so callers always receive a structured result', () => {
