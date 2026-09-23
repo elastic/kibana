@@ -48,11 +48,11 @@ export function useApiEndpoints(): {
     },
   } = useKibana<ObservabilityOnboardingAppServices>();
   const isManagedOtlpServiceAvailable = useManagedOtlpServiceAvailability();
-  const managedOtlpPrwEndpointEnabled = featureFlags.getBooleanValue(
+  const managedOtlpPrwEndpointEnabled = featureFlags.useBooleanValue(
     IS_MANAGED_OTLP_SERVICE_PRW_ENDPOINT_ENABLED,
     false
   );
-  const vendorEndpointsEnabled = featureFlags.getBooleanValue(IS_VENDOR_ENDPOINTS_ENABLED, false);
+  const vendorEndpointsEnabled = featureFlags.useBooleanValue(IS_VENDOR_ENDPOINTS_ENABLED, false);
 
   const { data, status } = useFetcher(
     (callApi) => callApi('GET /internal/observability_onboarding/api_endpoints'),
