@@ -56,3 +56,10 @@ export {
   getAccountTypeFromVarGroupOrInputs,
   detectTargetCsp,
 } from './var_group_helpers';
+
+// IaC deployment helpers
+export {
+  getAwsConsoleHostFromArn,
+  parseAwsRegionFromArn,
+  isCloudFormationStackArn,
+} from './iac_deployment';

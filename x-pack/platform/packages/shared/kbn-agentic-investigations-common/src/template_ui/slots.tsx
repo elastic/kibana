@@ -10,6 +10,7 @@ import type { Conversation } from '@kbn/agent-builder-common';
 import {
   ConversationDetailsFlyoutHeader,
   ConversationDetailsFlyoutFooter,
+  type ConversationDetailsFlyoutFooterProps,
   OverviewTab,
 } from '../components/details';
 import { conversationToInvestigation } from './conversation_to_investigation';
@@ -35,11 +36,13 @@ export const HeaderSlot = ({ conversation }: InvestigationSlotProps) => (
 
 export interface FooterSlotProps extends InvestigationSlotProps {
   onOpenChat: () => void;
+  onOpenEscalation?: ConversationDetailsFlyoutFooterProps['onOpenEscalation'];
 }
 
-export const FooterSlot = ({ conversation, onOpenChat }: FooterSlotProps) => (
+export const FooterSlot = ({ conversation, onOpenChat, onOpenEscalation }: FooterSlotProps) => (
   <ConversationDetailsFlyoutFooter
     investigation={conversationToInvestigation(conversation)}
     onOpenChat={onOpenChat}
+    onOpenEscalation={onOpenEscalation}
   />
 );

@@ -42,6 +42,12 @@ export interface RegisterAgenticInvestigationTemplateUIOptions {
   /** Localized template display name, shown in Agent Builder's title badge. */
   name: string;
   icon?: IconType;
+  /**
+   * When provided, the flyout footer renders a dedicated "Open escalation" primary button and
+   * delegates modal rendering to this function. Supplied by the caller so the modal can use
+   * Kibana HTTP hooks unavailable in this package.
+   */
+  renderEscalationModal?: import('./slots').FooterSlotProps['onOpenEscalation'];
 }
 
 /**
@@ -56,6 +62,7 @@ export const registerAgenticInvestigationTemplateUI = ({
   templateId,
   name,
   icon,
+  renderEscalationModal,
 }: RegisterAgenticInvestigationTemplateUIOptions): void => {
   const [overviewTabId] = getInvestigationTabIds(templateId);
 
@@ -99,6 +106,7 @@ export const registerAgenticInvestigationTemplateUI = ({
                     agentId: conversation.agent_id,
                   })
                 }
+                onOpenEscalation={renderEscalationModal}
               />
             </Suspense>
           );
