@@ -51,7 +51,7 @@ export interface UpdateCloudOnboardingDeploymentRequest {
     mechanisms?: DeploymentMethod[];
     ecfStacks?: CloudOnboardingEcfStack[];
     /** Set to null to clear the connector association (e.g. on MI→ECF transition). */
-    connectorId?: null;
+    connectorId?: string | null;
     /** Set to null to clear the auth method (e.g. on MI→ECF transition). */
     authMethod?: CloudOnboardingDeploymentAuthMethod | null;
   };
