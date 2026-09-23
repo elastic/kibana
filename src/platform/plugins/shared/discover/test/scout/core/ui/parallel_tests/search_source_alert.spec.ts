@@ -10,26 +10,7 @@ import type { Client } from '@elastic/elasticsearch';
 import type { ApiServicesFixture, ScoutPage } from '@kbn/scout';
 import { KibanaCodeEditorWrapper, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { spaceTest } from '../../../common/ui/fixtures';
-
-async function openDiscoverSearchThresholdRuleFlyout(page: ScoutPage) {
-  await page.testSubj.click('app-menu-overflow-button');
-  await page.testSubj.waitForSelector('discoverAlertsButton');
-  await page.testSubj.click('discoverAlertsButton');
-
-  if (await page.testSubj.isVisible('discoverLegacySearchThresholdRule')) {
-    await page.testSubj.click('discoverLegacySearchThresholdRule');
-  }
-
-  if (await page.testSubj.isVisible('discoverCreateAlertButton')) {
-    const createButton = page.testSubj.locator('discoverCreateAlertButton');
-    if (await createButton.isEnabled()) {
-      await page.testSubj.click('discoverCreateAlertButton');
-    }
-  }
-
-  await page.testSubj.waitForSelector('addRuleFlyoutTitle');
-}
+import { spaceTest, type DiscoverPageObjects } from '../../../common/ui/fixtures';
 
 const SOURCE_INDEX = 'search-source-alert';
 const OUTPUT_INDEX = 'search-source-alert-output';
@@ -169,6 +150,31 @@ const openRuleInManagement = async (page: ScoutPage, ruleName: string) => {
   await rulesList.locator(`[data-test-subj="rulesListTableRowName-${ruleName}"]`).click();
 };
 
+const assertInitialResults = async (
+  pageObjects: DiscoverPageObjects,
+  dataViewName: string
+): Promise<void> => {
+  expect(await pageObjects.filterBar.getFilterCount()).toBe(0);
+  expect(await pageObjects.queryBar.getQuery()).toBe('');
+  await expect(pageObjects.discover.getSelectedDataView()).toHaveAccessibleName(dataViewName);
+  await expect.poll(() => pageObjects.discover.getHitCountInt()).toBe(5);
+};
+
+const assertCurrentResults = async (
+  pageObjects: DiscoverPageObjects,
+  dataViewId: string
+): Promise<void> => {
+  expect(await pageObjects.queryBar.getQuery()).toBe('message:msg-1');
+  expect(
+    await pageObjects.filterBar.hasFilter({
+      field: 'message.keyword',
+      value: 'msg-1',
+    })
+  ).toBe(true);
+  await expect.poll(() => pageObjects.discover.getHitCountInt()).toBe(1);
+  expect(await pageObjects.discover.getCurrentDataViewId()).toBe(dataViewId);
+};
+
 async function defineSearchSourceAlert(page: ScoutPage, alertName: string) {
   await page.testSubj.click('thresholdPopover');
   await page.testSubj.fill('alertThresholdInput0', '1');
@@ -201,8 +207,6 @@ spaceTest.describe('Discover app - search source alert', { tag: tags.deploymentA
   const createdDataViewIds: string[] = [];
   const createdRuleIds: string[] = [];
   let connectorId = '';
-  let baselineRuleId = '';
-  let baselineRuleName = '';
   let sourceDataViewId = '';
 
   spaceTest.beforeAll(async ({ apiServices, esClient, scoutSpace }) => {
@@ -267,34 +271,13 @@ spaceTest.describe('Discover app - search source alert', { tag: tags.deploymentA
     });
     sourceDataViewId = sourceDataViewResponse.data.id;
     const {
-      data: { id: searchSourceAlertOutputDataViewId },
-    } = await apiServices.dataViews.create({
-      title: 'search-source-alert-output',
-      timeFieldName: '@timestamp',
-      spaceId: scoutSpace.id,
-    });
-    const {
       data: { id: searchSourceAlertWildcardDataViewId },
     } = await apiServices.dataViews.create({
       title: 'search-*',
       timeFieldName: '@timestamp',
       spaceId: scoutSpace.id,
     });
-    createdDataViewIds.push(
-      sourceDataViewId,
-      searchSourceAlertOutputDataViewId,
-      searchSourceAlertWildcardDataViewId
-    );
-
-    baselineRuleName = `search-source-alert-${scoutSpace.id}`;
-    baselineRuleId = await createSearchSourceRule({
-      apiServices,
-      connectorId: connector.id,
-      dataViewId: sourceDataViewId,
-      name: baselineRuleName,
-      spaceId: scoutSpace.id,
-    });
-    createdRuleIds.push(baselineRuleId);
+    createdDataViewIds.push(sourceDataViewId, searchSourceAlertWildcardDataViewId);
   });
 
   spaceTest.beforeEach(async ({ browserAuth }) => {
@@ -320,97 +303,59 @@ spaceTest.describe('Discover app - search source alert', { tag: tags.deploymentA
     await scoutSpace.savedObjects.cleanStandardList();
   });
 
-  spaceTest('should show time field validation error', async ({ page, pageObjects }) => {
+  spaceTest('should validate the time field and create an alert', async ({ page, pageObjects }) => {
     await pageObjects.discover.goto({ queryMode: 'classic' });
     await pageObjects.discover.waitUntilSearchingHasFinished();
-    await pageObjects.discover.selectDataView('search-source-alert');
+    await pageObjects.discover.selectDataView(SOURCE_INDEX);
     await pageObjects.datePicker.setCommonlyUsedTime('Last_15 minutes');
 
-    await openDiscoverSearchThresholdRuleFlyout(page);
-
-    await page.testSubj.click('selectDataViewExpression');
-    const dataViewSearchInput = page.testSubj.locator('indexPattern-switcher--input');
-    await dataViewSearchInput.waitFor({ state: 'visible' });
-    await dataViewSearchInput.fill('search-source-alert-o*');
-    await page.testSubj.click('explore-matching-indices-button');
-
-    const dataViewSelector = page.testSubj.locator('selectDataViewExpression');
-    await expect(dataViewSelector).toContainText('search-source-alert-o*');
-
-    await expect(page.testSubj.locator('esQueryAlertExpressionError')).toHaveText(
-      'Data view should have a time field.'
-    );
-  });
-
-  spaceTest('should create an alert', async ({ page, pageObjects }) => {
-    await pageObjects.discover.goto({ queryMode: 'classic' });
-    await pageObjects.discover.waitUntilSearchingHasFinished();
-
-    await openDiscoverSearchThresholdRuleFlyout(page);
+    await pageObjects.discover.openSearchThresholdRuleFlyout();
     await defineSearchSourceAlert(page, `tmp-rule-${Date.now()}`);
 
-    await page.testSubj.click('selectDataViewExpression');
-    const dataViewSwitcher = page.testSubj.locator('indexPattern-switcher');
-    await dataViewSwitcher.waitFor({ state: 'visible' });
-    await page.testSubj.locator('indexPattern-switcher--input').fill('');
-    await dataViewSwitcher.locator(`[data-test-subj="dataView-${SOURCE_INDEX}"]`).click();
+    await spaceTest.step('rejects a data view without a time field', async () => {
+      await page.testSubj.click('selectDataViewExpression');
+      const dataViewSearchInput = page.testSubj.locator('indexPattern-switcher--input');
+      await dataViewSearchInput.waitFor({ state: 'visible' });
+      await dataViewSearchInput.fill('search-source-alert-o*');
+      await page.testSubj.click('explore-matching-indices-button');
 
-    const dataViewSelector = page.testSubj.locator('selectDataViewExpression');
-    await expect(dataViewSelector).toContainText(SOURCE_INDEX);
+      await expect(page.testSubj.locator('selectDataViewExpression')).toContainText(
+        'search-source-alert-o*'
+      );
+      await expect(page.testSubj.locator('esQueryAlertExpressionError')).toHaveText(
+        'Data view should have a time field.'
+      );
+    });
 
-    await page.testSubj.click('ruleFormStep-details');
-    await page.components.toast().closeAll();
-    const saveButton = page.testSubj.locator('ruleFlyoutFooterSaveButton');
-    await saveButton.click();
-    await saveButton.waitFor({ state: 'hidden' });
+    await spaceTest.step('switches to a valid data view and creates the alert', async () => {
+      await page.testSubj.click('selectDataViewExpression');
+      const dataViewSwitcher = page.testSubj.locator('indexPattern-switcher');
+      await dataViewSwitcher.waitFor({ state: 'visible' });
+      await page.testSubj.locator('indexPattern-switcher--input').fill('');
+      await dataViewSwitcher.locator(`[data-test-subj="dataView-${SOURCE_INDEX}"]`).click();
 
-    await pageObjects.toasts.waitForToastWithText('Created rule');
+      await expect(page.testSubj.locator('selectDataViewExpression')).toContainText(SOURCE_INDEX);
+      await expect(page.testSubj.locator('esQueryAlertExpressionError')).toBeHidden();
+
+      await page.testSubj.click('ruleFormStep-details');
+      await page.components.toast().closeAll();
+      const saveButton = page.testSubj.locator('ruleFlyoutFooterSaveButton');
+      await saveButton.click();
+      await saveButton.waitFor({ state: 'hidden' });
+
+      await pageObjects.toasts.waitForToastWithText('Created rule');
+    });
   });
 
   spaceTest(
-    'should navigate to alert results via view in app link',
-    async ({ page, pageObjects }) => {
-      await openRuleInManagement(page, baselineRuleName);
-
-      await page.testSubj.click('app-menu-overflow-button');
-      await page.testSubj.click('ruleDetails-viewInDiscover');
-      await pageObjects.discover.waitUntilSearchingHasFinished();
-      await pageObjects.dataGrid.waitForDocTableRendered();
-
-      await expect(page.testSubj.locator('globalToastList')).toBeHidden();
-      expect(await pageObjects.filterBar.getFilterCount()).toBe(0);
-      expect(await pageObjects.queryBar.getQuery()).toBe('');
-      await expect(pageObjects.discover.getSelectedDataView()).toHaveAccessibleName(SOURCE_INDEX);
-      await expect.poll(() => pageObjects.discover.getHitCountInt()).toBe(5);
-      expect(await pageObjects.discover.getCurrentDataViewId()).toBe(sourceDataViewId);
-    }
-  );
-
-  spaceTest(
-    'should navigate to alert results via link provided in notification',
-    async ({ esClient, page, pageObjects }) => {
-      const contextLink = await getGeneratedContextLink(esClient, baselineRuleId);
-
-      await page.goto(new URL(contextLink, page.url()).toString());
-      await pageObjects.discover.waitUntilSearchingHasFinished();
-      await pageObjects.dataGrid.waitForDocTableRendered();
-
-      await pageObjects.toasts.waitForToastWithText('Displayed documents may vary');
-      expect(await pageObjects.filterBar.getFilterCount()).toBe(0);
-      expect(await pageObjects.queryBar.getQuery()).toBe('');
-      await expect(pageObjects.discover.getSelectedDataView()).toHaveAccessibleName(SOURCE_INDEX);
-      await expect.poll(() => pageObjects.discover.getHitCountInt()).toBe(5);
-    }
-  );
-
-  spaceTest(
-    'should display prev rule state after params update on clicking prev generated link',
+    'should preserve snapshot rule state while View in Discover uses updated params',
     async ({ apiServices, esClient, page, pageObjects, scoutSpace }) => {
+      const ruleName = `updated-rule-state-${scoutSpace.id}-${Date.now()}`;
       const ruleId = await createSearchSourceRule({
         apiServices,
         connectorId,
         dataViewId: sourceDataViewId,
-        name: `previous-rule-state-${scoutSpace.id}-${Date.now()}`,
+        name: ruleName,
         spaceId: scoutSpace.id,
       });
       createdRuleIds.push(ruleId);
@@ -425,22 +370,33 @@ spaceTest.describe('Discover app - search source alert', { tag: tags.deploymentA
         scoutSpace.id
       );
 
-      await page.goto(new URL(contextLink, page.url()).toString());
-      await pageObjects.discover.waitUntilSearchingHasFinished();
-      await pageObjects.dataGrid.waitForDocTableRendered();
+      await spaceTest.step('the previous notification link restores original params', async () => {
+        await page.goto(new URL(contextLink, page.url()).toString());
+        await pageObjects.discover.waitUntilSearchingHasFinished();
+        await pageObjects.dataGrid.waitForDocTableRendered();
 
-      await pageObjects.toasts.waitForToastWithText('Displayed documents may vary');
-      expect(await pageObjects.filterBar.getFilterCount()).toBe(0);
-      expect(await pageObjects.queryBar.getQuery()).toBe('');
-      await expect(pageObjects.discover.getSelectedDataView()).toHaveAccessibleName(SOURCE_INDEX);
-      await expect.poll(() => pageObjects.discover.getHitCountInt()).toBe(5);
+        await pageObjects.toasts.waitForToastWithText('Displayed documents may vary');
+        await assertInitialResults(pageObjects, SOURCE_INDEX);
+      });
+
+      await spaceTest.step('View in Discover uses current params', async () => {
+        await openRuleInManagement(page, ruleName);
+        await page.testSubj.click('app-menu-overflow-button');
+        await page.testSubj.click('ruleDetails-viewInDiscover');
+        await pageObjects.discover.waitUntilSearchingHasFinished();
+        await pageObjects.dataGrid.waitForDocTableRendered();
+
+        await expect(page.testSubj.locator('globalToastList')).toBeHidden();
+        await expect(pageObjects.discover.getSelectedDataView()).toHaveAccessibleName(SOURCE_INDEX);
+        await assertCurrentResults(pageObjects, sourceDataViewId);
+      });
     }
   );
 
   spaceTest(
-    'should display actual state after rule params update on clicking viewInApp link',
+    'should not overwrite current data view with alert data view when starting or saving a Discover session',
     async ({ apiServices, page, pageObjects, scoutSpace }) => {
-      const ruleName = `current-rule-state-${scoutSpace.id}-${Date.now()}`;
+      const ruleName = `session-data-view-${scoutSpace.id}-${Date.now()}`;
       const ruleId = await createSearchSourceRule({
         apiServices,
         connectorId,
@@ -450,52 +406,26 @@ spaceTest.describe('Discover app - search source alert', { tag: tags.deploymentA
       });
       createdRuleIds.push(ruleId);
 
-      await apiServices.alerting.rules.update(
-        ruleId,
-        {
-          params: getUpdatedSearchSourceRuleParams(sourceDataViewId),
-        },
-        scoutSpace.id
-      );
-
-      await openRuleInManagement(page, ruleName);
-      await page.testSubj.click('app-menu-overflow-button');
-      await page.testSubj.click('ruleDetails-viewInDiscover');
-      await pageObjects.discover.waitUntilSearchingHasFinished();
-      await pageObjects.dataGrid.waitForDocTableRendered();
-
-      await expect(page.testSubj.locator('globalToastList')).toBeHidden();
-      expect(await pageObjects.queryBar.getQuery()).toBe('message:msg-1');
-      expect(
-        await pageObjects.filterBar.hasFilter({
-          field: 'message.keyword',
-          value: 'msg-1',
-        })
-      ).toBe(true);
-      await expect(pageObjects.discover.getSelectedDataView()).toHaveAccessibleName(SOURCE_INDEX);
-      await expect.poll(() => pageObjects.discover.getHitCountInt()).toBe(1);
-      expect(await pageObjects.discover.getCurrentDataViewId()).toBe(sourceDataViewId);
-    }
-  );
-
-  spaceTest(
-    'should not overwrite current data view with alert data view when starting or saving a Discover session',
-    async ({ page, pageObjects, scoutSpace }) => {
-      const openBaselineRuleInDiscover = async () => {
-        await openRuleInManagement(page, baselineRuleName);
+      const openRuleInDiscover = async () => {
+        await openRuleInManagement(page, ruleName);
         await page.testSubj.click('app-menu-overflow-button');
         await page.testSubj.click('ruleDetails-viewInDiscover');
         await pageObjects.discover.waitUntilSearchingHasFinished();
         await pageObjects.dataGrid.waitForDocTableRendered();
       };
 
-      await openBaselineRuleInDiscover();
+      await openRuleInDiscover();
+
+      await expect(page.testSubj.locator('globalToastList')).toBeHidden();
+      await assertInitialResults(pageObjects, SOURCE_INDEX);
+      expect(await pageObjects.discover.getCurrentDataViewId()).toBe(sourceDataViewId);
+
       await pageObjects.discover.selectDataView(OTHER_DATA_VIEW);
       await pageObjects.discover.clickNewSearch();
 
       expect(await pageObjects.discover.getSelectedDataViewName()).toBe(OTHER_DATA_VIEW);
 
-      await openBaselineRuleInDiscover();
+      await openRuleInDiscover();
       await pageObjects.discover.selectDataView(OTHER_DATA_VIEW);
       await pageObjects.discover.saveSearch(
         `search-source-alert-session-${scoutSpace.id}-${Date.now()}`
@@ -506,63 +436,10 @@ spaceTest.describe('Discover app - search source alert', { tag: tags.deploymentA
   );
 
   spaceTest(
-    'should display prev data view state after update on clicking prev generated link',
-    async ({ apiServices, esClient, page, pageObjects, scoutSpace }) => {
-      const initialDataViewTitle = `search-source-alert-snapshot-${scoutSpace.id}-${Date.now()}`;
-      await esClient.indices.putAlias({
-        index: SOURCE_INDEX,
-        name: initialDataViewTitle,
-      });
-
-      const dataViewResponse = await apiServices.dataViews.create({
-        title: initialDataViewTitle,
-        timeFieldName: '@timestamp',
-        spaceId: scoutSpace.id,
-      });
-      const dataViewId = dataViewResponse.data.id;
-      createdDataViewIds.push(dataViewId);
-
-      const ruleId = await createSearchSourceRule({
-        apiServices,
-        connectorId,
-        dataViewId,
-        name: `previous-data-view-state-${scoutSpace.id}-${Date.now()}`,
-        spaceId: scoutSpace.id,
-      });
-      createdRuleIds.push(ruleId);
-
-      const contextLink = await getGeneratedContextLink(esClient, ruleId);
-
-      await apiServices.dataViews.update(dataViewId, {
-        title: 'search-s*',
-        sourceFilters: [{ value: 'message' }],
-        spaceId: scoutSpace.id,
-      });
-
-      await page.goto(new URL(contextLink, page.url()).toString());
-      await pageObjects.discover.waitUntilSearchingHasFinished();
-      await pageObjects.dataGrid.waitForDocTableRendered();
-
-      await pageObjects.toasts.waitForToastWithText('Displayed documents may vary');
-      expect(await pageObjects.filterBar.getFilterCount()).toBe(0);
-      expect(await pageObjects.queryBar.getQuery()).toBe('');
-      await expect(pageObjects.discover.getSelectedDataView()).toHaveAccessibleName(
-        initialDataViewTitle
-      );
-      await expect.poll(() => pageObjects.discover.getHitCountInt()).toBe(5);
-      await expect
-        .poll(async () =>
-          (await pageObjects.unifiedFieldList.getAllFieldNames()).includes('message')
-        )
-        .toBe(true);
-    }
-  );
-
-  spaceTest(
-    'should display actual data view state after update on clicking viewInApp link',
+    'should preserve snapshot data view state while View in Discover uses current state',
     async ({ apiServices, esClient, page, pageObjects, scoutSpace }) => {
       const uniqueSuffix = `${scoutSpace.id}-${Date.now()}`;
-      const initialDataViewTitle = `search-source-alert-current-${uniqueSuffix}`;
+      const initialDataViewTitle = `search-source-alert-original-${uniqueSuffix}`;
       const updatedDataViewTitle = `search-source-alert-updated-${uniqueSuffix}`;
       await esClient.indices.updateAliases({
         actions: [
@@ -579,7 +456,7 @@ spaceTest.describe('Discover app - search source alert', { tag: tags.deploymentA
       const dataViewId = dataViewResponse.data.id;
       createdDataViewIds.push(dataViewId);
 
-      const ruleName = `current-data-view-state-${uniqueSuffix}`;
+      const ruleName = `updated-data-view-state-${uniqueSuffix}`;
       const ruleId = await createSearchSourceRule({
         apiServices,
         connectorId,
@@ -588,6 +465,8 @@ spaceTest.describe('Discover app - search source alert', { tag: tags.deploymentA
         spaceId: scoutSpace.id,
       });
       createdRuleIds.push(ruleId);
+
+      const contextLink = await getGeneratedContextLink(esClient, ruleId);
 
       await apiServices.alerting.rules.update(
         ruleId,
@@ -602,74 +481,52 @@ spaceTest.describe('Discover app - search source alert', { tag: tags.deploymentA
         spaceId: scoutSpace.id,
       });
 
-      await openRuleInManagement(page, ruleName);
-      await page.testSubj.click('app-menu-overflow-button');
-      await page.testSubj.click('ruleDetails-viewInDiscover');
-      await pageObjects.discover.waitUntilSearchingHasFinished();
-      await pageObjects.dataGrid.waitForDocTableRendered();
+      await spaceTest.step('the previous notification link restores original state', async () => {
+        await page.goto(new URL(contextLink, page.url()).toString());
+        await pageObjects.discover.waitUntilSearchingHasFinished();
+        await pageObjects.dataGrid.waitForDocTableRendered();
 
-      await expect(page.testSubj.locator('globalToastList')).toBeHidden();
-      expect(await pageObjects.queryBar.getQuery()).toBe('message:msg-1');
-      expect(
-        await pageObjects.filterBar.hasFilter({
-          field: 'message.keyword',
-          value: 'msg-1',
-        })
-      ).toBe(true);
-      await expect.poll(() => pageObjects.discover.getHitCountInt()).toBe(1);
-      await expect
-        .poll(async () =>
-          (await pageObjects.unifiedFieldList.getAllFieldNames()).includes('message')
-        )
-        .toBe(false);
-      expect(await pageObjects.discover.getCurrentDataViewId()).toBe(dataViewId);
-
-      await pageObjects.discover.getSelectedDataView().click();
-      await page.testSubj.locator('indexPattern-switcher').waitFor({ state: 'visible' });
-      await page.testSubj.click('indexPattern-manage-field');
-      await page.testSubj.locator('indexPatternEditorFlyout').waitFor({ state: 'visible' });
-      await expect(page.testSubj.locator('createIndexPatternTitleInput')).toHaveValue(
-        updatedDataViewTitle
-      );
-    }
-  );
-
-  spaceTest(
-    'should navigate to alert results via link provided in notification using adhoc data view',
-    async ({ apiServices, esClient, page, pageObjects, scoutSpace }) => {
-      const adHocDataViewId = `search-source-adhoc-${scoutSpace.id}-${Date.now()}`;
-      const ruleId = await createSearchSourceRule({
-        apiServices,
-        connectorId,
-        dataViewId: adHocDataViewId,
-        name: `adhoc-data-view-${scoutSpace.id}-${Date.now()}`,
-        searchConfigurationIndex: getAdHocDataViewSpec(adHocDataViewId),
-        spaceId: scoutSpace.id,
+        await pageObjects.toasts.waitForToastWithText('Displayed documents may vary');
+        await assertInitialResults(pageObjects, initialDataViewTitle);
+        await expect
+          .poll(async () =>
+            (await pageObjects.unifiedFieldList.getAllFieldNames()).includes('message')
+          )
+          .toBe(true);
       });
-      createdRuleIds.push(ruleId);
 
-      const contextLink = await getGeneratedContextLink(esClient, ruleId);
-      await page.goto(new URL(contextLink, page.url()).toString());
-      await pageObjects.discover.waitUntilSearchingHasFinished();
-      await pageObjects.dataGrid.waitForDocTableRendered();
+      await spaceTest.step('View in Discover uses current state', async () => {
+        await openRuleInManagement(page, ruleName);
+        await page.testSubj.click('app-menu-overflow-button');
+        await page.testSubj.click('ruleDetails-viewInDiscover');
+        await pageObjects.discover.waitUntilSearchingHasFinished();
+        await pageObjects.dataGrid.waitForDocTableRendered();
 
-      await expect(pageObjects.discover.getSelectedDataView()).toHaveAccessibleName(
-        'search-source-*'
-      );
-      await expect.poll(() => pageObjects.discover.getHitCountInt()).toBe(5);
-      await expect(pageObjects.dataGrid.getCell(0, '_source')).toContainText(
-        'runtime-message-field'
-      );
-      await expect(pageObjects.dataGrid.getCell(0, '_source')).toContainText('mock-message');
+        await expect(page.testSubj.locator('globalToastList')).toBeHidden();
+        await assertCurrentResults(pageObjects, dataViewId);
+        await expect
+          .poll(async () =>
+            (await pageObjects.unifiedFieldList.getAllFieldNames()).includes('message')
+          )
+          .toBe(false);
+
+        await pageObjects.discover.getSelectedDataView().click();
+        await page.testSubj.locator('indexPattern-switcher').waitFor({ state: 'visible' });
+        await page.testSubj.click('indexPattern-manage-field');
+        await page.testSubj.locator('indexPatternEditorFlyout').waitFor({ state: 'visible' });
+        await expect(page.testSubj.locator('createIndexPatternTitleInput')).toHaveValue(
+          updatedDataViewTitle
+        );
+      });
     }
   );
 
   spaceTest(
-    'should navigate to alert results via view in app link using adhoc data view',
-    async ({ apiServices, page, pageObjects, scoutSpace }) => {
+    'should navigate to ad-hoc alert results via snapshot and current links',
+    async ({ apiServices, esClient, page, pageObjects, scoutSpace }) => {
       const uniqueSuffix = `${scoutSpace.id}-${Date.now()}`;
-      const adHocDataViewId = `search-source-adhoc-view-${uniqueSuffix}`;
-      const ruleName = `adhoc-data-view-view-${uniqueSuffix}`;
+      const adHocDataViewId = `search-source-adhoc-${uniqueSuffix}`;
+      const ruleName = `adhoc-data-view-${uniqueSuffix}`;
       const ruleId = await createSearchSourceRule({
         apiServices,
         connectorId,
@@ -680,26 +537,41 @@ spaceTest.describe('Discover app - search source alert', { tag: tags.deploymentA
       });
       createdRuleIds.push(ruleId);
 
-      await openRuleInManagement(page, ruleName);
-      await page.testSubj.click('app-menu-overflow-button');
-      await page.testSubj.click('ruleDetails-viewInDiscover');
-      await pageObjects.discover.waitUntilSearchingHasFinished();
-      await pageObjects.dataGrid.waitForDocTableRendered();
+      const contextLink = await getGeneratedContextLink(esClient, ruleId);
 
-      await expect(page.testSubj.locator('globalToastList')).toBeHidden();
-      await expect(pageObjects.discover.getSelectedDataView()).toHaveAccessibleName(
-        'search-source-*'
-      );
-      await expect.poll(() => pageObjects.discover.getHitCountInt()).toBe(5);
-      await expect(pageObjects.dataGrid.getCell(0, '_source')).toContainText(
-        'runtime-message-field'
-      );
-      await expect(pageObjects.dataGrid.getCell(0, '_source')).toContainText('mock-message');
+      const assertAdHocResults = async () => {
+        await expect(pageObjects.discover.getSelectedDataView()).toHaveAccessibleName(
+          'search-source-*'
+        );
+        await expect.poll(() => pageObjects.discover.getHitCountInt()).toBe(5);
+        await expect(pageObjects.dataGrid.getCell(0, '_source')).toContainText(
+          'runtime-message-field'
+        );
+        await expect(pageObjects.dataGrid.getCell(0, '_source')).toContainText('mock-message');
+      };
+
+      await spaceTest.step('opens snapshot results from the notification link', async () => {
+        await page.goto(new URL(contextLink, page.url()).toString());
+        await pageObjects.discover.waitUntilSearchingHasFinished();
+        await pageObjects.dataGrid.waitForDocTableRendered();
+        await assertAdHocResults();
+      });
+
+      await spaceTest.step('opens current results from View in Discover', async () => {
+        await openRuleInManagement(page, ruleName);
+        await page.testSubj.click('app-menu-overflow-button');
+        await page.testSubj.click('ruleDetails-viewInDiscover');
+        await pageObjects.discover.waitUntilSearchingHasFinished();
+        await pageObjects.dataGrid.waitForDocTableRendered();
+
+        await expect(page.testSubj.locator('globalToastList')).toBeHidden();
+        await assertAdHocResults();
+      });
     }
   );
 
   spaceTest(
-    'should display results after data view removal on clicking prev generated link',
+    'should preserve snapshot results but reject current results after data view removal',
     async ({ apiServices, esClient, page, pageObjects, scoutSpace }) => {
       const uniqueSuffix = `${scoutSpace.id}-${Date.now()}`;
       const dataViewTitle = `search-source-alert-deleted-${uniqueSuffix}`;
@@ -716,54 +588,7 @@ spaceTest.describe('Discover app - search source alert', { tag: tags.deploymentA
       const dataViewId = dataViewResponse.data.id;
       createdDataViewIds.push(dataViewId);
 
-      const ruleId = await createSearchSourceRule({
-        apiServices,
-        connectorId,
-        dataViewId,
-        name: `deleted-data-view-snapshot-${uniqueSuffix}`,
-        spaceId: scoutSpace.id,
-      });
-      createdRuleIds.push(ruleId);
-
-      const contextLink = await getGeneratedContextLink(esClient, ruleId);
-      await apiServices.dataViews.delete(dataViewId, scoutSpace.id);
-
-      await page.goto(new URL(contextLink, page.url()).toString());
-      await pageObjects.discover.waitUntilSearchingHasFinished();
-      await pageObjects.dataGrid.waitForDocTableRendered();
-
-      await pageObjects.toasts.waitForToastWithText('Displayed documents may vary');
-      expect(await pageObjects.filterBar.getFilterCount()).toBe(0);
-      expect(await pageObjects.queryBar.getQuery()).toBe('');
-      await expect(pageObjects.discover.getSelectedDataView()).toHaveAccessibleName(dataViewTitle);
-      await expect.poll(() => pageObjects.discover.getHitCountInt()).toBe(5);
-      await expect
-        .poll(async () =>
-          (await pageObjects.unifiedFieldList.getAllFieldNames()).includes('message')
-        )
-        .toBe(true);
-    }
-  );
-
-  spaceTest(
-    'should not display results after data view removal on clicking viewInApp link',
-    async ({ apiServices, esClient, page, pageObjects, scoutSpace }) => {
-      const uniqueSuffix = `${scoutSpace.id}-${Date.now()}`;
-      const dataViewTitle = `search-source-alert-missing-${uniqueSuffix}`;
-      await esClient.indices.putAlias({
-        index: SOURCE_INDEX,
-        name: dataViewTitle,
-      });
-
-      const dataViewResponse = await apiServices.dataViews.create({
-        title: dataViewTitle,
-        timeFieldName: '@timestamp',
-        spaceId: scoutSpace.id,
-      });
-      const dataViewId = dataViewResponse.data.id;
-      createdDataViewIds.push(dataViewId);
-
-      const ruleName = `missing-data-view-current-${uniqueSuffix}`;
+      const ruleName = `deleted-data-view-${uniqueSuffix}`;
       const ruleId = await createSearchSourceRule({
         apiServices,
         connectorId,
@@ -773,16 +598,33 @@ spaceTest.describe('Discover app - search source alert', { tag: tags.deploymentA
       });
       createdRuleIds.push(ruleId);
 
+      const contextLink = await getGeneratedContextLink(esClient, ruleId);
       await apiServices.dataViews.delete(dataViewId, scoutSpace.id);
 
-      await openRuleInManagement(page, ruleName);
-      await page.testSubj.click('app-menu-overflow-button');
-      await page.testSubj.click('ruleDetails-viewInDiscover');
+      await spaceTest.step('the previous notification link still renders results', async () => {
+        await page.goto(new URL(contextLink, page.url()).toString());
+        await pageObjects.discover.waitUntilSearchingHasFinished();
+        await pageObjects.dataGrid.waitForDocTableRendered();
 
-      await pageObjects.toasts.waitForToastWithText(
-        `Could not locate that data view (id: ${dataViewId}), click here to re-create it`
-      );
-      await expect(page.testSubj.locator('docTable')).toBeHidden();
+        await pageObjects.toasts.waitForToastWithText('Displayed documents may vary');
+        await assertInitialResults(pageObjects, dataViewTitle);
+        await expect
+          .poll(async () =>
+            (await pageObjects.unifiedFieldList.getAllFieldNames()).includes('message')
+          )
+          .toBe(true);
+      });
+
+      await spaceTest.step('View in Discover reports the missing data view', async () => {
+        await openRuleInManagement(page, ruleName);
+        await page.testSubj.click('app-menu-overflow-button');
+        await page.testSubj.click('ruleDetails-viewInDiscover');
+
+        await pageObjects.toasts.waitForToastWithText(
+          `Could not locate that data view (id: ${dataViewId}), click here to re-create it`
+        );
+        await expect(page.testSubj.locator('docTable')).toBeHidden();
+      });
     }
   );
 
@@ -821,10 +663,7 @@ spaceTest.describe('Discover app - search source alert', { tag: tags.deploymentA
       await pageObjects.dataGrid.waitForDocTableRendered();
 
       await pageObjects.toasts.waitForToastWithText('Displayed documents may vary');
-      expect(await pageObjects.filterBar.getFilterCount()).toBe(0);
-      expect(await pageObjects.queryBar.getQuery()).toBe('');
-      await expect(pageObjects.discover.getSelectedDataView()).toHaveAccessibleName(dataViewTitle);
-      await expect.poll(() => pageObjects.discover.getHitCountInt()).toBe(5);
+      await assertInitialResults(pageObjects, dataViewTitle);
       await expect
         .poll(async () =>
           (await pageObjects.unifiedFieldList.getAllFieldNames()).includes('message')
