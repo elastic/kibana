@@ -93,7 +93,7 @@ fileGroups:
     - common/**/*.json
     - public/**/*.json
     - test/scout/**/*
-    - test/scout_data_plugin/**/*
+    - test/scout_examples/**/*
     - test/scout_http2/**/*
     - test/scout_search_sessions/**/*
     - '!target/**/*'

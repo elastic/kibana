@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { resolve } from 'path';
+import { REPO_ROOT } from '@kbn/repo-info';
 import type { ScoutServerConfig } from '../../../../../types';
 import { defaultConfig } from '../../default/stateful/base.config';
 
@@ -14,6 +16,13 @@ export const servers: ScoutServerConfig = {
   ...defaultConfig,
   kbnTestServer: {
     ...defaultConfig.kbnTestServer,
-    serverArgs: [...defaultConfig.kbnTestServer.serverArgs, '--data.search.sessions.enabled=true'],
+    serverArgs: [
+      ...defaultConfig.kbnTestServer.serverArgs,
+      '--data.search.sessions.enabled=true',
+      `--plugin-path=${resolve(
+        REPO_ROOT,
+        'src/platform/test/plugin_functional/plugins/session_notifications'
+      )}`,
+    ],
   },
 };

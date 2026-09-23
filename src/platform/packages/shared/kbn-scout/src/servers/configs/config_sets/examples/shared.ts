@@ -12,10 +12,14 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { findTestPluginPaths } from '@kbn/test-kibana-server';
 
 /**
- * Stateful examples server args: example plugins via `--plugin-path` plus search
+ * Stateful examples server args: example and data-contract fixture plugins plus search
  * sessions. Do not add `--run-examples` — Scout CI uses `--kibanaInstallDir`.
  */
 export const examplesServerArgs = [
   '--data.search.sessions.enabled=true',
+  ...['data_search', 'index_patterns'].map(
+    (plugin) =>
+      `--plugin-path=${resolve(REPO_ROOT, 'src/platform/test/plugin_functional/plugins', plugin)}`
+  ),
   ...findTestPluginPaths([resolve(REPO_ROOT, 'examples'), resolve(REPO_ROOT, 'x-pack/examples')]),
 ];

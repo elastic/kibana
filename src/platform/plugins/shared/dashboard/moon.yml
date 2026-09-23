@@ -149,7 +149,6 @@ fileGroups:
     - public/**/*
     - server/**/*
     - test/scout/**/*
-    - test/scout_data_plugin/**/*
     - test/scout_oas_schema/**/*
     - test/scout_oas_schema/**/*.json
     - test/scout_anonymous_authc/**/*

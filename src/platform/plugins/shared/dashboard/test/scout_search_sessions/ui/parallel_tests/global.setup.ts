@@ -16,9 +16,12 @@ import { LOGSTASH_FUNCTIONAL_ARCHIVE } from '@kbn/data-plugin/test/scout_search_
  * server.
  */
 globalSetupHook(
-  'Ingest ES data for Background Search UI tests',
+  'Ingest ES data for Dashboard search session tests',
   { tag: '@local-stateful-classic' },
   async ({ esArchiver }) => {
     await esArchiver.loadIfNeeded(LOGSTASH_FUNCTIONAL_ARCHIVE);
+    await esArchiver.loadIfNeeded(
+      'src/platform/test/functional/fixtures/es_archiver/dashboard/current/data'
+    );
   }
 );
