@@ -33,8 +33,8 @@ KIBANA_USER="${KIBANA_USER:-elastic}"
 KIBANA_PASSWORD="${KIBANA_PASSWORD:-changeme}"
 KIBANA_SPACE="${KIBANA_SPACE:-default}"
 AGENT_BUILDER_API_VERSION="2023-10-31"
-PROPOSAL_ATTACHMENT_TYPE="investigation_proposal"
-PROPOSALS_INDEX=".kibana-investigation-proposals"
+PROPOSAL_ATTACHMENT_TYPE="platform.proposal"
+PROPOSALS_INDEX=".kibana-proposals"
 
 # Build the URL base that includes the space path prefix when not "default".
 if [ "$KIBANA_SPACE" = "default" ]; then
