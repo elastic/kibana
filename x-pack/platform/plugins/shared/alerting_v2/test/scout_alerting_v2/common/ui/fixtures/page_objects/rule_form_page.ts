@@ -53,9 +53,7 @@ export class RuleFormPage {
   }
 
   async gotoCreate() {
-    await this.page.gotoApp(
-      `${this.mountConfig.appRoute}${this.mountConfig.subPaths.rulesCreate}`
-    );
+    await this.page.gotoApp(`${this.mountConfig.appRoute}${this.mountConfig.subPaths.rulesCreate}`);
   }
 
   async gotoRulesList() {

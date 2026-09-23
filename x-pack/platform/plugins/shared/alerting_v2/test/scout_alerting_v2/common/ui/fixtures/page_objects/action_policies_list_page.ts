@@ -31,9 +31,7 @@ export class ActionPoliciesListPage {
   }
 
   async goto() {
-    await this.page.gotoApp(
-      `${this.mountConfig.appRoute}${this.mountConfig.paths.actionPolicies}`
-    );
+    await this.page.gotoApp(`${this.mountConfig.appRoute}${this.mountConfig.paths.actionPolicies}`);
   }
 
   async gotoEdit(policyId: string) {

@@ -43,7 +43,9 @@ export class EpisodeDetailsPage {
   }
 
   async goto(episodeId: string, spaceId?: string) {
-    const appPath = `${this.mountConfig.appRoute}${this.mountConfig.subPaths.episodeDetail(episodeId)}`;
+    const appPath = `${this.mountConfig.appRoute}${this.mountConfig.subPaths.episodeDetail(
+      episodeId
+    )}`;
     await this.page.goto(
       spaceId ? this.kbnUrl.app(appPath, { space: spaceId }) : this.kbnUrl.app(appPath)
     );

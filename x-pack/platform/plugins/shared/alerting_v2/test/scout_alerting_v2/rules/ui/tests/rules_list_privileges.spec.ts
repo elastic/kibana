@@ -18,41 +18,45 @@ import {
  * `read` vs `all`) actually reaches the client and drives
  * `UserCapabilities.canWrite('rules')` on the Rules list page.
  */
-test.describe('Rules list - read/write privileges', { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] }, () => {
-  let ruleId: string;
+test.describe(
+  'Rules list - read/write privileges',
+  { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
+  () => {
+    let ruleId: string;
 
-  test.beforeAll(async ({ apiServices }) => {
-    await apiServices.alertingV2.rules.cleanUp();
-    const rule = await apiServices.alertingV2.rules.create(
-      buildCreateRuleData({ metadata: { name: 'scout-rules-privileges' } })
-    );
-    ruleId = rule.id;
-  });
+    test.beforeAll(async ({ apiServices }) => {
+      await apiServices.alertingV2.rules.cleanUp();
+      const rule = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'scout-rules-privileges' } })
+      );
+      ruleId = rule.id;
+    });
 
-  test.afterAll(async ({ apiServices }) => {
-    await apiServices.alertingV2.rules.cleanUp();
-  });
+    test.afterAll(async ({ apiServices }) => {
+      await apiServices.alertingV2.rules.cleanUp();
+    });
 
-  test('editor can create rules and toggle enabled', async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginWithCustomRole(ALERTING_V2_RULES_ALL_ROLE);
-    await pageObjects.rulesList.goto();
-    await expect(pageObjects.rulesList.rulesListTable).toBeVisible();
+    test('editor can create rules and toggle enabled', async ({ browserAuth, pageObjects }) => {
+      await browserAuth.loginWithCustomRole(ALERTING_V2_RULES_ALL_ROLE);
+      await pageObjects.rulesList.goto();
+      await expect(pageObjects.rulesList.rulesListTable).toBeVisible();
 
-    await expect(pageObjects.rulesList.createRuleButton).toBeVisible();
-    await expect(pageObjects.rulesList.enabledSwitch(ruleId)).toBeEnabled();
-  });
+      await expect(pageObjects.rulesList.createRuleButton).toBeVisible();
+      await expect(pageObjects.rulesList.enabledSwitch(ruleId)).toBeEnabled();
+    });
 
-  test('read-only user cannot create rules or toggle enabled', async ({
-    browserAuth,
-    pageObjects,
-  }) => {
-    await browserAuth.loginWithCustomRole(ALERTING_V2_RULES_READ_ROLE);
-    await pageObjects.rulesList.goto();
-    await expect(pageObjects.rulesList.rulesListTable).toBeVisible();
+    test('read-only user cannot create rules or toggle enabled', async ({
+      browserAuth,
+      pageObjects,
+    }) => {
+      await browserAuth.loginWithCustomRole(ALERTING_V2_RULES_READ_ROLE);
+      await pageObjects.rulesList.goto();
+      await expect(pageObjects.rulesList.rulesListTable).toBeVisible();
 
-    await expect(pageObjects.rulesList.createRuleButton).toBeHidden();
-    // Read-only users get a status badge instead of a toggle, so the switch is never rendered.
-    await expect(pageObjects.rulesList.enabledSwitch(ruleId)).toBeHidden();
-    await expect(pageObjects.rulesList.enabledBadge(ruleId)).toBeVisible();
-  });
-});
+      await expect(pageObjects.rulesList.createRuleButton).toBeHidden();
+      // Read-only users get a status badge instead of a toggle, so the switch is never rendered.
+      await expect(pageObjects.rulesList.enabledSwitch(ruleId)).toBeHidden();
+      await expect(pageObjects.rulesList.enabledBadge(ruleId)).toBeVisible();
+    });
+  }
+);
