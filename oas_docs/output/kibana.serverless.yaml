@@ -44306,7 +44306,7 @@ paths:
                   items:
                     maxLength: 255
                     type: string
-                  maxItems: 100
+                  maxItems: 1000
                   type: array
                 services:
                   description: Current service set for this deployment. Refreshed on each successful deploy so resume after an incremental service addition restores all deployed services.
