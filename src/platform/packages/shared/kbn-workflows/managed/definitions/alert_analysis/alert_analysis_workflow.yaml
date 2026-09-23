@@ -76,6 +76,7 @@ triggers:
             # Allow extra ES alert fields; require only what Worker-path steps dereference.
             required:
               - _id
+              - _index
               - '@timestamp'
               - kibana
             properties:
@@ -83,6 +84,15 @@ triggers:
                 type: string
                 minLength: 1
                 maxLength: 512
+              _index:
+                type: string
+                # Passed to security.buildAlertEntityGraph as alertIndex (seed + search index).
+                # Must be a Security alerts alias or backing index — not an arbitrary ES index.
+                # Pattern covers alias (.alerts-security.alerts-<space>), internal backing
+                # (.internal.alerts-security.alerts-<space>-NNNNNN), and preview variants.
+                minLength: 1
+                maxLength: 512
+                pattern: '^\.(internal\.)?(preview\.)?alerts-security\.alerts-[a-zA-Z0-9._-]+$'
               '@timestamp':
                 type: string
                 # Used verbatim as the ES date-math enrichment anchor (e.g. `||-24h`).
@@ -119,9 +129,10 @@ triggers:
             or empty `alerts` array fails the run (workflow.fail) instead of completing with
             empty output. Absent on the standalone path, which keeps reading the alert
             trigger's own `event.alerts`.
-            Bounded to 1000 items; each item must include `_id`, `@timestamp`, and
-            `kibana.alert.rule.uuid` (writebacks, enrichment date-range anchor, and rule-context
-            derivation). Execution still chunks by consts.batch_size.
+            Bounded to 1000 items; each item must include `_id`, `_index` (Security alerts
+            alias or backing index for related-alert graph lookup), `@timestamp`, and
+            `kibana.alert.rule.uuid` (writebacks, enrichment date-range anchor, and
+            rule-context derivation). Execution still chunks by consts.batch_size.
         autoCloseEnabled:
           type: boolean
           description: >
