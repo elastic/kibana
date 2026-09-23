@@ -5,19 +5,22 @@
  * 2.0.
  */
 
+import { EVALS_EVIDENCE_LOG_EVENT_NAMES } from '@kbn/evals-common';
 import type { InstrumentationProfile, InstrumentationProfileSpec } from './types';
 
 const otelGenAiEvents: InstrumentationProfileSpec = {
   user_query: {
     source: 'logs',
-    filter: [{ field: 'event_name', value: 'gen_ai.user.message' }],
+    filter: [
+      { field: 'event_name', value: EVALS_EVIDENCE_LOG_EVENT_NAMES.OTEL_GENAI_USER_MESSAGE },
+    ],
     contentField: 'body.structured.content',
     select: 'first',
     parse: 'string',
   },
   agent_response: {
     source: 'logs',
-    filter: [{ field: 'event_name', value: 'gen_ai.choice' }],
+    filter: [{ field: 'event_name', value: EVALS_EVIDENCE_LOG_EVENT_NAMES.OTEL_GENAI_CHOICE }],
     contentField: 'body.structured.message.content',
     select: 'last',
     parse: 'string',
@@ -85,14 +88,21 @@ const elasticInference: InstrumentationProfileSpec = {
 const claudeCode: InstrumentationProfileSpec = {
   user_query: {
     source: 'logs',
-    filter: [{ field: 'event_name', value: 'user_prompt' }],
+    filter: [
+      { field: 'event_name', value: EVALS_EVIDENCE_LOG_EVENT_NAMES.CLAUDE_CODE_USER_PROMPT },
+    ],
     contentField: 'attributes.prompt',
     select: 'first',
     parse: 'string',
   },
   agent_response: {
     source: 'logs',
-    filter: [{ field: 'event_name', value: 'api_response_body' }],
+    filter: [
+      {
+        field: 'event_name',
+        value: EVALS_EVIDENCE_LOG_EVENT_NAMES.CLAUDE_CODE_API_RESPONSE_BODY,
+      },
+    ],
     contentField: 'attributes.body',
     select: 'last',
     parse: 'anthropic_message',
