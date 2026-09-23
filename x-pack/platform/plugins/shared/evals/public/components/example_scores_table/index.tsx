@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import React, { type ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
+import React, {
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {
   EuiAccordion,
   EuiBadge,
@@ -15,6 +23,8 @@ import {
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
+  EuiLoadingSpinner,
   EuiPagination,
   EuiSpacer,
   EuiText,
@@ -25,8 +35,10 @@ import {
 import { css } from '@emotion/css';
 import type {
   EvaluationExperimentDatasetExample,
+  EvaluationExperimentExamplePreview,
   EvaluationScoreDocument,
 } from '@kbn/evals-common';
+import { useExperimentExampleDetails } from '../../hooks/use_evals_api';
 import * as i18n from './translations';
 
 const formatScore = (score: number | null | undefined) =>
@@ -197,6 +209,188 @@ const JudgeLabel: React.FC<{ modelId: string }> = ({ modelId }) => (
   </EuiText>
 );
 
+interface ExampleDetailsContext {
+  experimentId: string;
+  datasetId: string;
+  executionId?: string;
+  exampleId: string;
+  repetitionIndex: number;
+}
+
+const renderJsonPreview = (value: unknown) => {
+  if (value == null) {
+    return '-';
+  }
+
+  const serializedValue = JSON.stringify(value, null, 2);
+  if (!serializedValue) {
+    return '-';
+  }
+
+  return (
+    <EuiCodeBlock
+      // Table cell content is a flex container, so without an explicit width the block
+      // shrink-wraps the JSON and pulls its copy/expand controls in with it.
+      css={{ width: '100%' }}
+      overflowHeight={200}
+      language="json"
+      paddingSize="none"
+      transparentBackground
+      fontSize="s"
+      isCopyable
+    >
+      {serializedValue}
+    </EuiCodeBlock>
+  );
+};
+
+const PREVIEW_MAX_HEIGHT_PX = 200;
+const PREVIEW_FADE_HEIGHT_PX = 32;
+
+const previewDetailCss = css`
+  width: 100%;
+`;
+
+const previewFrameCss = css`
+  max-height: ${PREVIEW_MAX_HEIGHT_PX}px;
+  overflow: hidden;
+`;
+
+const previewFadeButtonCss = (backgroundColor: string, focusColor: string, overlap: boolean) => css`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: ${PREVIEW_FADE_HEIGHT_PX}px;
+  margin: ${overlap ? -PREVIEW_FADE_HEIGHT_PX : 0}px 0 0;
+  padding: 0;
+  border: none;
+  cursor: pointer;
+  background: linear-gradient(to bottom, transparent, ${backgroundColor});
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+
+  &:focus-visible {
+    outline: 2px solid ${focusColor};
+    outline-offset: -2px;
+  }
+`;
+
+const PreviewFadeButton: React.FC<{
+  field: 'input' | 'output';
+  expanded: boolean;
+  overlap: boolean;
+  onClick: () => void;
+}> = ({ field, expanded, overlap, onClick }) => {
+  const { euiTheme } = useEuiTheme();
+  const viewLabel =
+    field === 'input' ? i18n.VIEW_FULL_INPUT_BUTTON_LABEL : i18n.VIEW_FULL_OUTPUT_BUTTON_LABEL;
+  const hideLabel =
+    field === 'input' ? i18n.HIDE_FULL_INPUT_ARIA_LABEL : i18n.HIDE_FULL_OUTPUT_ARIA_LABEL;
+  const label = expanded ? hideLabel : viewLabel;
+
+  return (
+    <button
+      type="button"
+      aria-expanded={expanded}
+      aria-label={label}
+      onClick={onClick}
+      className={previewFadeButtonCss(euiTheme.colors.emptyShade, euiTheme.colors.primary, overlap)}
+    >
+      <EuiIcon
+        type={expanded ? 'chevronSingleUp' : 'chevronSingleDown'}
+        size="m"
+        color="subdued"
+        aria-hidden={true}
+      />
+    </button>
+  );
+};
+
+const PreviewJsonDetail: React.FC<{
+  detailsContext: ExampleDetailsContext;
+  field: 'input' | 'output';
+  previews?: EvaluationExperimentExamplePreview[];
+}> = ({ detailsContext, field, previews }) => {
+  const [requested, setRequested] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  const frameRef = useRef<HTMLDivElement>(null);
+  const [frameHeight, setFrameHeight] = useState(0);
+  const { experimentId, datasetId, executionId, exampleId, repetitionIndex } = detailsContext;
+  const serializedPreview = previews?.find(
+    (preview) => preview.repetition_index === repetitionIndex
+  )?.[field];
+  const { data, isLoading, error } = useExperimentExampleDetails(
+    experimentId,
+    datasetId,
+    exampleId,
+    repetitionIndex,
+    executionId,
+    { enabled: requested }
+  );
+
+  useLayoutEffect(() => {
+    const node = frameRef.current;
+    setFrameHeight(node?.scrollHeight ?? 0);
+  }, [serializedPreview?.content, expanded]);
+
+  const toggle = () => {
+    setRequested(true);
+    setExpanded((current) => !current);
+  };
+
+  const overlap =
+    (Boolean(serializedPreview?.truncated) || frameHeight > PREVIEW_MAX_HEIGHT_PX) &&
+    frameHeight > PREVIEW_FADE_HEIGHT_PX;
+
+  if (expanded && isLoading) {
+    return <EuiLoadingSpinner size="m" data-test-subj="evalsExampleDetailsLoading" />;
+  }
+
+  if (expanded && error) {
+    return (
+      <div className={previewDetailCss}>
+        <EuiText color="danger" size="xs">
+          {i18n.getDetailsLoadErrorMessage(String(error))}
+        </EuiText>
+        <PreviewFadeButton field={field} expanded overlap={false} onClick={toggle} />
+      </div>
+    );
+  }
+
+  if (expanded && data) {
+    return (
+      <div className={previewDetailCss}>
+        {renderJsonPreview(field === 'input' ? data.example.input : data.task.output)}
+        <PreviewFadeButton field={field} expanded overlap={false} onClick={toggle} />
+      </div>
+    );
+  }
+
+  return (
+    <div className={previewDetailCss}>
+      <div ref={frameRef} className={previewFrameCss}>
+        {serializedPreview ? (
+          <EuiCodeBlock
+            css={{ width: '100%' }}
+            language="json"
+            paddingSize="none"
+            transparentBackground
+            fontSize="s"
+          >
+            {serializedPreview.content}
+          </EuiCodeBlock>
+        ) : (
+          '-'
+        )}
+      </div>
+      <PreviewFadeButton field={field} expanded={false} overlap={overlap} onClick={toggle} />
+    </div>
+  );
+};
+
 const EvaluatorScoreAccordion: React.FC<{
   score: EvaluationScoreDocument;
   exampleId: string;
@@ -348,17 +542,24 @@ const EvaluatorScoreGroupBlock: React.FC<{
 interface ExampleScoreRow {
   exampleId: string;
   exampleIndex: number | null;
+  previews?: EvaluationExperimentExamplePreview[];
   repetitionIndices: number[];
   scoresByRepetition: Record<number, EvaluationExperimentDatasetExample['scores']>;
 }
 
 export interface ExampleScoresTableProps {
+  experimentId: string;
+  datasetId: string;
+  executionId?: string;
   examples: EvaluationExperimentDatasetExample[];
   selectedExampleId?: string | null;
   onTraceClick: (traceId: string, exampleId: string) => void;
 }
 
 export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
+  experimentId,
+  datasetId,
+  executionId,
   examples,
   selectedExampleId,
   onTraceClick,
@@ -424,6 +625,7 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
         return {
           exampleId: example.example_id,
           exampleIndex: example.example_index ?? null,
+          previews: example.previews,
           repetitionIndices,
           scoresByRepetition,
         };
@@ -460,33 +662,6 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
           .filter((value): value is string => Boolean(value))
       )
     );
-
-  const renderJsonPreview = (value: unknown) => {
-    if (value == null) {
-      return '-';
-    }
-
-    const serializedValue = JSON.stringify(value, null, 2);
-    if (!serializedValue) {
-      return '-';
-    }
-
-    return (
-      <EuiCodeBlock
-        // Table cell content is a flex container, so without an explicit width the block
-        // shrink-wraps the JSON and pulls its copy/expand controls in with it.
-        css={{ width: '100%' }}
-        overflowHeight={200}
-        language="json"
-        paddingSize="none"
-        transparentBackground
-        fontSize="s"
-        isCopyable
-      >
-        {serializedValue}
-      </EuiCodeBlock>
-    );
-  };
 
   const itemIdToExpandedRowMap = useMemo<Record<string, ReactNode>>(() => {
     return rows.reduce<Record<string, ReactNode>>((acc, row) => {
@@ -538,10 +713,20 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
       render: (
         _scoresByRepetition: ExampleScoreRow['scoresByRepetition'],
         row: ExampleScoreRow
-      ) => {
-        const firstScoreDocument = getScoresForSelectedRepetition(row)[0];
-        return renderJsonPreview(firstScoreDocument?.example.input);
-      },
+      ) => (
+        <PreviewJsonDetail
+          key={`input-${row.exampleId}-${getSelectedRepetitionIndex(row)}`}
+          field="input"
+          previews={row.previews}
+          detailsContext={{
+            experimentId,
+            datasetId,
+            executionId,
+            exampleId: row.exampleId,
+            repetitionIndex: getSelectedRepetitionIndex(row),
+          }}
+        />
+      ),
     },
     {
       field: 'scoresByRepetition',
@@ -550,10 +735,20 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
       render: (
         _scoresByRepetition: ExampleScoreRow['scoresByRepetition'],
         row: ExampleScoreRow
-      ) => {
-        const firstScoreDocument = getScoresForSelectedRepetition(row)[0];
-        return renderJsonPreview(firstScoreDocument?.task.output);
-      },
+      ) => (
+        <PreviewJsonDetail
+          key={`output-${row.exampleId}-${getSelectedRepetitionIndex(row)}`}
+          field="output"
+          previews={row.previews}
+          detailsContext={{
+            experimentId,
+            datasetId,
+            executionId,
+            exampleId: row.exampleId,
+            repetitionIndex: getSelectedRepetitionIndex(row),
+          }}
+        />
+      ),
     },
     {
       field: 'scoresByRepetition',
