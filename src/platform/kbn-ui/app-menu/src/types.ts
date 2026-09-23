@@ -8,11 +8,14 @@
  */
 
 /*
- * Structured props only. Do not add `ReactNode`, `ReactElement`, JSX, or render-prop fields to
- * this contract: the menu must look like one component across apps, and the renderer coerces
- * text to plain strings and drops undeclared keys (see "Strict props" in this package's README).
- * If a layout cannot be expressed with strings, callbacks, and unions, add a structured field
- * instead.
+ * This contract is declarative on purpose: apps describe what to show (text, options, callbacks),
+ * and the menu decides how it looks. Do not add `ReactNode`, `ReactElement`, JSX, or render-prop
+ * fields here. They let every app paint its own UI, and the menu stops looking like one component.
+ * The renderer also coerces text to plain strings and drops undeclared keys, see "Strict props" in
+ * this package's README.
+ *
+ * When the existing props cannot express something, add a new declarative field for it rather
+ * than a slot for arbitrary content.
  */
 
 import type { EuiHideForProps, EuiSwitchProps, IconType } from '@elastic/eui';
