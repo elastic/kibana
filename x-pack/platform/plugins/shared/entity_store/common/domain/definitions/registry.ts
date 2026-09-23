@@ -7,7 +7,7 @@
 
 import assert from 'assert';
 
-import type { EntityType, ExtractionMode } from './entity_schema';
+import { EXTRACTION_MODE, type EntityType, type ExtractionMode } from './entity_schema';
 import {
   type EntityDefinitionWithoutId,
   type GatedEntityDefinition,
@@ -53,8 +53,9 @@ export const resolveExtractionMode = (
   isDualProcessEnabled: boolean,
   entityType: EntityType
 ): Extract<ExtractionMode, 'priority' | 'single'> => {
-  if (isDualProcessEnabled && hasPriorityExtractionGate(entityType)) return 'priority';
-  return 'single';
+  if (isDualProcessEnabled && hasPriorityExtractionGate(entityType))
+    return EXTRACTION_MODE.priority;
+  return EXTRACTION_MODE.single;
 };
 
 export const getEntityDefinitionId = (entityType: EntityType, space: string) =>
@@ -63,7 +64,7 @@ export const getEntityDefinitionId = (entityType: EntityType, space: string) =>
 export function getEntityDefinition(
   type: EntityType,
   namespace: string,
-  extractionMode: ExtractionMode = 'single'
+  extractionMode: ExtractionMode = EXTRACTION_MODE.single
 ): GatedEntityDefinition<ManagedEntityDefinition> {
   const definition = getEntityDefinitionWithoutId(type, extractionMode);
 
@@ -83,11 +84,11 @@ export function getEntityDefinition(
  */
 export function getEntityDefinitionWithoutId(
   type: EntityType,
-  extractionMode: ExtractionMode = 'single'
+  extractionMode: ExtractionMode = EXTRACTION_MODE.single
 ): GatedEntityDefinition<EntityDefinitionWithoutId> {
   const definition = getRegisteredDefinition(type);
   assert(
-    extractionMode === 'single' || definition.priorityExtractionGate,
+    extractionMode === EXTRACTION_MODE.single || definition.priorityExtractionGate,
     `No priority extraction gate declared for entity type: ${type}, cannot resolve '${extractionMode}' mode`
   );
 
