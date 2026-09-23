@@ -20,7 +20,10 @@ import {
   createActionRequestsEsSearchResultsMock,
   createActionResponsesEsSearchResultsMock,
 } from './mocks';
-import type { EndpointAppContextService } from '../../endpoint_app_context_services';
+import type {
+  EndpointAppContextService,
+  ScopedEndpointServices,
+} from '../../endpoint_app_context_services';
 import { createMockEndpointAppContextService } from '../../mocks';
 import { FleetAgentGenerator } from '../../../../common/endpoint/data_generators/fleet_agent_generator';
 
@@ -30,6 +33,12 @@ describe('When using `getActionDetailsById()', () => {
   let actionRequests: estypes.SearchResponse<LogsEndpointAction>;
   let actionResponses: estypes.SearchResponse<EndpointActionResponse | LogsEndpointActionResponse>;
   let endpointAppContextService: EndpointAppContextService;
+
+  const buildScoped = (cpsRead: boolean): ScopedEndpointServices =>
+    ({
+      isCpsRead: () => cpsRead,
+      getEsClient: () => esClient,
+    } as unknown as ScopedEndpointServices);
 
   beforeEach(() => {
     endpointAppContextService = createMockEndpointAppContextService();
@@ -207,7 +216,7 @@ describe('When using `getActionDetailsById()', () => {
     ).mockResolvedValue([]);
 
     const details = await getActionDetailsById(endpointAppContextService, 'default', '123', {
-      scoped: { isCpsRead: () => true } as never,
+      scoped: buildScoped(true),
     });
 
     expect(getHostMetadataList).toHaveBeenCalledWith(
@@ -218,5 +227,38 @@ describe('When using `getActionDetailsById()', () => {
       expect.anything()
     );
     expect(details.hosts).toEqual({ 'agent-a': { name: 'linked-host-a' } });
+  });
+
+  it('does not query the scoped metadata index when the read is origin-only', async () => {
+    const getHostMetadataList = jest.fn();
+    (endpointAppContextService.getEndpointMetadataService as jest.Mock).mockReturnValue({
+      getHostMetadataList,
+    });
+    (
+      endpointAppContextService.getInternalFleetServices().agent.getByIds as jest.Mock
+    ).mockResolvedValue([]);
+
+    const details = await getActionDetailsById(endpointAppContextService, 'default', '123', {
+      scoped: buildScoped(false),
+    });
+
+    expect(getHostMetadataList).not.toHaveBeenCalled();
+    expect(details.hosts).toEqual({ 'agent-a': { name: '' } });
+  });
+
+  it('keeps returning details when the linked-project hostname lookup fails', async () => {
+    (endpointAppContextService.getEndpointMetadataService as jest.Mock).mockReturnValue({
+      getHostMetadataList: jest.fn().mockRejectedValue(new Error('remote cluster unavailable')),
+    });
+    (
+      endpointAppContextService.getInternalFleetServices().agent.getByIds as jest.Mock
+    ).mockResolvedValue([]);
+
+    const details = await getActionDetailsById(endpointAppContextService, 'default', '123', {
+      scoped: buildScoped(true),
+    });
+
+    expect(details.id).toBe('123');
+    expect(details.hosts).toEqual({ 'agent-a': { name: '' } });
   });
 });

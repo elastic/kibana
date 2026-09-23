@@ -92,7 +92,7 @@ export const getActionDetailsById = async <T extends ActionDetails = ActionDetai
 
   // Origin-only enrichment leaves linked-project agents with empty names.
   // Under CPS, fall back to the request-scoped metadata index for those.
-  if (scoped && normalizedActionRequest.agentType === 'endpoint') {
+  if (scoped?.isCpsRead() && normalizedActionRequest.agentType === 'endpoint') {
     const unresolvedAgentIds = normalizedActionRequest.agents.filter(
       (agentId) => !agentsHostInfo[agentId]
     );
@@ -101,13 +101,20 @@ export const getActionDetailsById = async <T extends ActionDetails = ActionDetai
       const kuery = `united.agent.agent.id: (${unresolvedAgentIds
         .map((id) => `"${id}"`)
         .join(' OR ')})`;
+      // Best-effort: a failed lookup leaves names empty rather than failing the whole read
       const metadata = await endpointService
         .getEndpointMetadataService(spaceId)
-        .getHostMetadataList({ page: 0, pageSize: unresolvedAgentIds.length, kuery }, scoped);
+        .getHostMetadataList({ page: 0, pageSize: unresolvedAgentIds.length, kuery }, scoped)
+        .catch((error) => {
+          endpointService
+            .createLogger('getActionDetailsById')
+            .warn(`Failed to resolve linked-project hostnames: ${error.message}`);
+          return undefined;
+        });
 
       agentsHostInfo = unresolvedAgentIds.reduce(
         (acc, agentId) => {
-          const match = (metadata.data ?? []).find(
+          const match = (metadata?.data ?? []).find(
             (entry) => entry.metadata?.agent?.id === agentId
           );
           const hostname = match?.metadata?.host?.hostname;
