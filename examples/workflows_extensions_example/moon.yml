@@ -18,6 +18,7 @@ project:
   sourceRoot: examples/workflows_extensions_example
 dependsOn:
   - '@kbn/core'
+  - '@kbn/spaces-plugin'
   - '@kbn/workflows-extensions'
   - '@kbn/zod'
   - '@kbn/i18n'

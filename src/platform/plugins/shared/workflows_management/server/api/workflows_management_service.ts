@@ -701,7 +701,8 @@ export class WorkflowsService {
   public async installManagedWorkflow(
     id: ManagedWorkflowId,
     options: ManagedWorkflowServiceInstallOptions,
-    registeredPluginId: string
+    registeredPluginId: string,
+    request?: KibanaRequest
   ): Promise<void> {
     await this.ensureInitialized();
     const readiness = await this.ensureManagedInstallReady(`install '${id}'`);
@@ -710,16 +711,27 @@ export class WorkflowsService {
       this.managedWorkflowsService.markInstallIncomplete(registeredPluginId);
       return;
     }
-    return this.managedWorkflowsService.installManagedWorkflow(id, options, registeredPluginId);
+    return this.managedWorkflowsService.installManagedWorkflow(
+      id,
+      options,
+      registeredPluginId,
+      request
+    );
   }
 
   public async uninstallManagedWorkflow(
     id: ManagedWorkflowId,
     options: ManagedWorkflowOperationOptions,
-    registeredPluginId: string
+    registeredPluginId: string,
+    request?: KibanaRequest
   ): Promise<void> {
     await this.ensureInitialized();
-    return this.managedWorkflowsService.uninstallManagedWorkflow(id, options, registeredPluginId);
+    return this.managedWorkflowsService.uninstallManagedWorkflow(
+      id,
+      options,
+      registeredPluginId,
+      request
+    );
   }
 
   public async getManagedWorkflowStatus(

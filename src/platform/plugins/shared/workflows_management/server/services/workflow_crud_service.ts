@@ -354,10 +354,14 @@ export class WorkflowCrudService {
   async createWorkflowDocument(
     id: string,
     spaceId: string,
-    document: WorkflowProperties
+    document: WorkflowProperties,
+    request?: KibanaRequest
   ): Promise<WorkflowProperties> {
     return this.runOccWrite(id, async () => {
-      const { document: created } = await this.getIndexOccWriter().create({ id, document });
+      const { document: created } = await this.getIndexOccWriter({ request }).create({
+        id,
+        document,
+      });
       return created;
     });
   }

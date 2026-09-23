@@ -16,6 +16,7 @@
   ],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/spaces-plugin",
     "@kbn/workflows-extensions",
     "@kbn/zod",
     "@kbn/i18n",

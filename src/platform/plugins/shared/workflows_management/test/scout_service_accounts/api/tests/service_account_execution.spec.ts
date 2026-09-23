@@ -57,6 +57,9 @@ apiTest.describe(
     let accountId: string;
     let otherAccountId: string;
     const workflowIds = new Set<string>();
+    const managedIds = new Set<string>();
+    const managedPath = (id: string) =>
+      `internal/workflows_extensions_example/managed_service_account/${id}`;
     const accountIds = new Set<string>();
 
     const create = async (apiClient: ApiClientFixture, yaml: string): Promise<string> => {
@@ -166,6 +169,54 @@ apiTest.describe(
 
     const cleanupWorkflows = async (apiClient: ApiClientFixture): Promise<void> => {
       const failures: Error[] = [];
+      for (const id of managedIds) {
+        try {
+          const workflowId = `system-example-service-account-${id}`;
+          const existing = await apiClient.get(`api/workflows/workflow/${workflowId}`, {
+            headers,
+            responseType: 'json',
+          });
+          if (existing.statusCode === 404) {
+            managedIds.delete(id);
+          } else {
+            expect(existing).toHaveStatusCode(200);
+            const cancelled = await apiClient.post(
+              `api/workflows/workflow/${workflowId}/executions/cancel`,
+              { headers, responseType: 'json' }
+            );
+            expect(cancelled, JSON.stringify(cancelled.body)).toHaveStatusCode(200);
+            const query = new URLSearchParams(
+              NonTerminalExecutionStatuses.map((status) => ['statuses', status])
+            );
+            await expect
+              .poll(
+                async () => {
+                  const active = await apiClient.get(
+                    `api/workflows/workflow/${workflowId}/executions?${query}`,
+                    { headers, responseType: 'json' }
+                  );
+                  expect(active).toHaveStatusCode(200);
+                  return active.body.total;
+                },
+                { timeout: 30_000 }
+              )
+              .toBe(0);
+            const deleted = await apiClient.delete(managedPath(id), {
+              headers,
+              responseType: 'json',
+            });
+            expect(deleted, JSON.stringify(deleted.body)).toHaveStatusCode(204);
+            const remaining = await apiClient.get(
+              `api/workflows/workflow/system-example-service-account-${id}`,
+              { headers, responseType: 'json' }
+            );
+            expect(remaining).toHaveStatusCode(404);
+            managedIds.delete(id);
+          }
+        } catch (error) {
+          failures.push(new Error(`Failed to clean managed workflow ${id}`, { cause: error }));
+        }
+      }
       for (const id of workflowIds) {
         try {
           const disabled = await apiClient.put(`api/workflows/workflow/${id}`, {
@@ -262,6 +313,82 @@ apiTest.describe(
       if (failures.length)
         throw new AggregateError(failures, 'Service-account suite cleanup failed');
     });
+
+    apiTest(
+      'managed workflow installs, executes and rebinds with its service account',
+      async ({ apiClient }) => {
+        const id = `cp2-${Date.now()}`;
+        managedIds.add(id);
+        for (const serviceAccountId of [accountId, otherAccountId]) {
+          const installed = await apiClient.post(managedPath(id), {
+            headers,
+            body: { serviceAccountId },
+            responseType: 'json',
+          });
+          expect(installed, JSON.stringify(installed.body)).toHaveStatusCode(200);
+          const saved = await apiClient.get(`api/workflows/workflow/${installed.body.workflowId}`, {
+            headers,
+            responseType: 'json',
+          });
+          expect(saved, JSON.stringify(saved.body)).toHaveStatusCode(200);
+          expect(saved.body).toMatchObject({
+            managed: true,
+            managedBy: 'workflowsExtensionsExample',
+            definition: { settings: { run_as: serviceAccountId } },
+          });
+          const executed = await apiClient.post(`${managedPath(id)}/run`, {
+            headers,
+            body: {},
+            responseType: 'json',
+          });
+          expect(executed, JSON.stringify(executed.body)).toHaveStatusCode(200);
+          expectAccount(await wait(apiClient, executed.body.workflowExecutionId), serviceAccountId);
+        }
+      }
+    );
+
+    apiTest(
+      'managed workflow allows execution but rejects SA mutations without manage_security',
+      async ({ apiClient, samlAuth }) => {
+        const id = `cp2-${Date.now()}`;
+        managedIds.add(id);
+        const { cookieHeader } = await samlAuth.asInteractiveUser({
+          elasticsearch: { cluster: [], indices: [] },
+          kibana: [{ base: ['all'], feature: {}, spaces: ['*'] }],
+        });
+        const executorHeaders = { ...headers, ...cookieHeader };
+        const deniedInstall = await apiClient.post(managedPath(id), {
+          headers: executorHeaders,
+          body: { serviceAccountId: accountId },
+          responseType: 'json',
+        });
+        expect(deniedInstall, JSON.stringify(deniedInstall.body)).toHaveStatusCode(403);
+        const installed = await apiClient.post(managedPath(id), {
+          headers,
+          body: { serviceAccountId: accountId },
+          responseType: 'json',
+        });
+        expect(installed, JSON.stringify(installed.body)).toHaveStatusCode(200);
+        const deniedRebind = await apiClient.post(managedPath(id), {
+          headers: executorHeaders,
+          body: { serviceAccountId: otherAccountId },
+          responseType: 'json',
+        });
+        expect(deniedRebind, JSON.stringify(deniedRebind.body)).toHaveStatusCode(403);
+        const deniedDelete = await apiClient.delete(managedPath(id), {
+          headers: executorHeaders,
+          responseType: 'json',
+        });
+        expect(deniedDelete, JSON.stringify(deniedDelete.body)).toHaveStatusCode(403);
+        const executed = await apiClient.post(`${managedPath(id)}/run`, {
+          headers: executorHeaders,
+          body: {},
+          responseType: 'json',
+        });
+        expect(executed, JSON.stringify(executed.body)).toHaveStatusCode(200);
+        expectAccount(await wait(apiClient, executed.body.workflowExecutionId), accountId);
+      }
+    );
 
     apiTest(
       'runs the saved definition as its bound account and rejects modified test YAML',
