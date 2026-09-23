@@ -155,6 +155,10 @@ export const SYNCED_ALERTS_WITH_CLOSE_REASON = (count: number) =>
     defaultMessage: 'and synced {count, plural, =1 {# alert} other {# alerts}} with close reason',
   });
 
+export const WORKFLOW_RAN = i18n.translate('xpack.cases.caseView.userActions.workflowRan', {
+  defaultMessage: 'ran a workflow',
+});
+
 const ACTION_SOURCE_KIND_LABELS: Record<ActionSourceType, string> = {
   [ActionSourceTypes.agent]: i18n.translate(
     'xpack.cases.caseView.userActions.actionSource.agentLabel',
