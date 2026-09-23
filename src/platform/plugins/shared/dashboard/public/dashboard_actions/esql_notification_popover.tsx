@@ -9,11 +9,17 @@
 
 import React, { useCallback, useState } from 'react';
 
-import { EuiButtonIcon, EuiCodeBlock, EuiFormLabel, EuiPopover, EuiToolTip } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiCodeBlock,
+  EuiFlexGroup,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiToolTip,
+} from '@elastic/eui';
 
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { euiThemeVars } from '@kbn/ui-theme';
 import {
   apiCanLockHoverActions,
   useStateFromPublishingSubject,
@@ -21,7 +27,9 @@ import {
 
 import type { EsqlNotificationActionApi } from './esql_notification_action';
 
-const esqlLabel = i18n.translate('dashboard.panel.esql', { defaultMessage: 'ES|QL' });
+const viewEsqlLabel = i18n.translate('dashboard.panel.viewEsql', {
+  defaultMessage: 'View ES|QL query',
+});
 
 export function EsqlNotificationPopover({ api }: { api: EsqlNotificationActionApi }) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -38,7 +46,7 @@ export function EsqlNotificationPopover({ api }: { api: EsqlNotificationActionAp
   return (
     <EuiPopover
       button={
-        <EuiToolTip content={esqlLabel} disableScreenReaderOutput>
+        <EuiToolTip content={viewEsqlLabel} disableScreenReaderOutput>
           <EuiButtonIcon
             color="text"
             iconType="code"
@@ -49,16 +57,18 @@ export function EsqlNotificationPopover({ api }: { api: EsqlNotificationActionAp
               }
             }}
             data-test-subj={`embeddablePanelEsqlNotification-${api.uuid}`}
-            aria-label={esqlLabel}
+            aria-label={viewEsqlLabel}
           />
         </EuiToolTip>
       }
       isOpen={isPopoverOpen}
       closePopover={closePopover}
       anchorPosition="upCenter"
-      aria-label={esqlLabel}
+      aria-label={viewEsqlLabel}
     >
-      <EuiPopoverTitle>{esqlLabel}</EuiPopoverTitle>
+      <EuiPopoverTitle>
+        {i18n.translate('dashboard.panel.viewEsql', { defaultMessage: 'ES|QL query' })}
+      </EuiPopoverTitle>
       <EuiFlexGroup
         direction="column"
         gutterSize="s"
