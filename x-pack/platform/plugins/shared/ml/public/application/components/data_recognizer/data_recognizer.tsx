@@ -14,19 +14,14 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { useMlApi } from '../../contexts/kibana';
 import { RecognizedResult } from './recognized_result';
 
-export interface DataRecognizerResults {
-  count: number;
-  onChange?: () => void;
-}
-
 interface Props {
   indexPattern: DataView;
   savedSearch: SavedSearch | null;
-  results: DataRecognizerResults;
+  onResultsChange?: (count: number) => void;
   className?: string;
 }
 
-export const DataRecognizer: FC<Props> = ({ indexPattern, savedSearch, results }) => {
+export const DataRecognizer: FC<Props> = ({ indexPattern, savedSearch, onResultsChange }) => {
   const mlApi = useMlApi();
   const [recognizedResults, setRecognizedResults] = useState<ReactElement[]>([]);
 
@@ -51,19 +46,25 @@ export const DataRecognizer: FC<Props> = ({ indexPattern, savedSearch, results }
           />
         ));
 
-        results.count = elements.length;
-        results.onChange?.();
-
         setRecognizedResults(elements);
       })
       .catch(() => {
-        // Recognition failed; leave results empty.
+        if (cancelled) {
+          return;
+        }
+
+        // Recognition failed; report no results so consumers stop waiting.
+        setRecognizedResults([]);
       });
 
     return () => {
       cancelled = true;
     };
-  }, [indexPattern, mlApi, results, savedSearch]);
+  }, [indexPattern, mlApi, savedSearch]);
+
+  useEffect(() => {
+    onResultsChange?.(recognizedResults.length);
+  }, [recognizedResults, onResultsChange]);
 
   return <>{recognizedResults}</>;
 };
