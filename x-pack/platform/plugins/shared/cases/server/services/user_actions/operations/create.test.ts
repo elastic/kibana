@@ -1144,5 +1144,40 @@ describe('UserActionPersister', () => {
         ]
       `);
     });
+
+    it('throws when requested and any saved object item fails', async () => {
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [
+          {
+            attributes: createUserActionSO(),
+            id: '1',
+            type: CASE_USER_ACTION_SAVED_OBJECT,
+            references: [],
+          },
+          {
+            id: '2',
+            type: CASE_USER_ACTION_SAVED_OBJECT,
+            error: {
+              error: 'Internal Server Error',
+              message: 'failed to index user action',
+              statusCode: 500,
+            },
+          },
+        ],
+      });
+
+      const connectorUserAction = getRequest().userAction;
+      const titleUserAction = getRequest<'title'>({
+        type: 'title',
+        payload: { title: 'my title' },
+      }).userAction;
+
+      await expect(
+        persister.bulkCreateUserAction({
+          userActions: [connectorUserAction, titleUserAction],
+          throwOnItemError: true,
+        })
+      ).rejects.toThrow('Failed to create 1 of 2 user actions: failed to index user action');
+    });
   });
 });
