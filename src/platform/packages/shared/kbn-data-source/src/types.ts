@@ -44,7 +44,8 @@ export interface Column {
  *
  * Design rules — load-bearing, do not violate:
  * 1. {@link Column} is the minimum union. Source-specific properties are accessed via type narrowing.
- * 2. {@link isTimeBased} returns `!!timeFieldName`. Never introspect the fields/columns array.
+ * 2. {@link isTimeBased}: `EsqlSource` returns `!!timeFieldName` and must not introspect columns.
+ *    `DataViewSource` delegates to `DataView.isTimeBased()`.
  * 3. {@link EsqlSource} must never call `_field_caps`.
  * 4. {@link serialize} returns identity only — columns are runtime, never persisted.
  */
@@ -75,11 +76,11 @@ export interface DataSourceBase extends DataViewBase {
   getColumn(name: string): Column | undefined;
 
   /**
-   * True iff a time field is configured for this source.
+   * True iff this source is time-based.
    *
-   * MUST NOT introspect the fields/columns array. The presence of a configured
-   * time field is the only signal — whether that field exists in the current
-   * result set is irrelevant.
+   * `EsqlSource` uses only the configured `timeFieldName` — whether that field
+   * appears in the current result columns is irrelevant.
+   * `DataViewSource` delegates to `DataView.isTimeBased()`.
    */
   isTimeBased(): boolean;
 

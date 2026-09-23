@@ -8,6 +8,7 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { DataViewType } from '@kbn/data-views-plugin/common';
 import { DataViewSource } from './data_view_source';
 
 interface MockField {
@@ -24,6 +25,7 @@ function makeDataViewMock(
     timeFieldName?: string | undefined;
     fields?: MockField[];
     persisted?: boolean;
+    type?: DataViewType;
   } = {}
 ): DataView {
   const fields = overrides.fields ?? [];
@@ -35,6 +37,7 @@ function makeDataViewMock(
   return {
     id: 'id' in overrides ? overrides.id : 'dv-id',
     timeFieldName,
+    type: overrides.type,
     getName: jest.fn(() => overrides.name ?? 'My Data View'),
     getIndexPattern: jest.fn(() => overrides.indexPattern ?? 'logs-*'),
     isPersisted: jest.fn(() => overrides.persisted ?? true),
@@ -158,6 +161,18 @@ describe('DataViewSource', () => {
 
       expect(persisted.isPersisted()).toBe(true);
       expect(adhoc.isPersisted()).toBe(false);
+    });
+  });
+
+  describe('isRollup', () => {
+    it('returns true when the DataView is a rollup index pattern', () => {
+      const source = new DataViewSource(makeDataViewMock({ type: DataViewType.ROLLUP }));
+      expect(source.isRollup()).toBe(true);
+    });
+
+    it('returns false for a standard DataView', () => {
+      const source = new DataViewSource(makeDataViewMock());
+      expect(source.isRollup()).toBe(false);
     });
   });
 

@@ -19,6 +19,8 @@ import {
   buildEsqlSourceCacheKey,
   isComputedColumn,
   getQuerySummary,
+  getProjectRoutingFromEsqlQuery,
+  type ESQLSourceInfoColumn,
 } from '@kbn/esql-utils';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
@@ -28,6 +30,12 @@ import { sha256 } from '../sha256';
 
 export interface EsqlSourceArgs {
   query: string;
+  /**
+   * When provided, skips `getESQLSourceInfo` even if `http` is set.
+   * Use after a real fetch, or in tests. The instance cache is keyed by query
+   * identity, not columns — later `create` calls ignore a new `resultColumns`.
+   * Use {@link EsqlSource.withColumns} to replace columns on an existing id.
+   */
   resultColumns?: readonly DatatableColumn[];
   timeFieldName?: string;
   /**
@@ -38,7 +46,8 @@ export interface EsqlSourceArgs {
   projectRouting?: string;
   /**
    * When provided, the factory resolves the time field (`getESQLTimeField`) and
-   * the result schema (`getESQLSourceInfo` / LIMIT 0) in parallel.
+   * the result schema (`getESQLSourceInfo` / LIMIT 0) in parallel, unless
+   * `timeFieldName` / `resultColumns` are already set.
    */
   http?: HttpStart;
   /**
@@ -53,22 +62,41 @@ export interface EsqlSourceArgs {
   esqlVariables?: ESQLControlVariable[];
 }
 
+function columnsFromSourceInfo(columns: ESQLSourceInfoColumn[], query: string): DatatableColumn[] {
+  const querySummary = getQuerySummary(query);
+  return columns.map(({ name, esType }) => ({
+    id: name,
+    name,
+    meta: {
+      type: esFieldTypeToKibanaFieldType(esType) as DatatableColumn['meta']['type'],
+      esType,
+    },
+    isNull: false,
+    isComputedColumn: isComputedColumn(name, querySummary),
+  }));
+}
+
 interface EsqlSourceConstructorArgs {
   id: string;
   query: string;
   title: string;
   timeFieldName: string | undefined;
+  projectRouting: string | undefined;
   resultColumns: readonly DatatableColumn[];
 }
 
 /**
  * `DataSource` implementation for ES|QL queries.
  *
- * Does not require or create a `DataView`. Identity is derived from the query,
- * optional project routing, and time field name. When `http` is provided,
- * {@link EsqlSource.create} resolves the time field and LIMIT 0 schema in
- * parallel; `resultColumns` can still be supplied to skip or override schema
- * discovery.
+ * Does not require or create a `DataView`. Identity is derived from the trimmed
+ * query, optional project routing, control variables, and time field name.
+ * When `http` is provided, {@link EsqlSource.create} resolves the time field
+ * and LIMIT 0 schema in parallel unless `timeFieldName` / `resultColumns` are
+ * already set. Source-info failures still return an empty-column instance
+ * but are not cached.
+ *
+ * Instances are cached by query identity. The first `create` for a key wins;
+ * use {@link withColumns} to attach fetch-result columns without changing `id`.
  *
  * Construct via the async {@link EsqlSource.create} factory; the constructor
  * is private because id derivation uses `crypto.subtle.digest` (async).
@@ -81,6 +109,7 @@ export class EsqlSource implements DataSourceBase {
   public readonly query: string;
   public readonly title: string;
   public readonly timeFieldName: string | undefined;
+  public readonly projectRouting: string | undefined;
   public readonly references: SavedObjectReference[];
   public readonly fields: DataViewFieldBase[];
 
@@ -100,12 +129,14 @@ export class EsqlSource implements DataSourceBase {
     query,
     title,
     timeFieldName,
+    projectRouting,
     resultColumns,
   }: EsqlSourceConstructorArgs) {
     this.id = id;
     this.query = query;
     this.title = title;
     this.timeFieldName = timeFieldName;
+    this.projectRouting = projectRouting;
     this.references = [{ type: 'index-pattern', id, name: 'data-source' }];
 
     this.resultColumns = resultColumns;
@@ -114,10 +145,16 @@ export class EsqlSource implements DataSourceBase {
     this.fields = this.columns.map(columnToFieldBase);
   }
 
-  /** Async factory — id derivation via `crypto.subtle` requires async. */
+  /**
+   * Async factory. Identity (and the LRU cache key) is the trimmed query, project
+   * routing, control variables, and time field — not columns. The first successful
+   * `create` for a key wins; later calls return that instance. Use {@link withColumns}
+   * to attach fetch-result columns without changing `id`.
+   */
   public static async create(args: EsqlSourceArgs): Promise<EsqlSource> {
+    const query = args.query.trim();
     const { cacheKey: baseKey, cleanVariables } = buildEsqlSourceCacheKey(
-      args.query,
+      query,
       args.projectRouting,
       args.esqlVariables
     );
@@ -129,62 +166,69 @@ export class EsqlSource implements DataSourceBase {
     const cached = EsqlSource.instanceCache.get(instanceKey);
     if (cached) return cached;
 
-    const title = getIndexPatternFromESQLQuery(args.query);
+    const title = getIndexPatternFromESQLQuery(query);
+    const projectRouting = getProjectRoutingFromEsqlQuery(query) ?? args.projectRouting;
 
     let timeFieldName: string | undefined = args.timeFieldName;
     let resultColumns: readonly DatatableColumn[] = args.resultColumns ?? [];
+    let discoveredSchema: Awaited<ReturnType<typeof getESQLSourceInfo>> | null | undefined;
 
-    if (args.http) {
-      const querySummary = getQuerySummary(args.query);
+    const { http } = args;
+    const shouldResolveTimeField = Boolean(http) && timeFieldName === undefined;
+    const shouldResolveSchema = Boolean(http) && args.resultColumns === undefined;
+
+    if (http && (shouldResolveTimeField || shouldResolveSchema)) {
       const [resolvedTimeField, info] = await Promise.all([
-        timeFieldName === undefined
+        shouldResolveTimeField
           ? getESQLTimeField({
-              query: args.query,
-              http: args.http,
+              query,
+              http,
               projectRouting: args.projectRouting,
             })
           : Promise.resolve(timeFieldName),
-        getESQLSourceInfo({
-          query: args.query,
-          http: args.http,
-          projectRouting: args.projectRouting,
-          timeRange: args.timeRange,
-          timeFieldName: args.timeFieldName,
-          esqlVariables: cleanVariables,
-        }).catch(() => null),
+        shouldResolveSchema
+          ? getESQLSourceInfo({
+              query,
+              http,
+              projectRouting: args.projectRouting,
+              timeRange: args.timeRange,
+              timeFieldName: args.timeFieldName,
+              esqlVariables: cleanVariables,
+            }).catch(() => null)
+          : Promise.resolve(null),
       ]);
 
       timeFieldName = resolvedTimeField;
+      if (shouldResolveSchema) {
+        discoveredSchema = info;
+      }
       if (info) {
-        resultColumns = info.columns.map(({ name, esType }) => {
-          const kibanaFieldType = esFieldTypeToKibanaFieldType(esType);
-          return {
-            id: name,
-            name,
-            meta: { type: kibanaFieldType, esType },
-            isNull: false,
-            isComputedColumn: isComputedColumn(name, querySummary),
-          } as DatatableColumn;
-        });
+        resultColumns = columnsFromSourceInfo(info.columns, query);
       }
     }
 
     const hashInput = JSON.stringify([
       'esql',
-      args.query,
+      query,
       args.projectRouting ?? null,
+      cleanVariables ?? null,
       timeFieldName ?? null,
     ]);
     const hash = await sha256(hashInput);
     const instance = new EsqlSource({
       id: `esql-${hash}`,
-      query: args.query,
+      query,
       title,
       timeFieldName,
+      projectRouting,
       resultColumns,
     });
 
-    EsqlSource.instanceCache.set(instanceKey, instance);
+    // Failed source_info (`info === null`) is not a legitimate empty schema —
+    // skip the cache so a later create can retry discovery.
+    if (!shouldResolveSchema || discoveredSchema !== null) {
+      EsqlSource.instanceCache.set(instanceKey, instance);
+    }
     return instance;
   }
 
@@ -193,15 +237,20 @@ export class EsqlSource implements DataSourceBase {
   }
 
   /**
-   * Dataset identity for the FROM target + time field, independent of query-instance {@link id}.
-   * SORT / WHERE / EVAL keep the same key; a different FROM or time field does not.
+   * Dataset identity for the FROM target + time field + effective project routing,
+   * independent of query-instance {@link id}.
+   * SORT / WHERE / EVAL keep the same key; a different FROM, time field, or project does not.
    */
-  public static getDatasetKey(title: string, timeFieldName?: string): string {
-    return `esql:${title}:${timeFieldName ?? ''}`;
+  public static getDatasetKey(
+    title: string,
+    timeFieldName?: string,
+    projectRouting?: string
+  ): string {
+    return `esql:${title}:${timeFieldName ?? ''}:${projectRouting ?? ''}`;
   }
 
   public get datasetKey(): string {
-    return EsqlSource.getDatasetKey(this.title, this.timeFieldName);
+    return EsqlSource.getDatasetKey(this.title, this.timeFieldName, this.projectRouting);
   }
 
   public get name(): string {
@@ -226,6 +275,7 @@ export class EsqlSource implements DataSourceBase {
       query: this.query,
       title: this.title,
       timeFieldName: this.timeFieldName,
+      projectRouting: this.projectRouting,
       resultColumns,
     });
   }
