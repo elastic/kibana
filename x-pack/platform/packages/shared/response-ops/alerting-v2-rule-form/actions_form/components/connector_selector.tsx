@@ -35,7 +35,7 @@ export const ConnectorSelector = ({
   connectorTypeId,
   value,
   onChange,
-  connectorCreationConfig: connectorCreation = { mode: 'flyout' },
+  connectorCreationConfig = { mode: 'flyout' },
 }: ConnectorSelectorProps) => {
   const { data: connectors = [], isLoading } = useFetchConnectorsByType({ connectorTypeId });
   const triggersActionsUi = useService(
@@ -96,9 +96,9 @@ export const ConnectorSelector = ({
         labelAppend={
           <EuiLink
             data-test-subj="singleStepWorkflowCreateConnectorLink"
-            {...(connectorCreation.mode === 'new-tab'
+            {...(connectorCreationConfig.mode === 'new-tab'
               ? {
-                  href: connectorCreation.href,
+                  href: connectorCreationConfig.href,
                   target: '_blank',
                   rel: 'noopener noreferrer',
                 }
@@ -128,7 +128,7 @@ export const ConnectorSelector = ({
           options={options}
         />
       </EuiFormRow>
-      {connectorCreation.mode === 'flyout' && isCreateFlyoutOpen && (
+      {connectorCreationConfig.mode === 'flyout' && isCreateFlyoutOpen && (
         <KibanaContextProvider services={connectorFlyoutServices}>
           {triggersActionsUi.getAddConnectorFlyout({
             initialConnector: { actionTypeId: connectorTypeId },

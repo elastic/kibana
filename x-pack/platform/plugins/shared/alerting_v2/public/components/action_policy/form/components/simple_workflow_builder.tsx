@@ -47,10 +47,10 @@ const buildDraft = (stepType: InlineActionStepType): InlineWorkflowActionDraft =
 };
 
 interface SimpleWorkflowBuilderProps {
-  connectorCreation?: ConnectorCreationConfig;
+  connectorCreationConfig?: ConnectorCreationConfig;
 }
 
-export const SimpleWorkflowBuilder = ({ connectorCreation }: SimpleWorkflowBuilderProps) => {
+export const SimpleWorkflowBuilder = ({ connectorCreationConfig }: SimpleWorkflowBuilderProps) => {
   const { control } = useFormContext<ActionPolicyFormState>();
   const uiSettings = useService(CoreStart('uiSettings'));
   const isWorkflowsEnabled = uiSettings.get<boolean>(WORKFLOWS_UI_SETTING_ID);
@@ -129,7 +129,7 @@ export const SimpleWorkflowBuilder = ({ connectorCreation }: SimpleWorkflowBuild
                           <InlineWorkflowEditor
                             value={draft}
                             onChange={updateDraft}
-                            connectorCreation={connectorCreation}
+                            connectorCreationConfig={connectorCreationConfig}
                           />
                         </EuiPanel>
                       </EuiFlexItem>

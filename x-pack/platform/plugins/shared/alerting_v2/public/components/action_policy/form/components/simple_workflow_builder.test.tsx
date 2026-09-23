@@ -74,7 +74,7 @@ const renderBuilder = (
     return (
       <I18nProvider>
         <FormProvider {...methods}>
-          <SimpleWorkflowBuilder connectorCreation={connectorCreation} />
+          <SimpleWorkflowBuilder connectorCreationConfig={connectorCreation} />
         </FormProvider>
       </I18nProvider>
     );

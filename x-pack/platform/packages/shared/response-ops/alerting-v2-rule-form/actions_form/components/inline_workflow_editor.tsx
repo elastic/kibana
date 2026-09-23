@@ -15,13 +15,13 @@ import { ParamsEditor } from './params_editor';
 export interface InlineWorkflowEditorProps {
   value: InlineWorkflowActionDraft;
   onChange: (next: InlineWorkflowActionDraft) => void;
-  connectorCreation?: ConnectorCreationConfig;
+  connectorCreationConfig?: ConnectorCreationConfig;
 }
 
 export const InlineWorkflowEditor = ({
   value,
   onChange,
-  connectorCreation,
+  connectorCreationConfig,
 }: InlineWorkflowEditorProps) => {
   const definition = getInlineActionStepDefinition(value.stepType);
   if (!definition) {
@@ -33,7 +33,7 @@ export const InlineWorkflowEditor = ({
       <ConnectorSelector
         connectorTypeId={definition.connectorTypeId}
         value={value.connectorId}
-        connectorCreationConfig={connectorCreation}
+        connectorCreationConfig={connectorCreationConfig}
         onChange={(connectorId) => {
           if (connectorId === value.connectorId) return;
           onChange({ ...value, connectorId });

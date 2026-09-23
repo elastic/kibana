@@ -123,7 +123,7 @@ describe('InlineWorkflowEditor', () => {
   });
 
   it('forwards the connector creation mode to the connector selector', () => {
-    renderEditor({ connectorCreation: { mode: 'new-tab', href: '/connectors' } });
+    renderEditor({ connectorCreationConfig: { mode: 'new-tab', href: '/connectors' } });
 
     expect(screen.getByTestId('connectorSelector')).toHaveAttribute(
       'data-connector-creation-mode',
