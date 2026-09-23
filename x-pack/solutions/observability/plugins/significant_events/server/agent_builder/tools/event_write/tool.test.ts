@@ -9,6 +9,7 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import type { GetScopedClients } from '../../../routes/types';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
+import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
 import { createMockToolContext, invokeHandler } from '../../utils/test_helpers';
 import { BulkWriteError, MAX_BULK_WRITE_ITEMS } from '../bulk_write';
 import { eventsWriteBulkHandler } from './handler';
@@ -16,6 +17,10 @@ import { createEventsWriteTool, eventsWriteSchema } from './tool';
 
 jest.mock('../../../routes/utils/assert_significant_events_access', () => ({
   assertSignificantEventsAccess: jest.fn(),
+}));
+
+jest.mock('../../../routes/utils/assert_can_manage_significant_events', () => ({
+  assertCanManageSignificantEvents: jest.fn(),
 }));
 
 jest.mock('./handler', () => ({
@@ -54,6 +59,7 @@ describe('events_write tool', () => {
     jest.clearAllMocks();
     getFeatures.mockResolvedValue({ hits: [] });
     (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
+    (assertCanManageSignificantEvents as jest.Mock).mockResolvedValue(undefined);
   });
 
   it('enforces the batch bounds', () => {
@@ -328,6 +334,9 @@ describe('events_write tool', () => {
           }),
         ],
       })
+    );
+    expect(assertCanManageSignificantEvents).toHaveBeenCalledWith(
+      expect.objectContaining({ request: expect.anything() })
     );
   });
 

@@ -16,6 +16,7 @@ import dedent from 'dedent';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import type { GetScopedClients } from '../../../routes/types';
+import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import { createSignificantEventsAvailability } from '../significant_events_availability';
 import { attachEventInvestigationToolHandler } from './handler';
@@ -110,6 +111,7 @@ export const createEventInvestigationAttachTool = ({
           request,
         });
         await assertSignificantEventsAccess({ server, licensing });
+        await assertCanManageSignificantEvents({ request, server });
 
         const data = await attachEventInvestigationToolHandler({
           eventClient: await getEventClient(),
@@ -118,6 +120,7 @@ export const createEventInvestigationAttachTool = ({
           startedAt: toolParams.started_at,
           completedAt: toolParams.completed_at,
           alertEventsClient: await getAlertEventsClient(),
+          logger,
         });
 
         telemetry.trackAgentToolEventInvestigationAttach({

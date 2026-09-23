@@ -561,9 +561,9 @@ export async function eventsWriteBulkHandler({
   // version -> created; a prior version with a different status (e.g. triage re-open) -> status
   // changed. Emission is best-effort and guarded, so it never affects the returned results.
   const dualWriteLimit = alertEventsClient ? pLimit(DUAL_WRITE_CONCURRENCY) : null;
-  pendingToWrite.forEach(({ candidate, document }, responseIndex) => {
+  const dualWritePromises = pendingToWrite.flatMap(({ candidate, document }, responseIndex) => {
     if (createResults[responseIndex].error) {
-      return;
+      return [];
     }
     emitSignificantEventWriteTriggers({
       eventClient,
@@ -571,15 +571,19 @@ export async function eventsWriteBulkHandler({
       priorSignificantEvent: latestByEventId.get(candidate.eventId),
     });
     if (alertEventsClient && dualWriteLimit) {
-      dualWriteLimit(() => alertEventsClient.createAlertEvent(toRuleEvent(document))).catch(
-        (err) => {
-          logger?.error(
-            `Failed to write to .rule-events: ${err instanceof Error ? err.message : err}`
-          );
-        }
-      );
+      return [
+        dualWriteLimit(() => alertEventsClient.createAlertEvent(toRuleEvent(document))).catch(
+          (err) => {
+            logger?.error(
+              `Failed to write to .rule-events: ${err instanceof Error ? err.message : err}`
+            );
+          }
+        ),
+      ];
     }
+    return [];
   });
+  await Promise.all(dualWritePromises);
 
   return alignResults(results, 'Event bulk results were not aligned with every input');
 }

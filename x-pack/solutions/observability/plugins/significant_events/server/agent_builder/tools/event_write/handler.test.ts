@@ -1262,24 +1262,41 @@ describe('eventsWriteBulkHandler — dual-write to .rule-events (Writer 1)', () 
     expect(alertEventsClient.createAlertEvent).toHaveBeenCalledTimes(1);
   });
 
-  it('returns success and logs error when createAlertEvent rejects (error suppression)', async () => {
+  it('waits for and logs a rejected createAlertEvent without failing the significant event write', async () => {
     const eventClient = makeEventClient();
+    let rejectAlertEvent: ((reason?: unknown) => void) | undefined;
     const alertEventsClient = makeAlertEventsClient({
-      createAlertEvent: jest.fn().mockRejectedValue(new Error('rule-events unavailable')),
+      createAlertEvent: jest.fn(
+        () =>
+          new Promise<void>((_resolve, reject) => {
+            rejectAlertEvent = reject;
+          })
+      ),
     });
     const logger = makeLogger();
 
-    const results = await eventsWriteBulkHandler({
+    const handlerPromise = eventsWriteBulkHandler({
       eventClient,
       inputs: [{ ...baseInput, event_id: 'checkout__latency-abc12345' }],
       alertEventsClient,
       logger,
     });
 
-    // Old-stream write succeeds despite .rule-events failure
-    expect(results[0].written).toBe(true);
-    // Give the fire-and-forget promise a chance to settle (flush full microtask queue)
+    let settled = false;
+    void handlerPromise.then(() => {
+      settled = true;
+    });
     await new Promise(setImmediate);
+    expect(settled).toBe(false);
+
+    if (rejectAlertEvent === undefined) {
+      throw new Error('createAlertEvent did not start');
+    }
+    rejectAlertEvent(new Error('rule-events unavailable'));
+    const results = await handlerPromise;
+
+    // Old-stream write succeeds despite .rule-events failure.
+    expect(results[0].written).toBe(true);
     expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('rule-events unavailable'));
   });
 });
