@@ -39,7 +39,8 @@
     "@kbn/std",
     "@kbn/react-query",
     "@kbn/kibana-react-plugin",
-    "@kbn/user-profile-components"
+    "@kbn/user-profile-components",
+    "@kbn/agent-builder-plugin"
   ],
   "exclude": ["target/**/*"]
 }
