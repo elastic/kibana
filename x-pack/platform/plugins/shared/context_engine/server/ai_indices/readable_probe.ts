@@ -7,11 +7,7 @@
 
 import type { MsearchRequestItem, MsearchResponseItem } from '@elastic/elasticsearch/lib/api/types';
 
-/**
- * One `msearch` entry that reads nothing but tells us whether the caller may read `target`. Sent as
- * the caller, so Elasticsearch index privileges decide the outcome. Strict index options on purpose:
- * `ignore_unavailable` silently drops unreadable indices.
- */
+/** Probe that checks if the caller can read `target`; strict options on purpose — `ignore_unavailable` silently drops unreadable indices. */
 export const readableProbe = (target: string): MsearchRequestItem[] => [
   { index: target, allow_partial_search_results: false },
   { size: 0, terminate_after: 1, track_total_hits: false, query: { match_all: {} } },
@@ -21,11 +17,7 @@ export const readableProbe = (target: string): MsearchRequestItem[] => [
 const isMissingIndex = (target: string, item: MsearchResponseItem): boolean =>
   !target.includes(',') && 'error' in item && item.error.type === 'index_not_found_exception';
 
-/**
- * Why the probe cannot vouch for `target`: an error, a timeout, or a failed shard. `undefined` when
- * the caller may read it, or when it does not exist yet — a backing store that was never created
- * counts as readable, because the AI Index may have only just been registered.
- */
+/** Returns the failure reason, or `undefined` if readable — including when `target` doesn't exist yet (the AI Index may have just been registered). */
 export const readableProbeFailure = (
   target: string,
   item: MsearchResponseItem

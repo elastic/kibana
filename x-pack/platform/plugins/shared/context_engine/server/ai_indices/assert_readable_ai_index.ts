@@ -16,19 +16,13 @@ export interface AssertReadableAiIndexParams {
   aiIndex: AiIndexHttpItem;
 }
 
-/**
- * Throws `AiIndexNotReadableError` unless the caller can read the backing store, so describing an
- * AI Index takes the same privileges as listing it: the metadata reads behind a describe pass
- * `ignore_unavailable`, which turns an index the caller cannot see into an empty description rather
- * than a denial. Uses the list API's probe, whose per-item `msearch` error keeps the verdict ours.
- */
+/** Throws `AiIndexNotReadableError` unless the caller can read the backing store — `ignore_unavailable` on the metadata reads would otherwise silently swallow a refusal. */
 export const assertReadableAiIndex = async ({
   esClient,
   aiIndex,
 }: AssertReadableAiIndexParams): Promise<void> => {
   const target = aiIndex.dest.value;
-  // A refusal normally arrives as the probe's own response item, but Elasticsearch may also reject
-  // the whole `msearch`; either way the denial is this AI Index's, so the error stays ours.
+  // ES may reject the whole msearch rather than a per-item response; normalize to our error.
   const { responses } = await esClient
     .msearch({ searches: readableProbe(target) })
     .catch((error) => {
