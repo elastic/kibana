@@ -191,7 +191,7 @@ steps:
                   required: ["question_type", "esql_template", "esql_example", "params", "returns"]
             required: ["display_name", "summary", "notable_values", "when_to_use", "access_patterns"]
 
-      # Built once so verify_ki and create_ki see exactly the same document.
+      # Built once, then handed to create_ki to verify and write.
       - name: assemble_ki
         type: data.set
         with:
@@ -237,32 +237,27 @@ steps:
               doc_count: "${{ steps.entity_metrics.output.doc_count }}"
               distinct_breakdown: "${{ steps.entity_metrics.output.distinct_breakdown }}"
 
-      - name: verify_ki
-        type: context-engine.verifyKi
+      # `ki_id` is derived from the entity, so a re-run replaces that entity's profile rather
+      # than appending a second copy. Omit `ki_id` entirely on a data-stream destination,
+      # which rejects it. The verifiers run before the write; a KI that fails them is not written.
+      - name: create_ki
+        type: context-engine.createKi
         with:
+          ai_index_id: "{{ consts.ai_index_id }}"
+          ki_id: "entity-{{ steps.entity_context.output.entity | slugify }}"
+          ki: "${{ steps.assemble_ki.output.ki }}"
           verifiers:
             - esql-valid-syntax
             - esql-valid-runtime
-          ki: "${{ steps.assemble_ki.output.ki }}"
 
       - name: check_verification
         type: if
-        condition: "steps.verify_ki.output.passed : true"
+        condition: "steps.create_ki.output.verification.passed : false"
         steps:
-          # `ki_id` is derived from the entity, so a re-run replaces that entity's profile rather
-          # than appending a second copy. Omit `ki_id` entirely on a data-stream destination,
-          # which rejects it.
-          - name: create_ki
-            type: context-engine.createKi
-            with:
-              ai_index_id: "{{ consts.ai_index_id }}"
-              ki_id: "entity-{{ steps.entity_context.output.entity | slugify }}"
-              ki: "${{ steps.assemble_ki.output.ki }}"
-        else:
           - name: log_verification_failure
             type: console
             with:
               message: |
                 KI verification failed for {{ consts.entity_field }}
                 "{{ steps.entity_context.output.entity }}".
-                Results: {{ steps.verify_ki.output.results | json }}
+                Results: {{ steps.create_ki.output.verification.results | json }}

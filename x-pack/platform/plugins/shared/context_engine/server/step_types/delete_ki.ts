@@ -88,7 +88,6 @@ export const getDeleteKiStepDefinition = ({
               {
                 index: revision.index,
                 id: revision.documentId,
-                refresh: 'wait_for',
               },
               { signal: context.abortSignal }
             )

@@ -47,6 +47,7 @@ import { SignalsService } from './signals/service';
 import type { SignalsServiceApi } from './signals/service';
 import { registerSignalGeneratorTaskDefinition, scheduleSignalGenerator } from './tasks';
 import { createVerifyKiStepDefinition } from './step_types/verify_ki_step';
+import { createKiVerifierRunner } from './step_types/ki_verifier_runner';
 import { registerStepDefinitions } from './step_types';
 import { ContextEngineAnalyticsService } from './telemetry';
 import { isContextEngineEnabledInSpace } from './utils/is_context_engine_enabled_in_space';
@@ -123,13 +124,28 @@ export class ContextEnginePlugin
       return hasAllRequested;
     };
 
+    const kiVerifierWorkflowDeps = {
+      getWorkflowsManagement: () => this.workflowsManagementApiPromise,
+      checkExecutePrivilege: (request: KibanaRequest, spaceId: string) =>
+        checkApiPrivileges(request, spaceId, WorkflowsManagementOperationPrivileges.execute),
+    };
     setupDeps.workflowsExtensions.registerStepDefinition(
-      createVerifyKiStepDefinition(coreSetup, this.logger.get('context_steps'), analyticsService, {
-        getWorkflowsManagement: () => this.workflowsManagementApiPromise,
-        checkExecutePrivilege: (request, spaceId) =>
-          checkApiPrivileges(request, spaceId, WorkflowsManagementOperationPrivileges.execute),
-      })
+      createVerifyKiStepDefinition(
+        coreSetup,
+        this.logger.get('context_steps'),
+        analyticsService,
+        kiVerifierWorkflowDeps
+      )
     );
+    const runKiVerifiers = createKiVerifierRunner({
+      getAuditLogger: async (request) => {
+        const [coreStart] = await coreSetup.getStartServices();
+        return coreStart.security.audit.asScoped(request);
+      },
+      workflowVerifierDeps: kiVerifierWorkflowDeps,
+      analyticsService,
+      logger: this.logger.get('context_steps'),
+    });
 
     coreSetup.uiSettings.registerGlobal({
       [CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID]: {
@@ -251,6 +267,7 @@ export class ContextEnginePlugin
       getAiIndexService,
       isContextEngineEnabled,
       checkWritePrivilege,
+      runKiVerifiers,
       feedbackAnalysis: {
         getAiIndexService,
         getImprovementsService,

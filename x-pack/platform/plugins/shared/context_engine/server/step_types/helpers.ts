@@ -146,7 +146,6 @@ export const appendKiRevision = async ({
         id: source.id ?? kiId,
       },
       op_type: 'create',
-      refresh: 'wait_for',
     },
     { signal: abortSignal }
   );

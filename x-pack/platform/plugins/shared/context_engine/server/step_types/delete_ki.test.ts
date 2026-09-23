@@ -110,7 +110,6 @@ describe('getDeleteKiStepDefinition', () => {
       {
         index: 'ai-index-idx-my-ai-index',
         id: 'ki-1',
-        refresh: 'wait_for',
       },
       { signal: context.abortSignal }
     );
@@ -151,7 +150,6 @@ describe('getDeleteKiStepDefinition', () => {
           },
         },
         op_type: 'create',
-        refresh: 'wait_for',
       },
       { signal: context.abortSignal }
     );

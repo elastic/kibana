@@ -17,6 +17,7 @@ import {
   resolveOrCreateAiIndex,
   withKiWriteTelemetry,
 } from './helpers';
+import type { KiVerifierRunner } from './ki_verifier_runner';
 
 export const getCreateKiStepDefinition = ({
   getAiIndexService,
@@ -24,7 +25,8 @@ export const getCreateKiStepDefinition = ({
   checkWritePrivilege,
   analyticsService,
   logger,
-}: KiStepDependencies) =>
+  runKiVerifiers,
+}: KiStepDependencies & { runKiVerifiers: KiVerifierRunner }) =>
   createServerStepDefinition({
     ...createKiStepCommonDefinition,
     handler: async (context) => {
@@ -32,7 +34,14 @@ export const getCreateKiStepDefinition = ({
       const spaceId = context.contextManager.getContext().workflow.spaceId;
       await assertContextEngineEnabled(isContextEngineEnabled, spaceId);
 
-      const { ai_index_id: aiIndexId, ki_id: kiId, ki } = context.input;
+      const { ai_index_id: aiIndexId, ki_id: kiId, ki, verifiers } = context.input;
+      const verification = verifiers
+        ? await runKiVerifiers({ context, ki, verifiers, aiIndexId })
+        : undefined;
+      if (verification && !verification.passed) {
+        return { output: { verification } };
+      }
+
       return withKiWriteTelemetry({
         action: 'create',
         aiIndexId,
@@ -63,14 +72,13 @@ export const getCreateKiStepDefinition = ({
                 updated_at: now,
                 governance: { provenance: { created_by: writer, updated_by: writer } },
               },
-              // Data streams only accept `create`; `wait_for` makes the KI visible to later steps.
+              // Data streams only accept `create`.
               ...(dest.type === 'data_stream' ? { op_type: 'create' as const } : { id }),
-              refresh: 'wait_for',
             },
             { signal: context.abortSignal }
           );
 
-          return { output: { id } };
+          return { output: { id, ...(verification && { verification }) } };
         },
       });
     },

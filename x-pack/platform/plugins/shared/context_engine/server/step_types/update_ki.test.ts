@@ -134,7 +134,6 @@ describe('getUpdateKiStepDefinition', () => {
         },
         if_seq_no: 5,
         if_primary_term: 1,
-        refresh: 'wait_for',
       },
       { signal: context.abortSignal }
     );
@@ -347,7 +346,6 @@ describe('getUpdateKiStepDefinition', () => {
           },
         },
         op_type: 'create',
-        refresh: 'wait_for',
       },
       { signal: context.abortSignal }
     );

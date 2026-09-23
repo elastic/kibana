@@ -95,7 +95,6 @@ export const getUpdateKiStepDefinition = ({
                 doc: changes,
                 if_seq_no: revision.seqNo,
                 if_primary_term: revision.primaryTerm,
-                refresh: 'wait_for',
               },
               { signal: context.abortSignal }
             )
