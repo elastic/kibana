@@ -35,22 +35,25 @@ const TTL_MS = 168 * 60 * 60 * 1000; // 7 days
 
 export type EisCacheStatus = 'fresh' | 'expired' | 'missing' | 'malformed';
 
-const isPlainObject = (value: unknown): value is Record<string, object> =>
+const isPlainObject = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
 const parseCachedEntry = (cachePath: string): CachedEisConnectors | undefined => {
   try {
     const raw = fs.readFileSync(cachePath, 'utf-8');
     const cached: unknown = JSON.parse(raw);
+    if (!isPlainObject(cached)) {
+      return undefined;
+    }
+    const { connectors, fetched_at_ms: fetchedAtMs } = cached;
     if (
-      !isPlainObject(cached) ||
-      !isPlainObject(cached.connectors) ||
-      typeof cached.fetched_at_ms !== 'number' ||
-      !Number.isFinite(cached.fetched_at_ms)
+      !isPlainObject(connectors) ||
+      typeof fetchedAtMs !== 'number' ||
+      !Number.isFinite(fetchedAtMs)
     ) {
       return undefined;
     }
-    return cached as CachedEisConnectors;
+    return { connectors: connectors as Record<string, object>, fetched_at_ms: fetchedAtMs };
   } catch {
     return undefined;
   }
