@@ -55,7 +55,7 @@ export const ActionPolicyFormFlyout = ({
   });
 
   return (
-    <EuiFlyout onClose={onClose} aria-labelledby={FLYOUT_TITLE_ID} size="m" ownFocus>
+    <EuiFlyout onClose={onClose} aria-labelledby={FLYOUT_TITLE_ID} size="l" ownFocus>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m" id={FLYOUT_TITLE_ID}>
           <h2 data-test-subj="title">
