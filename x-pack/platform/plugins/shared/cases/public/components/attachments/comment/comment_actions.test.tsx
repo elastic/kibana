@@ -6,19 +6,21 @@
  */
 
 import React from 'react';
-import { screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import type { ComponentProps } from 'react';
+import { render } from '@testing-library/react';
 
 import { CommentActions } from './comment_actions';
 import { CommentRenderingProvider } from '../../user_actions/comment/comment_rendering_context';
 import type { CommentRenderingContextValue } from '../../user_actions/comment/comment_rendering_context';
-import { renderWithTestingProviders } from '../../../common/mock';
 import { getMockCommentRenderingContext } from '../../user_actions/mock';
+import { UserCommentPropertyActions } from '../../user_actions/property_actions/user_comment_property_actions';
 import type { CommentActionsProps } from './comment_actions';
 
-jest.mock('../../../common/lib/kibana');
-jest.mock('../../../common/navigation/hooks');
+jest.mock('../../user_actions/property_actions/user_comment_property_actions', () => ({
+  UserCommentPropertyActions: jest.fn(() => null),
+}));
+
+const propertyActionsMock = UserCommentPropertyActions as unknown as jest.Mock;
 
 const defaultProps: CommentActionsProps = {
   commentId: 'comment-1',
@@ -27,72 +29,56 @@ const defaultProps: CommentActionsProps = {
 
 const utils = getMockCommentRenderingContext();
 
-const USER_ACTION_ELLIPSES_TEST_ID = 'property-actions-user-action-ellipses';
-const USER_ACTION_PENCIL_TEST_ID = 'property-actions-user-action-pencil';
-
 const renderComponent = (
   props: CommentActionsProps = defaultProps,
   context: CommentRenderingContextValue = utils
 ) =>
-  renderWithTestingProviders(
+  render(
     <CommentRenderingProvider value={context}>
       <CommentActions {...props} />
     </CommentRenderingProvider>
   );
+
+const getPropertyActionsProps = (): ComponentProps<typeof UserCommentPropertyActions> =>
+  propertyActionsMock.mock.calls[0][0];
 
 describe('CommentActions', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('renders the property actions toolbar', async () => {
-    renderComponent();
-    expect(screen.getByTestId('property-actions-user-action')).toBeInTheDocument();
-  });
-
-  it('calls handleManageMarkdownEditId when edit is clicked', async () => {
+  it('renders the property actions with the comment content', () => {
     renderComponent();
 
-    await userEvent.click(screen.getByTestId(USER_ACTION_ELLIPSES_TEST_ID));
-    await waitForEuiPopoverOpen();
-
-    await userEvent.click(screen.getByTestId(USER_ACTION_PENCIL_TEST_ID));
-
-    await waitFor(() => {
-      expect(utils.handleManageMarkdownEditId).toHaveBeenCalledWith('comment-1');
-    });
+    expect(getPropertyActionsProps().commentContent).toBe('This is a comment');
+    expect(getPropertyActionsProps().isLoading).toBe(false);
   });
 
-  it('calls handleDeleteComment when delete is clicked', async () => {
+  it('calls handleManageMarkdownEditId when edit is triggered', () => {
     renderComponent();
 
-    await userEvent.click(screen.getByTestId(USER_ACTION_ELLIPSES_TEST_ID));
-    await waitForEuiPopoverOpen();
+    getPropertyActionsProps().onEdit();
 
-    await userEvent.click(screen.getByTestId('property-actions-user-action-trash'));
-
-    expect(await screen.findByTestId('property-actions-confirm-modal')).toBeInTheDocument();
-    await userEvent.click(screen.getByRole('button', { name: 'Delete' }));
-
-    await waitFor(() => {
-      expect(utils.handleDeleteComment).toHaveBeenCalledWith('comment-1', 'Deleted comment');
-    });
+    expect(utils.handleManageMarkdownEditId).toHaveBeenCalledWith('comment-1');
   });
 
-  it('calls handleManageQuote when quote is clicked', async () => {
+  it('calls handleDeleteComment when delete is triggered', () => {
     renderComponent();
 
-    await userEvent.click(screen.getByTestId(USER_ACTION_ELLIPSES_TEST_ID));
-    await waitForEuiPopoverOpen();
+    getPropertyActionsProps().onDelete();
 
-    await userEvent.click(screen.getByTestId('property-actions-user-action-quote'));
-
-    await waitFor(() => {
-      expect(utils.handleManageQuote).toHaveBeenCalledWith('This is a comment');
-    });
+    expect(utils.handleDeleteComment).toHaveBeenCalledWith('comment-1', 'Deleted comment');
   });
 
-  it('shows loading state when comment is loading', () => {
+  it('calls handleManageQuote when quote is triggered', () => {
+    renderComponent();
+
+    getPropertyActionsProps().onQuote();
+
+    expect(utils.handleManageQuote).toHaveBeenCalledWith('This is a comment');
+  });
+
+  it('passes the loading state when the comment is loading', () => {
     renderComponent(
       undefined,
       getMockCommentRenderingContext({
@@ -100,6 +86,6 @@ describe('CommentActions', () => {
       })
     );
 
-    expect(screen.getByTestId('user-action-title-loading')).toBeInTheDocument();
+    expect(getPropertyActionsProps().isLoading).toBe(true);
   });
 });
