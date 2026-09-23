@@ -117,7 +117,7 @@ describe('detection rule workflows', () => {
 
       const rendered = parse(
         definition.yamlTemplate({
-          settingsVersion: 2,
+          settingsVersion: 1,
           autonomyLevel: 'assisted',
           scheduleInterval: '6h',
           extras: { analysisWindowDays: 21, fpCountThreshold: 4, fpRateThresholdPct: 80 },
@@ -127,7 +127,7 @@ describe('detection rule workflows', () => {
 
       // consts.worker_settings is the single place the saved values are rendered into...
       expect((rendered.consts as Record<string, Record<string, unknown>>).worker_settings).toEqual({
-        settingsVersion: 2,
+        settingsVersion: 1,
         autonomy: 'assisted',
         scheduleInterval: '6h',
         extras: { analysisWindowDays: 21, fpCountThreshold: 4, fpRateThresholdPct: 80 },
@@ -168,7 +168,7 @@ describe('detection rule workflows', () => {
 
         expect(() =>
           definition.yamlTemplate?.({
-            settingsVersion: 2,
+            settingsVersion: 1,
             autonomyLevel: 'manual',
             scheduleInterval: '2h',
             extras,
