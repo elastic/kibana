@@ -28,8 +28,8 @@ export const validateAiIndexId = (value: string): string | undefined =>
           'Must start with a lowercase letter or number, then use lowercase letters, numbers, hyphens, and underscores.',
       });
 
-// Comma-separated index expressions: lowercase letters, numbers, `_`, `.`, `*`, `+`, `-`.
-export const AI_INDEX_DEST_VALUE_PATTERN = /^[a-z0-9_.*,+-]+$/;
+// A single index or data stream name: lowercase letters, numbers, `_`, `.`, `+`, `-`.
+const AI_INDEX_DEST_VALUE_PATTERN = /^[a-z0-9_.+-]+$/;
 
 /** Returns a translated error message for an invalid AI index dest value, or `undefined` when valid. */
 export const validateAiIndexDestValue = (value: string): string | undefined =>
@@ -37,7 +37,7 @@ export const validateAiIndexDestValue = (value: string): string | undefined =>
     ? undefined
     : i18n.translate('xpack.contextEngine.aiIndexDestValue.error.invalidFormat', {
         defaultMessage:
-          'Must use only lowercase letters, numbers, hyphens, underscores, periods, wildcards, and commas.',
+          'Must use only lowercase letters, numbers, hyphens, underscores, periods, and plus signs.',
       });
 
 const INTERVAL_PATTERN = /^([1-9][0-9]*)(m|h|d)$/;

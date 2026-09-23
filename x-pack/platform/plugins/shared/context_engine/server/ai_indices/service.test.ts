@@ -117,7 +117,6 @@ describe('AiIndexService', () => {
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
   let storageClient: jest.Mocked<Pick<AiIndexStorageClient, 'index' | 'search' | 'delete'>>;
   let service: AiIndexService;
-  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   const mockSearchHits = (...hits: SearchHitInput[]) => {
     storageClient.search.mockResolvedValue(
@@ -154,8 +153,10 @@ describe('AiIndexService', () => {
     createAiIndexStorageClientMock.mockReturnValue(storageClient);
     mockSearchHits();
 
-    logger = loggingSystemMock.createLogger();
-    service = new AiIndexService({ esClient, logger });
+    service = new AiIndexService({
+      esClient,
+      logger: loggingSystemMock.createLogger(),
+    });
   });
 
   const properties = {
@@ -1179,6 +1180,7 @@ describe('AiIndexService', () => {
       const okDocument: AiIndexDocument = { ...aiIndexDocument, id: 'ok', managed: true };
       mockSearchHitsOnce();
       mockSearchHitsOnce(storedHit(okDocument, { id: 'ok' }));
+      const logger = loggingSystemMock.createLogger();
       const ensure = jest.fn().mockImplementation(async (id: string) => {
         if (id === 'broken') {
           throw new InvalidAiIndexDestError('dest is invalid');

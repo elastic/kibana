@@ -2479,7 +2479,7 @@ describe('ai indices routes', () => {
     });
   });
 
-  describe('dest value body validation', () => {
+  describe('create body validation', () => {
     const validateBody = (body: unknown) => {
       const { validate } = getRoute('POST', aiIndexPath);
       if (validate === false || !validate.request?.body) {
@@ -2487,21 +2487,17 @@ describe('ai indices routes', () => {
       }
       return validate.request.body.validate(body);
     };
-    const body = (value: string) => ({
-      id: 'customer_support',
-      dest: { type: 'index', value },
+    const body = (overrides: { id?: string; value?: string } = {}) => ({
+      id: overrides.id ?? 'customer_support',
+      dest: { type: 'index', value: overrides.value ?? 'ai-index-idx-mine' },
       automations: [],
       sources: [],
     });
 
-    const validValues = [
-      'ai-index-idx-mine',
-      'ai-index-idx-a*,ai-index-idx-b*',
-      'ai-index-idx-a.b+c',
-    ];
+    const validValues = ['ai-index-idx-mine', 'ai-index-idx-a.b+c'];
     validValues.forEach((value) => {
-      it(`accepts ${value}`, () => {
-        expect(() => validateBody(body(value))).not.toThrow();
+      it(`accepts dest value ${value}`, () => {
+        expect(() => validateBody(body({ value }))).not.toThrow();
       });
     });
 
@@ -2510,35 +2506,21 @@ describe('ai indices routes', () => {
       'ai-index-idx-Mine',
       'ai-index-idx-a b',
       'ai-index-idx-a"b',
+      'ai-index-idx-a*',
+      'ai-index-idx-a,ai-index-idx-b',
     ];
     invalidValues.forEach((value) => {
-      it(`rejects ${JSON.stringify(value)}`, () => {
-        expect(() => validateBody(body(value))).toThrow(/lowercase letters, numbers, hyphens/);
+      it(`rejects dest value ${JSON.stringify(value)}`, () => {
+        expect(() => validateBody(body({ value }))).toThrow(/lowercase letters, numbers, hyphens/);
       });
-    });
-  });
-
-  describe('id body validation', () => {
-    const validateBody = (body: unknown) => {
-      const { validate } = getRoute('POST', aiIndexPath);
-      if (validate === false || !validate.request?.body) {
-        throw new Error('Expected a body schema');
-      }
-      return validate.request.body.validate(body);
-    };
-    const body = (id: string) => ({
-      id,
-      dest: { type: 'index', value: 'ai-index-idx-mine' },
-      automations: [],
-      sources: [],
     });
 
     it('accepts an id at the maximum length', () => {
-      expect(() => validateBody(body('a'.repeat(MAX_AI_INDEX_ID_LENGTH)))).not.toThrow();
+      expect(() => validateBody(body({ id: 'a'.repeat(MAX_AI_INDEX_ID_LENGTH) }))).not.toThrow();
     });
 
     it('rejects an id over the maximum length', () => {
-      expect(() => validateBody(body('a'.repeat(MAX_AI_INDEX_ID_LENGTH + 1)))).toThrow();
+      expect(() => validateBody(body({ id: 'a'.repeat(MAX_AI_INDEX_ID_LENGTH + 1) }))).toThrow();
     });
   });
 });

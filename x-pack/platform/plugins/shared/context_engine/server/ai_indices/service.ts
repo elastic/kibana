@@ -136,6 +136,7 @@ export class AiIndexService {
     if (existing) {
       throw new AiIndexAlreadyExistsError(aiIndexId);
     }
+
     // Uniqueness is a read-then-write check rather than `op_type: 'create'`, matching the Agent Builder persisted clients.
     await this.writeDocumentWithView(
       aiIndexId,

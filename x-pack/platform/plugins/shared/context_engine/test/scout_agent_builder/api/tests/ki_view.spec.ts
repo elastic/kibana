@@ -52,8 +52,8 @@ apiTest.describe('context engine KI retrieval view', { tag: tags.stateful.classi
 
   apiTest.beforeAll(async ({ requestAuth, esClient }) => {
     adminApiCredentials = await requestAuth.getApiKey('admin');
-    await esClient.indices.create({ index: DEST, mappings: MAPPINGS }, { ignore: [400] });
-    await esClient.indices.createDataStream({ name: DS_DEST }, { ignore: [400] });
+    await esClient.indices.create({ index: DEST, mappings: MAPPINGS });
+    await esClient.indices.createDataStream({ name: DS_DEST });
   });
 
   apiTest.afterAll(async ({ apiClient, esClient }) => {
