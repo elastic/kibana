@@ -111,10 +111,16 @@ export interface ProposalsServiceDeps {
 export class ProposalsService {
   constructor(private readonly deps: ProposalsServiceDeps) {}
 
+  /**
+   * Returns the action's metadata alongside the record, because the creation
+   * path has already resolved it: a caller that needs the approval policy —
+   * the gate workflow does, to honour `always-gate` — would otherwise have to
+   * fetch the same definition a second time.
+   */
   async create(
     params: CreateProposalRequest,
     { spaceId, user, request }: { spaceId: string; user?: ProposalUser; request: KibanaRequest }
-  ): Promise<Proposal> {
+  ): Promise<ProposalWithMetadata> {
     const id = uuidv4();
     // Workflow callers reach us through Liquid templates, which render an
     // absent input as an empty string. Left as-is, `expiresAt: ''` is rejected
@@ -181,7 +187,8 @@ export class ProposalsService {
       request
     );
 
-    return toProposal(id, document);
+    const proposal = toProposal(id, document);
+    return { ...proposal, action: metadata, expired: isExpired(proposal) };
   }
 
   /**
