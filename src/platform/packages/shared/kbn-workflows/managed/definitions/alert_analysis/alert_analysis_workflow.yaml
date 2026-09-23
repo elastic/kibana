@@ -1643,7 +1643,9 @@ steps:
                     Alert analysis batch {{ foreach.index }} returned no verdicts for
                     {{ foreach.item | size }} alerts.
 
-              # TODO: replace with ai.conversation.message.add once kibana#291688 merges
+              # TODO: replace with ai.conversation.message.add once kibana#291688 merges.
+              # Until then /api/chat/converse + trigger_mode:never appends via appendUserMessage,
+              # so these progress lines are stored as user messages (emoji does not change role).
               - name: post_batch_failure_comment
                 type: kibana.request
                 if: "${{ inputs.calledByWorker == true and variables.investigation_conversation_id != '' }}"
@@ -1661,7 +1663,7 @@ steps:
                     trigger_mode: "never"
                     input: >-
                       🤖 **Alert Analysis** — Batch {{ foreach.index }} ({{ foreach.item | size }} alert(s)) failed after retries and returned no verdicts.
-                      The alerts in this batch will not have tags or notes written; a re-run of the Worker will retry them.
+                      The alerts in this batch will not have verdict tags or verdict notes written; an error note will record the missing verdict, and a re-run of the Worker will retry them.
                       Execution: {{ execution.url }}
 
             else:
