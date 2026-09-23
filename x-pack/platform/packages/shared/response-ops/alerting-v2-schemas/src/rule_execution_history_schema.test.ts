@@ -208,9 +208,9 @@ describe('rule_execution_history_schema', () => {
         expect(listRuleExecutionsRequestSchema.parse({ sort_field: 'started_at' }).sort_field).toBe(
           'started_at'
         );
-        expect(listRuleExecutionsRequestSchema.parse({ sort_field: 'duration_ms' }).sort_field).toBe(
-          'duration_ms'
-        );
+        expect(
+          listRuleExecutionsRequestSchema.parse({ sort_field: 'duration_ms' }).sort_field
+        ).toBe('duration_ms');
       });
 
       it('rejects unknown sort fields', () => {
