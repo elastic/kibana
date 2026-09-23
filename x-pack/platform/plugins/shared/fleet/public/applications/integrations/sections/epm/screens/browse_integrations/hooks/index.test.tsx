@@ -14,6 +14,7 @@ import type { IntegrationCardItem } from '../../home/card_utils';
 import { useBrowseIntegrationHook } from '.';
 import { useUrlFilters } from './url_filters';
 import { useUrlCategories, useUrlDefaultCategories, useSetUrlCategory } from './url_categories';
+import { useLocalSearch } from '../../../../../hooks';
 
 jest.mock('../../home/hooks/use_available_packages');
 jest.mock('./url_filters');
@@ -649,6 +650,146 @@ describe('useBrowseIntegrationHook', () => {
 
         // apache collection degrades to 'Tomcat OTel'; re-sorted A-Z: Nginx (N) < Tomcat OTel (T)
         expect(result.current.filteredCards.map((c) => c.title)).toEqual(['Nginx', 'Tomcat OTel']);
+      });
+    });
+
+    describe('search revalidation after member filtering', () => {
+      const mockSearchReturning = (cards: IntegrationCardItem[]) => {
+        (useLocalSearch as jest.Mock).mockReturnValue({
+          search: jest.fn().mockReturnValue(cards),
+        });
+      };
+
+      it('drops a collection when the matched member is removed by a setup-method filter', () => {
+        // Search "ecs" finds collection via ECS member. Agentless filter removes ECS member.
+        // Surviving OTel member has no "ecs" in its text → collection must be dropped.
+        const collection = makeCollection('nginx', [
+          {
+            title: 'Nginx ECS',
+            type: 'integration',
+            supportsAgentless: false,
+            categories: ['web'],
+          },
+          {
+            title: 'Nginx OTel',
+            type: 'integration',
+            supportsAgentless: true,
+            categories: ['web'],
+          },
+        ]);
+        mockUseAvailablePackages([collection] as IntegrationCardItem[]);
+        mockSearchReturning([collection]);
+        (useUrlFilters as jest.Mock).mockReturnValue({
+          ...baseUrlFilters,
+          q: 'ecs',
+          setupMethod: ['agentless'],
+        });
+
+        const { result } = renderHook(() =>
+          useBrowseIntegrationHook({ prereleaseIntegrationsEnabled: false })
+        );
+
+        expect(result.current.filteredCards).toHaveLength(0);
+      });
+
+      it('keeps a collection when surviving members still contain the search term', () => {
+        // Search "nginx" finds collection. Agentless filter removes ECS member.
+        // Two agentless members survive so the collection stays intact (no singleton
+        // degradation). Both survivors contain "nginx" → collection is kept.
+        const collection = makeCollection('nginx', [
+          {
+            title: 'Nginx ECS',
+            type: 'integration',
+            supportsAgentless: false,
+            categories: ['web'],
+          },
+          {
+            title: 'Nginx OTel',
+            type: 'integration',
+            supportsAgentless: true,
+            categories: ['web'],
+          },
+          {
+            title: 'Nginx Metrics',
+            type: 'integration',
+            supportsAgentless: true,
+            categories: ['web'],
+          },
+        ]);
+        mockUseAvailablePackages([collection] as IntegrationCardItem[]);
+        mockSearchReturning([collection]);
+        (useUrlFilters as jest.Mock).mockReturnValue({
+          ...baseUrlFilters,
+          q: 'nginx',
+          setupMethod: ['agentless'],
+        });
+
+        const { result } = renderHook(() =>
+          useBrowseIntegrationHook({ prereleaseIntegrationsEnabled: false })
+        );
+
+        expect(result.current.filteredCards).toHaveLength(1);
+        expect(result.current.filteredCards[0].isCollectionCard).toBeTruthy();
+        expect(result.current.filteredCards[0].groupMembers).toHaveLength(2);
+      });
+
+      it('keeps a collection matched by its own title even when member text does not contain the term', () => {
+        // "Observability Suite" is the collection title. Members have unrelated names.
+        // Search "observability" matches the collection title (indexed by useLocalSearch).
+        // Secondary check must not drop it when its searchableContent lacks "observability".
+        const collection = {
+          ...makeCollection('obs-suite', [
+            { title: 'Metrics Agent', type: 'integration', categories: ['web'] },
+            { title: 'Logs Agent', type: 'integration', categories: ['web'] },
+          ]),
+          title: 'Observability Suite',
+        } as IntegrationCardItem;
+        mockUseAvailablePackages([collection] as IntegrationCardItem[]);
+        mockSearchReturning([collection]);
+        (useUrlFilters as jest.Mock).mockReturnValue({
+          ...baseUrlFilters,
+          q: 'observability',
+        });
+
+        const { result } = renderHook(() =>
+          useBrowseIntegrationHook({ prereleaseIntegrationsEnabled: false })
+        );
+
+        // Collection matched via its own title, not member text — must survive
+        expect(result.current.filteredCards).toHaveLength(1);
+        expect(result.current.filteredCards[0].isCollectionCard).toBeTruthy();
+      });
+
+      it('drops a promoted singleton when only the removed member matched the search', () => {
+        // Search "ecs" finds collection. Signal filter leaves only OTel member → singleton.
+        // Promoted singleton ("Nginx OTel") has no "ecs" in its text → must be dropped.
+        const collection = makeCollection('nginx', [
+          {
+            title: 'Nginx ECS',
+            type: 'integration',
+            signalTypes: ['metrics'],
+            categories: ['web'],
+          },
+          {
+            title: 'Nginx OTel',
+            type: 'integration',
+            signalTypes: ['traces'],
+            categories: ['web'],
+          },
+        ]);
+        mockUseAvailablePackages([collection] as IntegrationCardItem[]);
+        mockSearchReturning([collection]);
+        (useUrlFilters as jest.Mock).mockReturnValue({
+          ...baseUrlFilters,
+          q: 'ecs',
+          signal: ['traces'],
+        });
+
+        const { result } = renderHook(() =>
+          useBrowseIntegrationHook({ prereleaseIntegrationsEnabled: false })
+        );
+
+        expect(result.current.filteredCards).toHaveLength(0);
       });
     });
   });

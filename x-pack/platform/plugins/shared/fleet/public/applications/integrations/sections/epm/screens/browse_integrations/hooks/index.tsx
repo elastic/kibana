@@ -179,16 +179,30 @@ export function useBrowseIntegrationHook({
       cards = cards.filter((card) => card.type !== 'content');
     }
 
-    // Re-validate collection cards against the search term after member-level filtering.
-    // The search index is built from allCards, so a collection may pass search because of
-    // a member later removed by a setup-method or signal filter. applyCardFilter rebuilds
-    // searchableContent from survivors; check that the updated text still matches.
+    // Re-validate cards against the search term after member-level filtering.
+    // The search index runs on allCards before applyCardFilter, so two cases need
+    // a secondary check:
+    //   1. Collection cards: a member removed by a filter may have been the only
+    //      reason the collection matched. applyCardFilter rebuilds searchableContent
+    //      from survivors; check updated content + the card's own indexed fields.
+    //   2. Promoted singletons (isCollectionCard: false, id NOT in searchResults):
+    //      the search found their parent collection via a removed member's text;
+    //      the singleton itself must still match the query.
+    // Original ungrouped cards (id IS in searchResults) are kept unconditionally.
     if (searchTerm) {
       const tokens = searchTerm.trim().toLowerCase().split(/\s+/);
+      const matchesSearch = (card: IntegrationCardItem) => {
+        const fields = [card.searchableContent ?? '', card.title, card.name, card.description ?? '']
+          .join(' ')
+          .toLowerCase();
+        return tokens.some((token) => fields.includes(token));
+      };
       cards = cards.filter((card) => {
-        if (!card.isCollectionCard) return true;
-        const content = (card.searchableContent ?? '').toLowerCase();
-        return tokens.some((token) => content.includes(token));
+        if (card.isCollectionCard) return matchesSearch(card);
+        // Original non-collection card that passed the search index directly.
+        if (searchResults.includes(card[searchIdField])) return true;
+        // Promoted singleton — recheck against the search term.
+        return matchesSearch(card);
       });
     }
 
