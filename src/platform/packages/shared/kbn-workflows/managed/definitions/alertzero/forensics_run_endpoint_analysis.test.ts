@@ -255,16 +255,18 @@ describe('Endpoint analysis run', () => {
 
     it('reads back every attachment the valid path can write', () => {
       const attached = String(stepByName('resolve_run_outcome')?.with?.attached);
-
       const attachmentIds = allSteps
         .filter(({ type }) => type === 'ai.attachment.add')
         .map(({ with: withInputs }) => (withInputs as { id?: string })?.id);
 
-      expect(attachmentIds).not.toHaveLength(0);
+      expect(attachmentIds).toEqual([
+        '{{ steps.finding_ids.output.timeline }}',
+        '{{ steps.finding_ids.output.iocs }}',
+        '{{ steps.finding_ids.output.assessment }}',
+      ]);
       for (const id of attachmentIds) {
-        // A server-generated id cannot be read back, and cannot 409 a duplicate either.
-        expect(id).toBeDefined();
-        expect(attached).toContain(`contains '${id}'`);
+        const reference = String(id).replace(/^\{\{\s*/, '').replace(/\s*\}\}$/, '');
+        expect(attached).toContain(`contains ${reference}`);
       }
     });
 
@@ -335,29 +337,72 @@ describe('Endpoint analysis run', () => {
       expect(hasRequest(null)).toBe(false);
     });
 
+    it('keys each finding id with the indicator', () => {
+      const render = (field: string) =>
+        liquid.parseAndRenderSync(String(stepByName('finding_ids')?.with?.[field]), {
+          inputs: { ki_id: 'ki-1' },
+        });
+
+      expect(render('timeline')).toBe('forensic-timeline-ki-1');
+      expect(render('iocs')).toBe('forensic-iocs-ki-1');
+      expect(render('assessment')).toBe('forensic-assessment-ki-1');
+    });
+
+    const thisIndicator = {
+      timeline: 'forensic-timeline-ki-1',
+      iocs: 'forensic-iocs-ki-1',
+      assessment: 'forensic-assessment-ki-1',
+    };
     const outcome = (
       field: 'attached' | 'settled',
       found: { ids?: string[]; hostName?: string }
     ): unknown =>
       evaluate(String(stepByName('resolve_run_outcome')?.with?.[field]), {
         steps: {
+          finding_ids: { output: thisIndicator },
           resolve_written_findings: { output: { ids: found.ids } },
           resolve_host: { output: { host_name: found.hostName } },
         },
       });
 
-    it('settles a run whose findings are on the investigation', () => {
-      expect(outcome('settled', { ids: ['forensic-iocs'], hostName: 'host-a' })).toBe(true);
-      expect(outcome('attached', { ids: ['forensic-iocs'], hostName: 'host-a' })).toBe(true);
+    it('settles a run whose three findings for this indicator are on the investigation', () => {
+      const ids = [thisIndicator.timeline, thisIndicator.iocs, thisIndicator.assessment];
+      expect(outcome('settled', { ids, hostName: 'host-a' })).toBe(true);
+      expect(outcome('attached', { ids, hostName: 'host-a' })).toBe(true);
+    });
+
+    it('does not settle a run that landed only some of this indicator findings', () => {
+      expect(outcome('settled', { ids: [thisIndicator.iocs], hostName: 'host-a' })).toBe(false);
+      expect(
+        outcome('attached', {
+          ids: [thisIndicator.timeline, thisIndicator.assessment],
+          hostName: 'host-a',
+        })
+      ).toBe(false);
     });
 
     // The findings share a conversation with whatever else the investigation collected,
-    // so the outcome has to key off the ids this run writes rather than on anything
-    // being attached.
+    // including another indicator's forensic files, so the outcome has to key off the
+    // ids this run writes.
     it('ignores attachments this run did not write', () => {
-      expect(outcome('attached', { ids: ['attack-discovery', 'alerts'], hostName: 'host-a' })).toBe(
-        false
-      );
+      expect(
+        outcome('attached', {
+          ids: [
+            'attack-discovery',
+            'alerts',
+            'forensic-timeline-ki-2',
+            'forensic-iocs-ki-2',
+            'forensic-assessment-ki-2',
+          ],
+          hostName: 'host-a',
+        })
+      ).toBe(false);
+      expect(
+        outcome('settled', {
+          ids: ['forensic-timeline-ki-2', 'forensic-iocs-ki-2', 'forensic-assessment-ki-2'],
+          hostName: 'host-a',
+        })
+      ).toBe(false);
     });
 
     // The failure this whole gate exists for: a host was analyzed and nothing survived.
@@ -640,21 +685,33 @@ describe('Endpoint analysis run', () => {
     // The case this exists for is a re-dispatch after a failed retirement: the findings
     // are already attached and the only work left is the write. Paying 15m to rediscover
     // them is what made a stuck indicator expensive rather than merely repetitive.
-    it('skips the agent when the findings are already on the investigation', () => {
+    it('skips the agent when this indicator already has all three findings', () => {
       expect(stepByName('list_prior_findings')?.type).toBe('ai.attachment.list');
       expect(stepByName('forensic_analysis')?.if).toBe(
-        '${{ steps.resolve_prior_assessment.output.count == 0 }}'
+        '${{ steps.resolve_prior_assessment.output.count != 3 }}'
       );
 
+      const thisIndicator = {
+        timeline: 'forensic-timeline-ki-1',
+        iocs: 'forensic-iocs-ki-1',
+        assessment: 'forensic-assessment-ki-1',
+      };
       const counted = (ids: string[]): unknown =>
         evaluate(String(stepByName('resolve_prior_assessment')?.with?.count), {
           steps: {
+            finding_ids: { output: thisIndicator },
             list_prior_findings: { output: { attachments: ids.map((id) => ({ id })) } },
           },
         });
 
-      expect(counted(['forensic-timeline', 'forensic-assessment'])).toBe(1);
-      expect(counted(['forensic-timeline', 'forensic-iocs'])).toBe(0);
+      expect(
+        counted([thisIndicator.timeline, thisIndicator.iocs, thisIndicator.assessment])
+      ).toBe(3);
+      expect(counted([thisIndicator.timeline, thisIndicator.assessment])).toBe(2);
+      expect(counted([thisIndicator.iocs])).toBe(1);
+      expect(
+        counted(['forensic-timeline-ki-2', 'forensic-iocs-ki-2', 'forensic-assessment-ki-2'])
+      ).toBe(0);
       expect(counted([])).toBe(0);
     });
 

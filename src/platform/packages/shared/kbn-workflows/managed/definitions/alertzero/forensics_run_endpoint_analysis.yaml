@@ -107,16 +107,25 @@ steps:
     with:
       conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
 
+  # Built with `{{ }}` so later `${{ }}` checks can use the values. Those
+  # expressions do not expand a nested `{{ inputs.ki_id }}`.
+  - name: finding_ids
+    type: data.set
+    with:
+      timeline: "forensic-timeline-{{ inputs.ki_id }}"
+      iocs: "forensic-iocs-{{ inputs.ki_id }}"
+      assessment: "forensic-assessment-{{ inputs.ki_id }}"
+
   - name: when_ki_valid
     type: if
     condition: >-
       ${{ steps.resolve_request.output.has_request == true
         and steps.verify_investigation.output.metadata != null }}
     steps:
-      # An existing prior assessment means an earlier run analyzed this indicator but
-      # couldn't retire it. Finding it lets this run skip the agent and retry just the
-      # failed write — instead of burning a fresh 15m analysis every minute until the
-      # lookback closes.
+      # All three of this indicator's findings mean an earlier run finished the
+      # analysis but could not retire the indicator. Finding them lets this run
+      # skip the agent and retry just the write. One or two is a partial write, so
+      # the agent runs again. Another indicator's files do not count.
       #
       # Listing rather than reading the assessment by id, because `ai.attachment.read`
       # reports "no such attachment" and "the attachment service is broken" the same
@@ -130,10 +139,10 @@ steps:
       - name: resolve_prior_assessment
         type: data.set
         with:
-          # The assessment is the tell that an analysis completed: `rationale` is
-          # required, so a finished agent always leaves one, while `timeline` and `iocs`
-          # can legitimately be empty and prove nothing either way.
-          count: "${{ steps.list_prior_findings.output.attachments | where: 'id', 'forensic-assessment' | size }}"
+          # A finished run leaves all three ids, including an empty timeline or an
+          # empty IoC list. Fewer than three is a partial write from this indicator.
+          count: >-
+            ${{ steps.list_prior_findings.output.attachments | map: 'id' | where_exp: 'attachment_id', 'attachment_id == steps.finding_ids.output.timeline or attachment_id == steps.finding_ids.output.iocs or attachment_id == steps.finding_ids.output.assessment' | size }}
 
       # `workflow.spaceId` is the space of the worker that dispatched this run, not
       # the global space this workflow is installed in: a child execution inherits
@@ -210,9 +219,11 @@ steps:
         steps:
           - name: forensic_analysis
             type: ai.agent
-            # Skipped when the findings are already there. Re-running would spend 15m to
-            # produce a second opinion the fixed attachment ids would reject as duplicates.
-            if: "${{ steps.resolve_prior_assessment.output.count == 0 }}"
+            # Skipped only when all three of this indicator's findings are already
+            # there. One or two still runs the agent so a retry can fill the gaps.
+            # Re-running a complete set would spend 15m to produce a second opinion
+            # these ids would reject as duplicates.
+            if: "${{ steps.resolve_prior_assessment.output.count != 3 }}"
             # Continues on failure so the run still reaches its terminal write.
             # If this step failed the run instead, the indicator would stay
             # `pending`, and the sweep would re-run this 15m agent every minute
@@ -519,7 +530,7 @@ steps:
               continue: true
             with:
               conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
-              id: forensic-timeline
+              id: "{{ steps.finding_ids.output.timeline }}"
               render_inline: true
               type: security.investigation.timeline
               description: "Attack timeline: {{ steps.resolve_host.output.host_name }}"
@@ -533,7 +544,7 @@ steps:
               continue: true
             with:
               conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
-              id: forensic-iocs
+              id: "{{ steps.finding_ids.output.iocs }}"
               render_inline: true
               type: security.investigation.iocs
               description: Extracted indicators of compromise
@@ -548,7 +559,7 @@ steps:
               continue: true
             with:
               conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
-              id: forensic-assessment
+              id: "{{ steps.finding_ids.output.assessment }}"
               render_inline: true
               type: text
               description: Forensic assessment
@@ -668,17 +679,18 @@ steps:
     type: data.set
     with:
       attached: >-
-        ${{ steps.resolve_written_findings.output.ids contains 'forensic-timeline'
-          or steps.resolve_written_findings.output.ids contains 'forensic-iocs'
-          or steps.resolve_written_findings.output.ids contains 'forensic-assessment' }}
+        ${{ steps.resolve_written_findings.output.ids contains steps.finding_ids.output.timeline
+          and steps.resolve_written_findings.output.ids contains steps.finding_ids.output.iocs
+          and steps.resolve_written_findings.output.ids contains steps.finding_ids.output.assessment }}
       # Findings only exist when a host was known, since that's the only branch
       # where the agent runs. So no host means no findings is the correct
       # outcome, not a failure — and no retry will resolve a host that the
-      # discovery and its constituent alerts never named.
+      # discovery and its constituent alerts never named. One or two of this
+      # indicator's attachments is a partial write, not a finished run.
       settled: >-
-        ${{ steps.resolve_written_findings.output.ids contains 'forensic-timeline'
-          or steps.resolve_written_findings.output.ids contains 'forensic-iocs'
-          or steps.resolve_written_findings.output.ids contains 'forensic-assessment'
+        ${{ (steps.resolve_written_findings.output.ids contains steps.finding_ids.output.timeline
+          and steps.resolve_written_findings.output.ids contains steps.finding_ids.output.iocs
+          and steps.resolve_written_findings.output.ids contains steps.finding_ids.output.assessment)
           or steps.resolve_host.output.host_name == blank }}
 
   # Retiring the indicator so that the sweep stops picking it up.
