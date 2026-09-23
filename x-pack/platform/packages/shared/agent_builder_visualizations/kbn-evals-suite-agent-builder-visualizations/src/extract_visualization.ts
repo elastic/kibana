@@ -26,6 +26,7 @@ const isRenderer = (value: unknown): value is VisualizationRenderer =>
   typeof value === 'string' && RENDERERS.has(value as VisualizationRenderer);
 
 export interface ExtractedVisualization {
+  /** Empty only for static custom content, which has no backing query. */
   esql: string;
   chartType?: string;
   /** Absent on payloads that predate the field; treat as Lens. */
@@ -67,11 +68,13 @@ export function extractVisualizations(output: ConverseLikeOutput): ExtractedVisu
         attachment_id: attachmentId,
       } = candidate.data;
 
-      if (typeof esql !== 'string' || esql.trim().length === 0) {
+      const hasEsql = typeof esql === 'string' && esql.trim().length > 0;
+      // A chart is always query-backed; only custom content may be static.
+      if (!hasEsql && renderer !== 'custom_content') {
         continue;
       }
 
-      const extracted: ExtractedVisualization = { esql };
+      const extracted: ExtractedVisualization = { esql: hasEsql ? esql : '' };
 
       if (typeof chartType === 'string' && chartType.trim().length > 0) {
         extracted.chartType = chartType;

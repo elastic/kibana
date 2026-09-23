@@ -164,7 +164,9 @@ export function createEvaluateDataset({
       runQuery,
       // Last-turn visualizations only; `output.steps` also carries the first turn of edit examples.
       queryExtractor: (output) =>
-        visualizationExtractor(output).map((visualization) => visualization.esql),
+        visualizationExtractor(output)
+          .map((visualization) => visualization.esql)
+          .filter((esql) => esql.length > 0),
       includeHitDetection: true,
     });
 
@@ -324,7 +326,10 @@ export function createEvaluateDataset({
         messages: [{ message: last.message }],
         steps: [...(first.steps ?? []), ...(followUp ? last.steps ?? [] : [])],
         visualizations,
-        esql: visualizations.map((visualization) => visualization.esql).join('\n'),
+        esql: visualizations
+          .map((visualization) => visualization.esql)
+          .filter((esql) => esql.length > 0)
+          .join('\n'),
         agentTraceId: last.traceId,
         turns: followUp ? 2 : 1,
         prompts: last.prompts ?? [],
