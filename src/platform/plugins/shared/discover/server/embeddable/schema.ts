@@ -16,8 +16,10 @@ import {
 } from '@kbn/presentation-publishing-schemas';
 import type { GetDrilldownsSchemaFnType } from '@kbn/embeddable-plugin/server';
 import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
-import type { classicTabSchema, esqlTabSchema, tabSchema } from '@kbn/as-code-discover-schema';
-import { panelOverridesSchema, panelTabSchema } from '@kbn/as-code-discover-schema';
+import {
+  discoverSessionApiPanelOverridesSchema,
+  panelTabSchema,
+} from '@kbn/as-code-discover-schema';
 
 const DISCOVER_SUPPORTED_DRILLDOWN_TRIGGERS = [ON_OPEN_PANEL_MENU];
 
@@ -62,7 +64,7 @@ const discoverSessionByReferencePropsSchema = z
       description:
         'Tab to select from the referenced saved object. If omitted, defaults to the first tab.',
     }),
-    overrides: panelOverridesSchema,
+    overrides: discoverSessionApiPanelOverridesSchema,
   })
   .strict();
 const getDiscoverSessionByReferenceEmbeddableSchema = withPanelSchemas(
@@ -78,10 +80,6 @@ export const getDiscoverSessionEmbeddableSchema = (
     getDiscoverSessionByReferenceEmbeddableSchema(getDrilldownsSchema),
   ]);
 
-export type DiscoverSessionPanelOverrides = z.output<typeof panelOverridesSchema>;
-export type DiscoverSessionClassicTab = z.output<typeof classicTabSchema>;
-export type DiscoverSessionEsqlTab = z.output<typeof esqlTabSchema>;
-export type DiscoverSessionTab = z.output<typeof tabSchema>;
 export type DiscoverSessionEmbeddableByValueProps = z.output<
   typeof discoverSessionByValuePropsSchema
 >;
