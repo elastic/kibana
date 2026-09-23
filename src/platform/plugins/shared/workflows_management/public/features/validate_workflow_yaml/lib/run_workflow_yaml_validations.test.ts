@@ -9,7 +9,10 @@
 
 import { monaco } from '@kbn/code-editor';
 import { runWorkflowYamlValidations } from './run_workflow_yaml_validations';
+import { createMockWorkflowContextRegistry } from '../../../../common/lib/create_workflow_context_registry.mock';
 import { performComputation } from '../../../entities/workflows/store/workflow_detail/utils/computation';
+
+const emptyRegistry = createMockWorkflowContextRegistry();
 
 describe('runWorkflowYamlValidations', () => {
   it('reports variable validation errors with line-accurate positions', () => {
@@ -30,6 +33,7 @@ describe('runWorkflowYamlValidations', () => {
 
     const model = monaco.editor.createModel(yaml, 'yaml');
     const results = runWorkflowYamlValidations({
+      registry: emptyRegistry,
       yamlString: yaml,
       model,
       yamlDocument: computed.yamlDocument!,
@@ -63,6 +67,7 @@ describe('runWorkflowYamlValidations', () => {
     const computed = performComputation(yaml);
     const model = monaco.editor.createModel(yaml, 'yaml');
     const results = runWorkflowYamlValidations({
+      registry: emptyRegistry,
       yamlString: yaml,
       model,
       yamlDocument: computed.yamlDocument!,
@@ -107,6 +112,7 @@ describe('runWorkflowYamlValidations', () => {
     const model = monaco.editor.createModel(yaml, 'yaml');
 
     const results = runWorkflowYamlValidations({
+      registry: emptyRegistry,
       yamlString: yaml,
       model,
       yamlDocument: computed.yamlDocument!,

@@ -10,6 +10,7 @@
 import { LineCounter, parseDocument } from 'yaml';
 import type { WorkflowValidationRuleId, WorkflowYaml } from '@kbn/workflows';
 import type { PublicTriggerDefinition } from '@kbn/workflows-extensions/public';
+import type { YamlValidationResult } from '@kbn/workflows-yaml';
 import { z } from '@kbn/zod/v4';
 import { getYamlMarkerRuleId } from './get_yaml_marker_rule_id';
 import { validateGraphBuild } from './validate_graph_build';
@@ -20,7 +21,6 @@ import { validateWorkflowYaml } from '../../../../common/lib/validate_workflow_y
 import { getWorkflowZodSchema } from '../../../../common/schema';
 import { performComputation } from '../../../entities/workflows/store/workflow_detail/utils/computation';
 import { triggerSchemas } from '../../../trigger_schemas';
-import type { YamlValidationResult } from '../model/types';
 
 const INVALID_YAML = 'name: [unclosed';
 const SCHEMA_VIOLATION_YAML = ['enabled: true', 'steps: []'].join('\n');

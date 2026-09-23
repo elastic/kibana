@@ -16,31 +16,13 @@ export {
   isWorkflowValidationError,
   isWorkflowConflictError,
 } from './common/errors';
-export type { FormattedZodError, MockZodError, MockZodIssue } from './common/errors';
-export type { VariableMatch } from './common/regex';
 
 // Regex patterns and predicates
 export {
-  VARIABLE_REGEX,
   VARIABLE_REGEX_GLOBAL,
-  UNFINISHED_VARIABLE_REGEX_GLOBAL,
-  matchVariable,
-  matchAllVariables,
-  matchLastVariable,
-  matchLastUnfinishedVariable,
-  ALLOWED_KEY_REGEX,
   PROPERTY_PATH_REGEX,
-  LIQUID_FILTER_REGEX,
-  LIQUID_BLOCK_FILTER_REGEX,
-  LIQUID_BLOCK_KEYWORD_REGEX,
   LIQUID_BLOCK_START_REGEX,
   LIQUID_BLOCK_END_REGEX,
-  LIQUID_EXPRESSION_REGEX_GLOBAL,
-  LIQUID_OUTPUT_REGEX_GLOBAL,
-  LIQUID_TAG_REGEX_GLOBAL,
-  DYNAMIC_VALUE_REGEX,
-  VARIABLE_VALUE_REGEX,
-  LIQUID_TAG_VALUE_REGEX,
   isDynamicValue,
   isVariableValue,
   isLiquidTagValue,
@@ -50,24 +32,9 @@ export {
 export {
   buildTemplateTolerantJsonSchema,
   wholeValueStringAlternative,
-  anchorWholeValue,
-  toUnicodeSafePattern,
   TEMPLATE_VALUE_DEF_NAME,
 } from './common/json_schema/build_template_tolerant_json_schema';
-export type {
-  BuildTemplateTolerantJsonSchemaOptions,
-  JsonObject as TemplateTolerantJsonObject,
-  JsonValue as TemplateTolerantJsonValue,
-} from './common/json_schema/build_template_tolerant_json_schema';
-
-// Liquid (template engine + cache + validation)
-export { extractLiquidErrorPosition } from './common/liquid/extract_liquid_error_position';
-export { getLiquidInstance, parseTemplateString } from './common/liquid/liquid_parse_cache';
 export { validateLiquidTemplate } from './common/liquid/validate_liquid_template';
-export type { LiquidValidationError } from './common/liquid/validate_liquid_template';
-
-// YAML parsing and manipulation
-export { getYamlDocumentErrors } from './common/yaml/validate_yaml_document';
 export { updateYamlField } from './common/yaml/update_yaml_field';
 export {
   buildWorkflowLookup,
@@ -80,15 +47,8 @@ export {
   type StepPropInfo,
   type WorkflowLookup,
 } from './common/yaml/build_workflow_lookup';
-export {
-  stringifyWorkflowDefinition,
-  WORKFLOW_DEFINITION_KEYS_ORDER,
-} from './common/yaml/stringify_workflow_definition';
-export {
-  parseWorkflowYamlToJSON,
-  type ParseWorkflowYamlToJSONResult,
-  type ParseWorkflowYamlToJSONOptions,
-} from './common/yaml/parse_workflow_yaml_to_json';
+export { stringifyWorkflowDefinition } from './common/yaml/stringify_workflow_definition';
+export { parseWorkflowYamlToJSON } from './common/yaml/parse_workflow_yaml_to_json';
 export { parseYamlToJSONWithoutValidation } from './common/yaml/parse_workflow_yaml_to_json_without_validation';
 export { parseWorkflowYamlForAutocomplete } from './common/yaml/parse_workflow_yaml_for_autocomplete';
 export {
@@ -96,43 +56,51 @@ export {
   isVariableLineParseResult,
 } from './common/yaml/parse_line_for_completion';
 export { getStepNodesWithType, isStepLikeMap } from './common/yaml/get_step_nodes_with_type';
+export { getScalarValueAtOffset } from './common/yaml/get_scalar_value_at_offset';
 export { getTriggerNodesWithType } from './common/yaml/get_trigger_nodes_with_type';
 export type {
   LineParseResult,
   VariableLineParseResult,
   ForeachVariableLineParseResult,
-  LiquidLineParseResult,
-  LiquidSyntaxLineParseResult,
-  ConnectorIdLineParseResult,
-  WorkflowLineParseResult,
-  WorkflowInputsLineParseResult,
-  TypeLineParseResult,
-  TimezoneLineParseResult,
 } from './common/yaml/parse_line_for_completion';
+export { getZodTypeName } from './common/zod/get_zod_type_name';
+export { getDetailedTypeDescription } from './common/zod/zod_type_description';
+export { enrichErrorMessage } from './common/zod/enrich_error_message';
+export type { ConnectorParamsSchemaResolver } from './common/zod/enrich_error_message';
 
-// Zod helpers
-export { inferZodType } from './common/zod/infer_zod_type';
-export { getZodTypeName, getLiteralDescription } from './common/zod/get_zod_type_name';
+// Type guards
+export { isRecord } from './common/type_guards';
+
+// Validation result types shared by the editor and the server validator
 export {
-  getCompactTypeDescription,
-  getDetailedTypeDescription,
-} from './common/zod/zod_type_description';
-export { formatZodError } from './common/zod/format_zod_error';
-export type { FormatZodErrorOptions } from './common/zod/format_zod_error';
-export { enrichErrorMessage, clearEnrichmentCache } from './common/zod/enrich_error_message';
+  BATCHED_CUSTOM_MARKER_OWNER,
+  isYamlValidationMarkerOwner,
+  validationResultFingerprint,
+  validationResultsFingerprint,
+  filterHighlightableValidationResults,
+} from './common/validation/types';
 export type {
-  ErrorContext,
-  EnrichmentResult,
-  ConnectorParamsSchemaResolver,
-} from './common/zod/enrich_error_message';
+  ConnectorIdItem,
+  StepPropertyItem,
+  StepNameInfo,
+  YamlValidationErrorSeverity,
+  StepPropertyValidationResult,
+  YamlValidationDiagnostic,
+  YamlValidationResult,
+} from './common/validation/types';
+
+// Workflow context schema (variable/step/foreach context used by validation and autocomplete)
+export type {
+  RegisteredStepOutput,
+  WorkflowContextRegistry,
+} from './common/validation/context/registry';
+export { getContextSchemaForPath } from './common/validation/context/get_context_for_path';
+
+// Variable validation rules (the `variable-validation` rule group)
+export { collectAllVariables } from './common/validation/variables/collect_all_variables';
+export { validateVariables } from './common/validation/variables/validate_variables';
+export { validateLiquidYamlScalars } from './common/validation/variables/validate_liquid_yaml_scalars';
 
 // Yaml editing utilities
-export {
-  insertStep,
-  modifyStep,
-  modifyStepProperty,
-  modifyWorkflowProperty,
-  deleteStep,
-  getStepNode,
-} from './lib/yaml_edit';
-export type { StepDefinition, EditResult } from './lib/yaml_edit';
+export { insertStep, modifyStep, modifyStepProperty, deleteStep } from './lib/yaml_edit';
+export type { StepDefinition } from './lib/yaml_edit';
