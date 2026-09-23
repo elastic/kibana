@@ -7849,6 +7849,14 @@ importers:
 
   src/platform/packages/shared/esql/kbn-esql-browser: {}
 
+  src/platform/packages/shared/esql/kbn-esql-language: {}
+
+  src/platform/packages/shared/esql/kbn-esql-server-utils: {}
+
+  src/platform/packages/shared/esql/kbn-esql-types: {}
+
+  src/platform/packages/shared/esql/kbn-esql-utils: {}
+
   src/platform/packages/shared/home/sample_data_card: {}
 
   src/platform/packages/shared/home/sample_data_tab: {}
@@ -8019,17 +8027,9 @@ importers:
 
   src/platform/packages/shared/kbn-esql-composer: {}
 
-  src/platform/packages/shared/esql/kbn-esql-language: {}
-
   src/platform/packages/shared/kbn-esql-resource-browser: {}
 
   src/platform/packages/shared/kbn-esql-resource-browser/.storybook: {}
-
-  src/platform/packages/shared/esql/kbn-esql-server-utils: {}
-
-  src/platform/packages/shared/esql/kbn-esql-types: {}
-
-  src/platform/packages/shared/esql/kbn-esql-utils: {}
 
   src/platform/packages/shared/kbn-eval-kql: {}
 
