@@ -191,47 +191,51 @@ export const applyCortexEdits = async ({
 }): Promise<void> => {
   const { pages } = await store.list();
   const applied: AppliedCortexEdit[] = [];
-  for (const edit of edits) {
-    const slug = resolveSlug(edit, pages);
-    const id = toCortexKiId(edit.entity_type, slug);
-    if (edit.action === 'corroborate') {
-      const updated = await store.corroborate(id);
-      if (updated) {
-        applied.push({ action: 'corroborate', entityType: edit.entity_type });
-        logger.info(`Corroborated Cortex page ${id}`);
+  // Pages are mutated one at a time, so a failure part way through leaves the earlier edits
+  // persisted. Reporting from `finally` keeps the counts honest for those partial runs.
+  try {
+    for (const edit of edits) {
+      const slug = resolveSlug(edit, pages);
+      const id = toCortexKiId(edit.entity_type, slug);
+      if (edit.action === 'corroborate') {
+        const updated = await store.corroborate(id);
+        if (updated) {
+          applied.push({ action: 'corroborate', entityType: edit.entity_type });
+          logger.info(`Corroborated Cortex page ${id}`);
+        }
+        continue;
       }
-      continue;
-    }
 
-    if (edit.action === 'archive') {
-      const updated = await store.archive(id);
-      if (updated) {
-        applied.push({ action: 'archive', entityType: edit.entity_type });
-        logger.info(`Archived Cortex page ${id}`);
+      if (edit.action === 'archive') {
+        const updated = await store.archive(id);
+        if (updated) {
+          applied.push({ action: 'archive', entityType: edit.entity_type });
+          logger.info(`Archived Cortex page ${id}`);
+        }
+        continue;
       }
-      continue;
-    }
 
-    const existing = await store.get(id);
-    await store.upsert({
-      entityType: edit.entity_type,
-      slug,
-      title: edit.title,
-      description: edit.description ?? existing?.description,
-      content: edit.content ?? existing?.content ?? '',
-      // Same rule as corroborate: rewriting an archived page revives it as tentative, so a
-      // proposal cannot promote a retired fact straight back to established.
-      status:
-        existing?.status === 'archived'
-          ? 'tentative'
-          : edit.status ?? existing?.status ?? 'tentative',
-      corroborations: existing?.corroborations,
-    });
-    applied.push({ action: 'upsert', entityType: edit.entity_type });
-    logger.info(`Upserted Cortex page ${id}`);
+      const existing = await store.get(id);
+      await store.upsert({
+        entityType: edit.entity_type,
+        slug,
+        title: edit.title,
+        description: edit.description ?? existing?.description,
+        content: edit.content ?? existing?.content ?? '',
+        // Same rule as corroborate: rewriting an archived page revives it as tentative, so a
+        // proposal cannot promote a retired fact straight back to established.
+        status:
+          existing?.status === 'archived'
+            ? 'tentative'
+            : edit.status ?? existing?.status ?? 'tentative',
+        corroborations: existing?.corroborations,
+      });
+      applied.push({ action: 'upsert', entityType: edit.entity_type });
+      logger.info(`Upserted Cortex page ${id}`);
+    }
+  } finally {
+    telemetry.reportEditsApplied(applied);
   }
-
-  telemetry.reportEditsApplied(applied);
 };
 
 export const optimizeCortex = async ({
