@@ -883,7 +883,7 @@
     },
     {
       "groupName": "typescript",
-      "matchDepNames": ["typescript", "typescript-7"],
+      "matchDepNames": ["typescript", "typescript-7", "oxlint-tsgolint"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
