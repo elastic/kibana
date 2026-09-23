@@ -21711,6 +21711,8 @@ paths:
                   traces:
                     - type: elastic_agent
                       value: elastic-ai-agent
+                    - type: index
+                      value: traces-support
             schema:
               additionalProperties: false
               type: object
@@ -21991,6 +21993,33 @@ paths:
                 required:
                   - message
           description: The request was invalid, for example a malformed `dest`, an invalid ES|QL source, or an unresolvable connector source or trace.
+        '403':
+          content:
+            application/json:
+              examples:
+                forbiddenTraceExample:
+                  description: The caller lacks Elasticsearch index privileges to look up an index trace
+                  value:
+                    error: Forbidden
+                    message: 'security_exception: action [indices:admin/resolve/index] is unauthorized for user [jdoe] with effective roles [support_reader] on indices [traces-support], this action is granted by the index privileges [view_index_metadata,manage,read,all]'
+                    statusCode: 403
+              schema:
+                additionalProperties: false
+                description: Generic error response.
+                type: object
+                properties:
+                  error:
+                    description: The HTTP status text.
+                    type: string
+                  message:
+                    description: A human-readable error message.
+                    type: string
+                  statusCode:
+                    description: The HTTP status code.
+                    type: number
+                required:
+                  - message
+          description: Elasticsearch denied the `index` trace lookup outright; the caller lacks index privileges for it.
         '409':
           content:
             application/json:
@@ -22035,7 +22064,10 @@ paths:
                 "dest": { "type": "data_stream", "value": "ai-index-ds-customer-support" },
                 "automations": [{ "type": "workflow", "value": "8f1c2d3e-4b5a-6c7d-8e9f-0a1b2c3d4e5f" }],
                 "sources": [{ "type": "esql", "value": "FROM support-cases | LIMIT 100" }],
-                "traces": [{ "type": "elastic_agent", "value": "elastic-ai-agent" }]
+                "traces": [
+                  { "type": "elastic_agent", "value": "elastic-ai-agent" },
+                  { "type": "index", "value": "traces-support" }
+                ]
               }'
         - lang: Console
           source: |
@@ -22046,7 +22078,10 @@ paths:
               "dest": { "type": "data_stream", "value": "ai-index-ds-customer-support" },
               "automations": [{ "type": "workflow", "value": "8f1c2d3e-4b5a-6c7d-8e9f-0a1b2c3d4e5f" }],
               "sources": [{ "type": "esql", "value": "FROM support-cases | LIMIT 100" }],
-              "traces": [{ "type": "elastic_agent", "value": "elastic-ai-agent" }]
+              "traces": [
+                { "type": "elastic_agent", "value": "elastic-ai-agent" },
+                { "type": "index", "value": "traces-support" }
+              ]
             }
       x-state: Experimental
       x-metaTags:
@@ -22696,7 +22731,9 @@ paths:
                   sources:
                     - type: esql
                       value: FROM support-cases | LIMIT 100
-                  traces: []
+                  traces:
+                    - type: index
+                      value: traces-support
             schema:
               additionalProperties: false
               type: object
@@ -22938,9 +22975,7 @@ paths:
                 type: object
                 properties:
                   status:
-                    description: Whether the AI Index was created or updated.
                     enum:
-                      - created
                       - updated
                     type: string
                 required:
@@ -22959,10 +22994,8 @@ paths:
                 type: object
                 properties:
                   status:
-                    description: Whether the AI Index was created or updated.
                     enum:
                       - created
-                      - updated
                     type: string
                 required:
                   - status
@@ -22994,6 +23027,33 @@ paths:
                 required:
                   - message
           description: The request was invalid, for example a malformed `dest`, an invalid ES|QL source, or an unresolvable connector source or trace.
+        '403':
+          content:
+            application/json:
+              examples:
+                forbiddenTraceExample:
+                  description: The caller lacks Elasticsearch index privileges to look up an index trace
+                  value:
+                    error: Forbidden
+                    message: 'security_exception: action [indices:admin/resolve/index] is unauthorized for user [jdoe] with effective roles [support_reader] on indices [traces-support], this action is granted by the index privileges [view_index_metadata,manage,read,all]'
+                    statusCode: 403
+              schema:
+                additionalProperties: false
+                description: Generic error response.
+                type: object
+                properties:
+                  error:
+                    description: The HTTP status text.
+                    type: string
+                  message:
+                    description: A human-readable error message.
+                    type: string
+                  statusCode:
+                    description: The HTTP status code.
+                    type: number
+                required:
+                  - message
+          description: Elasticsearch denied the `index` trace lookup outright; the caller lacks index privileges for it.
         '409':
           content:
             application/json:
@@ -23037,7 +23097,7 @@ paths:
                 "dest": { "type": "data_stream", "value": "ai-index-ds-customer-support" },
                 "automations": [{ "type": "workflow", "value": "8f1c2d3e-4b5a-6c7d-8e9f-0a1b2c3d4e5f" }],
                 "sources": [{ "type": "esql", "value": "FROM support-cases | LIMIT 100" }],
-                "traces": []
+                "traces": [{ "type": "index", "value": "traces-support" }]
               }'
         - lang: Console
           source: |
@@ -23047,7 +23107,7 @@ paths:
               "dest": { "type": "data_stream", "value": "ai-index-ds-customer-support" },
               "automations": [{ "type": "workflow", "value": "8f1c2d3e-4b5a-6c7d-8e9f-0a1b2c3d4e5f" }],
               "sources": [{ "type": "esql", "value": "FROM support-cases | LIMIT 100" }],
-              "traces": []
+              "traces": [{ "type": "index", "value": "traces-support" }]
             }
       x-state: Experimental
       x-metaTags:
