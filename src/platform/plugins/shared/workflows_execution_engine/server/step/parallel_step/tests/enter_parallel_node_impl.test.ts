@@ -39,6 +39,11 @@ describe('EnterParallelNodeImpl', () => {
   let branchOutcome: (index: number) => ExecutionStatus;
   let branchRunCalls: number[];
 
+  // Step execution ids the impl asked to rehydrate before reading the branch
+  // results. Branch runtimes whose id is absent stand in for a branch whose
+  // output was deferred by a resume-time `load()` and never brought back.
+  let rehydratedIds: string[];
+
   const makeNode = (
     overrides: Partial<EnterParallelNode['configuration']> = {}
   ): EnterParallelNode =>
@@ -61,6 +66,7 @@ describe('EnterParallelNodeImpl', () => {
   beforeEach(() => {
     persistedState = undefined;
     branchRunCalls = [];
+    rehydratedIds = [];
     branchOutcome = () => ExecutionStatus.COMPLETED;
 
     workflowRuntime = {
@@ -80,6 +86,10 @@ describe('EnterParallelNodeImpl', () => {
       setCurrentStepState: jest.fn((s: ParallelStepState) => {
         persistedState = s;
       }),
+      rehydrateStepOutputs: jest.fn(async (ids: readonly string[]) => {
+        rehydratedIds.push(...ids);
+      }),
+      releaseReadOutputPins: jest.fn(),
       contextManager: {
         evaluateExpressionInContext: jest.fn((x) => x),
         renderValueAccordingToContext: jest.fn((x) => x),
@@ -101,6 +111,7 @@ describe('EnterParallelNodeImpl', () => {
         return {
           abortController: new AbortController(),
           contextManager: { ensureContextReady: jest.fn(), releaseReadPins: jest.fn() },
+          stepExecutionId: `exec_branch_${index}`,
           get stepExecution() {
             return { status: branchOutcome(index), state: {} };
           },
@@ -397,6 +408,60 @@ describe('EnterParallelNodeImpl', () => {
     expect(branchRunCalls).toEqual([0, 1]);
   });
 
+  // Regression: `finish` reads each branch's terminal output directly rather
+  // than through a template, so `StepIoService.prepareForRead` — which targets
+  // outputs by static template analysis — never pre-warms it. Resume-time
+  // `load()` defers every non-pinned step output, and a parallel step advances
+  // at most `concurrency` branches per tick, so without an explicit rehydrate
+  // every wave but the last aggregated as `output: {}`.
+  it('rehydrates branch outputs before aggregating, so earlier waves are not lost', async () => {
+    node = makeNode({
+      foreach: JSON.stringify(['a', 'b', 'c']),
+      concurrency: { max: 2 },
+      mode: 'settled',
+    });
+
+    // Stands in for the deferred state: an output reads as `{}` (mirroring the
+    // real `getStepOutput(...) || {}`) until the impl has named its step
+    // execution id to `rehydrateStepOutputs`.
+    factory.createStepExecutionRuntime = jest.fn(({ stackFrames }) => {
+      const lastFrame = stackFrames[stackFrames.length - 1];
+      const scopeId = lastFrame?.nestedScopes?.[lastFrame.nestedScopes.length - 1]?.scopeId;
+      const index = Number(scopeId ?? 0);
+      const stepExecutionId = `exec_branch_${index}`;
+      return {
+        abortController: new AbortController(),
+        contextManager: { ensureContextReady: jest.fn(), releaseReadPins: jest.fn() },
+        stepExecutionId,
+        get stepExecution() {
+          return { status: branchOutcome(index), state: {} };
+        },
+        getCurrentStepResult: () => ({
+          output: rehydratedIds.includes(stepExecutionId) ? { branch: index } : {},
+          error: undefined,
+        }),
+        timeoutStep: jest.fn(),
+      } as unknown as StepExecutionRuntime;
+    }) as unknown as typeof factory.createStepExecutionRuntime;
+
+    const impl = build();
+    // Tick 1 fills the window with branches 0 and 1; branch 2 waits for a slot.
+    await impl.run();
+    expect(stepRuntime.finishStep).not.toHaveBeenCalled();
+    // Tick 2 runs branch 2 and aggregates.
+    await impl.run();
+
+    expect(stepRuntime.finishStep).toHaveBeenCalledTimes(1);
+    const output = stepRuntime.finishStep.mock.calls[0][0] as {
+      results: Array<{ output?: { branch?: number } }>;
+    };
+    expect(output.results.map((r) => r.output)).toEqual([
+      { branch: 0 },
+      { branch: 1 },
+      { branch: 2 },
+    ]);
+  });
+
   it('count-waiting:true keeps a parked branch holding its slot so `max` still binds', async () => {
     // max: 1, two branches; branch 0 parks in a durable wait forever. With
     // count-waiting:true (default) the parked branch keeps its slot, so branch 1
@@ -410,6 +475,152 @@ describe('EnterParallelNodeImpl', () => {
     await impl.run();
     await impl.run();
     expect(branchRunCalls).toEqual([0, 0]);
+  });
+
+  // Upgrade compatibility: a state object written by a version that did not
+  // capture branch results carries status/currentNodeId and nothing else. Those
+  // branches are already terminal, so they are never advanced again and any
+  // approach that reads a per-branch captured result would emit nothing for
+  // them -- the data loss would survive the upgrade for exactly the in-flight
+  // executions the fix exists to rescue. Rehydrating from the branches' step
+  // executions does not depend on anything in persisted state, so it recovers
+  // them.
+  it('aggregates a resumed pre-upgrade state whose branches carry no captured result', async () => {
+    node = makeNode({
+      foreach: JSON.stringify(['a', 'b', 'c']),
+      concurrency: { max: 2 },
+      mode: 'settled',
+    });
+
+    // Exactly the old persisted shape: no `result` anywhere, every branch
+    // already terminal from before the upgrade.
+    persistedState = {
+      total: 3,
+      startedAt: Date.now() - 1_000,
+      static: false,
+      branches: [0, 1, 2].map((index) => ({
+        index,
+        key: ['a', 'b', 'c'][index],
+        status: 'completed' as const,
+        started: true,
+        currentNodeId: `branch_node_${index}`,
+        startedAt: Date.now() - 1_000,
+        finishedAt: Date.now() - 500,
+      })),
+    };
+
+    factory.createStepExecutionRuntime = jest.fn(({ stackFrames }) => {
+      const lastFrame = stackFrames[stackFrames.length - 1];
+      const scopeId = lastFrame?.nestedScopes?.[lastFrame.nestedScopes.length - 1]?.scopeId;
+      const index = Number(scopeId ?? 0);
+      const stepExecutionId = `exec_branch_${index}`;
+      return {
+        abortController: new AbortController(),
+        contextManager: { ensureContextReady: jest.fn(), releaseReadPins: jest.fn() },
+        stepExecutionId,
+        get stepExecution() {
+          return { status: branchOutcome(index), state: {} };
+        },
+        getCurrentStepResult: () => ({
+          output: rehydratedIds.includes(stepExecutionId) ? { branch: index } : {},
+          error: undefined,
+        }),
+        timeoutStep: jest.fn(),
+      } as unknown as StepExecutionRuntime;
+    }) as unknown as typeof factory.createStepExecutionRuntime;
+
+    // One tick: everything is already terminal, so this resume goes straight to
+    // aggregation without advancing a single branch.
+    await build().run();
+
+    expect(stepRuntime.finishStep).toHaveBeenCalledTimes(1);
+    const output = stepRuntime.finishStep.mock.calls[0][0] as {
+      results: Array<{ output?: { branch?: number } }>;
+    };
+    expect(output.results.map((r) => r.output)).toEqual([
+      { branch: 0 },
+      { branch: 1 },
+      { branch: 2 },
+    ]);
+  });
+
+  // The pin is not bookkeeping. `StepIoService.rehydrateOutputs` snapshots only
+  // the ids that are evicted when it starts, so an id that is RESIDENT at that
+  // moment is not in the fetch set -- and the persistence/eviction loop can run
+  // during the ES round trip. Without a read-pin held across the await and the
+  // subsequent synchronous reads, such an output is evicted mid-flight, never
+  // fetched, and aggregates as `{}`: the very data loss this fix exists to stop.
+  it('pins resident branch outputs so a concurrent eviction cycle cannot drop them mid-rehydrate', async () => {
+    node = makeNode({
+      foreach: JSON.stringify(['a', 'b', 'c']),
+      concurrency: { max: 2 },
+      mode: 'settled',
+    });
+
+    // Branches 0 and 1 settled in an earlier tick and were deferred by `load()`.
+    // Branch 2 settled in this tick, so its output is still resident -- and is
+    // therefore exactly the one `rehydrateOutputs` will not fetch.
+    const evicted = new Set(['exec_branch_0', 'exec_branch_1']);
+    const resident = new Set(['exec_branch_2']);
+    let pinned = new Set<string>();
+
+    stepRuntime.rehydrateStepOutputs = jest.fn(async (ids: readonly string[]) => {
+      pinned = new Set(ids);
+      const toFetch = ids.filter((id) => evicted.has(id));
+      // The await gap: the eviction cycle fires and takes anything resident and
+      // unpinned. With the pin in place it must take nothing.
+      await Promise.resolve();
+      for (const id of [...resident]) {
+        if (!pinned.has(id)) {
+          resident.delete(id);
+          evicted.add(id);
+        }
+      }
+      for (const id of toFetch) {
+        evicted.delete(id);
+        resident.add(id);
+      }
+    });
+    stepRuntime.releaseReadOutputPins = jest.fn(() => {
+      pinned = new Set();
+    });
+
+    factory.createStepExecutionRuntime = jest.fn(({ stackFrames }) => {
+      const lastFrame = stackFrames[stackFrames.length - 1];
+      const scopeId = lastFrame?.nestedScopes?.[lastFrame.nestedScopes.length - 1]?.scopeId;
+      const index = Number(scopeId ?? 0);
+      const stepExecutionId = `exec_branch_${index}`;
+      return {
+        abortController: new AbortController(),
+        contextManager: { ensureContextReady: jest.fn(), releaseReadPins: jest.fn() },
+        stepExecutionId,
+        get stepExecution() {
+          return { status: branchOutcome(index), state: {} };
+        },
+        // Mirrors the real `getStepOutput(...) || {}`: evicted reads as `{}`.
+        getCurrentStepResult: () => ({
+          output: resident.has(stepExecutionId) ? { branch: index } : {},
+          error: undefined,
+        }),
+        timeoutStep: jest.fn(),
+      } as unknown as StepExecutionRuntime;
+    }) as unknown as typeof factory.createStepExecutionRuntime;
+
+    const impl = build();
+    await impl.run();
+    await impl.run();
+
+    expect(stepRuntime.finishStep).toHaveBeenCalledTimes(1);
+    const output = stepRuntime.finishStep.mock.calls[0][0] as {
+      results: Array<{ output?: { branch?: number } }>;
+    };
+    expect(output.results.map((r) => r.output)).toEqual([
+      { branch: 0 },
+      { branch: 1 },
+      { branch: 2 },
+    ]);
+    // Pins must not outlive the read.
+    expect(stepRuntime.releaseReadOutputPins).toHaveBeenCalled();
   });
 
   it('count-waiting:false frees a parked branch\u2019s slot so a queued branch can start', async () => {

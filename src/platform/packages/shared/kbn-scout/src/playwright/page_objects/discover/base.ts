@@ -13,6 +13,7 @@ import { DataGrid } from '../data_grid';
 import { SavedObjectSaveModal } from '../saved_object_save_modal';
 import { KibanaCodeEditorWrapper } from '../../ui_components';
 import { QueryBar } from '../query_bar';
+import { UnifiedTabs } from '../unified_tabs';
 
 export type DiscoverQueryMode = 'esql' | 'classic';
 
@@ -27,6 +28,8 @@ export interface DataViewOptions {
   name: string;
   /** Create a temporary ("ad hoc") data view via "Explore" instead of saving. */
   adHoc?: boolean;
+  /** Wait for the tab to finish loading. Skip on uninitialized tabs (no grid yet). */
+  waitUntilLoaded?: boolean;
 }
 
 export interface TimeoutOptions {
@@ -44,6 +47,7 @@ export class DiscoverAppBase {
   public readonly codeEditor: KibanaCodeEditorWrapper;
   protected readonly dataGrid: DataGrid;
   protected readonly queryBar: QueryBar;
+  protected readonly unifiedTabs: UnifiedTabs;
   protected readonly interactiveSaveMenuItem;
   protected readonly saveButtonSecondary;
   /** Save modal locators/actions, shared with other apps (e.g. Maps) via `SavedObjectSaveModal`. */
@@ -54,6 +58,7 @@ export class DiscoverAppBase {
     this.codeEditor = new KibanaCodeEditorWrapper(page);
     this.dataGrid = new DataGrid(page);
     this.queryBar = new QueryBar(page);
+    this.unifiedTabs = new UnifiedTabs(page);
     this.appMenu = new AppMenu(page);
     this.interactiveSaveMenuItem = page.testSubj.locator('interactiveSaveMenuItem');
     this.saveButtonSecondary = page.testSubj.locator('discoverSaveButton-secondary-button');

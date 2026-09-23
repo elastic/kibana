@@ -766,6 +766,9 @@ export interface DocLinks {
     readonly querying: string;
     readonly security: string;
   };
+  readonly contextEngine: {
+    readonly overview: string;
+  };
   readonly agentBuilder: {
     readonly agentBuilder: string;
     readonly getStarted: string;

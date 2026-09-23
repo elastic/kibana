@@ -38,8 +38,8 @@ This package wraps `tsc --build` and adds several performance features on top:
 
 - **Automatic bootstrap repair**: Before any network I/O, the CLI validates that every
   `kbn_references` entry in the project graph resolves to a known TypeScript project. If any
-  reference is broken (e.g. a new package was added to main but `yarn kbn bootstrap` hasn't
-  run yet), the CLI runs `yarn kbn bootstrap` automatically and re-execs itself to pick up the
+  reference is broken (e.g. a new package was added to main but `pnpm kbn bootstrap` hasn't
+  run yet), the CLI runs `pnpm kbn bootstrap` automatically and re-execs itself to pick up the
   updated module state — avoiding a cryptic crash after a multi-minute GCS download.
 
 - **Fail-fast pass**: When running locally without a project filter, the CLI first type-checks

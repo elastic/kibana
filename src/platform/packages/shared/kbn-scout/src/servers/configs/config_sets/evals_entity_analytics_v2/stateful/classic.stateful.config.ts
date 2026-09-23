@@ -19,7 +19,7 @@ import type { ScoutServerConfig } from '../../../../../types';
  *
  * Note: Requires entity store V2 to be initialised before running. Use the populate
  * script from security-documents-generator to seed entities:
- *   yarn start organization-quick && yarn start generate-entity-maintainers-data --quick
+ *   pnpm start organization-quick && pnpm start generate-entity-maintainers-data --quick
  */
 export const servers: ScoutServerConfig = {
   ...evalsTracingConfig,

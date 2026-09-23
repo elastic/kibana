@@ -40,7 +40,11 @@ describe('triggerInvestigationStepDefinition', () => {
     const { definition } = createDefinition(start);
 
     await definition.handler(
-      createContext({ subject_type: 'significant_event', subject_id: 'event-1' })
+      createContext({
+        subject_type: 'significant_event',
+        subject_id: 'event-1',
+        title: 'Checkout latency breach',
+      })
     );
 
     expect(start).toHaveBeenCalledWith(
@@ -58,6 +62,7 @@ describe('triggerInvestigationStepDefinition', () => {
       createContext({
         subject_type: 'significant_event',
         subject_id: 'event-1',
+        title: 'Checkout latency breach',
         trigger_type: 'manual',
       })
     );
@@ -76,7 +81,11 @@ describe('triggerInvestigationStepDefinition', () => {
 
     await expect(
       definition.handler(
-        createContext({ subject_type: 'significant_event', subject_id: 'event-1' })
+        createContext({
+          subject_type: 'significant_event',
+          subject_id: 'event-1',
+          title: 'Checkout latency breach',
+        })
       )
     ).rejects.toBe(error);
     expect(start).toHaveBeenCalledTimes(1);

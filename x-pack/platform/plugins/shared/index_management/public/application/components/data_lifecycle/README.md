@@ -128,5 +128,5 @@ Note: this component uses `@kbn/i18n-react`. In Jest/component tests wrap with `
 From the Kibana repo root, run:
 
 ```bash
-yarn storybook index_management
+pnpm storybook index_management
 ```

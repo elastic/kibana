@@ -21,6 +21,7 @@ export const performComputation = (
 ): ComputedData => {
   if (!yamlString) {
     return {
+      yamlString,
       yamlLineCounter: undefined,
       yamlDocument: undefined,
       workflowLookup: undefined,
@@ -70,6 +71,7 @@ export const performComputation = (
   }
 
   return {
+    yamlString,
     yamlLineCounter: lineCounter,
     yamlDocument: yamlDoc,
     workflowLookup: lookup,

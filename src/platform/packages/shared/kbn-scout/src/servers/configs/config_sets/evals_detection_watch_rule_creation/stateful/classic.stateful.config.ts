@@ -16,6 +16,12 @@ import { servers as evalsTracingConfig } from '../../evals_tracing/stateful/clas
  * enabled; the workflow's ai.agent step additionally requires the Workflows UI and
  * agent settings, and the approval-gate tests respond to the review step through the
  * inbox plugin's respond route, which is also disabled by default.
+ *
+ * `agenticInvestigations` is a **required** plugin of alertzero (added in #290329) and defaults
+ * to `enabled: false`. Without this flag Kibana cascade-disables alertzero entirely, so
+ * `initialize_managed_workflows.ts` never runs and the rule-creation workflow is never installed.
+ * Nothing in the eval suite calls an `agenticInvestigations` route directly, but the flag is
+ * load-bearing and must not be removed.
  */
 export const servers: ScoutServerConfig = {
   ...evalsTracingConfig,
@@ -24,7 +30,9 @@ export const servers: ScoutServerConfig = {
     serverArgs: [
       ...evalsTracingConfig.kbnTestServer.serverArgs,
       '--xpack.alertzero.enabled=true',
+      '--xpack.agenticInvestigations.enabled=true',
       '--xpack.inbox.enabled=true',
+      '--xpack.securitySolution.enableExperimental=["rulePreviewAttachmentEnabled"]',
       '--uiSettings.overrides.workflows:ui:enabled=true',
       '--uiSettings.overrides.workflows:aiAgent:enabled=true',
     ],

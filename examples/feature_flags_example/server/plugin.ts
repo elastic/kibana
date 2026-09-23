@@ -38,20 +38,6 @@ export class FeatureFlagsExamplePlugin implements Plugin {
   }
 
   public start(core: CoreStart) {
-    // Promise form: when we need to fetch it once, like in an HTTP request
-    void Promise.all([
-      core.featureFlags.getBooleanValue(FeatureFlagExampleBoolean, false),
-      core.featureFlags.getStringValue(FeatureFlagExampleString, 'white'),
-      core.featureFlags.getNumberValue(FeatureFlagExampleNumber, 1),
-    ]).then(([bool, str, num]) => {
-      this.logger.info(`The feature flags are:
-      - ${FeatureFlagExampleBoolean}: ${bool}
-      - ${FeatureFlagExampleString}: ${str}
-      - ${FeatureFlagExampleNumber}: ${num}
-      `);
-    });
-
-    // Observable form: when we need to react to the changes
     combineLatest([
       core.featureFlags.getBooleanValue$(FeatureFlagExampleBoolean, false),
       core.featureFlags.getStringValue$(FeatureFlagExampleString, 'red'),
