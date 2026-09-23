@@ -80,14 +80,6 @@ export class AlertZeroPlugin
     }: AlertZeroSetupDependencies
   ): AlertZeroPluginSetup {
     if (!this.config.enabled) {
-      // Tier registration is the one thing that runs with the plugin disabled: the rows
-      // are shared infrastructure, and consumers outside AlertZero (threat intel supply
-      // behind `threatIntelSupplyEnabled`) resolve models through them without requiring
-      // this plugin to be enabled. A registry row nothing pins to is inert, since
-      // resolution is pull-driven (`endpoints.getForFeature`), so this only makes the
-      // AlertZero section render on the Model Settings page; everything else below stays
-      // behind the flag.
-      registerAlertZeroInferenceFeatures(searchInferenceEndpoints, this.logger.get('inference'));
       this.logger.info('AlertZero plugin is disabled');
       return {};
     }
