@@ -23,12 +23,12 @@ import {
   tailLog,
   isEdotDockerRunning,
 } from './services';
-import { probeHttp, SANDBOX_ENV_KEYS } from './profiles';
+import { probeHttp, SANDBOX_ENV_KEYS, SANDBOX_PEM_PATH_ENV_KEYS } from './profiles';
 
-/** Profile values win over shell exports; both count toward Scout staleness. */
+/** Profile values win over shell exports; both, including PEM file paths, count toward Scout staleness. */
 const pickSandboxEnv = (profileEnv: Record<string, string>): Record<string, string> =>
   Object.fromEntries(
-    SANDBOX_ENV_KEYS.flatMap((key) => {
+    [...SANDBOX_ENV_KEYS, ...SANDBOX_PEM_PATH_ENV_KEYS].flatMap((key) => {
       const value = profileEnv[key] ?? process.env[key];
       return value ? [[key, value]] : [];
     })

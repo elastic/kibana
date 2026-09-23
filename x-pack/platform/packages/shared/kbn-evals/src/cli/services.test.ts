@@ -92,6 +92,19 @@ describe('scoutEnvHash', () => {
     expect(scoutEnvHash({ ...base, SANDBOX_API_HOST: 'b' })).not.toBe(withSandbox);
   });
 
+  it('changes when a PEM file referenced by a *_PATH setting is replaced in place', () => {
+    const dir = Fs.mkdtempSync(Path.join(Os.tmpdir(), 'kbn-evals-pem-'));
+    const certPath = Path.join(dir, 'tls.crt');
+    try {
+      Fs.writeFileSync(certPath, 'old');
+      const before = scoutEnvHash({ ...base, SANDBOX_CLIENT_CERT_PATH: certPath });
+      Fs.writeFileSync(certPath, 'renewed');
+      expect(scoutEnvHash({ ...base, SANDBOX_CLIENT_CERT_PATH: certPath })).not.toBe(before);
+    } finally {
+      Fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
   it('ignores the order sandbox settings were provided in', () => {
     expect(scoutEnvHash({ ...base, SANDBOX_API_KEY: 'k', SANDBOX_API_HOST: 'h' })).toBe(
       scoutEnvHash({ ...base, SANDBOX_API_HOST: 'h', SANDBOX_API_KEY: 'k' })

@@ -12,6 +12,7 @@ import { tmpdir } from 'os';
 import { join } from 'path';
 import type { ScoutServerConfig } from '../../../../../types';
 import { servers as tracing } from '../../evals_tracing/stateful/classic.stateful.config';
+import { resolveNightshiftEvalSelection } from '../eval_selection';
 
 /** Reads PEM contents from `<name>` (e.g. the evals vault profile) or the file at `<name>_PATH`. */
 const readPem = (name: string): string | undefined => {
@@ -21,7 +22,8 @@ const readPem = (name: string): string | undefined => {
   return path ? readFileSync(path, 'utf8') : undefined;
 };
 
-const createInvestigationConfig = (): ScoutServerConfig => {
+/** Builds the investigation server config; exported for tests. */
+export const createInvestigationConfig = (): ScoutServerConfig => {
   const sandboxKey = process.env.SANDBOX_API_KEY;
   if (!sandboxKey)
     throw new Error(
@@ -95,10 +97,6 @@ const createInvestigationConfig = (): ScoutServerConfig => {
   };
 };
 
-// Mirrors the suite's playwright.config.ts: every eval runs unless `NIGHTSHIFT_DATASETS` narrows it,
-// and an unset selection without sandbox credentials falls back to the smoke eval.
-const selection =
-  process.env.NIGHTSHIFT_DATASETS || (process.env.SANDBOX_API_KEY ? 'all' : 'synthetic-smoke');
-
-export const servers: ScoutServerConfig =
-  selection === 'all' || selection === 'trace-only' ? createInvestigationConfig() : tracing;
+export const servers: ScoutServerConfig = resolveNightshiftEvalSelection().needsSandbox
+  ? createInvestigationConfig()
+  : tracing;

@@ -107,7 +107,12 @@ const configSchema = schema.object(
       schema.object(
         {
           host: schema.string({ minLength: 1 }),
-          port: schema.number({ min: 1, max: 65535 }),
+          port: schema.number({
+            min: 1,
+            max: 65535,
+            validate: (value) =>
+              Number.isInteger(value) ? undefined : 'must be an integer between 1 and 65535',
+          }),
           apiKey: schema.string({ minLength: 1 }),
           ssl: schema.object(
             {

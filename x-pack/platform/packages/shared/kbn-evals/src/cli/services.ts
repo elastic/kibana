@@ -80,11 +80,23 @@ export const connectorsHash = (): string =>
     process.env.KIBANA_TESTING_AI_CONNECTORS,
   ]);
 
+/** A `*_PATH` value hashes by file contents, so replacing a certificate in place is detected. */
+const readFileForHash = (path: string): string => {
+  try {
+    return Fs.readFileSync(path, 'utf8');
+  } catch {
+    return '<unreadable>';
+  }
+};
+
 export const scoutEnvHash = (env: Record<string, string> | undefined): string => {
   const sandboxParts = Object.entries(env ?? {})
     .filter(([key]) => key.startsWith('SANDBOX_'))
     .sort(([a], [b]) => a.localeCompare(b))
-    .map(([key, value]) => `${key}=${value}`);
+    .map(
+      ([key, value]) =>
+        `${key}=${value}${key.endsWith('_PATH') ? `:${readFileForHash(value)}` : ''}`
+    );
   // Sandbox settings only extend the hash when present, so stacks started without them stay reusable.
   return hashParts([env?.TRACING_EXPORTERS, env?.GCS_CREDENTIALS, ...sandboxParts]);
 };

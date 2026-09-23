@@ -67,6 +67,13 @@ export const SANDBOX_ENV_KEYS = [
   'SANDBOX_CA_CERT',
 ] as const;
 
+/** Shell-only alternatives to the PEM keys above; the Scout config set reads the file at each path. */
+export const SANDBOX_PEM_PATH_ENV_KEYS = [
+  'SANDBOX_CLIENT_CERT_PATH',
+  'SANDBOX_CLIENT_KEY_PATH',
+  'SANDBOX_CA_CERT_PATH',
+] as const;
+
 const isNonEmptyString = (value: unknown): value is string =>
   typeof value === 'string' && value.trim().length > 0;
 

@@ -7,33 +7,26 @@
 
 import Path from 'path';
 import { createPlaywrightEvalsConfig } from '@kbn/evals';
+import { resolveNightshiftEvalSelection, type NightshiftEvalSelection } from '@kbn/scout';
 
-// Every eval runs unless `NIGHTSHIFT_DATASETS` narrows the selection. Without sandbox credentials an
-// unset selection falls back to the smoke eval; an explicit `all`/`trace-only` still fails at startup.
-// Keep in sync with the `evals_nightshift_investigations` Scout config set, which applies the same rule.
-const requested = process.env.NIGHTSHIFT_DATASETS;
-const hasSandbox = Boolean(process.env.SANDBOX_API_KEY);
-const selection = requested || (hasSandbox ? 'all' : 'synthetic-smoke');
-if (!requested && !hasSandbox) {
+// Shares its selection rule with the `evals_nightshift_investigations` Scout config set, which
+// enables the sandbox for exactly the selections that run investigation specs.
+const { selection, needsSandbox, fellBackToSmoke } = resolveNightshiftEvalSelection();
+if (fellBackToSmoke) {
   process.stderr.write(
     '[nightshift-investigations] No sandbox credentials (SANDBOX_API_KEY); running only the smoke eval. ' +
       'Use --profile dev-vault or set NIGHTSHIFT_DATASETS to choose explicitly.\n'
   );
 }
-if (!['all', 'synthetic-smoke', 'trace-only'].includes(selection)) {
-  throw new Error(
-    `Unknown NIGHTSHIFT_DATASETS: ${selection}. Choose all, synthetic-smoke or trace-only.`
-  );
-}
 
-const includesInvestigations = selection === 'all' || selection === 'trace-only';
+const TEST_IGNORE: Record<NightshiftEvalSelection, string[]> = {
+  all: [],
+  'trace-only': ['**/smoke/**'],
+  'synthetic-smoke': ['**/investigation/**'],
+};
 
 export default createPlaywrightEvalsConfig({
   testDir: Path.resolve(__dirname, './evals'),
-  timeout: includesInvestigations ? 45 * 60_000 : 10 * 60_000,
-  testIgnore: {
-    all: [],
-    'trace-only': ['**/smoke/**'],
-    'synthetic-smoke': ['**/investigation/**'],
-  }[selection],
+  timeout: needsSandbox ? 45 * 60_000 : 10 * 60_000,
+  testIgnore: TEST_IGNORE[selection],
 });
