@@ -262,7 +262,9 @@ export const UpdateCloudOnboardingDeploymentRequestSchema = {
     mechanisms: schema.maybe(
       schema.arrayOf(CloudOnboardingDeploymentMechanismSchema, {
         maxSize: 10,
-        meta: { description: 'Delivery mechanisms active in this deployment; replaces the stored array.' },
+        meta: {
+          description: 'Delivery mechanisms active in this deployment; replaces the stored array.',
+        },
       })
     ),
     ecfStacks: schema.maybe(
