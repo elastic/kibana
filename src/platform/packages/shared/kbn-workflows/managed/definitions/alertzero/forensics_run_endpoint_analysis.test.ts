@@ -265,7 +265,9 @@ describe('Endpoint analysis run', () => {
         '{{ steps.finding_ids.output.assessment }}',
       ]);
       for (const id of attachmentIds) {
-        const reference = String(id).replace(/^\{\{\s*/, '').replace(/\s*\}\}$/, '');
+        const reference = String(id)
+          .replace(/^\{\{\s*/, '')
+          .replace(/\s*\}\}$/, '');
         expect(attached).toContain(`contains ${reference}`);
       }
     });
@@ -710,9 +712,9 @@ describe('Endpoint analysis run', () => {
           },
         });
 
-      expect(
-        counted([thisIndicator.timeline, thisIndicator.iocs, thisIndicator.assessment])
-      ).toBe(3);
+      expect(counted([thisIndicator.timeline, thisIndicator.iocs, thisIndicator.assessment])).toBe(
+        3
+      );
       expect(counted([thisIndicator.timeline, thisIndicator.assessment])).toBe(2);
       expect(counted([thisIndicator.iocs])).toBe(1);
       expect(
