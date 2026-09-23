@@ -141125,7 +141125,7 @@ components:
           type: integer
         search_matches:
           additionalProperties: false
-          description: Per-type match counts for the active search. Null when no search was provided. When is_truncated is true the server id filter was capped and the result may be truncated.
+          description: Per-type match counts for the active search. Null when no search was provided. When is_truncated is true the server ID filter was capped and the result may be truncated.
           nullable: true
           type: object
           properties:
