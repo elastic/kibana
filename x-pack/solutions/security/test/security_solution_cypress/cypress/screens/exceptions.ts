@@ -270,6 +270,12 @@ export const EXCEPTION_ITEM_OVERFLOW_ACTION_DELETE =
 
 export const EXECPTION_ITEM_CARD_HEADER_TITLE = '[data-test-subj="exceptionItemCardHeaderTitle"]';
 
+export const EXCEPTION_ITEM_DELETE_CONFIRM_MODAL =
+  '[data-test-subj="exceptionItemDeleteConfirmModal"]';
+
+export const EXCEPTION_ITEM_DELETE_CONFIRM_MODAL_CONFIRM_BTN =
+  '[data-test-subj="exceptionItemDeleteConfirmModal"] [data-test-subj="confirmModalConfirmButton"]';
+
 export const EMPTY_EXCEPTIONS_VIEWER = '[data-test-subj="emptyViewerState"]';
 
 export const EXCEPTIONS_ITEM_ERROR_CALLOUT = '[data-test-subj="addExceptionErrorCallOut"]';

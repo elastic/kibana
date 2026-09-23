@@ -71,10 +71,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const testButton = await testSubjects.find('testConnectorTab');
       await testButton.click();
       await testSubjects.setValue('comboBoxSearchInput', 'elastic@gmail.com');
-      await testSubjects.setValue('subjectInput', 'Test subject');
-      await testSubjects.setValue('messageTextArea', 'Enter message text');
-      /* timing issue sometimes happens with the combobox so we just try to set the subjectInput again */
-      await testSubjects.setValue('subjectInput', 'Test subject');
+      /* timing issue sometimes happens with the combobox so we just try again */
+      await testSubjects.setValue('comboBoxSearchInput', 'elastic@gmail.com');
       await commonScreenshots.takeScreenshot(
         'email-params-test',
         screenshotDirectories,
