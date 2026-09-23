@@ -7,5 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-require('@kbn/setup-node-env');
-require('@kbn/failed-test-reporter-cli').runCheckFlakyTestIssuesCli();
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+
+export const configSchema = schema.object({
+  // On by default in dev mode; cannot be switched on outside of it.
+  enabled: schema.conditional(
+    schema.contextRef('dev'),
+    true,
+    schema.boolean(),
+    schema.literal(false),
+    { defaultValue: schema.contextRef('dev') }
+  ),
+});
+
+export type ConfigSchema = TypeOf<typeof configSchema>;
