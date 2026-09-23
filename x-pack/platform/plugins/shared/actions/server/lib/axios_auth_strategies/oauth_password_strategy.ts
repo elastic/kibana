@@ -7,47 +7,41 @@
 
 import type { AxiosInstance } from 'axios';
 import type { GetTokenOpts } from '@kbn/connector-specs';
-import { getOAuthClientCredentialsAccessToken } from '../get_oauth_client_credentials_access_token';
+import { getOAuthPasswordAccessToken } from '../get_oauth_password_access_token';
 import { getDeleteTokenAxiosInterceptor } from '../delete_token_axios_interceptor';
 import type { AxiosAuthStrategy, AuthStrategyDeps } from './types';
 
-export class OAuthClientCredentialsStrategy implements AxiosAuthStrategy {
-  installResponseInterceptor(axiosInstance: AxiosInstance, deps: AuthStrategyDeps): void {
+export class OAuthPasswordStrategy implements AxiosAuthStrategy {
+  installResponseInterceptor(client: AxiosInstance, deps: AuthStrategyDeps): void {
     const { connectorId, connectorTokenClient } = deps;
     if (!connectorTokenClient) {
       throw new Error('Failed to delete invalid tokens: missing required ConnectorTokenClient.');
     }
     const { onFulfilled, onRejected } = getDeleteTokenAxiosInterceptor({
-      connectorTokenClient,
       connectorId,
+      connectorTokenClient,
     });
-    axiosInstance.interceptors.response.use(onFulfilled, onRejected);
+    client.interceptors.response.use(onFulfilled, onRejected);
   }
 
   async getToken(opts: GetTokenOpts, deps: AuthStrategyDeps): Promise<string | null> {
-    if (opts.authType !== 'oauth') {
-      throw new Error('OAuthClientCredentialsStrategy received non-oauth token opts');
+    if (opts.authType !== 'oauth_password') {
+      throw new Error('OAuthPasswordStrategy received non-password token opts');
     }
-
     const { connectorId, connectorTokenClient, logger, configurationUtilities } = deps;
-
-    return getOAuthClientCredentialsAccessToken({
-      connectorId,
-      logger,
+    return getOAuthPasswordAccessToken({
       tokenUrl: opts.tokenUrl,
-      oAuthScope: opts.scope,
-      configurationUtilities,
-      credentials: {
-        type: 'client_secret',
-        config: {
-          clientId: opts.clientId,
-          ...(opts.additionalFields ? { additionalFields: opts.additionalFields } : {}),
-        },
-        secrets: { clientSecret: opts.clientSecret },
-      },
-      connectorTokenClient,
-      tokenEndpointAuthMethod: opts.tokenEndpointAuthMethod,
+      username: opts.username,
+      password: opts.password,
+      clientId: opts.clientId,
+      scope: opts.scope,
+      usernameField: opts.usernameField,
+      requestBodyFormat: opts.requestBodyFormat,
       tokenType: opts.tokenType,
+      connectorId,
+      connectorTokenClient,
+      logger,
+      configurationUtilities,
     });
   }
 }
