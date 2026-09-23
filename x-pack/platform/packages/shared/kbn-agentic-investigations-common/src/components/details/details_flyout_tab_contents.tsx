@@ -6,99 +6,64 @@
  */
 
 import React, { memo, useState } from 'react';
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiBasicTable,
-  EuiText,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
+import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { Investigation } from '../../types';
+import { AttachmentSummarySection } from '../attachment_summary';
 import { DetailsBlock } from './detail_block';
 import { DETAILS_FLYOUT_LABELS } from './translations';
 
-const getColumns = () => {
-  const cellContent = (value: string) => (
-    <EuiText size="xs" color="subdued">
-      {value}
-    </EuiText>
-  );
-
-  return [
-    {
-      field: 'field',
-      name: DETAILS_FLYOUT_LABELS.overview.fieldColumn,
-      render: (field: string) => cellContent(field),
-    },
-    {
-      field: 'value',
-      name: DETAILS_FLYOUT_LABELS.overview.valueColumn,
-      render: (value: string) => cellContent(value),
-    },
-  ];
-};
-
 const SUMMARY_LIMIT = 120;
 
-export const OverviewTab = memo<{ investigation: Investigation }>(({ investigation }) => {
-  const { euiTheme } = useEuiTheme();
-  const { summary, affectedSurface, severity } = investigation;
-  const [expanded, setExpanded] = useState(false);
+export interface OverviewTabProps {
+  investigation: Investigation;
+  attachments: VersionedAttachment[] | undefined;
+  attachmentsService: AttachmentServiceStartContract;
+}
 
-  const isCondensed = summary != null && summary.length > SUMMARY_LIMIT;
-  const displayedSummary =
-    isCondensed && !expanded ? `${summary.slice(0, SUMMARY_LIMIT)}...` : summary;
+export const OverviewTab = memo<OverviewTabProps>(
+  ({ investigation, attachments, attachmentsService }) => {
+    const { summary } = investigation;
+    const [expanded, setExpanded] = useState(false);
 
-  interface ImpactRow {
-    field: string;
-    value: string;
+    const isCondensed = summary != null && summary.length > SUMMARY_LIMIT;
+    const displayedSummary =
+      isCondensed && !expanded ? `${summary.slice(0, SUMMARY_LIMIT)}...` : summary;
+
+    return (
+      <EuiFlexGroup direction="column" gutterSize="m">
+        {summary && (
+          <EuiFlexItem>
+            <DetailsBlock title={DETAILS_FLYOUT_LABELS.sections.overview}>
+              <EuiText size="s" color="subdued">
+                <p>{displayedSummary}</p>
+              </EuiText>
+              {isCondensed && (
+                <div>
+                  <EuiButtonEmpty
+                    size="s"
+                    flush="left"
+                    onClick={() => setExpanded((prev) => !prev)}
+                  >
+                    {expanded
+                      ? DETAILS_FLYOUT_LABELS.overview.showLess
+                      : DETAILS_FLYOUT_LABELS.overview.showMore}
+                  </EuiButtonEmpty>
+                </div>
+              )}
+            </DetailsBlock>
+          </EuiFlexItem>
+        )}
+
+        {/* Not wrapped in an EuiFlexItem: the section renders nothing when the investigation has
+            no listable attachment, and an empty item would still take a gutter. */}
+        <AttachmentSummarySection
+          attachments={attachments}
+          attachmentsService={attachmentsService}
+        />
+      </EuiFlexGroup>
+    );
   }
-  const impactRows: ImpactRow[] = [
-    affectedSurface
-      ? { field: DETAILS_FLYOUT_LABELS.overview.compromised, value: affectedSurface }
-      : null,
-    severity ? { field: DETAILS_FLYOUT_LABELS.overview.severity, value: severity } : null,
-  ].filter((row): row is ImpactRow => row !== null);
-
-  return (
-    <EuiFlexGroup direction="column" gutterSize="m">
-      {summary && (
-        <EuiFlexItem>
-          <DetailsBlock title={DETAILS_FLYOUT_LABELS.sections.overview}>
-            <EuiText size="s" color="subdued">
-              <p>{displayedSummary}</p>
-            </EuiText>
-            {isCondensed && (
-              <div>
-                <EuiButtonEmpty size="s" flush="left" onClick={() => setExpanded((prev) => !prev)}>
-                  {expanded
-                    ? DETAILS_FLYOUT_LABELS.overview.showLess
-                    : DETAILS_FLYOUT_LABELS.overview.showMore}
-                </EuiButtonEmpty>
-              </div>
-            )}
-          </DetailsBlock>
-        </EuiFlexItem>
-      )}
-
-      {impactRows.length > 0 && (
-        <EuiFlexItem>
-          <DetailsBlock title={DETAILS_FLYOUT_LABELS.sections.impact}>
-            <EuiPanel hasBorder paddingSize="none" style={{ borderRadius: euiTheme.size.s }}>
-              <EuiBasicTable
-                tableCaption={DETAILS_FLYOUT_LABELS.overview.tableCaption}
-                rowHeader="field"
-                items={impactRows}
-                columns={getColumns()}
-                tableLayout="auto"
-              />
-            </EuiPanel>
-          </DetailsBlock>
-        </EuiFlexItem>
-      )}
-    </EuiFlexGroup>
-  );
-});
+);
 OverviewTab.displayName = 'OverviewTab';

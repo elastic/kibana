@@ -7,6 +7,7 @@
 
 import React from 'react';
 import type { Conversation } from '@kbn/agent-builder-common';
+import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
 import {
   ConversationDetailsFlyoutHeader,
   ConversationDetailsFlyoutFooter,
@@ -26,8 +27,20 @@ interface InvestigationSlotProps {
   conversation: Conversation;
 }
 
-export const OverviewSlot = ({ conversation }: InvestigationSlotProps) => (
-  <OverviewTab investigation={conversationToInvestigation(conversation)} />
+export interface OverviewSlotProps extends InvestigationSlotProps {
+  /**
+   * Captured at registration: the flyout can mount outside a `KibanaContextProvider`, so the
+   * attachment registry cannot be reached from ambient context.
+   */
+  attachmentsService: AttachmentServiceStartContract;
+}
+
+export const OverviewSlot = ({ conversation, attachmentsService }: OverviewSlotProps) => (
+  <OverviewTab
+    investigation={conversationToInvestigation(conversation)}
+    attachments={conversation.attachments}
+    attachmentsService={attachmentsService}
+  />
 );
 
 export const HeaderSlot = ({ conversation }: InvestigationSlotProps) => (
