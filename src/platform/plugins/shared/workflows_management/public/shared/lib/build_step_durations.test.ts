@@ -68,16 +68,29 @@ describe('buildStepDurations', () => {
     });
   });
 
-  it('sets hasDuration false when executionTimeMs is absent (still running)', () => {
+  it('returns no entry when every doc for a step is in-flight (executionTimeMs absent)', () => {
+    // In-flight docs never make it into the result — there is nothing to display yet.
     const steps = { step_a: makeStepInfo('step_a', 'http.request') };
     const execs = [makeExec('step_a', 'http.request', undefined)];
     const result = buildStepDurations(execs, steps);
+    expect(result.get('step_a')).toBeUndefined();
+  });
+
+  it('in-flight doc does not dilute the average when a completed run exists', () => {
+    // One completed retry at 100ms + one in-flight retry.
+    // runCount, totalMs, min, max must all reflect only the completed run.
+    const steps = { step_a: makeStepInfo('step_a', 'http.request') };
+    const execs = [
+      makeExec('step_a', 'http.request', 100),
+      makeExec('step_a', 'http.request', undefined), // still running
+    ];
+    const result = buildStepDurations(execs, steps);
     expect(result.get('step_a')).toEqual({
-      totalMs: 0,
+      totalMs: 100,
       runCount: 1,
-      hasDuration: false,
-      minMs: 0,
-      maxMs: 0,
+      hasDuration: true,
+      minMs: 100,
+      maxMs: 100,
     });
   });
 
@@ -106,6 +119,22 @@ describe('buildStepDurations', () => {
     });
   });
 
+  it('excludes Infinity from totals, min, and max', () => {
+    // Infinity cannot arrive from Elasticsearch (JSON has no Infinity literal), but the
+    // guard is defensive; any non-finite payload must not corrupt subsequent arithmetic.
+    const steps = { step_a: makeStepInfo('step_a', 'http.request') };
+    const execs = [
+      makeExec('step_a', 'http.request', Infinity),
+      makeExec('step_a', 'http.request', 100),
+    ];
+    const result = buildStepDurations(execs, steps);
+    const entry = result.get('step_a');
+    expect(entry?.totalMs).toBe(100);
+    expect(entry?.runCount).toBe(1);
+    expect(Number.isFinite(entry?.minMs)).toBe(true);
+    expect(Number.isFinite(entry?.maxMs)).toBe(true);
+  });
+
   it('tracks two independent steps', () => {
     const steps = {
       step_a: makeStepInfo('step_a', 'http.request'),
@@ -117,7 +146,7 @@ describe('buildStepDurations', () => {
     expect(result.get('step_b')?.totalMs).toBe(120);
   });
 
-  it('foreach: loop step shows total (runCount=1), children show run count', () => {
+  it('foreach: loop step shows total (runCount=1), children show completed run count', () => {
     // Loop step itself: one doc with the whole wall clock.
     // Children: one doc per iteration, each with a numeric scopeId on the loop frame.
     const steps = {
@@ -152,18 +181,64 @@ describe('buildStepDurations', () => {
 
     const result = buildStepDurations(execs, steps);
 
-    // Loop step: foreach stepType forces runCount=1 so the chip shows total wall clock, not N×avg.
+    // Loop step: foreach stepType forces runCount=1 so the chip shows total wall clock, not ~avg.
     const loop = result.get('my_loop');
     expect(loop?.totalMs).toBe(867);
     expect(loop?.runCount).toBe(1);
 
-    // Child: 3 iterations → runCount = 3 (non-loop step, shows N × avg with tooltip).
+    // Child: 3 completed docs → runCount = 3 (non-loop step, shows ~avg in chip + tooltip).
     const child = result.get('child_step');
     expect(child?.totalMs).toBe(867); // 289 × 3
     expect(child?.runCount).toBe(3);
     expect(child?.hasDuration).toBe(true);
     expect(child?.minMs).toBe(289);
     expect(child?.maxMs).toBe(289);
+  });
+
+  it('parallel: container shows runCount=1 even when branch children have numeric scopeIds', () => {
+    // The engine assigns a distinct numeric branch index as the scopeId for each parallel branch.
+    // The parallel container step itself has one doc spanning the full fan-out wall clock.
+    // Regression: the old pass-1 scope-tracking code treated those numeric branch scopeIds as loop
+    // iterations and set runCount = branch-count (3) for the container. The container must show 1.
+    const steps = {
+      my_parallel: makeStepInfo('my_parallel', 'parallel'),
+      branch_a: makeStepInfo('branch_a', 'http.request', 'my_parallel'),
+      branch_b: makeStepInfo('branch_b', 'http.request', 'my_parallel'),
+      branch_c: makeStepInfo('branch_c', 'http.request', 'my_parallel'),
+    };
+
+    // Parallel container: one completed doc, full wall clock (branch children overlapped).
+    const parallelExec = makeExec('my_parallel', 'parallel', 1200);
+
+    // Each branch child runs once in its own distinct numeric scope (0, 1, 2).
+    const makeBranchExec = (branchId: string, branchIndex: string, ms: number) =>
+      makeExec(branchId, 'http.request', ms, [
+        {
+          stepId: 'my_parallel',
+          nestedScopes: [
+            { nodeId: `enterBranch_${branchIndex}`, nodeType: 'parallel', scopeId: branchIndex },
+          ],
+        },
+      ]);
+
+    const execs = [
+      parallelExec,
+      makeBranchExec('branch_a', '0', 800),
+      makeBranchExec('branch_b', '1', 400),
+      makeBranchExec('branch_c', '2', 1200),
+    ];
+
+    const result = buildStepDurations(execs, steps);
+
+    // Container: one completed doc → runCount = 1, regardless of the 3 distinct branch indices.
+    const container = result.get('my_parallel');
+    expect(container?.totalMs).toBe(1200);
+    expect(container?.runCount).toBe(1);
+
+    // Branches each ran once.
+    expect(result.get('branch_a')?.runCount).toBe(1);
+    expect(result.get('branch_b')?.runCount).toBe(1);
+    expect(result.get('branch_c')?.runCount).toBe(1);
   });
 
   it('tracks min and max across multiple runs of the same step', () => {
@@ -208,7 +283,7 @@ describe('buildStepDurations', () => {
     ];
 
     const execs = [
-      // leaf runs 2 outer × 2 inner = 4 times
+      // leaf runs 2 outer × 2 inner = 4 times (one completed doc per leaf execution)
       makeExec('leaf', 'http.request', 50, makeScopeStack('0', '0')),
       makeExec('leaf', 'http.request', 50, makeScopeStack('0', '1')),
       makeExec('leaf', 'http.request', 50, makeScopeStack('1', '0')),
@@ -218,14 +293,14 @@ describe('buildStepDurations', () => {
     const result = buildStepDurations(execs, steps);
     const leaf = result.get('leaf');
     expect(leaf?.totalMs).toBe(200);
-    // 4 unique full paths (outer 0 inner 0, outer 0 inner 1, outer 1 inner 0, outer 1 inner 1)
+    // 4 completed docs → runCount = 4.
     expect(leaf?.runCount).toBe(4);
   });
 
   it('retry attempts: non-numeric scopeId does not inflate iteration count', () => {
     const steps = { step_a: makeStepInfo('step_a', 'http.request') };
 
-    // Two retry docs — scopeId is non-numeric (e.g. 'attempt-1', 'attempt-2').
+    // Two retry docs — scopeId is non-numeric (e.g. '1-attempt', '2-attempt').
     const makeRetryExec = (attempt: string, ms: number) =>
       makeExec('step_a', 'http.request', ms, [
         {
@@ -240,7 +315,7 @@ describe('buildStepDurations', () => {
     const result = buildStepDurations(execs, steps);
     const entry = result.get('step_a');
     expect(entry?.totalMs).toBe(250);
-    // Non-numeric scope ids → no iteration set → runCount = runs = 2.
+    // Two completed docs → runCount = 2.
     expect(entry?.runCount).toBe(2);
   });
 
@@ -301,7 +376,7 @@ describe('formatStepDurationLabel', () => {
     expect(label).toBe('1s');
   });
 
-  it('formats repeated runs as N × avg', () => {
+  it('formats repeated runs as ~avg (tilde prefix, no run count in the chip)', () => {
     const label = formatStepDurationLabel({
       totalMs: 867,
       runCount: 3,
@@ -309,10 +384,11 @@ describe('formatStepDurationLabel', () => {
       minMs: 289,
       maxMs: 289,
     });
-    // avg = Math.round(867/3) = 289ms
-    expect(label).toContain('3');
+    // avg = Math.round(867/3) = 289ms; chip shows ~289ms, run count is in the hover tooltip only.
+    expect(label).toContain('~');
     expect(label).toContain('289ms');
-    expect(label).toContain('×');
+    expect(label).not.toContain('3'); // run count is NOT in the chip label
+    expect(label).not.toContain('×');
   });
 
   it('rounds the average to the nearest millisecond', () => {
@@ -373,16 +449,21 @@ describe('getStepDurationTone', () => {
 
 describe('getDurationGutterWidth', () => {
   it('returns the floor for an empty label set', () => {
-    expect(getDurationGutterWidth([])).toBe(52);
+    // 0 chars: ceil(0 * 6.6) + 6 = 6 < 34 floor → 34.
+    expect(getDurationGutterWidth([])).toBe(34);
   });
 
   it('returns the floor for short labels', () => {
-    expect(getDurationGutterWidth(['45ms'])).toBe(52);
+    // '~1s' (3 chars): ceil(3 * 6.6) + 6 = 26 < 34 floor → 34.
+    expect(getDurationGutterWidth(['~1s'])).toBe(34);
+    // '<1ms' (4 chars): ceil(4 * 6.6) + 6 = 33 < 34 floor → 34.
+    expect(getDurationGutterWidth(['<1ms'])).toBe(34);
   });
 
   it('returns a wider value for long labels', () => {
-    const w = getDurationGutterWidth(['12 × 1m 30s']);
-    expect(w).toBeGreaterThan(52);
+    // '~1m 30s' (7 chars): ceil(7 * 6.6) + 6 = 53 > 34 floor → 53.
+    const w = getDurationGutterWidth(['~1m 30s']);
+    expect(w).toBeGreaterThan(34);
     expect(w).toBeLessThanOrEqual(160);
   });
 
@@ -392,9 +473,9 @@ describe('getDurationGutterWidth', () => {
   });
 
   it('uses the longest label when multiple are present', () => {
-    const wShort = getDurationGutterWidth(['45ms']);
-    const wLong = getDurationGutterWidth(['45ms', '12 × 1m 30s']);
-    expect(wLong).toBeGreaterThanOrEqual(wShort);
+    const wShort = getDurationGutterWidth(['~1s']);    // 3 chars → 34 (floor)
+    const wLong = getDurationGutterWidth(['~1s', '~1m 30s']); // 7 chars → 53
+    expect(wLong).toBeGreaterThan(wShort);
   });
 });
 

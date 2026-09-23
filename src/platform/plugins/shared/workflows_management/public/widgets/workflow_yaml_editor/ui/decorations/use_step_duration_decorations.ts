@@ -8,6 +8,7 @@
  */
 
 import { useEuiTheme } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { useEffect, useMemo, useRef } from 'react';
 import { useSelector } from 'react-redux-v7';
@@ -15,6 +16,7 @@ import { monaco } from '@kbn/monaco';
 import {
   selectEditorWorkflowLookup,
   selectExecution,
+  selectHasChanges,
   selectHighlightedStepId,
   selectStepDurationDenominator,
   selectStepDurations,
@@ -48,8 +50,10 @@ const labelClass = (label: string): string =>
 
 /**
  * Shows a per-step duration chip in the Monaco lines-decorations gutter lane while an execution
- * is open in read-only mode (executions tab). The chip text, colour, and lane width are all
- * derived from the Redux store and update automatically as the execution polls.
+ * is open (executions tab, or after running a test from the workflow tab while the YAML still
+ * matches the snapshot). The chip text, colour, and lane width are all derived from the Redux
+ * store and update automatically as the execution polls. Chips are hidden when the editor content
+ * has diverged from the saved execution (selectHasChanges is true).
  *
  * Returns `{ styles }` — an Emotion `css` object that must be applied to the editor wrapper so
  * that the decoration class names resolve correctly.
@@ -60,9 +64,14 @@ export const useStepDurationDecorations = (editor: monaco.editor.IStandaloneCode
   const workflowLookup = useSelector(selectEditorWorkflowLookup);
   const highlightedStepId = useSelector(selectHighlightedStepId);
   const execution = useSelector(selectExecution);
+  const hasChanges = useSelector(selectHasChanges);
 
   const { euiTheme } = useEuiTheme();
   const { colors, border } = euiTheme;
+
+  // When the YAML has been edited the chip positions may no longer match the execution snapshot.
+  // Suppress all decorations, width management, and tooltip until the snapshot is again consistent.
+  const isActive = stepDurations.size > 0 && !hasChanges;
 
   // Memoize the decoration collection — re-created only when the editor instance changes.
   const decorationsCollection = useMemo(() => {
@@ -74,7 +83,7 @@ export const useStepDurationDecorations = (editor: monaco.editor.IStandaloneCode
   useEffect(() => {
     decorationsCollection?.clear();
 
-    if (!stepDurations.size || !workflowLookup?.steps) return;
+    if (!isActive || !workflowLookup?.steps) return;
 
     const decorations: monaco.editor.IModelDeltaDecoration[] = [];
 
@@ -99,7 +108,7 @@ export const useStepDurationDecorations = (editor: monaco.editor.IStandaloneCode
     }
 
     decorationsCollection?.set(decorations);
-  }, [decorationsCollection, stepDurations, workflowLookup, denominator, highlightedStepId]);
+  }, [decorationsCollection, isActive, stepDurations, workflowLookup, denominator, highlightedStepId]);
 
   // Effect 2 — manage lane width, monotonically per execution id.
   // We track the widest width seen for the current execution id and never shrink it, so a live
@@ -116,7 +125,7 @@ export const useStepDurationDecorations = (editor: monaco.editor.IStandaloneCode
       maxWidthRef.current = MONACO_DEFAULT_LINE_DECORATIONS_WIDTH;
     }
 
-    if (!stepDurations.size) {
+    if (!isActive) {
       editor.updateOptions({ lineDecorationsWidth: MONACO_DEFAULT_LINE_DECORATIONS_WIDTH });
       return;
     }
@@ -139,7 +148,7 @@ export const useStepDurationDecorations = (editor: monaco.editor.IStandaloneCode
     return () => {
       editor.updateOptions({ lineDecorationsWidth: MONACO_DEFAULT_LINE_DECORATIONS_WIDTH });
     };
-  }, [editor, execution?.id, stepDurations]);
+  }, [editor, execution?.id, isActive, stepDurations]);
 
   // Effect 3 — chip-hover tooltip.
   // Monaco's gutter area (lines-decorations lane) has no native hover API and is clipped by
@@ -147,7 +156,7 @@ export const useStepDurationDecorations = (editor: monaco.editor.IStandaloneCode
   // mouse-move event (which fires even through pointer-events:none children) to detect when the
   // cursor is over the GUTTER_LINE_DECORATIONS area and show a position:fixed div on document.body.
   useEffect(() => {
-    if (!editor) return;
+    if (!editor || !isActive) return;
 
     // Build a lineStart → StepDuration map for the steps that need a tooltip.
     const lineTooltip = new Map<number, StepDuration>();
@@ -188,14 +197,37 @@ export const useStepDurationDecorations = (editor: monaco.editor.IStandaloneCode
         const avg = formatDuration(Math.round(duration.totalMs / duration.runCount)).trim();
         const minStr = formatDuration(duration.minMs).trim();
         const maxStr = formatDuration(duration.maxMs).trim();
+
+        const runsLabel = i18n.translate(
+          'workflows.workflowYamlEditor.stepDurationGutter.tooltip.runs',
+          {
+            defaultMessage: '{count} completed {count, plural, one {run} other {runs}}',
+            values: { count: duration.runCount },
+          }
+        );
+        const avgLabel = i18n.translate(
+          'workflows.workflowYamlEditor.stepDurationGutter.tooltip.avg',
+          {
+            defaultMessage: 'Average duration per run: {duration}',
+            values: { duration: avg },
+          }
+        );
+        const minMaxLabel = i18n.translate(
+          'workflows.workflowYamlEditor.stepDurationGutter.tooltip.minMax',
+          {
+            defaultMessage: 'Min {min} · Max {max}',
+            values: { min: minStr, max: maxStr },
+          }
+        );
+
         const bold = document.createElement('strong');
-        bold.textContent = `${duration.runCount} runs`;
+        bold.textContent = runsLabel;
         tipEl.replaceChildren(
           bold,
           document.createElement('br'),
-          document.createTextNode(`avg: ${avg}`),
+          document.createTextNode(avgLabel),
           document.createElement('br'),
-          document.createTextNode(`min: ${minStr} - max: ${maxStr}`)
+          document.createTextNode(minMaxLabel)
         );
         tipEl.style.left = `${e.event.browserEvent.clientX + 12}px`;
         tipEl.style.top = `${e.event.browserEvent.clientY + 12}px`;
@@ -214,7 +246,7 @@ export const useStepDurationDecorations = (editor: monaco.editor.IStandaloneCode
       leaveDisposable.dispose();
       if (document.body.contains(tipEl)) document.body.removeChild(tipEl);
     };
-  }, [editor, stepDurations, workflowLookup, colors, border]);
+  }, [editor, isActive, stepDurations, workflowLookup, colors, border]);
 
   // Build styles: one rule for each distinct label present (content injection),
   // plus the shared layout and tone modifiers.
@@ -232,15 +264,16 @@ export const useStepDurationDecorations = (editor: monaco.editor.IStandaloneCode
       }
     }
 
-    const isActive = stepDurations.size > 0;
-
     return css({
       // Lane container — layout only, no visible style of its own.
       [`.${BASE_CLASS}`]: {
         display: 'flex',
         justifyContent: 'flex-end',
         alignItems: 'flex-start', // keeps chip on the first line of a word-wrapped `- name:`
-        paddingRight: '6px',
+        // 16px left padding ensures chip text never overlaps the folding chevron that Monaco
+        // renders at the left edge of the lines-decorations lane.
+        paddingLeft: '16px',
+        paddingRight: '4px',
         overflow: 'hidden',
         pointerEvents: 'none',
       },
@@ -250,7 +283,7 @@ export const useStepDurationDecorations = (editor: monaco.editor.IStandaloneCode
         fontSize: '11px',
         fontVariantNumeric: 'tabular-nums',
         whiteSpace: 'nowrap',
-        padding: '0 4px',
+        padding: '0 3px',
         borderRadius: border.radius.small,
         lineHeight: '23px', // matches WORKFLOW_MONACO_LAYOUT_OPTIONS.lineHeight
         color: colors.textSubdued,
@@ -268,15 +301,6 @@ export const useStepDurationDecorations = (editor: monaco.editor.IStandaloneCode
 
       // Per-label content injection. Built inline so Emotion owns insertion/cleanup.
       ...contentRules,
-
-      // Folding chevron: clamp to its reserved 16px so it does not overlap the right-aligned chip.
-      // `max-width` constrains an inline `width` without `!important`.
-      // Active only while the gutter is shown to avoid changing the editor appearance at rest.
-      ...(isActive && {
-        '.cldr[class*="codicon-folding-"]': {
-          maxWidth: '16px',
-        },
-      }),
     });
   }, [stepDurations, colors, border]);
 

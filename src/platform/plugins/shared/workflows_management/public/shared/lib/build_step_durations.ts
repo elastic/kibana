@@ -13,11 +13,11 @@ import type { StepInfo } from '@kbn/workflows-yaml';
 import { formatDuration } from './format_duration';
 
 export interface StepDuration {
-  /** `executionTimeMs` summed over every counted run. Drives the chip colour. */
+  /** `executionTimeMs` summed over every counted (completed) run. Drives the chip colour. */
   totalMs: number;
   /**
    * 1 for `foreach`/`while` steps (they always show total, not N × avg).
-   * Otherwise: loop iteration count or the number of counted runs.
+   * Otherwise: number of completed runs (docs with a valid executionTimeMs).
    */
   runCount: number;
   /** True when at least one counted run has a valid `executionTimeMs`. */
@@ -42,44 +42,20 @@ export const EMPTY_STEP_DURATIONS: ReadonlyMap<string, StepDuration> = Object.fr
  * and engine wrapper docs (timeout zones, retry, on-failure) are excluded without a hand-maintained
  * deny-list.
  *
+ * `runCount` reflects only completed runs (docs with a valid `executionTimeMs`). In-flight docs
+ * (null/undefined `executionTimeMs`) do not affect the average, so a live run that has not yet
+ * finished never dilutes the chip.
+ *
  * Returns a new Map on every call; callers should memoize.
  */
 export const buildStepDurations = (
   stepExecutions: WorkflowStepExecutionDto[],
   steps: Record<string, StepInfo>
 ): Map<string, StepDuration> => {
-  // Pass 1 — iteration counts for foreach/while steps.
-  // Maps loopStepId → Set of unique full scope-path strings so nested loops count correctly.
-  const iterationsByLoopStep = new Map<string, Set<string>>();
-
-  for (const exec of stepExecutions) {
-    const frames = exec.scopeStack ?? [];
-    frames.forEach((frame, i) => {
-      const hasNumericScope = frame.nestedScopes.some(
-        (scope) => scope.scopeId !== undefined && /^\d+$/.test(scope.scopeId)
-      );
-      if (hasNumericScope) {
-        // Use the full path up to (and including) this frame as the key so that nested loops
-        // track their own per-iteration scope independently.
-        const pathKey = frames
-          .slice(0, i + 1)
-          .flatMap((f) => [f.stepId, ...f.nestedScopes.map((s) => s.scopeId ?? '')])
-          .join('>');
-
-        let scopeSet = iterationsByLoopStep.get(frame.stepId);
-        if (!scopeSet) {
-          scopeSet = new Set();
-          iterationsByLoopStep.set(frame.stepId, scopeSet);
-        }
-        scopeSet.add(pathKey);
-      }
-    });
-  }
-
-  // Pass 2 — accumulate totals, using the allow-list to drop wrapper docs.
+  // Accumulate totals, using the allow-list to drop wrapper docs.
   const acc = new Map<
     string,
-    { totalMs: number; runs: number; hasDuration: boolean; minMs: number; maxMs: number }
+    { totalMs: number; runs: number; minMs: number; maxMs: number }
   >();
 
   for (const exec of stepExecutions) {
@@ -88,18 +64,22 @@ export const buildStepDurations = (
 
     // Allow-list: count only docs whose stepType matches the YAML step (drops wrapper nodes).
     if (stepInfo && stepType === stepInfo.stepType) {
-      let entry = acc.get(stepId);
-      if (!entry) {
-        entry = { totalMs: 0, runs: 0, hasDuration: false, minMs: Infinity, maxMs: 0 };
-        acc.set(stepId, entry);
-      }
+      // Validity check mirrors step_execution_tree_item_label.tsx:133-135.
+      // Number.isFinite guards against any non-finite payload that would corrupt totals.
+      if (
+        executionTimeMs !== undefined &&
+        executionTimeMs !== null &&
+        Number.isFinite(executionTimeMs) &&
+        executionTimeMs >= 0
+      ) {
+        let entry = acc.get(stepId);
+        if (!entry) {
+          entry = { totalMs: 0, runs: 0, minMs: Infinity, maxMs: 0 };
+          acc.set(stepId, entry);
+        }
 
-      entry.runs += 1;
-
-      // Validity check mirrors extract_execution_metadata.ts:633-642.
-      if (executionTimeMs !== undefined && executionTimeMs !== null && executionTimeMs >= 0) {
+        entry.runs += 1;
         entry.totalMs += executionTimeMs;
-        entry.hasDuration = true;
         entry.minMs = Math.min(entry.minMs, executionTimeMs);
         entry.maxMs = Math.max(entry.maxMs, executionTimeMs);
       }
@@ -113,14 +93,12 @@ export const buildStepDurations = (
   for (const [stepId, entry] of acc) {
     const stepInfo = steps[stepId];
     const isLoopStep = stepInfo?.stepType === 'foreach' || stepInfo?.stepType === 'while';
-    const iterationSet = iterationsByLoopStep.get(stepId);
-    const runCount = isLoopStep ? 1 : iterationSet ? iterationSet.size || 1 : entry.runs;
     result.set(stepId, {
       totalMs: entry.totalMs,
-      runCount,
-      hasDuration: entry.hasDuration,
-      minMs: entry.hasDuration ? entry.minMs : 0,
-      maxMs: entry.hasDuration ? entry.maxMs : 0,
+      runCount: isLoopStep ? 1 : entry.runs,
+      hasDuration: entry.runs > 0,
+      minMs: entry.runs > 0 ? entry.minMs : 0,
+      maxMs: entry.runs > 0 ? entry.maxMs : 0,
     });
   }
 
@@ -132,19 +110,17 @@ export const formatStepDurationLabel = (duration: StepDuration): string => {
   const { totalMs, runCount, hasDuration } = duration;
   if (!hasDuration) return '';
 
-  const durationStr = formatDuration(totalMs).trim();
-
   if (runCount > 1) {
     const avg = formatDuration(Math.round(totalMs / runCount)).trim();
     return i18n.translate('workflows.workflowYamlEditor.stepDurationGutter.repeatedLabel', {
-      defaultMessage: '{count} × {duration}',
+      defaultMessage: '~{duration}',
       description:
-        'Step duration gutter chip label for a step that ran multiple times. {count} is the number of runs and {duration} is the average duration per run.',
-      values: { count: runCount, duration: avg },
+        'Step duration gutter chip label for a step that ran multiple times. {duration} is the average duration per run, prefixed with ~ to indicate it is an approximation.',
+      values: { duration: avg },
     });
   }
 
-  return durationStr;
+  return formatDuration(totalMs).trim();
 };
 
 /** Hotspot tone for a duration chip: the step's share of the whole execution. */
@@ -166,12 +142,13 @@ export const getStepDurationTone = (totalMs: number, denominatorMs: number): Ste
   return 'none';
 };
 
-// Per-character width estimate for the 11px tabular-nums chip font, plus 8px of horizontal
-// padding (4px each side). The floor/ceiling prevent the lane from being either too narrow
+// Per-character width estimate for the 11px tabular-nums chip font, plus 6px of horizontal
+// padding (3px each side). The floor/ceiling prevent the lane from being either too narrow
 // (clipping) or absurdly wide.
-const CHARS_PX = 7.5;
-const CHIP_H_PADDING_PX = 8;
-const GUTTER_MIN_PX = 52;
+// Note: Monaco adds its own 16px for the folding chevron on top of the value returned here.
+const CHARS_PX = 6.6;
+const CHIP_H_PADDING_PX = 6;
+const GUTTER_MIN_PX = 34;
 const GUTTER_MAX_PX = 160;
 
 /**
