@@ -78,7 +78,11 @@ export const putPublicFieldDefinitionRoute = createCasesRoute({
       const updateOptions = { publicDefinitionLengthLimit: MAX_FIELD_DEFINITION_DEFINITION_LENGTH };
 
       if (request.query.dry_run) {
-        await casesClient.fieldDefinitions.validateUpdateFieldDefinition(fieldDefinitionId, input, updateOptions);
+        await casesClient.fieldDefinitions.validateUpdateFieldDefinition(
+          fieldDefinitionId,
+          input,
+          updateOptions
+        );
         return response.ok({ body: { valid: true } });
       }
 

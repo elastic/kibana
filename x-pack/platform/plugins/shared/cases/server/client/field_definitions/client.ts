@@ -286,7 +286,11 @@ export const createFieldDefinitionsSubClient = (
     updateFieldDefinition: withUsageCounter(
       usageCounterByMethod.updateFieldDefinition,
       clientArgs,
-      async (id: string, input: UpdateFieldDefinitionInput, options?: { publicDefinitionLengthLimit?: number }) => {
+      async (
+        id: string,
+        input: UpdateFieldDefinitionInput,
+        options?: { publicDefinitionLengthLimit?: number }
+      ) => {
         const fieldDef = await fieldDefinitionsService.getFieldDefinition(id);
         await ensureCanManageOrHideExistence(fieldDef, id);
         if (input.owner !== fieldDef.attributes.owner) {
@@ -388,7 +392,11 @@ export const createFieldDefinitionsSubClient = (
       }
     ),
 
-    validateUpdateFieldDefinition: async (id: string, input: UpdateFieldDefinitionInput, options?: { publicDefinitionLengthLimit?: number }) => {
+    validateUpdateFieldDefinition: async (
+      id: string,
+      input: UpdateFieldDefinitionInput,
+      options?: { publicDefinitionLengthLimit?: number }
+    ) => {
       const fieldDef = await fieldDefinitionsService.getFieldDefinition(id);
       await ensureCanManageOrHideExistence(fieldDef, id);
       if (input.owner !== fieldDef.attributes.owner) {
