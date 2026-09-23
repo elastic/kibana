@@ -47,26 +47,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       createOneCaseBeforeDeleteAllAfter(getPageObject, getService, owner);
 
       it('should show the case view page correctly', async () => {
-        if (await cases.common.isRedesignEnabled()) {
-          await testSubjects.existOrFail('appHeaderTitle');
-
-          await testSubjects.existOrFail('case-view-tab-title-activity');
-          await testSubjects.existOrFail('case-view-tab-title-attachments');
-          await testSubjects.existOrFail('description');
-
-          await testSubjects.existOrFail('case-view-activity');
-
-          await testSubjects.existOrFail('case-view-assignees-field-panel');
-          await testSubjects.existOrFail('sidebar-severity');
-          await testSubjects.existOrFail('case-view-participants-field-panel');
-          await testSubjects.existOrFail('case-tags');
-          await testSubjects.existOrFail('cases-categories');
-          await testSubjects.existOrFail('case-view-sidebar-connectors');
-          return;
-        }
-
-        await testSubjects.existOrFail('case-view-title');
-        await testSubjects.existOrFail('header-page-supplements');
+        await testSubjects.existOrFail('appHeaderTitle');
 
         await testSubjects.existOrFail('case-view-tab-title-activity');
         await testSubjects.existOrFail('case-view-tab-title-attachments');
@@ -74,13 +55,12 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await testSubjects.existOrFail('case-view-activity');
 
-        await testSubjects.existOrFail('case-view-assignees');
+        await testSubjects.existOrFail('case-view-assignees-field-panel');
         await testSubjects.existOrFail('sidebar-severity');
-        await testSubjects.existOrFail('case-view-user-list-reporter');
-        await testSubjects.existOrFail('case-view-user-list-participants');
-        await testSubjects.existOrFail('case-view-tag-list');
+        await testSubjects.existOrFail('case-view-participants-field-panel');
+        await testSubjects.existOrFail('case-tags');
         await testSubjects.existOrFail('cases-categories');
-        await testSubjects.existOrFail('sidebar-connectors');
+        await testSubjects.existOrFail('case-view-sidebar-connectors');
       });
     });
 

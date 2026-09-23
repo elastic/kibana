@@ -16,12 +16,10 @@ const owner = OBSERVABILITY_OWNER;
 
 export default ({ getService, getPageObject }: FtrProviderContext) => {
   describe('Create Case', function () {
-    const find = getService('find');
     const cases = getService('cases');
     const svlCases = getService('svlCases');
     const testSubjects = getService('testSubjects');
     const svlCommonPage = getPageObject('svlCommonPage');
-    const config = getService('config');
     const header = getPageObject('header');
 
     before(async () => {
@@ -52,42 +50,15 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
 
       await cases.common.waitForCaseViewToLoad();
 
-      if (await cases.common.isRedesignEnabled()) {
-        // Redesign moves the title to the app header and the attributes into the sidebar; tags and
-        // categories render as in-place editors rather than the legacy viewers.
-        const redesignTitle = await testSubjects.find('appHeaderTitle');
-        expect(await redesignTitle.getVisibleText()).to.contain(caseTitle);
+      const title = await testSubjects.find('appHeaderTitle');
+      expect(await title.getVisibleText()).to.contain(caseTitle);
 
-        const redesignDescription = await testSubjects.find('description');
-        expect(await redesignDescription.getVisibleText()).to.contain('test description');
+      const description = await testSubjects.find('description');
+      expect(await description.getVisibleText()).to.contain('test description');
 
-        await testSubjects.existOrFail('case-tags');
-        await testSubjects.existOrFail('cases-categories');
-        await testSubjects.existOrFail('case-view-sidebar-connectors');
-        return;
-      }
-
-      await testSubjects.existOrFail('case-view-title', {
-        timeout: config.get('timeouts.waitFor'),
-      });
-
-      // validate title
-      const title = await find.byCssSelector('[data-test-subj="editable-title-header-value"]');
-      expect(await title.getVisibleText()).equal(caseTitle);
-
-      // validate description
-      const description = await testSubjects.find('scrollable-markdown');
-      expect(await description.getVisibleText()).equal('test description');
-
-      // validate tag exists
-      await testSubjects.existOrFail('tag-tagme');
-
-      // validate category exists
-      await testSubjects.existOrFail('category-viewer-new');
-
-      // validate no connector added
-      const button = await find.byCssSelector('[data-test-subj*="case-callout"] button');
-      expect(await button.getVisibleText()).equal('Add connector');
+      await testSubjects.existOrFail('case-tags');
+      await testSubjects.existOrFail('cases-categories');
+      await testSubjects.existOrFail('case-view-sidebar-connectors');
     });
 
     describe('customFields', () => {
