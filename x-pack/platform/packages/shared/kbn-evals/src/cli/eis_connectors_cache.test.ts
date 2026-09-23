@@ -100,5 +100,13 @@ describe('eis_connectors_cache', () => {
       writeCache({ connectors: [], fetched_at_ms: 'not-a-number' });
       expect(readCachedEisConnectors(cachePath)).toBeUndefined();
     });
+
+    it('treats an empty connector map as malformed', () => {
+      // `{"connectors":{},"fetched_at_ms":<now>}` would otherwise export an
+      // empty KIBANA_TESTING_INFERENCE_ENDPOINTS payload on an EIS-backed run.
+      writeCache({ connectors: {}, fetched_at_ms: NOW });
+      expect(getEisCacheStatus(cachePath)).toBe('malformed');
+      expect(readCachedEisConnectors(cachePath)).toBeUndefined();
+    });
   });
 });

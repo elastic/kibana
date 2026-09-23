@@ -48,6 +48,7 @@ const parseCachedEntry = (cachePath: string): CachedEisConnectors | undefined =>
     const { connectors, fetched_at_ms: fetchedAtMs } = cached;
     if (
       !isPlainObject(connectors) ||
+      Object.keys(connectors).length === 0 ||
       typeof fetchedAtMs !== 'number' ||
       !Number.isFinite(fetchedAtMs)
     ) {
