@@ -117,53 +117,54 @@ describe('WorkflowGraphNode', () => {
     expect(screen.getByLabelText('Running')).toBeInTheDocument();
   });
 
-  it('shows retry description when step has retry max-attempts', () => {
+  it('shows retry failure badge when step has retry max-attempts', () => {
     renderNode({
       step: { retry: { 'max-attempts': 3 } },
     });
-    expect(screen.getByTestId('workflowGraphNodeOnFailureDescription')).toHaveTextContent(
-      'Retry on failure (3)'
-    );
+    // Always visible at rest — not gated on node hover.
+    expect(screen.getByTestId('workflowGraphNodeFailureBadge')).toBeInTheDocument();
+    expect(screen.getByTestId('workflowGraphNodeFailureBadgeAttempts')).toHaveTextContent('3');
   });
 
-  it('shows retry description from on-failure.retry', () => {
+  it('shows retry failure badge from on-failure.retry', () => {
     renderNode({
       step: { 'on-failure': { retry: { 'max-attempts': 2 } } },
     });
-    expect(screen.getByTestId('workflowGraphNodeOnFailureDescription')).toHaveTextContent(
-      'Retry on failure (2)'
-    );
+    expect(screen.getByTestId('workflowGraphNodeFailureBadgeAttempts')).toHaveTextContent('2');
   });
 
-  it('does NOT show on-failure description when neither retry nor continue is set', () => {
+  it('does NOT show failure badge when neither retry nor continue is set', () => {
     renderNode({ step: {} });
-    expect(screen.queryByTestId('workflowGraphNodeOnFailureDescription')).toBeNull();
+    expect(screen.queryByTestId('workflowGraphNodeFailureBadge')).toBeNull();
   });
 
-  it('shows continue description when on-failure.continue is true', () => {
+  it('shows continue failure badge when on-failure.continue is true', () => {
     renderNode({
       step: { 'on-failure': { continue: true } },
     });
-    expect(screen.getByTestId('workflowGraphNodeOnFailureDescription')).toHaveTextContent(
-      'Continue on failure'
+    expect(screen.getByTestId('workflowGraphNodeFailureBadge')).toHaveAttribute(
+      'aria-label',
+      'The workflow continues if this step fails'
     );
   });
 
-  it('shows combined description when retry and continue are both configured', () => {
+  it('shows combined failure badge when retry and continue are both configured', () => {
     renderNode({
       step: { 'on-failure': { retry: { 'max-attempts': 10 }, continue: true } },
     });
-    expect(screen.getByTestId('workflowGraphNodeOnFailureDescription')).toHaveTextContent(
-      'Retry (10) and continue on failure'
+    expect(screen.getByTestId('workflowGraphNodeFailureBadgeAttempts')).toHaveTextContent('10');
+    expect(screen.getByTestId('workflowGraphNodeFailureBadge').getAttribute('aria-label')).toMatch(
+      /continues if it still fails/
     );
   });
 
-  it('shows retry-only description when continue is false', () => {
+  it('shows retry-only failure badge when continue is false', () => {
     renderNode({
       step: { 'on-failure': { continue: false, retry: { 'max-attempts': 2 } } },
     });
-    expect(screen.getByTestId('workflowGraphNodeOnFailureDescription')).toHaveTextContent(
-      'Retry on failure (2)'
+    expect(screen.getByTestId('workflowGraphNodeFailureBadgeAttempts')).toHaveTextContent('2');
+    expect(screen.getByTestId('workflowGraphNodeFailureBadge').getAttribute('aria-label')).toMatch(
+      /stops if it still fails/
     );
   });
 

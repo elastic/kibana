@@ -8,6 +8,7 @@
  */
 
 import {
+  EuiBadge,
   EuiButtonIcon,
   euiCanAnimate,
   EuiContextMenuItem,
@@ -65,9 +66,9 @@ export interface WorkflowGraphNodeData extends Record<string, unknown> {
    * thread the workflow YAML down a second time.
    */
   readonly step?: {
-    readonly retry?: { readonly 'max-attempts'?: number };
+    readonly retry?: { readonly 'max-attempts'?: number; readonly delay?: string };
     readonly 'on-failure'?: {
-      readonly retry?: { readonly 'max-attempts'?: number };
+      readonly retry?: { readonly 'max-attempts'?: number; readonly delay?: string };
       readonly continue?: boolean;
       readonly fallback?: readonly unknown[];
     };
@@ -97,6 +98,15 @@ function getStepMaxAttempts(step: WorkflowGraphNodeData['step']): number | undef
   const fromOnFailure = step?.['on-failure']?.retry?.['max-attempts'];
   const value = fromDirect ?? fromOnFailure;
   return typeof value === 'number' && value > 0 ? value : undefined;
+}
+
+/** Retry delay string when retry is configured; defaults to `5s` for tooltips. */
+function getStepRetryDelay(step: WorkflowGraphNodeData['step']): string | undefined {
+  if (getStepMaxAttempts(step) == null) return undefined;
+  const fromDirect = step?.retry?.delay;
+  const fromOnFailure = step?.['on-failure']?.retry?.delay;
+  const value = fromDirect ?? fromOnFailure;
+  return typeof value === 'string' && value.length > 0 ? value : '5s';
 }
 
 /** True when `on-failure.continue` is enabled. */
@@ -322,31 +332,100 @@ function NodePreviewCard({
 }
 
 /**
- * Compact subtitle under the step name for on-failure retry / continue.
- * Keeps count when retrying; fits the existing ~56px node without growing it.
+ * Compact warning-family badge for retry / continue-on-failure posture.
+ *
+ * Color is warning/yellow only — never danger/red. Retry and continue-on-failure
+ * are *configured behaviour, not a failure state*; red is reserved for error
+ * paths and run failures, and using it here would make correctly-configured
+ * steps look broken on an idle canvas.
+ *
+ * Always visible at rest (not tied to node hover) — posture should read
+ * without requiring interaction.
  */
-function getOnFailureDescription(
-  maxAttempts: number | undefined,
-  continuesOnFailure: boolean
-): string | undefined {
+function NodeFailureBadge({
+  maxAttempts,
+  delay,
+  continuesOnFailure,
+}: {
+  maxAttempts: number | undefined;
+  delay: string | undefined;
+  continuesOnFailure: boolean;
+}) {
+  const { euiTheme } = useEuiTheme();
+  if (maxAttempts == null && !continuesOnFailure) return null;
+
+  let tooltip: string;
   if (maxAttempts != null && continuesOnFailure) {
-    return i18n.translate('workflowsUi.graphNode.retryAndContinueOnFailure', {
-      defaultMessage: 'Retry ({count}) and continue on failure',
-      values: { count: maxAttempts },
+    tooltip = i18n.translate('workflowsUi.graphNode.failureBadge.retryAndContinueTooltip', {
+      defaultMessage:
+        'Retries {count}× ({delay} delay), then the workflow continues if it still fails',
+      values: { count: maxAttempts, delay: delay ?? '5s' },
+    });
+  } else if (maxAttempts != null) {
+    tooltip = i18n.translate('workflowsUi.graphNode.failureBadge.retryTooltip', {
+      defaultMessage:
+        'Retries {count}× ({delay} delay), then the workflow stops if it still fails',
+      values: { count: maxAttempts, delay: delay ?? '5s' },
+    });
+  } else {
+    tooltip = i18n.translate('workflowsUi.graphNode.failureBadge.continueTooltip', {
+      defaultMessage: 'The workflow continues if this step fails',
     });
   }
-  if (maxAttempts != null) {
-    return i18n.translate('workflowsUi.graphNode.retryOnFailure', {
-      defaultMessage: 'Retry on failure ({count})',
-      values: { count: maxAttempts },
-    });
-  }
-  if (continuesOnFailure) {
-    return i18n.translate('workflowsUi.graphNode.continueOnFailure', {
-      defaultMessage: 'Continue on failure',
-    });
-  }
-  return undefined;
+
+  const isContinueOnly = maxAttempts == null && continuesOnFailure;
+
+  return (
+    <EuiToolTip content={tooltip} delay="long" disableScreenReaderOutput>
+      <EuiBadge
+        color="warning"
+        // Continue-only: put the icon in children (not iconType) so we keep the
+        // default badge padding / text inset — iconOnly uses tighter xs padding
+        // and reads as a cramped square next to retry pills.
+        iconType={isContinueOnly ? undefined : 'refresh'}
+        tabIndex={0}
+        aria-label={tooltip}
+        data-test-subj="workflowGraphNodeFailureBadge"
+        css={{
+          flex: '0 0 auto',
+          cursor: 'default',
+          '&:focus-visible': { outline: `2px solid ${euiTheme.colors.primary}` },
+        }}
+      >
+        {isContinueOnly ? (
+          <EuiIcon type="sortRight" size="s" aria-hidden />
+        ) : (
+          <>
+            {maxAttempts != null ? (
+              <span data-test-subj="workflowGraphNodeFailureBadgeAttempts">{maxAttempts}</span>
+            ) : null}
+            {maxAttempts != null && continuesOnFailure ? (
+              <>
+                <span
+                  aria-hidden
+                  css={{
+                    display: 'inline-block',
+                    width: 1,
+                    height: 10,
+                    background: euiTheme.colors.borderBaseWarning,
+                    marginInline: 4,
+                    verticalAlign: 'middle',
+                  }}
+                />
+                <EuiIcon
+                  type="sortRight"
+                  size="s"
+                  aria-label={i18n.translate('workflowsUi.graphNode.failureBadge.continueGlyph', {
+                    defaultMessage: 'Continue on failure',
+                  })}
+                />
+              </>
+            ) : null}
+          </>
+        )}
+      </EuiBadge>
+    </EuiToolTip>
+  );
 }
 
 function NodeStatusIcon({
@@ -400,7 +479,9 @@ function NodeRunActions({
   canRunSteps?: boolean;
   label: string;
 }) {
-  const runLabel = i18n.translate('workflowsUi.graphNode.runStep', { defaultMessage: 'Run step' });
+  const runLabel = i18n.translate('workflowsUi.graphNode.testThisStep', {
+    defaultMessage: 'Test this step',
+  });
   return (
     <div
       css={{ display: 'flex', alignItems: 'center', gap: 4, flex: '0 0 auto' }}
@@ -694,10 +775,10 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
   const displayLabel = isTriggerNode ? label : deslugifyStepName(label);
 
   const iconType = isTriggerNode ? getTriggerTypeIconType(stepType) : getStepIconType(stepType);
-  const onFailureDescription = getOnFailureDescription(
-    getStepMaxAttempts(step),
-    getStepContinuesOnFailure(step)
-  );
+  const maxAttempts = getStepMaxAttempts(step);
+  const retryDelay = getStepRetryDelay(step);
+  const continuesOnFailure = getStepContinuesOnFailure(step);
+  const hasFailureBadge = maxAttempts != null || continuesOnFailure;
   const hasFallback = getStepHasFallback(step);
   const targetHandlePos = node.targetPosition ?? Position.Top;
   const sourceHandlePos = node.sourcePosition ?? Position.Bottom;
@@ -852,10 +933,6 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'center',
-            gap: onFailureDescription ? 2 : 0,
-            // Nudge the stack up slightly when a subtitle is present so both
-            // lines fit the fixed ~56px node without growing the card.
-            transform: onFailureDescription ? 'translateY(-1px)' : undefined,
           }}
         >
           <span
@@ -864,7 +941,7 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
               fontSize: 12,
               fontStyle: 'normal',
               fontWeight: 500,
-              lineHeight: onFailureDescription ? '16px' : '24px',
+              lineHeight: '24px',
               color: colors.stepLabelColor,
               whiteSpace: 'nowrap',
               overflow: 'hidden',
@@ -874,24 +951,6 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
           >
             {displayLabel}
           </span>
-          {onFailureDescription ? (
-            <span
-              data-test-subj="workflowGraphNodeOnFailureDescription"
-              title={onFailureDescription}
-              css={{
-                fontFamily: euiTheme.font.family,
-                fontSize: 10,
-                fontWeight: 400,
-                lineHeight: '14px',
-                color: euiTheme.colors.textSubdued,
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-              }}
-            >
-              {onFailureDescription}
-            </span>
-          ) : null}
         </div>
 
         {isIncomplete && <NodeIncompleteIndicator />}
@@ -905,6 +964,13 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
           />
         )}
 
+        {hasFailureBadge && (
+          <NodeFailureBadge
+            maxAttempts={maxAttempts}
+            delay={retryDelay}
+            continuesOnFailure={continuesOnFailure}
+          />
+        )}
         {(canShowRun || editMode) && (
           <div
             css={{
@@ -913,7 +979,9 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
               gap: trailingReveal ? ACTION_BUTTON_GAP : 0,
               flex: '0 0 auto',
               // Collapse out of the flex row at rest so the label can use the
-              // full card width; expand on hover/focus and let the label ellipsize.
+              // full card width. Negative start margin cancels the parent flex
+              // `gap` so a zero-width slot does not inflate the right inset.
+              marginInlineStart: trailingReveal ? 0 : `calc(-1 * ${euiTheme.size.m})`,
               width: trailingReveal ? 'auto' : 0,
               maxWidth: trailingReveal ? 'none' : 0,
               overflow: 'hidden',

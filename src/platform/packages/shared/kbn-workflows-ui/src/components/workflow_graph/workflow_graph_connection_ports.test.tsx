@@ -17,7 +17,6 @@ import {
 import {
   ERROR_PORT_ALONG,
   PORT_HIT_SIZE,
-  PORT_STRADDLE_OUTSET,
   WorkflowGraphConnectionPorts,
 } from './workflow_graph_connection_ports';
 
@@ -35,7 +34,7 @@ const portAnchor = (testId: string): HTMLElement => {
 };
 
 describe('WorkflowGraphConnectionPorts', () => {
-  it('keeps a ≥22px hit target, zero outer layout size, and straddles the TB edge', () => {
+  it('keeps a ≥44px hit target straddling the bottom edge (pin on the border)', () => {
     const ports: NodePortTargets = {
       step: { index: 1, sourceNodeId: 'a' },
       errorStepId: 'a',
@@ -55,12 +54,15 @@ describe('WorkflowGraphConnectionPorts', () => {
     expect(getComputedStyle(wrap).height).toBe('0px');
     expect(getComputedStyle(wrap).width).toBe('100%');
 
-    const stepAnchor = portAnchor('workflowGraphPort-step');
-    expect(getComputedStyle(stepAnchor).width).toBe(`${PORT_HIT_SIZE}px`);
-    expect(getComputedStyle(stepAnchor).height).toBe(`${PORT_HIT_SIZE}px`);
-    expect(PORT_HIT_SIZE).toBeGreaterThanOrEqual(22);
+    const errorAnchor = portAnchor('workflowGraphPort-error');
+    expect(getComputedStyle(errorAnchor).width).toBe(`${PORT_HIT_SIZE}px`);
+    expect(getComputedStyle(errorAnchor).height).toBe(`${PORT_HIT_SIZE}px`);
+    expect(PORT_HIT_SIZE).toBeGreaterThanOrEqual(44);
     // Hit-target center sits on the bottom border (straddle).
-    expect(getComputedStyle(stepAnchor).bottom).toBe(`-${PORT_STRADDLE_OUTSET}px`);
+    expect(getComputedStyle(errorAnchor).bottom).toBe(`-${PORT_HIT_SIZE / 2}px`);
+    expect(getComputedStyle(errorAnchor).left).toBe(ERROR_PORT_ALONG);
+    // Add step lives on wires — not on the node edge.
+    expect(screen.queryByTestId('workflowGraphPort-step')).toBeNull();
   });
 
   it('hides the error port at rest and reveals it on node hover', () => {
@@ -96,7 +98,7 @@ describe('WorkflowGraphConnectionPorts', () => {
     expect(getComputedStyle(errorAnchor).pointerEvents).toBe('auto');
   });
 
-  it('mounts flow ports on the right edge for LR; error stays bottom-right', () => {
+  it('keeps the failure port on the bottom edge in LR', () => {
     const ports: NodePortTargets = {
       step: { index: 1, sourceNodeId: 'a' },
       errorStepId: 'a',
@@ -113,16 +115,14 @@ describe('WorkflowGraphConnectionPorts', () => {
     );
     const wrap = screen.getByTestId('workflowGraphConnectionPorts');
     expect(wrap).toHaveAttribute('data-direction', 'LR');
-    expect(getComputedStyle(wrap).width).toBe('0px');
-    expect(getComputedStyle(wrap).height).toBe('100%');
-    const stepAnchor = portAnchor('workflowGraphPort-step');
-    expect(getComputedStyle(stepAnchor).right).toBe(`-${PORT_STRADDLE_OUTSET}px`);
+    expect(getComputedStyle(wrap).height).toBe('0px');
+    expect(getComputedStyle(wrap).width).toBe('100%');
     const errorAnchor = portAnchor('workflowGraphPort-error');
     expect(getComputedStyle(errorAnchor).left).toBe(ERROR_PORT_ALONG);
-    expect(getComputedStyle(errorAnchor).bottom).toBe(`-${PORT_STRADDLE_OUTSET}px`);
+    expect(getComputedStyle(errorAnchor).bottom).toBe(`-${PORT_HIT_SIZE / 2}px`);
   });
 
-  it('fires insert-after on step port click and error context on error port', () => {
+  it('fires error context on error port click', () => {
     const onInsert = jest.fn();
     const ports: NodePortTargets = {
       step: { index: 2, path: [{ stepIndex: 0, branch: 'steps' }], sourceNodeId: 'a' },
@@ -136,16 +136,6 @@ describe('WorkflowGraphConnectionPorts', () => {
         direction="TB"
       />
     );
-    fireEvent.click(screen.getByTestId('workflowGraphPort-step'));
-    expect(onInsert).toHaveBeenCalledWith(
-      {
-        mode: 'step',
-        index: 2,
-        path: [{ stepIndex: 0, branch: 'steps' }],
-        sourceNodeId: 'a',
-      },
-      expect.objectContaining({ left: expect.any(Number) })
-    );
     fireEvent.click(screen.getByTestId('workflowGraphPort-error'));
     expect(onInsert).toHaveBeenCalledWith(
       { mode: 'error', stepId: 'a' },
@@ -157,30 +147,31 @@ describe('WorkflowGraphConnectionPorts', () => {
     jest.useFakeTimers();
     const ports: NodePortTargets = {
       step: { index: 1, sourceNodeId: 'a' },
+      errorStepId: 'a',
     };
     render(
       <div style={{ position: 'relative', width: 300, height: 64 }}>
         <WorkflowGraphConnectionPorts
           ports={ports}
           edit={edit}
-          nodeHovered={false}
+          nodeHovered
           direction="TB"
         />
       </div>
     );
-    const anchor = portAnchor('workflowGraphPort-step');
+    const anchor = portAnchor('workflowGraphPort-error');
     fireEvent.mouseEnter(anchor);
-    expect(screen.queryByText('Add step')).not.toBeInTheDocument();
+    expect(screen.queryByText('Add failure step')).not.toBeInTheDocument();
     act(() => {
       jest.advanceTimersByTime(999);
     });
-    expect(screen.queryByText('Add step')).not.toBeInTheDocument();
+    expect(screen.queryByText('Add failure step')).not.toBeInTheDocument();
     act(() => {
       jest.advanceTimersByTime(1);
     });
-    expect(screen.getByText('Add step')).toBeInTheDocument();
+    expect(screen.getByText('Add failure step')).toBeInTheDocument();
     fireEvent.mouseLeave(anchor);
-    expect(screen.queryByText('Add step')).not.toBeInTheDocument();
+    expect(screen.queryByText('Add failure step')).not.toBeInTheDocument();
     jest.useRealTimers();
   });
 
@@ -231,17 +222,14 @@ describe('WorkflowGraphConnectionPorts', () => {
     expect(errorPort).toHaveAttribute('data-port-active', 'true');
   });
 
-  it('renders then/else flow ports for if targets without an error port', () => {
+  it('renders nothing when there is no failure port to show', () => {
     const ports: NodePortTargets = {
       then: { index: 0, path: [{ stepIndex: 0, branch: 'steps' }], sourceNodeId: 'gate' },
       else: { index: 0, path: [{ stepIndex: 0, branch: 'else' }], sourceNodeId: 'gate' },
     };
-    render(
+    const { container } = render(
       <WorkflowGraphConnectionPorts ports={ports} edit={edit} nodeHovered direction="TB" />
     );
-    expect(screen.getByTestId('workflowGraphPort-then')).toBeInTheDocument();
-    expect(screen.getByTestId('workflowGraphPort-else')).toBeInTheDocument();
-    expect(screen.queryByTestId('workflowGraphPort-error')).toBeNull();
-    expect(screen.queryByTestId('workflowGraphPort-step')).toBeNull();
+    expect(container).toBeEmptyDOMElement();
   });
 });

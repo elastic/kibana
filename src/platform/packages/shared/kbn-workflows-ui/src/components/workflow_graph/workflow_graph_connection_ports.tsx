@@ -12,7 +12,7 @@ import type { EuiToolTipRef } from '@elastic/eui';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { LayoutDirection } from '@kbn/workflows';
-import type { NodePortTargets, StepPortTarget } from './compute_insertion_points';
+import type { NodePortTargets } from './compute_insertion_points';
 import {
   ERROR_PORT_ALONG,
   ERROR_PORT_FRACTION,
@@ -65,18 +65,16 @@ const SPRING_MS = PORT_SPRING_MS;
 export interface WorkflowGraphConnectionPortsProps {
   readonly ports: NodePortTargets;
   readonly edit: WorkflowGraphEditActions;
-  /** Node surface hover / focus-within — expands flow ports and reveals error. */
+  /** Node surface hover / focus-within — reveals the failure port. */
   readonly nodeHovered: boolean;
-  /** Layout direction — ports sit on the bottom (TB) or right (LR) edge. */
+  /** Layout direction — failure port stays on the bottom edge in both axes. */
   readonly direction: LayoutDirection;
 }
 
 /**
- * Node-anchored connection points. Absolutely positioned on the source edge;
- * contribute zero layout size to the node card.
- *
- * Flow ports (true → false) stay visible at rest; error ports are opacity-0
- * until the owning node is hovered or focused.
+ * Node-anchored failure port only. Add-step lives on wires / terminal stubs
+ * (see WorkflowGraphEditOverlays). Absolutely positioned on the bottom edge;
+ * contributes zero layout size to the node card.
  */
 export function WorkflowGraphConnectionPorts({
   ports,
@@ -92,21 +90,6 @@ export function WorkflowGraphConnectionPorts({
     pendingInsert?.context.mode === 'error' &&
     pendingInsert.context.stepId === ports.errorStepId;
 
-  const insertStep = useCallback(
-    (target: StepPortTarget, anchor: WorkflowGraphAnchorRect) => {
-      edit.onInsert(
-        {
-          mode: 'step',
-          index: target.index,
-          path: target.path,
-          sourceNodeId: target.sourceNodeId,
-        },
-        anchor
-      );
-    },
-    [edit]
-  );
-
   const insertError = useCallback(
     (stepId: string, anchor: WorkflowGraphAnchorRect) => {
       edit.onInsert({ mode: 'error', stepId }, anchor);
@@ -114,24 +97,6 @@ export function WorkflowGraphConnectionPorts({
     [edit]
   );
 
-  const addStepLabel = i18n.translate('workflowsUi.graph.port.addStep', {
-    defaultMessage: 'Add step',
-  });
-  const addStepTip = i18n.translate('workflowsUi.graph.port.addStepTip', {
-    defaultMessage: 'Add step',
-  });
-  const addTrueLabel = i18n.translate('workflowsUi.graph.port.addTruePath', {
-    defaultMessage: 'Add step — true path',
-  });
-  const addTrueTip = i18n.translate('workflowsUi.graph.port.addTruePathTip', {
-    defaultMessage: 'Add step (true)',
-  });
-  const addFalseLabel = i18n.translate('workflowsUi.graph.port.addFalsePath', {
-    defaultMessage: 'Add step — false path',
-  });
-  const addFalseTip = i18n.translate('workflowsUi.graph.port.addFalsePathTip', {
-    defaultMessage: 'Add step (false)',
-  });
   const addErrorLabel = i18n.translate('workflowsUi.graph.port.addErrorPath', {
     defaultMessage: 'Add error path',
   });
@@ -139,7 +104,9 @@ export function WorkflowGraphConnectionPorts({
     defaultMessage: 'Add failure step',
   });
 
-  const isIf = ports.then !== undefined || ports.else !== undefined;
+  if (!ports.errorStepId && !ports.errorConnected) {
+    return null;
+  }
 
   return (
     <div
@@ -147,68 +114,20 @@ export function WorkflowGraphConnectionPorts({
       data-direction={direction}
       css={{
         position: 'absolute',
-        ...(isHorizontal
-          ? { top: 0, bottom: 0, right: 0, width: 0, height: '100%' }
-          : { left: 0, right: 0, bottom: 0, height: 0, width: '100%' }),
+        // Failure port is always on the bottom edge (orientation-invariant).
+        left: 0,
+        right: 0,
+        bottom: 0,
+        height: 0,
+        width: '100%',
         pointerEvents: 'none',
         overflow: 'visible',
       }}
+      // Keep direction attribute for tests / a11y even though the port is bottom-only.
+      data-layout={isHorizontal ? 'LR' : 'TB'}
     >
-      {ports.step && (
-        <PortButton
-          kind="step"
-          along={STEP_PORT}
-          isHorizontal={isHorizontal}
-          ariaLabel={addStepLabel}
-          tip={addStepTip}
-          nodeHovered={nodeHovered}
-          fill={euiTheme.colors.primary}
-          ring={euiTheme.colors.backgroundBasePlain}
-          restFill={euiTheme.colors.borderBaseProminent}
-          euiThemeContext={euiThemeContext}
-          onActivate={(anchor) => insertStep(ports.step!, anchor)}
-          data-test-subj="workflowGraphPort-step"
-          iconType="plus"
-        />
-      )}
-      {isIf && ports.then && (
-        <PortButton
-          kind="step"
-          along={IF_PORT_TRUE}
-          isHorizontal={isHorizontal}
-          ariaLabel={addTrueLabel}
-          tip={addTrueTip}
-          nodeHovered={nodeHovered}
-          fill={euiTheme.colors.primary}
-          ring={euiTheme.colors.backgroundBasePlain}
-          restFill={euiTheme.colors.borderBaseProminent}
-          euiThemeContext={euiThemeContext}
-          onActivate={(anchor) => insertStep(ports.then!, anchor)}
-          data-test-subj="workflowGraphPort-then"
-          iconType="plus"
-        />
-      )}
-      {isIf && ports.else && (
-        <PortButton
-          kind="step"
-          along={IF_PORT_FALSE}
-          isHorizontal={isHorizontal}
-          ariaLabel={addFalseLabel}
-          tip={addFalseTip}
-          nodeHovered={nodeHovered}
-          fill={euiTheme.colors.primary}
-          ring={euiTheme.colors.backgroundBasePlain}
-          restFill={euiTheme.colors.borderBaseProminent}
-          euiThemeContext={euiThemeContext}
-          onActivate={(anchor) => insertStep(ports.else!, anchor)}
-          data-test-subj="workflowGraphPort-else"
-          iconType="plus"
-        />
-      )}
       {ports.errorStepId && (
         <PortButton
-          kind="error"
-          isHorizontal={isHorizontal}
           ariaLabel={addErrorLabel}
           tip={addErrorTip}
           nodeHovered={nodeHovered}
@@ -219,7 +138,6 @@ export function WorkflowGraphConnectionPorts({
           onActivate={(anchor) => insertError(ports.errorStepId!, anchor)}
           data-test-subj="workflowGraphPort-error"
           iconType="warning"
-          hiddenUntilHover
           forceActive={creatingError}
         />
       )}
@@ -255,9 +173,6 @@ function ConnectedErrorPort() {
 }
 
 function PortButton({
-  kind,
-  along,
-  isHorizontal,
   ariaLabel,
   tip,
   nodeHovered,
@@ -268,12 +183,8 @@ function PortButton({
   onActivate,
   'data-test-subj': dataTestSubj,
   iconType,
-  hiddenUntilHover = false,
   forceActive = false,
 }: {
-  readonly kind: 'step' | 'error';
-  readonly along?: string;
-  readonly isHorizontal: boolean;
   readonly ariaLabel: string;
   readonly tip: string;
   readonly nodeHovered: boolean;
@@ -284,7 +195,6 @@ function PortButton({
   readonly onActivate: (anchor: WorkflowGraphAnchorRect) => void;
   readonly 'data-test-subj': string;
   readonly iconType: 'plus' | 'warning';
-  readonly hiddenUntilHover?: boolean;
   /** Error-path definition in progress — keep expanded/active without hover. */
   readonly forceActive?: boolean;
 }) {
@@ -309,27 +219,14 @@ function PortButton({
     if (tipContent) tipRef.current?.showToolTip();
   }, [tipContent]);
 
-  const edgeStyle =
-    kind === 'error'
-      ? errorPortEdgeStyle(PORT_STRADDLE_OUTSET)
-      : isHorizontal
-      ? {
-          right: -PORT_STRADDLE_OUTSET,
-          top: along,
-          transform: 'translateY(-50%)',
-        }
-      : {
-          left: along,
-          bottom: -PORT_STRADDLE_OUTSET,
-          transform: 'translateX(-50%)',
-        };
+  // Hit box straddles the bottom border so the pin sits on the edge.
+  const edgeStyle = errorPortEdgeStyle(PORT_HIT_SIZE / 2);
 
   return (
     <EuiToolTip
       ref={tipRef}
       content={tipContent}
       position="top"
-      // aria-label already names the action; tooltip adds longer explainer copy.
       disableScreenReaderOutput
       display="block"
       repositionOnScroll
@@ -340,18 +237,13 @@ function PortButton({
             ...edgeStyle,
             width: PORT_HIT_SIZE,
             height: PORT_HIT_SIZE,
-            pointerEvents: 'auto' as const,
             zIndex: 5,
+            opacity: revealed ? 1 : 0,
+            pointerEvents: revealed ? ('auto' as const) : ('none' as const),
+            [euiCanAnimate]: { transition: 'opacity 150ms ease' },
+            '@media (prefers-reduced-motion: reduce)': { transition: 'none' },
+            '&:focus-within': { opacity: 1, pointerEvents: 'auto' },
           },
-          hiddenUntilHover
-            ? {
-                opacity: revealed ? 1 : 0,
-                pointerEvents: revealed ? ('auto' as const) : ('none' as const),
-                [euiCanAnimate]: { transition: 'opacity 150ms ease' },
-                '@media (prefers-reduced-motion: reduce)': { transition: 'none' },
-                '&:focus-within': { opacity: 1, pointerEvents: 'auto' },
-              }
-            : null,
         ],
         onMouseEnter: () => {
           clearDelay();
@@ -370,7 +262,7 @@ function PortButton({
         type="button"
         aria-label={ariaLabel}
         data-test-subj={dataTestSubj}
-        data-port-kind={kind}
+        data-port-kind="error"
         data-port-active={forceActive ? 'true' : undefined}
         onClick={(e) => {
           e.stopPropagation();
@@ -396,19 +288,23 @@ function PortButton({
               width: PORT_DOT_SIZE,
               height: PORT_DOT_SIZE,
               background: restFill,
+              border: 'none',
+              boxShadow: `0 0 0 2px ${ring}`,
+              color: ring,
             },
             '& .workflowGraphPortPin > span': { opacity: 0 },
             ...(revealed
               ? {
                   '& .workflowGraphPortPin': {
-                    width:
-                      kind === 'error' && !forceActive ? PORT_DOT_SIZE : PORT_EXPANDED_SIZE,
-                    height:
-                      kind === 'error' && !forceActive ? PORT_DOT_SIZE : PORT_EXPANDED_SIZE,
-                    background: kind === 'error' && !forceActive ? restFill : fill,
+                    width: forceActive ? PORT_EXPANDED_SIZE : PORT_DOT_SIZE,
+                    height: forceActive ? PORT_EXPANDED_SIZE : PORT_DOT_SIZE,
+                    background: forceActive ? fill : restFill,
+                    border: 'none',
+                    boxShadow: `0 0 0 2px ${ring}`,
+                    color: ring,
                   },
                   '& .workflowGraphPortPin > span': {
-                    opacity: kind === 'error' && !forceActive ? 0 : 1,
+                    opacity: forceActive ? 1 : 0,
                   },
                 }
               : {}),
@@ -418,6 +314,9 @@ function PortButton({
                     width: PORT_EXPANDED_SIZE,
                     height: PORT_EXPANDED_SIZE,
                     background: fill,
+                    border: 'none',
+                    boxShadow: `0 0 0 2px ${ring}`,
+                    color: ring,
                   },
                   '& .workflowGraphPortPin > span': { opacity: 1 },
                 }
@@ -426,6 +325,9 @@ function PortButton({
               width: PORT_EXPANDED_SIZE,
               height: PORT_EXPANDED_SIZE,
               background: fill,
+              border: 'none',
+              boxShadow: `0 0 0 2px ${ring}`,
+              color: ring,
             },
             '&:hover .workflowGraphPortPin > span, &:focus-visible .workflowGraphPortPin > span': {
               opacity: 1,
@@ -438,14 +340,13 @@ function PortButton({
           className="workflowGraphPortPin"
           css={{
             borderRadius: '50%',
-            boxShadow: `0 0 0 2px ${ring}`,
             display: 'inline-flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: ring,
             flex: '0 0 auto',
+            boxSizing: 'border-box',
             [euiCanAnimate]: {
-              transition: `width ${SPRING_MS} ${SPRING}, height ${SPRING_MS} ${SPRING}, background 120ms ease`,
+              transition: `width ${SPRING_MS} ${SPRING}, height ${SPRING_MS} ${SPRING}, background 120ms ease, border-color 120ms ease, box-shadow 120ms ease`,
             },
             '@media (prefers-reduced-motion: reduce)': { transition: 'none' },
             '& > span': {

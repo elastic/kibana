@@ -32,14 +32,14 @@ describe('computeInsertionPoints', () => {
     );
     expect(triggerId).toBeDefined();
     expect(points.byNodeId.get(triggerId!)).toEqual({
-      step: { index: 0, sourceNodeId: triggerId },
+      step: { index: 0, sourceNodeId: triggerId, isTerminal: false },
     });
     expect(points.byNodeId.get('a')).toEqual({
-      step: { index: 1, sourceNodeId: 'a' },
+      step: { index: 1, sourceNodeId: 'a', isTerminal: false },
       errorStepId: 'a',
     });
     expect(points.byNodeId.get('b')).toEqual({
-      step: { index: 2, sourceNodeId: 'b' },
+      step: { index: 2, sourceNodeId: 'b', isTerminal: true },
       errorStepId: 'b',
     });
   });
@@ -51,7 +51,12 @@ describe('computeInsertionPoints', () => {
     const points = computeInsertionPoints(workflow, transformWorkflowToGraph(workflow));
     expect(points.byNodeId.get('a')?.errorStepId).toBeUndefined();
     expect(points.byNodeId.get('a')?.errorConnected).toBe(true);
-    expect(points.byNodeId.get('a')?.step).toEqual({ index: 1, sourceNodeId: 'a' });
+    expect(points.byNodeId.get('a')?.step).toEqual({
+      index: 1,
+      sourceNodeId: 'a',
+      isTerminal: true,
+      path: undefined,
+    });
   });
 
   it('keeps the insertable error port when on-failure is retry/continue only', () => {
@@ -83,11 +88,13 @@ describe('computeInsertionPoints', () => {
         index: 0,
         path: [{ stepIndex: 0, branch: 'steps' }],
         sourceNodeId: 'gate',
+        isTerminal: false,
       },
       else: {
         index: 0,
         path: [{ stepIndex: 0, branch: 'else' }],
         sourceNodeId: 'gate',
+        isTerminal: false,
       },
     });
     // Branch leaves still have insert-after ports in their sequences.
@@ -95,11 +102,13 @@ describe('computeInsertionPoints', () => {
       index: 1,
       path: [{ stepIndex: 0, branch: 'steps' }],
       sourceNodeId: 'yes',
+      isTerminal: true,
     });
     expect(points.byNodeId.get('no')?.step).toEqual({
       index: 1,
       path: [{ stepIndex: 0, branch: 'else' }],
       sourceNodeId: 'no',
+      isTerminal: true,
     });
   });
 
@@ -111,5 +120,6 @@ describe('computeInsertionPoints', () => {
     const triggerPorts = [...points.byNodeId.values()];
     expect(triggerPorts).toHaveLength(1);
     expect(triggerPorts[0].step?.index).toBe(0);
+    expect(triggerPorts[0].step?.isTerminal).toBe(true);
   });
 });

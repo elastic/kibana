@@ -49,6 +49,7 @@ export const ensureWorkflowGraphEuiIcons = (): void => {
       { icon: refresh },
       { icon: trash },
       { icon: warning },
+      { icon: workflow },
     ] = await Promise.all([
       import('@elastic/eui/optimize/es/components/icon/icon'),
       import('@elastic/eui/optimize/es/components/icon/assets/at'),
@@ -69,6 +70,7 @@ export const ensureWorkflowGraphEuiIcons = (): void => {
       import('@elastic/eui/optimize/es/components/icon/assets/refresh'),
       import('@elastic/eui/optimize/es/components/icon/assets/trash'),
       import('@elastic/eui/optimize/es/components/icon/assets/warning'),
+      import('@elastic/eui/optimize/es/components/icon/assets/workflow'),
     ]);
 
     appendIconComponentCache({
@@ -90,6 +92,7 @@ export const ensureWorkflowGraphEuiIcons = (): void => {
       refresh,
       trash,
       warning,
+      workflow,
     });
   })();
 };

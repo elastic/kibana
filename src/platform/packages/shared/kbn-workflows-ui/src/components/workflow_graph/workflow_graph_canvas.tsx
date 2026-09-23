@@ -11,6 +11,7 @@ import {
   EuiButtonIcon,
   EuiCallOut,
   euiCanAnimate,
+  EuiText,
   EuiToolTip,
   transparentize,
   useEuiShadow,
@@ -53,6 +54,7 @@ import '@xyflow/react/dist/style.css';
 import './ensure_eui_icons';
 import { computeInsertionPoints } from './compute_insertion_points';
 import { computePendingErrorBranchPlacement, type PendingInsertVisual } from './pending_insert';
+import { resolveAppendInsertTarget } from './resolve_append_insert_target';
 import { useInsertLayoutAnimation } from './use_insert_layout_animation';
 import { useWorkflowLayout } from './use_workflow_layout';
 import {
@@ -162,11 +164,12 @@ const getResetViewTarget = (
   direction: LayoutDirection,
   bounds: Pick<GraphBounds, 'minX' | 'minY' | 'centerX' | 'centerY'>,
   wrapperWidth: number,
-  wrapperHeight: number
+  wrapperHeight: number,
+  topPadding: number = TOP_PADDING
 ): { x: number; y: number } =>
   direction === 'LR'
-    ? { x: bounds.minX + wrapperWidth / 2 - TOP_PADDING, y: bounds.centerY }
-    : { x: bounds.centerX, y: bounds.minY + wrapperHeight / 2 - TOP_PADDING };
+    ? { x: bounds.minX + wrapperWidth / 2 - topPadding, y: bounds.centerY }
+    : { x: bounds.centerX, y: bounds.minY + wrapperHeight / 2 - topPadding };
 
 const boundsFromNodes = (nodes: readonly Node[]): GraphBounds | undefined => {
   if (nodes.length === 0) return undefined;
@@ -838,6 +841,39 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
     onReady,
   ]);
 
+  // ⌘K / Ctrl+K appends to the selected sequence (trunk when nothing selected).
+  useEffect(() => {
+    if (!edit || suppressInsertionControls) return undefined;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (!(event.metaKey || event.ctrlKey) || event.key.toLowerCase() !== 'k') return;
+      // Ignore when typing in inputs / Monaco.
+      const target = event.target;
+      if (
+        target instanceof HTMLElement &&
+        (target.isContentEditable ||
+          target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.closest('.monaco-editor'))
+      ) {
+        return;
+      }
+      const stepTarget = resolveAppendInsertTarget(insertionPoints, selectedStepId);
+      if (!stepTarget) return;
+      event.preventDefault();
+      edit.onInsert(
+        {
+          mode: 'step',
+          index: stepTarget.index,
+          path: stepTarget.path,
+          sourceNodeId: stepTarget.sourceNodeId,
+        },
+        { left: 0, top: 0, width: 0, height: 0 }
+      );
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [edit, suppressInsertionControls, insertionPoints, selectedStepId]);
+
   const previousDirectionRef = useRef(direction);
   useEffect(() => {
     if (previousDirectionRef.current === direction) {
@@ -1019,7 +1055,34 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
                 </Panel>
               )}
               {!isEmptyWorkflow && edit && !suppressInsertionControls && (
-                <WorkflowGraphEditOverlays nodes={nodes} direction={direction} edit={edit} />
+                <WorkflowGraphEditOverlays
+                  nodes={animatedNodes}
+                  edges={animatedEdges}
+                  insertionPoints={insertionPoints}
+                  direction={direction}
+                  edit={edit}
+                />
+              )}
+              {edit && !suppressInsertionControls && !isEmptyWorkflow && (
+                <Panel position="bottom-center" style={{ marginBottom: 8 }}>
+                  <EuiText
+                    size="xs"
+                    color="subdued"
+                    data-test-subj="workflowGraphCmdKCaption"
+                    css={{ userSelect: 'none', pointerEvents: 'none' }}
+                  >
+                    {i18n.translate('workflowsUi.graph.cmdKCaption', {
+                      defaultMessage: '{shortcut} to add a step',
+                      values: {
+                        shortcut:
+                          typeof navigator !== 'undefined' &&
+                          /Mac|iPhone|iPad/.test(navigator.platform)
+                            ? '⌘K'
+                            : 'Ctrl+K',
+                      },
+                    })}
+                  </EuiText>
+                </Panel>
               )}
               {edit && pendingInsert && (
                 <WorkflowGraphPendingNode

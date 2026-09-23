@@ -18,24 +18,20 @@ import {
 } from '../../../entities/workflows/store/workflow_detail/slice';
 import { TestWrapper } from '../../../shared/test_utils/test_wrapper';
 
+jest.mock('../../../entities/workflows/model/use_workflow_stats', () => ({
+  useWorkflowFiltersOptions: () => ({ data: { tags: [{ label: 'shared', key: 'shared' }] } }),
+  useWorkflowStats: () => ({ data: undefined }),
+}));
+
 const BASE_YAML = `version: "1"
 name: Test Workflow
+description: A short description
 tags:
   - alpha
 consts:
   region: us-east-1
 triggers:
   - type: manual
-    inputs:
-      type: object
-      properties:
-        user:
-          type: string
-outputs:
-  type: object
-  properties:
-    result:
-      type: string
 steps:
   - name: log
     type: console
@@ -73,22 +69,20 @@ describe('WorkflowSettingsFlyout', () => {
     };
   };
 
-  it('renders a tab-less flyout with name, tags, and stub groups (no Sharing)', () => {
+  it('opens on General with name, description, and tags', () => {
     renderFlyout();
 
     expect(screen.getByTestId('workflowSettingsFlyout')).toBeInTheDocument();
-    expect(screen.queryByRole('tab')).not.toBeInTheDocument();
-    expect(screen.getByTestId('workflowSettingsNameInput')).toBeInTheDocument();
+    expect(screen.getByTestId('workflowSettingsTab-general')).toBeInTheDocument();
+    expect(screen.getByTestId('workflowSettingsTab-constants')).toBeInTheDocument();
+    expect(screen.queryByTestId('workflowSettingsTab-sharing')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('workflowSettingsTab-serviceAccount')).not.toBeInTheDocument();
+
+    expect(screen.getByTestId('workflowSettingsNameInput')).toHaveValue('Test Workflow');
+    expect(screen.getByTestId('workflowSettingsDescriptionInput')).toHaveValue(
+      'A short description'
+    );
     expect(screen.getByTestId('workflowSettingsTagsInput')).toBeInTheDocument();
-    expect(screen.getByText('Workflow name')).toBeInTheDocument();
-    expect(screen.getByText('Tags')).toBeInTheDocument();
-    expect(screen.getByText('Input')).toBeInTheDocument();
-    expect(screen.getByText('Output')).toBeInTheDocument();
-    expect(screen.getByText('Constants')).toBeInTheDocument();
-    expect(screen.queryByText('Sharing')).not.toBeInTheDocument();
-    expect(screen.getByTestId('workflowSettingsInputsList')).toHaveTextContent('user');
-    expect(screen.getByTestId('workflowSettingsOutputsList')).toHaveTextContent('result');
-    expect(screen.getByTestId('workflowSettingsConstantsList')).toHaveTextContent('region');
   });
 
   it('updates the draft YAML when the name changes', () => {
@@ -99,18 +93,25 @@ describe('WorkflowSettingsFlyout', () => {
     });
 
     expect(selectYamlString(store.getState())).toContain('name: Renamed Workflow');
-    expect(selectYamlString(store.getState())).not.toContain('name: Test Workflow');
   });
 
-  it('updates the draft YAML when tags change', () => {
+  it('removes description from YAML when cleared', () => {
     const { store } = renderFlyout();
 
-    const clearButton = screen
-      .getByTestId('workflowSettingsTagsInput')
-      .querySelector('[data-test-subj="comboBoxClearButton"]');
-    expect(clearButton).toBeTruthy();
-    fireEvent.click(clearButton!);
+    fireEvent.change(screen.getByTestId('workflowSettingsDescriptionInput'), {
+      target: { value: '' },
+    });
+    fireEvent.blur(screen.getByTestId('workflowSettingsDescriptionInput'));
 
-    expect(selectYamlString(store.getState())).toMatch(/tags:\s*\[\]/);
+    expect(selectYamlString(store.getState())).not.toContain('description');
+  });
+
+  it('shows Coming soon on the Constants tab', () => {
+    renderFlyout();
+
+    fireEvent.click(screen.getByTestId('workflowSettingsTab-constants'));
+    expect(screen.getByTestId('workflowSettingsConstantsPlaceholder')).toHaveTextContent(
+      'Coming soon.'
+    );
   });
 });

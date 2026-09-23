@@ -8,7 +8,6 @@
  */
 
 import {
-  EuiAccordion,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -18,6 +17,7 @@ import {
   EuiFieldNumber,
   EuiFieldText,
   EuiFormRow,
+  EuiIcon,
   EuiPopover,
   EuiSelect,
   EuiSwitch,
@@ -49,11 +49,7 @@ import {
   type StepFormField,
 } from '../lib/step_form_schema';
 import { ReferenceCapableField } from './reference_capable_field';
-import {
-  ErrorHandlingConfiguredBadge,
-  hasOnFailureConfigured,
-  StepErrorHandlingSection,
-} from './step_error_handling_section';
+import { StepErrorHandlingSection } from './step_error_handling_section';
 
 ensureWorkflowGraphEuiIcons();
 
@@ -85,7 +81,8 @@ export interface StepConfigPanelProps {
   readonly onViewFallbackOnCanvas?: (stepName: string) => void;
 }
 
-type PanelView = 'form' | 'yaml';
+type PanelTab = 'parameters' | 'settings';
+type ParametersMode = 'form' | 'yaml';
 
 /** Catalog display name — same label the Actions menu shows. */
 const resolveCatalogLabel = (
@@ -179,11 +176,11 @@ export function StepConfigPanel({
   onSave,
   isFallbackStep = false,
   onRevealErrorPort,
-  onViewFallbackOnCanvas,
 }: StepConfigPanelProps) {
   const { euiTheme } = useEuiTheme();
-  const [view, setView] = useState<PanelView>('form');
-  // The fragment is the single source of truth for both views.
+  const [tab, setTab] = useState<PanelTab>('parameters');
+  const [parametersMode, setParametersMode] = useState<ParametersMode>('form');
+  // The fragment is the single source of truth for Form and YAML.
   const [fragment, setFragment] = useState(initialFragment);
   const [showValidation, setShowValidation] = useState(false);
   const indent = useMemo(() => detectIndent(initialFragment), [initialFragment]);
@@ -386,16 +383,45 @@ export function StepConfigPanel({
     onSave(fragment);
   }, [parsed.valid, hasFormErrors, onSave, fragment]);
 
-  const viewOptions = [
+  const showSettings = !isFallbackStep && stepSupportsErrorHandling(stepType);
+
+  const tabOptions: Array<{ id: PanelTab; label: string }> = [
+    {
+      id: 'parameters',
+      label: i18n.translate('workflows.stepConfigPanel.parametersTab', {
+        defaultMessage: 'Inputs',
+      }),
+    },
+    {
+      id: 'settings',
+      label: i18n.translate('workflows.stepConfigPanel.settingsTab', {
+        defaultMessage: 'Settings',
+      }),
+    },
+  ];
+
+  const parametersModeOptions: Array<{
+    id: ParametersMode;
+    iconType: string;
+    label: string;
+  }> = [
     {
       id: 'form',
-      label: i18n.translate('workflows.stepConfigPanel.formView', { defaultMessage: 'Form' }),
+      iconType: 'workflow',
+      label: i18n.translate('workflows.stepConfigPanel.builderView', {
+        defaultMessage: 'Builder view',
+      }),
     },
     {
       id: 'yaml',
-      label: i18n.translate('workflows.stepConfigPanel.yamlView', { defaultMessage: 'YAML' }),
+      iconType: 'code',
+      label: i18n.translate('workflows.stepConfigPanel.yamlView', {
+        defaultMessage: 'YAML view',
+      }),
     },
   ];
+
+  const isBuilderMode = parametersMode === 'form';
 
   return (
     <div
@@ -422,136 +448,155 @@ export function StepConfigPanel({
         <div
           css={{
             display: 'flex',
-            alignItems: 'flex-start',
-            gap: euiTheme.size.s, // 8px between icon tile and name/description
+            alignItems: 'center',
+            gap: euiTheme.size.m,
             padding: `${euiTheme.size.m} ${euiTheme.size.m} ${euiTheme.size.s}`,
           }}
         >
-          <span
+          {/*
+            Single-line header: icon · name · pencil. No catalog/type subtitle —
+            the user already picked this node, the chip carries the provider,
+            and the form fields / YAML view identify the step kind.
+          */}
+          <div
             css={{
-              display: 'inline-flex',
+              display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center',
-              // Match the 40×40 step icon tiles (Actions menu / graph weight).
-              width: euiTheme.size.xxl,
-              height: euiTheme.size.xxl,
-              flex: '0 0 auto',
-              borderRadius: euiTheme.border.radius.small,
-              border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`,
-              background: euiTheme.colors.backgroundBaseSubdued,
+              gap: euiTheme.size.m,
+              minWidth: 0,
+              flex: '1 1 auto',
             }}
           >
-            <StepIcon stepType={stepType} executionStatus={undefined} size="m" />
-          </span>
-          <div css={{ minWidth: 0, flex: '1 1 auto' }}>
-            {isEditingName ? (
-              <div css={{ display: 'flex', flexDirection: 'column', gap: euiTheme.size.xs }}>
-                <EuiFieldText
-                  inputRef={(el) => {
-                    nameInputRef.current = el;
-                  }}
-                  compressed
-                  fullWidth
-                  value={nameDraft}
-                  isInvalid={Boolean(nameError)}
-                  aria-label={stepNameLabel}
-                  data-test-subj="workflowStepConfigPanelNameInput"
-                  onChange={(e) => {
-                    setNameDraft(e.target.value);
-                    if (nameError) setNameError(undefined);
-                  }}
-                  onBlur={commitNameEdit}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      commitNameEdit();
-                    } else if (e.key === 'Escape') {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      revertNameEdit();
-                    }
-                  }}
-                  css={{
-                    // Keep compressed control height; weight matches the title row.
-                    fontWeight: euiTheme.font.weight.bold,
-                  }}
-                />
-                {nameError ? (
-                  <EuiText size="xs" color="danger" data-test-subj="workflowStepConfigPanelNameError">
-                    {nameError}
-                  </EuiText>
-                ) : null}
-              </div>
-            ) : (
-              <EuiTitle size="xxs">
-                <h3
+            <span
+              css={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                // Match the 40×40 step icon tiles (Actions menu / graph weight).
+                width: euiTheme.size.xxl,
+                height: euiTheme.size.xxl,
+                flex: '0 0 auto',
+                borderRadius: euiTheme.border.radius.small,
+                border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`,
+                background: euiTheme.colors.backgroundBaseSubdued,
+              }}
+            >
+              <StepIcon stepType={stepType} executionStatus={undefined} size="m" />
+            </span>
+            <div css={{ minWidth: 0, flex: '1 1 auto' }}>
+              {isEditingName ? (
+                <div
                   css={{
                     display: 'flex',
-                    alignItems: 'center',
-                    // Match compressed EuiFieldText height so edit mode does not reflow.
+                    flexDirection: 'column',
+                    gap: euiTheme.size.xs,
                     minHeight: euiTheme.size.xl,
-                    maxWidth: '100%',
-                    margin: 0,
+                    justifyContent: 'center',
                   }}
                 >
-                  <div
+                  <EuiFieldText
+                    inputRef={(el) => {
+                      nameInputRef.current = el;
+                    }}
+                    compressed
+                    fullWidth
+                    value={nameDraft}
+                    isInvalid={Boolean(nameError)}
+                    aria-label={stepNameLabel}
+                    data-test-subj="workflowStepConfigPanelNameInput"
+                    onChange={(e) => {
+                      setNameDraft(e.target.value);
+                      if (nameError) setNameError(undefined);
+                    }}
+                    onBlur={commitNameEdit}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        commitNameEdit();
+                      } else if (e.key === 'Escape') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        revertNameEdit();
+                      }
+                    }}
                     css={{
-                      display: 'inline-flex',
+                      // Metric-neutral with EuiTitle size="xxs" (maps to font scale `s`).
+                      fontWeight: euiTheme.font.weight.bold,
+                      fontSize: euiTheme.font.scale.s * euiTheme.base,
+                      lineHeight: euiTheme.size.xl,
+                      height: euiTheme.size.xl,
+                      minHeight: euiTheme.size.xl,
+                      paddingBlock: 0,
+                      paddingInline: euiTheme.size.xs,
+                    }}
+                  />
+                  {nameError ? (
+                    <EuiText
+                      size="xs"
+                      color="danger"
+                      data-test-subj="workflowStepConfigPanelNameError"
+                    >
+                      {nameError}
+                    </EuiText>
+                  ) : null}
+                </div>
+              ) : (
+                <EuiTitle size="xxs">
+                  <h3
+                    css={{
+                      display: 'flex',
                       alignItems: 'center',
                       gap: euiTheme.size.xs,
-                      minWidth: 0,
-                      maxWidth: '100%',
                       minHeight: euiTheme.size.xl,
-                      // No inline-start padding — parent gap is the 8px from the icon tile.
-                      paddingInlineEnd: euiTheme.size.xs,
-                      borderRadius: euiTheme.border.radius.small,
-                      background: 'transparent',
-                      '&:hover, &:focus-within': {
-                        background: euiTheme.colors.backgroundBaseSubdued,
-                      },
+                      maxWidth: '100%',
+                      margin: 0,
                     }}
                   >
-                    <button
-                      type="button"
-                      onClick={beginNameEdit}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault();
-                          beginNameEdit();
-                        }
-                      }}
-                      aria-label={editNameLabel}
-                      data-test-subj="workflowStepConfigPanelTitle"
-                      css={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        minWidth: 0,
-                        flex: '1 1 auto',
-                        minHeight: euiTheme.size.xl,
-                        padding: 0,
-                        border: 'none',
-                        background: 'transparent',
-                        cursor: 'pointer',
-                        color: 'inherit',
-                        font: 'inherit',
-                        textAlign: 'left',
-                        '&:focus': { outline: 'none' },
-                        '&:focus-visible': {
-                          outline: `2px solid ${euiTheme.colors.primary}`,
-                          outlineOffset: 1,
-                        },
-                      }}
-                    >
-                      <span
+                    <EuiToolTip content={headerTitle} disableScreenReaderOutput>
+                      <button
+                        type="button"
+                        onClick={beginNameEdit}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            beginNameEdit();
+                          }
+                        }}
+                        aria-label={editNameLabel}
+                        data-test-subj="workflowStepConfigPanelTitle"
                         css={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          minWidth: 0,
+                          flex: '1 1 auto',
+                          minHeight: euiTheme.size.xl,
+                          padding: 0,
+                          border: 'none',
+                          background: 'transparent',
+                          cursor: 'pointer',
+                          color: 'inherit',
+                          font: 'inherit',
+                          fontWeight: 'inherit',
+                          textAlign: 'left',
                           overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap',
+                          '&:focus': { outline: 'none' },
+                          '&:focus-visible': {
+                            outline: `2px solid ${euiTheme.colors.primary}`,
+                            outlineOffset: 1,
+                          },
                         }}
                       >
-                        {headerTitle}
-                      </span>
-                    </button>
+                        <span
+                          css={{
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
+                          {headerTitle}
+                        </span>
+                      </button>
+                    </EuiToolTip>
                     <EuiButtonIcon
                       iconType="pencil"
                       size="xs"
@@ -561,80 +606,64 @@ export function StepConfigPanel({
                       data-test-subj="workflowStepConfigPanelEditName"
                       css={{ flex: '0 0 auto' }}
                     />
-                  </div>
-                </h3>
-              </EuiTitle>
-            )}
-            <div
-              data-test-subj="workflowStepConfigPanelSubtitle"
-              css={{
-                display: 'flex',
-                alignItems: 'baseline',
-                gap: euiTheme.size.xs,
-                minWidth: 0,
-              }}
-            >
-              <EuiText
-                size="xs"
-                color="subdued"
-                data-test-subj="workflowStepConfigPanelCatalog"
-                css={{ flex: '0 1 auto', minWidth: 0, whiteSpace: 'nowrap' }}
-              >
-                {catalogLabel}
-              </EuiText>
-              <EuiText size="xs" color="subdued" css={{ flex: '0 0 auto' }} aria-hidden>
-                ·
-              </EuiText>
-              <EuiToolTip content={stepType} disableScreenReaderOutput>
-                <EuiText
-                  size="xs"
-                  color="subdued"
-                  data-test-subj="workflowStepConfigPanelType"
-                  css={{
-                    flex: '1 1 auto',
-                    minWidth: 0,
-                    fontFamily: euiTheme.font.familyCode,
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  {stepType}
-                </EuiText>
-              </EuiToolTip>
+                  </h3>
+                </EuiTitle>
+              )}
             </div>
           </div>
-          <EuiToolTip content={closeLabel} disableScreenReaderOutput>
-            <EuiButtonIcon
-              iconType="cross"
-              color="text"
-              aria-label={closeLabel}
-              onClick={onCancel}
-              data-test-subj="workflowStepConfigPanelClose"
-              css={{ flex: '0 0 auto' }}
+          <div
+            css={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: euiTheme.size.s,
+              flex: '0 0 auto',
+            }}
+          >
+            {/*
+              Builder/YAML picks a *representation of the whole step* (YAML
+              covers inputs and settings together) while tabs pick *which part*
+              of the step you're viewing — two axes. The toggle sits above the
+              tabs in the header so it can govern them without an extra row.
+            */}
+            <ParametersModeToggle
+              mode={parametersMode}
+              options={parametersModeOptions}
+              onChange={setParametersMode}
             />
-          </EuiToolTip>
+            <EuiToolTip content={closeLabel} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType="cross"
+                color="text"
+                aria-label={closeLabel}
+                onClick={onCancel}
+                data-test-subj="workflowStepConfigPanelClose"
+                css={{ flex: '0 0 auto' }}
+              />
+            </EuiToolTip>
+          </div>
         </div>
-        <EuiTabs
-          size="s"
-          bottomBorder={false}
-          data-test-subj="workflowStepConfigPanelViewToggle"
-          aria-label={i18n.translate('workflows.stepConfigPanel.viewToggleLegend', {
-            defaultMessage: 'Step editor view',
-          })}
-          css={{ paddingInline: euiTheme.size.m }}
-        >
-          {viewOptions.map((option) => (
-            <EuiTab
-              key={option.id}
-              isSelected={view === option.id}
-              onClick={() => setView(option.id as PanelView)}
-              data-test-subj={`workflowStepConfigPanelView-${option.id}`}
-            >
-              {option.label}
-            </EuiTab>
-          ))}
-        </EuiTabs>
+        {isBuilderMode ? (
+          <EuiTabs
+            size="s"
+            bottomBorder={false}
+            data-test-subj="workflowStepConfigPanelTabs"
+            aria-label={i18n.translate('workflows.stepConfigPanel.tabsLegend', {
+              defaultMessage: 'Step editor sections',
+            })}
+            css={{ paddingInline: euiTheme.size.m }}
+          >
+            {tabOptions.map((option) => (
+              <EuiTab
+                key={option.id}
+                isSelected={tab === option.id}
+                onClick={() => setTab(option.id)}
+                data-test-subj={`workflowStepConfigPanelTab-${option.id}`}
+              >
+                {option.label}
+              </EuiTab>
+            ))}
+          </EuiTabs>
+        ) : null}
       </div>
 
       <div
@@ -642,51 +671,20 @@ export function StepConfigPanel({
           flex: '1 1 auto',
           minHeight: 0,
           overflow: 'hidden',
-          ...(view === 'form'
-            ? {
-                display: 'flex',
-                flexDirection: 'column' as const,
-                paddingInline: euiTheme.size.m,
-                boxSizing: 'border-box' as const,
-              }
-            : null),
+          display: 'flex',
+          flexDirection: 'column' as const,
+          paddingInline: euiTheme.size.m,
+          boxSizing: 'border-box' as const,
         }}
       >
-        {view === 'form' ? (
-          parsed.valid ? (
-            <StepForm
-              key={initialFragment}
-              fields={fields}
-              hasSchema={schema !== undefined}
-              fragment={fragment}
-              indent={indent}
-              stepType={stepType}
-              showValidation={showValidation}
-              isFallbackStep={isFallbackStep}
-              referenceCatalog={referenceCatalog}
-              missingName={isEmptyFieldValue(committedStepName)}
-              onChange={handleFieldChange}
-              onFragmentChange={setFragment}
-              onDraftErrorChange={handleDraftErrorChange}
-              onRevealErrorPort={onRevealErrorPort}
-              onViewFallbackOnCanvas={onViewFallbackOnCanvas}
-            />
-          ) : (
-            <EuiText size="s" color="danger" data-test-subj="workflowStepConfigPanelFormBlocked">
-              {i18n.translate('workflows.stepConfigPanel.invalidYamlForForm', {
-                defaultMessage: 'Fix the YAML to edit this step as a form. {error}',
-                values: { error: parsed.error ?? '' },
-              })}
-            </EuiText>
-          )
-        ) : (
+        {!isBuilderMode ? (
           <div
             css={{
+              flex: '1 1 auto',
+              minHeight: 240,
               height: '100%',
               width: '100%',
-              minHeight: 240,
-              // Monaco theme uses a transparent editor background; the container
-              // supplies the subtle fill (same token as the main YAML editor).
+              marginBlock: euiTheme.size.m,
               background: euiTheme.colors.backgroundBaseSubdued,
               overflow: 'hidden',
             }}
@@ -711,6 +709,71 @@ export function StepConfigPanel({
               dataTestSubj="workflowStepConfigPanelYaml"
             />
           </div>
+        ) : (
+          <>
+            <div
+              css={{
+                display: tab === 'parameters' ? 'flex' : 'none',
+                flexDirection: 'column',
+                flex: '1 1 auto',
+                minHeight: 0,
+                overflow: 'hidden',
+                paddingTop: euiTheme.size.m,
+              }}
+            >
+              {parsed.valid ? (
+                <StepForm
+                  key={initialFragment}
+                  fields={fields}
+                  hasSchema={schema !== undefined}
+                  fragment={fragment}
+                  showValidation={showValidation}
+                  referenceCatalog={referenceCatalog}
+                  onChange={handleFieldChange}
+                  onDraftErrorChange={handleDraftErrorChange}
+                />
+              ) : (
+                <EuiText
+                  size="s"
+                  color="danger"
+                  data-test-subj="workflowStepConfigPanelFormBlocked"
+                >
+                  {i18n.translate('workflows.stepConfigPanel.invalidYamlForForm', {
+                    defaultMessage: 'Fix the YAML to edit this step as a form. {error}',
+                    values: { error: parsed.error ?? '' },
+                  })}
+                </EuiText>
+              )}
+            </div>
+
+            <div
+              css={{
+                display: tab === 'settings' ? 'block' : 'none',
+                flex: '1 1 auto',
+                minHeight: 0,
+                overflow: 'auto',
+                paddingBlock: euiTheme.size.m,
+              }}
+              data-test-subj="workflowStepConfigPanelSettings"
+            >
+              {showSettings ? (
+                <div data-test-subj="workflowStepConfigErrorHandlingSection">
+                  <StepErrorHandlingSection
+                    fragment={fragment}
+                    indent={indent}
+                    onFragmentChange={setFragment}
+                    onRevealErrorPort={onRevealErrorPort}
+                  />
+                </div>
+              ) : (
+                <EuiText size="s" color="subdued">
+                  {i18n.translate('workflows.stepConfigPanel.settingsUnavailable', {
+                    defaultMessage: 'Error handling is not available for this step.',
+                  })}
+                </EuiText>
+              )}
+            </div>
+          </>
         )}
       </div>
 
@@ -740,40 +803,103 @@ export function StepConfigPanel({
   );
 }
 
+/** Icon segmented control — same glyphs/chrome as the canvas Visual/YAML toggle. */
+function ParametersModeToggle({
+  mode,
+  options,
+  onChange,
+}: {
+  mode: ParametersMode;
+  options: ReadonlyArray<{ id: ParametersMode; iconType: string; label: string }>;
+  onChange: (next: ParametersMode) => void;
+}) {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <div
+      role="group"
+      aria-label={i18n.translate('workflows.stepConfigPanel.parametersModeLegend', {
+        defaultMessage: 'Step editor mode',
+      })}
+      data-test-subj="workflowStepConfigPanelViewToggle"
+      css={{
+        background: euiTheme.colors.backgroundBaseSubdued,
+        border: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
+        borderRadius: euiTheme.border.radius.small,
+        padding: 3,
+        display: 'flex',
+        alignItems: 'center',
+        gap: 2,
+        flex: '0 0 auto',
+      }}
+    >
+      {options.map(({ id, iconType, label }) => {
+        const active = id === mode;
+        return (
+          <EuiToolTip key={id} content={label} delay="long" disableScreenReaderOutput>
+            <button
+              type="button"
+              title={label}
+              aria-label={label}
+              aria-pressed={active}
+              onClick={() => onChange(id)}
+              data-test-subj={`workflowStepConfigPanelView-${id}`}
+              css={{
+                width: 28,
+                height: 28,
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                border: 'none',
+                cursor: 'pointer',
+                borderRadius: 4,
+                padding: 0,
+                background: active ? euiTheme.colors.backgroundBasePrimary : 'transparent',
+                color: euiTheme.colors.text,
+                transition: 'background 120ms ease',
+                '&:hover': {
+                  background: active
+                    ? euiTheme.colors.backgroundBasePrimary
+                    : euiTheme.colors.backgroundBaseInteractiveHover,
+                },
+                '&:focus-visible': {
+                  outline: `2px solid ${euiTheme.colors.primary}`,
+                  outlineOffset: 2,
+                },
+              }}
+            >
+              <EuiIcon
+                type={iconType}
+                aria-hidden
+                color={active ? euiTheme.colors.primaryText : euiTheme.colors.text}
+              />
+            </button>
+          </EuiToolTip>
+        );
+      })}
+    </div>
+  );
+}
+
 function StepForm({
   fields,
   hasSchema,
   fragment,
-  indent,
-  stepType,
   showValidation,
-  isFallbackStep,
   referenceCatalog,
-  missingName,
   onChange,
-  onFragmentChange,
   onDraftErrorChange,
-  onRevealErrorPort,
-  onViewFallbackOnCanvas,
 }: {
   fields: readonly StepFormField[];
   /** False when no connector/built-in schema was resolved for this step type. */
   hasSchema: boolean;
   fragment: string;
-  indent: number;
-  stepType: string;
   showValidation: boolean;
-  isFallbackStep: boolean;
   referenceCatalog: ReturnType<typeof buildDataReferenceCatalog>;
-  missingName: boolean;
   onChange: (field: StepFormField, value: unknown) => void;
-  onFragmentChange: (next: string) => void;
   onDraftErrorChange: (id: string, error: string | undefined) => void;
-  onRevealErrorPort?: () => void;
-  onViewFallbackOnCanvas?: (stepName: string) => void;
 }) {
   const { euiTheme } = useEuiTheme();
-  const errorHandlingId = useGeneratedHtmlId({ prefix: 'workflowStepConfigErrorHandling' });
   const [optionalPickerOpen, setOptionalPickerOpen] = useState(false);
 
   // Primary = required or `advanced: false` (promoted). Everything else is optional
@@ -794,6 +920,8 @@ function StepForm({
     return map;
   }, [optionalFields]);
 
+  // Cleared values: an added optional field stays in the form until explicitly
+  // removed — no disappearing mid-edit when the user clears the input.
   const [revealedOptionalIds, setRevealedOptionalIds] = useState<readonly string[]>(() => {
     const ids: string[] = [];
     for (const field of optionalFields) {
@@ -804,7 +932,7 @@ function StepForm({
     return ids;
   });
 
-  // Auto-reveal optionals that gain a value (e.g. YAML tab edits).
+  // Auto-reveal optionals that gain a value (e.g. YAML tab edits). Never auto-hide.
   useEffect(() => {
     setRevealedOptionalIds((prev) => {
       let next: string[] | undefined;
@@ -833,24 +961,31 @@ function StepForm({
     [optionalFields, revealedOptionalIds]
   );
 
-  const showErrorHandling = !isFallbackStep && stepSupportsErrorHandling(stepType);
-
-  const errorConfigured = showErrorHandling && hasOnFailureConfigured(fragment);
-
   const formStackCss = {
-    '.euiFormRow + .euiFormRow': {
+    '.workflowStepConfigFieldRow + .workflowStepConfigFieldRow': {
       marginTop: euiTheme.size.l,
     },
   };
 
-  const renderField = (field: StepFormField, showOptionalMarker: boolean) => (
+  const removeOptionalField = useCallback(
+    (field: StepFormField) => {
+      const id = fieldId(field);
+      setRevealedOptionalIds((prev) => prev.filter((x) => x !== id));
+      onChange(field, undefined);
+      onDraftErrorChange(id, undefined);
+    },
+    [onChange, onDraftErrorChange]
+  );
+
+  const renderField = (field: StepFormField, options: { removable: boolean }) => (
     <StepFieldRow
       key={fieldId(field)}
       field={field}
       value={toJs(readFragmentValue(fragment, field.path))}
       showValidation={showValidation}
       referenceCatalog={referenceCatalog}
-      showOptionalMarker={showOptionalMarker}
+      showOptionalMarker={!field.required}
+      onRemove={options.removable ? () => removeOptionalField(field) : undefined}
       onChange={(value) => onChange(field, value)}
       onDraftErrorChange={(error) => onDraftErrorChange(fieldId(field), error)}
     />
@@ -862,14 +997,6 @@ function StepForm({
     setOptionalPickerOpen(false);
   }, []);
 
-  const accordionButtonCss = {
-    minHeight: 42,
-    alignItems: 'center' as const,
-    '&:hover, &:focus': {
-      textDecoration: 'none !important',
-    },
-  };
-
   const optionalPickerItems = availableOptionalFields.map((field) => (
     <EuiContextMenuItem
       key={fieldId(field)}
@@ -879,6 +1006,61 @@ function StepForm({
       {field.label}
     </EuiContextMenuItem>
   ));
+
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const endSentinelRef = useRef<HTMLDivElement | null>(null);
+  const [addFieldPinned, setAddFieldPinned] = useState(false);
+
+  useEffect(() => {
+    const root = scrollRef.current;
+    const sentinel = endSentinelRef.current;
+    if (
+      typeof IntersectionObserver === 'undefined' ||
+      !root ||
+      !sentinel ||
+      availableOptionalFields.length === 0
+    ) {
+      setAddFieldPinned(false);
+      return undefined;
+    }
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setAddFieldPinned(!entry.isIntersecting);
+      },
+      { root, threshold: 1 }
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [availableOptionalFields.length, primaryFields.length, revealedOptionalFields.length]);
+
+  const addOptionalButton = (
+    <EuiPopover
+      isOpen={optionalPickerOpen}
+      closePopover={() => setOptionalPickerOpen(false)}
+      panelPaddingSize="none"
+      anchorPosition="upLeft"
+      button={
+        <EuiButtonEmpty
+          size="s"
+          iconType="plusCircle"
+          flush="left"
+          color="primary"
+          onClick={() => setOptionalPickerOpen((open) => !open)}
+          data-test-subj="workflowStepConfigAddOptionalField"
+        >
+          {i18n.translate('workflows.stepConfigPanel.addOptionalField', {
+            defaultMessage: 'Add optional field',
+          })}
+        </EuiButtonEmpty>
+      }
+    >
+      <EuiContextMenuPanel
+        size="s"
+        items={optionalPickerItems}
+        data-test-subj="workflowStepConfigOptionalFieldMenu"
+      />
+    </EuiPopover>
+  );
 
   return (
     <div
@@ -892,11 +1074,12 @@ function StepForm({
       }}
     >
       <div
+        ref={scrollRef}
         css={{
           flex: '1 1 auto',
           minHeight: 0,
           overflow: 'auto',
-          paddingBlock: euiTheme.size.m,
+          paddingBottom: euiTheme.size.m,
         }}
       >
         {fields.length === 0 ? (
@@ -920,11 +1103,11 @@ function StepForm({
                 {hasSchema
                   ? i18n.translate('workflows.stepConfigPanel.noInputsBody', {
                       defaultMessage:
-                        'This step has no inputs to set. You can still rename it above or configure error handling below.',
+                        'This step has no inputs to set. You can still rename it above or configure Settings.',
                     })
                   : i18n.translate('workflows.stepConfigPanel.formUnavailableBody', {
                       defaultMessage:
-                        'This step type is not mapped to a form. Switch to the YAML tab to edit its configuration.',
+                        'This step type is not mapped to a form. Switch to YAML to edit its configuration.',
                     })}
               </EuiText>
             }
@@ -932,87 +1115,28 @@ function StepForm({
           />
         ) : (
           <div css={formStackCss} data-test-subj="workflowStepConfigPrimaryFields">
-            {primaryFields.map((field) => renderField(field, true))}
-            {revealedOptionalFields.map((field) => renderField(field, false))}
+            {primaryFields.map((field) => renderField(field, { removable: false }))}
+            {revealedOptionalFields.map((field) => renderField(field, { removable: true }))}
           </div>
         )}
 
-        {availableOptionalFields.length > 0 ? (
-          <div css={{ marginTop: euiTheme.size.m }}>
-            <EuiPopover
-              isOpen={optionalPickerOpen}
-              closePopover={() => setOptionalPickerOpen(false)}
-              panelPaddingSize="none"
-              anchorPosition="downLeft"
-              button={
-                <EuiButtonEmpty
-                  size="s"
-                  iconType="plusCircle"
-                  flush="left"
-                  onClick={() => setOptionalPickerOpen((open) => !open)}
-                  data-test-subj="workflowStepConfigAddOptionalField"
-                >
-                  {i18n.translate('workflows.stepConfigPanel.addOptionalField', {
-                    defaultMessage: 'Add optional field',
-                  })}
-                </EuiButtonEmpty>
-              }
-            >
-              <EuiContextMenuPanel
-                size="s"
-                items={optionalPickerItems}
-                data-test-subj="workflowStepConfigOptionalFieldMenu"
-              />
-            </EuiPopover>
-          </div>
+        {availableOptionalFields.length > 0 && !addFieldPinned ? (
+          <div css={{ marginTop: euiTheme.size.m }}>{addOptionalButton}</div>
         ) : null}
+        <div ref={endSentinelRef} aria-hidden css={{ height: 1, width: '100%' }} />
       </div>
 
-      {showErrorHandling ? (
+      {availableOptionalFields.length > 0 && addFieldPinned ? (
         <div
           css={{
             flex: '0 0 auto',
             borderTop: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`,
+            boxShadow: `0 -6px 12px -8px rgba(0, 0, 0, 0.18)`,
             background: euiTheme.colors.backgroundBasePlain,
+            paddingBlock: euiTheme.size.s,
           }}
         >
-          <EuiAccordion
-            id={errorHandlingId}
-            initialIsOpen={false}
-            buttonProps={{ css: accordionButtonCss }}
-            buttonContent={
-              <span
-                css={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  gap: euiTheme.size.s,
-                  width: '100%',
-                  paddingRight: euiTheme.size.s,
-                }}
-              >
-                <EuiTitle size="xs" css={{ fontSize: euiTheme.size.base }}>
-                  <span>
-                    {i18n.translate('workflows.stepConfigPanel.errorHandling', {
-                      defaultMessage: 'Error handling',
-                    })}
-                  </span>
-                </EuiTitle>
-                {errorConfigured ? <ErrorHandlingConfiguredBadge /> : null}
-              </span>
-            }
-            data-test-subj="workflowStepConfigErrorHandlingSection"
-          >
-            <div css={{ paddingBottom: euiTheme.size.m }}>
-              <StepErrorHandlingSection
-                fragment={fragment}
-                indent={indent}
-                onFragmentChange={onFragmentChange}
-                onRevealErrorPort={onRevealErrorPort}
-                onViewFallbackOnCanvas={onViewFallbackOnCanvas}
-              />
-            </div>
-          </EuiAccordion>
+          {addOptionalButton}
         </div>
       ) : null}
     </div>
@@ -1051,6 +1175,7 @@ function StepFieldRow({
   showValidation,
   referenceCatalog,
   showOptionalMarker,
+  onRemove,
   onChange,
   onDraftErrorChange,
 }: {
@@ -1059,6 +1184,7 @@ function StepFieldRow({
   showValidation: boolean;
   referenceCatalog: ReturnType<typeof buildDataReferenceCatalog>;
   showOptionalMarker: boolean;
+  onRemove?: () => void;
   onChange: (value: unknown) => void;
   onDraftErrorChange: (error: string | undefined) => void;
 }) {
@@ -1088,6 +1214,9 @@ function StepFieldRow({
   const optionalLabel = i18n.translate('workflows.stepConfigPanel.optional', {
     defaultMessage: 'Optional',
   });
+  const removeLabel = i18n.translate('workflows.stepConfigPanel.removeOptionalField', {
+    defaultMessage: 'Remove field',
+  });
   const representable = isFieldValueRepresentable(field, value);
   const schemaError = representable ? validateStepField(field, value) : undefined;
   const errorMessage = jsonDraftError ?? schemaError;
@@ -1116,11 +1245,57 @@ function StepFieldRow({
     </span>
   );
 
+  const removeExpandedCss = {
+    width: 18,
+    minWidth: 18,
+    opacity: 1,
+    marginInlineStart: 6,
+  };
+  const removeExpandCss = {
+    width: 0,
+    minWidth: 0,
+    opacity: 0,
+    overflow: 'hidden' as const,
+    marginInlineStart: 0,
+    transition: 'width 140ms ease, opacity 140ms ease, margin 140ms ease',
+    '@media (prefers-reduced-motion: reduce)': { transition: 'none' },
+    '&:hover': { color: euiTheme.colors.textDanger },
+    // Always focusable; expand on own focus the same way row hover does.
+    '&:focus, &:focus-visible': removeExpandedCss,
+  };
+
   const labelAppend =
-    showOptionalMarker && !field.required ? (
-      <EuiText size="xs" color="subdued">
-        {optionalLabel}
-      </EuiText>
+    showOptionalMarker || onRemove ? (
+      <span
+        css={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'flex-end',
+          // Expand ✕ to the right of Optional on row hover / own focus.
+          '.workflowStepConfigFieldRow:hover &, &:focus-within': {
+            '[data-remove-field]': removeExpandedCss,
+          },
+        }}
+      >
+        {showOptionalMarker ? (
+          <EuiText size="xs" color="subdued">
+            {optionalLabel}
+          </EuiText>
+        ) : null}
+        {onRemove ? (
+          <EuiButtonIcon
+            iconType="cross"
+            size="xs"
+            color="text"
+            title={removeLabel}
+            aria-label={removeLabel}
+            onClick={onRemove}
+            data-remove-field=""
+            data-test-subj={`workflowStepConfigRemoveOptional-${fieldId(field)}`}
+            css={removeExpandCss}
+          />
+        ) : null}
+      </span>
     ) : undefined;
 
   const helpText = representable
@@ -1133,22 +1308,24 @@ function StepFieldRow({
 
   if (!representable) {
     return (
-      <StepValidatedFormRow
-        label={labelContent}
-        labelAppend={labelAppend}
-        helpText={helpText}
-        isInvalid={false}
-        fullWidth
-        display="row"
-      >
-        <EuiFieldText
-          compressed
+      <div className="workflowStepConfigFieldRow">
+        <StepValidatedFormRow
+          label={labelContent}
+          labelAppend={labelAppend}
+          helpText={helpText}
+          isInvalid={false}
           fullWidth
-          readOnly
-          value={stringifyYaml(value).trim()}
-          data-test-subj={`${testSubj}-readonly`}
-        />
-      </StepValidatedFormRow>
+          display="row"
+        >
+          <EuiFieldText
+            compressed
+            fullWidth
+            readOnly
+            value={stringifyYaml(value).trim()}
+            data-test-subj={`${testSubj}-readonly`}
+          />
+        </StepValidatedFormRow>
+      </div>
     );
   }
 
@@ -1156,7 +1333,7 @@ function StepFieldRow({
     // Compact: label + switch on one line (8px gap), Optional right-aligned; help 4px below.
     return (
       <div
-        className="euiFormRow"
+        className="euiFormRow workflowStepConfigFieldRow"
         css={{
           display: 'flex',
           flexDirection: 'column',
@@ -1216,9 +1393,13 @@ function StepFieldRow({
     display: 'row' as const,
   };
 
+  const wrapRow = (child: React.ReactElement) => (
+    <div className="workflowStepConfigFieldRow">{child}</div>
+  );
+
   switch (field.kind) {
     case 'number':
-      return (
+      return wrapRow(
         <StepValidatedFormRow {...rowProps}>
           <EuiFieldNumber
             compressed
@@ -1234,7 +1415,7 @@ function StepFieldRow({
         </StepValidatedFormRow>
       );
     case 'select':
-      return (
+      return wrapRow(
         <StepValidatedFormRow {...rowProps}>
           <EuiSelect
             compressed
@@ -1250,7 +1431,7 @@ function StepFieldRow({
         </StepValidatedFormRow>
       );
     case 'code':
-      return (
+      return wrapRow(
         <StepValidatedFormRow {...rowProps}>
           <CodeField
             field={field}
@@ -1266,7 +1447,7 @@ function StepFieldRow({
       );
     case 'text':
     default:
-      return (
+      return wrapRow(
         <StepValidatedFormRow {...rowProps}>
           <ReferenceCapableField
             catalog={referenceCatalog}

@@ -161,12 +161,12 @@ const renderPanel = (overrides: Partial<React.ComponentProps<typeof StepConfigPa
 };
 
 describe('StepConfigPanel', () => {
-  it('renders instance name as title with catalog · type subtitle', () => {
+  it('renders instance name as title without a catalog · type subtitle', () => {
     renderPanel();
     expect(screen.getByTestId('workflowStepConfigPanelTitle')).toHaveTextContent('notify');
-    expect(screen.getByTestId('workflowStepConfigPanelCatalog')).toHaveTextContent('Slack');
-    expect(screen.getByTestId('workflowStepConfigPanelType')).toHaveTextContent('slack');
-    expect(screen.getByTestId('workflowStepConfigPanelSubtitle')).toHaveTextContent('Slack');
+    expect(screen.queryByTestId('workflowStepConfigPanelSubtitle')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('workflowStepConfigPanelCatalog')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('workflowStepConfigPanelType')).not.toBeInTheDocument();
     expect(screen.queryByText(/Configure/)).not.toBeInTheDocument();
     expect(screen.queryByTestId('workflowStepConfigField-name')).not.toBeInTheDocument();
     expect(screen.getByTestId('workflowStepConfigField-with.message')).toHaveValue(
@@ -182,7 +182,10 @@ describe('StepConfigPanel', () => {
     fireEvent.click(screen.getByTestId('workflowStepConfigAddOptionalField'));
     fireEvent.click(screen.getByTestId('workflowStepConfigAddOptionalOption-with.query'));
     expect(screen.getByTestId('workflowStepConfigField-with.query')).toBeInTheDocument();
+    expect(screen.getByTestId('workflowStepConfigRemoveOptional-with.query')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('workflowStepConfigPanelTab-settings'));
     expect(screen.getByTestId('workflowStepConfigErrorHandlingSection')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('workflowStepConfigPanelTab-parameters'));
     expect(screen.queryByTestId('workflowStepConfigConfiguration')).not.toBeInTheDocument();
     // Casing-only labels skip the YAML-key hint.
     expect(screen.queryByTestId('workflowStepConfigFieldKey-with.message')).not.toBeInTheDocument();
@@ -204,8 +207,7 @@ describe('StepConfigPanel', () => {
       initialFragment: 'type: slack\nconnector-id: abc\nwith:\n  message: hi\n',
     });
     expect(screen.getByTestId('workflowStepConfigPanelTitle')).toHaveTextContent('Slack Message');
-    expect(screen.getByTestId('workflowStepConfigPanelCatalog')).toHaveTextContent('Slack Message');
-    expect(screen.getByTestId('workflowStepConfigPanelType')).toHaveTextContent('slack');
+    expect(screen.queryByTestId('workflowStepConfigPanelSubtitle')).not.toBeInTheDocument();
   });
 
   it('edits the step name inline in the header', () => {
@@ -237,7 +239,7 @@ describe('StepConfigPanel', () => {
     expect(screen.getByTestId('workflowStepConfigPanelNameInput')).toBeInTheDocument();
   });
 
-  it('prettifies types that lack a catalog display name', () => {
+  it('prettifies types that lack a catalog display name for the insert title fallback', () => {
     const bareConnectors: ConnectorContractUnion[] = [
       {
         type: 'kibana.createCaseDefaultSpace',
@@ -249,18 +251,16 @@ describe('StepConfigPanel', () => {
       } as unknown as ConnectorContractUnion,
     ];
     renderPanel({
+      mode: 'insert',
       stepType: 'kibana.createCaseDefaultSpace',
       connectors: bareConnectors,
-      initialFragment:
-        'name: open_case\ntype: kibana.createCaseDefaultSpace\nwith:\n  title: t\n',
+      initialFragment: 'type: kibana.createCaseDefaultSpace\nwith:\n  title: t\n',
     });
-    expect(screen.getByTestId('workflowStepConfigPanelTitle')).toHaveTextContent('open_case');
-    expect(screen.getByTestId('workflowStepConfigPanelCatalog')).toHaveTextContent(
+    // No instance name yet — title falls back to the prettified catalog label.
+    expect(screen.getByTestId('workflowStepConfigPanelTitle')).toHaveTextContent(
       'Create case default space'
     );
-    expect(screen.getByTestId('workflowStepConfigPanelType')).toHaveTextContent(
-      'kibana.createCaseDefaultSpace'
-    );
+    expect(screen.queryByTestId('workflowStepConfigPanelSubtitle')).not.toBeInTheDocument();
   });
 
   it('shows a YAML-key hint only when the label diverges from the key', () => {
@@ -385,13 +385,14 @@ with:
     expect(screen.getByTestId('workflowStepConfigField-with.path')).toBeInTheDocument();
     expect(screen.getByTestId('workflowStepConfigAddOptionalField')).toBeInTheDocument();
 
-    // Promoted primary optionals may show Optional; picker-added fields never do.
+    // Optional stays flush-right on both promoted and picker-added fields; ✕ is hover/focus.
     const urlRow = screen.getByTestId('workflowStepConfigField-with.url').closest('.euiFormRow');
     expect(urlRow).toHaveTextContent('Optional');
     fireEvent.click(screen.getByTestId('workflowStepConfigAddOptionalField'));
     fireEvent.click(screen.getByTestId('workflowStepConfigAddOptionalOption-with.query'));
     const queryRow = screen.getByTestId('workflowStepConfigField-with.query').closest('.euiFormRow');
-    expect(queryRow).not.toHaveTextContent('Optional');
+    expect(queryRow).toHaveTextContent('Optional');
+    expect(screen.getByTestId('workflowStepConfigRemoveOptional-with.query')).toBeInTheDocument();
   });
 
   it('puts uncurated optionals behind Add optional field unless valued', () => {
@@ -399,9 +400,10 @@ with:
       initialFragment:
         'name: n\ntype: slack\nconnector-id: a\nwith:\n  message: hi\n  query:\n    q: "1"\n',
     });
-    // Valued query auto-reveals; error handling stays sticky at the bottom.
+    // Valued query auto-reveals; Settings holds error handling.
     expect(screen.getByTestId('workflowStepConfigField-with.query')).toBeInTheDocument();
     expect(screen.getByTestId('workflowStepConfigPrimaryFields')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('workflowStepConfigPanelTab-settings'));
     expect(screen.getByTestId('workflowStepConfigErrorHandlingSection')).toBeInTheDocument();
   });
 
@@ -414,8 +416,9 @@ with:
     });
     expect(screen.queryByTestId('workflowStepConfigConfiguration')).not.toBeInTheDocument();
     expect(screen.queryByTestId('workflowStepConfigAddOptionalField')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('workflowStepConfigPanelTab-settings'));
     expect(screen.queryByTestId('workflowStepConfigErrorHandlingSection')).not.toBeInTheDocument();
-    expect(screen.getByTestId('workflowStepConfigPanelForm')).toBeInTheDocument();
+    expect(screen.getByTestId('workflowStepConfigPanelSettings')).toBeInTheDocument();
   });
 
   it('writes retry and continue through on-failure and clears keys when toggled off', () => {
@@ -423,20 +426,23 @@ with:
       initialFragment: 'name: n\ntype: slack\nconnector-id: a\nwith:\n  message: hi\n',
       onRevealErrorPort: jest.fn(),
     });
-    // Accordion content stays in the DOM in the EUI test env — toggle switches directly.
+    fireEvent.click(screen.getByTestId('workflowStepConfigPanelTab-settings'));
     fireEvent.click(screen.getByTestId('workflowStepConfigErrorRetry'));
     fireEvent.click(screen.getByTestId('workflowStepConfigErrorContinue'));
-    fireEvent.click(screen.getByText('YAML'));
+    fireEvent.click(screen.getByTestId('workflowStepConfigPanelTab-parameters'));
+    fireEvent.click(screen.getByTestId('workflowStepConfigPanelView-yaml'));
     const yaml = (screen.getByTestId('workflowStepConfigPanelYaml') as HTMLTextAreaElement).value;
     expect(yaml).toContain('on-failure:');
     expect(yaml).toContain('max-attempts: 3');
     expect(yaml).toContain('delay: 5s');
     expect(yaml).toContain('continue: true');
 
-    fireEvent.click(screen.getByText('Form'));
+    fireEvent.click(screen.getByTestId('workflowStepConfigPanelView-form'));
+    fireEvent.click(screen.getByTestId('workflowStepConfigPanelTab-settings'));
     fireEvent.click(screen.getByTestId('workflowStepConfigErrorRetry'));
     fireEvent.click(screen.getByTestId('workflowStepConfigErrorContinue'));
-    fireEvent.click(screen.getByText('YAML'));
+    fireEvent.click(screen.getByTestId('workflowStepConfigPanelTab-parameters'));
+    fireEvent.click(screen.getByTestId('workflowStepConfigPanelView-yaml'));
     const cleared = (screen.getByTestId('workflowStepConfigPanelYaml') as HTMLTextAreaElement)
       .value;
     expect(cleared).not.toContain('on-failure');
@@ -458,6 +464,7 @@ with:
         />
       </I18nProvider>
     );
+    fireEvent.click(screen.getByTestId('workflowStepConfigPanelTab-settings'));
     expect(screen.queryByTestId('workflowStepConfigErrorHandlingSection')).not.toBeInTheDocument();
     unmount();
 
@@ -465,6 +472,7 @@ with:
       initialFragment: 'name: n\ntype: slack\nconnector-id: a\nwith:\n  message: hi\n',
       onRevealErrorPort,
     });
+    fireEvent.click(screen.getByTestId('workflowStepConfigPanelTab-settings'));
     expect(screen.getByTestId('workflowStepConfigErrorShowMe')).toBeInTheDocument();
     expect(screen.queryByTestId('workflowStepConfigErrorAddFallback')).not.toBeInTheDocument();
     fireEvent.click(screen.getByTestId('workflowStepConfigErrorShowMe'));
@@ -476,7 +484,7 @@ with:
     fireEvent.change(screen.getByTestId('workflowStepConfigField-with.message'), {
       target: { value: 'Changed {{ inputs.user }}' },
     });
-    fireEvent.click(screen.getByText('YAML'));
+    fireEvent.click(screen.getByTestId('workflowStepConfigPanelView-yaml'));
     const yaml = (screen.getByTestId('workflowStepConfigPanelYaml') as HTMLTextAreaElement).value;
     expect(yaml).toContain('# step comment');
     expect(yaml).toContain('x-owner: team-a');
@@ -552,8 +560,9 @@ with:
     const row = screen.getByTestId('workflowStepConfigField-with.debug-row');
     expect(row).toContainElement(switchEl);
     expect(row).toHaveTextContent('Debug');
-    // Optional markers are primary-only; revealed optionals never show them.
-    expect(row).not.toHaveTextContent('Optional');
+    // Auto-revealed optionals keep Optional + a hover/focus ✕ remove control.
+    expect(row).toHaveTextContent('Optional');
+    expect(screen.getByTestId('workflowStepConfigRemoveOptional-with.debug')).toBeInTheDocument();
     expect(row).toHaveTextContent('Include debug output');
     // Switch is not alone on a stacked field row — label is associated via htmlFor.
     expect(switchEl).toHaveAttribute('id');
@@ -563,11 +572,14 @@ with:
 
   it('Escape cancels and the YAML view edits flow back to the form', () => {
     const { onCancel } = renderPanel();
-    fireEvent.click(screen.getByText('YAML'));
+    expect(screen.getByTestId('workflowStepConfigPanelTabs')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('workflowStepConfigPanelView-yaml'));
+    expect(screen.queryByTestId('workflowStepConfigPanelTabs')).not.toBeInTheDocument();
     fireEvent.change(screen.getByTestId('workflowStepConfigPanelYaml'), {
       target: { value: 'name: renamed\ntype: slack\nconnector-id: abc\nwith:\n  message: yo\n' },
     });
-    fireEvent.click(screen.getByText('Form'));
+    fireEvent.click(screen.getByTestId('workflowStepConfigPanelView-form'));
+    expect(screen.getByTestId('workflowStepConfigPanelTabs')).toBeInTheDocument();
     expect(screen.getByTestId('workflowStepConfigPanelTitle')).toHaveTextContent('renamed');
     expect(screen.getByTestId('workflowStepConfigField-with.message')).toHaveValue('yo');
     fireEvent.keyDown(screen.getByTestId('workflowStepConfigPanel'), { key: 'Escape' });

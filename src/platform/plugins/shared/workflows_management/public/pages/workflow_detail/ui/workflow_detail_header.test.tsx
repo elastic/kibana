@@ -14,7 +14,6 @@ import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import { ChangeHistoryModalContext } from '@kbn/change-history-ui';
 import { useWorkflowsCapabilities, type WorkflowsManagementCapabilities } from '@kbn/workflows-ui';
 import { createMockWorkflowsCapabilities } from '@kbn/workflows-ui/mocks';
-import { SkipUnsavedRunConfirmationStorageKey } from './use_run_workflow_with_confirmation';
 import { WorkflowDetailHeader, type WorkflowDetailHeaderProps } from './workflow_detail_header';
 import { PLUGIN_ID } from '../../../../common';
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
@@ -75,12 +74,10 @@ jest.mock('@kbn/css-utils/public/use_memo_css', () => ({
 jest.mock('../../../hooks/use_workflows_experimental_ui_setting', () => ({
   useWorkflowsExperimentalUiSetting: jest.fn().mockReturnValue(false),
 }));
-
-// Run sits in the overflow when Settings occupies an inline slot (APP_MENU_ITEM_LIMIT).
-const openRunWorkflowButton = async (): Promise<HTMLElement> => {
-  await openAppMenuOverflow();
-  return screen.getByTestId('runWorkflowHeaderButton');
-};
+jest.mock('../../../entities/workflows/model/use_workflow_stats', () => ({
+  useWorkflowFiltersOptions: () => ({ data: { tags: [] } }),
+  useWorkflowStats: () => ({ data: undefined }),
+}));
 
 describe('WorkflowDetailHeader', () => {
   const defaultProps: WorkflowDetailHeaderProps = {
@@ -241,7 +238,7 @@ describe('WorkflowDetailHeader', () => {
     expect(getAllByText('Test Workflow').length).toBeGreaterThan(0);
   });
 
-  it('opens the workflow settings flyout from the Settings header action', () => {
+  it('opens the workflow settings flyout from the header gear', () => {
     const { getByTestId } = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />);
 
     expect(screen.queryByTestId('workflowSettingsFlyout')).not.toBeInTheDocument();
@@ -328,19 +325,9 @@ describe('WorkflowDetailHeader', () => {
     expect(getByTestId('saveWorkflowHeaderButton')).not.toBeDisabled();
   });
 
-  it('disables run workflow button when yaml has syntax errors', async () => {
-    renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
-      isValid: false,
-    });
-    expect(await openRunWorkflowButton()).toBeDisabled();
-  });
-
-  it('enables run workflow button when yaml has validation errors', async () => {
-    renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
-      isValid: true,
-      hasYamlSchemaValidationErrors: true,
-    });
-    expect(await openRunWorkflowButton()).toBeEnabled();
+  it('does not expose a Run action in the header app menu', () => {
+    renderWithProviders(<WorkflowDetailHeader {...defaultProps} />);
+    expect(screen.queryByTestId('runWorkflowHeaderButton')).not.toBeInTheDocument();
   });
 
   it('disables enabled toggle when yaml has validation errors', () => {
@@ -359,11 +346,6 @@ describe('WorkflowDetailHeader', () => {
     });
     const toggle = result.getByRole('switch');
     expect(toggle).toBeDisabled();
-  });
-
-  it('enables run workflow button when yaml is valid', async () => {
-    renderWithProviders(<WorkflowDetailHeader {...defaultProps} />);
-    expect(await openRunWorkflowButton()).toBeEnabled();
   });
 
   it('shows the managed badge for managed workflows', () => {
@@ -401,60 +383,6 @@ describe('WorkflowDetailHeader', () => {
     });
 
     expect(result.getByTestId('saveWorkflowHeaderButton')).toBeDisabled();
-  });
-
-  it('shows the unsaved changes confirmation when running with unsaved changes', async () => {
-    const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
-      hasChanges: true,
-    });
-
-    fireEvent.click(await openRunWorkflowButton());
-
-    expect(
-      result.getByTestId('runWorkflowWithUnsavedChangesConfirmationModal')
-    ).toBeInTheDocument();
-    expect(result.getByTestId('runWorkflowWithUnsavedChangesDontAskAgain')).toBeInTheDocument();
-  });
-
-  it('stores the run confirmation preference when confirming with the checkbox selected', async () => {
-    const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
-      hasChanges: true,
-    });
-
-    fireEvent.click(await openRunWorkflowButton());
-    fireEvent.click(result.getByTestId('runWorkflowWithUnsavedChangesDontAskAgain'));
-    fireEvent.click(result.getByTestId('confirmModalConfirmButton'));
-
-    expect(localStorage.getItem(SkipUnsavedRunConfirmationStorageKey)).toBe('true');
-    expect(result.queryByTestId('runWorkflowWithUnsavedChangesConfirmationModal')).toBeNull();
-    expect(result.store.getState().detail.isTestModalOpen).toBe(true);
-  });
-
-  it('skips the unsaved changes confirmation when the preference is stored', async () => {
-    localStorage.setItem(SkipUnsavedRunConfirmationStorageKey, 'true');
-    const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
-      hasChanges: true,
-    });
-
-    fireEvent.click(await openRunWorkflowButton());
-
-    expect(result.queryByTestId('runWorkflowWithUnsavedChangesConfirmationModal')).toBeNull();
-    expect(result.store.getState().detail.isTestModalOpen).toBe(true);
-  });
-
-  it('disables run workflow button while save is in flight', async () => {
-    const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
-      hasChanges: true,
-      isSaving: true,
-    });
-
-    const runButton = await openRunWorkflowButton();
-
-    expect(runButton).toBeDisabled();
-    fireEvent.click(runButton);
-
-    expect(result.queryByTestId('runWorkflowWithUnsavedChangesConfirmationModal')).toBeNull();
-    expect(result.store.getState().detail.isTestModalOpen).toBe(false);
   });
 
   it('disables executions tab when user cannot read workflow executions', () => {
@@ -621,7 +549,7 @@ describe('WorkflowDetailHeader', () => {
     });
   });
 
-  it('exposes the change history entry point on the workflow tab when a workflow id is present', async () => {
+  it('exposes the change history entry point inline left of Executions when a workflow id is present', () => {
     const changeHistoryModal = {
       isOpen: false,
       openModal: jest.fn(),
@@ -633,11 +561,9 @@ describe('WorkflowDetailHeader', () => {
       </ChangeHistoryModalContext.Provider>
     );
 
-    // History lives in the overflow ("More") menu, so open it before locating the entry point.
-    await openAppMenuOverflow();
-
     const historyItem = getByTestId('workflowDetailHistoryButton');
     expect(historyItem).toBeInTheDocument();
+    expect(getByTestId('workflowDetailExecutionsButton')).toBeInTheDocument();
 
     fireEvent.click(historyItem);
     expect(changeHistoryModal.openModal).toHaveBeenCalledTimes(1);

@@ -17,6 +17,12 @@ export interface StepPortTarget {
   readonly index: number;
   readonly path?: WorkflowStepInsertPath;
   readonly sourceNodeId: string;
+  /**
+   * End-of-sequence — rendered persistent (dashed) because there is no
+   * downstream node to hover. Mid-sequence ports stay hidden until the owning
+   * node is hovered or focused.
+   */
+  readonly isTerminal?: boolean;
 }
 
 /** Ports mounted on one graph node (edit mode only). */
@@ -85,10 +91,11 @@ export function computeInsertionPoints(
   }
 
   // Trigger ports: insert at index 0 of the top-level steps array.
+  // Terminal when there are no steps yet (nothing downstream to hover).
   for (const [id, ref] of Object.entries(nodeRefs)) {
     if (ref.kind !== 'trigger') continue;
     byNodeId.set(id, {
-      step: { index: 0, sourceNodeId: id },
+      step: { index: 0, sourceNodeId: id, isTerminal: steps.length === 0 },
     });
   }
 
@@ -106,6 +113,8 @@ export function computeInsertionPoints(
         // discussion. Leave a TODO at the insertion-target mapping; do not
         // add a join or extra port.
 
+        const thenSteps = asSteps(step.steps);
+        const elseSteps = asSteps(step.else);
         const thenPath: WorkflowStepInsertPath = [
           ...path,
           { stepIndex: index, branch: 'steps' },
@@ -115,12 +124,22 @@ export function computeInsertionPoints(
           { stepIndex: index, branch: 'else' },
         ];
         byNodeId.set(nodeId, {
-          then: { index: 0, path: thenPath, sourceNodeId: nodeId },
-          else: { index: 0, path: elsePath, sourceNodeId: nodeId },
+          then: {
+            index: 0,
+            path: thenPath,
+            sourceNodeId: nodeId,
+            isTerminal: thenSteps.length === 0,
+          },
+          else: {
+            index: 0,
+            path: elsePath,
+            sourceNodeId: nodeId,
+            isTerminal: elseSteps.length === 0,
+          },
           // Error port gated by stepSupportsErrorHandling (`if` → false until TODO(engine)).
         });
-        walkSequence(asSteps(step.steps), thenPath);
-        walkSequence(asSteps(step.else), elsePath);
+        walkSequence(thenSteps, thenPath);
+        walkSequence(elseSteps, elsePath);
         return;
       }
 
@@ -133,6 +152,7 @@ export function computeInsertionPoints(
           index: index + 1,
           path: path.length > 0 ? path : undefined,
           sourceNodeId: nodeId,
+          isTerminal: index + 1 === seq.length,
         },
         ...(stepSupportsErrorHandling(type)
           ? hasFallbackSteps(step)

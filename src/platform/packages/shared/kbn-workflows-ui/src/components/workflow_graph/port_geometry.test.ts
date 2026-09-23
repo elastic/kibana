@@ -17,6 +17,7 @@ import {
   FLOW_TO_ERROR_MIN_GAP,
   IF_PORT_FALSE,
   IF_PORT_TRUE,
+  PORT_EDGE_OUTSET,
   PORT_HIT_SIZE,
   PORT_STRADDLE_OUTSET,
   STEP_PORT,
@@ -79,16 +80,17 @@ describe('port_geometry', () => {
     });
   });
 
-  describe('straddle + edge origin geometry', () => {
-    it('defines straddle outset as half the hit target (≥22px)', () => {
-      expect(PORT_HIT_SIZE).toBeGreaterThanOrEqual(22);
-      expect(PORT_STRADDLE_OUTSET).toBe(PORT_HIT_SIZE / 2);
+  describe('edge-anchored control geometry', () => {
+    it('places controls ≈15px outside the source edge with ≥44px hit targets', () => {
+      expect(PORT_HIT_SIZE).toBeGreaterThanOrEqual(44);
+      expect(PORT_EDGE_OUTSET).toBe(15);
+      expect(PORT_STRADDLE_OUTSET).toBe(PORT_EDGE_OUTSET);
     });
 
-    it('TB: flow port center Y equals node bottom-border Y; edge starts there', () => {
+    it('TB: flow port center sits PORT_EDGE_OUTSET below the bottom border', () => {
       const bounds = { minX: 10, minY: 20, maxX: 310, maxY: 84 };
       const center = portCenterOnSourceEdge(bounds, 0.5, 'TB');
-      expect(center.y).toBe(bounds.maxY);
+      expect(center.y).toBe(bounds.maxY + PORT_EDGE_OUTSET);
       expect(center.x).toBe(10 + 300 * 0.5);
     });
 
@@ -104,10 +106,10 @@ describe('port_geometry', () => {
       expect(ERROR_PORT_FRACTION).toBeLessThan(0.8);
     });
 
-    it('LR: flow on the right edge; error stays on the bottom edge (same as TB)', () => {
+    it('LR: flow PORT_EDGE_OUTSET past the right edge; error stays on the bottom edge', () => {
       const bounds = { minX: 10, minY: 20, maxX: 310, maxY: 84 };
       const flow = portCenterOnSourceEdge(bounds, 0.32, 'LR');
-      expect(flow.x).toBe(bounds.maxX);
+      expect(flow.x).toBe(bounds.maxX + PORT_EDGE_OUTSET);
       expect(flow.y).toBeCloseTo(20 + 64 * 0.32);
       const errTb = errorPortCenter(bounds, 'TB');
       const errLr = errorPortCenter(bounds, 'LR');
@@ -116,10 +118,10 @@ describe('port_geometry', () => {
       expect(errLr.y).toBe(bounds.maxY);
     });
 
-    it('errorPortEdgeStyle is orientation-invariant (bottom + trailing-band fraction)', () => {
+    it('errorPortEdgeStyle straddles the bottom border with the hit box', () => {
       const style = errorPortEdgeStyle();
       expect(style.left).toBe(ERROR_PORT_ALONG);
-      expect(style.bottom).toBe(-PORT_STRADDLE_OUTSET);
+      expect(style.bottom).toBe(-(PORT_HIT_SIZE / 2));
       expect(style.transform).toBe('translateX(-50%)');
     });
   });
@@ -155,7 +157,7 @@ describe('port_geometry', () => {
       const centers = expandedPortCenters(300, 64, 1, true, 'LR');
       const flow = centers.find((c) => c.kind === 'flow')!;
       const err = centers.find((c) => c.kind === 'error')!;
-      expect(flow.x).toBe(300);
+      expect(flow.x).toBe(300 + PORT_EDGE_OUTSET);
       expect(err.y).toBe(64);
       expect(err.x).not.toBe(flow.x);
     });

@@ -13,14 +13,17 @@ import type { LayoutDirection } from '@kbn/workflows';
 /** Rest-state / expanded / hit sizes — kept here so geometry tests share one source. */
 export const PORT_DOT_SIZE = 8;
 export const PORT_EXPANDED_SIZE = 20;
-/** Invisible hit target — must stay ≥22 so the 8px dot is never the click target. */
-export const PORT_HIT_SIZE = 22;
+/** Invisible hit target — must stay ≥44 so the control is never the only clickable area. */
+export const PORT_HIT_SIZE = 44;
 
 /**
- * Outset that places the hit-target center ON the source-edge border line
- * (half the hit box outside the card). Expanded dots grow around the same center.
+ * Outset that places the control centre ≈15px outside the source edge
+ * (prompt: just outside the node's outgoing edge). Hit padding expands around
+ * that centre without contributing layout size to the node.
  */
-export const PORT_STRADDLE_OUTSET = PORT_HIT_SIZE / 2;
+export const PORT_EDGE_OUTSET = 15;
+/** @deprecated Prefer PORT_EDGE_OUTSET — kept as alias during the straddle → edge migrate. */
+export const PORT_STRADDLE_OUTSET = PORT_EDGE_OUTSET;
 
 /** Flow-port band for N ≥ 2 (fraction of the source-edge length). */
 export const FLOW_BAND_START = 0.32;
@@ -101,8 +104,8 @@ export function minCrossSizeForPorts(flowCount: number, hasErrorPort: boolean): 
 }
 
 /**
- * Pixel center of a flow port on the source edge — the center sits ON the
- * border line (straddle). Used by geometry tests and pending connectors.
+ * Pixel center of a flow port on the source edge — ≈PORT_EDGE_OUTSET outside
+ * the border. Used by geometry tests and pending connectors.
  */
 export function portCenterOnSourceEdge(
   nodeBounds: {
@@ -116,13 +119,13 @@ export function portCenterOnSourceEdge(
 ): { x: number; y: number } {
   if (direction === 'LR') {
     return {
-      x: nodeBounds.maxX,
+      x: nodeBounds.maxX + PORT_EDGE_OUTSET,
       y: nodeBounds.minY + (nodeBounds.maxY - nodeBounds.minY) * alongFraction,
     };
   }
   return {
     x: nodeBounds.minX + (nodeBounds.maxX - nodeBounds.minX) * alongFraction,
-    y: nodeBounds.maxY,
+    y: nodeBounds.maxY + PORT_EDGE_OUTSET,
   };
 }
 
@@ -156,11 +159,12 @@ export const handleAlongStyle = (
 
 /**
  * Absolute-position style for the error port: bottom edge at ERROR_PORT_FRACTION,
- * straddling the border. Same in both orientations — do not put the error
+ * hit box straddling the border so the pin sits on the edge (same as before the
+ * 15px flow-port outset). Same in both orientations — do not put the error
  * port on the right edge in LR.
  */
 export const errorPortEdgeStyle = (
-  straddleOutset: number = PORT_STRADDLE_OUTSET
+  straddleOutset: number = PORT_HIT_SIZE / 2
 ): CSSProperties => ({
   left: ERROR_PORT_ALONG,
   right: 'auto',

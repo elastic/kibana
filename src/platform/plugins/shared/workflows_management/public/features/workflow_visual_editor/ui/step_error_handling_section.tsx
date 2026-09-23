@@ -12,7 +12,6 @@ import {
   EuiFieldNumber,
   EuiFieldText,
   EuiFormRow,
-  EuiIcon,
   EuiLink,
   EuiSwitch,
   EuiText,
@@ -123,7 +122,6 @@ export function StepErrorHandlingSection({
   indent,
   onFragmentChange,
   onRevealErrorPort,
-  onViewFallbackOnCanvas,
 }: StepErrorHandlingSectionProps) {
   const { euiTheme } = useEuiTheme();
   const retrySwitchId = useGeneratedHtmlId({ prefix: 'workflowStepErrorRetry' });
@@ -335,54 +333,19 @@ export function StepErrorHandlingSection({
           background: euiTheme.colors.backgroundBaseSubdued,
         }}
       >
-        {state.fallbacks.length > 0 ? (
-          <>
-            {state.fallbacks.map((step) => (
-              <div
-                key={step.name}
-                data-test-subj={`workflowStepConfigErrorFallbackChip-${step.name}`}
-                css={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: euiTheme.size.s,
-                  minWidth: 0,
-                }}
-              >
-                <EuiIcon type="branch" color="danger" aria-hidden />
-                <span css={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {step.name}
-                </span>
-                {onViewFallbackOnCanvas ? (
-                  <EuiLink
-                    onClick={() => onViewFallbackOnCanvas(step.name)}
-                    data-test-subj={`workflowStepConfigErrorViewFallback-${step.name}`}
-                  >
-                    {i18n.translate('workflows.stepConfigPanel.errorHandling.viewOnCanvas', {
-                      defaultMessage: 'View on canvas',
-                    })}
-                  </EuiLink>
-                ) : null}
-              </div>
-            ))}
-          </>
-        ) : (
-          <EuiText size="xs" color="subdued">
-            {i18n.translate('workflows.stepConfigPanel.errorHandling.canvasHint', {
-              defaultMessage:
-                "To run specific steps when this fails, add an error path from the node's failure point on the canvas",
-            })}{' '}
-            {onRevealErrorPort ? (
-              <EuiLink
-                onClick={onRevealErrorPort}
-                data-test-subj="workflowStepConfigErrorShowMe"
-              >
-                {i18n.translate('workflows.stepConfigPanel.errorHandling.showMe', {
-                  defaultMessage: 'Show me',
-                })}
-              </EuiLink>
-            ) : null}
-          </EuiText>
-        )}
+        <EuiText size="xs" color="subdued">
+          {i18n.translate('workflows.stepConfigPanel.errorHandling.canvasHint', {
+            defaultMessage:
+              'To run specific steps when this fails, add an error path from this step on the canvas',
+          })}{' '}
+          {onRevealErrorPort ? (
+            <EuiLink onClick={onRevealErrorPort} data-test-subj="workflowStepConfigErrorShowMe">
+              {i18n.translate('workflows.stepConfigPanel.errorHandling.showMe', {
+                defaultMessage: 'Show me',
+              })}
+            </EuiLink>
+          ) : null}
+        </EuiText>
       </div>
     </div>
   );

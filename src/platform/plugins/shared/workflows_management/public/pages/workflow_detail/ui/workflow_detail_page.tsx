@@ -16,11 +16,6 @@ import { isHttpFetchError } from '@kbn/core-http-browser';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useWorkflowsCapabilities, type WorkflowsCreateRouteState } from '@kbn/workflows-ui';
-import {
-  CreateServiceAccountFlyout,
-  ExecutionIdentityModal,
-  RunAsPrototypeProvider,
-} from './run_as_prototype';
 import { workflowDefaultYaml } from './workflow_default_yml';
 import { WorkflowDetailEditor } from './workflow_detail_editor';
 import { WorkflowDetailHeader } from './workflow_detail_header';
@@ -294,7 +289,6 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
     ) : null;
 
   const pageContent = (
-    <RunAsPrototypeProvider>
       <EuiFlexGroup direction="column" gutterSize="none" css={kbnFullBodyHeightCss()}>
         <EuiFlexItem grow={false}>
           <WorkflowDetailHeader
@@ -335,9 +329,6 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
           <WorkflowDetailTestStepModal />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <ExecutionIdentityModal />
-      <CreateServiceAccountFlyout />
-    </RunAsPrototypeProvider>
   );
 
   if (!id) {

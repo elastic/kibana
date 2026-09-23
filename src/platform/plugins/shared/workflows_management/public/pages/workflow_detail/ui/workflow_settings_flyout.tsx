@@ -9,7 +9,6 @@
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
-  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiComboBox,
@@ -22,9 +21,10 @@ import {
   EuiFlyoutHeader,
   EuiFormRow,
   EuiSpacer,
-  EuiTabs,
   EuiTab,
+  EuiTabs,
   EuiText,
+  EuiTextArea,
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -32,11 +32,8 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  getInputsFromDefinition,
-  normalizeFieldsToJsonSchema,
-} from '@kbn/workflows/spec/lib/field_conversion';
 import { updateWorkflowYamlFields } from '../../../../common/lib/yaml/update_workflow_yaml_fields';
+import { useWorkflowFiltersOptions } from '../../../entities/workflows/model/use_workflow_stats';
 import {
   selectEditorWorkflowDefinition,
   selectYamlString,
@@ -50,75 +47,26 @@ export interface WorkflowSettingsFlyoutProps {
 }
 
 /**
- * TODO(slice5): as real Inputs / Outputs / Constants editors land, register
- * each here with `isReal: true`. Tab chrome renders only when ≥2 tabs are real.
- * Stub YAML-redirect groups must not be registered as tabs.
+ * Tab chrome: General (live) and Constants (coming soon until a real editor lands).
+ *
+ * TODO(constants): replace the coming-soon stub with a real editor.
  */
-const SETTINGS_TAB_REGISTRY = [
+const SETTINGS_TABS = [
   {
     id: 'general' as const,
-    isReal: true,
     label: i18n.translate('workflows.workflowSettingsFlyout.tab.general', {
       defaultMessage: 'General',
     }),
   },
-  // { id: 'inputs', isReal: true, label: '...' },
-  // { id: 'outputs', isReal: true, label: '...' },
-  // { id: 'constants', isReal: true, label: '...' },
+  {
+    id: 'constants' as const,
+    label: i18n.translate('workflows.workflowSettingsFlyout.tab.constants', {
+      defaultMessage: 'Constants',
+    }),
+  },
 ] as const;
 
-type SettingsTabId = (typeof SETTINGS_TAB_REGISTRY)[number]['id'];
-
-const realSettingsTabs = () => SETTINGS_TAB_REGISTRY.filter((tab) => tab.isReal);
-
-const fieldNamesFromJsonSchema = (schema: unknown): string[] => {
-  if (!schema || typeof schema !== 'object' || Array.isArray(schema)) {
-    return [];
-  }
-  const properties = (schema as { properties?: unknown }).properties;
-  if (!properties || typeof properties !== 'object' || Array.isArray(properties)) {
-    return [];
-  }
-  return Object.keys(properties as Record<string, unknown>);
-};
-
-const constNamesFromDefinition = (definition: { consts?: unknown } | null | undefined): string[] => {
-  const consts = definition?.consts;
-  if (!consts || typeof consts !== 'object' || Array.isArray(consts)) {
-    return [];
-  }
-  return Object.keys(consts as Record<string, unknown>);
-};
-
-const StubFieldList = ({
-  names,
-  emptyTestSubj,
-  listTestSubj,
-  emptyMessage,
-}: {
-  names: string[];
-  emptyTestSubj: string;
-  listTestSubj: string;
-  emptyMessage: React.ReactNode;
-}) => {
-  if (names.length === 0) {
-    return (
-      <EuiText size="s" color="subdued" data-test-subj={emptyTestSubj}>
-        {emptyMessage}
-      </EuiText>
-    );
-  }
-
-  return (
-    <EuiFlexGroup gutterSize="s" wrap responsive={false} data-test-subj={listTestSubj}>
-      {names.map((fieldName) => (
-        <EuiFlexItem grow={false} key={fieldName}>
-          <EuiBadge color="hollow">{fieldName}</EuiBadge>
-        </EuiFlexItem>
-      ))}
-    </EuiFlexGroup>
-  );
-};
+type SettingsTabId = (typeof SETTINGS_TABS)[number]['id'];
 
 export const WorkflowSettingsFlyout = ({
   isOpen,
@@ -127,40 +75,45 @@ export const WorkflowSettingsFlyout = ({
 }: WorkflowSettingsFlyoutProps) => {
   const titleId = useGeneratedHtmlId();
   const dispatch = useDispatch();
-  const yamlString = useSelector(selectYamlString);
+  const yamlString = useSelector(selectYamlString) ?? '';
   const definition = useSelector(selectEditorWorkflowDefinition);
 
-  const [name, setName] = useState('');
-  const [tagOptions, setTagOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
   const [selectedTabId, setSelectedTabId] = useState<SettingsTabId>('general');
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
+  const [tagOptions, setTagOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
 
-  const tabs = useMemo(() => realSettingsTabs(), []);
-  const showTabChrome = tabs.length >= 2;
+  const { data: tagFilterData } = useWorkflowFiltersOptions(['tags']);
+  const tagSuggestions = useMemo(
+    () =>
+      (tagFilterData?.tags ?? [])
+        .map((option) =>
+          typeof option.label === 'string' ? option.label : String(option.key ?? '')
+        )
+        .filter((label) => label.length > 0),
+    [tagFilterData]
+  );
+
+  const suggestionOptions = useMemo((): Array<EuiComboBoxOptionOption<string>> => {
+    const selected = new Set(tagOptions.map((o) => o.label.toLowerCase()));
+    return tagSuggestions
+      .filter((suggestion) => !selected.has(suggestion.toLowerCase()))
+      .map((label) => ({ label }));
+  }, [tagSuggestions, tagOptions]);
 
   useEffect(() => {
     if (!isOpen) {
       return;
     }
+    setSelectedTabId('general');
     setName(typeof definition?.name === 'string' ? definition.name : '');
+    setDescription(typeof definition?.description === 'string' ? definition.description : '');
     const tags = Array.isArray(definition?.tags) ? definition.tags : [];
     setTagOptions(tags.map((tag) => ({ label: tag })));
-    setSelectedTabId('general');
-  }, [isOpen, definition?.name, definition?.tags]);
-
-  const inputFieldNames = useMemo(
-    () => fieldNamesFromJsonSchema(getInputsFromDefinition(definition)),
-    [definition]
-  );
-
-  const outputFieldNames = useMemo(
-    () => fieldNamesFromJsonSchema(normalizeFieldsToJsonSchema(definition?.outputs)),
-    [definition]
-  );
-
-  const constantNames = useMemo(() => constNamesFromDefinition(definition), [definition]);
+  }, [isOpen, definition?.name, definition?.description, definition?.tags]);
 
   const applyYamlPatch = useCallback(
-    (patch: { name?: string; tags?: string[] }) => {
+    (patch: { name?: string; description?: string; tags?: string[] }) => {
       if (readOnly) {
         return;
       }
@@ -176,10 +129,41 @@ export const WorkflowSettingsFlyout = ({
     (event: React.ChangeEvent<HTMLInputElement>) => {
       const next = event.target.value;
       setName(next);
-      applyYamlPatch({ name: next });
+      if (next.trim()) {
+        applyYamlPatch({ name: next.trim() });
+      }
     },
     [applyYamlPatch]
   );
+
+  const handleNameBlur = useCallback(() => {
+    const next = name.trim();
+    if (!next) {
+      // Required key — revert local draft to the document value.
+      setName(typeof definition?.name === 'string' ? definition.name : '');
+      return;
+    }
+    if (next !== definition?.name) {
+      applyYamlPatch({ name: next });
+    }
+  }, [name, definition?.name, applyYamlPatch]);
+
+  const handleDescriptionChange = useCallback(
+    (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+      setDescription(event.target.value);
+    },
+    []
+  );
+
+  const handleDescriptionBlur = useCallback(() => {
+    const next = description.trim();
+    const current =
+      typeof definition?.description === 'string' ? definition.description.trim() : '';
+    if (next === current) {
+      return;
+    }
+    applyYamlPatch({ description: next });
+  }, [description, definition?.description, applyYamlPatch]);
 
   const handleTagsChange = useCallback(
     (selected: Array<EuiComboBoxOptionOption<string>>) => {
@@ -195,9 +179,7 @@ export const WorkflowSettingsFlyout = ({
       if (!normalized) {
         return;
       }
-      const exists = flattenedOptions.some(
-        (option) => option.label.toLowerCase() === normalized.toLowerCase()
-      );
+      const exists = flattenedOptions.some((option) => option.label === normalized);
       if (exists) {
         return;
       }
@@ -212,10 +194,6 @@ export const WorkflowSettingsFlyout = ({
     return null;
   }
 
-  // V1 is tab-less: General (name/tags) + Input/Output/Constants stubs share one body.
-  // When showTabChrome becomes true, only the selected real tab's body renders.
-  const showGeneralBody = !showTabChrome || selectedTabId === 'general';
-
   return (
     <EuiFlyout
       onClose={onClose}
@@ -224,7 +202,14 @@ export const WorkflowSettingsFlyout = ({
       data-test-subj="workflowSettingsFlyout"
       aria-labelledby={titleId}
     >
-      <EuiFlyoutHeader hasBorder>
+      <EuiFlyoutHeader
+        hasBorder
+        css={{
+          // Flyout padding targets `[class*='euiFlyoutHeader-hasBorder']`;
+          // bump specificity so tabs sit flush on the header border.
+          '&&': { paddingBottom: 0 },
+        }}
+      >
         <EuiTitle size="m">
           <h2 id={titleId}>
             <FormattedMessage
@@ -233,27 +218,23 @@ export const WorkflowSettingsFlyout = ({
             />
           </h2>
         </EuiTitle>
-        {showTabChrome ? (
-          <>
-            <EuiSpacer size="m" />
-            <EuiTabs>
-              {tabs.map((tab) => (
-                <EuiTab
-                  key={tab.id}
-                  isSelected={selectedTabId === tab.id}
-                  onClick={() => setSelectedTabId(tab.id)}
-                  data-test-subj={`workflowSettingsTab-${tab.id}`}
-                >
-                  {tab.label}
-                </EuiTab>
-              ))}
-            </EuiTabs>
-          </>
-        ) : null}
+        <EuiSpacer size="m" />
+        <EuiTabs bottomBorder={false}>
+          {SETTINGS_TABS.map((tab) => (
+            <EuiTab
+              key={tab.id}
+              isSelected={selectedTabId === tab.id}
+              onClick={() => setSelectedTabId(tab.id)}
+              data-test-subj={`workflowSettingsTab-${tab.id}`}
+            >
+              {tab.label}
+            </EuiTab>
+          ))}
+        </EuiTabs>
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
-        {showGeneralBody ? (
+        {selectedTabId === 'general' ? (
           <>
             <EuiFormRow
               fullWidth
@@ -267,8 +248,36 @@ export const WorkflowSettingsFlyout = ({
                 compressed
                 value={name}
                 onChange={handleNameChange}
+                onBlur={handleNameBlur}
                 disabled={readOnly}
                 data-test-subj="workflowSettingsNameInput"
+              />
+            </EuiFormRow>
+
+            <EuiSpacer size="m" />
+
+            <EuiFormRow
+              fullWidth
+              compressed
+              label={i18n.translate('workflows.workflowSettingsFlyout.descriptionLabel', {
+                defaultMessage: 'Description',
+              })}
+            >
+              <EuiTextArea
+                fullWidth
+                compressed
+                value={description}
+                onChange={handleDescriptionChange}
+                onBlur={handleDescriptionBlur}
+                disabled={readOnly}
+                rows={8}
+                placeholder={i18n.translate(
+                  'workflows.workflowSettingsFlyout.descriptionPlaceholder',
+                  {
+                    defaultMessage: 'Add a description…',
+                  }
+                )}
+                data-test-subj="workflowSettingsDescriptionInput"
               />
             </EuiFormRow>
 
@@ -290,104 +299,24 @@ export const WorkflowSettingsFlyout = ({
                 placeholder={i18n.translate('workflows.workflowSettingsFlyout.tagsPlaceholder', {
                   defaultMessage: 'Add tags',
                 })}
+                options={suggestionOptions}
                 selectedOptions={tagOptions}
                 onChange={handleTagsChange}
                 onCreateOption={handleCreateTag}
                 isDisabled={readOnly}
-                noSuggestions
                 data-test-subj="workflowSettingsTagsInput"
               />
             </EuiFormRow>
-
-            {!showTabChrome ? (
-              <>
-                <EuiSpacer size="m" />
-
-                <EuiFormRow
-                  fullWidth
-                  label={i18n.translate('workflows.workflowSettingsFlyout.inputLabel', {
-                    defaultMessage: 'Input',
-                  })}
-                  helpText={i18n.translate('workflows.workflowSettingsFlyout.inputDescription', {
-                    defaultMessage:
-                      'Inputs are defined on the manual trigger. Edit them in the YAML editor for now.',
-                  })}
-                >
-                  <StubFieldList
-                    names={inputFieldNames}
-                    emptyTestSubj="workflowSettingsInputsEmpty"
-                    listTestSubj="workflowSettingsInputsList"
-                    emptyMessage={
-                      <FormattedMessage
-                        id="workflows.workflowSettingsFlyout.inputEmpty"
-                        defaultMessage="No inputs defined."
-                      />
-                    }
-                  />
-                </EuiFormRow>
-
-                <EuiSpacer size="m" />
-
-                <EuiFormRow
-                  fullWidth
-                  label={i18n.translate('workflows.workflowSettingsFlyout.outputLabel', {
-                    defaultMessage: 'Output',
-                  })}
-                  helpText={i18n.translate('workflows.workflowSettingsFlyout.outputDescription', {
-                    defaultMessage:
-                      'Outputs declare the workflow return contract. Edit them in the YAML editor for now.',
-                  })}
-                >
-                  <StubFieldList
-                    names={outputFieldNames}
-                    emptyTestSubj="workflowSettingsOutputsEmpty"
-                    listTestSubj="workflowSettingsOutputsList"
-                    emptyMessage={
-                      <FormattedMessage
-                        id="workflows.workflowSettingsFlyout.outputEmpty"
-                        defaultMessage="No outputs defined."
-                      />
-                    }
-                  />
-                </EuiFormRow>
-
-                <EuiSpacer size="m" />
-
-                <EuiFormRow
-                  fullWidth
-                  label={i18n.translate('workflows.workflowSettingsFlyout.constantsLabel', {
-                    defaultMessage: 'Constants',
-                  })}
-                  helpText={i18n.translate(
-                    'workflows.workflowSettingsFlyout.constantsDescription',
-                    {
-                      defaultMessage:
-                        'Constants are workflow-scoped variables. Edit them in the YAML editor for now.',
-                    }
-                  )}
-                >
-                  <StubFieldList
-                    names={constantNames}
-                    emptyTestSubj="workflowSettingsConstantsEmpty"
-                    listTestSubj="workflowSettingsConstantsList"
-                    emptyMessage={
-                      <FormattedMessage
-                        id="workflows.workflowSettingsFlyout.constantsEmpty"
-                        defaultMessage="No constants defined."
-                      />
-                    }
-                  />
-                </EuiFormRow>
-
-                {/*
-                  TODO(sharing): Sharing is intentionally absent. When it ships,
-                  decide the affordance separately (likely a prominent header
-                  action, not a settings tab) — do not reintroduce a "Coming soon"
-                  stub here.
-                */}
-              </>
-            ) : null}
           </>
+        ) : null}
+
+        {selectedTabId === 'constants' ? (
+          <EuiText size="s" color="subdued" data-test-subj="workflowSettingsConstantsPlaceholder">
+            <FormattedMessage
+              id="workflows.workflowSettingsFlyout.comingSoon"
+              defaultMessage="Coming soon."
+            />
+          </EuiText>
         ) : null}
       </EuiFlyoutBody>
 
@@ -411,4 +340,3 @@ export const WorkflowSettingsFlyout = ({
     </EuiFlyout>
   );
 };
-
