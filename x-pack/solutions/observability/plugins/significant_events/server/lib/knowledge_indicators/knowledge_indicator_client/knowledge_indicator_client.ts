@@ -40,11 +40,9 @@ export type {
 /**
  * Space-scoped access to knowledge indicators keyed by Nightshift source id.
  *
- * A source id identifies the unit of data a KI describes. Today it is the
- * stream name: every caller passes `definition.name` and route paths still say
- * `{streamName}`. nightshift-program#1307 swaps in `nightshift-source` saved
- * object ids without touching this client. The server stamps the id on every
- * revision; it is never part of a write payload.
+ * A source id identifies the unit of data a KI describes. Callers pass a
+ * Nightshift source id. Route paths still say `{streamName}`. The server
+ * stamps the id on every revision; it is never part of a write payload.
  *
  * Every read filters on the space the client was built for and every write is
  * stamped with it; callers never see documents from another space.
@@ -279,6 +277,14 @@ export class KnowledgeIndicatorClient {
 
   deleteAllQueries(sourceId: string): Promise<void> {
     return this.orchestrator.deleteAllQueries(sourceId);
+  }
+
+  setSourceRulesEnabled(sourceId: string, enabled: boolean): Promise<void> {
+    return this.orchestrator.setSourceRulesEnabled(sourceId, enabled);
+  }
+
+  deleteOwnedRules(sourceId: string): Promise<void> {
+    return this.orchestrator.deleteOwnedRules(sourceId);
   }
 
   promoteQueries(sourceId: string, queryIds: string[]): Promise<PromoteQueriesResult> {

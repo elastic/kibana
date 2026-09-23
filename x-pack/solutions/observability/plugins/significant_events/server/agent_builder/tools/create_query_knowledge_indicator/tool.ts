@@ -14,7 +14,6 @@ import type {
   ToolAvailabilityResult,
 } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
-import { getStreamTypeFromDefinition, type StreamType } from '@kbn/streams-schema';
 import { MAX_ID_LENGTH, upsertStreamQueryRequestSchema } from '@kbn/significant-events-schema';
 import dedent from 'dedent';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
@@ -121,7 +120,6 @@ export function createQueryKnowledgeIndicatorTool({
     },
     handler: async ({ stream_name: streamName, ...queryInput }, context) => {
       const { request } = context;
-      let streamType: StreamType | 'unknown' = 'unknown';
 
       try {
         const scopedClients = await getScopedClients({
@@ -134,7 +132,6 @@ export function createQueryKnowledgeIndicatorTool({
         });
 
         const definition = await scopedClients.streamsClient.getStream(streamName);
-        streamType = getStreamTypeFromDefinition(definition);
 
         const kiClient = await scopedClients.getKnowledgeIndicatorClient();
         const { id } = await createQueryKnowledgeIndicatorToolHandler({
@@ -148,8 +145,7 @@ export function createQueryKnowledgeIndicatorTool({
           ki_kind: 'query',
           tool_id: 'ki_query_create',
           success: true,
-          stream_name: streamName,
-          stream_type: streamType,
+          source_id: streamName,
         });
 
         return {
@@ -179,8 +175,7 @@ export function createQueryKnowledgeIndicatorTool({
           ki_kind: 'query',
           tool_id: 'ki_query_create',
           success: false,
-          stream_name: streamName,
-          stream_type: streamType,
+          source_id: streamName,
           error_message: message,
         });
 

@@ -91,9 +91,7 @@ const readQueryOccurrencesRoute = createServerRoute({
     } = params.query;
     assertValidDateRange(from, to);
 
-    const resolvedStreamNames = await resolveStreamNames(streamNames, () =>
-      scopedClients.streamsClient.listStreams()
-    );
+    const resolvedStreamNames = await resolveStreamNames(streamNames, scopedClients.sourcesClient);
 
     const [kiClient, { alertsReader }] = await Promise.all([
       scopedClients.getKnowledgeIndicatorClient(),

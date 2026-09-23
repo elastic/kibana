@@ -8,7 +8,7 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { InferenceClient } from '@kbn/inference-common';
-import type { Streams } from '@kbn/streams-schema';
+import type { AnalysisTarget } from '@kbn/nightshift-ai';
 import { identifyKIQueries as identifyKIQueriesThroughAgent } from '@kbn/nightshift-ai';
 import type { SemanticCodeSearchTools } from '../semantic_code_search_grounding/semantic_code_search_tools';
 import type { KnowledgeIndicatorClient } from '../knowledge_indicators';
@@ -25,13 +25,19 @@ const generateSignificantEventsMock = identifyKIQueriesThroughAgent as jest.Mock
 describe('generateSignificantEventDefinitions (semantic code search wiring)', () => {
   let logger: jest.Mocked<Logger>;
 
-  const definition = { name: 'logs.test' } as Streams.all.Definition;
+  const target: AnalysisTarget = {
+    id: 'source-1',
+    name: 'Checkout',
+    sources: ['$.nightshift.sources.default.checkout'],
+    samplingSource: '$.nightshift.sources.default.checkout',
+  };
+  const params = { sourceId: 'source-1', target };
 
   const buildDeps = (overrides: Partial<Parameters<typeof identifyKIQueries>[1]> = {}) => ({
     inferenceClient: { bindTo: jest.fn().mockReturnValue({}) } as unknown as InferenceClient,
     kiClient: {
       getFeatures: jest.fn(),
-      getStreamToQueryLinksMap: jest.fn().mockResolvedValue({ 'logs.test': [] }),
+      getStreamToQueryLinksMap: jest.fn().mockResolvedValue({ 'source-1': [] }),
     } as unknown as KnowledgeIndicatorClient,
     logger,
     signal: new AbortController().signal,
@@ -82,7 +88,7 @@ describe('generateSignificantEventDefinitions (semantic code search wiring)', ()
   });
 
   it('does not pass tools or raise the step budget when no discovery tools are provided', async () => {
-    await identifyKIQueries({ definition, connectorId: 'c1', systemPrompt: 'SYSTEM' }, buildDeps());
+    await identifyKIQueries({ ...params, connectorId: 'c1', systemPrompt: 'SYSTEM' }, buildDeps());
 
     const args = generateSignificantEventsMock.mock.calls[0][0];
     expect(args.additionalTools).toBeUndefined();
@@ -103,7 +109,7 @@ describe('generateSignificantEventDefinitions (semantic code search wiring)', ()
     });
 
     const result = await identifyKIQueries(
-      { definition, connectorId: 'c1', systemPrompt: 'SYSTEM' },
+      { ...params, connectorId: 'c1', systemPrompt: 'SYSTEM' },
       buildDeps()
     );
 
@@ -112,7 +118,7 @@ describe('generateSignificantEventDefinitions (semantic code search wiring)', ()
 
   it('forwards maxDurationMs to the shared agent', async () => {
     await identifyKIQueries(
-      { definition, connectorId: 'c1', systemPrompt: 'SYSTEM', maxDurationMs: 300000 },
+      { ...params, connectorId: 'c1', systemPrompt: 'SYSTEM', maxDurationMs: 300000 },
       buildDeps()
     );
 
@@ -124,7 +130,7 @@ describe('generateSignificantEventDefinitions (semantic code search wiring)', ()
     const semanticCodeSearchTools = makeCodeTools();
 
     await identifyKIQueries(
-      { definition, connectorId: 'c1', systemPrompt: 'SYSTEM' },
+      { ...params, connectorId: 'c1', systemPrompt: 'SYSTEM' },
       buildDeps({ semanticCodeSearchTools })
     );
 
@@ -149,7 +155,7 @@ describe('generateSignificantEventDefinitions (semantic code search wiring)', ()
     };
 
     await identifyKIQueries(
-      { definition, connectorId: 'c1', systemPrompt: 'SYSTEM' },
+      { ...params, connectorId: 'c1', systemPrompt: 'SYSTEM' },
       buildDeps({ kiExtractionContextTools })
     );
 

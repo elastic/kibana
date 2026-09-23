@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { InferenceClient } from '@kbn/inference-common';
-import type { Streams } from '@kbn/streams-schema';
+import type { NightshiftSource } from '@kbn/nightshift-shared';
 import type { EbtTelemetryClient } from '../telemetry/ebt';
 import {
   generateKIQueries,
@@ -34,14 +34,15 @@ const isSignificantEventsFeatureFlagEnabledMock = jest.mocked(
   isSignificantEventsFeatureFlagEnabled
 );
 
-const definition = { name: 'logs.test' } as Streams.all.Definition;
+const source = {
+  id: 'source-1',
+  title: 'Checkout',
+  view_name: '$.nightshift.sources.default.checkout',
+} as NightshiftSource;
 
 const makeDeps = (
   overrides: Partial<GenerateKIQueriesDependencies> = {}
 ): GenerateKIQueriesDependencies => ({
-  streamsClient: {
-    getStream: jest.fn().mockResolvedValue(definition),
-  } as unknown as GenerateKIQueriesDependencies['streamsClient'],
   inferenceClient: {} as InferenceClient,
   kiClient: {} as never,
   esClient: {} as never,
@@ -94,7 +95,7 @@ describe('generateKIQueries', () => {
     } as unknown as EbtTelemetryClient;
 
     await generateKIQueries(
-      { streamName: 'logs.test', connectorId: 'test-connector' },
+      { source, connectorId: 'test-connector' },
       makeDeps({ telemetry, logger })
     );
 
@@ -113,7 +114,7 @@ describe('generateKIQueries', () => {
     } as unknown as EbtTelemetryClient;
 
     const result = await generateKIQueries(
-      { streamName: 'logs.test', connectorId: 'test-connector' },
+      { source, connectorId: 'test-connector' },
       makeDeps({ telemetry, logger })
     );
 
@@ -138,7 +139,7 @@ describe('generateKIQueries', () => {
 
   it('forwards maxDurationMs to the query generation wrapper', async () => {
     await generateKIQueries(
-      { streamName: 'logs.test', connectorId: 'test-connector', maxDurationMs: 300000 },
+      { source, connectorId: 'test-connector', maxDurationMs: 300000 },
       makeDeps({ logger })
     );
 
@@ -148,10 +149,7 @@ describe('generateKIQueries', () => {
   });
 
   it('does not pass a system prompt', async () => {
-    await generateKIQueries(
-      { streamName: 'logs.test', connectorId: 'test-connector' },
-      makeDeps({ logger })
-    );
+    await generateKIQueries({ source, connectorId: 'test-connector' }, makeDeps({ logger }));
 
     expect(identifyKIQueriesMock.mock.calls[0][0]).not.toHaveProperty('systemPrompt');
   });

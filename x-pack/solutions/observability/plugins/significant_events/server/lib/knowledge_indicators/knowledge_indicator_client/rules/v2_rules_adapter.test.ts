@@ -29,6 +29,8 @@ function makeRulesClientMock() {
     bulkCreateRules: jest.fn(),
     updateRule: jest.fn(),
     bulkDeleteRules: jest.fn(),
+    bulkEnableRules: jest.fn().mockResolvedValue({ errors: [] }),
+    bulkDisableRules: jest.fn().mockResolvedValue({ errors: [] }),
     ruleExists: jest.fn(),
     findRules: jest.fn().mockResolvedValue({ items: [], total: 0, page: 1, perPage: 500 }),
     getTags: jest.fn().mockResolvedValue([]),

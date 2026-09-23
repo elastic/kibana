@@ -13,6 +13,7 @@ import type { InferenceClient } from '@kbn/inference-common';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository';
 import type { SignificantEventsTuningConfig } from '@kbn/significant-events-schema';
+import type { SourcesClient } from '@kbn/nightshift-sources-plugin/server';
 import type { StreamsClient } from '@kbn/streams-plugin/server';
 import type { IUiSettingsClient } from '@kbn/core/server';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
@@ -60,6 +61,7 @@ export interface RouteHandlerScopedClients extends SignificantEventsClients {
   globalUiSettingsClient: IUiSettingsClient;
   fieldsMetadataClient: IFieldsMetadataClient;
   streamsClient: StreamsClient;
+  sourcesClient: SourcesClient;
   isSecurityEnabled: boolean;
   tuningConfig: SignificantEventsTuningConfig;
 }

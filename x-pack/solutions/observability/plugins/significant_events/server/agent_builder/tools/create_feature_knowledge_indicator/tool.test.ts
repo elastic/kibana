@@ -171,8 +171,7 @@ describe('ki_feature_create tool', () => {
         ki_kind: 'feature',
         tool_id: 'ki_feature_create',
         success: true,
-        stream_name: 'logs.test',
-        stream_type: 'classic',
+        source_id: 'logs.test',
       })
     );
   });
@@ -229,8 +228,7 @@ describe('ki_feature_create tool', () => {
         ki_kind: 'feature',
         tool_id: 'ki_feature_create',
         success: false,
-        stream_name: 'logs.test',
-        stream_type: 'classic',
+        source_id: 'logs.test',
         error_message: 'write failed',
       })
     );

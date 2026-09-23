@@ -22,10 +22,24 @@ const makeHandlerParams = ({ streamNames }: { streamNames: string[] }): HandlerP
     request: {},
     getScopedClients: jest.fn().mockResolvedValue({
       licensing: {},
+      sourcesClient: {
+        list: jest.fn().mockResolvedValue({
+          sources: streamNames.map((id) => ({ id, enabled: true })),
+          total: streamNames.length,
+          page: 1,
+          per_page: 100,
+        }),
+      },
       getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({
         getStreamNamesToReconcile: jest.fn().mockResolvedValue(streamNames),
+        setSourceRulesEnabled: jest.fn().mockResolvedValue(undefined),
+        deleteOwnedRules: jest.fn().mockResolvedValue(undefined),
+        deleteAllQueries: jest.fn().mockResolvedValue(undefined),
+        deleteIndicators: jest.fn().mockResolvedValue(undefined),
       }),
     }),
+    workflowClients: {},
+    maintenanceService: { getState: jest.fn().mockResolvedValue('enabled') },
     server: {} as HandlerParams['server'],
   } as unknown as HandlerParams);
 

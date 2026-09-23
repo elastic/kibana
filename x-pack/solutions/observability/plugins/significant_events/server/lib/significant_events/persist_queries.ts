@@ -6,10 +6,9 @@
  */
 
 import type { GeneratedSignificantEventQuery } from '@kbn/significant-events-schema';
-import { getSourcesForStream, normalizeEsqlSafe, replaceFromSources } from '@kbn/streams-schema';
+import { normalizeEsqlSafe, replaceFromSources } from '@kbn/streams-schema';
 import { HIGH_SEVERITY_THRESHOLD } from '@kbn/significant-events-schema';
 import { v4 } from 'uuid';
-import type { StreamsClient } from '@kbn/streams-plugin/server';
 import type { KnowledgeIndicatorClient, KIBulkOperation } from '../knowledge_indicators';
 import { queryFromLink } from '../knowledge_indicators/knowledge_indicator_client/serializers';
 import { canQueryBeRuleBacked } from './alerting/significant_events_alerting_context';
@@ -29,28 +28,24 @@ function isRuleEligible(query: GeneratedSignificantEventQuery): boolean {
 }
 
 export async function persistQueries(
-  streamName: string,
+  sourceId: string,
   queries: GeneratedSignificantEventQuery[],
   deps: {
     kiClient: KnowledgeIndicatorClient;
-    streamsClient: StreamsClient;
+    viewName: string;
   }
 ): Promise<PersistQueriesResult> {
-  const { kiClient, streamsClient } = deps;
+  const { kiClient, viewName } = deps;
 
   if (queries.length === 0) {
     return { persistedQueries: [], skippedQueries: [] };
   }
 
-  const definition = await streamsClient.getStream(streamName);
+  // Canonicalize FROM onto the source view so a stored query and an incoming one that differ
+  // only by source list still collide. No-op when the FROM already matches, or when there is none.
+  const dedupKey = (esql: string) => normalizeEsqlSafe(replaceFromSources(esql, [viewName]));
 
-  // A stored and an incoming query can be identical apart from their FROM (a classic stream
-  // accepts both `FROM name` and `FROM name, name.*`), so canonicalize the sources on both sides
-  // or the duplicate slips through. No-op when the FROM already matches, or when there is none.
-  const targetSources = getSourcesForStream(definition);
-  const dedupKey = (esql: string) => normalizeEsqlSafe(replaceFromSources(esql, targetSources));
-
-  const { [streamName]: existingLinks } = await kiClient.getStreamToQueryLinksMap([streamName]);
+  const { [sourceId]: existingLinks } = await kiClient.getStreamToQueryLinksMap([sourceId]);
   const existingById = new Map(existingLinks.map((link) => [link.query.id, link]));
   const existingEsqls = new Set(existingLinks.map((link) => dedupKey(link.query.esql.query)));
   const ruleBackedIds = new Set(
@@ -115,12 +110,12 @@ export async function persistQueries(
   }
 
   if (standardOps.length > 0) {
-    await kiClient.bulk(streamName, standardOps);
+    await kiClient.bulk(sourceId, standardOps);
   }
 
   if (ruleEligibleQueries.length > 0) {
     const ruleEligibleIds = new Set(ruleEligibleQueries.map((q) => q.id));
-    await kiClient.replaceStreamQueries(streamName, (currentLinks) => [
+    await kiClient.replaceStreamQueries(sourceId, (currentLinks) => [
       ...currentLinks.filter((l) => !ruleEligibleIds.has(l.query.id)).map(queryFromLink),
       ...ruleEligibleQueries.map(({ replaces: _replaces, ...q }) => ({
         ...q,

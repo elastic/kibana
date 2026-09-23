@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { Streams } from '@kbn/streams-schema';
 import type {
   GeneratedSignificantEventQuery,
   QueryLink,
@@ -13,11 +12,10 @@ import type {
 } from '@kbn/significant-events-schema';
 import { persistQueries } from './persist_queries';
 import type { KnowledgeIndicatorClient } from '../knowledge_indicators';
-import type { StreamsClient } from '@kbn/streams-plugin/server';
 
 jest.mock('uuid', () => ({ v4: () => 'generated-uuid' }));
 
-const definition = { name: 'logs.test' } as Streams.all.Definition;
+const VIEW_NAME = '$.nightshift.sources.default.logs';
 
 const makeLink = (
   overrides: {
@@ -69,36 +67,28 @@ const createMocks = (existingLinks: QueryLink[] = []) => {
     ),
   } as unknown as jest.Mocked<KnowledgeIndicatorClient>;
 
-  const streamsClient = {
-    getStream: jest.fn().mockResolvedValue(definition),
-  } as unknown as jest.Mocked<StreamsClient>;
-
-  return { kiClient, streamsClient };
+  return { kiClient };
 };
 
-const persistDeps = (
-  kiClient: jest.Mocked<KnowledgeIndicatorClient>,
-  streamsClient: jest.Mocked<StreamsClient>
-) => ({
+const persistDeps = (kiClient: jest.Mocked<KnowledgeIndicatorClient>) => ({
   kiClient,
-  streamsClient,
+  viewName: VIEW_NAME,
 });
 
 describe('persistQueries', () => {
   it('does nothing when queries array is empty', async () => {
-    const { kiClient, streamsClient } = createMocks();
-    await persistQueries('logs.test', [], persistDeps(kiClient, streamsClient));
+    const { kiClient } = createMocks();
+    await persistQueries('logs.test', [], persistDeps(kiClient));
 
-    expect(streamsClient.getStream).not.toHaveBeenCalled();
     expect(kiClient.bulk).not.toHaveBeenCalled();
     expect(kiClient.syncQueries).not.toHaveBeenCalled();
   });
 
   it('creates low-severity queries via kiClient.bulk with rule_backed: false', async () => {
-    const { kiClient, streamsClient } = createMocks();
+    const { kiClient } = createMocks();
     const query = makeGeneratedQuery();
 
-    await persistQueries('logs.test', [query], persistDeps(kiClient, streamsClient));
+    await persistQueries('logs.test', [query], persistDeps(kiClient));
 
     expect(kiClient.bulk).toHaveBeenCalledTimes(1);
     expect(kiClient.bulk).toHaveBeenCalledWith('logs.test', [
@@ -113,20 +103,20 @@ describe('persistQueries', () => {
 
   it('skips queries whose normalized ES|QL matches an existing stored query', async () => {
     const existing = makeLink({ id: 'q1', esql: 'FROM logs | WHERE body.text:"error"' });
-    const { kiClient, streamsClient } = createMocks([existing]);
+    const { kiClient } = createMocks([existing]);
 
     const duplicate = makeGeneratedQuery({
       esql: { query: 'FROM  logs  |  WHERE  body.text:"error"' },
     });
 
-    await persistQueries('logs.test', [duplicate], persistDeps(kiClient, streamsClient));
+    await persistQueries('logs.test', [duplicate], persistDeps(kiClient));
 
     expect(kiClient.bulk).not.toHaveBeenCalled();
     expect(kiClient.syncQueries).not.toHaveBeenCalled();
   });
 
   it('deduplicates within a single batch (intra-batch dedup)', async () => {
-    const { kiClient, streamsClient } = createMocks();
+    const { kiClient } = createMocks();
 
     const q1 = makeGeneratedQuery({
       title: 'First',
@@ -137,7 +127,7 @@ describe('persistQueries', () => {
       esql: { query: 'FROM logs | WHERE body.text:"timeout"' },
     });
 
-    await persistQueries('logs.test', [q1, q2], persistDeps(kiClient, streamsClient));
+    await persistQueries('logs.test', [q1, q2], persistDeps(kiClient));
 
     expect(kiClient.bulk).toHaveBeenCalledTimes(1);
     const ops = (kiClient.bulk as jest.Mock).mock.calls[0][1];
@@ -150,13 +140,13 @@ describe('persistQueries', () => {
       id: 'q1',
       esql: 'FROM logs | WHERE body.text:"timeout" AND body.text:"connection"',
     });
-    const { kiClient, streamsClient } = createMocks([existing]);
+    const { kiClient } = createMocks([existing]);
 
     const reordered = makeGeneratedQuery({
       esql: { query: 'FROM logs | WHERE body.text:"connection" AND body.text:"timeout"' },
     });
 
-    await persistQueries('logs.test', [reordered], persistDeps(kiClient, streamsClient));
+    await persistQueries('logs.test', [reordered], persistDeps(kiClient));
 
     expect(kiClient.bulk).not.toHaveBeenCalled();
     expect(kiClient.syncQueries).not.toHaveBeenCalled();
@@ -167,7 +157,7 @@ describe('persistQueries', () => {
       id: 'q1',
       esql: 'FROM logs.test | WHERE body.text:"error"',
     });
-    const { kiClient, streamsClient } = createMocks([existing]);
+    const { kiClient } = createMocks([existing]);
 
     const duplicate = makeGeneratedQuery({
       esql: { query: 'FROM logs.test, logs.test.* | WHERE body.text:"error"' },
@@ -176,7 +166,7 @@ describe('persistQueries', () => {
     const { skippedQueries } = await persistQueries(
       'logs.test',
       [duplicate],
-      persistDeps(kiClient, streamsClient)
+      persistDeps(kiClient)
     );
 
     expect(skippedQueries).toHaveLength(1);
@@ -186,14 +176,14 @@ describe('persistQueries', () => {
 
   it('routes replaces for non-rule-backed queries to bulk with rule_backed: false', async () => {
     const existing = makeLink({ id: 'q1', ruleBacked: false });
-    const { kiClient, streamsClient } = createMocks([existing]);
+    const { kiClient } = createMocks([existing]);
 
     const replacement = makeGeneratedQuery({
       replaces: 'q1',
       esql: { query: 'FROM logs | WHERE body.text:"new-error"' },
     });
 
-    await persistQueries('logs.test', [replacement], persistDeps(kiClient, streamsClient));
+    await persistQueries('logs.test', [replacement], persistDeps(kiClient));
 
     expect(kiClient.bulk).toHaveBeenCalledTimes(1);
     expect(kiClient.bulk).toHaveBeenCalledWith('logs.test', [
@@ -208,14 +198,14 @@ describe('persistQueries', () => {
 
   it('routes replaces for rule-backed queries through syncQueries', async () => {
     const existing = makeLink({ id: 'q1', ruleBacked: true });
-    const { kiClient, streamsClient } = createMocks([existing]);
+    const { kiClient } = createMocks([existing]);
 
     const replacement = makeGeneratedQuery({
       replaces: 'q1',
       esql: { query: 'FROM logs | WHERE body.text:"updated-error"' },
     });
 
-    await persistQueries('logs.test', [replacement], persistDeps(kiClient, streamsClient));
+    await persistQueries('logs.test', [replacement], persistDeps(kiClient));
 
     expect(kiClient.bulk).not.toHaveBeenCalled();
     expect(kiClient.syncQueries).toHaveBeenCalledTimes(1);
@@ -226,14 +216,14 @@ describe('persistQueries', () => {
   });
 
   it('falls through to new query when replaces targets a nonexistent ID', async () => {
-    const { kiClient, streamsClient } = createMocks();
+    const { kiClient } = createMocks();
 
     const query = makeGeneratedQuery({
       replaces: 'nonexistent-id',
       esql: { query: 'FROM logs | WHERE body.text:"fallback"' },
     });
 
-    await persistQueries('logs.test', [query], persistDeps(kiClient, streamsClient));
+    await persistQueries('logs.test', [query], persistDeps(kiClient));
 
     expect(kiClient.bulk).toHaveBeenCalledTimes(1);
     const ops = (kiClient.bulk as jest.Mock).mock.calls[0][1];
@@ -245,14 +235,14 @@ describe('persistQueries', () => {
       id: 'q1',
       esql: 'FROM logs | WHERE body.text:"error"',
     });
-    const { kiClient, streamsClient } = createMocks([existing]);
+    const { kiClient } = createMocks([existing]);
 
     const noOpReplace = makeGeneratedQuery({
       replaces: 'q1',
       esql: { query: 'FROM logs | WHERE body.text:"error"' },
     });
 
-    await persistQueries('logs.test', [noOpReplace], persistDeps(kiClient, streamsClient));
+    await persistQueries('logs.test', [noOpReplace], persistDeps(kiClient));
 
     expect(kiClient.bulk).not.toHaveBeenCalled();
     expect(kiClient.syncQueries).not.toHaveBeenCalled();
@@ -260,10 +250,10 @@ describe('persistQueries', () => {
 
   describe('resolveExpiresAt invariant', () => {
     it('assigns defaultExpiresAt to brand-new queries', async () => {
-      const { kiClient, streamsClient } = createMocks();
+      const { kiClient } = createMocks();
       const query = makeGeneratedQuery({ severity_score: 30 });
 
-      await persistQueries('logs.test', [query], { kiClient, streamsClient });
+      await persistQueries('logs.test', [query], { kiClient, viewName: VIEW_NAME });
 
       const ops = (kiClient.bulk as jest.Mock).mock.calls[0][1];
       expect(ops[0].index.query.expires_at).toBe(MOCK_DEFAULT_EXPIRES_AT);
@@ -275,7 +265,7 @@ describe('persistQueries', () => {
         ruleBacked: false,
         expiresAt: '2025-01-01T00:00:00.000Z',
       });
-      const { kiClient, streamsClient } = createMocks([managedPrior]);
+      const { kiClient } = createMocks([managedPrior]);
 
       const replacement = makeGeneratedQuery({
         replaces: 'q1',
@@ -283,7 +273,7 @@ describe('persistQueries', () => {
         esql: { query: 'FROM logs | WHERE body.text:"new"' },
       });
 
-      await persistQueries('logs.test', [replacement], { kiClient, streamsClient });
+      await persistQueries('logs.test', [replacement], { kiClient, viewName: VIEW_NAME });
 
       const ops = (kiClient.bulk as jest.Mock).mock.calls[0][1];
       expect(ops[0].index.query.expires_at).toBe(MOCK_DEFAULT_EXPIRES_AT);
@@ -291,7 +281,7 @@ describe('persistQueries', () => {
 
     it('preserves durable status when replacing a prior with no expiry', async () => {
       const durablePrior = makeLink({ id: 'q1', ruleBacked: false });
-      const { kiClient, streamsClient } = createMocks([durablePrior]);
+      const { kiClient } = createMocks([durablePrior]);
 
       const replacement = makeGeneratedQuery({
         replaces: 'q1',
@@ -299,7 +289,7 @@ describe('persistQueries', () => {
         esql: { query: 'FROM logs | WHERE body.text:"new"' },
       });
 
-      await persistQueries('logs.test', [replacement], { kiClient, streamsClient });
+      await persistQueries('logs.test', [replacement], { kiClient, viewName: VIEW_NAME });
 
       const ops = (kiClient.bulk as jest.Mock).mock.calls[0][1];
       expect(ops[0].index.query.expires_at).toBeUndefined();
@@ -308,10 +298,10 @@ describe('persistQueries', () => {
 
   describe('rule-eligible queries (severity >= 60, non-STATS)', () => {
     it('routes new high-severity queries through syncQueries', async () => {
-      const { kiClient, streamsClient } = createMocks();
+      const { kiClient } = createMocks();
       const query = makeGeneratedQuery({ severity_score: 75, type: 'match' });
 
-      await persistQueries('logs.test', [query], persistDeps(kiClient, streamsClient));
+      await persistQueries('logs.test', [query], persistDeps(kiClient));
 
       expect(kiClient.syncQueries).toHaveBeenCalledTimes(1);
       expect(kiClient.bulk).not.toHaveBeenCalled();
@@ -321,10 +311,10 @@ describe('persistQueries', () => {
     });
 
     it('routes new high-severity STATS queries to bulk (no rules)', async () => {
-      const { kiClient, streamsClient } = createMocks();
+      const { kiClient } = createMocks();
       const query = makeGeneratedQuery({ severity_score: 90, type: 'stats' });
 
-      await persistQueries('logs.test', [query], persistDeps(kiClient, streamsClient));
+      await persistQueries('logs.test', [query], persistDeps(kiClient));
 
       expect(kiClient.bulk).toHaveBeenCalledTimes(1);
       expect(kiClient.syncQueries).not.toHaveBeenCalled();
@@ -333,10 +323,10 @@ describe('persistQueries', () => {
     });
 
     it('creates rules at the exact threshold boundary (severity_score = 60)', async () => {
-      const { kiClient, streamsClient } = createMocks();
+      const { kiClient } = createMocks();
       const query = makeGeneratedQuery({ severity_score: 60, type: 'match' });
 
-      await persistQueries('logs.test', [query], persistDeps(kiClient, streamsClient));
+      await persistQueries('logs.test', [query], persistDeps(kiClient));
 
       expect(kiClient.syncQueries).toHaveBeenCalledTimes(1);
       expect(kiClient.bulk).not.toHaveBeenCalled();
@@ -348,7 +338,7 @@ describe('persistQueries', () => {
         esql: 'FROM logs | WHERE body.text:"old"',
         ruleBacked: true,
       });
-      const { kiClient, streamsClient } = createMocks([ruleBacked]);
+      const { kiClient } = createMocks([ruleBacked]);
 
       const lowSevNew = makeGeneratedQuery({
         title: 'Low sev',
@@ -368,7 +358,7 @@ describe('persistQueries', () => {
       await persistQueries(
         'logs.test',
         [lowSevNew, highSevNew, replaceRuleBacked],
-        persistDeps(kiClient, streamsClient)
+        persistDeps(kiClient)
       );
 
       expect(kiClient.bulk).toHaveBeenCalledTimes(1);
@@ -387,7 +377,7 @@ describe('persistQueries', () => {
         esql: 'FROM logs | WHERE body.text:"startup"',
         ruleBacked: false,
       });
-      const { kiClient, streamsClient } = createMocks([existingLow]);
+      const { kiClient } = createMocks([existingLow]);
 
       const highSevNew = makeGeneratedQuery({
         title: 'High sev',
@@ -395,7 +385,7 @@ describe('persistQueries', () => {
         esql: { query: 'FROM logs | WHERE body.text:"oom"' },
       });
 
-      await persistQueries('logs.test', [highSevNew], persistDeps(kiClient, streamsClient));
+      await persistQueries('logs.test', [highSevNew], persistDeps(kiClient));
 
       expect(kiClient.bulk).not.toHaveBeenCalled();
       expect(kiClient.syncQueries).toHaveBeenCalledTimes(1);

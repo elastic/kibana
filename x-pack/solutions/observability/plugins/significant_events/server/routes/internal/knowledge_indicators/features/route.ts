@@ -19,6 +19,7 @@ import { searchModeSchema } from '../../../utils/search_mode';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { StatusError } from '../../../../lib/errors/status_error';
+import { resolveStreamNames } from '../../../utils/resolve_stream_names';
 import type { KIBulkOperation } from '../../../../lib/knowledge_indicators';
 
 const MAX_INPUT_STRING_LENGTH = 255;
@@ -46,10 +47,10 @@ const upsertFeatureRoute = createServerRoute({
     server,
   }): Promise<{ acknowledged: boolean }> => {
     const scopedClients = await getScopedClients({ request });
-    const { licensing, streamsClient } = scopedClients;
+    const { licensing, sourcesClient } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
-    await streamsClient.ensureStream(params.path.name);
+    await sourcesClient.get(params.path.name);
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
     const { id, expires_at, ...baseBody } = params.body;
@@ -108,16 +109,15 @@ const deleteFeatureRoute = createServerRoute({
     logger,
   }): Promise<{ acknowledged: boolean }> => {
     const scopedClients = await getScopedClients({ request });
-    const { licensing, streamsClient } = scopedClients;
+    const { licensing, sourcesClient } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
-    await streamsClient.ensureStream(params.path.name);
+    await sourcesClient.get(params.path.name);
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
     await kiClient.bulk(params.path.name, [{ delete: { type: 'feature', id: params.path.id } }]);
 
     try {
-      await streamsClient.getStream(params.path.name);
       await kiClient.reconcileStream(params.path.name);
     } catch (err) {
       logger.warn(
@@ -160,10 +160,10 @@ const listFeaturesRoute = createServerRoute({
     server,
   }): Promise<{ features: Feature[] }> => {
     const scopedClients = await getScopedClients({ request });
-    const { licensing, streamsClient } = scopedClients;
+    const { licensing, sourcesClient } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
-    await streamsClient.ensureStream(params.path.name);
+    await sourcesClient.get(params.path.name);
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
     const {
@@ -219,8 +219,7 @@ export const listAllFeaturesRoute = createServerRoute({
       licensing: scopedClients.licensing,
     });
 
-    const streams = await scopedClients.streamsClient.listStreams();
-    const streamNames = streams.map((stream) => stream.name);
+    const streamNames = await resolveStreamNames(undefined, scopedClients.sourcesClient);
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
     const {
@@ -287,7 +286,7 @@ const bulkFeaturesRoute = createServerRoute({
     const scopedClients = await getScopedClients({
       request,
     });
-    const { streamsClient, licensing } = scopedClients;
+    const { sourcesClient, licensing } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
 
@@ -296,7 +295,7 @@ const bulkFeaturesRoute = createServerRoute({
       body: { operations },
     } = params;
 
-    await streamsClient.ensureStream(name);
+    await sourcesClient.get(name);
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
     const kiOps: KIBulkOperation[] = operations.map((op) =>
@@ -307,7 +306,6 @@ const bulkFeaturesRoute = createServerRoute({
     const hasShrinkingOp = operations.some((op) => 'delete' in op || 'exclude' in op);
     if (hasShrinkingOp) {
       try {
-        await streamsClient.getStream(name);
         await kiClient.reconcileStream(name);
       } catch (err) {
         logger.warn(
@@ -358,7 +356,7 @@ const bulkFeaturesAcrossStreamsRoute = createServerRoute({
     const scopedClients = await getScopedClients({
       request,
     });
-    const { licensing, streamsClient } = scopedClients;
+    const { licensing, sourcesClient } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
 
@@ -424,7 +422,7 @@ const bulkFeaturesAcrossStreamsRoute = createServerRoute({
 
     for (const streamName of streamsWithShrinkingOps) {
       try {
-        await streamsClient.getStream(streamName);
+        await sourcesClient.get(streamName);
         await kiClient.reconcileStream(streamName);
       } catch (err) {
         logger.warn(

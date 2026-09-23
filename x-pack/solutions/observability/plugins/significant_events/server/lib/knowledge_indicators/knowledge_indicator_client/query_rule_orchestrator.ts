@@ -290,6 +290,16 @@ export class QueryRuleOrchestrator {
     await this.writer.bulk(sourceId, [{ delete: { type: KI_TYPE_QUERY, id: queryId } }]);
   }
 
+  async setSourceRulesEnabled(sourceId: string, enabled: boolean): Promise<void> {
+    const ids = await this.rulesManagementClient.findOwnedRuleIds(sourceId);
+    await this.rulesManagementClient.setRulesEnabled(ids, enabled);
+  }
+
+  async deleteOwnedRules(sourceId: string): Promise<void> {
+    const ids = await this.rulesManagementClient.findOwnedRuleIds(sourceId);
+    await this.rulesManagementClient.bulkDeleteRules(ids);
+  }
+
   async deleteAllQueries(sourceId: string): Promise<void> {
     if (!this.isSignificantEventsEnabled) {
       this.logger.debug(

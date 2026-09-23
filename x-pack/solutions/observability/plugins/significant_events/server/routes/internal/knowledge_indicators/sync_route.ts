@@ -9,6 +9,7 @@ import { z } from '@kbn/zod/v4';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { createServerRoute } from '../../create_server_route';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
+import { reconcileSourceCatalog } from './reconcile_source_catalog';
 
 export interface StreamsWithIndicatorsResponse {
   streams: Array<{ streamName: string }>;
@@ -39,13 +40,27 @@ export const streamsWithIndicatorsRoute = createServerRoute({
     request,
     getScopedClients,
     server,
+    workflowClients,
+    maintenanceService,
   }): Promise<StreamsWithIndicatorsResponse> => {
-    const { getKnowledgeIndicatorClient, licensing } = await getScopedClients({ request });
+    const { getKnowledgeIndicatorClient, licensing, sourcesClient } = await getScopedClients({
+      request,
+    });
 
     await assertSignificantEventsAccess({ server, licensing });
 
     const kiClient = await getKnowledgeIndicatorClient();
-    const streamNames = await kiClient.getStreamNamesToReconcile();
+    const { sources, reconcileIds } = await reconcileSourceCatalog({
+      sourcesClient,
+      kiClient,
+      onboardingClient: workflowClients.streamsKIsOnboardingClient,
+      maintenanceService,
+      request,
+    });
+    const enabledIds = new Set(
+      sources.filter((source) => source.enabled).map((source) => source.id)
+    );
+    const streamNames = reconcileIds.filter((sourceId) => enabledIds.has(sourceId));
 
     return { streams: streamNames.map((streamName) => ({ streamName })) };
   },

@@ -109,7 +109,12 @@ const makeInferredHandlerParams = ({
 } = {}) => {
   const request = makeRequest();
   const routeLogger = makeRouteLogger();
-  const stream = { name: 'logs.test' };
+  const source = {
+    id: 'logs.test',
+    title: 'logs.test',
+    description: 'Checkout logs',
+    view_name: '$.nightshift.sources.default.logs',
+  };
   const kiClient = {};
   const agentBuilder = {};
   const server = {
@@ -145,7 +150,7 @@ const makeInferredHandlerParams = ({
     getScopedClients: jest.fn().mockResolvedValue({
       scopedClusterClient: { asCurrentUser: {} },
       streamDataEsClient: {},
-      streamsClient: { getStream: jest.fn().mockResolvedValue(stream) },
+      sourcesClient: { get: jest.fn().mockResolvedValue({ source }) },
       soClient: {},
       tuningConfig: {},
       licensing,
@@ -162,7 +167,7 @@ const makeInferredHandlerParams = ({
     handlerParams,
     request,
     routeLogger,
-    stream,
+    source,
     kiClient,
     agentBuilder,
     server,
@@ -177,7 +182,12 @@ const makeInferredHandlerParams = ({
 const makeComputedHandlerParams = () => {
   const request = makeRequest();
   const routeLogger = makeRouteLogger();
-  const stream = { name: 'logs.test' };
+  const source = {
+    id: 'logs.test',
+    title: 'logs.test',
+    description: 'Checkout logs',
+    view_name: '$.nightshift.sources.default.logs',
+  };
   const kiClient = {};
   const streamDataEsClient = {};
   const server = { agentBuilder: undefined };
@@ -203,7 +213,7 @@ const makeComputedHandlerParams = () => {
     request,
     getScopedClients: jest.fn().mockResolvedValue({
       streamDataEsClient,
-      streamsClient: { getStream: jest.fn().mockResolvedValue(stream) },
+      sourcesClient: { get: jest.fn().mockResolvedValue({ source }) },
       tuningConfig: {},
       licensing,
       getKnowledgeIndicatorClient: jest.fn().mockResolvedValue(kiClient),
@@ -218,7 +228,7 @@ const makeComputedHandlerParams = () => {
     handlerParams,
     request,
     routeLogger,
-    stream,
+    source,
     kiClient,
     streamDataEsClient,
     server,
@@ -347,7 +357,6 @@ describe('inferred feature identification route', () => {
     const {
       handlerParams,
       request,
-      stream,
       kiClient,
       agentBuilder,
       server,
@@ -371,7 +380,6 @@ describe('inferred feature identification route', () => {
         request,
         kiClient,
         streamName: 'logs.test',
-        streamType: 'logs',
         connectorId: 'connector-1',
         runId: 'run-1',
         iteration: 2,
@@ -386,7 +394,6 @@ describe('inferred feature identification route', () => {
         trackFeaturesIdentified: expect.any(Function),
       })
     );
-    expect(mockGetStreamTypeFromDefinition).toHaveBeenCalledWith(stream);
     expect(telemetry.trackFeaturesIdentified).not.toHaveBeenCalled();
     expect(ensureEnabled).toHaveBeenCalledWith({ request });
   });
@@ -435,7 +442,6 @@ describe('computed feature identification route', () => {
     const {
       handlerParams,
       request,
-      stream,
       kiClient,
       streamDataEsClient,
       server,
@@ -454,8 +460,14 @@ describe('computed feature identification route', () => {
     expect(maintenanceService.getState).toHaveBeenCalledWith({ request });
     expect(mockIdentifyComputedFeatures).toHaveBeenCalledWith(
       expect.objectContaining({
-        stream,
-        streamName: 'logs.test',
+        sourceId: 'logs.test',
+        target: {
+          id: 'logs.test',
+          name: 'logs.test',
+          description: 'Checkout logs',
+          sources: ['$.nightshift.sources.default.logs'],
+          samplingSource: '$.nightshift.sources.default.logs',
+        },
         start: 100,
         end: 200,
         esClient: streamDataEsClient,
@@ -485,6 +497,7 @@ describe('should identify features route', () => {
       request: {},
       getScopedClients: jest.fn().mockResolvedValue({
         licensing: {},
+        sourcesClient: { get: jest.fn().mockResolvedValue({ source: { id: 'logs.test' } }) },
         getKnowledgeIndicatorClient: jest.fn().mockResolvedValue(kiClient),
       }),
       server: {},
