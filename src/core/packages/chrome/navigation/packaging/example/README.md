@@ -6,7 +6,7 @@ Minimal test application for the `@kbn/one-navigation` package.
 
 ```bash
 # From the Kibana root
-yarn kbn bootstrap
+pnpm kbn bootstrap
 
 # Build the package
 cd src/core/packages/chrome/navigation/packaging
@@ -17,7 +17,7 @@ cd src/core/packages/chrome/navigation/packaging
 
 ```bash
 cd src/core/packages/chrome/navigation/packaging/example
-yarn start
+pnpm start
 ```
 
 Opens http://localhost:3000.

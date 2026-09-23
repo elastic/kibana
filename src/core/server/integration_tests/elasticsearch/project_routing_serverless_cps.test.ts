@@ -64,7 +64,7 @@ describe.skip('project_routing on serverless CPS', () => {
     const { startES, startKibana } = createTestServerlessInstances({
       adjustTimeout: (timeout: number) => jest.setTimeout(timeout),
       enableCPS: true,
-      // Match `yarn es serverless --projectType observability ...`
+      // Match `pnpm es serverless --projectType observability ...`
       projectType: 'oblt',
       // Required to apply the UIAM/serverless ES args block (mock IDP/project metadata).
       kibanaUrl: 'http://localhost:5601/',
