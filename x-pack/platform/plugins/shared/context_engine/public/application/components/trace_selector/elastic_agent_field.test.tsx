@@ -11,7 +11,6 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import { ElasticAgentField } from './elastic_agent_field';
 
 const mockUseAgentBuilderAgents = jest.fn();
@@ -20,22 +19,13 @@ jest.mock('../../hooks/use_agent_builder_agents', () => ({
   useAgentBuilderAgents: () => mockUseAgentBuilderAgents(),
 }));
 
-const defaultEbtElement = CONTEXT_ENGINE_UI_EBT.element.aiIndexCreatePage;
-
-const withDefaultEbt = (
-  props: Omit<React.ComponentProps<typeof ElasticAgentField>, 'ebtElement'>
-): React.ComponentProps<typeof ElasticAgentField> => ({
-  ebtElement: defaultEbtElement,
-  ...props,
-});
-
-const renderField = (props: Omit<React.ComponentProps<typeof ElasticAgentField>, 'ebtElement'>) => {
+const renderField = (props: React.ComponentProps<typeof ElasticAgentField>) => {
   const services = coreMock.createStart();
   const view = render(
     <I18nProvider>
       <EuiProvider>
         <KibanaContextProvider services={services}>
-          <ElasticAgentField {...withDefaultEbt(props)} />
+          <ElasticAgentField {...props} />
         </KibanaContextProvider>
       </EuiProvider>
     </I18nProvider>

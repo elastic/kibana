@@ -77,7 +77,7 @@ export const AiIndexCardGrid = () => {
             data-test-subj="contextAiIndexListClearFilters"
             onClick={() => setQueryFromText('')}
             {...getEbtProps({
-              element: CONTEXT_ENGINE_UI_EBT.element.aiIndexListPage,
+              element: CONTEXT_ENGINE_UI_EBT.element.aiIndexListPageToolbar,
               action: CONTEXT_ENGINE_UI_EBT.action.aiIndexList.CLEAR_FILTERS,
             })}
           >

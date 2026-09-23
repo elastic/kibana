@@ -48,7 +48,7 @@ export const SignalGroupRow = ({ group, onView }: SignalGroupRowProps) => (
       onView();
     }}
     {...getEbtProps({
-      element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPage,
+      element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageSignalsPanel,
       action: CONTEXT_ENGINE_UI_EBT.action.signals.VIEW_GROUP,
       detail: group.tag,
     })}

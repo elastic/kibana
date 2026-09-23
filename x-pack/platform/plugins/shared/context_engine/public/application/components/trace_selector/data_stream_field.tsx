@@ -6,27 +6,21 @@
  */
 
 import { EuiComboBox, EuiFormRow, type EuiComboBoxOptionOption } from '@elastic/eui';
-import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { useDebouncedValue } from '@kbn/react-hooks';
 import React, { useEffect, useMemo, useState } from 'react';
-import type { ContextEngineUiEbt } from '../../../../common/telemetry';
-import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import { useKibana } from '../../hooks/use_kibana';
 import { useSearchDataStreams } from '../../hooks/use_search_data_streams';
 import type { EditableAiIndexTrace } from './types';
 
-type ContextEngineEbtElement = ContextEngineUiEbt['element'][keyof ContextEngineUiEbt['element']];
-
 interface DataStreamFieldProps {
   value: EditableAiIndexTrace | undefined;
   onChange: (trace: EditableAiIndexTrace | undefined) => void;
-  ebtElement: ContextEngineEbtElement;
 }
 
 const SEARCH_DEBOUNCE_MS = 300;
 
-export const DataStreamField = ({ value, onChange, ebtElement }: DataStreamFieldProps) => {
+export const DataStreamField = ({ value, onChange }: DataStreamFieldProps) => {
   const {
     services: { notifications },
   } = useKibana();
@@ -103,10 +97,6 @@ export const DataStreamField = ({ value, onChange, ebtElement }: DataStreamField
           defaultMessage: 'Data stream trace source',
         })}
         data-test-subj="contextTraceDataStreamComboBox"
-        {...getEbtProps({
-          element: ebtElement,
-          action: CONTEXT_ENGINE_UI_EBT.action.traces.SELECT_DATA_STREAM,
-        })}
       />
     </EuiFormRow>
   );

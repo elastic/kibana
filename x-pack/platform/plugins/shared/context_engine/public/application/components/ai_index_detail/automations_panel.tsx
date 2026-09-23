@@ -115,7 +115,7 @@ export const AutomationsPanel = ({
                   isDisabled={isBusy}
                   data-test-subj="contextCancelEditingAutomationsButton"
                   {...getEbtProps({
-                    element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPage,
+                    element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageAutomationsPanel,
                     action: CONTEXT_ENGINE_UI_EBT.action.automations.CANCEL,
                   })}
                 >
@@ -133,7 +133,7 @@ export const AutomationsPanel = ({
                   isDisabled={isCreating}
                   data-test-subj="contextSaveAutomationsButton"
                   {...getEbtProps({
-                    element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPage,
+                    element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageAutomationsPanel,
                     action: CONTEXT_ENGINE_UI_EBT.action.automations.SAVE,
                   })}
                 >
@@ -153,7 +153,7 @@ export const AutomationsPanel = ({
                     onClick={suggestAutomation}
                     data-test-subj="contextSuggestAutomationButton"
                     {...getEbtProps({
-                      element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPage,
+                      element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageAutomationsPanel,
                       action: CONTEXT_ENGINE_UI_EBT.action.automations.SUGGEST,
                     })}
                   >
@@ -180,7 +180,7 @@ export const AutomationsPanel = ({
                   )}
                   data-test-subj="contextCreateAutomationButton"
                   {...getEbtProps({
-                    element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPage,
+                    element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageAutomationsPanel,
                     action: CONTEXT_ENGINE_UI_EBT.action.automations.CREATE,
                   })}
                 >
@@ -197,7 +197,7 @@ export const AutomationsPanel = ({
                   isDisabled={aiIndex === undefined}
                   data-test-subj="contextEditAutomationsButton"
                   {...getEbtProps({
-                    element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPage,
+                    element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageAutomationsPanel,
                     action: CONTEXT_ENGINE_UI_EBT.action.automations.EDIT,
                   })}
                 >

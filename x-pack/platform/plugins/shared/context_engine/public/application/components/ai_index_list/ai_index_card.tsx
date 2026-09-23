@@ -80,10 +80,6 @@ export const AiIndexCard = ({ aiIndex, href, onDeleteClick }: AiIndexCardProps) 
       paddingSize="l"
       data-test-subj="contextAiIndexCard"
       onClick={openCard}
-      {...getEbtProps({
-        element: CONTEXT_ENGINE_UI_EBT.element.aiIndexListPage,
-        action: CONTEXT_ENGINE_UI_EBT.action.aiIndexList.OPEN_CARD,
-      })}
     >
       <EuiFlexGroup direction="column" gutterSize="m">
         <EuiFlexItem grow={false}>
@@ -98,6 +94,10 @@ export const AiIndexCard = ({ aiIndex, href, onDeleteClick }: AiIndexCardProps) 
                         ref={titleLinkRef}
                         className="eui-textTruncate"
                         data-test-subj="contextAiIndexCardTitleLink"
+                        {...getEbtProps({
+                          element: CONTEXT_ENGINE_UI_EBT.element.aiIndexListPageCard,
+                          action: CONTEXT_ENGINE_UI_EBT.action.aiIndexList.OPEN_CARD,
+                        })}
                       >
                         {aiIndex.id}
                       </EuiLink>
@@ -132,7 +132,7 @@ export const AiIndexCard = ({ aiIndex, href, onDeleteClick }: AiIndexCardProps) 
                       aria-label={actionsAriaLabel}
                       onClick={() => setIsMenuOpen((open) => !open)}
                       {...getEbtProps({
-                        element: CONTEXT_ENGINE_UI_EBT.element.aiIndexListPage,
+                        element: CONTEXT_ENGINE_UI_EBT.element.aiIndexListPageCard,
                         action: CONTEXT_ENGINE_UI_EBT.action.aiIndexList.CARD_ACTIONS_MENU,
                       })}
                     />
@@ -156,7 +156,7 @@ export const AiIndexCard = ({ aiIndex, href, onDeleteClick }: AiIndexCardProps) 
                       }
                       data-test-subj="contextAiIndexCardDeleteAction"
                       {...getEbtProps({
-                        element: CONTEXT_ENGINE_UI_EBT.element.aiIndexListPage,
+                        element: CONTEXT_ENGINE_UI_EBT.element.aiIndexListPageCard,
                         action: CONTEXT_ENGINE_UI_EBT.action.aiIndexList.DELETE,
                       })}
                       onClick={() => {

@@ -84,9 +84,9 @@ export const TraceSelector = ({ value, onChange, ebtElement }: TraceSelectorProp
       </EuiButtonGroup>
       <EuiSpacer size="m" />
       {mode === 'elastic_agent' ? (
-        <ElasticAgentField value={value} onChange={onChange} ebtElement={ebtElement} />
+        <ElasticAgentField value={value} onChange={onChange} />
       ) : (
-        <DataStreamField value={value} onChange={onChange} ebtElement={ebtElement} />
+        <DataStreamField value={value} onChange={onChange} />
       )}
     </>
   );

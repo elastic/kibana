@@ -81,7 +81,7 @@ export const DescriptionPanel = ({
               isDisabled={aiIndex === undefined}
               data-test-subj="contextEditDescriptionButton"
               {...getEbtProps({
-                element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPage,
+                element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageDescriptionPanel,
                 action: CONTEXT_ENGINE_UI_EBT.action.description.EDIT,
               })}
             >
@@ -120,7 +120,7 @@ export const DescriptionPanel = ({
                 isDisabled={isSaving}
                 data-test-subj="contextDescriptionCancelButton"
                 {...getEbtProps({
-                  element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPage,
+                  element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageDescriptionPanel,
                   action: CONTEXT_ENGINE_UI_EBT.action.description.CANCEL,
                 })}
               >
@@ -138,7 +138,7 @@ export const DescriptionPanel = ({
                 isLoading={isSaving}
                 data-test-subj="contextDescriptionSaveButton"
                 {...getEbtProps({
-                  element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPage,
+                  element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageDescriptionPanel,
                   action: CONTEXT_ENGINE_UI_EBT.action.description.SAVE,
                 })}
               >

@@ -185,9 +185,9 @@ export const ConnectorsTab = ({
         prepend: <ConnectorTypeIcon actionTypeId={connector.actionTypeId} />,
         'data-test-subj': `contextConnectorOption-${connector.id}`,
         ...getEbtProps({
-          element: CONTEXT_ENGINE_UI_EBT.element.aiIndexEditFlyout,
+          element: CONTEXT_ENGINE_UI_EBT.element.aiIndexEditFlyoutSourcePicker,
           action: CONTEXT_ENGINE_UI_EBT.action.sources.TOGGLE_CONNECTOR,
-          detail: connector.id,
+          detail: connector.actionTypeId,
         }),
       })),
     [connectors, selectedIds]
@@ -245,7 +245,7 @@ export const ConnectorsTab = ({
       onClick={openCreateFlyout}
       data-test-subj="contextCreateConnectorButton"
       {...getEbtProps({
-        element: CONTEXT_ENGINE_UI_EBT.element.aiIndexEditFlyout,
+        element: CONTEXT_ENGINE_UI_EBT.element.aiIndexEditFlyoutSourcePicker,
         action: CONTEXT_ENGINE_UI_EBT.action.sources.CREATE_CONNECTOR,
       })}
     >

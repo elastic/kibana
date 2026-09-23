@@ -69,7 +69,7 @@ export const TracesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: TracesPa
               isDisabled={aiIndex === undefined}
               data-test-subj="contextEditTracesButton"
               {...getEbtProps({
-                element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPage,
+                element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageTracesPanel,
                 action: CONTEXT_ENGINE_UI_EBT.action.traces.EDIT,
               })}
             >
@@ -89,7 +89,7 @@ export const TracesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: TracesPa
           <TraceSelector
             value={editing.draft}
             onChange={editing.setDraft}
-            ebtElement={CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPage}
+            ebtElement={CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageTracesPanel}
           />
           <EuiSpacer size="m" />
           <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
@@ -99,7 +99,7 @@ export const TracesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: TracesPa
                 isDisabled={editing.isSaving}
                 data-test-subj="contextTracesCancelButton"
                 {...getEbtProps({
-                  element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPage,
+                  element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageTracesPanel,
                   action: CONTEXT_ENGINE_UI_EBT.action.traces.CANCEL,
                 })}
               >
@@ -117,7 +117,7 @@ export const TracesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: TracesPa
                 isLoading={editing.isSaving}
                 data-test-subj="contextTracesSaveButton"
                 {...getEbtProps({
-                  element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPage,
+                  element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageTracesPanel,
                   action: CONTEXT_ENGINE_UI_EBT.action.traces.SAVE,
                 })}
               >

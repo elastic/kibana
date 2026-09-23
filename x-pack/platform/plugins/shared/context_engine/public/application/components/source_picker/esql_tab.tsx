@@ -65,7 +65,7 @@ export const EsqlTab = ({ onAdd }: EsqlTabProps) => {
             isDisabled={!trimmedQuery}
             data-test-subj="contextAddEsqlSourceButton"
             {...getEbtProps({
-              element: CONTEXT_ENGINE_UI_EBT.element.aiIndexEditFlyout,
+              element: CONTEXT_ENGINE_UI_EBT.element.aiIndexEditFlyoutSourcePicker,
               action: CONTEXT_ENGINE_UI_EBT.action.sources.ADD_ESQL,
             })}
           >

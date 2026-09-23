@@ -127,7 +127,7 @@ export const SignalRow = ({ signal, onViewDetails }: SignalRowProps) => {
             onClick={onViewDetails}
             data-test-subj="contextSignalRowViewDetailsButton"
             {...getEbtProps({
-              element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPage,
+              element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageSignalsPanel,
               action: CONTEXT_ENGINE_UI_EBT.action.signals.VIEW_SIGNAL,
             })}
           >

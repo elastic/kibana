@@ -8,13 +8,30 @@
 /**
  * Stable `data-ebt-*` wire values for Context Engine UI click tracking.
  * Used with `getEbtProps()` from `@kbn/ebt-click`.
+ *
+ * Page-level elements identify navigation and chrome. Section-level elements
+ * (suffix `.panel`, `.card`, etc.) identify interactions within a page area.
  */
 const ebtElement = {
   aiIndexListPage: 'contextEngine.aiIndexListPage',
+  aiIndexListPageCard: 'contextEngine.aiIndexListPage.card',
+  aiIndexListPageManagedRow: 'contextEngine.aiIndexListPage.managedRow',
+  aiIndexListPageToolbar: 'contextEngine.aiIndexListPage.toolbar',
+  aiIndexListPageDeleteModal: 'contextEngine.aiIndexListPage.deleteModal',
   aiIndexCreatePage: 'contextEngine.aiIndexCreatePage',
+  aiIndexCreatePageTraceSelector: 'contextEngine.aiIndexCreatePage.traceSelector',
   aiIndexDetailPage: 'contextEngine.aiIndexDetailPage',
+  aiIndexDetailPageDescriptionPanel: 'contextEngine.aiIndexDetailPage.descriptionPanel',
+  aiIndexDetailPageTracesPanel: 'contextEngine.aiIndexDetailPage.tracesPanel',
+  aiIndexDetailPageSourcesPanel: 'contextEngine.aiIndexDetailPage.sourcesPanel',
+  aiIndexDetailPageAutomationsPanel: 'contextEngine.aiIndexDetailPage.automationsPanel',
+  aiIndexDetailPageSignalsPanel: 'contextEngine.aiIndexDetailPage.signalsPanel',
+  aiIndexDetailPageKiListPanel: 'contextEngine.aiIndexDetailPage.kiListPanel',
   aiIndexEditFlyout: 'contextEngine.aiIndexEditFlyout',
+  aiIndexEditFlyoutSourcePicker: 'contextEngine.aiIndexEditFlyout.sourcePicker',
   aiIndexDetailFlyout: 'contextEngine.aiIndexDetailFlyout',
+  aiIndexDetailFlyoutSignalGroup: 'contextEngine.aiIndexDetailFlyout.signalGroup',
+  aiIndexDetailFlyoutSignalDetail: 'contextEngine.aiIndexDetailFlyout.signalDetail',
 } as const;
 
 const ebtAction = {

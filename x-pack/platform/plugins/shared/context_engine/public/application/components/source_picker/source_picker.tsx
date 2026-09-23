@@ -106,7 +106,7 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
           }
           data-test-subj="contextSourcePickerTab-esql"
           {...getEbtProps({
-            element: CONTEXT_ENGINE_UI_EBT.element.aiIndexEditFlyout,
+            element: CONTEXT_ENGINE_UI_EBT.element.aiIndexEditFlyoutSourcePicker,
             action: CONTEXT_ENGINE_UI_EBT.action.sources.TAB_ESQL,
           })}
         >
@@ -126,7 +126,7 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
           }
           data-test-subj="contextSourcePickerTab-connectors"
           {...getEbtProps({
-            element: CONTEXT_ENGINE_UI_EBT.element.aiIndexEditFlyout,
+            element: CONTEXT_ENGINE_UI_EBT.element.aiIndexEditFlyoutSourcePicker,
             action: CONTEXT_ENGINE_UI_EBT.action.sources.TAB_CONNECTORS,
           })}
         >

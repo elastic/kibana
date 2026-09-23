@@ -25,7 +25,7 @@ jest.mock('../../hooks/use_search_data_streams', () => ({
   useSearchDataStreams: () => mockUseSearchDataStreams(),
 }));
 
-const defaultEbtElement = CONTEXT_ENGINE_UI_EBT.element.aiIndexCreatePage;
+const defaultEbtElement = CONTEXT_ENGINE_UI_EBT.element.aiIndexCreatePageTraceSelector;
 
 const withDefaultEbt = (
   props: Omit<React.ComponentProps<typeof TraceSelector>, 'ebtElement'>
@@ -115,8 +115,8 @@ describe('TraceSelector', () => {
     expect(onChange).toHaveBeenCalledWith({ type: 'index', value: 'logs-genai-default' });
   });
 
-  it('propagates the given ebtElement to the toggle buttons and the active field', () => {
-    const nonDefaultEbtElement = CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPage;
+  it('propagates the given ebtElement to the toggle buttons', () => {
+    const nonDefaultEbtElement = CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageTracesPanel;
     renderWithProps({
       value: undefined,
       onChange: jest.fn(),
@@ -135,13 +135,6 @@ describe('TraceSelector', () => {
     expect(indexToggle).toHaveAttribute(
       'data-ebt-action',
       CONTEXT_ENGINE_UI_EBT.action.traces.TOGGLE_DATA_STREAM
-    );
-
-    const agentComboBox = screen.getByTestId('contextTraceAgentComboBox');
-    expect(agentComboBox).toHaveAttribute('data-ebt-element', nonDefaultEbtElement);
-    expect(agentComboBox).toHaveAttribute(
-      'data-ebt-action',
-      CONTEXT_ENGINE_UI_EBT.action.traces.SELECT_AGENT
     );
   });
 });

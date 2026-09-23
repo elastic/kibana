@@ -66,7 +66,7 @@ export const KiListPanel = ({ aiIndex: { id: aiIndexId, dest } }: KiListPanelPro
           }),
           'data-test-subj': `contextKiListFilter-${type}`,
           ...getEbtProps({
-            element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPage,
+            element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageKiListPanel,
             action: CONTEXT_ENGINE_UI_EBT.action.kiList.FILTER_TYPE,
           }),
         })

@@ -201,7 +201,7 @@ export const SignalDetailFlyout = ({
               onClick={() => onNavigate(index - 1)}
               data-test-subj="contextSignalDetailPreviousButton"
               {...getEbtProps({
-                element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailFlyout,
+                element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailFlyoutSignalDetail,
                 action: CONTEXT_ENGINE_UI_EBT.action.signals.PREVIOUS,
               })}
             >
@@ -227,7 +227,7 @@ export const SignalDetailFlyout = ({
               onClick={() => onNavigate(index + 1)}
               data-test-subj="contextSignalDetailNextButton"
               {...getEbtProps({
-                element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailFlyout,
+                element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailFlyoutSignalDetail,
                 action: CONTEXT_ENGINE_UI_EBT.action.signals.NEXT,
               })}
             >

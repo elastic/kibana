@@ -120,7 +120,7 @@ export const AiIndexDeleteConfirmModal = ({
         checked={deleteKnowledgeIndicators}
         onChange={(event) => setDeleteKnowledgeIndicators(event.target.checked)}
         {...getEbtProps({
-          element: CONTEXT_ENGINE_UI_EBT.element.aiIndexListPage,
+          element: CONTEXT_ENGINE_UI_EBT.element.aiIndexListPageDeleteModal,
           action: CONTEXT_ENGINE_UI_EBT.action.aiIndexList.DELETE_KI_CHECKBOX,
         })}
         label={
@@ -141,7 +141,7 @@ export const AiIndexDeleteConfirmModal = ({
         disabled={automationsCount === 0 || !canDeleteWorkflows}
         onChange={(event) => setDeleteAutomations(event.target.checked)}
         {...getEbtProps({
-          element: CONTEXT_ENGINE_UI_EBT.element.aiIndexListPage,
+          element: CONTEXT_ENGINE_UI_EBT.element.aiIndexListPageDeleteModal,
           action: CONTEXT_ENGINE_UI_EBT.action.aiIndexList.DELETE_AUTOMATIONS_CHECKBOX,
         })}
         label={

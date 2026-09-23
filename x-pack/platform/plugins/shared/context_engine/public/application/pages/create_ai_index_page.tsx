@@ -197,7 +197,7 @@ export const CreateAiIndexPage = () => {
           <TraceSelector
             value={trace}
             onChange={setTrace}
-            ebtElement={CONTEXT_ENGINE_UI_EBT.element.aiIndexCreatePage}
+            ebtElement={CONTEXT_ENGINE_UI_EBT.element.aiIndexCreatePageTraceSelector}
           />
         </EuiPanel>
 

@@ -80,9 +80,8 @@ export const AutomationRow = ({
                   onClick={() => setIsPreviewOpen(true)}
                   data-test-subj="contextPreviewWorkflowButton"
                   {...getEbtProps({
-                    element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPage,
+                    element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageAutomationsPanel,
                     action: CONTEXT_ENGINE_UI_EBT.action.automations.PREVIEW_WORKFLOW,
-                    detail: automation.value,
                   })}
                 />
               </EuiToolTip>
@@ -105,9 +104,8 @@ export const AutomationRow = ({
                     )}
                     data-test-subj="contextOpenWorkflowButton"
                     {...getEbtProps({
-                      element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPage,
+                      element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageAutomationsPanel,
                       action: CONTEXT_ENGINE_UI_EBT.action.automations.OPEN_WORKFLOW,
-                      detail: automation.value,
                     })}
                   >
                     {i18n.translate(
@@ -126,9 +124,8 @@ export const AutomationRow = ({
                       data-test-subj="contextRemoveAutomationButton"
                       aria-label={removeLabel}
                       {...getEbtProps({
-                        element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPage,
+                        element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageAutomationsPanel,
                         action: CONTEXT_ENGINE_UI_EBT.action.automations.REMOVE,
-                        detail: automation.value,
                       })}
                     />
                   </EuiToolTip>

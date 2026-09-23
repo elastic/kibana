@@ -96,7 +96,7 @@ export const SignalsPanel = ({ isLoading, aiIndex }: SignalsPanelProps) => {
               isDisabled={aiIndex === undefined || !hasFeedbackAgent}
               data-test-subj="contextSignalsAnalyzeButton"
               {...getEbtProps({
-                element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPage,
+                element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageSignalsPanel,
                 action: CONTEXT_ENGINE_UI_EBT.action.signals.ANALYZE,
               })}
             >

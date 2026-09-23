@@ -56,7 +56,7 @@ export const AiIndexManagedRow = ({ aiIndex }: AiIndexManagedRowProps) => {
       onClick={() => navigateToContextEngine(getAiIndexDetailPath(aiIndex.id))}
       aria-label={viewDetailsLabel}
       {...getEbtProps({
-        element: CONTEXT_ENGINE_UI_EBT.element.aiIndexListPage,
+        element: CONTEXT_ENGINE_UI_EBT.element.aiIndexListPageManagedRow,
         action: CONTEXT_ENGINE_UI_EBT.action.aiIndexList.OPEN_MANAGED_ROW,
       })}
     >

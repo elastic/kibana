@@ -57,7 +57,7 @@ export const SourceRow = ({
               aria-label={removeLabel}
               data-test-subj="contextRemoveSourceButton"
               {...getEbtProps({
-                element: CONTEXT_ENGINE_UI_EBT.element.aiIndexEditFlyout,
+                element: CONTEXT_ENGINE_UI_EBT.element.aiIndexEditFlyoutSourcePicker,
                 action: CONTEXT_ENGINE_UI_EBT.action.sources.REMOVE_SOURCE,
                 ...(sourceType !== undefined && { detail: sourceType }),
               })}

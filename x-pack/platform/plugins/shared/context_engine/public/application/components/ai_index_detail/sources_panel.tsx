@@ -79,7 +79,7 @@ export const SourcesPanel = ({
               isDisabled={!canEdit}
               data-test-subj="contextEditSourcesButton"
               {...getEbtProps({
-                element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPage,
+                element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageSourcesPanel,
                 action: CONTEXT_ENGINE_UI_EBT.action.sources.EDIT,
               })}
             >

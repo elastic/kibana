@@ -100,7 +100,7 @@ export const SignalGroupFlyout = ({ group, aiIndex, onClose }: SignalGroupFlyout
                   isDisabled={aiIndex === undefined}
                   data-test-subj="contextSignalGroupAnalyzeButton"
                   {...getEbtProps({
-                    element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailFlyout,
+                    element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailFlyoutSignalGroup,
                     action: CONTEXT_ENGINE_UI_EBT.action.signals.GROUP_ANALYZE,
                     detail: group.tag,
                   })}
@@ -178,7 +178,7 @@ export const SignalGroupFlyout = ({ group, aiIndex, onClose }: SignalGroupFlyout
                           onClick={loadMore}
                           data-test-subj="contextSignalsGroupLoadMore"
                           {...getEbtProps({
-                            element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailFlyout,
+                            element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailFlyoutSignalGroup,
                             action: CONTEXT_ENGINE_UI_EBT.action.signals.LOAD_MORE,
                             detail: group.tag,
                           })}

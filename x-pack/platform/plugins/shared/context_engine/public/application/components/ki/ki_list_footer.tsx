@@ -51,7 +51,7 @@ export const KiListFooter = ({
                 isLoading={isLoading}
                 data-test-subj="contextKiListLoadMoreButton"
                 {...getEbtProps({
-                  element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPage,
+                  element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageKiListPanel,
                   action: CONTEXT_ENGINE_UI_EBT.action.kiList.LOAD_MORE,
                 })}
               >
@@ -82,7 +82,7 @@ export const KiListFooter = ({
                         rel="noopener noreferrer"
                         data-test-subj="contextKiListCapReachedDiscoverLink"
                         {...getEbtProps({
-                          element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPage,
+                          element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageKiListPanel,
                           action: CONTEXT_ENGINE_UI_EBT.action.kiList.DISCOVER_CAP_REACHED,
                         })}
                       >

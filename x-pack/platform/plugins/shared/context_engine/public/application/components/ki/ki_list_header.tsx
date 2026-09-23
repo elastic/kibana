@@ -51,7 +51,7 @@ export const KiListHeader = ({
         href={indexManagementHref}
         data-test-subj="contextKiListPanelDestLink"
         {...getEbtProps({
-          element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPage,
+          element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageKiListPanel,
           action: CONTEXT_ENGINE_UI_EBT.action.kiList.DEST_LINK,
         })}
       >
@@ -96,7 +96,7 @@ export const KiListHeader = ({
               rel="noopener noreferrer"
               data-test-subj="contextKiListDiscoverLink"
               {...getEbtProps({
-                element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPage,
+                element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageKiListPanel,
                 action: CONTEXT_ENGINE_UI_EBT.action.kiList.DISCOVER_LINK,
               })}
             >
