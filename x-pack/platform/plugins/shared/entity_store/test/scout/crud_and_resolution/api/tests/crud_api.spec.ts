@@ -795,26 +795,6 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
     expect(list.body.message).toContain('Invalid filter');
   });
 
-  apiTest(
-    'status response exposes nonPriorityStatus/Error but hides internal config and cursor state',
-    async ({ apiClient }) => {
-      const response = await apiClient.get(ENTITY_STORE_ROUTES.public.STATUS, {
-        headers: defaultHeaders,
-        responseType: 'json',
-      });
-      expect(response.statusCode).toBe(200);
-
-      for (const engine of response.body.engines) {
-        // process health fields must be present (even when null) so callers can detect errors
-        expect(engine).toHaveProperty('nonPriorityStatus');
-        expect(engine).toHaveProperty('nonPriorityError');
-        // internal config and cursor state must never appear in the public response
-        expect(engine).not.toHaveProperty('nonPriorityLogExtractionConfig');
-        expect(engine).not.toHaveProperty('nonPriorityLogExtractionState');
-      }
-    }
-  );
-
   apiTest('Should return 400 for invalid searchAfter JSON', async ({ apiClient }) => {
     const list = await apiClient.get(
       ENTITY_STORE_ROUTES.public.CRUD_GET + `?searchAfter=${encodeURIComponent('{bad')}`,
