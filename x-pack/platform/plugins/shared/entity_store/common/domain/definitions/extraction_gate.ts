@@ -9,7 +9,7 @@ import assert from 'assert';
 
 import type { Condition } from '@kbn/streamlang';
 import { isFilterCondition } from '@kbn/streamlang';
-import type { ExtractionMode } from './entity_schema';
+import { EXTRACTION_MODE, type ExtractionMode } from './entity_schema';
 
 /**
  * Strict complement of a priority gate, so every log is handled by exactly one process.
@@ -44,9 +44,9 @@ export const resolveExtractionGate = (
   priorityExtractionGate: Condition | undefined,
   extractionMode: ExtractionMode
 ): Condition | undefined => {
-  if (!priorityExtractionGate || extractionMode === 'single') return undefined;
+  if (!priorityExtractionGate || extractionMode === EXTRACTION_MODE.single) return undefined;
 
-  return extractionMode === 'priority'
+  return extractionMode === EXTRACTION_MODE.priority
     ? priorityExtractionGate
     : complementOf(priorityExtractionGate);
 };

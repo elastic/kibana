@@ -50,6 +50,50 @@ describe('FlyoutTemplate footer', () => {
     expect(screen.queryByText('Cancel')).not.toBeInTheDocument();
   });
 
+  it('forwards a custom data attribute and an EuiButton prop through PrimaryAction', () => {
+    renderTemplate(
+      <FlyoutTemplate onClose={noop} session="never" data-test-subj="withFooter">
+        <FlyoutTemplate.Body>
+          <span>content</span>
+        </FlyoutTemplate.Body>
+        <FlyoutTemplate.Footer>
+          <FlyoutTemplate.Footer.PrimaryAction
+            label="Save"
+            onClick={noop}
+            data-foo="primaryFoo"
+            data-test-subj="primarySave"
+            contentProps={{ 'data-test-subj': 'primaryContent' }}
+          />
+        </FlyoutTemplate.Footer>
+      </FlyoutTemplate>
+    );
+
+    expect(screen.getByTestId('primarySave')).toHaveAttribute('data-foo', 'primaryFoo');
+    expect(screen.getByTestId('primaryContent')).toBeInTheDocument();
+  });
+
+  it('forwards a custom data attribute and an EuiButtonEmpty prop through SecondaryAction', () => {
+    renderTemplate(
+      <FlyoutTemplate onClose={noop} session="never" data-test-subj="withFooter">
+        <FlyoutTemplate.Body>
+          <span>content</span>
+        </FlyoutTemplate.Body>
+        <FlyoutTemplate.Footer>
+          <FlyoutTemplate.Footer.SecondaryAction
+            label="Discard"
+            onClick={noop}
+            data-foo="secondaryFoo"
+            data-test-subj="secondaryDiscard"
+            textProps={{ 'data-test-subj': 'secondaryText' }}
+          />
+        </FlyoutTemplate.Footer>
+      </FlyoutTemplate>
+    );
+
+    expect(screen.getByTestId('secondaryDiscard')).toHaveAttribute('data-foo', 'secondaryFoo');
+    expect(screen.getByTestId('secondaryText')).toBeInTheDocument();
+  });
+
   it('renders the menu trigger to the right of the secondary action', () => {
     renderTemplate(
       <FlyoutTemplate onClose={noop} session="never" data-test-subj="menuFooter">
