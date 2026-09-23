@@ -7,6 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/*
+ * Structured props only. Do not add `ReactNode`, `ReactElement`, JSX, or render-prop fields to
+ * this contract: the menu must look like one component across apps, and the renderer coerces
+ * text to plain strings and drops undeclared keys (see "Strict props" in this package's README).
+ * If a layout cannot be expressed with strings, callbacks, and unions, add a structured field
+ * instead.
+ */
+
 import type { EuiHideForProps, EuiSwitchProps, IconType } from '@elastic/eui';
 import type { SplitButtonWithNotificationProps } from './components/split_button_with_notification';
 
