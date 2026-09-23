@@ -228,14 +228,6 @@ export const reportFlakySuiteIssues = async (
     `${report.flaky.length} flaky tests in ${suites.length} suites${dryRun ? ' (dry run)' : ''}`
   );
 
-  // Without push access the issues would be filed unlabelled, and so never found again
-  if (!dryRun && !(await github.canPush())) {
-    throw new Error(
-      `GITHUB_TOKEN cannot push to ${githubRepo}: issues it filed would lose their ` +
-        `${FAILED_TEST_LABEL} label and be refiled on every run. Grant it write access, or use --dry-run.`
-    );
-  }
-
   const target = { github, repo: githubRepo };
   const { issues, open, closed } = await fetchFailedTestIssues(target, closedSince, log);
   const index = indexIssues(issues.map(describeIssue));

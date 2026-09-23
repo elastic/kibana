@@ -166,19 +166,6 @@ export class GithubApi {
     return this.requestCount;
   }
 
-  /**
-   * Whether the token can push to the repository. Without push access GitHub still accepts new
-   * issues but silently drops their labels, and an unlabelled issue is invisible to every later
-   * label-filtered listing. Read-only, so it runs in dry-run mode too.
-   */
-  async canPush(): Promise<boolean> {
-    const resp = await this.request<{ permissions?: { push?: boolean } }>(
-      { method: 'GET', url: this.baseUrl.replace(/\/$/, ''), safeForDryRun: true },
-      {}
-    );
-    return resp.data.permissions?.push === true;
-  }
-
   async editIssueBodyAndEnsureOpen(issueNumber: number, newBody: string) {
     await this.request(
       {
