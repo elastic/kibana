@@ -88,19 +88,22 @@ async function updateManagedIntegrationsPolicy(
 
   // Fetch existing policy to preserve its name, namespace, and package version (avoids
   // timestamp-based name churn, namespace drift, and implicit package upgrades on a cleanup PUT).
-  let existingName: string | undefined;
-  let existingNamespace: string | undefined;
-  let existingVersion: string | undefined;
+  let existingGetResult: Awaited<ReturnType<typeof sendGetAgentlessPolicy>>;
   try {
-    const existing = await sendGetAgentlessPolicy(policyId);
-    existingName = existing.item?.name;
-    existingNamespace = existing.item?.namespace;
-    existingVersion = existing.item?.package?.version;
+    existingGetResult = await sendGetAgentlessPolicy(policyId);
   } catch {
     throw new Error(
       `Cannot safely update managed-integration policy ${policyId}: failed to fetch existing metadata.`
     );
   }
+  if (!existingGetResult.item) {
+    throw new Error(
+      `Cannot safely update managed-integration policy ${policyId}: GET succeeded but returned no item.`
+    );
+  }
+  const existingName = existingGetResult.item.name;
+  const existingNamespace = existingGetResult.item.namespace;
+  const existingVersion = existingGetResult.item.package?.version;
 
   const pkgInfoResponse = await sendGetPackageInfoByKey(packageName, existingVersion);
   const pkgInfo = pkgInfoResponse.data?.item;

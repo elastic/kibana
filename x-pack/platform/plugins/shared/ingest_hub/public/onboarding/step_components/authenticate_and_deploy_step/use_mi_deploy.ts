@@ -168,8 +168,14 @@ export function useMiDeploy({
             ...cleanupOps.toDelete,
             ...cleanupOps.toUpdate.map((u) => u.policyId),
           ]);
-          const cleanedLiveStale = Object.keys(liveStalePolicyIds).filter((id) =>
-            succeededIds.has(liveStalePolicyIds[id])
+          // Surviving instances from toUpdate still have an active policy — keep them in
+          // policyIdsByInstance. Only instances whose policy was deleted, or instances that
+          // were removed from an updated policy, should be cleaned up here.
+          const survivingFromUpdate = new Set(
+            cleanupOps.toUpdate.flatMap((u) => u.survivingInstanceIds)
+          );
+          const cleanedLiveStale = Object.keys(liveStalePolicyIds).filter(
+            (id) => !survivingFromUpdate.has(id) && succeededIds.has(liveStalePolicyIds[id])
           );
           for (const id of cleanedLiveStale) cleanedInstanceIds.add(id);
           // Prune stale instances before clearing the staging area (removeDeployInstances
@@ -251,8 +257,11 @@ export function useMiDeploy({
             ...cleanupOps.toDelete,
             ...cleanupOps.toUpdate.map((u) => u.policyId),
           ]);
-          const retryCleanedLiveStale = Object.keys(retryLiveStale).filter((id) =>
-            retrySucceeded.has(retryLiveStale[id])
+          const retrySurvivingFromUpdate = new Set(
+            cleanupOps.toUpdate.flatMap((u) => u.survivingInstanceIds)
+          );
+          const retryCleanedLiveStale = Object.keys(retryLiveStale).filter(
+            (id) => !retrySurvivingFromUpdate.has(id) && retrySucceeded.has(retryLiveStale[id])
           );
           for (const id of retryCleanedLiveStale) cleanedInstanceIds.add(id);
           removeDeployInstances(retryCleanedLiveStale);
