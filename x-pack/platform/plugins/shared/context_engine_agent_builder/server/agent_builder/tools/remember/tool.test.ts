@@ -34,12 +34,16 @@ describe('remember tool', () => {
       },
       getSecurityStart: async () => undefined,
       generateId: () => 'logical-memory-id',
+      generateSessionId: () => 'generated-session-id',
     });
 
-  const createContext = (conversationId: string | undefined) => {
+  const createContext = (conversationId: string | undefined, callSource?: 'mcp') => {
     const context = agentBuilderMocks.tools.createHandlerContext();
     return {
       ...context,
+      ...(callSource !== undefined && {
+        callContext: { ...context.callContext, callSource },
+      }),
       spaceId: 'space-1',
       esClient: {
         ...context.esClient,
@@ -69,13 +73,14 @@ describe('remember tool', () => {
 
   const run = async (
     input: Parameters<NonNullable<ReturnType<typeof createTool>['handler']>>[0] = params,
-    conversationId: string | undefined = 'conversation-1'
+    conversationId: string | undefined = 'conversation-1',
+    callSource?: 'mcp'
   ) => {
     const handler = createTool().handler;
     if (!handler) {
       throw new Error('Expected remember tool handler');
     }
-    return handler(input, createContext(conversationId));
+    return handler(input, createContext(conversationId, callSource));
   };
 
   beforeEach(() => {
@@ -100,12 +105,15 @@ describe('remember tool', () => {
     expect(tool.schema.shape.aiIndexId.description).toContain(
       'not the backing Elasticsearch index or data stream name'
     );
+    expect(tool.schema.shape.sessionId.description).toContain(
+      'sessionId returned by an earlier remember call'
+    );
     expect(
       kiFieldsSchema.shape.attributes.safeParse({ 'memory.session_id': 'conversation-1' }).success
     ).toBe(true);
   });
 
-  it('rejects calls without a conversation-derived session id', async () => {
+  it('rejects non-MCP calls without a conversation-derived session id', async () => {
     const result = await run(params, '');
 
     expect(result).toEqual({
@@ -118,6 +126,52 @@ describe('remember tool', () => {
     });
     expect(assertContextEngineWriteAccessMock).not.toHaveBeenCalled();
     expect(index).not.toHaveBeenCalled();
+  });
+
+  it('generates and returns a session id for an MCP call without one', async () => {
+    const result = await run(params, '', 'mcp');
+
+    expect(index).toHaveBeenCalledWith(
+      expect.objectContaining({
+        document: expect.objectContaining({
+          references: undefined,
+          attributes: {
+            'memory.session_id': 'generated-session-id',
+          },
+        }),
+      })
+    );
+    expect(result).toEqual({
+      results: [
+        {
+          type: ToolResultType.other,
+          data: { id: 'logical-memory-id', sessionId: 'generated-session-id' },
+        },
+      ],
+    });
+  });
+
+  it('reuses and returns a supplied session id for an MCP call', async () => {
+    const result = await run({ ...params, sessionId: 'existing-session-id' }, '', 'mcp');
+
+    expect(index).toHaveBeenCalledWith(
+      expect.objectContaining({
+        document: expect.objectContaining({
+          references: undefined,
+          attributes: {
+            'memory.session_id': 'existing-session-id',
+          },
+        }),
+      })
+    );
+    expect(result).toEqual({
+      results: [
+        {
+          type: ToolResultType.other,
+          data: { id: 'logical-memory-id', sessionId: 'existing-session-id' },
+        },
+      ],
+    });
   });
 
   it('rejects an AI index that does not have memory enabled', async () => {
@@ -143,7 +197,7 @@ describe('remember tool', () => {
   });
 
   it('creates a memory with server-derived session metadata', async () => {
-    const result = await run(params, 'conversation-1');
+    const result = await run({ ...params, sessionId: 'ignored-session-id' }, 'conversation-1');
 
     expect(assertContextEngineWriteAccessMock).toHaveBeenCalled();
     expect(get).toHaveBeenCalledWith('support', 'space-1');
@@ -188,7 +242,7 @@ describe('remember tool', () => {
       results: [
         {
           type: ToolResultType.other,
-          data: { id: 'logical-memory-id' },
+          data: { id: 'logical-memory-id', sessionId: 'conversation-1' },
         },
       ],
     });
@@ -431,7 +485,7 @@ describe('remember tool', () => {
       results: [
         {
           type: ToolResultType.other,
-          data: { id: 'memory-1' },
+          data: { id: 'memory-1', sessionId: 'conversation-1' },
         },
       ],
     });
