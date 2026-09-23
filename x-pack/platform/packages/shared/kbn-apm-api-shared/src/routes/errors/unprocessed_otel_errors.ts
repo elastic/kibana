@@ -7,6 +7,7 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 import { environmentSchema } from '@kbn/apm-types';
 import type { Error as ApmError } from '@kbn/apm-types';
+import { MAX_SERVICE_NAME_LENGTH } from '../../constants';
 import { defineRoute } from '../types';
 import { kuerySchema, rangeSchema } from '../../default_api_types';
 
@@ -24,7 +25,7 @@ export const unprocessedOtelErrorsRoute = defineRoute<UnprocessedOtelErrorsRespo
   endpoint: 'GET /internal/apm/services/{serviceName}/errors/unprocessed_otel',
   params: lazySchema(() =>
     z.object({
-      path: z.object({ serviceName: z.string() }),
+      path: z.object({ serviceName: z.string().max(MAX_SERVICE_NAME_LENGTH) }),
       query: z.object({}).merge(environmentSchema).merge(kuerySchema).merge(rangeSchema),
     })
   ),
