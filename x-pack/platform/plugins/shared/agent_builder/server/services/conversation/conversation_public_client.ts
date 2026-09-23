@@ -64,7 +64,7 @@ export const createConversationPublicClient = ({
       const { conversation, changedFields } = await client.patchMetadata(
         conversationId,
         updates,
-        options
+        options ? { access: options.access ?? 'owner' } : undefined
       );
       return { conversation, changedFields };
     },

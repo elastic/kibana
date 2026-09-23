@@ -7,7 +7,10 @@
 
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { AGENTIC_INVESTIGATIONS_API_VERSION } from '../../../common/constants';
-import { ESCALATION_ASSIGN_URL, ESCALATION_TEMPLATE_ID } from '../../../common/escalations/constants';
+import {
+  ESCALATION_ASSIGN_URL,
+  ESCALATION_TEMPLATE_ID,
+} from '../../../common/escalations/constants';
 import {
   assignConversationRequestBodySchema,
   assignConversationRequestParamsSchema,

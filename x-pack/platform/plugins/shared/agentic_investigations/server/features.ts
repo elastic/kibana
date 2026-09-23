@@ -116,10 +116,9 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
             privileges: [
               {
                 id: 'investigations_all',
-                name: i18n.translate(
-                  'xpack.agenticInvestigations.investigationsAllPrivilegeName',
-                  { defaultMessage: 'Manage investigations' }
-                ),
+                name: i18n.translate('xpack.agenticInvestigations.investigationsAllPrivilegeName', {
+                  defaultMessage: 'Manage investigations',
+                }),
                 includeIn: 'all',
                 api: [INVESTIGATIONS_API_PRIVILEGE_MANAGE],
                 savedObject: { all: [], read: [] },

@@ -10,7 +10,6 @@ import {
   EuiCheckableCard,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButton,
   EuiModal,
   EuiModalHeader,
   EuiModalHeaderTitle,
@@ -18,7 +17,6 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
-import { toMountPoint } from '@kbn/react-kibana-mount';
 import { css } from '@emotion/react';
 import { type EscalationModalRenderProps } from '@kbn/agentic-investigations-common';
 import {
@@ -57,7 +55,7 @@ export const ConnectedEscalationModal = memo<EscalationModalRenderProps>(
     const [incidentSearch, setIncidentSearch] = useState('');
     const [collaboratorSearch, setCollaboratorSearch] = useState('');
     const {
-      services: { notifications, theme, i18n: i18nStart },
+      services: { notifications },
     } = useKibana<CoreStart>();
 
     const { data: currentUserProfile } = useCurrentUserProfile();
@@ -172,16 +170,12 @@ export const ConnectedEscalationModal = memo<EscalationModalRenderProps>(
                   onSuccess: () => {
                     notifications?.toasts.addSuccess({
                       title: ESCALATION_SUCCESS.createTitle,
-                      text: toMountPoint(
-                        <EuiFlexGroup justifyContent="flexEnd">
-                          <EuiFlexItem grow={false}>
-                            <EuiButton href="/app/alertzero/escalations" size="s">
-                              {ESCALATION_SUCCESS.linkText}
-                            </EuiButton>
-                          </EuiFlexItem>
-                        </EuiFlexGroup>,
-                        { theme, i18n: i18nStart }
-                      ),
+                      actionProps: {
+                        primary: {
+                          children: ESCALATION_SUCCESS.linkText,
+                          href: '/app/alertzero/escalations',
+                        },
+                      },
                     });
                     onClose();
                   },
@@ -211,16 +205,12 @@ export const ConnectedEscalationModal = memo<EscalationModalRenderProps>(
                   onSuccess: () => {
                     notifications?.toasts.addSuccess({
                       title: ESCALATION_SUCCESS.addToTitle,
-                      text: toMountPoint(
-                        <EuiFlexGroup justifyContent="flexEnd">
-                          <EuiFlexItem grow={false}>
-                            <EuiButton href="/app/alertzero/escalations" size="s">
-                              {ESCALATION_SUCCESS.linkText}
-                            </EuiButton>
-                          </EuiFlexItem>
-                        </EuiFlexGroup>,
-                        { theme, i18n: i18nStart }
-                      ),
+                      actionProps: {
+                        primary: {
+                          children: ESCALATION_SUCCESS.linkText,
+                          href: '/app/alertzero/escalations',
+                        },
+                      },
                     });
                     onClose();
                   },

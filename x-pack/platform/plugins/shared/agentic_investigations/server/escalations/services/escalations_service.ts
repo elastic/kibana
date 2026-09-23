@@ -111,7 +111,7 @@ export class EscalationsService {
     const metadata = {
       ...filteredMetadata,
       [ESCALATION_LINKED_INVESTIGATIONS_FIELD]: [body.linked_investigation_id],
-      ...(body.assignees.length > 0 ? { [ESCALATION_ASSIGNEES_FIELD]: body.assignees } : {}),
+      ...(body.assignees?.length ? { [ESCALATION_ASSIGNEES_FIELD]: body.assignees } : {}),
     };
 
     const accessControl =

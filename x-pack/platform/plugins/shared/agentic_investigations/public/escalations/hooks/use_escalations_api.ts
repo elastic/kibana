@@ -110,13 +110,10 @@ export const useAssignEscalation = () => {
 
   return useMutation({
     mutationFn: ({ escalationId, assignees }: { escalationId: string; assignees: string[] }) =>
-      services.http.put(
-        ESCALATION_ASSIGN_URL.replace('{id}', encodeURIComponent(escalationId)),
-        {
-          version: AGENTIC_INVESTIGATIONS_API_VERSION,
-          body: JSON.stringify({ assignees }),
-        }
-      ),
+      services.http.put(ESCALATION_ASSIGN_URL.replace('{id}', encodeURIComponent(escalationId)), {
+        version: AGENTIC_INVESTIGATIONS_API_VERSION,
+        body: JSON.stringify({ assignees }),
+      }),
     onSuccess: () => invalidateEscalations(queryClient),
   });
 };

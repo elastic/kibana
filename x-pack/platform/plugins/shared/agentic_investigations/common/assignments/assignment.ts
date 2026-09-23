@@ -13,10 +13,7 @@ import { z } from '@kbn/zod/v4';
 import { MAX_ESCALATION_ASSIGNEES } from '../escalations/constants';
 
 /** A user profile uid, bounded to the length the conversation ACL enforces. */
-const assigneeIdSchema = z
-  .string()
-  .min(1)
-  .max(CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH);
+const assigneeIdSchema = z.string().min(1).max(CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH);
 
 const conversationIdSchema = z.string().min(1).max(CONVERSATION_ID_MAX_LENGTH);
 

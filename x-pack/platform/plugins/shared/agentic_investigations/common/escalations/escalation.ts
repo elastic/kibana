@@ -73,7 +73,7 @@ export const createEscalationRequestSchema = z
      * Defaults to empty — callers that know the current user's uid should include it
      * so the creator is automatically listed as a responsible party.
      */
-    assignees: z.array(collaboratorIdSchema).max(MAX_ESCALATION_ASSIGNEES).default([]),
+    assignees: z.array(collaboratorIdSchema).max(MAX_ESCALATION_ASSIGNEES).optional(),
   })
   .superRefine((value, ctx) => {
     if (value.visibility === 'private' && value.collaborators.length === 0) {

@@ -8,25 +8,18 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import type { Conversation } from '@kbn/agent-builder-common';
 import type { ConversationPublicClient } from '@kbn/agent-builder-server';
+import { WrongTemplateError } from './errors';
+
+export { WrongTemplateError };
 
 export interface AssignmentsServiceDeps {
   getConversationClient: (request: KibanaRequest) => Promise<ConversationPublicClient>;
 }
 
-/**
- * Thrown when the caller supplies a conversation id whose `template_id` does not match
- * the expected template for the route. Surfaces as a 404 so callers cannot distinguish
- * wrong-template from not-found.
- */
-export class WrongTemplateError extends Error {
-  constructor(conversationId: string, expectedTemplate: string) {
-    super(`Conversation "${conversationId}" is not a ${expectedTemplate}`);
-    this.name = 'WrongTemplateError';
-  }
-}
-
 export class AssignmentsService {
-  private readonly getConversationClient: (request: KibanaRequest) => Promise<ConversationPublicClient>;
+  private readonly getConversationClient: (
+    request: KibanaRequest
+  ) => Promise<ConversationPublicClient>;
 
   constructor({ getConversationClient }: AssignmentsServiceDeps) {
     this.getConversationClient = getConversationClient;
