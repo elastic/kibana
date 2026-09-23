@@ -11,6 +11,7 @@ import { registerDismissProposalRoute } from './dismiss_proposal';
 import { registerGetProposalRoute } from './get_proposal';
 import { registerListProposalsRoute } from './list_proposals';
 import { registerProposalStatsRoute } from './proposal_charts_summary';
+import { registerReviseProposalRoute } from './revise_proposal';
 
 // No create route: a proposal's decision is written behind its gate, so one
 // without a gate execution could never be decided. The gate workflow's
@@ -22,4 +23,5 @@ export const registerRoutes = (deps: RouteDependencies) => {
   registerApproveProposalRoute(deps);
   registerDismissProposalRoute(deps);
   registerProposalStatsRoute(deps);
+  registerReviseProposalRoute(deps);
 };

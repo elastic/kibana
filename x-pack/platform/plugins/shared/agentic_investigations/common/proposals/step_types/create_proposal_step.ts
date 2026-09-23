@@ -51,11 +51,22 @@ export const createProposalStepInputSchema = z.object({
 
 export const createProposalStepOutputSchema = z.object({
   proposalId: z.string(),
+  /** Equal to `proposalId` here; carried by the gate so it can resolve the chain later. */
+  rootProposalId: z.string(),
   status: z.string(),
   /** Comes from the action's metadata, so absent on a proposal with no action. */
   category: z.string().optional(),
-  /** True when no human has decided yet. */
-  requiresDecision: z.boolean(),
+  /**
+   * Hold the decision for a human however the caller's autonomy resolved,
+   * either because the action declares `approvalPolicy: always-gate` or
+   * because its metadata did not resolve at all — an unreadable policy is
+   * taken as the restrictive one rather than the permissive one.
+   *
+   * Emitted already reduced to a boolean rather than as the policy itself:
+   * the gating workflow combines it with two other terms in a Liquid
+   * condition, and Liquid has neither operator precedence nor parentheses.
+   */
+  alwaysGate: z.boolean(),
   /**
    * The absolute deadline the caller's `expiresIn` resolved to. Emitted so a
    * gating workflow can derive each attempt's remaining time from one fixed

@@ -118,21 +118,116 @@ outputs:
   - name: aiIndexId
     type: string
 steps:
-  # STUB — #19396 replaces this with the Context Engine knowledge indicator write.
-  # Catalog metadata and the bounded `actionInput` schema are already the real
-  # contract the gate and proposal card read.
-  - name: stub_write_analyze_endpoint_ki
-    type: console
+  # `contextEngine:enabled` is off by default and this step throws
+  # `FeatureDisabledError` when it is. That failure still fails the proposal: the
+  # fallback journals the error onto the Investigation, then `workflow.fail`
+  # so the gate records the proposal as `failed` and the Investigation stays
+  # open. There is nothing to fall back TO — the handoff is the only thing this
+  # action does.
+  #
+  # Written only here, never on an ungated path: the handoff IS the decision, and
+  # it is the expensive one. Running it from the action the gate executes also buys
+  # attribution to the approver and a row in the proposals index for audit.
+  #
+  # `ki_id` is stable per ATTACK, not per run, so a re-review replaces rather than
+  # appends a near-duplicate. A stable id means a replace resets
+  # `attributes.status` to `pending`, which could re-dispatch something the consumer
+  # already processed — but reaching here twice needs a second review run for the same
+  # attack AND a second approval of its proposal, so that is a note rather than a hazard
+  # to mechanise.
+  #
+  # Status lives ONLY on `attributes.status` and is not duplicated onto `tags`, per D28:
+  # `tags` is the fixed classification vocabulary a sweep selects on, `status` is a value
+  # that changes over the KI's life. Carrying it on both would be one state with two
+  # update paths. `attributes` is mapped `flattened`, so a consumer's
+  # `term: { attributes.status: pending }` matches.
+  #
+  # `title` is SYNTHESIZED rather than passed in. It is a required KI field, and deriving
+  # it from the id keeps the attack narrative out of the handoff — the Investigation and
+  # the Attack Discovery document are what carry that. `content` is omitted for the same
+  # reason, and because writing it would trigger a `semantic_text` embedding inference on
+  # every handoff for a document nobody semantically searches.
+  #
+  # The two ids live in `attributes` because that is the only place main can put them
+  # today. Once elastic/kibana#290962 lands they belong in first-class `references`
+  # (`relation: derived_from`); its `governance.lifecycle.status` is `active`/`deleted`
+  # only, so it does not replace the pending/processed lifecycle below.
+  #
+  # `type` and the attribute names are the CONSUMER's vocabulary, not this producer's:
+  # Forensics Watch sweeps this KI and reads it without ever calling back, so a name
+  # only this side agrees with reads as an absent field there.
+  #
+  # `space_id` is carried even though the step already stamps it under
+  # `governance.provenance.created_by.metadata`. A KI's backing index name derives from
+  # the AI index id alone, so every space's `security-investigations` indicators share
+  # one index, and both ids above are space-scoped — a consumer that cannot filter on
+  # the space cannot resolve either. Provenance is metadata about the writer; this is
+  # the routing data a sweep selects on.
+  - name: write_analyze_endpoint_ki
+    type: context-engine.createKi
     with:
-      message: >-
-        STUB #19396: would write a security.analyze_endpoint knowledge indicator
-        analyze-endpoint-{{ inputs.actionInput.attack_discovery_id }} into
-        {{ inputs.actionInput.ai_index_id }} for Investigation
-        {{ inputs.actionInput.investigation_id }} ({{ inputs.actionInput.classification }}).
+      ai_index_id: "{{ inputs.actionInput.ai_index_id }}"
+      ki_id: "analyze-endpoint-{{ inputs.actionInput.attack_discovery_id }}"
+      ki:
+        type: security.analyze_endpoint
+        title: "Forensics handoff for Attack Discovery {{ inputs.actionInput.attack_discovery_id }}"
+        description: >-
+          Classified {{ inputs.actionInput.classification }} by review
+          {{ inputs.actionInput.workflow_execution_id }}. Investigation
+          {{ inputs.actionInput.investigation_id }} is authoritative for the attack
+          narrative, its correlated alerts, and the FP/TP report.
+        tags:
+          # The sweep's selector.
+          - consumer:forensics
+          # The producing tier.
+          - watch:floor
+        attributes:
+          status: pending
+          producer: alertzero.ad_review.handoff_to_forensics.v1
+          watch_id: floor
+          attack_discovery_alert_id: "{{ inputs.actionInput.attack_discovery_id }}"
+          investigation_id: "{{ inputs.actionInput.investigation_id }}"
+          space_id: "{{ workflow.spaceId }}"
+          classification: "{{ inputs.actionInput.classification }}"
+          workflow_execution_id: "{{ inputs.actionInput.workflow_execution_id }}"
+    on-failure:
+      fallback:
+        - name: journal_handoff_failed
+          type: workflow.execute
+          with:
+            workflow-id: "{{ consts.journal_note }}"
+            inputs:
+              conversation_id: "{{ inputs.actionInput.investigation_id }}"
+              message: >-
+                Forensics handoff failed: knowledge indicator write failed.
+                {{ steps.write_analyze_endpoint_ki.error }}
+          on-failure:
+            continue: true
+        - name: fail_handoff
+          type: workflow.fail
+          with:
+            message: >-
+              Forensics handoff failed: knowledge indicator write failed.
+              {{ steps.write_analyze_endpoint_ki.error }}
 
+  - name: journal_handoff_succeeded
+    type: workflow.execute
+    with:
+      workflow-id: "{{ consts.journal_note }}"
+      inputs:
+        conversation_id: "{{ inputs.actionInput.investigation_id }}"
+        message: >-
+          Wrote knowledge indicator {{ steps.write_analyze_endpoint_ki.output.id }}
+          to {{ inputs.actionInput.ai_index_id }}
+          ({{ inputs.actionInput.classification }}).
+    on-failure:
+      continue: true
+
+  # `workflow.execute` declares its output as unknown, so the parent falls back
+  # to a heuristic read of the last step unless the child emits explicitly.
   - name: emit_result
     type: workflow.output
     status: completed
     with:
-      kiId: ""
+      kiId: "{{ steps.write_analyze_endpoint_ki.output.id }}"
       aiIndexId: "{{ inputs.actionInput.ai_index_id }}"
