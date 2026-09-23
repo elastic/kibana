@@ -42,6 +42,39 @@ xpack.notificationCenter.enabled: true
 
 Once enabled, the dynamic flags determine further plugin behavior
 
+## Space opt-in (advanced settings)
+
+Feature flags decide whether a deployment _may_ see the Notification Center; advanced settings
+decide whether a space _does_. Both are off by default, and a surface renders only when both agree:
+
+| Setting                                          | Gates                                                   |
+| ------------------------------------------------ | ------------------------------------------------------- |
+| `notificationCenter:enabled`                     | All Notification Center UI in the space                  |
+| `notificationCenter:types:<namespace>.<typeId>`  | One notification type within the space                   |
+
+The per-type settings are derived from `NOTIFICATION_REGISTRY`, so registering a type also
+gives it a toggle — no edit here. Settings are namespace-scoped, so each space opts in
+separately. At full launch the defaults flip to `true`.
+
+Browser code should not read either source directly. `public/lib/ui_visibility.ts` composes them:
+
+```ts
+notificationCenterVisible$(core); // uiEnabled flag AND notificationCenter:enabled
+visibleNotificationTypes$(core); // per type: its flag (when declared) AND its setting
+```
+
+Both are observables because the flag provider resolves asynchronously and a setting can change
+under a live page; a subscriber that renders `null` while `false` needs no page reload.
+
+> ⚠️ A type's feature flag gates its **effect**, not the visibility of its row in advanced
+> settings. `uiSettings.register` runs during setup, where no flag has a value yet, so the rows
+> are registered unconditionally and a flagged-off type is simply a toggle that does nothing.
+
+Serverless hides any setting missing from the allowlist in
+`src/platform/packages/shared/serverless/settings`, and allowlisting a setting that is not
+registered throws at boot in dev. These keys therefore stay off the allowlist until the plugin
+is enabled by default.
+
 ## Notification-type flag strategy
 
 Each notification type has its own boolean feature flag defined.

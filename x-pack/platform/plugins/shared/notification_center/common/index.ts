@@ -16,6 +16,13 @@ export {
 } from './feature_flags';
 
 export {
+  NOTIFICATION_CENTER_ENABLED_SETTING,
+  NOTIFICATION_CENTER_ENABLED_DEFAULT,
+  NOTIFICATION_TYPE_SETTINGS,
+  NOTIFICATION_TYPE_SETTING_DEFAULT,
+} from './ui_settings';
+
+export {
   notificationIdSchema,
   notificationWriteSchema,
   notificationReadSchema,

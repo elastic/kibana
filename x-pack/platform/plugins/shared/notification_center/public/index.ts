@@ -11,6 +11,9 @@ import type { NotificationCenterPublicSetup, NotificationCenterPublicStart } fro
 
 export type { NotificationCenterPublicSetup, NotificationCenterPublicStart } from './types';
 
+export { notificationCenterVisible$, visibleNotificationTypes$ } from './lib/ui_visibility';
+export type { NotificationCenterVisibilityDeps } from './lib/ui_visibility';
+
 export const plugin: PluginInitializer<
   NotificationCenterPublicSetup,
   NotificationCenterPublicStart

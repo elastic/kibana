@@ -21,6 +21,7 @@ dependsOn:
   - '@kbn/dev-cli-errors'
   - '@kbn/dev-cli-runner'
   - '@kbn/config-schema'
+  - '@kbn/i18n'
   - '@kbn/zod'
   - '@kbn/zod-helpers'
   - '@kbn/std'

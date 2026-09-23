@@ -21,6 +21,7 @@ import { registerNotificationDataStream } from './storage/notification_data_stre
 import { buildForType } from './lib/submit';
 import { registerNotificationUserStorage } from './storage/user_storage';
 import { registerNotificationRoutes } from './routes';
+import { registerNotificationCenterUiSettings } from './ui_settings';
 import type {
   NotificationCenterPluginSetup,
   NotificationCenterPluginStart,
@@ -54,6 +55,7 @@ export class NotificationCenterPlugin
     registerNotificationUserStorage(core.userStorage);
     registerNotificationCleanupTask(core, plugins.taskManager, this.logger);
     registerNotificationRoutes({ router: core.http.createRouter(), core, logger: this.logger });
+    registerNotificationCenterUiSettings(core.uiSettings);
 
     return {
       forType: buildForType(core),
