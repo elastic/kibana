@@ -14,7 +14,7 @@
   "include": ["**/*.ts", "**/*.tsx"],
   "kbn_references": [
     "@kbn/i18n",
-    "@kbn/data-views-plugin",
+    "@kbn/data-views-types",
     "@kbn/core",
     "@kbn/field-types",
     "@kbn/data-plugin",

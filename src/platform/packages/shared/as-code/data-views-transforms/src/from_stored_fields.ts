@@ -18,7 +18,7 @@
  * Three DataViewSpec maps are combined into a single `field_settings` map keyed by field name.
  */
 
-import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { DataViewSpec } from '@kbn/data-views-types';
 import {
   RUNTIME_FIELD_COMPOSITE_TYPE,
   type AsCodeRuntimeBaseField,
