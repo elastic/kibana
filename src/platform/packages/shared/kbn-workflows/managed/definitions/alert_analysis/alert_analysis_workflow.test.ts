@@ -1940,24 +1940,42 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
     expect(summaryStep.with.generated_summary).toContain("truncate: 2000, ''");
   });
 
-  it('truncates grouped_counts_summary to the workflow.output 10000-char limit', () => {
+  it('caps unique hosts at 50 before building grouped_counts_summary, then truncates to 10000 chars', () => {
     const summaryStep = findStepByName(workflow.steps, 'build_grouped_counts_summary') as {
       with: { grouped_counts_summary: string };
     };
+    expect(summaryStep.with.grouped_counts_summary).toContain('uniq | slice: 0, 50');
     expect(summaryStep.with.grouped_counts_summary).toContain("truncate: 10000, ''");
 
-    const longHost = 'h'.repeat(200);
+    // Short names so all 50 capped hosts fit under the 10000-char truncate; otherwise the
+    // char cap alone would hide whether the host slice ran.
     const verdicts = Array.from({ length: 80 }, (_, i) =>
       createMockOutputVerdict({
         alert_id: `a${i}`,
         classification: 'true_positive',
-        host_name: `${longHost}-${i}`,
+        host_name: `host-${i}`,
       })
     );
     const summary = engine.parseAndRenderSync(summaryStep.with.grouped_counts_summary, {
       variables: { output_verdicts: verdicts },
     });
 
+    expect(summary).toContain('host-0');
+    expect(summary).toContain('host-49');
+    expect(summary).not.toContain('host-50');
     expect(summary.length).toBeLessThanOrEqual(10000);
+
+    const longHost = 'h'.repeat(200);
+    const longVerdicts = Array.from({ length: 50 }, (_, i) =>
+      createMockOutputVerdict({
+        alert_id: `b${i}`,
+        classification: 'true_positive',
+        host_name: `${longHost}-${i}`,
+      })
+    );
+    const longSummary = engine.parseAndRenderSync(summaryStep.with.grouped_counts_summary, {
+      variables: { output_verdicts: longVerdicts },
+    });
+    expect(longSummary.length).toBeLessThanOrEqual(10000);
   });
 });
