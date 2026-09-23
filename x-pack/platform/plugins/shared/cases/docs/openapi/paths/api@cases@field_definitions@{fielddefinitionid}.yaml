@@ -78,7 +78,7 @@ put:
     content:
       application/json:
         schema:
-          $ref: '../components/schemas/field_definition_write_request.yaml'
+          $ref: '../components/schemas/field_definition_put_request.yaml'
         examples:
           updateCaseFieldDefinitionRequest:
             $ref: '../components/examples/field_definition_write_request.yaml'

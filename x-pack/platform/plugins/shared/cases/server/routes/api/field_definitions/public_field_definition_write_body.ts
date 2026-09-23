@@ -14,23 +14,28 @@ import {
   MAX_OWNER_LENGTH,
 } from '../../../../common/constants';
 
-/**
- * Public write body for POST/PUT /api/cases/field_definitions. Accepts only caller-ownable
- * attributes with explicit length bounds. Server-managed attributes (`fieldDefinitionId`,
- * `legacyKey`, `displayOrder`) are excluded — unknown keys are rejected so the accepted
- * surface can grow without ambiguity.
- *
- * `name` is optional: when omitted, the route layer extracts it from the YAML `definition`
- * via `validateFieldDefinitionYaml`. When provided, it must match the `name` in the YAML
- * (enforced at the client layer). This avoids forcing callers to repeat a value already
- * embedded in the definition.
- */
-export const PublicFieldDefinitionWriteBodySchema = z.strictObject({
+const sharedFields = {
   name: z.string().min(1).max(MAX_FIELD_DEFINITION_NAME_LENGTH).optional(),
   owner: z.string().min(1).max(MAX_OWNER_LENGTH),
-  definition: z.string().max(MAX_FIELD_DEFINITION_DEFINITION_LENGTH),
   description: z.string().max(MAX_FIELD_DEFINITION_DESCRIPTION_LENGTH).optional(),
   isGlobal: FieldDefinitionSchema.shape.isGlobal,
+};
+
+/** POST body — enforces the 30 000-char definition limit on new creates. */
+export const PublicFieldDefinitionWriteBodySchema = z.strictObject({
+  ...sharedFields,
+  definition: z.string().max(MAX_FIELD_DEFINITION_DEFINITION_LENGTH),
+});
+
+/**
+ * PUT body — does NOT enforce definition length so that existing definitions whose stored YAML
+ * exceeds the public limit (created via internal tools before this API existed) remain
+ * modifiable. A DoS-prevention upper bound (1 MB) still applies.
+ */
+export const PublicFieldDefinitionPutBodySchema = z.strictObject({
+  ...sharedFields,
+  definition: z.string().max(1_000_000),
 });
 
 export type PublicFieldDefinitionWriteBody = z.infer<typeof PublicFieldDefinitionWriteBodySchema>;
+export type PublicFieldDefinitionPutBody = z.infer<typeof PublicFieldDefinitionPutBodySchema>;

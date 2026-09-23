@@ -15,7 +15,7 @@ import { createCaseError } from '../../../common/error';
 import { getTypedApiErrorAttributes } from '../../../common/api_errors';
 import { createCasesRoute } from '../create_cases_route';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
-import { PublicFieldDefinitionWriteBodySchema } from './public_field_definition_write_body';
+import { PublicFieldDefinitionPutBodySchema } from './public_field_definition_write_body';
 import { toPublicFieldDefinition } from './to_public_field_definition';
 import { validateFieldDefinitionYaml } from './validate_field_definition_input';
 
@@ -50,7 +50,7 @@ export const putPublicFieldDefinitionRoute = createCasesRoute({
         field_definition_id: string;
       };
 
-      const bodyResult = PublicFieldDefinitionWriteBodySchema.safeParse(request.body);
+      const bodyResult = PublicFieldDefinitionPutBodySchema.safeParse(request.body);
       if (!bodyResult.success) {
         return response.badRequest({
           body: { message: `Invalid request body: ${JSON.stringify(bodyResult.error.issues)}` },
@@ -90,7 +90,12 @@ export const putPublicFieldDefinitionRoute = createCasesRoute({
         if (error.output.statusCode === 409) {
           const attributes = getTypedApiErrorAttributes(error);
           return response.conflict({
-            body: attributes ? { message: error.message, attributes } : { message: error.message },
+            body: {
+              statusCode: 409,
+              error: 'Conflict',
+              message: error.message,
+              ...(attributes ? { attributes } : {}),
+            },
           });
         }
         if (error.output.statusCode === 404) {
