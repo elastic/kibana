@@ -263,6 +263,13 @@ export function createEvaluateDataset({
       // Edit examples continue the conversation; only the edited chart is scored,
       // but the trajectory sees the tool calls of both turns.
       const followUp = input?.followUp;
+      if (followUp && !first.conversationId) {
+        // Without the id the edit would start a fresh conversation and score as an
+        // agent failure; fail the task so the harness problem is visible instead.
+        throw new Error(
+          `First turn returned no conversationId; cannot run follow-up "${followUp}"`
+        );
+      }
       const last = followUp
         ? await agentBuilderClient.converse({
             agentId,
