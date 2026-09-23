@@ -21,7 +21,6 @@ interface RunCaseWorkflowModalProps
     | 'filterWorkflow'
     | 'onExecute'
     | 'onExecutionSettled'
-    | 'showSuccessToast'
   > {
   onClose: () => void;
   /** Ref to the button that opened this modal; when set, focus is returned to it on close. */
@@ -32,6 +31,7 @@ interface RunCaseWorkflowModalProps
  * Modal wrapper around `RunWorkflowPanel` for the case detail view and the
  * cases list page. Provides a standard "Select workflow" header and returns
  * focus to the trigger button on close when `focusButtonRef` is supplied.
+ * Every Cases executor raises its own success toast, so the panel's is always suppressed.
  */
 export const RunCaseWorkflowModal: React.FC<RunCaseWorkflowModalProps> = ({
   inputs,
@@ -41,7 +41,6 @@ export const RunCaseWorkflowModal: React.FC<RunCaseWorkflowModalProps> = ({
   onClose,
   onExecute,
   onExecutionSettled,
-  showSuccessToast,
   focusButtonRef,
 }) => {
   const focusTrapProps = useFocusButtonTrap(focusButtonRef);
@@ -66,7 +65,7 @@ export const RunCaseWorkflowModal: React.FC<RunCaseWorkflowModalProps> = ({
           onClose={onClose}
           onExecute={onExecute}
           onExecutionSettled={onExecutionSettled}
-          showSuccessToast={showSuccessToast}
+          showSuccessToast={false}
         />
       </EuiModalBody>
     </EuiModal>
