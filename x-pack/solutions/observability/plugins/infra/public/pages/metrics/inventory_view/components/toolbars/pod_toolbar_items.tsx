@@ -6,11 +6,34 @@
  */
 
 import React from 'react';
+import {
+  K8S_DEPLOYMENT_NAME,
+  K8S_NAMESPACE_NAME,
+  K8S_NODE_NAME,
+} from '@kbn/metrics-data-access-plugin/common';
+import { useIsPodSchemaSelectorEnabled } from '../../../../../hooks/use_is_pod_schema_selector_enabled';
 import { MetricsAndGroupByToolbarItems } from './metrics_and_groupby_toolbar_items';
 import type { ToolbarProps } from './types';
 
-export const podGroupByFields = ['kubernetes.namespace', 'kubernetes.node.name', 'service.type'];
+export const ecsPodGroupByFields = ['kubernetes.namespace', 'kubernetes.node.name', 'service.type'];
+
+/** @deprecated Prefer `ecsPodGroupByFields`; kept for existing imports. */
+export const podGroupByFields = ecsPodGroupByFields;
+
+export const semconvPodGroupByFields = [K8S_NAMESPACE_NAME, K8S_NODE_NAME, K8S_DEPLOYMENT_NAME];
 
 export const PodToolbarItems = (props: ToolbarProps) => {
-  return <MetricsAndGroupByToolbarItems {...props} groupByFields={podGroupByFields} />;
+  const isPodSchemaSelectorEnabled = useIsPodSchemaSelectorEnabled();
+  const groupByFields =
+    isPodSchemaSelectorEnabled && props.preferredSchema === 'semconv'
+      ? semconvPodGroupByFields
+      : ecsPodGroupByFields;
+
+  return (
+    <MetricsAndGroupByToolbarItems
+      {...props}
+      groupByFields={groupByFields}
+      allowSchemaSelection={isPodSchemaSelectorEnabled}
+    />
+  );
 };

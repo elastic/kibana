@@ -31,6 +31,7 @@ import type {
   SnapshotGroupBy,
   SnapshotCustomMetricInput,
 } from '../../../../../common/http_api/snapshot_api';
+import { isSchemaAwareNodeType } from '../../../../../common/inventory/schema_aware_node_types';
 import { useInventoryViewsContext } from './use_inventory_views';
 
 export const DEFAULT_LEGEND: WaffleLegendOptions = {
@@ -79,7 +80,7 @@ function mapInventoryViewToState(savedView: InventoryView): WaffleOptionsState {
 
   // forces the default view to be set with what the time range metadata endpoint returns
   const preferredSchemaValue =
-    nodeType === 'host' && savedView.id === staticInventoryViewId
+    isSchemaAwareNodeType(nodeType) && savedView.id === staticInventoryViewId
       ? preferredSchema ?? null
       : // otherwise, use the preferred schema from the saved view
         preferredSchema;

@@ -9,17 +9,34 @@ import { DEFAULT_SCHEMA } from '../../../../../common/constants';
 import { getInventoryRequestSchema } from './get_inventory_request_schema';
 
 describe('getInventoryRequestSchema', () => {
-  it('keeps leftover Hosts OpenTelemetry schema off Kubernetes Pod requests', () => {
+  it('keeps leftover Hosts OpenTelemetry schema off Kubernetes Pod requests when the flag is off', () => {
     expect(getInventoryRequestSchema('pod', 'semconv')).toBe('ecs');
+    expect(getInventoryRequestSchema('pod', 'semconv', { isPodSchemaSelectorEnabled: false })).toBe(
+      'ecs'
+    );
   });
 
-  it('keeps Kubernetes Pods on Elastic Common Schema when preferredSchema is unset', () => {
+  it('keeps Kubernetes Pods on Elastic Common Schema when preferredSchema is unset and the flag is off', () => {
     expect(getInventoryRequestSchema('pod', null)).toBe('ecs');
     expect(getInventoryRequestSchema('pod', undefined)).toBe('ecs');
   });
 
-  it('keeps Kubernetes Pods on Elastic Common Schema even when preferredSchema is already ecs', () => {
-    expect(getInventoryRequestSchema('pod', 'ecs')).toBe('ecs');
+  it('forwards preferredSchema for Kubernetes Pods when the flag is on', () => {
+    expect(getInventoryRequestSchema('pod', 'semconv', { isPodSchemaSelectorEnabled: true })).toBe(
+      'semconv'
+    );
+    expect(getInventoryRequestSchema('pod', 'ecs', { isPodSchemaSelectorEnabled: true })).toBe(
+      'ecs'
+    );
+  });
+
+  it('falls through to DEFAULT_SCHEMA for Kubernetes Pods when preferredSchema is unset and the flag is on', () => {
+    expect(getInventoryRequestSchema('pod', null, { isPodSchemaSelectorEnabled: true })).toBe(
+      DEFAULT_SCHEMA
+    );
+    expect(getInventoryRequestSchema('pod', undefined, { isPodSchemaSelectorEnabled: true })).toBe(
+      DEFAULT_SCHEMA
+    );
   });
 
   it('forwards Hosts preferredSchema, including leftover OpenTelemetry', () => {

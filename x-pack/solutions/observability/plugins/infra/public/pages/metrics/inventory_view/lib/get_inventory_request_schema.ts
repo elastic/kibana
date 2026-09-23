@@ -8,16 +8,23 @@
 import type { DataSchemaFormat, InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { DEFAULT_SCHEMA } from '../../../../../common/constants';
 
+export interface GetInventoryRequestSchemaOptions {
+  isPodSchemaSelectorEnabled?: boolean;
+}
+
 /**
  * Resolves the Schema Inventory waffle requests should send for the current node type.
+ *
+ * When the pod schema selector flag is off, leftover Hosts preferredSchema must not
+ * query kubeletstats. Do not fall through to DEFAULT_SCHEMA for that coerce: that
+ * constant is `semconv`.
  */
 export const getInventoryRequestSchema = (
   nodeType: InventoryItemType,
-  preferredSchema: DataSchemaFormat | null | undefined
+  preferredSchema: DataSchemaFormat | null | undefined,
+  options?: GetInventoryRequestSchemaOptions
 ): DataSchemaFormat => {
-  // Leftover Hosts preferredSchema must not query kubeletstats until the pod toolbar owns Schema (#291416).
-  // Do not fall through to DEFAULT_SCHEMA here: that constant is `semconv`.
-  if (nodeType === 'pod') {
+  if (nodeType === 'pod' && !options?.isPodSchemaSelectorEnabled) {
     return 'ecs';
   }
 

@@ -22,6 +22,9 @@ import { escapeQuotes } from '@kbn/es-query';
 import type { UseSnapshotRequest } from '../../hooks/use_snaphot';
 import { useSnapshot } from '../../hooks/use_snaphot';
 jest.mock('../../hooks/use_waffle_options');
+jest.mock('../../../../../hooks/use_is_pod_schema_selector_enabled', () => ({
+  useIsPodSchemaSelectorEnabled: () => false,
+}));
 import { useWaffleOptionsContext } from '../../hooks/use_waffle_options';
 
 const mockedUseSnapshot = useSnapshot as jest.Mock<ReturnType<typeof useSnapshot>>;

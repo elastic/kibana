@@ -8,7 +8,7 @@
 import React, { useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import { first } from 'lodash';
-import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
+import { findInventoryFields, findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import { escapeQuotes } from '@kbn/es-query';
 import type { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import { SnapshotMetricTypeRT } from '@kbn/metrics-data-access-plugin/common';
@@ -17,6 +17,7 @@ import { getCustomMetricLabel } from '../../../../../../common/formatters/get_cu
 import type { SnapshotCustomMetricInput } from '../../../../../../common/http_api';
 import { useSourceContext } from '../../../../../containers/metrics_source';
 import type { InfraWaffleMapNode } from '../../../../../common/inventory/types';
+import { useIsPodSchemaSelectorEnabled } from '../../../../../hooks/use_is_pod_schema_selector_enabled';
 import { useSnapshot } from '../../hooks/use_snaphot';
 import { createInventoryMetricFormatter } from '../../lib/create_inventory_metric_formatter';
 import { getInventoryRequestSchema } from '../../lib/get_inventory_request_schema';
@@ -37,7 +38,11 @@ export const ConditionalToolTip = ({ node, nodeType, currentTime }: Props) => {
   const requestCurrentTime = useRef(currentTime);
   const model = findInventoryModel(nodeType);
   const { customMetrics, preferredSchema } = useWaffleOptionsContext();
-  const requestSchema = getInventoryRequestSchema(nodeType, preferredSchema);
+  const isPodSchemaSelectorEnabled = useIsPodSchemaSelectorEnabled();
+  const requestSchema = getInventoryRequestSchema(nodeType, preferredSchema, {
+    isPodSchemaSelectorEnabled,
+  });
+  const { id: nodeIdField } = findInventoryFields(nodeType, requestSchema);
 
   const requestMetrics = model.metrics
     .getWaffleMapTooltipMetrics({
@@ -52,7 +57,7 @@ export const ConditionalToolTip = ({ node, nodeType, currentTime }: Props) => {
   >;
 
   const { nodes, loading } = useSnapshot({
-    kuery: `"${model.fields.id}": "${escapeQuotes(node.id)}"`,
+    kuery: `"${nodeIdField}": "${escapeQuotes(node.id)}"`,
     metrics: requestMetrics,
     groupBy: [],
     nodeType,

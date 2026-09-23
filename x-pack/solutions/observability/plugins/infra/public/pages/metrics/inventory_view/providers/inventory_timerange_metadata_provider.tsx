@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
+import { isSchemaAwareNodeType } from '../../../../../common/inventory/schema_aware_node_types';
 import { TimeRangeMetadataProvider } from '../../../../hooks/use_time_range_metadata';
 import { useWaffleOptionsContext } from '../hooks/use_waffle_options';
 import { useWaffleFiltersContext } from '../hooks/use_waffle_filters';
@@ -22,7 +23,7 @@ export const InventoryTimeRangeMetadataProvider = ({ children }: { children: Rea
     };
   }, [currentTimeRange.from, currentTimeRange.to]);
 
-  if (nodeType !== 'host' && nodeType !== 'pod') {
+  if (!isSchemaAwareNodeType(nodeType)) {
     return <>{children}</>;
   }
 

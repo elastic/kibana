@@ -26,6 +26,8 @@ export class InventoryPage {
   public readonly metricsContextMenu: Locator;
 
   public readonly schemaSelect: Locator;
+  public readonly schemaHelpText: Locator;
+  public readonly schemaSelectorInvalidToken: Locator;
 
   public readonly k8sTourText: Locator;
   public readonly k8sTourDismissButton: Locator;
@@ -40,6 +42,11 @@ export class InventoryPage {
   public readonly nodesOverviewTable: Locator;
 
   public readonly noDataPrompt: Locator;
+  public readonly noDataSwitchSchemaLink: Locator;
+
+  public readonly contextMenuLogsLink: Locator;
+  public readonly contextMenuApmLink: Locator;
+  public readonly contextMenuMetricsLink: Locator;
 
   public readonly noDataPage: Locator;
   public readonly noDataPageActionButton: Locator;
@@ -81,6 +88,8 @@ export class InventoryPage {
     this.metricsContextMenu = this.page.getByTestId('infraInventoryMetricsContextMenu');
 
     this.schemaSelect = this.page.getByTestId('infraSchemaSelect');
+    this.schemaHelpText = this.page.getByText(/available in another schema/);
+    this.schemaSelectorInvalidToken = this.page.getByTestId('infraSchemaSelectorInvalidToken');
 
     this.k8sTourText = this.page.getByTestId('infra-kubernetesTour-text');
     this.k8sTourDismissButton = this.page.getByTestId('infra-kubernetesTour-dismiss');
@@ -95,6 +104,11 @@ export class InventoryPage {
     this.nodesOverviewTable = this.page.getByTestId('infraNodesOverviewTable');
 
     this.noDataPrompt = this.page.getByTestId('noMetricsDataPrompt');
+    this.noDataSwitchSchemaLink = this.page.getByTestId('infraInventoryViewNoDataInSelectedSchema');
+
+    this.contextMenuLogsLink = this.page.getByTestId('viewLogsContextMenuItem');
+    this.contextMenuApmLink = this.page.getByTestId('viewApmTracesContextMenuItem');
+    this.contextMenuMetricsLink = this.page.getByTestId('viewAssetDetailsContextMenuItem');
 
     this.noDataPage = this.page.getByTestId('kbnNoDataPage');
     this.noDataPageActionButton = this.noDataPage.getByTestId('noDataDefaultActionButton');
@@ -253,6 +267,11 @@ export class InventoryPage {
       name: container.getByTestId('nodeName'),
       value: container.getByTestId('nodeValue'),
     };
+  }
+
+  /** Alias for pod waffle tiles; same locator strategy as hosts. */
+  public async podWaffleNodeByName(podName: string) {
+    return this.getWaffleNode(podName);
   }
 
   public async clickWaffleNode(nodeName: string) {
