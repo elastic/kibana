@@ -45,6 +45,7 @@ import {
   getArtifactId,
   Manifest,
 } from '../../../lib/artifacts';
+import { YaraEngineUnavailableError } from '../../../lib/libyara';
 
 import {
   type InternalUnifiedManifestBaseSchema,
@@ -528,27 +529,81 @@ export class ManifestManager {
 
   /**
    * Builds an array of Custom YARA Signature artifacts (one per supported OS) based on the current
-   * state of the Custom YARA Signatures list
+   * state of the Custom YARA Signatures list.
+   * On libyara engine failure, retains baseline YARA artifacts so a flaky/unavailable engine
+   * cannot publish an empty or partial YARA pack (other artifact types still rebuild).
    */
   protected async buildCustomYaraSignaturesArtifacts(
-    allPolicyIds: string[]
+    allPolicyIds: string[],
+    baselineManifest: Manifest
   ): Promise<ArtifactsBuildResult> {
-    const defaultArtifacts: InternalArtifactCompleteSchema[] = [];
     const buildArtifactsForOsOptions: BuildArtifactsForOsOptions = {
       listId: ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id,
       name: ArtifactConstants.GLOBAL_CUSTOM_YARA_SIGNATURES_NAME,
     };
 
-    for (const os of ArtifactConstants.SUPPORTED_CUSTOM_YARA_SIGNATURES_OPERATING_SYSTEMS) {
-      defaultArtifacts.push(await this.buildArtifactsForOs({ os, ...buildArtifactsForOsOptions }));
-    }
+    try {
+      const defaultArtifacts: InternalArtifactCompleteSchema[] = [];
 
-    const policySpecificArtifacts: Record<string, InternalArtifactCompleteSchema[]> =
-      await this.buildArtifactsByPolicy(
-        allPolicyIds,
-        ArtifactConstants.SUPPORTED_CUSTOM_YARA_SIGNATURES_OPERATING_SYSTEMS,
-        buildArtifactsForOsOptions
+      for (const os of ArtifactConstants.SUPPORTED_CUSTOM_YARA_SIGNATURES_OPERATING_SYSTEMS) {
+        defaultArtifacts.push(
+          await this.buildArtifactsForOs({ os, ...buildArtifactsForOsOptions })
+        );
+      }
+
+      const policySpecificArtifacts: Record<string, InternalArtifactCompleteSchema[]> =
+        await this.buildArtifactsByPolicy(
+          allPolicyIds,
+          ArtifactConstants.SUPPORTED_CUSTOM_YARA_SIGNATURES_OPERATING_SYSTEMS,
+          buildArtifactsForOsOptions
+        );
+
+      return { defaultArtifacts, policySpecificArtifacts };
+    } catch (error) {
+      if (!(error instanceof YaraEngineUnavailableError)) {
+        throw error;
+      }
+
+      this.logger.error(
+        `Failed to build Custom YARA Signatures artifacts due to libyara engine failure; retaining previous YARA artifacts. ${error.message}`
       );
+
+      return this.copyBaselineCustomYaraSignaturesArtifacts(baselineManifest);
+    }
+  }
+
+  /**
+   * Copies Custom YARA artifacts from the baseline manifest (defaults + per-policy), preserving
+   * prior detections when the libyara engine cannot pack a new artifact this run.
+   */
+  protected copyBaselineCustomYaraSignaturesArtifacts(
+    baselineManifest: Manifest
+  ): ArtifactsBuildResult {
+    const defaultArtifacts: InternalArtifactCompleteSchema[] = [];
+    const policySpecificArtifacts: Record<string, InternalArtifactCompleteSchema[]> = {};
+    const yaraIdentifierPrefix = `${ArtifactConstants.GLOBAL_CUSTOM_YARA_SIGNATURES_NAME}-`;
+
+    for (const artifact of baselineManifest.getAllArtifacts()) {
+      if (artifact.identifier.startsWith(yaraIdentifierPrefix)) {
+        if (!internalArtifactCompleteSchema.is(artifact)) {
+          this.logger.warn(
+            `Skipping incomplete baseline Custom YARA artifact [${getArtifactId(artifact)}]`
+          );
+        } else {
+          if (baselineManifest.isDefaultArtifact(artifact)) {
+            defaultArtifacts.push(artifact);
+          }
+
+          const targetPolicies = baselineManifest.getArtifactTargetPolicies(artifact);
+          if (targetPolicies !== undefined) {
+            for (const policyId of targetPolicies) {
+              policySpecificArtifacts[policyId] = policySpecificArtifacts[policyId] ?? [];
+              policySpecificArtifacts[policyId].push(artifact);
+            }
+          }
+        }
+      }
+    }
 
     return { defaultArtifacts, policySpecificArtifacts };
   }
@@ -778,7 +833,7 @@ export class ManifestManager {
         ? [this.buildTrustedDevicesArtifacts(allPolicyIds)]
         : []),
       ...(this.experimentalFeatures.customYaraSignaturesEnabled
-        ? [this.buildCustomYaraSignaturesArtifacts(allPolicyIds)]
+        ? [this.buildCustomYaraSignaturesArtifacts(allPolicyIds, baselineManifest)]
         : []),
     ]);
 

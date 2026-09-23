@@ -217,34 +217,31 @@ async function translateOneYaraException(
     return undefined;
   }
 
-  try {
-    // Sequential: libyara WASM is a process singleton and is not safe for concurrent ccall.
-    // Full product validation (compile + meta constraints) so invalid arch/scan_type/etc.
-    // are skipped here instead of aborting later schema validation of the whole artifact.
-    const result = await validateCustomYaraRule(entry.value, exception.os_types);
+  // Sequential: libyara WASM is a process singleton and is not safe for concurrent ccall.
+  // Full product validation (compile + meta constraints) so invalid arch/scan_type/etc.
+  // are skipped here instead of aborting later schema validation of the whole artifact.
+  // Throws (engine trap/load/allocation) propagate — any throw fails the pack so a flaky
+  // engine cannot publish a partial or empty YARA artifact.
+  const result = await validateCustomYaraRule(entry.value, exception.os_types);
 
-    if (result.errorCount > 0) {
-      skipYaraItem(logger, exception.item_id, `validation reported ${result.errorCount} error(s)`);
-      return undefined;
-    }
-
-    return {
-      yara_rule_data: entry.value,
-      arch_context: getArchContextFromCompiledRules(result.rules),
-      scan_context: [...DEFAULT_YARA_SCAN_CONTEXT],
-      entry_id: exception.id,
-      entry_name: exception.name,
-    };
-  } catch {
-    skipYaraItem(logger, exception.item_id, 'libyara validation failed');
+  if (result.errorCount > 0) {
+    skipYaraItem(logger, exception.item_id, `validation reported ${result.errorCount} error(s)`);
     return undefined;
   }
+
+  return {
+    yara_rule_data: entry.value,
+    arch_context: getArchContextFromCompiledRules(result.rules),
+    scan_context: [...DEFAULT_YARA_SCAN_CONTEXT],
+    entry_id: exception.id,
+    entry_name: exception.name,
+  };
 }
 
 /**
  * Translates Custom YARA Signature exception items into the endpoint YARA artifact format.
- * Invalid items are omitted so one bad entry cannot fail the packager.
- * Uses `validateCustomYaraRule` so product meta constraints match create/update validation.
+ * Items that fail product validation are omitted so one bad entry cannot fail the packager.
+ * `YaraEngineUnavailableError` from libyara propagates so the packager can retain baseline YARA.
  */
 async function translateToYaraRules(
   exceptions: ExceptionListItemSchema[],

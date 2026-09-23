@@ -13,6 +13,7 @@ import {
   setYaraLogger,
   validateYaraRule,
 } from './validate_yara_rule';
+import { YaraEngineUnavailableError } from './errors';
 
 /**
  * Smoke test against the real libyara WASM artifact.
@@ -60,7 +61,10 @@ describe('validateYaraRule (libyara WASM)', () => {
     }) as typeof mod.ccall;
 
     try {
-      await expect(validateYaraRule('rule X { condition: true }')).rejects.toThrow(
+      const error = await validateYaraRule('rule X { condition: true }').catch((err) => err);
+      expect(error).toBeInstanceOf(YaraEngineUnavailableError);
+      expect(error).toHaveProperty(
+        'message',
         'libyara WASM validate_yara returned null (allocation failed)'
       );
       expect(utf8ToString).not.toHaveBeenCalled();
@@ -498,12 +502,8 @@ rule ${module}Check {
 
       try {
         const source = 'rule CacheMissOnThrow { condition: true }';
-        await expect(validateYaraRule(source)).rejects.toThrow(
-          'libyara WASM validate_yara returned null (allocation failed)'
-        );
-        await expect(validateYaraRule(source)).rejects.toThrow(
-          'libyara WASM validate_yara returned null (allocation failed)'
-        );
+        await expect(validateYaraRule(source)).rejects.toBeInstanceOf(YaraEngineUnavailableError);
+        await expect(validateYaraRule(source)).rejects.toBeInstanceOf(YaraEngineUnavailableError);
         expect(validateCalls).toBe(2);
       } finally {
         mod.ccall = originalCcall;

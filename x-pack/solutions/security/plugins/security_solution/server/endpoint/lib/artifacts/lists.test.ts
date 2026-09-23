@@ -38,10 +38,11 @@ import {
   EndpointArtifactScanContext,
 } from '../../../../common/endpoint/types';
 import type { YaraValidateResult } from '../libyara';
-import { validateYaraRule } from '../libyara';
+import { validateYaraRule, YaraEngineUnavailableError } from '../libyara';
 
 jest.mock('../libyara', () => ({
   validateYaraRule: jest.fn(),
+  YaraEngineUnavailableError: jest.requireActual('../libyara/errors').YaraEngineUnavailableError,
 }));
 
 const mockValidateYaraRule = validateYaraRule as jest.MockedFunction<typeof validateYaraRule>;
@@ -847,10 +848,10 @@ describe('artifacts lists', () => {
       ).resolves.toEqual({ entries: [] });
     });
 
-    test('it should skip an entry when libyara throws and still include valid entries', async () => {
+    test('it should fail the conversion when libyara throws for any entry', async () => {
       const validRule = 'rule Valid { condition: true }';
       mockValidateYaraRule
-        .mockRejectedValueOnce(new Error('libyara WASM trap'))
+        .mockRejectedValueOnce(new YaraEngineUnavailableError('libyara WASM trap'))
         .mockResolvedValueOnce(createYaraValidateResult([{}]));
 
       await expect(
@@ -861,17 +862,23 @@ describe('artifacts lists', () => {
           ],
           'v1'
         )
-      ).resolves.toEqual({
-        entries: [
-          {
-            yara_rule_data: validRule,
-            arch_context: [MetaArchValue.X86, MetaArchValue.ARM64],
-            scan_context: [EndpointArtifactScanContext.MEMORY],
-            entry_id: MOCK_YARA_ENTRY_ID,
-            entry_name: MOCK_YARA_ENTRY_NAME,
-          },
-        ],
-      });
+      ).rejects.toThrow(YaraEngineUnavailableError);
+    });
+
+    test('it should fail the conversion when every libyara call throws', async () => {
+      mockValidateYaraRule.mockRejectedValue(
+        new YaraEngineUnavailableError('libyara WASM allocation failed')
+      );
+
+      await expect(
+        convertYaraRulesToEndpointFormat(
+          [
+            getCustomYaraExceptionItem('rule First { condition: true }'),
+            getCustomYaraExceptionItem('rule Second { condition: true }'),
+          ],
+          'v1'
+        )
+      ).rejects.toThrow(YaraEngineUnavailableError);
     });
 
     test('it should return a stable hash regardless of order of entries', async () => {

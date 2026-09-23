@@ -18,6 +18,7 @@ import type {
   YaraValidateResult,
 } from './types';
 import { YaraMetaKeyOfInterest } from '../../../../common/endpoint/types';
+import { YaraEngineUnavailableError } from './errors';
 
 let logger: Logger | undefined;
 
@@ -66,6 +67,7 @@ export const setYaraLogger = (nextLogger: Logger | undefined): void => {
  * LRU-caches successful parses and compile errors by SHA-256 of the source
  * (up to 10,000 entries); WASM traps and internal errors are not cached.
  * Each call returns a deep copy so caller mutations do not change the cached result.
+ * Engine failures throw `YaraEngineUnavailableError` (not cached).
  */
 export const validateYaraRule = async (source: string): Promise<YaraValidateResult> => {
   const cacheKey = hashYaraSource(source);
@@ -83,9 +85,19 @@ export const validateYaraRule = async (source: string): Promise<YaraValidateResu
     return cloneYaraValidateResult(cached);
   }
 
-  const result = await compileYaraRule(source);
-  validateResultCache.set(cacheKey, result);
-  return cloneYaraValidateResult(result);
+  try {
+    const result = await compileYaraRule(source);
+    validateResultCache.set(cacheKey, result);
+    return cloneYaraValidateResult(result);
+  } catch (error) {
+    if (error instanceof YaraEngineUnavailableError) {
+      throw error;
+    }
+    throw new YaraEngineUnavailableError(
+      error instanceof Error ? error.message : 'libyara engine failed during validate',
+      error
+    );
+  }
 };
 
 const cloneYaraValidateResult = (result: YaraValidateResult): YaraValidateResult =>
@@ -157,20 +169,31 @@ async function compileYaraRule(source: string): Promise<YaraValidateResult> {
 /**
  * Returns the pinned libyara engine version string from the WASM module
  * (e.g. `"4.3.2"`). See `wasm/dist/ENGINE.md`.
+ * Engine failures throw `YaraEngineUnavailableError`.
  */
 export const getYaraEngineVersion = async (): Promise<string> => {
-  const mod = await loadYaraValidateModule();
   try {
-    return mod.ccall<string>('yara_engine_version', 'string', [], []);
-  } catch (error) {
-    if (isWasmTrap(error)) {
-      modulePromise = undefined;
-      logger?.error(
-        'libyara WASM trap during yara_engine_version; module will be reloaded on next call'
-      );
+    const mod = await loadYaraValidateModule();
+    try {
+      return mod.ccall<string>('yara_engine_version', 'string', [], []);
+    } catch (error) {
+      if (isWasmTrap(error)) {
+        modulePromise = undefined;
+        logger?.error(
+          'libyara WASM trap during yara_engine_version; module will be reloaded on next call'
+        );
+      }
+      logger?.error(error);
+      throw error;
     }
-    logger?.error(error);
-    throw error;
+  } catch (error) {
+    if (error instanceof YaraEngineUnavailableError) {
+      throw error;
+    }
+    throw new YaraEngineUnavailableError(
+      error instanceof Error ? error.message : 'libyara engine failed during yara_engine_version',
+      error
+    );
   }
 };
 
