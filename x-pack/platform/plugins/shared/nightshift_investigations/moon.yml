@@ -19,6 +19,7 @@ project:
 dependsOn:
   - '@kbn/share-plugin'
   - '@kbn/deeplinks-observability'
+  - '@kbn/nightshift-decision-trees'
   - '@kbn/config-schema'
   - '@kbn/core'
   - '@kbn/core-http-server'
@@ -54,6 +55,7 @@ dependsOn:
   - '@kbn/inference-plugin'
   - '@kbn/i18n-react'
   - '@kbn/utility-types'
+  - '@kbn/es-errors'
 tags:
   - plugin
   - prod
