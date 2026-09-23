@@ -9,7 +9,7 @@ print_if_dry_run
 
 if [[ "$BUILDKITE_BRANCH" == "$KIBANA_BASE_BRANCH" ]] || [[ "${DRY_RUN:-}" =~ ^(1|true)$ ]]; then
   echo "--- :beats: Downloading beats manifest"
-  download_artifact beats_manifest.json /tmp --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
+  download_artifact beats_manifest.json /tmp --build "$BUILDKITE_BUILD_ID"
   BEATS_MANIFEST_URL="$(jq -r .manifest_url /tmp/beats_manifest.json)"
 
   echo "--- :pipeline: Uploading DRA pipeline"

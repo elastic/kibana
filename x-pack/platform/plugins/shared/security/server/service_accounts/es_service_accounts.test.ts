@@ -182,6 +182,9 @@ describe('EsServiceAccounts', () => {
     });
 
     it('falls back to `superuser` and warns when roles cannot be derived', async () => {
+      request = httpServerMock.createKibanaRequest({
+        headers: { authorization: 'ApiKey a2V5LWlkOnNlY3JldA==' },
+      });
       // Elasticsearch reports no roles at all for an API key, and the key's `limited_by` names
       // its owner's roles regardless of the key's own restriction, so nothing can be inferred.
       getCurrentUser.mockReturnValue(
@@ -201,6 +204,7 @@ describe('EsServiceAccounts', () => {
       expect(esClient.asCurrentUser.transport.request.mock.calls[1][0]).toEqual(
         expect.objectContaining({ body: { roles: ['superuser'] } })
       );
+      expect(clusterClient.asScoped).toHaveBeenCalledWith(request);
       // The widest possible grant must never be silent.
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('was granted [superuser]'));
     });
