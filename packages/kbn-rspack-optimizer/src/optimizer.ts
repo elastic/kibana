@@ -51,7 +51,7 @@ interface WorkerMessage {
 /**
  * RSPack-based optimizer for use with kbn-cli-dev-mode
  *
- * This runs RSPack in a separate child process, similar to how @kbn/optimizer
+ * This runs RSPack in a separate child process, similar to how @kbn/rspack-optimizer
  * runs webpack in worker threads. This allows clean termination when the user
  * presses Ctrl+C - we can simply kill the worker process.
  *
