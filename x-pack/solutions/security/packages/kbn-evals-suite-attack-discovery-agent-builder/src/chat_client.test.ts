@@ -80,9 +80,11 @@ describe('parseInsightsFromSteps', () => {
   // proposed rule) precedes the insights block, so forward parsing returns
   // null while the backward scan finds the insights.
   it('finds insights that follow an earlier non-insights fenced block', () => {
-    const reasoning = `Proposed rule:\n\n\`\`\`json\n{"rule": "not insights"}\n\`\`\`\n\nReport:\n\n\`\`\`json\n${JSON.stringify({
-      insights: [{ title: 'Encoded PowerShell Followed by LSASS Dump' }],
-    })}\n\`\`\`\n`;
+    const reasoning = `Proposed rule:\n\n\`\`\`json\n{"rule": "not insights"}\n\`\`\`\n\nReport:\n\n\`\`\`json\n${JSON.stringify(
+      {
+        insights: [{ title: 'Encoded PowerShell Followed by LSASS Dump' }],
+      }
+    )}\n\`\`\`\n`;
 
     const insights = parseInsightsFromSteps([{ type: 'reasoning', reasoning }]);
 
