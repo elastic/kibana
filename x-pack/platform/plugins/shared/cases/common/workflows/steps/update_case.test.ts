@@ -52,13 +52,13 @@ describe('update_case common step definition', () => {
   });
 
   it('accepts extended_fields in update case input', () => {
-    const extended_fields = { priority_as_keyword: 'high' };
+    const extendedFields = { priority_as_keyword: 'high' };
     expect(
       InputSchema.parse({
         case_id: caseIdFixture,
-        updates: { extended_fields },
+        updates: { extended_fields: extendedFields },
       })
-    ).toMatchObject({ updates: { extended_fields } });
+    ).toMatchObject({ updates: { extended_fields: extendedFields } });
   });
 
   it('accepts a template switch in update case input', () => {
