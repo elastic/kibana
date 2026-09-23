@@ -22,7 +22,6 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DOCUMENT_TYPE_ENTITY } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import type { EuiThemeComputed } from '@elastic/eui';
 import {
   NodeContainer,
@@ -108,11 +107,69 @@ const EntityCardHeader = styled.div`
 /** Size of the inset icon box inside the header. */
 const ICON_BOX_SIZE = 40;
 
+// ---------------------------------------------------------------------------
+// Risk-score helpers
+//
+// These mirror the logic in security_solution:
+//   - getRiskLevel    → security_solution/common/entity_analytics/risk_engine/risk_levels.ts
+//   - getRiskScoreColors → security_solution/.../entities_table/risk_score_cell.tsx
+//
+// We cannot import from there directly because `security_solution` is a
+// `visibility: private` plugin and this package is a separate module —
+// crossing that boundary is forbidden by Kibana's module-boundary rules
+// (enforced by ESLint). If those thresholds or color tokens ever change,
+// update this copy too.
+// ---------------------------------------------------------------------------
+
+/** Risk severity levels, ordered ascending. */
+type RiskLevel = 'Unknown' | 'Low' | 'Moderate' | 'High' | 'Critical';
+
+/** Bucket a numeric risk score into a severity level. Thresholds match Entity Analytics. */
+const getRiskLevel = (score: number): RiskLevel => {
+  if (score >= 90) return 'Critical';
+  if (score >= 70) return 'High';
+  if (score >= 40) return 'Moderate';
+  if (score >= 20) return 'Low';
+  return 'Unknown';
+};
+
+/** Semantic EUI color tokens per risk level — identical to getRiskScoreColors in entity analytics. */
+const getRiskScoreColors = (
+  euiTheme: EuiThemeComputed,
+  level: RiskLevel
+): { background: string; text: string } => {
+  switch (level) {
+    case 'Critical':
+      return {
+        background: euiTheme.colors.backgroundLightDanger,
+        text: euiTheme.colors.textDanger,
+      };
+    case 'High':
+      return {
+        background: euiTheme.colors.backgroundLightRisk,
+        text: euiTheme.colors.textRisk,
+      };
+    case 'Moderate':
+      return {
+        background: euiTheme.colors.backgroundLightWarning,
+        text: euiTheme.colors.textWarning,
+      };
+    case 'Low':
+      return {
+        background: euiTheme.colors.backgroundBaseNeutral,
+        text: euiTheme.colors.textNeutral,
+      };
+    default:
+      return {
+        background: euiTheme.colors.backgroundBaseSubdued,
+        text: euiTheme.colors.textSubdued,
+      };
+  }
+};
+
 /**
  * Returns the icon box background color for an entity node.
  * Currently a passthrough — icon always uses the node's default fill color.
- * TODO: Map riskScore ranges to semantic EUI severity tokens (separate ticket).
- *       e.g. score >= 70 → danger tint, score >= 40 → warning tint, else → defaultColor.
  */
 const getIconColorByRiskScore = (
   _riskScore: { min: number; max: number } | undefined,
@@ -148,24 +205,6 @@ const EntityInfo = styled.div`
   justify-content: center;
   overflow: hidden;
   min-width: 0;
-`;
-
-/**
- * Inline risk score badge — floating pill on the right of the header row.
- * Does not stretch to full card height; sits centered alongside the icon.
- */
-const RiskBadgeArea = styled.div<{ euiTheme: EuiThemeComputed }>`
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2px ${({ euiTheme }) => euiTheme.size.s};
-  background: ${({ euiTheme }) => euiTheme.colors.backgroundLightDanger};
-  color: ${({ euiTheme }) => euiTheme.colors.danger};
-  font-weight: ${({ euiTheme }) => euiTheme.font.weight.bold};
-  font-size: ${({ euiTheme }) => euiTheme.size.m};
-  white-space: nowrap;
-  border-radius: ${({ euiTheme }) => euiTheme.border.radius.medium};
-  flex-shrink: 0;
 `;
 
 /**
@@ -207,7 +246,7 @@ const CountBadge = styled.div<{ euiTheme: EuiThemeComputed }>`
 const MetadataItem = styled.div<{ euiTheme: EuiThemeComputed }>`
   display: flex;
   flex-direction: column;
-  padding: ${({ euiTheme }) => euiTheme.size.s};
+  padding: ${({ euiTheme }) => euiTheme.size.m} ${({ euiTheme }) => euiTheme.size.s};
   gap: ${({ euiTheme }) => euiTheme.size.xxs};
   /* Prevent grid items from overflowing their 1fr column — required for
      text truncation inside flex children to work. */
@@ -268,11 +307,6 @@ const ASSET_CRITICALITY_LABEL = i18n.translate(
 const SOURCE_LABEL = i18n.translate(
   'securitySolutionPackages.csp.graph.entityNode.metadata.source',
   { defaultMessage: 'Source' }
-);
-
-const RISK_SCORE_LABEL = i18n.translate(
-  'securitySolutionPackages.csp.graph.entityNode.metadata.riskScore',
-  { defaultMessage: 'Risk score' }
 );
 
 const SOURCES_OVERFLOW_TOOLTIP_TITLE = i18n.translate(
@@ -408,58 +442,6 @@ const GeoCell = memo<{ countryCodes: string[] }>(({ countryCodes }) => {
 });
 GeoCell.displayName = 'GeoCell';
 
-const ENTITY_ID_LABEL = i18n.translate(
-  'securitySolutionPackages.csp.graph.entityNode.metadata.entityId',
-  { defaultMessage: 'Entity ID' }
-);
-
-const ENTITY_IDS_OVERFLOW_TOOLTIP_TITLE = i18n.translate(
-  'securitySolutionPackages.csp.graph.entityNode.metadata.entityIdsOverflow',
-  { defaultMessage: 'Additional entity IDs' }
-);
-
-/** Shows the first entity ID with ellipsis ("…") and a hollow "+N" badge for the rest. */
-const EntityIdsCell = memo<{ entityIds: string[] }>(({ entityIds }) => {
-  const [first, ...rest] = entityIds;
-  return (
-    <EuiFlexGroup
-      gutterSize="none"
-      alignItems="center"
-      responsive={false}
-      css={{ width: '100%', gap: '4px' }}
-    >
-      <EuiFlexItem css={{ flex: '0 1 auto', minWidth: 0 }}>
-        <EuiToolTip position="top" content={first}>
-          <EuiText size="xs" tabIndex={0}>
-            <p
-              css={{
-                margin: 0,
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {first}
-            </p>
-          </EuiText>
-        </EuiToolTip>
-      </EuiFlexItem>
-      {rest.length > 0 && (
-        <EuiFlexItem grow={false} css={{ flexShrink: 0 }}>
-          <EuiToolTip
-            position="top"
-            title={ENTITY_IDS_OVERFLOW_TOOLTIP_TITLE}
-            content={rest.join(', ')}
-          >
-            <EuiBadge color="hollow" tabIndex={0}>{`+${rest.length}`}</EuiBadge>
-          </EuiToolTip>
-        </EuiFlexItem>
-      )}
-    </EuiFlexGroup>
-  );
-});
-EntityIdsCell.displayName = 'EntityIdsCell';
-
 /**
  * 2×2 grid of EuiHealth dot + "count level" entries for the asset criticality
  * distribution shown in the grouped-node layers panel.
@@ -483,61 +465,6 @@ const CriticalityDistribution = memo<{
   </div>
 ));
 CriticalityDistribution.displayName = 'CriticalityDistribution';
-
-/**
- * Shows the risk score range as two colored inline badges:
- * min (blue / primary) — max (red / danger).
- */
-const RiskScoreRange = memo<{
-  riskScore: { min: number; max: number };
-  euiTheme: EuiThemeComputed;
-}>(({ riskScore, euiTheme }) => {
-  const minStr = riskScore.min.toFixed(2);
-  const maxStr = riskScore.max.toFixed(2);
-  const badgeBase = css`
-    padding: 1px 6px;
-    border-radius: ${euiTheme.border.radius.small};
-    font-size: ${euiTheme.size.m};
-    font-weight: ${euiTheme.font.weight.semiBold};
-    white-space: nowrap;
-  `;
-  return (
-    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <span
-          css={[
-            badgeBase,
-            css`
-              background: ${euiTheme.colors.backgroundLightPrimary};
-              color: ${euiTheme.colors.primary};
-            `,
-          ]}
-        >
-          {minStr}
-        </span>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiText size="xs" color="subdued">
-          <p css={{ margin: 0 }}>{'–'}</p>
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <span
-          css={[
-            badgeBase,
-            css`
-              background: ${euiTheme.colors.backgroundLightDanger};
-              color: ${euiTheme.colors.danger};
-            `,
-          ]}
-        >
-          {maxStr}
-        </span>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-});
-RiskScoreRange.displayName = 'RiskScoreRange';
 
 /** Renders an em-dash placeholder used when a metadata value is absent. */
 const DashValue = memo<{ euiTheme: EuiThemeComputed }>(({ euiTheme }) => (
@@ -573,11 +500,9 @@ const GroupedMetadataPanel = memo<{
   ips?: string[];
   countryCodes?: string[];
   sources?: string[];
-  entityIds?: string[];
   assetCriticality?: Array<{ level: string; count: number }>;
-  riskScore?: { min: number; max: number };
   euiTheme: EuiThemeComputed;
-}>(({ ips, countryCodes, sources, entityIds, assetCriticality, riskScore, euiTheme }) => (
+}>(({ ips, countryCodes, sources, assetCriticality, euiTheme }) => (
   <>
     {/* Row 1: Asset Criticality | Source */}
     <MetadataItem euiTheme={euiTheme}>
@@ -606,24 +531,6 @@ const GroupedMetadataPanel = memo<{
         <DashValue euiTheme={euiTheme} />
       )}
     </MetadataItem>
-
-    {/* Row 3: Entity ID | Risk Score */}
-    <MetadataItem euiTheme={euiTheme}>
-      <MetadataLabel>{ENTITY_ID_LABEL}</MetadataLabel>
-      {entityIds?.length ? (
-        <EntityIdsCell entityIds={entityIds} />
-      ) : (
-        <DashValue euiTheme={euiTheme} />
-      )}
-    </MetadataItem>
-    <MetadataItem euiTheme={euiTheme}>
-      <MetadataLabel>{RISK_SCORE_LABEL}</MetadataLabel>
-      {riskScore != null ? (
-        <RiskScoreRange riskScore={riskScore} euiTheme={euiTheme} />
-      ) : (
-        <DashValue euiTheme={euiTheme} />
-      )}
-    </MetadataItem>
   </>
 ));
 GroupedMetadataPanel.displayName = 'GroupedMetadataPanel';
@@ -633,11 +540,9 @@ const SingleEntityMetadataPanel = memo<{
   ips?: string[];
   countryCodes?: string[];
   sources?: string[];
-  entityId?: string;
   assetCriticality?: Array<{ level: string; count: number }>;
-  riskScore?: { min: number; max: number };
   euiTheme: EuiThemeComputed;
-}>(({ ips, countryCodes, sources, entityId, assetCriticality, riskScore, euiTheme }) => (
+}>(({ ips, countryCodes, sources, assetCriticality, euiTheme }) => (
   <>
     {/* Row 1: Asset Criticality | Source */}
     <MetadataItem euiTheme={euiTheme}>
@@ -668,52 +573,22 @@ const SingleEntityMetadataPanel = memo<{
         <DashValue euiTheme={euiTheme} />
       )}
     </MetadataItem>
-
-    {/* Row 3: Entity ID | Risk Score */}
-    <MetadataItem euiTheme={euiTheme}>
-      <MetadataLabel>{ENTITY_ID_LABEL}</MetadataLabel>
-      {entityId ? (
-        <EuiText size="xs">
-          <p
-            css={{
-              margin: 0,
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            {entityId}
-          </p>
-        </EuiText>
-      ) : (
-        <DashValue euiTheme={euiTheme} />
-      )}
-    </MetadataItem>
-    <MetadataItem euiTheme={euiTheme}>
-      <MetadataLabel>{RISK_SCORE_LABEL}</MetadataLabel>
-      {riskScore != null ? (
-        <span
-          css={css`
-            display: inline-flex;
-            align-self: flex-start;
-            padding: 1px 6px;
-            border-radius: ${euiTheme.border.radius.small};
-            background: ${euiTheme.colors.backgroundLightDanger};
-            color: ${euiTheme.colors.danger};
-            font-size: ${euiTheme.size.m};
-            font-weight: ${euiTheme.font.weight.semiBold};
-            white-space: nowrap;
-          `}
-        >
-          {riskScore.min.toFixed(2)}
-        </span>
-      ) : (
-        <DashValue euiTheme={euiTheme} />
-      )}
-    </MetadataItem>
   </>
 ));
 SingleEntityMetadataPanel.displayName = 'SingleEntityMetadataPanel';
+
+/** Derives risk badge display value and semantic colors from a raw risk score. */
+const computeRiskBadge = (
+  riskScore: EntityNodeViewModel['riskScore'],
+  euiTheme: EuiThemeComputed
+): { colors: ReturnType<typeof getRiskScoreColors> | null; display: string } => {
+  const value = riskScore?.max ?? null;
+  const level = value != null ? getRiskLevel(value) : null;
+  return {
+    colors: level != null ? getRiskScoreColors(euiTheme, level) : null,
+    display: value == null ? 'N/A' : (Math.round(value * 100) / 100).toFixed(2),
+  };
+};
 
 /**
  * Shared horizontal card node rendered by all entity node shape types
@@ -769,13 +644,12 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
   const isGrouped = showStackedShape(count);
   const countDisplay = count != null && count > 99 ? '99+' : String(count ?? '');
 
-  // Risk score: header badge shows min–max range (or single value when equal).
-  const riskScoreDisplay =
-    riskScore == null
-      ? 'N/A'
-      : riskScore.min === riskScore.max
-      ? String(Math.round(riskScore.min))
-      : `${Math.round(riskScore.min)}–${Math.round(riskScore.max)}`;
+  // Risk score: derive display value and severity colors matching Entity Analytics.
+  // For grouped nodes (min !== max) use the max score to determine severity level.
+  const { colors: riskBadgeColors, display: riskScoreDisplay } = computeRiskBadge(
+    riskScore,
+    euiTheme
+  );
 
   // Sources: aggregate from all documentsData entries (grouped nodes have many), deduped.
   const entitySources = useMemo<string[] | undefined>(() => {
@@ -791,16 +665,6 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
       }
     }
     return all.length ? all : undefined;
-  }, [documentsData]);
-
-  // Entity IDs: collect from entity-type documents (one per entity in the group).
-  // For single-entity nodes this is a one-element array.
-  const entityIds = useMemo<string[] | undefined>(() => {
-    if (!documentsData?.length) return undefined;
-    const ids = documentsData
-      .filter((doc) => doc.type === DOCUMENT_TYPE_ENTITY)
-      .map((doc) => doc.id);
-    return ids.length ? ids : undefined;
   }, [documentsData]);
 
   return (
@@ -843,7 +707,17 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
         </NodeToolbar>
       )}
 
-      <NodeShapeContainer>
+      {/* The entity card is shorter than the full NODE_HEIGHT reservation.
+          justify-content: center vertically centres the card in the container
+          so top: 50% on the handles lands at the card's true visual centre —
+          the same dagreNode.y where relationship/event nodes are placed. */}
+      <NodeShapeContainer
+        css={css`
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+        `}
+      >
         {/* Relative wrapper — stacked cards peek from the bottom of EntityCardWrapper */}
         <div
           css={css`
@@ -866,7 +740,7 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
               </IconBox>
 
               <EntityInfo>
-                <EuiText size="s">
+                <EuiText size="xs">
                   <p
                     css={css`
                       font-weight: ${euiTheme.font.weight.bold};
@@ -896,10 +770,25 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
                 )}
               </EntityInfo>
 
-              {/* Right: risk score badge */}
-              <RiskBadgeArea data-test-subj={GRAPH_ENTITY_NODE_RISK_BADGE_ID} euiTheme={euiTheme}>
-                {riskScoreDisplay}
-              </RiskBadgeArea>
+              {/* Right: risk score badge — colors match Entity Analytics RiskScoreCell */}
+              <EuiBadge
+                data-test-subj={GRAPH_ENTITY_NODE_RISK_BADGE_ID}
+                color={riskBadgeColors?.background ?? euiTheme.colors.backgroundBaseSubdued}
+                css={css`
+                  flex-shrink: 0;
+                  white-space: nowrap;
+                `}
+              >
+                <EuiText
+                  size="xs"
+                  css={css`
+                    font-weight: ${euiTheme.font.weight.semiBold};
+                    color: ${riskBadgeColors?.text ?? euiTheme.colors.textSubdued};
+                  `}
+                >
+                  {riskScoreDisplay}
+                </EuiText>
+              </EuiBadge>
             </EntityCardHeader>
 
             {/* Metadata panel — always visible */}
@@ -912,9 +801,7 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
                   ips={ips}
                   countryCodes={countryCodes}
                   sources={entitySources}
-                  entityIds={entityIds}
                   assetCriticality={assetCriticality}
-                  riskScore={riskScore}
                   euiTheme={euiTheme}
                 />
               ) : (
@@ -922,9 +809,7 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
                   ips={ips}
                   countryCodes={countryCodes}
                   sources={entitySources}
-                  entityId={entityIds?.[0]}
                   assetCriticality={assetCriticality}
-                  riskScore={riskScore}
                   euiTheme={euiTheme}
                 />
               )}
@@ -965,10 +850,10 @@ export const EntityCardNode = memo<NodeProps>((props: NodeProps) => {
           </>
         )}
 
-        {/* Handles sit at top: 50% of NodeShapeContainer (= NODE_HEIGHT / 2 = 120 px),
-            which lands at the card's visual centre (header + ~½ metadata panel).
-            Relationship/event nodes are centred at the same Dagre Y, so edges
-            connect at exactly the card midpoint. */}
+        {/* Handles sit at top: 50% of NodeShapeContainer (= NODE_HEIGHT / 2).
+            Because the card is flexbox-centred in the container, the card's
+            visual centre is also at NODE_HEIGHT / 2 = dagreNode.y, exactly
+            where relationship/event nodes are placed by the layout algorithm. */}
         <Handle
           type="target"
           isConnectable={false}
