@@ -16,6 +16,11 @@ import { proposalCategorySchema } from '@kbn/agentic-investigations-plugin/commo
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { ALERTZERO_API_PRIVILEGE_READ } from '../../../common/constants';
 import type { ProposalsPageResponse } from '../../../common/proposals/list';
+import {
+  MAX_QUEUE_PAGE_SIZE,
+  MAX_QUEUE_REACH,
+  fitsQueueReach,
+} from '../../../common/proposals/list';
 import type { RouteDependencies } from '../register_routes';
 import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 
@@ -28,10 +33,14 @@ const GetProposalsByCategoryParams = z.object({
   category: proposalCategorySchema,
 });
 
-const GetProposalsByCategoryQuery = z.object({
-  size: z.coerce.number().int().min(1).max(100).default(10),
-  from: z.coerce.number().int().min(0).max(9900).default(0),
-});
+// `size: 0` is a count-only read: a collapsed accordion needs the group total
+// without paying for its rows.
+const GetProposalsByCategoryQuery = z
+  .object({
+    size: z.coerce.number().int().min(0).max(MAX_QUEUE_PAGE_SIZE).default(10),
+    from: z.coerce.number().int().min(0).max(MAX_QUEUE_REACH).default(0),
+  })
+  .refine(fitsQueueReach, { message: `from + size must not exceed ${MAX_QUEUE_REACH}` });
 
 export const registerGetProposalsByCategoryRoute = ({
   router,
