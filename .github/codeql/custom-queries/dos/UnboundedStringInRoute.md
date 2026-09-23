@@ -32,8 +32,8 @@ Prefer the built-in semantic string helpers in `@kbn/config-schema` and `@kbn/zo
 | Helper | Minimum length | Maximum length |
 | --- | ---: | ---: |
 | `savedObjectId` | 1 | 512 |
-| `savedObjectType` | 0 | 256 |
-| `savedObjectVersion` | 0 | 256 |
+| `savedObjectType` | 1 | 256 |
+| `savedObjectVersion` | 1 | 256 |
 | `spaceId` | 1 | 512 |
 | `displayName` | 1 | 1,024 |
 | `description` | 0 | 10,000 |
