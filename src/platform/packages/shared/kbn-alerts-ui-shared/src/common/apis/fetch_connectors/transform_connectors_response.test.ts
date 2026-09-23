@@ -37,6 +37,7 @@ describe('transformConnectorsResponse', () => {
         secrets: {},
         config: {},
         is_connector_type_deprecated: true,
+        is_inbound_events_enabled: true,
       },
     ]);
 
@@ -66,6 +67,7 @@ describe('transformConnectorsResponse', () => {
         referencedByCount: 0,
         secrets: {},
         isConnectorTypeDeprecated: true,
+        isInboundEventsEnabled: true,
       },
     ]);
   });

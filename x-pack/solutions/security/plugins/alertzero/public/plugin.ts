@@ -15,7 +15,7 @@ import {
   type PluginInitializerContext,
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { filter, from, map, switchMap, take, type Subscription } from 'rxjs';
+import { Subject, filter, take, type Subscription } from 'rxjs';
 import {
   ALERTZERO_APP_ID,
   ALERTZERO_APP_PATH,
@@ -59,6 +59,12 @@ export class AlertZeroPublicPlugin
 {
   private readonly config: AlertZeroClientConfig;
   private templateRegistration?: Subscription;
+  private statusSubscription?: Subscription;
+  /**
+   * Allows `start()` to push updated deep links (with capability-resolved visibility)
+   * after capabilities become available, without re-registering the application.
+   */
+  private readonly appUpdater$ = new Subject<AppUpdater>();
 
   constructor(context: PluginInitializerContext<AlertZeroClientConfig>) {
     this.config = context.config.get();
@@ -84,19 +90,10 @@ export class AlertZeroPublicPlugin
       status: AppStatus.inaccessible,
       visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'],
       order: 101,
+      // Initial deep links without capability filtering — capabilities are not available at
+      // setup. `start()` emits an update via appUpdater$ once capabilities are known.
       deepLinks: getAlertZeroDeepLinks(),
-      updater$: from(coreSetup.getStartServices()).pipe(
-        switchMap(([coreStart]) =>
-          coreStart.uiSettings.get$<boolean>(ALERTZERO_ENABLED_SETTING_ID, false).pipe(
-            map(
-              (settingEnabled): AppUpdater =>
-                () => ({
-                  status: settingEnabled ? AppStatus.accessible : AppStatus.inaccessible,
-                })
-            )
-          )
-        )
-      ),
+      updater$: this.appUpdater$,
       mount: async (params) => {
         const [coreStart, startDeps] = await coreSetup.getStartServices();
         const { renderApp } = await import('./application');
@@ -115,6 +112,21 @@ export class AlertZeroPublicPlugin
     if (!this.config.enabled) {
       return {};
     }
+
+    // Push capability-resolved deep links now that `core.application.capabilities` is available.
+    this.appUpdater$.next(() => ({
+      deepLinks: getAlertZeroDeepLinks(core.application.capabilities),
+    }));
+
+    // Reactively gate the app status on the per-space setting so toggling it makes the app
+    // accessible/inaccessible without a reload.
+    this.statusSubscription = core.uiSettings
+      .get$<boolean>(ALERTZERO_ENABLED_SETTING_ID, false)
+      .subscribe((settingEnabled) => {
+        this.appUpdater$.next(() => ({
+          status: settingEnabled ? AppStatus.accessible : AppStatus.inaccessible,
+        }));
+      });
 
     // Lazy-load the entire escalation modal subtree — only resolved when the modal is first opened.
     // This keeps KibanaContextProvider, QueryClient, and ConnectedEscalationModal (plus all their
@@ -196,6 +208,7 @@ export class AlertZeroPublicPlugin
   }
 
   public stop() {
+    this.statusSubscription?.unsubscribe();
     this.templateRegistration?.unsubscribe();
   }
 }

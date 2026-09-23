@@ -9,7 +9,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { AppStatus, type AppUpdater } from '@kbn/core/public';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/public/mocks';
 import { getInvestigationTabIds } from '@kbn/agentic-investigations-common';
-import { BehaviorSubject, firstValueFrom, type Observable } from 'rxjs';
+import { BehaviorSubject, filter, firstValueFrom, map, type Observable } from 'rxjs';
 import { ALERTZERO_ENABLED_SETTING_ID } from '@kbn/alertzero-common';
 import type { AlertZeroClientConfig } from './types';
 import { AlertZeroPublicPlugin } from './plugin';
@@ -42,25 +42,22 @@ describe('AlertZeroPublicPlugin app registration', () => {
   const setupPlugin = (setting$: Observable<boolean>, enabled = true) => {
     const plugin = new AlertZeroPublicPlugin(createContext(createConfig({ enabled })));
     const coreSetup = coreMock.createSetup();
-    coreSetup.getStartServices.mockResolvedValue([
-      withSetting(coreMock.createStart(), setting$),
-      {},
-      {},
-    ] as never);
+    const coreStart = withSetting(coreMock.createStart(), setting$);
+    coreSetup.getStartServices.mockResolvedValue([coreStart, {}, {}] as never);
 
     plugin.setup(coreSetup as never, {} as never);
 
-    return coreSetup;
+    return { coreSetup, plugin, coreStart };
   };
 
   it('does not register the browser app when the deployment kill switch is off', () => {
-    const coreSetup = setupPlugin(new BehaviorSubject(true), false);
+    const { coreSetup } = setupPlugin(new BehaviorSubject(true), false);
 
     expect(coreSetup.application.register).not.toHaveBeenCalled();
   });
 
   it('registers the browser app as inaccessible so core strips its nav and deep links', () => {
-    const coreSetup = setupPlugin(new BehaviorSubject(false));
+    const { coreSetup } = setupPlugin(new BehaviorSubject(false));
 
     expect(coreSetup.application.register).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -71,13 +68,21 @@ describe('AlertZeroPublicPlugin app registration', () => {
     );
   });
 
+  // updater$ is a Subject driven by start(); filter out deep-link-only emissions (no status)
+  const statusUpdates$ = (updater$: Observable<AppUpdater>) =>
+    updater$.pipe(
+      map((fn) => fn({} as never)?.status),
+      filter((s): s is AppStatus => s !== undefined)
+    );
+
   const nextStatus = async (setting$: Observable<boolean>) => {
-    const coreSetup = setupPlugin(setting$);
+    const { coreSetup, plugin, coreStart } = setupPlugin(setting$);
     const { updater$ } = (coreSetup.application.register as jest.Mock).mock.calls[0][0] as {
       updater$: Observable<AppUpdater>;
     };
-    const updater = await firstValueFrom(updater$);
-    return updater({} as never)?.status;
+    const firstStatus = firstValueFrom(statusUpdates$(updater$));
+    plugin.start(coreStart as never, { agentBuilder: agentBuilderMocks.createStart() } as never);
+    return firstStatus;
   };
 
   it('flips the app to accessible while the setting is on', async () => {
@@ -90,18 +95,14 @@ describe('AlertZeroPublicPlugin app registration', () => {
 
   it('tracks later changes to the setting without a page reload', async () => {
     const setting$ = new BehaviorSubject(false);
-    const coreSetup = setupPlugin(setting$);
+    const { coreSetup, plugin, coreStart } = setupPlugin(setting$);
     const { updater$ } = (coreSetup.application.register as jest.Mock).mock.calls[0][0] as {
       updater$: Observable<AppUpdater>;
     };
 
-    const statuses: Array<AppStatus | undefined> = [];
-    const subscription = updater$.subscribe((updater) =>
-      statuses.push(updater({} as never)?.status)
-    );
-    // The updater only subscribes once `getStartServices` resolves.
-    await Promise.resolve();
-    await Promise.resolve();
+    const statuses: AppStatus[] = [];
+    const subscription = statusUpdates$(updater$).subscribe((s) => statuses.push(s));
+    plugin.start(coreStart as never, { agentBuilder: agentBuilderMocks.createStart() } as never);
     setting$.next(true);
     subscription.unsubscribe();
 

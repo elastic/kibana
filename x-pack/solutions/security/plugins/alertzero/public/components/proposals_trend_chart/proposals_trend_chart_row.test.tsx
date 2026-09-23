@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
-import type { ProposalChartsSummaryResponse } from '@kbn/agentic-investigations-plugin/common';
+import type { ProposalChartsSummaryResponse } from '@kbn/proposals-common';
 import { useProposalChartsSummary } from '../../hooks/use_proposal_charts_summary';
 import { ProposalsTrendChartRow } from './proposals_trend_chart_row';
 
