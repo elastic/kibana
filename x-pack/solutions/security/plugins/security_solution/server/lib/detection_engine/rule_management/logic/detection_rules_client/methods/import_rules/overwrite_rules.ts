@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { BulkUpdateRulesParams, RulesClient } from '@kbn/alerting-plugin/server';
+import type {
+  BulkUpdateRulesParams,
+  BulkUpdateRulesResult,
+  RulesClient,
+} from '@kbn/alerting-plugin/server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { RuleResponse } from '../../../../../../../../common/api/detection_engine';
 import type { PrebuiltRuleAsset } from '../../../../../prebuilt_rules';
@@ -100,13 +104,23 @@ export async function overwriteRules({
     return { successes, errors };
   }
 
-  const { successfulIds, errors: bulkErrors } = await rulesClient.bulkUpdateRules<RuleParams>({
-    rules: bulkInputs,
-    batchSize: options.batchSize,
-    allowMissingConnectorSecrets: options.allowMissingConnectorSecrets,
-    changeTracking: options.changeTracking,
-  });
+  let result: BulkUpdateRulesResult;
+  try {
+    result = await rulesClient.bulkUpdateRules<RuleParams>({
+      rules: bulkInputs,
+      batchSize: options.batchSize,
+      allowMissingConnectorSecrets: options.allowMissingConnectorSecrets,
+      changeTracking: options.changeTracking,
+    });
+  } catch (e) {
+    const message = e instanceof Error ? e.message : String(e);
+    for (const source of pending.values()) {
+      errors.push(createRuleImportErrorObject({ ruleId: source.rule_id, message }));
+    }
+    return { successes, errors };
+  }
 
+  const { successfulIds, errors: bulkErrors } = result;
   const successIds = new Set(successfulIds);
   const { errors: toggleErrors, failedIds } = await toggleState({
     rulesClient,
