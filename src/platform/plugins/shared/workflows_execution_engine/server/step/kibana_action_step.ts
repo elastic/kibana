@@ -232,7 +232,7 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
       headers?: Record<string, string>;
     };
 
-    if (cleanParams.body && cleanParams.form_data) {
+    if (cleanParams.body !== undefined && cleanParams.form_data !== undefined) {
       throw new Error('Cannot set both body and form_data — they are mutually exclusive.');
     }
     if (cleanParams.request) {
@@ -343,7 +343,7 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
       headers?: Record<string, string>;
     };
 
-    if (cleanParams.body && cleanParams.form_data) {
+    if (cleanParams.body !== undefined && cleanParams.form_data !== undefined) {
       throw new Error(
         'Cannot set both body and form_data — they are mutually exclusive. ' +
           'Use body for JSON requests, or form_data for multipart/form-data uploads.'

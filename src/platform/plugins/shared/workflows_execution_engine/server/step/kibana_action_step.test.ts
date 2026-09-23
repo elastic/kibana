@@ -174,6 +174,20 @@ describe('KibanaActionStepImpl', () => {
       expect(call.body).toBeUndefined();
     });
 
+    it('rejects body together with form_data, including falsy bodies', async () => {
+      for (const body of ['', false, 0, null, { title: 'kept' }]) {
+        contextManager.callKibanaApi.mockClear();
+        step = createStep({
+          body,
+          path: '/api/saved_objects/_import',
+          form_data: { file: { content: 'hello', filename: 'a.ndjson' } },
+        });
+        const result = await (step as any)._run();
+        expect(result.error.message).toContain('Cannot set both body and form_data');
+        expect(contextManager.callKibanaApi).not.toHaveBeenCalled();
+      }
+    });
+
     it('converts adapter response-size failures to the step error', async () => {
       contextManager.callKibanaApi.mockRejectedValue(new CallKibanaApiResponseTooLargeError(1000));
       step = createStep({ request: { method: 'GET', path: '/api/test' } });
@@ -340,6 +354,20 @@ describe('KibanaActionStepImpl', () => {
       const result = await (step as any)._run();
       expect(result.error.message).toContain('Invalid HTTP method "POSTs"');
       expect(global.fetch).not.toHaveBeenCalled();
+    });
+
+    it('rejects body together with form_data, including falsy bodies', async () => {
+      for (const body of ['', false, 0, null, { title: 'kept' }]) {
+        (global.fetch as jest.Mock).mockClear();
+        step = createStep({
+          body,
+          path: '/api/saved_objects/_import',
+          form_data: { file: { content: 'hello', filename: 'a.ndjson' } },
+        });
+        const result = await (step as any)._run();
+        expect(result.error.message).toContain('Cannot set both body and form_data');
+        expect(global.fetch).not.toHaveBeenCalled();
+      }
     });
 
     it('extracts fetcher options and does not include them in the request body', async () => {

@@ -255,6 +255,22 @@ describe('callKibanaApi', () => {
     }
   });
 
+  it('rejects an explicit space prefix, including a percent-encoded s', async () => {
+    for (const path of [
+      '/s/other-space/api/saved_objects/_find',
+      '/%73/other-space/api/status',
+      '/s/%6Fther-space/api/status',
+    ]) {
+      await expect(
+        callKibanaApi(
+          { fakeRequest: createFakeRequest(), coreStart: createCoreStart(), spaceId: 'default' },
+          { method: 'GET', path }
+        )
+      ).rejects.toThrow('Invalid Kibana API path');
+    }
+    expect(mockSelfFetch).not.toHaveBeenCalled();
+  });
+
   it('allows encoded route parameters while rejecting malformed and authority paths', async () => {
     mockSelfFetch.mockResolvedValue(mockSelfResponse(createMockResponse({ body: { ok: true } })));
     for (const path of ['/api/items/foo%20bar', '/api/items/%E2%9C%93']) {
