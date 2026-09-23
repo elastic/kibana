@@ -9,6 +9,7 @@ import type { DiagnosticResult } from '@elastic/elasticsearch';
 import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { DataStreamClient } from '@kbn/data-streams';
 
 import type { ResourceDefinition } from '../../../resources/datastreams/types';
 import { DatastreamInitializer } from './datastream_initializer';
@@ -206,8 +207,28 @@ describe('DatastreamInitializer', () => {
       });
     };
 
-    it('destroys the data stream when deployed version < destroyOnVersionBelow and episode has real (non-alias) sub-fields', async () => {
+    // Returns a queued `getIndexTemplate` response that reports v7 (current version).
+    // Used to confirm that installTemplate()'s post-PUT verification sees a current template.
+    const mockInstalledTemplate = () => mockDeployedTemplate(migrationDefinition.version);
+
+    // All migration tests spy on DataStreamClient.initializeTemplate so we don't
+    // have to thread the internal putMapping-rejection mock through every case.
+    // The real initializeTemplate calls putIndexTemplate + putMapping internally;
+    // the plain ES mock setup already covers the happy-path integration in
+    // 'installs the index template with DSL lifecycle' above.
+    let initializeTemplateSpy: jest.SpyInstance;
+    beforeEach(() => {
+      initializeTemplateSpy = jest
+        .spyOn(DataStreamClient, 'initializeTemplate')
+        .mockResolvedValue(undefined);
+    });
+    afterEach(() => {
+      initializeTemplateSpy.mockRestore();
+    });
+
+    it('installs the template before deleting the stream when legacy mapping is found', async () => {
       mockDeployedTemplate(6);
+      mockInstalledTemplate(); // installTemplate() verification read — returns v7
       esClient.indices.getMapping.mockResolvedValueOnce({
         '.ds-.alerting-test-000001': {
           mappings: {
@@ -227,10 +248,80 @@ describe('DatastreamInitializer', () => {
       const initializer = new DatastreamInitializer(mockLogger, esClient, migrationDefinition);
       await initializer.initialize();
 
+      expect(initializeTemplateSpy).toHaveBeenCalledTimes(1);
       expect(esClient.indices.deleteDataStream).toHaveBeenCalledWith({ name: '.alerting-test' });
       expect(mockLogger.warn).toHaveBeenCalledWith(
         expect.stringContaining('one-time destructive migration')
       );
+    });
+
+    it('aborts the wipe when installTemplate finds the template was not installed (PUT failed)', async () => {
+      mockDeployedTemplate(6);
+      // initializeTemplate throws (e.g. network error during PUT)
+      initializeTemplateSpy.mockRejectedValueOnce(new Error('ES unavailable'));
+      // verification read: template is still at v6, confirming the PUT failed
+      mockDeployedTemplate(6);
+      esClient.indices.getMapping.mockResolvedValueOnce({
+        '.ds-.alerting-test-000001': {
+          mappings: {
+            properties: {
+              episode: { properties: { id: { type: 'keyword' as const } } },
+            },
+          },
+        },
+      });
+
+      const initializer = new DatastreamInitializer(mockLogger, esClient, migrationDefinition);
+      await expect(initializer.initialize()).rejects.toThrow('ES unavailable');
+
+      expect(esClient.indices.deleteDataStream).not.toHaveBeenCalled();
+    });
+
+    it('proceeds to the delete when initializeTemplate throws but the template version is current', async () => {
+      // The expected case: initializeTemplate PUT v7 but then its internal putMapping on the
+      // v6 write index threw a 400. The template IS installed; we must not abort.
+      mockDeployedTemplate(6);
+      // initializeTemplate throws (the 400 putMapping rejection — type doesn't matter here,
+      // because installTemplate() catches any error and re-checks the template version)
+      initializeTemplateSpy.mockRejectedValueOnce(new Error('mapper cannot be changed'));
+      // verification read: template version is now v7 → the PUT succeeded
+      mockInstalledTemplate();
+      esClient.indices.getMapping.mockResolvedValueOnce({
+        '.ds-.alerting-test-000001': {
+          mappings: {
+            properties: {
+              episode: { properties: { id: { type: 'keyword' as const } } },
+            },
+          },
+        },
+      });
+      esClient.indices.deleteDataStream.mockResolvedValueOnce({ acknowledged: true });
+
+      const initializer = new DatastreamInitializer(mockLogger, esClient, migrationDefinition);
+      await initializer.initialize();
+
+      expect(esClient.indices.deleteDataStream).toHaveBeenCalledWith({ name: '.alerting-test' });
+    });
+
+    it('aborts when the template version GET itself fails after initializeTemplate', async () => {
+      mockDeployedTemplate(6);
+      initializeTemplateSpy.mockRejectedValueOnce(new Error('putMapping failed'));
+      // verification GET throws instead of returning a template
+      esClient.indices.getIndexTemplate.mockRejectedValueOnce(new Error('ES unavailable'));
+      esClient.indices.getMapping.mockResolvedValueOnce({
+        '.ds-.alerting-test-000001': {
+          mappings: {
+            properties: {
+              episode: { properties: { id: { type: 'keyword' as const } } },
+            },
+          },
+        },
+      });
+
+      const initializer = new DatastreamInitializer(mockLogger, esClient, migrationDefinition);
+      await expect(initializer.initialize()).rejects.toThrow('ES unavailable');
+
+      expect(esClient.indices.deleteDataStream).not.toHaveBeenCalled();
     });
 
     it('skips the wipe when episode.id is already an alias (handles hand-migrated clusters)', async () => {
@@ -253,6 +344,7 @@ describe('DatastreamInitializer', () => {
       const initializer = new DatastreamInitializer(mockLogger, esClient, migrationDefinition);
       await initializer.initialize();
 
+      expect(initializeTemplateSpy).not.toHaveBeenCalled();
       expect(esClient.indices.deleteDataStream).not.toHaveBeenCalled();
       expect(mockLogger.info).toHaveBeenCalledWith(
         expect.stringContaining('episode.id is already an alias field')
@@ -263,6 +355,7 @@ describe('DatastreamInitializer', () => {
       // Another PR could increment to the same version without the field rename.
       // The gate must rely on mapping shape, not version number, to handle this correctly.
       mockDeployedTemplate(7);
+      mockInstalledTemplate(); // installTemplate() verification read — returns v7
       esClient.indices.getMapping.mockResolvedValueOnce({
         '.ds-.alerting-test-000001': {
           mappings: {
@@ -291,6 +384,7 @@ describe('DatastreamInitializer', () => {
 
       expect(esClient.indices.getMapping).not.toHaveBeenCalled();
       expect(esClient.indices.deleteDataStream).not.toHaveBeenCalled();
+      expect(initializeTemplateSpy).not.toHaveBeenCalled();
     });
 
     it('skips migration on fresh install (no deployed template, no data stream)', async () => {
@@ -303,6 +397,7 @@ describe('DatastreamInitializer', () => {
       await initializer.initialize();
 
       expect(esClient.indices.deleteDataStream).not.toHaveBeenCalled();
+      expect(initializeTemplateSpy).not.toHaveBeenCalled();
     });
   });
 });

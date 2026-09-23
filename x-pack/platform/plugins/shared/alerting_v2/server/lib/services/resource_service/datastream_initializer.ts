@@ -33,7 +33,84 @@ export class DatastreamInitializer implements IResourceInitializer {
 
   public async initialize(): Promise<void> {
     await this.maybeDestroyForMigration();
-    const dataStreamDefinition: DataStreamDefinition<typeof this.resourceDefinition.mappings> = {
+
+    try {
+      await DataStreamClient.initialize({
+        logger: this.logger,
+        dataStream: this.buildDataStreamDefinition(),
+        elasticsearchClient: this.esClient,
+      });
+    } catch (error) {
+      if (!isResponseError(error) || error.statusCode !== 409) {
+        throw error;
+      }
+
+      this.logger.debug(`Data stream already exists: ${this.resourceDefinition.dataStreamName}.`);
+    }
+
+    await this.updateExistingIndicesReplicaSettings();
+  }
+
+  /**
+   * Installs the current-version index template before the data stream is deleted or wiped.
+   *
+   * `DataStreamClient.initializeTemplate` PUTs the template and then tries to apply
+   * `putMapping` to the existing write index. When the write index still has v6 mappings,
+   * ES rejects the `putMapping` (cannot convert a real object field to an alias in place).
+   * That error is expected and caught here; the important outcome is the template PUT.
+   *
+   * Rather than inspecting the error shape (which ES may change across versions), we verify
+   * the result by re-reading the template version. If the version is current, any error from
+   * `putMapping` is discarded and we return. If the PUT itself failed, we rethrow so the
+   * caller aborts rather than deleting the stream with a stale template.
+   *
+   * Once the current template is in place, any gap write (from any node or version) that
+   * triggers an auto-create will use this template rather than rebuilding from the old shape.
+   */
+  public async installTemplate(): Promise<void> {
+    let caughtError: unknown;
+
+    try {
+      await DataStreamClient.initializeTemplate({
+        logger: this.logger,
+        dataStream: this.buildDataStreamDefinition(),
+        elasticsearchClient: this.esClient,
+      });
+    } catch (error) {
+      this.logger.debug(
+        `[alerting_v2] installTemplate: initializeTemplate threw for ` +
+          `${this.resourceDefinition.dataStreamName} — verifying template version: ` +
+          `${error instanceof Error ? error.message : String(error)}`
+      );
+      caughtError = error;
+    }
+
+    // Verify the template was installed. We don't inspect the error because the ES error
+    // shape (status code, type) can change across releases.
+    const { index_templates: templates } = await this.esClient.indices.getIndexTemplate({
+      name: this.resourceDefinition.dataStreamName,
+    });
+    const rawVersion = templates[0]?.index_template?._meta?.version;
+    const installedVersion = typeof rawVersion === 'number' ? rawVersion : -1;
+
+    if (installedVersion >= this.resourceDefinition.version) {
+      // Template is current. Any error was the expected putMapping rejection, not a PUT failure.
+      return;
+    }
+
+    // Template was not installed — the PUT itself must have failed. Abort.
+    if (caughtError !== undefined) {
+      throw caughtError;
+    }
+    throw new Error(
+      `[alerting_v2] Template for ${this.resourceDefinition.dataStreamName} reports ` +
+        `version ${installedVersion < 0 ? '(none)' : installedVersion} after install attempt, ` +
+        `expected >= ${this.resourceDefinition.version}`
+    );
+  }
+
+  private buildDataStreamDefinition(): DataStreamDefinition<typeof this.resourceDefinition.mappings> {
+    return {
       name: this.resourceDefinition.dataStreamName,
       hidden: true,
       version: this.resourceDefinition.version,
@@ -54,22 +131,6 @@ export class DatastreamInitializer implements IResourceInitializer {
         },
       },
     };
-
-    try {
-      await DataStreamClient.initialize({
-        logger: this.logger,
-        dataStream: dataStreamDefinition,
-        elasticsearchClient: this.esClient,
-      });
-    } catch (error) {
-      if (!isResponseError(error) || error.statusCode !== 409) {
-        throw error;
-      }
-
-      this.logger.debug(`Data stream already exists: ${this.resourceDefinition.dataStreamName}.`);
-    }
-
-    await this.updateExistingIndicesReplicaSettings();
   }
 
   /**
@@ -127,6 +188,11 @@ export class DatastreamInitializer implements IResourceInitializer {
         `To trigger manually: POST /internal/alerting/v2/_reset_data_streams`
     );
 
+    // Install the current template before deleting the stream. Any gap write from any
+    // node or version that occurs between the delete and the subsequent initialize() call
+    // will auto-create the stream from this template rather than rebuilding the old shape.
+    await this.installTemplate();
+
     try {
       await this.esClient.indices.deleteDataStream({ name: dataStreamName });
     } catch (error) {
@@ -158,6 +224,10 @@ export class DatastreamInitializer implements IResourceInitializer {
       }
       return false;
     } catch (error) {
+      if (isResponseError(error) && error.statusCode === 404) {
+        // The stream was already wiped by another Kibana node; no legacy mapping to find.
+        return false;
+      }
       this.logger.warn(
         `[alerting_v2] Could not read mapping for ${dataStreamName}; skipping episode→alert wipe. ` +
           `Trigger POST /internal/alerting/v2/_reset_data_streams if rule-events data looks stale: ${error.message}`

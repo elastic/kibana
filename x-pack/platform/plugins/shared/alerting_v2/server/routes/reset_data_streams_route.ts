@@ -73,12 +73,24 @@ export class ResetDataStreamsRoute extends BaseAlertingRoute {
     });
 
     for (const definition of definitions) {
-      await this.deleteDataStreamIfExists(definition.dataStreamName);
-      await this.deleteIndexTemplateIfExists(definition.dataStreamName);
-      await this.recreate(definition);
+      await this.resetDefinition(definition);
     }
 
     return this.ctx.response.noContent();
+  }
+
+  /**
+   * Reinstalls the current template first, then deletes the data stream and recreates it.
+   * Installing the template before deleting ensures that any gap write during the wipe
+   * auto-creates the stream from the correct mappings rather than the old shape.
+   * The template is not deleted: that would leave a window where a gap write could
+   * auto-create with no template at all.
+   */
+  private async resetDefinition(definition: ResourceDefinition): Promise<void> {
+    const initializer = new DatastreamInitializer(this.coreLogger, this.esClient, definition);
+    await initializer.installTemplate();
+    await this.deleteDataStreamIfExists(definition.dataStreamName);
+    await initializer.initialize();
   }
 
   private async deleteDataStreamIfExists(name: string): Promise<void> {
@@ -90,21 +102,5 @@ export class ResetDataStreamsRoute extends BaseAlertingRoute {
       }
       throw error;
     }
-  }
-
-  private async deleteIndexTemplateIfExists(name: string): Promise<void> {
-    try {
-      await this.esClient.indices.deleteIndexTemplate({ name });
-    } catch (error) {
-      if (isResponseError(error) && error.statusCode === 404) {
-        return;
-      }
-      throw error;
-    }
-  }
-
-  private async recreate(definition: ResourceDefinition): Promise<void> {
-    const initializer = new DatastreamInitializer(this.coreLogger, this.esClient, definition);
-    await initializer.initialize();
   }
 }
