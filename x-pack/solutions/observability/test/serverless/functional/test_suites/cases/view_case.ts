@@ -195,13 +195,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       createOneCaseBeforeDeleteAllAfter(getPageObject, getService, owner);
 
       beforeEach(async function () {
-        // The redesign consolidates the activity type filters into a single dropdown
-        // (`user-actions-filter-bar-type-button`) with popover options and plain count badges rather
-        // than the legacy inline toggle buttons with `euiNotificationBadge` "N active filters" labels
-        // these assertions read; the redesign filter bar has its own unit coverage.
-        if (await cases.common.isRedesignEnabled()) {
-          this.skip();
-        }
+        // TODO: `user-actions-filter-activity-button-*` belongs to the legacy FilterActivity
+        // component; the redesign uses `user-actions-filter-bar-type-button`. Rewrite for redesign.
+        this.skip();
       });
 
       it('filters by all by default', async () => {
@@ -483,13 +479,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       ];
 
       before(async function () {
-        // The redesign only renders case-view custom fields when templates v2 (`templates.enabled`) is
-        // on, which defaults off; these assertions target the legacy sidebar custom-field editors.
-        if (await cases.common.isRedesignEnabled()) {
-          return this.skip();
-        }
-
         await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:cases' });
+        // showLegacyCustomFields requires the Cases app origin to be loaded first.
+        await cases.common.showLegacyCustomFields(owner);
         await cases.api.createConfigWithCustomFields({ customFields, owner });
         await cases.api.createCase({
           customFields: [

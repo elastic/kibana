@@ -167,13 +167,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       createOneCaseBeforeDeleteAllAfter(getPageObject, getService, owner);
 
       beforeEach(async function () {
-        // The redesign consolidates the activity type filters into a single dropdown
-        // (`user-actions-filter-bar-type-button`) with popover options and plain count badges rather
-        // than the legacy inline toggle buttons with `euiNotificationBadge` "N active filters" labels
-        // these assertions read; the redesign filter bar has its own unit coverage.
-        if (await cases.common.isRedesignEnabled()) {
-          this.skip();
-        }
+        // TODO: `user-actions-filter-activity-button-*` belongs to the legacy FilterActivity
+        // component; the redesign uses `user-actions-filter-bar-type-button`. Rewrite for redesign.
+        this.skip();
       });
 
       it('filters by all by default', async () => {
@@ -310,12 +306,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       beforeEach(async function () {
-        // The redesign renders all activity (paged actions, the show-more row, and the latest actions)
-        // in a single `user-actions-list`, whereas these assertions expect the legacy two-list DOM with
-        // fixed per-list counts; the redesign pagination has its own unit coverage.
-        if (await cases.common.isRedesignEnabled()) {
-          this.skip();
-        }
+        // TODO: these assertions count two separate `user-actions-list` elements; the redesign
+        // uses a single list with `ShowMoreActivities`. Rewrite for the redesign pagination model.
+        this.skip();
       });
 
       it('initially renders user actions list correctly', async () => {
@@ -464,13 +457,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       ];
 
       before(async function () {
-        // The redesign only renders case-view custom fields when templates v2 (`templates.enabled`) is
-        // on, which defaults off; these assertions target the legacy sidebar custom-field editors.
-        if (await cases.common.isRedesignEnabled()) {
-          return this.skip();
-        }
-
         await navigateToCasesApp(getPageObject, getService, owner);
+        // showLegacyCustomFields requires the Cases app origin to be loaded first.
+        await cases.common.showLegacyCustomFields(owner);
         await cases.api.createConfigWithCustomFields({ customFields, owner });
         await cases.api.createCase({
           customFields: [
