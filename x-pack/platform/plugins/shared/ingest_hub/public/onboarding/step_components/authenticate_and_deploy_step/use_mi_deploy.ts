@@ -189,11 +189,13 @@ export function useMiDeploy({
             (cleanupOps.toDelete.length > 0 || cleanupOps.toUpdate.length > 0)
           ) {
             const deletedIds = new Set(cleanupOps.toDelete);
+            const survivingEntries = Object.entries(policyIdsByInstance).filter(
+              ([, pid]) => !deletedIds.has(pid)
+            );
             await updateDeployment(onboardingDeploymentId, {
               services: selectedServiceIds,
-              packagePolicyIds: [
-                ...new Set(Object.values(policyIdsByInstance).filter((id) => !deletedIds.has(id))),
-              ],
+              packagePolicyIds: [...new Set(survivingEntries.map(([, pid]) => pid))],
+              policyIdsByInstance: Object.fromEntries(survivingEntries),
             });
           }
           await persistPendingIacTemplate();
@@ -317,20 +319,20 @@ export function useMiDeploy({
       // Only exclude deleted policy IDs; updated policies keep the same ID and remain active.
       const deletedPolicyIds = new Set(cleanupOps.toDelete);
       if (currentOnboardingDeploymentId) {
+        const mergedPolicyIdsByInstance = Object.fromEntries(
+          Object.entries({
+            ...policyIdsByInstance,
+            ...newPolicyIdsByInstance,
+          }).filter(([, pid]) => !deletedPolicyIds.has(pid))
+        );
         await updateDeployment(currentOnboardingDeploymentId, {
           services: selectedServiceIds,
           serviceVars: toSOServiceVars(
             serviceSettings?.serviceVars ?? {},
             servicesMap ?? new Map()
           ) as Record<string, Record<string, unknown>>,
-          packagePolicyIds: [
-            ...new Set(
-              Object.values({
-                ...policyIdsByInstance,
-                ...newPolicyIdsByInstance,
-              }).filter((id) => !deletedPolicyIds.has(id))
-            ),
-          ],
+          packagePolicyIds: [...new Set(Object.values(mergedPolicyIdsByInstance))],
+          policyIdsByInstance: mergedPolicyIdsByInstance,
           status: mergedFailed.length === 0 ? 'succeeded' : 'failed',
         });
       }

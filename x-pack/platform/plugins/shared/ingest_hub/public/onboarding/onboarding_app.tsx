@@ -96,7 +96,7 @@ export async function hydrateOnboardingSession(
       getOnboardingSessionKey(integrationId, 'detectAndReviewStep'),
       JSON.stringify({
         serviceStatuses: {},
-        policyIdsByInstance: {},
+        policyIdsByInstance: item.policyIdsByInstance ?? {},
         failedInstances: [],
         deployErrors: {},
         onboardingDeploymentId: item.id,
