@@ -71,6 +71,7 @@ export const clearEntityStoreIndices = async (esClient: EsClient) => {
 export const clearInstalledEntityStoreDocuments = async (esClient: EsClient) => {
   await esClient.deleteByQuery({
     index: LATEST_ALIAS,
+    conflicts: 'proceed',
     refresh: true,
     query: { match_all: {} },
     ignore_unavailable: true,
@@ -78,6 +79,7 @@ export const clearInstalledEntityStoreDocuments = async (esClient: EsClient) => 
 
   await esClient.deleteByQuery({
     index: UPDATES_INDEX,
+    conflicts: 'proceed',
     refresh: true,
     query: { match_all: {} },
     ignore_unavailable: true,
