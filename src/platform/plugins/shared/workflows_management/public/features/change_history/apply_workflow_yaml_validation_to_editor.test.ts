@@ -13,11 +13,14 @@ jest.mock('../../widgets/workflow_yaml_editor/lib/esql_validation/validate_esql_
   validateEsqlSteps: jest.fn().mockResolvedValue([]),
 }));
 
+import type { YamlValidationResult } from '@kbn/workflows-yaml';
+import { BATCHED_CUSTOM_MARKER_OWNER } from '@kbn/workflows-yaml';
 import {
   applyValidationHighlightsToEditor,
   applyWorkflowYamlValidationFromComputed,
   applyWorkflowYamlValidationToEditor,
 } from './apply_workflow_yaml_validation_to_editor';
+import { createMockWorkflowContextRegistry } from '../../../common/lib/create_workflow_context_registry.mock';
 import { performComputation } from '../../entities/workflows/store/workflow_detail/utils/computation';
 import type { WorkflowYamlValidationContext } from '../validate_workflow_yaml/lib/collect_full_workflow_yaml_validation_results';
 import * as createMarkersAndDecorationsModule from '../validate_workflow_yaml/lib/create_yaml_validation_markers_and_decorations';
@@ -25,10 +28,11 @@ import {
   clearWorkflowYamlComputationCache,
   getCachedWorkflowYamlComputationAsync,
 } from '../validate_workflow_yaml/lib/workflow_yaml_computation_cache';
-import { BATCHED_CUSTOM_MARKER_OWNER } from '../validate_workflow_yaml/model/types';
-import type { YamlValidationResult } from '../validate_workflow_yaml/model/types';
+
+const emptyRegistry = createMockWorkflowContextRegistry();
 
 const testValidationContext: WorkflowYamlValidationContext = {
+  registry: emptyRegistry,
   connectorTypes: { status: 'ready', value: {} },
   connectorsManagementUrl: 'http://test/connectors',
   workflows: { workflows: {}, totalWorkflows: 0 },
@@ -69,7 +73,6 @@ describe('applyWorkflowYamlValidationToEditor', () => {
 
     const { validationResults } = await applyWorkflowYamlValidationFromComputed(
       editor,
-      yaml,
       computed,
       true,
       decorationsRef,
@@ -92,12 +95,11 @@ describe('applyWorkflowYamlValidationToEditor', () => {
     const editor = createMockEditor(model);
     const decorationsRef = { current: null as monaco.editor.IEditorDecorationsCollection | null };
 
-    await applyWorkflowYamlValidationFromComputed(editor, yaml, computed, true, decorationsRef, {
+    await applyWorkflowYamlValidationFromComputed(editor, computed, true, decorationsRef, {
       validationContext: testValidationContext,
     });
     const { validationResults } = await applyWorkflowYamlValidationFromComputed(
       editor,
-      yaml,
       computed,
       false,
       decorationsRef,
@@ -134,7 +136,6 @@ describe('applyWorkflowYamlValidationToEditor', () => {
 
     const { validationResults } = await applyWorkflowYamlValidationFromComputed(
       editor,
-      yaml,
       computed,
       true,
       decorationsRef,
@@ -195,7 +196,6 @@ describe('applyWorkflowYamlValidationToEditor', () => {
 
     const { validationResults } = await applyWorkflowYamlValidationFromComputed(
       editor,
-      yaml,
       computed,
       true,
       decorationsRef,
@@ -232,7 +232,6 @@ describe('applyWorkflowYamlValidationToEditor', () => {
 
     const { validationResults } = await applyWorkflowYamlValidationFromComputed(
       editor,
-      yaml,
       computed,
       true,
       decorationsRef,
@@ -292,7 +291,6 @@ describe('applyWorkflowYamlValidationToEditor', () => {
 
     const { validationResults } = await applyWorkflowYamlValidationFromComputed(
       editor,
-      yaml,
       computed,
       true,
       decorationsRef,
