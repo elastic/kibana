@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import {
   EuiBadge,
@@ -63,6 +63,7 @@ import {
   SignificantEventsTuningConfigEditor,
   configToAnnotatedYaml,
 } from './significant_events_tuning_config_editor';
+import { DeveloperModeBadge } from '../../../../components/developer_mode_badge/developer_mode_badge';
 import { AppsSection } from './apps_section';
 import { MaintenanceSection } from './maintenance_section';
 import { StaleEventCleanupSection } from './stale_event_cleanup_section';
@@ -180,11 +181,19 @@ export function SettingsTab() {
     useState<SignificantEventsTuningConfig | null>(null);
   const [savedConfigYamlState, setSavedConfigYamlState] = useState<string>(savedConfigYaml);
 
+  useEffect(() => {
+    if (!isDeveloperMode && !isDeveloperModeSaving) {
+      setDraftConfigYaml(savedConfigYamlState);
+      setParsedTuningConfig(null);
+    }
+  }, [isDeveloperMode, isDeveloperModeSaving, savedConfigYamlState]);
+
   const [isSaving, setIsSaving] = useState(false);
   const [isConfirmingZeroMatch, setIsConfirmingZeroMatch] = useState(false);
   const zeroMatchConfirmModalTitleId = useGeneratedHtmlId({ prefix: 'zeroMatchConfirmModalTitle' });
 
-  const hasTuningConfigChanges = draftConfigYaml !== savedConfigYamlState;
+  const hasTuningConfigChanges =
+    isDeveloperMode && !isDeveloperModeSaving && draftConfigYaml !== savedConfigYamlState;
   const hasChanges =
     canEditSettings &&
     (indexPatterns !== savedIndexPatterns ||
@@ -221,7 +230,13 @@ export function SettingsTab() {
         await scheduledDiscovery.save();
       }
 
-      if (canEditSettings && hasTuningConfigChanges && parsedTuningConfig) {
+      if (
+        canEditSettings &&
+        isDeveloperMode &&
+        !isDeveloperModeSaving &&
+        hasTuningConfigChanges &&
+        parsedTuningConfig
+      ) {
         const fullConfig = { ...DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG, ...parsedTuningConfig };
         await core.settings.globalClient.set(
           OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_TUNING_CONFIG,
@@ -253,6 +268,8 @@ export function SettingsTab() {
     hasTuningConfigChanges,
     parsedTuningConfig,
     canEditSettings,
+    isDeveloperMode,
+    isDeveloperModeSaving,
   ]);
 
   const handleSave = useCallback(() => {
@@ -818,7 +835,7 @@ export function SettingsTab() {
           <EuiText size="s">
             <h3>
               {i18n.translate('xpack.significantEventsApp.settings.developerModeTitle', {
-                defaultMessage: 'Developer mode',
+                defaultMessage: 'Nightshift developer mode',
               })}
             </h3>
           </EuiText>
@@ -828,8 +845,7 @@ export function SettingsTab() {
             <EuiFlexItem grow={2}>
               <EuiText color="subdued" size="s">
                 {i18n.translate('xpack.significantEventsApp.settings.developerModeHelpText', {
-                  defaultMessage:
-                    'Unlocks extra Nightshift Management surfaces in this Kibana space. Changes take effect immediately.',
+                  defaultMessage: 'Show extra details and configuration options for expert users.',
                 })}
               </EuiText>
             </EuiFlexItem>
@@ -840,13 +856,15 @@ export function SettingsTab() {
                     data-test-subj="nightshiftDeveloperModeSwitch"
                     label={i18n.translate(
                       'xpack.significantEventsApp.settings.developerModeToggleSwitch',
-                      { defaultMessage: 'Enable developer mode' }
+                      {
+                        defaultMessage: 'Enable Nightshift developer mode',
+                      }
                     )}
                     checked={isDeveloperMode}
                     onChange={(e) => {
                       void setDeveloperMode(e.target.checked);
                     }}
-                    disabled={!canSaveAdvancedSettings || isDeveloperModeSaving}
+                    disabled={!canSaveAdvancedSettings || isDeveloperModeSaving || isSaving}
                   />
                 </EuiFormRow>
               </EuiForm>
@@ -855,62 +873,80 @@ export function SettingsTab() {
         </EuiPanel>
       </EuiPanel>
 
-      <EuiSpacer />
+      {isDeveloperMode && !isDeveloperModeSaving && (
+        <>
+          <EuiSpacer />
 
-      <EuiPanel hasBorder={true} hasShadow={false} paddingSize="none" grow={false}>
-        <EuiPanel hasShadow={false} color="subdued">
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiText size="s">
-                <h3>
-                  {i18n.translate('xpack.significantEventsApp.settings.tuningTitle', {
-                    defaultMessage: 'Significant Events tuning',
-                  })}
-                </h3>
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                data-test-subj="significantEventsAppSettingsTabResetToDefaultsButton"
+          <EuiPanel
+            hasBorder={true}
+            hasShadow={false}
+            paddingSize="none"
+            grow={false}
+            data-test-subj="nightshiftSettingsTuningPanel"
+          >
+            <EuiPanel hasShadow={false} color="subdued">
+              <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                    <EuiFlexItem grow={false}>
+                      <DeveloperModeBadge />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="s">
+                        <h3>
+                          {i18n.translate('xpack.significantEventsApp.settings.tuningTitle', {
+                            defaultMessage: 'Significant Events tuning',
+                          })}
+                        </h3>
+                      </EuiText>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    data-test-subj="significantEventsAppSettingsTabResetToDefaultsButton"
+                    size="s"
+                    iconType="refresh"
+                    isDisabled={!canEditSettings}
+                    onClick={() => {
+                      const defaultYaml = configToAnnotatedYaml(
+                        DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG
+                      );
+                      setDraftConfigYaml(defaultYaml);
+                      setParsedTuningConfig(DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG);
+                    }}
+                  >
+                    {i18n.translate('xpack.significantEventsApp.settings.resetToDefaults', {
+                      defaultMessage: 'Reset to defaults',
+                    })}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPanel>
+            <EuiPanel hasShadow={false} hasBorder={false}>
+              <EuiCallOut
+                announceOnMount
                 size="s"
-                iconType="refresh"
-                isDisabled={!canEditSettings}
-                onClick={() => {
-                  const defaultYaml = configToAnnotatedYaml(
-                    DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG
-                  );
-                  setDraftConfigYaml(defaultYaml);
-                  setParsedTuningConfig(DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG);
-                }}
-              >
-                {i18n.translate('xpack.significantEventsApp.settings.resetToDefaults', {
-                  defaultMessage: 'Reset to defaults',
+                color="warning"
+                iconType="warning"
+                title={i18n.translate('xpack.significantEventsApp.settings.tuningInfo', {
+                  defaultMessage:
+                    'These are advanced settings that control how features are discovered and queries are searched. Incorrect values may degrade onboarding quality or cause unexpected behavior. Changes take effect on the next run.',
                 })}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
-        <EuiPanel hasShadow={false} hasBorder={false}>
-          <EuiCallOut
-            size="s"
-            color="warning"
-            iconType="warning"
-            title={i18n.translate('xpack.significantEventsApp.settings.tuningInfo', {
-              defaultMessage:
-                'These are advanced settings that control how features are discovered and queries are searched. Incorrect values may degrade onboarding quality or cause unexpected behavior. Changes take effect on the next run.',
-            })}
-          />
-          <EuiSpacer size="m" />
-          <SignificantEventsTuningConfigEditor
-            value={draftConfigYaml}
-            isReadOnly={!canEditSettings}
-            onChange={(yaml, parsed) => {
-              setDraftConfigYaml(yaml);
-              setParsedTuningConfig(parsed);
-            }}
-          />
-        </EuiPanel>
-      </EuiPanel>
+              />
+              <EuiSpacer size="m" />
+              <SignificantEventsTuningConfigEditor
+                value={draftConfigYaml}
+                isReadOnly={!canEditSettings}
+                onChange={(yaml, parsed) => {
+                  setDraftConfigYaml(yaml);
+                  setParsedTuningConfig(parsed);
+                }}
+              />
+            </EuiPanel>
+          </EuiPanel>
+        </>
+      )}
 
       {isAppsEnabled && <AppsSection canEdit={canManageSlack} />}
 
@@ -972,6 +1008,7 @@ export function SettingsTab() {
                       isLoading={isSaving}
                       isDisabled={
                         !canEditSettings ||
+                        isDeveloperModeSaving ||
                         saveBlockedByPause ||
                         (hasTuningConfigChanges && parsedTuningConfig === null)
                       }

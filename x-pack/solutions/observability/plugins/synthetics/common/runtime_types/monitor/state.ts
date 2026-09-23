@@ -7,6 +7,10 @@
 
 import * as t from 'io-ts';
 import { PingErrorType, PingType } from '../ping/ping';
+import { zodAsIoTs } from '../zod_as_io_ts';
+
+const pingCodec = zodAsIoTs(PingType);
+const pingErrorCodec = zodAsIoTs(PingErrorType);
 
 export const StateType = t.intersection([
   t.type({
@@ -18,7 +22,7 @@ export const StateType = t.intersection([
       port: t.number,
       scheme: t.string,
     }),
-    summaryPings: t.array(PingType),
+    summaryPings: t.array(pingCodec),
     summary: t.partial({
       status: t.string,
       up: t.number,
@@ -48,7 +52,7 @@ export const StateType = t.intersection([
     service: t.partial({
       name: t.string,
     }),
-    error: PingErrorType,
+    error: pingErrorCodec,
   }),
 ]);
 

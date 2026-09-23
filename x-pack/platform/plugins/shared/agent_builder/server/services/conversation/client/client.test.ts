@@ -1115,8 +1115,7 @@ describe('ConversationClient', () => {
 
   describe('create', () => {
     beforeEach(() => {
-      mockEsClient.index.mockResolvedValue({ result: 'created' });
-      mockGetDocumentResponse(createConversationDocument());
+      mockEsClient.index.mockResolvedValue({ result: 'created', _seq_no: 0, _primary_term: 1 });
     });
 
     it('indexes with op_type create so existing conversations are never overwritten', async () => {
@@ -1134,6 +1133,78 @@ describe('ConversationClient', () => {
         })
       );
       expectNoReadBy(result);
+    });
+
+    it('forces an immediate refresh instead of waiting for the scheduled one', async () => {
+      await client.create({
+        id: 'conversation-1',
+        title: 'Conversation 1',
+        agent_id: 'agent-1',
+        rounds: [],
+      });
+
+      expect(mockEsClient.index).toHaveBeenCalledWith(expect.objectContaining({ refresh: true }));
+    });
+
+    it('builds the response from the written document without reading it back', async () => {
+      const result = await client.create({
+        id: 'conversation-1',
+        title: 'Conversation 1',
+        agent_id: 'agent-1',
+        rounds: [],
+      });
+
+      expect(mockRawEsClient.get).not.toHaveBeenCalled();
+      expect(agentRegistry.get).not.toHaveBeenCalled();
+      expect(result).toMatchObject({
+        id: 'conversation-1',
+        title: 'Conversation 1',
+        agent_id: 'agent-1',
+        user: { id: 'user-1', username: 'test-user' },
+        rounds: [],
+        events: [],
+        schema_version: CONVERSATION_SCHEMA_VERSION,
+        read: false,
+        pinned: false,
+        read_only: false,
+      });
+      expect(result.created_at).toBe(result.updated_at);
+      expectOwnerPermissions(result);
+      expectNoReadBy(result);
+    });
+
+    it('returns the same shape as get for the created conversation', async () => {
+      const created = await client.create({
+        id: 'conversation-1',
+        title: 'Conversation 1',
+        agent_id: 'agent-1',
+        rounds: [],
+      });
+
+      const { document: indexedDoc } = mockEsClient.index.mock.calls[0][0] as {
+        document: Document['_source'];
+      };
+      mockGetDocumentResponse({
+        _id: 'conversation-1',
+        _seq_no: 0,
+        _primary_term: 1,
+        _source: indexedDoc,
+      });
+
+      await expect(client.get('conversation-1')).resolves.toEqual(created);
+    });
+
+    it('fails when the index response carries no version metadata', async () => {
+      mockEsClient.index.mockResolvedValueOnce({ result: 'created' });
+
+      await expect(
+        client.create({
+          id: 'conversation-1',
+          title: 'Conversation 1',
+          agent_id: 'agent-1',
+          rounds: [],
+        })
+      ).rejects.toThrow('Conversation conversation-1 was indexed without version metadata');
     });
 
     it('throws an already-exists error when the id already exists', async () => {
@@ -2137,6 +2208,53 @@ describe('ConversationClient', () => {
       });
     });
 
+    it('default (owner) denies a non-owner on a public conversation', async () => {
+      getTemplateMock.mockReturnValue(makeTemplate('tmpl-a', { x: { input_type: 'TEXT' } }));
+      mockGetDocumentResponse(
+        createConversationDocument({
+          userId: 'other-user',
+          username: 'other',
+          accessMode: ConversationAccessControlMode.Public,
+        })
+      );
+
+      await expect(client.patchMetadata('conversation-1', { x: 'value' })).rejects.toMatchObject({
+        message: expect.stringContaining('conversation-1'),
+      });
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+
+    it('explicit { access: converse } allows a non-owner on a public conversation', async () => {
+      const template = makeTemplate('tmpl-a', { x: { input_type: 'TEXT' } });
+      getTemplateMock.mockReturnValue(template);
+      // The document must carry a template_id so patchMetadata can resolve the template.
+      const doc = createConversationDocumentWithTemplate({
+        templateId: 'tmpl-a',
+        // Override user and access_mode to simulate a public conversation owned by someone else.
+      });
+      // Patch the access_control to be Public and userId to be a different user.
+      const publicOtherDoc = {
+        ...doc,
+        _source: {
+          ...doc._source,
+          user_id: 'other-user',
+          user_name: 'other',
+          access_control: { access_mode: ConversationAccessControlMode.Public },
+        },
+      };
+      mockGetDocumentResponse(publicOtherDoc as Document);
+      mockEsClient.index.mockResolvedValue({ _seq_no: 3, _primary_term: 1 });
+      mockGetDocumentResponseOnce(publicOtherDoc as Document);
+
+      const { changedFields } = await client.patchMetadata(
+        'conversation-1',
+        { x: 'value' },
+        { access: 'converse' }
+      );
+      expect(changedFields).toEqual(['x']);
+      expect(mockEsClient.index).toHaveBeenCalledTimes(1);
+    });
+
     describe('emitMetadataPatched via event emitter', () => {
       const template = makeTemplate('tmpl-cb', {
         status: {
@@ -2271,8 +2389,7 @@ describe('ConversationClient', () => {
   describe('create with template', () => {
     beforeEach(() => {
       jest.clearAllMocks();
-      mockEsClient.index.mockResolvedValue({ result: 'created' });
-      mockGetDocumentResponse(createConversationDocumentWithTemplate());
+      mockEsClient.index.mockResolvedValue({ result: 'created', _seq_no: 0, _primary_term: 1 });
     });
 
     it('seeds metadata from template fields that have a default value and stamps template_version', async () => {
@@ -2852,8 +2969,7 @@ describe('ConversationClient', () => {
     });
 
     it('create fires with the attachment events of the initial batch', async () => {
-      mockEsClient.index.mockResolvedValue({ result: 'created' });
-      mockGetDocumentResponse(createConversationDocument());
+      mockEsClient.index.mockResolvedValue({ result: 'created', _seq_no: 0, _primary_term: 1 });
       const added = attachmentAddedEvent('evt-att-3');
 
       await clientWithCb.create({
@@ -2913,8 +3029,6 @@ describe('ConversationClient', () => {
     });
 
     it('promotes new conversations to events-native on create (schema_version + events written atomically)', async () => {
-      mockGetDocumentResponse(createConversationDocument({ schemaVersion: 1 }));
-
       await client.create({
         id: 'conversation-1',
         title: 'Conversation 1',
@@ -2944,17 +3058,6 @@ describe('ConversationClient', () => {
         { attachment_id: 'attachment-a', version: 1 },
         { attachment_id: 'attachment-b', version: 2 },
       ];
-
-      const written = createConversationDocument({
-        schemaVersion: 1,
-        rounds: [
-          {
-            ...createRound({ id: 'round-1', status: ConversationRoundStatus.completed }),
-            input: { message: 'hi', attachment_refs: attachmentRefs },
-          },
-        ],
-      });
-      mockGetDocumentResponse(written);
 
       const created = await client.create({
         id: 'conversation-1',

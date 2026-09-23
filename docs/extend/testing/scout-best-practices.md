@@ -175,8 +175,13 @@ Scout configs share servers. Anything your suite creates or changes can affect t
 
 Clean up in the right place:
 
-- **Per-test data**: clean up in `afterEach`/`afterAll`.
-- **Suite-wide state** (feature flags, global settings, shared archives): reset it in a [global teardown hook](./global-setup-hook.md#global-teardown-hook), which runs once after all workers have finished running the config's tests.
+- **Data your suite creates**: remove it in `afterEach`/`afterAll`.
+- **Config-wide state** (data ingested by the [global setup hook](./global-setup-hook.md), feature flags, global settings): reset it only in the [global teardown hook](./global-setup-hook.md#global-teardown-hook), which runs once after all workers have finished. A suite must never delete it; the other suites in the config depend on it.
+- **Use `cleanStandardList()` only when needed.** It removes saved objects from a predefined list of types, including dashboards, visualizations, and data views. Use it only when your scenario creates objects covered by that list and existing cleanup does not already remove them. Prefer `afterEach` or `afterAll`, according to the lifetime of the data; don't copy it into every setup and teardown hook.
+- **Check what the cleanup can delete.** `kbnClient.savedObjects.cleanStandardList()` uses the default space; `scoutSpace.savedObjects.cleanStandardList()` uses the worker's space. The helper does not distinguish your suite's objects from other matching objects. Preserve config-wide fixtures and pre-existing content; use targeted cleanup when those could be affected.
+- **Before-hook cleanup is an exception.** Use it only for a specific, documented setup requirement, such as recovering known leftovers from an interrupted run. Prefer targeted, idempotent cleanup and retain post-test cleanup.
+- **Saved-object cleanup is not a complete Kibana reset.** Restore settings and feature flags separately, and remove resources through their owning APIs when deletion requires additional cleanup, such as invalidating API keys or removing tasks.
+- **Delete non-space-scoped resources precisely.** Elasticsearch indices and documents, ingest pipelines, index and component templates, API keys, and cluster or global settings are visible to every suite and every parallel worker on the servers. Delete them by the unique names or ids your suite created, never by type, tag, or a fixed field value. This applies to shared helpers too: a helper written for a sequential suite may later be called from a parallel one.
 
 :::::{dropdown} Examples
 ❌ **Don't:** use a fixed literal resource name. Every spec, parallel worker, and leftover from an earlier suite shares it — one teardown deletes everyone's data:

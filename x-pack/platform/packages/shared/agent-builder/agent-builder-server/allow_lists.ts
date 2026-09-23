@@ -124,6 +124,12 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   'nightshift_sandbox_str_replace',
   'nightshift_sandbox_write_file',
 
+  // Nightshift – Decision trees
+  'submit_optimizer_result',
+  'record_system_learning',
+  'record_tool_learning',
+  'record_remediation',
+
   // Workflows
   `${internalNamespaces.workflows}.validate_workflow`,
   `${internalNamespaces.workflows}.get_step_definitions`,
@@ -166,6 +172,7 @@ export const AGENT_BUILDER_AGENT_TYPES = [
   chatAgentTypeId,
   `${internalNamespaces.platformSignificantEvents}.investigation-type`,
   `${internalNamespaces.platformSignificantEvents}.deductive-investigation-type`,
+  `${internalNamespaces.platformSignificantEvents}.decision-tree-reinforcement-type`,
   `${internalNamespaces.platformSignificantEvents}.discovery-type`,
   `${internalNamespaces.security}.alertzero-type`,
   `${internalNamespaces.platformSignificantEvents}.feature-identification-type`,
@@ -384,8 +391,8 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   // Platform – Custom Content
   'platform.custom_content.panel_context',
 
-  // Platform – Agentic Investigations
-  'investigation_proposal',
+  // Platform – Proposals
+  'platform.proposal',
 ] as const;
 
 export type AgentBuilderBuiltinAttachment = (typeof AGENT_BUILDER_BUILTIN_ATTACHMENTS)[number];

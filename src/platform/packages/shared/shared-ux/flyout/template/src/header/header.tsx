@@ -192,15 +192,9 @@ const BadgeOverflow = ({ badges }: { badges: ReactNode[] }) => {
 };
 
 /** Renders a resolved `Header.Badge` descriptor. */
-const renderBadge = (badge: HeaderBadgeDescriptor, key: string): ReactNode => (
-  <EuiBadge
-    key={key}
-    color={badge.color}
-    iconType={badge.iconType}
-    iconSide={badge.iconSide}
-    data-test-subj={badge['data-test-subj']}
-  >
-    {badge.label}
+const renderBadge = ({ label, ...badgeProps }: HeaderBadgeDescriptor, key: string): ReactNode => (
+  <EuiBadge key={key} {...badgeProps}>
+    {label}
   </EuiBadge>
 );
 
@@ -358,19 +352,16 @@ export const HeaderZone = ({
             {/* Always visible: tab bar. */}
             {showTabs && (
               <EuiTabs bottomBorder={false} size="m">
-                {tabs.map((tab) => (
+                {tabs.map(({ id, label, tabDomId, panelDomId, ...tabProps }) => (
                   <EuiTab
-                    key={tab.id}
-                    id={tab.tabDomId}
-                    aria-controls={tab.panelDomId}
-                    isSelected={tab.id === selectedTabId}
-                    onClick={() => selectTab(tab.id)}
-                    disabled={tab.disabled}
-                    prepend={tab.prepend}
-                    append={tab.append}
-                    data-test-subj={tab['data-test-subj']}
+                    key={id}
+                    {...tabProps}
+                    id={tabDomId}
+                    aria-controls={panelDomId}
+                    isSelected={id === selectedTabId}
+                    onClick={() => selectTab(id)}
                   >
-                    {tab.label}
+                    {label}
                   </EuiTab>
                 ))}
               </EuiTabs>

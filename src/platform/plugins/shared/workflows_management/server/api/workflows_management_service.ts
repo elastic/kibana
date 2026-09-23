@@ -675,10 +675,11 @@ export class WorkflowsService {
   public async validateWorkflow(
     yaml: string,
     spaceId: string,
-    request: KibanaRequest
+    request: KibanaRequest,
+    options: { includeVariableRules: boolean }
   ): Promise<ValidateWorkflowResponseDto> {
     await this.ensureInitialized();
-    return this.validationService.validateWorkflow(yaml, spaceId, request);
+    return this.validationService.validateWorkflow(yaml, spaceId, request, options);
   }
 
   public async getWorkflowZodSchema(

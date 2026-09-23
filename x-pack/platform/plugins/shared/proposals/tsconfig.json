@@ -1,0 +1,42 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "index.ts",
+    "public/**/*",
+    "server/**/*",
+    "integration_tests/**/*",
+    "../../../../../typings/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/config-schema",
+    "@kbn/core-security-server",
+    "@kbn/features-plugin",
+    "@kbn/i18n",
+    "@kbn/logging-mocks",
+    "@kbn/security-plugin-types-server",
+    "@kbn/spaces-plugin",
+    "@kbn/storage-adapter",
+    "@kbn/workflows",
+    "@kbn/workflows-execution-engine",
+    "@kbn/workflows-extensions",
+    "@kbn/workflows-management-plugin",
+    "@kbn/zod",
+    "@kbn/core-http-server-mocks",
+    "@kbn/zod-helpers",
+    "@kbn/std",
+    "@kbn/agent-builder-common",
+    "@kbn/agent-builder-server",
+    "@kbn/agent-builder-browser",
+    "@kbn/core-http-browser",
+    "@kbn/ui-callout",
+    "@kbn/react-query",
+    "@kbn/kibana-react-plugin",
+    "@kbn/proposals-common",
+    "@kbn/proposals-ui"
+  ],
+  "exclude": ["target/**/*"]
+}

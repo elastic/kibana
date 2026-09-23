@@ -17,7 +17,9 @@ import React from 'react';
 import { CONTEXT_ENGINE_APP_ID } from '../../../common/features';
 import { searchDataStreams } from '../api/data_streams';
 import { CONTEXT_ENGINE_PATHS } from '../paths';
+import { MAX_AI_INDEX_DESCRIPTION_LENGTH } from '../../../common/constants';
 import { CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ } from '../layout/context_engine_page_header';
+import { AI_INDEX_CREATED_LOCATION_STATE } from '../ai_index_created_location_state';
 import { CreateAiIndexPage } from './create_ai_index_page';
 
 jest.mock('../hooks/use_data_connectors', () => ({
@@ -286,6 +288,7 @@ describe('CreateAiIndexPage', () => {
 
     expect(services.application.navigateToApp).toHaveBeenCalledWith(CONTEXT_ENGINE_APP_ID, {
       path: '/ai_index/support-ticket-triage',
+      state: AI_INDEX_CREATED_LOCATION_STATE,
     });
   });
 
@@ -302,6 +305,26 @@ describe('CreateAiIndexPage', () => {
       expect(services.notifications.toasts.addError).toHaveBeenCalled();
     });
     expect(services.application.navigateToApp).not.toHaveBeenCalled();
+  });
+
+  it('shows a warning when the description is within 5% of the max length', () => {
+    renderWithProviders(coreMock.createStart());
+
+    typeId(VALID_ID);
+    typeDescription('a'.repeat(MAX_AI_INDEX_DESCRIPTION_LENGTH - 10));
+
+    expect(screen.getByText(/10 characters remaining/)).toBeInTheDocument();
+    expect(screen.getByTestId('contextCreateAiIndexButton')).toBeEnabled();
+  });
+
+  it('shows an error and disables create when the description exceeds the max length', () => {
+    renderWithProviders(coreMock.createStart());
+
+    typeId(VALID_ID);
+    typeDescription('a'.repeat(MAX_AI_INDEX_DESCRIPTION_LENGTH + 1));
+
+    expect(screen.getByText(/1 character over the 2,048 character limit/)).toBeInTheDocument();
+    expect(screen.getByTestId('contextCreateAiIndexButton')).toBeDisabled();
   });
 
   it('shows an error and stays disabled when the id contains invalid characters', () => {

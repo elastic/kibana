@@ -12,20 +12,29 @@ import { expect } from '@kbn/scout/api';
 import {
   AgentBuilderErrorCode,
   ConversationOriginType,
+  ConversationRoundStatus,
+  ConversationRoundStepType,
   TimelineEventType,
   isConversationCreatedEvent,
   isConversationUpdatedEvent,
   isRoundCompleteEvent,
   type Conversation,
   type ConversationEvent,
+  type ToolCallStep,
 } from '@kbn/agent-builder-common';
+import { AgentPromptType } from '@kbn/agent-builder-common/agents/prompts';
 import { createLlmProxy, type LlmProxy } from '@kbn/ftr-llm-proxy';
+import type { ChatResponse } from '../../../../common/http_api/chat';
 import type {
   ChatCallbackAcceptedResponse,
   ChatCallbackEventResponse,
   ChatCallbackFailureResponse,
   ChatCallbackResponse,
 } from '../../../../common/http_api/chat_callback';
+import {
+  createAgentViaKbn,
+  deleteAgentViaKbn,
+} from '../../../scout_agent_builder_shared/lib/agents_kbn';
 import {
   CallbackTestServer,
   type CallbackTestServerRequest,
@@ -35,10 +44,12 @@ import {
   deleteConnectorById,
 } from '../../../scout_agent_builder_shared/lib/connector_kbn';
 import {
+  setupAgentCallTool,
   setupAgentDirectAnswer,
   setupAgentDirectError,
   setupAgentHangingAnswer,
 } from '../../../scout_agent_builder_shared/lib/proxy_scenario';
+import { createToolViaKbn } from '../../../scout_agent_builder_shared/lib/tools_kbn';
 import { createSystemIndicesEsClient } from '../../../scout_agent_builder_shared/lib/system_indices_es_client';
 import { AGENT_EXECUTIONS_INDEX } from '../../../scout_agent_builder_shared/lib/constants';
 import { apiTest } from '../fixtures';
@@ -50,6 +61,9 @@ const INTERNAL_API_VERSION = '1';
 // Idempotency keys and external ids are per run: a replayed key would return the previous run's
 // execution without calling the LLM when the suite runs twice against the same stack.
 const RUN_ID = Date.now().toString(36);
+/** A tool that asks for confirmation before every call, and an agent that can use it. */
+const HITL_TOOL_ID = `interrupted-hitl-tool-${RUN_ID}`;
+const HITL_AGENT_ID = `interrupted-hitl-agent-${RUN_ID}`;
 
 const TERMINAL_EVENT_TYPES: string[] = [
   TimelineEventType.executionTerminated,
@@ -134,6 +148,16 @@ apiTest.describe(
       callbackServer = new CallbackTestServer();
       callbackServerUrl = await callbackServer.start();
       sysEsClient = await createSystemIndicesEsClient(esClient, config);
+
+      await createToolViaKbn(kbnClient, {
+        id: HITL_TOOL_ID,
+        type: 'esql',
+        description: 'A tool that always asks for confirmation',
+        tags: ['test'],
+        configuration: { query: 'ROW answer = 42', params: {} },
+        confirmation: { askUser: 'always' },
+      });
+      await createAgentViaKbn(kbnClient, { id: HITL_AGENT_ID, name: 'Interrupted HITL agent' });
     });
 
     apiTest.afterAll(async ({ asAdmin, kbnClient }) => {
@@ -142,6 +166,8 @@ apiTest.describe(
           `${API_AGENT_BUILDER}/conversations/${encodeURIComponent(conversationId)}`
         );
       }
+      await deleteAgentViaKbn(kbnClient, HITL_AGENT_ID);
+      await asAdmin.delete(`${API_AGENT_BUILDER}/tools/${encodeURIComponent(HITL_TOOL_ID)}`);
       // Conversation deletion does not cascade to execution documents; remove the ones this
       // suite created so repeated runs do not accumulate them on a shared server.
       await sysEsClient.deleteByQuery({
@@ -201,7 +227,7 @@ apiTest.describe(
 
     for (const mode of EXECUTION_MODES) {
       apiTest(
-        `[${mode}] persists a failed execution and surfaces it to the next round`,
+        `[${mode}] persists a failed execution as an interrupted round and surfaces it to the next round`,
         async ({ apiClient }) => {
           // 1. a successful first round (title generation happens here)
           await setupAgentDirectAnswer({
@@ -242,13 +268,19 @@ apiTest.describe(
           expect(failureBody.message).toContain('Error calling connector');
           await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
-          // 3. the failed execution is on the conversation as a full projection, not as a round
+          // 3. the failed execution is on the conversation as a full projection AND as a round:
+          //    completed, with an empty response and the interruption recorded
           const conversation = await getConversation(
             apiClient,
             adminCredentials.apiKeyHeader,
             conversationId
           );
-          expect(conversation.rounds).toHaveLength(1);
+          expect(conversation.rounds).toHaveLength(2);
+          const failedRound = conversation.rounds[1];
+          expect(failedRound.status).toBe(ConversationRoundStatus.completed);
+          expect(failedRound.response.message).toBe('');
+          expect(failedRound.interruption?.type).toBe('failed');
+          expect(failedRound.input.message).toBe(`second ${mode}`);
           const failed = (conversation.events ?? []).filter(
             (event) => event.type === TimelineEventType.executionFailed
           );
@@ -311,17 +343,157 @@ apiTest.describe(
             adminCredentials.apiKeyHeader,
             conversationId
           );
-          expect(after.rounds).toHaveLength(2);
+          expect(after.rounds).toHaveLength(3);
           expect(after.rounds.map((round) => round.input.message)).toStrictEqual([
             `first ${mode}`,
+            `second ${mode}`,
             `third ${mode}`,
           ]);
+        }
+      );
+
+      apiTest(
+        `[${mode}] an interrupted resume of a paused round completes that round and keeps the prompt response`,
+        async ({ apiClient }) => {
+          const converse = (payload: Record<string, unknown>) =>
+            postConverse(
+              apiClient,
+              adminCredentials.apiKeyHeader,
+              { agent_id: HITL_AGENT_ID, connector_id: connectorId, ...payload },
+              mode
+            );
+
+          // 1. the agent calls a tool that asks for confirmation: the round pauses on the prompt
+          setupAgentCallTool({
+            proxy: llmProxy,
+            title: 'Interrupted HITL title',
+            toolName: HITL_TOOL_ID,
+            toolArg: {},
+          });
+          const paused = await converse({ input: `run the tool ${mode}` });
+          expect(paused).toHaveStatusCode(200);
+          await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+          const pausedBody = paused.body as ChatResponse;
+          const conversationId = pausedBody.conversation_id;
+          conversationIds.add(conversationId);
+          expect(pausedBody.status).toBe(ConversationRoundStatus.awaitingPrompt);
+          const prompts = pausedBody.response.prompts ?? [];
+          expect(prompts).toHaveLength(1);
+          expect(prompts[0].type).toBe(AgentPromptType.confirmation);
+          const pausedConversation = await getConversation(
+            apiClient,
+            adminCredentials.apiKeyHeader,
+            conversationId
+          );
+          expect(pausedConversation.rounds).toHaveLength(1);
+          expect(pausedConversation.rounds[0].status).toBe(ConversationRoundStatus.awaitingPrompt);
+          expect(pausedConversation.rounds[0].pending_prompts).toHaveLength(1);
+          const promptRequested = (pausedConversation.events ?? []).filter(
+            (event) => event.type === TimelineEventType.executionTerminated
+          );
+          expect(promptRequested).toHaveLength(1);
+
+          // 2. the user confirms; the tool runs, then the resumed execution's LLM call fails
+          await setupAgentDirectError({
+            proxy: llmProxy,
+            continueConversation: true,
+            error: { type: 'error', statusCode: 500, errorMsg: 'boom on resume' },
+          });
+          const resumed = await converse({
+            conversation_id: conversationId,
+            prompts: { [prompts[0].id]: { allow: true } },
+          });
+          expect(resumed.statusCode).toBeGreaterThanOrEqual(400);
+          expect((resumed.body as { message: string }).message).toContain(
+            'Error calling connector'
+          );
+          await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+
+          // 3. still one round: completed, no pending prompt, the interruption recorded on it;
+          //    the prompt response and both executions' terminals are on the timeline
+          const conversation = await getConversation(
+            apiClient,
+            adminCredentials.apiKeyHeader,
+            conversationId
+          );
+          expect(conversation.rounds).toHaveLength(1);
+          const round = conversation.rounds[0];
+          expect(round.status).toBe(ConversationRoundStatus.completed);
+          expect(round.pending_prompts ?? []).toHaveLength(0);
+          expect(round.response.message).toBe('');
+          expect(round.interruption?.type).toBe('failed');
+          // the confirmed tool call ran before the failure and stays on the round
+          const toolCalls = round.steps.filter(
+            (step): step is ToolCallStep => step.type === ConversationRoundStepType.toolCall
+          );
+          expect(toolCalls.map((step) => step.tool_id)).toStrictEqual([HITL_TOOL_ID]);
+          expect(toolCalls[0].results.length).toBeGreaterThan(0);
+          expect(toolCalls[0].interrupted).toBeUndefined();
+
+          const events = conversation.events ?? [];
+          const promptResponses = events.filter(
+            (event) => event.type === TimelineEventType.promptResponse
+          );
+          expect(promptResponses).toHaveLength(1);
+          const promptResponseData = promptResponses[0].data as {
+            prompt_requested_event_id: string;
+            responses: Record<string, { allow?: boolean }>;
+          };
+          expect(promptResponseData.prompt_requested_event_id).toBe(promptRequested[0].id);
+          expect(promptResponseData.responses).toStrictEqual({ [prompts[0].id]: { allow: true } });
+          const failed = events.filter((event) => event.type === TimelineEventType.executionFailed);
+          expect(failed).toHaveLength(1);
+          expect(failed[0].trigger_event_id).toBe(promptResponses[0].id);
+          expect(failed[0].execution_id).not.toBe(promptRequested[0].execution_id);
+          // one terminal per execution: the pause (exec 0) and the interruption (exec 1)
+          for (const executionId of [promptRequested[0].execution_id!, failed[0].execution_id!]) {
+            expect(
+              eventsOfExecution(conversation, executionId).filter((event) =>
+                TERMINAL_EVENT_TYPES.includes(event.type)
+              )
+            ).toHaveLength(1);
+          }
+
+          // 4. a plain input starts a new round, with the interrupted round in its history
+          await setupAgentDirectAnswer({
+            proxy: llmProxy,
+            continueConversation: true,
+            response: 'after hitl ok',
+          });
+          const requestsBeforeNext = llmProxy.interceptedRequests.length;
+          const next = await converse({
+            input: `after the prompt ${mode}`,
+            conversation_id: conversationId,
+          });
+          expect(next).toHaveStatusCode(200);
+          await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+
+          const history = userMessagesOfFinalAnswerFor(
+            llmProxy,
+            `after the prompt ${mode}`,
+            requestsBeforeNext
+          ).join('\n');
+          expect(history).toContain(`run the tool ${mode}`);
+          expect(history).toContain('attempt to answer the previous message failed');
+
+          const after = await getConversation(
+            apiClient,
+            adminCredentials.apiKeyHeader,
+            conversationId
+          );
+          expect(after.rounds).toHaveLength(2);
+          expect(after.rounds.map((afterRound) => afterRound.input.message)).toStrictEqual([
+            `run the tool ${mode}`,
+            `after the prompt ${mode}`,
+          ]);
+          expect(after.rounds[1].status).toBe(ConversationRoundStatus.completed);
+          expect(after.rounds[1].response.message).toBe('after hitl ok');
         }
       );
     }
 
     apiTest(
-      'aborted execution (callback / task manager) is persisted, reports aborted, and is hidden from the next round',
+      "aborted execution (callback / task manager) is persisted as an interrupted round and stays in the next round's context",
       async ({ apiClient }) => {
         const externalConversationId = `team:T123/channel:C123/thread:interrupted-abort-${RUN_ID}`;
         const converseViaCallback = (input: string, idempotencyKey: string, token: string) =>
@@ -398,7 +570,13 @@ apiTest.describe(
             TERMINAL_EVENT_TYPES.includes(event.type)
           )
         ).toHaveLength(1);
-        expect(conversation!.rounds).toHaveLength(1);
+        // the aborted execution is a round of its own: completed, empty response, interruption
+        expect(conversation!.rounds).toHaveLength(2);
+        expect(conversation!.rounds[1].interruption).toMatchObject({
+          type: 'aborted',
+          aborted_by: { source: 'api' },
+        });
+        expect(conversation!.rounds[1].response.message).toBe('');
         // the abort came through the API: the terminal records the source and the requesting user
         const abortedBy = (
           aborted[0].data as {
@@ -436,7 +614,7 @@ apiTest.describe(
         expect(doc!._source?.abort_reason?.source).toBe('api');
         expect(doc!._source?.error?.meta?.abort_reason?.source).toBe('api');
 
-        // 5. a third round does not see the aborted round's input
+        // 5. a third round sees the aborted round's input followed by the interruption notice
         await setupAgentDirectAnswer({
           proxy: llmProxy,
           continueConversation: true,
@@ -457,7 +635,14 @@ apiTest.describe(
           'third after abort',
           requestsBeforeThird
         );
-        expect(userMessages.some((content) => content.includes('second aborted'))).toBe(false);
+        const history = userMessages.join('\n');
+        const abortedAt = history.indexOf('second aborted');
+        const noticeAt = history.indexOf('<system_notice>');
+        expect(abortedAt).toBeGreaterThanOrEqual(0);
+        expect(noticeAt).toBeGreaterThan(abortedAt);
+        expect(noticeAt).toBeLessThan(history.lastIndexOf('third after abort'));
+        expect(history).toContain('interrupted before the agent finished');
+        expect(history).toContain('<interruption source="api"');
       }
     );
   }

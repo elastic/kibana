@@ -430,11 +430,18 @@ describe('WorkflowsService (facade)', () => {
       const request = {} as any;
 
       await service.getAvailableConnectors('default', request);
-      await service.validateWorkflow('name: wf', 'default', request);
+      await service.validateWorkflow('name: wf', 'default', request, {
+        includeVariableRules: false,
+      });
       await service.getWorkflowZodSchema({ loose: false }, 'default', request);
 
       expect(validationSpies.getAvailableConnectors).toHaveBeenCalledWith('default', request);
-      expect(validationSpies.validateWorkflow).toHaveBeenCalledWith('name: wf', 'default', request);
+      expect(validationSpies.validateWorkflow).toHaveBeenCalledWith(
+        'name: wf',
+        'default',
+        request,
+        { includeVariableRules: false }
+      );
       expect(validationSpies.getWorkflowZodSchema).toHaveBeenCalledWith(
         { loose: false },
         'default',

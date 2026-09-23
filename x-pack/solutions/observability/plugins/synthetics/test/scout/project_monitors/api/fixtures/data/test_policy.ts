@@ -158,6 +158,9 @@ export const getHttpInput = ({
     tags: { type: 'yaml' },
     username: { type: 'text' },
     password: { type: 'password' },
+    // synthetics package 1.12.0+ (elastic/integrations#21116)
+    kerberos: { type: 'text' },
+    ntlm: { type: 'text' },
     'response.include_headers': { type: 'bool' },
     'response.include_body': { type: 'text' },
     'response.include_body_max_bytes': { type: 'text' },
@@ -223,6 +226,9 @@ export const getHttpInput = ({
     tags: { value: '["tag1","tag2"]', type: 'yaml' },
     username: { value: '"test-username"', type: 'text' },
     password: { value: '"test"', type: 'password' },
+    // synthetics package 1.12.0+ (elastic/integrations#21116)
+    kerberos: { value: null, type: 'text' },
+    ntlm: { value: null, type: 'text' },
     'response.include_headers': { value: true, type: 'bool' },
     'response.include_body': { value: 'never', type: 'text' },
     'response.include_body_max_bytes': { value: '1024', type: 'text' },
@@ -562,6 +568,20 @@ const OMITTED_WHEN_FALSY_FIELDS = [
   'wait',
 ];
 
+// Optional HTTP auth vars added in synthetics package 1.12.0
+// (elastic/integrations#21116). Present (usually empty) on 1.12.0+ package
+// templates and absent on older ones — drop empty values so golden fixtures
+// work against either package version.
+const OPTIONAL_EMPTY_HTTP_AUTH_VARS = ['kerberos', 'ntlm'] as const;
+
+const isEmptyPackageVar = (entry: unknown): boolean => {
+  if (entry == null || typeof entry !== 'object') {
+    return true;
+  }
+  const value = (entry as { value?: unknown }).value;
+  return value == null || value === '';
+};
+
 const normalizeCompiledStreamDefaults = (compiledStream: Record<string, unknown>) => {
   // `enabled` is guarded with `{{#unless}}`: omitted only when true (the
   // Heartbeat default); a disabled monitor still emits an explicit `false`.
@@ -571,6 +591,17 @@ const normalizeCompiledStreamDefaults = (compiledStream: Record<string, unknown>
   for (const field of OMITTED_WHEN_FALSY_FIELDS) {
     if (field in compiledStream && !compiledStream[field]) {
       delete compiledStream[field];
+    }
+  }
+};
+
+const normalizeOptionalHttpAuthVars = (vars: Record<string, unknown> | undefined) => {
+  if (!vars) {
+    return;
+  }
+  for (const key of OPTIONAL_EMPTY_HTTP_AUTH_VARS) {
+    if (!(key in vars) || isEmptyPackageVar(vars[key])) {
+      delete vars[key];
     }
   }
 };
@@ -596,6 +627,7 @@ export const comparePolicies = (aPolicy: PackagePolicy | undefined, bPolicy: Pac
       if (stream.compiled_stream) {
         normalizeCompiledStreamDefaults(stream.compiled_stream as Record<string, unknown>);
       }
+      normalizeOptionalHttpAuthVars(stream.vars as Record<string, unknown> | undefined);
     });
   });
 

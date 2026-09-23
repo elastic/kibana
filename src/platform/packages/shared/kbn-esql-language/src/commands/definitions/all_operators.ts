@@ -131,6 +131,8 @@ const otherDefinitions: FunctionDefinition[] = [
       Location.JOIN,
       // HIGHLIGHT's optional `prefix = "..."` modifier, like RERANK's `target = "query"`
       Location.HIGHLIGHT_QUERY,
+      // DENSE_VECTOR's `target = field` and `suffix = "..." ON` modifiers
+      Location.DENSE_VECTOR,
     ],
     signatures: [
       {

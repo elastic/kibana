@@ -65,7 +65,8 @@ export interface WorkflowExecutionQueryDeps {
 
 /** Deps for WorkflowValidationService. */
 export interface WorkflowValidationDeps {
-  workflowsExtensions: WorkflowsExtensionsServerPluginStart | undefined;
+  /** Required plugin dependency, so it is always present once start has run. */
+  workflowsExtensions: WorkflowsExtensionsServerPluginStart;
   getActionsClient: () => Promise<IUnsecuredActionsClient>;
   getActionsClientWithRequest: (request: KibanaRequest) => Promise<PublicMethodsOf<ActionsClient>>;
 }

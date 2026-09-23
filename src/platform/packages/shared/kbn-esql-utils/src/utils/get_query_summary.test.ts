@@ -28,6 +28,20 @@ describe('getQuerySummary', () => {
     expect(result.newColumns).toEqual(new Set(['avg_price', 'max_price']));
   });
 
+  it('returns generated columns from DENSE_VECTOR command', () => {
+    expect(getQuerySummary('FROM index | DENSE_VECTOR title, body').newColumns).toEqual(
+      new Set(['title_dense_vector', 'body_dense_vector'])
+    );
+
+    expect(
+      getQuerySummary('FROM index | DENSE_VECTOR suffix = "_dv" ON title, body').newColumns
+    ).toEqual(new Set(['title_dv', 'body_dv']));
+
+    expect(getQuerySummary('FROM index | DENSE_VECTOR vec = description').newColumns).toEqual(
+      new Set(['vec'])
+    );
+  });
+
   it('returns renamed columns from RENAME command', () => {
     const query = 'FROM index | RENAME old_name AS new_name';
     const result = getQuerySummary(query);

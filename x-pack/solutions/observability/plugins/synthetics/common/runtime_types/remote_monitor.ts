@@ -6,6 +6,7 @@
  */
 
 import * as t from 'io-ts';
+import { zodAsIoTs } from './zod_as_io_ts';
 import { remoteMonitorInfoSchema } from './remote';
 import { ConfigKey } from './monitor_management/config_key';
 import { MonitorTypeCodec } from './monitor_management/monitor_configs';
@@ -39,7 +40,7 @@ export const RemoteSyntheticsMonitorCodec = t.type({
   [ConfigKey.MONITOR_TYPE]: MonitorTypeCodec,
   [ConfigKey.TAGS]: t.array(t.string),
   [ConfigKey.LOCATIONS]: t.array(MonitorServiceLocationCodec),
-  remote: remoteMonitorInfoSchema,
+  remote: zodAsIoTs(remoteMonitorInfoSchema),
 });
 
 export type RemoteSyntheticsMonitor = t.TypeOf<typeof RemoteSyntheticsMonitorCodec>;

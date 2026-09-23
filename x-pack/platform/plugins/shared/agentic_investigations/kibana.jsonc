@@ -4,13 +4,13 @@
   "owner": ["@elastic/security-solution"],
   "group": "platform",
   "visibility": "shared",
-  "description": "Solution-agnostic base layer for agentic investigations. Owns the entities an agent and a human collaborate on: proposals, impact, and escalations today, investigations next.",
+  "description": "Solution-agnostic base layer for agentic investigations. Owns the entities an agent and a human collaborate on: impact and escalations today, investigations next. Proposals live in the `proposals` plugin.",
   "plugin": {
     "id": "agenticInvestigations",
     "configPath": ["xpack", "agenticInvestigations"],
     "browser": true,
     "server": true,
-    "requiredPlugins": ["agentBuilder", "agentBuilderPlatform", "features", "workflowsExtensions", "workflowsManagement"],
+    "requiredPlugins": ["agentBuilder", "agentBuilderPlatform", "features"],
     "requiredBundles": ["kibanaReact"],
     "optionalPlugins": ["security", "spaces"],
     "extraPublicDirs": ["common"]

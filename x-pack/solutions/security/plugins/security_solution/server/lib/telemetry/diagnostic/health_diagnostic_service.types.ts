@@ -104,6 +104,8 @@ export interface IndexQuery {
   integrations?: string[];
   datastreamTypes?: string[];
   encryptionKeyId?: string;
+  encryptDocument?: true;
+  expiresAt?: string;
 }
 
 /**
@@ -123,6 +125,8 @@ export interface ApiQuery {
   responsePathKey?: string;
   integrations?: string[];
   encryptionKeyId?: string;
+  encryptDocument?: true;
+  expiresAt?: string;
 }
 
 /**
@@ -167,7 +171,8 @@ export type SkipReason =
   | 'integration_not_installed'
   | 'parse_failure'
   | 'fleet_unavailable'
-  | 'unsupported_query';
+  | 'unsupported_query'
+  | 'expired';
 
 export interface SkippedQuery {
   kind: 'skipped';
@@ -186,19 +191,15 @@ export interface HealthDiagnosticQueryResult {
 }
 
 export interface HealthDiagnosticQueryStats {
-  // existing — unchanged
   name: string;
   started: string;
   finished: string;
   traceId: string;
   numDocs: number;
-  /** Kept for downstream backward compatibility. Derived from `status`. */
   passed: boolean;
   failure?: HealthDiagnosticQueryFailure;
   fieldNames: string[];
   circuitBreakers?: Record<string, unknown>;
-  // new fields
-  descriptorVersion: number;
   status: 'success' | 'failed' | 'skipped';
   skipReason?: SkipReason;
   integration?: IntegrationResolution;

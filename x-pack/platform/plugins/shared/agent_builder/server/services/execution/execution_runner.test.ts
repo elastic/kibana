@@ -1158,7 +1158,8 @@ describe('handleAgentExecution — interrupted executions', () => {
       'round-1::execution::1::execution_started',
       'round-1::execution::1::execution_failed',
     ]);
-    expect(write).not.toHaveProperty('status');
+    // the interrupted resume consumed the prompt: the round no longer awaits it
+    expect(write.status).toBe(ConversationRoundStatus.completed);
   });
 
   it('failure on a HITL resume: the round error keeps the paused round origin the request omits', async () => {

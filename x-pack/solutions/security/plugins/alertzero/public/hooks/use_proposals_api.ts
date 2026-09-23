@@ -14,7 +14,7 @@ import {
   ALERTZERO_PROPOSALS_CATEGORY_URL,
   ALERTZERO_PROPOSALS_CLOSED_URL,
 } from '@kbn/alertzero-common';
-import { retryOnTransientError } from '@kbn/agentic-investigations-plugin/public';
+import { retryOnTransientError } from './retry_on_transient_error';
 import type { ProposalsPageResponse } from '../../common/proposals/list';
 import { MAX_QUEUE_REACH } from '../../common/proposals/list';
 import { queryKeys } from '../query_keys';
