@@ -8,21 +8,23 @@
  */
 
 import { esql } from '@elastic/esql';
+import { fieldConstants } from '@kbn/discover-utils';
 import { escapeStringValue, isSingleSource, sanitazeESQLInput } from '@kbn/esql-utils';
-import { EXEMPLARS_MAX_ROWS } from '../../constants';
+import {
+  EXEMPLARS_MAX_ROWS,
+  EXEMPLARS_METRIC_NAME_FIELD,
+  EXEMPLARS_VALUE_FIELD,
+} from '../../constants';
 import { deriveExemplarsIndex } from '../exemplars/derive_exemplars_index';
 import type { ParsedMetricItem } from '../../../types';
 
-const TIMESTAMP_FIELD = '@timestamp';
-const METRIC_NAME_FIELD = 'metric_name';
-const VALUE_FIELD = 'value';
-// Native fields; `trace.id` and `span.id` are aliases of these.
-const TRACE_ID_FIELD = 'trace_id';
-const SPAN_ID_FIELD = 'span_id';
+const { TIMESTAMP_FIELD, TRACE_ID_FIELD, SPAN_ID_FIELD } = fieldConstants;
+
+// `trace.id` and `span.id` are aliases of the stream's native `trace_id` / `span_id`.
 const BASE_COLUMNS = [
   TIMESTAMP_FIELD,
-  METRIC_NAME_FIELD,
-  VALUE_FIELD,
+  EXEMPLARS_METRIC_NAME_FIELD,
+  EXEMPLARS_VALUE_FIELD,
   TRACE_ID_FIELD,
   SPAN_ID_FIELD,
 ];
@@ -58,9 +60,8 @@ export function createExemplarsQuery({
   // TODO(elasticsearch#154786): swap `FROM <index>` for `TS_EXEMPLARS` when available.
   const query = esql.from(exemplarsIndex);
 
-  // `metric_name` holds the OTel name without the `metrics.` prefix Kibana field names carry.
   const exemplarMetricName = escapeStringValue(metricName.replace(/^metrics\./, ''));
-  query.pipe(`WHERE ${METRIC_NAME_FIELD} == ${exemplarMetricName}`);
+  query.pipe(`WHERE ${EXEMPLARS_METRIC_NAME_FIELD} == ${exemplarMetricName}`);
 
   for (const statement of whereStatements) {
     const trimmed = statement.trim();

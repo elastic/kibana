@@ -30,7 +30,7 @@ describe('createExemplarsQuery', () => {
       `
 FROM exemplars-generic.otel-default
   | WHERE metric_name == "http.server.request.duration"
-  | KEEP @timestamp, metric_name, value, trace_id, span_id, \`attributes.http.route\`, \`resource.attributes.service.name\`
+  | KEEP @timestamp, metric_name, value, trace.id, span.id, \`attributes.http.route\`, \`resource.attributes.service.name\`
   | SORT @timestamp DESC
   | LIMIT 500
 `.trim()
@@ -54,7 +54,7 @@ FROM exemplars-generic.otel-default
   | WHERE metric_name == "http.server.request.duration"
   | WHERE attributes.http.route == "/orders"
   | WHERE attributes.http.response.status_code >= 500
-  | KEEP @timestamp, metric_name, value, trace_id, span_id, \`attributes.http.route\`, \`resource.attributes.service.name\`
+  | KEEP @timestamp, metric_name, value, trace.id, span.id, \`attributes.http.route\`, \`resource.attributes.service.name\`
   | SORT @timestamp DESC
   | LIMIT 500
 `.trim()
@@ -66,7 +66,7 @@ FROM exemplars-generic.otel-default
       `
 FROM exemplars-generic.otel-default
   | WHERE metric_name == "http.server.request.duration"
-  | KEEP @timestamp, metric_name, value, trace_id, span_id
+  | KEEP @timestamp, metric_name, value, trace.id, span.id
   | SORT @timestamp DESC
   | LIMIT 500
 `.trim()
@@ -83,7 +83,7 @@ FROM exemplars-generic.otel-default
       `
 FROM exemplars-generic.otel-default
   | WHERE metric_name == "http.server.request.duration"
-  | KEEP @timestamp, metric_name, value, trace_id, span_id
+  | KEEP @timestamp, metric_name, value, trace.id, span.id
   | SORT @timestamp DESC
   | LIMIT 25
 `.trim()
@@ -103,7 +103,7 @@ FROM exemplars-generic.otel-default
       `
 FROM exemplars-generic.otel-default
   | WHERE metric_name == "odd\\"name"
-  | KEEP @timestamp, metric_name, value, trace_id, span_id, \`attributes.odd\`\`dimension\`
+  | KEEP @timestamp, metric_name, value, trace.id, span.id, \`attributes.odd\`\`dimension\`
   | SORT @timestamp DESC
   | LIMIT 500
 `.trim()
@@ -122,12 +122,12 @@ FROM exemplars-generic.otel-default
     const query = createExemplarsQuery({
       metricItem: {
         ...mockMetric,
-        dimensionFields: [{ name: 'trace_id' }, { name: 'attributes.http.route' }],
+        dimensionFields: [{ name: 'trace.id' }, { name: 'attributes.http.route' }],
       },
     });
 
     expect(query).toContain(
-      'KEEP @timestamp, metric_name, value, trace_id, span_id, `attributes.http.route`'
+      'KEEP @timestamp, metric_name, value, trace.id, span.id, `attributes.http.route`'
     );
   });
 

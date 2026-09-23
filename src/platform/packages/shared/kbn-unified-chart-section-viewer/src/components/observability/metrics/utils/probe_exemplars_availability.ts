@@ -11,6 +11,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { ISearchGeneric } from '@kbn/search-types';
+import { EXEMPLARS_METRIC_NAME_FIELD } from '../../../../common/constants';
 import { isSuppressedFetchError } from '../../../chart/utils/is_suppressed_fetch_error';
 import { executeEsqlQuery } from './execute_esql_query';
 import { MetricsExecutionContextName } from './execution_context_enums';
@@ -20,9 +21,8 @@ import { MetricsExecutionContextName } from './execution_context_enums';
  * empty result, so every per-metric fetch is gated on this probe. It is a workaround until
  * `TS_EXEMPLARS` exists (elasticsearch#154786).
  */
-export const EXEMPLARS_PROBE_QUERY = 'FROM exemplars-*.otel-* | STATS BY metric_name';
+export const EXEMPLARS_PROBE_QUERY = `FROM exemplars-*.otel-* | STATS BY ${EXEMPLARS_METRIC_NAME_FIELD}`;
 
-const METRIC_NAME_COLUMN = 'metric_name';
 const NO_METRICS: ReadonlySet<string> = new Set();
 
 export interface ProbeExemplarsAvailabilityParams {
@@ -91,7 +91,7 @@ const fetchMetricsWithExemplars = async ({
 
 // ES stores `http.server.duration`; Kibana's ES|QL field names carry a `metrics.` prefix.
 const extractMetricNames = ({ columns, values }: ESQLSearchResponse): string[] => {
-  const columnIndex = columns.findIndex(({ name }) => name === METRIC_NAME_COLUMN);
+  const columnIndex = columns.findIndex(({ name }) => name === EXEMPLARS_METRIC_NAME_FIELD);
   if (columnIndex === -1) {
     return [];
   }

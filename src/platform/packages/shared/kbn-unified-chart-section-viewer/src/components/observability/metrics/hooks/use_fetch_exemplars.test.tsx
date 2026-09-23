@@ -57,8 +57,8 @@ const TEST_FILTERS: Filter[] = [
   },
 ];
 const TEST_ESQL_QUERY =
-  'FROM exemplars-generic.otel-default | WHERE metric_name == "http.server.request.duration" | KEEP @timestamp, metric_name, value, trace_id, span_id | SORT @timestamp DESC | LIMIT 500';
-const TEST_COLUMNS = ['@timestamp', 'metric_name', 'value', 'trace_id', 'span_id'].map((name) => ({
+  'FROM exemplars-generic.otel-default | WHERE metric_name == "http.server.request.duration" | KEEP @timestamp, metric_name, value, trace.id, span.id | SORT @timestamp DESC | LIMIT 500';
+const TEST_COLUMNS = ['@timestamp', 'metric_name', 'value', 'trace.id', 'span.id'].map((name) => ({
   name,
   type: 'keyword',
 }));
