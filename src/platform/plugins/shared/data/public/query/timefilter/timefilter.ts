@@ -135,11 +135,9 @@ export class Timefilter {
   /** Sets the time (moment input is stored as ISO strings) and emits when it changes. */
   public setTime = (time: Partial<InputTimeRange>) => {
     const current = this.getTime();
-    const isMomentRange = moment.isMoment(time.from) && moment.isMoment(time.to);
-    const mode = time.mode ?? (isMomentRange ? 'absolute' : current.mode);
     const from = moment.isMoment(time.from) ? time.from.toISOString() : time.from ?? current.from;
     const to = moment.isMoment(time.to) ? time.to.toISOString() : time.to ?? current.to;
-    const timeRange: TimeRange = { from, to, ...(mode && { mode }) };
+    const timeRange: TimeRange = { from, to };
     if (areTimeRangesDifferent(current, timeRange)) {
       this._time = timeRange;
       this._isTimeTouched = true;
