@@ -478,7 +478,7 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
     expect(response.body.no_data).toStrictEqual(body.no_data);
   });
 
-  for (const strategy of ['ignore', 'keep_last', 'resolve', 'alert'] as const) {
+  for (const strategy of ['ignore', 'keep_last', 'resolve'] as const) {
     apiTest(`create: returns 201 with no_data strategy "${strategy}"`, async ({ apiClient }) => {
       const body = buildCreateRuleData({
         metadata: { name: `no-data-${strategy}-rule` },
@@ -493,6 +493,20 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
       expect(response.body.no_data).toStrictEqual({ strategy });
     });
   }
+
+  apiTest('validation: rejects the "alert" no_data strategy', async ({ apiClient }) => {
+    const body = buildCreateRuleData({
+      metadata: { name: 'no-data-alert-rule' },
+      no_data: { strategy: 'alert' },
+      query: { base: 'FROM logs-* | LIMIT 1' },
+    });
+    const response = await apiClient.post(testData.RULE_API_PATH, {
+      headers: writerHeaders,
+      body,
+    });
+    expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
+  });
 
   apiTest('create: returns 201 with a breach segment', async ({ apiClient }) => {
     const body = buildCreateRuleData({

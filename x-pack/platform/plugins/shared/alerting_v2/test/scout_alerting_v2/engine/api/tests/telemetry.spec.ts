@@ -117,7 +117,7 @@ apiTest.describe('Alerting V2 Telemetry', { tag: tags.stateful.classic }, () => 
             breach: { segment: 'WHERE count > 5' },
           },
           recovery: { strategy: 'condition', segment: 'WHERE count <= 5' },
-          no_data: { strategy: 'alert' },
+          no_data: { strategy: 'keep_last' },
           grouping: undefined,
         })
       ),
@@ -179,9 +179,8 @@ apiTest.describe('Alerting V2 Telemetry', { tag: tags.stateful.classic }, () => 
     });
     expect(state.count_by_no_data_strategy).toStrictEqual({
       ignore: 2,
-      keep_last: 1,
+      keep_last: 2,
       resolve: 2,
-      alert: 1,
     });
 
     expect(state.executions_delay_p50_ms).toBeDefined();
