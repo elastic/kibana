@@ -7,7 +7,7 @@
 
 import type { AppMountParameters, AppUpdater, CoreSetup } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { from, map, switchMap } from 'rxjs';
+import { firstValueFrom, from, map, switchMap } from 'rxjs';
 import type { IngestHubStartDependencies } from '../types';
 import { INGEST_HUB_ONBOARDING_ENABLED_FLAG } from '../../common/constants';
 
@@ -35,9 +35,8 @@ export function registerOnboardingApp(
     ),
     mount: async (params: AppMountParameters) => {
       const [coreStart, deps] = await startServicesPromise;
-      const isEnabled = coreStart.featureFlags.getBooleanValue(
-        INGEST_HUB_ONBOARDING_ENABLED_FLAG,
-        false
+      const isEnabled = await firstValueFrom(
+        coreStart.featureFlags.getBooleanValue$(INGEST_HUB_ONBOARDING_ENABLED_FLAG, false)
       );
 
       if (!isEnabled) {
