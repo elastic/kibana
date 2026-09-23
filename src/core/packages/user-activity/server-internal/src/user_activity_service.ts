@@ -12,7 +12,7 @@ import type { Logger } from '@kbn/logging';
 import type { InternalLoggingServiceSetup } from '@kbn/core-logging-server-internal';
 import { map } from 'rxjs';
 import { AsyncLocalStorage } from 'async_hooks';
-import type { TrackUserActionParams } from '@kbn/core-user-activity-server';
+import type { TrackUserActionParams, UserActivityEventType } from '@kbn/core-user-activity-server';
 import {
   config as userActivityConfig,
   type UserActivityConfigType,
@@ -111,7 +111,11 @@ export class UserActivityService
 
     this.logger.info(message, {
       message,
-      event: { ...event, type: [...event.type], outcome: event.outcome ?? 'unknown' },
+      event: {
+        ...event,
+        type: event.type as UserActivityEventType[],
+        outcome: event.outcome ?? 'unknown',
+      },
       object,
       ...(metadata ? { metadata } : {}),
       ...(error ? { error } : {}),
