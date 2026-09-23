@@ -47,11 +47,12 @@ Whatever the strategy, a generated workflow has to:
   with `function_score` + `random_score` so repeated runs see different records rather than always
   the first-ingested ones.
 - **Use `ai.prompt` rather than `ai.agent`** unless tool use is genuinely required, and set
-  `effort-level: low` on every `ai.prompt` step. Leave `connector-id` off. `effort-level: low`
-  routes the step to the admin-configured fast/cheap model (Gemini Flash Lite, Haiku, or equivalent)
-  at run time, keeping per-document model calls cheap. Naming a `connector-id` pins a saved
-  automation to a connector that can be renamed, removed, or run out of billing quota long after the
-  conversation that wrote it — and the failure lands on a scheduled run with nobody watching.
+  `connector-id-by-feature: context_engine_prompt` on every `ai.prompt` step. Leave `connector-id`
+  off. `connector-id-by-feature` resolves the connector from the admin-configured "Context Engine AI
+  Prompt" feature at run time (Management → Model Settings), which defaults to Gemini Flash Lite —
+  keeping per-document model calls cheap. Naming a `connector-id` pins a saved automation to a
+  connector that can be renamed, removed, or run out of billing quota long after the conversation
+  that wrote it — and the failure lands on a scheduled run with nobody watching.
 - **Write through the `context-engine` steps**, never a raw `elasticsearch.index`, and gate every
   write on `context-engine.verifyKi` so an indicator whose ES|QL fails to parse is reported rather
   than persisted.
@@ -346,10 +347,11 @@ Each template opens with a comment saying what to change and what to leave. Take
 Rewriting the parts it tells you to leave is how a draft acquires faults the template does not
 have, and none of them announce themselves — the workflow still runs, and still writes indicators.
 
-The templates set `effort-level: low` on their `ai.prompt` steps and leave `connector-id` off. Both
-are deliberate: `effort-level: low` routes each call to the admin-configured fast/cheap model rather
-than a frontier model, and omitting `connector-id` keeps the automation deployment-agnostic. Do not
-remove `effort-level: low` and do not add a `connector-id`.
+The templates set `connector-id-by-feature: context_engine_prompt` on their `ai.prompt` steps and
+leave `connector-id` off. Both are deliberate: `connector-id-by-feature` resolves the connector from
+the admin-configured "Context Engine AI Prompt" feature at run time rather than pinning a literal
+connector id, keeping the automation deployment-agnostic. Do not remove
+`connector-id-by-feature: context_engine_prompt` and do not add a `connector-id`.
 
 **Do not generate a workflow.** `platform.core.generate_workflow` is in every agent's default
 toolset, so you have it here whether or not any skill offered it, and both its own description and

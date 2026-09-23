@@ -97,7 +97,7 @@ steps:
 
       - name: profile_entity
         type: ai.prompt
-        effort-level: low
+        connector-id-by-feature: context_engine_prompt
         with:
           systemPrompt: |
             You are a precise data analyst assistant. Ground every statement strictly in the

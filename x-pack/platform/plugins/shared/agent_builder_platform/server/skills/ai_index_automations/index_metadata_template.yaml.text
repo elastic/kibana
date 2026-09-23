@@ -69,7 +69,7 @@ steps:
 
   - name: generate_index_profile
     type: ai.prompt
-    effort-level: low
+    connector-id-by-feature: context_engine_prompt
     with:
       prompt: |
         You are documenting an Elasticsearch index for an AI Context Engine knowledge base.

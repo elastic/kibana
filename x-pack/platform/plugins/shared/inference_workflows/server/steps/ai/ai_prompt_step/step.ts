@@ -9,7 +9,7 @@ import type { CoreSetup } from '@kbn/core/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { AiPromptStepCommonDefinition } from '../../../../common/steps/ai';
 import type { InferenceWorkflowsStartDeps } from '../../../types';
-import { AI_PROMPT_FAST_FEATURE_ID, AI_PROMPT_FEATURE_ID } from '../ai_feature_ids';
+import { AI_PROMPT_FEATURE_ID } from '../ai_feature_ids';
 import { resolveConnectorId } from '../utils/resolve_connector_id';
 
 export const aiPromptStepDefinition = (coreSetup: CoreSetup<InferenceWorkflowsStartDeps>) =>
@@ -18,8 +18,7 @@ export const aiPromptStepDefinition = (coreSetup: CoreSetup<InferenceWorkflowsSt
     handler: async (context) => {
       const [, { inference, searchInferenceEndpoints }] = await coreSetup.getStartServices();
 
-      const featureId =
-        context.config['effort-level'] === 'low' ? AI_PROMPT_FAST_FEATURE_ID : AI_PROMPT_FEATURE_ID;
+      const featureId = context.config['connector-id-by-feature'] ?? AI_PROMPT_FEATURE_ID;
 
       const resolvedConnectorId = await resolveConnectorId(
         context.config['connector-id'],

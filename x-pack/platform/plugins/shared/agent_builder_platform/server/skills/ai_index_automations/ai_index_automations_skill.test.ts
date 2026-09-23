@@ -55,9 +55,12 @@ describe('aiIndexAutomationsSkill', () => {
     }
   });
 
-  it('pins no connector in any template, so ai.prompt resolves the default at run time', () => {
+  it('routes ai.prompt via the context-engine-prompt feature rather than a literal connector', () => {
     for (const reference of aiIndexAutomationsSkill.referencedContent ?? []) {
-      expect(reference.content).not.toContain('connector-id');
+      // Templates must use connector-id-by-feature (deployment-agnostic feature resolution)
+      // rather than a literal connector-id, which would break on rename / quota exhaustion.
+      expect(reference.content).toContain('connector-id-by-feature: context_engine_prompt');
+      expect(reference.content).not.toMatch(/^.*connector-id: /m);
     }
   });
 
@@ -83,6 +86,8 @@ describe('aiIndexAutomationsSkill', () => {
       `${internalNamespaces.workflows}.get_examples`,
       `${internalNamespaces.workflows}.get_connectors`,
       `${internalNamespaces.workflows}.workflow_execute_step`,
+      'platform.context_engine.save_automation',
+      'platform.context_engine.run_automation',
     ]);
   });
 
@@ -292,14 +297,15 @@ describe('aiIndexAutomationsSkill', () => {
       expect(content).toMatch(/one call for the example library rather than one per step/);
     });
 
-    it('leaves ai.prompt unpinned so it resolves the default connector at run time', () => {
-      expect(content).toMatch(/leave its\s+`connector-id` off/);
-      expect(content).toMatch(/omitting it resolves the deployment's default AI\s+connector/);
+    it('routes ai.prompt through a named feature rather than a literal connector-id', () => {
+      expect(content).toMatch(/`connector-id-by-feature`/);
+      expect(content).toContain('context_engine_prompt');
+      expect(content).toMatch(/Leave `connector-id`\s+off/);
     });
 
-    it('says the templates omit connector-id deliberately, so none is added back', () => {
-      expect(content).toMatch(/carry no `connector-id` on their `ai\.prompt` steps/);
-      expect(content).toMatch(/Do not add one/);
+    it('says the templates use connector-id-by-feature deliberately, so no literal connector is added', () => {
+      expect(content).toMatch(/connector-id-by-feature: context_engine_prompt.*on their `ai\.prompt` steps/s);
+      expect(content).toMatch(/do not add a `connector-id`/);
     });
 
     it('requires ${{ }} for non-strings, since {{ }} stringifies objects and booleans', () => {
@@ -406,18 +412,18 @@ describe('aiIndexAutomationsSkill', () => {
     it('does not let piloting a workflow be read as licence to run the saved one', () => {
       expect(content).toContain('Running one is a separate decision');
       expect(content).toMatch(
-        /do not\s+execute a saved\s+workflow unless the run you are in has told you/
+        /do not\s+execute a saved\s+workflow unless the context in this conversation calls for it/
       );
     });
 
-    it('has the save tool perform the run, so a failure is reported rather than retried', () => {
-      expect(content).toMatch(/starts that run itself, in its own code/);
+    it('has run_automation report a failed start as the final answer, not a retryable task', () => {
+      expect(content).toMatch(/run_automation` reports that the run did not start, that is the answer/);
       expect(content).toMatch(/that is the answer, not a task/);
       expect(content).toMatch(/a second attempt doubles it/);
     });
 
-    it('does not treat the save tool run flag as an unauthorized run', () => {
-      expect(content).toMatch(/approving the save approves the run/);
+    it('gives save and run each their own confirmation dialog', () => {
+      expect(content).toMatch(/two separate operations, each with its own confirmation\s+dialog/);
     });
 
     it('carries the workflow syntax itself, rather than depending on another skill for it', () => {
