@@ -89,4 +89,27 @@ describe('<SplitButtonWithNotification />', () => {
     await user.click(indicator);
     expect(onMainButtonClick).not.toHaveBeenCalled();
   });
+
+  it('should invoke onClick exactly once when the notification indicator is clicked', async () => {
+    // Regression: clicking the notification dot previously fired onClick twice —
+    // once from the dot's own handler and once from the event bubbling to ActionPrimary.
+    const onMainButtonClick = jest.fn();
+    // bypass pointer-events: none on the outer wrapper — only the inner icon is interactive
+    const user = userEvent.setup({ pointerEventsCheck: 0 });
+
+    render(
+      <SplitButtonWithNotification
+        label="Save"
+        onClick={onMainButtonClick}
+        onSecondaryButtonClick={jest.fn()}
+        secondaryButtonAriaLabel="More options"
+        showNotificationIndicator={true}
+        iconType="save"
+      />
+    );
+
+    const indicator = screen.getByTestId(APP_MENU_TEST_SUBJECTS.notificationIndicator);
+    await user.click(indicator);
+    expect(onMainButtonClick).toHaveBeenCalledTimes(1);
+  });
 });
