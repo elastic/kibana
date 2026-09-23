@@ -83,8 +83,11 @@ steps:
         Echo the tool's returned rule fields under "rule" and the attachment
         metadata alongside it. Never return id or rule_id. If the tool did not
         return a rule, for example because the data source does not exist, do
-        not invent one: return empty strings for every rule field and for
-        attachment_id, and say why in one sentence.
+        not invent one: return empty strings for name, description, query and
+        attachment_id, give every other rule field the plainest value its type
+        allows (language and type "esql", severity "low", risk_score 0, empty
+        strings for interval, from and to, empty lists for threat and tags),
+        and say why in one sentence.
       schema:
         type: object
         additionalProperties: false
@@ -152,11 +155,12 @@ steps:
 
   # A draft missing its query, name, description or attachment is not reviewable, so
   # nothing below runs for it and `reviewed` stays false: the caller keeps the gap
-  # open. The prompt returns empty strings for every rule field when the tool built
-  # nothing, and the create action requires a name and a description, so such a
-  # draft can never be created: proposing it fails the run instead of asking the
-  # analyst anything answerable. Step `if` cannot group with parentheses, so the
-  # compound test lives here as a flag.
+  # open. When the tool built nothing the prompt asks for exactly those four empty,
+  # and plain values everywhere else so the structured output still validates. The
+  # create action requires a name and a description, so such a draft can never be
+  # created: proposing it fails the run instead of asking the analyst anything
+  # answerable. Step `if` cannot group with parentheses, so the compound test lives
+  # here as a flag.
   - name: draft_ready
     type: data.set
     with:

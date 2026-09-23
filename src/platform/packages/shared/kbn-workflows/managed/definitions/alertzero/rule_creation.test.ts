@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { JSONSchema7 } from 'json-schema';
 import { parse } from 'yaml';
 import {
   ALERTZERO_ACTION_CREATE_RULE_WORKFLOW,
@@ -14,6 +15,7 @@ import {
   ALERTZERO_RULE_CREATION_WORKFLOW,
 } from '.';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
+import { convertJsonSchemaToZod } from '../../../spec/lib/build_fields_zod_validator';
 import { CREATE_INVESTIGATION_PROPOSAL_WORKFLOW } from '../agentic_investigations';
 
 interface YamlStep {
@@ -133,6 +135,42 @@ describe('Detection Rule Creation worker', () => {
       for (const name of ['preview_creation', 'attach_draft', 'propose_creation']) {
         expect(stepByName(name)?.if).toContain('steps.draft_ready.output.ok == true');
       }
+    });
+
+    // The no-draft answer the prompt asks for has to satisfy the output schema, or
+    // the agent step fails validation instead of handing draft_ready a draft to
+    // reject. Empty strings in every field would not: several are enums, a number
+    // or lists.
+    it('asks for a no-draft answer the schema accepts and draft_ready rejects', () => {
+      const schema = convertJsonSchemaToZod(
+        stepByName('draft_creation')?.with?.schema as JSONSchema7
+      );
+      const noDraft = {
+        attachment_id: '',
+        rule: {
+          name: '',
+          description: '',
+          query: '',
+          language: 'esql',
+          type: 'esql',
+          interval: '',
+          from: '',
+          to: '',
+          severity: 'low',
+          risk_score: 0,
+          threat: [],
+          tags: [],
+        },
+      };
+
+      expect(schema.safeParse(noDraft).success).toBe(true);
+      expect(evaluate(flagOf('draft_ready', 'ok'), draftContext(noDraft))).toBe(false);
+
+      const allEmpty = {
+        ...noDraft,
+        rule: { ...noDraft.rule, language: '', type: '', severity: '', risk_score: '' },
+      };
+      expect(schema.safeParse(allEmpty).success).toBe(false);
     });
 
     // The preview informs the analyst; it does not gate the proposal.

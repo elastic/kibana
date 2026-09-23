@@ -162,7 +162,8 @@ steps:
 
   # The agent reports the signature rule_id; the enable action, the rule link and
   # the attachment refresh all address the saved object, so resolve its uuid once.
-  # A miss leaves `id` unset and routes the verdict to the action-less report below.
+  # A 404 leaves `id` unset and routes the verdict to the action-less report below;
+  # any other failure stops the review in `fail_rule_lookup`.
   - name: resolve_rule
     type: kibana.request
     if: >-
@@ -177,6 +178,31 @@ steps:
         Content-Type: application/json
     on-failure:
       continue: true
+
+  # Only a 404 says the rule is not there. Any other failure (a 5xx, a 403, a
+  # timeout) says nothing about the rule, yet on covered_disabled it would route to
+  # the manual report, and acknowledging that report marks the indicator processed:
+  # the enable recommendation would be lost for good. So it fails the review before
+  # an investigation is opened, the indicator stays pending, and the next sweep
+  # retries the lookup. On covered_enabled a failed lookup only drops the rule link
+  # from the card, so that route carries on. kibana.request reports a non-2xx
+  # response as an error whose message starts with `HTTP <status>:`.
+  - name: resolve_rule_outcome
+    type: data.set
+    with:
+      failed: >-
+        ${{ steps.coverage_check.output.structured_output.verdict == 'covered_disabled'
+          and steps.resolve_rule.error != null
+          and not (steps.resolve_rule.error.message contains 'HTTP 404:') }}
+
+  - name: fail_rule_lookup
+    type: workflow.fail
+    if: "${{ steps.resolve_rule_outcome.output.failed == true }}"
+    with:
+      message: >-
+        Could not look up rule {{ steps.coverage_check.output.structured_output.rule_id }}
+        for the coverage check; the next sweep retries it.
+        {{ steps.resolve_rule.error.message }}
 
   # Human-facing record of this review, deliberately separate from coverage_check's
   # own conversation: the agent transcript stays opaque, the investigation is where

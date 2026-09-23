@@ -213,6 +213,41 @@ describe('Detection Coverage review', () => {
       expect(routeOf('report_unresolved_rule')).toContain('steps.resolve_rule.output.id == null');
     });
 
+    // Only a 404 means the rule is missing. Any other lookup failure on
+    // covered_disabled would otherwise reach the manual report, which an analyst can
+    // acknowledge away together with the enable recommendation.
+    it.each([
+      [
+        'covered_disabled',
+        { message: 'HTTP 404: {"message":"rule_id: \\"x\\" not found"}' },
+        false,
+      ],
+      ['covered_disabled', { message: 'HTTP 500: Internal Server Error' }, true],
+      ['covered_disabled', { message: 'HTTP 403: Forbidden' }, true],
+      ['covered_disabled', null, false],
+      ['covered_enabled', { message: 'HTTP 500: Internal Server Error' }, false],
+    ])('on %s after lookup error %j, fails the review: %s', (verdict, error, expected) => {
+      expect(
+        evaluateExpression(String(withOf('resolve_rule_outcome')?.failed), {
+          steps: {
+            coverage_check: { output: { structured_output: { verdict } } },
+            resolve_rule: { error },
+          },
+        })
+      ).toBe(expected);
+    });
+
+    // Failing before the investigation exists leaves nothing open behind a review
+    // the next sweep will run again.
+    it('stops on a failed lookup before an investigation is opened', () => {
+      const fail = stepByName('fail_rule_lookup');
+      expect(fail?.type).toBe('workflow.fail');
+      expect(fail?.if).toContain('steps.resolve_rule_outcome.output.failed == true');
+      expect(stepIndex('resolve_rule')).toBeLessThan(stepIndex('resolve_rule_outcome'));
+      expect(stepIndex('resolve_rule_outcome')).toBeLessThan(stepIndex('fail_rule_lookup'));
+      expect(stepIndex('fail_rule_lookup')).toBeLessThan(stepIndex('create_investigation'));
+    });
+
     it('offers the install action only with a signature id and a package version', () => {
       const ready = String(withOf('install_target')?.ready);
       expect(ready).toContain("structured_output.rule_id != ''");
