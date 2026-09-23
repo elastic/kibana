@@ -60,6 +60,8 @@ interface ManagedIntegrationsSectionProps {
   isDeploying: boolean;
   isDone: boolean;
   hasFailed: boolean;
+  /** When true, Deploy only runs cleanup (Fleet API calls) — AWS credentials are not required. */
+  isCleanupOnly?: boolean;
 }
 
 export function ManagedIntegrationsSection({
@@ -70,6 +72,7 @@ export function ManagedIntegrationsSection({
   isDeploying,
   isDone,
   hasFailed,
+  isCleanupOnly = false,
 }: ManagedIntegrationsSectionProps) {
   const { services } = useKibana<CoreStart & { cloud?: CloudStart }>();
   const { setConnectorId, setStaticKeys, setPendingIacTemplate, authenticateAndDeployStep } =
@@ -340,7 +343,7 @@ export function ManagedIntegrationsSection({
 
             {!hasFailed && !isDone && (
               <EuiButton
-                isDisabled={!isDeployReady}
+                isDisabled={!isDeployReady && !isCleanupOnly}
                 isLoading={isDeploying}
                 onClick={onDeploy}
                 data-test-subj="managedIntegrationsSection-deployButton"

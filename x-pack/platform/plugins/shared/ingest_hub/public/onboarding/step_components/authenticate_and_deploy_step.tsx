@@ -87,7 +87,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   }, [serviceSettings?.instances, selectedServiceIds, awsServicesMap]);
 
   // ── Managed Integrations ──────────────────────────────────────────────────────
-  const { handleDeploy, isDeploying, failedInstances, isAlreadyDeployed, deployGroups } = useDeploy(
+  const { handleDeploy, isDeploying, failedInstances, isAlreadyDeployed, deployGroups, isCleanupOnly } = useDeploy(
     {
       onContinue: () => {},
     }
@@ -387,6 +387,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
           isDeploying={isDeploying}
           isDone={isMiDone}
           hasFailed={hasFailed}
+          isCleanupOnly={isCleanupOnly}
         />
       )}
 

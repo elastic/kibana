@@ -38,6 +38,12 @@ export interface UseDeployResult {
   isAlreadyDeployed: boolean;
   /** The reconciled instance groups Deploy will create policies for; drives the Federated Identity template set. */
   deployGroups: DeployGroup[];
+  /**
+   * True when there is pending cleanup (removed services) but no new instances to deploy.
+   * Cleanup uses only Kibana/Fleet auth — AWS credentials are not required, so the Deploy
+   * button should be enabled regardless of isDeployReady.
+   */
+  isCleanupOnly: boolean;
 }
 
 export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeployResult {
@@ -179,6 +185,27 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
     detectAndReviewStep.pendingCleanupPolicyIds,
   ]);
 
+  const isCleanupOnly = useMemo(() => {
+    const policyIdsByInstance = detectAndReviewStep.policyIdsByInstance ?? {};
+    const activeInstanceIds = new Set(deployGroups.flatMap((g) => g.instanceIds));
+    const hasLiveStale = Object.keys(policyIdsByInstance).some((id) => !activeInstanceIds.has(id));
+    const hasPendingCleanup =
+      hasLiveStale || Object.keys(detectAndReviewStep.pendingCleanupPolicyIds ?? {}).length > 0;
+    if (!hasPendingCleanup) return false;
+    return !deployGroups.some((group) =>
+      group.members.some(
+        ({ instance }) =>
+          !(instance.instanceId in detectAndReviewStep.serviceStatuses) &&
+          !(instance.instanceId in policyIdsByInstance)
+      )
+    );
+  }, [
+    deployGroups,
+    detectAndReviewStep.policyIdsByInstance,
+    detectAndReviewStep.serviceStatuses,
+    detectAndReviewStep.pendingCleanupPolicyIds,
+  ]);
+
   const nonAgentlessServices: AwsServiceMatrixEntry[] = useMemo(
     () =>
       selectedServiceIds
@@ -226,5 +253,6 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
     handleDeploy,
     isAlreadyDeployed,
     deployGroups,
+    isCleanupOnly,
   };
 }
