@@ -29,9 +29,8 @@ apiTest.describe(
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     let manageCookie: Record<string, string>;
-    let readCookie: Record<string, string>;
 
-    apiTest.beforeAll(async ({ apiServices, samlAuth, config }) => {
+    apiTest.beforeAll(async ({ apiServices, config }) => {
       // The API is gated on the nightshift.enabled flag, which can only be overridden where
       // coreApp.allowDynamicConfigOverrides is set (Scout's local configs), not on Cloud.
       apiTest.skip(
@@ -44,8 +43,12 @@ apiTest.describe(
       await setNightshiftEnabled(apiServices, true);
       await apiServices.spaces.create({ id: SPACE_ID, name: SPACE_ID });
       await apiServices.spaces.create({ id: OTHER_SPACE_ID, name: OTHER_SPACE_ID });
+    });
+
+    // A worker has a single custom role slot, so logging in with another custom role changes the
+    // privileges behind every earlier cookie. Log in right before use instead of once up front.
+    apiTest.beforeEach(async ({ samlAuth }) => {
       ({ cookieHeader: manageCookie } = await samlAuth.asInteractiveUser(NIGHTSHIFT_MANAGE_ROLE));
-      ({ cookieHeader: readCookie } = await samlAuth.asInteractiveUser(NIGHTSHIFT_READ_ROLE));
     });
 
     apiTest.afterAll(async ({ apiServices, config }) => {
@@ -132,15 +135,19 @@ apiTest.describe(
       await putSandboxSecrets(apiClient, manageCookie, SPACE_ID, { entries: [] });
     });
 
-    apiTest('lets read-only users list keys but not change secrets', async ({ apiClient }) => {
-      const listed = await getSandboxSecrets(apiClient, readCookie, SPACE_ID);
-      expect(listed).toHaveStatusCode(200);
+    apiTest(
+      'lets read-only users list keys but not change secrets',
+      async ({ apiClient, samlAuth }) => {
+        const { cookieHeader: readCookie } = await samlAuth.asInteractiveUser(NIGHTSHIFT_READ_ROLE);
+        const listed = await getSandboxSecrets(apiClient, readCookie, SPACE_ID);
+        expect(listed).toHaveStatusCode(200);
 
-      const update = await putSandboxSecrets(apiClient, readCookie, SPACE_ID, {
-        entries: [{ key: 'READ_ONLY', value: 'read-only-value' }],
-      });
-      expect(update).toHaveStatusCode(403);
-    });
+        const update = await putSandboxSecrets(apiClient, readCookie, SPACE_ID, {
+          entries: [{ key: 'READ_ONLY', value: 'read-only-value' }],
+        });
+        expect(update).toHaveStatusCode(403);
+      }
+    );
 
     apiTest('returns 404 while Nightshift is disabled', async ({ apiClient, apiServices }) => {
       await setNightshiftEnabled(apiServices, false);
