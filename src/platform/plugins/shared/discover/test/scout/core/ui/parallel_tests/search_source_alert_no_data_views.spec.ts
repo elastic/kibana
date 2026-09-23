@@ -17,7 +17,7 @@ spaceTest.describe('Discover app - search source alert', { tag: tags.deploymentA
   });
 
   spaceTest('should allow creating an alert when there are no data views', async ({ page }) => {
-    await page.gotoApp('management/insightsAndAlerting/triggersActions');
+    await page.gotoApp('management/insightsAndAlerting/triggersActions/rules');
 
     await page.testSubj.click('createFirstRuleButton');
     await page.testSubj.click('.es-query-SelectOption');

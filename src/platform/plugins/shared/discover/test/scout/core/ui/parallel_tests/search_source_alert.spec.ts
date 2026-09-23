@@ -144,7 +144,7 @@ const getGeneratedContextLink = async (esClient: Client, ruleId: string) => {
 };
 
 const openRuleInManagement = async (page: ScoutPage, ruleName: string) => {
-  await page.gotoApp('management/insightsAndAlerting/triggersActions');
+  await page.gotoApp('management/insightsAndAlerting/triggersActions/rules');
   const rulesList = page.testSubj.locator('rulesList');
   await rulesList.waitFor({ state: 'visible' });
   await rulesList.locator(`[data-test-subj="rulesListTableRowName-${ruleName}"]`).click();
