@@ -109,7 +109,9 @@ export class GcsFileSystem extends AbstractFileSystem {
       });
       return JSON.parse(stdout) as ArchiveMetadata;
     } catch (error) {
-      this.log.debug(`Unable to read TypeScript cache metadata at ${metadataPath}: ${String(error)}`);
+      this.log.debug(
+        `Unable to read TypeScript cache metadata at ${metadataPath}: ${String(error)}`
+      );
       return undefined;
     }
   }
