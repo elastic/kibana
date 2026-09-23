@@ -20,7 +20,12 @@ export const useGetMaintenanceWindow = (maintenanceWindowId: string) => {
   const queryFn = async () => {
     const maintenanceWindow = await getMaintenanceWindow({ http, maintenanceWindowId });
 
-    const hasScopedQuery = !!maintenanceWindow.scopedQuery;
+    // v1 has a filter when scope.alerting is enabled and has a kql string or filters.
+    const hasScopedQuery = maintenanceWindow.scope?.alerting?.enabled
+      ? Boolean(
+          maintenanceWindow.scope.alerting.kql || maintenanceWindow.scope.alerting.filters?.length
+        )
+      : !!maintenanceWindow.scopedQuery;
     const hasOldCategorySettings = maintenanceWindow.categoryIds
       ? maintenanceWindow.categoryIds.length > 0 && maintenanceWindow.categoryIds.length < 3
       : false;
