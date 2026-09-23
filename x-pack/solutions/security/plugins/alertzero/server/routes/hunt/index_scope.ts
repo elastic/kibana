@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { HuntReadinessResponse } from '@kbn/alertzero-common';
+import type { HuntIndexScopeResponse } from '@kbn/alertzero-common';
 import {
   API_VERSIONS,
-  HuntReadinessRequestQuery,
+  HuntIndexScopeRequestQuery,
   HuntTechnology,
   INTERNAL_API_ACCESS,
 } from '@kbn/alertzero-common';
@@ -17,33 +17,34 @@ import { ALERTZERO_API_PRIVILEGE_READ, HUNT_INTERNAL_ROUTE_BASE } from '../../..
 import { resolveIndexScope } from '../../services/watches/hunt/common/resolve_index_scope';
 import type { RouteDependencies } from '../register_routes';
 
-export const HUNT_READINESS_URL = `${HUNT_INTERNAL_ROUTE_BASE}/readiness` as const;
+export const HUNT_INDEX_SCOPE_URL = `${HUNT_INTERNAL_ROUTE_BASE}/index_scope` as const;
 
 const HUNT_TECHNOLOGIES: HuntTechnology[] = HuntTechnology.options;
 
 /**
- * Readiness projection over `resolveIndexScope`, one entry per technology
- * (or the single requested one), for the given space. The security_solution
- * readiness route stays as-is and must not import this (one-way dependency rule).
+ * Index-scope projection over `resolveIndexScope`, one entry per technology
+ * (or the single requested one), for the given space. Distinct from Security
+ * Solution threat-intel readiness and SIEM Readiness; those stay as-is and
+ * must not import this (one-way dependency rule).
  */
-export const registerHuntReadinessRoute = ({ router, logger, getSpaceId }: RouteDependencies) => {
+export const registerHuntIndexScopeRoute = ({ router, logger, getSpaceId }: RouteDependencies) => {
   router.versioned
     .get({
-      path: HUNT_READINESS_URL,
+      path: HUNT_INDEX_SCOPE_URL,
       access: INTERNAL_API_ACCESS,
       security: {
         authz: {
           requiredPrivileges: [ALERTZERO_API_PRIVILEGE_READ],
         },
       },
-      summary: 'Hunt index-scope readiness per technology',
+      summary: 'Hunt index scope per technology',
     })
     .addVersion(
       {
         version: API_VERSIONS.internal.v1,
         validate: {
           request: {
-            query: buildRouteValidationWithZod(HuntReadinessRequestQuery),
+            query: buildRouteValidationWithZod(HuntIndexScopeRequestQuery),
           },
         },
       },
@@ -54,16 +55,16 @@ export const registerHuntReadinessRoute = ({ router, logger, getSpaceId }: Route
           const esClient = (await context.core).elasticsearch.client.asCurrentUser;
           const technologies = technology ? [technology] : HUNT_TECHNOLOGIES;
 
-          const body: HuntReadinessResponse = await Promise.all(
+          const body: HuntIndexScopeResponse = await Promise.all(
             technologies.map((tech) => resolveIndexScope({ esClient, technology: tech, spaceId }))
           );
 
           return response.ok({ body });
         } catch (error) {
-          logger.error(`Failed to resolve hunt readiness: ${error}`);
+          logger.error(`Failed to resolve hunt index scope: ${error}`);
           return response.customError({
             statusCode: 500,
-            body: { message: 'Failed to resolve hunt readiness' },
+            body: { message: 'Failed to resolve hunt index scope' },
           });
         }
       }
