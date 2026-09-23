@@ -37,8 +37,7 @@ export const VISUALIZATION_REFUSAL_EXAMPLES: VisualizationDatasetExample[] = wit
       reason: 'missing_index',
     }),
     refusalExample({
-      question:
-        'Create a line chart of average customer_age over time in kibana_sample_data_logs.',
+      question: 'Create a line chart of average customer_age over time in kibana_sample_data_logs.',
       reason: 'missing_field',
     }),
     refusalExample({
