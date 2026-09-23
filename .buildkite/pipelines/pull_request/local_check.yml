@@ -11,6 +11,7 @@ steps:
     timeout_in_minutes: 35
     env:
       CHECK_GATE: 'true'
+      USE_CITADEL_PROXY: 'true'
     retry:
       automatic:
         - exit_status: '-1'

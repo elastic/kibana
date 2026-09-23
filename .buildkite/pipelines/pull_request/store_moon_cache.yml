@@ -4,6 +4,8 @@ steps:
     timeout_in_minutes: 10
     id: store_cache
     soft_fail: true
+    env:
+      USE_CITADEL_PROXY: 'true'
     agents:
       machineType: n2-highcpu-4
       preemptible: false
