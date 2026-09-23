@@ -9,11 +9,13 @@
 
 import { renderHook, waitFor } from '@testing-library/react';
 import type { ConnectorTypeInfo } from '@kbn/workflows';
+import type { PublicTriggerDefinition } from '@kbn/workflows-extensions/public';
 import { isMonochromeActionType, useDynamicTypeIcons } from './use_dynamic_type_icons';
 import type { ConnectorsResponse } from '../../../entities/connectors/model/types';
 import { createStartServicesMock } from '../../../mocks';
 import { getTestProvider } from '../../../shared/mocks/test_providers';
 import { getIconBase64 } from '../../../shared/ui/step_icons/get_icon_base64';
+import { triggerSchemas } from '../../../trigger_schemas';
 
 jest.mock('../../../shared/ui/step_icons/get_icon_base64', () => ({
   getIconBase64: jest.fn().mockResolvedValue('data:image/png;base64,xx'),
@@ -36,6 +38,8 @@ function connectorTypeStub(actionTypeId: string): ConnectorTypeInfo {
 describe('useDynamicTypeIcons', () => {
   afterEach(() => {
     jest.useRealTimers();
+    jest.restoreAllMocks();
+    jest.mocked(getIconBase64).mockResolvedValue('data:image/png;base64,xx');
   });
 
   it('does not call actionTypeRegistry.get for connector types missing from the UI registry', () => {
@@ -109,6 +113,47 @@ describe('useDynamicTypeIcons', () => {
     );
     expect(getIconBase64).toHaveBeenCalledWith(
       expect.objectContaining({ actionTypeId: '.sharepoint-server', kind: 'step' })
+    );
+
+    unmount();
+  });
+
+  it('injects step icons and connector trigger icons', async () => {
+    jest.spyOn(triggerSchemas, 'getTriggerDefinitions').mockReturnValue([
+      { id: 'datadog.alert', title: 'Datadog alert' } as PublicTriggerDefinition,
+    ]);
+
+    const services = createStartServicesMock();
+    const connectorsData: ConnectorsResponse = {
+      totalConnectors: 0,
+      connectorTypes: {
+        '.notion': connectorTypeStub('.notion'),
+        '.datadog': connectorTypeStub('.datadog'),
+      },
+    };
+    const onShadowIconsCssReady = jest.fn();
+
+    const { unmount } = renderHook(
+      () => useDynamicTypeIcons(connectorsData, undefined, true, undefined, onShadowIconsCssReady),
+      { wrapper: getTestProvider({ services }) }
+    );
+
+    await waitFor(() => {
+      expect(onShadowIconsCssReady).toHaveBeenCalled();
+    });
+
+    const css = onShadowIconsCssReady.mock.calls.at(-1)?.[0] ?? '';
+    expect(css).toContain('.type-inline-highlight.type-notion::after');
+    expect(css).toContain('.type-inline-highlight.type-datadog::after');
+    expect(css).toContain('.custom-trigger-inline.type-ct-datadog-alert::after');
+    expect(getIconBase64).toHaveBeenCalledWith(
+      expect.objectContaining({ actionTypeId: '.notion', kind: 'step' })
+    );
+    expect(getIconBase64).toHaveBeenCalledWith(
+      expect.objectContaining({ actionTypeId: '.datadog', kind: 'step' })
+    );
+    expect(getIconBase64).toHaveBeenCalledWith(
+      expect.objectContaining({ actionTypeId: 'datadog.alert', kind: 'trigger' })
     );
 
     unmount();
