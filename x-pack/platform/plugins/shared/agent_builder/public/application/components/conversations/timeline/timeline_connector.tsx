@@ -9,7 +9,7 @@ import React from 'react';
 import { useConversation, useAgentId } from '../../../hooks/use_conversation';
 import { useConversationStream } from '../../../hooks/use_conversation_stream';
 import { useAgentBuilderAgentById } from '../../../hooks/agents/use_agent_by_id';
-import { RoundsScreenReaderStatus } from '../conversation_rounds/rounds_screen_reader_status';
+import { TimelineScreenReaderStatus } from './screen_reader_status';
 import { useTimelineItems } from './use_timeline_items';
 import { Timeline } from './timeline';
 import type { AgentTurnItem } from './types';
@@ -27,7 +27,7 @@ export const TimelineConnector: React.FC = () => {
 
   return (
     <>
-      <RoundsScreenReaderStatus responseMessage={lastTurn?.response?.message} />
+      <TimelineScreenReaderStatus responseMessage={lastTurn?.response?.message} />
       <Timeline
         items={items}
         agent={agent}

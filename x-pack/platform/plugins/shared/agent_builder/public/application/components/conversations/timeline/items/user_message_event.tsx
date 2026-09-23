@@ -11,7 +11,7 @@ import type {
   ConversationRoundAuthor,
   VersionedAttachment,
 } from '@kbn/agent-builder-common';
-import { RoundInput } from '../../conversation_rounds/round_input';
+import { UserMessage } from '../user_message/user_message';
 
 interface UserMessageEventProps {
   event: UserMessageEventData;
@@ -31,7 +31,7 @@ export const UserMessageEvent: React.FC<UserMessageEventProps> = ({
   conversationAttachments,
 }) => {
   return (
-    <RoundInput
+    <UserMessage
       input={event.data.message}
       startedAt={event.created_at}
       author={isPending ? undefined : toRoundAuthor(event.actor)}

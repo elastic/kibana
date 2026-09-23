@@ -48,11 +48,11 @@ test.describe(
       await expect(async () => {
         expect(await pageObjects.agentBuilder.isErrorVisible()).toBe(true);
       }).toPass({ timeout: 60_000 });
-      await expect(page.testSubj.locator('agentBuilderRoundError')).toBeHidden();
+      await expect(page.testSubj.locator('agentBuilderExecutionError')).toBeHidden();
 
       await pageObjects.agentBuilder.expandError();
-      await expect(page.testSubj.locator('agentBuilderRoundError')).toBeVisible();
-      await expect(page.testSubj.locator('agentBuilderGenericRoundError')).toBeVisible();
+      await expect(page.testSubj.locator('agentBuilderExecutionError')).toBeVisible();
+      await expect(page.testSubj.locator('agentBuilderGenericExecutionError')).toBeVisible();
 
       await page.reload();
 
@@ -60,7 +60,7 @@ test.describe(
         expect(await pageObjects.agentBuilder.isErrorVisible()).toBe(true);
       }).toPass({ timeout: 60_000 });
       await pageObjects.agentBuilder.expandError();
-      await expect(page.testSubj.locator('agentBuilderRoundError')).toBeVisible();
+      await expect(page.testSubj.locator('agentBuilderExecutionError')).toBeVisible();
     });
 
     test('shows a "not found" prompt when conversation ID does not exist', async ({
