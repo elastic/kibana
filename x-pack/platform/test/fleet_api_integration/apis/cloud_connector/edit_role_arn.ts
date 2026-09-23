@@ -180,6 +180,23 @@ export default function (providerContext: FtrProviderContext) {
       await expectRoleArnEverywhere(NEW_ARN);
     });
 
+    it('keeps external_id when a role-only retry does not change the ARN', async () => {
+      await supertest
+        .put(`/api/fleet/cloud_connectors/${connectorId}`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          vars: { role_arn: { type: 'text', value: NEW_ARN } },
+        })
+        .expect(200);
+
+      const { body: connector } = await supertest
+        .get(`/api/fleet/cloud_connectors/${connectorId}`)
+        .expect(200);
+      expect(connector.item.vars.role_arn.value).to.eql(NEW_ARN);
+      expect(connector.item.vars.external_id).to.eql(EXTERNAL_ID_SECRET);
+      await expectRoleArnEverywhere(NEW_ARN);
+    });
+
     it('rejects an invalid ARN with 400 and leaves every policy untouched', async () => {
       const revisionBefore = await getAgentPolicyRevision();
 

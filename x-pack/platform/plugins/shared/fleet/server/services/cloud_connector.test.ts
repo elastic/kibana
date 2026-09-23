@@ -1448,6 +1448,57 @@ describe('CloudConnectorService', () => {
         expect(rollback.revert).toHaveBeenCalledTimes(1);
       });
 
+      it('does not roll back when the conflicting write already stored this role ARN', async () => {
+        const rollback = { policyCount: 1, revert: jest.fn().mockResolvedValue(undefined) };
+        propagateRoleArnToPackagePoliciesMock.mockResolvedValueOnce(rollback);
+        mockSoClient.get
+          .mockResolvedValueOnce({
+            id: connectorId,
+            version: 'Wz-cc-version',
+            attributes: {
+              name: 'Test',
+              namespace: '*',
+              cloudProvider: 'aws',
+              vars: { role_arn: { type: 'text', value: oldArn } },
+              created_at: '2026-01-01T00:00:00Z',
+              updated_at: '2026-01-01T00:00:00Z',
+            },
+          } as SavedObject)
+          .mockResolvedValueOnce({
+            id: connectorId,
+            version: 'Wz-winner',
+            attributes: {
+              name: 'Test',
+              namespace: '*',
+              cloudProvider: 'aws',
+              vars: { role_arn: { type: 'text', value: newArn } },
+              created_at: '2026-01-01T00:00:00Z',
+              updated_at: '2026-01-01T00:00:00Z',
+            },
+          } as SavedObject);
+        mockSoClient.update.mockRejectedValueOnce(
+          SavedObjectsErrorHelpers.createConflictError(
+            CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+            connectorId
+          )
+        );
+
+        let caught: unknown;
+        try {
+          await service.update(
+            mockSoClient,
+            connectorId,
+            { vars: { role_arn: { type: 'text', value: newArn } } },
+            { esClient: mockEsClient }
+          );
+        } catch (err) {
+          caught = err;
+        }
+
+        expect(SavedObjectsErrorHelpers.isConflictError(caught)).toBe(true);
+        expect(rollback.revert).not.toHaveBeenCalled();
+      });
+
       it('rejects a Role ARN change without integration-policy write and does not fan out', async () => {
         await expect(
           service.update(
@@ -1540,6 +1591,24 @@ describe('CloudConnectorService', () => {
             connectorId,
             expect.objectContaining({
               vars: { role_arn: { type: 'text', value: newArn }, external_id: externalId },
+            })
+          );
+        });
+
+        it('merges a role-only payload when the ARN is unchanged so external_id is preserved', async () => {
+          await service.update(
+            mockSoClient,
+            connectorId,
+            { vars: { role_arn: { type: 'text', value: oldArn } } },
+            { esClient: mockEsClient }
+          );
+
+          expect(propagateRoleArnToPackagePoliciesMock).not.toHaveBeenCalled();
+          expect(mockSoClient.update).toHaveBeenCalledWith(
+            CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+            connectorId,
+            expect.objectContaining({
+              vars: { role_arn: { type: 'text', value: oldArn }, external_id: externalId },
             })
           );
         });
