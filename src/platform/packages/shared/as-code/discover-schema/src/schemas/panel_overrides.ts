@@ -11,7 +11,7 @@ import { z } from '@kbn/zod';
 import { DataGridDensity } from '@kbn/discover-session-constants';
 import { columnSettingsEntrySchema, documentsDisplayModeSchema, sortSchema } from './data_table';
 
-export const panelOverridesSchema = z
+export const discoverSessionApiPanelOverridesSchema = z
   .object({
     column_order: z
       .array(z.string().meta({ description: 'Field name of a column in display order.' }))

@@ -15,10 +15,10 @@ import { DiscoverTabType } from '@kbn/discover-session-constants';
 import { mockGetDrilldownsSchema } from '@kbn/embeddable-plugin/server/mocks';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import {
-  classicTabSchema,
+  discoverSessionApiClassicTabBaseSchema,
   discoverSessionApiTabSchema,
-  esqlTabSchema,
-  panelOverridesSchema,
+  discoverSessionApiEsqlTabBaseSchema,
+  discoverSessionApiPanelOverridesSchema,
 } from '@kbn/as-code-discover-schema';
 import { getDiscoverSessionEmbeddableSchema } from './schema';
 
@@ -65,9 +65,9 @@ const parseByValueTab = (tab: unknown) => {
   return result.tabs[0];
 };
 
-describe('classicTabSchema', () => {
+describe('discoverSessionApiClassicTabBaseSchema', () => {
   it('validates a data view reference tab and applies defaults', () => {
-    const validated = classicTabSchema.parse(classicTabInput);
+    const validated = discoverSessionApiClassicTabBaseSchema.parse(classicTabInput);
 
     expect(validated.data_source.type).toBe(AS_CODE_DATA_VIEW_REFERENCE_TYPE);
     expect(validated.filters).toEqual([]);
@@ -76,7 +76,7 @@ describe('classicTabSchema', () => {
   });
 
   it('validates query and filters using as-code schemas', () => {
-    const validated = classicTabSchema.parse({
+    const validated = discoverSessionApiClassicTabBaseSchema.parse({
       ...classicTabInput,
       query: {
         expression: 'status:200',
@@ -103,7 +103,7 @@ describe('classicTabSchema', () => {
 
   it('rejects an invalid data source type', () => {
     expect(() =>
-      classicTabSchema.parse({
+      discoverSessionApiClassicTabBaseSchema.parse({
         ...classicTabInput,
         data_source: {
           type: 'invalid_type',
@@ -115,7 +115,7 @@ describe('classicTabSchema', () => {
 
   it('rejects an invalid view mode', () => {
     expect(() =>
-      classicTabSchema.parse({
+      discoverSessionApiClassicTabBaseSchema.parse({
         ...classicTabInput,
         view_mode: 'invalid_mode',
       })
@@ -124,7 +124,7 @@ describe('classicTabSchema', () => {
 
   it('rejects an invalid sort direction', () => {
     expect(() =>
-      classicTabSchema.parse({
+      discoverSessionApiClassicTabBaseSchema.parse({
         ...classicTabInput,
         sort: [{ name: '@timestamp', direction: 'sideways' }],
       })
@@ -132,9 +132,9 @@ describe('classicTabSchema', () => {
   });
 });
 
-describe('esqlTabSchema', () => {
+describe('discoverSessionApiEsqlTabBaseSchema', () => {
   it('validates an ES|QL data source tab and applies data table defaults', () => {
-    const validated = esqlTabSchema.parse(esqlTabInput);
+    const validated = discoverSessionApiEsqlTabBaseSchema.parse(esqlTabInput);
 
     expect(validated.data_source.type).toBe(AS_CODE_ESQL_DATA_SOURCE_TYPE);
     expect(validated.data_source.query).toBe('FROM logs-* | LIMIT 10');
@@ -143,7 +143,7 @@ describe('esqlTabSchema', () => {
 
   it('rejects a nested data_source shape', () => {
     expect(() =>
-      esqlTabSchema.parse({
+      discoverSessionApiEsqlTabBaseSchema.parse({
         data_source: {
           data_view: {
             ref_id: 'logs-data-view',
@@ -154,11 +154,11 @@ describe('esqlTabSchema', () => {
   });
 
   it('rejects a classic data view reference used as an ES|QL tab', () => {
-    expect(() => esqlTabSchema.parse(classicTabInput)).toThrow();
+    expect(() => discoverSessionApiEsqlTabBaseSchema.parse(classicTabInput)).toThrow();
   });
 
   it('accepts data table limits on ES|QL tabs', () => {
-    const validated = esqlTabSchema.parse({
+    const validated = discoverSessionApiEsqlTabBaseSchema.parse({
       ...esqlTabInput,
       rows_per_page: 25,
       sample_size: 500,
@@ -230,14 +230,14 @@ describe('tab type parity', () => {
   );
 });
 
-describe('panelOverridesSchema', () => {
+describe('discoverSessionApiPanelOverridesSchema', () => {
   it('defaults to an empty object when omitted', () => {
-    expect(panelOverridesSchema.parse(undefined)).toEqual({});
+    expect(discoverSessionApiPanelOverridesSchema.parse(undefined)).toEqual({});
   });
 
   it('validates partial overrides', () => {
     expect(
-      panelOverridesSchema.parse({
+      discoverSessionApiPanelOverridesSchema.parse({
         column_order: ['@timestamp', 'message'],
         row_height: 'auto',
       })

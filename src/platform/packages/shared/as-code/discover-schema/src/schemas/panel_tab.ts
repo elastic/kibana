@@ -8,12 +8,12 @@
  */
 
 import { z } from '@kbn/zod';
-import { classicTabSchema, esqlTabSchema } from './tab';
-import { discoverSessionMetricsTabTypeStateSchema } from './metrics_tab';
-import { discoverSessionDefaultTabTypeStateSchema } from './session_data';
+import { discoverSessionApiClassicTabBaseSchema, discoverSessionApiEsqlTabBaseSchema } from './tab';
+import { discoverSessionApiMetricsTabTypeStateSchema } from './metrics_tab';
+import { discoverSessionApiDefaultTabTypeStateSchema } from './session_data';
 
-const panelMetricsTabSchema = esqlTabSchema
-  .extend(discoverSessionMetricsTabTypeStateSchema.shape)
+const panelMetricsTabSchema = discoverSessionApiEsqlTabBaseSchema
+  .extend(discoverSessionApiMetricsTabTypeStateSchema.shape)
   .meta({
     title: 'Metrics tab',
     description:
@@ -27,9 +27,10 @@ const panelMetricsTabSchema = esqlTabSchema
  * omits session-only fields such as id, label, and presentation state.
  */
 export const panelTabSchema = z.union([
-  classicTabSchema.extend(discoverSessionDefaultTabTypeStateSchema.shape),
-  esqlTabSchema
-    .extend(discoverSessionDefaultTabTypeStateSchema.shape)
-    .meta({ ...esqlTabSchema.meta() }), // extend() does not preserve object-level metadata.
+  discoverSessionApiClassicTabBaseSchema.extend(discoverSessionApiDefaultTabTypeStateSchema.shape),
+  discoverSessionApiEsqlTabBaseSchema
+    .extend(discoverSessionApiDefaultTabTypeStateSchema.shape)
+    // extend() does not preserve object-level metadata.
+    .meta({ ...discoverSessionApiEsqlTabBaseSchema.meta() }),
   panelMetricsTabSchema,
 ]);

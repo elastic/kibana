@@ -9,7 +9,7 @@
 
 import { expect } from '@kbn/scout/ui';
 import type { ApiServicesFixture } from '@kbn/scout';
-import type { DiscoverSessionApiDataInput } from '../../../../../server/api/schema';
+import type { DiscoverSessionApiDataInput } from '@kbn/as-code-discover-schema';
 import type { DiscoverPageObjects, DiscoverScoutSpace } from '../fixtures';
 import { spaceTest, tags, testData } from '../fixtures';
 
