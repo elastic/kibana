@@ -5,8 +5,14 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import { expect } from '@kbn/scout/api';
 import type { EsClient } from '@kbn/scout';
+
+// A snapshot that hasn't been registered yet surfaces as `snapshot_missing_exception`; every other
+// error (auth, wrong repository name, etc.) is a real failure and must be surfaced, not polled on.
+const isSnapshotMissingError = (error: unknown): boolean =>
+  error instanceof errors.ResponseError && error.body?.error?.type === 'snapshot_missing_exception';
 
 export interface SeedSlmPolicy {
   policyName: string;
@@ -93,7 +99,12 @@ export const waitForSnapshotToFinish = async (
     const snapshots = await esClient.snapshot
       .get({ repository, snapshot, ignore_unavailable: true })
       .then((response) => response.snapshots)
-      .catch(() => undefined);
+      .catch((error) => {
+        if (isSnapshotMissingError(error)) {
+          return undefined;
+        }
+        throw error;
+      });
     return snapshots?.[0]?.state;
   };
 
