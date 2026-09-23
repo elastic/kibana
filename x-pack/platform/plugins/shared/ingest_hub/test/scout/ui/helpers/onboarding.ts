@@ -22,14 +22,13 @@ export const DETECT_AND_REVIEW_SESSION_KEY = 'onboarding.aws.detectAndReviewStep
 const stepSubj = (step: string) => `onboardingStep-${step}`;
 
 export async function mockAwsPackage(page: ScoutPage, response: unknown): Promise<void> {
+  const body = JSON.stringify(response);
+  // Intercept both the unversioned path and any versioned path (e.g. /aws/7.1.1) so that
+  // cleanup flows calling sendGetPackageInfoByKey(name, existingVersion) don't hit the real
+  // package registry and get a different manifest or time out.
   await page.route(
-    (url) => /\/api\/fleet\/epm\/packages\/aws$/.test(url.pathname),
-    (route) =>
-      route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify(response),
-      })
+    (url) => /\/api\/fleet\/epm\/packages\/aws(\/[^/]+)?$/.test(url.pathname),
+    (route) => route.fulfill({ status: 200, contentType: 'application/json', body })
   );
 }
 
