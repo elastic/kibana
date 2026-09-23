@@ -157,32 +157,36 @@ export const roundToEvents = (
   conversation: ConversationForRoundEvents
 ): TimelineEvent[] => {
   const terminated = roundTerminatedEvent(round, conversation);
-  const feedbackEvent = round.feedback
-    ? ({
-        id: feedbackEventId(round.id),
-        type: TimelineEventType.roundFeedback,
-        created_at: round.feedback.submitted_at,
-        actor: { type: EventActorType.user, id: conversation.user?.id ?? 'unknown' },
-        data: {
-          round_id: round.id,
-          ...round.feedback,
-        },
-      } as TimelineEvent)
-    : null;
   return [
     ...roundStartEvents(round, conversation),
     ...roundStepEvents(round, conversation),
     ...(terminated ? [terminated] : []),
-    ...(feedbackEvent ? [feedbackEvent] : []),
   ];
 };
 
-/**
- * Converts a rounds-based conversation into a timeline, on read. Maps each round with
- * {@link roundToEvents}, in round order.
- */
-export const roundsToEvents = (conversation: Conversation): TimelineEvent[] =>
-  conversation.rounds.flatMap((round) => roundToEvents(round, conversation));
+export const roundsToEvents = (conversation: Conversation): TimelineEvent[] => {
+  const events: TimelineEvent[] = [];
+  for (const round of conversation.rounds) {
+    events.push(...roundToEvents(round, conversation));
+    if (round.feedback) {
+      events.push({
+        id: feedbackEventId(round.id),
+        type: TimelineEventType.roundFeedback,
+        created_at: round.feedback.submitted_at,
+        actor: {
+          type: EventActorType.user,
+          id: conversation.user?.id ?? conversation.user?.username ?? 'unknown',
+          ...(conversation.user?.username ? { username: conversation.user.username } : {}),
+        },
+        data: {
+          round_id: round.id,
+          ...round.feedback,
+        },
+      } as TimelineEvent);
+    }
+  }
+  return events;
+};
 
 const executionRunSummary = (round: ConversationRound): ExecutionRunSummary => ({
   model_usage: round.model_usage,

@@ -795,7 +795,10 @@ class ConversationClientImpl implements ConversationClient {
           throw skipWrite(current);
         }
         const currentEvents = current.events ?? [];
-        const nonRoundEvents = currentEvents.filter((event) => !event.id.startsWith(roundPrefix));
+        const nonRoundEvents = currentEvents.filter(
+          (event) =>
+            !event.id.startsWith(roundPrefix) || event.type === TimelineEventType.roundFeedback
+        );
         const existingIds = new Set(nonRoundEvents.map((event) => event.id));
         // Round-derived events for this round were just wiped, so they always pass; additive ids
         // collide only when a caller re-inserts an existing uuid, which we drop.

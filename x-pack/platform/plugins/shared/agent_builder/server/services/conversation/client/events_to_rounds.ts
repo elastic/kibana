@@ -9,7 +9,6 @@ import type {
   ConversationEvent,
   ConversationRound,
   ConversationRoundAuthor,
-  ConversationRoundFeedback,
   ConversationRoundStep,
   ExecutionStepEvent,
   ExecutionTerminatedEvent,
@@ -154,8 +153,8 @@ export const eventsToRounds = (events: ConversationEvent[]): ConversationRound[]
     return rounds.map((r) => {
       const fb = feedbackByRoundId.get(r.id);
       if (!fb || fb.vote === null) return r;
-      const { round_id: _ignored, ...feedbackFields } = fb;
-      return { ...r, feedback: feedbackFields as ConversationRoundFeedback };
+      const { round_id: _ignored, vote, ...restFeedback } = fb;
+      return { ...r, feedback: { vote: vote as 'up' | 'down', ...restFeedback } };
     });
   }
 

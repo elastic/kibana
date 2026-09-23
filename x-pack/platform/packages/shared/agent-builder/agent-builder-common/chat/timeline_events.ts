@@ -422,7 +422,7 @@ export const ROUND_DERIVED_EVENT_ID_SUFFIXES = {
 export const roundStepEventId = (roundId: string, sequence: number): string =>
   `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.stepPrefix}${sequence}`;
 
-/** ID for the feedback event for a given round. There is at most one per round. */
+/** ID used by the legacy migration path for a round's feedback event. New feedback events use uuidv4(). */
 export const feedbackEventId = (roundId: string): string => `${roundId}::feedback`;
 
 /** Builds an execution id for a resume appended to a round without rewriting its initial run. */
