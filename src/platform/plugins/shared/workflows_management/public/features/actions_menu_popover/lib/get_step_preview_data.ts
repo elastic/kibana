@@ -31,7 +31,7 @@ export const getStepPreviewData = (stepId: string): StepPreviewData => {
   }
 
   const registeredDefinition = stepSchemas.getStepDefinition(stepId);
-  if (registeredDefinition && stepSchemas.isPublicStepDefinition(registeredDefinition)) {
+  if (registeredDefinition) {
     return {
       inputSchema: registeredDefinition.inputSchema,
       outputSchema: registeredDefinition.outputSchema,

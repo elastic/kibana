@@ -17,6 +17,21 @@ describe('VectorDB navigation tree', () => {
     core.settings.globalClient.get = <T>(_key: string) => false as T;
   });
 
+  it('includes service accounts in Admin and Settings', () => {
+    const { footer } = createNavigationTree({
+      ...core.application,
+      core,
+    });
+    const adminAndSettingsNode = footer?.find((item) => item.id === 'admin_and_settings');
+    const accessSection = adminAndSettingsNode?.children?.find(
+      (item) => item.id === 'settings_access'
+    );
+
+    expect(accessSection?.children).toContainEqual(
+      expect.objectContaining({ link: 'management:service_accounts' })
+    );
+  });
+
   it('includes Stack Alerts in Admin and Settings > Alerts and insights', () => {
     const { footer } = createNavigationTree({
       ...core.application,
