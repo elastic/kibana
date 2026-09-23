@@ -30,6 +30,7 @@ import {
   ContextEnginePageSection,
   ContextEnginePageTemplate,
 } from '../layout/context_engine_page_template';
+import { AI_INDEX_CREATED_LOCATION_STATE } from '../ai_index_created_location_state';
 import { CONTEXT_ENGINE_PATHS, getAiIndexDetailPath } from '../paths';
 import { validateAiIndexId } from '../utils/ai_index_dest';
 
@@ -64,7 +65,11 @@ export const CreateAiIndexPage = () => {
       trace,
     });
     if (created) {
-      navigateToContextEngine(getAiIndexDetailPath(created.id));
+      navigateToContextEngine(
+        getAiIndexDetailPath(created.id),
+        undefined,
+        AI_INDEX_CREATED_LOCATION_STATE
+      );
     }
   };
 
