@@ -55,6 +55,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   const alertingApi = getService('alertingApiCommon');
   const esClient = getService('es');
+  const retry = getService('retry');
   const samlAuth = getService('samlAuth');
   let roleAuthc: RoleCredentials;
 
@@ -75,7 +76,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     before(async () => {
       roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
-      await enableStreams(apiClient);
+      await retry.tryForTime(30_000, () => enableStreams(apiClient));
     });
 
     after(async () => {
