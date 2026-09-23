@@ -158,9 +158,17 @@ export const candidateIssues = (suite: FlakySuite, index: IssueIndex): IssueDeta
   return [...candidates];
 };
 
-/** Whether a full JUnit test name (`describe … title`) ends with the flaky test's title. */
-const namesTest = (testName: string, titles: readonly string[]): boolean =>
-  titles.some((title) => testName === title || testName.endsWith(` ${title}`));
+/**
+ * Whether a JUnit test name names one of the suite's tests. JUnit names are the describe titles
+ * followed by the test title, so with a suite title known the comparison covers both: a sibling
+ * describe with a test of the same title must not match. A name that is the bare title still
+ * does, for reporters that record no describes.
+ */
+const namesTest = (testName: string, suite: FlakySuite): boolean =>
+  suite.tests.some(({ title }) => {
+    const full = suite.suiteTitle ? `${suite.suiteTitle} ${title}` : title;
+    return testName === full || testName.endsWith(` ${full}`) || testName === title;
+  });
 
 /** Suite issues first, then strongest match, open before closed, newest first. */
 export const compareMatches = (a: MatchedIssue, b: MatchedIssue): number =>
@@ -179,7 +187,6 @@ export const findMatchingIssues = (
   issues: readonly IssueDetails[]
 ): MatchedIssue[] => {
   const testIds = new Set(suite.tests.map((test) => test.testId));
-  const titles = suite.tests.map((test) => test.title);
   const directory = Path.dirname(suite.filePath);
   const baseName = Path.basename(suite.filePath);
 
@@ -188,7 +195,7 @@ export const findMatchingIssues = (
     const { issue, suiteFilePath, suiteTitle, suiteFramework, scoutTestId, filePath } = details;
     const { jestDirectory, testName, text } = details;
     const mentionsFile = text.includes(suite.filePath);
-    const namesFlakyTest = testName !== undefined && namesTest(testName, titles);
+    const namesFlakyTest = testName !== undefined && namesTest(testName, suite);
 
     // An issue about the whole file is about each of its suites; one file can hold suites of
     // several frameworks, so a recorded framework has to agree too

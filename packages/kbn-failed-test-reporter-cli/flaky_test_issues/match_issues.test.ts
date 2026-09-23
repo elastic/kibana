@@ -235,6 +235,29 @@ describe('findMatchingIssues', () => {
     ]);
   });
 
+  it('keeps a per-test issue to the describe block it names when sibling suites share a test title', () => {
+    const [suiteA, suiteB] = groupIntoSuites([
+      flakyTest({ testId: 'a-loads', title: 'loads', suiteTitle: 'A', failedBuilds: 9 }),
+      flakyTest({ testId: 'b-loads', title: 'loads', suiteTitle: 'B', failedBuilds: 5 }),
+    ]);
+    // a Jest issue names the test as `<describe titles> <title>`
+    const issueForA = describeIssue(
+      githubIssue({
+        number: 41,
+        title:
+          'Failing test: Jest Tests.x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests - A loads',
+        body: updateIssueMetadata(`| Location | ${SUITE_PATH} |`, {
+          'test.class':
+            'Jest Tests.x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests',
+          'test.name': 'A loads',
+        }),
+      })
+    );
+
+    expect(findMatchingIssues(suiteA, [issueForA]).map(({ match }) => match)).toEqual(['test']);
+    expect(findMatchingIssues(suiteB, [issueForA]).map(({ match }) => match)).toEqual(['file']);
+  });
+
   it('matches Scout issues by test id, or by file for other tests of the suite', () => {
     const [suite] = groupIntoSuites([
       flakyTest({ testId: 'id-1', title: 'creates default alert' }),
@@ -256,7 +279,11 @@ describe('findMatchingIssues', () => {
 
   it('matches Jest issues by directory and test name, since the classname has no file', () => {
     const [suite] = groupIntoSuites([
-      flakyTest({ filePath: 'src/plugins/a/client.test.ts', title: 'drops every stored event' }),
+      flakyTest({
+        filePath: 'src/plugins/a/client.test.ts',
+        suiteTitle: 'ConversationClient events',
+        title: 'drops every stored event',
+      }),
     ]);
     const related = findMatchingIssues(suite, [
       describeIssue(
@@ -275,6 +302,7 @@ describe('findMatchingIssues', () => {
     const [suite] = groupIntoSuites([
       flakyTest({
         filePath: 'x-pack/test/functional/apps/ml/synchronize.ts',
+        suiteTitle: 'machine learning - stack management jobs synchronize',
         title: 'should have nothing to sync anymore',
       }),
     ]);
