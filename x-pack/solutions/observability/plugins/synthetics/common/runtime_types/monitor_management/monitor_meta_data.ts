@@ -5,16 +5,9 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
+import type { SchemaOutput } from '../schema_output';
+import { MetadataCodec } from '../zod/monitor_meta_data';
 
-const ScriptSourceCodec = t.interface({
-  is_generated_script: t.boolean,
-  file_name: t.string,
-});
+export { MetadataCodec };
 
-export const MetadataCodec = t.partial({
-  is_tls_enabled: t.boolean,
-  script_source: ScriptSourceCodec,
-});
-
-export type Metadata = t.TypeOf<typeof MetadataCodec>;
+export type Metadata = SchemaOutput<typeof MetadataCodec>;
