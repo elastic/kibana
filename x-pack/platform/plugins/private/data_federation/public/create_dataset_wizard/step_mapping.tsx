@@ -7,7 +7,8 @@
 
 import type { SetStateAction } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiSpacer, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { Forms } from '@kbn/es-ui-shared-plugin/public';
 import { useController, useFormContext } from 'react-hook-form';
@@ -35,6 +36,8 @@ export function StepMapping() {
   const { updateContent } = Forms.useContent<DatasetWizardContent, 'mapping'>('mapping');
   const { field } = useController({ name: 'mappings', control });
   const [shouldShowTimeseriesValidation, setShouldShowTimeseriesValidation] = useState(false);
+  const [shouldShowDefineSchemaValidation, setShouldShowDefineSchemaValidation] = useState(false);
+  const [hasAttemptedValidation, setHasAttemptedValidation] = useState(false);
 
   const setMappings = useCallback(
     (next: SetStateAction<MappingEditorValue>) => {
@@ -58,6 +61,11 @@ export function StepMapping() {
   const dynamicMode = field.value.dynamic;
   const isTimeseriesFieldValid =
     !splitFields.timestampField || splitFields.timestampField.path.trim() !== '';
+  const declaredFieldCount = useMemo(() => {
+    return field.value.fields.filter((f) => f.name.trim() && f.type).length;
+  }, [field.value.fields]);
+  const isDefineSchemaValid = dynamicMode || declaredFieldCount > 0;
+  const isMappingStepValid = isTimeseriesFieldValid && isDefineSchemaValid;
 
   const onTimeseriesToggle = useCallback(
     (checked: boolean) => {
@@ -132,14 +140,16 @@ export function StepMapping() {
 
   useEffect(() => {
     updateContent({
-      isValid: isTimeseriesFieldValid,
+      isValid: hasAttemptedValidation ? isMappingStepValid : undefined,
       validate: async () => {
+        setHasAttemptedValidation(true);
         setShouldShowTimeseriesValidation(true);
-        return isTimeseriesFieldValid;
+        setShouldShowDefineSchemaValidation(true);
+        return isMappingStepValid;
       },
       getData: () => getValues().mappings,
     });
-  }, [getValues, isTimeseriesFieldValid, updateContent]);
+  }, [getValues, hasAttemptedValidation, isMappingStepValid, updateContent]);
 
   return (
     <div data-test-subj="createDatasetWizardMappingStep">
@@ -157,6 +167,24 @@ export function StepMapping() {
 
         <EuiSpacer size="m" />
         <InferSchemaToggle dynamicMode={dynamicMode} onDynamicModeChange={onDynamicModeChange} />
+        {shouldShowDefineSchemaValidation && !isDefineSchemaValid ? (
+          <>
+            <EuiSpacer size="s" />
+            <EuiText
+              color="danger"
+              size="s"
+              data-test-subj="createDatasetWizardDefineSchemaRequiresField"
+            >
+              {i18n.translate(
+                'xpack.dataFederation.createDatasetWizard.defineSchemaRequiresField',
+                {
+                  defaultMessage:
+                    'When Define schema is selected, you must map at least one field.',
+                }
+              )}
+            </EuiText>
+          </>
+        ) : null}
 
         <EuiSpacer size="m" />
         <MappingEditor

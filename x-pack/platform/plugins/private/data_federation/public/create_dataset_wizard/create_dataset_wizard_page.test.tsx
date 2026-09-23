@@ -11,6 +11,7 @@ import { fireEvent, render, waitFor } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
+import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Router } from '@kbn/shared-ux-router';
 import type { DataSetWithName, DataSource } from '../../common';
@@ -63,24 +64,26 @@ describe('CreateDatasetWizardPage', () => {
     const loadDataSets = jest.fn().mockResolvedValue(undefined);
     const view = render(
       <EuiProvider>
-        <MockAppHeaderProvider>
-          <Router history={history}>
-            <KibanaContextProvider
-              services={{
-                docLinks: docLinksMock,
-                datasetsClient: { add },
-                dataSourcesClient: { add: jest.fn() },
-              }}
-            >
-              <CreateDatasetWizardPage
-                dataSources={dataSources}
-                existingDataSetNames={[]}
-                loadDataSets={loadDataSets}
-                loadDataSources={jest.fn().mockResolvedValue(undefined)}
-              />
-            </KibanaContextProvider>
-          </Router>
-        </MockAppHeaderProvider>
+        <I18nProvider>
+          <MockAppHeaderProvider>
+            <Router history={history}>
+              <KibanaContextProvider
+                services={{
+                  docLinks: docLinksMock,
+                  datasetsClient: { add },
+                  dataSourcesClient: { add: jest.fn() },
+                }}
+              >
+                <CreateDatasetWizardPage
+                  dataSources={dataSources}
+                  existingDataSetNames={[]}
+                  loadDataSets={loadDataSets}
+                  loadDataSources={jest.fn().mockResolvedValue(undefined)}
+                />
+              </KibanaContextProvider>
+            </Router>
+          </MockAppHeaderProvider>
+        </I18nProvider>
       </EuiProvider>
     );
     return { ...view, history, add, loadDataSets };
@@ -150,11 +153,17 @@ describe('CreateDatasetWizardPage', () => {
 
     fireEvent.click(getByTestId('nextButton'));
     expect(await waitFor(() => getByTestId('createDatasetWizardMappingStep'))).toBeInTheDocument();
+    fireEvent.change(getByTestId('createDatasetWizardTimestampPath'), {
+      target: { value: 'event_time' },
+    });
     fireEvent.click(getByTestId('nextButton'));
     expect(await waitFor(() => getByTestId('createDatasetWizardReviewStep'))).toBeInTheDocument();
     fireEvent.click(getByTestId('backButton'));
     expect(await waitFor(() => getByTestId('createDatasetWizardMappingStep'))).toBeInTheDocument();
 
+    fireEvent.change(getByTestId('createDatasetWizardTimestampPath'), {
+      target: { value: 'event_time' },
+    });
     fireEvent.click(getByTestId('nextButton'));
 
     expect(await waitFor(() => getByTestId('createDatasetWizardReviewStep'))).toBeInTheDocument();
@@ -217,27 +226,29 @@ describe('CreateDatasetWizardPage', () => {
       settings: { format: 'csv', partition_detection: 'hive' },
     };
 
-    const { getByTestId } = render(
+    const { getByTestId, queryByTestId } = render(
       <EuiProvider>
-        <MockAppHeaderProvider>
-          <Router history={history}>
-            <KibanaContextProvider
-              services={{
-                docLinks: docLinksMock,
-                datasetsClient: { add, delete: remove },
-                dataSourcesClient: { add: jest.fn() },
-              }}
-            >
-              <CreateDatasetWizardPage
-                dataSources={dataSources}
-                existingDataSetNames={['logs-dataset']}
-                loadDataSets={loadDataSets}
-                loadDataSources={jest.fn().mockResolvedValue(undefined)}
-                initialDataSet={initialDataSet}
-              />
-            </KibanaContextProvider>
-          </Router>
-        </MockAppHeaderProvider>
+        <I18nProvider>
+          <MockAppHeaderProvider>
+            <Router history={history}>
+              <KibanaContextProvider
+                services={{
+                  docLinks: docLinksMock,
+                  datasetsClient: { add, delete: remove },
+                  dataSourcesClient: { add: jest.fn() },
+                }}
+              >
+                <CreateDatasetWizardPage
+                  dataSources={dataSources}
+                  existingDataSetNames={['logs-dataset']}
+                  loadDataSets={loadDataSets}
+                  loadDataSources={jest.fn().mockResolvedValue(undefined)}
+                  initialDataSet={initialDataSet}
+                />
+              </KibanaContextProvider>
+            </Router>
+          </MockAppHeaderProvider>
+        </I18nProvider>
       </EuiProvider>
     );
 
@@ -254,6 +265,12 @@ describe('CreateDatasetWizardPage', () => {
     ).toBeInTheDocument();
     fireEvent.click(getByTestId('nextButton'));
     expect(await waitFor(() => getByTestId('createDatasetWizardMappingStep'))).toBeInTheDocument();
+    const timestampPathInput = queryByTestId('createDatasetWizardTimestampPath');
+    if (timestampPathInput) {
+      fireEvent.change(timestampPathInput, {
+        target: { value: 'event_time' },
+      });
+    }
     fireEvent.click(getByTestId('nextButton'));
     expect(await waitFor(() => getByTestId('createDatasetWizardReviewStep'))).toBeInTheDocument();
     fireEvent.click(getByTestId('nextButton'));
@@ -283,27 +300,29 @@ describe('CreateDatasetWizardPage', () => {
       settings: { format: 'csv' },
     };
 
-    const { getByTestId } = render(
+    const { getByTestId, queryByTestId } = render(
       <EuiProvider>
-        <MockAppHeaderProvider>
-          <Router history={history}>
-            <KibanaContextProvider
-              services={{
-                docLinks: docLinksMock,
-                datasetsClient: { add, delete: remove },
-                dataSourcesClient: { add: jest.fn() },
-              }}
-            >
-              <CreateDatasetWizardPage
-                dataSources={dataSources}
-                existingDataSetNames={['logs-dataset']}
-                loadDataSets={jest.fn().mockResolvedValue(undefined)}
-                loadDataSources={jest.fn().mockResolvedValue(undefined)}
-                initialDataSet={initialDataSet}
-              />
-            </KibanaContextProvider>
-          </Router>
-        </MockAppHeaderProvider>
+        <I18nProvider>
+          <MockAppHeaderProvider>
+            <Router history={history}>
+              <KibanaContextProvider
+                services={{
+                  docLinks: docLinksMock,
+                  datasetsClient: { add, delete: remove },
+                  dataSourcesClient: { add: jest.fn() },
+                }}
+              >
+                <CreateDatasetWizardPage
+                  dataSources={dataSources}
+                  existingDataSetNames={['logs-dataset']}
+                  loadDataSets={jest.fn().mockResolvedValue(undefined)}
+                  loadDataSources={jest.fn().mockResolvedValue(undefined)}
+                  initialDataSet={initialDataSet}
+                />
+              </KibanaContextProvider>
+            </Router>
+          </MockAppHeaderProvider>
+        </I18nProvider>
       </EuiProvider>
     );
 
@@ -316,6 +335,10 @@ describe('CreateDatasetWizardPage', () => {
     ).toBeInTheDocument();
     fireEvent.click(getByTestId('nextButton'));
     expect(await waitFor(() => getByTestId('createDatasetWizardMappingStep'))).toBeInTheDocument();
+    const timestampPathInput = queryByTestId('createDatasetWizardTimestampPath');
+    if (timestampPathInput) {
+      fireEvent.change(timestampPathInput, { target: { value: 'event_time' } });
+    }
     fireEvent.click(getByTestId('nextButton'));
     expect(await waitFor(() => getByTestId('createDatasetWizardReviewStep'))).toBeInTheDocument();
     fireEvent.click(getByTestId('nextButton'));
@@ -324,5 +347,36 @@ describe('CreateDatasetWizardPage', () => {
       expect(add).toHaveBeenCalledWith(expect.objectContaining({ name: 'renamed-dataset' }));
       expect(remove).toHaveBeenCalledWith('logs-dataset');
     });
+  });
+
+  it('requires at least one mapped field when Define schema is selected', async () => {
+    const { getByTestId, findByTestId, queryByTestId } = renderWizard();
+
+    fireEvent.click(getByTestId('createDatasetDataSource'));
+    fireEvent.click(await findByTestId('createDatasetDataSource-source-1'));
+    fireEvent.change(getByTestId('createDatasetName'), { target: { value: 'logs-dataset' } });
+    fireEvent.change(getByTestId('createDatasetResource'), { target: { value: 'bucket/*' } });
+    selectFormat(getByTestId, 'csv');
+
+    fireEvent.click(getByTestId('nextButton'));
+    expect(
+      await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
+    ).toBeInTheDocument();
+
+    fireEvent.click(getByTestId('nextButton'));
+    expect(await waitFor(() => getByTestId('createDatasetWizardMappingStep'))).toBeInTheDocument();
+
+    // Turn off timeseries so there are zero mappings.
+    fireEvent.click(getByTestId('createDatasetWizardTimeseriesToggle'));
+
+    // Select Define schema (dynamic = false).
+    fireEvent.click(getByTestId('createDatasetWizardDefineSchemaCard'));
+
+    // Attempt to proceed.
+    fireEvent.click(getByTestId('nextButton'));
+
+    // Should stay on mapping step and show the error.
+    expect(queryByTestId('createDatasetWizardReviewStep')).toBeNull();
+    expect(getByTestId('createDatasetWizardDefineSchemaRequiresField')).toBeInTheDocument();
   });
 });
