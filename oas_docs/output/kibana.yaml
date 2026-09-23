@@ -13116,14 +13116,6 @@ paths:
             maxItems: 2
             minItems: 1
             type: array
-        - description: Free-text search. Matches rule name or rule ID (case-insensitive).
-          in: query
-          name: search
-          required: false
-          schema:
-            maxLength: 256
-            minLength: 1
-            type: string
         - description: Inclusive ISO datetime lower bound on event.start.
           in: query
           name: from
