@@ -47,6 +47,9 @@ export function useChildWorkflowExecutions(
       return map;
     },
     enabled: !!parentExecution?.id,
+    // Keep resolved children across terminalChildKey changes, so a selected child step
+    // is never briefly resolved against the parent execution.
+    keepPreviousData: true,
     staleTime:
       parentExecution && isTerminalStatus(parentExecution.status)
         ? Infinity
