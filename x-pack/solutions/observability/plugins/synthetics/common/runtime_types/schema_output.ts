@@ -5,20 +5,7 @@
  * 2.0.
  */
 
-/**
- * Bidirectional type equality. Used to prove `z.infer` of a twin matches
- * `t.TypeOf` of the io-ts original. A mismatch fails typecheck, not a runtime test.
- */
-export type Equal<X, Y> = (<T>() => T extends X ? 1 : 2) extends <T>() => T extends Y ? 1 : 2
-  ? true
-  : false;
-
-export type Expect<T extends true> = T;
-
-/** Requires every property of `T` to be `true` without needing a string index signature. */
-export type ExpectAllTrue<T extends { [K in keyof T]: true }> = T;
-
-export type MutuallyAssignable<X, Y> = [X] extends [Y] ? ([Y] extends [X] ? true : false) : false;
+import type { z } from '@kbn/zod';
 
 /** Named keys of `T`. A string index hides those keys when indexed as `[keyof T]`. */
 type StripIndex<T> = {
@@ -27,9 +14,9 @@ type StripIndex<T> = {
 
 /**
  * Drops the `{ [k: string]: unknown }` catchall `z.looseObject` adds.
- * A real record has no named keys, so its index signature stays.
+ * A real `z.record` has no named keys, so its index signature stays.
  */
-export type KnownKeys<T> = T extends string | number | boolean | bigint | symbol | null | undefined
+type KnownKeys<T> = T extends string | number | boolean | bigint | symbol | null | undefined
   ? T
   : T extends readonly (infer U)[]
   ? Array<KnownKeys<U>>
@@ -42,3 +29,5 @@ export type KnownKeys<T> = T extends string | number | boolean | bigint | symbol
       : StripIndex<T>
     : StripIndex<T>
   : T;
+
+export type SchemaOutput<S extends z.ZodType> = KnownKeys<z.output<S>>;
