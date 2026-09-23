@@ -33,6 +33,8 @@ import {
   toStoredTab,
 } from './transform_utils';
 import type {
+  DiscoverSessionEmbeddableByReferenceState,
+  DiscoverSessionEmbeddableByValueState,
   SearchEmbeddableByReferenceState,
   StoredSearchEmbeddableByReferenceState,
   StoredSearchEmbeddableByValueState,
@@ -45,10 +47,6 @@ import {
 } from './constants';
 import { SavedSearchType, VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import type { DiscoverSessionTabTypeState } from '@kbn/saved-search-plugin/common';
-import type {
-  DiscoverSessionEmbeddableByReferenceState,
-  DiscoverSessionEmbeddableByValueState,
-} from '../../server';
 import { DataGridDensity, DiscoverTabType } from '@kbn/discover-session-constants';
 import { ASCODE_FILTER_OPERATOR, ASCODE_FILTER_TYPE } from '@kbn/as-code-filters-constants';
 
@@ -740,7 +738,7 @@ describe('search embeddable transform utils', () => {
   });
 
   describe('toDiscoverSessionEmbeddableOverrides', () => {
-    it('converts stored state with all fields to panel overrides', () => {
+    it('converts stored state with all fields to embeddable overrides', () => {
       const storedState: StoredSearchEmbeddableState = {
         sort: [['@timestamp', 'desc']],
         columns: ['message', '@timestamp'],
@@ -822,7 +820,7 @@ describe('search embeddable transform utils', () => {
   });
 
   describe('fromDiscoverSessionEmbeddableOverrides', () => {
-    it('converts panel overrides with all fields to stored state', () => {
+    it('converts embeddable overrides with all fields to stored state', () => {
       const apiState = {
         sort: [{ name: '@timestamp', direction: 'desc' as const }],
         column_order: ['message', '@timestamp'],
