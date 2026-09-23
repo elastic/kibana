@@ -7,6 +7,10 @@
 
 import type { IRouter, KibanaRequest } from '@kbn/core/server';
 import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import type {
+  AgenticInvestigationsPluginSetup,
+  AgenticInvestigationsPluginStart,
+} from '@kbn/agentic-investigations-plugin/server';
 import type { ProposalsPluginSetup, ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { SearchInferenceEndpointsPluginSetup } from '@kbn/search-inference-endpoints/server';
@@ -23,6 +27,7 @@ export interface AlertZeroSetupDependencies {
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
   workflowsManagement: WorkflowsServerPluginSetup;
   agentBuilder: AgentBuilderPluginSetup;
+  agenticInvestigations: AgenticInvestigationsPluginSetup;
   proposals: ProposalsPluginSetup;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginSetup;
 }
@@ -31,6 +36,7 @@ export interface AlertZeroStartDependencies {
   spaces?: SpacesPluginStart;
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
   agentBuilder: AgentBuilderPluginStart;
+  agenticInvestigations: AgenticInvestigationsPluginStart;
   proposals: ProposalsPluginStart;
 }
 
