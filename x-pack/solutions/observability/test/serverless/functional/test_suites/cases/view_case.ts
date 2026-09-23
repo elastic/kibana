@@ -212,17 +212,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     describe('filter activity', () => {
-      createOneCaseBeforeDeleteAllAfter(getPageObject, getService, owner);
-
-      beforeEach(async function () {
-        // The redesign consolidates the activity type filters into a single dropdown
-        // (`user-actions-filter-bar-type-button`) with popover options and plain count badges rather
-        // than the legacy inline toggle buttons with `euiNotificationBadge` "N active filters" labels
-        // these assertions read; the redesign filter bar has its own unit coverage.
+      before(async function () {
+        // The redesign uses a different activity filter; skip before the legacy case-list setup.
         if (await cases.common.isRedesignEnabled()) {
           this.skip();
         }
       });
+      createOneCaseBeforeDeleteAllAfter(getPageObject, getService, owner);
 
       it('filters by all by default', async () => {
         const allBadge = await find.byCssSelector(

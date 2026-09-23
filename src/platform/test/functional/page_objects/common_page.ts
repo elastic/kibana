@@ -585,7 +585,7 @@ export class CommonPageObject extends FtrService {
     if (isValidatorCssString) {
       await this.find.byCssSelector(validator);
     } else {
-      await this.testSubjects.exists(validator);
+      await this.testSubjects.existOrFail(validator, { timeout: 5000 });
     }
   }
 

@@ -103,6 +103,7 @@ export class ListingTableService extends FtrService {
    * Clears search input on landing page
    */
   public async clearSearchFilter() {
+    if (!(await this.getSearchFilterValue())) return;
     await this.testSubjects.click('clearSearchButton');
   }
 

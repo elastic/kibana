@@ -37,6 +37,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
   const browser = getService('browser');
+  const retry = getService('retry');
 
   describe('custom urls', function () {
     this.timeout(5 * 60 * 1000);
@@ -85,6 +86,27 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('run custom urls', function () {
+      const openTestCustomUrl = async (index: number) => {
+        const existingHandles = new Set(await browser.getAllWindowHandles());
+        await ml.dataFrameAnalyticsEdit.openTestCustomUrl(dfaJobId, index);
+        await retry.tryForTime(10000, async () => {
+          const newHandle = (await browser.getAllWindowHandles()).find(
+            (handle) => !existingHandles.has(handle)
+          );
+          if (!newHandle) throw new Error('Custom URL has not opened a new tab');
+          await browser.switchToWindow(newHandle);
+        });
+      };
+
+      const closeTestCustomUrl = async () => {
+        if ((await browser.getAllWindowHandles()).length > 1) {
+          await browser.switchTab(1);
+          await browser.closeCurrentWindow();
+          await browser.switchTab(0);
+        }
+        await ml.dataFrameAnalyticsEdit.closeEditJobFlyout();
+      };
+
       before(async () => {
         testDashboardId = await ml.testResources.createMLTestDashboardIfNeeded();
       });
@@ -152,45 +174,30 @@ export default function ({ getService }: FtrProviderContext) {
       // wrapping into own describe to make sure new tab is cleaned up even if test failed
       // see: https://github.com/elastic/kibana/pull/67280#discussion_r430528122
       describe('tests Discover type custom URL', () => {
-        let tabsCount = 1;
-
         it('opens Discover page from test link in the edit job flyout', async () => {
           await ml.dataFrameAnalyticsTable.openEditFlyout(dfaJobId);
-          await ml.dataFrameAnalyticsEdit.openTestCustomUrl(dfaJobId, 0);
-          await browser.switchTab(1);
-          tabsCount++;
+          await openTestCustomUrl(0);
           await ml.dataFrameAnalyticsEdit.testDiscoverCustomUrlAction(); // Discover has no content for last 15m.
         });
 
         after(async () => {
-          if (tabsCount > 1) {
-            await browser.closeCurrentWindow();
-            await browser.switchTab(0);
-            await ml.dataFrameAnalyticsEdit.closeEditJobFlyout();
-          }
+          await closeTestCustomUrl();
         });
       });
 
       // wrapping into own describe to make sure new tab is cleaned up even if test failed
       // see: https://github.com/elastic/kibana/pull/67280#discussion_r430528122
       describe('tests Dashboard type custom URL', () => {
-        let tabsCount = 1;
         const testDashboardPanelCount = 0; // ML Test dashboard has no content.
 
         it('opens Dashboard page from test link in the edit job flyout', async () => {
           await ml.dataFrameAnalyticsTable.openEditFlyout(dfaJobId);
-          await ml.dataFrameAnalyticsEdit.openTestCustomUrl(dfaJobId, 1);
-          await browser.switchTab(1);
-          tabsCount++;
+          await openTestCustomUrl(1);
           await ml.dataFrameAnalyticsEdit.testDashboardCustomUrlAction(testDashboardPanelCount);
         });
 
         after(async () => {
-          if (tabsCount > 1) {
-            await browser.closeCurrentWindow();
-            await browser.switchTab(0);
-            await ml.dataFrameAnalyticsEdit.closeEditJobFlyout();
-          }
+          await closeTestCustomUrl();
         });
       });
     });

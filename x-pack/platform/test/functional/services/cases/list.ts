@@ -270,7 +270,25 @@ export function CasesTableServiceProvider(
       await this.openAssigneesPopover();
 
       await casesCommon.setSearchTextInAssigneesPopover(assignee);
-      await casesCommon.selectFirstRowInAssigneesPopover();
+      const optionSubj = await retry.tryForTime(5000, async () => {
+        const option = await find.byCssSelector(
+          '[data-test-subj^="userProfileSelectableOption-"]',
+          0
+        );
+        if (!(await option.getVisibleText()).toLowerCase().includes(assignee.toLowerCase())) {
+          throw new Error(`Assignee search result for ${assignee} is not ready`);
+        }
+
+        const subject = await option.getAttribute('data-test-subj');
+        if (!subject) throw new Error('Assignee option has no test subject');
+        return subject;
+      });
+
+      await testSubjects.click(optionSubj);
+      await retry.waitForWithTimeout(`assignee ${assignee} to be selected`, 5000, async () => {
+        const option = await testSubjects.find(optionSubj, 0);
+        return (await option.getAttribute('aria-checked')) === 'true';
+      });
     },
 
     async filterByOwner(owner: string) {
