@@ -251,15 +251,43 @@ function inferSchemaFromAssignRhs(
  * Extends the workflow context schema with template-local variables (assign/capture
  * and for-loop scope) so that validation and autocomplete recognize them.
  */
+/**
+ * Built schemas, keyed by base schema then by the locals in effect. Every
+ * reference sharing a signature shares one schema: extending a base schema with
+ * one key per assign is the bulk of the cost, and a scalar holding thousands of
+ * assigns and thousands of references would otherwise pay it once per reference.
+ *
+ * Owned by the caller rather than by this module, so its lifetime is a
+ * validation run: `createStepContextResolver` makes one and drops it with the
+ * run. A base schema is rebuilt per run anyway, so nothing here outlives it.
+ */
+export type TemplateLocalSchemaCache = WeakMap<
+  object,
+  Map<string, typeof DynamicStepContextSchema>
+>;
+
+export const createTemplateLocalSchemaCache = (): TemplateLocalSchemaCache => new WeakMap();
+
 export function extendContextWithTemplateLocals(
   baseSchema: typeof DynamicStepContextSchema,
   templateString: string,
-  offsetInTemplate: number
+  offsetInTemplate: number,
+  schemaCache: TemplateLocalSchemaCache = createTemplateLocalSchemaCache()
 ): typeof DynamicStepContextSchema {
-  const { assignVars, captureNames, forLoopScopes } = getTemplateLocalContext(
+  const { assignVars, captureNames, forLoopScopes, signature } = getTemplateLocalContext(
     templateString,
     offsetInTemplate
   );
+
+  let bySignature = schemaCache.get(baseSchema);
+  if (!bySignature) {
+    bySignature = new Map();
+    schemaCache.set(baseSchema, bySignature);
+  }
+  const cached = bySignature.get(signature);
+  if (cached) {
+    return cached;
+  }
 
   const extension: Record<string, z.ZodType> = {};
   for (const { name, rhs } of assignVars) {
@@ -287,13 +315,16 @@ export function extendContextWithTemplateLocals(
     extension.forloop = FORLOOP_SCHEMA;
   }
 
-  if (Object.keys(extension).length === 0) {
-    return baseSchema;
-  }
+  const extended =
+    Object.keys(extension).length === 0
+      ? baseSchema
+      : // Zod's .extend() returns a new ZodObject whose generic shape differs from
+        // DynamicStepContextSchema; the cast is necessary because the added keys are
+        // dynamic and not reflected in the static type.
+        (baseSchema.extend(extension) as typeof DynamicStepContextSchema);
 
-  // Zod's .extend() returns a new ZodObject whose generic shape differs from DynamicStepContextSchema;
-  // the cast is necessary because the added keys are dynamic and not reflected in the static type.
-  return baseSchema.extend(extension) as typeof DynamicStepContextSchema;
+  bySignature.set(signature, extended);
+  return extended;
 }
 
 const yamlStringCache = new WeakMap<Document, string | null>();
@@ -339,7 +370,8 @@ export function getContextSchemaWithTemplateLocals(
   offset: number,
   baseSchema: typeof DynamicStepContextSchema,
   /** Original YAML source (e.g. editor model). Prefer over re-serialized `doc.toString()` for block scalars. */
-  yamlSource?: string
+  yamlSource?: string,
+  schemaCache?: TemplateLocalSchemaCache
 ): typeof DynamicStepContextSchema {
   const scalarNode = getScalarValueAtOffset(yamlDocument, offset);
   if (!scalarNode || typeof scalarNode.value !== 'string' || !scalarNode.range) {
@@ -374,5 +406,5 @@ export function getContextSchemaWithTemplateLocals(
     return baseSchema;
   }
 
-  return extendContextWithTemplateLocals(baseSchema, templateString, offsetInTemplate);
+  return extendContextWithTemplateLocals(baseSchema, templateString, offsetInTemplate, schemaCache);
 }

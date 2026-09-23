@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { getLiquidInstance } from '../../liquid/liquid_parse_cache';
 import {
   forLoopScopesContainingOffset,
   getAllForLoopScopes,
   getTemplateLocalContext,
+  hasCachedTemplateLocalIndex,
   isLiquidRangeLiteral,
   resolveAssignChain,
 } from './extract_template_local_context';
@@ -342,5 +344,48 @@ describe('isLiquidRangeLiteral', () => {
 
   it.each(['consts.items', 'rows', '(1..n)'])('returns false for %s', (value) => {
     expect(isLiquidRangeLiteral(value)).toBe(false);
+  });
+});
+
+describe('template index cache', () => {
+  const MAX_CACHED_TEMPLATES = 16;
+  const templateOfSize = (chars: number, marker: string) =>
+    `{% assign ${marker} = "x" %}`.padEnd(chars, ' ');
+
+  it('evicts the oldest template once the cap is reached', () => {
+    const oldest = templateOfSize(100, 'oldest');
+    getTemplateLocalContext(oldest, oldest.length);
+    expect(hasCachedTemplateLocalIndex(oldest)).toBe(true);
+
+    for (let i = 0; i < MAX_CACHED_TEMPLATES; i++) {
+      getTemplateLocalContext(templateOfSize(100, `later${i}`), 0);
+    }
+
+    expect(hasCachedTemplateLocalIndex(oldest)).toBe(false);
+  });
+
+  it('parses a template that failed to parse once, however many offsets ask', () => {
+    // Every reference in a scalar asks for the locals at its own offset. Before
+    // failed parses were cached, each of those asks parsed the scalar again.
+    const malformed = `{% assign broken = ${'x'.repeat(2_000)}`;
+    const parse = jest.spyOn(getLiquidInstance(), 'parse');
+
+    for (let offset = 0; offset < malformed.length; offset += 2) {
+      getTemplateLocalContext(malformed, offset);
+    }
+
+    expect(parse.mock.calls.filter(([source]) => source === malformed)).toHaveLength(1);
+    expect(hasCachedTemplateLocalIndex(malformed)).toBe(true);
+    parse.mockRestore();
+  });
+
+  it('does not cache a template over the parse limit', () => {
+    // Rejected on length before any scanning, so there is nothing to save and
+    // caching would only retain the string.
+    const huge = templateOfSize(200_000, 'huge');
+
+    getTemplateLocalContext(huge, 0);
+
+    expect(hasCachedTemplateLocalIndex(huge)).toBe(false);
   });
 });

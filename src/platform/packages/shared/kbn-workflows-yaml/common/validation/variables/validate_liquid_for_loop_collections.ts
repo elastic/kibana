@@ -10,6 +10,7 @@
 import type { Document, LineCounter } from 'yaml';
 import type { WorkflowYaml } from '@kbn/workflows';
 import type { YamlValidationResult } from '../types';
+import type { ValidationBudget } from '../budget';
 import type { StepContextResolver } from '../context/step_context_resolver';
 import { validateLiquidYamlScalars } from './validate_liquid_yaml_scalars';
 
@@ -18,10 +19,14 @@ export function validateLiquidForLoopCollections(
   yamlString: string,
   yamlDocument: Document,
   lineCounter: LineCounter,
-  workflowDefinition: WorkflowYaml
+  workflowDefinition: WorkflowYaml,
+  budget?: ValidationBudget
 ): YamlValidationResult[] {
-  return validateLiquidYamlScalars(yamlString, yamlDocument, lineCounter, {
-    workflowDefinition,
-    stepContext,
-  }).filter((result) => result.owner === 'variable-validation');
+  return validateLiquidYamlScalars(
+    yamlString,
+    yamlDocument,
+    lineCounter,
+    { workflowDefinition, stepContext },
+    budget
+  ).filter((result) => result.owner === 'variable-validation');
 }

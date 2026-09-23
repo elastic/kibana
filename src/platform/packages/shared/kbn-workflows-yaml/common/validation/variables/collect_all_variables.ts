@@ -12,6 +12,7 @@ import { visit } from 'yaml';
 import { getPathFromAncestors } from '@kbn/workflows/common/utils/yaml';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
 import { matchAllVariables } from '../../regex';
+import { spendBudgetUnit, type ValidationBudget } from '../budget';
 import type { VariableItem } from '../types';
 
 interface ScalarEntry {
@@ -71,7 +72,8 @@ export function collectAllVariables(
   yamlString: string,
   yamlDocument: Document,
   lineCounter: LineCounter,
-  workflowGraph: WorkflowGraph
+  workflowGraph: WorkflowGraph,
+  budget?: ValidationBudget
 ): VariableItem[] {
   if (lineCounter.lineStarts.length === 0) {
     throw new Error('LineCounter must be initialized by parsing the YAML source');
@@ -84,6 +86,9 @@ export function collectAllVariables(
     const startOffset = match.index ?? 0;
     const entry = findScalarAtOffset(scalarIndex, startOffset);
     if (entry) {
+      if (!spendBudgetUnit(budget)) {
+        break;
+      }
       const endOffset = startOffset + (match[0].length ?? 0);
       const startPosition = lineCounter.linePos(startOffset);
       const endPosition = lineCounter.linePos(endOffset);

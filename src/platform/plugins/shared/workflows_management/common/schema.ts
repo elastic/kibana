@@ -469,8 +469,14 @@ export const getWorkflowZodSchema = (
   }
 
   const allConnectors = getAllConnectorsWithDynamicInternal(dynamicConnectorTypes);
-  return generateYamlSchemaFromConnectors(allConnectors, registeredTriggers);
+  return getWorkflowZodSchemaFromConnectors(allConnectors, registeredTriggers);
 };
+
+/** Same schema from an already-resolved list, for callers that need the list too. */
+export const getWorkflowZodSchemaFromConnectors = (
+  allConnectors: ConnectorContractUnion[],
+  registeredTriggers: CustomTriggerSchemaInput[] = []
+): z.ZodType => generateYamlSchemaFromConnectors(allConnectors, registeredTriggers);
 
 export const getWorkflowZodSchemaLoose = (
   dynamicConnectorTypes: Record<string, ConnectorTypeInfo> = {}
