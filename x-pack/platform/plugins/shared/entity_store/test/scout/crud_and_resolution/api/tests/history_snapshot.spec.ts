@@ -200,7 +200,9 @@ apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, ()
       };
 
       const expiredIndex = getHistorySnapshotIndexName('default', utcDaysAgo(31, 0));
-      const cutoffHourZeroIndex = getHistorySnapshotIndexName('default', utcDaysAgo(30, 0));
+      // 29 days ago is safely within the 30-day retention window regardless of when in the
+      // UTC day the snapshot runs. Exact cutoff-day/hour behavior is covered by unit tests.
+      const withinRetentionIndex = getHistorySnapshotIndexName('default', utcDaysAgo(29, 0));
       const recentIndex = getHistorySnapshotIndexName('default', utcDaysAgo(5, 12));
       const expiredLegacyIndex = getLegacySecurityHistorySnapshotIndexName(
         'default',
@@ -209,7 +211,7 @@ apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, ()
 
       await esClient.indices.delete(
         {
-          index: [expiredIndex, cutoffHourZeroIndex, recentIndex, expiredLegacyIndex],
+          index: [expiredIndex, withinRetentionIndex, recentIndex, expiredLegacyIndex],
           ignore_unavailable: true,
         },
         { ignore: [404] }
@@ -217,7 +219,7 @@ apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, ()
 
       await Promise.all([
         esClient.indices.create({ index: expiredIndex }),
-        esClient.indices.create({ index: cutoffHourZeroIndex }),
+        esClient.indices.create({ index: withinRetentionIndex }),
         esClient.indices.create({ index: recentIndex }),
         esClient.indices.create({ index: expiredLegacyIndex }),
       ]);
@@ -237,7 +239,7 @@ apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, ()
 
       expect(await esClient.indices.exists({ index: expiredIndex })).toBe(false);
       expect(await esClient.indices.exists({ index: expiredLegacyIndex })).toBe(false);
-      expect(await esClient.indices.exists({ index: cutoffHourZeroIndex })).toBe(true);
+      expect(await esClient.indices.exists({ index: withinRetentionIndex })).toBe(true);
       expect(await esClient.indices.exists({ index: recentIndex })).toBe(true);
       expect(await esClient.indices.exists({ index: body.historySnapshotIndex })).toBe(true);
     }

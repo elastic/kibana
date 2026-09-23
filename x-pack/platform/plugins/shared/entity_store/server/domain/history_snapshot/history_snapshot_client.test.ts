@@ -258,6 +258,23 @@ describe('HistorySnapshotClient', () => {
       expect(mockDeleteExpiredHistorySnapshots).toHaveBeenCalledTimes(1);
     });
 
+    it('returns error and still runs retention cleanup when source-index resolution fails', async () => {
+      mockResolveLatestEntitiesIndexName.mockRejectedValue(new Error('lookup failed'));
+
+      const result = await client.runHistorySnapshot();
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.message).toBe('History snapshot failed');
+      }
+      expect(mockGlobalStateClient.update).toHaveBeenCalledWith({
+        historySnapshot: expect.objectContaining({
+          lastError: { message: 'lookup failed', timestamp: expect.any(String) },
+        }),
+      });
+      expect(mockDeleteExpiredHistorySnapshots).toHaveBeenCalledTimes(1);
+    });
+
     it('still succeeds when retention cleanup throws', async () => {
       mockCreateIndex.mockResolvedValue(undefined);
       mockReindex.mockResolvedValue({

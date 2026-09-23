@@ -69,9 +69,13 @@ const getLegacyLatestCompatibilityAlias = (namespace: string) =>
  */
 const getCollidingNeutralNamespace = (namespace: string) => `security_${namespace}`;
 
-async function entityAliasExists(esClient: ElasticsearchClient, alias: string): Promise<boolean> {
+async function entityAliasExists(
+  esClient: ElasticsearchClient,
+  alias: string,
+  signal?: AbortSignal
+): Promise<boolean> {
   try {
-    await esClient.indices.getAlias({ name: alias });
+    await esClient.indices.getAlias({ name: alias }, { signal });
     return true;
   } catch {
     return false;
@@ -85,7 +89,8 @@ async function entityAliasExists(esClient: ElasticsearchClient, alias: string): 
  */
 export async function hasCollidingNeutralNamespaceAssets(
   esClient: ElasticsearchClient,
-  namespace: string
+  namespace: string,
+  signal?: AbortSignal
 ): Promise<boolean> {
   const collidingNamespace = getCollidingNeutralNamespace(namespace);
   const collidingAliases = [
@@ -94,7 +99,7 @@ export async function hasCollidingNeutralNamespaceAssets(
     getEntitiesAlias(ENTITY_METADATA, collidingNamespace),
   ];
   for (const alias of collidingAliases) {
-    if (await entityAliasExists(esClient, alias)) {
+    if (await entityAliasExists(esClient, alias, signal)) {
       return true;
     }
   }

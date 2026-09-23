@@ -198,14 +198,15 @@ export class HistorySnapshotClient {
 
     const timestampNow = moment.utc().toISOString();
     const snapshotDate = moment.utc().toDate();
-    const latestIndex = await resolveLatestEntitiesIndexName(this.esClient, this.namespace);
-    const historySnapshotIndex =
-      latestIndex === getLatestEntitiesIndexName(this.namespace)
-        ? getHistorySnapshotIndexName(this.namespace, snapshotDate)
-        : getLegacySecurityHistorySnapshotIndexName(this.namespace, snapshotDate);
 
     let result: RunHistorySnapshotResult;
     try {
+      const latestIndex = await resolveLatestEntitiesIndexName(this.esClient, this.namespace);
+      const historySnapshotIndex =
+        latestIndex === getLatestEntitiesIndexName(this.namespace)
+          ? getHistorySnapshotIndexName(this.namespace, snapshotDate)
+          : getLegacySecurityHistorySnapshotIndexName(this.namespace, snapshotDate);
+
       await createIndex(this.esClient, historySnapshotIndex, { throwIfExists: false });
 
       const reindexStart = Date.now();

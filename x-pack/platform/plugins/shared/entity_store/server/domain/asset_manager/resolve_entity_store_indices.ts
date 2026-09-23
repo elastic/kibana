@@ -109,10 +109,11 @@ export async function resolveMetadataDataStreamName(
  */
 export async function resolveHistorySnapshotIndexPatterns(
   esClient: ElasticsearchClient,
-  namespace: string
+  namespace: string,
+  signal?: AbortSignal
 ): Promise<string[]> {
   const neutral = getHistorySnapshotIndexPattern(namespace);
-  if (await hasCollidingNeutralNamespaceAssets(esClient, namespace)) {
+  if (await hasCollidingNeutralNamespaceAssets(esClient, namespace, signal)) {
     return [neutral];
   }
   return [neutral, getLegacySecurityHistorySnapshotIndexPattern(namespace)];

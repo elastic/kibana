@@ -251,6 +251,32 @@ describe('history snapshot retention', () => {
       expect(esClient.indices.resolveIndex).not.toHaveBeenCalled();
     });
 
+    it('forwards an unaborted signal to collision check, resolveIndex, and delete', async () => {
+      const controller = new AbortController();
+      const { signal } = controller;
+
+      (esClient.indices.resolveIndex as jest.Mock).mockResolvedValue({
+        indices: [{ name: '.entities.v2.history.default.2026-07-01-00' }],
+        aliases: [],
+        data_streams: [],
+      });
+
+      await deleteExpiredHistorySnapshots({
+        esClient,
+        namespace,
+        retentionDays: 30,
+        logger,
+        abortSignal: signal,
+      });
+
+      expect(mockHasColliding).toHaveBeenCalledWith(esClient, namespace, signal);
+      expect(esClient.indices.resolveIndex).toHaveBeenCalledWith(expect.anything(), { signal });
+      expect(esClient.indices.delete).toHaveBeenCalledWith(expect.anything(), {
+        signal,
+        ignore: [404],
+      });
+    });
+
     it('splits deletion into multiple requests when indices exceed the URL length limit', async () => {
       // Each name is ~1202 bytes. Two fit in one chunk (1202 + 3 + 1202 = 2407 < 3500),
       // the third would push it to 2407 + 3 + 1202 = 3612 > 3500, so it starts a new chunk.
