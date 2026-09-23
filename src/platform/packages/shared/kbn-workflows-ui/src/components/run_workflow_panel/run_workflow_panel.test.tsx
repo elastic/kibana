@@ -428,10 +428,12 @@ describe('RunWorkflowPanel', () => {
       fireEvent.click(screen.getByTestId('select-workflow-option'));
       fireEvent.click(screen.getByTestId('run-workflow-execute-button'));
 
-      expect(runWorkflow).toHaveBeenCalledWith({
-        workflowId: 'test-workflow-id',
-        inputs: { alert_ids: ['alert-1'] },
-      });
+      await waitFor(() =>
+        expect(runWorkflow).toHaveBeenCalledWith({
+          workflowId: 'test-workflow-id',
+          inputs: { alert_ids: ['alert-1'] },
+        })
+      );
       expect(mockMutate).not.toHaveBeenCalled();
     });
 
@@ -470,6 +472,26 @@ describe('RunWorkflowPanel', () => {
       expect(mockAddError).toHaveBeenCalledWith(
         expect.objectContaining({ message: 'executor failed' }),
         { title: i18n.WORKFLOW_START_FAILED_TOAST }
+      );
+      expect(onClose).toHaveBeenCalled();
+    });
+
+    it('shows an error toast and closes the modal when the executor throws synchronously', async () => {
+      const runWorkflow: RunWorkflowExecutor = jest.fn(() => {
+        throw new Error('executor threw');
+      });
+      const onClose = jest.fn();
+
+      renderComponent({ runWorkflow, onClose });
+
+      fireEvent.click(screen.getByTestId('select-workflow-option'));
+      fireEvent.click(screen.getByTestId('run-workflow-execute-button'));
+
+      await waitFor(() =>
+        expect(mockAddError).toHaveBeenCalledWith(
+          expect.objectContaining({ message: 'executor threw' }),
+          { title: i18n.WORKFLOW_START_FAILED_TOAST }
+        )
       );
       expect(onClose).toHaveBeenCalled();
     });

@@ -9,30 +9,13 @@ import { useCallback, useMemo, useState } from 'react';
 import type { WorkflowListItemDto } from '@kbn/workflows';
 import type { RunWorkflowExecutor } from '@kbn/workflows-ui';
 import { useWorkflowsCapabilities, useWorkflowsUIEnabledSetting } from '@kbn/workflows-ui';
-import {
-  CaseCreatedTriggerId,
-  CaseUpdatedTriggerId,
-  CaseStatusUpdatedTriggerId,
-  AttachmentsAddedTriggerId,
-  CommentsAddedTriggerId,
-} from '../../../common/workflows/triggers';
 import { CASE_WORKFLOW_ORIGIN_TYPE } from '../../../common/types/domain/user_action/workflow/constants';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import type { CaseUI } from '../../containers/types';
 import { useCasesConfig } from '../../common/lib/kibana';
 import { useCasesWorkflowExecutor } from './use_cases_workflow_executor';
 
-/**
- * All `cases.*` trigger IDs — workflows triggered by any of these are prioritised
- * in the selector when the user opens "Run workflow" from a case detail page.
- */
-const CASE_TRIGGER_TYPES = new Set<string>([
-  CaseCreatedTriggerId,
-  CaseUpdatedTriggerId,
-  CaseStatusUpdatedTriggerId,
-  AttachmentsAddedTriggerId,
-  CommentsAddedTriggerId,
-]);
+const CASE_TRIGGER_TYPE_PREFIX = 'cases.';
 
 /**
  * Stable empty array used as the default for workflowTags to avoid
@@ -69,12 +52,12 @@ export const createCaseWorkflowComparator = (
     if (tagRank !== 0) return tagRank;
 
     // The @kbn/workflows trigger-type union only knows built-in types; cases.* trigger
-    // IDs are runtime extensions, so we compare as strings.
+    // IDs are runtime extensions, so we compare their string prefix.
     const aHasCaseTrigger = (a.definition?.triggers ?? []).some((t) =>
-      CASE_TRIGGER_TYPES.has(t.type as string)
+      (t.type as string).startsWith(CASE_TRIGGER_TYPE_PREFIX)
     );
     const bHasCaseTrigger = (b.definition?.triggers ?? []).some((t) =>
-      CASE_TRIGGER_TYPES.has(t.type as string)
+      (t.type as string).startsWith(CASE_TRIGGER_TYPE_PREFIX)
     );
     return Number(bHasCaseTrigger) - Number(aHasCaseTrigger);
   };
@@ -143,14 +126,8 @@ export const useRunCaseWorkflow = ({
   const openModal = useCallback(() => setIsModalOpen(true), []);
   const closeModal = useCallback(() => setIsModalOpen(false), []);
 
-  const inputs = useMemo(
-    () => ({
-      event: {
-        caseIds: [caseData.id],
-      },
-    }),
-    [caseData.id]
-  );
+  // The Cases API derives event.caseIds from its authorized caseIds request field.
+  const inputs = useMemo(() => ({}), []);
 
   const origin = useMemo(
     () => ({ type: CASE_WORKFLOW_ORIGIN_TYPE, caseId: caseData.id }),

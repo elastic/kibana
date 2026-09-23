@@ -67,7 +67,7 @@ export const useRunWorkflowAction = ({
       return {
         name: <EuiTextColor>{RUN_WORKFLOW}</EuiTextColor>,
         onClick: () => handleOpen(selectedCasesForRun),
-        disabled: overLimit,
+        disabled: selectedCasesForRun.length === 0 || overLimit,
         toolTipContent: overLimit ? i18n.MAX_CASES_TOOLTIP(MAX_CASES_PER_WORKFLOW_RUN) : undefined,
         'data-test-subj': 'cases-bulk-action-run-workflow',
         icon: <EuiIcon type="play" size="m" aria-hidden={true} />,

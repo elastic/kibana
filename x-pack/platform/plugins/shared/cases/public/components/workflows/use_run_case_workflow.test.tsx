@@ -13,7 +13,11 @@ import {
   useRunCaseWorkflow,
 } from './use_run_case_workflow';
 import { CASE_WORKFLOW_ORIGIN_TYPE } from '../../../common/types/domain/user_action/workflow/constants';
-import { CaseCreatedTriggerId, CaseUpdatedTriggerId } from '../../../common/workflows/triggers';
+import {
+  CaseCreatedTriggerId,
+  CaseUpdatedTriggerId,
+  ExtendedFieldsUpdatedTriggerId,
+} from '../../../common/workflows/triggers';
 import { basicCase } from '../../containers/mock';
 
 // ---- module mocks ----
@@ -117,11 +121,10 @@ describe('useRunCaseWorkflow', () => {
   });
 
   describe('inputs', () => {
-    it('includes the case id in a caseIds array in the event payload', () => {
+    it('does not inject event.caseIds because the server owns that field', () => {
       const { result } = renderHookWithDefaults();
-      expect(result.current.inputs).toEqual({
-        event: { caseIds: [basicCase.id] },
-      });
+
+      expect(result.current.inputs).toEqual({});
     });
   });
 
@@ -206,6 +209,15 @@ describe('createCaseWorkflowComparator', () => {
     const compare = createCaseWorkflowComparator([]);
     const caseTrigger = makeWorkflow('case-wf', [], [CaseCreatedTriggerId]);
     const plain = makeWorkflow('plain-wf', [], ['manual']);
+    expect(compare(caseTrigger, plain)).toBeLessThan(0);
+    expect(compare(plain, caseTrigger)).toBeGreaterThan(0);
+  });
+
+  it('sorts extended-fields-trigger workflows before plain workflows', () => {
+    const compare = createCaseWorkflowComparator([]);
+    const caseTrigger = makeWorkflow('case-wf', [], [ExtendedFieldsUpdatedTriggerId]);
+    const plain = makeWorkflow('plain-wf', [], ['manual']);
+
     expect(compare(caseTrigger, plain)).toBeLessThan(0);
     expect(compare(plain, caseTrigger)).toBeGreaterThan(0);
   });

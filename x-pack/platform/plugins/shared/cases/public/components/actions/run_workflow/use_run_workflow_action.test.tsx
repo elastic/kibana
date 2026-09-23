@@ -111,6 +111,13 @@ describe('useRunWorkflowAction', () => {
       expect(item.disabled).toBe(false);
     });
 
+    it('is disabled when the selection is empty', () => {
+      const { result } = renderAction();
+      const item = result.current.getAction([]);
+
+      expect(item.disabled).toBe(true);
+    });
+
     it('is disabled when selection exceeds the cap', () => {
       const { result } = renderAction();
       const cases = Array.from({ length: MAX_CASES_PER_WORKFLOW_RUN + 1 }, (_, i) =>

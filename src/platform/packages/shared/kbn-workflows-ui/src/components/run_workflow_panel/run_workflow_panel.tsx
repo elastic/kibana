@@ -192,7 +192,8 @@ export const RunWorkflowPanel = ({
       };
 
       if (runWorkflowExecutor) {
-        void runWorkflowExecutor({ workflowId: selectedId, inputs: mergedInputs })
+        void Promise.resolve()
+          .then(() => runWorkflowExecutor({ workflowId: selectedId, inputs: mergedInputs }))
           .then(onSuccess, (err: unknown) => {
             notifications.toasts.addError(getWorkflowExecutionError(err), {
               title: i18n.WORKFLOW_START_FAILED_TOAST,
