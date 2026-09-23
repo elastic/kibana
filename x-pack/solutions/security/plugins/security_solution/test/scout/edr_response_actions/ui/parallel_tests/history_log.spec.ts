@@ -100,8 +100,11 @@ spaceTest.describe(
           await responseActionsHistory.toggleTypeFilter(TRIGGERED_BY_RULE);
           await responseActionsHistory.ruleLinkForHost(history.automatedHostname).click();
           await expect(page).toHaveURL(new RegExp(`/id/${history.ruleId}`));
-          await expect(page.testSubj.locator('breadcrumb last')).toContainText(
-            'Detection rules (SIEM)'
+          // The rules crumb is `breadcrumb last`, or `breadcrumb first last` when it is the
+          // only crumb. A missing generated rule then replaces that title with "Deleted rule".
+          await expect(page.testSubj.locator('~breadcrumb & ~last')).toContainText(
+            /Detection rules \(SIEM\)|Deleted rule/,
+            { timeout: 60_000 }
           );
         });
       }
