@@ -61,5 +61,8 @@ export const aiIndexAutomationsSkill = defineSkillType({
     `${internalNamespaces.workflows}.get_examples`,
     `${internalNamespaces.workflows}.get_connectors`,
     `${internalNamespaces.workflows}.workflow_execute_step`,
+    // CE automation lifecycle tools — save writes a named workflow; run fires it asynchronously.
+    'platform.context_engine.save_automation',
+    'platform.context_engine.run_automation',
   ],
 });

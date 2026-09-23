@@ -83,6 +83,8 @@ describe('aiIndexAutomationsSkill', () => {
       `${internalNamespaces.workflows}.get_examples`,
       `${internalNamespaces.workflows}.get_connectors`,
       `${internalNamespaces.workflows}.workflow_execute_step`,
+      'platform.context_engine.save_automation',
+      'platform.context_engine.run_automation',
     ]);
   });
 
@@ -406,18 +408,18 @@ describe('aiIndexAutomationsSkill', () => {
     it('does not let piloting a workflow be read as licence to run the saved one', () => {
       expect(content).toContain('Running one is a separate decision');
       expect(content).toMatch(
-        /do not\s+execute a saved\s+workflow unless the run you are in has told you/
+        /do not\s+execute a saved\s+workflow unless the context in this conversation calls for it/
       );
     });
 
-    it('has the save tool perform the run, so a failure is reported rather than retried', () => {
-      expect(content).toMatch(/starts that run itself, in its own code/);
+    it('has run_automation report a failed start as the final answer, not a retryable task', () => {
+      expect(content).toMatch(/run_automation` reports that the run did not start, that is the answer/);
       expect(content).toMatch(/that is the answer, not a task/);
       expect(content).toMatch(/a second attempt doubles it/);
     });
 
-    it('does not treat the save tool run flag as an unauthorized run', () => {
-      expect(content).toMatch(/approving the save approves the run/);
+    it('gives save and run each their own confirmation dialog', () => {
+      expect(content).toMatch(/two separate operations, each with its own confirmation\s+dialog/);
     });
 
     it('carries the workflow syntax itself, rather than depending on another skill for it', () => {
