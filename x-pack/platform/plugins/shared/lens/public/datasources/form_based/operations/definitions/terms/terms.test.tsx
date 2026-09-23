@@ -41,6 +41,7 @@ import {
   TERMS_CUSTOM_RANK_LAST_VALUE_SORT_FIELD_INVALID_TYPE,
   TERMS_CUSTOM_RANK_LAST_VALUE_SORT_FIELD_NOT_FOUND,
 } from '../../../../../user_messages_ids';
+import type { TermsColumnWithLastValueOrderAgg } from './helpers';
 
 jest.mock('@kbn/unified-field-list/src/services/field_stats', () => ({
   loadFieldStats: jest.fn().mockResolvedValue({
@@ -166,7 +167,9 @@ describe('terms', () => {
     };
   }
 
-  const createLastValueRankedTermsColumn = (sortField?: string): TermsIndexPatternColumn => ({
+  const createLastValueRankedTermsColumn = (
+    sortField?: string
+  ): TermsColumnWithLastValueOrderAgg => ({
     label: 'Top values of source',
     dataType: 'string',
     isBucketed: true,
@@ -182,8 +185,8 @@ describe('terms', () => {
         isBucketed: false,
         operationType: 'last_value',
         sourceField: 'bytes',
-        params: { sortField, showArrayValues: false },
-      } as LastValueIndexPatternColumn,
+        ...(sortField ? { params: { sortField } } : {}),
+      },
     },
   });
 
@@ -499,6 +502,24 @@ describe('terms', () => {
         );
 
         expect(esAggsFn).toEqual(expectOrderAggSortField('start_date'));
+      });
+
+      it('should not throw when the order-agg has no params and the data view has no date field', () => {
+        // `createLastValueRankedTermsColumn(undefined)` omits `params` entirely, mirroring an
+        // API-authored order-agg that dropped `time_field`. With no date field to fall back to, the
+        // config is a blocking-error case, but `toEsAggsFn` must still build without throwing so the
+        // error panel can render instead of crashing the editor.
+        expect(() =>
+          termsOperation.toEsAggsFn(
+            createLastValueRankedTermsColumn(undefined),
+            'col1',
+            createMockedIndexPatternWithoutType('date'),
+            layer,
+            uiSettingsMock,
+            [],
+            operationDefinitionMap
+          )
+        ).not.toThrow();
       });
     });
   });
