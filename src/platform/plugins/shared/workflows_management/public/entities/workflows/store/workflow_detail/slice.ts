@@ -186,7 +186,8 @@ const workflowDetailSlice = createSlice({
       }
     },
     _clearComputedData: (state) => {
-      state.computed = {};
+      // Not `undefined`, which re-arms the middleware bootstrap (see `setWorkflow`).
+      state.computed = { yamlString: undefined };
       state.focusedStepId = undefined;
       state.focusedTriggerId = undefined;
     },

@@ -249,6 +249,7 @@ export {
   parseExecutionId,
   executionTerminatedEventId,
   feedbackEventId,
+  executionStepEventId,
   RESERVED_CONVERSATION_EVENT_TYPES,
   type ReservedConversationEventType,
   BUILT_IN_CONVERSATION_EVENT_TYPES,
