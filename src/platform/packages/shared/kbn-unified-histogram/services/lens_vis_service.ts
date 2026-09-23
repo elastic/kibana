@@ -736,7 +736,7 @@ export class LensVisService {
 
     const isTextBased = isOfAggregateQueryType(query);
     const requestData = {
-      dataViewId: dataView.id,
+      dataViewId: queryParams.datasetKey ?? dataView.id,
       timeField: timeFieldName,
       timeInterval: isTextBased ? undefined : timeInterval,
       breakdownField: breakdownField?.name,
@@ -855,17 +855,33 @@ function areSuggestionAndVisContextAndQueryParamsStillCompatible({
   queryParams: QueryParams;
   requestData: UnifiedHistogramVisContext['requestData'];
 }): boolean {
-  // requestData should match
+  const isEsql = Boolean(queryParams.isPlainRecord);
+
+  // ES|QL `requestData.dataViewId` is `EsqlSource.datasetKey`, not the query-hashed
+  // `EsqlSource.id`. Skip exact id equality only to accept older vis contexts that
+  // still stored the hash; those fall back to FROM + time field on the layers.
   if (
     (Object.keys(requestData) as Array<keyof UnifiedHistogramVisContext['requestData']>).some(
-      (key) => !isEqual(requestData[key], externalVisContext.requestData[key])
+      (key) => {
+        if (isEsql && key === 'dataViewId') {
+          return (
+            requestData.dataViewId !== externalVisContext.requestData.dataViewId &&
+            !isPreferredEsqlVisCompatibleWithCurrentQuery(
+              externalVisContext.attributes,
+              queryParams.query,
+              queryParams.timeFieldName ?? queryParams.dataView.timeFieldName
+            )
+          );
+        }
+        return !isEqual(requestData[key], externalVisContext.requestData[key]);
+      }
     )
   ) {
     return false;
   }
 
   if (
-    queryParams.isPlainRecord &&
+    isEsql &&
     suggestionType === UnifiedHistogramSuggestionType.lensSuggestion &&
     !deriveLensSuggestionFromLensAttributes({ externalVisContext, queryParams })
   ) {

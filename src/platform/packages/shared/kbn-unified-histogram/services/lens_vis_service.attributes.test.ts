@@ -710,7 +710,7 @@ describe('LensVisService attributes', () => {
         },
         "requestData": Object {
           "breakdownField": undefined,
-          "dataViewId": "index-pattern-with-timefield-id",
+          "dataViewId": "esql:logstash-*:timestamp:",
           "timeField": "timestamp",
           "timeInterval": undefined,
         },
