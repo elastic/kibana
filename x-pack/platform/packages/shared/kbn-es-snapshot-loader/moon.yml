@@ -20,7 +20,6 @@ dependsOn:
   - '@kbn/dev-cli-runner'
   - '@kbn/kibana-api-cli'
   - '@kbn/tooling-log'
-  - '@kbn/zod'
 tags:
   - shared-common
   - package
