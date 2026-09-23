@@ -16,6 +16,9 @@ import type {
   HttpSelfResponse,
   HttpSelfScopedClient,
   HttpSelfService,
+  HttpSelfUnauthorizedErrorHandler,
+  HttpSelfUnauthorizedErrorHandlerResult,
+  HttpSelfUnauthorizedErrorHandlerToolkit,
   HttpServerInfo,
   IAuthHeadersStorage,
   IBasePath,
@@ -25,15 +28,22 @@ import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
-import { UIAM_INTERNAL_CALLER_ATTESTATION_HEADER } from '@kbn/core-security-server';
+import {
+  ES_CLIENT_AUTHENTICATION_HEADER,
+  UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
+} from '@kbn/core-security-server';
 import { getSpaceUrlPrefix } from '@kbn/core-spaces-common';
 import type { HttpConfig } from './http_config';
 import { SelfHttpDispatcherProvider } from './self_client_dispatcher';
-import { SELF_CALL_HEADER } from './self_client_observer';
+import { SELF_CALL_AUTH_CHALLENGE_HEADER, SELF_CALL_HEADER } from './self_client_observer';
 
 const JSON_CONTENT = /^(application\/(json|x-javascript)|text\/(x-)?javascript|x-json)(;.*)?$/;
 const DEFAULT_TIMEOUT_MS = 60_000;
 const KIBANA_VERSION_HEADER = 'kbn-version';
+// The secondary variant has no shared constant, and the Elasticsearch client that owns the
+// canonical one is not a dependency here. Kept honest by the tests that assert a caller cannot set
+// either of them.
+const ES_SECONDARY_CLIENT_AUTHENTICATION_HEADER = 'es-secondary-x-client-authentication';
 
 /**
  * Returns the UIAM internal-caller attestation for `outboundAuthorization`, or nothing.
@@ -70,6 +80,7 @@ interface HttpSelfClientParams {
   readonly log: Logger;
   readonly target: 'auto' | 'local';
   readonly getUiamAttestationGetter?: () => SelfClientUiamAttestationGetter | undefined;
+  readonly getUnauthorizedErrorHandler?: () => HttpSelfUnauthorizedErrorHandler | undefined;
 }
 
 interface SelfFetchInit extends RequestInit {
@@ -111,18 +122,41 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
     this.validateRequestContext();
 
     const fetchOptions = { ...options, path };
-    const request = this.createRequest(path, options);
-    this.logAttempt(request.method);
+    let request = this.createRequest(path, options);
+    this.logAttempt(request.method, false);
     const cleanup: Array<() => void> = [];
 
     try {
+      // A single signal for the whole call, so the caller's timeout stays a true wall-clock budget
+      // that also covers waiting for a credential refresh between the two attempts.
       const signal = this.createSignal(options, cleanup);
-      const fetchInit: SelfFetchInit = {
-        signal,
-        redirect: 'error',
-        dispatcher: this.dispatcherProvider.get(new URL(request.url)),
+      const dispatch = (outbound: Request) => {
+        const fetchInit: SelfFetchInit = {
+          signal,
+          redirect: 'error',
+          dispatcher: this.dispatcherProvider.get(new URL(outbound.url)),
+        };
+        return fetch(outbound, fetchInit);
       };
-      const response = await fetch(request, fetchInit);
+
+      let response = await dispatch(request);
+
+      if (isAuthChallengeResponse(response) && !signal.aborted) {
+        const retryAuthHeaders = await this.resolveRetryAuthHeaders(
+          path,
+          request,
+          response,
+          signal,
+          cleanup
+        );
+        if (retryAuthHeaders) {
+          // Nothing else reads this body, and undici holds the connection until it is drained.
+          await discardResponseBody(response);
+          request = this.createRequest(path, options, retryAuthHeaders);
+          this.logAttempt(request.method, true);
+          response = await dispatch(request);
+        }
+      }
 
       if (options.rawResponse) {
         return { fetchOptions, request, response };
@@ -149,7 +183,7 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
     }
   }
 
-  private logAttempt(targetMethod: string): void {
+  private logAttempt(targetMethod: string, isRetry: boolean): void {
     const targetMode =
       this.params.target === 'auto' && this.params.basePath.publicBaseUrl ? 'public' : 'local';
 
@@ -159,6 +193,7 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
         self_http_source_route_template: this.request.route.path,
         self_http_target_method: targetMethod,
         self_http_target_mode: targetMode,
+        self_http_retry: String(isRetry),
       },
     });
   }
@@ -176,11 +211,12 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
 
   private createRequest<TRequestBody>(
     path: string,
-    options: HttpSelfFetchOptions<TRequestBody>
+    options: HttpSelfFetchOptions<TRequestBody>,
+    retryAuthHeaders?: AuthHeaders
   ): Request {
     const method = options.method ?? 'GET';
     const url = this.createUrl(path, options);
-    const headers = this.createHeaders(options);
+    const headers = this.createHeaders(options, retryAuthHeaders);
     const body = serializeBody(headers, options.body);
 
     return new Request(url, {
@@ -240,7 +276,10 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
     return new URL(`${serverInfo.protocol}://${hostname}:${serverInfo.port}`);
   }
 
-  private createHeaders<TRequestBody>(options: HttpSelfFetchOptions<TRequestBody>): Headers {
+  private createHeaders<TRequestBody>(
+    options: HttpSelfFetchOptions<TRequestBody>,
+    retryAuthHeaders?: AuthHeaders
+  ): Headers {
     const headers = new Headers();
 
     const authHeaders = this.request.isFakeRequest
@@ -251,6 +290,10 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
       addHeaders(headers, getForwardedRequestHeaders(this.request));
     }
     addHeaders(headers, options.headers);
+    // Applied after the caller's headers so a refreshed credential wins over the one this request
+    // was built from. The attestation is stamped below from whatever ends up here, so a retry
+    // re-derives it rather than carrying one bound to the credential that just expired.
+    addHeaders(headers, retryAuthHeaders);
 
     headers.delete('cookie');
     // Strip the internal-origin header from all self calls before optionally adding Core's marker below.
@@ -276,6 +319,73 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
     }
 
     return headers;
+  }
+
+  /**
+   * Asks the registered handler whether this authentication-stage 401 can be recovered, returning
+   * the headers the replay must carry, or `undefined` to surface the 401 unchanged.
+   */
+  private async resolveRetryAuthHeaders(
+    path: string,
+    sentRequest: Request,
+    response: Response,
+    signal: AbortSignal,
+    cleanup: Array<() => void>
+  ): Promise<AuthHeaders | undefined> {
+    const handler = this.params.getUnauthorizedErrorHandler?.();
+    if (!handler) {
+      return undefined;
+    }
+
+    let result: HttpSelfUnauthorizedErrorHandlerResult;
+    try {
+      // The handler typically waits on a shared, single-flight credential exchange. Racing the
+      // wait — rather than the exchange — lets this caller give up on abort without cancelling the
+      // mint for everyone else waiting on it.
+      result = await Promise.race([
+        Promise.resolve(
+          handler(
+            { request: this.request, path, responseHeaders: response.headers },
+            selfUnauthorizedToolkit
+          )
+        ),
+        abortRejection(signal, cleanup),
+      ]);
+    } catch (error) {
+      if (signal.aborted) {
+        throw error;
+      }
+      this.params.log.warn(
+        `Kibana self HTTP call could not refresh its credential: ${(error as Error).message}`
+      );
+      return undefined;
+    }
+
+    if (result.type !== 'retry' || signal.aborted) {
+      return undefined;
+    }
+
+    const retryAuthHeaders = this.sanitizeRetryAuthHeaders(result.authHeaders);
+    // Replaying with the credential that was just rejected can only fail the same way. Refresh
+    // registries commonly reuse a very recently minted token, so this is a real case, not a
+    // theoretical one.
+    return retryAuthHeaders && !headersAlreadySent(sentRequest.headers, retryAuthHeaders)
+      ? retryAuthHeaders
+      : undefined;
+  }
+
+  private sanitizeRetryAuthHeaders(authHeaders: AuthHeaders): AuthHeaders | undefined {
+    const entries = Object.entries(authHeaders).filter(([name]) => {
+      if (isRetryOverridableHeader(name)) {
+        return true;
+      }
+      this.params.log.warn(
+        `Ignoring header [${name}] returned by the Kibana self HTTP unauthorized error handler.`
+      );
+      return false;
+    });
+
+    return entries.length ? (Object.fromEntries(entries) as AuthHeaders) : undefined;
   }
 
   private createSignal<TRequestBody>(
@@ -307,6 +417,66 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
     return controller.signal;
   }
 }
+
+const selfUnauthorizedToolkit: HttpSelfUnauthorizedErrorHandlerToolkit = {
+  notHandled: () => ({ type: 'notHandled' }),
+  retry: ({ authHeaders }) => ({ type: 'retry', authHeaders }),
+};
+
+/**
+ * Core-owned headers a retry overlay must not be able to set. Deliberately narrower than
+ * {@link isProtectedHeader}: overriding `authorization` is the whole point of a retry. The UIAM
+ * shared secret headers are denied outright — they belong to the Elasticsearch client and must
+ * never leave this process on a self call.
+ */
+const isRetryOverridableHeader = (name: string): boolean => {
+  const lowerName = name.toLowerCase();
+  return !(
+    lowerName === 'cookie' ||
+    lowerName === 'host' ||
+    lowerName === ES_CLIENT_AUTHENTICATION_HEADER ||
+    lowerName === ES_SECONDARY_CLIENT_AUTHENTICATION_HEADER ||
+    // Core stamps this from the credential it is about to send, after the overlay is applied, so a
+    // handler-supplied value would only ever be overwritten.
+    lowerName === UIAM_INTERNAL_CALLER_ATTESTATION_HEADER ||
+    lowerName.startsWith('kbn-') ||
+    lowerName === SELF_CALL_HEADER ||
+    lowerName.startsWith('x-elastic-internal-')
+  );
+};
+
+const isAuthChallengeResponse = (response: Response): boolean =>
+  response.status === 401 && response.headers.has(SELF_CALL_AUTH_CHALLENGE_HEADER);
+
+const headersAlreadySent = (sent: Headers, overlay: AuthHeaders): boolean =>
+  Object.entries(overlay).every(([name, value]) => {
+    const sentValue = sent.get(name);
+    return Array.isArray(value) ? sentValue === value.join(', ') : sentValue === value;
+  });
+
+/**
+ * Rejects when the call is aborted. The listener is removed through `cleanup` so a resolved call
+ * does not leave the promise pending on a long-lived signal.
+ */
+const abortRejection = (signal: AbortSignal, cleanup: Array<() => void>): Promise<never> =>
+  new Promise<never>((_resolve, reject) => {
+    if (signal.aborted) {
+      reject(signal.reason ?? new Error('The Kibana self HTTP call was aborted.'));
+      return;
+    }
+    const onAbort = () =>
+      reject(signal.reason ?? new Error('The Kibana self HTTP call was aborted.'));
+    signal.addEventListener('abort', onAbort, { once: true });
+    cleanup.push(() => signal.removeEventListener('abort', onAbort));
+  });
+
+const discardResponseBody = async (response: Response): Promise<void> => {
+  try {
+    await response.body?.cancel();
+  } catch {
+    // The socket is already gone; nothing to release.
+  }
+};
 
 const createHttpSelfFetchError = <TResponseBody>(
   message: string,
@@ -375,10 +545,17 @@ const isProtectedHeader = (name: string) => {
     lowerName === 'authorization' ||
     lowerName === 'cookie' ||
     lowerName === 'host' ||
+    // Derived from the credential on each attempt, so a caller-supplied value would be stale the
+    // moment that credential is refreshed. Matched explicitly rather than by an `x-kbn-` prefix,
+    // which would also capture the forwardable `x-kbn-context`.
+    lowerName === UIAM_INTERNAL_CALLER_ATTESTATION_HEADER ||
+    // The UIAM shared secret belongs to whatever authenticated the request, so the only legitimate
+    // source is the request's own auth headers. A caller must not be able to name its own.
+    lowerName === ES_CLIENT_AUTHENTICATION_HEADER ||
+    lowerName === ES_SECONDARY_CLIENT_AUTHENTICATION_HEADER ||
     lowerName.startsWith('kbn-') ||
     lowerName === SELF_CALL_HEADER ||
-    lowerName.startsWith('x-elastic-internal-') ||
-    lowerName === UIAM_INTERNAL_CALLER_ATTESTATION_HEADER
+    lowerName.startsWith('x-elastic-internal-')
   );
 };
 

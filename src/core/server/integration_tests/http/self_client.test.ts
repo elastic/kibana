@@ -36,6 +36,8 @@ import {
   type HttpService,
   type InternalHttpServiceStart,
 } from '@kbn/core-http-server-internal';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
+import { errors } from '@elastic/elasticsearch';
 import { createInternalHttpService } from '../utilities';
 
 interface RecursiveResponse {
@@ -67,7 +69,10 @@ type TestHttpConfig = Omit<Partial<HttpConfigType>, 'selfHttp' | 'ssl' | 'versio
   versioned?: Partial<HttpConfigType['versioned']>;
 };
 
-const startServer = async (serverConfig: TestHttpConfig = { port: TEST_PORT }) => {
+const startServer = async (
+  serverConfig: TestHttpConfig = { port: TEST_PORT },
+  { withAuth = false }: { withAuth?: boolean } = {}
+) => {
   const logger = loggingSystemMock.create();
   const server = createInternalHttpService({
     logger,
@@ -87,10 +92,35 @@ const startServer = async (serverConfig: TestHttpConfig = { port: TEST_PORT }) =
     docLinks: docLinksServiceMock.createSetupContract(),
   });
 
-  const { server: innerServer, createRouter, registerOnPostAuth } = await server.setup(setupDeps);
+  const {
+    server: innerServer,
+    createRouter,
+    registerAuth,
+    registerOnPostAuth,
+    setSelfClientUnauthorizedErrorHandler,
+  } = await server.setup(setupDeps);
   const router = createRouter('/');
   const supertest = Supertest(innerServer.listener);
   const started = { httpStart: null as InternalHttpServiceStart | null };
+  // One credential rotation: the self call's first attempt carries the stale token.
+  const credentials = { current: 'Bearer fresh', minted: 0, sideEffects: 0 };
+
+  if (withAuth) {
+    registerAuth((request, response, toolkit) => {
+      if (
+        request.route.path === '/self/rotating_target' &&
+        request.headers.authorization !== credentials.current
+      ) {
+        return response.unauthorized({ body: 'Stale credential' });
+      }
+      return toolkit.authenticated();
+    });
+
+    setSelfClientUnauthorizedErrorHandler((_options, toolkit) => {
+      credentials.minted += 1;
+      return toolkit.retry({ authHeaders: { authorization: credentials.current } });
+    });
+  }
   registerOnPostAuth((request, response, toolkit) => {
     if (request.route.path === '/self/authz_denied') {
       return response.forbidden({ body: 'Rejected by test authorization' });
@@ -340,6 +370,94 @@ const startServer = async (serverConfig: TestHttpConfig = { port: TEST_PORT }) =
     }
   );
 
+  router.get(
+    {
+      path: '/self/rotating_target',
+      security: routeSecurity,
+      validate: { query: schema.object({ payload: schema.string() }) },
+    },
+    (_context, req, res) =>
+      res.ok({ body: { payload: req.query.payload, authorization: req.headers.authorization } })
+  );
+
+  router.get(
+    {
+      path: '/self/call_rotating',
+      security: routeSecurity,
+      validate: false,
+    },
+    async (_context, req, res) => {
+      const fakeRequest = kibanaRequestFactory({
+        headers: { authorization: 'Bearer stale' },
+        auth: { isAuthenticated: true },
+      });
+
+      try {
+        const body = await started
+          .httpStart!.selfClient.asScoped(fakeRequest)
+          .fetch('/self/rotating_target', {
+            query: { payload: 'replayed-intact' },
+          });
+        return res.ok({ body: { body, minted: credentials.minted } });
+      } catch (error) {
+        return res.ok({ body: { error: (error as Error).message, minted: credentials.minted } });
+      }
+    }
+  );
+
+  router.get(
+    {
+      path: '/self/side_effect_then_401',
+      security: routeSecurity,
+      validate: false,
+    },
+    async () => {
+      // The handler runs, mutates state, and only then hits an expired credential downstream.
+      // Core turns an Elasticsearch 401 thrown by a handler into a 401 response, which must not
+      // be mistaken for an authentication-stage rejection.
+      credentials.sideEffects += 1;
+      throw Object.assign(
+        new errors.ResponseError({
+          statusCode: 401,
+          body: { error: { reason: 'token expired' } },
+          headers: {},
+          meta: {} as any,
+          warnings: null,
+        } as any),
+        { name: 'ResponseError' }
+      );
+    }
+  );
+
+  router.get(
+    {
+      path: '/self/call_side_effect',
+      security: routeSecurity,
+      validate: false,
+    },
+    async (_context, req, res) => {
+      const fakeRequest = kibanaRequestFactory({
+        headers: { authorization: 'Bearer stale' },
+        auth: { isAuthenticated: true },
+      });
+
+      try {
+        await started
+          .httpStart!.selfClient.asScoped(fakeRequest)
+          .fetch('/self/side_effect_then_401');
+        return res.ok({ body: { error: null, sideEffects: credentials.sideEffects } });
+      } catch (error) {
+        return res.ok({
+          body: {
+            error: (error as Error).message,
+            sideEffects: credentials.sideEffects,
+            minted: credentials.minted,
+          },
+        });
+      }
+    }
+  );
+
   started.httpStart = await server.start();
 
   return { server, httpStart: started.httpStart, logger, supertest };
@@ -359,6 +477,40 @@ describe('Http self client', () => {
     global.Request = originalRequest;
     global.Response = originalResponse;
     restoreSelfClientTestEnvironment();
+  });
+
+  describe('401 refresh and replay', () => {
+    let server: HttpService;
+    let supertest: Supertest.Agent;
+
+    beforeEach(async () => {
+      ({ server, supertest } = await startServer({ port: TEST_PORT }, { withAuth: true }));
+    });
+
+    afterEach(async () => {
+      await server.stop();
+      http.globalAgent.destroy();
+      https.globalAgent.destroy();
+    });
+
+    it('replays a call rejected by the authentication lifecycle with the refreshed credential', async () => {
+      const response = await supertest.get('/self/call_rotating').expect(200);
+
+      expect(response.body.minted).toBe(1);
+      expect(response.body.body).toEqual({
+        payload: 'replayed-intact',
+        authorization: 'Bearer fresh',
+      });
+    });
+
+    it('does not replay a 401 a route handler produced after a side effect', async () => {
+      const response = await supertest.get('/self/call_side_effect').expect(200);
+
+      // The handler ran exactly once: no replay, so its side effect was not duplicated.
+      expect(response.body.sideEffects).toBe(1);
+      expect(response.body.minted).toBe(0);
+      expect(response.body.error).toBeTruthy();
+    });
   });
 
   describe('path safety and recursion limits', () => {

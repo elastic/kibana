@@ -9,6 +9,7 @@
 
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import {
+  ES_CLIENT_AUTHENTICATION_HEADER,
   HTTPAuthorizationHeader,
   UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
 } from '@kbn/core-security-server';
@@ -108,6 +109,11 @@ const RESERVED_HEADER_NAMES = new Set([
   'content-type',
   'kbn-xsrf',
   UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
+  // A workflow author must not be able to name the UIAM shared secret their steps run under. Core's
+  // self client rejects these outright, so stripping them here turns a failed call into an ignored
+  // header rather than leaving the author to guess why.
+  ES_CLIENT_AUTHENTICATION_HEADER,
+  'es-secondary-x-client-authentication',
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST.toLowerCase(),
   'x-kibana-event-chain-depth',
   'x-kibana-event-chain-source-execution-id',
@@ -224,7 +230,9 @@ export async function callKibanaApi<T = unknown>(
 
   // Only the headers Core's self client does not manage for us: caller-supplied custom headers
   // (reserved ones stripped) plus the engine's event-chain propagation. Authorization, Content-Type,
-  // x-elastic-internal-origin, and kbn-version/xsrf are set by the self client itself.
+  // x-elastic-internal-origin, kbn-version/xsrf, and the UIAM internal-caller attestation are set
+  // by the self client itself — the attestation is bound to the credential, so it has to be
+  // derived per attempt by whoever chooses that credential.
   const outboundHeaders: Record<string, string> = {
     ...stripReservedHeaders(params.headers),
     ...getOutboundEventChainHeaders(fakeRequest, workflowRunId),
