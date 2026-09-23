@@ -33,7 +33,6 @@ async function openDiscoverSearchThresholdRuleFlyout(page: ScoutPage) {
 const SOURCE_INDEX = 'search-source-alert';
 const OUTPUT_INDEX = 'search-source-alert-output';
 const CONNECTOR_NAME = 'search-source-alert-test-connector';
-const RULE_NAME = 'test-search-source-alert';
 
 async function defineSearchSourceAlert(page: ScoutPage, alertName: string) {
   await page.testSubj.click('thresholdPopover');
@@ -65,7 +64,11 @@ async function defineSearchSourceAlert(page: ScoutPage, alertName: string) {
 
 spaceTest.describe('Discover app - search source alert', { tag: tags.deploymentAgnostic }, () => {
   const createdDataViewIds: string[] = [];
+  const createdRuleIds: string[] = [];
   let connectorId: string | undefined;
+  let baselineRuleId = '';
+  let baselineRuleName = '';
+  let sourceDataViewId = '';
 
   spaceTest.beforeAll(async ({ apiServices, esClient, scoutSpace }) => {
     await esClient.indices.delete({
@@ -116,6 +119,80 @@ spaceTest.describe('Discover app - search source alert', { tag: tags.deploymentA
       scoutSpace.id
     );
     connectorId = connector.id;
+
+    const sourceDataViewResponse = await apiServices.dataViews.create({
+      title: 'search-source-alert',
+      timeFieldName: '@timestamp',
+      spaceId: scoutSpace.id,
+    });
+    sourceDataViewId = sourceDataViewResponse.data.id;
+    const {
+      data: { id: searchSourceAlertOutputDataViewId },
+    } = await apiServices.dataViews.create({
+      title: 'search-source-alert-output',
+      timeFieldName: '@timestamp',
+      spaceId: scoutSpace.id,
+    });
+    const {
+      data: { id: searchSourceAlertWildcardDataViewId },
+    } = await apiServices.dataViews.create({
+      title: 'search-*',
+      timeFieldName: '@timestamp',
+      spaceId: scoutSpace.id,
+    });
+    createdDataViewIds.push(
+      sourceDataViewId,
+      searchSourceAlertOutputDataViewId,
+      searchSourceAlertWildcardDataViewId
+    );
+
+    baselineRuleName = `search-source-alert-${scoutSpace.id}`;
+    const ruleResponse = await apiServices.alerting.rules.create(
+      {
+        name: baselineRuleName,
+        ruleTypeId: '.es-query',
+        consumer: 'stackAlerts',
+        schedule: { interval: '1m' },
+        notifyWhen: 'onActiveAlert',
+        params: {
+          searchType: 'searchSource',
+          timeWindowSize: 30,
+          timeWindowUnit: 'm',
+          threshold: [1],
+          thresholdComparator: '>',
+          size: 100,
+          aggType: 'count',
+          groupBy: 'all',
+          termSize: 5,
+          excludeHitsFromPreviousRun: false,
+          sourceFields: [],
+          searchConfiguration: {
+            query: { query: '', language: 'kuery' },
+            index: sourceDataViewId,
+            filter: [],
+          },
+        },
+        actions: [
+          {
+            id: connector.id,
+            group: 'query matched',
+            params: {
+              documents: [
+                {
+                  rule_id: '{{rule.id}}',
+                  rule_name: '{{rule.name}}',
+                  alert_id: '{{alert.id}}',
+                  context_link: '{{context.link}}',
+                },
+              ],
+            },
+          },
+        ],
+      },
+      scoutSpace.id
+    );
+    baselineRuleId = ruleResponse.data.id;
+    createdRuleIds.push(baselineRuleId);
   });
 
   spaceTest.beforeEach(async ({ browserAuth }) => {
@@ -123,6 +200,9 @@ spaceTest.describe('Discover app - search source alert', { tag: tags.deploymentA
   });
 
   spaceTest.afterAll(async ({ apiServices, esClient, scoutSpace }) => {
+    await Promise.all(
+      createdRuleIds.map((ruleId) => apiServices.alerting.rules.delete(ruleId, scoutSpace.id))
+    );
     await Promise.all(
       createdDataViewIds.map((dataViewId) =>
         apiServices.dataViews.delete(dataViewId, scoutSpace.id)
@@ -137,95 +217,62 @@ spaceTest.describe('Discover app - search source alert', { tag: tags.deploymentA
     });
   });
 
-  spaceTest('should allow creating an alert when there are no data views', async ({ page }) => {
-    await page.gotoApp('management/insightsAndAlerting/triggersActions');
+  spaceTest('should show time field validation error', async ({ page, pageObjects }) => {
+    await pageObjects.discover.goto({ queryMode: 'classic' });
+    await pageObjects.discover.waitUntilSearchingHasFinished();
+    await pageObjects.discover.selectDataView('search-source-alert');
+    await pageObjects.datePicker.setCommonlyUsedTime('Last_15 minutes');
 
-    await page.testSubj.click('createFirstRuleButton');
-    await page.testSubj.click('.es-query-SelectOption');
-    await page.testSubj.click('queryFormType_searchSource');
-    await page.testSubj.waitForSelector('selectDataViewExpression');
+    await openDiscoverSearchThresholdRuleFlyout(page);
+
+    await page.testSubj.click('selectDataViewExpression');
+    const dataViewSearchInput = page.testSubj.locator('indexPattern-switcher--input');
+    await dataViewSearchInput.waitFor({ state: 'visible' });
+    await dataViewSearchInput.fill('search-source-alert-o*');
+    await page.testSubj.click('explore-matching-indices-button');
 
     const dataViewSelector = page.testSubj.locator('selectDataViewExpression');
-    await expect(dataViewSelector).toContainText('data view Select a data view');
+    await expect(dataViewSelector).toContainText('search-source-alert-o*');
+
+    await expect(page.testSubj.locator('esQueryAlertExpressionError')).toHaveText(
+      'Data view should have a time field.'
+    );
   });
 
-  spaceTest('when there are data views', async ({ pageObjects, apiServices, scoutSpace, page }) => {
-    await spaceTest.step('should create data views', async () => {
-      const {
-        data: { id: searchSourceAlertDataViewId },
-      } = await apiServices.dataViews.create({
-        title: 'search-source-alert',
-        timeFieldName: '@timestamp',
-        spaceId: scoutSpace.id,
-      });
-      const {
-        data: { id: searchSourceAlertOutputDataViewId },
-      } = await apiServices.dataViews.create({
-        title: 'search-source-alert-output',
-        timeFieldName: '@timestamp',
-        spaceId: scoutSpace.id,
-      });
-      const {
-        data: { id: searchSourceAlertWildcardDataViewId },
-      } = await apiServices.dataViews.create({
-        title: 'search-*',
-        timeFieldName: '@timestamp',
-        spaceId: scoutSpace.id,
-      });
-      createdDataViewIds.push(
-        searchSourceAlertDataViewId,
-        searchSourceAlertOutputDataViewId,
-        searchSourceAlertWildcardDataViewId
-      );
-    });
+  spaceTest('should create an alert', async ({ page, pageObjects }) => {
+    await pageObjects.discover.goto({ queryMode: 'classic' });
+    await pageObjects.discover.waitUntilSearchingHasFinished();
 
-    await spaceTest.step('should show time field validation error', async () => {
-      await pageObjects.discover.goto({ queryMode: 'classic' });
-      await pageObjects.discover.waitUntilSearchingHasFinished();
-      await pageObjects.discover.selectDataView('search-source-alert');
-      await pageObjects.datePicker.setCommonlyUsedTime('Last_15 minutes');
+    await openDiscoverSearchThresholdRuleFlyout(page);
+    await defineSearchSourceAlert(page, `tmp-rule-${Date.now()}`);
 
-      await openDiscoverSearchThresholdRuleFlyout(page);
-      // await defineSearchSourceAlert(page, RULE_NAME);
+    await page.testSubj.click('selectDataViewExpression');
+    const dataViewSwitcher = page.testSubj.locator('indexPattern-switcher');
+    await dataViewSwitcher.waitFor({ state: 'visible' });
+    await page.testSubj.locator('indexPattern-switcher--input').fill('');
+    await dataViewSwitcher.locator(`[data-test-subj="dataView-${SOURCE_INDEX}"]`).click();
 
-      await page.testSubj.click('selectDataViewExpression');
-      const dataViewSearchInput = page.testSubj.locator('indexPattern-switcher--input');
-      await dataViewSearchInput.waitFor({ state: 'visible' });
-      await dataViewSearchInput.fill('search-source-alert-o*');
-      await page.testSubj.click('explore-matching-indices-button');
+    const dataViewSelector = page.testSubj.locator('selectDataViewExpression');
+    await expect(dataViewSelector).toContainText(SOURCE_INDEX);
 
-      const dataViewSelector = page.testSubj.locator('selectDataViewExpression');
-      await expect(dataViewSelector).toContainText('search-source-alert-o*');
+    await page.testSubj.click('ruleFormStep-details');
+    await page.components.toast().closeAll();
+    const saveButton = page.testSubj.locator('ruleFlyoutFooterSaveButton');
+    await saveButton.click();
+    await saveButton.waitFor({ state: 'hidden' });
 
-      await expect(page.testSubj.locator('esQueryAlertExpressionError')).toHaveText(
-        'Data view should have a time field.'
-      );
-    });
+    await pageObjects.toasts.waitForToastWithText('Created rule');
+  });
 
-    await spaceTest.step('should create the alert', async () => {
-      await defineSearchSourceAlert(page, RULE_NAME);
-
-      await page.testSubj.click('selectDataViewExpression');
-      const dataViewSwitcher = page.testSubj.locator('indexPattern-switcher');
-      await dataViewSwitcher.waitFor({ state: 'visible' });
-      await page.testSubj.locator('indexPattern-switcher--input').fill('');
-      await dataViewSwitcher.locator(`[data-test-subj="dataView-${SOURCE_INDEX}"]`).click();
-
-      const dataViewSelector = page.testSubj.locator('selectDataViewExpression');
-      await expect(dataViewSelector).toContainText(SOURCE_INDEX);
-
-      await page.testSubj.click('ruleFormStep-details');
-      await page.components.toast().closeAll();
-      const saveButton = page.testSubj.locator('ruleFlyoutFooterSaveButton');
-      await saveButton.click();
-      await saveButton.waitFor({ state: 'hidden' });
-    });
-
-    await spaceTest.step('should navigate to alert results via view in app link', async () => {
+  spaceTest(
+    'should navigate to alert results via view in app link',
+    async ({ page, pageObjects }) => {
       await page.gotoApp('management/insightsAndAlerting/triggersActions');
       const rulesList = page.testSubj.locator('rulesList');
       await rulesList.waitFor({ state: 'visible' });
-      await rulesList.locator(`[data-test-subj="rulesListTableRowName-${RULE_NAME}"]`).click();
+      await rulesList
+        .locator(`[data-test-subj="rulesListTableRowName-${baselineRuleName}"]`)
+        .click();
 
       await page.testSubj.click('app-menu-overflow-button');
       await page.testSubj.click('ruleDetails-viewInDiscover');
@@ -237,6 +284,41 @@ spaceTest.describe('Discover app - search source alert', { tag: tags.deploymentA
       expect(await pageObjects.queryBar.getQuery()).toBe('');
       await expect(pageObjects.discover.getSelectedDataView()).toHaveAccessibleName(SOURCE_INDEX);
       await expect.poll(() => pageObjects.discover.getHitCountInt()).toBe(5);
-    });
-  });
+      expect(await pageObjects.discover.getCurrentDataViewId()).toBe(sourceDataViewId);
+    }
+  );
+
+  spaceTest(
+    'should navigate to alert results via link provided in notification',
+    async ({ esClient, page, pageObjects }) => {
+      let contextLink = '';
+      await expect
+        .poll(
+          async () => {
+            const response = await esClient.search<{
+              rule_id: string;
+              context_link: string;
+            }>({
+              index: OUTPUT_INDEX,
+              query: { match: { rule_id: baselineRuleId } },
+              size: 1,
+            });
+            contextLink = response.hits.hits[0]?._source?.context_link ?? '';
+            return contextLink;
+          },
+          { timeout: 90_000, intervals: [1_000] }
+        )
+        .not.toBe('');
+
+      await page.goto(new URL(contextLink, page.url()).toString());
+      await pageObjects.discover.waitUntilSearchingHasFinished();
+      await pageObjects.dataGrid.waitForDocTableRendered();
+
+      await pageObjects.toasts.waitForToastWithText('Displayed documents may vary');
+      expect(await pageObjects.filterBar.getFilterCount()).toBe(0);
+      expect(await pageObjects.queryBar.getQuery()).toBe('');
+      await expect(pageObjects.discover.getSelectedDataView()).toHaveAccessibleName(SOURCE_INDEX);
+      await expect.poll(() => pageObjects.discover.getHitCountInt()).toBe(5);
+    }
+  );
 });
