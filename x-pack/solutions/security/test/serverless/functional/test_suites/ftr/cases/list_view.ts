@@ -151,7 +151,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
-    describe.skip('severity filtering', () => { // Failing: https://github.com/elastic/kibana/issues/238814
+    describe('severity filtering', () => {
       // Error: retry.tryForTime timeout: Error: expected 10 to equal 5
       before(async () => {
         await navigateToCasesApp(getPageObject, getService, owner);
@@ -201,7 +201,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
-    describe.skip('pagination', () => { // Failing: https://github.com/elastic/kibana/issues/238814
+    describe('pagination', () => {
       // security_exception: action [indices:data/write/delete/byquery] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.kibana_alerting_cases], this action is granted by the index privileges [delete,write,all]
       createNCasesBeforeDeleteAllAfter(12, getPageObject, getService);
 
