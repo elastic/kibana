@@ -70,28 +70,42 @@ predicate isStaticPathText(Expr e) {
 }
 
 /**
- * A `buildPath(template, params)` call whose result really is encoded. `buildPath()` URI-encodes
- * only the values it substitutes for `{param}` placeholders and returns the template otherwise
- * unchanged, so it is an encoder only when the template argument cannot itself carry a
- * user-controllable segment. A one-argument `buildPath(id)` has no placeholders to substitute
- * into and returns `id` verbatim, so it is NOT an encoder. Exact name equality also keeps
- * `buildDeletePath` from matching `buildPath`.
+ * A call to the global `encodeURIComponent`. Resolved through `globalVarRef` rather than by
+ * callee name, so a local pass-through that shadows the builtin
+ * (`const encodeURIComponent = (x) => x;`) is not mistaken for the real thing. A member callee
+ * (`window.encodeURIComponent(x)`) is accepted too, matching the ESLint rule.
+ *
+ * `encodeURI` is deliberately NOT modelled: it does not escape `/` or `.`, so `../../`
+ * survives it.
  */
-predicate isEncodingBuildPathCall(Expr e) {
-  exists(CallExpr call | call = e |
-    call.getCalleeName() = "buildPath" and
-    isStaticPathText(call.getArgument(0))
-  )
+predicate isEncodeUriComponentCall(Expr e) {
+  e = DataFlow::globalVarRef("encodeURIComponent").getACall().asExpr()
+  or
+  e.(CallExpr).getCallee().(PropAccess).getPropertyName() = "encodeURIComponent"
 }
 
 /**
- * A direct call to `encodeURIComponent(...)`, or a `buildPath(...)` call that actually encodes
- * (identifier or member callee).
+ * A `buildPath(template, params)` call whose result really is encoded. Two conditions, both
+ * required:
+ *
+ * - it is Kibana's `buildPath`, resolved through the `@kbn/core-http-browser` import rather than
+ *   by callee name. Kibana has a dozen unrelated local helpers called `buildPath` that simply
+ *   interpolate their arguments, and trusting the name would treat those as sanitizers.
+ * - the template argument cannot itself carry a user-controllable segment. `buildPath()`
+ *   URI-encodes only the values it substitutes for `{param}` placeholders and returns the
+ *   template otherwise unchanged, so a one-argument `buildPath(id)` returns `id` verbatim.
  */
+predicate isEncodingBuildPathCall(Expr e) {
+  exists(DataFlow::CallNode call |
+    call = DataFlow::moduleMember("@kbn/core-http-browser", "buildPath").getACall() and
+    e = call.asExpr() and
+    isStaticPathText(call.getArgument(0).asExpr())
+  )
+}
+
+/** A direct call to `encodeURIComponent(...)`, or a `buildPath(...)` call that actually encodes. */
 predicate isDirectEncodeCall(Expr e) {
-  // Exact name only. `encodeURI` is deliberately NOT here: it does not escape `/` or `.`, so
-  // `../../` survives it.
-  e.(CallExpr).getCalleeName() = "encodeURIComponent"
+  isEncodeUriComponentCall(e)
   or
   isEncodingBuildPathCall(e)
 }
@@ -250,10 +264,28 @@ predicate templateHasInterpolation(TemplateLiteral t) {
  * to a function fails the cast and leaves the callback unsafe.
  */
 predicate isEncodingCallback(DataFlow::Node cb) {
-  cb.asExpr().(VarAccess).getName() = "encodeURIComponent"
+  cb = DataFlow::globalVarRef("encodeURIComponent")
   or
   forex(DataFlow::Node src | src = cb.getALocalSource() |
     isEncodingWrapperFunction(src.(DataFlow::FunctionNode).getFunction())
+  )
+}
+
+/**
+ * A `concat` argument that cannot introduce an unsafe segment. `concat` flattens one level, so an
+ * array argument contributes its ELEMENTS as path segments, not itself - without this
+ * `[BASE].concat(['status'])` would report, because a bare array expression matches none of the
+ * `isSafePathSegment` cases. `forex` over the sources, and every source must actually be an array,
+ * so a value that cannot be resolved to one is not quietly assumed safe.
+ */
+predicate isSafeConcatArgument(DataFlow::Node arg) {
+  isSafePathSegment(arg.asExpr())
+  or
+  forex(DataFlow::SourceNode src | src = arg.getALocalSource() |
+    src instanceof DataFlow::ArrayCreationNode and
+    forall(DataFlow::Node el | el = src.(DataFlow::ArrayCreationNode).getAnElement() |
+      isSafePathSegment(el.asExpr())
+    )
   )
 }
 
@@ -306,7 +338,7 @@ DataFlow::SourceNode unsafeSegmentArray() {
     concatCall = segmentArray().getAMethodCall("concat") and
     result = concatCall and
     arg = concatCall.getAnArgument() and
-    not isSafePathSegment(arg.asExpr())
+    not isSafeConcatArgument(arg)
   )
   or
   // `[a, b].map(fn)` keeps the elements unsafe unless `fn` encodes them.
@@ -390,6 +422,19 @@ predicate isHttpReceiver(Expr e) {
   isHttpReceiver(e.(PropAccess).getBase())
 }
 
+/**
+ * An object that supplies the options of an `http.*` call: the argument itself, or an object
+ * spread into it. Without the spread case, composing the options
+ * (`http.fetch({ ...opts, method })`) hides the `path` property from `getAPropertyWrite()` and
+ * the request path is never treated as a sink.
+ */
+DataFlow::SourceNode httpOptionsObject(DataFlow::MethodCallNode call) {
+  result = call.getArgument(0).getALocalSource()
+  or
+  result =
+    httpOptionsObject(call).(DataFlow::ObjectLiteralNode).getASpreadProperty().getALocalSource()
+}
+
 /** The path argument of a browser `http.*` request call. */
 DataFlow::Node httpRequestPath() {
   exists(DataFlow::MethodCallNode call |
@@ -401,10 +446,9 @@ DataFlow::Node httpRequestPath() {
     result = call.getArgument(0) and
     not result.asExpr() instanceof ObjectExpr
     or
-    // object overload: `http.fetch({ path, method, ... })`
-    exists(DataFlow::ObjectLiteralNode opts, DataFlow::PropWrite pathProp |
-      opts = call.getArgument(0).getALocalSource() and
-      pathProp = opts.getAPropertyWrite() and
+    // object overload: `http.fetch({ path, method, ... })`, including spread composition
+    exists(DataFlow::PropWrite pathProp |
+      pathProp = httpOptionsObject(call).getAPropertyWrite() and
       pathProp.getPropertyName() = "path" and
       result = pathProp.getRhs()
     )

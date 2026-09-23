@@ -19,6 +19,7 @@
 // - `// $ Alert` marks the sink line (the http call) that SHOULD be reported.
 // - Lines without `// $ Alert` should NOT be reported.
 
+import { buildPath } from '@kbn/core-http-browser';
 import { makeUnsafeDeletePath, makeSafeDeletePath, encodeSeg } from './__fixtures__/paths';
 
 // =============================================================================
@@ -36,6 +37,15 @@ http.options(condition ? `/api/dashboards/${id}` : '/api/dashboards/default'); /
 
 // BAD: object overload `{ path }`
 http.fetch({ path: `/api/dashboards/${id}`, method: 'POST', body }); // $ Alert
+
+// BAD: object overload composed with a spread. The sink is the `path` property write, so the
+// alert lands on the options object rather than on the fetch call.
+const fetchOptions = { path: `/api/dashboards/${id}` }; // $ Alert
+http.fetch({ ...fetchOptions, method: 'GET' });
+
+// GOOD: spread composition whose path is encoded
+const safeFetchOptions = { path: buildPath('/api/dashboards/{id}', { id }) };
+http.fetch({ ...safeFetchOptions, method: 'GET' });
 
 // BAD: constant prefix but unencoded dynamic suffix
 http.get(`${prefix}/${id}`); // $ Alert
@@ -146,6 +156,24 @@ http.get(INTERNAL_ROUTES.BASE + buildPath(dynamicRouteTemplate, {})); // $ Alert
 
 // BAD: `map(buildPath)` passes each element as the template argument, which is returned unchanged
 http.get([INTERNAL_ROUTES.BASE, id].map(buildPath).join('/')); // $ Alert
+
+// =============================================================================
+// The sanitizers are resolved, not matched by name
+// =============================================================================
+
+// BAD: an unrelated local helper that happens to be called buildPath is not Kibana's
+const localBuildPath = (tpl, x) => `${tpl}/${x}`;
+http.get(`${INTERNAL_ROUTES.BASE}${localBuildPath('/api/dashboards', id)}`); // $ Alert
+
+// BAD: a local pass-through shadowing the global encodeURIComponent is not the builtin
+function shadowedEncoder(val) {
+  const encodeURIComponent = (x) => x;
+  return `/api/dashboards/${encodeURIComponent(val)}`;
+}
+http.get(shadowedEncoder(id)); // $ Alert
+
+// GOOD: a member callee named encodeURIComponent is still the builtin
+http.get(`/api/dashboards/${window.encodeURIComponent(id)}`);
 
 // GOOD: non-string literal segments are constants, not user input
 http.get(`/api/dashboards/${1}`);
@@ -296,6 +324,18 @@ http.get([INTERNAL_ROUTES.BASE].filter(Boolean).concat(id).join('/')); // $ Aler
 
 // GOOD: the segment concatenated onto the transformed array is encoded
 http.get([INTERNAL_ROUTES.BASE].filter(Boolean).concat(encodeURIComponent(id)).join('/'));
+
+// GOOD: concat flattens one level, so a literal-only array argument adds only safe segments
+http.get([INTERNAL_ROUTES.BASE].concat(['status']).join('/'));
+
+// GOOD: concat of an array holding an encoded segment
+http.get([INTERNAL_ROUTES.BASE].concat([encodeURIComponent(id)]).join('/'));
+
+// GOOD: concat of an empty array adds nothing
+http.get([INTERNAL_ROUTES.BASE].concat([]).join('/'));
+
+// BAD: concat of an array holding a raw segment
+http.get([INTERNAL_ROUTES.BASE].concat([id]).join('/')); // $ Alert
 
 // BAD: the unsafe segment is pushed onto a transformed array
 const transformedParts = [INTERNAL_ROUTES.BASE].filter(Boolean);
