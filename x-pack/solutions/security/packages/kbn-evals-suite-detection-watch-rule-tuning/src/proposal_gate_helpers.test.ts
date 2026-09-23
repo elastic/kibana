@@ -20,6 +20,7 @@ import {
   isAwaitingApproval,
   isAwaitingProposalChild,
   neverRan,
+  pendingProposalChildFromSteps,
   soleProposalChild,
 } from './workflow_task';
 
@@ -60,6 +61,46 @@ describe('proposal gate harness helpers', () => {
     it('does NOT match non-parked statuses', () => {
       expect(isAwaitingApproval(ExecutionStatus.RUNNING)).toBe(false);
       expect(isAwaitingApproval(ExecutionStatus.COMPLETED)).toBe(false);
+    });
+  });
+
+  describe('pendingProposalChildFromSteps', () => {
+    const step = (over: Record<string, unknown>) =>
+      ({
+        id: 'step-1',
+        stepId: 'propose_exception',
+        stepType: 'workflow.execute',
+        status: ExecutionStatus.WAITING_FOR_CHILD,
+        state: { executionId: 'child-exec-1' },
+        ...over,
+      } as any);
+
+    it('reads the child id from the parked workflow.execute step — /children is blind while the gate is open', () => {
+      // The children API lists a child only after the launching step is terminal;
+      // while the gate is open the step is waiting_for_child and /children returns [].
+      expect(pendingProposalChildFromSteps([step({})])).toBe('child-exec-1');
+    });
+
+    it('ignores terminal and non-workflow-execute steps', () => {
+      expect(
+        pendingProposalChildFromSteps([
+          step({ status: ExecutionStatus.COMPLETED }),
+          step({ stepId: 'fetch_rule', stepType: 'kibana.request' }),
+        ])
+      ).toBeUndefined();
+    });
+
+    it('returns undefined when the step is parked but has no child id yet', () => {
+      expect(pendingProposalChildFromSteps([step({ state: {} })])).toBeUndefined();
+    });
+
+    it('throws when more than one workflow.execute step is parked', () => {
+      expect(() =>
+        pendingProposalChildFromSteps([
+          step({ id: 'step-1' }),
+          step({ id: 'step-2', state: { executionId: 'child-exec-2' } }),
+        ])
+      ).toThrow(/at most 1 parked workflow.execute/);
     });
   });
 

@@ -148,6 +148,39 @@ export const isAwaitingApproval = (status: ExecutionStatus): boolean =>
  * review proposes exactly one tuning change, so a second pending child means the stack
  * is shared or the cancel pass missed something, and answering either would be a guess.
  */
+/**
+ * The proposal-child execution the review is currently parked on, read from the
+ * review's own step executions — NOT from `/children`.
+ *
+ * `GET /api/workflows/executions/{id}/children` only lists a child once the
+ * `workflow.execute` step that launched it has reached a terminal status
+ * (`extractChildRefs` in `get_child_workflow_executions.ts` filters on
+ * `isTerminalStatus(step.status)`). While the proposal gate is OPEN that step is
+ * still `waiting_for_child`, so `/children` returns `[]` — exactly when the harness
+ * needs the child id to find the pending proposal record. The id is already present
+ * on the step (`state.executionId` is stamped when the child is spawned), so read it
+ * from there. Exactly one such step may be parked; more than one means the fixture
+ * or the stack is wrong and answering either gate would be a guess.
+ */
+export const pendingProposalChildFromSteps = (
+  steps: WorkflowStepExecutionDto[]
+): string | undefined => {
+  const parked = steps.filter(
+    (step) =>
+      step.stepType === 'workflow.execute' &&
+      step.status === ExecutionStatus.WAITING_FOR_CHILD &&
+      typeof step.state?.executionId === 'string' &&
+      step.state.executionId.length > 0
+  );
+  if (parked.length > 1) {
+    throw new Error(
+      `Expected at most 1 parked workflow.execute step on the review, found ${parked.length}: ` +
+        `${parked.map((s) => `${s.stepId}->${s.state?.executionId}`).join(', ')}`
+    );
+  }
+  return parked[0]?.state?.executionId as string | undefined;
+};
+
 export const soleProposalChild = (
   children: ChildWorkflowExecutionItem[]
 ): ChildWorkflowExecutionItem | undefined => {
@@ -754,23 +787,23 @@ export const runRuleTuningToApprovalGate = async ({
         // The review has fanned out its propose_* children and is parked until the
         // proposal's gate is decided. Exactly one proposal child may be pending —
         // `soleProposalChild` throws on more than one.
-        const proposalChild = soleProposalChild(await listReviewChildren(fetch, review.id));
-        if (proposalChild) {
-          const proposalRecord = await findPendingProposalForChild(
-            fetch,
-            proposalChild.executionId
-          );
+        // The gate is open: the workflow.execute step is still waiting_for_child, so
+        // `/children` CANNOT see the child yet (it lists only terminal steps' children).
+        // Read the child id from the parked step itself.
+        const proposalChildExecutionId = pendingProposalChildFromSteps(review.stepExecutions ?? []);
+        if (proposalChildExecutionId) {
+          const proposalRecord = await findPendingProposalForChild(fetch, proposalChildExecutionId);
           if (proposalRecord) {
             const diagnoseProposal = readProposalOrThrow(review);
             log.info(
               `Review execution ${review.id} is parked on its proposal gate ` +
                 `(status: ${review.status}, change_type: ${diagnoseProposal.change_type}, ` +
-                `proposal ${proposalRecord.id}, gate execution ${proposalChild.executionId})`
+                `proposal ${proposalRecord.id}, gate execution ${proposalChildExecutionId})`
             );
             return {
               workflowExecutionId,
               reviewExecutionId: review.id,
-              proposalChildExecutionId: proposalChild.executionId,
+              proposalChildExecutionId,
               proposalRecord,
               proposal: diagnoseProposal,
             };
