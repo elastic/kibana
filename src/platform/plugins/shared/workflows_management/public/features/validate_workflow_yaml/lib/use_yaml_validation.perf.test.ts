@@ -180,7 +180,6 @@ function assertTimingsWithinBudget(
       if (ms >= budgetMs) {
         violations.push({ step, ms, budgetMs });
       }
-      expect(ms).toBeLessThan(budgetMs);
     }
   }
   return violations;
@@ -194,9 +193,9 @@ function logTimingsTable(
   title: string,
   timings: Record<string, number>,
   calibrationMs: number,
-  logOnSuccess: boolean
+  forceLog: boolean
 ) {
-  if (!logOnSuccess && process.env.CI) {
+  if (!forceLog && process.env.CI) {
     return;
   }
   // eslint-disable-next-line no-console
@@ -529,10 +528,11 @@ afterAll(async () => {
     })),
   ];
 
-  // Race against a deadline: req() retries 5× with backoff (worst case ~400s) which
-  // exceeds Jest's hook timeout and is not catchable.
+  // Race against a deadline shorter than Jest's default 5s hook timeout: req() retries
+  // 5× with backoff (worst case ~400s) which would exceed the hook timeout and is not
+  // catchable. 4s is generous for a single authenticated POST with ~20 numbers.
   const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
-  await Promise.race([reporter.metrics(metrics).catch(() => {}), delay(15_000)]);
+  await Promise.race([reporter.metrics(metrics).catch(() => {}), delay(4_000)]);
 });
 
 // ─── Test suites ─────────────────────────────────────────────────────────────
@@ -551,22 +551,24 @@ for (const suite of SUITES) {
       calibrationMs = measureCalibrationMs();
     });
 
+    // Explicit timeout: infosec_demo per-step runs ~2.4s locally on an M-series Mac.
+    // CI agents run ~2.5× slower; the default 5s hook would be exceeded before any assertion fires.
     it('each validation step completes within budget', async () => {
       const { timings, config } = runPerStepBenchmarks(yamlContent, suite.config, calibrationMs);
 
       const varCount = Array.from(yamlContent.matchAll(VARIABLE_REGEX_GLOBAL)).length;
       const lineCount = yamlContent.split('\n').length;
 
-      let violations: Array<{ step: string; ms: number; budgetMs: number }> = [];
-      try {
-        violations = assertTimingsWithinBudget(timings, config, calibrationMs);
-      } finally {
-        logTimingsTable(
-          `\n--- Per-step (${lineCount} lines, ${varCount} vars, min-of-${suite.config.iterations}, ms) ---`,
-          timings,
-          calibrationMs,
-          violations.length > 0
-        );
+      const violations = assertTimingsWithinBudget(timings, config, calibrationMs);
+      // Log the table before asserting so it is visible on CI even when a step is over budget.
+      logTimingsTable(
+        `\n--- Per-step (${lineCount} lines, ${varCount} vars, min-of-${suite.config.iterations}, ms) ---`,
+        timings,
+        calibrationMs,
+        violations.length > 0
+      );
+      for (const { ms, budgetMs } of violations) {
+        expect(ms).toBeLessThan(budgetMs);
       }
 
       // Collect for afterAll ci-stats reporting.
@@ -575,8 +577,10 @@ for (const suite of SUITES) {
           allMinimums.push({ suiteName: suite.name, step, ms });
         }
       }
-    });
+    }, 60_000);
 
+    // Explicit timeout: infosec_demo E2E runs ~2.6s locally on an M-series Mac.
+    // CI agents run ~2.5× slower; the default 5s hook would be exceeded before any assertion fires.
     it('full validation pipeline completes within budget', async () => {
       const { minimums, config } = await runE2EBenchmark(yamlContent, suite.config, calibrationMs);
 
@@ -586,22 +590,22 @@ for (const suite of SUITES) {
       );
       expect(minimums.total).toBeLessThan(totalBudgetMs);
 
-      let violations: Array<{ step: string; ms: number; budgetMs: number }> = [];
-      try {
-        violations = assertTimingsWithinBudget(minimums, config, calibrationMs);
-      } finally {
-        logTimingsTable(
-          `\n--- E2E (min-of-${suite.config.iterations}, ms) ---`,
-          minimums,
-          calibrationMs,
-          violations.length > 0
-        );
+      const violations = assertTimingsWithinBudget(minimums, config, calibrationMs);
+      // Log the table before asserting so it is visible on CI even when a step is over budget.
+      logTimingsTable(
+        `\n--- E2E (min-of-${suite.config.iterations}, ms) ---`,
+        minimums,
+        calibrationMs,
+        violations.length > 0
+      );
+      for (const { ms, budgetMs } of violations) {
+        expect(ms).toBeLessThan(budgetMs);
       }
 
       // Collect for afterAll ci-stats reporting.
       for (const [step, ms] of Object.entries(minimums)) {
         allMinimums.push({ suiteName: `${suite.name}/e2e`, step, ms });
       }
-    });
+    }, 60_000);
   });
 }

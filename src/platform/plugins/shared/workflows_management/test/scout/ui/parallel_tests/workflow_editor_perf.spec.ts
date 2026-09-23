@@ -171,6 +171,16 @@ test.describe(
                     monacoEnv.monaco.editor.setModelMarkers = origSetModelMarkers;
                     editor.trigger('perf-test', 'undo', null);
 
+                    // A cycle with no marker calls means validation never ran — reject rather
+                    // than resolve with zeros, which would make a regression look like the best
+                    // possible performance when combined with Math.min across cycles.
+                    if (markerCalls.length === 0) {
+                      reject(
+                        new Error('No setModelMarkers calls observed — validation did not run')
+                      );
+                      return;
+                    }
+
                     const firstCall = markerCalls.length > 0 ? markerCalls[0].offsetMs : 0;
                     const lastCall =
                       markerCalls.length > 0
@@ -236,12 +246,6 @@ test.describe(
 
                   quiescenceTimer = setTimeout(finish, quiescence);
                   maxTimer = setTimeout(finish, maxWait);
-
-                  setTimeout(() => {
-                    if (markerCalls.length === 0 && !settled) {
-                      reject(new Error('No setModelMarkers calls observed within max wait'));
-                    }
-                  }, maxWait + 1000);
                 });
               },
               { quiescence: quiescenceMs, maxWait: maxWaitMs }
@@ -318,7 +322,7 @@ test.describe(
         ).toBeLessThan(worstCallCeiling);
       });
 
-      test(`[${name}] frame rate stays above threshold during rapid edits`, async ({
+      test(`[${name}] editor stays responsive during rapid edits`, async ({
         pageObjects,
         page,
         log,
@@ -465,6 +469,14 @@ test.describe(
         );
 
         log.info(`Frame stats: ${JSON.stringify(frameStats, null, 2)}`);
+
+        // Liveness: the page kept rendering and validation ran during the edit burst.
+        // These cannot flake on CPU share — they only fail if the editor froze or validation stopped.
+        expect(frameStats.totalFrames, 'rAF should have fired at least once').toBeGreaterThan(0);
+        expect(
+          frameStats.markerCascadesDuringEdits,
+          'setModelMarkers should have been called — validation must run during edits'
+        ).toBeGreaterThan(0);
 
         // Catastrophe net only — a single pathological frame blocking the renderer for > 4s.
         // This has never fired in practice; it is kept to catch a hang or deadlock.
