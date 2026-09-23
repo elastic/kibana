@@ -1594,19 +1594,17 @@ steps:
                       Execution: {{ execution.url }}
 
             else:
-              # Extract this batch's real alert IDs before merging model verdicts. A model
-              # can hallucinate an ID from a different batch; filtering to current-batch IDs
-              # ensures all_verdicts never contains cross-batch contamination.
-              - name: set_current_batch_alert_ids
+              # The model can echo an id from another batch; select_alert_verdict takes `first`
+              # over all_verdicts, so only this batch's ids may enter it (and the progress counts).
+              - name: set_batch_alert_ids
                 type: data.set
                 with:
-                  current_batch_alert_ids: "${{ foreach.item | map: '_id' }}"
+                  batch_alert_ids: "${{ foreach.item | map: '_id' }}"
 
-              # Verdicts filtered to IDs present in this batch only.
               - name: filter_verdicts_to_batch
                 type: data.set
                 with:
-                  batch_verdicts: "${{ steps.runAgent_step.output.structured_output.verdicts | where_exp: 'v', 'variables.current_batch_alert_ids contains v.id' }}"
+                  batch_verdicts: "${{ steps.runAgent_step.output.structured_output.verdicts | where_exp: 'v', 'variables.batch_alert_ids contains v.id' }}"
 
               - name: collect_batch_verdicts
                 type: data.set
@@ -1631,26 +1629,12 @@ steps:
                     with:
                       batch_summaries: "${{ variables.batch_summaries | push: steps.runAgent_step.output.structured_output.batch_summary }}"
 
-              # Reconcile progress counts to this batch's real alert ids before commenting.
-              # Raw agent verdicts may include fabricated/duplicate ids; apply_verdicts later
-              # drops unmatched ones, so counting structured_output directly can disagree with
-              # tags/notes/workflow.output.
-              - name: set_batch_alert_ids
-                type: data.set
-                with:
-                  batch_alert_ids: "${{ foreach.item | map: '_id' }}"
-                  # where_exp predicates — evaluated when counting, so they can reference
-                  # batch_alert_ids set in this same step's output merge.
-                  batch_tp_match_expr: "variables.batch_alert_ids contains v.id and v.classification == 'true_positive'"
-                  batch_fp_match_expr: "variables.batch_alert_ids contains v.id and v.classification == 'false_positive'"
-                  batch_inc_match_expr: "variables.batch_alert_ids contains v.id and v.classification == 'inconclusive'"
-
               - name: set_batch_progress_counts
                 type: data.set
                 with:
-                  batch_tp_count: "${{ steps.runAgent_step.output.structured_output.verdicts | where_exp: 'v', variables.batch_tp_match_expr | size }}"
-                  batch_fp_count: "${{ steps.runAgent_step.output.structured_output.verdicts | where_exp: 'v', variables.batch_fp_match_expr | size }}"
-                  batch_inc_count: "${{ steps.runAgent_step.output.structured_output.verdicts | where_exp: 'v', variables.batch_inc_match_expr | size }}"
+                  batch_tp_count: "${{ variables.batch_verdicts | where: 'classification', 'true_positive' | size }}"
+                  batch_fp_count: "${{ variables.batch_verdicts | where: 'classification', 'false_positive' | size }}"
+                  batch_inc_count: "${{ variables.batch_verdicts | where: 'classification', 'inconclusive' | size }}"
 
               # TODO: replace with ai.conversation.message.add once kibana#291688 merges
               - name: post_batch_progress_comment
@@ -2083,17 +2067,13 @@ steps:
             in {{ variables.batch_llm_calls }} model call(s);
             {{ variables.auto_close_ids | size }} alert(s) matched the auto-close thresholds.
 
-  # ---------------------------------------------------------------------------
-  # Worker-path skip fallback: populate missing_alert_ids when analysis_enabled
-  # short-circuits (workflow disabled, no connector, or zero pending alerts) so the
-  # Worker knows which alert IDs were never analysed rather than seeing an empty list
-  # that looks like a successful zero-verdict run.
-  # ---------------------------------------------------------------------------
-  - name: set_missing_alert_ids_on_skip
-    condition: "${{ inputs.calledByWorker == true and variables.pending_alert_count > 0 and variables.output_verdicts.size == 0 }}"
-    type: data.set
-    with:
-      missing_alert_ids: "${{ variables.alert_set | reject_exp: 'a', variables.pending_filter_expr | map: '_id' }}"
+    else:
+      # Skipped alerts are unprocessed, so the Worker must not read an empty list as "all reconciled".
+      - name: set_missing_alert_ids_on_skip
+        type: data.set
+        if: "${{ inputs.calledByWorker == true }}"
+        with:
+          missing_alert_ids: "${{ variables.alert_set | reject_exp: 'a', variables.pending_filter_expr | map: '_id' }}"
 
   # ---------------------------------------------------------------------------
   # Emit structured output for callers (Worker path)
