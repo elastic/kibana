@@ -20,8 +20,7 @@ export interface PluginEntry {
    * plugin.extraPublicDirs.
    *
    * Each target gets a `__kbnBundles__.define('plugin/{id}/{target}', ...)`
-   * registration in the generated entry, matching the legacy webpack
-   * optimizer's per-target registration. All targets for the same plugin
+   * registration in the generated entry. All targets for the same plugin
    * share a `webpackChunkName` magic comment so rspack merges them into
    * a single chunk, avoiding near-empty secondary chunks.
    *
@@ -31,20 +30,9 @@ export interface PluginEntry {
    * imports against these declared targets.
    */
   targets: string[];
-  /**
-   * Plugin IDs this plugin depends on.
-   * Once the legacy webpack optimizer is removed, consider reading this
-   * directly from PluginPackage.manifest when needed (e.g. --focus dependency
-   * expansion) rather than carrying it on PluginEntry.
-   */
+  /** Plugin IDs this plugin depends on (from manifest `plugin.requiredPlugins`). */
   requiredPlugins: string[];
-  /**
-   * Bundle IDs this plugin depends on (non-plugin bundles).
-   * Once the legacy webpack optimizer is removed, this field is likely
-   * unnecessary -- the rspack single-compilation model does not need
-   * per-bundle script loading, and core's getPluginBundlePaths would
-   * be simplified to load the unified bundle instead.
-   */
+  /** Bundle IDs this plugin depends on (from manifest `plugin.requiredBundles`). */
   requiredBundles: string[];
   /** Path to kibana.jsonc manifest */
   manifestPath: string;

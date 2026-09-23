@@ -80,6 +80,7 @@ export class NightshiftInvestigationsPlugin
   private inference?: NightshiftInvestigationsStartDeps['inference'];
   private elasticsearch?: ElasticsearchServiceStart;
   private savedObjects?: CoreStart['savedObjects'];
+  private featureFlags?: CoreStart['featureFlags'];
   private actionsStart?: ActionsPluginStart;
   private cortexEnabled = false;
   private investigationQuotaCallback?: InvestigationQuotaCallback;
@@ -265,6 +266,7 @@ export class NightshiftInvestigationsPlugin
     this.inference = plugins.inference;
     this.elasticsearch = coreStart.elasticsearch;
     this.savedObjects = coreStart.savedObjects;
+    this.featureFlags = coreStart.featureFlags;
     this.actionsStart = plugins.actions;
 
     // The `nightshift.ensureInvestigationAgent` workflow step is the general guarantee that the
@@ -298,6 +300,7 @@ export class NightshiftInvestigationsPlugin
       isInvestigationAvailable: (request) =>
         isInvestigationAvailable({
           request,
+          featureFlags: coreStart.featureFlags,
           agentBuilder: this.agentBuilder,
           logger: this.logger,
           searchInferenceEndpoints: this.searchInferenceEndpoints,
@@ -309,6 +312,9 @@ export class NightshiftInvestigationsPlugin
   }
 
   private getInvestigationsClient = (request: KibanaRequest, spaceId?: string) => {
+    if (!this.featureFlags) {
+      throw new Error('featureFlags is not available — plugin start() has not been called');
+    }
     const resolvedSpaceId =
       spaceId ?? this.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
 
@@ -324,6 +330,7 @@ export class NightshiftInvestigationsPlugin
       isAvailable: () =>
         isInvestigationAvailable({
           request,
+          featureFlags: this.featureFlags!,
           agentBuilder: this.agentBuilder,
           logger: this.logger,
           searchInferenceEndpoints: this.searchInferenceEndpoints,
