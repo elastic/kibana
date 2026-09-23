@@ -6,7 +6,17 @@
  */
 
 import React, { useState } from 'react';
-import { EuiButton, EuiCallOut, EuiConfirmModal, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiCallOut,
+  EuiConfirmModal,
+  EuiFieldText,
+  EuiFormRow,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SignificantEventsMaintenanceStatus } from '@kbn/significant-events-plugin/common';
@@ -75,23 +85,56 @@ function PausedCallout({ status }: { status: SignificantEventsMaintenanceStatus 
   );
 }
 
-export function MaintenanceSection({ canManage }: { canManage: boolean }) {
+export function MaintenanceSection({
+  canManage,
+  canReset,
+}: {
+  canManage: boolean;
+  canReset: boolean;
+}) {
   const { data: status, isLoading, isError, refetch } = useMaintenanceStatus();
-  const { pause, resume, isPausing, isResuming } = useSignificantEventsMaintenanceActions();
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const { pause, resume, reset, isPausing, isResuming, isResetting } =
+    useSignificantEventsMaintenanceActions();
+  const [openModal, setOpenModal] = useState<'activity' | 'reset'>();
+  const [resetConfirmation, setResetConfirmation] = useState('');
 
   const paused = status?.state === 'paused';
-  const isMutating = isPausing || isResuming;
+  const isMutating = isPausing || isResuming || isResetting;
   const statusReady = !isLoading && !isError && status !== undefined;
 
-  const onConfirm = () => {
-    setIsModalOpen(false);
+  const onConfirmActivityChange = () => {
+    setOpenModal(undefined);
     if (paused) {
       resume();
     } else {
       pause();
     }
   };
+
+  const closeResetModal = () => {
+    setOpenModal(undefined);
+    setResetConfirmation('');
+  };
+
+  const onConfirmReset = () => {
+    closeResetModal();
+    reset();
+  };
+
+  const resetButton = (
+    <EuiButton
+      data-test-subj="streams-settings-maintenance-reset-button"
+      color="danger"
+      iconType="trash"
+      isLoading={isResetting}
+      isDisabled={!canReset || isMutating}
+      onClick={() => setOpenModal('reset')}
+    >
+      {i18n.translate('xpack.significantEventsApp.settings.maintenance.resetButtonLabel', {
+        defaultMessage: 'Reset Significant Events data',
+      })}
+    </EuiButton>
+  );
 
   return (
     <EuiPanel hasBorder={true} hasShadow={false} paddingSize="none" grow={false}>
@@ -198,7 +241,7 @@ export function MaintenanceSection({ canManage }: { canManage: boolean }) {
           iconType={paused ? 'play' : 'pause'}
           isLoading={isMutating || isLoading}
           isDisabled={!canManage || !statusReady || isMutating}
-          onClick={() => setIsModalOpen(true)}
+          onClick={() => setOpenModal('activity')}
         >
           {isLoading
             ? i18n.translate('xpack.significantEventsApp.settings.maintenance.loadingButton', {
@@ -212,9 +255,22 @@ export function MaintenanceSection({ canManage }: { canManage: boolean }) {
                 defaultMessage: 'Pause Significant Events activity',
               })}
         </EuiButton>
+        <EuiSpacer size="s" />
+        {canReset ? (
+          resetButton
+        ) : (
+          <EuiToolTip
+            content={i18n.translate(
+              'xpack.significantEventsApp.settings.maintenance.resetPrivilegeTooltip',
+              { defaultMessage: 'Reset requires the Streams manage privilege.' }
+            )}
+          >
+            <span tabIndex={0}>{resetButton}</span>
+          </EuiToolTip>
+        )}
       </EuiPanel>
 
-      {isModalOpen && statusReady && (
+      {openModal === 'activity' && statusReady && (
         <EuiConfirmModal
           data-test-subj="streams-settings-maintenance-confirm-modal"
           aria-label={i18n.translate(
@@ -232,8 +288,8 @@ export function MaintenanceSection({ canManage }: { canManage: boolean }) {
                   { defaultMessage: 'Pause Significant Events activity?' }
                 )
           }
-          onCancel={() => setIsModalOpen(false)}
-          onConfirm={onConfirm}
+          onCancel={() => setOpenModal(undefined)}
+          onConfirm={onConfirmActivityChange}
           cancelButtonText={i18n.translate(
             'xpack.significantEventsApp.settings.maintenance.confirmCancel',
             { defaultMessage: 'Cancel' }
@@ -266,6 +322,92 @@ export function MaintenanceSection({ canManage }: { canManage: boolean }) {
                     'This disables all Significant Events managed workflows, cancels their in-flight executions, and disables the alerting rules backing knowledge indicator queries. No data is deleted.',
                 })}
           </p>
+        </EuiConfirmModal>
+      )}
+
+      {openModal === 'reset' && (
+        <EuiConfirmModal
+          data-test-subj="streams-settings-maintenance-reset-modal"
+          aria-label={i18n.translate(
+            'xpack.significantEventsApp.settings.maintenance.resetConfirmAriaLabel',
+            { defaultMessage: 'Confirm permanent Significant Events reset' }
+          )}
+          title={i18n.translate(
+            'xpack.significantEventsApp.settings.maintenance.resetConfirmTitle',
+            { defaultMessage: 'Permanently reset Significant Events data?' }
+          )}
+          onCancel={closeResetModal}
+          onConfirm={onConfirmReset}
+          cancelButtonText={i18n.translate(
+            'xpack.significantEventsApp.settings.maintenance.resetCancelButtonLabel',
+            { defaultMessage: 'Cancel' }
+          )}
+          confirmButtonText={i18n.translate(
+            'xpack.significantEventsApp.settings.maintenance.resetConfirmButtonLabel',
+            { defaultMessage: 'Reset permanently' }
+          )}
+          confirmButtonDisabled={resetConfirmation !== 'RESET'}
+          buttonColor="danger"
+          defaultFocusedButton="cancel"
+        >
+          <EuiText size="s">
+            <p>
+              <FormattedMessage
+                id="xpack.significantEventsApp.settings.maintenance.resetScopeDescription"
+                defaultMessage="This affects every Kibana space. It is permanent and cannot be undone."
+              />
+            </p>
+            <p>
+              <FormattedMessage
+                id="xpack.significantEventsApp.settings.maintenance.resetDeletesDescription"
+                defaultMessage="Reset cancels active workflow executions and permanently deletes:"
+              />
+            </p>
+            <ul>
+              <li>
+                <FormattedMessage
+                  id="xpack.significantEventsApp.settings.maintenance.resetKnowledgeIndicatorsDetail"
+                  defaultMessage="Knowledge indicators and stored queries"
+                />
+              </li>
+              <li>
+                <FormattedMessage
+                  id="xpack.significantEventsApp.settings.maintenance.resetRulesDetail"
+                  defaultMessage="Backing Alerting v2 rules"
+                />
+              </li>
+              <li>
+                <FormattedMessage
+                  id="xpack.significantEventsApp.settings.maintenance.resetInvestigationsDetail"
+                  defaultMessage="Nightshift investigations"
+                />
+              </li>
+              <li>
+                <FormattedMessage
+                  id="xpack.significantEventsApp.settings.maintenance.resetDataStreamsDetail"
+                  defaultMessage="Detections, discoveries, events, and knowledge-indicator data streams"
+                />
+              </li>
+            </ul>
+            <p>
+              <FormattedMessage
+                id="xpack.significantEventsApp.settings.maintenance.resetEndStateDescription"
+                defaultMessage="Other managed workflows are restored after cleanup. Continuous onboarding and scheduled discovery remain off."
+              />
+            </p>
+          </EuiText>
+          <EuiFormRow
+            label={i18n.translate(
+              'xpack.significantEventsApp.settings.maintenance.resetConfirmationLabel',
+              { defaultMessage: 'Type RESET to confirm' }
+            )}
+          >
+            <EuiFieldText
+              data-test-subj="streams-settings-maintenance-reset-confirmation"
+              value={resetConfirmation}
+              onChange={(event) => setResetConfirmation(event.target.value)}
+            />
+          </EuiFormRow>
         </EuiConfirmModal>
       )}
     </EuiPanel>
