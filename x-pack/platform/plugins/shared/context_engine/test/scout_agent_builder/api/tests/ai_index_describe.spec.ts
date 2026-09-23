@@ -93,7 +93,7 @@ const DESCRIBE_ROLE: KibanaRole = {
 const READ_ONLY_ROLE: KibanaRole = {
   elasticsearch: {
     cluster: [],
-    indices: [{ names: ['ai-index-idx-scout-describe-*'], privileges: ['read'] }],
+    indices: [{ names: ['ai-index-idx-scout-describe-*', DATA_STREAM], privileges: ['read'] }],
   },
   kibana: [CONTEXT_ENGINE_READ],
 };
@@ -329,19 +329,24 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
     expect(response.body.message).toBe(`AI index '${missingId}' not found`);
   });
 
-  apiTest(
-    'returns Elasticsearch 403 when the caller lacks view_index_metadata privilege',
-    async ({ apiClient }) => {
-      const response = await apiClient.get(describePath(SINGLE_AI_INDEX_ID), {
-        headers: { ...readOnlyCredentials.apiKeyHeader, ...API_HEADERS },
-        responseType: 'json',
-      });
+  for (const [kind, aiIndexId] of [
+    ['an index', SINGLE_AI_INDEX_ID],
+    ['a data stream', DATA_STREAM_AI_INDEX_ID],
+  ] as const) {
+    apiTest(
+      `returns Elasticsearch 403 for ${kind} when the caller lacks view_index_metadata privilege`,
+      async ({ apiClient }) => {
+        const response = await apiClient.get(describePath(aiIndexId), {
+          headers: { ...readOnlyCredentials.apiKeyHeader, ...API_HEADERS },
+          responseType: 'json',
+        });
 
-      expect(response).toHaveStatusCode(403);
-      // Elasticsearch refused `_mapping`; not Kibana's own authz layer.
-      expect(response.body.message).toMatch(/security_exception|unauthorized/i);
-    }
-  );
+        expect(response).toHaveStatusCode(403);
+        // Elasticsearch refused `_mapping`; not Kibana's own authz layer.
+        expect(response.body.message).toMatch(/security_exception|unauthorized/i);
+      }
+    );
+  }
 
   apiTest(
     'returns Elasticsearch 403 when the caller lacks read privilege',

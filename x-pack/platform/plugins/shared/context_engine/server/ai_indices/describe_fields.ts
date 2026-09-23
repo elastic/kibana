@@ -12,7 +12,7 @@ import type {
   MappingTypeMapping,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { isMaximumResponseSizeExceededError } from '@kbn/es-errors';
+import { isMaximumResponseSizeExceededError, isResponseError } from '@kbn/es-errors';
 import {
   MAX_AI_INDEX_DESCRIBE_FIELDS,
   MAX_AI_INDEX_DESCRIBE_METADATA_BYTES,
@@ -35,9 +35,20 @@ export interface AiIndexFieldsDescription {
 
 export interface DescribeAiIndexFieldsParams {
   esClient: ElasticsearchClient;
-  /** `dest.value`: index, data stream, or pattern. */
+  /** `dest.value`: index or data stream. */
   target: string;
 }
+
+const NO_FIELDS: AiIndexFieldsDescription = {
+  fields: [],
+  allFields: [],
+  semanticFields: [],
+  omittedFieldCount: 0,
+};
+
+/** The backing store of a freshly registered entry may not exist yet. */
+const isIndexNotFound = (error: unknown): boolean =>
+  isResponseError(error) && error.statusCode === 404;
 
 /**
  * `[path, type]` per typed property, containers and multi-fields included. Mapping-defined runtime
@@ -95,17 +106,24 @@ export const describeAiIndexFields = async ({
   esClient,
   target,
 }: DescribeAiIndexFieldsParams): Promise<AiIndexFieldsDescription> => {
-  const indexOptions = { index: target, ignore_unavailable: true, allow_no_indices: true };
+  const indexOptions = { index: target };
   const transportOptions = { maxResponseSize: MAX_AI_INDEX_DESCRIBE_METADATA_BYTES };
-  const [mappings, fieldCaps] = await Promise.all([
+  const metadata = await Promise.all([
     esClient.indices.getMapping(indexOptions, transportOptions),
     esClient.fieldCaps({ ...indexOptions, fields: '*' }, transportOptions),
   ]).catch((error) => {
     if (isMaximumResponseSizeExceededError(error)) {
       throw new AiIndexDescribeResponseTooLargeError(MAX_AI_INDEX_DESCRIBE_METADATA_BYTES);
     }
+    if (isIndexNotFound(error)) {
+      return undefined;
+    }
     throw error;
   });
+  if (metadata === undefined) {
+    return NO_FIELDS;
+  }
+  const [mappings, fieldCaps] = metadata;
 
   const typesByPath = new Map<string, Set<string>>();
   for (const { mappings: mapping } of Object.values(mappings)) {

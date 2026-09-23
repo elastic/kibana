@@ -7,6 +7,7 @@
 
 import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import {
   MAX_AI_INDEX_DESCRIBE_FIELDS,
   MAX_AI_INDEX_DESCRIBE_METADATA_BYTES,
@@ -20,6 +21,11 @@ const capability = (searchable: boolean, aggregatable: boolean) => ({
   aggregatable,
   metadata_field: false,
 });
+
+const esResponseError = (statusCode: number, type: string) =>
+  new errors.ResponseError(
+    elasticsearchClientMock.createApiResponse({ statusCode, body: { error: { type } } })
+  );
 
 describe('describeAiIndexFields', () => {
   const getMapping = jest.fn();
@@ -35,18 +41,32 @@ describe('describeAiIndexFields', () => {
     fieldCaps.mockResolvedValue({ indices: [], fields: {} });
   });
 
-  it('queries mapping and field caps for the target, tolerating missing indices', async () => {
+  // Lenient options would hide a backing index the caller may not read and describe it as empty.
+  it('queries mapping and field caps for the target with strict index options', async () => {
     getMapping.mockResolvedValue({});
 
-    await describeAiIndexFields({ esClient, target: 'ai-index-idx-*' });
+    await describeAiIndexFields({ esClient, target: 'ai-index-idx-a' });
 
-    const indexOptions = {
-      index: 'ai-index-idx-*',
-      ignore_unavailable: true,
-      allow_no_indices: true,
-    };
+    const indexOptions = { index: 'ai-index-idx-a' };
     expect(getMapping).toHaveBeenCalledWith(indexOptions, expect.anything());
     expect(fieldCaps).toHaveBeenCalledWith({ ...indexOptions, fields: '*' }, expect.anything());
+  });
+
+  it('describes a backing store that does not exist yet as having no fields', async () => {
+    getMapping.mockRejectedValue(esResponseError(404, 'index_not_found_exception'));
+    fieldCaps.mockRejectedValue(esResponseError(404, 'index_not_found_exception'));
+
+    const result = await describeAiIndexFields({ esClient, target: 'ai-index-idx-a' });
+
+    expect(result).toEqual({ fields: [], allFields: [], semanticFields: [], omittedFieldCount: 0 });
+  });
+
+  it('rethrows a refusal from Elasticsearch unchanged', async () => {
+    getMapping.mockRejectedValue(esResponseError(403, 'security_exception'));
+
+    await expect(describeAiIndexFields({ esClient, target: 'ai-index-idx-a' })).rejects.toThrow(
+      'security_exception'
+    );
   });
 
   it('flattens nested properties and multi-fields, sorted by path', async () => {
