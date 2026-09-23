@@ -145,7 +145,12 @@ describe('UiamServiceAccounts', () => {
           })
         );
         mockUiam.createServiceAccount.mockResolvedValue(validResponse);
-        await serviceAccounts.create(createMockRequest('ApiKey essu_key'), createParams);
+        await expect(
+          serviceAccounts.create(createMockRequest('ApiKey essu_key'), createParams)
+        ).resolves.toEqual({ id: 'service-account-id', name: 'nightshift-relay' });
+        expect(mockCheckPrivileges.globally).toHaveBeenCalledWith({
+          elasticsearch: { cluster: ['manage_security'], index: {} },
+        });
         expect(mockUiam.createServiceAccount).toHaveBeenCalledWith(
           new HTTPAuthorizationHeader('ApiKey', 'essu_key'),
           expect.objectContaining({ organization_id: 'organization-id' }),
@@ -182,13 +187,39 @@ describe('UiamServiceAccounts', () => {
       expect(mockUiam.createServiceAccount).not.toHaveBeenCalled();
     });
 
-    it('rejects with a 400 when the credential is not a UIAM credential', async () => {
-      await expect(
-        serviceAccounts.create(createMockRequest('ApiKey abcdef'), createParams)
-      ).rejects.toMatchObject({ output: { statusCode: 400 } });
+    it.each(['ApiKey', 'apikey', 'APIKEY', 'aPiKeY'])(
+      'rejects an Elasticsearch API key with scheme %s with a 400 before checking privileges',
+      async (scheme) => {
+        await expect(
+          serviceAccounts.create(createMockRequest(`${scheme} a2V5LWlkOnNlY3JldA==`), createParams)
+        ).rejects.toMatchObject({
+          output: {
+            statusCode: 400,
+            payload: { message: 'Provided credential is not compatible with UIAM' },
+          },
+        });
 
-      expect(mockUiam.createServiceAccount).not.toHaveBeenCalled();
-    });
+        expect(mockCheckPrivilegesWithRequest).not.toHaveBeenCalled();
+        expect(mockCheckPrivileges.globally).not.toHaveBeenCalled();
+        expect(mockUiam.createServiceAccount).not.toHaveBeenCalled();
+      }
+    );
+
+    it.each(['Bearer other_token', 'Basic dXNlcjpwYXNzd29yZA=='])(
+      'preserves the 400 error for incompatible credentials: %s',
+      async (authorization) => {
+        await expect(
+          serviceAccounts.create(createMockRequest(authorization), createParams)
+        ).rejects.toMatchObject({
+          output: {
+            statusCode: 400,
+            payload: { message: 'Provided credential is not compatible with UIAM' },
+          },
+        });
+
+        expect(mockUiam.createServiceAccount).not.toHaveBeenCalled();
+      }
+    );
 
     it('checks the `manage_security` cluster privilege for the caller', async () => {
       mockUiam.createServiceAccount.mockResolvedValue(validResponse);
@@ -202,18 +233,29 @@ describe('UiamServiceAccounts', () => {
       });
     });
 
-    it('rejects with a 403 when the caller lacks the `manage_security` cluster privilege', async () => {
-      mockCheckPrivileges.globally.mockResolvedValue(clusterPrivilegesResponse(false));
+    it.each(['Bearer essu_my_token', 'ApiKey essu_key'])(
+      'rejects %s when the caller lacks the `manage_security` cluster privilege',
+      async (authorization) => {
+        mockCheckPrivileges.globally.mockResolvedValue(clusterPrivilegesResponse(false));
 
-      await expect(
-        serviceAccounts.create(createMockRequest('Bearer essu_my_token'), createParams)
-      ).rejects.toMatchObject({ output: { statusCode: 403 } });
+        await expect(
+          serviceAccounts.create(createMockRequest(authorization), createParams)
+        ).rejects.toMatchObject({
+          output: {
+            statusCode: 403,
+            payload: {
+              message:
+                'Cannot create a service account: missing `manage_security` cluster privilege',
+            },
+          },
+        });
 
-      expect(mockUiam.createServiceAccount).not.toHaveBeenCalled();
-      expect(logger.warn).toHaveBeenCalledWith(
-        'Refused to create a service account: missing `manage_security` cluster privilege'
-      );
-    });
+        expect(mockUiam.createServiceAccount).not.toHaveBeenCalled();
+        expect(logger.warn).toHaveBeenCalledWith(
+          'Refused to create a service account: missing `manage_security` cluster privilege'
+        );
+      }
+    );
 
     // Kibana neither consumes nor reports the rest of UIAM's payload, so drift there is not
     // Kibana's to detect and must not fail a creation that already succeeded.

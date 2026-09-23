@@ -15,7 +15,14 @@ import {
 import { AgentPromptType } from '@kbn/agent-builder-common/agents/prompts';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import { createEmptyConversation, createRound } from '../../../../test_utils/conversations';
+import {
+  abortedExec0Timeline,
+  eventsNativeConversation,
+  pausedRoundTimeline,
+  pausedThenInterruptedResumeTimeline,
+} from '../../../../test_utils/timeline';
 import { roundsToEvents } from '../../../conversation/client/rounds_to_events';
+import { eventsForContext } from './context_timeline';
 import { ensureValidInput } from './preflight_checks';
 
 describe('preflight_checks', () => {
@@ -185,6 +192,33 @@ describe('preflight_checks', () => {
         expect(() =>
           ensureValidInput({ input, timeline: roundsToEvents(conversation) })
         ).not.toThrow();
+      });
+    });
+
+    describe('after an interrupted execution', () => {
+      it('after an interrupted resume: plain input accepted, prompt-only input rejected', () => {
+        const timeline = eventsForContext(
+          eventsNativeConversation(pausedThenInterruptedResumeTimeline('r1', ['tc1']))
+        );
+
+        expect(() => ensureValidInput({ input: { message: 'again' }, timeline })).not.toThrow();
+        expect(() =>
+          ensureValidInput({
+            input: { prompts: { 'tools.my_tool.confirmation.tc1': { allow: true } } },
+            timeline,
+          })
+        ).toThrow(/No standard input was provided/);
+      });
+
+      it('does not mistake an earlier round pause behind an interrupted round for pending', () => {
+        const timeline = eventsForContext(
+          eventsNativeConversation([
+            ...pausedRoundTimeline('r1', ['tc1']),
+            ...abortedExec0Timeline('r2', '2026-01-01T00:02:00.000Z'),
+          ])
+        );
+
+        expect(() => ensureValidInput({ input: { message: 'hi' }, timeline })).not.toThrow();
       });
     });
   });
