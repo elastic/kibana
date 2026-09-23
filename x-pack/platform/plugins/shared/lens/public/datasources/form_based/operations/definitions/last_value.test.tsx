@@ -600,13 +600,36 @@ describe('last_value', () => {
         ).params.showArrayValues
       ).toBeTruthy();
 
+      // Must be strictly false (not undefined) so the export transform's `?? true`
+      // fallback in fromLastValueLensStateToAPI does not incorrectly output multi_value: true
       expect(
         lastValueOperation.buildColumn({
           indexPattern,
           layer: localLayer,
           field: nonScriptedField!,
         }).params.showArrayValues
-      ).toBeFalsy();
+      ).toBe(false);
+    });
+
+    it('should set showArrayValues to false (not undefined) for a new regular-field column with no prior params', () => {
+      const indexPattern = createMockedIndexPattern();
+      const regularField = indexPattern.fields.find((field) => !field.scripted && !field.runtime)!;
+      const localLayer = {
+        columns: {},
+        columnOrder: [],
+        indexPatternId: '',
+      } as FormBasedLayer;
+
+      const { showArrayValues } = lastValueOperation.buildColumn({
+        indexPattern,
+        layer: localLayer,
+        field: regularField,
+      }).params;
+
+      // Regression test: previously returned undefined, causing the Dashboard API export
+      // transform (showArrayValues ?? true) to incorrectly emit multi_value: true.
+      expect(showArrayValues).toBe(false);
+      expect(typeof showArrayValues).toBe('boolean');
     });
   });
 
