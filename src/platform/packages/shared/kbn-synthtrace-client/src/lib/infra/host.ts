@@ -171,7 +171,7 @@ export interface HostMetricsDocument extends HostDocument {
   'system.memory.actual.free'?: number;
   'system.memory.used.bytes'?: number;
   'system.memory.used.pct'?: number;
-  'system.load'?: { 1: number; 5?: number; 15?: number; cores: number };
+  'system.load'?: { 1: number; cores: number };
   'host.network.ingress.bytes'?: number;
   'host.network.egress.bytes'?: number;
   'process.cpu.pct'?: number;

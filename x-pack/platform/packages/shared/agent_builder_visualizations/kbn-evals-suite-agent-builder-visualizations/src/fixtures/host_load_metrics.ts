@@ -32,19 +32,31 @@ export function buildHostLoadEvents({
   const stepMs = count === 1 ? 0 : (now - startMs) / (count - 1);
 
   return Array.from({ length: count }, (_, i) => {
-    const systemLoad = {
+    const systemLoad: BeatsSystemLoad = {
       1: 0.8 + i * 0.01,
       5: 0.6 + i * 0.008,
       15: 0.4 + i * 0.006,
       cores: 8,
     };
 
-    return infra
-      .host(HOST_NAME)
-      .load()
-      .overrides({ 'system.load': systemLoad })
-      .timestamp(startMs + stepMs * i);
+    return (
+      infra
+        .host(HOST_NAME)
+        .load()
+        // Structural widening only: synthtrace types just the 1-minute average, and the
+        // extra 5 / 15 averages are serialized as-is (asserted by seed_contract.test.ts).
+        .overrides({ 'system.load': systemLoad as { 1: number; cores: number } })
+        .timestamp(startMs + stepMs * i)
+    );
   });
+}
+
+/** The Beats `load` metricset fields the gold queries aggregate. */
+interface BeatsSystemLoad {
+  1: number;
+  5: number;
+  15: number;
+  cores: number;
 }
 
 export async function assertHostLoadMetricsReady(esClient: Client): Promise<void> {
