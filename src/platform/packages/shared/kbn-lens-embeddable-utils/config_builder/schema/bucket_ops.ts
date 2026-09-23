@@ -121,7 +121,7 @@ const bucketTermsRankByCustomLastValueOperationSchema = bucketTermsRankByCustomS
     }),
   })
   .meta({
-    id: 'termsRankByCustomLastValueOperation',
+    id: 'visTermsRankByCustomLastValueOperation',
     title: 'Terms Rank By Custom Last Value Operation',
     description: 'Terms ranked by the last value of a field.',
   });
