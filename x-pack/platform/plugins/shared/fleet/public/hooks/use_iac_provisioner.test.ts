@@ -99,4 +99,20 @@ describe('useIacProvisioner', () => {
 
     expect(useBooleanValue).toHaveBeenCalledWith(ENABLE_IAC_PROVISIONER_FLAG, false);
   });
+
+  it('evaluates the flag even when hosted or agentless gates are closed', () => {
+    const useBooleanValue = jest.fn().mockReturnValue(true);
+    mockedUseConfig.mockReturnValue({
+      agentless: { enabled: false },
+    } as any);
+    mockedUseStartServices.mockReturnValue({
+      cloud: { isCloudEnabled: false, isServerlessEnabled: false },
+      featureFlags: { useBooleanValue },
+    } as any);
+
+    const { result } = renderHook(() => useIacProvisioner());
+
+    expect(useBooleanValue).toHaveBeenCalledWith(ENABLE_IAC_PROVISIONER_FLAG, false);
+    expect(result.current.isIacProvisionerEnabled).toBe(false);
+  });
 });
