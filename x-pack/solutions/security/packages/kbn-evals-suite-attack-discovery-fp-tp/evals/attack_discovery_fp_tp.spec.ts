@@ -25,6 +25,7 @@ import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
   selectEvaluators,
+  tags,
   type EvaluationDataset,
   type Example,
   type DefaultEvaluators,
@@ -60,40 +61,44 @@ const corpusDataset = (name: CorpusName): EvaluationDataset => {
   };
 };
 
-evaluate.describe('Attack Discovery — FP/TP verdict accuracy', () => {
-  evaluate(
-    'runs the attack-discovery review workflow per corpus case and grades the verdict',
-    async ({
-      executorClient,
-      evaluators,
-      fetch,
-      log,
-    }: {
-      executorClient: { runExperiment: Function };
-      evaluators: Pick<DefaultEvaluators, 'criteria'>;
-      fetch: HttpHandler;
-      log: ToolingLog;
-    }) => {
-      const selectedEvaluators = selectEvaluators([
-        verdictAccuracy,
-        payloadConformance,
-        evaluators.criteria(VERDICT_QUALITY_CRITERIA) as never,
-      ]);
+evaluate.describe(
+  'Attack Discovery — FP/TP verdict accuracy',
+  { tag: tags.stateful.classic },
+  () => {
+    evaluate(
+      'runs the attack-discovery review workflow per corpus case and grades the verdict',
+      async ({
+        executorClient,
+        evaluators,
+        fetch,
+        log,
+      }: {
+        executorClient: { runExperiment: Function };
+        evaluators: Pick<DefaultEvaluators, 'criteria'>;
+        fetch: HttpHandler;
+        log: ToolingLog;
+      }) => {
+        const selectedEvaluators = selectEvaluators([
+          verdictAccuracy,
+          payloadConformance,
+          evaluators.criteria(VERDICT_QUALITY_CRITERIA) as never,
+        ]);
 
-      await executorClient.runExperiment(
-        {
-          datasets: CORPUS_NAMES.map(corpusDataset),
-          task: async ({ metadata }: { metadata: unknown }) => {
-            const { caseId, payload } = metadata as {
-              caseId: string;
-              payload: Record<string, unknown>;
-            };
-            log.info(`Running attack-discovery workflow for case ${caseId}`);
-            return runAttackDiscoveryWorkflow({ fetch, log, payload });
+        await executorClient.runExperiment(
+          {
+            datasets: CORPUS_NAMES.map(corpusDataset),
+            task: async ({ metadata }: { metadata: unknown }) => {
+              const { caseId, payload } = metadata as {
+                caseId: string;
+                payload: Record<string, unknown>;
+              };
+              log.info(`Running attack-discovery workflow for case ${caseId}`);
+              return runAttackDiscoveryWorkflow({ fetch, log, payload, caseId });
+            },
           },
-        },
-        selectedEvaluators
-      );
-    }
-  );
-});
+          selectedEvaluators
+        );
+      }
+    );
+  }
+);
