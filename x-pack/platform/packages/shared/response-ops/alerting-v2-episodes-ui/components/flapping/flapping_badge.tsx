@@ -6,6 +6,7 @@
  */
 
 import React, { useState } from 'react';
+import type { ReactElement } from 'react';
 import { css } from '@emotion/react';
 import { EuiBadge, EuiPopover, EuiPopoverTitle, EuiText } from '@elastic/eui';
 import * as i18n from './translations';
@@ -18,21 +19,33 @@ const popoverBodyCss = css`
  * Hollow "Flapping" badge with a popover explaining the detection thresholds.
  */
 export function FlappingBadge() {
-  const [isOpen, setIsOpen] = useState(false);
-
-  const button = (
-    <EuiBadge
-      color="hollow"
-      iconType="chartGauge"
-      iconSide="left"
-      tabIndex={0}
-      onClick={() => setIsOpen((open) => !open)}
-      onClickAriaLabel={i18n.FLAPPING_BADGE_ARIA_LABEL}
-      data-test-subj="alertEpisodeFlappingBadge"
-    >
-      {i18n.FLAPPING_BADGE_LABEL}
-    </EuiBadge>
+  return (
+    <FlappingPopover
+      renderButton={(onClick) => (
+        <EuiBadge
+          color="hollow"
+          iconType="chartGauge"
+          iconSide="left"
+          tabIndex={0}
+          onClick={onClick}
+          onClickAriaLabel={i18n.FLAPPING_BADGE_ARIA_LABEL}
+          data-test-subj="alertEpisodeFlappingBadge"
+        >
+          {i18n.FLAPPING_BADGE_LABEL}
+        </EuiBadge>
+      )}
+    />
   );
+}
+
+interface FlappingPopoverProps {
+  renderButton: (onClick: () => void) => ReactElement;
+}
+
+/** Adds the standard flapping explanation popover to the supplied trigger. */
+export const FlappingPopover = ({ renderButton }: FlappingPopoverProps) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const button = renderButton(() => setIsOpen((open) => !open));
 
   return (
     <EuiPopover
@@ -50,4 +63,4 @@ export function FlappingBadge() {
       </EuiText>
     </EuiPopover>
   );
-}
+};
