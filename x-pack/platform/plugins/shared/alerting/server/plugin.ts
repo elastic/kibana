@@ -54,6 +54,10 @@ import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
 import type { SharePluginStart } from '@kbn/share-plugin/server';
 import type { MaintenanceWindowsServerStart } from '@kbn/maintenance-windows-plugin/server';
+import type {
+  WorkflowsExtensionsServerPluginSetup,
+  WorkflowsExtensionsServerPluginStart,
+} from '@kbn/workflows-extensions/server';
 import { ApiKeyType } from './task_runner/types';
 import { RuleTypeRegistry } from './rule_type_registry';
 import { TaskRunnerFactory } from './task_runner';
@@ -99,10 +103,6 @@ import type { AlertingAuthorization } from './authorization';
 import type { SecurityHealth } from './lib/get_security_health';
 import { getSecurityHealth } from './lib/get_security_health';
 import { registerNodeCollector, registerClusterCollector, InMemoryMetrics } from './monitoring';
-import type {
-  WorkflowsExtensionsServerPluginSetup,
-  WorkflowsExtensionsServerPluginStart,
-} from '@kbn/workflows-extensions/server';
 import { registerTriggerDefinitions } from './lib/workflow_extensions/register_trigger_definitions';
 import { getRuleTaskTimeout } from './lib/get_rule_task_timeout';
 import { getActionsConfigMap } from './lib/get_actions_config_map';

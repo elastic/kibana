@@ -436,10 +436,7 @@ export class RuleTypeRunner<
     // Gate on autoRecoverAlerts: non-lifecycle rule types don't persist alert state
     // between runs, so every alert is vacuously "new" every execution — emitting
     // for them would reproduce the fan-out problem we're trying to fix.
-    if (
-      (ruleType.autoRecoverAlerts ?? true) &&
-      this.options.context.workflowsExtensions
-    ) {
+    if ((ruleType.autoRecoverAlerts ?? true) && this.options.context.workflowsExtensions) {
       const newAlerts = alertsClient.getProcessedAlerts('new');
       const recoveredAlerts = alertsClient.getProcessedAlerts('recovered');
       const newEntries = Object.entries(newAlerts);

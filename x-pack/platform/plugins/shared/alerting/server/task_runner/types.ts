@@ -28,6 +28,7 @@ import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
 import type { IAsyncSearchOptions } from '@kbn/data-plugin/common';
 import type { SpaceId } from '@kbn/core-spaces-common';
+import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import type { IAlertsClient } from '../alerts_client/types';
 import type { Alert } from '../alert';
 import type { AlertsService } from '../alerts_service/alerts_service';
@@ -61,7 +62,6 @@ import type { ConnectorAdapterRegistry } from '../connector_adapters/connector_a
 import type { RulesSettingsService } from '../rules_settings';
 import type { MaintenanceWindowsService } from './maintenance_windows';
 import type { RawRuleSnoozedInstance } from '../saved_objects/schemas/raw_rule';
-import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 
 export interface RuleTaskRunResult {
   state: RuleTaskState;

@@ -69,7 +69,8 @@ export const alertStateChangedEventSchema = z.object({
     .object({
       id: z.string().describe(
         i18n.translate('xpack.alerting.triggers.alertStateChanged.schema.alert.id', {
-          defaultMessage: 'Alert instance ID (the key the rule type uses to identify this instance).',
+          defaultMessage:
+            'Alert instance ID (the key the rule type uses to identify this instance).',
         })
       ),
       uuid: z.string().describe(
@@ -85,20 +86,26 @@ export const alertStateChangedEventSchema = z.object({
             '"recovered" = alert transitioned from active to resolved.',
         })
       ),
-      actionGroup: z.string().nullable().describe(
-        i18n.translate('xpack.alerting.triggers.alertStateChanged.schema.alert.actionGroup', {
-          defaultMessage:
-            'Action group at time of transition. Current group for new alerts; ' +
-            'last scheduled group for recovered alerts. Null if none was recorded.',
-        })
-      ),
-      start: z.string().nullable().describe(
-        i18n.translate('xpack.alerting.triggers.alertStateChanged.schema.alert.start', {
-          defaultMessage:
-            'ISO-8601 timestamp when this alert instance first became active. ' +
-            'Null for recovered alerts that have no start in state.',
-        })
-      ),
+      actionGroup: z
+        .string()
+        .nullable()
+        .describe(
+          i18n.translate('xpack.alerting.triggers.alertStateChanged.schema.alert.actionGroup', {
+            defaultMessage:
+              'Action group at time of transition. Current group for new alerts; ' +
+              'last scheduled group for recovered alerts. Null if none was recorded.',
+          })
+        ),
+      start: z
+        .string()
+        .nullable()
+        .describe(
+          i18n.translate('xpack.alerting.triggers.alertStateChanged.schema.alert.start', {
+            defaultMessage:
+              'ISO-8601 timestamp when this alert instance first became active. ' +
+              'Null for recovered alerts that have no start in state.',
+          })
+        ),
       status: z.string().describe(
         i18n.translate('xpack.alerting.triggers.alertStateChanged.schema.alert.status', {
           defaultMessage:
@@ -142,32 +149,26 @@ export const alertStateChangedTriggerDefinition: CommonTriggerDefinition<
       }
     ),
     examples: [
-      i18n.translate(
-        'xpack.alerting.workflowTriggers.alertStateChanged.documentation.example1',
-        {
-          defaultMessage: `## React to new alerts from rules tagged "k8s"
+      i18n.translate('xpack.alerting.workflowTriggers.alertStateChanged.documentation.example1', {
+        defaultMessage: `## React to new alerts from rules tagged "k8s"
 \`\`\`yaml
 triggers:
   - type: {triggerId}
     on:
       condition: 'alert.category: "new" and rule.tags: "k8s"'
 \`\`\``,
-          values: { triggerId: AlertStateChangedTriggerId },
-        }
-      ),
-      i18n.translate(
-        'xpack.alerting.workflowTriggers.alertStateChanged.documentation.example2',
-        {
-          defaultMessage: `## React when any alert from a specific rule recovers
+        values: { triggerId: AlertStateChangedTriggerId },
+      }),
+      i18n.translate('xpack.alerting.workflowTriggers.alertStateChanged.documentation.example2', {
+        defaultMessage: `## React when any alert from a specific rule recovers
 \`\`\`yaml
 triggers:
   - type: {triggerId}
     on:
       condition: 'alert.category: "recovered" and rule.id: "my-rule-id"'
 \`\`\``,
-          values: { triggerId: AlertStateChangedTriggerId },
-        }
-      ),
+        values: { triggerId: AlertStateChangedTriggerId },
+      }),
     ],
   },
   snippets: {

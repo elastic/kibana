@@ -88,7 +88,6 @@
     "@kbn/cps-utils",
     "@kbn/core-saved-objects-common",
     "@kbn/workflows-extensions",
-    "@kbn/workflows",
   ],
   "exclude": ["target/**/*"]
 }
