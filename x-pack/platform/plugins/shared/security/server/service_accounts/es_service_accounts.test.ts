@@ -117,6 +117,7 @@ describe('EsServiceAccounts', () => {
     getCurrentUserProfileId = jest.fn().mockResolvedValue(null);
 
     serviceAccounts = new EsServiceAccounts({
+      requestLifetimeMs: 600_000,
       logger,
       license,
       clusterClient,
@@ -314,6 +315,7 @@ describe('EsServiceAccounts', () => {
 
     it('rejects with a 424 when saved object encryption is unavailable', async () => {
       serviceAccounts = new EsServiceAccounts({
+        requestLifetimeMs: 600_000,
         logger,
         license,
         clusterClient,
@@ -986,27 +988,6 @@ describe('EsServiceAccounts', () => {
         output: { statusCode: 403 },
       });
       expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('#createFakeRequest', () => {
-    it('rejects with a 501 so callers surface a clear "not implemented" response', async () => {
-      await expect(serviceAccounts.createFakeRequest()).rejects.toMatchObject({
-        message: 'Creating requests for Elasticsearch service accounts is not yet implemented',
-        output: { statusCode: 501 },
-      });
-    });
-  });
-
-  describe('#reauthenticateFakeRequest', () => {
-    it('resolves to null so unrelated fake requests stay on the not-handled path', async () => {
-      await expect(serviceAccounts.reauthenticateFakeRequest()).resolves.toBeNull();
-    });
-  });
-
-  describe('#releaseFakeRequest', () => {
-    it('is a no-op since this backend never mints requests', () => {
-      expect(() => serviceAccounts.releaseFakeRequest()).not.toThrow();
     });
   });
 });

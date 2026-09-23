@@ -1194,6 +1194,7 @@
     "@kbn/serverless-vectordb-settings": "workspace:*",
     "@kbn/serverless-workplace-ai": "workspace:*",
     "@kbn/serverless-workplace-ai-settings": "workspace:*",
+    "@kbn/service-accounts-test-plugin": "workspace:*",
     "@kbn/session-notifications-plugin": "workspace:*",
     "@kbn/session-view-plugin": "workspace:*",
     "@kbn/setup-node-env": "workspace:*",

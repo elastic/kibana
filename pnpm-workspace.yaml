@@ -1526,6 +1526,7 @@ packages:
   - 'x-pack/platform/test/security_api_integration/plugins/features_provider'
   - 'x-pack/platform/test/security_api_integration/plugins/oidc_provider'
   - 'x-pack/platform/test/security_api_integration/plugins/saml_provider'
+  - 'x-pack/platform/test/security_api_integration/plugins/service_accounts'
   - 'x-pack/platform/test/security_api_integration/plugins/user_profiles_consumer'
   - 'x-pack/platform/test/security_functional/plugins/test_endpoints'
   - 'x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin'
