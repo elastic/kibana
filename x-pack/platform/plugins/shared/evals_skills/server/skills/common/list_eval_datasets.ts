@@ -12,7 +12,6 @@ import { DatasetMaturity, MAX_TAG_LENGTH, MAX_TAGS_PER_DATASET } from '@kbn/eval
 import { MAX_NAME_LENGTH } from '@kbn/evals-plugin/common';
 import type { EvalsSkillsStartDependencies } from '../../types';
 import { hasReadEvalsPrivilege } from './check_privileges';
-import { LIST_EVAL_DATASETS_TOOL_ID } from './tool_ids';
 import { errorResult, otherResult, toErrorResult } from './tool_results';
 
 /** Services the shared list-datasets tool needs. Both eval skills satisfy this. */
@@ -49,12 +48,14 @@ const schema = z.object({
 });
 
 /**
- * Lists evaluation datasets visible in the active space.
+ * Lists evaluation datasets visible in the active space. Each skill passes its
+ * own `id`, since inline tool ids must be unique across skills.
  */
 export const listEvalDatasetsTool = (
-  deps: ListEvalDatasetsToolDeps
+  deps: ListEvalDatasetsToolDeps,
+  id: string
 ): BuiltinSkillBoundedTool<typeof schema> => ({
-  id: LIST_EVAL_DATASETS_TOOL_ID,
+  id,
   type: ToolType.builtin,
   description:
     'List evaluation datasets (id, name, description, tags, maturity, example count). Optionally narrow by name, tag, or curation level.',
@@ -69,9 +70,8 @@ export const listEvalDatasetsTool = (
       }
 
       if (!evals.datasetService) {
-        return toErrorResult(
-          new Error('the evals dataset service is unavailable'),
-          'Failed to list evaluation datasets'
+        return errorResult(
+          'Failed to list evaluation datasets: the evals dataset service is unavailable'
         );
       }
 

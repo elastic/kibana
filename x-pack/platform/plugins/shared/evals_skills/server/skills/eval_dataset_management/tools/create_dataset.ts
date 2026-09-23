@@ -47,8 +47,7 @@ export const createDatasetTool = (
 ): BuiltinSkillBoundedTool<typeof schema> => ({
   id: evalsDatasetTools.createDataset,
   type: ToolType.builtin,
-  description:
-    'Create an evaluation dataset in the current space. Fails when the name already exists; use upsert_dataset to replace the examples of an existing dataset.',
+  description: `Create an evaluation dataset in the current space. Fails when the name already exists; use ${evalsDatasetTools.editExamples} or ${evalsDatasetTools.upsertDataset} to change the examples of an existing dataset.`,
   schema,
   confirmation: {
     askUser: 'always',

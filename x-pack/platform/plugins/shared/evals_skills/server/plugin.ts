@@ -62,7 +62,6 @@ export class EvalsSkillsPlugin
     agentBuilder.skills.register(createEvalExperimentsSkill(toolDeps));
     agentBuilder.skills.register(
       createEvalDatasetManagementSkill({
-        serverBasePath: coreSetup.http.basePath.serverBasePath,
         logger: this.logger,
         getStartDependencies,
       })

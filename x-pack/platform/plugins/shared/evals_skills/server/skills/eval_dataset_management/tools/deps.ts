@@ -10,8 +10,6 @@ import type { EvalsSkillsStartDependencies } from '../../../types';
 
 /** Services shared by every inline tool of the eval-dataset-management skill. */
 export interface EvalDatasetManagementToolDeps {
-  /** Configured server base path (without any space segment) - used to build result deep links. */
-  serverBasePath: string;
   logger: Logger;
   getStartDependencies: () => Promise<EvalsSkillsStartDependencies>;
 }

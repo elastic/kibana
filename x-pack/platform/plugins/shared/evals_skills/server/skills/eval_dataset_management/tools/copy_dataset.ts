@@ -13,6 +13,7 @@ import {
   datasetDescriptionSchema,
   datasetIdSchema,
   datasetNameSchema,
+  datasetNotFoundResult,
   errorResult,
   evalsDatasetTools,
   formatMaturity,
@@ -99,7 +100,7 @@ export const copyDatasetTool = (
 
       const dataset = await loaded.client.copy(datasetId, { name, description });
       if (!dataset) {
-        return errorResult(`Evaluation dataset not found: ${datasetId}`);
+        return datasetNotFoundResult(datasetId);
       }
 
       return otherResult({

@@ -20,7 +20,7 @@ import { MAX_ID_LENGTH } from '@kbn/evals-plugin/common';
 import type { EvalsPluginStart } from '@kbn/evals-plugin/server';
 import { hasManageEvalsPrivilege, hasReadEvalsPrivilege } from '../../common/check_privileges';
 import { evalsDatasetTools } from '../../common/tool_ids';
-import { errorResult, toErrorResult } from '../../common/tool_results';
+import { errorResult } from '../../common/tool_results';
 import type { EvalDatasetManagementToolDeps } from './deps';
 
 export { evalsDatasetTools };
@@ -46,7 +46,9 @@ export const datasetIdSchema = z
   .string()
   .min(1)
   .max(MAX_ID_LENGTH)
-  .describe('Dataset id, as returned by list_datasets or get_dataset.');
+  .describe(
+    `Dataset id, as returned by ${evalsDatasetTools.listDatasets} or ${evalsDatasetTools.getDataset}.`
+  );
 
 export const datasetTagsSchema = z
   .array(z.string().min(1).max(MAX_TAG_LENGTH).regex(TAG_PATTERN))
@@ -141,15 +143,26 @@ export const formatExamplesPreview = (examples: readonly DatasetExample[]): stri
 /** Joins markdown blocks into a confirmation message body. */
 export const toConfirmationMessage = (blocks: readonly string[]): string => blocks.join('\n\n');
 
-const DATASET_ALREADY_EXISTS = 'DatasetAlreadyExistsError';
+/** Matches evals storage errors by name, since their classes aren't exported by the plugin. */
+const isEvalsError = (error: unknown, name: string): error is Error =>
+  error instanceof Error && error.name === name;
 
 export const isDatasetAlreadyExistsError = (error: unknown): error is Error =>
-  error instanceof Error && error.name === DATASET_ALREADY_EXISTS;
+  isEvalsError(error, 'DatasetAlreadyExistsError');
 
-/** Create failed because the name is taken. Points the agent at upsert. */
+export const isDatasetExamplesLimitExceededError = (error: unknown): error is Error =>
+  isEvalsError(error, 'DatasetExamplesLimitExceededError');
+
+export const isExampleNotFoundError = (error: unknown): error is Error =>
+  isEvalsError(error, 'ExampleNotFoundError');
+
+export const datasetNotFoundResult = (datasetId: string): ToolHandlerStandardReturn =>
+  errorResult(`Evaluation dataset not found: ${datasetId}`);
+
+/** Create failed because the name is taken. Points the agent at the tools that edit it. */
 export const datasetAlreadyExistsResult = (error: Error): ToolHandlerStandardReturn =>
   errorResult(
-    `${error.message}. Use ${evalsDatasetTools.upsertDataset} to replace its examples, or choose a different name.`
+    `${error.message}. Use ${evalsDatasetTools.editExamples} to add to it, ${evalsDatasetTools.upsertDataset} to replace its examples, or choose a different name.`
   );
 
 type DatasetPrivilege = 'read' | 'manage';
@@ -185,10 +198,7 @@ export const loadDatasetClient = async (
 
   if (!evals.datasetService) {
     return {
-      error: toErrorResult(
-        new Error('the evals dataset service is unavailable'),
-        `Failed to ${action}`
-      ),
+      error: errorResult(`Failed to ${action}: the evals dataset service is unavailable`),
     };
   }
 

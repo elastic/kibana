@@ -8,10 +8,11 @@
 import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
+import { MAX_EXAMPLES_PER_DATASET } from '@kbn/evals-common';
 import type { EvalDatasetManagementToolDeps } from './deps';
 import {
   datasetIdSchema,
-  errorResult,
+  datasetNotFoundResult,
   evalsDatasetTools,
   loadDatasetClient,
   MAX_RETURNED_DATASET_EXAMPLES,
@@ -21,19 +22,28 @@ import {
 
 const schema = z.object({
   dataset_id: datasetIdSchema,
+  offset: z
+    .number()
+    .int()
+    .min(0)
+    .max(MAX_EXAMPLES_PER_DATASET)
+    .optional()
+    .describe(
+      `Index of the first example to return, for paging through large datasets. Defaults to 0.`
+    ),
 });
 
 /**
- * Reads one dataset, including a bounded slice of its examples.
+ * Reads one dataset, including a bounded page of its examples.
  */
 export const getDatasetTool = (
   deps: EvalDatasetManagementToolDeps
 ): BuiltinSkillBoundedTool<typeof schema> => ({
   id: evalsDatasetTools.getDataset,
   type: ToolType.builtin,
-  description: `Get one evaluation dataset by id, including up to ${MAX_RETURNED_DATASET_EXAMPLES} examples (input, output, metadata). When examples_omitted is greater than 0 the list is incomplete — do not pass it to upsert_dataset.`,
+  description: `Get one evaluation dataset by id, including a page of up to ${MAX_RETURNED_DATASET_EXAMPLES} examples (id, input, output, metadata) starting at offset. When examples_omitted is greater than 0 the page is incomplete: do not pass it to ${evalsDatasetTools.upsertDataset}; use ${evalsDatasetTools.editExamples} instead.`,
   schema,
-  handler: async ({ dataset_id: datasetId }, { request, spaceId }) => {
+  handler: async ({ dataset_id: datasetId, offset = 0 }, { request, spaceId }) => {
     try {
       const loaded = await loadDatasetClient(
         deps,
@@ -47,11 +57,11 @@ export const getDatasetTool = (
 
       const dataset = await loaded.client.get(datasetId);
       if (!dataset) {
-        return errorResult(`Evaluation dataset not found: ${datasetId}`);
+        return datasetNotFoundResult(datasetId);
       }
 
       const examples = dataset.examples
-        .slice(0, MAX_RETURNED_DATASET_EXAMPLES)
+        .slice(offset, offset + MAX_RETURNED_DATASET_EXAMPLES)
         .map(({ id, input, output, metadata }) => ({ id, input, output, metadata }));
 
       return otherResult({
@@ -60,10 +70,11 @@ export const getDatasetTool = (
         description: dataset.description,
         tags: dataset.tags ?? [],
         maturity: dataset.maturity,
-        examples_count: dataset.examples_count,
         shared_with_other_spaces: dataset.space_ids.some((id) => id !== spaceId),
-        examples,
+        examples_count: dataset.examples_count,
+        offset,
         examples_omitted: dataset.examples.length - examples.length,
+        examples,
       });
     } catch (error) {
       return toErrorResult(error, 'Failed to get an evaluation dataset');

@@ -14,8 +14,8 @@ import { listConnectorsTool } from './list_eval_connectors';
 import { previewEvalExperimentTool } from './preview_eval_experiment';
 import { saveEvalExperimentTool } from './save_eval_experiment';
 import { runEvalExperimentTool } from './run_eval_experiment';
+import { evalsExperimentTools } from './tool_utils';
 
-export { evalsExperimentTools as evalsTools } from './tool_utils';
 export type { EvalExperimentsToolDeps } from './deps';
 
 /**
@@ -25,7 +25,7 @@ export type { EvalExperimentsToolDeps } from './deps';
 export const getEvalExperimentsInlineTools = (
   deps: EvalExperimentsToolDeps
 ): SkillBoundedTool[] => [
-  listEvalDatasetsTool(deps),
+  listEvalDatasetsTool(deps, evalsExperimentTools.listDatasets),
   listEvaluatorsTool(deps),
   listEvalTargetsTool(deps),
   listConnectorsTool(deps),

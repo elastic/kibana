@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-export const EVALS_TOOLS_NAMESPACE = 'platform.evals';
+const EVALS_TOOLS_NAMESPACE = 'platform.evals';
 
-export const evalsTool = (name: string) => `${EVALS_TOOLS_NAMESPACE}.${name}`;
+const evalsTool = (name: string) => `${EVALS_TOOLS_NAMESPACE}.${name}`;
 
-export const LIST_EVAL_DATASETS_TOOL_ID = evalsTool('list_datasets');
-
-/** Inline tool ids for the eval-experiment-authoring skill. */
+/**
+ * Inline tool ids for the eval-experiment-authoring skill. Ids must not overlap
+ * with other skills' inline tools, which Agent Builder would rename on collision.
+ */
 export const evalsExperimentTools = {
-  listDatasets: LIST_EVAL_DATASETS_TOOL_ID,
+  listDatasets: evalsTool('experiments.list_datasets'),
   listEvaluators: evalsTool('list_evaluators'),
   listTargets: evalsTool('list_targets'),
   listConnectors: evalsTool('list_connectors'),
@@ -24,10 +25,11 @@ export const evalsExperimentTools = {
 
 /** Inline tool ids for the eval-dataset-management skill. */
 export const evalsDatasetTools = {
-  listDatasets: LIST_EVAL_DATASETS_TOOL_ID,
+  listDatasets: evalsTool('datasets.list_datasets'),
   getDataset: evalsTool('get_dataset'),
   createDataset: evalsTool('create_dataset'),
   upsertDataset: evalsTool('upsert_dataset'),
+  editExamples: evalsTool('edit_examples'),
   copyDataset: evalsTool('copy_dataset'),
   deleteDataset: evalsTool('delete_dataset'),
 } as const;

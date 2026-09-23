@@ -6,17 +6,17 @@
  */
 
 import { MAX_EXAMPLES_PER_DATASET } from '@kbn/evals-common';
-import { evalsDatasetTools } from './tools/tool_utils';
+import { evalsDatasetTools } from '../common/tool_ids';
 
 /**
  * Guidance shown to the agent when the eval-dataset-management skill is loaded.
- * It documents the tools and the recommended discover -> preview -> write flow.
+ * It documents the tools and the recommended discover -> draft -> write flow.
  */
 export const EVAL_DATASET_MANAGEMENT_SKILL_CONTENT = `## When to Use This Skill
 
 Use this skill when the user wants to **manage evaluation datasets** with the
-Evaluations (evals) feature: finding and inspecting them, creating them, replacing
-their examples, copying them, or deleting them.
+Evaluations (evals) feature: finding and inspecting them, creating them, adding,
+removing, or replacing their examples, copying them, or deleting them.
 
 Do **not** use this skill to compose or run evaluation experiments.
 
@@ -51,12 +51,14 @@ for the user to confirm.
 
 1. **Discover** with \`${evalsDatasetTools.listDatasets}\` (id, name, description, tags,
    maturity, example count). Use \`${evalsDatasetTools.getDataset}\` to read a dataset's
-   examples before changing it.
+   examples before changing it. It returns one page of examples; pass \`offset\` to read
+   the next page.
 2. **Draft** a short bulleted preview before any write: name, description, tags, maturity,
    example count, and the first few examples. For an upsert, say which examples will be
    added and which existing ones will be removed.
 3. **Write**. Each of these asks the user to confirm before it runs:
    - \`${evalsDatasetTools.createDataset}\` - create a dataset. Fails if the name already exists in this space.
+   - \`${evalsDatasetTools.editExamples}\` - add examples and/or remove specific examples by id, keeping every other example.
    - \`${evalsDatasetTools.upsertDataset}\` - create or replace by **name**. Replaces the whole example set: any existing example missing from the payload is removed.
    - \`${evalsDatasetTools.copyDataset}\` - copy a dataset under a new name.
    - \`${evalsDatasetTools.deleteDataset}\` - remove a dataset from this space.
@@ -64,7 +66,9 @@ for the user to confirm.
 ## Rules
 
 - Prefer \`${evalsDatasetTools.createDataset}\` for a new dataset. \`${evalsDatasetTools.upsertDataset}\` replaces the full example set, so read the current examples first and include every one that should be kept.
-- If \`${evalsDatasetTools.getDataset}\` reports \`examples_omitted\` greater than 0, that list is incomplete. Do not send it to \`${evalsDatasetTools.upsertDataset}\`. Upsert only with the complete example set.
+- To add or remove a few examples, use \`${evalsDatasetTools.editExamples}\` rather than an upsert.
+- If \`${evalsDatasetTools.getDataset}\` reports \`examples_omitted\` greater than 0, that page is incomplete. Never send it to \`${evalsDatasetTools.upsertDataset}\`; use \`${evalsDatasetTools.editExamples}\` instead, paging with \`offset\` to find the ids of examples to remove.
+- On an upsert of an existing dataset, pass its current description unless the user asked to change it. The upsert overwrites it, in every space that shares the dataset.
 - Deleting a dataset shared with other spaces only detaches it from the current space. Pass \`intent: 'delete'\` only when the user wants it destroyed, and \`intent: 'unshare'\` only when they want it removed from this space and kept elsewhere. Omit \`intent\` to let the dataset's spaces decide.
 - Summaries use a short **bulleted list**, not a markdown table.
 `;

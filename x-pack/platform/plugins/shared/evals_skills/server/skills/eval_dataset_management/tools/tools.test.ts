@@ -7,27 +7,38 @@
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import type { ZodObject, z } from '@kbn/zod/v4';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server';
+import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
+import { evalsDatasetTools } from '../../common/tool_ids';
 import type { EvalDatasetManagementToolDeps } from './deps';
 import { copyDatasetTool } from './copy_dataset';
 import { createDatasetTool } from './create_dataset';
 import { deleteDatasetTool } from './delete_dataset';
+import { editExamplesTool } from './edit_examples';
 import { getDatasetTool } from './get_dataset';
 import { upsertDatasetTool } from './upsert_dataset';
-import { evalsDatasetTools, MAX_RETURNED_DATASET_EXAMPLES } from './tool_utils';
+import { MAX_RETURNED_DATASET_EXAMPLES } from './tool_utils';
 
 const createContext = (spaceId = 'default'): ToolHandlerContext =>
   ({ request: httpServerMock.createKibanaRequest(), spaceId } as unknown as ToolHandlerContext);
 
-const firstResult = (ret: unknown) =>
-  (ret as { results: Array<{ type: string; data: any }> }).results[0];
+interface FirstResult {
+  type: string;
+  data: Record<string, unknown>;
+}
+
+const firstResult = (ret: unknown): FirstResult => (ret as { results: FirstResult[] }).results[0];
 
 interface DatasetClientMock {
   get: jest.Mock;
   getMetadata: jest.Mock;
+  datasetExists: jest.Mock;
   create: jest.Mock;
   upsert: jest.Mock;
+  addExamples: jest.Mock;
+  deleteExample: jest.Mock;
   resolveByName: jest.Mock;
   copy: jest.Mock;
   delete: jest.Mock;
@@ -52,14 +63,16 @@ const createDeps = (
   const datasetClient: DatasetClientMock = {
     get: jest.fn(),
     getMetadata: jest.fn(),
+    datasetExists: jest.fn().mockResolvedValue(true),
     create: jest.fn(),
     upsert: jest.fn(),
+    addExamples: jest.fn(),
+    deleteExample: jest.fn(),
     resolveByName: jest.fn(),
     copy: jest.fn(),
     delete: jest.fn(),
   };
   const deps: EvalDatasetManagementToolDeps = {
-    serverBasePath: '',
     logger: loggingSystemMock.createLogger(),
     getStartDependencies: jest.fn().mockResolvedValue(
       startDependencies ?? {
@@ -93,9 +106,15 @@ const alreadyExistsError = (name: string) => {
   return error;
 };
 
-const confirmationOf = async (
-  tool: { confirmation?: { getConfirmation?: (ctx: any) => any } },
-  toolParams: Record<string, unknown>
+const notFoundError = (exampleId: string) => {
+  const error = new Error(`Example not found: ${exampleId}`);
+  error.name = 'ExampleNotFoundError';
+  return error;
+};
+
+const confirmationOf = async <Schema extends ZodObject>(
+  tool: BuiltinSkillBoundedTool<Schema>,
+  toolParams: NoInfer<z.infer<Schema>>
 ) => tool.confirmation?.getConfirmation?.({ toolParams, context: createContext() });
 
 describe('getDatasetTool', () => {
@@ -114,13 +133,53 @@ describe('getDatasetTool', () => {
       description: 'Banking questions',
       tags: ['esql'],
       maturity: 'raw',
-      examples_count: 1,
       shared_with_other_spaces: false,
+      examples_count: 1,
+      offset: 0,
+      examples_omitted: 0,
       examples: [
         { id: 'e1', input: { q: 'hi' }, output: { a: 'hello' }, metadata: { source: 'chat' } },
       ],
-      examples_omitted: 0,
     });
+  });
+
+  it('lists the counts before the examples so they survive truncation', async () => {
+    const { deps, datasetClient } = createDeps();
+    datasetClient.get.mockResolvedValue(datasetDocument);
+
+    const result = firstResult(
+      await getDatasetTool(deps).handler({ dataset_id: 'd1' }, createContext())
+    );
+
+    const keys = Object.keys(result.data);
+    expect(keys.indexOf('examples_omitted')).toBeLessThan(keys.indexOf('examples'));
+  });
+
+  it('pages through examples from the given offset', async () => {
+    const { deps, datasetClient } = createDeps();
+    const examples = Array.from({ length: MAX_RETURNED_DATASET_EXAMPLES + 10 }, (_, index) => ({
+      id: `e${index}`,
+      input: { q: index },
+    }));
+    datasetClient.get.mockResolvedValue({
+      ...datasetDocument,
+      examples_count: examples.length,
+      examples,
+    });
+
+    const result = firstResult(
+      await getDatasetTool(deps).handler(
+        { dataset_id: 'd1', offset: MAX_RETURNED_DATASET_EXAMPLES },
+        createContext()
+      )
+    );
+
+    expect(result.data.offset).toBe(MAX_RETURNED_DATASET_EXAMPLES);
+    expect(result.data.examples).toHaveLength(10);
+    expect((result.data.examples as Array<{ id: string }>)[0].id).toBe(
+      `e${MAX_RETURNED_DATASET_EXAMPLES}`
+    );
+    expect(result.data.examples_omitted).toBe(MAX_RETURNED_DATASET_EXAMPLES);
   });
 
   it('truncates examples past the return bound and reports how many were omitted', async () => {
@@ -331,6 +390,20 @@ describe('upsertDatasetTool', () => {
     );
   });
 
+  it('warns when other spaces share the dataset being replaced', async () => {
+    const { deps, datasetClient } = createDeps();
+    datasetClient.resolveByName.mockResolvedValue({
+      ...datasetDocument,
+      space_ids: ['default', 'marketing'],
+    });
+
+    const confirmation = await confirmationOf(upsertDatasetTool(deps), input);
+
+    expect(confirmation?.message).toContain(
+      '**This dataset is shared with 1 other space(s); the change applies there too.**'
+    );
+  });
+
   it('keeps undeclared tags and maturity as is', async () => {
     const { deps, datasetClient } = createDeps();
     datasetClient.resolveByName.mockResolvedValue(datasetDocument);
@@ -370,6 +443,130 @@ describe('upsertDatasetTool', () => {
 
     expect(result.type).toBe(ToolResultType.error);
     expect(result.data.message).toMatch(/dataset service is unavailable/);
+  });
+});
+
+describe('editExamplesTool', () => {
+  const examples = [{ input: { q: 'hi' }, output: { a: 'hello' } }, { input: { q: 'bye' } }];
+
+  it('removes examples first, then adds, and reports both', async () => {
+    const { deps, datasetClient } = createDeps();
+    const calls: string[] = [];
+    datasetClient.deleteExample.mockImplementation(async (exampleId: string) => {
+      calls.push(`delete:${exampleId}`);
+      if (exampleId === 'missing') {
+        throw notFoundError(exampleId);
+      }
+    });
+    datasetClient.addExamples.mockImplementation(async () => {
+      calls.push('add');
+      return { added: 1, conflicts: 1 };
+    });
+
+    const result = firstResult(
+      await editExamplesTool(deps).handler(
+        { dataset_id: 'd1', add: examples, remove_ids: ['e1', 'missing', 'e1'] },
+        createContext()
+      )
+    );
+
+    expect(calls).toEqual(['delete:e1', 'delete:missing', 'add']);
+    expect(datasetClient.addExamples).toHaveBeenCalledWith('d1', examples, {
+      rejectDuplicates: false,
+    });
+    expect(result.type).toBe(ToolResultType.other);
+    expect(result.data).toEqual({
+      dataset_id: 'd1',
+      removed: ['e1'],
+      not_found: ['missing'],
+      added: 1,
+      skipped_duplicates: 1,
+    });
+  });
+
+  it('reports what was already removed when an unexpected error stops it', async () => {
+    const { deps, datasetClient } = createDeps();
+    datasetClient.deleteExample
+      .mockResolvedValueOnce(undefined)
+      .mockRejectedValueOnce(new Error('boom'));
+
+    const result = firstResult(
+      await editExamplesTool(deps).handler(
+        { dataset_id: 'd1', add: examples, remove_ids: ['e1', 'e2'] },
+        createContext()
+      )
+    );
+
+    expect(datasetClient.addExamples).not.toHaveBeenCalled();
+    expect(result.type).toBe(ToolResultType.error);
+    expect(result.data).toEqual({
+      message: 'Failed to edit the examples of an evaluation dataset: boom',
+      metadata: { removed: ['e1'], added: 0 },
+    });
+  });
+
+  it('explains a full dataset', async () => {
+    const { deps, datasetClient } = createDeps();
+    const error = new Error('A dataset can contain at most 10000 examples');
+    error.name = 'DatasetExamplesLimitExceededError';
+    datasetClient.addExamples.mockRejectedValue(error);
+
+    const result = firstResult(
+      await editExamplesTool(deps).handler({ dataset_id: 'd1', add: examples }, createContext())
+    );
+
+    expect(result.type).toBe(ToolResultType.error);
+    expect(result.data.message).toBe(
+      'A dataset can contain at most 10000 examples. Remove more examples first, or add them to a different dataset.'
+    );
+  });
+
+  it('refuses a dataset this space cannot see', async () => {
+    const { deps, datasetClient } = createDeps();
+    datasetClient.datasetExists.mockResolvedValue(false);
+
+    const result = firstResult(
+      await editExamplesTool(deps).handler(
+        { dataset_id: 'd1', add: examples, remove_ids: ['e1'] },
+        createContext()
+      )
+    );
+
+    expect(datasetClient.deleteExample).not.toHaveBeenCalled();
+    expect(datasetClient.addExamples).not.toHaveBeenCalled();
+    expect(result.data.message).toBe('Evaluation dataset not found: d1');
+  });
+
+  it('refuses callers without the manage privilege', async () => {
+    const { deps } = createDeps(securityWith(false) as unknown as Record<string, unknown>);
+
+    const result = firstResult(
+      await editExamplesTool(deps).handler({ dataset_id: 'd1', add: examples }, createContext())
+    );
+
+    expect(result.data.message).toMatch(/manage_evals/);
+  });
+
+  it('rejects an edit that neither adds nor removes anything', () => {
+    expect(editExamplesTool(createDeps().deps).schema.safeParse({ dataset_id: 'd1' }).success).toBe(
+      false
+    );
+  });
+
+  it('names the dataset, summarizes the edit, and previews added examples', async () => {
+    const { deps, datasetClient } = createDeps();
+    datasetClient.getMetadata.mockResolvedValue({ ...datasetDocument, examples_count: 5 });
+
+    const confirmation = await confirmationOf(editExamplesTool(deps), {
+      dataset_id: 'd1',
+      add: examples,
+      remove_ids: ['e1'],
+    });
+
+    expect(confirmation?.message).toContain(
+      'This removes 1 example(s) and adds 2 example(s) in dataset `bank`, which currently has 5. Every other example is kept.'
+    );
+    expect(confirmation?.message).toContain('1. Input: `{"q":"hi"}`');
   });
 });
 
@@ -486,7 +683,9 @@ describe('deleteDatasetTool', () => {
     );
 
     expect(result.type).toBe(ToolResultType.error);
-    expect(result.data.message).toMatch(/only remove it from this one/);
+    expect(result.data.message).toBe(
+      'This dataset is shared with other spaces, so it can only be removed from this one.'
+    );
   });
 
   it('explains an intent mismatch when an unshare would delete', async () => {
@@ -500,7 +699,9 @@ describe('deleteDatasetTool', () => {
       )
     );
 
-    expect(result.data.message).toMatch(/would delete it/);
+    expect(result.data.message).toBe(
+      'This is the last space holding this dataset, so removing it here would delete it.'
+    );
   });
 
   it('returns an error when the dataset does not exist', async () => {

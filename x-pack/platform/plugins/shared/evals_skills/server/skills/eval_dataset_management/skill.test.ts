@@ -7,12 +7,13 @@
 
 import { validateSkillDefinition } from '@kbn/agent-builder-server/skills/type_definition';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { evalsDatasetTools } from '../common/tool_ids';
+import { createEvalExperimentsSkill } from '../eval_experiments/skill';
+import type { EvalExperimentsToolDeps } from '../eval_experiments/tools/deps';
 import type { EvalDatasetManagementToolDeps } from './tools/deps';
-import { evalsDatasetTools } from './tools/tool_utils';
 import { createEvalDatasetManagementSkill } from './skill';
 
 const deps: EvalDatasetManagementToolDeps = {
-  serverBasePath: '',
   logger: loggingSystemMock.createLogger(),
   getStartDependencies: jest.fn(),
 };
@@ -20,6 +21,7 @@ const deps: EvalDatasetManagementToolDeps = {
 const writeToolIds = [
   evalsDatasetTools.createDataset,
   evalsDatasetTools.upsertDataset,
+  evalsDatasetTools.editExamples,
   evalsDatasetTools.copyDataset,
   evalsDatasetTools.deleteDataset,
 ];
@@ -41,6 +43,7 @@ describe('createEvalDatasetManagementSkill', () => {
       evalsDatasetTools.getDataset,
       evalsDatasetTools.createDataset,
       evalsDatasetTools.upsertDataset,
+      evalsDatasetTools.editExamples,
       evalsDatasetTools.copyDataset,
       evalsDatasetTools.deleteDataset,
     ]);
@@ -56,5 +59,18 @@ describe('createEvalDatasetManagementSkill', () => {
       };
       expect(tool?.confirmation?.askUser).toBe('always');
     }
+  });
+
+  it('shares no inline tool id with the eval-experiment-authoring skill', async () => {
+    const datasetTools = (await createEvalDatasetManagementSkill(deps).getInlineTools?.()) ?? [];
+    const experimentTools =
+      (await createEvalExperimentsSkill({
+        ...deps,
+        serverBasePath: '',
+        workflowsApi: {} as unknown as EvalExperimentsToolDeps['workflowsApi'],
+      }).getInlineTools?.()) ?? [];
+
+    const experimentToolIds = new Set(experimentTools.map((tool) => tool.id));
+    expect(datasetTools.filter((tool) => experimentToolIds.has(tool.id))).toEqual([]);
   });
 });

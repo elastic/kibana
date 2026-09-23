@@ -73,7 +73,7 @@ export const upsertDatasetTool = (
   id: evalsDatasetTools.upsertDataset,
   type: ToolType.builtin,
   description:
-    'Create or replace an evaluation dataset by name. When the name already exists, the example set is replaced: any existing example missing from this call is removed. Returns how many examples were added, removed, and unchanged.',
+    'Create or replace an evaluation dataset by name. When the name already exists, the example set is replaced: any existing example missing from this call is removed, in every space that shares the dataset. The description is overwritten with the one passed. Returns how many examples were added, removed, and unchanged.',
   schema,
   confirmation: {
     askUser: 'always',
@@ -89,6 +89,7 @@ export const upsertDatasetTool = (
           }
 
           const { name, description, tags, maturity, examples } = toolParams;
+          const otherSpaces = existing.space_ids.filter((id) => id !== context.spaceId).length;
 
           return {
             title: 'Replace evaluation dataset examples?',
@@ -121,6 +122,11 @@ export const upsertDatasetTool = (
               ].join('\n'),
               ...(existing.examples_count > 0
                 ? ['**Any existing example missing from this payload is removed.**']
+                : []),
+              ...(otherSpaces > 0
+                ? [
+                    `**This dataset is shared with ${otherSpaces} other space(s); the change applies there too.**`,
+                  ]
                 : []),
               ...formatExamplesPreview(examples),
             ]),

@@ -11,6 +11,7 @@ import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import type { EvalDatasetManagementToolDeps } from './deps';
 import {
   datasetIdSchema,
+  datasetNotFoundResult,
   errorResult,
   evalsDatasetTools,
   inlineCode,
@@ -114,13 +115,13 @@ export const deleteDatasetTool = (
 
       const result = await loaded.client.delete(datasetId, { intent });
       if (result === 'not_found') {
-        return errorResult(`Evaluation dataset not found: ${datasetId}`);
+        return datasetNotFoundResult(datasetId);
       }
       if (result === 'intent_mismatch') {
         return errorResult(
           intent === 'unshare'
-            ? 'This dataset is no longer shared with any other space, so removing it from this one would delete it.'
-            : 'This dataset is now shared with another space, so deleting it here would only remove it from this one.'
+            ? 'This is the last space holding this dataset, so removing it here would delete it.'
+            : 'This dataset is shared with other spaces, so it can only be removed from this one.'
         );
       }
 
