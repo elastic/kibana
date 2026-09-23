@@ -87,14 +87,6 @@ export const clearInstalledEntityStoreDocuments = async (esClient: EsClient) => 
     ignore_unavailable: true,
   });
 
-  await esClient.deleteByQuery({
-    index: UPDATES_INDEX,
-    conflicts: 'proceed',
-    refresh: true,
-    query: { match_all: {} },
-    ignore_unavailable: true,
-  });
-
   const resolved = await esClient.indices.resolveIndex({ name: HISTORY_INDEX_PATTERN });
   const historyIndices = resolved.indices.map((i) => i.name);
   if (historyIndices.length > 0) {
