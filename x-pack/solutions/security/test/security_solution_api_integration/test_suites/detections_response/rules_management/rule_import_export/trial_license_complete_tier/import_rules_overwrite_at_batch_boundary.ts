@@ -8,17 +8,22 @@
 import expect from 'expect';
 import { range } from 'lodash';
 import { deleteAllRules } from '@kbn/detections-response-ftr-services';
-import { RULE_IMPORT_BULK_CREATE_BATCH_SIZE } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_management/api/constants';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
-import { getCustomQueryRuleParams, importRules, importRulesWithSuccess } from '../../../utils';
+import {
+  assertRuleTask,
+  getCustomQueryRuleParams,
+  getRuleTaskId,
+  importRules,
+  importRulesWithSuccess,
+} from '../../../utils';
 
-/**
- * Pure overwrite across chunks. Sized above main import chunking (50) and
- * planned rewrite batches (300–500). See bulk-update readiness in the import
- * FTR coverage report / https://github.com/elastic/kibana/issues/275204
- */
 const RULE_COUNT = 568;
-const BATCH_SIZE = RULE_IMPORT_BULK_CREATE_BATCH_SIZE;
+// Keep in sync with rule_management/api/constants.ts without importing a private plugin module.
+const BATCH_SIZE = 200;
+
+if (RULE_COUNT <= BATCH_SIZE * 2) {
+  throw new Error('RULE_COUNT must span more than two import batches');
+}
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
@@ -53,6 +58,8 @@ export default ({ getService }: FtrProviderContext): void => {
           },
         })
         .expect(200);
+
+      expect(beforeOverwrite.total).toBe(RULE_COUNT);
 
       const priorByRuleId = new Map<string, { id: string; revision: number }>(
         beforeOverwrite.data.map((rule: { rule_id: string; id: string; revision: number }) => [
@@ -118,8 +125,22 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('enables and disables rules when overwriting a full batch', async () => {
-      const enableIds = range(BATCH_SIZE / 2).map((i) => `overwrite-batch-enable-${i}`);
-      const disableIds = range(BATCH_SIZE / 2).map((i) => `overwrite-batch-disable-${i}`);
+      const half = Math.floor(BATCH_SIZE / 2);
+      const enableIds = range(half).map((i) => `overwrite-batch-enable-${i}`);
+      const disableIds = range(BATCH_SIZE - half).map((i) => `overwrite-batch-disable-${i}`);
+      const mid = Math.floor(enableIds.length / 2);
+      const sampleEnable = [
+        enableIds[0],
+        enableIds[mid - 1],
+        enableIds[mid],
+        enableIds[enableIds.length - 1],
+      ];
+      const sampleDisable = [
+        disableIds[0],
+        disableIds[mid - 1],
+        disableIds[mid],
+        disableIds[disableIds.length - 1],
+      ];
 
       await importRulesWithSuccess({
         getService,
@@ -146,10 +167,12 @@ export default ({ getService }: FtrProviderContext): void => {
         .findRules({
           query: {
             page: 1,
-            per_page: BATCH_SIZE,
+            per_page: BATCH_SIZE + 1,
           },
         })
         .expect(200);
+
+      expect(beforeOverwrite.total).toBe(BATCH_SIZE);
 
       const priorByRuleId = new Map<string, { id: string; revision: number }>(
         beforeOverwrite.data.map((rule: { rule_id: string; id: string; revision: number }) => [
@@ -157,6 +180,14 @@ export default ({ getService }: FtrProviderContext): void => {
           { id: rule.id, revision: rule.revision },
         ])
       );
+      const disableTasks = new Map<string, string>();
+      for (const ruleId of sampleDisable) {
+        const prior = priorByRuleId.get(ruleId);
+        if (!prior) {
+          throw new Error(`Missing rule ${ruleId} before overwrite`);
+        }
+        disableTasks.set(ruleId, await getRuleTaskId({ getService, ruleId: prior.id }));
+      }
 
       await importRulesWithSuccess({
         getService,
@@ -191,25 +222,40 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(body.total).toBe(BATCH_SIZE);
       expect(body.data).toHaveLength(BATCH_SIZE);
 
-      const mid = Math.floor(enableIds.length / 2);
-      const sampleEnable = [enableIds[0], enableIds[mid], enableIds[enableIds.length - 1]];
-      const sampleDisable = [disableIds[0], disableIds[mid], disableIds[disableIds.length - 1]];
-
       for (const ruleId of sampleEnable) {
         const found = body.data.find((rule: { rule_id: string }) => rule.rule_id === ruleId);
         const prior = priorByRuleId.get(ruleId);
+        if (!found || !prior) {
+          throw new Error(`Missing rule ${ruleId} after overwrite`);
+        }
         expect(found?.enabled).toBe(true);
         expect(found?.name).toBe(`Enabled ${ruleId}`);
         expect(found?.id).toBe(prior?.id);
         expect(found?.revision).toBe((prior?.revision ?? 0) + 1);
+        await assertRuleTask({
+          getService,
+          ruleId: found.id,
+          enabled: true,
+          interval: '100m',
+        });
       }
       for (const ruleId of sampleDisable) {
         const found = body.data.find((rule: { rule_id: string }) => rule.rule_id === ruleId);
         const prior = priorByRuleId.get(ruleId);
+        const taskId = disableTasks.get(ruleId);
+        if (!found || !prior || !taskId) {
+          throw new Error(`Missing rule ${ruleId} after overwrite`);
+        }
         expect(found?.enabled).toBe(false);
         expect(found?.name).toBe(`Disabled ${ruleId}`);
         expect(found?.id).toBe(prior?.id);
         expect(found?.revision).toBe((prior?.revision ?? 0) + 1);
+        await assertRuleTask({
+          getService,
+          taskId,
+          enabled: false,
+          interval: '100m',
+        });
       }
     });
   });

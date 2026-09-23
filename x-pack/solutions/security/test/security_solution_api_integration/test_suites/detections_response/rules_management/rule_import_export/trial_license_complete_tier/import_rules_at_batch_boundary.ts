@@ -9,12 +9,14 @@ import expect from 'expect';
 import { range } from 'lodash';
 import { deleteAllRules } from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
-import { getCustomQueryRuleParams, importRules, importRulesWithSuccess } from '../../../utils';
+import {
+  assertNoRuleTask,
+  getCustomQueryRuleParams,
+  importRules,
+  importRulesWithSuccess,
+} from '../../../utils';
 
-/**
- * Sized above current import chunking on main (50) and any bulk rewrite batch
- * size still under discussion, so create + overwrite both span multiple chunks.
- */
+// Sized to span at least two full import batches (current batch size: 200).
 const RULE_COUNT = 501;
 const EXISTING_COUNT = 251;
 
@@ -52,6 +54,8 @@ export default ({ getService }: FtrProviderContext): void => {
           },
         })
         .expect(200);
+
+      expect(beforeOverwrite.total).toBe(EXISTING_COUNT);
 
       const priorByRuleId = new Map<string, { id: string; revision: number }>(
         beforeOverwrite.data.map((rule: { rule_id: string; id: string; revision: number }) => [
@@ -97,7 +101,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(foundIds).toEqual([...allIds].sort());
 
       // Spot-check overwrite targets keep SO id and bump revision; a create is new.
-      const sampleRuleIds = ['batch-rule-0', 'batch-rule-250', 'batch-rule-500'];
+      const sampleRuleIds = ['batch-rule-0', 'batch-rule-250', 'batch-rule-251', 'batch-rule-500'];
       for (const ruleId of sampleRuleIds) {
         const found = body.data.find(
           (rule: { rule_id: string; id: string; name: string; revision: number }) =>
@@ -110,6 +114,13 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(found?.revision).toBe(prior.revision + 1);
         } else {
           expect(found?.revision).toBe(0);
+          if (!found) {
+            throw new Error(`Missing rule ${ruleId} after import`);
+          }
+          await assertNoRuleTask({
+            getService,
+            ruleId: found.id,
+          });
         }
       }
     });
