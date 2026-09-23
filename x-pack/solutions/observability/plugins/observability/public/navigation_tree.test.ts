@@ -17,7 +17,7 @@ const getAlertsAndInsightsLinks = async (
   alertingV2Enabled = false
 ): Promise<Array<string | undefined>> => {
   const coreStart = coreMock.createStart();
-  coreStart.featureFlags.getBooleanValue = jest.fn().mockReturnValue(false);
+  coreStart.featureFlags.getBooleanValue$ = jest.fn().mockReturnValue(of(false));
   coreStart.settings.client.get$ = jest.fn().mockReturnValue(of(AIChatExperience.Classic));
   coreStart.settings.globalClient.get.mockReturnValue(alertingV2Enabled);
 

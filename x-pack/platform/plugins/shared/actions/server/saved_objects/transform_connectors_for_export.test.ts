@@ -230,6 +230,7 @@ describe('transform connector for export', () => {
           secrets: {},
           apiKey: null,
           uiamApiKey: null,
+          hasInboundEventIdentity: false,
         },
       }))
     );
@@ -255,6 +256,7 @@ describe('transform connector for export', () => {
           isMissingSecrets: true,
           apiKey: null,
           uiamApiKey: null,
+          hasInboundEventIdentity: false,
         },
       }))
     );
@@ -289,6 +291,7 @@ describe('transform connector for export', () => {
           secrets: {},
           apiKey: null,
           uiamApiKey: null,
+          hasInboundEventIdentity: false,
         },
       },
     ]);

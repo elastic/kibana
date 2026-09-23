@@ -1,0 +1,532 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { DynamicStepContextSchema } from '@kbn/workflows';
+import { expectZodSchemaEqual } from '@kbn/workflows/common/utils/zod/test_utils/expect_zod_schema_equal';
+import { WorkflowGraph } from '@kbn/workflows/graph';
+import { z } from '@kbn/zod/v4';
+import type { StepEntrySchemaCache } from './get_steps_collection_schema';
+import { getStepsCollectionSchema } from './get_steps_collection_schema';
+import { createMockWorkflowContextRegistry } from './registry.mock';
+
+const emptyRegistry = createMockWorkflowContextRegistry();
+
+function unwrapStepSchema(schema: z.ZodTypeAny): z.ZodObject<any> {
+  if (schema instanceof z.ZodLazy) {
+    return schema.unwrap() as z.ZodObject<any>;
+  }
+  return schema as z.ZodObject<any>;
+}
+
+describe('getStepsCollectionSchema', () => {
+  it('should return empty steps collection schema for a step with no predecessors', () => {
+    const definition = {
+      version: '1' as const,
+      name: 'test-workflow',
+      enabled: true,
+      triggers: [
+        {
+          type: 'manual' as const,
+          enabled: true,
+        },
+      ],
+      steps: [
+        {
+          name: 'step-name',
+          type: 'console',
+          with: {
+            message: 'Hello, world!',
+          },
+        },
+      ],
+    };
+    const workflowGraph = WorkflowGraph.fromWorkflowDefinition(definition);
+    const { schema: stepsCollectionSchema, size } = getStepsCollectionSchema(
+      emptyRegistry,
+      DynamicStepContextSchema,
+      workflowGraph,
+      'step-name'
+    );
+    expectZodSchemaEqual(stepsCollectionSchema, z.object({}));
+    expect(size).toBe(0);
+  });
+  it('should share predecessor entry schemas across step contexts', () => {
+    const definition = {
+      version: '1' as const,
+      name: 'test-workflow',
+      enabled: true,
+      triggers: [
+        {
+          type: 'manual' as const,
+          enabled: true,
+        },
+      ],
+      steps: [
+        {
+          name: 'step-1',
+          type: 'console',
+          with: {
+            message: 'Hello, world!',
+          },
+        },
+        {
+          name: 'loop',
+          type: 'foreach',
+          foreach: '["item1", "item2", "item3"]',
+          steps: [
+            {
+              name: 'step-1-foreach-1',
+              type: 'console',
+              with: {
+                message: 'Hello, {{foreach.item}}',
+              },
+            },
+            {
+              name: 'step-1-foreach-2',
+              type: 'console',
+              with: { message: 'Goodbye, {{foreach.item}}' },
+            },
+          ],
+        },
+      ],
+    };
+    const workflowGraph = WorkflowGraph.fromWorkflowDefinition(definition);
+    const stepEntrySchemaCache: StepEntrySchemaCache = new WeakMap();
+    const { schema: stepsCollectionSchema, size } = getStepsCollectionSchema(
+      emptyRegistry,
+      DynamicStepContextSchema,
+      workflowGraph,
+      'step-1-foreach-1',
+      undefined,
+      stepEntrySchemaCache
+    );
+    expect(Object.keys(stepsCollectionSchema.shape).sort()).toEqual(['loop', 'step-1']);
+    expect(size).toBe(2);
+
+    // The actual schema for the foreach loop step
+    const actualLoopSchema = (stepsCollectionSchema as z.ZodObject<any>).shape.loop;
+
+    // Check that it's based on ForEachContextSchema
+    expect(actualLoopSchema).toBeDefined();
+    expect(actualLoopSchema.def.type).toBe('object');
+
+    // Check the shape properties
+    const loopShape = (actualLoopSchema as z.ZodObject<any>).shape;
+    expect(loopShape.items.def.type).toBe('array');
+    expect(loopShape.items.element.def.type).toBe('string');
+    expect(loopShape.index.def.type).toBe('number');
+    expect(loopShape.total.def.type).toBe('number');
+
+    // For the main schema, check the step-1 output (unwrap ZodLazy for non-foreach steps)
+    const step1Schema = unwrapStepSchema(
+      (stepsCollectionSchema as z.ZodObject<any>).shape['step-1']
+    );
+    expect(step1Schema).toBeDefined();
+    expect(step1Schema.shape.output.def.type).toBe('optional');
+    expect(step1Schema.shape.error.def.type).toBe('optional');
+
+    const { schema: nextStepCollectionSchema } = getStepsCollectionSchema(
+      emptyRegistry,
+      DynamicStepContextSchema,
+      workflowGraph,
+      'step-1-foreach-2',
+      undefined,
+      stepEntrySchemaCache
+    );
+
+    expect(nextStepCollectionSchema.shape['step-1']).toBe(stepsCollectionSchema.shape['step-1']);
+    expect(nextStepCollectionSchema.shape.loop).toBeDefined();
+    expect(nextStepCollectionSchema.shape.loop).not.toBe(stepsCollectionSchema.shape.loop);
+  });
+
+  it('should deduplicate predecessor nodes sharing the same stepId', () => {
+    const definition = {
+      version: '1' as const,
+      name: 'test-workflow',
+      enabled: true,
+      triggers: [{ type: 'manual' as const, enabled: true }],
+      steps: [
+        {
+          name: 'loop',
+          type: 'foreach',
+          foreach: '["a", "b"]',
+          steps: [
+            {
+              name: 'inner-step',
+              type: 'console',
+              with: { message: 'hi' },
+            },
+          ],
+        },
+        {
+          name: 'after-loop',
+          type: 'console',
+          with: { message: 'done' },
+        },
+      ],
+    };
+    const workflowGraph = WorkflowGraph.fromWorkflowDefinition(definition);
+    const { schema: stepsCollectionSchema, size } = getStepsCollectionSchema(
+      emptyRegistry,
+      DynamicStepContextSchema,
+      workflowGraph,
+      'after-loop'
+    );
+
+    expect(Object.keys(stepsCollectionSchema.shape).sort()).toEqual(['inner-step', 'loop']);
+    expect(size).toBe(2);
+
+    const loopSchema = (stepsCollectionSchema as z.ZodObject<any>).shape.loop;
+    expect(loopSchema).toBeDefined();
+    expect(loopSchema.def.type).toBe('object');
+    const loopShape = (loopSchema as z.ZodObject<any>).shape;
+    expect(loopShape.items).toBeDefined();
+    expect(loopShape.index).toBeDefined();
+    expect(loopShape.total).toBeDefined();
+  });
+
+  it('should include if-step output schema with conditionResult for steps after an if block', () => {
+    const definition = {
+      version: '1' as const,
+      name: 'test-workflow',
+      enabled: true,
+      triggers: [{ type: 'manual' as const, enabled: true }],
+      steps: [
+        {
+          name: 'check',
+          type: 'if',
+          condition: 'true',
+          steps: [
+            {
+              name: 'then-step',
+              type: 'console',
+              with: { message: 'yes' },
+            },
+          ],
+        },
+        {
+          name: 'after-check',
+          type: 'console',
+          with: { message: 'done' },
+        },
+      ],
+    };
+    const workflowGraph = WorkflowGraph.fromWorkflowDefinition(definition);
+    const { schema: stepsCollectionSchema, size } = getStepsCollectionSchema(
+      emptyRegistry,
+      DynamicStepContextSchema,
+      workflowGraph,
+      'after-check'
+    );
+
+    expect(Object.keys(stepsCollectionSchema.shape).sort()).toEqual(['check', 'then-step']);
+    expect(size).toBe(2);
+
+    const checkSchema = unwrapStepSchema((stepsCollectionSchema as z.ZodObject<any>).shape.check);
+    expect(checkSchema).toBeDefined();
+    expect(checkSchema.shape.output).toBeDefined();
+
+    const outputInnerType = checkSchema.shape.output.unwrap();
+    const outputShape = (outputInnerType as z.ZodObject<any>).shape;
+    expect(outputShape.conditionResult).toBeDefined();
+  });
+
+  it('should include inner step outputs for while step (do-while semantics)', () => {
+    const definition = {
+      version: '1' as const,
+      name: 'test-workflow',
+      enabled: true,
+      triggers: [{ type: 'manual' as const, enabled: true }],
+      steps: [
+        {
+          name: 'poll',
+          type: 'while',
+          condition: '{{ steps.check.output.done }}',
+          steps: [
+            {
+              name: 'check',
+              type: 'console',
+              with: { message: 'checking...' },
+            },
+          ],
+        },
+      ],
+    };
+    const workflowGraph = WorkflowGraph.fromWorkflowDefinition(definition);
+    const { schema: stepsCollectionSchema, size } = getStepsCollectionSchema(
+      emptyRegistry,
+      DynamicStepContextSchema,
+      workflowGraph,
+      'poll'
+    );
+
+    expect(Object.keys(stepsCollectionSchema.shape).sort()).toEqual(['check']);
+    expect(size).toBe(1);
+
+    const checkSchema = unwrapStepSchema((stepsCollectionSchema as z.ZodObject<any>).shape.check);
+    expect(checkSchema).toBeDefined();
+    expect(checkSchema.shape.output).toBeDefined();
+    expect(checkSchema.shape.error).toBeDefined();
+  });
+
+  it('should include inner steps and predecessors for while step after other steps', () => {
+    const definition = {
+      version: '1' as const,
+      name: 'test-workflow',
+      enabled: true,
+      triggers: [{ type: 'manual' as const, enabled: true }],
+      steps: [
+        {
+          name: 'setup',
+          type: 'console',
+          with: { message: 'init' },
+        },
+        {
+          name: 'poll',
+          type: 'while',
+          condition: '{{ steps.check.output.done }}',
+          steps: [
+            {
+              name: 'check',
+              type: 'console',
+              with: { message: 'checking...' },
+            },
+          ],
+        },
+      ],
+    };
+    const workflowGraph = WorkflowGraph.fromWorkflowDefinition(definition);
+    const { schema: stepsCollectionSchema, size } = getStepsCollectionSchema(
+      emptyRegistry,
+      DynamicStepContextSchema,
+      workflowGraph,
+      'poll'
+    );
+
+    expect(Object.keys(stepsCollectionSchema.shape).sort()).toEqual(['check', 'setup']);
+    expect(size).toBe(2);
+
+    const setupSchema = unwrapStepSchema((stepsCollectionSchema as z.ZodObject<any>).shape.setup);
+    expect(setupSchema).toBeDefined();
+    expect(setupSchema.shape.output).toBeDefined();
+
+    const checkSchema = unwrapStepSchema((stepsCollectionSchema as z.ZodObject<any>).shape.check);
+    expect(checkSchema).toBeDefined();
+    expect(checkSchema.shape.output).toBeDefined();
+  });
+
+  it('should include multiple inner steps for while step', () => {
+    const definition = {
+      version: '1' as const,
+      name: 'test-workflow',
+      enabled: true,
+      triggers: [{ type: 'manual' as const, enabled: true }],
+      steps: [
+        {
+          name: 'poll',
+          type: 'while',
+          condition: '{{ steps.evaluate.output.done }}',
+          steps: [
+            {
+              name: 'fetch',
+              type: 'console',
+              with: { message: 'fetching...' },
+            },
+            {
+              name: 'evaluate',
+              type: 'console',
+              with: { message: 'evaluating...' },
+            },
+          ],
+        },
+      ],
+    };
+    const workflowGraph = WorkflowGraph.fromWorkflowDefinition(definition);
+    const { schema: stepsCollectionSchema, size } = getStepsCollectionSchema(
+      emptyRegistry,
+      DynamicStepContextSchema,
+      workflowGraph,
+      'poll'
+    );
+
+    expect(Object.keys(stepsCollectionSchema.shape).sort()).toEqual(['evaluate', 'fetch']);
+    expect(size).toBe(2);
+
+    const fetchSchema = unwrapStepSchema((stepsCollectionSchema as z.ZodObject<any>).shape.fetch);
+    expect(fetchSchema).toBeDefined();
+    expect(fetchSchema.shape.output).toBeDefined();
+
+    const evaluateSchema = unwrapStepSchema(
+      (stepsCollectionSchema as z.ZodObject<any>).shape.evaluate
+    );
+    expect(evaluateSchema).toBeDefined();
+    expect(evaluateSchema.shape.output).toBeDefined();
+  });
+
+  it('should not include inner steps for non-while steps (e.g. foreach)', () => {
+    const definition = {
+      version: '1' as const,
+      name: 'test-workflow',
+      enabled: true,
+      triggers: [{ type: 'manual' as const, enabled: true }],
+      steps: [
+        {
+          name: 'loop',
+          type: 'foreach',
+          foreach: '["a", "b"]',
+          steps: [
+            {
+              name: 'inner',
+              type: 'console',
+              with: { message: 'hi' },
+            },
+          ],
+        },
+      ],
+    };
+    const workflowGraph = WorkflowGraph.fromWorkflowDefinition(definition);
+    const { schema: stepsCollectionSchema, size } = getStepsCollectionSchema(
+      emptyRegistry,
+      DynamicStepContextSchema,
+      workflowGraph,
+      'loop'
+    );
+
+    expect(Object.keys(stepsCollectionSchema.shape).sort()).toEqual([]);
+    expect(size).toBe(0);
+
+    const innerSchema = (stepsCollectionSchema as z.ZodObject<any>).shape.inner;
+    expect(innerSchema).toBeUndefined();
+  });
+
+  it('should produce the same schema when precomputedPredecessors are passed', () => {
+    const definition = {
+      version: '1' as const,
+      name: 'test-workflow',
+      enabled: true,
+      triggers: [{ type: 'manual' as const, enabled: true }],
+      steps: [
+        { name: 'step-1', type: 'console', with: { message: 'hi' } },
+        { name: 'step-2', type: 'console', with: { message: 'hello' } },
+        { name: 'step-3', type: 'console', with: { message: 'hey' } },
+      ],
+    };
+    const workflowGraph = WorkflowGraph.fromWorkflowDefinition(definition);
+
+    const { schema: withoutPrecomputed } = getStepsCollectionSchema(
+      emptyRegistry,
+      DynamicStepContextSchema,
+      workflowGraph,
+      'step-3'
+    );
+
+    const stepNode = workflowGraph.getStepNode('step-3')!;
+    const predecessors = workflowGraph.getAllPredecessors(stepNode.id);
+    const { schema: withPrecomputed } = getStepsCollectionSchema(
+      emptyRegistry,
+      DynamicStepContextSchema,
+      workflowGraph,
+      'step-3',
+      predecessors
+    );
+
+    expect(Object.keys(withPrecomputed.shape).sort()).toEqual(
+      Object.keys(withoutPrecomputed.shape).sort()
+    );
+    expect(Object.keys(withPrecomputed.shape).sort()).toEqual(['step-1', 'step-2']);
+  });
+
+  it('should use step names as is', () => {
+    const definition = {
+      version: '1' as const,
+      name: 'Weird Step Names',
+      enabled: true,
+      triggers: [
+        {
+          type: 'manual' as const,
+          enabled: true,
+        },
+      ],
+      steps: [
+        {
+          name: 'Step with spaces',
+          type: 'console',
+          with: {
+            message: 'Hello, world!',
+          },
+        },
+        {
+          name: 'CamelCaseStep',
+          type: 'console',
+          with: {
+            message: 'Hello, world!',
+          },
+        },
+        {
+          name: '$pecial*$ymb0l$',
+          type: 'console',
+          with: {
+            message: 'Hello, world!',
+          },
+        },
+        {
+          name: 'point-of-access',
+          type: 'console',
+          with: {
+            message: 'Hello, world!',
+          },
+        },
+      ],
+    };
+    const workflowGraph = WorkflowGraph.fromWorkflowDefinition(definition);
+    const { schema: stepsCollectionSchema, size } = getStepsCollectionSchema(
+      emptyRegistry,
+      DynamicStepContextSchema,
+      workflowGraph,
+      'point-of-access'
+    );
+
+    expect(Object.keys(stepsCollectionSchema.shape).sort()).toEqual([
+      '$pecial*$ymb0l$',
+      'CamelCaseStep',
+      'Step with spaces',
+    ]);
+    expect(size).toBe(3);
+
+    expect(stepsCollectionSchema).toBeDefined();
+    expect((stepsCollectionSchema.shape as any)['Step with spaces']).toBeDefined();
+    expect((stepsCollectionSchema.shape as any).CamelCaseStep).toBeDefined();
+    expect((stepsCollectionSchema.shape as any)['$pecial*$ymb0l$']).toBeDefined();
+
+    expect(() =>
+      getStepsCollectionSchema(
+        emptyRegistry,
+        DynamicStepContextSchema,
+        workflowGraph,
+        'Step with spaces'
+      )
+    ).not.toThrow();
+    expect(() =>
+      getStepsCollectionSchema(
+        emptyRegistry,
+        DynamicStepContextSchema,
+        workflowGraph,
+        'CamelCaseStep'
+      )
+    ).not.toThrow();
+    expect(() =>
+      getStepsCollectionSchema(
+        emptyRegistry,
+        DynamicStepContextSchema,
+        workflowGraph,
+        '$pecial*$ymb0l$'
+      )
+    ).not.toThrow();
+  });
+});
