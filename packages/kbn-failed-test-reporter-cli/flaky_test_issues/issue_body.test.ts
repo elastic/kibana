@@ -66,7 +66,14 @@ const multiTestReport = () => {
           buildFailRate: 0.1,
           latestRun: { status: 'skipped', timestamp: new Date('2026-09-09T06:04:41.000Z') },
         },
-        { branch: '9.2', builds: 64, failedBuilds: 3, buildFailRate: 3 / 64 },
+        {
+          branch: '9.2',
+          builds: 64,
+          failedBuilds: 3,
+          buildFailRate: 3 / 64,
+          lastFailedAt: new Date('2026-09-07T11:40:00.000Z'),
+        },
+        { branch: '9.1', builds: 58, failedBuilds: 0, buildFailRate: 0 },
       ],
       latestRun: {
         branch: 'main',
@@ -173,6 +180,21 @@ describe('renderFlakySuiteIssueBody', () => {
     const multi = multiTestReport();
     expect(renderFlakySuiteIssueBody(multi.suite, { report: multi.report })).toContain(
       '3 tests in the `Default status alert` suite appear to be flaky:\n\n| Test |'
+    );
+  });
+
+  it("lists every branch of the suite, failing ones first with the worst test's counts", () => {
+    const { suite, report } = multiTestReport();
+    expect(renderFlakySuiteIssueBody(suite, { report })).toContain(
+      [
+        '#### Failures by Branch',
+        '',
+        '| Branch | Failed builds | Last failure |',
+        '|---|---|---|',
+        '| 🔴 `main` | 49 / 509 (10%) | 2026-09-09 06:12 UTC |',
+        '| 🔴 `9.2` | 3 / 64 (5%) | 2026-09-07 11:40 UTC |',
+        '| ✅ `9.1` | 0 / 58 |',
+      ].join('\n')
     );
   });
 

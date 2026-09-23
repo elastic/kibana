@@ -15,6 +15,7 @@ import {
   codeBlock,
   formatBuildLink,
   formatDateRange,
+  formatDateTime,
   formatFailureMessage,
   formatPercent,
   FRAMEWORK_LABELS,
@@ -241,6 +242,71 @@ const failuresSection = (suite: FlakySuite): string => {
   return [`${plural(distinct.length, 'distinct error')}.`, ...shown].join('\n\n');
 };
 
+/** A branch's row of the breakdown: the worst test's counts there and the newest failure. */
+interface BranchFailures {
+  branch: string;
+  builds: number;
+  failedBuilds: number;
+  buildFailRate: number;
+  lastFailedAt?: Date;
+}
+
+/**
+ * Every branch in scope a test of the suite ran on, failing branches first then by rate. Counts
+ * are the worst test's on that branch rather than a sum over tests, as one build failing several
+ * tests would otherwise count several times.
+ */
+const branchFailures = (suite: FlakySuite): BranchFailures[] => {
+  const byBranch = new Map<string, BranchFailures>();
+  for (const test of suite.tests) {
+    for (const stats of test.byBranch) {
+      const current = byBranch.get(stats.branch);
+      const worst =
+        !current ||
+        stats.failedBuilds > current.failedBuilds ||
+        (stats.failedBuilds === current.failedBuilds && stats.builds > current.builds)
+          ? stats
+          : current;
+      const lastFailedAt = [current?.lastFailedAt, stats.lastFailedAt]
+        .filter((date): date is Date => date !== undefined)
+        .sort((a, b) => b.getTime() - a.getTime())[0];
+      byBranch.set(stats.branch, {
+        branch: stats.branch,
+        builds: worst.builds,
+        failedBuilds: worst.failedBuilds,
+        buildFailRate: worst.buildFailRate,
+        lastFailedAt,
+      });
+    }
+  }
+  return [...byBranch.values()].sort(
+    (a, b) =>
+      Number(b.failedBuilds > 0) - Number(a.failedBuilds > 0) ||
+      b.buildFailRate - a.buildFailRate ||
+      a.branch.localeCompare(b.branch)
+  );
+};
+
+/** Which branches the suite fails on and which it does not, at a glance. */
+const failuresByBranch = (suite: FlakySuite): string | undefined => {
+  const branches = branchFailures(suite);
+  if (branches.length === 0) {
+    return undefined;
+  }
+  const rows = branches.map(({ branch, builds, failedBuilds, buildFailRate, lastFailedAt }) => [
+    `${failedBuilds > 0 ? '🔴' : '✅'} ${inlineCode(branch)}`,
+    failedBuilds > 0
+      ? `${failedBuilds} / ${builds} (${formatPercent(buildFailRate)})`
+      : `0 / ${builds}`,
+    lastFailedAt ? formatDateTime(lastFailedAt) : '',
+  ]);
+  return [
+    '#### Failures by Branch',
+    '',
+    table(['Branch', 'Failed builds', 'Last failure'], rows),
+  ].join('\n');
+};
+
 const pipelineLink = (pipeline: string): string =>
   `[${inlineCode(pipeline)}](${BUILDKITE_ORG_URL}/${pipeline})`;
 
@@ -299,6 +365,7 @@ export const renderFlakySuiteIssueBody = (
     suiteDetails(suite),
     '### Failures',
     failuresSection(suite),
+    failuresByBranch(suite),
     failuresByPipeline(suite, ctx.report),
     relatedIssues(ctx),
   ];

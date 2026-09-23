@@ -38,6 +38,14 @@ Locator: chart | pipe
 TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.
 \`\`\`
 
+#### Failures by Branch
+
+| Branch | Failed builds | Last failure |
+|---|---|---|
+| 🔴 \`main\` | 49 / 509 (10%) | 2026-09-09 06:12 UTC |
+| 🔴 \`9.2\` | 3 / 64 (5%) | 2026-09-07 11:40 UTC |
+| ✅ \`9.1\` | 0 / 58 |  |
+
 Possibly related: #7, #8.
 
 <!-- kibanaCiData = {\\"flaky-test-suite\\":{\\"suite.filePath\\":\\"x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/default_status_alert.spec.ts\\",\\"suite.title\\":\\"Default status alert\\",\\"suite.framework\\":\\"playwright\\",\\"suite.testIds\\":[\\"a\\",\\"b\\",\\"c\\"],\\"report.generatedAt\\":\\"2026-09-09T09:04:41.000Z\\",\\"report.count\\":1,\\"report.history\\":[{\\"generatedAt\\":\\"2026-09-09T09:04:41.000Z\\",\\"builds\\":264,\\"failedBuilds\\":23}]}} -->"
@@ -68,6 +76,12 @@ One sampled failure:
 \`\`\`text
 Error: Timed out 30000ms waiting for expect(locator).toBeVisible()
 \`\`\`
+
+#### Failures by Branch
+
+| Branch | Failed builds | Last failure |
+|---|---|---|
+| 🔴 \`main\` | 49 / 509 (10%) | 2026-09-09 06:12 UTC |
 
 #### Failures by Pipeline
 
