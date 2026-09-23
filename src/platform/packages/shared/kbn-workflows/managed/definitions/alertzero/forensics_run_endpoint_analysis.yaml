@@ -92,6 +92,9 @@ steps:
     with:
       attack_discovery_alert_id: "{{ steps.read_ki.output.hits.hits[0]._source.attributes.attack_discovery_alert_id }}"
       investigation_id: "{{ steps.read_ki.output.hits.hits[0]._source.attributes.investigation_id }}"
+      # Set by an earlier run of this workflow, before the agent. Blank means this
+      # indicator has not been analyzed yet.
+      forensic_attempted_at: "{{ steps.read_ki.output.hits.hits[0]._source.attributes.forensic_attempted_at | default: '' }}"
       # Explicitly set whether we have the data we need to continue
       has_request: >-
         ${{ steps.read_ki.output.hits.hits[0]._source.attributes.attack_discovery_alert_id != blank
@@ -124,8 +127,9 @@ steps:
     steps:
       # All three of this indicator's findings mean an earlier run finished the
       # analysis but could not retire the indicator. Finding them lets this run
-      # skip the agent and retry just the write. One or two is a partial write, so
-      # the agent runs again. Another indicator's files do not count.
+      # skip the agent and retry just the write. Fewer than three after an attempt
+      # was already recorded skips the agent too: a later run does not start
+      # another 15m analysis. Another indicator's files do not count.
       #
       # Listing rather than reading the assessment by id, because `ai.attachment.read`
       # reports "no such attachment" and "the attachment service is broken" the same
@@ -217,13 +221,25 @@ steps:
         type: if
         condition: "${{ steps.resolve_host.output.host_name != blank }}"
         steps:
+          # Record the attempt before the agent. A later run reads it back from the
+          # indicator and does not start another analysis. `attributes` merges, so
+          # this does not change `status`. A failed write fails the run here, before
+          # the agent, and the indicator stays pending for one more try.
+          - name: mark_attempted
+            type: context-engine.updateKi
+            if: "${{ steps.resolve_prior_assessment.output.count != 3 and steps.resolve_request.output.forensic_attempted_at == blank }}"
+            with:
+              ai_index_id: "{{ inputs.ai_index_id }}"
+              ki_id: "{{ inputs.ki_id }}"
+              ki:
+                attributes:
+                  forensic_attempted_at: "{{ execution.startedAt }}"
           - name: forensic_analysis
             type: ai.agent
-            # Skipped only when all three of this indicator's findings are already
-            # there. One or two still runs the agent so a retry can fill the gaps.
-            # Re-running a complete set would spend 15m to produce a second opinion
-            # these ids would reject as duplicates.
-            if: "${{ steps.resolve_prior_assessment.output.count != 3 }}"
+            # Runs once per indicator: only when findings are still missing and no
+            # earlier run has recorded an attempt. All three findings, or a recorded
+            # attempt with any still missing, skips the agent.
+            if: "${{ steps.resolve_prior_assessment.output.count != 3 and steps.resolve_request.output.forensic_attempted_at == blank }}"
             # Continues on failure so the run still reaches its terminal write.
             # If this step failed the run instead, the indicator would stay
             # `pending`, and the sweep would re-run this 15m agent every minute
@@ -733,7 +749,7 @@ steps:
         conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
         message: >-
           Endpoint analysis of `{{ steps.resolve_host.output.host_name }}` left no findings on this investigation.
-          {% if steps.forensic_analysis.error != null %}The forensic agent failed: {{ steps.forensic_analysis.error.message }}{% else %}The analysis finished but none of its findings could be attached.{% endif %}
+          {% if steps.forensic_analysis.error != null %}The forensic agent failed: {{ steps.forensic_analysis.error.message }}{% elsif steps.resolve_request.output.forensic_attempted_at != blank %}A previous attempt did not finish, so this run did not start another analysis.{% else %}The analysis finished but none of its findings could be attached.{% endif %}
 
   # The run had a host to analyze but still landed no findings — e.g. no
   # OWNER access on the conversation, a deleted investigation, a rejected

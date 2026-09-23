@@ -667,17 +667,19 @@ describe('Endpoint analysis run', () => {
 
     // An indicator left `pending` is re-dispatched every minute for the rest of the
     // lookback window. Swallowing the write that prevents that reports a completed run
-    // while the loop starts, so retirement is the one thing here allowed to fail the run.
+    // while the loop starts. The attempt marker is the same kind of write: if it fails
+    // quietly, the agent still runs, and the next sweep has no record that it did.
     it('does not swallow the write that stops the indicator being re-dispatched', () => {
-      const retirements = allSteps.filter(({ type }) => type === 'context-engine.updateKi');
+      const writes = allSteps.filter(({ type }) => type === 'context-engine.updateKi');
 
-      expect(retirements.map(({ name }) => name).sort()).toEqual([
+      expect(writes.map(({ name }) => name).sort()).toEqual([
+        'mark_attempted',
         'mark_failed',
         'mark_invalid',
         'mark_processed',
         'mark_unreachable',
       ]);
-      for (const step of retirements) {
+      for (const step of writes) {
         expect(step['on-failure']).toBeUndefined();
       }
     });
@@ -687,8 +689,12 @@ describe('Endpoint analysis run', () => {
     // them is what made a stuck indicator expensive rather than merely repetitive.
     it('skips the agent when this indicator already has all three findings', () => {
       expect(stepByName('list_prior_findings')?.type).toBe('ai.attachment.list');
-      expect(stepByName('forensic_analysis')?.if).toBe(
-        '${{ steps.resolve_prior_assessment.output.count != 3 }}'
+      expect(stepByName('forensic_analysis')?.if).toBe(stepByName('mark_attempted')?.if);
+      expect(String(stepByName('forensic_analysis')?.if)).toContain(
+        'steps.resolve_prior_assessment.output.count != 3'
+      );
+      expect(String(stepByName('forensic_analysis')?.if)).toContain(
+        'steps.resolve_request.output.forensic_attempted_at == blank'
       );
 
       const thisIndicator = {
@@ -713,6 +719,40 @@ describe('Endpoint analysis run', () => {
         counted(['forensic-timeline-ki-2', 'forensic-iocs-ki-2', 'forensic-assessment-ki-2'])
       ).toBe(0);
       expect(counted([])).toBe(0);
+    });
+
+    // The marker is read from the indicator at the start of the run, not from the
+    // write this run is about to make. Otherwise the same execution would record
+    // the attempt and then skip the agent it just authorized.
+    it('runs the agent at most once per indicator', () => {
+      const names = allSteps.map(({ name }) => name);
+      const mark = stepByName('mark_attempted');
+
+      expect(names.indexOf('mark_attempted')).toBeLessThan(names.indexOf('forensic_analysis'));
+      expect(mark?.type).toBe('context-engine.updateKi');
+      expect(mark?.with).toEqual({
+        ai_index_id: '{{ inputs.ai_index_id }}',
+        ki_id: '{{ inputs.ki_id }}',
+        ki: {
+          attributes: {
+            forensic_attempted_at: '{{ execution.startedAt }}',
+          },
+        },
+      });
+
+      const runsAgent = (count: number, attemptedAt: string): unknown =>
+        evaluate(String(stepByName('forensic_analysis')?.if), {
+          steps: {
+            resolve_prior_assessment: { output: { count } },
+            resolve_request: { output: { forensic_attempted_at: attemptedAt } },
+          },
+        });
+
+      expect(runsAgent(0, '')).toBe(true);
+      expect(runsAgent(2, '')).toBe(true);
+      expect(runsAgent(3, '')).toBe(false);
+      expect(runsAgent(0, '2026-09-23T14:00:00.000Z')).toBe(false);
+      expect(runsAgent(2, '2026-09-23T14:00:00.000Z')).toBe(false);
     });
 
     // `ai.attachment.read` cannot answer this question: it catches every error and
