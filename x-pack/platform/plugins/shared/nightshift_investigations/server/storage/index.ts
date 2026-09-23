@@ -6,6 +6,8 @@
  */
 
 export type {
+  DeleteAllInvestigationsFailure,
+  DeleteAllInvestigationsResult,
   FindInvestigationsAcrossSpacesResult,
   FindInvestigationsQuery,
   FindInvestigationsResult,

@@ -57,7 +57,7 @@ import {
   nightshiftInvestigationSavedObjectType,
   NIGHTSHIFT_INVESTIGATION_SO_TYPE,
 } from './saved_objects';
-import { SavedObjectInvestigationRepository } from './storage';
+import { createInvestigationSweepRepository, SavedObjectInvestigationRepository } from './storage';
 import {
   registerInvestigationReconciliationTask,
   scheduleInvestigationReconciliationTask,
@@ -389,6 +389,8 @@ export class NightshiftInvestigationsPlugin
 
     return {
       getInvestigationsClient: this.getInvestigationsClient,
+      deleteAllInvestigations: () =>
+        createInvestigationSweepRepository(coreStart.savedObjects).deleteAllAcrossSpaces(),
       isInvestigationAvailable: (request) =>
         isInvestigationAvailable({
           request,
