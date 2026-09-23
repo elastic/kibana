@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
@@ -131,5 +131,85 @@ describe('AlertEpisodeRunbookSection', () => {
     await waitFor(() =>
       expect(screen.getByTestId('alertingV2EpisodeRunbookSectionError')).toBeInTheDocument()
     );
+  });
+
+  describe('preview mode', () => {
+    const renderWithFullGuide = (onShowFullGuide: () => void) => {
+      runEsqlAsyncSearchMock.mockResolvedValue(eventsResponse);
+      mockHttp.get.mockResolvedValueOnce(mockRuleWithRunbook);
+
+      return render(
+        <I18nProvider>
+          <AlertEpisodeRunbookSection
+            episodeId="ep-1"
+            services={mockServices}
+            compressed
+            showTitle
+            onShowFullGuide={onShowFullGuide}
+          />
+        </I18nProvider>,
+        { wrapper }
+      );
+    };
+
+    it('renders the Runbook heading', async () => {
+      renderWithFullGuide(jest.fn());
+
+      expect(await screen.findByTestId('alertingV2EpisodeRunbookSectionTitle')).toHaveTextContent(
+        'Runbook'
+      );
+    });
+
+    it('clamps to a preview and calls onShowFullGuide from the link', async () => {
+      const onShowFullGuide = jest.fn();
+      renderWithFullGuide(onShowFullGuide);
+
+      expect(
+        await screen.findByTestId('alertingV2EpisodeDetailsRunbookPreview')
+      ).toBeInTheDocument();
+
+      const link = screen.getByTestId('alertingV2EpisodeRunbookShowFullGuide');
+      expect(link.tagName).toBe('BUTTON');
+      fireEvent.click(link);
+
+      expect(onShowFullGuide).toHaveBeenCalledTimes(1);
+    });
+
+    it('puts the link in the title row, above the content', async () => {
+      renderWithFullGuide(jest.fn());
+
+      const title = await screen.findByTestId('alertingV2EpisodeRunbookSectionTitle');
+      const link = screen.getByTestId('alertingV2EpisodeRunbookShowFullGuide');
+      const preview = screen.getByTestId('alertingV2EpisodeDetailsRunbookPreview');
+
+      // Same row as the heading.
+      const titleRow = title.closest('[class*="euiFlexGroup"]');
+      expect(titleRow).not.toBeNull();
+      expect(titleRow).toContainElement(link);
+
+      // And that row comes before the runbook body.
+      expect(link.compareDocumentPosition(preview)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    });
+
+    it('renders no heading, preview or link by default, as the full page does', async () => {
+      runEsqlAsyncSearchMock.mockResolvedValue(eventsResponse);
+      mockHttp.get.mockResolvedValueOnce(mockRuleWithRunbook);
+
+      render(
+        <I18nProvider>
+          <AlertEpisodeRunbookSection episodeId="ep-1" services={mockServices} />
+        </I18nProvider>,
+        { wrapper }
+      );
+
+      await waitFor(() =>
+        expect(screen.getByTestId('alertingV2EpisodeDetailsRunbookContent')).toBeInTheDocument()
+      );
+      expect(screen.queryByTestId('alertingV2EpisodeRunbookSectionTitle')).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('alertingV2EpisodeDetailsRunbookPreview')
+      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId('alertingV2EpisodeRunbookShowFullGuide')).not.toBeInTheDocument();
+    });
   });
 });
