@@ -848,6 +848,17 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(emptyGate.steps[0].with.message).toContain('empty array');
   });
 
+  it('bypasses already-analyzed dedup on the Worker path so retries return full output', () => {
+    const bypassGate = findStepByName(workflow.steps, 'bypass_dedup_for_worker') as {
+      type: string;
+      condition: string;
+      steps: Array<{ with: { pending_filter_expr: string } }>;
+    };
+    expect(bypassGate.type).toBe('if');
+    expect(bypassGate.condition).toBe('${{ inputs.calledByWorker == true }}');
+    expect(bypassGate.steps[0].with.pending_filter_expr).toBe('false');
+  });
+
   // The model echoes the alert id back with each verdict, and that echo is only safe as a
   // pairing key. A caller acts on what workflow.output emits — the Alert Triage Worker tags,
   // notes and closes by it — so exporting the raw model output would let a fabricated id close
