@@ -13,9 +13,12 @@ import {
   SIGNIFICANT_EVENTS_INVESTIGATION_PROGRESS_REPORT_TOOL_ID,
 } from './tool';
 
+const availability = { cacheMode: 'space' as const, handler: jest.fn() };
+
 const createTool = () =>
   createInvestigationProgressReportTool({
     logger: loggerMock.create(),
+    availability,
   });
 
 describe('investigation_progress_report tool', () => {
@@ -25,10 +28,11 @@ describe('investigation_progress_report tool', () => {
     expect(tool.id).toBe(SIGNIFICANT_EVENTS_INVESTIGATION_PROGRESS_REPORT_TOOL_ID);
   });
 
-  it('is not gated by an availability check', () => {
+  // Without this the tool stays listed in the catalog after investigations become unavailable.
+  it('is gated by the availability check it was given', () => {
     const tool = createTool();
 
-    expect(tool.availability).toBeUndefined();
+    expect(tool.availability).toBe(availability);
   });
 
   it('requires and ranks confidence-scored current output', () => {
