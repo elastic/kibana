@@ -154,16 +154,5 @@ export function CasesSingleViewServiceProvider({ getService, getPageObject }: Ft
       const reportedBy = await testSubjects.getVisibleText('case-view-reported-by');
       return reportedBy.replace(REPORTED_BY_PREFIX, '').trim();
     },
-
-    async getParticipants() {
-      await testSubjects.existOrFail('case-view-user-list-participants');
-
-      const participants = await testSubjects.findAllDescendant(
-        'user-profile-username',
-        await testSubjects.find('case-view-user-list-participants')
-      );
-
-      return participants;
-    },
   };
 }
