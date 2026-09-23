@@ -23,6 +23,8 @@ import { type ITableColumn, ManagedTable } from '../../../shared/managed_table';
 import { getComparisonEnabled } from '../../../shared/time_comparison/get_comparison_enabled';
 import { DependencyOperationDetailLink } from '../../dependency_operation_detail_view/dependency_operation_detail_link';
 import { TransactionTab } from '../../transaction_details/waterfall_with_summary/transaction_tabs';
+import { getUnsupportedKueryFields } from './get_unsupported_kuery_fields';
+import { UnsupportedKueryFieldsWarning } from './unsupported_kuery_fields_warning';
 
 interface OperationStatisticsItem extends SpanMetricGroup {
   spanName: string;
@@ -161,6 +163,8 @@ export function DependencyDetailOperationsList() {
     }),
   ];
 
+  const unsupportedKueryFields = getUnsupportedKueryFields(kuery);
+
   const comparisonOperationsBySpanName = keyBy(comparisonStatsFetch.data?.operations, 'spanName');
 
   const noItemsMessage = (
@@ -198,15 +202,18 @@ export function DependencyDetailOperationsList() {
     }) ?? [];
 
   return (
-    <ManagedTable
-      columns={columns}
-      items={items}
-      noItemsMessage={noItemsMessage}
-      initialSortField="impact"
-      initialSortDirection="desc"
-      isLoading={primaryStatsFetch.status === FETCH_STATUS.LOADING}
-      initialPageSize={25}
-      data-test-subj="apmDependencyDetailOperationsListTable"
-    />
+    <>
+      <UnsupportedKueryFieldsWarning fields={unsupportedKueryFields} />
+      <ManagedTable
+        columns={columns}
+        items={items}
+        noItemsMessage={noItemsMessage}
+        initialSortField="impact"
+        initialSortDirection="desc"
+        isLoading={primaryStatsFetch.status === FETCH_STATUS.LOADING}
+        initialPageSize={25}
+        data-test-subj="apmDependencyDetailOperationsListTable"
+      />
+    </>
   );
 }
