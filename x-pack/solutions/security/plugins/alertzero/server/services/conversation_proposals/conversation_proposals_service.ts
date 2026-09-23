@@ -5,25 +5,46 @@
  * 2.0.
  */
 
+import type { SortCombinations } from '@elastic/elasticsearch/lib/api/types';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
-import type { AgenticInvestigationsPluginStart } from '@kbn/agentic-investigations-plugin/server';
-import type {
-  ProposalWithMetadata,
-  ProposalsQuery,
-} from '@kbn/agentic-investigations-plugin/common';
-import { isAwaitingDecision } from '@kbn/agentic-investigations-plugin/common';
-import {
-  CLOSED_GROUP_KEY,
-  type ProposalGroups,
-  type ProposalItem,
-  type GetProposalsListResponse,
-} from '../../../common/proposals/list';
+import type { MetadataFieldValue } from '@kbn/agent-builder-common';
+import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
+import type { ProposalWithMetadata } from '@kbn/proposals-common';
+import type { ProposalItem, ProposalsPageResponse } from '../../../common/proposals/list';
 
-type ProposalsService = ReturnType<AgenticInvestigationsPluginStart['getProposalsService']>;
+type ProposalsService = ReturnType<ProposalsPluginStart['getProposalsService']>;
 
-/** Conversation-derived fields merged onto a proposal on read. Both absent when unreadable. */
-type ConversationDecoration = Pick<ProposalItem, 'conversationTitle' | 'conversationAgentId'>;
+/** Conversation-derived fields merged onto a proposal on read. Absent when unreadable. */
+type ConversationDecoration = Pick<
+  ProposalItem,
+  'conversationTitle' | 'conversationAgentId' | 'conversationAssignees'
+>;
+
+/**
+ * Metadata is only deserialized to a `TEXT_ARRAY`'s declared `string[]` when the
+ * conversation's template resolves; otherwise it stays in storage form, where a
+ * single entry is a bare string.
+ */
+const readAssignees = (value: MetadataFieldValue | undefined): string[] => {
+  if (Array.isArray(value)) return value;
+  return typeof value === 'string' ? [value] : [];
+};
+
+/** Fixed window for the closed-proposals queue: decisions older than this are not shown. */
+const CLOSED_DECIDED_WITHIN_HOURS = 72;
+
+/**
+ * Breaks every tie the timestamps leave, so a row cannot move between two offset
+ * pages and be shown twice or skipped. Unique per live proposal: `create` roots a
+ * chain at its own id, `revise` numbers it, and the one other pair that shares both
+ * — an original and its clone — never appear together, since both queues exclude
+ * superseded records.
+ */
+const TIEBREAKER: SortCombinations[] = [
+  { rootProposalId: { order: 'asc' } },
+  { revision: { order: 'asc' } },
+];
 
 export class ConversationProposalsService {
   constructor(
@@ -32,82 +53,76 @@ export class ConversationProposalsService {
     private readonly logger: Logger
   ) {}
 
-  async list(
-    query: ProposalsQuery,
+  /** Returns pending proposals for a single action category, newest first. */
+  async listByCategory(
+    category: string,
     request: KibanaRequest,
-    spaceId: string
-  ): Promise<GetProposalsListResponse> {
-    const { proposals, truncated } = await this.proposalsService.listByWindow(
-      {
-        decidedWithinHours: query.windowHours,
-        // One live proposal per subject: a retried action leaves the failed
-        // attempt behind pointing at its replacement.
-        excludeSuperseded: true,
-        excludeExpired: false,
-      },
-      spaceId
+    spaceId: string,
+    { size, from }: { size: number; from: number }
+  ): Promise<ProposalsPageResponse> {
+    const { proposals, total } = await this.proposalsService.list(
+      { category, status: 'pending', excludeSuperseded: true, excludeExpired: false, size, from },
+      spaceId,
+      [{ createdAt: { order: 'desc' as const } }, ...TIEBREAKER]
     );
 
-    const conversations = await this.getConversations(
+    const conversations = await this.fetchConversations(
       proposals.map((p) => p.conversationId),
       request
     );
 
-    const groups = this.groupProposals(proposals, conversations);
-    const total = Object.values(groups).reduce((sum, items) => sum + items.length, 0);
-    return { groups, total, truncated };
+    return { proposals: this.enrichProposals(proposals, conversations), total };
   }
 
-  private groupProposals(
-    proposals: ProposalWithMetadata[],
-    conversations: Map<string, ConversationDecoration>
-  ): ProposalGroups {
-    const groups: ProposalGroups = { [CLOSED_GROUP_KEY]: [] };
+  /** Proposals that stopped awaiting a human in the last 72 h, newest decision first. */
+  async listClosed(
+    request: KibanaRequest,
+    spaceId: string,
+    { size, from }: { size: number; from: number }
+  ): Promise<ProposalsPageResponse> {
+    const { proposals, total } = await this.proposalsService.list(
+      {
+        decidedWithinHours: CLOSED_DECIDED_WITHIN_HOURS,
+        excludeSuperseded: true,
+        excludeExpired: false,
+        size,
+        from,
+      },
+      spaceId,
+      [
+        { decidedAt: { order: 'desc' as const } },
+        { createdAt: { order: 'desc' as const } },
+        ...TIEBREAKER,
+      ]
+    );
 
-    for (const proposal of proposals) {
-      const item: ProposalItem = {
-        ...proposal,
-        ...conversations.get(proposal.conversationId),
-      };
+    const conversations = await this.fetchConversations(
+      proposals.map((p) => p.conversationId),
+      request
+    );
 
-      // Anything not awaiting is closed, including a proposal that expired
-      // unanswered — it carries no decision but nobody can act on it either.
-      // `executing` counts as closed too: the human already approved and the
-      // action is running, so re-offering it would invite a second decision.
-      if (!isAwaitingDecision(proposal)) {
-        groups[CLOSED_GROUP_KEY].push(item);
-      } else if (proposal.category) {
-        if (!groups[proposal.category]) {
-          groups[proposal.category] = [];
-        }
-        groups[proposal.category].push(item);
-      }
-    }
-
-    groups[CLOSED_GROUP_KEY].sort((a, b) => {
-      if (!a.decidedAt || !b.decidedAt) return 0;
-      return b.decidedAt.localeCompare(a.decidedAt);
-    });
-
-    return groups;
+    return { proposals: this.enrichProposals(proposals, conversations), total };
   }
 
-  private async getConversations(
+  /** Returns an empty map if the read fails: enrichment is decoration, not load-bearing. */
+  private async fetchConversations(
     conversationIds: string[],
     request: KibanaRequest
   ): Promise<Map<string, ConversationDecoration>> {
     const uniqueIds = [...new Set(conversationIds)];
+    if (uniqueIds.length === 0) return new Map();
+
     const client = await this.agentBuilder.conversations.getScopedClient({ request });
 
-    // Decoration only: if the bulk read fails, still return the proposals list without it.
     try {
       const conversations = await client.bulkGet(uniqueIds);
       return new Map(
-        [...conversations].map(([id, { title, agent_id: agentId }]) => [
+        [...conversations].map(([id, { title, agent_id: agentId, metadata }]) => [
           id,
           {
             ...(title ? { conversationTitle: title } : {}),
             ...(agentId ? { conversationAgentId: agentId } : {}),
+            conversationAssignees: readAssignees(metadata?.assignees),
           },
         ])
       );
@@ -115,5 +130,19 @@ export class ConversationProposalsService {
       this.logger.debug(`Could not resolve conversations: ${err}`);
       return new Map();
     }
+  }
+
+  private enrichProposals(
+    proposals: ProposalWithMetadata[],
+    conversations: Map<string, ConversationDecoration>
+  ): ProposalItem[] {
+    return proposals.map((proposal) => {
+      const conversation = conversations.get(proposal.conversationId);
+      return {
+        ...proposal,
+        ...conversation,
+        conversationAssignees: conversation?.conversationAssignees ?? [],
+      };
+    });
   }
 }
