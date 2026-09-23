@@ -900,6 +900,32 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(emptyGate.steps[0].with.message).toContain('empty array');
   });
 
+  it('fails the Worker path when alerts contain duplicate _id values', () => {
+    const rejectGate = findStepByName(workflow.steps, 'reject_duplicate_caller_alert_ids') as {
+      type: string;
+      condition: string;
+      steps: Array<{
+        name: string;
+        type: string;
+        condition?: string;
+        with?: { caller_alert_count?: string; caller_unique_alert_id_count?: string };
+        steps?: Array<{ type: string; with: { message: string } }>;
+      }>;
+    };
+    expect(rejectGate.type).toBe('if');
+    expect(rejectGate.condition).toBe('${{ inputs.calledByWorker == true }}');
+    expect(rejectGate.steps[0].name).toBe('compute_caller_alert_id_counts');
+    expect(rejectGate.steps[0].with?.caller_alert_count).toBe('${{ variables.alert_set.size }}');
+    expect(rejectGate.steps[0].with?.caller_unique_alert_id_count).toBe(
+      "${{ variables.alert_set | map: '_id' | uniq | size }}"
+    );
+    expect(rejectGate.steps[1].condition).toBe(
+      '${{ variables.caller_alert_count != variables.caller_unique_alert_id_count }}'
+    );
+    expect(rejectGate.steps[1].steps?.[0].type).toBe('workflow.fail');
+    expect(rejectGate.steps[1].steps?.[0].with.message).toContain('unique alert _id');
+  });
+
   it('bypasses already-analyzed dedup on the Worker path so retries return full output', () => {
     const bypassGate = findStepByName(workflow.steps, 'bypass_dedup_for_worker') as {
       type: string;
@@ -1393,6 +1419,39 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
     expect(
       evaluateExpression(engine, emptyGate.condition, {
         inputs: { calledByWorker: true, alerts: [{ _id: 'a1' }] },
+      })
+    ).toBe(false);
+  });
+
+  it('detects duplicate caller alert _ids via uniq count before failing', () => {
+    const computeStep = findStepByName(workflow.steps, 'compute_caller_alert_id_counts') as {
+      with: { caller_alert_count: string; caller_unique_alert_id_count: string };
+    };
+    const failGate = findStepByName(workflow.steps, 'fail_if_duplicate_caller_alert_ids') as {
+      condition: string;
+    };
+    const alerts = [
+      { _id: 'a1', _index: '.alerts-security.alerts-default' },
+      { _id: 'a1', _index: '.alerts-security.alerts-default' },
+      { _id: 'a2', _index: '.alerts-security.alerts-default' },
+    ];
+
+    const total = evaluateExpression(engine, computeStep.with.caller_alert_count, {
+      variables: { alert_set: alerts },
+    });
+    const unique = evaluateExpression(engine, computeStep.with.caller_unique_alert_id_count, {
+      variables: { alert_set: alerts },
+    });
+    expect(total).toBe(3);
+    expect(unique).toBe(2);
+    expect(
+      evaluateExpression(engine, failGate.condition, {
+        variables: { caller_alert_count: total, caller_unique_alert_id_count: unique },
+      })
+    ).toBe(true);
+    expect(
+      evaluateExpression(engine, failGate.condition, {
+        variables: { caller_alert_count: 2, caller_unique_alert_id_count: 2 },
       })
     ).toBe(false);
   });
