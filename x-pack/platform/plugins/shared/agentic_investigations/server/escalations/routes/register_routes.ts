@@ -8,10 +8,12 @@
 import type { EscalationRouteDependencies } from '../types';
 import { registerCreateEscalationRoute } from './create_escalation';
 import { registerListEscalationsRoute } from './list_escalations';
+import { registerSuggestUsersRoute } from './suggest_users';
 import { registerUpdateEscalationRoute } from './update_escalation';
 
 export const registerEscalationRoutes = (deps: EscalationRouteDependencies) => {
   registerCreateEscalationRoute(deps);
   registerListEscalationsRoute(deps);
   registerUpdateEscalationRoute(deps);
+  registerSuggestUsersRoute(deps);
 };

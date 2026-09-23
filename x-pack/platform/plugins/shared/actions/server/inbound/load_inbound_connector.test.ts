@@ -108,6 +108,37 @@ describe('loadInboundConnector', () => {
     });
   });
 
+  it('keeps hasInboundEventIdentity when the saved object has it', async () => {
+    unsecuredSavedObjectsClient.get.mockResolvedValue({
+      id: 'so-1',
+      type: ACTION_SAVED_OBJECT_TYPE,
+      references: [],
+      attributes: {
+        actionTypeId: '.myConnector',
+        name: 'SO',
+        isMissingSecrets: false,
+        config: {},
+        secrets: {},
+        hasInboundEventIdentity: true,
+      },
+    });
+
+    const result = await loadInboundConnector({
+      connectorId: 'so-1',
+      connectorTypeId: '.myConnector',
+      spaceId: 'default',
+      unsecuredSavedObjectsClient,
+      inMemoryConnectors: [],
+      logger,
+    });
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        hasInboundEventIdentity: true,
+      })
+    );
+  });
+
   it('returns undefined when the saved object cannot be loaded', async () => {
     unsecuredSavedObjectsClient.get.mockRejectedValue(new Error('not found'));
     const result = await loadInboundConnector({
