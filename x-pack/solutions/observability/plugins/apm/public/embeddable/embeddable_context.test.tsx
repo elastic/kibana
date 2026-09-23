@@ -10,6 +10,7 @@ import { act, render, screen } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { Router } from '@kbn/shared-ux-router';
 import { useLocation } from 'react-router-dom';
+import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, of } from 'rxjs';
 import { License } from '@kbn/licensing-plugin/common/license';
@@ -157,16 +158,25 @@ describe('ApmEmbeddableContext', () => {
   describe('CPS feature flag', () => {
     const createFlaggedDeps = (isCpsEnabled$: Observable<boolean>) => {
       const cps = cpsPluginMock.createStartContract();
-      const getBooleanValue$ = jest.fn(() => isCpsEnabled$);
+
+      // Stand-in for `core.featureFlags.useBooleanValue`, which seeds the first render from the
+      // synchronous evaluation before following later changes.
+      let latest: boolean | undefined;
+      isCpsEnabled$.subscribe((enabled) => {
+        latest = enabled;
+      });
+      const useBooleanValue = jest.fn((_flagName: string, fallback: boolean) =>
+        useObservable(isCpsEnabled$, latest ?? fallback)
+      );
 
       return {
         cps,
-        getBooleanValue$,
+        useBooleanValue,
         deps: {
           ...mockDeps,
           coreStart: {
             ...mockCore,
-            featureFlags: { ...mockCore.featureFlags, getBooleanValue$ },
+            featureFlags: { ...mockCore.featureFlags, useBooleanValue },
           },
           pluginsStart: { ...mockDeps.pluginsStart, cps },
         } as unknown as Parameters<typeof ApmEmbeddableContext>[0]['deps'],
@@ -174,7 +184,7 @@ describe('ApmEmbeddableContext', () => {
     };
 
     it('observes the flag with the shared default as fallback', () => {
-      const { deps, getBooleanValue$ } = createFlaggedDeps(of(true));
+      const { deps, useBooleanValue } = createFlaggedDeps(of(true));
 
       render(
         <ApmEmbeddableContext deps={deps}>
@@ -182,7 +192,7 @@ describe('ApmEmbeddableContext', () => {
         </ApmEmbeddableContext>
       );
 
-      expect(getBooleanValue$).toHaveBeenCalledWith(
+      expect(useBooleanValue).toHaveBeenCalledWith(
         OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
         OBSERVABILITY_APM_CPS_ENABLED_DEFAULT
       );

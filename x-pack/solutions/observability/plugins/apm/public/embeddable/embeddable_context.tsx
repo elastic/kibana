@@ -11,7 +11,6 @@ import { RouterProvider } from '@kbn/typed-react-router-config';
 import type { MemoryHistory } from 'history';
 import { createMemoryHistory } from 'history';
 import React, { useEffect, useMemo, useRef } from 'react';
-import useObservable from 'react-use/lib/useObservable';
 import {
   OBSERVABILITY_APM_CPS_ENABLED_DEFAULT,
   OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
@@ -98,26 +97,12 @@ export function ApmEmbeddableContext({
   } as ApmPluginContextValue;
 
   createCallApmApi(deps.coreStart);
-  const { isCpsEnabled$, initialIsCpsEnabled } = useMemo(() => {
-    const flag$ = deps.coreStart.featureFlags.getBooleanValue$(
-      OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
-      OBSERVABILITY_APM_CPS_ENABLED_DEFAULT
-    );
-
-    // `useObservable` only subscribes after commit, but descendants read the services below while
-    // they render, so seeding it with the fallback would expose the wrong CPS wiring whenever the
-    // flag disagrees with it. Core evaluates the flag synchronously on subscribe, so read it here.
-    let current = OBSERVABILITY_APM_CPS_ENABLED_DEFAULT;
-    flag$
-      .subscribe((enabled) => {
-        current = enabled;
-      })
-      .unsubscribe();
-
-    return { isCpsEnabled$: flag$, initialIsCpsEnabled: current };
-  }, [deps.coreStart]);
-
-  const isCpsEnabled = useObservable(isCpsEnabled$, initialIsCpsEnabled);
+  // Descendants read the services below while they render, so the flag has to be resolved by the
+  // first render. The core hook seeds it from the synchronous evaluation, then follows changes.
+  const isCpsEnabled = deps.coreStart.featureFlags.useBooleanValue(
+    OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
+    OBSERVABILITY_APM_CPS_ENABLED_DEFAULT
+  );
   useMemo(() => {
     const cpsManager = isCpsEnabled ? deps.pluginsStart.cps?.cpsManager : undefined;
     const callApmApi = createCallApmApiV2(deps.coreStart, { cpsManager });
