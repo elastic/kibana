@@ -58,10 +58,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
   });
 
   describe('when xpack.alertzero.enabled is false', () => {
-    // Registration sits after the config guard, which is the only thing keeping the AlertZero
-    // section off the Feature settings page: the inference registry is not space-filtered and
-    // `visibilityCondition` keys off a uiSetting, so plugin config cannot hide it any other way.
-    it('does not register managed-workflow ownership, features, inference tiers, or HTTP routes', () => {
+    it('does not register managed-workflow ownership, features, or HTTP routes', () => {
       const plugin = new AlertZeroPlugin(createContext(createConfig({ enabled: false })));
       const coreSetup = coreMock.createSetup();
       const features = { registerKibanaFeature: jest.fn() };
@@ -81,7 +78,31 @@ describe('AlertZeroPlugin feature-flag gating', () => {
       expect(registerRoutes).not.toHaveBeenCalled();
       expect(coreSetup.http.createRouter).not.toHaveBeenCalled();
       expect(registerAgentType).not.toHaveBeenCalled();
-      expect(registerAlertZeroInferenceFeatures).not.toHaveBeenCalled();
+    });
+
+    // The tiers are shared infrastructure: threat intel supply resolves its models through
+    // them without requiring AlertZero enabled. A registry row nothing pins to is inert
+    // (pull-driven resolution), so registering with the plugin off only makes the section
+    // render on the Model Settings page.
+    it('still registers the inference tiers so shared consumers can resolve them', () => {
+      const plugin = new AlertZeroPlugin(createContext(createConfig({ enabled: false })));
+      const searchInferenceEndpoints = { features: { register: jest.fn() } };
+
+      plugin.setup(
+        coreMock.createSetup() as never,
+        {
+          features: { registerKibanaFeature: jest.fn() },
+          workflowsExtensions: { registerManagedWorkflowOwner: jest.fn() },
+          workflowsManagement: undefined,
+          searchInferenceEndpoints,
+        } as never
+      );
+
+      expect(registerAlertZeroInferenceFeatures).toHaveBeenCalledWith(
+        searchInferenceEndpoints,
+        expect.anything()
+      );
+      expect(registerRoutes).not.toHaveBeenCalled();
     });
 
     it('does not install managed worker workflows on start', () => {

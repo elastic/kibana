@@ -5,13 +5,19 @@
  * 2.0.
  */
 
+import { ALERTZERO_REASONING_INFERENCE_FEATURE_ID } from '@kbn/alertzero-common';
 import {
   EXTRACT_DIAMOND_API_PATH,
-  THREAT_INTEL_DIAMOND_INFERENCE_FEATURE_ID,
   extractDiamondBodySchema,
   extractDiamondResponseSchema,
   EXTRACT_DIAMOND_MAX_BODY_BYTES,
 } from '../../../common/threat_intel';
+// Diamond extraction is the one deep-reasoning stage (D49): it reads the whole
+// report and produces structured adversary analysis, so it gets the frontier
+// rung. The tier's recommendation chain (Opus 5, then Sonnet 5, then GPT-5.6
+// Sol) keeps the fallback within the frontier/mid rungs rather than collapsing
+// onto the deployment default, which would put a cheap model on adversary
+// analysis.
 import { extractDiamond } from '../services';
 import { resolveScopedModel } from './lib/scoped_model';
 import { THREAT_INTEL_WRITE_AUTHZ } from './lib/authz';
@@ -51,7 +57,7 @@ export const registerExtractDiamondRoute = ({
           searchInferenceEndpoints: getSearchInferenceEndpoints(),
           request,
           uiSettingsClient: core.uiSettings.client,
-          featureId: THREAT_INTEL_DIAMOND_INFERENCE_FEATURE_ID,
+          featureId: ALERTZERO_REASONING_INFERENCE_FEATURE_ID,
           logger,
         });
         if (!modelOutcome.ok) {

@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { ALERTZERO_FAST_INFERENCE_FEATURE_ID } from '@kbn/alertzero-common';
 import {
   CLASSIFY_SEVERITY_API_PATH,
-  THREAT_INTEL_ENRICH_INFERENCE_FEATURE_ID,
   classifySeverityBodySchema,
   classifySeverityResponseSchema,
   CLASSIFY_SEVERITY_MAX_BODY_BYTES,
   type ThreatCategory,
 } from '../../../common/threat_intel';
+// See assess_relevance.ts for why the enrich stages pin to the operator's
+// Fast pick (D49): high-volume, low-stakes, on a 4h schedule over every report.
 import { classifySeverity } from '../services';
 import { resolveScopedModel } from './lib/scoped_model';
 import { THREAT_INTEL_WRITE_AUTHZ } from './lib/authz';
@@ -52,7 +54,7 @@ export const registerClassifySeverityRoute = ({
           searchInferenceEndpoints: getSearchInferenceEndpoints(),
           request,
           uiSettingsClient: core.uiSettings.client,
-          featureId: THREAT_INTEL_ENRICH_INFERENCE_FEATURE_ID,
+          featureId: ALERTZERO_FAST_INFERENCE_FEATURE_ID,
           logger,
         });
         if (!modelOutcome.ok) {
