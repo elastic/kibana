@@ -20,7 +20,6 @@ import {
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
-  extractVisualizationEsql,
   extractVisualizations,
   getToolIds,
   type ExtractedVisualization,
@@ -155,7 +154,9 @@ export function createEvaluateDataset({
     VisualizationAgentTaskOutput
   >({
     esClient,
-    queryExtractor: extractVisualizationEsql,
+    // Last-turn visualizations only; `output.steps` also carries the first turn of edit examples.
+    queryExtractor: (output) =>
+      visualizationExtractor(output).map((visualization) => visualization.esql),
     includeHitDetection: true,
   });
 
