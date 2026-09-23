@@ -52,12 +52,36 @@ spaceTest.describe('Run workflow alert action', { tag: [...tags.stateful.classic
     });
   });
 
-  spaceTest.beforeEach(async ({ browserAuth, apiServices, scoutSpace }) => {
+  spaceTest.beforeEach(async ({ browserAuth, apiServices, scoutSpace, kbnClient, esClient }) => {
     ruleName = `${CUSTOM_QUERY_RULE.name}_${scoutSpace.id}_${Date.now()}`;
-    await apiServices.detectionRule.createCustomQueryRule({
+
+    // Seed a synthetic log event so that CUSTOM_QUERY_RULE ('*:*' over 'logs-*')
+    // matches at least one document and the detection engine produces an alert.
+    // In CI the test indices contain existing data; a fresh local cluster starts
+    // empty, so the rule fires with zero matches and the alerts table stays empty.
+    // A per-space index name prevents cross-worker cleanup interference.
+    await esClient.index({
+      index: `logs-security-test-${scoutSpace.id}`,
+      document: { '@timestamp': new Date().toISOString(), message: 'scout warmup event' },
+      refresh: true,
+    });
+
+    const { id: ruleId } = await apiServices.detectionRule.createCustomQueryRule({
       ...CUSTOM_QUERY_RULE,
       name: ruleName,
     });
+
+    // Trigger an immediate rule execution rather than waiting for the scheduled
+    // cycle (default: 5 min).  The route returns 204 with an empty body.
+    await kbnClient.request({
+      method: 'POST',
+      path: `/s/${scoutSpace.id}/internal/alerting/rule/${ruleId}/_run_soon`,
+    });
+
+    // Block until the detection engine has indexed at least one alert for this
+    // rule (polls every 1 s, gives up after 60 s).
+    await apiServices.detectionAlerts.waitForAlerts(ruleName, 1, 60_000);
+
     // Use a custom role that includes workflowsManagement privileges (canExecuteWorkflow)
     // in addition to the security index privileges needed to view alerts
     await browserAuth.loginWithCustomRole(FULL_KIBANA_SECURITY_ROLE);
@@ -68,8 +92,16 @@ spaceTest.describe('Run workflow alert action', { tag: [...tags.stateful.classic
     await apiServices.detectionAlerts.deleteAll();
   });
 
-  spaceTest.afterAll(async ({ scoutSpace }) => {
+  spaceTest.afterAll(async ({ scoutSpace, esClient }) => {
     await scoutSpace.uiSettings.unset('workflows:ui:enabled');
+    // Remove synthetic log events seeded during this worker's beforeEach calls.
+    await esClient.deleteByQuery({
+      index: `logs-security-test-${scoutSpace.id}`,
+      ignore_unavailable: true,
+      query: { match_all: {} },
+      conflicts: 'proceed',
+      refresh: true,
+    });
   });
 
   spaceTest(
