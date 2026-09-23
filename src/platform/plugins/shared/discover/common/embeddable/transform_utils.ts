@@ -40,8 +40,6 @@ import type {
   DiscoverSessionEmbeddableByReferenceState,
   DiscoverSessionEmbeddableByValueState,
   DiscoverSessionEmbeddableState,
-} from '../../server';
-import type {
   SearchEmbeddableByReferenceState,
   SearchEmbeddableState,
   StoredSearchEmbeddableByReferenceState,

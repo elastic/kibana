@@ -12,15 +12,13 @@ import type { DiscoverSessionApiClassicTabBase } from '@kbn/as-code-discover-sch
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { getSearchEmbeddableTransforms } from './search_embeddable_transforms';
 import type {
+  DiscoverSessionEmbeddableByReferenceState,
+  DiscoverSessionEmbeddableByValueState,
+  DiscoverSessionEmbeddableState,
   SearchEmbeddableState,
   StoredSearchEmbeddableByValueState,
   StoredSearchEmbeddableState,
 } from './types';
-import type {
-  DiscoverSessionEmbeddableByReferenceState,
-  DiscoverSessionEmbeddableByValueState,
-  DiscoverSessionEmbeddableState,
-} from '../../server';
 import { SavedSearchType } from '@kbn/saved-search-plugin/common';
 import { SAVED_SEARCH_SAVED_OBJECT_REF_NAME } from './constants';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
