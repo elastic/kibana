@@ -32,6 +32,7 @@ import {
 } from './evaluators/chart_type_vs_intent';
 import { skipRefusalExamples, withLowScoreLogging } from './evaluator_utils';
 import { createEsqlExecutionEvaluator } from './evaluators/esql_execution';
+import { createEsqlQueryRunner } from './evaluators/esql_query_runner';
 import { createCalibratedEsqlEquivalenceEvaluator } from './evaluators/esql_functional_equivalence';
 import { createEsqlResultEquivalenceEvaluator } from './evaluators/esql_result_equivalence';
 import {
@@ -149,11 +150,15 @@ export function createEvaluateDataset({
   const visualizationExtractor = (output: VisualizationAgentTaskOutput) =>
     output.visualizations ?? extractVisualizations(output);
 
+  // Four evaluators execute the candidate ES|QL; one runner means each query runs once.
+  const runQuery = createEsqlQueryRunner(esClient);
+
   const esqlExecutionEvaluator = createEsqlExecutionEvaluator<
     VisualizationDatasetExample,
     VisualizationAgentTaskOutput
   >({
     esClient,
+    runQuery,
     // Last-turn visualizations only; `output.steps` also carries the first turn of edit examples.
     queryExtractor: (output) =>
       visualizationExtractor(output).map((visualization) => visualization.esql),
@@ -175,6 +180,7 @@ export function createEvaluateDataset({
     VisualizationAgentTaskOutput
   >({
     esClient,
+    runQuery,
     predictionExtractor: (output) => output.esql ?? '',
     groundTruthExtractor: (expected) => extractGoldQuery(expected),
   });
@@ -217,6 +223,7 @@ export function createEvaluateDataset({
     VisualizationAgentTaskOutput
   >({
     esClient,
+    runQuery,
     visualizationExtractor,
   });
 
@@ -225,6 +232,7 @@ export function createEvaluateDataset({
     VisualizationAgentTaskOutput
   >({
     esClient,
+    runQuery,
     visualizationExtractor,
     expectedChartTypeExtractor: (expected) => extractGoldChartType(expected),
   });

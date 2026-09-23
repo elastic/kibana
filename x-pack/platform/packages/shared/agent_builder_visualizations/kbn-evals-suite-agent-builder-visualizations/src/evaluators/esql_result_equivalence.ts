@@ -7,15 +7,10 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EvaluationResult, Evaluator, Example, TaskOutput } from '@kbn/evals';
-import { substituteEsqlBindParams } from './esql_bind_params';
+import { createEsqlQueryRunner, type EsqlQueryRunner } from './esql_query_runner';
 import { normalizeEsqlForEquivalence } from './normalize_esql_for_equivalence';
 
 export const ESQL_RESULT_EQUIVALENCE_EVALUATOR_NAME = 'ES|QL Result Equivalence';
-
-interface EsqlQueryResult {
-  columns?: Array<{ name: string; type: string }>;
-  values?: unknown[][];
-}
 
 export interface RowNormalizeOptions {
   /** Decimal places numeric values are rounded to; absorbs aggregation precision drift. */
@@ -92,9 +87,12 @@ export function createEsqlResultEquivalenceEvaluator<
   groundTruthExtractor: (expected: TExample['output']) => string;
   normalize?: RowNormalizeOptions;
   name?: string;
+  /** Shared runner so evaluators that execute the same query hit ES once. */
+  runQuery?: EsqlQueryRunner;
 }): Evaluator<TExample, TTaskOutput> {
   const {
     esClient,
+    runQuery = createEsqlQueryRunner(esClient),
     predictionExtractor,
     groundTruthExtractor,
     normalize = {},
@@ -127,12 +125,8 @@ export function createEsqlResultEquivalenceEvaluator<
       // The suite treats the time-picker WHERE as cosmetic (the chart supplies the
       // window), so strip it from both sides before executing, as the LLM judge does.
       const [goldResult, candidateResult] = await Promise.allSettled([
-        esClient.esql.query({
-          query: substituteEsqlBindParams(normalizeEsqlForEquivalence(goldQuery)),
-        }) as Promise<EsqlQueryResult>,
-        esClient.esql.query({
-          query: substituteEsqlBindParams(normalizeEsqlForEquivalence(candidateQuery)),
-        }) as Promise<EsqlQueryResult>,
+        runQuery(normalizeEsqlForEquivalence(goldQuery)),
+        runQuery(normalizeEsqlForEquivalence(candidateQuery)),
       ]);
 
       if (goldResult.status === 'rejected') {

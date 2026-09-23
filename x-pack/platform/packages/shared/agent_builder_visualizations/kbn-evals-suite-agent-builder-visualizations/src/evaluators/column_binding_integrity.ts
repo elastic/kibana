@@ -9,8 +9,8 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EvaluationResult, Evaluator, Example, TaskOutput } from '@kbn/evals';
 import type { ExtractedVisualization } from '../extract_visualization';
 import { skippedResult } from '../evaluator_utils';
-import { substituteEsqlBindParams } from './esql_bind_params';
 import { isNumericColumn, type EsqlColumn } from './esql_column_types';
+import { createEsqlQueryRunner, type EsqlQueryRunner } from './esql_query_runner';
 
 export const COLUMN_BINDING_INTEGRITY_EVALUATOR_NAME = 'Column Binding Integrity';
 
@@ -170,9 +170,12 @@ export function createColumnBindingIntegrityEvaluator<
   esClient: ElasticsearchClient;
   visualizationExtractor: (output: TTaskOutput) => ExtractedVisualization[];
   name?: string;
+  /** Shared runner so evaluators that execute the same query hit ES once. */
+  runQuery?: EsqlQueryRunner;
 }): Evaluator<TExample, TTaskOutput> {
   const {
     esClient,
+    runQuery = createEsqlQueryRunner(esClient),
     visualizationExtractor,
     name = COLUMN_BINDING_INTEGRITY_EVALUATOR_NAME,
   } = config;
@@ -221,10 +224,8 @@ export function createColumnBindingIntegrityEvaluator<
             };
           }
           try {
-            const response = await esClient.esql.query({
-              query: substituteEsqlBindParams(visualization.esql),
-            });
-            const checks = checkColumnBindings(bindings, (response.columns ?? []) as EsqlColumn[]);
+            const response = await runQuery(visualization.esql);
+            const checks = checkColumnBindings(bindings, response.columns ?? []);
             const failures = checks.filter((check) => check.status !== 'ok').map(describeFailure);
             return {
               index,
