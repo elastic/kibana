@@ -46,4 +46,4 @@ To check for flakiness, run the suite repeatedly (e.g. x30) by appending `--repe
 node scripts/playwright test --config x-pack/platform/plugins/private/remote_clusters/test/scout/ui/playwright.config.ts --project local --grep stateful-classic --repeat-each 30
 ```
 
-Test results are available under the matching `output` folder (`ui/output` or `api/output`).
+Test results are written relative to where the command is run: HTML/JSON reports go to `.scout/reports` and other artifacts (screenshots, traces) to `.scout/test-artifacts`.

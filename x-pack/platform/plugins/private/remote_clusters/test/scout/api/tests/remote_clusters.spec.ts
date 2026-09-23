@@ -25,6 +25,9 @@ import {
 
 const OWNED_CLUSTER_NAMES = [CLUSTER_NAME, ...EXTRA_CLUSTER_NAMES];
 
+// Worst-case remote-connect ceiling under CI load.
+const REMOTE_CONNECT_TIMEOUT_MS = 30_000;
+
 const removeOwnedClusters = (esClient: EsClient) =>
   Promise.all(OWNED_CLUSTER_NAMES.map((name) => removeCluster(esClient, name)));
 
@@ -154,14 +157,16 @@ apiTest.describe('Remote clusters API', { tag: ['@local-stateful-classic'] }, ()
   });
 
   apiTest('lists a registered cluster once it is connected', async ({ apiClient, esClient }) => {
+    // Scout's default 60s test budget also covers hooks; give the connect poll headroom.
+    apiTest.setTimeout(REMOTE_CONNECT_TIMEOUT_MS + 60_000);
+
     await seedSniffCluster(esClient, CLUSTER_NAME, {
       seeds: [nodeSeed],
       nodeConnections: 3,
       skipUnavailable: false,
     });
 
-    // Connecting a remote cluster is asynchronous, so poll until it reports as connected. Allow a
-    // generous timeout (the FTR's retry.try defaulted to ~2 minutes) to derisk slow CI machines.
+    // Connecting a remote cluster is asynchronous, so poll until it reports as connected.
     await expect
       .poll(
         async () => {
@@ -173,7 +178,7 @@ apiTest.describe('Remote clusters API', { tag: ['@local-stateful-classic'] }, ()
           expect(response).toHaveStatusCode(200);
           return response.body.filter((cluster: { name: string }) => cluster.name === CLUSTER_NAME);
         },
-        { timeout: 120_000 }
+        { timeout: REMOTE_CONNECT_TIMEOUT_MS }
       )
       .toStrictEqual([
         {
