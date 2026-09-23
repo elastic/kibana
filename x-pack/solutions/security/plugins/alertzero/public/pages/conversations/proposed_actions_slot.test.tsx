@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { ProposalWithMetadata } from '@kbn/proposals-common';
@@ -15,6 +15,7 @@ import {
   useConversationProposals,
   useDismissProposal,
 } from '@kbn/proposals-plugin/public';
+import { useCurrentUserProfile } from '@kbn/agentic-investigations-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ProposedActionsSlot } from './proposed_actions_slot';
 
@@ -22,6 +23,10 @@ jest.mock('@kbn/proposals-plugin/public', () => ({
   useConversationProposals: jest.fn(),
   useApproveProposal: jest.fn(),
   useDismissProposal: jest.fn(),
+}));
+
+jest.mock('@kbn/agentic-investigations-plugin/public', () => ({
+  useCurrentUserProfile: jest.fn(),
 }));
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
@@ -33,9 +38,12 @@ const mockUseConversationProposals = useConversationProposals as jest.MockedFunc
 >;
 const mockUseApproveProposal = useApproveProposal as jest.MockedFunction<typeof useApproveProposal>;
 const mockUseDismissProposal = useDismissProposal as jest.MockedFunction<typeof useDismissProposal>;
+const mockUseCurrentUserProfile = useCurrentUserProfile as jest.MockedFunction<
+  typeof useCurrentUserProfile
+>;
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 
-const approveMutate = jest.fn();
+const approveMutateAsync = jest.fn().mockResolvedValue(undefined);
 const dismissMutate = jest.fn();
 const addDanger = jest.fn();
 
@@ -75,12 +83,16 @@ const renderSlot = () =>
 describe('ProposedActionsSlot', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseApproveProposal.mockReturnValue({ mutate: approveMutate } as unknown as ReturnType<
-      typeof useApproveProposal
-    >);
+    approveMutateAsync.mockResolvedValue(undefined);
+    mockUseApproveProposal.mockReturnValue({
+      mutateAsync: approveMutateAsync,
+    } as unknown as ReturnType<typeof useApproveProposal>);
     mockUseDismissProposal.mockReturnValue({ mutate: dismissMutate } as unknown as ReturnType<
       typeof useDismissProposal
     >);
+    mockUseCurrentUserProfile.mockReturnValue({
+      data: null,
+    } as unknown as ReturnType<typeof useCurrentUserProfile>);
     mockUseKibana.mockReturnValue({
       services: { notifications: { toasts: { addDanger } } },
     } as unknown as ReturnType<typeof useKibana>);
@@ -98,7 +110,7 @@ describe('ProposedActionsSlot', () => {
     expect(screen.getByText('After-hours domain admin logins — fin-dc-01')).toBeInTheDocument();
   });
 
-  it('renders a decided proposal as a closed, non-interactive record rather than dropping it', () => {
+  it('renders a decided proposal as a closed record, but still opens a read-only modal for it', () => {
     mockUseConversationProposals.mockReturnValue({
       data: { proposals: [decidedProposal], total: 1 },
       isLoading: false,
@@ -111,8 +123,12 @@ describe('ProposedActionsSlot', () => {
 
     fireEvent.click(screen.getByTestId('investigationFlyoutProposedAction-proposal-2'));
 
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-    expect(approveMutate).not.toHaveBeenCalled();
+    const dialog = screen.getByRole('dialog');
+    expect(within(dialog).getByText('Applied')).toBeInTheDocument();
+    expect(
+      screen.queryByTestId('investigationFlyoutProposedAction-proposal-2-modal-confirm')
+    ).not.toBeInTheDocument();
+    expect(approveMutateAsync).not.toHaveBeenCalled();
   });
 
   it('shows an empty state when this conversation has no proposals', () => {
@@ -126,7 +142,7 @@ describe('ProposedActionsSlot', () => {
     expect(screen.getByText('No proposed actions for this investigation.')).toBeInTheDocument();
   });
 
-  it('approves with the proposal id and its own action input', () => {
+  it('approves with the proposal id and its own action input, then shows Applied without closing', async () => {
     mockUseConversationProposals.mockReturnValue({
       data: { proposals: [mockProposal], total: 1 },
       isLoading: false,
@@ -138,10 +154,32 @@ describe('ProposedActionsSlot', () => {
       screen.getByTestId('investigationFlyoutProposedAction-proposal-1-modal-confirm')
     );
 
-    expect(approveMutate).toHaveBeenCalledWith(
-      { id: 'proposal-1', body: { actionInput: undefined } },
-      expect.objectContaining({ onError: expect.any(Function) })
+    expect(approveMutateAsync).toHaveBeenCalledWith({
+      id: 'proposal-1',
+      body: { actionInput: undefined },
+    });
+    await waitFor(() => {
+      expect(within(screen.getByRole('dialog')).getByText('Applied')).toBeInTheDocument();
+    });
+  });
+
+  it('surfaces a toast and keeps the modal open for retry when approving fails', async () => {
+    approveMutateAsync.mockRejectedValueOnce(new Error('boom'));
+    mockUseConversationProposals.mockReturnValue({
+      data: { proposals: [mockProposal], total: 1 },
+      isLoading: false,
+    } as unknown as ReturnType<typeof useConversationProposals>);
+
+    renderSlot();
+    fireEvent.click(screen.getByTestId('investigationFlyoutProposedAction-proposal-1'));
+    fireEvent.click(
+      screen.getByTestId('investigationFlyoutProposedAction-proposal-1-modal-confirm')
     );
+
+    await waitFor(() => expect(addDanger).toHaveBeenCalledTimes(1));
+    expect(
+      screen.getByTestId('investigationFlyoutProposedAction-proposal-1-modal-confirm')
+    ).toBeInTheDocument();
   });
 
   it('opens the dismiss modal instead of dismissing directly', () => {

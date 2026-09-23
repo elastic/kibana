@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { ApprovalProposal } from '@kbn/proposals-ui';
@@ -29,7 +29,7 @@ const mockProposal: ApprovalProposal = {
 
 const baseProps: ProposedActionButtonProps = {
   proposal: mockProposal,
-  onConfirm: jest.fn(),
+  onConfirm: jest.fn().mockResolvedValue(undefined),
   onDismiss: jest.fn(),
   'data-test-subj': 'proposedAction',
 };
@@ -62,14 +62,17 @@ describe('ProposedActionButton', () => {
     ).toBeGreaterThanOrEqual(2);
   });
 
-  it('commits the approval and closes the modal when Approve is clicked', () => {
+  it('commits the approval and shows the modal applying, then applied, without closing it', async () => {
     renderButton();
     fireEvent.click(screen.getByTestId('proposedAction'));
 
     fireEvent.click(screen.getByTestId('proposedAction-modal-confirm'));
 
     expect(baseProps.onConfirm).toHaveBeenCalledTimes(1);
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(within(screen.getByRole('dialog')).getByText('Applied')).toBeInTheDocument();
+    });
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
   });
 
   it('records the dismissal and closes the modal when Dismiss is clicked', () => {
@@ -107,18 +110,20 @@ describe('ProposedActionButton', () => {
       expect(screen.queryByText('Response action • Irreversible')).not.toBeInTheDocument();
     });
 
-    it('shows a Dismissed badge for a dismissed proposal', () => {
+    it('shows a Declined badge for a dismissed proposal', () => {
       renderButton({ proposal: { ...decidedProposal, decision: 'dismissed' } });
 
-      expect(screen.getByText('Dismissed')).toBeInTheDocument();
+      expect(screen.getByText('Declined')).toBeInTheDocument();
     });
 
-    it('is not clickable, so no approval modal can be opened on a closed record', () => {
+    it('is still clickable, opening a read-only modal for the closed record', () => {
       renderButton({ proposal: decidedProposal });
 
       fireEvent.click(screen.getByTestId('proposedAction'));
 
-      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+      const dialog = screen.getByRole('dialog');
+      expect(within(dialog).getByText('Applied')).toBeInTheDocument();
+      expect(screen.queryByTestId('proposedAction-modal-confirm')).not.toBeInTheDocument();
     });
   });
 });

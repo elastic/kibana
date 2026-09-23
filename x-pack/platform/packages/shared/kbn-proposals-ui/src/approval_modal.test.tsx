@@ -6,13 +6,16 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
+import { I18nProvider } from '@kbn/i18n-react';
 import { ApprovalModal, type ApprovalModalProps } from './approval_modal';
 import type { ApprovalProposal } from './types';
 
 const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <EuiProvider>{children}</EuiProvider>
+  <I18nProvider>
+    <EuiProvider>{children}</EuiProvider>
+  </I18nProvider>
 );
 
 const mockProposal: ApprovalProposal = {
@@ -26,7 +29,7 @@ const mockProposal: ApprovalProposal = {
 
 const baseProps: ApprovalModalProps = {
   proposal: mockProposal,
-  onConfirm: jest.fn(),
+  onConfirm: jest.fn().mockResolvedValue(undefined),
   onClose: jest.fn(),
   onDismiss: jest.fn(),
   'data-test-subj': 'approvalModal',
@@ -108,6 +111,58 @@ describe('ApprovalModal', () => {
     renderModal();
     fireEvent.click(screen.getByTestId('approvalModal-confirm'));
     expect(baseProps.onConfirm).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows an Applying state while onConfirm is in flight, then Applied once it resolves', async () => {
+    let resolveConfirm: () => void = () => {};
+    const onConfirm = jest.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          resolveConfirm = resolve;
+        })
+    );
+    renderModal({ onConfirm, currentActorName: 'Ava' });
+
+    fireEvent.click(screen.getByTestId('approvalModal-confirm'));
+
+    expect(screen.getByText('Applying')).toBeInTheDocument();
+    expect(screen.queryByTestId('approvalModal-confirm')).not.toBeInTheDocument();
+
+    await act(async () => {
+      resolveConfirm();
+    });
+    await waitFor(() => expect(screen.getByText('Applied')).toBeInTheDocument());
+    expect(screen.getAllByText(/Ava/).length).toBeGreaterThan(0);
+  });
+
+  it('reverts to pending and shows an error when onConfirm rejects', async () => {
+    const onConfirm = jest.fn().mockRejectedValue(new Error('The action rejected its inputs.'));
+    renderModal({ onConfirm });
+
+    fireEvent.click(screen.getByTestId('approvalModal-confirm'));
+
+    await waitFor(() =>
+      expect(screen.getByText('The action rejected its inputs.')).toBeInTheDocument()
+    );
+    expect(screen.getByTestId('approvalModal-confirm')).toBeInTheDocument();
+    expect(screen.queryByText('Applied')).not.toBeInTheDocument();
+  });
+
+  it('renders a decided proposal as a read-only history rather than offering another decision', () => {
+    renderModal({
+      proposal: {
+        ...mockProposal,
+        decision: 'dismissed',
+        decidedBy: { fullName: 'Bonnie Fishel' },
+        decidedAt: '2024-01-01T17:20:00.000Z',
+        rationale: 'Already reported elsewhere (duplicate)',
+      },
+    });
+
+    expect(screen.getByText('Declined')).toBeInTheDocument();
+    expect(screen.getByText(/Already reported elsewhere \(duplicate\)/)).toBeInTheDocument();
+    expect(screen.queryByTestId('approvalModal-confirm')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('approvalModal-dismiss')).not.toBeInTheDocument();
   });
 
   it('disables approving a proposal whose deadline has passed', () => {

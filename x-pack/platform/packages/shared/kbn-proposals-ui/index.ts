@@ -10,7 +10,15 @@ export {
   ApprovalContent,
   type ApprovalContentProps,
   type ApprovalAction,
+  type ApprovalDecision,
   type AlwaysAllowOption,
 } from './src/approval_content';
-export { getProposalTitle, getProposalTone, isProposalExpired } from './src/proposal_helpers';
+export type { ApprovalOutcomeStatus } from './src/approval_outcome';
+export {
+  getProposalCaption,
+  getProposalDecision,
+  getProposalTitle,
+  getProposalTone,
+  isProposalExpired,
+} from './src/proposal_helpers';
 export type { ApprovalProposal } from './src/types';

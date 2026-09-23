@@ -34,6 +34,11 @@ jest.mock('@kbn/proposals-plugin/public', () => ({
   useApproveProposal: jest.fn(),
   useDismissProposal: jest.fn(),
 }));
+// Only the profile lookup is stubbed here.
+jest.mock('@kbn/agentic-investigations-plugin/public', () => ({
+  ...jest.requireActual('@kbn/agentic-investigations-plugin/public'),
+  useCurrentUserProfile: jest.fn(() => ({ data: null })),
+}));
 jest.mock('../../hooks/use_proposals_api');
 jest.mock('../../hooks/use_proposal_charts_summary');
 jest.mock('../../components/proposals_trend_chart', () => ({
@@ -168,11 +173,12 @@ const renderPage = (initialEntry: string) => {
   return { core, agentBuilder, closeFlyout, history };
 };
 
-const approveMutate = jest.fn();
+const approveMutateAsync = jest.fn().mockResolvedValue(undefined);
 const dismissMutate = jest.fn();
 
 beforeEach(() => {
-  mockUseApproveProposal.mockReturnValue({ mutate: approveMutate });
+  approveMutateAsync.mockResolvedValue(undefined);
+  mockUseApproveProposal.mockReturnValue({ mutateAsync: approveMutateAsync });
   mockUseDismissProposal.mockReturnValue({ mutate: dismissMutate });
   mockOpenCount(0);
 });
@@ -354,32 +360,28 @@ describe('ConversationsPage decisions', () => {
 
     fireEvent.click(approvalDialog().getByRole('button', { name: 'Approve' }));
 
-    expect(approveMutate).toHaveBeenCalledWith(
-      { id: 'prop-1', body: { actionInput: { user: 'cfo@corp' } } },
-      expect.objectContaining({ onSuccess: expect.any(Function) })
-    );
+    expect(approveMutateAsync).toHaveBeenCalledWith({
+      id: 'prop-1',
+      body: { actionInput: { user: 'cfo@corp' } },
+    });
   });
 
-  it('keeps the approval modal open until the mutation succeeds', () => {
+  it('stays open and shows Applied once the mutation succeeds, rather than closing', async () => {
     renderPage('/');
     openApproval();
     fireEvent.click(approvalDialog().getByRole('button', { name: 'Approve' }));
 
-    // A refusal — expired deadline, someone decided first — must not close the modal as
-    // though the decision had landed. onSuccess is the only thing that closes it.
+    // The decision's own outcome now shows in place — the modal never auto-closes, so a
+    // refusal (expired deadline, someone decided first) reads the same way: still open.
+    await waitFor(() => expect(approvalDialog().getByText('Applied')).toBeInTheDocument());
     expect(screen.getByRole('dialog', { name: 'Revoke sessions' })).toBeInTheDocument();
-
-    const [, handlers] = approveMutate.mock.calls[0];
-    act(() => handlers.onSuccess());
-
-    expect(screen.queryByRole('dialog', { name: 'Revoke sessions' })).not.toBeInTheDocument();
   });
 
   it('hands Dismiss off to the dismiss modal rather than deciding without a reason', () => {
     renderPage('/');
     openApproval();
 
-    fireEvent.click(approvalDialog().getByRole('button', { name: 'Dismiss' }));
+    fireEvent.click(approvalDialog().getByRole('button', { name: 'Decline' }));
 
     // The approval modal closes and the reason form takes over for the same proposal: a
     // dismissal is a decision with a reason, never a silent close.

@@ -5,18 +5,30 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useCallback, useState } from 'react';
 import { css } from '@emotion/react';
 import {
+  EuiAvatar,
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiMarkdownFormat,
+  EuiText,
   useEuiTheme,
   type EuiButtonColor,
 } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
 import { ApprovalModalHeader } from './approval_modal_header';
+import { ApprovalActorTime } from './approval_actor_time';
 import { AlwaysAllowCheckbox } from './always_allow_checkbox';
+import {
+  getApprovalOutcomeBadge,
+  getApprovalOutcomeBanner,
+  type ApprovalOutcomeStatus,
+} from './approval_outcome';
+import { APPROVAL_MODAL_TRANSLATIONS } from './translations';
 
 export interface AlwaysAllowOption {
   id: string;
@@ -27,13 +39,29 @@ export interface AlwaysAllowOption {
 
 export interface ApprovalAction {
   label: string;
-  onClick: () => void;
+  onClick: () => void | Promise<void>;
   /** Overrides the component-level {@link ApprovalContentProps.iconType} on the button. */
   iconType?: IconType;
   color?: EuiButtonColor;
   isDisabled?: boolean;
   isLoading?: boolean;
+  /**
+   * Read only off `primaryAction`. Once its `onClick` promise resolves, this is the decision it
+   * made — drives the transient "Applying"/"Declining" phase and the badge/banner/footer once it
+   * settles, so a caller stops having to track loading state and render the outcome itself.
+   */
+  outcomeStatus?: ApprovalOutcomeStatus;
   'data-test-subj'?: string;
+}
+
+/** A proposal already decided — by this component's own click, or before this render existed. */
+export interface ApprovalDecision {
+  status: ApprovalOutcomeStatus;
+  actorName: string;
+  /** ISO 8601 timestamp. */
+  decidedAt: string;
+  /** Shown in the outcome banner, e.g. why a decline was made. */
+  reason?: React.ReactNode;
 }
 
 export interface ApprovalContentProps {
@@ -52,6 +80,14 @@ export interface ApprovalContentProps {
   titleId?: string;
   /** Header caption below the badge, e.g. a category/reversibility line. Omitted when there is none. */
   caption?: React.ReactNode;
+  /** Already decided — read-only history. Omit while a proposal is still awaiting one. */
+  decision?: ApprovalDecision;
+  /**
+   * Who is submitting `primaryAction` right now, for the optimistic "Applying"/"Declining" phase.
+   * Falls back to a generic "You" when omitted, so a host that has not wired a profile lookup
+   * still gets a coherent transient state.
+   */
+  currentActorName?: string;
   alwaysAllow?: AlwaysAllowOption;
   /** Rendered as a filled `EuiButton`. Footer is omitted entirely when both this and `secondaryActions` are absent. */
   primaryAction?: ApprovalAction;
@@ -62,6 +98,11 @@ export interface ApprovalContentProps {
   'data-test-subj'?: string;
 }
 
+type TransientPhase = 'idle' | 'applying' | 'declining';
+
+const bannerIconFor = (color: 'success' | 'primary' | 'danger'): IconType =>
+  color === 'success' ? 'check' : color === 'danger' ? 'warning' : 'clock';
+
 /**
  * Layout-agnostic approval UI.
  *
@@ -69,8 +110,13 @@ export interface ApprovalContentProps {
  * {@link ApprovalModal}) or directly into a div/card (by the Agent Builder
  * proposal attachment) without adding an extra wrapping element.
  *
- * Footer is omitted entirely when neither `primaryAction` nor `secondaryActions`
- * are provided.
+ * Owns the decision's async lifecycle: `primaryAction.onClick` may return a promise, and while it
+ * is in flight (and once it settles) this renders the transient/outcome UI itself — the badge,
+ * banner, and footer identity row — rather than a caller tracking `isLoading` and re-deriving the
+ * same thing. A caller only needs to supply the mutation and, once the server confirms it, a real
+ * `decision` prop; until then the optimistic one this produces carries the UI.
+ *
+ * Footer is omitted entirely when neither `primaryAction` nor `secondaryActions` are provided.
  */
 export const ApprovalContent = memo<ApprovalContentProps>(
   ({
@@ -81,6 +127,8 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     showHeader = true,
     titleId,
     caption,
+    decision,
+    currentActorName,
     alwaysAllow,
     primaryAction,
     secondaryActions,
@@ -88,6 +136,66 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     'data-test-subj': dataTestSubj,
   }) => {
     const { euiTheme } = useEuiTheme();
+    const [transientPhase, setTransientPhase] = useState<TransientPhase>('idle');
+    const [transientSince, setTransientSince] = useState<string | undefined>(undefined);
+    const [optimisticDecision, setOptimisticDecision] = useState<ApprovalDecision | undefined>(
+      undefined
+    );
+    const [actionError, setActionError] = useState<string | undefined>(undefined);
+
+    const effectiveDecision = decision ?? optimisticDecision;
+    const actorName = currentActorName ?? APPROVAL_MODAL_TRANSLATIONS.currentActorFallback;
+
+    const handlePrimaryClick = useCallback(async () => {
+      if (!primaryAction) {
+        return;
+      }
+      setActionError(undefined);
+      if (!primaryAction.outcomeStatus) {
+        // No decision to track (e.g. a step that just moves to a different form) — run it as-is.
+        await primaryAction.onClick();
+        return;
+      }
+      const startedAt = new Date().toISOString();
+      setTransientSince(startedAt);
+      setTransientPhase(primaryAction.outcomeStatus === 'declined' ? 'declining' : 'applying');
+      try {
+        await primaryAction.onClick();
+        setOptimisticDecision({
+          status: primaryAction.outcomeStatus,
+          actorName,
+          decidedAt: startedAt,
+        });
+      } catch (err) {
+        setActionError(
+          err instanceof Error ? err.message : APPROVAL_MODAL_TRANSLATIONS.actionErrorTitle
+        );
+      } finally {
+        setTransientPhase('idle');
+      }
+    }, [primaryAction, actorName]);
+
+    const approvalPhase = effectiveDecision
+      ? effectiveDecision.status
+      : transientPhase === 'idle'
+      ? 'pending'
+      : transientPhase;
+
+    const badge = getApprovalOutcomeBadge(approvalPhase);
+    const banner = getApprovalOutcomeBanner(approvalPhase);
+    const isSettledOrTransient = approvalPhase !== 'pending';
+
+    const headerCaption = effectiveDecision ? (
+      <ApprovalActorTime
+        actorName={effectiveDecision.actorName}
+        decisionType={effectiveDecision.status}
+        at={effectiveDecision.decidedAt}
+      />
+    ) : transientPhase !== 'idle' && transientSince ? (
+      <ApprovalActorTime actorName={actorName} at={transientSince} live />
+    ) : (
+      caption
+    );
 
     const defaultButtonColor: EuiButtonColor = tone === 'danger' ? 'danger' : 'primary';
 
@@ -98,7 +206,12 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     return (
       <>
         {showHeader && (
-          <ApprovalModalHeader caption={caption} title={title} titleId={titleId ?? ''} />
+          <ApprovalModalHeader
+            badge={badge}
+            caption={headerCaption}
+            title={title}
+            titleId={titleId ?? ''}
+          />
         )}
 
         <div
@@ -120,6 +233,38 @@ export const ApprovalContent = memo<ApprovalContentProps>(
               </EuiMarkdownFormat>
             </div>
           )}
+
+          {banner && (
+            // eslint-disable-next-line @kbn/kbn-ui/prefer_kbn_ui_callout
+            <EuiCallOut
+              announceOnMount
+              size="s"
+              color={banner.color}
+              iconType={bannerIconFor(banner.color)}
+              title={
+                effectiveDecision?.reason
+                  ? `${banner.title} • ${effectiveDecision.reason}`
+                  : banner.hint
+                  ? `${banner.title} • ${banner.hint}`
+                  : banner.title
+              }
+              data-test-subj={dataTestSubj ? `${dataTestSubj}-outcome` : undefined}
+            />
+          )}
+
+          {actionError && (
+            <>
+              <div css={css({ marginTop: euiTheme.size.s })} />
+              {/* eslint-disable-next-line @kbn/kbn-ui/prefer_kbn_ui_callout */}
+              <EuiCallOut
+                announceOnMount
+                size="s"
+                color="danger"
+                title={actionError}
+                data-test-subj={dataTestSubj ? `${dataTestSubj}-error` : undefined}
+              />
+            </>
+          )}
         </div>
 
         {alwaysAllow && (
@@ -131,45 +276,69 @@ export const ApprovalContent = memo<ApprovalContentProps>(
 
         {children}
 
-        {hasFooter && (
-          <div
-            css={css({
-              display: 'flex',
-              gap: euiTheme.size.s,
-              justifyContent: 'flex-end',
-              padding: euiTheme.size.base,
-            })}
-          >
-            {/* Secondaries first so the decision that commits something sits rightmost. */}
-            {secondaryActions?.map((action, i) => (
-              <EuiButtonEmpty
-                key={i}
-                size="s"
-                color={action.color ?? 'primary'}
-                iconType={action.iconType}
-                isDisabled={action.isDisabled}
-                isLoading={action.isLoading}
-                onClick={action.onClick}
-                data-test-subj={action['data-test-subj']}
-              >
-                {action.label}
-              </EuiButtonEmpty>
-            ))}
-            {primaryAction && (
-              <EuiButton
-                fill
-                size="s"
-                color={primaryAction.color ?? defaultButtonColor}
-                iconType={primaryAction.iconType ?? iconType}
-                isDisabled={primaryAction.isDisabled}
-                isLoading={primaryAction.isLoading}
-                onClick={primaryAction.onClick}
-                data-test-subj={primaryAction['data-test-subj']}
-              >
-                {primaryAction.label}
-              </EuiButton>
-            )}
+        {isSettledOrTransient ? (
+          <div css={css({ padding: euiTheme.size.base })}>
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiAvatar name={effectiveDecision?.actorName ?? actorName} size="s" />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs" color="subdued">
+                  {effectiveDecision ? (
+                    <ApprovalActorTime
+                      actorName={effectiveDecision.actorName}
+                      at={effectiveDecision.decidedAt}
+                    />
+                  ) : (
+                    transientSince && (
+                      <ApprovalActorTime actorName={actorName} at={transientSince} live />
+                    )
+                  )}
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </div>
+        ) : (
+          hasFooter && (
+            <div
+              css={css({
+                display: 'flex',
+                gap: euiTheme.size.s,
+                justifyContent: 'flex-end',
+                padding: euiTheme.size.base,
+              })}
+            >
+              {/* Secondaries first so the decision that commits something sits rightmost. */}
+              {secondaryActions?.map((action, i) => (
+                <EuiButtonEmpty
+                  key={i}
+                  size="s"
+                  color={action.color ?? 'primary'}
+                  iconType={action.iconType}
+                  isDisabled={action.isDisabled}
+                  isLoading={action.isLoading}
+                  onClick={action.onClick}
+                  data-test-subj={action['data-test-subj']}
+                >
+                  {action.label}
+                </EuiButtonEmpty>
+              ))}
+              {primaryAction && (
+                <EuiButton
+                  fill
+                  size="s"
+                  color={primaryAction.color ?? defaultButtonColor}
+                  iconType={primaryAction.iconType ?? iconType}
+                  isDisabled={primaryAction.isDisabled}
+                  isLoading={primaryAction.isLoading}
+                  onClick={handlePrimaryClick}
+                  data-test-subj={primaryAction['data-test-subj']}
+                >
+                  {primaryAction.label}
+                </EuiButton>
+              )}
+            </div>
+          )
         )}
       </>
     );

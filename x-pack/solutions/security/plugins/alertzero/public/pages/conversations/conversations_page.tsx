@@ -18,6 +18,8 @@ import {
   Impact,
 } from '@kbn/agentic-investigations-common';
 import { useApproveProposal, useDismissProposal } from '@kbn/proposals-plugin/public';
+import { useCurrentUserProfile } from '@kbn/agentic-investigations-plugin/public';
+import { getUserDisplayName } from '@kbn/user-profile-components';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import {
@@ -54,6 +56,10 @@ export const ConversationsPage: React.FC = () => {
   const approve = useApproveProposal();
   const dismiss = useDismissProposal();
   const dropDecided = useDropDecidedProposal();
+  const { data: currentUserProfile } = useCurrentUserProfile();
+  const currentActorName = currentUserProfile
+    ? getUserDisplayName(currentUserProfile.user)
+    : undefined;
   const [surfaceFilter, setSurfaceFilter] = useState<string | null>(null);
   useAlertZeroDocTitle(QUEUE_PAGE_INFO.pageTitle);
 
@@ -129,20 +135,19 @@ export const ConversationsPage: React.FC = () => {
     [notifications]
   );
 
+  // Stays open on success rather than closing: the approval modal itself shows the resulting
+  // "Applied" state, so the analyst sees the outcome before dismissing it themselves.
   const confirmApproval = useCallback(
-    (proposal: ProposalItem) => {
-      approve.mutate(
-        { id: proposal.id, body: { actionInput: proposal.actionInput } },
-        {
-          onSuccess: () => {
-            void dropDecided(proposal.id);
-            closeApproval();
-          },
-          onError: onDecisionError,
-        }
-      );
+    async (proposal: ProposalItem) => {
+      try {
+        await approve.mutateAsync({ id: proposal.id, body: { actionInput: proposal.actionInput } });
+        void dropDecided(proposal.id);
+      } catch (err) {
+        onDecisionError(err);
+        throw err;
+      }
     },
-    [approve, closeApproval, dropDecided, onDecisionError]
+    [approve, dropDecided, onDecisionError]
   );
 
   // Dismissing is a decision with a reason, so the approval modal hands off to the dismiss
@@ -234,6 +239,7 @@ export const ConversationsPage: React.FC = () => {
         onCloseAction={closeModal}
         onCloseApproval={closeApproval}
         onConfirmApproval={confirmApproval}
+        currentActorName={currentActorName}
         onDismissApproval={dismissApproval}
         renderDismissModal={renderDismissModal}
         renderEscalationModal={renderEscalationModal}

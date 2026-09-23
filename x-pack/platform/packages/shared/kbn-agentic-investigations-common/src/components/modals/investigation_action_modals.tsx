@@ -41,15 +41,18 @@ export interface InvestigationActionModalsProps<
   onCloseApproval: () => void;
   /**
    * Commits the approval. Receives the proposal rather than closing over it, so a caller's
-   * handler stays referentially stable across renders. Falls back to closing the modal, so a
-   * host that opens one with no mutation to call cannot leave it stuck open.
+   * handler stays referentially stable across renders. Awaited by the modal itself, which shows
+   * the "Applying"/"Applied" states for as long as this takes. Falls back to closing the modal,
+   * so a host that opens one with no mutation to call cannot leave it stuck open.
    */
-  onConfirmApproval?: (proposal: TProposal) => void;
+  onConfirmApproval?: (proposal: TProposal) => Promise<void>;
   /**
    * Records a dismissal from the approval modal. Omitted by hosts that cannot capture one,
    * which also hides the Dismiss button rather than leaving it inert.
    */
   onDismissApproval?: (proposal: TProposal) => void;
+  /** Who's approving, for the modal's optimistic "Applying" state. */
+  currentActorName?: string;
   /**
    * Replaces the default rationale-only dismiss modal. Supplied when a solution's
    * dismissal captures more than a rationale — a structured reason, say — which changes
@@ -82,16 +85,22 @@ export const InvestigationActionModals = <TProposal extends ApprovalProposal = A
   onDismissApproval,
   renderDismissModal,
   renderEscalationModal,
+  currentActorName,
 }: InvestigationActionModalsProps<TProposal>) => (
   <>
     {approvalProposal ? (
       <ApprovalModal
         proposal={approvalProposal}
-        onConfirm={() =>
-          onConfirmApproval ? onConfirmApproval(approvalProposal) : onCloseApproval()
-        }
+        onConfirm={async () => {
+          if (onConfirmApproval) {
+            await onConfirmApproval(approvalProposal);
+          } else {
+            onCloseApproval();
+          }
+        }}
         onClose={onCloseApproval}
         onDismiss={onDismissApproval ? () => onDismissApproval(approvalProposal) : undefined}
+        currentActorName={currentActorName}
       />
     ) : null}
 

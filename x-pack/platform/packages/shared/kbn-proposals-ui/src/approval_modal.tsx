@@ -11,6 +11,7 @@ import { EuiModal, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
 import { ApprovalContent } from './approval_content';
 import {
   getProposalCaption,
+  getProposalDecision,
   getProposalTitle,
   getProposalTone,
   isProposalExpired,
@@ -26,13 +27,20 @@ export interface ApprovalModalProps {
     onChange: (checked: boolean) => void;
   };
   proposal: ApprovalProposal;
-  onConfirm: () => void;
+  /**
+   * Awaited by `ApprovalContent` itself, which shows the "Applying" transient state for as long
+   * as this takes and the "Applied" one once it resolves — pass the mutation's own promise
+   * (`mutateAsync`) rather than a fire-and-forget `mutate` call.
+   */
+  onConfirm: () => Promise<void>;
   onClose: () => void;
   /**
    * Renders Dismiss beside Approve. Omitted by hosts that cannot record a dismissal, which is
    * why there is no Cancel here — `EuiModal`'s own close control already covers walking away.
    */
   onDismiss?: () => void;
+  /** Who's approving, for the optimistic "Applying" state before the server confirms a decider. */
+  currentActorName?: string;
   'data-test-subj'?: string;
 }
 
@@ -44,7 +52,15 @@ export interface ApprovalModalProps {
  * from whatever each host happened to keep.
  */
 export const ApprovalModal = memo<ApprovalModalProps>(
-  ({ alwaysAllow, proposal, onConfirm, onClose, onDismiss, 'data-test-subj': dataTestSubj }) => {
+  ({
+    alwaysAllow,
+    proposal,
+    onConfirm,
+    onClose,
+    onDismiss,
+    currentActorName,
+    'data-test-subj': dataTestSubj,
+  }) => {
     const { euiTheme } = useEuiTheme();
     const titleId = useGeneratedHtmlId({ prefix: 'approvalModalHeader' });
 
@@ -65,11 +81,14 @@ export const ApprovalModal = memo<ApprovalModalProps>(
           comment={proposal.comment}
           titleId={titleId}
           caption={getProposalCaption(proposal)}
+          decision={getProposalDecision(proposal)}
+          currentActorName={currentActorName}
           alwaysAllow={alwaysAllow}
           data-test-subj={dataTestSubj}
           primaryAction={{
             label: APPROVAL_MODAL_TRANSLATIONS.approve,
             onClick: onConfirm,
+            outcomeStatus: 'applied',
             isDisabled: isExpired,
             'data-test-subj': dataTestSubj ? `${dataTestSubj}-confirm` : undefined,
           }}

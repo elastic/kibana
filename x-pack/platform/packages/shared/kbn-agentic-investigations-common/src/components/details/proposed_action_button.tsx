@@ -20,14 +20,19 @@ import {
 export interface ProposedActionButtonProps {
   /** Same shape the card's recommended-action menu item reads its proposal from. */
   proposal: ApprovalProposal;
-  /** Commits the approval, e.g. the mutation the queue page hands `InvestigationActionModals`. */
-  onConfirm: () => void;
+  /**
+   * Commits the approval. Awaited by the modal itself, which shows the "Applying"/"Applied"
+   * states for as long as this takes — pass the mutation's own promise (`mutateAsync`).
+   */
+  onConfirm: () => Promise<void>;
   /** Omitted by hosts that cannot record a dismissal, which also hides the modal's Dismiss button. */
   onDismiss?: () => void;
+  /** Who's approving, for the modal's optimistic "Applying" state. */
+  currentActorName?: string;
   'data-test-subj'?: string;
 }
 
-type BadgeConfig = Required<ProposedActionStatusBadgeProps>;
+type BadgeConfig = Required<Omit<ProposedActionStatusBadgeProps, 'isLoading'>>;
 
 const badgeConfigFor = (proposal: ApprovalProposal): BadgeConfig => {
   if (proposal.decision === 'approved') {
@@ -54,25 +59,20 @@ const badgeConfigFor = (proposal: ApprovalProposal): BadgeConfig => {
 /**
  * A row in the flyout's "Proposed actions" list.
  *
- * A pending proposal is clickable: it opens the same {@link ApprovalModal} the conversation
- * card's recommended-action menu item opens (see `onClickRecommendedAction` in `BaseActions`), so
- * a proposal reads and decides identically whether it was reached from the queue or from inside
- * its own flyout. A decided one is a closed record instead — the badge reports the outcome and
- * who/when decided it, and there is nothing left to click through to.
+ * Always clickable: it opens the same {@link ApprovalModal} the conversation card's
+ * recommended-action menu item opens (see `onClickRecommendedAction` in `BaseActions`), so a
+ * proposal reads and decides identically whether it was reached from the queue or from inside its
+ * own flyout. For a decided proposal that modal is read-only — the badge reports the outcome and
+ * who/when decided it, and there is nothing left to submit.
  */
 export const ProposedActionButton = memo<ProposedActionButtonProps>(
-  ({ proposal, onConfirm, onDismiss, 'data-test-subj': dataTestSubj }) => {
+  ({ proposal, onConfirm, onDismiss, currentActorName, 'data-test-subj': dataTestSubj }) => {
     const { euiTheme } = useEuiTheme();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const isDecided = proposal.decision !== undefined;
 
     const openModal = useCallback(() => setIsModalOpen(true), []);
     const closeModal = useCallback(() => setIsModalOpen(false), []);
-
-    const handleConfirm = useCallback(() => {
-      onConfirm();
-      closeModal();
-    }, [onConfirm, closeModal]);
 
     const handleDismiss = useCallback(() => {
       onDismiss?.();
@@ -112,28 +112,22 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
         <EuiPanel
           hasBorder
           paddingSize="m"
-          role={isDecided ? undefined : 'button'}
-          tabIndex={isDecided ? undefined : 0}
-          aria-label={isDecided ? undefined : DETAILS_FLYOUT_LABELS.proposedAction.ariaLabel}
+          role="button"
+          tabIndex={0}
+          aria-label={DETAILS_FLYOUT_LABELS.proposedAction.ariaLabel}
           data-test-subj={dataTestSubj}
           css={css({
             borderRadius: euiTheme.border.radius.medium,
-            cursor: isDecided ? 'default' : 'pointer',
-            ...(isDecided
-              ? {}
-              : { '&:hover': { backgroundColor: euiTheme.colors.backgroundBaseSubdued } }),
+            cursor: 'pointer',
+            '&:hover': { backgroundColor: euiTheme.colors.backgroundBaseSubdued },
           })}
-          onClick={isDecided ? undefined : openModal}
-          onKeyDown={
-            isDecided
-              ? undefined
-              : (event: React.KeyboardEvent) => {
-                  if (event.key === 'Enter' || event.key === ' ') {
-                    event.preventDefault();
-                    openModal();
-                  }
-                }
-          }
+          onClick={openModal}
+          onKeyDown={(event: React.KeyboardEvent) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault();
+              openModal();
+            }
+          }}
         >
           <EuiFlexGroup direction="column" gutterSize="xs">
             <EuiFlexItem>
@@ -167,12 +161,13 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
           </EuiFlexGroup>
         </EuiPanel>
 
-        {!isDecided && isModalOpen && (
+        {isModalOpen && (
           <ApprovalModal
             proposal={proposal}
-            onConfirm={handleConfirm}
+            onConfirm={onConfirm}
             onClose={closeModal}
             onDismiss={onDismiss ? handleDismiss : undefined}
+            currentActorName={currentActorName}
             data-test-subj={dataTestSubj ? `${dataTestSubj}-modal` : undefined}
           />
         )}

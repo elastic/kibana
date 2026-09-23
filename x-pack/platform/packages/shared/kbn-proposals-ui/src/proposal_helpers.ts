@@ -6,6 +6,7 @@
  */
 
 import type { ApprovalProposal } from './types';
+import type { ApprovalDecision } from './approval_content';
 import { APPROVAL_MODAL_TRANSLATIONS } from './translations';
 
 /**
@@ -34,6 +35,25 @@ export const getProposalCaption = (proposal: ApprovalProposal): string | undefin
   ].filter((part): part is string => Boolean(part));
 
   return parts.length > 0 ? parts.join(' • ') : undefined;
+};
+
+/**
+ * The read-only decision `ApprovalContent` renders in place of its Approve/Decline buttons.
+ * `undefined` while a proposal is still awaiting one, or if it was decided by someone the API
+ * carried no name for — a decided card with no known decider is better shown as still pending
+ * than attributed to nobody.
+ */
+export const getProposalDecision = (proposal: ApprovalProposal): ApprovalDecision | undefined => {
+  const actorName = proposal.decidedBy?.fullName ?? proposal.decidedBy?.username ?? undefined;
+  if (!proposal.decision || !proposal.decidedAt || !actorName) {
+    return undefined;
+  }
+  return {
+    status: proposal.decision === 'approved' ? 'applied' : 'declined',
+    actorName,
+    decidedAt: proposal.decidedAt,
+    reason: proposal.rationale,
+  };
 };
 
 /**

@@ -12,6 +12,8 @@ import {
   useConversationProposals,
   useDismissProposal,
 } from '@kbn/proposals-plugin/public';
+import { useCurrentUserProfile } from '@kbn/agentic-investigations-plugin/public';
+import { getUserDisplayName } from '@kbn/user-profile-components';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { ProposedActionButton } from '@kbn/agentic-investigations-common';
@@ -36,9 +38,14 @@ export const ProposedActionsSlot = ({ conversationId }: ProposedActionsSlotProps
     services: { notifications },
   } = useKibana<CoreStart>();
   const { data, isLoading } = useConversationProposals(conversationId);
+  const { data: currentUserProfile } = useCurrentUserProfile();
   const approve = useApproveProposal();
   const dismiss = useDismissProposal();
   const [dismissingProposalId, setDismissingProposalId] = useState<string | null>(null);
+
+  const currentActorName = currentUserProfile
+    ? getUserDisplayName(currentUserProfile.user)
+    : undefined;
 
   const closeDismissModal = useCallback(() => setDismissingProposalId(null), []);
   const onDecisionError = useCallback(
@@ -67,13 +74,19 @@ export const ProposedActionsSlot = ({ conversationId }: ProposedActionsSlotProps
           <EuiFlexItem key={proposal.id}>
             <ProposedActionButton
               proposal={proposal}
-              onConfirm={() =>
-                approve.mutate(
-                  { id: proposal.id, body: { actionInput: proposal.actionInput } },
-                  { onError: onDecisionError }
-                )
-              }
+              onConfirm={async () => {
+                try {
+                  await approve.mutateAsync({
+                    id: proposal.id,
+                    body: { actionInput: proposal.actionInput },
+                  });
+                } catch (err) {
+                  onDecisionError(err);
+                  throw err;
+                }
+              }}
               onDismiss={() => setDismissingProposalId(proposal.id)}
+              currentActorName={currentActorName}
               data-test-subj={`investigationFlyoutProposedAction-${proposal.id}`}
             />
           </EuiFlexItem>

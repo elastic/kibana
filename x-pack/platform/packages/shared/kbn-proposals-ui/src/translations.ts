@@ -29,4 +29,25 @@ export const APPROVAL_MODAL_TRANSLATIONS = Object.freeze({
   irreversible: i18n.translate('xpack.alertzero.approvalModal.caption.irreversible', {
     defaultMessage: 'Irreversible',
   }),
+  appliedBannerTitle: i18n.translate('xpack.alertzero.approvalModal.outcome.appliedTitle', {
+    defaultMessage: 'Applied successfully',
+  }),
+  declinedBannerTitle: i18n.translate('xpack.alertzero.approvalModal.outcome.declinedTitle', {
+    defaultMessage: 'Declined',
+  }),
+  applyingBannerTitle: i18n.translate('xpack.alertzero.approvalModal.outcome.applyingTitle', {
+    defaultMessage: 'Applying',
+  }),
+  decliningBannerTitle: i18n.translate('xpack.alertzero.approvalModal.outcome.decliningTitle', {
+    defaultMessage: 'Declining',
+  }),
+  inProgressHint: i18n.translate('xpack.alertzero.approvalModal.outcome.inProgressHint', {
+    defaultMessage: 'Typically takes 3-5 minutes.',
+  }),
+  actionErrorTitle: i18n.translate('xpack.alertzero.approvalModal.outcome.actionError', {
+    defaultMessage: 'Could not record the decision. Try again.',
+  }),
+  currentActorFallback: i18n.translate('xpack.alertzero.approvalModal.outcome.currentActor', {
+    defaultMessage: 'You',
+  }),
 });

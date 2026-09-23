@@ -16,44 +16,54 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
-import { ProposedActionStatusBadge } from '../../details/needs_review_badge';
+import {
+  ProposedActionStatusBadge,
+  type ProposedActionStatusBadgeProps,
+} from '../../details/needs_review_badge';
 
 interface ApprovalModalHeaderProps {
-  /** Category/reversibility line, e.g. "Rule tuning · Reversible". Omitted when there is none. */
+  /**
+   * Badge color/icon/label/loading. Omitted for the default "Needs review" pending state — see
+   * {@link ProposedActionStatusBadge}'s own defaults.
+   */
+  badge?: ProposedActionStatusBadgeProps;
+  /** Category/reversibility line, or the decider's name and time once decided/deciding. */
   caption?: React.ReactNode;
   title: string;
   titleId: string;
 }
 
-export const ApprovalModalHeader = memo<ApprovalModalHeaderProps>(({ caption, title, titleId }) => {
-  const { euiTheme } = useEuiTheme();
+export const ApprovalModalHeader = memo<ApprovalModalHeaderProps>(
+  ({ badge, caption, title, titleId }) => {
+    const { euiTheme } = useEuiTheme();
 
-  return (
-    <EuiModalHeader
-      css={css({
-        flexDirection: 'column',
-        alignItems: 'flex-start',
-        padding: euiTheme.size.base,
-      })}
-    >
-      <EuiTitle id={titleId} size="s">
-        <p>{title}</p>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
-        <EuiFlexItem grow={false}>
-          <ProposedActionStatusBadge />
-        </EuiFlexItem>
-        {caption && (
+    return (
+      <EuiModalHeader
+        css={css({
+          flexDirection: 'column',
+          alignItems: 'flex-start',
+          padding: euiTheme.size.base,
+        })}
+      >
+        <EuiTitle id={titleId} size="s">
+          <p>{title}</p>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
           <EuiFlexItem grow={false}>
-            <EuiText size="xs" color="subdued">
-              {caption}
-            </EuiText>
+            <ProposedActionStatusBadge {...badge} />
           </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-    </EuiModalHeader>
-  );
-});
+          {caption && (
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                {caption}
+              </EuiText>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      </EuiModalHeader>
+    );
+  }
+);
 
 ApprovalModalHeader.displayName = 'ApprovalModalHeader';
