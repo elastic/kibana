@@ -19,12 +19,20 @@ import {
   EuiText,
   EuiTextBlockTruncate,
   EuiToolTip,
+  logicalCSS,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import React, { useState } from 'react';
 import type { AiIndexHttpItem } from '../../../../common/http_api/ai_indices';
 import { AI_INDEX_TYPE_LABEL } from './labels';
+
+// The grid sizes its `1fr` tracks from each card's min-content width, and the title never wraps,
+// so without this an id stretches its column — and the whole grid — past the viewport.
+const shrinkable = css`
+  ${logicalCSS('min-width', 0)}
+`;
 
 const AiIndexCardFooter = ({ aiIndex }: { aiIndex: AiIndexHttpItem }) => (
   <>
@@ -66,6 +74,7 @@ export const AiIndexCard = ({ aiIndex, href, onDeleteClick }: AiIndexCardProps) 
 
   return (
     <EuiCard
+      css={shrinkable}
       data-test-subj="contextAiIndexCard"
       textAlign="left"
       titleSize="xs"
@@ -78,10 +87,12 @@ export const AiIndexCard = ({ aiIndex, href, onDeleteClick }: AiIndexCardProps) 
           justifyContent="spaceBetween"
           responsive={false}
         >
-          <EuiFlexItem className="eui-textTruncate">
+          <EuiFlexItem className="eui-textTruncate" css={shrinkable}>
             <EuiFlexGroup gutterSize="s" alignItems="baseline" responsive={false}>
-              <EuiFlexItem className="eui-textTruncate">
-                <span className="eui-textTruncate">{aiIndex.id}</span>
+              <EuiFlexItem className="eui-textTruncate" css={shrinkable}>
+                <span className="eui-textTruncate" title={aiIndex.id}>
+                  {aiIndex.id}
+                </span>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiText

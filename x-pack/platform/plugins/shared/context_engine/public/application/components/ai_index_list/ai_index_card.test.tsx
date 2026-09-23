@@ -66,6 +66,18 @@ describe('AiIndexCard', () => {
     );
   });
 
+  // The grid sizes its `1fr` tracks from each card's min-content width, and the title never wraps,
+  // so a card that cannot shrink stretches its column — and the whole grid — past the viewport.
+  it('lets the card shrink below the width of a long id', () => {
+    const id = 'a'.repeat(256);
+
+    renderAiIndexCard(buildAiIndex({ id }));
+
+    expect(screen.getByTestId('contextAiIndexCard')).toHaveStyle({ minInlineSize: '0' });
+    // The ellipsis hides most of a long id, so the full value stays reachable on hover.
+    expect(screen.getByTitle(id)).toBeInTheDocument();
+  });
+
   it('renders the description', () => {
     renderAiIndexCard(buildAiIndex({ description: 'Escalation playbooks for support' }));
 
