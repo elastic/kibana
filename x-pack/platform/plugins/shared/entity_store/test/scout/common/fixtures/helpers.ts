@@ -71,7 +71,10 @@ export const clearEntityStoreIndices = async (esClient: EsClient) => {
   await esClient.indices.delete({ index: toDelete, ignore_unavailable: true }, { ignore: [404] });
 
   await esClient.indices.deleteDataStream({ name: LOGS_TEST_INDEX }).catch(() => {});
-  await esClient.indices.deleteDataStream({ name: QUERY_TRANSLATION_TEST_INDEX }).catch(() => {});
+  await esClient.indices.deleteDataStream(
+    { name: QUERY_TRANSLATION_TEST_INDEX },
+    { ignore: [404] }
+  );
 };
 
 /**
@@ -171,11 +174,17 @@ export const setupQueryTranslationTestDataStream = async (esClient: EsClient) =>
     composed_of: ['ecs@mappings'],
     priority: 500,
   });
-  await esClient.indices.deleteDataStream({ name: QUERY_TRANSLATION_TEST_INDEX }).catch(() => {});
+  await esClient.indices.deleteDataStream(
+    { name: QUERY_TRANSLATION_TEST_INDEX },
+    { ignore: [404] }
+  );
 };
 
 export const teardownQueryTranslationTestDataStream = async (esClient: EsClient) => {
-  await esClient.indices.deleteDataStream({ name: QUERY_TRANSLATION_TEST_INDEX }).catch(() => {});
+  await esClient.indices.deleteDataStream(
+    { name: QUERY_TRANSLATION_TEST_INDEX },
+    { ignore: [404] }
+  );
   await esClient.indices
     .deleteIndexTemplate({ name: 'entity-store-query-translation-test' })
     .catch(() => {});
