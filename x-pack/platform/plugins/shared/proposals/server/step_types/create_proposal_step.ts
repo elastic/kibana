@@ -62,6 +62,7 @@ export const getCreateProposalStepDefinition = ({
           },
           {
             spaceId,
+            request,
             // `execution.executedBy` is only ever a username, so it is the last
             // resort when the request yields no identity at all.
             user: user ?? {

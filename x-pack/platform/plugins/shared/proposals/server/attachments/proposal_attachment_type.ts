@@ -5,59 +5,76 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import type { Logger } from '@kbn/core/server';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
-import { actionCategorySchema, actionImpactSchema } from '@kbn/workflows';
-import { PROPOSAL_ATTACHMENT_TYPE, proposalSchema } from '@kbn/proposals-common';
+import type { ProposalAttachmentData, ProposalWithMetadata } from '@kbn/proposals-common';
+import { PROPOSAL_ATTACHMENT_TYPE, proposalAttachmentDataSchema } from '@kbn/proposals-common';
+import type { ProposalPrivilegesChecker } from '../services/check_proposal_privileges';
+import type { ProposalsService } from '../services/proposals_service';
 
-/** Snapshot stored inside the attachment, mirroring `ProposalWithMetadata`. */
-const proposalAttachmentDataSchema = proposalSchema.extend({
-  action: z
-    .object({
-      name: z.string(),
-      impact: actionImpactSchema,
-      category: actionCategorySchema,
-      reversible: z.boolean().optional(),
-    })
-    .optional(),
-  expired: z.boolean(),
-});
+export interface ProposalAttachmentTypeDeps {
+  getProposalsService: () => ProposalsService;
+  privileges: ProposalPrivilegesChecker;
+  logger: Logger;
+}
 
-type ProposalAttachmentData = z.infer<typeof proposalAttachmentDataSchema>;
+/**
+ * Where the decision stands, as the agent needs to understand it.
+ *
+ * Expiry is reported by the banner instead: an expired proposal has no decision
+ * to report, and `Decision: pending` underneath `EXPIRED` told the agent one was
+ * still coming. That is reachable on every read now that `expired` is evaluated
+ * live rather than snapshotted when the attachment was written.
+ */
+const describeOutcome = (proposal: ProposalWithMetadata, isExpired: boolean): string => {
+  if (isExpired) {
+    return '';
+  }
+  if (proposal.status === 'pending') {
+    return 'Awaiting a human decision. Do not attempt to approve or dismiss this proposal yourself.';
+  }
+  return `Decision: ${proposal.status}${
+    proposal.decidedBy?.username ? ` by ${proposal.decidedBy.username}` : ''
+  }`;
+};
 
 /**
  * Format a proposal for the LLM.  Keep it terse: the human decision is the
  * only action the agent can request — it cannot run the action itself.
  */
-const formatProposalForAgent = (data: ProposalAttachmentData): string => {
+const formatProposalForAgent = (proposal: ProposalWithMetadata): string => {
   // Deliberately NOT `PROPOSAL_WITHOUT_ACTION_LABEL`: this string is LLM prompt input
   // and must stay untranslated and carry the analyst-directive clause. The UI badge
-  // ("No automated action") lives in public/proposals/translations.ts.
+  // ("No automated action") lives in public/translations.ts.
   const label =
-    data.action?.name ??
-    data.actionWorkflowId ??
+    proposal.action?.name ??
+    proposal.actionWorkflowId ??
     'No automated action — analyst carries this out themselves';
+
+  // Both, because they can disagree: `expired` is the deadline evaluated on
+  // read, while `status: 'expired'` is the settlement the gate writes when
+  // nobody answered — which it can do before the deadline itself passes.
+  const isExpired = proposal.expired || proposal.status === 'expired';
 
   const lines: string[] = [
     `## Proposal: ${label}`,
-    `Status: ${data.status}`,
-    data.expired ? 'EXPIRED: the decision deadline has passed' : '',
+    `Status: ${proposal.status}`,
+    // Not "the deadline has passed": the gate can settle a proposal as expired
+    // before its deadline, and `Decision deadline` below would then print a
+    // future date directly under a banner claiming it was behind us.
+    isExpired ? 'EXPIRED: this proposal can no longer be decided.' : '',
     '',
-    data.comment,
+    proposal.comment,
     '',
-    `Impact: ${data.impact} | Confidence: ${data.confidence} | Category: ${
-      data.action?.category ?? data.category ?? 'unknown'
+    `Impact: ${proposal.impact} | Confidence: ${proposal.confidence} | Category: ${
+      proposal.action?.category ?? proposal.category ?? 'unknown'
     }`,
-    data.action?.reversible !== undefined
-      ? `Reversible: ${data.action.reversible ? 'yes' : 'no'}`
+    proposal.action?.reversible !== undefined
+      ? `Reversible: ${proposal.action.reversible ? 'yes' : 'no'}`
       : '',
-    data.expiresAt ? `Decision deadline: ${data.expiresAt}` : '',
+    proposal.expiresAt ? `Decision deadline: ${proposal.expiresAt}` : '',
     '',
-    data.status === 'pending' && !data.expired
-      ? 'Awaiting a human decision. Do not attempt to approve or dismiss this proposal yourself.'
-      : `Decision: ${data.status}${
-          data.decidedBy?.username ? ` by ${data.decidedBy.username}` : ''
-        }`,
+    describeOutcome(proposal, isExpired),
   ];
 
   return lines.filter((l) => l !== '').join('\n');
@@ -70,7 +87,14 @@ const formatProposalForAgent = (data: ProposalAttachmentData): string => {
  * attachments with `attachment_add` / `attachment_update` — they are created
  * exclusively by the proposals API.
  */
-export const proposalAttachmentType: AttachmentTypeDefinition = {
+export const createProposalAttachmentType = ({
+  getProposalsService,
+  privileges,
+  logger,
+}: ProposalAttachmentTypeDeps): AttachmentTypeDefinition<
+  typeof PROPOSAL_ATTACHMENT_TYPE,
+  ProposalAttachmentData
+> => ({
   id: PROPOSAL_ATTACHMENT_TYPE,
 
   isReadonly: true,
@@ -83,11 +107,29 @@ export const proposalAttachmentType: AttachmentTypeDefinition = {
     return { valid: false, error: result.error.message };
   },
 
-  format: (attachment) => ({
-    getRepresentation: () => ({
-      type: 'text',
-      value: formatProposalForAgent(attachment.data as ProposalAttachmentData),
-    }),
+  // Read at representation time rather than at add time, so what the agent is
+  // told matches what the analyst sees. `origin` first because attachments
+  // written before the payload shrank carry the id only there.
+  format: (attachment, { request, spaceId }) => ({
+    getRepresentation: async () => {
+      const proposalId = attachment.origin ?? attachment.data.proposalId;
+      try {
+        // The service reads as the internal user, so nothing below this line
+        // enforces the caller's own privileges. Attachments of this type are
+        // `isReadonly`, but that only stops the agent's attachment tools — the
+        // public attachment API still lets any caller name an arbitrary
+        // proposal id here, which without this check would read it back to the
+        // LLM for someone holding no proposals privilege at all.
+        await privileges.assertCanRead(request);
+        const proposal = await getProposalsService().get(proposalId, spaceId);
+        return { type: 'text', value: formatProposalForAgent(proposal) };
+      } catch (error) {
+        logger.warn(`Failed to read proposal ${proposalId} for its attachment: ${error}`);
+        // Same text whether the proposal is missing or merely off-limits, so
+        // the representation cannot be used to probe for ids.
+        return { type: 'text', value: '## Proposal: currently unavailable' };
+      }
+    },
   }),
 
   getAgentDescription: () =>
@@ -99,4 +141,4 @@ export const proposalAttachmentType: AttachmentTypeDefinition = {
     '`<render_attachment id="ATTACHMENT_ID" />` (replace ATTACHMENT_ID with the actual id) so ' +
     'the analyst can act on it directly in the chat.\n' +
     '- If the proposal is expired or already decided, say so in your response but still render the card.',
-};
+});
