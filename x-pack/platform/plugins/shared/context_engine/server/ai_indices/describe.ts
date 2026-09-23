@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { aiIndexViewName } from '../../common/constants';
+import { kiViewName } from '../../common/constants';
 import type { AiIndexHttpItem, KiTypeCount } from '../../common/http_api/ai_indices';
 import { describeAiIndexAggregations } from './describe_aggregations';
 import { describeAiIndexFields } from './describe_fields';
@@ -29,7 +29,7 @@ const fieldLine = ({ path, type, searchable, aggregatable }: AiIndexField): stri
 const headerSection = ({ id, description }: AiIndexHttpItem): string[] => [
   `AI index: ${id}`,
   ...(description ? [description] : []),
-  `Query with ES|QL against: ${aiIndexViewName(id)}`,
+  `Query with ES|QL against: ${kiViewName(id)}`,
 ];
 
 const fieldsSection = (fields: AiIndexField[], omittedFieldCount: number): string[] => {
@@ -100,6 +100,6 @@ export const describeAiIndex = async ({
     semanticFieldsSection(semanticFields),
     kiTypeCountsSection(kiTypeCounts),
     tagCountsSection(tagCounts),
-    exampleQueriesSection(aiIndexViewName(aiIndex.id)),
+    exampleQueriesSection(kiViewName(aiIndex.id)),
   ]);
 };

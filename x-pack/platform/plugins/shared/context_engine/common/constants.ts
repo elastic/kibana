@@ -77,10 +77,6 @@ export const AI_INDEX_DEST_PREFIX = 'ai-index-';
 export const AI_INDEX_DATA_STREAM_PREFIX = `${AI_INDEX_DEST_PREFIX}ds-`;
 export const AI_INDEX_INDEX_PREFIX = `${AI_INDEX_DEST_PREFIX}idx-`;
 
-/** The ES|QL view agents retrieve an AI index through. */
-export const AI_INDEX_VIEW_PREFIX = 'v-ai-index-';
-export const aiIndexViewName = (aiIndexId: string): string => `${AI_INDEX_VIEW_PREFIX}${aiIndexId}`;
-
 /**
  * Storage type used for AI indexes created from the UI. The `data_stream` type still exists
  * and is supported by the API/server for solutions and expert users; only the UI is defaulted.
@@ -98,6 +94,9 @@ export const MAX_AI_INDEX_FEEDBACK_AGENT_ID_LENGTH = 256;
 export const MAX_AI_INDEX_DESCRIPTION_LENGTH = 2048;
 export const MAX_AI_INDEX_DEST_VALUE_LENGTH = 1024;
 export const MAX_INDEX_NAME_BYTES = 255;
+/** The ES|QL view agents retrieve an AI index through. */
+export const KI_VIEW_NAME_PREFIX = 'v-ai-index-';
+export const kiViewName = (aiIndexId: string): string => `${KI_VIEW_NAME_PREFIX}${aiIndexId}`;
 export const MAX_AI_INDEX_AUTOMATION_LENGTH = 1024;
 export const MAX_AI_INDEX_SOURCE_VALUE_LENGTH = 10240;
 export const MAX_AI_INDEX_AUTOMATIONS = 100;

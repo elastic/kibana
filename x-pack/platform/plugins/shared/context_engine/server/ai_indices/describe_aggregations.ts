@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
 import {
@@ -17,6 +18,30 @@ import type { AiIndexField, AiIndexTagCount } from './types';
 
 const KI_TYPE_FIELD = 'type';
 const KI_TAGS_FIELD = 'tags';
+const KI_LIFECYCLE_STATUS_FIELD = 'governance.lifecycle.status';
+const KI_EXPIRES_AT_FIELD = 'expires_at';
+
+/** Unset or `active` status, and not yet expired: the view's lifecycle filters. */
+const activeKiFilters: QueryDslQueryContainer[] = [
+  {
+    bool: {
+      should: [
+        { bool: { must_not: { exists: { field: KI_LIFECYCLE_STATUS_FIELD } } } },
+        { term: { [KI_LIFECYCLE_STATUS_FIELD]: 'active' } },
+      ],
+      minimum_should_match: 1,
+    },
+  },
+  {
+    bool: {
+      should: [
+        { bool: { must_not: { exists: { field: KI_EXPIRES_AT_FIELD } } } },
+        { range: { [KI_EXPIRES_AT_FIELD]: { gt: 'now' } } },
+      ],
+      minimum_should_match: 1,
+    },
+  },
+];
 
 /** Bucket keys must be strings: `conflict` and numeric mappings are excluded by construction. */
 const KEYWORD_TYPES: ReadonlySet<string> = new Set(['keyword', 'constant_keyword', 'wildcard']);
@@ -50,9 +75,10 @@ const isAggregatableKeyword = (fields: AiIndexField[], path: string): boolean =>
   );
 
 /**
- * Space-filtered `terms` counts on `type` / `tags`; each skipped unless an aggregatable keyword.
- * Shard failures error out rather than return undercounts. A 403 (caller lacks `read` on the
- * backing indices) yields no counts instead of failing the whole describe.
+ * Space- and lifecycle-filtered `terms` counts on `type` / `tags`; each skipped unless an
+ * aggregatable keyword. Data stream revisions are not collapsed. Shard failures error out rather
+ * than return undercounts. A 403 (caller lacks `read` on the backing indices) yields no counts
+ * instead of failing the whole describe.
  */
 export const describeAiIndexAggregations = async ({
   esClient,
@@ -74,7 +100,7 @@ export const describeAiIndexAggregations = async ({
       allow_partial_search_results: false,
       size: 0,
       track_total_hits: false,
-      query: buildAiIndexSpaceFilter(spaceId),
+      query: { bool: { filter: [buildAiIndexSpaceFilter(spaceId), ...activeKiFilters] } },
       aggs: {
         ...(hasType && {
           types: {
