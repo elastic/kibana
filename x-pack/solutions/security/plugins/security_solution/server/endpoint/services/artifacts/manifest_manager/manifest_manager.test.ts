@@ -53,6 +53,7 @@ import { CUSTOM_YARA_SIGNATURE_FIELD_TYPE } from '../../../../../common/endpoint
 import { buildPerPolicyTag } from '../../../../../common/endpoint/service/artifacts/utils';
 import { getIsEndpointExceptionsPerPolicyEnabled } from '../../../lib/reference_data';
 import { MetaArchValue, EndpointArtifactScanContext } from '../../../../../common/endpoint/types';
+import { validateYaraRule, YaraEngineUnavailableError } from '../../../lib/libyara';
 
 jest.mock('../../../lib/reference_data');
 jest.mock('../../../lib/libyara', () => ({
@@ -63,7 +64,11 @@ jest.mock('../../../lib/libyara', () => ({
     warningCount: 0,
     rules: [{ identifier: 'test', meta: {}, duplicateMeta: [] }],
   })),
+  YaraEngineUnavailableError: jest.requireActual('../../../lib/libyara/errors')
+    .YaraEngineUnavailableError,
 }));
+
+const mockValidateYaraRule = validateYaraRule as jest.MockedFunction<typeof validateYaraRule>;
 
 const mockedGetIsEndpointExceptionsPerPolicyEnabled =
   getIsEndpointExceptionsPerPolicyEnabled as jest.MockedFunction<
@@ -1378,6 +1383,81 @@ describe('ManifestManager', () => {
           },
         ],
       });
+    });
+
+    test('retains baseline Custom YARA artifacts when libyara engine fails', async () => {
+      const yaraRuleText = 'rule Example { condition: true }';
+      const yaraListItem = getExceptionListItemSchemaMock({
+        list_id: ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id,
+        os_types: ['windows'],
+        tags: [GLOBAL_ARTIFACT_TAG],
+        entries: [
+          {
+            field: CUSTOM_YARA_SIGNATURE_FIELD_TYPE,
+            operator: 'included',
+            type: 'match',
+            value: yaraRuleText,
+          },
+        ],
+      });
+
+      const context = buildManifestManagerContextMock({
+        experimentalFeatures: ['customYaraSignaturesEnabled'],
+      });
+      const manifestManager = new ManifestManager(context);
+
+      context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
+        [ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id]: { windows: [yaraListItem] },
+      });
+      context.packagePolicyService.fetchAllItemIds = getMockPolicyFetchAllItemIds([
+        TEST_POLICY_ID_1,
+      ]);
+
+      const baselineManifest = await manifestManager.buildNewManifest();
+      const baselineWindowsYara = baselineManifest
+        .getAllArtifacts()
+        .find((a) => a.identifier === ARTIFACT_NAME_CUSTOM_YARA_SIGNATURES_WINDOWS);
+
+      expect(getArtifactObject(baselineWindowsYara!)).toStrictEqual({
+        entries: [
+          {
+            yara_rule_data: yaraRuleText,
+            arch_context: [MetaArchValue.X86, MetaArchValue.ARM64],
+            scan_context: [EndpointArtifactScanContext.MEMORY],
+            entry_id: yaraListItem.id,
+            entry_name: yaraListItem.name,
+          },
+        ],
+      });
+
+      mockValidateYaraRule.mockRejectedValueOnce(
+        new YaraEngineUnavailableError('libyara WASM trap')
+      );
+
+      const manifest = await manifestManager.buildNewManifest(baselineManifest);
+      const artifacts = manifest.getAllArtifacts();
+
+      expect(artifacts.length).toBe(20);
+      expect(getArtifactIds(artifacts)).toStrictEqual(
+        SUPPORTED_ARTIFACT_NAMES_WITH_CUSTOM_YARA_SIGNATURES
+      );
+
+      const yaraWindowsArtifact = artifacts.find(
+        (a) => a.identifier === ARTIFACT_NAME_CUSTOM_YARA_SIGNATURES_WINDOWS
+      );
+
+      expect(getArtifactObject(yaraWindowsArtifact!)).toStrictEqual({
+        entries: [
+          {
+            yara_rule_data: yaraRuleText,
+            arch_context: [MetaArchValue.X86, MetaArchValue.ARM64],
+            scan_context: [EndpointArtifactScanContext.MEMORY],
+            entry_id: yaraListItem.id,
+            entry_name: yaraListItem.name,
+          },
+        ],
+      });
+      expect(getArtifactId(yaraWindowsArtifact!)).toEqual(getArtifactId(baselineWindowsYara!));
     });
   });
 
