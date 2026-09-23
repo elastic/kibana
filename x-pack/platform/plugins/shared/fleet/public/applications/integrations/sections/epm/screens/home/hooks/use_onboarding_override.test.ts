@@ -15,7 +15,7 @@ const mockNavigateToApp = jest.fn();
 
 jest.mock('../../../../../hooks', () => ({
   useStartServices: () => ({
-    featureFlags: { getBooleanValue: mockGetBooleanValue },
+    featureFlags: { useBooleanValue: mockGetBooleanValue },
     application: {
       navigateToApp: mockNavigateToApp,
       getUrlForApp: mockGetUrlForApp,

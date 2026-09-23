@@ -22,17 +22,27 @@ export const K8S_POD_NAME = 'k8s.pod.name' as const;
 export const K8S_NAMESPACE_NAME = 'k8s.namespace.name' as const;
 export const K8S_NODE_NAME = 'k8s.node.name' as const;
 export const K8S_DEPLOYMENT_NAME = 'k8s.deployment.name' as const;
+// Dashboards query `k8s.pod.*`. The same value is also stored under `metrics.k8s.pod.*`.
+export const K8S_POD_CPU_LIMIT_UTILIZATION = 'k8s.pod.cpu_limit_utilization' as const;
+export const K8S_POD_CPU_NODE_UTILIZATION = 'k8s.pod.cpu.node.utilization' as const;
+export const K8S_POD_CPU_USAGE = 'k8s.pod.cpu.usage' as const;
+export const K8S_POD_MEMORY_LIMIT_UTILIZATION = 'k8s.pod.memory_limit_utilization' as const;
+export const K8S_POD_MEMORY_NODE_UTILIZATION = 'k8s.pod.memory.node.utilization' as const;
+export const K8S_POD_MEMORY_WORKING_SET = 'k8s.pod.memory.working_set' as const;
+export const K8S_POD_MEMORY_USAGE = 'k8s.pod.memory.usage' as const;
+export const K8S_POD_NETWORK_IO = 'k8s.pod.network.io' as const;
 export const SEMCONV_K8S_POD_CPU_LIMIT_UTILIZATION =
-  'metrics.k8s.pod.cpu_limit_utilization' as const;
-export const SEMCONV_K8S_POD_CPU_NODE_UTILIZATION = 'metrics.k8s.pod.cpu.node.utilization' as const;
-export const SEMCONV_K8S_POD_CPU_USAGE = 'metrics.k8s.pod.cpu.usage' as const;
+  `metrics.${K8S_POD_CPU_LIMIT_UTILIZATION}` as const;
+export const SEMCONV_K8S_POD_CPU_NODE_UTILIZATION =
+  `metrics.${K8S_POD_CPU_NODE_UTILIZATION}` as const;
+export const SEMCONV_K8S_POD_CPU_USAGE = `metrics.${K8S_POD_CPU_USAGE}` as const;
 export const SEMCONV_K8S_POD_MEMORY_LIMIT_UTILIZATION =
-  'metrics.k8s.pod.memory_limit_utilization' as const;
+  `metrics.${K8S_POD_MEMORY_LIMIT_UTILIZATION}` as const;
 export const SEMCONV_K8S_POD_MEMORY_NODE_UTILIZATION =
-  'metrics.k8s.pod.memory.node.utilization' as const;
-export const SEMCONV_K8S_POD_MEMORY_WORKING_SET = 'metrics.k8s.pod.memory.working_set' as const;
-export const SEMCONV_K8S_POD_MEMORY_USAGE = 'metrics.k8s.pod.memory.usage' as const;
-export const SEMCONV_K8S_POD_NETWORK_IO = 'metrics.k8s.pod.network.io' as const;
+  `metrics.${K8S_POD_MEMORY_NODE_UTILIZATION}` as const;
+export const SEMCONV_K8S_POD_MEMORY_WORKING_SET = `metrics.${K8S_POD_MEMORY_WORKING_SET}` as const;
+export const SEMCONV_K8S_POD_MEMORY_USAGE = `metrics.${K8S_POD_MEMORY_USAGE}` as const;
+export const SEMCONV_K8S_POD_NETWORK_IO = `metrics.${K8S_POD_NETWORK_IO}` as const;
 
 const RESOURCE_K8S_POD_UID = 'resource.attributes.k8s.pod.uid' as const;
 const RESOURCE_K8S_POD_NAME = 'resource.attributes.k8s.pod.name' as const;
@@ -70,6 +80,14 @@ export interface SemconvPodMetricsDocument extends SemconvPodDocument {
   'metricset.name'?: string;
   direction?: SemconvNetworkDirection;
   interface?: string;
+  [K8S_POD_CPU_LIMIT_UTILIZATION]?: number;
+  [K8S_POD_CPU_NODE_UTILIZATION]?: number;
+  [K8S_POD_CPU_USAGE]?: number;
+  [K8S_POD_MEMORY_LIMIT_UTILIZATION]?: number;
+  [K8S_POD_MEMORY_NODE_UTILIZATION]?: number;
+  [K8S_POD_MEMORY_WORKING_SET]?: number;
+  [K8S_POD_MEMORY_USAGE]?: number;
+  [K8S_POD_NETWORK_IO]?: number;
   [SEMCONV_K8S_POD_CPU_LIMIT_UTILIZATION]?: number;
   [SEMCONV_K8S_POD_CPU_NODE_UTILIZATION]?: number;
   [SEMCONV_K8S_POD_CPU_USAGE]?: number;
@@ -94,8 +112,11 @@ export class SemconvPod extends Entity<SemconvPodDocument> {
       new SemconvPodMetrics({
         ...this.fields,
         'metricset.name': 'cpu',
+        [K8S_POD_CPU_LIMIT_UTILIZATION]: CPU_LIMIT_UTILIZATION,
         [SEMCONV_K8S_POD_CPU_LIMIT_UTILIZATION]: CPU_LIMIT_UTILIZATION,
+        [K8S_POD_CPU_NODE_UTILIZATION]: CPU_NODE_UTILIZATION,
         [SEMCONV_K8S_POD_CPU_NODE_UTILIZATION]: CPU_NODE_UTILIZATION,
+        [K8S_POD_CPU_USAGE]: CPU_USAGE,
         [SEMCONV_K8S_POD_CPU_USAGE]: CPU_USAGE,
       }),
     ];
@@ -106,7 +127,9 @@ export class SemconvPod extends Entity<SemconvPodDocument> {
       new SemconvPodMetrics({
         ...this.fields,
         'metricset.name': 'cpu',
+        [K8S_POD_CPU_NODE_UTILIZATION]: CPU_NODE_UTILIZATION,
         [SEMCONV_K8S_POD_CPU_NODE_UTILIZATION]: CPU_NODE_UTILIZATION,
+        [K8S_POD_CPU_USAGE]: CPU_USAGE,
         [SEMCONV_K8S_POD_CPU_USAGE]: CPU_USAGE,
       }),
     ];
@@ -117,9 +140,13 @@ export class SemconvPod extends Entity<SemconvPodDocument> {
       new SemconvPodMetrics({
         ...this.fields,
         'metricset.name': 'memory',
+        [K8S_POD_MEMORY_LIMIT_UTILIZATION]: MEMORY_LIMIT_UTILIZATION,
         [SEMCONV_K8S_POD_MEMORY_LIMIT_UTILIZATION]: MEMORY_LIMIT_UTILIZATION,
+        [K8S_POD_MEMORY_NODE_UTILIZATION]: MEMORY_NODE_UTILIZATION,
         [SEMCONV_K8S_POD_MEMORY_NODE_UTILIZATION]: MEMORY_NODE_UTILIZATION,
+        [K8S_POD_MEMORY_WORKING_SET]: MEMORY_WORKING_SET_BYTES,
         [SEMCONV_K8S_POD_MEMORY_WORKING_SET]: MEMORY_WORKING_SET_BYTES,
+        [K8S_POD_MEMORY_USAGE]: MEMORY_USAGE_BYTES,
         [SEMCONV_K8S_POD_MEMORY_USAGE]: MEMORY_USAGE_BYTES,
       }),
     ];
@@ -130,8 +157,11 @@ export class SemconvPod extends Entity<SemconvPodDocument> {
       new SemconvPodMetrics({
         ...this.fields,
         'metricset.name': 'memory',
+        [K8S_POD_MEMORY_NODE_UTILIZATION]: MEMORY_NODE_UTILIZATION,
         [SEMCONV_K8S_POD_MEMORY_NODE_UTILIZATION]: MEMORY_NODE_UTILIZATION,
+        [K8S_POD_MEMORY_WORKING_SET]: MEMORY_WORKING_SET_BYTES,
         [SEMCONV_K8S_POD_MEMORY_WORKING_SET]: MEMORY_WORKING_SET_BYTES,
+        [K8S_POD_MEMORY_USAGE]: MEMORY_USAGE_BYTES,
         [SEMCONV_K8S_POD_MEMORY_USAGE]: MEMORY_USAGE_BYTES,
       }),
     ];
@@ -142,16 +172,17 @@ export class SemconvPod extends Entity<SemconvPodDocument> {
     const directions: SemconvNetworkDirection[] = ['receive', 'transmit'];
 
     return interfaces.flatMap((iface) =>
-      directions.map(
-        (direction) =>
-          new SemconvPodMetrics({
-            ...this.fields,
-            direction,
-            interface: iface,
-            'metricset.name': 'network',
-            [SEMCONV_K8S_POD_NETWORK_IO]: this.nextNetworkIo(direction, iface),
-          })
-      )
+      directions.map((direction) => {
+        const io = this.nextNetworkIo(direction, iface);
+        return new SemconvPodMetrics({
+          ...this.fields,
+          direction,
+          interface: iface,
+          'metricset.name': 'network',
+          [K8S_POD_NETWORK_IO]: io,
+          [SEMCONV_K8S_POD_NETWORK_IO]: io,
+        });
+      })
     );
   }
 

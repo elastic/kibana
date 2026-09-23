@@ -97,6 +97,24 @@ export class InfraSynthtraceEsClientImpl
       type: keyword,
       namespace: keyword,
     };
+    const k8sPodMetricProperties = {
+      cpu_limit_utilization: double,
+      cpu: {
+        properties: {
+          node: { properties: { utilization: double } },
+          usage: double,
+        },
+      },
+      memory_limit_utilization: double,
+      memory: {
+        properties: {
+          node: { properties: { utilization: double } },
+          working_set: double,
+          usage: double,
+        },
+      },
+      network: { properties: { io: double } },
+    };
     const k8sIdentityProperties = {
       pod: {
         properties: {
@@ -107,6 +125,17 @@ export class InfraSynthtraceEsClientImpl
       namespace: { properties: { name: keyword } },
       node: { properties: { name: keyword } },
       deployment: { properties: { name: keyword } },
+    };
+    // Unprefixed metrics live on k8s.pod beside uid and name. resource.attributes.k8s stays identity-only.
+    const k8sWithMetricsProperties = {
+      ...k8sIdentityProperties,
+      pod: {
+        properties: {
+          uid: keyword,
+          name: keyword,
+          ...k8sPodMetricProperties,
+        },
+      },
     };
 
     await this.putOtelDataStreamTemplate(
@@ -142,7 +171,7 @@ export class InfraSynthtraceEsClientImpl
         '@timestamp': { type: 'date' },
         direction: keyword,
         interface: keyword,
-        k8s: { properties: k8sIdentityProperties },
+        k8s: { properties: k8sWithMetricsProperties },
         resource: {
           properties: {
             attributes: {
@@ -158,24 +187,7 @@ export class InfraSynthtraceEsClientImpl
             k8s: {
               properties: {
                 pod: {
-                  properties: {
-                    cpu_limit_utilization: double,
-                    cpu: {
-                      properties: {
-                        node: { properties: { utilization: double } },
-                        usage: double,
-                      },
-                    },
-                    memory_limit_utilization: double,
-                    memory: {
-                      properties: {
-                        node: { properties: { utilization: double } },
-                        working_set: double,
-                        usage: double,
-                      },
-                    },
-                    network: { properties: { io: double } },
-                  },
+                  properties: k8sPodMetricProperties,
                 },
               },
             },
