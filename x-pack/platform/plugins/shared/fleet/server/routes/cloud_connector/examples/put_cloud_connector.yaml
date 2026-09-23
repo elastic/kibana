@@ -68,3 +68,19 @@ responses:
               statusCode: 403
               error: 'Forbidden'
               message: 'Role ARN updates require permission to write integration policies.'
+  500:
+    description: 'Role ARN fan-out failed'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'Package policies could not be updated to the new role ARN'
+            value:
+              statusCode: 500
+              error: 'Internal Server Error'
+              message: 'Failed to update role ARN on 1 package policy (ids: policy-1).'
+              attributes:
+                updateFailed:
+                  - policy-1
+                revertFailed: []
+                bumpFailed: false

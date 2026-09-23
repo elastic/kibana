@@ -239,6 +239,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
               body: genericErrorResponse,
               description: 'A conflict occurred.',
             },
+            500: {
+              body: genericErrorResponse,
+              description: 'Role ARN fan-out failed.',
+            },
           },
         },
       },
