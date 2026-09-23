@@ -70,4 +70,5 @@ mongodb-connection-string-url
 magic-string
 graphql
 @cfworker/json-schema
+oxlint-tsgolint
 bump-cli
