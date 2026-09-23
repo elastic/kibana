@@ -49,10 +49,7 @@ export async function cleanupAgentBasedPolicies(
         })
         .catch((err) => {
           // eslint-disable-next-line no-console
-          console.error(
-            `Failed to delete agent-based package policy ${policyId}:`,
-            err
-          );
+          console.error(`Failed to delete agent-based package policy ${policyId}:`, err);
         })
     ),
     ...planned.toUpdate.map(({ policyId, survivingInstanceIds }) =>
@@ -62,10 +59,7 @@ export async function cleanupAgentBasedPolicies(
         })
         .catch((err) => {
           // eslint-disable-next-line no-console
-          console.error(
-            `Failed to update agent-based package policy ${policyId}:`,
-            err
-          );
+          console.error(`Failed to update agent-based package policy ${policyId}:`, err);
         })
     ),
   ]);

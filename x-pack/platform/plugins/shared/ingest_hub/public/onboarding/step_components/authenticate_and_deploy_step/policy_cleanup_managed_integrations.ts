@@ -45,10 +45,7 @@ export async function cleanupManagedIntegrationsPolicies(
         })
         .catch((err) => {
           // eslint-disable-next-line no-console
-          console.error(
-            `Failed to delete managed-integrations policy ${policyId}:`,
-            err
-          );
+          console.error(`Failed to delete managed-integrations policy ${policyId}:`, err);
         })
     ),
     ...planned.toUpdate.map(({ policyId, survivingInstanceIds }) =>
@@ -58,10 +55,7 @@ export async function cleanupManagedIntegrationsPolicies(
         })
         .catch((err) => {
           // eslint-disable-next-line no-console
-          console.error(
-            `Failed to update managed-integrations policy ${policyId}:`,
-            err
-          );
+          console.error(`Failed to update managed-integrations policy ${policyId}:`, err);
         })
     ),
   ]);
