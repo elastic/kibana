@@ -593,6 +593,7 @@ describe('AgentBasedSection', () => {
           ],
         },
         isLoading: false,
+        isError: false,
       });
       renderSection();
       await waitFor(() => {
@@ -617,6 +618,7 @@ describe('AgentBasedSection', () => {
           ],
         },
         isLoading: false,
+        isError: false,
       });
       renderSection();
       await waitFor(() => {
@@ -639,6 +641,27 @@ describe('AgentBasedSection', () => {
       mockUseGetAgentPoliciesQuery.mockReturnValue({ data: undefined, isLoading: true });
       renderSection();
       // Wait a tick to confirm no reconciliation fires during loading.
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      const reconciliationCalls = setAgentBasedDeployment.mock.calls.filter(
+        (c) => c[0]?.selectedAgentPolicyIds !== undefined
+      );
+      expect(reconciliationCalls).toHaveLength(0);
+    });
+
+    it('does not reconcile when the policy query errors — retains persisted ids so a transient API failure does not wipe the selection', async () => {
+      const setAgentBasedDeployment = jest.fn();
+      setupMocks({
+        agentHostsMode: 'existing',
+        selectedAgentPolicyIds: ['policy-a'],
+        setAgentBasedDeployment,
+      });
+      // React Query sets isLoading:false + isError:true when the request fails; data stays undefined.
+      mockUseGetAgentPoliciesQuery.mockReturnValue({
+        data: undefined,
+        isLoading: false,
+        isError: true,
+      });
+      renderSection();
       await new Promise((resolve) => setTimeout(resolve, 0));
       const reconciliationCalls = setAgentBasedDeployment.mock.calls.filter(
         (c) => c[0]?.selectedAgentPolicyIds !== undefined

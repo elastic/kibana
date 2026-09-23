@@ -251,7 +251,11 @@ export function AgentBasedSection({
   );
 
   // ── Existing policy multi-select ──────────────────────────────────────────
-  const { data: policiesData, isLoading: isPoliciesLoading } = useGetAgentPoliciesQuery(
+  const {
+    data: policiesData,
+    isLoading: isPoliciesLoading,
+    isError: isPoliciesError,
+  } = useGetAgentPoliciesQuery(
     { full: false, perPage: 1000, sortField: 'name', sortOrder: 'asc' },
     { enabled: agentHostsMode === 'existing' }
   );
@@ -273,13 +277,12 @@ export function AgentBasedSection({
 
   const isEmpty = !isPoliciesLoading && policyOptions.length === 0;
 
-  // After policies load, filter out any persisted ids that no longer exist or are now managed/
-  // Fleet-Server policies (deleted between sessions, or policy type changed). The raw
-  // selectedAgentPolicyIds array is the source of truth for deployment but policyOptions
-  // already excludes managed/Fleet-Server policies, so reconciling against it keeps the two
-  // in sync and prevents a stale id from being passed to the deploy function.
+  // After policies load successfully, filter out any persisted ids that no longer exist or are
+  // now managed/Fleet-Server policies (deleted between sessions, or policy type changed).
+  // Guard on !isPoliciesError: React Query sets isLoading=false on error while policiesData stays
+  // undefined, which would produce an empty policyOptions and incorrectly wipe the selection.
   useEffect(() => {
-    if (isPoliciesLoading || agentHostsMode !== 'existing') return;
+    if (isPoliciesLoading || isPoliciesError || agentHostsMode !== 'existing') return;
     const validIds = new Set(policyOptions.map((o) => o.value));
     const reconciled = selectedAgentPolicyIds.filter((id) => validIds.has(id));
     if (reconciled.length !== selectedAgentPolicyIds.length) {
@@ -288,6 +291,7 @@ export function AgentBasedSection({
   }, [
     policyOptions,
     isPoliciesLoading,
+    isPoliciesError,
     agentHostsMode,
     selectedAgentPolicyIds,
     setAgentBasedDeployment,
