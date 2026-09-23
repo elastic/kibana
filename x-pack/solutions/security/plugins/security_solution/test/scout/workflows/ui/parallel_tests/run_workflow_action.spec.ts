@@ -14,13 +14,42 @@ import {
 } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
 
-// Failing: See https://github.com/elastic/kibana/issues/261392
-spaceTest.describe.skip('Run workflow alert action', { tag: [...tags.stateful.classic] }, () => {
+spaceTest.describe('Run workflow alert action', { tag: [...tags.stateful.classic] }, () => {
   let ruleName: string;
 
-  spaceTest.beforeAll(async ({ scoutSpace }) => {
+  spaceTest.beforeAll(async ({ scoutSpace, kbnClient }) => {
     // Enable the Workflows UI feature flag required for the "Run workflow" action to appear
     await scoutSpace.uiSettings.set({ 'workflows:ui:enabled': true });
+
+    // The StorageIndexAdapter for the workflows management plugin creates the
+    // .workflows* index template and backing index lazily on the first write.
+    // That cold-start takes >10 s under the 2-worker parallel config, which
+    // exceeds Scout's 10 s actionTimeout when the first write happens inside a
+    // test body via page.request.post().  Create and immediately delete a
+    // throwaway workflow here, where the 3-minute beforeAll budget and the
+    // undici-based kbnClient (no per-request deadline) absorb the latency.
+    const warmupYaml = [
+      "version: '1'",
+      `name: '__warmup_${Date.now()}__'`,
+      'enabled: false',
+      'triggers:',
+      '  - type: alert',
+      'steps:',
+      '  - name: log',
+      '    type: console',
+      '    with:',
+      "      message: 'warmup'",
+    ].join('\n');
+    const warmupResponse = await kbnClient.request<{ id: string }>({
+      method: 'POST',
+      path: `/s/${scoutSpace.id}/api/workflows/workflow`,
+      body: { yaml: warmupYaml },
+    });
+    await kbnClient.request({
+      method: 'DELETE',
+      path: `/s/${scoutSpace.id}/api/workflows/workflow/${warmupResponse.data.id}`,
+      ignoreErrors: [404],
+    });
   });
 
   spaceTest.beforeEach(async ({ browserAuth, apiServices, scoutSpace }) => {
