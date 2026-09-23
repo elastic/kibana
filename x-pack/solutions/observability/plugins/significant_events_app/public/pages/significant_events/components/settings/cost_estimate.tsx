@@ -244,7 +244,7 @@ export const CostEstimate = () => {
                 </EuiFlexItem>
                 <EuiFlexItem
                   grow={false}
-                  onClick={(event) => {
+                  onClick={(event: React.MouseEvent<HTMLDivElement>) => {
                     event.stopPropagation();
                   }}
                 >
