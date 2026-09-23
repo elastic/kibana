@@ -15,12 +15,14 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { LAST_VALUE_ID, LAST_VALUE_NAME } from '@kbn/lens-formula-docs';
 import type {
   DataType,
+  GenericIndexPatternColumn,
   LastValueIndexPatternColumn,
+  LastValueOrderAggColumn,
   IndexPatternField,
   IndexPattern,
 } from '@kbn/lens-common';
 import { adjustTimeScaleLabelSuffix, getSafeName } from '@kbn/lens-common';
-import type { FieldBasedOperationErrorMessage, OperationDefinition } from '.';
+import type { FieldBasedOperationErrorMessage, OperationDefinition, ParamEditorProps } from '.';
 import {
   getFormatFromPreviousColumn,
   getInvalidFieldMessage,
@@ -291,7 +293,12 @@ export const lastValueOperation: OperationDefinition<
     indexPattern,
     isReferenced,
     paramEditorCustomProps,
-  }) => {
+  }: // As a terms order-agg (rank-by), this editor receives a `LastValueOrderAggColumn`, whose `params`
+  // may be absent. Widen `currentColumn` so the compiler enforces the optional `params` handling.
+  ParamEditorProps<
+    LastValueIndexPatternColumn | LastValueOrderAggColumn,
+    GenericIndexPatternColumn
+  >) => {
     const { labels, isInline } = paramEditorCustomProps || {};
     const sortByFieldLabel =
       labels?.[0] ||
@@ -301,7 +308,8 @@ export const lastValueOperation: OperationDefinition<
 
     const dateFields = getDateFields(indexPattern);
     const isSortFieldInvalid =
-      getInvalidSortFieldMessages(currentColumn.params.sortField, '', indexPattern).length > 0;
+      getInvalidSortFieldMessages(currentColumn.params?.sortField ?? '', '', indexPattern).length >
+      0;
 
     const usingTopValues = Object.keys(layer.columns).some(
       (_columnId) => layer.columns[_columnId].operationType === 'terms'
@@ -328,7 +336,7 @@ export const lastValueOperation: OperationDefinition<
                   'When you show array values, you are unable to use this field to rank top values.',
               }
             )}
-            isInvalid={currentColumn.params.showArrayValues && usingTopValues}
+            isInvalid={currentColumn.params?.showArrayValues && usingTopValues}
             display="rowCompressed"
             fullWidth
             data-test-subj="lns-indexPattern-lastValue-showArrayValues"
@@ -352,9 +360,9 @@ export const lastValueOperation: OperationDefinition<
                   </EuiText>
                 }
                 compressed={true}
-                checked={Boolean(currentColumn.params.showArrayValues)}
+                checked={Boolean(currentColumn.params?.showArrayValues)}
                 disabled={isScriptedField(currentColumn.sourceField, indexPattern)}
-                onChange={() => setShowArrayValues(!currentColumn.params.showArrayValues)}
+                onChange={() => setShowArrayValues(!currentColumn.params?.showArrayValues)}
               />
             </EuiToolTip>
           </EuiFormRow>

@@ -296,7 +296,7 @@ export function getOrderAggLastValueSortFieldStatus(
   column: TermsColumnWithLastValueOrderAgg,
   indexPattern: IndexPattern
 ): OrderAggLastValueSortFieldStatus {
-  const { sortField } = column.params.orderAgg.params;
+  const sortField = column.params.orderAgg.params?.sortField;
 
   if (!sortField) {
     const defaultField = getDefaultDateFieldName(indexPattern);
@@ -331,7 +331,7 @@ export function getOrderAggErrorMessages(
   }
 
   const status = getOrderAggLastValueSortFieldStatus(column, indexPattern);
-  const sortField = column.params.orderAgg.params.sortField ?? '';
+  const sortField = column.params.orderAgg.params?.sortField ?? '';
 
   switch (status.status) {
     case 'missing-no-default':
