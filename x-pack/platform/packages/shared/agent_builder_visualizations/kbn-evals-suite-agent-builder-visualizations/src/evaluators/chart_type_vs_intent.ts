@@ -13,7 +13,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import { z } from '@kbn/zod/v4';
 import type { VisualizationRenderer } from '@kbn/agent-builder-visualizations-common';
 import type { ExtractedVisualization } from '../extract_visualization';
-import { skippedResult } from '../evaluator_utils';
+import { isRecord, skippedResult } from '../evaluator_utils';
 import type { GoldChartForm } from './gold_visualization_config';
 
 export const CHART_TYPE_VS_INTENT_EVALUATOR_NAME = 'Chart Type vs Intent';
@@ -40,9 +40,6 @@ export type ChartIntentJudge = (input: {
   gold: GoldChartForm;
   actual: ActualChartForm;
 }) => Promise<ChartIntentVerdict>;
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
 
 const SYSTEM_PROMPT = `You judge whether the FORM of a generated chart satisfies a user's visualization request.
 

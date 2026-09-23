@@ -7,6 +7,7 @@
 
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import type { VisualizationRenderer } from '@kbn/agent-builder-visualizations-common';
+import { isRecord } from './evaluator_utils';
 
 const CREATE_VISUALIZATION_TOOL_ID = platformCoreTools.createVisualization;
 const VISUALIZATION_RESULT_TYPE = 'visualization';
@@ -14,9 +15,6 @@ const VISUALIZATION_RESULT_TYPE = 'visualization';
 interface ConverseLikeOutput {
   steps?: Array<Record<string, unknown>>;
 }
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
 
 const RENDERERS: ReadonlySet<VisualizationRenderer> = new Set<VisualizationRenderer>([
   'lens',

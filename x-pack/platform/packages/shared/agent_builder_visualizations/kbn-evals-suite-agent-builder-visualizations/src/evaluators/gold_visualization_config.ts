@@ -6,9 +6,7 @@
  */
 
 import type { LensApiConfigESQL } from '@kbn/lens-embeddable-utils';
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
+import { isRecord } from '../evaluator_utils';
 
 /**
  * Deep-partial of a Config API type. String `type` fields also accept

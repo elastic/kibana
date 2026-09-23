@@ -9,6 +9,10 @@ import type { EvaluationResult, Evaluator, Example, TaskOutput } from '@kbn/eval
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { ExtractedVisualization } from './extract_visualization';
 
+/** Plain-object guard for walking untyped tool payloads and gold configs. */
+export const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
 /** Shared result for evaluators with nothing to check; `null` keeps them out of averages. */
 export const skippedResult = (explanation: string): EvaluationResult => ({
   score: null,

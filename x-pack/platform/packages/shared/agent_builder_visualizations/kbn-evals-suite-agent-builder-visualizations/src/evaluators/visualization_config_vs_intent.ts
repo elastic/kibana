@@ -7,7 +7,7 @@
 
 import type { EvaluationResult, Evaluator, Example, TaskOutput } from '@kbn/evals';
 import type { ExtractedVisualization } from '../extract_visualization';
-import { skippedResult } from '../evaluator_utils';
+import { isRecord, skippedResult } from '../evaluator_utils';
 import {
   extractGoldQuery,
   hasStructuralGoldConfig,
@@ -27,9 +27,6 @@ const isSkippedKey = (path: string, key: string): boolean =>
   key === 'data_source' ||
   (key === 'type' && (path === '' || LAYER_PATH.test(path))) ||
   (key === 'mark' && path === 'spec');
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
 
 interface MatchReport {
   checked: number;

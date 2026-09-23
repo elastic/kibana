@@ -8,7 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EvaluationResult, Evaluator, Example, TaskOutput } from '@kbn/evals';
 import type { ExtractedVisualization } from '../extract_visualization';
-import { skippedResult } from '../evaluator_utils';
+import { isRecord, skippedResult } from '../evaluator_utils';
 import { isNumericColumn, type EsqlColumn } from './esql_column_types';
 import { createEsqlQueryRunner, type EsqlQueryRunner } from './esql_query_runner';
 
@@ -45,9 +45,6 @@ const DIMENSION_KEYS = new Set([
   'split_metrics_by',
 ]);
 const SKIP_KEYS = new Set(['data_source']);
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
 
 const roleForKey = (key: string, chartType: string | undefined): BindingRole => {
   if (
