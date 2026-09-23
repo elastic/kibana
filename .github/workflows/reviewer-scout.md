@@ -36,10 +36,10 @@ engine:
     CLAUDE_CODE_SUBAGENT_MODEL: opus[1m]
 # Check out the trusted base commit (never the PR head in a pull_request_target job) so the agent
 # can read docs, skills, sibling specs, and playwright configs locally. PR changes come from the
-# prefetched diff / GitHub tools. On workflow_dispatch the ref is empty and actions/checkout falls
-# back to the dispatched branch's `github.sha`.
+# prefetched diff / GitHub tools. Dispatch runs resolve the selected PR base SHA through prefetch.
+# PR events use the base SHA from their event payload.
 checkout:
-  ref: ${{ github.event.pull_request.base.sha }}
+  ref: ${{ github.event.pull_request.base.sha || needs.prefetch_pr_context.outputs.base_sha }}
   fetch-depth: 1
 # Activation rules:
 # - Manual runs always activate.
