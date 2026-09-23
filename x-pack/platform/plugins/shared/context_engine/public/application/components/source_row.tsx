@@ -12,6 +12,7 @@ import type { ReactNode } from 'react';
 import React from 'react';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../common/telemetry';
 import { ItemRow } from './item_row';
+import type { SourceType } from './source_picker/types';
 
 interface SourceRowProps {
   label: string;
@@ -19,6 +20,7 @@ interface SourceRowProps {
   icon: ReactNode;
   children?: ReactNode;
   onRemove?: () => void;
+  sourceType?: SourceType;
   'data-test-subj'?: string;
 }
 
@@ -28,6 +30,7 @@ export const SourceRow = ({
   icon,
   children,
   onRemove,
+  sourceType,
   'data-test-subj': dataTestSubj,
 }: SourceRowProps) => {
   const removeLabel = i18n.translate('xpack.contextEngine.sourceRow.removeAriaLabel', {
@@ -56,7 +59,7 @@ export const SourceRow = ({
               {...getEbtProps({
                 element: CONTEXT_ENGINE_UI_EBT.element.aiIndexEditFlyout,
                 action: CONTEXT_ENGINE_UI_EBT.action.sources.REMOVE_SOURCE,
-                detail: label,
+                ...(sourceType !== undefined && { detail: sourceType }),
               })}
             />
           </EuiToolTip>

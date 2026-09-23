@@ -58,7 +58,6 @@ export const AiIndexManagedRow = ({ aiIndex }: AiIndexManagedRowProps) => {
       {...getEbtProps({
         element: CONTEXT_ENGINE_UI_EBT.element.aiIndexListPage,
         action: CONTEXT_ENGINE_UI_EBT.action.aiIndexList.OPEN_MANAGED_ROW,
-        detail: aiIndex.id,
       })}
     >
       <EuiFlexGroup alignItems="center" gutterSize="l" responsive={false}>

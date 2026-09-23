@@ -122,7 +122,6 @@ export const AiIndexDeleteConfirmModal = ({
         {...getEbtProps({
           element: CONTEXT_ENGINE_UI_EBT.element.aiIndexListPage,
           action: CONTEXT_ENGINE_UI_EBT.action.aiIndexList.DELETE_KI_CHECKBOX,
-          detail: aiIndex.id,
         })}
         label={
           <FormattedMessage
@@ -144,7 +143,6 @@ export const AiIndexDeleteConfirmModal = ({
         {...getEbtProps({
           element: CONTEXT_ENGINE_UI_EBT.element.aiIndexListPage,
           action: CONTEXT_ENGINE_UI_EBT.action.aiIndexList.DELETE_AUTOMATIONS_CHECKBOX,
-          detail: aiIndex.id,
         })}
         label={
           <FormattedMessage

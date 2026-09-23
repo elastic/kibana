@@ -41,7 +41,12 @@ export const SignalGroupRow = ({ group, onView }: SignalGroupRowProps) => (
     hasBorder
     paddingSize="m"
     data-test-subj="contextSignalGroupRow"
-    onClick={onView}
+    onClick={(event: React.MouseEvent) => {
+      if ((event.target as HTMLElement).closest('button')) {
+        return;
+      }
+      onView();
+    }}
     {...getEbtProps({
       element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPage,
       action: CONTEXT_ENGINE_UI_EBT.action.signals.VIEW_GROUP,
@@ -75,17 +80,8 @@ export const SignalGroupRow = ({ group, onView }: SignalGroupRowProps) => (
         <EuiButtonEmpty
           size="s"
           iconType="inspect"
-          onClick={(event: React.MouseEvent) => {
-            // The panel is also clickable; stop the bubbled click from double-firing onView.
-            event.stopPropagation();
-            onView();
-          }}
+          onClick={onView}
           data-test-subj="contextSignalGroupViewDetailsButton"
-          {...getEbtProps({
-            element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPage,
-            action: CONTEXT_ENGINE_UI_EBT.action.signals.VIEW_GROUP,
-            detail: group.tag,
-          })}
         >
           {i18n.translate('xpack.contextEngine.aiIndexDetail.signals.groupViewDetailsButton', {
             defaultMessage: 'View details',

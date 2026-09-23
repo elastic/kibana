@@ -179,6 +179,7 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
                     label={label}
                     typeLabel={typeLabel}
                     icon={icon}
+                    sourceType={source.type}
                     onRemove={() => removeSource(source)}
                     data-test-subj={`contextSelectedSource-${source.type}-${index}`}
                   >
