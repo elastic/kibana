@@ -74,12 +74,26 @@ steps:
     with:
       index: "ai-index-idx-{{ inputs.ai_index_id }}"
       size: 1
+      sort:
+        - "@timestamp":
+            order: desc
+            unmapped_type: date
       query:
         bool:
           filter:
-            - ids:
-                values:
-                  - "{{ inputs.ki_id }}"
+            - bool:
+                should:
+                  - term:
+                      id: "{{ inputs.ki_id }}"
+                  - bool:
+                      filter:
+                        - ids:
+                            values:
+                              - "{{ inputs.ki_id }}"
+                      must_not:
+                        - exists:
+                            field: id
+                minimum_should_match: 1
             - term:
                 type: security.analyze_endpoint
             - term:

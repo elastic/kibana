@@ -145,6 +145,31 @@ describe('Endpoint analysis run', () => {
       expect(termValue('attributes.status')).toBe('pending');
     });
 
+    // The sweep sends the logical `id`. An `ids` query matches document `_id`, which
+    // on a data stream is a revision, so the child would find nothing. Documents
+    // written before `id` existed still have to match `_id`.
+    it('matches the logical id and falls back to _id only when id is absent', () => {
+      const idClause = readFilters.find((clause) => clause.bool !== undefined)?.bool as
+        | {
+            should?: Array<Record<string, unknown>>;
+            minimum_should_match?: number;
+          }
+        | undefined;
+      expect(idClause?.minimum_should_match).toBe(1);
+      expect(idClause?.should).toEqual([
+        { term: { id: '{{ inputs.ki_id }}' } },
+        {
+          bool: {
+            filter: [{ ids: { values: ['{{ inputs.ki_id }}'] } }],
+            must_not: [{ exists: { field: 'id' } }],
+          },
+        },
+      ]);
+      expect(stepByName('read_ki')?.with?.sort).toEqual([
+        { '@timestamp': { order: 'desc', unmapped_type: 'date' } },
+      ]);
+    });
+
     // The filters have to sit on the read rather than on each write, because the read
     // is the single thing every later gate derives from. An id that fails them yields
     // no hits, which the conditions below already treat as nothing to act on.
