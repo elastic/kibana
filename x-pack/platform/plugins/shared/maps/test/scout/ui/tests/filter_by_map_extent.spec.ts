@@ -54,20 +54,14 @@ test.describe(
         await pageObjects.lens.setEuiSwitch(FILTER_BY_MAP_EXTENT_SWITCH, true);
         await page.keyboard.press('Escape');
         await expect
-          .poll(async () => {
-            await pageObjects.dashboard.waitForRenderComplete();
-            return page.locator('[data-test-subj="metric_value"]').textContent();
-          })
+          .poll(() => page.locator('[data-test-subj="metric_value"]').textContent())
           .toBe('1');
       });
 
       await test.step('metric updates when map is panned', async () => {
         await pageObjects.maps.setView(32.95539, -93.93054, 5);
         await expect
-          .poll(async () => {
-            await pageObjects.dashboard.waitForRenderComplete();
-            return page.locator('[data-test-subj="metric_value"]').textContent();
-          })
+          .poll(() => page.locator('[data-test-subj="metric_value"]').textContent())
           .toBe('2');
       });
 
@@ -79,10 +73,7 @@ test.describe(
         await pageObjects.lens.setEuiSwitch(FILTER_BY_MAP_EXTENT_SWITCH, false);
         await page.keyboard.press('Escape');
         await expect
-          .poll(async () => {
-            await pageObjects.dashboard.waitForRenderComplete();
-            return page.locator('[data-test-subj="metric_value"]').textContent();
-          })
+          .poll(() => page.locator('[data-test-subj="metric_value"]').textContent())
           .toBe('6');
       });
     });

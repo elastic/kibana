@@ -173,8 +173,10 @@ export class MapsPage {
 
   private async closeSetViewPopover() {
     if (await this.setViewForm.isVisible()) {
-      await this.page.testSubj.click('toggleSetViewVisibilityButton');
-      await this.setViewForm.waitFor({ state: 'hidden' });
+      // In embedded contexts (e.g. dashboard), the toggle button does not reliably
+      // close the popover, so use Escape instead.
+      await this.page.keyboard.press('Escape');
+      await this.setViewForm.waitFor({ state: 'hidden', timeout: DEFAULT_MAP_LOADING_TIMEOUT });
     }
   }
 
@@ -193,7 +195,8 @@ export class MapsPage {
       .poll(
         async () => {
           const currentView = await this.getView();
-          const stable = prevView !== undefined && JSON.stringify(prevView) === JSON.stringify(currentView);
+          const stable =
+            prevView !== undefined && JSON.stringify(prevView) === JSON.stringify(currentView);
           prevView = currentView;
           return stable;
         },
