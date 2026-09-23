@@ -80,5 +80,5 @@ export const createClassicEpisodeSource = ({
   actionExtensions: classicActionExtensions,
 
   getRuleDetailsHref: (ruleId) =>
-    `/app/${host.app}${host.pathPrefix}${getRuleDetailsRoute(ruleId)}`,
+    `${host.appBasePath ?? `/app/${host.app}`}${host.pathPrefix}${getRuleDetailsRoute(ruleId)}`,
 });
