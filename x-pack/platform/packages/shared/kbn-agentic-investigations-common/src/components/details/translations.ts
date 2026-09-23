@@ -15,12 +15,6 @@ export const DETAILS_FLYOUT_LABELS = Object.freeze({
     overview: i18n.translate('xpack.alertzero.detailsFlyout.tabs.overview', {
       defaultMessage: 'Overview',
     }),
-    attachments: i18n.translate('xpack.alertzero.detailsFlyout.tabs.attachments', {
-      defaultMessage: 'Attachments',
-    }),
-    timeline: i18n.translate('xpack.alertzero.detailsFlyout.tabs.timeline', {
-      defaultMessage: 'Timeline',
-    }),
   },
   sections: {
     overview: i18n.translate('xpack.alertzero.detailsFlyout.sections.situation', {
@@ -38,12 +32,6 @@ export const DETAILS_FLYOUT_LABELS = Object.freeze({
         defaultMessage: 'Parent investigation',
       }
     ),
-    attachments: i18n.translate('xpack.alertzero.detailsFlyout.sections.attachments', {
-      defaultMessage: 'Attachments',
-    }),
-    timeline: i18n.translate('xpack.alertzero.detailsFlyout.sections.timeline', {
-      defaultMessage: 'Timeline',
-    }),
   },
   overview: {
     showMore: i18n.translate('xpack.alertzero.detailsFlyout.overview.showMore', {
@@ -69,14 +57,6 @@ export const DETAILS_FLYOUT_LABELS = Object.freeze({
     }),
     severity: i18n.translate('xpack.alertzero.detailsFlyout.overview.severity', {
       defaultMessage: 'Severity',
-    }),
-  },
-  attachments: {
-    emptyTitle: i18n.translate('xpack.alertzero.detailsFlyout.attachments.emptyTitle', {
-      defaultMessage: 'No attachments',
-    }),
-    emptyBody: i18n.translate('xpack.alertzero.detailsFlyout.attachments.emptyBody', {
-      defaultMessage: 'Attachments will appear here.',
     }),
   },
   actions: {
