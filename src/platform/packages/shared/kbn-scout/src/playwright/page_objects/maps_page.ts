@@ -228,19 +228,20 @@ export class MapsPage {
   /**
    * Clicks the map at a position relative to the container's center to lock the tooltip.
    * xOffset/yOffset follow the FTR convention: positive x = right, negative y = up.
-   * Retries until mapTooltipCloseButton appears (i.e. a feature was hit and tooltip locked).
+   * Waits for layers to be ready before clicking, then asserts the locked tooltip separately.
    */
   async lockTooltipAtPosition(xOffset: number, yOffset: number) {
-    const closeButton = this.page.testSubj.locator('mapTooltipCloseButton');
+    await this.waitForLayersToLoad();
 
-    await expect(async () => {
-      const box = await this.mapContainer.boundingBox();
-      if (!box) throw new Error('Map container bounding box not found');
-      const x = box.x + box.width / 2 + xOffset;
-      const y = box.y + box.height / 2 + yOffset;
-      await this.page.mouse.move(x, y);
-      await this.page.mouse.click(x, y);
-      await closeButton.waitFor({ state: 'visible', timeout: 2000 });
-    }).toPass({ timeout: 15000 });
+    const box = await this.mapContainer.boundingBox();
+    if (!box) throw new Error('Map container bounding box not found');
+    const x = box.x + box.width / 2 + xOffset;
+    const y = box.y + box.height / 2 + yOffset;
+    await this.page.mouse.move(x, y);
+    await this.page.mouse.click(x, y);
+
+    await this.page.testSubj
+      .locator('mapTooltipCloseButton')
+      .waitFor({ state: 'visible', timeout: DEFAULT_MAP_LOADING_TIMEOUT });
   }
 }
