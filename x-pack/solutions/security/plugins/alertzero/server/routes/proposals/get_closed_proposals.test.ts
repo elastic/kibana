@@ -91,7 +91,7 @@ describe('registerGetClosedProposalsRoute', () => {
     const response = httpServerMock.createResponseFactory();
 
     await handler(
-      {},
+      createRouteContextMock(),
       httpServerMock.createKibanaRequest({ query: { size: 0, from: 0 } }),
       response
     );

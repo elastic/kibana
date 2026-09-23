@@ -93,7 +93,7 @@ describe('registerGetProposalsByCategoryRoute', () => {
     const response = httpServerMock.createResponseFactory();
 
     await handler(
-      {},
+      createRouteContextMock(),
       httpServerMock.createKibanaRequest({
         params: { category: 'respond' },
         query: { size: 0, from: 0 },
