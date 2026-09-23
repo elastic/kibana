@@ -114,9 +114,18 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
         trigger.type === 'manual'
     );
     expect(manualTrigger).toBeDefined();
-    expect(manualTrigger?.inputs?.properties).toHaveProperty('alerts');
-    expect(manualTrigger?.inputs?.properties).toHaveProperty('calledByWorker');
-    expect(manualTrigger?.inputs?.properties).toHaveProperty('connectorIdByFeature');
+    const manualInputs = manualTrigger?.inputs;
+    // WorkflowSchema accepts legacy array or JSON Schema object; after normalizeFieldsToJsonSchema
+    // manual inputs are object-shaped. Narrow before reading `.properties` for tsc.
+    expect(manualInputs && typeof manualInputs === 'object' && !Array.isArray(manualInputs)).toBe(
+      true
+    );
+    if (!manualInputs || typeof manualInputs !== 'object' || Array.isArray(manualInputs)) {
+      return;
+    }
+    expect(manualInputs.properties).toHaveProperty('alerts');
+    expect(manualInputs.properties).toHaveProperty('calledByWorker');
+    expect(manualInputs.properties).toHaveProperty('connectorIdByFeature');
 
     expect(result.data.outputs).toBeDefined();
     if (
