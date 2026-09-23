@@ -41,6 +41,9 @@ jest.mock('./screen_reader_status', () => ({
 jest.mock('../../../hooks/use_conversation_stream', () => ({
   useConversationStream: () => ({ isResuming: false }),
 }));
+jest.mock('../../../hooks/use_agent_builder_service', () => ({
+  useAgentBuilderServices: () => ({ attachmentsService: { hasAttachmentType: () => false } }),
+}));
 jest.mock('./timeline', () => ({
   Timeline: ({ items }: { items: TimelineItem[] }) => (
     <ul>

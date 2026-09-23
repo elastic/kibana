@@ -6,10 +6,19 @@
  */
 
 import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
+import type { ConversationEvent } from '@kbn/agent-builder-common';
 import { TimelineEventType } from '@kbn/agent-builder-common';
 import type { TimelineDisplayEvent } from '../../../../services/events';
-import { EXECUTION_STREAMING_EVENT_TYPE } from '../../../../services/events';
-import type { ExecutionAccumulator, TimelineItem, UserEntry } from './types';
+import {
+  EXECUTION_STREAMING_EVENT_TYPE,
+  isTimelineDisplayEvent,
+} from '../../../../services/events';
+import type {
+  ExecutionAccumulator,
+  GroupedItem,
+  UnresolvedAttachmentItem,
+  UserEntry,
+} from './types';
 import { accumulatorToItem, foldAttachmentRefs } from './timeline_item_utils';
 import { findAwaitingPromptEventId } from './awaiting_prompt';
 import { answersByPromptId, withQuestionAnswers } from './prompt_answers';
@@ -17,17 +26,19 @@ import { resolvedToolCallIds, isSupersededToolCallStep } from './tool_call_steps
 import { resumeToOriginalExecutionId } from './execution_chains';
 
 export const groupTimelineEvents = (
-  events: TimelineDisplayEvent[],
+  events: ConversationEvent[],
   eventsById: Map<string, TimelineDisplayEvent>,
   /** Id of the locally-built user message that has no saved twin yet. */
   pendingUserMessageId?: string
-): TimelineItem[] => {
-  const awaitingPromptEventId = findAwaitingPromptEventId(events);
-  const answers = answersByPromptId(events);
-  const resolvedToolCalls = resolvedToolCallIds(events);
-  const resumeLinks = resumeToOriginalExecutionId(events, eventsById);
+): GroupedItem[] => {
+  // The run-shaped helpers only understand built-in events; narrow once, up front.
+  const displayEvents = events.filter(isTimelineDisplayEvent);
+  const awaitingPromptEventId = findAwaitingPromptEventId(displayEvents);
+  const answers = answersByPromptId(displayEvents);
+  const resolvedToolCalls = resolvedToolCallIds(displayEvents);
+  const resumeLinks = resumeToOriginalExecutionId(displayEvents, eventsById);
 
-  const ordered: Array<UserEntry | ExecutionAccumulator> = [];
+  const ordered: Array<UserEntry | UnresolvedAttachmentItem | ExecutionAccumulator> = [];
   const accMap = new Map<string, ExecutionAccumulator>();
   const seenAttachmentRefs = new Map<string, AttachmentVersionRef>();
 
@@ -53,6 +64,10 @@ export const groupTimelineEvents = (
   };
 
   for (const event of events) {
+    if (!isTimelineDisplayEvent(event)) {
+      // Custom event types are stored alongside the built-in ones; nothing draws them yet.
+      continue;
+    }
     switch (event.type) {
       case TimelineEventType.userMessage:
         foldAttachmentRefs(seenAttachmentRefs, event.data.attachment_refs);
@@ -120,18 +135,18 @@ export const groupTimelineEvents = (
   }
 
   return ordered.map(
-    (entry): TimelineItem =>
+    (entry): GroupedItem =>
       'executionId' in entry ? accumulatorToItem(entry, eventsById, awaitingPromptEventId) : entry
   );
 };
 
 /** Groups a timeline - saved events, live events, or both merged - into renderable items. */
 export const buildItems = (
-  events: TimelineDisplayEvent[],
+  events: ConversationEvent[],
   pendingUserMessageId?: string
-): TimelineItem[] =>
+): GroupedItem[] =>
   groupTimelineEvents(
     events,
-    new Map(events.map((event) => [event.id, event])),
+    new Map(events.filter(isTimelineDisplayEvent).map((event) => [event.id, event])),
     pendingUserMessageId
   );

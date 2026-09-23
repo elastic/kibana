@@ -20,6 +20,8 @@ import { createExecutionFailedEvent } from './items/execution_failed_event.facto
 import { createExecutionAbortedEvent } from './items/execution_aborted_event.factory';
 import { createExecutionStepEvent } from './items/execution_step.factory';
 import { createPromptResponseEvent } from './items/prompt_response_event.factory';
+import { createAttachmentAddedEvent } from './items/attachment_added_event.factory';
+import type { ConversationEvent } from '@kbn/agent-builder-common';
 import type { ExecutionStreamingEvent, TimelineDisplayEvent } from '../../../../services/events';
 import { EXECUTION_STREAMING_EVENT_TYPE } from '../../../../services/events';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents';
@@ -772,5 +774,33 @@ describe('groupTimelineEvents attachment refs', () => {
 
     expect(only).not.toHaveProperty('attachmentRefs');
     expect(only).not.toHaveProperty('triggerAttachmentRefs');
+  });
+});
+
+describe('groupTimelineEvents with events outside the built-in set', () => {
+  const user = createUserMessageEvent({ id: 'user-1' });
+  const started = createExecutionStartedEvent({ id: 'es-1', execution_id: 'exec-1' });
+  const terminated = createExecutionTerminatedEvent({ id: 'et-1', execution_id: 'exec-1' });
+
+  it('accepts a custom event type and ignores it', () => {
+    const custom: ConversationEvent = {
+      id: 'note-1',
+      type: 'text_note',
+      created_at: '2026-09-03T11:17:45.000Z',
+      actor: { type: EventActorType.user, id: 'u1' },
+      data: { text: 'hello' },
+    };
+
+    const items = buildItems([user, custom, started, terminated]);
+
+    expect(items.map((item) => item.kind)).toEqual(['userMessage', 'agentTurn']);
+  });
+
+  it('still drops attachment events', () => {
+    const attachmentAdded = createAttachmentAddedEvent({ id: 'aa-1' });
+
+    const items = buildItems([user, started, terminated, attachmentAdded]);
+
+    expect(items.map((item) => item.kind)).toEqual(['userMessage', 'agentTurn']);
   });
 });

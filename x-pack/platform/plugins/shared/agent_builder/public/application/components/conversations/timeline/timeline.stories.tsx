@@ -18,10 +18,12 @@ import type { Meta, StoryObj } from '@storybook/react';
 import type { ChatEvent, TimelineEvent } from '@kbn/agent-builder-common';
 import { ConversationRoundStepType } from '@kbn/agent-builder-common';
 import { AgentBuilderStorybookProvider } from '../../../__storybook__/agent_builder_storybook_provider';
+import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { Timeline } from './timeline';
 import { DevSseEmitter } from './dev_sse_emitter';
 import { sseToEvents, emptyLiveEventsState } from '../../../../services/events/sse_to_events';
 import { buildItems } from './to_timeline_items';
+import { resolveTimelineItems } from './resolve_timeline_items';
 import { createUserMessageEvent } from './items/user_message_event.factory';
 import { createExecutionStartedEvent } from './items/execution_started.factory';
 import { createExecutionStepEvent } from './items/execution_step.factory';
@@ -182,7 +184,8 @@ const InteractiveInner: React.FC<{ onReset: () => void }> = ({ onReset }) => {
   const emit = useCallback((event: ChatEvent) => dispatch(event), []);
 
   const events = [...seedEvents, ...liveState.events];
-  const items = buildItems(events);
+  const { attachmentsService } = useAgentBuilderServices();
+  const items = resolveTimelineItems(buildItems(events), { attachmentsService });
 
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
