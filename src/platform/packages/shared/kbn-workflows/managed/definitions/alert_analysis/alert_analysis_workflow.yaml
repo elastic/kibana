@@ -1610,21 +1610,29 @@ steps:
                   batch_input_tokens: "${{ variables.batch_input_tokens | plus: steps.runAgent_step.output.metadata.usage.inputTokens }}"
                   batch_output_tokens: "${{ variables.batch_output_tokens | plus: steps.runAgent_step.output.metadata.usage.outputTokens }}"
                   batch_llm_calls: "${{ variables.batch_llm_calls | plus: 1 }}"
+                  # `uniq` so a repeated id cannot stand in for one the model dropped.
+                  batch_matched_id_count: "${{ variables.batch_verdicts | map: 'id' | uniq | size }}"
                   # First non-empty wins: keep the connector from the first successful batch
                   # call so the Worker can name it in Comment 2 without a second lookup.
                   resolved_connector_id: >-
                     {% if variables.resolved_connector_id == '' %}{{ steps.runAgent_step.output.metadata.usage.connectorId }}{% else %}{{ variables.resolved_connector_id }}{% endif %}
 
-              # Accumulate the optional batch_summary the model returned (Worker path only).
-              # `compact` in the join step drops nil values, so pushing nil is safe here.
+              # Keep the model's batch_summary (Worker path only) when at least one of its
+              # verdicts matched this batch, and say so when it covers only part of the batch;
+              # a summary with no matched verdicts would describe results the caller never sees.
               - name: accumulate_batch_summary_gate
                 type: if
-                condition: "${{ inputs.calledByWorker == true }}"
+                condition: "${{ inputs.calledByWorker == true and variables.batch_matched_id_count > 0 and steps.runAgent_step.output.structured_output.batch_summary != blank }}"
                 steps:
+                  - name: build_batch_summary_entry
+                    type: data.set
+                    with:
+                      batch_summary_entry: >-
+                        {{ steps.runAgent_step.output.structured_output.batch_summary }}{% if variables.batch_matched_id_count < variables.batch_alert_ids.size %} (Covers {{ variables.batch_matched_id_count }} of {{ variables.batch_alert_ids.size }} alerts in this batch; the rest returned no verdict.){% endif %}
                   - name: accumulate_batch_summary
                     type: data.set
                     with:
-                      batch_summaries: "${{ variables.batch_summaries | push: steps.runAgent_step.output.structured_output.batch_summary }}"
+                      batch_summaries: "${{ variables.batch_summaries | push: variables.batch_summary_entry }}"
 
               - name: set_batch_progress_counts
                 type: data.set
@@ -1895,12 +1903,13 @@ steps:
           - name: build_grouped_counts_summary
             type: data.set
             with:
-              # Capture then truncate to the workflow.output maxLength (10000). A 1000-alert
-              # Worker batch can produce more host sentences than the schema allows; without
-              # this cap the run would fail at emit after tags/notes were already written.
+              # Cap unique hosts before the per-host rescans (same 50 budget as
+              # impacted_entities), then truncate to the workflow.output maxLength (10000).
+              # Without the host cap a 1000-unique-host batch does ~4M Liquid predicates
+              # and can hit the engine render limit after tags/notes are already written.
               grouped_counts_summary: >-
                 {%- capture grouped_counts_summary_raw -%}
-                {%- assign hosts = variables.output_verdicts | map: 'host_name' | uniq -%}
+                {%- assign hosts = variables.output_verdicts | map: 'host_name' | uniq | slice: 0, 50 -%}
                 {%- for h in hosts -%}
                 {%- assign for_host = variables.output_verdicts | where: 'host_name', h -%}
                 {%- assign tp = for_host | where: 'classification', 'true_positive' | size -%}
