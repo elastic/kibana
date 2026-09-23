@@ -63,6 +63,18 @@ describe('bulk edit eligibility', () => {
       );
     });
 
+    it('excludes locked monitors from bulk enable/disable', () => {
+      expect(
+        isMonitorBulkStatusEditable(
+          {
+            ...makeMonitor({ origin: SourceType.PROJECT }),
+            [ConfigKey.LOCKED]: true,
+          },
+          true
+        )
+      ).toBe(false);
+    });
+
     it('allows non-ui monitors on private locations without public-location permission', () => {
       expect(
         isMonitorBulkStatusEditable(

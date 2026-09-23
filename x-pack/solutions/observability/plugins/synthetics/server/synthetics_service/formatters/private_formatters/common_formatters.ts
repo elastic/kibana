@@ -41,6 +41,7 @@ export const commonFormatters: CommonFormatMap = {
   [ConfigKey.MAX_ATTEMPTS]: null,
   [ConfigKey.MAINTENANCE_WINDOWS]: null,
   [ConfigKey.KIBANA_SPACES]: null,
+  [ConfigKey.LOCKED]: null,
   retest_on_failure: null,
   [ConfigKey.SCHEDULE]: (fields) =>
     JSON.stringify(

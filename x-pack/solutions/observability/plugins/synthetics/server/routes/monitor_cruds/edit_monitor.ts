@@ -12,7 +12,7 @@ import { isEmpty } from 'lodash';
 import { queryBoolean, routeId } from '../zod_query';
 import { editMonitorRequestBody } from './monitor_request_body';
 import { syntheticsMonitorSavedObjectType } from '../../../common/types/saved_objects';
-import { invalidOriginError } from './add_monitor';
+import { invalidOriginError, monitorLockedError } from './add_monitor';
 import {
   InvalidLocationError,
   InvalidScheduleError,
@@ -98,6 +98,18 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
       const { decryptedMonitor: decryptedMonitorPrevMonitor, normalizedMonitor: previousMonitor } =
         await monitorConfigRepository.getDecrypted(monitorId, spaceId);
       const normalizedPreviousMonitor = previousMonitor.attributes;
+
+      // `locked` is source-owned; Kibana APIs cannot set or clear it.
+      delete (monitor as Partial<SyntheticsMonitor>)[ConfigKey.LOCKED];
+
+      if (normalizedPreviousMonitor[ConfigKey.LOCKED]) {
+        return response.badRequest({
+          body: {
+            message: monitorLockedError(),
+            attributes: { details: monitorLockedError() },
+          },
+        });
+      }
 
       if (normalizedPreviousMonitor.origin !== 'ui' && !reqQuery.internal) {
         return response.badRequest(getInvalidOriginError(monitor));

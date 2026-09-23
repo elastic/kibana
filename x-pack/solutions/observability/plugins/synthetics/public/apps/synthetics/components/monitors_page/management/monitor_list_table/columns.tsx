@@ -33,7 +33,7 @@ import type {
   ServiceLocations,
   SyntheticsMonitorSchedule,
 } from '../../../../../../../common/runtime_types';
-import { ConfigKey } from '../../../../../../../common/runtime_types';
+import { ConfigKey, isMonitorLocked } from '../../../../../../../common/runtime_types';
 
 import { MonitorTypeBadge } from '../../../common/components/monitor_type_badge';
 import { getFrequencyLabel } from './labels';
@@ -429,7 +429,8 @@ export function useMonitorListColumns({
             canEditSynthetics &&
             !isActionLoading(fields) &&
             isPublicLocationsAllowed(fields) &&
-            isServiceAllowed,
+            isServiceAllowed &&
+            !isMonitorLocked(fields),
           onClick: (fields) => {
             updateAlertEnabledState({
               monitor: {

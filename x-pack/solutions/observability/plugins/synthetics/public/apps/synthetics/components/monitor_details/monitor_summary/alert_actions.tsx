@@ -19,7 +19,11 @@ import rison from '@kbn/rison';
 import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
 import { toggleStatusAlert } from '../../../../../../common/runtime_types/monitor_management/alert_config';
 import { useMonitorAlertEnable } from '../../../hooks/use_monitor_alert_enable';
-import { ConfigKey, isExternalSyntheticsMonitor } from '../../../../../../common/runtime_types';
+import {
+  ConfigKey,
+  isExternalSyntheticsMonitor,
+  isMonitorLocked,
+} from '../../../../../../common/runtime_types';
 import { useSelectedMonitor } from '../hooks/use_selected_monitor';
 import {
   DISABLE_STATUS_ALERT,
@@ -72,7 +76,7 @@ export const AlertActions = ({ from, to }: { from: string; to: string }) => {
       key="edit"
       icon={isAlertEnabled ? 'bellSlash' : 'bell'}
       onClick={onToggleAlertClick}
-      disabled={isLoading}
+      disabled={isLoading || isMonitorLocked(monitor)}
     >
       {isAlertEnabled ? DISABLE_STATUS_ALERT : ENABLE_STATUS_ALERT}{' '}
       {isLoading && <EuiLoadingSpinner />}

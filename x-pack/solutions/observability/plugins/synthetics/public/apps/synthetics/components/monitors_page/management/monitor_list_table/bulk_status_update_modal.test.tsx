@@ -156,6 +156,45 @@ describe('<BulkStatusUpdateModal />', () => {
     });
   });
 
+  it('surfaces locked monitors as skipped', async () => {
+    const monitors = [
+      makeMonitor('ok-1', 'Unlocked monitor', { enabled: false }),
+      {
+        ...makeMonitor('locked-1', 'Locked monitor', {
+          origin: SourceType.PROJECT,
+          enabled: false,
+        }),
+        [ConfigKey.LOCKED]: true,
+      },
+    ];
+    fetchBulkUpdateMonitorsMock.mockResolvedValue({
+      result: [{ id: 'ok-1', updated: true }],
+    });
+
+    const { getByText, getByTestId, queryByText } = render(
+      <BulkStatusUpdateModal
+        monitors={monitors}
+        enabled={true}
+        onClose={onClose}
+        reloadPage={reloadPage}
+      />
+    );
+
+    expect(getByText('Enable 1 monitor?')).toBeInTheDocument();
+    expect(getByText('1 monitor will not be updated')).toBeInTheDocument();
+    expect(getByText('Locked monitor')).toBeInTheDocument();
+    expect(queryByText('Unlocked monitor')).not.toBeInTheDocument();
+
+    clickConfirm(getByTestId);
+
+    await waitFor(() => {
+      expect(fetchBulkUpdateMonitorsMock).toHaveBeenCalledWith({
+        spaceId: undefined,
+        updates: [{ id: 'ok-1', attributes: { [ConfigKey.ENABLED]: true } }],
+      });
+    });
+  });
+
   it('groups monitors by space and issues one request per space', async () => {
     // `home` lives in the current space, `away` only in another space (visible
     // via "show from all spaces"), and `shared` is shared to all spaces.

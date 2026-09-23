@@ -89,6 +89,7 @@ export const CommonFieldsCodec = t.intersection([
     [ConfigKey.LABELS]: t.record(t.string, t.string),
     [ConfigKey.MAINTENANCE_WINDOWS]: t.array(t.string),
     [ConfigKey.KIBANA_SPACES]: t.array(t.string),
+    [ConfigKey.LOCKED]: t.boolean,
     retest_on_failure: t.boolean,
   }),
 ]);

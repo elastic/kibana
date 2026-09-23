@@ -58,4 +58,5 @@ export const commonFormatters: CommonFormatMap = {
   [ConfigKey.TAGS]: arrayFormatter,
   [ConfigKey.LABELS]: null,
   [ConfigKey.MAINTENANCE_WINDOWS]: null,
+  [ConfigKey.LOCKED]: null,
 };

@@ -338,14 +338,14 @@ const ALL_ALREADY_DISABLED = i18n.translate('xpack.synthetics.bulkOperations.all
 
 const NO_ELIGIBLE_TO_ENABLE = i18n.translate('xpack.synthetics.bulkOperations.noEligibleToEnable', {
   defaultMessage:
-    'None of the selected monitors can be enabled here. Monitors using locations you cannot access are excluded.',
+    'None of the selected monitors can be enabled here. Locked monitors and monitors using locations you cannot access are excluded.',
 });
 
 const NO_ELIGIBLE_TO_DISABLE = i18n.translate(
   'xpack.synthetics.bulkOperations.noEligibleToDisable',
   {
     defaultMessage:
-      'None of the selected monitors can be disabled here. Monitors using locations you cannot access are excluded.',
+      'None of the selected monitors can be disabled here. Locked monitors and monitors using locations you cannot access are excluded.',
   }
 );
 

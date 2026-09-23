@@ -71,6 +71,7 @@ export const OverviewStatusMetaDataCodec = z.looseObject({
     .array(z.object({ remoteName: z.string(), locationId: z.string() }))
     .optional(),
   origin: MonitorOriginCodec.optional(),
+  locked: z.boolean().optional(),
 });
 
 export const OverviewStatusFilterIdCodec = z.looseObject({

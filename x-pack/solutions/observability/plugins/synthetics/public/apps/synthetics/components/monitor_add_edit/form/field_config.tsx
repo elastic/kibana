@@ -607,8 +607,9 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
           await trigger(ConfigKey.ENABLED);
         },
         'data-test-subj': 'syntheticsEnableSwitch',
-        // enabled is an allowed field for read only
-        disabled: !isProjectMonitor && readOnly,
+        // enabled is an allowed field for read-only project monitors unless locked
+        disabled:
+          (readOnly && !isProjectMonitor) || Boolean(formState.defaultValues?.[ConfigKey.LOCKED]),
       };
     },
   },
@@ -630,8 +631,9 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
           await trigger(AlertConfigKey.STATUS_ENABLED);
         },
         'data-test-subj': 'syntheticsAlertStatusSwitch',
-        // alert config is an allowed field for read only
-        disabled: !isProjectMonitor && readOnly,
+        // alert config is an allowed field for read-only project monitors unless locked
+        disabled:
+          (readOnly && !isProjectMonitor) || Boolean(formState.defaultValues?.[ConfigKey.LOCKED]),
       };
     },
   },
@@ -653,8 +655,9 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
           await trigger(AlertConfigKey.TLS_ENABLED);
         },
         'data-test-subj': 'syntheticsAlertStatusSwitch',
-        // alert config is an allowed field for read only
-        disabled: !isProjectMonitor && readOnly,
+        // alert config is an allowed field for read-only project monitors unless locked
+        disabled:
+          (readOnly && !isProjectMonitor) || Boolean(formState.defaultValues?.[ConfigKey.LOCKED]),
       };
     },
   },

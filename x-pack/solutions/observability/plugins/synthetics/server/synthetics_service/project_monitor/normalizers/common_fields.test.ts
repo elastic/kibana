@@ -187,6 +187,7 @@ describe('getNormalizeCommonFields', () => {
           },
           custom_heartbeat_id: 'test-id-test-projectId-test-namespace',
           enabled: true,
+          locked: false,
           hash: '',
           journey_id: 'test-id',
           locations: [
@@ -257,6 +258,7 @@ describe('getNormalizeCommonFields', () => {
         },
         custom_heartbeat_id: 'test-id-test-projectId-test-namespace',
         enabled: true,
+        locked: false,
         hash: '',
         journey_id: 'test-id',
         locations: [
@@ -353,6 +355,24 @@ describe('getNormalizeCommonFields - maintenance windows', () => {
     expect(() => getNormalizeCommonFields(config as unknown as NormalizedProjectProps)).toThrow(
       /does-not-exist/
     );
+  });
+
+  it('persists locked from the project payload', () => {
+    const { normalizedFields } = getNormalizeCommonFields({
+      ...baseConfig,
+      monitor: { ...baseMonitor, locked: true },
+      maintenanceWindows: [],
+    } as unknown as NormalizedProjectProps);
+    expect(normalizedFields.locked).toBe(true);
+  });
+
+  it('defaults locked to false when omitted so a later push can unlock', () => {
+    const { normalizedFields } = getNormalizeCommonFields({
+      ...baseConfig,
+      monitor: { ...baseMonitor },
+      maintenanceWindows: [],
+    } as unknown as NormalizedProjectProps);
+    expect(normalizedFields.locked).toBe(false);
   });
 });
 
