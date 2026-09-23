@@ -31,11 +31,10 @@ export interface ActualChartForm {
   layerMarks?: string[];
 }
 
-// A type alias (not an interface) so it satisfies the tool callback's Record<string, unknown> response.
-export type ChartIntentVerdict = {
+export interface ChartIntentVerdict {
   verdict: 'satisfies' | 'does_not_satisfy';
   reason: string;
-};
+}
 
 export type ChartIntentJudge = (input: {
   question: string;
@@ -163,7 +162,9 @@ export function createChartIntentJudge({
             );
           }
           captured = { verdict, reason };
-          return { response: captured };
+          // A fresh literal: the callback response must be a Record<string, unknown>,
+          // which a named interface without an index signature is not.
+          return { response: { verdict, reason } };
         },
       },
     });

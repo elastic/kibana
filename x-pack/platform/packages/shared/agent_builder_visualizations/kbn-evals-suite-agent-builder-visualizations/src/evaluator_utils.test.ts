@@ -98,7 +98,6 @@ describe('withLowScoreLogging', () => {
 
     expect(log.warning).not.toHaveBeenCalled();
   });
-
 });
 
 describe('skipRefusalExamples', () => {
