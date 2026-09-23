@@ -15,7 +15,7 @@ import { buildEsqlAdditionalInstructions } from './esql_instructions';
 import { validateQueryTarget } from './validate_query_target';
 
 /** Normalized result of resolving an ES|QL query for a visualization. */
-export interface GeneratedVisualizationEsql {
+interface GeneratedVisualizationEsql {
   /** The generated query. Absent when generation failed. */
   query?: string;
   /**
@@ -28,7 +28,7 @@ export interface GeneratedVisualizationEsql {
   error?: string;
 }
 
-export interface GenerateVisualizationEsqlParams {
+interface GenerateVisualizationEsqlParams {
   nlQuery: string;
   index: string | undefined;
   /**

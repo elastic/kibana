@@ -22,7 +22,7 @@ export const installDeductiveInvestigationAgent = async ({
 }: {
   agentBuilder: AgentBuilderPluginStart;
   spaceId: string;
-  availability?: AgentAvailabilityConfig;
+  availability: AgentAvailabilityConfig;
 }): Promise<void> => {
   await agentBuilder.agents.ensure({
     spaceId,
