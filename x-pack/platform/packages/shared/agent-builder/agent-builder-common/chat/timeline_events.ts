@@ -12,6 +12,7 @@ import type {
   AssistantResponse,
   ConversationRoundStep,
   ConversationRoundOrigin,
+  FeedbackChipId,
   RoundInput,
   RoundModelUsageStats,
 } from './conversation';
@@ -94,6 +95,8 @@ export enum TimelineEventType {
   attachmentAdded = 'attachment_added',
   attachmentUpdated = 'attachment_updated',
   attachmentDeleted = 'attachment_deleted',
+  // User feedback
+  roundFeedback = 'round_feedback',
 }
 
 /** Fields the server fills in when an event is accepted; absent on producer input. */
@@ -313,6 +316,24 @@ export type AttachmentTimelineEvent =
   | AttachmentUpdatedEvent
   | AttachmentDeletedEvent;
 
+export interface RoundFeedbackEventData {
+  round_id: string;
+  vote: 'up' | 'down';
+  chips?: FeedbackChipId[];
+  comment?: string;
+  submitted_at: string;
+  connector_id?: string;
+  model?: string;
+}
+export type RoundFeedbackEvent = BaseTimelineEvent<
+  TimelineEventType.roundFeedback,
+  RoundFeedbackEventData
+>;
+export type RoundFeedbackEventInput = BaseTimelineEventInput<
+  TimelineEventType.roundFeedback,
+  RoundFeedbackEventData
+>;
+
 const ATTACHMENT_EVENT_TYPES: ReadonlySet<string> = new Set([
   TimelineEventType.attachmentAdded,
   TimelineEventType.attachmentUpdated,
@@ -350,7 +371,8 @@ export type TimelineEvent =
   | ExecutionAbortedEvent
   | AttachmentAddedEvent
   | AttachmentUpdatedEvent
-  | AttachmentDeletedEvent;
+  | AttachmentDeletedEvent
+  | RoundFeedbackEvent;
 
 /** A timeline event as supplied by a caller, before the server assigns id/created_at/actor. */
 export type TimelineEventInput =
@@ -363,7 +385,8 @@ export type TimelineEventInput =
   | BaseTimelineEventInput<TimelineEventType.executionAborted, ExecutionAbortedEventData>
   | BaseTimelineEventInput<TimelineEventType.attachmentAdded, AttachmentAddedEventData>
   | BaseTimelineEventInput<TimelineEventType.attachmentUpdated, AttachmentUpdatedEventData>
-  | BaseTimelineEventInput<TimelineEventType.attachmentDeleted, AttachmentDeletedEventData>;
+  | BaseTimelineEventInput<TimelineEventType.attachmentDeleted, AttachmentDeletedEventData>
+  | RoundFeedbackEventInput;
 
 /**
  * The run lock held on a conversation while an execution is active.
@@ -398,6 +421,9 @@ export const ROUND_DERIVED_EVENT_ID_SUFFIXES = {
 /** ID for a step event. */
 export const roundStepEventId = (roundId: string, sequence: number): string =>
   `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.stepPrefix}${sequence}`;
+
+/** ID for the feedback event for a given round. There is at most one per round. */
+export const feedbackEventId = (roundId: string): string => `${roundId}::feedback`;
 
 /** Builds an execution id for a resume appended to a round without rewriting its initial run. */
 export const resumeExecutionId = (roundId: string, executionIndex: number): string =>

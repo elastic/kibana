@@ -26,6 +26,7 @@ import {
   TimelineEventType,
   TimelineTriggerType,
   executionTerminatedEventId,
+  feedbackEventId,
   parseExecutionId,
   resumeExecutionId,
   roundStepEventId,
@@ -156,10 +157,23 @@ export const roundToEvents = (
   conversation: ConversationForRoundEvents
 ): TimelineEvent[] => {
   const terminated = roundTerminatedEvent(round, conversation);
+  const feedbackEvent = round.feedback
+    ? ({
+        id: feedbackEventId(round.id),
+        type: TimelineEventType.roundFeedback,
+        created_at: round.feedback.submitted_at,
+        actor: { type: EventActorType.user, id: conversation.user?.id ?? 'unknown' },
+        data: {
+          round_id: round.id,
+          ...round.feedback,
+        },
+      } as TimelineEvent)
+    : null;
   return [
     ...roundStartEvents(round, conversation),
     ...roundStepEvents(round, conversation),
     ...(terminated ? [terminated] : []),
+    ...(feedbackEvent ? [feedbackEvent] : []),
   ];
 };
 

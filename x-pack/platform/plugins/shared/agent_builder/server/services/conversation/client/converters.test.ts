@@ -22,6 +22,7 @@ import {
   MIN_EVENTS_NATIVE_SCHEMA_VERSION,
   TimelineEventType,
   ToolOrigin,
+  feedbackEventId,
   isEventsNativeVersion,
 } from '@kbn/agent-builder-common';
 import {
@@ -2184,25 +2185,15 @@ describe('conversation model converters', () => {
       expect(updated.rounds[0].response?.message).toBe('stored truth');
     });
 
-    it('carries round feedback into caller-supplied rounds that lack it (step-only appendEvents with feedback)', () => {
+    it('honors caller-supplied rounds when events are also provided (step-only appendEvents)', () => {
       const base = eventsNativeStored();
-      const storedFeedback = {
-        vote: 'up' as const,
-        submitted_at: '2024-01-01T00:00:00.000Z',
-      };
-      const conversation: Conversation = {
-        ...base,
-        rounds: base.rounds.map((r) =>
-          r.id === 'round-1' ? { ...r, feedback: storedFeedback } : r
-        ),
-      };
       const callerRounds = [{ ...base.rounds[0], response: { message: 'updated response' } }];
 
       const updated = updateConversation({
-        conversation,
+        conversation: base,
         update: {
-          id: conversation.id,
-          events: conversation.events!,
+          id: base.id,
+          events: base.events!,
           rounds: callerRounds,
         } as Parameters<typeof updateConversation>[0]['update'] & {
           events: TimelineEvent[];
@@ -2212,7 +2203,6 @@ describe('conversation model converters', () => {
       });
 
       expect(updated.rounds[0].response?.message).toBe('updated response');
-      expect(updated.rounds[0].feedback).toEqual(storedFeedback);
     });
 
     it('promotes a legacy conversation to events-native when a caller supplies events (appendEvents on a legacy doc)', () => {
@@ -2243,17 +2233,22 @@ describe('conversation model converters', () => {
       expect(updated.events?.map((event) => event.id)).toEqual(['seed::user_message']);
     });
 
-    it('carries round feedback across an appendEvents update (feedback survives eventsToRounds)', () => {
+    it('projects round_feedback events onto rounds across an appendEvents update', () => {
       const base = eventsNativeStored();
-      const storedFeedback = {
-        vote: 'up' as const,
-        submitted_at: '2024-01-01T00:00:00.000Z',
+      const feedbackEvent: TimelineEvent = {
+        id: feedbackEventId('round-1'),
+        type: TimelineEventType.roundFeedback,
+        created_at: '2024-01-01T00:00:00.000Z',
+        actor: { type: EventActorType.user, id: 'user_id', username: 'user_name' },
+        data: {
+          round_id: 'round-1',
+          vote: 'up' as const,
+          submitted_at: '2024-01-01T00:00:00.000Z',
+        },
       };
       const conversation: Conversation = {
         ...base,
-        rounds: base.rounds.map((r) =>
-          r.id === 'round-1' ? { ...r, feedback: storedFeedback } : r
-        ),
+        events: [...base.events!, feedbackEvent],
       };
 
       const appended: TimelineEvent = {
@@ -2277,7 +2272,7 @@ describe('conversation model converters', () => {
       });
 
       const round = updated.rounds?.find((r) => r.id === 'round-1');
-      expect(round?.feedback).toEqual(storedFeedback);
+      expect(round?.feedback).toEqual({ vote: 'up', submitted_at: '2024-01-01T00:00:00.000Z' });
     });
 
     it('keeps events-native docs stamped with the native marker on update', () => {

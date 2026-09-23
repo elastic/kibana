@@ -13,6 +13,7 @@ import type {
   ExecutionStepEvent,
   ExecutionTerminatedEvent,
   PromptResponseEvent,
+  RoundFeedbackEvent,
   RoundInput,
   UserMessageEvent,
 } from '@kbn/agent-builder-common';
@@ -136,6 +137,25 @@ export const eventsToRounds = (events: ConversationEvent[]): ConversationRound[]
       }
     }
     rounds.push(round);
+  }
+
+  const feedbackByRoundId = new Map<string, RoundFeedbackEvent['data']>();
+  for (const event of events) {
+    if (event.type === TimelineEventType.roundFeedback) {
+      feedbackByRoundId.set(
+        (event as RoundFeedbackEvent).data.round_id,
+        (event as RoundFeedbackEvent).data
+      );
+    }
+  }
+
+  if (feedbackByRoundId.size > 0) {
+    return rounds.map((r) => {
+      const fb = feedbackByRoundId.get(r.id);
+      if (!fb) return r;
+      const { round_id: _ignored, ...feedbackFields } = fb;
+      return { ...r, feedback: feedbackFields };
+    });
   }
 
   return rounds;

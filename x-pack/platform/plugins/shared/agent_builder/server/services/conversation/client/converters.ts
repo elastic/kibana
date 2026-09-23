@@ -476,22 +476,11 @@ export const updateConversation = ({
   } as Conversation;
 
   if (updateEvents !== undefined) {
-    const feedbackByRoundId = new Map(
-      (conversation.rounds ?? [])
-        .filter((r) => r.feedback !== undefined)
-        .map((r) => [r.id, r.feedback!])
-    );
-    const sourceRounds = safeUpdate.rounds ?? eventsToRounds(updateEvents);
-    const rounds = sourceRounds.map((r) => {
-      if (r.feedback !== undefined) return r;
-      const fb = feedbackByRoundId.get(r.id);
-      return fb !== undefined ? { ...r, feedback: fb } : r;
-    });
     return {
       ...merged,
       schema_version: CONVERSATION_SCHEMA_VERSION,
       events: updateEvents,
-      rounds,
+      rounds: safeUpdate.rounds ?? eventsToRounds(updateEvents),
     };
   }
 

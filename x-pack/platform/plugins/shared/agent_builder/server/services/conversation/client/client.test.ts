@@ -18,6 +18,7 @@ import {
   TimelineTriggerType,
   createAgentNotFoundError,
   createAgentUnavailableError,
+  feedbackEventId,
   isConversationWriteConflictError,
 } from '@kbn/agent-builder-common';
 import type { ConversationAccessControlEntry } from '@kbn/agent-builder-common/chat/access_control';
@@ -1594,7 +1595,7 @@ describe('ConversationClient', () => {
       mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
     });
 
-    it('persists a vote with chips and comment, stamping connector and model from model_usage', async () => {
+    it('persists a round_feedback event with chips, comment, connector and model', async () => {
       const roundWithModel = createRound({
         id: 'round-1',
         model_usage: {
@@ -1613,46 +1614,50 @@ describe('ConversationClient', () => {
         comment: 'great answer',
       });
 
-      expect(mockEsClient.index).toHaveBeenCalledWith(
-        expect.objectContaining({
-          id: 'conversation-1',
-          if_seq_no: 1,
-          if_primary_term: 1,
-          document: expect.objectContaining({
-            conversation_rounds: [
-              expect.objectContaining({
-                id: 'round-1',
-                feedback: expect.objectContaining({
-                  vote: 'up',
-                  chips: ['useful'],
-                  comment: 'great answer',
-                  connector_id: 'connector-abc',
-                  model: 'claude-4.6-sonnet',
-                }),
-              }),
-            ],
-          }),
-        })
-      );
+      const { events } = mockEsClient.index.mock.calls[0][0].document as {
+        events: TimelineEvent[];
+      };
+      const feedbackEvent = events.find((e) => e.id === feedbackEventId('round-1'));
+      expect(feedbackEvent).toMatchObject({
+        id: feedbackEventId('round-1'),
+        type: TimelineEventType.roundFeedback,
+        data: expect.objectContaining({
+          round_id: 'round-1',
+          vote: 'up',
+          chips: ['useful'],
+          comment: 'great answer',
+          connector_id: 'connector-abc',
+          model: 'claude-4.6-sonnet',
+        }),
+      });
     });
 
-    it('removes the feedback sub-object entirely on retract (vote: null)', async () => {
-      const roundWithFeedback = {
-        ...round,
-        feedback: {
+    it('removes the round_feedback event entirely on retract (vote: null)', async () => {
+      const priorFeedbackEvent: TimelineEvent = {
+        id: feedbackEventId('round-1'),
+        type: TimelineEventType.roundFeedback,
+        created_at: '2025-01-01T00:00:00.000Z',
+        actor: { type: EventActorType.user, id: 'user-1', username: 'test-user' },
+        data: {
+          round_id: 'round-1',
           vote: 'up' as const,
-          chips: [],
-          comment: '',
           submitted_at: '2025-01-01T00:00:00.000Z',
         },
       };
-      mockGetDocumentResponse(createConversationDocument({ rounds: [roundWithFeedback] }));
+      mockGetDocumentResponse(
+        createConversationDocument({
+          rounds: [round],
+          schemaVersion: CONVERSATION_SCHEMA_VERSION,
+          events: [priorFeedbackEvent],
+        })
+      );
 
       await client.updateRoundFeedback('conversation-1', 'round-1', { vote: null });
 
-      const persistedRounds = mockEsClient.index.mock.calls[0][0].document
-        .conversation_rounds as Array<Record<string, unknown>>;
-      expect(persistedRounds[0]).not.toHaveProperty('feedback');
+      const { events } = mockEsClient.index.mock.calls[0][0].document as {
+        events: TimelineEvent[];
+      };
+      expect(events.every((e) => e.id !== feedbackEventId('round-1'))).toBe(true);
     });
 
     it('throws bad request when the round does not exist in the conversation', async () => {
