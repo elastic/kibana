@@ -9,16 +9,9 @@ import { EuiDescribedFormGroup, EuiSpacer, EuiText, EuiTitle } from '@elastic/eu
 import { FlyoutAccordion } from '@kbn/flyout-sections';
 import type { ReactNode } from 'react';
 import React from 'react';
-import type {
-  CollapsibleSection,
-  CollapsibleSectionConfig,
-  FormLayout,
-} from '../types';
+import type { CollapsibleSection, CollapsibleSectionConfig, FormLayout } from '../types';
 
-type ActionPolicyFormSectionId =
-  | 'policyDetails'
-  | 'policyScope'
-  | CollapsibleSection;
+type ActionPolicyFormSectionId = 'policyDetails' | 'policyScope' | CollapsibleSection;
 
 interface ActionPolicyFormSectionProps {
   children: ReactNode;

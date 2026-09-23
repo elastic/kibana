@@ -54,15 +54,15 @@ jest.mock('@kbn/alerting-v2-rule-form', () => ({
   isActionValid: () => true,
   InlineWorkflowEditor: ({
     value,
-    connectorCreation,
+    connectorCreationConfig,
   }: {
     value: { id: string };
-    connectorCreation?: { mode: string; href?: string };
+    connectorCreationConfig?: { mode: string; href?: string };
   }) => (
     <div
       data-test-subj={`inlineWorkflowEditor-${value.id}`}
-      data-connector-creation-mode={connectorCreation?.mode}
-      data-connector-creation-href={connectorCreation?.href}
+      data-connector-creation-mode={connectorCreationConfig?.mode}
+      data-connector-creation-href={connectorCreationConfig?.href}
     />
   ),
 }));

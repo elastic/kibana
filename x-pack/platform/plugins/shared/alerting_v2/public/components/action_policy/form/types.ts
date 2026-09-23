@@ -26,9 +26,7 @@ export interface CollapsibleSectionConfig {
 export interface ActionPolicyFormConfig {
   readonly connectorCreation: ConnectorCreationConfig;
   readonly layout?: FormLayout;
-  readonly collapsibleSections?: Partial<
-    Record<CollapsibleSection, CollapsibleSectionConfig>
-  >;
+  readonly collapsibleSections?: Partial<Record<CollapsibleSection, CollapsibleSectionConfig>>;
 }
 
 export interface ActionPolicyFormState {

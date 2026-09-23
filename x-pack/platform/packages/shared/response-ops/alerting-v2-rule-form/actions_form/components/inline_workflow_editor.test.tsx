@@ -47,14 +47,14 @@ jest.mock('@kbn/react-query', () => ({
 
 jest.mock('./connector_selector', () => ({
   ConnectorSelector: ({
-    connectorCreation,
+    connectorCreationConfig,
   }: {
-    connectorCreation?: { mode: string; href?: string };
+    connectorCreationConfig?: { mode: string; href?: string };
   }) => (
     <div
       data-test-subj="connectorSelector"
-      data-connector-creation-mode={connectorCreation?.mode}
-      data-connector-creation-href={connectorCreation?.href}
+      data-connector-creation-mode={connectorCreationConfig?.mode}
+      data-connector-creation-href={connectorCreationConfig?.href}
     />
   ),
 }));
