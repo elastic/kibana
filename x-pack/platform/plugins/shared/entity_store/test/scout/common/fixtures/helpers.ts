@@ -286,15 +286,21 @@ export const uninstallEntityStoreSuiteWithKbnClient = async ({
   esClient: EsClient;
   kbnClient: KbnClientFixture;
 }) => {
-  await kbnClient.request({
-    method: 'POST',
-    path: ENTITY_STORE_ROUTES.public.UNINSTALL,
-    headers: { 'elastic-api-version': API_VERSIONS.public.v1 },
-    body: {},
-    ignoreErrors: [404],
-  });
-  await clearEntityStoreIndices(esClient);
-  await kbnClient.uiSettings.unset(FF_ENABLE_ENTITY_STORE_V2);
+  try {
+    await kbnClient.request({
+      method: 'POST',
+      path: ENTITY_STORE_ROUTES.public.UNINSTALL,
+      headers: { 'elastic-api-version': API_VERSIONS.public.v1 },
+      body: {},
+      ignoreErrors: [404],
+    });
+  } finally {
+    try {
+      await clearEntityStoreIndices(esClient);
+    } finally {
+      await kbnClient.uiSettings.unset(FF_ENABLE_ENTITY_STORE_V2);
+    }
+  }
 };
 
 export const searchDocById = async (esClient: EsClient, id: string) => {
