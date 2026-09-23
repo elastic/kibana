@@ -216,6 +216,7 @@ export type MatrixModelConfig = TypeOf<typeof modelSchema>;
 export const parseMatrixConfig = (raw: unknown): MatrixConfig => {
   const config = matrixConfigSchema.validate(raw);
   assertNoDuplicateIds(config);
+  assertScoringNeedsExamplePrefixes(config);
   return config;
 };
 
@@ -223,9 +224,13 @@ export const parseMatrixConfig = (raw: unknown): MatrixConfig => {
  * Column/composite ids share one namespace: both key `MatrixRow.cells` and are looked up
  * by id when rendering. A duplicate silently overwrites the earlier cell while the id
  * still appears twice in `config.columns`/`config.composites`, double-counting it toward
- * coverage and the Overall aggregate. Model ids collide the same way in `matrix.proprietary`
- * / `matrix.openSource`. Reject all three after schema validation, where the well-typed
- * arrays are cheap to walk.
+ * coverage and the Overall aggregate. Model identity collides the same way: `matchesModel`
+ * (see `build_matrix.ts`) accepts either a row's primary `id` or any of its `matchIds`, so
+ * an id reused as another row's alias (or an alias shared by two rows) resolves the same
+ * scored model into multiple published rows. Composite `from` references are validated here
+ * too: an unknown ref is silently dropped by `aggregateCells`, so a typo or forward reference
+ * would otherwise publish a plausible-looking score computed from only the valid subset.
+ * Reject all of these after schema validation, where the well-typed arrays are cheap to walk.
  */
 const assertNoDuplicateIds = (config: MatrixConfig): void => {
   const columnIds = new Set<string>();
@@ -247,12 +252,78 @@ const assertNoDuplicateIds = (config: MatrixConfig): void => {
     compositeIds.add(composite.id);
   }
 
-  const modelIds = new Set<string>();
-  for (const model of config.models) {
-    if (modelIds.has(model.id)) {
-      throw new Error(`Duplicate model id "${model.id}".`);
+  // Composites may reference base columns or earlier composites, but not themselves or
+  // later composites (computeComposite reads `cells`, which is only populated for base
+  // columns and composites resolved earlier in `config.composites` order).
+  const resolvableByThisPoint = new Set<string>(columnIds);
+  for (const composite of config.composites) {
+    for (const refId of composite.from) {
+      if (!resolvableByThisPoint.has(refId)) {
+        throw new Error(
+          `Composite "${composite.id}" references unknown or not-yet-defined source "${refId}" ` +
+            `in "from". Composite sources must be base column ids or ids of composites declared earlier.`
+        );
+      }
     }
-    modelIds.add(model.id);
+    resolvableByThisPoint.add(composite.id);
+  }
+
+  // Model identity spans both `id` and `matchIds` (see `matchesModel` in build_matrix.ts):
+  // any id/alias reused across rows would silently merge two rows' scores into one.
+  const modelIdentifierOwners = new Map<string, string>();
+  for (const model of config.models) {
+    for (const identifier of [model.id, ...(model.matchIds ?? [])]) {
+      const owner = modelIdentifierOwners.get(identifier);
+      if (owner !== undefined) {
+        throw new Error(
+          owner === model.id
+            ? `Duplicate model id "${identifier}".`
+            : `Model identifier "${identifier}" is used by more than one model row ` +
+              `(as id or matchIds); each model id/alias must resolve to exactly one row.`
+        );
+      }
+      modelIdentifierOwners.set(identifier, model.id);
+    }
+  }
+};
+
+/**
+ * `requireEisJudge`/`useVerdictLadder` only take effect on the raw per-document score path
+ * (`scoresByPrefixToDatasets`, gated on `examplePrefixes`) — the pre-aggregated stats path
+ * (`getExperimentStats`) has no judge-name/verdict-label data to filter or remap. Unlike
+ * `excludeSelfJudged`, which is separately enforced pre-aggregation in
+ * `pickLatestExperimentPerModel` (see `queryMatrixScores`), a suite that enables either of
+ * these two fields but has no column declaring `examplePrefixes` for that suite would silently
+ * score unfiltered/unmapped raw means while claiming the policy is applied. Fail at load time
+ * instead of publishing numbers the policy never touched.
+ */
+const assertScoringNeedsExamplePrefixes = (config: MatrixConfig): void => {
+  const policyEnabled =
+    Boolean(config.scoring?.requireEisJudge) || Boolean(config.scoring?.useVerdictLadder);
+  if (!policyEnabled) {
+    return;
+  }
+
+  const suitesWithPrefixes = new Set<string>();
+  const allSuites = new Set<string>();
+  for (const column of config.columns) {
+    for (const suiteId of column.suites) {
+      allSuites.add(suiteId);
+      if (column.examplePrefixes && column.examplePrefixes.length > 0) {
+        suitesWithPrefixes.add(suiteId);
+      }
+    }
+  }
+
+  const unsatisfied = [...allSuites].filter((suiteId) => !suitesWithPrefixes.has(suiteId));
+  if (unsatisfied.length > 0) {
+    throw new Error(
+      `Global \`scoring\` enables requireEisJudge/useVerdictLadder, but suite(s) ` +
+        `${unsatisfied.map((id) => `"${id}"`).join(', ')} have no column declaring ` +
+        `"examplePrefixes". These two policy fields only take effect on the per-document score ` +
+        `path, which requires examplePrefixes; without it the suite silently falls back to ` +
+        `unfiltered/unmapped pre-aggregated stats.`
+    );
   }
 };
 

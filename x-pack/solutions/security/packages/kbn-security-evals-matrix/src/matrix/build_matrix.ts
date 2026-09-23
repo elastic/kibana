@@ -213,19 +213,22 @@ const buildCell = (
     erroredOutEvaluators = [],
   }: { selfJudged?: boolean; excludedSelfJudged?: number; erroredOutEvaluators?: string[] } = {}
 ): MatrixCell => {
-  if (mean === undefined) {
-    return excludedSelfJudged > 0
-      ? { kind: 'excluded', reason: 'self-judged', docs: excludedSelfJudged }
-      : { kind: 'missing' };
-  }
-
-  // Only evaluators that count toward this cell matter; excluded metrics (e.g. Latency) are ignored.
+  // Checked before the `mean === undefined` branch: a cell-relevant evaluator that errored on
+  // every example produces no numeric score at all, so `mean` is undefined even though the run
+  // completed. That is a broken-evaluator outage, not ordinary missing data, and must surface
+  // as `insufficient-evaluators` rather than silently reading as unmeasured.
   const erroredOut = erroredOutEvaluators.filter(
     (name) =>
       column.evaluators?.includes(name) ?? !isExcludedEvaluator(name, config.excludeEvaluators)
   );
   if (erroredOut.length > 0) {
     return { kind: 'insufficient-evaluators', evaluators: erroredOut };
+  }
+
+  if (mean === undefined) {
+    return excludedSelfJudged > 0
+      ? { kind: 'excluded', reason: 'self-judged', docs: excludedSelfJudged }
+      : { kind: 'missing' };
   }
 
   const scale = column.scale ?? config.defaultScale;
@@ -423,8 +426,17 @@ const buildTokenCost = (
   return { models };
 };
 
-/** Groups rows into tiers: a new tier starts once the drop from the tier leader exceeds the combined 95% interval. */
-const assignTiers = (rows: MatrixRow[], config: MatrixConfig): MatrixRow[] => {
+/**
+ * Groups rows into tiers: a new tier starts once the drop from the tier leader exceeds
+ * the combined 95% interval. `rankValue` must be the same metric the rows are sorted by
+ * (composite `sortValue` when composites exist, else legacy `overall`) — otherwise a
+ * row's tier and its rank position can disagree.
+ */
+const assignTiers = (
+  rows: MatrixRow[],
+  config: MatrixConfig,
+  rankValue: (row: MatrixRow) => number
+): MatrixRow[] => {
   const sd = config.overall.runStdev;
   if (!sd) {
     return rows;
@@ -433,8 +445,8 @@ const assignTiers = (rows: MatrixRow[], config: MatrixConfig): MatrixRow[] => {
   let tier = 1;
   let leader: number | undefined;
   return rows.map((row) => {
-    const value = row.overall.kind === 'score' ? row.overall.value : undefined;
-    if (value === undefined) {
+    const value = rankValue(row);
+    if (value < 0) {
       return row;
     }
     if (leader === undefined) {
@@ -509,6 +521,21 @@ const buildMatrixRow = (
     const kind = cells[c.id].kind;
     return kind === 'score' || kind === 'not-recommended';
   }).length;
+
+  // `minCoverage` gates every aggregate built from the base columns, not just the
+  // legacy Overall column — otherwise a composite (which ranking prefers over Overall
+  // once composites are configured) can rank a row that Overall itself would have
+  // excluded for insufficient coverage.
+  if (config.minCoverage > 0 && scoredColumns < config.minCoverage) {
+    for (const composite of config.composites) {
+      cells[composite.id] = {
+        kind: 'insufficient-coverage',
+        covered: scoredColumns,
+        required: config.minCoverage,
+      };
+    }
+  }
+
   // When saturation exclusions are active, Overall aggregates its own cell values
   // computed without the saturated evaluators; base cells above are untouched.
   const overallSourceCells = Object.keys(overallCells).length > 0 ? overallCells : cells;
@@ -652,8 +679,8 @@ export const buildMatrix = (
     displayColumns: buildDisplayColumns(config),
     overallLabel: config.overall.label,
     evaluatorSaturation: saturation,
-    proprietary: assignTiers(proprietary.sort(sortByPrimaryDesc), config),
-    openSource: assignTiers(openSource.sort(sortByPrimaryDesc), config),
+    proprietary: assignTiers(proprietary.sort(sortByPrimaryDesc), config, sortValue),
+    openSource: assignTiers(openSource.sort(sortByPrimaryDesc), config, sortValue),
     ...(config.tokenCost
       ? { tokenCost: buildTokenCost(config, config.tokenCost, resolveScores) }
       : {}),

@@ -29,6 +29,7 @@ import { renderMatrixHtml } from '../../matrix/render_matrix_html';
 import { renderReliabilityHtml } from '../../matrix/render_reliability_html';
 import { queryMatrixTraces } from '../../matrix/query_matrix_traces';
 import type { MatrixTraceData } from '../../matrix/trace_types';
+import type { JudgeVerdict } from '../../matrix/judge_agreement';
 import { readLocalGitState } from '../../matrix/local_git_state';
 import {
   warnOnConfiguredNamesMissingFromData,
@@ -71,7 +72,7 @@ export const matrixScoreQuery = (
   suiteIds,
   modelIds,
   branch,
-  branchBySuite: branchBySuiteFromColumns(config),
+  branchBySuite: branchBySuiteFromColumns(config, branch),
   lookbackDays,
   asOf,
   prefixesBySuite: prefixesBySuiteFromColumns(config),
@@ -123,32 +124,38 @@ export const prefixesBySuiteFromColumns = (config: MatrixConfig): Record<string,
 };
 
 /**
- * Collapses per-column `branch` overrides into a suite-keyed map; throws when columns sharing a suite disagree.
+ * Collapses per-column `branch` overrides into a suite-keyed map; throws when columns sharing
+ * a suite disagree on their *effective* branch (`column.branch ?? globalBranch`). A column that
+ * omits `branch` still inherits the CLI's global branch, so it must be checked against another
+ * column's explicit override for the same suite -- not skipped, or the suite silently reads
+ * whichever override happened to be recorded first.
  */
 export const branchBySuiteFromColumns = (
-  config: MatrixConfig
+  config: MatrixConfig,
+  globalBranch?: string
 ): Record<string, string | string[]> => {
   const bySuite: Record<string, string | string[]> = {};
   const describe = (branch: string | string[]): string =>
     Array.isArray(branch) ? branch.join(', ') : branch;
 
   for (const column of config.columns) {
-    for (const suiteId of column.suites) {
-      if (!column.branch) {
-        break;
+    // A column with no override still queries `globalBranch`; only omit it from the map
+    // when there's nothing to override with either, so callers fall back to their own default.
+    const effective = column.branch ?? globalBranch;
+    if (effective) {
+      for (const suiteId of column.suites) {
+        const existing = bySuite[suiteId];
+        if (existing !== undefined && describe(existing) !== describe(effective)) {
+          throw new Error(
+            `Conflicting branch overrides for suite "${suiteId}": ` +
+              `"${describe(existing)}" and "${describe(effective)}". A suite is queried ` +
+              `once, so its columns must agree on which branch to read.`
+          );
+        }
+        bySuite[suiteId] = effective;
       }
-      const existing = bySuite[suiteId];
-      if (existing !== undefined && describe(existing) !== describe(column.branch)) {
-        throw new Error(
-          `Conflicting branch overrides for suite "${suiteId}": ` +
-            `"${describe(existing)}" and "${describe(column.branch)}". A suite is queried ` +
-            `once, so its columns must agree on which branch to read.`
-        );
-      }
-      bySuite[suiteId] = column.branch;
     }
   }
-
   return bySuite;
 };
 
@@ -321,6 +328,7 @@ export const matrixCmd: Command<void> = {
 
     // Traces are queried before rendering so they can be embedded in matrix.json.
     let traces: MatrixTraceData | undefined;
+    const judgeVerdicts: JudgeVerdict[] = [];
     const traceCacheForProvenance = flagsReader.string('trace-cache') ?? 'none';
     const localGit = readLocalGitState(repoRoot, log);
     if (generateHtml) {
@@ -347,7 +355,8 @@ export const matrixCmd: Command<void> = {
           config.models
             .filter((model) => (model.matchIds ?? []).length > 0)
             .map((model) => [model.id, model.matchIds ?? []])
-        )
+        ),
+        judgeVerdicts
       );
 
       // Server-fetched traces can come back without steps, so count only the ones that carry steps.
@@ -414,13 +423,18 @@ export const matrixCmd: Command<void> = {
         traces
       );
       Fs.writeFileSync(Path.join(outDir, 'matrix.html'), htmlContent);
-      const reliabilityHtml = renderReliabilityHtml(matrix, traces, {
-        branch,
-        lookbackDays,
-        asOf,
-        commitSha: process.env.BUILDKITE_COMMIT ?? localGit.sha,
-        dirtyWorkingTree: localGit.dirty,
-      });
+      const reliabilityHtml = renderReliabilityHtml(
+        matrix,
+        traces,
+        {
+          branch,
+          lookbackDays,
+          asOf,
+          commitSha: process.env.BUILDKITE_COMMIT ?? localGit.sha,
+          dirtyWorkingTree: localGit.dirty,
+        },
+        judgeVerdicts
+      );
       Fs.writeFileSync(Path.join(outDir, 'matrix.reliability.html'), reliabilityHtml);
       log.info(`Wrote matrix.html and matrix.reliability.html to ${outDir}`);
     }

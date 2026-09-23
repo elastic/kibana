@@ -149,13 +149,13 @@ export const scoresByPrefixToDatasets = (
             : doc.evaluator?.score;
 
           let errTrack = erroredByPrefix.get(prefix);
-          if (!errTrack) {
-            errTrack = new Map();
-            erroredByPrefix.set(prefix, errTrack);
-          }
-          const tally = errTrack.get(evaluatorName) ?? { errored: 0, scored: 0 };
           // A trace evaluator that found no spans reports 'unavailable', not 'error'.
           if (doc.evaluator?.label === 'error' || doc.evaluator?.label === 'unavailable') {
+            if (!errTrack) {
+              errTrack = new Map();
+              erroredByPrefix.set(prefix, errTrack);
+            }
+            const tally = errTrack.get(evaluatorName) ?? { errored: 0, scored: 0 };
             tally.errored += 1;
             errTrack.set(evaluatorName, tally);
           }
@@ -165,8 +165,11 @@ export const scoresByPrefixToDatasets = (
               excluded.unmappedVerdict += 1;
             }
           } else {
-            tally.scored += 1;
-            errTrack.set(evaluatorName, tally);
+            if (errTrack) {
+              const tally = errTrack.get(evaluatorName) ?? { errored: 0, scored: 0 };
+              tally.scored += 1;
+              errTrack.set(evaluatorName, tally);
+            }
 
             let evaluators = byPrefix.get(prefix);
             if (!evaluators) {
@@ -185,7 +188,13 @@ export const scoresByPrefixToDatasets = (
 
   options.onExcluded?.(excluded);
 
-  return [...byPrefix.entries()].map(([prefix, evaluators]) => {
+  // Union with erroredByPrefix: a prefix where every evaluator errored (no numeric score
+  // survived) exists only in erroredByPrefix and must still surface as a completed-but-broken
+  // cell, not silently vanish as ordinary missing data.
+  const allPrefixes = new Set<string>([...byPrefix.keys(), ...erroredByPrefix.keys()]);
+
+  return [...allPrefixes].map((prefix) => {
+    const evaluators = byPrefix.get(prefix) ?? new Map<string, { sum: number; count: number }>();
     // An evaluator that recovered on retry still produced a grade.
     const erroredOut = [...(erroredByPrefix.get(prefix)?.entries() ?? [])]
       .filter(([, tally]) => tally.errored > 0 && tally.scored === 0)
@@ -245,11 +254,21 @@ export const pickLatestExperimentPerModel = (
     lookbackDays,
     now = Date.now(),
     allowSelfJudged = false,
+    rejectWhenAnySelfJudged = true,
     onSelfJudgedRejected,
   }: {
     lookbackDays?: number;
     now?: number;
     allowSelfJudged?: boolean;
+    /**
+     * When `false`, an experiment is only rejected if EVERY judge on it is self-judged
+     * (used for prefix-bucketed suites, whose per-document aggregation in
+     * `scoresByPrefixToDatasets` can separate a mixed independent-judge/self-judge run and
+     * keep the independent verdicts). Defaults to `true`: reject on any self-judged judge,
+     * which is required for the pre-aggregated stats path — it has no per-document filter,
+     * so a mixed run would otherwise publish a mean partly derived from self-judged scores.
+     */
+    rejectWhenAnySelfJudged?: boolean;
     /** Called for each experiment skipped because the grader was the graded model. */
     onSelfJudgedRejected?: (experiment: EvaluationExperimentSummary) => void;
   } = {}
@@ -267,9 +286,12 @@ export const pickLatestExperimentPerModel = (
         if (at <= now) {
           // Skip self-judged runs here so an older, independently judged run can be picked.
           const judges = experimentJudges(experiment);
+          const judgedSelf = judges.map(
+            (judge) => Boolean(judge?.id) && describeJudge(judge?.id ?? '', modelId).selfJudged
+          );
           const rejectedSelfJudged =
             !allowSelfJudged &&
-            judges.some((judge) => judge?.id && describeJudge(judge.id, modelId).selfJudged);
+            (rejectWhenAnySelfJudged ? judgedSelf.some(Boolean) : judgedSelf.every(Boolean));
           if (rejectedSelfJudged) {
             onSelfJudgedRejected?.(experiment);
           } else {
@@ -346,6 +368,7 @@ export const queryMatrixScores = async (
   for (const suiteId of suiteIds) {
     const suiteBranches = toBranchList(branchBySuite?.[suiteId] ?? branch);
     const suiteScoring = scoringBySuite?.[suiteId] ?? scoring;
+    const suitePrefixes = prefixesBySuite[suiteId] ?? [];
     for (const modelId of modelIds) {
       // A suite's models can be split across branches, so union every configured branch.
       const experiments = (
@@ -369,6 +392,12 @@ export const queryMatrixScores = async (
           // Absent config must not be stricter than an explicit `false`: only a
           // resolved excludeSelfJudged===true rejects self-judged runs.
           allowSelfJudged: suiteScoring?.excludeSelfJudged !== true,
+          // Prefix-bucketed suites read raw score documents and apply excludeSelfJudged per
+          // document in scoresByPrefixToDatasets below, so a mixed experiment (one independent
+          // judge + one self-judge) can still contribute its independent verdicts — only reject
+          // outright when EVERY judge on it is self-judged. The pre-aggregated stats path below
+          // has no per-document filter, so it must keep rejecting on ANY self-judged judge.
+          rejectWhenAnySelfJudged: suitePrefixes.length === 0,
           onSelfJudgedRejected: (rejected) => {
             selfJudgedRejected.push(rejected);
           },

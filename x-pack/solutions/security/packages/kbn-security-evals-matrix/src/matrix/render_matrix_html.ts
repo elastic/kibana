@@ -546,6 +546,9 @@ export const renderMatrixHtml = (
     `Generated ${esc(generatedAt)}`,
     provenance.branch ? `branch \`${esc(provenance.branch)}\`` : undefined,
     provenance.lookbackDays !== undefined ? `${provenance.lookbackDays}-day lookback` : undefined,
+    provenance.asOf !== undefined
+      ? `as of ${esc(new Date(provenance.asOf).toISOString().slice(0, 10))} (later runs excluded)`
+      : undefined,
     provenance.commitSha ? `commit \`${esc(provenance.commitSha)}\`` : undefined,
     provenance.buildUrl
       ? isSafeHttpUrl(provenance.buildUrl)

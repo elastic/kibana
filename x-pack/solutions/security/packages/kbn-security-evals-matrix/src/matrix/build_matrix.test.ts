@@ -1050,6 +1050,18 @@ describe('errored-evaluator guard', () => {
     expect(matrix.proprietary[0].cells.triage.kind).toBe('score');
   });
 
+  // Every relevant evaluator errored -> mean is undefined for the dataset, not merely narrowed.
+  // The guard must fire before the "no numeric mean" branch collapses this to `missing`.
+  it('reports insufficient-evaluators (not missing) when every evaluator on the dataset errored', () => {
+    const matrix = buildMatrix(withDatasets([], ['Trajectory', 'SkillInvoked']), guardConfig);
+    const cell = matrix.proprietary[0].cells.triage;
+
+    expect(cell).toEqual({
+      kind: 'insufficient-evaluators',
+      evaluators: ['Trajectory', 'SkillInvoked'],
+    });
+  });
+
   it('does not let an unmeasured cell contribute to Overall', () => {
     const matrix = buildMatrix(withDatasets(survivingSaturatedOnly, ['Trajectory']), guardConfig);
     const overall = matrix.proprietary[0].overall;

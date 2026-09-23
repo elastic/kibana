@@ -330,6 +330,23 @@ describe('renderMatrixHtml', () => {
     expect(html).toContain('abc123');
   });
 
+  it('includes asOf between lookback and commit, matching the markdown renderer', () => {
+    const asOf = Date.parse('2026-05-01T00:00:00.000Z');
+    const html = renderMatrixHtml(mockMatrix, mockConfig, {
+      lookbackDays: 14,
+      asOf,
+      commitSha: 'abc123',
+    });
+    expect(html).toContain('as of 2026-05-01 (later runs excluded)');
+    // Order matters: lookback -> asOf -> commit, same as render_matrix.ts.
+    const lookbackIdx = html.indexOf('14-day lookback');
+    const asOfIdx = html.indexOf('as of 2026-05-01');
+    const commitIdx = html.indexOf('commit `abc123`');
+    expect(lookbackIdx).toBeGreaterThan(-1);
+    expect(asOfIdx).toBeGreaterThan(lookbackIdx);
+    expect(commitIdx).toBeGreaterThan(asOfIdx);
+  });
+
   it('escapes untrusted provenance strings before composing the provenance line', () => {
     const html = renderMatrixHtml(mockMatrix, mockConfig, {
       branch: '</p><img src=x onerror=alert(1)>',

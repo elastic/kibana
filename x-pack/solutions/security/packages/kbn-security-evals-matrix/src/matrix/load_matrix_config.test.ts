@@ -94,6 +94,47 @@ describe('parseMatrixConfig', () => {
     ).toThrow(/array size is \[1001\], but cannot be greater than \[1000\]/);
   });
 
+  it('rejects requireEisJudge/useVerdictLadder on a suite with no examplePrefixes column', () => {
+    expect(() =>
+      parseMatrixConfig({
+        ...minimalConfig,
+        scoring: { requireEisJudge: true },
+      })
+    ).toThrow(/no column declaring "examplePrefixes"/);
+
+    expect(() =>
+      parseMatrixConfig({
+        ...minimalConfig,
+        scoring: { useVerdictLadder: true },
+      })
+    ).toThrow(/no column declaring "examplePrefixes"/);
+  });
+
+  it('accepts requireEisJudge/useVerdictLadder when every suite has an examplePrefixes column', () => {
+    const config = parseMatrixConfig({
+      ...minimalConfig,
+      columns: [
+        {
+          id: 'alert_triage',
+          label: 'Alert Triage',
+          suites: ['security-alert-triage'],
+          examplePrefixes: ['alert-analysis'],
+        },
+      ],
+      scoring: { requireEisJudge: true, useVerdictLadder: true },
+    });
+    expect(config.scoring?.requireEisJudge).toBe(true);
+  });
+
+  it('does NOT require examplePrefixes for excludeSelfJudged (separately enforced pre-aggregation)', () => {
+    expect(() =>
+      parseMatrixConfig({
+        ...minimalConfig,
+        scoring: { excludeSelfJudged: true },
+      })
+    ).not.toThrow();
+  });
+
   it('applies defaults for optional fields', () => {
     const config = parseMatrixConfig(minimalConfig);
 

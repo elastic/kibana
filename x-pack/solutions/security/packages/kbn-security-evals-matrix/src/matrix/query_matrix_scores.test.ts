@@ -128,6 +128,40 @@ describe('pickLatestExperimentPerModel', () => {
     expect(result.get('m1')?.experiment_id).toBe('clean');
   });
 
+  it('rejectWhenAnySelfJudged=false keeps a mixed independent/self-judge experiment', () => {
+    const mixed = experiment({
+      experiment_id: 'mixed',
+      modelId: 'm1',
+      timestamp: '2026-06-09T00:00:00.000Z',
+      evaluator_models: [
+        { id: 'judge', family: 'f', provider: 'p' },
+        { id: 'm1', family: 'f', provider: 'p' },
+      ],
+    });
+
+    // Default (pre-aggregated stats path): any self-judged judge rejects the whole experiment.
+    const strict = pickLatestExperimentPerModel([mixed]);
+    expect(strict.get('m1')).toBeUndefined();
+
+    // Prefix-bucketed suites: only an ALL-self-judged experiment is rejected outright.
+    const lenient = pickLatestExperimentPerModel([mixed], { rejectWhenAnySelfJudged: false });
+    expect(lenient.get('m1')?.experiment_id).toBe('mixed');
+  });
+
+  it('rejectWhenAnySelfJudged=false still rejects an experiment judged only by self-judges', () => {
+    const allSelfJudged = experiment({
+      experiment_id: 'all-self',
+      modelId: 'm1',
+      timestamp: '2026-06-09T00:00:00.000Z',
+      evaluator_models: [{ id: 'm1', family: 'f', provider: 'p' }],
+    });
+
+    const result = pickLatestExperimentPerModel([allSelfJudged], {
+      rejectWhenAnySelfJudged: false,
+    });
+    expect(result.get('m1')).toBeUndefined();
+  });
+
   it('ignores experiments without a task model id', () => {
     const result = pickLatestExperimentPerModel([
       experiment({ experiment_id: 'no-model', modelId: undefined }),
@@ -1009,5 +1043,22 @@ describe('scoresByPrefixToDatasets errored-out tracking', () => {
       ['alert-analysis']
     );
     expect(datasets[0].erroredOutEvaluators).toBeUndefined();
+  });
+
+  it('still surfaces a prefix where every evaluator errored and none ever scored', () => {
+    // No doc for this prefix ever produces a numeric score, so byPrefix never gets an entry —
+    // only the erroredByPrefix union (allPrefixes) keeps this dataset from vanishing entirely.
+    const datasets = scoresByPrefixToDatasets(
+      [
+        doc('alert-analysis-a', 'Trajectory', undefined, 'error'),
+        doc('alert-analysis-b', 'Trajectory', undefined, 'error'),
+      ],
+      ['alert-analysis']
+    );
+
+    expect(datasets).toHaveLength(1);
+    expect(datasets[0].datasetId).toBe('prefix:alert-analysis');
+    expect(datasets[0].evaluators).toEqual([]);
+    expect(datasets[0].erroredOutEvaluators).toEqual(['Trajectory']);
   });
 });

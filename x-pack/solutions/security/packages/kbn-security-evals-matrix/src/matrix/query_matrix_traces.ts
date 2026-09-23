@@ -13,6 +13,29 @@ import type { MatrixTraceData, MatrixTraceEntry, TraceStep } from './trace_types
 import { traceKey } from './trace_types';
 import type { PathContract } from './trajectory_agreement';
 import { answersFromDocs, pathContractFromDocs, trailsFromDocs } from './trajectory_agreement';
+import type { JudgeVerdict } from './judge_agreement';
+
+/** Converts one score document into a judge verdict, when it carries an identifiable judge + score. */
+const verdictFromScoreDoc = (
+  score: EvaluationScoreDocument,
+  modelId: string
+): JudgeVerdict | undefined => {
+  const example = score.example?.id;
+  const evaluator = score.evaluator?.name;
+  const judgeId = score.evaluator?.model?.id;
+  const evalScore = score.evaluator?.score;
+  if (!example || !evaluator || !judgeId || typeof evalScore !== 'number') {
+    return undefined;
+  }
+  return {
+    modelId,
+    judgeId,
+    example,
+    repetition: score.task?.repetition_index ?? 0,
+    evaluator,
+    score: evalScore,
+  };
+};
 
 /** Runs `fn` over `items` with at most `limit` in flight, preserving input order. */
 const mapWithConcurrency = async <T, R>(
@@ -213,7 +236,8 @@ const processExampleBatch = (
   suiteId: string,
   executionId: string,
   traces: MatrixTraceData,
-  examplePrefixes: ReadonlySet<string> = new Set()
+  examplePrefixes: ReadonlySet<string> = new Set(),
+  judgeVerdictsOut?: JudgeVerdict[]
 ): boolean => {
   const relevant = scores
     .filter((score) => score.task?.model?.id === modelId)
@@ -225,6 +249,13 @@ const processExampleBatch = (
     });
 
   if (relevant.length === 0) return false;
+
+  if (judgeVerdictsOut) {
+    for (const score of relevant) {
+      const verdict = verdictFromScoreDoc(score, modelId);
+      if (verdict) judgeVerdictsOut.push(verdict);
+    }
+  }
 
   const entry = extractTraceFromScore(relevant[0]);
   entry.scores = exampleScoresByEvaluator(relevant);
@@ -275,6 +306,9 @@ const processExampleBatch = (
       if (traces[suiteTraceKey] === undefined) {
         traces[suiteTraceKey] = fallbackEntry;
       }
+      // A fallback trace was resolved even though the newest doc was incomplete —
+      // the caller's missing-example accounting must not double-count this example.
+      return true;
     }
   }
 
@@ -316,7 +350,8 @@ export const queryMatrixTraces = async (
   aggregated: AggregatedModelScores[],
   traceCache?: Record<string, EvaluationScoreDocument[]>,
   toolCallWarnAbove: number = 0,
-  modelAliases: ReadonlyMap<string, readonly string[]> = new Map()
+  modelAliases: ReadonlyMap<string, readonly string[]> = new Map(),
+  judgeVerdictsOut?: JudgeVerdict[]
 ): Promise<MatrixTraceData> => {
   const traces: MatrixTraceData = {};
 
@@ -522,7 +557,8 @@ export const queryMatrixTraces = async (
         ref.suiteId,
         ref.executionId,
         traces,
-        examplePrefixes
+        examplePrefixes,
+        judgeVerdictsOut
       );
       if (!ok) missing.push(exampleId);
     }
