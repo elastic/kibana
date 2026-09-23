@@ -43,6 +43,15 @@ export type ChartIntentJudge = (input: {
   actual: ActualChartForm;
 }) => Promise<ChartIntentVerdict>;
 
+interface JudgedVisualization {
+  index: number;
+  actual: ActualChartForm;
+  satisfies: boolean;
+  reason: string;
+  /** Set when the judge produced no verdict; `satisfies` carries no signal then. */
+  fallback?: 'judge_no_tool_call';
+}
+
 const SYSTEM_PROMPT = `You judge whether the FORM of a generated chart satisfies a user's visualization request.
 
 You receive the user's request, the gold chart form the dataset author considers correct, and the chart form the agent produced. Chart form means:
@@ -272,24 +281,18 @@ export function createChartTypeVsIntentEvaluator<
 
       const question = questionExtractor(input);
       const details = await Promise.all(
-        visualizations.map(async (visualization, index) => {
+        visualizations.map(async (visualization, index): Promise<JudgedVisualization> => {
           const actual = describeActualChartForm(visualization);
           try {
             const { verdict, reason } = await judge({ question, gold, actual });
-            return {
-              index,
-              actual,
-              satisfies: verdict === 'satisfies',
-              reason,
-              fallback: undefined as 'judge_no_tool_call' | undefined,
-            };
+            return { index, actual, satisfies: verdict === 'satisfies', reason };
           } catch (error) {
             return {
               index,
               actual,
               satisfies: false,
               reason: error instanceof Error ? error.message : String(error),
-              fallback: 'judge_no_tool_call' as const,
+              fallback: 'judge_no_tool_call',
             };
           }
         })
