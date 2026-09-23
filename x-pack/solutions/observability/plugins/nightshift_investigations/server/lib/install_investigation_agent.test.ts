@@ -11,10 +11,8 @@ import {
   NIGHTSHIFT_INVESTIGATION_AGENT_ID,
   NIGHTSHIFT_INVESTIGATION_AGENT_TYPE_ID,
 } from '../agents/investigation';
-import {
-  installDeductiveInvestigationAgent,
-  installInvestigationAgent,
-} from './install_investigation_agent';
+import { installDeductiveInvestigationAgent } from './install_deductive_investigation_agent';
+import { installInvestigationAgent } from './install_investigation_agent';
 
 describe('installInvestigationAgent', () => {
   it('ensures a system-owned persisted typed agent in the requested space', async () => {
@@ -45,12 +43,18 @@ describe('installInvestigationAgent', () => {
 
   it('ensures the deductive investigator so Cortex/Memory hydrate is attached in the UI', async () => {
     const agentBuilder = agentBuilderMocks.createStart();
+    const availability = { cacheMode: 'space' as const, handler: jest.fn() };
 
-    await installDeductiveInvestigationAgent({ agentBuilder, spaceId: 'default' });
+    await installDeductiveInvestigationAgent({
+      agentBuilder,
+      spaceId: 'default',
+      availability,
+    });
 
     expect(agentBuilder.agents.ensure).toHaveBeenCalledWith(
       expect.objectContaining({
         spaceId: 'default',
+        availability,
         agent: expect.objectContaining({
           id: 'significant-events.deductive-investigation',
           type: 'platform.sig_events.deductive-investigation-type',
