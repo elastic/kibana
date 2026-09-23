@@ -70,6 +70,23 @@ describe('describe_ai_index tool', () => {
     });
   });
 
+  it('logs at debug and returns an error result when the backing store is not readable', async () => {
+    const { deps, readService } = createAiIndexToolDepsMock();
+    const error = Object.assign(new Error("AI index 'parks' is not readable: unauthorized"), {
+      name: 'AiIndexNotReadableError',
+    });
+    readService.describe.mockRejectedValue(error);
+
+    const ctx = agentBuilderMocks.tools.createHandlerContext();
+    const result = await createDescribeAiIndexTool(deps).handler({ ai_index_id: 'parks' }, ctx);
+
+    expect(result).toEqual({
+      results: [{ type: ToolResultType.error, data: { message: error.message } }],
+    });
+    expect(ctx.logger.debug).toHaveBeenCalled();
+    expect(ctx.logger.error).not.toHaveBeenCalled();
+  });
+
   it('returns an error result when the caller lacks the read privilege', async () => {
     const { deps } = createAiIndexToolDepsMock({ authorized: false });
 

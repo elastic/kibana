@@ -58,10 +58,14 @@ export const createDescribeAiIndexTool = (
       return { results: [{ type: ToolResultType.other, data: { response } }] };
     } catch (error) {
       const message = getErrorMessage(error);
-      context.logger.error(
-        `Error running ${contextEngineAiIndexTools.describeAiIndex}: ${message}`,
-        { error }
-      );
+      if (error instanceof Error && error.name === 'AiIndexNotReadableError') {
+        context.logger.debug(`${contextEngineAiIndexTools.describeAiIndex}: ${message}`);
+      } else {
+        context.logger.error(
+          `Error running ${contextEngineAiIndexTools.describeAiIndex}: ${message}`,
+          { error }
+        );
+      }
       return { results: [{ type: ToolResultType.error, data: { message } }] };
     }
   },
