@@ -6,5 +6,6 @@
  */
 
 export { SandboxSecretsConflictError } from './sandbox_secrets_conflict_error';
+export { SandboxSecretsDisabledError } from './sandbox_secrets_disabled_error';
 export { SandboxSecretsUnavailableError } from './sandbox_secrets_unavailable_error';
 export { SandboxSecretsValidationError } from './sandbox_secrets_validation_error';

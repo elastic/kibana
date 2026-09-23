@@ -7,6 +7,7 @@
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
+  coreMock,
   httpServerMock,
   loggingSystemMock,
   savedObjectsClientMock,
@@ -15,11 +16,12 @@ import {
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
+import { NIGHTSHIFT_API_PRIVILEGES, NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import { NIGHTSHIFT_SECRETS_SO_TYPE } from '../saved_objects';
 import { createSandboxSecretsClient } from './sandbox_secrets_client';
 import {
   SandboxSecretsConflictError,
+  SandboxSecretsDisabledError,
   SandboxSecretsUnavailableError,
   SandboxSecretsValidationError,
 } from './errors';
@@ -33,6 +35,7 @@ const setup = ({
   withSecurity = true,
   useRbac = true,
   hasReadPrivilege = true,
+  nightshiftEnabled = true,
 }: {
   canEncrypt?: boolean;
   storedValues?: Record<string, string>;
@@ -40,7 +43,13 @@ const setup = ({
   withSecurity?: boolean;
   useRbac?: boolean;
   hasReadPrivilege?: boolean;
+  nightshiftEnabled?: boolean;
 } = {}) => {
+  const featureFlags = coreMock.createStart().featureFlags;
+  featureFlags.getBooleanValue.mockImplementation(async (flag) =>
+    flag === NIGHTSHIFT_ENABLED_FLAG ? nightshiftEnabled : false
+  );
+
   const savedObjects = savedObjectsServiceMock.createStartContract();
   const soClient = savedObjectsClientMock.create();
   soClient.asScopedToNamespace.mockReturnValue(soClient);
@@ -92,6 +101,7 @@ const setup = ({
 
   const client = createSandboxSecretsClient({
     getDeps: () => ({
+      featureFlags,
       savedObjects,
       encryptedSavedObjects,
       spaces,
@@ -148,6 +158,44 @@ describe('createSandboxSecretsClient', () => {
         expect.objectContaining({ includedHiddenTypes: [NIGHTSHIFT_SECRETS_SO_TYPE] })
       );
       expect(soClient.asScopedToNamespace).toHaveBeenCalledWith('team-a');
+    });
+  });
+
+  describe('when the nightshift.enabled flag is off', () => {
+    it('refuses to list or replace secrets', async () => {
+      const { client, soClient, request } = setup({
+        storedValues: { A_KEY: 'value-123' },
+        nightshiftEnabled: false,
+      });
+
+      await expect(client.listKeys(request)).rejects.toBeInstanceOf(SandboxSecretsDisabledError);
+      await expect(
+        client.replaceEntries(request, { entries: [{ key: 'A_KEY', value: 'value-456' }] })
+      ).rejects.toBeInstanceOf(SandboxSecretsDisabledError);
+      expect(soClient.find).not.toHaveBeenCalled();
+      expect(soClient.create).not.toHaveBeenCalled();
+    });
+
+    it('refuses sandbox access without decrypting', async () => {
+      const { client, getDecryptedAsInternalUser, request } = setup({
+        storedValues: { A_KEY: 'value-123' },
+        nightshiftEnabled: false,
+      });
+
+      await expect(client.resolveForCommand(request, ['A_KEY'])).resolves.toEqual({
+        errorMessage: expect.stringContaining('Nightshift is not enabled'),
+      });
+      await expect(client.listKeysForSandbox(request)).resolves.toEqual([]);
+      expect(getDecryptedAsInternalUser).not.toHaveBeenCalled();
+    });
+
+    it('still returns redaction values', async () => {
+      const { client, request } = setup({
+        storedValues: { A_KEY: 'value-123' },
+        nightshiftEnabled: false,
+      });
+
+      await expect(client.getRedactionValues(request)).resolves.toEqual(['value-123']);
     });
   });
 

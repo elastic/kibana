@@ -14,6 +14,8 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { ZodObject } from '@kbn/zod/v4';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import { registerRoutes } from '@kbn/server-route-repository';
 import type { KibanaRequest } from '@kbn/core/server';
@@ -47,6 +49,7 @@ import {
   createSandboxOutputRedactorProvider,
   withSandboxOutputRedaction,
 } from './tools/sandbox_bash/sandbox_output_redaction';
+import { createNightshiftEnabledAvailability } from './tools/sandbox_bash/sandbox_tool_availability';
 import {
   nightshiftInvestigationSavedObjectType,
   nightshiftSecretsEncryptionParams,
@@ -117,6 +120,7 @@ export class NightshiftInvestigationsPlugin
 
     const sandboxSecretsClient = createSandboxSecretsClient({
       getDeps: () => ({
+        featureFlags: this.featureFlags,
         savedObjects: this.savedObjects,
         encryptedSavedObjects: this.encryptedSavedObjectsStart,
         security: this.securityStart,
@@ -181,48 +185,45 @@ export class NightshiftInvestigationsPlugin
           }),
           logger: sandboxLogger.get('output_redaction'),
         };
+        const availability = createNightshiftEnabledAvailability(() => this.featureFlags);
+        const { agentBuilder } = plugins;
+        const registerSandboxTool = <TSchema extends ZodObject>(
+          tool: BuiltinToolDefinition<TSchema>
+        ) =>
+          agentBuilder.tools.register({
+            ...withSandboxOutputRedaction(tool, redaction),
+            availability,
+          });
 
-        plugins.agentBuilder.tools.register(
-          withSandboxOutputRedaction(
-            createSandboxBashTool({
-              getSandboxStart,
-              sandboxWorkspaceManager,
-              resolveConnectorCredentials,
-              sandboxSecretsClient,
-              logger: sandboxLogger,
-            }),
-            redaction
-          )
+        registerSandboxTool(
+          createSandboxBashTool({
+            getSandboxStart,
+            sandboxWorkspaceManager,
+            resolveConnectorCredentials,
+            sandboxSecretsClient,
+            logger: sandboxLogger,
+          })
         );
-        plugins.agentBuilder.tools.register(
-          withSandboxOutputRedaction(
-            createSandboxViewFileTool({
-              getSandboxStart,
-              sandboxWorkspaceManager,
-              logger: sandboxLogger,
-            }),
-            redaction
-          )
+        registerSandboxTool(
+          createSandboxViewFileTool({
+            getSandboxStart,
+            sandboxWorkspaceManager,
+            logger: sandboxLogger,
+          })
         );
-        plugins.agentBuilder.tools.register(
-          withSandboxOutputRedaction(
-            createSandboxStrReplaceTool({
-              getSandboxStart,
-              sandboxWorkspaceManager,
-              logger: sandboxLogger,
-            }),
-            redaction
-          )
+        registerSandboxTool(
+          createSandboxStrReplaceTool({
+            getSandboxStart,
+            sandboxWorkspaceManager,
+            logger: sandboxLogger,
+          })
         );
-        plugins.agentBuilder.tools.register(
-          withSandboxOutputRedaction(
-            createSandboxWriteFileTool({
-              getSandboxStart,
-              sandboxWorkspaceManager,
-              logger: sandboxLogger,
-            }),
-            redaction
-          )
+        registerSandboxTool(
+          createSandboxWriteFileTool({
+            getSandboxStart,
+            sandboxWorkspaceManager,
+            logger: sandboxLogger,
+          })
         );
       }
     }

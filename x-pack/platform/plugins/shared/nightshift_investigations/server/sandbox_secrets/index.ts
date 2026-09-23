@@ -13,6 +13,7 @@ export {
 } from './sandbox_secrets_client';
 export {
   SandboxSecretsConflictError,
+  SandboxSecretsDisabledError,
   SandboxSecretsUnavailableError,
   SandboxSecretsValidationError,
 } from './errors';

@@ -8,6 +8,7 @@
 import { isBoom } from '@hapi/boom';
 import {
   SandboxSecretsConflictError,
+  SandboxSecretsDisabledError,
   SandboxSecretsUnavailableError,
   SandboxSecretsValidationError,
 } from '../sandbox_secrets';
@@ -32,6 +33,10 @@ describe('rethrowSandboxSecretsError', () => {
 
   it('maps version conflicts to 409', () => {
     expect(statusOf(new SandboxSecretsConflictError())).toBe(409);
+  });
+
+  it('maps a disabled Nightshift to 404', () => {
+    expect(statusOf(new SandboxSecretsDisabledError())).toBe(404);
   });
 
   it('rethrows unknown errors unchanged', () => {

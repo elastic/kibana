@@ -6,7 +6,8 @@
  */
 
 import { expect } from '@kbn/scout/api';
-import { tags } from '@kbn/scout';
+import { tags, type ApiServicesFixture } from '@kbn/scout';
+import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import {
   apiTest,
   NIGHTSHIFT_MANAGE_ROLE,
@@ -20,6 +21,9 @@ const SPACE_ID = uniqueId('nightshift-secrets-space');
 const OTHER_SPACE_ID = uniqueId('nightshift-secrets-other');
 const GITHUB_TOKEN = 'ghp_scout_secret_value';
 
+const setNightshiftEnabled = (apiServices: ApiServicesFixture, enabled: boolean | null) =>
+  apiServices.core.settings({ 'feature_flags.overrides': { [NIGHTSHIFT_ENABLED_FLAG]: enabled } });
+
 apiTest.describe(
   '/internal/nightshift/sandbox_secrets',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
@@ -27,16 +31,30 @@ apiTest.describe(
     let manageCookie: Record<string, string>;
     let readCookie: Record<string, string>;
 
-    apiTest.beforeAll(async ({ apiServices, samlAuth }) => {
+    apiTest.beforeAll(async ({ apiServices, samlAuth, config }) => {
+      // The API is gated on the nightshift.enabled flag, which can only be overridden where
+      // coreApp.allowDynamicConfigOverrides is set (Scout's local configs), not on Cloud.
+      apiTest.skip(
+        config.isCloud === true,
+        `Cannot override '${NIGHTSHIFT_ENABLED_FLAG}' on Cloud deployments`
+      );
+      if (config.isCloud) {
+        return;
+      }
+      await setNightshiftEnabled(apiServices, true);
       await apiServices.spaces.create({ id: SPACE_ID, name: SPACE_ID });
       await apiServices.spaces.create({ id: OTHER_SPACE_ID, name: OTHER_SPACE_ID });
       ({ cookieHeader: manageCookie } = await samlAuth.asInteractiveUser(NIGHTSHIFT_MANAGE_ROLE));
       ({ cookieHeader: readCookie } = await samlAuth.asInteractiveUser(NIGHTSHIFT_READ_ROLE));
     });
 
-    apiTest.afterAll(async ({ apiServices }) => {
+    apiTest.afterAll(async ({ apiServices, config }) => {
+      if (config.isCloud) {
+        return;
+      }
       await apiServices.spaces.delete(SPACE_ID);
       await apiServices.spaces.delete(OTHER_SPACE_ID);
+      await setNightshiftEnabled(apiServices, null);
     });
 
     apiTest('stores secrets and only ever returns their keys', async ({ apiClient }) => {
@@ -122,6 +140,21 @@ apiTest.describe(
         entries: [{ key: 'READ_ONLY', value: 'read-only-value' }],
       });
       expect(update).toHaveStatusCode(403);
+    });
+
+    apiTest('returns 404 while Nightshift is disabled', async ({ apiClient, apiServices }) => {
+      await setNightshiftEnabled(apiServices, false);
+      try {
+        const listed = await getSandboxSecrets(apiClient, manageCookie, SPACE_ID);
+        expect(listed).toHaveStatusCode(404);
+
+        const update = await putSandboxSecrets(apiClient, manageCookie, SPACE_ID, {
+          entries: [{ key: 'DISABLED', value: 'disabled-value' }],
+        });
+        expect(update).toHaveStatusCode(404);
+      } finally {
+        await setNightshiftEnabled(apiServices, true);
+      }
     });
   }
 );

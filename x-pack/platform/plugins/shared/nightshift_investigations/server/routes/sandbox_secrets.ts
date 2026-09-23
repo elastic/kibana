@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { badRequest, conflict } from '@hapi/boom';
+import { badRequest, conflict, notFound } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import type {
@@ -21,12 +21,16 @@ import {
 } from '../../common/sandbox_secrets';
 import {
   SandboxSecretsConflictError,
+  SandboxSecretsDisabledError,
   SandboxSecretsUnavailableError,
   SandboxSecretsValidationError,
 } from '../sandbox_secrets';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
 
 export const rethrowSandboxSecretsError = (error: unknown): never => {
+  if (error instanceof SandboxSecretsDisabledError) {
+    throw notFound();
+  }
   if (
     error instanceof SandboxSecretsValidationError ||
     error instanceof SandboxSecretsUnavailableError
@@ -49,8 +53,13 @@ const getSandboxSecretsRoute = createNightshiftInvestigationsServerRoute({
   },
   security: { authz: { requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read] } },
   params: z.object({}),
-  handler: async ({ request, sandboxSecretsClient }): Promise<GetSandboxSecretsResponse> =>
-    sandboxSecretsClient.listKeys(request),
+  handler: async ({ request, sandboxSecretsClient }): Promise<GetSandboxSecretsResponse> => {
+    try {
+      return await sandboxSecretsClient.listKeys(request);
+    } catch (error) {
+      return rethrowSandboxSecretsError(error);
+    }
+  },
 });
 
 const putSandboxSecretsRoute = createNightshiftInvestigationsServerRoute({

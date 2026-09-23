@@ -12,7 +12,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
+import { NIGHTSHIFT_API_PRIVILEGES, NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import type {
   GetSandboxSecretsResponse,
   PutSandboxSecretsRequest,
@@ -26,6 +26,7 @@ import {
 import { NIGHTSHIFT_SECRETS_SO_TYPE, type NightshiftSecretsAttributes } from '../saved_objects';
 import {
   SandboxSecretsConflictError,
+  SandboxSecretsDisabledError,
   SandboxSecretsUnavailableError,
   SandboxSecretsValidationError,
 } from './errors';
@@ -39,7 +40,9 @@ export interface SandboxSecretsEnv {
 export type SandboxSecretsResolution = SandboxSecretsEnv | { errorMessage: string };
 
 export interface SandboxSecretsClient {
+  /** Throws {@link SandboxSecretsDisabledError} unless the `nightshift.enabled` flag is on. */
   listKeys: (request: KibanaRequest) => Promise<GetSandboxSecretsResponse>;
+  /** Throws {@link SandboxSecretsDisabledError} unless the `nightshift.enabled` flag is on. */
   replaceEntries: (
     request: KibanaRequest,
     params: PutSandboxSecretsRequest
@@ -58,6 +61,7 @@ export interface SandboxSecretsClient {
 }
 
 export interface SandboxSecretsClientDeps {
+  featureFlags?: CoreStart['featureFlags'];
   savedObjects?: CoreStart['savedObjects'];
   encryptedSavedObjects?: EncryptedSavedObjectsPluginStart;
   security?: SecurityPluginStart;
@@ -161,10 +165,22 @@ export const createSandboxSecretsClient = ({
     }
   };
 
+  const isNightshiftEnabled = async (): Promise<boolean> =>
+    (await getDeps().featureFlags?.getBooleanValue(NIGHTSHIFT_ENABLED_FLAG, false)) ?? false;
+
+  const assertNightshiftEnabled = async (): Promise<void> => {
+    if (!(await isNightshiftEnabled())) {
+      throw new SandboxSecretsDisabledError();
+    }
+  };
+
   // Deny by default: without the security plugin the user's privileges cannot be verified.
   const getSandboxAccessDeniedReason = async (
     request: KibanaRequest
   ): Promise<string | undefined> => {
+    if (!(await isNightshiftEnabled())) {
+      return new SandboxSecretsDisabledError().message;
+    }
     const { security } = getDeps();
     if (!security) {
       return 'Sandbox secrets are unavailable: the security plugin is not available.';
@@ -183,6 +199,7 @@ export const createSandboxSecretsClient = ({
 
   return {
     listKeys: async (request) => {
+      await assertNightshiftEnabled();
       const existing = await findSecretsObject(request);
       if (!existing) {
         return { keys: [], canEncrypt };
@@ -191,6 +208,7 @@ export const createSandboxSecretsClient = ({
     },
 
     replaceEntries: async (request, params) => {
+      await assertNightshiftEnabled();
       validateEntries(params);
 
       const existing = await findSecretsObject(request);
