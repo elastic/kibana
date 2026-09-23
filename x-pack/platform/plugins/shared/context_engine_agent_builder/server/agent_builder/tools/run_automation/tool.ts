@@ -49,9 +49,9 @@ export const createRunAutomationTool = ({
   annotations: {
     title: 'Run workflow automation',
     readOnlyHint: false,
-    destructiveHint: false,
+    destructiveHint: true,
     idempotentHint: false,
-    openWorldHint: false,
+    openWorldHint: true,
   },
   description: dedent`
     Run a saved Context Engine workflow automation over the full corpus.
@@ -108,21 +108,23 @@ export const createRunAutomationTool = ({
         };
       }
 
-      const enableNotice =
-        saved?.enabled !== true
-          ? ' The workflow is currently disabled and will be enabled in order to run, and stays enabled afterwards even if the run fails.'
-          : '';
-
       const canUpdate = await hasWorkflowUpdatePrivilege({
         security: await getSecurityStart(),
         request,
         spaceId,
       });
 
+      // When the workflow state is unknown (no read privilege), use conditional language rather than
+      // asserting that it is disabled — execute privilege does not imply read privilege, so this is
+      // a supported combination, not a defensive edge case.
       const enableBlockNotice =
-        saved?.enabled !== true && !canUpdate
-          ? ' The workflow is disabled and you do not have permission to enable it, so it cannot be run.'
-          : enableNotice;
+        saved !== undefined && saved.enabled !== true
+          ? canUpdate
+            ? ' The workflow is currently disabled and will be enabled in order to run, and stays enabled afterwards even if the run fails.'
+            : ' The workflow is disabled and you do not have permission to enable it, so it cannot be run.'
+          : saved === undefined
+          ? ' If the workflow is disabled, it will be enabled in order to run and stays enabled afterwards even if the run fails.'
+          : '';
 
       return {
         title: 'Run workflow automation',

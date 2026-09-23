@@ -56,18 +56,22 @@ export const runAutomationHandler = async ({
 
   const serverBasePath = (await getCoreStart()).http.basePath.serverBasePath;
   const spaceSegment = spaceId && spaceId !== 'default' ? `/s/${spaceId}` : '';
-  const workflowUrl = `${serverBasePath}${spaceSegment}/app/workflows/${encodeURIComponent(
+  const workflowBaseUrl = `${serverBasePath}${spaceSegment}/app/workflows/${encodeURIComponent(
     params.workflowId
   )}`;
 
   if (!runResult.started) {
-    return { ...runResult, workflowUrl };
+    return { ...runResult, workflowUrl: workflowBaseUrl };
   }
+
+  const workflowUrl = `${workflowBaseUrl}?tab=executions&executionId=${encodeURIComponent(
+    runResult.executionId ?? ''
+  )}`;
 
   return {
     ...runResult,
     workflowUrl,
-    statusCheckHint: `Use platform.core.get_workflow_execution_status with execution_id "${runResult.executionId}" to check progress. The user can ask you for a status update at any time.`,
+    statusCheckHint: `Use platform.core.get_workflow_execution_status with executionId "${runResult.executionId}" to check progress. The user can ask you for a status update at any time.`,
   };
 };
 
