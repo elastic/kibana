@@ -6,29 +6,80 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import {
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiPageHeader,
   EuiSpacer,
-  EuiText,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
-import { useHistory } from 'react-router-dom';
-import * as i18n from './translations';
+import { css } from '@emotion/react';
+
+const getPndGreeting = (): string => {
+  const hour = new Date().getHours();
+
+  if (hour < 12) {
+    return i18n.translate('xpack.pnd.hero.morningGreetingDescription', {
+      defaultMessage: 'Good morning!',
+    });
+  }
+
+  if (hour < 18) {
+    return i18n.translate('xpack.pnd.hero.afternoonGreetingDescription', {
+      defaultMessage: 'Good afternoon!',
+    });
+  }
+
+  return i18n.translate('xpack.pnd.hero.eveningGreetingDescription', {
+    defaultMessage: 'Good evening!',
+  });
+};
+
+const getPndHeroTitle = ({
+  isQueueEmpty,
+  isLoading,
+  hasNeedsAction,
+  eventCount,
+}: {
+  isQueueEmpty: boolean;
+  isLoading: boolean;
+  hasNeedsAction: boolean;
+  eventCount: number;
+}): string => {
+  if (isLoading) {
+    return i18n.translate('xpack.pnd.hero.checkingTitle', {
+      defaultMessage: 'Looking into your data...',
+    });
+  }
+
+  if (isQueueEmpty) {
+    return i18n.translate('xpack.pnd.hero.noEventsTitle', {
+      defaultMessage: 'No events found',
+    });
+  }
+
+  if (hasNeedsAction) {
+    return i18n.translate('xpack.pnd.hero.needsActionTitle', {
+      defaultMessage: '{eventCount, plural, one {# action needs you} other {# actions need you}}',
+      values: {
+        eventCount,
+      },
+    });
+  }
+
+  return i18n.translate('xpack.pnd.hero.allClearTitle', {
+    defaultMessage: "You're all caught up",
+  });
+};
 
 export interface PndPageHeaderProps {
-  title: React.ReactNode;
-  subtitle?: React.ReactNode;
-  /** Controls rendered inline to the left of the title (same header row). */
-  leftSideItems?: React.ReactNode[];
-  rightSideItems?: React.ReactNode[];
-  border?: boolean;
-  backTo?: { path: string; label?: string };
-  bottomSpacer?: boolean;
+  isQueueEmpty?: boolean;
+  isLoading?: boolean;
+  eventCount?: number;
 }
-
 /**
  * Page header for PND routes.
  *
@@ -38,77 +89,80 @@ export interface PndPageHeaderProps {
  * which pushes Watches (and any page with actions) down vs placeholders.
  */
 export const PndPageHeader: React.FC<PndPageHeaderProps> = ({
-  title,
-  subtitle,
-  leftSideItems,
-  rightSideItems,
-  border = false,
-  backTo,
-  bottomSpacer = true,
+  isQueueEmpty = false,
+  isLoading = false,
+  eventCount = 0,
 }) => {
-  const history = useHistory();
-  const leadingItems = leftSideItems?.filter(Boolean) ?? [];
-  const trailingItems = rightSideItems?.filter(Boolean) ?? [];
-
+  const { euiTheme } = useEuiTheme();
+  const title = getPndHeroTitle({
+    isQueueEmpty,
+    isLoading,
+    hasNeedsAction: eventCount > 0,
+    eventCount,
+  });
   return (
     <>
-      {backTo ? (
-        <>
-          <EuiButtonEmpty
-            iconType="arrowLeft"
-            flush="left"
-            onClick={() => history.push(backTo.path)}
-            data-test-subj="pndPageHeaderBack"
-          >
-            {backTo.label ?? i18n.BACK_DEFAULT}
-          </EuiButtonEmpty>
-          <EuiSpacer size="s" />
-        </>
-      ) : null}
-      <EuiPageHeader alignItems="center" bottomBorder={border} data-test-subj="pndPageHeader">
+      <EuiPageHeader
+        alignItems="center"
+        bottomBorder={false}
+        responsive
+        data-test-subj="pndPageHeader"
+      >
         <EuiFlexGroup
           alignItems="center"
-          justifyContent="spaceBetween"
-          gutterSize="l"
+          justifyContent="flexStart"
+          gutterSize="m"
           responsive={false}
           wrap
         >
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-              {leadingItems.map((item, index) => (
-                <EuiFlexItem key={index} grow={false}>
-                  {item}
-                </EuiFlexItem>
-              ))}
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="l">
-                  <h1>{title}</h1>
-                </EuiTitle>
-                {subtitle ? (
-                  <>
-                    <EuiSpacer size="xs" />
-                    <EuiText color="subdued" size="s">
-                      {typeof subtitle === 'string' ? <p>{subtitle}</p> : subtitle}
-                    </EuiText>
-                  </>
-                ) : null}
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <div
+              aria-label={i18n.translate('xpack.pnd.hero.pndIconAriaLabel', {
+                defaultMessage: 'PND',
+              })}
+              role="img"
+              css={css`
+                align-items: center;
+                border: 1px solid ${euiTheme.colors.lightShade};
+                border-radius: 50%;
+                color: ${euiTheme.colors.textAssistance};
+                display: inline-flex;
+                height: calc(${euiTheme.size.xxl} + ${euiTheme.size.s});
+                justify-content: center;
+                position: relative;
+                width: calc(${euiTheme.size.xxl} + ${euiTheme.size.s});
+                transition: background ${euiTheme.animation.slow} ease,
+                  border-color ${euiTheme.animation.slow} ease;
+              `}
+            >
+              <EuiIcon type="sun" size="m" aria-hidden={true} />
+              <span
+                style={{
+                  display: 'inline-block',
+                  background: `${euiTheme.colors.danger}`,
+                  width: `${euiTheme.size.s}`,
+                  height: `${euiTheme.size.s}`,
+                  borderRadius: '50%',
+                  boxShadow: `0 0 0 2px ${euiTheme.colors.textGhost}`,
+                  position: 'absolute',
+                  pointerEvents: 'none',
+                  top: '1px',
+                  right: '1px',
+                }}
+              />
+            </div>
           </EuiFlexItem>
-          {trailingItems.length > 0 ? (
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
-                {trailingItems.map((item, index) => (
-                  <EuiFlexItem key={index} grow={false}>
-                    {item}
-                  </EuiFlexItem>
-                ))}
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          ) : null}
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="m" css={{ fontWeight: 500 }}>
+              <h1>
+                <span style={{ color: euiTheme.colors.mediumShade }}>{getPndGreeting()}</span>{' '}
+                <span>{title}</span>
+              </h1>
+            </EuiTitle>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPageHeader>
-      {bottomSpacer ? <EuiSpacer size="l" /> : null}
+      <EuiSpacer size="l" />
     </>
   );
 };

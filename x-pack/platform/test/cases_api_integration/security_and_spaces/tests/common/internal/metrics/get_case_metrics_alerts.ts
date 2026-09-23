@@ -7,7 +7,11 @@
 
 import expect from '@kbn/expect';
 import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
-import { getPostCaseRequest, postCommentAlertReq } from '../../../../../common/lib/mock';
+import {
+  getPostCaseRequest,
+  postCommentAlertReq,
+  postCommentEntityReq,
+} from '../../../../../common/lib/mock';
 
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import {
@@ -101,6 +105,121 @@ export default ({ getService }: FtrProviderContext): void => {
             { name: 'jf9e87gsut', count: 1 },
           ])
         ).to.be(true);
+      });
+    });
+
+    describe('alert details merged with entity attachments', () => {
+      before(async () => {
+        await esArchiver.load(
+          'x-pack/platform/test/fixtures/es_archives/cases/signals/hosts_users'
+        );
+      });
+
+      after(async () => {
+        await esArchiver.unload(
+          'x-pack/platform/test/fixtures/es_archives/cases/signals/hosts_users'
+        );
+      });
+
+      afterEach(async () => {
+        await deleteAllCaseItems(es);
+      });
+
+      it('adds an entity attachment name that is not already an alert identity to the total', async () => {
+        const caseId = await createCaseWithAlerts();
+
+        await createComment({
+          supertest,
+          caseId,
+          params: {
+            ...postCommentEntityReq,
+            attachmentId: 'entity-new-user',
+            metadata: { entityName: 'brand-new-user', entityType: 'user' },
+          },
+        });
+        await createComment({
+          supertest,
+          caseId,
+          params: {
+            ...postCommentEntityReq,
+            attachmentId: 'entity-new-host',
+            metadata: { entityName: 'brand-new-host', entityType: 'host' },
+          },
+        });
+
+        const metrics = await getCaseMetrics({
+          supertest,
+          caseId,
+          features: [CaseMetricsFeature.ALERTS_USERS, CaseMetricsFeature.ALERTS_HOSTS],
+        });
+
+        expect(metrics.alerts?.users?.total).to.be(5);
+        expect(metrics.alerts?.hosts?.total).to.be(4);
+      });
+
+      it('does not double count an entity attachment name that matches an existing alert identity', async () => {
+        const caseId = await createCaseWithAlerts();
+
+        // 'zpxm4rqnze' and 'Host-abc' already come from the alert documents loaded above.
+        await createComment({
+          supertest,
+          caseId,
+          params: {
+            ...postCommentEntityReq,
+            attachmentId: 'entity-existing-user',
+            metadata: { entityName: 'zpxm4rqnze', entityType: 'user' },
+          },
+        });
+        await createComment({
+          supertest,
+          caseId,
+          params: {
+            ...postCommentEntityReq,
+            attachmentId: 'entity-existing-host',
+            metadata: { entityName: 'Host-abc', entityType: 'host' },
+          },
+        });
+
+        const metrics = await getCaseMetrics({
+          supertest,
+          caseId,
+          features: [CaseMetricsFeature.ALERTS_USERS, CaseMetricsFeature.ALERTS_HOSTS],
+        });
+
+        expect(metrics.alerts?.users?.total).to.be(4);
+        expect(metrics.alerts?.hosts?.total).to.be(3);
+      });
+
+      it('counts entity attachments on a case with no alerts', async () => {
+        const theCase = await createCase(supertest, getPostCaseRequest());
+
+        await createComment({
+          supertest,
+          caseId: theCase.id,
+          params: {
+            ...postCommentEntityReq,
+            attachmentId: 'entity-only-user',
+            metadata: { entityName: 'entity-only-user-name', entityType: 'user' },
+          },
+        });
+        await createComment({
+          supertest,
+          caseId: theCase.id,
+          params: {
+            ...postCommentEntityReq,
+            attachmentId: 'entity-only-host',
+            metadata: { entityName: 'entity-only-host-name', entityType: 'host' },
+          },
+        });
+
+        const metrics = await getCaseMetrics({
+          supertest,
+          caseId: theCase.id,
+          features: [CaseMetricsFeature.ALERTS_USERS, CaseMetricsFeature.ALERTS_HOSTS],
+        });
+
+        expect(metrics.alerts?.users?.total).to.be(1);
+        expect(metrics.alerts?.hosts?.total).to.be(1);
       });
     });
 

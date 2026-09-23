@@ -107,6 +107,7 @@ describe('useBulkActionsByTableType', () => {
       to: '2020-07-08T08:20:18.966Z',
       tableId: mockTableId,
       refetch: expect.any(Function),
+      runtimeMappings: undefined,
     });
 
     expect(useAddBulkToTimelineActionModule.useAddBulkToTimelineAction).toHaveBeenCalledWith({
@@ -116,5 +117,17 @@ describe('useBulkActionsByTableType', () => {
       scopeId: PageScope.alerts,
       tableId: mockTableId,
     });
+  });
+
+  it('forwards runtimeMappings to useBulkAlertActionItems', () => {
+    const runtimeMappings = { object_name: { type: 'keyword' as const } };
+
+    renderHook(() =>
+      useBulkActionsByTableType(mockTableId, mockQuery, mockRefresh, runtimeMappings)
+    );
+
+    expect(useBulkAlertActionItemsModule.useBulkAlertActionItems).toHaveBeenCalledWith(
+      expect.objectContaining({ runtimeMappings })
+    );
   });
 });

@@ -117,7 +117,7 @@ describe('control group renderer', () => {
       })
     );
 
-    expect(applySpy).toBeCalledWith({
+    expect(applySpy).toHaveBeenCalledWith({
       type: 'test_control',
       selection: 'test selection',
     });
@@ -157,6 +157,24 @@ describe('control group renderer', () => {
       />
     );
     expect(api.query$?.getValue()).toEqual(updatedQuery);
+  });
+
+  test('project routing changes are dispatched to control parent API if they are different', async () => {
+    const initialProjectRouting = '_alias:_origin';
+    const updatedProjectRouting = '_alias:*';
+
+    const { component, api } = await mountControlGroupRenderer({
+      projectRouting: initialProjectRouting,
+    });
+    expect(api.projectRouting$.getValue()).toEqual(initialProjectRouting);
+    component.rerender(
+      <ControlGroupRenderer
+        onApiAvailable={jest.fn()}
+        getCreationOptions={mockGetCreationOptions}
+        projectRouting={updatedProjectRouting}
+      />
+    );
+    expect(api.projectRouting$.getValue()).toEqual(updatedProjectRouting);
   });
 
   test('time range changes are dispatched to control parent API if they are different', async () => {

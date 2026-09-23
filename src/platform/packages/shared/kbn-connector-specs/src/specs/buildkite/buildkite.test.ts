@@ -559,9 +559,6 @@ describe('Buildkite', () => {
         content: jsonContent({ items: [{ slug: 'my-pipeline' }] }),
       });
 
-      if (!Buildkite.test) {
-        throw new Error('test handler not defined');
-      }
       const result = await Buildkite.test.handler(mockContext);
 
       expect(mockCallTool).toHaveBeenCalledWith({
@@ -569,7 +566,6 @@ describe('Buildkite', () => {
         arguments: { org_slug: 'my-org', per_page: 1 },
       });
       expect(result).toEqual({
-        ok: true,
         message: 'Connected to Buildkite organization "my-org".',
       });
     });
@@ -577,13 +573,9 @@ describe('Buildkite', () => {
     it('reports success with a warning when no pipelines are visible', async () => {
       mockCallTool.mockResolvedValue({ content: jsonContent({ items: [] }) });
 
-      if (!Buildkite.test) {
-        throw new Error('test handler not defined');
-      }
       const result = await Buildkite.test.handler(mockContext);
 
       expect(result).toEqual({
-        ok: true,
         message:
           'Connected to Buildkite organization "my-org", but no pipelines were found. Verify the organization slug and that the token can see pipelines.',
       });
@@ -592,10 +584,6 @@ describe('Buildkite', () => {
     it('propagates errors thrown by withMcpClient', async () => {
       const { withMcpClient } = jest.requireMock('../../lib/mcp/with_mcp_client');
       withMcpClient.mockRejectedValueOnce(new Error('connection refused'));
-
-      if (!Buildkite.test) {
-        throw new Error('test handler not defined');
-      }
 
       await expect(Buildkite.test.handler(mockContext)).rejects.toThrow('connection refused');
     });

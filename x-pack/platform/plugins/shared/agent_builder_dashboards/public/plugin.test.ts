@@ -6,12 +6,19 @@
  */
 
 import type { CoreStart, PluginInitializerContext } from '@kbn/core/public';
-import { OPEN_DASHBOARD_CHAT_ACTION_ID } from '@kbn/dashboard-plugin/public';
+import {
+  OPEN_DASHBOARD_CHAT_ACTION_ID,
+  PRETTIFY_DASHBOARD_ACTION_ID,
+} from '@kbn/dashboard-plugin/public';
 import { AgentBuilderDashboardsPlugin } from './plugin';
 import type { AgentBuilderDashboardsPluginPublicStartDependencies } from './types';
 
 jest.mock('./attachment_types', () => ({
   registerDashboardAttachmentUiDefinition: jest.fn(() => jest.fn()),
+  createIdGenerator: () => ({
+    current: 'draft-id',
+    next: jest.fn(),
+  }),
 }));
 
 describe('AgentBuilderDashboardsPlugin', () => {
@@ -27,12 +34,22 @@ describe('AgentBuilderDashboardsPlugin', () => {
         },
       },
       chrome: {},
+      notifications: {
+        toasts: {},
+      },
+      rendering: {
+        addContext: jest.fn(),
+      },
     } as unknown as CoreStart);
 
   const createStartDependencies = () =>
     ({
-      agentBuilder: { openChat },
+      agentBuilder: {
+        openChat,
+        getAgentBuilderAccess: jest.fn(),
+      },
       dashboard: {},
+      files: {},
       share: {
         url: {
           locators: {
@@ -50,7 +67,7 @@ describe('AgentBuilderDashboardsPlugin', () => {
     openChat.mockClear();
   });
 
-  it('registers a lazy open-dashboard-chat action when Agent Builder is available', async () => {
+  it('registers the lazy chat and prettify actions when Agent Builder is available', async () => {
     const plugin = new AgentBuilderDashboardsPlugin({} as PluginInitializerContext);
 
     plugin.start(createCoreStart(true), createStartDependencies());
@@ -59,11 +76,16 @@ describe('AgentBuilderDashboardsPlugin', () => {
       OPEN_DASHBOARD_CHAT_ACTION_ID,
       expect.any(Function)
     );
+    // TODO: Temporarily disabled.
+    expect(registerActionAsync).not.toHaveBeenCalledWith(
+      PRETTIFY_DASHBOARD_ACTION_ID,
+      expect.any(Function)
+    );
 
-    const action = await registerActionAsync.mock.calls[0][1]();
-    expect(action.id).toBe(OPEN_DASHBOARD_CHAT_ACTION_ID);
+    const openChatAction = await registerActionAsync.mock.calls[0][1]();
+    expect(openChatAction.id).toBe(OPEN_DASHBOARD_CHAT_ACTION_ID);
 
-    await action.execute({
+    await openChatAction.execute({
       trigger: { id: OPEN_DASHBOARD_CHAT_ACTION_ID },
     });
     expect(openChat).toHaveBeenCalled();

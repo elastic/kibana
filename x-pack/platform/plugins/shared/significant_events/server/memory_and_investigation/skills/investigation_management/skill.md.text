@@ -21,7 +21,7 @@ workflowId: "system-significant-events-investigation"
 inputs:
   message: "<required – describe the issue or event to investigate>"
   stream_names: ["<optional – data stream names to scope the investigation>"]
-  context: { <optional – any structured context, e.g. sig event or alert metadata> }
+  context: { <optional – any structured context, e.g. significant event or alert metadata> }
   concurrency_key: "<optional – stable key to de-duplicate repeated investigations>"
 waitForCompletion: true
 ```
@@ -35,8 +35,8 @@ waitForCompletion: true
 **Input schema:**
 - `message` (string, required) — a clear description of the issue to investigate. Include symptoms, time range, and any relevant context. Be specific.
 - `stream_names` (string array, optional) — data stream names to scope observability queries. Leave empty to let the investigation agent discover relevant streams.
-- `context` (object, optional) — structured context such as sig event metadata, alert payload, or environment info. Passed verbatim to the investigation agent.
-- `concurrency_key` (string, optional) — a stable key (e.g. a sig event's discovery slug or an alert id). Investigations sharing a key are de-duplicated: starting a new one cancels any in-progress investigation with the same key.
+- `context` (object, optional) — structured context such as significant event metadata, alert payload, or environment info. Passed verbatim to the investigation agent.
+- `concurrency_key` (string, optional) — a stable key (e.g. a significant event's event id or an alert id). Investigations sharing a key are de-duplicated: starting a new one cancels any in-progress investigation with the same key.
 
 **Example call (free-form issue):**
 ```
@@ -61,10 +61,10 @@ When the user wants to investigate a Significant Event, gather the event's metad
 **2. Build the workflow inputs from the event:**
 - `message`: `"{title}\n\n{summary}"`
 - `stream_names`: the event's `Streams`
-- `concurrency_key`: the event's `Event ID` — this de-duplicates with the investigation that the significant-events triage automatically launches for promoted events (so a chat-initiated investigation supersedes an in-flight automatic one rather than running twice).
+- `concurrency_key`: the event's `Event ID` — this de-duplicates with the investigation that the significant-events discovery automatically launches for promoted events (so a chat-initiated investigation supersedes an in-flight automatic one rather than running twice).
 - `context`: a structured object with the event metadata you can read from the attachment.
 
-**Example call (sig event context):**
+**Example call (significant event context):**
 ```
 execute_workflow({
   workflowId: "system-significant-events-investigation",
@@ -152,7 +152,7 @@ When you trigger an investigation for a Significant Event, record it on the even
 - `started_at` — same start time as the initial call.
 - `completed_at` — the current ISO-8601 datetime.
 
-This tool is idempotent (replace-by-`workflow_execution_id`): the investigation workflow also auto-records both the start and terminal entries when it runs via the triage pipeline, so calling this tool for the same execution id is always safe.
+This tool is idempotent (replace-by-`workflow_execution_id`): the investigation workflow also auto-records both the start and terminal entries when it runs via the discovery pipeline, so calling this tool for the same execution id is always safe.
 
 Only call this tool when a Significant Event was the context for the investigation (`event_uuid` is known). Skip it for free-form issues or alert investigations.
 
@@ -164,7 +164,8 @@ When the investigation completes, summarise the structured output for the user:
 |---|---|
 | `summary` | Final narrative summary of the investigation |
 | `hypotheses` | Every candidate cause investigated, each with a `confidence` score 0–1, a `status` (`confirmed`, `dismissed`, or `investigating`), and a `reason` |
-| `conclusion` | Markdown describing the confirmed root cause mechanism and recommended next steps |
-| `gaps_found` | Data or signal gaps that limited the investigation |
+| `conclusion` | Prose narrative naming the confirmed root cause and its mechanism |
+| `recommendations` | Concrete, actionable next steps, each with a `title` and optional `description`/`code` |
+| `blind_spots` | Data or signal gaps that limited the investigation, each with a `title` and `description` |
 
-Present the findings in plain language. Highlight the `confirmed` hypothesis and the `conclusion` first, then surface the `dismissed` hypotheses (with their reasons) and `gaps_found` if they add useful context.
+Present the findings in plain language. Highlight the `confirmed` hypothesis and the `conclusion` first, then the `recommendations`, then surface the `dismissed` hypotheses (with their reasons) and `blind_spots` if they add useful context.

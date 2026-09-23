@@ -140,7 +140,7 @@ export const registerSignificantEventsSkills = async ({
 
   const doEnsureRegistered = async (): Promise<void> => {
     if (!(await isAvailable())) {
-      logger.debug('significant_events: availability flag disabled, skipping skills registration');
+      logger.debug('significantEvents: availability flag disabled, skipping skills registration');
       return;
     }
 

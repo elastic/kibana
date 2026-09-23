@@ -19,6 +19,6 @@ import { EntityType } from '../../../../common/entity_analytics/types';
 export const EntityIconByType: Record<EntityType, IconType> = {
   [EntityType.user]: 'user',
   [EntityType.host]: 'storage',
-  [EntityType.service]: 'node',
+  [EntityType.service]: 'vectorTriangle',
   [EntityType.generic]: 'globe',
 };

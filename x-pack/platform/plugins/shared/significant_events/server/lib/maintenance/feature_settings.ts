@@ -7,7 +7,7 @@
 
 import type { FakeRawRequest, IUiSettingsClient, KibanaRequest } from '@kbn/core/server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
-import { asSpaceId } from '@kbn/core-spaces-common';
+import type { SpaceId } from '@kbn/core-spaces-common';
 import {
   OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
@@ -17,7 +17,7 @@ import { SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID } from '@kbn/wo
 import { LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID } from '../../../common/constants';
 import type { SignificantEventsMaintenanceFailure } from '../../../common/maintenance/types';
 import type { GetScopedClients } from '../../routes/types';
-import { SCHEDULED_MAINTENANCE_WORKFLOW_IDS } from './managed_workflow_targets';
+import { SCHEDULED_DISCOVERY_WORKFLOW_IDS } from './managed_workflow_targets';
 
 /**
  * Snapshot of feature toggles that Pause turned off so Resume can restore only
@@ -25,7 +25,7 @@ import { SCHEDULED_MAINTENANCE_WORKFLOW_IDS } from './managed_workflow_targets';
  */
 export interface PausedFeatureSettings {
   continuousOnboardingWasEnabled: boolean;
-  scheduledDiscoveryEnabledSpaceIds: string[];
+  scheduledDiscoveryEnabledSpaceIds: SpaceId[];
 }
 
 const toMessage = (error: unknown): string =>
@@ -34,7 +34,7 @@ const toMessage = (error: unknown): string =>
 /** Failure targets for the settings step. */
 const CONTINUOUS_SETTING_TARGET = 'settings:continuous-onboarding';
 const SCHEDULED_SETTING_TARGET_PREFIX = 'settings:scheduled-discovery@';
-const scheduledSettingTarget = (spaceId: string): string =>
+const scheduledSettingTarget = (spaceId: SpaceId): string =>
   `${SCHEDULED_SETTING_TARGET_PREFIX}${spaceId}`;
 
 export const isContinuousOnboardingWorkflowId = (workflowId: string): boolean =>
@@ -42,13 +42,13 @@ export const isContinuousOnboardingWorkflowId = (workflowId: string): boolean =>
   workflowId === LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID;
 
 export const isScheduledDiscoveryWorkflowId = (workflowId: string): boolean =>
-  SCHEDULED_MAINTENANCE_WORKFLOW_IDS.some(
+  SCHEDULED_DISCOVERY_WORKFLOW_IDS.some(
     (baseId) => workflowId === baseId || workflowId.startsWith(`${baseId}-`)
   );
 
 /** Whether Resume should turn this settings-backed workflow back on. */
 export const shouldRestoreSettingsBackedWorkflow = (
-  workflow: { id: string; spaceId: string },
+  workflow: { id: string; spaceId: SpaceId },
   pausedSettings: PausedFeatureSettings | undefined
 ): boolean => {
   if (isContinuousOnboardingWorkflowId(workflow.id)) {
@@ -61,11 +61,11 @@ export const shouldRestoreSettingsBackedWorkflow = (
   return true;
 };
 
-const requestForSpace = (request: KibanaRequest, spaceId: string): KibanaRequest => {
+const requestForSpace = (request: KibanaRequest, spaceId: SpaceId): KibanaRequest => {
   const fakeRawRequest: FakeRawRequest = {
     headers: request.headers,
     path: '/',
-    spaceId: asSpaceId(spaceId),
+    spaceId,
   };
   return kibanaRequestFactory(fakeRawRequest);
 };
@@ -84,7 +84,7 @@ export const createFeatureSettingsController = ({
 
   const getSpaceClient = async (
     request: KibanaRequest,
-    spaceId: string
+    spaceId: SpaceId
   ): Promise<IUiSettingsClient> => {
     const spaceRequest = requestForSpace(request, spaceId);
     const soClient = server.core.savedObjects.getScopedClient(spaceRequest);
@@ -103,7 +103,7 @@ export const createFeatureSettingsController = ({
     failures,
   }: {
     request: KibanaRequest;
-    spaceIds: string[];
+    spaceIds: SpaceId[];
     previous: PausedFeatureSettings | undefined;
     failures: SignificantEventsMaintenanceFailure[];
   }): Promise<PausedFeatureSettings> => {
@@ -270,7 +270,7 @@ export const createFeatureSettingsController = ({
     failures,
   }: {
     request: KibanaRequest;
-    spaceIds: string[];
+    spaceIds: SpaceId[];
     failures: SignificantEventsMaintenanceFailure[];
   }): Promise<void> => {
     try {

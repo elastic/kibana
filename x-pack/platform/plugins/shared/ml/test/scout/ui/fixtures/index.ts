@@ -5,12 +5,23 @@
  * 2.0.
  */
 
-import type { KibanaUrl, PageObjects, ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
+import type {
+  KibanaUrl,
+  PageObjects,
+  ScoutPage,
+  ScoutTestFixtures,
+  ScoutWorkerFixtures,
+} from '@kbn/scout';
 import { test as baseTest, createLazyPageObject } from '@kbn/scout';
+import type { MlUiPageObjects } from './page_objects';
+import { extendPageObjects } from './page_objects';
 import { DataFrameAnalyticsPage } from './page_objects/data_frame_analytics_page';
 
+export { CUSTOM_ROLES } from '../../api/fixtures/custom_roles';
+export { ML_USERS } from '../../api/fixtures/constants';
+
 export interface MlUiTestFixtures extends ScoutTestFixtures {
-  pageObjects: PageObjects & {
+  pageObjects: MlUiPageObjects & {
     dataFrameAnalytics: DataFrameAnalyticsPage;
   };
 }
@@ -22,18 +33,17 @@ export const test = baseTest.extend<MlUiTestFixtures, ScoutWorkerFixtures>({
       page,
       kbnUrl,
     }: {
-      pageObjects: MlUiTestFixtures['pageObjects'];
-      page: MlUiTestFixtures['page'];
+      pageObjects: PageObjects;
+      page: ScoutPage;
       kbnUrl: KibanaUrl;
     },
     use: (pageObjects: MlUiTestFixtures['pageObjects']) => Promise<void>
   ) => {
     await use({
-      ...pageObjects,
+      ...extendPageObjects(pageObjects, page),
       dataFrameAnalytics: createLazyPageObject(DataFrameAnalyticsPage, page, kbnUrl),
     });
   },
 });
 
-export { CUSTOM_ROLES } from '../../api/fixtures/custom_roles';
-export { ML_USERS } from '../../api/fixtures/constants';
+export * as testData from './constants';

@@ -35,6 +35,7 @@ import type { AlertSnoozePayload } from '@kbn/response-ops-alert-snooze';
 import { useAlertFieldNames } from '@kbn/alerts-ui-shared/src/common/hooks/use_alert_field_names';
 
 import { useKibana } from '../../../utils/kibana_react';
+import { useInvestigateAlert } from '../../../hooks/use_investigate_alert';
 import type { TopAlert } from '../../../typings/alerts';
 import { useAuthorizedToReadRuleType } from '../../../hooks/use_authorized_to_read_rule_type';
 import { observabilityFeatureId } from '../../../../common';
@@ -101,6 +102,7 @@ export function HeaderActions({
     http,
     notifications,
   } = services;
+  const alertId = alert?.fields[ALERT_UUID];
 
   const { authorizedToReadRuleType } = useAuthorizedToReadRuleType();
 
@@ -170,6 +172,12 @@ export function HeaderActions({
     }
   }, [alert, alertIndex, untrackAlerts, onUntrackAlert]);
 
+  const { showInvestigateAction, handleInvestigate, isInvestigating, investigateActionLabel } =
+    useInvestigateAlert({
+      alertId,
+      onInvestigate: () => setIsPopoverOpen(false),
+    });
+
   const [alertDetailsRuleFormFlyoutOpen, setAlertDetailsRuleFormFlyoutOpen] = useState(false);
 
   const handleTogglePopover = () => setIsPopoverOpen(!isPopoverOpen);
@@ -184,51 +192,8 @@ export function HeaderActions({
   };
 
   return (
-    <>
+    <ObsCasesContext>
       <EuiFlexGroup direction="row" gutterSize="s" justifyContent="flexEnd">
-        {alert?.fields[ALERT_RULE_UUID] && alert?.fields[ALERT_RULE_TYPE_ID] && (
-          <EuiFlexItem grow={false}>
-            <RuleQueryInspector
-              ruleId={alert.fields[ALERT_RULE_UUID]}
-              ruleTypeId={alert.fields[ALERT_RULE_TYPE_ID]}
-              alertId={alert.fields[ALERT_UUID]}
-            />
-          </EuiFlexItem>
-        )}
-        {discoverUrl && (
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              href={discoverUrl}
-              iconType="discoverApp"
-              target="_blank"
-              data-test-subj={`alertDetailsPage_viewInDiscover${rule ? `_${rule.ruleTypeId}` : ''}`}
-              {...getEbtProps({
-                action: EBT_CLICK_ACTIONS.OPEN_IN_DISCOVER,
-                element: ALERT_DETAILS_EBT_ELEMENTS.HEADER,
-                detail: rule?.ruleTypeId,
-              })}
-            >
-              <EuiText size="s">
-                {i18n.translate('xpack.observability.alertDetails.viewInDiscover', {
-                  defaultMessage: 'View in Discover',
-                })}
-              </EuiText>
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        )}
-
-        {cases && canAddToCase && (
-          <EuiFlexItem grow={false}>
-            <ObsCasesContext>
-              <AddToCaseButton
-                alert={alert}
-                alertIndex={alertIndex}
-                rule={rule}
-                setIsPopoverOpen={setIsPopoverOpen}
-              />
-            </ObsCasesContext>
-          </EuiFlexItem>
-        )}
         <EuiFlexItem grow={false}>
           <EuiPopover
             panelPaddingSize="none"
@@ -279,6 +244,53 @@ export function HeaderActions({
                 <div style={{ width: '220px' }}>
                   <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="s">
                     <div />
+
+                    {showInvestigateAction && (
+                      <EuiButtonEmpty
+                        size="s"
+                        color="text"
+                        iconType="inspect"
+                        onClick={handleInvestigate}
+                        disabled={isInvestigating}
+                        data-test-subj="alertDetailsInvestigate"
+                      >
+                        <EuiText size="s">{investigateActionLabel}</EuiText>
+                      </EuiButtonEmpty>
+                    )}
+
+                    {cases && canAddToCase && (
+                      <AddToCaseButton
+                        alert={alert}
+                        alertIndex={alertIndex}
+                        rule={rule}
+                        setIsPopoverOpen={setIsPopoverOpen}
+                      />
+                    )}
+
+                    {discoverUrl && (
+                      <EuiButtonEmpty
+                        size="s"
+                        color="text"
+                        href={discoverUrl}
+                        iconType="discoverApp"
+                        target="_blank"
+                        onClick={handleClosePopover}
+                        data-test-subj={`alertDetailsPage_viewInDiscover${
+                          rule ? `_${rule.ruleTypeId}` : ''
+                        }`}
+                        {...getEbtProps({
+                          action: EBT_CLICK_ACTIONS.OPEN_IN_DISCOVER,
+                          element: ALERT_DETAILS_EBT_ELEMENTS.HEADER,
+                          detail: rule?.ruleTypeId,
+                        })}
+                      >
+                        <EuiText size="s">
+                          {i18n.translate('xpack.observability.alertDetails.viewInDiscover', {
+                            defaultMessage: 'View in Discover',
+                          })}
+                        </EuiText>
+                      </EuiButtonEmpty>
+                    )}
 
                     <EuiButtonEmpty
                       size="s"
@@ -341,6 +353,16 @@ export function HeaderActions({
                       <>
                         <EuiHorizontalRule margin="none" />
 
+                        {alert?.fields[ALERT_RULE_UUID] && alert?.fields[ALERT_RULE_TYPE_ID] && (
+                          <RuleQueryInspector
+                            ruleId={alert.fields[ALERT_RULE_UUID]}
+                            ruleTypeId={alert.fields[ALERT_RULE_TYPE_ID]}
+                            alertId={alert.fields[ALERT_UUID]}
+                            size="s"
+                            color="text"
+                          />
+                        )}
+
                         <EuiButtonEmpty
                           size="s"
                           color="text"
@@ -391,7 +413,7 @@ export function HeaderActions({
           onLoading={noop}
         />
       ) : null}
-    </>
+    </ObsCasesContext>
   );
 }
 

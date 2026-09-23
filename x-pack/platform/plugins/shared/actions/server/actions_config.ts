@@ -150,6 +150,9 @@ export interface ActionsConfigurationUtilities {
   getEarsUrl: () => string | undefined;
   isEarsEnabled: () => boolean;
   isEarsExperimentalEnabled: () => boolean;
+  isInboundEventsEnabled: () => boolean;
+  getInboundEventsMaxBodyBytes: () => number;
+  getInboundEventsMaxEmitted: () => number;
 }
 
 function allowListErrorMessage(field: AllowListingField, value: string) {
@@ -373,5 +376,8 @@ export function getActionsConfigurationUtilities(
     getEarsUrl: () => config.auth.ears?.url,
     isEarsEnabled: () => config.auth.ears?.enabled ?? false,
     isEarsExperimentalEnabled: () => config.auth.ears?.enableExperimental ?? false,
+    isInboundEventsEnabled: () => config.inboundEvents.enabled,
+    getInboundEventsMaxBodyBytes: () => config.inboundEvents.maxBodyBytes.getValueInBytes(),
+    getInboundEventsMaxEmitted: () => config.inboundEvents.maxEmitted,
   };
 }

@@ -6,6 +6,8 @@
  */
 
 export { Streams, streamDefinitionSchema } from './src/models/streams';
+export type * as StreamsV2 from './src/v2';
+export * as StreamsV2Examples from './src/v2/__examples__';
 export { IngestBase, type IngestStreamIndexMode } from './src/models/ingest/base';
 export { Ingest, IngestStream, IngestUpsertRequest } from './src/models/ingest';
 export {
@@ -40,6 +42,11 @@ export {
 export { getStreamTypeFromDefinition } from './src/helpers/get_stream_type_from_definition';
 export type { StreamType } from './src/helpers/get_stream_type_from_definition';
 export { isRootStreamDefinition } from './src/helpers/is_root_stream_definition';
+export {
+  isBuiltInRootStreamField,
+  otelRootBuiltInFieldNames,
+  ecsRootBuiltInFieldNames,
+} from './src/helpers/is_built_in_root_stream_field';
 export {
   isOtelStream,
   OTEL_CONTENT_FIELD,
@@ -80,8 +87,11 @@ export {
   extractBucketColumnName,
   extractBucketIntervalMs,
   extractBucketTargetField,
+  extractReferencedColumns,
   extractStatsGroupColumns,
   extractWhereExpression,
+  findOverBroadMatchPredicates,
+  renderOverBroadMatchError,
   getFromSources,
   getStatsQueryHints,
   hasStatsCommand,

@@ -5,14 +5,23 @@
  * 2.0.
  */
 
-import { Logger, OnSetup, PluginSetup, PluginStart } from '@kbn/core-di';
-import { CoreSetup } from '@kbn/core-di-server';
 import type { ContainerModuleLoadOptions } from 'inversify';
-import type { AlertingServerSetupDependencies, AlertingServerStartDependencies } from '../types';
+import { OnSetup, PluginSetup, PluginStart, Start } from '@kbn/core-di';
+import type { ServiceToken } from '@kbn/core-di';
+import { CoreSetup, CoreStart } from '@kbn/core-di-server';
+import type { KibanaRequest } from '@kbn/core/server';
+import { resolveRequestScoped } from '../agent_builder/resolve_request_scoped';
+import { PrivilegeChecker } from '../lib/services/privilege_checker/privilege_checker';
+import type {
+  AlertingServerSetupDependencies,
+  AlertingServerStartDependencies,
+  AlertingServerStart,
+} from '../types';
 import { registerFeaturePrivileges } from '../lib/security/privileges';
 import { registerSavedObjects } from '../saved_objects';
 import { EventLoggerToken } from '../lib/services/event_log_service/tokens';
-import { registerStepDefinitions } from '../lib/workflow_extensions/register_step_definitions';
+import { LoggerServiceToken } from '../lib/services/logger_service/logger_service';
+import { registerCreateAlertEventStep } from '../lib/workflow_extensions/register_create_alert_event_step';
 import { registerTriggerDefinitions } from '../lib/workflow_extensions/register_trigger_definitions';
 import { registerAlertingV2UsageCollector } from '../lib/usage/usage_collector';
 import {
@@ -32,8 +41,6 @@ import { alertingAdvancedSettings } from '../settings/advanced_settings';
  */
 export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
   bind(OnSetup).toConstantValue((container) => {
-    const logger = container.get(Logger);
-
     registerFeaturePrivileges(container.get(PluginSetup('features')));
 
     registerSavedObjects({
@@ -43,7 +50,7 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
           'encryptedSavedObjects'
         )
       ),
-      logger,
+      logger: container.get(LoggerServiceToken).forSubsystem('savedObjects'),
     });
 
     const uiSettingsSetup = container.get(CoreSetup('uiSettings'));
@@ -66,7 +73,22 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
       PluginSetup<AlertingServerSetupDependencies['workflowsExtensions']>('workflowsExtensions')
     );
     registerTriggerDefinitions(workflowsExtensionsSetup);
-    registerStepDefinitions(workflowsExtensionsSetup);
+
+    const getAlertEventsClient = (request: KibanaRequest) =>
+      container
+        .get(Start as ServiceToken<AlertingServerStart>)
+        .getAlertEventsClientWithRequest(request);
+    const checkAlertWritePrivilege = (request: KibanaRequest) =>
+      resolveRequestScoped(
+        container.get(CoreStart('injection')),
+        request,
+        PrivilegeChecker
+      ).canWrite('alerts');
+    registerCreateAlertEventStep(
+      workflowsExtensionsSetup,
+      getAlertEventsClient,
+      checkAlertWritePrivilege
+    );
 
     // Usage collection is optional. The telemetry task that feeds this collector
     // is registered unconditionally via the `TaskDefinition` registry in

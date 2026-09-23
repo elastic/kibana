@@ -217,7 +217,7 @@ describe('TrialCompanion', () => {
 
         expectedFirstRender.forEach((milestoneId) => {
           const icon = getByTestId(`${TEST_SUBJ_PREFIX}-item-icon-${milestoneId}`);
-          expect(icon).toHaveAttribute('data-euiicon-type', 'checkInCircleFilled');
+          expect(icon).toHaveAttribute('data-euiicon-type', 'checkCircleFill');
         });
 
         mockUseGetNBA.mockReturnValue(secondResponse);
@@ -239,7 +239,7 @@ describe('TrialCompanion', () => {
 
             expectedSecondRender.forEach((milestoneId) => {
               const icon = getByTestId(`${TEST_SUBJ_PREFIX}-item-icon-${milestoneId}`);
-              expect(icon).toHaveAttribute('data-euiicon-type', 'checkInCircleFilled');
+              expect(icon).toHaveAttribute('data-euiicon-type', 'checkCircleFill');
             });
           });
         } else {

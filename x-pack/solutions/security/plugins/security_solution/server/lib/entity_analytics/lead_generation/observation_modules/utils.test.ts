@@ -9,6 +9,9 @@ import type { LeadEntity } from '../types';
 import {
   errorMessage,
   extractIsPrivileged,
+  getAssetCriticality,
+  getEntityAttributes,
+  getEntityLifecycle,
   matchesPrivilegedWatchlist,
   PRIVILEGED_USER_WATCHLIST_ID,
 } from './utils';
@@ -60,6 +63,89 @@ describe('extractIsPrivileged', () => {
   it('returns false when watchlists is not an array', () => {
     expect(extractIsPrivileged(withWatchlists(undefined))).toBe(false);
     expect(extractIsPrivileged(withWatchlists('a-string'))).toBe(false);
+  });
+});
+
+describe('getEntityAttributes', () => {
+  const withAttributes = (attributes: Record<string, unknown>): LeadEntity =>
+    buildEntity({
+      record: { entity: { attributes } } as unknown as LeadEntity['record'],
+    });
+
+  it('returns the schema slice and ignores extra keys', () => {
+    expect(
+      getEntityAttributes(
+        withAttributes({
+          managed: false,
+          mfa_enabled: true,
+          watchlists: ['some-watchlist'],
+          storage_class: 'hot',
+          privileged: true,
+        })
+      )
+    ).toEqual({
+      managed: false,
+      mfa_enabled: true,
+      watchlists: ['some-watchlist'],
+    });
+  });
+
+  it('returns undefined when attributes is missing', () => {
+    expect(getEntityAttributes(buildEntity())).toBeUndefined();
+  });
+});
+
+describe('getEntityLifecycle', () => {
+  it('returns first_seen and last_seen and ignores extra keys', () => {
+    const firstSeen = '2026-08-20T12:00:00.000Z';
+    const lastSeen = '2026-08-26T12:00:00.000Z';
+    expect(
+      getEntityLifecycle(
+        buildEntity({
+          record: {
+            entity: {
+              lifecycle: { first_seen: firstSeen, last_seen: lastSeen, last_activity: lastSeen },
+            },
+          } as unknown as LeadEntity['record'],
+        })
+      )
+    ).toEqual({ first_seen: firstSeen, last_seen: lastSeen });
+  });
+
+  it('returns undefined when first_seen is not a datetime', () => {
+    expect(
+      getEntityLifecycle(
+        buildEntity({
+          record: {
+            entity: { lifecycle: { first_seen: 'not-a-datetime' } },
+          } as unknown as LeadEntity['record'],
+        })
+      )
+    ).toBeUndefined();
+  });
+});
+
+describe('getAssetCriticality', () => {
+  it('reads criticality from the record-root asset object', () => {
+    expect(
+      getAssetCriticality(
+        buildEntity({
+          record: {
+            asset: { criticality: 'high_impact', name: 'prod-db' },
+          } as unknown as LeadEntity['record'],
+        })
+      )
+    ).toBe('high_impact');
+  });
+
+  it('returns undefined when criticality is not a known level', () => {
+    expect(
+      getAssetCriticality(
+        buildEntity({
+          record: { asset: { criticality: 'not-a-level' } } as unknown as LeadEntity['record'],
+        })
+      )
+    ).toBeUndefined();
   });
 });
 

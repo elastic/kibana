@@ -22,8 +22,10 @@ export type AgentDefinitionWithPermissions = AgentDefinition & {
 
 export type GetAgentResponse = AgentDefinitionWithPermissions;
 
+export type ListAgentResponseItem = AgentDefinitionWithPermissions;
+
 export interface ListAgentResponse {
-  results: AgentDefinitionWithPermissions[];
+  results: ListAgentResponseItem[];
 }
 
 export type UpdateAgentResponse = AgentDefinitionWithPermissions;
@@ -32,6 +34,35 @@ export type CreateAgentResponse = AgentDefinitionWithPermissions;
 
 export interface DeleteAgentResponse {
   success: boolean;
+}
+
+/**
+ * The public agent APIs only return an agent's own configuration, so this is the only way
+ * a client can tell inherited AI indices from assigned ones.
+ */
+export interface AgentAiIndexEntry {
+  id: string;
+  is_default: boolean;
+}
+
+export interface AgentAiIndicesWarning {
+  message: string;
+  agent_type?: string;
+}
+
+export interface AgentAiIndicesItem {
+  agent_id: string;
+  ai_indices: AgentAiIndexEntry[];
+}
+
+export interface ListAgentAiIndicesResponse {
+  results: AgentAiIndicesItem[];
+  warnings?: AgentAiIndicesWarning[];
+}
+
+export interface GetAgentAiIndicesResponse {
+  ai_indices: AgentAiIndexEntry[];
+  warnings?: AgentAiIndicesWarning[];
 }
 
 /**

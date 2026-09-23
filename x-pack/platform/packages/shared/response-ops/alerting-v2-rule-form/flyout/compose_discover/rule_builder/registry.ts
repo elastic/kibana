@@ -19,7 +19,7 @@ import { getInvalidExpressionReferences } from './threshold/validate_metric_refe
 import { RuleBuilderAlertConditionStep } from './threshold/alert_condition_step';
 import { BuilderRecoveryForm } from './threshold/recovery_condition_step';
 import { parseThresholdEsql } from './threshold/parse_esql';
-import { THRESHOLD_STEP_TITLE } from './threshold/translations';
+import { THRESHOLD_CREATE_FLYOUT_TITLE, THRESHOLD_STEP_TITLE } from './threshold/translations';
 
 const defineBuilder = <TState>(def: RuleBuilderDefinition<TState>): RuleBuilderDefinition =>
   def as RuleBuilderDefinition;
@@ -65,6 +65,7 @@ const getValidatedThresholdValues = (values: ThresholdFormValues): ThresholdForm
 const thresholdDefinition = defineBuilder<ThresholdFormValues>({
   type: 'threshold',
   stepTitle: THRESHOLD_STEP_TITLE,
+  createFlyoutTitle: THRESHOLD_CREATE_FLYOUT_TITLE,
   createDefaultState: () => ({
     ...DEFAULT_THRESHOLD_FORM_VALUES,
     stats: DEFAULT_THRESHOLD_FORM_VALUES.stats.map((s) => ({ ...s, id: generateId() })),

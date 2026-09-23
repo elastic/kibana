@@ -30,6 +30,7 @@ export interface OptionsListSuccessResponse {
   suggestions: OptionsListSuggestions<OptionsListSelection>;
   totalCardinality: number;
   invalidSelections?: OptionsListSelection[];
+  isPartial: boolean;
 }
 
 /**

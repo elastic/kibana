@@ -238,17 +238,21 @@ myApp.open();
 // Close
 myApp.close();
 
-const isOpen = core.chrome.sidebar.isOpen();
+// Check this app
+const isOpen = myApp.isOpen();
+const isOpen$ = myApp.isOpen$();
+
+// Check the global sidebar state
+const isSidebarOpen = core.chrome.sidebar.isOpen();
 const currentAppId = core.chrome.sidebar.getCurrentAppId();
 ```
 
 From React components, use hooks from `@kbn/core-chrome-sidebar-components`:
 
 ```tsx
-import { useSidebar, useSidebarApp } from '@kbn/core-chrome-sidebar-components';
+import { useSidebarApp } from '@kbn/core-chrome-sidebar-components';
 
 function MyToolbarButton() {
-  const { close, isOpen } = useSidebar();
   const myApp = useSidebarApp('mySidebarApp');
 
   return (
@@ -259,7 +263,9 @@ function MyToolbarButton() {
       <button onClick={myApp.open}>
         Open with defaults
       </button>
-      {isOpen && <button onClick={close}>Close sidebar</button>}
+      <button onClick={myApp.isOpen ? myApp.close : myApp.open}>
+        {myApp.isOpen ? 'Close' : 'Open'}
+      </button>
     </>
   );
 }

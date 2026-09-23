@@ -40,7 +40,11 @@ const FileDeleteButtonComponent: React.FC<FileDeleteButtonProps> = ({ caseId, fi
     buttonRef,
   };
 
-  return permissions.delete ? (
+  if (!permissions.delete) {
+    return null;
+  }
+
+  return (
     <>
       {isIcon ? (
         <EuiButtonIcon {...buttonProps} />
@@ -57,8 +61,6 @@ const FileDeleteButtonComponent: React.FC<FileDeleteButtonProps> = ({ caseId, fi
         />
       ) : null}
     </>
-  ) : (
-    <></>
   );
 };
 FileDeleteButtonComponent.displayName = 'FileDeleteButton';

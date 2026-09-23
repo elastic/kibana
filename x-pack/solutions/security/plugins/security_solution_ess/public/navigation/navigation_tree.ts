@@ -18,7 +18,6 @@ import { AGENT_BUILDER_NAV_AT_TOP_FLAG } from '@kbn/navigation-plugin/public';
 import { getAlertingV2ManagementNavPanel } from '@kbn/alerting-v2-utils';
 import { getWorkflowsNavPanel } from '@kbn/deeplinks-workflows';
 import { type Services } from '../common/services';
-import { SOLUTION_NAME } from './translations';
 
 export const createNavigationTree = (
   services: Services,
@@ -34,61 +33,27 @@ export const createNavigationTree = (
     icon: 'productAgent',
     link: 'agent_builder' as AppDeepLinkId,
   };
+  const contextEngineLink = {
+    icon: 'sparkles',
+    link: 'context_engine' as AppDeepLinkId,
+  };
 
   return {
     body: [
-      {
-        id: 'security_solution_home',
-        icon: 'logoSecurity',
-        link: securityLink(SecurityPageName.landing),
-        renderAs: 'home',
-        title: SOLUTION_NAME,
-      },
       ...(showAgentBuilder && agentBuilderNavAtTop ? [agentBuilderLink] : []),
+      contextEngineLink,
       {
         link: 'inbox' as AppDeepLinkId,
-        icon: 'email',
+        icon: 'mail',
       },
       // PND body (nodes omitted when xpack.pnd.enabled is false)
-      {
-        link: 'pnd' as AppDeepLinkId,
-        icon: 'sparkles',
-      },
-      {
-        link: 'pnd:chats' as AppDeepLinkId,
-        icon: 'comment',
-      },
+      ...defaultNavigationTree.pnd(),
       {
         link: 'discover',
         icon: 'productDiscover',
       },
       defaultNavigationTree.dashboards(),
-      {
-        link: 'pnd:alerts' as AppDeepLinkId,
-        icon: 'bell',
-      },
-      {
-        link: 'pnd:attacks' as AppDeepLinkId,
-        icon: 'warning',
-      },
-      {
-        link: 'pnd:records' as AppDeepLinkId,
-        icon: 'documents',
-      },
-      {
-        link: 'pnd:threat_hunt' as AppDeepLinkId,
-        icon: 'inspect',
-      },
-      {
-        link: 'pnd:streams' as AppDeepLinkId,
-        icon: 'aggregate',
-      },
-      {
-        link: 'pnd:watches' as AppDeepLinkId,
-        icon: 'eye',
-        getIsActive: ({ pathNameSerialized, prepend }) =>
-          pathNameSerialized.startsWith(prepend('/app/pnd/watches')),
-      },
+      ...defaultNavigationTree.pndSecondary(),
       defaultNavigationTree.rules(),
       services.uiSettings.get(
         ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,

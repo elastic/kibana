@@ -176,8 +176,15 @@ export function isDuplicateFeature(feature: BaseFeature, other: BaseFeature): bo
   );
 }
 
-const mergeArrays = (a: string[] | undefined, b: string[] | undefined): string[] | undefined => {
-  const merged = uniq([...(a ?? []), ...(b ?? [])]);
+export const MAX_FEATURE_ARRAY_ITEMS = 10;
+
+// Keep the tail: incoming items are appended last, so the most recently emitted survive the cut.
+const boundedUnion = (
+  a: string[] | undefined,
+  b: string[] | undefined,
+  max: number = MAX_FEATURE_ARRAY_ITEMS
+): string[] | undefined => {
+  const merged = uniq([...(a ?? []), ...(b ?? [])]).slice(-max);
   return merged.length > 0 ? merged : undefined;
 };
 
@@ -208,22 +215,11 @@ export function mergeFeature(existing: BaseFeature, incoming: BaseFeature): Base
   const existingVersion = existing.properties.version;
   const incomingVersion = incoming.properties.version;
   const versionHistory = getStringArray(existing.meta?.version_history);
-  // Unioning incoming aliases is safe: model-written meta.aliases is stripped at the identify
-  // boundary, so whatever arrives here was assigned by code after a verified reuse.
-  const aliases = uniq([
-    ...getStringArray(existing.meta?.aliases),
-    ...getStringArray(incoming.meta?.aliases),
-  ]).slice(-10);
 
   if (versionHistory.length > 0) {
     mergedMeta.version_history = versionHistory;
   } else {
     delete mergedMeta.version_history;
-  }
-  if (aliases.length > 0) {
-    mergedMeta.aliases = aliases;
-  } else {
-    delete mergedMeta.aliases;
   }
 
   if (
@@ -233,7 +229,9 @@ export function mergeFeature(existing: BaseFeature, incoming: BaseFeature): Base
     incomingVersion.trim().length > 0 &&
     existingVersion !== incomingVersion
   ) {
-    mergedMeta.version_history = uniq([...versionHistory, existingVersion]).slice(-10);
+    mergedMeta.version_history = uniq([...versionHistory, existingVersion]).slice(
+      -MAX_FEATURE_ARRAY_ITEMS
+    );
   }
 
   return {
@@ -245,9 +243,9 @@ export function mergeFeature(existing: BaseFeature, incoming: BaseFeature): Base
     description: incoming.description,
     properties: mergedProperties,
     confidence: Math.round((existing.confidence + incoming.confidence) / 2),
-    evidence: mergeArrays(existing.evidence, incoming.evidence),
-    evidence_doc_ids: mergeArrays(existing.evidence_doc_ids, incoming.evidence_doc_ids),
-    tags: mergeArrays(existing.tags, incoming.tags),
+    evidence: boundedUnion(existing.evidence, incoming.evidence),
+    evidence_doc_ids: boundedUnion(existing.evidence_doc_ids, incoming.evidence_doc_ids),
+    tags: boundedUnion(existing.tags, incoming.tags),
     filter: incoming.filter ?? existing.filter,
     meta: Object.keys(mergedMeta).length > 0 ? mergedMeta : undefined,
   };

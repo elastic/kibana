@@ -7,8 +7,12 @@
 
 import * as React from 'react';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import type { RouteComponentProps } from 'react-router-dom';
 import { Router } from '@kbn/shared-ux-router';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
+import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { createMemoryHistory, createLocation } from 'history';
 
@@ -35,7 +39,7 @@ import { shareService } from '@kbn/dashboard-plugin/public/services/kibana_servi
 import type { IlmPolicyMigrationStatus } from '@kbn/reporting-common/types';
 import type { HttpSetupMock } from '@kbn/core-http-browser-mocks';
 
-import { IlmPolicyStatusContextProvider } from '../../lib/ilm_policy_status_context';
+import { PolicyStatusContextProvider } from '../../lib/default_status_context';
 import { mockConfig } from '../__test__/report_listing.test.helpers';
 import { ReportDiagnostic } from './report_diagnostic';
 
@@ -122,36 +126,38 @@ describe('Reporting tabs', () => {
       : reportingAPIClient;
     return (
       <EuiThemeProvider>
-        <KibanaContextProvider
-          services={{
-            http,
-            application,
-            uiSettings: uiSettingsClient,
-            data: dataService,
-            share: {
-              shareService,
-              url: {
-                ...sharePluginMock.createStartContract().url,
-                locators: {
-                  get: () => ilmLocator,
+        <MockAppHeaderProvider>
+          <KibanaContextProvider
+            services={{
+              http,
+              application,
+              uiSettings: uiSettingsClient,
+              data: dataService,
+              share: {
+                shareService,
+                url: {
+                  ...sharePluginMock.createStartContract().url,
+                  locators: {
+                    get: () => ilmLocator,
+                  },
                 },
               },
-            },
-            notifications: notificationServiceMock.createStartContract(),
-          }}
-        >
-          <InternalApiClientProvider apiClient={updatedReportingAPIClient} http={http}>
-            <IlmPolicyStatusContextProvider>
-              <IntlProvider locale="en">
-                <Router history={renderProps.history ?? props.history}>
-                  <QueryClientProvider client={queryClient}>
-                    <ReportingTabs {...renderProps} />
-                  </QueryClientProvider>
-                </Router>
-              </IntlProvider>
-            </IlmPolicyStatusContextProvider>
-          </InternalApiClientProvider>
-        </KibanaContextProvider>
+              notifications: notificationServiceMock.createStartContract(),
+            }}
+          >
+            <InternalApiClientProvider apiClient={updatedReportingAPIClient} http={http}>
+              <PolicyStatusContextProvider config={renderProps.config}>
+                <IntlProvider locale="en">
+                  <Router history={renderProps.history ?? props.history}>
+                    <QueryClientProvider client={queryClient}>
+                      <ReportingTabs {...renderProps} />
+                    </QueryClientProvider>
+                  </Router>
+                </IntlProvider>
+              </PolicyStatusContextProvider>
+            </InternalApiClientProvider>
+          </KibanaContextProvider>
+        </MockAppHeaderProvider>
       </EuiThemeProvider>
     );
   };
@@ -164,6 +170,12 @@ describe('Reporting tabs', () => {
   it('renders exports components', async () => {
     render(renderComponent(props));
 
+    expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+      'Reporting'
+    );
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.description)).toHaveTextContent(
+      'Get reports generated in Kibana applications.'
+    );
     expect(await screen.findByTestId('reportingTabs-exports')).toBeInTheDocument();
     expect(await screen.findByTestId('reportingTabs-schedules')).toBeInTheDocument();
   });
@@ -213,6 +225,7 @@ describe('Reporting tabs', () => {
       // @ts-expect-error we don't need to provide all props for the test
       render(renderComponent({ ...props, shareService: updatedShareService }));
 
+      await openAppMenuOverflow();
       expect(await screen.findByTestId('ilmPolicyLink')).toBeInTheDocument();
     });
 
@@ -242,15 +255,30 @@ describe('Reporting tabs', () => {
       // @ts-expect-error we don't need to provide all props for the test
       render(renderComponent({ ...props, shareService: updatedShareService, config: newConfig }));
 
+      expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+        'Reporting'
+      );
+      expect(await screen.findByTestId('reportExportsTable')).toBeInTheDocument();
       expect(screen.queryByTestId('ilmPolicyLink')).not.toBeInTheDocument();
     });
   });
 
   describe('Screenshotting Diagnostic', () => {
-    it('shows screenshotting diagnostic link if config is stateful', async () => {
+    it('shows screenshotting diagnostic as the primary header action if config is stateful', async () => {
       render(renderComponent(props));
 
-      expect(await screen.findByTestId('screenshotDiagnosticLink')).toBeInTheDocument();
+      expect(await screen.findByTestId('screenshotDiagnosticLink')).toHaveTextContent(
+        'Run diagnosis'
+      );
+    });
+
+    it('opens the diagnosis flyout from the header primary action', async () => {
+      const user = userEvent.setup();
+      render(renderComponent(props));
+
+      await user.click(await screen.findByTestId('screenshotDiagnosticLink'));
+
+      expect(await screen.findByTestId('reportDiagnosisFlyout')).toBeInTheDocument();
     });
 
     it('does not show when image reporting not set in config', async () => {

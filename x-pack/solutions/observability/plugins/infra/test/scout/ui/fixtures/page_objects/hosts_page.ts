@@ -5,40 +5,55 @@
  * 2.0.
  */
 
+import rison from '@kbn/rison';
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout-oblt';
 import { EXTENDED_TIMEOUT, KPI_METRICS } from '../constants';
 
 type PreferredSchema = 'ecs' | 'semconv' | null;
 
+const buildHostsQuery = (hostNames: string[] = []) =>
+  hostNames.map((hostName) => `host.name : ${JSON.stringify(hostName)}`).join(' or ');
+
+const buildHostsRisonState = ({
+  from,
+  to,
+  hostNames,
+  preferredSchema,
+}: {
+  from: string;
+  to: string;
+  hostNames?: string[];
+  preferredSchema: PreferredSchema;
+}) =>
+  rison.encodeUnknown({
+    dateRange: { from, to },
+    filters: [],
+    limit: 100,
+    panelFilters: [],
+    preferredSchema,
+    query: { language: 'kuery', query: buildHostsQuery(hostNames) },
+  });
+
 export class HostsPage {
   public readonly tableLoaded: Locator;
-  public readonly tableLoading: Locator;
   public readonly tableRows: Locator;
   public readonly tableNoData: Locator;
   public readonly searchBar: Locator;
   public readonly querySubmitButton: Locator;
   public readonly errorCallout: Locator;
 
-  public readonly metricsTab: Locator;
   public readonly logsTab: Locator;
   public readonly alertsTab: Locator;
-  public readonly alertsTabCountBadge: Locator;
-
-  public readonly logsSearchBar: Locator;
-  public readonly excludeButton: Locator;
 
   public readonly kpiGrid: Locator;
-  public readonly metricsChartsContainer: Locator;
 
-  public readonly tablePageSizeSelector: Locator;
   public readonly selectedHostsFilterButton: Locator;
   public readonly addFilterButton: Locator;
-  public readonly noDataPage: Locator;
-  public readonly noDataPageActionButton: Locator;
+  public readonly excludeButton: Locator;
+  public readonly availableFilterOptions: Locator;
 
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
     this.tableLoaded = this.page.getByTestId('hostsView-table-loaded');
-    this.tableLoading = this.page.getByTestId('hostsView-table-loading');
     this.tableRows = this.page.getByTestId('hostsView-tableRow');
     // EuiBasicTable renders noItemsMessage in both caption (a11y) and body cell; scope to cell.
     this.tableNoData = this.page.getByRole('cell').getByTestId('hostsViewTableNoData');
@@ -46,38 +61,31 @@ export class HostsPage {
     this.querySubmitButton = this.page.getByTestId('querySubmitButton');
     this.errorCallout = this.page.getByTestId('hostsViewErrorCallout');
 
-    this.metricsTab = this.page.getByTestId('hostsView-tabs-metrics');
     this.logsTab = this.page.getByTestId('hostsView-tabs-logs');
     this.alertsTab = this.page.getByTestId('hostsView-tabs-alerts');
-    this.alertsTabCountBadge = this.page.getByTestId('hostsView-tabs-alerts-count');
-
-    this.logsSearchBar = this.page.getByTestId('hostsView-logs-text-field-search');
-    this.excludeButton = this.page.getByTestId('optionsList__excludeResults');
 
     this.kpiGrid = this.page.getByTestId('hostsViewKPIGrid');
-    this.metricsChartsContainer = this.page.getByTestId('hostsView-metricChart');
 
-    this.tablePageSizeSelector = this.page.getByTestId('tablePaginationPopoverButton');
     this.selectedHostsFilterButton = this.page.getByTestId('hostsViewTableSelectHostsFilterButton');
     this.addFilterButton = this.page.getByTestId('hostsViewTableAddFilterButton');
-    this.noDataPage = this.page.getByTestId('kbnNoDataPage');
-    this.noDataPageActionButton = this.noDataPage.getByTestId('noDataDefaultActionButton');
+    this.excludeButton = this.page.getByTestId('optionsList__excludeResults');
+    this.availableFilterOptions = this.page.getByTestId('optionsList-control-available-options');
   }
 
   private async waitForTableToLoad() {
     await this.tableLoaded.waitFor({ timeout: EXTENDED_TIMEOUT });
   }
 
-  public async filterByQueryBar(query: string) {
-    await this.searchBar.clear();
-    await this.searchBar.fill(query);
-    await this.searchBar.press('Enter');
-    await this.waitForTableToLoad();
-  }
-
+  /**
+   * Submits a KQL query. If the search bar already has a value (for example the
+   * host filter from `goToPage({ hostNames })`), the new query is AND-combined
+   * with the current value so that filter is preserved.
+   */
   public async submitQuery(query: string) {
+    const currentQuery = await this.searchBar.inputValue();
+    const combinedQuery = currentQuery ? `(${currentQuery}) and (${query})` : query;
     await this.searchBar.clear();
-    await this.searchBar.fill(query);
+    await this.searchBar.fill(combinedQuery);
     await this.querySubmitButton.click();
     await Promise.race([
       this.tableLoaded.waitFor({ timeout: EXTENDED_TIMEOUT }),
@@ -89,19 +97,24 @@ export class HostsPage {
   public async goToPage({
     from,
     to,
+    hostNames,
     preferredSchema = null,
     skipLoadWait = false,
   }: {
     from: string;
     to: string;
+    hostNames?: string[];
     preferredSchema?: PreferredSchema;
     skipLoadWait?: boolean;
   }) {
     const baseUrl = this.kbnUrl.app('metrics');
-    const schemaPart =
-      preferredSchema === null ? 'preferredSchema:!n' : `preferredSchema:${preferredSchema}`;
-    const risonState = `(dateRange:(from:'${from}',to:'${to}'),filters:!(),limit:100,panelFilters:!(),${schemaPart},query:(language:kuery,query:''))`;
-    await this.page.goto(`${baseUrl}/hosts?_a=${risonState}`);
+    const risonState = buildHostsRisonState({
+      from,
+      to,
+      hostNames,
+      preferredSchema,
+    });
+    await this.page.goto(`${baseUrl}/hosts?_a=${risonState}`, { timeout: EXTENDED_TIMEOUT });
     if (!skipLoadWait) {
       await this.waitForTableToLoad();
     }
@@ -110,34 +123,27 @@ export class HostsPage {
   public async goToPageWithRelativeRange({
     rangeFrom,
     rangeTo,
+    hostNames,
     preferredSchema = null,
     skipLoadWait = false,
   }: {
     rangeFrom: string;
     rangeTo: string;
+    hostNames?: string[];
     preferredSchema?: PreferredSchema;
     skipLoadWait?: boolean;
   }) {
     const baseUrl = this.kbnUrl.app('metrics');
-    const schemaPart =
-      preferredSchema === null ? 'preferredSchema:!n' : `preferredSchema:${preferredSchema}`;
-    const risonState = `(dateRange:(from:'${rangeFrom}',to:'${rangeTo}'),filters:!(),limit:100,panelFilters:!(),${schemaPart},query:(language:kuery,query:''))`;
-    await this.page.goto(`${baseUrl}/hosts?_a=${risonState}`);
+    const risonState = buildHostsRisonState({
+      from: rangeFrom,
+      to: rangeTo,
+      hostNames,
+      preferredSchema,
+    });
+    await this.page.goto(`${baseUrl}/hosts?_a=${risonState}`, { timeout: EXTENDED_TIMEOUT });
     if (!skipLoadWait) {
       await this.waitForTableToLoad();
     }
-  }
-
-  public async goToHostsPage(opts: { skipLoadWait?: boolean } = {}) {
-    const baseUrl = this.kbnUrl.app('metrics');
-    await this.page.goto(`${baseUrl}/hosts`);
-    if (!opts.skipLoadWait) {
-      await this.waitForTableToLoad();
-    }
-  }
-
-  public async clickNoDataPageAddDataButton() {
-    await this.noDataPageActionButton.click();
   }
 
   public getHostRow(hostName: string) {
@@ -159,35 +165,6 @@ export class HostsPage {
     await this.waitForTableToLoad();
   }
 
-  public async closeFlyoutWithEscape() {
-    await this.page.keyboard.press('Escape');
-    await this.waitForTableToLoad();
-  }
-
-  // Table helpers
-
-  public getHostDetailLinks() {
-    return this.page.getByTestId('hostsViewTableEntryTitleLink');
-  }
-
-  public getCellContentLocator(row: Locator, cellTestId: string): Locator {
-    return row.getByTestId(cellTestId).locator('.euiTableCellContent');
-  }
-
-  public getRowDataLocators(row: Locator) {
-    return {
-      alertsCount: this.getCellContentLocator(row, 'hostsView-tableRow-alertsCount'),
-      title: row.getByTestId('hostsViewTableEntryTitleLink'),
-      cpuUsage: this.getCellContentLocator(row, 'hostsView-tableRow-cpuUsage'),
-      normalizedLoad: this.getCellContentLocator(row, 'hostsView-tableRow-normalizedLoad1m'),
-      memoryUsage: this.getCellContentLocator(row, 'hostsView-tableRow-memoryUsage'),
-      memoryFree: this.getCellContentLocator(row, 'hostsView-tableRow-memoryFree'),
-      diskSpaceUsage: this.getCellContentLocator(row, 'hostsView-tableRow-diskSpaceUsage'),
-      rx: this.getCellContentLocator(row, 'hostsView-tableRow-rx'),
-      tx: this.getCellContentLocator(row, 'hostsView-tableRow-tx'),
-    };
-  }
-
   public async clickHostCheckbox(hostId: string, os: string) {
     await this.page.getByTestId(`checkboxSelectRow-${hostId}-${os}`).click();
   }
@@ -200,7 +177,37 @@ export class HostsPage {
     await this.addFilterButton.click();
   }
 
-  // KPI helpers
+  public async openFilterControl(fieldName: string) {
+    const control = this.page.getByTestId(`optionsList-control-${fieldName}`);
+    await control.waitFor({ timeout: EXTENDED_TIMEOUT });
+    await control.click();
+    await this.availableFilterOptions.waitFor({
+      state: 'visible',
+      timeout: EXTENDED_TIMEOUT,
+    });
+  }
+
+  public async closeFilterControl() {
+    await this.page.keyboard.press('Escape');
+    await this.availableFilterOptions.waitFor({
+      state: 'hidden',
+      timeout: EXTENDED_TIMEOUT,
+    });
+  }
+
+  public async enableExcludeMode() {
+    await this.excludeButton.click();
+    await this.excludeButton
+      .and(this.page.locator('[aria-pressed="true"]'))
+      .waitFor({ timeout: EXTENDED_TIMEOUT });
+  }
+
+  public async selectFilterOption(optionValue: string) {
+    const option = this.page.getByTestId(`optionsList-control-selection-${optionValue}`);
+    await option.waitFor({ timeout: EXTENDED_TIMEOUT });
+    await option.click({ timeout: EXTENDED_TIMEOUT });
+    await this.waitForTableToLoad();
+  }
 
   private getHostKPIValueSelector(kpiPanelTestId: string): string {
     // Relative to `kpiGrid` — do not repeat `hostsViewKPIGrid` here or Playwright
@@ -224,10 +231,6 @@ export class HostsPage {
       { sel: selector },
       { timeout }
     );
-  }
-
-  public getKPITileValueLocator(type: string) {
-    return this.kpiGrid.getByTestId(`hostsViewKPI-${type}`).locator('.echMetricText__value');
   }
 
   /**
@@ -264,36 +267,10 @@ export class HostsPage {
       .waitFor({ state: 'attached', timeout });
   }
 
-  // Metrics tab
-
-  public async visitMetricsTab() {
-    await this.metricsTab.scrollIntoViewIfNeeded();
-    await this.metricsTab.click();
-  }
-
-  public getMetricsCharts() {
-    return this.metricsChartsContainer.locator(
-      '[data-test-subj*="hostsView-metricChart-"]:not([data-test-subj*="hover-actions"])'
-    );
-  }
-
-  public async clickMetricChartAction(chartTestId: string) {
-    const element = this.page.getByTestId(chartTestId);
-    await element.hover();
-    const button = element.getByTestId('embeddablePanelToggleMenuIcon');
-    await button.click();
-    const menu = this.page.getByTestId('presentationPanelContextMenuItems');
-    await menu.hover();
-  }
-
-  // Logs tab
-
   public async visitLogsTab() {
     await this.logsTab.scrollIntoViewIfNeeded();
     await this.logsTab.click();
   }
-
-  // Alerts tab
 
   public async visitAlertsTab() {
     await this.alertsTab.scrollIntoViewIfNeeded();
@@ -303,96 +280,12 @@ export class HostsPage {
       .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
   }
 
-  public async getAlertsCount(): Promise<string> {
-    await this.alertsTabCountBadge.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
-    return (await this.alertsTabCountBadge.textContent()) ?? '0';
-  }
-
-  public async setAlertStatusFilter(status?: 'active' | 'recovered' | 'untracked'): Promise<void> {
-    const testIds: Record<string, string> = {
-      active: 'hostsView-alert-status-filter-active-button',
-      recovered: 'hostsView-alert-status-filter-recovered-button',
-      untracked: 'hostsView-alert-status-filter-untracked-button',
-      all: 'hostsView-alert-status-filter-show-all-button',
-    };
-    const testId = status ? testIds[status] : testIds.all;
-    const button = this.page.getByTestId(testId);
-    await button.scrollIntoViewIfNeeded();
-    await button.click();
-    await this.waitForAlertsTableToLoad();
-  }
-
   public getAlertsTable(): Locator {
     return this.page.getByTestId('alertsTableIsLoaded');
   }
 
-  public getAlertsTableRows(): Locator {
-    return this.getAlertsTable().locator('.euiDataGridRow');
-  }
-
-  public getAlertsTableCells(): Locator {
-    return this.getAlertsTable().locator('[data-test-subj="dataGridRowCell"]');
-  }
-
-  public async getAlertsTableRowCount(): Promise<number> {
-    const rows = this.getAlertsTableRows();
-    await this.page.waitForFunction(
-      (selector) => document.querySelectorAll(selector).length > 0,
-      '[data-test-subj="alertsTableIsLoaded"] .euiDataGridRow',
-      { timeout: EXTENDED_TIMEOUT }
-    );
-    return rows.count();
-  }
-
   public async waitForAlertsTableToLoad(): Promise<void> {
     await this.getAlertsTable().waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
-  }
-
-  // Pagination
-
-  public async changePageSize(pageSize: number) {
-    await this.tablePageSizeSelector.click();
-    await this.page.getByTestId(`tablePagination-${pageSize}-rows`).click();
-  }
-
-  public async paginateTo(pageNumber: number) {
-    await this.page.getByTestId(`pagination-button-${pageNumber - 1}`).click();
-  }
-
-  // Sorting
-
-  public async sortByCpuUsage() {
-    const cpuHeader = this.page.getByTestId('tableHeaderCell_cpuV2_2');
-    await cpuHeader.getByTestId('tableHeaderSortButton').click();
-  }
-
-  public async sortByTitle() {
-    const titleHeader = this.page.getByTestId('tableHeaderCell_title_1');
-    await titleHeader.getByTestId('tableHeaderSortButton').click();
-  }
-
-  // Filter controls
-
-  public async openFilterControl(fieldName: string) {
-    const controlTestId = `optionsList-control-${fieldName}`;
-    const control = this.page.getByTestId(controlTestId);
-    await control.locator('.euiLoadingSpinner').waitFor({ state: 'hidden' });
-    await control.waitFor();
-    await control.click();
-    await this.excludeButton.waitFor();
-  }
-
-  public async enableExcludeMode() {
-    await this.excludeButton.waitFor();
-    await this.excludeButton.click();
-  }
-
-  public async selectFilterOption(optionValue: string) {
-    const optionTestId = `optionsList-control-selection-${optionValue}`;
-    const option = this.page.getByTestId(optionTestId);
-    await option.waitFor();
-    await option.click();
-    await this.waitForTableToLoad();
   }
 
   public async clickRefresh() {

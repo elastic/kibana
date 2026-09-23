@@ -37,6 +37,7 @@ export const getSyntheticsCertsFacetsRoute: SyntheticsRestApiRouteFactory<{
       from: schema.maybe(schema.string({ maxLength: 256 })),
       to: schema.maybe(schema.string({ maxLength: 256 })),
       remoteNames: schema.maybe(schema.string({ maxLength: 1024 })),
+      showFromAllSpaces: schema.maybe(schema.boolean()),
     }),
   },
   handler: async ({
@@ -47,7 +48,7 @@ export const getSyntheticsCertsFacetsRoute: SyntheticsRestApiRouteFactory<{
     server,
     spaceId,
   }) => {
-    const { from, to, remoteNames } = request.query;
+    const { from, to, remoteNames, showFromAllSpaces } = request.query;
 
     const ccsEnabled = isCCSEnabled(server);
 
@@ -63,6 +64,7 @@ export const getSyntheticsCertsFacetsRoute: SyntheticsRestApiRouteFactory<{
 
     const monitors = await monitorConfigRepository.getAll({
       filter: `${syntheticsMonitorAttributes}.${ConfigKey.ENABLED}: true`,
+      showFromAllSpaces,
     });
 
     // See `get_certificates.ts` for the CCS short-circuit rationale.
@@ -80,6 +82,7 @@ export const getSyntheticsCertsFacetsRoute: SyntheticsRestApiRouteFactory<{
       ccsEnabled,
       remoteNames: remoteNameList,
       spaceId,
+      showFromAllSpaces: Boolean(showFromAllSpaces),
     });
 
     return { data };

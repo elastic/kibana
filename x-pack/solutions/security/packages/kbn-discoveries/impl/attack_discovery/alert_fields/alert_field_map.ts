@@ -42,7 +42,20 @@ import {
  * Field map for attack discovery alerts - defines the Elasticsearch mappings
  * for fields stored in attack discovery alert documents.
  *
- * This is copied from elastic_assistant to make the discoveries plugin independent.
+ * DELIBERATE FORK. This is a copy of `attackDiscoveryAlertFieldMap` from
+ * `@kbn/attack-discovery-schedules-common`
+ * (`x-pack/solutions/security/packages/kbn-attack-discovery-schedules-common/impl/fields/field_map.ts`),
+ * forked so that `@kbn/discoveries` can eventually become a standalone package. Do NOT
+ * de-duplicate the two copies.
+ *
+ * Both copies are installed into the SAME component template
+ * (`.adhoc.alerts-security.attack.discovery.alerts-mappings`) — `elastic_assistant` installs
+ * the canonical one, the `discoveries` plugin installs this one — so if they drift, the
+ * installed mappings depend on plugin install order. Every change here MUST be mirrored in
+ * the canonical copy, and vice versa.
+ *
+ * Parity is enforced by
+ * `x-pack/solutions/security/plugins/discoveries/server/attack_discovery_index_parity.test.ts`.
  */
 export const attackDiscoveryAlertFieldMap: FieldMap = {
   /**
@@ -208,8 +221,9 @@ export const attackDiscoveryAlertFieldMap: FieldMap = {
 
 /**
  * Context identifier for attack discovery alerts.
- * IMPORTANT: This MUST match the value used by elastic_assistant plugin
- * (defined in elastic_assistant/server/lib/attack_discovery/schedules/constants.ts)
- * to ensure both plugins read/write to the same index.
+ * IMPORTANT: This MUST match the canonical value in
+ * `@kbn/attack-discovery-schedules-common/impl/constants.ts` (used by the elastic_assistant
+ * plugin) to ensure both plugins read/write to the same index. Parity is enforced by
+ * `x-pack/solutions/security/plugins/discoveries/server/attack_discovery_index_parity.test.ts`.
  */
 export const ATTACK_DISCOVERY_ALERTS_CONTEXT = 'security.attack.discovery' as const;

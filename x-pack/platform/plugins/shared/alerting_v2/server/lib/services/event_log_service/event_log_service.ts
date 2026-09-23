@@ -18,7 +18,7 @@ import type { PolicyExecutionOutcome } from '@kbn/alerting-v2-schemas';
 import type { AlertingServerSetupDependencies } from '../../../types';
 import { EsServiceInternalToken } from '../es_service/tokens';
 import { LoggerServiceToken, type LoggerServiceContract } from '../logger_service/logger_service';
-import { ALERTING_V2_LOG_CODES } from '../../errors/error_codes';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import { EventLoggerToken } from './tokens';
 import { buildFindActionPolicyEventsQuery } from './queries/action_policy_events_query';
 import { buildRuleExecutionsQuery } from './queries/rule_executions_query';
@@ -57,13 +57,17 @@ export interface EventLogServiceContract {
 
 @injectable()
 export class EventLogService implements EventLogServiceContract {
+  private readonly logger: LoggerServiceContract;
+
   constructor(
     @inject(EventLoggerToken) private readonly eventLogger: IEventLogger,
     @inject(PluginSetup<AlertingServerSetupDependencies['eventLog']>('eventLog'))
     private readonly eventLogService: IEventLogService,
     @inject(EsServiceInternalToken) private readonly esClient: ElasticsearchClient,
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
-  ) {}
+    @inject(LoggerServiceToken) loggerService: LoggerServiceContract
+  ) {
+    this.logger = loggerService.forSubsystem('executionHistory');
+  }
 
   public logEvent(event: IEvent, id?: string): void {
     this.eventLogger.logEvent(event, id);
@@ -140,11 +144,11 @@ export class EventLogService implements EventLogServiceContract {
       // code points at either upstream schema drift in Task Manager or a
       // filter in the query that has fallen out of sync with the
       // normalizer.
-      this.logger.error({
-        error: new Error(
-          `Dropped ${droppedCount} of ${response.hits.hits.length} task-run hit(s) on the rule executions read path. The normalizer rejected rows the ES query is supposed to have excluded. Investigate Task Manager schema drift or rule_executions_query filter coverage.`
-        ),
-        code: ALERTING_V2_LOG_CODES.EXECUTION_HISTORY_NORMALIZER_REJECTED_EVENTS,
+      this.logger.warn({
+        message: () =>
+          `Rule execution history normalizer dropped ${droppedCount} of ` +
+          `${response.hits.hits.length} task-run hits the ES query should have excluded`,
+        code: ALERTING_LOG_CODES.EXECUTION_HISTORY_NORMALIZER_DEGRADED,
       });
     }
 

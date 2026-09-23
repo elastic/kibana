@@ -21,18 +21,22 @@ import type { UnifiedHistogramFetch$ } from '@kbn/unified-histogram/types';
 import type { UnifiedMetricsGridProps } from '../../../types';
 import { createESQLQuery } from '../../../common/utils';
 import { dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
-import { MetricsExperienceStateProvider } from './context/metrics_experience_state_provider';
+import {
+  MetricsExperienceStateProvider,
+  useMetricsExperienceState,
+} from './context/metrics_experience_state_provider';
 import { withRestorableState } from '../../../restorable_state';
 import type { FlyoutState } from '../../../restorable_state';
 
 jest.mock('@kbn/discover-utils', () => {
-  const { METRICS_GRID_SETTINGS_DEFAULTS } = jest.requireActual(
+  const { METRICS_GRID_SETTINGS_DEFAULTS, METRICS_GRID_SORT_DEFAULTS } = jest.requireActual(
     '@kbn/discover-utils/src/data_types/metrics'
   );
 
   return {
     DiscoverFlyouts: { metricInsights: 'metricInsights' },
     METRICS_GRID_SETTINGS_DEFAULTS,
+    METRICS_GRID_SORT_DEFAULTS,
     dismissAllFlyoutsExceptFor: jest.fn(),
   };
 });
@@ -169,6 +173,34 @@ describe('MetricsGrid', () => {
         expect.anything()
       );
     });
+  });
+
+  it('passes the effective aggregation label as yAxisTitle to each chart', () => {
+    renderMetricsGrid();
+
+    // Both metric items are counters; the default counter aggregation is SUM.
+    metricItems.forEach((_, index) => {
+      expect(Chart).toHaveBeenNthCalledWith(
+        index + 1,
+        expect.objectContaining({ yAxisTitle: 'Sum' }),
+        expect.anything()
+      );
+    });
+  });
+
+  it.each([
+    ['system util', ['system', 'util']],
+    ['system*util', ['system', 'util']],
+    ['utilizaton', ['utilization']],
+    ['not-a-match', []],
+  ])('passes precise title highlights for the search term %s', (searchTerm, titleHighlight) => {
+    renderMetricsGrid({ searchTerm });
+
+    expect(Chart).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ titleHighlight }),
+      expect.anything()
+    );
   });
 
   it('passes the correct size prop', () => {
@@ -1020,31 +1052,71 @@ describe('MetricsGrid', () => {
       expect(createESQLQuery).toHaveBeenCalledTimes(1);
     });
 
-    it('re-renders every ChartItem when flyoutState changes, exposing a spurious context subscription', () => {
-      renderMetricsGrid();
+    it('does not re-render ChartItem when an unrelated context value changes', () => {
+      const CurrentPageControl = () => {
+        const { currentPage, onPageChange } = useMetricsExperienceState();
+
+        return (
+          <button
+            type="button"
+            data-test-subj="currentPageControl"
+            onClick={() => onPageChange(currentPage + 1)}
+          >
+            {currentPage}
+          </button>
+        );
+      };
+
+      render(
+        <MetricsExperienceStateProvider profileId="test-profile">
+          <CurrentPageControl />
+          <MetricsGrid {...defaultProps} discoverFetch$={discoverFetch$} />
+        </MetricsExperienceStateProvider>
+      );
 
       expect(Chart).toHaveBeenCalledTimes(metricItems.length);
-
-      // Capture the onViewDetails handler before clearing the mock.
-      const onViewDetails = (Chart as jest.Mock).mock.calls[0][0].onViewDetails;
       (Chart as jest.Mock).mockClear();
 
-      // Trigger a flyoutState change. No ChartItem prop changes — metricItems,
-      // dimensions, fetchParams, handleViewDetails, and isFocused are all
-      // unchanged. React.memo on ChartItem should therefore skip all re-renders.
-      //
-      // It does not, because ChartItem calls useMetricsExperienceState() to
-      // read `profileId`. That gives it a live subscription to the context
-      // object, which receives a new reference on every state update. When
-      // flyoutState changes, all N ChartItems re-render via the subscription
-      // even though `profileId` itself is static.
-      act(() => {
-        onViewDetails();
-      });
+      fireEvent.click(screen.getByTestId('currentPageControl'));
 
-      // BUG: Chart is called once per ChartItem (N = metricItems.length) despite
-      // no prop change. After the fix (pass profileId as a prop from MetricsGrid
-      // instead of reading it inside ChartItem), this count should be 0.
+      expect(screen.getByTestId('currentPageControl')).toHaveTextContent('1');
+      expect(Chart).not.toHaveBeenCalled();
+    });
+
+    it('re-renders ChartItem when a relevant context value changes', () => {
+      const { rerender } = render(
+        <MetricsExperienceStateProvider
+          profileId="test-profile"
+          gridSettings={{
+            counterAggregation: 'max',
+            gaugeAggregation: 'avg',
+            histogramPercentile: 'p90',
+            dimensions: [],
+            searchTerm: '',
+          }}
+        >
+          <MetricsGrid {...defaultProps} discoverFetch$={discoverFetch$} />
+        </MetricsExperienceStateProvider>
+      );
+
+      expect(Chart).toHaveBeenCalledTimes(metricItems.length);
+      (Chart as jest.Mock).mockClear();
+
+      rerender(
+        <MetricsExperienceStateProvider
+          profileId="test-profile"
+          gridSettings={{
+            counterAggregation: 'max',
+            gaugeAggregation: 'avg',
+            histogramPercentile: 'p95',
+            dimensions: [],
+            searchTerm: '',
+          }}
+        >
+          <MetricsGrid {...defaultProps} discoverFetch$={discoverFetch$} />
+        </MetricsExperienceStateProvider>
+      );
+
       expect(Chart).toHaveBeenCalledTimes(metricItems.length);
     });
   });
@@ -1058,6 +1130,8 @@ describe('MetricsGrid', () => {
             counterAggregation: 'max',
             gaugeAggregation: 'avg',
             histogramPercentile: 'p90',
+            dimensions: [],
+            searchTerm: '',
           }}
         >
           <MetricsGrid {...defaultProps} discoverFetch$={discoverFetch$} />
@@ -1070,6 +1144,8 @@ describe('MetricsGrid', () => {
             counterAggregation: 'max',
             gaugeAggregation: 'avg',
             histogramPercentile: 'p90',
+            dimensions: [],
+            searchTerm: '',
           },
         })
       );

@@ -1,5 +1,8 @@
 {
   "sha1": "775b7f7ae6ad531928077d4f9e8111b26e330222",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "fd81d6f4f94014d-c770ca813d09ddf",
@@ -11,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/graph/test/scout/api/tests/feature_controls/capabilities_graph_all.spec.ts",
-        "line": 22,
-        "column": 12
+        "line": 18,
+        "column": 13
       }
     },
     {
@@ -25,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/graph/test/scout/api/tests/feature_controls/capabilities_graph_read.spec.ts",
-        "line": 22,
-        "column": 12
+        "line": 18,
+        "column": 13
       }
     },
     {
@@ -39,8 +42,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/graph/test/scout/api/tests/feature_controls/capabilities_no_graph.spec.ts",
-        "line": 22,
-        "column": 12
+        "line": 18,
+        "column": 13
       }
     },
     {
@@ -53,8 +56,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/graph/test/scout/api/tests/feature_controls/capabilities_space_disabled.spec.ts",
-        "line": 35,
-        "column": 12
+        "line": 29,
+        "column": 7
       }
     },
     {
@@ -67,8 +70,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/graph/test/scout/api/tests/feature_controls/capabilities_space_enabled.spec.ts",
-        "line": 29,
-        "column": 12
+        "line": 21,
+        "column": 92
       }
     },
     {
@@ -81,8 +84,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/graph/test/scout/api/tests/graph_explore.spec.ts",
-        "line": 39,
-        "column": 12
+        "line": 34,
+        "column": 40
       }
     }
   ]

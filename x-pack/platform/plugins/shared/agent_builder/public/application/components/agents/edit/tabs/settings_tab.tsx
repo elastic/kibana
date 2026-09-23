@@ -50,6 +50,7 @@ import { isPreExecutionWorkflowEnabled } from '../../../../utils/is_pre_executio
 import { ACCESS_CONTROL_MODE_LABELS } from '../../../../utils/access_control_mode_i18n';
 import type { AgentFormData } from '../agent_form';
 import { truncateAvatarSymbol } from '../agent_form_validation';
+import { AiIndicesSection } from './ai_indices_section';
 
 interface AgentSettingsTabProps {
   control: Control<AgentFormData>;
@@ -107,10 +108,10 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
   );
   const accessControlModeOptions = [
     {
-      value: AgentAccessControlMode.Public,
+      value: AgentAccessControlMode.Private,
       inputDisplay: renderAccessControlModeOption({
-        icon: ACCESS_CONTROL_MODE_ICON[AgentAccessControlMode.Public],
-        label: ACCESS_CONTROL_MODE_LABELS[AgentAccessControlMode.Public],
+        icon: ACCESS_CONTROL_MODE_ICON[AgentAccessControlMode.Private],
+        label: ACCESS_CONTROL_MODE_LABELS[AgentAccessControlMode.Private],
       }),
     },
     {
@@ -121,10 +122,10 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
       }),
     },
     {
-      value: AgentAccessControlMode.Private,
+      value: AgentAccessControlMode.Public,
       inputDisplay: renderAccessControlModeOption({
-        icon: ACCESS_CONTROL_MODE_ICON[AgentAccessControlMode.Private],
-        label: ACCESS_CONTROL_MODE_LABELS[AgentAccessControlMode.Private],
+        icon: ACCESS_CONTROL_MODE_ICON[AgentAccessControlMode.Public],
+        label: ACCESS_CONTROL_MODE_LABELS[AgentAccessControlMode.Public],
       }),
     },
   ];
@@ -342,6 +343,8 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
+
+      <AiIndicesSection control={control} agentId={agentId} isFormDisabled={isFormDisabled} />
 
       <EuiHorizontalRule />
 

@@ -39,6 +39,7 @@ describe('generateWorkflowTool', () => {
   const buildContext = (
     overrides: Partial<{
       get: jest.Mock;
+      getActive: jest.Mock;
       add: jest.Mock;
       update: jest.Mock;
       sendUiEvent: jest.Mock;
@@ -52,6 +53,7 @@ describe('generateWorkflowTool', () => {
       spaceId: 'default',
       attachments: {
         get: overrides.get ?? jest.fn(),
+        getActive: overrides.getActive ?? jest.fn().mockReturnValue([]),
         add:
           overrides.add ??
           jest
@@ -78,6 +80,7 @@ describe('generateWorkflowTool', () => {
   it('creates a new workflow: adds diff attachment, adds workflow attachment, sends UI event, reports telemetry', async () => {
     generateWorkflowMock.mockResolvedValueOnce({
       workflow: generatedWorkflow,
+      yaml: 'name: foo\n',
       response: 'created the workflow',
     } as any);
 
@@ -125,6 +128,7 @@ describe('generateWorkflowTool', () => {
   it('persists a provided workflowId on creation: both diff and workflow attachments carry it', async () => {
     generateWorkflowMock.mockResolvedValueOnce({
       workflow: generatedWorkflow,
+      yaml: 'name: foo\n',
       response: 'created',
     } as any);
 
@@ -162,8 +166,26 @@ describe('generateWorkflowTool', () => {
   });
 
   it('updates an existing attachment: updates (not adds) workflow attachment, emits diff, reports telemetry', async () => {
+    const beforeYaml = `name: foo
+# One Slack alert per stream.
+steps:
+  - name: notify
+    type: console
+    with:
+      owner: UDLQ63P5L #Andy
+`;
+    const generatedYaml = `name: foo
+# One Slack alert per stream.
+steps:
+  - name: notify
+    type: console
+    if: "{{ steps.weekday.output <= 5 }}"
+    with:
+      owner: UDLQ63P5L #Andy
+`;
     generateWorkflowMock.mockResolvedValueOnce({
       workflow: generatedWorkflow,
+      yaml: generatedYaml,
       response: 'edited',
     } as any);
 
@@ -173,7 +195,7 @@ describe('generateWorkflowTool', () => {
       type: WORKFLOW_YAML_ATTACHMENT_TYPE,
       data: {
         data: {
-          yaml: 'name: foo\n',
+          yaml: beforeYaml,
           workflowId: 'persisted-wf-123',
           name: 'foo',
         },
@@ -195,6 +217,7 @@ describe('generateWorkflowTool', () => {
       'src-att',
       expect.objectContaining({
         data: expect.objectContaining({
+          yaml: generatedYaml,
           name: 'foo',
           workflowId: 'persisted-wf-123',
         }),
@@ -206,7 +229,7 @@ describe('generateWorkflowTool', () => {
 
     expect(sendUiEvent).toHaveBeenCalledWith(
       WORKFLOW_YAML_CHANGED_EVENT,
-      expect.objectContaining({ beforeYaml: 'name: foo\n' })
+      expect.objectContaining({ beforeYaml, afterYaml: generatedYaml })
     );
 
     expect(aiTelemetryClient.reportEditResult).toHaveBeenCalledWith(
@@ -233,6 +256,12 @@ describe('generateWorkflowTool', () => {
     expect(
       (out as { results: Array<{ type: string; data: any }> }).results[0].data.message
     ).toMatch(/not found/i);
+    expect(
+      (out as { results: Array<{ type: string; data: any }> }).results[0].data.message
+    ).toContain('platform.workflows.get_workflow');
+    expect(
+      (out as { results: Array<{ type: string; data: any }> }).results[0].data.message
+    ).toContain('attach: true');
   });
 
   it('returns an errorResult when the source attachment is the wrong type', async () => {

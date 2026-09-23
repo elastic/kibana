@@ -25,7 +25,6 @@ export {
   DEFAULT_SIG_EVENTS_SCHEDULED_DISCOVERY_BATCH_SIZE,
   DEFAULT_SIG_EVENTS_SCHEDULED_MAX_REVIEW_PASSES,
   DEFAULT_SIG_EVENTS_SCHEDULED_REVIEW_INTERVAL_MINUTES,
-  DEFAULT_SIG_EVENTS_SCHEDULED_TRIAGE_BATCH_SIZE,
   MAX_SIG_EVENTS_SCHEDULED_BATCH_SIZE,
   MAX_SIG_EVENTS_SCHEDULED_REVIEW_PASSES,
   MIN_SIG_EVENTS_SCHEDULED_BATCH_SIZE,
@@ -35,7 +34,6 @@ export {
 
 export {
   SIGNIFICANT_EVENT_ATTACHMENT_TYPE,
-  SIGNIFICANT_EVENT_SML_TYPE,
   type SignificantEventAttachment,
   type PendingSignificantEventAttachment,
 } from './significant_event_attachment';
@@ -85,3 +83,14 @@ export {
   stateBlocksNewActivity,
 } from './maintenance/state_machine';
 export type { SignificantEventsMaintenanceState } from './maintenance/state_machine';
+
+export { DEFAULT_RUN_LIMITS, MAX_RUN_LIMIT, MIN_RUN_LIMIT, RUN_QUOTA_GROUPS } from './run_quotas';
+export type {
+  RunQuotaConsumeRequest,
+  RunQuotaConsumeResponse,
+  RunQuotaGroup,
+  RunQuotaSettings,
+  RunQuotaSettingsUpdate,
+  RunQuotaWindow,
+  RunQuotasResponse,
+} from './run_quotas';

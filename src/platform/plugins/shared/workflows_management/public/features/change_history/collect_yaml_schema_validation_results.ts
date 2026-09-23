@@ -17,6 +17,7 @@ import {
 } from '../../widgets/workflow_yaml_editor/lib/utils';
 import { filterMonacoYamlMarkers } from '../validate_workflow_yaml/lib/filter_monaco_yaml_markers';
 import { formatMonacoYamlMarker } from '../validate_workflow_yaml/lib/format_monaco_yaml_marker';
+import { getYamlMarkerRuleId } from '../validate_workflow_yaml/lib/get_yaml_marker_rule_id';
 import type { YamlValidationResult } from '../validate_workflow_yaml/model/types';
 
 export const collectYamlSchemaValidationResults = (
@@ -53,6 +54,7 @@ export const collectYamlSchemaValidationResults = (
       endLineNumber: formatted.endLineNumber,
       endColumn: formatted.endColumn,
       owner: 'yaml',
+      ruleId: getYamlMarkerRuleId(formatted.source),
       source: formatted.source,
       hoverMessage: null,
       afterMessage: null,

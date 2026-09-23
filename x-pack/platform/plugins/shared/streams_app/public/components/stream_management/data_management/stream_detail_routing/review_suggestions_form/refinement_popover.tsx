@@ -216,7 +216,7 @@ export const RefinementPopover = ({
                           onClick={() => setIsConnectorPopoverOpen((prev) => !prev)}
                           color="text"
                           size="s"
-                          iconType="controlsHorizontal"
+                          iconType="controls"
                           aria-label={connectorPickerAriaLabel}
                         />
                       </EuiToolTip>

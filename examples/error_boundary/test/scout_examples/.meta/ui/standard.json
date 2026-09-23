@@ -1,5 +1,8 @@
 {
   "sha1": "b53aecbf8726637d9875ee295a25aa0ffbb0a970",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "21a7ddcdeb201c8-d8f2f2c8a5c03a2",
@@ -10,8 +13,8 @@
       ],
       "location": {
         "file": "examples/error_boundary/test/scout_examples/ui/tests/error_boundary.spec.ts",
-        "line": 20,
-        "column": 7
+        "line": 15,
+        "column": 11
       }
     },
     {
@@ -23,8 +26,8 @@
       ],
       "location": {
         "file": "examples/error_boundary/test/scout_examples/ui/tests/error_boundary.spec.ts",
-        "line": 37,
-        "column": 7
+        "line": 26,
+        "column": 16
       }
     }
   ]

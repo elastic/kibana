@@ -17,20 +17,18 @@ export interface SignificantEventsAppKibanaContext {
     start: SignificantEventsAppStartDependencies;
   };
   services: SignificantEventsAppServices;
-  isServerless: boolean;
 }
 
 const useTypedKibana = (): SignificantEventsAppKibanaContext => {
   const context = useKibana<CoreStart & Omit<SignificantEventsAppKibanaContext, 'core'>>();
 
   return useMemo(() => {
-    const { dependencies, services, isServerless, ...core } = context.services;
+    const { dependencies, services, ...core } = context.services;
 
     return {
       core,
       dependencies,
       services,
-      isServerless,
     };
   }, [context.services]);
 };

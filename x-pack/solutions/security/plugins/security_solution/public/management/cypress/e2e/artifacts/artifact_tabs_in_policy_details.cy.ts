@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { getEndpointSecurityPolicyManager } from '../../../../../scripts/endpoint/common/roles_users';
-import { getRoleWithArtifactReadPrivilege } from '../../fixtures/role_with_artifact_read_privilege';
+import { getEndpointSecurityPolicyManagerArtifactRole } from '../../../../../scripts/endpoint/common/roles_users';
 import { getArtifactsListTestsData } from '../../fixtures/artifacts_page';
 import { visitPolicyDetailsPage } from '../../screens/policy_details';
 import {
@@ -20,44 +19,23 @@ import { login, ROLE } from '../../tasks/login';
 import { performUserActions } from '../../tasks/perform_user_actions';
 import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
 import type { ReturnTypeFromChainable } from '../../types';
-import { SECURITY_FEATURE_ID } from '../../../../../common/constants';
 
 const loginWithPrivilegeAll = () => {
   login(ROLE.endpoint_policy_manager);
 };
 
 const loginWithPrivilegeRead = (privilegePrefix: string) => {
-  const roleWithArtifactReadPrivilege = getRoleWithArtifactReadPrivilege(privilegePrefix);
-  login.withCustomRole({ name: 'roleWithArtifactReadPrivilege', ...roleWithArtifactReadPrivilege });
+  login.withCustomRole({
+    name: 'roleWithArtifactReadPrivilege',
+    ...getEndpointSecurityPolicyManagerArtifactRole(privilegePrefix, 'read'),
+  });
 };
 
 const loginWithPrivilegeNone = (privilegePrefix: string) => {
-  const roleWithoutArtifactPrivilege = getRoleWithoutArtifactPrivilege(privilegePrefix);
-  login.withCustomRole({ name: 'roleWithoutArtifactPrivilege', ...roleWithoutArtifactPrivilege });
-};
-
-const getRoleWithoutArtifactPrivilege = (privilegePrefix: string) => {
-  const endpointSecurityPolicyManagerRole = getEndpointSecurityPolicyManager();
-
-  const siemVersion =
-    Object.keys(endpointSecurityPolicyManagerRole.kibana[0].feature).find((feature) =>
-      feature.startsWith('siem')
-    ) ?? SECURITY_FEATURE_ID;
-
-  return {
-    ...endpointSecurityPolicyManagerRole,
-    kibana: [
-      {
-        ...endpointSecurityPolicyManagerRole.kibana[0],
-        feature: {
-          ...endpointSecurityPolicyManagerRole.kibana[0].feature,
-          [siemVersion]: endpointSecurityPolicyManagerRole.kibana[0].feature[siemVersion].filter(
-            (privilege) => privilege !== `${privilegePrefix}all`
-          ),
-        },
-      },
-    ],
-  };
+  login.withCustomRole({
+    name: 'roleWithoutArtifactPrivilege',
+    ...getEndpointSecurityPolicyManagerArtifactRole(privilegePrefix, 'none'),
+  });
 };
 
 const clickArtifactTab = (tabId: string) => {

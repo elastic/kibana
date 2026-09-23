@@ -365,6 +365,27 @@ Main Discover stores URL-backed fields in the `_p` URL parameter so they survive
 Shared links restore supported `Url` and `Persistent` state for the active data source profile. `Ui` state is not
 included in shared links.
 
+#### Saving profile state with Discover sessions
+
+Saved-session state is separate from the field lifetimes in `ProfileStateType`. To persist profile state with a saved
+Discover session, the data source profile must return a `tabType`, and that tab type must have a saved-state transform
+registered in the shared profile state registry:
+
+```ts
+resolve: () => ({
+  isMatch: true,
+  context: {
+    tabType: DiscoverTabType.Metrics,
+    profileState: METRICS_STATE_DEF,
+  },
+});
+```
+
+The transform owns the complete saved payload for its tab type and explicitly selects which profile state fields are
+saved. A field can therefore participate in URL or local-tab persistence without being saved to the session, and vice
+versa. See the [developer guide](./DEV_DOCS.md#adding-a-saved-tab-type) for the schema, transform, and registration
+steps.
+
 Use `toolkit.getStateAdapter()` inside extension point implementations to read, observe, and update the state:
 
 ```tsx

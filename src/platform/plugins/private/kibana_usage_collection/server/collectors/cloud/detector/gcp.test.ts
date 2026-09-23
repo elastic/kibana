@@ -54,7 +54,7 @@ describe('GCP', () => {
         headers: { 'Metadata-Flavor': 'Google' },
         method: 'GET',
       };
-      expect(fetchMock).toBeCalledTimes(3);
+      expect(fetchMock).toHaveBeenCalledTimes(3);
       expect(fetchMock).toHaveBeenNthCalledWith(1, `${basePath}id`, fetchParams);
       expect(fetchMock).toHaveBeenNthCalledWith(2, `${basePath}machine-type`, fetchParams);
       expect(fetchMock).toHaveBeenNthCalledWith(3, `${basePath}zone`, fetchParams);
@@ -143,7 +143,7 @@ describe('GCP', () => {
         });
       const response = await gcpService['_checkIfService']();
 
-      expect(fetchMock).toBeCalledTimes(3);
+      expect(fetchMock).toHaveBeenCalledTimes(3);
 
       expect(response.isConfirmed()).toEqual(true);
       expect(response.toJSON()).toMatchInlineSnapshot(`

@@ -16,7 +16,5 @@ export const toExpressionAst = (vis: Vis<VisParams>) => {
     spec: vis.params.spec,
   });
 
-  const ast = buildExpression([vega]);
-
-  return ast.toAst();
+  return buildExpression([vega]).toAst();
 };

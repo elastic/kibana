@@ -1,0 +1,876 @@
+{
+  "sha1": "48efcf0e8805fa86fbb2ffa6acb9695c2f7d4db6",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "236fa8bc4bd1f77-0fc156f04efa80f",
+      "title": "EnableDefaultAlerting does create the rules when there are no connectors defined",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/enable_default_alerting.spec.ts",
+        "line": 127,
+        "column": 19
+      }
+    },
+    {
+      "id": "236fa8bc4bd1f77-1528b70e90731e9",
+      "title": "EnableDefaultAlerting returns the created alerts when called",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/enable_default_alerting.spec.ts",
+        "line": 139,
+        "column": 14
+      }
+    },
+    {
+      "id": "236fa8bc4bd1f77-fbe1a1cc0747722",
+      "title": "EnableDefaultAlerting enables alert when new monitor is added",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/enable_default_alerting.spec.ts",
+        "line": 148,
+        "column": 13
+      }
+    },
+    {
+      "id": "236fa8bc4bd1f77-bfefb07286097c4",
+      "title": "EnableDefaultAlerting deletes (and recreates) the default rule when settings are updated",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/enable_default_alerting.spec.ts",
+        "line": 163,
+        "column": 27
+      }
+    },
+    {
+      "id": "236fa8bc4bd1f77-0e9f0e4ff87ec9d",
+      "title": "EnableDefaultAlerting doesnt throw errors when rule has already been deleted",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/enable_default_alerting.spec.ts",
+        "line": 222,
+        "column": 80
+      }
+    },
+    {
+      "id": "3391fd001109be0-39423a0033f9d41",
+      "title": "getCertificates returns an empty result when no monitors are configured",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/get_certs.spec.ts",
+        "line": 196,
+        "column": 25
+      }
+    },
+    {
+      "id": "3391fd001109be0-70e2396560b1ffa",
+      "title": "getCertificates returns lightweight certificates across the expiry spectrum",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/get_certs.spec.ts",
+        "line": 209,
+        "column": 7
+      }
+    },
+    {
+      "id": "3391fd001109be0-5628c1eb0d06786",
+      "title": "getCertificates filters certificates by monitor type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/get_certs.spec.ts",
+        "line": 261,
+        "column": 31
+      }
+    },
+    {
+      "id": "3391fd001109be0-906968ab3b602e5",
+      "title": "getCertificates filters certificates by tag",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/get_certs.spec.ts",
+        "line": 269,
+        "column": 16
+      }
+    },
+    {
+      "id": "3391fd001109be0-f93ac990bb1d547",
+      "title": "getCertificates filters certificates by issuer (CA)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/get_certs.spec.ts",
+        "line": 274,
+        "column": 28
+      }
+    },
+    {
+      "id": "3391fd001109be0-2d7ba069a35ace4",
+      "title": "getCertificates filters certificates by expiry window (notValidAfter)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/get_certs.spec.ts",
+        "line": 283,
+        "column": 69
+      }
+    },
+    {
+      "id": "3391fd001109be0-5233bbaf36f75bb",
+      "title": "getCertificates returns global distinct-cert counts per filter value",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/get_certs.spec.ts",
+        "line": 294,
+        "column": 7
+      }
+    },
+    {
+      "id": "3391fd001109be0-8d4a78e30743922",
+      "title": "getCertificates includes browser certificates and scopes them by resource type and origin",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/get_certs.spec.ts",
+        "line": 331,
+        "column": 7
+      }
+    },
+    {
+      "id": "3391fd001109be0-97758b8d3c68725",
+      "title": "getCertificates reports browser resource-type and origin facet counts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/get_certs.spec.ts",
+        "line": 395,
+        "column": 16
+      }
+    },
+    {
+      "id": "3391fd001109be0-e682df4da11da1a",
+      "title": "getCertificates includes certificates from other permitted spaces when showFromAllSpaces is true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/get_certs.spec.ts",
+        "line": 393,
+        "column": 27
+      }
+    },
+    {
+      "id": "b0aae28b2a3143e-fa52f188bdb4d91",
+      "title": "MaintenanceWindowsRoute returns only monitor-referenced windows to a read-only user, projecting the UI fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/maintenance_windows_route.spec.ts",
+        "line": 114,
+        "column": 56
+      }
+    },
+    {
+      "id": "b0aae28b2a3143e-814df6954500a4e",
+      "title": "MaintenanceWindowsRoute only returns maintenance windows from the caller space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/maintenance_windows_route.spec.ts",
+        "line": 154,
+        "column": 49
+      }
+    },
+    {
+      "id": "f8859c3fd64dc96-09989aaa3089140",
+      "title": "SyncMaintenanceWindows applies the maintenance window to a private-location package policy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/maintenance_windows.spec.ts",
+        "line": 184,
+        "column": 72
+      }
+    },
+    {
+      "id": "f8859c3fd64dc96-1eab459104d1bcc",
+      "title": "SyncMaintenanceWindows applies the maintenance window to a package policy in a non-default space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/maintenance_windows.spec.ts",
+        "line": 203,
+        "column": 25
+      }
+    },
+    {
+      "id": "577787ed20e4944-736e95bf373f0da",
+      "title": "ResetMonitorBulkRoute resets multiple healthy monitors",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/reset_monitor_bulk.spec.ts",
+        "line": 92,
+        "column": 13
+      }
+    },
+    {
+      "id": "577787ed20e4944-b682fef1da00516",
+      "title": "ResetMonitorBulkRoute bumps Fleet policy revision after bulk reset",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/reset_monitor_bulk.spec.ts",
+        "line": 102,
+        "column": 11
+      }
+    },
+    {
+      "id": "577787ed20e4944-1018cbf7530a941",
+      "title": "ResetMonitorBulkRoute recreates missing policy for one of multiple monitors",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/reset_monitor_bulk.spec.ts",
+        "line": 132,
+        "column": 29
+      }
+    },
+    {
+      "id": "577787ed20e4944-788bee04a1b48ba",
+      "title": "ResetMonitorBulkRoute single ID in bulk behaves like single endpoint",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/reset_monitor_bulk.spec.ts",
+        "line": 156,
+        "column": 16
+      }
+    },
+    {
+      "id": "577787ed20e4944-64e7c4a5a5263e4",
+      "title": "ResetMonitorBulkRoute is idempotent — calling bulk reset twice succeeds",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/reset_monitor_bulk.spec.ts",
+        "line": 172,
+        "column": 16
+      }
+    },
+    {
+      "id": "577787ed20e4944-fd31cd8aa8f9539",
+      "title": "ResetMonitorBulkRoute preserves monitor configs after bulk reset",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/reset_monitor_bulk.spec.ts",
+        "line": 188,
+        "column": 17
+      }
+    },
+    {
+      "id": "577787ed20e4944-89647dd3ee1f8cc",
+      "title": "ResetMonitorBulkRoute returns per-monitor errors when some monitors are not found",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/reset_monitor_bulk.spec.ts",
+        "line": 232,
+        "column": 30
+      }
+    },
+    {
+      "id": "577787ed20e4944-8c5bc5d0bc246fb",
+      "title": "ResetMonitorBulkRoute returns 403 for viewer user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/reset_monitor_bulk.spec.ts",
+        "line": 249,
+        "column": 29
+      }
+    },
+    {
+      "id": "577787ed20e4944-e3b69d9cc3d4ed7",
+      "title": "ResetMonitorBulkRoute all monitors not found returns empty successful results",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/reset_monitor_bulk.spec.ts",
+        "line": 251,
+        "column": 27
+      }
+    },
+    {
+      "id": "1e331e753e9bc47-5d0a115c61f9ff6",
+      "title": "ResetMonitorRoute resets a healthy monitor and returns success",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/reset_monitor.spec.ts",
+        "line": 109,
+        "column": 60
+      }
+    },
+    {
+      "id": "1e331e753e9bc47-ba1d3f0e5ac0b2f",
+      "title": "ResetMonitorRoute recreates missing Fleet package policy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/reset_monitor.spec.ts",
+        "line": 119,
+        "column": 27
+      }
+    },
+    {
+      "id": "1e331e753e9bc47-5e583fafbcdb957",
+      "title": "ResetMonitorRoute overwrites existing policy (handles corruption)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/reset_monitor.spec.ts",
+        "line": 142,
+        "column": 15
+      }
+    },
+    {
+      "id": "1e331e753e9bc47-eeefd3b997de672",
+      "title": "ResetMonitorRoute is idempotent — calling reset multiple times succeeds",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/reset_monitor.spec.ts",
+        "line": 165,
+        "column": 15
+      }
+    },
+    {
+      "id": "1e331e753e9bc47-67966c7564c4dd9",
+      "title": "ResetMonitorRoute preserves monitor config — saved object is unchanged",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/reset_monitor.spec.ts",
+        "line": 181,
+        "column": 71
+      }
+    },
+    {
+      "id": "1e331e753e9bc47-55dd38d1965ec76",
+      "title": "ResetMonitorRoute resets a healthy monitor with force=true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/reset_monitor.spec.ts",
+        "line": 194,
+        "column": 24
+      }
+    },
+    {
+      "id": "1e331e753e9bc47-8db0d3d0f7573fe",
+      "title": "ResetMonitorRoute recreates missing Fleet package policy with force=true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/reset_monitor.spec.ts",
+        "line": 209,
+        "column": 64
+      }
+    },
+    {
+      "id": "1e331e753e9bc47-8b33b82565e9dbe",
+      "title": "ResetMonitorRoute is idempotent with force=true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/reset_monitor.spec.ts",
+        "line": 231,
+        "column": 64
+      }
+    },
+    {
+      "id": "1e331e753e9bc47-a09d3e3af4ef004",
+      "title": "ResetMonitorRoute preserves monitor config with force=true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/reset_monitor.spec.ts",
+        "line": 247,
+        "column": 29
+      }
+    },
+    {
+      "id": "1e331e753e9bc47-654bfbc89e2fb16",
+      "title": "ResetMonitorRoute recreates policies for all locations when one is missing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/reset_monitor.spec.ts",
+        "line": 259,
+        "column": 24
+      }
+    },
+    {
+      "id": "1e331e753e9bc47-cd1e3810b9cd9ec",
+      "title": "ResetMonitorRoute recreates all policies with force=true when all are missing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/reset_monitor.spec.ts",
+        "line": 281,
+        "column": 18
+      }
+    },
+    {
+      "id": "1e331e753e9bc47-9f04000effea421",
+      "title": "ResetMonitorRoute returns 404 for non-existent monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/reset_monitor.spec.ts",
+        "line": 310,
+        "column": 13
+      }
+    },
+    {
+      "id": "1e331e753e9bc47-02549a00dad6343",
+      "title": "ResetMonitorRoute returns 404 for non-existent monitor with force=true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/reset_monitor.spec.ts",
+        "line": 313,
+        "column": 73
+      }
+    },
+    {
+      "id": "1e331e753e9bc47-4b61c0b146fb113",
+      "title": "ResetMonitorRoute returns 403 for viewer user (default mode)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/reset_monitor.spec.ts",
+        "line": 323,
+        "column": 6
+      }
+    },
+    {
+      "id": "1e331e753e9bc47-b62b1d4282e77a4",
+      "title": "ResetMonitorRoute returns 403 for viewer user (force mode)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/reset_monitor.spec.ts",
+        "line": 331,
+        "column": 7
+      }
+    },
+    {
+      "id": "fea223c3d71f598-4dc9108e39d9fc1",
+      "title": "SyntheticsEnablement [PUT] returns response when user cannot manage api keys",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/synthetics_enablement.spec.ts",
+        "line": 190,
+        "column": 18
+      }
+    },
+    {
+      "id": "fea223c3d71f598-3aee530c0d6c5e3",
+      "title": "SyntheticsEnablement [PUT] returns response for an admin with privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/synthetics_enablement.spec.ts",
+        "line": 194,
+        "column": 25
+      }
+    },
+    {
+      "id": "fea223c3d71f598-a191eb97ba2a0cc",
+      "title": "SyntheticsEnablement [PUT] does not create excess api keys",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/synthetics_enablement.spec.ts",
+        "line": 202,
+        "column": 63
+      }
+    },
+    {
+      "id": "fea223c3d71f598-9492c577f3ba2f2",
+      "title": "SyntheticsEnablement [PUT] auto re-enables api key when invalidated",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/synthetics_enablement.spec.ts",
+        "line": 214,
+        "column": 7
+      }
+    },
+    {
+      "id": "fea223c3d71f598-0789ac6d6ecad79",
+      "title": "SyntheticsEnablement [PUT] returns response for an uptime all user without admin privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/synthetics_enablement.spec.ts",
+        "line": 235,
+        "column": 24
+      }
+    },
+    {
+      "id": "fea223c3d71f598-0ad8b56a88cc9cc",
+      "title": "SyntheticsEnablement [PUT] returns response when user can manage api keys via manage_security",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/synthetics_enablement.spec.ts",
+        "line": 253,
+        "column": 5
+      }
+    },
+    {
+      "id": "fea223c3d71f598-a088cf70566c5a0",
+      "title": "SyntheticsEnablement [PUT] returns response when user can manage api keys via manage_api_key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/synthetics_enablement.spec.ts",
+        "line": 253,
+        "column": 5
+      }
+    },
+    {
+      "id": "fea223c3d71f598-9068556897c1c6b",
+      "title": "SyntheticsEnablement [PUT] returns response when user can manage api keys via manage_own_api_key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/synthetics_enablement.spec.ts",
+        "line": 253,
+        "column": 5
+      }
+    },
+    {
+      "id": "fea223c3d71f598-cd9f48ef8ccd89c",
+      "title": "SyntheticsEnablement [PUT] enables synthetics for a writer user without api-key management privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/synthetics_enablement.spec.ts",
+        "line": 285,
+        "column": 5
+      }
+    },
+    {
+      "id": "fea223c3d71f598-775d431a8453662",
+      "title": "SyntheticsEnablement [PUT] auto re-enables the api key when the existing key has invalid permissions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/synthetics_enablement.spec.ts",
+        "line": 320,
+        "column": 7
+      }
+    },
+    {
+      "id": "fea223c3d71f598-4eef40b517d659d",
+      "title": "SyntheticsEnablement [DELETE] is idempotent when already disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/synthetics_enablement.spec.ts",
+        "line": 373,
+        "column": 25
+      }
+    },
+    {
+      "id": "fea223c3d71f598-2d1648b0da58a39",
+      "title": "SyntheticsEnablement [DELETE] is idempotent across consecutive deletes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/synthetics_enablement.spec.ts",
+        "line": 377,
+        "column": 75
+      }
+    },
+    {
+      "id": "fea223c3d71f598-12be86604bf217c",
+      "title": "SyntheticsEnablement [DELETE] with an admin",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/synthetics_enablement.spec.ts",
+        "line": 383,
+        "column": 7
+      }
+    },
+    {
+      "id": "fea223c3d71f598-805d4e3a68c63db",
+      "title": "SyntheticsEnablement [DELETE] with an uptime user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/synthetics_enablement.spec.ts",
+        "line": 390,
+        "column": 14
+      }
+    },
+    {
+      "id": "fea223c3d71f598-4ae994e9f48d799",
+      "title": "SyntheticsEnablement [DELETE] is space agnostic",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/synthetics_enablement.spec.ts",
+        "line": 396,
+        "column": 14
+      }
+    },
+    {
+      "id": "656d8a65c5323c5-2b6ead023d7d43a",
+      "title": "tlsRuleBrowserCertsAlert fires an alert for an expiring browser-monitor certificate",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/tls_rule_browser_certs_alert.spec.ts",
+        "line": 210,
+        "column": 21
+      }
+    },
+    {
+      "id": "656d8a65c5323c5-369e192742f4aa9",
+      "title": "tlsRuleBrowserCertsAlert recovers the alert once the browser certificate is no longer evaluated",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/tls_rule_browser_certs_alert.spec.ts",
+        "line": 217,
+        "column": 29
+      }
+    },
+    {
+      "id": "a9d865dd25cfa2c-15ffc48d762c16a",
+      "title": "tlsRuleBrowserCerts evaluates only lightweight monitors when includeBrowserCerts is unset",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/tls_rule_browser_certs.spec.ts",
+        "line": 88,
+        "column": 7
+      }
+    },
+    {
+      "id": "a9d865dd25cfa2c-5767cc01930b07f",
+      "title": "tlsRuleBrowserCerts also evaluates browser monitors when includeBrowserCerts is true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/tls_rule_browser_certs.spec.ts",
+        "line": 94,
+        "column": 21
+      }
+    }
+  ]
+}

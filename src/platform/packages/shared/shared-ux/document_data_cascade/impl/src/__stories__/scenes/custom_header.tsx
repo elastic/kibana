@@ -179,7 +179,7 @@ export const CascadeCustomHeaderImplementation: StoryObj<
     >(
       () => [
         {
-          iconType: 'arrowDown',
+          iconType: 'chevronSingleDown',
           iconSide: 'right',
           onClick: () => {
             /** Noop click handler */

@@ -27,7 +27,12 @@ export const mapUiamConvertResponseToKeyResults = (
     if (item.status === 'success') {
       converted.push({
         taskId,
-        uiamApiKey: Buffer.from(`${item.id}:${item.key}`).toString('base64'),
+        // Persist the raw `essu_…` secret, matching what `EsAndUiamApiKeyStrategy.grantApiKeys`
+        // stores: it is the credential presented at execution and on invalidation, and the key id
+        // is persisted separately on `userScope.uiamApiKeyId`. Encoding `base64(<id>:<secret>)`
+        // here instead made Elasticsearch parse the credential as a native `id:api_key` pair and
+        // reject it (see `getUiamApiKeySecret`, which still normalizes keys stored that way).
+        uiamApiKey: item.key,
         uiamApiKeyId: item.id,
         attributes,
         version,

@@ -23,8 +23,8 @@ import {
   mergeEmitterWorkflowIntoEventChainVisited,
 } from '../lib/telemetry/utils/extract_execution_metadata';
 import { WorkflowExecutionTelemetryClient } from '../lib/telemetry/workflow_execution_telemetry_client';
-import { StepExecutionRepository } from '../repositories/step_execution_repository';
-import { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import type { StepExecutionRepository } from '../repositories/step_execution_repository';
+import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import { NodesFactory } from '../step/nodes_factory';
 import type { WorkflowsExecutionEnginePluginStart } from '../types';
 import { StepExecutionRuntimeFactory } from '../workflow_context_manager/step_execution_runtime_factory';
@@ -43,6 +43,8 @@ export async function setupDependencies(
   logger: Logger,
   config: WorkflowsExecutionEngineConfig,
   dependencies: ContextDependencies,
+  workflowExecutionRepository: WorkflowExecutionRepository,
+  stepExecutionRepository: StepExecutionRepository,
   fakeRequest?: KibanaRequest,
   workflowsExecutionEngine?: WorkflowsExecutionEnginePluginStart
 ) {
@@ -53,8 +55,6 @@ export async function setupDependencies(
   // Get ES client from core services (guaranteed to be available at task execution time)
   const internalEsClient = coreStart.elasticsearch.client.asInternalUser;
 
-  const workflowExecutionRepository = new WorkflowExecutionRepository(internalEsClient, logger);
-  const stepExecutionRepository = new StepExecutionRepository(internalEsClient, logger);
   const workflowRepository = new WorkflowRepository({
     esClient: internalEsClient,
     logger,

@@ -34,6 +34,7 @@ export interface RouteHandlerScopedClients {
   soClient: SavedObjectsClientContract;
   internalSoClient: SavedObjectsClientContract;
   spaceId: string;
+  isCpsAvailable: boolean;
   dataViewsService: DataViewsService;
   rulesClient: RulesClientApi;
   racClient: AlertsClient;

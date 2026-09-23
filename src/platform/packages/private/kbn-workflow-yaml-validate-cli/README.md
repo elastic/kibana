@@ -26,7 +26,7 @@ Flags:
 | --- | --- | --- |
 | `--recursive` / `-r` | Descend into subdirectories | off (top-level only) |
 | `--summary-only` | Suppress per-file streaming; print only failures and the final summary | off (stream every file) |
-| `--variant` | Force a schema variant: `strict` or `template` | auto-detect per file |
+| `--variant` | Force a validation mode: `strict`, `template`, or `managed` | auto-detect per file |
 | `--schema` | Explicit schema source: a bundle directory or an `http(s)://` base URL | — |
 | `--schema-cdn-url` | CDN base URL used as a fallback (also `KBN_WORKFLOW_SCHEMA_CDN_URL`) | — |
 | `--kibana-version` | Select a version under the local target dir | highest available |
@@ -62,7 +62,7 @@ Three layers run per file:
    `strict` or `template` variant. Plain workflows use `strict`; installable
    templates (files with a `template-metadata` block) have that block validated
    with the strict template-metadata schema, stripped, and the remaining body
-   validated against `template`. `--variant` forces a specific variant.
+   validated against `template`. `--variant` forces a specific mode.
 2. **Semantic** — step-name uniqueness and execution-graph (DAG) validity, reusing
    Kibana's own `validateStepNameUniqueness` and `WorkflowGraph`. Runs only when
    the JSON Schema layer passed for that file.
@@ -71,6 +71,25 @@ Three layers run per file:
 
 The process exits non-zero if any file has an error. An empty folder logs a
 warning and exits 0.
+
+### Managed workflows (`--variant managed`)
+
+Managed workflow definitions (under `@kbn/workflows/managed`) are plain workflows
+that carry install-time placeholder tokens — e.g.
+`every: "__DETECTION_INTERVAL_MINUTES__m"` or
+`detectionIntervalMinutes: __DETECTION_INTERVAL_MINUTES__` — which are
+exact-token-replaced when the workflow is installed, so they never reach the
+runtime. These `__SOMETHING__` tokens (upper-snake, double-underscore-delimited)
+are not part of either published schema.
+
+`--variant managed` validates the document against the `strict` schema but
+additionally tolerates any value carrying such a token: schema errors on those
+scalar positions are reclassified into a single non-failing `managed` warning per
+path (the same mechanism used for LiquidJS values), so the file passes while every
+placeholder is still surfaced. This tolerance is opt-in: under
+`auto`/`strict`/`template` a stray `__FOO__` remains a failing error. It is
+distinct from the lowercase `__install__.<name>` library placeholder tolerated by
+the `template` variant.
 
 ### Readable schema errors
 

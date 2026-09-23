@@ -12,7 +12,7 @@ import { renderingServiceMock } from '@kbn/core-rendering-browser-mocks';
 import { createSnoozeAction } from './snooze';
 import * as modal from '../components/snooze_expiry_modal';
 import * as bulk from './bulk_create_alert_actions';
-import type { AlertEpisode } from '@kbn/alerting-v2-common-queries';
+import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
 const makeEpisode = (overrides: Partial<AlertEpisode> = {}): AlertEpisode => ({
   '@timestamp': '2026-04-23T00:00:00Z',
   'episode.id': 'e1',

@@ -51,6 +51,14 @@ exports[`Error ATTRIBUTE_GEN_AI_SYSTEM 1`] = `undefined`;
 
 exports[`Error ATTRIBUTE_GEN_AI_SYSTEM_INSTRUCTIONS 1`] = `undefined`;
 
+exports[`Error ATTRIBUTE_GEN_AI_TOOL_CALL_ARGUMENTS 1`] = `undefined`;
+
+exports[`Error ATTRIBUTE_GEN_AI_TOOL_CALL_RESULT 1`] = `undefined`;
+
+exports[`Error ATTRIBUTE_GEN_AI_TOOL_DEFINITIONS 1`] = `undefined`;
+
+exports[`Error ATTRIBUTE_GEN_AI_TOOL_NAME 1`] = `undefined`;
+
 exports[`Error ATTRIBUTE_GEN_AI_USAGE_INPUT_TOKENS 1`] = `undefined`;
 
 exports[`Error ATTRIBUTE_GEN_AI_USAGE_OUTPUT_TOKENS 1`] = `undefined`;
@@ -281,6 +289,14 @@ exports[`Error METRIC_JAVA_NON_HEAP_MEMORY_MAX 1`] = `undefined`;
 exports[`Error METRIC_JAVA_NON_HEAP_MEMORY_USED 1`] = `undefined`;
 
 exports[`Error METRIC_JAVA_THREAD_COUNT 1`] = `undefined`;
+
+exports[`Error METRIC_JVM_CPU_RECENT_UTILIZATION 1`] = `undefined`;
+
+exports[`Error METRIC_JVM_MEMORY_LIMIT 1`] = `undefined`;
+
+exports[`Error METRIC_JVM_MEMORY_TYPE 1`] = `undefined`;
+
+exports[`Error METRIC_JVM_MEMORY_USED 1`] = `undefined`;
 
 exports[`Error METRIC_OTEL_JVM_CPU_PERCENT 1`] = `undefined`;
 
@@ -549,6 +565,14 @@ exports[`Span ATTRIBUTE_GEN_AI_SYSTEM 1`] = `undefined`;
 
 exports[`Span ATTRIBUTE_GEN_AI_SYSTEM_INSTRUCTIONS 1`] = `undefined`;
 
+exports[`Span ATTRIBUTE_GEN_AI_TOOL_CALL_ARGUMENTS 1`] = `undefined`;
+
+exports[`Span ATTRIBUTE_GEN_AI_TOOL_CALL_RESULT 1`] = `undefined`;
+
+exports[`Span ATTRIBUTE_GEN_AI_TOOL_DEFINITIONS 1`] = `undefined`;
+
+exports[`Span ATTRIBUTE_GEN_AI_TOOL_NAME 1`] = `undefined`;
+
 exports[`Span ATTRIBUTE_GEN_AI_USAGE_INPUT_TOKENS 1`] = `undefined`;
 
 exports[`Span ATTRIBUTE_GEN_AI_USAGE_OUTPUT_TOKENS 1`] = `undefined`;
@@ -766,6 +790,14 @@ exports[`Span METRIC_JAVA_NON_HEAP_MEMORY_MAX 1`] = `undefined`;
 exports[`Span METRIC_JAVA_NON_HEAP_MEMORY_USED 1`] = `undefined`;
 
 exports[`Span METRIC_JAVA_THREAD_COUNT 1`] = `undefined`;
+
+exports[`Span METRIC_JVM_CPU_RECENT_UTILIZATION 1`] = `undefined`;
+
+exports[`Span METRIC_JVM_MEMORY_LIMIT 1`] = `undefined`;
+
+exports[`Span METRIC_JVM_MEMORY_TYPE 1`] = `undefined`;
+
+exports[`Span METRIC_JVM_MEMORY_USED 1`] = `undefined`;
 
 exports[`Span METRIC_OTEL_JVM_CPU_PERCENT 1`] = `undefined`;
 
@@ -1030,6 +1062,14 @@ exports[`Transaction ATTRIBUTE_GEN_AI_SYSTEM 1`] = `undefined`;
 
 exports[`Transaction ATTRIBUTE_GEN_AI_SYSTEM_INSTRUCTIONS 1`] = `undefined`;
 
+exports[`Transaction ATTRIBUTE_GEN_AI_TOOL_CALL_ARGUMENTS 1`] = `undefined`;
+
+exports[`Transaction ATTRIBUTE_GEN_AI_TOOL_CALL_RESULT 1`] = `undefined`;
+
+exports[`Transaction ATTRIBUTE_GEN_AI_TOOL_DEFINITIONS 1`] = `undefined`;
+
+exports[`Transaction ATTRIBUTE_GEN_AI_TOOL_NAME 1`] = `undefined`;
+
 exports[`Transaction ATTRIBUTE_GEN_AI_USAGE_INPUT_TOKENS 1`] = `undefined`;
 
 exports[`Transaction ATTRIBUTE_GEN_AI_USAGE_OUTPUT_TOKENS 1`] = `undefined`;
@@ -1261,6 +1301,14 @@ exports[`Transaction METRIC_JAVA_NON_HEAP_MEMORY_MAX 1`] = `undefined`;
 exports[`Transaction METRIC_JAVA_NON_HEAP_MEMORY_USED 1`] = `undefined`;
 
 exports[`Transaction METRIC_JAVA_THREAD_COUNT 1`] = `undefined`;
+
+exports[`Transaction METRIC_JVM_CPU_RECENT_UTILIZATION 1`] = `undefined`;
+
+exports[`Transaction METRIC_JVM_MEMORY_LIMIT 1`] = `undefined`;
+
+exports[`Transaction METRIC_JVM_MEMORY_TYPE 1`] = `undefined`;
+
+exports[`Transaction METRIC_JVM_MEMORY_USED 1`] = `undefined`;
 
 exports[`Transaction METRIC_OTEL_JVM_CPU_PERCENT 1`] = `undefined`;
 

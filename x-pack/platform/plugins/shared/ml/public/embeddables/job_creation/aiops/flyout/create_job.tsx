@@ -18,8 +18,8 @@ import {
   EuiHorizontalRule,
   EuiComboBox,
   EuiFormRow,
-  EuiCallOut,
 } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
 import type { TimeRange } from '@kbn/es-query';
@@ -49,6 +49,7 @@ export const CreateJob: FC<Props> = ({ dataView, field, query, timeRange }) => {
       share,
       uiSettings,
       mlServices: { mlApi },
+      cps,
     },
   } = useMlFromLensKibanaContext();
   const [categorizationType, setCategorizationType] = useState<CategorizationType>(
@@ -89,9 +90,10 @@ export const CreateJob: FC<Props> = ({ dataView, field, query, timeRange }) => {
         data.query.timefilter.timefilter,
         share,
         data,
-        mlApi
+        mlApi,
+        cps
       ),
-    [share, data, mlApi, uiSettings]
+    [share, data, mlApi, uiSettings, cps]
   );
 
   function createADJobInWizard() {
@@ -255,7 +257,7 @@ export const CreateJob: FC<Props> = ({ dataView, field, query, timeRange }) => {
           <>
             <EuiSpacer size="m" />
 
-            <EuiCallOut
+            <KbnInfoCallout
               announceOnMount
               size="s"
               title={

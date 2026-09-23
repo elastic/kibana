@@ -39,7 +39,6 @@ import {
   VISUALIZATION_CREATION_EXAMPLES,
 } from './benchmark_dataset';
 
-// Use the native kbn-evals executor directly — no Phoenix dependency.
 const base = evalsBase.extend<{}, { chatClient: AgentBuilderEvaluationChatClient }>({
   chatClient: [
     async ({ fetch, log, connector }, use) => {

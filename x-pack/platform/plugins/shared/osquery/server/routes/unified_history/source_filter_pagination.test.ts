@@ -22,6 +22,7 @@ import type { LiveActionHit } from './map_live_hit_to_row';
 import type { SourceFilter, UnifiedHistoryRow } from '../../../common/api/unified_history/types';
 import type { SortValues } from './query_live_actions_dsl';
 import { buildLiveActionsQuery } from './query_live_actions_dsl';
+import { httpServerMock } from '@kbn/core/server/mocks';
 import { processLiveHistory } from './process_live_history';
 import { mergeRows } from './merge_rows';
 import { computePaginationCursors, decodeCursor, encodeCursor } from './cursor_utils';
@@ -36,6 +37,8 @@ const mockOsqueryContext = {
     .fn()
     .mockResolvedValue([{ elasticsearch: { client: { asInternalUser: {} } } }]),
 } as never;
+
+const mockRequest = httpServerMock.createKibanaRequest();
 
 const mockLogger = { warn: jest.fn() } as never;
 
@@ -146,7 +149,9 @@ const fetchPage = async (
   const { liveRows, sortValuesMap } = await processLiveHistory({
     liveHits,
     osqueryContext: mockOsqueryContext,
+    request: mockRequest,
     spaceId: 'default',
+    cpsActive: false,
     logger: mockLogger,
   });
 

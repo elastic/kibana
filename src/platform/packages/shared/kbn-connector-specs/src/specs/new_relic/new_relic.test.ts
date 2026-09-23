@@ -655,11 +655,9 @@ describe('NewRelic', () => {
         data: { data: { actor: { user: { name: 'Jane Doe', email: 'jane@example.com' } } } },
       });
 
-      if (!NewRelic.test) throw new Error('Test handler not defined');
       const result = await NewRelic.test.handler(mockContext);
 
       expect(result).toEqual({
-        ok: true,
         message: 'Connected to New Relic NerdGraph as Jane Doe (jane@example.com).',
       });
     });

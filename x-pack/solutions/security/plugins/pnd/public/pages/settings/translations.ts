@@ -11,7 +11,7 @@ export const PAGE_TITLE = i18n.translate('xpack.pnd.settings.pageTitle', {
   defaultMessage: 'Settings',
 });
 
-export const MOCK_DATA_NOTE = i18n.translate('xpack.pnd.settings.mockDataNote', {
+export const WATCH_ENABLEMENT_NOTE = i18n.translate('xpack.pnd.settings.watchEnablementNote', {
   defaultMessage:
-    'Mock data is controlled by xpack.pnd.ui.useMockData in kibana.yml. Toggle requires a restart.',
+    'Enable or configure each watch from its own page. There is no space-level switch.',
 });

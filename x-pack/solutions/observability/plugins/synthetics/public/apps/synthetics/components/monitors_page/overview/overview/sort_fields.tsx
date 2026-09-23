@@ -32,6 +32,7 @@ export const SortFields = () => {
         handleSortChange(
           setOverviewPageStateAction({
             sortOrder: 'asc',
+            page: 1,
           })
         );
       },
@@ -44,6 +45,7 @@ export const SortFields = () => {
         handleSortChange(
           setOverviewPageStateAction({
             sortOrder: 'desc',
+            page: 1,
           })
         );
       },
@@ -60,6 +62,7 @@ export const SortFields = () => {
           setOverviewPageStateAction({
             sortField: 'status',
             sortOrder: 'asc',
+            page: 1,
           })
         );
       },
@@ -74,6 +77,7 @@ export const SortFields = () => {
           setOverviewPageStateAction({
             sortField: `${ConfigKey.NAME}.keyword`,
             sortOrder: 'asc',
+            page: 1,
           })
         );
       },
@@ -88,6 +92,7 @@ export const SortFields = () => {
           setOverviewPageStateAction({
             sortField: 'urls',
             sortOrder: 'asc',
+            page: 1,
           })
         );
       },
@@ -102,6 +107,7 @@ export const SortFields = () => {
           setOverviewPageStateAction({
             sortField: `${ConfigKey.MONITOR_TYPE}.keyword`,
             sortOrder: 'asc',
+            page: 1,
           })
         );
       },
@@ -116,6 +122,7 @@ export const SortFields = () => {
           setOverviewPageStateAction({
             sortField: 'updated_at',
             sortOrder: 'desc',
+            page: 1,
           })
         );
       },

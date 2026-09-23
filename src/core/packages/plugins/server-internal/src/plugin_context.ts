@@ -425,6 +425,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
     security: {
       authc: deps.security.authc,
       audit: deps.security.audit,
+      serviceAccounts: deps.security.serviceAccounts,
     },
     userProfile: deps.userProfile,
     injection: {

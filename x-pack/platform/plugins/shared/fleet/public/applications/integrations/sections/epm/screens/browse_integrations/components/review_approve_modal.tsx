@@ -406,7 +406,7 @@ export const ReviewApproveModal: React.FC<{
           disableScreenReaderOutput
         >
           <EuiButtonIcon
-            iconType="expand"
+            iconType="maximize"
             aria-label={i18n.translate(
               'xpack.fleet.epmList.manageIntegrations.actions.reviewRowOpenFlyoutAriaLabel',
               { defaultMessage: 'Open data stream results flyout' }

@@ -57,14 +57,14 @@ describe('#registerType', () => {
   it('throws if `attributesToEncrypt` is empty', () => {
     expect(() =>
       service.registerType({ type: 'known-type-1', attributesToEncrypt: new Set() })
-    ).toThrowError('The "attributesToEncrypt" array for "known-type-1" is empty.');
+    ).toThrow('The "attributesToEncrypt" array for "known-type-1" is empty.');
   });
 
   it('throws if `type` has been registered already', () => {
     service.registerType({ type: 'known-type-1', attributesToEncrypt: new Set(['attr']) });
     expect(() =>
       service.registerType({ type: 'known-type-1', attributesToEncrypt: new Set(['attr']) })
-    ).toThrowError('The "known-type-1" saved object type is already registered.');
+    ).toThrow('The "known-type-1" saved object type is already registered.');
   });
 });
 
@@ -656,7 +656,7 @@ describe('#encryptAttributes', () => {
       service.encryptAttributes({ type: 'known-type-1', id: 'object-id' }, attributes, {
         user: mockUser,
       })
-    ).rejects.toThrowError(EncryptionError);
+    ).rejects.toThrow(EncryptionError);
 
     expect(attributes).toEqual({
       attrOne: 'one',
@@ -698,7 +698,7 @@ describe('#encryptAttributes', () => {
         service.encryptAttributes({ type: 'known-type-1', id: 'object-id' }, attributes, {
           user: mockUser,
         })
-      ).rejects.toThrowError(EncryptionError);
+      ).rejects.toThrow(EncryptionError);
 
       expect(attributes).toEqual({
         attrOne: 'one',
@@ -1156,7 +1156,7 @@ describe('#decryptAttributes', () => {
           attributesWithoutAttr,
           { user: mockUser }
         )
-      ).rejects.toThrowError(EncryptionError);
+      ).rejects.toThrow(EncryptionError);
     });
 
     it('fails to decrypt if ID does not match', async () => {
@@ -1165,7 +1165,7 @@ describe('#decryptAttributes', () => {
         service.decryptAttributes({ type: 'known-type-1', id: 'object-id*' }, encryptedAttributes, {
           user: mockUser,
         })
-      ).rejects.toThrowError(EncryptionError);
+      ).rejects.toThrow(EncryptionError);
     });
 
     it('fails to decrypt if type does not match', async () => {
@@ -1174,7 +1174,7 @@ describe('#decryptAttributes', () => {
         service.decryptAttributes({ type: 'known-type-2', id: 'object-id' }, encryptedAttributes, {
           user: mockUser,
         })
-      ).rejects.toThrowError(EncryptionError);
+      ).rejects.toThrow(EncryptionError);
     });
 
     it('fails to decrypt if namespace does not match', async () => {
@@ -1190,7 +1190,7 @@ describe('#decryptAttributes', () => {
           encryptedAttributes,
           { user: mockUser }
         )
-      ).rejects.toThrowError(EncryptionError);
+      ).rejects.toThrow(EncryptionError);
     });
 
     it('fails to decrypt if namespace is expected, but is not provided', async () => {
@@ -1204,7 +1204,7 @@ describe('#decryptAttributes', () => {
         service.decryptAttributes({ type: 'known-type-1', id: 'object-id' }, encryptedAttributes, {
           user: mockUser,
         })
-      ).rejects.toThrowError(EncryptionError);
+      ).rejects.toThrow(EncryptionError);
     });
 
     it('fails if retry decryption without namespace is not correct', async () => {
@@ -1227,7 +1227,7 @@ describe('#decryptAttributes', () => {
           encryptedAttributes,
           { user: mockUser, isTypeBeingConverted: true }
         )
-      ).rejects.toThrowError(EncryptionError);
+      ).rejects.toThrow(EncryptionError);
       expect(mockNodeCrypto.decrypt).toHaveBeenCalledTimes(2);
       expect(mockNodeCrypto.decrypt).toHaveBeenNthCalledWith(
         1, // first attempted to decrypt with the namespace in the descriptor (fail)
@@ -1249,9 +1249,7 @@ describe('#decryptAttributes', () => {
           { ...encryptedAttributes, attrThree: 2 },
           { user: mockUser }
         )
-      ).rejects.toThrowError(
-        'Encrypted "attrThree" attribute should be a string, but found number'
-      );
+      ).rejects.toThrow('Encrypted "attrThree" attribute should be a string, but found number');
     });
 
     it('fails to decrypt if encrypted attribute is not correct', async () => {
@@ -1262,7 +1260,7 @@ describe('#decryptAttributes', () => {
           { ...encryptedAttributes, attrThree: 'some-unknown-string' },
           { user: mockUser }
         )
-      ).rejects.toThrowError(EncryptionError);
+      ).rejects.toThrow(EncryptionError);
     });
 
     it('fails to decrypt if the AAD attribute has changed', async () => {
@@ -1273,7 +1271,7 @@ describe('#decryptAttributes', () => {
           { ...encryptedAttributes, attrOne: 'oNe' },
           { user: mockUser }
         )
-      ).rejects.toThrowError(EncryptionError);
+      ).rejects.toThrow(EncryptionError);
     });
 
     it('fails if encrypted with another encryption key', async () => {
@@ -1292,7 +1290,7 @@ describe('#decryptAttributes', () => {
         service.decryptAttributes({ type: 'known-type-1', id: 'object-id' }, encryptedAttributes, {
           user: mockUser,
         })
-      ).rejects.toThrowError(EncryptionError);
+      ).rejects.toThrow(EncryptionError);
     });
   });
 
@@ -1450,7 +1448,7 @@ describe('#decryptAttributes', () => {
         service.decryptAttributes({ type: 'known-type-1', id: 'object-id' }, attributes, {
           user: mockUser,
         })
-      ).rejects.toThrowError(EncryptionError);
+      ).rejects.toThrow(EncryptionError);
     });
   });
 });
@@ -1632,7 +1630,7 @@ describe('#encryptAttributesSync', () => {
 
     expect(() =>
       service.encryptAttributesSync({ type: 'known-type-1', id: 'object-id' }, attributes)
-    ).toThrowError(EncryptionError);
+    ).toThrow(EncryptionError);
 
     expect(attributes).toEqual({
       attrOne: 'one',
@@ -1674,7 +1672,7 @@ describe('#encryptAttributesSync', () => {
         service.encryptAttributesSync({ type: 'known-type-1', id: 'object-id' }, attributes, {
           user: mockUser,
         })
-      ).toThrowError(EncryptionError);
+      ).toThrow(EncryptionError);
 
       expect(attributes).toEqual({
         attrOne: 'one',
@@ -2097,7 +2095,7 @@ describe('#decryptAttributesSync', () => {
           { type: 'known-type-1', id: 'object-id' },
           attributesWithoutAttr
         )
-      ).toThrowError(EncryptionError);
+      ).toThrow(EncryptionError);
     });
 
     it('fails to decrypt if ID does not match', () => {
@@ -2106,7 +2104,7 @@ describe('#decryptAttributesSync', () => {
           { type: 'known-type-1', id: 'object-id*' },
           encryptedAttributes
         )
-      ).toThrowError(EncryptionError);
+      ).toThrow(EncryptionError);
     });
 
     it('fails to decrypt if type does not match', () => {
@@ -2115,7 +2113,7 @@ describe('#decryptAttributesSync', () => {
           { type: 'known-type-2', id: 'object-id' },
           encryptedAttributes
         )
-      ).toThrowError(EncryptionError);
+      ).toThrow(EncryptionError);
     });
 
     it('fails to decrypt if namespace does not match', () => {
@@ -2129,7 +2127,7 @@ describe('#decryptAttributesSync', () => {
           { type: 'known-type-1', id: 'object-id', namespace: 'object-NS' },
           encryptedAttributes
         )
-      ).toThrowError(EncryptionError);
+      ).toThrow(EncryptionError);
     });
 
     it('fails to decrypt if namespace is expected, but is not provided', () => {
@@ -2143,7 +2141,7 @@ describe('#decryptAttributesSync', () => {
           { type: 'known-type-1', id: 'object-id' },
           encryptedAttributes
         )
-      ).toThrowError(EncryptionError);
+      ).toThrow(EncryptionError);
     });
 
     it('fails if retry decryption without namespace is not correct', () => {
@@ -2166,7 +2164,7 @@ describe('#decryptAttributesSync', () => {
           encryptedAttributes,
           { user: mockUser, isTypeBeingConverted: true }
         )
-      ).toThrowError(EncryptionError);
+      ).toThrow(EncryptionError);
       expect(mockNodeCrypto.decryptSync).toHaveBeenCalledTimes(2);
       expect(mockNodeCrypto.decryptSync).toHaveBeenNthCalledWith(
         1, // first attempted to decrypt with the namespace in the descriptor (fail)
@@ -2189,7 +2187,7 @@ describe('#decryptAttributesSync', () => {
             attrThree: 2,
           }
         )
-      ).toThrowError('Encrypted "attrThree" attribute should be a string, but found number');
+      ).toThrow('Encrypted "attrThree" attribute should be a string, but found number');
     });
 
     it('fails to decrypt if encrypted attribute is not correct', () => {
@@ -2201,7 +2199,7 @@ describe('#decryptAttributesSync', () => {
             attrThree: 'some-unknown-string',
           }
         )
-      ).toThrowError(EncryptionError);
+      ).toThrow(EncryptionError);
     });
 
     it('fails to decrypt if the AAD attribute has changed', () => {
@@ -2213,7 +2211,7 @@ describe('#decryptAttributesSync', () => {
             attrOne: 'oNe',
           }
         )
-      ).toThrowError(EncryptionError);
+      ).toThrow(EncryptionError);
     });
 
     it('fails if encrypted with another encryption key', () => {
@@ -2232,7 +2230,7 @@ describe('#decryptAttributesSync', () => {
           { type: 'known-type-1', id: 'object-id' },
           encryptedAttributes
         )
-      ).toThrowError(EncryptionError);
+      ).toThrow(EncryptionError);
     });
   });
 
@@ -2401,7 +2399,7 @@ describe('#decryptAttributesSync', () => {
         service.decryptAttributesSync({ type: 'known-type-1', id: 'object-id' }, attributes, {
           user: mockUser,
         })
-      ).toThrowError(EncryptionError);
+      ).toThrow(EncryptionError);
     });
   });
 });

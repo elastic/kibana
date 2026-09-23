@@ -56,6 +56,8 @@ import { fieldsServiceProvider } from '../fields_service';
 import { jobServiceProvider } from '../job_service';
 import { resultsServiceProvider } from '../results_service';
 import type { MLSavedObjectService } from '../../saved_objects';
+import type { ServerlessInfo } from '../../types';
+import { getIsMlCpsEnabled } from '../../lib/cps_utils';
 
 const ML_DIR = 'ml';
 const KIBANA_DIR = 'kibana';
@@ -107,6 +109,7 @@ export class DataRecognizer {
   private _mlSavedObjectService: MLSavedObjectService;
   private _dataViewsService: DataViewsService;
   private _request: KibanaRequest;
+  private _serverless: ServerlessInfo;
 
   private _modulesDir = `${__dirname}/modules`;
   private _indexPatternName: string = '';
@@ -140,7 +143,8 @@ export class DataRecognizer {
     dataViewsService: DataViewsService,
     mlSavedObjectService: MLSavedObjectService,
     request: KibanaRequest,
-    compatibleModuleType: CompatibleModule | null
+    compatibleModuleType: CompatibleModule | null,
+    serverless: ServerlessInfo
   ) {
     this._client = mlClusterClient;
     this._mlClient = mlClient;
@@ -148,7 +152,8 @@ export class DataRecognizer {
     this._dataViewsService = dataViewsService;
     this._mlSavedObjectService = mlSavedObjectService;
     this._request = request;
-    this._jobsService = jobServiceProvider(mlClusterClient, mlClient);
+    this._serverless = serverless;
+    this._jobsService = jobServiceProvider(mlClusterClient, mlClient, serverless);
     this._resultsService = resultsServiceProvider(mlClient);
     this._calculateModelMemoryLimit = calculateModelMemoryLimitProvider(mlClusterClient, mlClient);
     this._compatibleModuleType = compatibleModuleType;
@@ -553,7 +558,8 @@ export class DataRecognizer {
     jobOverrides?: JobOverride | JobOverride[],
     datafeedOverrides?: DatafeedOverride | DatafeedOverride[],
     estimateModelMemory?: boolean,
-    applyToAllSpaces: boolean = false
+    applyToAllSpaces: boolean = false,
+    projectRouting?: string
   ) {
     // load the config from disk
     const moduleConfig = await this.getModule(moduleId, undefined, jobPrefix);
@@ -627,6 +633,17 @@ export class DataRecognizer {
           df.config.query = query;
         });
       }
+
+      if (
+        projectRouting !== undefined &&
+        this._serverless.cpsEnabled &&
+        (await getIsMlCpsEnabled(this._client))
+      ) {
+        moduleConfig.datafeeds.forEach((df) => {
+          df.config.project_routing = projectRouting;
+        });
+      }
+
       saveResults.datafeeds = await this._saveDatafeeds(moduleConfig.datafeeds);
 
       if (startDatafeed) {
@@ -1499,7 +1516,8 @@ export function dataRecognizerFactory(
   dataViewsService: DataViewsService,
   mlSavedObjectService: MLSavedObjectService,
   request: KibanaRequest,
-  compatibleModuleType: CompatibleModule | null
+  compatibleModuleType: CompatibleModule | null,
+  serverless: ServerlessInfo
 ) {
   return new DataRecognizer(
     client,
@@ -1508,7 +1526,8 @@ export function dataRecognizerFactory(
     dataViewsService,
     mlSavedObjectService,
     request,
-    compatibleModuleType
+    compatibleModuleType,
+    serverless
   );
 }
 

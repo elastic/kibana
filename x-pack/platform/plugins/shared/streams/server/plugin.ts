@@ -20,10 +20,11 @@ import { OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS } from '@kbn/management
 import { registerRoutes } from '@kbn/server-route-repository';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { RulesClient, RulesClientCreateOptions } from '@kbn/alerting-plugin/server';
-import { LOGS_ECS_STREAM_NAME, ROOT_STREAM_NAMES, Streams } from '@kbn/streams-schema';
+import { ROOT_STREAM_NAMES, Streams } from '@kbn/streams-schema';
 import { isNotFoundError } from '@kbn/es-errors';
 import type { Subscription } from 'rxjs';
 import type { KnowledgeIndicatorClientContract } from '@kbn/significant-events-schema';
+import { SIGNIFICANT_EVENT_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import type { StreamsClient } from './lib/streams/client';
 import type { StreamsConfig } from '../common/config';
 import {
@@ -48,8 +49,7 @@ import type {
 import { createStreamsGlobalSearchResultProvider } from './lib/streams/create_streams_global_search_result_provider';
 import { backfillWiredStreamViews } from './lib/streams/esql_views/backfill_wired_stream_views';
 import { ProcessorSuggestionsService } from './lib/streams/ingest_pipelines/processor_suggestions_service';
-import { baseFields } from './lib/streams/component_templates/logs_layer';
-import { ecsBaseFields } from './lib/streams/component_templates/logs_ecs_layer';
+import { getDefaultRootFields } from './lib/streams/root_stream_definition';
 import { registerStreamsAgentBuilder } from './agent_builder/register';
 import { PatternExtractionService } from './lib/pattern_extraction/pattern_extraction_service';
 import { registerFieldsMetadataExtractors } from './register_fields_metadata_extractors';
@@ -167,16 +167,17 @@ export class StreamsPlugin
         contentService.getClient(),
       ]);
 
-      let kiClientPromise: Promise<KnowledgeIndicatorClientContract> | undefined;
-      const getKnowledgeIndicatorClient = (): Promise<KnowledgeIndicatorClientContract> => {
-        if (!this.kiProvider) {
-          throw new Error(
-            'No KnowledgeIndicatorClient provider registered. Is the significant_events plugin enabled?'
-          );
-        }
-        kiClientPromise ??= this.kiProvider(request);
-        return kiClientPromise;
-      };
+      let getKnowledgeIndicatorClient:
+        | (() => Promise<KnowledgeIndicatorClientContract>)
+        | undefined;
+      if (this.kiProvider) {
+        let kiClientPromise: Promise<KnowledgeIndicatorClientContract> | undefined;
+        const provider = this.kiProvider;
+        getKnowledgeIndicatorClient = () => {
+          kiClientPromise ??= provider(request);
+          return kiClientPromise;
+        };
+      }
 
       const license = await licensing.getLicense();
       const isSecurityEnabled = license.getFeature('security').isEnabled;
@@ -247,6 +248,7 @@ export class StreamsPlugin
       privileges: {
         all: {
           app: [STREAMS_FEATURE_ID, SIGNIFICANT_EVENTS_APP_ID],
+          aiIndex: { read: [SIGNIFICANT_EVENT_KI_TYPE] },
           savedObject: {
             all: [],
             read: [],
@@ -256,6 +258,7 @@ export class StreamsPlugin
         },
         read: {
           app: [STREAMS_FEATURE_ID, SIGNIFICANT_EVENTS_APP_ID],
+          aiIndex: { read: [SIGNIFICANT_EVENT_KI_TYPE] },
           savedObject: {
             all: [],
             read: [],
@@ -366,7 +369,7 @@ export class StreamsPlugin
                             ...definition.stream.ingest,
                             wired: {
                               ...definition.stream.ingest.wired,
-                              fields: name === LOGS_ECS_STREAM_NAME ? ecsBaseFields : baseFields,
+                              fields: getDefaultRootFields(name),
                             },
                           },
                         },
@@ -433,14 +436,8 @@ export class StreamsPlugin
           soClient,
           rulesClient: await pluginsStart.alerting.getRulesClientWithRequest(request),
         });
-        const getKnowledgeIndicatorClient = (): Promise<KnowledgeIndicatorClientContract> => {
-          if (!this.kiProvider) {
-            throw new Error(
-              'No KnowledgeIndicatorClient provider registered. Is the significant_events plugin enabled?'
-            );
-          }
-          return this.kiProvider(request);
-        };
+        const provider = this.kiProvider;
+        const getKnowledgeIndicatorClient = provider ? () => provider(request) : undefined;
         const license = await pluginsStart.licensing.getLicense();
         return this.streamsService!.getClient({
           attachmentClient,

@@ -42,6 +42,7 @@ export class CloudConnectedPlugin
   private readonly telemetry = new CloudConnectTelemetryService();
   private homeSetup?: HomePublicPluginSetup;
   private managementSetup?: ManagementSetup;
+  private deploymentId?: string;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<CloudConnectConfig>();
@@ -60,6 +61,7 @@ export class CloudConnectedPlugin
     // Store plugin setup references for registering hooks in start()
     this.homeSetup = plugins.home;
     this.managementSetup = plugins.management;
+    this.deploymentId = plugins.cloud?.deploymentId;
 
     // Setup telemetry
     this.telemetry.setup(core.analytics);
@@ -95,7 +97,10 @@ export class CloudConnectedPlugin
   }
 
   public start(core: CoreStart): CloudConnectedPluginStart {
-    const useCloudConnectStatus = createUseCloudConnectStatusHook({ http: core.http });
+    const useCloudConnectStatus = createUseCloudConnectStatusHook({
+      http: core.http,
+      deploymentId: this.deploymentId,
+    });
 
     // Register the hook with home plugin if available.
     // We use this registration pattern instead of having home depend on cloudConnect

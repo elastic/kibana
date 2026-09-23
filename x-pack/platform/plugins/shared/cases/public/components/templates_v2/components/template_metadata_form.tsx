@@ -38,14 +38,6 @@ export const TemplateMetadataForm: React.FC<TemplateMetadataFormProps> = ({
     [metadata.tags]
   );
 
-  // The required name commits immediately so the header action accurately enables/disables while
-  // typing. Description keystrokes remain local until pause/blur, avoiding needless re-renders of
-  // this form, Monaco, and the tags combobox. Tags change atomically, so they propagate immediately.
-  const handleNameChange = useCallback(
-    (value: string) => onChange({ ...metadata, name: value }),
-    [metadata, onChange]
-  );
-
   const handleDescriptionChange = useCallback(
     (value: string) => onChange({ ...metadata, description: value }),
     [metadata, onChange]
@@ -121,16 +113,7 @@ export const TemplateMetadataForm: React.FC<TemplateMetadataFormProps> = ({
         </>
       )}
 
-      <DebouncedTemplateTextField
-        label={i18n.TEMPLATE_NAME_LABEL}
-        value={metadata.name}
-        onChange={handleNameChange}
-        commitOnChange
-        isInvalid={errors.name != null}
-        error={errors.name}
-        dataTestSubj="templateMetadataNameInput"
-      />
-
+      {/* The template name is edited in the page title, not here — see TemplateFormLayout. */}
       {optionalMetadataRows}
     </EuiForm>
   );

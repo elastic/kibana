@@ -124,7 +124,6 @@ With PATH_TO_CONFIG and other options as follows.
    | anomaly detection result views | `src/platform/test/functional/apps/ml/anomaly_detection_result_views/config.ts` |
    | anomaly detection integrations | `src/platform/test/functional/apps/ml/anomaly_detection_integrations/config.ts` |
    | data frame analytics           | `src/platform/test/functional/apps/ml/data_frame_analytics/config.ts`           |
-   | data visualizer                | `src/platform/test/functional/apps/ml/data_visualizer/config.ts`                |
    | permissions                    | `src/platform/test/functional/apps/ml/permissions/config.ts`                    |
    | stack management jobs          | `src/platform/test/functional/apps/ml/stack_management_jobs/config.ts`          |
    | short tests                    | `src/platform/test/functional/apps/ml/short_tests/config.ts`                    |
@@ -133,14 +132,18 @@ With PATH_TO_CONFIG and other options as follows.
    feature controls, settings and notifications. Test files for each group are located
    in the directory of their configuration file.
 
+1. Scout UI tests (data visualizer):
+
+   | Area              | PATH                                                                 |
+   | ----------------- | -------------------------------------------------------------------- |
+   | data visualizer   | `x-pack/platform/plugins/private/data_visualizer/test/scout/ui/`     |
+   | ML actions panel  | `x-pack/platform/plugins/shared/ml/test/scout/ui/`                   |
+
 1. Functional UI tests with `Basic` license:
 
    | Group                                                 | PATH_TO_CONFIG                                                            |
    | ----------------------------------------------------- | ------------------------------------------------------------------------- |
    | permissions                                           | `platform/test/functional_basic/apps/ml/permissions/config.ts`            |
-   | data visualizer group1 (file data viz)                | `platform/test/functional_basic/apps/ml/data_visualizer/group3/config.ts` |
-   | data visualizer group2 (index data viz)               | `platform/test/functional_basic/apps/ml/data_visualizer/group2/config.ts` |
-   | data visualizer group3 (actions panel, discover grid) | `platform/test/functional_basic/apps/ml/data_visualizer/group3/config.ts` |
 
 1. API integration tests with `Trial` license:
 

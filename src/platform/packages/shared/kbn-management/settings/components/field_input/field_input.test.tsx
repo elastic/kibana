@@ -177,7 +177,7 @@ describe('FieldInput', () => {
             />
           )
         )
-      ).toThrowError(`Unsaved change for ${type} mismatch: number`);
+      ).toThrow(`Unsaved change for ${type} mismatch: number`);
     });
 
     expect(() =>
@@ -189,7 +189,7 @@ describe('FieldInput', () => {
           />
         )
       )
-    ).toThrowError(`Unsaved change for number mismatch: string`);
+    ).toThrow(`Unsaved change for number mismatch: string`);
 
     consoleMock.mockRestore();
   });
@@ -205,7 +205,7 @@ describe('FieldInput', () => {
       },
     } as unknown as FieldInputProps;
 
-    expect(() => render(wrap(<FieldInput {...props} />))).toThrowError(
+    expect(() => render(wrap(<FieldInput {...props} />))).toThrow(
       'Unknown or incompatible field type: foobar'
     );
 

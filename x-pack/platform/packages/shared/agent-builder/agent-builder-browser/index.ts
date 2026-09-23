@@ -15,8 +15,21 @@ export type {
   WorkflowListItem,
 } from './tools';
 export type { AgentsServiceStartContract } from './agents';
-export type { AttachmentUIDefinition, AttachmentServiceStartContract } from './attachments';
+export type {
+  AttachmentUIDefinition,
+  AttachmentServiceStartContract,
+  ConversationDetailsRenderProps,
+} from './attachments';
 export type { RendererUIDefinition, RendererServiceStartContract } from './renderers';
+export type {
+  ConversationTemplateTabRenderProps,
+  ConversationTemplateTabDefinition,
+  ConversationTemplateUIDefinition,
+  ConversationTemplateBriefCardRenderProps,
+  ConversationTemplateUIContext,
+  ConversationTemplateServiceStartContract,
+} from './templates';
+export { TIMELINE_TAB_ID, BUILTIN_TAB_IDS } from './templates';
 export type {
   EventsServiceStartContract,
   ChatUiEventsContract,
@@ -36,6 +49,7 @@ export type {
   PublicEmbeddableConversationInputProps,
   EmbeddableConversationInputRef,
   OpenConversationSidebarOptions,
+  OpenConversationDetailsOptions,
   ConversationSidebarRef,
   OpenConversationSidebarReturn,
 } from './plugin_contract';

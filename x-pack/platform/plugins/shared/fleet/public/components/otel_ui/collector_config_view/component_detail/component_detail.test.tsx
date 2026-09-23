@@ -15,6 +15,10 @@ import type { OTelCollectorConfig, ComponentHealth } from '../../../../../common
 
 import { OTelComponentDetail } from './component_detail';
 
+jest.mock('../../../../services/use_yaml', () => ({
+  useYaml: () => require('yaml'),
+}));
+
 const config: OTelCollectorConfig = {
   receivers: {
     otlp: {

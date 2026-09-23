@@ -9,16 +9,17 @@ echo "--- Setup Node"
 NODE_VERSION="$(cat "$KIBANA_DIR/.node-version")"
 export NODE_VERSION
 NODE_VARIANT=""
+mkdir -p "$NODE_CACHE_DIR"
 if [[ "${CI_FORCE_NODE_POINTER_COMPRESSION:-}" = "true" ]]; then
   echo ' -- Using Node.js variant with pointer compression enabled'
   NODE_VARIANT="node-pointer-compression/"
-  export NODE_DIR="$CACHE_DIR/node-pointer-compression/$NODE_VERSION"
+  export NODE_DIR="$NODE_CACHE_DIR/node-pointer-compression/$NODE_VERSION"
 elif [[ "${CI_FORCE_NODE_GLIBC_217:-}" = "true" ]]; then
   echo ' -- Using Node.js variant compatible with glibc 2.17'
   NODE_VARIANT="node-glibc-217/"
-  export NODE_DIR="$CACHE_DIR/node-glibc-217/$NODE_VERSION"
+  export NODE_DIR="$NODE_CACHE_DIR/node-glibc-217/$NODE_VERSION"
 else
-  export NODE_DIR="$CACHE_DIR/node/$NODE_VERSION"
+  export NODE_DIR="$NODE_CACHE_DIR/node/$NODE_VERSION"
   echo ' -- Using default Node.js'
 fi
 export NODE_BIN_DIR="$NODE_DIR/bin"

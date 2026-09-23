@@ -16,7 +16,7 @@ import {
 
 /** Definition overrides for tests; allows custom trigger types (e.g. cases.updated). */
 interface TestDefinitionOverrides {
-  triggers?: Array<{ type: string; on?: { condition?: string } }>;
+  triggers?: Array<{ type: string; 'connector-id'?: string; on?: { condition?: string } }>;
   steps?: unknown[];
 }
 
@@ -267,5 +267,190 @@ describe('classifyWorkflowTriggerMatch', () => {
       definition: { triggers: [{ type: 'cases.updated' }], steps: [] },
     });
     expect(classifyWorkflowTriggerMatch(workflow, 'cases.updated', {}, mockLogger)).toBe('matched');
+  });
+
+  describe('requiresConnectorId', () => {
+    const connectorEventOptions = { requiresConnectorId: true };
+
+    it('returns matched when YAML connector-id equals payload connectorId', () => {
+      const workflow = createMockWorkflow({
+        definition: {
+          triggers: [{ type: 'inboundWebhook.received', 'connector-id': 'webhook-1' }],
+          steps: [],
+        },
+      });
+      expect(
+        classifyWorkflowTriggerMatch(
+          workflow,
+          'inboundWebhook.received',
+          { connectorId: 'webhook-1' },
+          mockLogger,
+          connectorEventOptions
+        )
+      ).toBe('matched');
+    });
+
+    it('returns connector_id_mismatch when YAML connector-id differs', () => {
+      const workflow = createMockWorkflow({
+        definition: {
+          triggers: [
+            {
+              type: 'inboundWebhook.received',
+              'connector-id': 'webhook-1',
+              on: { condition: 'event.body.action: created' },
+            },
+          ],
+          steps: [],
+        },
+      });
+      expect(
+        classifyWorkflowTriggerMatch(
+          workflow,
+          'inboundWebhook.received',
+          { connectorId: 'webhook-2', body: { action: 'created' } },
+          mockLogger,
+          connectorEventOptions
+        )
+      ).toBe('connector_id_mismatch');
+    });
+
+    it('returns connector_id_mismatch when YAML connector-id is missing or empty', () => {
+      const missing = createMockWorkflow({
+        definition: { triggers: [{ type: 'inboundWebhook.received' }], steps: [] },
+      });
+      const empty = createMockWorkflow({
+        definition: {
+          triggers: [{ type: 'inboundWebhook.received', 'connector-id': '   ' }],
+          steps: [],
+        },
+      });
+      expect(
+        classifyWorkflowTriggerMatch(
+          missing,
+          'inboundWebhook.received',
+          { connectorId: 'webhook-1' },
+          mockLogger,
+          connectorEventOptions
+        )
+      ).toBe('connector_id_mismatch');
+      expect(
+        classifyWorkflowTriggerMatch(
+          empty,
+          'inboundWebhook.received',
+          { connectorId: 'webhook-1' },
+          mockLogger,
+          connectorEventOptions
+        )
+      ).toBe('connector_id_mismatch');
+    });
+
+    it('returns connector_id_mismatch when payload connectorId is missing', () => {
+      const workflow = createMockWorkflow({
+        definition: {
+          triggers: [{ type: 'inboundWebhook.received', 'connector-id': 'webhook-1' }],
+          steps: [],
+        },
+      });
+      expect(
+        classifyWorkflowTriggerMatch(
+          workflow,
+          'inboundWebhook.received',
+          {},
+          mockLogger,
+          connectorEventOptions
+        )
+      ).toBe('connector_id_mismatch');
+    });
+
+    it('applies KQL after a connector-id match', () => {
+      const workflow = createMockWorkflow({
+        definition: {
+          triggers: [
+            {
+              type: 'inboundWebhook.received',
+              'connector-id': 'webhook-1',
+              on: { condition: 'event.body.action: created' },
+            },
+          ],
+          steps: [],
+        },
+      });
+      expect(
+        classifyWorkflowTriggerMatch(
+          workflow,
+          'inboundWebhook.received',
+          { connectorId: 'webhook-1', body: { action: 'created' } },
+          mockLogger,
+          connectorEventOptions
+        )
+      ).toBe('matched');
+      expect(
+        classifyWorkflowTriggerMatch(
+          workflow,
+          'inboundWebhook.received',
+          { connectorId: 'webhook-1', body: { action: 'deleted' } },
+          mockLogger,
+          connectorEventOptions
+        )
+      ).toBe('kql_false');
+    });
+
+    it('does not gate cases.updated or built-in triggers when the flag is off', () => {
+      const workflow = createMockWorkflow({
+        definition: {
+          triggers: [{ type: 'cases.updated', 'connector-id': 'ignored' }],
+          steps: [],
+        },
+      });
+      expect(
+        classifyWorkflowTriggerMatch(
+          workflow,
+          'cases.updated',
+          { connectorId: 'other' },
+          mockLogger
+        )
+      ).toBe('matched');
+      expect(
+        classifyWorkflowTriggerMatch(createMockWorkflow(), 'cases.updated', {}, mockLogger)
+      ).toBe('matched');
+    });
+
+    it('matches the same-type trigger whose connector-id equals the payload, not the first block', () => {
+      const workflow = createMockWorkflow({
+        definition: {
+          triggers: [
+            {
+              type: 'inboundWebhook.received',
+              'connector-id': 'webhook-1',
+              on: { condition: 'event.body.action: created' },
+            },
+            {
+              type: 'inboundWebhook.received',
+              'connector-id': 'webhook-2',
+              on: { condition: 'event.body.action: paid' },
+            },
+          ],
+          steps: [],
+        },
+      });
+      expect(
+        classifyWorkflowTriggerMatch(
+          workflow,
+          'inboundWebhook.received',
+          { connectorId: 'webhook-2', body: { action: 'paid' } },
+          mockLogger,
+          connectorEventOptions
+        )
+      ).toBe('matched');
+      expect(
+        classifyWorkflowTriggerMatch(
+          workflow,
+          'inboundWebhook.received',
+          { connectorId: 'webhook-2', body: { action: 'created' } },
+          mockLogger,
+          connectorEventOptions
+        )
+      ).toBe('kql_false');
+    });
   });
 });

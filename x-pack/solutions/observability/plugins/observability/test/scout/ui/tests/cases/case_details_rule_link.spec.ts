@@ -20,7 +20,7 @@ import { CASES_ALL_WITH_ALERTS_ROLE } from '../../fixtures/roles';
 // the rule that produced it, which navigates to the rule management page.
 test.describe(
   'Observability cases - case detail rule link',
-  { tag: [...tags.stateful.classic] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     let caseId: string;
 

@@ -15,9 +15,11 @@ export const internalNamespaces = {
   platformDashboard: 'platform.dashboard',
   platformStreams: 'platform.streams',
   platformSignificantEvents: 'platform.sig_events', // intentionally abbreviated
+  platformContextEngine: 'platform.context_engine',
   filestore: 'filestore',
   attachments: 'attachments',
   observability: 'observability',
+  ml: 'ml',
   search: 'search',
   security: 'security',
   streams: 'platform.streams',
@@ -33,9 +35,11 @@ export const protectedNamespaces: string[] = [
   internalNamespaces.attachments,
   internalNamespaces.filestore,
   internalNamespaces.observability,
+  internalNamespaces.ml,
   internalNamespaces.platformDashboard, // Owned by agent_builder_dashboards plugin
   internalNamespaces.platformStreams,
   internalNamespaces.platformSignificantEvents,
+  internalNamespaces.platformContextEngine,
   internalNamespaces.search,
   internalNamespaces.security,
   internalNamespaces.streams,

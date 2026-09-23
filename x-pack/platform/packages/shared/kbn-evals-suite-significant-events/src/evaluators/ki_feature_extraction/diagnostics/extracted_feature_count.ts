@@ -17,6 +17,7 @@ import { getFeaturesFromOutput } from '../types';
 export const extractedFeatureCountEvaluator = {
   name: 'extracted_feature_count',
   kind: 'CODE' as const,
+  direction: 'neutral',
   evaluate: async ({ output }) => {
     const features = getFeaturesFromOutput(output);
     const evidenceCounts = features.map((feature) => feature.evidence?.length ?? 0);
@@ -25,7 +26,7 @@ export const extractedFeatureCountEvaluator = {
     return {
       score: features.length,
       explanation: `Returned ${features.length} feature(s) with ${totalEvidence} evidence string(s)`,
-      details: {
+      metadata: {
         featureCount: features.length,
         totalEvidence,
         maxEvidencePerFeature: evidenceCounts.length ? Math.max(...evidenceCounts) : 0,

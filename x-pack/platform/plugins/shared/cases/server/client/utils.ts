@@ -67,7 +67,6 @@ import {
   assertUnreachable,
   isCommentRequestTypeEvent,
 } from '../common/utils';
-import type { ExternalReferenceAttachmentTypeRegistry } from '../attachment_framework/external_reference_registry';
 import type { UnifiedAttachmentTypeRegistry } from '../attachment_framework/unified_attachment_registry';
 import type { UnifiedAttachmentPayload } from '../../common/types/domain/attachment/v2';
 import { parseUnifiedAttachmentWithSchema } from './attachments/validators';
@@ -80,10 +79,7 @@ import type { ICasesCustomField } from '../custom_fields';
 import { casesCustomFields } from '../custom_fields';
 
 // TODO: I think we can remove most of this function since we're using a different excess
-export const decodeCommentRequest = (
-  comment: AttachmentRequest,
-  externalRefRegistry: ExternalReferenceAttachmentTypeRegistry
-) => {
+export const decodeCommentRequest = (comment: AttachmentRequest) => {
   if (isLegacyCommentAttachment(comment)) {
     decodeWithExcessOrThrow(UserCommentAttachmentPayloadRt)(comment);
   } else if (isCommentRequestTypeActions(comment)) {
@@ -136,7 +132,7 @@ export const decodeCommentRequest = (
   } else if (isCommentRequestTypeEvent(comment)) {
     decodeWithExcessOrThrow(EventAttachmentPayloadRt)(comment);
   } else if (isCommentRequestTypeExternalReference(comment)) {
-    decodeExternalReferenceAttachment(comment, externalRefRegistry);
+    decodeExternalReferenceAttachment(comment);
   } else if (isCommentRequestTypePersistableState(comment)) {
     decodeWithExcessOrThrow(PersistableStateAttachmentPayloadRt)(comment);
   } else {
@@ -149,21 +145,11 @@ export const decodeCommentRequest = (
   }
 };
 
-const decodeExternalReferenceAttachment = (
-  attachment: ExternalReferenceAttachmentPayload,
-  externalRefRegistry: ExternalReferenceAttachmentTypeRegistry
-) => {
+const decodeExternalReferenceAttachment = (attachment: ExternalReferenceAttachmentPayload) => {
   if (attachment.externalReferenceStorage.type === ExternalReferenceStorageType.savedObject) {
     decodeWithExcessOrThrow(ExternalReferenceSOAttachmentPayloadRt)(attachment);
   } else {
     decodeWithExcessOrThrow(ExternalReferenceNoSOAttachmentPayloadRt)(attachment);
-  }
-
-  const metadata = attachment.externalReferenceMetadata;
-  if (externalRefRegistry.has(attachment.externalReferenceAttachmentTypeId)) {
-    const attachmentType = externalRefRegistry.get(attachment.externalReferenceAttachmentTypeId);
-
-    attachmentType.schemaValidator?.(metadata);
   }
 };
 
@@ -203,11 +189,10 @@ export const decodeUnifiedCommentRequest = (
 
 export const decodeCommentRequestV2 = (
   attachment: AttachmentRequestV2,
-  externalRefRegistry: ExternalReferenceAttachmentTypeRegistry,
   unifiedRegistry: UnifiedAttachmentTypeRegistry
 ) => {
   if (isLegacyAttachmentRequest(attachment)) {
-    decodeCommentRequest(attachment, externalRefRegistry);
+    decodeCommentRequest(attachment);
   } else if (isUnifiedAttachmentRequest(attachment)) {
     decodeUnifiedCommentRequest(attachment, unifiedRegistry);
   } else {

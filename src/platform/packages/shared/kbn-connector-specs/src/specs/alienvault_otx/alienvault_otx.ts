@@ -41,6 +41,7 @@ export const AlienVaultOTXConnector: ConnectorSpec = {
   actions: {
     getIndicator: {
       isTool: true,
+      scope: 'read',
       input: lazySchema(() =>
         z.object({
           indicatorType: z
@@ -75,6 +76,7 @@ export const AlienVaultOTXConnector: ConnectorSpec = {
 
     searchPulses: {
       isTool: true,
+      scope: 'read',
       input: lazySchema(() =>
         z.object({
           query: z.string().optional().describe('Search query'),
@@ -111,6 +113,7 @@ export const AlienVaultOTXConnector: ConnectorSpec = {
 
     getPulse: {
       isTool: true,
+      scope: 'read',
       input: lazySchema(() =>
         z.object({
           pulseId: z.string().describe('Pulse ID'),
@@ -136,6 +139,7 @@ export const AlienVaultOTXConnector: ConnectorSpec = {
 
     getRelatedPulses: {
       isTool: true,
+      scope: 'read',
       input: lazySchema(() =>
         z.object({
           indicatorType: z
@@ -169,23 +173,14 @@ export const AlienVaultOTXConnector: ConnectorSpec = {
 
   test: {
     handler: async (ctx) => {
-      try {
-        await ctx.client.get('https://otx.alienvault.com/api/v1/pulses/subscribed', {
-          params: { limit: 1 },
-        });
-        return {
-          ok: true,
-          message: 'Successfully connected to AlienVault OTX API',
-        };
-      } catch (error) {
-        return {
-          ok: false,
-          message: `Failed to connect: ${error}`,
-        };
-      }
+      await ctx.client.get('https://otx.alienvault.com/api/v1/pulses/subscribed', {
+        params: { limit: 1 },
+      });
+      return {};
     },
     description: i18n.translate('connectorSpecs.alienvaultOtx.test.description', {
       defaultMessage: 'Verifies AlienVault OTX API key',
     }),
+    enabled: true,
   },
 };

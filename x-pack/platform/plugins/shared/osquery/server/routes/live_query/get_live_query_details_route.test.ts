@@ -97,6 +97,7 @@ describe('getLiveQueryDetailsRoute', () => {
     );
 
     mockOsqueryContext = {
+      isCpsActive: jest.fn().mockResolvedValue(false),
       service: {
         getActiveSpace: jest.fn().mockResolvedValue({ id: 'space-a' }),
       },
@@ -174,6 +175,7 @@ describe('getLiveQueryDetailsRoute', () => {
     mockActionResponse();
 
     mockOsqueryContext = {
+      isCpsActive: jest.fn().mockResolvedValue(false),
       service: {
         getActiveSpace: jest.fn().mockResolvedValue({ id: 'custom-space' }),
         getIntegrationNamespaces: jest
@@ -209,6 +211,7 @@ describe('getLiveQueryDetailsRoute', () => {
     mockActionResponse();
 
     mockOsqueryContext = {
+      isCpsActive: jest.fn().mockResolvedValue(false),
       service: {
         getActiveSpace: jest.fn().mockResolvedValue({ id: 'custom-space' }),
         getIntegrationNamespaces: jest.fn().mockResolvedValue({ [OSQUERY_INTEGRATION_NAME]: [] }),
@@ -235,5 +238,42 @@ describe('getLiveQueryDetailsRoute', () => {
       undefined,
       'custom-space'
     );
+  });
+
+  describe('when CPS is enabled', () => {
+    it('uses the CPS-scoped search client for action details', async () => {
+      const mockCpsSearchFn = setupActionDetailsSearch();
+      mockActionResponse();
+      const mockCpsSearch = jest.fn().mockReturnValue({ search: mockCpsSearchFn });
+      const contextSearchFn = jest.fn();
+
+      mockOsqueryContext = {
+        isCpsActive: jest.fn().mockResolvedValue(true),
+        service: {
+          getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
+        },
+        logFactory: { get: jest.fn().mockReturnValue({ debug: jest.fn() }) },
+        getStartServices: jest
+          .fn()
+          .mockResolvedValue([
+            { elasticsearch: { client: { asInternalUser: {} } } },
+            { data: { search: { asScoped: mockCpsSearch } } },
+          ]),
+      } as unknown as OsqueryAppContext;
+
+      const mockRouter = createMockRouter();
+      getLiveQueryDetailsRoute(mockRouter, mockOsqueryContext);
+      routeHandler = getRouteHandler(mockRouter);
+
+      await routeHandler(
+        createMockContext(contextSearchFn) as never,
+        httpServerMock.createKibanaRequest({ params: { id: 'action-1' }, query: {} }),
+        httpServerMock.createResponseFactory()
+      );
+
+      expect(mockCpsSearch).toHaveBeenCalledWith(expect.anything(), { projectRouting: 'space' });
+      expect(mockCpsSearchFn).toHaveBeenCalled();
+      expect(contextSearchFn).not.toHaveBeenCalled();
+    });
   });
 });

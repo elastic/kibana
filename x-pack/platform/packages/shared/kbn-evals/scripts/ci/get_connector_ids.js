@@ -10,6 +10,7 @@
 // from the environment, then writes matching connector IDs (newline-separated) to stdout.
 
 const { parseMaybeBase64Json } = require('./ai_connectors');
+const { slugifyId } = require('./slugify_id');
 
 const cfg = parseMaybeBase64Json(process.env.KIBANA_TESTING_AI_CONNECTORS || '');
 
@@ -33,6 +34,9 @@ const connectorIds =
           const matchesRequested = (requestedValue) => {
             if (requestedValue === id) return true;
             if (typeof defaultModel === 'string' && requestedValue === defaultModel) return true;
+            if (requestedValue.startsWith('openrouter/') && slugifyId(requestedValue) === id) {
+              return true;
+            }
             if (typeof eisModelId === 'string') {
               if (requestedValue === eisModelId) return true;
               if (

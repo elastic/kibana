@@ -46,6 +46,7 @@ export const uiamServiceMock = {
       resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
       revoked: true,
     }),
+    deleteOAuthClient: jest.fn().mockResolvedValue(undefined),
     listOAuthConnections: jest.fn().mockResolvedValue({ connections: [] }),
     updateOAuthConnection: jest.fn().mockResolvedValue({
       id: 'mock-connection-id',
@@ -59,6 +60,7 @@ export const uiamServiceMock = {
       resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
       revoked: true,
     }),
+    deleteOAuthConnection: jest.fn().mockResolvedValue(undefined),
     resolveUsers: jest.fn().mockResolvedValue({ users: {} }),
   }),
 };

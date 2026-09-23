@@ -5,8 +5,10 @@
     "strictNullChecks": false
   },
   "include": [
+    "common/**/*",
     "server/**/*",
     "public/**/*",
+    "test/scout/**/*",
     "*.ts",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "public/test_utils/vega_map_test.json",
@@ -47,7 +49,12 @@
     "@kbn/css-utils",
     "@kbn/visualizations-common",
     "@kbn/es-types",
+    "@kbn/esql-types",
     "@kbn/esql-utils",
+    "@kbn/scout",
+    "@kbn/presentation-util",
+    "@kbn/zod",
+    "@kbn/presentation-publishing-schemas",
   ],
   "exclude": [
     "target/**/*",

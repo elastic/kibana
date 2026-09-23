@@ -879,6 +879,10 @@ function mockStats(
           },
           custom: {},
         },
+        execution_control: {
+          paused: false,
+          paused_task_types: [],
+        },
         ...configuration,
       },
     },

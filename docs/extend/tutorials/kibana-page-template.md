@@ -111,7 +111,7 @@ This prop is a simple boolean uses any `pageHeader` info provided to populate an
     pageTitle: 'Dashboards',
     description: "You don't have any dashboards yet.",
     rightSideItems: [
-      <EuiButton fill iconType="plusInCircleFilled">
+      <EuiButton fill iconType="plusCircle">
         Create new dashboard
       </EuiButton>,
     ],
@@ -136,7 +136,7 @@ You can also provide a custom empty prompt to replace the pre-built one using [`
     title={<h1>No data</h1>}
     body="You have no data. Would you like some of ours?"
     actions={[
-      <EuiButton fill iconType="plusInCircleFilled">
+      <EuiButton fill iconType="plusCircle">
         Get sample data
       </EuiButton>,
     ]}
@@ -160,7 +160,7 @@ When passing both a `pageHeader` configuration and rendering a `KibanaPageTempla
     title={<h2>No data</h2>}
     body="You have no data. Would you like some of ours?"
     actions={[
-      <EuiButton fill iconType="plusInCircleFilled">
+      <EuiButton fill iconType="plusCircle">
         Get sample data
       </EuiButton>,
     ]}

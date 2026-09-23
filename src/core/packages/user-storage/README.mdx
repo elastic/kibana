@@ -131,9 +131,9 @@ Once you pick a scope for a key, changing it later is a breaking change for user
 2. At every `set`, against the incoming value (rejects invalid writes with `400`).
 3. At every `get`, against the stored value. If the stored value fails to parse — usually because the schema has been narrowed since the value was written — the registered default is returned and a warning is logged. You can therefore tighten a schema without writing a migration, but consumers should treat the resulting value reset as a possible UX outcome.
 
-**Preloaded values.** By default, browser-side reads are **lazy**: the cache starts empty for a given key and the first `get(key)` / `get$(key)` call fires a `GET /internal/user_storage/{key}` request to hydrate it. While the request is in-flight `get(key)` returns `undefined` (or the provided `defaultValue`) and `get$(key)` emits `undefined`, then emits again once the value arrives.
+**Preloaded values.** By default, browser-side reads are **lazy**: the cache starts empty for a given key and the first `get`/`get$` miss fires a `GET /internal/user_storage/{key}` request to hydrate it. `peek(key)` never fetches — it returns `undefined` (or the provided `defaultValue`) until one of those lands; `get(key)` is `async` and resolves once it does (see [Browser API](#browser-api) for the full read/write surface).
 
-For keys on the critical rendering path, opt in to **eager injection** by setting `preload: true` in the key's `UserStorageDefinition`. Core then calls `getForInjection()` during server-side rendering and embeds only the opted-in keys into `<kbn-injected-metadata>` under `userStorage.values`, so those values are available synchronously before the first React render without any in-browser fetch.
+For keys on the critical rendering path, opt in to **eager injection** by setting `preload: true` in the key's `UserStorageDefinition`. Core then calls `getForInjection()` during server-side rendering and embeds only the opted-in keys into `<kbn-injected-metadata>` under `userStorage.values`, so those values are available synchronously (via `peek`) before the first React render without any in-browser fetch.
 
 ## Server API
 
@@ -227,27 +227,47 @@ All three return `403` when the request has no `profile_uid`.
 
 ## Browser API
 
-The browser surface is in `@kbn/core-user-storage-browser` and is exposed on `core.userStorage` at both `setup` and `start`. The client is **synchronous** for reads (cache-backed) and asynchronous for writes (HTTP-backed):
+The browser surface is in `@kbn/core-user-storage-browser` and is exposed on `core.userStorage` at both `setup` and `start`.
 
 | Method | Returns | Notes |
 |---|---|---|
-| `peek<T>(key, default?)` | `T \| undefined` | Pure cache read, never fetches. Safe in React render. |
-| `get<T>(key, default?)` | `T \| undefined` | Cache read; first miss on a lazy key triggers a background fetch. |
-| `get$<T>(key, default?)` | `Observable<T \| undefined>` | Current value, then every future value for the key. |
-| `set<T>(key, value)` | `Promise<T>` | `PUT`; caches the server-validated value on success. |
-| `remove(key)` | `Promise<void>` | `DELETE`; clears the cached override. |
-| `getUpdate$()` | `Observable<UserStorageUpdate>` | Successful `set`/`remove` events across all keys (not lazy hydrations). |
-| `getHttpError$()` | `Observable<Error>` | Errors from `set` / `remove` / lazy-fetch calls. |
+| `isAvailable()` | `boolean` | Whether User Storage is available for the current user (`false` for anonymous / no-`profile_uid` users, or when the auth realm denies access). A single condition gates both read preloading and writes. Static for the lifetime of a page load. Check this — not user profile state — before offering save/delete UI. When `false`, reads resolve to their `defaultValue` without a request and writes reject locally. |
+| `peek<T>(key, default?)` | `T \| undefined` | Pure, synchronous cache read; never fetches, never `await`s. Safe in React render, and the right choice for `preload: true` keys (always cached at first paint) or any best-effort snapshot where you don't want to trigger a fetch. Never use as the base of a write for a lazy key. |
+| `get<T>(key, default?)` | `Promise<T \| undefined>` | Safe, resolved read: resolves once the effective value is known, awaiting a lazy fetch if needed. Rejects if the fetch fails. Use this as the read half of a read-modify-write. |
+| `get$<T>(key, default?)` | `Observable<T \| undefined>` | Cache snapshot, then every future value for the key (hydration and writes). The first emission may be a temporary default for a non-preloaded key; a failed fetch neither errors nor completes the stream — subscribers stay on the default (see `getHttpError$`). |
+| `set<T>(key, value)` | `Promise<T>` | `PUT`; caches the server-validated value on success. Last-write-wins. Rejects without a request when `isAvailable()` is `false`. |
+| `remove(key)` | `Promise<void>` | `DELETE`; clears the cached override. Rejects without a request when `isAvailable()` is `false`. |
+| `getHttpError$()` | `Observable<Error>` | Errors from `set` / `remove` / lazy-fetch calls — the only channel for a silent `get$` fetch failure. |
 
 ```typescript
 import type { IUserStorageClient } from '@kbn/core-user-storage-browser';
 
-const layout = core.userStorage.get<NavLayout>('myPlugin:nav-layout', defaultLayout);
-await core.userStorage.set('myPlugin:nav-layout', nextLayout);
-await core.userStorage.remove('myPlugin:tour-dismissed');
+if (core.userStorage.isAvailable()) {
+  const layout = await core.userStorage.get<NavLayout>('myPlugin:nav-layout', defaultLayout);
+  await core.userStorage.set('myPlugin:nav-layout', nextLayout);
+  await core.userStorage.remove('myPlugin:tour-dismissed');
+}
 ```
 
-Pass a `defaultValue` to `get(key, default)` so consumers never see `undefined`. For keys with `preload: true` the cache is pre-populated at first paint, so `get` is truly synchronous. For lazy keys, the first `get` triggers a background fetch and returns `undefined` (or `defaultValue`) until the response arrives.
+For `preload: true` keys the cache is pre-populated at first paint, so `peek` is truly synchronous and is the natural choice in render/imperative code that can't `await`. For lazy keys, prefer `get` whenever you need the *true* stored value — e.g. as the base of a read-modify-write — since `peek` can return an unhydrated default before the background fetch lands.
+
+**Read-modify-write.** Don't build a mutation on top of `peek()` for a lazy key — the cache may not be hydrated yet, and computing the next value from an unhydrated default can silently overwrite a user's existing stored data. Await `get()`, then `set()`:
+
+```typescript
+const stored = await core.userStorage.get<StoredPresets>(
+  'myPlugin:date-range-presets',
+  DEFAULT_STORED_PRESETS
+);
+
+if (alreadyHasPreset(stored, preset)) {
+  return; // no-op
+}
+
+await core.userStorage.set('myPlugin:date-range-presets', {
+  ...stored,
+  presets: [...stored.presets, preset],
+});
+```
 
 The observables drive live updates and centralized error handling:
 
@@ -255,12 +275,6 @@ The observables drive live updates and centralized error handling:
 core.userStorage.get$<NavLayout>('myPlugin:nav-layout').subscribe((layout) => {
   // emits the cached value (or undefined) on subscribe, again when a lazy fetch lands,
   // and again on every successful set/remove for this key
-});
-
-core.userStorage.getUpdate$().subscribe((update) => {
-  // fires on every successful set/remove across all keys (not on lazy fetches)
-  if (update.type === 'set') console.log(update.key, update.newValue);
-  if (update.type === 'remove') console.log(update.key, 'removed');
 });
 
 core.userStorage.getHttpError$().subscribe((err) => {
@@ -306,11 +320,11 @@ const NavLayoutEditor = () => {
 };
 ```
 
-`useUserStorage(key, defaultValue?)` returns `[value, setter]`. The value reflects the synchronous cache and re-renders on change. The setter persists via HTTP, refreshes the cache on success, and resolves to the validated value. If the HTTP write fails, the cache is unchanged, the returned promise rejects, and the error is published to `getHttpError$`.
+`useUserStorage(key, defaultValue?)` returns `[value, setter]`. `value` re-renders on every cache change; the setter persists via HTTP and refreshes the cache on success. Inline `defaultValue` object literals are compared structurally so they do not re-subscribe on every render.
 
-Because `myPlugin:nav-layout` is registered with `preload: true`, `layout` is populated synchronously on the very first render — no loading state needed.
+Because `myPlugin:nav-layout` is registered with `preload: true`, `layout` is populated synchronously on the very first render. For a lazy (`preload: false`) key, `value` is the caller's `defaultValue` until the background fetch resolves (and stays the default if that fetch fails). Use `useUserStorageClient().get()` when you must wait for the resolved stored value, or `getHttpError$` to observe a failed read.
 
-For the less common operations — `remove`, `getUpdate$`, `getHttpError$` — reach for the underlying client:
+For less common operations — `remove`, `getHttpError$` — reach for the underlying client:
 
 ```tsx
 const client = useUserStorageClient();
@@ -327,7 +341,7 @@ Use the mocks in `@kbn/core-user-storage-browser-mocks` (browser) and `@kbn/core
 import { userStorageServiceMock } from '@kbn/core-user-storage-browser-mocks';
 
 const userStorage = userStorageServiceMock.createStartContract();
-userStorage.get.mockReturnValue({ hidden: ['discover'], order: [] });
+userStorage.peek.mockReturnValue({ hidden: ['discover'], order: [] });
 
 render(
   <UserStorageProvider userStorage={userStorage}>
@@ -355,7 +369,7 @@ The browser mock's `createStartContract()` returns a fully-mocked `IUserStorageC
 
 ### No fallback for missing `profile_uid`
 
-If your feature must work for users without a profile (anonymous pages, API-key auth), do not depend on User Storage. The browser cache will be empty and writes will return `403`. Either layer over `localStorage` for those cases or design the feature so missing User Storage is acceptable (e.g. fall back to defaults).
+If your feature must work for users without a profile (anonymous pages, API-key auth), do not depend on User Storage. Check `core.userStorage.isAvailable()` before offering save/delete UI — for these users it's `false`, the browser cache will be empty, reads resolve to their `defaultValue` without a request, and writes reject locally (no HTTP round-trip). Either layer over `localStorage` for those cases or design the feature so missing User Storage is acceptable (e.g. fall back to defaults).
 
 ### Single-tab consistency
 

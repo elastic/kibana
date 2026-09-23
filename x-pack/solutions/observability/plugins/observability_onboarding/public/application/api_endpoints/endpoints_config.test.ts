@@ -27,6 +27,7 @@ const createContext = (overrides: Partial<ApiEndpointContext> = {}): ApiEndpoint
   isManagedOtlpServiceAvailable: false,
   isServerless: false,
   managedOtlpPrwEndpointEnabled: false,
+  vendorEndpointsEnabled: true,
   ...overrides,
 });
 
@@ -220,7 +221,9 @@ describe('API_ENDPOINTS', () => {
               managedOtlpServiceUrl: 'https://otlp.example.com:443',
             })
           )
-        ).toBe('https://otlp.example.com:443/api/v1/write');
+        ).toBe(
+          'https://otlp.example.com:443/inputs/prometheus-remote-write/_default_/api/v1/write'
+        );
       });
 
       it('uses the ES-native URL when not Serverless and the managed OTLP PRW endpoint is disabled', () => {
@@ -247,7 +250,9 @@ describe('API_ENDPOINTS', () => {
               elasticsearchUrl: 'https://es.example.com',
             })
           )
-        ).toBe('https://otlp.example.com:443/api/v1/write');
+        ).toBe(
+          'https://otlp.example.com:443/inputs/prometheus-remote-write/_default_/api/v1/write'
+        );
       });
 
       it('falls back to the ES-native URL when the managed OTLP PRW endpoint is enabled but the managed OTLP URL is missing', () => {
@@ -298,7 +303,7 @@ describe('vendor endpoints', () => {
           cardTitle: 'Supabase',
           fieldLabel: 'Supabase logs endpoint',
           logo: 'supabase',
-          url: 'https://otlp.example.com:443/supabase/v1/logs',
+          url: 'https://otlp.example.com:443/inputs/supabase/_default_/v1/logs',
         },
         {
           id: ApiEndpointId.Vercel,
@@ -306,7 +311,7 @@ describe('vendor endpoints', () => {
           fieldLabel: 'Vercel endpoint',
           logo: 'vercel_black',
           darkLogo: 'vercel_white',
-          url: 'https://otlp.example.com:443/vercel',
+          url: 'https://otlp.example.com:443/inputs/vercel/_default_',
         },
       ]);
     });
@@ -338,7 +343,21 @@ describe('vendor endpoints', () => {
         })
       );
 
-      expect(endpoints[0].url).toBe('https://otlp.example.com:443/supabase/v1/logs');
+      expect(endpoints[0].url).toBe(
+        'https://otlp.example.com:443/inputs/supabase/_default_/v1/logs'
+      );
+    });
+
+    it('returns an empty list when the vendor endpoints flag is disabled', () => {
+      expect(
+        getPopoverVendorEndpoints(
+          createContext({
+            isManagedOtlpServiceAvailable: true,
+            managedOtlpServiceUrl: 'https://otlp.example.com:443',
+            vendorEndpointsEnabled: false,
+          })
+        )
+      ).toEqual([]);
     });
   });
 
@@ -359,6 +378,19 @@ describe('vendor endpoints', () => {
         getVendorEndpointsForTab(
           ApiEndpointId.OpenTelemetry,
           createContext({ managedOtlpServiceUrl: 'https://otlp.example.com:443' })
+        )
+      ).toEqual([]);
+    });
+
+    it('returns an empty list when the vendor endpoints flag is disabled', () => {
+      expect(
+        getVendorEndpointsForTab(
+          ApiEndpointId.OpenTelemetry,
+          createContext({
+            isManagedOtlpServiceAvailable: true,
+            managedOtlpServiceUrl: 'https://otlp.example.com:443',
+            vendorEndpointsEnabled: false,
+          })
         )
       ).toEqual([]);
     });

@@ -39,6 +39,22 @@ export function createTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
   const spacesService = getService('spaces');
   const noop = () => undefined;
 
+  /**
+   * Tear down a throwaway space created by one of these tests. Must run even when the request
+   * or its assertions failed: Kibana may have created the space before the client saw an
+   * error, and these suites assert on the exact set of spaces, so a single leaked space
+   * cascades into every later `get_all`, `update` and `delete` test in the same config.
+   * `spacesService.delete` is a no-op on a missing space, so this is safe to call
+   * unconditionally.
+   */
+  const deleteSpaceQuietly = async (id: string) => {
+    try {
+      await spacesService.delete(id);
+    } catch (error) {
+      // Best-effort cleanup; never mask the failure the test itself reported.
+    }
+  };
+
   const expectConflictResponse = (resp: { [key: string]: any }) => {
     expect(resp.body).to.only.have.keys(['error', 'message', 'statusCode']);
     expect(resp.body.error).to.equal('Conflict');
@@ -118,27 +134,28 @@ export function createTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
         });
 
         after(async () => {
-          await supertest.destroy();
+          // `before` may have failed before assigning, in which case there is nothing to clean up.
+          await supertest?.destroy();
         });
 
         getTestScenariosForSpace(spaceId).forEach(({ urlPrefix, scenario }) => {
           it(`should return ${tests.newSpace.statusCode} ${scenario}`, async () => {
-            const response = await supertest
-              .post(`${urlPrefix}/api/spaces/space`)
-              .send({
-                name: 'marketing',
-                id: 'marketing',
-                description: 'a description',
-                color: '#5c5959',
-                disabledFeatures: [],
-              })
-              .expect(tests.newSpace.statusCode);
+            try {
+              const response = await supertest
+                .post(`${urlPrefix}/api/spaces/space`)
+                .send({
+                  name: 'marketing',
+                  id: 'marketing',
+                  description: 'a description',
+                  color: '#5c5959',
+                  disabledFeatures: [],
+                })
+                .expect(tests.newSpace.statusCode);
 
-            if (response.status === 200) {
-              await spacesService.delete('marketing');
+              return tests.newSpace.response(response);
+            } finally {
+              await deleteSpaceQuietly('marketing');
             }
-
-            return tests.newSpace.response(response);
           });
 
           describe('when it already exists', () => {
@@ -159,23 +176,23 @@ export function createTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
 
           describe('when _reserved is specified', () => {
             it(`should return ${tests.reservedSpecified.statusCode} and ignore _reserved ${scenario}`, async () => {
-              const response = await supertest
-                .post(`${urlPrefix}/api/spaces/space`)
-                .send({
-                  name: 'reserved space',
-                  id: 'reserved',
-                  description: 'a description',
-                  color: '#5c5959',
-                  _reserved: true,
-                  disabledFeatures: [],
-                })
-                .expect(tests.reservedSpecified.statusCode);
+              try {
+                const response = await supertest
+                  .post(`${urlPrefix}/api/spaces/space`)
+                  .send({
+                    name: 'reserved space',
+                    id: 'reserved',
+                    description: 'a description',
+                    color: '#5c5959',
+                    _reserved: true,
+                    disabledFeatures: [],
+                  })
+                  .expect(tests.reservedSpecified.statusCode);
 
-              if (response.status === 200) {
-                await spacesService.delete('reserved');
+                return tests.reservedSpecified.response(response);
+              } finally {
+                await deleteSpaceQuietly('reserved');
               }
-
-              return tests.reservedSpecified.response(response);
             });
           });
 
@@ -183,23 +200,23 @@ export function createTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
             it(`should return ${tests.solutionSpecified.statusCode}`, async () => {
               const statusCode = isServerless ? 400 : tests.solutionSpecified.statusCode;
 
-              const response = await supertest
-                .post(`${urlPrefix}/api/spaces/space`)
-                .send({
-                  name: 'space with solution',
-                  id: 'solution',
-                  description: 'a description',
-                  color: '#5c5959',
-                  solution: 'es',
-                  disabledFeatures: [],
-                })
-                .expect(statusCode);
+              try {
+                const response = await supertest
+                  .post(`${urlPrefix}/api/spaces/space`)
+                  .send({
+                    name: 'space with solution',
+                    id: 'solution',
+                    description: 'a description',
+                    color: '#5c5959',
+                    solution: 'es',
+                    disabledFeatures: [],
+                  })
+                  .expect(statusCode);
 
-              if (response.status === 200) {
-                await spacesService.delete('solution');
+                return isServerless ? noop : tests.solutionSpecified.response(response);
+              } finally {
+                await deleteSpaceQuietly('solution');
               }
-
-              return isServerless ? noop : tests.solutionSpecified.response(response);
             });
           });
         });

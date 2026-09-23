@@ -1141,4 +1141,102 @@ describe('CaseCommentModel', () => {
       expect(args.updatedAttributes.total_comments).toEqual(1);
     });
   });
+
+  describe('alert/event indexed-reference validation', () => {
+    it('checks alert authorization before persisting the attachment (createComment)', async () => {
+      clientArgs.services.alertsService.ensureAlertsAuthorized.mockRejectedValueOnce(
+        new Error('not authorized')
+      );
+
+      await expect(
+        model.createComment({
+          id: 'comment-1',
+          commentReq: alertComment,
+          createdDate,
+        })
+      ).rejects.toThrow('not authorized');
+
+      expect(clientArgs.services.attachmentService.create).not.toHaveBeenCalled();
+    });
+
+    it('checks alert authorization before persisting the attachment batch (bulkCreate)', async () => {
+      clientArgs.services.alertsService.ensureAlertsAuthorized.mockRejectedValueOnce(
+        new Error('not authorized')
+      );
+
+      await expect(
+        model.bulkCreate({
+          attachments: [
+            { id: 'comment-1', ...comment },
+            { id: 'comment-2', ...alertComment },
+          ],
+        })
+      ).rejects.toThrow('not authorized');
+
+      expect(clientArgs.services.attachmentService.bulkCreate).not.toHaveBeenCalled();
+    });
+
+    it('checks event existence before persisting the attachment (createComment)', async () => {
+      clientArgs.services.alertsService.ensureDocumentsExist.mockRejectedValueOnce(
+        new Error('document not found')
+      );
+
+      await expect(
+        model.createComment({
+          id: 'comment-1',
+          commentReq: eventComment,
+          createdDate,
+        })
+      ).rejects.toThrow('document not found');
+
+      expect(clientArgs.services.alertsService.ensureDocumentsExist).toHaveBeenCalledWith({
+        alerts: [{ id: 'event-id-1', index: 'mock-index' }],
+      });
+      expect(clientArgs.services.attachmentService.create).not.toHaveBeenCalled();
+    });
+
+    it('checks event existence before persisting the attachment batch (bulkCreate)', async () => {
+      clientArgs.services.alertsService.ensureDocumentsExist.mockRejectedValueOnce(
+        new Error('document not found')
+      );
+
+      await expect(
+        model.bulkCreate({
+          attachments: [{ id: 'comment-1', ...eventComment }],
+        })
+      ).rejects.toThrow('document not found');
+
+      expect(clientArgs.services.attachmentService.bulkCreate).not.toHaveBeenCalled();
+    });
+
+    it('does not call ensureDocumentsExist for a batch with no event attachments', async () => {
+      await model.bulkCreate({
+        attachments: [{ id: 'comment-1', ...alertComment }],
+      });
+
+      expect(clientArgs.services.alertsService.ensureDocumentsExist).not.toHaveBeenCalled();
+    });
+
+    it('does not call ensureAlertsAuthorized for a batch with no alert attachments', async () => {
+      await model.bulkCreate({
+        attachments: [{ id: 'comment-1', ...eventComment }],
+      });
+
+      expect(clientArgs.services.alertsService.ensureAlertsAuthorized).not.toHaveBeenCalled();
+    });
+
+    it('validates alert authorization before the saved object is created', async () => {
+      await model.createComment({
+        id: 'comment-1',
+        commentReq: alertComment,
+        createdDate,
+      });
+
+      const authorizeOrder =
+        clientArgs.services.alertsService.ensureAlertsAuthorized.mock.invocationCallOrder[0];
+      const createOrder = clientArgs.services.attachmentService.create.mock.invocationCallOrder[0];
+
+      expect(authorizeOrder).toBeLessThan(createOrder);
+    });
+  });
 });

@@ -61,14 +61,21 @@ export const ConversationSearchModal: React.FC<ConversationSearchModalProps> = (
   const { euiTheme } = useEuiTheme();
   const modalTitleId = useGeneratedHtmlId();
 
-  const { conversations = [], isLoading } = useConversationList({ agentId });
+  // Consume both the pinned and unpinned caches — opening the modal costs no
+  // extra network request since ConversationList and PinnedConversationList
+  // have already populated these keys in the sidebar.
+  const { conversations: unpinnedConversations = [], isLoading: isLoadingUnpinned } =
+    useConversationList({ agentId, pinned: false });
+  const { conversations: pinnedConversations = [], isLoading: isLoadingPinned } =
+    useConversationList({ agentId, pinned: true });
+  const isLoading = isLoadingUnpinned || isLoadingPinned;
 
   const sortedConversations = useMemo(
     () =>
-      [...conversations].sort(
+      [...pinnedConversations, ...unpinnedConversations].sort(
         (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
       ),
-    [conversations]
+    [pinnedConversations, unpinnedConversations]
   );
 
   const filteredConversations = useMemo(() => {

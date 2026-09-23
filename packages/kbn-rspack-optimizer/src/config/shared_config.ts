@@ -9,14 +9,10 @@
 
 import Path from 'path';
 import Fs from 'fs';
-import {
-  rspack,
-  type RuleSetRule,
-  type Configuration,
-  type RspackPluginInstance,
-} from '@rspack/core';
+import type { RuleSetRule, Configuration, RspackPluginInstance } from '@rspack/core';
 import { getSharedConfig } from '@kbn/transpiler-config';
 import { DEFAULT_THEME_TAGS } from '@kbn/core-ui-settings-common';
+import { rspack } from '../rspack_runtime';
 import type { ThemeTag } from '../types';
 
 /**
@@ -87,9 +83,12 @@ export function getSharedResolveFallback(): Record<string, false> {
  * This is faster than the webpack `swc-loader` because it's implemented
  * in Rust and integrated directly into RSPack.
  *
- * Uses @swc/plugin-emotion for CSS-in-JS. styled-components files
- * will still work at runtime - we just won't have build-time optimizations
- * like better debugging labels for styled-components.
+ * Emotion CSS-in-JS is handled in two parts: the `css` prop via Emotion's JSX
+ * runtime (`importSource: '@emotion/react'`), and styled-component labels +
+ * component-selector `target`s via the `@swc/plugin-emotion` WASM plugin
+ * (mirrors `@emotion/babel-plugin` on the webpack path). styled-components files
+ * still work at runtime without a build plugin - we just won't have build-time
+ * optimizations like better debugging labels for styled-components.
  *
  * This is acceptable because:
  * 1. Kibana is migrating from styled-components to Emotion
@@ -128,7 +127,34 @@ function getSwcOptions(dist: boolean, hmr: boolean = false) {
           importSource: '@emotion/react',
         },
       },
-      // No plugins needed - Emotion's JSX runtime handles css prop directly
+      // The JSX runtime above only handles the css prop. Emotion *component
+      // selectors* (interpolating a styled component as a CSS selector, e.g.
+      // `${NodeShapeContainer}:hover`) additionally require a build transform
+      // that injects a stable `target` into each styled component. The webpack
+      // optimizer gets this from `@emotion/babel-plugin` (via
+      // `@emotion/babel-preset-css-prop`); under SWC we run the equivalent
+      // `@swc/plugin-emotion` WASM plugin so component selectors don't throw at
+      // runtime. labelFormat is shared with the Babel path via
+      // `@kbn/transpiler-config` to keep generated class names consistent.
+      //
+      // NOTE: `@swc/plugin-emotion` is a WebAssembly plugin whose ABI is locked
+      // to the `swc_core` version that RSPack's bundled SWC was built against.
+      // RSPack 2.1.8 reports `swc_core` 72.0.0; `@swc/plugin-emotion@14.15.0` is
+      // built against `swc_core` 72.0.0 (exact match). The pinned version must
+      // be re-checked whenever `@rspack/core` is bumped, or the build will panic
+      // on a plugin ABI mismatch.
+      experimental: {
+        plugins: [
+          [
+            require.resolve('@swc/plugin-emotion'),
+            {
+              autoLabel: dist ? 'never' : 'dev-only',
+              labelFormat: sharedConfig.emotion.labelFormat,
+              sourceMap: !dist,
+            },
+          ],
+        ],
+      },
       // Target ES2020 for browser builds (matches Kibana's browserslist)
       target: 'es2020',
       // Keep class names for debugging and error messages
@@ -243,7 +269,11 @@ export function getCssLoaderRule(dist: boolean): RuleSetRule {
  * Get the sass-loader chain for a specific theme.
  * Each theme uses different globals (light vs dark colors/shadows).
  */
-function getSassLoaderChain(repoRoot: string, theme: ThemeTag, dist: boolean): RuleSetRule['use'] {
+function getSassLoaderChain(
+  repoRoot: string,
+  theme: ThemeTag,
+  dist: boolean
+): NonNullable<RuleSetRule['use']> {
   const nodeModulesPath = Path.resolve(repoRoot, 'node_modules');
   const globalsPath = Path.resolve(
     repoRoot,
@@ -467,6 +497,96 @@ export function getSharedIgnoreWarnings(): RegExp[] {
     /__dirname.*is used and has been mocked/,
     /__filename.*is used and has been mocked/,
   ];
+}
+
+/**
+ * Shared module.parser options for all RSPack builds.
+ */
+export function getSharedModuleParserConfig(): NonNullable<Configuration['module']>['parser'] {
+  return {
+    javascript: {
+      // Rspack v2 changed the default from 'warn' to 'error'. Keep 'warn':
+      // known cases exist in the codebase (see getSharedIgnoreWarnings) and
+      // SWC-transpiled type re-exports would otherwise fail the build.
+      exportsPresence: 'warn',
+    },
+  };
+}
+
+/**
+ * Rspack v2 enables asset-size performance budget warnings by default. Kibana
+ * enforces bundle sizes via limits.yml + BundleMetricsPlugin instead, so the
+ * built-in budgets are disabled in all optimizer configs.
+ */
+export const SHARED_PERFORMANCE_CONFIG: Configuration['performance'] = false;
+
+/**
+ * Shared persistent cache configuration for all RSPack builds.
+ * (Rspack v2: the v1 experiments.cache option moved to the top-level `cache`.)
+ *
+ * Centralized so the storage layout and version-hash mechanics stay in sync
+ * between the main build and external plugin builds. The `versionPrefix`
+ * stays per-build-type; bump it when the Rspack major or the config semantics
+ * change in a cache-incompatible way.
+ */
+export function getSharedCacheConfig({
+  enabled,
+  dist,
+  repoRoot,
+  cacheRoot = repoRoot,
+  versionPrefix,
+  configFiles,
+  extraBuildDependencies = [],
+  managedNodeModules = false,
+}: {
+  enabled: boolean;
+  dist: boolean;
+  repoRoot: string;
+  /** Root under which node_modules/.cache/.rspack-cache is created (default: repoRoot) */
+  cacheRoot?: string;
+  /** Cache format/semantics version prefix, e.g. 'v9' or 'external-plugin-v4' */
+  versionPrefix: string;
+  /** Repo-relative files hashed into the version and tracked as build dependencies */
+  configFiles: readonly string[];
+  /** Absolute extra build dependencies (tracked, but not hashed into the version) */
+  extraBuildDependencies?: string[];
+  /** Treat repo node_modules as package-manager-managed for faster validation */
+  managedNodeModules?: boolean;
+}): Configuration['cache'] {
+  if (!enabled) {
+    return false;
+  }
+
+  return {
+    type: 'persistent',
+    // Treat node_modules/ as package-manager-managed. Rspack skips
+    // per-file stats during cache validation and relies on package.json
+    // changes (captured by buildDependencies below) instead.
+    ...(managedNodeModules
+      ? { snapshot: { managedPaths: [Path.resolve(repoRoot, 'node_modules')] } }
+      : {}),
+    buildDependencies: [
+      ...extraBuildDependencies,
+      ...configFiles.map((f) => Path.resolve(repoRoot, f)),
+    ],
+    // Version includes a hash of the config files for reliable invalidation;
+    // buildDependencies may not trigger on TypeScript file changes.
+    version: `${versionPrefix}-${dist ? 'prod' : 'dev'}-${computeConfigHash(
+      repoRoot,
+      configFiles
+    )}`,
+    // Separate cache directories for dev vs dist to avoid stale cache issues.
+    // Structure: .rspack-cache/dev or .rspack-cache/dist
+    // Clear all: rm -rf node_modules/.cache/.rspack-cache
+    storage: {
+      type: 'filesystem',
+      directory: Path.resolve(
+        cacheRoot,
+        'node_modules/.cache/.rspack-cache',
+        dist ? 'dist' : 'dev'
+      ),
+    },
+  };
 }
 
 /**

@@ -15,7 +15,7 @@ export class MarkdownVisPageObject extends FtrService {
 
   public async getEditedText() {
     const textarea = await this.testSubjects.find('euiMarkdownEditorTextArea');
-    return await textarea.getVisibleText();
+    return await textarea.getAttribute('value');
   }
 
   public async getRenderedText() {

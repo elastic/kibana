@@ -13,7 +13,7 @@ import {
   SIGNIFICANT_EVENTS_EVENT_STATUS_UPDATE_TOOL_ID,
   SIGNIFICANT_EVENTS_SEARCH_EVENTS_TOOL_ID,
   SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_SEARCH_TOOL_ID,
-  SIGNIFICANT_EVENTS_INVESTIGATION_PROGRESS_REPORT_TOOL_ID,
+  SIGNIFICANT_EVENTS_FEATURE_SIMILARITY_SEARCH_TOOL_ID,
 } from './register_tools';
 import { createMockGetScopedClients } from '../utils/test_helpers';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
@@ -47,10 +47,10 @@ describe('registerAgentBuilderTools', () => {
     const registeredIds = agentBuilder.tools.register.mock.calls.map((call) => call[0].id);
 
     expect(registeredIds).toContain(SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_SEARCH_TOOL_ID);
+    expect(registeredIds).toContain(SIGNIFICANT_EVENTS_FEATURE_SIMILARITY_SEARCH_TOOL_ID);
     expect(registeredIds).toContain(SIGNIFICANT_EVENTS_SEARCH_EVENTS_TOOL_ID);
     expect(registeredIds).toContain(SIGNIFICANT_EVENTS_EVENT_CREATE_TOOL_ID);
     expect(registeredIds).toContain(SIGNIFICANT_EVENTS_EVENT_STATUS_UPDATE_TOOL_ID);
-    expect(registeredIds).toContain(SIGNIFICANT_EVENTS_INVESTIGATION_PROGRESS_REPORT_TOOL_ID);
   });
 
   it('registers tools with non-empty descriptions and schemas', () => {

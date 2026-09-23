@@ -124,6 +124,7 @@ import {
   type FleetUsage,
   registerFleetUsageCollector,
 } from './collectors/register';
+import { setupIacProvisionerTelemetry } from './services/telemetry/iac_provisioner_telemetry';
 import { FleetArtifactsClient } from './services/artifacts';
 import type { FleetRouter } from './types/request_context';
 import { TelemetryEventsSender } from './telemetry/sender';
@@ -682,6 +683,7 @@ export class FleetPlugin
     this.fetchUsage = async (signal: AbortSignal) => await fetchFleetUsage(core, config, signal);
     this.fleetUsageSender = new FleetUsageSender(deps.taskManager, core, this.fetchUsage);
     registerFleetUsageLogger(deps.taskManager, async () => fetchAgentsUsage(core, config));
+    setupIacProvisionerTelemetry(core.analytics);
 
     const fetchAgents = async (signal: AbortSignal) => await fetchAgentMetrics(core, signal);
     this.fleetMetricsTask = new FleetMetricsTask(deps.taskManager, fetchAgents);

@@ -202,7 +202,7 @@ describe('PackageInstaller', () => {
             service_settings: {},
           },
         })
-      ).rejects.toThrowError();
+      ).rejects.toThrow();
 
       expect(productDocClient.setInstallationSuccessful).not.toHaveBeenCalled();
 
@@ -518,7 +518,7 @@ describe('PackageInstaller', () => {
 
       await expect(
         packageInstaller.installSecurityLabs({ inferenceId: defaultInferenceEndpoints.ELSER })
-      ).rejects.toThrowError();
+      ).rejects.toThrow();
 
       expect(productDocClient.setSecurityLabsInstallationFailed).toHaveBeenCalledWith({
         version: VERSION_NEW,
