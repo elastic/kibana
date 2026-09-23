@@ -264,7 +264,8 @@ export const UpdateCloudOnboardingDeploymentRequestSchema = {
       schema.arrayOf(CloudOnboardingDeploymentMechanismSchema, {
         maxSize: 10,
         meta: {
-          description: 'Delivery mechanisms active in this deployment. Replaces the stored mechanisms array.',
+          description:
+            'Delivery mechanisms active in this deployment. Replaces the stored mechanisms array.',
         },
       })
     ),
