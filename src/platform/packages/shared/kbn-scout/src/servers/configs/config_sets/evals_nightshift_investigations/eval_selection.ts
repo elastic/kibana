@@ -25,11 +25,7 @@ export interface ResolvedNightshiftEvalSelection {
   fellBackToSmoke: boolean;
 }
 
-/**
- * Resolves `NIGHTSHIFT_DATASETS`. Unset runs every eval when sandbox credentials are present and
- * falls back to smoke otherwise; an explicit value is used as-is. Shared by the suite's Playwright
- * config and this Scout config set so the tests that run and the server they run on cannot drift.
- */
+/** Resolves `NIGHTSHIFT_DATASETS` for both the suite's Playwright config and this Scout config set. */
 export const resolveNightshiftEvalSelection = (
   env: Record<string, string | undefined> = process.env
 ): ResolvedNightshiftEvalSelection => {
@@ -45,11 +41,17 @@ export const resolveNightshiftEvalSelection = (
 
   const resolved = selection as NightshiftEvalSelection;
   const needsSandbox = resolved !== 'synthetic-smoke';
+  // Playwright resolves this on every run; a reused Scout server never reloads its config.
+  if (needsSandbox && !hasSandbox) {
+    throw new Error(
+      `NIGHTSHIFT_DATASETS=${resolved} runs investigation evals, but SANDBOX_API_KEY is required; ` +
+        'use --profile dev-vault, export SANDBOX_*, or select synthetic-smoke.'
+    );
+  }
   return {
     selection: resolved,
     needsSandbox,
-    // An explicit investigation selection without credentials still starts it, to fail fast.
-    startInvestigationServer: hasSandbox || needsSandbox,
+    startInvestigationServer: hasSandbox,
     fellBackToSmoke: !requested && !hasSandbox,
   };
 };

@@ -95,8 +95,8 @@ retained without grader-specific formatting or truncation. Each persisted score 
 conversation trace; the placeholder has a separate evaluator trace.
 
 The `evals_nightshift_investigations` server config extends `evals_tracing` whenever sandbox
-credentials are present, or `all`/`trace-only` is selected explicitly. Otherwise it is plain
-`evals_tracing`, so the smoke eval needs no sandbox credentials.
+credentials are present. Otherwise it is plain `evals_tracing`, so the smoke eval needs no sandbox
+credentials.
 It enables the investigation engine, its `nightshift.enabled` feature flag and
 sandbox, disables Cortex, and exports full Agent Builder
 payloads (user messages, system instructions, responses, tool arguments/results and conversation
@@ -302,7 +302,7 @@ against.
 
 | Variable              | Effect                                                                                                                                                                                                                                                                                              |
 | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `NIGHTSHIFT_DATASETS` | `synthetic-smoke` runs the seed smoke eval, `trace-only` the file-driven investigations, `all` both. Unset means `all` when sandbox credentials are present, otherwise `synthetic-smoke` with a warning. An explicit `all` or `trace-only` requires sandbox credentials. Unknown values fail early. |
+| `NIGHTSHIFT_DATASETS` | `synthetic-smoke` runs the seed smoke eval, `trace-only` the file-driven investigations, `all` both. Unset means `all` when sandbox credentials are present, otherwise `synthetic-smoke` with a warning. An explicit `all` or `trace-only` without sandbox credentials fails before any test runs, even when Scout is reused. Unknown values fail early. |
 | `SELECTED_EVALUATORS` | Standard `@kbn/evals` filter, by evaluator name (`documents_restored`, `timestamps_replayed`).                                                                                                                                                                                                      |
 | `GCS_CREDENTIALS`     | Service account JSON Elasticsearch uses to reach the seed-data bucket. Read access is enough to run the suite.                                                                                                                                                                                      |
 

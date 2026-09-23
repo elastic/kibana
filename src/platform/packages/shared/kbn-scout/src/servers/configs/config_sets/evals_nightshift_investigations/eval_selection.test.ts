@@ -40,12 +40,19 @@ describe('resolveNightshiftEvalSelection', () => {
     ['synthetic-smoke', false],
     ['trace-only', true],
     ['all', true],
-  ] as const)('honours an explicit %s regardless of credentials', (selection, needsSandbox) => {
-    for (const env of [{}, WITH_SANDBOX]) {
-      expect(
-        resolveNightshiftEvalSelection({ ...env, NIGHTSHIFT_DATASETS: selection })
-      ).toMatchObject({ selection, needsSandbox, fellBackToSmoke: false });
-    }
+  ] as const)('honours an explicit %s when credentials are present', (selection, needsSandbox) => {
+    expect(
+      resolveNightshiftEvalSelection({ ...WITH_SANDBOX, NIGHTSHIFT_DATASETS: selection })
+    ).toMatchObject({ selection, needsSandbox, fellBackToSmoke: false });
+  });
+
+  it('honours an explicit synthetic-smoke without credentials', () => {
+    expect(resolveNightshiftEvalSelection({ NIGHTSHIFT_DATASETS: 'synthetic-smoke' })).toEqual({
+      selection: 'synthetic-smoke',
+      needsSandbox: false,
+      startInvestigationServer: false,
+      fellBackToSmoke: false,
+    });
   });
 
   it('chooses the server from credentials, not the selection, so switching selections needs no restart', () => {
@@ -63,11 +70,16 @@ describe('resolveNightshiftEvalSelection', () => {
     ).toBe(false);
   });
 
-  it('still starts the investigation server for an explicit investigation selection without credentials, to fail fast', () => {
-    expect(
-      resolveNightshiftEvalSelection({ NIGHTSHIFT_DATASETS: 'trace-only' }).startInvestigationServer
-    ).toBe(true);
-  });
+  it.each(['trace-only', 'all'])(
+    'rejects an explicit %s without credentials, even when Scout would be reused',
+    (selection) => {
+      // The Playwright config resolves the selection on every run, so this fails fast instead of
+      // running investigation specs against a reused smoke-only server.
+      expect(() => resolveNightshiftEvalSelection({ NIGHTSHIFT_DATASETS: selection })).toThrow(
+        `NIGHTSHIFT_DATASETS=${selection} runs investigation evals, but SANDBOX_API_KEY is required`
+      );
+    }
+  );
 
   it('rejects unknown selections', () => {
     expect(() => resolveNightshiftEvalSelection({ NIGHTSHIFT_DATASETS: 'bogus' })).toThrow(
