@@ -14,7 +14,7 @@ import { css, keyframes } from '@emotion/react';
 import type { UseEuiTheme } from '@elastic/eui';
 import { euiCanAnimate, useEuiTheme } from '@elastic/eui';
 
-export const kbnFullScreenBgCss = ({ euiTheme }: UseEuiTheme) => {
+export const kbnFullScreenBgCss = ({ euiTheme, colorMode }: UseEuiTheme) => {
   const fullScreenGraphicsFadeIn = keyframes`
   from {
     opacity: 0;
@@ -23,6 +23,10 @@ export const kbnFullScreenBgCss = ({ euiTheme }: UseEuiTheme) => {
     opacity: 1;
   }
 `;
+  // Match the top stop of the framed chrome canvas. The dark shade scale inverts,
+  // so lightestShade is that stop in light mode and colors.body is that stop in dark.
+  const pageBackground =
+    colorMode === 'DARK' ? euiTheme.colors.body : euiTheme.colors.lightestShade;
   return css({
     position: 'fixed',
     top: 0,
@@ -31,7 +35,7 @@ export const kbnFullScreenBgCss = ({ euiTheme }: UseEuiTheme) => {
     bottom: 0,
     zIndex: Number(euiTheme.levels.navigation) + 1000,
     background: 'inherit',
-    backgroundColor: euiTheme.colors.backgroundBasePlain,
+    backgroundColor: pageBackground,
     overflow: 'auto',
     [euiCanAnimate]: {
       opacity: 0,

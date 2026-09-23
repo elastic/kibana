@@ -58,6 +58,19 @@ export const framedAppearanceBackgroundStyles = (euiThemeContext: UseEuiTheme) =
   `;
 };
 
+/**
+ * Classic (plain) chrome leaves the app area transparent, so the page color is
+ * the inline `html` background set in `updateRootBackground`. That token is now
+ * the canvas shade. `!important` is required to beat the inline style and keep
+ * the original subdued page color (`#F6F9FC` in light mode).
+ */
+export const plainAppearanceBackgroundStyles = ({ euiTheme }: UseEuiTheme) => css`
+  html:root {
+    background-color: ${euiTheme.colors.backgroundBaseSubdued} !important;
+    background-image: none;
+  }
+`;
+
 // temporary hacks that need to be removed after better flyout and global sidenav customization support in EUI
 // https://github.com/elastic/eui/issues/8820
 const globalTempHackStyles = (
@@ -161,7 +174,9 @@ export const GridLayoutGlobalStyles = ({ appearance = 'plain' }: GridLayoutGloba
       styles={[
         globalLayoutStyles(),
         globalTempHackStyles(euiTheme.euiTheme, appearance),
-        isFramedAppearance && framedAppearanceBackgroundStyles(euiTheme),
+        isFramedAppearance
+          ? framedAppearanceBackgroundStyles(euiTheme)
+          : plainAppearanceBackgroundStyles(euiTheme),
       ]}
     />
   );
