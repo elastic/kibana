@@ -173,7 +173,7 @@ Object {
   },
   "requestData": Object {
     "breakdownField": undefined,
-    "dataViewId": "index-pattern-with-timefield-id",
+    "dataViewId": "esql:logstash:timestamp:",
     "timeField": "timestamp",
     "timeInterval": undefined,
   },
@@ -318,7 +318,7 @@ Object {
     "visualizationType": "lnsHeatmap",
   },
   "requestData": Object {
-    "dataViewId": "index-pattern-with-timefield-id",
+    "dataViewId": "esql:logstash:timestamp:",
     "timeField": "timestamp",
   },
   "suggestionType": "lensSuggestion",
