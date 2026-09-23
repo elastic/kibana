@@ -116,10 +116,11 @@ export class ConversationStreamService {
     if (!stream || !current || current.cursor) {
       return;
     }
-    if (!current.events.some((event) => event.execution_id === executionId)) {
+    const nextEvents = current.events.filter((event) => event.execution_id !== executionId);
+    if (nextEvents.length === current.events.length) {
       return;
     }
-    stream.state$.next(emptyLiveEventsState());
+    stream.state$.next({ ...current, events: nextEvents });
     this.maybeTeardown(conversationId);
   }
 }

@@ -74,7 +74,7 @@ describe('useResumeRoundMutation', () => {
     jest.clearAllMocks();
   });
 
-  it('releases the live events once the refetch contains the saved execution', async () => {
+  it('releases the execution events once the refetch contains the saved execution, keeping the answer', async () => {
     const { bindings, source, result, conversationStreamService } = setup();
     mockGet.mockResolvedValue({ id: conversationId, rounds: [], events: [terminated] });
 
@@ -85,7 +85,11 @@ describe('useResumeRoundMutation', () => {
       source.complete();
     });
 
-    await waitFor(() => expect(conversationStreamService.getSnapshot(conversationId)).toEqual([]));
+    await waitFor(() =>
+      expect(
+        conversationStreamService.getSnapshot(conversationId).map(({ id, type }) => ({ id, type }))
+      ).toEqual([{ id: 'pending::prompt_response', type: 'prompt_response' }])
+    );
     expect(bindings.clearActiveStream).toHaveBeenCalledWith(conversationId);
   });
 
