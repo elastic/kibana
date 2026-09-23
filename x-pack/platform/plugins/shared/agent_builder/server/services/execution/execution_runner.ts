@@ -190,12 +190,13 @@ const handleConversationExecution = async ({
     projectRouting,
     roundId,
     conversationOperation,
+    receivedAt: receivedAtIso,
   } = execution.agentParams;
 
   const { owner } = execution;
 
   // A record written before the execution service resolved all of these cannot be run.
-  if (!conversationId || !roundId || !conversationOperation || !owner) {
+  if (!conversationId || !roundId || !conversationOperation || !owner || !receivedAtIso) {
     throw createInternalError('Execution is missing required conversation parameters');
   }
 
@@ -226,7 +227,9 @@ const handleConversationExecution = async ({
         subagentCreation,
       });
 
-  const receivedAt = new Date();
+  // Matches the receipt-time write's timestamp, so a rebuilt interruption event lands with the
+  // same created_at rather than moving to when this run picked the record up.
+  const receivedAt = new Date(receivedAtIso);
 
   const roundOrigin = origin ? { type: origin.type } : undefined;
   const telemetryOrigin = resolveTelemetryOrigin({ conversation, requestOrigin: origin?.type });

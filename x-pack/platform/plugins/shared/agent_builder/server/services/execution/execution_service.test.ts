@@ -159,6 +159,7 @@ describe('AgentExecutionService', () => {
         conversationId: 'conv-1',
         roundId: 'round-1',
         conversationOperation: 'UPDATE',
+        receivedAt: '2024-01-01T00:00:00.000Z',
       },
       eventCount: 0,
       events: [],
@@ -565,6 +566,7 @@ describe('AgentExecutionService', () => {
           conversationId: 'conv-1',
           roundId: 'round-1',
           conversationOperation: 'UPDATE',
+          receivedAt: '2024-01-01T00:00:00.000Z',
         },
         eventCount: 0,
         events: [],
@@ -686,6 +688,7 @@ describe('AgentExecutionService', () => {
           conversationId: 'conv-1',
           roundId: 'round-1',
           conversationOperation: 'UPDATE',
+          receivedAt: '2024-01-01T00:00:00.000Z',
         },
         eventCount: 0,
         events: [],
@@ -950,6 +953,7 @@ describe('AgentExecutionService', () => {
           conversationId: 'conv-1',
           roundId: 'round-1',
           conversationOperation: 'UPDATE' as const,
+          receivedAt: '2024-01-01T00:00:00.000Z',
         },
         eventCount: 0,
         events: [],
@@ -1015,6 +1019,14 @@ describe('AgentExecutionService', () => {
       // completed run rewrites carries it too instead of the untrimmed original.
       const [{ agentParams }] = mockExecutionClient.create.mock.calls[0];
       expect((agentParams as { nextInput: { message: string } }).nextInput.message).toBe('hi');
+    });
+
+    it('stores the receipt time, so a run rebuilding the message keeps its created_at', async () => {
+      await converse();
+
+      const [{ events }] = conversationClient.appendEvents.mock.calls[0];
+      const [{ agentParams }] = mockExecutionClient.create.mock.calls[0];
+      expect((agentParams as { receivedAt: string }).receivedAt).toBe(events[0].created_at);
     });
 
     it('records the execution before writing, so a replayed request cannot duplicate the message', async () => {

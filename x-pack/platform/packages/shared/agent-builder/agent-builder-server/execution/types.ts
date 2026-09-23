@@ -130,6 +130,8 @@ export interface StoredConversationExecutionParams extends ConversationExecution
   conversationId: string;
   /** The round the service opened, so the run reuses the ids of the events written for it. */
   roundId: string;
+  /** When the request node persisted the round's opening message, ISO 8601. */
+  receivedAt: string;
   /**
    * How the conversation was resolved, so the run reports a creation this request made rather
    * than the update its own read sees.

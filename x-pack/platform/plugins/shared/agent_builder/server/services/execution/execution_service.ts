@@ -167,6 +167,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
                 autoCreateConversationWithId: true,
                 conversationOperation: conversation.operation,
                 roundId,
+                receivedAt: receivedAt.toISOString(),
               }
             : validatedParams,
         parentExecutionId: params.parentExecutionId,
