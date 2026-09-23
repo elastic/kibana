@@ -95,15 +95,11 @@ describe('AlertAnalysisCallerAlerts', () => {
     expect(AlertAnalysisCallerAlerts.parse([alert])).toEqual([alert]);
   });
 
-  it('accepts date-time @timestamp values with a UTC offset', () => {
-    const result = AlertAnalysisCallerAlerts.safeParse([
-      { ...alert, '@timestamp': '2026-09-23T12:00:00.000+02:00' },
-    ]);
-    expect(result.success).toBe(true);
-  });
-
-  it.each(['not-a-date', '2026-09-23'])('rejects a non date-time @timestamp (%s)', (timestamp) => {
-    const result = AlertAnalysisCallerAlerts.safeParse([{ ...alert, '@timestamp': timestamp }]);
-    expect(result.success).toBe(false);
-  });
+  it.each(['not-a-date', '2026-09-23', '2026-09-23T12:00:00.000+02:00'])(
+    'rejects a non-UTC date-time @timestamp (%s), matching execution-time validation',
+    (timestamp) => {
+      const result = AlertAnalysisCallerAlerts.safeParse([{ ...alert, '@timestamp': timestamp }]);
+      expect(result.success).toBe(false);
+    }
+  );
 });

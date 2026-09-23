@@ -165,6 +165,10 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(validator.safeParse({ alerts: [{ ...alert, _index: 'logs-endpoint' }] }).success).toBe(
       false
     );
+    expect(
+      validator.safeParse({ alerts: [{ ...alert, '@timestamp': '2026-09-23T12:00:00.000+02:00' }] })
+        .success
+    ).toBe(false);
   });
 
   it('reads per-space config at run time from the space-scoped runtime_config route', () => {
