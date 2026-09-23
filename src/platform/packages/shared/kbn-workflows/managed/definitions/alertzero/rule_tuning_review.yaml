@@ -803,10 +803,6 @@ steps:
       - match: threshold
         steps:
           - name: propose_threshold
-            # Guard: the oneOf schema is not enforced at the LLM layer, so the
-            # agent can emit change_type=threshold without the required fields.
-            # Skip the proposal rather than creating an unapprovable one; the
-            # alerts stay unreviewed and the next sweep retries.
             if: >-
               ${{ steps.diagnose_rule.output.structured_output.proposed_threshold_value != nil
                 and steps.diagnose_rule.output.structured_output.proposed_threshold_field != nil
