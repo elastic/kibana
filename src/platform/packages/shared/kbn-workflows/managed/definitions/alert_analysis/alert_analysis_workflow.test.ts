@@ -746,13 +746,22 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
 
     const alertsInput = (
       manualTrigger?.inputs?.properties as {
-        alerts?: { items?: { required?: string[] }; maxItems?: number };
+        alerts?: {
+          items?: {
+            required?: string[];
+            properties?: { '@timestamp'?: { format?: string; maxLength?: number } };
+          };
+          maxItems?: number;
+        };
       }
     )?.alerts;
     expect(alertsInput?.maxItems).toBe(1000);
     expect(alertsInput?.items?.required).toEqual(
       expect.arrayContaining(['_id', '@timestamp', 'kibana'])
     );
+    // Used as an ES date-math enrichment anchor — reject non-dates at the input boundary.
+    expect(alertsInput?.items?.properties?.['@timestamp']?.format).toBe('date-time');
+    expect(alertsInput?.items?.properties?.['@timestamp']?.maxLength).toBe(64);
 
     const alertTrigger = (workflow.triggers as Array<{ type: string; inputs?: unknown }>).find(
       ({ type }) => type === 'alert'
