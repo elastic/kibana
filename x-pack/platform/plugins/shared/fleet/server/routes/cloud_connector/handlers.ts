@@ -215,6 +215,8 @@ export const updateCloudConnectorHandler: FleetRequestHandler<
         esClient,
         user,
         canWriteIntegrationPolicies: fleetContext.authz.integrations.writeIntegrationPolicies,
+        request,
+        listSpaces: () => fleetContext.getAllSpaces(),
       }
     );
     logger.info(`Successfully updated cloud connector ${cloudConnectorId}`);

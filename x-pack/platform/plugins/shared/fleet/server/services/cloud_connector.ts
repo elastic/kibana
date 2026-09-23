@@ -9,8 +9,11 @@ import {
   SavedObjectsErrorHelpers,
   type AuthenticatedUser,
   type ElasticsearchClient,
+  type KibanaRequest,
   type Logger,
 } from '@kbn/core/server';
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 
 import { isIamRoleArn } from '../../common/services/cloud_connectors';
@@ -59,6 +62,7 @@ import {
 
 import { appContextService } from './app_context';
 import { propagateRoleArnToPackagePolicies } from './cloud_connectors';
+import { authorizeSharedConnectorRoleArnSpaces } from './cloud_connectors/role_arn_cross_space';
 import type { RoleArnPropagationRollback } from './cloud_connectors';
 import { validatePolicyNamespaceForSpace } from './spaces/policy_namespaces';
 import { extractSecretIdsFromCloudConnectorVars } from './secrets/cloud_connector';
@@ -433,6 +437,10 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
        * Role ARN change; connector-only edits are unaffected.
        */
       canWriteIntegrationPolicies?: boolean;
+      /** Present on the HTTP path so a shared connector can be authorized in every space. */
+      request?: KibanaRequest;
+      /** Resolves concrete space ids when the connector is shared into all spaces. */
+      listSpaces?: () => Promise<Array<{ id: string }>>;
     }
   ): Promise<CloudConnector> {
     const logger = this.getLogger('update');
@@ -520,13 +528,94 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
             'Role ARN update is not supported from this code path (missing esClient for package-policy fan-out).'
           );
         }
-        roleArnRollback = await propagateRoleArnToPackagePolicies({
-          soClient,
-          esClient,
-          connectorId: cloudConnectorId,
-          newRoleArn,
-          user,
-        });
+        const sharedNamespaces = existingCloudConnector.namespaces;
+        const isSharedAcrossSpaces =
+          !!sharedNamespaces &&
+          (sharedNamespaces.includes(ALL_SPACES_ID) ||
+            new Set(sharedNamespaces.filter((spaceId) => spaceId.length > 0)).size > 1);
+        if (isSharedAcrossSpaces) {
+          const currentSpaceId = soClient.getCurrentNamespace() ?? DEFAULT_SPACE_ID;
+          const spaceIds = await authorizeSharedConnectorRoleArnSpaces({
+            currentSpaceId,
+            namespaces: sharedNamespaces,
+            request: options?.request,
+            listSpaces: options?.listSpaces,
+          });
+          const rollbacks: RoleArnPropagationRollback[] = [];
+          try {
+            for (const spaceId of spaceIds) {
+              const spaceClient =
+                spaceId === currentSpaceId ? soClient : soClient.asScopedToNamespace(spaceId);
+              const rollback = await propagateRoleArnToPackagePolicies({
+                soClient: spaceClient,
+                esClient,
+                connectorId: cloudConnectorId,
+                newRoleArn,
+                user,
+              });
+              if (rollback) {
+                rollbacks.push(rollback);
+              }
+            }
+          } catch (fanOutError) {
+            const revertErrors: unknown[] = [];
+            for (const rollback of rollbacks) {
+              try {
+                await rollback.revert();
+              } catch (revertError) {
+                revertErrors.push(revertError);
+                logger.error(
+                  `Failed to revert a Role ARN fan-out for connector ${cloudConnectorId} after a later space failed`,
+                  revertError
+                );
+              }
+            }
+            if (revertErrors.length > 0) {
+              const updateFailed =
+                fanOutError instanceof CloudConnectorRoleArnPropagationError
+                  ? fanOutError.detail.updateFailed
+                  : [];
+              const revertFailed = revertErrors.flatMap((revertError) =>
+                revertError instanceof CloudConnectorRoleArnPropagationError
+                  ? revertError.detail.revertFailed
+                  : []
+              );
+              const fanOutMessage =
+                fanOutError instanceof Error ? fanOutError.message : String(fanOutError);
+              throw new CloudConnectorRoleArnPropagationError(
+                `Role ARN fan-out failed (${fanOutMessage}) and reverting an earlier space also failed`,
+                {
+                  updateFailed,
+                  revertFailed,
+                  bumpFailed: revertErrors.some(
+                    (revertError) =>
+                      revertError instanceof CloudConnectorRoleArnPropagationError &&
+                      revertError.detail.bumpFailed
+                  ),
+                }
+              );
+            }
+            throw fanOutError;
+          }
+          if (rollbacks.length > 0) {
+            roleArnRollback = {
+              policyCount: rollbacks.reduce((count, rollback) => count + rollback.policyCount, 0),
+              async revert() {
+                for (const rollback of rollbacks) {
+                  await rollback.revert();
+                }
+              },
+            };
+          }
+        } else {
+          roleArnRollback = await propagateRoleArnToPackagePolicies({
+            soClient,
+            esClient,
+            connectorId: cloudConnectorId,
+            newRoleArn,
+            user,
+          });
+        }
         updateAttributes.verification_status = 'pending';
         updateAttributes.verification_started_at = null;
         updateAttributes.verification_failed_at = null;

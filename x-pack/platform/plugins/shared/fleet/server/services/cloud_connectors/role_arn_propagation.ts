@@ -85,13 +85,12 @@ const renderPolicyIds = (ids: string[]): string => {
 };
 
 /**
- * Fan out a new role ARN to every package policy that references this connector **in the
- * caller's Kibana space**.
+ * Fan out a new role ARN to every package policy that references this connector **in
+ * `soClient`'s Kibana space**.
  *
- * Connectors are created with the request-scoped SO client and live in that space; the flyout
- * usage list and package-policy count are space-scoped the same way. Cross-space fan-out via
- * internal clients would let a caller with Fleet privilege in one space mutate policies in
- * spaces they cannot manage — so this stays on `soClient` and does not query `spaceIds: ['*']`.
+ * A connector shared into other spaces is handled by the caller: it checks the caller can write
+ * integration policies in each space, then calls this once per space with a client scoped to
+ * that space. This function stays on `soClient` and does not query `spaceIds: ['*']`.
  *
  * Semantics: "policies first, then connector; on any policy failure, revert successful policies."
  * The caller writes the connector AFTER a successful call to this function. Idempotent: policies

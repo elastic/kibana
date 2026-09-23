@@ -168,7 +168,12 @@ describe('updateCloudConnectorHandler', () => {
       expect.objectContaining({
         vars: { role_arn: { type: 'text', value: 'arn:aws:iam::123456789012:role/New' } },
       }),
-      expect.objectContaining({ user: mockUser, canWriteIntegrationPolicies: true })
+      expect.objectContaining({
+        user: mockUser,
+        canWriteIntegrationPolicies: true,
+        request,
+        listSpaces: expect.any(Function),
+      })
     );
     expect(response.ok).toHaveBeenCalled();
   });

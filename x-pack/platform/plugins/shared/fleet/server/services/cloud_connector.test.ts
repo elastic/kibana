@@ -6,7 +6,7 @@
  */
 
 import type { SavedObject, SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import type { AuthenticatedUser, ElasticsearchClient } from '@kbn/core/server';
+import type { AuthenticatedUser, ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
@@ -24,7 +24,7 @@ import {
 } from '../../common/constants/cloud_connector';
 
 import { createSavedObjectClientMock } from '../mocks';
-import { CloudConnectorRoleArnPropagationError } from '../errors';
+import { CloudConnectorRoleArnPropagationError, FleetUnauthorizedError } from '../errors';
 import type {
   CreateCloudConnectorRequest,
   UpdateCloudConnectorRequest,
@@ -1534,6 +1534,194 @@ describe('CloudConnectorService', () => {
         );
 
         expect(propagateRoleArnToPackagePoliciesMock).not.toHaveBeenCalled();
+      });
+
+      describe('connector shared across spaces', () => {
+        const request = {} as KibanaRequest;
+        let atSpaces: jest.Mock;
+        const otherSpaceClient = createSavedObjectClientMock();
+
+        const shareConnector = (namespaces: string[]) => {
+          mockSoClient.get.mockResolvedValue({
+            id: connectorId,
+            version: 'Wz-cc-version',
+            namespaces,
+            attributes: {
+              name: 'Test',
+              namespace: '*',
+              cloudProvider: 'aws',
+              vars: { role_arn: { type: 'text', value: oldArn } },
+              verification_status: 'success',
+              verification_started_at: '2026-09-01T00:00:00Z',
+              created_at: '2026-01-01T00:00:00Z',
+              updated_at: '2026-01-01T00:00:00Z',
+            },
+          } as SavedObject);
+        };
+
+        beforeEach(() => {
+          propagateRoleArnToPackagePoliciesMock.mockReset();
+          atSpaces = jest.fn().mockResolvedValue({ hasAllRequested: true });
+          mockAppContextService.getSecurity = jest.fn().mockReturnValue({
+            authz: {
+              checkPrivilegesWithRequest: jest.fn().mockReturnValue({ atSpaces }),
+              actions: { api: { get: (privilege: string) => `api:${privilege}` } },
+            },
+          });
+          mockSoClient.getCurrentNamespace.mockReturnValue('default');
+          mockSoClient.asScopedToNamespace.mockReturnValue(otherSpaceClient);
+          shareConnector(['default', 'space-b']);
+        });
+
+        const updateSharedRole = (
+          options: {
+            listSpaces?: () => Promise<Array<{ id: string }>>;
+            includeRequest?: boolean;
+          } = {}
+        ) =>
+          service.update(
+            mockSoClient,
+            connectorId,
+            { vars: { role_arn: { type: 'text', value: newArn } } },
+            {
+              esClient: mockEsClient,
+              ...(options.includeRequest === false ? {} : { request }),
+              listSpaces: options.listSpaces,
+            }
+          );
+
+        it('refuses the Role ARN change when the caller cannot write integration policies in every space', async () => {
+          atSpaces.mockResolvedValue({ hasAllRequested: false });
+
+          await expect(updateSharedRole()).rejects.toThrow(FleetUnauthorizedError);
+          await expect(updateSharedRole()).rejects.toThrow(
+            'This identity is shared with other spaces. You need permission to write integration policies in each of them before its Role ARN can change.'
+          );
+
+          expect(atSpaces).toHaveBeenCalledWith(['default', 'space-b'], {
+            kibana: ['api:fleet-agent-policies-all', 'api:integrations-all'],
+          });
+          expect(propagateRoleArnToPackagePoliciesMock).not.toHaveBeenCalled();
+          expect(mockSoClient.update).not.toHaveBeenCalled();
+        });
+
+        it('refuses the Role ARN change when the request is missing, so other spaces cannot be authorized', async () => {
+          await expect(updateSharedRole({ includeRequest: false })).rejects.toThrow(
+            FleetUnauthorizedError
+          );
+
+          expect(atSpaces).not.toHaveBeenCalled();
+          expect(propagateRoleArnToPackagePoliciesMock).not.toHaveBeenCalled();
+        });
+
+        it('fans the Role ARN out to each space once the caller is authorized in all of them', async () => {
+          await updateSharedRole();
+
+          expect(propagateRoleArnToPackagePoliciesMock).toHaveBeenNthCalledWith(
+            1,
+            expect.objectContaining({ soClient: mockSoClient, newRoleArn: newArn })
+          );
+          expect(mockSoClient.asScopedToNamespace).toHaveBeenCalledWith('space-b');
+          expect(propagateRoleArnToPackagePoliciesMock).toHaveBeenNthCalledWith(
+            2,
+            expect.objectContaining({ soClient: otherSpaceClient, newRoleArn: newArn })
+          );
+          expect(mockSoClient.update).toHaveBeenCalled();
+        });
+
+        it('reverts every space when the connector write fails after the fan-out', async () => {
+          const currentRollback = {
+            policyCount: 1,
+            revert: jest.fn().mockResolvedValue(undefined),
+          };
+          const otherRollback = { policyCount: 2, revert: jest.fn().mockResolvedValue(undefined) };
+          propagateRoleArnToPackagePoliciesMock
+            .mockResolvedValueOnce(currentRollback)
+            .mockResolvedValueOnce(otherRollback);
+          mockSoClient.update.mockRejectedValueOnce(new Error('connector write failed'));
+
+          await expect(updateSharedRole()).rejects.toThrow('connector write failed');
+
+          expect(currentRollback.revert).toHaveBeenCalledTimes(1);
+          expect(otherRollback.revert).toHaveBeenCalledTimes(1);
+        });
+
+        it('reverts spaces already updated when a later space fails', async () => {
+          const rollback = { policyCount: 1, revert: jest.fn().mockResolvedValue(undefined) };
+          propagateRoleArnToPackagePoliciesMock
+            .mockResolvedValueOnce(rollback)
+            .mockRejectedValueOnce(
+              new CloudConnectorRoleArnPropagationError('space-b failed', {
+                updateFailed: ['p2'],
+                revertFailed: [],
+                bumpFailed: false,
+              })
+            );
+
+          await expect(updateSharedRole()).rejects.toThrow(CloudConnectorRoleArnPropagationError);
+
+          expect(rollback.revert).toHaveBeenCalledTimes(1);
+          expect(mockSoClient.update).not.toHaveBeenCalled();
+        });
+
+        it('includes the earlier space when its revert fails after a later space fails', async () => {
+          const rollback = {
+            policyCount: 1,
+            revert: jest.fn().mockRejectedValue(
+              new CloudConnectorRoleArnPropagationError('revert failed', {
+                updateFailed: [],
+                revertFailed: ['p1'],
+                bumpFailed: false,
+              })
+            ),
+          };
+          propagateRoleArnToPackagePoliciesMock
+            .mockResolvedValueOnce(rollback)
+            .mockRejectedValueOnce(
+              new CloudConnectorRoleArnPropagationError('space-b failed', {
+                updateFailed: ['p2'],
+                revertFailed: [],
+                bumpFailed: false,
+              })
+            );
+
+          await expect(updateSharedRole()).rejects.toMatchObject({
+            detail: { updateFailed: ['p2'], revertFailed: ['p1'] },
+          });
+          expect(mockSoClient.update).not.toHaveBeenCalled();
+        });
+
+        it('checks every space when the connector is shared with all spaces', async () => {
+          shareConnector(['*']);
+          const listSpaces = jest
+            .fn()
+            .mockResolvedValue([{ id: 'default' }, { id: 'space-b' }, { id: 'space-c' }]);
+          const spaceCClient = createSavedObjectClientMock();
+          mockSoClient.asScopedToNamespace.mockImplementation((spaceId: string) =>
+            spaceId === 'space-c' ? spaceCClient : otherSpaceClient
+          );
+
+          await updateSharedRole({ listSpaces });
+
+          expect(atSpaces).toHaveBeenCalledWith(['default', 'space-b', 'space-c'], {
+            kibana: ['api:fleet-agent-policies-all', 'api:integrations-all'],
+          });
+          expect(propagateRoleArnToPackagePoliciesMock).toHaveBeenCalledTimes(3);
+          expect(mockSoClient.asScopedToNamespace).toHaveBeenCalledWith('space-b');
+          expect(mockSoClient.asScopedToNamespace).toHaveBeenCalledWith('space-c');
+        });
+
+        it('does not authorize other spaces when the connector lives in only the current one', async () => {
+          shareConnector(['default']);
+
+          await updateSharedRole();
+
+          expect(mockAppContextService.getSecurity).not.toHaveBeenCalled();
+          expect(propagateRoleArnToPackagePoliciesMock).toHaveBeenCalledTimes(1);
+          expect(propagateRoleArnToPackagePoliciesMock).toHaveBeenCalledWith(
+            expect.objectContaining({ soClient: mockSoClient })
+          );
+        });
       });
 
       it('resets verification fields when role_arn changes', async () => {
