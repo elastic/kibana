@@ -132,10 +132,9 @@ export function ChartConfigPanel({
         previousQuery.current = query;
       }
     }
-    // rerender the component if the data has changed or flyout becomes visible
-    // Note: when suggestion/chart type changes while flyout is visible, it flows through
-    // visContext.attributes props instead of recreating the component (which would reset state)
-    if (isPlainRecord && (dataHasChanged || !isFlyoutVisible)) {
+    // ChartConfigPanel only mounts while the flyout is visible, so load the editor
+    // from attributes even when Lens table adapters are missing (aborted/error chart).
+    if (isPlainRecord && (dataHasChanged || isFlyoutVisible)) {
       fetchLensConfigComponent();
     }
   }, [
