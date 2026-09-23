@@ -28,7 +28,9 @@ const boundedIncludedObjectsSchema: z.Schema<ContentPackIncludedObjects> = z.laz
       objects: z.strictObject({
         mappings: z.boolean(),
         // 9.4 adds queries alongside mappings and routing
-        queries: z.array(z.object({ id: z.string().nonempty().max(MAX_STREAM_NAME_LENGTH) })).max(200),
+        queries: z
+          .array(z.object({ id: z.string().nonempty().max(MAX_STREAM_NAME_LENGTH) }))
+          .max(200),
         routing: z
           .array(
             boundedIncludedObjectsSchema.and(
