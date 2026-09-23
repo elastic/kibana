@@ -99,7 +99,7 @@ export async function hydrateOnboardingSession(
             agentHostsMode: policyIds.length ? 'existing' : 'new',
             selectedAgentPolicyIds: policyIds,
             // Secrets are never persisted; restoring the method puts the right form in front of the user.
-            agentCredentialMethod: fromSOAuthMethod(item.authMethod),
+            agentCredentialMethod: fromSOAuthMethod(item.authMethod), // CodeQL[js/clear-text-storage-of-sensitive-data] false positive: authMethod is a UI selector enum ('static_keys', 'assume_role', etc.), not a credential
           })
         : item.connectorId
         ? JSON.stringify({ connectorId: item.connectorId, authMethod: 'identity_federation' })
