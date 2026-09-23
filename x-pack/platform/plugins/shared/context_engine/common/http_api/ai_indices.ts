@@ -8,10 +8,7 @@
 import type { EsqlEsqlColumnInfo, FieldValue } from '@elastic/elasticsearch/lib/api/types';
 import type { ImprovementAction } from './improvement_actions';
 
-/**
- * The type of backing store an AI index is attached to. `index` covers a
- * concrete index name or an index pattern (e.g. `foo`, `foo,bar`, `foo*`).
- */
+/** The type of backing store an AI index is attached to. */
 export type AiIndexType = 'data_stream' | 'index';
 
 export interface AiIndexDest {
