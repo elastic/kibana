@@ -36,7 +36,6 @@ if [[ -z "${KIBANA_WIF_AUDIENCE:-}" ]]; then
   echo "KIBANA_WIF_AUDIENCE is not set, cannot activate service account $GCLOUD_SA_PROXY_EMAIL."
   exit 1
 fi
-
 mkdir -p "$KIBANA_WIF_CREDENTIALS_DIR"
 WIF_TOKEN_TMP="$(mktemp "$KIBANA_WIF_CREDENTIALS_DIR/token.XXXXXX")"
 if ! buildkite-agent oidc request-token --audience "$KIBANA_WIF_AUDIENCE" > "$WIF_TOKEN_TMP"; then
@@ -54,7 +53,7 @@ gcloud iam workload-identity-pools create-cred-config \
   --credential-source-type=text \
   --output-file="$WIF_CREDENTIALS_FILE"
 
-if ! gcloud auth login --cred-file="$WIF_CREDENTIALS_FILE" --no-user-output-enabled; then
+if ! gcloud auth login --cred-file="$WIF_CREDENTIALS_FILE" --quiet --no-user-output-enabled; then
   echo "Failed to activate service account $GCLOUD_SA_PROXY_EMAIL."
   exit 1
 fi
