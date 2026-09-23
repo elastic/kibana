@@ -30,8 +30,8 @@ import {
   putStream,
 } from '../streams/helpers/requests';
 
-const RESET_STREAM_NAME = 'logs.maintenance-reset-test';
-const ORPHAN_RULE_STREAM_NAME = 'logs.maintenance-reset-orphan-rule';
+const RESET_STREAM_NAME = 'logs.otel.maintenance-reset-test';
+const ORPHAN_RULE_STREAM_NAME = 'logs.otel.maintenance-reset-orphan-rule';
 const REGISTERED_DATA_STREAMS = [
   '.significant_events-detections',
   '.significant_events-events',
@@ -131,6 +131,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('wipes data, restores registered streams, keeps reads healthy, and is repeatable', async () => {
+      await apiClient
+        .fetch('GET /internal/significant_events/events', { params: { query: {} } })
+        .expect(200);
+      await apiClient
+        .fetch('GET /internal/significant_events/detections', { params: { query: {} } })
+        .expect(200);
       await putStream(apiClient, RESET_STREAM_NAME, { stream: resetStream, ...emptyAssets });
       await putStream(apiClient, ORPHAN_RULE_STREAM_NAME, {
         stream: resetStream,
