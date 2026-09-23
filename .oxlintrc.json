@@ -115,6 +115,67 @@
       }
     },
     {
+      // Platform & Solutions API Tests
+      "files": [
+        "src/platform/plugins/**/test/{scout,scout_*}/**/api/**/*.ts",
+        "x-pack/platform/**/plugins/**/test/{scout,scout_*}/**/api/**/*.ts",
+        "x-pack/solutions/**/plugins/**/test/{scout,scout_*}/**/api/**/*.ts"
+      ],
+      "rules": {
+        "@kbn/eslint/scout_require_api_client_in_api_test": [
+          "error",
+          { "alternativeFixtures": ["esClient"] }
+        ]
+      }
+    },
+    {
+      // Security Solution API tests may call endpoints through the generated Scout API clients
+      // exposed by `@kbn/security-solution-test-api-clients/scout`
+      "files": ["x-pack/solutions/security/plugins/**/test/{scout,scout_*}/**/api/**/*.ts"],
+      "rules": {
+        "@kbn/eslint/scout_require_api_client_in_api_test": [
+          "error",
+          {
+            "alternativeFixtures": [
+              "esClient",
+              "detectionsApi",
+              "discoveriesApi",
+              "endpointExceptionsApi",
+              "endpointManagementApi",
+              "entityAnalyticsApi",
+              "exceptionsApi",
+              "listsApi",
+              "osqueryApi",
+              "timelinesApi"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      // Agent Builder API tests authenticate through role-scoped API client fixtures
+      "files": [
+        "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/*/api/**/*.ts",
+        "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/**/*.ts"
+      ],
+      "rules": {
+        "@kbn/eslint/scout_require_api_client_in_api_test": [
+          "error",
+          { "alternativeFixtures": ["esClient", "asAdmin", "asViewer", "asPrivilegedUser"] }
+        ]
+      }
+    },
+    {
+      // Workflows API tests use WorkflowsApiService (wrapping kbnClient/API) for workflow operations
+      "files": [
+        "src/platform/plugins/shared/workflows_management/test/scout/api/**/*.ts",
+        "src/platform/plugins/shared/workflows_management/test/scout_workflows_oom_testing/api/**/*.ts"
+      ],
+      "rules": {
+        "@kbn/eslint/scout_require_api_client_in_api_test": "off"
+      }
+    },
+    {
       "files": [
         "src/platform/plugins/shared/**/*.ts",
         "x-pack/solutions/**/*.ts",

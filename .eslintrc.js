@@ -3101,44 +3101,6 @@ module.exports = {
         '@kbn/eslint/scout_no_raw_eui_selectors': 'error',
       },
     },
-    {
-      // Platform & Solutions API Tests
-      files: [
-        'src/platform/plugins/**/test/{scout,scout_*}/**/api/**/*.ts',
-        'x-pack/platform/**/plugins/**/test/{scout,scout_*}/**/api/**/*.ts',
-        'x-pack/solutions/**/plugins/**/test/{scout,scout_*}/**/api/**/*.ts',
-      ],
-      rules: {
-        '@kbn/eslint/scout_require_api_client_in_api_test': [
-          'error',
-          { alternativeFixtures: ['esClient'] },
-        ],
-      },
-    },
-    {
-      // Security Solution API tests may call endpoints through the generated Scout API clients
-      // exposed by `@kbn/security-solution-test-api-clients/scout`
-      files: ['x-pack/solutions/security/plugins/**/test/{scout,scout_*}/**/api/**/*.ts'],
-      rules: {
-        '@kbn/eslint/scout_require_api_client_in_api_test': [
-          'error',
-          {
-            alternativeFixtures: [
-              'esClient',
-              'detectionsApi',
-              'discoveriesApi',
-              'endpointExceptionsApi',
-              'endpointManagementApi',
-              'entityAnalyticsApi',
-              'exceptionsApi',
-              'listsApi',
-              'osqueryApi',
-              'timelinesApi',
-            ],
-          },
-        ],
-      },
-    },
 
     /**
      * kbn-ui dependency allowlist — packages under `src/platform/kbn-ui/**` must be

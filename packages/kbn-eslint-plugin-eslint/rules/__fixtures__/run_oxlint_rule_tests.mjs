@@ -66,6 +66,8 @@ const parityTests = {
   scout_no_locators: () => require('../scout_no_locators.test.js'),
   scout_no_promise_all_with_playwright_apis: () =>
     require('../scout_no_promise_all_with_playwright_apis.test.js'),
+  scout_require_api_client_in_api_test: () =>
+    require('../scout_require_api_client_in_api_test.test.js'),
   scout_require_global_setup_hook_in_parallel_tests: () =>
     require('../scout_require_global_setup_hook_in_parallel_tests.test.js'),
   scout_test_file_naming: () => require('../scout_test_file_naming.test.js'),
