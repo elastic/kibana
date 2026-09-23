@@ -14,6 +14,8 @@ import {
   builtinWorkflowInputDefinitions,
   SECURITY_ALERT_ANALYSIS_CALLER_ALERTS_INPUT_DEFINITION_ID,
 } from '../../../spec/builtin_workflow_input_definitions';
+import { buildFieldsZodValidator } from '../../../spec/lib/build_fields_zod_validator';
+import { getInputsFromDefinition } from '../../../spec/lib/field_conversion';
 import { WorkflowSchema } from '../../../spec/schema';
 
 type Step = Record<string, unknown>;
@@ -140,6 +142,29 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
       expect(result.data.outputs.properties).toHaveProperty('verdicts');
       expect(result.data.outputs.properties).toHaveProperty('missing_alert_ids');
     }
+  });
+
+  it.each([
+    ['the raw yaml', () => parse(SECURITY_ALERT_ANALYSIS_WORKFLOW.yaml)],
+    ['the WorkflowSchema-parsed definition', () => WorkflowSchema.parse(workflow)],
+  ])('enforces the caller alerts contract at execution-time input validation for %s', (_, load) => {
+    // Same path as the execution engine's validateWorkflowInputs.
+    const validator = buildFieldsZodValidator(getInputsFromDefinition(load()));
+    const alert = {
+      _id: 'alert-1',
+      _index: '.internal.alerts-security.alerts-default-000001',
+      '@timestamp': '2026-09-23T10:00:00.000Z',
+      kibana: { alert: { rule: { uuid: 'rule-1' } } },
+    };
+
+    expect(validator.safeParse({ alerts: [alert] }).success).toBe(true);
+    expect(validator.safeParse({ alerts: Array.from({ length: 1001 }, () => alert) }).success).toBe(
+      false
+    );
+    expect(validator.safeParse({ alerts: [{ _id: 'alert-1' }] }).success).toBe(false);
+    expect(validator.safeParse({ alerts: [{ ...alert, _index: 'logs-endpoint' }] }).success).toBe(
+      false
+    );
   });
 
   it('reads per-space config at run time from the space-scoped runtime_config route', () => {
