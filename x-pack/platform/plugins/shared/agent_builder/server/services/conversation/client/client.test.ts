@@ -1115,8 +1115,7 @@ describe('ConversationClient', () => {
 
   describe('create', () => {
     beforeEach(() => {
-      mockEsClient.index.mockResolvedValue({ result: 'created' });
-      mockGetDocumentResponse(createConversationDocument());
+      mockEsClient.index.mockResolvedValue({ result: 'created', _seq_no: 0, _primary_term: 1 });
     });
 
     it('indexes with op_type create so existing conversations are never overwritten', async () => {
@@ -1134,6 +1133,78 @@ describe('ConversationClient', () => {
         })
       );
       expectNoReadBy(result);
+    });
+
+    it('forces an immediate refresh instead of waiting for the scheduled one', async () => {
+      await client.create({
+        id: 'conversation-1',
+        title: 'Conversation 1',
+        agent_id: 'agent-1',
+        rounds: [],
+      });
+
+      expect(mockEsClient.index).toHaveBeenCalledWith(expect.objectContaining({ refresh: true }));
+    });
+
+    it('builds the response from the written document without reading it back', async () => {
+      const result = await client.create({
+        id: 'conversation-1',
+        title: 'Conversation 1',
+        agent_id: 'agent-1',
+        rounds: [],
+      });
+
+      expect(mockRawEsClient.get).not.toHaveBeenCalled();
+      expect(agentRegistry.get).not.toHaveBeenCalled();
+      expect(result).toMatchObject({
+        id: 'conversation-1',
+        title: 'Conversation 1',
+        agent_id: 'agent-1',
+        user: { id: 'user-1', username: 'test-user' },
+        rounds: [],
+        events: [],
+        schema_version: CONVERSATION_SCHEMA_VERSION,
+        read: false,
+        pinned: false,
+        read_only: false,
+      });
+      expect(result.created_at).toBe(result.updated_at);
+      expectOwnerPermissions(result);
+      expectNoReadBy(result);
+    });
+
+    it('returns the same shape as get for the created conversation', async () => {
+      const created = await client.create({
+        id: 'conversation-1',
+        title: 'Conversation 1',
+        agent_id: 'agent-1',
+        rounds: [],
+      });
+
+      const { document: indexedDoc } = mockEsClient.index.mock.calls[0][0] as {
+        document: Document['_source'];
+      };
+      mockGetDocumentResponse({
+        _id: 'conversation-1',
+        _seq_no: 0,
+        _primary_term: 1,
+        _source: indexedDoc,
+      });
+
+      await expect(client.get('conversation-1')).resolves.toEqual(created);
+    });
+
+    it('fails when the index response carries no version metadata', async () => {
+      mockEsClient.index.mockResolvedValueOnce({ result: 'created' });
+
+      await expect(
+        client.create({
+          id: 'conversation-1',
+          title: 'Conversation 1',
+          agent_id: 'agent-1',
+          rounds: [],
+        })
+      ).rejects.toThrow('Conversation conversation-1 was indexed without version metadata');
     });
 
     it('throws an already-exists error when the id already exists', async () => {
@@ -2271,8 +2342,7 @@ describe('ConversationClient', () => {
   describe('create with template', () => {
     beforeEach(() => {
       jest.clearAllMocks();
-      mockEsClient.index.mockResolvedValue({ result: 'created' });
-      mockGetDocumentResponse(createConversationDocumentWithTemplate());
+      mockEsClient.index.mockResolvedValue({ result: 'created', _seq_no: 0, _primary_term: 1 });
     });
 
     it('seeds metadata from template fields that have a default value and stamps template_version', async () => {
@@ -2852,8 +2922,7 @@ describe('ConversationClient', () => {
     });
 
     it('create fires with the attachment events of the initial batch', async () => {
-      mockEsClient.index.mockResolvedValue({ result: 'created' });
-      mockGetDocumentResponse(createConversationDocument());
+      mockEsClient.index.mockResolvedValue({ result: 'created', _seq_no: 0, _primary_term: 1 });
       const added = attachmentAddedEvent('evt-att-3');
 
       await clientWithCb.create({
@@ -2913,8 +2982,6 @@ describe('ConversationClient', () => {
     });
 
     it('promotes new conversations to events-native on create (schema_version + events written atomically)', async () => {
-      mockGetDocumentResponse(createConversationDocument({ schemaVersion: 1 }));
-
       await client.create({
         id: 'conversation-1',
         title: 'Conversation 1',
@@ -2944,17 +3011,6 @@ describe('ConversationClient', () => {
         { attachment_id: 'attachment-a', version: 1 },
         { attachment_id: 'attachment-b', version: 2 },
       ];
-
-      const written = createConversationDocument({
-        schemaVersion: 1,
-        rounds: [
-          {
-            ...createRound({ id: 'round-1', status: ConversationRoundStatus.completed }),
-            input: { message: 'hi', attachment_refs: attachmentRefs },
-          },
-        ],
-      });
-      mockGetDocumentResponse(written);
 
       const created = await client.create({
         id: 'conversation-1',

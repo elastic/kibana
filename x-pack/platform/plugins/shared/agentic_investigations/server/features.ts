@@ -9,18 +9,12 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { i18n } from '@kbn/i18n';
 import { AGENTIC_INVESTIGATIONS_PLUGIN_ID } from '../common/constants';
-import {
-  PROPOSALS_UI_CAPABILITY_DECIDE,
-  PROPOSALS_UI_CAPABILITY_SHOW,
-} from '../common/proposals/constants';
+import { IMPACT_UI_CAPABILITY_MANAGE, IMPACT_UI_CAPABILITY_SHOW } from '../common/impact/constants';
 import {
   ESCALATIONS_UI_CAPABILITY_MANAGE,
   ESCALATIONS_UI_CAPABILITY_SHOW,
 } from '../common/escalations/constants';
-import {
-  PROPOSALS_API_PRIVILEGE_MANAGE,
-  PROPOSALS_API_PRIVILEGE_READ,
-} from './proposals/constants';
+import { IMPACT_API_PRIVILEGE_MANAGE, IMPACT_API_PRIVILEGE_READ } from './impact/constants';
 import {
   ESCALATIONS_API_PRIVILEGE_MANAGE,
   ESCALATIONS_API_PRIVILEGE_READ,
@@ -33,25 +27,27 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
       defaultMessage: 'Agentic Investigations',
     }),
     minimumLicense: 'enterprise',
-    // Sits just after Workflows (3000), whose platform it builds on, and after
-    // Agent Builder (1000). The category drives placement in the Roles and
-    // Spaces feature pickers; `app` stays empty because this plugin
-    // contributes no navigation of its own.
-    order: 3100,
+    // Sits just after Proposed Actions (3100), whose records these entities
+    // reference, and after Workflows (3000) and Agent Builder (1000). The
+    // category drives placement in the Roles and Spaces feature pickers; `app`
+    // stays empty because this plugin contributes no navigation of its own.
+    order: 3110,
     category: DEFAULT_APP_CATEGORIES.kibana,
     app: [],
     privileges: {
       all: {
         app: [],
-        api: [PROPOSALS_API_PRIVILEGE_READ, PROPOSALS_API_PRIVILEGE_MANAGE],
+        // Impact rides on the feature itself: an investigation always has one,
+        // so All and Read grant it together with the rest of the feature.
+        api: [IMPACT_API_PRIVILEGE_READ, IMPACT_API_PRIVILEGE_MANAGE],
         savedObject: { all: [], read: [] },
-        ui: [PROPOSALS_UI_CAPABILITY_SHOW, PROPOSALS_UI_CAPABILITY_DECIDE],
+        ui: [IMPACT_UI_CAPABILITY_SHOW, IMPACT_UI_CAPABILITY_MANAGE],
       },
       read: {
         app: [],
-        api: [PROPOSALS_API_PRIVILEGE_READ],
+        api: [IMPACT_API_PRIVILEGE_READ],
         savedObject: { all: [], read: [] },
-        ui: [PROPOSALS_UI_CAPABILITY_SHOW],
+        ui: [IMPACT_UI_CAPABILITY_SHOW],
       },
     },
     subFeatures: [
