@@ -84,7 +84,6 @@ triggers:
                         minimum: 0
                     required: [field, value]
                   description: Unique-value conditions. Use [] to remove all cardinality conditions.
-              required: [value, field, cardinality]
             interval:
               type: string
               maxLength: 32
