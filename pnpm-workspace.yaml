@@ -229,6 +229,7 @@ packages:
   - 'examples/unified_field_list_examples'
   - 'examples/user_profile_examples'
   - 'examples/v8_profiler_examples'
+  - 'oas_docs'
   - 'packages/kbn-babel-preset'
   - 'packages/kbn-capture-oas-snapshot-cli'
   - 'packages/kbn-check-mappings-update-cli'
@@ -1316,3 +1317,6 @@ packages:
   - 'x-pack/solutions/security/test/security_solution_api_integration/config/services/detections_response'
   - 'x-pack/solutions/security/test/security_solution_endpoint'
 # END GENERATED PACKAGES
+
+# Keep a last field entry, because a trailing comment might be removed by some parsers. 
+lockfile: true

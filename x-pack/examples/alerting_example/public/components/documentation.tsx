@@ -46,8 +46,8 @@ export const DocumentationPage = (
         </p>
         <EuiCallOut title="Transport Layer Security" iconType="warning" color="warning">
           If you see a message about needing to enable the Transport Layer Security, start ES with{' '}
-          <code>yarn es snapshot --ssl --license trial</code> and Kibana with{' '}
-          <code>yarn start --run-examples --ssl</code>. If you running chrome on a mac, you may need
+          <code>pnpm es snapshot --ssl --license trial</code> and Kibana with{' '}
+          <code>pnpm start --run-examples --ssl</code>. If you running chrome on a mac, you may need
           to type in <code>thisisunsafe</code> if you see the Certificate invalid screen with no way
           to &lsquo;proceed anyway&rsquo;.
         </EuiCallOut>
