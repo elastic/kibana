@@ -91,7 +91,6 @@ export const AttachmentSummaryRow = memo<AttachmentSummaryRowProps>(
               iconType={iconType}
               iconSize="s"
               size="s"
-              // Must be a hex or 'plain'/'subdued'; this token resolves to one.
               color={euiTheme.colors.backgroundBasePrimary}
               iconColor={euiTheme.colors.textPrimary}
               data-test-subj="attachmentSummaryRowIcon"
