@@ -16,6 +16,12 @@ import type { CasesUI } from '../../containers/types';
 import { runCaseWorkflow } from './api';
 import * as i18n from './translations';
 
+/** Builds the Workflows app path that opens an execution on the workflow's executions tab. */
+export const getWorkflowExecutionPath = (workflowId: string, executionId: string): string =>
+  `/${encodeURIComponent(workflowId)}?tab=executions&executionId=${encodeURIComponent(
+    executionId
+  )}`;
+
 /** Builds the `text` mount point for the right-aligned "View execution" button. */
 export const buildViewExecutionText = (executionHref: string, rendering: ToMountPointParams) =>
   toMountPoint(
@@ -64,7 +70,7 @@ export const useRunWorkflowOnCases = ({ cases }: { cases: CasesUI }): RunWorkflo
       });
 
       const executionHref = response.workflowExecutionId
-        ? getAppUrl({ path: `${workflowId}?executionId=${response.workflowExecutionId}` })
+        ? getAppUrl({ path: getWorkflowExecutionPath(workflowId, response.workflowExecutionId) })
         : undefined;
 
       const text =

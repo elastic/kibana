@@ -12,7 +12,7 @@ import type { CaseWorkflowRunOrigin } from '../../../common/types/api';
 import { useAppUrl, useHttp, useKibana, useToasts } from '../../common/lib/kibana';
 import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_page';
 import { runCaseWorkflow } from './api';
-import { buildViewExecutionText } from './use_run_workflow_on_cases';
+import { buildViewExecutionText, getWorkflowExecutionPath } from './use_run_workflow_on_cases';
 import * as i18n from './translations';
 
 export interface UseCasesWorkflowExecutorParams {
@@ -51,7 +51,7 @@ export const useCasesWorkflowExecutor = ({
       });
 
       const executionHref = response.workflowExecutionId
-        ? getAppUrl({ path: `${workflowId}?executionId=${response.workflowExecutionId}` })
+        ? getAppUrl({ path: getWorkflowExecutionPath(workflowId, response.workflowExecutionId) })
         : undefined;
 
       const text =

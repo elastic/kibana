@@ -97,7 +97,9 @@ describe('useRunWorkflowOnCases', () => {
   });
 
   it('shows a success toast with a right-floated "View execution" button', async () => {
-    const mockGetAppUrl = jest.fn().mockReturnValue('/app/workflows/wf-1?executionId=exec-1');
+    const mockGetAppUrl = jest
+      .fn()
+      .mockReturnValue('/app/workflows/wf-1?tab=executions&executionId=exec-1');
     const { useAppUrl } = jest.requireMock('../../common/lib/kibana');
     useAppUrl.mockReturnValue({ getAppUrl: mockGetAppUrl });
 
@@ -111,6 +113,9 @@ describe('useRunWorkflowOnCases', () => {
       await result.current({ workflowId: 'wf-1', inputs: {} });
     });
 
+    expect(mockGetAppUrl).toHaveBeenCalledWith({
+      path: '/wf-1?tab=executions&executionId=exec-1',
+    });
     expect(mockToasts.addSuccess).toHaveBeenCalledTimes(1);
     expect(mockToasts.addSuccess).toHaveBeenCalledWith(
       expect.objectContaining({ text: expect.anything() })
@@ -119,7 +124,9 @@ describe('useRunWorkflowOnCases', () => {
   });
 
   it('shows a warning toast (with "View execution" button) when activityStatus is "failed"', async () => {
-    const mockGetAppUrl = jest.fn().mockReturnValue('/app/workflows/wf-1?executionId=exec-1');
+    const mockGetAppUrl = jest
+      .fn()
+      .mockReturnValue('/app/workflows/wf-1?tab=executions&executionId=exec-1');
     const { useAppUrl } = jest.requireMock('../../common/lib/kibana');
     useAppUrl.mockReturnValue({ getAppUrl: mockGetAppUrl });
 

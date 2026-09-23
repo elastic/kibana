@@ -24,7 +24,9 @@ const mockRunCaseWorkflow = jest.spyOn(api, 'runCaseWorkflow');
 describe('useCasesWorkflowExecutor', () => {
   const mockHttp = {} as HttpStart;
   const mockToasts = notificationServiceMock.createStartContract().toasts;
-  const mockGetAppUrl = jest.fn().mockReturnValue('/app/workflows/wf-1?executionId=exec-1');
+  const mockGetAppUrl = jest
+    .fn()
+    .mockReturnValue('/app/workflows/wf-1?tab=executions&executionId=exec-1');
 
   const { useAppUrl, useHttp, useKibana, useToasts } = jest.requireMock('../../common/lib/kibana');
 
@@ -109,6 +111,20 @@ describe('useCasesWorkflowExecutor', () => {
       expect.objectContaining({ text: expect.anything() })
     );
     expect(mockRefreshCaseViewPage).toHaveBeenCalledTimes(1);
+  });
+
+  it('links to the execution on the workflow executions tab', async () => {
+    mockRunCaseWorkflow.mockResolvedValueOnce({
+      workflowExecutionId: 'exec-ok',
+      activityStatus: 'succeeded',
+    });
+
+    const { result } = renderExecutorHook();
+    await result.current({ workflowId: 'wf-1', inputs: {} });
+
+    expect(mockGetAppUrl).toHaveBeenCalledWith({
+      path: '/wf-1?tab=executions&executionId=exec-ok',
+    });
   });
 
   it('propagates errors thrown by the API', async () => {
