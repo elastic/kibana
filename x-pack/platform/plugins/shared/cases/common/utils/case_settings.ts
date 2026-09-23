@@ -38,3 +38,11 @@ export const getCaseSettings = (owner: string): OwnerCaseSettings => {
     observablesEnabled: features.observables.enabled,
   };
 };
+
+/**
+ * Returns true when observable extraction must be blocked regardless of the space configuration.
+ * Only known owners with observables explicitly disabled are blocked. Unknown owners (e.g. test
+ * fixture owners not in OWNER_INFO) are not blocked so their space configuration is respected.
+ */
+export const isObservablesExtractionBlocked = (owner: string): boolean =>
+  Object.hasOwn(OWNER_INFO, owner) && !OWNER_INFO[owner as Owner].features.observables.enabled;

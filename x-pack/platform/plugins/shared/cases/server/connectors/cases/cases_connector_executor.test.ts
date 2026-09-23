@@ -283,7 +283,7 @@ describe('CasesConnectorExecutor', () => {
                       "id": "mock-id-1",
                       "owner": "cases",
                       "settings": Object {
-                        "extractObservables": false,
+                        "extractObservables": true,
                         "syncAlerts": false,
                       },
                       "tags": Array [
@@ -310,7 +310,7 @@ describe('CasesConnectorExecutor', () => {
                       "id": "mock-id-2",
                       "owner": "cases",
                       "settings": Object {
-                        "extractObservables": false,
+                        "extractObservables": true,
                         "syncAlerts": false,
                       },
                       "tags": Array [
@@ -337,7 +337,7 @@ describe('CasesConnectorExecutor', () => {
                       "id": "mock-id-3",
                       "owner": "cases",
                       "settings": Object {
-                        "extractObservables": false,
+                        "extractObservables": true,
                         "syncAlerts": false,
                       },
                       "tags": Array [
@@ -598,7 +598,7 @@ describe('CasesConnectorExecutor', () => {
                   "id": "mock-id-3",
                   "owner": "cases",
                   "settings": Object {
-                    "extractObservables": false,
+                    "extractObservables": true,
                     "syncAlerts": false,
                   },
                   "tags": Array [
@@ -973,7 +973,7 @@ describe('CasesConnectorExecutor', () => {
                   "id": "mock-id-4",
                   "owner": "cases",
                   "settings": Object {
-                    "extractObservables": false,
+                    "extractObservables": true,
                     "syncAlerts": false,
                   },
                   "tags": Array [
@@ -1223,7 +1223,7 @@ describe('CasesConnectorExecutor', () => {
                     "id": "mock-id-4",
                     "owner": "cases",
                     "settings": Object {
-                      "extractObservables": false,
+                      "extractObservables": true,
                       "syncAlerts": false,
                     },
                     "tags": Array [
@@ -1297,7 +1297,7 @@ fields: []
             expect(createdCase.connector.type).toBe('.none');
             expect(createdCase.settings).toEqual({
               syncAlerts: false,
-              extractObservables: false,
+              extractObservables: true,
             });
             expect(createdCase.assignees).toBeUndefined();
             expect(createdCase.customFields).toEqual([]);
@@ -2416,7 +2416,7 @@ fields: []
                     "id": "mock-id-3",
                     "owner": "cases",
                     "settings": Object {
-                      "extractObservables": false,
+                      "extractObservables": true,
                       "syncAlerts": false,
                     },
                     "tags": Array [
@@ -2497,7 +2497,7 @@ fields: []
                     "id": "mock-id-4",
                     "owner": "cases",
                     "settings": Object {
-                      "extractObservables": false,
+                      "extractObservables": true,
                       "syncAlerts": false,
                     },
                     "tags": Array [
@@ -4417,7 +4417,7 @@ fields: []
                       "id": "mock-id-1",
                       "owner": "cases",
                       "settings": Object {
-                        "extractObservables": false,
+                        "extractObservables": true,
                         "syncAlerts": false,
                       },
                       "tags": Array [
@@ -4442,7 +4442,7 @@ fields: []
                       "id": "mock-id-2",
                       "owner": "cases",
                       "settings": Object {
-                        "extractObservables": false,
+                        "extractObservables": true,
                         "syncAlerts": false,
                       },
                       "tags": Array [
@@ -4467,7 +4467,7 @@ fields: []
                       "id": "mock-id-3",
                       "owner": "cases",
                       "settings": Object {
-                        "extractObservables": false,
+                        "extractObservables": true,
                         "syncAlerts": false,
                       },
                       "tags": Array [

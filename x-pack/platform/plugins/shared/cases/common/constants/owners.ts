@@ -96,7 +96,7 @@ export const OWNER_INFO: Record<Owner, RouteInfo> = {
     casesBasePath: '/insightsAndAlerting/cases',
     features: {
       alerts: { sync: false },
-      observables: { enabled: true, autoExtract: false },
+      observables: { enabled: true, autoExtract: true },
     },
     validRuleConsumers: [
       AlertConsumers.ML,

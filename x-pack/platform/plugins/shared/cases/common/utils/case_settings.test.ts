@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getCaseSettings } from './case_settings';
+import { getCaseSettings, isObservablesExtractionBlocked } from './case_settings';
 
 describe('getCaseSettings', () => {
   it('returns Security owner flags from OWNER_INFO', () => {
@@ -19,7 +19,7 @@ describe('getCaseSettings', () => {
   it('returns Stack owner flags from OWNER_INFO', () => {
     expect(getCaseSettings('cases')).toEqual({
       syncAlerts: false,
-      extractObservables: false,
+      extractObservables: true,
       observablesEnabled: true,
     });
   });
@@ -40,6 +40,27 @@ describe('getCaseSettings', () => {
         extractObservables: false,
         observablesEnabled: false,
       });
+    }
+  );
+});
+
+describe('isObservablesExtractionBlocked', () => {
+  it('returns true only for Observability (known owner with observables disabled)', () => {
+    expect(isObservablesExtractionBlocked('observability')).toBe(true);
+  });
+
+  it('returns false for Security', () => {
+    expect(isObservablesExtractionBlocked('securitySolution')).toBe(false);
+  });
+
+  it('returns false for Stack', () => {
+    expect(isObservablesExtractionBlocked('cases')).toBe(false);
+  });
+
+  it.each([[''], ['foobar'], ['securitySolutionFixture']])(
+    'returns false for unknown owner %j so space config is respected',
+    (owner) => {
+      expect(isObservablesExtractionBlocked(owner)).toBe(false);
     }
   );
 });

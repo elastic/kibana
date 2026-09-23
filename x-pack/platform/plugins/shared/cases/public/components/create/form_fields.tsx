@@ -33,6 +33,7 @@ import { CaseFormFields } from '../case_form_fields';
 import { builderMap as customFieldsBuilderMap } from '../custom_fields/builder';
 import { ObservablesToggle } from '../case_form_fields/observables_toggle';
 import { getInitialCreateCaseSettings } from './utils';
+import { isObservablesExtractionBlocked } from '../../../common/utils/case_settings';
 
 export interface CreateCaseFormFieldsProps {
   configuration: CasesConfigurationUI;
@@ -113,8 +114,9 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
       if (field && !field.isPristine) {
         return;
       }
-      setFieldValue('extractObservables', configuration.extractObservables ?? true);
-    }, [configuration.extractObservables, configuration.id, getFields, setFieldValue]);
+      const fallback = isObservablesExtractionBlocked(caseOwner) ? false : true;
+      setFieldValue('extractObservables', configuration.extractObservables ?? fallback);
+    }, [caseOwner, configuration.extractObservables, configuration.id, getFields, setFieldValue]);
 
     const defaultTemplate = useMemo(
       () => ({

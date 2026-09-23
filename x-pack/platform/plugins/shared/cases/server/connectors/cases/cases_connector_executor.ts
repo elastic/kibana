@@ -29,7 +29,10 @@ import {
 } from '../../../common/constants';
 import { COMMENT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
 import { toUnifiedAttachmentType } from '../../../common/utils/attachments';
-import { getCaseSettings } from '../../../common/utils/case_settings';
+import {
+  getCaseSettings,
+  isObservablesExtractionBlocked,
+} from '../../../common/utils/case_settings';
 import type { BulkCreateCasesRequest } from '../../../common/types/api';
 import type { UnifiedAttachmentPayload } from '../../../common/types/domain/attachment/v2';
 import type { Case, CaseSeverity } from '../../../common';
@@ -885,7 +888,9 @@ export class CasesConnectorExecutor {
       (customField) => !legacyKeysWithV2Values?.has(customField.key)
     );
     const { syncAlerts } = getCaseSettings(params.owner);
-    const extractObservables = spaceExtractObservables ?? true;
+    const extractObservables = isObservablesExtractionBlocked(params.owner)
+      ? false
+      : spaceExtractObservables ?? true;
 
     const baseRequest: Omit<BulkCreateCasesRequest['cases'][number], 'id'> & { id: string } = {
       id: caseId,
@@ -975,7 +980,9 @@ export class CasesConnectorExecutor {
     );
 
     const { syncAlerts } = getCaseSettings(params.owner);
-    const extractObservables = spaceExtractObservables ?? true;
+    const extractObservables = isObservablesExtractionBlocked(params.owner)
+      ? false
+      : spaceExtractObservables ?? true;
 
     return {
       id: caseId,

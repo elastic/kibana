@@ -19,6 +19,7 @@ import { flattenCaseSavedObject, transformNewCase } from '../../common/utils';
 import type { CasesClient, CasesClientArgs } from '..';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { Owner } from '../../../common/constants/types';
+import { isObservablesExtractionBlocked } from '../../../common/utils/case_settings';
 import type {
   BulkCreateCasesRequest,
   BulkCreateCasesResponse,
@@ -544,13 +545,17 @@ const createBulkCreateCaseRequest = async ({
   // only sees the latter and rejects the former as missing.
 
   // Default extractObservables from the space configuration when the caller omitted it.
-  // Precedence: caller-explicit > space config default > true (matches configure client / Settings UI).
+  // observablesEnabled is the primary gate: if the feature is off for this owner, extraction
+  // is always false regardless of what the space config holds.
+  // Precedence: caller-explicit > space config default > observablesEnabled.
   if (caseWithoutId.settings.extractObservables === undefined) {
     caseWithoutId = {
       ...caseWithoutId,
       settings: {
         ...caseWithoutId.settings,
-        extractObservables: spaceExtractObservables ?? true,
+        extractObservables: isObservablesExtractionBlocked(caseWithoutId.owner)
+          ? false
+          : spaceExtractObservables ?? true,
       },
     };
   }
