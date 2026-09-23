@@ -9,8 +9,12 @@ import React, { memo } from 'react';
 import { css } from '@emotion/react';
 import { EuiModal, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
 import { ApprovalContent } from './approval_content';
-import { getProposalTitle, getProposalTone, isProposalExpired } from './proposal_helpers';
-import { toActionImpactItems } from './to_action_impact_items';
+import {
+  getProposalCaption,
+  getProposalTitle,
+  getProposalTone,
+  isProposalExpired,
+} from './proposal_helpers';
 import { APPROVAL_MODAL_TRANSLATIONS } from './translations';
 import type { ApprovalProposal } from './types';
 
@@ -51,7 +55,7 @@ export const ApprovalModal = memo<ApprovalModalProps>(
       <EuiModal
         aria-labelledby={titleId}
         onClose={onClose}
-        css={css({ maxWidth: 560, width: '100%', borderRadius: euiTheme.size.m })}
+        css={css({ maxWidth: 640, width: '100%', borderRadius: euiTheme.size.xs })}
         data-test-subj={dataTestSubj}
       >
         <ApprovalContent
@@ -59,9 +63,8 @@ export const ApprovalModal = memo<ApprovalModalProps>(
           tone={getProposalTone(proposal)}
           iconType="lock"
           comment={proposal.comment}
-          actionImpact={{ variant: 'list', items: toActionImpactItems(proposal) }}
           titleId={titleId}
-          warningLabel={APPROVAL_MODAL_TRANSLATIONS.warningLabel}
+          caption={getProposalCaption(proposal)}
           alwaysAllow={alwaysAllow}
           data-test-subj={dataTestSubj}
           primaryAction={{

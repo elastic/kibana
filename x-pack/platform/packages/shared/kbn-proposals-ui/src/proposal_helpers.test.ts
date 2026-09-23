@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getProposalTone, isProposalExpired } from './proposal_helpers';
+import { getProposalCaption, getProposalTone, isProposalExpired } from './proposal_helpers';
 import type { ApprovalProposal } from './types';
 
 const proposal = (overrides: Partial<ApprovalProposal> = {}): ApprovalProposal => ({
@@ -41,6 +41,34 @@ describe('getProposalTone', () => {
 
   it('is primary when neither the proposal nor its action declares an impact', () => {
     expect(getProposalTone(proposal({ impact: undefined }))).toBe('primary');
+  });
+});
+
+describe('getProposalCaption', () => {
+  it('joins category and reversibility', () => {
+    expect(
+      getProposalCaption(proposal({ category: 'configure', action: { reversible: true } }))
+    ).toBe('configure • Reversible');
+  });
+
+  it("prefers the action's own category over the proposal's", () => {
+    expect(
+      getProposalCaption(
+        proposal({ category: 'configure', action: { category: 'response', reversible: false } })
+      )
+    ).toBe('response • Irreversible');
+  });
+
+  it('omits reversibility when the action declares none', () => {
+    expect(getProposalCaption(proposal({ category: 'configure' }))).toBe('configure');
+  });
+
+  it('omits category when neither the proposal nor its action declares one', () => {
+    expect(getProposalCaption(proposal({ action: { reversible: true } }))).toBe('Reversible');
+  });
+
+  it('is undefined when there is neither a category nor a reversibility flag', () => {
+    expect(getProposalCaption(proposal())).toBeUndefined();
   });
 });
 

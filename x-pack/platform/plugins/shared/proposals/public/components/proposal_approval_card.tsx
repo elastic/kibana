@@ -15,7 +15,6 @@ import {
   ApprovalContent,
   getProposalTone,
   isProposalExpired,
-  toActionImpactItems,
 } from '@kbn/proposals-ui';
 import type { ApprovalAction } from '@kbn/proposals-ui';
 import { isAwaitingDecision } from '@kbn/proposals-common';
@@ -265,7 +264,6 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(
           tone={getProposalTone(liveProposal)}
           iconType="lock"
           comment={liveProposal.comment}
-          actionImpact={{ variant: 'list', items: toActionImpactItems(liveProposal) }}
           primaryAction={primaryAction}
           secondaryActions={secondaryActions}
         >

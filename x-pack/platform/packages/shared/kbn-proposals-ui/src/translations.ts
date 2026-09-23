@@ -8,17 +8,11 @@
 import { i18n } from '@kbn/i18n';
 
 export const APPROVAL_MODAL_TRANSLATIONS = Object.freeze({
-  warningLabel: i18n.translate('xpack.proposals.approvalModal.warningLabel', {
-    defaultMessage: 'APPROVAL REQUIRED',
-  }),
-  actionImpactTitle: i18n.translate('xpack.proposals.approvalModal.actionImpactTitle', {
-    defaultMessage: 'Impact',
-  }),
   approve: i18n.translate('xpack.proposals.approvalModal.approve', {
     defaultMessage: 'Approve',
   }),
   dismiss: i18n.translate('xpack.proposals.approvalModal.dismiss', {
-    defaultMessage: 'Dismiss',
+    defaultMessage: 'Decline',
   }),
   noAction: i18n.translate('xpack.proposals.approvalModal.noAction', {
     defaultMessage: 'No automated action',
@@ -28,5 +22,11 @@ export const APPROVAL_MODAL_TRANSLATIONS = Object.freeze({
   }),
   alwaysAllowAriaLabel: i18n.translate('xpack.proposals.approvalModal.alwaysAllow.ariaLabel', {
     defaultMessage: 'Always allow this action',
+  }),
+  reversible: i18n.translate('xpack.alertzero.approvalModal.caption.reversible', {
+    defaultMessage: 'Reversible',
+  }),
+  irreversible: i18n.translate('xpack.alertzero.approvalModal.caption.irreversible', {
+    defaultMessage: 'Irreversible',
   }),
 });

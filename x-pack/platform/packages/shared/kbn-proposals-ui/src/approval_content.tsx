@@ -16,11 +16,7 @@ import {
 } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
 import { ApprovalModalHeader } from './approval_modal_header';
-import { ActionImpactSection } from './action_impact_section';
-import type { ActionImpactContent } from './action_impact_section';
-import { ApprovalActorRow } from './approval_actor_row';
 import { AlwaysAllowCheckbox } from './always_allow_checkbox';
-import { APPROVAL_MODAL_TRANSLATIONS } from './translations';
 
 export interface AlwaysAllowOption {
   id: string;
@@ -43,25 +39,19 @@ export interface ApprovalAction {
 export interface ApprovalContentProps {
   title: string;
   tone: 'primary' | 'danger';
-  /** Used for the header avatar, the impact-row default icon colour, and (fallback) the primary-action button icon. */
+  /** Fallback icon for the primary-action button. */
   iconType: IconType;
-  /** The proposal's own markdown, rendered as the body above the impact section. */
+  /** The proposal's own markdown, rendered as the body. */
   comment?: string;
-  /** What the action would touch: its category, impact, reversibility and decision deadline. */
-  actionImpact?: ActionImpactContent;
   /**
-   * Show the avatar + warning-label + title header.
+   * Show the badge + title header.
    * Set to `false` when a host (e.g. Agent Builder attachment framework) already draws its own header.
    * @default true
    */
   showHeader?: boolean;
   titleId?: string;
-  warningLabel?: string;
-  /**
-   * Show the actor row (who is acting) below the impact section.
-   * @default true
-   */
-  showActorRow?: boolean;
+  /** Header caption below the badge, e.g. a category/reversibility line. Omitted when there is none. */
+  caption?: React.ReactNode;
   alwaysAllow?: AlwaysAllowOption;
   /** Rendered as a filled `EuiButton`. Footer is omitted entirely when both this and `secondaryActions` are absent. */
   primaryAction?: ApprovalAction;
@@ -88,11 +78,9 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     tone,
     iconType,
     comment,
-    actionImpact,
     showHeader = true,
     titleId,
-    warningLabel,
-    showActorRow = true,
+    caption,
     alwaysAllow,
     primaryAction,
     secondaryActions,
@@ -101,7 +89,6 @@ export const ApprovalContent = memo<ApprovalContentProps>(
   }) => {
     const { euiTheme } = useEuiTheme();
 
-    const iconColor = tone === 'danger' ? euiTheme.colors.danger : euiTheme.colors.primary;
     const defaultButtonColor: EuiButtonColor = tone === 'danger' ? 'danger' : 'primary';
 
     const hasFooter =
@@ -111,24 +98,18 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     return (
       <>
         {showHeader && (
-          <ApprovalModalHeader
-            tone={tone}
-            iconType={iconType}
-            warningLabel={warningLabel ?? APPROVAL_MODAL_TRANSLATIONS.warningLabel}
-            title={title}
-            titleId={titleId ?? ''}
-          />
+          <ApprovalModalHeader caption={caption} title={title} titleId={titleId ?? ''} />
         )}
 
-        {/* A comment is as long as the worker made it, so the body scrolls and the footer stays
-            reachable without the modal growing past the viewport. */}
         <div
           css={css({
-            padding: euiTheme.size.m,
+            padding: `0 ${euiTheme.size.base}`,
             maxBlockSize: '50vh',
             overflowY: 'auto',
           })}
         >
+          {/* A comment is as long as the worker made it, so the body scrolls and the footer stays
+            reachable without the modal growing past the viewport. */}
           {comment !== undefined && (
             <div css={css({ marginBottom: euiTheme.size.m })}>
               <EuiMarkdownFormat
@@ -139,10 +120,6 @@ export const ApprovalContent = memo<ApprovalContentProps>(
               </EuiMarkdownFormat>
             </div>
           )}
-          {actionImpact && (
-            <ActionImpactSection content={actionImpact} defaultItemIconColor={iconColor} />
-          )}
-          {showActorRow && <ApprovalActorRow />}
         </div>
 
         {alwaysAllow && (
@@ -160,8 +137,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
               display: 'flex',
               gap: euiTheme.size.s,
               justifyContent: 'flex-end',
-              padding: euiTheme.size.m,
-              borderTop: `1px solid ${euiTheme.colors.lightestShade}`,
+              padding: euiTheme.size.base,
             })}
           >
             {/* Secondaries first so the decision that commits something sits rightmost. */}
@@ -169,7 +145,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
               <EuiButtonEmpty
                 key={i}
                 size="s"
-                color={action.color ?? 'text'}
+                color={action.color ?? 'primary'}
                 iconType={action.iconType}
                 isDisabled={action.isDisabled}
                 isLoading={action.isLoading}

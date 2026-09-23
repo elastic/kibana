@@ -16,6 +16,27 @@ export const getProposalTitle = (proposal: ApprovalProposal): string =>
   proposal.action?.name ?? proposal.actionWorkflowId ?? APPROVAL_MODAL_TRANSLATIONS.noAction;
 
 /**
+ * The category/reversibility line shown under a proposal's title — in the modal header and the
+ * flyout's `ProposedActionButton` row alike, so the two describe the same proposal identically.
+ * `undefined` when the proposal carries neither, so a caller can skip the line rather than render
+ * an empty one.
+ */
+export const getProposalCaption = (proposal: ApprovalProposal): string | undefined => {
+  const category = proposal.action?.category ?? proposal.category;
+  const reversible = proposal.action?.reversible;
+  const parts = [
+    category,
+    reversible === undefined
+      ? undefined
+      : reversible
+      ? APPROVAL_MODAL_TRANSLATIONS.reversible
+      : APPROVAL_MODAL_TRANSLATIONS.irreversible,
+  ].filter((part): part is string => Boolean(part));
+
+  return parts.length > 0 ? parts.join(' • ') : undefined;
+};
+
+/**
  * The row's own impact first: a revision can override it, and it is the value the queue sorts
  * by, so preferring the action's declared impact would show the impact a revision replaced.
  * The action's value is only the default for a proposal that never set one.

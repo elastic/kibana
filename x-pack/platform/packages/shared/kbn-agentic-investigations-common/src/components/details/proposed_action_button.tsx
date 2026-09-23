@@ -7,20 +7,15 @@
 
 import React, { memo, useCallback, useState } from 'react';
 import { css } from '@emotion/react';
-import {
-  EuiBadge,
-  type EuiBadgeProps,
-  EuiFlexGroup,
-  EuiFlexItem,
-  type IconType,
-  EuiPanel,
-  EuiText,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage, FormattedTime } from '@kbn/i18n-react';
 import { ApprovalModal, getProposalTitle, type ApprovalProposal } from '@kbn/proposals-ui';
 import { DETAILS_FLYOUT_LABELS } from './translations';
 import { getEmptyValue } from '../helpers';
+import {
+  ProposedActionStatusBadge,
+  type ProposedActionStatusBadgeProps,
+} from './needs_review_badge';
 
 export interface ProposedActionButtonProps {
   /** Same shape the card's recommended-action menu item reads its proposal from. */
@@ -32,11 +27,7 @@ export interface ProposedActionButtonProps {
   'data-test-subj'?: string;
 }
 
-interface BadgeConfig {
-  color: EuiBadgeProps['color'];
-  iconType: IconType;
-  label: string;
-}
+type BadgeConfig = Required<ProposedActionStatusBadgeProps>;
 
 const badgeConfigFor = (proposal: ApprovalProposal): BadgeConfig => {
   if (proposal.decision === 'approved') {
@@ -158,9 +149,11 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
                   </EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiBadge color={badge.color} iconType={badge.iconType}>
-                    {badge.label}
-                  </EuiBadge>
+                  <ProposedActionStatusBadge
+                    color={badge.color}
+                    iconType={badge.iconType}
+                    label={badge.label}
+                  />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>

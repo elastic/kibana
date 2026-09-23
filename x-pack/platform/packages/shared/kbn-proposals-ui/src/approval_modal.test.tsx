@@ -40,10 +40,22 @@ describe('ApprovalModal', () => {
     jest.clearAllMocks();
   });
 
-  it('titles the modal with the action name and shows the warning label', () => {
+  it('titles the modal with the action name and shows the needs-review badge', () => {
     renderModal();
     expect(screen.getByText('Apply monitored exception')).toBeInTheDocument();
-    expect(screen.getByText(/approval required/i)).toBeInTheDocument();
+    expect(screen.getByText('Needs review')).toBeInTheDocument();
+  });
+
+  it('builds the header caption from the category and reversibility, matching the flyout row', () => {
+    renderModal({
+      proposal: { ...mockProposal, category: 'configure', action: { reversible: true } },
+    });
+    expect(screen.getByText('configure • Reversible')).toBeInTheDocument();
+  });
+
+  it('omits the header caption when the proposal has neither a category nor reversibility', () => {
+    renderModal({ proposal: { ...mockProposal, category: undefined, action: undefined } });
+    expect(screen.queryByText(/reversible/i)).not.toBeInTheDocument();
   });
 
   it('falls back to the workflow id when the action metadata carries no name', () => {
@@ -63,27 +75,6 @@ describe('ApprovalModal', () => {
     expect(
       screen.getByText('This action suppresses qualys-scan on the DMZ scan pool only.')
     ).toBeInTheDocument();
-  });
-
-  it('builds the impact rows from the proposal, so the modal matches the Agent Builder card', () => {
-    renderModal({
-      proposal: {
-        ...mockProposal,
-        category: 'configure',
-        action: { name: 'Apply monitored exception', reversible: true },
-      },
-    });
-
-    expect(screen.getByText('Impact')).toBeInTheDocument();
-    expect(screen.getByText('configure')).toBeInTheDocument();
-    expect(screen.getByText('low impact')).toBeInTheDocument();
-    expect(screen.getByText('Reversible')).toBeInTheDocument();
-  });
-
-  it('always renders the actor row', () => {
-    renderModal();
-    expect(screen.getByText('You')).toBeInTheDocument();
-    expect(screen.getByText(/Senior Analyst/)).toBeInTheDocument();
   });
 
   it('does not render always-allow checkbox when alwaysAllow is omitted', () => {

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { ApprovalProposal } from '@kbn/proposals-ui';
@@ -55,8 +55,8 @@ describe('ProposedActionButton', () => {
 
     fireEvent.click(screen.getByTestId('proposedAction'));
 
-    expect(screen.getByRole('dialog')).toBeInTheDocument();
-    expect(screen.getByText(/approval required/i)).toBeInTheDocument();
+    const dialog = screen.getByRole('dialog');
+    expect(within(dialog).getByText('Needs review')).toBeInTheDocument();
     expect(
       screen.getAllByText('Isolate cfo-mbp-14 — host isolation').length
     ).toBeGreaterThanOrEqual(2);

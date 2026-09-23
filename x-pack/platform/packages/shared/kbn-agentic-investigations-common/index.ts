@@ -51,6 +51,7 @@ export {
   ProposedActionButton,
   type ProposedActionButtonProps,
 } from './src/components/details/proposed_action_button';
+export { ProposedActionStatusBadge } from './src/components/details/needs_review_badge';
 
 export {
   AttachmentSummarySection,
