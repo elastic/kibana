@@ -29,6 +29,7 @@ import {
   AlertsConversationDetailsContent,
   type AlertsAttachmentData,
 } from './alerts_conversation_details';
+import { createImpactAttachmentDefinition } from './impact';
 
 /**
  * Extension of UnknownAttachment that includes an optional attachmentLabel field in the data property
@@ -141,24 +142,19 @@ export const registerInvestigationIocsAttachment = ({
 
 /**
  * Registers the `security.impact` attachment renderer (entity × verdict table summarising
- * alert-analysis results for impacted hosts and users). Dynamically imports
- * [./impact](./impact/index.ts) so EuiBasicTable and the impact-specific code stay off the
- * main `securitySolution` page-load bundle.
+ * alert-analysis results for impacted hosts and users). The definition is registered
+ * synchronously so Agent Builder can resolve the type on first render; `ImpactInlineContent`
+ * stays behind `React.lazy` inside the definition so the table UI remains code-split.
  */
 export const registerImpactAttachment = ({
   attachments,
 }: {
   attachments: AttachmentServiceStartContract;
 }): void => {
-  void import(
-    /* webpackChunkName: "security_impact_attachment" */
-    './impact'
-  ).then(({ createImpactAttachmentDefinition }) => {
-    attachments.addAttachmentType(
-      SecurityAgentBuilderAttachments.impact,
-      createImpactAttachmentDefinition()
-    );
-  });
+  attachments.addAttachmentType(
+    SecurityAgentBuilderAttachments.impact,
+    createImpactAttachmentDefinition()
+  );
 };
 
 /**

@@ -72,13 +72,11 @@ describe('registerAttachmentUiDefinitions', () => {
 });
 
 describe('registerImpactAttachment', () => {
-  it('registers the security.impact attachment type', async () => {
+  it('registers the security.impact attachment type synchronously', () => {
     const addAttachmentType = jest.fn();
     const attachments = { addAttachmentType } as unknown as AttachmentServiceStartContract;
 
     registerImpactAttachment({ attachments });
-
-    await new Promise((resolve) => setImmediate(resolve));
 
     expect(addAttachmentType).toHaveBeenCalledWith(
       SecurityAgentBuilderAttachments.impact,
