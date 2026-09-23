@@ -202,15 +202,6 @@ const handleConversationExecution = async ({
   const { logger, runAgent, trackingService, analyticsService, meteringService, agentService } =
     deps;
 
-  // Resolve scoped services
-  const { modelProvider, selectedConnectorId } = await resolveServices({
-    agentId,
-    connectorId,
-    telemetryMetadata,
-    request,
-    ...deps,
-  });
-
   const conversationClient = await deps.conversationService.getScopedClientAsUser({
     request,
     user: { ...owner, isAdmin: false },
@@ -242,8 +233,18 @@ const handleConversationExecution = async ({
 
   // From here on the receipt-time `user_message` is stored (fresh round) or a pending round is
   // being resumed: any rejection before the stream exists would leave it dangling, so the setup
-  // window is guarded and its failure recorded as an interrupted execution.
+  // window is guarded and its failure recorded as an interrupted execution. Service/connector
+  // resolution moved inside this guard too, so a run that fails to resolve one still gets a
+  // terminal recorded next to the message that was already persisted.
   try {
+    const { modelProvider, selectedConnectorId } = await resolveServices({
+      agentId,
+      connectorId,
+      telemetryMetadata,
+      request,
+      ...deps,
+    });
+
     // Execute agent
     const agentEvents$ = executeAgent$({
       agentId,

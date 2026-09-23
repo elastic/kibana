@@ -1123,6 +1123,49 @@ describe('handleAgentExecution — interrupted executions', () => {
     expect(seen.map((event) => event.type)).toContain(TimelineEventType.executionFailed);
   });
 
+  it('a service/connector resolution failure is caught by the same guard as a later setup failure', async () => {
+    // resolveServices runs first in the runner, before the agent registry lookup covered above:
+    // it must be inside the same guard, or a rejection here leaves the receipt-time message with
+    // no failure terminal next to it.
+    const conversationClient = echoingClient();
+    mockAgentStream([makeRoundStartedEvent(), makeRoundCompleteEvent()], 'asyncShared');
+    resolveServicesMock.mockRejectedValue(new Error('no connector available'));
+    const deps = createDeps({ conversationClient });
+
+    const events$ = await handleAgentExecution({
+      execution: {
+        executionId: 'execution-1',
+        executionMode: AgentExecutionMode.conversation,
+        owner: { id: 'owner-1', username: 'owner' },
+        agentParams: {
+          agentId: 'test-agent',
+          conversationId: 'conversation-1',
+          roundId: 'round-1',
+          conversationOperation: 'UPDATE',
+          nextInput: { message: 'Hello' },
+        },
+      } as never,
+      deps: deps as never,
+      request: { headers: {} } as never,
+      abortSignal: new AbortController().signal,
+    });
+    const { seen, thrown } = await collect(events$);
+
+    expect(seen.map((event) => event.type)).toEqual([TimelineEventType.executionFailed]);
+    expect(thrown).toMatchObject({
+      code: AgentBuilderErrorCode.internalError,
+      message: 'Error executing agent: no connector available',
+    });
+
+    expect(conversationClient.replaceRoundEvents).toHaveBeenCalledTimes(1);
+    const [write] = conversationClient.replaceRoundEvents.mock.calls[0];
+    expect(write.events.map((event) => event.id)).toEqual([
+      'round-1::user_message',
+      'round-1::execution_started',
+      'round-1::execution_failed',
+    ]);
+  });
+
   it('setup failure after the receipt write: minimal execution_failed persisted, streamed, then the normalised error', async () => {
     const conversationClient = echoingClient();
     mockAgentStream([makeRoundStartedEvent(), makeRoundCompleteEvent()], 'asyncShared');
