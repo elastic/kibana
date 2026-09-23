@@ -15,6 +15,7 @@
       "custom_apps"
     ],
     "requiredPlugins": [
+      "data",
       "embeddable",
       "lens"
     ],

@@ -6,16 +6,20 @@
  */
 
 import React, { createContext, useContext } from 'react';
+import type { HttpStart } from '@kbn/core/public';
 import type { TimeRange } from '@kbn/es-query';
+import type { ISearchGeneric } from '@kbn/search-types';
 
 /**
  * Catalog components receive only their resolved A2UI props, which is right for
- * pure UI but leaves Kibana-backed components (charts) with no way to reach
- * services or the page time range. This context is that channel — deliberately
- * narrow, so the surface a generated document can touch stays small.
+ * pure UI but leaves Kibana-backed components with no way to reach services or
+ * the page time range. This context is that channel — deliberately narrow, so
+ * the surface a generated document can touch stays small.
  */
 export interface CustomAppServices {
   timeRange: TimeRange;
+  search: ISearchGeneric;
+  http: HttpStart;
 }
 
 const CustomAppServicesContext = createContext<CustomAppServices | undefined>(undefined);

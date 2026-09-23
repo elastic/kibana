@@ -31,6 +31,12 @@
     "@kbn/es-query",
     "@kbn/agent-builder-server",
     "@kbn/agent-builder-common",
+    "@kbn/data-plugin",
+    "@kbn/esql-utils",
+    "@kbn/search-types",
+    "@kbn/es-types",
+    "@kbn/datemath",
+    "@kbn/charts-theme",
     "@kbn/code-editor",
     "@kbn/react-kibana-context-render"
   ]

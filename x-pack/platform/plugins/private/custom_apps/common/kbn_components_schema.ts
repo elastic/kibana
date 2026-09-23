@@ -14,7 +14,7 @@
 export const KBN_LENS_PANEL_SCHEMA = {
   type: 'object',
   description:
-    'Embeds a Lens visualization. Prefer savedObjectId, which references an existing saved visualization. Use attributes only for a chart that has not been saved.',
+    'Embeds an existing saved Lens visualization by id. Only use this when the user refers to a visualization they already saved; to chart data from a query, use Chart with an ES|QL query instead.',
   properties: {
     component: { const: 'KbnLensPanel' },
     savedObjectId: {
@@ -24,9 +24,44 @@ export const KBN_LENS_PANEL_SCHEMA = {
     attributes: {
       type: 'object',
       description:
-        'Inline Lens attributes for a by-value chart. Large and easy to get wrong; prefer savedObjectId.',
+        'Inline Lens attributes for a by-value chart. Large and easy to get wrong; prefer savedObjectId, or use Chart.',
     },
   },
   required: ['component'],
   oneOf: [{ required: ['savedObjectId'] }, { required: ['attributes'] }],
+} as const;
+
+export const CHART_SCHEMA = {
+  type: 'object',
+  description:
+    'Plots rows from the data model, normally rows an ES|QL query produced. This is the default way to draw a chart.',
+  properties: {
+    component: { const: 'Chart' },
+    chartType: {
+      type: 'string',
+      enum: ['bar', 'line', 'area'],
+      default: 'bar',
+      description: 'Use line or area for a value over time, bar for comparing categories.',
+    },
+    rows: {
+      $ref: 'common_types.json#/$defs/DynamicValue',
+      description:
+        'The rows to plot, normally a binding such as {"path": "/traffic"} pointing at an ES|QL query result.',
+    },
+    x: {
+      type: 'string',
+      description: 'Column name for the x axis, exactly as the ES|QL query names it.',
+    },
+    y: {
+      type: 'string',
+      description: 'Column name for the y axis, exactly as the ES|QL query names it.',
+    },
+    breakdown: {
+      type: 'string',
+      description: 'Optional column name to split the series by.',
+    },
+    xTitle: { type: 'string' },
+    yTitle: { type: 'string' },
+  },
+  required: ['component', 'rows', 'x', 'y'],
 } as const;

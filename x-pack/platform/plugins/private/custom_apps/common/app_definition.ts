@@ -55,6 +55,23 @@ const a2uiMessageSchema = z.custom<A2uiMessage>(
   { message: `Not an A2UI message: expected one of ${MESSAGE_KEYS.join(', ')}` }
 );
 
+/**
+ * An ES|QL query whose results are written into a surface's data model before
+ * it renders, so components bind to live data with the same `{"path": ...}`
+ * syntax they use for static values.
+ *
+ * Queries are a sibling of `surfaces` rather than an A2UI message because the
+ * protocol has no notion of a data source — the agent describes *what* to show
+ * and *where the data comes from*, and the renderer joins them.
+ */
+export const esqlQuerySchema = z.object({
+  query: z.string().min(1),
+  path: z.string().startsWith('/'),
+  shape: z.enum(['rows', 'first', 'value']).optional().default('rows'),
+});
+
+export type EsqlQuery = z.infer<typeof esqlQuerySchema>;
+
 export const customAppDefinitionSchema = z.object({
   version: z.literal(1),
   title: z.string().min(1),
@@ -62,6 +79,7 @@ export const customAppDefinitionSchema = z.object({
   layout: z.record(z.string(), layoutWidgetSchema),
   panels: z.record(z.string(), z.object({ title: z.string().optional() })),
   surfaces: z.record(z.string(), z.array(a2uiMessageSchema)),
+  queries: z.record(z.string(), z.array(esqlQuerySchema)).optional(),
 });
 
 export type CustomAppDefinition = z.infer<typeof customAppDefinitionSchema>;

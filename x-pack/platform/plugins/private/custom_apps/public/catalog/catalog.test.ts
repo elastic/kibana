@@ -19,7 +19,10 @@ describe('customAppCatalog', () => {
     const base = Object.keys(euiCatalogSchema.components);
     const extended = Object.keys(customAppCatalogSchema.components);
     expect(extended).toEqual(expect.arrayContaining(base));
-    expect(extended.filter((name) => !base.includes(name))).toEqual(['KbnLensPanel']);
+    expect(extended.filter((name) => !base.includes(name)).sort()).toEqual([
+      'Chart',
+      'KbnLensPanel',
+    ]);
   });
 
   it('requires a KbnLensPanel to be either by-reference or by-value, not neither', () => {

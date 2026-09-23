@@ -9,12 +9,13 @@ import React, { useMemo } from 'react';
 import { GridLayout } from '@kbn/grid-layout';
 import type { GridLayoutData } from '@kbn/grid-layout';
 import { A2uiSurface, MessageProcessor } from '@kbn/a2ui-renderer';
-import type { A2uiMessage, ResolvedActionEvent } from '@kbn/a2ui-renderer';
-import { EuiCallOut, EuiText } from '@elastic/eui';
-import { customAppCatalog } from '../catalog';
-import type { CustomAppDefinition } from '../../common/app_definition';
+import type { A2uiMessage, ResolvedActionEvent, Surface } from '@kbn/a2ui-renderer';
+import { EuiCallOut, EuiLoadingChart, EuiText } from '@elastic/eui';
+import { customAppCatalog, useCustomAppServices } from '../catalog';
+import type { CustomAppDefinition, EsqlQuery } from '../../common/app_definition';
 import { GRID_SETTINGS } from '../../common/constants';
 import { CustomAppPanel } from './custom_app_panel';
+import { useEsqlQueries } from './use_esql_queries';
 
 export interface CustomAppGridProps {
   definition: CustomAppDefinition;
@@ -23,6 +24,61 @@ export interface CustomAppGridProps {
   onAction: (event: ResolvedActionEvent) => void;
   onEditPanel: (panelId: string) => void;
   onRemovePanel: (panelId: string) => void;
+}
+
+/**
+ * Runs a panel's ES|QL queries into its data model, then renders the surface.
+ * Query results land in the same data model as static values, so components
+ * bind to live data with no special casing.
+ */
+function PanelSurface({
+  surface,
+  queries,
+  onAction,
+}: {
+  surface: Surface;
+  queries: EsqlQuery[] | undefined;
+  onAction: (event: ResolvedActionEvent) => void;
+}) {
+  const services = useCustomAppServices();
+  const { isLoading, errors } = useEsqlQueries({
+    queries,
+    dataModel: surface.dataModel,
+    timeRange: services?.timeRange ?? { from: 'now-7d', to: 'now' },
+    search: services?.search as never,
+    http: services?.http as never,
+  });
+
+  return (
+    <>
+      {errors.length > 0 && (
+        <EuiCallOut announceOnMount size="s" color="danger" title="A query failed">
+          <ul>
+            {errors.map((message) => (
+              <li key={message}>{message}</li>
+            ))}
+          </ul>
+        </EuiCallOut>
+      )}
+      {isLoading && queries?.length ? (
+        <EuiLoadingChart size="l" />
+      ) : (
+        <A2uiSurface
+          surface={surface}
+          catalog={customAppCatalog}
+          onAction={onAction}
+          renderUnknown={(componentType) => (
+            <EuiCallOut
+              announceOnMount
+              size="s"
+              color="danger"
+              title={`Unknown component "${componentType}"`}
+            />
+          )}
+        />
+      )}
+    </>
+  );
 }
 
 /**
@@ -66,18 +122,10 @@ export function CustomAppGrid({
             onRemove={() => onRemovePanel(panelId)}
           >
             {surface ? (
-              <A2uiSurface
+              <PanelSurface
                 surface={surface}
-                catalog={customAppCatalog}
+                queries={definition.queries?.[panelId]}
                 onAction={onAction}
-                renderUnknown={(componentType) => (
-                  <EuiCallOut
-                    announceOnMount
-                    size="s"
-                    color="danger"
-                    title={`Unknown component "${componentType}"`}
-                  />
-                )}
               />
             ) : (
               <EuiText size="s" color="subdued">

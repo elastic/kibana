@@ -15,11 +15,13 @@ import {
   EuiSuperDatePicker,
 } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { isLayoutEqual } from '@kbn/grid-layout';
 import type { GridLayoutData } from '@kbn/grid-layout';
 import type { A2uiMessage } from '@kbn/a2ui-renderer';
 import { CustomAppServicesProvider } from '../catalog';
+import { SampleDataCallout } from './sample_data_callout';
 import type { CustomAppDefinition } from '../../common/app_definition';
 import { getPanelIds } from '../../common/app_definition';
 import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../../common/constants';
@@ -30,6 +32,7 @@ import { createActionHandler } from './handle_action';
 
 export interface CustomAppPageProps {
   core: CoreStart;
+  data: DataPublicPluginStart;
   client: CustomAppClient;
   appId: string;
   onNavigateToList: () => void;
@@ -56,7 +59,7 @@ function bottomRow(layout: GridLayoutData): number {
   return max;
 }
 
-export function CustomAppPage({ core, client, appId, onNavigateToList }: CustomAppPageProps) {
+export function CustomAppPage({ core, data, client, appId, onNavigateToList }: CustomAppPageProps) {
   const [saved, setSaved] = useState<CustomAppDefinition | undefined>();
   const [definition, setDefinition] = useState<CustomAppDefinition | undefined>();
   const [isEditing, setIsEditing] = useState(false);
@@ -246,7 +249,11 @@ export function CustomAppPage({ core, client, appId, onNavigateToList }: CustomA
           <EuiCallOut announceOnMount size="s" color="warning" title="You have unsaved changes" />
         )}
 
-        <CustomAppServicesProvider services={{ timeRange }}>
+        <SampleDataCallout core={core} />
+
+        <CustomAppServicesProvider
+          services={{ timeRange, search: data.search.search, http: core.http }}
+        >
           <CustomAppGrid
             definition={definition}
             isEditing={isEditing}

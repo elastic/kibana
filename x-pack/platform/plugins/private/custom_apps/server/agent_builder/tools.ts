@@ -13,14 +13,18 @@ import { z } from '@kbn/zod/v4';
 import dedent from 'dedent';
 import euiCatalogSchema from '@kbn/a2ui-eui-catalog/catalog.json';
 import { describeCatalog } from '../../common/describe_catalog';
-import { KBN_LENS_PANEL_SCHEMA } from '../../common/kbn_components_schema';
+import { CHART_SCHEMA, KBN_LENS_PANEL_SCHEMA } from '../../common/kbn_components_schema';
 import { PLUGIN_ID } from '../../common/constants';
 import { createCustomApp, InvalidCustomAppError, listCustomApps } from '../custom_app_service';
 
 const fullCatalog = {
   ...euiCatalogSchema,
-  components: { ...euiCatalogSchema.components, KbnLensPanel: KBN_LENS_PANEL_SCHEMA },
-} as Parameters<typeof describeCatalog>[0];
+  components: {
+    ...euiCatalogSchema.components,
+    Chart: CHART_SCHEMA,
+    KbnLensPanel: KBN_LENS_PANEL_SCHEMA,
+  },
+} as unknown as Parameters<typeof describeCatalog>[0];
 
 const createAppSchema = z.object({
   definition: z
@@ -56,6 +60,26 @@ export const createCreateAppTool = (): BuiltinToolDefinition<typeof createAppSch
                Lay panels out without overlapping.
       panels:  { <panelId>: { title } } — the panel header
       surfaces: { <panelId>: [ A2UI messages ] } — the contents of that panel
+      queries: { <panelId>: [ { query, path, shape } ] } — optional ES|QL data
+
+    Getting data — prefer ES|QL for anything real:
+      Put an ES|QL query in 'queries' and its results land in that panel's data
+      model at 'path', where components bind to them like any other value.
+        shape "rows"  -> an array of row objects (for Table and Chart)
+        shape "first" -> the first row as one object (for a few Stat tiles)
+        shape "value" -> the first cell only (for a single number)
+      The page time picker is applied automatically to whatever time field the
+      queried index has, so do not put a time range in the query itself.
+      Name every output column in the query (STATS x = COUNT(*) BY y = field),
+      then bind to those exact names.
+
+      Example: a query { "path": "/series", "shape": "rows",
+        "query": "FROM logs | STATS requests = COUNT(*) BY time = BUCKET(@timestamp, 1 day) | SORT time" }
+      feeds a chart { "component": "Chart", "chartType": "line",
+        "rows": {"path": "/series"}, "x": "time", "y": "requests" }.
+
+      Only hardcode values into dataModel for things that genuinely are static,
+      such as form defaults.
 
     Each surface is normally one message:
       { "version": "v1.0", "createSurface": { "surfaceId": "<panelId>",

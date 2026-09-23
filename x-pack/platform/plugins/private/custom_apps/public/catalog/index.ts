@@ -8,7 +8,8 @@
 import type { Catalog } from '@kbn/a2ui-renderer';
 import { euiCatalog, euiCatalogSchema } from '@kbn/a2ui-eui-catalog';
 import { KbnLensPanel } from './kbn_lens_panel';
-import { KBN_LENS_PANEL_SCHEMA } from '../../common/kbn_components_schema';
+import { Chart } from './chart';
+import { CHART_SCHEMA, KBN_LENS_PANEL_SCHEMA } from '../../common/kbn_components_schema';
 
 /**
  * The base catalog is a shared package and stays pure EUI, so it can be used
@@ -19,6 +20,7 @@ export const customAppCatalog: Catalog = {
   ...euiCatalog,
   components: {
     ...euiCatalog.components,
+    [Chart.name]: Chart,
     [KbnLensPanel.name]: KbnLensPanel,
   },
 };
@@ -27,6 +29,7 @@ export const customAppCatalogSchema = {
   ...euiCatalogSchema,
   components: {
     ...euiCatalogSchema.components,
+    Chart: CHART_SCHEMA,
     KbnLensPanel: KBN_LENS_PANEL_SCHEMA,
   },
 };

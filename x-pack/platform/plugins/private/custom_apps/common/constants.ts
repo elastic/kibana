@@ -12,6 +12,10 @@ export const CUSTOM_APP_SAVED_OBJECT_TYPE = 'custom_app';
 
 export const API_BASE_PATH = '/internal/custom_apps';
 
+/** The bundled templates all query this sample data set. */
+export const SAMPLE_DATA_SET_ID = 'logs';
+export const SAMPLE_DATA_INDEX = 'kibana_sample_data_logs';
+
 /** Grid settings, matching the dashboard's so apps feel the same to use. */
 export const GRID_SETTINGS = {
   gutterSize: 8,
