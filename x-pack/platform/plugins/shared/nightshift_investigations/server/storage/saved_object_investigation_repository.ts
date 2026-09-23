@@ -29,6 +29,10 @@ const toRecord = <Attributes extends Partial<InvestigationAttributes>>({
   ...attributes,
 });
 
+/** Text-mapped attributes the free-text `query` searches across. */
+const buildSearchFields = (query: FindInvestigationsQuery): string[] | undefined =>
+  query.query ? ['title', 'subject_summary', 'summary', 'conclusion'] : undefined;
+
 export type InvestigationSavedObjectsClient = Pick<
   SavedObjectsClientContract,
   'create' | 'get' | 'update' | 'find'
@@ -111,6 +115,8 @@ export class SavedObjectInvestigationRepository implements InvestigationReposito
     const result = await this.savedObjectsClient.find<Pick<InvestigationAttributes, Fields>>({
       type: NIGHTSHIFT_INVESTIGATION_SO_TYPE,
       filter: buildInvestigationFilter(query),
+      search: query.query,
+      searchFields: buildSearchFields(query),
       sortField: query.sortField ?? 'created_at',
       sortOrder: query.sortOrder ?? 'desc',
       page: query.page,

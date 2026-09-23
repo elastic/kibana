@@ -32,6 +32,7 @@ apiTest.describe(
     apiTest.beforeEach(async ({ kbnClient }) => {
       await seedInvestigation(kbnClient, {
         id: TEST_ID,
+        title: 'Checkout API latency breach',
         status: 'completed',
         subject_type: 'alert',
         subject_id: 'alert-42',
@@ -66,6 +67,7 @@ apiTest.describe(
       expect(response).toHaveStatusCode(200);
 
       expect(response.body.investigation_id).toBe(TEST_ID);
+      expect(response.body.title).toBe('Checkout API latency breach');
       expect(response.body.subject).toStrictEqual({
         type: 'alert',
         id: 'alert-42',

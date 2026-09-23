@@ -9,9 +9,12 @@
 
 export { PrimaryAction } from './primary';
 export { SecondaryAction } from './secondary';
+export { PrimaryActionMenu } from './primary_menu';
 export {
   primaryActionPart,
   secondaryActionPart,
+  primaryActionMenuPart,
   PRIMARY_ACTION_PART_NAME,
   SECONDARY_ACTION_PART_NAME,
+  PRIMARY_ACTION_MENU_PART_NAME,
 } from './part';

@@ -16,11 +16,13 @@ import {
   EVALS_DATASET_UPSERT_URL,
   EVALS_DATASET_URL,
   EVALS_EXPERIMENT_SCORES_URL,
+  EVALS_EXPERIMENT_DATASET_EXAMPLES_URL,
   EVALS_EXPERIMENT_URL,
   EVALS_EXPERIMENTS_URL,
   EVALS_SCORES_URL,
   GetEvaluationDatasetResponse,
   GetEvaluationExperimentResponse,
+  GetEvaluationExperimentDatasetExamplesResponse,
   GetEvaluationExperimentScoresResponse,
   GetEvaluationExperimentsResponse,
   IngestScoresRequestBody,
@@ -176,10 +178,14 @@ const mapStatsResponse = (
   };
 };
 
+/**
+ * Omits absent filters rather than sending them as undefined, which reaches the route as an empty
+ * string and filters every score out. An unfiltered read has to mean "no filter", not "match ''".
+ */
 const buildExperimentQuery = (options?: GetExperimentFilters) => ({
-  suite_id: options?.suiteId,
-  model_id: options?.taskModelId,
-  execution_id: options?.executionId,
+  ...(options?.suiteId ? { suite_id: options.suiteId } : {}),
+  ...(options?.taskModelId ? { model_id: options.taskModelId } : {}),
+  ...(options?.executionId ? { execution_id: options.executionId } : {}),
 });
 
 const VERSIONED_HEADERS = { 'elastic-api-version': API_VERSIONS.internal.v1 };
@@ -294,6 +300,24 @@ export class EvalsClient {
       );
       return [];
     }
+  }
+
+  /** Reads complete per-example score evidence from the run's home Space. */
+  async getExperimentDatasetExamples(
+    experimentId: string,
+    datasetId: string
+  ): Promise<GetEvaluationExperimentDatasetExamplesResponse> {
+    const response = await this.kbnClient.request({
+      path: this.path(
+        EVALS_EXPERIMENT_DATASET_EXAMPLES_URL.replace(
+          '{experimentId}',
+          encodeURIComponent(experimentId)
+        ).replace('{datasetId}', encodeURIComponent(datasetId))
+      ),
+      method: 'GET',
+      headers: VERSIONED_HEADERS,
+    });
+    return GetEvaluationExperimentDatasetExamplesResponse.parse(getResponseData(response));
   }
 
   /**

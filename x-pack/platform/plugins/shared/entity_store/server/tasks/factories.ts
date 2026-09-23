@@ -8,11 +8,15 @@
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { EntityStoreCoreSetup } from '../types';
+import type { ExtractionMode } from '../../common';
 import { AssetManagerClient } from '../domain/asset_manager';
 import { LogsExtractionClient } from '../domain/logs_extraction';
 import { EngineDescriptorClient, EntityStoreGlobalStateClient } from '../domain/saved_objects';
 import type { TelemetryReporter } from '../telemetry/events';
-import { isLegacySecurityAssetsMigrationEnabled } from '../infra/feature_flags';
+import {
+  isDualProcessEnabled,
+  isLegacySecurityAssetsMigrationEnabled,
+} from '../infra/feature_flags';
 
 export interface LogsExtractionClientFactoryResult {
   logsExtractionClient: LogsExtractionClient;
@@ -29,12 +33,14 @@ export async function createLogsExtractionClient({
   logger,
   namespace,
   isServerless,
+  extractionMode,
 }: {
   core: EntityStoreCoreSetup;
   logger: Logger;
   namespace: string;
   fakeRequest: KibanaRequest;
   isServerless: boolean;
+  extractionMode?: ExtractionMode;
 }): Promise<LogsExtractionClientFactoryResult> {
   const [coreStart, pluginsStart] = await core.getStartServices();
 
@@ -59,6 +65,7 @@ export async function createLogsExtractionClient({
     dataViewsService,
     engineDescriptorClient: new EngineDescriptorClient(soClient, namespace, logger),
     globalStateClient: new EntityStoreGlobalStateClient(soClient, namespace, logger),
+    extractionMode,
   });
 
   return { logsExtractionClient };
@@ -111,6 +118,7 @@ export async function createAssetManagerClient({
       savedObjectsClient: soClient,
       isLegacySecurityAssetsMigrationEnabled: () =>
         isLegacySecurityAssetsMigrationEnabled(coreStart.featureFlags),
+      isDualProcessEnabled: () => isDualProcessEnabled(coreStart.featureFlags),
     }),
   };
 }

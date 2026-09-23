@@ -17,6 +17,14 @@ export {
   type QueryAttemptFailureReason,
 } from './src/significant_events/queries/identify_ki_queries';
 export {
+  createQueryValidationContext,
+  validateKIQueries,
+  type CandidateKIQuery,
+  type ValidatedKIQuery,
+  type QueryValidationResult,
+  type QueryValidationContext,
+} from './src/significant_events/queries/validate_ki_queries';
+export {
   createDefaultSignificantEventsToolUsage,
   type SignificantEventsToolUsage,
 } from './src/significant_events/queries/tools/tool_usage';

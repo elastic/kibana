@@ -85,6 +85,7 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
           'plugin-id': pluginId,
           'aggregate-by': aggregateBy,
           'max-step-size': maxStepSize,
+          'reasoning-level': reasoningLevel,
         } = context.config;
         const maxContentLength =
           typeof maxStepSize === 'string' ? parseMaxStepSize(maxStepSize) : undefined;
@@ -156,6 +157,7 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
               attachments,
             },
             ...(maxContentLength !== undefined ? { maxContentLength } : {}),
+            ...(reasoningLevel !== undefined ? { reasoningLevel } : {}),
             ...(pluginId ? { telemetryMetadata: { pluginId, aggregateBy } } : {}),
           },
           // workflows already run as scheduled tasks

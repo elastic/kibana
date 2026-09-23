@@ -8,7 +8,7 @@
  */
 
 import { parse as yamlLoad } from 'yaml';
-import { doAnyChangesMatch as realDoAnyChangesMatch } from '../../../pipeline-utils/github/github';
+import { doAnyChangesMatch as realDoAnyChangesMatch } from '../../../pipeline-utils/github/github.ts';
 import { FIPS_GH_LABELS, FIPS_VERSION } from '#pipeline-utils/pr_labels';
 import { getKibanaDir } from '#pipeline-utils/utils';
 
@@ -40,11 +40,11 @@ jest.mock('#pipeline-utils', () => {
   };
 });
 
-jest.mock('./pre_build', () => ({
+jest.mock('./pre_build.ts', () => ({
   runPreBuild: mockRunPreBuild,
 }));
 
-jest.mock('../../../pipelines/evals/eval_pipeline', () => ({
+jest.mock('../../../pipelines/evals/eval_pipeline.ts', () => ({
   getEvalTriggerStep: mockGetEvalTriggerStep,
 }));
 
@@ -52,7 +52,7 @@ const ORIGINAL_ENV = process.env;
 
 const importPipelineModule = async () => {
   await jest.isolateModulesAsync(async () => {
-    await import('./pipeline');
+    await import('./pipeline.ts');
   });
 };
 
@@ -295,8 +295,8 @@ describe('pull_request pipeline generation', () => {
     expect(mockAreChangesSkippable).not.toHaveBeenCalled();
   });
 
-  it('emits storybooks when yarn.lock changes', async () => {
-    const changes = [{ filename: 'yarn.lock' }];
+  it('emits storybooks when pnpm-lock.yaml changes', async () => {
+    const changes = [{ filename: 'pnpm-lock.yaml' }];
     mockGetPrChangesCached.mockResolvedValue(changes);
     mockDoAnyChangesMatch.mockImplementation((paths, scopedChanges) =>
       realDoAnyChangesMatch(paths, scopedChanges ?? changes)

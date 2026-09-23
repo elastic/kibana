@@ -153,7 +153,7 @@ const createMockCoreStart = (sidebarApp: ReturnType<typeof createMockSidebarApp>
     },
     chrome: {
       sidebar: { getApp: jest.fn(() => sidebarApp) },
-      next: { aiButton: { register: jest.fn() } },
+      controls: { aiButton: { register: jest.fn() } },
     },
     uiSettings: {
       get$: jest.fn(() => new BehaviorSubject(false)),
