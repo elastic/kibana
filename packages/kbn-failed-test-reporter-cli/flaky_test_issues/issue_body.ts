@@ -356,7 +356,7 @@ export const renderFlakySuiteIssueBody = (
     testsTable(suite.tests, {
       withDashboardLinks: true,
       maxRows: MAX_TEST_ROWS,
-      minFailRate: ctx.report.thresholds.minFailRate,
+      thresholds: ctx.report.thresholds,
     }),
     skippedNote(suite),
     '### Suite',

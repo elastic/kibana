@@ -111,18 +111,31 @@ export const branchesByFailedBuilds = (
   );
 };
 
+/** The thresholds a branch has to clear on its own for the test to count as flaky there. */
+export type BranchThresholds = Pick<
+  FlakyTestReport['thresholds'],
+  'minBuilds' | 'minFailedBuilds' | 'minFailRate'
+>;
+
+/** Whether the test qualified as flaky on this branch: enough builds and failures, high enough rate. */
+export const isFlakyBranch = (
+  stats: Pick<FlakyTestBranchStats, 'builds' | 'failedBuilds' | 'buildFailRate'>,
+  { minBuilds, minFailedBuilds, minFailRate }: BranchThresholds
+): boolean =>
+  stats.builds >= minBuilds &&
+  stats.failedBuilds >= minFailedBuilds &&
+  stats.buildFailRate >= minFailRate;
+
 /**
- * `` **`9.5` 3% (4 / 122)** ``, one line per branch on which the test's failure rate clears the
- * report's `minFailRate`, highest first; every branch when the report has no rate threshold. The
- * total over branches is left out on purpose, a clean branch dilutes it below what qualified.
+ * `` **`9.5` 3% (4 / 122)** ``, one line per branch on which the test clears every threshold of the
+ * report, highest rate first. The total over branches is left out on purpose, a clean branch
+ * dilutes it below what qualified.
  */
 export const formatBranchRates = (
   test: Pick<FlakyTestEntry, 'byBranch'>,
-  minFailRate: number
+  thresholds: BranchThresholds
 ): string => {
-  const flaky = test.byBranch.filter(
-    (stats) => minFailRate === 0 || stats.buildFailRate >= minFailRate
-  );
+  const flaky = test.byBranch.filter((stats) => isFlakyBranch(stats, thresholds));
   if (flaky.length === 0) {
     return '-';
   }
@@ -133,12 +146,10 @@ export const formatBranchRates = (
         b.failedBuilds - a.failedBuilds ||
         a.branch.localeCompare(b.branch)
     )
-    .map(({ branch, builds, failedBuilds, buildFailRate }) => {
-      const rate = `${inlineCode(branch)} ${formatPercent(
-        buildFailRate
-      )} (${failedBuilds} / ${builds})`;
-      return minFailRate > 0 && buildFailRate >= minFailRate ? `**${rate}**` : rate;
-    })
+    .map(
+      ({ branch, builds, failedBuilds, buildFailRate }) =>
+        `**${inlineCode(branch)} ${formatPercent(buildFailRate)} (${failedBuilds} / ${builds})**`
+    )
     .join('<br>');
 };
 
@@ -151,15 +162,15 @@ export const testsTable = (
   {
     withDashboardLinks,
     maxRows,
-    minFailRate,
-  }: { withDashboardLinks: boolean; maxRows: number; minFailRate: number }
+    thresholds,
+  }: { withDashboardLinks: boolean; maxRows: number; thresholds: BranchThresholds }
 ): string => {
   const header = ['Test', 'Flaky branches'];
   const rows = tests
     .slice(0, maxRows)
     .map((test) => [
       test.title,
-      formatBranchRates(test, minFailRate),
+      formatBranchRates(test, thresholds),
       ...(withDashboardLinks ? [`[dashboard](${testDashboardUrl(test.testId)})`] : []),
     ]);
   const rest = tests.length - maxRows;

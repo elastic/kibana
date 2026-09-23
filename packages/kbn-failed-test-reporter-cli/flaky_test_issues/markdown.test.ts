@@ -55,25 +55,28 @@ describe('branchesByFailedBuilds', () => {
 });
 
 describe('formatBranchRates', () => {
+  const thresholds = { minBuilds: 10, minFailedBuilds: 2, minFailRate: 0.03 };
   const test = flakyTest({
     byBranch: [
       { branch: 'main', builds: 547, failedBuilds: 0, buildFailRate: 0 },
       { branch: '9.5', builds: 122, failedBuilds: 4, buildFailRate: 4 / 122 },
       { branch: '9.4', builds: 100, failedBuilds: 2, buildFailRate: 0.02 },
+      // a high rate on too few builds or failures does not qualify a branch
+      { branch: 'feature', builds: 1, failedBuilds: 1, buildFailRate: 1 },
+      { branch: '8.19', builds: 50, failedBuilds: 1, buildFailRate: 0.02 },
     ],
   });
 
-  it('lists only the branches clearing the threshold, highest rate first, in bold', () => {
-    expect(formatBranchRates(test, 0.03)).toBe('**`9.5` 3% (4 / 122)**');
-    expect(formatBranchRates(test, 0.02)).toBe('**`9.5` 3% (4 / 122)**<br>**`9.4` 2% (2 / 100)**');
+  it('lists only the branches clearing every threshold, highest rate first, in bold', () => {
+    expect(formatBranchRates(test, thresholds)).toBe('**`9.5` 3% (4 / 122)**');
+    expect(formatBranchRates(test, { ...thresholds, minFailRate: 0.02 })).toBe(
+      '**`9.5` 3% (4 / 122)**<br>**`9.4` 2% (2 / 100)**'
+    );
   });
 
-  it('lists every branch, none in bold, without a rate threshold, and a dash without branches', () => {
-    expect(formatBranchRates(test, 0)).toBe(
-      '`9.5` 3% (4 / 122)<br>`9.4` 2% (2 / 100)<br>`main` 0% (0 / 547)'
-    );
-    expect(formatBranchRates(flakyTest({ byBranch: [] }), 0.03)).toBe('-');
-    expect(formatBranchRates(test, 0.5)).toBe('-');
+  it('shows a dash when no branch qualifies', () => {
+    expect(formatBranchRates(flakyTest({ byBranch: [] }), thresholds)).toBe('-');
+    expect(formatBranchRates(test, { ...thresholds, minFailRate: 0.5 })).toBe('-');
   });
 });
 
@@ -95,7 +98,7 @@ describe('testsTable', () => {
     const rendered = testsTable(tests, {
       withDashboardLinks: true,
       maxRows: 2,
-      minFailRate: 0.03,
+      thresholds: { minBuilds: 10, minFailedBuilds: 2, minFailRate: 0.03 },
     });
 
     expect(rendered.split('\n')).toHaveLength(6);
@@ -105,7 +108,11 @@ describe('testsTable', () => {
     );
     expect(rendered).toContain('and 2 more flaky tests in this file.');
     expect(
-      testsTable(tests, { withDashboardLinks: false, maxRows: 10, minFailRate: 0.03 })
+      testsTable(tests, {
+        withDashboardLinks: false,
+        maxRows: 10,
+        thresholds: { minBuilds: 10, minFailedBuilds: 2, minFailRate: 0.03 },
+      })
     ).not.toContain('Dashboard');
   });
 });
