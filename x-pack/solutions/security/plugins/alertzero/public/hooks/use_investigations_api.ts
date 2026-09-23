@@ -8,8 +8,8 @@
 import type { UseQueryResult } from '@kbn/react-query';
 import { useQuery } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { retryOnTransientError } from '@kbn/agentic-investigations-plugin/public';
 import { API_VERSIONS, ALERTZERO_INVESTIGATIONS_COUNT_URL } from '@kbn/alertzero-common';
+import { retryOnTransientError } from './retry_on_transient_error';
 
 interface InvestigationsCountResponse {
   total: number;
