@@ -5,7 +5,16 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFieldText } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFieldText,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import { PluginStart } from '@kbn/core-di';
 import { Context, CoreStart } from '@kbn/core-di-browser';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -74,24 +83,80 @@ const queryClient = new QueryClient({
   },
 });
 
+const StoryEnvironment = ({ children }: { children: React.ReactNode }) => (
+  <Context.Provider value={storyContainer}>
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  </Context.Provider>
+);
+
 const ActionPolicyFormFlyoutStory = () => {
   const [isOpen, setIsOpen] = useState(true);
 
   return (
-    <Context.Provider value={storyContainer}>
-      <QueryClientProvider client={queryClient}>
-        {isOpen ? (
-          <ActionPolicyFormFlyout
-            onClose={() => setIsOpen(false)}
-            onSave={action('Create action policy')}
-          />
-        ) : (
-          <EuiButton fill onClick={() => setIsOpen(true)}>
-            Open action policy flyout
-          </EuiButton>
-        )}
-      </QueryClientProvider>
-    </Context.Provider>
+    <StoryEnvironment>
+      {isOpen ? (
+        <ActionPolicyFormFlyout
+          onClose={() => setIsOpen(false)}
+          onSave={action('Create action policy')}
+        />
+      ) : (
+        <EuiButton fill onClick={() => setIsOpen(true)}>
+          Open action policy flyout
+        </EuiButton>
+      )}
+    </StoryEnvironment>
+  );
+};
+
+const PARENT_FLYOUT_TITLE_ID = 'actionPolicyParentFlyoutTitle';
+
+const NestedActionPolicyFormFlyoutStory = () => {
+  const [isParentOpen, setIsParentOpen] = useState(true);
+  const [isActionPolicyOpen, setIsActionPolicyOpen] = useState(false);
+
+  return (
+    <StoryEnvironment>
+      {isParentOpen ? (
+        <>
+          <EuiFlyout
+            ownFocus
+            size="m"
+            onClose={() => setIsParentOpen(false)}
+            aria-labelledby={PARENT_FLYOUT_TITLE_ID}
+          >
+            <EuiFlyoutHeader hasBorder>
+              <EuiTitle size="m">
+                <h2 id={PARENT_FLYOUT_TITLE_ID}>Create rule</h2>
+              </EuiTitle>
+            </EuiFlyoutHeader>
+            <EuiFlyoutBody>
+              <EuiText>
+                <p>
+                  This flyout represents the Rule Form. Open the Action Policy Form without closing
+                  it.
+                </p>
+              </EuiText>
+            </EuiFlyoutBody>
+            <EuiFlyoutFooter>
+              <EuiButton fill onClick={() => setIsActionPolicyOpen(true)}>
+                Create action policy
+              </EuiButton>
+            </EuiFlyoutFooter>
+          </EuiFlyout>
+
+          {isActionPolicyOpen && (
+            <ActionPolicyFormFlyout
+              onClose={() => setIsActionPolicyOpen(false)}
+              onSave={action('Create action policy from rule form')}
+            />
+          )}
+        </>
+      ) : (
+        <EuiButton fill onClick={() => setIsParentOpen(true)}>
+          Open rule form flyout
+        </EuiButton>
+      )}
+    </StoryEnvironment>
   );
 };
 
@@ -114,3 +179,15 @@ export default meta;
 type Story = StoryObj<typeof ActionPolicyFormFlyoutStory>;
 
 export const CreateMode: Story = {};
+
+export const OpenedFromRuleFormFlyout: Story = {
+  render: () => <NestedActionPolicyFormFlyoutStory />,
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Opens the Action Policy Form as a child of a Rule Form flyout while keeping the parent flyout mounted.',
+      },
+    },
+  },
+};
