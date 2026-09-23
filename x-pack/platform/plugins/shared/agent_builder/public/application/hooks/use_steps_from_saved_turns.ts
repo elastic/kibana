@@ -17,10 +17,13 @@ import { useConversation } from './use_conversation';
  */
 export const useStepsFromSavedTurns = (): ConversationRoundStep[] => {
   const { conversation } = useConversation();
-  const events = conversation?.events?.filter(isTimelineEvent);
+  const savedEvents = conversation?.events;
 
   return useMemo(
-    () => buildItems(events ?? []).flatMap((item) => (item.kind === 'agentTurn' ? item.steps : [])),
-    [events]
+    () =>
+      buildItems((savedEvents ?? []).filter(isTimelineEvent)).flatMap((item) =>
+        item.kind === 'agentTurn' ? item.steps : []
+      ),
+    [savedEvents]
   );
 };

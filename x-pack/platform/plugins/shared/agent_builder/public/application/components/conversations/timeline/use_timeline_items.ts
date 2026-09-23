@@ -84,7 +84,8 @@ export const useTimelineItems = (): TimelineItem[] => {
     [pendingMessage, pendingAttachments, pendingUserMessageId]
   );
 
-  const docEvents = conversation?.events?.filter(isTimelineEvent);
+  const savedEvents = conversation?.events;
+  const docEvents = useMemo(() => savedEvents?.filter(isTimelineEvent), [savedEvents]);
   // Once the saved twin is in the cache the message is no longer pending, even though the local
   // copy still exists.
   const isPendingUnsaved =
