@@ -7,11 +7,13 @@
 
 import React, { useCallback, useState } from 'react';
 import {
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiPanel,
   EuiText,
+  EuiTitle,
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
@@ -31,15 +33,8 @@ export interface SignalCardsProps {
 }
 
 /** 6 tiles in a 1×6 compact horizontal strip. */
-const CARDS_HEIGHT = 96;
-const VALUE_FONT_SIZE = 26;
-const TITLE_FONT_SIZE = 11;
-/** Metric `primaryAdjacentGap` for bottom value + extra is 0. */
-const DELTA_VALUE_GAP = 0;
 const METRIC_LINE_HEIGHT = 1.2;
 const DIMMED_OPACITY = 0.7;
-/** Metric `panelPadding` (small spacing). */
-const CARD_PADDING = 8;
 
 /** v.5 title overrides (tooltip uses the same string). */
 const V3_CARD_TITLES: Partial<Record<SignalCardId, string>> = {
@@ -167,6 +162,7 @@ interface SignalMetricCardProps {
   card: SignalCardData;
   selected: boolean;
   dimmed: boolean;
+  isExpanded: boolean;
   onToggle: () => void;
 }
 
@@ -178,6 +174,7 @@ const SignalMetricCard: React.FC<SignalMetricCardProps> = ({
   card,
   selected,
   dimmed,
+  isExpanded,
   onToggle,
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -236,9 +233,10 @@ const SignalMetricCard: React.FC<SignalMetricCardProps> = ({
         display: flex;
         flex-direction: column;
         block-size: 100%;
-        padding: ${CARD_PADDING}px;
+        min-block-size: ${isExpanded ? `calc(${euiTheme.base}px * 10)` : '0'};
+        padding: ${euiTheme.size.s};
         border: 1px solid ${borderColor};
-        border-radius: 0;
+        border-radius: ${euiTheme.border.radius.medium};
         background: ${tileBackground};
         opacity: ${dimmed ? DIMMED_OPACITY : 1};
         cursor: ${interactive ? 'pointer' : 'default'};
@@ -279,16 +277,25 @@ const SignalMetricCard: React.FC<SignalMetricCardProps> = ({
             `}
           >
             <EuiText
-              color="subdued"
+              size="m"
               css={css`
-                font-size: ${TITLE_FONT_SIZE}px;
-                font-weight: ${euiTheme.font.weight.semiBold};
+                font-weight: ${euiTheme.font.weight.bold};
                 line-height: ${METRIC_LINE_HEIGHT};
+                color: ${euiTheme.colors.textParagraph};
               `}
             >
               {displayTitle}
             </EuiText>
-            {/* Description hidden in compact layout; available via tooltip on the card */}
+            <EuiText
+              size="m"
+              color="subdued"
+              css={css`
+                line-height: ${METRIC_LINE_HEIGHT};
+                margin-block-start: ${euiTheme.size.xs};
+              `}
+            >
+              {displayDescription}
+            </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <CornerControl
@@ -319,20 +326,20 @@ const SignalMetricCard: React.FC<SignalMetricCardProps> = ({
                 display: flex;
                 flex-direction: column;
                 align-items: flex-end;
-                gap: ${DELTA_VALUE_GAP}px;
               `}
             >
-              <EuiText
+              <EuiTitle
+                size="l"
                 css={css`
-                  font-size: ${VALUE_FONT_SIZE}px;
-                  font-weight: ${euiTheme.font.weight.bold};
                   line-height: ${METRIC_LINE_HEIGHT};
                   text-align: end;
-                  color: ${euiTheme.colors.textParagraph};
+                  ${isExpanded
+                    ? `font-size: calc(${euiTheme.base}px * 2.5);`
+                    : ''}
                 `}
               >
-                {card.value}
-              </EuiText>
+                <span>{card.value}</span>
+              </EuiTitle>
             </div>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -368,59 +375,80 @@ export const SignalCards: React.FC<SignalCardsProps> = ({
   cards,
   onFilterForCard,
 }) => {
+  const { euiTheme } = useEuiTheme();
+  const [isExpanded, setIsExpanded] = useState(false);
   const anySelected = activeFilter?.type === 'card';
+  const columns = isExpanded ? 3 : 6;
 
   return (
-    <EuiPanel
-      hasBorder={false}
-      hasShadow={false}
-      paddingSize="none"
-      data-test-subj="eaFaceliftSignalCards"
-      css={css`
-        block-size: ${CARDS_HEIGHT}px;
-        overflow: hidden;
-      `}
-    >
+    <>
       <div
         css={css`
-          display: grid;
-          grid-template-columns: repeat(6, minmax(0, 1fr));
-          block-size: 100%;
+          display: flex;
+          justify-content: flex-end;
+          margin-block-end: ${euiTheme.size.xs};
         `}
       >
-        {cards.map((card, index) => {
-          const selected = activeFilter?.type === 'card' && activeFilter.cardId === card.id;
-          const dimmed = Boolean(anySelected && !selected);
-
-          return (
-            <div
-              key={card.id}
-              css={css`
-                min-inline-size: 0;
-                min-block-size: 0;
-                block-size: 100%;
-                /* Overlap adjacent 1px borders so dividers stay 1px and selection paints on top. */
-                margin-inline-start: ${index > 0 ? '-1px' : '0'};
-                position: relative;
-                /* eslint-disable-next-line @elastic/eui/no-static-z-index -- local grid cell stacking, no semantic token applies */
-                z-index: ${selected ? 2 : 1};
-
-                &:hover,
-                &:focus-within {
-                  z-index: 2;
-                }
-              `}
-            >
-              <SignalMetricCard
-                card={card}
-                selected={selected}
-                dimmed={dimmed}
-                onToggle={() => onFilterForCard(card.id)}
-              />
-            </div>
-          );
-        })}
+        <EuiToolTip content={isExpanded ? 'Compact layout' : 'Expanded layout'}>
+          <EuiButtonIcon
+            iconType={isExpanded ? 'tableOfContents' : 'apps'}
+            onClick={() => setIsExpanded((prev) => !prev)}
+            aria-label={isExpanded ? 'Switch to compact layout' : 'Switch to expanded layout'}
+            size="xs"
+            color="text"
+          />
+        </EuiToolTip>
       </div>
-    </EuiPanel>
+      <EuiPanel
+        hasBorder={false}
+        hasShadow={false}
+        paddingSize="none"
+        data-test-subj="eaFaceliftSignalCards"
+        css={css`
+          overflow: hidden;
+        `}
+      >
+        <div
+          css={css`
+            display: grid;
+            grid-template-columns: repeat(${columns}, minmax(0, 1fr));
+            gap: ${euiTheme.size.s};
+            block-size: 100%;
+          `}
+        >
+          {cards.map((card) => {
+            const selected = activeFilter?.type === 'card' && activeFilter.cardId === card.id;
+            const dimmed = Boolean(anySelected && !selected);
+
+            return (
+              <div
+                key={card.id}
+                css={css`
+                  min-inline-size: 0;
+                  min-block-size: 0;
+                  block-size: 100%;
+                  position: relative;
+                  /* eslint-disable-next-line @elastic/eui/no-static-z-index -- local grid cell stacking, no semantic token applies */
+                  z-index: ${selected ? 2 : 1};
+
+                  &:hover,
+                  &:focus-within {
+                    z-index: 2;
+                  }
+                `}
+              >
+                <SignalMetricCard
+                  card={card}
+                  selected={selected}
+                  dimmed={dimmed}
+                  isExpanded={isExpanded}
+                  onToggle={() => onFilterForCard(card.id)}
+                />
+              </div>
+            );
+          })}
+        </div>
+      </EuiPanel>
+    </>
   );
 };
