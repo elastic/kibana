@@ -7,7 +7,7 @@ date: 2022-05-17
 tags: ['kibana', 'dev', 'contributor', 'operations', 'eslint', 'plugin']
 ---
 
-An ESLint and Oxlint plugin exposing custom rules used and built specifically for development within Kibana. Thirty-one custom rules run in Oxlint using its `createOnce` alternative API and are wrapped with `eslintCompatPlugin` so existing ESLint configuration remains compatible. `module_migration` remains ESLint-only until its RegExp-bearing options have an equivalent Oxlint configuration, and `no_unsafe_hash` remains ESLint-only to preserve protected disable-directive enforcement.
+An ESLint and Oxlint plugin exposing custom rules used and built specifically for development within Kibana. Thirty-two custom rules run in Oxlint using its `createOnce` alternative API and are wrapped with `eslintCompatPlugin` so existing ESLint configuration remains compatible. Only `no_unsafe_hash` remains ESLint-only to preserve protected disable-directive enforcement.
 
 Oxlint loads the plugin from `.oxlintrc.json` with the existing rule namespace preserved:
 
@@ -48,6 +48,8 @@ module.exports = {
 ## module_migration
 
 Offers a way to force a migration from a given node module into another as an alternative.
+
+For Oxlint JSON configuration, serialize `include` and `exclude` regular expressions as `{ "source": "...", "flags": "..." }`. JavaScript ESLint configurations can continue to use `RegExp` values.
 
 ```javascript
 module.exports = {

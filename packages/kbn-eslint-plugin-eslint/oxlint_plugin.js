@@ -14,6 +14,7 @@ module.exports = eslintCompatPlugin({
   rules: {
     'require-license-header': require('./rules/require_license_header'),
     'disallow-license-headers': require('./rules/disallow_license_headers'),
+    module_migration: require('./rules/module_migration'),
     no_async_promise_body: require('./rules/no_async_promise_body'),
     no_async_foreach: require('./rules/no_async_foreach'),
     no_trailing_import_slash: require('./rules/no_trailing_import_slash'),
