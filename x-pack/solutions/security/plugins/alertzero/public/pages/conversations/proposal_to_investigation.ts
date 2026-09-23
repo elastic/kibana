@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ProposalConfidence, ProposalImpact } from '@kbn/agentic-investigations-plugin/common';
+import type { ProposalConfidence, ProposalImpact } from '@kbn/proposals-common';
 import type { Investigation, RecommendedAction } from '@kbn/agentic-investigations-common';
 import type { ProposalItem } from '../../../common/proposals/list';
 import { CLOSED_GROUP_KEY } from '../../../common/proposals/list';
@@ -107,6 +107,7 @@ export const proposalToInvestigation = (proposal: ProposalItem): Investigation =
     // recordId is repurposed to carry the proposal id into the ⋮ modal system.
     // The page renders dismiss/assign modals only if modalState.recordId is set.
     recordId: proposal.id,
+    conversationId: proposal.conversationId,
     summary: proposal.comment,
     primaryActionLabel: proposal.action?.name,
     // `conversationAssignees` is an array but `Investigation.assignee` is singular,
