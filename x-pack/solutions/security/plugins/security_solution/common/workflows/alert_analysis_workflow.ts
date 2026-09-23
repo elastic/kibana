@@ -86,8 +86,9 @@ export const AlertAnalysisImpactedEntity = z.object({
 export type AlertAnalysisImpactedEntity = z.infer<typeof AlertAnalysisImpactedEntity>;
 
 // Structured output block emitted by the workflow when invoked by a caller (Worker path).
-// Also available on the standalone path — accumulators are always initialised so the output
-// is well-formed even when the analysis_enabled guard short-circuits.
+// On the standalone (alert-trigger) path the step still fires, but Worker-gated accumulators
+// (verdicts, generated_summary, impacted_entities, missing_alert_ids, resolved connector_id)
+// stay at empty-init — do not treat that payload as a complete analysis summary.
 // Object schema is exported separately so contract-sync tests can read `.shape` after
 // `.superRefine()` wraps the refined schema.
 export const AlertAnalysisWorkflowOutputFields = z.object({
@@ -95,6 +96,8 @@ export const AlertAnalysisWorkflowOutputFields = z.object({
   false_positive_count: z.number().int().min(0),
   true_positive_count: z.number().int().min(0),
   inconclusive_count: z.number().int().min(0),
+  // IDs that qualified for and were submitted to FP auto-close — not confirmed closed
+  // (SetAlertsStatus uses conflicts: proceed; response has no per-id reconciliation).
   auto_closed_ids: z.array(z.string().max(512)),
   grouped_counts_summary: z.string().max(10000),
   generated_summary: z.string().max(2000),
@@ -103,6 +106,9 @@ export const AlertAnalysisWorkflowOutputFields = z.object({
   impacted_entities: z.array(AlertAnalysisImpactedEntity).max(50),
   // YAML Liquid emits the boolean as a string ("true" / "false").
   impacted_entities_truncated: z.enum(['true', 'false']),
+  // Alert ids from the analyzed set with no matching agent verdict. Empty when
+  // every alert was reconciled; non-empty means a partial (still completed) result.
+  missing_alert_ids: z.array(z.string().max(512)).max(1000),
 });
 
 export const AlertAnalysisWorkflowOutput = AlertAnalysisWorkflowOutputFields.superRefine(

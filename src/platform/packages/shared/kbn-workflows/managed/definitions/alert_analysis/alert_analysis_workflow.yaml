@@ -76,6 +76,7 @@ triggers:
             # Allow extra ES alert fields; require only what Worker-path steps dereference.
             required:
               - _id
+              - _index
               - '@timestamp'
               - kibana
             properties:
@@ -83,8 +84,20 @@ triggers:
                 type: string
                 minLength: 1
                 maxLength: 512
+              _index:
+                type: string
+                # Passed to security.buildAlertEntityGraph as alertIndex (seed + search index).
+                # Must be a Security alerts alias or backing index — not an arbitrary ES index.
+                # Pattern covers alias (.alerts-security.alerts-<space>), internal backing
+                # (.internal.alerts-security.alerts-<space>-NNNNNN), and preview variants.
+                minLength: 1
+                maxLength: 512
+                pattern: '^\.(internal\.)?(preview\.)?alerts-security\.alerts-[a-zA-Z0-9._-]+$'
               '@timestamp':
                 type: string
+                # Used verbatim as the ES date-math enrichment anchor (e.g. `||-24h`).
+                # Reject non-dates at the input boundary so enrichment does not fail mid-run.
+                format: date-time
                 minLength: 1
                 maxLength: 64
               kibana:
@@ -116,9 +129,10 @@ triggers:
             or empty `alerts` array fails the run (workflow.fail) instead of completing with
             empty output. Absent on the standalone path, which keeps reading the alert
             trigger's own `event.alerts`.
-            Bounded to 1000 items; each item must include `_id`, `@timestamp`, and
-            `kibana.alert.rule.uuid` (writebacks, enrichment date-range anchor, and rule-context
-            derivation). Execution still chunks by consts.batch_size.
+            Bounded to 1000 items; each item must include `_id`, `_index` (Security alerts
+            alias or backing index for related-alert graph lookup), `@timestamp`, and
+            `kibana.alert.rule.uuid` (writebacks, enrichment date-range anchor, and
+            rule-context derivation). Execution still chunks by consts.batch_size.
         autoCloseEnabled:
           type: boolean
           description: >
@@ -181,6 +195,8 @@ triggers:
 
 # Structured output emitted by the `emit_workflow_output` step at the end of each run.
 # Always present, even when analysis is skipped (empty arrays / zero counts).
+# On the standalone path, Worker-gated fields (verdicts, summaries, impact entities, etc.)
+# stay empty even when tags/notes ran — see the emit_workflow_output step comment.
 # Declared in JSON Schema object form, not the legacy `- name: / type:` list. The legacy
 # converter hardcodes array items to `anyOf: [string, number, boolean]`
 # (field_conversion.ts), so an array of objects cannot be expressed in it: `verdicts` would
@@ -200,6 +216,7 @@ outputs:
     - agent_id
     - impacted_entities
     - impacted_entities_truncated
+    - missing_alert_ids
   properties:
     verdicts:
       type: array
@@ -294,6 +311,18 @@ outputs:
       enum:
         - "true"
         - "false"
+    missing_alert_ids:
+      type: array
+      description: >
+        Alert ids from the analyzed set for which the agent returned no matching
+        verdict. Always present (empty when every alert was reconciled). Workers
+        should treat a non-empty list as a partial result — the run still completes
+        so matched verdicts are not discarded, but missing ids need retry or
+        Investigation follow-up.
+      maxItems: 1000
+      items:
+        type: string
+        maxLength: 512
     false_positive_count:
       type: integer
       minimum: 0
@@ -305,6 +334,11 @@ outputs:
       minimum: 0
     auto_closed_ids:
       type: array
+      description: >
+        Alert ids that qualified for FP auto-close and were submitted to
+        kibana.SetAlertsStatus. Not a confirmation that every id is closed:
+        the close step uses conflicts: proceed, so version-conflicted docs can
+        remain open while still appearing here. Treat as attempted/candidate ids.
       items:
         type: string
         maxLength: 512
@@ -368,6 +402,9 @@ steps:
   - name: set_workflow_variables
     type: data.set
     with:
+      # Copy for ES/Liquid bodies — sibling managed workflows (threat-intel, significant
+      # events) do the same so enrichment queries can term-filter kibana.space_ids.
+      spaceId: "{{ workflow.spaceId }}"
       normalized_version: "{{ consts.workflow_version | downcase | replace: ' ', '_' }}"
       # One entry per alert, appended by each batch call: { id, classification,
       # confidence_score, rationale, contributing_factors }. `id` is the model's echo of the
@@ -414,6 +451,9 @@ steps:
       impacted_entities: []
       # Set true when impacted_entities was truncated to 50; false otherwise.
       impacted_entities_truncated: "false"
+      # Alert ids with no agent verdict (apply_verdicts no-match branch). Empty-init so
+      # the skip / standalone path still emits a well-formed workflow.output.
+      missing_alert_ids: []
 
   # ---------------------------------------------------------------------------
   # Read this space's configuration at run time
@@ -561,6 +601,19 @@ steps:
         with:
           alert_set: "${{ inputs.alerts }}"
 
+  # Worker supplies an explicit alert set and expects a complete structured result for it.
+  # The standalone "already analyzed" tag filter would drop tagged alerts on retry (e.g.
+  # after a mid-run failure) and leave those ids out of workflow.output. Bypass dedup on
+  # the Worker path so every caller-supplied alert is re-analyzed and returned.
+  - name: bypass_dedup_for_worker
+    type: if
+    condition: "${{ inputs.calledByWorker == true }}"
+    steps:
+      - name: clear_pending_filter_for_worker
+        type: data.set
+        with:
+          pending_filter_expr: 'false'
+
   # Worker path with a missing or empty alerts input would otherwise skip analysis and
   # emit empty workflow.output with status completed — a miswired caller looks healthy.
   # Fail loud instead so the Worker treats the run as an error and retries / surfaces it.
@@ -586,6 +639,30 @@ steps:
           message: >-
             Alert Analysis Worker path requires a non-empty alerts input;
             inputs.alerts was an empty array.
+
+  # Duplicate _id entries would be analyzed/written multiple times while the model only
+  # returns one verdict per id — select_alert_verdict would reuse the same match and
+  # workflow.output.verdicts would double-count. Fail before batching rather than silently
+  # collapsing (JSON Schema uniqueItems only rejects identical objects, not same-_id pairs).
+  - name: reject_duplicate_caller_alert_ids
+    type: if
+    condition: "${{ inputs.calledByWorker == true }}"
+    steps:
+      - name: compute_caller_alert_id_counts
+        type: data.set
+        with:
+          caller_alert_count: "${{ variables.alert_set.size }}"
+          caller_unique_alert_id_count: "${{ variables.alert_set | map: '_id' | uniq | size }}"
+      - name: fail_if_duplicate_caller_alert_ids
+        type: if
+        condition: "${{ variables.caller_alert_count != variables.caller_unique_alert_id_count }}"
+        steps:
+          - name: fail_duplicate_caller_alert_ids
+            type: workflow.fail
+            with:
+              message: >-
+                Alert Analysis Worker path requires unique alert _id values;
+                inputs.alerts contained duplicate ids.
 
   # ---------------------------------------------------------------------------
   # Rule context for enrichment queries / logs
@@ -655,12 +732,16 @@ steps:
       - name: get_close_history_search
         type: elasticsearch.search
         with:
-          index: ".alerts-security.alerts-*"
+          # Space-scoped alias + kibana.space_ids filter: Worker-path rule UUID comes from
+          # caller-supplied alerts and must not read another space's alert data.
+          index: ".alerts-security.alerts-{{ variables.spaceId }}"
           size: 0
           track_total_hits: true
           query:
             bool:
               filter:
+                - term:
+                    kibana.space_ids: "{{ variables.spaceId }}"
                 - term:
                     kibana.alert.rule.uuid: "{{ variables.rule_id }}"
                 - term:
@@ -673,12 +754,14 @@ steps:
       - name: get_close_history_false_positive_count
         type: elasticsearch.search
         with:
-          index: ".alerts-security.alerts-*"
+          index: ".alerts-security.alerts-{{ variables.spaceId }}"
           size: 0
           track_total_hits: true
           query:
             bool:
               filter:
+                - term:
+                    kibana.space_ids: "{{ variables.spaceId }}"
                 - term:
                     kibana.alert.rule.uuid: "{{ variables.rule_id }}"
                 - term:
@@ -709,7 +792,7 @@ steps:
         type: elasticsearch.esql.query
         with:
           query: |-
-            FROM .alerts-security.alerts-*
+            FROM .alerts-security.alerts-{{ variables.spaceId }}
             | WHERE `kibana.alert.rule.uuid` == ?1 AND `kibana.alert.workflow_status` == "closed"
             | EVAL close_reason = COALESCE(`kibana.alert.workflow_reason`, "unknown")
             | STATS close_reason_count = COUNT(*) BY close_reason
@@ -719,6 +802,8 @@ steps:
           filter:
             bool:
               filter:
+                - term:
+                    kibana.space_ids: "{{ variables.spaceId }}"
                 - range:
                     "@timestamp":
                       gte: '{{ variables.anchor_timestamp }}||-30d'
@@ -744,7 +829,7 @@ steps:
       - name: get_global_prevalence_stats
         type: elasticsearch.search
         with:
-          index: ".alerts-security.alerts-*"
+          index: ".alerts-security.alerts-{{ variables.spaceId }}"
           size: 0
           track_total_hits: true
           runtime_mappings:
@@ -777,6 +862,8 @@ steps:
           query:
             bool:
               filter:
+                - term:
+                    kibana.space_ids: "{{ variables.spaceId }}"
                 - term:
                     kibana.alert.rule.uuid: "{{ variables.rule_id }}"
                 - range:
@@ -824,7 +911,7 @@ steps:
       - name: get_noise_signal_stats
         type: elasticsearch.search
         with:
-          index: ".alerts-security.alerts-*"
+          index: ".alerts-security.alerts-{{ variables.spaceId }}"
           size: 0
           track_total_hits: true
           runtime_mappings:
@@ -857,6 +944,8 @@ steps:
           query:
             bool:
               filter:
+                - term:
+                    kibana.space_ids: "{{ variables.spaceId }}"
                 - term:
                     kibana.alert.rule.uuid: "{{ variables.rule_id }}"
                 - range:
@@ -899,7 +988,7 @@ steps:
       - name: get_rule_metadata_source
         type: elasticsearch.search
         with:
-          index: ".alerts-security.alerts-*"
+          index: ".alerts-security.alerts-{{ variables.spaceId }}"
           size: 1
           _source:
             - "kibana.alert.rule.name"
@@ -912,8 +1001,12 @@ steps:
             - "kibana.alert.rule.references"
             - "kibana.alert.rule.threat"
           query:
-            term:
-              kibana.alert.rule.uuid: "{{ variables.rule_id }}"
+            bool:
+              filter:
+                - term:
+                    kibana.space_ids: "{{ variables.spaceId }}"
+                - term:
+                    kibana.alert.rule.uuid: "{{ variables.rule_id }}"
 
       - name: get_rule_metadata
         type: data.set
@@ -1471,12 +1564,18 @@ steps:
                 properties:
                   verdicts:
                     type: array
+                    # Cap at consts.batch_size: a batch never has more than 50 real alerts, so
+                    # more than 50 verdicts is hallucination/injection. Without this bound a
+                    # 10 MB response can inflate all_verdicts across up to 20 batches.
+                    maxItems: 50
                     description: One verdict per alert in the batch, in the order the alerts were given.
                     items:
                       type: object
                       properties:
                         id:
                           type: string
+                          # Matches alerts items._id maxLength — the model must echo a real id.
+                          maxLength: 512
                           description: The alert id, copied verbatim from the <alert id="..."> block being classified
                         classification:
                           type: string
@@ -1515,6 +1614,11 @@ steps:
                         - contributing_factors
                   batch_summary:
                     type: string
+                    # Prompt asks ≤45 words; bound at the producer so up to ~20 batch
+                    # summaries cannot inflate execution state before join+truncate.
+                    # 500 chars leaves headroom while staying well under generated_summary's
+                    # 2000-char emit cap (20 × 500 would be truncated at join anyway).
+                    maxLength: 500
                     description: >-
                       Optional 1–2 sentences (≤45 words) grouped by host or user explaining
                       why the batch verdicts came out as they did. Present only when
@@ -1539,7 +1643,9 @@ steps:
                     Alert analysis batch {{ foreach.index }} returned no verdicts for
                     {{ foreach.item | size }} alerts.
 
-              # TODO: replace with ai.conversation.message.add once kibana#291688 merges
+              # TODO: replace with ai.conversation.message.add once kibana#291688 merges.
+              # Until then /api/chat/converse + trigger_mode:never appends via appendUserMessage,
+              # so these progress lines are stored as user messages (emoji does not change role).
               - name: post_batch_failure_comment
                 type: kibana.request
                 if: "${{ inputs.calledByWorker == true and variables.investigation_conversation_id != '' }}"
@@ -1557,7 +1663,7 @@ steps:
                     trigger_mode: "never"
                     input: >-
                       🤖 **Alert Analysis** — Batch {{ foreach.index }} ({{ foreach.item | size }} alert(s)) failed after retries and returned no verdicts.
-                      The alerts in this batch will not have tags or notes written; a re-run of the Worker will retry them.
+                      The alerts in this batch will not have verdict tags or verdict notes written; an error note will record the missing verdict, and a re-run of the Worker will retry them.
                       Execution: {{ execution.url }}
 
             else:
@@ -1687,6 +1793,15 @@ steps:
                   headers:
                     kbn-xsrf: string
                     Content-Type: application/json
+
+              # Expose the unreconciled id in workflow.output so a Worker can retry or
+              # surface a partial Investigation result instead of treating completed+empty
+              # as success. Prefer this over failing the whole run (matched verdicts would
+              # be discarded). Real alert id only — never the model's echo.
+              - name: accumulate_missing_alert_id
+                type: data.set
+                with:
+                  missing_alert_ids: "${{ variables.missing_alert_ids | push: foreach.item._id }}"
             else:
 
               # -------------------------------------------------------------------
@@ -1887,9 +2002,40 @@ steps:
           # Build one entity row per unique host, then per unique user, collecting
           # per-entity verdict counts. The Worker passes this to the security.impact
           # attachment so the Investigation shows what the alert batch touched.
+          #
+          # Cap the unique-name lists BEFORE the loops: a 1000-alert batch can have
+          # ~2000 unique host+user names, and each iteration rescans all verdicts.
+          # Hosts take the first up-to-50 slots; users get the remainder. Truncation
+          # is computed from the uncapped counts.
+          - name: collect_unique_entity_names
+            type: data.set
+            with:
+              host_names_all: "${{ variables.output_verdicts | map: 'host_name' | uniq }}"
+              user_names_all: "${{ variables.output_verdicts | map: 'user_name' | uniq }}"
+
+          - name: plan_host_entity_iteration
+            type: data.set
+            with:
+              entity_name_count: "${{ variables.host_names_all.size | plus: variables.user_names_all.size }}"
+              host_names_for_entities: "${{ variables.host_names_all | slice: 0, 50 }}"
+
+          # Budget/truncation need the capped host list from the previous step — Liquid cannot
+          # read a sibling key from the same data.set `with` block.
+          - name: plan_user_entity_iteration
+            type: data.set
+            with:
+              impacted_entities_truncated: >-
+                {% if variables.entity_name_count > 50 %}true{% else %}false{% endif %}
+              user_entity_budget: "${{ 50 | minus: variables.host_names_for_entities.size }}"
+
+          - name: slice_user_names_for_entities
+            type: data.set
+            with:
+              user_names_for_entities: "${{ variables.user_names_all | slice: 0, variables.user_entity_budget }}"
+
           - name: build_host_entities
             type: foreach
-            foreach: "${{ variables.output_verdicts | map: 'host_name' | uniq }}"
+            foreach: "${{ variables.host_names_for_entities }}"
             steps:
               - name: build_host_entity
                 type: data.set
@@ -1909,7 +2055,7 @@ steps:
 
           - name: build_user_entities
             type: foreach
-            foreach: "${{ variables.output_verdicts | map: 'user_name' | uniq }}"
+            foreach: "${{ variables.user_names_for_entities }}"
             steps:
               - name: build_user_entity
                 type: data.set
@@ -1927,14 +2073,11 @@ steps:
                 with:
                   impacted_entities: "${{ variables.impacted_entities | push: variables.current_entity }}"
 
-          # Cap at 50 entities so the security.impact attachment schema (max: 50) never
-          # rejects the payload. Batches with many unique hosts + users can exceed 50 even
-          # under normal conditions; truncated records whether rows were dropped.
+          # Safety slice — lists were already capped above; keep ≤50 if a future change
+          # reorders host/user budgeting.
           - name: cap_impacted_entities
             type: data.set
             with:
-              impacted_entities_truncated: >-
-                {% if variables.impacted_entities.size > 50 %}true{% else %}false{% endif %}
               impacted_entities: "${{ variables.impacted_entities | slice: 0, 50 }}"
 
       # -----------------------------------------------------------------------
@@ -1945,6 +2088,8 @@ steps:
       # a list of ids, so the whole execution closes in two calls rather than two per alert.
       # auto_close_ids is accumulated inside apply_verdicts using foreach.item._id (the real
       # alert id, never the model's echo), so a fabricated model id cannot close an unrelated alert.
+      # Emitted as workflow.output.auto_closed_ids = ids submitted to SetAlertsStatus — not a
+      # confirmed-closed list (conflicts: proceed can leave individual docs open).
 
       - name: check_auto_close_conditions
         type: if
@@ -2004,6 +2149,13 @@ steps:
   # When the guard short-circuits (workflow disabled, no connector, zero pending alerts),
   # the accumulators are still at their initialised values ([] / 0) and the output is
   # well-formed — callers receive an empty verdict list rather than a missing output.
+  #
+  # STANDALONE PATH CAVEAT: output_verdicts / generated_summary / impacted_entities /
+  # missing_alert_ids / connector_id (resolved) are only accumulated when
+  # calledByWorker == true. On a standalone (alert-trigger) run those fields stay at
+  # their empty-init values even though tags/notes/auto-close may have run.
+  # auto_closed_ids IS populated on both paths. Do not treat standalone workflow.output
+  # as a complete analysis summary — there is no Worker consumer of it today.
   - name: emit_workflow_output
     type: workflow.output
     status: completed
@@ -2015,6 +2167,8 @@ steps:
       true_positive_count: "${{ variables.output_verdicts | where: 'classification', 'true_positive' | size }}"
       inconclusive_count: "${{ variables.output_verdicts | where: 'classification', 'inconclusive' | size }}"
       auto_closed_ids: "${{ variables.auto_close_ids }}"
+      # Candidate / submitted ids (see outputs.auto_closed_ids description) — not reconciled
+      # against SetAlertsStatus per-doc success; that step returns opaque update_by_query counts.
       grouped_counts_summary: "{{ variables.grouped_counts_summary }}"
       # Empty string on the standalone / skip path — honest signal that no call was made.
       generated_summary: "{{ variables.generated_summary }}"
@@ -2026,3 +2180,5 @@ steps:
       impacted_entities: "${{ variables.impacted_entities }}"
       # "true" when the list was capped at 50; "false" otherwise.
       impacted_entities_truncated: "{{ variables.impacted_entities_truncated }}"
+      # Alert ids the agent omitted; empty when every analyzed alert got a verdict.
+      missing_alert_ids: "${{ variables.missing_alert_ids }}"

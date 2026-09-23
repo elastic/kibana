@@ -10,6 +10,7 @@
 import { parse } from 'yaml';
 import { SECURITY_ALERT_ANALYSIS_WORKFLOW } from '.';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
+import { WorkflowSchema } from '../../../spec/schema';
 
 type Step = Record<string, unknown>;
 
@@ -96,6 +97,37 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     steps: unknown[];
     triggers: unknown[];
   };
+
+  it('passes WorkflowSchema normalization and keeps manual-trigger Worker inputs', () => {
+    // Raw yaml.parse alone can miss schema transforms that strip trigger fields (the class of
+    // bug that previously left inputs on an alert trigger). Parse through WorkflowSchema so
+    // manual-trigger inputs and structured outputs survive the same normalization the runtime
+    // uses. Full connector runtime is not exercised here.
+    const result = WorkflowSchema.safeParse(parse(SECURITY_ALERT_ANALYSIS_WORKFLOW.yaml));
+    expect(result.success ? null : result.error.issues).toBeNull();
+    if (!result.success) {
+      return;
+    }
+
+    const manualTrigger = result.data.triggers.find(
+      (trigger): trigger is Extract<(typeof result.data.triggers)[number], { type: 'manual' }> =>
+        trigger.type === 'manual'
+    );
+    expect(manualTrigger).toBeDefined();
+    expect(manualTrigger?.inputs?.properties).toHaveProperty('alerts');
+    expect(manualTrigger?.inputs?.properties).toHaveProperty('calledByWorker');
+    expect(manualTrigger?.inputs?.properties).toHaveProperty('connectorIdByFeature');
+
+    expect(result.data.outputs).toBeDefined();
+    if (
+      result.data.outputs &&
+      typeof result.data.outputs === 'object' &&
+      'properties' in result.data.outputs
+    ) {
+      expect(result.data.outputs.properties).toHaveProperty('verdicts');
+      expect(result.data.outputs.properties).toHaveProperty('missing_alert_ids');
+    }
+  });
 
   it('reads per-space config at run time from the space-scoped runtime_config route', () => {
     const fetchStep = findStepByName(workflow.steps, 'fetch_runtime_config') as {
@@ -242,10 +274,11 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
           properties: {
             verdicts: {
               type: string;
+              maxItems: number;
               items: {
                 required: string[];
                 properties: {
-                  id: { type: string };
+                  id: { type: string; maxLength: number };
                   classification: { enum: string[] };
                   confidence_score: { minimum: number; maximum: number };
                   rationale: { type: string; maxLength: number };
@@ -256,6 +289,7 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
                 };
               };
             };
+            batch_summary?: { type: string; maxLength: number };
           };
         };
       };
@@ -268,11 +302,15 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
 
     const verdicts = agentStep.with.schema.properties.verdicts;
     expect(verdicts.type).toBe('array');
+    // Cap at consts.batch_size — more than 50 verdicts cannot pair to real alerts in a batch.
+    expect(verdicts.maxItems).toBe(50);
     // The echoed id is what pairs a verdict with its alert, so it is required.
     expect(verdicts.items.required).toEqual(
       expect.arrayContaining(['id', 'classification', 'confidence_score', 'rationale'])
     );
     expect(verdicts.items.properties.id.type).toBe('string');
+    // Matches alerts items._id maxLength so a hallucinated long id fails at the producer.
+    expect(verdicts.items.properties.id.maxLength).toBe(512);
     expect(verdicts.items.properties.classification.enum).toEqual([
       'false_positive',
       'true_positive',
@@ -287,6 +325,8 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(verdicts.items.properties.rationale.maxLength).toBe(500);
     expect(verdicts.items.properties.contributing_factors.maxItems).toBe(3);
     expect(verdicts.items.properties.contributing_factors.items.maxLength).toBe(100);
+    // Bound at the producer so accumulated batch_summaries cannot inflate execution state.
+    expect(agentStep.with.schema.properties.batch_summary?.maxLength).toBe(500);
   });
 
   it('tells the model how to behave in a batch: one verdict per id, judged independently', () => {
@@ -375,6 +415,42 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
       with: { anchor_timestamp: string };
     };
     expect(anchorStep.with.anchor_timestamp).toBe('{{ variables.alert_set[0]["@timestamp"] }}');
+  });
+
+  it('scopes enrichment alert-index queries to the executing Kibana space', () => {
+    // Worker-path rule UUID is caller-supplied; without space isolation a forged UUID could
+    // read another space's close-history / prevalence / rule-metadata into the model prompt.
+    const initStep = findStepByName(workflow.steps, 'set_workflow_variables') as {
+      with: { spaceId: string };
+    };
+    expect(initStep.with.spaceId).toBe('{{ workflow.spaceId }}');
+
+    for (const stepName of [
+      'get_close_history_search',
+      'get_close_history_false_positive_count',
+      'get_global_prevalence_stats',
+      'get_noise_signal_stats',
+      'get_rule_metadata_source',
+    ]) {
+      const step = findStepByName(workflow.steps, stepName) as {
+        with: { index: string; query: { bool: { filter: Array<Record<string, unknown>> } } };
+      };
+      expect(step.with.index).toBe('.alerts-security.alerts-{{ variables.spaceId }}');
+      expect(step.with.query.bool.filter).toEqual(
+        expect.arrayContaining([{ term: { 'kibana.space_ids': '{{ variables.spaceId }}' } }])
+      );
+    }
+
+    const esqlStep = findStepByName(workflow.steps, 'get_close_history_reasons_summary') as {
+      with: {
+        query: string;
+        filter: { bool: { filter: Array<Record<string, unknown>> } };
+      };
+    };
+    expect(esqlStep.with.query).toContain('FROM .alerts-security.alerts-{{ variables.spaceId }}');
+    expect(esqlStep.with.filter.bool.filter).toEqual(
+      expect.arrayContaining([{ term: { 'kibana.space_ids': '{{ variables.spaceId }}' } }])
+    );
   });
 
   it('keeps the related-alert graph per alert and summarises it into the batch prompt', () => {
@@ -652,9 +728,10 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
 
   it('auto_close_ids is initialised to empty in set_workflow_variables', () => {
     const initStep = findStepByName(workflow.steps, 'set_workflow_variables') as {
-      with: { auto_close_ids: unknown };
+      with: { auto_close_ids: unknown; missing_alert_ids: unknown };
     };
     expect(initStep.with.auto_close_ids).toEqual([]);
+    expect(initStep.with.missing_alert_ids).toEqual([]);
   });
 
   it('initialises connector_id_by_feature to empty string so the standalone path is unchanged', () => {
@@ -746,13 +823,32 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
 
     const alertsInput = (
       manualTrigger?.inputs?.properties as {
-        alerts?: { items?: { required?: string[] }; maxItems?: number };
+        alerts?: {
+          items?: {
+            required?: string[];
+            properties?: {
+              '@timestamp'?: { format?: string; maxLength?: number };
+              _index?: { maxLength?: number; pattern?: string };
+            };
+          };
+          maxItems?: number;
+        };
       }
     )?.alerts;
     expect(alertsInput?.maxItems).toBe(1000);
     expect(alertsInput?.items?.required).toEqual(
-      expect.arrayContaining(['_id', '@timestamp', 'kibana'])
+      expect.arrayContaining(['_id', '_index', '@timestamp', 'kibana'])
     );
+    // Related-alert graph passes foreach.item._index as alertIndex — require a Security
+    // alerts alias/backing index so a schema-valid Worker payload cannot omit it or point
+    // the graph at an arbitrary ES index.
+    expect(alertsInput?.items?.properties?._index?.maxLength).toBe(512);
+    expect(alertsInput?.items?.properties?._index?.pattern).toBe(
+      '^\\.(internal\\.)?(preview\\.)?alerts-security\\.alerts-[a-zA-Z0-9._-]+$'
+    );
+    // Used as an ES date-math enrichment anchor — reject non-dates at the input boundary.
+    expect(alertsInput?.items?.properties?.['@timestamp']?.format).toBe('date-time');
+    expect(alertsInput?.items?.properties?.['@timestamp']?.maxLength).toBe(64);
 
     const alertTrigger = (workflow.triggers as Array<{ type: string; inputs?: unknown }>).find(
       ({ type }) => type === 'alert'
@@ -834,6 +930,43 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     );
     expect(emptyGate.steps[0].type).toBe('workflow.fail');
     expect(emptyGate.steps[0].with.message).toContain('empty array');
+  });
+
+  it('fails the Worker path when alerts contain duplicate _id values', () => {
+    const rejectGate = findStepByName(workflow.steps, 'reject_duplicate_caller_alert_ids') as {
+      type: string;
+      condition: string;
+      steps: Array<{
+        name: string;
+        type: string;
+        condition?: string;
+        with?: { caller_alert_count?: string; caller_unique_alert_id_count?: string };
+        steps?: Array<{ type: string; with: { message: string } }>;
+      }>;
+    };
+    expect(rejectGate.type).toBe('if');
+    expect(rejectGate.condition).toBe('${{ inputs.calledByWorker == true }}');
+    expect(rejectGate.steps[0].name).toBe('compute_caller_alert_id_counts');
+    expect(rejectGate.steps[0].with?.caller_alert_count).toBe('${{ variables.alert_set.size }}');
+    expect(rejectGate.steps[0].with?.caller_unique_alert_id_count).toBe(
+      "${{ variables.alert_set | map: '_id' | uniq | size }}"
+    );
+    expect(rejectGate.steps[1].condition).toBe(
+      '${{ variables.caller_alert_count != variables.caller_unique_alert_id_count }}'
+    );
+    expect(rejectGate.steps[1].steps?.[0].type).toBe('workflow.fail');
+    expect(rejectGate.steps[1].steps?.[0].with.message).toContain('unique alert _id');
+  });
+
+  it('bypasses already-analyzed dedup on the Worker path so retries return full output', () => {
+    const bypassGate = findStepByName(workflow.steps, 'bypass_dedup_for_worker') as {
+      type: string;
+      condition: string;
+      steps: Array<{ with: { pending_filter_expr: string } }>;
+    };
+    expect(bypassGate.type).toBe('if');
+    expect(bypassGate.condition).toBe('${{ inputs.calledByWorker == true }}');
+    expect(bypassGate.steps[0].with.pending_filter_expr).toBe('false');
   });
 
   // The model echoes the alert id back with each verdict, and that echo is only safe as a
@@ -1322,6 +1455,39 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
     ).toBe(false);
   });
 
+  it('detects duplicate caller alert _ids via uniq count before failing', () => {
+    const computeStep = findStepByName(workflow.steps, 'compute_caller_alert_id_counts') as {
+      with: { caller_alert_count: string; caller_unique_alert_id_count: string };
+    };
+    const failGate = findStepByName(workflow.steps, 'fail_if_duplicate_caller_alert_ids') as {
+      condition: string;
+    };
+    const alerts = [
+      { _id: 'a1', _index: '.alerts-security.alerts-default' },
+      { _id: 'a1', _index: '.alerts-security.alerts-default' },
+      { _id: 'a2', _index: '.alerts-security.alerts-default' },
+    ];
+
+    const total = evaluateExpression(engine, computeStep.with.caller_alert_count, {
+      variables: { alert_set: alerts },
+    });
+    const unique = evaluateExpression(engine, computeStep.with.caller_unique_alert_id_count, {
+      variables: { alert_set: alerts },
+    });
+    expect(total).toBe(3);
+    expect(unique).toBe(2);
+    expect(
+      evaluateExpression(engine, failGate.condition, {
+        variables: { caller_alert_count: total, caller_unique_alert_id_count: unique },
+      })
+    ).toBe(true);
+    expect(
+      evaluateExpression(engine, failGate.condition, {
+        variables: { caller_alert_count: 2, caller_unique_alert_id_count: 2 },
+      })
+    ).toBe(false);
+  });
+
   it('builds an output verdict keyed on the real alert id, with __missing__ entity defaults', () => {
     const buildStep = findStepByName(workflow.steps, 'build_output_verdict') as {
       with: { output_verdict: Record<string, unknown> };
@@ -1398,6 +1564,19 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
     expect(result).toEqual([...existing, next]);
   });
 
+  it('accumulates missing_alert_ids when the agent returns no verdict for an alert', () => {
+    const accumulateStep = findStepByName(workflow.steps, 'accumulate_missing_alert_id') as {
+      with: { missing_alert_ids: string };
+    };
+
+    const result = evaluateExpression(engine, accumulateStep.with.missing_alert_ids, {
+      variables: { missing_alert_ids: ['already-missing'] },
+      foreach: { item: { _id: 'no-verdict-id' } },
+    });
+
+    expect(result).toEqual(['already-missing', 'no-verdict-id']);
+  });
+
   it('emits workflow.output counts and fields from accumulated Worker verdicts', () => {
     const outputStep = findStepByName(workflow.steps, 'emit_workflow_output') as {
       with: Record<string, unknown>;
@@ -1433,6 +1612,7 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
         agent_id: 'elastic-ai-agent',
         impacted_entities: [{ entity_type: 'host', name: 'host-a' }],
         impacted_entities_truncated: 'false',
+        missing_alert_ids: ['a-missing'],
       },
     }) as Record<string, unknown>;
 
@@ -1447,6 +1627,7 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
     expect(rendered.agent_id).toBe('elastic-ai-agent');
     expect(rendered.impacted_entities).toEqual([{ entity_type: 'host', name: 'host-a' }]);
     expect(rendered.impacted_entities_truncated).toBe('false');
+    expect(rendered.missing_alert_ids).toEqual(['a-missing']);
   });
 
   it('renders a deterministic grouped_counts_summary from output_verdicts', () => {
@@ -1524,26 +1705,78 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
     });
   });
 
-  it('caps impacted_entities at 50 and flags truncation', () => {
-    const capStep = findStepByName(workflow.steps, 'cap_impacted_entities') as {
-      with: { impacted_entities_truncated: string; impacted_entities: string };
+  it('pre-caps unique host/user lists before entity loops and flags truncation from uncapped counts', () => {
+    const hostPlan = findStepByName(workflow.steps, 'plan_host_entity_iteration') as {
+      with: { host_names_for_entities: string; entity_name_count: string };
     };
+    const userPlan = findStepByName(workflow.steps, 'plan_user_entity_iteration') as {
+      with: {
+        impacted_entities_truncated: string;
+        user_entity_budget: string;
+      };
+    };
+    const userSlice = findStepByName(workflow.steps, 'slice_user_names_for_entities') as {
+      with: { user_names_for_entities: string };
+    };
+    const hostLoop = findStepByName(workflow.steps, 'build_host_entities') as {
+      foreach: string;
+    };
+    const userLoop = findStepByName(workflow.steps, 'build_user_entities') as {
+      foreach: string;
+    };
+    const capStep = findStepByName(workflow.steps, 'cap_impacted_entities') as {
+      with: { impacted_entities: string };
+    };
+
+    expect(hostLoop.foreach).toContain('host_names_for_entities');
+    expect(userLoop.foreach).toContain('user_names_for_entities');
+
+    const hostNamesAll = Array.from({ length: 40 }, (_, i) => `host-${i}`);
+    const userNamesAll = Array.from({ length: 30 }, (_, i) => `user-${i}`);
+
+    const entityNameCount = evaluateExpression(engine, hostPlan.with.entity_name_count, {
+      variables: { host_names_all: hostNamesAll, user_names_all: userNamesAll },
+    });
+    expect(entityNameCount).toBe(70);
+
+    const hostNamesForEntities = evaluateExpression(engine, hostPlan.with.host_names_for_entities, {
+      variables: { host_names_all: hostNamesAll },
+    }) as string[];
+    expect(hostNamesForEntities).toHaveLength(40);
+
+    const truncatedFlag = engine.parseAndRenderSync(userPlan.with.impacted_entities_truncated, {
+      variables: { entity_name_count: 70 },
+    });
+    expect(truncatedFlag.trim()).toBe('true');
+
+    const userBudget = evaluateExpression(engine, userPlan.with.user_entity_budget, {
+      variables: { host_names_for_entities: hostNamesForEntities },
+    });
+    expect(userBudget).toBe(10);
+
+    const userNamesForEntities = evaluateExpression(
+      engine,
+      userSlice.with.user_names_for_entities,
+      {
+        variables: {
+          user_names_all: userNamesAll,
+          user_entity_budget: userBudget,
+        },
+      }
+    ) as string[];
+    expect(userNamesForEntities).toHaveLength(10);
+    expect(userNamesForEntities[0]).toBe('user-0');
+    expect(userNamesForEntities[9]).toBe('user-9');
+
+    // Safety net still slices any materialized list to 50.
     const entities = Array.from({ length: 55 }, (_, i) => ({
       entity_type: 'host',
       name: `host-${i}`,
     }));
-
-    const truncatedFlag = engine.parseAndRenderSync(capStep.with.impacted_entities_truncated, {
-      variables: { impacted_entities: entities },
-    });
     const capped = evaluateExpression(engine, capStep.with.impacted_entities, {
       variables: { impacted_entities: entities },
     }) as unknown[];
-
-    expect(truncatedFlag.trim()).toBe('true');
     expect(capped).toHaveLength(50);
-    expect(capped[0]).toEqual({ entity_type: 'host', name: 'host-0' });
-    expect(capped[49]).toEqual({ entity_type: 'host', name: 'host-49' });
   });
 
   it('applies autoCloseEnabled only when the caller explicitly provides it', () => {
