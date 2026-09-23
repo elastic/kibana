@@ -33,6 +33,7 @@ import { userMessageActor } from './client/rounds_to_events';
 import type { ConversationWithPermissions } from '../../../common/http_api/conversations';
 import type { ConversationEventBus } from '../../workflows/triggers/conversation_event_bus';
 import { createScopedConversationEventEmitter } from '../../workflows/triggers/conversation_event_bus';
+import type { ConversationEventsServiceStart } from '../conversation_events';
 
 export interface AppendUserMessageOptions {
   request: KibanaRequest;
@@ -58,6 +59,7 @@ interface ConversationServiceDeps {
   agents: AgentsServiceStart;
   attachments: AttachmentServiceStart;
   eventBus?: ConversationEventBus;
+  conversationEvents: ConversationEventsServiceStart;
 }
 
 export class ConversationServiceImpl implements ConversationService {
@@ -68,6 +70,7 @@ export class ConversationServiceImpl implements ConversationService {
   private readonly agents: AgentsServiceStart;
   private readonly attachments: AttachmentServiceStart;
   private readonly eventBus?: ConversationEventBus;
+  private readonly conversationEvents: ConversationEventsServiceStart;
 
   constructor({
     logger,
@@ -77,6 +80,7 @@ export class ConversationServiceImpl implements ConversationService {
     agents,
     attachments,
     eventBus,
+    conversationEvents,
   }: ConversationServiceDeps) {
     this.logger = logger;
     this.security = security;
@@ -85,6 +89,7 @@ export class ConversationServiceImpl implements ConversationService {
     this.agents = agents;
     this.attachments = attachments;
     this.eventBus = eventBus;
+    this.conversationEvents = conversationEvents;
   }
 
   async getScopedClient({ request }: { request: KibanaRequest }): Promise<ConversationClient> {
@@ -100,6 +105,7 @@ export class ConversationServiceImpl implements ConversationService {
       logger: this.logger,
       space,
       agentRegistry,
+      conversationEvents: this.conversationEvents,
       eventEmitter: eventBus ? createScopedConversationEventEmitter(eventBus, request) : undefined,
     });
   }

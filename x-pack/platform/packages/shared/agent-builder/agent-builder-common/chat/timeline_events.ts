@@ -421,6 +421,21 @@ export const executionTerminatedEventId = (roundId: string, executionIndex: numb
       }`;
 
 /**
+ * ID for a step event of any execution. Step ids are not uniform: the initial run numbers steps
+ * off the round id, a resume numbers them off its own execution id.
+ */
+export const executionStepEventId = (
+  roundId: string,
+  executionIndex: number,
+  sequence: number
+): string =>
+  executionIndex === 0
+    ? roundStepEventId(roundId, sequence)
+    : `${resumeExecutionId(roundId, executionIndex)}${
+        ROUND_DERIVED_EVENT_ID_SUFFIXES.stepPrefix
+      }${sequence}`;
+
+/**
  * Type names that are not covered by a `TimelineEventType` member but would still
  * produce ids colliding with round-derived ones.
  */
@@ -439,6 +454,9 @@ export const BUILT_IN_CONVERSATION_EVENT_TYPES: readonly TimelineEventType[] =
 /** True when `type` is one of the built-in timeline event type names. */
 export const isBuiltInConversationEventType = (type: string): type is TimelineEventType =>
   (BUILT_IN_CONVERSATION_EVENT_TYPES as readonly string[]).includes(type);
+
+export const isTimelineEvent = (event: ConversationEvent): event is TimelineEvent =>
+  isBuiltInConversationEventType(event.type);
 
 /**
  * Union of the string values of all built-in timeline event types.
@@ -463,3 +481,9 @@ export type ValidConversationEventType<T extends string> =
     : T extends BuiltInConversationEventTypeValue
     ? never
     : T;
+
+/** Input event for adding to a conversation. Server assigns id, created_at, and actor. */
+export interface ConversationAddEventInput {
+  type: string;
+  data: Record<string, unknown>;
+}

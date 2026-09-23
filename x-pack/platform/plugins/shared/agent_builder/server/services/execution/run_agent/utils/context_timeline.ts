@@ -14,10 +14,12 @@ import type {
   ExecutionTerminatedEvent,
   TimelineEvent,
   UserMessageEvent,
+  ConversationEvent,
 } from '@kbn/agent-builder-common';
 import {
   TimelineEventType,
   isEventsNativeVersion,
+  isTimelineEvent,
   parseExecutionId,
 } from '@kbn/agent-builder-common';
 import type { ProcessedRoundInput } from '@kbn/agent-builder-server';
@@ -37,11 +39,8 @@ export type ProcessedTimelineEvent =
   | Exclude<TimelineEvent, UserMessageEvent>
   | ProcessedUserMessageEvent;
 
-type AnyTimelineEvent = TimelineEvent | ProcessedTimelineEvent;
-type UserMessageOf<E extends AnyTimelineEvent> = Extract<
-  E,
-  { type: TimelineEventType.userMessage }
->;
+type AnyTimelineEvent = TimelineEvent | ProcessedTimelineEvent | ConversationEvent;
+type UserMessageOf<E extends AnyTimelineEvent> = E & UserMessageEvent;
 
 /** A round as it appears on the normalized context timeline: one execution triggered by a user message. */
 export interface TimelineRound<E extends AnyTimelineEvent = TimelineEvent> {
@@ -92,7 +91,8 @@ export const eventsForContext = (conversation: Conversation): TimelineEvent[] =>
   if (!isEventsNativeVersion(conversation.schema_version) || !conversation.events?.length) {
     return roundsToEvents(conversation);
   }
-  const folded = roundsToEvents({ ...conversation, rounds: eventsToRounds(conversation.events) });
+  const timelineEvents = conversation.events.filter(isTimelineEvent);
+  const folded = roundsToEvents({ ...conversation, rounds: eventsToRounds(timelineEvents) });
   const positions = new Map(conversation.events.map((event, index) => [event.id, index]));
   const position = (id: string) => positions.get(id) ?? Number.MAX_SAFE_INTEGER;
   // Folding drops the standalone messages and the executions that never terminated, so re-add
@@ -102,7 +102,7 @@ export const eventsForContext = (conversation: Conversation): TimelineEvent[] =>
   //
   // Failed initial executions are surfaced (capped to the most recent ones, so repeated failures
   // cannot grow the context without bound); aborted executions and failed resumes never are.
-  const failed = groupTimelineFailedExecutions(conversation.events)
+  const failed = groupTimelineFailedExecutions(timelineEvents)
     .sort(
       (left, right) =>
         right.userMessage.created_at.localeCompare(left.userMessage.created_at) ||
@@ -110,7 +110,7 @@ export const eventsForContext = (conversation: Conversation): TimelineEvent[] =>
     )
     .slice(0, MAX_FAILED_EXECUTIONS_IN_CONTEXT)
     .flatMap((entry) => entry.events);
-  return [...folded, ...standaloneUserMessages(conversation.events), ...failed].sort(
+  return [...folded, ...standaloneUserMessages(timelineEvents), ...failed].sort(
     (left, right) =>
       left.created_at.localeCompare(right.created_at) || position(left.id) - position(right.id)
   );
