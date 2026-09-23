@@ -25,8 +25,6 @@ import { ConversationInput } from './conversation_input/conversation_input';
 import { ConversationRounds } from './conversation_rounds/conversation_rounds';
 import { NewConversationPrompt } from './new_conversation_prompt';
 import { useConversationId } from '../../context/conversation/use_conversation_id';
-import { useStreamingContext } from '../../context/streaming/streaming_context';
-import { useIsAnyConversationStreaming } from '../../hooks/use_is_any_conversation_streaming';
 import { useConversationScrollActions } from '../../hooks/use_conversation_scroll_actions';
 import { useOnRoundFromOtherParticipant } from '../../hooks/use_on_round_from_other_participant';
 import { useAnchoredRoundIndex } from '../../hooks/use_anchored_round';
@@ -38,8 +36,6 @@ import {
   fullWidthAndHeightStyles,
 } from './conversation.styles';
 import { ScrollButton } from './scroll_button';
-import { useAppLeave } from '../../context/app_leave_context';
-import { useNavigationAbort } from '../../hooks/use_navigation_abort';
 import { ErrorPrompt } from '../common/prompt/error_prompt';
 import { PROMPT_LAYOUT_VARIANTS } from '../common/prompt/layout';
 import { StartNewConversationButton } from './actions/start_new_conversation_button';
@@ -55,13 +51,10 @@ export const Conversation: React.FC<{}> = () => {
   const { euiTheme } = useEuiTheme();
   const conversationId = useConversationId();
   const hasActiveConversation = useHasActiveConversation();
-  const isAnyStreaming = useIsAnyConversationStreaming();
-  const { cancelAllStreams } = useStreamingContext();
   const conversationRounds = useConversationRounds();
   const lastRound = conversationRounds.at(-1);
   const { isFetched } = useConversationStatus();
   const { errorType } = useConversationError();
-  const onAppLeave = useAppLeave();
   const { attachmentsService } = useAgentBuilderServices();
   const {
     attachments: stagedAttachments = [],
@@ -73,14 +66,6 @@ export const Conversation: React.FC<{}> = () => {
   const { staleAttachments, scheduleStaleCheck } = useStaleAttachments(conversationId);
   const [dismissStaleAttachments, setDismissStaleAttachments] = useState(false);
   useSendPredefinedInitialMessage();
-
-  // Page-leave guard fires for any in-flight stream, not just this conversation's.
-  // On confirmed leave, cancel every stream so background mutations don't keep running.
-  useNavigationAbort({
-    onAppLeave,
-    isResponseLoading: isAnyStreaming,
-    cancelAll: cancelAllStreams,
-  });
 
   const [scrollContainer, setScrollContainer] = useState<HTMLDivElement | null>(null);
   const {
