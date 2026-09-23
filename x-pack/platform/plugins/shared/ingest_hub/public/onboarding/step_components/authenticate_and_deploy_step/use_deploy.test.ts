@@ -776,6 +776,7 @@ function setupMocks({
 describe('useDeploy', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockCleanupManagedIntegrationsPolicies.mockResolvedValue({ toDelete: [], toUpdate: [] });
   });
 
   it('initializes with default namespace and idle state', () => {

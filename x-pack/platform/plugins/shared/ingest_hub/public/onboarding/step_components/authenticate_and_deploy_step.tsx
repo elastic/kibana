@@ -307,6 +307,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     hasAnyEcf,
     showAgentSection,
     isAgentDone,
+    isAgentBased,
     handleAgentDeployForNext,
     handleDeploy,
     ecfSectionProps,
