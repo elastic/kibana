@@ -31,7 +31,6 @@
     "@kbn/spaces-plugin",
     "@kbn/search-inference-endpoints",
     "@kbn/scout",
-    "@kbn/core-logging-server-mocks",
-    "@kbn/core-spaces-common"
+    "@kbn/core-logging-server-mocks"
   ]
 }
