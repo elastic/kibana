@@ -11,6 +11,7 @@ import {
 } from './constants';
 import {
   getRuleChangeHistoryEventParamsSchema,
+  getRuleChangeHistoryEventQuerySchema,
   listRuleChangeHistoryRequestSchema,
   listRuleChangeHistoryResponseSchema,
   ruleChangeHistoryDetailSchema,
@@ -18,21 +19,26 @@ import {
 
 describe('listRuleChangeHistoryRequestSchema', () => {
   it('applies defaults for page and per_page', () => {
-    expect(listRuleChangeHistoryRequestSchema.parse({})).toEqual({
+    expect(listRuleChangeHistoryRequestSchema.parse({ rule_id: 'rule-1' })).toEqual({
+      rule_id: 'rule-1',
       page: 1,
       per_page: RULE_CHANGE_HISTORY_DEFAULT_PER_PAGE,
     });
   });
 
+  it('requires rule_id', () => {
+    expect(listRuleChangeHistoryRequestSchema.safeParse({ page: 1 }).success).toBe(false);
+  });
+
   it('coerces numeric query strings', () => {
-    expect(listRuleChangeHistoryRequestSchema.parse({ page: '2', per_page: '10' })).toEqual({
-      page: 2,
-      per_page: 10,
-    });
+    expect(
+      listRuleChangeHistoryRequestSchema.parse({ rule_id: 'rule-1', page: '2', per_page: '10' })
+    ).toEqual({ rule_id: 'rule-1', page: 2, per_page: 10 });
   });
 
   it('rejects pages that exceed the max result window', () => {
     const result = listRuleChangeHistoryRequestSchema.safeParse({
+      rule_id: 'rule-1',
       page: RULE_CHANGE_HISTORY_MAX_RESULT_WINDOW / 20 + 1,
       per_page: 20,
     });
@@ -40,27 +46,39 @@ describe('listRuleChangeHistoryRequestSchema', () => {
   });
 
   it('rejects unknown keys (strict mode)', () => {
-    expect(listRuleChangeHistoryRequestSchema.safeParse({ unknown_field: 'x' }).success).toBe(
-      false
-    );
+    expect(
+      listRuleChangeHistoryRequestSchema.safeParse({ rule_id: 'rule-1', unknown_field: 'x' })
+        .success
+    ).toBe(false);
   });
 });
 
 describe('getRuleChangeHistoryEventParamsSchema', () => {
-  it('requires both id and event_id', () => {
-    expect(
-      getRuleChangeHistoryEventParamsSchema.parse({ id: 'rule-1', event_id: 'event-1' })
-    ).toEqual({ id: 'rule-1', event_id: 'event-1' });
-    expect(getRuleChangeHistoryEventParamsSchema.safeParse({ id: 'rule-1' }).success).toBe(false);
+  it('requires change_id', () => {
+    expect(getRuleChangeHistoryEventParamsSchema.parse({ change_id: 'event-1' })).toEqual({
+      change_id: 'event-1',
+    });
+    expect(getRuleChangeHistoryEventParamsSchema.safeParse({}).success).toBe(false);
   });
 
   it('rejects unknown keys', () => {
     expect(
       getRuleChangeHistoryEventParamsSchema.safeParse({
-        id: 'rule-1',
-        eventId: 'event-1',
+        change_id: 'event-1',
         foo: 'bar',
       }).success
+    ).toBe(false);
+  });
+});
+
+describe('getRuleChangeHistoryEventQuerySchema', () => {
+  it('requires rule_id and rejects unknown keys', () => {
+    expect(getRuleChangeHistoryEventQuerySchema.parse({ rule_id: 'rule-1' })).toEqual({
+      rule_id: 'rule-1',
+    });
+    expect(getRuleChangeHistoryEventQuerySchema.safeParse({}).success).toBe(false);
+    expect(
+      getRuleChangeHistoryEventQuerySchema.safeParse({ rule_id: 'rule-1', foo: 'bar' }).success
     ).toBe(false);
   });
 });

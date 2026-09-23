@@ -38,12 +38,12 @@ export const GET_RULE_CHANGE_HISTORY_EVENT_RESPONSE: RuleChangeHistoryDetail = {
 
 const INVALID_PATH_PARAMETERS_RESPONSE = invalidResponseExample({
   summary: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
-  message: 'event_id: Too small: expected string to have >=1 characters',
+  message: 'change_id: Too small: expected string to have >=1 characters',
   details: {
     errors: {
       errors: [],
       properties: {
-        event_id: { errors: ['Too small: expected string to have >=1 characters'] },
+        change_id: { errors: ['Too small: expected string to have >=1 characters'] },
       },
     },
   },

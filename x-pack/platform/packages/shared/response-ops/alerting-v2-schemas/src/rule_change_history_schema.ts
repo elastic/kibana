@@ -13,16 +13,21 @@ import {
   RULE_CHANGE_HISTORY_MAX_PER_PAGE,
   RULE_CHANGE_HISTORY_MAX_RESULT_WINDOW,
 } from './constants';
-import type { RuleResponse } from './rule_data_schema';
+import { ruleIdSchema, type RuleResponse } from './rule_data_schema';
 
 /**
- * Query params for `GET …/rules/{id}/history`.
+ * Query params for `GET …/change_history/rules`.
+ *
+ * `rule_id` is singular because each row's diff is computed against its
+ * predecessor in the same rule's stream; interleaving rules would diff
+ * unrelated configurations.
  *
  * Pagination mirrors execution-history: 1-based `page`, bounded `per_page`,
  * and a max result window guard so callers cannot page arbitrarily deep.
  */
 export const listRuleChangeHistoryRequestSchema = z
   .object({
+    rule_id: ruleIdSchema,
     page: queryIntSchema({ min: 1, max: RULE_CHANGE_HISTORY_MAX_RESULT_WINDOW })
       .default(1)
       .describe('Page number (1-based).'),
@@ -35,20 +40,30 @@ export const listRuleChangeHistoryRequestSchema = z
     message: `page * per_page cannot exceed ${RULE_CHANGE_HISTORY_MAX_RESULT_WINDOW}.`,
     path: ['page'],
   });
+
 export type ListRuleChangeHistoryRequest = z.infer<typeof listRuleChangeHistoryRequestSchema>;
 
-/** Path params for `GET …/rules/{id}/history/{event_id}`. */
+/** Path params for `GET …/change_history/rules/{change_id}`. */
 export const getRuleChangeHistoryEventParamsSchema = z
   .object({
-    id: z.string().min(1).max(ID_MAX_LENGTH).describe('The identifier for the rule.'),
-    event_id: z
+    change_id: z
       .string()
       .min(1)
       .max(ID_MAX_LENGTH)
-      .describe('The change-history event identifier (`event.id`).'),
+      .describe('The change-history event identifier.'),
   })
   .strict();
 export type GetRuleChangeHistoryEventParams = z.infer<typeof getRuleChangeHistoryEventParamsSchema>;
+
+/**
+ * Query params for `GET …/change_history/rules/{change_id}`.
+ *
+ * `change_id` alone identifies the event; `rule_id` is here only because the
+ * one read API `@kbn/change-history` exposes always filters on an object id.
+ * Tracked for removal in https://github.com/elastic/kibana/issues/292882.
+ */
+export const getRuleChangeHistoryEventQuerySchema = z.object({ rule_id: ruleIdSchema }).strict();
+export type GetRuleChangeHistoryEventQuery = z.infer<typeof getRuleChangeHistoryEventQuerySchema>;
 
 /**
  * Actor for a change-history row. Unattributed writes may carry an empty
