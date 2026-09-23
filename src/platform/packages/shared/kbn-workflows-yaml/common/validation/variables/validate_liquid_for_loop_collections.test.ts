@@ -36,6 +36,7 @@ import {
 } from '../context/get_foreach_state_schema';
 import { getWorkflowContextSchema } from '../context/get_workflow_context_schema';
 import { createMockWorkflowContextRegistry } from '../context/registry.mock';
+import { createStepContextResolver } from '../context/step_context_resolver';
 
 const emptyRegistry = createMockWorkflowContextRegistry();
 
@@ -48,11 +49,15 @@ describe('validateLiquidForLoopCollections', () => {
 
   beforeEach(() => {
     results = validateLiquidForLoopCollections(
-      emptyRegistry,
+      createStepContextResolver(
+        emptyRegistry,
+        forLoopValidationWorkflowDefinition,
+        workflowGraph,
+        yamlDocument
+      ),
       FOR_LOOP_VALIDATION_YAML,
       yamlDocument,
       lineCounter,
-      workflowGraph,
       forLoopValidationWorkflowDefinition
     );
   });
@@ -90,12 +95,17 @@ steps:
       message: '{{ steps.only }}'
 `;
     const plainLineCounter = new LineCounter();
+    const plainDoc = parseDocument(plainYaml, { lineCounter: plainLineCounter });
     const plainResults = validateLiquidForLoopCollections(
-      emptyRegistry,
+      createStepContextResolver(
+        emptyRegistry,
+        forLoopValidationWorkflowDefinition,
+        workflowGraph,
+        plainDoc
+      ),
       plainYaml,
-      parseDocument(plainYaml, { lineCounter: plainLineCounter }),
+      plainDoc,
       plainLineCounter,
-      workflowGraph,
       forLoopValidationWorkflowDefinition
     );
     expect(plainResults).toHaveLength(0);
@@ -110,11 +120,15 @@ steps:
     expect(yamlOffset).toBeGreaterThan(-1);
 
     const foldedResults = validateLiquidForLoopCollections(
-      emptyRegistry,
+      createStepContextResolver(
+        emptyRegistry,
+        forLoopFoldedOnlyWorkflowDefinition,
+        foldedGraph,
+        foldedDoc
+      ),
       FOR_LOOP_FOLDED_ONLY_YAML,
       foldedDoc,
       foldedLineCounter,
-      foldedGraph,
       forLoopFoldedOnlyWorkflowDefinition
     );
 
@@ -135,11 +149,15 @@ steps:
     const nestedGraph = WorkflowGraph.fromWorkflowDefinition(forLoopNestedWorkflowDefinition);
 
     const nestedResults = validateLiquidForLoopCollections(
-      emptyRegistry,
+      createStepContextResolver(
+        emptyRegistry,
+        forLoopNestedWorkflowDefinition,
+        nestedGraph,
+        nestedDoc
+      ),
       FOR_LOOP_NESTED_YAML,
       nestedDoc,
       nestedLineCounter,
-      nestedGraph,
       forLoopNestedWorkflowDefinition
     );
 
@@ -185,11 +203,15 @@ steps:
     }
 
     const runtimeResults = validateLiquidForLoopCollections(
-      emptyRegistry,
+      createStepContextResolver(
+        emptyRegistry,
+        forLoopRuntimeJsonWorkflowDefinition,
+        runtimeGraph,
+        runtimeDoc
+      ),
       FOR_LOOP_RUNTIME_JSON_YAML,
       runtimeDoc,
       runtimeLineCounter,
-      runtimeGraph,
       forLoopRuntimeJsonWorkflowDefinition
     );
     expect(
@@ -205,11 +227,15 @@ steps:
     const esqlGraph = WorkflowGraph.fromWorkflowDefinition(forLoopEsqlCellWorkflowDefinition);
 
     const esqlResults = validateLiquidForLoopCollections(
-      emptyRegistry,
+      createStepContextResolver(
+        emptyRegistry,
+        forLoopEsqlCellWorkflowDefinition,
+        esqlGraph,
+        esqlDoc
+      ),
       FOR_LOOP_ESQL_CELL_YAML,
       esqlDoc,
       esqlLineCounter,
-      esqlGraph,
       forLoopEsqlCellWorkflowDefinition
     );
 
@@ -231,11 +257,15 @@ steps:
     );
 
     const idiomResults = validateLiquidForLoopCollections(
-      emptyRegistry,
+      createStepContextResolver(
+        emptyRegistry,
+        forLoopEmptyArrayIdiomWorkflowDefinition,
+        idiomGraph,
+        idiomDoc
+      ),
       FOR_LOOP_EMPTY_ARRAY_IDIOM_YAML,
       idiomDoc,
       idiomLineCounter,
-      idiomGraph,
       forLoopEmptyArrayIdiomWorkflowDefinition
     );
 

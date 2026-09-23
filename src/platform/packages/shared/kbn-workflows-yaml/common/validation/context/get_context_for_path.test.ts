@@ -525,6 +525,23 @@ describe('getContextSchemaForStep', () => {
 
   const workflowGraph = WorkflowGraph.fromWorkflowDefinition(definition);
 
+  it('traverses predecessors once per context without caching them on the graph', () => {
+    const graph = WorkflowGraph.fromWorkflowDefinition(definition);
+    const getAllPredecessorsSpy = jest.spyOn(graph, 'getAllPredecessors');
+
+    getContextSchemaForStep(emptyRegistry, DynamicStepContextSchema, graph, 'step-a');
+
+    expect(getAllPredecessorsSpy).toHaveBeenCalledTimes(1);
+    expect(getAllPredecessorsSpy).toHaveBeenCalledWith('step-a');
+
+    getContextSchemaForStep(emptyRegistry, DynamicStepContextSchema, graph, 'step-a');
+
+    expect(getAllPredecessorsSpy).toHaveBeenCalledTimes(2);
+    expect(getAllPredecessorsSpy.mock.results[0].value).not.toBe(
+      getAllPredecessorsSpy.mock.results[1].value
+    );
+  });
+
   it('should return baseSchema unmodified for an unknown step name', () => {
     const baseSchema = DynamicStepContextSchema.extend({
       inputs: z.object({}),

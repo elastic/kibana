@@ -95,6 +95,7 @@ export type {
   WorkflowContextRegistry,
 } from './common/validation/context/registry';
 export { getContextSchemaForPath } from './common/validation/context/get_context_for_path';
+export { createStepContextResolver } from './common/validation/context/step_context_resolver';
 
 // Variable validation rules (the `variable-validation` rule group)
 export { collectAllVariables } from './common/validation/variables/collect_all_variables';

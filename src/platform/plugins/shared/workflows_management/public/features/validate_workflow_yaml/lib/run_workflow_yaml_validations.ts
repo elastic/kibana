@@ -14,6 +14,7 @@ import type { WorkflowGraph } from '@kbn/workflows/graph';
 import type { WorkflowContextRegistry, YamlValidationResult } from '@kbn/workflows-yaml';
 import {
   collectAllVariables,
+  createStepContextResolver,
   validateLiquidYamlScalars,
   validateVariables as validateVariablesInternal,
 } from '@kbn/workflows-yaml';
@@ -55,13 +56,15 @@ export function runWorkflowYamlValidations({
   workflowGraph,
   workflowDefinition,
 }: RunWorkflowYamlValidationsParams): YamlValidationResult[] {
+  const stepContext =
+    workflowGraph && workflowDefinition
+      ? createStepContextResolver(registry, workflowDefinition, workflowGraph, yamlDocument)
+      : undefined;
   const liquidScalarResults = validateLiquidYamlScalars(
     yamlString,
     yamlDocument,
     lineCounter,
-    workflowGraph && workflowDefinition
-      ? { registry, workflowGraph, workflowDefinition }
-      : undefined
+    workflowDefinition && stepContext ? { workflowDefinition, stepContext } : undefined
   );
 
   const results: YamlValidationResult[] = [
@@ -79,14 +82,13 @@ export function runWorkflowYamlValidations({
     );
   }
 
-  if (workflowGraph && workflowDefinition) {
+  if (workflowGraph && workflowDefinition && stepContext) {
     const variableItems = collectAllVariables(yamlString, yamlDocument, lineCounter, workflowGraph);
     results.push(
       ...validateTriggerConditions(workflowDefinition, yamlDocument),
       ...validateVariablesInternal(
-        registry,
+        stepContext,
         variableItems,
-        workflowGraph,
         workflowDefinition,
         yamlDocument,
         yamlString

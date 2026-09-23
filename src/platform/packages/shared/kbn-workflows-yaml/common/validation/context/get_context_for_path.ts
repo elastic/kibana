@@ -15,6 +15,7 @@ import {
   isEnterForeach,
   isEnterParallel,
   isEnterWhile,
+  type GraphNodeUnion,
   type WorkflowGraph,
 } from '@kbn/workflows/graph';
 import { DataMapStepTypeId } from '@kbn/workflows-extensions/common';
@@ -26,6 +27,7 @@ import {
 } from './get_data_map_context_schema';
 import { getForeachStateSchema } from './get_foreach_state_schema';
 import { getNearestStepPath } from './get_nearest_step_path';
+import type { StepEntrySchemaCache } from './get_steps_collection_schema';
 import { getStepsCollectionSchema } from './get_steps_collection_schema';
 import type { WorkflowContextRegistry } from './registry';
 import { getValueAtYamlPath } from './get_value_at_yaml_path';
@@ -43,7 +45,8 @@ export function getContextSchemaForStep(
   registry: WorkflowContextRegistry,
   baseSchema: typeof DynamicStepContextSchema,
   workflowGraph: WorkflowGraph,
-  stepName: string
+  stepName: string,
+  stepEntrySchemaCache?: StepEntrySchemaCache
 ): typeof DynamicStepContextSchema {
   const stepId = getStepId(stepName);
   const stepNode = workflowGraph.getStepNode(stepId);
@@ -54,22 +57,28 @@ export function getContextSchemaForStep(
 
   const extension: Record<string, z.ZodType> = {};
 
-  const stepsCollectionSchema = getStepsCollectionSchema(
+  const stepsCollection = getStepsCollectionSchema(
     registry,
     baseSchema,
     workflowGraph,
     stepName,
-    predecessors
+    predecessors,
+    stepEntrySchemaCache
   );
-  if (Object.keys(stepsCollectionSchema.shape).length > 0) {
-    extension.steps = stepsCollectionSchema;
+  if (stepsCollection.size > 0) {
+    extension.steps = stepsCollection.schema;
   }
 
   extension.variables = getVariablesSchema(workflowGraph, stepName, predecessors);
 
   let schema = baseSchema.extend(extension) as typeof DynamicStepContextSchema;
 
-  const enrichments = getStepContextSchemaEnrichmentEntries(schema, workflowGraph, stepName);
+  const enrichments = getStepContextSchemaEnrichmentEntries(
+    schema,
+    workflowGraph,
+    stepName,
+    predecessors
+  );
   if (enrichments.length > 0) {
     const enrichmentShape: Record<string, z.ZodType> = {};
     for (const enrichment of enrichments) {
@@ -145,7 +154,8 @@ function maybeExtendWithTemplateLocals(
 function getStepContextSchemaEnrichmentEntries(
   stepContextSchema: typeof DynamicStepContextSchema,
   workflowExecutionGraph: WorkflowGraph,
-  stepId: string
+  stepId: string,
+  predecessors: readonly GraphNodeUnion[]
 ) {
   const enrichments: { key: 'foreach' | 'while' | 'item' | 'index'; value: z.ZodType }[] = [];
   const stepNode = workflowExecutionGraph.getStepNode(stepId);
@@ -154,7 +164,7 @@ function getStepContextSchemaEnrichmentEntries(
     throw new Error(`Step node not found for step id: ${stepId}`);
   }
 
-  const stack = workflowExecutionGraph.getNodeStack(stepNode?.id);
+  const stack = workflowExecutionGraph.getNodeStack(stepNode.id, predecessors);
 
   for (const nodeId of stack) {
     const node = workflowExecutionGraph.getNode(nodeId);

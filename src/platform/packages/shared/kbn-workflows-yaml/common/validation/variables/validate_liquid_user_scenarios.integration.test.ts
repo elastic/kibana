@@ -15,6 +15,7 @@ import { validateLiquidForLoopCollections } from './validate_liquid_for_loop_col
 import { validateVariables } from './validate_variables';
 import { positionAt } from './__fixtures__/text_position';
 import { createMockWorkflowContextRegistry } from '../context/registry.mock';
+import { createStepContextResolver } from '../context/step_context_resolver';
 
 const emptyRegistry = createMockWorkflowContextRegistry();
 
@@ -28,13 +29,13 @@ function assertScenarioPassesValidation(scenario: ScenarioDefinition): void {
   const lineCounter = new LineCounter();
   const doc = parseDocument(scenario.yaml, { lineCounter });
   const graph = WorkflowGraph.fromWorkflowDefinition(scenario.definition);
+  const stepContext = createStepContextResolver(emptyRegistry, scenario.definition, graph, doc);
 
   const collectionResults = validateLiquidForLoopCollections(
-    emptyRegistry,
+    stepContext,
     scenario.yaml,
     doc,
     lineCounter,
-    graph,
     scenario.definition
   );
   const collectionErrors = collectionResults.filter((r) => r.severity === 'error');
@@ -60,9 +61,8 @@ function assertScenarioPassesValidation(scenario: ScenarioDefinition): void {
   });
 
   const variableResults = validateVariables(
-    emptyRegistry,
+    stepContext,
     variableItems,
-    graph,
     scenario.definition,
     doc,
     scenario.yaml
@@ -157,13 +157,13 @@ steps:
     const lineCounter = new LineCounter();
     const doc = parseDocument(yaml, { lineCounter });
     const graph = WorkflowGraph.fromWorkflowDefinition(definition);
+    const stepContext = createStepContextResolver(emptyRegistry, definition, graph, doc);
 
     const collectionResults = validateLiquidForLoopCollections(
-      emptyRegistry,
+      stepContext,
       yaml,
       doc,
       lineCounter,
-      graph,
       definition
     );
     expect(collectionResults.filter((r) => r.severity === 'error')).toEqual([]);
@@ -175,7 +175,7 @@ steps:
     const end = positionAt(yaml, offset + match![0].length);
 
     const variableResults = validateVariables(
-      emptyRegistry,
+      stepContext,
       [
         {
           id: 'row.typo-var',
@@ -189,7 +189,6 @@ steps:
           offset,
         },
       ],
-      graph,
       definition,
       doc,
       yaml

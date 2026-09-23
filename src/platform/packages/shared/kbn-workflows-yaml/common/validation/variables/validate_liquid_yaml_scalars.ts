@@ -10,10 +10,8 @@
 import _ from 'lodash';
 import type { Document, LineCounter, Node, Pair, Scalar } from 'yaml';
 import { visit } from 'yaml';
-import { DynamicStepContextSchema } from '@kbn/workflows';
-import type { WorkflowYaml } from '@kbn/workflows';
+import type { DynamicStepContextSchema, WorkflowYaml } from '@kbn/workflows';
 import { getPathFromAncestors } from '@kbn/workflows/common/utils/yaml';
-import type { WorkflowGraph } from '@kbn/workflows/graph';
 import type { YamlValidationErrorSeverity, YamlValidationResult } from '../types';
 import { extractLiquidErrorPosition } from '../../liquid/extract_liquid_error_position';
 import { parseTemplateString } from '../../liquid/liquid_parse_cache';
@@ -28,14 +26,12 @@ import {
   isLiquidStringLiteral,
   resolveAssignChain,
 } from '../context/extract_template_local_context';
-import { getContextSchemaForStep } from '../context/get_context_for_path';
 import {
   getForeachCollectionDiagnostic,
   getForeachItemSchema,
 } from '../context/get_foreach_state_schema';
 import { getNearestStepPath } from '../context/get_nearest_step_path';
-import { getWorkflowContextSchema } from '../context/get_workflow_context_schema';
-import type { WorkflowContextRegistry } from '../context/registry';
+import type { StepContextResolver } from '../context/step_context_resolver';
 
 const LIQUID_OUTPUT_PATTERN = '{{';
 const LIQUID_TAG_PATTERN = '{%';
@@ -49,20 +45,14 @@ interface CollectionDiagnostic {
 
 /** Grouped because the Liquid syntax pass runs without them, on YAML that fails schema parse or graph build. */
 export interface LiquidContextDeps {
-  readonly registry: WorkflowContextRegistry;
-  readonly workflowGraph: WorkflowGraph;
   readonly workflowDefinition: WorkflowYaml;
+  readonly stepContext: StepContextResolver;
 }
 
-interface ForLoopValidationContext {
+interface ForLoopValidationContext extends LiquidContextDeps {
   readonly yamlString: string;
   readonly lineCounter: LineCounter;
-  readonly registry: WorkflowContextRegistry;
-  readonly workflowGraph: WorkflowGraph;
-  readonly workflowDefinition: WorkflowYaml;
   readonly yamlDocument: Document;
-  readonly baseSchema: typeof DynamicStepContextSchema;
-  readonly stepSchemaCache: Map<string, typeof DynamicStepContextSchema>;
 }
 
 /**
@@ -86,14 +76,6 @@ export function validateLiquidYamlScalars(
         lineCounter,
         ...contextDeps,
         yamlDocument,
-        baseSchema: DynamicStepContextSchema.merge(
-          getWorkflowContextSchema(
-            contextDeps.registry,
-            contextDeps.workflowDefinition,
-            yamlDocument
-          )
-        ) as typeof DynamicStepContextSchema,
-        stepSchemaCache: new Map(),
       }
     : null;
 
@@ -208,16 +190,7 @@ function collectForLoopCollectionResults(
     return results;
   }
 
-  let stepSchema = ctx.stepSchemaCache.get(nearestStep.name);
-  if (!stepSchema) {
-    stepSchema = getContextSchemaForStep(
-      ctx.registry,
-      ctx.baseSchema,
-      ctx.workflowGraph,
-      nearestStep.name
-    );
-    ctx.stepSchemaCache.set(nearestStep.name, stepSchema);
-  }
+  const stepSchema = ctx.stepContext.forStep(nearestStep.name);
 
   const forLoopScopes = getAllForLoopScopes(templateString);
   for (const scope of forLoopScopes) {

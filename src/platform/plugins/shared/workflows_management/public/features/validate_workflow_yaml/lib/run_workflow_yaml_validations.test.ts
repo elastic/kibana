@@ -15,6 +15,51 @@ import { performComputation } from '../../../entities/workflows/store/workflow_d
 const emptyRegistry = createMockWorkflowContextRegistry();
 
 describe('runWorkflowYamlValidations', () => {
+  it('shares step contexts across variable and Liquid validation only within one run', () => {
+    const yaml = [
+      'name: shared-context-workflow',
+      'steps:',
+      '  - name: render',
+      '    type: console',
+      '    with:',
+      '      message: "{{ consts.missing }} {% for item in consts.missing %}{{ item }}{% endfor %}"',
+    ].join('\n');
+    const { yamlDocument, yamlLineCounter, workflowGraph, workflowDefinition } =
+      performComputation(yaml);
+    if (!yamlDocument || !yamlLineCounter || !workflowGraph || !workflowDefinition) {
+      throw new Error('Expected a parsed workflow and graph');
+    }
+    const getAllPredecessorsSpy = jest.spyOn(workflowGraph, 'getAllPredecessors');
+    const model = monaco.editor.createModel(yaml, 'yaml');
+    const params = {
+      registry: emptyRegistry,
+      yamlString: yaml,
+      model,
+      yamlDocument,
+      lineCounter: yamlLineCounter,
+      workflowGraph,
+      workflowDefinition,
+    };
+
+    try {
+      const results = runWorkflowYamlValidations(params);
+
+      expect(results).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ ruleId: 'invalidVariableReference', severity: 'error' }),
+          expect.objectContaining({ ruleId: 'invalidCollectionPath', severity: 'error' }),
+        ])
+      );
+      expect(getAllPredecessorsSpy).toHaveBeenCalledTimes(1);
+      expect(getAllPredecessorsSpy).toHaveBeenCalledWith('render');
+
+      expect(runWorkflowYamlValidations(params)).toEqual(results);
+      expect(getAllPredecessorsSpy).toHaveBeenCalledTimes(2);
+    } finally {
+      model.dispose();
+    }
+  });
+
   it('reports variable validation errors with line-accurate positions', () => {
     const yaml = [
       'name: test-workflow',
