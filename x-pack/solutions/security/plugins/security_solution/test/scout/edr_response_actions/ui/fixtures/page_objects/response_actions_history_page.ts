@@ -45,14 +45,7 @@ export class ResponseActionsHistoryPage {
     const shouldSelect = (await option.getAttribute('aria-checked')) !== 'true';
 
     await this.clickTypeOption(option);
-    if (!(await this.reachesCheckedState(option, shouldSelect, 2_000))) {
-      await this.clickTypeOption(option);
-      if (!(await this.reachesCheckedState(option, shouldSelect, 5_000))) {
-        throw new Error(
-          `Types filter "${label}" did not become ${shouldSelect ? 'checked' : 'unchecked'}`
-        );
-      }
-    }
+    await this.waitForCheckedState(option, shouldSelect);
 
     // Leave the popover open. Selecting an option does not close it, and
     // clicking the filter button to dismiss it opens the popover again.
@@ -85,20 +78,11 @@ export class ResponseActionsHistoryPage {
     await option.click();
   }
 
-  private async reachesCheckedState(
-    option: Locator,
-    selected: boolean,
-    timeout: number
-  ): Promise<boolean> {
+  private async waitForCheckedState(option: Locator, selected: boolean): Promise<void> {
     const checkedState = selected
       ? option.and(this.page.locator('[aria-checked="true"]'))
       : option.and(this.page.locator(':not([aria-checked="true"])'));
-    try {
-      await checkedState.waitFor({ state: 'attached', timeout });
-      return true;
-    } catch {
-      return false;
-    }
+    await checkedState.waitFor({ state: 'attached' });
   }
 
   private async waitForTypeQuery(label: string, selected: boolean): Promise<void> {
