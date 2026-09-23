@@ -9,9 +9,9 @@
 
 import { type Document, isPair, isScalar, type LineCounter, visit } from 'yaml';
 import { getHitlChannelConnectorTypeFromPath } from '@kbn/workflows';
+import type { ConnectorIdItem } from '@kbn/workflows-yaml';
 import { getPathFromAncestors } from '../../../../common/lib/yaml';
 import { getConnectorTypeIdForTriggerEventId } from '../../../../common/triggers/connector_event_triggers';
-import type { ConnectorIdItem } from '../model/types';
 
 function isConnectorIdValue(node: unknown, lastAncestor: unknown): boolean {
   return isPair(lastAncestor) && lastAncestor.value === node;
