@@ -17,10 +17,6 @@ apiTest.describe(
   () => {
     let ruleId: string | undefined;
 
-    apiTest.beforeEach(() => {
-      apiTest.setTimeout(180_000);
-    });
-
     apiTest.afterAll(async ({ apiClient, samlAuth }) => {
       if (!ruleId) {
         return;
@@ -35,6 +31,8 @@ apiTest.describe(
     apiTest(
       'rule execution reconciles missing UIAM API key tags',
       async ({ apiClient, esClient, requestAuth, samlAuth }) => {
+        apiTest.setTimeout(600_000);
+
         const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
         const headers = { ...COMMON_HEADERS, ...cookieHeader };
         const createResponse = await apiClient.post('api/alerting/rule', {

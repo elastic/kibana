@@ -35,20 +35,29 @@ export const updateRuleMissingUiamKeyTag = async (
     includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE],
     excludedExtensions: [SPACES_EXTENSION_ID],
   });
-  const updatedSavedObject = await savedObjectsClient.update<RawRule>(
-    RULE_SAVED_OBJECT_TYPE,
-    ruleId,
-    rawRule,
-    {
-      mergeAttributes: false,
-      namespace: context.spaceIdToNamespace(spaceId),
-      version: ruleData.version,
-    }
-  );
+  try {
+    const updatedSavedObject = await savedObjectsClient.update<RawRule>(
+      RULE_SAVED_OBJECT_TYPE,
+      ruleId,
+      rawRule,
+      {
+        mergeAttributes: false,
+        namespace: context.spaceIdToNamespace(spaceId),
+        version: ruleData.version,
+      }
+    );
 
-  return {
-    ...ruleData,
-    version: updatedSavedObject.version,
-    rawRule,
-  };
+    return {
+      ...ruleData,
+      version: updatedSavedObject.version,
+      rawRule,
+    };
+  } catch (error) {
+    context.logger.warn(
+      `Failed to update missing UIAM API key tags for rule ${ruleId}: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+    return ruleData;
+  }
 };

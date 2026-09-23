@@ -6,6 +6,7 @@
  */
 
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import {
   LEGACY_MISSING_UIAM_API_KEY_TAG,
   MISSING_UIAM_API_KEY_TAG,
@@ -23,10 +24,12 @@ const unsafeSavedObjectsClient = savedObjectsServiceMock
   .createStartContract()
   .getUnsafeInternalClient();
 const mockUpdate = jest.mocked(unsafeSavedObjectsClient.update);
+const logger = loggingSystemMock.createLogger();
 
 const context = {
   apiKeyType: ApiKeyType.UIAM,
   isServerless: true,
+  logger,
   savedObjects,
   shouldGrantUiam: true,
   spaceIdToNamespace: jest.fn().mockReturnValue(spaceId),
@@ -109,5 +112,17 @@ describe('updateRuleMissingUiamKeyTag', () => {
 
     expect(result).toBe(ruleData);
     expect(mockUpdate).not.toHaveBeenCalled();
+  });
+
+  test('continues with the loaded rule when updating its tags fails', async () => {
+    const ruleData = getRuleData({ uiamApiKey: null, tags: [] });
+    mockUpdate.mockRejectedValueOnce(new Error('saved object update failed'));
+
+    const result = await updateRuleMissingUiamKeyTag(context, ruleId, spaceId, ruleData);
+
+    expect(result).toBe(ruleData);
+    expect(logger.warn).toHaveBeenCalledWith(
+      `Failed to update missing UIAM API key tags for rule ${ruleId}: saved object update failed`
+    );
   });
 });
