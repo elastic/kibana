@@ -41,7 +41,6 @@ jest.mock('./routes/register_routes', () => ({
 
 const createConfig = (overrides: Partial<AlertZeroConfig> = {}): AlertZeroConfig => ({
   enabled: false,
-  ui: { useMockData: true },
   ...overrides,
 });
 
@@ -184,7 +183,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
       plugin.start(coreStart, {
         spaces: undefined,
         workflowsExtensions,
-        agenticInvestigations: { getProposalsService: jest.fn().mockReturnValue({}) },
+        proposals: { getProposalsService: jest.fn().mockReturnValue({}) },
       } as never);
 
       expect(initializeManagedWorkflows).toHaveBeenCalledWith(
@@ -203,7 +202,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         spaces: undefined,
         workflowsExtensions: { initManagedWorkflowsClient: jest.fn() },
         agentBuilder,
-        agenticInvestigations: { getProposalsService: jest.fn().mockReturnValue({}) },
+        proposals: { getProposalsService: jest.fn().mockReturnValue({}) },
       } as never);
 
       expect(ensureAgentSafe).toHaveBeenCalledWith(

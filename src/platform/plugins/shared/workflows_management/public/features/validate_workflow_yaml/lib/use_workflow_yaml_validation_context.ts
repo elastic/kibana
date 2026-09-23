@@ -15,6 +15,7 @@ import type {
   WorkflowYamlValidationContext,
 } from './collect_full_workflow_yaml_validation_results';
 import { useGetPropertyHandler } from './property_handlers/use_get_property_handler';
+import { createWorkflowContextRegistry } from '../../../../common/lib/create_workflow_context_registry';
 import { useAvailableConnectors } from '../../../entities/connectors/model/use_available_connectors';
 import {
   selectConnectorsLoadState,
@@ -41,7 +42,11 @@ export function useWorkflowYamlValidationContext(): WorkflowYamlValidationContex
   const connectorsData = useAvailableConnectors();
   const connectorsLoadState = useSelector(selectConnectorsLoadState);
   const workflows = useSelector(selectWorkflows);
-  const { application, http, data, licensing } = useKibana().services;
+  const { application, http, data, licensing, workflowsExtensions } = useKibana().services;
+  const registry = useMemo(
+    () => createWorkflowContextRegistry(workflowsExtensions),
+    [workflowsExtensions]
+  );
   const esqlCallbacks = useWorkflowEsqlCallbacks({
     http,
     application,
@@ -54,6 +59,7 @@ export function useWorkflowYamlValidationContext(): WorkflowYamlValidationContex
 
   return useMemo(
     () => ({
+      registry,
       connectorTypes: getConnectorTypesValidationState(connectorsData, connectorsLoadState),
       connectorsManagementUrl: application.getUrlForApp('management', {
         deepLinkId: 'triggersActionsConnectors',
@@ -63,7 +69,7 @@ export function useWorkflowYamlValidationContext(): WorkflowYamlValidationContex
       getPropertyHandler,
       esqlCallbacks: esqlCallbacksRef.current,
     }),
-    [application, connectorsData, connectorsLoadState, getPropertyHandler, workflows]
+    [application, connectorsData, connectorsLoadState, getPropertyHandler, registry, workflows]
   );
 }
 
