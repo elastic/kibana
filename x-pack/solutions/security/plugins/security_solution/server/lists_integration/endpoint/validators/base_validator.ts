@@ -223,10 +223,11 @@ export class BaseValidator {
   /**
    * Trims edge whitespace from entry values in place.
    *
-   * Only artifacts whose fields are a fixed, known set of paths/hashes/signers (Trusted Apps and
-   * Blocklist) should call this. Artifacts that let the user pick any field from the events index
-   * (Event Filters, Endpoint Exceptions) must not, because edge whitespace can be part of a
-   * legitimate value there — a Linux file name or a registry value name, for example.
+   * Only artifacts whose fields are a fixed, known set of paths/hashes/signers (basic-mode Trusted
+   * Apps and Blocklist) should call this. Artifacts that let the user pick any field from the
+   * events index (Event Filters, Endpoint Exceptions, advanced-mode Trusted Apps) must not, because
+   * edge whitespace can be part of a legitimate value there — a Linux file name or a registry value
+   * name, for example.
    */
   protected trimEntryValues(item: ExceptionItemLikeOptions): void {
     this.forEachLiteralEntry(item, (entry) => {

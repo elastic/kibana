@@ -133,6 +133,17 @@ describe('Endpoint Exceptions API validations', () => {
       expect(item.entries[0]).toEqual(expect.objectContaining({ value: 'a'.repeat(64) }));
     });
 
+    it('does not trim edge whitespace in advanced mode', async () => {
+      enableAdvancedMode();
+      const item = buildItem(
+        [{ field: 'process.args', type: 'match', operator: 'included', value: ' elastic ' }],
+        [GLOBAL_ARTIFACT_TAG, 'form_mode:advanced']
+      );
+
+      await expect(validator.validatePreCreateItem(item)).resolves.toBeDefined();
+      expect(item.entries[0]).toEqual(expect.objectContaining({ value: ' elastic ' }));
+    });
+
     it('rejects a nested null character on update', async () => {
       await expect(
         validator.validatePreUpdateItem(
