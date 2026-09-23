@@ -10,6 +10,7 @@
 import { mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { dirname, join } from 'path';
+import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 
 jest.mock('../../evals_tracing/stateful/classic.stateful.config', () => ({
   servers: {
@@ -109,6 +110,12 @@ describe('Nightshift remote telemetry configuration', () => {
   it('reserves capacity for sixteen normal workflow tasks plus background tasks', () => {
     process.env.NIGHTSHIFT_CONCURRENCY = '16';
     expect(readServers().kbnTestServer.serverArgs).toContain('--xpack.task_manager.capacity=21');
+  });
+
+  it('enables the current investigation availability flag', () => {
+    expect(readServers().kbnTestServer.serverArgs).toContain(
+      `--feature_flags.overrides.${NIGHTSHIFT_ENABLED_FLAG}=true`
+    );
   });
 
   it.each([

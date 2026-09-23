@@ -10,6 +10,7 @@
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
+import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import type { ScoutServerConfig } from '../../../../../types';
 import { servers as tracing } from '../../evals_tracing/stateful/classic.stateful.config';
 
@@ -110,7 +111,7 @@ const createInvestigationConfig = (): ScoutServerConfig => {
         '--xpack.nightshift_investigations.enabled=true',
         // Capacity counts normal-cost tasks, not raw cost units; reserve five background task slots.
         `--xpack.task_manager.capacity=${Math.max(10, concurrency + 5)}`,
-        '--feature_flags.overrides.streams.significantEventsAvailable=true',
+        `--feature_flags.overrides.${NIGHTSHIFT_ENABLED_FLAG}=true`,
         '--xpack.nightshift_investigations.cortex.enabled=false',
         `--config=${sandboxConfigPath}`,
         '--uiSettings.overrides.workflows:ui:enabled=true',
