@@ -29,7 +29,7 @@ module.exports = {
       },
     ],
   },
-  create: (context) => {
+  createOnce: (context) => {
     return {
       Program(program) {
         const licenses = init(context, program, () => {
@@ -56,7 +56,7 @@ module.exports = {
 
         if (!licenses || !licenses.length) return;
 
-        const sourceCode = context.getSourceCode();
+        const sourceCode = context.sourceCode;
 
         sourceCode
           .getAllComments()

@@ -44,7 +44,7 @@ for (const ruleName of ruleNames) {
     throw new Error(`Oxlint plugin rule '${ruleName}' must use createOnce.`);
   }
 
-  const testFile = resolve(testDirectory, `../${ruleName}.test.js`);
+  const testFile = resolve(testDirectory, `../${ruleName.replaceAll('-', '_')}.test.js`);
   try {
     require.resolve(testFile);
   } catch {
