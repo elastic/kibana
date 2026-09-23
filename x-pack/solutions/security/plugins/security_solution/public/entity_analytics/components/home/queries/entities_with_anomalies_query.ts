@@ -38,13 +38,11 @@ export const buildEntitiesWithAnomaliesCountQuery = (
     parts.push(`| EVAL ${euid.esql.getEuidEvaluation(entityType, `${entityType}_euid`)}`);
   }
 
-  // Build derived_euids as multi-value so a multi-typed anomaly record contributes all
-  // entity types — consistent with the alerts pipeline. Nulls filtered after MV_EXPAND.
+  // Pick the first non-null EUID across entity types. MV_APPEND of two computed scalars
+  // does not reliably produce a multi-value field in all ES|QL versions (MV_APPEND(scalar, null)
+  // may return null), so we use COALESCE over individual scalar columns instead.
   const euidVars = ENTITY_TYPES.map((t) => `${t}_euid`);
-  const nestedMvAppend = euidVars
-    .slice(0, -1)
-    .reduceRight((inner, v) => `MV_APPEND(${v}, ${inner})`, euidVars[euidVars.length - 1]);
-  parts.push(`| EVAL derived_euids = ${nestedMvAppend}`);
+  parts.push(`| EVAL derived_euids = COALESCE(${euidVars.join(', ')})`);
   parts.push(`| MV_EXPAND derived_euids`);
   parts.push(`| WHERE derived_euids IS NOT NULL`);
   // STATS BY on a temp column avoids grouping on the mapped entity.id field in the anomalies

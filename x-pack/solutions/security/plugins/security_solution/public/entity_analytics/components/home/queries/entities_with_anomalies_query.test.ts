@@ -38,11 +38,9 @@ describe('buildEntitiesWithAnomaliesCountQuery', () => {
     expect(joinIdx).toBeGreaterThan(renameIdx);
   });
 
-  it('combines entity type EUIDs with nested MV_APPEND', () => {
+  it('picks the first non-null EUID via COALESCE across entity types', () => {
     const query = buildEntitiesWithAnomaliesCountQuery(mockEuid, '.entities-v1');
-    expect(query).toContain(
-      '| EVAL derived_euids = MV_APPEND(user_euid, MV_APPEND(host_euid, service_euid))'
-    );
+    expect(query).toContain('| EVAL derived_euids = COALESCE(user_euid, host_euid, service_euid)');
   });
 
   it('applies entity filter clauses after the LOOKUP JOIN', () => {
