@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { ActionPolicySnoozeButton } from './action_policy_snooze_button';
@@ -87,13 +86,13 @@ describe('ActionPolicySnoozeButton', () => {
     expect(onSnooze).not.toHaveBeenCalled();
   });
 
-  it('opens the snooze modal and applies the selected duration', async () => {
+  it('opens the snooze modal and applies the selected duration', () => {
     renderButton(createPolicy());
 
-    await userEvent.click(screen.getByTestId('actionPolicySnoozeButton'));
+    fireEvent.click(screen.getByTestId('actionPolicySnoozeButton'));
     expect(screen.getByTestId('actionPolicySnoozeModal')).toBeInTheDocument();
 
-    await userEvent.click(screen.getByTestId('actionPolicySnoozeModalApply'));
+    fireEvent.click(screen.getByTestId('actionPolicySnoozeModalApply'));
 
     expect(onSnooze).toHaveBeenCalledTimes(1);
     const [id, snoozedUntil] = onSnooze.mock.calls[0];
