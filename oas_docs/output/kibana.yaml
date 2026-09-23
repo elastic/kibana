@@ -146442,8 +146442,7 @@ components:
         A reusable field definition from the field library. The `legacyKey` attribute, which is a server-managed link to a migrated v1 custom field, is not included in the public API response.
       properties:
         definition:
-          description: The field definition as a YAML string.
-          maxLength: 30000
+          description: The field definition as a YAML string. New definitions are limited to 30 000 characters, but existing definitions created via internal tooling may be longer.
           type: string
         description:
           description: Optional human-readable description of the field's purpose.

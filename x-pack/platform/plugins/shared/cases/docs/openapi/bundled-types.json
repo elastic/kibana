@@ -5913,8 +5913,7 @@
           },
           "definition": {
             "type": "string",
-            "maxLength": 30000,
-            "description": "The field definition as a YAML string."
+            "description": "The field definition as a YAML string. New definitions are limited to 30 000 characters, but existing definitions created via internal tooling may be longer.\n"
           },
           "owner": {
             "$ref": "#/components/schemas/owner"
