@@ -35,8 +35,6 @@ export {
 export { OverviewTab } from './src/components/details/details_flyout_tab_contents';
 export { DetailsBlock } from './src/components/details/detail_block';
 
-export { TimelineEventList } from './src/components/timeline/timeline_event_list';
-
 export {
   registerAgenticInvestigationTemplateUI,
   type RegisterAgenticInvestigationTemplateUIOptions,
