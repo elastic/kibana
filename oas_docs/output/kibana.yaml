@@ -45395,6 +45395,16 @@ paths:
                   description: Incremented by callers performing a retry.
                   minimum: 1
                   type: number
+                authMethod:
+                  enum:
+                    - identity_federation
+                    - static_keys
+                    - null
+                  nullable: true
+                  type: string
+                connectorId:
+                  enum: []
+                  nullable: true
                 deploymentId:
                   description: CFN stack ARN (or equivalent); provided by the client after manual deployment.
                   maxLength: 2048
