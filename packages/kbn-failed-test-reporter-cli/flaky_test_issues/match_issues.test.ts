@@ -274,6 +274,43 @@ describe('findMatchingIssues', () => {
     ]);
   });
 
+  it('keeps a per-test issue to its framework, when the metadata records one', () => {
+    const directory = SUITE_PATH.replace(/\/[^/]+$/, '');
+    const [playwright] = groupIntoSuites([
+      flakyTest({ title: 'loads', suiteTitle: 'A', framework: 'playwright' }),
+    ]);
+    const [jest] = groupIntoSuites([
+      flakyTest({ title: 'loads', suiteTitle: 'A', framework: 'jest' }),
+    ]);
+    const jestIssue = describeIssue(
+      githubIssue({
+        number: 51,
+        body: updateIssueMetadata(`| Location | ${SUITE_PATH} |`, {
+          'test.class': `Jest Tests.${directory}`,
+          'test.name': 'A loads',
+          'test.type': 'jest',
+        }),
+      })
+    );
+    const cypressIssue = describeIssue(
+      githubIssue({
+        number: 52,
+        body: updateIssueMetadata(`| Location | ${SUITE_PATH} |`, {
+          'test.class': 'Security Solution Cypress.cypress/e2e',
+          'test.name': 'A loads',
+        }),
+      })
+    );
+
+    // same name, other framework: a mention of the file, not a match of the test
+    expect(findMatchingIssues(playwright, [jestIssue]).map(({ match }) => match)).toEqual(['file']);
+    expect(findMatchingIssues(jest, [jestIssue]).map(({ match }) => match)).toEqual(['test']);
+    // no test.type recorded: the name still counts, as before
+    expect(findMatchingIssues(playwright, [cypressIssue]).map(({ match }) => match)).toEqual([
+      'test',
+    ]);
+  });
+
   it('matches Scout issues by test id, or by file for other tests of the suite', () => {
     const [suite] = groupIntoSuites([
       flakyTest({ testId: 'id-1', title: 'creates default alert' }),

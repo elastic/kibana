@@ -8,6 +8,7 @@
  */
 
 import Path from 'path';
+import type { TestFramework } from '@kbn/scout-reporting';
 import { getLocationFromClassname } from '../failed_tests_reporter/get_failures';
 import type { GithubIssue } from '../failed_tests_reporter/github_api';
 import { getIssueMetadata } from '../failed_tests_reporter/issue_metadata';
@@ -39,6 +40,11 @@ export interface IssueDetails {
   jestDirectory?: string;
   /** Full test name from the metadata, i.e. the describe blocks followed by the test title. */
   testName?: string;
+  /**
+   * Framework of a per-test issue, from the `test.type` the failed-test reporter records
+   * (`scout` is Playwright); absent for Cypress issues and hand-written ones.
+   */
+  testFramework?: TestFramework;
   /** Title and body with JUnit's `·` restored to `.`, so file paths can be looked up in it. */
   text: string;
 }
@@ -71,6 +77,13 @@ const metadataString = (body: string, key: string): string | undefined => {
   return typeof value === 'string' ? value : undefined;
 };
 
+/** `test.type` as `report_failed_tests` records it, mapped to the report's framework names. */
+const TEST_TYPE_FRAMEWORKS: Record<string, TestFramework> = {
+  jest: 'jest',
+  ftr: 'ftr',
+  scout: 'playwright',
+};
+
 /** Extracts the matching keys of an issue once, so every suite can be checked cheaply. */
 export const describeIssue = (issue: GithubIssue): IssueDetails => {
   const className = metadataString(issue.body, 'test.class') ?? '';
@@ -78,6 +91,7 @@ export const describeIssue = (issue: GithubIssue): IssueDetails => {
   const classLocation = getLocationFromClassname(className);
   const location = issue.body.match(LOCATION_ROW)?.[1];
   const suiteMetadata = readFlakySuiteIssueMetadata(issue.body);
+  const testType = metadataString(issue.body, 'test.type');
   return {
     issue,
     suiteFilePath: suiteMetadata?.['suite.filePath'] ?? readSuiteFilePathFromTitle(issue.title),
@@ -91,6 +105,7 @@ export const describeIssue = (issue: GithubIssue): IssueDetails => {
       : undefined,
     jestDirectory: className.startsWith(JEST_CLASS_PREFIX) ? classLocation : undefined,
     testName: metadataString(issue.body, 'test.name'),
+    testFramework: testType === undefined ? undefined : TEST_TYPE_FRAMEWORKS[testType],
     text: undot(`${issue.title}\n${issue.body}`),
   };
 };
@@ -200,9 +215,14 @@ export const findMatchingIssues = (
   const matches: MatchedIssue[] = [];
   for (const details of issues) {
     const { issue, suiteFilePath, suiteTitle, suiteFramework, scoutTestId, filePath } = details;
-    const { jestDirectory, testName, text } = details;
+    const { jestDirectory, testName, testFramework, text } = details;
     const mentionsFile = text.includes(suite.filePath);
-    const namesFlakyTest = testName !== undefined && namesTest(testName, suite);
+    // A per-test issue is about this suite's test only if the frameworks agree, when known: a
+    // Jest and a Playwright test in one directory may share a name
+    const namesFlakyTest =
+      testName !== undefined &&
+      namesTest(testName, suite) &&
+      (testFramework === undefined || testFramework === suite.framework);
 
     // An issue about the whole file is about each of its suites; one file can hold suites of
     // several frameworks, so a recorded framework has to agree too
