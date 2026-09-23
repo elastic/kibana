@@ -3213,6 +3213,10 @@ src/platform/packages/shared/kbn-workflows/managed/definitions/threat_intel @ela
 /x-pack/solutions/security/plugins/security_solution/server/threat_intel @elastic/security-investigations
 /x-pack/solutions/security/plugins/security_solution/common/threat_intel @elastic/security-investigations
 /x-pack/solutions/security/plugins/security_solution/test/scout_threat_intel @elastic/security-investigations
+# Scout config sets live under kbn-scout (appex-qa by default); override so TI
+# supply changes do not require appex-qa review.
+/src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/threat_intel @elastic/security-investigations
+/src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/evals_threat_intel @elastic/security-investigations
 x-pack/solutions/security/plugins/security_solution/common/workflows/alert_analysis_workflow.ts @elastic/security-investigations
 x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management_ui/pages/alert_analysis_workflow @elastic/security-investigations
 x-pack/solutions/security/plugins/security_solution/server/workflows/alert_analysis_workflow @elastic/security-investigations
