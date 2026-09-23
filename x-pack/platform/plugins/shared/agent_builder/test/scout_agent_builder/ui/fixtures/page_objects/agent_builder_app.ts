@@ -9,7 +9,7 @@ import type { ToolConfirmationPolicyMode, ToolType } from '@kbn/agent-builder-co
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import type { LlmProxy } from '@kbn/ftr-llm-proxy';
 import type { ScoutPage } from '@kbn/scout';
-import { KibanaCodeEditorWrapper } from '@kbn/scout';
+import { euiSelectors, KibanaCodeEditorWrapper } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { subj } from '@kbn/test-subj-selector';
 import {
@@ -600,7 +600,7 @@ export class AgentBuilderApp {
     const deleteActionSelector = `agentBuilderAgentsListDelete-${agentId}`;
     await this.agentAction(agentId, deleteActionSelector).click();
     const modal = this.page.locator(
-      '.euiModal[role="alertdialog"][aria-labelledby^="agentDeleteModalTitle"]'
+      `${euiSelectors.modal.ROOT_SELECTOR}[role="alertdialog"][aria-labelledby^="agentDeleteModalTitle"]`
     );
     return {
       getTitle: async () => {
