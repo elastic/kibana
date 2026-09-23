@@ -15,7 +15,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { coreMock } from '@kbn/core/public/mocks';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/public/mocks';
-import { useApproveProposal, useDismissProposal } from '@kbn/agentic-investigations-plugin/public';
+import { useApproveProposal, useDismissProposal } from '@kbn/proposals-plugin/public';
 import {
   useProposalsByCategory,
   useProposalsByCategoryCount,
@@ -29,8 +29,8 @@ import { ConversationsPage } from './conversations_page';
 
 // Only the mutations are stubbed: the module also exports DISMISS_REASON_OPTIONS, which
 // the dismiss modal's select needs for real.
-jest.mock('@kbn/agentic-investigations-plugin/public', () => ({
-  ...jest.requireActual('@kbn/agentic-investigations-plugin/public'),
+jest.mock('@kbn/proposals-plugin/public', () => ({
+  ...jest.requireActual('@kbn/proposals-plugin/public'),
   useApproveProposal: jest.fn(),
   useDismissProposal: jest.fn(),
 }));

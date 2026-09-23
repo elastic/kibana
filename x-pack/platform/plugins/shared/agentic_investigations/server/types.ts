@@ -9,37 +9,30 @@ import type { KibanaRequest } from '@kbn/core/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import type {
-  WorkflowsExtensionsServerPluginSetup,
-  WorkflowsExtensionsServerPluginStart,
-} from '@kbn/workflows-extensions/server';
-import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
-import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { AgentBuilderPlatformPluginSetup } from '@kbn/agent-builder-platform-plugin/server';
 import type { ImpactReadClient } from './impact/services/impact_client';
-import type { ProposalsService } from './proposals/services/proposals_service';
-import type { ProposalPrivilegesChecker } from './proposals/services/check_proposal_privileges';
 import type { EscalationsService } from './escalations/services/escalations_service';
 
 export interface AgenticInvestigationsSetupDependencies {
   features: FeaturesPluginSetup;
-  workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
-  workflowsManagement: WorkflowsServerPluginSetup;
-  agentBuilder: AgentBuilderPluginSetup;
+  /**
+   * No API is read from it. Required for ordering: it registers the
+   * `escalation` and `investigation` conversation templates this plugin's
+   * entities are built on, and `EscalationsService` throws at runtime without
+   * them.
+   */
   agentBuilderPlatform: AgentBuilderPlatformPluginSetup;
 }
 
 export interface AgenticInvestigationsStartDependencies {
   /**
-   * Needed to authorize a principal that did not arrive through a route — a
-   * workflow execution deciding or writing a proposal, or an in-process impact
-   * read. Optional because Kibana can run without it; the privilege checks fail
-   * closed when it is absent.
+   * Needed to authorize an in-process impact read, which bypasses the route's
+   * `security.authz`. Optional because Kibana can run without it; the privilege
+   * checks fail closed when it is absent.
    */
   security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
-  workflowsExtensions: WorkflowsExtensionsServerPluginStart;
   agentBuilder: AgentBuilderPluginStart;
 }
 
@@ -49,14 +42,11 @@ export interface AgenticInvestigationsStartDependencies {
  * per entity this plugin owns.
  */
 export interface AgenticInvestigationsPluginStart {
-  getProposalsService: () => ProposalsService;
   /**
    * Request-scoped impact reads. Checks `read_impact` and derives the space
    * from the request, because in-process callers bypass route `security.authz`.
    */
   getImpactClient: (request: KibanaRequest) => ImpactReadClient;
-  /** For in-process callers (Agent Builder tools) that bypass the route's `security.authz`. */
-  getProposalPrivileges: () => ProposalPrivilegesChecker;
   getEscalationsService: () => EscalationsService;
 }
 

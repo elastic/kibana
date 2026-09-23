@@ -9,7 +9,7 @@ import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { queryKeys as platformQueryKeys } from '@kbn/agentic-investigations-plugin/public';
+import { queryKeys as platformQueryKeys } from '@kbn/proposals-plugin/public';
 import { MAX_QUEUE_REACH } from '../../common/proposals/list';
 import {
   PROPOSALS_POLL_INTERVAL_MS,

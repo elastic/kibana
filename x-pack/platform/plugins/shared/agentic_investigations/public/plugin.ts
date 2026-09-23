@@ -6,35 +6,23 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { registerProposalsPublicStepDefinitions } from './proposals/step_types';
 import type {
   AgenticInvestigationsPublicPluginSetup,
   AgenticInvestigationsPublicPluginStart,
-  AgenticInvestigationsPublicSetupDependencies,
-  AgenticInvestigationsPublicStartDependencies,
 } from './types';
 
+/**
+ * The browser side contributes hooks rather than registrations: escalations and
+ * user profiles are consumed directly by a solution's UI.
+ */
 export class AgenticInvestigationsPublicPlugin
   implements Plugin<AgenticInvestigationsPublicPluginSetup, AgenticInvestigationsPublicPluginStart>
 {
-  setup(
-    _core: CoreSetup,
-    { workflowsExtensions }: AgenticInvestigationsPublicSetupDependencies
-  ): AgenticInvestigationsPublicPluginSetup {
-    registerProposalsPublicStepDefinitions(workflowsExtensions);
+  setup(_core: CoreSetup): AgenticInvestigationsPublicPluginSetup {
     return {};
   }
 
-  start(
-    core: CoreStart,
-    startDeps: AgenticInvestigationsPublicStartDependencies
-  ): AgenticInvestigationsPublicPluginStart {
-    if (startDeps.agentBuilder) {
-      const agentBuilder = startDeps.agentBuilder;
-      void import('./proposals/attachments').then(({ registerProposalAttachmentTypes }) => {
-        registerProposalAttachmentTypes(agentBuilder);
-      });
-    }
+  start(_core: CoreStart): AgenticInvestigationsPublicPluginStart {
     return {};
   }
 

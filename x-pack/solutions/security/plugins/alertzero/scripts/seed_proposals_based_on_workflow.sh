@@ -12,10 +12,10 @@ set -euo pipefail
 #      conversation, so every proposal lands on its own card in the queue.
 #
 # IMPORTANT — this does not work on an unpatched checkout. The helper reaches the
-# queue through `workflow.execute` on `system-create-investigation-proposal`,
+# queue through `workflow.execute` on `system-create-proposal`,
 # which is a managed, global workflow. The engine only resolves those for a
 # managed *parent* run, so a manual run of this helper fails with
-# `Workflow not found: "system-create-investigation-proposal"`. To seed locally,
+# `Workflow not found: "system-create-proposal"`. To seed locally,
 # force the parent to count as managed in
 # `src/platform/plugins/shared/workflows_execution_engine/server/step/workflow_execute_step/workflow_execute_step_impl.ts`:
 #
@@ -298,7 +298,7 @@ steps:
   - name: create_proposal
     type: workflow.executeAsync
     with:
-      workflow-id: system-create-investigation-proposal
+      workflow-id: system-create-proposal
       inputs:
         conversationId: "{{ variables.conversation_id }}"
         comment: "{{ variables.comment }}"

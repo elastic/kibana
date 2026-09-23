@@ -1142,7 +1142,7 @@ describe('Attack Discovery worker chain', () => {
       });
 
       it('calls the versioned internal proposals route', () => {
-        expect(JSON.stringify(readback?.with)).toContain('/internal/investigations/proposals/');
+        expect(JSON.stringify(readback?.with)).toContain('/internal/proposals/');
       });
 
       // The two axes are what separate a decline from a lapse, so the read-back is no
@@ -1202,9 +1202,7 @@ describe('Attack Discovery worker chain', () => {
 
     it('creates exactly one proposal', () => {
       expect(
-        reviewSteps.filter(
-          (step) => step.with?.['workflow-id'] === 'system-create-investigation-proposal'
-        )
+        reviewSteps.filter((step) => step.with?.['workflow-id'] === 'system-create-proposal')
       ).toHaveLength(1);
     });
 

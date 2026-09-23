@@ -18,18 +18,6 @@ export type {
 } from './types';
 
 export {
-  retryOnTransientError,
-  useApproveProposal,
-  useDismissProposal,
-  usePendingProposals,
-  useProposal,
-} from './proposals/hooks/use_proposals_api';
-
-export { queryKeys } from './proposals/query_keys';
-
-export { DISMISS_REASON_LABELS, DISMISS_REASON_OPTIONS } from './proposals/dismiss_reason_i18n';
-
-export {
   useListEscalations,
   useCreateEscalation,
   useAddToEscalation,

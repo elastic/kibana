@@ -30,6 +30,11 @@
     "xpack.contentConnectors": "solutions/search/plugins/content_connectors",
     "xpack.contextEngine": "platform/plugins/shared/context_engine",
     "xpack.agenticInvestigations": "platform/plugins/shared/agentic_investigations",
+    "xpack.proposals": [
+      "platform/plugins/shared/proposals",
+      "platform/packages/shared/kbn-proposals-common",
+      "platform/packages/shared/kbn-proposals-ui"
+    ],
     "xpack.csp": [
       "solutions/security/plugins/cloud_security_posture",
       "packages/kbn-cloud-security-posture-common",

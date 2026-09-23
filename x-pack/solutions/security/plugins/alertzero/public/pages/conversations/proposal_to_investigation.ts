@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ProposalConfidence, ProposalImpact } from '@kbn/agentic-investigations-plugin/common';
+import type { ProposalConfidence, ProposalImpact } from '@kbn/proposals-common';
 import type { Investigation, RecommendedAction } from '@kbn/agentic-investigations-common';
 import type { ProposalItem } from '../../../common/proposals/list';
 import { CLOSED_GROUP_KEY } from '../../../common/proposals/list';

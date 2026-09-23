@@ -7,7 +7,7 @@ pageLoadAssetSize:
   agentBuilderSml: 597
   agentBuilderVisualizations: 1551
   agentBuilderWorkflows: 1029
-  agenticInvestigations: 13459
+  agenticInvestigations: 4869
   aiAssistantManagementSelection: 355
   aiops: 586
   alerting: 8789
@@ -156,6 +156,7 @@ pageLoadAssetSize:
   productDocBase: 4218
   productIntercept: 4738
   profiling: 12944
+  proposals: 13459
   queryActivity: 1149
   reindexService: 1964
   remoteClusters: 5794
