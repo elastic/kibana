@@ -32,6 +32,19 @@ export interface WorkflowUrlState {
   replayExecutionId?: string;
 }
 
+export interface WorkflowUrlUpdateOptions {
+  /**
+   * Replace the current history entry instead of pushing a new one. Use it for normalisation and
+   * cleanup (consuming a one-shot param, defaulting a selection), so Back skips the intermediate URL.
+   */
+  replace?: boolean;
+}
+
+export type WorkflowUrlSelectionSetter = (
+  value: string | null,
+  options?: WorkflowUrlUpdateOptions
+) => void;
+
 /**
  * Normalise a `query-string` value (which may be `string | string[] | null`)
  * to `string | undefined`, taking the first element of any array.
@@ -77,7 +90,7 @@ export function useWorkflowUrlState() {
   }, [location.search]);
 
   const updateUrlState = useCallback(
-    (updates: Partial<WorkflowUrlState>) => {
+    (updates: Partial<WorkflowUrlState>, { replace = true }: WorkflowUrlUpdateOptions = {}) => {
       const currentParams = parse(history.location.search);
 
       // Update the params with new values
@@ -101,53 +114,70 @@ export function useWorkflowUrlState() {
         return;
       }
 
-      history.replace({
+      const nextLocation = {
         ...history.location,
         search: nextSearch,
-      });
+      };
+      if (replace) {
+        history.replace(nextLocation);
+      } else {
+        history.push(nextLocation);
+      }
     },
     [history]
   );
 
   const setActiveTab = useCallback(
-    (tab: 'workflow' | 'executions') => {
+    (tab: 'workflow' | 'executions', options: WorkflowUrlUpdateOptions = {}) => {
       // When switching to other tab, clear execution selection
-      updateUrlState({
-        executionId: undefined,
-        stepExecutionId: undefined,
-        stepId: undefined,
-        tab,
-      });
+      updateUrlState(
+        {
+          executionId: undefined,
+          stepExecutionId: undefined,
+          stepId: undefined,
+          tab,
+        },
+        { replace: false, ...options }
+      );
     },
     [updateUrlState]
   );
 
-  const setSelectedExecution = useCallback(
-    (executionId: string | null) => {
-      updateUrlState({
-        executionId: executionId || undefined,
-        stepExecutionId: undefined,
-        stepId: undefined,
-      });
+  const setSelectedExecution = useCallback<WorkflowUrlSelectionSetter>(
+    (executionId, options = {}) => {
+      updateUrlState(
+        {
+          executionId: executionId || undefined,
+          stepExecutionId: undefined,
+          stepId: undefined,
+        },
+        { replace: false, ...options }
+      );
     },
     [updateUrlState]
   );
 
-  const setSelectedStepExecution = useCallback(
-    (stepExecutionId: string | null) => {
-      updateUrlState({
-        stepExecutionId: stepExecutionId || undefined,
-        stepId: undefined,
-      });
+  const setSelectedStepExecution = useCallback<WorkflowUrlSelectionSetter>(
+    (stepExecutionId, options = {}) => {
+      updateUrlState(
+        {
+          stepExecutionId: stepExecutionId || undefined,
+          stepId: undefined,
+        },
+        { replace: false, ...options }
+      );
     },
     [updateUrlState]
   );
 
-  const setSelectedStep = useCallback(
-    (stepId: string | null) => {
-      updateUrlState({
-        stepId: stepId || undefined,
-      });
+  const setSelectedStep = useCallback<WorkflowUrlSelectionSetter>(
+    (stepId, options = {}) => {
+      updateUrlState(
+        {
+          stepId: stepId || undefined,
+        },
+        { replace: false, ...options }
+      );
     },
     [updateUrlState]
   );

@@ -107,10 +107,10 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
   useEffect(() => {
     if (!canReadWorkflowExecution) {
       if (activeTab === 'executions') {
-        setUrlTab('workflow');
+        setUrlTab('workflow', { replace: true });
       }
       if (selectedExecutionId) {
-        setSelectedExecution(null);
+        setSelectedExecution(null, { replace: true });
       }
     }
   }, [canReadWorkflowExecution, activeTab, selectedExecutionId, setUrlTab, setSelectedExecution]);

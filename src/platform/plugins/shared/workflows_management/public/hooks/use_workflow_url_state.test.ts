@@ -9,7 +9,7 @@
 
 import { act, renderHook } from '@testing-library/react';
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, useHistory } from 'react-router-dom';
 import { useWorkflowUrlState } from './use_workflow_url_state';
 import { getStoredEditorView, getStoredGraphDirection } from '../lib/workflow_editor_preferences';
 
@@ -378,6 +378,121 @@ describe('useWorkflowUrlState', () => {
       });
 
       expect(result.current.graphDirection).toBe('TB');
+    });
+  });
+  describe('browser history', () => {
+    const renderWithHistory = (initialEntries: string[]) =>
+      renderHook(() => ({ urlState: useWorkflowUrlState(), history: useHistory() }), {
+        wrapper: createWrapper(initialEntries),
+      });
+
+    it('pushes an entry per explicit step selection so Back returns to the previous step', () => {
+      const { result } = renderWithHistory(['/?executionId=exec-1']);
+
+      act(() => {
+        result.current.urlState.setSelectedStepExecution('step-a');
+      });
+      act(() => {
+        result.current.urlState.setSelectedStepExecution('step-b');
+      });
+
+      expect(result.current.urlState.selectedStepExecutionId).toBe('step-b');
+
+      act(() => {
+        result.current.history.goBack();
+      });
+
+      expect(result.current.urlState.selectedStepExecutionId).toBe('step-a');
+
+      act(() => {
+        result.current.history.goBack();
+      });
+
+      expect(result.current.urlState.selectedStepExecutionId).toBeUndefined();
+    });
+
+    it('pushes an entry when the step selection is cleared', () => {
+      const { result } = renderWithHistory(['/?executionId=exec-1&stepExecutionId=step-a']);
+
+      act(() => {
+        result.current.urlState.setSelectedStepExecution(null);
+      });
+
+      expect(result.current.urlState.selectedStepExecutionId).toBeUndefined();
+
+      act(() => {
+        result.current.history.goBack();
+      });
+
+      expect(result.current.urlState.selectedStepExecutionId).toBe('step-a');
+    });
+
+    it('pushes an entry when an execution is selected', () => {
+      const { result } = renderWithHistory(['/?tab=executions']);
+
+      act(() => {
+        result.current.urlState.setSelectedExecution('exec-1');
+      });
+      act(() => {
+        result.current.history.goBack();
+      });
+
+      expect(result.current.urlState.selectedExecutionId).toBeUndefined();
+    });
+
+    it('replaces the entry when a selection is normalised with replace', () => {
+      const { result } = renderWithHistory(['/?executionId=exec-1']);
+
+      act(() => {
+        result.current.urlState.setSelectedStepExecution('trigger', { replace: true });
+      });
+
+      expect(result.current.urlState.selectedStepExecutionId).toBe('trigger');
+
+      act(() => {
+        result.current.history.goBack();
+      });
+
+      expect(result.current.urlState.selectedStepExecutionId).toBe('trigger');
+    });
+
+    it('replaces the entry when clearing replayExecutionId so Back does not restore it', () => {
+      const { result } = renderWithHistory(['/?replayExecutionId=exec-1']);
+
+      act(() => {
+        result.current.urlState.clearReplayExecutionId();
+      });
+      act(() => {
+        result.current.history.goBack();
+      });
+
+      expect(result.current.urlState.replayExecutionId).toBeUndefined();
+    });
+
+    it('replaces the entry when clearing the resume param so Back does not restore it', () => {
+      const { result } = renderWithHistory(['/?resume=true']);
+
+      act(() => {
+        result.current.urlState.clearResumeParam();
+      });
+      act(() => {
+        result.current.history.goBack();
+      });
+
+      expect(result.current.urlState.shouldAutoResume).toBe(false);
+    });
+
+    it('replaces the entry when the editor view changes', () => {
+      const { result } = renderWithHistory(['/?view=yaml']);
+
+      act(() => {
+        result.current.urlState.setEditorView('graph');
+      });
+      act(() => {
+        result.current.history.goBack();
+      });
+
+      expect(result.current.history.length).toBe(1);
     });
   });
 });

@@ -552,7 +552,7 @@ describe('WorkflowDetailPage', () => {
         s.dispatch(setWorkflow(mockWorkflow));
       });
 
-      expect(setActiveTab).toHaveBeenCalledWith('workflow');
+      expect(setActiveTab).toHaveBeenCalledWith('workflow', { replace: true });
     });
 
     it('clears selected execution on workflow tab when execution read is not allowed', () => {
@@ -572,7 +572,7 @@ describe('WorkflowDetailPage', () => {
         s.dispatch(setWorkflow(mockWorkflow));
       });
 
-      expect(setSelectedExecution).toHaveBeenCalledWith(null);
+      expect(setSelectedExecution).toHaveBeenCalledWith(null, { replace: true });
     });
 
     it('does not mount execution list when execution read is not allowed', () => {

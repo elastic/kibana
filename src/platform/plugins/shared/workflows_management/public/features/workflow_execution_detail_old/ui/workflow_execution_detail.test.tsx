@@ -220,7 +220,7 @@ describe('WorkflowExecutionDetail', () => {
         </TestWrapper>
       );
 
-      expect(mockSetSelectedStepExecution).toHaveBeenCalledWith('__overview');
+      expect(mockSetSelectedStepExecution).toHaveBeenCalledWith('__overview', { replace: true });
     });
   });
 
@@ -454,7 +454,7 @@ describe('WorkflowExecutionDetail', () => {
         </TestWrapper>
       );
 
-      expect(mockSetSelectedStepExecution).toHaveBeenCalledWith('__overview');
+      expect(mockSetSelectedStepExecution).toHaveBeenCalledWith('__overview', { replace: true });
     });
 
     it('should auto-select __overview when no step is selected and execution is terminal with no steps', () => {
@@ -471,7 +471,7 @@ describe('WorkflowExecutionDetail', () => {
         </TestWrapper>
       );
 
-      expect(mockSetSelectedStepExecution).toHaveBeenCalledWith('__overview');
+      expect(mockSetSelectedStepExecution).toHaveBeenCalledWith('__overview', { replace: true });
     });
   });
 });
@@ -823,6 +823,6 @@ describe('WorkflowExecutionDetail - auto-select overview on failed before steps'
       </TestWrapper>
     );
 
-    expect(mockSetSelectedStepExecution).toHaveBeenCalledWith('__overview');
+    expect(mockSetSelectedStepExecution).toHaveBeenCalledWith('__overview', { replace: true });
   });
 });
