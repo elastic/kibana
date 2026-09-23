@@ -693,6 +693,17 @@ describe('artifacts lists', () => {
       });
     });
 
+    test('it should skip an entry when meta.arch is unsupported', async () => {
+      mockValidateYaraRule.mockResolvedValue(createYaraValidateResult([{ arch: 'amd64' }]));
+
+      await expect(
+        convertYaraRulesToEndpointFormat(
+          [getCustomYaraExceptionItem('rule Amd64Only { condition: true }')],
+          'v1'
+        )
+      ).resolves.toEqual({ entries: [] });
+    });
+
     test('it should skip an entry when meta.arch differs across rules', async () => {
       mockValidateYaraRule.mockResolvedValue(
         createYaraValidateResult([
@@ -788,7 +799,7 @@ describe('artifacts lists', () => {
       });
     });
 
-    test('it should set scan_context to memory when some rules omit meta.scan_type and others set Memory', async () => {
+    test('it should skip an entry when some rules omit meta.scan_type and others set Memory', async () => {
       mockValidateYaraRule.mockResolvedValue(
         createYaraValidateResult([
           { identifier: 'First', scanType: MetaScanTypeValue.MEMORY },
@@ -805,17 +816,7 @@ describe('artifacts lists', () => {
           ],
           'v1'
         )
-      ).resolves.toEqual({
-        entries: [
-          {
-            yara_rule_data: 'rule First { condition: true } rule Second { condition: true }',
-            arch_context: [MetaArchValue.X86, MetaArchValue.ARM64],
-            scan_context: [EndpointArtifactScanContext.MEMORY],
-            entry_id: MOCK_YARA_ENTRY_ID,
-            entry_name: MOCK_YARA_ENTRY_NAME,
-          },
-        ],
-      });
+      ).resolves.toEqual({ entries: [] });
     });
 
     test('it should skip an entry when meta.scan_type is not Memory', async () => {

@@ -25,13 +25,9 @@ import {
 } from '../../../../common/endpoint/service/artifacts/constants';
 import type { ExperimentalFeatures } from '../../../../common';
 import { isProcessDescendantsEnabled } from '../../../../common/endpoint/service/artifacts/utils';
-import {
-  MetaArchValue,
-  MetaScanTypeValue,
-  EndpointArtifactScanContext,
-} from '../../../../common/endpoint/types';
+import { MetaArchValue, EndpointArtifactScanContext } from '../../../../common/endpoint/types';
 import type { YaraCompiledRule } from '../libyara';
-import { validateYaraRule } from '../libyara';
+import { validateCustomYaraRule } from '../custom_yara_signatures';
 import type {
   InternalArtifactCompleteSchema,
   TranslatedEntry,
@@ -186,47 +182,20 @@ const DEFAULT_YARA_SCAN_CONTEXT: TranslatedYaraRule['scan_context'] = [
   EndpointArtifactScanContext.MEMORY,
 ];
 
-const unifyArchMeta = (arch?: string): string | undefined =>
-  arch?.split(/, ?/).sort().join(', ') ?? undefined;
-
+/**
+ * Reads `arch_context` from rules that already passed `validateCustomYaraRule`.
+ * Product validation guarantees a non-empty rule list and that `meta.arch` is either
+ * omitted on every rule or set to the same allowed value(s) on every rule.
+ */
 function getArchContextFromCompiledRules(
   rules: YaraCompiledRule[]
-): TranslatedYaraRule['arch_context'] | undefined {
-  const [referenceRule, ...restOfRules] = rules;
-  if (referenceRule === undefined) {
-    return undefined;
-  }
-
-  const referenceArch = unifyArchMeta(referenceRule.meta.arch);
-
-  for (const rule of restOfRules) {
-    if (unifyArchMeta(rule.meta.arch) !== referenceArch) {
-      return undefined;
-    }
-  }
-
-  const originalArch = referenceRule.meta.arch;
+): TranslatedYaraRule['arch_context'] {
+  const originalArch = rules[0]?.meta.arch;
   if (originalArch === undefined) {
     return [...DEFAULT_YARA_ARCH_CONTEXT];
   }
 
   return originalArch.split(/, ?/) as TranslatedYaraRule['arch_context'];
-}
-
-/**
- * `meta.scan_type` is omitted or `Memory` on every rule (API-enforced).
- * Endpoint currently always receives `["memory"]`.
- */
-function getScanContextFromCompiledRules(
-  rules: YaraCompiledRule[]
-): TranslatedYaraRule['scan_context'] | undefined {
-  for (const rule of rules) {
-    if (rule.meta.scan_type !== undefined && rule.meta.scan_type !== MetaScanTypeValue.MEMORY) {
-      return undefined;
-    }
-  }
-
-  return [...DEFAULT_YARA_SCAN_CONTEXT];
 }
 
 const skipYaraItem = (logger: Logger | undefined, itemId: string, reason: string): void => {
@@ -250,37 +219,19 @@ async function translateOneYaraException(
 
   try {
     // Sequential: libyara WASM is a process singleton and is not safe for concurrent ccall.
-    const result = await validateYaraRule(entry.value);
+    // Full product validation (compile + meta constraints) so invalid arch/scan_type/etc.
+    // are skipped here instead of aborting later schema validation of the whole artifact.
+    const result = await validateCustomYaraRule(entry.value, exception.os_types);
 
     if (result.errorCount > 0) {
-      skipYaraItem(
-        logger,
-        exception.item_id,
-        `libyara reported ${result.errorCount} compile error(s)`
-      );
-      return undefined;
-    }
-
-    const archContext = getArchContextFromCompiledRules(result.rules);
-    if (archContext === undefined) {
-      skipYaraItem(
-        logger,
-        exception.item_id,
-        'no compiled rules or inconsistent meta.arch across rules in this entry'
-      );
-      return undefined;
-    }
-
-    const scanContext = getScanContextFromCompiledRules(result.rules);
-    if (scanContext === undefined) {
-      skipYaraItem(logger, exception.item_id, 'invalid meta.scan_type');
+      skipYaraItem(logger, exception.item_id, `validation reported ${result.errorCount} error(s)`);
       return undefined;
     }
 
     return {
       yara_rule_data: entry.value,
-      arch_context: archContext,
-      scan_context: scanContext,
+      arch_context: getArchContextFromCompiledRules(result.rules),
+      scan_context: [...DEFAULT_YARA_SCAN_CONTEXT],
       entry_id: exception.id,
       entry_name: exception.name,
     };
@@ -293,6 +244,7 @@ async function translateOneYaraException(
 /**
  * Translates Custom YARA Signature exception items into the endpoint YARA artifact format.
  * Invalid items are omitted so one bad entry cannot fail the packager.
+ * Uses `validateCustomYaraRule` so product meta constraints match create/update validation.
  */
 async function translateToYaraRules(
   exceptions: ExceptionListItemSchema[],
