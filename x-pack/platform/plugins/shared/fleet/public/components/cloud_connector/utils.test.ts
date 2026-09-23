@@ -41,7 +41,7 @@ import {
   ORGANIZATION_ACCOUNT,
   TEMPLATE_URL_TOKENS,
   AWS_WORKLOAD_IDENTITY_CLOUD_FORMATION_TEMPLATE_URL,
-  AWS_WORKLOAD_IDENTITY_TEMPLATE_MIN_PACKAGE_VERSIONS,
+  AWS_WORKLOAD_IDENTITY_TEMPLATE_PACKAGES,
 } from './constants';
 import type { CloudConnectorCredentials } from './types';
 import { AWS_PROVIDER, AZURE_PROVIDER, GCP_PROVIDER } from './constants';
@@ -1572,41 +1572,19 @@ describe('isStackArnInvalid', () => {
 });
 
 describe('isAwsWorkloadIdentityTemplatePackage', () => {
-  it.each(Object.entries(AWS_WORKLOAD_IDENTITY_TEMPLATE_MIN_PACKAGE_VERSIONS))(
-    '%s qualifies from %s, with or without a prerelease tag',
-    (packageName, minVersion) => {
-      expect(isAwsWorkloadIdentityTemplatePackage(packageName, minVersion)).toBe(true);
-      expect(isAwsWorkloadIdentityTemplatePackage(packageName, `${minVersion}-beta`)).toBe(true);
-      expect(isAwsWorkloadIdentityTemplatePackage(packageName, `${minVersion}-preview1`)).toBe(
-        true
-      );
-    }
-  );
-
-  it('accepts newer versions of a listed package', () => {
-    expect(isAwsWorkloadIdentityTemplatePackage('aws', '8.6.0')).toBe(true);
-    expect(isAwsWorkloadIdentityTemplatePackage('aws', '9.0.0-beta')).toBe(true);
-    expect(isAwsWorkloadIdentityTemplatePackage('aws_logs', '3.0.0')).toBe(true);
-  });
-
-  it('rejects versions of a listed package that predate the template', () => {
-    expect(isAwsWorkloadIdentityTemplatePackage('aws', '8.3.9')).toBe(false);
-    expect(isAwsWorkloadIdentityTemplatePackage('aws', '8.3.9-beta')).toBe(false);
-    expect(isAwsWorkloadIdentityTemplatePackage('aws_bedrock', '2.1.0')).toBe(false);
-    expect(isAwsWorkloadIdentityTemplatePackage('aws_securityhub', '2.2.9')).toBe(false);
-    expect(isAwsWorkloadIdentityTemplatePackage('aws_bedrock_agentcore', '1.0.0')).toBe(false);
+  it.each(AWS_WORKLOAD_IDENTITY_TEMPLATE_PACKAGES)('%s qualifies', (packageName) => {
+    expect(isAwsWorkloadIdentityTemplatePackage(packageName)).toBe(true);
   });
 
   it('rejects packages that are not in the list', () => {
-    expect(isAwsWorkloadIdentityTemplatePackage('cloud_security_posture', '3.0.0')).toBe(false);
-    expect(isAwsWorkloadIdentityTemplatePackage('aws_billing', '1.0.0')).toBe(false);
-    expect(isAwsWorkloadIdentityTemplatePackage('azure', '2.0.0')).toBe(false);
+    expect(isAwsWorkloadIdentityTemplatePackage('cloud_security_posture')).toBe(false);
+    expect(isAwsWorkloadIdentityTemplatePackage('aws_billing')).toBe(false);
+    expect(isAwsWorkloadIdentityTemplatePackage('azure')).toBe(false);
   });
 
-  it('rejects missing or unparsable input', () => {
-    expect(isAwsWorkloadIdentityTemplatePackage(undefined, '8.5.0')).toBe(false);
-    expect(isAwsWorkloadIdentityTemplatePackage('aws', undefined)).toBe(false);
-    expect(isAwsWorkloadIdentityTemplatePackage('aws', 'not-a-version')).toBe(false);
+  it('rejects a missing package name', () => {
+    expect(isAwsWorkloadIdentityTemplatePackage(undefined)).toBe(false);
+    expect(isAwsWorkloadIdentityTemplatePackage('')).toBe(false);
   });
 });
 
@@ -1614,12 +1592,11 @@ describe('getAwsIdentityFederationTemplateUrl', () => {
   const packageUrl =
     'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https://example.com/legacy.yml&param_ElasticResourceId=RESOURCE_ID';
 
-  it('returns the hardcoded Workload Identity URL when the flag is on and the package moved to it', () => {
+  it('returns the hardcoded Workload Identity URL when the flag is on and the package is listed', () => {
     expect(
       getAwsIdentityFederationTemplateUrl({
         isWorkloadIdentityTemplateEnabled: true,
         packageName: 'aws',
-        packageVersion: '8.5.0-beta',
         iacTemplateUrl: packageUrl,
       })
     ).toBe(AWS_WORKLOAD_IDENTITY_CLOUD_FORMATION_TEMPLATE_URL);
@@ -1630,7 +1607,6 @@ describe('getAwsIdentityFederationTemplateUrl', () => {
       getAwsIdentityFederationTemplateUrl({
         isWorkloadIdentityTemplateEnabled: true,
         packageName: 'aws_mq',
-        packageVersion: '2.1.0',
         iacTemplateUrl: undefined,
       })
     ).toBe(AWS_WORKLOAD_IDENTITY_CLOUD_FORMATION_TEMPLATE_URL);
@@ -1641,26 +1617,16 @@ describe('getAwsIdentityFederationTemplateUrl', () => {
       getAwsIdentityFederationTemplateUrl({
         isWorkloadIdentityTemplateEnabled: false,
         packageName: 'aws',
-        packageVersion: '8.5.0',
         iacTemplateUrl: packageUrl,
       })
     ).toBe(packageUrl);
   });
 
-  it('returns the package URL unchanged for packages outside the list or below the minimum version', () => {
+  it('returns the package URL unchanged for packages outside the list', () => {
     expect(
       getAwsIdentityFederationTemplateUrl({
         isWorkloadIdentityTemplateEnabled: true,
         packageName: 'cloud_security_posture',
-        packageVersion: '3.0.0',
-        iacTemplateUrl: packageUrl,
-      })
-    ).toBe(packageUrl);
-    expect(
-      getAwsIdentityFederationTemplateUrl({
-        isWorkloadIdentityTemplateEnabled: true,
-        packageName: 'aws',
-        packageVersion: '8.3.0',
         iacTemplateUrl: packageUrl,
       })
     ).toBe(packageUrl);
@@ -1670,7 +1636,6 @@ describe('getAwsIdentityFederationTemplateUrl', () => {
     const url = getAwsIdentityFederationTemplateUrl({
       isWorkloadIdentityTemplateEnabled: true,
       packageName: 'aws',
-      packageVersion: '8.5.0',
       iacTemplateUrl: undefined,
     });
     const result = getCloudConnectorRemoteRoleTemplate({

@@ -26,7 +26,6 @@ export function useAwsWorkloadIdentityTemplateEnabled(): boolean {
 
 export interface UseAwsIdentityFederationTemplateUrlParams {
   packageName: string | undefined;
-  packageVersion: string | undefined;
   /** URL from the package's `iac_template_url`. */
   iacTemplateUrl: string | undefined;
 }
@@ -38,7 +37,6 @@ export interface UseAwsIdentityFederationTemplateUrlParams {
  */
 export function useAwsIdentityFederationTemplateUrl({
   packageName,
-  packageVersion,
   iacTemplateUrl,
 }: UseAwsIdentityFederationTemplateUrlParams): string | undefined {
   const isWorkloadIdentityTemplateEnabled = useAwsWorkloadIdentityTemplateEnabled();
@@ -47,9 +45,8 @@ export function useAwsIdentityFederationTemplateUrl({
       getAwsIdentityFederationTemplateUrl({
         isWorkloadIdentityTemplateEnabled,
         packageName,
-        packageVersion,
         iacTemplateUrl,
       }),
-    [isWorkloadIdentityTemplateEnabled, packageName, packageVersion, iacTemplateUrl]
+    [isWorkloadIdentityTemplateEnabled, packageName, iacTemplateUrl]
   );
 }

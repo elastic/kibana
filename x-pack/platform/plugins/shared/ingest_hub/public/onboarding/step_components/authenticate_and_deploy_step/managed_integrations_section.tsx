@@ -139,7 +139,6 @@ export function ManagedIntegrationsSection({
   // option launches the hardcoded Workload Identity template instead of its iac_template_url.
   const iacTemplateUrl = useAwsIdentityFederationTemplateUrl({
     packageName: awsPackageResponse?.item?.name,
-    packageVersion: awsPackageResponse?.item?.version,
     iacTemplateUrl: packageIacTemplateUrl,
   });
 

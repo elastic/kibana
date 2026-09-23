@@ -74,7 +74,6 @@ describe('useAwsIdentityFederationTemplateUrl', () => {
     const { result } = renderHook(() =>
       useAwsIdentityFederationTemplateUrl({
         packageName: 'aws',
-        packageVersion: '8.5.0-beta',
         iacTemplateUrl: PACKAGE_URL,
       })
     );
@@ -85,7 +84,6 @@ describe('useAwsIdentityFederationTemplateUrl', () => {
     const { result } = renderHook(() =>
       useAwsIdentityFederationTemplateUrl({
         packageName: 'aws',
-        packageVersion: '8.5.0-beta',
         iacTemplateUrl: PACKAGE_URL,
       })
     );
@@ -98,7 +96,6 @@ describe('useAwsIdentityFederationTemplateUrl', () => {
     const { result } = renderHook(() =>
       useAwsIdentityFederationTemplateUrl({
         packageName: 'cloud_security_posture',
-        packageVersion: '3.0.0',
         iacTemplateUrl: PACKAGE_URL,
       })
     );

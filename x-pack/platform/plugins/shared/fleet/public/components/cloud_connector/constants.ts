@@ -49,19 +49,17 @@ export const AWS_WORKLOAD_IDENTITY_CLOUD_FORMATION_TEMPLATE_URL =
   'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https://elastic-cspm-cft.s3.eu-central-1.amazonaws.com/cloudformation-federated-identity-wii-aws-9.6.0.yml&param_ElasticOrganizationId=ORGANIZATION_ID&param_ElasticCloudProvider=CLOUD_PROVIDER&param_ElasticCloudRegion=CLOUD_REGION&param_ElasticCloudEnvironment=CLOUD_ENVIRONMENT&param_ElasticResourceType=RESOURCE_TYPE&param_ElasticResourceId=RESOURCE_ID';
 
 /**
- * Packages whose Identity Federation option moved to the WII template, with the first package
- * version that carries it. Prerelease tags are ignored when comparing, so `8.4.0-beta` and
- * `8.4.0` both qualify for `aws`.
+ * Packages whose Identity Federation option launches the WII template. Any installed version
+ * qualifies: the template is a property of Kibana and the agentless runtime, not of the package.
  */
-export const AWS_WORKLOAD_IDENTITY_TEMPLATE_MIN_PACKAGE_VERSIONS: Readonly<Record<string, string>> =
-  {
-    aws: '8.4.0',
-    aws_bedrock: '2.2.0',
-    aws_logs: '2.1.0',
-    aws_mq: '2.1.0',
-    aws_securityhub: '2.3.0',
-    aws_bedrock_agentcore: '1.1.0',
-  };
+export const AWS_WORKLOAD_IDENTITY_TEMPLATE_PACKAGES: readonly string[] = [
+  'aws',
+  'aws_bedrock',
+  'aws_logs',
+  'aws_mq',
+  'aws_securityhub',
+  'aws_bedrock_agentcore',
+];
 
 export const CLOUD_FORMATION_TEMPLATE_URL_CLOUD_CONNECTORS =
   'cloud_formation_cloud_connectors_template';

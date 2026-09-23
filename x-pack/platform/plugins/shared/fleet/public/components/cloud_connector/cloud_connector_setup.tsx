@@ -56,7 +56,6 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
 }) => {
   const awsIacTemplateUrl = useAwsIdentityFederationTemplateUrl({
     packageName: packageInfo.name,
-    packageVersion: packageInfo.version,
     iacTemplateUrl: packageIacTemplateUrl,
   });
   const iacTemplateUrl = cloudProvider === AWS_PROVIDER ? awsIacTemplateUrl : packageIacTemplateUrl;

@@ -656,7 +656,6 @@ describe('CloudConnectorSetup', () => {
 
       expect(mockUseAwsIdentityFederationTemplateUrl).toHaveBeenCalledWith({
         packageName: mockPackageInfo.name,
-        packageVersion: mockPackageInfo.version,
         iacTemplateUrl: packageUrl,
       });
       expect(mockNewCloudConnectorForm).toHaveBeenCalledWith(
