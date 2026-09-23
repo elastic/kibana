@@ -2,9 +2,11 @@
 
 A uniform abstraction over data sources in Kibana — DSL (index-pattern-backed) and ES|QL — so that consumers like Discover, Lens, and Dashboards share a single code path for rendering, filtering, and identifying data.
 
+There is no in-tree consumer of this package yet. Discover will be the first.
+
 ## The problem
 
-`DataView` does three jobs: identity, index schema (`_field_caps`), and result-column metadata. ES|QL only needs the first. Today that mismatch is papered over with adhoc DataViews, a parallel `columnsMeta` structure, and scattered `if (isEsqlMode)` branches across the codebase.
+`DataView` does three jobs: identity, index schema (`_field_caps`), and result-column metadata. ES|QL does not use `_field_caps` for schema; it uses a LIMIT 0 / `source_info` request against the query. Today that mismatch is papered over with adhoc DataViews, a parallel `columnsMeta` structure, and scattered `if (isEsqlMode)` branches across the codebase.
 
 ## The abstraction
 
@@ -16,42 +18,75 @@ Consumers ──→ DataSource ──┬──→ DataViewSource ──→ DataV
 `DataSource` is the contract every consumer depends on. Two implementations:
 
 - **`DataViewSource`** — thin wrapper around an existing `DataView`. Used for DSL. Every property delegates directly to the underlying DataView; consumers that need DSL-specific features (runtime fields, scripted fields, `searchSource`) call `getDataView()`.
-- **`EsqlSource`** — built directly from `(query, resultColumns)`. No DataView underneath, no `_field_caps` call. Identity is `esql-{sha256}` — the `esql-` prefix sits outside the hash so `DataSourceService` can discriminate ES|QL ids without inspecting the registry.
+- **`EsqlSource`** — built from the ES|QL query. No DataView underneath, no `_field_caps` call. Schema comes from `getESQLSourceInfo` (LIMIT 0) or from caller-supplied `resultColumns`.
 
 Both implementations satisfy `DataViewBase` from `@kbn/es-query`, so filter utilities (`buildEsQuery`, `getDisplayValueFromFilter`, `filter_matches_index`) accept a `DataSource` directly.
+
+## Two identities (ES|QL)
+
+`EsqlSource` has two keys. Do not use one where the other is required.
+
+| Key | Shape | Changes when | Use for |
+| --- | --- | --- | --- |
+| `id` | `esql-{sha256(trimmed query, projectRouting, esqlVariables, timeFieldName)}` | Query, routing, control values, or time field | Schema / columns, filter `meta.index`, cache keys |
+| `datasetKey` | `esql:{FROM}:{timeField}:{projectRouting}` | FROM target, time field, or CPS project | Pin, histogram vis keep/drop (`isSameDataset`) |
+
+`SORT` / `WHERE` / `EVAL` keep the same `datasetKey` and a different `id`. Classic and mixed switches compare `id` via `isSameDataset`.
+
+The `esql-` prefix sits outside the hash so `DataSourceService` can discriminate ES|QL ids without inspecting the registry.
 
 ## Key design rules
 
 1. `Column` is the minimum union both implementations can provide. It intentionally excludes `searchable`, `aggregatable`, `runtimeField`, etc. — DSL consumers that need those narrow to `DataViewSource` and call `getDataView()`.
-2. `isTimeBased()` returns `!!timeFieldName`. It must never introspect the fields/columns array.
+2. `isTimeBased()`: `EsqlSource` returns `!!timeFieldName` and must not introspect columns. `DataViewSource` delegates to `DataView.isTimeBased()`.
 3. `EsqlSource` must never call `_field_caps`.
 4. `serialize()` returns identity only. Columns are runtime state — rehydration re-derives them from the query result (ES|QL) or DataView refresh (DSL).
 
 ## Usage
 
 ```ts
-import { EsqlSource, DataViewSource, DataSourceService } from '@kbn/data-source';
+import {
+  EsqlSource,
+  DataViewSource,
+  DataSourceService,
+  isSameDataset,
+} from '@kbn/data-source';
 
-// ES|QL — constructed from the query result
+// ES|QL — http resolves time field + LIMIT 0 schema in parallel
 const source = await EsqlSource.create({
   query: 'FROM logs-* | LIMIT 10',
-  resultColumns: datatableColumns,
-  timeFieldName: '@timestamp',
+  http,
+  timeRange,                // optional, for ?_tstart / ?_tend
+  esqlVariables,            // optional, control variables
   projectRouting,           // optional, isolates ids per CPS project
 });
 
-// DSL — thin wrapper around an existing DataView
-const source = new DataViewSource(dataView);
+// Skip schema discovery when columns are already known (tests, post-fetch)
+const fromResult = await EsqlSource.create({
+  query: 'FROM logs-* | LIMIT 10',
+  resultColumns: datatableColumns,
+  timeFieldName: '@timestamp',
+});
 
-// Polymorphic column access — same call for both
+// Same query instance, updated columns after a real fetch (does not change id)
+const withFetchColumns = source.withColumns(datatableColumns);
+
+isSameDataset(source, withFetchColumns); // true (same FROM + time field + project)
+source.id === withFetchColumns.id;       // true
+source.datasetKey;                       // 'esql:logs-*:@timestamp:'
+
+// DSL — thin wrapper around an existing DataView
+const dslSource = new DataViewSource(dataView);
+
 const col = source.getColumn('host.name');  // Column | undefined
 const all = source.getColumns();            // readonly Column[]
 
-// DSL-specific access (narrows to DataViewSource)
-if (source instanceof DataViewSource) {
-  const field = source.getDataView().getFieldByName('host.name');
+if (dslSource instanceof DataViewSource) {
+  const field = dslSource.getDataView().getFieldByName('host.name');
 }
 ```
+
+`EsqlSource.create` caches instances by query + routing + time field. The first successful create for a key wins, including columns; later `create` calls return that instance. A failed `source_info` lookup still returns an empty-column instance to the caller but is not cached, so the next create can retry. Use `withColumns` to replace columns.
 
 ## `DataSourceService`
 
@@ -71,9 +106,17 @@ const source = await service.get(someId);
 const source = service.fromDataView(dataView);
 ```
 
+Unregistered `esql-*` ids return `undefined` (no fallback to `dataViews.get`).
+
 ## `cache_adapter`
 
-A transitional shim that registers an `EsqlSource` as a thin DataView in the `dataViewsService` cache, so consumers that haven't yet migrated to `DataSourceService` keep working. Delete once all such consumers migrate to `DataSourceService.get()`.
+A transitional shim that registers an `EsqlSource` as a DataView in the `dataViewsService` cache, so consumers that haven't yet migrated to `DataSourceService` keep working (`dataViews.get(esql-*)`).
+
+- `skipFetchFields: true` — never calls `_field_caps`
+- copies LIMIT 0 / `getColumns()` onto the spec
+- injects the time field if it is missing from the result columns, so `DataView.isTimeBased()` stays true
+
+Delete once all such consumers migrate to `DataSourceService.get()`.
 
 ## Serialization
 
