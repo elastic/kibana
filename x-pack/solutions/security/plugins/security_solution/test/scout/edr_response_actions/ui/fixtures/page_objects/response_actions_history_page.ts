@@ -54,7 +54,8 @@ export class ResponseActionsHistoryPage {
       }
     }
 
-    await this.closeTypesFilter();
+    // Leave the popover open. Selecting an option does not close it, and
+    // clicking the filter button to dismiss it opens the popover again.
     await this.waitForTypeQuery(label, shouldSelect);
   }
 
@@ -73,18 +74,6 @@ export class ResponseActionsHistoryPage {
     }
     await this.typesFilterButton.click();
     await list.waitFor({ state: 'visible' });
-  }
-
-  private async closeTypesFilter(): Promise<void> {
-    const list = this.typesFilterList();
-    if (!(await list.isVisible())) {
-      return;
-    }
-    await this.page.keyboard.press('Escape');
-    if (await list.isVisible()) {
-      await this.typesFilterButton.click();
-    }
-    await list.waitFor({ state: 'hidden' });
   }
 
   // Scroll before clicking. The option is in the DOM while its center sits
