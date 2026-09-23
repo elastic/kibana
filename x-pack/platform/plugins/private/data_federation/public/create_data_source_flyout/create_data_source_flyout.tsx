@@ -262,7 +262,7 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
           : createDataSourceFlyoutStrings.testConnectionErrorTitle()
       }
       color={connectionTestResult === 'success' ? 'success' : 'danger'}
-      iconType={connectionTestResult === 'success' ? 'checkInCircleFilled' : 'errorFilled'}
+      iconType={connectionTestResult === 'success' ? 'checkCircleFill' : 'errorFill'}
       data-test-subj={`createDataSourceFlyoutTestConnectionCallout-${connectionTestResult}`}
     >
       <p>

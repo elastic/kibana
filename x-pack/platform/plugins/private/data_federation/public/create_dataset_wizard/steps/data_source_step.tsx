@@ -518,7 +518,7 @@ export const DataSourceStep = forwardRef<DataSourceStepHandle, DataSourceStepPro
                 announceOnMount
                 size="s"
                 color={connectionTestResult === 'success' ? 'success' : 'warning'}
-                iconType={connectionTestResult === 'success' ? 'checkInCircleFilled' : 'warning'}
+                iconType={connectionTestResult === 'success' ? 'checkCircleFill' : 'warning'}
                 title={
                   connectionTestResult === 'success'
                     ? createDataSourceFlyoutStrings.testConnectionSuccessTitle()

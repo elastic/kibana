@@ -81,7 +81,7 @@ export function FederatedIdentityDeployPanel({
         <EuiFlexItem css={federatedIdentityDeployActionItemCss}>
           <EuiButton
             color="primary"
-            iconType="popout"
+            iconType="external"
             iconSide="right"
             href={launchUrl}
             target="_blank"
