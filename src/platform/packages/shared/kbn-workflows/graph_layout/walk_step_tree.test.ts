@@ -115,7 +115,7 @@ describe('STEP_CHILD_CONTAINER_KEYS — object-model ↔ AST invariant', () => {
 
     // Every kind of slot that visitStepChildSlots can produce maps to at least
     // one key in STEP_CHILD_CONTAINER_KEYS.
-    const slotToKeys: Record<string, string[]> = {
+    const slotToKeys = {
       steps: ['steps'],
       else: ['else'],
       branch: ['branches'],
@@ -123,7 +123,7 @@ describe('STEP_CHILD_CONTAINER_KEYS — object-model ↔ AST invariant', () => {
       default: ['default'],
       fallback: ['on-failure', 'fallback'],
       'iteration-fallback': ['iteration-on-failure', 'fallback'],
-    };
+    } as const;
 
     for (const [slotKind, requiredKeys] of Object.entries(slotToKeys)) {
       for (const key of requiredKeys) {

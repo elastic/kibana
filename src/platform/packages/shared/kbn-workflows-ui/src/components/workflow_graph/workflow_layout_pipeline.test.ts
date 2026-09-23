@@ -464,10 +464,7 @@ describe('workflow layout pipeline', () => {
     it('trigger 0 is left of trigger 1 when trigger 1 leads a deeper subtree', () => {
       const { result } = runLayout(
         minimal({
-          triggers: [
-            { type: 'manual', enabled: true },
-            { type: 'scheduled', enabled: true },
-          ],
+          triggers: [{ type: 'manual' }, { type: 'scheduled', with: { every: '1h' } }],
           steps: [{ name: 'step_a', type: 'http' }] as unknown as WorkflowYaml['steps'],
         }),
         'TB'
@@ -994,7 +991,6 @@ describe('Cycle C — group-hosted lane placement (foreach body on-failure)', ()
       'TB'
     );
 
-    const good = findNode(result.nodes, 'good');
     const recover = findNode(result.nodes, 'recover');
     const bad = findNode(result.nodes, 'bad');
 
