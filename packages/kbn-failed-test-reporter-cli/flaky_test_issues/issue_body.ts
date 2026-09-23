@@ -38,7 +38,10 @@ const LEGACY_TITLE_PATTERN = /^Flaky\b.*\btest suite:\s*(\S+\.[jt]sx?)\s*$/;
 export const FLAKY_TEST_SUITE_METADATA_PREFIX = 'flaky-test-suite';
 
 const MAX_TEST_ROWS = 15;
-const MAX_DISTINCT_FAILURES = 2;
+/** Distinct error messages shown in full; a suite with more gets a count of the rest. */
+const MAX_DISTINCT_FAILURES = 3;
+/** Test titles labelling an error are cut beyond this many characters. */
+const MAX_LABEL_TITLE_LENGTH = 80;
 /** GitHub rejects longer issue titles with a 422. */
 const MAX_TITLE_LENGTH = 256;
 
@@ -224,11 +227,17 @@ const failuresSection = (suite: FlakySuite): string => {
   }
   const shown = distinct.slice(0, MAX_DISTINCT_FAILURES).map(({ message, count, tests }) => {
     const subject =
-      suite.tests.length > 1 ? tests.map((title) => `*${shortTitle(title)}*`).join(', ') : '';
+      suite.tests.length > 1
+        ? tests.map((title) => `*${shortTitle(title, MAX_LABEL_TITLE_LENGTH)}*`).join(', ')
+        : '';
     const share = count === total ? `all ${samples}` : `${count} of the ${samples}`;
     return `${subject ? `${subject} ` : ''}(${share}):\n\n${codeBlock(message)}`;
   });
-  return [`${plural(distinct.length, 'distinct error')}.`, ...shown].join('\n\n');
+  const rest = distinct.length - shown.length;
+  return [
+    ...shown,
+    ...(rest > 0 ? [`and ${plural(rest, 'more error')} among the sampled failures.`] : []),
+  ].join('\n\n');
 };
 
 /** A branch's row of the breakdown: the worst test's counts there and the newest failure. */

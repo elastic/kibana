@@ -22,9 +22,7 @@ Latest run on \`main\` was skipped (2026-09-09).
 
 ### Failures
 
-2 distinct errors.
-
-*does not keep a hidden histogram after…* (2 of the 3 sampled failures):
+*does not keep a hidden histogram after visiting Dashboard* (2 of the 3 sampled failures):
 
 \`\`\`text
 Error: expect(locator).toBeVisible() failed
@@ -32,7 +30,7 @@ Error: expect(locator).toBeVisible() failed
 Locator: chart | pipe
 \`\`\`
 
-*reverts breakdown, interval, and visibi…* (1 of the 3 sampled failures):
+*reverts breakdown, interval, and visibility on a saved session* (1 of the 3 sampled failures):
 
 \`\`\`text
 TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.
