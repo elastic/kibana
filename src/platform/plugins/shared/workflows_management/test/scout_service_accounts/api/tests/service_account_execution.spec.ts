@@ -70,6 +70,25 @@ apiTest.describe(
       workflowIds.add(id);
       return id;
     };
+    const updateYaml = async (
+      apiClient: ApiClientFixture,
+      id: string,
+      yaml: string
+    ): Promise<void> => {
+      const response = await apiClient.put(`api/workflows/workflow/${id}`, {
+        headers,
+        body: { yaml },
+        responseType: 'json',
+      });
+      expect(response, JSON.stringify(response.body)).toHaveStatusCode(200);
+    };
+    const expectIdentityFailure = (execution: WorkflowExecutionDto): void => {
+      expect(execution.error?.type).toBe('ServiceAccountExecutionError');
+      expect(
+        execution.stepExecutions?.some((step) => step.stepId === 'authenticate') ?? false
+      ).toBe(false);
+    };
+
     const run = async (
       apiClient: ApiClientFixture,
       id: string,
@@ -631,6 +650,222 @@ apiTest.describe(
         expect(overwrite.body.failed as object[]).toHaveLength(0);
         const execution = await wait(apiClient, await run(apiClient, id));
         expect(execution.effectiveIdentity).toBeUndefined();
+      }
+    );
+
+    for (const continuation of ['timer', 'retry'] as const) {
+      apiTest(
+        `SA continuation audit: ${continuation} retains the bound identity`,
+        async ({ apiClient }) => {
+          apiTest.setTimeout(120_000);
+          const delayedStep =
+            continuation === 'timer'
+              ? `  - name: delay
+    type: wait
+    with:
+      duration: 8s
+`
+              : `  - name: expected_failure
+    type: elasticsearch.request
+    with:
+      method: GET
+      path: /cp2-nonexistent-${Date.now()}/_doc/missing
+    on-failure:
+      retry:
+        max-attempts: 1
+        delay: 8s
+      continue: true
+`;
+          const id = await create(
+            apiClient,
+            workflowYaml(accountId, delayedStep + authenticationStep)
+          );
+          const executionId = await run(apiClient, id);
+          await wait(apiClient, executionId, 'waiting');
+          expectAccount(await wait(apiClient, executionId), accountId);
+        }
+      );
+    }
+
+    for (const rebind of [false, true]) {
+      apiTest(
+        `SA continuation audit: queued execution ${
+          rebind ? 'rejects a changed binding' : 'retains its identity on promotion'
+        }`,
+        async ({ apiClient }) => {
+          apiTest.setTimeout(180_000);
+          const yaml = workflowYaml(accountId, waitStep + authenticationStep).replace(
+            'settings:',
+            `settings:
+  concurrency:
+    max: 1
+    strategy: queue
+    key: cp2-queue-${Date.now()}`
+          );
+          const id = await create(apiClient, yaml);
+          const firstId = await run(apiClient, id);
+          const first = await wait(apiClient, firstId, 'waiting_for_input');
+          const secondId = await run(apiClient, id);
+          await wait(apiClient, secondId, 'queued');
+          if (rebind) {
+            await updateYaml(apiClient, id, yaml.replace(accountId, otherAccountId));
+          }
+          await resume(apiClient, {
+            id,
+            yaml,
+            executionId: firstId,
+            stepExecutionId: first.stepExecutions?.find((step) => step.stepId === 'approval')?.id,
+          });
+          if (rebind) {
+            await wait(apiClient, firstId, 'failed');
+            const rejected = await wait(apiClient, secondId, 'failed');
+            expectIdentityFailure(rejected);
+          } else {
+            expectAccount(await wait(apiClient, firstId), accountId);
+            const second = await wait(apiClient, secondId, 'waiting_for_input');
+            await resume(apiClient, {
+              id,
+              yaml,
+              executionId: secondId,
+              stepExecutionId: second.stepExecutions?.find((step) => step.stepId === 'approval')
+                ?.id,
+            });
+            expectAccount(await wait(apiClient, secondId), accountId);
+          }
+        }
+      );
+    }
+
+    for (const boundChild of [false, true]) {
+      apiTest(
+        `SA continuation audit: ${
+          boundChild ? 'bound' : 'unbound'
+        } child approval does not change parent identity`,
+        async ({ apiClient, samlAuth }) => {
+          apiTest.setTimeout(180_000);
+          const { cookieHeader } = await samlAuth.asInteractiveUser({
+            elasticsearch: { cluster: [], indices: [] },
+            kibana: [{ base: ['all'], feature: {}, spaces: ['*'] }],
+          });
+          const approverHeaders = { ...headers, ...cookieHeader };
+          const childYaml = workflowYaml(otherAccountId, waitStep + authenticationStep);
+          const childId = await create(
+            apiClient,
+            boundChild
+              ? childYaml
+              : childYaml.replace(`settings:\n  run_as: ${otherAccountId}\n`, '')
+          );
+          const parentId = await create(
+            apiClient,
+            workflowYaml(
+              accountId,
+              `  - name: child
+    type: workflow.execute
+    with:
+      workflow-id: ${childId}
+      inputs: {}
+${authenticationStep}`
+            )
+          );
+          const parentExecutionId = await run(apiClient, parentId);
+          const parent = await wait(apiClient, parentExecutionId, 'waiting_for_child');
+          const childExecutionId = parent.stepExecutions?.find((step) => step.stepId === 'child')
+            ?.state?.executionId;
+          expect(typeof childExecutionId).toBe('string');
+          const child = await wait(apiClient, String(childExecutionId), 'waiting_for_input');
+          const approved = await apiClient.post(`api/workflows/executions/${child.id}/resume`, {
+            headers: approverHeaders,
+            body: {
+              input: { approved: true },
+              stepExecutionId: child.stepExecutions?.find((step) => step.stepId === 'approval')?.id,
+            },
+            responseType: 'json',
+          });
+          expect(approved, JSON.stringify(approved.body)).toHaveStatusCode(200);
+          const completedChild = await wait(apiClient, child.id);
+          expect(completedChild.effectiveIdentity).toStrictEqual(
+            boundChild ? { type: 'service_account', id: otherAccountId } : undefined
+          );
+          const output = JSON.stringify(
+            completedChild.stepExecutions?.find((step) => step.stepId === 'authenticate')?.output
+          );
+          expect(output).not.toContain(accountId);
+          expect(output.includes(otherAccountId)).toBe(boundChild);
+          expectAccount(await wait(apiClient, parentExecutionId), accountId);
+        }
+      );
+    }
+
+    apiTest(
+      'SA continuation audit: binding failure dispatches the failure handler',
+      async ({ apiClient }) => {
+        apiTest.setTimeout(180_000);
+        const sourceId = await create(
+          apiClient,
+          workflowYaml(
+            accountId,
+            `  - name: expected_failure
+    type: elasticsearch.request
+    with:
+      method: GET
+      path: /cp2-no-such-index-${Date.now()}/_doc/missing
+`
+          )
+        );
+        const handlerId = await create(
+          apiClient,
+          workflowYaml(otherAccountId).replace(
+            '  - type: manual',
+            `  - type: workflows.failed
+    on:
+      condition: 'event.workflow.id: "${sourceId}"'`
+          )
+        );
+        const handlerExecutions = async (): Promise<WorkflowExecutionDto[]> => {
+          const response = await apiClient.get(`api/workflows/workflow/${handlerId}/executions`, {
+            headers,
+            responseType: 'json',
+          });
+          expect(response).toHaveStatusCode(200);
+          return response.body.results;
+        };
+        await wait(apiClient, await run(apiClient, sourceId), 'failed');
+        await expect
+          .poll(async () => (await handlerExecutions()).length, { timeout: 30_000 })
+          .toBe(1);
+        const control = (await handlerExecutions())[0];
+        expectAccount(await wait(apiClient, control.id), otherAccountId);
+        const yaml = workflowYaml(accountId, waitStep + authenticationStep);
+        const updated = await apiClient.put(`api/workflows/workflow/${sourceId}`, {
+          headers,
+          body: { yaml },
+          responseType: 'json',
+        });
+        expect(updated).toHaveStatusCode(200);
+        const executionId = await run(apiClient, sourceId);
+        const paused = await wait(apiClient, executionId, 'waiting_for_input');
+        const rebound = await apiClient.put(`api/workflows/workflow/${sourceId}`, {
+          headers,
+          body: { yaml: yaml.replace(accountId, otherAccountId) },
+          responseType: 'json',
+        });
+        expect(rebound).toHaveStatusCode(200);
+        await resume(apiClient, {
+          id: sourceId,
+          yaml,
+          executionId,
+          stepExecutionId: paused.stepExecutions?.find((step) => step.stepId === 'approval')?.id,
+        });
+        const failed = await wait(apiClient, executionId, 'failed');
+        expect(failed.error?.type).toBe('ServiceAccountExecutionError');
+        await expect
+          .poll(async () => (await handlerExecutions()).length, { timeout: 30_000 })
+          .toBe(2);
+        const handler = (await handlerExecutions()).find(
+          (execution) => execution.id !== control.id
+        );
+        expect(handler).toBeDefined();
+        expectAccount(await wait(apiClient, String(handler?.id)), otherAccountId);
       }
     );
 

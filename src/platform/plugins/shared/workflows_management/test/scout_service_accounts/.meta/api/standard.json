@@ -1,5 +1,5 @@
 {
-  "sha1": "6f5ff69c5aea159e72844ea51fb3b60ec6dca9f9",
+  "sha1": "198db0b0afb07aeb0cb3f1ae2dbf0af77edbe4bc",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -13,7 +13,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
-        "line": 248,
+        "line": 267,
         "column": 7
       }
     },
@@ -26,7 +26,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
-        "line": 275,
+        "line": 294,
         "column": 16
       }
     },
@@ -39,7 +39,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
-        "line": 317,
+        "line": 336,
         "column": 27
       }
     },
@@ -52,7 +52,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
-        "line": 453,
+        "line": 472,
         "column": 15
       }
     },
@@ -65,7 +65,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
-        "line": 453,
+        "line": 472,
         "column": 15
       }
     },
@@ -78,7 +78,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
-        "line": 490,
+        "line": 509,
         "column": 28
       }
     },
@@ -91,7 +91,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
-        "line": 518,
+        "line": 537,
         "column": 15
       }
     },
@@ -104,7 +104,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
-        "line": 534,
+        "line": 553,
         "column": 67
       }
     },
@@ -117,7 +117,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
-        "line": 539,
+        "line": 558,
         "column": 7
       }
     },
@@ -130,7 +130,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
-        "line": 557,
+        "line": 576,
         "column": 14
       }
     },
@@ -143,8 +143,99 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
-        "line": 582,
+        "line": 601,
         "column": 71
+      }
+    },
+    {
+      "id": "59645759a29407d-60b93d04e2278c8",
+      "title": "[NON-MKI] Saved workflow service account execution SA continuation audit: timer retains the bound identity",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
+        "line": 658,
+        "column": 9
+      }
+    },
+    {
+      "id": "59645759a29407d-0edae74a23d9ca8",
+      "title": "[NON-MKI] Saved workflow service account execution SA continuation audit: retry retains the bound identity",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
+        "line": 658,
+        "column": 9
+      }
+    },
+    {
+      "id": "59645759a29407d-11f4f36964b059a",
+      "title": "[NON-MKI] Saved workflow service account execution SA continuation audit: queued execution retains its identity on promotion",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
+        "line": 695,
+        "column": 18
+      }
+    },
+    {
+      "id": "59645759a29407d-39ca95989e85ded",
+      "title": "[NON-MKI] Saved workflow service account execution SA continuation audit: queued execution rejects a changed binding",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
+        "line": 695,
+        "column": 18
+      }
+    },
+    {
+      "id": "59645759a29407d-0a284496f27165a",
+      "title": "[NON-MKI] Saved workflow service account execution SA continuation audit: unbound child approval does not change parent identity",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
+        "line": 744,
+        "column": 29
+      }
+    },
+    {
+      "id": "59645759a29407d-a4c532b1d0a5a22",
+      "title": "[NON-MKI] Saved workflow service account execution SA continuation audit: bound child approval does not change parent identity",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
+        "line": 744,
+        "column": 29
+      }
+    },
+    {
+      "id": "59645759a29407d-832de6fb582b888",
+      "title": "[NON-MKI] Saved workflow service account execution SA continuation audit: binding failure dispatches the failure handler",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
+        "line": 801,
+        "column": 32
       }
     },
     {
@@ -156,8 +247,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_execution.spec.ts",
-        "line": 632,
-        "column": 27
+        "line": 872,
+        "column": 64
       }
     }
   ]

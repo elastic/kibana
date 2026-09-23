@@ -10,6 +10,7 @@
 import { usageApiPluginMock } from '@kbn/usage-api-plugin/server/mocks';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { EsWorkflowExecution } from '@kbn/workflows';
+import { getEventChainContext } from '@kbn/workflows-extensions/server';
 import { mockContextDependencies } from './__mock__/context_dependencies';
 import {
   createFakeKibanaRequest,
@@ -73,6 +74,9 @@ const setup = () => {
   jest.spyOn(meteringService, 'reportWorkflowExecution').mockResolvedValue(undefined);
   return {
     accounts,
+    setTestRun: () => {
+      execution.isTestRun = true;
+    },
     setStatus: (status: ExecutionStatus) => {
       execution.status = status;
     },
@@ -119,6 +123,57 @@ describe.each([
       params.dependencies.cloudSetup
     );
     expect(setupDependencies).not.toHaveBeenCalled();
+  });
+
+  it('emits a failure event using the original request when minting fails', async () => {
+    const { params } = setup();
+    await expect(execute(params)).rejects.toThrow('Binding changed');
+    expect(params.workflowsExecutionEngine.triggerEvents.emitEvent).toHaveBeenCalledWith({
+      triggerId: 'workflows.failed',
+      request: params.fakeRequest,
+      payload: expect.objectContaining({
+        workflow: expect.objectContaining({ id: 'workflow' }),
+        execution: expect.objectContaining({ id: 'child' }),
+        error: { message: 'Binding changed' },
+      }),
+    });
+    await execute(params);
+    expect(params.workflowsExecutionEngine.triggerEvents.emitEvent).toHaveBeenCalledTimes(1);
+  });
+
+  it('preserves event-chain limits when failure occurs before runtime setup', async () => {
+    const { params } = setup();
+    await params.workflowExecutionRepository.updateWorkflowExecution({
+      id: 'child',
+      context: { event: { eventChainDepth: 3, eventChainVisitedWorkflowIds: ['upstream'] } },
+    });
+    await expect(execute(params)).rejects.toThrow('Binding changed');
+    expect(getEventChainContext(params.fakeRequest)).toEqual({
+      depth: 3,
+      sourceExecutionId: 'child',
+      visitedWorkflowIds: ['upstream', 'workflow'],
+    });
+  });
+
+  it('still completes cleanup when failure-event dispatch throws', async () => {
+    const { params } = setup();
+    params.workflowsExecutionEngine.triggerEvents.emitEvent.mockRejectedValue(
+      new Error('Dispatch unavailable')
+    );
+    await expect(execute(params)).rejects.toThrow('Binding changed');
+    expect(params.workflowsExecutionEngine.triggerEvents.emitEvent).toHaveBeenCalledTimes(1);
+    expect(params.internalResumeWorkflowExecution).toHaveBeenCalledTimes(1);
+    expect(drainConcurrencyQueueSlots).toHaveBeenCalledTimes(1);
+    expect(params.logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Dispatch unavailable')
+    );
+  });
+
+  it('does not emit identity-failure events for test runs', async () => {
+    const { params, setTestRun } = setup();
+    setTestRun();
+    await expect(execute(params)).rejects.toThrow('Binding changed');
+    expect(params.workflowsExecutionEngine.triggerEvents.emitEvent).not.toHaveBeenCalled();
   });
 
   it('retries parent and queue cleanup after a transient post-execution read failure', async () => {

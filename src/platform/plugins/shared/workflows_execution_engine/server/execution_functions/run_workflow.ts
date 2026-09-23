@@ -21,6 +21,7 @@ import { isWorkflowGraphSetupError } from './workflow_graph_setup_error';
 import { handleQueuedWorkflowRunAtTaskStart } from '../concurrency/handle_queued_workflow_run_at_task_start';
 import type { WorkflowsExecutionEngineConfig } from '../config';
 import { emitWorkflowExecutionFailedEventIfFailed } from '../lib/emit_workflow_execution_failed_event';
+import { emitWorkflowIdentityFailureEvent } from '../lib/emit_workflow_identity_failure_event';
 import type { WorkflowsMeteringService } from '../metering';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
@@ -274,6 +275,8 @@ export const runWorkflow = async (
       const failedExecution = {
         ...execution,
         status: ExecutionStatus.FAILED,
+        finishedAt: new Date().toISOString(),
+        error: executionError,
         context: { ...execution.context, serviceAccountFailureCleanupPending: true },
       };
       // Finalize steps before publishing the terminal execution status that stops UI polling.
@@ -282,8 +285,15 @@ export const runWorkflow = async (
         id: execution.id,
         status: ExecutionStatus.FAILED,
         context: failedExecution.context,
-        finishedAt: new Date().toISOString(),
+        finishedAt: failedExecution.finishedAt,
         error: executionError,
+      });
+      await emitWorkflowIdentityFailureEvent({
+        execution: failedExecution,
+        request: params.fakeRequest,
+        emitEvent: params.workflowsExecutionEngine.triggerEvents.emitEvent,
+        logger: params.logger,
+        maxEventChainDepth: params.config.eventDriven.maxChainDepth,
       });
       await completeIdentityFailureCleanup(failedExecution, {
         ...params,
