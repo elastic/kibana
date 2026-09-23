@@ -65,7 +65,7 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
 
       var err = document.createElement('div');
       err.style.textAlign = 'center';
-      err.style.padding = '240px 20px';
+      err.style.padding = 'min(240px, 20vh) 20px';
       err.style.fontFamily = 'Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif';
       err.style.maxInlineSize = '420px';
       err.style.margin = '0 auto';
@@ -229,7 +229,7 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
 
       var err = document.createElement('div');
       err.style.textAlign = 'center';
-      err.style.padding = '240px 20px';
+      err.style.padding = 'min(240px, 20vh) 20px';
       err.style.fontFamily = 'Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif';
       err.style.maxInlineSize = '420px';
       err.style.margin = '0 auto';
