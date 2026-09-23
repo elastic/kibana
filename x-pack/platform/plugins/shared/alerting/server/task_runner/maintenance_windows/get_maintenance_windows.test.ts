@@ -311,6 +311,28 @@ describe('filterMaintenanceWindows', () => {
       })
     ).toEqual([mockMaintenanceWindows[1], mockMaintenanceWindows[2]]);
   });
+  test('excludes v2-only MW from both scoped and unscoped buckets', () => {
+    const v2OnlyMW: MaintenanceWindow = {
+      ...getMockMaintenanceWindow(),
+      eventStartTime: new Date().toISOString(),
+      eventEndTime: new Date().toISOString(),
+      status: MaintenanceWindowStatus.Running,
+      id: 'test-v2-only',
+      scope: { alerting: { enabled: false } },
+    };
+    expect(
+      filterMaintenanceWindows({
+        maintenanceWindows: [v2OnlyMW],
+        withScopedQuery: true,
+      })
+    ).toEqual([]);
+    expect(
+      filterMaintenanceWindows({
+        maintenanceWindows: [v2OnlyMW],
+        withScopedQuery: false,
+      })
+    ).toEqual([]);
+  });
 });
 
 describe('filterMaintenanceWindowsIds', () => {

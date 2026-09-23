@@ -19,7 +19,7 @@ export const alertingV2ScopeSchema = schema.object(
         maxLength: MAX_KQL_LENGTH,
         meta: {
           description:
-            'A filter written in Kibana Query Language (KQL). Evaluated in memory against the alerting v2 episode context (episode_id, episode_status, rule.*, data.*).',
+            'A filter written in Kibana Query Language (KQL). Evaluated in memory against the alerting v2 episode context (episode_id, episode_status, group_hash, last_event_timestamp, severity, data.*).',
         },
       })
     ),

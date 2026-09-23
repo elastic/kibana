@@ -36,7 +36,7 @@ const autoHeightContainer = css`
 /**
  * KQL input for the maintenance window's experimental episode-data filter.
  * Mirrors alerting_v2's MatcherInput so users get autocompletion against the
- * v2 episode matcher context (rule.*, episode_*, data.*).
+ * v2 episode matcher context (episode_*, data.*).
  *
  * Duplicated rather than imported to avoid a maintenance_windows → alerting_v2
  * dependency (alerting_v2 already requires maintenance_windows for SO access).
