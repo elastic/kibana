@@ -10,22 +10,22 @@ import { FlyoutAccordion } from '@kbn/flyout-sections';
 import type { ReactNode } from 'react';
 import React from 'react';
 import type {
-  ActionPolicyFormCollapsibleSection,
-  ActionPolicyFormCollapsibleSectionConfig,
-  ActionPolicyFormLayout,
+  CollapsibleSection,
+  CollapsibleSectionConfig,
+  FormLayout,
 } from '../types';
 
 type ActionPolicyFormSectionId =
   | 'policyDetails'
   | 'policyScope'
-  | ActionPolicyFormCollapsibleSection;
+  | CollapsibleSection;
 
 interface ActionPolicyFormSectionProps {
   children: ReactNode;
-  config?: ActionPolicyFormCollapsibleSectionConfig;
+  config?: CollapsibleSectionConfig;
   description: ReactNode;
   id: ActionPolicyFormSectionId;
-  layout?: ActionPolicyFormLayout;
+  layout?: FormLayout;
   title: ReactNode;
 }
 

@@ -16,18 +16,18 @@ import type {
   InlineWorkflowActionDraft,
 } from '@kbn/alerting-v2-rule-form';
 
-export type ActionPolicyFormCollapsibleSection = 'notificationControls' | 'destination';
-export type ActionPolicyFormLayout = 'page' | 'flyout';
+export type CollapsibleSection = 'notificationControls' | 'destination';
+export type FormLayout = 'page' | 'flyout';
 
-export interface ActionPolicyFormCollapsibleSectionConfig {
+export interface CollapsibleSectionConfig {
   readonly initialIsOpen?: boolean;
 }
 
 export interface ActionPolicyFormConfig {
   readonly connectorCreation: ConnectorCreationConfig;
-  readonly layout?: ActionPolicyFormLayout;
+  readonly layout?: FormLayout;
   readonly collapsibleSections?: Partial<
-    Record<ActionPolicyFormCollapsibleSection, ActionPolicyFormCollapsibleSectionConfig>
+    Record<CollapsibleSection, CollapsibleSectionConfig>
   >;
 }
 
