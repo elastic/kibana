@@ -50,11 +50,11 @@ DataFlow::MethodCallNode unboundedConfigSchemaString() {
   )
 }
 
-/* ---------- Zod (@kbn/zod, @kbn/zod/v4, zod) ---------- */
+/* ---------- Zod (@kbn/zod, @kbn/zod/v4, zod, zod/v4) ---------- */
 
 /** A reference to the `z` object from a Zod module (named or namespace import). */
 DataFlow::SourceNode zodApi() {
-  exists(string p | p = ["@kbn/zod", "@kbn/zod/v4", "zod"] |
+  exists(string p | p = ["@kbn/zod", "@kbn/zod/v4", "zod", "zod/v4"] |
     result = DataFlow::moduleImport(p).getAPropertyRead("z")
     or
     result = DataFlow::moduleImport(p)
@@ -90,7 +90,7 @@ DataFlow::Node intentionalUnboundedString() {
   exists(API::Node helpers |
     helpers = API::moduleImport("@kbn/config-schema").getMember("schema")
     or
-    helpers = API::moduleImport(["@kbn/config-schema", "@kbn/zod", "@kbn/zod/v4"])
+    helpers = API::moduleImport(["@kbn/config-schema", "@kbn/zod", "@kbn/zod/v4", "zod/v4"])
   |
     result = helpers.getMember("unboundedString").getACall()
     or
