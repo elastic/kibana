@@ -15,6 +15,7 @@ import {
   NonTerminalExecutionStatuses,
 } from '@kbn/workflows';
 import type { WorkflowExecutionsDataClient } from './data_access_layer';
+import type { WorkflowExecutionPersistence } from './execution_persistence';
 
 /**
  * An execution document is written by several independent writers while the run is in flight:
@@ -27,7 +28,7 @@ import type { WorkflowExecutionsDataClient } from './data_access_layer';
  */
 const UPDATE_RETRY_ON_CONFLICT = 3;
 
-export class WorkflowExecutionRepository {
+export class WorkflowExecutionRepository implements WorkflowExecutionPersistence {
   constructor(private workflowExecutionsDataClient: WorkflowExecutionsDataClient) {}
 
   /**

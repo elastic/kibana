@@ -9,6 +9,10 @@
 
 import { z } from '@kbn/zod/v4';
 import { CONNECTOR_ID_MAX_LENGTH } from '../../common/constants';
+import {
+  TEMPLATE_EXPRESSION_MAX_LENGTH,
+  WHOLE_VALUE_TEMPLATE_EXPRESSION_REGEX,
+} from '../../common/template_expressions';
 import type { ConnectorContractUnion } from '../../types/v1';
 import { getDeprecatedStepMessage, getStepDeprecationInfo } from '../deprecated_step_metadata';
 import { KIBANA_TYPE_ALIASES } from '../kibana/aliases';
@@ -166,6 +170,220 @@ function hasNoRequiredFields(schema: z.ZodType): boolean {
   );
 }
 
+/**
+ * Only whole-value `${{ … }}` expressions are accepted — not arbitrary strings, and not the
+ * bare `{{ … }}` form, which the templating engine always renders to a string and so can never
+ * satisfy an array param. See WHOLE_VALUE_TEMPLATE_EXPRESSION_REGEX for the full rationale.
+ */
+const LIQUID_TEMPLATE_SCHEMA = z
+  .string()
+  .regex(WHOLE_VALUE_TEMPLATE_EXPRESSION_REGEX)
+  .max(TEMPLATE_EXPRESSION_MAX_LENGTH);
+
+/** Checks attached to a `.optional()` / `.default()` wrapper (e.g. via `.refine()` after it). */
+type FieldWrapperChecks = NonNullable<z.ZodOptional['def']['checks']>;
+
+/**
+ * A `.optional()` / `.default()` layer stripped off a params field so it can be replayed verbatim.
+ * Defaults keep a getter rather than a captured value: in Zod v4, `def.defaultValue` evaluates a
+ * factory (or shallow-clones a static value) on every read, so reading it once at unwrap time would
+ * freeze that result into every subsequent parse. Wrapper-level checks are carried along so a
+ * refinement applied after `.optional()` / `.default()` is not dropped when the inner array is
+ * replaced with `array | template`.
+ */
+type FieldWrapper =
+  | { kind: 'optional'; checks: FieldWrapperChecks }
+  | { kind: 'default'; getValue: () => unknown; checks: FieldWrapperChecks };
+
+/**
+ * Strips the `.optional()` / `.default()` layers off a params field, returning the wrapped type
+ * together with the layers in outermost-first order.
+ */
+function unwrapFieldWrappers(field: z.ZodType): { inner: z.ZodType; wrappers: FieldWrapper[] } {
+  const wrappers: FieldWrapper[] = [];
+  let inner = field;
+  while (inner instanceof z.ZodOptional || inner instanceof z.ZodDefault) {
+    const checks = (inner.def.checks ?? []) as FieldWrapperChecks;
+    if (inner instanceof z.ZodOptional) {
+      wrappers.push({ kind: 'optional', checks });
+    } else {
+      const zodDefault = inner;
+      wrappers.push({ kind: 'default', getValue: () => zodDefault.def.defaultValue, checks });
+    }
+    inner = inner.unwrap() as z.ZodType;
+  }
+  return { inner, wrappers };
+}
+
+/**
+ * Re-applies checks that lived on an optional/default wrapper. Template strings skip them: those
+ * checks are written against `array | undefined` (or the defaulted array), and array APIs throw a
+ * TypeError that escapes `safeParse` when handed a Liquid expression.
+ */
+function applyWrapperChecks(field: z.ZodType, checks: FieldWrapperChecks): z.ZodType {
+  if (checks.length === 0) {
+    return field;
+  }
+  return field.check((ctx) => {
+    if (typeof ctx.value === 'string') {
+      return;
+    }
+    const result = z
+      .any()
+      .check(...checks)
+      .safeParse(ctx.value);
+    if (!result.success) {
+      for (const issue of result.error.issues) {
+        ctx.issues.push(issue);
+      }
+      return;
+    }
+    ctx.value = result.data;
+  });
+}
+
+/**
+ * Rebuilds the wrapper stack returned by {@link unwrapFieldWrappers} in its original order.
+ * The order is load-bearing: coalescing the layers into "optional, then default" would collapse
+ * stacked defaults onto the innermost value instead of the outermost one that Zod actually applies.
+ */
+function rewrapField(field: z.ZodType, wrappers: FieldWrapper[]): z.ZodType {
+  // `wrappers` is outermost-first, so replay it back-to-front to end up with the same stack.
+  // Pass `getValue` itself into `.default()` so Zod invokes the original supplier per parse.
+  return wrappers.reduceRight<z.ZodType>((acc, wrapper) => {
+    const rewrapped = wrapper.kind === 'optional' ? acc.optional() : acc.default(wrapper.getValue);
+    return applyWrapperChecks(rewrapped, wrapper.checks);
+  }, field);
+}
+
+/** True when the object carries `.refine()` / `.superRefine()` checks of its own. */
+function hasObjectLevelChecks(schema: z.ZodObject): boolean {
+  return (schema.def.checks?.length ?? 0) > 0;
+}
+
+/**
+ * Re-attaches the object-level checks of `paramsSchema` to the widened object.
+ *
+ * Those checks are written against the declared field types, so once a field accepts
+ * `array | string` a refinement like `(v) => v.ids.every(...)` receives a string and throws a
+ * TypeError. That exception escapes `safeParse` and fails the whole create/update request, so the
+ * checks cannot simply be preserved as-is. When a widened field holds a template, each check is
+ * tried on its own and checks that throw (because they need the unresolved array) are skipped —
+ * other checks, including those on unrelated fields, still run. Non-templated values run every
+ * object-level check against the already-parsed field output (without re-running field schemas,
+ * which would re-apply non-idempotent transforms). Successful check output is written back so
+ * object-level `.overwrite()` transforms are not discarded.
+ */
+function deferChecksForTemplateValues(
+  paramsSchema: z.ZodObject,
+  widenedShape: Record<string, z.ZodType>,
+  widenedKeys: string[]
+): z.ZodType {
+  const rebuilt = z.object({ ...paramsSchema.shape, ...widenedShape });
+  // Rebuilding from the shape drops the unknownKeys policy, which lives on `catchall`
+  // (`z.never()` for strict objects, `z.unknown()` for loose ones).
+  const { catchall } = paramsSchema.def;
+  const widened = catchall ? rebuilt.catchall(catchall) : rebuilt;
+
+  // Field schemas already ran in `widened`. Re-parsing through `paramsSchema` would re-apply
+  // non-idempotent field transforms (e.g. `.transform(v => v + '!')`) and can reject values the
+  // original schema accepts. `z.any()` fields + the original object checks validate the output
+  // shape without touching the fields again. Passthrough keeps keys that `widened` already
+  // accepted via catchall — a plain `z.object` would strip them before checks run and from
+  // `result.data` written back to `ctx.value`.
+  const objectChecks = paramsSchema.def.checks ?? [];
+  const anyShape = Object.fromEntries(
+    Object.keys(paramsSchema.shape as Record<string, z.ZodType>).map((key) => [key, z.any()])
+  ) as z.ZodRawShape;
+  const checksOnlyObject = () => z.object(anyShape).passthrough();
+  const outputChecksOnly = checksOnlyObject().check(...objectChecks);
+
+  // Use `.check()` (not `superRefine`) so successful overwrites can replace `ctx.value`;
+  // `superRefine` can only add issues and would drop `.overwrite()` output from result.data.
+  return widened.check((ctx) => {
+    const params = ctx.value as Record<string, unknown>;
+    if (!widenedKeys.some((key) => typeof params[key] === 'string')) {
+      const result = outputChecksOnly.safeParse(ctx.value);
+      if (!result.success) {
+        // Replaying path and message keeps the issue pointing at the offending field, which both
+        // Monaco markers and the template-error suppression in parseWorkflowYamlToJSON rely on.
+        for (const issue of result.error.issues) {
+          ctx.issues.push(issue);
+        }
+        return;
+      }
+      ctx.value = result.data;
+      return;
+    }
+
+    // Template present: do not bail on every object check. Run each check alone and skip only
+    // those that throw when they assume a declared array/object field type. Thread `current`
+    // forward so an overwrite that does not touch the templated field still applies.
+    let current = ctx.value;
+    for (const check of objectChecks) {
+      try {
+        const result = checksOnlyObject().check(check).safeParse(current);
+        if (!result.success) {
+          for (const issue of result.error.issues) {
+            ctx.issues.push(issue);
+          }
+        } else {
+          current = result.data;
+        }
+      } catch {
+        // Check depended on an unresolved templated field (e.g. called `.every` on a string).
+      }
+    }
+    ctx.value = current;
+  });
+}
+
+/**
+ * Widens top-level array fields of a connector params schema to also accept a whole-value
+ * Liquid template expression like `"${{ event.messages }}"`, so that passing a templated value
+ * where an array is declared is not reported as a type error.
+ *
+ * This is not editor-only: the same generated schema is the server-side gate for workflow
+ * create/update (`workflow_crud_service` / `workflow_validation_service` in
+ * workflows_management), so it decides what can be *persisted*, not just what Monaco underlines.
+ * The accepted form is restricted to the one the templating engine resolves without stringifying,
+ * because connector params are not re-validated against `paramsSchema` at execution time. Note
+ * that this preserves the *expression's* type rather than guaranteeing an array: `${{ inputs.x }}`
+ * still resolves to whatever `x` holds. Catching that requires validating rendered params before
+ * invocation, which the execution engine does not do today.
+ *
+ * Only the direct children of the params schema (not nested objects) are widened, to avoid
+ * disturbing deeply nested schemas such as the ES API's MappingTypeMapping.
+ */
+function withTemplateStringSupport(paramsSchema: z.ZodType): z.ZodType {
+  if (!(paramsSchema instanceof z.ZodObject)) {
+    return paramsSchema;
+  }
+  const widenedShape: Record<string, z.ZodType> = {};
+  for (const [key, field] of Object.entries(paramsSchema.shape as Record<string, z.ZodType>)) {
+    const { inner, wrappers } = unwrapFieldWrappers(field);
+    if (inner instanceof z.ZodArray) {
+      // Re-apply the wrappers that were stripped above. Dropping `.default()` here would turn a
+      // defaulted param into a required one and break workflows that legitimately omit it.
+      widenedShape[key] = rewrapField(z.union([LIQUID_TEMPLATE_SCHEMA, inner]), wrappers);
+    }
+  }
+
+  const widenedKeys = Object.keys(widenedShape);
+  if (widenedKeys.length === 0) {
+    return paramsSchema;
+  }
+
+  if (hasObjectLevelChecks(paramsSchema)) {
+    return deferChecksForTemplateValues(paramsSchema, widenedShape, widenedKeys);
+  }
+
+  // safeExtend preserves the unknownKeys policy (strict/passthrough), unlike extend().
+  // `widenedShape` is built as a mutable record; ZodRawShape is the readonly shape safeExtend
+  // expects, so the cast only relaxes mutability.
+  return paramsSchema.safeExtend(widenedShape as z.ZodRawShape);
+}
+
 function generateStepSchemaForConnector(
   connector: ConnectorContractUnion,
   stepSchema: z.ZodType,
@@ -179,11 +397,13 @@ function generateStepSchemaForConnector(
       connector.hasConnectorId === 'required' ? connectorId : connectorId.optional();
   }
 
+  const templateAwareParamsSchema = withTemplateStringSupport(connector.paramsSchema);
+
   // If all params are optional (or there are none), `with` itself should be optional so users
   // don't have to write an empty `with: {}` block for steps that need no inputs.
   const withSchema = hasNoRequiredFields(connector.paramsSchema)
-    ? connector.paramsSchema.optional()
-    : connector.paramsSchema;
+    ? templateAwareParamsSchema.optional()
+    : templateAwareParamsSchema;
 
   return BaseConnectorStepSchema.extend({
     type: connector.description
