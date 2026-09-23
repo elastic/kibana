@@ -15,13 +15,17 @@ import {
   TerminalExecutionStatuses,
 } from '@kbn/workflows';
 import type {
+  EsWorkflowExecution,
   EsWorkflowStepExecution,
   WorkflowExecutionDto,
   WorkflowExecutionHistoryModel,
   WorkflowExecutionListDto,
 } from '@kbn/workflows';
 import type { ChildWorkflowExecutionItem } from '@kbn/workflows/types/v1';
-import type { LogSearchResult } from '@kbn/workflows-execution-engine/server';
+import type {
+  ExecutionsSearchRequest,
+  LogSearchResult,
+} from '@kbn/workflows-execution-engine/server';
 import type {
   ExecutionLogsParams,
   StepLogsParams,
@@ -33,6 +37,7 @@ import { buildTimeRangeFilter } from '../api/lib/build_time_range_filter';
 import {
   buildManagedWorkflowExecutionsFilter,
   buildWorkflowExecutionsSpaceFilter,
+  emptyWorkflowExecutionsSearchResponse,
 } from '../api/lib/build_workflow_executions_search_query';
 import { isIndexNotFoundError } from '../api/lib/es_error_helpers';
 import { getChildWorkflowExecutions } from '../api/lib/get_child_workflow_executions';
@@ -329,6 +334,26 @@ export class WorkflowExecutionQueryService {
       page,
       collapse: params.collapse ? { field: params.collapse } : undefined,
     });
+  }
+
+  /**
+   * Runs an aggregation-only search over workflow executions with the internal user.
+   *
+   * Callers must authorize the request and scope the query themselves; this method adds no
+   * filtering of its own. It exists so the executions filter controls can aggregate a system
+   * index that no built-in Elasticsearch role can read.
+   */
+  async aggregateExecutions(
+    request: ExecutionsSearchRequest
+  ): Promise<estypes.SearchResponse<EsWorkflowExecution>> {
+    try {
+      return await this.deps.workflowExecutionsDataClient.search(request);
+    } catch (error) {
+      if (isIndexNotFoundError(error)) {
+        return emptyWorkflowExecutionsSearchResponse() as estypes.SearchResponse<EsWorkflowExecution>;
+      }
+      throw error;
+    }
   }
 
   async getWorkflowExecutionHistory(

@@ -43,10 +43,30 @@ export type ControlsRendererParentApi = Pick<
   Partial<PublishesUnifiedSearch> &
   PublishesViewMode &
   HasSerializedChildState<object> &
-  Partial<PublishesDisabledActionIds> & {
+  Partial<PublishesDisabledActionIds> &
+  Partial<HasOptionsListSuggestionsPath> & {
     registerChildApi: (api: DefaultEmbeddableApi) => void;
     isCompressed?: () => boolean;
   };
+
+/**
+ * Lets an embedding app redirect options list suggestion requests to its own HTTP route.
+ *
+ * Controls fetch suggestions with the current user's Elasticsearch privileges. Apps backed by an
+ * index that those privileges do not cover (for example a Kibana system index) can implement this
+ * to point the controls at a route that authorizes the request itself and queries with an internal
+ * user.
+ */
+export interface HasOptionsListSuggestionsPath {
+  /** Returns the override path, or `undefined` to use the controls plugin's default route. */
+  getOptionsListSuggestionsPath: () => string | undefined;
+}
+
+export const apiHasOptionsListSuggestionsPath = (
+  api: unknown
+): api is HasOptionsListSuggestionsPath =>
+  typeof (api as HasOptionsListSuggestionsPath | undefined)?.getOptionsListSuggestionsPath ===
+  'function';
 
 export interface PublishesFocusedPanelId {
   focusedPanelId$: BehaviorSubject<string | undefined>;

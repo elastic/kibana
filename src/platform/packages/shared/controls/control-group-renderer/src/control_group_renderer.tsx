@@ -54,6 +54,12 @@ export interface ControlGroupRendererProps {
   projectRouting?: ProjectRouting;
   dataLoading?: boolean;
   compressed?: boolean;
+  /**
+   * HTTP path the options list controls call to fetch suggestions. Defaults to the controls
+   * plugin's own route, which queries Elasticsearch as the current user. Apps whose index is not
+   * covered by the user's Elasticsearch privileges can pass their own route instead.
+   */
+  optionsListSuggestionsPath?: string;
 }
 
 export const ControlGroupRenderer = ({
@@ -66,6 +72,7 @@ export const ControlGroupRenderer = ({
   viewMode,
   dataLoading,
   compressed,
+  optionsListSuggestionsPath,
 }: ControlGroupRendererProps) => {
   const {
     services: { uiActions },
@@ -109,6 +116,9 @@ export const ControlGroupRenderer = ({
     }
   }, [projectRouting, projectRouting$]);
 
+  const optionsListSuggestionsPathRef = useRef(optionsListSuggestionsPath);
+  optionsListSuggestionsPathRef.current = optionsListSuggestionsPath;
+
   const parentApi = useMemo(() => {
     if (!childrenApi || !layoutApi) return;
 
@@ -123,6 +133,7 @@ export const ControlGroupRenderer = ({
       projectRouting$,
       reload$,
       panelIsPinned: () => true,
+      getOptionsListSuggestionsPath: () => optionsListSuggestionsPathRef.current,
       getEditorConfig: getEditorConfig.current,
       disabledActionIds$,
       setDisabledActionIds: (ids: string[] | undefined) => {

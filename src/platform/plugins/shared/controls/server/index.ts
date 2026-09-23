@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export { getOptionsListDslSuggestions } from './options_list/get_options_list_dsl_suggestions';
+export { optionsListDslFetchBodySchema } from './options_list/options_list_fetch_body_schema';
+export type { OptionsListDSLFetchBody, OptionsListResponse } from '../common/options_list/types';
+
 export const plugin = async () => {
   const { ControlsPlugin } = await import('./plugin');
   return new ControlsPlugin();

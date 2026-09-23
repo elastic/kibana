@@ -25,16 +25,19 @@ const buildApi = ({
   filters$,
   parentQuery$,
   projectRouting$,
+  suggestionsPath,
 }: {
   filters$: BehaviorSubject<unknown>;
   parentQuery$: BehaviorSubject<unknown>;
   projectRouting$?: BehaviorSubject<string | undefined>;
+  suggestionsPath?: string;
 }) => {
   const parentApi = {
     filters$,
     query$: parentQuery$,
     timeRange$: new BehaviorSubject({ from: 'now-15m', to: 'now' }),
     ...(projectRouting$ ? { projectRouting$ } : {}),
+    ...(suggestionsPath ? { getOptionsListSuggestionsPath: () => suggestionsPath } : {}),
   };
   return {
     parentApi,
@@ -133,6 +136,33 @@ describe('fetchAndValidate$ ES|QL filter wiring', () => {
     expect(fetchSpy).toHaveBeenCalledTimes(1);
     const body = JSON.parse(fetchSpy.mock.calls[0][1].body);
     expect(body.projectRouting).toBe('_alias:*');
+
+    subscription.unsubscribe();
+  }, 10000);
+
+  it('posts to the suggestions path the parent api supplies', async () => {
+    const filters$ = new BehaviorSubject<unknown>([]);
+    const parentQuery$ = new BehaviorSubject<unknown>(undefined);
+    const api = buildApi({
+      filters$,
+      parentQuery$,
+      suggestionsPath: '/internal/my_app/suggestions',
+    });
+
+    const { suggestions$ } = fetchAndValidate$({
+      api,
+      requestSize$: new BehaviorSubject<number>(10) as any,
+      runPastTimeout$: new BehaviorSubject<boolean>(false) as any,
+      selectedOptions$: new BehaviorSubject<unknown[]>([]) as any,
+      searchTechnique$: new BehaviorSubject<'wildcard'>('wildcard') as any,
+      sort$: new BehaviorSubject<unknown>({ by: '_count', direction: 'desc' }) as any,
+    });
+    const subscription = suggestions$.subscribe(() => {});
+
+    await new Promise((resolve) => setTimeout(resolve, 200));
+
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    expect(fetchSpy.mock.calls[0][0]).toBe('/internal/my_app/suggestions');
 
     subscription.unsubscribe();
   }, 10000);

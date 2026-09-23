@@ -122,6 +122,7 @@ export class WorkflowsPlugin
       spaces,
       workflowsService,
       audit,
+      getAutocompleteSettings: plugins.kql.autocomplete.getAutocompleteSettings,
     });
 
     if (plugins.inbox) {

@@ -35,6 +35,7 @@ import type { IWorkflowEventLoggerService } from './workflow_event_logger';
 
 export type {
   DataClient,
+  ExecutionsSearchRequest,
   GetStepExecutionsByIdsOptions,
   GetWorkflowExecutionsByIdsOptions,
   StepExecutionsDataClient,

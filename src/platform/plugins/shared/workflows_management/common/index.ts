@@ -16,6 +16,29 @@ export const WORKFLOWS_STEP_EXECUTIONS_INDEX = '.workflows-step-executions';
 
 export const WORKFLOWS_EXECUTIONS_MAX_RESULT_WINDOW = 10_000;
 
+/**
+ * Route that serves options list suggestions for the executions filter controls.
+ *
+ * `.workflows-executions` is a system index no built-in Elasticsearch role can read, so the
+ * controls cannot aggregate it with the current user's credentials. This route authorizes the
+ * request with the workflows execution-read privilege and queries with an internal user instead.
+ */
+export const WORKFLOW_EXECUTION_FILTER_SUGGESTIONS_PATH =
+  '/internal/workflows/executions/_filter_suggestions';
+
+/** Fields the executions filter controls may aggregate on. */
+export const WORKFLOW_EXECUTION_FILTER_FIELDS = [
+  'status',
+  'workflowId',
+  'executedBy',
+  'triggeredBy',
+  'createdBy',
+  'spaceId',
+  'isTestRun',
+] as const;
+
+export type WorkflowExecutionFilterField = (typeof WORKFLOW_EXECUTION_FILTER_FIELDS)[number];
+
 /** Max `size` for GET .../executions/{id}/steps. */
 export const WORKFLOW_EXECUTION_STEPS_MAX_PAGE_SIZE = 5000;
 

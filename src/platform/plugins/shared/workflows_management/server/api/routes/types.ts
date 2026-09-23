@@ -8,6 +8,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import type { PluginSetup as KqlPluginSetup } from '@kbn/kql/server';
 import type { SpacesServiceSetup } from '@kbn/spaces-plugin/server';
 import type { WorkflowManagementAuditLog } from './utils/workflow_audit_logging';
 import type { WorkflowsManagementConfig } from '../../config';
@@ -23,6 +24,8 @@ export interface RouteDependencies {
   logger: Logger;
   spaces: SpacesServiceSetup;
   audit: WorkflowManagementAuditLog;
+  /** KQL autocomplete settings, used to bound options list suggestion aggregations. */
+  getAutocompleteSettings: KqlPluginSetup['autocomplete']['getAutocompleteSettings'];
 }
 
 export type RouteHandler = (deps: RouteDependencies) => void;

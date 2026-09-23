@@ -68,6 +68,11 @@ export interface FilterGroupProps {
    * The control embeddable renderer
    */
   Storage: typeof Storage;
+  /**
+   * HTTP path the options list controls call to fetch suggestions. Pass this when the index the
+   * controls read is not covered by the current user's Elasticsearch privileges.
+   */
+  optionsListSuggestionsPath?: string;
   storageKey?: string;
   disableLocalStorageSync?: boolean;
 }

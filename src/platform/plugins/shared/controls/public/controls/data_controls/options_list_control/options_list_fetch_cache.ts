@@ -22,6 +22,8 @@ import type {
 } from '../../../../common/options_list/types';
 import { coreServices } from '../../../services/kibana_services';
 
+export const DEFAULT_OPTIONS_LIST_FETCH_PATH = '/internal/controls/optionsList/fetch';
+
 const REQUEST_CACHE_SIZE = 50; // only store a max of 50 responses
 const REQUEST_CACHE_TTL = 1000 * 60; // time to live = 1 minute
 
@@ -41,7 +43,7 @@ export class OptionsListFetchCache {
     });
   }
 
-  private getRequestHash = (request: OptionsListUnifiedFetchBody) => {
+  private getRequestHash = (request: OptionsListUnifiedFetchBody, fetchPath: string) => {
     // round timeRange to the minute to avoid cache misses
     const roundedTimeRange = (timeRange?: TimeRange) =>
       timeRange
@@ -67,6 +69,7 @@ export class OptionsListFetchCache {
       } = request;
 
       return hash({
+        fetchPath,
         kind: request.kind,
         index,
         selectedOptions,
@@ -96,6 +99,7 @@ export class OptionsListFetchCache {
     } = request;
 
     return hash({
+      fetchPath,
       kind: request.kind,
       esql,
       timeRange: roundedTimeRange(timeRange),
@@ -112,22 +116,20 @@ export class OptionsListFetchCache {
 
   public async runFetchRequest(
     request: OptionsListUnifiedFetchBody,
-    abortSignal: AbortSignal
+    abortSignal: AbortSignal,
+    fetchPath: string = DEFAULT_OPTIONS_LIST_FETCH_PATH
   ): Promise<OptionsListResponse> {
-    const requestHash = this.getRequestHash(request);
+    const requestHash = this.getRequestHash(request, fetchPath);
     if (!request.isReload && this.cache.has(requestHash)) {
       return Promise.resolve(this.cache.get(requestHash)!);
     }
 
-    const result = await coreServices.http.fetch<OptionsListResponse>(
-      `/internal/controls/optionsList/fetch`,
-      {
-        version: '1',
-        body: JSON.stringify(request),
-        signal: abortSignal,
-        method: 'POST',
-      }
-    );
+    const result = await coreServices.http.fetch<OptionsListResponse>(fetchPath, {
+      version: '1',
+      body: JSON.stringify(request),
+      signal: abortSignal,
+      method: 'POST',
+    });
 
     if (!optionsListResponseWasFailure(result)) {
       this.cache.set(requestHash, result);
