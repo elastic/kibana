@@ -33,6 +33,8 @@ export const proposalStatusSchema = z.enum([
   'failed',
   'expired',
   'no_action',
+  /** Replaced by a revision, not rejected — distinct from `dismissed`/`no_action`. */
+  'superseded',
 ]);
 export type ProposalStatus = z.infer<typeof proposalStatusSchema>;
 
@@ -72,7 +74,7 @@ export type DismissReason = z.infer<typeof dismissReasonSchema>;
 const MAX_ID_LENGTH = 256;
 const MAX_NAME_LENGTH = 256;
 /** Markdown shown to a human, so it needs room without being unbounded. */
-const MAX_COMMENT_LENGTH = 8192;
+export const MAX_COMMENT_LENGTH = 8192;
 const MAX_RATIONALE_LENGTH = 4096;
 const MAX_ERROR_LENGTH = 4096;
 /** ISO 8601 timestamps; generous enough for any offset notation. */
@@ -80,7 +82,7 @@ const MAX_TIMESTAMP_LENGTH = 64;
 /** An action's input is opaque to us, so cap its breadth rather than its shape. */
 const MAX_ACTION_INPUT_KEYS = 100;
 
-const boundedActionInput = z
+export const boundedActionInput = z
   .record(z.string().max(MAX_NAME_LENGTH), z.unknown())
   .refine((value) => Object.keys(value).length <= MAX_ACTION_INPUT_KEYS, {
     message: `actionInput may not exceed ${MAX_ACTION_INPUT_KEYS} keys`,
@@ -127,10 +129,16 @@ export const proposalSchema = z.object({
   decision: proposalDecisionSchema.optional(),
   /**
    * Set when this proposal was replaced — by a retry after a failed action, or
-   * by a tuned variant. Points at the successor so the queue can show one live
-   * proposal per subject rather than every attempt.
+   * by an analyst-requested revision. Points at the successor so the queue can
+   * show one live proposal per subject rather than every attempt.
    */
   supersededBy: z.string().max(MAX_ID_LENGTH).optional(),
+  /** First proposal in the chain; equal to `id` on the root and never rewritten. */
+  rootProposalId: z.string().max(MAX_ID_LENGTH).optional(),
+  /** Exactly one hop back, where `rootProposalId` is the first hop. Absent on the root. */
+  supersedes: z.string().max(MAX_ID_LENGTH).optional(),
+  /** 1-based position in the chain. Not incremented by `clone()`: a retry is not a revision. */
+  revision: z.number().int().min(1).optional(),
   /** Snapshotted from the triggering context at creation; never re-scored. */
   impact: proposalImpactSchema,
   confidence: proposalConfidenceSchema,
@@ -240,6 +248,10 @@ export const proposalFiltersSchema = z.object({
 export type ProposalFilters = z.infer<typeof proposalFiltersSchema>;
 
 export const listProposalsQuerySchema = proposalFiltersSchema.extend({
+  /** Filters to proposals in the given action category. */
+  category: proposalCategorySchema.optional(),
+  /** Bounds the closed queue to a recency window rather than all decided history. */
+  decidedWithinHours: z.coerce.number().int().min(1).max(168).optional(),
   size: z.coerce.number().int().min(1).max(MAX_PROPOSALS_PAGE_SIZE).default(50),
   from: z.coerce.number().int().min(0).max(MAX_PROPOSALS_PAGE_OFFSET).default(0),
 });
@@ -248,28 +260,6 @@ export type ListProposalsQuery = z.infer<typeof listProposalsQuerySchema>;
 export interface ListProposalsResponse {
   proposals: ProposalWithMetadata[];
   total: number;
-}
-
-export const MAX_PROPOSALS_SIZE = 500;
-
-export const proposalsQuerySchema = z.object({
-  windowHours: z.coerce.number().int().min(1).max(168).default(24),
-});
-export type ProposalsQuery = z.infer<typeof proposalsQuerySchema>;
-
-export interface ProposalsListResponse {
-  proposals: ProposalWithMetadata[];
-  total: number;
-  truncated: boolean;
-}
-
-/**
- * Parameters for `listByWindow`: the shared filters, plus how far back to reach
- * for decisions. The union of "awaiting" and "recently decided" is what the
- * shape *is*, so it is not a flag.
- */
-export interface ListByWindowQuery extends ProposalFilters {
-  decidedWithinHours: number;
 }
 
 export const proposalChartsSummaryQuerySchema = z
@@ -299,13 +289,15 @@ export type ProposalChartsSummaryQuery = z.infer<typeof proposalChartsSummaryQue
 export interface ProposalChartsSummaryBucket {
   /** Unix ms, start of the bucket. */
   timestamp: number;
-  /** Per category, how many proposals were created but not yet decided at the bucket end. */
+  /** Per category, how many proposals were open at any point during the bucket. */
   counts: Record<string, number>;
 }
 
 export interface ProposalChartsSummaryResponse {
   /** One entry per slot, zero-filled, oldest first. */
   buckets: ProposalChartsSummaryBucket[];
+  /** Proposals in this space still awaiting a decision right now, across all categories. */
+  currentOpen: number;
 }
 
 /**

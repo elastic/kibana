@@ -18,7 +18,6 @@ import type {
   RegistryInput,
   NewPackagePolicyInput,
 } from '../../../../../../types';
-import { ExperimentalFeaturesService } from '../../../../../../services';
 import {
   OTEL_COLLECTOR_INPUT_TYPE,
   DATA_STREAM_TYPE_VAR_NAME,
@@ -1262,9 +1261,6 @@ describe('PackagePolicyInputPanel', () => {
     let mockUpdateOtelInput: jest.Mock;
 
     beforeEach(() => {
-      jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
-        enableVarGroups: true,
-      } as any);
       useAgentlessMock.mockReturnValue({
         isAgentlessEnabled: false,
         isAgentlessDefault: false,
@@ -1427,9 +1423,6 @@ describe('PackagePolicyInputPanel', () => {
 
   describe('Non-GA release badge hoisting', () => {
     beforeEach(() => {
-      jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
-        enableVarGroups: true,
-      } as any);
       useAgentlessMock.mockReturnValue({
         isAgentlessEnabled: false,
         isAgentlessDefault: false,
