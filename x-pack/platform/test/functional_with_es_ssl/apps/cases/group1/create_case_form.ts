@@ -123,12 +123,6 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
 
     describe('customFields', () => {
       it('creates a case with custom fields', async function () {
-        // The redesigned case view only renders custom-field viewers inside the templates-v2
-        // sidebar section, which is off by default, so there is nothing to assert there.
-        if (await cases.common.isRedesignEnabled()) {
-          return this.skip();
-        }
-
         // Templates v2 hides the legacy inline custom fields on Create behind a switch;
         // reveal it so this legacy flow is exercised whether or not templates is on.
         await cases.common.showLegacyCustomFields('cases');
@@ -188,12 +182,6 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
       });
 
       it('creates a case with custom fields that have default values', async function () {
-        // The redesigned case view only renders custom-field viewers inside the templates-v2
-        // sidebar section, which is off by default, so there is nothing to assert there.
-        if (await cases.common.isRedesignEnabled()) {
-          return this.skip();
-        }
-
         // Templates v2 hides the legacy inline custom fields on Create behind a switch;
         // reveal it so this legacy flow is exercised whether or not templates is on.
         await cases.common.showLegacyCustomFields('cases');

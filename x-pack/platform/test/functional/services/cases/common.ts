@@ -34,14 +34,6 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
       await browser.setLocalStorageItem(`${owner}.cases.showLegacyCustomFields`, 'true');
     },
 
-    /**
-     * @deprecated Always returns true — the redesign is the only Cases UI.
-     * All remaining callers are block-level skip guards; remove them in Step 2.
-     */
-    async isRedesignEnabled(): Promise<boolean> {
-      return true;
-    },
-
     async waitForCaseViewToLoad() {
       await retry.waitFor('the case view page to load', async () => {
         return testSubjects.exists('appHeaderTitle');

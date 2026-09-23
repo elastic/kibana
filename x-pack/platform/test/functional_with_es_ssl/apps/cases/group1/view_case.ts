@@ -72,27 +72,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await find.byCssSelector('[data-test-subj*="title-update-action"]');
       });
 
-      it('shows error message when title is more than 160 characters', async function () {
-        // The redesign validates the title length server-side (surfaced as a toast) rather than with
-        // an inline form error, so this legacy client-side validation flow does not apply.
-        if (await cases.common.isRedesignEnabled()) {
-          return this.skip();
-        }
-
-        const longTitle = Array(161).fill('x').toString();
-
-        await testSubjects.click('editable-title-header-value');
-        await testSubjects.setValue('editable-title-input-field', longTitle);
-        await testSubjects.click('editable-title-submit-btn');
-
-        const error = await find.byCssSelector('.euiFormErrorText');
-        expect(await error.getVisibleText()).equal(
-          'The length of the title is too long. The maximum length is 160 characters.'
-        );
-
-        await testSubjects.click('editable-title-cancel-btn');
-      });
-
       it('shows error when description is empty strings, trims the description value on submit', async () => {
         await testSubjects.click('description-edit-icon');
 
@@ -172,57 +151,12 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await find.byCssSelector('[data-test-subj*="category-delete-action"]');
       });
 
-      it('shows error when category is more than 50 characters', async function () {
-        // The redesign surfaces category length validation inline on the always-visible combo box
-        // rather than through the legacy edit form, so this flow does not apply.
-        if (await cases.common.isRedesignEnabled()) {
-          return this.skip();
-        }
-
-        const longCategory = Array(51).fill('x').toString();
-        await testSubjects.click('category-edit-button');
-        await comboBox.setCustom('comboBoxInput', longCategory);
-        await testSubjects.click('edit-category-submit');
-
-        const error = await find.byCssSelector('.euiFormErrorText');
-        expect(await error.getVisibleText()).equal(
-          'The length of the category is too long. The maximum length is 50 characters.'
-        );
-
-        await testSubjects.click('edit-category-cancel');
-      });
-
       it('adds a tag to a case', async () => {
         const tag = uuidv4();
         await cases.common.addTag(tag);
 
         // validate user action
         await find.byCssSelector('[data-test-subj*="tags-add-action"]');
-      });
-
-      it('shows error when tag is more than 256 characters', async function () {
-        // The redesign surfaces tag length validation inline on the always-visible combo box rather
-        // than through the legacy edit form, so this flow does not apply.
-        if (await cases.common.isRedesignEnabled()) {
-          return this.skip();
-        }
-
-        const longTag = Array(257).fill('a').toString();
-
-        await testSubjects.click('tag-list-edit-button');
-        await comboBox.clearInputField('comboBoxInput');
-
-        await header.waitUntilLoadingHasFinished();
-
-        await comboBox.setCustom('comboBoxInput', longTag);
-        await browser.pressKeys(browser.keys.ENTER);
-
-        const error = await find.byCssSelector('.euiFormErrorText');
-        expect(await error.getVisibleText()).equal(
-          'The length of the tag is too long. The maximum length is 256 characters.'
-        );
-
-        await testSubjects.click('edit-tags-cancel');
       });
 
       it('deletes a tag from a case', async () => {
@@ -253,11 +187,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
 
         it("reopens a case from the 'reopen case' button", async function () {
-          // The redesign has no action-bar quick-action button (`case-view-status-action-button`);
-          // status is changed only from the header badge, covered by the dropdown-menu tests above.
-          if (await cases.common.isRedesignEnabled()) {
-            return this.skip();
-          }
+          // TODO: `case-view-status-action-button` exists in the redesign but the post-click
+          // assertions use `header-page-supplements` and `case-status-badge-popover-button-*`
+          // which belong to the legacy CaseActionBar and are absent from the redesign case view.
+          // Rewrite these assertions with redesign-native selectors.
+          return this.skip();
 
           await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses.closed);
           await header.waitUntilLoadingHasFinished();
@@ -282,11 +216,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
 
         it("marks in progress a case from the 'mark in progress' button", async function () {
-          // The redesign has no action-bar quick-action button (`case-view-status-action-button`);
-          // status is changed only from the header badge, covered by the dropdown-menu tests above.
-          if (await cases.common.isRedesignEnabled()) {
-            return this.skip();
-          }
+          // TODO: see "reopens a case" above — same issue with post-click assertions.
+          return this.skip();
 
           await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses.open);
           await header.waitUntilLoadingHasFinished();
@@ -311,11 +242,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
 
         it("closes a case from the 'close case' button", async function () {
-          // The redesign has no action-bar quick-action button (`case-view-status-action-button`);
-          // status is changed only from the header badge, covered by the dropdown-menu tests above.
-          if (await cases.common.isRedesignEnabled()) {
-            return this.skip();
-          }
+          // TODO: see "reopens a case" above — same issue with post-click assertions.
+          return this.skip();
 
           await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses['in-progress']);
           await header.waitUntilLoadingHasFinished();
@@ -730,13 +658,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
 
       beforeEach(async function () {
-        // The redesign consolidates the activity type filters into a single dropdown
-        // (`user-actions-filter-bar-type-button`) with popover options and plain count badges rather
-        // than the legacy inline toggle buttons with `euiNotificationBadge` "N active filters" labels
-        // these assertions read; the redesign filter bar has its own unit coverage.
-        if (await cases.common.isRedesignEnabled()) {
-          this.skip();
-        }
+        // TODO: `user-actions-filter-activity-button-*` belongs to the legacy FilterActivity
+        // component which is not rendered by the redesign case view; the redesign uses
+        // `user-actions-filter-bar-type-button` (UserActionsFilterBar). Rewrite for the new UI.
+        this.skip();
       });
 
       it('filters by all by default', async () => {
@@ -827,12 +752,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       beforeEach(async function () {
-        // The redesign renders all activity (paged actions, the show-more row, and the latest actions)
-        // in a single `user-actions-list`, whereas these assertions expect the legacy two-list DOM with
-        // fixed per-list counts; the redesign pagination has its own unit coverage.
-        if (await cases.common.isRedesignEnabled()) {
-          this.skip();
-        }
+        // TODO: these assertions count two separate `user-actions-list` elements with fixed
+        // per-page sizes, which was the legacy two-list structure. The redesign uses a single
+        // list with `ShowMoreActivities`; rewrite using the redesign pagination model.
+        this.skip();
       });
 
       after(async () => {
@@ -1020,11 +943,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       beforeEach(async function () {
-        // The redesign renders reporter/participants as app-header metadata and sidebar avatars rather
-        // than the legacy username lists these assertions read, so this suite targets the legacy UI.
-        if (await cases.common.isRedesignEnabled()) {
-          this.skip();
-        }
+        // TODO: `case-view-user-list-participants` and `case-view-user-list-reporter` are absent
+        // from the redesign; participants/reporter are shown as avatars and metadata in the
+        // AppHeader. Rewrite with the redesign's participant selectors.
+        this.skip();
       });
 
       afterEach(async () => {
@@ -1110,13 +1032,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       ];
 
       before(async function () {
-        // The redesign only renders case-view custom fields when templates v2 (`templates.enabled`) is
-        // on, which defaults off; these assertions target the legacy sidebar custom-field editors.
-        if (await cases.common.isRedesignEnabled()) {
-          return this.skip();
-        }
-
         await cases.navigation.navigateToApp();
+        // showLegacyCustomFields requires the Cases app origin to be loaded first.
+        await cases.common.showLegacyCustomFields('cases');
         await cases.api.createConfigWithCustomFields({ customFields, owner: 'cases' });
         await cases.api.createCase({
           customFields: [
