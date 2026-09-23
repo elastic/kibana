@@ -63,21 +63,6 @@ export const putPublicFieldDefinitionRoute = createCasesRoute({
         return response.badRequest({ body: { message: definitionValidation.message } });
       }
 
-      // Only allow definition strings longer than the public POST limit when the caller is
-      // submitting the exact same bytes already stored (grandfathering legacy definitions created
-      // by internal tooling). Changed definitions must respect MAX_FIELD_DEFINITION_DEFINITION_LENGTH.
-      const submittedDefinition = bodyResult.data.definition;
-      if (submittedDefinition.length > MAX_FIELD_DEFINITION_DEFINITION_LENGTH) {
-        const current = await casesClient.fieldDefinitions.getFieldDefinition(fieldDefinitionId);
-        if (submittedDefinition !== current.attributes.definition) {
-          return response.badRequest({
-            body: {
-              message: `Field definition must not exceed ${MAX_FIELD_DEFINITION_DEFINITION_LENGTH} characters`,
-            },
-          });
-        }
-      }
-
       // Resolve `name` from the YAML when the caller omitted it.
       // Do NOT enforce MAX_FIELD_DEFINITION_NAME_LENGTH here: existing definitions may have names
       // that exceed the 50-char public write limit (internal creates have a higher bound), and
@@ -90,14 +75,17 @@ export const putPublicFieldDefinitionRoute = createCasesRoute({
         name: resolvedName,
       };
 
+      const updateOptions = { publicDefinitionLengthLimit: MAX_FIELD_DEFINITION_DEFINITION_LENGTH };
+
       if (request.query.dry_run) {
-        await casesClient.fieldDefinitions.validateUpdateFieldDefinition(fieldDefinitionId, input);
+        await casesClient.fieldDefinitions.validateUpdateFieldDefinition(fieldDefinitionId, input, updateOptions);
         return response.ok({ body: { valid: true } });
       }
 
       const updated = await casesClient.fieldDefinitions.updateFieldDefinition(
         fieldDefinitionId,
-        input
+        input,
+        updateOptions
       );
 
       return response.ok({ body: toPublicFieldDefinition(updated.attributes) });

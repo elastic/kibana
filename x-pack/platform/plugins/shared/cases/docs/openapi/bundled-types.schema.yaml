@@ -1452,7 +1452,7 @@ paths:
           content:
             application/json:
               schema:
-                oneOf:
+                anyOf:
                   - description: Identity-immutable conflict — name or type was changed.
                     type: object
                     required:

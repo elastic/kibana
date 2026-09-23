@@ -22046,7 +22046,7 @@ paths:
                 response409:
                   $ref: '#/components/examples/Cases_response_409'
               schema:
-                oneOf:
+                anyOf:
                   - description: Identity-immutable conflict — name or type was changed.
                     type: object
                     properties:

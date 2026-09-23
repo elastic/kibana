@@ -45,10 +45,15 @@ export interface FieldDefinitionsSubClient {
   validateCreateFieldDefinition(input: CreateFieldDefinitionInput): Promise<void>;
   updateFieldDefinition(
     id: string,
-    input: UpdateFieldDefinitionInput
+    input: UpdateFieldDefinitionInput,
+    options?: { publicDefinitionLengthLimit?: number }
   ): Promise<SavedObject<FieldDefinition>>;
   /** Runs authorization + identity-immutability validation without writing. Used by the `dry_run` path. */
-  validateUpdateFieldDefinition(id: string, input: UpdateFieldDefinitionInput): Promise<void>;
+  validateUpdateFieldDefinition(
+    id: string,
+    input: UpdateFieldDefinitionInput,
+    options?: { publicDefinitionLengthLimit?: number }
+  ): Promise<void>;
   deleteFieldDefinition(id: string): Promise<void>;
 }
 
@@ -281,12 +286,26 @@ export const createFieldDefinitionsSubClient = (
     updateFieldDefinition: withUsageCounter(
       usageCounterByMethod.updateFieldDefinition,
       clientArgs,
-      async (id: string, input: UpdateFieldDefinitionInput) => {
+      async (id: string, input: UpdateFieldDefinitionInput, options?: { publicDefinitionLengthLimit?: number }) => {
         const fieldDef = await fieldDefinitionsService.getFieldDefinition(id);
         await ensureCanManageOrHideExistence(fieldDef, id);
         if (input.owner !== fieldDef.attributes.owner) {
           throw Boom.badRequest(
             `Cannot change the owner of a field definition. Current owner: ${fieldDef.attributes.owner}`
+          );
+        }
+
+        // Public API length guard: only allow definition strings that exceed the public limit
+        // when the caller is submitting the exact bytes already stored (grandfathering legacy
+        // definitions). Changed definitions must respect the limit. This check happens here,
+        // after ensureCanManageOrHideExistence, so the auth boundary is preserved.
+        if (
+          options?.publicDefinitionLengthLimit != null &&
+          input.definition.length > options.publicDefinitionLengthLimit &&
+          input.definition !== fieldDef.attributes.definition
+        ) {
+          throw Boom.badRequest(
+            `Field definition must not exceed ${options.publicDefinitionLengthLimit} characters`
           );
         }
 
@@ -352,12 +371,22 @@ export const createFieldDefinitionsSubClient = (
       }
     ),
 
-    validateUpdateFieldDefinition: async (id: string, input: UpdateFieldDefinitionInput) => {
+    validateUpdateFieldDefinition: async (id: string, input: UpdateFieldDefinitionInput, options?: { publicDefinitionLengthLimit?: number }) => {
       const fieldDef = await fieldDefinitionsService.getFieldDefinition(id);
       await ensureCanManageOrHideExistence(fieldDef, id);
       if (input.owner !== fieldDef.attributes.owner) {
         throw Boom.badRequest(
           `Cannot change the owner of a field definition. Current owner: ${fieldDef.attributes.owner}`
+        );
+      }
+
+      if (
+        options?.publicDefinitionLengthLimit != null &&
+        input.definition.length > options.publicDefinitionLengthLimit &&
+        input.definition !== fieldDef.attributes.definition
+      ) {
+        throw Boom.badRequest(
+          `Field definition must not exceed ${options.publicDefinitionLengthLimit} characters`
         );
       }
 
