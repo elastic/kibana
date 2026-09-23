@@ -1,0 +1,220 @@
+openapi: 3.0.0
+info:
+  title: AlertZero Hunt component schemas
+  version: '1'
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    HuntTechnology:
+      type: string
+      enum: [aws_iam, fortigate]
+      description: >-
+        Supported technologies. Extend only alongside a TECHNOLOGY_INDEX_MAP entry.
+
+    IndexScopeStatus:
+      type: string
+      enum: [ok, degraded, blocked]
+      description: >-
+        `ok`: every required/optional pattern resolved. `degraded`: every
+        required pattern resolved but an optional one did not. `blocked`: a
+        required pattern resolved to nothing; the hunt must not run.
+
+    IndexScopeWindow:
+      type: object
+      required: [from, to]
+      properties:
+        from:
+          type: string
+          description: ISO 8601 start of the search window, inclusive.
+        to:
+          type: string
+          description: ISO 8601 end of the search window, exclusive.
+
+    ResolvedIndexScope:
+      type: object
+      required: [technology, status, required, optional, missing, window, rowLimit]
+      description: >-
+        `required`/`optional` list every pattern checked for the technology;
+        `missing` lists every pattern from either list that resolved to zero indices.
+      properties:
+        technology:
+          $ref: '#/components/schemas/HuntTechnology'
+        status:
+          $ref: '#/components/schemas/IndexScopeStatus'
+        required:
+          type: array
+          items:
+            type: string
+        optional:
+          type: array
+          items:
+            type: string
+        missing:
+          type: array
+          items:
+            type: string
+        window:
+          $ref: '#/components/schemas/IndexScopeWindow'
+        rowLimit:
+          type: integer
+
+    HuntIocType:
+      type: string
+      enum: [ip, email, domain, url, hash]
+      description: IOC kinds Tier 1 knows how to map to ECS fields.
+
+    HuntIoc:
+      type: object
+      required: [type, value]
+      properties:
+        type:
+          $ref: '#/components/schemas/HuntIocType'
+        value:
+          type: string
+
+    HuntForThreatStatus:
+      type: string
+      enum: [scope_blocked, no_searchable_terms, no_environment_hits, environment_hits_found]
+      description: >-
+        Tier 1 raw hunt statuses. The hit/clean collapse for
+        evidence[].last_hunt_status happens in the managed-workflow evidence step.
+        `scope_blocked` means no required index existed, so the hunt never ran; it is
+        a failed run, never clean.
+
+    AffectedAsset:
+      type: object
+      required: [name, hitCount]
+      properties:
+        name:
+          type: string
+        hitCount:
+          type: integer
+
+    HuntForThreatHit:
+      type: object
+      required: [index, id, score]
+      additionalProperties: true
+      properties:
+        index:
+          type: string
+        id:
+          type: string
+        score:
+          type: number
+          nullable: true
+        matched:
+          type: object
+          description: >-
+            Which IOC and/or ATT&CK technique produced this hit. Not yet
+            populated by Tier 1: requires per-IOC attribution (highlight or
+            a per-IOC query) that Tier 1's current single combined `should`
+            query doesn't provide. Declared here so the SSE mapper's
+            `events[].matched` has a stable contract to fill in once Tier 1
+            adds attribution.
+          properties:
+            ioc:
+              type: object
+              properties:
+                type:
+                  type: string
+                value:
+                  type: string
+            technique_id:
+              type: string
+            field:
+              type: string
+
+    HuntForThreatResult:
+      type: object
+      required:
+        - status
+        - hasConfirmedHit
+        - searchedIocs
+        - searchedTechniques
+        - resolvedIocs
+        - resolvedTechniques
+        - timeRange
+        - counts
+        - hits
+        - affectedAssets
+        - perIndex
+      properties:
+        status:
+          $ref: '#/components/schemas/HuntForThreatStatus'
+        hasConfirmedHit:
+          type: boolean
+          description: >-
+            A confirmed event match in a required index inside the window.
+            Never set by an optional-index or out-of-window match.
+        searchedIocs:
+          type: integer
+        searchedTechniques:
+          type: integer
+        resolvedIocs:
+          type: array
+          items:
+            $ref: '#/components/schemas/HuntIoc'
+        resolvedTechniques:
+          type: array
+          items:
+            type: string
+        timeRange:
+          type: object
+          required: [from, to]
+          properties:
+            from:
+              type: string
+            to:
+              type: string
+        counts:
+          type: object
+          required: [totalHits, returnedHits, affectedHosts, affectedUsers]
+          properties:
+            totalHits:
+              type: integer
+            returnedHits:
+              type: integer
+            affectedHosts:
+              type: integer
+            affectedUsers:
+              type: integer
+        hits:
+          type: array
+          items:
+            $ref: '#/components/schemas/HuntForThreatHit'
+        affectedAssets:
+          type: object
+          required: [hosts, users, services]
+          properties:
+            hosts:
+              type: array
+              items:
+                $ref: '#/components/schemas/AffectedAsset'
+            users:
+              type: array
+              items:
+                $ref: '#/components/schemas/AffectedAsset'
+            services:
+              type: array
+              items:
+                $ref: '#/components/schemas/AffectedAsset'
+        perIndex:
+          type: array
+          items:
+            type: object
+            required: [index, hitCount, required]
+            properties:
+              index:
+                type: string
+              hitCount:
+                type: integer
+              required:
+                type: boolean
+                description: >-
+                  Regex match of this concrete `_index` bucket against the
+                  resolved technology's required index patterns (e.g.
+                  `logs-aws.*`), computed once by Tier 1, not re-derived
+                  downstream.
+        message:
+          type: string

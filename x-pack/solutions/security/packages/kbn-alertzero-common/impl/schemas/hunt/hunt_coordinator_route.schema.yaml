@@ -1,0 +1,255 @@
+openapi: 3.0.0
+info:
+  title: AlertZero hunt coordinator route
+  version: '1'
+paths:
+  /internal/alertzero/hunt/hunt_coordinator:
+    post:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: HuntCoordinator
+      description: >-
+        Chains Tier 1 into Tier 2 with tier2_when gating and no-model
+        degradation. Returns completedSuccessfully so the calling workflow
+        decides whether to write the per-space evidence[] element.
+      summary: Run the hunt coordinator
+      tags:
+        - AlertZero API
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [trigger]
+              additionalProperties: false
+              properties:
+                report_id:
+                  type: string
+                run_id:
+                  type: string
+                  description: >-
+                    Run id supplied by the Worker fan-out so every child of one
+                    sweep shares it, which is what the packaging barrier and the
+                    conclusion dedupe key off. The route mints one only when the
+                    caller has no sweep to tie the run to.
+                technology:
+                  type: string
+                  maxLength: 64
+                  nullable: true
+                  description: >-
+                    One of the HuntTechnology values to pin the hunt to that
+                    technology's index scope. Omit it, or send null or an empty
+                    string (a workflow renders an unset input as ""), and the
+                    coordinator resolves every known technology and hunts the ones
+                    whose required indices exist in the space. Any other value is a
+                    400. Kept a plain string because a workflow caller cannot omit
+                    the key.
+                text:
+                  type: string
+                  maxLength: 200000
+                iocs:
+                  type: array
+                  items:
+                    $ref: '../components/hunt.schema.yaml#/components/schemas/HuntIoc'
+                techniques:
+                  type: array
+                  items:
+                    type: string
+                time_range:
+                  type: object
+                  required: [from, to]
+                  properties:
+                    from:
+                      type: string
+                    to:
+                      type: string
+                size:
+                  type: integer
+                  minimum: 1
+                max_assets:
+                  type: integer
+                  minimum: 1
+                llm_confidence_threshold:
+                  type: number
+                  minimum: 0
+                  maximum: 1
+                tier2_when:
+                  type: string
+                  enum: [on_hits, always, never]
+                max_tier2_sample_events:
+                  type: integer
+                  minimum: 1
+                trigger:
+                  type: string
+                  enum: [manual, scheduled]
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - runId
+                  - technologies
+                  - tier1
+                  - message
+                  - next_step
+                  - completedSuccessfully
+                properties:
+                  status:
+                    $ref: '#/components/schemas/HuntCoordinatorStatus'
+                  report_id:
+                    type: string
+                  runId:
+                    type: string
+                  technologies:
+                    type: array
+                    description: >-
+                      Technologies whose indices the hunt ran against. Empty when
+                      the scope was blocked.
+                    items:
+                      $ref: '../components/hunt.schema.yaml#/components/schemas/HuntTechnology'
+                  tier1:
+                    allOf:
+                      - $ref: '../components/hunt.schema.yaml#/components/schemas/HuntForThreatResult'
+                      - type: object
+                        required: [tier]
+                        properties:
+                          tier:
+                            type: integer
+                            enum: [1]
+                  tier2:
+                    type: object
+                    nullable: true
+                    required:
+                      - status
+                      - behaviors
+                      - indexed_behaviors
+                      - next_step
+                      - hasHit
+                    properties:
+                      status:
+                        type: string
+                        enum: [no_behaviors_found, no_behaviors_validated, behaviors_proposed]
+                      report_id:
+                        type: string
+                      behaviors:
+                        type: array
+                        items:
+                          type: object
+                          required:
+                            - technique_id
+                            - evidence_quote
+                            - llm_confidence
+                            - confidence
+                            - technique_name
+                            - reference
+                            - tactic_ids
+                            - proposed_esql_rule
+                            - rule_name
+                            - severity
+                            - risk_score
+                          properties:
+                            technique_id:
+                              type: string
+                            evidence_quote:
+                              type: string
+                            llm_confidence:
+                              type: number
+                            confidence:
+                              type: number
+                            technique_name:
+                              type: string
+                            reference:
+                              type: string
+                            tactic_ids:
+                              type: array
+                              items:
+                                type: string
+                            parent_technique_id:
+                              type: string
+                            proposed_esql_rule:
+                              type: string
+                            rule_name:
+                              type: string
+                            severity:
+                              type: string
+                              enum: [critical, high, medium, low]
+                            risk_score:
+                              type: number
+                      indexed_behaviors:
+                        type: array
+                        items:
+                          type: object
+                          required:
+                            - id
+                            - technique_id
+                            - description
+                            - llm_confidence
+                            - confidence
+                          properties:
+                            id:
+                              type: string
+                            technique_id:
+                              type: string
+                            description:
+                              type: string
+                            telemetry_targets:
+                              type: array
+                              items:
+                                type: string
+                            llm_confidence:
+                              type: number
+                            confidence:
+                              type: number
+                      dropped_unknown_ids:
+                        type: array
+                        items:
+                          type: string
+                      message:
+                        type: string
+                      next_step:
+                        type: string
+                      hasHit:
+                        type: boolean
+                        enum: [false]
+                      tier:
+                        type: integer
+                        enum: [2]
+                  tier2_skipped_reason:
+                    type: string
+                  message:
+                    type: string
+                  next_step:
+                    type: string
+                  completedSuccessfully:
+                    type: boolean
+                    description: >-
+                      True when the run completed without hard errors. The
+                      calling workflow checks this before writing hunt evidence,
+                      so a failed run writes nothing.
+                  sse:
+                    type: array
+                    description: >-
+                      Populated when Tier 1 confirmed a hit: one entry per
+                      confirmed technique (a single report-scoped entry when
+                      Tier 2 produced none). The caller fans out over this
+                      array with ai.attachment.add, one call per entry; no
+                      templated fields.
+                    items:
+                      type: object
+                      required: [attachment_id, data]
+                      properties:
+                        attachment_id:
+                          type: string
+                        data:
+                          type: object
+                          additionalProperties: true
+components:
+  schemas:
+    HuntCoordinatorStatus:
+      type: string
+      enum: [blocked, tier1_only, tier1_and_tier2, tier2_only_skipped]

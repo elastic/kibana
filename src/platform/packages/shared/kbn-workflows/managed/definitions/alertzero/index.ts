@@ -21,10 +21,12 @@ import {
   ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID,
   ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW_ID,
 } from './attack_discovery_workflows';
+import { ALERTZERO_CORRELATION_WORKFLOW_ID } from './correlation';
 import { ALERTZERO_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID } from './detection_rule_creation';
 import { ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID } from './detection_rule_tuning';
 import { ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID } from './floor_alert_triage';
 import { ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID } from './floor_attack_discovery';
+import { ALERTZERO_HUNT_WORKFLOW_ID } from './hunt';
 import { ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID } from './hunt_continuous_threat_hunt';
 import { ALERTZERO_JOURNAL_NOTE_WORKFLOW_ID } from './journal_note';
 import {
@@ -86,6 +88,8 @@ export {
   ALERTZERO_JOURNAL_NOTE_WORKFLOW,
   ALERTZERO_JOURNAL_NOTE_WORKFLOW_ID,
 } from './journal_note';
+export { ALERTZERO_HUNT_WORKFLOW, ALERTZERO_HUNT_WORKFLOW_ID } from './hunt';
+export { ALERTZERO_CORRELATION_WORKFLOW, ALERTZERO_CORRELATION_WORKFLOW_ID } from './correlation';
 export {
   ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW,
   ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
@@ -135,6 +139,19 @@ export const ALERTZERO_ATTACK_DISCOVERY_WORKFLOW_IDS = [
   ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW_ID,
   ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID,
   ALERTZERO_JOURNAL_NOTE_WORKFLOW_ID,
+] as const;
+
+/**
+ * Hunt Watch's two untagged children (PR 3b), invoked via `workflow.execute`
+ * by PR 4's tagged Worker (`hunt_continuous_threat_hunt.yaml`) using the
+ * registered ids `system-security-hunt-execute` /
+ * `system-security-hunt-correlation`. Own no trigger, so — like
+ * `journal_note` above — they must be installed globally for the Worker's
+ * `workflow.execute` call to resolve them.
+ */
+export const ALERTZERO_HUNT_CHILD_WORKFLOW_IDS = [
+  ALERTZERO_HUNT_WORKFLOW_ID,
+  ALERTZERO_CORRELATION_WORKFLOW_ID,
 ] as const;
 
 /**
