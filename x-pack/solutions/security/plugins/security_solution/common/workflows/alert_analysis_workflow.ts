@@ -95,6 +95,8 @@ export const AlertAnalysisWorkflowOutputFields = z.object({
   false_positive_count: z.number().int().min(0),
   true_positive_count: z.number().int().min(0),
   inconclusive_count: z.number().int().min(0),
+  // IDs that qualified for and were submitted to FP auto-close — not confirmed closed
+  // (SetAlertsStatus uses conflicts: proceed; response has no per-id reconciliation).
   auto_closed_ids: z.array(z.string().max(512)),
   grouped_counts_summary: z.string().max(10000),
   generated_summary: z.string().max(2000),

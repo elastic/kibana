@@ -19,8 +19,8 @@ export const SECURITY_ALERT_ANALYSIS_WORKFLOW_ID = 'system-security-alert-analys
 export const SECURITY_ALERT_ANALYSIS_WORKFLOW = {
   id: SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
   pluginId: 'securitySolution',
-  // Tip of the Worker-callable YAML (agent batch_summary maxLength).
-  version: 26,
+  // Tip of the Worker-callable YAML (document auto_closed_ids as candidate ids).
+  version: 27,
   billable: false,
   visibility: {
     selectors: ['rule_action'],
