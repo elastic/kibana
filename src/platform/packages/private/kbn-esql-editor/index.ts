@@ -15,6 +15,11 @@ export type { ESQLEditorRestorableState } from './src/restorable_state';
 export { QuickSearchVisor } from './src/editor_visor';
 export type { QuickSearchVisorProps } from './src/editor_visor';
 export { esqlKeyboardShortcuts } from './src/editor_footer/esql_keyboard_shortcuts';
+export { ESQLMenu } from './src/editor_menu';
+export { EsqlEditorActionsProvider } from './src/editor_actions_context';
+export { EsqlEditorActionsRegister } from './src/editor_actions_register';
+export type { EsqlEditorActionsRegisterProps } from './src/editor_actions_register';
+export { helpLabel } from './src/editor_menu/menu_i18n';
 
 export { registerESQLEditorAnalyticsEvents } from './src/telemetry/events_registration';
 export { ESQLEditorTelemetryService } from './src/telemetry/telemetry_service';
