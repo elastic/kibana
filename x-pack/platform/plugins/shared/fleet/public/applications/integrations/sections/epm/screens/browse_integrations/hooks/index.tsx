@@ -20,9 +20,13 @@ import { useUrlCategories, useUrlDefaultCategories, useSetUrlCategory } from './
 // Apply a filter predicate to cards, also filtering groupMembers of collection cards so
 // badge counts and flyout variants reflect the active filter state. Collections that drop
 // below 2 matching members degrade to individual tiles (matching ungrouped semantics).
+// singletonFilter: optional guard applied before promoting a singleton member to a top-level
+// tile, so implicit visibility rules (deprecated, content) that ran before this filter step
+// are still enforced on promoted cards.
 function applyCardFilter(
   cards: IntegrationCardItem[],
-  predicate: (card: IntegrationCardItem) => boolean
+  predicate: (card: IntegrationCardItem) => boolean,
+  singletonFilter?: (member: IntegrationCardItem) => boolean
 ): IntegrationCardItem[] {
   const result: IntegrationCardItem[] = [];
   for (const card of cards) {
@@ -33,10 +37,14 @@ function applyCardFilter(
     const filteredMembers = (card.groupMembers ?? []).filter(predicate);
     if (filteredMembers.length === 0) continue;
     if (filteredMembers.length === 1) {
-      result.push(filteredMembers[0]);
+      if (!singletonFilter || singletonFilter(filteredMembers[0])) {
+        result.push(filteredMembers[0]);
+      }
       continue;
     }
-    result.push({ ...card, groupMembers: filteredMembers });
+    // Recompute categories from the surviving members so sidebar counts stay accurate.
+    const filteredCategories = [...new Set(filteredMembers.flatMap((m) => m.categories))];
+    result.push({ ...card, groupMembers: filteredMembers, categories: filteredCategories });
   }
   return result;
 }
@@ -116,30 +124,42 @@ export function useBrowseIntegrationHook({
       cards = cards.filter((card) => !('isDeprecated' in card && card.isDeprecated === true));
     }
 
+    // Implicit visibility predicate reapplied to singletons promoted by degradation —
+    // deprecated/content members inside a collection must not reach the top-level grid
+    // unless the user has explicitly enabled those filters.
+    const implicitVisible = (c: IntegrationCardItem) =>
+      (showDeprecated || !('isDeprecated' in c && c.isDeprecated === true)) &&
+      (urlFilters.showContent || c.type !== 'content');
+
     // Apply setup method filters (union: show cards matching ANY selected method).
     // applyCardFilter ensures collection members are filtered too so badge/flyout reflect
     // only the members matching the active setup method.
     const setupMethodFilters = urlFilters.setupMethod;
     if (setupMethodFilters && setupMethodFilters.length > 0) {
-      cards = applyCardFilter(cards, (card) =>
-        setupMethodFilters.some((method) => {
-          switch (method) {
-            case 'agentless':
-              return card.supportsAgentless === true;
-            case 'elastic_agent':
-              return card.type === 'integration' || card.type === 'input';
-            default:
-              return false;
-          }
-        })
+      cards = applyCardFilter(
+        cards,
+        (card) =>
+          setupMethodFilters.some((method) => {
+            switch (method) {
+              case 'agentless':
+                return card.supportsAgentless === true;
+              case 'elastic_agent':
+                return card.type === 'integration' || card.type === 'input';
+              default:
+                return false;
+            }
+          }),
+        implicitVisible
       );
     }
 
     // Apply signal filters (union: show cards matching ANY selected signal).
     const signalFilters = urlFilters.signal;
     if (signalFilters && signalFilters.length > 0) {
-      cards = applyCardFilter(cards, (card) =>
-        signalFilters.some((s) => card.signalTypes?.includes(s))
+      cards = applyCardFilter(
+        cards,
+        (card) => signalFilters.some((s) => card.signalTypes?.includes(s)),
+        implicitVisible
       );
     }
 
@@ -165,15 +185,43 @@ export function useBrowseIntegrationHook({
   // When multiple effective categories are active, show cards matching ALL of them
   // (AND logic / intersection). applyCardFilter ensures collection members are filtered
   // too so the badge count and flyout variants reflect the active category state.
+  // Re-sort at the end because singleton degradation can change a card's title, shifting
+  // its position relative to the pre-sort from sortedCards.
   const filteredCards = useMemo(() => {
+    const sortKey = urlFilters.sort ?? 'recent-old';
+    const showDeprecated = urlFilters.status?.includes(STATUS_DEPRECATED) ?? false;
+    const implicitVisible = (c: IntegrationCardItem) =>
+      (showDeprecated || !('isDeprecated' in c && c.isDeprecated === true)) &&
+      (urlFilters.showContent || c.type !== 'content');
+
+    let result: IntegrationCardItem[];
     if (effectiveCategories.length > 0 || selectedSubCategory) {
-      return applyCardFilter(nonCategoryFilteredCards, (c) => {
-        if (selectedSubCategory) return c.categories.includes(selectedSubCategory);
-        return effectiveCategories.every((cat) => c.categories.includes(cat));
-      });
+      result = applyCardFilter(
+        nonCategoryFilteredCards,
+        (c) => {
+          if (selectedSubCategory) return c.categories.includes(selectedSubCategory);
+          return effectiveCategories.every((cat) => c.categories.includes(cat));
+        },
+        implicitVisible
+      );
+    } else {
+      result = nonCategoryFilteredCards;
     }
-    return nonCategoryFilteredCards;
-  }, [nonCategoryFilteredCards, effectiveCategories, selectedSubCategory]);
+
+    if (sortKey === 'a-z') {
+      return [...result].sort((a, b) => a.title.localeCompare(b.title));
+    } else if (sortKey === 'z-a') {
+      return [...result].sort((a, b) => b.title.localeCompare(a.title));
+    }
+    return result;
+  }, [
+    nonCategoryFilteredCards,
+    effectiveCategories,
+    selectedSubCategory,
+    urlFilters.sort,
+    urlFilters.status,
+    urlFilters.showContent,
+  ]);
 
   // Recompute category counts based on non-category filtered cards so
   // sidebar counts reflect active filters (e.g. agentless, search, signal).

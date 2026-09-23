@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { EuiHorizontalRule, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
@@ -137,6 +137,14 @@ export const AvailablePackages: React.FC<{ prereleaseIntegrationsEnabled: boolea
         : undefined,
     [openCollectionGroupId, filteredCards]
   );
+
+  // Clear stale ?collection= param when active filters remove or degrade the open collection
+  // so it does not unexpectedly re-open the flyout after the filter is cleared.
+  useEffect(() => {
+    if (openCollectionGroupId && !openCollectionCard) {
+      closeCollection();
+    }
+  }, [openCollectionGroupId, openCollectionCard, closeCollection]);
 
   // Build the return path that member detail pages use to navigate back here with the flyout open.
   const collectionReturnPath = useMemo(

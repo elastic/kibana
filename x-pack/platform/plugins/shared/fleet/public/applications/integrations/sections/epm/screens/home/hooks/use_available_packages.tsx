@@ -291,7 +291,8 @@ export const useAvailablePackages = ({
         result.push(filteredMembers[0]);
         continue;
       }
-      result.push({ ...card, groupMembers: filteredMembers });
+      const filteredCategories = [...new Set(filteredMembers.flatMap((m) => m.categories))];
+      result.push({ ...card, groupMembers: filteredMembers, categories: filteredCategories });
     }
     return result;
   }, [allCards, isAgentlessEnabled, onlyAgentlessFilter]);
@@ -318,7 +319,8 @@ export const useAvailablePackages = ({
         result.push(filteredMembers[0]);
         continue;
       }
-      result.push({ ...card, groupMembers: filteredMembers });
+      const filteredCategories = [...new Set(filteredMembers.flatMap((m) => m.categories))];
+      result.push({ ...card, groupMembers: filteredMembers, categories: filteredCategories });
     }
     return result;
   }, [cards, selectedCategory, selectedSubCategory]);

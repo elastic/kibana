@@ -136,6 +136,14 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
     [openCollectionGroupId, rawFilteredCards]
   );
 
+  // Clear stale ?collection= param when active filters remove or degrade the open collection
+  // so it does not unexpectedly re-open the flyout after the filter is cleared.
+  useEffect(() => {
+    if (openCollectionGroupId && !openCollectionCard) {
+      closeCollection();
+    }
+  }, [openCollectionGroupId, openCollectionCard, closeCollection]);
+
   const collectionReturnPath = useMemo(
     () =>
       openCollectionGroupId

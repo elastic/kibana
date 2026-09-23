@@ -434,6 +434,220 @@ describe('useBrowseIntegrationHook', () => {
     });
   });
 
+  describe('Collection card filtering', () => {
+    const makeCollection = (
+      name: string,
+      members: Array<Partial<IntegrationCardItem>>
+    ): IntegrationCardItem => {
+      const allCategories = [...new Set(members.flatMap((m) => m.categories ?? []))];
+      return {
+        id: `collection:${name}`,
+        name,
+        title: name.charAt(0).toUpperCase() + name.slice(1),
+        description: `${name} collection`,
+        isCollectionCard: true,
+        categories: allCategories,
+        groupMembers: members.map((m, i) => ({
+          id: `epr:${name}-${i}`,
+          name: `${name}-${i}`,
+          title: `${name} variant ${i}`,
+          description: '',
+          url: `/detail/${name}-${i}/overview`,
+          icons: [],
+          version: '1.0.0',
+          integration: '',
+          ...m,
+        })) as IntegrationCardItem[],
+        url: '',
+        icons: [],
+        version: '',
+        integration: '',
+      } as unknown as IntegrationCardItem;
+    };
+
+    const baseUrlFilters = { q: undefined, sort: undefined, status: undefined };
+
+    describe('category filter', () => {
+      it('filters groupMembers and recomputes categories when multiple members match', () => {
+        // Two members match 'opentelemetry'; one has only 'web' (removed). After filtering,
+        // categories must be recomputed from survivors so 'security' (only on the removed
+        // member) no longer appears.
+        const collection = makeCollection('nginx', [
+          { categories: ['opentelemetry'] },
+          { categories: ['opentelemetry', 'web'] },
+          { categories: ['web', 'security'] }, // removed by filter
+        ]);
+
+        mockUseAvailablePackages([collection] as IntegrationCardItem[]);
+        (useUrlCategories as jest.Mock).mockReturnValue({
+          category: 'opentelemetry',
+          subCategory: undefined,
+        });
+        (useUrlFilters as jest.Mock).mockReturnValue(baseUrlFilters);
+
+        const { result } = renderHook(() =>
+          useBrowseIntegrationHook({ prereleaseIntegrationsEnabled: false })
+        );
+
+        expect(result.current.filteredCards).toHaveLength(1);
+        const card = result.current.filteredCards[0];
+        expect(card.isCollectionCard).toBe(true);
+        expect(card.groupMembers).toHaveLength(2);
+        // categories recomputed from survivors only — 'security' is gone
+        expect(card.categories).toContain('opentelemetry');
+        expect(card.categories).toContain('web');
+        expect(card.categories).not.toContain('security');
+      });
+
+      it('degrades a collection to an individual tile when only one member matches', () => {
+        const collection = makeCollection('nginx', [
+          { categories: ['web', 'opentelemetry'] },
+          { categories: ['web'] },
+        ]);
+
+        mockUseAvailablePackages([collection] as IntegrationCardItem[]);
+        (useUrlCategories as jest.Mock).mockReturnValue({
+          category: 'opentelemetry',
+          subCategory: undefined,
+        });
+        (useUrlFilters as jest.Mock).mockReturnValue(baseUrlFilters);
+
+        const { result } = renderHook(() =>
+          useBrowseIntegrationHook({ prereleaseIntegrationsEnabled: false })
+        );
+
+        expect(result.current.filteredCards).toHaveLength(1);
+        expect(result.current.filteredCards[0].isCollectionCard).toBeFalsy();
+      });
+
+      it('excludes a collection when no member matches the category', () => {
+        const collection = makeCollection('nginx', [
+          { categories: ['web'] },
+          { categories: ['web'] },
+        ]);
+
+        mockUseAvailablePackages([collection] as IntegrationCardItem[]);
+        (useUrlCategories as jest.Mock).mockReturnValue({
+          category: 'opentelemetry',
+          subCategory: undefined,
+        });
+        (useUrlFilters as jest.Mock).mockReturnValue(baseUrlFilters);
+
+        const { result } = renderHook(() =>
+          useBrowseIntegrationHook({ prereleaseIntegrationsEnabled: false })
+        );
+
+        expect(result.current.filteredCards).toHaveLength(0);
+      });
+    });
+
+    describe('setupMethod filter', () => {
+      it('filters groupMembers by agentless and keeps collection when multiple members survive', () => {
+        const collection = makeCollection('nginx', [
+          { supportsAgentless: true, type: 'integration', categories: ['web'] },
+          { supportsAgentless: true, type: 'integration', categories: ['web'] },
+          { supportsAgentless: false, type: 'integration', categories: ['web'] },
+        ]);
+
+        mockUseAvailablePackages([collection] as IntegrationCardItem[]);
+        (useUrlFilters as jest.Mock).mockReturnValue({
+          ...baseUrlFilters,
+          setupMethod: ['agentless'],
+        });
+
+        const { result } = renderHook(() =>
+          useBrowseIntegrationHook({ prereleaseIntegrationsEnabled: false })
+        );
+
+        expect(result.current.filteredCards).toHaveLength(1);
+        expect(result.current.filteredCards[0].isCollectionCard).toBe(true);
+        expect(result.current.filteredCards[0].groupMembers).toHaveLength(2);
+      });
+
+      it('does not promote a deprecated singleton when deprecated filter is off', () => {
+        const collection = makeCollection('nginx', [
+          {
+            supportsAgentless: true,
+            type: 'integration',
+            categories: ['web'],
+            isDeprecated: true,
+          } as Partial<IntegrationCardItem>,
+          { supportsAgentless: false, type: 'integration', categories: ['web'] },
+        ]);
+
+        mockUseAvailablePackages([collection] as IntegrationCardItem[]);
+        (useUrlFilters as jest.Mock).mockReturnValue({
+          ...baseUrlFilters,
+          setupMethod: ['agentless'],
+          status: undefined,
+        });
+
+        const { result } = renderHook(() =>
+          useBrowseIntegrationHook({ prereleaseIntegrationsEnabled: false })
+        );
+
+        // Only the deprecated member supports agentless → singleton, but it is deprecated
+        // and the deprecated filter is off, so the card must be suppressed entirely.
+        expect(result.current.filteredCards).toHaveLength(0);
+      });
+    });
+
+    describe('signal filter', () => {
+      it('filters groupMembers by signal type', () => {
+        const collection = makeCollection('nginx', [
+          { signalTypes: ['logs', 'metrics'], categories: ['web'] },
+          { signalTypes: ['metrics'], categories: ['web'] },
+          { signalTypes: ['traces'], categories: ['web'] },
+        ]);
+
+        mockUseAvailablePackages([collection] as IntegrationCardItem[]);
+        (useUrlFilters as jest.Mock).mockReturnValue({
+          ...baseUrlFilters,
+          signal: ['logs'],
+        });
+
+        const { result } = renderHook(() =>
+          useBrowseIntegrationHook({ prereleaseIntegrationsEnabled: false })
+        );
+
+        // Only the first member has 'logs' → singleton degradation
+        expect(result.current.filteredCards).toHaveLength(1);
+        expect(result.current.filteredCards[0].isCollectionCard).toBeFalsy();
+      });
+    });
+
+    describe('sort stability after singleton degradation', () => {
+      it('re-sorts A-Z after a collection degrades to a differently titled singleton', () => {
+        const apacheCollection = makeCollection('apache', [
+          { title: 'Apache OTel', categories: ['web', 'opentelemetry'] },
+          { title: 'Apache ECS', categories: ['web'] },
+        ]);
+        const nginxCard = {
+          id: 'epr:nginx',
+          name: 'nginx',
+          title: 'Nginx',
+          categories: ['web', 'opentelemetry'],
+          type: 'integration',
+        } as unknown as IntegrationCardItem;
+
+        // A-Z: apache collection (A) comes before nginx (N)
+        mockUseAvailablePackages([apacheCollection, nginxCard] as IntegrationCardItem[]);
+        (useUrlCategories as jest.Mock).mockReturnValue({
+          category: 'opentelemetry',
+          subCategory: undefined,
+        });
+        (useUrlFilters as jest.Mock).mockReturnValue({ ...baseUrlFilters, sort: 'a-z' });
+
+        const { result } = renderHook(() =>
+          useBrowseIntegrationHook({ prereleaseIntegrationsEnabled: false })
+        );
+
+        // apache collection degrades to 'Apache OTel'; sorted A-Z: Apache OTel < Nginx
+        expect(result.current.filteredCards.map((c) => c.title)).toEqual(['Apache OTel', 'Nginx']);
+      });
+    });
+  });
+
   describe('Combined filters', () => {
     it('includes deprecated integrations and sorts a-z when status includes deprecated', () => {
       const cards = [
