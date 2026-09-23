@@ -974,7 +974,7 @@ export const UpdateCaseRequest = lazySchema(() =>
               'Deprecated. Use `extended_fields` instead. Custom field values for a case. Any optional custom fields that are not specified in the request are set to null. Values written here continue to work during the migration to `extended_fields`.\n'
             ),
           /**
-      * The case template. Requires the `xpack.cases.templates.enabled` setting. Updating `template` is validation-only: switching the template validates the case's `extended_fields` against the new template's fields but does not inject template defaults (unlike create). Omit to leave the current template unchanged; set to `null` to clear it; set to `{ id, version }` to switch. Unlike create, switching a template on update is an explicit versioned action: both `id` and `version` are required — the server does not resolve a latest version here. After switching, use the get case fields API (`GET /api/cases/{case_id}/fields`) to see the fields the new template exposes.
+      * The case template. Requires the `xpack.cases.templates.enabled` setting. Omit to leave the current template unchanged; set to `null` to clear it; set to `{ id, version }` to switch. Unlike create, switching a template on update is an explicit versioned action: both `id` and `version` are required — the server does not resolve a latest version here. If `extended_fields` is also provided in the same request, those values are validated against the new template's fields; already-stored field values are not re-validated. After switching, use the get case fields API to see the fields the new template exposes.
 
       */
           template: z
