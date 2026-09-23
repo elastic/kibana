@@ -61,8 +61,12 @@ export const createMemoryWriter = ({
 
 export const addConversationReference = (
   references: MemoryReference[] | undefined,
-  conversationId: string
-): MemoryReference[] => {
+  conversationId: string | undefined
+): MemoryReference[] | undefined => {
+  if (conversationId === undefined) {
+    return references;
+  }
+
   const existingReferences = references ?? [];
   const uri = `conversation://${conversationId}`;
 

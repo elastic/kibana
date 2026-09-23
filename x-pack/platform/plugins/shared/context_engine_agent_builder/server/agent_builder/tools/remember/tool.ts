@@ -47,6 +47,14 @@ const rememberSchema = z.object({
     .max(MAX_KI_ID_LENGTH)
     .optional()
     .describe('The id of an existing memory to revise. Omit when creating a new memory.'),
+  sessionId: z
+    .string()
+    .min(1)
+    .max(MAX_KI_ID_LENGTH)
+    .optional()
+    .describe(
+      'For external calls only: omit unless continuing a memory session using the sessionId returned by an earlier remember call. Do not invent a value. Agent Builder calls ignore this input and use the current conversation ID.'
+    ),
   type: memoryTypeSchema.describe(
     'Use memory.session_fact for a granular fact discovered during a session, or memory.session for a session synthesis'
   ),
@@ -77,11 +85,13 @@ export const createRememberTool = ({
   getCoreStart,
   getSecurityStart,
   generateId = randomUUID,
+  generateSessionId = randomUUID,
 }: {
   getAiIndexService: () => Promise<AiIndexService>;
   getCoreStart: () => Promise<CoreStart>;
   getSecurityStart: () => Promise<SecurityPluginStart | undefined>;
   generateId?: () => string;
+  generateSessionId?: () => string;
 }): BuiltinToolDefinition<typeof rememberSchema> => ({
   id: CONTEXT_ENGINE_REMEMBER_TOOL_ID,
   type: ToolType.builtin,
@@ -103,15 +113,17 @@ export const createRememberTool = ({
     Use memory.session for a synthesis of what was tried, what worked, and what should be done
     differently. Omit id to create a memory; provide an id returned by an earlier call only when
     deliberately revising that memory. This tool handles session metadata, conversation references,
-    and provenance server-side.
+    and provenance server-side. For external calls, omit sessionId unless continuing with the
+    sessionId returned by an earlier remember call. Agent Builder calls ignore sessionId and use
+    the current conversation ID.
   `,
   schema: rememberSchema,
   handler: async (params, context) => {
-    const { request, spaceId, esClient, runContext, logger } = context;
+    const { request, spaceId, esClient, runContext, logger, callContext } = context;
     const agent = getAgentFromRunContext(runContext);
-    const conversationId = agent?.conversationId;
+    const conversationId = agent?.conversationId || undefined;
 
-    if (!conversationId) {
+    if (!conversationId && callContext?.callSource !== 'mcp') {
       return {
         results: [
           {
@@ -123,6 +135,8 @@ export const createRememberTool = ({
     }
 
     try {
+      const sessionId = conversationId ?? params.sessionId ?? generateSessionId();
+
       await assertContextEngineWriteAccess({
         request,
         spaceId,
@@ -226,7 +240,7 @@ export const createRememberTool = ({
         references: addConversationReference(existingDocument?.references, conversationId),
         attributes: {
           ...existingDocument?.attributes,
-          'memory.session_id': conversationId,
+          'memory.session_id': sessionId,
         },
         governance: updateMemoryProvenance(
           existingDocument?.governance,
@@ -263,7 +277,7 @@ export const createRememberTool = ({
         results: [
           {
             type: ToolResultType.other,
-            data: { id: logicalId },
+            data: { id: logicalId, sessionId },
           },
         ],
       };
