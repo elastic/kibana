@@ -63,7 +63,7 @@ export const ALERT_ANALYSIS_CALLER_ALERT_INDEX_PATTERN =
 export const AlertAnalysisCallerAlertItem = z.looseObject({
   _id: z.string().min(1).max(512),
   _index: z.string().min(1).max(512).regex(ALERT_ANALYSIS_CALLER_ALERT_INDEX_PATTERN),
-  '@timestamp': z.iso.datetime({ offset: true }).min(1).max(64),
+  '@timestamp': z.iso.datetime().min(1).max(64),
   kibana: z.looseObject({
     alert: z.looseObject({
       rule: z.looseObject({

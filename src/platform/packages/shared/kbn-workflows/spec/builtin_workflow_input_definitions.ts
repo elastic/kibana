@@ -170,7 +170,8 @@ const securityAlertAnalysisCallerAlerts: JsonSchema = {
         format: 'date-time',
         minLength: 1,
         maxLength: 64,
-        description: 'Used verbatim as the ES date-math enrichment anchor (e.g. `||-24h`).',
+        description:
+          'UTC (`Z` suffix, as stored on Security alerts). Used verbatim as the ES date-math enrichment anchor (e.g. `||-24h`).',
       },
       kibana: {
         type: 'object',
