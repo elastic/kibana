@@ -14,6 +14,7 @@ import { directTraceKey, parseDirectTraceKey, traceKey } from './trace_types';
 import type { PathContract } from './trajectory_agreement';
 import { answersFromDocs, pathContractFromDocs, trailsFromDocs } from './trajectory_agreement';
 import type { JudgeVerdict } from './judge_agreement';
+import { applyScoringPolicy, type ScoringPolicy } from './scoring_policy';
 
 /** Converts one score document into a judge verdict, when it carries an identifiable judge + score. */
 const verdictFromScoreDoc = (
@@ -247,7 +248,14 @@ const processExampleBatch = (
   executionId: string,
   traces: MatrixTraceData,
   examplePrefixes: ReadonlySet<string> = new Set(),
-  judgeVerdictsOut?: JudgeVerdict[]
+  judgeVerdictsOut?: JudgeVerdict[],
+  /**
+   * The suite's effective scoring policy (as `queryMatrixScores` applied it per document).
+   * Verdicts and trace-card scores must mirror the published matrix: without the policy,
+   * a strict-policy suite reports cross-family judge agreement and prompt-card scores
+   * derived from documents the matrix itself rejected.
+   */
+  scoringPolicy?: ScoringPolicy
 ): boolean => {
   const relevant = scores
     .filter((score) => score.task?.model?.id === modelId)
@@ -260,16 +268,25 @@ const processExampleBatch = (
 
   if (relevant.length === 0) return false;
 
+  // Docs the scoring policy admitted; when no policy is configured every doc is admitted.
+  const admitted =
+    scoringPolicy &&
+    (scoringPolicy.excludeSelfJudged === true || scoringPolicy.requireEisJudge === true)
+      ? relevant.filter(
+          (score) => applyScoringPolicy(score, scoringPolicy, () => false).score !== null
+        )
+      : relevant;
+
   if (judgeVerdictsOut) {
-    for (const score of relevant) {
+    for (const score of admitted) {
       const verdict = verdictFromScoreDoc(score, modelId, suiteId);
       if (verdict) judgeVerdictsOut.push(verdict);
     }
   }
 
   const entry = extractTraceFromScore(relevant[0]);
-  entry.scores = exampleScoresByEvaluator(relevant);
-  const spread = exampleSpreadByEvaluator(relevant);
+  entry.scores = exampleScoresByEvaluator(admitted);
+  const spread = exampleSpreadByEvaluator(admitted);
   if (Object.keys(spread).length > 0) {
     entry.spread = spread;
   }
@@ -319,7 +336,7 @@ const processExampleBatch = (
     const firstComplete = relevant.find(isCompleteScore);
     if (firstComplete) {
       const fallbackEntry = extractTraceFromScore(firstComplete);
-      fallbackEntry.scores = exampleScoresByEvaluator(relevant.filter(isCompleteScore));
+      fallbackEntry.scores = exampleScoresByEvaluator(admitted.filter(isCompleteScore));
       const fid = firstComplete.example?.id;
       if (fid) {
         const completeDocs = relevant.filter(isCompleteScore);
@@ -422,7 +439,13 @@ export const queryMatrixTraces = async (
   traceCache?: Record<string, EvaluationScoreDocument[]>,
   toolCallWarnAbove: number = 0,
   modelAliases: ReadonlyMap<string, readonly string[]> = new Map(),
-  judgeVerdictsOut?: JudgeVerdict[]
+  judgeVerdictsOut?: JudgeVerdict[],
+  /**
+   * Per-suite scoring policy keyed by suite id — the same map `queryMatrixScores`
+   * consumed, so trace verdicts/cards mirror exactly the admitted-document set the
+   * published matrix used.
+   */
+  scoringBySuite?: Record<string, ScoringPolicy>
 ): Promise<MatrixTraceData> => {
   const traces: MatrixTraceData = {};
 
@@ -629,7 +652,8 @@ export const queryMatrixTraces = async (
         ref.executionId,
         traces,
         examplePrefixes,
-        judgeVerdictsOut
+        judgeVerdictsOut,
+        scoringBySuite?.[ref.suiteId]
       );
       if (!ok) missing.push(exampleId);
     }

@@ -48,6 +48,15 @@ export interface AggregatedDatasetScores {
   evaluators: AggregatedEvaluatorScore[];
   /** Evaluators that produced `label=error`/`unavailable` docs and no numeric score. */
   erroredOutEvaluators?: string[];
+  /**
+   * Score docs rejected by the judge policy for THIS dataset (prefix column) only.
+   * Set when a column's own scores were all withheld, even though sibling prefixes
+   * in the same suite survived — a suite-level flag would hide the completed-but-
+   * rejected run and render this column as ordinary missing data.
+   */
+  excludedSelfJudged?: number;
+  /** Same as `excludedSelfJudged`, for the non-EIS-judge policy. */
+  excludedNonEis?: number;
 }
 
 export interface AggregatedSuiteScores {
@@ -109,11 +118,19 @@ export const scoresByPrefixToDatasets = (
 ): AggregatedDatasetScores[] => {
   const byPrefix = new Map<string, Map<string, { sum: number; count: number }>>();
   const erroredByPrefix = new Map<string, Map<string, { errored: number; scored: number }>>();
+  // Per-prefix judge-policy rejections: a column whose every doc was withheld must
+  // surface as `excluded:*` even when sibling prefixes in the suite survived.
+  const excludedByPrefix = new Map<string, { selfJudged: number; nonEis: number }>();
   const excluded: ExcludedScoreCounts = {
     nonQuality: 0,
     nonEis: 0,
     selfJudged: 0,
     unmappedVerdict: 0,
+  };
+  const tallyPrefixExclusion = (prefix: string, kind: 'selfJudged' | 'nonEis'): void => {
+    const entry = excludedByPrefix.get(prefix) ?? { selfJudged: 0, nonEis: 0 };
+    entry[kind] += 1;
+    excludedByPrefix.set(prefix, entry);
   };
 
   for (const doc of scores) {
@@ -132,6 +149,7 @@ export const scoresByPrefixToDatasets = (
         const rejectedEisJudge = options.requireEisJudge && (!judgeId || !isEisBacked(judgeId));
         if (rejectedEisJudge) {
           excluded.nonEis += 1;
+          tallyPrefixExclusion(prefix, 'nonEis');
         }
         const rejectedSelfJudged =
           !rejectedEisJudge &&
@@ -141,6 +159,7 @@ export const scoresByPrefixToDatasets = (
           describeJudge(judgeId, taskModelId).selfJudged;
         if (rejectedSelfJudged) {
           excluded.selfJudged += 1;
+          tallyPrefixExclusion(prefix, 'selfJudged');
         }
 
         // Only maximize-direction evaluators are quality scores.
@@ -197,8 +216,14 @@ export const scoresByPrefixToDatasets = (
 
   // Union with erroredByPrefix: a prefix where every evaluator errored (no numeric score
   // survived) exists only in erroredByPrefix and must still surface as a completed-but-broken
-  // cell, not silently vanish as ordinary missing data.
-  const allPrefixes = new Set<string>([...byPrefix.keys(), ...erroredByPrefix.keys()]);
+  // cell, not silently vanish as ordinary missing data. Same for a prefix whose every doc was
+  // rejected by the judge policy: it exists only in excludedByPrefix and must render as
+  // `excluded:*` rather than missing.
+  const allPrefixes = new Set<string>([
+    ...byPrefix.keys(),
+    ...erroredByPrefix.keys(),
+    ...excludedByPrefix.keys(),
+  ]);
 
   return [...allPrefixes].map((prefix) => {
     const evaluators = byPrefix.get(prefix) ?? new Map<string, { sum: number; count: number }>();
@@ -206,6 +231,7 @@ export const scoresByPrefixToDatasets = (
     const erroredOut = [...(erroredByPrefix.get(prefix)?.entries() ?? [])]
       .filter(([, tally]) => tally.errored > 0 && tally.scored === 0)
       .map(([name]) => name);
+    const prefixExclusions = excludedByPrefix.get(prefix);
     return {
       datasetId: `prefix:${prefix}`,
       datasetName: prefix,
@@ -215,6 +241,14 @@ export const scoresByPrefixToDatasets = (
         count: agg.count,
       })),
       ...(erroredOut.length > 0 ? { erroredOutEvaluators: erroredOut } : {}),
+      // Exposed per dataset so buildCell can mark THIS column excluded even when
+      // sibling prefixes in the suite kept admissible scores.
+      ...(prefixExclusions && prefixExclusions.selfJudged > 0
+        ? { excludedSelfJudged: prefixExclusions.selfJudged }
+        : {}),
+      ...(prefixExclusions && prefixExclusions.nonEis > 0
+        ? { excludedNonEis: prefixExclusions.nonEis }
+        : {}),
     };
   });
 };
@@ -462,11 +496,15 @@ export const queryMatrixScores = async (
         // Gather every shard of the sweep, reapplying the `asOf` cutoff AND the self-judge policy
         // to the raw listing. `pickLatestExperimentPerModel` only vets the chosen `latest`; the
         // shard reconstruction starts from the unfiltered list, so a rejected self-judged shard
-        // would be merged back into the published score. This path has no per-document filter
-        // (unlike prefix suites), so any self-judged judge disqualifies the whole experiment.
+        // would be merged back into the published score. On the stats path there is no
+        // per-document filter, so any self-judged judge disqualifies the whole experiment —
+        // but prefix suites DO filter per document in `scoresByPrefixToDatasets`, so their
+        // shards must survive this summary-level rejection or a mixed sweep loses the
+        // older shard's admissible independent verdicts entirely.
         const excludeSelfJudged = suiteScoring?.excludeSelfJudged === true;
+        const isPrefixSuite = (prefixesBySuite[suiteId] ?? []).length > 0;
         const admitsJudgedPolicy = (candidate: EvaluationExperimentSummary): boolean => {
-          if (!excludeSelfJudged) {
+          if (!excludeSelfJudged || isPrefixSuite) {
             return true;
           }
           return !experimentJudges(candidate).some(
@@ -576,9 +614,16 @@ export const queryMatrixScores = async (
               // pre-aggregated stats route, so it is usually non-empty even when every synthetic
               // `prefix:*` dataset was rejected. Keying "nothing survived" off the whole array
               // would make an all-rejected prefix column render as ordinary missing data.
-              if (prefixDatasets.length === 0) {
-                noPrefixDatasetSurvived = true;
-              }
+              // A dataset that survived only as an exclusion record (every doc withheld, no
+              // evaluators) counts as "nothing survived" too, so the suite-level excluded:*
+              // labeling still fires alongside the per-dataset counts.
+              noPrefixDatasetSurvived =
+                prefixDatasets.length === 0 ||
+                prefixDatasets.every(
+                  (d) =>
+                    d.evaluators.length === 0 &&
+                    ((d.excludedSelfJudged ?? 0) > 0 || (d.excludedNonEis ?? 0) > 0)
+                );
               if (datasets.length === before && suiteExcludedCounts) {
                 const judgeIssue = suiteExcludedCounts.selfJudged + suiteExcludedCounts.nonEis;
                 const remedy =

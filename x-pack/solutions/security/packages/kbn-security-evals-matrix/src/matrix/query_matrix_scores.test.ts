@@ -472,8 +472,13 @@ describe('queryMatrixScores', () => {
     expect(model.excluded?.selfJudged).toBe(2);
     expect(warn).toHaveBeenCalledWith(expect.stringContaining('dropped 2 self-judged'));
 
-    // No per-prefix dataset survived, but the exclusion tally records why.
-    expect(model.suites[0].datasets.some((d) => d.datasetId.startsWith('prefix:'))).toBe(false);
+    // No per-prefix dataset survived, but the exclusion tally records why. Round 8:
+    // the rejected prefix surfaces as an exclusion-record dataset (no evaluators,
+    // per-dataset count set) so buildCell can label the column excluded:self-judged.
+    const prefixes = model.suites[0].datasets.filter((d) => d.datasetId.startsWith('prefix:'));
+    expect(prefixes).toHaveLength(1);
+    expect(prefixes[0].evaluators).toEqual([]);
+    expect(prefixes[0].excludedSelfJudged).toBe(2);
   });
 
   it('warns when a model ran fewer examples than its peers', async () => {
@@ -1165,7 +1170,13 @@ describe('round 6 regression: admission and accumulation fixes', () => {
       }
     );
 
-    expect(datasets).toHaveLength(0);
+    // Round 8: a fully rejected prefix now emits an exclusion-record dataset (carrying
+    // the per-dataset count and no evaluators) instead of vanishing, so the column can
+    // render as `excluded:non-eis-judge` rather than ordinary missing data.
+    expect(datasets).toHaveLength(1);
+    expect(datasets[0].datasetId).toBe('prefix:alert-analysis');
+    expect(datasets[0].evaluators).toEqual([]);
+    expect(datasets[0].excludedNonEis).toBe(1);
   });
 
   it('accumulates exclusion counts across suites for the same model', async () => {
@@ -1248,5 +1259,126 @@ describe('round 7 regression: non-EIS exclusion surfaces as excluded, not missin
     const suite = rows[0].suites[0];
     expect(suite.excludedNonEis).toBe(1);
     expect(suite.excludedSelfJudged).toBeUndefined();
+  });
+});
+
+// Round 8 regression tests: each assertion fails against the pre-fix code.
+describe('round 8 review findings', () => {
+  const log = new ToolingLog() as unknown as SomeDevLog;
+
+  const experimentFor = (id: string, executionId: string, timestamp: string, judgeIds: string[]) =>
+    ({
+      experiment_id: id,
+      execution_id: executionId,
+      timestamp,
+      task_model: { id: 'm1' },
+      evaluator_models: judgeIds.map((judge) => ({ id: judge })),
+    } as unknown as EvaluationExperimentSummary);
+
+  const scoreDoc = (exampleId: string, judgeId: string, executionId: string, score = 0.9) =>
+    ({
+      example: { id: exampleId, index: 0, dataset: { id: 'd1', name: 'D1' } },
+      task: { model: { id: 'm1' }, trace_id: 't', repetition_index: 0 },
+      evaluator: { name: 'correctness', score, model: { id: judgeId } },
+      metadata: { execution_id: executionId },
+    } as unknown as EvaluationScoreDocument);
+
+  it('keeps a mixed/self-judged older shard when reconstructing prefix-suite shards (high)', async () => {
+    // Regression: `admitsJudgedPolicy` rejected every shard whose summary listed a
+    // self-judge, so a prefix sweep with a judged newer shard and a mixed older shard
+    // lost the older shard's admissible independent scores. For prefix suites the
+    // per-document filter in scoresByPrefixToDatasets is the policy.
+    const client = {
+      listExperiments: jest
+        .fn()
+        .mockResolvedValue([
+          experimentFor('e-new', 'sweep-1-s1of2', '2026-09-23T12:00:00Z', ['eis-judge-a']),
+          experimentFor('e-old', 'sweep-1-s2of2', '2026-09-23T10:00:00Z', ['eis-judge-a', 'm1']),
+        ]),
+      getExperimentStats: jest.fn().mockResolvedValue({
+        taskModel: { id: 'm1' },
+        evaluatorModel: { id: 'eis-judge-a' },
+        totalRepetitions: 1,
+        stats: [],
+      }),
+      getExperimentScores: jest
+        .fn()
+        .mockImplementation((_id: string, opts: { executionId: string }) =>
+          Promise.resolve(
+            opts.executionId === 'sweep-1-s1of2'
+              ? [scoreDoc('alert-a', 'eis-judge-a', 'sweep-1-s1of2')]
+              : [
+                  scoreDoc('hunt-a', 'eis-judge-a', 'sweep-1-s2of2'),
+                  scoreDoc('hunt-b', 'm1', 'sweep-1-s2of2'), // self-judged, dropped per document
+                ]
+          )
+        ),
+    } as unknown as MatrixEvalsClient;
+
+    const rows = await queryMatrixScores(client, log, {
+      suiteIds: ['s1'],
+      modelIds: ['m1'],
+      prefixesBySuite: { s1: ['alert', 'hunt'] },
+      scoring: { excludeSelfJudged: true, requireEisJudge: true },
+    });
+
+    const suite = rows[0].suites[0];
+    const hunt = suite.datasets.find((d) => d.datasetId === 'prefix:hunt');
+    expect(hunt).toBeDefined();
+    // The old shard's independent verdict must contribute: its mean comes from the
+    // admitted `hunt-a` doc only, not from the self-judged one.
+    expect(hunt?.evaluators).toEqual([{ evaluatorName: 'correctness', mean: 0.9, count: 1 }]);
+  });
+
+  it('tracks policy exclusions per prefix, not only suite-wide', async () => {
+    // Regression: all `alert` scores failed requireEisJudge while `hunt` scores
+    // survived; `noPrefixDatasetSurvived` stayed false, so the alert column rendered
+    // as missing instead of excluded:non-eis-judge.
+    const client = {
+      listExperiments: jest
+        .fn()
+        .mockResolvedValue([
+          experimentFor('e1', 'x1', '2026-09-23T12:00:00Z', ['mystery-judge', 'eis-judge-a']),
+        ]),
+      getExperimentStats: jest.fn().mockResolvedValue({
+        taskModel: { id: 'm1' },
+        evaluatorModel: { id: 'eis-judge-a' },
+        totalRepetitions: 1,
+        stats: [],
+      }),
+      getExperimentScores: jest
+        .fn()
+        .mockResolvedValue([
+          scoreDoc('alert-a', 'mystery-judge', 'x1'),
+          scoreDoc('hunt-a', 'eis-judge-a', 'x1'),
+        ]),
+    } as unknown as MatrixEvalsClient;
+
+    const rows = await queryMatrixScores(client, log, {
+      suiteIds: ['s1'],
+      modelIds: ['m1'],
+      prefixesBySuite: { s1: ['alert', 'hunt'] },
+      scoring: { requireEisJudge: true, excludeSelfJudged: true },
+    });
+
+    const alert = rows[0].suites[0].datasets.find((d) => d.datasetId === 'prefix:alert');
+    expect(alert?.excludedNonEis).toBe(1);
+    expect(alert?.evaluators).toEqual([]);
+    expect(rows[0].suites[0].excludedNonEis).toBeUndefined();
+  });
+
+  it('emits a dataset for a prefix whose every score document was rejected', () => {
+    // Regression: a fully rejected prefix existed in no map, so the synthetic
+    // dataset vanished and buildCell had nothing to read the exclusion from.
+    const datasets = scoresByPrefixToDatasets(
+      [scoreDoc('alert-a', 'mystery-judge', 'x1')],
+      ['alert'],
+      { requireEisJudge: true }
+    );
+
+    expect(datasets).toHaveLength(1);
+    expect(datasets[0].datasetId).toBe('prefix:alert');
+    expect(datasets[0].excludedNonEis).toBe(1);
+    expect(datasets[0].evaluators).toEqual([]);
   });
 });

@@ -56,4 +56,26 @@ describe('directTraceKey / parseDirectTraceKey', () => {
     expect(parseDirectTraceKey(traceKey('m', 'suite-1'))).toBeUndefined();
     expect(parseDirectTraceKey('no-separator')).toBeUndefined();
   });
+
+  // Regression (round 8): suite ids are validated only as nonempty strings and may
+  // contain `:`; the parser used to stop the suite at the next colon, turning a
+  // `security:persona` suite into suite `security` + example `persona:alert-a`.
+  it('round-trips a suite id containing colons', () => {
+    const key = directTraceKey('model-x', 'security:persona', 'alert-a');
+    expect(parseDirectTraceKey(key)).toEqual({
+      modelId: 'model-x',
+      suiteId: 'security:persona',
+      exampleId: 'alert-a',
+    });
+  });
+
+  it('keeps colon-bearing suites distinct from their colon-split prefixes', () => {
+    expect(directTraceKey('m', 'security:persona', 'alert-a')).not.toBe(
+      directTraceKey('m', 'security', 'persona:alert-a')
+    );
+  });
+
+  it('rejects a key with a malformed percent escape in the suite component', () => {
+    expect(parseDirectTraceKey('m:direct:%zz:example-1')).toBeUndefined();
+  });
 });

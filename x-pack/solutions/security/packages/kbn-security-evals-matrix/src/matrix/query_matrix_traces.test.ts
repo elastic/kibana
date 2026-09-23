@@ -978,3 +978,94 @@ describe('round 7 regression: alias mirroring follows newest run', () => {
     expect(traces['eis/model:alert-analysis-a'].scores).toEqual({ primary: 1 });
   });
 });
+
+// Round 8 regression tests: verdicts and trace-card scores must mirror the matrix's
+// admitted-document policy.
+describe('round 8 review findings: trace policy filtering', () => {
+  const policyDoc = (judgeId: string, score: number): EvaluationScoreDocument =>
+    ({
+      example: { id: 'example-1' },
+      evaluator: { name: 'Correctness', score, model: { id: judgeId } },
+      metadata: { execution_id: 'exec-a' },
+      task: {
+        model: { id: 'model-x' },
+        output: { messages: [{ message: 'done' }] },
+        repetition_index: 0,
+      },
+    } as unknown as EvaluationScoreDocument);
+
+  const makeClient = (docs: EvaluationScoreDocument[]) => ({
+    getExperimentScores: jest.fn(
+      async () => [{ example: { id: 'example-1' } }] as EvaluationScoreDocument[]
+    ),
+    getExampleScores: jest.fn(async () => docs),
+  });
+
+  const logStub = { debug: jest.fn(), warning: jest.fn() };
+
+  const aggregatedFor = () => [
+    {
+      modelId: 'model-x',
+      suites: [
+        {
+          suiteId: 'suite-1',
+          experimentId: 'exec-a',
+          datasets: [],
+          evaluators: [],
+        },
+      ],
+    },
+  ];
+
+  it('excludes self-judged verdicts and scores when the suite policy excludes them', async () => {
+    // Regression: the verdict loop and exampleScoresByEvaluator read every fetched
+    // doc, so a self-judged verdict claimed cross-family judge agreement and a
+    // rejected doc's raw score appeared on the prompt card.
+    const client = makeClient([policyDoc('model-x', 0.1), policyDoc('eis-judge', 0.9)]);
+    const judgeVerdicts: JudgeVerdict[] = [];
+
+    const traces = await queryMatrixTraces(
+      client as never,
+      logStub as never,
+      aggregatedFor() as never,
+      undefined,
+      0,
+      new Map(),
+      judgeVerdicts,
+      { 'suite-1': { excludeSelfJudged: true } }
+    );
+
+    expect(judgeVerdicts).toEqual([
+      {
+        modelId: 'model-x',
+        judgeId: 'eis-judge',
+        suiteId: 'suite-1',
+        example: 'example-1',
+        repetition: 0,
+        evaluator: 'Correctness',
+        score: 0.9,
+      },
+    ]);
+    expect(traces['model-x:direct:suite-1:example-1'].scores).toEqual({ Correctness: 0.9 });
+  });
+
+  it('keeps every verdict and score when no strict policy is configured', async () => {
+    const client = makeClient([policyDoc('model-x', 0.1), policyDoc('eis-judge', 0.9)]);
+    const judgeVerdicts: JudgeVerdict[] = [];
+
+    const traces = await queryMatrixTraces(
+      client as never,
+      logStub as never,
+      aggregatedFor() as never,
+      undefined,
+      0,
+      new Map(),
+      judgeVerdicts
+    );
+
+    expect(judgeVerdicts).toHaveLength(2);
+    expect(traces['model-x:direct:suite-1:example-1'].scores).toEqual({
+      Correctness: 0.5,
+    });
+  });
+});

@@ -64,12 +64,13 @@ export const traceKey = (modelId: string, columnId: string): string => `${modelI
  * Key for a direct per-example trace cell. Suite-scoped and marked with the
  * literal `direct` segment: two selected suites can reuse an example ID, so the
  * (model, example) pair alone is not a unique cell, and unmarked keys already
- * carry other meanings (`model:prefix:<p>`, `model:<suiteId>`). The parser
- * splits on colons, so suite and example ids must stay colon-free — the same
- * constraint `traceKey` already documents for config ids.
+ * carry other meanings (`model:prefix:<p>`, `model:<suiteId>`). Suite ids are
+ * validated only as nonempty strings and may contain `:`, so the suite
+ * component is percent-encoded (colon included) and the parser decodes it —
+ * the first colon after `:direct:` then always ends the suite.
  */
 export const directTraceKey = (modelId: string, suiteId: string, exampleId: string): string =>
-  `${modelId}:direct:${suiteId}:${exampleId}`;
+  `${modelId}:direct:${encodeURIComponent(suiteId)}:${exampleId}`;
 
 /** Splits a `directTraceKey` back into its model, suite and example ids. */
 export const parseDirectTraceKey = (
@@ -84,9 +85,22 @@ export const parseDirectTraceKey = (
   if (first < 1 || second < 0 || third < 0) {
     return undefined;
   }
+  const suiteId = decodeSafe(key.slice(second + 1, third));
+  if (suiteId === undefined) {
+    return undefined;
+  }
   return {
     modelId: key.slice(0, first),
-    suiteId: key.slice(second + 1, third),
+    suiteId,
     exampleId: key.slice(third + 1),
   };
+};
+
+/** Decodes a percent-encoded key component; a malformed escape invalidates the key. */
+const decodeSafe = (component: string): string | undefined => {
+  try {
+    return decodeURIComponent(component);
+  } catch {
+    return undefined;
+  }
 };

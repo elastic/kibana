@@ -311,11 +311,14 @@ export const matrixCmd: Command<void> = {
       )} (branch: ${branch ?? 'any'})`
     );
 
-    const aggregated = await queryMatrixScores(
-      evalsClient,
-      log,
-      matrixScoreQuery(config, { suiteIds, modelIds, branch, lookbackDays, asOf })
-    );
+    const matrixQuery = matrixScoreQuery(config, {
+      suiteIds,
+      modelIds,
+      branch,
+      lookbackDays,
+      asOf,
+    });
+    const aggregated = await queryMatrixScores(evalsClient, log, matrixQuery);
 
     if (aggregated.length === 0) {
       throw createFailError(
@@ -368,7 +371,8 @@ export const matrixCmd: Command<void> = {
             .filter((model) => (model.matchIds ?? []).length > 0)
             .map((model) => [model.id, model.matchIds ?? []])
         ),
-        judgeVerdicts
+        judgeVerdicts,
+        matrixQuery.scoringBySuite
       );
 
       // Server-fetched traces can come back without steps, so count only the ones that carry steps.

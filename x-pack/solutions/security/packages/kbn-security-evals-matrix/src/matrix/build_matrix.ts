@@ -584,16 +584,34 @@ const buildMatrixRow = (
   const overallCells: Record<string, MatrixCell> = {};
   for (const column of config.columns) {
     const columnSuites = new Set(column.suites);
+    // Per-prefix judge-policy rejections land on the synthetic `prefix:<p>` dataset itself,
+    // so a column whose own prefix lost every score reads `excluded:*` even when a sibling
+    // column fed by the same suite kept admissible scores (suite-level counts would be 0).
+    const columnDatasetIds = column.examplePrefixes
+      ? new Set(column.examplePrefixes.map((prefix) => `prefix:${prefix}`))
+      : column.datasetIds
+      ? new Set(column.datasetIds)
+      : undefined;
+    const columnSuitesAll = modelScores.suites.filter((suite) => columnSuites.has(suite.suiteId));
+    const perDataset = (pick: (dataset: AggregatedSuiteScores['datasets'][number]) => number) =>
+      columnSuitesAll.reduce(
+        (total, suite) =>
+          total +
+          suite.datasets
+            .filter((dataset) => !columnDatasetIds || columnDatasetIds.has(dataset.datasetId))
+            .reduce((sum, dataset) => sum + (pick(dataset) || 0), 0),
+        0
+      );
     const cellExtras = {
-      selfJudged: modelScores.suites.some(
-        (suite) => columnSuites.has(suite.suiteId) && suite.selfJudged === true
+      selfJudged: columnSuitesAll.some((suite) => suite.selfJudged === true),
+      excludedSelfJudged: Math.max(
+        columnSuitesAll.reduce((total, suite) => total + (suite.excludedSelfJudged ?? 0), 0),
+        perDataset((dataset) => dataset.excludedSelfJudged ?? 0)
       ),
-      excludedSelfJudged: modelScores.suites
-        .filter((suite) => columnSuites.has(suite.suiteId))
-        .reduce((total, suite) => total + (suite.excludedSelfJudged ?? 0), 0),
-      excludedNonEis: modelScores.suites
-        .filter((suite) => columnSuites.has(suite.suiteId))
-        .reduce((total, suite) => total + (suite.excludedNonEis ?? 0), 0),
+      excludedNonEis: Math.max(
+        columnSuitesAll.reduce((total, suite) => total + (suite.excludedNonEis ?? 0), 0),
+        perDataset((dataset) => dataset.excludedNonEis ?? 0)
+      ),
       erroredOutEvaluators: columnErroredOutEvaluators(modelScores, column),
     };
     cells[column.id] = buildCell(
