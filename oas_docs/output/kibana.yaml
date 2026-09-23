@@ -145112,7 +145112,8 @@ components:
         created_by:
           $ref: '#/components/schemas/Cases_case_response_created_by_properties'
         customFields:
-          description: Custom field values for the case.
+          deprecated: true
+          description: Deprecated. Use `extended_fields` instead. Custom field values for the case.
           items:
             type: object
             properties:
@@ -145146,6 +145147,8 @@ components:
           example: 120
           nullable: true
           type: integer
+        extended_fields_labels:
+          $ref: '#/components/schemas/Cases_case_extended_fields_labels'
         external_service:
           $ref: '#/components/schemas/Cases_external_service'
         id:
