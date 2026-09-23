@@ -9,11 +9,11 @@ import type { CloudProjectContext } from './types';
 import type { UiamRoleAssignments } from '../uiam';
 
 /**
- * The suffix UIAM puts on the Cloud role that grants a project's application roles and nothing
+ * The Cloud role UIAM defines for granting application roles across an organization and nothing
  * else. Sending any other `role_id` would also ask for control-plane privileges, which a Kibana
  * workload has no use for.
  */
-const APPLICATION_ONLY_ROLE_SUFFIX = '-application-only';
+const ORGANIZATION_APPLICATION_ONLY_ROLE = 'organization-application-only';
 
 /**
  * Builds the role assignments Kibana sends when creating a UIAM service account with the given
@@ -21,27 +21,21 @@ const APPLICATION_ONLY_ROLE_SUFFIX = '-application-only';
  * assignments as its ceiling, so the account can never do more than its creator could when it
  * was created.
  *
- * The assignment is scoped to every project of this project's type in the organization, not to
- * this project alone, so the account can take part in cross-project search among them the way a
- * user with the same roles would: on each such project the named roles apply if they exist there,
- * and the creator's own reach there is the ceiling. It does not reach linked projects of another
- * type. UIAM keys project role assignments by type, and the application-only role is per type
- * too. An organization-wide equivalent (`organization-application-only`) is being added in
- * https://github.com/elastic/uiam-commons/pull/321, and a per-project selection would become
- * further entries in the same list.
+ * The assignment is scoped to the whole organization, not to this project alone, so the account
+ * can take part in cross-project search the way a user with the same roles would. On each linked
+ * project, of any type, the named roles apply if they exist there, and the creator's own reach
+ * there is the ceiling. A per-project selection would become project-scoped entries alongside
+ * this one.
  */
 export const buildRoleAssignments = (
-  { organizationId, projectType }: CloudProjectContext,
+  { organizationId }: Pick<CloudProjectContext, 'organizationId'>,
   roles: string[]
 ): UiamRoleAssignments => ({
-  project: {
-    [projectType]: [
-      {
-        role_id: `${projectType}${APPLICATION_ONLY_ROLE_SUFFIX}`,
-        organization_id: organizationId,
-        all: true,
-        application_roles: roles,
-      },
-    ],
-  },
+  organization: [
+    {
+      role_id: ORGANIZATION_APPLICATION_ONLY_ROLE,
+      organization_id: organizationId,
+      application_roles: roles,
+    },
+  ],
 });

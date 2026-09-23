@@ -55,16 +55,13 @@ describe('UiamServiceAccounts', () => {
 
   /** The role assignments Kibana sends for `createParams`: application-only, org-wide, downscoped. */
   const expectedRoleAssignments = {
-    project: {
-      security: [
-        {
-          role_id: 'security-application-only',
-          organization_id: 'organization-id',
-          all: true,
-          application_roles: ['viewer', 'editor'],
-        },
-      ],
-    },
+    organization: [
+      {
+        role_id: 'organization-application-only',
+        organization_id: 'organization-id',
+        application_roles: ['viewer', 'editor'],
+      },
+    ],
   };
 
   const createMockRequest = (authHeader?: string): KibanaRequest =>
