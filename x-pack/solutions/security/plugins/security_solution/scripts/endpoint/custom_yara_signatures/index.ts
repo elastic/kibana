@@ -28,10 +28,11 @@ export const cli = () => {
   run(
     async (options) => {
       try {
-        await createCustomYaraSignatures(options);
-        const alertSuffix = options.flags.withAlerts
-          ? ` and matching memory-signature alerts indexed to ${ENDPOINT_ALERTS_INDEX}`
-          : '';
+        const { alertsIndexed } = await createCustomYaraSignatures(options);
+        const alertSuffix =
+          options.flags.withAlerts && alertsIndexed
+            ? ` and matching memory-signature alerts indexed to ${ENDPOINT_ALERTS_INDEX}`
+            : '';
         options.log.success(
           `${options.flags.count} endpoint custom YARA signatures created${alertSuffix}`
         );
@@ -95,7 +96,7 @@ const indexMatchingMemoryAlerts = async ({
   esClient: Client;
   items: ExceptionListItemSchema[];
   log: ToolingLog;
-}): Promise<void> => {
+}): Promise<boolean> => {
   const generator = new EndpointDocGenerator();
   const alerts = items.map((item) => {
     const yaraText = getYaraRuleText(item);
@@ -123,20 +124,25 @@ const indexMatchingMemoryAlerts = async ({
           firstError ? `: ${firstError.type} ${firstError.reason}` : ''
         }`
       );
-      return;
+      return false;
     }
 
     log.info(
       `Indexed ${alerts.length} memory-signature alerts to ${ENDPOINT_ALERTS_INDEX} with matching CYS entry_id values`
     );
+    return true;
   } catch (err) {
     log.warning(
       `Failed to index Custom YARA Signature alerts to ${ENDPOINT_ALERTS_INDEX}. Ensure the endpoint alerts data stream exists (for example by running resolver_generator). ${err.message}`
     );
+    return false;
   }
 };
 
-const createCustomYaraSignatures: RunFn = async ({ flags, log }) => {
+const createCustomYaraSignatures = async ({
+  flags,
+  log,
+}: Parameters<RunFn>[0]): Promise<{ alertsIndexed: boolean }> => {
   const generator = new ExceptionsListItemGenerator();
   const kbn = new KbnClient({ log, url: flags.kibana as string });
 
@@ -176,12 +182,15 @@ const createCustomYaraSignatures: RunFn = async ({ flags, log }) => {
     { concurrency: 10 }
   );
 
-  if (flags.withAlerts) {
-    const esClient = new Client({
-      node: flags.elasticsearch as string,
-      Connection: HttpConnection,
-    });
-
-    await indexMatchingMemoryAlerts({ esClient, items: createdItems, log });
+  if (!flags.withAlerts) {
+    return { alertsIndexed: false };
   }
+
+  const esClient = new Client({
+    node: flags.elasticsearch as string,
+    Connection: HttpConnection,
+  });
+
+  const alertsIndexed = await indexMatchingMemoryAlerts({ esClient, items: createdItems, log });
+  return { alertsIndexed };
 };
