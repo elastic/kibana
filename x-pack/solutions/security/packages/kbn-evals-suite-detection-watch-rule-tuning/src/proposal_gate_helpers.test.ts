@@ -15,7 +15,7 @@
  * the next task's stale-cancel kills it and no fixture ever scores.
  */
 
-import { ExecutionStatus } from '@kbn/workflows';
+import { ExecutionStatus, type WorkflowStepExecutionDto } from '@kbn/workflows';
 import {
   isAwaitingApproval,
   isAwaitingProposalChild,
@@ -73,7 +73,7 @@ describe('proposal gate harness helpers', () => {
         status: ExecutionStatus.WAITING_FOR_CHILD,
         state: { executionId: 'child-exec-1' },
         ...over,
-      } as any);
+      } as unknown as WorkflowStepExecutionDto);
 
     it('reads the child id from the parked workflow.execute step — /children is blind while the gate is open', () => {
       // The children API lists a child only after the launching step is terminal;
