@@ -40,4 +40,23 @@ describe('createInterruptibleLanguageProvider', () => {
     releaseRun('full-result');
     tokenSource.dispose();
   });
+
+  it('rejects when the cancellation token has already been triggered', async () => {
+    const tokenSource = new monaco.CancellationTokenSource();
+
+    tokenSource.cancel();
+
+    let releaseRun: ((value: string) => void) | null = null;
+    const resultPromise = createInterruptibleLanguageProvider(
+      () =>
+        new Promise<string>((resolve) => {
+          releaseRun = resolve;
+        }),
+      tokenSource.token
+    );
+
+    await expect(resultPromise).rejects.toThrow('AbortedDueToCancellationRequest');
+    expect(releaseRun).toBeNull();
+    tokenSource.dispose();
+  });
 });

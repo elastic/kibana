@@ -56,8 +56,10 @@ export const KBN_A11Y_HANDLE_ESCAPE_ACTION_ID = 'kbn.a11y.handleEscape' as const
  * browser, or it silently no-ops in Chrome.
  */
 const getRealInputSurface = (editorDomNode: HTMLElement | null): HTMLElement | null =>
-  editorDomNode?.querySelector<HTMLElement>('.native-edit-context') ??
-  editorDomNode?.querySelector<HTMLElement>('textarea:not([readonly])') ??
+  editorDomNode?.querySelector<HTMLElement>(
+    '.native-edit-context[aria-roledescription="editor"]'
+  ) ??
+  editorDomNode?.querySelector<HTMLElement>('textarea[aria-roledescription="editor"]') ??
   null;
 
 export interface CodeEditorProps

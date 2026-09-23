@@ -406,7 +406,10 @@ export class VisualizeEditorPageObject extends FtrService {
   }
 
   public async inputValueInCodeEditor(value: string) {
-    await this.monacoEditor.setCodeEditorValue(value);
+    await this.monacoEditor.setCodeEditorValueByCssSelector(
+      '.react-monaco-editor-container',
+      value
+    );
   }
 
   public async clickReset() {
