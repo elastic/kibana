@@ -102,7 +102,7 @@ export {
 export { getProjectRoutingFromEsqlQuery } from './utils/set_instructions_helpers';
 export { isComputedColumn, getQuerySummary } from './utils/get_query_summary';
 export {
-  createEsqlViewsClient,
+  createEsqlViewsManagementClient,
   EsqlViewsClientError,
   type EsqlViewsClient,
 } from './utils/esql_views_client';
