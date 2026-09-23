@@ -95,9 +95,10 @@ describe('ignored kibana fetcher helpers', () => {
     ]);
   });
 
-  it('warns generated kibana.* steps regardless of the kibana.request flag', () => {
-    expect(shouldWarnIgnoredKibanaFetcher('kibana.createCase', false)).toBe(true);
+  it('warns kibana.* steps only when the self-client flag is on', () => {
+    expect(shouldWarnIgnoredKibanaFetcher('kibana.createCase', false)).toBe(false);
     expect(shouldWarnIgnoredKibanaFetcher('kibana.request', false)).toBe(false);
+    expect(shouldWarnIgnoredKibanaFetcher('kibana.createCase', true)).toBe(true);
     expect(shouldWarnIgnoredKibanaFetcher('kibana.request', true)).toBe(true);
     expect(shouldWarnIgnoredKibanaFetcher('http', true)).toBe(false);
   });

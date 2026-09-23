@@ -193,13 +193,9 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
   }
 
   private async shouldUseCoreSelfClient(): Promise<boolean> {
-    const stepType = this.node.configuration.type;
-    if (stepType === 'kibana.request') {
-      return this.stepExecutionRuntime.contextManager
-        .getCoreStart()
-        .featureFlags.getBooleanValue(WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG, false);
-    }
-    return true;
+    return this.stepExecutionRuntime.contextManager
+      .getCoreStart()
+      .featureFlags.getBooleanValue(WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG, false);
   }
 
   private async executeViaSelfClient(
@@ -324,7 +320,7 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
   }
 
   /**
-   * Global `fetch` client used when `kibana.request` is not routed through Core self-client.
+   * Global `fetch` client used when Kibana steps are not routed through Core self-client.
    */
   private async executeViaLegacy(
     kibanaUrl: string,

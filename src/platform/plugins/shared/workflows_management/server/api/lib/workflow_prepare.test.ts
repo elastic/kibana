@@ -546,7 +546,7 @@ describe('prepareWorkflowDocumentFromYaml', () => {
     expect(logger.warn).not.toHaveBeenCalled();
   });
 
-  it('logs generated kibana.* fetcher even when the kibana.request flag is off', () => {
+  it('does not log generated kibana.* fetcher when the self-client flag is off', () => {
     const zodSchema = getWorkflowZodSchema({});
     const logger = { warn: jest.fn() } as unknown as import('@kbn/logging').Logger;
     const yaml = [
@@ -573,11 +573,6 @@ describe('prepareWorkflowDocumentFromYaml', () => {
       logger,
     });
 
-    expect(logger.warn).toHaveBeenCalledWith(
-      expect.stringContaining('fetcher'),
-      expect.objectContaining({
-        labels: expect.objectContaining({ step_names: 'get-case' }),
-      })
-    );
+    expect(logger.warn).not.toHaveBeenCalled();
   });
 });

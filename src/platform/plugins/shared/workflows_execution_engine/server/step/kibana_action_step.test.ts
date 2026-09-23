@@ -749,24 +749,34 @@ describe('KibanaActionStepImpl', () => {
   });
 
   describe('other kibana.* step types', () => {
-    it('uses Core self-client when the kibana.request flag is off', async () => {
+    it('uses legacy fetch and applies YAML fetcher when the flag is off', async () => {
       mockGetBooleanValue.mockResolvedValue(false);
-      step = createStep({ request: { method: 'GET', path: '/api/status' } }, 'kibana.getCase');
-      await (step as any)._run();
-      expect(contextManager.callKibanaApi).toHaveBeenCalledWith(
-        expect.objectContaining({ method: 'GET', path: '/api/status' })
+      step = createStep(
+        {
+          title: 'Test Case',
+          description: 'Test Description',
+          owner: 'securitySolution',
+          fetcher: { follow_redirects: false },
+        },
+        'kibana.createCase'
       );
-      expect(global.fetch).not.toHaveBeenCalled();
-      expect(mockGetBooleanValue).not.toHaveBeenCalled();
+      await (step as any)._run();
+      expect(contextManager.callKibanaApi).not.toHaveBeenCalled();
+      expect(workflowLogger.logWarn).not.toHaveBeenCalled();
+      expect(global.fetch).toHaveBeenCalledWith(
+        'https://localhost:5601/api/cases',
+        expect.objectContaining({ method: 'POST', redirect: 'manual' })
+      );
+      expect(mockGetBooleanValue).toHaveBeenCalled();
     });
 
-    it('uses Core self-client when the kibana.request flag is on', async () => {
+    it('uses Core self-client when the flag is on', async () => {
       mockGetBooleanValue.mockResolvedValue(true);
       step = createStep({ request: { method: 'GET', path: '/api/status' } }, 'kibana.getCase');
       await (step as any)._run();
       expect(contextManager.callKibanaApi).toHaveBeenCalled();
       expect(global.fetch).not.toHaveBeenCalled();
-      expect(mockGetBooleanValue).not.toHaveBeenCalled();
+      expect(mockGetBooleanValue).toHaveBeenCalled();
     });
 
     it('does not double-prefix generated non-default-space paths', async () => {
@@ -783,7 +793,7 @@ describe('KibanaActionStepImpl', () => {
     });
 
     it('builds generated connector requests through the self-client adapter', async () => {
-      mockGetBooleanValue.mockResolvedValue(false);
+      mockGetBooleanValue.mockResolvedValue(true);
       step = createStep(
         { title: 'Test Case', description: 'Test Description', owner: 'securitySolution' },
         'kibana.createCase'
@@ -804,7 +814,7 @@ describe('KibanaActionStepImpl', () => {
     });
 
     it('does not forward use_server_info, use_localhost, or debug on generated connectors', async () => {
-      mockGetBooleanValue.mockResolvedValue(false);
+      mockGetBooleanValue.mockResolvedValue(true);
       step = createStep(
         {
           title: 'Test Case',
@@ -824,8 +834,8 @@ describe('KibanaActionStepImpl', () => {
       expect(call.body.title).toBe('Test Case');
     });
 
-    it('warns and ignores YAML fetcher', async () => {
-      mockGetBooleanValue.mockResolvedValue(false);
+    it('warns and ignores YAML fetcher when the flag is on', async () => {
+      mockGetBooleanValue.mockResolvedValue(true);
       step = createStep(
         {
           request: { method: 'GET', path: '/api/status' },

@@ -649,7 +649,7 @@ steps:
       ]);
     });
 
-    it('warns generated kibana.* fetcher even when the kibana.request flag is off', () => {
+    it('does not warn on generated kibana.* fetcher when the self-client flag is off', () => {
       const yaml = `
 version: '1'
 name: kibana-generated-fetcher
@@ -666,14 +666,8 @@ steps:
 `;
       const result = validateWorkflowYaml(yaml, schema);
 
-      expect(result.diagnostics).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
-            severity: 'warning',
-            ruleId: 'ignoredFetcherSetting',
-            path: ['steps', 0, 'with', 'fetcher'],
-          }),
-        ])
+      expect(result.diagnostics.some((diag) => diag.ruleId === 'ignoredFetcherSetting')).toBe(
+        false
       );
     });
 

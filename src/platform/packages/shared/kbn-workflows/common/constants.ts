@@ -27,9 +27,8 @@ export const WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID = 'workflows:ui:show
 export const WORKFLOW_EXECUTION_STATS_BAR_SETTING_ID = 'workflows:executionStatsBar:enabled';
 
 /**
- * When true, `kibana.request` uses Core `http.selfClient`.
- * When false, `kibana.request` uses the global `fetch` client, including YAML `fetcher`.
- * Other `kibana.*` step types always use Core self-client.
+ * When true, all `kibana.*` steps use Core `http.selfClient`.
+ * When false, all `kibana.*` steps use the global `fetch` client, including YAML `fetcher`.
  */
 export const WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG =
   'workflows.kibanaRequest.coreSelfClientEnabled';

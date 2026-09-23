@@ -971,7 +971,7 @@ groups:
       - setting: server.selfHttp.maxRedirects
         id: server-selfhttp-maxredirects
         description: |
-          Sets how many same-origin HTTP redirects Kibana follows for requests it makes to its own APIs. This includes generated workflow `kibana.*` steps, and `kibana.request` steps when they use Core `http.selfClient` (`workflows.kibanaRequest.coreSelfClientEnabled`). When that flag is off, `kibana.request` uses the global fetch client and this setting does not apply. `0` rejects redirects. Values `1` through `20` allow that many same-origin hops. Scheme, host, and port must match. Cross-origin redirects are always rejected.
+          Sets how many same-origin HTTP redirects Kibana follows for requests it makes to its own APIs. Workflow `kibana.*` steps use Core `http.selfClient` when `workflows.kibanaRequest.coreSelfClientEnabled` is enabled. When that flag is off, they use the global fetch client and this setting does not apply. `0` rejects redirects. Values `1` through `20` allow that many same-origin hops. Scheme, host, and port must match. Cross-origin redirects are always rejected.
         datatype: int
         default: 0
         applies_to:
@@ -998,7 +998,7 @@ groups:
       - setting: server.selfHttp.ssl.verificationMode
         id: server-selfhttp-ssl-verificationmode
         description: |
-          Controls verification of the server certificate on HTTPS requests Kibana makes to its own APIs. This includes generated workflow `kibana.*` steps, and `kibana.request` steps when they use Core `http.selfClient` (`workflows.kibanaRequest.coreSelfClientEnabled`). When that flag is off, `kibana.request` uses the global fetch client and this setting does not apply; those steps still honor YAML `fetcher.skip_ssl_verification`. `"full"` verifies the certificate and hostname, `"certificate"` verifies the certificate only, and `"none"` skips verification. Local listener hops treat `"full"` as `"certificate"` because the loopback URL hostname usually does not match the certificate SAN, and that implicit path trusts only this instance's leaf certificate from [`server.ssl.certificate`](#server-ssl-cert-key) or [`server.ssl.keystore.path`](#server-ssl-keystore-path). `"none"` is still honored on local hops.
+          Controls verification of the server certificate on HTTPS requests Kibana makes to its own APIs. Workflow `kibana.*` steps use Core `http.selfClient` when `workflows.kibanaRequest.coreSelfClientEnabled` is enabled. When that flag is off, they use the global fetch client and this setting does not apply; those steps still honor YAML `fetcher.skip_ssl_verification`. `"full"` verifies the certificate and hostname, `"certificate"` verifies the certificate only, and `"none"` skips verification. Local listener hops treat `"full"` as `"certificate"` because the loopback URL hostname usually does not match the certificate SAN, and that implicit path trusts only this instance's leaf certificate from [`server.ssl.certificate`](#server-ssl-cert-key) or [`server.ssl.keystore.path`](#server-ssl-keystore-path). `"none"` is still honored on local hops.
         datatype: enum
         default: full
         options:

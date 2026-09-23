@@ -32,8 +32,7 @@ import { validateTriggers } from './validate_triggers';
 export interface ValidateWorkflowYamlOptions {
   triggerDefinitions?: TriggerDefinitionForValidateTriggers[];
   /**
-   * When true, `kibana.request` YAML `fetcher` is warned as ignored.
-   * Generated `kibana.*` steps always warn because they always use Core self-client.
+   * When true, `kibana.*` YAML `fetcher` is warned as ignored because it uses Core self-client.
    */
   warnIgnoredKibanaFetcher?: boolean;
   /**
@@ -152,9 +151,9 @@ export function validateWorkflowYaml(
       diagnostics.push({ severity: 'error', message, source: 'graph', ruleId: 'graphBuildError' });
     }
 
-    const warnKibanaRequestFetcher = options?.warnIgnoredKibanaFetcher ?? false;
+    const warnKibanaFetcher = options?.warnIgnoredKibanaFetcher ?? false;
     for (const occurrence of collectIgnoredKibanaFetcherOccurrences(parsedWorkflow.steps)) {
-      if (shouldWarnIgnoredKibanaFetcher(occurrence.stepType, warnKibanaRequestFetcher)) {
+      if (shouldWarnIgnoredKibanaFetcher(occurrence.stepType, warnKibanaFetcher)) {
         diagnostics.push({
           severity: 'warning',
           message: IGNORED_KIBANA_FETCHER_SETTING_MESSAGE,
