@@ -48,6 +48,18 @@ const maintenanceSummarySchemaV1 = schema.object({
   }),
 });
 
+const maintenanceDeletedCountsSchemaV2 = schema.object({
+  knowledgeIndicators: schema.number(),
+  storedQueries: schema.number(),
+  rules: schema.number(),
+  investigations: schema.number(),
+  dataStreams: schema.number(),
+});
+
+const maintenanceSummarySchemaV2 = maintenanceSummarySchemaV1.extends({
+  deleted: schema.maybe(maintenanceDeletedCountsSchemaV2),
+});
+
 const disabledWorkflowSchemaV1 = schema.object({
   id: schema.string(),
   spaceId: schema.string(),
@@ -74,8 +86,12 @@ const maintenanceStateAttributesV1 = schema.object({
   pausedSettings: schema.maybe(pausedFeatureSettingsSchemaV1),
 });
 
+const maintenanceStateAttributesV2 = maintenanceStateAttributesV1.extends({
+  lastSummary: schema.maybe(maintenanceSummarySchemaV2),
+});
+
 export type SignificantEventsMaintenanceStateAttributes = TypeOf<
-  typeof maintenanceStateAttributesV1
+  typeof maintenanceStateAttributesV2
 >;
 
 export const getSignificantEventsMaintenanceStateSavedObjectType = (): SavedObjectsType => ({
@@ -97,6 +113,13 @@ export const getSignificantEventsMaintenanceStateSavedObjectType = (): SavedObje
       schemas: {
         forwardCompatibility: maintenanceStateAttributesV1.extends({}, { unknowns: 'ignore' }),
         create: maintenanceStateAttributesV1,
+      },
+    },
+    '2': {
+      changes: [],
+      schemas: {
+        forwardCompatibility: maintenanceStateAttributesV2.extends({}, { unknowns: 'ignore' }),
+        create: maintenanceStateAttributesV2,
       },
     },
   },

@@ -183,6 +183,14 @@ export class KnowledgeIndicatorClient {
     return [...new Set([...withIndicators, ...withOwnedRules])];
   }
 
+  findStreamNamesWithOwnedRules(): Promise<string[]> {
+    return this.orchestrator.findStreamNamesWithOwnedRules();
+  }
+
+  findOwnedRuleIds(streamName: string): Promise<string[]> {
+    return this.orchestrator.findOwnedRuleIds(streamName);
+  }
+
   findIndicators(
     streams: string | string[],
     query: string,

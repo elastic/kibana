@@ -11,8 +11,8 @@ import { brandSpaceId, DEFAULT_SPACE_ID, type SpaceId } from '@kbn/core-spaces-c
 import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { ALERTING_ERROR_CODES, type RulesClientApi } from '@kbn/alerting-v2-plugin/server';
-import type { SignificantEventsServer } from '../../types';
 import type {
+  SignificantEventsMaintenanceDeletedCounts,
   SignificantEventsMaintenanceFailure,
   SignificantEventsMaintenanceStatus,
   SignificantEventsMaintenanceSummary,
@@ -23,6 +23,11 @@ import {
   type SignificantEventsMaintenanceState,
 } from '../../../common/maintenance/state_machine';
 import type { GetScopedClients } from '../../routes/types';
+import type { SignificantEventsServer } from '../../types';
+import { KNOWLEDGE_INDICATORS_DATA_STREAM } from '../knowledge_indicators/data_stream';
+import { DETECTIONS_DATA_STREAM } from '../significant_events/detections/data_stream';
+import { DISCOVERIES_DATA_STREAM } from '../significant_events/discoveries_data_stream';
+import { EVENTS_DATA_STREAM } from '../significant_events/events/data_stream';
 import {
   SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID,
   SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
@@ -38,6 +43,7 @@ import {
   buildDisableTargets,
   type MaintenanceWorkflowTarget,
 } from './managed_workflow_targets';
+import { collectResetSnapshot } from './reset_snapshot';
 
 type ManagementApi = WorkflowsServerPluginSetup['management'];
 
@@ -88,6 +94,11 @@ export interface SignificantEventsMaintenanceService {
    * even after the deployment is already reported as enabled.
    */
   resume(params: {
+    request: KibanaRequest;
+    updatedBy?: string;
+  }): Promise<SignificantEventsMaintenanceSummary>;
+  /** Destructively clear all Significant Events data and return activity to enabled. */
+  reset(params: {
     request: KibanaRequest;
     updatedBy?: string;
   }): Promise<SignificantEventsMaintenanceSummary>;
@@ -177,6 +188,40 @@ const setV2RulesEnabled = async (
   };
 };
 
+const RULE_BULK_SIZE = 100;
+
+const deleteV2Rules = async (
+  rulesClient: RulesClientApi,
+  ids: string[]
+): Promise<{ deleted: number; failures: SignificantEventsMaintenanceFailure[] }> => {
+  let deleted = 0;
+  const failures: SignificantEventsMaintenanceFailure[] = [];
+  for (let offset = 0; offset < ids.length; offset += RULE_BULK_SIZE) {
+    const chunk = ids.slice(offset, offset + RULE_BULK_SIZE);
+    try {
+      const result = await rulesClient.bulkDeleteRules({ ids: chunk });
+      deleted += result.affected_count;
+      for (const error of result.errors) {
+        if (error.error.code !== ALERTING_ERROR_CODES.RULE_NOT_FOUND) {
+          failures.push({ target: `rule:${error.id}`, error: error.error.message });
+        }
+      }
+    } catch (error) {
+      const message = toMessage(error);
+      failures.push(...chunk.map((id) => ({ target: `rule:${id}`, error: message })));
+    }
+  }
+  return { deleted, failures };
+};
+
+const emptyDeletedCounts = (): SignificantEventsMaintenanceDeletedCounts => ({
+  knowledgeIndicators: 0,
+  storedQueries: 0,
+  rules: 0,
+  investigations: 0,
+  dataStreams: 0,
+});
+
 export const createSignificantEventsMaintenanceService = ({
   logger,
   server,
@@ -203,8 +248,9 @@ export const createSignificantEventsMaintenanceService = ({
   };
 
   // Lazy: this factory runs in plugin setup, before `server.core` is assigned
-  // in start(). Route authz is the user gate (Nightshift read for status, Nightshift
-  // manage for pause/resume). This SO is hidden, agnostic, and not listed on
+  // in start(). Route authz is the user gate (Nightshift read for status,
+  // Nightshift manage for pause/resume, Streams manage for reset). This SO is hidden,
+  // agnostic, and not listed on
   // any Nightshift privilege `savedObject` array. A scoped client then checks
   // `saved_object:significant-events-maintenance-state/get` and 403s every
   // Nightshift-only user once the document exists. Same pattern as run quotas.
@@ -417,15 +463,18 @@ export const createSignificantEventsMaintenanceService = ({
     mgmt: ManagementApi,
     { id, spaceId }: MaintenanceWorkflowTarget,
     request: KibanaRequest,
-    failures: SignificantEventsMaintenanceFailure[]
+    failures: SignificantEventsMaintenanceFailure[],
+    reportMissing = true
   ): Promise<'toggled' | 'already' | 'gone' | 'failed'> => {
     const target = `workflow:${id}@${spaceId}`;
     try {
       const workflow = await mgmt.getWorkflow(id, spaceId);
       if (!workflow) {
-        // Gone — surface it, but don't keep the deployment paused on a workflow
-        // that no longer exists.
-        failures.push({ target, error: 'workflow not found' });
+        if (reportMissing) {
+          // Gone — surface it, but don't keep the deployment paused on a workflow
+          // that no longer exists.
+          failures.push({ target, error: 'workflow not found' });
+        }
         return 'gone';
       }
       if (workflow.enabled) {
@@ -790,6 +839,239 @@ export const createSignificantEventsMaintenanceService = ({
         } else {
           logFailures(log, message, failures);
         }
+        return summary;
+      });
+    },
+
+    async reset({ request, updatedBy }) {
+      return withTransitionLock(async () => {
+        const existing = await readState();
+        const failures: SignificantEventsMaintenanceFailure[] = [];
+        const deleted = emptyDeletedCounts();
+
+        if (normalizeState(existing?.state) !== 'paused') {
+          try {
+            await writeState({
+              state: 'paused',
+              updatedAt: new Date().toISOString(),
+              updatedBy,
+              disabledWorkflows: existing?.disabledWorkflows ?? [],
+              disabledRuleIds: existing?.disabledRuleIds ?? [],
+              pausedSettings: existing?.pausedSettings,
+              lastSummary: {
+                state: 'paused',
+                executionsCancelled: 0,
+                workflowsDisabled: existing?.disabledWorkflows.length ?? 0,
+                rulesDisabled: existing?.disabledRuleIds.length ?? 0,
+                partialFailures: [],
+              },
+            });
+          } catch (writeError) {
+            log.error(
+              `Significant Events reset failed before cleanup: could not persist paused intent: ${toMessage(
+                writeError
+              )}`
+            );
+            throw writeError;
+          }
+        }
+
+        const spaceIds = await getAllSpaceIds(request, failures);
+        const mgmt = server.workflowsManagement?.management;
+        const recoveryByKey = new Map<string, MaintenanceWorkflowTarget>();
+        for (const workflow of existing?.disabledWorkflows ?? []) {
+          recoveryByKey.set(workflowKey(workflow), workflow);
+        }
+
+        if (mgmt) {
+          for (const target of buildDisableTargets(spaceIds)) {
+            if (await disableWorkflow(mgmt, target, request, failures)) {
+              recoveryByKey.set(workflowKey(target), target);
+            }
+          }
+          for (const target of buildCancelTargets(spaceIds)) {
+            await cancelTargetExecutions(mgmt, target, request, failures);
+          }
+        } else {
+          failures.push({
+            target: 'workflows',
+            error: 'Workflows management plugin is not available',
+          });
+        }
+
+        await featureSettings.reassertFeatureSettingsOff({ request, spaceIds, failures });
+
+        let scopedClients: Awaited<ReturnType<GetScopedClients>> | undefined;
+        const ruleIds = new Set(existing?.disabledRuleIds ?? []);
+        try {
+          scopedClients = await getScopedClients({ request });
+          const snapshot = await collectResetSnapshot(
+            await scopedClients.getKnowledgeIndicatorClient(),
+            failures
+          );
+          deleted.knowledgeIndicators = snapshot.knowledgeIndicators;
+          deleted.storedQueries = snapshot.storedQueries;
+          for (const ruleId of snapshot.ruleIds) {
+            ruleIds.add(ruleId);
+          }
+        } catch (error) {
+          failures.push({ target: 'snapshot', error: toMessage(error) });
+        }
+
+        if (ruleIds.size > 0) {
+          if (!scopedClients) {
+            failures.push({ target: 'rules', error: 'Scoped clients are not available' });
+          } else {
+            try {
+              const { alertingV2RulesClient } =
+                await scopedClients.getSignificantEventsAlertingContext();
+              if (alertingV2RulesClient) {
+                const ruleResult = await deleteV2Rules(alertingV2RulesClient, [...ruleIds]);
+                deleted.rules = ruleResult.deleted;
+                failures.push(...ruleResult.failures);
+              } else {
+                failures.push({
+                  target: 'rules',
+                  error: 'Alerting v2 rules client is not available',
+                });
+              }
+            } catch (error) {
+              failures.push({ target: 'rules', error: toMessage(error) });
+            }
+          }
+        }
+
+        if (server.nightshiftInvestigations) {
+          try {
+            const investigations = await server.nightshiftInvestigations.deleteAllInvestigations();
+            deleted.investigations = investigations.deleted;
+            failures.push(
+              ...investigations.failures.map(({ id, spaceId, error }) => ({
+                target: `investigation:${id}@${spaceId}`,
+                error,
+              }))
+            );
+          } catch (error) {
+            failures.push({ target: 'investigations', error: toMessage(error) });
+          }
+        }
+
+        const esClient = server.core.elasticsearch.client.asInternalUser;
+        for (const name of [
+          DETECTIONS_DATA_STREAM,
+          EVENTS_DATA_STREAM,
+          KNOWLEDGE_INDICATORS_DATA_STREAM,
+        ]) {
+          try {
+            await server.core.dataStreams.initializeClient(name);
+          } catch (error) {
+            failures.push({ target: `data-stream:${name}:initialize`, error: toMessage(error) });
+          }
+
+          let exists = false;
+          try {
+            exists = await esClient.indices.exists({ index: name });
+          } catch (error) {
+            failures.push({ target: `data-stream:${name}`, error: toMessage(error) });
+          }
+
+          let documentCount: number | undefined;
+          if (exists) {
+            try {
+              documentCount = (await esClient.count({ index: name })).count;
+            } catch (error) {
+              failures.push({ target: `data-stream:${name}:count`, error: toMessage(error) });
+            }
+          }
+
+          let needsCreate = !exists;
+          if (exists && (documentCount === undefined || documentCount > 0)) {
+            try {
+              await esClient.indices.deleteDataStream({ name }, { ignore: [404] });
+              needsCreate = true;
+              if (documentCount !== undefined && documentCount > 0) {
+                deleted.dataStreams += 1;
+              }
+            } catch (error) {
+              failures.push({ target: `data-stream:${name}:delete`, error: toMessage(error) });
+            }
+          }
+
+          if (needsCreate) {
+            try {
+              await esClient.indices.createDataStream({ name });
+            } catch (error) {
+              failures.push({ target: `data-stream:${name}:create`, error: toMessage(error) });
+            }
+          }
+        }
+
+        try {
+          if (await esClient.indices.exists({ index: DISCOVERIES_DATA_STREAM })) {
+            await esClient.indices.deleteDataStream(
+              { name: DISCOVERIES_DATA_STREAM },
+              { ignore: [404] }
+            );
+            deleted.dataStreams += 1;
+          }
+        } catch (error) {
+          failures.push({
+            target: `data-stream:${DISCOVERIES_DATA_STREAM}:delete`,
+            error: toMessage(error),
+          });
+        }
+
+        const remainingWorkflows: MaintenanceWorkflowTarget[] = [];
+        if (mgmt) {
+          for (const workflow of recoveryByKey.values()) {
+            if (!shouldRestoreSettingsBackedWorkflow(workflow, undefined)) {
+              continue;
+            }
+            const outcome = await reEnableWorkflow(mgmt, workflow, request, failures, false);
+            if (outcome === 'failed') {
+              remainingWorkflows.push(workflow);
+            }
+          }
+        } else {
+          remainingWorkflows.push(
+            ...[...recoveryByKey.values()].filter((workflow) =>
+              shouldRestoreSettingsBackedWorkflow(workflow, undefined)
+            )
+          );
+        }
+
+        const summary: SignificantEventsMaintenanceSummary = {
+          state: 'enabled',
+          executionsCancelled: 0,
+          workflowsDisabled: remainingWorkflows.length,
+          rulesDisabled: 0,
+          deleted,
+          partialFailures: failures,
+        };
+
+        try {
+          await writeState({
+            state: 'enabled',
+            updatedAt: new Date().toISOString(),
+            updatedBy,
+            disabledWorkflows: remainingWorkflows,
+            disabledRuleIds: [],
+            lastSummary: summary,
+          });
+        } catch (writeError) {
+          log.error(
+            `Significant Events reset persist failed after destructive cleanup: ${toMessage(
+              writeError
+            )}`
+          );
+          throw writeError;
+        }
+
+        logFailures(
+          log,
+          `Significant Events reset completed with ${failures.length} failure(s)`,
+          failures
+        );
         return summary;
       });
     },
