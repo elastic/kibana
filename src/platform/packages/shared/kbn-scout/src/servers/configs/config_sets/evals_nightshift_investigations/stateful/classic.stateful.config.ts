@@ -47,6 +47,8 @@ const createInvestigationConfig = (sandboxKey: string): ScoutServerConfig => {
       'Sandbox-api mTLS needs SANDBOX_CLIENT_CERT and SANDBOX_CLIENT_KEY (PEM contents) or their *_PATH equivalents.'
     );
   }
+  // Validate every input before creating the temp directory and exit handlers below.
+  const port = readSandboxPort();
 
   const exporterPrefix = '--telemetry.tracing.exporters=';
   const parentArgs = tracing.kbnTestServer.serverArgs;
@@ -73,7 +75,7 @@ const createInvestigationConfig = (sandboxKey: string): ScoutServerConfig => {
     'xpack.sandbox': {
       enabled: true,
       host: process.env.SANDBOX_API_HOST || 'localhost',
-      port: readSandboxPort(),
+      port,
       api_key: sandboxKey,
       ssl: {
         certificate,

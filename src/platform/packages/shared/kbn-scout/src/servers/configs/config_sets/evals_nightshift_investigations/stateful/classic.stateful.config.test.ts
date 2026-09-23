@@ -7,9 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { readFileSync } from 'fs';
-import { join } from 'path';
+import { readFileSync, rmSync } from 'fs';
+import { dirname, join } from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
+
+const CLEANUP_EVENTS: readonly string[] = ['exit', 'SIGINT', 'SIGTERM', 'SIGHUP'];
+
+type Listener = (...args: unknown[]) => void;
+
+// `process` has per-event overloads, so go through the plain EventEmitter signatures instead.
+const emitter: NodeJS.EventEmitter = process;
+const listenersOf = (event: string): Listener[] =>
+  emitter
+    .listeners(event)
+    .filter((listener): listener is Listener => typeof listener === 'function');
 
 // `src/` packages cannot import `@kbn/nightshift-shared` (x-pack), so read the flag from its source
 // to fail if it is renamed again without this config set following (see #292333).
@@ -29,6 +40,8 @@ const SANDBOX_ENV = {
   SANDBOX_CA_CERT: 'CA',
 };
 
+const configDirs = new Set<string>();
+
 const loadConfig = (env: Record<string, string>) => {
   let loaded: typeof import('./classic.stateful.config') | undefined;
   jest.isolateModules(() => {
@@ -36,13 +49,23 @@ const loadConfig = (env: Record<string, string>) => {
     loaded = jest.requireActual('./classic.stateful.config');
   });
   if (!loaded) throw new Error('config failed to load');
+  const configArg = loaded.servers.kbnTestServer.serverArgs.find((arg: string) =>
+    arg.startsWith('--config=')
+  );
+  if (configArg) configDirs.add(dirname(configArg.slice('--config='.length)));
   return loaded;
 };
 
+afterAll(() => {
+  for (const dir of configDirs) rmSync(dir, { recursive: true, force: true });
+});
+
 describe('evals_nightshift_investigations config set', () => {
   const originalEnv = process.env;
+  let listenersBefore: Map<string, Listener[]>;
 
   beforeEach(() => {
+    listenersBefore = new Map(CLEANUP_EVENTS.map((event) => [event, listenersOf(event)]));
     process.env = { ...originalEnv };
     delete process.env.NIGHTSHIFT_DATASETS;
     for (const key of Object.keys(process.env)) {
@@ -50,7 +73,15 @@ describe('evals_nightshift_investigations config set', () => {
     }
   });
 
+  // Each investigation-config load writes a temp directory and registers exit/signal handlers;
+  // remove both so repeated loads neither leak directories nor exceed Node's listener limit.
   afterEach(() => {
+    for (const event of CLEANUP_EVENTS) {
+      const before = listenersBefore.get(event) ?? [];
+      for (const listener of listenersOf(event)) {
+        if (!before.includes(listener)) emitter.removeListener(event, listener);
+      }
+    }
     process.env = originalEnv;
   });
 
@@ -121,11 +152,18 @@ describe('evals_nightshift_investigations config set', () => {
     expect(written['xpack.sandbox']).toMatchObject({ host: 'localhost', port: 9090 });
   });
 
-  it.each(['abc', '0', '65536', '9090.5'])('rejects SANDBOX_API_PORT=%s', (port) => {
-    expect(() => loadConfig({ ...SANDBOX_ENV, SANDBOX_API_PORT: port })).toThrow(
-      `SANDBOX_API_PORT must be an integer between 1 and 65535, got "${port}"`
-    );
-  });
+  it.each(['abc', '0', '65536', '9090.5'])(
+    'rejects SANDBOX_API_PORT=%s before registering signal handlers',
+    (port) => {
+      // Only this config set registers signal handlers; the evals_tracing parent it imports may
+      // add its own `exit` handler (for GCS_CREDENTIALS), so signals are the precise check.
+      const signalListeners = process.listenerCount('SIGTERM');
+      expect(() => loadConfig({ ...SANDBOX_ENV, SANDBOX_API_PORT: port })).toThrow(
+        `SANDBOX_API_PORT must be an integer between 1 and 65535, got "${port}"`
+      );
+      expect(process.listenerCount('SIGTERM')).toBe(signalListeners);
+    }
+  );
 
   it('names the variable and path when a PEM file cannot be read', () => {
     const { SANDBOX_CLIENT_CERT, ...env } = SANDBOX_ENV;

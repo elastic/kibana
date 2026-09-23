@@ -23,27 +23,33 @@ export interface EvalSelection {
 export const resolveEvalSelection = (
   env: Record<string, string | undefined> = process.env
 ): EvalSelection => {
-  const ids = parseRequestedIds(env.NIGHTSHIFT_DATASETS);
+  const requested = env.NIGHTSHIFT_DATASETS?.trim();
+  const ids = parseRequestedIds(requested);
   const hasSandbox = Boolean(env.SANDBOX_API_KEY);
+  const requiresSandbox = (selected: string) => {
+    // Playwright resolves this on every run; a reused Scout server never reloads its config.
+    if (!hasSandbox) {
+      throw new Error(
+        `NIGHTSHIFT_DATASETS=${requested} selects ${selected}, which runs investigation evals, but ` +
+          'SANDBOX_API_KEY is required; use --profile dev-vault, export SANDBOX_*, or select only smoke datasets.'
+      );
+    }
+  };
 
   if (!ids) {
+    // Only a genuinely unset value falls back; an explicit `all` asked for investigations too.
+    if (requested) requiresSandbox('all');
     return {
       runSmoke: true,
       runInvestigations: hasSandbox,
       smokeDatasetsRequest: undefined,
-      fellBackToSmoke: !hasSandbox && !env.NIGHTSHIFT_DATASETS?.trim(),
+      fellBackToSmoke: !hasSandbox,
     };
   }
 
   const smokeIds = ids.filter((id) => id !== INVESTIGATION_DATASET_ID);
   const runInvestigations = ids.includes(INVESTIGATION_DATASET_ID);
-  // Playwright resolves this on every run; a reused Scout server never reloads its config.
-  if (runInvestigations && !hasSandbox) {
-    throw new Error(
-      `NIGHTSHIFT_DATASETS includes ${INVESTIGATION_DATASET_ID}, which runs investigation evals, but ` +
-        'SANDBOX_API_KEY is required; use --profile dev-vault, export SANDBOX_*, or select only smoke datasets.'
-    );
-  }
+  if (runInvestigations) requiresSandbox(INVESTIGATION_DATASET_ID);
 
   return {
     runSmoke: smokeIds.length > 0,

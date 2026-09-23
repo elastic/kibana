@@ -77,7 +77,16 @@ describe('resolveEvalSelection', () => {
     'rejects %s without credentials, even when Scout would be reused',
     (value) => {
       expect(() => resolveEvalSelection({ NIGHTSHIFT_DATASETS: value })).toThrow(
-        'NIGHTSHIFT_DATASETS includes trace-only, which runs investigation evals, but SANDBOX_API_KEY is required'
+        `NIGHTSHIFT_DATASETS=${value} selects trace-only, which runs investigation evals, but SANDBOX_API_KEY is required`
+      );
+    }
+  );
+
+  it.each(['all', ' all ', 'synthetic-smoke,all'])(
+    'rejects an explicit %s without credentials instead of silently running only smoke',
+    (value) => {
+      expect(() => resolveEvalSelection({ NIGHTSHIFT_DATASETS: value })).toThrow(
+        `NIGHTSHIFT_DATASETS=${value.trim()} selects all, which runs investigation evals, but SANDBOX_API_KEY is required`
       );
     }
   );
