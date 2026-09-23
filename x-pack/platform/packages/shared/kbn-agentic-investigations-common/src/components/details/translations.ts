@@ -62,6 +62,12 @@ export const DETAILS_FLYOUT_LABELS = Object.freeze({
     needsReviewBadge: i18n.translate('xpack.alertzero.detailsFlyout.proposedAction.needsReview', {
       defaultMessage: 'Needs review',
     }),
+    appliedBadge: i18n.translate('xpack.alertzero.detailsFlyout.proposedAction.applied', {
+      defaultMessage: 'Applied',
+    }),
+    dismissedBadge: i18n.translate('xpack.alertzero.detailsFlyout.proposedAction.dismissed', {
+      defaultMessage: 'Dismissed',
+    }),
     reversible: i18n.translate('xpack.alertzero.detailsFlyout.proposedAction.reversible', {
       defaultMessage: 'Reversible',
     }),

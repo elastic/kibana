@@ -16,6 +16,7 @@ export type { ProposalsPublicPluginSetup, ProposalsPublicPluginStart } from './t
 
 export {
   useApproveProposal,
+  useConversationProposals,
   useDismissProposal,
   usePendingProposals,
   useProposal,

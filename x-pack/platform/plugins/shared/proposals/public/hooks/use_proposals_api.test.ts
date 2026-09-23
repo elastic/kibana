@@ -12,6 +12,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import {
   retryOnTransientError,
+  useConversationProposals,
   usePendingProposals,
   useProposal,
   useApproveProposal,
@@ -139,6 +140,52 @@ describe('usePendingProposals', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(result.current.data).toEqual(mockResponse);
+  });
+});
+
+describe('useConversationProposals', () => {
+  it('calls GET on the proposals URL scoped to the conversation, with no status filter', async () => {
+    const http = makeHttp();
+    http.get.mockResolvedValue({ proposals: [], total: 0 });
+    useKibanaMock.mockReturnValue({ services: { http } } as unknown as ReturnType<
+      typeof useKibana
+    >);
+
+    const { Wrapper } = createWrapper();
+    const { result } = renderHook(() => useConversationProposals('conv-42'), { wrapper: Wrapper });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    // Decided proposals matter here too — the investigation's own history, not just what still
+    // needs a human — so unlike `usePendingProposals` this carries no `status` filter.
+    expect(http.get).toHaveBeenCalledWith(PROPOSALS_INTERNAL_URL, {
+      version: AGENTIC_INVESTIGATIONS_API_VERSION,
+      query: { conversationId: 'conv-42', excludeSuperseded: true },
+    });
+  });
+
+  it('returns the data from the API', async () => {
+    const http = makeHttp();
+    const mockResponse = {
+      proposals: [{ id: 'p-1', status: 'succeeded', decision: 'approved' }],
+      total: 1,
+    };
+    http.get.mockResolvedValue(mockResponse);
+    useKibanaMock.mockReturnValue({ services: { http } } as unknown as ReturnType<
+      typeof useKibana
+    >);
+
+    const { Wrapper } = createWrapper();
+    const { result } = renderHook(() => useConversationProposals('conv-42'), { wrapper: Wrapper });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data).toEqual(mockResponse);
+  });
+
+  it('uses a query key distinct from usePendingProposals, so the two caches never collide', () => {
+    expect(queryKeys.proposals.forConversation('conv-42')).not.toEqual(
+      queryKeys.proposals.list('conv-42')
+    );
   });
 });
 

@@ -12,14 +12,14 @@ import { I18nProvider } from '@kbn/i18n-react';
 import type { ProposalWithMetadata } from '@kbn/proposals-common';
 import {
   useApproveProposal,
+  useConversationProposals,
   useDismissProposal,
-  usePendingProposals,
 } from '@kbn/proposals-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ProposedActionsSlot } from './proposed_actions_slot';
 
 jest.mock('@kbn/proposals-plugin/public', () => ({
-  usePendingProposals: jest.fn(),
+  useConversationProposals: jest.fn(),
   useApproveProposal: jest.fn(),
   useDismissProposal: jest.fn(),
 }));
@@ -28,8 +28,8 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn(),
 }));
 
-const mockUsePendingProposals = usePendingProposals as jest.MockedFunction<
-  typeof usePendingProposals
+const mockUseConversationProposals = useConversationProposals as jest.MockedFunction<
+  typeof useConversationProposals
 >;
 const mockUseApproveProposal = useApproveProposal as jest.MockedFunction<typeof useApproveProposal>;
 const mockUseDismissProposal = useDismissProposal as jest.MockedFunction<typeof useDismissProposal>;
@@ -51,6 +51,16 @@ const mockProposal: ProposalWithMetadata = {
   createdAt: '2024-01-01T00:00:00Z',
   expired: false,
   action: { name: 'Isolate cfo-mbp-14 — host isolation', category: 'Response action' },
+};
+
+const decidedProposal: ProposalWithMetadata = {
+  ...mockProposal,
+  id: 'proposal-2',
+  status: 'succeeded',
+  decision: 'approved',
+  decidedBy: { fullName: 'Bonnie Fishel', username: 'bfishel', email: null },
+  decidedAt: '2024-01-01T17:20:00.000Z',
+  action: { name: 'After-hours domain admin logins — fin-dc-01', category: 'Response action' },
 };
 
 const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -76,22 +86,40 @@ describe('ProposedActionsSlot', () => {
     } as unknown as ReturnType<typeof useKibana>);
   });
 
-  it('renders a proposed-action button for each pending proposal', () => {
-    mockUsePendingProposals.mockReturnValue({
-      data: { proposals: [mockProposal], total: 1 },
+  it('renders a proposed-action button for each proposal, decided or not', () => {
+    mockUseConversationProposals.mockReturnValue({
+      data: { proposals: [mockProposal, decidedProposal], total: 2 },
       isLoading: false,
-    } as unknown as ReturnType<typeof usePendingProposals>);
+    } as unknown as ReturnType<typeof useConversationProposals>);
 
     renderSlot();
 
     expect(screen.getByText('Isolate cfo-mbp-14 — host isolation')).toBeInTheDocument();
+    expect(screen.getByText('After-hours domain admin logins — fin-dc-01')).toBeInTheDocument();
   });
 
-  it('shows an empty state when there are no pending proposals', () => {
-    mockUsePendingProposals.mockReturnValue({
+  it('renders a decided proposal as a closed, non-interactive record rather than dropping it', () => {
+    mockUseConversationProposals.mockReturnValue({
+      data: { proposals: [decidedProposal], total: 1 },
+      isLoading: false,
+    } as unknown as ReturnType<typeof useConversationProposals>);
+
+    renderSlot();
+
+    expect(screen.getByText('Applied')).toBeInTheDocument();
+    expect(screen.getByText(/Bonnie Fishel/)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('investigationFlyoutProposedAction-proposal-2'));
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(approveMutate).not.toHaveBeenCalled();
+  });
+
+  it('shows an empty state when this conversation has no proposals', () => {
+    mockUseConversationProposals.mockReturnValue({
       data: { proposals: [], total: 0 },
       isLoading: false,
-    } as unknown as ReturnType<typeof usePendingProposals>);
+    } as unknown as ReturnType<typeof useConversationProposals>);
 
     renderSlot();
 
@@ -99,10 +127,10 @@ describe('ProposedActionsSlot', () => {
   });
 
   it('approves with the proposal id and its own action input', () => {
-    mockUsePendingProposals.mockReturnValue({
+    mockUseConversationProposals.mockReturnValue({
       data: { proposals: [mockProposal], total: 1 },
       isLoading: false,
-    } as unknown as ReturnType<typeof usePendingProposals>);
+    } as unknown as ReturnType<typeof useConversationProposals>);
 
     renderSlot();
     fireEvent.click(screen.getByTestId('investigationFlyoutProposedAction-proposal-1'));
@@ -117,10 +145,10 @@ describe('ProposedActionsSlot', () => {
   });
 
   it('opens the dismiss modal instead of dismissing directly', () => {
-    mockUsePendingProposals.mockReturnValue({
+    mockUseConversationProposals.mockReturnValue({
       data: { proposals: [mockProposal], total: 1 },
       isLoading: false,
-    } as unknown as ReturnType<typeof usePendingProposals>);
+    } as unknown as ReturnType<typeof useConversationProposals>);
 
     renderSlot();
     fireEvent.click(screen.getByTestId('investigationFlyoutProposedAction-proposal-1'));

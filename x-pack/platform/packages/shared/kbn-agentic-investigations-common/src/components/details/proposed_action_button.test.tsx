@@ -8,11 +8,14 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
+import { I18nProvider } from '@kbn/i18n-react';
 import type { ApprovalProposal } from '@kbn/proposals-ui';
 import { ProposedActionButton, type ProposedActionButtonProps } from './proposed_action_button';
 
 const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <EuiProvider>{children}</EuiProvider>
+  <I18nProvider>
+    <EuiProvider>{children}</EuiProvider>
+  </I18nProvider>
 );
 
 const mockProposal: ApprovalProposal = {
@@ -84,5 +87,38 @@ describe('ProposedActionButton', () => {
     fireEvent.click(screen.getByTestId('proposedAction'));
 
     expect(screen.queryByTestId('proposedAction-modal-dismiss')).not.toBeInTheDocument();
+  });
+
+  describe('a decided proposal', () => {
+    const decidedProposal: ApprovalProposal = {
+      ...mockProposal,
+      status: 'succeeded',
+      decision: 'approved',
+      decidedBy: { fullName: 'Bonnie Fishel', username: 'bfishel' },
+      decidedAt: '2024-01-01T17:20:00.000Z',
+    };
+
+    it('shows an Applied badge and who/when decided it instead of Needs review', () => {
+      renderButton({ proposal: decidedProposal });
+
+      expect(screen.getByText('Applied')).toBeInTheDocument();
+      expect(screen.queryByText('Needs review')).not.toBeInTheDocument();
+      expect(screen.getByText(/Bonnie Fishel/)).toBeInTheDocument();
+      expect(screen.queryByText('Response action • Irreversible')).not.toBeInTheDocument();
+    });
+
+    it('shows a Dismissed badge for a dismissed proposal', () => {
+      renderButton({ proposal: { ...decidedProposal, decision: 'dismissed' } });
+
+      expect(screen.getByText('Dismissed')).toBeInTheDocument();
+    });
+
+    it('is not clickable, so no approval modal can be opened on a closed record', () => {
+      renderButton({ proposal: decidedProposal });
+
+      fireEvent.click(screen.getByTestId('proposedAction'));
+
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
   });
 });

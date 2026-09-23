@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { UseQueryResult } from '@kbn/react-query';
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -65,6 +66,29 @@ export const usePendingProposals = (conversationId?: string) => {
           excludeSuperseded: true,
           ...(conversationId ? { conversationId } : {}),
         },
+      }),
+    keepPreviousData: true,
+    retry: retryOnTransientError,
+  });
+};
+
+/**
+ * Every proposal on one conversation, decided or not — the investigation flyout's own proposal
+ * history, as opposed to `usePendingProposals`'s cross-conversation "awaiting a human" queue.
+ * Superseded rows are still dropped: a retried proposal's earlier attempts are not history worth
+ * a card of their own, only the live head is.
+ */
+export const useConversationProposals = (
+  conversationId: string
+): UseQueryResult<ListProposalsResponse, unknown> => {
+  const { services } = useKibana();
+
+  return useQuery({
+    queryKey: queryKeys.proposals.forConversation(conversationId),
+    queryFn: async (): Promise<ListProposalsResponse> =>
+      services.http!.get<ListProposalsResponse>(PROPOSALS_INTERNAL_URL, {
+        version: AGENTIC_INVESTIGATIONS_API_VERSION,
+        query: { conversationId, excludeSuperseded: true },
       }),
     keepPreviousData: true,
     retry: retryOnTransientError,

@@ -9,8 +9,8 @@ import React, { useCallback, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import {
   useApproveProposal,
+  useConversationProposals,
   useDismissProposal,
-  usePendingProposals,
 } from '@kbn/proposals-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
@@ -24,15 +24,18 @@ export interface ProposedActionsSlotProps {
 }
 
 /**
- * `renderProposedActions` content for the investigation flyout's overview tab. Owns the dismiss
- * modal itself — like the footer, this slot is mounted through `core.overlays.openFlyout`, where
- * there is no page-level React tree to delegate it to.
+ * `renderProposedActions` content for the investigation flyout's overview tab. Shows the whole
+ * proposal history for this conversation, decided or not, so an already-applied action still
+ * shows the closed record `ProposedActionButton` renders — rather than `usePendingProposals`,
+ * which drops a proposal the moment it stops awaiting a human. Owns the dismiss modal itself —
+ * like the footer, this slot is mounted through `core.overlays.openFlyout`, where there is no
+ * page-level React tree to delegate it to.
  */
 export const ProposedActionsSlot = ({ conversationId }: ProposedActionsSlotProps) => {
   const {
     services: { notifications },
   } = useKibana<CoreStart>();
-  const { data, isLoading } = usePendingProposals(conversationId);
+  const { data, isLoading } = useConversationProposals(conversationId);
   const approve = useApproveProposal();
   const dismiss = useDismissProposal();
   const [dismissingProposalId, setDismissingProposalId] = useState<string | null>(null);
