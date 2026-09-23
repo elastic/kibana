@@ -31,6 +31,25 @@ describe('requestOAuthToken', () => {
     createAxiosInstanceMock.mockReturnValue(axiosInstanceMock);
   });
 
+  test.each(['bearer', 'BEARER', 'Bearer'])(
+    'preserves token type %s when no override is supplied',
+    async (tokenType) => {
+      axiosInstanceMock.mockResolvedValueOnce({
+        status: 200,
+        data: { access_token: 'token', token_type: tokenType },
+      });
+      await expect(
+        requestOAuthToken(
+          'https://test',
+          'client_credentials',
+          actionsConfigMock.create(),
+          mockLogger,
+          {}
+        )
+      ).resolves.toMatchObject({ tokenType, accessToken: 'token' });
+    }
+  );
+
   test('making a token request with the required options', async () => {
     const configurationUtilities = actionsConfigMock.create();
     axiosInstanceMock.mockReturnValueOnce({
