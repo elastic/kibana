@@ -160,6 +160,41 @@ describe('create-investigation-proposal workflow execution', () => {
     });
   });
 
+  describe('a proposal revised while its gate is parked', () => {
+    it("runs the action against the revised actionInput, not the trigger's original", async () => {
+      await fixture.start({
+        actionWorkflowId: ACTION_WORKFLOW_ID,
+        actionInput: { name: 'original-name' },
+      });
+
+      await fixture.revise({ actionInput: { name: 'analyst-corrected-name' } });
+      await fixture.resume(true);
+
+      const executions = fixture.stepExecutions('execute_action', 'workflow.execute');
+      expect(executions).toHaveLength(1);
+      // The trigger's static `inputs.actionInput` still reads `original-name`;
+      // asserting on the executed step's own recorded input, not on the
+      // proposal record, is what actually proves the revision reached the
+      // action rather than the workflow's original static trigger input.
+      const input = executions[0].input as { inputs?: { actionInput?: Record<string, unknown> } };
+      expect(input?.inputs?.actionInput).toEqual({ name: 'analyst-corrected-name' });
+    });
+
+    it('marks the pre-revision proposal superseded and settles the outcome on the revision', async () => {
+      await fixture.start({ actionWorkflowId: ACTION_WORKFLOW_ID });
+      const original = fixture.onlyProposal();
+
+      await fixture.revise({ comment: 'clarified per analyst request' });
+      await fixture.resume(true);
+
+      const [supersededOriginal, revision] = fixture.proposals();
+      expect(supersededOriginal.id).toBe(original.id);
+      expect(supersededOriginal.status).toBe('superseded');
+      expect(supersededOriginal.supersededBy).toBe(revision.id);
+      expect(revision.decision).toBe('approved');
+    });
+  });
+
   describe('an external resume', () => {
     // Carries no request, so the engine wakes the pre-scheduled task under the
     // workflow runner's own API key. That identity always holds
@@ -323,6 +358,47 @@ describe('create-investigation-proposal workflow execution', () => {
       // resolve and the flag is deliberately ignored.
       expect(fixture.executionStatus()).toBe(ExecutionStatus.WAITING_FOR_INPUT);
       expect(fixture.onlyProposal().decision).toBeUndefined();
+    });
+
+    it('should still gate an always-gate action the caller tried to authorise', async () => {
+      fixture.setActionMetadata({
+        name: 'Create rule',
+        category: 'tune',
+        approvalPolicy: 'always-gate',
+      });
+
+      await fixture.start({ actionWorkflowId: ACTION_WORKFLOW_ID, autoApprove: true });
+
+      // The action's own declaration outranks whatever autonomy the caller
+      // resolved, so a Worker cannot auto-approve it by mistake.
+      expect(fixture.executionStatus()).toBe(ExecutionStatus.WAITING_FOR_INPUT);
+      expect(fixture.onlyProposal().decision).toBeUndefined();
+    });
+
+    it('should gate when the action metadata could not be read at all', async () => {
+      fixture.failActionLookup();
+
+      await fixture.start({ actionWorkflowId: ACTION_WORKFLOW_ID, autoApprove: true });
+
+      // Creation swallows the read failure, so an unreadable policy is
+      // indistinguishable from a permissive one — a transient outage must not
+      // be what lets an action run unattended.
+      expect(fixture.executionStatus()).toBe(ExecutionStatus.WAITING_FOR_INPUT);
+      expect(fixture.onlyProposal().decision).toBeUndefined();
+    });
+
+    it('should skip the gate for an autonomy-dependent action', async () => {
+      fixture.setActionMetadata({
+        name: 'Create rule',
+        category: 'tune',
+        approvalPolicy: 'autonomy-dependent',
+      });
+
+      await fixture.start({ actionWorkflowId: ACTION_WORKFLOW_ID, autoApprove: true });
+
+      // Declaring the policy explicitly must behave like declaring nothing;
+      // only `always-gate` overrides the caller.
+      expect(fixture.proposals()[0].decision).toBe('approved');
     });
   });
 });
