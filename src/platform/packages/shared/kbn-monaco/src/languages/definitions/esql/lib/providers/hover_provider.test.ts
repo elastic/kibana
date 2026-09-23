@@ -120,6 +120,56 @@ describe('hover_provider', () => {
       expect(mockOnDecorationHoverShown).toHaveBeenCalledTimes(1);
     });
 
+    it('should track the same word separately for each model', async () => {
+      // The provider is registered once per language and shared by every ES|QL editor, so
+      // deduplication has to be per model — otherwise the first editor to hover a word
+      // silently swallows the second editor's telemetry for it.
+      const mockOnDecorationHoverShown = jest.fn();
+      const mockDeps: ESQLDependencies = {
+        telemetry: {
+          onDecorationHoverShown: mockOnDecorationHoverShown,
+        },
+      };
+
+      const mockWordAtPosition = {
+        word: 'testword',
+        startColumn: 5,
+        endColumn: 13,
+      };
+      const mockDecorations = [
+        {
+          options: {
+            hoverMessage: { value: 'Test hover message' },
+          },
+        },
+      ];
+
+      const createModelHoveringTestWord = (uri: string) =>
+        createTextModel({
+          value: 'FROM index | EVAL field = 1',
+          uri: monaco.Uri.parse(uri),
+          getWordAtPosition: jest.fn().mockReturnValue(mockWordAtPosition),
+          getDecorationsInRange: jest.fn().mockReturnValue(mockDecorations),
+        });
+
+      const hoverProvider = ESQLLang.getHoverProvider!(mockDeps);
+
+      await hoverProvider.provideHover(
+        createModelHoveringTestWord('inmemory://first'),
+        mockPosition,
+        mockToken
+      );
+      expect(mockOnDecorationHoverShown).toHaveBeenCalledTimes(1);
+
+      // Same word, different model — must still be reported.
+      await hoverProvider.provideHover(
+        createModelHoveringTestWord('inmemory://second'),
+        mockPosition,
+        mockToken
+      );
+      expect(mockOnDecorationHoverShown).toHaveBeenCalledTimes(2);
+    });
+
     it('should track decoration hover when word changes to different word', async () => {
       const mockOnDecorationHoverShown = jest.fn();
       const mockDeps: ESQLDependencies = {
@@ -229,6 +279,34 @@ describe('hover_provider', () => {
 
       expect(result).toBeNull();
       expect(disposedModel.getValue).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('already-cancelled token', () => {
+    it('does not access the model or invoke dependency callbacks when the token is already cancelled', async () => {
+      const mockGetColumnsFor = jest.fn(async () => [createField('numberField', 'double')]);
+      const mockOnDecorationHoverShown = jest.fn();
+      const mockDeps: ESQLDependencies = {
+        getColumnsFor: mockGetColumnsFor,
+        telemetry: {
+          onDecorationHoverShown: mockOnDecorationHoverShown,
+        },
+      };
+
+      const cancelledTokenSource = new monaco.CancellationTokenSource();
+      cancelledTokenSource.cancel();
+
+      const hoverProvider = ESQLLang.getHoverProvider!(mockDeps);
+      const result = await hoverProvider.provideHover(
+        mockModel,
+        mockPosition,
+        cancelledTokenSource.token
+      );
+
+      expect(result).toBeNull();
+      expect(mockModel.getValue).not.toHaveBeenCalled();
+      expect(mockGetColumnsFor).not.toHaveBeenCalled();
+      expect(mockOnDecorationHoverShown).not.toHaveBeenCalled();
     });
   });
 });
