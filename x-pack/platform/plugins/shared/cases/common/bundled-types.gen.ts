@@ -1619,7 +1619,7 @@ export const TemplateDryRunResponse = lazySchema(() =>
 export type TemplateDryRunResponse = z.infer<typeof TemplateDryRunResponse>;
 
 /**
-  * A reusable field definition from the field library. The `legacyKey` attribute, which is a server-managed link to a migrated v1 custom field, is not included in the public API response.
+  * A field definition from the field library. The `legacyKey` attribute, which is a server-managed link to a migrated custom field, is not included in the public API response.
 
   */
 export const FieldDefinitionResponse = lazySchema(() =>
@@ -1716,7 +1716,7 @@ export const GetCaseFieldDefinitionsResponse = lazySchema(() =>
 export type GetCaseFieldDefinitionsResponse = z.infer<typeof GetCaseFieldDefinitionsResponse>;
 
 /**
-  * The body for creating or updating a reusable field definition.
+  * The body for creating or updating a field definition.
 
 Resource limits (enforced on write; a violation returns `400`): an owner may have at most 200 field definitions per space. The `definition` string may not exceed 30000 characters.
 
@@ -1760,14 +1760,14 @@ export const FieldDefinitionWriteRequest = lazySchema(() =>
         .optional()
         .describe("Optional human-readable description of the field's purpose."),
       /**
-      * When true, this field is rendered in every case for this owner, regardless of the template used. Global fields cannot be demoted (set to false) while they are linked to an active v1 custom field in the Cases configuration.
+      * When true, this field is rendered in every case for this owner, regardless of the template used. Global fields cannot be demoted (set to false) while they are linked to an active custom field in the Cases configuration.
 
       */
       isGlobal: z
         .boolean()
         .optional()
         .describe(
-          'When true, this field is rendered in every case for this owner, regardless of the template used. Global fields cannot be demoted (set to false) while they are linked to an active v1 custom field in the Cases configuration.\n'
+          'When true, this field is rendered in every case for this owner, regardless of the template used. Global fields cannot be demoted (set to false) while they are linked to an active custom field in the Cases configuration.\n'
         ),
     })
     .strict()
@@ -1775,7 +1775,7 @@ export const FieldDefinitionWriteRequest = lazySchema(() =>
 export type FieldDefinitionWriteRequest = z.infer<typeof FieldDefinitionWriteRequest>;
 
 /**
-  * The body for updating a reusable field definition.
+  * The body for updating a field definition.
 
 Identity constraints: the `name` property must match the `name` key in the YAML `definition`. When `name` is omitted, the server extracts it from the `definition` YAML automatically. A field's `name` and YAML `type` are immutable — an attempt to change either returns `409` with `attributes.code = "field_identity_immutable"` and `attributes.changed` listing which identity attributes were modified.
 
@@ -1819,14 +1819,14 @@ export const FieldDefinitionPutRequest = lazySchema(() =>
         .optional()
         .describe("Optional human-readable description of the field's purpose."),
       /**
-      * When true, this field is rendered in every case for this owner, regardless of the template used. Global fields cannot be demoted (set to false) while they are linked to an active v1 custom field in the Cases configuration.
+      * When true, this field is rendered in every case for this owner, regardless of the template used. Global fields cannot be demoted (set to false) while they are linked to an active custom field in the Cases configuration.
 
       */
       isGlobal: z
         .boolean()
         .optional()
         .describe(
-          'When true, this field is rendered in every case for this owner, regardless of the template used. Global fields cannot be demoted (set to false) while they are linked to an active v1 custom field in the Cases configuration.\n'
+          'When true, this field is rendered in every case for this owner, regardless of the template used. Global fields cannot be demoted (set to false) while they are linked to an active custom field in the Cases configuration.\n'
         ),
     })
     .strict()
