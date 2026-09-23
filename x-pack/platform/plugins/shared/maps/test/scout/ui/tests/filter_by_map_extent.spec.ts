@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { tags, test } from '@kbn/scout';
+import { expect, tags, test } from '@kbn/scout';
 
 const KBN_ARCHIVE = 'x-pack/platform/test/functional/fixtures/kbn_archives/maps.json';
 const ES_ARCHIVE_LOGSTASH = 'x-pack/platform/test/fixtures/es_archives/logstash_functional';
@@ -52,14 +52,22 @@ test.describe(
         );
         await pageObjects.lens.setEuiSwitch(FILTER_BY_MAP_EXTENT_SWITCH, true);
         await page.keyboard.press('Escape');
-        await pageObjects.dashboard.waitForRenderComplete();
-        await pageObjects.lens.assertLegacyMetric('Count of records', '1');
+        await expect
+          .poll(async () => {
+            await pageObjects.dashboard.waitForRenderComplete();
+            return page.locator('[data-test-subj="metric_value"]').textContent();
+          })
+          .toBe('1');
       });
 
       await test.step('metric updates when map is panned', async () => {
         await pageObjects.maps.setView(32.95539, -93.93054, 5);
-        await pageObjects.dashboard.waitForRenderComplete();
-        await pageObjects.lens.assertLegacyMetric('Count of records', '2');
+        await expect
+          .poll(async () => {
+            await pageObjects.dashboard.waitForRenderComplete();
+            return page.locator('[data-test-subj="metric_value"]').textContent();
+          })
+          .toBe('2');
       });
 
       await test.step('metric returns to all records when filter is disabled', async () => {
@@ -69,8 +77,12 @@ test.describe(
         );
         await pageObjects.lens.setEuiSwitch(FILTER_BY_MAP_EXTENT_SWITCH, false);
         await page.keyboard.press('Escape');
-        await pageObjects.dashboard.waitForRenderComplete();
-        await pageObjects.lens.assertLegacyMetric('Count of records', '6');
+        await expect
+          .poll(async () => {
+            await pageObjects.dashboard.waitForRenderComplete();
+            return page.locator('[data-test-subj="metric_value"]').textContent();
+          })
+          .toBe('6');
       });
     });
   }
