@@ -13,7 +13,9 @@ import {
   type Plugin,
   type PluginInitializerContext,
 } from '@kbn/core/public';
+import type { Logger } from '@kbn/logging';
 import { i18n } from '@kbn/i18n';
+import { getSpaceIdFromPath } from '@kbn/core-spaces-common';
 import {
   ALERTZERO_APP_ID,
   ALERTZERO_APP_PATH,
@@ -26,6 +28,7 @@ import {
 import React from 'react';
 import { registerAgenticInvestigationTemplateUI } from '@kbn/agentic-investigations-common';
 import { getAlertZeroDeepLinks } from './deep_links';
+import { registerAlertZeroAttachmentTypesUI } from './agent_builder/attachment_types';
 import { EscalationModalBoundary } from './pages/conversations/escalation_modal_boundary';
 import type {
   AlertZeroClientConfig,
@@ -55,9 +58,11 @@ export class AlertZeroPublicPlugin
     >
 {
   private readonly config: AlertZeroClientConfig;
+  private readonly logger: Logger;
 
   constructor(context: PluginInitializerContext<AlertZeroClientConfig>) {
     this.config = context.config.get();
+    this.logger = context.logger.get();
   }
 
   public setup(
@@ -152,6 +157,24 @@ export class AlertZeroPublicPlugin
               React.createElement(LazyEscalationModal, props)
             )
         : undefined,
+    });
+
+    // Space id comes from the base path so registration starts synchronously.
+    const { spaceId } = getSpaceIdFromPath(
+      core.http.basePath.get(),
+      core.http.basePath.serverBasePath
+    );
+
+    registerAlertZeroAttachmentTypesUI(startDeps.agentBuilder.attachments, {
+      http: core.http,
+      navigation: {
+        share: startDeps.share,
+        spaceId,
+        prependPath: (path) => core.http.basePath.prepend(path),
+        getUrlForApp: core.application.getUrlForApp,
+      },
+    }).catch((error) => {
+      this.logger.error('Failed to register AlertZero attachment UI definitions', error);
     });
 
     return {};
