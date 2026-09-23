@@ -624,6 +624,29 @@ describe('OnboardingFlowProvider', () => {
 
       expect(result.current.detectAndReviewStep.failedInstances).toEqual(['inst_x']);
     });
+
+    // Regression: policyIdsByInstance populated by MI deploy was preserved on method switch,
+    // causing isAlreadyDeployed to return true on the agent-based path for the same service.
+    it('clears policyIdsByInstance so MI-deployed IDs cannot falsely satisfy agent-based isAlreadyDeployed', () => {
+      const { result, rerender } = renderHook(() => useOnboardingFlow(), { wrapper });
+
+      act(() => {
+        result.current.updateDetectAndReviewStep({
+          policyIdsByInstance: { 'inst-a': 'mi-policy-1' },
+        });
+      });
+      rerender();
+      expect(result.current.detectAndReviewStep.policyIdsByInstance).toEqual({
+        'inst-a': 'mi-policy-1',
+      });
+
+      act(() => {
+        result.current.setDeploymentMethod('agent_based');
+      });
+      rerender();
+
+      expect(result.current.detectAndReviewStep.policyIdsByInstance).toEqual({});
+    });
   });
 
   describe('setAgentBasedDeployment', () => {
