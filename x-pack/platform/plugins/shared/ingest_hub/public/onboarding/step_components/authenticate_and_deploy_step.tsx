@@ -272,10 +272,13 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
       // mirroring the order in useDeploy's handleDeploy for the managed-integration path.
       onContinue();
       if (deploymentId) {
-        if (!ecfStacksUnchanged) {
-          await updateDeployment(deploymentId, { status: 'succeeded', ecfStacks });
-          updateDetectAndReviewStep({ ecfStacks });
-        }
+        // Always include mechanisms when updating — if reusing an existing MI deployment SO
+        // (existingId), this transitions it from ['managed_integration'] to ['ecf'].
+        await updateDeployment(deploymentId, {
+          mechanisms: ['ecf'],
+          ...(!ecfStacksUnchanged ? { status: 'succeeded', ecfStacks } : {}),
+        });
+        if (!ecfStacksUnchanged) updateDetectAndReviewStep({ ecfStacks });
         if (!existingId) persistDeploymentId(deploymentId);
       }
       return;

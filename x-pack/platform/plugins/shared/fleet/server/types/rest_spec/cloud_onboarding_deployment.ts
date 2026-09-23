@@ -259,6 +259,12 @@ export const UpdateCloudOnboardingDeploymentRequestSchema = {
       schema.arrayOf(schema.string({ maxLength: 255 }), { maxSize: 100 })
     ),
     apiKeyId: schema.maybe(schema.string({ maxLength: 255 })),
+    mechanisms: schema.maybe(
+      schema.arrayOf(CloudOnboardingDeploymentMechanismSchema, {
+        maxSize: 10,
+        meta: { description: 'Delivery mechanisms active in this deployment; replaces the stored array.' },
+      })
+    ),
     ecfStacks: schema.maybe(
       schema.arrayOf(EcfStackSchema, {
         maxSize: 10,
