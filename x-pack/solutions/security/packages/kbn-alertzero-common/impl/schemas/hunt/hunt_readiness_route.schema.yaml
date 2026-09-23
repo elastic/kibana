@@ -1,0 +1,32 @@
+openapi: 3.0.0
+info:
+  title: AlertZero Hunt readiness API endpoint
+  version: '1'
+paths:
+  /internal/alertzero/hunt/readiness:
+    get:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: HuntReadiness
+      description: >-
+        Readiness projection over resolveIndexScope, one entry per technology
+        (or the single requested one), for the given space.
+      summary: Hunt index-scope readiness per technology
+      tags:
+        - AlertZero API
+      parameters:
+        - name: technology
+          in: query
+          required: false
+          schema:
+            $ref: '../components/hunt.schema.yaml#/components/schemas/HuntTechnology'
+          description: Limit the readiness check to a single technology
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '../components/hunt.schema.yaml#/components/schemas/ResolvedIndexScope'

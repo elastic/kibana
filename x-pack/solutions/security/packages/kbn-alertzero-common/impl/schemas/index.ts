@@ -46,3 +46,45 @@ export {
   UpdateWorkerRequestParams,
   UpdateWorkerResponse,
 } from './workers/update_worker_route.gen';
+export {
+  AffectedAsset,
+  HuntForThreatHit,
+  HuntForThreatResult,
+  HuntForThreatStatus,
+  HuntIoc,
+  HuntIocType,
+  HuntTechnology,
+  IndexScopeStatus,
+  IndexScopeWindow,
+  ResolvedIndexScope,
+} from './components/hunt.gen';
+export { HuntForThreatRequestBody, HuntForThreatResponse } from './hunt/hunt_for_threat_route.gen';
+export { HuntReadinessRequestQuery, HuntReadinessResponse } from './hunt/hunt_readiness_route.gen';
+export {
+  HuntBehaviorArticleContext,
+  HuntBehaviorIoc,
+  HuntBehaviorRequestBody,
+  HuntBehaviorResponse,
+  HuntBehaviorStatus,
+} from './hunt/hunt_behavior_route.gen';
+export {
+  CandidatesRequestBody,
+  CandidatesResponse,
+  CandidateSkipReason,
+} from './hunt/candidates_route.gen';
+export {
+  HuntCoordinatorRequestBody,
+  HuntCoordinatorResponse,
+  HuntCoordinatorStatus,
+} from './hunt/hunt_coordinator_route.gen';
+export {
+  AnchorIoc,
+  AnchorItem,
+  AnchorSet,
+  CorrelateRequestBody,
+  CorrelateResponse,
+  CorrelationEngineStatus,
+  DiamondScore,
+  HuntCorrelationAttachmentData,
+  HuntCorrelationAttachmentThresholds,
+} from './hunt/correlate_route.gen';

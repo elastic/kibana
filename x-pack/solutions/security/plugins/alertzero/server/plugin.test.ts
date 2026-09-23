@@ -184,6 +184,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         spaces: undefined,
         workflowsExtensions,
         agenticInvestigations: { getProposalsService: jest.fn().mockReturnValue({}) },
+        inference: {},
       } as never);
 
       expect(initializeManagedWorkflows).toHaveBeenCalledWith(
@@ -203,6 +204,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         workflowsExtensions: { initManagedWorkflowsClient: jest.fn() },
         agentBuilder,
         agenticInvestigations: { getProposalsService: jest.fn().mockReturnValue({}) },
+        inference: {},
       } as never);
 
       expect(ensureAgentSafe).toHaveBeenCalledWith(

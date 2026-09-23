@@ -56,6 +56,10 @@ dependsOn:
   - '@kbn/user-profile-components'
   - '@kbn/shared-ux-error-boundary'
   - '@kbn/react-kibana-mount'
+  - '@kbn/security-mitre-attack-server'
+  - '@kbn/security-mitre-attack-common'
+  - '@kbn/inference-plugin'
+  - '@kbn/management-settings-ids'
 tags:
   - plugin
   - prod
