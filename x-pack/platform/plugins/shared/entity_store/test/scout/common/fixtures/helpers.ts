@@ -247,9 +247,7 @@ export const uninstallEntityStoreSuite = async ({
   expect(uninstallResponse.statusCode).toBe(200);
   await clearEntityStoreIndices(esClient);
 
-  await kbnClient.uiSettings.update({
-    [FF_ENABLE_ENTITY_STORE_V2]: false,
-  });
+  await kbnClient.uiSettings.unset(FF_ENABLE_ENTITY_STORE_V2);
 };
 
 export const searchDocById = async (esClient: EsClient, id: string) => {
