@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { isRight } from 'fp-ts/Either';
 import { PrivateLocationCodec } from './synthetics_private_locations';
 
 const classic = {
@@ -16,19 +15,19 @@ const classic = {
 
 describe('PrivateLocationCodec isAgentSharding', () => {
   it('decodes a classic location without the flag', () => {
-    expect(isRight(PrivateLocationCodec.decode(classic))).toBe(true);
+    expect(PrivateLocationCodec.safeParse(classic).success).toBe(true);
   });
 
   it('decodes a scalable location with the flag', () => {
-    const result = PrivateLocationCodec.decode({ ...classic, isAgentSharding: true });
-    expect(isRight(result)).toBe(true);
-    if (isRight(result)) {
-      expect(result.right.isAgentSharding).toBe(true);
+    const result = PrivateLocationCodec.safeParse({ ...classic, isAgentSharding: true });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.isAgentSharding).toBe(true);
     }
   });
 
   it('rejects a non-boolean flag', () => {
-    expect(isRight(PrivateLocationCodec.decode({ ...classic, isAgentSharding: 'yes' }))).toBe(
+    expect(PrivateLocationCodec.safeParse({ ...classic, isAgentSharding: 'yes' }).success).toBe(
       false
     );
   });
