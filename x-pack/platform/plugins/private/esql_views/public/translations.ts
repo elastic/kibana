@@ -32,6 +32,9 @@ export const translations = {
   errorTitle: i18n.translate('xpack.esqlViews.managementPage.errorTitle', {
     defaultMessage: 'Unable to load ES|QL views',
   }),
+  reloadErrorTitle: i18n.translate('xpack.esqlViews.managementPage.reloadErrorTitle', {
+    defaultMessage: 'Unable to reload ES|QL views',
+  }),
   retryButton: i18n.translate('xpack.esqlViews.managementPage.retryButton', {
     defaultMessage: 'Try again',
   }),

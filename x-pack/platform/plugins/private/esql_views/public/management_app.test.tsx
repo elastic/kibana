@@ -271,8 +271,12 @@ describe('ManagementApp', () => {
     expect(await screen.findByText('first-view')).toBeInTheDocument();
     fireEvent.click(screen.getByTestId('esqlViewsReloadButton'));
 
-    expect(await screen.findByText('Reload failed')).toBeInTheDocument();
+    expect(await screen.findByTestId('esqlViewsReloadError')).toHaveTextContent(
+      'Unable to reload ES|QL views'
+    );
+    expect(screen.getByTestId('esqlViewsReloadError')).toHaveTextContent('Reload failed');
     expect(screen.getByTestId('esqlViewsTable')).toBeInTheDocument();
+    expect(screen.getByText('first-view')).toBeInTheDocument();
     expect(client.getViews).toHaveBeenCalledTimes(2);
   });
 

@@ -10,11 +10,13 @@ import React, { useMemo, useState } from 'react';
 import type { EuiBasicTableColumn, EuiInMemoryTableProps } from '@elastic/eui';
 import {
   EuiButton,
+  EuiCallOut,
   EuiCode,
   EuiCodeBlock,
   EuiEmptyPrompt,
   EuiInMemoryTable,
   EuiPopover,
+  EuiSpacer,
 } from '@elastic/eui';
 import type { EsqlView } from '@kbn/esql-types';
 import { translations } from './translations';
@@ -166,43 +168,58 @@ export const EsqlViewsTable: FunctionComponent<EsqlViewsTableProps> = ({
   );
 
   return (
-    <EuiInMemoryTable<EsqlView>
-      items={views}
-      itemId="name"
-      columns={columns}
-      error={error?.message}
-      loading={isLoading}
-      search={search}
-      sorting={{
-        sort: {
-          field: 'name',
-          direction: 'asc',
-        },
-      }}
-      pagination={{
-        initialPageSize: 10,
-        pageSizeOptions: [10, 25, 50],
-      }}
-      rowHeader="name"
-      data-test-subj="esqlViewsTable"
-      tableCaption={translations.tableCaption}
-      noItemsMessage={
-        isSearchActive ? (
-          <EuiEmptyPrompt
-            data-test-subj="esqlViewsNoSearchResults"
-            iconType="magnify"
-            title={<h2>{translations.noSearchResultsTitle}</h2>}
-          />
-        ) : (
-          <EuiEmptyPrompt
-            iconType="inspect"
-            title={<h2>{translations.emptyTitle}</h2>}
-            body={<p>{translations.emptyDescription}</p>}
-          />
-        )
-      }
-      tableLayout="fixed"
-      responsiveBreakpoint={false}
-    />
+    <>
+      {error && (
+        <>
+          <EuiCallOut
+            announceOnMount
+            data-test-subj="esqlViewsReloadError"
+            color="danger"
+            iconType="warning"
+            title={translations.reloadErrorTitle}
+          >
+            <p>{error.message}</p>
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </>
+      )}
+      <EuiInMemoryTable<EsqlView>
+        items={views}
+        itemId="name"
+        columns={columns}
+        loading={isLoading}
+        search={search}
+        sorting={{
+          sort: {
+            field: 'name',
+            direction: 'asc',
+          },
+        }}
+        pagination={{
+          initialPageSize: 10,
+          pageSizeOptions: [10, 25, 50],
+        }}
+        rowHeader="name"
+        data-test-subj="esqlViewsTable"
+        tableCaption={translations.tableCaption}
+        noItemsMessage={
+          isSearchActive ? (
+            <EuiEmptyPrompt
+              data-test-subj="esqlViewsNoSearchResults"
+              iconType="magnify"
+              title={<h2>{translations.noSearchResultsTitle}</h2>}
+            />
+          ) : (
+            <EuiEmptyPrompt
+              iconType="inspect"
+              title={<h2>{translations.emptyTitle}</h2>}
+              body={<p>{translations.emptyDescription}</p>}
+            />
+          )
+        }
+        tableLayout="fixed"
+        responsiveBreakpoint={false}
+      />
+    </>
   );
 };
