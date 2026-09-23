@@ -46,7 +46,7 @@ const matchingSubtext = i18n.translate(
 
 const emptyStateLabel = i18n.translate(
   'xpack.responseOps.alertingV2RuleForm.linkedActionPolicies.noMatchesEmptyState',
-  { defaultMessage: 'No matching action policies found.' }
+  { defaultMessage: 'No action policies match yet.' }
 );
 
 const errorTitle = i18n.translate(
@@ -91,6 +91,10 @@ export const LinkedActionPoliciesStep = ({ http, CreateActionPolicyFormFlyout }:
         <h3>{actionPoliciesTitle}</h3>
       </EuiTitle>
       <EuiSpacer size="xs" />
+      <EuiText size="s" color="subdued">
+        <p>{matchingSubtext}</p>
+      </EuiText>
+      <EuiSpacer size="m" />
 
       {isLoading && <EuiLoadingSpinner size="m" data-test-subj="linkedActionPoliciesLoading" />}
 
@@ -106,14 +110,18 @@ export const LinkedActionPoliciesStep = ({ http, CreateActionPolicyFormFlyout }:
       {!isLoading &&
         !error &&
         (items.length === 0 ? (
-          <EuiText size="s" color="subdued" data-test-subj="linkedActionPoliciesEmpty">
-            <p>{emptyStateLabel}</p>
-          </EuiText>
+          <EuiPanel
+            color="subdued"
+            hasShadow={false}
+            paddingSize="l"
+            data-test-subj="linkedActionPoliciesEmpty"
+          >
+            <EuiText size="s" color="subdued" textAlign="center">
+              <p>{emptyStateLabel}</p>
+            </EuiText>
+          </EuiPanel>
         ) : (
           <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="linkedActionPoliciesList">
-            <EuiText size="s" color="subdued">
-              <p>{matchingSubtext}</p>
-            </EuiText>
             {items.map(({ action_policy: actionPolicy, category }) => {
               const editLabel = getEditLabel(actionPolicy.name);
               const connectorTypes = connectorTypesByPolicy.get(actionPolicy.id) ?? [];

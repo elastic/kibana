@@ -62,7 +62,7 @@ describe('LinkedActionPoliciesStep', () => {
     });
   });
 
-  it('renders the title and the matching subtext when policies are present', () => {
+  it('renders the title and description when policies are present', () => {
     mockUseMatchedActionPolicies.mockReturnValue({
       isLoading: false,
       error: null,
@@ -82,7 +82,7 @@ describe('LinkedActionPoliciesStep', () => {
     expect(screen.getByText('Action policies')).toBeInTheDocument();
     expect(
       screen.getByText(
-        'These policies match this rule by catch-all or tag. Policies with a query condition may also match at dispatch time based on alert data.'
+        'Match action policies with rule tags above, or link an existing action policy.'
       )
     ).toBeInTheDocument();
   });
@@ -115,7 +115,7 @@ describe('LinkedActionPoliciesStep', () => {
     renderComponent();
 
     expect(screen.getByTestId('linkedActionPoliciesEmpty')).toBeInTheDocument();
-    expect(screen.getByText('No matching action policies found.')).toBeInTheDocument();
+    expect(screen.getByText('No action policies match yet.')).toBeInTheDocument();
   });
 
   it('opens the create action policy flyout and refreshes matches after creation', async () => {
