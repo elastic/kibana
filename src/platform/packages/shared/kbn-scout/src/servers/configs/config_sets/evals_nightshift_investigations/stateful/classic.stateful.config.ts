@@ -13,19 +13,27 @@ import { join } from 'path';
 import type { ScoutServerConfig } from '../../../../../types';
 import { servers as tracing } from '../../evals_tracing/stateful/classic.stateful.config';
 
+/** Reads PEM contents from `<name>` (e.g. the evals vault profile) or the file at `<name>_PATH`. */
+const readPem = (name: string): string | undefined => {
+  const contents = process.env[name];
+  if (contents) return contents;
+  const path = process.env[`${name}_PATH`];
+  return path ? readFileSync(path, 'utf8') : undefined;
+};
+
 const createInvestigationConfig = (): ScoutServerConfig => {
   const sandboxKey = process.env.SANDBOX_API_KEY;
   if (!sandboxKey)
     throw new Error(
-      'SANDBOX_API_KEY is required; start the external sandbox-api before running Nightshift evals.'
+      'SANDBOX_API_KEY is required; add a "sandbox" block to the evals profile or export SANDBOX_* before running Nightshift evals.'
     );
 
-  const certificatePath = process.env.SANDBOX_CLIENT_CERT_PATH;
-  const keyPath = process.env.SANDBOX_CLIENT_KEY_PATH;
-  const caPath = process.env.SANDBOX_CA_CERT_PATH;
-  if (!certificatePath || !keyPath) {
+  const certificate = readPem('SANDBOX_CLIENT_CERT');
+  const key = readPem('SANDBOX_CLIENT_KEY');
+  const certificateAuthorities = readPem('SANDBOX_CA_CERT');
+  if (!certificate || !key) {
     throw new Error(
-      'SANDBOX_CLIENT_CERT_PATH and SANDBOX_CLIENT_KEY_PATH are required for sandbox-api mTLS.'
+      'Sandbox-api mTLS needs SANDBOX_CLIENT_CERT and SANDBOX_CLIENT_KEY (PEM contents) or their *_PATH equivalents.'
     );
   }
 
@@ -57,9 +65,9 @@ const createInvestigationConfig = (): ScoutServerConfig => {
       port: Number(process.env.SANDBOX_API_PORT ?? 9090),
       api_key: sandboxKey,
       ssl: {
-        certificate: readFileSync(certificatePath, 'utf8'),
-        key: readFileSync(keyPath, 'utf8'),
-        ...(caPath ? { certificate_authorities: readFileSync(caPath, 'utf8') } : {}),
+        certificate,
+        key,
+        ...(certificateAuthorities ? { certificate_authorities: certificateAuthorities } : {}),
       },
     },
   };
@@ -87,5 +95,10 @@ const createInvestigationConfig = (): ScoutServerConfig => {
   };
 };
 
+// Mirrors the suite's playwright.config.ts: every eval runs unless `NIGHTSHIFT_DATASETS` narrows it,
+// and an unset selection without sandbox credentials falls back to the smoke eval.
+const selection =
+  process.env.NIGHTSHIFT_DATASETS || (process.env.SANDBOX_API_KEY ? 'all' : 'synthetic-smoke');
+
 export const servers: ScoutServerConfig =
-  process.env.NIGHTSHIFT_DATASETS === 'trace-only' ? createInvestigationConfig() : tracing;
+  selection === 'all' || selection === 'trace-only' ? createInvestigationConfig() : tracing;

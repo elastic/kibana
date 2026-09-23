@@ -22,7 +22,8 @@ const formatEnvPrefix = (overrides: Record<string, string>) =>
         key.includes('API_KEY') ||
         key.includes('CREDENTIALS') ||
         key.includes('TOKEN') ||
-        key === 'GCS_CREDENTIALS';
+        key === 'GCS_CREDENTIALS' ||
+        (key.startsWith('SANDBOX_') && key !== 'SANDBOX_API_HOST' && key !== 'SANDBOX_API_PORT');
       return `${key}=${isSensitive ? '[redacted]' : value}`;
     })
     .join(' ');

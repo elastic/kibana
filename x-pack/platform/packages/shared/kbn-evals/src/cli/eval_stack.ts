@@ -23,7 +23,16 @@ import {
   tailLog,
   isEdotDockerRunning,
 } from './services';
-import { probeHttp } from './profiles';
+import { probeHttp, SANDBOX_ENV_KEYS } from './profiles';
+
+/** Profile values win over shell exports; both count toward Scout staleness. */
+const pickSandboxEnv = (profileEnv: Record<string, string>): Record<string, string> =>
+  Object.fromEntries(
+    SANDBOX_ENV_KEYS.flatMap((key) => {
+      const value = profileEnv[key] ?? process.env[key];
+      return value ? [[key, value]] : [];
+    })
+  );
 
 const SCOUT_LOCAL_CONFIG = '.scout/servers/local.json';
 const SCOUT_READY_POLL_INTERVAL_MS = 3000;
@@ -155,6 +164,8 @@ export interface EnsureScoutOptions {
   log: ToolingLog;
   gcsCredentials: string | undefined;
   tracingExporters: string | undefined;
+  /** Sandbox-api connection settings forwarded to Scout (see `SANDBOX_ENV_KEYS`). */
+  sandboxEnv?: Record<string, string>;
   serverConfigSet?: string;
 }
 
@@ -167,9 +178,10 @@ export const ensureScout = async ({
   log,
   gcsCredentials,
   tracingExporters,
+  sandboxEnv,
   serverConfigSet = 'evals_tracing',
 }: EnsureScoutOptions): Promise<void> => {
-  const scoutEnv: Record<string, string> = {};
+  const scoutEnv: Record<string, string> = { ...sandboxEnv };
   if (gcsCredentials) {
     scoutEnv.GCS_CREDENTIALS = gcsCredentials;
   }
@@ -293,6 +305,7 @@ export const ensureEvalStack = async ({
     log,
     gcsCredentials: profileEnvOverrides.GCS_CREDENTIALS,
     tracingExporters: profileEnvOverrides.TRACING_EXPORTERS,
+    sandboxEnv: pickSandboxEnv(profileEnvOverrides),
     serverConfigSet,
   });
 

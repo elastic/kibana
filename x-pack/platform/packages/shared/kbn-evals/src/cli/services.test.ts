@@ -8,7 +8,7 @@
 import Fs from 'fs';
 import Os from 'os';
 import Path from 'path';
-import { edotEnvHash, isEdotStale } from './services';
+import { edotEnvHash, isEdotStale, scoutEnvHash } from './services';
 
 const LOCAL_ES = 'http://elastic:changeme@localhost:9200';
 const CLOUD_ES = 'https://kbn-evals-serverless.es.us-central1.gcp.elastic.cloud';
@@ -76,5 +76,25 @@ describe('isEdotStale', () => {
 
   it('says nothing when no collector was ever started', () => {
     expect(isEdotStale(repoRoot, LOCAL_ES)).toEqual({ stale: false });
+  });
+});
+
+describe('scoutEnvHash', () => {
+  const base = { TRACING_EXPORTERS: '[]', GCS_CREDENTIALS: '{}' };
+
+  it('keeps the hash of stacks started without sandbox settings', () => {
+    expect(scoutEnvHash({ ...base, UNRELATED: 'x' })).toBe(scoutEnvHash(base));
+  });
+
+  it('changes when a sandbox setting is added or changed', () => {
+    const withSandbox = scoutEnvHash({ ...base, SANDBOX_API_HOST: 'a' });
+    expect(withSandbox).not.toBe(scoutEnvHash(base));
+    expect(scoutEnvHash({ ...base, SANDBOX_API_HOST: 'b' })).not.toBe(withSandbox);
+  });
+
+  it('ignores the order sandbox settings were provided in', () => {
+    expect(scoutEnvHash({ ...base, SANDBOX_API_KEY: 'k', SANDBOX_API_HOST: 'h' })).toBe(
+      scoutEnvHash({ ...base, SANDBOX_API_HOST: 'h', SANDBOX_API_KEY: 'k' })
+    );
   });
 });

@@ -49,7 +49,23 @@ interface VaultConfig {
   tracingEs?: { url?: string; apiKey?: string };
   tracingExporters?: unknown;
   gcsDatasetAccessCredentials?: unknown;
+  sandbox?: {
+    host?: string;
+    port?: number | string;
+    apiKey?: string;
+    ssl?: { certificate?: string; key?: string; certificateAuthorities?: string };
+  };
 }
+
+/** Env vars the sandbox-enabled Scout config sets read; PEM values hold certificate contents. */
+export const SANDBOX_ENV_KEYS = [
+  'SANDBOX_API_HOST',
+  'SANDBOX_API_PORT',
+  'SANDBOX_API_KEY',
+  'SANDBOX_CLIENT_CERT',
+  'SANDBOX_CLIENT_KEY',
+  'SANDBOX_CA_CERT',
+] as const;
 
 const isNonEmptyString = (value: unknown): value is string =>
   typeof value === 'string' && value.trim().length > 0;
@@ -67,6 +83,26 @@ const maybeSetGcsCredentialsEnv = (cfg: VaultConfig | undefined, next: Record<st
   if (!isNonEmptyString(serialized) || isPlaceholder(serialized)) return;
 
   next.GCS_CREDENTIALS = serialized;
+};
+
+const maybeSetSandboxEnv = (cfg: VaultConfig | undefined, next: Record<string, string>) => {
+  const sandbox = cfg?.sandbox;
+  if (!isRecord(sandbox)) return;
+
+  const { host, port, apiKey, ssl } = sandbox;
+  const entries: Array<[string, unknown]> = [
+    ['SANDBOX_API_HOST', host],
+    ['SANDBOX_API_PORT', typeof port === 'number' ? String(port) : port],
+    ['SANDBOX_API_KEY', apiKey],
+    ['SANDBOX_CLIENT_CERT', ssl?.certificate],
+    ['SANDBOX_CLIENT_KEY', ssl?.key],
+    ['SANDBOX_CA_CERT', ssl?.certificateAuthorities],
+  ];
+  for (const [key, value] of entries) {
+    if (isNonEmptyString(value) && !isPlaceholder(value)) {
+      next[key] = value;
+    }
+  }
 };
 
 export const resolveVaultConfigPath = (repoRoot: string, profile?: string): string => {
@@ -137,6 +173,7 @@ export const envFromDatasetsProfile = (
   }
 
   maybeSetGcsCredentialsEnv(cfg, next);
+  maybeSetSandboxEnv(cfg, next);
   return next;
 };
 
@@ -168,5 +205,6 @@ export const envFromExportProfile = (
   }
 
   maybeSetGcsCredentialsEnv(cfg, next);
+  maybeSetSandboxEnv(cfg, next);
   return next;
 };
