@@ -183,6 +183,7 @@ export function ErrorsFromLogsSection({
                 logsIndexPattern={logsIndexPattern}
                 tableCaption={tableCaption}
                 loading={isLoading}
+                maxCountExceeded={maxCountExceeded}
                 noItemsMessage={
                   <EuiText size="s" color="subdued">
                     <p data-test-subj="apmErrorsFromLogsEmptyState">

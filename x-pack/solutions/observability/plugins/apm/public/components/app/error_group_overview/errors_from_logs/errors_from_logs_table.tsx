@@ -29,6 +29,9 @@ interface Props {
    * Mirrors ErrorGroupList's `isCompactMode` for the service Overview.
    */
   isCompactMode?: boolean;
+  /** When true the endpoint returned more than 500 rows and truncated. Affects the
+   *  search empty-state message so users know the search only covers the displayed rows. */
+  maxCountExceeded?: boolean;
 }
 
 export function ErrorsFromLogsTable({
@@ -40,6 +43,7 @@ export function ErrorsFromLogsTable({
   noItemsMessage,
   loading = false,
   isCompactMode = false,
+  maxCountExceeded = false,
 }: Props) {
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -53,6 +57,17 @@ export function ErrorsFromLogsTable({
           searchQuery,
         })
       : items;
+
+  // When a search is active, the 500-row cap means "no results" may be a false
+  // negative: the searched term could exist in older logs beyond the cap. Surface
+  // a scoped message so users know to widen their query via the KQL bar instead.
+  const emptyMessage =
+    searchQuery.length > 0 && filteredItems.length === 0 && maxCountExceeded
+      ? i18n.translate('xpack.apm.errorsFromLogs.noSearchResultsTruncated', {
+          defaultMessage:
+            'No matching errors found in the 500 most recent logs. Use the KQL bar to search all logs.',
+        })
+      : noItemsMessage;
 
   return (
     <>
@@ -78,7 +93,7 @@ export function ErrorsFromLogsTable({
           showPerPageOptions: !isCompactMode,
           pageSize: isCompactMode ? 5 : 10,
         }}
-        noItemsMessage={noItemsMessage}
+        noItemsMessage={emptyMessage}
         loading={loading}
         compressed
       />
