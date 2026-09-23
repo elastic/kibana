@@ -15,6 +15,7 @@ import {
   type Worker,
 } from '@kbn/alertzero-common';
 import { WorkerSettingsPanel } from './worker_settings_panel';
+import { ExperimentalFeaturesService } from '../../../common/experimental_features_service';
 
 const WORKER_ID = SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID;
 /** Not `<workerId>-<spaceId>`, so a client that rebuilds that convention fails this test. */
@@ -38,6 +39,13 @@ const createWorker = (workflowId: string | null): Worker => ({
 });
 
 const renderPanel = (workflowId: string | null, isAccordion: boolean) => {
+  // This suite exercises the "view executions" link, not the agent picker. Keep the flag off so
+  // rendering RuleTuningSettings' `WorkerAgentIdField` (which calls `useQuery`) doesn't require
+  // wrapping every test here in a QueryClientProvider it has no other reason to need.
+  ExperimentalFeaturesService.init({
+    experimentalFeatures: { workerAgentPickerEnabled: false },
+  });
+
   const core = coreMock.createStart();
   core.application.getUrlForApp.mockImplementation(
     (appId: string, options?: { path?: string }) => `/app/${appId}${options?.path ?? ''}`

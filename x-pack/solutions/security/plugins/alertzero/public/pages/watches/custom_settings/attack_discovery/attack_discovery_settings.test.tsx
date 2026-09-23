@@ -17,6 +17,7 @@ import {
   type WorkerSettings,
 } from '@kbn/alertzero-common';
 import { AttackDiscoverySettings } from './attack_discovery_settings';
+import { ExperimentalFeaturesService } from '../../../../common/experimental_features_service';
 
 const CUSTOM_AGENT_ID = 'my-custom-agent';
 
@@ -60,11 +61,24 @@ const renderSettings = ({
 describe('AttackDiscoverySettings', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    ExperimentalFeaturesService.init({
+      experimentalFeatures: { workerAgentPickerEnabled: true },
+    });
     listAgents.mockResolvedValue([
       { id: agentBuilderDefaultAgentId, name: 'Default agent', readonly: false },
       { id: CUSTOM_AGENT_ID, name: 'My custom agent', readonly: false },
       { id: 'platform-builtin', name: 'Platform built-in', readonly: true },
     ]);
+  });
+
+  it('hides the agent picker when the feature flag is off', () => {
+    ExperimentalFeaturesService.init({
+      experimentalFeatures: { workerAgentPickerEnabled: false },
+    });
+
+    renderSettings();
+
+    expect(screen.queryByTestId('alertZeroAttackDiscoveryAgentField')).not.toBeInTheDocument();
   });
 
   it('renders the agent picker', async () => {

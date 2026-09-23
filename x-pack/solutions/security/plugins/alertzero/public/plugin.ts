@@ -27,6 +27,8 @@ import React from 'react';
 import { registerAgenticInvestigationTemplateUI } from '@kbn/agentic-investigations-common';
 import { getAlertZeroDeepLinks } from './deep_links';
 import { EscalationModalBoundary } from './pages/conversations/escalation_modal_boundary';
+import { parseExperimentalConfigValue } from '../common/experimental_features';
+import { ExperimentalFeaturesService } from './common/experimental_features_service';
 import type {
   AlertZeroClientConfig,
   AlertZeroPublicSetup,
@@ -58,6 +60,11 @@ export class AlertZeroPublicPlugin
 
   constructor(context: PluginInitializerContext<AlertZeroClientConfig>) {
     this.config = context.config.get();
+
+    const { features: experimentalFeatures } = parseExperimentalConfigValue(
+      this.config.enableExperimental ?? []
+    );
+    ExperimentalFeaturesService.init({ experimentalFeatures });
   }
 
   public setup(

@@ -7,16 +7,35 @@
 
 import type { PluginConfigDescriptor } from '@kbn/core/server';
 import { schema, type TypeOf } from '@kbn/config-schema';
+import type { ExperimentalFeatures } from '../common/experimental_features';
 
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
+  /**
+   * For internal use. A list of string values (comma delimited) that will enable experimental
+   * type of functionality that is not yet released. Valid values for this setting need to be
+   * defined in `x-pack/solutions/security/plugins/alertzero/common/experimental_features.ts`
+   * under the `allowedExperimentalValues` object.
+   *
+   * @example
+   * xpack.alertzero.enableExperimental:
+   *   - workerAgentPickerEnabled
+   */
+  enableExperimental: schema.arrayOf(schema.string(), {
+    defaultValue: () => [],
+  }),
 });
 
-export type AlertZeroConfig = TypeOf<typeof configSchema>;
+export type AlertZeroConfigSchemaType = TypeOf<typeof configSchema>;
 
-export const config: PluginConfigDescriptor<AlertZeroConfig> = {
+export type AlertZeroConfig = AlertZeroConfigSchemaType & {
+  experimentalFeatures: ExperimentalFeatures;
+};
+
+export const config: PluginConfigDescriptor<AlertZeroConfigSchemaType> = {
   exposeToBrowser: {
     enabled: true,
+    enableExperimental: true,
   },
   schema: configSchema,
 };

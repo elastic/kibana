@@ -16,6 +16,7 @@ import {
   type Worker,
 } from '@kbn/alertzero-common';
 import { RuleTuningSettings } from './rule_tuning_settings';
+import { ExperimentalFeaturesService } from '../../../../common/experimental_features_service';
 
 const CUSTOM_AGENT_ID = 'my-custom-agent';
 
@@ -63,6 +64,9 @@ const renderSettings = (onExtrasChange = jest.fn(), settings = ruleTuning.settin
 describe('RuleTuningSettings', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    ExperimentalFeaturesService.init({
+      experimentalFeatures: { workerAgentPickerEnabled: true },
+    });
     listAgents.mockResolvedValue([
       { id: agentBuilderDefaultAgentId, name: 'Default agent', readonly: false },
       { id: CUSTOM_AGENT_ID, name: 'My custom agent', readonly: false },
@@ -140,6 +144,16 @@ describe('RuleTuningSettings', () => {
   });
 
   describe('agent picker', () => {
+    it('is hidden when the feature flag is off', () => {
+      ExperimentalFeaturesService.init({
+        experimentalFeatures: { workerAgentPickerEnabled: false },
+      });
+
+      renderSettings();
+
+      expect(screen.queryByTestId('alertZeroRuleTuningAgentField')).not.toBeInTheDocument();
+    });
+
     it('leaves the agent unset until the user picks one, preserving the default agent', async () => {
       const { onExtrasChange } = renderSettings();
 

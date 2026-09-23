@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { AttackDiscoveryWorkerExtras, type WorkerSettings } from '@kbn/alertzero-common';
 import { WorkerAgentIdField } from '../agent/worker_agent_id_field';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_is_experimental_feature_enabled';
 import * as i18n from './translations';
 import type { WorkerCustomSettingsComponent } from '../types';
 
@@ -32,6 +33,14 @@ export const AttackDiscoverySettings: WorkerCustomSettingsComponent = ({
   onExtrasChange,
 }) => {
   const extras = readAttackDiscoveryExtras(settings);
+  const isAgentPickerEnabled = useIsExperimentalFeatureEnabled('workerAgentPickerEnabled');
+
+  // UI-only gate: hides the control from new selections. A Worker that already stored
+  // `extras.agentId` while the flag was on keeps executing on it — see the flag's doc comment
+  // in `common/experimental_features.ts`.
+  if (!isAgentPickerEnabled) {
+    return null;
+  }
 
   return (
     <>

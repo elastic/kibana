@@ -31,6 +31,7 @@ import { WatchDetailPage } from './watch_detail';
 import * as settingsI18n from './settings_translations';
 import { useWatch } from '../../hooks/use_watches_api';
 import { useUpdateWorker, useWorkers } from '../../hooks/use_workers_api';
+import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
 
 jest.mock('../../hooks/use_alertzero_doc_title', () => ({ useAlertZeroDocTitle: jest.fn() }));
 jest.mock('../../hooks/use_watches_api');
@@ -208,6 +209,9 @@ const renderWatch = (watchId: string, workers: Worker[]) => {
 describe('WatchDetailPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    ExperimentalFeaturesService.init({
+      experimentalFeatures: { workerAgentPickerEnabled: true },
+    });
   });
 
   it('shows Floor Workers with per-Worker enablement and autonomy, and no Watch switch', () => {
