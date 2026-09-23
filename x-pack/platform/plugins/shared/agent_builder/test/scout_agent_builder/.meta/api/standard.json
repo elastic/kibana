@@ -1,5 +1,5 @@
 {
-  "sha1": "a70df5826b424491e2c943268c5fd097d0413e1f",
+  "sha1": "7e75283ce930eb05762a81fef486da9013b3fa51",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -14,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_access_control_api.spec.ts",
-        "line": 348,
-        "column": 85
+        "line": 405,
+        "column": 42
       }
     },
     {
@@ -28,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_access_control_api.spec.ts",
-        "line": 359,
-        "column": 26
+        "line": 418,
+        "column": 22
       }
     },
     {
@@ -42,8 +42,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_access_control_api.spec.ts",
-        "line": 388,
-        "column": 26
+        "line": 447,
+        "column": 24
       }
     },
     {
@@ -56,8 +56,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_access_control_api.spec.ts",
-        "line": 409,
-        "column": 16
+        "line": 466,
+        "column": 30
       }
     },
     {
@@ -70,7 +70,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_access_control_api.spec.ts",
-        "line": 408,
+        "line": 460,
         "column": 27
       }
     },
@@ -84,8 +84,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_access_control_api.spec.ts",
-        "line": 485,
-        "column": 11
+        "line": 543,
+        "column": 7
       }
     },
     {
@@ -98,8 +98,22 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_access_control_api.spec.ts",
-        "line": 507,
-        "column": 23
+        "line": 565,
+        "column": 29
+      }
+    },
+    {
+      "id": "d18f81a84aa5c84-4c6a2bf3cc3dd5a",
+      "title": "Agent Builder — agents access-control API name-only access_control.entries (pre-id migration) still grant read and list access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_access_control_api.spec.ts",
+        "line": 659,
+        "column": 11
       }
     },
     {
@@ -112,8 +126,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_access_control_api.spec.ts",
-        "line": 602,
-        "column": 18
+        "line": 692,
+        "column": 6
       }
     },
     {
@@ -126,8 +140,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_access_control_api.spec.ts",
-        "line": 655,
-        "column": 11
+        "line": 744,
+        "column": 30
       }
     },
     {
@@ -140,8 +154,36 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_access_control_api.spec.ts",
-        "line": 689,
-        "column": 16
+        "line": 778,
+        "column": 23
+      }
+    },
+    {
+      "id": "d18f81a84aa5c84-f33424a8a737c36",
+      "title": "Agent Builder — agents access-control API PUT /agents/{id}/access_control accepts legacy name-only entries and rejects entries with neither id nor name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_access_control_api.spec.ts",
+        "line": 821,
+        "column": 32
+      }
+    },
+    {
+      "id": "d18f81a84aa5c84-f07e8465b7ea88b",
+      "title": "Agent Builder — agents access-control API PUT /agents/{id}/access_control round-trips a legacy name-only entry alongside new id-backed entries",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_access_control_api.spec.ts",
+        "line": 865,
+        "column": 15
       }
     },
     {
@@ -154,8 +196,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_access_control_api.spec.ts",
-        "line": 732,
-        "column": 13
+        "line": 910,
+        "column": 19
       }
     },
     {
@@ -168,8 +210,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_access_control_api.spec.ts",
-        "line": 758,
-        "column": 32
+        "line": 940,
+        "column": 5
       }
     },
     {
@@ -182,8 +224,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_access_control_api.spec.ts",
-        "line": 767,
-        "column": 5
+        "line": 949,
+        "column": 17
       }
     },
     {
@@ -196,8 +238,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_access_control_api.spec.ts",
-        "line": 783,
-        "column": 7
+        "line": 962,
+        "column": 41
       }
     },
     {
@@ -210,8 +252,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_access_control_api.spec.ts",
-        "line": 798,
-        "column": 10
+        "line": 979,
+        "column": 5
       }
     },
     {
@@ -224,8 +266,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_access_control_api.spec.ts",
-        "line": 813,
-        "column": 9
+        "line": 994,
+        "column": 25
       }
     },
     {
