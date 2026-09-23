@@ -67,7 +67,7 @@ export function EsqlNotificationPopover({ api }: { api: EsqlNotificationActionAp
       aria-label={viewEsqlLabel}
     >
       <EuiPopoverTitle>
-        {i18n.translate('dashboard.panel.viewEsql', { defaultMessage: 'ES|QL query' })}
+        {i18n.translate('dashboard.panel.esqlTitle', { defaultMessage: 'ES|QL query' })}
       </EuiPopoverTitle>
       <EuiFlexGroup
         direction="column"
