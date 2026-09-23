@@ -67,61 +67,7 @@ triggers:
       additionalProperties: false
       properties:
         alerts:
-          type: array
-          # Cap matches the Kibana alerting max-alerts-per-run ceiling so a Worker cannot
-          # submit an unbounded array (each item still becomes LLM work via batch_size chunks).
-          maxItems: 1000
-          items:
-            type: object
-            # Allow extra ES alert fields; require only what Worker-path steps dereference.
-            required:
-              - _id
-              - _index
-              - '@timestamp'
-              - kibana
-            properties:
-              _id:
-                type: string
-                minLength: 1
-                maxLength: 512
-              _index:
-                type: string
-                # Passed to security.buildAlertEntityGraph as alertIndex (seed + search index).
-                # Must be a Security alerts alias or backing index — not an arbitrary ES index.
-                # Pattern covers alias (.alerts-security.alerts-<space>), internal backing
-                # (.internal.alerts-security.alerts-<space>-NNNNNN), and preview variants.
-                minLength: 1
-                maxLength: 512
-                pattern: '^\.(internal\.)?(preview\.)?alerts-security\.alerts-[a-zA-Z0-9._-]+$'
-              '@timestamp':
-                type: string
-                # Used verbatim as the ES date-math enrichment anchor (e.g. `||-24h`).
-                # Reject non-dates at the input boundary so enrichment does not fail mid-run.
-                format: date-time
-                minLength: 1
-                maxLength: 64
-              kibana:
-                type: object
-                required:
-                  - alert
-                properties:
-                  alert:
-                    type: object
-                    required:
-                      - rule
-                    properties:
-                      rule:
-                        type: object
-                        required:
-                          - uuid
-                        properties:
-                          uuid:
-                            type: string
-                            minLength: 1
-                            maxLength: 512
-                          name:
-                            type: string
-                            maxLength: 1024
+          $ref: '#/kibana/definitions/securityAlertAnalysisCallerAlerts'
           description: >
             Alert documents to analyse, supplied by a `workflow.execute` caller such as the
             AlertZero Alert Triage Worker. A child run receives no trigger event, so without
@@ -415,8 +361,7 @@ steps:
       # { alert_id, classification, confidence_score, rationale, contributing_factors,
       #   host_name, user_name }.
       output_verdicts: []
-      # Initialised so the declared output is well-formed on the skip path, where
-      # build_grouped_counts_summary never runs (it sits inside the analysis_enabled guard).
+      # Skip-path placeholder — build_grouped_counts_summary only runs inside analysis_enabled.
       grouped_counts_summary: ""
       # One entry per alert: { id, summary } — the related-alert graph, pre-rendered.
       # Reset at the start of each batch iteration (see classify_alert_batches).
@@ -428,31 +373,23 @@ steps:
       batch_input_tokens: 0
       batch_output_tokens: 0
       batch_llm_calls: 0
-      # Initialised empty; set to a real feature id by apply_caller_input_overrides when
-      # a caller (e.g. the Alert Triage Worker) supplies connectorIdByFeature as an input.
-      # Kept at the same level as connector_id so the analysis_enabled guard and the
-      # ai.agent step can check both with a single variable.
+      # Sibling of connector_id; apply_caller_input_overrides sets the feature id when the
+      # Worker supplies connectorIdByFeature. analysis_enabled / ai.agent check either.
       connector_id_by_feature: ""
-      # Initialised empty; overridden by apply_caller_input_overrides when the Worker
-      # passes investigationConversationId. When non-empty and calledByWorker is true,
-      # progress comments are posted into that conversation.
+      # apply_caller_input_overrides sets this from investigationConversationId (Worker
+      # progress comments when calledByWorker is true).
       investigation_conversation_id: ""
-      # Collects the optional batch_summary strings emitted by each model call (Worker
-      # path only; gated by calledByWorker in accumulate_batch_summary_gate). Joined
-      # into generated_summary at the end. Empty-init keeps the skip path well-formed.
+      # Per-batch model summaries (Worker path); joined into generated_summary at the end.
       batch_summaries: []
       generated_summary: ""
-      # Actual connector ID used by the first successful batch call; accumulated with
-      # first-non-empty-wins logic in collect_batch_verdicts. An empty string on the
-      # skip path is the honest "no call was made" signal.
+      # First successful batch connector id (first-non-empty-wins in collect_batch_verdicts).
+      # Empty on the skip path = no LLM call was made.
       resolved_connector_id: ""
-      # Structured entity × verdict array built in build_grouped_counts_summary_gate
-      # (Worker path only). Workers pass this to the security.impact attachment.
+      # Entity × verdict rows for security.impact (Worker path only).
       impacted_entities: []
-      # Set true when impacted_entities was truncated to 50; false otherwise.
+      # true when impacted_entities was truncated to 50.
       impacted_entities_truncated: "false"
-      # Alert ids with no agent verdict (apply_verdicts no-match branch). Empty-init so
-      # the skip / standalone path still emits a well-formed workflow.output.
+      # Alert ids with no agent verdict (apply_verdicts no-match branch).
       missing_alert_ids: []
 
   # ---------------------------------------------------------------------------
@@ -558,17 +495,6 @@ steps:
               auto_close_enabled: "${{ inputs.autoCloseEnabled }}"
 
   # ---------------------------------------------------------------------------
-  # Pre-compute connector_configured helper
-  # ---------------------------------------------------------------------------
-  # The analysis_enabled guard cannot use parentheses (the YAML template parser reads
-  # `(` as range syntax). Pre-computing the two-connector OR here keeps the guard a
-  # simple `and` chain with no operator-precedence risk.
-  - name: set_connector_configured
-    type: data.set
-    with:
-      connector_configured: "${{ variables.connector_id != '' or variables.connector_id_by_feature != '' }}"
-
-  # ---------------------------------------------------------------------------
   # Select the alerts to analyze
   # ---------------------------------------------------------------------------
   # The pending set is never materialised into a variable: it is a `reject_exp` applied
@@ -617,7 +543,8 @@ steps:
   # Worker path with a missing or empty alerts input would otherwise skip analysis and
   # emit empty workflow.output with status completed — a miswired caller looks healthy.
   # Fail loud instead so the Worker treats the run as an error and retries / surfaces it.
-  # Split into two gates: parentheses are illegal in workflow conditions (range syntax).
+  # Split into two gates so a missing `alerts` and an empty array each get a distinct
+  # workflow.fail message (parentheses are fine — groupedExpressions is enabled).
   - name: require_caller_alerts_present
     type: if
     condition: "${{ inputs.calledByWorker == true and inputs.alerts == null }}"
@@ -698,11 +625,11 @@ steps:
   # Enrichment, the AI agent calls and auto-close only run when this space has the workflow
   # enabled, a connector configured, and at least one alert left to analyze. A disabled or
   # unconfigured space no-ops, which is why enabled-by-default with an empty connector is
-  # safe. The guard is a parens-free `and` because the workflow template parser reads `(`
-  # as range syntax.
+  # safe. Parentheses group the two-connector OR — createWorkflowLiquidEngine enables
+  # groupedExpressions, so this is valid Liquid (not range syntax).
   - name: analysis_enabled
     type: if
-    condition: "${{ variables.workflow_enabled and variables.connector_configured and variables.pending_alert_count > 0 }}"
+    condition: "${{ variables.workflow_enabled and (variables.connector_id != '' or variables.connector_id_by_feature != '') and variables.pending_alert_count > 0 }}"
     steps:
 
       # Logged inside the guard so a space with the workflow disabled does not claim, on every rule
@@ -1667,10 +1594,22 @@ steps:
                       Execution: {{ execution.url }}
 
             else:
+              # The model can echo an id from another batch; select_alert_verdict takes `first`
+              # over all_verdicts, so only this batch's ids may enter it (and the progress counts).
+              - name: set_batch_alert_ids
+                type: data.set
+                with:
+                  batch_alert_ids: "${{ foreach.item | map: '_id' }}"
+
+              - name: filter_verdicts_to_batch
+                type: data.set
+                with:
+                  batch_verdicts: "${{ steps.runAgent_step.output.structured_output.verdicts | where_exp: 'v', 'variables.batch_alert_ids contains v.id' }}"
+
               - name: collect_batch_verdicts
                 type: data.set
                 with:
-                  all_verdicts: "${{ variables.all_verdicts | concat: steps.runAgent_step.output.structured_output.verdicts }}"
+                  all_verdicts: "${{ variables.all_verdicts | concat: variables.batch_verdicts }}"
                   batch_input_tokens: "${{ variables.batch_input_tokens | plus: steps.runAgent_step.output.metadata.usage.inputTokens }}"
                   batch_output_tokens: "${{ variables.batch_output_tokens | plus: steps.runAgent_step.output.metadata.usage.outputTokens }}"
                   batch_llm_calls: "${{ variables.batch_llm_calls | plus: 1 }}"
@@ -1690,26 +1629,12 @@ steps:
                     with:
                       batch_summaries: "${{ variables.batch_summaries | push: steps.runAgent_step.output.structured_output.batch_summary }}"
 
-              # Reconcile progress counts to this batch's real alert ids before commenting.
-              # Raw agent verdicts may include fabricated/duplicate ids; apply_verdicts later
-              # drops unmatched ones, so counting structured_output directly can disagree with
-              # tags/notes/workflow.output.
-              - name: set_batch_alert_ids
-                type: data.set
-                with:
-                  batch_alert_ids: "${{ foreach.item | map: '_id' }}"
-                  # where_exp predicates — evaluated when counting, so they can reference
-                  # batch_alert_ids set in this same step's output merge.
-                  batch_tp_match_expr: "variables.batch_alert_ids contains v.id and v.classification == 'true_positive'"
-                  batch_fp_match_expr: "variables.batch_alert_ids contains v.id and v.classification == 'false_positive'"
-                  batch_inc_match_expr: "variables.batch_alert_ids contains v.id and v.classification == 'inconclusive'"
-
               - name: set_batch_progress_counts
                 type: data.set
                 with:
-                  batch_tp_count: "${{ steps.runAgent_step.output.structured_output.verdicts | where_exp: 'v', variables.batch_tp_match_expr | size }}"
-                  batch_fp_count: "${{ steps.runAgent_step.output.structured_output.verdicts | where_exp: 'v', variables.batch_fp_match_expr | size }}"
-                  batch_inc_count: "${{ steps.runAgent_step.output.structured_output.verdicts | where_exp: 'v', variables.batch_inc_match_expr | size }}"
+                  batch_tp_count: "${{ variables.batch_verdicts | where: 'classification', 'true_positive' | size }}"
+                  batch_fp_count: "${{ variables.batch_verdicts | where: 'classification', 'false_positive' | size }}"
+                  batch_inc_count: "${{ variables.batch_verdicts | where: 'classification', 'inconclusive' | size }}"
 
               # TODO: replace with ai.conversation.message.add once kibana#291688 merges
               - name: post_batch_progress_comment
@@ -2141,6 +2066,14 @@ steps:
             {{ variables.all_verdicts | size }} verdicts for {{ variables.pending_alert_count }} alerts
             in {{ variables.batch_llm_calls }} model call(s);
             {{ variables.auto_close_ids | size }} alert(s) matched the auto-close thresholds.
+
+    else:
+      # Skipped alerts are unprocessed, so the Worker must not read an empty list as "all reconciled".
+      - name: set_missing_alert_ids_on_skip
+        type: data.set
+        if: "${{ inputs.calledByWorker == true }}"
+        with:
+          missing_alert_ids: "${{ variables.alert_set | reject_exp: 'a', variables.pending_filter_expr | map: '_id' }}"
 
   # ---------------------------------------------------------------------------
   # Emit structured output for callers (Worker path)

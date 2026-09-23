@@ -10,6 +10,12 @@
 import { parse } from 'yaml';
 import { SECURITY_ALERT_ANALYSIS_WORKFLOW } from '.';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
+import {
+  builtinWorkflowInputDefinitions,
+  SECURITY_ALERT_ANALYSIS_CALLER_ALERTS_INPUT_DEFINITION_ID,
+} from '../../../spec/builtin_workflow_input_definitions';
+import { buildFieldsZodValidator } from '../../../spec/lib/build_fields_zod_validator';
+import { getInputsFromDefinition } from '../../../spec/lib/field_conversion';
 import { WorkflowSchema } from '../../../spec/schema';
 
 type Step = Record<string, unknown>;
@@ -114,9 +120,18 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
         trigger.type === 'manual'
     );
     expect(manualTrigger).toBeDefined();
-    expect(manualTrigger?.inputs?.properties).toHaveProperty('alerts');
-    expect(manualTrigger?.inputs?.properties).toHaveProperty('calledByWorker');
-    expect(manualTrigger?.inputs?.properties).toHaveProperty('connectorIdByFeature');
+    const manualInputs = manualTrigger?.inputs;
+    // WorkflowSchema accepts legacy array or JSON Schema object; after normalizeFieldsToJsonSchema
+    // manual inputs are object-shaped. Narrow before reading `.properties` for tsc.
+    expect(manualInputs && typeof manualInputs === 'object' && !Array.isArray(manualInputs)).toBe(
+      true
+    );
+    if (!manualInputs || typeof manualInputs !== 'object' || Array.isArray(manualInputs)) {
+      return;
+    }
+    expect(manualInputs.properties).toHaveProperty('alerts');
+    expect(manualInputs.properties).toHaveProperty('calledByWorker');
+    expect(manualInputs.properties).toHaveProperty('connectorIdByFeature');
 
     expect(result.data.outputs).toBeDefined();
     if (
@@ -127,6 +142,33 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
       expect(result.data.outputs.properties).toHaveProperty('verdicts');
       expect(result.data.outputs.properties).toHaveProperty('missing_alert_ids');
     }
+  });
+
+  it.each([
+    ['the raw yaml', () => parse(SECURITY_ALERT_ANALYSIS_WORKFLOW.yaml)],
+    ['the WorkflowSchema-parsed definition', () => WorkflowSchema.parse(workflow)],
+  ])('enforces the caller alerts contract at execution-time input validation for %s', (_, load) => {
+    // Same path as the execution engine's validateWorkflowInputs.
+    const validator = buildFieldsZodValidator(getInputsFromDefinition(load()));
+    const alert = {
+      _id: 'alert-1',
+      _index: '.internal.alerts-security.alerts-default-000001',
+      '@timestamp': '2026-09-23T10:00:00.000Z',
+      kibana: { alert: { rule: { uuid: 'rule-1' } } },
+    };
+
+    expect(validator.safeParse({ alerts: [alert] }).success).toBe(true);
+    expect(validator.safeParse({ alerts: Array.from({ length: 1001 }, () => alert) }).success).toBe(
+      false
+    );
+    expect(validator.safeParse({ alerts: [{ _id: 'alert-1' }] }).success).toBe(false);
+    expect(validator.safeParse({ alerts: [{ ...alert, _index: 'logs-endpoint' }] }).success).toBe(
+      false
+    );
+    expect(
+      validator.safeParse({ alerts: [{ ...alert, '@timestamp': '2026-09-23T12:00:00.000+02:00' }] })
+        .success
+    ).toBe(false);
   });
 
   it('reads per-space config at run time from the space-scoped runtime_config route', () => {
@@ -215,11 +257,10 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(guard.type).toBe('if');
     // A disabled space or a space with no connector must skip enrichment, the AI agent calls, and
     // auto-close (fixes enabled-with-no-connector and moves the on/off decision to run time), and
-    // an execution whose alerts were all analyzed already must not call the model at all. The guard
-    // is a parens-free `and` chain; `connector_configured` is pre-computed by set_connector_configured
-    // to avoid the `(` range-syntax pitfall with the two-connector OR.
+    // an execution whose alerts were all analyzed already must not call the model at all.
+    // Parentheses group the two-connector OR (groupedExpressions is enabled on the engine).
     expect(guard.condition).toBe(
-      '${{ variables.workflow_enabled and variables.connector_configured and variables.pending_alert_count > 0 }}'
+      "${{ variables.workflow_enabled and (variables.connector_id != '' or variables.connector_id_by_feature != '') and variables.pending_alert_count > 0 }}"
     );
 
     // Everything expensive lives under the guard — including the "about to analyze N alerts" log,
@@ -392,8 +433,9 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     const counts = findStepByName(workflow.steps, 'set_batch_progress_counts') as {
       with: { batch_tp_count: string };
     };
-    expect(counts.with.batch_tp_count).toContain('variables.batch_tp_match_expr');
-    expect(counts.with.batch_tp_count).toContain('where_exp');
+    expect(counts.with.batch_tp_count).toBe(
+      "${{ variables.batch_verdicts | where: 'classification', 'true_positive' | size }}"
+    );
   });
 
   it('fetches rule-scoped enrichment once per execution, not once per alert', () => {
@@ -538,7 +580,7 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
       with: Record<string, string>;
     };
     expect(collectStep.with.all_verdicts).toBe(
-      '${{ variables.all_verdicts | concat: steps.runAgent_step.output.structured_output.verdicts }}'
+      '${{ variables.all_verdicts | concat: variables.batch_verdicts }}'
     );
     expect(collectStep.with.batch_input_tokens).toContain(
       'steps.runAgent_step.output.metadata.usage.inputTokens'
@@ -546,6 +588,30 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(collectStep.with.batch_output_tokens).toContain(
       'steps.runAgent_step.output.metadata.usage.outputTokens'
     );
+  });
+
+  it('filters batch verdicts to the batch alert ids before collecting them', () => {
+    const batchSteps = findStepByName(workflow.steps, 'check_batch_output_exists') as {
+      else: Array<{ name: string }>;
+    };
+    const stepNames = batchSteps.else.map(({ name }) => name);
+
+    expect(stepNames.indexOf('set_batch_alert_ids')).toBeLessThan(
+      stepNames.indexOf('filter_verdicts_to_batch')
+    );
+    expect(stepNames.indexOf('filter_verdicts_to_batch')).toBeLessThan(
+      stepNames.indexOf('collect_batch_verdicts')
+    );
+  });
+
+  it('populates missing_alert_ids from the pending alerts when analysis_enabled skips', () => {
+    const analysisEnabled = findStepByName(workflow.steps, 'analysis_enabled') as {
+      else: Array<{ name: string; if: string }>;
+    };
+    const [skipFallback] = analysisEnabled.else;
+
+    expect(skipFallback.name).toBe('set_missing_alert_ids_on_skip');
+    expect(skipFallback.if).toBe('${{ inputs.calledByWorker == true }}');
   });
 
   it('formats the verdict note timestamp with a human-readable date filter', () => {
@@ -737,8 +803,7 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
   it('initialises connector_id_by_feature to empty string so the standalone path is unchanged', () => {
     // Both paths invoke the same underlying workflow. The empty initialiser means that when no
     // caller supplies connectorIdByFeature, the variable exists but is "" — the analysis_enabled
-    // guard sees connector_configured = (connector_id != '' or '' != '') = (connector_id != ''),
-    // which matches the pre-Worker guard behaviour.
+    // guard's OR collapses to (connector_id != ''), matching pre-Worker guard behaviour.
     const initStep = findStepByName(workflow.steps, 'set_workflow_variables') as {
       with: { connector_id_by_feature: string; investigation_conversation_id: string };
     };
@@ -821,20 +886,28 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(manualTrigger?.inputs?.properties).toHaveProperty('alerts');
     expect(manualTrigger?.inputs?.properties).toHaveProperty('calledByWorker');
 
-    const alertsInput = (
+    const alertsRef = (
       manualTrigger?.inputs?.properties as {
-        alerts?: {
-          items?: {
-            required?: string[];
-            properties?: {
-              '@timestamp'?: { format?: string; maxLength?: number };
-              _index?: { maxLength?: number; pattern?: string };
-            };
-          };
-          maxItems?: number;
-        };
+        alerts?: { $ref?: string };
       }
     )?.alerts;
+    expect(alertsRef?.$ref).toBe(
+      `#/kibana/definitions/${SECURITY_ALERT_ANALYSIS_CALLER_ALERTS_INPUT_DEFINITION_ID}`
+    );
+
+    // Shape lives in the builtin registry (alerting-v2 style), not inline in the YAML.
+    const alertsInput = builtinWorkflowInputDefinitions[
+      SECURITY_ALERT_ANALYSIS_CALLER_ALERTS_INPUT_DEFINITION_ID
+    ] as {
+      items?: {
+        required?: string[];
+        properties?: {
+          '@timestamp'?: { format?: string; maxLength?: number };
+          _index?: { maxLength?: number; pattern?: string };
+        };
+      };
+      maxItems?: number;
+    };
     expect(alertsInput?.maxItems).toBe(1000);
     expect(alertsInput?.items?.required).toEqual(
       expect.arrayContaining(['_id', '_index', '@timestamp', 'kibana'])
@@ -1006,19 +1079,15 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(JSON.stringify(workflow.steps)).not.toMatch(ternaryInExpression);
   });
 
-  it('pre-computes connector_configured to keep the analysis_enabled guard a simple and chain', () => {
-    const helperStep = findStepByName(workflow.steps, 'set_connector_configured') as {
-      type: string;
-      with: { connector_configured: string };
+  it('uses parenthesized connector OR on analysis_enabled (groupedExpressions)', () => {
+    const guard = findStepByName(workflow.steps, 'analysis_enabled') as {
+      condition: string;
     };
-    expect(helperStep).toBeDefined();
-    expect(helperStep.type).toBe('data.set');
-    expect(helperStep.with.connector_configured).toBe(
-      "${{ variables.connector_id != '' or variables.connector_id_by_feature != '' }}"
+    expect(guard.condition).toContain(
+      "(variables.connector_id != '' or variables.connector_id_by_feature != '')"
     );
-    // Must run before analysis_enabled so the guard sees the computed value
-    const ancestors = findStepAncestors(workflow.steps, 'set_connector_configured') ?? [];
-    expect(ancestors.map((a) => a.name)).not.toContain('analysis_enabled');
+    // No pre-compute helper — parentheses are legal with groupedExpressions: true.
+    expect(findStepByName(workflow.steps, 'set_connector_configured')).toBeUndefined();
   });
 
   it('emits workflow.output at the top level so callers always receive a structured result', () => {
@@ -1575,6 +1644,49 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
     });
 
     expect(result).toEqual(['already-missing', 'no-verdict-id']);
+  });
+
+  it('drops verdicts whose id belongs to another batch', () => {
+    const idsStep = findStepByName(workflow.steps, 'set_batch_alert_ids') as {
+      with: { batch_alert_ids: string };
+    };
+    const filterStep = findStepByName(workflow.steps, 'filter_verdicts_to_batch') as {
+      with: { batch_verdicts: string };
+    };
+    const { name: agentStepName } = findStepByType(workflow.steps, 'ai.agent') as { name: string };
+
+    const batchAlertIds = evaluateExpression(engine, idsStep.with.batch_alert_ids, {
+      foreach: { item: [{ _id: 'a1' }, { _id: 'a2' }] },
+    });
+    const batchVerdicts = evaluateExpression(engine, filterStep.with.batch_verdicts, {
+      variables: { batch_alert_ids: batchAlertIds },
+      steps: {
+        [agentStepName]: {
+          output: {
+            structured_output: {
+              verdicts: [{ id: 'a1' }, { id: 'other-batch-alert' }, { id: 'a2' }],
+            },
+          },
+        },
+      },
+    });
+
+    expect(batchVerdicts).toEqual([{ id: 'a1' }, { id: 'a2' }]);
+  });
+
+  it('reports every pending alert as missing when analysis is skipped', () => {
+    const skipFallback = findStepByName(workflow.steps, 'set_missing_alert_ids_on_skip') as {
+      with: { missing_alert_ids: string };
+    };
+
+    const result = evaluateExpression(engine, skipFallback.with.missing_alert_ids, {
+      variables: {
+        alert_set: [{ _id: 'a1' }, { _id: 'a2' }],
+        pending_filter_expr: 'false',
+      },
+    });
+
+    expect(result).toEqual(['a1', 'a2']);
   });
 
   it('emits workflow.output counts and fields from accumulated Worker verdicts', () => {
