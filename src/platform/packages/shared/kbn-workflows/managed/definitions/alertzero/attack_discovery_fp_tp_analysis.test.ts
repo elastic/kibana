@@ -554,6 +554,37 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
       );
     });
 
+    // The persisted AD document carries its data under the dot-prefixed
+    // `kibana.alert.attack_discovery.*` fields (transformToBaseAlertDocument;
+    // kbn-attack-discovery-schedules-common field_names.ts) — not under flat
+    // `attack_title`/`attack_summary`/`related_entities` names, which nothing
+    // writes.
+    it('reads the persisted kibana.alert.attack_discovery.* fields', () => {
+      const with_ = JSON.stringify(stepIn('prepare_evidence')?.with);
+      for (const field of [
+        'kibana.alert.attack_discovery.title',
+        'kibana.alert.attack_discovery.summary_markdown',
+        'kibana.alert.attack_discovery.details_markdown',
+        'kibana.alert.attack_discovery.entity_summary_markdown',
+        'kibana.alert.attack_discovery.alert_ids',
+      ]) {
+        expect(with_).toContain(field);
+      }
+      expect(with_).not.toContain('_source.attack_title');
+      expect(with_).not.toContain('_source.attack_summary');
+      expect(with_).not.toContain('related_entities');
+    });
+
+    // Same bounded-evidence style as before: absent fields degrade to defaults,
+    // and summaries stay inside the agent prompt's bounds.
+    it('keeps defaults and truncation on the document-sourced evidence', () => {
+      const with_ = stepIn('prepare_evidence')?.with ?? {};
+      expect(String(with_.attack_title)).toContain("| default: ''");
+      expect(String(with_.attack_summary)).toContain('truncate: 8000');
+      expect(String(with_.entity_summary_markdown)).toContain('truncate: 8000');
+      expect(String(with_.alert_ids)).toContain('default: consts.no_items');
+    });
+
     it('gathers its evidence after both loads', () => {
       expect(stepNames.indexOf('prepare_evidence')).toBeGreaterThan(
         Math.max(

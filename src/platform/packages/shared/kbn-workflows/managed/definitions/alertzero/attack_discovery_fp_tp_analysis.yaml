@@ -5,8 +5,11 @@ description: >
   returns a verdict. It returns a result and applies nothing: the review that calls
   it owns the verdict attachment and every lifecycle transition.
 
-  The analysis body gathers the attack's title, summary, entities and correlated
-  alert ids from the loaded document, hands them to one `ai.agent` call on its own
+  The analysis body gathers the attack's title, summary, entity summary and
+  correlated alert ids from the loaded document's persisted
+  `kibana.alert.attack_discovery.*` fields (what the AD Worker actually writes;
+  kbn-attack-discovery-schedules-common field_names.ts), hands them to one
+  `ai.agent` call on its own
   backing conversation (so the Investigation agent is never woken), and classifies
   the correlation as false_positive, true_positive or inconclusive via structured
   output. An agent call that fails after the workflow's retries degrades to
@@ -163,10 +166,15 @@ steps:
   - name: prepare_evidence
     type: data.set
     with:
-      attack_title: "{{ steps.load_attack_discovery.output.hits.hits[0]._source.attack_title | default: '' }}"
-      attack_summary: "{{ steps.load_attack_discovery.output.hits.hits[0]._source.attack_summary | default: steps.load_attack_discovery.output.hits.hits[0]._source.message | default: '' | truncate: 8000, '' }}"
-      entities: "${{ steps.load_attack_discovery.output.hits.hits[0]._source.related_entities | default: consts.no_items }}"
-      alert_ids: "${{ steps.load_attack_discovery.output.hits.hits[0]._source.alert_ids | default: consts.no_items }}"
+      # Reads the fields the AD Worker actually persists (transformToBaseAlertDocument;
+      # kbn-attack-discovery-schedules-common/impl/fields/field_names.ts):
+      # kibana.alert.attack_discovery.{title,summary_markdown,details_markdown,
+      # entity_summary_markdown,alert_ids}. The flat `attack_title`/`attack_summary`/
+      # `related_entities` names nothing writes.
+      attack_title: "{{ steps.load_attack_discovery.output.hits.hits[0]._source['kibana.alert.attack_discovery.title'] | default: '' }}"
+      attack_summary: "{{ steps.load_attack_discovery.output.hits.hits[0]._source['kibana.alert.attack_discovery.summary_markdown'] | default: steps.load_attack_discovery.output.hits.hits[0]._source['kibana.alert.attack_discovery.details_markdown'] | default: '' | truncate: 8000, '' }}"
+      entity_summary_markdown: "{{ steps.load_attack_discovery.output.hits.hits[0]._source['kibana.alert.attack_discovery.entity_summary_markdown'] | default: '' | truncate: 8000, '' }}"
+      alert_ids: "${{ steps.load_attack_discovery.output.hits.hits[0]._source['kibana.alert.attack_discovery.alert_ids'] | default: consts.no_items }}"
       investigation_status: "{{ steps.load_investigation.output.status | default: 'unknown' }}"
 
   # One tool-less agent call classifies the correlation. `connector-id-by-feature`
@@ -204,8 +212,8 @@ steps:
 
         Attack title: {{ steps.prepare_evidence.output.attack_title }}
         Attack summary: {{ steps.prepare_evidence.output.attack_summary }}
-        Entities: {{ steps.prepare_evidence.output.entities | join: ", " }}
         Correlated alert ids: {{ steps.prepare_evidence.output.alert_ids | join: ", " }}
+        Entity summary: {{ steps.prepare_evidence.output.entity_summary_markdown }}
         Investigation status: {{ steps.prepare_evidence.output.investigation_status }}
 
         Return false_positive when the evidence contradicts the correlation,
