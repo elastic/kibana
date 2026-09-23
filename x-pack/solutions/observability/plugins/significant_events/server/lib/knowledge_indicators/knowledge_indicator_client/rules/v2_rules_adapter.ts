@@ -8,6 +8,7 @@
 import { isBoom } from '@hapi/boom';
 import { ALERTING_ERROR_CODES, type RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import pLimit from 'p-limit';
+import { uniq } from 'lodash';
 import { compileMatchCountBreachQuery } from '../../../significant_events/rules/match_count_query_compiler';
 import { withAllProjectsRouting } from '../../../significant_events/rules/project_routing';
 import {
@@ -17,10 +18,12 @@ import {
 import { getMetricSeriesRuleSchedule } from '../../../significant_events/rules/schedule';
 import {
   BulkCreateRulesError,
-  STREAMS_RULE_STREAM_TAG_PREFIX,
-  streamNameFromTag,
-  toStreamTag,
+  RULE_OWNERSHIP_TAG_PREFIXES,
+  sourceIdFromOwnershipTag,
+  toLegacyStreamTag,
+  toSourceTag,
   type IRulesManagementClient,
+  type RuleOwnershipTagPrefix,
   type SignificantEventsRuleDefinition,
 } from './rules_management_client';
 
@@ -54,16 +57,13 @@ export interface RulesAdapterV2Params {
  * Internal getTags size for ownership-tag enumeration. The HTTP tags route stays
  * capped at 20 for typeahead; server-side consumers may request up to 10000.
  */
-const OWNED_STREAM_TAGS_SIZE = 10000;
+const OWNED_SOURCE_TAGS_SIZE = 10000;
 
 /**
  * Wraps alerting_v2 `RulesClientApi` to implement IRulesManagementClient.
  *
- * create/update handle their own 409/404 fallbacks internally so QueryClient does not
+ * create/update handle their own 409/404 fallbacks internally so QueryRuleOrchestrator does not
  * need to know Alerting v2's retry semantics.
- *
- * Space context: the caller must obtain the client with the intended space
- * (SigEvents uses default space), matching the former HTTP client behavior.
  */
 export class RulesAdapterV2 implements IRulesManagementClient {
   private readonly rulesClient: RulesAdapterV2Params['rulesClient'];
@@ -151,12 +151,51 @@ export class RulesAdapterV2 implements IRulesManagementClient {
     return results.filter(({ exists }) => exists).map(({ id }) => id);
   }
 
-  async findOwnedRuleIds(streamName: string): Promise<string[]> {
+  async findOwnedRuleIds(sourceId: string): Promise<string[]> {
+    const perTag = await Promise.all(
+      [toSourceTag(sourceId), toLegacyStreamTag(sourceId)].map((tag) => this.findRuleIdsByTag(tag))
+    );
+    return uniq(perTag.flat());
+  }
+
+  async findStreamNamesWithOwnedRules(): Promise<string[]> {
+    const perPrefix = await Promise.all(
+      RULE_OWNERSHIP_TAG_PREFIXES.map((prefix) => this.findTagsByPrefix(prefix))
+    );
+    return uniq(
+      perPrefix
+        .flat()
+        .map(sourceIdFromOwnershipTag)
+        .filter((sourceId): sourceId is string => sourceId !== undefined)
+    );
+  }
+
+  async findRuleIdsByTagPrefix(prefix: RuleOwnershipTagPrefix): Promise<string[]> {
+    const tags = await this.findTagsByPrefix(prefix);
+    const limit = pLimit(RULE_EXISTS_CONCURRENCY);
+    const perTag = await Promise.all(tags.map((tag) => limit(() => this.findRuleIdsByTag(tag))));
+    return uniq(perTag.flat());
+  }
+
+  /**
+   * Tag buckets (not rule documents) that start with `prefix`. `getTags`'s
+   * `search` is a substring match, so the prefix is re-checked client-side.
+   */
+  private async findTagsByPrefix(prefix: RuleOwnershipTagPrefix): Promise<string[]> {
+    const tags = await this.rulesClient.getTags({
+      search: prefix,
+      kind: 'signal',
+      size: OWNED_SOURCE_TAGS_SIZE,
+    });
+    return tags.filter((tag) => tag.startsWith(prefix));
+  }
+
+  private async findRuleIdsByTag(tag: string): Promise<string[]> {
     const ids: string[] = [];
     let page = 1;
     while (true) {
       const result = await this.rulesClient.findRules({
-        filter: `metadata.tags: "${toStreamTag(streamName)}"`,
+        filter: `metadata.tags: "${tag}"`,
         perPage: FIND_PAGE_SIZE,
         page,
       });
@@ -167,24 +206,6 @@ export class RulesAdapterV2 implements IRulesManagementClient {
       page++;
     }
     return ids;
-  }
-
-  async findStreamNamesWithOwnedRules(): Promise<string[]> {
-    // Prefix-search returns matching tag buckets (not rule documents). Non-ownership
-    // tags are still filtered client-side in case the include pattern is broadened.
-    const tags = await this.rulesClient.getTags({
-      search: STREAMS_RULE_STREAM_TAG_PREFIX,
-      kind: 'signal',
-      size: OWNED_STREAM_TAGS_SIZE,
-    });
-    const streamNames = new Set<string>();
-    for (const tag of tags) {
-      const streamName = streamNameFromTag(tag);
-      if (streamName) {
-        streamNames.add(streamName);
-      }
-    }
-    return [...streamNames];
   }
 
   private async createRulesAndUpdateConflicts(
@@ -321,7 +342,7 @@ function toV2CommonBody({ definition, isServerless }: ToV2BodyParams) {
   return {
     metadata: {
       name: definition.name,
-      tags: [toStreamTag(definition.streamName), METRIC_SERIES_RULE_TAG],
+      tags: [toSourceTag(definition.sourceId), METRIC_SERIES_RULE_TAG],
     },
     time_field: definition.timestampField,
     schedule: {

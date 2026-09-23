@@ -12,7 +12,7 @@ import { createFeatureKnowledgeIndicatorToolHandler } from './handler';
 describe('createFeatureKnowledgeIndicatorToolHandler', () => {
   const logger = loggingSystemMock.createLogger();
 
-  const featureInput: Omit<BaseFeature, 'stream_name'> = {
+  const featureInput: BaseFeature = {
     id: 'feature-1',
     type: 'custom',
     description: 'Feature description',
@@ -42,12 +42,9 @@ describe('createFeatureKnowledgeIndicatorToolHandler', () => {
     const [streamNameArg, operationsArg] = kiClient.bulk.mock.calls[0];
     expect(streamNameArg).toBe('logs.test');
     expect(operationsArg).toHaveLength(1);
-    expect(operationsArg[0].index.feature).toEqual(
-      expect.objectContaining({
-        ...featureInput,
-        stream_name: 'logs.test',
-      })
-    );
+    // The source is routed through `bulk(sourceId, ...)`, never stored on the payload itself.
+    expect(operationsArg[0].index.feature).toEqual(expect.objectContaining(featureInput));
+    expect(operationsArg[0].index.feature).not.toHaveProperty('stream_name');
   });
 
   it('throws when feature storage fails', async () => {

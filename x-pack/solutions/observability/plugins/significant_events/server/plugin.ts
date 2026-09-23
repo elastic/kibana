@@ -59,6 +59,7 @@ import { deleteLegacyRules } from './lib/significant_events/rules/delete_legacy_
 
 import { createSignificantEventsAlertingContextResolver } from './lib/significant_events/alerting/significant_events_alerting_context';
 import type { SignificantEventsAlertingContext } from './lib/significant_events/alerting/significant_events_alerting_context';
+
 import { EbtTelemetryService } from './lib/telemetry/ebt';
 import { significantEventsRouteRepository } from './routes';
 import type { GetScopedClients, RouteHandlerScopedClients } from './routes/types';
@@ -200,9 +201,9 @@ export class SignificantEventsPlugin
       // `scopedClusterClient`: origin-only. Used for everything the plugin owns (its hidden
       // data streams), which only ever exists in the origin project.
       // `streamDataEsClient`: always routed across every CPS-linked project, regardless of the
-      // active space's project routing expression. Knowledge indicators are not space-scoped -
-      // they model all data available to a stream - so extraction must always read across every
-      // linked project.
+      // active space's project routing expression. Knowledge indicators are stored per space,
+      // but they model all data available to a source, so extraction must always read across
+      // every linked project.
       //
       // Detection matches that all-projects scope on serverless via `withAllProjectsRouting`.
       const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
@@ -222,7 +223,9 @@ export class SignificantEventsPlugin
 
       const streamsClient = await streamsSetup.getStreamsClient({ request, rulesClientOptions });
 
-      const space = pluginsStart.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+      // Core always populates `request.spaceId` (default space when the URL has no prefix), so
+      // no fallback is needed. Knowledge indicators and their rules are scoped to this space.
+      const space = request.spaceId;
 
       const significantEventsClients = createSignificantEventsClients({
         services: significantEventsServices,
@@ -237,8 +240,9 @@ export class SignificantEventsPlugin
       });
 
       const getAlertingV2RulesClient = async () =>
-        pluginsStart.alertingVTwo.getRulesClientWithRequestInSpace(request, DEFAULT_SPACE_ID);
+        pluginsStart.alertingVTwo.getRulesClientWithRequestInSpace(request, space);
 
+      // Significant Events v1 rules only ever existed in the default space.
       const deleteLegacyRulesById = async (ruleIds: string[]): Promise<void> => {
         if (ruleIds.length === 0) {
           return;
@@ -261,6 +265,7 @@ export class SignificantEventsPlugin
         knowledgeIndicatorService.getClient({
           esClient: scopedClusterClient.asInternalUser,
           soClient,
+          space,
           context,
           config: tuningConfig,
         });
@@ -279,9 +284,11 @@ export class SignificantEventsPlugin
         scopedClusterClient,
         streamDataEsClient,
         soClient,
+        space,
         attachmentClient,
         getSignificantEventsAlertingContext: resolveSignificantEventsAlertingContext,
         getKnowledgeIndicatorClient,
+
         deleteLegacyRules: deleteLegacyRulesById,
         ...significantEventsClients,
         inferenceClient,
@@ -437,10 +444,8 @@ export class SignificantEventsPlugin
         workflowClients,
         maintenanceService: this.maintenanceService,
         priceService,
-        getSpaceId: async (request: KibanaRequest) => {
-          const [, pluginsStart] = await core.getStartServices();
-          return pluginsStart.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
-        },
+        // Same resolution as the knowledge indicator space above; core always populates it.
+        getSpaceId: async (request: KibanaRequest) => request.spaceId,
       },
       core,
       logger: this.logger,

@@ -117,8 +117,8 @@ const deleteFeatureRoute = createServerRoute({
     await kiClient.bulk(params.path.name, [{ delete: { type: 'feature', id: params.path.id } }]);
 
     try {
-      const definition = await streamsClient.getStream(params.path.name);
-      await kiClient.reconcileStream(definition);
+      await streamsClient.getStream(params.path.name);
+      await kiClient.reconcileStream(params.path.name);
     } catch (err) {
       logger.warn(
         `reconcileStream after feature delete failed for stream "${params.path.name}": ${
@@ -307,8 +307,8 @@ const bulkFeaturesRoute = createServerRoute({
     const hasShrinkingOp = operations.some((op) => 'delete' in op || 'exclude' in op);
     if (hasShrinkingOp) {
       try {
-        const definition = await streamsClient.getStream(name);
-        await kiClient.reconcileStream(definition);
+        await streamsClient.getStream(name);
+        await kiClient.reconcileStream(name);
       } catch (err) {
         logger.warn(
           `reconcileStream after bulk feature ops failed for stream "${name}": ${
@@ -424,8 +424,8 @@ const bulkFeaturesAcrossStreamsRoute = createServerRoute({
 
     for (const streamName of streamsWithShrinkingOps) {
       try {
-        const definition = await streamsClient.getStream(streamName);
-        await kiClient.reconcileStream(definition);
+        await streamsClient.getStream(streamName);
+        await kiClient.reconcileStream(streamName);
       } catch (err) {
         logger.warn(
           `reconcileStream after bulk cross-stream feature ops failed for stream "${streamName}": ${

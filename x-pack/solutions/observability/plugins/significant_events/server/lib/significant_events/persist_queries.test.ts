@@ -63,11 +63,8 @@ const createMocks = (existingLinks: QueryLink[] = []) => {
     bulk: jest.fn().mockResolvedValue({ applied: 1, skipped: 0 }),
     syncQueries: jest.fn().mockResolvedValue(undefined),
     replaceStreamQueries: jest.fn(
-      async (
-        def: Streams.all.Definition,
-        getNextQueries: (links: QueryLink[]) => StreamQuery[]
-      ) => {
-        await kiClient.syncQueries(def, getNextQueries(existingLinks));
+      async (sourceId: string, getNextQueries: (links: QueryLink[]) => StreamQuery[]) => {
+        await kiClient.syncQueries(sourceId, getNextQueries(existingLinks));
       }
     ),
   } as unknown as jest.Mocked<KnowledgeIndicatorClient>;
@@ -222,8 +219,8 @@ describe('persistQueries', () => {
 
     expect(kiClient.bulk).not.toHaveBeenCalled();
     expect(kiClient.syncQueries).toHaveBeenCalledTimes(1);
-    const [defArg, queriesArg] = (kiClient.syncQueries as jest.Mock).mock.calls[0];
-    expect(defArg).toBe(definition);
+    const [sourceIdArg, queriesArg] = (kiClient.syncQueries as jest.Mock).mock.calls[0];
+    expect(sourceIdArg).toBe('logs.test');
     expect(queriesArg).toHaveLength(1);
     expect(queriesArg[0].id).toBe('q1');
   });

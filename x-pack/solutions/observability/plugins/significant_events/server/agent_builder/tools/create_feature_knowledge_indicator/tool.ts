@@ -15,7 +15,7 @@ import type {
 import type { Logger } from '@kbn/core/server';
 import { z } from '@kbn/zod/v4';
 import { getStreamTypeFromDefinition, type StreamType } from '@kbn/streams-schema';
-import { baseFeatureSchema } from '@kbn/significant-events-schema';
+import { baseFeatureSchema, MAX_ID_LENGTH } from '@kbn/significant-events-schema';
 import dedent from 'dedent';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import type { GetScopedClients } from '../../../routes/types';
@@ -26,7 +26,12 @@ import { createFeatureKnowledgeIndicatorToolHandler } from './handler';
 export const SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_CREATE_FEATURE_TOOL_ID =
   platformSignificantEventsTools.createFeatureKnowledgeIndicator;
 
+// `stream_name` routes the feature to its source; it is not part of the stored feature payload.
 const createFeatureKISchema = baseFeatureSchema.extend({
+  stream_name: z
+    .string()
+    .max(MAX_ID_LENGTH)
+    .describe('Stream the feature belongs to, e.g. "logs.ecs.nginx".'),
   expires_at: z.iso
     .datetime()
     .optional()

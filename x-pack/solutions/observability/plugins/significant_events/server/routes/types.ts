@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient, IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
+
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { InferenceClient } from '@kbn/inference-common';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
@@ -21,6 +22,7 @@ import type { SignificantEventsAlertingContext } from '../lib/significant_events
 import type { SignificantEventsServer } from '../types';
 import type { EbtTelemetryClient } from '../lib/telemetry/ebt';
 import type { KnowledgeIndicatorClient } from '../lib/knowledge_indicators';
+
 import type { SignificantEventsClients } from '../lib/significant_events/significant_events_clients';
 import type { ContinuousKiOnboardingWorkflowService } from '../lib/workflows/continuous_onboarding_workflow';
 import type { CleanupWorkflowService } from '../lib/workflows/cleanup_workflow';
@@ -45,9 +47,12 @@ export interface RouteHandlerScopedClients extends SignificantEventsClients {
    */
   streamDataEsClient: ElasticsearchClient;
   soClient: SavedObjectsClientContract;
+  /** Request space (`request.spaceId`); knowledge indicators and their rules are scoped to it. */
+  space: string;
   attachmentClient: AttachmentClient;
   getSignificantEventsAlertingContext: () => Promise<SignificantEventsAlertingContext>;
   getKnowledgeIndicatorClient: () => Promise<KnowledgeIndicatorClient>;
+
   deleteLegacyRules: (ruleIds: string[]) => Promise<void>;
   inferenceClient: InferenceClient;
   licensing: LicensingPluginStart;

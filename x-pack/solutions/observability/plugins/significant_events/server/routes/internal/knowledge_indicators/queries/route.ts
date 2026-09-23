@@ -127,14 +127,12 @@ const promoteUnbackedQueriesRoute = createServerRoute({
     await assertNotPaused({ maintenanceService, request });
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
-    const streamDefinitions = new Map(
-      (await streamsClient.listStreams()).map((definition) => [definition.name, definition])
-    );
+    const sourceIds = (await streamsClient.listStreams()).map((definition) => definition.name);
 
     return kiClient.promoteUnbackedQueries({
       queryIds: params?.body?.queryIds,
       minSeverityScore: params?.body?.minSeverityScore,
-      streamDefinitions,
+      sourceIds,
     });
   },
 });
@@ -203,7 +201,7 @@ const demoteBackedQueriesRoute = createServerRoute({
         logger.warn(`Skipping demotion for missing stream ${streamName}`);
         continue;
       }
-      const result = await kiClient.demoteQueries(definition, queryIds);
+      const result = await kiClient.demoteQueries(definition.name, queryIds);
       demoted += result.demoted;
     }
 
@@ -306,7 +304,7 @@ const bulkDeleteQueriesRoute = createServerRoute({
         continue;
       }
       try {
-        await kiClient.deleteQueries(definition, queryIds);
+        await kiClient.deleteQueries(definition.name, queryIds);
         backedRuleIds.forEach((ruleId) => candidateRuleIds.add(ruleId));
         succeeded += queryIds.length;
       } catch (error) {
@@ -407,7 +405,7 @@ const reconcileQueriesRoute = createServerRoute({
 
           let reconciledQueries = 0;
           try {
-            await kiClient.replaceStreamQueries(result.value, (currentLinks) => {
+            await kiClient.replaceStreamQueries(result.value.name, (currentLinks) => {
               reconciledQueries = currentLinks.filter((link) => link.rule_backed).length;
               return currentLinks.map(queryFromLink);
             });
@@ -827,7 +825,7 @@ const upsertQueryRoute = createServerRoute({
       id: queryId,
       type: deriveQueryType(queryBody.esql.query),
     };
-    await kiClient.upsertQuery(definition, query);
+    await kiClient.upsertQuery(definition.name, query);
 
     return { acknowledged: true };
   },

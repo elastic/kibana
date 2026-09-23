@@ -135,7 +135,7 @@ export async function executeFeatureIdentificationAgent({
     throw new Error('Feature identification agent returned invalid finalize_features output');
   }
 
-  const { features, ignoredFeatures } = parseFinalizedFeatures(rawParams, streamName, logger);
+  const { features, ignoredFeatures } = parseFinalizedFeatures(rawParams, logger);
 
   const tokensUsed: ChatCompletionTokenCount = chatTokenCountFromModelUsage(
     roundEvent?.data.round.model_usage

@@ -100,7 +100,7 @@ export async function runFeatureIdentificationAgent({
   });
   const rawParams = getSuccessfulFinalizeFeaturesParams(result.steps);
 
-  const { features, ignoredFeatures } = parseFinalizedFeatures(rawParams, streamName);
+  const { features, ignoredFeatures } = parseFinalizedFeatures(rawParams);
 
   return {
     features,

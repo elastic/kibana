@@ -27,7 +27,7 @@ import {
   QUERY_RULE_ID,
   QUERY_RULE_BACKED,
   QUERY_TYPE,
-  STREAM_NAME,
+  SOURCE_ID,
   TYPE,
 } from '../fields';
 import { fromStoredFeature, fromStoredQuery } from './serializers';
@@ -50,11 +50,17 @@ function ruleUnbackedPostGroupingWhere(
   }
 }
 
+/**
+ * Read side of the knowledge indicator store. Every method is scoped to the
+ * space of the injected `RevisionReader`, including the ones that take no
+ * source id (`getRuleBackedQueryLinks`, `getPromotableUnbackedQueries`,
+ * `findFeaturesByIds`): "all sources" means all sources in that space.
+ */
 export class IndicatorReader {
   constructor(private readonly revisionReader: RevisionReader) {}
 
   async getFeatures(
-    streams: string | string[],
+    sources: string | string[],
     options: {
       type?: string[];
       excludedType?: string[];
@@ -67,8 +73,8 @@ export class IndicatorReader {
       sort?: ComposerSortShorthand[];
     } = {}
   ): Promise<{ hits: Feature[] }> {
-    const streamNames = Array.isArray(streams) ? streams : [streams];
-    if (streamNames.length === 0) {
+    const sourceIds = Array.isArray(sources) ? sources : [sources];
+    if (sourceIds.length === 0) {
       return { hits: [] };
     }
 
@@ -89,7 +95,7 @@ export class IndicatorReader {
 
     const where = combineWhere(
       inPredicate(TYPE, [KI_TYPE_FEATURE]),
-      inPredicate(STREAM_NAME, streamNames),
+      inPredicate(SOURCE_ID, sourceIds),
       inPredicate(ID, options.id ?? [])
     );
 
@@ -113,10 +119,10 @@ export class IndicatorReader {
     return { hits };
   }
 
-  async getExcludedFeatures(stream: string): Promise<{ hits: Feature[] }> {
+  async getExcludedFeatures(sourceId: string): Promise<{ hits: Feature[] }> {
     const where = combineWhere(
       inPredicate(TYPE, [KI_TYPE_FEATURE]),
-      inPredicate(STREAM_NAME, [stream])
+      inPredicate(SOURCE_ID, [sourceId])
     );
     const docs = await this.revisionReader.fetchLatestRevisions(
       where,
@@ -127,8 +133,8 @@ export class IndicatorReader {
     return { hits };
   }
 
-  async getFeature(stream: string, id: string): Promise<Feature> {
-    const { hits } = await this.getFeatures(stream, { id: [id] });
+  async getFeature(sourceId: string, id: string): Promise<Feature> {
+    const { hits } = await this.getFeatures(sourceId, { id: [id] });
     if (hits.length === 0) {
       throw new StatusError(`Feature ${id} not found`, 404);
     }
@@ -137,20 +143,17 @@ export class IndicatorReader {
 
   /**
    * Pure ES|QL probe: returns the timestamp of the most recent **active**
-   * feature revision for a stream (neither tombstoned nor excluded), optionally
+   * feature revision for a source (neither tombstoned nor excluded), optionally
    * scoped to a set of feature types.
    *
    * Only active revisions are counted on purpose, so a `null` result reliably
    * signals an empty active set for the requested types. `shouldIdentifyFeatures`
    * relies on this in two ways: a `null` inferred result forces re-identification
    * (empty or user-wiped set), while the computed-type timestamp drives the
-   * recency throttle. Note that this probe does **not** filter on `expires_at`,
-   * so it includes durable (`expires_at IS NULL`) revisions that keep-alive
-   * re-stamps — callers that need a keep-alive-immune signal must scope to types
-   * that are always expiring (e.g. `COMPUTED_FEATURE_TYPES`).
+   * recency throttle.
    */
   async getLatestRevisionTimestamp(
-    stream: string,
+    sourceId: string,
     options: { types?: string[] } = {}
   ): Promise<{ '@timestamp': string } | null> {
     const featureTypesFilter = options.types?.length
@@ -158,7 +161,7 @@ export class IndicatorReader {
       : undefined;
     const where = combineWhere(
       inPredicate(TYPE, [KI_TYPE_FEATURE]),
-      inPredicate(STREAM_NAME, [stream])
+      inPredicate(SOURCE_ID, [sourceId])
     );
 
     const docs = await this.revisionReader.fetchLatestRevisions(
@@ -174,7 +177,7 @@ export class IndicatorReader {
   }
 
   async getQueryLinks(
-    streamNames: string[],
+    sourceIds: string[],
     filters?: {
       ruleUnbacked?: RuleUnbackedFilter;
       queryIds?: string[];
@@ -197,7 +200,7 @@ export class IndicatorReader {
 
     const where = combineWhere(
       inPredicate(TYPE, [KI_TYPE_QUERY]),
-      inPredicate(STREAM_NAME, streamNames),
+      inPredicate(SOURCE_ID, sourceIds),
       inPredicate(ID, filters?.queryIds ?? [])
     );
 
@@ -215,16 +218,16 @@ export class IndicatorReader {
   }
 
   async getStreamToQueryLinksMap(
-    streamNames: string[],
+    sourceIds: string[],
     options: { includeExpired?: boolean } = {}
   ): Promise<Record<string, QueryLink[]>> {
-    const links = await this.getQueryLinks(streamNames, {
+    const links = await this.getQueryLinks(sourceIds, {
       ruleUnbacked: 'include',
       includeExpired: options.includeExpired,
     });
     const result: Record<string, QueryLink[]> = {};
-    for (const name of streamNames) {
-      result[name] = [];
+    for (const sourceId of sourceIds) {
+      result[sourceId] = [];
     }
     for (const link of links) {
       if (!result[link.stream_name]) {
@@ -236,12 +239,12 @@ export class IndicatorReader {
   }
 
   async bulkGetQueriesByIds(
-    stream: string,
+    sourceId: string,
     ids: string[],
     options: { includeExpired?: boolean } = {}
   ): Promise<QueryLink[]> {
     if (ids.length === 0) return [];
-    return this.getQueryLinks([stream], {
+    return this.getQueryLinks([sourceId], {
       queryIds: ids,
       ruleUnbacked: 'include',
       includeExpired: options.includeExpired,
@@ -261,7 +264,7 @@ export class IndicatorReader {
   }
 
   /**
-   * Returns all unbacked, non-STATS queries across streams. Filtering by
+   * Returns all unbacked, non-STATS queries across sources. Filtering by
    * `query.query_type != stats` happens via the post-grouping WHERE so the
    * latest revision drives the decision.
    */
@@ -293,12 +296,12 @@ export class IndicatorReader {
     const docs = await this.revisionReader.fetchLatestRevisions(where, IS_NOT_DELETED);
     return docs.filter(isStoredFeatureKnowledgeIndicator).map((doc) => ({
       id: doc.id,
-      stream_name: doc['stream.name'],
+      stream_name: doc['source.id'],
     }));
   }
 
   /**
-   * Returns distinct stream names that have at least one active (non-deleted) KI revision.
+   * Returns distinct source ids that have at least one active (non-deleted) KI revision.
    */
   async getStreamNamesWithKnowledgeIndicators(): Promise<string[]> {
     const where = inPredicate(TYPE, [KI_TYPE_FEATURE, KI_TYPE_QUERY]);

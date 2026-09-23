@@ -18,7 +18,7 @@ export async function createFeatureKnowledgeIndicatorToolHandler({
 }: {
   kiClient: KnowledgeIndicatorClient;
   streamName: string;
-  featureInput: Omit<BaseFeature, 'stream_name'>;
+  featureInput: BaseFeature;
   expiresAt?: string;
   logger: Logger;
 }): Promise<{ id: string }> {
@@ -28,7 +28,6 @@ export async function createFeatureKnowledgeIndicatorToolHandler({
 
   const feature = {
     ...featureInput,
-    stream_name: streamName,
     expires_at: expiresAt,
   };
 

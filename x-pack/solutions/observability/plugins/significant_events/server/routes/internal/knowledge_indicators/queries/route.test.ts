@@ -135,7 +135,7 @@ describe('reconcileQueriesRoute', () => {
 
     const result = await route.handler(handlerParams);
 
-    expect(replaceStreamQueries).toHaveBeenCalledWith({ name: 'logs.test' }, expect.any(Function));
+    expect(replaceStreamQueries).toHaveBeenCalledWith('logs.test', expect.any(Function));
     expect(result).toEqual({
       reconciled: 1,
       failed: 0,
@@ -550,7 +550,7 @@ describe('upsertQueryRoute', () => {
     await expect(upsertQueryRoute.handler(handlerParams)).resolves.toEqual({ acknowledged: true });
     expect(getQueryLinks).not.toHaveBeenCalled();
     expect(upsertQuery).toHaveBeenCalledWith(
-      definition,
+      'logs.test',
       expect.objectContaining({
         id: 'q1',
         type: 'match',
@@ -578,7 +578,7 @@ describe('upsertQueryRoute', () => {
     } as unknown as Parameters<typeof upsertQueryRoute.handler>[0];
 
     await expect(upsertQueryRoute.handler(handlerParams)).resolves.toEqual({ acknowledged: true });
-    expect(upsertQuery).toHaveBeenCalledWith(definition, expect.objectContaining({ id: 'q1' }));
+    expect(upsertQuery).toHaveBeenCalledWith('logs.test', expect.objectContaining({ id: 'q1' }));
   });
 
   it('throws 404 when the query is missing and no target_name is provided', async () => {
