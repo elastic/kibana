@@ -81,17 +81,25 @@ apiTest.describe(
       expect(cleared.body.keys).toStrictEqual([]);
     });
 
-    apiTest('rejects new keys without a value and reserved keys', async ({ apiClient }) => {
-      const missingValue = await putSandboxSecrets(apiClient, manageCookie, SPACE_ID, {
-        entries: [{ key: 'NO_VALUE' }],
-      });
-      expect(missingValue).toHaveStatusCode(400);
+    apiTest(
+      'rejects new keys without a value, too short values and reserved keys',
+      async ({ apiClient }) => {
+        const missingValue = await putSandboxSecrets(apiClient, manageCookie, SPACE_ID, {
+          entries: [{ key: 'NO_VALUE' }],
+        });
+        expect(missingValue).toHaveStatusCode(400);
 
-      const reserved = await putSandboxSecrets(apiClient, manageCookie, SPACE_ID, {
-        entries: [{ key: 'CONNECTOR_TOKEN', value: 'x' }],
-      });
-      expect(reserved).toHaveStatusCode(400);
-    });
+        const tooShort = await putSandboxSecrets(apiClient, manageCookie, SPACE_ID, {
+          entries: [{ key: 'TOO_SHORT', value: 'short' }],
+        });
+        expect(tooShort).toHaveStatusCode(400);
+
+        const reserved = await putSandboxSecrets(apiClient, manageCookie, SPACE_ID, {
+          entries: [{ key: 'CONNECTOR_TOKEN', value: 'reserved-value' }],
+        });
+        expect(reserved).toHaveStatusCode(400);
+      }
+    );
 
     apiTest('keeps secrets isolated per space', async ({ apiClient }) => {
       const created = await putSandboxSecrets(apiClient, manageCookie, SPACE_ID, {
@@ -111,7 +119,7 @@ apiTest.describe(
       expect(listed).toHaveStatusCode(200);
 
       const update = await putSandboxSecrets(apiClient, readCookie, SPACE_ID, {
-        entries: [{ key: 'READ_ONLY', value: 'nope' }],
+        entries: [{ key: 'READ_ONLY', value: 'read-only-value' }],
       });
       expect(update).toHaveStatusCode(403);
     });

@@ -176,33 +176,35 @@ describe('createSandboxWorkspaceManager', () => {
   });
 
   describe('sandbox secrets', () => {
-    const createManagerWithSecrets = (listKeys: jest.Mock) =>
+    const createManagerWithSecrets = (listKeysForSandbox: jest.Mock) =>
       createSandboxWorkspaceManager({
-        getDeps: () => ({ sandboxSecretsClient: { listKeys } }),
+        getDeps: () => ({ sandboxSecretsClient: { listKeysForSandbox } }),
         logger,
       });
 
-    it('passes the available secret keys to the manifest', async () => {
-      const listKeys = jest.fn().mockResolvedValue({ keys: ['GITHUB_TOKEN'], canEncrypt: true });
+    it('passes the secret keys available to the caller to the manifest', async () => {
+      const listKeysForSandbox = jest.fn().mockResolvedValue(['GITHUB_TOKEN']);
       const session = createSessionMock(true);
+      const callContext = createCallContext(['connector-1']);
 
-      await createManagerWithSecrets(listKeys).ensureWorkspaceReady({
+      await createManagerWithSecrets(listKeysForSandbox).ensureWorkspaceReady({
         session,
-        callContext: createCallContext(['connector-1']),
+        callContext,
       });
 
+      expect(listKeysForSandbox).toHaveBeenCalledWith(callContext.request);
       expect(mockWriteConnectorManifest).toHaveBeenCalledWith(
         expect.objectContaining({ secretKeys: ['GITHUB_TOKEN'] })
       );
     });
 
     it('rewrites the manifest when the secret keys change', async () => {
-      const listKeys = jest
+      const listKeysForSandbox = jest
         .fn()
-        .mockResolvedValueOnce({ keys: ['GITHUB_TOKEN'], canEncrypt: true })
-        .mockResolvedValueOnce({ keys: ['GITHUB_TOKEN'], canEncrypt: true })
-        .mockResolvedValueOnce({ keys: ['GITHUB_TOKEN', 'NEW_KEY'], canEncrypt: true });
-      const managerWithSecrets = createManagerWithSecrets(listKeys);
+        .mockResolvedValueOnce(['GITHUB_TOKEN'])
+        .mockResolvedValueOnce(['GITHUB_TOKEN'])
+        .mockResolvedValueOnce(['GITHUB_TOKEN', 'NEW_KEY']);
+      const managerWithSecrets = createManagerWithSecrets(listKeysForSandbox);
       const session = createSessionMock(false);
       const callContext = createCallContext(['connector-1']);
 
@@ -218,10 +220,10 @@ describe('createSandboxWorkspaceManager', () => {
     });
 
     it('treats a failing secrets lookup as no secrets and logs a warning', async () => {
-      const listKeys = jest.fn().mockRejectedValue(new Error('boom'));
+      const listKeysForSandbox = jest.fn().mockRejectedValue(new Error('boom'));
       const session = createSessionMock(true);
 
-      await createManagerWithSecrets(listKeys).ensureWorkspaceReady({
+      await createManagerWithSecrets(listKeysForSandbox).ensureWorkspaceReady({
         session,
         callContext: createCallContext(['connector-1']),
       });

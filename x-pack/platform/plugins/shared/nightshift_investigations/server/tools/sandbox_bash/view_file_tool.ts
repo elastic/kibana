@@ -61,6 +61,7 @@ export const createSandboxViewFileTool = ({
     idempotentHint: true,
     openWorldHint: false,
   },
+  excludeFromMcp: true,
   handler: async (params, context) => {
     const rawConversationId = getConversationId(context);
     if (!rawConversationId) {

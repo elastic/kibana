@@ -13,7 +13,9 @@ import {
   savedObjectsServiceMock,
 } from '@kbn/core/server/mocks';
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { NIGHTSHIFT_SECRETS_SO_TYPE } from '../saved_objects';
 import { createSandboxSecretsClient } from './sandbox_secrets_client';
 import {
@@ -28,10 +30,16 @@ const setup = ({
   canEncrypt = true,
   storedValues,
   spaceId = 'default',
+  withSecurity = true,
+  useRbac = true,
+  hasReadPrivilege = true,
 }: {
   canEncrypt?: boolean;
   storedValues?: Record<string, string>;
   spaceId?: string;
+  withSecurity?: boolean;
+  useRbac?: boolean;
+  hasReadPrivilege?: boolean;
 } = {}) => {
   const savedObjects = savedObjectsServiceMock.createStartContract();
   const soClient = savedObjectsClientMock.create();
@@ -73,11 +81,27 @@ const setup = ({
     spacesService: { getSpaceId: jest.fn(() => spaceId) },
   } as unknown as SpacesPluginStart;
 
+  const checkPrivileges = jest.fn(async () => ({ hasAllRequested: hasReadPrivilege }));
+  const security = {
+    authz: {
+      mode: { useRbacForRequest: jest.fn(() => useRbac) },
+      checkPrivilegesDynamicallyWithRequest: jest.fn(() => checkPrivileges),
+      actions: { api: { get: (operation: string) => `api:${operation}` } },
+    },
+  } as unknown as SecurityPluginStart;
+
   const client = createSandboxSecretsClient({
-    getDeps: () => ({ savedObjects, encryptedSavedObjects, spaces }),
+    getDeps: () => ({
+      savedObjects,
+      encryptedSavedObjects,
+      spaces,
+      security: withSecurity ? security : undefined,
+    }),
     canEncrypt,
     logger: loggingSystemMock.createLogger(),
   });
+
+  const request = httpServerMock.createKibanaRequest();
 
   return {
     client,
@@ -85,7 +109,8 @@ const setup = ({
     savedObjects,
     getDecryptedAsInternalUser,
     encryptedSavedObjects,
-    request: httpServerMock.createKibanaRequest(),
+    checkPrivileges,
+    request,
   };
 };
 
@@ -143,7 +168,7 @@ describe('createSandboxSecretsClient', () => {
         entries: [
           { key: 'KEEP' },
           { key: 'REPLACE', value: 'new-value' },
-          { key: 'ADD', value: 'x' },
+          { key: 'ADD', value: 'added-secret' },
         ],
         version: 'v1',
       });
@@ -153,7 +178,7 @@ describe('createSandboxSecretsClient', () => {
         NIGHTSHIFT_SECRETS_SO_TYPE,
         {
           keys: ['KEEP', 'REPLACE', 'ADD'],
-          values: { KEEP: 'kept-value', REPLACE: 'new-value', ADD: 'x' },
+          values: { KEEP: 'kept-value', REPLACE: 'new-value', ADD: 'added-secret' },
         },
         { id: STORED_ID, overwrite: true, version: 'v1' }
       );
@@ -171,11 +196,11 @@ describe('createSandboxSecretsClient', () => {
       });
 
       await expect(
-        client.replaceEntries(request, { entries: [{ key: 'A_KEY', value: 'v' }] })
+        client.replaceEntries(request, { entries: [{ key: 'A_KEY', value: 'value-123' }] })
       ).resolves.toEqual({ keys: ['A_KEY'], version: 'v1' });
       expect(soClient.create).toHaveBeenCalledWith(
         NIGHTSHIFT_SECRETS_SO_TYPE,
-        { keys: ['A_KEY'], values: { A_KEY: 'v' } },
+        { keys: ['A_KEY'], values: { A_KEY: 'value-123' } },
         undefined
       );
       expect(getDecryptedAsInternalUser).not.toHaveBeenCalled();
@@ -196,10 +221,19 @@ describe('createSandboxSecretsClient', () => {
         const { client, request } = setup({ storedValues: {} });
 
         await expect(
-          client.replaceEntries(request, { entries: [{ key, value: 'v' }] })
+          client.replaceEntries(request, { entries: [{ key, value: 'value-123' }] })
         ).rejects.toBeInstanceOf(SandboxSecretsValidationError);
       }
     );
+
+    it('rejects values too short to be redacted', async () => {
+      const { client, soClient, request } = setup({ storedValues: {} });
+
+      await expect(
+        client.replaceEntries(request, { entries: [{ key: 'A_KEY', value: 'short' }] })
+      ).rejects.toThrow('at least 8 characters');
+      expect(soClient.create).not.toHaveBeenCalled();
+    });
 
     it('rejects duplicate keys', async () => {
       const { client, request } = setup({ storedValues: {} });
@@ -207,18 +241,18 @@ describe('createSandboxSecretsClient', () => {
       await expect(
         client.replaceEntries(request, {
           entries: [
-            { key: 'DUP', value: 'a' },
-            { key: 'DUP', value: 'b' },
+            { key: 'DUP', value: 'value-aaa' },
+            { key: 'DUP', value: 'value-bbb' },
           ],
         })
-      ).rejects.toBeInstanceOf(SandboxSecretsValidationError);
+      ).rejects.toThrow('listed more than once');
     });
 
     it('fails when encryption is unavailable', async () => {
       const { client, request } = setup({ canEncrypt: false, storedValues: {} });
 
       await expect(
-        client.replaceEntries(request, { entries: [{ key: 'A_KEY', value: 'v' }] })
+        client.replaceEntries(request, { entries: [{ key: 'A_KEY', value: 'value-123' }] })
       ).rejects.toBeInstanceOf(SandboxSecretsUnavailableError);
     });
 
@@ -229,7 +263,10 @@ describe('createSandboxSecretsClient', () => {
       );
 
       await expect(
-        client.replaceEntries(request, { entries: [{ key: 'A_KEY', value: 'v' }], version: 'v0' })
+        client.replaceEntries(request, {
+          entries: [{ key: 'A_KEY', value: 'value-123' }],
+          version: 'v0',
+        })
       ).rejects.toBeInstanceOf(SandboxSecretsConflictError);
     });
 
@@ -247,15 +284,19 @@ describe('createSandboxSecretsClient', () => {
   });
 
   describe('resolveForCommand', () => {
-    it('returns only the requested secrets and marks long values for redaction', async () => {
+    it('returns only the requested secrets and marks them for redaction', async () => {
       const { client, getDecryptedAsInternalUser, request } = setup({
         spaceId: 'team-a',
-        storedValues: { GITHUB_TOKEN: 'ghp_long_secret', SHORT: 'abc', OTHER: 'other-value' },
+        storedValues: {
+          GITHUB_TOKEN: 'ghp_long_secret',
+          SECOND: 'second-value',
+          OTHER: 'other-value',
+        },
       });
 
-      await expect(client.resolveForCommand(request, ['GITHUB_TOKEN', 'SHORT'])).resolves.toEqual({
-        env: { GITHUB_TOKEN: 'ghp_long_secret', SHORT: 'abc' },
-        secretValues: ['ghp_long_secret'],
+      await expect(client.resolveForCommand(request, ['GITHUB_TOKEN', 'SECOND'])).resolves.toEqual({
+        env: { GITHUB_TOKEN: 'ghp_long_secret', SECOND: 'second-value' },
+        secretValues: ['ghp_long_secret', 'second-value'],
       });
       expect(getDecryptedAsInternalUser).toHaveBeenCalledWith(
         NIGHTSHIFT_SECRETS_SO_TYPE,
@@ -304,6 +345,126 @@ describe('createSandboxSecretsClient', () => {
       await expect(client.resolveForCommand(request, ['A_KEY'])).resolves.toEqual({
         errorMessage: expect.stringContaining('Sandbox secrets are unavailable'),
       });
+    });
+
+    it('refuses users without the Nightshift read privilege without decrypting', async () => {
+      const { client, getDecryptedAsInternalUser, checkPrivileges, request } = setup({
+        storedValues: { A_KEY: 'value-123' },
+        hasReadPrivilege: false,
+      });
+
+      const result = await client.resolveForCommand(request, ['A_KEY']);
+
+      expect(result).toEqual({
+        errorMessage: expect.stringContaining('require the Nightshift read privilege'),
+      });
+      expect(checkPrivileges).toHaveBeenCalledWith({
+        kibana: [`api:${NIGHTSHIFT_API_PRIVILEGES.read}`],
+      });
+      expect(getDecryptedAsInternalUser).not.toHaveBeenCalled();
+    });
+
+    it('refuses when the security plugin is unavailable', async () => {
+      const { client, getDecryptedAsInternalUser, request } = setup({
+        storedValues: { A_KEY: 'value-123' },
+        withSecurity: false,
+      });
+
+      await expect(client.resolveForCommand(request, ['A_KEY'])).resolves.toEqual({
+        errorMessage: expect.stringContaining('security plugin is not available'),
+      });
+      expect(getDecryptedAsInternalUser).not.toHaveBeenCalled();
+    });
+
+    it('skips the privilege check when RBAC does not apply to the request', async () => {
+      const { client, checkPrivileges, request } = setup({
+        storedValues: { A_KEY: 'value-123' },
+        useRbac: false,
+        hasReadPrivilege: false,
+      });
+
+      await expect(client.resolveForCommand(request, ['A_KEY'])).resolves.toEqual({
+        env: { A_KEY: 'value-123' },
+        secretValues: ['value-123'],
+      });
+      expect(checkPrivileges).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('listKeysForSandbox', () => {
+    it('returns the stored keys without decrypting', async () => {
+      const { client, getDecryptedAsInternalUser, request } = setup({
+        storedValues: { A_KEY: 'value-123', B_KEY: 'value-456' },
+      });
+
+      await expect(client.listKeysForSandbox(request)).resolves.toEqual(['A_KEY', 'B_KEY']);
+      expect(getDecryptedAsInternalUser).not.toHaveBeenCalled();
+    });
+
+    it('returns no keys for users without the Nightshift read privilege', async () => {
+      const { client, soClient, request } = setup({
+        storedValues: { A_KEY: 'value-123' },
+        hasReadPrivilege: false,
+      });
+
+      await expect(client.listKeysForSandbox(request)).resolves.toEqual([]);
+      expect(soClient.find).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('getRedactionValues', () => {
+    it('returns every stored value regardless of the Nightshift read privilege', async () => {
+      const { client, checkPrivileges, request } = setup({
+        storedValues: { A_KEY: 'value-123', B_KEY: 'value-456' },
+        hasReadPrivilege: false,
+      });
+
+      await expect(client.getRedactionValues(request)).resolves.toEqual(['value-123', 'value-456']);
+      expect(checkPrivileges).not.toHaveBeenCalled();
+    });
+
+    it('returns no values when nothing is stored', async () => {
+      const { client, getDecryptedAsInternalUser, request } = setup();
+
+      await expect(client.getRedactionValues(request)).resolves.toEqual([]);
+      expect(getDecryptedAsInternalUser).not.toHaveBeenCalled();
+    });
+
+    it('decrypts again only when the stored object version changes', async () => {
+      const { client, soClient, getDecryptedAsInternalUser, request } = setup({
+        storedValues: { A_KEY: 'value-123' },
+      });
+
+      await client.getRedactionValues(request);
+      await client.getRedactionValues(request);
+      expect(getDecryptedAsInternalUser).toHaveBeenCalledTimes(1);
+
+      soClient.find.mockResolvedValueOnce({
+        page: 1,
+        per_page: 1,
+        total: 1,
+        saved_objects: [
+          {
+            id: STORED_ID,
+            type: NIGHTSHIFT_SECRETS_SO_TYPE,
+            references: [],
+            version: 'v2',
+            score: 0,
+            attributes: { keys: ['A_KEY'] },
+          },
+        ],
+      });
+      await client.getRedactionValues(request);
+      expect(getDecryptedAsInternalUser).toHaveBeenCalledTimes(2);
+    });
+
+    it('throws when stored values cannot be decrypted', async () => {
+      const { client, getDecryptedAsInternalUser, request } = setup({
+        storedValues: { A_KEY: 'value-123' },
+      });
+      getDecryptedAsInternalUser.mockRejectedValue(new Error('Unable to decrypt'));
+
+      await expect(client.getRedactionValues(request)).rejects.toThrow('Unable to decrypt');
     });
   });
 });

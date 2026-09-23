@@ -44,6 +44,10 @@ import { createSandboxWriteFileTool } from './tools/sandbox_bash/write_file_tool
 import { createConnectorCredentialResolver } from './tools/sandbox_bash/connector_credentials';
 import { createSandboxWorkspaceManager } from './tools/sandbox_bash/sandbox_workspace_manager';
 import {
+  createSandboxOutputRedactorProvider,
+  withSandboxOutputRedaction,
+} from './tools/sandbox_bash/sandbox_output_redaction';
+import {
   nightshiftInvestigationSavedObjectType,
   nightshiftSecretsEncryptionParams,
   nightshiftSecretsSavedObjectType,
@@ -86,6 +90,7 @@ export class NightshiftInvestigationsPlugin
   private featureFlags?: CoreStart['featureFlags'];
   private actionsStart?: ActionsPluginStart;
   private encryptedSavedObjectsStart?: NightshiftInvestigationsStartDeps['encryptedSavedObjects'];
+  private securityStart?: NightshiftInvestigationsStartDeps['security'];
   private cortexEnabled = false;
   private investigationQuotaCallback?: InvestigationQuotaCallback;
 
@@ -114,6 +119,7 @@ export class NightshiftInvestigationsPlugin
       getDeps: () => ({
         savedObjects: this.savedObjects,
         encryptedSavedObjects: this.encryptedSavedObjectsStart,
+        security: this.securityStart,
         spaces: this.spaces,
       }),
       canEncrypt: plugins.encryptedSavedObjects?.canEncrypt ?? false,
@@ -169,36 +175,54 @@ export class NightshiftInvestigationsPlugin
           getDeps: () => ({ actions: this.actionsStart }),
           logger: sandboxLogger.get('connector_credentials'),
         });
+        const redaction = {
+          getOutputRedactor: createSandboxOutputRedactorProvider({
+            getDeps: () => ({ actions: this.actionsStart, sandboxSecretsClient }),
+          }),
+          logger: sandboxLogger.get('output_redaction'),
+        };
 
         plugins.agentBuilder.tools.register(
-          createSandboxBashTool({
-            getSandboxStart,
-            sandboxWorkspaceManager,
-            resolveConnectorCredentials,
-            sandboxSecretsClient,
-            logger: sandboxLogger,
-          })
+          withSandboxOutputRedaction(
+            createSandboxBashTool({
+              getSandboxStart,
+              sandboxWorkspaceManager,
+              resolveConnectorCredentials,
+              sandboxSecretsClient,
+              logger: sandboxLogger,
+            }),
+            redaction
+          )
         );
         plugins.agentBuilder.tools.register(
-          createSandboxViewFileTool({
-            getSandboxStart,
-            sandboxWorkspaceManager,
-            logger: sandboxLogger,
-          })
+          withSandboxOutputRedaction(
+            createSandboxViewFileTool({
+              getSandboxStart,
+              sandboxWorkspaceManager,
+              logger: sandboxLogger,
+            }),
+            redaction
+          )
         );
         plugins.agentBuilder.tools.register(
-          createSandboxStrReplaceTool({
-            getSandboxStart,
-            sandboxWorkspaceManager,
-            logger: sandboxLogger,
-          })
+          withSandboxOutputRedaction(
+            createSandboxStrReplaceTool({
+              getSandboxStart,
+              sandboxWorkspaceManager,
+              logger: sandboxLogger,
+            }),
+            redaction
+          )
         );
         plugins.agentBuilder.tools.register(
-          createSandboxWriteFileTool({
-            getSandboxStart,
-            sandboxWorkspaceManager,
-            logger: sandboxLogger,
-          })
+          withSandboxOutputRedaction(
+            createSandboxWriteFileTool({
+              getSandboxStart,
+              sandboxWorkspaceManager,
+              logger: sandboxLogger,
+            }),
+            redaction
+          )
         );
       }
     }
@@ -287,6 +311,7 @@ export class NightshiftInvestigationsPlugin
     this.featureFlags = coreStart.featureFlags;
     this.actionsStart = plugins.actions;
     this.encryptedSavedObjectsStart = plugins.encryptedSavedObjects;
+    this.securityStart = plugins.security;
 
     // The `nightshift.ensureInvestigationAgent` workflow step is the general guarantee that the
     // agent exists wherever an investigation runs. This narrower install exists so the agent is

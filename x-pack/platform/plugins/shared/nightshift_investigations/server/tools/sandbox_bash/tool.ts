@@ -80,6 +80,7 @@ export const createSandboxBashTool = ({
     idempotentHint: false,
     openWorldHint: true,
   },
+  excludeFromMcp: true,
   handler: async (params, context) => {
     const { command, working_directory, env, timeout_seconds, connector_id, secret_keys } = params;
 

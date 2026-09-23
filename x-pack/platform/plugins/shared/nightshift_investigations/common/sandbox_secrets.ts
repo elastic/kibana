@@ -9,6 +9,8 @@ export const SANDBOX_SECRETS_API_PATH = '/internal/nightshift/sandbox_secrets';
 
 export const SANDBOX_SECRET_KEY_REGEX = /^[A-Z_][A-Z0-9_]*$/;
 export const MAX_SANDBOX_SECRET_KEY_LENGTH = 128;
+/** Shorter values could not be redacted from sandbox output without mangling unrelated text. */
+export const MIN_SANDBOX_SECRET_VALUE_LENGTH = 8;
 export const MAX_SANDBOX_SECRET_VALUE_LENGTH = 16384;
 export const MAX_SANDBOX_SECRETS = 100;
 export const MAX_SANDBOX_SECRETS_VERSION_LENGTH = 256;

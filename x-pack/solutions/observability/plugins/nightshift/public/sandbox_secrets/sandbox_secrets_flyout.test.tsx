@@ -104,11 +104,28 @@ describe('SandboxSecretsFlyout', () => {
       target: { value: 'CONNECTOR_TOKEN' },
     });
     fireEvent.change(screen.getByTestId('nightshiftSandboxSecretValue'), {
-      target: { value: 'value' },
+      target: { value: 'reserved-value' },
     });
     await act(async () => fireEvent.click(screen.getByTestId('nightshiftSandboxSecretsSave')));
 
     expect(screen.getByText(/CONNECTOR_\* are reserved/)).toBeInTheDocument();
+    expect(getPutBody()).toBeUndefined();
+  });
+
+  it('rejects values too short to be redacted from sandbox output', async () => {
+    const { getPutBody } = setup({ keys: [], canEncrypt: true });
+    await screen.findByTestId('nightshiftSandboxSecretsEmpty');
+
+    fireEvent.click(screen.getByTestId('nightshiftSandboxSecretsAdd'));
+    fireEvent.change(screen.getByTestId('nightshiftSandboxSecretKey'), {
+      target: { value: 'SHORT_VALUE' },
+    });
+    fireEvent.change(screen.getByTestId('nightshiftSandboxSecretValue'), {
+      target: { value: 'short' },
+    });
+    await act(async () => fireEvent.click(screen.getByTestId('nightshiftSandboxSecretsSave')));
+
+    expect(screen.getByText('Use at least 8 characters.')).toBeInTheDocument();
     expect(getPutBody()).toBeUndefined();
   });
 

@@ -27,7 +27,7 @@ export const createSandboxWorkspaceManager = ({
 }: {
   getDeps: () => {
     actions?: ActionsPluginStart;
-    sandboxSecretsClient?: Pick<SandboxSecretsClient, 'listKeys'>;
+    sandboxSecretsClient?: Pick<SandboxSecretsClient, 'listKeysForSandbox'>;
   };
   /** When set, `/workspace/elastic.md` is (re-)seeded alongside the connector manifest. */
   telemetryConnectorId?: string;
@@ -36,13 +36,12 @@ export const createSandboxWorkspaceManager = ({
   const lastWorkspaceKeys = new Map<SandboxSession, string>();
 
   const listSecretKeys = async (
-    sandboxSecretsClient: Pick<SandboxSecretsClient, 'listKeys'> | undefined,
-    request: KibanaRequest
+    sandboxSecretsClient: Pick<SandboxSecretsClient, 'listKeysForSandbox'> | undefined,
+    callContext: SandboxCallContext
   ): Promise<string[]> => {
     if (!sandboxSecretsClient) return [];
     try {
-      const { keys } = await sandboxSecretsClient.listKeys(request);
-      return keys;
+      return await sandboxSecretsClient.listKeysForSandbox(callContext.request);
     } catch (err) {
       logger.warn(`Listing sandbox secrets failed: ${(err as Error).message}`);
       return [];
@@ -58,7 +57,7 @@ export const createSandboxWorkspaceManager = ({
       callContext: SandboxCallContext;
     }): Promise<void> {
       const { actions, sandboxSecretsClient } = getDeps();
-      const secretKeys = await listSecretKeys(sandboxSecretsClient, callContext.request);
+      const secretKeys = await listSecretKeys(sandboxSecretsClient, callContext);
 
       const currentKey = JSON.stringify({
         connectors: [...callContext.allowedConnectorIds].sort(),

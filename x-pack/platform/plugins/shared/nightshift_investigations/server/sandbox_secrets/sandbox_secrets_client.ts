@@ -10,15 +10,20 @@ import { SavedObjectsErrorHelpers, SavedObjectsUtils } from '@kbn/core/server';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import type {
   GetSandboxSecretsResponse,
   PutSandboxSecretsRequest,
   PutSandboxSecretsResponse,
 } from '../../common/sandbox_secrets';
-import { MAX_SANDBOX_SECRETS, validateSandboxSecretKey } from '../../common/sandbox_secrets';
+import {
+  MAX_SANDBOX_SECRETS,
+  MIN_SANDBOX_SECRET_VALUE_LENGTH,
+  validateSandboxSecretKey,
+} from '../../common/sandbox_secrets';
 import { NIGHTSHIFT_SECRETS_SO_TYPE, type NightshiftSecretsAttributes } from '../saved_objects';
-import { MIN_REDACTABLE_SECRET_LENGTH } from '../tools/sandbox_bash/connector_credentials';
 import {
   SandboxSecretsConflictError,
   SandboxSecretsUnavailableError,
@@ -39,15 +44,23 @@ export interface SandboxSecretsClient {
     request: KibanaRequest,
     params: PutSandboxSecretsRequest
   ) => Promise<PutSandboxSecretsResponse>;
+  /** Keys a sandbox tool call may request; empty when the user may not use sandbox secrets. */
+  listKeysForSandbox: (request: KibanaRequest) => Promise<string[]>;
   resolveForCommand: (
     request: KibanaRequest,
     requestedKeys: readonly string[]
   ) => Promise<SandboxSecretsResolution>;
+  /**
+   * Every stored value of the request's space, for redacting sandbox output. Not privilege-gated:
+   * the values must never leave Kibana. Throws when stored values exist but cannot be decrypted.
+   */
+  getRedactionValues: (request: KibanaRequest) => Promise<string[]>;
 }
 
 export interface SandboxSecretsClientDeps {
   savedObjects?: CoreStart['savedObjects'];
   encryptedSavedObjects?: EncryptedSavedObjectsPluginStart;
+  security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
 }
 
@@ -56,10 +69,15 @@ const validateEntries = ({ entries }: PutSandboxSecretsRequest): void => {
     throw new SandboxSecretsValidationError(`At most ${MAX_SANDBOX_SECRETS} secrets are allowed`);
   }
   const seen = new Set<string>();
-  for (const { key } of entries) {
+  for (const { key, value } of entries) {
     const keyError = validateSandboxSecretKey(key);
     if (keyError) {
       throw new SandboxSecretsValidationError(`Secret key '${key}' ${keyError}`);
+    }
+    if (value !== undefined && value.length < MIN_SANDBOX_SECRET_VALUE_LENGTH) {
+      throw new SandboxSecretsValidationError(
+        `Secret '${key}' must be at least ${MIN_SANDBOX_SECRET_VALUE_LENGTH} characters long`
+      );
     }
     if (seen.has(key)) {
       throw new SandboxSecretsValidationError(`Secret key '${key}' is listed more than once`);
@@ -70,7 +88,8 @@ const validateEntries = ({ entries }: PutSandboxSecretsRequest): void => {
 
 /**
  * Creates the client for the per-space sandbox secrets object. Values are only ever decrypted as
- * the internal user and never returned to callers other than the sandbox command resolver.
+ * the internal user and never returned to callers other than the sandbox command resolver, which
+ * only serves users with the Nightshift read privilege, and the sandbox output redaction.
  */
 export const createSandboxSecretsClient = ({
   getDeps,
@@ -84,8 +103,13 @@ export const createSandboxSecretsClient = ({
   const getSpaceId = (request: KibanaRequest): string =>
     getDeps().spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
 
-  // Access is authorized by the route/tool privileges, so the security extension is skipped; the
-  // encryption extension stays enabled so `values` is encrypted on write.
+  // Keyed by space and object id; an entry is reused only while the object version is unchanged,
+  // so edits made on any Kibana node invalidate it on the next lookup.
+  const redactionValuesCache = new Map<string, { version?: string; values: string[] }>();
+
+  // Access is authorized by the route privileges and `getSandboxAccessDeniedReason`, so the
+  // security extension is skipped; the encryption extension stays enabled so `values` is
+  // encrypted on write.
   const getSavedObjectsClient = (request: KibanaRequest) => {
     const { savedObjects } = getDeps();
     if (!savedObjects) {
@@ -137,6 +161,26 @@ export const createSandboxSecretsClient = ({
     }
   };
 
+  // Deny by default: without the security plugin the user's privileges cannot be verified.
+  const getSandboxAccessDeniedReason = async (
+    request: KibanaRequest
+  ): Promise<string | undefined> => {
+    const { security } = getDeps();
+    if (!security) {
+      return 'Sandbox secrets are unavailable: the security plugin is not available.';
+    }
+    const { authz } = security;
+    if (!authz.mode.useRbacForRequest(request)) {
+      return undefined;
+    }
+    const { hasAllRequested } = await authz.checkPrivilegesDynamicallyWithRequest(request)({
+      kibana: [authz.actions.api.get(NIGHTSHIFT_API_PRIVILEGES.read)],
+    });
+    return hasAllRequested
+      ? undefined
+      : 'Sandbox secrets require the Nightshift read privilege in this space.';
+  };
+
   return {
     listKeys: async (request) => {
       const existing = await findSecretsObject(request);
@@ -186,9 +230,22 @@ export const createSandboxSecretsClient = ({
       }
     },
 
+    listKeysForSandbox: async (request) => {
+      if (await getSandboxAccessDeniedReason(request)) {
+        return [];
+      }
+      const existing = await findSecretsObject(request);
+      return existing?.attributes.keys ?? [];
+    },
+
     resolveForCommand: async (request, requestedKeys) => {
       let values: Record<string, string>;
       try {
+        const deniedReason = await getSandboxAccessDeniedReason(request);
+        if (deniedReason) {
+          logger.warn(`Refused sandbox secrets: ${deniedReason}`);
+          return { errorMessage: deniedReason };
+        }
         const existing = await findSecretsObject(request);
         values = await readDecryptedValues(request, existing?.id);
       } catch (err) {
@@ -206,14 +263,26 @@ export const createSandboxSecretsClient = ({
       }
 
       const env: Record<string, string> = {};
-      const secretValues: string[] = [];
       for (const key of requestedKeys) {
-        const value = values[key];
-        env[key] = value;
-        if (value.length >= MIN_REDACTABLE_SECRET_LENGTH) secretValues.push(value);
+        env[key] = values[key];
       }
       logger.debug(`Injecting ${requestedKeys.length} sandbox secret(s) into a single command`);
-      return { env, secretValues };
+      return { env, secretValues: Object.values(env) };
+    },
+
+    getRedactionValues: async (request) => {
+      const existing = await findSecretsObject(request);
+      if (!existing) {
+        return [];
+      }
+      const cacheKey = `${getSpaceId(request)}:${existing.id}`;
+      const cached = redactionValuesCache.get(cacheKey);
+      if (cached && cached.version === existing.version) {
+        return cached.values;
+      }
+      const values = Object.values(await readDecryptedValues(request, existing.id));
+      redactionValuesCache.set(cacheKey, { version: existing.version, values });
+      return values;
     },
   };
 };

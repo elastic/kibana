@@ -62,7 +62,7 @@ const setup = ({
       context
     );
 
-  return { run, runCommand, resolveForCommand, request };
+  return { tool, run, runCommand, resolveForCommand, request };
 };
 
 describe('sandbox bash tool — sandbox secrets', () => {
@@ -138,5 +138,11 @@ describe('sandbox bash tool — sandbox secrets', () => {
       { type: ToolResultType.error, data: { message: 'Unknown sandbox secret(s): MISSING' } },
     ]);
     expect(runCommand).not.toHaveBeenCalled();
+  });
+
+  it('is not exposed over MCP', () => {
+    const { tool } = setup();
+
+    expect(tool.excludeFromMcp).toBe(true);
   });
 });

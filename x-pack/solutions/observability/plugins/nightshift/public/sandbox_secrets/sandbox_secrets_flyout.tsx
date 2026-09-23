@@ -30,6 +30,7 @@ import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import {
   MAX_SANDBOX_SECRETS,
+  MIN_SANDBOX_SECRET_VALUE_LENGTH,
   validateSandboxSecretKey,
   type SandboxSecretEntry,
 } from '@kbn/nightshift-investigations-plugin/common';
@@ -62,12 +63,21 @@ const getKeyError = (row: SecretRow, rows: readonly SecretRow[]): string | undef
   return undefined;
 };
 
-const getValueError = (row: SecretRow): string | undefined =>
-  row.value === '' && !hasStoredValue(row)
-    ? i18n.translate('xpack.nightshift.sandboxSecrets.valueRequiredError', {
-        defaultMessage: 'Enter a value for this secret.',
+const getValueError = (row: SecretRow): string | undefined => {
+  if (row.value === '') {
+    return hasStoredValue(row)
+      ? undefined
+      : i18n.translate('xpack.nightshift.sandboxSecrets.valueRequiredError', {
+          defaultMessage: 'Enter a value for this secret.',
+        });
+  }
+  return row.value.length < MIN_SANDBOX_SECRET_VALUE_LENGTH
+    ? i18n.translate('xpack.nightshift.sandboxSecrets.valueTooShortError', {
+        defaultMessage: 'Use at least {minLength} characters.',
+        values: { minLength: MIN_SANDBOX_SECRET_VALUE_LENGTH },
       })
     : undefined;
+};
 
 const toEntries = (rows: readonly SecretRow[]): SandboxSecretEntry[] =>
   rows.map((row) =>

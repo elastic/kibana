@@ -54,6 +54,8 @@ dependsOn:
   - '@kbn/inference-plugin'
   - '@kbn/i18n-react'
   - '@kbn/utility-types'
+  - '@kbn/encrypted-saved-objects-plugin'
+  - '@kbn/security-plugin'
 tags:
   - plugin
   - prod

@@ -27,6 +27,7 @@ import type {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
 } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { NightshiftInvestigationsClient } from './client/investigations_client';
 import type { TriggerEmitter } from './workflows/triggers/emit';
 
@@ -63,6 +64,7 @@ export interface NightshiftInvestigationsStartDeps {
   ruleRegistry?: RuleRegistryPluginStartContract;
   sandbox?: SandboxPluginStart;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
+  security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
   taskManager: TaskManagerStartContract;
   workflowsExtensions?: WorkflowsExtensionsServerPluginStart;

@@ -17,6 +17,7 @@ import {
   MAX_SANDBOX_SECRETS_VERSION_LENGTH,
   MAX_SANDBOX_SECRET_KEY_LENGTH,
   MAX_SANDBOX_SECRET_VALUE_LENGTH,
+  MIN_SANDBOX_SECRET_VALUE_LENGTH,
 } from '../../common/sandbox_secrets';
 import {
   SandboxSecretsConflictError,
@@ -67,7 +68,11 @@ const putSandboxSecretsRoute = createNightshiftInvestigationsServerRoute({
         .array(
           z.object({
             key: z.string().max(MAX_SANDBOX_SECRET_KEY_LENGTH),
-            value: z.string().min(1).max(MAX_SANDBOX_SECRET_VALUE_LENGTH).optional(),
+            value: z
+              .string()
+              .min(MIN_SANDBOX_SECRET_VALUE_LENGTH)
+              .max(MAX_SANDBOX_SECRET_VALUE_LENGTH)
+              .optional(),
           })
         )
         .max(MAX_SANDBOX_SECRETS),
