@@ -144,6 +144,28 @@ test.describe(
         expect(await app.isFocusWithin(flyout)).toBe(true);
       });
 
+      test(`collapsing the ${form} header dismisses the badge overflow popover`, async ({
+        page,
+        pageObjects,
+      }) => {
+        const app = pageObjects.flyoutSystem;
+        const session = app.session(form);
+        const flyout = await app.openFlyout(form, session);
+
+        const overflow = app.badgeOverflow(form, session);
+        await overflow.click();
+        const popover = page.getByRole('dialog', { name: 'Show 2 more badges' });
+        await expect(popover).toBeVisible();
+
+        await app.wheelOverHeader(form, session, WHEEL_DELTA);
+        await expect(app.collapsibleRegion(form, session)).toHaveAttribute('aria-hidden', 'true');
+
+        // The panel is portalled, so nothing else would take it down once its anchor goes inert,
+        // leaving the badges floating over a control that is no longer there.
+        await expect(popover).toBeHidden();
+        expect(await app.isFocusWithin(flyout)).toBe(true);
+      });
+
       test(`the ${form} header keeps aria-hidden and focusability in agreement during the collapse animation`, async ({
         page,
         pageObjects,
@@ -185,6 +207,36 @@ test.describe(
           include: [app.rootSelector(form, session)],
         });
         expect(violations).toHaveLength(0);
+      });
+
+      test(`the ${form} header swallows the wheel when nothing in the flyout can scroll`, async ({
+        pageObjects,
+      }) => {
+        const app = pageObjects.flyoutSystem;
+        const session = app.session(form);
+        await app.openFlyout(form, session);
+        await expect(app.childTrigger(form, session, 'A')).toBeVisible();
+        const child = await app.openChildFlyout(form, session, 'A');
+
+        const result = await child.evaluate((el) => {
+          const body = el.querySelector('[data-test-subj="euiFlyoutBodyOverflow"]') as HTMLElement;
+          const content = el.querySelector('[data-test-subj="euiFlyoutContent"]') as HTMLElement;
+          const header = el.querySelector('.euiFlyoutHeader') as HTMLElement;
+          const event = new WheelEvent('wheel', { deltaY: 50, cancelable: true, bubbles: true });
+          header.dispatchEvent(event);
+          return {
+            bodyScrolls: body.scrollHeight > body.clientHeight,
+            contentScrolls: content.scrollHeight > content.clientHeight,
+            defaultPrevented: event.defaultPrevented,
+          };
+        });
+
+        // The swallow path only exists when neither scroller has anywhere left to go.
+        expect(result.bodyScrolls).toBe(false);
+        expect(result.contentScrolls).toBe(false);
+
+        // Releasing here would chain the scroll out to the page behind the flyout.
+        expect(result.defaultPrevented).toBe(true);
       });
 
       test(`the ${form} footer stays reachable by wheel at a reflow viewport`, async ({

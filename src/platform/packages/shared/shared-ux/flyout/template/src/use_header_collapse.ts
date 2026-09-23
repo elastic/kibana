@@ -37,22 +37,11 @@ const WHEEL_PAGE_FRACTION = 0.9;
 /** Absorbs fractional-DPR rounding when comparing a scroll offset against its extreme. */
 const SCROLL_EDGE_EPSILON = 1;
 
-/**
- * Whether the scroller can no longer move in the delta's direction.
- *
- * `EuiFlyout` wraps the header, body, and footer in a `.euiFlyout__content` element that becomes
- * a scroll container of its own at short viewports. Calling `preventDefault()` on a wheel event
- * cancels scroll chaining as well as the default scroll, so swallowing the event at the body
- * scroller's extreme would leave that outer container — and the footer with it — unreachable.
- */
-const isAtScrollEdge = (scroller: HTMLElement, delta: number): boolean => {
-  if (delta === 0) return true;
-  if (delta < 0) return scroller.scrollTop <= SCROLL_EDGE_EPSILON;
-  // TODO(a11y-review): when the body does not overflow, maxScrollTop is <= 0 and both branches
-  // report "at edge", so the wheel handler never calls preventDefault and a wheel over the header
-  // scrolls the page behind a short non-modal flyout. Gate the release on scrollHeight > clientHeight?
-  const maxScrollTop = scroller.scrollHeight - scroller.clientHeight;
-  return scroller.scrollTop >= maxScrollTop - SCROLL_EDGE_EPSILON;
+/** Whether the element can still move in the delta's direction. */
+const canScrollBy = (element: HTMLElement, delta: number): boolean => {
+  if (delta === 0) return false;
+  if (delta < 0) return element.scrollTop > SCROLL_EDGE_EPSILON;
+  return element.scrollTop < element.scrollHeight - element.clientHeight - SCROLL_EDGE_EPSILON;
 };
 
 /**
@@ -164,9 +153,8 @@ export const useHeaderCollapse = ({
     // blurring any focused descendant — focus would land on `<body>`, outside the flyout's focus
     // trap. Moving it has to happen here, before the state flips: once the attributes are on the
     // element there is no focused node left to find. The scroll container is the natural
-    // destination, being both focusable and the thing the user was already scrolling.
-    // TODO(a11y-review): `contains` misses focus sitting in a portal owned by this region, such as
-    // the badge-overflow popover panel, so the anchor can be hidden while focus is still inside it.
+    // destination, being both focusable and the thing the user was already scrolling. Content the
+    // region portals elsewhere is outside this check, so it has to dismiss itself on collapse.
     if (next && collapsibleNodeRef.current?.contains(document.activeElement)) {
       scroller.focus();
     }
@@ -262,6 +250,9 @@ export const useHeaderCollapse = ({
     // Walk up to the flyout header element to cover its padding, which the inner wrapper does not.
     const header = node?.closest<HTMLElement>('.euiFlyoutHeader');
     if (!header) return;
+    // `EuiFlyout` wraps the header, body, and footer in this element, which becomes a scroll
+    // container of its own at short viewports.
+    const outerScroller = header.closest<HTMLElement>('.euiFlyout__content');
 
     const onWheel = (event: Event) => {
       const scroller = scrollerRef.current;
@@ -269,13 +260,22 @@ export const useHeaderCollapse = ({
       // Let modified wheel events (Ctrl/Cmd+scroll = browser zoom, Alt+scroll = h-scroll, etc.)
       // pass through unmodified so the browser can handle them normally.
       if (event.ctrlKey || event.metaKey || event.altKey || event.shiftKey) return;
+
       const delta = wheelDeltaToPixels(event, scroller.clientHeight);
-      // Release the event at the extreme so the browser can chain the scroll outward.
-      if (isAtScrollEdge(scroller, delta)) return;
-      // The header is not scrollable, so the browser would otherwise scroll the page behind it.
-      // Requires the non-passive listener below; React's onWheel is passive and cannot do this.
+      if (canScrollBy(scroller, delta)) {
+        // The header is not scrollable, so the browser would otherwise scroll the page behind it.
+        // Requires the non-passive listener below; React's onWheel is passive and cannot do this.
+        event.preventDefault();
+        scroller.scrollBy({ top: delta });
+        return;
+      }
+
+      // `preventDefault()` cancels scroll chaining along with the default scroll, so releasing the
+      // event is the only way the outer container — and the footer inside it — stays reachable.
+      if (!outerScroller || canScrollBy(outerScroller, delta)) return;
+
+      // Nothing inside the flyout can take the scroll, so releasing would only move the page.
       event.preventDefault();
-      scroller.scrollBy({ top: delta });
     };
 
     header.addEventListener('wheel', onWheel, { passive: false });
