@@ -1841,6 +1841,21 @@
               }
             }
           },
+          "400": {
+            "description": "The request is invalid. For example, the `owner` query parameter is missing or `page`/`perPage` are not integers.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response400": {
+                    "$ref": "#/components/examples/response_400_invalid_template"
+                  }
+                }
+              }
+            }
+          },
           "401": {
             "description": "Authorization information is missing or invalid.",
             "content": {
@@ -5992,7 +6007,7 @@
       },
       "field_definition_put_request": {
         "title": "Field definition PUT request",
-        "description": "The body for updating a reusable field definition.\n\nIdentity constraints: the `name` property must match the `name` key in the YAML `definition`. When `name` is omitted, the server extracts it from the `definition` YAML automatically. A field's `name` and YAML `type` are immutable — an attempt to change either returns `409` with `attributes.code = \"field_identity_immutable\"` and `attributes.changed` listing which identity attributes were modified.\n\nNote: unlike the POST endpoint, the `definition` field has no enforced character limit on PUT. This allows existing field definitions whose stored YAML was created through internal tooling before the public API existed (and may exceed 30 000 characters) to remain modifiable.\n",
+        "description": "The body for updating a reusable field definition.\n\nIdentity constraints: the `name` property must match the `name` key in the YAML `definition`. When `name` is omitted, the server extracts it from the `definition` YAML automatically. A field's `name` and YAML `type` are immutable — an attempt to change either returns `409` with `attributes.code = \"field_identity_immutable\"` and `attributes.changed` listing which identity attributes were modified.\n\nUnlike the POST endpoint, PUT allows an unchanged `definition` to be submitted even if it exceeds 30 000 characters, so that field definitions created through internal tooling remain modifiable. When the submitted `definition` differs from the stored value, the 30 000-character limit is enforced. A hard upper bound of 1 000 000 characters always applies regardless of whether the definition is changed.\n",
         "type": "object",
         "additionalProperties": false,
         "required": [
@@ -6011,6 +6026,7 @@
           },
           "definition": {
             "type": "string",
+            "maxLength": 1000000,
             "description": "The field definition as a YAML string describing a single field (type, label, control, metadata).",
             "example": "name: priority\nlabel: Priority\ntype: keyword\ncontrol: SELECT_BASIC\nmetadata:\n  options: [low, medium, high]\n  default: medium\n"
           },
@@ -8076,6 +8092,14 @@
           "total": 1
         }
       },
+      "response_400_invalid_template": {
+        "summary": "The request is invalid.",
+        "value": {
+          "error": "Bad Request",
+          "message": "Template [invalid-template-id] not found for owner [cases]",
+          "statusCode": 400
+        }
+      },
       "field_definition_write_request": {
         "summary": "Create or update a reusable field definition.",
         "value": {
@@ -8095,14 +8119,6 @@
           "definition": "name: priority\nlabel: Priority\ntype: keyword\ncontrol: SELECT_BASIC\nmetadata:\n  options: [low, medium, high]\n  default: medium\n",
           "description": "Ticket priority level.",
           "isGlobal": false
-        }
-      },
-      "response_400_invalid_template": {
-        "summary": "The request is invalid.",
-        "value": {
-          "error": "Bad Request",
-          "message": "Template [invalid-template-id] not found for owner [cases]",
-          "statusCode": 400
         }
       },
       "get_case_applicable_fields_response": {

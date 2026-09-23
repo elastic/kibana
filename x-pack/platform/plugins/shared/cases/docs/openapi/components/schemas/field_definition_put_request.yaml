@@ -10,9 +10,11 @@ description: >
   attributes were modified.
 
 
-  Note: unlike the POST endpoint, the `definition` field has no enforced character limit on PUT.
-  This allows existing field definitions whose stored YAML was created through internal tooling
-  before the public API existed (and may exceed 30 000 characters) to remain modifiable.
+  Unlike the POST endpoint, PUT allows an unchanged `definition` to be submitted even if it exceeds
+  30 000 characters, so that field definitions created through internal tooling remain modifiable.
+  When the submitted `definition` differs from the stored value, the 30 000-character limit is
+  enforced. A hard upper bound of 1 000 000 characters always applies regardless of whether the
+  definition is changed.
 type: object
 additionalProperties: false
 required:
@@ -31,6 +33,7 @@ properties:
     $ref: 'owner.yaml'
   definition:
     type: string
+    maxLength: 1000000
     description: The field definition as a YAML string describing a single field (type, label, control, metadata).
     example: |
       name: priority

@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { isBoom } from '@hapi/boom';
 import {
   CASE_FIELD_DEFINITION_DETAILS_URL,
+  MAX_FIELD_DEFINITION_DEFINITION_LENGTH,
   MAX_FIELD_DEFINITION_ID_LENGTH,
 } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
@@ -60,6 +61,21 @@ export const putPublicFieldDefinitionRoute = createCasesRoute({
       const definitionValidation = validateFieldDefinitionYaml(bodyResult.data.definition);
       if (!definitionValidation.valid) {
         return response.badRequest({ body: { message: definitionValidation.message } });
+      }
+
+      // Only allow definition strings longer than the public POST limit when the caller is
+      // submitting the exact same bytes already stored (grandfathering legacy definitions created
+      // by internal tooling). Changed definitions must respect MAX_FIELD_DEFINITION_DEFINITION_LENGTH.
+      const submittedDefinition = bodyResult.data.definition;
+      if (submittedDefinition.length > MAX_FIELD_DEFINITION_DEFINITION_LENGTH) {
+        const current = await casesClient.fieldDefinitions.getFieldDefinition(fieldDefinitionId);
+        if (submittedDefinition !== current.attributes.definition) {
+          return response.badRequest({
+            body: {
+              message: `Field definition must not exceed ${MAX_FIELD_DEFINITION_DEFINITION_LENGTH} characters`,
+            },
+          });
+        }
       }
 
       // Resolve `name` from the YAML when the caller omitted it.
