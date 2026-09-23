@@ -9,7 +9,6 @@ import { z } from '@kbn/zod/v4';
 import { arrayOrSingleSchema, queryIntSchema } from './common';
 import {
   ID_MAX_LENGTH,
-  MAX_SEARCH_LENGTH,
   EXECUTION_HISTORY_MAX_PER_PAGE,
   EXECUTION_HISTORY_DEFAULT_PER_PAGE,
   EXECUTION_HISTORY_MAX_RESULT_WINDOW,
@@ -54,13 +53,6 @@ export const listRuleExecutionsRequestSchema = z
   .object({
     rule_ids: ruleIdArraySchema.optional().describe(`Rule id filter. `),
     outcome: outcomeArraySchema.optional().describe('Outcome filter. '),
-    search: z
-      .string()
-      .trim()
-      .min(1)
-      .max(MAX_SEARCH_LENGTH)
-      .optional()
-      .describe('Free-text search. Matches rule name or rule ID (case-insensitive).'),
     from: z.iso
       .datetime()
       .optional()

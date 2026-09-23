@@ -7,7 +7,6 @@
 
 import {
   ID_MAX_LENGTH,
-  MAX_SEARCH_LENGTH,
   EXECUTION_HISTORY_DEFAULT_PER_PAGE,
   EXECUTION_HISTORY_MAX_PER_PAGE,
   EXECUTION_HISTORY_MAX_RESULT_WINDOW,
@@ -68,41 +67,12 @@ describe('rule_execution_history_schema', () => {
         });
       });
 
-      it('does not inject rule_ids / outcome / search / from / to when missing', () => {
+      it('does not inject rule_ids / outcome / from / to when missing', () => {
         const parsed = listRuleExecutionsRequestSchema.parse({});
         expect(parsed).not.toHaveProperty('rule_ids');
         expect(parsed).not.toHaveProperty('outcome');
-        expect(parsed).not.toHaveProperty('search');
         expect(parsed).not.toHaveProperty('from');
         expect(parsed).not.toHaveProperty('to');
-      });
-    });
-
-    describe('search', () => {
-      it('accepts a valid search string', () => {
-        expect(listRuleExecutionsRequestSchema.parse({ search: 'my rule' }).search).toBe('my rule');
-      });
-
-      it('trims surrounding whitespace', () => {
-        expect(listRuleExecutionsRequestSchema.parse({ search: '  hello  ' }).search).toBe('hello');
-      });
-
-      it('rejects a whitespace-only string (empty after trim)', () => {
-        expect(listRuleExecutionsRequestSchema.safeParse({ search: '   ' }).success).toBe(false);
-      });
-
-      it(`accepts a search of exactly MAX_SEARCH_LENGTH (${MAX_SEARCH_LENGTH}) chars`, () => {
-        expect(
-          listRuleExecutionsRequestSchema.safeParse({ search: 'a'.repeat(MAX_SEARCH_LENGTH) })
-            .success
-        ).toBe(true);
-      });
-
-      it(`rejects a search longer than MAX_SEARCH_LENGTH (${MAX_SEARCH_LENGTH}) chars`, () => {
-        expect(
-          listRuleExecutionsRequestSchema.safeParse({ search: 'a'.repeat(MAX_SEARCH_LENGTH + 1) })
-            .success
-        ).toBe(false);
       });
     });
 
@@ -355,7 +325,6 @@ describe('rule_execution_history_schema', () => {
       const input = {
         rule_ids: ['rule-x', 'rule-y'],
         outcome: ['success', 'failure'] as const,
-        search: 'db outage',
         from: '2026-06-01T00:00:00Z',
         to: '2026-06-02T00:00:00Z',
         sort: 'duration' as const,
