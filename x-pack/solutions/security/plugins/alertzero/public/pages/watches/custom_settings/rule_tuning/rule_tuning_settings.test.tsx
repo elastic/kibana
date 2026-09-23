@@ -42,11 +42,13 @@ const renderSettings = (onExtrasChange = jest.fn()) => {
       onExtrasChange={onExtrasChange}
     />
   );
-  return {
-    onExtrasChange,
-    rerender,
-    field: screen.getByTestId('alertZeroAnalysisWindowDays'),
-  };
+  return { onExtrasChange, rerender };
+};
+
+const expectDefaultsShown = () => {
+  expect(screen.getByTestId('alertZeroAnalysisWindowDays')).toHaveValue(7);
+  expect(screen.getByTestId('alertZeroFpCountThreshold')).toHaveValue(10);
+  expect(screen.getByTestId('alertZeroFpRateThresholdPct')).toHaveValue(50);
 };
 
 /** Each control: its test subject, the saved value it shows, a valid edit, and an out-of-range one. */
@@ -132,9 +134,11 @@ describe('RuleTuningSettings', () => {
   );
 
   it('re-syncs every control when the parent resets the values', () => {
-    const { rerender, field } = renderSettings();
+    const { rerender } = renderSettings();
 
-    fireEvent.change(field, { target: { value: '7' } });
+    fireEvent.change(screen.getByTestId('alertZeroAnalysisWindowDays'), {
+      target: { value: '7' },
+    });
     rerender(
       <RuleTuningSettings
         worker={ruleTuning}
@@ -143,9 +147,7 @@ describe('RuleTuningSettings', () => {
       />
     );
 
-    expect(screen.getByTestId('alertZeroAnalysisWindowDays')).toHaveValue(7);
-    expect(screen.getByTestId('alertZeroFpCountThreshold')).toHaveValue(10);
-    expect(screen.getByTestId('alertZeroFpRateThresholdPct')).toHaveValue(50);
+    expectDefaultsShown();
   });
 
   it('falls back to the defaults when extras are missing', () => {
@@ -157,9 +159,7 @@ describe('RuleTuningSettings', () => {
       />
     );
 
-    expect(screen.getByTestId('alertZeroAnalysisWindowDays')).toHaveValue(7);
-    expect(screen.getByTestId('alertZeroFpCountThreshold')).toHaveValue(10);
-    expect(screen.getByTestId('alertZeroFpRateThresholdPct')).toHaveValue(50);
+    expectDefaultsShown();
   });
 
   it('falls back to the defaults when stored extras are incomplete', () => {
@@ -171,8 +171,6 @@ describe('RuleTuningSettings', () => {
       />
     );
 
-    expect(screen.getByTestId('alertZeroAnalysisWindowDays')).toHaveValue(7);
-    expect(screen.getByTestId('alertZeroFpCountThreshold')).toHaveValue(10);
-    expect(screen.getByTestId('alertZeroFpRateThresholdPct')).toHaveValue(50);
+    expectDefaultsShown();
   });
 });

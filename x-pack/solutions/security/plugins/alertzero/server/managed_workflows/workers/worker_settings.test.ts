@@ -6,6 +6,7 @@
  */
 
 import {
+  RULE_TUNING_DEFAULT_EXTRAS,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
   SYSTEM_SECURITY_WORKER_IDS,
@@ -201,7 +202,7 @@ describe('createWorkerSettingsRegistration', () => {
 
   describe('Worker-specific settings — detection rule tuning', () => {
     const registration = createWorkerSettingsRegistration(RULE_TUNING_WORKER_ID);
-    const defaultExtras = { analysisWindowDays: 7, fpCountThreshold: 10, fpRateThresholdPct: 50 };
+    const defaultExtras = RULE_TUNING_DEFAULT_EXTRAS;
     const storedDefaults = {
       settingsVersion: 1,
       autonomyLevel: 'manual',

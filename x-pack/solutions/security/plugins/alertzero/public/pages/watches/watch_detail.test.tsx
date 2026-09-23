@@ -12,17 +12,18 @@ import { act, fireEvent, render, screen, waitFor, within } from '@testing-librar
 import { MemoryRouter, Route, Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
 import {
-  SYSTEM_SECURITY_WATCH_HUNT_ID,
+  type CatalogWatchId,
+  createCatalogWatchPlaceholder,
+  RULE_TUNING_DEFAULT_EXTRAS,
   SYSTEM_SECURITY_WATCH_DETECTION_ID,
   SYSTEM_SECURITY_WATCH_FLOOR_ID,
+  SYSTEM_SECURITY_WATCH_HUNT_ID,
   SYSTEM_SECURITY_WATCH_OFFICER_ID,
-  SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
-  createCatalogWatchPlaceholder,
-  type CatalogWatchId,
+  SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
   type Worker,
 } from '@kbn/alertzero-common';
 import { WatchDetailPage } from './watch_detail';
@@ -140,7 +141,7 @@ const huntWorker = createWorker({
 });
 
 /** Complete Rule Tuning extras; cases vary the window and keep the FP thresholds at default. */
-const RULE_TUNING_EXTRAS = { analysisWindowDays: 14, fpCountThreshold: 10, fpRateThresholdPct: 50 };
+const RULE_TUNING_EXTRAS = { ...RULE_TUNING_DEFAULT_EXTRAS, analysisWindowDays: 14 };
 
 const detectionWorkers: Worker[] = [
   createWorker({

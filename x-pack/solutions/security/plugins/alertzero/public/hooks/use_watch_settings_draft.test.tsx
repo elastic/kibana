@@ -7,6 +7,7 @@
 
 import { act, renderHook } from '@testing-library/react';
 import {
+  RULE_TUNING_DEFAULT_EXTRAS,
   SYSTEM_SECURITY_WATCH_DETECTION_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
@@ -34,7 +35,7 @@ const createWorker = (overrides: Partial<Worker> & Pick<Worker, 'id' | 'name'>):
 });
 
 /** Complete Rule Tuning extras; cases vary the window and keep the FP thresholds at default. */
-const RULE_TUNING_EXTRAS = { analysisWindowDays: 14, fpCountThreshold: 10, fpRateThresholdPct: 50 };
+const RULE_TUNING_EXTRAS = { ...RULE_TUNING_DEFAULT_EXTRAS, analysisWindowDays: 14 };
 
 const ruleTuning = createWorker({
   id: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
@@ -43,7 +44,7 @@ const ruleTuning = createWorker({
     workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
     autonomy: 'manual',
     scheduleInterval: '2h',
-    extras: { ...RULE_TUNING_EXTRAS, analysisWindowDays: 14 },
+    extras: RULE_TUNING_EXTRAS,
   },
 });
 
@@ -85,7 +86,7 @@ describe('useWatchSettingsDraft', () => {
     expect(result.current.isDirty).toBe(false);
     expect(result.current.resolve(ruleTuning)).toMatchObject({
       enabled: false,
-      settings: { extras: { ...RULE_TUNING_EXTRAS, analysisWindowDays: 14 } },
+      settings: { extras: RULE_TUNING_EXTRAS },
       dirty: false,
     });
   });
@@ -185,7 +186,7 @@ describe('useWatchSettingsDraft', () => {
         extras: { ...RULE_TUNING_EXTRAS, analysisWindowDays: 7 },
       });
       result.current.updateSettings(ruleTuning, {
-        extras: { ...RULE_TUNING_EXTRAS, analysisWindowDays: 14 },
+        extras: RULE_TUNING_EXTRAS,
       });
     });
 

@@ -6,6 +6,7 @@
  */
 
 import { parse } from 'yaml';
+import { RULE_TUNING_DEFAULT_EXTRAS } from '@kbn/alertzero-common';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { createWorkflowLiquidEngine } from '@kbn/workflows';
 import { convertJsonSchemaToZod } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
@@ -45,6 +46,21 @@ const getManagedYaml = (workflowId: string): string => {
     return definition.yamlTemplate(registration.settings.createDefaultValues());
   }
   throw new Error(`Managed workflow definition "${workflowId}" has no YAML source`);
+};
+
+const renderRuleTuningWorker = (extras: Record<string, number>): string => {
+  const definition = getManagedWorkflowDefinition(
+    ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID
+  );
+  if (!definition || !('yamlTemplate' in definition) || !definition.yamlTemplate) {
+    throw new Error('Rule Tuning worker definition has no YAML template');
+  }
+  return definition.yamlTemplate({
+    settingsVersion: 1,
+    autonomyLevel: 'assisted',
+    scheduleInterval: '6h',
+    extras,
+  });
 };
 
 interface NestedStep {
@@ -108,19 +124,11 @@ describe('detection rule workflows', () => {
     // The sweep's own consts are fallbacks for a manual run, so a saved setting only
     // takes effect if the wrapper renders it into the dispatch inputs.
     it('forwards the saved analysis window and both FP thresholds to the sweep', () => {
-      const definition = getManagedWorkflowDefinition(
-        ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID
-      );
-      if (!definition || !('yamlTemplate' in definition) || !definition.yamlTemplate) {
-        throw new Error('Rule Tuning worker definition has no YAML template');
-      }
-
       const rendered = parse(
-        definition.yamlTemplate({
-          settingsVersion: 1,
-          autonomyLevel: 'assisted',
-          scheduleInterval: '6h',
-          extras: { analysisWindowDays: 21, fpCountThreshold: 4, fpRateThresholdPct: 80 },
+        renderRuleTuningWorker({
+          analysisWindowDays: 21,
+          fpCountThreshold: 4,
+          fpRateThresholdPct: 80,
         })
       ) as WorkflowYaml;
       const [dispatch] = flattenSteps(rendered.steps as unknown as NestedStep[]);
@@ -140,12 +148,6 @@ describe('detection rule workflows', () => {
         min_fp_count: '${{ consts.worker_settings.extras.fpCountThreshold }}',
         min_fp_rate_pct: '${{ consts.worker_settings.extras.fpRateThresholdPct }}',
       });
-      // Every path the inputs reference exists on the consts they read from.
-      const extras = (rendered.consts as Record<string, Record<string, unknown>>).worker_settings
-        .extras as Record<string, unknown>;
-      for (const field of ['analysisWindowDays', 'fpCountThreshold', 'fpRateThresholdPct']) {
-        expect(extras).toHaveProperty(field);
-      }
     });
 
     // Boot reconcile re-renders installed documents from persisted values without migrating them,
@@ -153,27 +155,10 @@ describe('detection rule workflows', () => {
     it.each(['analysisWindowDays', 'fpCountThreshold', 'fpRateThresholdPct'] as const)(
       'refuses to render stored values missing %s',
       (missing) => {
-        const definition = getManagedWorkflowDefinition(
-          ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID
-        );
-        if (!definition || !('yamlTemplate' in definition) || !definition.yamlTemplate) {
-          throw new Error('Rule Tuning worker definition has no YAML template');
-        }
-        const extras: Record<string, number> = {
-          analysisWindowDays: 7,
-          fpCountThreshold: 10,
-          fpRateThresholdPct: 50,
-        };
+        const extras: Record<string, number> = { ...RULE_TUNING_DEFAULT_EXTRAS };
         delete extras[missing];
 
-        expect(() =>
-          definition.yamlTemplate?.({
-            settingsVersion: 1,
-            autonomyLevel: 'manual',
-            scheduleInterval: '2h',
-            extras,
-          })
-        ).toThrow(`extras.${missing}`);
+        expect(() => renderRuleTuningWorker(extras)).toThrow(`extras.${missing}`);
       }
     );
   });

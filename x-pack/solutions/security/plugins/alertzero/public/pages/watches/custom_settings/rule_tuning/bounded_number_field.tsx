@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 
 interface BoundedNumberFieldProps {
@@ -53,23 +53,20 @@ export const BoundedNumberField: React.FC<BoundedNumberFieldProps> = ({
     setDraft(String(value));
   }, [value]);
 
-  const onDraftChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      const text = event.target.value;
-      setDraft(text);
-      const parsed = parseBoundedNumber(text, min, max);
-      if (parsed !== undefined && parsed !== value) {
-        onChange(parsed);
-      }
-    },
-    [max, min, onChange, value]
-  );
+  const onDraftChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const text = event.target.value;
+    setDraft(text);
+    const parsed = parseBoundedNumber(text, min, max);
+    if (parsed !== undefined && parsed !== value) {
+      onChange(parsed);
+    }
+  };
 
-  const revertInvalidDraft = useCallback(() => {
+  const revertInvalidDraft = () => {
     if (parseBoundedNumber(draft, min, max) === undefined) {
       setDraft(String(value));
     }
-  }, [draft, max, min, value]);
+  };
 
   return (
     <EuiFormRow label={label} helpText={helpText} fullWidth data-test-subj={`${testSubj}Field`}>

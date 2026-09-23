@@ -7,6 +7,7 @@
 
 import { SYSTEM_SECURITY_WATCH_IDS } from '../../constants';
 import { createCatalogWatchPlaceholder } from '../watches/watch_helpers';
+import { RULE_TUNING_DEFAULT_EXTRAS } from '../worker_settings';
 import type { Watch } from '.';
 import {
   GetWatchResponse,
@@ -86,62 +87,41 @@ describe('AlertZero schema smoke tests', () => {
         workerId: 'system-security-detection-rule-tuning',
         autonomy: 'manual',
         scheduleInterval: '2h',
-        extras: { analysisWindowDays: 7, fpCountThreshold: 10, fpRateThresholdPct: 50 },
+        extras: RULE_TUNING_DEFAULT_EXTRAS,
       }).success
     ).toBe(true);
     expect(WorkerSettingsWrite.safeParse({ extras: { anything: true } }).success).toBe(true);
   });
 
   it('closes the Detection-owned Rule Tuning extras', () => {
-    const complete = { analysisWindowDays: 7, fpCountThreshold: 10, fpRateThresholdPct: 50 };
-
     expect(RuleTuningWorkerExtras.safeParse({}).success).toBe(false);
-    expect(RuleTuningWorkerExtras.safeParse({ ...complete, extra: 1 }).success).toBe(false);
-    expect(RuleTuningWorkerExtras.safeParse(complete).success).toBe(true);
+    expect(
+      RuleTuningWorkerExtras.safeParse({ ...RULE_TUNING_DEFAULT_EXTRAS, extra: 1 }).success
+    ).toBe(false);
+    expect(RuleTuningWorkerExtras.safeParse(RULE_TUNING_DEFAULT_EXTRAS).success).toBe(true);
   });
 
   it.each(['analysisWindowDays', 'fpCountThreshold', 'fpRateThresholdPct'] as const)(
     'rejects Rule Tuning extras missing %s',
     (missing) => {
-      const complete: Record<string, number> = {
-        analysisWindowDays: 7,
-        fpCountThreshold: 10,
-        fpRateThresholdPct: 50,
-      };
-      delete complete[missing];
+      const incomplete: Record<string, number> = { ...RULE_TUNING_DEFAULT_EXTRAS };
+      delete incomplete[missing];
 
-      expect(RuleTuningWorkerExtras.safeParse(complete).success).toBe(false);
+      expect(RuleTuningWorkerExtras.safeParse(incomplete).success).toBe(false);
     }
   );
 
-  it.each([7.5, 0, 31])('rejects analysisWindowDays %s', (analysisWindowDays) => {
-    expect(
-      RuleTuningWorkerExtras.safeParse({
-        analysisWindowDays,
-        fpCountThreshold: 10,
-        fpRateThresholdPct: 50,
-      }).success
-    ).toBe(false);
-  });
-
-  it.each([1.5, 1, 101])('rejects fpCountThreshold %s', (fpCountThreshold) => {
-    expect(
-      RuleTuningWorkerExtras.safeParse({
-        analysisWindowDays: 7,
-        fpCountThreshold,
-        fpRateThresholdPct: 50,
-      }).success
-    ).toBe(false);
-  });
-
-  it.each([50.5, -1, 101])('rejects fpRateThresholdPct %s', (fpRateThresholdPct) => {
-    expect(
-      RuleTuningWorkerExtras.safeParse({
-        analysisWindowDays: 7,
-        fpCountThreshold: 10,
-        fpRateThresholdPct,
-      }).success
-    ).toBe(false);
+  // Each field: a non-integer, one below its floor, one above its ceiling.
+  it.each([
+    ['analysisWindowDays', [7.5, 0, 31]],
+    ['fpCountThreshold', [1.5, 1, 101]],
+    ['fpRateThresholdPct', [50.5, -1, 101]],
+  ] as const)('rejects out-of-range %s', (field, values) => {
+    for (const value of values) {
+      expect(
+        RuleTuningWorkerExtras.safeParse({ ...RULE_TUNING_DEFAULT_EXTRAS, [field]: value }).success
+      ).toBe(false);
+    }
   });
 
   it.each([
@@ -150,7 +130,7 @@ describe('AlertZero schema smoke tests', () => {
   ])('accepts fpCountThreshold %s and fpRateThresholdPct %s at the bounds', (count, rate) => {
     expect(
       RuleTuningWorkerExtras.safeParse({
-        analysisWindowDays: 7,
+        ...RULE_TUNING_DEFAULT_EXTRAS,
         fpCountThreshold: count,
         fpRateThresholdPct: rate,
       }).success

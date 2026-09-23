@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { parse } from 'yaml';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import {
@@ -547,10 +548,9 @@ describe('WorkersService', () => {
       });
       // The saved values are rendered into consts.worker_settings.extras; the sweep inputs
       // read them from there, so both halves are asserted.
-      const yaml = harness.documents.get(`${RULE_TUNING}-${SPACE}`)?.yaml;
-      expect(yaml).toContain('analysisWindowDays: 21');
-      expect(yaml).toContain('fpCountThreshold: 4');
-      expect(yaml).toContain('fpRateThresholdPct: 80');
+      const yaml = harness.documents.get(`${RULE_TUNING}-${SPACE}`)?.yaml ?? '';
+      const { consts } = parse(yaml) as { consts: { worker_settings: { extras: unknown } } };
+      expect(consts.worker_settings.extras).toEqual(SAVED_EXTRAS);
       expect(yaml).toContain(
         'analysis_window_days: "${{ consts.worker_settings.extras.analysisWindowDays }}"'
       );
