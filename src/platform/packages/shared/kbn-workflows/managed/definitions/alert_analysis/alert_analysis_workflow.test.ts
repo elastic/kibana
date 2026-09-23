@@ -10,6 +10,7 @@
 import { parse } from 'yaml';
 import { SECURITY_ALERT_ANALYSIS_WORKFLOW } from '.';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
+import { WorkflowSchema } from '../../../spec/schema';
 
 type Step = Record<string, unknown>;
 
@@ -96,6 +97,37 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     steps: unknown[];
     triggers: unknown[];
   };
+
+  it('passes WorkflowSchema normalization and keeps manual-trigger Worker inputs', () => {
+    // Raw yaml.parse alone can miss schema transforms that strip trigger fields (the class of
+    // bug that previously left inputs on an alert trigger). Parse through WorkflowSchema so
+    // manual-trigger inputs and structured outputs survive the same normalization the runtime
+    // uses. Full connector runtime is not exercised here.
+    const result = WorkflowSchema.safeParse(parse(SECURITY_ALERT_ANALYSIS_WORKFLOW.yaml));
+    expect(result.success ? null : result.error.issues).toBeNull();
+    if (!result.success) {
+      return;
+    }
+
+    const manualTrigger = result.data.triggers.find(
+      (trigger): trigger is Extract<(typeof result.data.triggers)[number], { type: 'manual' }> =>
+        trigger.type === 'manual'
+    );
+    expect(manualTrigger).toBeDefined();
+    expect(manualTrigger?.inputs?.properties).toHaveProperty('alerts');
+    expect(manualTrigger?.inputs?.properties).toHaveProperty('calledByWorker');
+    expect(manualTrigger?.inputs?.properties).toHaveProperty('connectorIdByFeature');
+
+    expect(result.data.outputs).toBeDefined();
+    if (
+      result.data.outputs &&
+      typeof result.data.outputs === 'object' &&
+      'properties' in result.data.outputs
+    ) {
+      expect(result.data.outputs.properties).toHaveProperty('verdicts');
+      expect(result.data.outputs.properties).toHaveProperty('missing_alert_ids');
+    }
+  });
 
   it('reads per-space config at run time from the space-scoped runtime_config route', () => {
     const fetchStep = findStepByName(workflow.steps, 'fetch_runtime_config') as {
