@@ -22,8 +22,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const svlCommonPage = getPageObject('svlCommonPage');
   const toasts = getService('toasts');
 
-  // Failing: See https://github.com/elastic/kibana/issues/238814
-  describe.skip('Cases List', function () {
+  describe('Cases List', function () {
     before(async () => {
       await svlCommonPage.loginWithPrivilegedRole();
 
@@ -152,7 +151,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('severity filtering', () => {
+    describe.skip('severity filtering', () => { // Failing: https://github.com/elastic/kibana/issues/238814
       // Error: retry.tryForTime timeout: Error: expected 10 to equal 5
       before(async () => {
         await navigateToCasesApp(getPageObject, getService, owner);
@@ -202,7 +201,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('pagination', () => {
+    describe.skip('pagination', () => { // Failing: https://github.com/elastic/kibana/issues/238814
       // security_exception: action [indices:data/write/delete/byquery] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.kibana_alerting_cases], this action is granted by the index privileges [delete,write,all]
       createNCasesBeforeDeleteAllAfter(12, getPageObject, getService);
 

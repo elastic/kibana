@@ -406,6 +406,8 @@ export function CasesTableServiceProvider(
 
       await testSubjects.click('cases-edit-tags-flyout-submit');
       await testSubjects.missingOrFail('cases-edit-tags-flyout');
+      await header.waitUntilLoadingHasFinished();
+      await this.waitForTableToFinishLoading();
     },
 
     async bulkAddNewTag(selectedCases: number[], tag: string) {
@@ -434,6 +436,8 @@ export function CasesTableServiceProvider(
 
       await testSubjects.click('cases-edit-tags-flyout-submit');
       await testSubjects.missingOrFail('cases-edit-tags-flyout');
+      await header.waitUntilLoadingHasFinished();
+      await this.waitForTableToFinishLoading();
     },
 
     async bulkEditAssignees(selectedCases: number[], assigneesToClick: string[]) {
