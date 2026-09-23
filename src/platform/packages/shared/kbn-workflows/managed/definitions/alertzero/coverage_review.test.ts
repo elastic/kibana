@@ -292,13 +292,36 @@ describe('Detection Coverage review', () => {
     });
 
     it('closes the investigation on a decision and leaves it open without one', () => {
+      const close = stepByName('close_investigation');
+      expect(close?.type).toBe('switch');
+      expect(close?.if).toContain('steps.create_investigation.output.conversation_id != null');
+      // No default: a run that reached no decision closes nothing.
+      expect(close?.default).toBeUndefined();
+
+      const caseSteps = (match: string) =>
+        close?.cases?.find((c) => c.match === match)?.steps.map(({ name }) => name);
+      expect(caseSteps('approved')).toEqual(['close_investigation_resolved']);
+      expect(caseSteps('dismissed')).toEqual(['close_investigation_dismissed']);
+
       const resolved = stepByName('close_investigation_resolved');
       const dismissed = stepByName('close_investigation_dismissed');
       expect(resolved?.type).toBe('ai.conversation.metadata.patch');
-      expect(resolved?.if).toContain('steps.record_decision.output.approved == true');
-      expect(dismissed?.if).toContain('steps.record_decision.output.dismissed == true');
+      expect(resolved).not.toHaveProperty('if');
+      expect(dismissed).not.toHaveProperty('if');
       expect((resolved?.with?.updates as Record<string, string>).status).toBe('closed');
       expect((dismissed?.with?.updates as Record<string, string>).status).toBe('closed');
+    });
+
+    it.each([
+      ['an approval', { approved: true, dismissed: false }, 'approved'],
+      ['a dismissal', { approved: false, dismissed: true }, 'dismissed'],
+      ['an expired proposal', { approved: false, dismissed: false }, ''],
+    ])('routes %s to the matching close', (_scenario, decision, expected) => {
+      const rendered = createWorkflowLiquidEngine().parseAndRenderSync(
+        String(stepByName('close_investigation')?.expression),
+        { steps: { record_decision: { output: decision } } }
+      );
+      expect(rendered).toBe(expected);
     });
 
     // The review runs in the space of the sweep that started it. A link without the

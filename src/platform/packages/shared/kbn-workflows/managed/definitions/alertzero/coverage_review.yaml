@@ -544,35 +544,38 @@ steps:
       continue: true
 
   # Metadata writes fire the ai.conversation.metadataUpdated trigger, which is
-  # the emit point for downstream feedback signals. An expired gate leaves the
-  # investigation open on purpose: nobody decided.
-  - name: close_investigation_resolved
-    type: ai.conversation.metadata.patch
-    if: >-
-      ${{ steps.create_investigation.output.conversation_id != null
-        and steps.record_decision.output.approved == true }}
-    with:
-      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
-      updates:
-        status: closed
-        close_reason: resolved
-        verdict: "{% if steps.propose_enable.output.status == 'succeeded' %}Analyst approved enabling the existing rule.{% elsif steps.propose_install.output.status == 'succeeded' %}Analyst approved installing the prebuilt rule.{% elsif steps.propose_confirm.output.decision == 'approved' %}Analyst confirmed the enabled rule covers the gap.{% elsif steps.run_rule_creation.output.created == true %}Analyst approved creating a new rule for the gap.{% else %}Analyst acknowledged the coverage check report.{% endif %}"
-    on-failure:
-      continue: true
+  # the emit point for downstream feedback signals. An expired gate matches
+  # neither case, so the investigation stays open on purpose: nobody decided.
+  - name: close_investigation
+    type: switch
+    if: "${{ steps.create_investigation.output.conversation_id != null }}"
+    expression: "{% if steps.record_decision.output.approved == true %}approved{% elsif steps.record_decision.output.dismissed == true %}dismissed{% endif %}"
+    cases:
+      - match: approved
+        steps:
+          - name: close_investigation_resolved
+            type: ai.conversation.metadata.patch
+            with:
+              conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+              updates:
+                status: closed
+                close_reason: resolved
+                verdict: "{% if steps.propose_enable.output.status == 'succeeded' %}Analyst approved enabling the existing rule.{% elsif steps.propose_install.output.status == 'succeeded' %}Analyst approved installing the prebuilt rule.{% elsif steps.propose_confirm.output.decision == 'approved' %}Analyst confirmed the enabled rule covers the gap.{% elsif steps.run_rule_creation.output.created == true %}Analyst approved creating a new rule for the gap.{% else %}Analyst acknowledged the coverage check report.{% endif %}"
+            on-failure:
+              continue: true
 
-  - name: close_investigation_dismissed
-    type: ai.conversation.metadata.patch
-    if: >-
-      ${{ steps.create_investigation.output.conversation_id != null
-        and steps.record_decision.output.dismissed == true }}
-    with:
-      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
-      updates:
-        status: closed
-        close_reason: other
-        verdict: "Analyst dismissed the coverage proposal."
-    on-failure:
-      continue: true
+      - match: dismissed
+        steps:
+          - name: close_investigation_dismissed
+            type: ai.conversation.metadata.patch
+            with:
+              conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+              updates:
+                status: closed
+                close_reason: other
+                verdict: "Analyst dismissed the coverage proposal."
+            on-failure:
+              continue: true
 
   # Decide whether each approved action was applied, and whether anyone decided at
   # all. The gate's `succeeded` only says the action workflow completed: an install
