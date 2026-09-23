@@ -11,7 +11,7 @@ import {
 } from '../../common/pod_schema_selector_feature_flag';
 import { useKibanaContextForPlugin } from './use_kibana';
 
-/** Temporary flag until the feature is fully enabled. */
+/** Temporary release gate. Default off so the unfinished pod Schema selector does not ship enabled. */
 export const useIsPodSchemaSelectorEnabled = (): boolean => {
   const { services } = useKibanaContextForPlugin();
 
