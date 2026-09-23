@@ -1,95 +1,65 @@
 # @kbn/evals-suite-attack-discovery-fp-tp
 
-Outcome eval for the Attack Discovery FP/TP analysis ([security-team#19285](https://github.com/elastic/security-team/issues/19285)). It seeds a world around one persisted Attack Discovery, runs the analysis workflow, and grades the workflow's execution output against the contract posted on [security-team#19280](https://github.com/elastic/security-team/issues/19280).
+FP/TP verdict eval suite for the attack-discovery review workflow, built on the
+`@kbn/evals` harness. Ships 7 vendored, validated JSONL corpora (1,017 cases) plus
+the corpus loader, workflow task module, and evaluators that grade the review
+step's structured verdict.
 
-## What it runs
+> **Status: harness + dataset validated, verdict path pending.** The review
+> workflow under test is still a stub on main
+> ([security-team#19282](https://github.com/elastic/security-team/issues/19282));
+> the suite currently validates the run/poll/structured-output plumbing and the
+> dataset layer. Once the stub lands, the Playwright eval drives it end-to-end.
 
-Until the managed analysis workflow ships ([security-team#19282](https://github.com/elastic/security-team/issues/19282)), the suite installs `src/sample_workflow/fp_tp_analysis.yaml` for the run and deletes it afterwards. The sample follows the contract's inputs, evidence sources, checks, and output shape, but it has **no claim-verification gate**: the verdict it returns is the model's proposal as-is. Its scores measure the prompt, not the product.
+## Corpus provenance
 
-The workflow's `ai.agent` step runs `alertzero-thin-agent` with no tools and resolves its connector from the `alertzero_reasoning` inference feature. `beforeAll` routes that feature to the model under test and restores the previous inference settings in `afterAll`.
+All corpora live in `corpora/*.jsonl` with per-corpus READMEs. Schema is
+validated at load time (`src/corpus_loader.ts`) with the same semantics as
+`validate.py` in the source repo.
 
-## Dataset
+| Corpus | Cases | Labels (TP/FP/Inconclusive) | Provenance | Flags / permitted use |
+| --- | --- | --- | --- | --- |
+| guide-sanity | 750 | 300 / 225 / 225 | `public` (GUIDE eval slice; ~21.6% majority-vote label noise) | **SANITY ONLY — acceptance thresholds against these labels are forbidden** |
+| botsv3-benign-day | 96 | 0 / 96 / 0 | `replay` (BOTSv3 benign day, no attack) | FP regression set |
+| botsv3-fp-alerts | 54 | 0 / 54 / 0 | `replay` (BOTSv3 alerts, honest known-FP slice; labels not human-adjudicated) | **PROVISIONAL** — pending review |
+| tp-chains | 3 | 3 / 0 / 0 | `replay` (multi-stage BOTSv3 attack chains) | Small TP smoke set |
+| adversarial-twins | 21 | 0 / 15 / 6 | `adversarial-mutation` (synthetic twins; every case carries `mutation_spec` naming the broken invariant) | Robustness: label must flip with the invariant |
+| perturbations | 15 | 12 / 0 / 3 | `adversarial-mutation` (synthetic) | Robustness |
+| cloud-fp-synthetic | 78 | 0 / 73 / 5 | `synthetic` (hand-built ECS fixtures from cloud-rule `false_positives` notes; per-clause verified) | **PROVISIONAL** — synthetic fixtures, detection-logic sanity and FP-condition modeling only |
 
-The dataset is every example of every scenario registered in `src/scenarios/index.ts`. Today that is one scenario, `encoded-powershell` (encoded PowerShell on a workstation vs. an Intune/SCCM box; see [its README](src/scenarios/encoded_powershell/README.md)):
+Total: **1,017 cases.** Raw source telemetry (837MB BOTSv3 capture, GUIDE CSV)
+is intentionally **not** vendored — see the external
+`alertzero-datasets` repository for raw data, build scripts, and
+`ACCEPTANCE.md` (corpus acceptance criteria and validation evidence).
 
-| Example | Situation | World | Gold outcome |
-| --- | --- | --- | --- |
-| `encoded-powershell.fp` | U1 | FP twin | `false_positive` |
-| `encoded-powershell.tp` | U6 | TP twin | `true_positive` |
-| `encoded-powershell.tp-entities-missing` | U6 | TP twin, no entity documents | `true_positive` |
-| `encoded-powershell.fp-entities-missing` | U1 | FP twin, no entity documents | `inconclusive` |
-| `encoded-powershell.tp-events-missing` | U6 | TP twin, no raw events | `inconclusive` |
-| `encoded-powershell.mixed-world` | U1 | FP entities + TP events | `inconclusive` |
-| `encoded-powershell.failed-missing-ad` | U6 | No Attack Discovery document | `failed` |
-| `encoded-powershell.failed-missing-cited-alert` | U6 | The discovery cites an alert that is not seeded | `failed` |
+## Permitted-use rules
 
-A missing source is one-sided: it blocks `false_positive` (missing evidence cannot clear an alert) but not `true_positive`, which needs a supporting raw-event check (`process_parent` or `network_destination`). `entity_role` alone never escalates, so `tp-events-missing` stays `inconclusive`.
-
-Situations follow the contract: U1 lookalike, U2 benign alerts, U3 invented chain, U4 shared egress or jump box, U5 ambient, U6 true attack. U2–U5 have no scenario yet.
-
-Each example's metadata carries its scenario, situation, and evidence state, so reports can be sliced by any of them. Every task seeds its documents under a fresh run marker and suffix (`uniquify`), so repetitions and examples never share a document, and deletes them when it ends.
-
-Setup stops Entity Store log extraction (`PUT /api/security/entity_store/stop`) for the duration of the suite. Otherwise the store builds entities from the seeded raw events, and a world seeded without entities (`tp-entities-missing`) would gain them mid-run. Cleanup also deletes any entity on a seeded host. Teardown restarts extraction if it was running before the suite started. If a run is killed before teardown, run `PUT /api/security/entity_store/start` to resume it.
+- **GUIDE sanity-only:** `guide-sanity` labels are noisy public annotations.
+  They may sanity-check system verdicts at the corpus level; pass/fail gates
+  computed against them are forbidden.
+- **PROVISIONAL:** `botsv3-fp-alerts` and `cloud-fp-synthetic` labels are not
+  yet human-reviewed. Results against them are directional, not gating.
+  Whether cloud-fp-synthetic is included in graded runs vs. kept untested is
+  a review-time decision.
+- The loader surfaces `sanityOnly` / `provisional` on every example's metadata
+  so runners and reports can enforce these rules mechanically.
 
 ## Layout
 
-```
-src/
-  world/                  Scenario-agnostic: world and gold types, seeding and cleanup,
-                          uniquify, timestamp shifting, evidence-state helpers
-  scenarios/
-    index.ts              Registry: FP_TP_SCENARIOS, FP_TP_EXAMPLES, buildFpTpExampleWorld
-    types.ts              FpTpScenario, FpTpExample, FpTpSituation, FpTpEvidenceState
-    registry.test.ts      Invariants every scenario must hold
-    encoded_powershell/   One authored scenario: ids, attack, entities, event overlays, gold, examples
-  sample_workflow/        The workflow under test until #19282 ships
-  workflow_task.ts        Runs the workflow and reads its output
-  evaluators.ts
-```
+- `src/corpus_loader.ts` — JSONL loading + schema/enum/count validation (throws on invalid)
+- `src/workflow_task.ts` — `POST /api/workflows/{id}/run` + poll + `ai.agent`
+  structured-output verdict extraction
+- `src/evaluators.ts` — `VerdictAccuracy` (CODE, primary), `PayloadConformance`
+  (CODE: label enum + `summary_markdown` present and ≤ 8k chars), and the LLM
+  criteria set for verdict-quality review
+- `src/constants.ts` — corpus registry with known case counts (regression guard)
+- `evals/attack_discovery_fp_tp.spec.ts` — the Playwright eval (gated on the
+  review workflow landing)
+- `corpora/` — the 7 vendored corpora + READMEs
 
-## Adding a scenario
+## Tests
 
-1. Create `src/scenarios/<scenario_key>/` modelled on `encoded_powershell/`. Build alerts and raw events from a registry scenario in `@kbn/evals-suite-attack-discovery-agent-builder` (`buildAd2SeedPlan`), then add the authored attack, entity documents, event overlays, and gold for each twin.
-2. Export an `FpTpScenario` from its `index.ts`:
-   - `key`: the scenario key; every example id must start with `<key>.`.
-   - `sharedNames`: every name the run marker does not make unique (attack id, host names, user names). `uniquify` suffixes them per run.
-   - `twins`: the complete worlds a person can seed by hand, keyed by variant.
-   - `examples`: one entry per eval example, with its situation, evidence state, gold outcome, and `buildWorld(runMarker)`. Use the helpers in `src/world/evidence_states.ts` for the degraded-evidence and failure examples.
-3. Add the scenario to `FP_TP_SCENARIOS` in `src/scenarios/index.ts`.
-4. Run the package's jest tests. `registry.test.ts` checks the new examples for unique ids, no unsuffixed shared names, disjoint documents across runs, and raw events inside the workflow's ±2h window.
-
-## Evaluators
-
-- `OutcomeAccuracy` (primary): the outcome matches the gold; a `failed` gold also needs an explicit `FAILED` execution, so a timeout or cancellation does not pass. The label is the predicted outcome, so the report reads as a confusion matrix.
-- `UnsafeClose`: 0 when the run predicts `false_positive` and the gold is anything else. A false positive closes the attack.
-- `PayloadConformance`: the run completed and has a supported verdict, a non-empty `summary_markdown` of at most 8000 characters, a `rationale_markdown` of at most 50000 characters when present, and an `attack_discovery_id` that echoes the input. A run whose gold is `failed` ended `FAILED` (a timeout or cancellation does not count) and produced no payload.
-- `trajectory`: the agent called no tools. N/A when traces are unavailable.
-- LLM criteria on the summary and rationale: cited ids exist in the seeded data, nothing is invented (the task output carries the seeded documents in `seededEvidence`), the discovery's and alerts' story is stated as fact only where the entities or raw events show it, the deciding checks are named, and an `inconclusive` verdict says what was missing or conflicting. N/A for failed runs.
-
-A grader for whether `claims` are grounded in the seeded data waits for the verification gate; the raw `coverage`, `checks`, and `claims` are already captured in the task output.
-
-## Running locally
-
-```bash
-node scripts/evals start --suite security-attack-discovery-fp-tp --model <connector-id> --repetitions 5
-```
-
-The suite's stack uses the `evals_attack_discovery_fp_tp` Scout config set, which enables AlertZero (and the `agenticInvestigations` and `proposals` plugins it requires) plus the Workflows UI and agent settings.
-
-## Reproducibility
-
-Run with `--repetitions 5` or more. Each repetition is a separate run in the report, so per-example agreement is the share of an example's repetitions that land on the same outcome; `OutcomeAccuracy`'s label distribution per example shows it directly.
-
-## Acceptance criteria (proposed)
-
-- Hard gates on the core models: `PayloadConformance` = 1.0 and `UnsafeClose` = 1.0.
-- `OutcomeAccuracy`: record the sample workflow's numbers as the baseline #19282 has to beat, then set a threshold.
-
-## Switching to the managed workflow (after #19282)
-
-1. Set `FP_TP_WORKFLOW_SOURCE` in `src/constants.ts` to `managed`.
-2. Delete `src/sample_workflow/` and the install and delete calls around it in the spec.
-3. Add the claim-grounding evaluator.
-4. Add a weekly step to `.buildkite/pipelines/evals/llm_evals.yml`, copying `Evals: Alert Analysis Workflow` with `EVAL_SUITE_ID: 'security-attack-discovery-fp-tp'`.
-
-Until then the suite runs on demand through the `evals:security-attack-discovery-fp-tp` PR label.
+`npx jest x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-fp-tp`
+runs the unit suite: loader validation against the real vendored corpora,
+corrupt-label/duplicate-id/mutation-spec mutation tests, evaluator scoring, and
+workflow task run/poll/verdict plumbing.

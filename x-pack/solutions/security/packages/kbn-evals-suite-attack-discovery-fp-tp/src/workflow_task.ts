@@ -9,255 +9,189 @@ import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
-  extractAgentConversationIds,
-  readAgentToolCallsFromTraces,
-} from '@kbn/security-evals-workflow-traces';
-import {
-  ExecutionStatus,
   TerminalExecutionStatuses,
+  type ExecutionStatus,
   type WorkflowExecutionDto,
+  type WorkflowStepExecutionDto,
 } from '@kbn/workflows';
-import {
-  FP_TP_VERDICTS,
-  PUBLIC_API_VERSION,
-  type FpTpOutcome,
-  type FpTpVerdict,
-} from './constants';
-import type { FpTpSeededEvidence } from './world';
+import { FP_TP_ANALYSIS_WORKFLOW_ID, WORKFLOWS_API_VERSION } from './constants';
 
-const OUTPUT_STEP_TYPE = 'workflow.output';
+/**
+ * Task module: runs the FP/TP analysis workflow
+ * (`system-security-attack-discovery-fp-tp-analysis`) for one corpus case and
+ * extracts the verdict from the workflow output.
+ *
+ * The workflow emits `verdict` / `summary_markdown` / `rationale_markdown` /
+ * `analysis_execution_id` at the workflow-output level (see
+ * attack_discovery_fp_tp_analysis.yaml); the agent's structured output uses
+ * `confidence` (not `confidence_score`).
+ */
 
-/** The analysis output's `payload`, as the contract defines it. */
-export interface FpTpPayload {
+/** The `ai.agent` step whose structured output we grade. */
+const AGENT_STEP_TYPE = 'ai.agent';
+/** stepId fallbacks for execution records that omit `stepType`. */
+const AGENT_STEP_ID_FALLBACKS = ['runAgent_step', 'onechat_runAgent_step'];
+
+const isAgentStep = (step: WorkflowStepExecutionDto): boolean =>
+  step.stepType === AGENT_STEP_TYPE ||
+  (step.stepType === undefined && AGENT_STEP_ID_FALLBACKS.includes(step.stepId));
+
+/** Verdict as the workflow's `ai.agent` step is schema-constrained to return it. */
+export interface WorkflowVerdict {
+  id?: string;
   verdict?: string;
+  label?: string;
+  classification?: string;
   summary_markdown?: string;
+  confidence?: number;
   rationale_markdown?: string;
 }
 
-/** The analysis's execution output. Only `payload` is graded for now. */
-export interface FpTpAnalysisOutput {
+/** The workflow output shape of the fp-tp analysis workflow. */
+interface WorkflowOutput {
+  verdict?: string;
+  summary_markdown?: string;
+  rationale_markdown?: string;
+  analysis_execution_id?: string;
   attack_discovery_id?: string;
-  investigation_id?: string;
-  workflow_id?: string;
-  workflow_version?: number;
-  coverage?: Record<string, unknown>;
-  payload?: FpTpPayload;
-  checks?: unknown[];
-  claims?: Record<string, unknown>;
 }
 
-/** Ids this run seeded, carried in the task output so LLM graders can check citations. */
-export interface FpTpSeededIds {
-  attackDiscoveryId: string;
-  alertIds: string[];
-  entityIds: string[];
-  eventIds: string[];
+interface StructuredOutput {
+  verdict?: WorkflowVerdict;
+  verdicts?: WorkflowVerdict[];
 }
 
-/** Task output graded by the suite's evaluators. */
-export interface FpTpTaskOutput {
+/**
+ * Task output graded by the suite's evaluators. `verdict` is undefined when
+ * the workflow failed or no agent verdict was produced — evaluators treat
+ * that as incorrect/non-conformant rather than throwing.
+ */
+export interface AttackDiscoveryTaskOutput {
+  verdict?: WorkflowVerdict;
+  workflowOutput?: WorkflowOutput;
   executionId: string;
   executionStatus: ExecutionStatus;
-  /** `failed` when the run failed or did not finish in time; otherwise the verdict. */
-  outcome?: FpTpOutcome;
-  payload?: FpTpPayload;
-  attackDiscoveryIdEcho?: string;
-  /** The whole execution output, including `coverage`, `checks`, and `claims`. */
-  raw?: FpTpAnalysisOutput;
-  seededIds: FpTpSeededIds;
-  /** The seeded documents, so LLM graders can check the summary invents nothing. */
-  seededEvidence: FpTpSeededEvidence;
-  /** Conversations the workflow's `ai.agent` steps created; the caller deletes them. */
-  agentConversationIds: string[];
-  toolCallIds?: string[];
-  toolCallsUnavailable?: boolean;
+  traceId?: string;
 }
-
-const isTerminal = (status: ExecutionStatus): boolean => TerminalExecutionStatuses.includes(status);
-
-const isVerdict = (value: unknown): value is FpTpVerdict =>
-  FP_TP_VERDICTS.some((verdict) => verdict === value);
-
-const conversationIdsOf = ({ stepExecutions }: WorkflowExecutionDto): string[] =>
-  extractAgentConversationIds(stepExecutions).map(({ conversationId }) => conversationId);
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+const isTerminal = (status: ExecutionStatus): boolean => TerminalExecutionStatuses.includes(status);
+
 /**
- * Reads the analysis output from an execution record. The engine stores it in
- * `context.output`; the `workflow.output` step's own output is the fallback.
+ * Reads the workflow output (`workflow.output` step) when the execution record
+ * carries it.
  */
-export const readAnalysisOutput = (
-  execution: WorkflowExecutionDto
-): FpTpAnalysisOutput | undefined => {
-  const fromContext = execution.context?.output;
-  if (typeof fromContext === 'object' && fromContext !== null) {
-    return fromContext as FpTpAnalysisOutput;
+export const readWorkflowOutput = (execution: WorkflowExecutionDto): WorkflowOutput | undefined =>
+  (execution as { output?: WorkflowOutput | null }).output ?? undefined;
+
+/**
+ * Scans the agent step's execution records for a structured_output verdict.
+ * Each step yields multiple records (an enter record whose `output` is null,
+ * plus the record carrying the result), so we scan every agent-step record —
+ * enter records are skipped naturally by the null-output guard. A missing
+ * verdict is reported as `undefined`, not thrown.
+ */
+export const readAgentVerdict = (
+  stepExecutions: WorkflowStepExecutionDto[]
+): WorkflowVerdict | undefined => {
+  for (const step of stepExecutions.filter(isAgentStep)) {
+    const output = step.output as { structured_output?: StructuredOutput } | null | undefined;
+    const structured = output?.structured_output;
+    const verdict = structured?.verdict ?? structured?.verdicts?.[0];
+    if (verdict) {
+      return verdict;
+    }
   }
-  const step = execution.stepExecutions.find(
-    ({ stepType, output }) => stepType === OUTPUT_STEP_TYPE && output
-  );
-  return (step?.output ?? undefined) as FpTpAnalysisOutput | undefined;
+  return undefined;
 };
 
 /**
- * Maps a terminal (or timed-out) execution to its graded outcome. Only a completed run
- * with a supported verdict has a verdict outcome; a completed run with anything else
- * has no outcome, which the evaluators score as wrong.
+ * Normalizes a verdict to a canonical label from the workflow's enum
+ * (`verdict` field at either the workflow-output or structured-output level,
+ * with the agent's `label`/`classification` aliases kept for resilience).
  */
-export const toOutcome = (
-  execution: WorkflowExecutionDto,
-  output: FpTpAnalysisOutput | undefined
-): FpTpOutcome | undefined => {
-  if (execution.status !== ExecutionStatus.COMPLETED) {
-    return 'failed';
-  }
-  const verdict = output?.payload?.verdict;
-  return isVerdict(verdict) ? verdict : undefined;
-};
+export const normalizeVerdictLabel = (
+  task: Pick<AttackDiscoveryTaskOutput, 'verdict' | 'workflowOutput'>
+): string | undefined =>
+  task.workflowOutput?.verdict ??
+  task.verdict?.verdict ??
+  task.verdict?.label ??
+  task.verdict?.classification;
 
 /**
- * Runs the FP/TP analysis workflow for one seeded Attack Discovery and returns its
- * outcome. A run that is not terminal by `maxWaitMs` counts as `failed`: the contract
- * has a hard timeout, so an overrun is itself a failure. The overrun is cancelled and
- * awaited for up to `cancelWaitMs`, so the caller does not remove its fixture mid-run.
- * When a status read fails, the run is cancelled the same way and the error rethrown;
- * `onFailedReadConversationIds` receives the conversations it created, for cleanup.
+ * Runs the FP/TP analysis workflow for a single case payload and returns the
+ * verdict plus execution metadata so evaluators can see infra failures instead
+ * of throwing.
  */
-export const runFpTpAnalysisWorkflow = async ({
+export const runAttackDiscoveryWorkflow = async ({
   fetch,
   log,
-  traceEsClient,
-  workflowId,
-  attackDiscoveryId,
-  investigationId,
-  seededIds,
-  seededEvidence,
-  maxWaitMs = 15 * 60_000,
-  cancelWaitMs = 60_000,
+  payload,
+  maxWaitMs = 12 * 60_000,
   pollIntervalMs = 3_000,
-  onFailedReadConversationIds,
 }: {
   fetch: HttpHandler;
   log: ToolingLog;
-  traceEsClient?: EsClient;
-  workflowId: string;
-  attackDiscoveryId: string;
-  investigationId: string;
-  seededIds: FpTpSeededIds;
-  seededEvidence: FpTpSeededEvidence;
+  /** The corpus case payload handed to the workflow as its input event. */
+  payload: Record<string, unknown>;
   maxWaitMs?: number;
-  cancelWaitMs?: number;
   pollIntervalMs?: number;
-  onFailedReadConversationIds?: (conversationIds: string[]) => void;
-}): Promise<FpTpTaskOutput> => {
+  traceEsClient?: EsClient;
+}): Promise<AttackDiscoveryTaskOutput> => {
   const { workflowExecutionId } = (await fetch(
-    `/api/workflows/workflow/${encodeURIComponent(workflowId)}/run`,
+    `/api/workflows/workflow/${FP_TP_ANALYSIS_WORKFLOW_ID}/run`,
     {
       method: 'POST',
-      version: PUBLIC_API_VERSION,
-      headers: { 'elastic-api-version': PUBLIC_API_VERSION },
-      body: JSON.stringify({
-        inputs: { attack_discovery_id: attackDiscoveryId, investigation_id: investigationId },
-      }),
+      version: WORKFLOWS_API_VERSION,
+      headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
+      body: JSON.stringify({ inputs: { event: { payload } } }),
     }
   )) as { workflowExecutionId: string };
 
-  log.info(
-    `Started FP/TP analysis execution ${workflowExecutionId} for Attack Discovery ${attackDiscoveryId}`
-  );
+  log.info(`Started fp-tp analysis workflow execution ${workflowExecutionId} for case payload`);
 
-  const readExecution = async (): Promise<WorkflowExecutionDto> =>
-    (await fetch(`/api/workflows/executions/${workflowExecutionId}`, {
+  const deadline = Date.now() + maxWaitMs;
+  let execution: WorkflowExecutionDto | undefined;
+
+  while (Date.now() < deadline) {
+    execution = (await fetch(`/api/workflows/executions/${workflowExecutionId}`, {
       method: 'GET',
-      version: PUBLIC_API_VERSION,
-      headers: { 'elastic-api-version': PUBLIC_API_VERSION },
+      version: WORKFLOWS_API_VERSION,
+      headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
       query: { includeOutput: true },
     })) as WorkflowExecutionDto;
 
-  // Cancels the run and waits up to `cancelWaitMs` for it to stop. Read errors are
-  // tolerated here; the last record read, if any, is returned.
-  const cancelAndAwait = async (): Promise<WorkflowExecutionDto | undefined> => {
-    await fetch(`/api/workflows/executions/${encodeURIComponent(workflowExecutionId)}/cancel`, {
-      method: 'POST',
-      version: PUBLIC_API_VERSION,
-      headers: { 'elastic-api-version': PUBLIC_API_VERSION },
-    }).catch((error: Error) =>
-      log.warning(
-        `Could not cancel FP/TP analysis execution ${workflowExecutionId}: ${error.message}`
-      )
-    );
-    const cancelDeadline = Date.now() + cancelWaitMs;
-    let last: WorkflowExecutionDto | undefined;
-    do {
-      await sleep(pollIntervalMs);
-      last = (await readExecution().catch(() => undefined)) ?? last;
-    } while ((last === undefined || !isTerminal(last.status)) && Date.now() < cancelDeadline);
-    if (last === undefined || !isTerminal(last.status)) {
-      log.warning(
-        `FP/TP analysis execution ${workflowExecutionId} was still ${
-          last?.status ?? 'unreadable'
-        } ${cancelWaitMs}ms after cancelling`
-      );
+    if (isTerminal(execution.status)) {
+      break;
     }
-    return last;
-  };
 
-  const deadline = Date.now() + maxWaitMs;
-  let execution: WorkflowExecutionDto;
-  try {
-    execution = await readExecution();
-    while (!isTerminal(execution.status) && Date.now() < deadline) {
-      await sleep(pollIntervalMs);
-      execution = await readExecution();
-    }
-  } catch (error) {
-    log.warning(
-      `Could not read FP/TP analysis execution ${workflowExecutionId}: ${error.message}; cancelling it`
-    );
-    const last = await cancelAndAwait();
-    if (last !== undefined) {
-      onFailedReadConversationIds?.(conversationIdsOf(last));
-    }
-    throw error;
+    await sleep(pollIntervalMs);
   }
 
-  const timedOut = !isTerminal(execution.status);
-  if (timedOut) {
+  if (!execution) {
+    throw new Error(`No execution returned for workflow run ${workflowExecutionId}`);
+  }
+
+  if (!isTerminal(execution.status)) {
     log.warning(
-      `FP/TP analysis execution ${workflowExecutionId} was not terminal after ${maxWaitMs}ms (last status: ${execution.status}); cancelling it and counting it as failed`
-    );
-    execution = (await cancelAndAwait()) ?? execution;
-  } else if (execution.status !== ExecutionStatus.COMPLETED) {
-    log.info(
-      `FP/TP analysis execution ${workflowExecutionId} ended ${execution.status}: ${
-        execution.error?.message ?? 'no error message'
-      }`
+      `Workflow execution ${workflowExecutionId} did not reach a terminal status within ${maxWaitMs}ms (last status: ${execution.status})`
     );
   }
 
-  const output = readAnalysisOutput(execution);
-
-  const conversationIds = conversationIdsOf(execution);
-  // The agent is tool-less, so no tool is exempt from the zero-tool guardrail.
-  const { toolCallIds, unavailable } = await readAgentToolCallsFromTraces({
-    traceEsClient,
-    conversationIds,
-    log,
-    excludeToolIds: [],
-  });
+  const workflowOutput = readWorkflowOutput(execution);
+  const verdict = readAgentVerdict(execution.stepExecutions);
+  if (!verdict && !workflowOutput?.verdict) {
+    log.warning(
+      `Workflow execution ${workflowExecutionId} produced no verdict (status: ${execution.status})`
+    );
+  }
 
   return {
+    verdict,
+    workflowOutput,
     executionId: workflowExecutionId,
     executionStatus: execution.status,
-    outcome: timedOut ? 'failed' : toOutcome(execution, output),
-    payload: output?.payload,
-    attackDiscoveryIdEcho: output?.attack_discovery_id,
-    raw: output,
-    seededIds,
-    seededEvidence,
-    agentConversationIds: conversationIds,
-    toolCallIds,
-    toolCallsUnavailable: unavailable,
+    traceId: execution.traceId,
   };
 };

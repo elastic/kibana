@@ -6,44 +6,63 @@
  */
 
 /**
- * Shared constants for the Attack Discovery FP/TP analysis eval suite.
+ * Shared constants for the attack-discovery FP/TP eval suite.
  *
- * Route paths, ids, and API versions are inlined rather than imported from the owning
- * plugins, so this functional-tests package takes no runtime dependency on them. They
- * mirror:
- *   - the managed FP/TP analysis workflow id (@kbn/workflows/managed, #19282)
- *   - ALERTZERO_REASONING_INFERENCE_FEATURE_ID (@kbn/alertzero-common)
- *   - the workflows_management and agent_builder public API versions
- *   - APIRoutes.GET/PUT_INFERENCE_SETTINGS (search_inference_endpoints common)
+ * Route paths and API versions are intentionally inlined (rather than imported
+ * from `@kbn/security-solution-plugin` / `@kbn/workflows/managed`) to keep this
+ * functional-tests package free of a runtime dependency on the security
+ * solution plugin. They mirror the alert-analysis-workflow suite's constants.
  */
+
+/** Public workflows_management API version (`Elastic-Api-Version` header). */
+export const WORKFLOWS_API_VERSION = '2023-10-31';
 
 /**
- * Which workflow the suite runs. `sample` installs the YAML in `src/sample_workflow/`
- * for the run; `managed` runs the shipped workflow once #19282 lands.
+ * The AD (attack discovery) workflow that produces attack documents. The
+ * suite's task module grades the FP/TP analysis workflow
+ * (`FP_TP_ANALYSIS_WORKFLOW_ID`) against those documents' persisted
+ * `kibana.alert.attack_discovery.*` fields.
  */
-export const FP_TP_WORKFLOW_SOURCE: 'sample' | 'managed' = 'sample';
+export const ATTACK_DISCOVERY_WORKFLOW_ID = 'system-security-attack-discovery';
 
-export const FP_TP_MANAGED_WORKFLOW_ID = 'system-security-attack-discovery-fp-tp-analysis';
+/**
+ * The FP/TP analysis workflow this suite grades
+ * (`ALERTZERO_ATTACK_DISCOVERY_FP_TP_ANALYSIS_WORKFLOW_ID` in
+ * kbn-workflows' alertzero managed definitions). The task module runs THIS
+ * workflow; the AD (`ATTACK_DISCOVERY_WORKFLOW_ID`) id is kept for reference.
+ */
+export const FP_TP_ANALYSIS_WORKFLOW_ID = 'system-security-attack-discovery-fp-tp-analysis';
 
-/** Public workflows_management and agent_builder API version. */
-export const PUBLIC_API_VERSION = '2023-10-31';
+/** Verdict labels the canonical case schema's gold enum admits. */
+export const LABELS = ['true_positive', 'false_positive', 'inconclusive'] as const;
 
-export const INFERENCE_SETTINGS_ROUTE = '/internal/search_inference_endpoints/settings';
+export type Label = (typeof LABELS)[number];
 
-export const INFERENCE_SETTINGS_API_VERSION = '1';
+/** Label provenance values enforced by the loader (mirrors validate.py). */
+export const LABEL_PROVENANCES = ['public', 'replay', 'synthetic', 'adversarial-mutation'] as const;
 
-/** Inference feature the analysis's `ai.agent` step resolves its connector from. */
-export const FP_TP_INFERENCE_FEATURE_ID = 'alertzero_reasoning';
+export type LabelProvenance = (typeof LABEL_PROVENANCES)[number];
 
-export const FP_TP_VERDICTS = ['true_positive', 'false_positive', 'inconclusive'] as const;
+/** Vendored corpus names and their known case counts (regression guard). */
+export const CORPUS_CASE_COUNTS = {
+  'guide-sanity': 750,
+  'botsv3-benign-day': 96,
+  'botsv3-fp-alerts': 54,
+  'tp-chains': 3,
+  'adversarial-twins': 21,
+  perturbations: 15,
+  'cloud-fp-synthetic': 78,
+} as const;
 
-export type FpTpVerdict = (typeof FP_TP_VERDICTS)[number];
+export type CorpusName = keyof typeof CORPUS_CASE_COUNTS;
 
-/** Every outcome a run can have. `failed` is an execution state, never a verdict. */
-export const FP_TP_OUTCOMES = [...FP_TP_VERDICTS, 'failed'] as const;
+export const CORPUS_NAMES = Object.keys(CORPUS_CASE_COUNTS) as CorpusName[];
 
-export type FpTpOutcome = (typeof FP_TP_OUTCOMES)[number];
+/** Permitted-use flags surfaced on loaded examples. */
+export const SANITY_ONLY_CORPORA: readonly CorpusName[] = ['guide-sanity'];
 
-export const SUMMARY_MARKDOWN_MAX_LENGTH = 8000;
-
-export const RATIONALE_MARKDOWN_MAX_LENGTH = 50000;
+/** Corpora still carrying a PROVISIONAL flag (labels pending human review). */
+export const PROVISIONAL_CORPORA: readonly CorpusName[] = [
+  'botsv3-fp-alerts',
+  'cloud-fp-synthetic',
+];
