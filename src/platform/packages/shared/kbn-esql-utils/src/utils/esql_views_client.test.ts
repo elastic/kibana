@@ -9,7 +9,7 @@
 
 import type { HttpStart } from '@kbn/core/public';
 import { VIEWS_BULK_DELETE_ROUTE, VIEWS_ROUTE } from '@kbn/esql-types';
-import { createEsqlViewsClient, EsqlViewsClientError } from './esql_views_client';
+import { createEsqlViewsManagementClient, EsqlViewsClientError } from './esql_views_client';
 
 const createHttpError = (status: number, message: string) => {
   const error = new Error(message);
@@ -37,14 +37,17 @@ const createHttpMock = () => {
   return { http, get, put, deleteRequest, post };
 };
 
-describe('createEsqlViewsClient', () => {
+describe('createEsqlViewsManagementClient', () => {
   it('gets all views', async () => {
     const { http, get } = createHttpMock();
     const response = { views: [{ name: 'my-view', query: 'FROM logs-*' }] };
     get.mockResolvedValue(response);
 
-    await expect(createEsqlViewsClient(http).getViews()).resolves.toEqual(response);
-    expect(get).toHaveBeenCalledWith(VIEWS_ROUTE, { signal: undefined });
+    await expect(createEsqlViewsManagementClient(http).getViews()).resolves.toEqual(response);
+    expect(get).toHaveBeenCalledWith(VIEWS_ROUTE, {
+      query: { strict: true },
+      signal: undefined,
+    });
   });
 
   it('gets a view using an encoded name', async () => {
@@ -52,7 +55,7 @@ describe('createEsqlViewsClient', () => {
     const view = { name: 'view/name', query: 'ROW value = 1' };
     get.mockResolvedValue(view);
 
-    await expect(createEsqlViewsClient(http).getView('view/name')).resolves.toEqual(view);
+    await expect(createEsqlViewsManagementClient(http).getView('view/name')).resolves.toEqual(view);
     expect(get).toHaveBeenCalledWith('/internal/esql/views/view%2Fname', {
       signal: undefined,
     });
@@ -62,14 +65,16 @@ describe('createEsqlViewsClient', () => {
     const { http, get } = createHttpMock();
     get.mockRejectedValue(createHttpError(404, 'Not found'));
 
-    await expect(createEsqlViewsClient(http).getView('missing-view')).resolves.toBeUndefined();
+    await expect(
+      createEsqlViewsManagementClient(http).getView('missing-view')
+    ).resolves.toBeUndefined();
   });
 
   it('creates a view after an exact-name preflight returns 404', async () => {
     const { http, get, put } = createHttpMock();
     get.mockRejectedValue(createHttpError(404, 'Not found'));
     put.mockResolvedValue({ acknowledged: true });
-    const client = createEsqlViewsClient(http);
+    const client = createEsqlViewsManagementClient(http);
 
     await expect(
       client.createView({
@@ -91,7 +96,7 @@ describe('createEsqlViewsClient', () => {
     get.mockResolvedValue({ name: 'my-view', query: 'FROM logs-*' });
 
     await expect(
-      createEsqlViewsClient(http).createView({
+      createEsqlViewsManagementClient(http).createView({
         name: 'my-view',
         query: 'FROM new-logs-*',
       })
@@ -107,7 +112,7 @@ describe('createEsqlViewsClient', () => {
     get.mockRejectedValue(createHttpError(403, 'Forbidden'));
 
     await expect(
-      createEsqlViewsClient(http).createView({
+      createEsqlViewsManagementClient(http).createView({
         name: 'my-view',
         query: 'FROM logs-*',
       })
@@ -123,7 +128,7 @@ describe('createEsqlViewsClient', () => {
     put.mockResolvedValue({ acknowledged: true });
 
     await expect(
-      createEsqlViewsClient(http).updateView({
+      createEsqlViewsManagementClient(http).updateView({
         name: 'my-view',
         query: 'FROM updated-logs-*',
       })
@@ -140,7 +145,7 @@ describe('createEsqlViewsClient', () => {
     const { http, deleteRequest } = createHttpMock();
     deleteRequest.mockResolvedValue({ acknowledged: true });
 
-    await expect(createEsqlViewsClient(http).deleteViews(['my-view'])).resolves.toEqual({
+    await expect(createEsqlViewsManagementClient(http).deleteViews(['my-view'])).resolves.toEqual({
       acknowledged: true,
     });
     expect(deleteRequest).toHaveBeenCalledWith('/internal/esql/views/my-view');
@@ -151,7 +156,7 @@ describe('createEsqlViewsClient', () => {
     post.mockResolvedValue({ acknowledged: true });
 
     await expect(
-      createEsqlViewsClient(http).deleteViews(['first-view', 'second-view'])
+      createEsqlViewsManagementClient(http).deleteViews(['first-view', 'second-view'])
     ).resolves.toEqual({ acknowledged: true });
     expect(post).toHaveBeenCalledWith(VIEWS_BULK_DELETE_ROUTE, {
       body: JSON.stringify({ names: ['first-view', 'second-view'] }),
@@ -161,7 +166,7 @@ describe('createEsqlViewsClient', () => {
   it('rejects an empty delete request', async () => {
     const { http } = createHttpMock();
 
-    await expect(createEsqlViewsClient(http).deleteViews([])).rejects.toEqual(
+    await expect(createEsqlViewsManagementClient(http).deleteViews([])).rejects.toEqual(
       new EsqlViewsClientError('At least one ES|QL view name is required', 400)
     );
   });
