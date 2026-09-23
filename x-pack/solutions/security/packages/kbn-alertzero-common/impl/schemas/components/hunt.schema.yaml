@@ -72,6 +72,8 @@ components:
           $ref: '#/components/schemas/HuntIocType'
         value:
           type: string
+          minLength: 1
+          maxLength: 2048
 
     HuntForThreatStatus:
       type: string

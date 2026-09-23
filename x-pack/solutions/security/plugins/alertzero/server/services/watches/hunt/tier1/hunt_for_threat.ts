@@ -166,8 +166,8 @@ const classifyIdentityType = (
  * Hit bar: at least one confirmed match in a *required* index pattern inside
  * the window. A match only in an optional pattern (including the alerts
  * pattern), or outside the window, does not set `hasConfirmedHit`. It can
- * still appear in `hits`/`counts`/`perIndex` for context, but only
- * `hasConfirmedHit` is treated as evidence by the coordinator.
+ * still appear in `hits`/`counts`/`perIndex` for context. The coordinator's
+ * `tier2_when: on_hits` gate follows `hasConfirmedHit` for the same reason.
  */
 export const huntForThreat = async (
   esClient: ElasticsearchClient,

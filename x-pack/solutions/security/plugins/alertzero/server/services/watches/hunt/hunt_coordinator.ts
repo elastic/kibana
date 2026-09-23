@@ -80,6 +80,16 @@ export interface HuntCoordinatorResult {
 
 const DEFAULT_TIER2_SAMPLE_EVENTS = 5;
 
+/** Matches the OpenAPI `text` maxLength on hunt_behavior / hunt_coordinator. */
+const MAX_HUNT_REPORT_TEXT_CHARS = 200_000;
+
+const clampHuntReportText = (value: string | undefined): string | undefined => {
+  if (value === undefined || value.length === 0) return undefined;
+  return value.length > MAX_HUNT_REPORT_TEXT_CHARS
+    ? value.slice(0, MAX_HUNT_REPORT_TEXT_CHARS)
+    : value;
+};
+
 const summarizeHit = (hit: HuntForThreatResult['hits'][number]): string => {
   const parts: string[] = [];
   const src = hit as Record<string, unknown>;
@@ -122,7 +132,9 @@ const decideTier2Skip = (
     if (tier2When === 'always') return null;
     return 'no_searchable_input';
   }
-  if (tier2When === 'on_hits' && tier1.status !== 'environment_hits_found') {
+  // Gate on the confirmed hit bar, not merely `environment_hits_found`: optional-only
+  // matches (alerts, endpoint) populate hits/counts but must not burn a Tier 2 run.
+  if (tier2When === 'on_hits' && !tier1.hasConfirmedHit) {
     return 'no_environment_hits';
   }
   return null;
@@ -186,7 +198,9 @@ export const huntCoordinator = async (
   const iocs = callerIocs.length > 0 ? callerIocs : reportContext?.iocs ?? [];
   const techniques =
     callerTechniques.length > 0 ? callerTechniques : reportContext?.techniques ?? [];
-  const text = callerText ?? reportContext?.text;
+  // Clamp after merge: request schema bounds caller `text`, but report-loaded
+  // `content.body_text` has no such bound and must not exceed the Tier 2 contract.
+  const text = clampHuntReportText(callerText ?? reportContext?.text);
 
   // Resolve the index scope from the environment: the named technology, or every
   // technology whose required indices exist in this space.

@@ -73,7 +73,7 @@ export const HuntIocTypeEnum = HuntIocType.enum;
 export const HuntIoc = lazySchema(() =>
   z.object({
     type: HuntIocType,
-    value: z.string(),
+    value: z.string().min(1).max(2048),
   })
 );
 export type HuntIoc = z.infer<typeof HuntIoc>;

@@ -60,6 +60,23 @@ describe('loadReportHuntContext', () => {
     expect(context?.text).toEqual(expect.stringContaining('AssumeRole'));
   });
 
+  it('clamps body text to the Tier 2 request maxLength', async () => {
+    const oversized = 'x'.repeat(200_001);
+    esClient.search.mockResolvedValue(
+      respond([
+        {
+          ...reportHit,
+          _source: {
+            ...reportHit._source,
+            content: { body_text: oversized },
+          },
+        },
+      ])
+    );
+    const context = await loadReportHuntContext({ esClient, spaceId: 'hunt-a', reportId: 'rpt-1' });
+    expect(context?.text).toHaveLength(200_000);
+  });
+
   it('scopes the lookup to the acting space', async () => {
     await loadReportHuntContext({ esClient, spaceId: 'hunt-a', reportId: 'rpt-1' });
     const query = (esClient.search as unknown as jest.Mock).mock.calls[0][0].query;

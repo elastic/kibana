@@ -38,6 +38,17 @@ describe('buildCandidateQuery', () => {
     expect(result.ids).toHaveLength(0);
   });
 
+  it('throws when the reports search fails so callers do not treat it as an empty pool', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.search.mockRejectedValue(new Error('index_not_found_exception'));
+    await expect(
+      buildCandidateQuery(esClient, logger, {
+        trigger: 'scheduled',
+        spaceId: 'default',
+      })
+    ).rejects.toThrow('index_not_found_exception');
+  });
+
   it('returns ids for scheduled trigger (hunt-once gate)', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     esClient.search.mockResolvedValue(searchResponseOf(['rpt-1', 'rpt-2']));

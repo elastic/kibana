@@ -27,15 +27,15 @@ export const HuntForThreatRequestBody = lazySchema(() =>
   z
     .object({
       technology: HuntTechnology,
-      iocs: z.array(HuntIoc).optional(),
-      techniques: z.array(z.string()).optional(),
+      iocs: z.array(HuntIoc).max(100).optional(),
+      techniques: z.array(z.string().min(1).max(32)).max(100).optional(),
       timeRange: z
         .object({
-          from: z.string(),
-          to: z.string(),
+          from: z.string().min(1).max(64),
+          to: z.string().min(1).max(64),
         })
         .optional(),
-      size: z.number().int().min(1).optional(),
+      size: z.number().int().min(1).max(100).optional(),
     })
     .strict()
 );

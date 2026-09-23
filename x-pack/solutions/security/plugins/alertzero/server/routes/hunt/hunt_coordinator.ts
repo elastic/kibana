@@ -122,7 +122,7 @@ export const registerHuntCoordinatorRoute = ({
           logger.error(`hunt_coordinator route failed: ${(err as Error).message}`);
           return response.customError({
             statusCode: 500,
-            body: { message: `Hunt coordinator failed: ${(err as Error).message}` },
+            body: { message: 'Hunt coordinator failed' },
           });
         }
       }

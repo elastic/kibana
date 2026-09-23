@@ -100,9 +100,8 @@ export const registerHuntBehaviorRoute = ({
           return response.customError({
             statusCode: 500,
             body: {
-              message: `LLM extraction failed: ${
-                (err as Error).message
-              }. Verify a default GenAI connector is configured.`,
+              message:
+                'LLM extraction failed. Verify a GenAI connector is configured for this deployment.',
             },
           });
         }

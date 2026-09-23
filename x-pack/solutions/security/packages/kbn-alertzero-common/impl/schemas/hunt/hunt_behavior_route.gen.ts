@@ -25,8 +25,8 @@ export const HuntBehaviorStatusEnum = HuntBehaviorStatus.enum;
 
 export const HuntBehaviorIoc = lazySchema(() =>
   z.object({
-    type: z.string(),
-    value: z.string(),
+    type: z.string().min(1).max(64),
+    value: z.string().min(1).max(2048),
   })
 );
 export type HuntBehaviorIoc = z.infer<typeof HuntBehaviorIoc>;
@@ -36,24 +36,25 @@ export type HuntBehaviorIoc = z.infer<typeof HuntBehaviorIoc>;
  */
 export const HuntBehaviorArticleContext = lazySchema(() =>
   z.object({
-    matched_indices: z.array(z.string()).optional(),
-    affected_hosts: z.array(z.string()).optional(),
-    affected_users: z.array(z.string()).optional(),
-    sample_events: z.array(z.string()).optional(),
+    matched_indices: z.array(z.string().max(512)).max(50).optional(),
+    affected_hosts: z.array(z.string().max(512)).max(50).optional(),
+    affected_users: z.array(z.string().max(512)).max(50).optional(),
+    sample_events: z.array(z.string().max(2048)).max(50).optional(),
     time_range: z
       .object({
-        from: z.string(),
-        to: z.string(),
+        from: z.string().min(1).max(64),
+        to: z.string().min(1).max(64),
       })
       .optional(),
     proposed_atomic_rules: z
       .array(
         z.object({
-          rule_name: z.string(),
-          ioc_type: z.string(),
-          ioc_value: z.string(),
+          rule_name: z.string().max(512),
+          ioc_type: z.string().max(64),
+          ioc_value: z.string().max(2048),
         })
       )
+      .max(50)
       .optional(),
   })
 );
@@ -63,9 +64,9 @@ export const HuntBehaviorRequestBody = lazySchema(() =>
   z
     .object({
       text: z.string().max(200000),
-      report_id: z.string().optional(),
+      report_id: z.string().min(1).max(512).optional(),
       llm_confidence_threshold: z.number().min(0).max(1).optional(),
-      iocs: z.array(HuntBehaviorIoc).optional(),
+      iocs: z.array(HuntBehaviorIoc).max(100).optional(),
       article_context: HuntBehaviorArticleContext.optional(),
     })
     .strict()
