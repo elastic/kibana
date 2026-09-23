@@ -8,13 +8,18 @@
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import {
+  ANALYSIS_WINDOW_DAYS_MAX,
+  ANALYSIS_WINDOW_DAYS_MIN,
+  FP_COUNT_THRESHOLD_MAX,
+  FP_COUNT_THRESHOLD_MIN,
+  FP_RATE_THRESHOLD_PCT_MAX,
+  FP_RATE_THRESHOLD_PCT_MIN,
   RULE_TUNING_DEFAULT_EXTRAS,
   RuleTuningWorkerExtras,
   type WorkerSettings,
 } from '@kbn/alertzero-common';
-import { AnalysisWindowDaysField } from './analysis_window_days_field';
-import { FpCountThresholdField } from './fp_count_threshold_field';
-import { FpRateThresholdPctField } from './fp_rate_threshold_pct_field';
+import { BoundedNumberField } from './bounded_number_field';
+import * as i18n from './translations';
 import type { WorkerCustomSettingsComponent } from '../types';
 
 /** The server projects complete extras; fall back to the defaults rather than crash a render. */
@@ -38,18 +43,36 @@ export const RuleTuningSettings: WorkerCustomSettingsComponent = ({
   return (
     <>
       <EuiSpacer size="m" />
-      <AnalysisWindowDaysField
-        current={extras.analysisWindowDays}
+      <BoundedNumberField
+        value={extras.analysisWindowDays}
+        min={ANALYSIS_WINDOW_DAYS_MIN}
+        max={ANALYSIS_WINDOW_DAYS_MAX}
+        label={i18n.ANALYSIS_WINDOW_DAYS_LABEL}
+        helpText={i18n.ANALYSIS_WINDOW_DAYS_HELP}
+        ariaLabel={i18n.ANALYSIS_WINDOW_DAYS_ARIA_LABEL}
+        testSubj="alertZeroAnalysisWindowDays"
         isDisabled={isDisabled}
         onChange={(analysisWindowDays) => onExtrasChange({ ...extras, analysisWindowDays })}
       />
-      <FpCountThresholdField
-        current={extras.fpCountThreshold}
+      <BoundedNumberField
+        value={extras.fpCountThreshold}
+        min={FP_COUNT_THRESHOLD_MIN}
+        max={FP_COUNT_THRESHOLD_MAX}
+        label={i18n.FP_COUNT_THRESHOLD_LABEL}
+        helpText={i18n.FP_COUNT_THRESHOLD_HELP}
+        ariaLabel={i18n.FP_COUNT_THRESHOLD_ARIA_LABEL}
+        testSubj="alertZeroFpCountThreshold"
         isDisabled={isDisabled}
         onChange={(fpCountThreshold) => onExtrasChange({ ...extras, fpCountThreshold })}
       />
-      <FpRateThresholdPctField
-        current={extras.fpRateThresholdPct}
+      <BoundedNumberField
+        value={extras.fpRateThresholdPct}
+        min={FP_RATE_THRESHOLD_PCT_MIN}
+        max={FP_RATE_THRESHOLD_PCT_MAX}
+        label={i18n.FP_RATE_THRESHOLD_PCT_LABEL}
+        helpText={i18n.FP_RATE_THRESHOLD_PCT_HELP}
+        ariaLabel={i18n.FP_RATE_THRESHOLD_PCT_ARIA_LABEL}
+        testSubj="alertZeroFpRateThresholdPct"
         isDisabled={isDisabled}
         onChange={(fpRateThresholdPct) => onExtrasChange({ ...extras, fpRateThresholdPct })}
       />
