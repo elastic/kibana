@@ -20,10 +20,11 @@ import {
   builtinWorkflowInputDefinitions,
 } from '@kbn/workflows';
 import type { AlertAnalysisCallerAlertItem } from './alert_analysis_workflow';
+import { AlertAnalysisCallerAlerts } from './alert_analysis_workflow';
 
-// If `AlertAnalysisCallerAlertItem` gains or loses a field, this map causes a
-// TypeScript compile error — forcing the schema to be updated in lockstep.
-const _alertItemKeyGuard: Record<keyof AlertAnalysisCallerAlertItem, true> = {
+// Keyed on `.shape`: the loose object's inferred type has a string index signature, so
+// `keyof AlertAnalysisCallerAlertItem` would accept any key and never fail to compile.
+const _alertItemKeyGuard: Record<keyof typeof AlertAnalysisCallerAlertItem.shape, true> = {
   _id: true,
   _index: true,
   '@timestamp': true,
@@ -70,5 +71,39 @@ describe('securityAlertAnalysisCallerAlerts builtin workflow input definition', 
     };
     expect(items?.properties?.['@timestamp']?.format).toBe('date-time');
     expect(items?.properties?.['@timestamp']?.maxLength).toBe(64);
+  });
+});
+
+describe('AlertAnalysisCallerAlerts', () => {
+  const alert = {
+    _id: 'alert-1',
+    _index: '.internal.alerts-security.alerts-default-000001',
+    '@timestamp': '2026-09-23T10:00:00.000Z',
+    host: { name: 'host-1' },
+    user: { name: 'user-1' },
+    process: { command_line: 'cmd.exe /c whoami' },
+    kibana: {
+      alert: {
+        workflow_tags: ['ai.classification.true_positive'],
+        severity: 'high',
+        rule: { uuid: 'rule-1', name: 'Rule 1', rule_type_id: 'siem.queryRule' },
+      },
+    },
+  };
+
+  it('keeps the full alert document, including nested kibana.alert fields', () => {
+    expect(AlertAnalysisCallerAlerts.parse([alert])).toEqual([alert]);
+  });
+
+  it('accepts date-time @timestamp values with a UTC offset', () => {
+    const result = AlertAnalysisCallerAlerts.safeParse([
+      { ...alert, '@timestamp': '2026-09-23T12:00:00.000+02:00' },
+    ]);
+    expect(result.success).toBe(true);
+  });
+
+  it.each(['not-a-date', '2026-09-23'])('rejects a non date-time @timestamp (%s)', (timestamp) => {
+    const result = AlertAnalysisCallerAlerts.safeParse([{ ...alert, '@timestamp': timestamp }]);
+    expect(result.success).toBe(false);
   });
 });
