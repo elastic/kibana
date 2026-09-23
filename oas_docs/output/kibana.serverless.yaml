@@ -20996,7 +20996,7 @@ paths:
             type: integer
         - description: The number of results per page. Defaults to 20, maximum 100.
           in: query
-          name: per_page
+          name: perPage
           required: false
           schema:
             default: 20
@@ -138613,7 +138613,7 @@ components:
           type: string
         owner:
           description: The application that owns this field definition.
-          maxLength: 50
+          maxLength: 30
           minLength: 1
           type: string
       required:
@@ -138698,7 +138698,7 @@ components:
           type: string
         owner:
           description: The application that owns this field definition.
-          maxLength: 50
+          maxLength: 30
           minLength: 1
           type: string
       required:

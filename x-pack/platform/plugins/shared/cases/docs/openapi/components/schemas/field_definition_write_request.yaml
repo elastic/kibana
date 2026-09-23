@@ -30,7 +30,7 @@ properties:
   owner:
     type: string
     minLength: 1
-    maxLength: 50
+    maxLength: 30
     description: The application that owns this field definition.
   definition:
     type: string

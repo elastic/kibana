@@ -40,7 +40,7 @@ get:
         minimum: 1
         default: 1
     - in: query
-      name: per_page
+      name: perPage
       description: The number of results per page. Defaults to 20, maximum 100.
       required: false
       schema:

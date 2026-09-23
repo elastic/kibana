@@ -1803,7 +1803,7 @@
           },
           {
             "in": "query",
-            "name": "per_page",
+            "name": "perPage",
             "description": "The number of results per page. Defaults to 20, maximum 100.",
             "required": false,
             "schema": {
@@ -6006,7 +6006,7 @@
           "owner": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 50,
+            "maxLength": 30,
             "description": "The application that owns this field definition."
           },
           "definition": {
@@ -6045,7 +6045,7 @@
           "owner": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 50,
+            "maxLength": 30,
             "description": "The application that owns this field definition."
           },
           "definition": {
