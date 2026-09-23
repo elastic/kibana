@@ -36,15 +36,15 @@ What becomes easier, what becomes harder, what constraints this imposes on futur
 
 | ADR | Title | Status |
 |---|---|---|
-| [0001](0001-graph-inline-authoring-scope.md) | Graph inline authoring — scope | Accepted |
-| [0002](0002-synchronous-commit-for-graph-gestures.md) | Synchronous commit for graph gestures | Accepted |
-| [0003](0003-name-addressing-and-shared-traversal.md) | Name addressing and shared step-child traversal | Superseded by ADR-0007 |
-| [0004](0004-fallback-diamond-and-continue.md) | Fallback lane shape and `continue` separation | Accepted |
-| [0005](0005-undo-delegates-to-monaco.md) | Undo delegates to Monaco | Accepted |
-| [0006](0006-graph-mutations-reuse-snippet-path.md) | Graph mutations reuse the snippet insertion path | Accepted |
-| [0007](0007-structural-child-slots.md) | Structural child slots and per-slot enumerator | Accepted |
-| [0008](0008-post-dagre-lane-order.md) | Post-dagre fork and trigger lane order | Superseded by ADR-0011 |
-| [0009](0009-alignment-ignored-edges.md) | `alignmentIgnoredEdges`: excluding failure edges from cross-axis alignment | Accepted |
-| [0010](0010-fallback-lane-graph-model.md) | Fallback lane graph model | Accepted (Decision 2 superseded by ADR-0012) |
-| [0011](0011-post-dagre-positioning-pipeline.md) | Post-dagre positioning pipeline | Superseded by ADR-0012 |
-| [0012](0012-reserved-side-lanes.md) | Reserved side lanes | Accepted |
+| [0001](0001_graph_inline_authoring_scope.md) | Graph inline authoring — scope | Accepted |
+| [0002](0002_synchronous_commit_for_graph_gestures.md) | Synchronous commit for graph gestures | Accepted |
+| [0003](0003_name_addressing_and_shared_traversal.md) | Name addressing and shared step-child traversal | Superseded by ADR-0007 |
+| [0004](0004_fallback_diamond_and_continue.md) | Fallback lane shape and `continue` separation | Accepted |
+| [0005](0005_undo_delegates_to_monaco.md) | Undo delegates to Monaco | Accepted |
+| [0006](0006_graph_mutations_reuse_snippet_path.md) | Graph mutations reuse the snippet insertion path | Accepted |
+| [0007](0007_structural_child_slots.md) | Structural child slots and per-slot enumerator | Accepted |
+| [0008](0008_post_dagre_lane_order.md) | Post-dagre fork and trigger lane order | Superseded by ADR-0011 |
+| [0009](0009_alignment_ignored_edges.md) | `alignmentIgnoredEdges`: excluding failure edges from cross-axis alignment | Accepted |
+| [0010](0010_fallback_lane_graph_model.md) | Fallback lane graph model | Accepted (Decision 2 superseded by ADR-0012) |
+| [0011](0011_post_dagre_positioning_pipeline.md) | Post-dagre positioning pipeline | Superseded by ADR-0012 |
+| [0012](0012_reserved_side_lanes.md) | Reserved side lanes | Accepted |
