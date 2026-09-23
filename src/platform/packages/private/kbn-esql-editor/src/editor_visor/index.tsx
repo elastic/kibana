@@ -179,6 +179,7 @@ export function QuickSearchVisor({
                       size="s"
                       variant={isKqlMode ? 'outlined' : 'accent'}
                       aria-pressed={!isKqlMode}
+                      isSelected={!isKqlMode}
                       onClick={() => onVisorModeChange(VisorMode.NaturalLanguage)}
                       data-test-subj="esqlVisorAskAiButton"
                       css={isKqlMode ? styles.aiButtonSparkleHover : undefined}
