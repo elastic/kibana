@@ -30,7 +30,7 @@ describe('installDecisionTreeReinforcementAgent', () => {
       agent: expect.objectContaining({
         id: NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID,
         type: NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_TYPE_ID,
-        access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
+        access_control: { access_mode: AgentAccessControlMode.Private },
       }),
     });
   });

@@ -103,6 +103,7 @@ describe('ensureInvestigationAgentStepDefinition', () => {
     expect(installDecisionTreeReinforcementAgent).toHaveBeenCalledWith({
       agentBuilder,
       spaceId: 'space-1',
+      availability,
     });
     expect(installInvestigationAgent).not.toHaveBeenCalled();
     expect(callKibanaApi).toHaveBeenCalledWith({
