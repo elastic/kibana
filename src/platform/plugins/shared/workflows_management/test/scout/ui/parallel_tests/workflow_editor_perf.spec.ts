@@ -244,7 +244,11 @@ test.describe(
 
                   syncEditMs = Number((performance.now() - editTimestamp).toFixed(2));
 
-                  quiescenceTimer = setTimeout(finish, quiescence);
+                  // Only the deadline timer runs here. The quiescence timer starts inside
+                  // the setModelMarkers interceptor after the first call arrives, so it never
+                  // fires before validation has begun. Without this, a slow CI agent where
+                  // validation takes > quiescence ms to start would trigger finish() with an
+                  // empty markerCalls before any measurement was taken.
                   maxTimer = setTimeout(finish, maxWait);
                 });
               },
