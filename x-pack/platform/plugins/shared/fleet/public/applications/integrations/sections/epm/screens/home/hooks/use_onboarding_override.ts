@@ -16,7 +16,6 @@ const ONBOARDING_ENABLED_FLAG = 'ingestHub.onboardingEnabled';
 const ONBOARDING_APP_ID = 'onboarding';
 const ONBOARDING_AWS_PATH = '/aws';
 
-// The package whose detail page hands over to the AWS onboarding flow.
 export const AWS_ONBOARDING_PACKAGE_NAME = 'aws';
 // Card id of the top-level aws package. Its policy templates are `epr:aws-<template>`.
 const AWS_PACKAGE_TILE_ID = 'epr:aws';
@@ -54,8 +53,7 @@ export function useOnboardingOverride() {
     [application]
   );
 
-  // `newSession` tells the onboarding app to drop any session storage left over from an
-  // earlier run, so the flow always opens on a clean first step.
+  // `newSession` makes the onboarding app drop session storage left over from an earlier run.
   const navigateToOnboarding = useCallback(() => {
     application.navigateToApp(ONBOARDING_APP_ID, {
       path: ONBOARDING_AWS_PATH,
@@ -69,12 +67,10 @@ export function useOnboardingOverride() {
         return cards;
       }
 
-      // The aws package keeps its own tile so the tile still opens the integration detail
-      // page; the "Add AWS" button there is what hands over to the onboarding flow.
       return cards.reduce<IntegrationCardItem[]>((kept, card) => {
         if (card.id === AWS_PACKAGE_TILE_ID) {
-          // Pin the overview page so `enableIntegrationTileClickToAdd` cannot send the tile
-          // straight to the Fleet wizard and skip the detail page that owns the handover.
+          // Pinned to the overview page so `enableIntegrationTileClickToAdd` cannot send the
+          // tile past the detail page, which is where the handover to onboarding lives.
           kept.push({
             ...card,
             url: getHref('integration_details_overview', {

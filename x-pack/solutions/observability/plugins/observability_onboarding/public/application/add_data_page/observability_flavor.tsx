@@ -72,8 +72,7 @@ export const useObservabilityCuratedCategories = ({
       {
         // ingest_hub's guided AWS flow wins over the CloudWatch quickstart
         // while it rolls out behind its own flag.
-        // An href alone cannot carry router state, so the click handler does the navigation
-        // and passes `newSession` to make the flow drop any leftover session storage.
+        // An href cannot carry router state, so the click handler passes `newSession`.
         aws: featureFlags.getBooleanValue(IS_INGEST_HUB_ONBOARDING_ENABLED, false)
           ? {
               href: getUrlForApp?.('onboarding', { path: '/aws' }),

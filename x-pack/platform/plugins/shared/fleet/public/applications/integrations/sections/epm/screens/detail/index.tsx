@@ -234,10 +234,8 @@ export function Detail() {
         : AddIntegrationButtonDisabledReason.MISSING_PRIVILEGES
       : undefined;
 
-  /** The AWS onboarding flow replaces the Fleet add-integration wizard for the AWS package while
-   ** the flag is on. A preselected agent policy stays on the Fleet flow, which is the only one
-   ** that can honour it.
-   */
+  // A preselected agent policy stays on the Fleet wizard, which is the only flow that can
+  // honour it.
   const isAwsOnboardingEntry =
     isOnboardingEnabled &&
     packageInfo?.name === AWS_ONBOARDING_PACKAGE_NAME &&

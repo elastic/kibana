@@ -110,7 +110,6 @@ describe('useOnboardingOverride', () => {
     });
 
     it('pins the aws tile to the overview page even when tile-click-to-add points it at the wizard', () => {
-      // enableIntegrationTileClickToAdd makes card_utils build an add_integration_to_policy url.
       const awsCard = makeCard('aws', undefined, {
         version: '3.2.1',
         url: '/app/integrations/detail/aws-3.2.1/add-integration',
