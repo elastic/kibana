@@ -411,6 +411,7 @@ const feedbackAnalysisResponseSchema = () =>
       schema.string({ meta: { description: 'KQL narrowing which signals the analysis reads.' } })
     ),
     allowed_actions: schema.maybe(
+      // codeql[js/kibana/unbounded-array-in-schema] Response schema: validates server output, not request input
       schema.arrayOf(improvementActionSchema, {
         meta: { description: 'Improvement actions the analysis may propose.' },
       })
@@ -448,12 +449,15 @@ export const aiIndexHttpItemResponseSchema = () =>
       schema.string({ meta: { description: 'Human-readable description of the AI Index.' } })
     ),
     dest: aiIndexDestResponseSchema(),
+    // codeql[js/kibana/unbounded-array-in-schema] Response schema: validates server output, not request input
     automations: schema.arrayOf(aiIndexAutomationResponseSchema(), {
       meta: { description: 'Automations associated with the AI Index.' },
     }),
+    // codeql[js/kibana/unbounded-array-in-schema] Response schema: validates server output, not request input
     sources: schema.arrayOf(aiIndexSourceResponseSchema(), {
       meta: { description: 'Additional sources that provide context for the AI Index.' },
     }),
+    // codeql[js/kibana/unbounded-array-in-schema] Response schema: validates server output, not request input
     traces: schema.arrayOf(aiIndexTraceWithQueryResponseSchema(), {
       meta: {
         description: 'Trace sources linked to this AI Index, each with its derived ES|QL query.',
@@ -467,15 +471,14 @@ export const createAiIndexResponseSchema = () =>
     status: schema.literal('created'),
   });
 
-export const putAiIndexResponseSchema = () =>
+export const updateAiIndexResponseSchema = () =>
   schema.object({
-    status: schema.oneOf([schema.literal('created'), schema.literal('updated')], {
-      meta: { description: 'Whether the AI Index was created or updated.' },
-    }),
+    status: schema.literal('updated'),
   });
 
 export const listAiIndexResponseSchema = () =>
   schema.object({
+    // codeql[js/kibana/unbounded-array-in-schema] Response schema: validates server output, not request input
     ai_indices: schema.arrayOf(aiIndexHttpItemResponseSchema(), {
       meta: { description: 'The AI Indices available to the caller in the current space.' },
     }),
@@ -483,6 +486,7 @@ export const listAiIndexResponseSchema = () =>
 
 export const queryAiIndicesResponseSchema = () =>
   schema.object({
+    // codeql[js/kibana/unbounded-array-in-schema] Response schema: validates server output, not request input
     columns: schema.arrayOf(
       schema.object(
         {
@@ -493,6 +497,7 @@ export const queryAiIndicesResponseSchema = () =>
       ),
       { meta: { description: 'Column metadata for the returned rows.' } }
     ),
+    // codeql[js/kibana/unbounded-array-in-schema] Response schema: validates server output, not request input
     values: schema.arrayOf(schema.arrayOf(schema.any()), {
       meta: {
         description:
@@ -513,6 +518,7 @@ export const deleteAiIndexResponseSchema = () =>
     acknowledged: schema.boolean({
       meta: { description: 'Whether the AI Index entry was deleted.' },
     }),
+    // codeql[js/kibana/unbounded-array-in-schema] Response schema: validates server output, not request input
     errors: schema.arrayOf(schema.string(), {
       meta: { description: 'Best-effort cleanup errors after the entry was deleted, if any.' },
     }),

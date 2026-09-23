@@ -92,9 +92,9 @@ import {
   listAiIndexResponseSchema,
   listKisQuerySchema,
   putAiIndexBodySchema,
-  putAiIndexResponseSchema,
   queryAiIndicesBodySchema,
   queryAiIndicesResponseSchema,
+  updateAiIndexResponseSchema,
 } from './schemas/ai_indices_schema';
 import { withContextEngineFeatureFlag } from './with_feature_flag';
 
@@ -234,6 +234,11 @@ export const registerAiIndexRoutes = ({
               description:
                 'The request was invalid, for example a malformed `dest`, an invalid ES|QL source, or an unresolvable connector source or trace.',
             },
+            403: {
+              body: errorResponseSchema,
+              description:
+                'Elasticsearch denied the `index` trace lookup outright; the caller lacks index privileges for it.',
+            },
             409: {
               body: errorResponseSchema,
               description: 'An AI Index with the same id already exists, or the write conflicted.',
@@ -297,17 +302,22 @@ export const registerAiIndexRoutes = ({
           },
           response: {
             200: {
-              body: putAiIndexResponseSchema,
+              body: updateAiIndexResponseSchema,
               description: 'The AI Index was updated.',
             },
             201: {
-              body: putAiIndexResponseSchema,
+              body: createAiIndexResponseSchema,
               description: 'The AI Index was created.',
             },
             400: {
               body: errorResponseSchema,
               description:
                 'The request was invalid, for example a malformed `dest`, an invalid ES|QL source, or an unresolvable connector source or trace.',
+            },
+            403: {
+              body: errorResponseSchema,
+              description:
+                'Elasticsearch denied the `index` trace lookup outright; the caller lacks index privileges for it.',
             },
             409: {
               body: errorResponseSchema,

@@ -19,6 +19,8 @@ requestBody:
             traces:
               - type: elastic_agent
                 value: elastic-ai-agent
+              - type: index
+                value: traces-support
 responses:
   201:
     content:
@@ -38,6 +40,16 @@ responses:
               statusCode: 400
               error: Bad Request
               message: "dest.value 'support-cases' is not allowed: it must start with 'ai-index-ds-'"
+  403:
+    content:
+      application/json:
+        examples:
+          forbiddenTraceExample:
+            description: "The caller lacks Elasticsearch index privileges to look up an index trace"
+            value:
+              statusCode: 403
+              error: Forbidden
+              message: "security_exception: action [indices:admin/resolve/index] is unauthorized for user [jdoe] with effective roles [support_reader] on indices [traces-support], this action is granted by the index privileges [view_index_metadata,manage,read,all]"
   409:
     content:
       application/json:
@@ -62,7 +74,10 @@ x-codeSamples:
           "dest": { "type": "data_stream", "value": "ai-index-ds-customer-support" },
           "automations": [{ "type": "workflow", "value": "8f1c2d3e-4b5a-6c7d-8e9f-0a1b2c3d4e5f" }],
           "sources": [{ "type": "esql", "value": "FROM support-cases | LIMIT 100" }],
-          "traces": [{ "type": "elastic_agent", "value": "elastic-ai-agent" }]
+          "traces": [
+            { "type": "elastic_agent", "value": "elastic-ai-agent" },
+            { "type": "index", "value": "traces-support" }
+          ]
         }'
   - lang: Console
     source: |
@@ -73,5 +88,8 @@ x-codeSamples:
         "dest": { "type": "data_stream", "value": "ai-index-ds-customer-support" },
         "automations": [{ "type": "workflow", "value": "8f1c2d3e-4b5a-6c7d-8e9f-0a1b2c3d4e5f" }],
         "sources": [{ "type": "esql", "value": "FROM support-cases | LIMIT 100" }],
-        "traces": [{ "type": "elastic_agent", "value": "elastic-ai-agent" }]
+        "traces": [
+          { "type": "elastic_agent", "value": "elastic-ai-agent" },
+          { "type": "index", "value": "traces-support" }
+        ]
       }

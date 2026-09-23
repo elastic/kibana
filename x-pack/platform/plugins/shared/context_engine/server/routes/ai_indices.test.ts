@@ -372,6 +372,21 @@ describe('ai indices routes', () => {
     });
   });
 
+  const createEsError = (statusCode: number, message: string) =>
+    new errors.ResponseError({
+      meta: {
+        aborted: false,
+        attempts: 1,
+        connection: null,
+        context: null,
+        name: message,
+        request: {} as unknown as DiagnosticResult['meta']['request'],
+      },
+      warnings: [],
+      body: { error: { type: message, reason: message } },
+      statusCode,
+    });
+
   describe('POST /api/context_engine/ai_index', () => {
     const postBody = {
       id: 'customer_support',
@@ -497,6 +512,20 @@ describe('ai indices routes', () => {
         body: {
           message: `Index trace 'missing-logs' does not match any index, data stream, or alias`,
         },
+      });
+    });
+
+    it('returns 403 without creating when Elasticsearch denies an index trace lookup', async () => {
+      esResolveIndex.mockRejectedValue(createEsError(403, 'security_exception'));
+
+      await callRoute('POST', aiIndexPath, {
+        body: { ...postBody, traces: [{ type: 'index', value: 'traces-support' }] },
+      });
+
+      expect(aiIndexService.create).not.toHaveBeenCalled();
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 403,
+        body: { message: expect.stringMatching(/^security_exception: /) },
       });
     });
 
@@ -635,6 +664,21 @@ describe('ai indices routes', () => {
         },
       });
     });
+
+    it('returns 403 without updating when Elasticsearch denies an index trace lookup', async () => {
+      esResolveIndex.mockRejectedValue(createEsError(403, 'security_exception'));
+
+      await callRoute('PUT', aiIndexByIdPath, {
+        ...putRequest,
+        body: { ...putRequest.body, traces: [{ type: 'index', value: 'traces-support' }] },
+      });
+
+      expect(aiIndexService.put).not.toHaveBeenCalled();
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 403,
+        body: { message: expect.stringMatching(/^security_exception: /) },
+      });
+    });
   });
 
   describe('GET /api/context_engine/ai_index/{aiIndexId}', () => {
@@ -697,21 +741,6 @@ describe('ai indices routes', () => {
       });
     });
   });
-
-  const createEsError = (statusCode: number, message: string) =>
-    new errors.ResponseError({
-      meta: {
-        aborted: false,
-        attempts: 1,
-        connection: null,
-        context: null,
-        name: message,
-        request: {} as unknown as DiagnosticResult['meta']['request'],
-      },
-      warnings: [],
-      body: { error: { type: message, reason: message } },
-      statusCode,
-    });
 
   describe('POST /api/context_engine/ai_index/_query', () => {
     const queryBody = { query: 'FROM ai-index-idx-a | LIMIT 10', params: { type: 'faq' } };
