@@ -156,7 +156,7 @@ export class MapsPage {
       );
     } else {
       await expandButton.waitFor({ state: 'visible', timeout: DEFAULT_MAP_LOADING_TIMEOUT });
-      await expect(expandButton.locator('.euiLoadingSpinner')).toHaveCount(0, {
+      await expect(expandButton.locator('[role="progressbar"]')).toHaveCount(0, {
         timeout: DEFAULT_MAP_LOADING_TIMEOUT,
       });
     }
