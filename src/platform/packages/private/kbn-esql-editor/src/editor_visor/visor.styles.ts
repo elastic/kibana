@@ -7,12 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { UseEuiTheme } from '@elastic/eui';
-import { euiFontSizeFromScale } from '@elastic/eui';
+import { euiCanAnimate, euiFontSizeFromScale } from '@elastic/eui';
 import { css } from '@emotion/react';
-
-export const visorWidthPercentage = 0.5;
-export const dropdownWidthPercentage = 0.35;
-const INLINE_SOURCES_PICKER_WIDTH = 100;
 
 // Cap the expanded NL textarea height to roughly a third of the viewport,
 // offset by 100px to leave room for the editor chrome above and below.
@@ -22,8 +18,6 @@ const VISOR_INNER_PADDING = '2px';
 
 export const visorStyles = (
   euiThemeContext: UseEuiTheme,
-  comboBoxWidth: number,
-  isSpaceReduced: boolean,
   isInline: boolean,
   isVisible: boolean = true
 ) => {
@@ -48,44 +42,6 @@ export const visorStyles = (
     visorWrapper: css`
       width: 100%;
     `,
-    visorBox: css`
-      border: 1px solid ${euiTheme.colors.borderBaseSubdued};
-      border-radius: ${borderRadius};
-    `,
-    comboBoxWrapper: css`
-      justify-content: center;
-      padding-left: ${euiTheme.size.xs};
-      overflow: hidden;
-      min-width: 0;
-      ${isInline
-        ? `
-          flex: 0 0 ${INLINE_SOURCES_PICKER_WIDTH}px;
-          width: ${INLINE_SOURCES_PICKER_WIDTH}px;
-        `
-        : `
-          flex-grow: 1;
-          max-width: ${
-            isSpaceReduced ? `calc(${visorWidthPercentage * 100}%)` : `${comboBoxWidth}px`
-          };
-        `}
-    `,
-    separator: css`
-      width: 1px;
-      height: ${euiTheme.size.xl};
-      flex-shrink: 0;
-      align-self: stretch;
-      position: relative;
-      &::after {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: 0;
-        transform: translateY(-50%);
-        width: 1px;
-        height: ${euiTheme.size.base};
-        background-color: ${euiTheme.colors.borderBasePlain};
-      }
-    `,
     searchWrapper: css`
       justify-content: center;
       position: relative;
@@ -93,9 +49,6 @@ export const visorStyles = (
 
       .euiFormControlLayout--group {
         border-radius: ${borderRadius};
-      }
-      .euiFormControlLayout--group::after {
-        border: none;
       }
 
       .euiFormControlLayout__append {
@@ -109,12 +62,6 @@ export const visorStyles = (
         font-size: ${fontSize} !important;
         padding-left: ${euiTheme.size.s} !important;
         padding-top: ${euiTheme.size.s} !important;
-        box-shadow: none;
-        &:focus,
-        &:hover {
-          box-shadow: none !important;
-          outline: none !important;
-        }
       }
     `,
     searchInner: css`
@@ -124,14 +71,70 @@ export const visorStyles = (
       padding-left: ${euiTheme.size.xs};
       flex-shrink: 0;
     `,
-    aiBadgeWrapper: css`
+    modeToggleWrapper: css`
       padding-left: ${euiTheme.size.xs};
-      padding-right: ${euiTheme.size.s};
       flex-shrink: 0;
       display: flex;
       align-items: center;
-      .euiBadge__icon {
-        cursor: pointer;
+    `,
+    modeToggle: css`
+      display: flex;
+      align-items: center;
+      gap: 0;
+      border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
+      border-radius: ${borderRadius};
+      padding: ${euiTheme.size.xxs};
+    `,
+    kqlModeButton: css`
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-inline-size: ${euiTheme.size.xl};
+      min-block-size: ${euiTheme.size.xl};
+      border-radius: ${euiTheme.border.radius.small};
+    `,
+    kqlModeButtonActive: css`
+      background-color: ${euiTheme.colors.backgroundFilledText};
+
+      .euiButtonIcon,
+      .euiButtonIcon svg {
+        color: ${euiTheme.colors.textInverse};
+        fill: currentColor;
+      }
+    `,
+    aiButtonSparkleHover: css`
+      overflow: visible;
+
+      @keyframes esqlVisorSparkleTwinkle {
+        0%,
+        8% {
+          opacity: 1;
+        }
+        18%,
+        38% {
+          opacity: 0;
+        }
+        48%,
+        100% {
+          opacity: 1;
+        }
+      }
+
+      ${euiCanAnimate} {
+        &:hover svg path,
+        &:focus-visible svg path {
+          animation: esqlVisorSparkleTwinkle 1.1s ease-in-out infinite;
+        }
+
+        &:hover svg path:nth-of-type(2),
+        &:focus-visible svg path:nth-of-type(2) {
+          animation-delay: 0.28s;
+        }
+
+        &:hover svg path:nth-of-type(3),
+        &:focus-visible svg path:nth-of-type(3) {
+          animation-delay: 0.56s;
+        }
       }
     `,
     nlInputWrapper: css`
@@ -140,29 +143,6 @@ export const visorStyles = (
     `,
     nlInput: css`
       font-size: ${fontSize};
-      box-shadow: none !important;
-      border: none !important;
-      padding: 0 !important;
-      background: transparent !important;
-      &:hover,
-      &:focus {
-        box-shadow: none !important;
-        outline: none !important;
-      }
-    `,
-    nlFormControl: css`
-      .euiFormControlLayout {
-        box-shadow: none !important;
-        background: transparent !important;
-        &:hover,
-        &:focus-within {
-          outline: none !important;
-          box-shadow: none !important;
-        }
-      }
-      .euiFormControlLayout__childrenWrapper {
-        background: transparent !important;
-      }
     `,
   };
 };

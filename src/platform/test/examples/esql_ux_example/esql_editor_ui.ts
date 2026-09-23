@@ -37,27 +37,14 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    it('should change datasource and search with visor', async () => {
+    it('should search with visor using the editor query source', async () => {
+      await esql.setEsqlEditorQuery('FROM logstash-*');
       await esql.toggleQuickSearchVisor(true);
 
-      // Change datasource
-      await esql.toggleDatasourceDropdown(true);
-
-      const datasourceList = await testSubjects.find('esqlEditor-visor-datasourcesList-switcher');
-      const datasourceSearchInput = await datasourceList.findByCssSelector('input[type="search"]');
-
-      await datasourceSearchInput.click();
-      await datasourceSearchInput.pressKeys(Key.ARROW_DOWN);
-      await datasourceSearchInput.pressKeys(Key.ARROW_DOWN);
-      await datasourceSearchInput.pressKeys(Key.ENTER);
-      await esql.toggleDatasourceDropdown(false);
-
-      // Search and verify query updated with KQL
       const kqlInput = await testSubjects.find('esqlVisorKQLQueryInput');
       await kqlInput.click();
       await kqlInput.type('test');
 
-      // Wait for the submit button to appear (confirms React state updated with typed value)
       await retry.waitFor('KQL submit button to appear', async () => {
         return await testSubjects.exists('esqlVisorKQLSubmit');
       });

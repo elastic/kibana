@@ -309,27 +309,4 @@ export class ESQLService extends FtrService {
       expect(await this.isQuickSearchVisorVisible()).to.be(open);
     });
   }
-
-  public async toggleDatasourceDropdown(open: boolean) {
-    if (open) {
-      await this.retry.try(async () => {
-        try {
-          await this.testSubjects.click('visorSourcesDropdownButton');
-        } catch (error) {
-          if (error instanceof Error && error.message.includes('ElementClickInterceptedError')) {
-            // Monaco suggestions can overlap the visor datasource button; dismiss and retry.
-            await this.browser.pressKeys(Key.ESCAPE);
-          }
-          throw error;
-        }
-      });
-    } else {
-      await this.browser.pressKeys(Key.ESCAPE);
-    }
-
-    await this.retry.try(async () => {
-      const exists = await this.testSubjects.exists('esqlEditor-visor-datasourcesList-switcher');
-      expect(exists).to.be(open);
-    });
-  }
 }

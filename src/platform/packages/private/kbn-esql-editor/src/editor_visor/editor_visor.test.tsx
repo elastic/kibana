@@ -12,7 +12,6 @@ import { kqlPluginMock } from '@kbn/kql/public/mocks';
 import { act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import { screen } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -67,7 +66,6 @@ describe('Quick search visor', () => {
     });
     props = {
       query: 'FROM test_index',
-      isSpaceReduced: false,
       onUpdateAndSubmitQuery: jest.fn(),
     };
   });
@@ -76,44 +74,38 @@ describe('Quick search visor', () => {
     jest.clearAllMocks();
   });
 
-  it('should render the sources dropdown and the KQL query input', async () => {
-    const { getByTestId } = renderWithI18n(renderESQLVisor({ ...props }));
+  it('should render the KQL query input', async () => {
+    renderWithI18n(renderESQLVisor({ ...props }));
 
     await waitFor(() => {
-      expect(getByTestId('ESQLEditor-visor-sources-dropdown')).toBeInTheDocument();
-    });
-
-    expect(kqlMock.QueryStringInput).toHaveBeenCalled();
-  });
-
-  it('should display the available sources in the dropdown list', async () => {
-    const { getByTestId } = renderWithI18n(renderESQLVisor({ ...props }));
-
-    await waitFor(() => {
-      expect(getByTestId('ESQLEditor-visor-sources-dropdown')).toBeInTheDocument();
-    });
-
-    const dropdownButton = getByTestId('visorSourcesDropdownButton');
-    await act(async () => {
-      await userEvent.click(dropdownButton);
-    });
-
-    await waitFor(() => {
-      expect(getByTestId('esqlEditor-visor-datasourcesList-switcher')).toBeInTheDocument();
-    });
-
-    await waitFor(() => {
-      expect(screen.getAllByText('test_index').length).toBeGreaterThan(0);
-      expect(screen.getAllByText('logs').length).toBeGreaterThan(0);
+      expect(kqlMock.QueryStringInput).toHaveBeenCalled();
     });
   });
 
-  it('should default to the first fetched source when query has no source', async () => {
-    const { getByTestId } = renderWithI18n(renderESQLVisor({ ...props, query: 'ROW x =1' }));
+  it('should submit a KQL filter using indexes from the editor query', async () => {
+    const onUpdateAndSubmitQuery = jest.fn();
+    renderWithI18n(renderESQLVisor({ ...props, onUpdateAndSubmitQuery }));
 
-    await waitFor(() => {
-      expect(getByTestId('visorSourcesDropdownButton')).toHaveTextContent('test_index');
-    });
+    await waitFor(() => expect(kqlMock.QueryStringInput).toHaveBeenCalled());
+
+    const { onSubmit } = (kqlMock.QueryStringInput as jest.Mock).mock.calls.at(-1)[0];
+    act(() => onSubmit({ query: 'hostname:web-01', language: 'kuery' }));
+
+    expect(onUpdateAndSubmitQuery).toHaveBeenCalledWith(
+      'FROM test_index | WHERE KQL("""hostname:web-01""")'
+    );
+  });
+
+  it('should not submit a KQL filter when the editor query has no source', async () => {
+    const onUpdateAndSubmitQuery = jest.fn();
+    renderWithI18n(renderESQLVisor({ ...props, query: 'ROW x = 1', onUpdateAndSubmitQuery }));
+
+    await waitFor(() => expect(kqlMock.QueryStringInput).toHaveBeenCalled());
+
+    const { onSubmit } = (kqlMock.QueryStringInput as jest.Mock).mock.calls.at(-1)[0];
+    act(() => onSubmit({ query: 'hostname:web-01', language: 'kuery' }));
+
+    expect(onUpdateAndSubmitQuery).not.toHaveBeenCalled();
   });
 
   it('should build a TS query when the current query uses the TS command', async () => {
@@ -168,15 +160,19 @@ describe('Quick search visor', () => {
       );
     }
 
-    it('should show the Ask AI button when license is enterprise and connector exists', async () => {
-      const { getByTestId } = renderWithI18n(renderWithEnterprise({ ...props }));
+    it('should show the mode buttons when license is enterprise and connector exists', async () => {
+      const { getByTestId, getByText } = renderWithI18n(renderWithEnterprise({ ...props }));
       await waitFor(() => {
         expect(getByTestId('esqlVisorAskAiButton')).toBeInTheDocument();
+        expect(getByTestId('esqlVisorModeKql')).toBeInTheDocument();
+        expect(getByText('AI mode')).toBeInTheDocument();
       });
+      expect(getByTestId('esqlVisorModeKql')).toHaveAttribute('aria-pressed', 'true');
+      expect(getByTestId('esqlVisorAskAiButton')).toHaveAttribute('aria-pressed', 'false');
     });
 
     it('should switch to NL mode when Ask AI is clicked', async () => {
-      const { getByTestId, queryByTestId } = renderWithI18n(renderWithEnterprise({ ...props }));
+      const { getByTestId } = renderWithI18n(renderWithEnterprise({ ...props }));
       await waitFor(() => {
         expect(getByTestId('esqlVisorAskAiButton')).toBeInTheDocument();
       });
@@ -184,18 +180,10 @@ describe('Quick search visor', () => {
         await userEvent.click(getByTestId('esqlVisorAskAiButton'));
       });
       expect(getByTestId('esqlVisorNLQueryInput')).toBeInTheDocument();
-      expect(queryByTestId('esqlVisorAskAiButton')).not.toBeInTheDocument();
-    });
-
-    it('should render the sources dropdown with reduced opacity in NL mode', async () => {
-      const { getByTestId } = renderWithI18n(renderWithEnterprise({ ...props }));
-      await waitFor(() => {
-        expect(getByTestId('esqlVisorAskAiButton')).toBeInTheDocument();
-      });
-      await act(async () => {
-        await userEvent.click(getByTestId('esqlVisorAskAiButton'));
-      });
-      expect(getByTestId('ESQLEditor-visor-sources-dropdown')).toBeInTheDocument();
+      expect(getByTestId('esqlVisorAskAiButton')).toBeInTheDocument();
+      expect(getByTestId('esqlVisorModeKql')).toBeInTheDocument();
+      expect(getByTestId('esqlVisorModeKql')).toHaveAttribute('aria-pressed', 'false');
+      expect(getByTestId('esqlVisorAskAiButton')).toHaveAttribute('aria-pressed', 'true');
     });
 
     it('should show the Stop button while NL generation is in progress', async () => {
@@ -216,7 +204,7 @@ describe('Quick search visor', () => {
       await waitFor(() => expect(getByTestId('esqlVisorStopGeneration')).toBeInTheDocument());
     });
 
-    it('should return to KQL mode when back button is clicked', async () => {
+    it('should return to KQL mode when the KQL mode button is clicked', async () => {
       const { getByTestId, queryByTestId } = renderWithI18n(renderWithEnterprise({ ...props }));
       await waitFor(() => {
         expect(getByTestId('esqlVisorAskAiButton')).toBeInTheDocument();
@@ -226,11 +214,12 @@ describe('Quick search visor', () => {
       });
       expect(getByTestId('esqlVisorNLQueryInput')).toBeInTheDocument();
       await act(async () => {
-        await userEvent.click(getByTestId('esqlVisorBackToKql'));
+        await userEvent.click(getByTestId('esqlVisorModeKql'));
       });
       await waitFor(() => {
         expect(queryByTestId('esqlVisorNLQueryInput')).not.toBeInTheDocument();
         expect(getByTestId('esqlVisorAskAiButton')).toBeInTheDocument();
+        expect(getByTestId('esqlVisorModeKql')).toBeInTheDocument();
       });
     });
   });

@@ -1190,26 +1190,17 @@ export const QueryBarTopRow = React.memo(
         <EuiFlexItem grow={false}>
           <NoDataPopover storage={storage} showNoDataPopover={props.indicateNoData}>
             <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
-              {shouldRenderESQLUi ? (
-                <>
-                  {shouldRenderUpdateButton() ? button : null}
-                  {props.esqlApproximation && (
-                    <EsqlApproximationToggle
-                      isApproximate={props.esqlApproximation.isApproximate}
-                      onChange={props.esqlApproximation.onChange}
-                      additionalText={props.esqlApproximation.additionalText}
-                      disabled={props.esqlApproximation.disabled}
-                      disabledReason={props.esqlApproximation.disabledReason}
-                    />
-                  )}
-                  {shouldRenderDatePicker() ? renderDatePicker() : null}
-                </>
-              ) : (
-                <>
-                  {shouldRenderDatePicker() ? renderDatePicker() : null}
-                  {shouldRenderUpdateButton() ? button : null}
-                </>
+              {shouldRenderDatePicker() ? renderDatePicker() : null}
+              {shouldRenderESQLUi && props.esqlApproximation && (
+                <EsqlApproximationToggle
+                  isApproximate={props.esqlApproximation.isApproximate}
+                  onChange={props.esqlApproximation.onChange}
+                  additionalText={props.esqlApproximation.additionalText}
+                  disabled={props.esqlApproximation.disabled}
+                  disabledReason={props.esqlApproximation.disabledReason}
+                />
               )}
+              {shouldRenderUpdateButton() ? button : null}
             </EuiFlexGroup>
           </NoDataPopover>
         </EuiFlexItem>
