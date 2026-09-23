@@ -242,10 +242,11 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
           properties: {
             verdicts: {
               type: string;
+              maxItems: number;
               items: {
                 required: string[];
                 properties: {
-                  id: { type: string };
+                  id: { type: string; maxLength: number };
                   classification: { enum: string[] };
                   confidence_score: { minimum: number; maximum: number };
                   rationale: { type: string; maxLength: number };
@@ -269,11 +270,15 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
 
     const verdicts = agentStep.with.schema.properties.verdicts;
     expect(verdicts.type).toBe('array');
+    // Cap at consts.batch_size — more than 50 verdicts cannot pair to real alerts in a batch.
+    expect(verdicts.maxItems).toBe(50);
     // The echoed id is what pairs a verdict with its alert, so it is required.
     expect(verdicts.items.required).toEqual(
       expect.arrayContaining(['id', 'classification', 'confidence_score', 'rationale'])
     );
     expect(verdicts.items.properties.id.type).toBe('string');
+    // Matches alerts items._id maxLength so a hallucinated long id fails at the producer.
+    expect(verdicts.items.properties.id.maxLength).toBe(512);
     expect(verdicts.items.properties.classification.enum).toEqual([
       'false_positive',
       'true_positive',
