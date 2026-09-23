@@ -655,9 +655,10 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
 
   it('auto_close_ids is initialised to empty in set_workflow_variables', () => {
     const initStep = findStepByName(workflow.steps, 'set_workflow_variables') as {
-      with: { auto_close_ids: unknown };
+      with: { auto_close_ids: unknown; missing_alert_ids: unknown };
     };
     expect(initStep.with.auto_close_ids).toEqual([]);
+    expect(initStep.with.missing_alert_ids).toEqual([]);
   });
 
   it('initialises connector_id_by_feature to empty string so the standalone path is unchanged', () => {
@@ -1421,6 +1422,19 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
     expect(result).toEqual([...existing, next]);
   });
 
+  it('accumulates missing_alert_ids when the agent returns no verdict for an alert', () => {
+    const accumulateStep = findStepByName(workflow.steps, 'accumulate_missing_alert_id') as {
+      with: { missing_alert_ids: string };
+    };
+
+    const result = evaluateExpression(engine, accumulateStep.with.missing_alert_ids, {
+      variables: { missing_alert_ids: ['already-missing'] },
+      foreach: { item: { _id: 'no-verdict-id' } },
+    });
+
+    expect(result).toEqual(['already-missing', 'no-verdict-id']);
+  });
+
   it('emits workflow.output counts and fields from accumulated Worker verdicts', () => {
     const outputStep = findStepByName(workflow.steps, 'emit_workflow_output') as {
       with: Record<string, unknown>;
@@ -1456,6 +1470,7 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
         agent_id: 'elastic-ai-agent',
         impacted_entities: [{ entity_type: 'host', name: 'host-a' }],
         impacted_entities_truncated: 'false',
+        missing_alert_ids: ['a-missing'],
       },
     }) as Record<string, unknown>;
 
@@ -1470,6 +1485,7 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
     expect(rendered.agent_id).toBe('elastic-ai-agent');
     expect(rendered.impacted_entities).toEqual([{ entity_type: 'host', name: 'host-a' }]);
     expect(rendered.impacted_entities_truncated).toBe('false');
+    expect(rendered.missing_alert_ids).toEqual(['a-missing']);
   });
 
   it('renders a deterministic grouped_counts_summary from output_verdicts', () => {

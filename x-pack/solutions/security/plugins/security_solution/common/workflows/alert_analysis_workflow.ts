@@ -105,6 +105,9 @@ export const AlertAnalysisWorkflowOutputFields = z.object({
   impacted_entities: z.array(AlertAnalysisImpactedEntity).max(50),
   // YAML Liquid emits the boolean as a string ("true" / "false").
   impacted_entities_truncated: z.enum(['true', 'false']),
+  // Alert ids from the analyzed set with no matching agent verdict. Empty when
+  // every alert was reconciled; non-empty means a partial (still completed) result.
+  missing_alert_ids: z.array(z.string().max(512)).max(1000),
 });
 
 export const AlertAnalysisWorkflowOutput = AlertAnalysisWorkflowOutputFields.superRefine(
