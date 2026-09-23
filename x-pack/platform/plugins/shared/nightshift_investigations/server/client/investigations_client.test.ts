@@ -73,6 +73,7 @@ const mockLogger = {
 } as unknown as Logger;
 
 const mockRequest = {} as KibanaRequest;
+const mockAgentAvailability = { cacheMode: 'space' as const, handler: jest.fn() };
 const investigationQuotaCallback = jest.fn().mockResolvedValue({ allowed: true });
 
 let repository: jest.Mocked<InvestigationRepository>;
@@ -86,6 +87,7 @@ const makeClient = (
     logger: mockLogger,
     spaceIdOverride: SPACE_ID,
     agentBuilder: mockAgentBuilder,
+    agentAvailability: mockAgentAvailability,
     investigationQuotaCallback,
     investigationRepository: repository,
     isAvailable: jest.fn().mockResolvedValue(true),
@@ -464,6 +466,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     expect(installDeductiveInvestigationAgentMock).toHaveBeenCalledWith({
       agentBuilder: mockAgentBuilder,
       spaceId: SPACE_ID,
+      availability: mockAgentAvailability,
     });
     expect(installInvestigationAgentMock).not.toHaveBeenCalled();
     expect(mockManagement.runWorkflow).toHaveBeenCalledWith(
@@ -767,6 +770,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     expect(installInvestigationAgentMock).toHaveBeenCalledWith({
       agentBuilder: mockAgentBuilder,
       spaceId: SPACE_ID,
+      availability: mockAgentAvailability,
     });
     expect(installInvestigationAgentMock.mock.invocationCallOrder[0]).toBeLessThan(
       mockManagement.runWorkflow.mock.invocationCallOrder[0]
@@ -844,6 +848,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
       workflowsManagement: mockWorkflowsManagement,
       logger: mockLogger,
       spaceIdOverride: SPACE_ID,
+      agentAvailability: mockAgentAvailability,
       investigationRepository: repository,
       isAvailable: jest.fn().mockResolvedValue(true),
     });

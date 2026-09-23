@@ -220,8 +220,7 @@ describe('runWorkflow', () => {
         expect(internalResumeWorkflowExecution).toHaveBeenCalledWith(
           'parent-execution',
           spaceId,
-          undefined,
-          fakeRequest
+          undefined
         );
         expect(workflowRuntime.start).not.toHaveBeenCalled();
       });
