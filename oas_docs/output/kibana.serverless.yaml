@@ -116488,6 +116488,18 @@ components:
               properties:
                 mappings:
                   type: boolean
+                queries:
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        maxLength: 200
+                        minLength: 1
+                        type: string
+                    required:
+                      - id
+                  maxItems: 200
+                  type: array
                 routing:
                   items:
                     allOf:
@@ -116504,6 +116516,7 @@ components:
                   type: array
               required:
                 - mappings
+                - queries
                 - routing
           required:
             - objects
