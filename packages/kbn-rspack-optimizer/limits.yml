@@ -53,6 +53,7 @@ pageLoadAssetSize:
   dataViewManagement: 1302
   dataViews: 1697
   dataVisualizer: 7461
+  devComments: 1500
   developerToolbar: 1951
   devTools: 4281
   discover: 19917
@@ -125,7 +126,7 @@ pageLoadAssetSize:
   logsDataAccess: 576
   logsShared: 2042
   logstash: 11772
-  maintenanceWindows: 3754
+  maintenanceWindows: 4338
   management: 10296
   maps: 1201
   mapsEms: 3256

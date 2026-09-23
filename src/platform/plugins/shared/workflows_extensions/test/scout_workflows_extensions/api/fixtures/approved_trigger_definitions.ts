@@ -40,15 +40,15 @@
 export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: string }> = [
   {
     id: 'ai.attachmentAdded',
-    schemaHash: '843b39ae3d48c95ab9b31c0f0c88be551b2498700535062b186aca8114c783bf',
+    schemaHash: 'c82f96366f59ded38993b577bbeea35d01d916dc9403881636f193c4ccf39526',
   },
   {
     id: 'ai.attachmentDeleted',
-    schemaHash: 'e89135cede7bc011a830318bbaec7e29709e72d41a71e4a04d747fe3cc6549b6',
+    schemaHash: '1867659824969a51ef31fb3f7a808a1dfec1cccc0beb8976eb94a4c7a5b701ae',
   },
   {
     id: 'ai.attachmentUpdated',
-    schemaHash: '4725f1ac547f598dbef94ac23d8bf667a75cdba14e64697126e2fd10263cd687',
+    schemaHash: '73a6023bf61fccf1dab6d9f6a35f028e6b89d054565444262a3e7da734fbe1d1',
   },
   {
     id: 'ai.conversation.metadataUpdated',
