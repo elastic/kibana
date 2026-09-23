@@ -47,6 +47,7 @@ export const DataRecognizer: FC<Props> = ({ indexPattern, savedSearch, onResults
         ));
 
         setRecognizedResults(elements);
+        onResultsChange?.(elements.length);
       })
       .catch(() => {
         if (cancelled) {
@@ -55,16 +56,13 @@ export const DataRecognizer: FC<Props> = ({ indexPattern, savedSearch, onResults
 
         // Recognition failed; report no results so consumers stop waiting.
         setRecognizedResults([]);
+        onResultsChange?.(0);
       });
 
     return () => {
       cancelled = true;
     };
-  }, [indexPattern, mlApi, savedSearch]);
-
-  useEffect(() => {
-    onResultsChange?.(recognizedResults.length);
-  }, [recognizedResults, onResultsChange]);
+  }, [indexPattern, mlApi, onResultsChange, savedSearch]);
 
   return <>{recognizedResults}</>;
 };
