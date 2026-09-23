@@ -124,7 +124,7 @@ const indexResponseActionHost = ({
   return indexHostsAndAlerts(
     esClient,
     kbnClient,
-    `history-log-${randomUUID()}`,
+    0,
     1,
     1,
     METADATA_DATASTREAM,
