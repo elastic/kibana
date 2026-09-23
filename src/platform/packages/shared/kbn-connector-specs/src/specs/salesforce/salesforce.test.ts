@@ -28,9 +28,16 @@ describe('SalesforceConnector', () => {
     jest.clearAllMocks();
   });
 
-  it('should define every action (except test) as a tool for agent exposure', () => {
+  it('should define agent-facing actions as tools and ingest actions as workflow-only', () => {
+    const ingestActions = new Set(['soqlIngest']);
+
     for (const actionName of Object.keys(SalesforceConnector.actions)) {
-      if (actionName !== 'test') {
+      if (actionName === 'test') {
+        continue;
+      }
+      if (ingestActions.has(actionName)) {
+        expect(SalesforceConnector.actions[actionName].isTool).toBe(false);
+      } else {
         expect(SalesforceConnector.actions[actionName].isTool).toBe(true);
       }
     }
@@ -73,6 +80,50 @@ describe('SalesforceConnector', () => {
           },
         },
       });
+    });
+  });
+
+  describe('soqlIngest action', () => {
+    it('returns compact records and pagination metadata', async () => {
+      mockClient.get.mockResolvedValue({
+        data: {
+          totalSize: 2,
+          done: false,
+          nextRecordsUrl: '/services/data/v66.0/query/01gxx0000001',
+          records: [{ Id: '500xx000001', CaseNumber: '00123456' }],
+        },
+      });
+
+      const result = await SalesforceConnector.actions.soqlIngest.handler(mockContext, {
+        soql: 'SELECT Id, CaseNumber FROM Case LIMIT 1',
+      });
+
+      expect(result).toEqual({
+        ok: true,
+        records: [{ Id: '500xx000001', CaseNumber: '00123456' }],
+        nextRecordsUrl: '/services/data/v66.0/query/01gxx0000001',
+        hasMore: true,
+        done: false,
+        totalSize: 2,
+      });
+      expect(SalesforceConnector.actions.soqlIngest.isTool).toBe(false);
+    });
+
+    it('uses nextRecordsUrl when provided', async () => {
+      const nextUrl = '/services/data/v66.0/query/01gxx0000001';
+      mockClient.get.mockResolvedValue({
+        data: {
+          totalSize: 2,
+          done: true,
+          records: [{ Id: '500xx000002', CaseNumber: '00123457' }],
+        },
+      });
+
+      await SalesforceConnector.actions.soqlIngest.handler(mockContext, {
+        nextRecordsUrl: nextUrl,
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(`${baseUrl}${nextUrl}`, {});
     });
   });
 
@@ -313,4 +364,44 @@ describe('SalesforceConnector', () => {
       await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
   });
+
+  describe('soqlIngest auth/scope error handling (CONN-003 DoD)', () => {
+    const mk = (impl: () => any) => {
+      const spec = SalesforceConnector.actions.soqlIngest as { handler: (ctx: unknown, input: unknown) => Promise<unknown> };
+      const ctx = {
+        secrets: { tokenUrl: 'https://login.salesforce.com/services/oauth2/token' },
+        client: { get: impl },
+      };
+      return { spec, ctx };
+    };
+    it('surfaces an actionable message on 401 (expired/invalid credentials)', async () => {
+      const { spec, ctx } = mk(() =>
+        Promise.reject({
+          response: { status: 401, data: { message: 'Session expired or invalid' } },
+        })
+      );
+      await expect(spec.handler(ctx, { soql: 'SELECT Id FROM Case' })).rejects.toThrow(
+        /authentication failed \(401\).*re-authorize/s
+      );
+    });
+    it('surfaces an actionable message on 403 (missing api scope / object access)', async () => {
+      const { spec, ctx } = mk(() =>
+        Promise.reject({
+          response: { status: 403, data: { message: 'Requested operation not permitted' } },
+        })
+      );
+      await expect(spec.handler(ctx, { soql: 'SELECT Id FROM Case' })).rejects.toThrow(
+        /access denied \(403\).*'api' scope/s
+      );
+    });
+    it('passes through pagination calls with the same error handling', async () => {
+      const { spec, ctx } = mk(() =>
+        Promise.reject({ response: { status: 401, data: {} } })
+      );
+      await expect(
+        spec.handler(ctx, { nextRecordsUrl: '/services/data/v60.0/query/abc/next' })
+      ).rejects.toThrow(/401/);
+    });
+  });
+
 });
