@@ -15,7 +15,6 @@ import {
 } from '../../../../common/constants';
 
 const sharedFields = {
-  name: z.string().min(1).max(MAX_FIELD_DEFINITION_NAME_LENGTH).optional(),
   owner: z.string().min(1).max(MAX_OWNER_LENGTH),
   description: z.string().max(MAX_FIELD_DEFINITION_DESCRIPTION_LENGTH).optional(),
   isGlobal: FieldDefinitionSchema.shape.isGlobal,
@@ -24,16 +23,22 @@ const sharedFields = {
 /** POST body — enforces the 30 000-char definition limit on new creates. */
 export const PublicFieldDefinitionWriteBodySchema = z.strictObject({
   ...sharedFields,
+  // POST creates a new identity: enforce the 50-char public name limit.
+  name: z.string().min(1).max(MAX_FIELD_DEFINITION_NAME_LENGTH).optional(),
   definition: z.string().max(MAX_FIELD_DEFINITION_DEFINITION_LENGTH),
 });
 
 /**
- * PUT body — does NOT enforce definition length so that existing definitions whose stored YAML
- * exceeds the public limit (created via internal tools before this API existed) remain
- * modifiable. A DoS-prevention upper bound (1 MB) still applies.
+ * PUT body — does NOT enforce the 50-char name or 30 000-char definition limits so that existing
+ * definitions created via internal tools (with longer names/definitions) remain modifiable.
+ * DoS-prevention upper bounds still apply.
+ * The identity-immutability guard in the client rejects any name change regardless.
  */
 export const PublicFieldDefinitionPutBodySchema = z.strictObject({
   ...sharedFields,
+  // PUT preserves an existing identity: a stored name may exceed the 50-char POST limit.
+  // Bounded to 1 000 chars to prevent unbounded input; the identity guard rejects changes.
+  name: z.string().min(1).max(1_000).optional(),
   definition: z.string().max(1_000_000),
 });
 

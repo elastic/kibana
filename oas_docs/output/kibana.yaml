@@ -146547,8 +146547,8 @@ components:
           type: boolean
         name:
           description: |
-            The field name, unique per owner (case-insensitive). Must match the `name` key inside the YAML definition. When omitted, the name is extracted from the definition YAML automatically. Immutable after creation.
-          maxLength: 50
+            The field name, unique per owner (case-insensitive). Must match the `name` key inside the YAML definition. When omitted, the name is extracted from the definition YAML automatically. Immutable after creation. Unlike POST, the 50-character limit is not enforced on PUT so that definitions with legacy names that exceed the limit remain modifiable.
+          maxLength: 1000
           minLength: 1
           type: string
         owner:

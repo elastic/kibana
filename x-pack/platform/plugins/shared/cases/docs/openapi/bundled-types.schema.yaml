@@ -4194,9 +4194,9 @@ components:
         name:
           type: string
           minLength: 1
-          maxLength: 50
+          maxLength: 1000
           description: |
-            The field name, unique per owner (case-insensitive). Must match the `name` key inside the YAML definition. When omitted, the name is extracted from the definition YAML automatically. Immutable after creation.
+            The field name, unique per owner (case-insensitive). Must match the `name` key inside the YAML definition. When omitted, the name is extracted from the definition YAML automatically. Immutable after creation. Unlike POST, the 50-character limit is not enforced on PUT so that definitions with legacy names that exceed the limit remain modifiable.
         owner:
           $ref: '#/components/schemas/owner'
         definition:
