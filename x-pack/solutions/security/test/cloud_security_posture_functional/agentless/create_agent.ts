@@ -63,7 +63,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await pageObjects.header.waitUntilLoadingHasFinished();
       await cisIntegration.clickSaveButton();
       await retry.tryForTime(agentCreationTimeout, async () => {
-        await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
+        await cisIntegration.waitForPostInstallModal();
         expect((await cisIntegrationAws.getPostInstallCloudFormationModal()) !== undefined).to.be(
           true
         );
@@ -110,7 +110,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
       await pageObjects.header.waitUntilLoadingHasFinished();
       await retry.tryForTime(agentCreationTimeout, async () => {
-        await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
+        await testSubjects.existOrFail('agentlessEnrollmentFlyout', { timeout: 10000 });
         expect(await cisIntegrationAws.showPostInstallCloudFormationModal()).to.be(false);
       });
 
@@ -153,7 +153,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await cisIntegration.clickSaveButton();
 
       await retry.tryForTime(agentCreationTimeout, async () => {
-        await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
+        await testSubjects.existOrFail('agentlessEnrollmentFlyout', { timeout: 10000 });
         expect(await cisIntegrationAws.showPostInstallCloudFormationModal()).to.be(false);
       });
 
@@ -185,7 +185,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       // add timeout to give extra time for the modal to show up
       await retry.tryForTime(agentCreationTimeout, async () => {
-        await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
+        await cisIntegration.waitForPostInstallModal();
         const resStatus = await cisIntegrationAws.showPostInstallCloudFormationModal();
         expect(resStatus).to.be(true);
       });
@@ -215,7 +215,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await cisIntegration.clickSaveButton();
 
       await retry.tryForTime(agentCreationTimeout, async () => {
-        await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
+        await cisIntegration.waitForPostInstallModal();
         expect(await cisIntegrationAws.showPostInstallCloudFormationModal()).to.be(true);
       });
 

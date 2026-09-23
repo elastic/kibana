@@ -441,10 +441,14 @@ export function AddCisIntegrationFormPageProvider({
     await optionToBeClicked.click();
   };
 
-  const waitUntilLaunchCloudFormationButtonAppears = async () =>
-    await testSubjects.existOrFail(TEST_IDS.CONFIRM_CLOUD_FORMATION_MODAL_CONFIRM_BUTTON, {
-      timeout: 20000,
-    });
+  const waitForPostInstallModal = async () =>
+    await retry.waitForWithTimeout(
+      'post-install modal to appear',
+      20000,
+      async () =>
+        (await testSubjects.exists(TEST_IDS.CONFIRM_CLOUD_FORMATION_MODAL_CONFIRM_BUTTON)) ||
+        (await testSubjects.exists(TEST_IDS.CONFIRM_MODAL_TITLE_TEXT))
+    );
 
   const clickSaveIntegrationButton = async () => {
     const optionToBeClicked = await findOptionInPage(TEST_IDS.SAVE_INTEGRATION);
@@ -814,7 +818,7 @@ export function AddCisIntegrationFormPageProvider({
     navigateToEditIntegrationPage,
     navigateToEditAgentlessIntegrationPage,
     closeAllOpenTabs,
-    waitUntilLaunchCloudFormationButtonAppears,
+    waitForPostInstallModal,
     showCredentialJsonSecretPanel,
     isSaveButtonEnabled,
     clickAwsPolicyOption,

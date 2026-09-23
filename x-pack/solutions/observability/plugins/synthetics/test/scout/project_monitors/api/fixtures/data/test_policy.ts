@@ -624,6 +624,14 @@ export const comparePolicies = (aPolicy: PackagePolicy | undefined, bPolicy: Pac
 
   [...actualInputs, ...expectedInputs].forEach((input) => {
     input.streams?.forEach((stream) => {
+      if (stream.data_stream.dataset === 'http' && stream.vars) {
+        // Package versions differ on whether unset HTTP authentication options are present.
+        for (const field of ['kerberos', 'ntlm'] as const) {
+          if (stream.vars[field]?.value === undefined) {
+            delete stream.vars[field];
+          }
+        }
+      }
       if (stream.compiled_stream) {
         normalizeCompiledStreamDefaults(stream.compiled_stream as Record<string, unknown>);
       }
