@@ -588,12 +588,35 @@ steps:
                 Alert Analysis Worker path requires unique alert _id values;
                 inputs.alerts contained duplicate ids.
 
+  # All enrichment (prevalence, noise, close history, rule metadata, AI prompt) anchors on
+  # alert_set[0].kibana.alert.rule.uuid. Mixed-rule batches would analyze remaining alerts
+  # with the wrong rule context. Fail loud so the caller is forced to split by rule before
+  # invoking the workflow.
+  - name: reject_multi_rule_caller_alerts
+    type: if
+    condition: "${{ inputs.calledByWorker == true }}"
+    steps:
+      - name: compute_caller_unique_rule_count
+        type: data.set
+        with:
+          caller_unique_rule_uuid_count: "${{ variables.alert_set | map: 'kibana.alert.rule.uuid' | uniq | size }}"
+      - name: fail_if_multi_rule_caller_alerts
+        type: if
+        condition: "${{ variables.caller_unique_rule_uuid_count > 1 }}"
+        steps:
+          - name: fail_multi_rule_caller_alerts
+            type: workflow.fail
+            with:
+              message: >-
+                Alert Analysis Worker path requires all alerts to belong to a single rule;
+                inputs.alerts contained alerts from multiple rule UUIDs.
+
   # ---------------------------------------------------------------------------
   # Rule context for enrichment queries / logs
   # ---------------------------------------------------------------------------
   # Standalone (alert trigger) reads event.rule. Worker/manual child runs have no
-  # trigger event, so derive from the first alert in alert_set. Floor Triage batches
-  # are single-rule; multi-rule Worker sets are unsupported (enrichment filters one uuid).
+  # trigger event, so derive from the first alert in alert_set. Worker batches are
+  # guaranteed single-rule by the reject_multi_rule_caller_alerts gate above.
   - name: set_rule_context
     type: data.set
     with:
