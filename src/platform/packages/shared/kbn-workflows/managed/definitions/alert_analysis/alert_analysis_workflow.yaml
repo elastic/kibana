@@ -1895,12 +1895,13 @@ steps:
           - name: build_grouped_counts_summary
             type: data.set
             with:
-              # Capture then truncate to the workflow.output maxLength (10000). A 1000-alert
-              # Worker batch can produce more host sentences than the schema allows; without
-              # this cap the run would fail at emit after tags/notes were already written.
+              # Cap unique hosts before the per-host rescans (same 50 budget as
+              # impacted_entities), then truncate to the workflow.output maxLength (10000).
+              # Without the host cap a 1000-unique-host batch does ~4M Liquid predicates
+              # and can hit the engine render limit after tags/notes are already written.
               grouped_counts_summary: >-
                 {%- capture grouped_counts_summary_raw -%}
-                {%- assign hosts = variables.output_verdicts | map: 'host_name' | uniq -%}
+                {%- assign hosts = variables.output_verdicts | map: 'host_name' | uniq | slice: 0, 50 -%}
                 {%- for h in hosts -%}
                 {%- assign for_host = variables.output_verdicts | where: 'host_name', h -%}
                 {%- assign tp = for_host | where: 'classification', 'true_positive' | size -%}
