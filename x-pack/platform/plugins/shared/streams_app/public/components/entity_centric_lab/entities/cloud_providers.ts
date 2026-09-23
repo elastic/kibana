@@ -32,6 +32,11 @@ export interface CloudServiceDescriptor {
   readonly label: string;
   /** Maps to `Entity.type` on the seeded instances, e.g. `AWS EC2 Instance`. */
   readonly entityType: string;
+  /**
+   * Functional category this cloud service maps to when cloud entities
+   * are distributed into domain categories (hosts, services, storage, …).
+   */
+  readonly targetCategory: 'hosts' | 'services' | 'functions' | 'storage';
   /** Seeded instances so every service page has demo data. */
   readonly instances: ReadonlyArray<{ readonly name: string; readonly health: EntityHealth }>;
 }
@@ -55,6 +60,7 @@ export const CLOUD_PROVIDERS: readonly CloudProviderDescriptor[] = [
         id: 'ec2',
         label: 'EC2',
         entityType: 'AWS EC2 Instance',
+        targetCategory: 'hosts',
         instances: [
           { name: 'i-0a1b2c3d4e5f6789a', health: 'unhealthy' },
           { name: 'i-04e5f6a708b9c1d2e', health: 'healthy' },
@@ -66,6 +72,7 @@ export const CLOUD_PROVIDERS: readonly CloudProviderDescriptor[] = [
         id: 'lambda',
         label: 'Lambda',
         entityType: 'AWS Lambda function',
+        targetCategory: 'functions',
         instances: [
           { name: 'orders-api-handler', health: 'healthy' },
           { name: 'fraud-screener', health: 'atRisk' },
@@ -77,6 +84,7 @@ export const CLOUD_PROVIDERS: readonly CloudProviderDescriptor[] = [
         id: 's3',
         label: 'S3',
         entityType: 'AWS S3 bucket',
+        targetCategory: 'storage',
         instances: [
           { name: 'payflow-receipts', health: 'healthy' },
           { name: 'payments-audit-logs', health: 'healthy' },
@@ -95,6 +103,7 @@ export const CLOUD_PROVIDERS: readonly CloudProviderDescriptor[] = [
         id: 'compute',
         label: 'Compute Engine',
         entityType: 'GCP Compute Engine',
+        targetCategory: 'hosts',
         instances: [
           { name: 'gce-orders-eu-1', health: 'healthy' },
           { name: 'gce-orders-eu-2', health: 'atRisk' },
@@ -106,6 +115,7 @@ export const CLOUD_PROVIDERS: readonly CloudProviderDescriptor[] = [
         id: 'functions',
         label: 'Cloud Functions',
         entityType: 'GCP Cloud Function',
+        targetCategory: 'functions',
         instances: [
           { name: 'settle-payment', health: 'healthy' },
           { name: 'notify-merchant', health: 'healthy' },
@@ -116,6 +126,7 @@ export const CLOUD_PROVIDERS: readonly CloudProviderDescriptor[] = [
         id: 'storage',
         label: 'Cloud Storage',
         entityType: 'GCP Cloud Storage bucket',
+        targetCategory: 'storage',
         instances: [
           { name: 'gcs-invoices', health: 'healthy' },
           { name: 'gcs-cold-archive', health: 'healthy' },
@@ -133,6 +144,7 @@ export const CLOUD_PROVIDERS: readonly CloudProviderDescriptor[] = [
         id: 'vm',
         label: 'Virtual Machines',
         entityType: 'Azure VM',
+        targetCategory: 'hosts',
         instances: [
           { name: 'vm-payments-we-1', health: 'healthy' },
           { name: 'vm-payments-we-2', health: 'unhealthy' },
@@ -144,6 +156,7 @@ export const CLOUD_PROVIDERS: readonly CloudProviderDescriptor[] = [
         id: 'functions',
         label: 'Functions',
         entityType: 'Azure Function',
+        targetCategory: 'functions',
         instances: [
           { name: 'az-webhook-relay', health: 'healthy' },
           { name: 'az-token-refresh', health: 'atRisk' },
@@ -154,6 +167,7 @@ export const CLOUD_PROVIDERS: readonly CloudProviderDescriptor[] = [
         id: 'blob',
         label: 'Blob Storage',
         entityType: 'Azure Blob Storage',
+        targetCategory: 'storage',
         instances: [
           { name: 'blob-receipts', health: 'healthy' },
           { name: 'blob-audit', health: 'healthy' },

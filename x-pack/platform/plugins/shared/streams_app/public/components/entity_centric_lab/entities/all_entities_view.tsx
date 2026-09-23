@@ -52,13 +52,6 @@ const k8sFilterGroupCss = css`
   gap: 4px;
 `;
 
-// Fixed-width column for the in-page Cloud tree so the main content keeps
-// the rest of the row. `flex-shrink: 0` stops the nav collapsing when the
-// grid/list is wide.
-const CLOUD_SIDE_NAV_COLUMN = css`
-  width: 220px;
-  flex-shrink: 0;
-`;
 
 import {
   EntityFlyout,
@@ -133,7 +126,7 @@ import {
   matchesTagFilters,
 } from './fake_entities';
 import { GroupedGridView } from './grouped_grid_view';
-import { CloudSideNav } from './cloud_side_nav';
+// CloudSideNav removed — cloud entities now live under functional categories.
 import { EntitiesListView } from './entities_list_view';
 import { GeomapView } from './geomap_view';
 import { EntitiesTagFilters } from './entities_tag_filters';
@@ -193,8 +186,11 @@ import { EntityErrorBoundary } from './entity_error_boundary';
 import {
   CATEGORY_TAB_STORAGE_KEY,
   GROUP_BY_STORAGE_KEY,
+  PAGE_SIZE_CHANGE_EVENT,
   TAG_FILTERS_STORAGE_KEY,
   VIEW_MODE_STORAGE_KEY,
+  readPageSize,
+  writePageSize,
 } from './storage_keys';
 import {
   applyViewToStorage,
@@ -255,6 +251,32 @@ const useEntitiesViewMode = (): [ViewMode, (next: ViewMode) => void] => {
     }
   }, []);
   return [viewMode, setViewMode];
+};
+
+// --- Page-size persistence -------------------------------------------
+//
+// The rows-per-page choice (10 / 25 / 50) is persisted in localStorage.
+// Table components write directly via `writePageSize` (from storage_keys);
+// this hook re-reads on every custom event so the parent React state
+// (and `currentViewState`) stays in sync without prop threading.
+
+const usePageSize = (): [number, (next: number) => void] => {
+  const [pageSize, setPageSizeState] = useState<number>(readPageSize);
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+    const listener = () => setPageSizeState(readPageSize());
+    window.addEventListener(PAGE_SIZE_CHANGE_EVENT, listener);
+    window.addEventListener('storage', listener);
+    return () => {
+      window.removeEventListener(PAGE_SIZE_CHANGE_EVENT, listener);
+      window.removeEventListener('storage', listener);
+    };
+  }, []);
+  const setPageSize = useCallback((next: number) => {
+    setPageSizeState(next);
+    writePageSize(next);
+  }, []);
+  return [pageSize, setPageSize];
 };
 
 // --- Category-tab + tag-filter persistence ---------------------------
@@ -867,6 +889,7 @@ const AllEntitiesViewInner = ({
   // entity query is per-view, not a preference.
   const [activeTagFilters, setActiveTagFilters] = useEntitiesTagFilters();
   const [viewMode, setViewMode] = useEntitiesViewMode();
+  const [pageSize, setPageSize] = usePageSize();
 
   // Some tour steps are anchored to DOM elements that only render in
   // specific view modes (e.g. step 3 "Color by" lives inside
@@ -1714,6 +1737,7 @@ const AllEntitiesViewInner = ({
       // ElasticOn "Group by" — tracked so the "Unsaved changes" badge lights on
       // change and Save/Update persists the grouping.
       groupBy,
+      pageSize,
     }),
     [
       categoryScope,
@@ -1729,6 +1753,7 @@ const AllEntitiesViewInner = ({
       rangeFrom,
       rangeTo,
       groupBy,
+      pageSize,
     ]
   );
 
@@ -1815,6 +1840,7 @@ const AllEntitiesViewInner = ({
         setActiveExtraFilters(view.state.extraFilters ?? EMPTY_EXTRA_FILTERS);
         setLabFilters(view.state.queryFilters ?? []);
         setGroupBy([...(view.state.groupBy ?? DEFAULT_GROUP_BY)]);
+        setPageSize(view.state.pageSize ?? 10);
         if (view.state.storeTime && view.state.timeRange) {
           updateTimeRange({ from: view.state.timeRange.from, to: view.state.timeRange.to });
         }
@@ -1849,6 +1875,7 @@ const AllEntitiesViewInner = ({
       setCategoryTab,
       setViewMode,
       setGroupBy,
+      setPageSize,
       updateTimeRange,
     ]
   );
@@ -2084,11 +2111,6 @@ const AllEntitiesViewInner = ({
           </>
         ) : null}
         <EuiFlexGroup gutterSize="l" alignItems="flexStart" responsive={false}>
-          {isCloudScoped && !isLatest ? (
-            <EuiFlexItem grow={false} css={CLOUD_SIDE_NAV_COLUMN}>
-              <CloudSideNav providerScope={cloudProviderScope} serviceScope={cloudServiceScope} />
-            </EuiFlexItem>
-          ) : null}
           <EuiFlexItem>
             {showOverviewTab ? (
               categoryScope ? (
@@ -2295,14 +2317,6 @@ const AllEntitiesViewInner = ({
                       </EuiFlexGroup>
                     </EuiFlexItem>
                   ) : null}
-                  {isCloudCategoryPage ? (
-                    <EuiFlexItem grow={false}>
-                      <CloudProviderFilter
-                        value={cloudProviderFilter}
-                        onChange={setCloudProviderFilter}
-                      />
-                    </EuiFlexItem>
-                  ) : null}
                   {showCategoryTypeFilter ? (
                     <EuiFlexItem grow={false}>
                       <CategoryResourceTypeFilter
@@ -2459,7 +2473,7 @@ const AllEntitiesViewInner = ({
                     entities={filteredEntities}
                     onSelectEntity={openEntity}
                     selectedEntityName={selectedEntityName}
-                    groupCloudByProvider={!customGroupBy}
+                    groupCloudByProvider={false}
                     enablePaletteColoring={isElasticOn}
                     refreshTick={refreshTick}
                     customGroupBy={customGroupBy}
@@ -2616,20 +2630,6 @@ const AllEntitiesViewInner = ({
                     </EuiTitle>
                   </EuiFlexItem>
                   <EuiFlexItem />
-                  {showCloudHierarchyToggle ? (
-                    <EuiFlexItem grow={false}>
-                      <EuiSwitch
-                        compressed
-                        label={i18n.translate(
-                          'xpack.streams.entityCentricLab.entities.cloudHierarchyToggle',
-                          { defaultMessage: 'Group by provider' }
-                        )}
-                        checked={cloudHierarchyEnabled}
-                        onChange={(event) => setCloudHierarchyEnabled(event.target.checked)}
-                        data-test-subj="entityCentricLabCloudHierarchyToggle"
-                      />
-                    </EuiFlexItem>
-                  ) : null}
                   <EuiFlexItem grow={false}>
                     <EuiButtonGroup
                       legend={i18n.translate(
@@ -2685,7 +2685,7 @@ const AllEntitiesViewInner = ({
                     entities={filteredEntities}
                     onSelectEntity={openEntity}
                     selectedEntityName={selectedEntityName}
-                    groupCloudByProvider={cloudHierarchyEnabled}
+                    groupCloudByProvider={false}
                     enablePaletteColoring={isElasticOn}
                     refreshTick={refreshTick}
                   />
@@ -2699,7 +2699,7 @@ const AllEntitiesViewInner = ({
                   <EntitiesListView
                     entities={filteredEntities}
                     onSelectEntity={openEntity}
-                    groupCloudByProvider={cloudHierarchyEnabled}
+                    groupCloudByProvider={false}
                   />
                 )}
                 </EntityErrorBoundary>

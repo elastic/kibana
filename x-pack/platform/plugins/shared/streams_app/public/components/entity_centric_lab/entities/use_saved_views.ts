@@ -90,6 +90,11 @@ export interface SavedViewState {
    * backward compatibility with views saved before this field existed.
    */
   readonly groupBy?: readonly GroupByFieldId[];
+  /**
+   * Rows-per-page in the list/table view. Optional for backward
+   * compatibility with views saved before this field existed.
+   */
+  readonly pageSize?: number;
 }
 
 export interface SavedView {
@@ -126,6 +131,7 @@ import {
   GROUP_BY_STORAGE_KEY,
   TAG_FILTERS_STORAGE_KEY,
   VIEW_MODE_STORAGE_KEY,
+  writePageSize,
 } from './storage_keys';
 
 /**
@@ -217,6 +223,10 @@ const parseState = (value: unknown): SavedViewState | undefined => {
     storeTime: source.storeTime === true,
     timeRange: parseTimeRange(source.timeRange),
     groupBy: parseGroupBy(source.groupBy),
+    pageSize:
+      typeof source.pageSize === 'number' && [10, 25, 50].includes(source.pageSize)
+        ? source.pageSize
+        : undefined,
   };
 };
 
@@ -567,6 +577,9 @@ const canonicalState = (state: SavedViewState) => ({
   // page at the default grouping compare equal and don't spuriously light the
   // "Modified" badge. Order is significant (level 1 vs 2), so don't sort.
   groupBy: [...(state.groupBy && state.groupBy.length > 0 ? state.groupBy : DEFAULT_GROUP_BY)],
+  // Absent page-size == 10 (the default), so a legacy view without pageSize
+  // and a page showing 10 rows compare equal.
+  pageSize: state.pageSize ?? 10,
 });
 
 export const areStatesEqual = (a: SavedViewState, b: SavedViewState): boolean => {
@@ -609,6 +622,7 @@ export const applyViewToStorage = (view: SavedView): void => {
           : DEFAULT_GROUP_BY),
       ])
     );
+    writePageSize(view.state.pageSize ?? 10);
   } catch {
     // Same trade-off as the other write helpers: the in-memory copy
     // still works for the current session; the view just won't survive

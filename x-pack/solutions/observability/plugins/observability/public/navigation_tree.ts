@@ -395,6 +395,17 @@ function createNavTree({
   const servicesCategoryNode = {
     id: 'entityCentricLab-entitiesServices',
     link: 'streams:entitiesServices' as const,
+    title: i18n.translate('xpack.observability.obltNav.entityCentric.services', {
+      defaultMessage: 'APM Services',
+    }),
+  };
+  const functionsCategoryNode = {
+    id: 'entityCentricLab-entitiesFunctions',
+    link: 'streams:entitiesFunctions' as const,
+  };
+  const storageCategoryNode = {
+    id: 'entityCentricLab-entitiesStorage',
+    link: 'streams:entitiesStorage' as const,
   };
   const networkingCategoryNode = {
     id: 'entityCentricLab-entitiesNetworking',
@@ -424,16 +435,16 @@ function createNavTree({
     link: 'streams:entitiesOther' as const,
   };
 
-  // Full category list for the entity-centric lab. The Cloud node keeps its
-  // nested `panelOpener` (in the current chrome side-nav only the top-level
-  // Cloud link renders; providers surface via Cloud's own flyout panel).
+  // Full category list for the entity-centric lab. Cloud services are now
+  // distributed into their functional categories (Hosts, Functions, Storage).
   const entityCentricCategoryChildren = [
     hostsCategoryNode,
-    cloudCategoryNode,
     kubernetesCategoryNode,
     databasesCategoryNode,
+    storageCategoryNode,
     networkingCategoryNode,
     servicesCategoryNode,
+    functionsCategoryNode,
     middlewaresCategoryNode,
     llmsCategoryNode,
     otherCategoryNode,
@@ -484,10 +495,9 @@ function createNavTree({
             defaultMessage: 'Saved views',
           }),
           children: orderedSavedViews.map((view) => {
-            // Rebuild the exact route the view was saved on. Cloud views carry a
-            // provider (and optionally a service) sub-scope, so a view saved on
-            // `/entities/cloud/aws/s3` reloads that page — not the whole Cloud
-            // category.
+            // Rebuild the exact route the view was saved on. Legacy cloud views
+            // may still carry a cloud provider/service sub-scope — keep the
+            // route builder for backward compat.
             let categorySegment = '';
             if (view.category === 'cloud' && view.cloudProvider) {
               categorySegment = view.cloudService
@@ -609,11 +619,8 @@ function createNavTree({
     ].filter((child) => matchesLatestSearch(child.title)),
   };
 
-  // Latest categories render as a flat, untitled group — but Cloud is pulled out
-  // into its own collapsible section (see `latestCloudSection`) and slotted back
-  // into its original position (after Databases, or after Services in Latest)
-  // by splitting the list in two. ElasticOn omits APM Services entirely
-  // (infra-first); do not add the node here or chrome will keep showing it.
+  // Latest categories render as a flat list. Cloud services are now
+  // distributed into their functional categories (Hosts, Functions, Storage).
   const latestCategoryChildrenTop = [
     {
       id: 'entityCentricLab-entitiesHosts',
@@ -639,18 +646,30 @@ function createNavTree({
       }),
       getIsActive: categoryGetIsActive('/app/streams/entities/databases'),
     },
-    ...(elasticOnEnabled
-      ? []
-      : [
-          {
-            id: 'entityCentricLab-entitiesServices',
-            link: 'streams:entitiesServices' as const,
-            title: i18n.translate('xpack.observability.obltNav.latest.services', {
-              defaultMessage: 'Services',
-            }),
-            getIsActive: categoryGetIsActive('/app/streams/entities/services'),
-          },
-        ]),
+    {
+      id: 'entityCentricLab-entitiesStorage',
+      link: 'streams:entitiesStorage' as const,
+      title: i18n.translate('xpack.observability.obltNav.latest.storage', {
+        defaultMessage: 'Storage',
+      }),
+      getIsActive: categoryGetIsActive('/app/streams/entities/storage'),
+    },
+    {
+      id: 'entityCentricLab-entitiesServices',
+      link: 'streams:entitiesServices' as const,
+      title: i18n.translate('xpack.observability.obltNav.latest.services', {
+        defaultMessage: 'APM Services',
+      }),
+      getIsActive: categoryGetIsActive('/app/streams/entities/services'),
+    },
+    {
+      id: 'entityCentricLab-entitiesFunctions',
+      link: 'streams:entitiesFunctions' as const,
+      title: i18n.translate('xpack.observability.obltNav.latest.functions', {
+        defaultMessage: 'Functions',
+      }),
+      getIsActive: categoryGetIsActive('/app/streams/entities/functions'),
+    },
   ].filter((child) => matchesLatestSearch(child.title));
 
   const latestCategoryChildrenMiddle = [
@@ -832,18 +851,10 @@ function createNavTree({
   // section, so the providers land at the bottom of the category list with no
   // dividers bracketing them.
   // ElasticOn is infra-first: APM Services is omitted; drop "Other" catch-all.
-  // Cloud is a single flat link (provider filter lives on the page).
-  // Explicit order: Hosts, Cloud, Kubernetes, Databases, Networking, Messaging, AI/ML.
+  // Cloud services are distributed into Hosts / Functions / Storage.
+  // Explicit order: Hosts, Kubernetes, Databases, Storage, APM Services, Functions, Networking, Messaging, AI/ML.
   const elasticOnCategoryChildren = [
-    ...latestCategoryChildrenTop.filter(
-      (child) => child.id === 'entityCentricLab-entitiesHosts'
-    ),
-    cloudCategoryNodeFlat,
-    ...latestCategoryChildrenTop.filter(
-      (child) =>
-        child.id !== 'entityCentricLab-entitiesHosts' &&
-        child.id !== 'entityCentricLab-entitiesServices'
-    ),
+    ...latestCategoryChildrenTop,
     ...latestCategoryChildrenMiddle,
     ...latestCategoryChildrenBottom.filter(
       (child) => child.id !== 'entityCentricLab-entitiesOther'
@@ -855,9 +866,13 @@ function createNavTree({
     : infraShortTermMode
     ? [
         entitiesAllSection,
-        infraCloudSection,
         {
-          children: [databasesCategoryNode, kubernetesCategoryNode],
+          children: [
+            hostsCategoryNode,
+            kubernetesCategoryNode,
+            databasesCategoryNode,
+            storageCategoryNode,
+          ],
         },
       ]
     : elasticOnEnabled
@@ -882,7 +897,6 @@ function createNavTree({
         ...(savedViewsSection ? [savedViewsSection] : []),
         ...(latestEntitiesAllSection.children.length > 0 ? [latestEntitiesAllSection] : []),
         ...(latestCategoryChildrenTop.length > 0 ? [{ children: latestCategoryChildrenTop }] : []),
-        ...(latestCloudSection ? [latestCloudSection] : []),
         ...(latestCategoryChildrenMiddle.length > 0
           ? [{ children: latestCategoryChildrenMiddle }]
           : []),

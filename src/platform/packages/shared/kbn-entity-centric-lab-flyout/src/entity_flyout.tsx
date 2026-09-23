@@ -498,7 +498,8 @@ export const EntityFlyout = ({
     });
   }, [closeActionMenu, notifications, entityName]);
 
-  const actionPanels = useMemo<EuiContextMenuPanelDescriptor[]>(() => {
+  // ---- Context-aware primary action per flyout tab ----
+  const allActions = useMemo(() => {
     const viewInApmLabel = i18n.translate('entityCentricLabFlyout.flyout.actions.viewInApm', {
       defaultMessage: 'View in APM',
     });
@@ -509,6 +510,10 @@ export const EntityFlyout = ({
     const viewInInfrastructureLabel = i18n.translate(
       'entityCentricLabFlyout.flyout.actions.viewInInfrastructure',
       { defaultMessage: 'View in Infrastructure' }
+    );
+    const viewInDiscoverLabel = i18n.translate(
+      'entityCentricLabFlyout.flyout.actions.viewInDiscover',
+      { defaultMessage: 'View in Discover' }
     );
     const openRelatedDashboardLabel = i18n.translate(
       'entityCentricLabFlyout.flyout.actions.openRelatedDashboard',
@@ -530,80 +535,139 @@ export const EntityFlyout = ({
       { defaultMessage: 'Roll back to previous version' }
     );
 
-    // Build the "write" section dynamically so the rollback entry
-    // only surfaces for kinds where it actually maps to something
-    // (APM service / K8s deployment have a "previous version"; an
-    // S3 bucket or AWS region does not). Sits at the top of the
-    // write section, separated from the deep-link entries above,
-    // and uses a distinct `danger` colour so users notice this is a
-    // destructive change to the entity itself.
-    const writeItems: EuiContextMenuPanelItemDescriptor[] = [];
+    return {
+      viewInApm: { label: viewInApmLabel, icon: 'apmApp' as const, testSubj: 'viewInApm' },
+      viewInLogs: {
+        label: viewInLogsExplorerLabel,
+        icon: 'logoLogging' as const,
+        testSubj: 'viewInLogs',
+      },
+      viewInInfra: {
+        label: viewInInfrastructureLabel,
+        icon: 'logoMetrics' as const,
+        testSubj: 'viewInInfrastructure',
+      },
+      viewInDiscover: {
+        label: viewInDiscoverLabel,
+        icon: 'discoverApp' as const,
+        testSubj: 'viewInDiscover',
+      },
+      openDashboard: {
+        label: openRelatedDashboardLabel,
+        icon: 'dashboardApp' as const,
+        testSubj: 'openDashboard',
+      },
+      addToCase: { label: addToCaseLabel, icon: 'casesApp' as const, testSubj: 'addToCase' },
+      createAlertRule: {
+        label: createAlertRuleLabel,
+        icon: 'bell' as const,
+        testSubj: 'createAlertRule',
+      },
+      annotateDeployment: {
+        label: annotateDeploymentLabel,
+        icon: 'tag' as const,
+        testSubj: 'annotateDeployment',
+      },
+      rollback: {
+        label: rollbackLabel,
+        icon: 'editorUndo' as const,
+        testSubj: 'rollbackToPreviousVersion',
+      },
+    };
+  }, []);
+
+  // Map each flyout tab to its most-relevant primary action, taking the
+  // entity kind into account so infra entities never show "View in APM"
+  // and service entities never show "View in Infrastructure".
+  // Tabs without a clear contextual action map to `null` — the
+  // primary button is hidden and only the ellipsis menu remains.
+  const primaryAction = useMemo(() => {
+    type Action = (typeof allActions)[keyof typeof allActions];
+    const serviceKinds = new Set(['service', 'deployment']);
+
+    const kindDefault: Action | null = serviceKinds.has(kind ?? '')
+      ? allActions.viewInApm
+      : null;
+
+    const tabActionMap: Record<string, Action | null> = {
+      overview: kindDefault,
+      metrics: allActions.viewInDiscover,
+      logs: allActions.viewInLogs,
+      traces: allActions.viewInApm,
+      alerts: allActions.createAlertRule,
+      services: allActions.viewInApm,
+      processes: null,
+      relationships: null,
+      dashboards: null,
+      profiling: allActions.viewInApm,
+    };
+    return tabActionMap[activeTab] ?? kindDefault;
+  }, [activeTab, allActions, kind]);
+
+  // Ellipsis menu: "Add to case" always, plus rollback for service/deployment,
+  // plus annotate deployment. Navigation deep-links that aren't the current
+  // primary action are also included so they remain accessible.
+  const ellipsisMenuItems = useMemo<EuiContextMenuPanelItemDescriptor[]>(() => {
+    const deepLinkActions = [
+      allActions.viewInApm,
+      allActions.viewInDiscover,
+      allActions.viewInLogs,
+      allActions.viewInInfra,
+      ...(activeTab === 'dashboards' ? [] : [allActions.openDashboard]),
+    ];
+
+    const items: EuiContextMenuPanelItemDescriptor[] = deepLinkActions
+      .filter((a) => !primaryAction || a.testSubj !== primaryAction.testSubj)
+      .map((a) => ({
+        name: a.label,
+        icon: a.icon,
+        'data-test-subj': `entityCentricLabFlyoutAction-${a.testSubj}`,
+        onClick: () => handleActionClick(a.label),
+      }));
+
+    items.push({ isSeparator: true, key: 'sep-manage' });
+
     if (kind === 'service' || kind === 'deployment') {
-      writeItems.push({
-        name: rollbackLabel,
-        icon: 'editorUndo',
-        'data-test-subj': 'entityCentricLabFlyoutAction-rollbackToPreviousVersion',
+      items.push({
+        name: allActions.rollback.label,
+        icon: allActions.rollback.icon,
+        'data-test-subj': `entityCentricLabFlyoutAction-${allActions.rollback.testSubj}`,
         onClick: handleRollbackClick,
       });
     }
-    writeItems.push(
+
+    items.push(
       {
-        name: addToCaseLabel,
-        icon: 'casesApp',
-        'data-test-subj': 'entityCentricLabFlyoutAction-addToCase',
-        onClick: () => handleActionClick(addToCaseLabel),
+        name: allActions.addToCase.label,
+        icon: allActions.addToCase.icon,
+        'data-test-subj': `entityCentricLabFlyoutAction-${allActions.addToCase.testSubj}`,
+        onClick: () => handleActionClick(allActions.addToCase.label),
       },
+      ...(!primaryAction || primaryAction.testSubj !== allActions.createAlertRule.testSubj
+        ? [
+            {
+              name: allActions.createAlertRule.label,
+              icon: allActions.createAlertRule.icon,
+              'data-test-subj': `entityCentricLabFlyoutAction-${allActions.createAlertRule.testSubj}`,
+              onClick: () => handleActionClick(allActions.createAlertRule.label),
+            },
+          ]
+        : []),
       {
-        name: createAlertRuleLabel,
-        icon: 'bell',
-        'data-test-subj': 'entityCentricLabFlyoutAction-createAlertRule',
-        onClick: () => handleActionClick(createAlertRuleLabel),
-      },
-      {
-        name: annotateDeploymentLabel,
-        icon: 'tag',
-        'data-test-subj': 'entityCentricLabFlyoutAction-annotateDeployment',
-        onClick: () => handleActionClick(annotateDeploymentLabel),
+        name: allActions.annotateDeployment.label,
+        icon: allActions.annotateDeployment.icon,
+        'data-test-subj': `entityCentricLabFlyoutAction-${allActions.annotateDeployment.testSubj}`,
+        onClick: () => handleActionClick(allActions.annotateDeployment.label),
       }
     );
 
-    return [
-      {
-        id: 0,
-        title: i18n.translate('entityCentricLabFlyout.flyout.actions.panelTitle', {
-          defaultMessage: 'Take action',
-        }),
-        items: [
-          {
-            name: viewInApmLabel,
-            icon: 'apmApp',
-            'data-test-subj': 'entityCentricLabFlyoutAction-viewInApm',
-            onClick: () => handleActionClick(viewInApmLabel),
-          },
-          {
-            name: viewInLogsExplorerLabel,
-            icon: 'logoLogging',
-            'data-test-subj': 'entityCentricLabFlyoutAction-viewInLogs',
-            onClick: () => handleActionClick(viewInLogsExplorerLabel),
-          },
-          {
-            name: viewInInfrastructureLabel,
-            icon: 'logoMetrics',
-            'data-test-subj': 'entityCentricLabFlyoutAction-viewInInfrastructure',
-            onClick: () => handleActionClick(viewInInfrastructureLabel),
-          },
-          {
-            name: openRelatedDashboardLabel,
-            icon: 'dashboardApp',
-            'data-test-subj': 'entityCentricLabFlyoutAction-openDashboard',
-            onClick: () => handleActionClick(openRelatedDashboardLabel),
-          },
-          { isSeparator: true, key: 'sep-manage' },
-          ...writeItems,
-        ],
-      },
-    ];
-  }, [handleActionClick, handleRollbackClick, kind]);
+    return items;
+  }, [allActions, primaryAction, activeTab, kind, handleActionClick, handleRollbackClick]);
+
+  const ellipsisMenuPanels = useMemo<EuiContextMenuPanelDescriptor[]>(
+    () => [{ id: 0, items: ellipsisMenuItems }],
+    [ellipsisMenuItems]
+  );
 
   // Flyout tab / custom-link overrides are keyed by the specific entity-type
   // id (e.g. `aws-ec2`), resolved the same way the wizard wrote it, so a
@@ -1009,31 +1073,48 @@ export const EntityFlyout = ({
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiPopover
-              button={
-                <EuiButton
-                  fill
-                  iconType="arrowDown"
-                  iconSide="right"
-                  data-test-subj="entityCentricLabFlyoutTakeAction"
-                  onClick={() => setIsActionMenuOpen((open) => !open)}
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              {primaryAction ? (
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    fill
+                    iconType={primaryAction.icon}
+                    data-test-subj={`entityCentricLabFlyoutPrimaryAction-${primaryAction.testSubj}`}
+                    onClick={() => handleActionClick(primaryAction.label)}
+                  >
+                    {primaryAction.label}
+                  </EuiButton>
+                </EuiFlexItem>
+              ) : null}
+              <EuiFlexItem grow={false}>
+                <EuiPopover
+                  button={
+                    <EuiButtonIcon
+                      display="base"
+                      size="m"
+                      iconType="boxesHorizontal"
+                      data-test-subj="entityCentricLabFlyoutMoreActions"
+                      onClick={() => setIsActionMenuOpen((open) => !open)}
+                      aria-label={i18n.translate(
+                        'entityCentricLabFlyout.flyout.moreActionsAriaLabel',
+                        { defaultMessage: 'More actions' }
+                      )}
+                    />
+                  }
+                  isOpen={isActionMenuOpen}
+                  closePopover={closeActionMenu}
+                  panelPaddingSize="none"
+                  anchorPosition="upRight"
+                  data-test-subj="entityCentricLabFlyoutMoreActionsMenu"
                 >
-                  {i18n.translate('entityCentricLabFlyout.flyout.takeAction', {
-                    defaultMessage: 'Take action',
-                  })}
-                </EuiButton>
-              }
-              isOpen={isActionMenuOpen}
-              closePopover={closeActionMenu}
-              panelPaddingSize="none"
-              anchorPosition="upRight"
-              aria-label={i18n.translate('entityCentricLabFlyout.flyout.takeActionMenuAriaLabel', {
-                defaultMessage: 'Take action menu',
-              })}
-              data-test-subj="entityCentricLabFlyoutTakeActionMenu"
-            >
-              <EuiContextMenu initialPanelId={0} panels={actionPanels} size="s" />
-            </EuiPopover>
+                  <EuiContextMenu
+                    initialPanelId={0}
+                    panels={ellipsisMenuPanels}
+                    size="s"
+                  />
+                </EuiPopover>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>

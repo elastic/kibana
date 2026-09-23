@@ -43,6 +43,7 @@ import type { Entity, EntityCategoryId, EntityHealth } from './fake_entities';
 import { HEALTH_RANK, getCategoryDescriptor } from './fake_entities';
 import { useVariation } from './variation_context';
 import type { PhaseVariation } from './variation_registry';
+import { readPageSize, writePageSize } from './storage_keys';
 import { CLOUD_PROVIDERS } from './cloud_providers';
 import {
   K8S_CONTEXT_KEYS,
@@ -591,7 +592,7 @@ export const EntityDataGridSection = ({
   }, [rows, sortingColumns, bucketKey, refreshTick]);
 
   const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(PAGE_SIZE_OPTIONS[0]);
+  const [pageSize, setPageSize] = useState(readPageSize);
   const pageCount = Math.max(1, Math.ceil(sortedRows.length / pageSize));
   const safePageIndex = Math.min(pageIndex, pageCount - 1);
 
@@ -707,6 +708,7 @@ export const EntityDataGridSection = ({
           onChangeItemsPerPage: (size) => {
             setPageSize(size);
             setPageIndex(0);
+            writePageSize(size);
           },
           onChangePage: setPageIndex,
         }}

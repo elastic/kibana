@@ -34,6 +34,7 @@ import {
   isCategoryHiddenInElasticOn,
 } from './fake_entities';
 import { labThings } from '../lab_terminology';
+import { readPageSize, writePageSize } from './storage_keys';
 import { CLOUD_PROVIDERS, type CloudProviderDescriptor } from './cloud_providers';
 import { EntityDataGridSection } from './entities_data_grid';
 import { UNGROUPED_LABEL, groupEntities, type GroupByFieldDef } from './entity_group_by';
@@ -348,9 +349,16 @@ const TableSection = ({
   const captionLabel = subTypeLabel
     ? `${descriptor?.label ?? category} · ${subTypeLabel}`
     : descriptor?.label ?? category;
-  // When nested without a sub-type label the category header is already
-  // rendered outside the panel — skip the in-panel duplicate.
   const showInPanelHeader = !nested || Boolean(subTypeLabel);
+
+  const handleTableChange = useCallback(
+    (criteria: { page?: { size: number } }) => {
+      if (criteria.page) {
+        writePageSize(criteria.page.size);
+      }
+    },
+    []
+  );
 
   return (
     <EuiPanel hasBorder hasShadow={false} paddingSize="m">
@@ -375,9 +383,10 @@ const TableSection = ({
         rowHeader="name"
         sorting={{ sort: { field: 'health', direction: 'asc' } }}
         pagination={{
-          initialPageSize: PAGE_SIZE_OPTIONS[0],
+          initialPageSize: readPageSize(),
           pageSizeOptions: [...PAGE_SIZE_OPTIONS],
         }}
+        onTableChange={handleTableChange}
         data-test-subj={
           subTypeLabel
             ? `entityCentricLabEntitiesTable-${category}-${subTypeLabel.toLowerCase()}`

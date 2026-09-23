@@ -25,7 +25,8 @@ export type EntityCategoryId =
   | 'kubernetes'
   | 'databases'
   | 'services'
-  | 'cloud'
+  | 'functions'
+  | 'storage'
   | 'networking'
   | 'middlewares'
   | 'llms'
@@ -65,11 +66,12 @@ export interface EntityCategoryDescriptor {
  */
 export const ENTITY_CATEGORIES: readonly EntityCategoryDescriptor[] = [
   { id: 'hosts', label: 'Hosts', icon: 'storage' },
-  { id: 'cloud', label: 'Cloud', icon: 'cloudSunny' },
   { id: 'kubernetes', label: 'Kubernetes', icon: 'logoKubernetes' },
   { id: 'databases', label: 'Databases', icon: 'database' },
+  { id: 'storage', label: 'Storage', icon: 'folderOpen' },
   { id: 'networking', label: 'Networking', icon: 'globe' },
-  { id: 'services', label: 'Services', icon: 'apmApp' },
+  { id: 'services', label: 'APM Services', icon: 'apmApp' },
+  { id: 'functions', label: 'Functions', icon: 'function' },
   { id: 'middlewares', label: 'Messaging', icon: 'logstashIf' },
   { id: 'llms', label: 'AI/ML', icon: 'sparkles' },
   // Catch-all bucket — rendered as a nav section so user-typed
@@ -85,7 +87,7 @@ export const ENTITY_CATEGORIES: readonly EntityCategoryDescriptor[] = [
  * stripped from nav, inventory, and Manage entity types when
  * `labMode === 'elasticOn'`.
  */
-export const ELASTICON_HIDDEN_CATEGORY_IDS: ReadonlySet<EntityCategoryId> = new Set(['services']);
+export const ELASTICON_HIDDEN_CATEGORY_IDS: ReadonlySet<EntityCategoryId> = new Set([]);
 
 export const isCategoryHiddenInElasticOn = (categoryId: EntityCategoryId): boolean =>
   ELASTICON_HIDDEN_CATEGORY_IDS.has(categoryId);
@@ -560,7 +562,7 @@ const NON_KUBERNETES_SPECS: readonly CategorySpec[] = [
   {
     category: 'hosts',
     total: 24,
-    typeCycle: ['Bare-metal', 'VM'],
+    typeCycle: ['Bare-metal'],
     seedRows: HOST_SEED_ROWS,
     fallbackName: (index) => `host-${padIndex(index, 3)}`,
   },
@@ -694,7 +696,7 @@ const buildCloudEntities = (): Entity[] => {
         serviceEntities.push({
           id: `cloud-${provider.id}-${service.id}-${index + 1}`,
           name: instance.name,
-          category: 'cloud',
+          category: service.targetCategory,
           provider: provider.id,
           subType: service.label,
           type: service.entityType,
@@ -978,6 +980,17 @@ export const buildFakeEntities = (
     ),
   ]);
 
+  // Count entities per category from the actual entity list so that
+  // cloud entities (now distributed into hosts/services/storage)
+  // are counted under their functional category automatically.
+  const entityCountsByCategory = new Map<EntityCategoryId, number>();
+  for (const entity of entities) {
+    entityCountsByCategory.set(
+      entity.category,
+      (entityCountsByCategory.get(entity.category) ?? 0) + 1
+    );
+  }
+
   const categoryCounts: EntityCategoryCounts[] = ENTITY_CATEGORIES.map((descriptor) => {
     if (descriptor.id === 'kubernetes') {
       return {
@@ -986,19 +999,10 @@ export const buildFakeEntities = (
         subCounts: effectiveKubeSpecs.map((sub) => ({ label: sub.label, total: sub.total })),
       };
     }
-    if (descriptor.id === 'cloud') {
-      return {
-        category: 'cloud' as const,
-        total: CLOUD_TOTAL,
-        subCounts: CLOUD_PROVIDERS.map((provider) => ({
-          label: provider.label,
-          total: provider.services.reduce((sum, service) => sum + service.instances.length, 0),
-        })),
-      };
-    }
-    const spec = NON_KUBERNETES_SPECS.find((s) => s.category === descriptor.id);
-    const base = spec?.total ?? 0;
-    return { category: descriptor.id, total: base * multiplier };
+    return {
+      category: descriptor.id,
+      total: entityCountsByCategory.get(descriptor.id) ?? 0,
+    };
   });
 
   const MAX_VISIBLE = 10_000;

@@ -220,11 +220,31 @@ export class StreamsAppPlugin
         {
           id: 'entitiesServices',
           title: i18n.translate('xpack.streams.deepLinks.entitiesServicesTitle', {
-            defaultMessage: 'Services',
+            defaultMessage: 'APM Services',
           }),
           path: '/entities/services',
           visibleIn: [],
         },
+        {
+          id: 'entitiesFunctions',
+          title: i18n.translate('xpack.streams.deepLinks.entitiesFunctionsTitle', {
+            defaultMessage: 'Functions',
+          }),
+          path: '/entities/functions',
+          visibleIn: [],
+        },
+        {
+          id: 'entitiesStorage',
+          title: i18n.translate('xpack.streams.deepLinks.entitiesStorageTitle', {
+            defaultMessage: 'Storage',
+          }),
+          path: '/entities/storage',
+          visibleIn: [],
+        },
+        // Cloud deep links kept for backward-compat with bookmarks /
+        // saved views; the "Cloud" category is no longer surfaced in
+        // the nav — cloud entities now live under Hosts / Functions /
+        // Storage.
         {
           id: 'entitiesCloud',
           title: i18n.translate('xpack.streams.deepLinks.entitiesCloudTitle', {
