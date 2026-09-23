@@ -36,7 +36,9 @@ export class MapsPage {
   public readonly saveModal: SavedObjectSaveModal;
 
   constructor(private readonly page: ScoutPage) {
+    // Only present when Maps is the top-level app (standalone). Not available in embeddable contexts (e.g. dashboard panels).
     this.mapsPlugin = this.page.locator('#maps-plugin');
+    // Only present when Maps is the top-level app (standalone). Not available in embeddable contexts (e.g. dashboard panels).
     this.mapRenderComplete = this.page.locator('#maps-plugin[data-map-loaded="true"]');
     this.saveAndReturnButton = this.page.testSubj.locator('mapSaveAndReturnButton');
     this.saveButton = this.page.testSubj.locator('mapSaveButton');
@@ -125,6 +127,7 @@ export class MapsPage {
 
   /** Waits until map layers are loaded. Works in both standalone (expanded TOC) and minimized TOC contexts. */
   async waitForLayersToLoad() {
+    await this.mapContainer.waitFor({ state: 'visible', timeout: DEFAULT_MAP_LOADING_TIMEOUT });
     if (await this.mapLayerToc.isVisible()) {
       // Maps uses EuiLoadingSpinner (role=progressbar) while a layer loads; there is no
       // dedicated layer-loading data-test-subj, so wait for toggles + no progressbars.
