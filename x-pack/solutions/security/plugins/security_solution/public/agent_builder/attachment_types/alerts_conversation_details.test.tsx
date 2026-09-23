@@ -9,23 +9,23 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
+import type { ConversationDetailsRenderProps } from '@kbn/agent-builder-browser/attachments';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
 import {
   ALERTS_CONVERSATION_DETAILS_TEST_ID,
   AlertsConversationDetailsContent,
+  type AlertsAttachment,
   type AlertsAttachmentData,
 } from './alerts_conversation_details';
 
 const renderDetails = (data: AlertsAttachmentData) => {
-  const props = {
+  const props: ConversationDetailsRenderProps<AlertsAttachment> = {
     attachment: {
       id: 'att-1',
       type: SecurityAgentBuilderAttachments.alerts,
       data,
     },
-    isSidebar: true,
-  } as AttachmentRenderProps<typeof props.attachment>;
+  };
 
   return render(
     <EuiProvider>

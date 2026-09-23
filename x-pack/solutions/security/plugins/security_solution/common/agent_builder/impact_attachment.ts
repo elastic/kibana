@@ -19,6 +19,7 @@ const liquidNonNegativeInt = z.union([
   z.number().int().min(0).max(100_000),
   z
     .string()
+    .max(6)
     .regex(/^\d+$/, 'Expected a non-negative integer string')
     .transform((value) => Number(value))
     .pipe(z.number().int().min(0).max(100_000)),
@@ -65,7 +66,7 @@ export type ImpactedEntity = z.infer<typeof impactedEntitySchema>;
  */
 export const impactAttachmentDataSchema = z
   .object({
-    attachmentLabel: z.string().optional(),
+    attachmentLabel: z.string().max(1024).optional(),
     entities: z.array(impactedEntitySchema).max(MAX_IMPACTED_ENTITIES),
     total_alert_count: liquidNonNegativeInt.optional(),
     /** True when the entity list was capped to MAX_IMPACTED_ENTITIES before attaching.

@@ -36,6 +36,10 @@ describe('createImpactAttachmentType', () => {
     expect(attachmentType.id).toBe(SecurityAgentBuilderAttachments.impact);
   });
 
+  it('raises maxContentLength above the default so full entity lists are not truncated', () => {
+    expect(attachmentType.maxContentLength).toBe(64_000);
+  });
+
   describe('validate', () => {
     it('accepts a payload with a mix of hosts and users', async () => {
       const result = await attachmentType.validate({
@@ -96,6 +100,13 @@ describe('createImpactAttachmentType', () => {
         });
         expect(result.valid).toBe(false);
       }
+    });
+
+    it('rejects an overlong zero-padded Liquid count string before parsing', async () => {
+      const result = await attachmentType.validate({
+        entities: [{ ...validEntity, alert_count: '0'.repeat(7) }],
+      });
+      expect(result.valid).toBe(false);
     });
 
     it('accepts a truncated payload with the flag set (native boolean)', async () => {
@@ -163,6 +174,14 @@ describe('createImpactAttachmentType', () => {
       const result = await attachmentType.validate({
         entities: [validEntity],
         total_alert_count: 1,
+      });
+      expect(result.valid).toBe(false);
+    });
+
+    it('rejects an attachmentLabel longer than 1024 characters', async () => {
+      const result = await attachmentType.validate({
+        entities: [validEntity],
+        attachmentLabel: 'a'.repeat(1025),
       });
       expect(result.valid).toBe(false);
     });

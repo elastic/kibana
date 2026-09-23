@@ -25,6 +25,9 @@ export {
 /** Creates the definition for the `security.impact` attachment type. */
 export const createImpactAttachmentType = (): AttachmentTypeDefinition => ({
   id: SecurityAgentBuilderAttachments.impact,
+  // Default is 10_000; 50×1024-char names plus verdict lines exceed that. 64_000
+  // covers the schema's worst-case formatImpactForAgent output with headroom.
+  maxContentLength: 64_000,
   validate: (input) => {
     const result = impactAttachmentDataSchema.safeParse(input);
     if (result.success) {
