@@ -16,6 +16,7 @@ import type {
   AgentsServiceStartContract,
   AttachmentServiceStartContract,
   ConversationsServiceStartContract,
+  ConversationEventsServiceStartContract,
   RendererServiceStartContract,
   EventsServiceStartContract,
   ToolServiceStartContract,
@@ -218,6 +219,8 @@ export interface AgentBuilderPluginStart {
    * Events service contract, can be used to listen to chat events.
    */
   events: EventsServiceStartContract;
+  /** Browser-side UI registry for custom conversation events. */
+  conversationEvents: ConversationEventsServiceStartContract;
   /**
    * Conversations service contract, can be used to append events to conversations.
    */

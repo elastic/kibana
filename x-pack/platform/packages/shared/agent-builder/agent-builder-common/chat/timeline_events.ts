@@ -543,6 +543,31 @@ export type ValidConversationEventType<T extends string> =
     ? never
     : T;
 
+/**
+ * Validates a conversation event type name at runtime, throwing a descriptive error if invalid.
+ * Enforces the same three naming rules as the server-side registry:
+ *   1. May not contain the id delimiter (`::`)
+ *   2. May not be a reserved type (`execution`, `step`)
+ *   3. May not shadow a built-in timeline event type
+ *
+ * Pair with the compile-time {@link ValidConversationEventType} guard for full coverage.
+ */
+export const assertValidConversationEventType = (type: string): void => {
+  if (type.includes(CONVERSATION_EVENT_ID_DELIMITER)) {
+    throw new Error(
+      `Conversation event type "${type}" must not contain "${CONVERSATION_EVENT_ID_DELIMITER}"`
+    );
+  }
+  if ((RESERVED_CONVERSATION_EVENT_TYPES as readonly string[]).includes(type)) {
+    throw new Error(`Conversation event type "${type}" is reserved and cannot be registered`);
+  }
+  if (isBuiltInConversationEventType(type)) {
+    throw new Error(
+      `Conversation event type "${type}" is a built-in timeline event type and cannot be registered`
+    );
+  }
+};
+
 /** Input event for adding to a conversation. Server assigns id, created_at, and actor. */
 export interface ConversationAddEventInput {
   type: string;
