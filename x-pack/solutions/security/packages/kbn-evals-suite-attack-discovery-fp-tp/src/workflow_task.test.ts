@@ -137,6 +137,76 @@ describe('buildAttackDiscoveryFromPayload', () => {
     expect(doc.detailsMarkdown).toContain('none recorded');
     expect(doc.entitySummaryMarkdown).toBeUndefined();
   });
+
+  it('dispatches chain payloads (events list) to the chain renderer', () => {
+    const doc = buildAttackDiscoveryFromPayload('c3', {
+      attack_chain: 'mimicrat-clickfix',
+      events: [
+        {
+          '@timestamp': '2026-02-11T10:00:00.000Z',
+          event: { sequence: 1, category: 'process', action: 'process_started' },
+          host: { name: 'WS-FIN-214' },
+          user: { name: 'j.meyer', domain: 'CORP' },
+          process: { pid: 4812, name: 'powershell.exe', command_line: 'powershell.exe -W H' },
+          message: 'clipboard-injected obfuscated PowerShell executed',
+        },
+      ],
+    });
+    expect(doc.title).toContain('mimicrat-clickfix');
+    expect(doc.detailsMarkdown).toContain('powershell.exe');
+    expect(doc.detailsMarkdown).not.toContain('Categories:');
+    expect(doc.mitreAttackTactics).toEqual(['process']);
+    expect(doc.timestamp).toBe('2026-02-11T10:00:00.000Z');
+  });
+
+  it('dispatches BOTSv3 rule-match payloads to the matched_events renderer', () => {
+    const doc = buildAttackDiscoveryFromPayload('c4', {
+      rule_name: 'Accepted Default Telnet Port Connection',
+      rule_id: '34fde489',
+      language: 'kuery',
+      match_kind: 'event',
+      severity: 'medium',
+      matched_events: [
+        { timestamp: '2018-08-20T10:43:38.000Z', host: 'FROTHLY-FW1', sourcetype: 'cisco:asa' },
+      ],
+    });
+    expect(doc.title).toContain('Accepted Default Telnet Port Connection');
+    expect(doc.detailsMarkdown).toContain('FROTHLY-FW1');
+    expect(doc.timestamp).toBe('2018-08-20T10:43:38.000Z');
+  });
+
+  it('dispatches single-ECS cloud payloads to the cloud renderer', () => {
+    const doc = buildAttackDiscoveryFromPayload('c5', {
+      '@timestamp': '2026-09-21T02:00:00.000Z',
+      event_code: 'Microsoft.Compute/snapshots/delete',
+      event: { action: 'Microsoft.Compute/snapshots/delete', outcome: 'Succeeded' },
+      user: { name: 'svc-backup', id: 'u-1' },
+      cloud: { provider: 'azure', 'account.id': 'acc-1' },
+      azure: { activitylogs: { operation_name: 'Microsoft.Compute/snapshots/delete' } },
+    });
+    expect(doc.title).toContain('snapshots/delete');
+    expect(doc.detailsMarkdown).toContain('svc-backup');
+    expect(doc.timestamp).toBe('2026-09-21T02:00:00.000Z');
+  });
+
+  it('dispatches benign-window payloads to the window renderer (no events)', () => {
+    const doc = buildAttackDiscoveryFromPayload('c6', {
+      window_start_utc: '2018-08-20T00:00:00Z',
+      window_end_utc: '2018-08-20T00:15:00Z',
+      dataset: 'botsv3',
+      capture_day: '2018-08-20',
+      exclusion_spec: 'botsv3/exclusion_spec.json',
+    });
+    expect(doc.title).toContain('Benign window');
+    expect(doc.detailsMarkdown).toContain('none recorded');
+    expect(doc.timestamp).toBe('2018-08-20T00:00:00Z');
+  });
+
+  it('throws a shape error for unrecognized non-empty payloads', () => {
+    expect(() => buildAttackDiscoveryFromPayload('c7', { totally: 'unknown' })).toThrow(
+      /matches no known corpus shape/
+    );
+  });
 });
 
 describe('seedAttackDiscovery', () => {
@@ -391,7 +461,11 @@ describe('runAttackDiscoveryWorkflow (corpus → ids bridge)', () => {
   });
 
   it('warns (no throw) when polling exceeds the deadline', async () => {
-    const log: { info: jest.Mock; warning: jest.Mock } = { info: jest.fn(), warning: jest.fn() };
+    const log: { info: jest.Mock; warning: jest.Mock; error: jest.Mock } = {
+      info: jest.fn(),
+      warning: jest.fn(),
+      error: jest.fn(),
+    };
     const fetch = bridgeFetch({
       runResponse: { workflowExecutionId: 'exec-3' },
       execution: { status: 'running', stepExecutions: [] },

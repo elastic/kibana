@@ -224,15 +224,14 @@ const listOf = (v: unknown): string[] => (Array.isArray(v) ? v.map(String) : [])
 const joinList = (items: string[], empty = 'none recorded'): string =>
   items.length > 0 ? items.join(', ') : empty;
 
-/**
- * Builds the CreateAttackDiscoveryAlertsParams' `attackDiscoveries` entry from
- * a corpus case. The gold label / gold_rationale are NEVER rendered into the
- * document — the workflow must classify from evidence alone.
- */
-export const buildAttackDiscoveryFromPayload = (
-  caseId: string,
-  payload: Record<string, unknown>
-): {
+const truncate = (s: string, max = 200): string => (s.length > max ? `${s.slice(0, max)}…` : s);
+
+// ---------------------------------------------------------------------------
+// Per-corpus payload renderers. Corpus payload shapes VARY per corpus family;
+// each corpus maps its own evidence onto the canonical AD document fields.
+// ---------------------------------------------------------------------------
+
+interface AdDocumentFields {
   title: string;
   summaryMarkdown: string;
   detailsMarkdown: string;
@@ -240,8 +239,17 @@ export const buildAttackDiscoveryFromPayload = (
   mitreAttackTactics: string[];
   alertIds: string[];
   timestamp?: string;
-} => {
-  const ev = payload as CorpusEvidence;
+}
+
+/** Common alertId / timestamp helpers shared by the renderers. */
+const alertIdsFor = (caseId: string): string[] => [`case-${caseId}-alert-1`];
+
+/**
+ * guide-sanity: flat GUIDE incident-level fields (Category, DetectorNames,
+ * MitreTechniques, Devices, Accounts, ActionGrouped, …). Categories are
+ * ATT&CK tactic names and map to mitreAttackTactics.
+ */
+const renderGuidePayload = (caseId: string, ev: CorpusEvidence): AdDocumentFields => {
   const categories = listOf(ev.Category);
   const detectors = listOf(ev.DetectorNames);
   const techniques = listOf(ev.MitreTechniques);
@@ -249,7 +257,6 @@ export const buildAttackDiscoveryFromPayload = (
   const granular = listOf(ev.ActionGranular);
   const devices = listOf(ev.Devices);
   const accounts = listOf(ev.Accounts);
-  const alertIds = [`case-${caseId}-alert-1`];
 
   const title = `GUIDE ${ev.IncidentId ?? caseId}: ${
     categories[0] ?? detectors[0] ?? 'suspicious activity'
@@ -293,9 +300,318 @@ export const buildAttackDiscoveryFromPayload = (
     entitySummaryMarkdown,
     // GUIDE categories ARE ATT&CK tactic names (CredentialAccess, LateralMovement, ...).
     mitreAttackTactics: categories,
-    alertIds,
+    alertIds: alertIdsFor(caseId),
     timestamp: typeof ev.Timestamp === 'string' ? ev.Timestamp : undefined,
   };
+};
+
+/** A single ECS-shaped event from the chain corpora's `events` list. */
+interface ChainEvent {
+  '@timestamp'?: string;
+  message?: string;
+  event?: { category?: string | string[]; action?: string; sequence?: number };
+  host?: { name?: string };
+  user?: { name?: string; domain?: string };
+  process?: { name?: string; command_line?: string; pid?: number };
+  destination?: { ip?: string; domain?: string; port?: number };
+  source?: { ip?: string };
+}
+
+const eventToLine = (e: ChainEvent): string => {
+  const parts: string[] = [];
+  if (e['@timestamp']) parts.push(e['@timestamp']);
+  if (e.host?.name) parts.push(`host ${e.host.name}`);
+  if (e.user?.name)
+    parts.push(`user ${e.user.domain ? `${e.user.domain}\\${e.user.name}` : e.user.name}`);
+  if (e.process?.name)
+    parts.push(`process ${e.process.name}${e.process.pid ? ` (pid ${e.process.pid})` : ''}`);
+  if (e.process?.command_line) parts.push(`command_line ${truncate(e.process.command_line)}`);
+  if (e.destination?.ip) parts.push(`dst ${e.destination.ip}`);
+  if (e.destination?.domain) parts.push(`dst domain ${e.destination.domain}`);
+  if (e.destination?.port) parts.push(`port ${e.destination.port}`);
+  if (e.source?.ip) parts.push(`src ${e.source.ip}`);
+  if (e.event?.action) parts.push(`action ${e.event.action}`);
+  if (e.message) parts.push(truncate(e.message, 160));
+  return parts.length > 0 ? `- ${parts.join(' | ')}` : '- (no extractable fields)';
+};
+
+const chainEventLines = (events: unknown): string[] =>
+  (Array.isArray(events) ? events : []).slice(0, 40).map(eventToLine);
+
+const chainEntitySummary = (events: ChainEvent[]): string | undefined => {
+  const host = events.find((e) => e.host?.name)?.host?.name;
+  const user = events.find((e) => e.user?.name)?.user?.name;
+  if (!host && !user) {
+    return undefined;
+  }
+  return `Host {{ host.name ${host ?? 'unknown'} }} User {{ user.name ${user ?? 'unknown'} }}`;
+};
+
+const chainTimestamp = (events: ChainEvent[]): string | undefined =>
+  events.find((e) => typeof e['@timestamp'] === 'string')?.['@timestamp'];
+
+/** Tactic guess from event categories (elastic category → ATT&CK tactic-ish label). */
+const tacticsFromEvents = (events: ChainEvent[]): string[] => {
+  const tactics = new Set<string>();
+  for (const e of events) {
+    const cats = Array.isArray(e.event?.category) ? e.event.category : [e.event?.category];
+    for (const c of cats) {
+      if (typeof c === 'string' && c) {
+        tactics.add(c);
+      }
+    }
+  }
+  return [...tactics];
+};
+
+/**
+ * tp-chains / adversarial-twins / perturbations: `{ attack_chain, events, … }`
+ * where `events` is a list of ECS-shaped docs replaying one attack chain.
+ * Mutation/perturbation/omission metadata is deliberately NOT rendered — the
+ * workflow must judge the replayed evidence alone.
+ */
+const renderChainPayload = (
+  caseId: string,
+  payload: {
+    attack_chain?: string;
+    events?: unknown;
+    documented_stages?: unknown;
+    omissions?: unknown;
+    variant?: unknown;
+    mutation?: unknown;
+    perturbation_rule?: unknown;
+  }
+): AdDocumentFields => {
+  const events = (Array.isArray(payload.events) ? payload.events : []) as ChainEvent[];
+  const chain = typeof payload.attack_chain === 'string' ? payload.attack_chain : caseId;
+
+  const title = `Attack chain ${chain}: ${events.length} replayed event(s)`;
+  const summaryMarkdown =
+    `Replay of attack chain '${chain}' consisting of ${events.length} sequenced event(s). ` +
+    `Review the evidence timeline and classify the chain as a true positive or false positive ` +
+    `based only on the events rendered below.`;
+  const detailsMarkdown = `Evidence rendered from attack chain ${chain}:\n\n${chainEventLines(
+    events
+  ).join('\n')}`;
+
+  return {
+    title,
+    summaryMarkdown,
+    detailsMarkdown,
+    entitySummaryMarkdown: chainEntitySummary(events),
+    mitreAttackTactics: tacticsFromEvents(events),
+    alertIds: alertIdsFor(caseId),
+    timestamp: chainTimestamp(events),
+  };
+};
+
+/** BOTSv3 rule match event from `matched_events` (raw summary JSON string). */
+interface MatchedEvent {
+  timestamp?: string;
+  host?: string;
+  sourcetype?: string;
+  summary?: string;
+  es_index?: string;
+  es_id?: string;
+}
+
+/**
+ * botsv3-fp-alerts: `{ rule_name, rule_id, language, match_kind, matched_events, severity }`
+ * — a detection rule plus the benign events that matched it (false positives).
+ */
+const renderBotsv3FpPayload = (
+  caseId: string,
+  payload: {
+    rule_name?: string;
+    rule_id?: string;
+    language?: string;
+    match_kind?: string;
+    severity?: string;
+    matched_events?: unknown;
+  }
+): AdDocumentFields => {
+  const matches = (
+    Array.isArray(payload.matched_events) ? payload.matched_events : []
+  ) as MatchedEvent[];
+  const ruleName = typeof payload.rule_name === 'string' ? payload.rule_name : 'unknown rule';
+
+  const title = `Rule match: ${ruleName} (${matches.length} matched event(s))`;
+  const summaryMarkdown =
+    `Detection rule '${ruleName}' (id ${payload.rule_id ?? 'unknown'}, language ` +
+    `${payload.language ?? 'unknown'}, match kind ${payload.match_kind ?? 'unknown'}) matched ` +
+    `${matches.length} event(s). Classify whether the match is a true or false positive based ` +
+    `only on the matched events.`;
+  const detailLines = matches.slice(0, 20).map((m) => {
+    const parts = [m.timestamp, m.host ? `host ${m.host}` : undefined, m.sourcetype]
+      .filter(Boolean)
+      .join(' | ');
+    return `- ${parts || 'match'}: ${m.summary ? truncate(m.summary, 200) : '(no summary)'}`;
+  });
+  const detailsMarkdown = `Matched events for rule '${ruleName}':\n\n${
+    detailLines.length > 0 ? detailLines.join('\n') : '- (no matched events)'
+  }`;
+
+  const hosts = matches.map((m) => m.host).filter((h): h is string => typeof h === 'string');
+  const entitySummaryMarkdown =
+    hosts.length > 0 ? `Host {{ host.name ${hosts[0]} }} User {{ user.name unknown }}` : undefined;
+
+  return {
+    title,
+    summaryMarkdown,
+    detailsMarkdown,
+    entitySummaryMarkdown,
+    mitreAttackTactics: [],
+    alertIds: alertIdsFor(caseId),
+    timestamp: matches.find((m) => typeof m.timestamp === 'string')?.timestamp,
+  };
+};
+
+/**
+ * cloud-fp-synthetic: a single flattened ECS cloud doc
+ * (`azure.activitylogs` snapshot ops etc., `labels.benign: true`).
+ */
+/** Flattens the single-ECS cloud doc into scalar display fields. */
+const flattenCloudFields = (p: Record<string, unknown>) => {
+  const timestamp = typeof p['@timestamp'] === 'string' ? p['@timestamp'] : undefined;
+  const event = (p.event ?? {}) as { action?: string; dataset?: string; outcome?: string };
+  const user = (p.user ?? {}) as { name?: string; id?: string };
+  const cloud = (p.cloud ?? {}) as { provider?: string; 'account.id'?: string };
+  const azure = (p.azure ?? {}) as {
+    activitylogs?: { operation_name?: string };
+    resource_id?: string;
+  };
+  const source = (p.source ?? {}) as { ip?: string };
+  return {
+    timestamp,
+    action: azure.activitylogs?.operation_name ?? event.action ?? 'unknown cloud operation',
+    outcome: event.outcome ?? 'unknown',
+    dataset: event.dataset ?? 'unknown',
+    provider: cloud.provider ?? 'unknown',
+    accountId: cloud['account.id'] ?? 'unknown',
+    resourceId: azure.resource_id ?? 'unknown',
+    userName: user.name ?? 'unknown',
+    userId: user.id ?? 'unknown',
+    sourceIp: source.ip ?? 'unknown',
+    eventCode: p.event_code ?? 'unknown',
+  };
+};
+
+const renderCloudFpPayload = (caseId: string, p: Record<string, unknown>): AdDocumentFields => {
+  const f = flattenCloudFields(p);
+
+  const title = `Cloud activity: ${f.action}`;
+  const summaryMarkdown =
+    `Cloud ${f.provider} activity in dataset ${f.dataset}: ` +
+    `'${f.action}' (outcome ${f.outcome}) by user ${f.userName} ` +
+    `on account ${f.accountId}. Classify whether this activity is a true ` +
+    `or false positive based only on the event fields.`;
+  const lines: string[] = [
+    `- Action: ${f.action}`,
+    `- Event code: ${String(f.eventCode)}`,
+    `- Outcome: ${f.outcome}`,
+    `- Dataset: ${f.dataset}`,
+    `- Cloud provider: ${f.provider}`,
+    `- Cloud account: ${f.accountId}`,
+    `- Resource: ${f.resourceId}`,
+    `- User: ${f.userName} (${f.userId})`,
+    `- Source IP: ${f.sourceIp}`,
+    `- Timestamp: ${f.timestamp ?? 'unknown'}`,
+  ];
+  const detailsMarkdown = `Evidence rendered from cloud event ${caseId}:\n\n${lines.join('\n')}`;
+
+  const entitySummaryMarkdown = `Host {{ host.name cloud }} User {{ user.name ${f.userName} }}`;
+
+  return {
+    title,
+    summaryMarkdown,
+    detailsMarkdown,
+    entitySummaryMarkdown,
+    mitreAttackTactics: [],
+    alertIds: alertIdsFor(caseId),
+    timestamp: f.timestamp,
+  };
+};
+
+/**
+ * botsv3-benign-day: window metadata only — NO events (`{ window_start_utc,
+ * window_end_utc, dataset, capture_day, exclusion_spec }`). Rendered as an AD
+ * document whose evidence is an explicitly empty quiet window.
+ */
+const renderBenignWindowPayload = (
+  caseId: string,
+  payload: {
+    window_start_utc?: string;
+    window_end_utc?: string;
+    dataset?: string;
+    capture_day?: string;
+    exclusion_spec?: string;
+  }
+): AdDocumentFields => {
+  const start = payload.window_start_utc ?? 'unknown';
+  const end = payload.window_end_utc ?? 'unknown';
+
+  return {
+    title: `Benign window ${start} → ${end}`,
+    summaryMarkdown:
+      `Capture window ${start} to ${end} from dataset ${payload.dataset ?? 'unknown'} ` +
+      `(day ${payload.capture_day ?? 'unknown'}) recorded no suspicious activity. Classify ` +
+      `this window as a true or false positive based only on the (empty) evidence.`,
+    detailsMarkdown: `Evidence rendered from benign window ${caseId}:\n\n${[
+      `- Window start: ${start}`,
+      `- Window end: ${end}`,
+      `- Dataset: ${String(payload.dataset ?? 'unknown')}`,
+      `- Capture day: ${String(payload.capture_day ?? 'unknown')}`,
+      `- Exclusion spec: ${String(payload.exclusion_spec ?? 'unknown')}`,
+      '- Events: none recorded (the window is expected to be benign)',
+    ].join('\n')}`,
+    entitySummaryMarkdown: undefined,
+    mitreAttackTactics: [],
+    alertIds: alertIdsFor(caseId),
+    timestamp: typeof payload.window_start_utc === 'string' ? payload.window_start_utc : undefined,
+  };
+};
+
+const hasGuideShape = (payload: Record<string, unknown>): boolean =>
+  ['Category', 'DetectorNames', 'IncidentId', 'MitreTechniques'].some((k) => k in payload);
+
+/**
+ * Builds the CreateAttackDiscoveryAlertsParams' `attackDiscoveries` entry from
+ * a corpus case, dispatching on the corpus payload SHAPE (payloads vary per
+ * corpus family): flat GUIDE fields → GUIDE renderer; `events` list → chain
+ * renderer; `matched_events` list → BOTSv3 rule-match renderer; single ECS
+ * cloud doc → cloud renderer; window metadata only → benign-window renderer.
+ * The gold label / gold_rationale are NEVER rendered into the document — the
+ * workflow must classify from evidence alone.
+ */
+export const buildAttackDiscoveryFromPayload = (
+  caseId: string,
+  payload: Record<string, unknown>
+): AdDocumentFields => {
+  const p = payload ?? {};
+  if (Object.keys(p).length === 0) {
+    // Degenerate/empty payload (real corpora never ship one): render the GUIDE
+    // defaults rather than throwing, so a blank case still seeds.
+    return renderGuidePayload(caseId, p as CorpusEvidence);
+  }
+  if (hasGuideShape(p)) {
+    return renderGuidePayload(caseId, p as CorpusEvidence);
+  }
+  if (Array.isArray(p.events)) {
+    return renderChainPayload(caseId, p);
+  }
+  if (Array.isArray(p.matched_events)) {
+    return renderBotsv3FpPayload(caseId, p);
+  }
+  if ('@timestamp' in p || 'azure' in p || 'labels.benign' in p) {
+    return renderCloudFpPayload(caseId, p);
+  }
+  if ('window_start_utc' in p || 'capture_day' in p) {
+    return renderBenignWindowPayload(caseId, p);
+  }
+  throw new Error(
+    `case ${caseId}: payload matches no known corpus shape ` +
+      `(keys: ${Object.keys(p).slice(0, 12).join(', ')})`
+  );
 };
 
 // ---------------------------------------------------------------------------

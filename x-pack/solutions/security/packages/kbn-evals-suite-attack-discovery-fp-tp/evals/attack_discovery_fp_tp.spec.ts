@@ -94,11 +94,13 @@ evaluate.describe(
         await executorClient.runExperiment(
           {
             datasets: CORPUS_NAMES.map(corpusDataset),
-            task: async ({ metadata }: { metadata: unknown }) => {
-              const { caseId, payload } = metadata as {
-                caseId: string;
-                payload: Record<string, unknown>;
-              };
+            task: async (example: {
+              input: { caseId: string; payload: Record<string, unknown> };
+            }) => {
+              // ExperimentTask receives the full Example (kbn-evals `ExperimentTask`),
+              // so caseId/payload come from `example.input` — NOT `example.metadata`,
+              // which does not carry the payload (run8's crash source).
+              const { caseId, payload } = example.input;
               log.info(`Running attack-discovery workflow for case ${caseId}`);
               return runAttackDiscoveryWorkflow({ fetch, log, payload, caseId });
             },
