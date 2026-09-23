@@ -52,6 +52,14 @@ apiTest.describe('Automated resolution integration tests', { tag: ENTITY_STORE_T
     });
   });
 
+  apiTest.afterAll(async ({ apiClient }) => {
+    const enable = await apiClient.put(
+      ENTITY_STORE_ROUTES.public.RESOLUTION_RULES_ENABLE(RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH),
+      { headers: defaultHeaders, responseType: 'json' }
+    );
+    expect(enable.statusCode).toBe(200);
+  });
+
   apiTest(
     'Basic email matching — two entities with same email',
     async ({ apiClient, esClient }) => {

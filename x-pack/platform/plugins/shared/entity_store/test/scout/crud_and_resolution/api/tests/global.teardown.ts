@@ -6,11 +6,11 @@
  */
 
 import { globalTeardownHook } from '@kbn/scout';
-import { uninstallEntityStoreSuite } from '../../../common/fixtures/helpers';
+import { uninstallEntityStoreSuiteWithKbnClient } from '../../../common/fixtures/helpers';
 
 globalTeardownHook(
   'Uninstall Entity Store for CRUD and resolution API suite',
-  async ({ apiClient, esClient, kbnClient, samlAuth }) => {
-    await uninstallEntityStoreSuite({ apiClient, esClient, kbnClient, samlAuth });
+  async ({ esClient, kbnClient }) => {
+    await uninstallEntityStoreSuiteWithKbnClient({ esClient, kbnClient });
   }
 );
