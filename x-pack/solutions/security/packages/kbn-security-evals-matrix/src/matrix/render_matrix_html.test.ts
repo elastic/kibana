@@ -349,6 +349,7 @@ describe('renderMatrixHtml', () => {
     expect(safe).toContain('<a href="https://buildkite.com/build/1">build</a>');
 
     const unsafe = renderMatrixHtml(mockMatrix, mockConfig, {
+      // eslint-disable-next-line no-script-url
       buildUrl: 'javascript:alert(1)',
     });
     expect(unsafe).not.toContain('<a href="javascript:alert(1)">');
