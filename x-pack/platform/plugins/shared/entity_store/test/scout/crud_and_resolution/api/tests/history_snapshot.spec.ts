@@ -19,7 +19,6 @@ import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common';
 import {
   getHistorySnapshotIndexName,
   getLegacySecurityHistorySnapshotIndexName,
-  getLegacySecurityHistorySnapshotIndexPattern,
 } from '../../../../../server/domain/asset_manager/history_snapshot_index';
 import {
   clearEntityStoreIndices,
@@ -69,12 +68,6 @@ apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, ()
     });
     expect(response.statusCode).toBe(200);
     await clearEntityStoreIndices(esClient);
-    // clearEntityStoreIndices only covers the neutral history pattern; explicitly remove
-    // legacy security history indices so retention-test artifacts don't leak to later suites.
-    await esClient.indices.delete(
-      { index: getLegacySecurityHistorySnapshotIndexPattern('default'), ignore_unavailable: true },
-      { ignore: [404] }
-    );
     await teardownLogsTestDataStream(esClient);
   });
 
@@ -216,32 +209,45 @@ apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, ()
         utcDaysAgo(40, 0)
       );
 
-      // Skip-create (ignore 400) instead of delete-then-create: if an index already
-      // exists as a real snapshot, leave it — the retention assertions hold either way.
+      // Create only indices that don't already exist so we only clean up what we own.
+      const testIndices: string[] = [];
       await Promise.all(
-        [expiredIndex, withinRetentionIndex, recentIndex, expiredLegacyIndex].map((idx) =>
-          esClient.indices.create({ index: idx }, { ignore: [400] })
-        )
+        [expiredIndex, withinRetentionIndex, recentIndex, expiredLegacyIndex].map(async (idx) => {
+          try {
+            await esClient.indices.create({ index: idx });
+            testIndices.push(idx);
+          } catch {
+            // Already exists — not owned by this test, leave it alone.
+          }
+        })
       );
 
-      const snapshotResponse = await apiClient.post(
-        ENTITY_STORE_ROUTES.internal.FORCE_HISTORY_SNAPSHOT,
-        {
-          headers: internalHeaders,
-          responseType: 'json',
-          body: {},
-        }
-      );
-      expect(snapshotResponse.statusCode).toBe(200);
-      const body = snapshotResponse.body as { ok: boolean; historySnapshotIndex: string };
-      expect(body.ok).toBe(true);
-      expect(body.historySnapshotIndex).toBeDefined();
+      try {
+        const snapshotResponse = await apiClient.post(
+          ENTITY_STORE_ROUTES.internal.FORCE_HISTORY_SNAPSHOT,
+          {
+            headers: internalHeaders,
+            responseType: 'json',
+            body: {},
+          }
+        );
+        expect(snapshotResponse.statusCode).toBe(200);
+        const body = snapshotResponse.body as { ok: boolean; historySnapshotIndex: string };
+        expect(body.ok).toBe(true);
+        expect(body.historySnapshotIndex).toBeDefined();
 
-      expect(await esClient.indices.exists({ index: expiredIndex })).toBe(false);
-      expect(await esClient.indices.exists({ index: expiredLegacyIndex })).toBe(false);
-      expect(await esClient.indices.exists({ index: withinRetentionIndex })).toBe(true);
-      expect(await esClient.indices.exists({ index: recentIndex })).toBe(true);
-      expect(await esClient.indices.exists({ index: body.historySnapshotIndex })).toBe(true);
+        expect(await esClient.indices.exists({ index: expiredIndex })).toBe(false);
+        expect(await esClient.indices.exists({ index: expiredLegacyIndex })).toBe(false);
+        expect(await esClient.indices.exists({ index: withinRetentionIndex })).toBe(true);
+        expect(await esClient.indices.exists({ index: recentIndex })).toBe(true);
+        expect(await esClient.indices.exists({ index: body.historySnapshotIndex })).toBe(true);
+      } finally {
+        await Promise.all(
+          testIndices.map((idx) =>
+            esClient.indices.delete({ index: idx, ignore_unavailable: true }, { ignore: [404] })
+          )
+        );
+      }
     }
   );
 });
