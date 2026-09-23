@@ -420,9 +420,8 @@ unique to this attempt. In the templates the indicator is built in a single `dat
 tag goes on that step's `ki.tags` list — the one place all of them read from — not on
 `context-engine.createKi`, which takes the assembled document rather than building it.
 
-That tag is the only handle you will have on what the pilot wrote: on a data-stream destination
-`createKi` refuses `ki_id` and Elasticsearch generates the ids, so there is nothing else to find
-them by.
+That tag is the only handle you will have on what the pilot wrote: when `ki_id` is omitted the
+step generates the ids, so there is nothing else to find them by.
 
 Bound the run to a handful of documents while you are iterating. The templates put that bound in
 `consts` — `max_entities`, `max_documents`, `corpus_filter` — so it is one edit to narrow and one
@@ -438,10 +437,10 @@ the tag back with `platform.context_engine.query_ai_indices`, which applies spac
 server-side (never read an AI Index with `platform.core.execute_esql`):
 
 ```esql
-FROM <destination> METADATA _id
+FROM <destination>
 | MV_EXPAND tags
 | WHERE tags == "ce-pilot-<runId>"
-| KEEP _id, title, type, content, attributes
+| KEEP id, title, type, content, attributes
 | LIMIT 100
 ```
 
@@ -464,12 +463,13 @@ query, the reason and the mapping. Fix and run again, within your attempt budget
 
 **Clean up before you return.** The pilot wrote into the user's real index, so the tagged indicators
 are yours to remove and cleanup is not optional — a skipped one leaves junk that nobody else will
-know to look for. Run a second inline workflow: an `elasticsearch.esql.query` selecting `_id` for the
-tag as above, then a `foreach` over the results calling `context-engine.deleteKi` with `ki_id` set to
-each `_id`. Confirm through the view, `FROM v-ai-index-<ai_index_id> | MV_EXPAND tags | WHERE tags
-== "ce-pilot-<runId>" | LIMIT 1`, which returns nothing once the cleanup has run; on a data stream
-the backing store still holds the revisions marked deleted. Do this for every `runId` you used, not
-only the last.
+know to look for. Run a second inline workflow: an `elasticsearch.esql.query` for the tag as above
+ending in `STATS BY id` (a data stream holds one revision per write, so the same `id` can repeat),
+then a `foreach` over the results calling `context-engine.deleteKi` with `ki_id` set to each `id`.
+`deleteKi` resolves `ki_id` against the `id` field, never Elasticsearch's `_id`. Confirm through
+the view, `FROM v-ai-index-<ai_index_id> | MV_EXPAND tags | WHERE tags == "ce-pilot-<runId>" |
+LIMIT 1`, which returns nothing once the cleanup has run; on a data stream the backing store still
+holds the revisions marked deleted. Do this for every `runId` you used, not only the last.
 
 **Strip the tag, then hand it back.** Remove the `ce-pilot-*` tag from the indicator's `tags` and
 widen the `consts` bounds back to what the brief specified — the pilot's narrow filter is not the

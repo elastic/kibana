@@ -337,8 +337,8 @@ describe('aiIndexAutomationsSkill', () => {
       expect(content).toMatch(/cleanup is not optional/);
     });
 
-    it('notes that a data stream leaves the tag as the only handle on pilot output', () => {
-      expect(content).toMatch(/createKi` refuses `ki_id`/);
+    it('notes that generated ids leave the tag as the only handle on pilot output', () => {
+      expect(content).toMatch(/when `ki_id` is omitted the\s+step generates the ids/);
     });
 
     it('puts the pilot tag where the templates build the indicator, not on the write step', () => {
@@ -384,8 +384,8 @@ describe('aiIndexAutomationsSkill', () => {
     });
 
     it('states the createKi id rules that make a re-run idempotent', () => {
-      expect(content).toMatch(/Passing the same `ki_id` again replaces the indicator/);
-      expect(content).toMatch(/On a data-stream destination `ki_id` is rejected/);
+      expect(content).toMatch(/Passing the same `ki_id` again is what makes a re-run idempotent/);
+      expect(content).toMatch(/on a data stream it appends a new revision/);
     });
 
     it('bounds what a KI attribute can hold, since indicators carry ES|QL in one', () => {
@@ -394,8 +394,8 @@ describe('aiIndexAutomationsSkill', () => {
     });
 
     it('says why updateKi is not interchangeable with createKi', () => {
-      expect(content).toMatch(/It fails when the indicator does not\s+exist/);
-      expect(content).toMatch(/not a substitute\s+for `createKi`/);
+      expect(content).toMatch(/It fails when the indicator does not exist, or is deleted unless/);
+      expect(content).toMatch(/not a substitute for\s+`createKi`/);
     });
 
     it('names the check validation does not cover, since a valid draft can still match nothing', () => {
