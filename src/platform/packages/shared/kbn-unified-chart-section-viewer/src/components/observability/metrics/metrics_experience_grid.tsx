@@ -13,10 +13,6 @@ import { usePerformanceContext } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
 import useToggle from 'react-use/lib/useToggle';
 import { useFetchMetricsData } from './hooks/use_fetch_metrics_data';
-import {
-  useExemplarsAvailability,
-  type ExemplarsAvailabilityResult,
-} from './hooks/use_exemplars_availability';
 import { METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ } from '../../../common/constants';
 import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
 import { ChartsGrid } from '../../charts_grid';
@@ -77,13 +73,6 @@ export const MetricsExperienceGrid = ({
     isComponentVisible,
     selectedDimensionNames: selectedDimensions,
     profileId,
-  });
-
-  const exemplarsAvailability: ExemplarsAvailabilityResult = useExemplarsAvailability({
-    fetchParams,
-    services,
-    profileId,
-    metricItems,
   });
 
   const { filteredMetricItems } = useMetricFieldsFilter({
@@ -211,7 +200,6 @@ export const MetricsExperienceGrid = ({
           histogramCss={histogramCss}
           isDiscoverLoading={isDiscoverLoading}
           isTabSelected={isTabSelected}
-          exemplarsAvailability={exemplarsAvailability}
         />
       </ChartsGrid>
       {isGridSettingsFlyoutOpen && (

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { useAbortableAsync } from '@kbn/react-hooks';
 import { FEATURE_FLAG_DEFAULTS, FEATURE_FLAGS } from '../../../../common/constants';
@@ -17,47 +18,31 @@ import { useReportChartSectionError } from '../../../chart/hooks/use_report_char
 import { createExemplarsQuery } from '../../../../common/utils/esql/create_exemplars_query';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 import { MetricsExecutionContextName } from '../utils/execution_context_enums';
+import { probeExemplarsAvailability } from '../utils/probe_exemplars_availability';
 
-/**
- * Raw ES|QL response shape produced by `executeEsqlQuery`. Column names and row
- * values are used by the points renderer in kibana#289722 to draw exemplar diamonds.
- * When that PR merges, import `EsqlRawResponse` from there instead.
- */
-export interface ExemplarRawResponse {
-  columns: Array<{ name: string; type: string }>;
-  values: unknown[][];
-}
+export type ExemplarsResponse = Pick<ESQLSearchResponse, 'columns' | 'values'>;
 
 export interface UseFetchExemplarsParams {
   fetchParams: ChartSectionProps['fetchParams'];
   services: ChartSectionProps['services'];
   metricItem: ParsedMetricItem;
-  /** Populated by the grid-level probe; gates the fetch per-metric. */
-  availableMetrics: Set<string>;
   whereStatements?: string[];
   originalSource?: string;
   profileId: string;
 }
 
-const isEsqlRawResponse = (
-  r: object
-): r is { columns: Array<{ name: string; type: string }>; values: unknown[][] } =>
-  Array.isArray((r as Record<string, unknown>).columns) &&
-  Array.isArray((r as Record<string, unknown>).values);
-
 /**
- * Per-chart exemplar row fetch. Returns `undefined` while in-flight, when the
- * flag is off, or when the metric has no exemplars. Never throws.
+ * Fetches the exemplars for one metric chart. Returns `undefined` while in flight, when
+ * the flag is off, or when the metric has no exemplars. Never throws.
  */
 export const useFetchExemplars = ({
   fetchParams,
   services,
   metricItem,
-  availableMetrics,
   whereStatements,
   originalSource,
   profileId,
-}: UseFetchExemplarsParams): ExemplarRawResponse | undefined => {
+}: UseFetchExemplarsParams): ExemplarsResponse | undefined => {
   const isExemplarsEnabled = useFeatureFlag(
     FEATURE_FLAGS.IS_EXEMPLARS_ENABLED,
     FEATURE_FLAG_DEFAULTS[FEATURE_FLAGS.IS_EXEMPLARS_ENABLED]
@@ -71,14 +56,29 @@ export const useFetchExemplars = ({
     uiSettings,
   } = services;
 
-  const { value } = useAbortableAsync<ExemplarRawResponse | undefined>(
+  const { value } = useAbortableAsync<ExemplarsResponse | undefined>(
     async ({ signal }) => {
-      if (!isExemplarsEnabled || !dataView || !availableMetrics.has(metricItem.metricName)) {
+      if (!isExemplarsEnabled || !dataView) {
         return undefined;
       }
 
+      // Empty for non-OTel metrics, which can have no exemplars stream and so never probe.
       const esqlQuery = createExemplarsQuery({ metricItem, whereStatements, originalSource });
       if (!esqlQuery) {
+        return undefined;
+      }
+
+      const onError = (error: unknown) =>
+        reportError({ error, source: 'useFetchExemplars', labels: { profile_id: profileId } });
+
+      const metricsWithExemplars = await probeExemplarsAvailability({
+        search,
+        dataView,
+        uiSettings,
+        profileId,
+        onError,
+      });
+      if (signal.aborted || !metricsWithExemplars.has(metricItem.metricName)) {
         return undefined;
       }
 
@@ -94,25 +94,19 @@ export const useFetchExemplars = ({
           profileId,
           executionContextName: MetricsExecutionContextName.EXEMPLARS,
         });
-
-        if (!isEsqlRawResponse(rawResponse)) {
-          return undefined;
-        }
-
         return { columns: rawResponse.columns, values: rawResponse.values };
       } catch (error) {
-        if (isSuppressedFetchError(error)) {
-          return undefined;
+        if (!isSuppressedFetchError(error)) {
+          onError(error);
         }
-        reportError({ error, source: 'useFetchExemplars', labels: { profile_id: profileId } });
         return undefined;
       }
     },
-    // `availableMetrics` identity changes when the probe resolves, triggering the first fetch.
+    // `fetchParams.timeRange` and `filters` are rebuilt once per Discover fetch (see
+    // `processFetchParams` in kbn-unified-histogram), so this re-fires at the chart's cadence.
     [
       isExemplarsEnabled,
       dataView,
-      availableMetrics,
       metricItem,
       whereStatements,
       originalSource,

@@ -23,7 +23,6 @@ import { ES_FIELD_TYPES } from '@kbn/field-types';
 import * as metricsExperienceStateProvider from './context/metrics_experience_state_provider';
 import { getFetch$Mock, getFetchParamsMock } from '@kbn/unified-histogram/__mocks__/fetch_params';
 import type { MappingTimeSeriesMetricType } from '@elastic/elasticsearch/lib/api/types';
-import { LEGACY_HISTOGRAM_USER_MESSAGES } from '../../../common/utils/user_messages';
 
 jest.mock('./context/metrics_experience_state_provider');
 jest.mock('./hooks');
@@ -113,7 +112,6 @@ describe('MetricsExperienceGridContent', () => {
       },
       histogramCss: { name: '', styles: '' },
       isTabSelected: true,
-      exemplarsAvailability: { availableMetrics: new Set<string>() },
     };
 
     useMetricsExperienceStateMock.mockReturnValue({
@@ -254,50 +252,5 @@ describe('MetricsExperienceGridContent', () => {
       (MetricsGrid as jest.Mock).mock.calls.length - 1
     ][0];
     expect(lastCall.dimensions).toEqual([dimensions[0]]);
-  });
-
-  describe('getUserMessages', () => {
-    const legacyHistogramItem: ParsedMetricItem = {
-      metricName: 'latency',
-      indexName: 'metrics-*',
-      units: ['ms'],
-      metricTypes: ['histogram'],
-      fieldTypes: [ES_FIELD_TYPES.HISTOGRAM],
-      dimensionFields: [],
-    };
-
-    const renderAndGetUserMessages = (
-      exemplarsAvailability: MetricsExperienceGridContentProps['exemplarsAvailability']
-    ) => {
-      const { MetricsGrid } = jest.requireMock('./metrics_grid');
-      render(
-        <MetricsExperienceGridContent
-          {...defaultProps}
-          exemplarsAvailability={exemplarsAvailability}
-        />,
-        { wrapper: IntlProvider }
-      );
-      const lastCall = (MetricsGrid as jest.Mock).mock.calls[
-        (MetricsGrid as jest.Mock).mock.calls.length - 1
-      ][0];
-      return lastCall.getUserMessages as (item: ParsedMetricItem) => unknown;
-    };
-
-    it('returns no messages for a plain metric', () => {
-      const getUserMessages = renderAndGetUserMessages({
-        availableMetrics: new Set<string>(),
-      });
-
-      expect(getUserMessages(metricItems[0])).toBeUndefined();
-      expect(getUserMessages(metricItems[1])).toBeUndefined();
-    });
-
-    it('returns the legacy histogram warning for a legacy histogram metric', () => {
-      const getUserMessages = renderAndGetUserMessages({
-        availableMetrics: new Set<string>(),
-      });
-
-      expect(getUserMessages(legacyHistogramItem)).toBe(LEGACY_HISTOGRAM_USER_MESSAGES);
-    });
   });
 });
