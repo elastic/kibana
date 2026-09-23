@@ -7,19 +7,24 @@
 
 import { v4 as uuidV4 } from 'uuid';
 import type { ApiClientFixture, CookieHeader } from '@kbn/scout';
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { apiTest } from '../fixtures';
 import {
   COMMON_HEADERS,
   NO_CLAIM_OBSERVATION_MS,
   NUDGE_CLAIM_BUDGET_MS,
+  NUDGE_ROUNDS,
   ONE_HOUR_MS,
   RESCHEDULE_EVIDENCE_MS,
   TEST_TASK_TYPE,
 } from '../fixtures/constants';
 
-apiTest.describe('Task Manager claim nudge', { tag: tags.stateful.classic }, () => {
+/**
+ * Tagged local-only rather than with `tags.stateful.classic`, which also expands to the Cloud
+ * target. Scout only applies custom server config sets to local targets, so on Cloud this suite
+ * would run against defaults, where a 500ms poll interval meets the nudge budget on its own.
+ */
+apiTest.describe('Task Manager claim nudge', { tag: ['@local-stateful-classic'] }, () => {
   const taskIdsToCleanup: string[] = [];
 
   /** An hour out, so the only thing that can make it run during the test is a claim nudge. */
@@ -116,38 +121,67 @@ apiTest.describe('Task Manager claim nudge', { tag: tags.stateful.classic }, () 
     await runSoon(apiClient, cookieHeader, taskId);
   });
 
+  /**
+   * The negative control's task is still scheduled an hour out when this runs, so a silently
+   * failed delete leaks it. `delete()` resolves rather than throws on an error status, so the
+   * status has to be checked explicitly. Every task is still attempted before failing.
+   */
   apiTest.afterAll(async ({ apiClient, samlAuth }) => {
     const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
+    const failures: string[] = [];
+
     for (const taskId of taskIdsToCleanup) {
-      await apiClient
-        .delete(`internal/task_manager/tasks/${taskId}`, {
+      try {
+        const response = await apiClient.delete(`internal/task_manager/tasks/${taskId}`, {
           headers: { ...COMMON_HEADERS, ...cookieHeader },
-        })
-        .catch(() => {});
+        });
+
+        // 404 means the task already ran and Task Manager removed it, which is a clean outcome.
+        if (response.statusCode !== 200 && response.statusCode !== 404) {
+          failures.push(`${taskId}: HTTP ${response.statusCode}`);
+        }
+      } catch (err) {
+        failures.push(`${taskId}: ${err}`);
+      }
+    }
+
+    if (failures.length > 0) {
+      throw new Error(`Failed to delete scheduled tasks:\n${failures.join('\n')}`);
     }
   });
 
+  /**
+   * Measured over several rounds rather than once, because the poller's cadence is not synchronized
+   * to the test: the next regular cycle can happen to fall inside any single budget window. Since
+   * the poller runs at most one cycle per `poll_interval` and the whole loop is bounded well inside
+   * one, requiring every round to meet the budget leaves regular polling able to account for at most
+   * one of them.
+   */
   apiTest(
     'runSoon gets a task claimed well before the next poll cycle would',
     async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
-      const { taskId, runAt: originalRunAt } = await scheduleTaskDueInAnHour(
-        apiClient,
-        cookieHeader
-      );
 
-      const runSoonAt = Date.now();
-      await runSoon(apiClient, cookieHeader, taskId);
+      for (let round = 1; round <= NUDGE_ROUNDS; round++) {
+        const { taskId, runAt: originalRunAt } = await scheduleTaskDueInAnHour(
+          apiClient,
+          cookieHeader
+        );
 
-      await expect
-        .poll(
-          () => wasClaimedSince(apiClient, cookieHeader, taskId, { originalRunAt, runSoonAt }),
-          {
-            timeout: NUDGE_CLAIM_BUDGET_MS,
-            intervals: [100],
-          }
-        )
-        .toBe(true);
+        const runSoonAt = Date.now();
+        await runSoon(apiClient, cookieHeader, taskId);
+
+        await expect
+          .poll(
+            () => wasClaimedSince(apiClient, cookieHeader, taskId, { originalRunAt, runSoonAt }),
+            {
+              timeout: NUDGE_CLAIM_BUDGET_MS,
+              intervals: [100],
+              message: `task was not claimed within the nudge budget (round ${round} of ${NUDGE_ROUNDS})`,
+            }
+          )
+          .toBe(true);
+      }
     }
   );
 
@@ -157,8 +191,9 @@ apiTest.describe('Task Manager claim nudge', { tag: tags.stateful.classic }, () 
       const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
       const { taskId, runAt } = await scheduleTaskDueInAnHour(apiClient, cookieHeader);
 
-      // The negative control for the test above: nothing claims the task within the same window,
-      // so meeting the nudge budget there can only be the nudge and not a regular poll cycle.
+      // Shows a task this far out is never claimed on its own, so the test above is measuring one
+      // that only a nudge could bring forward. That test establishes attribution through its round
+      // count, not through this one, which runs at a different point in the poller's cadence.
       await new Promise((resolve) => setTimeout(resolve, NO_CLAIM_OBSERVATION_MS));
 
       const response = await getTask(apiClient, cookieHeader, taskId);

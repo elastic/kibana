@@ -17,8 +17,15 @@ export const COMMON_HEADERS = {
 export const TEST_TASK_TYPE = 'task_manager:invalidate_api_keys';
 
 // Absorbs CI jitter while staying far below the 60s `poll_interval` in the
-// `task_manager_claim_nudge` Scout config, so only a nudge can meet it.
+// `task_manager_claim_nudge` Scout config. A regular poll cycle can still happen to land inside a
+// single budget window, which is why the positive test measures NUDGE_ROUNDS of them.
 export const NUDGE_CLAIM_BUDGET_MS = 5_000;
+
+// How many nudges the positive test measures. The poller runs at most one regular cycle per
+// `poll_interval`, so while `NUDGE_ROUNDS * NUDGE_CLAIM_BUDGET_MS` stays well inside that interval,
+// at most one round can be explained by regular polling and the rest can only be the nudge. This is
+// what makes the test independent of where it happens to fall in the poller's cadence.
+export const NUDGE_ROUNDS = 3;
 
 // How long the negative control waits to show nothing claims the task on its own. Separate from the
 // budget above so tuning one for CI jitter cannot silently weaken the other.

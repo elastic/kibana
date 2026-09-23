@@ -1,5 +1,5 @@
 {
-  "sha1": "1d6df52263c3105263b21f2164c20e19c7869a53",
+  "sha1": "e18ca45ae20409a5be7daee3e476086758c6b65b",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -10,13 +10,12 @@
       "title": "Task Manager claim nudge runSoon gets a task claimed well before the next poll cycle would",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/task_manager/test/scout_task_manager_claim_nudge/api/tests/claim_nudge.spec.ts",
-        "line": 110,
-        "column": 1
+        "line": 129,
+        "column": 40
       }
     },
     {
@@ -24,13 +23,12 @@
       "title": "Task Manager claim nudge a task due in an hour is left untouched without a runSoon",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/task_manager/test/scout_task_manager_claim_nudge/api/tests/claim_nudge.spec.ts",
-        "line": 119,
-        "column": 11
+        "line": 142,
+        "column": 9
       }
     }
   ]
