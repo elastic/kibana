@@ -43,10 +43,8 @@ const failedDocTooltip = (
 // eslint-disable-next-line import/no-default-export
 export default function QualitySummaryCards({
   selectedCard,
-  setSelectedCard,
 }: {
   selectedCard: 'degraded' | 'failed';
-  setSelectedCard: React.Dispatch<React.SetStateAction<'degraded' | 'failed'>>;
 }) {
   const {
     totalDocsCount,
@@ -62,6 +60,7 @@ export default function QualitySummaryCards({
   const {
     loadingState: { dataStreamSettingsLoading, dataStreamDetailsLoading },
   } = useDatasetQualityDetailsState();
+  const isLoading = dataStreamSettingsLoading || dataStreamDetailsLoading;
 
   const {
     openModal,
@@ -74,7 +73,7 @@ export default function QualitySummaryCards({
     <EuiFlexGroup gutterSize="m" direction="column" style={{ height: '100%' }}>
       <EuiFlexItem grow={true}>
         <Card
-          isDisabled={false}
+          isDisabled={isLoading}
           isSelected={selectedCard === 'degraded'}
           title={overviewPanelDatasetQualityIndicatorDegradedDocs}
           titleTooltipContent={degradedDocTooltip}
@@ -105,18 +104,15 @@ export default function QualitySummaryCards({
           }
           onClick={() => {
             handleDocsTrendChartChange('degraded');
-            setSelectedCard('degraded');
           }}
-          isLoading={dataStreamSettingsLoading || dataStreamDetailsLoading}
+          isLoading={isLoading}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={true}>
-        {dataStreamSettingsLoading ||
-        dataStreamDetailsLoading ||
-        (hasFailureStore && canUserReadFailureStore) ? (
+        {isLoading || (hasFailureStore && canUserReadFailureStore) ? (
           <Card
-            isLoading={dataStreamSettingsLoading || dataStreamDetailsLoading}
-            isDisabled={false}
+            isLoading={isLoading}
+            isDisabled={isLoading}
             isSelected={selectedCard === 'failed'}
             title={overviewPanelDatasetQualityIndicatorFailedDocs}
             titleTooltipContent={failedDocTooltip}
@@ -147,7 +143,6 @@ export default function QualitySummaryCards({
             }
             onClick={() => {
               handleDocsTrendChartChange('failed');
-              setSelectedCard('failed');
             }}
           />
         ) : (
