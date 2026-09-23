@@ -157,8 +157,11 @@ export class DatastreamInitializer implements IResourceInitializer {
         }
       }
       return false;
-    } catch {
-      // Can't confirm legacy mapping — err on the side of not wiping.
+    } catch (error) {
+      this.logger.warn(
+        `[alerting_v2] Could not read mapping for ${dataStreamName}; skipping episode→alert wipe. ` +
+          `Trigger POST /internal/alerting/v2/_reset_data_streams if rule-events data looks stale: ${error.message}`
+      );
       return false;
     }
   }

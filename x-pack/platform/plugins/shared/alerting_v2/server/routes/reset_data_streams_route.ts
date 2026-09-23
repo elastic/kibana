@@ -18,13 +18,13 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { ReservedPrivilegesSet } from '@kbn/core/server';
 import type { RouteSecurity } from '@kbn/core-http-server';
 import { Logger as CoreLogger } from '@kbn/core-di';
 import { isResponseError } from '@kbn/es-errors';
 import { inject, injectable } from 'inversify';
 
-import { ALERTING_V2_API_PRIVILEGES } from '../lib/security/privileges';
-import { EsServiceScopedToken } from '../lib/services/es_service/tokens';
+import { EsServiceInternalToken } from '../lib/services/es_service/tokens';
 import { DatastreamInitializer } from '../lib/services/resource_service/datastream_initializer';
 import { getDataStreamResourceDefinitions } from '../resources/datastreams/register';
 import type { ResourceDefinition } from '../resources/datastreams/types';
@@ -39,11 +39,7 @@ export class ResetDataStreamsRoute extends BaseAlertingRoute {
   static path = RESET_DATA_STREAMS_API_PATH;
   static security: RouteSecurity = {
     authz: {
-      requiredPrivileges: [
-        ALERTING_V2_API_PRIVILEGES.rules.write,
-        ALERTING_V2_API_PRIVILEGES.alerts.write,
-        ALERTING_V2_API_PRIVILEGES.actionPolicies.write,
-      ],
+      requiredPrivileges: [ReservedPrivilegesSet.superuser],
     },
   };
   static routeOptions = {
@@ -51,20 +47,19 @@ export class ResetDataStreamsRoute extends BaseAlertingRoute {
     summary: 'Reset alerting v2 data streams (wipe and reinstall index templates)',
   } as const;
 
-  static validate = {
-    request: {},
+  protected static schemas = {
     response: {
       204: {
         description: 'Data streams were reset successfully.',
       },
     },
-  } as const;
+  };
 
   protected readonly routeName = 'reset alerting v2 data streams';
 
   constructor(
     @inject(AlertingRouteContext) ctx: AlertingRouteContext,
-    @inject(EsServiceScopedToken) private readonly esClient: ElasticsearchClient,
+    @inject(EsServiceInternalToken) private readonly esClient: ElasticsearchClient,
     @inject(CoreLogger) private readonly coreLogger: Logger
   ) {
     super(ctx);
