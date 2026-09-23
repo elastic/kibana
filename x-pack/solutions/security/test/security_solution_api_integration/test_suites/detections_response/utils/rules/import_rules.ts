@@ -15,6 +15,7 @@ interface ImportRulesParams {
   getService: FtrProviderContext['getService'];
   rules: unknown[];
   overwrite: boolean;
+  overwriteExceptions?: boolean;
   spaceId?: string;
 }
 
@@ -22,13 +23,23 @@ export async function importRules({
   getService,
   rules,
   overwrite,
+  overwriteExceptions,
   spaceId,
 }: ImportRulesParams): Promise<ImportRulesResponse> {
   const detectionsApi = getService('detectionsApi');
   const buffer = Buffer.from(combineArrayToNdJson(rules));
 
   const { body: importResponse } = await detectionsApi
-    .importRules({ query: { overwrite, overwrite_action_connectors: overwrite } }, spaceId)
+    .importRules(
+      {
+        query: {
+          overwrite,
+          overwrite_action_connectors: overwrite,
+          overwrite_exceptions: overwriteExceptions,
+        },
+      },
+      spaceId
+    )
     .attach('file', buffer, 'rules.ndjson')
     .expect('Content-Type', 'application/json; charset=utf-8')
     .expect(200);

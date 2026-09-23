@@ -20,7 +20,7 @@ import {
   ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW_ID,
   ALERTZERO_RULE_TUNING_WORKER_WORKFLOW_ID,
   ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID,
-  CREATE_INVESTIGATION_PROPOSAL_WORKFLOW_ID,
+  CREATE_PROPOSAL_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import { projectSkillsFromDefinition } from '../services/utils';
 import { workerRegistry } from './worker_registry';
@@ -198,8 +198,7 @@ describe('detection rule workflows', () => {
 
       const proposals = all.filter(
         ({ type, with: input }) =>
-          type === 'workflow.execute' &&
-          input?.['workflow-id'] === CREATE_INVESTIGATION_PROPOSAL_WORKFLOW_ID
+          type === 'workflow.execute' && input?.['workflow-id'] === CREATE_PROPOSAL_WORKFLOW_ID
       );
       expect(proposals.map(({ name }) => name)).toEqual([
         'propose_entry',
@@ -314,7 +313,7 @@ describe('detection rule workflows', () => {
       // the gate's 72h default. A gate that starts asking for its own deadline
       // has to be checked against the ceiling here.
       const proposals = (review.steps as Array<Record<string, any>>).filter(
-        (step) => step.with?.['workflow-id'] === CREATE_INVESTIGATION_PROPOSAL_WORKFLOW_ID
+        (step) => step.with?.['workflow-id'] === CREATE_PROPOSAL_WORKFLOW_ID
       );
       expect(proposals.length).toBeGreaterThan(0);
       for (const proposal of proposals) {
