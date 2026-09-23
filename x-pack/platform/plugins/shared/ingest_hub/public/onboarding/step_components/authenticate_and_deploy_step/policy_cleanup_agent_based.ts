@@ -50,7 +50,7 @@ export async function cleanupAgentBasedPolicies(
         .catch((err) => {
           // eslint-disable-next-line no-console
           console.error(
-            `[ingest_hub] Failed to delete agent-based package policy ${policyId}:`,
+            `Failed to delete agent-based package policy ${policyId}:`,
             err
           );
         })
@@ -63,7 +63,7 @@ export async function cleanupAgentBasedPolicies(
         .catch((err) => {
           // eslint-disable-next-line no-console
           console.error(
-            `[ingest_hub] Failed to update agent-based package policy ${policyId}:`,
+            `Failed to update agent-based package policy ${policyId}:`,
             err
           );
         })
@@ -106,7 +106,7 @@ async function updateAgentBasedPolicy(
     existingVersion = existing.data?.item?.package?.version;
   } catch {
     throw new Error(
-      `[ingest_hub] Cannot safely update agent-based policy ${policyId}: failed to fetch existing metadata.`
+      `Cannot safely update agent-based policy ${policyId}: failed to fetch existing metadata.`
     );
   }
 

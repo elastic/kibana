@@ -46,7 +46,7 @@ export async function cleanupManagedIntegrationsPolicies(
         .catch((err) => {
           // eslint-disable-next-line no-console
           console.error(
-            `[ingest_hub] Failed to delete managed-integrations policy ${policyId}:`,
+            `Failed to delete managed-integrations policy ${policyId}:`,
             err
           );
         })
@@ -59,7 +59,7 @@ export async function cleanupManagedIntegrationsPolicies(
         .catch((err) => {
           // eslint-disable-next-line no-console
           console.error(
-            `[ingest_hub] Failed to update managed-integrations policy ${policyId}:`,
+            `Failed to update managed-integrations policy ${policyId}:`,
             err
           );
         })
@@ -98,7 +98,7 @@ async function updateManagedIntegrationsPolicy(
     existingVersion = existing.item?.package?.version;
   } catch {
     throw new Error(
-      `[ingest_hub] Cannot safely update managed-integration policy ${policyId}: failed to fetch existing metadata.`
+      `Cannot safely update managed-integration policy ${policyId}: failed to fetch existing metadata.`
     );
   }
 
