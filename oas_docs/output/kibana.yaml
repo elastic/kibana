@@ -45431,11 +45431,30 @@ paths:
                       - templateVersion
                   maxItems: 10
                   type: array
+                mechanisms:
+                  description: Delivery mechanisms active in this deployment; replaces the stored array.
+                  items:
+                    description: 'Delivery mechanism: managed_integration, ecf, or agent_based.'
+                    enum:
+                      - managed_integration
+                      - ecf
+                      - agent_based
+                    type: string
+                  maxItems: 10
+                  type: array
                 packagePolicyIds:
                   items:
                     maxLength: 255
                     type: string
                   maxItems: 100
+                  type: array
+                services:
+                  description: Updated service list; replaces the stored services array.
+                  items:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  maxItems: 1000
                   type: array
                 serviceVars:
                   additionalProperties:
