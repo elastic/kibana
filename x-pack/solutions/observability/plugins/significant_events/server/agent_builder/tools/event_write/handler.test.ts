@@ -1265,14 +1265,13 @@ describe('eventsWriteBulkHandler — dual-write to .rule-events (Writer 1)', () 
   it('waits for and logs a rejected createAlertEvent without failing the significant event write', async () => {
     const eventClient = makeEventClient();
     let rejectAlertEvent: ((reason?: unknown) => void) | undefined;
-    const alertEventsClient = makeAlertEventsClient({
-      createAlertEvent: jest.fn(
-        () =>
-          new Promise<void>((_resolve, reject) => {
-            rejectAlertEvent = reject;
-          })
-      ),
-    });
+    const alertEventsClient = makeAlertEventsClient();
+    alertEventsClient.createAlertEvent.mockImplementation(
+      () =>
+        new Promise((_, reject) => {
+          rejectAlertEvent = reject;
+        })
+    );
     const logger = makeLogger();
 
     const handlerPromise = eventsWriteBulkHandler({
