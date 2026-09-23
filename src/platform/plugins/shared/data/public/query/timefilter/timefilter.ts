@@ -132,25 +132,18 @@ export class Timefilter {
     return getAbsoluteTimeRange(this._time, { forceNow: this.nowProvider.get() });
   }
 
-  /**
-   * Updates timefilter time.
-   * Emits 'timeUpdate' and 'fetch' events when time changes
-   * @param {Object} time
-   * @property {string|moment} time.from
-   * @property {string|moment} time.to
-   */
+  /** Sets the time (moment input is stored as ISO strings) and emits when it changes. */
   public setTime = (time: Partial<InputTimeRange>) => {
     const current = this.getTime();
-    const nextMode = 'mode' in time ? time.mode : current.mode;
-    const newTime: TimeRange = {
-      from: moment.isMoment(time.from) ? time.from.toISOString() : time.from ?? current.from,
-      to: moment.isMoment(time.to) ? time.to.toISOString() : time.to ?? current.to,
-      ...(nextMode !== undefined ? { mode: nextMode } : {}),
-    };
-    if (areTimeRangesDifferent(current, newTime)) {
-      this._time = newTime;
+    const isMomentRange = moment.isMoment(time.from) && moment.isMoment(time.to);
+    const mode = time.mode ?? (isMomentRange ? 'absolute' : current.mode);
+    const from = moment.isMoment(time.from) ? time.from.toISOString() : time.from ?? current.from;
+    const to = moment.isMoment(time.to) ? time.to.toISOString() : time.to ?? current.to;
+    const timeRange: TimeRange = { from, to, ...(mode && { mode }) };
+    if (areTimeRangesDifferent(current, timeRange)) {
+      this._time = timeRange;
       this._isTimeTouched = true;
-      this._history.add(newTime);
+      this._history.add(timeRange);
       this.timeUpdate$.next();
       this.fetch$.next();
     }

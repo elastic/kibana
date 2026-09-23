@@ -23,6 +23,7 @@ export type InputTimeRange =
   | {
       from: Moment;
       to: Moment;
+      mode?: TimeRange['mode'];
     };
 
 export type { TimeRangeBounds } from '../../../common';

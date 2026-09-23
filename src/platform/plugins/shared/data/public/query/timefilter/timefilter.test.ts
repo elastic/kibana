@@ -117,7 +117,13 @@ describe('setTime', () => {
     expect(timefilter.getTime()).toEqual({
       from: from.toISOString(),
       to: to.toISOString(),
+      mode: 'absolute',
     });
+  });
+
+  test('should keep an explicit mode for moment input', () => {
+    timefilter.setTime({ from: moment(), to: moment(), mode: 'relative' });
+    expect(timefilter.getTime().mode).toBe('relative');
   });
 });
 

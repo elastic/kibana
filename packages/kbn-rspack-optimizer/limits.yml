@@ -7,13 +7,11 @@ pageLoadAssetSize:
   agentBuilderSml: 597
   agentBuilderVisualizations: 1551
   agentBuilderWorkflows: 1029
-  agenticInvestigations: 13459
   aiAssistantManagementSelection: 355
   aiops: 586
   alerting: 8789
-  alertingVTwo: 24358
-  alertzero: 17737
-  apm: 35746
+  alertingVTwo: 21472
+  apm: 31419
   apmShared: 1896
   apmSourcesAccess: 1174
   automaticImport: 13257
@@ -29,7 +27,7 @@ pageLoadAssetSize:
   cloudExperiments: 67356
   cloudFullStory: 1642
   cloudLinks: 21894
-  cloudSecurityPosture: 14802
+  cloudSecurityPosture: 12224
   console: 24516
   contentConnectors: 3166
   contentManagement: 6737
@@ -39,7 +37,7 @@ pageLoadAssetSize:
   core: 320
   cps: 6032
   crossClusterReplication: 7691
-  customContent: 3300
+  customContent: 2714
   customIntegrations: 636
   dashboard: 536
   dashboardMarkdown: 4012
@@ -55,7 +53,7 @@ pageLoadAssetSize:
   dataVisualizer: 7461
   developerToolbar: 1951
   devTools: 4281
-  discover: 19917
+  discover: 18086
   discoverEnhanced: 1359
   discoveries: 31528
   discoverShared: 1070
@@ -66,9 +64,8 @@ pageLoadAssetSize:
   embeddableAlertsTable: 1536
   enterpriseSearch: 28188
   entityStore: 2252
-  esql: 341
+  esql: 306
   esqlDataGrid: 215
-  esqlViews: 1205
   esUiShared: 2284
   evals: 4875
   eventAnnotation: 17278
@@ -89,7 +86,7 @@ pageLoadAssetSize:
   files: 3954
   filesManagement: 940
   fileUpload: 480
-  fleet: 7307
+  fleet: 6546
   genAiSettings: 1795
   globalSearch: 5447
   globalSearchBar: 21704
@@ -112,7 +109,7 @@ pageLoadAssetSize:
   interactiveSetup: 32694
   intercepts: 14374
   kibanaOverview: 1863
-  kibanaReact: 1618
+  kibanaReact: 1225
   kibanaUsageCollection: 529
   kibanaUtils: 2884
   kql: 337
@@ -137,8 +134,7 @@ pageLoadAssetSize:
   navigation: 332
   newsfeed: 10708
   nightshift: 2362
-  nightshiftInvestigations: 9405
-  nightshiftSources: 3928
+  nightshiftInvestigations: 1221
   noDataPage: 630
   notificationCenter: 600
   observability: 4071
@@ -146,12 +142,12 @@ pageLoadAssetSize:
   observabilityAIAssistant: 2236
   observabilityAIAssistantApp: 5918
   observabilityAiAssistantManagement: 2280
-  observabilityAlerting: 3500
   observabilityLogsExplorer: 1351
   observabilityOnboarding: 8873
   observabilityShared: 7496
   osquery: 13046
   painlessLab: 2550
+  pnd: 4489
   presentationUtil: 350
   productDocBase: 4218
   productIntercept: 4738
@@ -193,11 +189,11 @@ pageLoadAssetSize:
   sessionView: 647
   share: 379
   shared-core: 311749
-  shared-misc: 155260
+  shared-misc: 140291
   shared-packages: 5010040
   shared-plugins: 13536562
   shared-solution-packages: 347767
-  significantEvents: 3679
+  significantEvents: 3022
   significantEventsApp: 5212
   slo: 19531
   snapshotRestore: 16909
@@ -206,7 +202,7 @@ pageLoadAssetSize:
   stackConnectors: 63548
   streams: 4563
   streamsApp: 55882
-  synthetics: 20839
+  synthetics: 18443
   telemetry: 20586
   telemetryManagementSection: 1738
   timelines: 1409
