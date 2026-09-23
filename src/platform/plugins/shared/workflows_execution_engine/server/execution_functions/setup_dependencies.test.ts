@@ -411,6 +411,14 @@ describe('setupDependencies', () => {
     });
   });
 
+  /**
+   * Machine-checked invariant: the syncLogDrain supplied to setupDependencies must
+   * be forwarded to WorkflowEventLoggerService so that every per-execution logger
+   * routes its flushEvents calls to the drain instead of writing to ES inline.
+   *
+   * If someone removes the forwarding at the setupDependencies callsite, this test
+   * fails while all drain unit tests still pass — making the regression visible.
+   */
   describe('WorkflowEventLoggerService wiring', () => {
     beforeEach(() => {
       const mockScopedClient = {
@@ -422,7 +430,7 @@ describe('setupDependencies', () => {
       });
     });
 
-    it('calls WorkflowEventLoggerService with dataStreams, logger, and enableConsoleLogging', async () => {
+    it('calls WorkflowEventLoggerService with dataStreams, logger, enableConsoleLogging, and syncLogDrain', async () => {
       const mockFakeRequest = { headers: {} } as KibanaRequest;
 
       await setupDependencies({
@@ -437,7 +445,8 @@ describe('setupDependencies', () => {
       expect(WorkflowEventLoggerService).toHaveBeenCalledWith(
         mockDependencies.coreStart.dataStreams,
         mockLogger,
-        mockConfig.logging.console
+        mockConfig.logging.console,
+        undefined
       );
     });
   });
