@@ -52,7 +52,7 @@ import {
   createSandboxOutputRedactorProvider,
   withSandboxOutputRedaction,
 } from './tools/sandbox_bash/sandbox_output_redaction';
-import { createNightshiftEnabledAvailability } from './tools/sandbox_bash/sandbox_tool_availability';
+import { createSandboxToolAvailability } from './tools/sandbox_bash/sandbox_tool_availability';
 import {
   nightshiftInvestigationSavedObjectType,
   nightshiftSecretsEncryptionParams,
@@ -190,7 +190,9 @@ export class NightshiftInvestigationsPlugin
           }),
           logger: sandboxLogger.get('output_redaction'),
         };
-        const availability = createNightshiftEnabledAvailability(() => this.featureFlags);
+        const availability = createSandboxToolAvailability({
+          getDeps: () => ({ featureFlags: this.featureFlags, security: this.securityStart }),
+        });
         const { agentBuilder } = plugins;
         const registerSandboxTool = <TSchema extends ZodObject>(
           tool: BuiltinToolDefinition<TSchema>

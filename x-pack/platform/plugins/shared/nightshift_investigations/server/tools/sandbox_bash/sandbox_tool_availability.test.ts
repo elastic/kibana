@@ -6,34 +6,82 @@
  */
 
 import { coreMock, httpServerMock, uiSettingsServiceMock } from '@kbn/core/server/mocks';
-import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
-import { createNightshiftEnabledAvailability } from './sandbox_tool_availability';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import { NIGHTSHIFT_API_PRIVILEGES, NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
+import { createSandboxToolAvailability } from './sandbox_tool_availability';
 
-const context = {
-  request: httpServerMock.createKibanaRequest(),
-  uiSettings: uiSettingsServiceMock.createClient(),
-  spaceId: 'default',
+const setup = ({
+  enabled = true,
+  withSecurity = true,
+  useRbac = true,
+  hasManagePrivilege = true,
+}: {
+  enabled?: boolean;
+  withSecurity?: boolean;
+  useRbac?: boolean;
+  hasManagePrivilege?: boolean;
+} = {}) => {
+  const { featureFlags } = coreMock.createStart();
+  featureFlags.getBooleanValue.mockResolvedValue(enabled);
+  const checkPrivileges = jest.fn(async () => ({ hasAllRequested: hasManagePrivilege }));
+  const security = {
+    authz: {
+      mode: { useRbacForRequest: jest.fn(() => useRbac) },
+      checkPrivilegesDynamicallyWithRequest: jest.fn(() => checkPrivileges),
+      actions: { api: { get: (operation: string) => `api:${operation}` } },
+    },
+  } as unknown as SecurityPluginStart;
+
+  const { handler } = createSandboxToolAvailability({
+    getDeps: () => ({ featureFlags, security: withSecurity ? security : undefined }),
+  });
+  const check = () =>
+    handler({
+      request: httpServerMock.createKibanaRequest(),
+      uiSettings: uiSettingsServiceMock.createClient(),
+      spaceId: 'default',
+    });
+
+  return { check, featureFlags, checkPrivileges };
 };
 
-describe('createNightshiftEnabledAvailability', () => {
-  it.each([
-    [true, 'available'],
-    [false, 'unavailable'],
-  ])('reports the tool as %p → %s', async (enabled, status) => {
-    const { featureFlags } = coreMock.createStart();
-    featureFlags.getBooleanValue.mockResolvedValue(enabled);
+describe('createSandboxToolAvailability', () => {
+  it('is available with the flag on and the Nightshift manage privilege', async () => {
+    const { check, featureFlags, checkPrivileges } = setup();
 
-    const { handler } = createNightshiftEnabledAvailability(() => featureFlags);
-
-    await expect(handler(context)).resolves.toEqual(expect.objectContaining({ status }));
+    await expect(check()).resolves.toEqual({ status: 'available' });
     expect(featureFlags.getBooleanValue).toHaveBeenCalledWith(NIGHTSHIFT_ENABLED_FLAG, false);
+    expect(checkPrivileges).toHaveBeenCalledWith({
+      kibana: [`api:${NIGHTSHIFT_API_PRIVILEGES.manage}`],
+    });
   });
 
-  it('reports the tool as unavailable before start', async () => {
-    const { handler } = createNightshiftEnabledAvailability(() => undefined);
+  it('is unavailable while the flag is off', async () => {
+    const { check, checkPrivileges } = setup({ enabled: false });
 
-    await expect(handler(context)).resolves.toEqual(
-      expect.objectContaining({ status: 'unavailable' })
-    );
+    await expect(check()).resolves.toEqual(expect.objectContaining({ status: 'unavailable' }));
+    expect(checkPrivileges).not.toHaveBeenCalled();
+  });
+
+  it('is unavailable without the Nightshift manage privilege', async () => {
+    const { check } = setup({ hasManagePrivilege: false });
+
+    await expect(check()).resolves.toEqual({
+      status: 'unavailable',
+      reason: expect.stringContaining('manage privilege'),
+    });
+  });
+
+  it('is unavailable when the security plugin is missing', async () => {
+    const { check } = setup({ withSecurity: false });
+
+    await expect(check()).resolves.toEqual(expect.objectContaining({ status: 'unavailable' }));
+  });
+
+  it('skips the privilege check when RBAC does not apply to the request', async () => {
+    const { check, checkPrivileges } = setup({ useRbac: false, hasManagePrivilege: false });
+
+    await expect(check()).resolves.toEqual({ status: 'available' });
+    expect(checkPrivileges).not.toHaveBeenCalled();
   });
 });
