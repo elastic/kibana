@@ -35,43 +35,52 @@ const TTL_MS = 168 * 60 * 60 * 1000; // 7 days
 
 export type EisCacheStatus = 'fresh' | 'expired' | 'missing' | 'malformed';
 
-export const getEisCacheStatus = (cachePath: string = CACHE_PATH): EisCacheStatus => {
+const isPlainObject = (value: unknown): value is Record<string, object> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const parseCachedEntry = (cachePath: string): CachedEisConnectors | undefined => {
   try {
-    if (!fs.existsSync(cachePath)) {
-      return 'missing';
-    }
-
     const raw = fs.readFileSync(cachePath, 'utf-8');
-    const cached: CachedEisConnectors = JSON.parse(raw);
-
-    if (!cached.connectors || !cached.fetched_at_ms) {
-      return 'malformed';
+    const cached: unknown = JSON.parse(raw);
+    if (
+      !isPlainObject(cached) ||
+      !isPlainObject(cached.connectors) ||
+      typeof cached.fetched_at_ms !== 'number' ||
+      !Number.isFinite(cached.fetched_at_ms)
+    ) {
+      return undefined;
     }
-
-    if (Date.now() - cached.fetched_at_ms > TTL_MS) {
-      return 'expired';
-    }
-
-    return 'fresh';
+    return cached as CachedEisConnectors;
   } catch {
+    return undefined;
+  }
+};
+
+export const getEisCacheStatus = (cachePath: string = CACHE_PATH): EisCacheStatus => {
+  if (!fs.existsSync(cachePath)) {
+    return 'missing';
+  }
+
+  const cached = parseCachedEntry(cachePath);
+  if (!cached) {
     return 'malformed';
   }
+
+  if (Date.now() - cached.fetched_at_ms > TTL_MS) {
+    return 'expired';
+  }
+
+  return 'fresh';
 };
 
 export const readCachedEisConnectors = (
   cachePath: string = CACHE_PATH
 ): Record<string, object> | undefined => {
-  if (getEisCacheStatus(cachePath) !== 'fresh') {
+  const cached = parseCachedEntry(cachePath);
+  if (!cached || Date.now() - cached.fetched_at_ms > TTL_MS) {
     return undefined;
   }
-
-  try {
-    const raw = fs.readFileSync(cachePath, 'utf-8');
-    const cached: CachedEisConnectors = JSON.parse(raw);
-    return cached.connectors;
-  } catch {
-    return undefined;
-  }
+  return cached.connectors;
 };
 
 export const writeCachedEisConnectors = (connectors: Record<string, object>): void => {

@@ -58,6 +58,31 @@ describe('eis_connectors_cache', () => {
       writeCache({ fetched_at_ms: NOW });
       expect(getEisCacheStatus(cachePath)).toBe('malformed');
     });
+
+    it('returns malformed when runtime field types are wrong', () => {
+      // valid JSON, but fetched_at_ms is a string: Date.now() - 'not-a-number' is NaN,
+      // which silently passes the TTL comparison if only truthiness is checked
+      writeCache({ connectors: [], fetched_at_ms: 'not-a-number' });
+      expect(getEisCacheStatus(cachePath)).toBe('malformed');
+
+      writeCache({ connectors: { 'eis-x': {} }, fetched_at_ms: String(NOW) });
+      expect(getEisCacheStatus(cachePath)).toBe('malformed');
+
+      // connectors must be a plain object, not an array or scalar
+      writeCache({ connectors: [], fetched_at_ms: NOW });
+      expect(getEisCacheStatus(cachePath)).toBe('malformed');
+
+      writeCache({ connectors: 'nope', fetched_at_ms: NOW });
+      expect(getEisCacheStatus(cachePath)).toBe('malformed');
+
+      // top level must be an object
+      writeCache([freshPayload()]);
+      expect(getEisCacheStatus(cachePath)).toBe('malformed');
+
+      // non-finite numbers (JSON.stringify of NaN becomes null) must not pass
+      writeCache({ connectors: { 'eis-x': {} }, fetched_at_ms: null });
+      expect(getEisCacheStatus(cachePath)).toBe('malformed');
+    });
   });
 
   describe('readCachedEisConnectors', () => {
@@ -68,6 +93,11 @@ describe('eis_connectors_cache', () => {
       expect(readCachedEisConnectors(cachePath)).toEqual({ 'eis-x': { inferenceId: 'x' } });
 
       writeCache({ ...freshPayload(), fetched_at_ms: NOW - TTL_MS - 1 });
+      expect(readCachedEisConnectors(cachePath)).toBeUndefined();
+    });
+
+    it('returns undefined when runtime field types are wrong', () => {
+      writeCache({ connectors: [], fetched_at_ms: 'not-a-number' });
       expect(readCachedEisConnectors(cachePath)).toBeUndefined();
     });
   });
