@@ -22037,7 +22037,36 @@ paths:
                 response409:
                   $ref: '#/components/examples/Cases_response_409'
               schema:
-                $ref: '#/components/schemas/Cases_response_4xx'
+                oneOf:
+                  - description: Identity-immutable conflict — name or type was changed.
+                    properties:
+                      attributes:
+                        properties:
+                          changed:
+                            items:
+                              type: string
+                            type: array
+                          code:
+                            enum:
+                              - field_identity_immutable
+                            type: string
+                        required:
+                          - code
+                          - changed
+                        type: object
+                      error:
+                        type: string
+                      message:
+                        type: string
+                      statusCode:
+                        type: integer
+                    required:
+                      - statusCode
+                      - error
+                      - message
+                      - attributes
+                    type: object
+                  - $ref: '#/components/schemas/Cases_response_4xx'
           description: |
             A field's name or type cannot be changed after creation, or a global field cannot be demoted while linked to an active custom field.
       summary: Update editable attributes of a reusable field definition

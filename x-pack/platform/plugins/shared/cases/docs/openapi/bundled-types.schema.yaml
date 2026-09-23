@@ -1443,7 +1443,36 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/response_4xx'
+                oneOf:
+                  - description: Identity-immutable conflict — name or type was changed.
+                    type: object
+                    required:
+                      - statusCode
+                      - error
+                      - message
+                      - attributes
+                    properties:
+                      statusCode:
+                        type: integer
+                      error:
+                        type: string
+                      message:
+                        type: string
+                      attributes:
+                        type: object
+                        required:
+                          - code
+                          - changed
+                        properties:
+                          code:
+                            type: string
+                            enum:
+                              - field_identity_immutable
+                          changed:
+                            type: array
+                            items:
+                              type: string
+                  - $ref: '#/components/schemas/response_4xx'
               examples:
                 response409:
                   $ref: '#/components/examples/response_409'

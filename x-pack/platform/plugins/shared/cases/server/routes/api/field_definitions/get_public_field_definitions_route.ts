@@ -36,8 +36,21 @@ export const getPublicFieldDefinitionsRoute = createCasesRoute({
         schema.string({ maxLength: 50 }),
       ]),
       isGlobal: schema.maybe(schema.boolean()),
-      page: schema.number({ defaultValue: 1, min: 1 }),
-      perPage: schema.number({ defaultValue: 20, min: 1, max: 100 }),
+      page: schema.number({
+        defaultValue: 1,
+        min: 1,
+        validate: (v) => {
+          if (!Number.isInteger(v)) return 'must be an integer';
+        },
+      }),
+      perPage: schema.number({
+        defaultValue: 20,
+        min: 1,
+        max: 100,
+        validate: (v) => {
+          if (!Number.isInteger(v)) return 'must be an integer';
+        },
+      }),
       sortField: schema.maybe(
         schema.oneOf([
           schema.literal('name'),
