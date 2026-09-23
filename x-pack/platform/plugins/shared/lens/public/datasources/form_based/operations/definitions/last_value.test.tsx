@@ -571,7 +571,7 @@ describe('last_value', () => {
           layer: localLayer,
           field: scriptedField!,
         }).params.showArrayValues
-      ).toBeTruthy();
+      ).toBe(true);
 
       expect(
         lastValueOperation.buildColumn({
@@ -579,7 +579,7 @@ describe('last_value', () => {
           layer: localLayer,
           field: runtimeKeywordField!,
         }).params.showArrayValues
-      ).toBeTruthy();
+      ).toBe(true);
 
       expect(
         lastValueOperation.buildColumn({
@@ -587,7 +587,7 @@ describe('last_value', () => {
           layer: localLayer,
           field: runtimeNumericField!,
         }).params.showArrayValues
-      ).toBeFalsy();
+      ).toBe(false);
 
       expect(
         lastValueOperation.buildColumn(
@@ -598,10 +598,8 @@ describe('last_value', () => {
           },
           { showArrayValues: true }
         ).params.showArrayValues
-      ).toBeTruthy();
+      ).toBe(true);
 
-      // Must be strictly false (not undefined) so the export transform's `?? false`
-      // fallback in fromLastValueLensStateToAPI correctly outputs multi_value: false
       expect(
         lastValueOperation.buildColumn({
           indexPattern,
@@ -611,7 +609,7 @@ describe('last_value', () => {
       ).toBe(false);
     });
 
-    it('should set showArrayValues to false (not undefined) for a new regular-field column with no prior params', () => {
+    it('should set showArrayValues to false for a new regular-field column with no prior params', () => {
       const indexPattern = createMockedIndexPattern();
       const regularField = indexPattern.fields.find((field) => !field.scripted && !field.runtime)!;
       const localLayer = {
@@ -620,16 +618,13 @@ describe('last_value', () => {
         indexPatternId: '',
       } as FormBasedLayer;
 
-      const { showArrayValues } = lastValueOperation.buildColumn({
-        indexPattern,
-        layer: localLayer,
-        field: regularField,
-      }).params;
-
-      // Regression test: previously returned undefined, causing the Dashboard API export
-      // transform (showArrayValues ?? false) to incorrectly emit multi_value: true.
-      expect(showArrayValues).toBe(false);
-      expect(typeof showArrayValues).toBe('boolean');
+      expect(
+        lastValueOperation.buildColumn({
+          indexPattern,
+          layer: localLayer,
+          field: regularField,
+        }).params.showArrayValues
+      ).toBe(false);
     });
   });
 
