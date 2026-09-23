@@ -21691,7 +21691,7 @@ paths:
             default: 1
             minimum: 1
             type: integer
-        - description: 'The number of results per page. Defaults to 20, maximum 100.'
+        - description: The number of results per page. Defaults to 20, maximum 100.
           in: query
           name: per_page
           required: false
@@ -146514,10 +146514,8 @@ components:
           minimum: 0
           type: integer
         fieldDefinitionId:
-          description: >
-            Unique server-assigned identifier for the field definition (UUID). May be UUIDv4 for
-            definitions created through the public API, or UUIDv5 for definitions created by internal
-            migration processes.
+          description: |
+            Unique server-assigned identifier for the field definition (UUID). May be UUIDv4 for definitions created through the public API, or UUIDv5 for definitions created by internal migration processes.
           maxLength: 36
           type: string
         isGlobal:
