@@ -125,6 +125,8 @@ const featureHasEndpoint = async ({
 }): Promise<boolean> => {
   if (!searchInferenceEndpoints) return false;
   try {
+    // An unregistered tier can still resolve the global connector catalog.
+    if (!searchInferenceEndpoints.features.get(featureId)) return false;
     const { endpoints } = await searchInferenceEndpoints.endpoints.getForFeature(
       featureId,
       request
