@@ -22,7 +22,7 @@ inputs:
   message: "<required – describe the issue or event to investigate>"
   title: "<required – short human-readable headline for the investigation>"
   stream_names: ["<optional – data stream names to scope the investigation>"]
-  context: { <optional – any structured context, e.g. significant event or alert metadata> }
+  context: { <required subject context; see source-specific examples below> }
   concurrency_key: "<optional – stable key to de-duplicate repeated investigations>"
 waitForCompletion: true
 ```
@@ -37,7 +37,7 @@ waitForCompletion: true
 - `message` (string, required) — a clear description of the issue to investigate. Include symptoms, time range, and any relevant context. Be specific.
 - `title` (string, required) — a short human-readable headline (under ~80 characters) naming the affected entity and the problem, e.g. the significant event title or the alert rule name. It is the investigation's title, so never use an id or UUID.
 - `stream_names` (string array, optional) — data stream names to scope observability queries. Leave empty to let the investigation agent discover relevant streams.
-- `context` (object, optional) — structured context such as significant event metadata, alert payload, or environment info. Passed verbatim to the investigation agent.
+- `context` (object, required) — includes `source` and the corresponding subject id (`manual_id`, `alert_id`, or `significant_event_id`), plus any structured context for the investigation agent.
 - `concurrency_key` (string, optional) — a stable key (e.g. a significant event's event id or an alert id). Investigations sharing a key are de-duplicated: starting a new one cancels any in-progress investigation with the same key.
 
 **Example call (free-form issue):**
@@ -47,7 +47,11 @@ execute_workflow({
   inputs: {
     message: "Error rate on the checkout service spiked by 400% starting at 14:30 UTC. HTTP 503 errors are dominating.",
     title: "Checkout error rate spike (HTTP 503)",
-    stream_names: ["logs-checkout-service.default", "metrics-checkout-service.default"]
+    stream_names: ["logs-checkout-service.default", "metrics-checkout-service.default"],
+    context: {
+      source: "manual",
+      manual_id: "checkout-error-rate-spike"
+    }
   },
   waitForCompletion: true
 })
@@ -105,7 +109,7 @@ When the user wants to investigate an alert, load the alert's data first, then t
 - `title`: the rule name (`kibana.alert.rule.name`).
 - `stream_names`: derive from `service.name` / `host.name` when they map to known data streams; otherwise omit and let the investigation agent discover relevant streams.
 - `concurrency_key`: the alert id (`kibana.alert.uuid`), to de-duplicate repeated requests for the same alert.
-- `context`: a structured `alert` object with the key fields above.
+- `context`: `source: "alert"`, `alert_id`, and a structured `alert` object with the key fields above.
 
 **Example call (alert context):**
 ```
@@ -118,6 +122,7 @@ execute_workflow({
     concurrency_key: "a1b2c3d4-0000-1111-2222-333344445555",
     context: {
       source: "alert",
+      alert_id: "a1b2c3d4-0000-1111-2222-333344445555",
       alert: {
         uuid: "a1b2c3d4-0000-1111-2222-333344445555",
         rule_name: "High error rate - checkout",

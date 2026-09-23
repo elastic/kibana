@@ -63,6 +63,7 @@ it('executes the manual investigation and preserves the raw report and complete 
     conversation,
   });
   expect(result.execution_error).toBeUndefined();
+  expect(result.structured_report).not.toHaveProperty('trigger_feedback');
 });
 
 it.each([
