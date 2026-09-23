@@ -44,7 +44,12 @@ export const HelpPopover: React.FC<{
   onESQLDocsFlyoutVisibilityChanged?: (isOpen: boolean) => void;
   /** Size for the docs flyout. Pass a named size when embedded in another flyout. */
   docsFlyoutSize?: EuiFlyoutProps['size'];
-}> = ({ onESQLDocsFlyoutVisibilityChanged, docsFlyoutSize }) => {
+  /**
+   * Hides the recommended-queries section (and skips deriving it). Use when the embedder
+   * can't apply a picked query — i.e. no `submitEsqlQuery` action is wired.
+   */
+  hideRecommendedQueries?: boolean;
+}> = ({ onESQLDocsFlyoutVisibilityChanged, docsFlyoutSize, hideRecommendedQueries }) => {
   const kibana = useKibana<ESQLEditorDeps>();
   const { core, data } = kibana.services;
   const { docLinks, http, chrome, analytics } = core;
@@ -83,7 +88,7 @@ export const HelpPopover: React.FC<{
 
   useEffect(() => {
     let isMounted = true;
-    if (!isESQLMenuPopoverOpen) {
+    if (!isESQLMenuPopoverOpen || hideRecommendedQueries) {
       return () => {
         isMounted = false;
       };
@@ -132,7 +137,7 @@ export const HelpPopover: React.FC<{
     return () => {
       isMounted = false;
     };
-  }, [data.dataViews, http, isESQLMenuPopoverOpen]);
+  }, [data.dataViews, http, isESQLMenuPopoverOpen, hideRecommendedQueries]);
 
   const { queryForRecommendedQueries, timeFieldName, categorizationField, dataviewName } =
     dataviewDerived;
@@ -247,7 +252,7 @@ export const HelpPopover: React.FC<{
               </EuiContextMenuItem>
             ),
           },
-          ...(Boolean(recommendedQueries.length)
+          ...(!hideRecommendedQueries && Boolean(recommendedQueries.length)
             ? [
                 {
                   name: i18n.translate('esqlEditor.menu.exampleQueries', {
@@ -289,6 +294,7 @@ export const HelpPopover: React.FC<{
     actions,
     categorizationField,
     dataviewName,
+    hideRecommendedQueries,
     queryForRecommendedQueries,
     solutionsRecommendedQueries,
     timeFieldName,
