@@ -11,7 +11,6 @@ import type { ConnectorTypeInfo } from '@kbn/workflows';
 import type { ConnectorIdItem } from '@kbn/workflows-yaml';
 import { validateConnectorIds } from './validate_connector_ids';
 import { stepSchemas } from '../../../../common/step_schemas';
-import type { ConnectorIdItem } from '../model/types';
 
 describe('validateConnectorIds', () => {
   const mockConnectorInstance = {
@@ -314,6 +313,34 @@ describe('validateConnectorIds', () => {
       expect(results[0].severity).toBe('error');
       expect(results[0].hoverMessage).toContain('Manage connectors');
       expect(results[0].hoverMessage).toContain('http://localhost:5601/app/management/connectors');
+    });
+
+    it('should link missing inference endpoints to Feature Settings', () => {
+      const getStepDefinitionSpy = jest.spyOn(stepSchemas, 'getStepDefinition').mockReturnValue({
+        editorHandlers: {
+          config: {
+            'connector-id': {
+              connectorIdSelection: {
+                connectorTypes: ['inference.unified_completion'],
+                inferenceFeatureId: 'ai_summarize',
+              },
+            },
+          },
+        },
+      } as never);
+      stepSchemas.setInferenceConnectorInstances(new Map([['ai_summarize', []]]));
+
+      const results = validateConnectorIds(
+        [createConnectorIdItem({ key: 'missing-endpoint', connectorType: 'ai.summarize' })],
+        mockConnectorTypes,
+        'http://test/connectors',
+        'http://test/feature-settings'
+      );
+      getStepDefinitionSpy.mockRestore();
+
+      expect(results[0].message).toContain('Inference endpoint "missing-endpoint" not found');
+      expect(results[0].hoverMessage).toContain('[Feature Settings](http://test/feature-settings)');
+      expect(results[0].hoverMessage).not.toContain('Manage connectors');
     });
 
     it('should use connector displayName if available', () => {

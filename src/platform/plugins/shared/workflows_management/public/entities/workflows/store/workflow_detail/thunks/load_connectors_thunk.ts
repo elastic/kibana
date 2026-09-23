@@ -37,7 +37,7 @@ export const loadConnectorsThunk = createAsyncThunk<
       const inferenceFeatureIds = [
         ...new Set(
           stepSchemas.getAllRegisteredStepDefinitions().flatMap((definition) => {
-            if (!stepSchemas.isPublicStepDefinition(definition)) {
+            if (!('editorHandlers' in definition)) {
               return [];
             }
             const featureId =

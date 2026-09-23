@@ -110,7 +110,6 @@ describe('loadConnectorsThunk', () => {
         },
       } as never,
     ]);
-    jest.spyOn(stepSchemas, 'isPublicStepDefinition').mockReturnValue(true);
     mockWorkflowApi.getConnectors.mockResolvedValue(mockConnectorsResponse1);
     mockLoadConnectors.mockResolvedValue([
       {
@@ -151,7 +150,6 @@ describe('loadConnectorsThunk', () => {
         },
       } as never,
     ]);
-    jest.spyOn(stepSchemas, 'isPublicStepDefinition').mockReturnValue(true);
     mockWorkflowApi.getConnectors.mockResolvedValue(mockConnectorsResponse1);
     mockLoadConnectors.mockRejectedValue(new Error('Inference request failed'));
 
