@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { JSHandle } from 'playwright/test';
 import type { ScoutPage } from '..';
 import { expect } from '..';
 import { KibanaCodeEditorWrapper } from '../ui_components';
@@ -175,7 +176,8 @@ export class LensApp {
 
   /**
    * Opens the Lens save modal, fills in the title, optionally selects
-   * a dashboard target, and confirms. Waits for the modal to close.
+   * a dashboard target, and confirms. Waits for the modal to close and, when the save
+   * created a new library visualization, for the editor to finish reloading it.
    */
   async save(
     title: string,
@@ -193,36 +195,83 @@ export class LensApp {
           addToDashboard: 'none';
         }
   ) {
-    await this.openSaveOptionsIfNeeded();
-    await this.saveButton.click();
-    await this.saveModal.waitFor({ state: 'visible' });
-    await this.savedObjectTitleInput.fill(title);
+    const savedObjectIdBeforeSave = await this.getSavedObjectIdFromUrl();
+    const workspaceBeforeSave = await this.page.evaluateHandle(() =>
+      document.querySelector('[data-test-subj="lnsWorkspace"]')
+    );
 
-    // Prefer checking the radio input — label clicks race save-modal remounts.
-    if (options?.addToDashboard === 'existing') {
-      await this.page.locator('#existing-dashboard-option').check();
-      await this.page.testSubj.locator('open-dashboard-picker').click();
-      await this.page.testSubj
-        .locator(`dashboard-picker-option-${options.dashboardTitle.split(' ').join('-')}`)
-        .click();
-    } else if (options?.addToDashboard === 'new') {
-      if (options.saveAsNew !== undefined) {
-        await this.setEuiSwitch('saveAsNewCheckbox', options.saveAsNew);
-      }
-      await this.page.locator('#new-dashboard-option').check();
-      if (options.saveToLibrary !== undefined) {
-        if (options.saveToLibrary) {
-          await this.addToLibraryCheckbox.check();
-        } else {
-          await this.addToLibraryCheckbox.uncheck();
+    try {
+      await this.openSaveOptionsIfNeeded();
+      await this.saveButton.click();
+      await this.saveModal.waitFor({ state: 'visible' });
+      await this.savedObjectTitleInput.fill(title);
+
+      // Prefer checking the radio input — label clicks race save-modal remounts.
+      if (options?.addToDashboard === 'existing') {
+        await this.page.locator('#existing-dashboard-option').check();
+        await this.page.testSubj.locator('open-dashboard-picker').click();
+        await this.page.testSubj
+          .locator(`dashboard-picker-option-${options.dashboardTitle.split(' ').join('-')}`)
+          .click();
+      } else if (options?.addToDashboard === 'new') {
+        if (options.saveAsNew !== undefined) {
+          await this.setEuiSwitch('saveAsNewCheckbox', options.saveAsNew);
         }
+        await this.page.locator('#new-dashboard-option').check();
+        if (options.saveToLibrary !== undefined) {
+          if (options.saveToLibrary) {
+            await this.addToLibraryCheckbox.check();
+          } else {
+            await this.addToLibraryCheckbox.uncheck();
+          }
+        }
+      } else if (options?.addToDashboard === 'none') {
+        await this.page.locator('#add-to-library-option').check();
       }
-    } else if (options?.addToDashboard === 'none') {
-      await this.page.locator('#add-to-library-option').check();
-    }
 
-    await this.confirmSaveButton.click();
-    await this.saveModal.waitFor({ state: 'hidden' });
+      await this.confirmSaveButton.click();
+      await this.saveModal.waitFor({ state: 'hidden' });
+      await this.waitForPostSaveReload(savedObjectIdBeforeSave, workspaceBeforeSave);
+    } finally {
+      // Release the handle so the detached pre-save workspace can be garbage collected.
+      await workspaceBeforeSave.dispose();
+    }
+  }
+
+  /** Reads the `#/edit/<id>` saved object id from the in-page URL, if the editor shows one. */
+  private async getSavedObjectIdFromUrl(): Promise<string | undefined> {
+    const url = await this.page.evaluate(() => window.location.href);
+    return /\/edit\/([^/?#]+)/.exec(url)?.[1];
+  }
+
+  /**
+   * Saving a *new* library visualization redirects the editor to `#/edit/<id>`, which makes
+   * Lens re-initialise its state from the saved object (`EditorRenderer` re-runs `loadInitial`).
+   * Until that reload lands the editor still looks interactive, but any edit made in the
+   * meantime is discarded when the reloaded state replaces it. The reload unmounts and
+   * remounts the editor frame, so wait for a *new* `lnsWorkspace` node before returning.
+   * Re-saving an existing visualization, or saving into a dashboard, does not reload.
+   */
+  private async waitForPostSaveReload(
+    savedObjectIdBeforeSave: string | undefined,
+    workspaceBeforeSave: JSHandle<Element | null>
+  ) {
+    const savedObjectIdAfterSave = await this.getSavedObjectIdFromUrl();
+    if (!savedObjectIdAfterSave || savedObjectIdAfterSave === savedObjectIdBeforeSave) {
+      return;
+    }
+    // Compare DOM nodes rather than waiting for `hidden` then `visible`: the unmounted
+    // window can be shorter than a poll interval locally, so a hidden-wait could miss it.
+    await this.page.waitForFunction(
+      (previousWorkspace) => {
+        const workspace = document.querySelector('[data-test-subj="lnsWorkspace"]');
+        return workspace !== null && workspace !== previousWorkspace;
+      },
+      workspaceBeforeSave,
+      // Two round trips (data view check + saved object load); slow on cloud.
+      { timeout: 20_000 }
+    );
+    await this.page.testSubj.locator('lnsWorkspace').waitFor({ state: 'visible' });
   }
 
   async applyFlyoutChanges() {
