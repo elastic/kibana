@@ -119,13 +119,6 @@ export const CancelActionModal = memo<CancelActionModalProps>(
           acc[hostInfo.metadata.agent.id] = (hostInfo.metadata.Endpoint.capabilities ??
             []) as EndpointCapabilities[];
 
-          // FIXME:PT DO NOT COMMIT - tests only
-          if (hostInfo.metadata.agent.id === '18fc31e5-c32c-4e0b-8e25-d28889c2e395') {
-            acc[hostInfo.metadata.agent.id] = acc[hostInfo.metadata.agent.id].filter(
-              (capability) => capability !== 'cancel'
-            );
-          }
-
           return acc;
         },
         {}
