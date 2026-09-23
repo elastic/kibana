@@ -23,11 +23,7 @@ export const ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW = {
   id: ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID,
   management: ALERTZERO_WORKER_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  // Bumped for the `agentId` const and its forward, on top of upstream's own bump to
-  // 4: the hash covers this function's source, not the YAML it renders, so an
-  // existing install would otherwise keep rendering the old template with neither
-  // change applied.
-  version: 5,
+  version: 4,
   yamlTemplate: (values: ScheduledWorkerTemplateValues): string =>
     renderScheduledWorkerYaml(FLOOR_ATTACK_DISCOVERY_YAML, values),
 } as const satisfies ManagedWorkflowDefinition<ScheduledWorkerTemplateValues>;

@@ -7,10 +7,8 @@
 
 import {
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
-  SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
   SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
 } from '@kbn/alertzero-common';
-import { AttackDiscoverySettings } from './attack_discovery/attack_discovery_settings';
 import { HuntSettings } from './hunt/hunt_settings';
 import { RuleTuningSettings } from './rule_tuning/rule_tuning_settings';
 import type { WorkerCustomSettingsComponent } from './types';
@@ -22,7 +20,6 @@ import type { WorkerCustomSettingsComponent } from './types';
  */
 const WORKER_CUSTOM_SETTINGS_COMPONENTS: Partial<Record<string, WorkerCustomSettingsComponent>> = {
   [SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID]: RuleTuningSettings,
-  [SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID]: AttackDiscoverySettings,
   [SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID]: HuntSettings,
 };
 

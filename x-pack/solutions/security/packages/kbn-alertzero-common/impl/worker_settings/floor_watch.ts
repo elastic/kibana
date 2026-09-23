@@ -10,7 +10,6 @@ import {
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
   WATCH_AUTONOMY_LEVELS,
 } from '../../constants';
-import { AttackDiscoveryWorkerExtras } from '../schemas';
 import type { WorkerSettingsDeclaration } from './types';
 
 export const ALERT_TRIAGE_SETTINGS: WorkerSettingsDeclaration = {
@@ -18,7 +17,7 @@ export const ALERT_TRIAGE_SETTINGS: WorkerSettingsDeclaration = {
   allowedAutonomyLevels: WATCH_AUTONOMY_LEVELS,
 };
 
-export const ATTACK_DISCOVERY_SETTINGS: WorkerSettingsDeclaration<AttackDiscoveryWorkerExtras> = {
+export const ATTACK_DISCOVERY_SETTINGS: WorkerSettingsDeclaration = {
   workerId: SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
   // Two levels rather than the shared three: this Worker has exactly one gate — the
   // forensics handoff a true-positive or inconclusive verdict proposes — so it needs
@@ -28,7 +27,4 @@ export const ATTACK_DISCOVERY_SETTINGS: WorkerSettingsDeclaration<AttackDiscover
   allowedAutonomyLevels: ['manual', 'supervised'],
   // Matches the Attack Discovery schedule form default.
   scheduleInterval: { defaultValue: '24h' },
-  // No `defaultValue`: the agent is opt-in, so a Worker that has never had one picked stores no
-  // `extras` key and the review keeps opening its conversation with the default agent.
-  extras: { schema: AttackDiscoveryWorkerExtras },
 };

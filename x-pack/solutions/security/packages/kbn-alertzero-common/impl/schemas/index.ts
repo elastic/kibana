@@ -43,11 +43,6 @@ export {
   HuntAgentId,
 } from './components/hunt_watch_settings.gen';
 
-export {
-  AttackDiscoveryAgentId,
-  AttackDiscoveryWorkerExtras,
-} from './components/floor_watch_settings.gen';
-
 export { ListWatchesResponse } from './watches/list_watches_route.gen';
 export { GetWatchResponse } from './watches/get_watch_route.gen';
 export { ListWorkersResponse } from './workers/list_workers_route.gen';
