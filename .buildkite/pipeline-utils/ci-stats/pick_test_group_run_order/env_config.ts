@@ -88,15 +88,14 @@ export function loadRunOrderConfig() {
     useSelectiveTesting:
       (Boolean(process.env.GITHUB_PR_NUMBER) || isMergeQueue) &&
       !(parseCsvEnv('GITHUB_PR_LABELS') ?? []).includes(PREVENT_SELECTIVE_TESTS_LABEL),
-    // PRs compare from their common ancestor with the target branch; a merge group's
-    // pinned base already contains earlier queued PRs in its history, excluding them from the diff.
+    // PRs compare from their common ancestor with the target branch. A merge group
+    // compares from the commit it is built on (HEAD~1 for single-PR squash groups),
+    // so earlier queued PRs are excluded.
     selectionBase: isMergeQueue
       ? process.env.BUILDKITE_MERGE_QUEUE_BASE_COMMIT || undefined
       : process.env.GITHUB_PR_MERGE_BASE || undefined,
-    // On merge queues, ci-stats retains the broader target-branch coverage base for timing history.
-    /** Reference commit for past test durations used to size and balance groups, not to select tests. */
-    historyBase:
-      process.env.GITHUB_PR_MERGE_BASE || process.env.MERGE_QUEUE_MERGE_BASE || undefined,
+    /** Commit whose past test durations size and balance groups; not used to select tests. */
+    timingBase: process.env.GITHUB_PR_MERGE_BASE || process.env.MERGE_QUEUE_MERGE_BASE || undefined,
     prNumber: process.env.GITHUB_PR_NUMBER || undefined,
 
     allowZeroConfigMatches: ['true', 'yes', '1'].includes(

@@ -156,7 +156,7 @@ describe('loadRunOrderConfig', () => {
     expect(cfg.useSelectiveTesting).toBe(true);
     expect(cfg.isMergeQueue).toBe(true);
     expect(cfg.selectionBase).toBe('group-base');
-    expect(cfg.historyBase).toBe('older-main-base');
+    expect(cfg.timingBase).toBe('older-main-base');
   });
 
   it('does not fall back to the coverage base when the pinned merge-group base is missing', () => {
@@ -165,7 +165,7 @@ describe('loadRunOrderConfig', () => {
     const cfg = loadRunOrderConfig();
     expect(cfg.useSelectiveTesting).toBe(true);
     expect(cfg.selectionBase).toBeUndefined();
-    expect(cfg.historyBase).toBe('older-main-base');
+    expect(cfg.timingBase).toBe('older-main-base');
   });
 
   it('honors the prevent label on merge-queue builds', () => {
@@ -182,7 +182,7 @@ describe('loadRunOrderConfig', () => {
     process.env.MERGE_QUEUE_MERGE_BASE = 'mq-base';
     const cfg = loadRunOrderConfig();
     expect(cfg.selectionBase).toBe('pr-base');
-    expect(cfg.historyBase).toBe('pr-base');
+    expect(cfg.timingBase).toBe('pr-base');
   });
 
   it('uses TEST_GROUP_TYPE_* overrides when provided', () => {

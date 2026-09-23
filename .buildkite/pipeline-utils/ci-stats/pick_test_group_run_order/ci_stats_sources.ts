@@ -39,9 +39,9 @@ export function buildCiStatsSources(args: {
   pipelineSlug: string;
   prNumber: string | undefined;
   /** Reference commit for past test durations used to size and balance groups, not to select tests. */
-  historyBase: string | undefined;
+  timingBase: string | undefined;
 }): CiStatsSource[] {
-  const { trackedBranch, ownBranch, pipelineSlug, prNumber, historyBase } = args;
+  const { trackedBranch, ownBranch, pipelineSlug, prNumber, timingBase } = args;
 
   const isMergeQueue = pipelineSlug === PIPELINES.MERGE_QUEUE;
 
@@ -53,7 +53,7 @@ export function buildCiStatsSources(args: {
     // using kibana-on-merge groups will provide a closer approximation, with a failure mode -
     // of too many ftr groups instead of potential timeouts.
     // merge-queue builds run on throwaway gh-readonly-queue/* branches, so their own
-    // branch has no history; they use historyBase and tracked-branch sources below.
+    // branch has no history; they use timingBase and tracked-branch sources below.
     ...(!prNumber &&
     !isMergeQueue &&
     pipelineSlug !== PIPELINES.ON_MERGE &&
@@ -65,10 +65,10 @@ export function buildCiStatsSources(args: {
       : []),
     // The timing-history base remains MERGE_QUEUE_MERGE_BASE on queue builds,
     // and may have results only in kibana-merge-queue.
-    ...(historyBase
+    ...(timingBase
       ? [
-          { commit: historyBase, jobName: PIPELINES.ON_MERGE },
-          { commit: historyBase, jobName: PIPELINES.MERGE_QUEUE },
+          { commit: timingBase, jobName: PIPELINES.ON_MERGE },
+          { commit: timingBase, jobName: PIPELINES.MERGE_QUEUE },
         ]
       : []),
     // merge-queue builds report the target branch as their branch, so recent queue

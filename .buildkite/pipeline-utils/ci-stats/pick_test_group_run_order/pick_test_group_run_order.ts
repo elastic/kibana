@@ -162,7 +162,7 @@ export async function pickTestGroupRunOrder() {
       ownBranch: config.ownBranch,
       pipelineSlug: config.pipelineSlug,
       prNumber: config.prNumber,
-      historyBase: config.historyBase,
+      timingBase: config.timingBase,
     }),
     groups: buildCiStatsGroups({
       jestUnitConfigs,
