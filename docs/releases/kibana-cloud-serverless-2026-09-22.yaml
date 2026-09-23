@@ -16,7 +16,7 @@ entries:
   products:
   - product: cloud-serverless
   - product: kibana
-  description: '> Exposes the `decidedBy` field (username, fullName, email, profileUid) in the `proposals.getProposal` workflow step output so investigation workers can attribute proposal decisions in comments.'
+  description: 'Exposes the `decidedBy` field (username, fullName, email, profileUid) in the `proposals.getProposal` workflow step output so investigation workers can attribute proposal decisions in comments.'
   prs:
   - https://github.com/elastic/kibana/pull/291996
 - file:
@@ -146,7 +146,7 @@ entries:
     name: 289646.yaml
     checksum: e5a0eed99d0daa5f3a7b23291c210f7279079341
   type: feature
-  title: 'Migrates route: Infrastructure → Inventory / Hosts details...'
+  title: Add the shared app header to Infrastructure detail pages
   products:
   - product: cloud-serverless
   - product: kibana
@@ -193,7 +193,7 @@ entries:
   products:
   - product: cloud-serverless
   - product: kibana
-  description: '> The Security Alert Analysis workflow is now disabled by default for new spaces; users must explicitly enable it via the Alert Analysis Workflow settings page.'
+  description: 'The Security Alert Analysis workflow is now disabled by default for new spaces; users must explicitly enable it via the Alert Analysis Workflow settings page.'
   prs:
   - https://github.com/elastic/kibana/pull/291240
 - file:
@@ -237,7 +237,7 @@ entries:
     name: 287825.yaml
     checksum: cc5b0fb6d199c97e8af05ee774d4702ba1d2825b
   type: enhancement
-  title: POC transaction details flyout from service details flyout
+  title: Open transaction details from the service details flyout
   products:
   - product: cloud-serverless
   - product: kibana
@@ -364,7 +364,7 @@ entries:
     name: 291698.yaml
     checksum: 747c1b6ebb1b709263deeed5e53e7c7fbfd411f1
   type: bug-fix
-  title: Truncates JSM and Opsgenie message field to 130 characters instead of...
+  title: Truncate Jira Service Management and Opsgenie messages at 130 characters
   products:
   - product: cloud-serverless
   - product: kibana
@@ -413,7 +413,7 @@ entries:
     name: 289032.yaml
     checksum: 62821b0b6cfb23493b9f73e0db81dce7784c4a5e
   type: feature
-  title: New tab - empty page
+  title: Keep new Discover tabs empty until you run a search
   products:
   - product: cloud-serverless
   - product: kibana
@@ -512,7 +512,7 @@ entries:
     name: 288664.yaml
     checksum: 8aea3b9b38c6db50104846f1b777e680be9d2431
   type: bug-fix
-  title: email connector invoked via HTTP returns fixed content
+  title: Use fixed subject and body when the email connector is called over HTTP
   products:
   - product: cloud-serverless
   - product: kibana
@@ -576,7 +576,7 @@ entries:
     name: 290058.yaml
     checksum: 29b8dfebc06041e51e1696b8825f3bd3da962971
   type: bug-fix
-  title: Halve New Terms document fetch batch when the response exceeds...
+  title: Fix New Terms rules that fail when the fetched documents are too large
   products:
   - product: cloud-serverless
   - product: kibana
@@ -587,7 +587,7 @@ entries:
     name: 279607.yaml
     checksum: 09100b9fd2e4ae36c0a2e3200a4759ebbe82c22b
   type: feature
-  title: (Connectors) MongoDB connector
+  title: Add a MongoDB connector
   products:
   - product: cloud-serverless
   - product: kibana
@@ -669,7 +669,7 @@ entries:
     name: 291813.yaml
     checksum: 33714b32860ceec6beebbd6b72f2ca4ae3e2203f
   type: bug-fix
-  title: Triggers a data stream rollover on mapper_parsing_exception caused by custom...
+  title: Fix integration upgrades that add a custom analyzer after the write index exists
   products:
   - product: cloud-serverless
   - product: kibana
