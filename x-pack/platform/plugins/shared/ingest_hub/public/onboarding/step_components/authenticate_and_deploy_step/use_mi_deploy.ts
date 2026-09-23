@@ -185,9 +185,7 @@ export function useMiDeploy({
             await updateDeployment(onboardingDeploymentId, {
               services: selectedServiceIds,
               packagePolicyIds: [
-                ...new Set(
-                  Object.values(policyIdsByInstance).filter((id) => !deletedIds.has(id))
-                ),
+                ...new Set(Object.values(policyIdsByInstance).filter((id) => !deletedIds.has(id))),
               ],
             });
           }
