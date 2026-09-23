@@ -657,28 +657,12 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     describe('filter activity', () => {
       createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
 
-      beforeEach(async function () {
-        // TODO: `user-actions-filter-activity-button-*` belongs to the legacy FilterActivity
-        // component which is not rendered by the redesign case view; the redesign uses
-        // `user-actions-filter-bar-type-button` (UserActionsFilterBar). Rewrite for the new UI.
-        this.skip();
-      });
-
       it('filters by all by default', async () => {
-        const allBadge = await find.byCssSelector(
-          '[data-test-subj="user-actions-filter-activity-button-all"] span.euiNotificationBadge'
-        );
-
-        expect(await allBadge.getAttribute('aria-label')).equal('1 active filters');
+        const typeButton = await testSubjects.find('user-actions-filter-bar-type-button');
+        expect(await typeButton.getVisibleText()).to.contain('All');
       });
 
       it('filters by comment successfully', async () => {
-        const commentBadge = await find.byCssSelector(
-          '[data-test-subj="user-actions-filter-activity-button-comments"] span.euiNotificationBadge'
-        );
-
-        expect(await commentBadge.getAttribute('aria-label')).equal('0 available filters');
-
         const commentArea = await find.byCssSelector(
           '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
         );
@@ -688,18 +672,16 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await header.waitUntilLoadingHasFinished();
 
-        await testSubjects.click('user-actions-filter-activity-button-comments');
+        await testSubjects.click('user-actions-filter-bar-type-button');
+        await testSubjects.click('user-actions-filter-bar-type-option-comments');
 
-        expect(await commentBadge.getAttribute('aria-label')).equal('1 active filters');
+        await header.waitUntilLoadingHasFinished();
+
+        const typeButton = await testSubjects.find('user-actions-filter-bar-type-button');
+        expect(await typeButton.getVisibleText()).to.contain('Comments');
       });
 
       it('filters by history successfully', async () => {
-        const historyBadge = await find.byCssSelector(
-          '[data-test-subj="user-actions-filter-activity-button-history"] span.euiNotificationBadge'
-        );
-
-        expect(await historyBadge.getAttribute('aria-label')).equal('1 available filters');
-
         await cases.common.selectSeverity(CaseSeverity.MEDIUM);
 
         await header.waitUntilLoadingHasFinished();
@@ -708,33 +690,23 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await header.waitUntilLoadingHasFinished();
 
-        await testSubjects.click('user-actions-filter-activity-button-history');
-
-        expect(await historyBadge.getAttribute('aria-label')).equal('3 active filters');
-      });
-
-      it('sorts by newest first successfully', async () => {
-        await testSubjects.click('user-actions-filter-activity-button-all');
-
-        const AllBadge = await find.byCssSelector(
-          '[data-test-subj="user-actions-filter-activity-button-all"] span.euiNotificationBadge'
-        );
-
-        expect(await AllBadge.getVisibleText()).equal('4');
-
-        const sortDesc = await find.byCssSelector(
-          '[data-test-subj="user-actions-sort-select"] [value="desc"]'
-        );
-
-        await sortDesc.click();
+        await testSubjects.click('user-actions-filter-bar-type-button');
+        await testSubjects.click('user-actions-filter-bar-type-option-history');
 
         await header.waitUntilLoadingHasFinished();
 
-        const userActionsLists = await find.allByCssSelector(
-          '[data-test-subj="user-actions-list"]'
-        );
+        const typeButton = await testSubjects.find('user-actions-filter-bar-type-button');
+        expect(await typeButton.getVisibleText()).to.contain('History');
+      });
 
-        const actionList = await userActionsLists[0].findAllByClassName('euiComment');
+      it('sorts by newest first successfully', async () => {
+        await testSubjects.click('user-actions-filter-bar-sort-button');
+        await testSubjects.click('user-actions-filter-bar-sort-option-desc');
+
+        await header.waitUntilLoadingHasFinished();
+
+        const userActionsList = await find.byCssSelector('[data-test-subj="user-actions-list"]');
+        const actionList = await userActionsList.findAllByClassName('euiComment');
 
         expect(await actionList[0].getAttribute('data-test-subj')).contain('status-update-action');
       });
