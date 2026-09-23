@@ -8,7 +8,7 @@
  */
 
 import { esql } from '@elastic/esql';
-import { isSingleSource, sanitazeESQLInput } from '@kbn/esql-utils';
+import { escapeStringValue, isSingleSource, sanitazeESQLInput } from '@kbn/esql-utils';
 import { EXEMPLARS_MAX_ROWS } from '../../constants';
 import { deriveExemplarsIndex } from '../exemplars/derive_exemplars_index';
 import type { ParsedMetricItem } from '../../../types';
@@ -26,6 +26,14 @@ const VALUE_FIELD = 'value';
  */
 const TRACE_ID_FIELD = 'trace_id';
 const SPAN_ID_FIELD = 'span_id';
+/** Columns every exemplar query projects, before the metric's own dimensions. */
+const BASE_COLUMNS = [
+  TIMESTAMP_FIELD,
+  METRIC_NAME_FIELD,
+  VALUE_FIELD,
+  TRACE_ID_FIELD,
+  SPAN_ID_FIELD,
+];
 
 interface CreateExemplarsQueryParams {
   metricItem: ParsedMetricItem;
@@ -72,8 +80,8 @@ export function createExemplarsQuery({
 
   // ES stores the OTel metric name in `metric_name` without the `metrics.` mapping
   // prefix that Kibana's ES|QL field names carry (e.g. `metrics.foo` → `"foo"`).
-  const exemplarMetricName = metricName.replace(/^metrics\./, '').replace(/"/g, '\\"');
-  query.pipe(`WHERE ${METRIC_NAME_FIELD} == "${exemplarMetricName}"`);
+  const exemplarMetricName = escapeStringValue(metricName.replace(/^metrics\./, ''));
+  query.pipe(`WHERE ${METRIC_NAME_FIELD} == ${exemplarMetricName}`);
 
   for (const statement of whereStatements) {
     const trimmed = statement.trim();
@@ -82,15 +90,10 @@ export function createExemplarsQuery({
     }
   }
 
-  const baseColumns = [TIMESTAMP_FIELD, METRIC_NAME_FIELD, VALUE_FIELD, TRACE_ID_FIELD, SPAN_ID_FIELD];
   const keepColumns = [
-    TIMESTAMP_FIELD,
-    METRIC_NAME_FIELD,
-    VALUE_FIELD,
-    TRACE_ID_FIELD,
-    SPAN_ID_FIELD,
+    ...BASE_COLUMNS,
     ...dimensionFields
-      .filter(({ name }) => !baseColumns.includes(name))
+      .filter(({ name }) => !BASE_COLUMNS.includes(name))
       .map(({ name }) => sanitazeESQLInput(name)),
   ];
   query.pipe(`KEEP ${keepColumns.join(', ')}`);

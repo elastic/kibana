@@ -115,6 +115,7 @@ const probeResponse = (metricNames: string[]) => ({
   rawResponse: {
     columns: [{ name: 'metric_name', type: 'keyword' }],
     values: metricNames.map((name) => [name]),
+    requestParams: { query: EXEMPLARS_PROBE_QUERY },
   },
   requestParams: { query: EXEMPLARS_PROBE_QUERY },
 });

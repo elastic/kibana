@@ -25,4 +25,3 @@ export const LEGACY_HISTOGRAM_USER_MESSAGES: UserMessage[] = [
     displayLocations: [{ id: 'embeddableBadge' }],
   },
 ];
-

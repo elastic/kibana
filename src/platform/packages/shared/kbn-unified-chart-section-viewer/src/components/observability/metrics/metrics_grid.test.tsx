@@ -123,7 +123,7 @@ describe('MetricsGrid', () => {
     services,
     actions,
     isTabSelected: true,
-    exemplarsAvailability: { availableMetrics: new Set<string>(), hasProbeFailed: false },
+    exemplarsAvailability: { availableMetrics: new Set<string>() },
   };
 
   const renderMetricsGrid = (props: Partial<MetricsGridProps> = {}) => {

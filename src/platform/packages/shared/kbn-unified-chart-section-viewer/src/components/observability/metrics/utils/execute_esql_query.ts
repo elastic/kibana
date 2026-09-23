@@ -12,6 +12,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { ISearchGeneric } from '@kbn/search-types';
 import type { ESQLControlVariable } from '@kbn/esql-types';
+import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
 import { getESQLResults } from '@kbn/esql-utils';
 import { buildEsQuery } from '@kbn/es-query';
 import { getTime, getEsQueryConfig } from '@kbn/data-plugin/public';
@@ -59,7 +60,7 @@ export const fetchEsqlResponseOrThrow = async (
 
 export interface ExecuteEsqlResult<TDocument> {
   documents: TDocument[];
-  rawResponse: object;
+  rawResponse: ESQLSearchResponse & { requestParams: ESQLSearchParams };
   requestParams: { query: string; filter?: object };
 }
 

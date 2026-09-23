@@ -14,21 +14,14 @@ import {
 } from '../../constants';
 
 /**
- * Wildcards, comma lists, cross-cluster prefixes (`remote:index`) and source
- * selectors (`index::failures`) all name a scope that cannot be mapped onto
- * a single exemplars data stream.
+ * Characters that mark a source as something other than one concrete index: wildcards,
+ * comma lists, cross-cluster prefixes (`remote:index`), source selectors
+ * (`index::failures`) and whitespace. None of these map onto a single exemplars stream.
  */
-function includesNonConcreteChars(metricsIndex: string) {
-  return (
-    metricsIndex.includes('*') ||
-    metricsIndex.includes(',') ||
-    metricsIndex.includes(':') ||
-    metricsIndex.includes(' ') ||
-    metricsIndex.includes('\t') ||
-    metricsIndex.includes('\n') ||
-    metricsIndex.includes('\r')
-  );
-}
+const NON_CONCRETE_SOURCE_CHARS = ['*', ',', ':', ' ', '\t', '\n', '\r'];
+
+const isConcreteSource = (metricsIndex: string): boolean =>
+  !NON_CONCRETE_SOURCE_CHARS.some((char) => metricsIndex.includes(char));
 
 /**
  * Maps an OTel metrics data stream onto its parallel exemplars data stream, or returns
@@ -39,7 +32,7 @@ export const deriveExemplarsIndex = (metricsIndex: string): string | undefined =
     return undefined;
   }
 
-  if (includesNonConcreteChars(metricsIndex)) {
+  if (!isConcreteSource(metricsIndex)) {
     return undefined;
   }
 

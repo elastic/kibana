@@ -102,6 +102,7 @@ const exemplarResponse = (columnNames: string[]) => ({
   rawResponse: {
     columns: columnNames.map((name) => ({ name, type: 'double' })),
     values: [[1_700_000_000_000, 0.42, 'trace-abc', 'span-xyz', '/orders']],
+    requestParams: { query: TEST_ESQL_QUERY },
   },
   requestParams: { query: TEST_ESQL_QUERY },
 });

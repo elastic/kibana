@@ -111,6 +111,14 @@ FROM exemplars-generic.otel-default
     );
   });
 
+  it('escapes backslashes in the metric name string value', () => {
+    expect(
+      createExemplarsQuery({
+        metricItem: { ...mockMetric, metricName: 'metrics.odd\\name', dimensionFields: [] },
+      })
+    ).toContain('WHERE metric_name == "odd\\\\name"');
+  });
+
   it('does not repeat a dimension that collides with a shared exemplar column', () => {
     const query = createExemplarsQuery({
       metricItem: {
