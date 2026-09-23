@@ -34,7 +34,7 @@ user_activity:
 - `user_activity.appenders`: Logging appenders used by the service. This uses the same appender schema as Kibana logging. For more details, refer to [Logging settings](/reference/configuration-reference/logging-settings.md). By default, it uses a JSON console appender.
 - `user_activity.filters`: Optional list of filter rules applied to `event.action`.
 
-When enabled, events are logged under the logger context `user_activity.event` and include the fields `{ message, event, object, metadata, error, user, kibana, ...}`.
+When enabled, events are logged under the logger context `user_activity.event` and include the fields `{ message, event, object, metadata, error, user, kibana.session.id, kibana.space.id, ...}`.
 
 ### Filters
 
