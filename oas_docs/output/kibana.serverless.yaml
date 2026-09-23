@@ -663,6 +663,7 @@ paths:
           name: id
           required: true
           schema:
+            maxLength: 36
             type: string
       requestBody:
         content:
@@ -136260,6 +136261,7 @@ components:
             - tags
             - title
             - user
+            - workflow
           example: create_case
           type: string
         type: array
@@ -138486,6 +138488,115 @@ components:
               enum:
                 - user
               type: string
+    Cases_payload_workflow:
+      description: The payload for a workflow user action, recorded when a user runs a workflow from a case.
+      type: object
+      properties:
+        origin:
+          description: The context from which the workflow was triggered.
+          oneOf:
+            - type: object
+              properties:
+                id:
+                  description: The case ID.
+                  type: string
+                type:
+                  enum:
+                    - cases.case
+                  type: string
+              required:
+                - type
+                - id
+            - type: object
+              properties:
+                id:
+                  description: The observable ID.
+                  type: string
+                type:
+                  enum:
+                    - cases.observable
+                  type: string
+                typeKey:
+                  description: The observable type key.
+                  type: string
+                value:
+                  description: The observable value.
+                  type: string
+              required:
+                - type
+                - id
+            - type: object
+              properties:
+                count:
+                  description: The number of selected observables.
+                  type: number
+                id:
+                  description: The case ID.
+                  type: string
+                type:
+                  enum:
+                    - cases.observables
+                  type: string
+              required:
+                - type
+                - id
+            - type: object
+              properties:
+                attachmentType:
+                  description: The normalized registered attachment type.
+                  type: string
+                id:
+                  description: The attachment target ID.
+                  type: string
+                index:
+                  description: The Elasticsearch index the target document lives in.
+                  type: string
+                type:
+                  enum:
+                    - cases.attachment
+                  type: string
+              required:
+                - type
+                - id
+                - attachmentType
+            - type: object
+              properties:
+                attachmentType:
+                  description: The normalized registered attachment type.
+                  type: string
+                count:
+                  description: The number of selected attachment targets.
+                  type: number
+                id:
+                  description: The case ID.
+                  type: string
+                type:
+                  enum:
+                    - cases.attachments
+                  type: string
+              required:
+                - type
+                - id
+                - attachmentType
+        workflow:
+          description: Identifies the workflow that was run.
+          type: object
+          properties:
+            executionId:
+              description: The execution ID returned by the Workflows engine.
+              type: string
+            id:
+              description: The workflow ID.
+              type: string
+            name:
+              description: The workflow name at the time the run was triggered.
+              type: string
+          required:
+            - id
+            - name
+            - executionId
+      required:
+        - workflow
     Cases_related_case:
       description: |
         Summary of a case returned when listing cases that contain a given alert. This is a subset of the full case response.
@@ -139192,6 +139303,7 @@ components:
             - $ref: '#/components/schemas/Cases_payload_tags'
             - $ref: '#/components/schemas/Cases_payload_title'
             - $ref: '#/components/schemas/Cases_payload_user_comment'
+            - $ref: '#/components/schemas/Cases_payload_workflow'
         type:
           description: The type of action.
           enum:
@@ -139211,6 +139323,7 @@ components:
             - status
             - tags
             - title
+            - workflow
           example: create_case
           type: string
         version:
@@ -153689,8 +153802,12 @@ components:
       properties:
         alerting:
           additionalProperties: false
+          description: Settings that control how this maintenance window affects Alerting V1 alerts, including an optional KQL filter. Always returned when scope is returned. Check `enabled` to see whether the maintenance window affects these alerts.
           type: object
           properties:
+            enabled:
+              description: Whether this maintenance window applies to Alerting V1 alerts. If omitted, is treated as `true`.
+              type: boolean
             query:
               additionalProperties: false
               type: object
@@ -153702,9 +153819,68 @@ components:
                 - kql
           required:
             - query
+        alerting_v2:
+          additionalProperties: false
+          description: Settings that control how this maintenance window affects Alerting V2 alerting episodes, including an optional KQL filter. If you omit `alerting_v2`, the maintenance window doesn't affect Alerting V2 alert episodes.
+          type: object
+          properties:
+            enabled:
+              description: Whether the maintenance window applies to Alerting V2 alert episodes. If omitted, is treated as `true`.
+              type: boolean
+            query:
+              additionalProperties: false
+              type: object
+              properties:
+                kql:
+                  description: A KQL filter that limits which Alerting V2 alert episodes this maintenance window affects. Matching alert episodes don't send notifications while the window is active. If query isn't returned, the window affects all Alerting V2 alert episodes.
+                  maxLength: 4096
+                  type: string
+              required:
+                - kql
       required:
         - alerting
       title: maintenance_window_scope
+      type: object
+    Kibana_HTTP_APIs_maintenance_window_scope_request:
+      additionalProperties: false
+      properties:
+        alerting:
+          additionalProperties: false
+          description: Settings that control how this maintenance window affects Alerting V1 alerts, including an optional KQL filter. If you include `scope` but omit `alerting`, the maintenance window doesn't affect these alerts.
+          type: object
+          properties:
+            enabled:
+              description: Whether this maintenance window applies to Alerting V1 alerts. If omitted, is treated as `true`.
+              type: boolean
+            query:
+              additionalProperties: false
+              type: object
+              properties:
+                kql:
+                  description: A KQL filter that limits which Alerting V1 alerts this maintenance window affects. Matching alerts don't run rule actions while the window is active. If you omit query, the window affects all alerts.
+                  maxLength: 10000
+                  type: string
+              required:
+                - kql
+        alerting_v2:
+          additionalProperties: false
+          description: Settings that control how this maintenance window affects Alerting V2 alerting episodes, including an optional KQL filter. If you omit `alerting_v2`, the maintenance window doesn't affect Alerting V2 alert episodes.
+          type: object
+          properties:
+            enabled:
+              description: Whether this maintenance window affects Alerting V2 alert episodes. Defaults to `true`.
+              type: boolean
+            query:
+              additionalProperties: false
+              type: object
+              properties:
+                kql:
+                  description: A KQL filter that limits which Alerting V2 alert episodes this maintenance window affects. You can filter on `episode_id`, `episode_status`, `group_hash`, `last_event_timestamp`, `severity`, and `data.*`. Matching episodes don't send notifications while the window is active. If you omit query, the window affects all Alerting V2 alert episodes.
+                  maxLength: 4096
+                  type: string
+              required:
+                - kql
+      title: maintenance_window_scope_request
       type: object
     Kibana_HTTP_APIs_managed_integration:
       additionalProperties: false
@@ -156922,9 +157098,11 @@ components:
       properties:
         connector_type_id:
           description: The type of connector.
+          maxLength: 64
           type: string
         name:
           description: The display name for the connector.
+          maxLength: 1024
           type: string
         config:
           additionalProperties: {}
@@ -157016,7 +157194,7 @@ components:
           required:
             - custom
         scope:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_maintenance_window_scope'
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_maintenance_window_scope_request'
         title:
           description: The name of the maintenance window. While this name does not have to be unique, a distinctive name can help you identify a specific maintenance window.
           type: string
@@ -164992,6 +165170,7 @@ components:
       properties:
         name:
           description: The display name for the connector.
+          maxLength: 1024
           type: string
         config:
           additionalProperties: {}
@@ -165066,7 +165245,7 @@ components:
           required:
             - custom
         scope:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_maintenance_window_scope'
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_maintenance_window_scope_request'
         title:
           description: The name of the maintenance window. While this name does not have to be unique, a distinctive name can help you identify a specific maintenance window.
           type: string

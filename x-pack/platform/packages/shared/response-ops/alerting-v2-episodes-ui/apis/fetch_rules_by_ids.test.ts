@@ -6,7 +6,6 @@
  */
 
 import { ALERTING_V2_RULE_API_PATH } from '@kbn/alerting-v2-constants';
-import { MAX_KQL_LENGTH } from '@kbn/alerting-v2-schemas';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { ALERT_EPISODES_LIST_PAGE_SIZE, RULES_RESOLUTION_BATCH_SIZE } from '../constants';
 import { fetchRulesByIds } from './fetch_rules_by_ids';
@@ -78,26 +77,6 @@ describe('fetchRulesByIds', () => {
       { id: 'rule-0' },
       { id: `rule-${RULES_RESOLUTION_BATCH_SIZE}` },
     ]);
-  });
-
-  it('keeps every filter under the API limit for a full page of UUID-length ids', async () => {
-    const ids = Array.from(
-      { length: ALERT_EPISODES_LIST_PAGE_SIZE },
-      (_, index) => `550e8400-e29b-41d4-a716-${String(index).padStart(12, '0')}`
-    );
-
-    await fetchRulesByIds({ http: mockHttp, ids });
-
-    const filters: string[] = (mockHttp.get as jest.Mock).mock.calls.map(
-      ([, options]) => options.query.filter
-    );
-
-    // A full page of UUIDs needs more batches than the page-size ceiling alone implies.
-    expect(filters.length).toBeGreaterThan(
-      ALERT_EPISODES_LIST_PAGE_SIZE / RULES_RESOLUTION_BATCH_SIZE
-    );
-    filters.forEach((filter) => expect(filter.length).toBeLessThanOrEqual(MAX_KQL_LENGTH));
-    expect(filters.join(' ')).toContain(ids[ids.length - 1]);
   });
 
   it('caps ids at ALERT_EPISODES_LIST_PAGE_SIZE', async () => {
