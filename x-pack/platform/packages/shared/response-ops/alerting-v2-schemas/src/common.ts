@@ -45,9 +45,13 @@ export type TagsResponse = z.infer<typeof tagsResponseSchema>;
  * Identity that performed a write, reported on `created_by` / `updated_by`.
  *
  * A user profile ID is recorded rather than a username because usernames and
- * full names change while a profile ID does not. The object shape (rather than a
- * bare ID) leaves room to describe identities that have no profile, such as
- * service accounts, without another breaking change.
+ * full names change while a profile ID does not.
+ *
+ * The object shape (rather than a bare ID) exists so identity can be described
+ * in more detail later. Today every attributed write has a profile, and a write
+ * without one — an API key, or an unactivated profile — is reported as `null`.
+ * Describing such an actor positively (a service account, say) means relaxing
+ * `profile_uid` to optional, which is deferred until there is a caller for it.
  *
  * Deliberately not `.strict()`: additional identity fields are expected to be
  * added, and older clients should tolerate them.

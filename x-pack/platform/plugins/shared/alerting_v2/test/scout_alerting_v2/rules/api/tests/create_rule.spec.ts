@@ -54,6 +54,9 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
       expect(response.body.metadata).toStrictEqual({ ...body.metadata, version: 1 });
       expect(response.body.schedule).toStrictEqual(body.schedule);
       expect(response.body.query).toStrictEqual(body.query);
+      // Actors are structured objects, not the legacy bare profile-UID string.
+      expect(typeof response.body.created_by.profile_uid).toBe('string');
+      expect(typeof response.body.updated_by.profile_uid).toBe('string');
 
       const persisted = await apiServices.alertingV2.rules.get(response.body.id);
       expect(persisted.id).toBe(response.body.id);
@@ -88,6 +91,16 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
       expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
+
+  apiTest('validation: rejects body with the removed metadata.owner', async ({ apiClient }) => {
+    const body = buildCreateRuleData();
+    const response = await apiClient.post(testData.RULE_API_PATH, {
+      headers: writerHeaders,
+      body: { ...body, metadata: { ...body.metadata, owner: 'u_alice' } },
+    });
+    expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
+  });
 
   apiTest(
     'validation: rejects body with unknown metadata keys (strict schema)',

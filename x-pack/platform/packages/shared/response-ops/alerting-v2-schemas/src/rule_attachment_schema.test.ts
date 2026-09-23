@@ -60,6 +60,17 @@ describe('ruleAttachmentDataSchema', () => {
     });
   });
 
+  it('still resolves an attachment stored with the removed metadata.owner', () => {
+    const result = ruleAttachmentDataSchema.parse({
+      ...baseRule,
+      id: 'rule-1',
+      metadata: { ...baseRule.metadata, owner: 'u_alice' },
+    });
+
+    expect(result.metadata).not.toHaveProperty('owner');
+    expect(result.metadata).toMatchObject({ name: 'High CPU' });
+  });
+
   it('rejects a rule that is missing a required field', () => {
     const { query, ...withoutQuery } = baseRule;
 

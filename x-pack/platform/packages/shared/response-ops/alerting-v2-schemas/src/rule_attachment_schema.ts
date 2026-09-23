@@ -27,8 +27,9 @@ export const RULE_ATTACHMENT_TYPE = 'platform.alerting.rule' as const;
  * `.strip()` undoes the `.strict()` inherited from the create-rule base schema,
  * making this a projection rather than a validator: callers hand over a whole
  * `RuleResponse` and the actors are dropped instead of raising
- * `unrecognized_keys`. It also lets attachments stored before the actors were
- * removed still resolve.
+ * `unrecognized_keys`. It also lets attachments stored before the actors and
+ * `metadata.owner` were removed still resolve. Unlike the strictness itself,
+ * `.strip()` does not cascade, so the nested metadata needs its own.
  */
 const { shape } = ruleResponseSchema;
 
@@ -39,7 +40,7 @@ export const ruleAttachmentDataSchema = ruleResponseSchema
     enabled: opt(shape.enabled),
     created_at: opt(shape.created_at),
     updated_at: opt(shape.updated_at),
-    metadata: shape.metadata.extend({ version: opt(shape.metadata.shape.version) }),
+    metadata: shape.metadata.extend({ version: opt(shape.metadata.shape.version) }).strip(),
   })
   .strip();
 

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ObjectType } from '@kbn/config-schema';
 import type { SavedObject, SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { createModelVersionTestMigrator } from '@kbn/core-test-helpers-model-versions';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../common/saved_object_types';
@@ -91,6 +92,36 @@ describe('ruleModelVersions', () => {
         ...(document.attributes as Record<string, unknown>),
         createdBy: { profile_uid: 'author_profile_uid' },
         updatedBy: { profile_uid: 'editor_profile_uid' },
+      });
+    });
+  });
+
+  // The actor is a nested object, so these pin that `unknowns: 'ignore'` on the
+  // attributes schema reaches it. It does: config-schema maps the option to Joi's
+  // `stripUnknown`, which cascades to children that do not override it. Without
+  // that, a v6 node could not read a rule whose actor a newer node had extended.
+  describe('v6 forward compatibility', () => {
+    const forwardCompatibility = ruleModelVersions['6']?.schemas
+      ?.forwardCompatibility as ObjectType;
+
+    const validate = (attributes: Record<string, unknown>) =>
+      forwardCompatibility.validate(attributes) as Record<string, unknown>;
+
+    const v6Attributes = (actor: Record<string, unknown>) => ({
+      ...(createV5RuleDocument().attributes as Record<string, unknown>),
+      createdBy: actor,
+      updatedBy: null,
+    });
+
+    it('drops identity fields a newer node added to the actor', () => {
+      expect(
+        validate(v6Attributes({ profile_uid: 'author_profile_uid', username: 'author' })).createdBy
+      ).toEqual({ profile_uid: 'author_profile_uid' });
+    });
+
+    it('keeps the actor intact when it carries no extra fields', () => {
+      expect(validate(v6Attributes({ profile_uid: 'author_profile_uid' })).createdBy).toEqual({
+        profile_uid: 'author_profile_uid',
       });
     });
   });

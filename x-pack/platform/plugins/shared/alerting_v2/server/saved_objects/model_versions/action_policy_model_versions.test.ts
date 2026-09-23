@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ObjectType } from '@kbn/config-schema';
 import type { SavedObject, SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { createModelVersionTestMigrator } from '@kbn/core-test-helpers-model-versions';
 import { ACTION_POLICY_SAVED_OBJECT_TYPE } from '../../../common/saved_object_types';
@@ -257,6 +258,24 @@ describe('actionPolicyModelVersions', () => {
         createdBy: { profile_uid: 'author_profile_uid' },
         updatedBy: { profile_uid: 'editor_profile_uid' },
       });
+    });
+  });
+
+  // Mirrors the rule check: the actor is nested, and `unknowns: 'ignore'` on the
+  // attributes schema has to reach it for a v4 node to read a policy whose actor
+  // a newer node extended.
+  describe('v4 forward compatibility', () => {
+    const forwardCompatibility = actionPolicyModelVersions['4']?.schemas
+      ?.forwardCompatibility as ObjectType;
+
+    it('drops identity fields a newer node added to the actor', () => {
+      const attributes = forwardCompatibility.validate({
+        ...(createV3PolicyDocument().attributes as Record<string, unknown>),
+        createdBy: { profile_uid: 'author_profile_uid', username: 'author' },
+        updatedBy: null,
+      }) as Record<string, unknown>;
+
+      expect(attributes.createdBy).toEqual({ profile_uid: 'author_profile_uid' });
     });
   });
 });
