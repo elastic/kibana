@@ -113,6 +113,9 @@ const DELETE_SECURITY: RouteSecurity = {
   },
 };
 
+const CONTEXT_ENGINE_DISABLED_NOTE =
+  'Returns a 404 while Context Engine is turned off in this space (`contextEngine:enabled`).';
+
 const hasWorkflowDeletePrivilege = (request: KibanaRequest): boolean =>
   WorkflowsManagementOperationPrivileges.delete.every(
     (privilege) => request.authzResult?.[privilege] === true
@@ -210,8 +213,7 @@ export const registerAiIndexRoutes = ({
       security: WRITE_SECURITY,
       access: 'public',
       summary: 'Create an AI Index',
-      description:
-        'Creates an AI Index record attached to a data stream or index. Fails with a 409 if an AI Index with the same id already exists.',
+      description: `Creates an AI Index record attached to a data stream or index. Fails with a 409 if an AI Index with the same id already exists. ${CONTEXT_ENGINE_DISABLED_NOTE}`,
       options: {
         tags: ['oas-tag:context engine'],
         availability: { stability: 'experimental', since: '9.6.0' },
@@ -286,8 +288,7 @@ export const registerAiIndexRoutes = ({
       security: WRITE_SECURITY,
       access: 'public',
       summary: 'Create or update an AI Index',
-      description:
-        'Creates an AI Index with the given id, or replaces an existing one. The request body replaces the whole record: omitted fields are removed, and omitted arrays become empty. A managed AI Index cannot be replaced and returns a 409.',
+      description: `Creates an AI Index with the given id, or replaces an existing one. The request body replaces the whole record: omitted fields are removed, and omitted arrays become empty. A managed AI Index cannot be replaced and returns a 409. ${CONTEXT_ENGINE_DISABLED_NOTE}`,
       options: {
         tags: ['oas-tag:context engine'],
         availability: { stability: 'experimental', since: '9.6.0' },
@@ -371,8 +372,7 @@ export const registerAiIndexRoutes = ({
       security: READ_SECURITY,
       access: 'public',
       summary: 'Get an AI Index',
-      description:
-        'Fetches an AI Index by id from the current space, including the ES|QL query derived from each trace.',
+      description: `Fetches an AI Index by id from the current space, including the ES|QL query derived from each trace. ${CONTEXT_ENGINE_DISABLED_NOTE}`,
       options: {
         tags: ['oas-tag:context engine'],
         availability: { stability: 'experimental', since: '9.6.0' },
@@ -424,7 +424,7 @@ export const registerAiIndexRoutes = ({
       security: READ_SECURITY,
       access: 'public',
       summary: 'List AI Indices',
-      description: `Lists the AI Indices registered in the current space that the caller can read. An AI Index is left out when the caller cannot read its backing index. An empty AI Index is still listed. Up to ${MAX_AI_INDICES} entries. The space comes from the request URL (\`/s/{spaceId}/…\`, or the default space); it cannot be set any other way.`,
+      description: `Lists the AI Indices registered in the current space that the caller can read. An AI Index is left out when the caller cannot read its backing index. An empty AI Index is still listed. Up to ${MAX_AI_INDICES} entries. The space comes from the request URL (\`/s/{spaceId}/…\`, or the default space); it cannot be set any other way. ${CONTEXT_ENGINE_DISABLED_NOTE}`,
       options: {
         tags: ['oas-tag:context engine'],
         availability: { stability: 'experimental', since: '9.6.0' },
@@ -465,7 +465,7 @@ export const registerAiIndexRoutes = ({
       security: READ_SECURITY,
       access: 'public',
       summary: 'Query AI Indices',
-      description: `Runs an ES|QL query as the current user, with a space filter and a row limit (at most ${MAX_AI_INDEX_QUERY_LIMIT}) applied server-side. The space comes from the request URL (\`/s/{spaceId}/…\`, or the default space); nothing in the request body can change it or replace the space filter. The query decides which indices it reads; Elasticsearch index privileges bound what it can reach.`,
+      description: `Runs an ES|QL query as the current user, with a space filter and a row limit (at most ${MAX_AI_INDEX_QUERY_LIMIT}) applied server-side. The space comes from the request URL (\`/s/{spaceId}/…\`, or the default space); nothing in the request body can change it or replace the space filter. The query decides which indices it reads; Elasticsearch index privileges bound what it can reach. ${CONTEXT_ENGINE_DISABLED_NOTE}`,
       options: {
         tags: ['oas-tag:context engine'],
         availability: { stability: 'experimental', since: '9.6.0' },
@@ -518,7 +518,7 @@ export const registerAiIndexRoutes = ({
       security: READ_SECURITY,
       access: 'public',
       summary: 'Describe an AI Index',
-      description: `Returns a free-form text context block for an agent: the AI Index, its ES|QL target, the fields its backing indices expose (at most ${MAX_AI_INDEX_DESCRIBE_FIELDS}) and which are semantic, knowledge item type and tag counts in the current space, and example ES|QL queries. Read as the current user, so Elasticsearch index privileges bound what it can reach. The space comes from the request URL (\`/s/{spaceId}/…\`, or the default space); it cannot be set any other way.`,
+      description: `Returns a free-form text context block for an agent: the AI Index, its ES|QL target, the fields its backing indices expose (at most ${MAX_AI_INDEX_DESCRIBE_FIELDS}) and which are semantic, knowledge item type and tag counts in the current space, and example ES|QL queries. Read as the current user, so Elasticsearch index privileges bound what it can reach. The space comes from the request URL (\`/s/{spaceId}/…\`, or the default space); it cannot be set any other way. ${CONTEXT_ENGINE_DISABLED_NOTE}`,
       options: {
         tags: ['oas-tag:context engine'],
         availability: { stability: 'experimental', since: '9.6.0' },
@@ -708,7 +708,7 @@ export const registerAiIndexRoutes = ({
         'Deletes an AI Index by id. The backing data stream/index (and therefore its Knowledge ' +
         'Indicators) and the attached workflow automations are left untouched unless the ' +
         '`delete_knowledge_indicators`/`delete_automations` query parameters are set to true. ' +
-        'The dest is not deleted when another AI Index still uses it.',
+        `The dest is not deleted when another AI Index still uses it. ${CONTEXT_ENGINE_DISABLED_NOTE}`,
       options: {
         tags: ['oas-tag:context engine'],
         availability: { stability: 'experimental', since: '9.6.0' },
