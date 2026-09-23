@@ -116,6 +116,7 @@ describe('checking changes on all registered encrypted SO types', () => {
 
     expect(modelVersionMap).toMatchInlineSnapshot(`
       Array [
+        "action|4",
         "action|3",
         "action|2",
         "action|1",
