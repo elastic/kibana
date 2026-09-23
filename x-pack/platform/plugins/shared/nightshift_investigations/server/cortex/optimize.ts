@@ -13,6 +13,7 @@ import {
   type CortexPageStatus,
   type CortexPageSummary,
 } from '../../common/cortex';
+import { isReinforcementOwnedSlug } from '../../common/decision_trees';
 import type { CortexPageStore } from './page_store';
 import { canonicalizeSlug, slugFromCortexId, toCortexKiId } from './page_store';
 
@@ -187,6 +188,12 @@ export const applyCortexEdits = async ({
   const { pages } = await store.list();
   for (const edit of edits) {
     const slug = resolveSlug(edit, pages);
+    // The reinforcement agent validates every write to its own pages against the Mermaid node
+    // contract or the learning length budget. A free-form wiki edit would bypass those guardrails.
+    if (isReinforcementOwnedSlug(slug)) {
+      logger.debug(`Skipped Cortex edit targeting reinforcement-owned page ${slug}`);
+      continue;
+    }
     const id = toCortexKiId(edit.entity_type, slug);
     if (edit.action === 'corroborate') {
       const updated = await store.corroborate(id);
@@ -237,7 +244,11 @@ export const optimizeCortex = async ({
   logger: Logger;
 }): Promise<void> => {
   await store.pruneDuplicates();
-  const { pages } = await store.list();
+  const { pages: allPages } = await store.list();
+  // Reinforcement-owned pages are kept out of the catalog so the model never proposes edits to them.
+  const pages = allPages.filter(
+    (page) => !isReinforcementOwnedSlug(slugFromCortexId(page.id, page.entity_type))
+  );
   const transcript = [
     '## User',
     userMessage.slice(0, MAX_TRANSCRIPT_CHARS),

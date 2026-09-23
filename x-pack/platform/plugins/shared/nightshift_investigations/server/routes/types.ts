@@ -10,6 +10,7 @@ import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository'
 import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import type { NightshiftInvestigationsClient } from '../client/investigations_client';
 import type { CortexPageStore } from '../cortex/page_store';
+import type { DecisionTreeStore } from '../decision_trees/store';
 import type { GetTriggerEmitter } from '../types';
 
 export type GetInvestigationsClient = (
@@ -21,6 +22,8 @@ export type GetAlertsClient = (request: KibanaRequest) => Promise<AlertsClient> 
 
 export type GetCortexPageStore = (request: KibanaRequest) => CortexPageStore;
 
+export type GetDecisionTreeStore = (request: KibanaRequest) => DecisionTreeStore;
+
 export interface NightshiftInvestigationsRouteHandlerResources
   extends DefaultRouteHandlerResources {
   getInvestigationsClient: GetInvestigationsClient;
@@ -28,4 +31,6 @@ export interface NightshiftInvestigationsRouteHandlerResources
   getAlertsClient: GetAlertsClient;
   getCortexPageStore: GetCortexPageStore;
   isCortexEnabled: () => boolean;
+  getDecisionTreeStore: GetDecisionTreeStore;
+  isDecisionTreesEnabled: () => boolean;
 }

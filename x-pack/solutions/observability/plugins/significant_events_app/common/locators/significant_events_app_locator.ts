@@ -19,6 +19,7 @@ export type SignificantEventsAppTab =
   | 'detections'
   | 'significant_events'
   | 'cortex'
+  | 'decision_trees'
   // Kept for locator compatibility; resolves to the standalone Settings page.
   | 'settings';
 
