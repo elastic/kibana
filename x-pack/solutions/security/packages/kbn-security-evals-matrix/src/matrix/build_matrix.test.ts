@@ -972,7 +972,7 @@ describe('buildMatrix self-judged disclosure', () => {
 
 describe('buildMatrix withheld-vs-never-ran', () => {
   // Withheld self-judged cells must be distinguishable from a model that never ran.
-  const cfg: MatrixConfig = parseMatrixConfig({
+  const withheldConfig: MatrixConfig = parseMatrixConfig({
     minCoverage: 1,
     columns: [{ id: 'migrations', label: 'Migrations', suites: ['suite-a'], weight: 1 }],
     models: [
@@ -1001,7 +1001,7 @@ describe('buildMatrix withheld-vs-never-ran', () => {
         // model-b never ran the suite at all.
         { modelId: 'model-b', provider: 'p', suites: [] },
       ],
-      cfg
+      withheldConfig
     );
 
     const withheld = matrix.proprietary.find((r) => r.modelId === 'model-a')!.cells.migrations;
@@ -1022,7 +1022,7 @@ describe('buildMatrix withheld-vs-never-ran', () => {
           suites: [{ suiteId: 'suite-a', experimentId: 'e1', datasets: [] }],
         },
       ],
-      cfg
+      withheldConfig
     );
 
     expect(matrix.proprietary[0].cells.migrations).toEqual({ kind: 'missing' });
@@ -1134,5 +1134,118 @@ describe('errored-evaluator guard', () => {
     const overall = matrix.proprietary[0].overall;
 
     expect(overall.kind).not.toBe('score');
+  });
+});
+
+describe('buildMatrix round-4 review findings', () => {
+  const suite = (suiteId: string, mean: number, selfJudged?: boolean) => ({
+    suiteId,
+    experimentId: `e-${suiteId}`,
+    ...(selfJudged === undefined ? {} : { selfJudged }),
+    datasets: [{ datasetId: 'd', datasetName: 'd', evaluators: [evaluator(mean)] }],
+  });
+
+  it('discloses a self-judged base score on the composite built from it', () => {
+    // Regression: the aggregate was rebuilt with `toCell(value, cfg)` and dropped the flag,
+    // so a composite (or Overall) hiding a self-judged base read as an independently judged score.
+    const cfg: MatrixConfig = parseMatrixConfig({
+      showOverall: false,
+      columns: [
+        { id: 'c1', label: 'C1', suites: ['s1'], allowSelfJudged: true },
+        { id: 'c2', label: 'C2', suites: ['s2'] },
+      ],
+      composites: [{ id: 'group_score', label: 'Group', from: ['c1', 'c2'] }],
+      models: [{ id: 'm1', label: 'M1' }],
+    });
+
+    const matrix = buildMatrix(
+      [{ modelId: 'm1', suites: [suite('s1', 0.8, true), suite('s2', 0.6)] }],
+      cfg
+    );
+
+    expect(matrix.proprietary[0].cells.group_score).toMatchObject({
+      kind: 'score',
+      selfJudged: true,
+    });
+  });
+
+  it('does not flag a composite whose sources were all judged independently', () => {
+    const cfg: MatrixConfig = parseMatrixConfig({
+      showOverall: false,
+      columns: [
+        { id: 'c1', label: 'C1', suites: ['s1'] },
+        { id: 'c2', label: 'C2', suites: ['s2'] },
+      ],
+      composites: [{ id: 'group_score', label: 'Group', from: ['c1', 'c2'] }],
+      models: [{ id: 'm1', label: 'M1' }],
+    });
+
+    const matrix = buildMatrix(
+      [{ modelId: 'm1', suites: [suite('s1', 0.8, false), suite('s2', 0.6, false)] }],
+      cfg
+    );
+
+    expect(
+      (matrix.proprietary[0].cells.group_score as { selfJudged?: boolean }).selfJudged
+    ).toBeUndefined();
+  });
+
+  it('merges suites from every matching identity, not just the first', () => {
+    // Regression: `get(id) ?? find(alias)` returned a single entry, so suites that only the
+    // alias had run silently vanished from the row.
+    const cfg: MatrixConfig = parseMatrixConfig({
+      columns: [
+        { id: 'c1', label: 'C1', suites: ['s1'] },
+        { id: 'c2', label: 'C2', suites: ['s2'] },
+      ],
+      models: [{ id: 'eis/model', label: 'EIS Model', matchIds: ['provider/slug'] }],
+    });
+
+    const matrix = buildMatrix(
+      [
+        { modelId: 'eis/model', suites: [suite('s1', 0.8)] },
+        { modelId: 'provider/slug', suites: [suite('s2', 0.6)] },
+      ],
+      cfg
+    );
+
+    const row = matrix.proprietary[0];
+    expect(row.cells.c1).toEqual({ kind: 'score', value: 8 });
+    expect(row.cells.c2).toEqual({ kind: 'score', value: 6 });
+  });
+
+  it('does not warn about zero scored cells when every cell is not-recommended', () => {
+    // Regression: a fully-measured, all-failing run produced only `not-recommended` cells, so a
+    // score-only count read 0 and printed "do NOT publish this run".
+    const cfg: MatrixConfig = parseMatrixConfig({
+      notRecommendedBelow: 5,
+      columns: [{ id: 'triage', label: 'Triage', suites: ['suite-a'] }],
+      models: [{ id: 'model-a', label: 'Model A' }],
+    });
+    const warning = jest.fn();
+
+    const matrix = buildMatrix([{ modelId: 'model-a', suites: [suite('suite-a', 0.2)] }], cfg, {
+      warning,
+    });
+
+    expect(matrix.proprietary[0].cells.triage).toEqual({ kind: 'not-recommended' });
+    expect(warning).not.toHaveBeenCalledWith(
+      expect.stringContaining('No column produced a single scored cell')
+    );
+  });
+
+  it('still warns when no column produced any measurable cell at all', () => {
+    // Guard against over-correcting: a genuinely empty run must keep the warning.
+    const cfg: MatrixConfig = parseMatrixConfig({
+      columns: [{ id: 'triage', label: 'Triage', suites: ['suite-a'] }],
+      models: [{ id: 'model-a', label: 'Model A' }],
+    });
+    const warning = jest.fn();
+
+    buildMatrix([{ modelId: 'model-a', suites: [] }], cfg, { warning });
+
+    expect(warning).toHaveBeenCalledWith(
+      expect.stringContaining('No column produced a single scored cell')
+    );
   });
 });

@@ -9,7 +9,12 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 import { buildMatrix } from '../../matrix/build_matrix';
 import { renderMatrix } from '../../matrix/render_matrix';
-import { branchBySuiteFromColumns, matrixScoreQuery, sanitizeKbnUrlForLog } from './matrix';
+import {
+  branchBySuiteFromColumns,
+  matrixScoreQuery,
+  sanitizeKbnUrlForLog,
+  scoringBySuiteFromColumns,
+} from './matrix';
 import { parseMatrixConfig } from '../../matrix/load_matrix_config';
 import type { AggregatedModelScores } from '../../matrix/query_matrix_scores';
 
@@ -299,5 +304,61 @@ describe('sanitizeKbnUrlForLog', () => {
 
   it('falls back to a placeholder for an unparseable URL rather than logging it raw', () => {
     expect(sanitizeKbnUrlForLog('not a url')).toBe('<unparseable-url>');
+  });
+});
+
+describe('scoringBySuiteFromColumns', () => {
+  const config = (overrides = {}) =>
+    parseMatrixConfig({
+      columns: [{ id: 'triage', label: 'Triage', suites: ['suite-a'] }],
+      models: [{ id: 'model-a', label: 'Model A' }],
+      ...overrides,
+    });
+
+  it('treats a column that omits allowSelfJudged as running under the global policy', () => {
+    // Regression: those columns were filtered out before the comparison, so an explicit
+    // override on a sibling column on the same suite was silently applied to them too.
+    expect(() =>
+      scoringBySuiteFromColumns(
+        config({
+          scoring: { excludeSelfJudged: true },
+          columns: [
+            { id: 'triage', label: 'Triage', suites: ['suite-a'] },
+            { id: 'detect', label: 'Detect', suites: ['suite-a'], allowSelfJudged: true },
+          ],
+        })
+      )
+    ).toThrow(/Conflicting allowSelfJudged settings for suite "suite-a"/);
+  });
+
+  it('accepts an inherited policy that agrees with the explicit override', () => {
+    const bySuite = scoringBySuiteFromColumns(
+      config({
+        scoring: { excludeSelfJudged: false },
+        columns: [
+          { id: 'triage', label: 'Triage', suites: ['suite-a'] },
+          { id: 'detect', label: 'Detect', suites: ['suite-a'], allowSelfJudged: true },
+        ],
+      })
+    );
+
+    expect(bySuite['suite-a'].excludeSelfJudged).toBe(false);
+  });
+
+  it('only emits an override for suites a column configures explicitly', () => {
+    // An inheriting column must not write a synthetic entry: the global default is applied on
+    // fetch anyway, and synthesising one would freeze today's default into the query options.
+    const bySuite = scoringBySuiteFromColumns(
+      config({
+        scoring: { excludeSelfJudged: true },
+        columns: [
+          { id: 'triage', label: 'Triage', suites: ['suite-a'] },
+          { id: 'detect', label: 'Detect', suites: ['suite-b'], allowSelfJudged: true },
+        ],
+      })
+    );
+
+    expect(Object.keys(bySuite)).toEqual(['suite-b']);
+    expect(bySuite['suite-b'].excludeSelfJudged).toBe(false);
   });
 });

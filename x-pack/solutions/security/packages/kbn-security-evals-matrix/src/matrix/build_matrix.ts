@@ -12,7 +12,12 @@ import type {
   MatrixModelConfig,
   MatrixTokenCostConfig,
 } from './load_matrix_config';
-import type { AggregatedEvaluatorScore, AggregatedModelScores } from './query_matrix_scores';
+import type {
+  AggregatedEvaluatorScore,
+  AggregatedModelScores,
+  AggregatedSuiteScores,
+  ExcludedScoreCounts,
+} from './query_matrix_scores';
 import { detectSaturatedEvaluators, saturatedEvaluatorNames } from './evaluator_saturation';
 import type { EvaluatorSaturation } from './evaluator_saturation';
 
@@ -20,7 +25,8 @@ import type { EvaluatorSaturation } from './evaluator_saturation';
 export type MatrixCell =
   /** `selfJudged` marks a score graded by the model itself (allowed via `allowSelfJudged`); consumers must disclose it. */
   | { kind: 'score'; value: number; selfJudged?: boolean }
-  | { kind: 'not-recommended' }
+  /** Below the recommendation threshold; still a run that happened, so it counts as measured. */
+  | { kind: 'not-recommended'; selfJudged?: boolean }
   /** The model ran, but every score was rejected by judge policy. */
   | { kind: 'excluded'; reason: 'self-judged' | 'non-eis-judge' | 'same-family'; docs: number }
   /** Too few scored columns for an aggregate (`config.minCoverage`); only produced for `Overall`. */
@@ -114,7 +120,7 @@ const toCell = (
   { selfJudged = false }: { selfJudged?: boolean } = {}
 ): MatrixCell =>
   value <= config.notRecommendedBelow
-    ? { kind: 'not-recommended' }
+    ? { kind: 'not-recommended', ...(selfJudged ? { selfJudged: true } : {}) }
     : { kind: 'score', value, ...(selfJudged ? { selfJudged: true } : {}) };
 
 /** Sample count doubles as the aggregation weight; zero-count evaluators still count once. */
@@ -267,6 +273,9 @@ const aggregateCells = (
   let weightedSum = 0;
   let totalWeight = 0;
   let hasAnyData = false;
+  // A self-judged contributor is disclosed on the aggregate: a composite or Overall that hides the
+  // flagged base column would otherwise read as an ordinary independently judged score.
+  let selfJudged = false;
 
   for (const { cell, weight } of sources) {
     if (cell && cell.kind !== 'missing' && cell.kind !== 'excluded') {
@@ -277,12 +286,20 @@ const aggregateCells = (
         cell.kind === 'insufficient-coverage' ||
         cell.kind === 'insufficient-evaluators'
       ) {
-        if (config.notRecommendedCountsAsZeroInOverall && cell.kind === 'not-recommended') {
-          totalWeight += weight;
+        if (cell.kind === 'not-recommended') {
+          if (cell.selfJudged) {
+            selfJudged = true;
+          }
+          if (config.notRecommendedCountsAsZeroInOverall) {
+            totalWeight += weight;
+          }
         }
       } else {
         weightedSum += cell.value * weight;
         totalWeight += weight;
+        if (cell.selfJudged) {
+          selfJudged = true;
+        }
       }
     }
   }
@@ -291,7 +308,7 @@ const aggregateCells = (
     return { kind: 'missing' };
   }
 
-  return toCell(roundTo(weightedSum / totalWeight, config.decimals), config);
+  return toCell(roundTo(weightedSum / totalWeight, config.decimals), config, { selfJudged });
 };
 
 const computeOverall = (cells: Record<string, MatrixCell>, config: MatrixConfig): MatrixCell =>
@@ -577,10 +594,70 @@ export const buildMatrix = (
   config: MatrixConfig,
   log?: { warning: (message: string) => void }
 ): Matrix => {
-  const byModelId = new Map(aggregated.map((entry) => [entry.modelId, entry]));
-  const resolveScores = (modelConfig: MatrixModelConfig) =>
-    byModelId.get(modelConfig.id) ??
-    aggregated.find((entry) => matchesModel(modelConfig, entry.modelId));
+  // A configured row can match several aggregated identities (its own id plus every `matchIds`
+  // alias). Suites are queried per identity, so an alias may hold suites the primary id does not --
+  // picking one identity with `get() ?? find()` silently dropped the rest. Merge them per suite.
+  const newestSuiteByTimestamp = (list: AggregatedSuiteScores[]): AggregatedSuiteScores =>
+    list.reduce((best, current) =>
+      (current.timestamp ?? '') > (best.timestamp ?? '') ? current : best
+    );
+  const matchedSuites = (matches: AggregatedModelScores[]): AggregatedSuiteScores[] => {
+    const bySuiteId = new Map<string, AggregatedSuiteScores[]>();
+    for (const match of matches) {
+      for (const suite of match.suites) {
+        const list = bySuiteId.get(suite.suiteId) ?? [];
+        list.push(suite);
+        bySuiteId.set(suite.suiteId, list);
+      }
+    }
+    return [...bySuiteId.values()].map((list) =>
+      list.length === 1 ? list[0] : newestSuiteByTimestamp(list)
+    );
+  };
+  const sumExcludedCounts = (matches: AggregatedModelScores[]): ExcludedScoreCounts | undefined => {
+    const present = matches
+      .map((match) => match.excluded)
+      .filter((counts): counts is ExcludedScoreCounts => counts !== undefined);
+    if (present.length === 0) {
+      return undefined;
+    }
+    const total: ExcludedScoreCounts = {
+      nonQuality: 0,
+      nonEis: 0,
+      selfJudged: 0,
+      unmappedVerdict: 0,
+    };
+    for (const counts of present) {
+      total.nonQuality += counts.nonQuality;
+      total.nonEis += counts.nonEis;
+      total.selfJudged += counts.selfJudged;
+      total.unmappedVerdict += counts.unmappedVerdict;
+    }
+    return total;
+  };
+  const mergeMatchedScores = (
+    modelId: string,
+    matches: AggregatedModelScores[]
+  ): AggregatedModelScores => {
+    const family = matches.find((match) => match.family !== undefined)?.family;
+    const provider = matches.find((match) => match.provider !== undefined)?.provider;
+    const excluded = sumExcludedCounts(matches);
+    return {
+      modelId,
+      ...(family !== undefined ? { family } : {}),
+      ...(provider !== undefined ? { provider } : {}),
+      suites: matchedSuites(matches),
+      ...(excluded !== undefined ? { excluded } : {}),
+    };
+  };
+
+  const resolveScores = (modelConfig: MatrixModelConfig): AggregatedModelScores | undefined => {
+    const matches = aggregated.filter((entry) => matchesModel(modelConfig, entry.modelId));
+    if (matches.length === 0) {
+      return undefined;
+    }
+    return matches.length === 1 ? matches[0] : mergeMatchedScores(modelConfig.id, matches);
+  };
 
   const saturation = config.overall.excludeSaturatedEvaluators
     ? detectSaturatedEvaluators(aggregated)
@@ -626,8 +703,10 @@ export const buildMatrix = (
 
   const allRows = [...proprietary, ...openSource];
   if (log && allRows.length > 0) {
+    const measuredKinds = (cell: MatrixCell | undefined): boolean =>
+      cell?.kind === 'score' || cell?.kind === 'not-recommended';
     for (const column of config.columns) {
-      const scored = allRows.filter((row) => row.cells[column.id]?.kind === 'score').length;
+      const scored = allRows.filter((row) => measuredKinds(row.cells[column.id])).length;
       if (scored > 0 && scored < allRows.length / 2) {
         log.warning(
           `Column "${column.label}" has scores for only ${scored} of ${allRows.length} models -- too sparse to rank, and the models that did run it are averaged over a different column set than the rest. Check whether the suite is scheduled in the weekly pipeline before reading these cells as model differences.`
@@ -655,7 +734,7 @@ export const buildMatrix = (
 
     const scoredCells = allRows.reduce(
       (sum, row) =>
-        sum + config.columns.filter((column) => row.cells[column.id]?.kind === 'score').length,
+        sum + config.columns.filter((column) => measuredKinds(row.cells[column.id])).length,
       0
     );
     if (scoredCells === 0) {

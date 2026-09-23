@@ -448,10 +448,26 @@ export const queryMatrixScores = async (
         }
       } else {
         // The stats route must be filtered by execution_id; a bare experiment_id lookup 404s.
-        // Gather every shard of the sweep, reapplying the `asOf` cutoff to the raw listing.
+        // Gather every shard of the sweep, reapplying the `asOf` cutoff AND the self-judge policy
+        // to the raw listing. `pickLatestExperimentPerModel` only vets the chosen `latest`; the
+        // shard reconstruction starts from the unfiltered list, so a rejected self-judged shard
+        // would be merged back into the published score. This path has no per-document filter
+        // (unlike prefix suites), so any self-judged judge disqualifies the whole experiment.
+        const excludeSelfJudged = suiteScoring?.excludeSelfJudged === true;
+        const admitsJudgedPolicy = (candidate: EvaluationExperimentSummary): boolean => {
+          if (!excludeSelfJudged) {
+            return true;
+          }
+          return !experimentJudges(candidate).some(
+            (judge) => Boolean(judge?.id) && describeJudge(judge?.id ?? '', modelId).selfJudged
+          );
+        };
         const shardMembers = pickShardExperiments(
           experiments.filter((candidate) => {
             if (candidate.task_model?.id !== modelId) {
+              return false;
+            }
+            if (!admitsJudgedPolicy(candidate)) {
               return false;
             }
             if (asOf === undefined) {
@@ -504,6 +520,9 @@ export const queryMatrixScores = async (
           // reading the cross-suite `excludedByModel` accumulator there would carry
           // an earlier suite's rejection counts onto this suite's row.
           let suiteExcludedCounts: ExcludedScoreCounts | undefined;
+          // Set only for `examplePrefixes` suites whose synthetic prefix datasets all failed the
+          // judge policy; those columns ignore the pre-aggregated stats datasets entirely.
+          let noPrefixDatasetSurvived = false;
           if (examplePrefixes.length > 0) {
             try {
               const scores = (
@@ -520,20 +539,24 @@ export const queryMatrixScores = async (
               const before = datasets.length;
               // excludedByModel accumulates across every suite for the final audit summary;
               // reading it back for labeling here would attribute an earlier suite's
-              // rejections to this one (e.g. a later suite with zero mappable verdicts,
-              // no self-judged issue at all, rendering as "excluded:self-judged" from
-              // stale state). Assign to the suite-scoped variable instead.
-              datasets.push(
-                ...scoresByPrefixToDatasets(scores, examplePrefixes, {
-                  ...suiteScoring,
-                  onExcluded: (counts) => {
-                    if (counts.selfJudged + counts.nonEis + counts.unmappedVerdict > 0) {
-                      suiteExcludedCounts = counts;
-                      excludedByModel.set(modelId, counts);
-                    }
-                  },
-                })
-              );
+              // rejections to this one. Assign to the suite-scoped variable instead.
+              const prefixDatasets = scoresByPrefixToDatasets(scores, examplePrefixes, {
+                ...suiteScoring,
+                onExcluded: (counts) => {
+                  if (counts.selfJudged + counts.nonEis + counts.unmappedVerdict > 0) {
+                    suiteExcludedCounts = counts;
+                    excludedByModel.set(modelId, counts);
+                  }
+                },
+              });
+              datasets.push(...prefixDatasets);
+              // The suite's own prefix datasets, not `datasets`: `datasets` is seeded from the
+              // pre-aggregated stats route, so it is usually non-empty even when every synthetic
+              // `prefix:*` dataset was rejected. Keying "nothing survived" off the whole array
+              // would make an all-rejected prefix column render as ordinary missing data.
+              if (prefixDatasets.length === 0) {
+                noPrefixDatasetSurvived = true;
+              }
               if (datasets.length === before && suiteExcludedCounts) {
                 const judgeIssue = suiteExcludedCounts.selfJudged + suiteExcludedCounts.nonEis;
                 const remedy =
@@ -589,7 +612,7 @@ export const queryMatrixScores = async (
             commitSha: latest.git_commit_sha ?? undefined,
             ...rowJudgeInfo,
             excludedSelfJudged:
-              datasets.length === 0 &&
+              (examplePrefixes.length > 0 ? noPrefixDatasetSurvived : datasets.length === 0) &&
               excludedSelfJudgedCount !== undefined &&
               excludedSelfJudgedCount > 0
                 ? excludedSelfJudgedCount

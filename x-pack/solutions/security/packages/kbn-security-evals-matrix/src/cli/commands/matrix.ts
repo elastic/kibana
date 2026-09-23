@@ -85,24 +85,36 @@ export const scoringBySuiteFromColumns = (
   config: MatrixConfig
 ): Record<string, ScoreAggregationOptions> => {
   const bySuite: Record<string, ScoreAggregationOptions> = {};
-  // Track each suite's effective excludeSelfJudged so shared-suite conflicts fail loudly
-  // instead of being resolved by column order (the policy is applied per suite on fetch).
+  // Absent config must not be stricter than an explicit `false`: only a resolved
+  // `excludeSelfJudged === true` excludes self-judged runs.
+  const globalExcludeSelfJudged = config.scoring?.excludeSelfJudged === true;
+  // The policy is applied per suite at fetch time, so every column reading a suite must agree on
+  // it. Compare each column's EFFECTIVE policy (its override, else the global default): a column
+  // that omits `allowSelfJudged` still reads the suite under the global policy, so skipping it
+  // would let an explicit override silently apply to a column that never agreed to it.
   const excludeBySuite = new Map<string, boolean>();
-  for (const column of config.columns.filter((c) => c.allowSelfJudged !== undefined)) {
-    const exclude = !column.allowSelfJudged;
+  for (const column of config.columns) {
+    const exclude =
+      column.allowSelfJudged === undefined ? globalExcludeSelfJudged : !column.allowSelfJudged;
     for (const suiteId of column.suites ?? []) {
       const existing = excludeBySuite.get(suiteId);
       if (existing !== undefined && existing !== exclude) {
+        const source = (value: boolean): string =>
+          value === globalExcludeSelfJudged ? 'inherited' : 'override';
         throw new Error(
-          `Conflicting allowSelfJudged settings for suite "${suiteId}": one column sets ` +
-            `allowSelfJudged=${
-              column.allowSelfJudged
-            } and another allowSelfJudged=${!column.allowSelfJudged}. ` +
+          `Conflicting allowSelfJudged settings for suite "${suiteId}": one column resolves to ` +
+            `allowSelfJudged=${!exclude} (${source(
+              exclude
+            )}) and another to allowSelfJudged=${!existing} (${source(existing)}). ` +
             `Scores are fetched per suite, so every column backed by this suite must agree on the self-judging policy.`
         );
       }
       excludeBySuite.set(suiteId, exclude);
-      bySuite[suiteId] = { ...config.scoring, excludeSelfJudged: exclude };
+      // Only materialize a suite override when this column actually sets one; columns inheriting
+      // the global policy are already covered by `config.scoring`.
+      if (column.allowSelfJudged !== undefined) {
+        bySuite[suiteId] = { ...config.scoring, excludeSelfJudged: exclude };
+      }
     }
   }
   return bySuite;

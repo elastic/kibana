@@ -181,8 +181,15 @@ export const trailSetsEqual = (a: string[], b: string[]): boolean => {
   return true;
 };
 
+/**
+ * Minimum repeats before a pairwise agreement rate is reported as measured. One trail has no pairs,
+ * so 2 is the smallest number that yields any estimate at all — this is a measurability floor, not a
+ * confidence threshold, and the report's copy is interpolated from it so the two cannot drift.
+ */
+export const MIN_RELIABILITY_REPETITIONS = 2;
+
 export const cellAgreement = (trails: string[][], answers?: string[]): TrajectoryAgreement => {
-  if (trails.length <= 1) {
+  if (trails.length < MIN_RELIABILITY_REPETITIONS) {
     return { status: 'unmeasured', repetitions: trails.length };
   }
 

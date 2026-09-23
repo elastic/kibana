@@ -7,6 +7,7 @@
 
 import type { Matrix } from './build_matrix';
 import { renderReliabilityHtml } from './render_reliability_html';
+import { cellAgreement, MIN_RELIABILITY_REPETITIONS } from './trajectory_agreement';
 
 const matrix: Matrix = {
   columns: [],
@@ -118,7 +119,19 @@ describe('renderReliabilityHtml', () => {
     const html = renderReliabilityHtml(matrix, {
       'measured:example-a': { repTrails: [['search'], ['search']] },
     });
-    expect(html).toContain('needs k&ge;5');
+    // Asserted through the constant so the copy cannot drift from `cellAgreement`'s floor.
+    expect(html).toContain(`needs k&ge;${MIN_RELIABILITY_REPETITIONS}`);
+  });
+
+  it('reports exactly the repetition floor the code enforces', () => {
+    // The floor is interpolated from the constant, so the rendered claim and `cellAgreement`
+    // are the same number by construction: one fewer repeat stays unmeasured, the floor measures.
+    const below = cellAgreement(
+      Array.from({ length: MIN_RELIABILITY_REPETITIONS - 1 }, () => ['a'])
+    );
+    const atFloor = cellAgreement(Array.from({ length: MIN_RELIABILITY_REPETITIONS }, () => ['a']));
+    expect(below.status).toBe('unmeasured');
+    expect(atFloor.status).toBe('measured');
   });
 
   it('discloses a dirty working tree in provenance', () => {

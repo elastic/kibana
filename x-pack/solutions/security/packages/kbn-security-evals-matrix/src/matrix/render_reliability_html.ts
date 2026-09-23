@@ -15,6 +15,7 @@ import {
 } from './judge_agreement';
 import {
   intervalsOverlap,
+  MIN_RELIABILITY_REPETITIONS,
   resolveProbe,
   rowAgreement,
   type ReliabilityRow,
@@ -71,7 +72,7 @@ const reliabilityHtml = (agreement: ReliabilityRow, tied: boolean): string => {
   if (agreement.status === 'unmeasured') {
     return (
       '<span class="unmeasured">Unmeasured</span>' +
-      `<small>needs k&ge;5 repeats · ${agreement.cells} rankable cells at 1 rep</small>`
+      `<small>needs k&ge;${MIN_RELIABILITY_REPETITIONS} repeats · ${agreement.cells} rankable cells at 1 rep</small>`
     );
   }
   const interval = agreement.interval;

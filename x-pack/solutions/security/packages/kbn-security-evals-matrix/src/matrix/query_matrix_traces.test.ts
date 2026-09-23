@@ -7,6 +7,7 @@
 
 import type { EvaluationScoreDocument } from '@kbn/evals-common';
 import {
+  aliasJudgeVerdicts,
   aliasTraceKeys,
   countRepetitions,
   exampleScoresByEvaluator,
@@ -783,5 +784,58 @@ describe('aliasTraceKeys', () => {
     const traces: MatrixTraceData = { 'provider/slug:prefix:alert-analysis': entry(3) };
     aliasTraceKeys(traces, new Map([['row', ['provider/slug']]]));
     expect(traces['row:prefix:alert-analysis']).toEqual(entry(3));
+  });
+});
+
+describe('aliasJudgeVerdicts', () => {
+  const verdict = (modelId: string, judgeId = 'judge-x', score = 0.7): JudgeVerdict => ({
+    modelId,
+    judgeId,
+    example: 'example-1',
+    repetition: 0,
+    evaluator: 'Correctness',
+    score,
+  });
+
+  it('mirrors an alias-scored verdict onto the configured row id', () => {
+    // Regression: verdicts were left keyed by the provider-reported id only, so a row whose
+    // scores came in under its alias rendered with no judge-agreement data.
+    const verdicts = [verdict('provider/slug')];
+
+    aliasJudgeVerdicts(verdicts, new Map([['row', ['provider/slug']]]));
+
+    expect(verdicts.map((v) => v.modelId)).toEqual(['provider/slug', 'row']);
+    expect(verdicts[1]).toEqual(verdict('row'));
+  });
+
+  it('leaves verdicts already keyed by the row id alone', () => {
+    const verdicts = [verdict('row')];
+
+    aliasJudgeVerdicts(verdicts, new Map([['row', ['provider/slug']]]));
+
+    expect(verdicts).toEqual([verdict('row')]);
+  });
+
+  it('leaves non-aliased (EIS) verdicts untouched', () => {
+    const verdicts = [verdict('eis/model')];
+
+    aliasJudgeVerdicts(verdicts, new Map());
+
+    expect(verdicts).toEqual([verdict('eis/model')]);
+  });
+
+  it('does not leak a mirrored verdict back onto another row sharing the alias', () => {
+    // Two configured rows share one provider identity; each must keep only its own copy.
+    const verdicts = [verdict('provider/slug')];
+
+    aliasJudgeVerdicts(
+      verdicts,
+      new Map([
+        ['row-a', ['provider/slug']],
+        ['row-b', ['provider/slug']],
+      ])
+    );
+
+    expect(verdicts.map((v) => v.modelId)).toEqual(['provider/slug', 'row-a', 'row-b']);
   });
 });

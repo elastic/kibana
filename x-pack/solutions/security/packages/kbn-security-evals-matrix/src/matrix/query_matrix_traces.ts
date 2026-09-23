@@ -316,6 +316,30 @@ const processExampleBatch = (
 };
 
 /**
+ * Mirrors judge verdicts recorded under a provider-reported `task.model.id` alias onto the matrix
+ * row's own model id. `aliasTraceKeys` does the same for trace cells; without this the reliability
+ * table keys judge agreement by `configured` id while the verdicts carry the alias, so a row scored
+ * entirely through an alias reads as having no judge agreement at all.
+ */
+export const aliasJudgeVerdicts = (
+  verdicts: JudgeVerdict[],
+  modelAliases: ReadonlyMap<string, readonly string[]>
+): void => {
+  const seen = new Set(verdicts.map((v) => `${v.modelId}\u0000${v.judgeId}`));
+  for (const [rowId, aliases] of modelAliases) {
+    const targetAliases = aliases.filter((alias) => alias !== rowId);
+    const candidates = verdicts.filter((verdict) => targetAliases.includes(verdict.modelId));
+    for (const verdict of candidates) {
+      const key = `${rowId}\u0000${verdict.judgeId}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        verdicts.push({ ...verdict, modelId: rowId });
+      }
+    }
+  }
+};
+
+/**
  * Mirrors trace cells keyed by a provider-reported `task.model.id` alias onto
  * the matrix row's own model id.
  */
@@ -652,5 +676,8 @@ export const queryMatrixTraces = async (
   log.debug(`Matrix traces resolved ${Object.keys(traces).length} trace entries`);
   overlayRepeatedCacheTrails(traces, traceCache);
   aliasTraceKeys(traces, modelAliases);
+  if (judgeVerdictsOut) {
+    aliasJudgeVerdicts(judgeVerdictsOut, modelAliases);
+  }
   return traces;
 };
