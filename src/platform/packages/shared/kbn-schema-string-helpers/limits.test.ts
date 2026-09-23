@@ -41,7 +41,9 @@ test('requires a nonempty explanation', () => {
 });
 
 test.each([-1, -0.5, 1.5, Infinity, NaN])('rejects invalid unbounded minLength %s', (minLength) => {
-  expect(() => assertValidMinLength(minLength)).toThrow('requires a non-negative integer minLength');
+  expect(() => assertValidMinLength(minLength)).toThrow(
+    'requires a non-negative integer minLength'
+  );
 });
 
 test('accepts valid unbounded minLength values', () => {
