@@ -74,7 +74,12 @@ export async function deleteExpiredHistorySnapshots({
 
   const now = new Date();
   const log = logger.get('deleteExpiredHistorySnapshots');
-  const patterns = await resolveHistorySnapshotIndexPatterns(esClient, namespace, abortSignal);
+  const patterns = await resolveHistorySnapshotIndexPatterns(
+    esClient,
+    namespace,
+    abortSignal,
+    true
+  );
 
   log.debug(`Matching history snapshot patterns ${JSON.stringify(patterns)}`);
 

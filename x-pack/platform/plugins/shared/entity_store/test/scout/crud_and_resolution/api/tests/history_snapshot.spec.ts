@@ -19,6 +19,7 @@ import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common';
 import {
   getHistorySnapshotIndexName,
   getLegacySecurityHistorySnapshotIndexName,
+  getLegacySecurityHistorySnapshotIndexPattern,
 } from '../../../../../server/domain/asset_manager/history_snapshot_index';
 import {
   clearEntityStoreIndices,
@@ -68,6 +69,12 @@ apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, ()
     });
     expect(response.statusCode).toBe(200);
     await clearEntityStoreIndices(esClient);
+    // clearEntityStoreIndices only covers the neutral history pattern; explicitly remove
+    // legacy security history indices so retention-test artifacts don't leak to later suites.
+    await esClient.indices.delete(
+      { index: getLegacySecurityHistorySnapshotIndexPattern('default'), ignore_unavailable: true },
+      { ignore: [404] }
+    );
     await teardownLogsTestDataStream(esClient);
   });
 
@@ -209,20 +216,13 @@ apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, ()
         utcDaysAgo(40, 0)
       );
 
-      await esClient.indices.delete(
-        {
-          index: [expiredIndex, withinRetentionIndex, recentIndex, expiredLegacyIndex],
-          ignore_unavailable: true,
-        },
-        { ignore: [404] }
+      // Skip-create (ignore 400) instead of delete-then-create: if an index already
+      // exists as a real snapshot, leave it — the retention assertions hold either way.
+      await Promise.all(
+        [expiredIndex, withinRetentionIndex, recentIndex, expiredLegacyIndex].map((idx) =>
+          esClient.indices.create({ index: idx }, { ignore: [400] })
+        )
       );
-
-      await Promise.all([
-        esClient.indices.create({ index: expiredIndex }),
-        esClient.indices.create({ index: withinRetentionIndex }),
-        esClient.indices.create({ index: recentIndex }),
-        esClient.indices.create({ index: expiredLegacyIndex }),
-      ]);
 
       const snapshotResponse = await apiClient.post(
         ENTITY_STORE_ROUTES.internal.FORCE_HISTORY_SNAPSHOT,

@@ -269,7 +269,7 @@ describe('history snapshot retention', () => {
         abortSignal: signal,
       });
 
-      expect(mockHasColliding).toHaveBeenCalledWith(esClient, namespace, signal);
+      expect(mockHasColliding).toHaveBeenCalledWith(esClient, namespace, signal, true);
       expect(esClient.indices.resolveIndex).toHaveBeenCalledWith(expect.anything(), { signal });
       expect(esClient.indices.delete).toHaveBeenCalledWith(expect.anything(), {
         signal,
