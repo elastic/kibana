@@ -8,28 +8,22 @@
  */
 
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
-import { EMBEDDABLE_EDITOR_MENU_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
-import { EDITOR_MENU_EDIT_FILTERS_ACTION } from '../editor_menu/constants';
+import { ACTION_REMOVE_PANEL } from './remove_panel_action/constants';
 import { registerActions } from './register_actions';
 
 describe('registerActions', () => {
-  it('registers the filters action with a loader', async () => {
+  it('does not register an edit-filters action', () => {
     const uiActions = uiActionsPluginMock.createSetupContract();
 
     registerActions(uiActions);
 
-    expect(uiActions.registerActionAsync).toHaveBeenCalledWith(
-      EDITOR_MENU_EDIT_FILTERS_ACTION,
+    expect(uiActions.registerActionAsync).not.toHaveBeenCalledWith(
+      'EDITOR_MENU_EDIT_FILTERS_ACTION',
       expect.any(Function)
     );
-    expect(uiActions.attachAction).toHaveBeenCalledWith(
-      EMBEDDABLE_EDITOR_MENU_TRIGGER,
-      EDITOR_MENU_EDIT_FILTERS_ACTION
+    expect(uiActions.registerActionAsync).toHaveBeenCalledWith(
+      ACTION_REMOVE_PANEL,
+      expect.any(Function)
     );
-    const loader = uiActions.registerActionAsync.mock.calls.find(
-      ([actionId]) => actionId === EDITOR_MENU_EDIT_FILTERS_ACTION
-    )?.[1];
-    if (!loader) throw new Error('Expected filters action loader');
-    expect((await loader()).id).toBe(EDITOR_MENU_EDIT_FILTERS_ACTION);
   });
 });

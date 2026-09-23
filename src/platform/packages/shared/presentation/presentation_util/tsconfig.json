@@ -16,5 +16,6 @@
     "@kbn/react-kibana-mount",
     "@kbn/core-mount-utils-browser",
     "@kbn/core-overlays-browser",
+    "@kbn/es-query",
   ]
 }

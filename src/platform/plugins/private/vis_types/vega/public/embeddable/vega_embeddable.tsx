@@ -18,6 +18,8 @@ import type {
   EmbeddablePublicDefinition,
   HasDrilldowns,
 } from '@kbn/embeddable-plugin/public';
+import { openLazySystemFlyout, type EditorFlyoutSearchBarProps } from '@kbn/presentation-util';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { BehaviorSubject, combineLatest, map, merge, skip, switchMap, tap } from 'rxjs';
 import { isOfQueryType, type AggregateQuery, type Filter, type Query } from '@kbn/es-query';
 import { parse } from 'hjson';
@@ -48,7 +50,6 @@ import {
   titleComparators,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
-import { openLazySystemFlyout, tracksOverlays } from '@kbn/presentation-util';
 import {
   VEGA_EMBEDDABLE_TYPE,
   VEGA_STANDALONE_EMBEDDABLE_FLAG,
@@ -67,6 +68,7 @@ import { createInspectorAdapters } from '../vega_inspector';
 import type { VegaByValueState } from '../../server';
 import {
   createVegaEditorMenuManager,
+  createVegaEditorMenuServices,
   type VegaEditorRenderParams,
 } from './vega_editor_menu_session';
 // Frame only. The spec editor stays a separate lazy chunk inside this module, so Edit does not
@@ -143,7 +145,8 @@ export type VegaEmbeddableApi = DefaultEmbeddableApi<VegaByValueState> &
   };
 
 interface VegaEmbeddableDependencies {
-  uiActions: Pick<VegaPluginStartDependencies['uiActions'], 'executeTriggerActions'>;
+  uiActions: Pick<VegaPluginStartDependencies['uiActions'], 'executeTriggerActions' | 'getAction'>;
+  SearchBar: UnifiedSearchPublicPluginStart['ui']['SearchBar'];
   visualizationDependencies: VegaVisualizationDependencies;
 }
 
@@ -268,6 +271,9 @@ export const vegaEmbeddableFactory = (
       return (
         <VegaEditorFlyout
           menuManager={menuManager}
+          SearchBar={({ indexPatterns, ...props }: EditorFlyoutSearchBarProps) => (
+            <deps.SearchBar {...props} indexPatterns={indexPatterns as DataView[]} />
+          )}
           ariaLabelledBy={ariaLabelledBy}
           closeFlyout={closeFlyout}
           initialSpec={initialSpec}
@@ -306,9 +312,10 @@ export const vegaEmbeddableFactory = (
       isEditingEnabled: () => true,
       renderEditor,
       onEdit: async ({ isNewPanel = false, returnFocus } = {}) => {
-        const flyoutType =
-          tracksOverlays(parentApi) && parentApi.panelFlyoutType === 'overlay' ? 'overlay' : 'push';
-        const menuManager = createVegaEditorMenuManager(flyoutType, api);
+        const menuManager = createVegaEditorMenuManager(
+          createVegaEditorMenuServices(core, deps.uiActions),
+          api
+        );
         const flyoutRef = openLazySystemFlyout({
           core,
           parentApi,
@@ -358,12 +365,7 @@ export const vegaEmbeddableFactory = (
       rendered$.next(true);
     };
 
-    const fetchSubscription = combineLatest([
-      spec$,
-      fetch$(api),
-      query$,
-      filters$,
-    ])
+    const fetchSubscription = combineLatest([spec$, fetch$(api), query$, filters$])
       .pipe(
         switchMap(async ([spec, data, panelQuery, panelFilters]) => {
           abortController.abort();

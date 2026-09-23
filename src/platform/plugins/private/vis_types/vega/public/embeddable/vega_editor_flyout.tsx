@@ -13,29 +13,55 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiSkeletonText,
   EuiTitle,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { EditorMenuManager } from '@kbn/embeddable-plugin/public';
+import {
+  EditorFlyoutBody,
+  type EditorFlyoutSearchBarProps,
+  type EditorMenuManager,
+} from '@kbn/presentation-util';
+import { isOfQueryType, type Filter, type Query } from '@kbn/es-query';
+import {
+  apiPublishesWritableUnifiedSearch,
+  useStateFromPublishingSubject,
+  type PublishesWritableUnifiedSearch,
+} from '@kbn/presentation-publishing';
+import { isEqual } from 'lodash';
 import { VegaEditorMenu } from './vega_editor_menu';
 import type { VegaByValueState } from '../../server';
+
+interface PanelSearchState {
+  query: Query | undefined;
+  filters: Filter[] | undefined;
+}
+
+const emptySearch: PanelSearchState = { query: undefined, filters: undefined };
+
+const readPanelSearch = (api: PublishesWritableUnifiedSearch | undefined): PanelSearchState => {
+  if (!api) return emptySearch;
+  const published = api.query$.getValue();
+  let query: Query | undefined;
+  if (
+    isOfQueryType(published) &&
+    typeof published.query === 'string' &&
+    published.query.trim() !== ''
+  ) {
+    query = { language: published.language, query: published.query };
+  }
+  const filters = api.filters$.getValue();
+  return { query, filters: filters && filters.length > 0 ? filters : undefined };
+};
+
+const sameSearch = (left: PanelSearchState, right: PanelSearchState): boolean =>
+  isEqual(left.query, right.query) && isEqual(left.filters ?? [], right.filters ?? []);
 
 const VegaSpecEditor = lazy(() =>
   import('../components/vega_vis_editor').then((module) => ({ default: module.VegaSpecEditor }))
 );
-
-const bodyCss = css({
-  '.euiFlyoutBody__overflowContent': {
-    display: 'flex',
-    height: '100%',
-    '.vgaEditor': { minHeight: 0 },
-  },
-});
 
 const specFromEditor = (
   text: string,
@@ -56,12 +82,14 @@ export const VegaEditorFlyout = ({
   closeFlyout,
   initialSpec,
   menuManager,
+  SearchBar,
   isNewPanel = false,
   onPreview,
   onRevert,
   onSave,
 }: {
   menuManager: EditorMenuManager;
+  SearchBar: React.ComponentType<EditorFlyoutSearchBarProps>;
   ariaLabelledBy: string;
   closeFlyout: () => void;
   initialSpec: VegaByValueState['spec'];
@@ -76,11 +104,44 @@ export const VegaEditorFlyout = ({
   const [spec, setSpec] = useState(initialEditorValue);
   const [previewedSpec, setPreviewedSpec] = useState(initialEditorValue);
   const [format, setFormat] = useState<VegaByValueState['spec']['format']>(initialSpec.format);
-  const canPreview = spec !== previewedSpec;
-  const canSave = isNewPanel || spec !== initialEditorValue;
+  const api = useStateFromPublishingSubject(menuManager.panelApi$);
+  const searchApi = apiPublishesWritableUnifiedSearch(api) ? api : undefined;
+  const [search, setSearch] = useState<PanelSearchState>(emptySearch);
+  const [previewedSearch, setPreviewedSearch] = useState<PanelSearchState>(emptySearch);
+  const [searchReady, setSearchReady] = useState(false);
+  const openedSearchRef = useRef<PanelSearchState | null>(null);
+
+  useEffect(() => {
+    if (!searchApi) return;
+    const sync = () => {
+      const next = readPanelSearch(searchApi);
+      setSearch((current) => (sameSearch(current, next) ? current : next));
+    };
+    if (!openedSearchRef.current) {
+      const initial = readPanelSearch(searchApi);
+      openedSearchRef.current = initial;
+      setPreviewedSearch(initial);
+      setSearch(initial);
+      setSearchReady(true);
+    }
+    sync();
+    const querySubscription = searchApi.query$.subscribe(sync);
+    const filtersSubscription = searchApi.filters$.subscribe(sync);
+    return () => {
+      querySubscription.unsubscribe();
+      filtersSubscription.unsubscribe();
+    };
+  }, [searchApi]);
+
+  const openedSearch = openedSearchRef.current ?? emptySearch;
+  const searchChanged = searchReady && !sameSearch(search, openedSearch);
+  const searchUnpreviewed = searchReady && !sameSearch(search, previewedSearch);
+  const canPreview = spec !== previewedSpec || searchUnpreviewed;
+  const canSave = isNewPanel || spec !== initialEditorValue || searchChanged;
   const previewChanges = () => {
     onPreview(specFromEditor(spec, format));
     setPreviewedSpec(spec);
+    setPreviewedSearch(search);
   };
 
   // Revert on unmount unless the user saved. A ref holds the latest callback without re-arming the
@@ -99,6 +160,7 @@ export const VegaEditorFlyout = ({
 
   const handleSave = () => {
     saved.current = true;
+    menuManager.commitSession();
     onSave(specFromEditor(spec, format));
     closeFlyout();
   };
@@ -109,7 +171,7 @@ export const VegaEditorFlyout = ({
           <h2 id={ariaLabelledBy}>Vega</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody css={bodyCss}>
+      <EditorFlyoutBody menuManager={menuManager} SearchBar={SearchBar}>
         <Suspense
           fallback={
             <EuiSkeletonText
@@ -129,7 +191,7 @@ export const VegaEditorFlyout = ({
             onFormatChange={setFormat}
           />
         </Suspense>
-      </EuiFlyoutBody>
+      </EditorFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>

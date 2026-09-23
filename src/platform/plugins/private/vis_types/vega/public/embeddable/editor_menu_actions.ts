@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { EditorMenuActionContext } from '@kbn/embeddable-plugin/public';
+import type { EditorMenuActionContext } from '@kbn/presentation-util';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { VEGA_EMBEDDABLE_TYPE } from '../../common/constants';
 import { VEGA_EDITOR_HELP_ACTION, VEGA_EDITOR_OPTIONS_ACTION } from '../constants';

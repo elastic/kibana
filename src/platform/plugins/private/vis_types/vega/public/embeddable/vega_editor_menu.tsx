@@ -11,7 +11,7 @@ import React from 'react';
 import { EuiWrappingPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import type { EditorMenuManager } from '@kbn/embeddable-plugin/public';
+import type { EditorMenuManager } from '@kbn/presentation-util';
 import type { VegaActionsMenuProps } from '../components/vega_actions_menu';
 import { VegaActionsMenuContent } from '../components/vega_actions_menu';
 import { VegaHelpMenuContent } from '../components/vega_help_menu';

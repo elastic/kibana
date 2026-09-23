@@ -15,6 +15,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { initializeDrilldownsManager } from '@kbn/embeddable-plugin/public/drilldowns/drilldowns_manager';
 import { openLazySystemFlyout } from '@kbn/presentation-util';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 import { ESQLVariableType } from '@kbn/esql-types';
 import { getESQLQueryVariables } from '@kbn/esql-utils';
@@ -147,7 +148,8 @@ describe('vegaEmbeddableFactory', () => {
       key === VEGA_STANDALONE_EMBEDDABLE_FLAG ? standaloneEmbeddableEnabled : fallback
     );
     const factory = vegaEmbeddableFactory(coreStart, {
-      uiActions: { executeTriggerActions },
+      uiActions: { executeTriggerActions, getAction: jest.fn() },
+      SearchBar: (() => null) as UnifiedSearchPublicPluginStart['ui']['SearchBar'],
       visualizationDependencies,
     });
     const uuid = 'vega-panel';
@@ -426,7 +428,6 @@ describe('vegaEmbeddableFactory', () => {
             trailingActions: [
               expect.objectContaining({ 'aria-label': 'Vega editor options', iconType: 'gear' }),
               expect.objectContaining({ 'aria-label': 'Vega help', iconType: 'question' }),
-              expect.objectContaining({ 'aria-label': 'Edit filters', iconType: 'filter' }),
             ],
           }),
         }),
@@ -444,14 +445,14 @@ describe('vegaEmbeddableFactory', () => {
 
     await api.onEdit();
     const flyout = mockOpenLazyFlyout.mock.calls[0][0];
-    const content = (await flyout.loadContent({
+    const wrapped = (await flyout.loadContent({
       ariaLabelledBy: 'vega-flyout-title',
       closeFlyout: jest.fn(),
     })) as React.ReactElement<{ menuManager: { activeMenu$: BehaviorSubject<unknown> } }>;
 
     closeEditor();
     await onClose;
-    expect(content.props.menuManager.activeMenu$.isStopped).toBe(true);
+    expect(wrapped.props.menuManager.activeMenu$.isStopped).toBe(true);
   });
 
   it('restores the original spec when editing is cancelled', async () => {

@@ -56,6 +56,7 @@ const vegaVisStyles = {
     '&.vgaEditor': {
       width: '100%',
       flexGrow: 1,
+      minHeight: 0,
 
       '.kibanaCodeEditor': {
         width: '100%',

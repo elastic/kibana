@@ -19,20 +19,23 @@
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
 import { ADD_PANEL_VISUALIZATION_GROUP } from '@kbn/embeddable-plugin/public';
+import { openLazySystemFlyout } from '@kbn/presentation-util';
 import {
   apiCanAddNewPanel,
   apiIsPresentationContainer,
   type EmbeddableApiContext,
 } from '@kbn/presentation-publishing';
-import { openLazySystemFlyout, tracksOverlays } from '@kbn/presentation-util';
-import type { Action } from '@kbn/ui-actions-plugin/public';
+import type { Action, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { VEGA_EMBEDDABLE_TYPE } from '../../common/constants';
 import type { VegaByValueState } from '../../server';
 import { ADD_VEGA_EMBEDDABLE_ACTION_ID } from '../constants';
 import { getDefaultSpec } from '../default_spec';
 import { VegaPanelIcon } from '../vega_icon';
-import { createVegaEditorMenuManager } from './vega_editor_menu_session';
+import {
+  createVegaEditorMenuManager,
+  createVegaEditorMenuServices,
+} from './vega_editor_menu_session';
 import type { VegaEmbeddableApi } from './vega_embeddable';
 
 export class AddVegaEmbeddableAction implements Action<EmbeddableApiContext> {
@@ -41,7 +44,10 @@ export class AddVegaEmbeddableAction implements Action<EmbeddableApiContext> {
   public order = 0;
   public grouping = [ADD_PANEL_VISUALIZATION_GROUP];
 
-  constructor(private readonly core: CoreStart) {}
+  constructor(
+    private readonly core: CoreStart,
+    private readonly uiActions: Pick<UiActionsStart, 'getAction'>
+  ) {}
 
   public getIconType() {
     return VegaPanelIcon;
@@ -64,9 +70,9 @@ export class AddVegaEmbeddableAction implements Action<EmbeddableApiContext> {
 
   public async execute({ embeddable, returnFocus }: EmbeddableApiContext) {
     if (!apiCanAddNewPanel(embeddable)) throw new IncompatibleActionError();
-    const flyoutType =
-      tracksOverlays(embeddable) && embeddable.panelFlyoutType === 'overlay' ? 'overlay' : 'push';
-    const menuManager = createVegaEditorMenuManager(flyoutType);
+    const menuManager = createVegaEditorMenuManager(
+      createVegaEditorMenuServices(this.core, this.uiActions)
+    );
     let closed = false;
     const flyoutRef = openLazySystemFlyout({
       core: this.core,

@@ -22,6 +22,7 @@ import type { MapsEmsPluginPublicStart } from '@kbn/maps-ems-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import {
   ADD_CANVAS_ELEMENT_TRIGGER,
   ADD_PANEL_TRIGGER,
@@ -79,6 +80,7 @@ export interface VegaPluginStartDependencies {
   mapsEms: MapsEmsPluginPublicStart;
   dataViews: DataViewsPublicPluginStart;
   uiActions: UiActionsStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
   usageCollection: UsageCollectionStart;
   inspector: InspectorStart;
 }
@@ -125,6 +127,7 @@ export class VegaPlugin implements Plugin<void, void> {
       const { vegaEmbeddableFactory } = await import('./embeddable/vega_embeddable');
       return vegaEmbeddableFactory(startCore, {
         uiActions: startDeps.uiActions,
+        SearchBar: startDeps.unifiedSearch.ui.SearchBar,
         visualizationDependencies,
       });
     });
@@ -164,7 +167,7 @@ export class VegaPlugin implements Plugin<void, void> {
     // existing panels still render after a flag rollback.
     deps.uiActions.registerActionAsync(ADD_VEGA_EMBEDDABLE_ACTION_ID, async () => {
       const { AddVegaEmbeddableAction } = await import('./embeddable/add_vega_embeddable_action');
-      return new AddVegaEmbeddableAction(core);
+      return new AddVegaEmbeddableAction(core, deps.uiActions);
     });
 
     // The feature flag swaps both Dashboard and Canvas from legacy Visualize action to the

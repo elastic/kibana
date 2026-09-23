@@ -25,16 +25,21 @@ import { AddVegaEmbeddableAction } from './add_vega_embeddable_action';
 
 jest.mock('../default_spec', () => ({ getDefaultSpec: () => '{ mark: point }' }));
 jest.mock('@kbn/presentation-util', () => ({
+  ...jest.requireActual('@kbn/presentation-util'),
   openLazySystemFlyout: jest.fn(() => ({ onClose: new Promise(() => undefined) })),
   tracksOverlays: jest.fn(() => false),
 }));
 
 const mockOpenLazySystemFlyout = jest.mocked(openLazySystemFlyout);
-const core = { overlays: {} } as CoreStart;
+const core = {
+  notifications: { toasts: { addError: jest.fn() } },
+  overlays: {},
+} as unknown as CoreStart;
+const uiActions = { getAction: jest.fn() };
 
 describe('AddVegaEmbeddableAction', () => {
   it('uses the Vega SVG icon in the add panel menu', () => {
-    const action = new AddVegaEmbeddableAction(core);
+    const action = new AddVegaEmbeddableAction(core, uiActions);
 
     expect(action.getIconType()).toBe(VegaPanelIcon);
   });
@@ -53,7 +58,7 @@ describe('AddVegaEmbeddableAction', () => {
     );
     const returnFocus = jest.fn();
 
-    await new AddVegaEmbeddableAction(core).execute({
+    await new AddVegaEmbeddableAction(core, uiActions).execute({
       embeddable: { addNewPanel },
       returnFocus,
     });
@@ -69,7 +74,6 @@ describe('AddVegaEmbeddableAction', () => {
     expect(flyoutProps?.flyoutMenuProps?.trailingActions).toEqual([
       expect.objectContaining({ iconType: 'gear' }),
       expect.objectContaining({ iconType: 'question' }),
-      expect.objectContaining({ 'aria-label': 'Edit filters', iconType: 'filter' }),
     ]);
 
     const loading = loadContent({ ariaLabelledBy: 'vega-title', closeFlyout: jest.fn() });
