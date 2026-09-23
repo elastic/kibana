@@ -663,6 +663,7 @@ paths:
           name: id
           required: true
           schema:
+            maxLength: 36
             type: string
       requestBody:
         content:
@@ -1805,21 +1806,24 @@ paths:
                     access_control:
                       access_mode: private
                       entries:
-                        - name: bob
+                        - added_at: '2026-02-11T10:15:00.000Z'
+                          id: u_bob_profile_uid
                           role: user
                           type: user
                     permissions:
                       update_access_control: false
                 getAgentAccessControlResponseExample:
-                  description: Example response for a caller who can manage access control — the agent has two grantees.
+                  description: Example response for a caller who can manage access control — the agent has two grantees keyed on their Kibana user profile uid.
                   value:
                     access_control:
                       access_mode: private
                       entries:
-                        - name: alice
+                        - added_at: '2026-02-11T10:15:00.000Z'
+                          id: u_alice_profile_uid
                           role: editor
                           type: user
-                        - name: bob
+                        - added_at: '2026-02-11T10:15:00.000Z'
+                          id: u_bob_profile_uid
                           role: user
                           type: user
                     permissions:
@@ -1849,7 +1853,7 @@ paths:
         - lang: Console
           source: |
             GET kbn://api/agent_builder/agents/{id}/access_control
-      x-state: ''
+      x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -1861,7 +1865,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Replace the per-agent access-control entries. The agent owner, cluster admins, and anyone access control grants Manager can call this endpoint. Each call replaces the entire entries list — the most recent successful update wins. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).<br/><br/>[Required authorization] Route required privileges: agentBuilder:manageAgents.
+        Replace the per-agent access-control entries. Each entry grants one user a role on this agent. Identify the user by their Kibana user profile uid (`id`). Entries created before profile uids were adopted may use `name` (deprecated) instead. The agent owner, cluster admins, and anyone access control grants Manager can call this endpoint. Each call replaces the entire entries list — the most recent successful update wins. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).<br/><br/>[Required authorization] Route required privileges: agentBuilder:manageAgents.
       operationId: put-agent-builder-agents-id-access-control
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -1886,13 +1890,13 @@ paths:
                 value:
                   entries: []
               updateAgentAccessControlRequestExample:
-                description: Example request granting two users access to the agent — Alice as Editor (can update the agent and its access control), Bob as User (can run the agent).
+                description: Example request granting two users access to the agent by their Kibana user profile uid — Alice as Editor (can update the agent configuration), Bob as User (can run the agent).
                 value:
                   entries:
-                    - name: alice
+                    - id: u_alice_profile_uid
                       role: editor
                       type: user
-                    - name: bob
+                    - id: u_bob_profile_uid
                       role: user
                       type: user
             schema:
@@ -1900,18 +1904,24 @@ paths:
               type: object
               properties:
                 entries:
-                  description: Access-control entries to apply to the agent. Each entry has a `type` (currently only `user` is supported), a `name` (the principal username), and a `role`.
+                  description: Access-control entries to apply to the agent. Each entry has a `type` (for example `user`), a `role`, and either an `id` (the principal user profile uid, preferred) or a deprecated `name` (username).
                   items:
                     additionalProperties: false
                     type: object
                     properties:
+                      id:
+                        description: Stable identifier of the user to grant access to (Kibana user profile uid). Preferred over `name`.
+                        maxLength: 1024
+                        minLength: 1
+                        type: string
+                        x-state: Technical Preview
                       name:
-                        description: Case-sensitive Kibana username of the principal to grant access to.
+                        description: Case-sensitive Kibana username of the user to grant access to. Still supported, but `id` is preferred for new grants because a username cannot distinguish same-named users across authentication realms.
                         maxLength: 1024
                         minLength: 1
                         type: string
                       role:
-                        description: 'Role granted to the principal. Roles are hierarchical: `user` allows viewing, listing, reading, and running the agent; `editor` adds updating the agent and its access control; `manager` adds deleting the agent and managing access control.'
+                        description: 'Role granted to the principal. Roles are hierarchical: `user` allows viewing, listing, reading, and running the agent; `editor` adds updating the agent configuration; `manager` adds deleting the agent and managing its access control.'
                         enum:
                           - user
                           - editor
@@ -1923,7 +1933,6 @@ paths:
                         type: string
                     required:
                       - type
-                      - name
                       - role
                   maxItems: 100
                   type: array
@@ -1939,10 +1948,12 @@ paths:
                   value:
                     access_mode: private
                     entries:
-                      - name: alice
+                      - added_at: '2026-02-11T10:15:00.000Z'
+                        id: u_alice_profile_uid
                         role: editor
                         type: user
-                      - name: bob
+                      - added_at: '2026-02-11T10:15:00.000Z'
+                        id: u_bob_profile_uid
                         role: user
                         type: user
           description: Indicates a successful response
@@ -1990,8 +2001,8 @@ paths:
               -H "Content-Type: application/json" \
               -d '{
                 "entries": [
-                  { "type": "user", "name": "alice", "role": "editor" },
-                  { "type": "user", "name": "bob", "role": "user" }
+                  { "type": "user", "id": "u_alice_profile_uid", "role": "editor" },
+                  { "type": "user", "id": "u_bob_profile_uid", "role": "user" }
                 ]
               }'
         - lang: Console
@@ -1999,11 +2010,11 @@ paths:
             PUT kbn://api/agent_builder/agents/{id}/access_control
             {
               "entries": [
-                { "type": "user", "name": "alice", "role": "editor" },
-                { "type": "user", "name": "bob", "role": "user" }
+                { "type": "user", "id": "u_alice_profile_uid", "role": "editor" },
+                { "type": "user", "id": "u_bob_profile_uid", "role": "user" }
               ]
             }
-      x-state: ''
+      x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -9685,7 +9696,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Apply a partial update to an existing action policy. Fields not present in the body are left unchanged.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-action-policies.
+        Apply a partial update to an existing action policy. Fields not present in the body are left unchanged.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-action-policies AND read_alerting-v2-rules.
       operationId: patch-alerting-v2-action-policies-id
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -13770,7 +13781,7 @@ paths:
                     - rule-1
                     - rule-2
             schema:
-              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_get_rules_request'
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_by_ids_request'
       responses:
         '200':
           content:
@@ -15681,508 +15692,6 @@ paths:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Run a rule now
-      tags:
-        - alerting-v2
-      x-state: Experimental
-      x-metaTags:
-        - content: Kibana, Elastic Cloud Serverless
-          name: product_name
-  /api/alerting/v2/series/_bulk_snooze:
-    post:
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/series/_bulk_snooze</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Create the same action for multiple alert episode series in a single request.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
-      operationId: post-alerting-v2-series-bulk-snooze
-      parameters:
-        - description: A required header to protect against CSRF attacks
-          in: header
-          name: kbn-xsrf
-          required: true
-          schema:
-            example: 'true'
-            type: string
-      requestBody:
-        content:
-          application/json:
-            examples:
-              bulkSnoozeSeriesActionRequest:
-                summary: Snooze one series until a date and one indefinitely
-                value:
-                  items:
-                    - expiry: '2026-01-16T12:00:00.000Z'
-                      group_hash: group-hash-1
-                    - group_hash: group-hash-2
-            schema:
-              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_snooze_series_request'
-      responses:
-        '200':
-          content:
-            application/json:
-              examples:
-                bulkSnoozeSeriesActionResponse:
-                  summary: All actions created
-                  value:
-                    affected_count: 2
-                    errors: []
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_operation_response'
-          description: Returns the number of created actions and per-item errors for actions that were not created.
-        '400':
-          content:
-            application/json:
-              examples:
-                invalidRequest:
-                  summary: Items list is empty
-                  value:
-                    code: BAD_REQUEST
-                    details:
-                      errors:
-                        items:
-                          - At least one action must be provided
-                    error: Bad Request
-                    message: 'items: At least one action must be provided'
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates an invalid schema or parameters.
-        '401':
-          content:
-            application/json:
-              examples:
-                unauthorized:
-                  summary: Request was not authenticated
-                  value:
-                    code: UNAUTHORIZED
-                    error: Unauthorized
-                    message: Authentication required to access this API.
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the request was not authenticated.
-        '403':
-          content:
-            application/json:
-              examples:
-                forbidden:
-                  summary: Caller lacks required privileges
-                  value:
-                    code: FORBIDDEN
-                    error: Forbidden
-                    message: The current user does not have the required privileges for this request.
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the user does not have the required privileges to perform the request.
-        '500':
-          content:
-            application/json:
-              examples:
-                internalServerError:
-                  summary: Unexpected server-side error
-                  value:
-                    code: INTERNAL_SERVER_ERROR
-                    error: Internal Server Error
-                    message: An unexpected error occurred.
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates an unexpected server-side error.
-        '503':
-          content:
-            application/json:
-              examples:
-                alertingDisabled:
-                  summary: Alerting V2 is disabled
-                  value:
-                    code: ALERTING_DISABLED
-                    error: Service Unavailable
-                    message: Alerting is disabled.
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
-      summary: Bulk snooze alert episode series
-      tags:
-        - alerting-v2
-      x-state: Experimental
-      x-metaTags:
-        - content: Kibana, Elastic Cloud Serverless
-          name: product_name
-  /api/alerting/v2/series/_bulk_unsnooze:
-    post:
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/series/_bulk_unsnooze</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Create the same action for multiple alert episode series in a single request.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
-      operationId: post-alerting-v2-series-bulk-unsnooze
-      parameters:
-        - description: A required header to protect against CSRF attacks
-          in: header
-          name: kbn-xsrf
-          required: true
-          schema:
-            example: 'true'
-            type: string
-      requestBody:
-        content:
-          application/json:
-            examples:
-              bulkUnsnoozeSeriesActionRequest:
-                summary: Clear the snooze on two alert episode series
-                value:
-                  items:
-                    - group_hash: group-hash-1
-                    - group_hash: group-hash-2
-            schema:
-              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_unsnooze_series_request'
-      responses:
-        '200':
-          content:
-            application/json:
-              examples:
-                bulkUnsnoozeSeriesActionResponse:
-                  summary: All actions created
-                  value:
-                    affected_count: 2
-                    errors: []
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_operation_response'
-          description: Returns the number of created actions and per-item errors for actions that were not created.
-        '400':
-          content:
-            application/json:
-              examples:
-                invalidRequest:
-                  summary: Items list is empty
-                  value:
-                    code: BAD_REQUEST
-                    details:
-                      errors:
-                        items:
-                          - At least one action must be provided
-                    error: Bad Request
-                    message: 'items: At least one action must be provided'
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates an invalid schema or parameters.
-        '401':
-          content:
-            application/json:
-              examples:
-                unauthorized:
-                  summary: Request was not authenticated
-                  value:
-                    code: UNAUTHORIZED
-                    error: Unauthorized
-                    message: Authentication required to access this API.
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the request was not authenticated.
-        '403':
-          content:
-            application/json:
-              examples:
-                forbidden:
-                  summary: Caller lacks required privileges
-                  value:
-                    code: FORBIDDEN
-                    error: Forbidden
-                    message: The current user does not have the required privileges for this request.
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the user does not have the required privileges to perform the request.
-        '500':
-          content:
-            application/json:
-              examples:
-                internalServerError:
-                  summary: Unexpected server-side error
-                  value:
-                    code: INTERNAL_SERVER_ERROR
-                    error: Internal Server Error
-                    message: An unexpected error occurred.
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates an unexpected server-side error.
-        '503':
-          content:
-            application/json:
-              examples:
-                alertingDisabled:
-                  summary: Alerting V2 is disabled
-                  value:
-                    code: ALERTING_DISABLED
-                    error: Service Unavailable
-                    message: Alerting is disabled.
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
-      summary: Bulk unsnooze alert episode series
-      tags:
-        - alerting-v2
-      x-state: Experimental
-      x-metaTags:
-        - content: Kibana, Elastic Cloud Serverless
-          name: product_name
-  /api/alerting/v2/series/{group_hash}/_snooze:
-    post:
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/series/{group_hash}/_snooze</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Create an action for a specific alert episode series.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
-      operationId: post-alerting-v2-series-group-hash-snooze
-      parameters:
-        - description: A required header to protect against CSRF attacks
-          in: header
-          name: kbn-xsrf
-          required: true
-          schema:
-            example: 'true'
-            type: string
-        - description: Hash identifying the alert episode series to apply the action to.
-          in: path
-          name: group_hash
-          required: true
-          schema:
-            maxLength: 256
-            minLength: 1
-            type: string
-      requestBody:
-        content:
-          application/json:
-            examples:
-              createSnoozeSeriesActionRequest:
-                summary: Snooze until 2026-01-16T12:00:00.000Z
-                value:
-                  expiry: '2026-01-16T12:00:00.000Z'
-            schema:
-              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_new_snooze_series_action'
-      responses:
-        '204':
-          description: Indicates the action was created.
-        '400':
-          content:
-            application/json:
-              examples:
-                invalidRequest:
-                  summary: Path is missing required group_hash.
-                  value:
-                    code: BAD_REQUEST
-                    details:
-                      errors:
-                        group_hash:
-                          - Required
-                    error: Bad Request
-                    message: 'group_hash: Required'
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates an invalid schema or parameters.
-        '401':
-          content:
-            application/json:
-              examples:
-                unauthorized:
-                  summary: Request was not authenticated
-                  value:
-                    code: UNAUTHORIZED
-                    error: Unauthorized
-                    message: Authentication required to access this API.
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the request was not authenticated.
-        '403':
-          content:
-            application/json:
-              examples:
-                forbidden:
-                  summary: Caller lacks required privileges
-                  value:
-                    code: FORBIDDEN
-                    error: Forbidden
-                    message: The current user does not have the required privileges for this request.
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the user does not have the required privileges to perform the request.
-        '404':
-          content:
-            application/json:
-              examples:
-                alertSeriesNotFound:
-                  summary: No alert episode series exists for the given group_hash
-                  value:
-                    code: ALERT_EVENT_NOT_FOUND
-                    details:
-                      group_hash: group-hash-1
-                    error: Not Found
-                    message: Alert series with group_hash [group-hash-1] not found
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alert episode series was not found.
-        '500':
-          content:
-            application/json:
-              examples:
-                internalServerError:
-                  summary: Unexpected server-side error
-                  value:
-                    code: INTERNAL_SERVER_ERROR
-                    error: Internal Server Error
-                    message: An unexpected error occurred.
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates an unexpected server-side error.
-        '503':
-          content:
-            application/json:
-              examples:
-                alertingDisabled:
-                  summary: Alerting V2 is disabled
-                  value:
-                    code: ALERTING_DISABLED
-                    error: Service Unavailable
-                    message: Alerting is disabled.
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
-      summary: Snooze an alert episode series
-      tags:
-        - alerting-v2
-      x-state: Experimental
-      x-metaTags:
-        - content: Kibana, Elastic Cloud Serverless
-          name: product_name
-  /api/alerting/v2/series/{group_hash}/_unsnooze:
-    post:
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/series/{group_hash}/_unsnooze</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Create an action for a specific alert episode series.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
-      operationId: post-alerting-v2-series-group-hash-unsnooze
-      parameters:
-        - description: A required header to protect against CSRF attacks
-          in: header
-          name: kbn-xsrf
-          required: true
-          schema:
-            example: 'true'
-            type: string
-        - description: Hash identifying the alert episode series to apply the action to.
-          in: path
-          name: group_hash
-          required: true
-          schema:
-            maxLength: 256
-            minLength: 1
-            type: string
-      requestBody:
-        content:
-          application/json:
-            examples:
-              createUnsnoozeSeriesActionRequest:
-                summary: Clear the current snooze
-                value: {}
-            schema:
-              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_new_unsnooze_series_action'
-      responses:
-        '204':
-          description: Indicates the action was created.
-        '400':
-          content:
-            application/json:
-              examples:
-                invalidRequest:
-                  summary: Path is missing required group_hash.
-                  value:
-                    code: BAD_REQUEST
-                    details:
-                      errors:
-                        group_hash:
-                          - Required
-                    error: Bad Request
-                    message: 'group_hash: Required'
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates an invalid schema or parameters.
-        '401':
-          content:
-            application/json:
-              examples:
-                unauthorized:
-                  summary: Request was not authenticated
-                  value:
-                    code: UNAUTHORIZED
-                    error: Unauthorized
-                    message: Authentication required to access this API.
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the request was not authenticated.
-        '403':
-          content:
-            application/json:
-              examples:
-                forbidden:
-                  summary: Caller lacks required privileges
-                  value:
-                    code: FORBIDDEN
-                    error: Forbidden
-                    message: The current user does not have the required privileges for this request.
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the user does not have the required privileges to perform the request.
-        '404':
-          content:
-            application/json:
-              examples:
-                alertSeriesNotFound:
-                  summary: No alert episode series exists for the given group_hash
-                  value:
-                    code: ALERT_EVENT_NOT_FOUND
-                    details:
-                      group_hash: group-hash-1
-                    error: Not Found
-                    message: Alert series with group_hash [group-hash-1] not found
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alert episode series was not found.
-        '500':
-          content:
-            application/json:
-              examples:
-                internalServerError:
-                  summary: Unexpected server-side error
-                  value:
-                    code: INTERNAL_SERVER_ERROR
-                    error: Internal Server Error
-                    message: An unexpected error occurred.
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates an unexpected server-side error.
-        '503':
-          content:
-            application/json:
-              examples:
-                alertingDisabled:
-                  summary: Alerting V2 is disabled
-                  value:
-                    code: ALERTING_DISABLED
-                    error: Service Unavailable
-                    message: Alerting is disabled.
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
-      summary: Unsnooze an alert episode series
       tags:
         - alerting-v2
       x-state: Experimental
@@ -42456,7 +41965,7 @@ paths:
                           type: string
                           x-state: Experimental
                         iac_deployment_id:
-                          description: Identifier of the last CloudFormation stack deployed for this connector.
+                          description: ARN of the last CloudFormation stack deployed for this connector (`arn:<partition>:cloudformation:<region>:<account>:stack/<name>/<id>`).
                           maxLength: 2048
                           minLength: 1
                           type: string
@@ -42613,7 +42122,7 @@ paths:
                   type: string
                   x-state: Experimental
                 iac_deployment_id:
-                  description: Identifier of the last CloudFormation stack deployed for this connector.
+                  description: ARN of the last CloudFormation stack deployed for this connector (`arn:<partition>:cloudformation:<region>:<account>:stack/<name>/<id>`).
                   maxLength: 2048
                   minLength: 1
                   type: string
@@ -42720,7 +42229,7 @@ paths:
                         type: string
                         x-state: Experimental
                       iac_deployment_id:
-                        description: Identifier of the last CloudFormation stack deployed for this connector.
+                        description: ARN of the last CloudFormation stack deployed for this connector (`arn:<partition>:cloudformation:<region>:<account>:stack/<name>/<id>`).
                         maxLength: 2048
                         minLength: 1
                         type: string
@@ -42964,7 +42473,7 @@ paths:
                         type: string
                         x-state: Experimental
                       iac_deployment_id:
-                        description: Identifier of the last CloudFormation stack deployed for this connector.
+                        description: ARN of the last CloudFormation stack deployed for this connector (`arn:<partition>:cloudformation:<region>:<account>:stack/<name>/<id>`).
                         maxLength: 2048
                         minLength: 1
                         type: string
@@ -43116,7 +42625,7 @@ paths:
                   type: string
                   x-state: Experimental
                 iac_deployment_id:
-                  description: Identifier of the last CloudFormation stack deployed for this connector.
+                  description: ARN of the last CloudFormation stack deployed for this connector (`arn:<partition>:cloudformation:<region>:<account>:stack/<name>/<id>`).
                   maxLength: 2048
                   minLength: 1
                   type: string
@@ -43219,7 +42728,7 @@ paths:
                         type: string
                         x-state: Experimental
                       iac_deployment_id:
-                        description: Identifier of the last CloudFormation stack deployed for this connector.
+                        description: ARN of the last CloudFormation stack deployed for this connector (`arn:<partition>:cloudformation:<region>:<account>:stack/<name>/<id>`).
                         maxLength: 2048
                         minLength: 1
                         type: string
@@ -125985,7 +125494,7 @@ paths:
                   maxLength: 1000
                   type: string
                 include:
-                  $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_55___schema0'
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_53___schema0'
                 name:
                   maxLength: 256
                   type: string
@@ -139945,7 +139454,7 @@ components:
           type: boolean
       required:
         - data_view
-    Kibana_HTTP_APIs__zod_v4_55___schema0:
+    Kibana_HTTP_APIs__zod_v4_53___schema0:
       anyOf:
         - additionalProperties: false
           type: object
@@ -139974,7 +139483,7 @@ components:
                 routing:
                   items:
                     allOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_55___schema0'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_53___schema0'
                       - type: object
                         properties:
                           destination:
@@ -141056,22 +140565,6 @@ components:
       required:
         - match_count
         - sample
-    Kibana_HTTP_APIs_alerting_bulk_get_rules_request:
-      additionalProperties: false
-      type: object
-      properties:
-        ids:
-          description: Rule identifiers to retrieve. The response preserved this order.
-          items:
-            description: A rule identifier.
-            maxLength: 150
-            minLength: 1
-            type: string
-          maxItems: 100
-          minItems: 1
-          type: array
-      required:
-        - ids
     Kibana_HTTP_APIs_alerting_bulk_get_rules_response:
       additionalProperties: false
       type: object
@@ -141145,35 +140638,6 @@ components:
       required:
         - ids
         - snoozed_until
-    Kibana_HTTP_APIs_alerting_bulk_snooze_series_item:
-      additionalProperties: false
-      type: object
-      properties:
-        expiry:
-          description: ISO datetime when snooze should expire.
-          format: date-time
-          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
-          type: string
-        group_hash:
-          description: Hash identifying the alert episode series to apply the action to.
-          maxLength: 256
-          minLength: 1
-          type: string
-      required:
-        - group_hash
-    Kibana_HTTP_APIs_alerting_bulk_snooze_series_request:
-      additionalProperties: false
-      type: object
-      properties:
-        items:
-          description: List of 1 to 100 snooze actions to create.
-          items:
-            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_snooze_series_item'
-          maxItems: 100
-          minItems: 1
-          type: array
-      required:
-        - items
     Kibana_HTTP_APIs_alerting_bulk_tag_episodes_item:
       additionalProperties: false
       type: object
@@ -141226,30 +140690,6 @@ components:
           description: List of 1 to 100 unack actions to create.
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_unack_episodes_item'
-          maxItems: 100
-          minItems: 1
-          type: array
-      required:
-        - items
-    Kibana_HTTP_APIs_alerting_bulk_unsnooze_series_item:
-      additionalProperties: false
-      type: object
-      properties:
-        group_hash:
-          description: Hash identifying the alert episode series to apply the action to.
-          maxLength: 256
-          minLength: 1
-          type: string
-      required:
-        - group_hash
-    Kibana_HTTP_APIs_alerting_bulk_unsnooze_series_request:
-      additionalProperties: false
-      type: object
-      properties:
-        items:
-          description: List of 1 to 100 unsnooze actions to create.
-          items:
-            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_unsnooze_series_item'
           maxItems: 100
           minItems: 1
           type: array
@@ -141521,15 +140961,6 @@ components:
         - metadata
         - schedule
         - query
-    Kibana_HTTP_APIs_alerting_new_snooze_series_action:
-      additionalProperties: false
-      type: object
-      properties:
-        expiry:
-          description: ISO datetime when snooze should expire.
-          format: date-time
-          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
-          type: string
     Kibana_HTTP_APIs_alerting_new_tag_episode_action:
       additionalProperties: false
       type: object
@@ -141545,10 +140976,6 @@ components:
       required:
         - tags
     Kibana_HTTP_APIs_alerting_new_unack_episode_action:
-      additionalProperties: false
-      type: object
-      properties: {}
-    Kibana_HTTP_APIs_alerting_new_unsnooze_series_action:
       additionalProperties: false
       type: object
       properties: {}
@@ -157387,9 +156814,11 @@ components:
       properties:
         connector_type_id:
           description: The type of connector.
+          maxLength: 64
           type: string
         name:
           description: The display name for the connector.
+          maxLength: 1024
           type: string
         config:
           additionalProperties: {}
@@ -165457,6 +164886,7 @@ components:
       properties:
         name:
           description: The display name for the connector.
+          maxLength: 1024
           type: string
         config:
           additionalProperties: {}
