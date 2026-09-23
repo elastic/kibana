@@ -13,7 +13,7 @@ tags:
   - watch-floor
 
 settings:
-  # Must exceed the gate workflow's 72 h timeout. `system-create-investigation-proposal`
+  # Must exceed the gate workflow's 72 h timeout. `system-create-proposal`
   # parks this Worker run on `waitForApproval` for up to 72 h at Manual autonomy.
   # The 6 h default would kill the run mid-gate.
   timeout: '80h'
@@ -42,7 +42,7 @@ consts:
 # unusable Alert Analysis path must not open an Investigation.
 #
 # The conclusion metadata-patch, tags, and notes MUST be written before the
-# gate (`workflow.execute system-create-investigation-proposal`). The gate
+# gate (`workflow.execute system-create-proposal`). The gate
 # parks this Worker for up to 72 h at Manual autonomy; anything sequenced
 # after it is invisible to the analyst until a decision arrives.
 #
@@ -502,9 +502,9 @@ steps:
       - name: create_fp_proposal
         type: workflow.execute
         # A 72 h gate timeout surfaces as a step failure in the parent
-        # (create_investigation_proposal.yaml: "A gate timeout surfaces as a step
-        # failure rather than a branch"). Patch the Investigation closed so the
-        # analyst sees a legible terminal state rather than a perpetually open one.
+        # (create_proposal.yaml: "A gate timeout surfaces as a step failure rather
+        # than a branch"). Patch the Investigation closed so the analyst sees a
+        # legible terminal state rather than a perpetually open one.
         on-failure:
           fallback:
             - name: close_investigation_on_gate_timeout
@@ -534,7 +534,7 @@ steps:
                     🤖 **Alert Triage** — No decision received within 72 hours. {{ variables.fp_candidate_ids | size }} alert(s) remain open and tagged az:false_positive.
                     Re-run the Worker to create a new proposal.
         with:
-          workflow-id: system-create-investigation-proposal
+          workflow-id: system-create-proposal
           inputs:
             conversationId: "{{ steps.create_investigation.output.conversation_id }}"
             comment: >-
