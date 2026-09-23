@@ -21457,7 +21457,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Lists the AI Indices registered in the current space that the caller can read. An AI Index is left out when the caller cannot read its backing index. An empty AI Index is still listed. Up to 100 entries. The space comes from the request URL (`/s/{spaceId}/…`, or the default space); it cannot be set any other way.<br/><br/>[Required authorization] Route required privileges: contextEngine:read.
+        Lists the AI Indices registered in the current space that the caller can read. An AI Index is left out when the caller cannot read its backing index. An empty AI Index is still listed. Up to 100 entries. The space comes from the request URL (`/s/{spaceId}/…`, or the default space); it cannot be set any other way. Returns a 404 while Context Engine is turned off in this space (`contextEngine:enabled`).<br/><br/>[Required authorization] Route required privileges: contextEngine:read.
       operationId: get-context-engine-ai-index
       parameters: []
       responses:
@@ -21668,6 +21668,34 @@ paths:
                 required:
                   - ai_indices
           description: The AI Indices available to the caller in the current space.
+        '404':
+          content:
+            application/json:
+              examples:
+                contextEngineDisabledExample:
+                  description: Context Engine is turned off in this space
+                  summary: Context Engine turned off
+                  value:
+                    error: Not Found
+                    message: Not Found
+                    statusCode: 404
+              schema:
+                additionalProperties: false
+                description: Generic error response.
+                type: object
+                properties:
+                  error:
+                    description: The HTTP status text.
+                    type: string
+                  message:
+                    description: A human-readable error message.
+                    type: string
+                  statusCode:
+                    description: The HTTP status code.
+                    type: number
+                required:
+                  - message
+          description: Context Engine is turned off in this space.
       summary: List AI Indices
       tags:
         - context engine
@@ -21692,7 +21720,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Creates an AI Index record attached to a data stream or index. Fails with a 409 if an AI Index with the same id already exists.<br/><br/>[Required authorization] Route required privileges: contextEngine:write.
+        Creates an AI Index record attached to a data stream or index. Fails with a 409 if an AI Index with the same id already exists. Returns a 404 while Context Engine is turned off in this space (`contextEngine:enabled`).<br/><br/>[Required authorization] Route required privileges: contextEngine:write.
       operationId: post-context-engine-ai-index
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -22041,6 +22069,34 @@ paths:
                 required:
                   - message
           description: Elasticsearch denied the `index` trace lookup outright; the caller lacks index privileges for it.
+        '404':
+          content:
+            application/json:
+              examples:
+                contextEngineDisabledExample:
+                  description: Context Engine is turned off in this space
+                  summary: Context Engine turned off
+                  value:
+                    error: Not Found
+                    message: Not Found
+                    statusCode: 404
+              schema:
+                additionalProperties: false
+                description: Generic error response.
+                type: object
+                properties:
+                  error:
+                    description: The HTTP status text.
+                    type: string
+                  message:
+                    description: A human-readable error message.
+                    type: string
+                  statusCode:
+                    description: The HTTP status code.
+                    type: number
+                required:
+                  - message
+          description: Context Engine is turned off in this space.
         '409':
           content:
             application/json:
@@ -22118,7 +22174,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Runs an ES|QL query as the current user, with a space filter and a row limit (at most 1000) applied server-side. The space comes from the request URL (`/s/{spaceId}/…`, or the default space); nothing in the request body can change it or replace the space filter. The query decides which indices it reads; Elasticsearch index privileges bound what it can reach.<br/><br/>[Required authorization] Route required privileges: contextEngine:read.
+        Runs an ES|QL query as the current user, with a space filter and a row limit (at most 1000) applied server-side. The space comes from the request URL (`/s/{spaceId}/…`, or the default space); nothing in the request body can change it or replace the space filter. The query decides which indices it reads; Elasticsearch index privileges bound what it can reach. Returns a 404 while Context Engine is turned off in this space (`contextEngine:enabled`).<br/><br/>[Required authorization] Route required privileges: contextEngine:read.
       operationId: post-context-engine-ai-index-query
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -22282,6 +22338,34 @@ paths:
                 required:
                   - message
           description: Elasticsearch rejected the read; the caller lacks index privileges.
+        '404':
+          content:
+            application/json:
+              examples:
+                contextEngineDisabledExample:
+                  description: Context Engine is turned off in this space
+                  summary: Context Engine turned off
+                  value:
+                    error: Not Found
+                    message: Not Found
+                    statusCode: 404
+              schema:
+                additionalProperties: false
+                description: Generic error response.
+                type: object
+                properties:
+                  error:
+                    description: The HTTP status text.
+                    type: string
+                  message:
+                    description: A human-readable error message.
+                    type: string
+                  statusCode:
+                    description: The HTTP status code.
+                    type: number
+                required:
+                  - message
+          description: Context Engine is turned off in this space.
       summary: Query AI Indices
       tags:
         - context engine
@@ -22319,7 +22403,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Deletes an AI Index by id. The backing data stream/index (and therefore its Knowledge Indicators) and the attached workflow automations are left untouched unless the `delete_knowledge_indicators`/`delete_automations` query parameters are set to true. The dest is not deleted when another AI Index still uses it.<br/><br/>[Required authorization] Route required privileges: contextEngine:write. Extended privileges (optional, expand functionality when granted): workflowsManagement:delete.
+        Deletes an AI Index by id. The backing data stream/index (and therefore its Knowledge Indicators) and the attached workflow automations are left untouched unless the `delete_knowledge_indicators`/`delete_automations` query parameters are set to true. The dest is not deleted when another AI Index still uses it. Returns a 404 while Context Engine is turned off in this space (`contextEngine:enabled`).<br/><br/>[Required authorization] Route required privileges: contextEngine:write. Extended privileges (optional, expand functionality when granted): workflowsManagement:delete.
       operationId: delete-context-engine-ai-index-aiindexid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -22389,6 +22473,13 @@ paths:
           content:
             application/json:
               examples:
+                contextEngineDisabledExample:
+                  description: Context Engine is turned off in this space
+                  summary: Context Engine turned off
+                  value:
+                    error: Not Found
+                    message: Not Found
+                    statusCode: 404
                 notFoundExample:
                   description: No AI Index with the given id exists in the current space
                   summary: AI Index not found
@@ -22412,7 +22503,7 @@ paths:
                     type: number
                 required:
                   - message
-          description: No AI Index with the given id exists in the current space.
+          description: No AI Index with the given id exists in the current space, or Context Engine is turned off in this space.
         '409':
           content:
             application/json:
@@ -22466,7 +22557,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Fetches an AI Index by id from the current space, including the ES|QL query derived from each trace.<br/><br/>[Required authorization] Route required privileges: contextEngine:read.
+        Fetches an AI Index by id from the current space, including the ES|QL query derived from each trace. Returns a 404 while Context Engine is turned off in this space (`contextEngine:enabled`).<br/><br/>[Required authorization] Route required privileges: contextEngine:read.
       operationId: get-context-engine-ai-index-aiindexid
       parameters:
         - description: The unique identifier of the AI Index.
@@ -22686,6 +22777,13 @@ paths:
           content:
             application/json:
               examples:
+                contextEngineDisabledExample:
+                  description: Context Engine is turned off in this space
+                  summary: Context Engine turned off
+                  value:
+                    error: Not Found
+                    message: Not Found
+                    statusCode: 404
                 notFoundExample:
                   description: No AI Index with the given id exists in the current space
                   summary: AI Index not found
@@ -22709,7 +22807,7 @@ paths:
                     type: number
                 required:
                   - message
-          description: No AI Index with the given id exists in the current space.
+          description: No AI Index with the given id exists in the current space, or Context Engine is turned off in this space.
       summary: Get an AI Index
       tags:
         - context engine
@@ -22734,7 +22832,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Creates an AI Index with the given id, or replaces an existing one. The request body replaces the whole record: omitted fields are removed, and omitted arrays become empty. A managed AI Index cannot be replaced and returns a 409.<br/><br/>[Required authorization] Route required privileges: contextEngine:write.
+        Creates an AI Index with the given id, or replaces an existing one. The request body replaces the whole record: omitted fields are removed, and omitted arrays become empty. A managed AI Index cannot be replaced and returns a 409. Returns a 404 while Context Engine is turned off in this space (`contextEngine:enabled`).<br/><br/>[Required authorization] Route required privileges: contextEngine:write.
       operationId: put-context-engine-ai-index-aiindexid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -23103,6 +23201,34 @@ paths:
                 required:
                   - message
           description: Elasticsearch denied the `index` trace lookup outright; the caller lacks index privileges for it.
+        '404':
+          content:
+            application/json:
+              examples:
+                contextEngineDisabledExample:
+                  description: Context Engine is turned off in this space
+                  summary: Context Engine turned off
+                  value:
+                    error: Not Found
+                    message: Not Found
+                    statusCode: 404
+              schema:
+                additionalProperties: false
+                description: Generic error response.
+                type: object
+                properties:
+                  error:
+                    description: The HTTP status text.
+                    type: string
+                  message:
+                    description: A human-readable error message.
+                    type: string
+                  statusCode:
+                    description: The HTTP status code.
+                    type: number
+                required:
+                  - message
+          description: Context Engine is turned off in this space.
         '409':
           content:
             application/json:
@@ -23172,7 +23298,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Returns a free-form text context block for an agent: the AI Index, its ES|QL target, the fields its backing indices expose (at most 500) and which are semantic, knowledge item type and tag counts in the current space, and example ES|QL queries. Read as the current user, so Elasticsearch index privileges bound what it can reach. The space comes from the request URL (`/s/{spaceId}/…`, or the default space); it cannot be set any other way.<br/><br/>[Required authorization] Route required privileges: contextEngine:read.
+        Returns a free-form text context block for an agent: the AI Index, its ES|QL target, the fields its backing indices expose (at most 500) and which are semantic, knowledge item type and tag counts in the current space, and example ES|QL queries. Read as the current user, so Elasticsearch index privileges bound what it can reach. The space comes from the request URL (`/s/{spaceId}/…`, or the default space); it cannot be set any other way. Returns a 404 while Context Engine is turned off in this space (`contextEngine:enabled`).<br/><br/>[Required authorization] Route required privileges: contextEngine:read.
       operationId: get-context-engine-ai-index-aiindexid-describe
       parameters:
         - description: The unique identifier of the AI Index.
@@ -23317,6 +23443,13 @@ paths:
           content:
             application/json:
               examples:
+                contextEngineDisabledExample:
+                  description: Context Engine is turned off in this space
+                  summary: Context Engine turned off
+                  value:
+                    error: Not Found
+                    message: Not Found
+                    statusCode: 404
                 notFoundExample:
                   description: No AI Index with the given id exists in the current space
                   summary: AI Index not found
@@ -23340,7 +23473,7 @@ paths:
                     type: number
                 required:
                   - message
-          description: No AI Index with the given id exists in the current space.
+          description: No AI Index with the given id exists in the current space, or Context Engine is turned off in this space.
       summary: Describe an AI Index
       tags:
         - context engine
