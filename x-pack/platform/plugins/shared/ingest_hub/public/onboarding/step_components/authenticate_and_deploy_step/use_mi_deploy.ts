@@ -143,6 +143,7 @@ export function useMiDeploy({
         });
         onContinue();
 
+        let cleanupFailed = false;
         if (hasPendingCleanup) {
           cleanupOps = await cleanupManagedIntegrationsPolicies({
             pendingCleanupPolicyIds: effectivePendingCleanup,
@@ -172,11 +173,17 @@ export function useMiDeploy({
             )
           );
           updateDetectAndReviewStep({ pendingCleanupPolicyIds: remainingPending });
+          cleanupFailed = Object.keys(remainingPending).length > 0;
         }
 
         if (targets.length === 0) {
           setIsDeploying(false);
-          // Cleanup-only: no new deploys, but deleted policies must be pruned from the SO record.
+          if (cleanupFailed) {
+            // Cleanup did not fully succeed — keep the section actionable so the user can retry.
+            updateDetectAndReviewStep({ isDeploying: false });
+            return;
+          }
+          // Cleanup-only success: prune deleted policies from the SO record.
           if (
             onboardingDeploymentId &&
             (cleanupOps.toDelete.length > 0 || cleanupOps.toUpdate.length > 0)
@@ -216,6 +223,9 @@ export function useMiDeploy({
           ...retryLiveStale,
           ...(pendingCleanupPolicyIds ?? {}),
         };
+        // Mark as deploying before awaiting cleanup so a double-click cannot start a second run.
+        setIsDeploying(true);
+        updateDetectAndReviewStep({ isDeploying: true });
         if (Object.keys(retryPending).length > 0) {
           cleanupOps = await cleanupManagedIntegrationsPolicies({
             pendingCleanupPolicyIds: retryPending,
@@ -243,9 +253,7 @@ export function useMiDeploy({
           });
         }
 
-        setIsDeploying(true);
         updateDetectAndReviewStep({
-          isDeploying: true,
           serviceStatuses: retryStatuses,
           failedInstances: remainingFailed,
           deployErrors: {},

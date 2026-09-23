@@ -1999,7 +1999,7 @@ describe('useDeploy — cleanup orchestration', () => {
     expect(removeDeployInstances).toHaveBeenCalledWith(['vpcflow']);
   });
 
-  it('does not call cleanupManagedIntegrationsPolicies on retry (instanceIds provided)', async () => {
+  it('calls cleanupManagedIntegrationsPolicies on retry when pendingCleanupPolicyIds is non-empty', async () => {
     setupMocks({
       selectedServiceIds: ['ec2'],
       detectAndReviewStep: {
@@ -2017,6 +2017,6 @@ describe('useDeploy — cleanup orchestration', () => {
       await result.current.handleDeploy(['ec2']);
     });
 
-    expect(mockCleanupManagedIntegrationsPolicies).not.toHaveBeenCalled();
+    expect(mockCleanupManagedIntegrationsPolicies).toHaveBeenCalled();
   });
 });

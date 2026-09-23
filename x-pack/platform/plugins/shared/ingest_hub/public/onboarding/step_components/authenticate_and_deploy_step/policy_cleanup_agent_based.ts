@@ -100,11 +100,14 @@ async function updateAgentBasedPolicy(
   let existingVersion: string | undefined;
   try {
     const existing = await sendGetOnePackagePolicy(policyId);
+    if (existing.error) throw existing.error;
     existingName = existing.data?.item?.name;
     existingNamespace = existing.data?.item?.namespace;
     existingVersion = existing.data?.item?.package?.version;
   } catch {
-    // Non-fatal — fall back to generated name, hook namespace, and latest package version.
+    throw new Error(
+      `[ingest_hub] Cannot safely update agent-based policy ${policyId}: failed to fetch existing metadata.`
+    );
   }
 
   const pkgInfoResponse = await sendGetPackageInfoByKey(packageName, existingVersion);
@@ -127,13 +130,14 @@ async function updateAgentBasedPolicy(
   const pkgTemplates: Array<{
     name?: string;
     input?: string;
-    inputs?: Array<{ type: string }>;
+    inputs?: Array<{ id?: string; type: string }>;
   }> =
     ((pkgInfo as unknown as Record<string, unknown>).policy_templates as typeof pkgTemplates) ?? [];
   for (const template of pkgTemplates) {
     const templateInputs = template.inputs ?? (template.input ? [{ type: template.input }] : []);
     for (const input of templateInputs) {
-      const key = template.name ? `${template.name}-${input.type}` : input.type;
+      const inputKey = input.id ?? input.type;
+      const key = template.name ? `${template.name}-${inputKey}` : inputKey;
       if (!inputs[key]) inputs[key] = { enabled: false, streams: {} };
     }
   }

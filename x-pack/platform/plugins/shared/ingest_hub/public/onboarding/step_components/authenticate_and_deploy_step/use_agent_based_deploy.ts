@@ -160,6 +160,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
         };
 
         // Clean up package policies for removed services before creating new ones.
+        let cleanupFailed = false;
         if (hasPendingCleanup) {
           const targetPolicyIds = agentPolicyId ? [agentPolicyId] : selectedAgentPolicyIds ?? [];
           const cleanupOps = await cleanupAgentBasedPolicies({
@@ -190,12 +191,13 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
             )
           );
           updateDetectAndReviewStep({ pendingCleanupPolicyIds: remainingPending });
+          cleanupFailed = Object.keys(remainingPending).length > 0;
         }
 
         if (targetsToDeploy.length === 0) {
           setIsDeploying(false);
           updateDetectAndReviewStep({ isDeploying: false });
-          return { failed: false };
+          return { failed: cleanupFailed };
         }
 
         let policyIdsByInstance: Record<string, string> = {};

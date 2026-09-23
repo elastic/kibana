@@ -97,7 +97,9 @@ async function updateManagedIntegrationsPolicy(
     existingName = existing.item?.name;
     existingVersion = existing.item?.package?.version;
   } catch {
-    // Non-fatal — fall back to generated name and latest package version.
+    throw new Error(
+      `[ingest_hub] Cannot safely update managed-integration policy ${policyId}: failed to fetch existing metadata.`
+    );
   }
 
   const pkgInfoResponse = await sendGetPackageInfoByKey(packageName, existingVersion);
@@ -121,13 +123,14 @@ async function updateManagedIntegrationsPolicy(
   const pkgTemplates: Array<{
     name?: string;
     input?: string;
-    inputs?: Array<{ type: string }>;
+    inputs?: Array<{ id?: string; type: string }>;
   }> =
     ((pkgInfo as unknown as Record<string, unknown>).policy_templates as typeof pkgTemplates) ?? [];
   for (const template of pkgTemplates) {
     const templateInputs = template.inputs ?? (template.input ? [{ type: template.input }] : []);
     for (const input of templateInputs) {
-      const key = template.name ? `${template.name}-${input.type}` : input.type;
+      const inputKey = input.id ?? input.type;
+      const key = template.name ? `${template.name}-${inputKey}` : inputKey;
       if (!inputs[key]) inputs[key] = { enabled: false, streams: {} };
     }
   }
