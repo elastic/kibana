@@ -47,7 +47,7 @@ describe('useCasesFeatures', () => {
     );
   });
 
-  it('disables sync alerts but enables extract observables and keeps the observables table for the stack owner', () => {
+  it('disables sync/extract but keeps the observables table for the stack owner', () => {
     const { result } = renderHook(() => useCasesFeatures(), {
       wrapper: ({ children }) => <TestProviders owner={['cases']}>{children}</TestProviders>,
     });
@@ -56,7 +56,7 @@ describe('useCasesFeatures', () => {
       expect.objectContaining({
         isSyncAlertsEnabled: false,
         isObservablesFeatureEnabled: true,
-        isExtractObservablesEnabled: true,
+        isExtractObservablesEnabled: false,
         hasCaseSettings: false,
       })
     );
