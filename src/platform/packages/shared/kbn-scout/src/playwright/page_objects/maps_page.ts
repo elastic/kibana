@@ -228,7 +228,6 @@ export class MapsPage {
    * Retries until mapTooltipCloseButton appears (i.e. a feature was hit and tooltip locked).
    */
   async lockTooltipAtPosition(xOffset: number, yOffset: number) {
-    await this.mapContainer.waitFor({ state: 'visible' });
     const closeButton = this.page.testSubj.locator('mapTooltipCloseButton');
 
     await expect(async () => {
