@@ -53,11 +53,10 @@ export function RulePagePageProvider({ getService, getPageObjects }: FtrProvider
   const rulePage = {
     toggleBulkActionButton: async () => {
       const bulkActionButtonToBeClicked = await testSubjects.find(RULES_BULK_ACTION_BUTTON);
-      await retry.waitFor('bulk action options to be displayed', async () => {
+      if ((await bulkActionButtonToBeClicked.getAttribute('aria-expanded')) !== 'true') {
         await bulkActionButtonToBeClicked.click();
-        const bulkActionOptions = await testSubjects.findAll(RULES_BULK_ACTION_OPTION_DISABLE);
-        return bulkActionOptions.length > 0;
-      });
+      }
+      await testSubjects.existOrFail(RULES_BULK_ACTION_OPTION_DISABLE, { timeout: 5000 });
     },
 
     clickBulkActionOption: async (optionTestId: string) => {
@@ -73,6 +72,7 @@ export function RulePagePageProvider({ getService, getPageObjects }: FtrProvider
     clickSelectAllRules: async () => {
       const selectAllRulesButton = await testSubjects.find(RULES_SELECT_ALL_RULES);
       await selectAllRulesButton.click();
+      await testSubjects.existOrFail(RULES_CLEAR_ALL_RULES_SELECTION, { timeout: 5000 });
     },
 
     clickClearAllRulesSelection: async () => {

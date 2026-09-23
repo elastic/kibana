@@ -266,7 +266,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           const casesAll = findAssigneeByUserName('cases_all_user')!;
           const casesAll2 = findAssigneeByUserName('cases_all_user2')!;
 
-          await cases.casesTable.bulkAddNewAssignees([0, 1], 'cases all_user');
+          await cases.casesTable.bulkAddNewAssignees([0, 1], 'cases all_user', casesAll.uid);
           await header.waitUntilLoadingHasFinished();
 
           const case1 = await cases.api.getCase({ caseId: caseIds[0] });

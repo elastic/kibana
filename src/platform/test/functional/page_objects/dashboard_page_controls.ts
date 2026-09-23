@@ -415,22 +415,23 @@ export class DashboardPageControls extends FtrService {
   }
 
   public async isOptionsListPopoverOpen(controlId: string) {
-    const isPopoverOpen = await this.find.existsByCssSelector(`#control-popover-${controlId}`);
+    const isPopoverOpen = await this.find.existsByCssSelector(`#control-popover-${controlId}`, 0);
     this.log.debug(`Is popover open: ${isPopoverOpen} for Options List: ${controlId}`);
     return isPopoverOpen;
   }
 
   public async optionsListOpenPopover(controlId: string, ignoreTopOffsetOrOptions?: boolean) {
     this.log.debug(`Opening popover for Options List: ${controlId}`);
-    await this.retry.try(async () => {
+    await this.retry.tryForTime(10000, async () => {
+      if (await this.isOptionsListPopoverOpen(controlId)) return;
       await this.testSubjects.click(
         `optionsList-control-${controlId}`,
         500,
         !ignoreTopOffsetOrOptions ? await this.panelActions.getContainerTopOffset() : undefined
       );
-      await this.retry.waitForWithTimeout('popover to open', 500, async () => {
-        return await this.testSubjects.exists(`optionsList-control-popover`);
-      });
+      if (!(await this.isOptionsListPopoverOpen(controlId))) {
+        throw new Error(`Options List popover ${controlId} has not opened`);
+      }
     });
   }
 
@@ -525,11 +526,18 @@ export class DashboardPageControls extends FtrService {
     return cardinalityLabel.split(' ')[0];
   }
 
-  public async optionsListPopoverSearchForOption(search: string) {
+  public async optionsListPopoverSearchForOption(search: string, controlId?: string) {
     this.log.debug(`searching for ${search} in options list`);
-    await this.optionsListPopoverAssertOpen();
-    await this.testSubjects.setValue(`optionsList-control-search-input`, search, {
-      typeCharByChar: true,
+    await this.retry.tryForTime(10000, async () => {
+      if (controlId) await this.optionsListOpenPopover(controlId);
+      if (!(await this.testSubjects.exists('optionsList-control-search-input'))) {
+        throw new Error('Options List search input has not rendered');
+      }
+      const input = await this.testSubjects.find('optionsList-control-search-input', 1000);
+      await input.click();
+      const focusedInput = await this.find.activeElement();
+      await focusedInput.clearValue();
+      await focusedInput.type(search, { charByChar: true });
     });
     await this.optionsListPopoverWaitForLoading();
   }
@@ -566,9 +574,9 @@ export class DashboardPageControls extends FtrService {
     });
   }
 
-  public async optionsListPopoverSelectOption(availableOption: string) {
+  public async optionsListPopoverSelectOption(availableOption: string, controlId?: string) {
     this.log.debug(`selecting ${availableOption} from options list`);
-    await this.optionsListPopoverSearchForOption(availableOption);
+    await this.optionsListPopoverSearchForOption(availableOption, controlId);
 
     await this.retry.try(async () => {
       await this.testSubjects.existOrFail(`optionsList-control-selection-${availableOption}`);
@@ -726,29 +734,20 @@ export class DashboardPageControls extends FtrService {
   public async rangeSliderSetLowerBound(controlId: string, value: string) {
     this.log.debug(`Setting range slider lower bound to ${value}`);
     await this.retry.try(async () => {
-      await this.testSubjects.setValue(
-        `range-slider-control-${controlId} > rangeSlider__lowerBoundFieldNumber`,
-        value
-      );
-      await this.testSubjects.pressEnter(
-        // force the change without waiting for the debounce
-        `range-slider-control-${controlId} > rangeSlider__lowerBoundFieldNumber`
-      );
+      const selector = `range-slider-control-${controlId} > rangeSlider__lowerBoundFieldNumber`;
+      await this.testSubjects.setValue(selector, value, { clearWithKeyboard: true });
+      // The control flushes its debounced onChange on mouse-up, not on Enter.
+      await this.testSubjects.click(selector);
       expect(await this.rangeSliderGetLowerBoundAttribute(controlId, 'value')).to.be(value);
     });
   }
 
   public async rangeSliderSetUpperBound(controlId: string, value: string) {
-    this.log.debug(`Setting range slider lower bound to ${value}`);
+    this.log.debug(`Setting range slider upper bound to ${value}`);
     await this.retry.try(async () => {
-      await this.testSubjects.setValue(
-        `range-slider-control-${controlId} > rangeSlider__upperBoundFieldNumber`,
-        value
-      );
-      await this.testSubjects.pressEnter(
-        // force the change without waiting for the debounce
-        `range-slider-control-${controlId} > rangeSlider__upperBoundFieldNumber`
-      );
+      const selector = `range-slider-control-${controlId} > rangeSlider__upperBoundFieldNumber`;
+      await this.testSubjects.setValue(selector, value, { clearWithKeyboard: true });
+      await this.testSubjects.click(selector);
       expect(await this.rangeSliderGetUpperBoundAttribute(controlId, 'value')).to.be(value);
     });
   }

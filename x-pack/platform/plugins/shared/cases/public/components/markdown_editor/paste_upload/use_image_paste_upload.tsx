@@ -134,6 +134,7 @@ export function useImagePasteUpload({
 
       try {
         if (!uploadState.isUploading()) {
+          dispatch({ type: ActionType.RESET });
           uploadState.setFiles([fileToUpload]);
         }
       } catch (err) {
@@ -141,7 +142,6 @@ export function useImagePasteUpload({
       }
 
       if (canUpload(uploadState, caseId)) {
-        dispatch({ type: ActionType.RESET });
         uploadState.upload({ caseIds: [caseId], owner });
       }
     };

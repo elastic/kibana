@@ -401,7 +401,7 @@ export function MachineLearningCommonUIProvider({
     async ensureAllMenuPopoversClosed() {
       await retry.tryForTime(5000, async () => {
         await browser.pressKeys(browser.keys.ESCAPE);
-        const popoverExists = await find.existsByCssSelector('euiContextMenuPanel');
+        const popoverExists = await find.existsByCssSelector('.euiContextMenuPanel', 0);
         expect(popoverExists).to.eql(false, 'All popovers should be closed');
       });
     },
@@ -417,10 +417,19 @@ export function MachineLearningCommonUIProvider({
     async invokeTableRowAction(
       rowSelector: string,
       actionTestSubject: string,
-      fromContextMenu: boolean = true
+      fromContextMenu: boolean | 'auto' = true
     ) {
       await retry.tryForTime(30 * 1000, async () => {
-        if (fromContextMenu) {
+        const useContextMenu =
+          fromContextMenu === 'auto'
+            ? await testSubjects.exists(`${rowSelector} > euiCollapsedItemActionsButton`)
+            : fromContextMenu;
+        if (fromContextMenu === 'auto' && !useContextMenu) {
+          if (!(await testSubjects.exists(`${rowSelector} > ${actionTestSubject}`))) {
+            throw new Error(`Action "${actionTestSubject}" has not rendered for ${rowSelector}`);
+          }
+        }
+        if (useContextMenu) {
           await this.ensureAllMenuPopoversClosed();
 
           await testSubjects.click(`${rowSelector} > euiCollapsedItemActionsButton`);

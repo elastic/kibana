@@ -65,7 +65,9 @@ export class TestSubjects extends FtrService {
    * appear and returns `true` as soon as it does, or `false` if the timeout elapses.
    *
    * Returns rather than throws, making it suitable for branching on optional UI that may still be
-   * rendering. Use `existOrFail` when the element is required and its absence should throw.
+   * rendering. A missing optional element costs the full timeout; when choosing between alternative
+   * UI states, probe both with `exists` and retry until one appears instead of waiting for one to be
+   * absent. Use `existOrFail` when the element is required and its absence should throw.
    *
    * If the element is hidden it is not treated as "existing", unless `options.allowHidden`
    * is set to `true`.

@@ -430,6 +430,14 @@ export class SecurityPageObject extends FtrService {
   async clickSaveCreateUser() {
     await this.find.clickByButtonText('Create user');
     await this.header.waitUntilLoadingHasFinished();
+    await this.retry.waitForWithTimeout(
+      'return to the users list after saving',
+      10000,
+      async () => {
+        const url = await this.browser.getCurrentUrl();
+        return url.includes('/security/users') && !url.includes('/security/users/create');
+      }
+    );
   }
 
   async clickSaveEditRole() {
@@ -437,6 +445,14 @@ export class SecurityPageObject extends FtrService {
     await saveButton.moveMouseTo();
     await saveButton.click();
     await this.header.waitUntilLoadingHasFinished();
+    await this.retry.waitForWithTimeout(
+      'return to the roles list after saving',
+      10000,
+      async () => {
+        const url = await this.browser.getCurrentUrl();
+        return url.includes('/security/roles') && !url.includes('/security/roles/edit');
+      }
+    );
   }
 
   async addIndexToRole(index: string) {

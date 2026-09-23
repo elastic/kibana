@@ -452,7 +452,7 @@ export function CasesTableServiceProvider(
       await testSubjects.missingOrFail('cases-edit-assignees-flyout');
     },
 
-    async bulkAddNewAssignees(selectedCases: number[], searchTerm: string) {
+    async bulkAddNewAssignees(selectedCases: number[], searchTerm: string, assigneeUid: string) {
       const rows = await find.allByCssSelector('.euiTableRowCellCheckbox');
 
       for (const caseIndex of selectedCases) {
@@ -474,7 +474,9 @@ export function CasesTableServiceProvider(
       await testSubjects.existOrFail('cases-actions-assignees-edit-selectable-search-input');
       await searchInput.type(searchTerm);
 
-      await casesCommon.selectFirstRowInAssigneesPopover();
+      const assigneeOption = `cases-actions-assignees-edit-selectable-assignee-${assigneeUid}`;
+      await testSubjects.existOrFail(assigneeOption, { timeout: 10000 });
+      await testSubjects.click(assigneeOption);
 
       await testSubjects.click('cases-edit-assignees-flyout-submit');
       await testSubjects.missingOrFail('cases-edit-assignees-flyout');

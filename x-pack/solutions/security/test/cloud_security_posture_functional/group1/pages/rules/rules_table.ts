@@ -34,6 +34,21 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     let rule: typeof pageObjects.rule;
     let findings: typeof pageObjects.findings;
     let agentPolicyId: string;
+    const expectBulkActionDisabledState = async (
+      enableDisabled: boolean,
+      disableDisabled: boolean
+    ) => {
+      await retryService.tryForTime(10000, async () => {
+        expect(
+          (await rule.rulePage.isBulkActionOptionDisabled(RULES_BULK_ACTION_OPTION_ENABLE)) ===
+            'true'
+        ).to.be(enableDisabled);
+        expect(
+          (await rule.rulePage.isBulkActionOptionDisabled(RULES_BULK_ACTION_OPTION_DISABLE)) ===
+            'true'
+        ).to.be(disableDisabled);
+      });
+    };
 
     before(async () => {
       rule = pageObjects.rule;
@@ -100,26 +115,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('It should disable Enable option when there are all rules selected are already enabled ', async () => {
         await rule.rulePage.clickSelectAllRules();
         await rule.rulePage.toggleBulkActionButton();
-        expect(
-          (await rule.rulePage.isBulkActionOptionDisabled(RULES_BULK_ACTION_OPTION_ENABLE)) ===
-            'true'
-        ).to.be(true);
-        expect(
-          (await rule.rulePage.isBulkActionOptionDisabled(RULES_BULK_ACTION_OPTION_DISABLE)) ===
-            'true'
-        ).to.be(false);
+        await expectBulkActionDisabledState(true, false);
       });
 
       it('It should disable both Enable and Disable options when there are no rules selected', async () => {
         await rule.rulePage.toggleBulkActionButton();
-        expect(
-          (await rule.rulePage.isBulkActionOptionDisabled(RULES_BULK_ACTION_OPTION_ENABLE)) ===
-            'true'
-        ).to.be(true);
-        expect(
-          (await rule.rulePage.isBulkActionOptionDisabled(RULES_BULK_ACTION_OPTION_DISABLE)) ===
-            'true'
-        ).to.be(true);
+        await expectBulkActionDisabledState(true, true);
       });
 
       it('It should disable Disable option when there are all rules selected are already Disabled', async () => {
@@ -132,32 +133,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
         await pageObjects.header.waitUntilLoadingHasFinished();
         await rule.rulePage.clickSelectAllRules();
-        await retryService.try(async () => {
-          await rule.rulePage.toggleBulkActionButton();
-          expect(
-            (await rule.rulePage.isBulkActionOptionDisabled(RULES_BULK_ACTION_OPTION_ENABLE)) ===
-              'true'
-          ).to.be(false);
-          expect(
-            (await rule.rulePage.isBulkActionOptionDisabled(RULES_BULK_ACTION_OPTION_DISABLE)) ===
-              'true'
-          ).to.be(true);
-        });
+        await rule.rulePage.toggleBulkActionButton();
+        await expectBulkActionDisabledState(false, true);
       });
 
       it('Both option should not be disabled if selected rules contains both enabled and disabled rules', async () => {
         await rule.rulePage.clickEnableRulesRowSwitchButton(0);
         await pageObjects.header.waitUntilLoadingHasFinished();
+        await retryService.waitForWithTimeout('disabled rule count to update', 10000, async () =>
+          (await (await rule.rulePage.getDisabledRulesCounter()).getVisibleText()).includes('1')
+        );
         await rule.rulePage.clickSelectAllRules();
         await rule.rulePage.toggleBulkActionButton();
-        expect(
-          (await rule.rulePage.isBulkActionOptionDisabled(RULES_BULK_ACTION_OPTION_ENABLE)) ===
-            'true'
-        ).to.be(false);
-        expect(
-          (await rule.rulePage.isBulkActionOptionDisabled(RULES_BULK_ACTION_OPTION_DISABLE)) ===
-            'true'
-        ).to.be(false);
+        await expectBulkActionDisabledState(false, false);
       });
     });
 

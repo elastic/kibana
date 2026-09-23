@@ -404,11 +404,15 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
           }
         }
 
-        await panelOpenerBtn.click();
-
-        // Wait for panel to appear (checks both sidePanel and nestedPanel)
-        await retry.waitFor(`panel ${sectionId} to appear after click`, async () => {
-          return await this.isPanelOpen(sectionId);
+        await retry.tryForTime(10000, async () => {
+          if (await this.isPanelOpen(sectionId)) return;
+          const opener = await testSubjects.find(`~nav-item-id-${sectionId}`, TIMEOUT_CHECK);
+          if ((await opener.getAttribute('aria-expanded')) !== 'true') {
+            await opener.click();
+          }
+          await retry.waitForWithTimeout(`panel ${sectionId} to appear after click`, 1500, () =>
+            this.isPanelOpen(sectionId)
+          );
         });
       },
       async isCollapsed() {

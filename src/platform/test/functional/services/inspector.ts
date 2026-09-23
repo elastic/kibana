@@ -251,7 +251,17 @@ export class InspectorService extends FtrService {
    * Opens inspector requests view
    */
   public async openInspectorRequestsView(): Promise<void> {
-    if (!(await this.testSubjects.waitForExists('inspectorViewChooser', { timeout: 1000 }))) return;
+    if (!(await this.testSubjects.exists('inspectorViewChooser'))) {
+      if (
+        (await this.testSubjects.exists('inspectorTable')) ||
+        (await this.testSubjects.exists('inspectorNoRequestsMessage'))
+      ) {
+        return;
+      }
+      if (!(await this.testSubjects.waitForExists('inspectorViewChooser', { timeout: 1000 }))) {
+        return;
+      }
+    }
     await this.openInspectorView('Requests');
   }
 

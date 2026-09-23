@@ -62,6 +62,26 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
   const browser = getService('browser');
+  const retry = getService('retry');
+
+  const openTestCustomUrl = async (index: number) => {
+    await ml.jobTable.openTestCustomUrl(JOB_CONFIG.job_id, index);
+    await retry.waitForWithTimeout(
+      'custom URL to open a new tab',
+      10000,
+      async () => (await browser.getAllWindowHandles()).length > 1
+    );
+    await browser.switchTab(1);
+  };
+
+  const closeTestCustomUrl = async () => {
+    if ((await browser.getAllWindowHandles()).length > 1) {
+      await browser.switchTab(1);
+      await browser.closeCurrentWindow();
+      await browser.switchTab(0);
+    }
+    await ml.jobTable.closeEditJobFlyout();
+  };
 
   describe('custom urls', function () {
     this.tags(['ml']);
@@ -132,44 +152,30 @@ export default function ({ getService }: FtrProviderContext) {
     // wrapping into own describe to make sure new tab is cleaned up even if test failed
     // see: https://github.com/elastic/kibana/pull/67280#discussion_r430528122
     describe('tests Discover type custom URL', () => {
-      let tabsCount = 1;
       const docCountFormatted = '268';
 
       it('opens Discover page from test link in the edit job flyout', async () => {
-        await ml.jobTable.openTestCustomUrl(JOB_CONFIG.job_id, 0);
-        await browser.switchTab(1);
-        tabsCount++;
+        await openTestCustomUrl(0);
         await ml.jobTable.testDiscoverCustomUrlAction(docCountFormatted);
       });
 
       after(async () => {
-        if (tabsCount > 1) {
-          await browser.closeCurrentWindow();
-          await browser.switchTab(0);
-          await ml.jobTable.closeEditJobFlyout();
-        }
+        await closeTestCustomUrl();
       });
     });
 
     // wrapping into own describe to make sure new tab is cleaned up even if test failed
     // see: https://github.com/elastic/kibana/pull/67280#discussion_r430528122
     describe('tests Dashboard type custom URL', () => {
-      let tabsCount = 1;
       const testDashboardPanelCount = 0; // ML Test dashboard has no content.
 
       it('opens Dashboard page from test link in the edit job flyout', async () => {
-        await ml.jobTable.openTestCustomUrl(JOB_CONFIG.job_id, 1);
-        await browser.switchTab(1);
-        tabsCount++;
+        await openTestCustomUrl(1);
         await ml.jobTable.testDashboardCustomUrlAction(testDashboardPanelCount);
       });
 
       after(async () => {
-        if (tabsCount > 1) {
-          await browser.closeCurrentWindow();
-          await browser.switchTab(0);
-          await ml.jobTable.closeEditJobFlyout();
-        }
+        await closeTestCustomUrl();
       });
     });
   });

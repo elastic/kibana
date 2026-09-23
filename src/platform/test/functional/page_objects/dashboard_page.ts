@@ -449,8 +449,10 @@ export class DashboardPageObject extends FtrService {
     }
   }
 
-  public async expectUnsavedChangesNotificationExists(timeout: number | undefined = undefined) {
-    await this.testSubjects.waitForExists(UNSAVED_CHANGES_NOTIFICATION, { timeout });
+  public async expectUnsavedChangesNotificationExists(
+    timeout = this.testSubjects.WAIT_FOR_EXISTS_TIME
+  ) {
+    await this.testSubjects.existOrFail(UNSAVED_CHANGES_NOTIFICATION, { timeout });
   }
 
   public async clickNewDashboard(

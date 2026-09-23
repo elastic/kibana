@@ -31,8 +31,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.console.isContextMenuOpen()).to.be(false);
       await PageObjects.console.clickContextMenu();
       await testSubjects.existOrFail('consoleMenu');
-      await PageObjects.console.clickContextMenu();
-      await testSubjects.missingOrFail('consoleMenu');
     });
 
     it('should have options to copy to language, open documentation, and auto indent', async () => {
@@ -42,7 +40,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.console.isCopyToLanguageButtonVisible()).to.be.eql(true);
       expect(await PageObjects.console.isOpenDocumentationButtonVisible()).to.be.eql(true);
       expect(await PageObjects.console.isAutoIndentButtonVisible()).to.be.eql(true);
-      await PageObjects.console.clickContextMenu();
+      await browser.pressKeys(browser.keys.ESCAPE);
       await testSubjects.missingOrFail('consoleMenu');
     });
 

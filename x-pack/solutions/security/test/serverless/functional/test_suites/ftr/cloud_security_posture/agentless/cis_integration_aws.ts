@@ -33,7 +33,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     before(async () => {
       const { setupMockServer } = await import('./mock_agentless_api');
       const mockAgentlessApiService = setupMockServer();
-      mockApiServer = mockAgentlessApiService.listen(8089);
+      await new Promise<void>((resolve, reject) => {
+        mockApiServer = mockAgentlessApiService.listen(8089, resolve);
+        mockApiServer.once('error', reject);
+      });
 
       await pageObjects.svlCommonPage.loginAsAdmin();
       cisIntegration = pageObjects.cisAddIntegration;

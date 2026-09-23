@@ -158,6 +158,23 @@ describe('useImagePasteUpload', () => {
       await waitFor(() => expect(result.current.isUploading).toBe(true));
     });
 
+    it('inserts the placeholder when the pasted image starts uploading', async () => {
+      const { textarea, field } = setup();
+      const imageFile = new File(['image'], 'image.png', { type: 'image/png' });
+      const clipboardData = new DataTransfer();
+      Object.defineProperty(clipboardData, 'items', {
+        value: [{ kind: 'file', type: imageFile.type, getAsFile: () => imageFile }],
+      });
+
+      act(() => {
+        textarea.dispatchEvent(new ClipboardEvent('paste', { clipboardData, bubbles: true }));
+      });
+
+      await waitFor(() =>
+        expect(field.setValue).toHaveBeenCalledWith('<!-- uploading "image.png" -->')
+      );
+    });
+
     it('sets error when unsupported mime is pasted', () => {
       const { textarea, result } = setup();
 

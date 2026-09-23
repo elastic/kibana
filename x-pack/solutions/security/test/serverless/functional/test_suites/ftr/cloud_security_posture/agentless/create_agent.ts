@@ -32,14 +32,17 @@ export default function ({ getPageObjects }: FtrProviderContext) {
     before(async () => {
       const { setupMockServer } = await import('./mock_agentless_api');
       const mockAgentlessApiService = setupMockServer();
-      mockApiServer = mockAgentlessApiService.listen(8089);
+      await new Promise<void>((resolve, reject) => {
+        mockApiServer = mockAgentlessApiService.listen(8089, resolve);
+        mockApiServer.once('error', reject);
+      });
 
       await pageObjects.svlCommonPage.loginAsAdmin();
       cisIntegration = pageObjects.cisAddIntegration;
     });
 
     after(async () => {
-      mockApiServer.close();
+      await new Promise<void>((resolve) => mockApiServer.close(() => resolve()));
     });
 
     it(`should create agentless-agent`, async () => {

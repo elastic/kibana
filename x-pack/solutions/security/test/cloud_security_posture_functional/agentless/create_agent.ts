@@ -19,6 +19,8 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const agentCreationTimeout = 1000 * 60 * 1; // 1 minute
   const retry = getService('retry');
+  const testSubjects = getService('testSubjects');
+  const supertest = getService('supertest');
   const pageObjects = getPageObjects([
     'common',
     'cspSecurity',
@@ -36,7 +38,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     before(async () => {
       const { setupMockServer } = await import('./mock_agentless_api');
       const mockAgentlessApiService = setupMockServer();
-      mockApiServer = mockAgentlessApiService.listen(8089);
+      await new Promise<void>((resolve, reject) => {
+        mockApiServer = mockAgentlessApiService.listen(8089, resolve);
+        mockApiServer.once('error', reject);
+      });
 
       cisIntegration = pageObjects.cisAddIntegration;
       cisIntegrationAws = pageObjects.cisAddIntegration.cisAws;
@@ -44,7 +49,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     after(async () => {
       await pageObjects.cspSecurity.logout();
-      mockApiServer.close();
+      await new Promise<void>((resolve) => mockApiServer.close(() => resolve()));
     });
 
     it('Hyperlink on PostInstallation Modal should have the correct URL', async () => {
@@ -90,7 +95,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await cisIntegration.fillInTextField('awsDirectAccessKeyId', 'access_key_id');
       await cisIntegration.fillInTextField('passwordInput-secret-access-key', 'secret_access_key');
 
+      await retry.waitForWithTimeout('agentless policy save button to be enabled', 10000, () =>
+        testSubjects.isEnabled('createPackagePolicySaveButton')
+      );
       await cisIntegration.clickSaveButton();
+      await retry.tryForTime(10000, async () => {
+        const { body } = await supertest
+          .get('/api/fleet/package_policies')
+          .query({ perPage: 100 })
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+        const policyNames: string[] = body.items.map((item: { name: string }) => item.name);
+        expect(policyNames).to.contain(integrationPolicyName);
+      });
       await pageObjects.header.waitUntilLoadingHasFinished();
       await retry.tryForTime(agentCreationTimeout, async () => {
         await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();

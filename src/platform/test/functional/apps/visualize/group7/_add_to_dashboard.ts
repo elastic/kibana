@@ -329,8 +329,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await dashboard.saveDashboard('My Very Entitled Dashboard');
 
-      await dashboard.gotoDashboardLandingPage();
-      await listingTable.clickItemLink('dashboard', 'My Very Entitled Dashboard');
+      await dashboard.loadSavedDashboard('My Very Entitled Dashboard');
 
       const [newPanelTitle] = await dashboard.getPanelTitles();
       expect(newPanelTitle).to.equal('My New panel title');

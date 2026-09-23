@@ -28,7 +28,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     before(async () => {
       const { setupMockServer } = await import('./mock_agentless_api');
       const mockAgentlessApiService = setupMockServer();
-      mockApiServer = mockAgentlessApiService.listen(8089);
+      await new Promise<void>((resolve, reject) => {
+        mockApiServer = mockAgentlessApiService.listen(8089, resolve);
+        mockApiServer.once('error', reject);
+      });
 
       // Ensure CSP is installed — prior suites in this FTR config (e.g. cis_integration_aws)
       // delete the package in their after hook, so we can't rely on the server-args preinstall.

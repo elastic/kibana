@@ -87,6 +87,17 @@ describe('TestSubjects existence checks', () => {
     );
   });
 
+  it('returns false when waitForExists times out', async () => {
+    existsByDisplayedByCssSelector.mockResolvedValue(false);
+    const testSubjects = getTestSubjects();
+
+    await expect(testSubjects.waitForExists('selector')).resolves.toBe(false);
+    expect(existsByDisplayedByCssSelector).toHaveBeenCalledWith(
+      '[data-test-subj="selector"]',
+      2500
+    );
+  });
+
   it('uses the try timeout and throws when existOrFail does not find the element', async () => {
     existsByDisplayedByCssSelector.mockResolvedValue(false);
     const testSubjects = getTestSubjects();

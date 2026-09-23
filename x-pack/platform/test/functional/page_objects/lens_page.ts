@@ -839,20 +839,24 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * Save the current Lens visualization.
      */
     async openSaveOptionsIfNeeded() {
-      if (await testSubjects.exists('lnsApp_saveButton')) {
-        return;
-      }
       const secondarySubjects = [
         'lnsApp_saveAndReturnButton-secondary-button',
         'lnsApp_replaceInDashboardButton-secondary-button',
         'lnsApp_replaceInCanvasButton-secondary-button',
       ];
-      for (const subject of secondarySubjects) {
-        if (await testSubjects.exists(subject)) {
-          await testSubjects.click(subject);
+      await retry.tryForTime(10000, async () => {
+        if (await testSubjects.exists('lnsApp_saveButton')) {
           return;
         }
-      }
+        for (const subject of secondarySubjects) {
+          if (await testSubjects.exists(subject)) {
+            await testSubjects.click(subject);
+            return;
+          }
+        }
+        throw new Error('Lens save controls have not rendered');
+      });
+      await testSubjects.existOrFail('lnsApp_saveButton', { timeout: 10000 });
     },
 
     async save(

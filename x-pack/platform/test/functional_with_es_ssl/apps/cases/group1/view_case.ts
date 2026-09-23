@@ -134,14 +134,18 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await editCommentTextArea.type('Description with space     ');
 
+        await retry.waitFor('description save button to be enabled', () =>
+          testSubjects.isEnabled('editable-save-markdown')
+        );
         await testSubjects.click('editable-save-markdown');
         await header.waitUntilLoadingHasFinished();
 
-        const desc = await find.byCssSelector(
-          '[data-test-subj="description"] [data-test-subj="scrollable-markdown"]'
-        );
-
-        expect(await desc.getVisibleText()).equal('Description with space');
+        await retry.tryForTime(10000, async () => {
+          const desc = await find.byCssSelector(
+            '[data-test-subj="description"] [data-test-subj="scrollable-markdown"]'
+          );
+          expect(await desc.getVisibleText()).equal('Description with space');
+        });
       });
 
       it('comment area does not have focus on page load', async () => {

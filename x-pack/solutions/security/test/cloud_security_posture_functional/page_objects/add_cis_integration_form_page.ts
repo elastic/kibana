@@ -450,13 +450,24 @@ export function AddCisIntegrationFormPageProvider({
   };
 
   const getPostInstallModal = async () => {
-    return await testSubjects.exists(TEST_IDS.CONFIRM_MODAL_TITLE_TEXT);
+    if (await testSubjects.waitForExists(TEST_IDS.CONFIRM_MODAL_TITLE_TEXT, { timeout: 10000 })) {
+      return await testSubjects.find(TEST_IDS.CONFIRM_MODAL_TITLE_TEXT);
+    }
+    return undefined;
   };
 
   const checkIntegrationPliAuthBlockExists = async () => {
+    return await testSubjects.exists(TEST_IDS.CLOUD_SECURITY_POSTURE_PLI_AUTH_BLOCK);
+  };
+
+  const waitForIntegrationPliAuthBlock = async () => {
     return await testSubjects.waitForExists(TEST_IDS.CLOUD_SECURITY_POSTURE_PLI_AUTH_BLOCK, {
       timeout: 5000,
     });
+  };
+
+  const waitForCreateIntegrationForm = async () => {
+    await testSubjects.existOrFail(TEST_IDS.CREATE_PACKAGE_POLICY_PAGE, { timeout: 10000 });
   };
 
   const pasteTextInField = async (selector: string, text: string) => {
@@ -780,6 +791,8 @@ export function AddCisIntegrationFormPageProvider({
     getValueInEditPage,
     isOptionChecked,
     checkIntegrationPliAuthBlockExists,
+    waitForIntegrationPliAuthBlock,
+    waitForCreateIntegrationForm,
     getReplaceSecretButton,
     getSecretComponentReplaceButton,
     inputUniqueIntegrationName,

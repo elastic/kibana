@@ -46,7 +46,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('captures a screenshot and pastes it into the markdown editor', async () => {
       const takeScreenshotResult = await browser.takeScreenshot();
-      await driver.executeScript(async (screenshotData: string) => {
+      const pasteResult = await driver.executeScript<{
+        foundTextarea: boolean;
+        fileCount: number;
+        prevented: boolean;
+      }>(async (screenshotData: string) => {
         const blob = new Blob([
           new Uint8Array(
             atob(screenshotData)
@@ -68,23 +72,32 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         if (textarea) {
           textarea.dispatchEvent(pasteEvent);
         }
+        return {
+          foundTextarea: !!textarea,
+          fileCount: clipboardData.items.length,
+          prevented: pasteEvent.defaultPrevented,
+        };
       }, takeScreenshotResult);
+      expect(pasteResult.foundTextarea).to.be(true);
+      expect(pasteResult.fileCount).to.be(1);
+      expect(pasteResult.prevented).to.be(true);
     });
 
     it('uploads the image and replaces the placeholder with a markdown link', async () => {
-      // check that image upload placeholder text is displayed
-      await retry.waitFor('textarea to contain upload placeholder text', async () => {
+      // The upload may finish before the transient placeholder can be observed.
+      await retry.waitFor('image upload to start or finish', async () => {
         const textarea = await find.byCssSelector('#newComment');
-        if (!textarea) return false;
-        const content = await textarea.getVisibleText();
-        return content?.includes('<!-- uploading "screenshot.png" -->');
+        const content = (await textarea.getAttribute('value')) ?? '';
+        return (
+          content.includes('<!-- uploading "screenshot.png" -->') ||
+          content.includes('![screenshot.png](/api/files/files/')
+        );
       });
 
       // wait for the image placeholder to be replaced with markdown url
       await retry.waitFor('image placeholder is replaced with markdown url', async () => {
         const textarea = await find.byCssSelector('#newComment');
-        if (!textarea) return false;
-        const content = await textarea?.getVisibleText();
+        const content = await textarea.getAttribute('value');
         if (!content) return false;
         // we don't know the full url because the asset gets a unique id
         expect(content.includes('![screenshot.png](/api/files/files/')).to.be(true);
@@ -98,8 +111,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await find.clickByButtonText('Preview');
 
       // assert the image is present
-      const image = await find.existsByCssSelector('img[alt="screenshot.png"]');
-      expect(!!image).to.be(true);
+      await retry.waitForWithTimeout('uploaded image to be visible in preview', 10000, () =>
+        find.existsByDisplayedByCssSelector('img[alt="screenshot.png"]', 0)
+      );
 
       // assert that the image is a real image
       await retry.waitFor(
