@@ -67,7 +67,7 @@ const CORPORA_DIR = join(__dirname, '..', 'corpora');
 /** Mutation corpora grouped under the `tp-chains` corpus family in the JSONL data. */
 const MUTATION_CORPORA: readonly CorpusName[] = ['adversarial-twins', 'perturbations'];
 
-const corpusPath = (name: CorpusName) => join(CORPORA_DIR, `${name}.jsonl`);
+const corpusPath = (name: CorpusName) => join(CORPORA_DIR, `${name.replaceAll('-', '_')}.jsonl`);
 
 const assertNonEmpty = (value: unknown, field: string, where: string): void => {
   if (value === undefined || value === null) {
