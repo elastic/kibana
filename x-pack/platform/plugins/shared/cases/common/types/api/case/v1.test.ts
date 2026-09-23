@@ -1080,31 +1080,45 @@ describe('CasePatchRequestRt', () => {
 
 describe('CaseUpdateRequestTemplateRt', () => {
   it('accepts a valid template reference', () => {
-    expect(PathReporter.report(CaseUpdateRequestTemplateRt.decode({ id: 'tmpl-1', version: 1 }))).toContain('No errors!');
+    expect(
+      PathReporter.report(CaseUpdateRequestTemplateRt.decode({ id: 'tmpl-1', version: 1 }))
+    ).toContain('No errors!');
   });
 
   it('accepts version > 1', () => {
-    expect(PathReporter.report(CaseUpdateRequestTemplateRt.decode({ id: 'tmpl-1', version: 42 }))).toContain('No errors!');
+    expect(
+      PathReporter.report(CaseUpdateRequestTemplateRt.decode({ id: 'tmpl-1', version: 42 }))
+    ).toContain('No errors!');
   });
 
   it('rejects version 0', () => {
-    expect(PathReporter.report(CaseUpdateRequestTemplateRt.decode({ id: 'tmpl-1', version: 0 }))).toContain('The template version must be a positive integer.');
+    expect(
+      PathReporter.report(CaseUpdateRequestTemplateRt.decode({ id: 'tmpl-1', version: 0 }))
+    ).toContain('The template version must be a positive integer.');
   });
 
   it('rejects a negative version', () => {
-    expect(PathReporter.report(CaseUpdateRequestTemplateRt.decode({ id: 'tmpl-1', version: -1 }))).toContain('The template version must be a positive integer.');
+    expect(
+      PathReporter.report(CaseUpdateRequestTemplateRt.decode({ id: 'tmpl-1', version: -1 }))
+    ).toContain('The template version must be a positive integer.');
   });
 
   it('rejects a non-integer version', () => {
-    expect(PathReporter.report(CaseUpdateRequestTemplateRt.decode({ id: 'tmpl-1', version: 1.5 }))).toContain('The template version must be a positive integer.');
+    expect(
+      PathReporter.report(CaseUpdateRequestTemplateRt.decode({ id: 'tmpl-1', version: 1.5 }))
+    ).toContain('The template version must be a positive integer.');
   });
 
   it('rejects a missing version', () => {
-    expect(PathReporter.report(CaseUpdateRequestTemplateRt.decode({ id: 'tmpl-1' }))).not.toContain('No errors!');
+    expect(PathReporter.report(CaseUpdateRequestTemplateRt.decode({ id: 'tmpl-1' }))).not.toContain(
+      'No errors!'
+    );
   });
 
   it('rejects a missing id', () => {
-    expect(PathReporter.report(CaseUpdateRequestTemplateRt.decode({ version: 1 }))).not.toContain('No errors!');
+    expect(PathReporter.report(CaseUpdateRequestTemplateRt.decode({ version: 1 }))).not.toContain(
+      'No errors!'
+    );
   });
 });
 
