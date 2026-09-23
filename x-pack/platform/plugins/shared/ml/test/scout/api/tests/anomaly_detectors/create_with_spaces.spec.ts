@@ -57,6 +57,13 @@ apiTest.describe(
           { headers: { ...INTERNAL_API_HEADERS, ...cookieHeader }, responseType: 'json' }
         );
         expect(fromSpace2).toHaveStatusCode(404);
+
+        const jobsSpaces = await apiClient.get('internal/ml/saved_objects/jobs_spaces', {
+          headers: { ...INTERNAL_API_HEADERS, ...cookieHeader },
+          responseType: 'json',
+        });
+        expect(jobsSpaces).toHaveStatusCode(200);
+        expect(jobsSpaces.body['anomaly-detector'][JOB_ID]).toStrictEqual([SPACE_1]);
       }
     );
   }
