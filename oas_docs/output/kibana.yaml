@@ -45403,8 +45403,8 @@ paths:
                   nullable: true
                   type: string
                 connectorId:
-                  enum: []
-                  nullable: true
+                  maxLength: 255
+                  type: string
                 deploymentId:
                   description: CFN stack ARN (or equivalent); provided by the client after manual deployment.
                   maxLength: 2048
