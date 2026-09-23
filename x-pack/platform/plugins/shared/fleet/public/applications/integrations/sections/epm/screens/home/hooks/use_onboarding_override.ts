@@ -48,7 +48,7 @@ const HIDDEN_TILE_IDS = new Set(['epr:aws']);
 
 export function useOnboardingOverride() {
   const { featureFlags, application } = useStartServices();
-  const isOnboardingEnabled = featureFlags.getBooleanValue(ONBOARDING_ENABLED_FLAG, false);
+  const isOnboardingEnabled = featureFlags.useBooleanValue(ONBOARDING_ENABLED_FLAG, false);
 
   const navigateToOnboarding = useCallback(() => {
     application.navigateToApp('onboarding', { path: '/aws', state: { newSession: true } });

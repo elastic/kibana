@@ -32,7 +32,7 @@ jest.mock('../../../../../hooks', () => ({
   useGetReplacementCustomIntegrationsQuery: () => mockUseGetReplacementCustomIntegrationsQuery(),
   useGetPackageVerificationKeyId: () => mockUseGetPackageVerificationKeyId(),
   useStartServices: () => ({
-    featureFlags: { getBooleanValue: jest.fn().mockReturnValue(false) },
+    featureFlags: { useBooleanValue: jest.fn().mockReturnValue(false) },
     application: {
       navigateToApp: jest.fn(),
       getUrlForApp: jest.fn().mockReturnValue('/app/onboarding/aws'),

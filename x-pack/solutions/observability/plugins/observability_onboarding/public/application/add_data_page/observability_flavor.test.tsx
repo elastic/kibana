@@ -78,7 +78,7 @@ const buildServices = ({
   return {
     ...core,
     featureFlags: {
-      getBooleanValue: jest.fn(
+      useBooleanValue: jest.fn(
         (key: string, fallback: boolean) => featureFlagValues[key] ?? fallback
       ),
     },

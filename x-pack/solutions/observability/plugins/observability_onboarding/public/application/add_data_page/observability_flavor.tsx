@@ -47,6 +47,10 @@ export const useObservabilityCuratedCategories = ({
     },
   } = useKibana<ObservabilityOnboardingAppServices>();
   const isManagedOtlpServiceAvailable = useManagedOtlpServiceAvailability();
+  const isIngestHubOnboardingEnabled = featureFlags.useBooleanValue(
+    IS_INGEST_HUB_ONBOARDING_ENABLED,
+    false
+  );
   const metricsOnboardingEnabled = usePricingFeature(
     ObservabilityOnboardingPricingFeature.METRICS_ONBOARDING
   );
@@ -69,7 +73,7 @@ export const useObservabilityCuratedCategories = ({
       {
         // ingest_hub's guided AWS flow wins over the CloudWatch quickstart
         // while it rolls out behind its own flag.
-        aws: featureFlags.getBooleanValue(IS_INGEST_HUB_ONBOARDING_ENABLED, false)
+        aws: isIngestHubOnboardingEnabled
           ? { href: getUrlForApp?.('onboarding', { path: '/aws' }) }
           : reactRouterNavigate(history, '/aws'),
         opentelemetry: isManagedOtlpServiceAvailable
@@ -124,7 +128,7 @@ export const useObservabilityCuratedCategories = ({
     colorMode,
     euiTheme,
     application,
-    featureFlags,
+    isIngestHubOnboardingEnabled,
     isServerless,
     isManagedOtlpServiceAvailable,
     metricsOnboardingEnabled,
