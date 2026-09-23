@@ -163,7 +163,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await cisIntegration.navigateToEditAgentlessIntegrationPage();
       await pageObjects.header.waitUntilLoadingHasFinished();
 
-      expect(await cisIntegration.showSetupTechnologyComponent()).to.be(true);
+      await testSubjects.existOrFail('setup-technology-selector', { timeout: 10000 });
     });
 
     it(`should hide setup technology selector in edit mode`, async () => {

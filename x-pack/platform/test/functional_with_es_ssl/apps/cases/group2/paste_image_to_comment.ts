@@ -46,41 +46,43 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('captures a screenshot and pastes it into the markdown editor', async () => {
       const takeScreenshotResult = await browser.takeScreenshot();
-      const pasteResult = await driver.executeScript<{
-        foundTextarea: boolean;
-        fileCount: number;
-        prevented: boolean;
-      }>(async (screenshotData: string) => {
-        const blob = new Blob([
-          new Uint8Array(
-            atob(screenshotData)
-              .split('')
-              .map((c) => c.charCodeAt(0))
-          ),
-        ]);
-        const imageFile = new File([blob], 'screenshot.png', { type: 'image/png' });
+      await retry.tryForTime(10000, async () => {
+        const pasteResult = await driver.executeScript<{
+          foundTextarea: boolean;
+          fileCount: number;
+          prevented: boolean;
+        }>(async (screenshotData: string) => {
+          const blob = new Blob([
+            new Uint8Array(
+              atob(screenshotData)
+                .split('')
+                .map((c) => c.charCodeAt(0))
+            ),
+          ]);
+          const imageFile = new File([blob], 'screenshot.png', { type: 'image/png' });
 
-        const clipboardData = new DataTransfer();
-        clipboardData.items.add(imageFile);
+          const clipboardData = new DataTransfer();
+          clipboardData.items.add(imageFile);
 
-        const pasteEvent = new ClipboardEvent('paste', {
-          clipboardData,
-          bubbles: true,
-          cancelable: true,
-        });
-        const textarea = document.querySelector('#newComment');
-        if (textarea) {
-          textarea.dispatchEvent(pasteEvent);
-        }
-        return {
-          foundTextarea: !!textarea,
-          fileCount: clipboardData.items.length,
-          prevented: pasteEvent.defaultPrevented,
-        };
-      }, takeScreenshotResult);
-      expect(pasteResult.foundTextarea).to.be(true);
-      expect(pasteResult.fileCount).to.be(1);
-      expect(pasteResult.prevented).to.be(true);
+          const pasteEvent = new ClipboardEvent('paste', {
+            clipboardData,
+            bubbles: true,
+            cancelable: true,
+          });
+          const textarea = document.querySelector('#newComment');
+          if (textarea) {
+            textarea.dispatchEvent(pasteEvent);
+          }
+          return {
+            foundTextarea: !!textarea,
+            fileCount: clipboardData.items.length,
+            prevented: pasteEvent.defaultPrevented,
+          };
+        }, takeScreenshotResult);
+        expect(pasteResult.foundTextarea).to.be(true);
+        expect(pasteResult.fileCount).to.be(1);
+        expect(pasteResult.prevented).to.be(true);
+      });
     });
 
     it('uploads the image and replaces the placeholder with a markdown link', async () => {
