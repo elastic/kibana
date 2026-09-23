@@ -95,7 +95,7 @@ import {
   putAiIndexResponseSchema,
   queryAiIndicesBodySchema,
   queryAiIndicesResponseSchema,
-} from './schemas/ai_indices';
+} from './schemas/ai_indices_schema';
 import { withContextEngineFeatureFlag } from './with_feature_flag';
 
 const READ_SECURITY: RouteSecurity = {
