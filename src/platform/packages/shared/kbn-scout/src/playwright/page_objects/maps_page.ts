@@ -123,6 +123,15 @@ export class MapsPage {
     await this.saveAndReturnButton.click();
   }
 
+  /** Waits for loading indicators to clear on the minimized layer control (embedded/dashboard context). */
+  async waitForLayersToLoadMinimizedLayerControl() {
+    const expandButton = this.page.testSubj.locator('mapExpandLayerControlButton');
+    await expandButton.waitFor({ state: 'visible', timeout: DEFAULT_MAP_LOADING_TIMEOUT });
+    await expect(expandButton.locator('.euiLoadingSpinner')).toHaveCount(0, {
+      timeout: DEFAULT_MAP_LOADING_TIMEOUT,
+    });
+  }
+
   /** Waits until Map layer TOC has entries and loading indicators are gone (FTR parity). */
   async waitForLayersToLoad() {
     await this.mapLayerToc.waitFor({ state: 'visible', timeout: DEFAULT_MAP_LOADING_TIMEOUT });
@@ -227,10 +236,10 @@ export class MapsPage {
     await expect(async () => {
       const box = await this.mapContainer.boundingBox();
       if (!box) throw new Error('Map container bounding box not found');
-      await this.page.mouse.click(
-        box.x + box.width / 2 + xOffset,
-        box.y + box.height / 2 + yOffset
-      );
+      const x = box.x + box.width / 2 + xOffset;
+      const y = box.y + box.height / 2 + yOffset;
+      await this.page.mouse.move(x, y);
+      await this.page.mouse.click(x, y);
       await closeButton.waitFor({ state: 'visible', timeout: 2000 });
     }).toPass({ timeout: 15000 });
   }
