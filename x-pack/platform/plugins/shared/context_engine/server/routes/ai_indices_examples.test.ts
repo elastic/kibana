@@ -8,7 +8,9 @@
 import fs from 'node:fs';
 import { parse } from 'yaml';
 import type { Type } from '@kbn/config-schema';
-import type { IRouter } from '@kbn/core/server';
+import type { IRouter, RequestHandler, RequestHandlerContext } from '@kbn/core/server';
+import { kibanaResponseFactory } from '@kbn/core/server';
+import { httpServerMock } from '@kbn/core/server/mocks';
 import type { AddVersionOpts, VersionedRouteValidation } from '@kbn/core-http-server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { registerAiIndexRoutes } from './ai_indices';
@@ -29,20 +31,25 @@ interface ExampleFile {
 }
 
 type RouteOpts = AddVersionOpts<unknown, unknown, unknown>;
+type RouteHandler = RequestHandler<unknown, unknown, unknown>;
 
-const registered: Array<{ route: string; opts: RouteOpts }> = [];
+const registered: Array<{ route: string; opts: RouteOpts; handler: RouteHandler }> = [];
 
 const captureMethod =
   (method: string) =>
   ({ path }: { path: string }) => {
     const builder = {
-      addVersion: (opts: RouteOpts) => {
-        registered.push({ route: `${method} ${path}`, opts });
+      addVersion: (opts: RouteOpts, handler: RouteHandler) => {
+        registered.push({ route: `${method} ${path}`, opts, handler });
         return builder;
       },
     };
     return builder;
   };
+
+const disabledContext = {
+  core: Promise.resolve({ uiSettings: { client: { get: async () => false } } }),
+} as unknown as RequestHandlerContext;
 
 registerAiIndexRoutes({
   router: {
@@ -64,7 +71,7 @@ registerAiIndexRoutes({
   getSpaces: jest.fn(),
 });
 
-const routesWithExamples = registered.flatMap(({ route, opts }) => {
+const routesWithExamples = registered.flatMap(({ route, opts, handler }) => {
   const examplePath = opts.options?.oasOperationObject?.();
   if (typeof examplePath !== 'string' || opts.validate === false) {
     return [];
@@ -72,7 +79,7 @@ const routesWithExamples = registered.flatMap(({ route, opts }) => {
   const validation: VersionedRouteValidation<unknown, unknown, unknown> =
     typeof opts.validate === 'function' ? opts.validate() : opts.validate;
   const examples: ExampleFile = parse(fs.readFileSync(examplePath, 'utf8'));
-  return [{ route, validation, examples }];
+  return [{ route, validation, examples, handler }];
 });
 
 const examplesOf = ({ content }: ExampleMediaType) =>
@@ -90,13 +97,27 @@ describe('AI index route examples', () => {
     expect(routesWithExamples).toHaveLength(7);
   });
 
-  describe.each(routesWithExamples)('$route', ({ validation, examples }) => {
+  describe.each(routesWithExamples)('$route', ({ validation, examples, handler }) => {
     const responseSchemas = validation.response ?? {};
     const declaredStatuses = Object.keys(responseSchemas).filter((key) => /^\d+$/.test(key));
 
     it('has an example for exactly the declared response statuses', () => {
       expect(Object.keys(examples.responses).sort()).toEqual(declaredStatuses.sort());
     });
+
+    const notFoundSchema = responseSchemas[404]?.body as (() => Type<unknown>) | undefined;
+    if (notFoundSchema) {
+      it('returns a 404 matching its schema when the context engine is disabled', async () => {
+        const { status, payload } = await handler(
+          disabledContext,
+          httpServerMock.createKibanaRequest(),
+          kibanaResponseFactory
+        );
+
+        expect(status).toBe(404);
+        expect(() => notFoundSchema().validate(payload)).not.toThrow();
+      });
+    }
 
     it.each(
       Object.entries(examples.responses).flatMap(([status, media]) =>

@@ -313,7 +313,9 @@ describe('ai indices routes', () => {
       body: { enabled: true },
     });
 
-    expect(response.notFound).toHaveBeenCalledTimes(10);
+    expect(response.notFound.mock.calls).toEqual(
+      Array(10).fill([{ body: { message: 'Not Found' } }])
+    );
     expect(aiIndexService.create).not.toHaveBeenCalled();
     expect(aiIndexService.put).not.toHaveBeenCalled();
     expect(aiIndexService.get).not.toHaveBeenCalled();
