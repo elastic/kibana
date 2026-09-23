@@ -388,14 +388,14 @@ export const Settings = lazySchema(() =>
      */
     syncAlerts: z.boolean().describe('Turns alert syncing on or off.'),
     /**
-      * When true, observables (e.g. IPs, hashes, URLs) are automatically extracted from case comments. When omitted on create, the space configuration default is used; falls back to `true` if no space configuration exists. Precedence: explicit value > template setting > space config > true.
+      * When true, observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments. When omitted on create, the space configuration default is used. Falls back to `true` if no space configuration exists. Precedence: explicit value > template setting > space config > true.
 
       */
     extractObservables: z
       .boolean()
       .optional()
       .describe(
-        'When true, observables (e.g. IPs, hashes, URLs) are automatically extracted from case comments. When omitted on create, the space configuration default is used; falls back to `true` if no space configuration exists. Precedence: explicit value > template setting > space config > true.\n'
+        'When true, observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments. When omitted on create, the space configuration default is used. Falls back to `true` if no space configuration exists. Precedence: explicit value > template setting > space config > true.\n'
       ),
   })
 );
