@@ -172,7 +172,8 @@ export class AlertZeroPlugin
     this.conversationProposalsService = new ConversationProposalsService(
       plugins.proposals.getProposalsService(),
       plugins.agentBuilder,
-      this.logger
+      this.logger,
+      plugins.agenticInvestigations.getImpactClient
     );
 
     this.watchesService = new WatchesService();
