@@ -360,15 +360,30 @@ function isConnectorEligible(attrs: CloudConnectorSOAttributes): boolean {
 async function updateConnectorStatus(
   soClient: SavedObjectsClientContract,
   connectorId: string,
-  attrs: Partial<CloudConnectorSOAttributes>
+  attrs: Partial<CloudConnectorSOAttributes>,
+  /**
+   * Version from the connector this run started verifying. A role-ARN edit commits a new
+   * version and resets verification; an unversioned stamp from this in-flight run would
+   * overwrite that reset with the old role's status.
+   */
+  version?: string
 ): Promise<void> {
   const logger = appContextService.getLogger().get('otel-verifier');
   try {
-    await soClient.update<CloudConnectorSOAttributes>(
-      CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
-      connectorId,
-      attrs
-    );
+    if (version !== undefined) {
+      await soClient.update<CloudConnectorSOAttributes>(
+        CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+        connectorId,
+        attrs,
+        { version }
+      );
+    } else {
+      await soClient.update<CloudConnectorSOAttributes>(
+        CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+        connectorId,
+        attrs
+      );
+    }
   } catch (err) {
     logger.error(
       `${VERIFY_PERMISSIONS_TASK} Failed to update connector ${connectorId} status: ${err.message}`
@@ -441,19 +456,29 @@ async function verifyConnector(
       `${VERIFY_PERMISSIONS_TASK} Verifier policy ${policyId} created for connector ${connector.id}`
     );
 
-    await updateConnectorStatus(soClient, connector.id, {
-      verification_started_at: startedAt,
-      verification_status: 'pending',
-    });
+    await updateConnectorStatus(
+      soClient,
+      connector.id,
+      {
+        verification_started_at: startedAt,
+        verification_status: 'pending',
+      },
+      connector.version
+    );
     return true;
   } catch (err) {
     logger.error(
       `${VERIFY_PERMISSIONS_TASK} Failed to verify connector ${connector.id}: ${err.message}`
     );
-    await updateConnectorStatus(soClient, connector.id, {
-      verification_status: 'failed',
-      verification_failed_at: new Date().toISOString(),
-    });
+    await updateConnectorStatus(
+      soClient,
+      connector.id,
+      {
+        verification_status: 'failed',
+        verification_failed_at: new Date().toISOString(),
+      },
+      connector.version
+    );
     return false;
   }
 }
