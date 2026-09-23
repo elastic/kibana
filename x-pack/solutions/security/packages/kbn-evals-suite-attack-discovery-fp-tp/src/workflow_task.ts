@@ -634,7 +634,8 @@ export interface SeedingClients {
  */
 export const seedAttackDiscovery = async (
   { fetch, log }: SeedingClients,
-  doc: ReturnType<typeof buildAttackDiscoveryFromPayload>
+  doc: ReturnType<typeof buildAttackDiscoveryFromPayload>,
+  caseId: string
 ): Promise<PersistedAttackDiscovery> => {
   const response = (await fetch(
     '/internal/elastic_assistant/data_generator/attack_discoveries/_create',
@@ -665,6 +666,9 @@ export const seedAttackDiscovery = async (
             timestamp: doc.timestamp,
           },
         ],
+        // Required by CreateAttackDiscoveryAlertsParams (z.string()); groups the
+        // seeded doc(s) into one synthetic generation.
+        generationUuid: `eval-${caseId}-${Date.now()}`,
       }),
     }
   )) as { data?: PersistedAttackDiscovery[] };
@@ -698,7 +702,15 @@ export const seedInvestigation = async (
   await fetch('/api/agent_builder/conversations', {
     method: 'POST',
     headers: { 'kbn-xsrf': 'true', 'elastic-api-version': '2023-10-31' },
-    body: JSON.stringify({ conversation_id: conversationId, title }),
+    body: JSON.stringify({
+      conversation_id: conversationId,
+      title,
+      // The workflow runtime resolves its own internal user via getFakeRequest(),
+      // not the REST caller — a private conversation is unreadable by
+      // `load_investigation` (client.ts get() permission check). Public mode
+      // lets any user with access to the agent read the conversation.
+      access_control: { access_mode: 'public' },
+    }),
   });
   log.info(`Opened investigation conversation ${conversationId} for AD ${attackDiscoveryId}`);
   return conversationId;
@@ -738,7 +750,8 @@ export const runAttackDiscoveryWorkflow = async ({
   try {
     seeded = await seedAttackDiscovery(
       { fetch, log },
-      buildAttackDiscoveryFromPayload(caseId, payload)
+      buildAttackDiscoveryFromPayload(caseId, payload),
+      caseId
     );
     investigationId = await seedInvestigation({ fetch, log }, seeded.id, seeded.title ?? caseId);
   } catch (err) {

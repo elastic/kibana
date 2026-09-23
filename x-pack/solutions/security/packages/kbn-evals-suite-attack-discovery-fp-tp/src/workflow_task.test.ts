@@ -217,7 +217,7 @@ describe('seedAttackDiscovery', () => {
       return { data: [{ id: AD_DOC_ID }] };
     }) as never;
     const doc = buildAttackDiscoveryFromPayload('c1', GUIDE_PAYLOAD);
-    const persisted = await seedAttackDiscovery({ fetch, log: mockLog() }, doc);
+    const persisted = await seedAttackDiscovery({ fetch, log: mockLog() }, doc, 'c1');
 
     expect(persisted.id).toBe(AD_DOC_ID);
     expect(calls[0].url).toBe(
@@ -231,6 +231,8 @@ describe('seedAttackDiscovery', () => {
     expect(body.attackDiscoveries[0].title).toBe(doc.title);
     expect(body.attackDiscoveries[0].summaryMarkdown).toBe(doc.summaryMarkdown);
     expect(body.apiConfig.connectorId).toBe('none');
+    expect(typeof body.generationUuid).toBe('string');
+    expect(body.generationUuid.length).toBeGreaterThan(0);
   });
 
   it('throws (no id invented) when the route returns no persisted document', async () => {
@@ -238,7 +240,8 @@ describe('seedAttackDiscovery', () => {
     await expect(
       seedAttackDiscovery(
         { fetch, log: mockLog() },
-        buildAttackDiscoveryFromPayload('c1', GUIDE_PAYLOAD)
+        buildAttackDiscoveryFromPayload('c1', GUIDE_PAYLOAD),
+        'c1'
       )
     ).rejects.toThrow('no persisted attack discovery id');
   });
@@ -262,6 +265,8 @@ describe('seedInvestigation', () => {
     const body = JSON.parse((calls[0].init as RequestInit).body as string);
     expect(body.conversation_id).toBe(conversationId);
     expect(body.title).toBe('AD title');
+    // Shared access so the workflow runtime's own internal user can read it.
+    expect(body.access_control).toEqual({ access_mode: 'public' });
     // No message field: the investigation agent must not be woken.
     expect(body.message).toBeUndefined();
     expect(body.messages).toBeUndefined();
