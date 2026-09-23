@@ -7,7 +7,7 @@
 
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
-import type { AgenticInvestigationsPluginStart } from '@kbn/agentic-investigations-plugin/server';
+import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 
 /**
  * Shared service handles the hunt pipeline (Tier 1, Tier 2, correlation and,
@@ -16,8 +16,8 @@ import type { AgenticInvestigationsPluginStart } from '@kbn/agentic-investigatio
  * so none of them import agentBuilder/inference directly.
  */
 export interface HuntServices {
-  /** Agentic Investigations' proposals service, for writing back hunt proposals. */
-  getProposalsService: AgenticInvestigationsPluginStart['getProposalsService'];
+  /** The proposals plugin's service, for writing back hunt proposals. */
+  getProposalsService: ProposalsPluginStart['getProposalsService'];
   /** Inference plugin start contract, for building a ScopedModel per hunt run. */
   getInference: () => InferenceServerStart;
   /**
