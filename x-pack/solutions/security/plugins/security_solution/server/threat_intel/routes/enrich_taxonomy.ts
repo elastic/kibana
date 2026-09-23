@@ -12,8 +12,6 @@ import {
   enrichTaxonomyResponseSchema,
   ENRICH_TAXONOMY_MAX_BODY_BYTES,
 } from '../../../common/threat_intel';
-// See assess_relevance.ts for why the enrich stages pin to the operator's
-// Fast pick (D49): high-volume, low-stakes, on a 4h schedule over every report.
 import { enrichTaxonomy } from '../services';
 import { resolveScopedModel } from './lib/scoped_model';
 import { THREAT_INTEL_WRITE_AUTHZ } from './lib/authz';

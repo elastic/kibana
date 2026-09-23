@@ -17,7 +17,6 @@ import type {
   SecuritySolutionPluginSetupDependencies,
   SecuritySolutionPluginStartDependencies,
 } from '../plugin_contract';
-import { registerThreatIntelInferenceFeatures } from './inference_features';
 import { registerRoutes as registerThreatIntelRoutes } from './routes';
 import { ensureThreatIntelBootstrap } from './setup/bootstrap_threat_intel';
 import { ensureIndicatorAliasForSpace } from './setup/indicator_alias';
@@ -91,8 +90,6 @@ export const setupThreatIntel = ({
     new Error('Threat intelligence bootstrap has not started yet')
   );
   runtime.bootstrapReady.catch(() => {});
-
-  registerThreatIntelInferenceFeatures(plugins.searchInferenceEndpoints, logger.get('threatIntel'));
 
   const router = core.http.createRouter();
   registerThreatIntelRoutes({

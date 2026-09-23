@@ -9,7 +9,6 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ExperimentalFeatures } from '../../common';
-import { registerThreatIntelInferenceFeatures } from './inference_features';
 import { registerRoutes as registerThreatIntelRoutes } from './routes';
 import { ensureThreatIntelBootstrap } from './setup/bootstrap_threat_intel';
 import { ensureIndicatorAliasForSpace } from './setup/indicator_alias';
@@ -24,9 +23,6 @@ import { createThreatIntelRuntime, setupThreatIntel, startThreatIntel } from './
 
 // Explicit factories rather than automock: these are barrels, and automock does not
 // reliably produce callables for their re-exports.
-jest.mock('./inference_features', () => ({
-  registerThreatIntelInferenceFeatures: jest.fn(),
-}));
 jest.mock('./routes', () => ({ registerRoutes: jest.fn() }));
 jest.mock('./setup/bootstrap_threat_intel', () => ({ ensureThreatIntelBootstrap: jest.fn() }));
 jest.mock('./tasks', () => ({
@@ -48,12 +44,11 @@ jest.mock('../workflows/security_managed_workflows', () => ({
 /**
  * Everything the pipeline registers. The flag-off case asserts every one of these is
  * untouched, which is the guarantee that makes the whole feature safe to ship
- * disabled: no routes, no workflow step, no inference feature, no index template, no
- * task definition, and no schedule. Managed-workflow install lives in plugin.ts
- * via `installSecurityManagedWorkflowsAndMarkReady`, not here.
+ * disabled: no routes, no workflow step, no index template, no task definition,
+ * and no schedule. Managed-workflow install lives in plugin.ts via
+ * `installSecurityManagedWorkflowsAndMarkReady`, not here.
  */
 const ALL_REGISTRATIONS = [
-  ['inference features', registerThreatIntelInferenceFeatures],
   ['routes', registerThreatIntelRoutes],
   ['workflow steps', registerThreatIntelWorkflowSteps],
   ['promote task definition', registerPromoteThreatIndicatorsTask],
@@ -188,7 +183,6 @@ describe('threat intel wiring', () => {
     // The mirror of the flag-off case: if these stopped being called the flag-off
     // assertions above would pass trivially and prove nothing.
     it.each([
-      ['inference features', registerThreatIntelInferenceFeatures],
       ['routes', registerThreatIntelRoutes],
       ['workflow steps', registerThreatIntelWorkflowSteps],
       ['promote task definition', registerPromoteThreatIndicatorsTask],

@@ -12,7 +12,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
 import { resolveScopedModel } from './scoped_model';
 
-const FEATURE_ID = 'threat_intel_enrich';
+const FEATURE_ID = 'alertzero_fast';
 
 const request = {} as KibanaRequest;
 
@@ -206,7 +206,7 @@ describe('resolveScopedModel — endpoint fallback within a feature', () => {
       searchInferenceEndpoints: twoEndpoints as never,
       request: {} as never,
       uiSettingsClient: { get: jest.fn() } as never,
-      featureId: 'threat_intel_enrich',
+      featureId: 'alertzero_fast',
       logger: loggingSystemMock.createLogger(),
     });
 
@@ -227,7 +227,7 @@ describe('resolveScopedModel — endpoint fallback within a feature', () => {
       searchInferenceEndpoints: twoEndpoints as never,
       request: {} as never,
       uiSettingsClient: { get: jest.fn() } as never,
-      featureId: 'threat_intel_enrich',
+      featureId: 'alertzero_fast',
       logger: loggingSystemMock.createLogger(),
     });
 

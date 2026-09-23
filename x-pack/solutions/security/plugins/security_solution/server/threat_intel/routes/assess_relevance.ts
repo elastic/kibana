@@ -12,10 +12,6 @@ import {
   assessRelevanceResponseSchema,
   ASSESS_RELEVANCE_MAX_BODY_BYTES,
 } from '../../../common/threat_intel';
-// The enrich stages (taxonomy, severity, relevance) run over every report on a 4h
-// schedule: high volume, low stakes, so they pin to the operator's Fast pick (D49)
-// rather than a threat-intel-owned row. Fast's recommendation chain degrades within
-// the rung instead of collapsing onto the deployment default.
 import { assessRelevance } from '../services';
 import { resolveScopedModel } from './lib/scoped_model';
 import { THREAT_INTEL_WRITE_AUTHZ } from './lib/authz';
