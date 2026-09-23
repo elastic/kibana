@@ -93,7 +93,10 @@ describe('<SplitButtonWithNotification />', () => {
   it('should invoke onClick exactly once when the notification tip icon is clicked', async () => {
     // Regression: the EuiIconTip previously had its own onClick handler, causing it to fire
     // once directly and once again via bubbling to ActionPrimary — two modals from one click.
-    const { onMainButtonClick, user } = setup({ showNotificationIndicator: true, iconType: 'save' });
+    const { onMainButtonClick, user } = setup({
+      showNotificationIndicator: true,
+      iconType: 'save',
+    });
 
     const indicator = screen.getByTestId(APP_MENU_TEST_SUBJECTS.notificationIndicator);
     // EuiIcon renders as a span[data-euiicon-type] in the test environment; it sits inside
