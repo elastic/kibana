@@ -284,6 +284,8 @@ function StreamFlyoutContent({ name, onClose, refreshStreams }: StreamFlyoutProp
   if (definition) {
     customActions.push(
       <EuiContextMenuItem
+        data-test-subj="canvasFlyoutStreamMenu-processingToggle"
+        key="processing-toggle"
         icon={streamUiMeta.processing ? 'minus' : 'plus'}
         onClick={() => {
           const updated = {
@@ -309,6 +311,8 @@ function StreamFlyoutContent({ name, onClose, refreshStreams }: StreamFlyoutProp
   if (canDeleteStream) {
     customActions.push(
       <EuiContextMenuItem
+        data-test-subj="canvasFlyoutStreamMenu-deleteStream"
+        key="delete-stream"
         icon="trash"
         color="danger"
         onClick={() => {
@@ -334,6 +338,7 @@ function StreamFlyoutContent({ name, onClose, refreshStreams }: StreamFlyoutProp
         button={
           <EuiToolTip position="left" content={menuLabel} disableScreenReaderOutput>
             <EuiButtonIcon
+              data-test-subj="canvasFlyoutStreamMenu-button"
               aria-label={menuLabel}
               size="s"
               iconType="ellipsis"
