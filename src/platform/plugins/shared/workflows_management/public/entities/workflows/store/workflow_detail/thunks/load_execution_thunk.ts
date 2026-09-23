@@ -25,9 +25,11 @@ import { performComputation } from '../utils/computation';
 
 export interface LoadExecutionParams {
   id: string;
+  /** True once the poll loop that issued this request was superseded; the response is then dropped. */
+  isStale?: () => boolean;
 }
 
-export type LoadExecutionResponse = WorkflowExecutionDto;
+export type LoadExecutionResponse = WorkflowExecutionDto | undefined;
 
 export const loadExecutionThunk = createAsyncThunk<
   LoadExecutionResponse,
@@ -35,7 +37,7 @@ export const loadExecutionThunk = createAsyncThunk<
   { state: RootState; extra: { services: WorkflowsServices } }
 >(
   'detail/loadExecutionThunk',
-  async ({ id }, { getState, dispatch, rejectWithValue, extra: { services } }) => {
+  async ({ id, isStale }, { getState, dispatch, rejectWithValue, extra: { services } }) => {
     const { http, notifications } = services;
     const api = new WorkflowApi(http);
     try {
@@ -76,12 +78,20 @@ export const loadExecutionThunk = createAsyncThunk<
         ...stepPageRequests,
       ]);
 
-      // Replace the pages this poll fetched and keep any page "Show more" appended meanwhile.
-      const currentPages = getState().detail.stepExecutionPages;
+      // Another execution was selected while this request was in flight: the store already
+      // holds (or will hold) that run, so committing this response would overwrite it.
+      if (isStale?.()) {
+        return getState().detail.execution;
+      }
+
+      // Replace the pages this poll fetched and keep any page "Show more" appended meanwhile,
+      // but only while the store still holds this run.
+      const { execution: currentExecution, stepExecutionPages: currentPages } = getState().detail;
       const fetchedPages = stepPages.map((page) => page.results);
-      const pages = isSameRun
-        ? [...fetchedPages, ...currentPages.slice(fetchedPages.length)]
-        : fetchedPages;
+      const pages =
+        currentExecution?.id === id
+          ? [...fetchedPages, ...currentPages.slice(fetchedPages.length)]
+          : fetchedPages;
 
       const response: WorkflowExecutionDto = { ...execution, stepExecutions: pages.flat() };
       dispatch(setExecution(response));

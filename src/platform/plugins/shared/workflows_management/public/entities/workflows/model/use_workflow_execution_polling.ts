@@ -47,7 +47,7 @@ export const useWorkflowExecutionPolling = (workflowExecutionId: string): Pollin
   }, [workflowExecution, workflowExecutionId]);
 
   useSerialPolling({
-    poll: () => loadExecution({ id: workflowExecutionId }),
+    poll: (isCancelled) => loadExecution({ id: workflowExecutionId, isStale: isCancelled }),
     pollKey: workflowExecutionId,
     intervalMs: WORKFLOW_EXECUTION_POLL_INTERVAL_MS,
     shouldStop: () => {

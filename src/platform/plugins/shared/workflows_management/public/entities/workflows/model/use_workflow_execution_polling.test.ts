@@ -135,7 +135,10 @@ describe('useWorkflowExecutionPolling', () => {
     await flushPoll();
 
     expect(mockLoadExecution).toHaveBeenCalledTimes(1);
-    expect(mockLoadExecution).toHaveBeenCalledWith({ id: mockWorkflowExecutionId });
+    expect(mockLoadExecution).toHaveBeenCalledWith({
+      id: mockWorkflowExecutionId,
+      isStale: expect.any(Function),
+    });
   });
 
   it('should poll again after the previous poll finishes and the interval elapses', async () => {
@@ -308,7 +311,10 @@ describe('useWorkflowExecutionPolling', () => {
       hookResult?.rerender({ id: 'new-execution-id' });
       await jest.advanceTimersByTimeAsync(0);
     });
-    expect(mockLoadExecution).toHaveBeenCalledWith({ id: 'new-execution-id' });
+    expect(mockLoadExecution).toHaveBeenCalledWith({
+      id: 'new-execution-id',
+      isStale: expect.any(Function),
+    });
 
     await advancePollInterval();
     expect(mockLoadExecution).toHaveBeenCalledTimes(2);

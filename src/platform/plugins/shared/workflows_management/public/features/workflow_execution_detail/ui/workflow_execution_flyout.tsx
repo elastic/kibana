@@ -471,9 +471,11 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
     const workflowExecution = useSelector(selectExecution);
     const stepExecutionsTotal = useSelector(selectStepExecutionsTotal);
     // Monaco renders only the visible lines, so a run with thousands of loaded steps stays usable.
+    // Only stringify while the JSON tab is showing; the Table tab re-renders on every poll.
     const executionJson = useMemo(
-      () => (workflowExecution ? JSON.stringify(workflowExecution, null, 2) : ''),
-      [workflowExecution]
+      () =>
+        activeTab === 'json' && workflowExecution ? JSON.stringify(workflowExecution, null, 2) : '',
+      [activeTab, workflowExecution]
     );
 
     const workflowName =

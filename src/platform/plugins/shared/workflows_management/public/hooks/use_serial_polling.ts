@@ -10,7 +10,8 @@
 import { useEffect, useRef } from 'react';
 
 export interface UseSerialPollingParams {
-  poll: () => Promise<unknown>;
+  /** `isCancelled` turns true once this loop is superseded (key change) or unmounted. */
+  poll: (isCancelled?: () => boolean) => Promise<unknown>;
   intervalMs: number | (() => number);
   enabled?: boolean;
   immediate?: boolean;
@@ -50,7 +51,7 @@ export const useSerialPolling = ({
 
       while (!cancelled) {
         if (immediate || !isFirstIteration) {
-          await pollRef.current().catch(() => undefined);
+          await pollRef.current(() => cancelled).catch(() => undefined);
 
           if (cancelled || shouldStopRef.current()) {
             break;

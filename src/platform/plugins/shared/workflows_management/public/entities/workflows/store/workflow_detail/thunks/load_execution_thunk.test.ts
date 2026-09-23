@@ -226,6 +226,20 @@ describe('loadExecutionThunk', () => {
     expect(store.getState().detail.stepExecutionPages).toHaveLength(1);
   });
 
+  it('should drop the response when the poll loop was superseded in flight', async () => {
+    store.dispatch(setExecution({ ...mockExecution, id: 'exec-b' }));
+    store.dispatch(setStepExecutionPages([loadedPage]));
+    mockGetExecution.mockResolvedValue({ ...mockExecution, id: 'exec-a' });
+
+    const result = await store.dispatch(loadExecutionThunk({ id: 'exec-a', isStale: () => true }));
+
+    const { execution, stepExecutionPages } = store.getState().detail;
+    expect(execution?.id).toBe('exec-b');
+    expect(stepExecutionPages).toEqual([loadedPage]);
+    // The superseded request hands back whatever the store holds now, never its own response.
+    expect(result.payload).toBe(execution);
+  });
+
   it('should handle HTTP error with body message', async () => {
     const error = {
       body: { message: 'Execution not found' },
