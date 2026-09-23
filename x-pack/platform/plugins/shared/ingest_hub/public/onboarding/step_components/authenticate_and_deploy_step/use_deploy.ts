@@ -14,20 +14,13 @@ import { sendUpdateCloudConnector, sendVerifyCloudConnectorIacKey } from '@kbn/f
 
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
-import type { ServiceChipState } from '../../onboarding_flow_context';
 import { SERVICE_SETTINGS_SESSION_KEY } from '../service_settings_step/use_service_settings';
 import type { ServiceSettingsPersistedState } from '../service_settings_step/use_service_settings';
-import {
-  buildDeployGroups,
-  buildInstanceStatuses,
-  collectDeployResults,
-  deployGroup,
-} from './deploy_groups';
+import { buildDeployGroups } from './deploy_groups';
 import type { DeployGroup } from './deploy_groups';
-import { buildIacIntegrations, toSOServiceVars } from './package_inputs';
+import { buildIacIntegrations } from './package_inputs';
 import { useOnboardingSO } from './use_onboarding_so';
-import { cleanupManagedIntegrationsPolicies } from './policy_cleanup_managed_integrations';
-import type { PolicyCleanupOps } from './policy_cleanup';
+import { useMiDeploy } from './use_mi_deploy';
 
 export {
   getRegionFieldName,
@@ -198,306 +191,32 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
     [selectedServiceIds, servicesMap]
   );
 
-  const handleDeploy = useCallback(
-    async (instanceIds?: string[]) => {
-      const isInitialDeploy = instanceIds === undefined;
-
-      let groupsToDeploy: DeployGroup[];
-      let cleanupOps: PolicyCleanupOps = { toDelete: [], toUpdate: [] };
-
-      if (isInitialDeploy) {
-        // Restrict each group to members not already tracked — an already-deployed instance
-        // must not get a second policy on a subsequent Deploy click (e.g. after navigating back).
-        groupsToDeploy = deployGroups
-          .map((group) => {
-            const untrackedMembers = group.members.filter(
-              ({ instance }) => !(instance.instanceId in detectAndReviewStep.serviceStatuses)
-            );
-            if (untrackedMembers.length === 0) return null;
-            return {
-              ...group,
-              instanceIds: untrackedMembers.map(({ instance }) => instance.instanceId),
-              members: untrackedMembers,
-            };
-          })
-          .filter((g): g is DeployGroup => g !== null);
-        // Flat list of all instanceIds being deployed this run.
-        const targets = groupsToDeploy.flatMap(({ instanceIds: ids }) => ids);
-
-        // Non-managed-integration services are shown as gray chips (ECF deployed on a different path).
-        const newNonAgentlessStatuses: Record<string, ServiceChipState> = {};
-        for (const service of nonAgentlessServices) {
-          if (!(service.id in detectAndReviewStep.serviceStatuses)) {
-            newNonAgentlessStatuses[service.id] = 'instantiating';
-          }
-        }
-
-        // Services deselected from Step 1 never call removeDeployInstance, so pendingCleanupPolicyIds
-        // won't capture them. Detect stale entries by comparing policyIdsByInstance against the
-        // reconciled deployGroups (which already filters by selectedServiceIds).
-        const activeInstanceIds = new Set(deployGroups.flatMap((g) => g.instanceIds));
-        const liveStalePolicyIds: Record<string, string> = {};
-        for (const [iid, pid] of Object.entries(detectAndReviewStep.policyIdsByInstance)) {
-          if (!activeInstanceIds.has(iid)) liveStalePolicyIds[iid] = pid;
-        }
-        const effectivePendingCleanup: Record<string, string> = {
-          ...liveStalePolicyIds,
-          ...(detectAndReviewStep.pendingCleanupPolicyIds ?? {}),
-        };
-
-        const hasPendingCleanup = Object.keys(effectivePendingCleanup).length > 0;
-
-        if (
-          targets.length === 0 &&
-          Object.keys(newNonAgentlessStatuses).length === 0 &&
-          !hasPendingCleanup
-        ) {
-          onContinue();
-          // Everything is already deployed: the only work left is a template-details write that failed
-          // last time.
-          await persistPendingIacTemplate();
-          return;
-        }
-
-        const initialStatuses = buildInstanceStatuses(targets, []);
-        if (hasPendingCleanup || targets.length > 0) setIsDeploying(true);
-        updateDetectAndReviewStep({
-          isDeploying: hasPendingCleanup || targets.length > 0,
-          serviceStatuses: { ...initialStatuses, ...newNonAgentlessStatuses },
-        });
-        onContinue();
-
-        if (hasPendingCleanup) {
-          cleanupOps = await cleanupManagedIntegrationsPolicies({
-            pendingCleanupPolicyIds: effectivePendingCleanup,
-            currentPolicyIdsByInstance: detectAndReviewStep.policyIdsByInstance,
-            instances: serviceSettings?.instances ?? [],
-            storedServiceVars: serviceSettings?.serviceVars ?? {},
-            globalRegion: serviceSettings?.globalRegion ?? '',
-            namespace,
-            authenticateAndDeployStep,
-            servicesMap: servicesMap ?? new Map(),
-          });
-          // Only prune instances whose policy cleanup actually succeeded — failed cleanups
-          // remain in pendingCleanupPolicyIds for retry on the next deploy attempt.
-          const succeededIds = new Set([
-            ...cleanupOps.toDelete,
-            ...cleanupOps.toUpdate.map((u) => u.policyId),
-          ]);
-          const cleanedLiveStale = Object.keys(liveStalePolicyIds).filter((id) =>
-            succeededIds.has(liveStalePolicyIds[id])
-          );
-          // Prune stale instances before clearing the staging area (removeDeployInstances
-          // must come first so its write isn't overwritten).
-          removeDeployInstances(cleanedLiveStale);
-          const remainingPending = Object.fromEntries(
-            Object.entries(detectAndReviewStep.pendingCleanupPolicyIds ?? {}).filter(
-              ([, policyId]) => !succeededIds.has(policyId)
-            )
-          );
-          updateDetectAndReviewStep({ pendingCleanupPolicyIds: remainingPending });
-        }
-
-        if (targets.length === 0) {
-          setIsDeploying(false);
-          // Cleanup-only: no new deploys, but deleted policies must be pruned from the SO record.
-          const existingDeploymentId = detectAndReviewStep.onboardingDeploymentId;
-          if (
-            existingDeploymentId &&
-            (cleanupOps.toDelete.length > 0 || cleanupOps.toUpdate.length > 0)
-          ) {
-            const deletedIds = new Set(cleanupOps.toDelete);
-            await updateDeployment(existingDeploymentId, {
-              services: selectedServiceIds,
-              packagePolicyIds: [
-                ...new Set(
-                  Object.values(detectAndReviewStep.policyIdsByInstance).filter(
-                    (id) => !deletedIds.has(id)
-                  )
-                ),
-              ],
-            });
-          }
-          await persistPendingIacTemplate();
-          return;
-        }
-      } else {
-        // Retry: select any group that intersects the requested instanceIds.
-        // A bundled group is re-run as a whole — retrying one bundled original re-runs its bundle.
-        const retrySet = new Set(instanceIds);
-        groupsToDeploy = deployGroups.filter(({ instanceIds: ids }) =>
-          ids.some((id) => retrySet.has(id))
-        );
-        // Expand to the full set of ids actually being re-deployed (may be wider than retrySet
-        // when a bundled group is included). A stale id that's no longer in any group is silently
-        // dropped — otherwise it would be set to 'instantiating' and never resolved.
-        const deployedTargets = groupsToDeploy.flatMap(({ instanceIds: ids }) => ids);
-        const retryStatuses = buildInstanceStatuses(deployedTargets, []);
-        const remainingFailed = detectAndReviewStep.failedInstances.filter(
-          (id) => !deployedTargets.includes(id)
-        );
-
-        // Cleanup must run on retry too — pending/live-stale policies are not bound to initial deploys.
-        const retryActiveIds = new Set(deployGroups.flatMap((g) => g.instanceIds));
-        const retryLiveStale: Record<string, string> = {};
-        for (const [iid, pid] of Object.entries(detectAndReviewStep.policyIdsByInstance)) {
-          if (!retryActiveIds.has(iid)) retryLiveStale[iid] = pid;
-        }
-        const retryPending: Record<string, string> = {
-          ...retryLiveStale,
-          ...(detectAndReviewStep.pendingCleanupPolicyIds ?? {}),
-        };
-        if (Object.keys(retryPending).length > 0) {
-          cleanupOps = await cleanupManagedIntegrationsPolicies({
-            pendingCleanupPolicyIds: retryPending,
-            currentPolicyIdsByInstance: detectAndReviewStep.policyIdsByInstance,
-            instances: serviceSettings?.instances ?? [],
-            storedServiceVars: serviceSettings?.serviceVars ?? {},
-            globalRegion: serviceSettings?.globalRegion ?? '',
-            namespace,
-            authenticateAndDeployStep,
-            servicesMap: servicesMap ?? new Map(),
-          });
-          const retrySucceeded = new Set([
-            ...cleanupOps.toDelete,
-            ...cleanupOps.toUpdate.map((u) => u.policyId),
-          ]);
-          removeDeployInstances(
-            Object.keys(retryLiveStale).filter((id) => retrySucceeded.has(retryLiveStale[id]))
-          );
-          updateDetectAndReviewStep({
-            pendingCleanupPolicyIds: Object.fromEntries(
-              Object.entries(detectAndReviewStep.pendingCleanupPolicyIds ?? {}).filter(
-                ([, policyId]) => !retrySucceeded.has(policyId)
-              )
-            ),
-          });
-        }
-
-        setIsDeploying(true);
-        updateDetectAndReviewStep({
-          isDeploying: true,
-          serviceStatuses: retryStatuses,
-          failedInstances: remainingFailed,
-          deployErrors: {},
-        });
-      }
-
-      const globalRegion = serviceSettings?.globalRegion ?? '';
-      const storedServiceVars = serviceSettings?.serviceVars ?? {};
-
-      const { connectorId } = authenticateAndDeployStep;
-      let onboardingDeploymentId = detectAndReviewStep.onboardingDeploymentId;
-
-      if (isInitialDeploy && !onboardingDeploymentId) {
-        onboardingDeploymentId =
-          (await createDeployment({
-            provider: 'aws',
-            connectorId,
-            mechanisms: hasEcfServices ? ['managed_integration', 'ecf'] : ['managed_integration'],
-            services: selectedServiceIds,
-            serviceVars: toSOServiceVars(storedServiceVars, servicesMap ?? new Map()) as Record<
-              string,
-              Record<string, unknown>
-            >,
-            globalRegion,
-            dataFormat,
-            authMethod: connectorId ? 'identity_federation' : 'static_keys',
-          })) ?? undefined;
-        if (onboardingDeploymentId) {
-          // Enter edit mode: add ?deploymentId= to URL so the format selector is locked
-          // and any reload identifies this as a resumable deployment.
-          persistDeploymentId(onboardingDeploymentId);
-        }
-      }
-
-      // Promise.allSettled preserves insertion order, so results[i] matches groupsToDeploy[i].
-      const results = await Promise.allSettled(
-        groupsToDeploy.map((group) =>
-          deployGroup(group, {
-            namespace,
-            globalRegion,
-            storedServiceVars,
-            authenticateAndDeployStep,
-          })
-        )
-      );
-
-      const deployedTargets = groupsToDeploy.flatMap(({ instanceIds: ids }) => ids);
-      const {
-        policyIdsByInstance,
-        failedInstances: newFailed,
-        errorsByInstance,
-      } = collectDeployResults(results, groupsToDeploy);
-      const newServiceStatuses = buildInstanceStatuses(deployedTargets, newFailed, 'detecting');
-
-      // Merge with instances that failed in a prior run but weren't retried in this one.
-      const deployedSet = new Set(deployedTargets);
-      const previouslyFailed = getLatestFailedInstances().filter((id) => !deployedSet.has(id));
-      const mergedFailed = [...previouslyFailed, ...newFailed];
-
-      // Update SO with deploy outcome (best-effort).
-      // Only exclude deleted policy IDs; updated policies keep the same ID and remain active.
-      const deletedPolicyIds = new Set(cleanupOps.toDelete);
-      if (onboardingDeploymentId) {
-        await updateDeployment(onboardingDeploymentId, {
-          services: selectedServiceIds,
-          serviceVars: toSOServiceVars(
-            serviceSettings?.serviceVars ?? {},
-            servicesMap ?? new Map()
-          ) as Record<string, Record<string, unknown>>,
-          packagePolicyIds: [
-            ...new Set(
-              Object.values({
-                ...detectAndReviewStep.policyIdsByInstance,
-                ...policyIdsByInstance,
-              }).filter((id) => !deletedPolicyIds.has(id))
-            ),
-          ],
-          status: mergedFailed.length === 0 ? 'succeeded' : 'failed',
-        });
-      }
-
-      if (mergedFailed.length === 0) {
-        await persistPendingIacTemplate();
-      }
-
-      setIsDeploying(false);
-      setFailedInstances(mergedFailed);
-      updateDetectAndReviewStep({
-        isDeploying: false,
-        serviceStatuses: newServiceStatuses,
-        policyIdsByInstance,
-        failedInstances: mergedFailed,
-        deployErrors: errorsByInstance,
-      });
-    },
-
-    [
-      deployGroups,
-      nonAgentlessServices,
-      serviceSettings,
-      authenticateAndDeployStep,
-      namespace,
-      onContinue,
-      updateDetectAndReviewStep,
-      removeDeployInstances,
-      getLatestFailedInstances,
-      detectAndReviewStep.serviceStatuses,
-      detectAndReviewStep.failedInstances,
-      detectAndReviewStep.onboardingDeploymentId,
-      detectAndReviewStep.policyIdsByInstance,
-      detectAndReviewStep.pendingCleanupPolicyIds,
-      createDeployment,
-      updateDeployment,
-      persistDeploymentId,
-      selectedServiceIds,
-      dataFormat,
-      servicesMap,
-      hasEcfServices,
-      persistPendingIacTemplate,
-    ]
-  );
+  const handleDeploy = useMiDeploy({
+    deployGroups,
+    nonAgentlessServices,
+    serviceSettings,
+    authenticateAndDeployStep,
+    namespace,
+    selectedServiceIds,
+    dataFormat,
+    servicesMap,
+    hasEcfServices,
+    onContinue,
+    updateDetectAndReviewStep,
+    removeDeployInstances,
+    getLatestFailedInstances,
+    persistPendingIacTemplate,
+    setIsDeploying,
+    setFailedInstances,
+    createDeployment,
+    updateDeployment,
+    persistDeploymentId,
+    serviceStatuses: detectAndReviewStep.serviceStatuses,
+    failedInstances: detectAndReviewStep.failedInstances,
+    onboardingDeploymentId: detectAndReviewStep.onboardingDeploymentId,
+    policyIdsByInstance: detectAndReviewStep.policyIdsByInstance,
+    pendingCleanupPolicyIds: detectAndReviewStep.pendingCleanupPolicyIds,
+  });
 
   return {
     namespace,
