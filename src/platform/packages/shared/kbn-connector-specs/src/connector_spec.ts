@@ -118,6 +118,7 @@ export interface OAuthPasswordGetTokenOpts {
   scope?: string;
   usernameField?: 'username' | 'email';
   requestBodyFormat?: 'form' | 'json';
+  tokenType?: string;
 }
 
 export interface EarsGetTokenOpts {
@@ -376,7 +377,7 @@ export interface AuthTypeDef {
     /** Display name shown in the auth type picker. Defaults to the auth type's built-in label when omitted. */
     label?: string;
     meta?: Record<string, Record<string, unknown>>;
-    // can override other Zod fields here in the future if needed
+    fields?: Record<string, z.ZodType>;
   };
 }
 export interface ConnectorSpec {

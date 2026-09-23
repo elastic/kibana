@@ -42,6 +42,12 @@ const authSchema = lazySchema(() =>
         .enum(['form', 'json'])
         .default('form')
         .meta({ label: i18n.OAUTH_REQUEST_BODY_FORMAT_LABEL, hidden: true }),
+      tokenType: z
+        .string()
+        .min(1)
+        .max(128)
+        .optional()
+        .meta({ label: i18n.OAUTH_TOKEN_TYPE_LABEL, hidden: true }),
     })
     .meta({ label: i18n.OAUTH_PASSWORD_LABEL })
 );
@@ -50,8 +56,16 @@ export const OAuthPassword: AuthTypeSpec<z.infer<typeof authSchema>> = {
   id: 'oauth_password',
   schema: authSchema,
   configure: async (ctx, client, secrets) => {
-    const { tokenUrl, username, password, clientId, scope, usernameField, requestBodyFormat } =
-      secrets;
+    const {
+      tokenUrl,
+      username,
+      password,
+      clientId,
+      scope,
+      usernameField,
+      requestBodyFormat,
+      tokenType,
+    } = secrets;
     const token = await ctx.getToken({
       authType: 'oauth_password',
       tokenUrl,
@@ -61,6 +75,7 @@ export const OAuthPassword: AuthTypeSpec<z.infer<typeof authSchema>> = {
       scope,
       usernameField,
       requestBodyFormat,
+      tokenType,
     });
     if (!token) {
       throw new Error('Unable to retrieve an OAuth password access token.');

@@ -96,6 +96,26 @@ describe('requestOAuthPasswordToken', () => {
     );
   });
 
+  test.each([undefined, 'Bearer'])(
+    'uses token type override %s only when requested',
+    async (tokenType) => {
+      axiosInstanceMock.mockResolvedValueOnce({
+        status: 200,
+        data: { token_type: 'bearer', access_token: 'token' },
+      });
+      const result = await requestOAuthPasswordToken(
+        'https://test/api/token',
+        mockLogger,
+        { username: 'user', password: 'password', tokenType },
+        actionsConfigMock.create()
+      );
+      expect(result.tokenType).toBe(tokenType ?? 'bearer');
+      expect(new URLSearchParams(axiosInstanceMock.mock.calls[0][1].data).has('tokenType')).toBe(
+        false
+      );
+    }
+  );
+
   test('checks the allowed host before sending credentials', async () => {
     const configurationUtilities = actionsConfigMock.create();
     configurationUtilities.ensureUriAllowed.mockImplementation(() => {

@@ -49,6 +49,24 @@ import {
   type ExecutePluginInput,
 } from './types';
 
+const tokenUrlSchema = lazySchema(() =>
+  z
+    .url()
+    .max(2048)
+    .refine((value) => {
+      if (!URL.canParse(value)) return false;
+      const url = new URL(value);
+      return (
+        url.protocol === 'https:' &&
+        !url.username &&
+        !url.password &&
+        !url.search &&
+        !url.hash &&
+        /^\/api\/token\/?$/.test(url.pathname)
+      );
+    }, 'Enter an HTTPS ThreatQ token URL ending in /api/token, without credentials, query parameters, or a fragment.')
+);
+
 const configSchema = lazySchema(() =>
   z.object({
     url: UISchemas.url('https://threatq.example.com')
@@ -137,8 +155,9 @@ export const ThreatQ: ConnectorSpec = {
       {
         type: 'oauth_client_credentials',
         isRecommended: true,
-        defaults: { tokenEndpointAuthMethod: 'client_secret_basic' },
+        defaults: { tokenEndpointAuthMethod: 'client_secret_basic', tokenType: 'Bearer' },
         overrides: {
+          fields: { tokenUrl: tokenUrlSchema },
           label: i18n.translate('core.kibanaConnectorSpecs.threatq.auth.oauthLabel', {
             defaultMessage: 'OAuth 2.0 API credentials',
           }),
@@ -155,8 +174,9 @@ export const ThreatQ: ConnectorSpec = {
       },
       {
         type: 'oauth_password',
-        defaults: { usernameField: 'email', requestBodyFormat: 'json' },
+        defaults: { usernameField: 'email', requestBodyFormat: 'json', tokenType: 'Bearer' },
         overrides: {
+          fields: { tokenUrl: tokenUrlSchema },
           label: i18n.translate('core.kibanaConnectorSpecs.threatq.auth.userLabel', {
             defaultMessage: 'User authentication',
           }),

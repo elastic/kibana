@@ -112,6 +112,10 @@ export const OAUTH_TOKEN_URL_LABEL = i18n.translate('connectorSpecs.oauthTokenUr
   defaultMessage: 'Token URL',
 });
 
+export const OAUTH_TOKEN_TYPE_LABEL = i18n.translate('connectorSpecs.oauthTokenType.label', {
+  defaultMessage: 'Token type',
+});
+
 export const OAUTH_CLIENT_ID_LABEL = i18n.translate('connectorSpecs.oauthClientId.label', {
   defaultMessage: 'Client ID',
 });

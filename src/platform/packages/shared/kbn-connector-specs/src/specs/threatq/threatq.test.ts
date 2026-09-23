@@ -404,6 +404,7 @@ describe('ThreatQ', () => {
     expect(schema.parse(valid)).toMatchObject({
       usernameField: 'email',
       requestBodyFormat: 'json',
+      tokenType: 'Bearer',
     });
     for (const field of ['tokenUrl', 'username', 'password', 'clientId']) {
       expect(schema.safeParse({ ...valid, [field]: undefined }).success).toBe(false);
@@ -423,6 +424,7 @@ describe('ThreatQ', () => {
       clientId: 'api-password',
       usernameField: 'email',
       requestBodyFormat: 'json',
+      tokenType: 'Bearer',
     };
     ctx.client = await OAuthPassword.configure(
       { getCustomHostSettings: () => undefined, getToken, logger: ctx.log, sslSettings: {} },
@@ -445,7 +447,10 @@ describe('ThreatQ', () => {
       clientId: 'oauth-client',
       clientSecret: 'oauth-secret',
     };
-    expect(schema.parse(valid)).toMatchObject({ tokenEndpointAuthMethod: 'client_secret_basic' });
+    expect(schema.parse(valid)).toMatchObject({
+      tokenEndpointAuthMethod: 'client_secret_basic',
+      tokenType: 'Bearer',
+    });
     for (const field of ['tokenUrl', 'clientId', 'clientSecret']) {
       expect(schema.safeParse({ ...valid, [field]: undefined }).success).toBe(false);
       expect(schema.safeParse({ ...valid, [field]: '' }).success).toBe(false);
@@ -462,6 +467,7 @@ describe('ThreatQ', () => {
         clientId: 'oauth-client',
         clientSecret: 'oauth-secret',
         tokenEndpointAuthMethod: 'client_secret_basic',
+        tokenType: 'Bearer',
       }
     );
     nock(origin, { reqheaders: { authorization: 'Bearer oauth-token' } })
@@ -470,7 +476,10 @@ describe('ThreatQ', () => {
       .reply(200, response);
     await expect(ThreatQ.test.handler(ctx)).resolves.toEqual({ message: 'Connected to ThreatQ.' });
     expect(getToken).toHaveBeenCalledWith(
-      expect.objectContaining({ tokenEndpointAuthMethod: 'client_secret_basic' })
+      expect.objectContaining({
+        tokenEndpointAuthMethod: 'client_secret_basic',
+        tokenType: 'Bearer',
+      })
     );
     expect(ThreatQ.auth?.types[0]).toMatchObject({
       type: 'oauth_client_credentials',
@@ -478,6 +487,32 @@ describe('ThreatQ', () => {
       isRecommended: true,
     });
   });
+
+  it.each(['oauth_password', 'oauth_client_credentials'])(
+    '%s requires a secure ThreatQ token endpoint',
+    (authType) => {
+      const schema = generateSecretsSchemaFromSpec(ThreatQ.auth);
+      const credentials = {
+        authType,
+        username: 'user@example.com',
+        password: 'user-password',
+        clientId: 'client',
+        clientSecret: 'secret',
+      };
+      for (const tokenUrl of [
+        'http://threatq.example.com/api/token',
+        'https://user:password@threatq.example.com/api/token',
+        'https://threatq.example.com/api/token?password=secret',
+        'https://threatq.example.com/api/token#fragment',
+        'https://threatq.example.com/other',
+      ]) {
+        expect(schema.safeParse({ ...credentials, tokenUrl }).success).toBe(false);
+      }
+      expect(schema.safeParse({ ...credentials, tokenUrl: `${origin}/api/token` }).success).toBe(
+        true
+      );
+    }
+  );
 
   it.each(['searchIndicators', 'searchObjects'])(
     '%s sends fields in the body and relationships in the query',

@@ -32,7 +32,7 @@ describe('requestOAuthToken', () => {
   });
 
   test.each(['bearer', 'BEARER', 'Bearer'])(
-    'normalizes token type %s to the Bearer header scheme',
+    'preserves token type %s when no override is supplied',
     async (tokenType) => {
       axiosInstanceMock.mockResolvedValueOnce({
         status: 200,
@@ -46,7 +46,7 @@ describe('requestOAuthToken', () => {
           mockLogger,
           {}
         )
-      ).resolves.toMatchObject({ tokenType: 'Bearer', accessToken: 'token' });
+      ).resolves.toMatchObject({ tokenType, accessToken: 'token' });
     }
   );
 
@@ -299,7 +299,7 @@ describe('requestOAuthToken', () => {
     );
 
     expect(result).toEqual({
-      tokenType: 'Bearer',
+      tokenType: 'bearer',
       accessToken: 'crowdstrike-token-123',
       expiresIn: 1799,
       refreshToken: undefined,
@@ -403,7 +403,7 @@ describe('requestOAuthToken', () => {
     );
 
     expect(result).toEqual({
-      tokenType: 'Bearer',
+      tokenType: 'bearer',
       accessToken: 'xoxp-slack-user-token',
       expiresIn: 7200,
       refreshToken: 'nested-refresh',
@@ -468,7 +468,7 @@ describe('requestOAuthToken', () => {
     );
 
     expect(result).toEqual({
-      tokenType: 'Bearer',
+      tokenType: 'bearer',
       accessToken: 'xoxp-user-token',
       expiresIn: 43200,
       refreshToken: 'top-level-refresh',
@@ -503,7 +503,7 @@ describe('requestOAuthToken', () => {
     );
 
     expect(result).toEqual({
-      tokenType: 'Bearer',
+      tokenType: 'bearer',
       accessToken: 'nested-token',
       expiresIn: 100,
       refreshToken: 'nested-refresh',

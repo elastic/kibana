@@ -41,6 +41,26 @@ Enter the token URL (`https://your-instance/api/token`), user email, user passwo
 
 Kibana stores these credentials as encrypted secrets. It exchanges them for an access token using the OAuth password grant, reuses the token until it expires, and then obtains a new token automatically. Credentials are sent in the JSON body over HTTPS.
 
+When creating a connector through the Kibana API, put the ThreatQ API password in `secrets.clientId`:
+
+```console
+POST kbn:/api/actions/connector
+{
+  "name": "ThreatQ",
+  "connector_type_id": ".threatq",
+  "config": {
+    "url": "https://your-instance"
+  },
+  "secrets": {
+    "authType": "oauth_password",
+    "tokenUrl": "https://your-instance/api/token",
+    "username": "user@example.com",
+    "password": "<user password>",
+    "clientId": "<ThreatQ API password>"
+  }
+}
+```
+
 **Bearer token**
 
 Enter a valid ThreatQ access token without the `Bearer` prefix. Obtain the token through ThreatQ's API or SDK, using credentials with access to the required objects. The connector stores the token as an encrypted secret and sends it with each request.

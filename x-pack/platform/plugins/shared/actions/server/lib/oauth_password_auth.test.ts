@@ -25,6 +25,7 @@ const secrets = {
   clientId: 'api-password',
   usernameField: 'email',
   requestBodyFormat: 'json',
+  tokenType: 'Bearer',
 };
 const tokenBody = {
   email: secrets.username,

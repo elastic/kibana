@@ -149,8 +149,7 @@ export async function requestOAuthToken<T>(
     };
 
     return {
-      tokenType:
-        options?.tokenType ?? (tokenType.toLowerCase() === 'bearer' ? 'Bearer' : tokenType),
+      tokenType,
       accessToken,
       expiresIn: siblingOrRoot('expires_in'),
       refreshToken: siblingOrRoot('refresh_token'),

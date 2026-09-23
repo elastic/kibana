@@ -28,10 +28,16 @@ export class OAuthPasswordStrategy implements AxiosAuthStrategy {
     if (opts.authType !== 'oauth_password') {
       throw new Error('OAuthPasswordStrategy received non-password token opts');
     }
-    const { authType, ...params } = opts;
     const { connectorId, connectorTokenClient, logger, configurationUtilities } = deps;
     return getOAuthPasswordAccessToken({
-      ...params,
+      tokenUrl: opts.tokenUrl,
+      username: opts.username,
+      password: opts.password,
+      clientId: opts.clientId,
+      scope: opts.scope,
+      usernameField: opts.usernameField,
+      requestBodyFormat: opts.requestBodyFormat,
+      tokenType: opts.tokenType,
       connectorId,
       connectorTokenClient,
       logger,

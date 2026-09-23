@@ -26,7 +26,11 @@ export const getOAuthPasswordAccessToken = async ({
   password,
   configurationUtilities,
   connectorTokenClient,
-  ...requestParams
+  clientId,
+  scope,
+  usernameField,
+  requestBodyFormat,
+  tokenType,
 }: GetOAuthPasswordAccessTokenOpts) => {
   if (!username || !password) {
     logger.warn(`Missing required fields for requesting OAuth Password Grant access token`);
@@ -56,7 +60,7 @@ export const getOAuthPasswordAccessToken = async ({
     const tokenResult = await requestOAuthPasswordToken(
       tokenUrl,
       logger,
-      { username, password, ...requestParams },
+      { username, password, clientId, scope, usernameField, requestBodyFormat, tokenType },
       configurationUtilities
     );
     accessToken = `${tokenResult.tokenType} ${tokenResult.accessToken}`;

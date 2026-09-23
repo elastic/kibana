@@ -18,6 +18,7 @@ export interface PasswordOAuthRequestParams {
   scope?: string;
   usernameField?: 'username' | 'email';
   requestBodyFormat?: 'form' | 'json';
+  tokenType?: string;
 }
 
 export async function requestOAuthPasswordToken(
@@ -33,6 +34,7 @@ export async function requestOAuthPasswordToken(
     scope,
     usernameField = 'username',
     requestBodyFormat,
+    tokenType,
   } = params;
   return await requestOAuthToken<Record<string, string>>(
     tokenUrl,
@@ -46,6 +48,6 @@ export async function requestOAuthPasswordToken(
       ...(scope ? { scope } : {}),
     },
     false,
-    { bodyFormat: requestBodyFormat }
+    { bodyFormat: requestBodyFormat, tokenType }
   );
 }
