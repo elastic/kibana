@@ -190,7 +190,7 @@ apiTest.describe('Create deactivate episode action API', { tag: '@local-stateful
   });
 
   apiTest(
-    'returns 404 when the episode exists but is not the latest of its series',
+    'returns 409 when the episode exists but is not the latest of its series',
     async ({ apiClient, apiServices }) => {
       // Lifecycle actions are guarded to the latest episode: closing a
       // superseded episode would write a synthetic .rule-events doc that
@@ -221,7 +221,7 @@ apiTest.describe('Create deactivate episode action API', { tag: '@local-stateful
         body: { reason: 'close the old one' },
       });
 
-      expect(response).toHaveStatusCode(404);
+      expect(response).toHaveStatusCode(409);
       expect(response.body.code).toBe('ALERT_EPISODE_NOT_LATEST');
       expect(response.body.details).toMatchObject({
         episode_id: olderEpisodeId,
@@ -237,7 +237,7 @@ apiTest.describe('Create deactivate episode action API', { tag: '@local-stateful
   );
 
   apiTest(
-    'precondition: rejects deactivate of an already-inactive episode with INVALID_EPISODE_STATE_TRANSITION (400)',
+    'precondition: rejects deactivate of an already-inactive episode with INVALID_EPISODE_STATE_TRANSITION (409)',
     async ({ apiClient, apiServices }) => {
       const ruleId = 'deactivate-already-inactive-rule';
       const groupHash = 'deactivate-already-inactive-group';
@@ -258,7 +258,7 @@ apiTest.describe('Create deactivate episode action API', { tag: '@local-stateful
         body: { reason: 'valid reason' },
       });
 
-      expect(response).toHaveStatusCode(400);
+      expect(response).toHaveStatusCode(409);
       expect(response.body.code).toBe('INVALID_EPISODE_STATE_TRANSITION');
 
       const ruleEvents = await apiServices.alertingV2.ruleEvents.find(ruleId);

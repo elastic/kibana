@@ -869,6 +869,11 @@ export class RulesClient {
     ]);
   }
 
+  /**
+   * Brings the rule's next run forward. Task Manager reschedules rather than
+   * executes, so this resolves before the rule has run, and calls that land
+   * before the run starts collapse into a single run.
+   */
   @withApm
   public async runRuleNow({ id }: { id: string }): Promise<void> {
     const { spaceId } = this.getSpaceContext();

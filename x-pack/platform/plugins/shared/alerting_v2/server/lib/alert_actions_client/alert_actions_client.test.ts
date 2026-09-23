@@ -254,7 +254,7 @@ describe('AlertActionsClient', () => {
           action: { action_type: ALERT_EPISODE_ACTION_TYPE.ACTIVATE, reason: 'reopen' },
         })
       ).rejects.toMatchObject({
-        output: { statusCode: 404 },
+        output: { statusCode: 409 },
         data: {
           code: 'ALERT_EPISODE_NOT_LATEST',
           details: { episode_id: 'old-episode', group_hash: 'group-1' },

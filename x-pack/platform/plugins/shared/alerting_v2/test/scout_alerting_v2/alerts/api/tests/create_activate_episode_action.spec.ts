@@ -186,7 +186,7 @@ apiTest.describe('Create activate episode action API', { tag: '@local-stateful-c
   });
 
   apiTest(
-    'returns 404 when the episode exists but is not the latest of its series',
+    'returns 409 when the episode exists but is not the latest of its series',
     async ({ apiClient, apiServices }) => {
       // Lifecycle actions are guarded to the latest episode: reopening a
       // superseded episode would write a synthetic .rule-events doc that
@@ -218,7 +218,7 @@ apiTest.describe('Create activate episode action API', { tag: '@local-stateful-c
         body: { reason: 'reopen the old one' },
       });
 
-      expect(response).toHaveStatusCode(404);
+      expect(response).toHaveStatusCode(409);
       expect(response.body.code).toBe('ALERT_EPISODE_NOT_LATEST');
       expect(response.body.details).toMatchObject({
         episode_id: olderEpisodeId,
@@ -255,7 +255,7 @@ apiTest.describe('Create activate episode action API', { tag: '@local-stateful-c
         body: { reason: 'reopen' },
       });
 
-      expect(response).toHaveStatusCode(400);
+      expect(response).toHaveStatusCode(409);
       expect(response.body.code).toBe('INVALID_EPISODE_STATE_TRANSITION');
 
       const ruleEvents = await apiServices.alertingV2.ruleEvents.find(ruleId);
