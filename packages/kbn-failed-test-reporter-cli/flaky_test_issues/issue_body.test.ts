@@ -11,6 +11,7 @@ import {
   flakySuiteIssueTitle,
   readFlakySuiteIssueMetadata,
   readSuiteFilePathFromTitle,
+  readSuiteFrameworkFromTitle,
   renderFlakySuiteIssueBody,
 } from './issue_body';
 import { groupIntoSuites } from './suites';
@@ -150,6 +151,17 @@ describe('flakySuiteIssueTitle', () => {
         suiteTitle: undefined,
       })
     ).toBe('Flaky FTR suite: b.ts');
+  });
+});
+
+describe('readSuiteFrameworkFromTitle', () => {
+  it('maps the framework label of a legacy title back, and nothing without one', () => {
+    expect(readSuiteFrameworkFromTitle('Flaky Scout test suite: a/b/c.spec.ts')).toBe('playwright');
+    expect(readSuiteFrameworkFromTitle('Flaky Jest test suite: a.test.ts')).toBe('jest');
+    expect(readSuiteFrameworkFromTitle('Flaky FTR test suite: a.ts')).toBe('ftr');
+    expect(readSuiteFrameworkFromTitle('Flaky test suite: a.ts')).toBeUndefined();
+    expect(readSuiteFrameworkFromTitle('Flaky Foo test suite: a.ts')).toBeUndefined();
+    expect(readSuiteFrameworkFromTitle('Flaky Scout suite: a describe title')).toBeUndefined();
   });
 });
 

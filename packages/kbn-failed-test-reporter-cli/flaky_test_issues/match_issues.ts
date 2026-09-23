@@ -11,7 +11,11 @@ import Path from 'path';
 import { getLocationFromClassname } from '../failed_tests_reporter/get_failures';
 import type { GithubIssue } from '../failed_tests_reporter/github_api';
 import { getIssueMetadata } from '../failed_tests_reporter/issue_metadata';
-import { readFlakySuiteIssueMetadata, readSuiteFilePathFromTitle } from './issue_body';
+import {
+  readFlakySuiteIssueMetadata,
+  readSuiteFilePathFromTitle,
+  readSuiteFrameworkFromTitle,
+} from './issue_body';
 import type { FlakySuite } from './suites';
 
 /**
@@ -25,7 +29,7 @@ export interface IssueDetails {
   suiteFilePath?: string;
   /** Suite of that file the issue is about; absent for issues about a whole file. */
   suiteTitle?: string;
-  /** Framework the suite issue is about; absent for issues filed before it was recorded. */
+  /** Framework the suite issue is about; absent when neither metadata nor a legacy title names one. */
   suiteFramework?: string;
   /** Scout test id from the `Test ID` row; the same id `discover-flaky-tests` reports. */
   scoutTestId?: string;
@@ -78,7 +82,7 @@ export const describeIssue = (issue: GithubIssue): IssueDetails => {
     issue,
     suiteFilePath: suiteMetadata?.['suite.filePath'] ?? readSuiteFilePathFromTitle(issue.title),
     suiteTitle: suiteMetadata?.['suite.title'],
-    suiteFramework: suiteMetadata?.['suite.framework'],
+    suiteFramework: suiteMetadata?.['suite.framework'] ?? readSuiteFrameworkFromTitle(issue.title),
     scoutTestId: issue.body.match(SCOUT_TEST_ID_ROW)?.[1],
     filePath: location
       ? undot(location)

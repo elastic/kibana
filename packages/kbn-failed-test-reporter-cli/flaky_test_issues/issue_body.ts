@@ -8,7 +8,7 @@
  */
 
 import Path from 'path';
-import { type FlakyTestReport } from '@kbn/scout-reporting';
+import type { FlakyTestReport, TestFramework } from '@kbn/scout-reporting';
 import { getIssueMetadata, updateIssueMetadata } from '../failed_tests_reporter/issue_metadata';
 import {
   BUILDKITE_ORG_URL,
@@ -75,6 +75,17 @@ export interface FlakySuiteIssueMetadata {
 /** Suite file path named by a legacy issue title. */
 export const readSuiteFilePathFromTitle = (title: string): string | undefined =>
   title.trim().match(LEGACY_TITLE_PATTERN)?.[1];
+
+/** `Flaky Jest test suite: <file>` names its framework by label; `Flaky test suite: <file>` does not. */
+const LEGACY_TITLE_FRAMEWORK_PATTERN = /^Flaky\s+(\S+)\s+test suite:/;
+
+/** Framework named by a legacy issue title, when it names one this reporter knows. */
+export const readSuiteFrameworkFromTitle = (title: string): TestFramework | undefined => {
+  const label = title.trim().match(LEGACY_TITLE_FRAMEWORK_PATTERN)?.[1];
+  return (Object.keys(FRAMEWORK_LABELS) as TestFramework[]).find(
+    (framework) => FRAMEWORK_LABELS[framework].short === label
+  );
+};
 
 const metadataValue = (body: string, key: keyof FlakySuiteIssueMetadata): unknown =>
   getIssueMetadata(body, key, undefined, FLAKY_TEST_SUITE_METADATA_PREFIX);

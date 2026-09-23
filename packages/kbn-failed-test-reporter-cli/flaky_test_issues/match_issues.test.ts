@@ -79,7 +79,7 @@ describe('describeIssue', () => {
     ).toMatchObject({ suiteFilePath: SUITE_PATH, testName: undefined });
     expect(
       describeIssue(githubIssue({ number: 5, title: `Flaky FTR test suite: ${SUITE_PATH}` }))
-    ).toMatchObject({ suiteFilePath: SUITE_PATH, testName: undefined });
+    ).toMatchObject({ suiteFilePath: SUITE_PATH, suiteFramework: 'ftr', testName: undefined });
     expect(
       describeIssue(githubIssue({ number: 6, title: 'Flaky Scout suite: two words' }))
     ).toMatchObject({ suiteFilePath: undefined });
@@ -256,6 +256,22 @@ describe('findMatchingIssues', () => {
 
     expect(findMatchingIssues(suiteA, [issueForA]).map(({ match }) => match)).toEqual(['test']);
     expect(findMatchingIssues(suiteB, [issueForA]).map(({ match }) => match)).toEqual(['file']);
+  });
+
+  it('keeps a legacy suite issue to the framework its title names', () => {
+    const [suite] = groupIntoSuites([flakyTest()]); // a Playwright suite
+    const matches = findMatchingIssues(suite, [
+      describeIssue(githubIssue({ number: 14, title: `Flaky Jest test suite: ${SUITE_PATH}` })),
+      describeIssue(githubIssue({ number: 15, title: `Flaky Scout test suite: ${SUITE_PATH}` })),
+      describeIssue(githubIssue({ number: 16, title: `Flaky test suite: ${SUITE_PATH}` })),
+    ]);
+
+    // the Jest issue is about another framework's suite of the same file, so a mention only
+    expect(matches.map(({ issue, match }) => [issue.number, match])).toEqual([
+      [16, 'suite'],
+      [15, 'suite'],
+      [14, 'file'],
+    ]);
   });
 
   it('matches Scout issues by test id, or by file for other tests of the suite', () => {
