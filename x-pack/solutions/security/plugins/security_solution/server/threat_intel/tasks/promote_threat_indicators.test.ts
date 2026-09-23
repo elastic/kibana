@@ -274,7 +274,7 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
             ],
             sourceName: 'maltrail',
             sourceUrl:
-              'https://raw.githubusercontent.com/stamparm/maltrail/master/trails/static/malware/cobaltstrike.txt',
+              'https://raw.githubusercontent.com/stamparm/trails/main/malware/cobaltstrike.txt',
             trailLabel: 'cobaltstrike',
           }),
         ],
@@ -297,7 +297,7 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
             iocs: [{ type: 'ip', value: '9.9.9.9' }],
             sourceName: 'maltrail',
             sourceUrl:
-              'https://raw.githubusercontent.com/stamparm/maltrail/master/trails/static/malware/cobaltstrike.txt',
+              'https://raw.githubusercontent.com/stamparm/trails/main/malware/cobaltstrike.txt',
             trailLabel: 'cobaltstrike',
           }),
         ],
@@ -305,7 +305,7 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
       );
 
       expect(ops[0].scriptParams.reference).toBe(
-        'https://raw.githubusercontent.com/stamparm/maltrail/master/trails/static/malware/cobaltstrike.txt'
+        'https://raw.githubusercontent.com/stamparm/trails/main/malware/cobaltstrike.txt'
       );
     });
 

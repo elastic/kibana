@@ -19,6 +19,11 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import type {
+  EncryptedSavedObjectsPluginSetup,
+  EncryptedSavedObjectsPluginStart,
+} from '@kbn/encrypted-saved-objects-plugin/server';
 import type { FeaturesPluginSetup, FeaturesPluginStart } from '@kbn/features-plugin/server';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type {
@@ -55,7 +60,11 @@ import { FipsService } from './fips';
 import { defineRoutes } from './routes';
 import { setupSavedObjects } from './saved_objects';
 import type { CloudProjectContext, ServiceAccountsServiceStart } from './service_accounts';
-import { ServiceAccountsService } from './service_accounts';
+import {
+  registerServiceAccountCredentialSavedObjectType,
+  registerWorkloadBindingSavedObjectType,
+  ServiceAccountsService,
+} from './service_accounts';
 import type { Session } from './session_management';
 import { SessionManagementService } from './session_management';
 import { setupSpacesClient } from './spaces';
@@ -88,6 +97,7 @@ export interface SecurityPluginSetup extends SecurityPluginSetupWithoutDeprecate
 }
 
 export interface PluginSetupDependencies {
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   features: FeaturesPluginSetup;
   licensing: LicensingPluginSetup;
   taskManager: TaskManagerSetupContract;
@@ -98,6 +108,7 @@ export interface PluginSetupDependencies {
 
 export interface PluginStartDependencies {
   cloud?: CloudStart;
+  encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   features: FeaturesPluginStart;
   licensing: LicensingPluginStart;
   taskManager: TaskManagerStartContract;
@@ -157,6 +168,7 @@ export class SecurityPlugin
 
   private readonly serviceAccountsService: ServiceAccountsService;
   private serviceAccountsStart?: ServiceAccountsServiceStart | null;
+  private canEncryptSavedObjects = false;
   /**
    * Returns the service account management API, or `null` when service accounts are
    * not enabled for this deployment.
@@ -240,9 +252,24 @@ export class SecurityPlugin
 
   public setup(
     core: CoreSetup<PluginStartDependencies, SecurityPluginStart>,
-    { features, licensing, taskManager, usageCollection, spaces, cloud }: PluginSetupDependencies
+    {
+      encryptedSavedObjects,
+      features,
+      licensing,
+      taskManager,
+      usageCollection,
+      spaces,
+      cloud,
+    }: PluginSetupDependencies
   ) {
     this.kibanaIndexName = core.savedObjects.getDefaultIndex();
+    this.canEncryptSavedObjects = encryptedSavedObjects.canEncrypt;
+
+    // Registered unconditionally, even when service accounts are disabled: a saved object type
+    // that comes and goes with a feature flag leaves its documents unreadable on any deployment
+    // that once had the feature on.
+    registerWorkloadBindingSavedObjectType(core.savedObjects, encryptedSavedObjects);
+    registerServiceAccountCredentialSavedObjectType(core.savedObjects, encryptedSavedObjects);
     const config$ = this.initializerContext.config.create<TypeOf<typeof ConfigSchema>>().pipe(
       map((rawConfig) =>
         createConfig(rawConfig, this.initializerContext.logger.get('config'), {
@@ -255,6 +282,14 @@ export class SecurityPlugin
     });
 
     const config = this.getConfig();
+
+    if (
+      this.initializerContext.env.packageInfo.buildFlavor === 'serverless' &&
+      !config.uiam?.enabled
+    ) {
+      throw new Error('`xpack.security.uiam.enabled` must be `true` on serverless deployments.');
+    }
+
     const kibanaIndexName = this.getKibanaIndexName();
 
     // A subset of `start` services we need during `setup`.
@@ -294,6 +329,7 @@ export class SecurityPlugin
       config,
       license,
       customBranding: core.customBranding,
+      getServiceAccounts: () => this.serviceAccountsStart ?? null,
     });
 
     registerSecurityUsageCollector({ usageCollection, config, license });
@@ -437,7 +473,14 @@ export class SecurityPlugin
 
   public start(
     core: CoreStart,
-    { cloud, features, licensing, taskManager, spaces }: PluginStartDependencies
+    {
+      cloud,
+      encryptedSavedObjects,
+      features,
+      licensing,
+      taskManager,
+      spaces,
+    }: PluginStartDependencies
   ) {
     this.logger.debug('Starting plugin');
 
@@ -506,11 +549,19 @@ export class SecurityPlugin
 
     this.serviceAccountsStart = this.serviceAccountsService.start({
       config,
+      isServerless: this.initializerContext.env.packageInfo.buildFlavor === 'serverless',
       license: this.securityLicense!,
       uiam,
       checkPrivilegesWithRequest: this.authorizationSetup!.checkPrivilegesWithRequest,
       cloudProjectContext: this.cloudProjectContext,
+      clusterClient,
+      savedObjects: core.savedObjects,
+      encryptedSavedObjects,
+      canEncrypt: this.canEncryptSavedObjects,
       getCurrentUser: this.authenticationStart.getCurrentUser,
+      getCurrentUserProfileId: (request) =>
+        this.getUserProfileService().getCurrentProfileId({ request }),
+      getSpaceId: (request) => spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
     });
 
     this.authorizationService.start({
@@ -532,6 +583,7 @@ export class SecurityPlugin
       authc: {
         getCurrentUser: this.authenticationStart.getCurrentUser,
         apiKeys: publicApiKeys,
+        systemIdentity: this.authenticationStart.systemIdentity,
       },
       authz: {
         actions: this.authorizationSetup!.actions,

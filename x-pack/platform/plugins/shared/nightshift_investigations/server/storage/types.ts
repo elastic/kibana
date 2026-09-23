@@ -15,6 +15,7 @@ import type {
 } from '../../common';
 
 export interface InvestigationAttributes extends InvestigationStructuredOutput {
+  title: string;
   status: InvestigationStatus;
   subject_type: InvestigationSubjectType;
   subject_id: string;
@@ -44,6 +45,7 @@ export type ProjectedInvestigationRecord<Fields extends keyof InvestigationAttri
 };
 
 export interface InvestigationPatch extends InvestigationStructuredOutput {
+  title?: string;
   status?: InvestigationStatus;
   started_at?: string;
   completed_at?: string;
@@ -52,17 +54,14 @@ export interface InvestigationPatch extends InvestigationStructuredOutput {
   conversation_id?: string;
 }
 
-/**
- * Filters shared by the list query, the severity-count facet and the cross-space sweep.
- *
- * Excludes `severities`, pagination and sort: none of them apply to a facet count.
- * `FindInvestigationsQuery` extends this with the parts that are list-only.
- */
-export interface SeverityCountsQuery {
+export interface FindInvestigationsQuery<
+  Fields extends keyof InvestigationAttributes = keyof InvestigationAttributes
+> {
   statuses?: InvestigationStatus[];
   subjectTypes?: InvestigationSubjectType[];
+  severities?: Severity[];
   /**
-   * Full-text query across subject_summary, summary, and conclusion.
+   * Full-text query across title, subject_summary, summary, and conclusion.
    * Passed as `search` + `searchFields` to the SO find API, not as part of the KQL filter.
    */
   query?: string;
@@ -73,21 +72,12 @@ export interface SeverityCountsQuery {
   startedBefore?: string;
   completedAfter?: string;
   completedBefore?: string;
-}
-
-export interface FindInvestigationsQuery<
-  Fields extends keyof InvestigationAttributes = keyof InvestigationAttributes
-> extends SeverityCountsQuery {
-  severities?: Severity[];
   sortField?: 'created_at' | 'completed_at' | 'severity';
   sortOrder?: 'asc' | 'desc';
   page?: number;
   perPage?: number;
   fields?: Fields[];
 }
-
-/** Counts of investigations at each severity tier, always zero-filled for all four options. */
-export type SeverityCounts = Record<Severity, number>;
 
 export type FindInvestigationsResult<
   Fields extends keyof InvestigationAttributes = keyof InvestigationAttributes
@@ -100,7 +90,6 @@ export interface InvestigationRepository {
   find<Fields extends keyof InvestigationAttributes = keyof InvestigationAttributes>(
     query: FindInvestigationsQuery<Fields>
   ): Promise<FindInvestigationsResult<Fields>>;
-  countBySeverity(query: SeverityCountsQuery): Promise<SeverityCounts>;
 }
 
 export type FindInvestigationsAcrossSpacesResult<

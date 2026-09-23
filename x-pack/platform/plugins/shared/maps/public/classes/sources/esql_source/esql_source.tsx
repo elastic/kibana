@@ -308,6 +308,7 @@ export class ESQLSource
     return {
       data: convertToGeoJson(esqlSearchResponse),
       meta: {
+        approximationApplied: esqlSearchResponse.approximation_applied,
         resultsCount,
         areResultsTrimmed: resultsCount >= limit,
       },
