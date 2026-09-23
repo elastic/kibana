@@ -12917,7 +12917,7 @@ paths:
             maxItems: 50
             minItems: 1
             type: array
-        - description: Sort field. Defaults to dispatched_at.
+        - description: Sort field. Defaults to "dispatched_at".
           in: query
           name: sort
           required: true
@@ -12926,7 +12926,7 @@ paths:
             enum:
               - dispatched_at
             type: string
-        - description: Sort direction. Defaults to desc
+        - description: Sort direction. Defaults to "desc".
           in: query
           name: sort_order
           required: true
