@@ -19,3 +19,8 @@ export const ONBOARDING_BODY = i18n.translate('xpack.alertzero.onboarding.body',
 export const ONBOARDING_ACTION = i18n.translate('xpack.alertzero.onboarding.configureWatches', {
   defaultMessage: 'Configure Watches',
 });
+
+export const ONBOARDING_READ_ONLY_BODY = i18n.translate('xpack.alertzero.onboarding.readOnlyBody', {
+  defaultMessage:
+    'AlertZero automatically investigates security alerts and proposes actions. Ask an administrator to enable a Watch worker to start receiving investigations.',
+});
