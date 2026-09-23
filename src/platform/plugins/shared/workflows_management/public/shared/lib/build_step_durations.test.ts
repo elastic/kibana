@@ -473,7 +473,7 @@ describe('getDurationGutterWidth', () => {
   });
 
   it('uses the longest label when multiple are present', () => {
-    const wShort = getDurationGutterWidth(['~1s']);    // 3 chars → 34 (floor)
+    const wShort = getDurationGutterWidth(['~1s']); // 3 chars → 34 (floor)
     const wLong = getDurationGutterWidth(['~1s', '~1m 30s']); // 7 chars → 53
     expect(wLong).toBeGreaterThan(wShort);
   });
