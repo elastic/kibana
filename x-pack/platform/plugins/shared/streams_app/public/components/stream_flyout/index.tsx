@@ -291,6 +291,7 @@ function StreamFlyoutContent({ name, onClose, refreshStreams }: StreamFlyoutProp
       <EuiContextMenuItem
         data-test-subj="canvasFlyoutStreamMenu-processingToggle"
         key="processing-toggle"
+        disabled={hasProcessingEnabled}
         icon={isProcessingEnabled ? 'minus' : 'plus'}
         onClick={() => {
           const showing = !isProcessingEnabled;
