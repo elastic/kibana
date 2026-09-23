@@ -1,5 +1,5 @@
 {
-  "sha1": "c1d93fecb3af38dcde6b71c9e16566a250f90839",
+  "sha1": "2da827ac7f9b6915239a9f3c665718e18bef024f",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -2228,8 +2228,8 @@
       }
     },
     {
-      "id": "9d2e752c90a3182-cf58298a6445c32",
-      "title": "Update action policy API key API update: rotates the API key and returns 204",
+      "id": "9d2e752c90a3182-70274dcc0b5db9b",
+      "title": "Update action policy API key API update: rotates the API key and returns 200 with the policy",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -2249,8 +2249,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/update_action_policy_api_key.spec.ts",
-        "line": 50,
-        "column": 16
+        "line": 52,
+        "column": 65
       }
     },
     {
@@ -2262,7 +2262,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/update_action_policy_api_key.spec.ts",
-        "line": 82,
+        "line": 88,
         "column": 19
       }
     },
@@ -2275,20 +2275,20 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/update_action_policy_api_key.spec.ts",
-        "line": 93,
+        "line": 99,
         "column": 68
       }
     },
     {
-      "id": "9d2e752c90a3182-94977b8d1865081",
-      "title": "Update action policy API key API authorization: 204 with full alerting_v2 privileges (write)",
+      "id": "9d2e752c90a3182-b59264d34b6046c",
+      "title": "Update action policy API key API authorization: 200 with full alerting_v2 privileges (write)",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/update_action_policy_api_key.spec.ts",
-        "line": 100,
+        "line": 106,
         "column": 5
       }
     },
@@ -2301,7 +2301,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/update_action_policy_api_key.spec.ts",
-        "line": 112,
+        "line": 118,
         "column": 5
       }
     },
@@ -2314,7 +2314,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/update_action_policy_api_key.spec.ts",
-        "line": 123,
+        "line": 129,
         "column": 9
       }
     },

@@ -49,8 +49,8 @@ describe('entityIdSchema', () => {
     expect(entityIdSchema.safeParse(nfd).success).toBe(false);
   });
 
-  it('trims surrounding whitespace rather than rejecting it', () => {
-    expect(entityIdSchema.parse('  prod-cpu  ')).toBe('prod-cpu');
+  it('rejects surrounding whitespace rather than resolving to the trimmed id', () => {
+    expect(entityIdSchema.safeParse('  prod-cpu  ').success).toBe(false);
   });
 });
 

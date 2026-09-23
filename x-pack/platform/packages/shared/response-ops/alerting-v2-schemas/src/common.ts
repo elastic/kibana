@@ -16,10 +16,12 @@ import { ID_MAX_LENGTH, MAX_DURATION, MAX_DURATION_LENGTH } from './constants';
  * segment and a log line unambiguously, and that cannot differ byte-wise
  * while looking identical. The server-generated default is a UUID v4, which
  * satisfies it.
+ *
+ * Not trimmed: the value addresses a resource, so padding is rejected rather
+ * than normalised into a lookup for a different id.
  */
 const entityIdSchema = z
   .string()
-  .trim()
   .min(1)
   .max(ID_MAX_LENGTH)
   .regex(/^[a-zA-Z0-9_-]+$/, 'Must contain only letters, digits, underscores, and hyphens.');
