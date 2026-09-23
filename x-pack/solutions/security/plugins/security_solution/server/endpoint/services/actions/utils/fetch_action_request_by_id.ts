@@ -15,10 +15,12 @@ import type {
   LogsEndpointAction,
 } from '../../../../../common/endpoint/types';
 import { catchAndWrapError } from '../../../utils';
-import type { EndpointAppContextService } from '../../../endpoint_app_context_services';
+import type {
+  EndpointAppContextService,
+  ScopedEndpointServices,
+} from '../../../endpoint_app_context_services';
 import { CustomHttpRequestError } from '../../../../utils/custom_http_request_error';
-import type { OrphanResponseActionsMetadata } from '../../../lib/reference_data';
-import { REF_DATA_KEYS } from '../../../lib/reference_data';
+import { fetchOrphanActionsSpaceId } from './fetch_orphan_actions_space_id';
 
 /**
  * Fetches a single Action request document.
@@ -37,17 +39,21 @@ export const fetchActionRequestById = async <
   actionId: string,
   {
     bypassSpaceValidation = false,
+    scoped,
   }: Partial<{
     /**
      * if `true`, then no space validations will be done on the action retrieved. Default is `false`.
      * USE IT CAREFULLY!
      */
     bypassSpaceValidation: boolean;
+    /** Required for the read to fan out under CPS; without it the read is origin-only */
+    scoped: ScopedEndpointServices;
   }> = {}
 ): Promise<LogsEndpointAction<TParameters, TOutputContent, TMeta>> => {
   const logger = endpointService.createLogger('fetchActionRequestById');
-  const searchResponse = await endpointService
-    .getInternalEsClient()
+  const cpsRead = scoped?.isCpsRead() ?? false;
+  const esClient = cpsRead && scoped ? scoped.getEsClient() : endpointService.getInternalEsClient();
+  const searchResponse = await esClient
     .search<LogsEndpointAction<TParameters, TOutputContent, TMeta>>(
       {
         index: ENDPOINT_ACTIONS_INDEX,
@@ -62,6 +68,58 @@ export const fetchActionRequestById = async <
 
   if (!actionRequest) {
     throw new NotFoundError(`Action with id '${actionId}' not found.`);
+  } else if (!bypassSpaceValidation && cpsRead) {
+    // Visibility is the OR of two rules. The document's own `originSpaceId` covers the fanned-in
+    // case, where the Fleet lookup would throw because the agent is not enrolled locally and would
+    // therefore 404 every cross-project action. The Fleet lookup is then still consulted as a
+    // fallback, because an integration policy shared into this space after the action was created
+    // makes that action visible here even though its `originSpaceId` names another space. This
+    // mirrors the list query in `fetch_action_requests.ts`; the two must agree or a row is listed
+    // and then 404s when opened.
+    const actionTags = Array.isArray(actionRequest.tags)
+      ? actionRequest.tags
+      : actionRequest.tags
+      ? [actionRequest.tags]
+      : [];
+    const isOrphanAction = actionTags.includes(
+      ALLOWED_ACTION_REQUEST_TAGS.integrationPolicyDeleted
+    );
+    const isVisibleInSpace =
+      actionRequest.originSpaceId === spaceId ||
+      (isOrphanAction && (await fetchOrphanActionsSpaceId(endpointService)) === spaceId);
+
+    if (!isVisibleInSpace) {
+      // originSpaceId does not match, but a policy shared into this space since the action was
+      // created should still make it visible (shared-policy case). Fall back to the Fleet check.
+      const integrationPolicyIds = (actionRequest.agent.policy ?? []).map(
+        ({ integrationPolicyId }) => integrationPolicyId
+      );
+
+      // An empty list would make Fleet's `matchAll: false` check vacuously pass, so the fallback is
+      // only attempted when the document actually names a policy
+      let fleetAllowed = false;
+
+      if (integrationPolicyIds.length > 0) {
+        try {
+          await endpointService.getInternalFleetServices(spaceId).ensureInCurrentSpace({
+            integrationPolicyIds,
+            options: { matchAll: false },
+          });
+          fleetAllowed = true;
+        } catch (err) {
+          // Not visible via a shared policy either, so both rules failed and the throw below stands
+        }
+      }
+
+      if (!fleetAllowed) {
+        logger.debug(
+          () =>
+            `Action [${actionId}] with originSpaceId [${actionRequest.originSpaceId}] is not visible in space [${spaceId}]`
+        );
+
+        throw new NotFoundError(`Action [${actionId}] not found`);
+      }
+    }
   } else if (!bypassSpaceValidation) {
     if (!actionRequest.agent.policy || actionRequest.agent.policy.length === 0) {
       const message = `Response action [${actionId}] missing 'agent.policy' information - unable to determine if response action is accessible for space [${spaceId}]`;
@@ -103,11 +161,7 @@ export const fetchActionRequestById = async <
             `Checking to see if Orphan action [${actionId}] can be displayed in space [${spaceId}]`
           );
 
-          const orphanActionsSpaceId = (
-            await endpointService
-              .getReferenceDataClient()
-              .get<OrphanResponseActionsMetadata>(REF_DATA_KEYS.orphanResponseActionsSpace)
-          ).metadata.spaceId;
+          const orphanActionsSpaceId = await fetchOrphanActionsSpaceId(endpointService);
 
           if (orphanActionsSpaceId && orphanActionsSpaceId === spaceId) {
             logger.debug(`Action [${actionId}] can be returned for spaceId [${spaceId}]`);

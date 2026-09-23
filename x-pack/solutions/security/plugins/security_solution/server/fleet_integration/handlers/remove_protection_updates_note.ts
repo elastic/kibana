@@ -6,7 +6,10 @@
  */
 
 import type { PostPackagePolicyPostDeleteCallback } from '@kbn/fleet-plugin/server';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import {
+  LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+} from '@kbn/fleet-plugin/common';
 import pMap from 'p-map';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { stringify } from '../../endpoint/utils/stringify';
@@ -28,10 +31,11 @@ export const removeProtectionUpdatesNote = async (
     const foundProtectionUpdatesNotes = await soClient
       .find({
         type: protectionUpdatesNoteSavedObjectType,
-        hasReference: {
-          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-          id: policy.id,
-        },
+        hasReference: [
+          { type: PACKAGE_POLICY_SAVED_OBJECT_TYPE, id: policy.id },
+          { type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE, id: policy.id },
+        ],
+        hasReferenceOperator: 'OR',
         namespaces: ['*'],
       })
       .catch(

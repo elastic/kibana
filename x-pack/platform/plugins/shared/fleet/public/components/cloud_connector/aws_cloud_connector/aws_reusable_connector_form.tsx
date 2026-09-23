@@ -21,16 +21,7 @@ export const AWSReusableConnectorForm: React.FC<{
   setCredentials: (credentials: AwsCloudConnectorCredentials) => void;
   accountType?: AccountType;
   packageName?: string;
-  policyTemplate?: string;
-}> = ({
-  credentials,
-  setCredentials,
-  isEditPage,
-  cloudConnectorId,
-  accountType,
-  packageName,
-  policyTemplate,
-}) => {
+}> = ({ credentials, setCredentials, isEditPage, cloudConnectorId, accountType, packageName }) => {
   return (
     <>
       <EuiSpacer size="m" />
@@ -48,7 +39,6 @@ export const AWSReusableConnectorForm: React.FC<{
         setCredentials={setCredentials}
         accountType={accountType}
         packageName={packageName}
-        policyTemplate={policyTemplate}
       />
       <EuiSpacer size="m" />
     </>

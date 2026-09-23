@@ -17,6 +17,7 @@ import { ALERTING_V2_RULE_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ruleIdParamsSchema } from './route_schemas';
+import { disableRuleOasExamples } from './disable_rule_oas_example';
 
 @injectable()
 export class DisableRuleRoute extends BaseAlertingRoute {
@@ -28,8 +29,10 @@ export class DisableRuleRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
+    access: 'public' as const,
     summary: 'Disable a rule',
     description: 'Disable a rule by identifier.',
+    oasOperationObject: disableRuleOasExamples,
   } as const;
   static schemas = {
     request: {

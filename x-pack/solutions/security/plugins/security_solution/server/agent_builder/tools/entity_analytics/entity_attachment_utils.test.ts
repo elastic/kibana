@@ -5,17 +5,19 @@
  * 2.0.
  */
 
+import { buildRenderAttachmentTag } from './attachment_utils';
 import {
-  ATTACHMENT_IDENTIFIER_TYPES,
   buildListEntityAttachmentId,
-  buildRenderAttachmentTag,
   buildSingleEntityAttachmentId,
   describeAttachmentForRow,
+} from './entity_attachment_utils';
+import {
+  ENTITY_IDENTIFIER_TYPES,
   ENTITY_STORE_ENTITY_ID_FIELD,
   ENTITY_STORE_ENTITY_NAME_FIELD,
   ENTITY_STORE_ENTITY_TYPE_FIELD,
-  type AttachmentIdentifierType,
-} from './entity_attachment_utils';
+  type EntityIdentifierType,
+} from './entity_resolution';
 import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
 
 describe('buildSingleEntityAttachmentId', () => {
@@ -42,9 +44,9 @@ describe('buildSingleEntityAttachmentId', () => {
     expect(a).not.toBe(b);
   });
 
-  it.each(ATTACHMENT_IDENTIFIER_TYPES)(
+  it.each(ENTITY_IDENTIFIER_TYPES)(
     'contains no autolink-triggering characters after the type prefix for type %s',
-    (identifierType: AttachmentIdentifierType) => {
+    (identifierType: EntityIdentifierType) => {
       const id = buildSingleEntityAttachmentId(identifierType, 'lena.medhurst@acmecrm.com');
       const suffix = id.slice(
         `${SecurityAgentBuilderAttachments.entity}:${identifierType}:`.length
@@ -101,7 +103,7 @@ describe('buildRenderAttachmentTag', () => {
     // remark-parse-no-trim because the inline autolink / email tokenizers
     // fire before the HTML tokenizer and shatter the tag across AST nodes.
     // The hash guarantee is what keeps buildRenderAttachmentTag safe.
-    ATTACHMENT_IDENTIFIER_TYPES.forEach((identifierType: AttachmentIdentifierType) => {
+    ENTITY_IDENTIFIER_TYPES.forEach((identifierType: EntityIdentifierType) => {
       const attachmentId = buildSingleEntityAttachmentId(
         identifierType,
         'lena.medhurst@acmecrm.com'
@@ -166,9 +168,9 @@ describe('render-tag-safe attachment id regression', () => {
     '<script>alert(1)</script>',
   ];
 
-  it.each(ATTACHMENT_IDENTIFIER_TYPES)(
+  it.each(ENTITY_IDENTIFIER_TYPES)(
     'buildSingleEntityAttachmentId hides email-shaped identifiers behind a hex hash for type %s',
-    (identifierType: AttachmentIdentifierType) => {
+    (identifierType: EntityIdentifierType) => {
       EMAIL_LIKE_INPUTS.forEach((input) => {
         const id = buildSingleEntityAttachmentId(identifierType, input);
         expect(id).toMatch(

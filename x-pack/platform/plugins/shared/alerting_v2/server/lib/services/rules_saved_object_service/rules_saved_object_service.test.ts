@@ -66,6 +66,89 @@ describe('RulesSavedObjectService', () => {
     ({ rulesSavedObjectService, mockSavedObjectsClient } = createRulesSavedObjectService());
   });
 
+  describe('bulkCreate', () => {
+    const attrs = { metadata: { name: 'rule-a' } } as never;
+
+    it('returns an empty array when given no items', async () => {
+      const result = await rulesSavedObjectService.bulkCreate([]);
+
+      expect(result).toEqual([]);
+      expect(mockSavedObjectsClient.bulkCreate).not.toHaveBeenCalled();
+    });
+
+    it('creates saved objects with overwrite false and maps successes', async () => {
+      mockSavedObjectsClient.bulkCreate.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'rule-1',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: attrs,
+            references: [],
+            version: 'WzEsMV0=',
+          },
+        ],
+      });
+
+      const result = await rulesSavedObjectService.bulkCreate([{ id: 'rule-1', attrs }]);
+
+      expect(mockSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+        [
+          {
+            type: RULE_SAVED_OBJECT_TYPE,
+            id: 'rule-1',
+            attributes: attrs,
+          },
+        ],
+        { overwrite: false }
+      );
+      expect(result).toEqual([
+        {
+          id: 'rule-1',
+          attributes: attrs,
+          version: 'WzEsMV0=',
+          references: [],
+        },
+      ]);
+    });
+
+    it('maps mixed success and per-item saved object errors', async () => {
+      mockSavedObjectsClient.bulkCreate.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'rule-1',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: attrs,
+            references: [],
+            version: 'WzEsMV0=',
+          },
+          {
+            id: 'rule-2',
+            type: RULE_SAVED_OBJECT_TYPE,
+            error: { statusCode: 409, error: 'Conflict', message: 'version conflict' },
+          },
+        ],
+      } as never);
+
+      const result = await rulesSavedObjectService.bulkCreate([
+        { id: 'rule-1', attrs },
+        { id: 'rule-2', attrs },
+      ]);
+
+      expect(result).toEqual([
+        {
+          id: 'rule-1',
+          attributes: attrs,
+          version: 'WzEsMV0=',
+          references: [],
+        },
+        {
+          id: 'rule-2',
+          error: { statusCode: 409, error: 'Conflict', message: 'version conflict' },
+        },
+      ]);
+    });
+  });
+
   describe('getTotalScheduledPerMinute', () => {
     it('aggregates enabled rules across all spaces and sums their per-minute frequency', async () => {
       mockSavedObjectsClient.find.mockResolvedValue(
@@ -220,6 +303,123 @@ describe('RulesSavedObjectService', () => {
           searchFields: ['metadata.name'],
           defaultSearchOperator: 'AND',
         })
+      );
+    });
+  });
+
+  describe('findTags', () => {
+    const mockTagsResponse = (buckets: Array<{ key: string }>) =>
+      ({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 0,
+        aggregations: { tags: { buckets } },
+      } as unknown as Awaited<ReturnType<SavedObjectsClientContract['find']>>);
+
+    it('aggregates tags with size 20 and _count:desc when no search or filter', async () => {
+      mockSavedObjectsClient.find.mockResolvedValue(
+        mockTagsResponse([{ key: 'cpu' }, { key: 'memory' }])
+      );
+
+      const tags = await rulesSavedObjectService.findTags();
+
+      expect(tags).toEqual(['cpu', 'memory']);
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: RULE_SAVED_OBJECT_TYPE,
+          perPage: 0,
+          aggs: {
+            tags: expect.objectContaining({
+              terms: expect.objectContaining({ size: 20, order: { _count: 'desc' } }),
+            }),
+          },
+        })
+      );
+    });
+
+    it('does not include an include pattern when search is absent', async () => {
+      mockSavedObjectsClient.find.mockResolvedValue(mockTagsResponse([]));
+
+      await rulesSavedObjectService.findTags();
+
+      const call = mockSavedObjectsClient.find.mock.calls[0][0];
+      expect((call.aggs as any).tags.terms).not.toHaveProperty('include');
+    });
+
+    it('adds an escaped prefix include pattern when search is provided', async () => {
+      mockSavedObjectsClient.find.mockResolvedValue(mockTagsResponse([{ key: 'production' }]));
+
+      await rulesSavedObjectService.findTags({ search: 'pro' });
+
+      const call = mockSavedObjectsClient.find.mock.calls[0][0];
+      expect((call.aggs as any).tags.terms.include).toBe('pro.*');
+    });
+
+    it('escapes regex special characters in the search prefix', async () => {
+      mockSavedObjectsClient.find.mockResolvedValue(mockTagsResponse([]));
+
+      await rulesSavedObjectService.findTags({ search: 'a.b+c' });
+
+      const call = mockSavedObjectsClient.find.mock.calls[0][0];
+      expect((call.aggs as any).tags.terms.include).toBe('a\\.b\\+c.*');
+    });
+
+    it('escapes Elasticsearch-only regexp operators in the search prefix', async () => {
+      mockSavedObjectsClient.find.mockResolvedValue(mockTagsResponse([]));
+
+      await rulesSavedObjectService.findTags({ search: 'a<b&c' });
+
+      const call = mockSavedObjectsClient.find.mock.calls[0][0];
+      expect((call.aggs as any).tags.terms.include).toBe('a\\<b\\&c.*');
+    });
+
+    it('forwards the SO filter when provided', async () => {
+      mockSavedObjectsClient.find.mockResolvedValue(mockTagsResponse([{ key: 'tag' }]));
+
+      await rulesSavedObjectService.findTags({
+        filter: `${RULE_SAVED_OBJECT_TYPE}.attributes.kind: alert`,
+      });
+
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter: `${RULE_SAVED_OBJECT_TYPE}.attributes.kind: alert`,
+        })
+      );
+    });
+
+    it('returns empty array when aggregations are missing', async () => {
+      mockSavedObjectsClient.find.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 0,
+      } as Awaited<ReturnType<SavedObjectsClientContract['find']>>);
+
+      const tags = await rulesSavedObjectService.findTags();
+
+      expect(tags).toEqual([]);
+    });
+
+    it('forwards a custom size to the terms aggregation', async () => {
+      mockSavedObjectsClient.find.mockResolvedValue(mockTagsResponse([]));
+
+      await rulesSavedObjectService.findTags({ size: 10000 });
+
+      const call = mockSavedObjectsClient.find.mock.calls[0][0];
+      expect((call.aggs as any).tags.terms.size).toBe(10000);
+    });
+
+    it('clamps size to the allowed range', async () => {
+      mockSavedObjectsClient.find.mockResolvedValue(mockTagsResponse([]));
+
+      await rulesSavedObjectService.findTags({ size: 0 });
+      expect((mockSavedObjectsClient.find.mock.calls[0][0].aggs as any).tags.terms.size).toBe(1);
+
+      mockSavedObjectsClient.find.mockClear();
+      await rulesSavedObjectService.findTags({ size: 99999 });
+      expect((mockSavedObjectsClient.find.mock.calls[0][0].aggs as any).tags.terms.size).toBe(
+        10000
       );
     });
   });

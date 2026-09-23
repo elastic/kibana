@@ -75,7 +75,10 @@ export const SearchRulesAggregations = lazySchema(() =>
       /**
        * Facet categories for which to compute counts over the filtered + searched set.
        */
-      counts: z.array(GranularRulesFacetCategory).optional(),
+      counts: z
+        .array(GranularRulesFacetCategory)
+        .optional()
+        .describe('Facet categories for which to compute counts over the filtered + searched set.'),
     })
     .strict()
 );

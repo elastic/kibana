@@ -50,6 +50,70 @@ describe('getCaseStepDefinition', () => {
     });
   });
 
+  it('converts unified comments back to the legacy wire shape before returning', async () => {
+    const unifiedCase = {
+      ...createCaseResponseFixture,
+      comments: [
+        {
+          id: 'comment-1',
+          version: 'WzQ3LDFc',
+          type: 'comment',
+          data: { content: 'Investigating now' },
+          owner: 'securitySolution',
+          created_at: '2020-02-19T23:06:33.798Z',
+          created_by: {
+            full_name: 'Leslie Knope',
+            username: 'lknope',
+            email: 'leslie.knope@elastic.co',
+          },
+          pushed_at: null,
+          pushed_by: null,
+          updated_at: null,
+          updated_by: null,
+        },
+      ],
+    };
+    const get = jest.fn().mockResolvedValue(unifiedCase);
+    const getCasesClient = jest.fn().mockResolvedValue({
+      cases: { get },
+    } as unknown as CasesClient);
+    const definition = getCaseStepDefinition(getCasesClient);
+
+    const result = await definition.handler(
+      createContext({
+        case_id: 'case-1',
+        include_comments: true,
+      })
+    );
+
+    expect(result).toEqual({
+      output: {
+        case: {
+          ...unifiedCase,
+          comments: [
+            {
+              id: 'comment-1',
+              version: 'WzQ3LDFc',
+              type: 'user',
+              comment: 'Investigating now',
+              owner: 'securitySolution',
+              created_at: '2020-02-19T23:06:33.798Z',
+              created_by: {
+                full_name: 'Leslie Knope',
+                username: 'lknope',
+                email: 'leslie.knope@elastic.co',
+              },
+              pushed_at: null,
+              pushed_by: null,
+              updated_at: null,
+              updated_by: null,
+            },
+          ],
+        },
+      },
+    });
+  });
+
   it('fetches case with includeComments=false when include_comments is false', async () => {
     const get = jest.fn().mockResolvedValue(createCaseResponseFixture);
     const getCasesClient = jest.fn().mockResolvedValue({

@@ -29,7 +29,7 @@ export const ON_OPEN_PANEL_MENU = 'on_open_panel_menu';
  * Actions attached to ADD_PANEL_TRIGGER trigger
  * are displayed in dashboards' add panel menu
  *
- * Please consult with @elastic/kibana-presentation before attaching
+ * Please consult with @elastic/kibana-dashboards before attaching
  * new actions to this trigger.
  */
 export const ADD_PANEL_TRIGGER = 'ADD_PANEL_TRIGGER';
@@ -37,7 +37,7 @@ export const ADD_PANEL_TRIGGER = 'ADD_PANEL_TRIGGER';
  * Actions attached to FEATURED_ADD_PANEL_TRIGGER trigger
  * are displayed at top of dashboards' add panel menu with distinct UI
  *
- * Please consult with @elastic/kibana-presentation before attaching
+ * Please consult with @elastic/kibana-dashboards before attaching
  * new actions to this trigger.
  */
 export const FEATURED_ADD_PANEL_TRIGGER = 'FEATURED_ADD_PANEL_TRIGGER';
@@ -56,7 +56,6 @@ export const SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID =
 export const DISCOVER_CELL_ACTIONS_TRIGGER_ID = 'DISCOVER_CELL_ACTIONS_TRIGGER_ID';
 
 export const PANEL_BADGE_TRIGGER = 'PANEL_BADGE_TRIGGER';
-export const PANEL_NOTIFICATION_TRIGGER = 'PANEL_NOTIFICATION_TRIGGER';
 export const MULTI_VALUE_CLICK_TRIGGER = 'MULTI_VALUE_CLICK_TRIGGER';
 export const CELL_VALUE_TRIGGER = 'CELL_VALUE_TRIGGER';
 
@@ -79,6 +78,7 @@ export const IN_APP_EMBEDDABLE_EDIT_TRIGGER = 'IN_APP_EMBEDDABLE_EDIT_TRIGGER';
 
 export const CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER =
   'CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER';
+export const UPDATE_AD_JOBS_PROJECT_ROUTING_TRIGGER = 'UPDATE_AD_JOBS_PROJECT_ROUTING_TRIGGER';
 export const SWIM_LANE_SELECTION_TRIGGER = 'SWIM_LANE_SELECTION_TRIGGER';
 export const EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER = 'EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER';
 export const SINGLE_METRIC_VIEWER_ENTITY_FIELD_SELECTION_TRIGGER =

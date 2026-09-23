@@ -46,7 +46,7 @@ describe('useFindAlertsQuery', () => {
     await waitFor(() => expect(result.current.isLoading).toBe(true), { timeout: 5000 });
 
     expect(mockServices.http.post).toHaveBeenCalledTimes(1);
-    expect(mockServices.http.post).toBeCalledWith('/internal/rac/alerts/find', {
+    expect(mockServices.http.post).toHaveBeenCalledWith('/internal/rac/alerts/find', {
       body: '{"consumers":["bar"],"rule_type_ids":["foo"]}',
     });
   });

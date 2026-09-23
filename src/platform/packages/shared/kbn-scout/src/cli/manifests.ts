@@ -57,7 +57,7 @@ export async function generateScoutConfigManifest(configPath: string, log?: Tool
   return result;
 }
 
-async function updateScoutConfigManifests(
+export async function updateScoutConfigManifests(
   onlyOutdated: boolean,
   removeDangling: boolean,
   reload: boolean,
@@ -66,6 +66,7 @@ async function updateScoutConfigManifests(
 ) {
   const expectedManifestPaths: string[] = [];
   const updatedConfigPaths: string[] = [];
+  const failedConfigPaths: string[] = [];
   const ongoingManifestUpdates = new Set<Promise<any>>();
   const maxOngoingManifestUpdates = concurrencyLimit > 0 ? concurrencyLimit : 1;
 
@@ -98,9 +99,16 @@ async function updateScoutConfigManifests(
     // Start manifest update task
     log.info(`Generating manifest for test config at '${config.path}'`);
     const manifestUpdateTask = generateScoutConfigManifest(config.path, log)
-      .then(() => {
-        updatedConfigPaths.push(config.path);
-      })
+      .then(
+        () => {
+          updatedConfigPaths.push(config.path);
+        },
+        (reason) => {
+          const message = reason instanceof Error ? reason.message : String(reason);
+          log.error(`Failed to generate manifest for test config at '${config.path}': ${message}`);
+          failedConfigPaths.push(config.path);
+        }
+      )
       .finally(() => {
         ongoingManifestUpdates.delete(manifestUpdateTask);
       });
@@ -110,6 +118,18 @@ async function updateScoutConfigManifests(
 
   // Wait for all manifest updates to complete
   await Promise.all(ongoingManifestUpdates);
+
+  // Retry failed manifest update tasks if any and fail fast
+  if (failedConfigPaths.length > 0) {
+    log.warning(
+      `Retrying manifest generation for ${failedConfigPaths.length} configs ` +
+        'that failed during the first attempt'
+    );
+    for (const configPath of failedConfigPaths) {
+      await generateScoutConfigManifest(configPath, log);
+      updatedConfigPaths.push(configPath);
+    }
+  }
 
   if (removeDangling) {
     // Remove any manifest files that no longer have a corresponding test config

@@ -14,3 +14,4 @@ export { TagsAddRemove } from './tags_add_remove';
 export { AgentActivityFlyout } from './agent_activity_flyout';
 export { AgentMigrateFlyout } from './migrate_agent_flyout';
 export { ChangeAgentPrivilegeLevelFlyout } from './change_agent_privilege_level_flyout';
+export { ScheduledActionsBadge } from './scheduled_actions_badge';

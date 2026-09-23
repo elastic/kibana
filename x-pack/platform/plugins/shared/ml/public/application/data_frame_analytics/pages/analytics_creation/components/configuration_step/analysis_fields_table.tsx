@@ -8,7 +8,6 @@
 import type { FC } from 'react';
 import React, { Fragment, useEffect, useState } from 'react';
 import {
-  EuiCallOut,
   EuiFormRow,
   EuiPanel,
   EuiSpacer,
@@ -16,6 +15,7 @@ import {
   LEFT_ALIGNMENT,
   SortableProperties,
 } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -253,17 +253,18 @@ export const AnalysisFieldsTable: FC<{
           </EuiText>
         )}
         {tableItems.length === 0 && (
-          <EuiCallOut
+          <KbnInfoCallout
             announceOnMount={false}
             title={i18n.translate('xpack.ml.dataframe.analytics.create.calloutTitle', {
               defaultMessage: 'Analysis fields not available',
             })}
-          >
-            <FormattedMessage
-              id="xpack.ml.dataframe.analytics.create.calloutMessage"
-              defaultMessage="Additional data required to load analysis fields."
-            />
-          </EuiCallOut>
+            text={
+              <FormattedMessage
+                id="xpack.ml.dataframe.analytics.create.calloutMessage"
+                defaultMessage="Additional data required to load analysis fields."
+              />
+            }
+          />
         )}
         {tableItems.length > 0 && (
           <EuiPanel paddingSize="m" data-test-subj="mlAnalyticsCreateJobWizardIncludesSelect">

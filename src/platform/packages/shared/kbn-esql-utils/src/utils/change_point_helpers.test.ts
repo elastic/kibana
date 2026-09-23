@@ -10,9 +10,10 @@ import {
   hasChangePointCommand,
   getChangePointOutputColumnNames,
   getChangePointSeriesColumns,
-  getChangePointEntityColumns,
+  getChangePointByColumns,
   buildChangePointLineDataQuery,
   appendEntityFiltersToChangePointLineEsql,
+  formatEsqlEntityPredicate,
   formatEsqlIdentifier,
   formatEsqlLiteral,
 } from './change_point_helpers';
@@ -100,34 +101,27 @@ describe('getChangePointSeriesColumns', () => {
   });
 });
 
-describe('getChangePointEntityColumns', () => {
-  it('returns empty array when esql is undefined or empty', () => {
-    expect(getChangePointEntityColumns(undefined)).toEqual([]);
-    expect(getChangePointEntityColumns('')).toEqual([]);
-  });
-
-  it('returns empty array when there is no CHANGE_POINT command', () => {
-    expect(getChangePointEntityColumns('FROM index | STATS count = COUNT(*)')).toEqual([]);
-  });
-
-  it('returns empty array when CHANGE_POINT has no BY clause', () => {
-    expect(getChangePointEntityColumns('FROM a | CHANGE_POINT value ON time')).toEqual([]);
-  });
-
-  it('returns single BY column', () => {
-    expect(getChangePointEntityColumns('FROM a | CHANGE_POINT value ON time BY host')).toEqual([
-      'host',
-    ]);
-  });
-
-  it('returns multiple BY columns', () => {
+describe('getChangePointByColumns', () => {
+  it('returns undefined when there is no CHANGE_POINT BY', () => {
+    expect(getChangePointByColumns(undefined)).toBeUndefined();
     expect(
-      getChangePointEntityColumns('FROM a | CHANGE_POINT value ON time BY host, service')
-    ).toEqual(['host', 'service']);
+      getChangePointByColumns(
+        'FROM idx | STATS avg_bytes = AVG(bytes) BY bucket = BUCKET(@timestamp, 1 day) | CHANGE_POINT avg_bytes ON bucket'
+      )
+    ).toBeUndefined();
   });
 
-  it('returns empty array for an unparseable query', () => {
-    expect(getChangePointEntityColumns('NOT VALID ESQL !!!')).toEqual([]);
+  it('returns BY columns from the query', () => {
+    expect(
+      getChangePointByColumns(
+        'FROM idx | STATS avg_bytes = AVG(bytes) BY host, bucket = BUCKET(@timestamp, 1 day) | CHANGE_POINT avg_bytes ON bucket BY host'
+      )
+    ).toEqual(['host']);
+    expect(
+      getChangePointByColumns(
+        'FROM idx | STATS avg_bytes = AVG(bytes) BY host, service, bucket = BUCKET(@timestamp, 1 day) | CHANGE_POINT avg_bytes ON bucket BY host, service'
+      )
+    ).toEqual(['host', 'service']);
   });
 });
 
@@ -218,6 +212,17 @@ describe('formatEsqlLiteral', () => {
   });
 });
 
+describe('formatEsqlEntityPredicate', () => {
+  it('uses equality for values with literals', () => {
+    expect(formatEsqlEntityPredicate('host', 'web-1')).toBe('host == "web-1"');
+  });
+
+  it('uses IS NULL for null and undefined', () => {
+    expect(formatEsqlEntityPredicate('host', null)).toBe('host IS NULL');
+    expect(formatEsqlEntityPredicate('host', undefined)).toBe('host IS NULL');
+  });
+});
+
 describe('appendEntityFiltersToChangePointLineEsql', () => {
   it('returns the query unchanged when there are no entity columns', () => {
     const q = 'FROM idx | STATS m = AVG(x) BY t';
@@ -238,11 +243,11 @@ describe('appendEntityFiltersToChangePointLineEsql', () => {
     );
   });
 
-  it('skips columns with no literal (null / undefined)', () => {
+  it('uses IS NULL for missing entity values', () => {
     const q = 'FROM idx | STATS m = AVG(x) BY host, t';
     expect(
       appendEntityFiltersToChangePointLineEsql(q, { host: null, other: 'ok' }, ['host', 'other'])
-    ).toBe('FROM idx | STATS m = AVG(x) BY host, t | WHERE other == "ok"');
+    ).toBe('FROM idx | STATS m = AVG(x) BY host, t | WHERE host IS NULL AND other == "ok"');
   });
 
   it('appends WHERE for entity columns with empty string values', () => {

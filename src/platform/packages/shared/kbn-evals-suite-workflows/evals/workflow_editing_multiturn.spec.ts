@@ -156,14 +156,12 @@ evaluate.describe(
   'Multi-turn workflow editing',
   { tag: tags.serverless.observability.complete },
   () => {
-    evaluate('three-turn scaffold → add → revisit', async ({ evaluateMultiTurnEditDataset }) => {
+    evaluate('multi-turn editing cases', async ({ evaluateMultiTurnEditDataset }) => {
       await evaluateMultiTurnEditDataset({
         dataset: {
-          name: 'workflow-editing-multiturn: three-turn',
+          name: 'workflow-editing-multiturn: core',
           description:
-            'Three-turn conversation where turn 3 IMPLICITLY contradicts turn 2 — the user ' +
-            'never says "drop the time filter", but the new request is incompatible with ' +
-            'the 24-hour window from turn 2. Tests whether the agent notices and rebuilds.',
+            'Multi-turn editing cases: implicit conflict resolution across turns and mixed insert/delete/modify with reintroduction.',
           examples: [
             {
               input: {
@@ -201,63 +199,46 @@ evaluate.describe(
               },
               metadata: { category: 'multi-turn-three-turn' },
             },
+            {
+              input: {
+                initialYaml: baseWorkflowYaml,
+                turns: [
+                  {
+                    instruction:
+                      'Add a console step at the very beginning that logs "Starting pipeline".',
+                  },
+                  { instruction: 'Drop the log_end step — we no longer need it.' },
+                  {
+                    instruction:
+                      'Change fetch_data to use POST with an empty JSON body instead of GET.',
+                  },
+                  {
+                    instruction:
+                      "Actually the workflow's pretty chatty in our logs — strip out anything that's just logging to the console. Keep only the actual HTTP work.",
+                  },
+                  {
+                    instruction:
+                      'On second thought we DO need an audit trail — add back a console log at the end recording the HTTP response status, similar to what log_end used to do but with the new POST response.',
+                  },
+                ],
+              },
+              output: {
+                criteria: [
+                  'The final workflow contains exactly two steps.',
+                  'The first step is the modified fetch_data (type http, method POST, with a JSON body).',
+                  'The second step is a console step that runs AFTER fetch_data (not before, not in parallel) and logs the HTTP response status via a Liquid reference to steps.fetch_data.output.',
+                  'No remnants of the original log_start step or the turn-1 "Starting pipeline" console step exist (those were removed in turn 4 and not reintroduced).',
+                  "The new audit step references steps.fetch_data.output (not foreach.item, not a hardcoded string) — proving the agent threaded turn 3's POST output through to turn 5's logging.",
+                ],
+                expectedStepCount: { min: 2, max: 2 },
+                preservedStepNames: [],
+                expectedMaxToolCalls: 9,
+              },
+              metadata: { category: 'multi-turn-mixed' },
+            },
           ],
         },
       });
     });
-
-    evaluate(
-      'mixed insert / delete / modify across turns',
-      async ({ evaluateMultiTurnEditDataset }) => {
-        await evaluateMultiTurnEditDataset({
-          dataset: {
-            name: 'workflow-editing-multiturn: mixed-operations',
-            description:
-              'Five-turn conversation: insert + delete + modify, then a class-based cleanup, ' +
-              'then a turn that reintroduces something previously deleted in a different ' +
-              'position. Tests memory of earlier state + spatial reasoning across turns.',
-            examples: [
-              {
-                input: {
-                  initialYaml: baseWorkflowYaml,
-                  turns: [
-                    {
-                      instruction:
-                        'Add a console step at the very beginning that logs "Starting pipeline".',
-                    },
-                    { instruction: 'Drop the log_end step — we no longer need it.' },
-                    {
-                      instruction:
-                        'Change fetch_data to use POST with an empty JSON body instead of GET.',
-                    },
-                    {
-                      instruction:
-                        "Actually the workflow's pretty chatty in our logs — strip out anything that's just logging to the console. Keep only the actual HTTP work.",
-                    },
-                    {
-                      instruction:
-                        'On second thought we DO need an audit trail — add back a console log at the end recording the HTTP response status, similar to what log_end used to do but with the new POST response.',
-                    },
-                  ],
-                },
-                output: {
-                  criteria: [
-                    'The final workflow contains exactly two steps.',
-                    'The first step is the modified fetch_data (type http, method POST, with a JSON body).',
-                    'The second step is a console step that runs AFTER fetch_data (not before, not in parallel) and logs the HTTP response status via a Liquid reference to steps.fetch_data.output.',
-                    'No remnants of the original log_start step or the turn-1 "Starting pipeline" console step exist (those were removed in turn 4 and not reintroduced).',
-                    "The new audit step references steps.fetch_data.output (not foreach.item, not a hardcoded string) — proving the agent threaded turn 3's POST output through to turn 5's logging.",
-                  ],
-                  expectedStepCount: { min: 2, max: 2 },
-                  preservedStepNames: [],
-                  expectedMaxToolCalls: 9,
-                },
-                metadata: { category: 'multi-turn-mixed' },
-              },
-            ],
-          },
-        });
-      }
-    );
   }
 );

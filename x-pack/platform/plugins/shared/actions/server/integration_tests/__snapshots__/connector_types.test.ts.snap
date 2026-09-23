@@ -1067,7 +1067,6 @@ Object {
           "type": "number",
         },
         "verificationMode": Object {
-          "default": "full",
           "enum": Array [
             "full",
             "certificate",
@@ -1500,7 +1499,37 @@ Object {
     },
     "query": Object {
       "additionalProperties": Object {
-        "type": "string",
+        "anyOf": Array [
+          Object {
+            "anyOf": Array [
+              Object {
+                "type": "string",
+              },
+              Object {
+                "type": "number",
+              },
+              Object {
+                "type": "boolean",
+              },
+            ],
+          },
+          Object {
+            "items": Object {
+              "anyOf": Array [
+                Object {
+                  "type": "string",
+                },
+                Object {
+                  "type": "number",
+                },
+                Object {
+                  "type": "boolean",
+                },
+              ],
+            },
+            "type": "array",
+          },
+        ],
       },
       "propertyNames": Object {
         "type": "string",
@@ -1630,7 +1659,37 @@ Object {
     },
     "query": Object {
       "additionalProperties": Object {
-        "type": "string",
+        "anyOf": Array [
+          Object {
+            "anyOf": Array [
+              Object {
+                "type": "string",
+              },
+              Object {
+                "type": "number",
+              },
+              Object {
+                "type": "boolean",
+              },
+            ],
+          },
+          Object {
+            "items": Object {
+              "anyOf": Array [
+                Object {
+                  "type": "string",
+                },
+                Object {
+                  "type": "number",
+                },
+                Object {
+                  "type": "boolean",
+                },
+              ],
+            },
+            "type": "array",
+          },
+        ],
       },
       "propertyNames": Object {
         "type": "string",

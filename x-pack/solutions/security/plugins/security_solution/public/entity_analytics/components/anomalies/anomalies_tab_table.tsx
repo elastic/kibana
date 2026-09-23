@@ -63,6 +63,7 @@ import {
 } from './test_ids';
 import { AnomaliesTableEmptyMessage } from './table/empty_message';
 import { AnomaliesTableLoadingSkeleton } from './table/loading_skeleton';
+import type { EntityToAttach } from '../../../cases/attachments/entity';
 
 export interface TableChangeEvent {
   page?: { index: number; size: number };
@@ -90,6 +91,7 @@ const noItemsRowCss = css`
 
 interface AnomalyTabTableSectionProps {
   anomalies: AnomalySummaryEntry[];
+  entityToAttach: EntityToAttach;
   entityType: EntityType;
   onTableChange: (event: TableChangeEvent) => void;
   page: number;
@@ -103,6 +105,7 @@ interface AnomalyTabTableSectionProps {
 
 export const AnomalyTabTableSection: React.FC<AnomalyTabTableSectionProps> = ({
   anomalies,
+  entityToAttach,
   entityType,
   onTableChange,
   page,
@@ -169,7 +172,7 @@ export const AnomalyTabTableSection: React.FC<AnomalyTabTableSectionProps> = ({
                 data-test-subj={ANOMALIES_TABLE_ROW_EXPAND_BUTTON_TEST_ID}
                 aria-label={label}
                 aria-expanded={isExpanded}
-                iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
+                iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
                 color="text"
                 onClick={() => toggleRowExpanded(item.id)}
               />
@@ -258,10 +261,12 @@ export const AnomalyTabTableSection: React.FC<AnomalyTabTableSectionProps> = ({
         name: ENTITY_ANOMALY_TABLE_ACTIONS_COLUMN,
         width: '64px',
         align: 'right',
-        render: (item: TableRow) => <AnomalyRowActionsMenu row={item} timeRange={timeRange} />,
+        render: (item: TableRow) => (
+          <AnomalyRowActionsMenu entityToAttach={entityToAttach} row={item} timeRange={timeRange} />
+        ),
       },
     ],
-    [expandedRowIds, timeRange, toggleRowExpanded]
+    [entityToAttach, expandedRowIds, timeRange, toggleRowExpanded]
   );
 
   const itemIdToExpandedRowMap = useMemo(() => {

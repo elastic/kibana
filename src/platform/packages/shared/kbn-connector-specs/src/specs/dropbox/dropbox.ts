@@ -52,7 +52,7 @@ export const Dropbox: ConnectorSpec = {
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['workflows', 'agentBuilder'],
+    supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
   },
 
   auth: {
@@ -102,6 +102,7 @@ export const Dropbox: ConnectorSpec = {
   actions: {
     whoAmI: {
       isTool: true,
+      scope: 'read',
       description:
         'Retrieve details about the currently authenticated Dropbox user, including name, email, and account type. ' +
         'Use this to confirm authentication is working and to identify which Dropbox account is connected.',
@@ -113,6 +114,7 @@ export const Dropbox: ConnectorSpec = {
 
     search: {
       isTool: true,
+      scope: 'read',
       description:
         'Search for files and folders in Dropbox by keyword. Searches across file names and content. Returns file paths, ' +
         'names, and metadata. Use this as the primary way to locate files before reading their content.',
@@ -130,6 +132,7 @@ export const Dropbox: ConnectorSpec = {
 
     listFolder: {
       isTool: true,
+      scope: 'read',
       description:
         'List files and subfolders within a specific Dropbox folder. Use an empty string for the root folder. Use paths ' +
         'from search results to browse specific directories. Returns file names, paths, sizes, and modification dates.',
@@ -144,6 +147,7 @@ export const Dropbox: ConnectorSpec = {
 
     getFileMetadata: {
       isTool: true,
+      scope: 'read',
       description:
         'Get detailed metadata for a specific file or folder in Dropbox, including size, modification date, content ' +
         'hash, and sharing info. Use this to inspect a file before downloading its content, or to verify a path exists.',
@@ -157,6 +161,7 @@ export const Dropbox: ConnectorSpec = {
 
     getFileContent: {
       isTool: true,
+      scope: 'read',
       description:
         'Download the content of a file from Dropbox and return it as text. Dropbox extracts text from documents (up' +
         ' to 5 MB). Use paths from search or listFolder results. WARNING: Returns base64-encoded binary content for ' +
@@ -172,6 +177,7 @@ export const Dropbox: ConnectorSpec = {
 
     createSharedLink: {
       isTool: true,
+      scope: 'write',
       description:
         'Create a shared link for a file or folder in Dropbox. Returns a shareable URL. ' +
         'Use paths from search or listFolder results. ' +
@@ -187,6 +193,7 @@ export const Dropbox: ConnectorSpec = {
 
     listSharedLinks: {
       isTool: true,
+      scope: 'read',
       description:
         'List existing shared links in Dropbox. Optionally filter to links for a specific file or folder path. Returns ' +
         'URLs, visibility settings, and expiration dates for each link.',
@@ -200,6 +207,7 @@ export const Dropbox: ConnectorSpec = {
 
     listTools: {
       isTool: true,
+      scope: 'read',
       description:
         'List all tools available on the Dropbox MCP server. Use this to discover available capabilities, including ' +
         'write operations (upload, move, copy, delete) and file versioning tools not exposed as named actions.',
@@ -214,6 +222,7 @@ export const Dropbox: ConnectorSpec = {
 
     callTool: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Call any tool on the Dropbox MCP server directly by name. Use this as an escape hatch for tools not yet ' +
         'exposed as named actions (such as create_file, create_folder, copy, move, delete, or restore_file_revision). Use ' +
@@ -232,13 +241,11 @@ export const Dropbox: ConnectorSpec = {
     }),
     handler: async (ctx) => {
       return withMcpClient(ctx, async (mcp) => {
-        const { tools } = await mcp.listTools();
-        return {
-          ok: true,
-          message: `Connected to Dropbox MCP server. ${tools.length} tools available.`,
-        };
+        await mcp.listTools();
+        return {};
       });
     },
+    enabled: true,
   },
 
   skill: [

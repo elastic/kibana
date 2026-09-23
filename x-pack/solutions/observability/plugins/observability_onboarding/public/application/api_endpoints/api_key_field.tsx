@@ -24,6 +24,10 @@ interface Props {
   canCreate: boolean;
   wasKeyCreatedBefore: boolean;
   onCreate: () => void;
+  dataTestSubjSuffix?: string;
+  ariaLabel?: string;
+  isDisabled?: boolean;
+  createdBeforePlaceholder?: string;
 }
 
 export const ApiKeyField = ({
@@ -32,6 +36,10 @@ export const ApiKeyField = ({
   canCreate,
   wasKeyCreatedBefore,
   onCreate,
+  dataTestSubjSuffix = '',
+  ariaLabel,
+  isDisabled = false,
+  createdBeforePlaceholder,
 }: Props) => {
   const hasApiKey = Boolean(encodedApiKey);
 
@@ -44,6 +52,17 @@ export const ApiKeyField = ({
       defaultMessage: "You don't have permission to create API keys. Contact your administrator.",
     }
   );
+  const apiKeyCreationInProgressMessage = i18n.translate(
+    'xpack.observability_onboarding.apiEndpoints.apiKeyCreationInProgressMessage',
+    {
+      defaultMessage: 'Another API key is being created. Wait for it to finish.',
+    }
+  );
+  const createButtonTooltip = !canCreate
+    ? noPermissionMessage
+    : isDisabled
+    ? apiKeyCreationInProgressMessage
+    : undefined;
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
@@ -59,7 +78,8 @@ export const ApiKeyField = ({
             value={encodedApiKey ?? ''}
             placeholder={
               wasKeyCreatedBefore
-                ? i18n.translate(
+                ? createdBeforePlaceholder ??
+                  i18n.translate(
                     'xpack.observability_onboarding.apiEndpoints.apiKeyCreatedBeforePlaceholder',
                     { defaultMessage: 'Existing key cannot be displayed. Create a new one' }
                   )
@@ -67,8 +87,8 @@ export const ApiKeyField = ({
                     defaultMessage: 'No API key yet',
                   })
             }
-            data-test-subj="observabilityOnboardingApiEndpointApiKeyValue"
-            aria-label={apiKeyLabel}
+            data-test-subj={`observabilityOnboardingApiEndpointApiKeyValue${dataTestSubjSuffix}`}
+            aria-label={ariaLabel ?? apiKeyLabel}
             append={
               hasApiKey ? (
                 <EuiCopy textToCopy={encodedApiKey ?? ''}>
@@ -77,11 +97,12 @@ export const ApiKeyField = ({
                       element="button"
                       iconLeft="copy"
                       onClick={copy}
-                      data-test-subj="observabilityOnboardingApiEndpointApiKeyCopyButton"
+                      data-test-subj={`observabilityOnboardingApiEndpointApiKeyCopyButton${dataTestSubjSuffix}`}
                       aria-label={i18n.translate(
-                        'xpack.observability_onboarding.apiEndpoints.copyButton',
+                        'xpack.observability_onboarding.apiEndpoints.apiKeyCopyButtonAriaLabel',
                         {
-                          defaultMessage: 'Copy to clipboard',
+                          defaultMessage: 'Copy {label} to clipboard',
+                          values: { label: ariaLabel ?? apiKeyLabel },
                         }
                       )}
                     />
@@ -94,13 +115,13 @@ export const ApiKeyField = ({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFormRow hasEmptyLabelSpace>
-          <EuiToolTip content={!canCreate ? noPermissionMessage : undefined}>
+          <EuiToolTip content={createButtonTooltip}>
             <EuiButton
-              iconType="plusInCircle"
+              iconType="plusCircle"
               onClick={onCreate}
               isLoading={isCreating}
-              isDisabled={!canCreate}
-              data-test-subj="observabilityOnboardingApiEndpointCreateApiKeyButton"
+              isDisabled={!canCreate || isDisabled}
+              data-test-subj={`observabilityOnboardingApiEndpointCreateApiKeyButton${dataTestSubjSuffix}`}
             >
               {i18n.translate('xpack.observability_onboarding.apiEndpoints.createKey', {
                 defaultMessage: 'Create key',

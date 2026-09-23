@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { ToolType } from '@kbn/agent-builder-common';
+import type { ToolConfirmationPolicyMode, ToolType } from '@kbn/agent-builder-common';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import type { LlmProxy } from '@kbn/ftr-llm-proxy';
 import type { ScoutPage } from '@kbn/scout';
-import { KibanaCodeEditorWrapper } from '@kbn/scout';
+import { euiSelectors, KibanaCodeEditorWrapper } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { subj } from '@kbn/test-subj-selector';
 import {
@@ -115,7 +115,7 @@ export class AgentBuilderApp {
     // has painted on resource-constrained CI runs.
     await this.page.waitForFunction(
       (expected: string) => {
-        const els = document.querySelectorAll('[data-test-subj="agentBuilderRoundResponse"]');
+        const els = document.querySelectorAll('[data-test-subj="agentBuilderResponseMessage"]');
         if (els.length === 0) {
           return false;
         }
@@ -149,13 +149,13 @@ export class AgentBuilderApp {
       response: expectedResponse,
       continueConversation: true,
     });
-    const existingCount = await this.page.testSubj.locator('agentBuilderRoundResponse').count();
+    const existingCount = await this.page.testSubj.locator('agentBuilderResponseMessage').count();
     await this.typeMessage(userMessage);
     await this.sendMessage();
     await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
     await this.page.waitForFunction(
       (prev) => {
-        const els = document.querySelectorAll('[data-test-subj="agentBuilderRoundResponse"]');
+        const els = document.querySelectorAll('[data-test-subj="agentBuilderResponseMessage"]');
         return els.length > prev;
       },
       existingCount,
@@ -216,12 +216,14 @@ export class AgentBuilderApp {
     return newTitle;
   }
 
-  async clickRetryButton() {
-    await this.page.testSubj.click('agentBuilderRoundErrorRetryButton');
+  /** The collapsed "An error occurred" line of a failed turn. */
+  async isErrorVisible() {
+    return this.page.testSubj.locator('agentBuilderExecutionFailedToggle').isVisible();
   }
 
-  async isErrorVisible() {
-    return this.page.testSubj.locator('agentBuilderRoundError').isVisible();
+  /** Expands the failed turn's error line to show the error details. */
+  async expandError() {
+    await this.page.testSubj.click('agentBuilderExecutionFailedToggle');
   }
 
   async navigateToToolsLanding() {
@@ -266,6 +268,28 @@ export class AgentBuilderApp {
       .locator('agentBuilderToolFormPage')
       .locator('[data-test-subj="euiMarkdownEditorTextArea"]');
     return (await ta.inputValue()).trim();
+  }
+
+  async setConfirmationPolicyValue(value: ToolConfirmationPolicyMode) {
+    await this.page.testSubj
+      .locator('agentBuilderToolConfirmationPolicySelect')
+      .selectOption(value);
+  }
+
+  async getConfirmationPolicyValue(): Promise<string> {
+    return this.page.testSubj.locator('agentBuilderToolConfirmationPolicySelect').inputValue();
+  }
+
+  async expectConfirmationPolicyValueToBeVisible() {
+    await expect(
+      this.page.testSubj.locator('agentBuilderToolConfirmationPolicySelect')
+    ).toBeVisible();
+  }
+
+  async expectConfirmationPolicyValue(value: ToolConfirmationPolicyMode) {
+    await expect(
+      this.page.testSubj.locator('agentBuilderToolConfirmationPolicySelect')
+    ).toHaveValue(value);
   }
 
   async setIndexPattern(indexPattern: string) {
@@ -472,7 +496,7 @@ export class AgentBuilderApp {
   async selectAgentLabel(label: string) {
     const contentSelector = subj('agentBuilderAgentsListContent');
     const labelsButtonSelector = `${contentSelector} button[type="button"][aria-label="Labels Selection"]`;
-    const optionSelector = `ul[role="listbox"][aria-label="Labels"] > li[role="option"][title="${label}"]`;
+    const optionSelector = `ul[role="listbox"][aria-label="Labels"] > li[role="option"] span[title="${label}"]`;
     await this.page.locator(labelsButtonSelector).click();
     await this.page.locator(optionSelector).click();
   }
@@ -523,16 +547,28 @@ export class AgentBuilderApp {
   async getAgentLabels(agentId: string) {
     const row = this.page.testSubj.locator(this.agentListRowSelector(agentId));
     const labelsCell = row.getByTestId('agentBuilderAgentsListLabels');
-    const labelTexts = await labelsCell.locator(subj('^agentBuilderLabel-')).allInnerTexts();
-    const viewMore = labelsCell.getByTestId('agentBuilderLabelsViewMoreButton');
-    if (await viewMore.isVisible()) {
-      await viewMore.click();
-      const popover = this.page.testSubj.locator('agentBuilderLabelsViewMorePopover');
-      const hidden = await popover.locator(subj('^agentBuilderLabel-')).allInnerTexts();
-      labelTexts.push(...hidden);
-      await viewMore.click();
-    }
-    return labelTexts;
+    return labelsCell.locator(subj('^agentBuilderLabel-')).allInnerTexts();
+  }
+
+  async navigateToAgentOverview(agentId: string) {
+    await this.page.gotoApp(`agent_builder/agents/${agentId}/overview`);
+    await this.page.testSubj.locator('agentOverviewPage').waitFor({
+      state: 'visible',
+      timeout: 60_000,
+    });
+  }
+
+  async openEditDetailsFlyout() {
+    await this.page.testSubj.click('agentOverviewEditDetailsButton');
+    await this.page.testSubj.locator('editDetailsFlyout').waitFor({ state: 'visible' });
+  }
+
+  async setEditDetailsInstructions(instructions: string) {
+    await this.page.testSubj.fill('editDetailsInstructionsInput', instructions);
+  }
+
+  async getEditDetailsInstructions() {
+    return this.page.testSubj.locator('editDetailsInstructionsInput').inputValue();
   }
 
   async clickAgentChat(agentId: string) {
@@ -564,7 +600,7 @@ export class AgentBuilderApp {
     const deleteActionSelector = `agentBuilderAgentsListDelete-${agentId}`;
     await this.agentAction(agentId, deleteActionSelector).click();
     const modal = this.page.locator(
-      '.euiModal[role="alertdialog"][aria-labelledby^="agentDeleteModalTitle"]'
+      `${euiSelectors.modal.ROOT_SELECTOR}[role="alertdialog"][aria-labelledby^="agentDeleteModalTitle"]`
     );
     return {
       getTitle: async () => {
@@ -728,7 +764,7 @@ export class AgentBuilderApp {
     await this.page.testSubj.fill('mcpClientNameInput', name);
   }
 
-  async selectMcpClientLogo(label: string = 'MCP client logo') {
+  async selectMcpClientLogo(label: string) {
     const combo = this.page.testSubj.locator('mcpClientLogoSelect');
     await combo.click();
     const option = this.page.getByRole('option', { name: label });
@@ -758,6 +794,34 @@ export class AgentBuilderApp {
     return id;
   }
 
+  async openMcpClientActionsMenu(clientId: string) {
+    await this.page.testSubj.click(`agentBuilderMcpClientsListActions-${clientId}`);
+  }
+
+  async openMcpClientEdit(clientId: string) {
+    await this.openMcpClientActionsMenu(clientId);
+    await this.page.testSubj
+      .locator(`mcpClientEditAction-${clientId}`)
+      .waitFor({ state: 'visible' });
+    await this.page.testSubj.click(`mcpClientEditAction-${clientId}`);
+    await this.page.testSubj.locator('agentBuilderMcpClientEditPage').waitFor({ state: 'visible' });
+    await this.page.testSubj.locator('mcpClientNameInput').waitFor({ state: 'visible' });
+  }
+
+  async submitMcpClientUpdate(): Promise<void> {
+    await Promise.all([
+      this.page.waitForResponse(
+        (res) =>
+          res.url().includes('/internal/security/oauth/clients') &&
+          res.request().method() === 'PATCH'
+      ),
+      this.page.testSubj.click('mcpClientUpdateButton'),
+    ]);
+    await this.page.testSubj
+      .locator('agentBuilderMcpClientsListPage')
+      .waitFor({ state: 'visible' });
+  }
+
   async closeMcpClientDetails() {
     await this.dismissToasts();
     await this.page.testSubj.click('mcpClientDetailsCloseButton');
@@ -780,7 +844,7 @@ export class AgentBuilderApp {
   }
 
   async openMcpClientRevokeModal(clientId: string) {
-    await this.page.testSubj.click(`agentBuilderMcpClientsListActions-${clientId}`);
+    await this.openMcpClientActionsMenu(clientId);
     await this.page.testSubj
       .locator(`mcpClientRevokeAction-${clientId}`)
       .waitFor({ state: 'visible' });
@@ -792,6 +856,21 @@ export class AgentBuilderApp {
     await this.page.testSubj.fill('mcpClientRevokeConfirmInput', clientName);
     await this.page.testSubj.click('mcpClientRevokeConfirmButton');
     await this.page.testSubj.locator('mcpClientRevokeModal').waitFor({ state: 'detached' });
+  }
+
+  async openMcpClientDeleteModal(clientId: string) {
+    await this.openMcpClientActionsMenu(clientId);
+    await this.page.testSubj
+      .locator(`mcpClientDeleteAction-${clientId}`)
+      .waitFor({ state: 'visible' });
+    await this.page.testSubj.click(`mcpClientDeleteAction-${clientId}`);
+    await this.page.testSubj.locator('mcpClientDeleteModal').waitFor({ state: 'visible' });
+  }
+
+  async confirmMcpClientDelete() {
+    const modal = this.page.testSubj.locator('mcpClientDeleteModal');
+    await modal.getByTestId('confirmModalConfirmButton').click();
+    await modal.waitFor({ state: 'detached' });
   }
 
   async getMcpClientRowStatus(clientId: string): Promise<string> {

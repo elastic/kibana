@@ -33,7 +33,9 @@ import { PassThrough } from 'stream';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { createTaskRunError, getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { ConnectorAuthorizationError } from '@kbn/connector-specs';
+import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import { GEN_AI_TOKEN_COUNT_EVENT } from './event_based_telemetry';
+import { IN_MEMORY_CONNECTOR_REVISION } from './single_file_connectors/build_client_lease_key';
 import type { ConnectorRateLimiter } from './connector_rate_limiter';
 import { createMockInMemoryConnector } from '../application/connector/mocks';
 
@@ -309,6 +311,63 @@ beforeEach(() => {
 });
 
 describe('Action Executor', () => {
+  test('passes saved-object version only to spec connector executors', async () => {
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+      ...connectorSavedObject,
+      version: 'WzEsMV0=',
+    });
+    connectorTypeRegistry.get.mockReturnValueOnce({
+      ...connectorType,
+      source: ACTION_TYPE_SOURCES.spec,
+    });
+
+    await actionExecutor.execute(executeParams);
+
+    expect(connectorType.executor).toHaveBeenCalledWith(
+      expect.objectContaining({
+        connectorVersion: 'WzEsMV0=',
+      })
+    );
+    expect(connectorType.executor).not.toHaveBeenCalledWith(
+      expect.objectContaining({ spaceId: expect.anything() })
+    );
+  });
+
+  test('passes the in-memory revision sentinel for preconfigured spec connectors', async () => {
+    connectorTypeRegistry.get.mockReturnValueOnce({
+      ...connectorType,
+      source: ACTION_TYPE_SOURCES.spec,
+      validate: {
+        config: { schema: z.object({ bar: z.string() }) },
+        secrets: { schema: z.object({ apiKey: z.string() }) },
+        params: { schema: z.object({ foo: z.boolean() }) },
+      },
+    });
+
+    // A preconfigured connector has no saved object, so it has no version. Without an explicit
+    // sentinel the executor would reject it as a missing-version framework error.
+    await actionExecutor.execute({ ...executeParams, actionId: 'preconfigured' });
+
+    expect(connectorType.executor).toHaveBeenCalledWith(
+      expect.objectContaining({ connectorVersion: IN_MEMORY_CONNECTOR_REVISION })
+    );
+    expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).not.toHaveBeenCalled();
+  });
+
+  test('does not pass connectorVersion to non-spec connector executors', async () => {
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+      ...connectorSavedObject,
+      version: 'WzEsMV0=',
+    });
+    connectorTypeRegistry.get.mockReturnValueOnce(connectorType);
+
+    await actionExecutor.execute(executeParams);
+
+    expect(connectorType.executor).not.toHaveBeenCalledWith(
+      expect.objectContaining({ connectorVersion: expect.anything() })
+    );
+  });
+
   for (const executeUnsecure of [false, true]) {
     const label = executeUnsecure ? 'executes unsecured' : 'executes';
 
@@ -339,7 +398,7 @@ describe('Action Executor', () => {
         CONNECTOR_ID,
         { namespace: 'some-namespace' }
       );
-      expect(authorizationMock.ensureAuthorized).not.toBeCalled();
+      expect(authorizationMock.ensureAuthorized).not.toHaveBeenCalled();
 
       expect(connectorTypeRegistry.get).toHaveBeenCalledWith('test');
       expect(connectorTypeRegistry.isActionExecutable).toHaveBeenCalledWith(CONNECTOR_ID, 'test', {
@@ -363,7 +422,14 @@ describe('Action Executor', () => {
         signal: undefined,
       });
 
-      expect(loggerMock.debug).toBeCalledWith('executing action test:1: 1');
+      expect(loggerMock.debug).toHaveBeenCalledWith('executing action test:1: 1', {
+        labels: {
+          actionId: '1',
+          actionLabel: 'test:1: 1',
+          actionTypeId: 'test',
+          spaceId: 'some-namespace',
+        },
+      });
       expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
 
       const execStartDoc = getBaseExecuteStartEventLogDoc(executeUnsecure);
@@ -373,7 +439,7 @@ describe('Action Executor', () => {
       expect(eventLogger.logEvent).toHaveBeenNthCalledWith(2, execDoc);
 
       expect(mockRateLimiterLog).toHaveBeenCalledTimes(1);
-      expect(mockRateLimiterLog).toBeCalledWith('test');
+      expect(mockRateLimiterLog).toHaveBeenCalledWith('test');
     });
 
     test(`successfully  ${label} with any defined auth headers`, async () => {
@@ -512,7 +578,14 @@ describe('Action Executor', () => {
           profileUid: executeUnsecure ? undefined : mockUser?.profile_uid,
         });
 
-        expect(loggerMock.debug).toBeCalledWith('executing action test:1: 1');
+        expect(loggerMock.debug).toHaveBeenCalledWith('executing action test:1: 1', {
+          labels: {
+            actionId: '1',
+            actionLabel: 'test:1: 1',
+            actionTypeId: 'test',
+            spaceId: 'some-namespace',
+          },
+        });
         expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
 
         const execStartDoc = getBaseExecuteStartEventLogDoc(executeUnsecure);
@@ -602,7 +675,17 @@ describe('Action Executor', () => {
         ...(executeUnsecure ? {} : { source: SOURCE }),
       });
 
-      expect(loggerMock.debug).toBeCalledWith('executing action test:preconfigured: Preconfigured');
+      expect(loggerMock.debug).toHaveBeenCalledWith(
+        'executing action test:preconfigured: Preconfigured',
+        {
+          labels: {
+            actionId: 'preconfigured',
+            actionLabel: 'test:preconfigured: Preconfigured',
+            actionTypeId: 'test',
+            spaceId: 'some-namespace',
+          },
+        }
+      );
       expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
 
       const execStartDoc = getBaseExecuteStartEventLogDoc(executeUnsecure);
@@ -698,8 +781,16 @@ describe('Action Executor', () => {
           notifyUsage: true,
         }
       );
-      expect(loggerMock.debug).toBeCalledWith(
-        'executing action .cases:system-connector-.cases: System action: .cases'
+      expect(loggerMock.debug).toHaveBeenCalledWith(
+        'executing action .cases:system-connector-.cases: System action: .cases',
+        {
+          labels: {
+            actionId: 'system-connector-.cases',
+            actionLabel: '.cases:system-connector-.cases: System action: .cases',
+            actionTypeId: '.cases',
+            spaceId: 'some-namespace',
+          },
+        }
       );
       expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
 
@@ -780,7 +871,7 @@ describe('Action Executor', () => {
         expect(connectorTypeRegistry.hasSubFeature).not.toHaveBeenCalled();
       } else {
         expect(connectorTypeRegistry.hasSubFeature).toHaveBeenCalled();
-        expect(authorizationMock.ensureAuthorized).toBeCalled();
+        expect(authorizationMock.ensureAuthorized).toHaveBeenCalled();
       }
 
       expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledWith(
@@ -810,7 +901,17 @@ describe('Action Executor', () => {
         ...(executeUnsecure ? {} : { source: SOURCE }),
       });
 
-      expect(loggerMock.debug).toBeCalledWith('executing action test.sub-feature-action:1: 1');
+      expect(loggerMock.debug).toHaveBeenCalledWith(
+        'executing action test.sub-feature-action:1: 1',
+        {
+          labels: {
+            actionId: '1',
+            actionLabel: 'test.sub-feature-action:1: 1',
+            actionTypeId: 'test.sub-feature-action',
+            spaceId: 'some-namespace',
+          },
+        }
+      );
       expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
 
       const execStartDoc = getBaseExecuteStartEventLogDoc(executeUnsecure);
@@ -1251,7 +1352,17 @@ describe('Action Executor', () => {
         ...(executeUnsecure ? {} : { source: SOURCE }),
       });
 
-      expect(loggerMock.debug).toBeCalledWith('executing action test:preconfigured: Preconfigured');
+      expect(loggerMock.debug).toHaveBeenCalledWith(
+        'executing action test:preconfigured: Preconfigured',
+        {
+          labels: {
+            actionId: 'preconfigured',
+            actionLabel: 'test:preconfigured: Preconfigured',
+            actionTypeId: 'test',
+            spaceId: 'some-namespace',
+          },
+        }
+      );
       expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
 
       const execStartDoc = getBaseExecuteStartEventLogDoc(executeUnsecure);
@@ -1349,8 +1460,16 @@ describe('Action Executor', () => {
         profileUid: mockUser?.profile_uid,
       });
 
-      expect(loggerMock.debug).toBeCalledWith(
-        'executing action .cases:system-connector-.cases: System action: .cases'
+      expect(loggerMock.debug).toHaveBeenCalledWith(
+        'executing action .cases:system-connector-.cases: System action: .cases',
+        {
+          labels: {
+            actionId: 'system-connector-.cases',
+            actionLabel: '.cases:system-connector-.cases: System action: .cases',
+            actionTypeId: '.cases',
+            spaceId: 'some-namespace',
+          },
+        }
       );
       expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
 
@@ -1431,7 +1550,7 @@ describe('Action Executor', () => {
       } else {
         await actionExecutor.execute(executeParams);
       }
-      expect(loggerMock.warn).not.toBeCalled();
+      expect(loggerMock.warn).not.toHaveBeenCalled();
     });
 
     test(`${label} logs warning when executor returns error gracefully`, async () => {
@@ -1453,8 +1572,20 @@ describe('Action Executor', () => {
       } else {
         await actionExecutor.execute(executeParams);
       }
-      expect(loggerMock.warn).toBeCalledWith(
-        'action execution failure: test:1: 1: message for action execution error: serviceMessage for action execution error'
+      expect(loggerMock.warn).toHaveBeenCalledWith(
+        'action execution failure: test:1: 1: message for action execution error: serviceMessage for action execution error',
+        {
+          labels: {
+            actionId: '1',
+            actionLabel: 'test:1: 1',
+            actionTypeId: 'test',
+            alertExecutionId: undefined,
+            alertId: undefined,
+            name: '1',
+            ruleId: undefined,
+            spaceId: 'some-namespace',
+          },
+        }
       );
     });
 
@@ -1477,12 +1608,35 @@ describe('Action Executor', () => {
       }
 
       expect(executorResult?.errorSource).toBe(TaskErrorSource.FRAMEWORK);
-      expect(loggerMock.warn).toBeCalledWith(
-        'action execution failure: test:1: 1: an error occurred while running the action: this action execution is intended to fail; retry: true'
+      expect(loggerMock.warn).toHaveBeenCalledWith(
+        'action execution failure: test:1: 1: an error occurred while running the action: this action execution is intended to fail; retry: true',
+        {
+          labels: {
+            actionId: '1',
+            actionLabel: 'test:1: 1',
+            actionTypeId: 'test',
+            alertExecutionId: undefined,
+            alertId: undefined,
+            name: '1',
+            ruleId: undefined,
+            spaceId: 'some-namespace',
+          },
+        }
       );
-      expect(loggerMock.error).toBeCalledWith(err, {
+      expect(loggerMock.error).toHaveBeenCalledWith(err, {
         error: { stack_trace: 'foo error\n  stack 1\n  stack 2\n  stack 3' },
-        tags: ['test', '1', 'action-run-failed', 'framework-error'],
+        labels: {
+          actionId: '1',
+          actionLabel: 'test:1: 1',
+          actionTypeId: 'test',
+          alertExecutionId: undefined,
+          alertId: undefined,
+          name: '1',
+          ruleId: undefined,
+          ruleName: undefined,
+          spaceId: 'some-namespace',
+        },
+        tags: ['action-run-failed', 'framework-error'],
       });
     });
 
@@ -1508,12 +1662,34 @@ describe('Action Executor', () => {
       }
 
       expect(executorResult?.errorSource).toBe(TaskErrorSource.USER);
-      expect(loggerMock.warn).toBeCalledWith(
-        'action execution failure: test:1: 1: an error occurred while running the action: this action execution is intended to fail; retry: true'
+      expect(loggerMock.warn).toHaveBeenCalledWith(
+        'action execution failure: test:1: 1: an error occurred while running the action: this action execution is intended to fail; retry: true',
+        {
+          labels: {
+            actionId: '1',
+            actionLabel: 'test:1: 1',
+            actionTypeId: 'test',
+            alertExecutionId: undefined,
+            alertId: undefined,
+            name: '1',
+            ruleId: undefined,
+            spaceId: 'some-namespace',
+          },
+        }
       );
-      expect(loggerMock.error).toBeCalledWith(err, {
+      expect(loggerMock.error).toHaveBeenCalledWith(err, {
         error: { stack_trace: 'foo error\n  stack 1\n  stack 2\n  stack 3' },
-        tags: ['test', '1', 'action-run-failed', 'user-error'],
+        labels: {
+          actionId: '1',
+          actionLabel: 'test:1: 1',
+          actionTypeId: 'test',
+          alertExecutionId: undefined,
+          alertId: undefined,
+          name: '1',
+          ruleId: undefined,
+          spaceId: 'some-namespace',
+        },
+        tags: ['action-run-failed', 'user-error'],
       });
     });
 
@@ -1553,12 +1729,34 @@ describe('Action Executor', () => {
         retry: false,
         errorSource: TaskErrorSource.USER,
       });
-      expect(loggerMock.warn).toBeCalledWith(
-        'action execution failure: test:1: 1: an error occurred while running the action: Refresh token expired. User must re-authorize.'
+      expect(loggerMock.warn).toHaveBeenCalledWith(
+        'action execution failure: test:1: 1: an error occurred while running the action: Refresh token expired. User must re-authorize.',
+        {
+          labels: {
+            actionId: '1',
+            actionLabel: 'test:1: 1',
+            actionTypeId: 'test',
+            alertExecutionId: undefined,
+            alertId: undefined,
+            name: '1',
+            ruleId: undefined,
+            spaceId: 'some-namespace',
+          },
+        }
       );
-      expect(loggerMock.error).toBeCalledWith(err, {
+      expect(loggerMock.error).toHaveBeenCalledWith(err, {
         error: { stack_trace: 'foo error\n  stack 1\n  stack 2\n  stack 3' },
-        tags: ['test', '1', 'action-run-failed', 'user-error'],
+        labels: {
+          actionId: '1',
+          actionLabel: 'test:1: 1',
+          actionTypeId: 'test',
+          alertExecutionId: undefined,
+          alertId: undefined,
+          name: '1',
+          ruleId: undefined,
+          spaceId: 'some-namespace',
+        },
+        tags: ['action-run-failed', 'user-error'],
       });
     });
 
@@ -1582,8 +1780,20 @@ describe('Action Executor', () => {
       } else {
         await actionExecutor.execute(executeParams);
       }
-      expect(loggerMock.warn).toBeCalledWith(
-        'action execution failure: test:1: 1: returned unexpected result "invalid-status"'
+      expect(loggerMock.warn).toHaveBeenCalledWith(
+        'action execution failure: test:1: 1: returned unexpected result "invalid-status"',
+        {
+          labels: {
+            actionId: '1',
+            actionLabel: 'test:1: 1',
+            actionTypeId: 'test',
+            alertExecutionId: undefined,
+            alertId: undefined,
+            name: '1',
+            ruleId: undefined,
+            spaceId: 'some-namespace',
+          },
+        }
       );
     });
 
@@ -1670,12 +1880,34 @@ describe('Action Executor', () => {
       }
 
       expect(executorResult?.errorSource).toBe(TaskErrorSource.USER);
-      expect(loggerMock.warn).toBeCalledWith(
-        'action execution failure: test:1: 1: an error occurred while running the action: Client network socket disconnected before secure TLS connection was established; retry: true'
+      expect(loggerMock.warn).toHaveBeenCalledWith(
+        'action execution failure: test:1: 1: an error occurred while running the action: Client network socket disconnected before secure TLS connection was established; retry: true',
+        {
+          labels: {
+            actionId: '1',
+            actionLabel: 'test:1: 1',
+            actionTypeId: 'test',
+            alertExecutionId: undefined,
+            alertId: undefined,
+            name: '1',
+            ruleId: undefined,
+            spaceId: 'some-namespace',
+          },
+        }
       );
-      expect(loggerMock.error).toBeCalledWith(err, {
+      expect(loggerMock.error).toHaveBeenCalledWith(err, {
         error: { stack_trace: 'foo error\n  stack 1\n  stack 2\n  stack 3' },
-        tags: ['test', '1', 'action-run-failed', 'user-error'],
+        labels: {
+          actionId: '1',
+          actionLabel: 'test:1: 1',
+          actionTypeId: 'test',
+          alertExecutionId: undefined,
+          alertId: undefined,
+          name: '1',
+          ruleId: undefined,
+          spaceId: 'some-namespace',
+        },
+        tags: ['action-run-failed', 'user-error'],
       });
     });
   }
@@ -1798,7 +2030,7 @@ describe('System actions', () => {
 
     await actionExecutor.execute({ ...executeParams, actionId: 'system-connector-.cases' });
 
-    expect(authorizationMock.ensureAuthorized).toBeCalledWith({
+    expect(authorizationMock.ensureAuthorized).toHaveBeenCalledWith({
       actionTypeId: '.cases',
       operation: 'execute',
       additionalPrivileges: ['test/create'],
@@ -1827,7 +2059,7 @@ describe('System actions', () => {
       ActionExecutionSourceType.HTTP_REQUEST
     );
 
-    expect(authorizationMock.ensureAuthorized).toBeCalledWith({
+    expect(authorizationMock.ensureAuthorized).toHaveBeenCalledWith({
       actionTypeId: '.cases',
       operation: 'execute',
       additionalPrivileges: ['test/create'],
@@ -1849,7 +2081,7 @@ describe('Sub-feature connectors', () => {
 
     await actionExecutor.execute(executeParams);
 
-    expect(authorizationMock.ensureAuthorized).toBeCalledWith({
+    expect(authorizationMock.ensureAuthorized).toHaveBeenCalledWith({
       actionTypeId: 'test.sub-feature-action',
       operation: 'execute',
       additionalPrivileges: ['test/create'],
@@ -1880,7 +2112,7 @@ describe('Sub-feature connectors', () => {
       ActionExecutionSourceType.HTTP_REQUEST
     );
 
-    expect(authorizationMock.ensureAuthorized).toBeCalledWith({
+    expect(authorizationMock.ensureAuthorized).toHaveBeenCalledWith({
       actionTypeId: 'test.sub-feature-action',
       operation: 'execute',
       additionalPrivileges: ['test/create'],

@@ -40,9 +40,19 @@ jest.mock('../../monitor_details/monitor_summary/locations_status', () => ({
   LocationsStatus: () => <div data-test-subj="locationsStatusStub" />,
 }));
 
+jest.mock('./monitor_assigned_agents', () => ({
+  MonitorAssignedAgents: () => <div data-test-subj="monitorAssignedAgentsStub" />,
+}));
+
 jest.mock('@kbn/observability-shared-plugin/public', () => ({
   TagsList: ({ tags }: { tags: string[] }) => (
     <div data-test-subj="tagsListStub">{tags.join(',')}</div>
+  ),
+}));
+
+jest.mock('./monitor_maintenance_windows', () => ({
+  MonitorMaintenanceWindows: ({ monitorMWs }: { monitorMWs: string[] }) => (
+    <div data-test-subj="maintenanceWindowsStub">{monitorMWs.join(',')}</div>
   ),
 }));
 
@@ -55,6 +65,7 @@ const localMonitor = {
   enabled: true,
   schedule: { number: '5', unit: 'm' },
   locations: [{ id: 'us-east', label: 'US East' }],
+  created_at: '2025-12-01T00:00:00Z',
   updated_at: '2026-01-01T00:00:00Z',
   origin: 'ui',
   project_id: '',
@@ -89,10 +100,11 @@ const pingWithTimespan = {
 } as unknown as Ping;
 
 describe('MonitorDetailsPanel', () => {
-  it('renders SO-only sections (Enabled, Last modified, Frequency) for a local monitor', () => {
+  it('renders SO-only sections (Enabled, Created, Last modified, Frequency) for a local monitor', () => {
     render(<MonitorDetailsPanel monitor={localMonitor} loading={false} configId="config-1" />);
 
     expect(screen.getByTestId('monitorEnabledStub')).toBeInTheDocument();
+    expect(screen.getByText(/^Created$/i)).toBeInTheDocument();
     expect(screen.getByText(/Last modified/i)).toBeInTheDocument();
     expect(screen.getByText(/Frequency/i)).toBeInTheDocument();
   });
@@ -101,6 +113,7 @@ describe('MonitorDetailsPanel', () => {
     render(<MonitorDetailsPanel monitor={remoteMonitor} loading={false} configId="config-1" />);
 
     expect(screen.queryByTestId('monitorEnabledStub')).not.toBeInTheDocument();
+    expect(screen.queryByText(/^Created$/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/Last modified/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/Frequency/i)).not.toBeInTheDocument();
   });
@@ -117,8 +130,34 @@ describe('MonitorDetailsPanel', () => {
     render(<MonitorDetailsPanel monitor={heartbeatMonitor} loading={false} configId="config-1" />);
 
     expect(screen.queryByTestId('monitorEnabledStub')).not.toBeInTheDocument();
+    expect(screen.queryByText(/^Created$/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/Last modified/i)).not.toBeInTheDocument();
     expect(screen.getByTestId('tagsListStub')).toHaveTextContent('env:prod');
+  });
+
+  it('renders the maintenance windows section when the monitor has attached windows', () => {
+    render(
+      <MonitorDetailsPanel
+        monitor={
+          {
+            ...localMonitor,
+            maintenance_windows: ['mw-1', 'mw-2'],
+          } as EncryptedSyntheticsSavedMonitor
+        }
+        loading={false}
+        configId="config-1"
+      />
+    );
+
+    expect(screen.getByText(/Maintenance windows/i)).toBeInTheDocument();
+    expect(screen.getByTestId('maintenanceWindowsStub')).toHaveTextContent('mw-1,mw-2');
+  });
+
+  it('hides the maintenance windows section when none are attached', () => {
+    render(<MonitorDetailsPanel monitor={localMonitor} loading={false} configId="config-1" />);
+
+    expect(screen.queryByText(/Maintenance windows/i)).not.toBeInTheDocument();
+    expect(screen.queryByTestId('maintenanceWindowsStub')).not.toBeInTheDocument();
   });
 
   it('derives the frequency from the latest ping timespan for a heartbeat monitor', () => {

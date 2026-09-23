@@ -11,6 +11,35 @@ import { z } from '@kbn/zod/v4';
 import { getSchemaForAuthType } from './get_schema_for_auth_type';
 
 describe('getSchemaForAuthType()', () => {
+  test('applies field schemas while preserving validation metadata and other auth types', () => {
+    const { schema } = getSchemaForAuthType({
+      type: 'oauth_client_credentials',
+      defaults: { tokenType: 'Bearer' },
+      overrides: {
+        fields: { tokenUrl: z.url({ protocol: /^https$/ }).max(2048) },
+        meta: { tokenUrl: { helpText: 'HTTPS required' } },
+      },
+    });
+    expect(schema.shape.tokenUrl.safeParse('http://identity.example.com/token').success).toBe(
+      false
+    );
+    expect(schema.shape.tokenUrl.meta()).toMatchObject({
+      label: 'Token URL',
+      validate: { allowedHosts: true },
+      helpText: 'HTTPS required',
+    });
+    expect(schema.shape.tokenType.parse(undefined)).toBe('Bearer');
+    expect(z.toJSONSchema(schema).properties?.tokenUrl).toMatchObject({
+      format: 'uri',
+      maxLength: 2048,
+    });
+    const original = getSchemaForAuthType('oauth_client_credentials');
+    expect(
+      original.schema.shape.tokenUrl.safeParse('http://identity.example.com/token').success
+    ).toBe(true);
+    expect(original.schema.shape.tokenType.parse(undefined)).toBeUndefined();
+  });
+
   test('correctly returns schema for auth type definition when only type ID is provided', () => {
     const { schema } = getSchemaForAuthType('basic');
     expect(z.toJSONSchema(schema)).toMatchSnapshot();
@@ -57,6 +86,22 @@ describe('getSchemaForAuthType()', () => {
       authMode: 'shared',
       label: 'API key header authentication',
     });
+  });
+
+  test('carries isKibanaManaged into the schema meta so the form can skip the option', () => {
+    const { schema } = getSchemaForAuthType({ type: 'relay', defaults: {} });
+
+    expect(schema.meta()).toEqual({
+      authMode: 'shared',
+      label: 'Elastic app (bot user)',
+      isKibanaManaged: true,
+    });
+  });
+
+  test('omits isKibanaManaged for an auth type that Kibana does not manage', () => {
+    const { schema } = getSchemaForAuthType({ type: 'basic', defaults: {} });
+
+    expect(schema.meta()).not.toHaveProperty('isKibanaManaged');
   });
 
   test('ignores defaults for key that is not in auth type schema', () => {

@@ -9,13 +9,22 @@ import { v4 as uuidv4 } from 'uuid';
 import { sectionGridSchema } from '@kbn/agent-builder-dashboards-common';
 import type { AttachmentPanel, DashboardSection } from '@kbn/agent-builder-dashboards-common';
 import { z } from '@kbn/zod/v4';
-import { createPanelInputMaterializer } from './panel_creation';
+import { createPanelInputMaterializer, applyCustomContentTemplates } from './panel_creation';
 import { defineOperation } from './types';
 import { addSectionPanelItemSchema } from './panels';
+import { findSectionIndex } from '../dashboard_state';
 
 export const addSectionOperation = defineOperation({
   schema: z.object({
     operation: z.literal('add_section'),
+    key: z
+      .string()
+      .min(1)
+      .max(256)
+      .optional()
+      .describe(
+        'Optional key for referencing this new section in later operations in the same call, using sectionId (or remove_section.id). Must be unique within the call and must not match an existing section id. Not saved; future calls use the generated section id from the result.'
+      ),
     title: z.string().max(256).describe('Section title.'),
     grid: sectionGridSchema,
     panels: z
@@ -23,10 +32,20 @@ export const addSectionOperation = defineOperation({
       .min(1)
       .optional()
       .describe(
-        'Optional inline panels (source: "config" or source: "request") to create inside the new section. Panel grids are section-relative.'
+        "Creates new panels inside the section, with section-relative grids. To group existing panels, omit this field and move their original panelIds with update_panel_layouts using this section's key."
       ),
   }),
-  handler: ({ dashboardData, operation, operationIndex, context }) => {
+  handler: async ({ dashboardData, operation, operationIndex, context }) => {
+    const { key } = operation;
+    if (key !== undefined) {
+      if (context.sectionIdsByKey.has(key)) {
+        throw new Error(`Section key "${key}" is already used in this call.`);
+      }
+      if (findSectionIndex(dashboardData.panels, key) !== -1) {
+        throw new Error(`Section key "${key}" conflicts with an existing section id.`);
+      }
+    }
+
     let nextSection: DashboardSection = {
       id: uuidv4(),
       title: operation.title,
@@ -41,22 +60,33 @@ export const addSectionOperation = defineOperation({
         operationIndex,
         operationType: operation.operation,
         failures: context.failures,
+        resolveAttachmentPanel: context.resolveAttachmentPanel,
       });
+
+      const materialized = operation.panels.map((item, i) => ({
+        item,
+        panel: materializePanelInput(item, i),
+      }));
+
+      if (context.resolveCustomContentTemplate) {
+        await applyCustomContentTemplates(
+          materialized,
+          context.resolveCustomContentTemplate,
+          context.failures
+        );
+      }
 
       const sectionPanels: AttachmentPanel[] = [];
 
-      for (const [panelInputIndex, item] of operation.panels.entries()) {
-        const materializedPanel = materializePanelInput(item, panelInputIndex);
-        if (materializedPanel === undefined) {
-          continue;
-        }
+      for (const { item, panel } of materialized) {
+        if (panel === undefined) continue;
 
         const panelId = uuidv4();
-        sectionPanels.push({ id: panelId, ...materializedPanel.panelContent, grid: item.grid });
-        if (materializedPanel.authoringNote) {
+        sectionPanels.push({ id: panelId, ...panel.panelContent, grid: item.grid });
+        if (panel.authoringNote) {
           context.panelAuthoringNotes.push({
             panelId,
-            authoringNote: materializedPanel.authoringNote,
+            authoringNote: panel.authoringNote,
           });
         }
       }
@@ -65,6 +95,10 @@ export const addSectionOperation = defineOperation({
         ...nextSection,
         panels: sectionPanels,
       };
+    }
+
+    if (key !== undefined) {
+      context.sectionIdsByKey.set(key, nextSection.id);
     }
 
     return {

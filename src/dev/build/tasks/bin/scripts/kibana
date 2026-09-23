@@ -16,10 +16,6 @@ done
 DIR="$(dirname "${SCRIPT}")/.."
 CONFIG_DIR=${KBN_PATH_CONF:-"$DIR/config"}
 
-{{#rspack}}
-export KBN_USE_RSPACK=true
-{{/rspack}}
-
 test_node() {
   test -x "$NODE"
   if [ ! -x "$NODE" ]; then
@@ -59,7 +55,9 @@ NODE="${DIR}/node/pointer-compression/bin/node"
 test_node
 
 BASE_NODE_OPTIONS="--no-warnings --max-http-header-size=65536"
-if [ "$KBN_DISALLOW_CODE_GEN_FROM_STRINGS" = 'true' ]; then
+# Code generation from strings (eval / new Function) is disallowed by default.
+# Opt out by setting KBN_DISALLOW_CODE_GEN_FROM_STRINGS=false.
+if [ "$KBN_DISALLOW_CODE_GEN_FROM_STRINGS" != 'false' ]; then
   BASE_NODE_OPTIONS="$BASE_NODE_OPTIONS --disallow-code-generation-from-strings"
 fi
 if [ -f "${CONFIG_DIR}/node.options" ]; then

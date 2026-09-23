@@ -12,13 +12,13 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiPanel,
-  EuiText,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useState } from 'react';
 import type { AiIndexAutomation } from '../../../../common/http_api/ai_indices';
+import { ItemRow } from '../item_row';
+import { WorkflowYamlPreviewFlyout } from './workflow_yaml_preview_flyout';
 
 interface AutomationRowProps {
   automation: AiIndexAutomation;
@@ -39,26 +39,24 @@ export const AutomationRow = ({
   isRemoveDisabled,
   onRemove,
 }: AutomationRowProps) => {
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const displayName = name ?? automation.value;
+  const previewLabel = i18n.translate(
+    'xpack.contextEngine.aiIndexDetail.automations.previewWorkflowAriaLabel',
+    { defaultMessage: 'Preview workflow YAML for {name}', values: { name: displayName } }
+  );
   const removeLabel = i18n.translate(
     'xpack.contextEngine.aiIndexDetail.automations.removeButtonAriaLabel',
     { defaultMessage: 'Remove automation {name}', values: { name: displayName } }
   );
 
   return (
-    <EuiPanel hasBorder paddingSize="m" data-test-subj="contextAiIndexAutomationRow">
-      <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="indexRuntime" size="l" aria-hidden={true} />
-        </EuiFlexItem>
-        {/* minWidth: 0 lets the flex item shrink so long names truncate instead of overflowing the panel */}
-        <EuiFlexItem css={{ minWidth: 0 }}>
-          <EuiText size="s" className="eui-textTruncate">
-            {displayName}
-          </EuiText>
-        </EuiFlexItem>
-        {enabled !== undefined && (
-          <EuiFlexItem grow={false}>
+    <>
+      <ItemRow
+        label={displayName}
+        icon={<EuiIcon type="tablePlay" size="l" aria-hidden={true} />}
+        badge={
+          enabled !== undefined ? (
             <EuiBadge color={enabled ? 'success' : 'hollow'}>
               {enabled
                 ? i18n.translate('xpack.contextEngine.aiIndexDetail.automations.enabledBadge', {
@@ -68,40 +66,69 @@ export const AutomationRow = ({
                     defaultMessage: 'Disabled',
                   })}
             </EuiBadge>
-          </EuiFlexItem>
-        )}
-        {isEditing && (
-          <>
+          ) : undefined
+        }
+        actions={
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                size="s"
-                iconType="popout"
-                iconSide="right"
-                href={editHref}
-                target="_blank"
-                data-test-subj="contextOpenWorkflowButton"
-              >
-                {i18n.translate(
-                  'xpack.contextEngine.aiIndexDetail.automations.editWorkflowButton',
-                  { defaultMessage: 'Edit workflow' }
-                )}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiToolTip content={removeLabel} disableScreenReaderOutput>
+              <EuiToolTip content={previewLabel} disableScreenReaderOutput>
                 <EuiButtonIcon
-                  iconType="trash"
-                  color="danger"
-                  onClick={onRemove}
-                  isDisabled={isRemoveDisabled}
-                  data-test-subj="contextRemoveAutomationButton"
-                  aria-label={removeLabel}
+                  iconType="eye"
+                  aria-label={previewLabel}
+                  onClick={() => setIsPreviewOpen(true)}
+                  data-test-subj="contextPreviewWorkflowButton"
                 />
               </EuiToolTip>
             </EuiFlexItem>
-          </>
-        )}
-      </EuiFlexGroup>
-    </EuiPanel>
+            {isEditing ? (
+              <>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    size="s"
+                    iconType="external"
+                    iconSide="right"
+                    href={editHref}
+                    title={i18n.translate(
+                      'xpack.contextEngine.aiIndexDetail.automations.editWorkflowTooltip',
+                      { defaultMessage: 'Opens the workflow editor' }
+                    )}
+                    aria-label={i18n.translate(
+                      'xpack.contextEngine.aiIndexDetail.automations.editWorkflowAriaLabel',
+                      { defaultMessage: 'Edit workflow in editor' }
+                    )}
+                    data-test-subj="contextOpenWorkflowButton"
+                  >
+                    {i18n.translate(
+                      'xpack.contextEngine.aiIndexDetail.automations.editWorkflowButton',
+                      { defaultMessage: 'Edit workflow' }
+                    )}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip content={removeLabel} disableScreenReaderOutput>
+                    <EuiButtonIcon
+                      iconType="trash"
+                      color="danger"
+                      onClick={onRemove}
+                      isDisabled={isRemoveDisabled}
+                      data-test-subj="contextRemoveAutomationButton"
+                      aria-label={removeLabel}
+                    />
+                  </EuiToolTip>
+                </EuiFlexItem>
+              </>
+            ) : null}
+          </EuiFlexGroup>
+        }
+        data-test-subj="contextAiIndexAutomationRow"
+      />
+      {isPreviewOpen ? (
+        <WorkflowYamlPreviewFlyout
+          workflowId={automation.value}
+          workflowName={displayName}
+          onClose={() => setIsPreviewOpen(false)}
+        />
+      ) : null}
+    </>
   );
 };

@@ -17,4 +17,4 @@ There are generally multiple instances of {{kib}} all hosted behind a round-robi
 
 ## Using WebSockets
 
-{{kib}} has a number of platform services that don't work with WebSockets, for example authentication and authorization. If your use-case would benefit substantially from websockets, talk to the {{kib}} Core team about adding support. Do not hack around this limitation.
+{{kib}} has a number of platform services that don't work with WebSockets, for example authentication and authorization. If your use-case would benefit substantially from websockets, [open an issue](https://github.com/elastic/kibana/issues/new/choose) to discuss adding support. Do not hack around this limitation.

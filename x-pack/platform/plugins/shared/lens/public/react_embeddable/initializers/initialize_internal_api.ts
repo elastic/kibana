@@ -32,10 +32,9 @@ export function initializeInternalApi(
 ): LensInternalApi {
   const hasRenderCompleted$ = new BehaviorSubject<boolean>(false);
   const expressionParams$ = new BehaviorSubject<ExpressionWrapperProps | null>(null);
-  const expressionAbortController$ = new BehaviorSubject<AbortController | undefined>(undefined);
-  if (apiHasAbortController(parentApi)) {
-    expressionAbortController$.next(parentApi.abortController);
-  }
+  const expressionAbortController$ = new BehaviorSubject<AbortController>(
+    apiHasAbortController(parentApi) ? parentApi.abortController : new AbortController()
+  );
   const renderCount$ = new BehaviorSubject<number>(0);
 
   const attributes$ = new BehaviorSubject<LensRuntimeState['attributes']>(
@@ -109,17 +108,13 @@ export function initializeInternalApi(
     updateDataLoading: (newDataLoading: boolean | undefined) => dataLoading$.next(newDataLoading),
     updateOverrides: (overrides: LensOverrides['overrides']) => overrides$.next(overrides),
     updateAttributes: (attributes: LensRuntimeState['attributes']) => attributes$.next(attributes),
-    updateAbortController: (abortController: AbortController | undefined) =>
+    updateAbortController: (abortController: AbortController) =>
       expressionAbortController$.next(abortController),
     updateDisabledTriggers: (disableTriggers: LensPanelProps['disableTriggers']) =>
       disableTriggers$.next(disableTriggers),
     updateDataViews: (dataViews: DataView[] | undefined) => dataViews$.next(dataViews),
     updateMessages: (newMessages: UserMessage[]) => messages$.next(newMessages),
     updateValidationMessages: (newMessages: UserMessage[]) => validationMessages$.next(newMessages),
-    resetAllMessages: () => {
-      messages$.next([]);
-      validationMessages$.next([]);
-    },
     updateBlockingError: (blockingError: Error | undefined) => blockingError$.next(blockingError),
     setAsCreated: () => isNewlyCreated$.next(false),
     getDisplayOptions: () => {

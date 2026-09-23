@@ -638,6 +638,7 @@ The message contains some high-level information, and the corresponding log meta
 | http.request.mime_type | (optional) mime as specified in the headers | string |
 | http.request.referrer | (optional) referrer | string |
 | http.request.headers | request headers | object |
+| http.request.id | (optional) Opaque request id used to join with proxy / error logs | string |
 | http.response.body.bytes | (optional) Calculated response payload size in bytes | number |
 | http.response.status_code | status code returned | number |
 | http.response.headers | response headers | object |
@@ -645,6 +646,33 @@ The message contains some high-level information, and the corresponding log meta
 | url.path | request path | string |
 | url.query | (optional) request query string | string |
 | user_agent.original | raw user-agent string provided in request headers | string |
+
+To emit the **status Kibana actually sent** at the default `info` level for a specific route,
+set `options.httpResponseLogLevel: 'info'` when registering the route. Core then writes a slim
+record (`http.response.status_code`, `url.path`, `http.request.id`) without query strings,
+headers, or client IP. The full access-log record above stays at `debug`.
+
+Use this only for routes that on-call must query during incidents. Do not opt in high-volume
+or user-input-heavy paths.
+
+```ts
+router.get(
+  {
+    path: '/internal/api/my_plugin/status',
+    validate: false,
+    options: { httpResponseLogLevel: 'info' },
+  },
+  handler
+);
+
+router.versioned
+  .get({
+    access: 'internal',
+    path: '/internal/api/my_plugin/status',
+    options: { httpResponseLogLevel: 'info' },
+  })
+  .addVersion({ version: '1', validate: false }, handler);
+```
 
 ## Usage
 

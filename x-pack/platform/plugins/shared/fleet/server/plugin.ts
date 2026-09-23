@@ -15,6 +15,7 @@ import type {
   CoreStart,
   ElasticsearchClient,
   ElasticsearchServiceStart,
+  FeatureFlagsStart,
   HttpServiceSetup,
   KibanaRequest,
   Logger,
@@ -124,6 +125,7 @@ import {
   type FleetUsage,
   registerFleetUsageCollector,
 } from './collectors/register';
+import { setupIacProvisionerTelemetry } from './services/telemetry/iac_provisioner_telemetry';
 import { FleetArtifactsClient } from './services/artifacts';
 import type { FleetRouter } from './types/request_context';
 import { TelemetryEventsSender } from './telemetry/sender';
@@ -170,6 +172,10 @@ import {
   registerVerifyPermissionsTask,
   scheduleVerifyPermissionsTask,
 } from './tasks/agentless/verify_permissions_task';
+import {
+  registerIacUpgradeCheckTask,
+  scheduleIacUpgradeCheckTask,
+} from './tasks/iac_upgrade_check_task';
 import { registerReindexIntegrationKnowledgeTask } from './tasks/reindex_integration_knowledge_task';
 import { registerSyncNamespaceTemplatesTask } from './tasks/sync_namespace_templates_task';
 import { registerSyncIlmPolicyTask } from './tasks/sync_ilm_policy_task';
@@ -243,6 +249,7 @@ export interface FleetAppContext {
   lockManagerService?: LockManagerService;
   alertingStart?: AlertingServerStart;
   reportingStart?: ReportingStart;
+  featureFlags: FeatureFlagsStart;
 }
 
 export type FleetSetupContract = void;
@@ -682,6 +689,7 @@ export class FleetPlugin
     this.fetchUsage = async (signal: AbortSignal) => await fetchFleetUsage(core, config, signal);
     this.fleetUsageSender = new FleetUsageSender(deps.taskManager, core, this.fetchUsage);
     registerFleetUsageLogger(deps.taskManager, async () => fetchAgentsUsage(core, config));
+    setupIacProvisionerTelemetry(core.analytics);
 
     const fetchAgents = async (signal: AbortSignal) => await fetchAgentMetrics(core, signal);
     this.fleetMetricsTask = new FleetMetricsTask(deps.taskManager, fetchAgents);
@@ -710,6 +718,7 @@ export class FleetPlugin
     registerAgentlessDeploymentSyncTask(deps.taskManager, this.configInitialValue);
     registerVerifyPermissionsTask(deps.taskManager);
     registerVerifierPolicyCleanupTask(deps.taskManager);
+    registerIacUpgradeCheckTask(deps.taskManager);
     registerReindexIntegrationKnowledgeTask(deps.taskManager);
     registerSyncNamespaceTemplatesTask(deps.taskManager);
     registerSyncIlmPolicyTask(deps.taskManager);
@@ -853,6 +862,7 @@ export class FleetPlugin
       fleetPolicyRevisionsCleanupTask: this.fleetPolicyRevisionsCleanupTask,
       alertingStart: plugins.alerting,
       reportingStart: plugins.reporting,
+      featureFlags: core.featureFlags,
     });
     licenseService.start(plugins.licensing.license$);
     this.telemetryEventsSender.start(plugins.telemetry, core).catch(() => {});
@@ -881,6 +891,7 @@ export class FleetPlugin
     ).catch(() => {});
     scheduleVerifyPermissionsTask(plugins.taskManager).catch(() => {});
     scheduleVerifierPolicyCleanupTask(plugins.taskManager).catch((error) => {});
+    scheduleIacUpgradeCheckTask(plugins.taskManager).catch(() => {});
     this.fleetPolicyRevisionsCleanupTask
       ?.start({ taskManager: plugins.taskManager })
       .catch(() => {});

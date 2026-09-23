@@ -7,11 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as globby from 'globby';
+import { globbySync } from 'globby';
 
-import DISABLED_JEST_CONFIGS from '../../../disabled_jest_configs.json';
-import SHARDED_JEST_CONFIGS from '../../../sharded_jest_configs.json';
-import { filterEmptyJestConfigs } from '../get_tests_from_config';
+import { filterEmptyJestConfigs } from '../get_tests_from_config.ts';
+import { loadBuildkiteJson } from '../../load_buildkite_json.ts';
+import { getKibanaDir } from '#pipeline-utils';
+
+const DISABLED_JEST_CONFIGS = loadBuildkiteJson<
+  typeof import('../../../disabled_jest_configs.json')
+>('disabled_jest_configs.json');
+const SHARDED_JEST_CONFIGS = loadBuildkiteJson<typeof import('../../../sharded_jest_configs.json')>(
+  'sharded_jest_configs.json'
+);
 
 export const SHARD_ANNOTATION_SEP = '||shard=';
 
@@ -20,21 +27,23 @@ export const SHARD_ANNOTATION_SEP = '||shard=';
  * the empty-config filter, and the shard map.
  */
 export function discoverJestUnitConfigs(limitSolutions: string[] | undefined): string[] {
-  const raw = globJestConfigs(['**/jest.config.js', '!**/__fixtures__/**'], limitSolutions);
+  const raw = globJestConfigs(
+    ['**/jest.config.js', '**/jest.config.cjs', '!**/__fixtures__/**'],
+    limitSolutions
+  );
   return expandShardedJestConfigs(filterEmptyJestConfigs(raw));
 }
 
 /**
  * Discover Jest integration configs honoring LIMIT_SOLUTIONS, the disabled list,
- * and the shard map. Integration configs are intentionally not filtered for
- * emptiness (matches historical behavior).
+ * the empty-config filter, and the shard map.
  */
 export function discoverJestIntegrationConfigs(limitSolutions: string[] | undefined): string[] {
   const raw = globJestConfigs(
-    ['**/jest.integration.config.js', '!**/__fixtures__/**'],
+    ['**/jest.integration.config.js', '**/jest.integration.config.cjs', '!**/__fixtures__/**'],
     limitSolutions
   );
-  return expandShardedJestConfigs(raw);
+  return expandShardedJestConfigs(filterEmptyJestConfigs(raw));
 }
 
 /**
@@ -63,8 +72,8 @@ export function expandShardedJestConfigs(configs: string[]): string[] {
 }
 
 function globJestConfigs(patterns: string[], limitSolutions: string[] | undefined): string[] {
-  return globby.sync(globsForSolutions(patterns, limitSolutions), {
-    cwd: process.cwd(),
+  return globbySync(globsForSolutions(patterns, limitSolutions), {
+    cwd: getKibanaDir(),
     absolute: false,
     ignore: [...DISABLED_JEST_CONFIGS, '**/node_modules/**'],
   });

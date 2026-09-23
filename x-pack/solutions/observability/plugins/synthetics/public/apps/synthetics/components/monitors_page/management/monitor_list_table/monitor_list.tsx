@@ -17,6 +17,13 @@ import type { MonitorListSortField } from '../../../../../../../common/runtime_t
 import { DeleteMonitor } from './delete_monitor';
 import { ResetMonitorModal } from './reset_monitor_modal';
 import { BulkStatusUpdateModal } from './bulk_status_update_modal';
+import type { BulkEditAction } from './bulk_operations';
+import { BulkTagsFlyout } from './bulk_tags_flyout';
+import { BulkServiceNameFlyout } from './bulk_service_name_flyout';
+import { BulkLabelsFlyout } from './bulk_labels_flyout';
+import { BulkLocationsFlyout } from './bulk_locations_flyout';
+import { BulkScheduleFlyout } from './bulk_schedule_flyout';
+import { BulkMaintenanceWindowsFlyout } from './bulk_maintenance_windows_flyout';
 import { useMonitorIntegrationHealth } from '../../../common/hooks/use_monitor_integration_health';
 import type { IHttpSerializedFetchError } from '../../../../state/utils/http_error';
 import type { MonitorListPageState } from '../../../../state';
@@ -25,9 +32,13 @@ import type {
   OverviewStatusState,
 } from '../../../../../../../common/runtime_types';
 import { ConfigKey, SourceType } from '../../../../../../../common/runtime_types';
-import { useMonitorListColumns } from './columns';
+import { useMonitorListColumns, MANAGEMENT_DEFAULT_VISIBLE_COLUMN_IDS } from './columns';
 import * as labels from './labels';
 import type { ClientPluginsStart } from '../../../../../../plugin';
+import {
+  MANAGEMENT_TABLE_COLUMNS_STORAGE_KEY,
+  useTableColumnSelector,
+} from '../../../common/hooks/use_table_column_selector';
 
 export type MonitorListItem = EncryptedSyntheticsSavedMonitor;
 
@@ -64,6 +75,10 @@ export const MonitorList = ({
     ids: string[];
     enabled: boolean;
   } | null>(null);
+  const [bulkEditAction, setBulkEditAction] = useState<BulkEditAction | null>(null);
+  const [isLocationsFlyoutOpen, setIsLocationsFlyoutOpen] = useState(false);
+  const [isScheduleFlyoutOpen, setIsScheduleFlyoutOpen] = useState(false);
+  const [isMaintenanceWindowsFlyoutOpen, setIsMaintenanceWindowsFlyoutOpen] = useState(false);
   const { resetMonitors, isFixableByReset } = useMonitorIntegrationHealth();
 
   const items: MonitorListItem[] = useMemo(
@@ -81,10 +96,17 @@ export const MonitorList = ({
       const { index, size } = page;
       const { field, direction } = sort;
 
+      const rawField = String(field);
+      const nextSortField = (
+        rawField === 'enabled' || rawField === 'created_at' || rawField === 'updated_at'
+          ? rawField
+          : `${rawField}.keyword`
+      ) as MonitorListSortField;
+
       loadPage({
         pageIndex: index,
         pageSize: size,
-        sortField: (field === 'enabled' ? field : `${field}.keyword`) as MonitorListSortField,
+        sortField: nextSortField,
         sortOrder: direction,
       });
     },
@@ -111,12 +133,17 @@ export const MonitorList = ({
     total: totalItemCount,
   });
 
-  const columns = useMonitorListColumns({
+  const allColumns = useMonitorListColumns({
     loading,
     overviewStatus,
     setMonitorPendingDeletion,
     setMonitorPendingReset,
     isFixableByReset,
+  });
+  const { columns, ColumnSelector } = useTableColumnSelector({
+    columns: allColumns,
+    defaultVisibleColumnIds: MANAGEMENT_DEFAULT_VISIBLE_COLUMN_IDS,
+    storageKeyPrefix: MANAGEMENT_TABLE_COLUMNS_STORAGE_KEY,
   });
 
   const [selectedItems, setSelectedItems] = useState<MonitorListItem[]>([]);
@@ -150,6 +177,11 @@ export const MonitorList = ({
           setMonitorPendingDeletion={setMonitorPendingDeletion}
           setMonitorPendingReset={setMonitorPendingReset}
           setMonitorPendingStatusUpdate={setMonitorPendingStatusUpdate}
+          setBulkEditAction={setBulkEditAction}
+          setIsLocationsFlyoutOpen={setIsLocationsFlyoutOpen}
+          setIsScheduleFlyoutOpen={setIsScheduleFlyoutOpen}
+          setIsMaintenanceWindowsFlyoutOpen={setIsMaintenanceWindowsFlyoutOpen}
+          columnSelector={ColumnSelector}
         />
         <EuiHorizontalRule margin="s" />
         <EuiBasicTable<MonitorListItem>
@@ -207,6 +239,66 @@ export const MonitorList = ({
           enabled={monitorPendingStatusUpdate.enabled}
           onClose={() => setMonitorPendingStatusUpdate(null)}
           onCompleted={() => setSelectedItems([])}
+          reloadPage={reloadPage}
+        />
+      )}
+      {bulkEditAction === 'tags' && (
+        <BulkTagsFlyout
+          monitors={selectedItems as EncryptedSyntheticsSavedMonitor[]}
+          onClose={() => {
+            setBulkEditAction(null);
+            setSelectedItems([]);
+          }}
+          reloadPage={reloadPage}
+        />
+      )}
+      {bulkEditAction === 'serviceName' && (
+        <BulkServiceNameFlyout
+          monitors={selectedItems as EncryptedSyntheticsSavedMonitor[]}
+          onClose={() => {
+            setBulkEditAction(null);
+            setSelectedItems([]);
+          }}
+          reloadPage={reloadPage}
+        />
+      )}
+      {bulkEditAction === 'labels' && (
+        <BulkLabelsFlyout
+          monitors={selectedItems as EncryptedSyntheticsSavedMonitor[]}
+          onClose={() => {
+            setBulkEditAction(null);
+            setSelectedItems([]);
+          }}
+          reloadPage={reloadPage}
+        />
+      )}
+      {isLocationsFlyoutOpen && (
+        <BulkLocationsFlyout
+          monitors={selectedItems as EncryptedSyntheticsSavedMonitor[]}
+          onClose={() => {
+            setIsLocationsFlyoutOpen(false);
+            setSelectedItems([]);
+          }}
+          reloadPage={reloadPage}
+        />
+      )}
+      {isScheduleFlyoutOpen && (
+        <BulkScheduleFlyout
+          monitors={selectedItems as EncryptedSyntheticsSavedMonitor[]}
+          onClose={() => {
+            setIsScheduleFlyoutOpen(false);
+            setSelectedItems([]);
+          }}
+          reloadPage={reloadPage}
+        />
+      )}
+      {isMaintenanceWindowsFlyoutOpen && (
+        <BulkMaintenanceWindowsFlyout
+          monitors={selectedItems as EncryptedSyntheticsSavedMonitor[]}
+          onClose={() => {
+            setIsMaintenanceWindowsFlyoutOpen(false);
+            setSelectedItems([]);
+          }}
           reloadPage={reloadPage}
         />
       )}

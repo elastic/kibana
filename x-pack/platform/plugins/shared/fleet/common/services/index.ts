@@ -7,7 +7,7 @@
 
 export * from './routes';
 export { validateFleetSavedObjectId } from './validate_fleet_id';
-export { isValidDuration } from './validate_duration';
+export { isValidDuration, isValidEnrollmentKeyExpiration } from './validate_duration';
 export * as AgentStatusKueryHelper from './agent_status';
 export * from './package_helpers';
 export {
@@ -69,6 +69,8 @@ export {
   getNormalizedDataStreams,
   getPolicyTemplateDataStreamPaths,
   filterPolicyTemplatesTiles,
+  getEnabledPolicyTemplates,
+  getEnabledInputsByPolicyTemplate,
   hasMultipleEnabledPolicyTemplates,
   getPolicyTemplateInputDefinition,
   registryInputAllowsDynamicSignalTypes,
@@ -106,7 +108,10 @@ export {
   mapPackageReleaseToIntegrationCardRelease,
 } from './package_prerelease';
 
-export { getAllowedOutputTypesForAgentPolicy } from './output_helpers';
+export {
+  getAllowedOutputTypesForAgentPolicy,
+  getAllowedOutputTypesForMonitoring,
+} from './output_helpers';
 export { agentStatusesToSummary } from './agent_statuses_to_summary';
 
 export {
@@ -145,6 +150,7 @@ export {
   shouldShowVar,
   isVarRequiredByVarGroup,
   isVarInSelectedVarGroupOption,
+  inferVarGroupSelections,
 } from './var_group_helpers';
 
 // Cloud Connector accessor module

@@ -8,13 +8,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type {
-  RouteSecurity,
-  AllRequiredCondition,
-  AnyRequiredCondition,
-} from '@kbn/core-http-server';
+import type { RouteSecurity, Privileges } from '@kbn/core-http-server';
 import { ReservedPrivilegesSet } from '@kbn/core-http-server';
-import { unwindNestedSecurityPrivileges } from '@kbn/core-security-server';
+import { flattenSecurityPrivileges, groupSecurityPrivileges } from '@kbn/core-security-server';
 import type { DeepPartial } from '@kbn/utility-types';
 
 const privilegeSetSchema = schema.object(
@@ -52,29 +48,11 @@ const requiredPrivilegesSchema = schema.arrayOf(
   {
     maxSize: 100,
     validate: (value) => {
-      const anyRequired: string[] = [];
-      const allRequired: string[] = [];
-
       if (!Array.isArray(value)) {
         return undefined;
       }
 
-      value.forEach((privilege) => {
-        if (typeof privilege === 'string') {
-          allRequired.push(privilege);
-        } else {
-          if (privilege.anyRequired) {
-            anyRequired.push(
-              ...unwindNestedSecurityPrivileges<AnyRequiredCondition>(privilege.anyRequired)
-            );
-          }
-          if (privilege.allRequired) {
-            allRequired.push(
-              ...unwindNestedSecurityPrivileges<AllRequiredCondition>(privilege.allRequired)
-            );
-          }
-        }
-      });
+      const { anyRequired, allRequired } = groupSecurityPrivileges(value as Privileges);
 
       if (anyRequired.includes(ReservedPrivilegesSet.superuser)) {
         return 'Using superuser privileges in anyRequired is not allowed';
@@ -131,21 +109,72 @@ const requiredPrivilegesSchema = schema.arrayOf(
   }
 );
 
-const authzSchema = schema.object({
-  enabled: schema.maybe(schema.literal(false)),
-  requiredPrivileges: schema.conditional(
-    schema.siblingRef('enabled'),
-    schema.never(),
-    requiredPrivilegesSchema,
-    schema.never()
-  ),
-  reason: schema.conditional(
-    schema.siblingRef('enabled'),
-    schema.never(),
-    schema.never(),
-    schema.string()
-  ),
+const extendedPrivilegesSchema = schema.arrayOf(schema.any(), {
+  minSize: 1,
+  maxSize: 100,
+  validate: (value) => {
+    if (value.some((privilege) => typeof privilege !== 'string')) {
+      return 'extendedPrivileges must be a flat list of privilege name strings; privilege sets (anyRequired/allRequired) are not supported';
+    }
+
+    const privileges = value as string[];
+
+    if (privileges.includes(ReservedPrivilegesSet.superuser)) {
+      return 'Using superuser privileges in extendedPrivileges is not allowed';
+    }
+
+    if (privileges.includes(ReservedPrivilegesSet.operator)) {
+      return 'Using operator privileges in extendedPrivileges is not allowed';
+    }
+
+    const uniquePrivileges = new Set(privileges);
+    if (privileges.length !== uniquePrivileges.size) {
+      return 'extendedPrivileges must contain unique values';
+    }
+  },
 });
+
+const authzSchema = schema.object(
+  {
+    enabled: schema.maybe(schema.literal(false)),
+    requiredPrivileges: schema.conditional(
+      schema.siblingRef('enabled'),
+      schema.never(),
+      requiredPrivilegesSchema,
+      schema.never()
+    ),
+    extendedPrivileges: schema.conditional(
+      schema.siblingRef('enabled'),
+      schema.never(),
+      schema.maybe(extendedPrivilegesSchema),
+      schema.never()
+    ),
+    reason: schema.conditional(
+      schema.siblingRef('enabled'),
+      schema.never(),
+      schema.never(),
+      schema.string()
+    ),
+  },
+  {
+    validate: (value) => {
+      // When authz is enabled, requiredPrivileges is already required by the base schema.
+      if (!value.extendedPrivileges || !value.requiredPrivileges) {
+        return undefined;
+      }
+
+      const requiredPrivileges = flattenSecurityPrivileges(value.requiredPrivileges);
+      const overlaps = value.extendedPrivileges.filter((privilege) =>
+        requiredPrivileges.includes(privilege)
+      );
+      if (overlaps.length) {
+        return `extendedPrivileges cannot overlap with requiredPrivileges: [${overlaps.join(
+          ', '
+        )}]`;
+      }
+    },
+  }
+);
 
 const authcSchema = schema.object({
   enabled: schema.oneOf([

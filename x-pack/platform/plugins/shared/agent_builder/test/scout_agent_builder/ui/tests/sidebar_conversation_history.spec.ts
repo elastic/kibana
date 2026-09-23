@@ -23,7 +23,8 @@ const CONVERSATION_DATA = [
   },
 ] as const;
 
-test.describe(
+// Failing: See https://github.com/elastic/kibana/issues/289099
+test.describe.skip(
   'Agent Builder — sidebar conversation history',
   { tag: [...tags.stateful.classic, ...tags.serverless.search] },
   () => {
@@ -69,7 +70,7 @@ test.describe(
         await pageObjects.agentBuilder.openEmbeddableMenu();
         await pageObjects.agentBuilder.selectEmbeddableConversation(conversationIds[0]);
         await expect(async () => {
-          await expect(page.testSubj.locator('agentBuilderRoundResponse')).toContainText(
+          await expect(page.testSubj.locator('agentBuilderResponseMessage')).toContainText(
             CONVERSATION_DATA[0].expectedResponse
           );
         }).toPass({ timeout: 120_000 });
@@ -77,7 +78,7 @@ test.describe(
         await pageObjects.agentBuilder.openEmbeddableMenu();
         await pageObjects.agentBuilder.selectEmbeddableConversation(conversationIds[1]);
         await expect(async () => {
-          await expect(page.testSubj.locator('agentBuilderRoundResponse')).toContainText(
+          await expect(page.testSubj.locator('agentBuilderResponseMessage')).toContainText(
             CONVERSATION_DATA[1].expectedResponse
           );
         }).toPass({ timeout: 120_000 });

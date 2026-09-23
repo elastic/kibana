@@ -17,6 +17,7 @@ project:
   owner: '@elastic/response-ops'
   sourceRoot: x-pack/platform/plugins/shared/maintenance_windows
 dependsOn:
+  - '@kbn/app-header'
   - '@kbn/core'
   - '@kbn/security-plugin'
   - '@kbn/licensing-plugin'
@@ -37,6 +38,7 @@ dependsOn:
   - '@kbn/features-plugin'
   - '@kbn/lazy-object'
   - '@kbn/task-manager-plugin'
+  - '@kbn/ui-callout'
   - '@kbn/core-http-request-handler-context-server'
   - '@kbn/kibana-react-plugin'
   - '@kbn/management-plugin'
@@ -57,6 +59,10 @@ dependsOn:
   - '@kbn/core-test-helpers-model-versions'
   - '@kbn/rule-data-utils'
   - '@kbn/alerts-as-data-utils'
+  - '@kbn/alerting-v2-schemas'
+  - '@kbn/alerting-v2-constants'
+  - '@kbn/kql'
+  - '@kbn/data-views-plugin'
 tags:
   - plugin
   - prod

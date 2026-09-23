@@ -7,6 +7,7 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import type { LoggerService } from '../../services/logger_service/logger_service';
 import type { WorkflowService } from '../../services/workflow_service/workflow_service';
 import { RULE_CREATED_EVENT_TYPE, type RuleCreatedEvent } from '../rule_event_publisher/events';
@@ -18,8 +19,11 @@ import { RULE_WORKFLOW_TRIGGERS, RuleCreatedTriggerId } from './triggers';
 
 const ruleCreatedEvent: RuleCreatedEvent = {
   type: RULE_CREATED_EVENT_TYPE,
-  payload: { rule: { ruleId: 'rule-1', spaceId: 'my-space' } },
+  payload: { ruleId: 'rule-1', spaceId: 'my-space', correlationId: 'corr-1' },
 };
+
+// Workflows only ever see the projected rule reference, never the full payload.
+const projectedWorkflowPayload = { rule: { ruleId: 'rule-1', spaceId: 'my-space', tags: [] } };
 
 describe('RuleWorkflowSubscriber', () => {
   let bus: jest.Mocked<EventBus<AlertingDomainEvent, AlertingPublisherContext>>;
@@ -74,10 +78,10 @@ describe('RuleWorkflowSubscriber', () => {
       // the same credentials/space that changed the rule (RNA #504 requirement 3).
       expect(workflowsExtensions.getClient).toHaveBeenCalledWith(request);
       expect(mockEmitEvent).toHaveBeenCalledTimes(1);
-      expect(mockEmitEvent).toHaveBeenCalledWith(RuleCreatedTriggerId, ruleCreatedEvent.payload);
+      expect(mockEmitEvent).toHaveBeenCalledWith(RuleCreatedTriggerId, projectedWorkflowPayload);
     });
 
-    it('catches WorkflowService failures, logs them, and does not let the rejection escape the handler', async () => {
+    it("catches WorkflowService failures, logs them with the binding's eventType, and does not let the rejection escape the handler", async () => {
       mockEmitEvent.mockRejectedValueOnce(new Error('workflows unreachable'));
 
       subscriber.start();
@@ -87,6 +91,15 @@ describe('RuleWorkflowSubscriber', () => {
       ).resolves.toBeUndefined();
 
       expect(mockLogger.error).toHaveBeenCalledTimes(1);
+      expect(mockLogger.error).toHaveBeenCalledWith('workflows unreachable', {
+        labels: {
+          event_type: RULE_CREATED_EVENT_TYPE,
+          rule_id: ruleCreatedEvent.payload.ruleId,
+          space_id: ruleCreatedEvent.payload.spaceId,
+          code: ALERTING_LOG_CODES.EVENTS_RULE_WORKFLOW_SUBSCRIBER_FAILED,
+        },
+        error: expect.objectContaining({ message: 'workflows unreachable' }),
+      });
     });
   });
 

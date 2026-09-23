@@ -49,17 +49,34 @@ import { createRuleSavedObject } from '../../../../rules_client/lib';
 import type { ValidateScheduleLimitResult } from '../get_schedule_frequency';
 import { validateScheduleLimit } from '../get_schedule_frequency';
 import { logRuleChanges } from '../common_utils/log_rule_changes';
+import { reportRuleCreatedEvent } from '../common_utils/event_based_telemetry';
 
 export interface CreateRuleOptions {
   id?: string;
   initialRevision?: number;
+  /**
+   * Declares that the API key the request authenticated with is borrowed (e.g. granted by Task
+   * Manager for a background task) and must not become the rule's key: a framework-owned key with
+   * the same privileges is minted for the rule instead. A no-op when the request is not
+   * authenticated with an API key, so callers may set it unconditionally.
+   */
+  cloneApiKey?: boolean;
 }
+
+/** Matches HTTP create `template_id` maxLength. */
+export const RULE_CREATE_TEMPLATE_ID_MAX_LENGTH = 1024;
 
 export interface CreateRuleParams<Params extends RuleParams = never> {
   data: CreateRuleData<Params>;
   options?: CreateRuleOptions;
   changeTracking?: RuleChangeTracking;
   allowMissingConnectorSecrets?: boolean;
+  /**
+   * The id of the rule template this rule was created from, when known (e.g. gallery
+   * create-from-template, or Fleet installing a rule from a package template). Used only
+   * for telemetry - it is not persisted on the rule saved object.
+   */
+  templateId?: string;
 }
 
 export async function createRule<Params extends RuleParams = never>(
@@ -67,7 +84,19 @@ export async function createRule<Params extends RuleParams = never>(
   createParams: CreateRuleParams<Params>
   // TODO (http-versioning): This should be of type Rule, change this when all rule types are fixed
 ): Promise<SanitizedRule<Params>> {
-  const { data: initialData, options, changeTracking, allowMissingConnectorSecrets } = createParams;
+  const {
+    data: initialData,
+    options,
+    changeTracking,
+    allowMissingConnectorSecrets,
+    templateId,
+  } = createParams;
+
+  if (templateId !== undefined && templateId.length > RULE_CREATE_TEMPLATE_ID_MAX_LENGTH) {
+    throw Boom.badRequest(
+      `Error validating create data - templateId must be at most ${RULE_CREATE_TEMPLATE_ID_MAX_LENGTH} characters`
+    );
+  }
 
   const actionsClient = await context.getActionsClient();
 
@@ -151,7 +180,9 @@ export async function createRule<Params extends RuleParams = never>(
   let isAuthTypeApiKey = false;
   try {
     const apiKeyName = generateAPIKeyName(ruleType.id, data.name);
-    const resolved = await resolveRuleAPIKey(context, apiKeyName, data.enabled);
+    const resolved = await resolveRuleAPIKey(context, apiKeyName, data.enabled, {
+      cloneApiKey: options?.cloneApiKey,
+    });
     createdAPIKey = resolved.createdAPIKey;
     isAuthTypeApiKey = resolved.isAuthTypeApiKey;
   } catch (error) {
@@ -204,12 +235,12 @@ export async function createRule<Params extends RuleParams = never>(
   const { systemActions, actions: actionToNotUse, ...restData } = data;
 
   const apiKeyProps = apiKeyAsRuleDomainProperties(createdAPIKey, username, isAuthTypeApiKey);
-  const tagsWithUiamCheck = await addMissingUiamKeyTagIfNeeded(
+  const tagsWithUiamCheck = addMissingUiamKeyTagIfNeeded(
     data.tags,
     apiKeyProps.uiamApiKey,
-    apiKeyProps.apiKeyCreatedByUser,
     context.isServerless,
-    context.featureFlags
+    context.shouldGrantUiam,
+    context.apiKeyType
   );
 
   // Convert domain rule object to ES rule attributes
@@ -294,6 +325,16 @@ export async function createRule<Params extends RuleParams = never>(
 
   // Convert domain rule to rule (Remove certain properties)
   const rule = transformRuleDomainToRule<Params>(ruleDomain);
+
+  reportRuleCreatedEvent(context, {
+    id,
+    templateId,
+    createTime,
+    alertTypeId: data.alertTypeId,
+    enabled: data.enabled,
+    consumer: data.consumer,
+    producer: ruleType.producer,
+  });
 
   // TODO (http-versioning): Remove this cast, this enables us to move forward
   // without fixing all of other solution types

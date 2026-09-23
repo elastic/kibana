@@ -250,6 +250,14 @@ const PER_TYPE_FIXTURES: {
     { template: { id: 't-1', version: 1 } },
     { action: 'update' }
   ),
+  workflow: makeUserActionSO(
+    'workflow',
+    {
+      workflow: { id: 'wf-1', name: 'My Workflow', executionId: 'exec-1' },
+      origin: { type: 'cases.case', id: 'case-1' },
+    },
+    { action: 'create' }
+  ),
 };
 
 // ----- Layer 1: doc-builder output ⊆ activity mapping (per-type) -----
@@ -326,14 +334,7 @@ const SURFACE_FIELDS_THE_DOC_BUILDER_READS = [
 ];
 
 describe('SO mapping carries every surface field the activity doc-builder reads', () => {
-  const soType = createCaseUserActionSavedObjectType({
-    persistableStateAttachmentTypeRegistry: {
-      has: () => false,
-      get: () => undefined,
-      getAll: () => [],
-      register: () => undefined,
-    } as never,
-  } as never);
+  const soType = createCaseUserActionSavedObjectType();
   const soPaths = collectMappedPaths(soType.mappings as MappingTypeMapping);
   it.each(SURFACE_FIELDS_THE_DOC_BUILDER_READS)('SO mapping has %s', (field) => {
     expect(soPaths.has(field)).toBe(true);

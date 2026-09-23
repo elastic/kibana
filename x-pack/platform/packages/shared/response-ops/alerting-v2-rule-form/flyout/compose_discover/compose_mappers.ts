@@ -16,7 +16,7 @@ import {
   deriveAlertDelayModeFromStateTransition,
   deriveRecoveryDelayModeFromStateTransition,
 } from '../../form/utils/state_transition_helpers';
-import { resolveRecoveryStrategy } from '../../form/utils/rule_request_mappers';
+import { isRecoveryEnabled, resolveRecoveryStrategy } from '../../form/utils/rule_request_mappers';
 import type { FormValues } from '../../form/types';
 
 const DELAY_IMMEDIATE = 'immediate';
@@ -42,15 +42,17 @@ const mapStateTransition = (formValues: FormValues) => {
     if (stateTransition?.pendingCount != null) out.pending_count = stateTransition.pendingCount;
   }
 
-  if (recoveryMode === DELAY_IMMEDIATE) {
-    out.recovering_count = 0;
-  } else if (recoveryMode !== DELAY_DURATION && stateTransition?.recoveringCount != null) {
-    out.recovering_count = stateTransition.recoveringCount;
-  } else if (recoveryMode === DELAY_DURATION) {
-    if (stateTransition?.recoveringTimeframe != null)
-      out.recovering_timeframe = stateTransition.recoveringTimeframe;
-    if (stateTransition?.recoveringCount != null)
+  if (isRecoveryEnabled(formValues)) {
+    if (recoveryMode === DELAY_IMMEDIATE) {
+      out.recovering_count = 0;
+    } else if (recoveryMode !== DELAY_DURATION && stateTransition?.recoveringCount != null) {
       out.recovering_count = stateTransition.recoveringCount;
+    } else if (recoveryMode === DELAY_DURATION) {
+      if (stateTransition?.recoveringTimeframe != null)
+        out.recovering_timeframe = stateTransition.recoveringTimeframe;
+      if (stateTransition?.recoveringCount != null)
+        out.recovering_count = stateTransition.recoveringCount;
+    }
   }
 
   return Object.keys(out).length ? out : undefined;
@@ -63,10 +65,7 @@ export const composeFormToCreateRequest = (
   const artifacts = mapArtifacts(mergeArtifactsByType(formValues));
   const recoveryStrategy = resolveRecoveryStrategy(formValues);
 
-  const noDataStrategy =
-    formValues.kind === 'alert' && formValues.noDataStrategy
-      ? formValues.noDataStrategy
-      : undefined;
+  const noDataStrategy = formValues.noDataStrategy;
 
   return {
     kind: formValues.kind,
@@ -109,6 +108,9 @@ export const composeFormToUpdateRequest = (
     metadata: {
       ...metadata,
       builder_type: metadata.builder_type ?? null,
+      // Empty tags must be sent as an explicit `null` to clear them; omitting
+      // the key would preserve the existing tags on a partial update.
+      tags: formValues.metadata.tags?.length ? formValues.metadata.tags : null,
     },
     recovery_strategy: resolveRecoveryStrategy(formValues) ?? null,
     no_data_strategy: no_data_strategy ?? null,

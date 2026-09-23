@@ -8,10 +8,10 @@
 import { LENS_UNKNOWN_VIS } from '@kbn/lens-common';
 import { isLensDSLConfig, type LensConfigBuilder } from '@kbn/lens-embeddable-utils';
 import { getMeta, type AsCodeMeta } from '@kbn/as-code-shared-schemas';
+import { toAsCodeTags, toStoredTags } from '@kbn/as-code-shared-transforms';
 
-import type { LensSavedObject, LensUpdateIn } from '../../../content_management';
+import type { LensSavedObject, LensUpdateIn } from '../../../content_management/zod';
 import type { LensCreateRequestBody, LensResponseItem, LensUpdateRequestBody } from './types';
-import { toLegacyDurationUnits } from '../../../../common/transforms/ga_schema_validator';
 
 /**
  * Converts Lens request data to Lens Config
@@ -20,29 +20,27 @@ export function getLensRequestConfig(
   builder: LensConfigBuilder,
   config: LensCreateRequestBody | LensUpdateRequestBody
 ): LensUpdateIn['data'] & LensUpdateIn['options'] {
+  const { references: tagReferences } = toStoredTags(config);
   const attributes = builder.fromAPIFormat(config);
 
   return {
     ...attributes,
+    references: [...(attributes.references ?? []), ...tagReferences],
   } satisfies LensUpdateIn['data'] & LensUpdateIn['options'];
 }
 
 /**
  * Converts Lens Saved Object to Lens Response Item.
- *
- * The `LensConfigBuilder` always emits GA duration unit names. When `useGASchemas` is `false`
- * (the `asCode.useGASchemas` feature flag is disabled), duration units are down-converted to their
- * legacy names so the response is consistent with the legacy input the route accepts.
  */
 export function getLensResponseItem(
   builder: LensConfigBuilder,
-  item: LensSavedObject,
-  useGASchemas: boolean
+  item: LensSavedObject
 ): LensResponseItem {
   const { id, references, attributes } = item;
   const meta = getLensResponseItemMeta(item);
 
-  const apiFormat = builder.toAPIFormat({
+  const { tags } = toAsCodeTags(references);
+  const chartData = builder.toAPIFormat({
     references,
     ...attributes,
 
@@ -50,8 +48,7 @@ export function getLensResponseItem(
     state: attributes.state!,
     visualizationType: attributes.visualizationType ?? LENS_UNKNOWN_VIS,
   });
-
-  const data = useGASchemas ? apiFormat : toLegacyDurationUnits(apiFormat);
+  const data = { ...chartData, tags };
 
   if (isLensDSLConfig(data)) {
     return {

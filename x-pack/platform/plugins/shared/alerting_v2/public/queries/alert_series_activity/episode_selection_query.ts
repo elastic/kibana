@@ -6,7 +6,7 @@
  */
 
 import { esql } from '@elastic/esql';
-import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-episodes-ui/constants';
+import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 
 /**
  * Selects the episodes the alert timeline draws, scoped to the chosen top-N

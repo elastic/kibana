@@ -11,6 +11,7 @@ import type {
 } from '@kbn/agent-builder-browser';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { HttpStart } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { DataPublicPluginStart, ISessionService } from '@kbn/data-plugin/public';
@@ -89,6 +90,46 @@ export const registerAttachmentUiDefinitions = (attachments: AttachmentServiceSt
       getIcon: () => 'bell',
     }
   );
+};
+
+/**
+ * Registers the `security.investigation.timeline` attachment renderer
+ * (chronological event table for forensic artifacts).
+ */
+export const registerInvestigationTimelineAttachment = ({
+  attachments,
+}: {
+  attachments: AttachmentServiceStartContract;
+}): void => {
+  void import(
+    /* webpackChunkName: "security_investigation_timeline_attachment" */
+    './investigation_timeline'
+  ).then(({ createInvestigationTimelineAttachmentDefinition }) => {
+    attachments.addAttachmentType(
+      SecurityAgentBuilderAttachments.investigationTimeline,
+      createInvestigationTimelineAttachmentDefinition()
+    );
+  });
+};
+
+/**
+ * Registers the `security.investigation.iocs` attachment renderer
+ * (category table of indicator badges for forensic artifacts).
+ */
+export const registerInvestigationIocsAttachment = ({
+  attachments,
+}: {
+  attachments: AttachmentServiceStartContract;
+}): void => {
+  void import(
+    /* webpackChunkName: "security_investigation_iocs_attachment" */
+    './investigation_iocs'
+  ).then(({ createInvestigationIocsAttachmentDefinition }) => {
+    attachments.addAttachmentType(
+      SecurityAgentBuilderAttachments.investigationIocs,
+      createInvestigationIocsAttachmentDefinition()
+    );
+  });
 };
 
 /**
@@ -247,6 +288,113 @@ export const registerEntityAnalyticsDashboardAttachment = ({
 };
 
 /**
+ * Registers the `security.entity_graph` attachment renderer (inline read-only
+ * relationship-graph preview + "Open full graph" deep link). Dynamically imports
+ * [./entity_graph](./entity_graph/index.ts) so the heavy graph deps
+ * (`@kbn/cloud-security-posture-graph`) stay off the main `securitySolution`
+ * page-load bundle.
+ *
+ * Race-window: same semantics as {@link registerRuleAttachment} — the chunk
+ * resolves during plugin start well before the user can receive a graph preview
+ * attachment from the LLM.
+ */
+export const registerEntityGraphAttachment = ({
+  attachments,
+  application,
+  http,
+  agentBuilder,
+  chrome,
+  searchSession,
+  experimentalFeatures,
+  uiSettings,
+}: {
+  attachments: AttachmentServiceStartContract;
+  application: ApplicationStart;
+  http: HttpStart;
+  agentBuilder?: AgentBuilderPluginStart;
+  chrome?: SecurityAgentBuilderChrome;
+  searchSession?: ISessionService;
+  experimentalFeatures: ExperimentalFeatures;
+  uiSettings: IUiSettingsClient;
+}): void => {
+  void import(
+    /* webpackChunkName: "security_entity_graph_attachment" */
+    './entity_graph'
+  ).then(({ createEntityGraphAttachmentDefinition }) => {
+    attachments.addAttachmentType(
+      SecurityAgentBuilderAttachments.entityGraph,
+      createEntityGraphAttachmentDefinition({
+        application,
+        http,
+        agentBuilder,
+        chrome,
+        searchSession,
+        experimentalFeatures,
+        uiSettings,
+      })
+    );
+  });
+};
+
+/**
+ * Registers the `security.entity_risk_score_history` attachment renderer
+ * (compact risk timeline chart + "Open full risk history" deep link into the entity
+ * flyout). Dynamically imports the chart chunk so `@elastic/charts` /
+ * RiskScoreTimeline stay off the main page-load bundle.
+ */
+export const registerEntityRiskScoreHistoryAttachment = ({
+  attachments,
+  application,
+  agentBuilder,
+  chrome,
+  experimentalFeatures,
+  searchSession,
+  uiSettings,
+}: {
+  attachments: AttachmentServiceStartContract;
+  application: ApplicationStart;
+  agentBuilder?: AgentBuilderPluginStart;
+  chrome?: SecurityAgentBuilderChrome;
+  experimentalFeatures: ExperimentalFeatures;
+  searchSession?: ISessionService;
+  uiSettings: IUiSettingsClient;
+}): void => {
+  void import(
+    /* webpackChunkName: "security_entity_risk_score_history_attachment" */
+    './entity_risk_score_history'
+  ).then(({ createEntityRiskScoreHistoryAttachmentDefinition }) => {
+    attachments.addAttachmentType(
+      SecurityAgentBuilderAttachments.entityRiskScoreHistory,
+      createEntityRiskScoreHistoryAttachmentDefinition({
+        application,
+        agentBuilder,
+        chrome,
+        experimentalFeatures,
+        searchSession,
+        uiSettings,
+      })
+    );
+  });
+};
+
+/**
+ * Registers the `security.exception` attachment renderer (read-only card showing
+ * a proposed rule exception's description and conditions).
+ */
+export const registerExceptionAttachment = ({
+  attachments,
+}: {
+  attachments: AttachmentServiceStartContract;
+}): void => {
+  void import(
+    /* webpackChunkName: "security_exception_attachment" */
+    './exception'
+  ).then(({ registerExceptionAttachment: register }) => {
+    register({ attachments });
+  });
+};
+
+/**
  * Registers the `security.rulePreview` attachment renderer (inline alert table showing
  * preview results). Dynamically imports {@link ./rule_preview_attachment} so the heavy
  * transitive deps (SecuritySolutionFlyout, RulePreviewAlertsTable, sourcerer, etc.)
@@ -270,5 +418,54 @@ export const registerRulePreviewAttachment = ({
     './rule_preview'
   ).then(({ registerRulePreviewAttachment: register }) => {
     register({ attachments, data, spaces, getServices, getStore });
+  });
+};
+
+/**
+ * Registers the `security.attack_discovery` attachment renderer (inline summary
+ * and details via `AttackDiscoveryMarkdownFormatter`).
+ *
+ * Dynamically imports
+ * [./attack_discovery](./attack_discovery) so the markdown field-plugin stack stays
+ * off the main `securitySolution` page-load bundle.
+ *
+ * Race-window: same semantics as {@link registerRuleAttachment} — until the chunk
+ * resolves, `security.attack_discovery` attachments are header-only.
+ */
+export const registerAttackDiscoveryAttachment = ({
+  attachments,
+}: {
+  attachments: AttachmentServiceStartContract;
+}): void => {
+  void import(
+    /* webpackChunkName: "security_attack_discovery_attachment" */
+    './attack_discovery'
+  ).then(({ registerAttackDiscoveryAttachment: register }) => {
+    register({ attachments });
+  });
+};
+
+/**
+ * Registers the `security.attack_discovery.verdict` attachment renderer (per-verdict
+ * header icon and badge, plus the summary and optional rationale via
+ * `AttackDiscoveryMarkdownFormatter`).
+ *
+ * Dynamically imports
+ * [./attack_discovery_verdict](./attack_discovery_verdict) so the markdown field-plugin
+ * stack stays off the main `securitySolution` page-load bundle.
+ *
+ * Race-window: same semantics as {@link registerRuleAttachment} — until the chunk
+ * resolves, `security.attack_discovery.verdict` attachments are header-only.
+ */
+export const registerAttackDiscoveryVerdictAttachment = ({
+  attachments,
+}: {
+  attachments: AttachmentServiceStartContract;
+}): void => {
+  void import(
+    /* webpackChunkName: "security_attack_discovery_verdict_attachment" */
+    './attack_discovery_verdict'
+  ).then(({ registerAttackDiscoveryVerdictAttachment: register }) => {
+    register({ attachments });
   });
 };

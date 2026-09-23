@@ -38,6 +38,41 @@ describe('CasesClientFactory', () => {
     jest.clearAllMocks();
   });
 
+  it('propagates the client source to the cases client', async () => {
+    const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
+
+    await casesClientFactory.create({
+      request,
+      savedObjectsService: coreStart.savedObjects,
+      scopedClusterClient,
+      clientSource: 'workflow',
+    });
+
+    expect(createCasesClientMocked).toHaveBeenCalledWith(
+      expect.objectContaining({ clientSource: 'workflow' })
+    );
+  });
+
+  it('creates a workflow run context with a client and request-scoped operations', async () => {
+    const casesClient = {};
+    createCasesClientMocked.mockReturnValue(casesClient);
+    const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
+
+    const context = await casesClientFactory.createWorkflowRunContext({
+      request,
+      savedObjectsService: coreStart.savedObjects,
+      scopedClusterClient,
+      clientSource: 'rest_api',
+    });
+
+    expect(context.casesClient).toBe(casesClient);
+    expect(context.workflowOperations).toEqual({
+      ensureAuthorizedToRunWorkflow: expect.any(Function),
+      preflightWorkflowExecution: expect.any(Function),
+      recordWorkflowExecution: expect.any(Function),
+    });
+  });
+
   describe('user info', () => {
     it('constructs the user info from user profiles', async () => {
       const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
@@ -50,6 +85,7 @@ describe('CasesClientFactory', () => {
         request,
         savedObjectsService: coreStart.savedObjects,
         scopedClusterClient,
+        clientSource: 'rest_api',
       });
 
       expect(args.securityPluginStart.userProfiles.getCurrent).toHaveBeenCalled();
@@ -74,6 +110,7 @@ describe('CasesClientFactory', () => {
         request,
         savedObjectsService: coreStart.savedObjects,
         scopedClusterClient,
+        clientSource: 'rest_api',
       });
 
       expect(args.securityPluginStart.userProfiles.getCurrent).toHaveBeenCalled();
@@ -93,6 +130,7 @@ describe('CasesClientFactory', () => {
         request: fakeRequest,
         savedObjectsService: coreStart.savedObjects,
         scopedClusterClient,
+        clientSource: 'rest_api',
       });
 
       expect(args.securityPluginStart.userProfiles.getCurrent).toHaveBeenCalled();
@@ -111,6 +149,7 @@ describe('CasesClientFactory', () => {
         request,
         savedObjectsService: coreStart.savedObjects,
         scopedClusterClient,
+        clientSource: 'rest_api',
       });
 
       expect(args.securityPluginStart.userProfiles.getCurrent).toHaveBeenCalled();

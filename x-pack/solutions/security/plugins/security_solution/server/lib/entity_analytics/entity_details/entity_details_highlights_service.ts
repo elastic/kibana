@@ -31,6 +31,7 @@ import type {
 import type { MlSummaryJob } from '@kbn/ml-plugin/server';
 import type { EntityStoreCRUDClient } from '@kbn/entity-store/server';
 import type { CriteriaField } from '@kbn/ml-anomaly-utils';
+import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
 import { createGetRiskScores } from '../risk_score/get_risk_score';
 import type { EntityRiskScoreRecord } from '../../../../common/api/entity_analytics/common';
 import type { RiskEngineDataClient } from '../risk_engine/risk_engine_data_client';
@@ -147,6 +148,7 @@ interface EntityDetailsHighlightsServiceFactoryOptions {
   entityStoreClient: EntityStoreCRUDClient;
   esClient: ElasticsearchClient;
   experimentalFeatures: EntityAnalyticsRoutesDeps['config']['experimentalFeatures'];
+  mitreDataClient?: MitreAttackDataClient;
   spaceId: string;
   logger: Logger;
   request: KibanaRequest;
@@ -169,6 +171,7 @@ export const entityDetailsHighlightsServiceFactory = ({
   riskEngineClient,
   entityStoreClient,
   experimentalFeatures,
+  mitreDataClient,
   request,
   spaceId,
   esClient,
@@ -499,7 +502,9 @@ export const entityDetailsHighlightsServiceFactory = ({
             vulnerabilitiesTotal: enrichedEntity.vulnerabilitiesTotal,
           }
         : {}),
-      anomalies: anomaliesAnonymized,
+      // Null when empty so the model gets an explicit "no ML anomalies" signal
+      // (clearer than [] or omitting the key).
+      anomalies: anomaliesAnonymized.length > 0 ? anomaliesAnonymized : null,
     };
   };
 
@@ -542,7 +547,9 @@ export const entityDetailsHighlightsServiceFactory = ({
             vulnerabilitiesTotal: vulnerabilityData.vulnerabilitiesTotal,
           }
         : {}),
-      anomalies: anomaliesAnonymized,
+      // Null when empty so the model gets an explicit "no ML anomalies" signal
+      // (clearer than [] or omitting the key).
+      anomalies: anomaliesAnonymized.length > 0 ? anomaliesAnonymized : null,
     };
   };
 
@@ -558,6 +565,7 @@ export const entityDetailsHighlightsServiceFactory = ({
       esClient,
       experimentalFeatures,
       logger,
+      mitreDataClient,
       ml,
       request,
       soClient,
@@ -575,11 +583,11 @@ export const entityDetailsHighlightsServiceFactory = ({
     });
 
     if (!enrichedEntities || enrichedEntities.length === 0) {
-      // No entity → omit vulnerabilities entirely (nothing applicable to report)
+      // No entity → omit vulnerabilities; anomalies are explicitly null (no ML findings).
       return {
         riskScore: [],
         assetCriticality: [],
-        anomalies: [],
+        anomalies: null,
       };
     }
 

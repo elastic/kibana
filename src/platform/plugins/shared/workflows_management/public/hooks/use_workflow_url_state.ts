@@ -11,6 +11,12 @@ import { parse, stringify } from 'query-string';
 import { useCallback, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import type { LayoutDirection } from '@kbn/workflows';
+import {
+  getStoredEditorView,
+  getStoredGraphDirection,
+  setStoredEditorView,
+  setStoredGraphDirection,
+} from '../lib/workflow_editor_preferences';
 
 export type WorkflowUrlStateTabType = 'workflow' | 'executions';
 export type WorkflowEditorView = 'yaml' | 'graph';
@@ -23,6 +29,7 @@ export interface WorkflowUrlState {
   stepExecutionId?: string;
   stepId?: string;
   resume?: boolean;
+  replayExecutionId?: string;
 }
 
 /**
@@ -46,16 +53,26 @@ export function useWorkflowUrlState() {
     stepExecutionId: string | undefined;
     stepId: string | undefined;
     shouldAutoResume: boolean;
+    replayExecutionId: string | undefined;
   } => {
     const params = parse(location.search);
     return {
       tab: (firstString(params.tab) as WorkflowUrlStateTabType) || 'workflow',
-      view: params.view === 'graph' ? 'graph' : 'yaml',
-      direction: params.direction === 'LR' ? 'LR' : 'TB',
+      view:
+        getStoredEditorView() ??
+        (params.view === 'graph' || params.view === 'yaml'
+          ? (params.view as WorkflowEditorView)
+          : 'yaml'),
+      direction:
+        getStoredGraphDirection() ??
+        (params.direction === 'LR' || params.direction === 'TB'
+          ? (params.direction as LayoutDirection)
+          : 'TB'),
       executionId: firstString(params.executionId),
       stepExecutionId: firstString(params.stepExecutionId),
       stepId: firstString(params.stepId),
       shouldAutoResume: firstString(params.resume) === 'true',
+      replayExecutionId: firstString(params.replayExecutionId),
     };
   }, [location.search]);
 
@@ -79,12 +96,15 @@ export function useWorkflowUrlState() {
 
       // Update the URL without causing a full page reload
       const newSearch = stringify(cleanParams, { encode: false });
-      const newLocation = {
-        ...history.location,
-        search: newSearch ? `?${newSearch}` : '',
-      };
+      const nextSearch = newSearch ? `?${newSearch}` : '';
+      if (nextSearch === history.location.search) {
+        return;
+      }
 
-      history.replace(newLocation);
+      history.replace({
+        ...history.location,
+        search: nextSearch,
+      });
     },
     [history]
   );
@@ -136,11 +156,15 @@ export function useWorkflowUrlState() {
     updateUrlState({ resume: undefined });
   }, [updateUrlState]);
 
+  const clearReplayExecutionId = useCallback(() => {
+    updateUrlState({ replayExecutionId: undefined });
+  }, [updateUrlState]);
+
   const setEditorView = useCallback(
     (view: WorkflowEditorView) => {
+      setStoredEditorView(view);
       updateUrlState({
-        // Omit default to keep the URL clean
-        view: view === 'yaml' ? undefined : view,
+        view,
         // Clear the flyout selection when switching views
         stepId: undefined,
       });
@@ -150,8 +174,8 @@ export function useWorkflowUrlState() {
 
   const setGraphDirection = useCallback(
     (direction: LayoutDirection) => {
-      // Omit default 'TB' to keep the URL clean
-      updateUrlState({ direction: direction === 'TB' ? undefined : direction });
+      setStoredGraphDirection(direction);
+      updateUrlState({ direction });
     },
     [updateUrlState]
   );
@@ -165,6 +189,7 @@ export function useWorkflowUrlState() {
     selectedStepExecutionId: urlState.stepExecutionId,
     selectedStepId: urlState.stepId,
     shouldAutoResume: urlState.shouldAutoResume,
+    replayExecutionId: urlState.replayExecutionId,
 
     // State setters
     setActiveTab,
@@ -175,5 +200,6 @@ export function useWorkflowUrlState() {
     setSelectedStep,
     updateUrlState,
     clearResumeParam,
+    clearReplayExecutionId,
   };
 }

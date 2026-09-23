@@ -263,7 +263,7 @@ describe('XY', () => {
         // Manual-only annotation layer: no data view is emitted on the API layer,
         // even though the source state still has the `xy-visualization-layer-` ref.
         expect(annotationLayer).toBeDefined();
-        expect(annotationLayer?.data_source).toBeUndefined();
+        expect(annotationLayer).not.toHaveProperty('data_source');
 
         // Round trip back to state must produce a persisted by-value annotation
         // layer (no `indexPatternId`, no own reference). The Lens XY runtime then
@@ -293,7 +293,12 @@ describe('XY', () => {
         const api = builder.toAPIFormat(annotationXY) as XYConfig;
         const annotationLayer = api.layers.find((layer) => layer.type === 'annotations');
 
-        expect(annotationLayer?.data_source).toEqual(
+        expect(annotationLayer).toHaveProperty('data_source');
+        expect(
+          annotationLayer && 'data_source' in annotationLayer
+            ? annotationLayer.data_source
+            : undefined
+        ).toEqual(
           expect.objectContaining({
             type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
             ref_id: 'metrics-*',
@@ -529,7 +534,6 @@ describe('XY', () => {
                   },
                 ],
               },
-              query: { esql: 'FROM logs | STATS count = COUNT(*) BY timestamp' },
               filters: [],
             },
           };
@@ -587,7 +591,6 @@ describe('XY', () => {
                   },
                 ],
               },
-              query: { esql: 'FROM logs | STATS count = COUNT(*) BY bytes' },
               filters: [],
             },
           };
@@ -880,6 +883,25 @@ describe('XY', () => {
       validator.xy.fromApi(apiXYWithNoTitleAndCustomOutsideLegend);
     });
 
+    it('should round-trip area fill styling', () => {
+      validator.xy.fromApi({
+        type: 'xy',
+        title: 'Area fill test',
+        styling: {
+          areas: { fill: 'gradient', fill_opacity: 0.5 },
+        },
+        layers: [
+          {
+            data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'myDataView' },
+            type: 'area',
+            ignore_global_filters: false,
+            sampling: 1,
+            y: [{ operation: 'count', empty_as_null: false }],
+          },
+        ],
+      });
+    });
+
     it('should convert API with by-reference annotation layer', () => {
       validator.xy.fromApi({
         type: 'xy',
@@ -1077,6 +1099,35 @@ describe('XY', () => {
       const dataLayer = apiOutput.layers[0];
       expect('breakdown_by' in dataLayer && dataLayer.breakdown_by?.color).toEqual(
         DEFAULT_LINE_CATEGORICAL_COLOR_MAPPING
+      );
+    });
+
+    it('should emit default categorical palette on breakdown_by for stacked area charts', () => {
+      const config = {
+        type: 'xy',
+        title: 'Stacked area breakdown color default test',
+        layers: [
+          {
+            data_source: {
+              type: 'esql',
+              query: 'FROM logs | STATS count = count() BY product',
+            },
+            type: 'area_stacked',
+            ignore_global_filters: false,
+            sampling: 1,
+            y: [{ column: 'count' }],
+            breakdown_by: { column: 'product' },
+          },
+        ],
+      } satisfies XYConfig;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const apiOutput = builder.toAPIFormat(lensState) as XYConfig;
+
+      const dataLayer = apiOutput.layers[0];
+      expect('breakdown_by' in dataLayer && dataLayer.breakdown_by?.color).toEqual(
+        DEFAULT_CATEGORICAL_COLOR_MAPPING
       );
     });
 

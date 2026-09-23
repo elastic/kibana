@@ -523,8 +523,7 @@ export const SimplifiedPackagePolicyInputsSchema = schema.maybe(
   SimplifiedPackagePolicyInputRecordSchema
 );
 
-const VALIDATE_DATASTREAMS_PERMISSION_REGEX =
-  /^(logs)|(metrics)|(traces)|(synthetics)|(profiles)-(.*)$/;
+const VALIDATE_DATASTREAMS_PERMISSION_REGEX = /^(logs|metrics|traces|synthetics|profiles)-(.+)$/;
 
 function validateAdditionalDatastreamsPermissions(values: string[]) {
   for (const val of values) {

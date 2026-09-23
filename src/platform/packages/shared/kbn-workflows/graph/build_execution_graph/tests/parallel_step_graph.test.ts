@@ -364,4 +364,58 @@ describe('convertToWorkflowGraph - parallel step', () => {
       'exitTimeoutZone_fanOut',
     ]);
   });
+
+  it('wraps the parallel block in an if zone when a step-level `if` is set', () => {
+    const executionGraph = buildGraph({ ...baseParallel, if: 'inputs.enabled : true' });
+    const topSort = graphlib.alg.topsort(executionGraph);
+    expect(topSort).toEqual([
+      'enterCondition_if_fanOut',
+      'enterThen_if_fanOut',
+      'enterParallel_fanOut',
+      'branchStep',
+      'exitParallel_fanOut',
+      'exitThen_if_fanOut',
+      'exitCondition_if_fanOut',
+    ]);
+  });
+
+  it('rejects a step-level `if` inside a dynamic branch body', () => {
+    expect(() =>
+      buildGraph({
+        ...baseParallel,
+        steps: [
+          {
+            name: 'branchStep',
+            type: 'slack',
+            connectorId: 'slack',
+            with: {},
+            if: 'inputs.enabled : true',
+          } as unknown as ConnectorStep,
+        ],
+      })
+    ).toThrow(/unsupported flow-control/);
+  });
+
+  it('rejects a step-level `if` inside a static branch body', () => {
+    expect(() =>
+      buildGraph({
+        name: 'fanOut',
+        type: 'parallel',
+        branches: [
+          {
+            name: 'vt',
+            steps: [
+              {
+                name: 'scan',
+                type: 'slack',
+                connectorId: 'slack',
+                with: {},
+                if: 'inputs.enabled : true',
+              },
+            ],
+          },
+        ],
+      } as unknown as ParallelStep)
+    ).toThrow(/unsupported flow-control/);
+  });
 });

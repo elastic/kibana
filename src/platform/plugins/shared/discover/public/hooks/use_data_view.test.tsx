@@ -69,7 +69,7 @@ describe('useDataView', () => {
     const { result } = await render({ dataViewId: '2' });
 
     expect(mockDataViewsGet).toHaveBeenCalledWith(adhocDataView.id);
-    expect(mockServices.dataViews.create).toBeCalledTimes(0);
+    expect(mockServices.dataViews.create).toHaveBeenCalledTimes(0);
     expect(result.current.dataView).toEqual(adhocDataView);
   });
 });

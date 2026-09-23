@@ -14,6 +14,13 @@ export const NEW = i18n.translate(
   }
 );
 
+export const NEW_ENTRY_OPTIONS_ARIA_LABEL = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.newEntryOptionsAriaLabel',
+  {
+    defaultMessage: 'New knowledge base entry options',
+  }
+);
+
 export const INDEX = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.indexLabel',
   {

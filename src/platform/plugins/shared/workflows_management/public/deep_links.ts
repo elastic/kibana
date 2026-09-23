@@ -28,27 +28,12 @@ export function getDeepLinks({
 }: DeepLinksParams = {}): AppDeepLink[] {
   const links: AppDeepLink[] = [
     {
-      id: WorkflowsPageName.workflows,
-      title: libraryEnabled
-        ? i18n.translate('workflowsManagement.nav.workflowsDeepLinkTitle', {
-            defaultMessage: 'Workflows',
-          })
-        : PLUGIN_NAME,
+      id: WorkflowsPageName.list,
+      title: PLUGIN_NAME,
       path: '/',
-      ...(libraryEnabled ? { visibleIn: sideNavVisibleIn } : {}),
+      ...((libraryEnabled || executionsViewEnabled) && { visibleIn: sideNavVisibleIn }),
     },
   ];
-
-  if (libraryEnabled) {
-    links.push({
-      id: WorkflowsPageName.library,
-      title: i18n.translate('workflowsManagement.nav.libraryDeepLinkTitle', {
-        defaultMessage: 'Template Library',
-      }),
-      path: '/library',
-      visibleIn: sideNavVisibleIn,
-    });
-  }
 
   if (executionsViewEnabled) {
     links.push({
@@ -57,6 +42,19 @@ export function getDeepLinks({
         defaultMessage: 'Executions',
       }),
       path: '/executions',
+      // Without projectSideNav, solution nav strips this node (DEFAULT_LINK_VISIBILITY is globalSearch-only).
+      visibleIn: sideNavVisibleIn,
+    });
+  }
+
+  if (libraryEnabled) {
+    links.push({
+      id: WorkflowsPageName.library,
+      title: i18n.translate('workflowsManagement.nav.libraryDeepLinkTitle', {
+        defaultMessage: 'Template library',
+      }),
+      path: '/library',
+      visibleIn: sideNavVisibleIn,
     });
   }
 

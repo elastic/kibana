@@ -14,26 +14,36 @@ import {
   EuiSkeletonText,
   EuiSpacer,
   EuiText,
-  EuiTextArea,
   EuiTitle,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
-import { MAX_AI_INDEX_DESCRIPTION_LENGTH } from '../../../../common/constants';
 import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
+import { MAX_AI_INDEX_DESCRIPTION_LENGTH } from '../../../../common/constants';
+import { AiIndexDescriptionField } from '../ai_index_description_field';
 import { useSaveAiIndexDescription } from '../../hooks/use_save_ai_index_description';
+import { validateTextInput } from '../../utils/validate_text_input';
 
 interface DescriptionPanelProps {
   isLoading: boolean;
   aiIndex: GetAiIndexResponse | undefined;
   onSaved: () => void;
+  isManaged: boolean;
 }
 
-export const DescriptionPanel = ({ isLoading, aiIndex, onSaved }: DescriptionPanelProps) => {
+export const DescriptionPanel = ({
+  isLoading,
+  aiIndex,
+  onSaved,
+  isManaged,
+}: DescriptionPanelProps) => {
   const { saveDescription, isSaving } = useSaveAiIndexDescription();
   const [isEditing, setIsEditing] = useState(false);
   const [draft, setDraft] = useState('');
+  const descriptionValidation = validateTextInput({
+    value: draft,
+    maxLength: MAX_AI_INDEX_DESCRIPTION_LENGTH,
+  });
 
   const startEditing = () => {
     setDraft(aiIndex?.description ?? '');
@@ -41,7 +51,7 @@ export const DescriptionPanel = ({ isLoading, aiIndex, onSaved }: DescriptionPan
   };
 
   const handleSave = async () => {
-    if (!aiIndex) {
+    if (!aiIndex || !descriptionValidation.valid) {
       return;
     }
     const saved = await saveDescription(aiIndex, draft);
@@ -64,9 +74,9 @@ export const DescriptionPanel = ({ isLoading, aiIndex, onSaved }: DescriptionPan
             </h2>
           </EuiTitle>
         </EuiFlexItem>
-        {!isEditing && (
+        {!isEditing && !isManaged && !isLoading && (
           <EuiFlexItem grow={false}>
-            <EuiButton
+            <EuiButtonEmpty
               size="s"
               iconType="pencil"
               onClick={startEditing}
@@ -77,7 +87,7 @@ export const DescriptionPanel = ({ isLoading, aiIndex, onSaved }: DescriptionPan
                 id="xpack.contextEngine.aiIndexDetail.description.editButton"
                 defaultMessage="Edit"
               />
-            </EuiButton>
+            </EuiButtonEmpty>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
@@ -86,19 +96,12 @@ export const DescriptionPanel = ({ isLoading, aiIndex, onSaved }: DescriptionPan
         <EuiSkeletonText lines={2} />
       ) : isEditing ? (
         <>
-          <EuiTextArea
-            fullWidth
+          <AiIndexDescriptionField
             value={draft}
-            onChange={(event) => setDraft(event.target.value)}
-            maxLength={MAX_AI_INDEX_DESCRIPTION_LENGTH}
+            onChange={setDraft}
+            error={descriptionValidation.error}
+            warning={descriptionValidation.warning}
             data-test-subj="contextDescriptionTextArea"
-            aria-label={i18n.translate('xpack.contextEngine.aiIndexDetail.description.ariaLabel', {
-              defaultMessage: 'AI index description',
-            })}
-            placeholder={i18n.translate(
-              'xpack.contextEngine.aiIndexDetail.description.placeholder',
-              { defaultMessage: 'Describe what this AI index is for.' }
-            )}
           />
           <EuiSpacer size="m" />
           <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
@@ -120,6 +123,7 @@ export const DescriptionPanel = ({ isLoading, aiIndex, onSaved }: DescriptionPan
                 size="s"
                 onClick={handleSave}
                 isLoading={isSaving}
+                isDisabled={!descriptionValidation.valid}
                 data-test-subj="contextDescriptionSaveButton"
               >
                 <FormattedMessage
@@ -133,12 +137,18 @@ export const DescriptionPanel = ({ isLoading, aiIndex, onSaved }: DescriptionPan
       ) : (
         <EuiText size="s" color={aiIndex?.description ? undefined : 'subdued'}>
           <p>
-            {aiIndex?.description ?? (
-              <FormattedMessage
-                id="xpack.contextEngine.aiIndexDetail.description.empty"
-                defaultMessage="No sources yet — add a source and a summary will be generated automatically."
-              />
-            )}
+            {aiIndex?.description ??
+              (isManaged ? (
+                <FormattedMessage
+                  id="xpack.contextEngine.aiIndexDetail.description.emptyManaged"
+                  defaultMessage="No description yet."
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.contextEngine.aiIndexDetail.description.empty"
+                  defaultMessage="No description yet. Add one to help agents understand this AI index."
+                />
+              ))}
           </p>
         </EuiText>
       )}

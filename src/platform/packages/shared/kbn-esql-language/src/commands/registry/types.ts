@@ -334,10 +334,40 @@ export enum Location {
    * In the PROMQL command (PromQL query expression)
    */
   PROMQL = 'promql',
+
+  /**
+   * In the HIGHLIGHT command ON field list
+   */
+  HIGHLIGHT = 'highlight',
+
+  /**
+   * In the HIGHLIGHT command query expression (before ON)
+   */
+  HIGHLIGHT_QUERY = 'highlight_query',
+
+  /**
+   * In the DENSE_VECTOR command field list
+   */
+  DENSE_VECTOR = 'dense_vector',
+
+  /**
+   * In the DENSE_VECTOR command `suffix = "..." ON` field list. Only used to give that list the
+   * same suggestion ordering as the top-level one, which the sorting context keys per option.
+   */
+  DENSE_VECTOR_ON = 'dense_vector_on',
 }
 
 export enum UnmappedFieldsStrategy {
   DEFAULT = 'DEFAULT',
   NULLIFY = 'NULLIFY',
   LOAD = 'LOAD',
+  LOAD_ALL = 'LOAD_ALL',
+}
+const UNMAPPED_FIELD_STRATEGIES = new Set<string>(Object.values(UnmappedFieldsStrategy));
+
+export function isUnmappedFieldsStrategy(
+  value: string | undefined
+): value is UnmappedFieldsStrategy {
+  if (!value) return false;
+  return UNMAPPED_FIELD_STRATEGIES.has(value);
 }

@@ -15,6 +15,7 @@ describe('trackDiscoverSessionAction', () => {
     id: 'session-1',
     data: {
       title: 'My Discover session',
+      tags: ['tag-1', 'tag-2'],
     },
   };
   let trackUserAction: jest.Mock;
@@ -26,9 +27,9 @@ describe('trackDiscoverSessionAction', () => {
   });
 
   it.each([
-    ['create', 'discover_session_create', 'creation', 'created'],
-    ['update', 'discover_session_update', 'change', 'updated'],
-    ['delete', 'discover_session_delete', 'deletion', 'deleted'],
+    ['create', 'discover_session_create', ['creation'], 'created'],
+    ['update', 'discover_session_update', ['change'], 'updated'],
+    ['delete', 'discover_session_delete', ['deletion'], 'deleted'],
   ] as const)('tracks a successful %s', (operation, action, eventType, verb) => {
     trackDiscoverSessionAction(userActivity, operation, result);
 
@@ -42,7 +43,7 @@ describe('trackDiscoverSessionAction', () => {
         id: 'session-1',
         name: 'My Discover session',
         type: 'discover_session',
-        tags: [],
+        tags: ['tag-1', 'tag-2'],
       },
     });
   });

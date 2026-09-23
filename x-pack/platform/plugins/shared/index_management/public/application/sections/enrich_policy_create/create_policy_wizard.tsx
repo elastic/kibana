@@ -8,7 +8,8 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiStepStatus } from '@elastic/eui';
-import { EuiSteps, EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiSteps, EuiSpacer } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import type { SerializedEnrichPolicy } from '@kbn/index-management-shared-types';
 import { useAppContext } from '../../app_context';
@@ -133,17 +134,14 @@ export const CreatePolicyWizard = () => {
     <>
       {createError && (
         <>
-          <EuiCallOut
+          <KbnDangerCallout
             announceOnMount
             title={i18n.translate('xpack.idxMgmt.enrichPolicyCreate.errorTitle', {
               defaultMessage: 'Unable to create your policy',
             })}
-            color="danger"
-            iconType="error"
             data-test-subj="errorWhenCreatingCallout"
-          >
-            <p className="eui-textBreakWord">{createError?.message || createError?.error}</p>
-          </EuiCallOut>
+            text={<p className="eui-textBreakWord">{createError?.message || createError?.error}</p>}
+          />
           <EuiSpacer size="xl" />
         </>
       )}

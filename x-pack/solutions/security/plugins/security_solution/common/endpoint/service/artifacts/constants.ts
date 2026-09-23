@@ -13,6 +13,9 @@ export const BY_POLICY_ARTIFACT_TAG_PREFIX = 'policy:';
 
 export const GLOBAL_ARTIFACT_TAG = `${BY_POLICY_ARTIFACT_TAG_PREFIX}all`;
 
+/** Tag that marks an artifact entry as disabled and excluded from the packed artifact. */
+export const DISABLED_ARTIFACT_TAG = 'disabled';
+
 export const IMPORTED_ARTIFACT_TAG = 'imported_artifact';
 
 export const ADVANCED_MODE_TAG = 'form_mode:advanced';
@@ -25,6 +28,9 @@ export const TRUSTED_PROCESS_DESCENDANTS_TAG = 'trust_process_descendants';
 
 /** The tag prefix that tracks the space(s) that is considered the "owner" of the artifact.  */
 export const OWNER_SPACE_ID_TAG_PREFIX = 'ownerSpaceId:';
+
+/** Exception list entry field type used to store YARA rule text */
+export const CUSTOM_YARA_SIGNATURE_FIELD_TYPE = 'custom_yara_signature';
 
 export const PROCESS_DESCENDANT_EXTRA_ENTRY: EntryMatch = Object.freeze({
   field: 'event.category',

@@ -39,12 +39,21 @@ export const spaceTest = spaceBaseTest.extend<
   },
 });
 
-export { TRACES, RICH_TRACE, MINIMAL_TRACE, PRODUCER_TRACE, DEEP_TRACE } from './constants';
+export {
+  TRACES,
+  RICH_TRACE,
+  MINIMAL_TRACE,
+  PRODUCER_TRACE,
+  DEEP_TRACE,
+  OTEL_SERVICE,
+} from './constants';
 export { setupTracesExperience, teardownTracesExperience } from './setup';
-export { expectTracesExperienceEnabled } from './helpers';
+export { openServiceFlyoutFromAboutSection, expectTracesExperienceEnabled } from './helpers';
 export {
   richTrace,
   traceCorrelatedLogs,
   minimalTraceCorrelatedLogs,
   deepTrace,
+  otelTrace,
 } from './synthtrace/complete_traces_experience';
+export { indexUnprocessedOtelTrace } from './synthtrace/otel_unprocessed';

@@ -17,9 +17,11 @@ import {
   type DashboardAttachmentData,
 } from '@kbn/agent-builder-dashboards-common';
 
+import { createCustomContentTemplateResolver } from '@kbn/custom-content-server';
 import { dashboardTools } from '../../../common';
 import { retrieveLatestVersion } from './attachment_state';
 import {
+  createAttachmentPanelResolver,
   createVisPanelResolver,
   executeDashboardOperations,
   getErrorMessage,
@@ -116,7 +118,8 @@ Use operations[] to:
 4. update panel layouts without changing content
 5. add / remove sections, including inline section panels during add_section
 6. remove panels
-7. add / remove controls (interactive filters pinned above the dashboard: dropdown, range slider, or time slider)`,
+7. add / remove controls (interactive filters pinned above the dashboard: dropdown, range slider, or time slider)
+8. add / edit custom content panels (\`source: "config"\`, \`type: "custom_content"\`) for HTML-based layouts that Lens and Vega cannot express`,
     schema: generateDashboardSchema,
     handler: async (
       { dashboardAttachmentId: previousAttachmentId, operations },
@@ -143,6 +146,12 @@ Use operations[] to:
             events,
             esClient,
           }),
+          resolveCustomContentTemplate: createCustomContentTemplateResolver({
+            logger,
+            modelProvider,
+            esClient,
+          }),
+          resolveAttachmentPanel: createAttachmentPanelResolver({ attachments }),
         });
 
         // Data-aware default time range computation

@@ -39,7 +39,7 @@ export const ConnectorsCustomizeEmptyState: React.FC<ConnectorsCustomizeEmptySta
           <EuiButton
             data-test-subj="agentConnectorsCustomizeEmptyStateAddButton"
             fill
-            iconType="plusInCircle"
+            iconType="plusCircle"
             iconSide="left"
             onClick={onAddFromLibrary}
           >

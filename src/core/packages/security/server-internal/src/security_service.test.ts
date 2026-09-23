@@ -16,7 +16,10 @@ import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import type { CoreSecurityDelegateContract } from '@kbn/core-security-server';
+import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 import { SecurityService } from './security_service';
+import { WorkloadTypeRegistry } from './workload_type_registry';
+import { convertSecurityApi as actualConvertSecurityApi } from './utils/convert_security_api';
 import { configServiceMock } from '@kbn/config-mocks';
 import { getFips } from 'crypto';
 
@@ -123,6 +126,79 @@ describe('SecurityService', function () {
       });
     });
 
+    describe('#serviceAccounts.registerWorkloadType', () => {
+      it('records the workload type for the plugin', () => {
+        const setup = service.setup();
+
+        expect(() =>
+          setup.serviceAccounts.registerWorkloadType('alerting', {
+            type: 'rule',
+            name: 'Alerting rule',
+          })
+        ).not.toThrow();
+      });
+
+      it('rejects an invalid type', () => {
+        expect(() =>
+          service.setup().serviceAccounts.registerWorkloadType('alerting', {
+            type: 'Alerting.Rule',
+            name: 'Alerting rule',
+          })
+        ).toThrow(/only lowercase letters, digits and underscores are allowed/);
+      });
+
+      it('rejects a duplicate type from the same plugin', () => {
+        const setup = service.setup();
+        setup.serviceAccounts.registerWorkloadType('alerting', { type: 'rule', name: 'Rule' });
+
+        expect(() =>
+          setup.serviceAccounts.registerWorkloadType('alerting', { type: 'rule', name: 'Rule' })
+        ).toThrow(
+          /Service account workload type \[rule\] has already been registered by plugin \[alerting\]/
+        );
+      });
+
+      it('lets different plugins register the same type', () => {
+        const setup = service.setup();
+        setup.serviceAccounts.registerWorkloadType('alerting', { type: 'rule', name: 'Rule' });
+
+        expect(() =>
+          setup.serviceAccounts.registerWorkloadType('workflows', { type: 'rule', name: 'Rule' })
+        ).not.toThrow();
+      });
+
+      it('hands the registrations to the start contract', async () => {
+        convertSecurityApiMock.mockImplementation(actualConvertSecurityApi);
+        const setup = service.setup();
+        setup.serviceAccounts.registerWorkloadType('alerting', { type: 'rule', name: 'Rule' });
+
+        const serviceAccounts = {
+          isEnabled: jest.fn(),
+          create: jest.fn(),
+          getWorkloadBinding: jest.fn().mockResolvedValue(null),
+          bindWorkload: jest.fn(),
+          unbindWorkload: jest.fn(),
+          withScopedRequestForWorkload: jest.fn(),
+        };
+        setup.registerSecurityDelegate({
+          authc: { apiKeys: {} },
+          serviceAccounts,
+        } as unknown as CoreSecurityDelegateContract);
+
+        const start = service.start();
+        const params = { workloadType: 'rule', workloadId: 'rule-id', spaceId: 'default' };
+
+        await start.serviceAccounts.asScopedToPlugin('alerting').getWorkloadBinding(params);
+        expect(serviceAccounts.getWorkloadBinding).toHaveBeenCalledWith('alerting', params);
+
+        await expect(
+          start.serviceAccounts.asScopedToPlugin('workflows').getWorkloadBinding(params)
+        ).rejects.toThrow(
+          /Plugin \[workflows\] has not registered service account workload type \[rule\]/
+        );
+      });
+    });
+
     describe('#uiam', () => {
       it('should be set to `null` if UIAM is not configured ', () => {
         expect(service.setup().uiam).toBeNull();
@@ -146,7 +222,7 @@ describe('SecurityService', function () {
         expect(service.setup().uiam).toBeNull();
       });
 
-      it('should return shared secret if UIAM is enabled', () => {
+      it('should attach the configured shared secret if UIAM is enabled', () => {
         service = new SecurityService(
           mockCoreContext.create({
             configService: configServiceMock.create({
@@ -161,7 +237,12 @@ describe('SecurityService', function () {
             }),
           })
         );
-        expect(service.setup().uiam?.sharedSecret).toBe('some-secret');
+        expect(
+          service.setup().uiam?.getElasticsearchClientAuthentication({
+            credentialSource: 'internal',
+            credential: new HTTPAuthorizationHeader('ApiKey', 'essu_internal_key'),
+          })
+        ).toBe('some-secret');
       });
     });
   });
@@ -189,7 +270,10 @@ describe('SecurityService', function () {
       service.start();
 
       expect(convertSecurityApiMock).toHaveBeenCalledTimes(1);
-      expect(convertSecurityApiMock).toHaveBeenCalledWith(contract);
+      expect(convertSecurityApiMock).toHaveBeenCalledWith(
+        contract,
+        expect.any(WorkloadTypeRegistry)
+      );
     });
 
     it('calls convertSecurityApi with the default implementation when no API was registered', () => {
@@ -200,7 +284,10 @@ describe('SecurityService', function () {
       service.start();
 
       expect(convertSecurityApiMock).toHaveBeenCalledTimes(1);
-      expect(convertSecurityApiMock).toHaveBeenCalledWith(contract);
+      expect(convertSecurityApiMock).toHaveBeenCalledWith(
+        contract,
+        expect.any(WorkloadTypeRegistry)
+      );
     });
 
     it('returns the result of convertSecurityApi as contract', () => {

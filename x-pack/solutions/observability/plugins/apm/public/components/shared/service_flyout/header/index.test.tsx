@@ -76,11 +76,21 @@ describe('ServiceFlyoutHeader', () => {
     mockUseServiceFlyoutContext.mockReturnValue({
       deps: { core: mockCore, share: mockShare, lens: undefined, dataViews: undefined },
       service: baseNodeData,
+      capabilities: {
+        loading: false,
+        error: undefined,
+        schema: 'ecs' as const,
+        header: { serviceNameLink: true, badges: true },
+        overview: { transactions: true, transactionTypeFilter: true, infraMetrics: true },
+        footer: { alerts: true, slos: true },
+      },
       filters: {
         environment: 'production',
         setEnvironment: jest.fn(),
         rangeFrom: 'now-15m',
         rangeTo: 'now',
+        start: '2026-01-01T00:00:00.000Z',
+        end: '2026-01-01T00:15:00.000Z',
         setRange: jest.fn(),
         refreshToken: 0,
         onRefresh: jest.fn(),
@@ -113,6 +123,37 @@ describe('ServiceFlyoutHeader', () => {
     expect(titleLink).toHaveAttribute('href', '/app/apm/overview-href');
     expect(titleLink).toHaveAttribute('data-ebt-action', 'viewService');
     expect(titleLink).toHaveAttribute('data-ebt-element', 'serviceFlyoutTitle');
+    expect(screen.getByTestId('serviceBadgesMock')).toBeInTheDocument();
+  });
+
+  it('renders the title as plain text when serviceNameLink capability is disabled', () => {
+    mockUseServiceFlyoutContext.mockReturnValue({
+      deps: { core: mockCore, share: mockShare, lens: undefined, dataViews: undefined },
+      service: baseNodeData,
+      capabilities: {
+        loading: false,
+        error: undefined,
+        schema: 'otel' as const,
+        header: { serviceNameLink: false, badges: false },
+        overview: { transactions: false, transactionTypeFilter: false, infraMetrics: false },
+        footer: { alerts: false, slos: false },
+      },
+      filters: {
+        environment: 'production',
+        setEnvironment: jest.fn(),
+        rangeFrom: 'now-15m',
+        rangeTo: 'now',
+        start: '2026-01-01T00:00:00.000Z',
+        end: '2026-01-01T00:15:00.000Z',
+        setRange: jest.fn(),
+        refreshToken: 0,
+        onRefresh: jest.fn(),
+      },
+    });
+    renderHeader();
+
+    expect(screen.queryByTestId('serviceFlyoutTitleLink')).not.toBeInTheDocument();
+    expect(screen.getByTestId('serviceFlyoutTitle')).toHaveTextContent(baseNodeData.name);
     expect(screen.getByTestId('serviceBadgesMock')).toBeInTheDocument();
   });
 

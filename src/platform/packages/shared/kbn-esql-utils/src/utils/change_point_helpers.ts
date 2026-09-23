@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { Parser, WrappingPrettyPrinter, isColumn } from '@elastic/esql';
+import { Parser, WrappingPrettyPrinter, isColumn, isOptionNode } from '@elastic/esql';
 import { CommandNames } from '@kbn/esql-language';
 import type {
   ESQLAstChangePointCommand,
@@ -82,30 +82,28 @@ export const getChangePointSeriesColumns = (
 };
 
 /**
- * Entity (BY-clause) column names from the first CHANGE_POINT command in the query.
- * Returns an empty array when there is no BY clause or no CHANGE_POINT command.
- * These are the column names needed to group CHANGE_POINT result rows by entity and to call
- * {@link appendEntityFiltersToChangePointLineEsql}.
+ * Column names from `CHANGE_POINT ... BY col[, col]` on the first top-level CHANGE_POINT command.
  */
-export const getChangePointEntityColumns = (esql?: string): string[] => {
-  if (!esql) return [];
+export const getChangePointByColumns = (esql?: string): string[] | undefined => {
+  if (!esql) return undefined;
   try {
     const { root } = Parser.parse(esql);
     const cp = root.commands.find((c) => c.name === CommandNames.CHANGE_POINT) as
       | ESQLAstChangePointCommand
       | undefined;
-    if (!cp) return [];
-    const byOption = cp.args.find(
-      (a): a is ESQLCommandOption =>
-        (a as ESQLCommandOption).type === 'option' && (a as ESQLCommandOption).name === 'by'
-    );
-    if (!byOption) return [];
-    return byOption.args.filter(isColumn).map((c) => c.parts.join('.'));
+    if (!cp) return undefined;
+    const byOption = cp.args.find((arg) => isOptionNode(arg) && arg.name === 'by') as
+      | ESQLCommandOption
+      | undefined;
+    if (!byOption) return undefined;
+    const cols = byOption.args.filter(isColumn).map((c) => c.parts.join('.'));
+    return cols.length ? cols : undefined;
   } catch {
-    return [];
+    return undefined;
   }
 };
 
+// Entity filters need readable identifiers when possible, and escaped backticks when not.
 export const formatEsqlIdentifier = (columnId: string): string => {
   if (/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(columnId)) {
     return columnId;
@@ -113,7 +111,7 @@ export const formatEsqlIdentifier = (columnId: string): string => {
   return sanitazeESQLInput(columnId) ?? `\`${columnId.replace(/`/g, '``')}\``;
 };
 
-// Entity values come from table data, so keep non-string literals typed and skip nullish values.
+// Formats a JS value as an ES|QL literal. Returns undefined when the value is missing
 export const formatEsqlLiteral = (value: unknown): string | undefined => {
   if (value === null || value === undefined) return undefined;
   if (typeof value === 'boolean') {
@@ -134,6 +132,13 @@ export const formatEsqlLiteral = (value: unknown): string | undefined => {
   return escapeStringValue(String(value));
 };
 
+/** Builds a WHERE fragment for one grouping column, including rows with a missing value. */
+export const formatEsqlEntityPredicate = (columnId: string, value: unknown): string => {
+  const identifier = formatEsqlIdentifier(columnId);
+  const lit = formatEsqlLiteral(value);
+  return lit === undefined ? `${identifier} IS NULL` : `${identifier} == ${lit}`;
+};
+
 /**
  * Narrows the line-chart ES|QL to a specific entity row by appending a {@code | WHERE} clause.
  */
@@ -143,12 +148,8 @@ export const appendEntityFiltersToChangePointLineEsql = (
   entityColumnIds: readonly string[]
 ): string => {
   if (!entityColumnIds.length) return lineEsql;
-  const predicates = entityColumnIds.reduce<string[]>((acc, col) => {
-    const lit = formatEsqlLiteral(row[col]);
-    if (lit !== undefined) acc.push(`${formatEsqlIdentifier(col)} == ${lit}`);
-    return acc;
-  }, []);
-  return predicates.length ? `${lineEsql} | WHERE ${predicates.join(' AND ')}` : lineEsql;
+  const predicates = entityColumnIds.map((col) => formatEsqlEntityPredicate(col, row[col]));
+  return `${lineEsql} | WHERE ${predicates.join(' AND ')}`;
 };
 
 // Removes SORT immediately before CHANGE_POINT because Lens can sort the line data itself.

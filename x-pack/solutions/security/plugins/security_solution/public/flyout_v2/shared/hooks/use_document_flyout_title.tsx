@@ -24,6 +24,7 @@ import { FLYOUT_ORIGIN } from '../../../common/lib/telemetry';
 import { DocumentSeverity } from '../../document/main/components/severity';
 import { Timestamp } from '../components/timestamp';
 import { useFlyoutApi } from '../../use_flyout_api';
+import { isRulePreviewDocument } from '../utils/is_rule_preview_document';
 
 export interface UseDocumentFlyoutTitleOptions {
   /** The source document to derive display values from. */
@@ -42,8 +43,12 @@ export interface DocumentFlyoutTitleResult {
    * documents.
    */
   iconType: string;
-  /** Opens the source document as a child flyout (the attack flyout for attack documents). */
-  onTitleClick: () => void;
+  /**
+   * Opens the source document as a child flyout (the attack flyout for attack documents).
+   * Undefined for rule preview documents — the source document is transient and cannot be
+   * re-opened; callers should render the title as plain text instead.
+   */
+  onTitleClick: (() => void) | undefined;
   /** Severity badge for the document. */
   badge: React.ReactNode;
   /** Formatted timestamp for the document. */
@@ -64,6 +69,7 @@ export const useDocumentFlyoutTitle = ({
   // rule type id first — they'd otherwise match the generic alert branch below.
   const isAttack = useMemo(() => isAttackDocument(hit), [hit]);
   const attackTitle = useMemo(() => getAttackTitleValue(hit), [hit]);
+  const isPreview = useMemo(() => isRulePreviewDocument(hit), [hit]);
 
   const isAlert = useMemo(
     () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
@@ -87,7 +93,10 @@ export const useDocumentFlyoutTitle = ({
   // must be opened with openAttackFlyoutAsChild (which fetches via useTimelineEventsDetails against
   // the specific index). openDocumentFlyoutFromIndexAsChild uses useEsDocSearch against the default
   // data view and returns NotFound for attack documents.
-  const onTitleClick = useCallback(() => {
+  //
+  // Rule preview documents are transient and cannot be re-opened, so no click handler is
+  // provided — callers render the title as plain text in that case.
+  const onTitleClickImpl = useCallback(() => {
     if (isAttack) {
       openAttackFlyoutAsChild({
         attackId: hit.raw._id ?? '',
@@ -115,6 +124,8 @@ export const useDocumentFlyoutTitle = ({
     onAlertUpdated,
     sessionTitle,
   ]);
+
+  const onTitleClick = isPreview ? undefined : onTitleClickImpl;
 
   const badge = <DocumentSeverity hit={hit} />;
   const timestamp = <Timestamp hit={hit} size="xs" />;

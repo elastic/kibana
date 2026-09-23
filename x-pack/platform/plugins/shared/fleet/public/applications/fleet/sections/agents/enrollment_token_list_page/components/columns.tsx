@@ -6,13 +6,14 @@
  */
 
 import React from 'react';
-import { EuiIcon } from '@elastic/eui';
+import { EuiHealth } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedDate } from '@kbn/i18n-react';
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
 
 import { ApiKeyField } from '../../../../../../components/api_key_field';
+import { getEnrollmentTokenStatus } from '../../../../../../services';
 import type { EnrollmentAPIKey, GetAgentPoliciesResponseItem } from '../../../../types';
 import { getOneEnrollmentAPIKeyToken } from '../../../../hooks';
 
@@ -72,20 +73,39 @@ export const getColumns = ({
   },
   {
     field: 'active',
-    name: i18n.translate('xpack.fleet.enrollmentTokensList.activeTitle', {
-      defaultMessage: 'Active',
+    name: i18n.translate('xpack.fleet.enrollmentTokensList.statusTitle', {
+      defaultMessage: 'Status',
     }),
-    width: '80px',
-    render: (active: boolean) =>
-      active ? (
-        <EuiIcon
-          type="dot"
-          color="success"
-          aria-label={i18n.translate('xpack.fleet.enrollmentTokensList.activeValue', {
+    width: '110px',
+    render: (_active: boolean, apiKey: EnrollmentAPIKey) => {
+      const status = getEnrollmentTokenStatus(apiKey);
+      const { color, label } = {
+        active: {
+          color: 'success',
+          label: i18n.translate('xpack.fleet.enrollmentTokensList.activeValue', {
             defaultMessage: 'Active',
-          })}
-        />
-      ) : null,
+          }),
+        },
+        expired: {
+          color: 'warning',
+          label: i18n.translate('xpack.fleet.enrollmentTokensList.expiredValue', {
+            defaultMessage: 'Expired',
+          }),
+        },
+        inactive: {
+          color: 'subdued',
+          label: i18n.translate('xpack.fleet.enrollmentTokensList.inactiveValue', {
+            defaultMessage: 'Inactive',
+          }),
+        },
+      }[status];
+
+      return (
+        <EuiHealth color={color} data-test-subj={`enrollmentTokenTable.${status}Status`}>
+          {label}
+        </EuiHealth>
+      );
+    },
   },
   {
     field: 'actions',

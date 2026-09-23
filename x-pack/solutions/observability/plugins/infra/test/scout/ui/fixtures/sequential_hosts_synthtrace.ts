@@ -23,16 +23,7 @@ import type {
   SynthtraceGenerator,
 } from '@kbn/synthtrace-client';
 import { Readable } from 'stream';
-import {
-  DATE_WITH_HOSTS_DATA_FROM,
-  DATE_WITH_HOSTS_DATA_TO,
-  DATE_WITH_SEMCONV_DATA_FROM,
-  DATE_WITH_SEMCONV_DATA_TO,
-  HOST_NAME_WITH_SERVICES,
-  HOSTS,
-  SEMCONV_HOSTS,
-  SERVICE_PER_HOST_COUNT,
-} from './constants';
+import { HOST_NAME_WITH_SERVICES, HOSTS, SEMCONV_HOSTS, SERVICE_PER_HOST_COUNT } from './constants';
 import { generateAddServicesToExistingHost } from './synthtrace/add_services_to_existing_hosts';
 import { generateHostData } from './synthtrace/host_data';
 import { generateLogsDataForHostsOrContainers } from './synthtrace/logs_data_for_hosts_or_containers';
@@ -45,6 +36,11 @@ export interface SequentialSynthtraceWorkerDeps {
   kbnUrl: KibanaUrl;
   log: ScoutLogger;
   config: ScoutTestConfig;
+}
+
+interface SequentialSynthtraceTimeRange {
+  from: string;
+  to: string;
 }
 
 type SynthtraceClientName = 'infraEsClient' | 'logsEsClient' | 'apmEsClient';
@@ -209,13 +205,14 @@ const indexApm = async (
 };
 
 export const ingestHostsFlyoutSynthtraceData = async (
-  deps: SequentialSynthtraceWorkerDeps
+  deps: SequentialSynthtraceWorkerDeps,
+  { from, to }: SequentialSynthtraceTimeRange
 ): Promise<void> => {
   await indexInfra(
     deps,
     generateHostData({
-      from: DATE_WITH_HOSTS_DATA_FROM,
-      to: DATE_WITH_HOSTS_DATA_TO,
+      from,
+      to,
       hosts: HOSTS,
     })
   );
@@ -223,8 +220,8 @@ export const ingestHostsFlyoutSynthtraceData = async (
   await indexLogs(
     deps,
     generateLogsDataForHostsOrContainers({
-      from: DATE_WITH_HOSTS_DATA_FROM,
-      to: DATE_WITH_HOSTS_DATA_TO,
+      from,
+      to,
       hostNames: HOSTS.map((host) => host.hostName),
     })
   );
@@ -232,8 +229,8 @@ export const ingestHostsFlyoutSynthtraceData = async (
   await indexApm(
     deps,
     generateAddServicesToExistingHost({
-      from: DATE_WITH_HOSTS_DATA_FROM,
-      to: DATE_WITH_HOSTS_DATA_TO,
+      from,
+      to,
       hostName: HOST_NAME_WITH_SERVICES,
       servicesPerHost: SERVICE_PER_HOST_COUNT,
     })
@@ -292,13 +289,14 @@ export const cleanHostsFlyoutSynthtraceData = async (
 };
 
 export const ingestSemconvHostsSynthtraceData = async (
-  deps: SequentialSynthtraceWorkerDeps
+  deps: SequentialSynthtraceWorkerDeps,
+  { from, to }: SequentialSynthtraceTimeRange
 ): Promise<void> => {
   await indexInfra(
     deps,
     generateSemconvHostData({
-      from: DATE_WITH_SEMCONV_DATA_FROM,
-      to: DATE_WITH_SEMCONV_DATA_TO,
+      from,
+      to,
       hosts: SEMCONV_HOSTS,
     })
   );

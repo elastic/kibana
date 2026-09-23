@@ -200,9 +200,9 @@ describe('BasicTransitionStrategy', () => {
     it.each<[AlertEpisodeStatus, AlertEpisodeStatus]>([
       [alertEpisodeStatus.inactive, alertEpisodeStatus.inactive],
       [alertEpisodeStatus.pending, alertEpisodeStatus.inactive],
-      [alertEpisodeStatus.active, alertEpisodeStatus.recovering],
+      [alertEpisodeStatus.active, alertEpisodeStatus.inactive],
       [alertEpisodeStatus.recovering, alertEpisodeStatus.inactive],
-    ])("'recover' transitions %s → %s (mirrors recovered-event FSM)", (from, to) => {
+    ])("'recover' transitions %s → %s (resolves immediately to inactive)", (from, to) => {
       const result = getNextState({
         eventStatus: alertEventStatus.no_data,
         noDataStrategy: 'recover',

@@ -81,7 +81,7 @@ export const USEFUL_LINKS = i18n.translate(
 export const EA_DASHBOARD_LINK = i18n.translate(
   'xpack.securitySolution.riskScore.riskScorePreview.eaDocsDashboard',
   {
-    defaultMessage: 'Entity Analytics dashboard',
+    defaultMessage: 'Entity analytics',
   }
 );
 
@@ -303,6 +303,13 @@ export const APPLIED_TO_RISK_SCORES_OF = i18n.translate(
 export const REMOVE_FILTER = i18n.translate('xpack.securitySolution.riskScore.removeFilter', {
   defaultMessage: 'Remove filter',
 });
+
+export const FILTER_DETAILS_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.riskScore.filterDetailsAriaLabel',
+  {
+    defaultMessage: 'Alert filter details',
+  }
+);
 
 export const SAVE_FILTERS = i18n.translate('xpack.securitySolution.riskScore.saveFilters', {
   defaultMessage: 'Save changes',

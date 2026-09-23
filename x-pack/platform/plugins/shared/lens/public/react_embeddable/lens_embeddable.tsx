@@ -200,6 +200,10 @@ export const createLensEmbeddableFactory = (
           ...stateConfig.api,
           ...dashboardConfig.api,
           supportsJsonExport: true,
+          cancelRequests: (reason) => {
+            const abortController = internalApi.expressionAbortController$.getValue();
+            abortController.abort(reason);
+          },
         }
       );
 
@@ -212,7 +216,9 @@ export const createLensEmbeddableFactory = (
         api,
         parentApi,
         internalApi,
-        services
+        services,
+        undefined,
+        searchContextConfig.internalApi.setApproximationApplied
       );
 
       const onUnmount = () => {

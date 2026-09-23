@@ -3,23 +3,23 @@ apiVersion: backstage.io/v1alpha1
 kind: Resource
 metadata:
   name: bk-kibana-code-quality-fallow
-  description: Weekly code quality analysis for search-kibana and workchat-eng using fallow
+  description: Weekly code quality analysis for search-ml-ux and workchat-eng using fallow
   links:
     - url: 'https://buildkite.com/elastic/kibana-code-quality-fallow'
       title: Pipeline link
 spec:
   type: buildkite-pipeline
-  owner: 'group:search-kibana'
+  owner: 'group:search-ml-ux'
   system: buildkite
   implementation:
     apiVersion: buildkite.elastic.dev/v1
     kind: Pipeline
     metadata:
       name: kibana / code-quality-fallow
-      description: Weekly code quality analysis for search-kibana and workchat-eng using fallow
+      description: Weekly code quality analysis for search-ml-ux and workchat-eng using fallow
     spec:
       env:
-        SLACK_NOTIFICATIONS_CHANNEL: '#search-kibana'
+        SLACK_NOTIFICATIONS_CHANNEL: '#search-ml-ux'
         KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'true'
         FALLOW_SAVE_SNAPSHOT: 'true'
       schedules:
@@ -40,7 +40,7 @@ spec:
         prefix_pull_request_fork_branch_names: false
         skip_pull_request_builds_for_existing_commits: true
       teams:
-        search-kibana:
+        search-ml-ux:
           access_level: MANAGE_BUILD_AND_READ
         kibana-operations:
           access_level: MANAGE_BUILD_AND_READ

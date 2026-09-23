@@ -14,11 +14,12 @@
 
 import type { SavedObjectsFindResult } from '@kbn/core-saved-objects-api-server';
 import { i18n } from '@kbn/i18n';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import { getSavedObjectKqlFilter } from '../../common';
 import type { MonitorConfigUpdate } from '../bulk_cruds/edit_monitor_bulk';
 import { mergeSourceMonitor } from '../formatters/saved_object_to_monitor';
 import {
-  assertCanUpdateMonitorInAllSpaces,
+  assertCanPerformMonitorBulkActionInAllSpaces,
   validateMonitorPrivateLocationSpaces,
 } from '../monitor_locations_utils';
 import { normalizeAPIConfig, validateMonitor } from '../monitor_validation';
@@ -28,6 +29,7 @@ import { ELASTIC_MANAGED_LOCATIONS_DISABLED } from '../project_monitor/add_monit
 import type { RouteContext } from '../../types';
 import {
   ConfigKey,
+  SourceType,
   type EncryptedSyntheticsMonitor,
   type MonitorFields,
   type SyntheticsMonitor,
@@ -76,7 +78,7 @@ export class UpdateMonitorAPI {
   private locationPermissionsPromise?: ReturnType<typeof validateLocationPermissions>;
   private readonly spacePermissionCache = new Map<
     string,
-    ReturnType<typeof assertCanUpdateMonitorInAllSpaces>
+    ReturnType<typeof assertCanPerformMonitorBulkActionInAllSpaces>
   >();
 
   constructor(routeContext: RouteContext) {
@@ -92,10 +94,11 @@ export class UpdateMonitorAPI {
 
     const decryptedMonitors = await this.findDecryptedMonitors(ids);
     this.markNotFound(ids, decryptedMonitors);
+    const maintenanceWindows = await this.getMaintenanceWindows(decryptedMonitors, patchById);
 
     for (const decryptedMonitor of decryptedMonitors) {
       const patch = patchById.get(decryptedMonitor.id) ?? {};
-      await this.processMonitor(decryptedMonitor, patch);
+      await this.processMonitor(decryptedMonitor, patch, maintenanceWindows);
     }
 
     await this.rejectNameConflictsWithExistingMonitors(updates);
@@ -115,6 +118,28 @@ export class UpdateMonitorAPI {
     return monitorConfigRepository.findDecryptedMonitors({ spaceId, filter });
   }
 
+  private async getMaintenanceWindows(
+    decryptedMonitors: Array<SavedObjectsFindResult<SyntheticsMonitorWithSecretsAttributes>>,
+    patchById: Map<string, Partial<EncryptedSyntheticsMonitor>>
+  ): Promise<MaintenanceWindow[] | undefined> {
+    // Bulk updates can include non-`ui` monitors that still need MW ref
+    // resolution (e.g. enable/disable), matching the single-edit route.
+    const hasMaintenanceWindowRefs = decryptedMonitors.some((monitor) => {
+      const patch = patchById.get(monitor.id);
+      const refs =
+        patch?.[ConfigKey.MAINTENANCE_WINDOWS] ?? monitor.attributes[ConfigKey.MAINTENANCE_WINDOWS];
+      return (refs?.length ?? 0) > 0;
+    });
+
+    if (!hasMaintenanceWindowRefs) {
+      return undefined;
+    }
+
+    return this.routeContext.syntheticsMonitorClient.syntheticsService.getMaintenanceWindows(
+      this.routeContext.spaceId
+    );
+  }
+
   private markNotFound(
     ids: string[],
     decryptedMonitors: Array<SavedObjectsFindResult<SyntheticsMonitorWithSecretsAttributes>>
@@ -132,11 +157,12 @@ export class UpdateMonitorAPI {
 
   private async processMonitor(
     decryptedMonitor: SavedObjectsFindResult<SyntheticsMonitorWithSecretsAttributes>,
-    patch: Partial<EncryptedSyntheticsMonitor>
+    patch: Partial<EncryptedSyntheticsMonitor>,
+    maintenanceWindows?: MaintenanceWindow[]
   ) {
     const monitorId = decryptedMonitor.id;
 
-    if (this.shouldRejectProjectMonitor(decryptedMonitor.attributes)) {
+    if (this.shouldRejectProjectMonitor(decryptedMonitor.attributes, patch)) {
       this.result.perIdErrors[monitorId] = {
         code: 'invalid_origin',
         message: invalidOriginMessage(decryptedMonitor.attributes[ConfigKey.MONITOR_SOURCE_TYPE]),
@@ -176,7 +202,8 @@ export class UpdateMonitorAPI {
       normalizedMonitor = await editMonitorAPI.normalizeMonitor(
         (formattedConfig ?? merged) as CreateMonitorPayLoad,
         patch as CreateMonitorPayLoad,
-        (prevAttrs as MonitorFields)[ConfigKey.LOCATIONS]
+        (prevAttrs as MonitorFields)[ConfigKey.LOCATIONS],
+        maintenanceWindows
       );
     } catch (error) {
       this.result.perIdErrors[monitorId] = {
@@ -221,10 +248,19 @@ export class UpdateMonitorAPI {
     this.result.survivors.push(this.buildSurvivor(decryptedMonitor, decodedMonitor, prevAttrs));
   }
 
-  // Rejects non-ui-origin monitors (project, terraform) — same policy as the single PUT.
-  // To allow patches on project monitors in future, this is the seam to extend.
-  private shouldRejectProjectMonitor(prevAttrs: SyntheticsMonitorWithSecretsAttributes): boolean {
-    return prevAttrs[ConfigKey.MONITOR_SOURCE_TYPE] !== 'ui';
+  // Non-`ui` monitors (project, terraform) are config-managed at their source, so
+  // arbitrary bulk patches stay rejected. The one exception is the operational
+  // enable/disable toggle: an `enabled`-only patch is allowed and reconciled back
+  // to source on the next push (via the CONFIG_HASH reset in `buildSurvivor`),
+  // mirroring the single-edit `internal` enable/disable flow.
+  private shouldRejectProjectMonitor(
+    prevAttrs: SyntheticsMonitorWithSecretsAttributes,
+    patch: Partial<EncryptedSyntheticsMonitor>
+  ): boolean {
+    if (prevAttrs[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.UI) {
+      return false;
+    }
+    return !isEnabledOnlyPatch(patch);
   }
 
   // Validation runs on the decrypted shape; `formatSecrets` is deferred to
@@ -364,7 +400,7 @@ export class UpdateMonitorAPI {
     }
 
     /*
-     * `assertCanUpdateMonitorInAllSpaces` returns a Kibana response object on
+     * `assertCanPerformMonitorBulkActionInAllSpaces` returns a Kibana response object on
      * failure (designed for single-PUT early-return). We can't put that in a
      * per-id slot, so collapse to a generic forbidden message. The privilege
      * was already audit-logged by core.
@@ -386,11 +422,15 @@ export class UpdateMonitorAPI {
   private assertCanUpdateInSpaces(
     spaceIds: string[],
     savedObjectType: string
-  ): ReturnType<typeof assertCanUpdateMonitorInAllSpaces> {
+  ): ReturnType<typeof assertCanPerformMonitorBulkActionInAllSpaces> {
     const key = `${savedObjectType}::${[...new Set(spaceIds)].sort().join(',')}`;
     let cached = this.spacePermissionCache.get(key);
     if (!cached) {
-      cached = assertCanUpdateMonitorInAllSpaces(this.routeContext, spaceIds, savedObjectType);
+      cached = assertCanPerformMonitorBulkActionInAllSpaces(
+        this.routeContext,
+        spaceIds,
+        savedObjectType
+      );
       this.spacePermissionCache.set(key, cached);
     }
     return cached;
@@ -448,10 +488,17 @@ const notFoundMessage = (id: string) =>
     values: { id },
   });
 
+// The only field a non-`ui` monitor may be bulk-patched with (operational
+// enable/disable toggle); every other field must be changed at its source.
+const isEnabledOnlyPatch = (patch: Partial<EncryptedSyntheticsMonitor>): boolean => {
+  const keys = Object.keys(patch);
+  return keys.length === 1 && keys[0] === ConfigKey.ENABLED;
+};
+
 const invalidOriginMessage = (origin: string | undefined) =>
   i18n.translate('xpack.synthetics.server.bulkUpdate.invalidOrigin', {
     defaultMessage:
-      'Monitors of origin "{origin}" cannot be edited via the bulk update API. Use the dedicated workflow for that origin instead.',
+      'Monitors of origin "{origin}" can only be enabled or disabled via the bulk update API. Update any other fields from their source instead.',
     values: { origin: origin ?? 'unknown' },
   });
 

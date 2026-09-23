@@ -9,6 +9,8 @@ import type {
   BulkByIdsParams,
   BulkByQueryParams,
   BulkByQueryResult,
+  BulkCreateRulesParams,
+  BulkCreateRulesResponse,
   BulkResponse,
   CreateRuleData,
   DryRunResponse,
@@ -17,12 +19,16 @@ import type {
   RuleResponse,
   UpdateRuleData,
 } from '@kbn/alerting-v2-schemas';
+import type { SavedObjectReference } from '@kbn/core/server';
+import type { RuleSavedObjectAttributes } from '../../saved_objects';
 
 /** Re-exported from the shared schemas package. */
 export type {
   BulkByIdsParams,
   BulkByQueryParams,
   BulkByQueryResult,
+  BulkCreateRulesParams,
+  BulkCreateRulesResponse,
   BulkResponse,
   CreateRuleData,
   DryRunResponse,
@@ -34,12 +40,21 @@ export type {
 
 export type BulkOperationError = BulkResponse['errors'][number];
 
+/** An enabled rule whose executor task API key is a candidate for rotation. */
+export interface RotationCandidate {
+  id: string;
+  taskId: string;
+  attrs: RuleSavedObjectAttributes;
+  version?: string;
+  references: SavedObjectReference[];
+}
+
 export interface CreateRuleParams {
   data: CreateRuleData;
   options?: { id?: string };
 }
 
-export interface FindRulesParams {
+export interface FindRulesArgs {
   page?: number;
   perPage?: number;
   filter?: string;

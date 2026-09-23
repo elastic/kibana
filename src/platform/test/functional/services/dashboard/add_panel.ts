@@ -66,7 +66,7 @@ export class DashboardAddPanelService extends FtrService {
   async clickAddLensPanel() {
     this.log.debug('DashboardAddPanel.clickAddLensPanel');
     await this.openAddPanelFlyout();
-    await this.clickAddNewPanelFromUIActionLink('Visualization');
+    await this.clickAddNewPanelFromUIActionLink('Create visualization');
     await this.header.waitUntilLoadingHasFinished();
     await this.testSubjects.existOrFail('lnsApp', {
       timeout: 5000,
@@ -88,7 +88,7 @@ export class DashboardAddPanelService extends FtrService {
   async clickAddEsqlPanel() {
     this.log.debug('DashboardAddPanel.clickAddEsqlPanel');
     await this.openAddPanelFlyout();
-    await this.clickAddNewPanelFromUIActionLink('Visualization (query)');
+    await this.clickAddNewPanelFromUIActionLink('Create visualization (query)');
   }
 
   async clickAddDiscoverPanel() {

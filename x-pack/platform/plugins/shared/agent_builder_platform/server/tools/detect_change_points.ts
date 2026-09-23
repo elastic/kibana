@@ -20,7 +20,7 @@ import {
   hasChangePointCommand,
   getChangePointSeriesColumns,
   getChangePointOutputColumnNames,
-  getChangePointEntityColumns,
+  getChangePointByColumns,
   buildChangePointLineDataQuery,
   appendEntityFiltersToChangePointLineEsql,
 } from '@kbn/esql-utils';
@@ -84,6 +84,13 @@ The tool will:
 Set save_charts = true ONLY when the user explicitly asks to save charts or add them to a dashboard.
 
 Do NOT call this tool unless the user explicitly requests change point analysis.`,
+    annotations: {
+      title: 'Detect Change Points',
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false,
+      openWorldHint: false,
+    },
     schema: detectChangePointsSchema,
     tags: [],
     handler: async (
@@ -132,7 +139,7 @@ Do NOT call this tool unless the user explicitly requests change point analysis.
 
       const { valueColumn, timeColumn } = seriesColumns;
       const { typeColumn, pvalueColumn } = outputColumns;
-      const entityColumns = getChangePointEntityColumns(query);
+      const entityColumns = getChangePointByColumns(query) ?? [];
 
       const timeRange = resolveTimeRange(attachments, explicitTimeRange);
       const timeRangeParams = buildTimeRangeParams(timeRange) ?? [];

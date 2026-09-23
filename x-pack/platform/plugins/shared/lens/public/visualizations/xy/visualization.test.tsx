@@ -3195,6 +3195,71 @@ describe('xy_visualization', () => {
         ]);
       });
 
+      it('should defer the wrong-data-type error for an ES|QL layer until its activeData is available', () => {
+        mockDatasource.publicAPIMock.isTextBasedLanguage.mockReturnValue(true);
+        expect(
+          getErrorMessages(
+            xyVisualization,
+            {
+              ...exampleState(),
+              layers: [
+                {
+                  layerId: 'first',
+                  layerType: layerTypes.DATA,
+                  seriesType: 'area',
+                  splitAccessors: ['d'],
+                  xAccessor: 'a',
+                  accessors: ['b'],
+                },
+              ],
+            },
+            // No activeData yet: the ES|QL column type is only known once the query has run, so the
+            // blocking error must be deferred, otherwise the expression that resolves the real type
+            // would never run.
+            { datasourceLayers: frame.datasourceLayers, dataViews: {} as DataViewsState }
+          )
+        ).toEqual([]);
+      });
+
+      it('should return the wrong-data-type error for an ES|QL layer once activeData resolves the column as non-numeric', () => {
+        mockDatasource.publicAPIMock.isTextBasedLanguage.mockReturnValue(true);
+        expect(
+          getErrorMessages(
+            xyVisualization,
+            {
+              ...exampleState(),
+              layers: [
+                {
+                  layerId: 'first',
+                  layerType: layerTypes.DATA,
+                  seriesType: 'area',
+                  splitAccessors: ['d'],
+                  xAccessor: 'a',
+                  accessors: ['b'],
+                },
+              ],
+            },
+            {
+              datasourceLayers: frame.datasourceLayers,
+              dataViews: {} as DataViewsState,
+              activeData: {
+                first: {
+                  type: 'datatable',
+                  columns: [{ id: 'b', name: 'b', meta: { type: 'string' } }],
+                  rows: [],
+                },
+              },
+            } as Partial<FramePublicAPI>
+          )
+        ).toEqual([
+          {
+            shortMessage: 'Wrong data type for Vertical axis.',
+            longMessage:
+              'The dimension MyOperation provided for the Vertical axis has the wrong data type. Expected number but have string',
+          },
+        ]);
+      });
+
       it('should return an error if two incompatible xAccessors (multiple layers) are used', () => {
         // current incompatibility is only for date and numeric histograms as xAccessors
         const datasourceLayers = {
@@ -4457,7 +4522,7 @@ describe('xy_visualization', () => {
           ],
           annotationGroups
         )
-      ).not.toThrowError();
+      ).not.toThrow();
     });
   });
 
@@ -4587,6 +4652,25 @@ describe('xy_visualization', () => {
       expect((newState.layers[0] as XYDataLayerConfig).seriesType).toEqual(newType);
       expect((newState.layers[1] as XYDataLayerConfig).seriesType).toEqual('area');
       expect((newState.layers[2] as XYDataLayerConfig).seriesType).toEqual('area');
+    });
+
+    describe('areaFill defaulting', () => {
+      it('applies the solid default when an area layer is introduced', () => {
+        const state = exampleState();
+        (state.layers[0] as XYDataLayerConfig).seriesType = 'bar';
+        expect(state.areaFill).toBeUndefined();
+        const newState = xyVisualization.switchVisualizationType!('area', state);
+        expect((newState.layers[0] as XYDataLayerConfig).seriesType).toEqual('area');
+        expect(newState.areaFill).toEqual('solid');
+      });
+
+      it('preserves an existing areaFill when switching area subtypes', () => {
+        const state = exampleState();
+        state.areaFill = 'gradient';
+        (state.layers[0] as XYDataLayerConfig).seriesType = 'area';
+        const newState = xyVisualization.switchVisualizationType!('area_stacked', state);
+        expect(newState.areaFill).toEqual('gradient');
+      });
     });
   });
 });

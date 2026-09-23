@@ -7,7 +7,7 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type { ComponentType, ReactNode } from 'react';
+import type { ComponentType, ReactNode, MutableRefObject } from 'react';
 import type { CommonProps } from '@elastic/eui';
 import type { ParsedArgData, ParsedCommandInterface, PossibleArgDataTypes } from './service/types';
 import type { CommandExecutionResultComponent } from './components/command_execution_result';
@@ -25,8 +25,18 @@ export interface CommandArgDefinition {
    * the user has entered the argument name - it does not validate that the argument must have a
    * value. Arguments that have no value entered by the user have (by default) a value of
    * `true` boolean.
+   *
+   * NOTE: an argument should not be both `required` and `conditionallyRequired`.
    */
   required: boolean;
+
+  /**
+   * Indicates that this argument is required only when one of the other arguments in the
+   * list defined is used by the user
+   *
+   * NOTE: an argument should not be both `required` and `conditionallyRequired`.
+   */
+  conditionallyRequired?: string[];
 
   /** If argument can be used multiple times */
   allowMultiples: boolean;
@@ -38,24 +48,26 @@ export interface CommandArgDefinition {
   about: ReactNode;
 
   /**
-   * If argument (when used) should have a value defined by the user.
-   * Default is `false` which mean that argument can be entered without any value - internally the
-   * value for the argument will be a boolean `true`.
-   * When set to `true` the argument is expected to have a value that is non-boolean
-   * In addition, the following options can be used with this parameter to further validate the user's input:
+   * If argument (when used) should have a value defined by the user. Default is `false`
+   * This parameter supports the following values:
    *
-   * - `non-empty-string`: user's value must be a string whose length is greater than zero. Note that
-   *   the value entered will first be `trim()`'d.
-   * - `number`: user's value will be converted to a Number and ensured to be a `safe integer`
-   * - `number-greater-than-zero`: user's value must be a number greater than zero
-   * - `truthy`: The argument must have a value and the values must be "truthy" (evaluate to `Boolean` true)
+   * - `false`: argument does not accept a value from the user. Internally, the value for the
+   *            argument will be a boolean `true`.
+   * - `true`: the argument is expected to have a value that is non-boolean
+   * - `'non-empty-string'`: user's value must be a string whose length is greater than zero. Note that
+   *    the value entered will first be `trim()`'d.
+   * - `'number'`: user's value will be converted to a Number and ensured to be a `safe integer`
+   * - `'number-greater-than-zero'`: user's value must be a number greater than zero
+   * - `'truthy'`: The argument must have a value and the values must be "truthy" (evaluate to `Boolean` true)
    */
   mustHaveValue?: boolean | 'non-empty-string' | 'number' | 'number-greater-than-zero' | 'truthy';
 
   /**
-   * Specifies that one or more arguments might be required, but only one of them can be used at a time.
+   * Indicates that the argument definition is part of a group of arguments (all sharing the same id) and
+   * that only one of them can be used at a time. Defining this property will make the argument group
+   * required for command input as long as it is not also defined as a conditionally required argument.
    */
-  exclusiveOr?: boolean;
+  exclusiveOrGroupId?: string;
 
   /**
    * Validate the individual values given to this argument.
@@ -349,9 +361,13 @@ export interface CommandArgumentValueSelectorProps<
    */
   command: Command<CommandDefinition<TMeta>, TArgs, TSelectorArgsState>;
 
+  /** API to the interacting with the console */
+  consoleApi: ConsoleApi;
+
   /**
    * Callback to request focus back to the console input after selector operations.
    * Should be called when the selector component closes or completes its interaction.
+   * @deprecated use `consoleApi` instead
    */
   requestFocus?: () => void;
 }
@@ -365,6 +381,17 @@ export interface CommandArgumentValueSelectorProps<
  */
 export type CommandArgumentValueSelectorComponent =
   ComponentType<CommandArgumentValueSelectorProps>;
+
+/**
+ * Interface that allows interacting with the console once it has already been rendered.
+ */
+export interface ConsoleApi {
+  /** Populate the console input with the provided command  */
+  setInput(command: string): void;
+
+  /** Set focus on the console input area */
+  setFocusOnInput(): void;
+}
 
 export interface ConsoleProps extends CommonProps {
   /**
@@ -385,6 +412,12 @@ export interface ConsoleProps extends CommonProps {
 
   /** The string to display to the left of the input area */
   prompt?: string;
+
+  /**
+   * If provided, it will add the console's API to the `current` property. The API returned
+   * allows for interacting with the console from outside the component.
+   */
+  apiRef?: MutableRefObject<ConsoleApi | undefined>;
 
   /**
    * If defined, certain console data (ex. command input history) will be persisted to localstorage

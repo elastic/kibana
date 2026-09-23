@@ -8,31 +8,79 @@
 import type { StepResult } from '../steps/pipeline_types';
 
 export interface RunMetrics {
-  scoresWrittenBase: number;
-  scoresWrittenResolution: number;
-  scoresWrittenResetToZero: number;
+  scoresWrittenRiskIndexBase: number;
+  scoresWrittenRiskIndexResolution: number;
+  scoresWrittenRiskIndexResetToZero: number;
+  // Entity-store successful writes (0 when dual-write disabled)
+  scoresWrittenEntityStoreBase: number;
+  scoresWrittenEntityStoreResolution: number;
+  scoresWrittenEntityStoreResetToZero: number;
+  // Phase 1 scores calculated from alerts before the not_in_store filter
+  scoresCalculatedBase: number;
+  // Missing-at-lookup scores not recovered by creation
+  scoresDroppedNotInStore: number;
+  // Scores missing at lookup time, before creation
+  scoresMissingFromStoreBase: number;
+  scoresFailedBase: number;
+  scoresFailedResolution: number;
+  scoresFailedResetToZero: number;
   pagesProcessed: number;
   lookupPrunedDocs: number;
+  /** Entities created by the create-if-missing path during base scoring. */
+  entitiesCreated: number;
+  /** Missing scores not written because no alert was found or policy rejected them. */
+  entitiesCreateSkipped: number;
+  /** Missing scores rejected by EUID/field validation or bulk creation. */
+  entitiesCreateFailed: number;
 }
 
 const METRIC_KEYS: ReadonlyArray<keyof RunMetrics> = [
-  'scoresWrittenBase',
-  'scoresWrittenResolution',
-  'scoresWrittenResetToZero',
+  'scoresWrittenRiskIndexBase',
+  'scoresWrittenRiskIndexResolution',
+  'scoresWrittenRiskIndexResetToZero',
+  'scoresWrittenEntityStoreBase',
+  'scoresWrittenEntityStoreResolution',
+  'scoresWrittenEntityStoreResetToZero',
+  'scoresCalculatedBase',
+  'scoresDroppedNotInStore',
+  'scoresMissingFromStoreBase',
+  'scoresFailedBase',
+  'scoresFailedResolution',
+  'scoresFailedResetToZero',
   'pagesProcessed',
   'lookupPrunedDocs',
+  'entitiesCreated',
+  'entitiesCreateSkipped',
+  'entitiesCreateFailed',
 ];
 
 const emptyMetrics = (): RunMetrics => ({
-  scoresWrittenBase: 0,
-  scoresWrittenResolution: 0,
-  scoresWrittenResetToZero: 0,
+  scoresWrittenRiskIndexBase: 0,
+  scoresWrittenRiskIndexResolution: 0,
+  scoresWrittenRiskIndexResetToZero: 0,
+  scoresWrittenEntityStoreBase: 0,
+  scoresWrittenEntityStoreResolution: 0,
+  scoresWrittenEntityStoreResetToZero: 0,
+  scoresCalculatedBase: 0,
+  scoresDroppedNotInStore: 0,
+  scoresMissingFromStoreBase: 0,
+  scoresFailedBase: 0,
+  scoresFailedResolution: 0,
+  scoresFailedResetToZero: 0,
   pagesProcessed: 0,
   lookupPrunedDocs: 0,
+  entitiesCreated: 0,
+  entitiesCreateSkipped: 0,
+  entitiesCreateFailed: 0,
 });
 
-const scoresWrittenTotal = (metrics: RunMetrics): number =>
-  metrics.scoresWrittenBase + metrics.scoresWrittenResolution + metrics.scoresWrittenResetToZero;
+const scoresWrittenRiskIndexTotal = (metrics: RunMetrics): number =>
+  metrics.scoresWrittenRiskIndexBase +
+  metrics.scoresWrittenRiskIndexResolution +
+  metrics.scoresWrittenRiskIndexResetToZero;
+
+const scoresFailedTotal = (metrics: RunMetrics): number =>
+  metrics.scoresFailedBase + metrics.scoresFailedResolution + metrics.scoresFailedResetToZero;
 
 interface SummaryContext {
   namespace: string;
@@ -60,20 +108,40 @@ export const createRunMetricsTracker = () => {
     recordBase: (
       target: RunMetrics,
       summary: {
-        scoresWritten: number;
+        scoresWrittenRiskIndex: number;
+        scoresWrittenEntityStore: number;
+        scoresCalculated: number;
+        scoresDroppedNotInStore: number;
+        scoresMissingFromStore: number;
+        scoresFailed: number;
         pagesProcessed: number;
+        entitiesCreated: number;
+        entityCreationsSkipped: number;
+        entityCreationsFailed: number;
       }
     ) => {
-      target.scoresWrittenBase = summary.scoresWritten;
+      target.scoresWrittenRiskIndexBase = summary.scoresWrittenRiskIndex;
+      target.scoresWrittenEntityStoreBase = summary.scoresWrittenEntityStore;
+      target.scoresCalculatedBase = summary.scoresCalculated;
+      target.scoresDroppedNotInStore = summary.scoresDroppedNotInStore;
+      target.scoresMissingFromStoreBase = summary.scoresMissingFromStore;
+      target.scoresFailedBase = summary.scoresFailed;
       target.pagesProcessed = summary.pagesProcessed;
+      target.entitiesCreated = summary.entitiesCreated;
+      target.entitiesCreateSkipped = summary.entityCreationsSkipped;
+      target.entitiesCreateFailed = summary.entityCreationsFailed;
     },
 
     recordResolution: (target: RunMetrics, result: StepResult) => {
-      target.scoresWrittenResolution = result.scoresWritten;
+      target.scoresWrittenRiskIndexResolution = result.scoresWrittenRiskIndex;
+      target.scoresWrittenEntityStoreResolution = result.scoresWrittenEntityStore;
+      target.scoresFailedResolution = result.scoresFailed;
     },
 
     recordResetToZero: (target: RunMetrics, result: StepResult) => {
-      target.scoresWrittenResetToZero = result.scoresWritten;
+      target.scoresWrittenRiskIndexResetToZero = result.scoresWrittenRiskIndex;
+      target.scoresWrittenEntityStoreResetToZero = result.scoresWrittenEntityStore;
+      target.scoresFailedResetToZero = result.scoresFailed;
     },
 
     recordPrune: (target: RunMetrics, prunedDocs: number) => {
@@ -88,13 +156,15 @@ export const createRunMetricsTracker = () => {
 
     toRunSummary: (runMetrics: RunMetrics, context: RunSummaryContext) => ({
       ...context,
-      scoresWrittenTotal: scoresWrittenTotal(runMetrics),
+      scoresWrittenRiskIndexTotal: scoresWrittenRiskIndexTotal(runMetrics),
+      scoresFailedTotal: scoresFailedTotal(runMetrics),
       ...runMetrics,
     }),
 
     toAggregateSummary: (context: AggregateSummaryContext) => ({
       ...context,
-      scoresWrittenTotal: scoresWrittenTotal(aggregate),
+      scoresWrittenRiskIndexTotal: scoresWrittenRiskIndexTotal(aggregate),
+      scoresFailedTotal: scoresFailedTotal(aggregate),
       ...aggregate,
     }),
   };

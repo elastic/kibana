@@ -54,11 +54,11 @@ const mockExecuteEsql = executeEsql as jest.MockedFunction<typeof executeEsql>;
 
 /** Helper that narrows the union return type to the results-bearing branch. */
 const callTool = async (
-  params: Parameters<ReturnType<typeof detectChangePointsTool>['handler']>[0],
+  params: Parameters<ReturnType<typeof detectChangePointsTool>['schema']['parse']>[0],
   attachments?: AttachmentStateManager
 ): Promise<ToolHandlerStandardReturn> => {
   const tool = detectChangePointsTool();
-  const result = await tool.handler(params, {
+  const result = await tool.handler(tool.schema.parse(params), {
     esClient: mockEsClient,
     logger: mockLogger,
     attachments: attachments ?? createMockAttachments(),

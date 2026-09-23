@@ -8,15 +8,15 @@
  */
 
 import Path from 'path';
-import { rspack, type Compiler } from '@rspack/core';
+import type { Compiler } from '@rspack/core';
+import { rspack } from '../rspack_runtime';
 
 /**
  * Elastic License 2.0 banner for x-pack plugin bundles.
  *
- * This is the exact text the legacy webpack optimizer prepends to every output
- * chunk of x-pack plugin compilations via `webpack.BannerPlugin({ raw: true })`.
- * The `/*!` prefix ensures the comment survives minification (both SWC and
- * Terser preserve `/*!` comments by default).
+ * This text is prepended to every output chunk of x-pack plugins. The `/*!`
+ * prefix marks it as a legal comment so it survives any future
+ * re-minification.
  *
  * This is intentionally NOT the same as the triple-license source file header
  * (`TRIPLE_ELV2_SSPL1_AGPL3_LICENSE_HEADER` in `.eslintrc.js`) or the
@@ -31,16 +31,13 @@ export const XPACK_ELASTIC_LICENSE_BANNER =
  * Rspack plugin that selectively prepends the Elastic License 2.0 banner
  * to x-pack plugin chunks in the single compilation.
  *
- * The legacy webpack optimizer ran one compilation per plugin and used
- * `webpack.BannerPlugin` on each x-pack compilation. The rspack optimizer
- * uses a single compilation for all plugins, so this plugin identifies
- * x-pack chunks by their **chunk name** (e.g., `plugin-discover`) — stable
- * regardless of output filename hashing — and prepends the banner only to
- * those chunks' `.js` assets.
+ * Since the optimizer uses a single compilation for all plugins, this plugin
+ * identifies x-pack chunks by their **chunk name** (e.g., `plugin-discover`)
+ * — stable regardless of output filename hashing — and prepends the banner
+ * only to those chunks' `.js` assets.
  *
- * X-pack detection uses the same directory-prefix heuristic as the legacy
- * optimizer: plugins whose `contextDir` lives under `<repoRoot>/x-pack/`
- * are considered x-pack plugins.
+ * X-pack detection uses a directory-prefix heuristic: plugins whose
+ * `contextDir` lives under `<repoRoot>/x-pack/` are considered x-pack plugins.
  *
  * CSS is injected via `style-loader` (not extracted to files), so only
  * `.js` files need bannering. Shared vendor/split chunks contain third-party
@@ -64,7 +61,14 @@ export class XPackBannerPlugin {
       compilation.hooks.processAssets.tap(
         {
           name: 'XPackBannerPlugin',
-          stage: rspack.Compilation.PROCESS_ASSETS_STAGE_ADDITIONS,
+          // Runs after minification (PROCESS_ASSETS_STAGE_OPTIMIZE_SIZE = 400)
+          // because SWC minification strips legal comments with our minimizer
+          // options — in Rspack v1 and v2 alike — so a pre-minify banner never
+          // survived into dist bundles. Injecting post-minify makes the banner
+          // independent of minimizer comment settings. Still before
+          // BundleMetricsPlugin (PROCESS_ASSETS_STAGE_ANALYSE = 4000) so
+          // measured sizes include it.
+          stage: rspack.Compilation.PROCESS_ASSETS_STAGE_SUMMARIZE,
         },
         () => {
           for (const chunk of compilation.chunks) {

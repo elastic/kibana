@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, waitFor } from '@testing-library/react';
+import { fireEvent, render, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EuiThemeProvider } from '@elastic/eui';
 
@@ -32,12 +32,20 @@ jest.mock('../../../../hooks', () => ({
 }));
 
 const mockUseLocation = jest.fn();
+const mockHistoryReplace = jest.fn();
 jest.mock('react-router-dom', () => ({
   useLocation: () => mockUseLocation(),
-  useHistory: () => ({ push: jest.fn() }),
+  useHistory: () => ({ push: jest.fn(), replace: mockHistoryReplace }),
 }));
 
-jest.mock('./components/responsive_package_grid', () => ({ ResponsivePackageGrid: () => null }));
+// Capture the items prop so tests can invoke injected onCardClick handlers directly.
+let capturedFilteredCards: Array<{ isCollectionCard?: boolean; onCardClick?: () => void }> = [];
+jest.mock('./components/responsive_package_grid', () => ({
+  ResponsivePackageGrid: ({ items }: { items: any[] }) => {
+    capturedFilteredCards = items;
+    return null;
+  },
+}));
 jest.mock('./components/search_and_filters_bar', () => ({ SearchAndFiltersBar: () => null }));
 jest.mock('./components/side_bar', () => ({ Sidebar: () => null }));
 jest.mock('./components/no_data_prompt', () => ({ NoDataPrompt: () => null }));
@@ -46,6 +54,7 @@ jest.mock('./components/manage_integrations_table', () => ({
 }));
 jest.mock('../../components/no_epr_callout', () => ({ NoEprCallout: () => null }));
 
+import { OBLT_DEFAULT_CATEGORIES } from '../../../../../../../common/constants';
 import { BrowseIntegrationsPage } from '.';
 
 const ALL_CATEGORY = { id: '', title: 'All categories', count: 10 };
@@ -64,6 +73,7 @@ const makeDefaultHookReturn = (overrides = {}) => ({
   eprPackageLoadingError: undefined,
   eprCategoryLoadingError: undefined,
   filteredCards: [],
+  allCards: [],
   onCategoryChange: jest.fn(),
   availableSubCategories: [],
   ...overrides,
@@ -81,6 +91,7 @@ describe('BrowseIntegrationsPage', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    capturedFilteredCards = [];
     mockUseBrowseIntegrationHook.mockReturnValue(makeDefaultHookReturn());
     mockUseSetUrlDefaultCategories.mockReturnValue(mockSetUrlDefaultCategoriesFn);
     mockUseSetUrlCategory.mockReturnValue(mockSetUrlCategoryFn);
@@ -103,10 +114,9 @@ describe('BrowseIntegrationsPage', () => {
     it('sets both default categories as URL query params on first load in Observability projects', async () => {
       renderPage();
       await waitFor(() => {
-        expect(mockSetUrlDefaultCategoriesFn).toHaveBeenCalledWith(
-          ['opentelemetry', 'observability'],
-          { replace: true }
-        );
+        expect(mockSetUrlDefaultCategoriesFn).toHaveBeenCalledWith([...OBLT_DEFAULT_CATEGORIES], {
+          replace: true,
+        });
       });
     });
 
@@ -201,6 +211,97 @@ describe('BrowseIntegrationsPage', () => {
       await waitFor(() => {
         expect(mockSetUrlDefaultCategoriesFn).toHaveBeenCalledTimes(1);
       });
+    });
+  });
+
+  describe('collection flyout URL state', () => {
+    const nginxCollectionCard = {
+      id: 'collection:nginx',
+      name: 'nginx',
+      title: 'Nginx',
+      description: 'Nginx variants',
+      isCollectionCard: true,
+      url: '/app/integrations/browse',
+      categories: [],
+      icons: [],
+      integration: '',
+      version: '',
+      groupMembers: [
+        {
+          id: 'epr:nginx-1',
+          name: 'nginx',
+          title: 'Nginx',
+          description: 'Nginx standard',
+          url: '/app/integrations/detail/nginx-1.0/overview',
+          icons: [],
+          categories: [],
+          integration: '',
+          version: '1.0.0',
+        },
+      ],
+    };
+
+    it('renders the CollectionFlyout when ?collection=nginx is in the URL', async () => {
+      mockUseBrowseIntegrationHook.mockReturnValue(
+        makeDefaultHookReturn({ allCards: [nginxCollectionCard] })
+      );
+      mockUseLocation.mockReturnValue({
+        pathname: '/app/integrations/browse',
+        search: '?collection=nginx',
+      });
+      const { getByTestId } = renderPage();
+      await waitFor(() => {
+        expect(getByTestId('collectionFlyout')).toBeInTheDocument();
+      });
+    });
+
+    it('does not render the CollectionFlyout when no ?collection param is present', async () => {
+      mockUseBrowseIntegrationHook.mockReturnValue(
+        makeDefaultHookReturn({ allCards: [nginxCollectionCard] })
+      );
+      const { queryByTestId } = renderPage();
+      await waitFor(() => {
+        expect(queryByTestId('collectionFlyout')).not.toBeInTheDocument();
+      });
+    });
+
+    it('calls history.replace without the collection param when the flyout is closed', async () => {
+      mockUseBrowseIntegrationHook.mockReturnValue(
+        makeDefaultHookReturn({ allCards: [nginxCollectionCard] })
+      );
+      mockUseLocation.mockReturnValue({
+        pathname: '/app/integrations/browse',
+        search: '?collection=nginx',
+      });
+      const { getByLabelText } = renderPage();
+      await waitFor(() => getByLabelText('Close this dialog'));
+      fireEvent.click(getByLabelText('Close this dialog'));
+      expect(mockHistoryReplace).toHaveBeenCalledWith(
+        expect.objectContaining({ search: expect.not.stringContaining('collection') })
+      );
+    });
+
+    it('calls history.replace with the collection param when a collection card is clicked', async () => {
+      mockUseBrowseIntegrationHook.mockReturnValue(
+        makeDefaultHookReturn({
+          filteredCards: [nginxCollectionCard],
+          allCards: [nginxCollectionCard],
+        })
+      );
+      renderPage();
+
+      // BrowseIntegrationsPage overrides onCardClick on collection cards to call openCollection.
+      // Access it via the captured list prop on ResponsivePackageGrid.
+      await waitFor(() => {
+        expect(capturedFilteredCards.length).toBeGreaterThan(0);
+      });
+      const card = capturedFilteredCards.find((c) => c.isCollectionCard);
+      expect(card?.onCardClick).toBeDefined();
+      card!.onCardClick!();
+
+      expect(mockHistoryReplace).toHaveBeenCalledWith(
+        expect.objectContaining({ search: expect.stringContaining('collection=nginx') })
+      );
     });
   });
 });

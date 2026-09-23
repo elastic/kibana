@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { DiscoverSessionApiData } from '@kbn/as-code-discover-schema';
 import { asCodeIdSchema, getMeta } from '@kbn/as-code-shared-schemas';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { SavedSearchType } from '@kbn/saved-search-plugin/common';
 import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server';
-import type { DiscoverSessionApiData, DiscoverSessionApiResponse } from './schema';
+import type { DiscoverSessionApiResponse } from './schema';
 import { transformDiscoverSessionIn, transformDiscoverSessionOut } from './transforms';
 
 export const upsertDiscoverSession = async (
@@ -46,7 +47,7 @@ export const upsertDiscoverSession = async (
     }
 
     // Creating a session with an invalid legacy ID returns a 400 response.
-    asCodeIdSchema.validate(id);
+    asCodeIdSchema.parse(id);
   }
 
   const updateResponse = await core.savedObjects.client.update<DiscoverSessionAttributes>(
@@ -68,7 +69,7 @@ export const upsertDiscoverSession = async (
   return {
     body: {
       id: updated.id,
-      data: transformDiscoverSessionOut(updated.attributes, updated.references),
+      data: transformDiscoverSessionOut(updated.attributes, updated.references).sessionState,
       meta: getMeta(updated),
     },
     operation: updateResponse.created_at ? 'create' : 'update',

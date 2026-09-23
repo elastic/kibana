@@ -289,6 +289,61 @@ describe('persistTimeline', () => {
       });
     });
   });
+
+  describe('discover session title', () => {
+    const timelineId = '9d5693e0-a42a-11ea-b8f4-c5434162742a';
+    const version = 'initial version';
+    const saveSavedSearchMock = jest.fn();
+
+    const mockSavedSearch = {
+      id: 'savedSearchId',
+      // Stale on purpose: this is the snapshot the ES|QL tab took before the timeline was renamed
+      title: 'Saved Discover session for Timeline - Old name',
+      searchSource: createSearchSourceMock({
+        index: buildDataViewMock({ name: 'first-data-view', fields: deepMockedFields }),
+      }),
+      managed: false,
+    };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+
+      (KibanaServices.get as jest.Mock).mockReturnValue({
+        http: { patch: jest.fn().mockResolvedValue(mockPatchTimelineResponse) },
+        savedSearch: { save: saveSavedSearchMock },
+      });
+    });
+
+    test('derives the saved search title from the timeline title on save', async () => {
+      await api.persistTimeline({
+        timelineId,
+        version,
+        timeline: { ...timelineData, title: 'New name', savedSearchId: 'savedSearchId' },
+        savedSearch: mockSavedSearch,
+      });
+
+      expect(saveSavedSearchMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'Saved Discover session for Timeline - New name',
+        }),
+        { copyOnSave: false }
+      );
+    });
+
+    test('keeps the existing saved search title when the timeline has no title', async () => {
+      await api.persistTimeline({
+        timelineId,
+        version,
+        timeline: { ...timelineData, title: '', savedSearchId: 'savedSearchId' },
+        savedSearch: mockSavedSearch,
+      });
+
+      expect(saveSavedSearchMock).toHaveBeenCalledWith(
+        expect.objectContaining({ title: mockSavedSearch.title }),
+        { copyOnSave: false }
+      );
+    });
+  });
 });
 
 describe('importTimelines', () => {
@@ -345,7 +400,7 @@ describe('exportSelectedTimeline', () => {
   });
 
   test('should pass correct args to KibanaServices', () => {
-    expect(fetchMock).toBeCalledWith('/api/timeline/_export', {
+    expect(fetchMock).toHaveBeenCalledWith('/api/timeline/_export', {
       body: JSON.stringify({ ids }),
       method: 'POST',
       query: { file_name: 'timelines_export.ndjson' },
@@ -372,7 +427,7 @@ describe('getDraftTimeline', () => {
   });
 
   test('should pass correct args to KibanaServices', () => {
-    expect(getMock).toBeCalledWith('/api/timeline/_draft', {
+    expect(getMock).toHaveBeenCalledWith('/api/timeline/_draft', {
       query: timelineType,
       version: '2023-10-31',
     });
@@ -398,7 +453,7 @@ describe('cleanDraftTimeline', () => {
 
     api.cleanDraftTimeline(args);
 
-    expect(postMock).toBeCalledWith('/api/timeline/_draft', {
+    expect(postMock).toHaveBeenCalledWith('/api/timeline/_draft', {
       body: JSON.stringify(args),
       version: '2023-10-31',
     });
@@ -413,7 +468,7 @@ describe('cleanDraftTimeline', () => {
 
     api.cleanDraftTimeline(args);
 
-    expect(postMock).toBeCalledWith('/api/timeline/_draft', {
+    expect(postMock).toHaveBeenCalledWith('/api/timeline/_draft', {
       body: JSON.stringify(args),
       version: '2023-10-31',
     });
@@ -512,6 +567,27 @@ describe('copyTimeline', () => {
       expect.objectContaining({
         body: expect.stringContaining(ridiculousTimelineTitle),
       })
+    );
+  });
+
+  it('derives the copied saved search title from the timeline title', async () => {
+    jest.clearAllMocks();
+
+    await api.copyTimeline({
+      timelineId: 'test',
+      timeline: {
+        ...timelineData,
+        title: 'Copied timeline',
+        savedSearchId: 'test',
+      },
+      savedSearch: mockSavedSearch,
+    });
+
+    expect(saveSavedSearchMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'Saved Discover session for Timeline - Copied timeline',
+      }),
+      { copyOnSave: false }
     );
   });
 

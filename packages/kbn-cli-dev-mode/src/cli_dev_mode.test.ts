@@ -119,6 +119,7 @@ it('passes correct args to sub-classes', () => {
     Array [
       Array [
         Object {
+          "allowlistPluginGroups": undefined,
           "basePath": undefined,
           "cache": true,
           "dist": true,
@@ -319,7 +320,7 @@ describe('#start()/#stop()', () => {
       Array [
         Object {
           "args": Array [
-            "[@kbn/optimizer] fatal error",
+            "[@kbn/rspack-optimizer] fatal error",
             "Error: foo bar",
           ],
           "type": "bad",

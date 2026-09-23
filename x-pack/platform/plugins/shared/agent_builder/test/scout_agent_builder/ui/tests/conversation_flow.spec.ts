@@ -53,7 +53,7 @@ test.describe(
       );
 
       await expect(async () => {
-        await expect(page.testSubj.locator('agentBuilderRoundResponse')).toContainText(
+        await expect(page.testSubj.locator('agentBuilderResponseMessage')).toContainText(
           MOCKED_RESPONSE
         );
         await expect(page.testSubj.locator('agentBuilderConversationTitleButton')).toContainText(
@@ -64,10 +64,9 @@ test.describe(
         ).toContainText(MOCKED_TITLE);
       }).toPass({ timeout: 120_000 });
 
-      await expect(page.testSubj.locator('agentBuilderToolCallGroup')).toContainText(
-        '1 tool responded',
-        { timeout: 60_000 }
-      );
+      const toolCallStep = page.testSubj.locator('agentBuilderToolCallStep');
+      await expect(toolCallStep).toContainText('tool: platform.core.search', { timeout: 60_000 });
+      await expect(toolCallStep).toContainText('ran');
 
       await pageObjects.agentBuilder.clickNewConversationButton();
       await expect(async () => {

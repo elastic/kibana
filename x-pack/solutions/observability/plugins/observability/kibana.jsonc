@@ -20,7 +20,6 @@
       "embeddable",
       "fieldFormats",
       "uiActions",
-      "presentationUtil",
       "features",
       "files",
       "inspector",
@@ -41,7 +40,7 @@
       "esql",
       "savedObjectsTagging",
       "streams",
-      "kql"
+      "kql",
     ],
     "optionalPlugins": [
       "observabilityAgentBuilder",
@@ -51,6 +50,7 @@
       "discover",
       "exploratoryView",
       "home",
+      "globalSearch",
       "usageCollection",
       "cloud",
       "spaces",
@@ -59,7 +59,8 @@
       "investigate",
       "cps",
       "ingestHub",
-      "significant_events"
+      "significantEvents",
+      "nightshiftInvestigations",
     ],
     "requiredBundles": [
       "aiops",
@@ -70,10 +71,10 @@
       "logsShared",
       "kibanaReact",
       "kibanaUtils",
-      "significant_events",
+      "significantEvents",
       "stackAlerts",
-      "observabilityAgentBuilder"
+      "observabilityAgentBuilder",
     ],
-    "extraPublicDirs": ["common"]
-  }
+    "extraPublicDirs": ["common"],
+  },
 }

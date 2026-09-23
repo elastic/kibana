@@ -20,6 +20,7 @@ import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import type { UserStorageServiceStart } from '@kbn/core-user-storage-server';
+import type { UserSettings } from '@kbn/core-user-settings-server-internal';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import {
   type DarkModeValue,
@@ -40,7 +41,7 @@ import type {
   RenderingMetadata,
   RenderingStartDeps,
 } from './types';
-import { registerBootstrapRoute, bootstrapRendererFactory, isRspackModeEnabled } from './bootstrap';
+import { registerBootstrapRoute, bootstrapRendererFactory } from './bootstrap';
 import {
   getSettingValue,
   getCommonStylesheetPaths,
@@ -75,6 +76,7 @@ export class RenderingService {
   private readonly logger: Logger;
   private airgapped: boolean = false;
   private isCoreRenderingInReactConcurrentMode: boolean = true;
+  private exposeNavDependencies: boolean = false;
   private userStorageStart?: UserStorageServiceStart;
   constructor(private readonly coreContext: CoreContext) {
     this.logger = coreContext.logger.get('rendering');
@@ -120,6 +122,12 @@ export class RenderingService {
     this.isCoreRenderingInReactConcurrentMode = await firstValueFrom(
       this.coreContext.configService.atPath<boolean>('isCoreRenderingInReactConcurrentMode')
     ).catch(() => true);
+
+    this.exposeNavDependencies = await firstValueFrom(
+      this.coreContext.configService.atPath<{ exposeNavDependencies?: boolean }>('plugins')
+    )
+      .then((pluginsConfig) => pluginsConfig?.exposeNavDependencies ?? false)
+      .catch(() => false);
 
     registerBootstrapRoute({
       router: http.createRouter<InternalRenderingRequestHandlerContext>(''),
@@ -190,6 +198,7 @@ export class RenderingService {
       packageInfo: this.coreContext.env.packageInfo,
       airgapped: this.airgapped,
       isCoreRenderingInReactConcurrentMode: this.isCoreRenderingInReactConcurrentMode,
+      exposeNavDependencies: this.exposeNavDependencies,
     };
     const staticAssetsHrefBase = http.staticAssets.getHrefBase();
     const usingCdn = http.staticAssets.isUsingCdn();
@@ -203,9 +212,8 @@ export class RenderingService {
       defaultSettings,
       settingsUserValues = {},
       globalSettingsUserValues = {},
-      userSettingDarkMode,
-      userSettingLocale,
-      userStorageValues = {},
+      { darkMode: userSettingDarkMode, locale: userSettingLocale } = {},
+      userStorageResult = { available: false, values: {} },
     ] = await Promise.all(
       isAnonymousPage
         ? [uiSettings.client?.getRegistered() ?? {}]
@@ -213,19 +221,15 @@ export class RenderingService {
             withAsyncDefaultValues(request, uiSettings.client?.getRegistered()),
             uiSettings.client?.getUserProvided(true),
             uiSettings.globalClient?.getUserProvided(true),
-            // dark mode
-            userSettings?.getUserSettingDarkMode(request),
-            // locale
-            userSettings?.getUserSettingLocale(request),
+            userSettings?.getUserSettings(request),
             // user storage
             this.fetchUserStorage(request),
           ] as [
             ReturnType<typeof withAsyncDefaultValues>,
             Promise<Record<string, UserProvidedValues>>,
             Promise<Record<string, UserProvidedValues>>,
-            Promise<DarkModeValue> | undefined,
-            Promise<string> | undefined,
-            Promise<Record<string, unknown>>
+            Promise<UserSettings> | undefined,
+            Promise<{ available: boolean; values: Record<string, unknown> }>
           ])
     );
 
@@ -283,7 +287,12 @@ export class RenderingService {
     const configLocale = i18nLib.getLocale();
     const translationHashes = i18n.getTranslationHashes();
     const availableLocales = i18n.getAvailableLocales();
-    const { locale: effectiveLocale, setCookieHeader } = resolveLocale({
+    const {
+      locale: effectiveLocale,
+      setCookieHeader,
+      browserPreferredLocale,
+      source: localeSource,
+    } = resolveLocale({
       request,
       userSettingLocale,
       configLocale,
@@ -310,25 +319,22 @@ export class RenderingService {
     const filteredPlugins = filterUiPlugins({ uiPlugins, isAnonymousPage });
     const bootstrapScript = isAnonymousPage ? 'bootstrap-anonymous.js' : 'bootstrap.js';
 
-    const useRspack = isRspackModeEnabled();
     const uiPublicUrl = `${staticAssetsHrefBase}/ui`;
 
-    // Script preloads are intentionally removed for Rspack mode. Under HTTP/1.1
-    // (dev mode), <link rel="preload" as="script"> tags saturate the 6-connection
-    // limit and delay critical CSS, regressing FCP by ~4x. The bootstrap load()
-    // array already ensures all scripts are fetched with "High" priority via
-    // dynamic <script async=false> tags, so preloads provide no benefit and
-    // actively harm performance.
+    // Script preloads are intentionally omitted. Under HTTP/1.1 (dev mode),
+    // <link rel="preload" as="script"> tags saturate the 6-connection limit and
+    // delay critical CSS, regressing FCP by ~4x. The bootstrap load() array
+    // already ensures all scripts are fetched with "High" priority via dynamic
+    // <script async=false> tags, so preloads provide no benefit and actively
+    // harm performance.
     //
     // Font preloads are kept: they are small, high-priority, and give the browser
     // a head start on WOFF2 downloads during HTML parsing.
-    const preloadFonts = useRspack
-      ? [
-          `${uiPublicUrl}/fonts/inter/Inter-Regular.woff2`,
-          `${uiPublicUrl}/fonts/inter/Inter-Medium.woff2`,
-          `${uiPublicUrl}/fonts/inter/Inter-SemiBold.woff2`,
-        ]
-      : undefined;
+    const preloadFonts = [
+      `${uiPublicUrl}/fonts/inter/Inter-Regular.woff2`,
+      `${uiPublicUrl}/fonts/inter/Inter-Medium.woff2`,
+      `${uiPublicUrl}/fonts/inter/Inter-SemiBold.woff2`,
+    ];
 
     const metadata: RenderingMetadata = {
       strictCsp: http.csp.strict,
@@ -340,7 +346,7 @@ export class RenderingService {
       darkMode,
       stylesheetPaths: commonStylesheetPaths,
       preloadFonts,
-      optimizeFontLoading: useRspack || undefined,
+      optimizeFontLoading: true,
       customBranding: {
         faviconSVG: branding?.faviconSVG,
         faviconPNG: branding?.faviconPNG,
@@ -368,6 +374,10 @@ export class RenderingService {
         i18n: {
           translationsUrl,
           availableLocales: availableLocales.map(({ id, label }) => ({ id, label })),
+          locale: effectiveLocale,
+          browserPreferredLocale,
+          localeSource,
+          configDefaultLocale: configLocale,
         },
         theme: {
           darkMode,
@@ -400,7 +410,7 @@ export class RenderingService {
           uiSettings: settings,
           globalUiSettings: globalSettings,
         },
-        userStorage: { values: userStorageValues },
+        userStorage: userStorageResult,
       },
     };
 
@@ -416,15 +426,19 @@ export class RenderingService {
 
   public async stop() {}
 
-  private async fetchUserStorage(request: KibanaRequest): Promise<Record<string, unknown>> {
+  private async fetchUserStorage(
+    request: KibanaRequest
+  ): Promise<{ available: boolean; values: Record<string, unknown> }> {
     const userStorage = this.userStorageStart;
-    if (!userStorage) return {};
+    if (!userStorage) return { available: false, values: {} };
 
+    // A `null` scoped client means the current user has no `profile_uid` and user storage is not available.
     const client = userStorage.asScoped(request);
-    if (!client) return {};
+    if (!client) return { available: false, values: {} };
 
     try {
-      return await client.getForInjection();
+      const values = await client.getForInjection();
+      return { available: true, values };
     } catch (err) {
       // Authorization errors are expected for users whose auth realm does not
       // grant access to user-storage saved objects (e.g. certain SAML configs).
@@ -434,7 +448,7 @@ export class RenderingService {
         SavedObjectsErrorHelpers.isNotAuthorizedError(err)
       ) {
         this.logger.debug(`User storage preload skipped (not authorized): ${err.message}`);
-        return {};
+        return { available: false, values: {} };
       }
 
       this.logger.error(`User storage preload failed: ${err.message}`);

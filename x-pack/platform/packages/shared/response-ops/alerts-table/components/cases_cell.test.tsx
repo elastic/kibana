@@ -129,6 +129,6 @@ describe('CasesCell', () => {
     expect(screen.getByText('Test case')).toBeInTheDocument();
 
     await userEvent.click(screen.getByText('Test case'));
-    expect(navigateToCaseView).toBeCalledWith({ caseId: 'test-id' });
+    expect(navigateToCaseView).toHaveBeenCalledWith({ caseId: 'test-id' });
   });
 });

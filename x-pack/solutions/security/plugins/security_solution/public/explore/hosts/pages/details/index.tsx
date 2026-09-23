@@ -195,7 +195,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({
   );
 
   const { dataView, status } = useDataView(PageScope.explore);
-  const selectedPatterns = useSelectedPatterns(PageScope.explore);
+  const selectedPatterns = useSelectedPatterns(dataView);
   const indicesExist = !!dataView.matchedIndices?.length;
 
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);

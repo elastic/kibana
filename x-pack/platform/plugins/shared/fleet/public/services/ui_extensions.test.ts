@@ -9,6 +9,7 @@ import { lazy } from 'react';
 
 import type {
   PackagePolicyEditExtensionComponent,
+  PackagePolicyReplaceDefineStepExtensionComponent,
   UIExtensionRegistrationCallback,
   UIExtensionsStorage,
 } from '../types';
@@ -43,6 +44,27 @@ describe('UI Extension services', () => {
         view: 'package-policy-edit',
         package: 'endpoint',
         Component: LazyCustomView,
+      });
+    });
+
+    it('should store useWidePageLayout on package-policy-replace-define-step', () => {
+      const LazyCustomView = lazy<PackagePolicyReplaceDefineStepExtensionComponent>(async () => {
+        return {
+          default: (() => {}) as unknown as PackagePolicyReplaceDefineStepExtensionComponent,
+        };
+      });
+      register({
+        view: 'package-policy-replace-define-step',
+        package: 'cribl',
+        Component: LazyCustomView,
+        useWidePageLayout: true,
+      });
+
+      expect(storage.cribl['package-policy-replace-define-step']).toEqual({
+        view: 'package-policy-replace-define-step',
+        package: 'cribl',
+        Component: LazyCustomView,
+        useWidePageLayout: true,
       });
     });
 

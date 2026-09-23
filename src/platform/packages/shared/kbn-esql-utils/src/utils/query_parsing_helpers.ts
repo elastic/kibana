@@ -35,6 +35,7 @@ import type {
   ESQLAstForkCommand,
   ESQLAstQueryExpression,
 } from '@elastic/esql/types';
+import type { VariableNamePrefix } from '@kbn/esql-types';
 import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { monaco } from '@kbn/code-editor';
@@ -327,19 +328,16 @@ export const getQueryColumnsFromESQLQuery = (esql: string): string[] => {
   return columns.map((column) => column.name);
 };
 
-export const getESQLQueryVariables = (esql: string): string[] => {
+/**
+ * Returns the names of ES|QL variables used in a query, without `?`/`??` prefixes.
+ * @param esql The ESQL query string
+ * @param prefix Keep only Identifier (`??`) or Value (`?`) variables; omit for both.
+ */
+export const getESQLQueryVariables = (esql: string, prefix?: VariableNamePrefix): string[] => {
   const { root } = Parser.parse(esql);
-  const params: string[] = [];
-  const collect = (node: { literalType: string; text: string }) => {
-    if (node.literalType === 'param') params.push(node.text);
-  };
-  // TODO: simplify to Walker.params(root) once @elastic/esql is bumped to the version
-  // that natively collects PromQL param literals via visitPromqlLiteral.
-  Walker.walk(root, {
-    visitLiteral: collect,
-    promql: { visitPromqlLiteral: collect },
-  });
-  return [...new Set(params.map((t) => t.replace(LEADING_PARAM_PREFIX_REGEX, '')))];
+  return Walker.params(root)
+    .filter((v) => !prefix || v.paramKind === prefix)
+    .map((v) => v.text.replace(LEADING_PARAM_PREFIX_REGEX, ''));
 };
 
 /**
@@ -482,9 +480,12 @@ export const getValuesFromQueryField = (queryString: string, cursorPosition?: mo
   return field?.name !== '*' ? field?.name : undefined;
 };
 
-// this is for backward compatibility, if the query is of fields or functions type
-// and the query is not set with ?? in the query, we should set it
-// https://github.com/elastic/elasticsearch/pull/122459
+/**
+ * Rewrites `?varName` → `??varName` for FIELDS/FUNCTIONS variables.
+ *
+ * **Backward compat only** — unnecessary for new integrations, which have no saved queries
+ * predating the `??` syntax (https://github.com/elastic/elasticsearch/pull/122459).
+ */
 export const fixESQLQueryWithVariables = (
   queryString: string,
   esqlVariables?: ESQLControlVariable[]

@@ -201,7 +201,7 @@ function CreateDataSourceFlyoutTypeSettingsAzureFederatedIdentityFields({
       <EuiButtonEmpty
         size="s"
         flush="left"
-        iconType={isOptionalOpen ? 'arrowDown' : 'arrowRight'}
+        iconType={isOptionalOpen ? 'chevronSingleDown' : 'chevronSingleRight'}
         aria-expanded={isOptionalOpen}
         aria-controls={optionalId}
         onClick={() => setIsOptionalOpen((value) => !value)}

@@ -8,11 +8,11 @@
 import { AgentAccessControlMode } from '@kbn/agent-builder-common';
 import { buildReadAccessFilter } from './query';
 
-const ownerUser = { id: 'user-1', username: 'owner' };
-const ownerByUsernameOnly = { username: 'owner' };
+const ownerUser = { id: 'user-1', username: 'owner', isAdmin: false };
+const ownerByUsernameOnly = { username: 'owner', isAdmin: false };
 
 describe('buildReadAccessFilter', () => {
-  it('includes owner clauses, the not-private access-control mode clause, and a nested user-ACL clause', () => {
+  it('includes owner id clause, legacy username ownership, the not-private access-control mode clause, an id-backed nested user-ACL clause, an id-less nested user-ACL fallback, and the legacy acl clause', () => {
     const filter = buildReadAccessFilter({ user: ownerUser });
     expect(filter).toEqual({
       bool: {
@@ -31,14 +31,34 @@ describe('buildReadAccessFilter', () => {
               ],
             },
           },
-          { term: { created_by_name: 'owner' } },
           { term: { created_by_id: 'user-1' } },
+          {
+            bool: {
+              must_not: { exists: { field: 'created_by_id' } },
+              filter: { term: { created_by_name: 'owner' } },
+            },
+          },
           {
             nested: {
               path: 'access_control.entries',
               ignore_unmapped: true,
               query: {
                 bool: {
+                  filter: [
+                    { term: { 'access_control.entries.type': 'user' } },
+                    { term: { 'access_control.entries.id': 'user-1' } },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            nested: {
+              path: 'access_control.entries',
+              ignore_unmapped: true,
+              query: {
+                bool: {
+                  must_not: { exists: { field: 'access_control.entries.id' } },
                   filter: [
                     { term: { 'access_control.entries.type': 'user' } },
                     { term: { 'access_control.entries.name': 'owner' } },
@@ -72,8 +92,9 @@ describe('buildReadAccessFilter', () => {
     });
   });
 
-  it('omits created_by_id clause when user.id is undefined but still adds user-ACL nested clause', () => {
+  it('omits created_by_id and id-backed entry clauses when user.id is undefined but still adds legacy username, id-less entry, and user-ACL clauses', () => {
     const filter = buildReadAccessFilter({ user: ownerByUsernameOnly });
+    // Public/Shared, legacy visibility, created_by_name, id-less entries, legacy acl.
     expect(filter.bool.should).toHaveLength(5);
     expect(filter.bool.should[0]).toEqual({
       bool: {
@@ -89,13 +110,19 @@ describe('buildReadAccessFilter', () => {
         ],
       },
     });
-    expect(filter.bool.should[2]).toEqual({ term: { created_by_name: 'owner' } });
+    expect(filter.bool.should[2]).toEqual({
+      bool: {
+        must_not: { exists: { field: 'created_by_id' } },
+        filter: { term: { created_by_name: 'owner' } },
+      },
+    });
     expect(filter.bool.should[3]).toEqual({
       nested: {
         path: 'access_control.entries',
         ignore_unmapped: true,
         query: {
           bool: {
+            must_not: { exists: { field: 'access_control.entries.id' } },
             filter: [
               { term: { 'access_control.entries.type': 'user' } },
               { term: { 'access_control.entries.name': 'owner' } },
@@ -104,6 +131,16 @@ describe('buildReadAccessFilter', () => {
         },
       },
     });
+    expect(filter.bool.should).not.toContainEqual({ term: { created_by_name: 'owner' } });
+    for (const clause of filter.bool.should) {
+      const filters = (
+        clause as {
+          nested?: { query?: { bool?: { filter?: Array<{ term?: Record<string, string> }> } } };
+        }
+      ).nested?.query?.bool?.filter;
+      const ids = (filters ?? []).map((f) => f.term?.['access_control.entries.id']).filter(Boolean);
+      expect(ids).toHaveLength(0);
+    }
   });
 
   it('only emits user-type access-control clauses (V1)', () => {
@@ -116,6 +153,6 @@ describe('buildReadAccessFilter', () => {
       .flatMap((clause) => clause.nested?.query?.bool?.filter ?? [])
       .map((clauseFilter) => clauseFilter.term?.['access_control.entries.type'])
       .filter(Boolean);
-    expect(types).toEqual(['user']);
+    expect(types).toEqual(['user', 'user']);
   });
 });

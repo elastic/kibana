@@ -9,9 +9,11 @@
 
 import Path from 'path';
 import Fs from 'fs';
-import { rspack, type Compiler, type Stats } from '@rspack/core';
+import type { Compiler, Stats } from '@rspack/core';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { DEFAULT_THEME_TAGS } from '@kbn/core-ui-settings-common';
+import type { KibanaGroup } from '@kbn/projects-solutions-groups';
+import { rspack } from './rspack_runtime';
 import { createSingleCompileConfig } from './config/create_single_compile_config';
 import { isHmrEnabled } from './hmr/hmr_enabled';
 import { HmrServer } from './hmr/hmr_server';
@@ -22,12 +24,16 @@ export const IGNORED_WATCH_PATTERNS: RegExp[] = [
   /[\\/]node_modules[\\/]/,
   /[\\/]target[\\/]/,
   /\.tsbuildinfo$/,
+  /(^|[\\/])tsconfig[^\\/]*\.type_check\.json$/,
   /\.test\.[jt]sx?$/,
   /\.spec\.[jt]sx?$/,
   /\.stories\.[jt]sx?$/,
   /\.mock\.[jt]sx?$/,
   /[\\/]__(?:mocks|snapshots|fixtures|jest)__[\\/]/,
   /[\\/]jest(?:\.integration)?\.config\.[jt]s$/,
+  // Scout/Playwright output (test artifacts, reports, server configs) written
+  // into plugin dirs during test runs; must not trigger watch rebuilds.
+  /[\\/]\.scout[\\/]/,
 ];
 
 export interface BuildOptions {
@@ -38,6 +44,12 @@ export interface BuildOptions {
   cache?: boolean;
   examples?: boolean;
   testPlugins?: boolean;
+  /** Explicit plugin paths passed via --plugin-path */
+  pluginPaths?: string[];
+  /** Directories scanned for plugins */
+  pluginScanDirs?: string[];
+  /** Restrict discovery to plugins belonging to these groups */
+  allowlistPluginGroups?: readonly KibanaGroup[];
   themeTags?: ThemeTag[];
   log?: ToolingLog;
   /** Enable profiling - writes stats.json and RsDoctor report */
@@ -59,7 +71,8 @@ export interface BuildResult {
   errors?: string[];
   warnings?: string[];
   duration?: number;
-  entryCount?: number;
+  /** Number of discovered bundles (core + plugins) included in the compilation */
+  bundleCount?: number;
   totalSize?: number;
   /** Function to close the watcher (only set in watch mode) */
   close?: () => Promise<void>;
@@ -86,6 +99,9 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
     cache = true,
     examples = false,
     testPlugins = false,
+    pluginPaths,
+    pluginScanDirs,
+    allowlistPluginGroups,
     themeTags = [...DEFAULT_THEME_TAGS],
     log,
     profile = false,
@@ -115,7 +131,7 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
 
     log?.info('Creating single-compilation RSPack config...');
 
-    const config = await createSingleCompileConfig({
+    const { config, bundleCount } = await createSingleCompileConfig({
       repoRoot,
       outputRoot,
       dist,
@@ -123,6 +139,9 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
       cache,
       examples,
       testPlugins,
+      pluginPaths,
+      pluginScanDirs,
+      allowlistPluginGroups,
       themeTags,
       log,
       profile,
@@ -138,12 +157,14 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
     const compiler = rspack(config) as Compiler;
 
     if (watch) {
-      return runWatchBuild(compiler, log, startTime, repoRoot, hmrServer);
-    } else {
-      // HMR is not used outside watch mode; clean up if somehow started
-      await hmrServer?.close();
-      return runProductionBuild(compiler, log, startTime, repoRoot);
+      const result = await runWatchBuild(compiler, log, startTime, repoRoot, hmrServer);
+      return { ...result, bundleCount };
     }
+
+    // HMR is not used outside watch mode; clean up if somehow started
+    await hmrServer?.close();
+    const result = await runProductionBuild(compiler, log, startTime, repoRoot);
+    return { ...result, bundleCount };
   } catch (error: any) {
     await hmrServer?.close();
     log?.error(`Build failed: ${error.message}`);
@@ -422,7 +443,6 @@ async function runWatchBuild(
 
 interface ProcessStatsResult extends BuildResult {
   entryCount?: number;
-  totalSize?: number;
   compilationTime?: number;
   assets?: Array<{ name: string; size: number }>;
 }
@@ -480,17 +500,9 @@ function processStats(
       assets: false,
       modules: false,
     });
-    const lines = warningOutput
-      .split('\n')
-      .filter(
-        (line) => !line.includes('rspack.persistentCache') && !line.includes('BuildDependencies')
-      )
-      .slice(0, 20);
-    if (lines.length > 0) {
-      log.warning('Build warnings (first 20):');
-      for (const line of lines) {
-        log.warning(line);
-      }
+
+    if (warningOutput.trim()) {
+      log.warning(warningOutput);
     }
   }
 

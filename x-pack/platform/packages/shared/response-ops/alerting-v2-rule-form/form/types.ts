@@ -6,7 +6,6 @@
  */
 
 import type { RuleKind, RecoveryStrategy, NoDataStrategy } from '@kbn/alerting-v2-schemas';
-import type { ActionFormValue } from '../actions_form';
 
 export type { RuleKind, RecoveryStrategy, NoDataStrategy };
 
@@ -64,11 +63,7 @@ export interface RuleGrouping {
 export interface RuleArtifact {
   id: string;
   type: string;
-  value: string;
-}
-
-export interface RuleNotificationsValue {
-  workflows: ActionFormValue;
+  data: Record<string, any>;
 }
 
 export interface StateTransition {
@@ -99,7 +94,6 @@ export interface FormValues {
   stateTransitionAlertDelayMode: StateTransitionDelayMode;
   stateTransitionRecoveryDelayMode: StateTransitionDelayMode;
   artifacts?: RuleArtifact[];
-  notifications?: RuleNotificationsValue;
   runbookArtifacts?: RuleArtifact[];
   dashboardArtifacts?: RuleArtifact[];
 }

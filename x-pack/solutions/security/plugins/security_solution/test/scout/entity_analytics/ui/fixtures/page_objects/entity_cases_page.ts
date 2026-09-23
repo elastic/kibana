@@ -7,14 +7,11 @@
 
 import type { Locator, ScoutPage } from '@kbn/scout-security';
 import { SECURITY_ENTITY_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
-import {
-  ADD_TO_NEW_CASE_TEST_ID,
-  ADD_TO_EXISTING_CASE_TEST_ID,
-} from '../../../../../../common/cases/attachments/entity/test_ids';
+import { ADD_TO_CASE_TEST_ID } from '../../../../../../common/cases/attachments/entity/test_ids';
 
 /**
  * Page object for entity attachment Cases UI interactions:
- * - Entity flyout Take Action popover (Add to new/existing case)
+ * - Entity flyout Take Action popover (Add to case)
  * - Cases new-case creation flyout
  * - Case view Attachments tab + the "Entities" attachment accordion
  *
@@ -34,8 +31,8 @@ import {
 export class EntityCasesPage {
   // Entity flyout – Take Action popover
   public readonly takeActionButton: Locator;
-  public readonly addToNewCaseItem: Locator;
-  public readonly addToExistingCaseItem: Locator;
+  public readonly addToCaseItem: Locator;
+  public readonly createNewCaseFromModalButton: Locator;
 
   // Case view – Attachments tab + Entities accordion
   public readonly attachmentsTab: Locator;
@@ -53,8 +50,8 @@ export class EntityCasesPage {
 
   constructor(private readonly page: ScoutPage) {
     this.takeActionButton = page.testSubj.locator('take-action-button');
-    this.addToNewCaseItem = page.testSubj.locator(ADD_TO_NEW_CASE_TEST_ID);
-    this.addToExistingCaseItem = page.testSubj.locator(ADD_TO_EXISTING_CASE_TEST_ID);
+    this.addToCaseItem = page.testSubj.locator(ADD_TO_CASE_TEST_ID);
+    this.createNewCaseFromModalButton = page.testSubj.locator('cases-table-add-case-filter-bar');
 
     this.attachmentsTab = page.testSubj.locator('case-view-tab-title-attachments');
     this.attachmentsContainer = page.testSubj.locator('case-view-attachments');
@@ -104,11 +101,8 @@ export class EntityCasesPage {
   }
 
   async clickAddToNewCase() {
-    await this.addToNewCaseItem.click();
-  }
-
-  async clickAddToExistingCase() {
-    await this.addToExistingCaseItem.click();
+    await this.addToCaseItem.click();
+    await this.createNewCaseFromModalButton.click();
   }
 
   async fillCaseName(name: string) {
@@ -127,6 +121,16 @@ export class EntityCasesPage {
 
   async navigateToCase(caseId: string) {
     await this.page.gotoApp(`security/cases/${caseId}`);
+    // Cold full-page navigation lands on the `case-view-loading` spinner; wait for
+    // the case view's own loaded signal before returning so downstream tab clicks
+    // aren't racing the case fetch. `case-view-tabs` is the tab bar the cases
+    // framework renders only once the case fetch resolves, and — unlike
+    // `case-view-title` — it exists in both the legacy and redesigned case views
+    // (`xpack.cases.casesRedesign.details` defaults to true), so this readiness
+    // wait holds regardless of the redesign flag.
+    await this.page.testSubj
+      .locator('case-view-tabs')
+      .waitFor({ state: 'visible', timeout: 30000 });
   }
 
   // Case view lands on the Activity tab; the Entities accordion lives inside the

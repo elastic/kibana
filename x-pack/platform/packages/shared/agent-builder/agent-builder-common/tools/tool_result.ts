@@ -18,6 +18,7 @@ export enum ToolResultType {
   other = 'other',
   error = 'error',
   fileReference = 'file_reference',
+  image = 'image',
 }
 
 interface ToolResultTypeDataMap {
@@ -30,6 +31,7 @@ interface ToolResultTypeDataMap {
   [ToolResultType.error]: ErrorResultData;
   [ToolResultType.fileReference]: FileReferenceResultData;
   [ToolResultType.other]: OtherResultData;
+  [ToolResultType.image]: ImageResultData;
 }
 
 export type ToolResultDataOf<Type extends ToolResultType> = ToolResultTypeDataMap[Type];
@@ -124,14 +126,8 @@ export enum SupportedChartType {
   Mosaic = 'mosaic',
 }
 
-export interface VisualizationResultData {
-  esql: string;
+interface VisualizationResultDataBase {
   time_range?: TimeRange;
-  renderer?: 'lens' | 'vega';
-  /** Shared visualization payload. Vega stores spec at visualization.spec. */
-  visualization: Record<string, unknown> & { spec?: string };
-  /** Optional chart type identifier (primarily Lens). */
-  chart_type?: SupportedChartType;
   /**
    * ID of the persisted visualization attachment. Present when persistence
    * succeeded; the agent renders the visualization inline via
@@ -141,6 +137,31 @@ export interface VisualizationResultData {
   /** Version of the persisted attachment backing this result. */
   version?: number;
 }
+
+/** A Lens or Vega result. `renderer` is omitted on results predating the discriminator. */
+export interface ChartVisualizationResultData extends VisualizationResultDataBase {
+  esql: string;
+  renderer?: 'lens' | 'vega';
+  /** Shared visualization payload. Vega stores spec at visualization.spec. */
+  visualization: Record<string, unknown> & { spec?: string };
+  /** Optional chart type identifier (primarily Lens). */
+  chart_type?: SupportedChartType;
+}
+
+/**
+ * A custom content result. The HTML template is deliberately absent — it lives in the
+ * attachment, and round-tripping KBs of markup through the model invites corruption.
+ */
+export interface CustomContentVisualizationResultData extends VisualizationResultDataBase {
+  renderer: 'custom_content';
+  esql?: string;
+  /** The prompt the template was generated from. */
+  visualization: { prompt: string };
+}
+
+export type VisualizationResultData =
+  | ChartVisualizationResultData
+  | CustomContentVisualizationResultData;
 
 export type VisualizationResult = ToolResultMixin<ToolResultType.visualization>;
 
@@ -206,4 +227,19 @@ export const isFileReferenceResult = (result: ToolResult): result is FileReferen
 
 export const isVisualizationResult = (result: ToolResult): result is VisualizationResult => {
   return result.type === ToolResultType.visualization;
+};
+
+// image
+
+export interface ImageResultData {
+  attachment_id: string;
+  mime_type: string;
+  name?: string;
+  description: string;
+}
+
+export type ImageResult = ToolResultMixin<ToolResultType.image>;
+
+export const isImageResult = (result: ToolResult): result is ImageResult => {
+  return result.type === ToolResultType.image;
 };

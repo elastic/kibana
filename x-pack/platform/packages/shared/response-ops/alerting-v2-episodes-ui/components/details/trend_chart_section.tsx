@@ -10,8 +10,8 @@ import {
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingSpinner,
   EuiPanel,
+  EuiSkeletonRectangle,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -24,7 +24,8 @@ import { useFetchEpisodeTrendQuery } from '../../hooks/use_fetch_episode_trend_q
 import { prepareTrendInputs } from './prepare_trend_inputs';
 import { mapEventDataToSeries } from './trend_data';
 import type { AlertEpisodeDetailsServices } from './types';
-import type { TrendMetricGroup } from './trend_types';
+import { TREND_CHART_HEIGHT, type TrendMetricGroup } from './trend_types';
+import { getPanelTitleSize } from './panel_title_sizes';
 import * as i18n from './translations';
 
 const AlertEpisodeTrendChart = React.lazy(() =>
@@ -34,6 +35,8 @@ const AlertEpisodeTrendChart = React.lazy(() =>
 export interface AlertEpisodeTrendChartSectionProps {
   episodeId: string;
   services: Pick<AlertEpisodeDetailsServices, 'data' | 'http' | 'spaces'>;
+  /** Renders the title one step smaller, for narrow hosts like the details flyout. */
+  compressed?: boolean;
 }
 
 interface MetricBadgesProps {
@@ -75,6 +78,7 @@ const MetricBadges = ({ groups, selected, onSelect }: MetricBadgesProps) => {
 export const AlertEpisodeTrendChartSection = ({
   episodeId,
   services,
+  compressed,
 }: AlertEpisodeTrendChartSectionProps) => {
   const { data, http, spaces } = services;
 
@@ -117,7 +121,7 @@ export const AlertEpisodeTrendChartSection = ({
     <EuiPanel hasBorder paddingSize="m" data-test-subj="alertingV2EpisodeTrendChart">
       <EuiFlexGroup gutterSize="s" alignItems="flexStart" wrap={false} responsive={false}>
         <EuiFlexItem grow={false} css={{ flexShrink: 0 }}>
-          <EuiTitle size="xxs">
+          <EuiTitle size={getPanelTitleSize(compressed)}>
             <h2>{i18n.TREND_CHART_TITLE}</h2>
           </EuiTitle>
         </EuiFlexItem>
@@ -138,9 +142,15 @@ export const AlertEpisodeTrendChartSection = ({
           {i18n.TREND_CHART_LOAD_ERROR}
         </EuiText>
       ) : isLoading ? (
-        <EuiLoadingSpinner size="m" data-test-subj="alertingV2EpisodeTrendChartSectionLoading" />
+        <EuiSkeletonRectangle
+          width="100%"
+          height={TREND_CHART_HEIGHT}
+          data-test-subj="alertingV2EpisodeTrendChartSectionLoading"
+        />
       ) : series ? (
-        <React.Suspense fallback={<EuiLoadingSpinner size="m" />}>
+        <React.Suspense
+          fallback={<EuiSkeletonRectangle width="100%" height={TREND_CHART_HEIGHT} />}
+        >
           <AlertEpisodeTrendChart series={series} thresholds={selectedGroup!.thresholds} />
         </React.Suspense>
       ) : null}

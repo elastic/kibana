@@ -10,6 +10,14 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import type { ServiceFlyoutService } from '.';
 import { ServiceFlyout } from '.';
 
+jest.mock('../../../plugin', () => ({
+  getApmInternalServices: () => ({ callApmApi: jest.fn() }),
+}));
+
+jest.mock('./hooks/use_apm_indices', () => ({
+  useApmIndices: () => ({ indices: undefined, loading: false }),
+}));
+
 jest.mock('../../../context/time_range_metadata/time_range_metadata_context', () => ({
   TimeRangeMetadataContextProvider: ({ children }: { children: React.ReactNode }) => (
     <>{children}</>
@@ -26,14 +34,36 @@ jest.mock('@elastic/eui', () => {
 });
 
 jest.mock('../responsive_flyout', () => ({
-  ResponsiveFlyout: ({ children, onClose }: { children: React.ReactNode; onClose: () => void }) => (
-    <section data-test-subj="responsiveFlyoutMock">
+  ResponsiveFlyout: ({
+    children,
+    onClose,
+    historyKey,
+  }: {
+    children: React.ReactNode;
+    onClose: () => void;
+    historyKey?: symbol;
+  }) => (
+    <section data-test-subj="responsiveFlyoutMock" data-history-key={historyKey?.toString()}>
       <button data-test-subj="responsiveFlyoutCloseButton" onClick={onClose}>
         close
       </button>
       {children}
     </section>
   ),
+}));
+
+jest.mock('./hooks/use_service_flyout_capabilities', () => ({
+  useServiceFlyoutCapabilities: () => ({
+    loading: false,
+    error: undefined,
+    schema: 'ecs',
+    header: { serviceNameLink: true, badges: true },
+    overview: { transactions: true, transactionTypeFilter: true, infraMetrics: true },
+    footer: { alerts: true, slos: true },
+  }),
+}));
+jest.mock('../../../hooks/use_time_range', () => ({
+  useTimeRange: () => ({ start: '2024-01-01T00:00:00.000Z', end: '2024-01-01T01:00:00.000Z' }),
 }));
 
 jest.mock('./header', () => ({
@@ -106,6 +136,8 @@ const service: ServiceFlyoutService = {
   agentName: 'java',
 };
 
+const mockReportServiceFlyoutViewed = jest.fn();
+
 const contextProps = {
   deps: {
     core: {} as any,
@@ -113,46 +145,50 @@ const contextProps = {
     lens: {} as any,
     dataViews: {} as any,
   },
+  telemetry: {
+    client: { reportServiceFlyoutViewed: mockReportServiceFlyoutViewed },
+    source: 'test-source',
+  },
 };
 
 beforeEach(() => {
   jest.clearAllMocks();
 });
 
-describe('ServiceFlyout onView', () => {
-  it('notifies the consumer with the initial tab on mount', () => {
-    const onView = jest.fn();
-
+describe('ServiceFlyout telemetry', () => {
+  it('reports the initial tab on mount', () => {
     render(
       <ServiceFlyout
         {...contextProps}
         service={service}
         filters={{ environment: 'ENVIRONMENT_ALL', rangeFrom: 'now-15m', rangeTo: 'now' }}
-        onView={onView}
         onClose={jest.fn()}
       />
     );
 
-    expect(onView).toHaveBeenCalledTimes(1);
-    expect(onView).toHaveBeenCalledWith({ tabId: 'overview' });
+    expect(mockReportServiceFlyoutViewed).toHaveBeenCalledTimes(1);
+    expect(mockReportServiceFlyoutViewed).toHaveBeenCalledWith({
+      tabId: 'overview',
+      source: 'test-source',
+    });
   });
 
-  it('notifies the consumer with the new tab when the selected tab changes', () => {
-    const onView = jest.fn();
-
+  it('reports the new tab when the selected tab changes', () => {
     render(
       <ServiceFlyout
         {...contextProps}
         service={service}
         filters={{ environment: 'ENVIRONMENT_ALL', rangeFrom: 'now-15m', rangeTo: 'now' }}
-        onView={onView}
         onClose={jest.fn()}
       />
     );
 
     fireEvent.click(screen.getByTestId('mockTabChange'));
 
-    expect(onView).toHaveBeenLastCalledWith({ tabId: 'alerts' });
+    expect(mockReportServiceFlyoutViewed).toHaveBeenLastCalledWith({
+      tabId: 'alerts',
+      source: 'test-source',
+    });
   });
 });
 
@@ -267,5 +303,41 @@ describe('ServiceFlyout local filter state', () => {
     );
 
     expect(screen.getByTestId('serviceFlyoutOverviewReadout')).toHaveTextContent('staging:');
+  });
+});
+
+describe('ServiceFlyout historyKey', () => {
+  it('forwards historyKey to ResponsiveFlyout when provided', () => {
+    const historyKey = Symbol('test-history-key');
+
+    render(
+      <ServiceFlyout
+        {...contextProps}
+        service={service}
+        filters={{ environment: 'ENVIRONMENT_ALL', rangeFrom: 'now-15m', rangeTo: 'now' }}
+        onClose={jest.fn()}
+        historyKey={historyKey}
+      />
+    );
+
+    expect(screen.getByTestId('responsiveFlyoutMock')).toHaveAttribute(
+      'data-history-key',
+      historyKey.toString()
+    );
+  });
+
+  // Nested tx/full-trace flyouts need a shared history key for Back. When the
+  // caller omits `historyKey`, ServiceFlyout creates one (Symbol fallback).
+  it('generates a historyKey when not provided', () => {
+    render(
+      <ServiceFlyout
+        {...contextProps}
+        service={service}
+        filters={{ environment: 'ENVIRONMENT_ALL', rangeFrom: 'now-15m', rangeTo: 'now' }}
+        onClose={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId('responsiveFlyoutMock')).toHaveAttribute('data-history-key');
   });
 });

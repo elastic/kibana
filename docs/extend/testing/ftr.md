@@ -27,23 +27,23 @@ FTR starts Elasticsearch and Kibana from a config file, then runs test files aga
 
 ```bash
 # Start servers once, keep them running
-yarn test:ftr:server --config path/to/config.ts
+pnpm test:ftr:server --config path/to/config.ts
 
 # In a second terminal, run tests against the running servers
-yarn test:ftr:runner --config path/to/config.ts
+pnpm test:ftr:runner --config path/to/config.ts
 ```
 
 **Useful flags:**
 
 ```bash
 # Run a specific test by name
-yarn test:ftr:runner --config path/to/config.ts --grep "test name"
+pnpm test:ftr:runner --config path/to/config.ts --grep "test name"
 
 # Debug with browser open, stop on first failure
-yarn test:ftr --config path/to/config.ts --debug --bail
+pnpm test:ftr --config path/to/config.ts --debug --bail
 
 # Run against serverless Elasticsearch
-yarn test:ftr --config path/to/config.ts --esFrom serverless
+pnpm test:ftr --config path/to/config.ts --esFrom serverless
 ```
 
 **Pros:**
@@ -65,12 +65,12 @@ The {{kib}} repo contains many FTR config files which use slightly different con
 
 - serverless:
   - `.buildkite/ftr-manifests/ftr_base_serverless_configs.yml`
-  - `.buildkite/ftr-manifests/ftr_oblt_serverless_configs.yml`
+  - `.buildkite/ftr-manifests/ftr_observability_serverless_configs.yml`
   - `.buildkite/ftr-manifests/ftr_security_serverless_configs.yml`
   - `.buildkite/ftr-manifests/ftr_search_serverless_configs.yml`
 - stateful:
   - `.buildkite/ftr-manifests/ftr_platform_stateful_configs.yml`
-  - `.buildkite/ftr-manifests/ftr_oblt_stateful_configs.yml`
+  - `.buildkite/ftr-manifests/ftr_observability_stateful_configs.yml`
   - `.buildkite/ftr-manifests/ftr_security_stateful_configs.yml`
   - `.buildkite/ftr-manifests/ftr_search_stateful_configs.yml`
 

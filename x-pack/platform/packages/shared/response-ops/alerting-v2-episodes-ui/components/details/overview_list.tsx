@@ -7,13 +7,21 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { EuiBadge, EuiBadgeGroup, EuiDescriptionList, EuiText, useEuiTheme } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiBadgeGroup,
+  EuiDescriptionList,
+  EuiLink,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
 import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { EpisodeActionState, AlertEpisodeGroupAction } from '../../types/action';
 import { AlertingEpisodeGroupingTags } from '../grouping/alerting_episode_grouping_tags';
 import { AlertEpisodeAssigneeCell } from '../assignee_cell';
+import { UserProfileDisplay } from '../user_profile_display';
 import { EMPTY_VALUE } from '../../constants';
 import { formatDateTime } from '../../utils/format_date_time';
 import { isEpisodeSnoozed } from '../../utils/is_episode_snoozed';
@@ -54,9 +62,16 @@ export const AlertEpisodeOverviewList = ({
 }: AlertEpisodeOverviewListProps) => {
   const { euiTheme } = useEuiTheme();
   const isAcked = episodeAction?.lastAckAction === ALERT_EPISODE_ACTION_TYPE.ACK;
-  const isResolved = groupAction?.lastDeactivateAction === ALERT_EPISODE_ACTION_TYPE.DEACTIVATE;
+  const isResolved = episodeAction?.lastDeactivateAction === ALERT_EPISODE_ACTION_TYPE.DEACTIVATE;
   const isSnoozed = isEpisodeSnoozed(groupAction?.lastSnoozeAction, groupAction?.snoozeExpiry);
   const tags = groupAction?.tags ?? [];
+  // Caller-controlled (data.alert_url from external ingest). Restrict to absolute
+  // http(s) before putting into href — blocks javascript:/data: stored XSS.
+  const rawAlertUrl =
+    typeof groupingData.alert_url === 'string' && groupingData.alert_url.length > 0
+      ? groupingData.alert_url
+      : undefined;
+  const alertUrl = rawAlertUrl && /^https?:\/\//i.test(rawAlertUrl) ? rawAlertUrl : undefined;
 
   return (
     <EuiDescriptionList
@@ -96,6 +111,23 @@ export const AlertEpisodeOverviewList = ({
                   ),
               },
             ]),
+        ...(alertUrl
+          ? [
+              {
+                title: i18n.METADATA_LIST_SOURCE_URL_LABEL,
+                description: (
+                  <EuiLink
+                    href={alertUrl}
+                    target="_blank"
+                    external
+                    data-test-subj="alertingV2EpisodeDetailsOverviewListAlertUrl"
+                  >
+                    {i18n.METADATA_LIST_SOURCE_URL_LINK}
+                  </EuiLink>
+                ),
+              },
+            ]
+          : []),
         ...(tags.length > 0
           ? [
               {
@@ -135,8 +167,8 @@ export const AlertEpisodeOverviewList = ({
               {
                 title: i18n.ACTIONS_OVERVIEW_ACKNOWLEDGED_BY,
                 description: (
-                  <AlertEpisodeAssigneeCell
-                    assigneeUid={episodeAction?.lastAckActor}
+                  <UserProfileDisplay
+                    userProfileUid={episodeAction?.lastAckActor}
                     userProfile={userProfile}
                   />
                 ),
@@ -148,8 +180,8 @@ export const AlertEpisodeOverviewList = ({
               {
                 title: i18n.ACTIONS_OVERVIEW_RESOLVED_BY,
                 description: (
-                  <AlertEpisodeAssigneeCell
-                    assigneeUid={groupAction?.lastDeactivateActor}
+                  <UserProfileDisplay
+                    userProfileUid={episodeAction?.lastDeactivateActor}
                     userProfile={userProfile}
                   />
                 ),
@@ -161,8 +193,8 @@ export const AlertEpisodeOverviewList = ({
               {
                 title: i18n.ACTIONS_OVERVIEW_SNOOZED_BY,
                 description: (
-                  <AlertEpisodeAssigneeCell
-                    assigneeUid={groupAction?.lastSnoozeActor}
+                  <UserProfileDisplay
+                    userProfileUid={groupAction?.lastSnoozeActor}
                     userProfile={userProfile}
                   />
                 ),

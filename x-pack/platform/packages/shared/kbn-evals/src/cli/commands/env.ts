@@ -15,35 +15,20 @@ const ENV_DOCS = [
     example: 'TEST_RUN_ID=bk-abc123',
   },
   {
-    name: 'EVALUATION_CONNECTOR_ID',
+    name: 'EVAL_CONNECTOR_ID',
     description: 'Connector used for LLM-as-a-judge evaluators (required).',
-    example: 'EVALUATION_CONNECTOR_ID=bedrock-claude',
+    example: 'EVAL_CONNECTOR_ID=bedrock-claude',
   },
   {
-    name: 'EVALUATION_REPETITIONS',
+    name: 'EVAL_REPETITIONS',
     description: 'Overrides configured repetition count for evals.',
-    example: 'EVALUATION_REPETITIONS=3',
-  },
-  {
-    name: 'KBN_EVALS_EXECUTOR',
-    description: 'Switch to the Phoenix-backed executor.',
-    example: 'KBN_EVALS_EXECUTOR=phoenix',
+    example: 'EVAL_REPETITIONS=3',
   },
   {
     name: 'KBN_EVALS_SKIP_CONNECTOR_SETUP',
     description:
       'Skip automatic connector setup/teardown. Use this option when evaluating with pre-defined connectors.',
     example: 'KBN_EVALS_SKIP_CONNECTOR_SETUP=true',
-  },
-  {
-    name: 'PHOENIX_BASE_URL',
-    description: 'Phoenix base URL used when KBN_EVALS_EXECUTOR=phoenix.',
-    example: 'PHOENIX_BASE_URL=http://localhost:6006',
-  },
-  {
-    name: 'PHOENIX_API_KEY',
-    description: 'Phoenix API key used when KBN_EVALS_EXECUTOR=phoenix.',
-    example: 'PHOENIX_API_KEY=...',
   },
   {
     name: 'TRACING_ES_URL',
@@ -62,32 +47,33 @@ const ENV_DOCS = [
     example: 'TRACING_EXPORTERS=\'[{"http":{"url":"https://ingest.example.com/v1/traces"}}]\'',
   },
   {
-    name: 'EVALUATIONS_KBN_URL',
+    name: 'EVAL_KBN_URL',
     description:
       'Kibana URL used for eval score ingestion and dataset operations when targeting a non-local cluster.',
-    example: 'EVALUATIONS_KBN_URL=http://elastic:changeme@localhost:5601',
+    example: 'EVAL_KBN_URL=http://elastic:changeme@localhost:5601',
   },
   {
-    name: 'EVALUATIONS_KBN_API_KEY',
-    description: 'API key for authenticating to EVALUATIONS_KBN_URL.',
-    example: 'EVALUATIONS_KBN_API_KEY=...',
+    name: 'EVAL_KBN_API_KEY',
+    description: 'API key for authenticating to EVAL_KBN_URL.',
+    example: 'EVAL_KBN_API_KEY=...',
   },
   {
     name: 'SELECTED_EVALUATORS',
     description:
-      'Comma-separated list of evaluator names to run. Supports patterns: Precision@K, Recall@K, F1@K match all K-specific evaluators.',
-    example: 'SELECTED_EVALUATORS="Precision@K,Recall@K,F1@K,Factuality"',
+      'Comma-separated list of evaluator names to run. Supports patterns: Precision@K, Recall@K, F1@K, HitRate@K, MRR@K, NDCG@K, MAP@K match all K-specific evaluators.',
+    example: 'SELECTED_EVALUATORS="Precision@K,Recall@K,NDCG@K,Factuality"',
   },
   {
-    name: 'RAG_EVAL_K',
+    name: 'IR_EVAL_K',
     description:
-      'Overrides default k used by RAG evaluators. Supports comma-separated values for multi-K evaluation.',
-    example: 'RAG_EVAL_K=5,10,20',
+      'Overrides default k used by IR (information retrieval) evaluators. Supports comma-separated values for multi-K evaluation. The deprecated RAG_EVAL_K is still read as a fallback.',
+    example: 'IR_EVAL_K=5,10,20',
   },
   {
-    name: 'INDEX_FOCUSED_RAG_EVAL',
-    description: 'Restrict RAG evaluators to ground-truth indices.',
-    example: 'INDEX_FOCUSED_RAG_EVAL=true',
+    name: 'INDEX_FOCUSED_IR_EVAL',
+    description:
+      'Restrict IR evaluators to ground-truth indices. The deprecated INDEX_FOCUSED_RAG_EVAL is still read as a fallback.',
+    example: 'INDEX_FOCUSED_IR_EVAL=true',
   },
 ];
 

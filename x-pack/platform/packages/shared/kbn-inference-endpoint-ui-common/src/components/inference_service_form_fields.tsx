@@ -32,7 +32,7 @@ import type { ConnectorFormSchema } from '@kbn/triggers-actions-ui-plugin/public
 import type { HttpSetup, IToasts } from '@kbn/core/public';
 import * as LABELS from '../translations';
 import type { Config, ConfigEntryView, InferenceProvider, Secrets } from '../types/types';
-import { FieldType, isMapWithStringValues } from '../types/types';
+import { FieldType, isMapWithStringValues, isStringArray } from '../types/types';
 import {
   SERVICE_PROVIDERS,
   solutionKeys,
@@ -571,6 +571,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
               typeof configValue === 'number' ||
               typeof configValue === 'boolean' ||
               (typeof configValue === 'object' && isMapWithStringValues(configValue)) ||
+              isStringArray(configValue) ||
               configValue === null ||
               configValue === undefined
             ) {
@@ -606,26 +607,23 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
               isInvalid={isInvalid}
               error={errorMessage}
             >
-              <>
-                <EuiSpacer size="s" />
-                <EuiInputPopover
-                  id={'providerInputPopoverId'}
-                  fullWidth
-                  input={selectInput}
-                  isOpen={isProviderPopoverOpen}
-                  closePopover={closeProviderPopover}
-                  className="rightArrowIcon"
-                >
-                  <SelectableProvider
-                    currentSolution={currentSolution}
-                    providers={updatedProviders ?? []}
-                    onClosePopover={closeProviderPopover}
-                    onProviderChange={onProviderChange}
-                    onSolutionFilterChange={toggleAndApplyFilter}
-                    solutionFilter={solutionFilter}
-                  />
-                </EuiInputPopover>
-              </>
+              <EuiInputPopover
+                id={'providerInputPopoverId'}
+                fullWidth
+                input={selectInput}
+                isOpen={isProviderPopoverOpen}
+                closePopover={closeProviderPopover}
+                className="rightArrowIcon"
+              >
+                <SelectableProvider
+                  currentSolution={currentSolution}
+                  providers={updatedProviders ?? []}
+                  onClosePopover={closeProviderPopover}
+                  onProviderChange={onProviderChange}
+                  onSolutionFilterChange={toggleAndApplyFilter}
+                  solutionFilter={solutionFilter}
+                />
+              </EuiInputPopover>
             </EuiFormRow>
           );
           return formRow;

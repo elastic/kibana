@@ -17,7 +17,7 @@
  * 2. Critical TypeScript/React settings are correctly defined
  *
  * Usage:
- *   node -r @kbn/babel-register/install packages/kbn-transpiler-config/scripts/validate_config_sync.ts
+ *   node -r @kbn/swc-register/install packages/kbn-transpiler-config/scripts/validate_config_sync.ts
  *
  * Exit codes:
  *   0 - All configs are in sync

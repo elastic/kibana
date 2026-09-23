@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { i18n } from '@kbn/i18n';
 import type { SavedObject, SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { isSavedObjectErrorResult } from '@kbn/core-saved-objects-server';
+import { MAX_PARAM_BULK_SIZE, optionalRouteId, routeId } from '../../zod_query';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
 import { syntheticsParamType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
@@ -26,15 +27,13 @@ export const deleteSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
   validate: {},
   validation: {
     request: {
-      body: schema.nullable(
-        schema.object({
-          ids: schema.arrayOf(schema.string(), {
-            minSize: 1,
-          }),
+      body: z
+        .strictObject({
+          ids: z.array(routeId).min(1).max(MAX_PARAM_BULK_SIZE),
         })
-      ),
-      params: schema.object({
-        id: schema.maybe(schema.string()),
+        .nullable(),
+      params: z.strictObject({
+        id: optionalRouteId,
       }),
     },
   },
@@ -90,7 +89,7 @@ export async function getExistingParamsInfo(
   const spaces = Array.from(
     new Set(
       existingParam.saved_objects.reduce((acc, obj) => {
-        return acc.concat(obj.namespaces ?? []);
+        return acc.concat(isSavedObjectErrorResult(obj) ? [] : obj.namespaces ?? []);
       }, [] as string[])
     )
   );

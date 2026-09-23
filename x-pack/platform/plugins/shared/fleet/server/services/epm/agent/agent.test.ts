@@ -626,7 +626,7 @@ paths:
 `;
     const vars = {};
 
-    expect(() => compileTemplate(vars, getMockedMetaVariable(), streamTemplate)).toThrowError(
+    expect(() => compileTemplate(vars, getMockedMetaVariable(), streamTemplate)).toThrow(
       'Error while compiling agent template: options.inverse is not a function'
     );
   });
@@ -643,7 +643,7 @@ paths:
       },
     };
 
-    expect(() => compileTemplate(vars, getMockedMetaVariable(), template)).toThrowError(
+    expect(() => compileTemplate(vars, getMockedMetaVariable(), template)).toThrow(
       'YAMLException: Duplicated key "processors" found in agent policy yaml, please check your yaml variables.'
     );
   });
@@ -671,6 +671,16 @@ type: {{_meta.stream.data_stream.type}}
       dataset: 'dataset.name',
       type: 'logs',
     });
+  });
+
+  it('should fold single newlines to a space in double-quoted YAML scalars', () => {
+    // Regression: https://github.com/elastic/sdh-beats/issues/7456
+    // Multi-line double-quoted SQL in stream templates (e.g. Oracle tablespace) had
+    // tokens concatenated because a single \n was deleted instead of folded to a space.
+    const template = `sql: "SUM(bytes) AS TOTAL_BYTES\nFROM details"\n`;
+
+    const output = compileTemplate({}, getMockedMetaVariable(), template);
+    expect(output).toEqual({ sql: 'SUM(bytes) AS TOTAL_BYTES FROM details' });
   });
 });
 

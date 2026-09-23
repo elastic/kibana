@@ -96,3 +96,53 @@ export const getCurrentAndStoredMode = async (
   const storedMode = await getStoredQueryMode(page);
   return { currentMode, storedMode };
 };
+
+/**
+ * Submits an ES|QL query expected to trigger the cascade (grouped) layout and
+ * returns whether the cascade layout actually rendered. Assertion is left to
+ * the caller so it stays in the test body, not hidden inside a helper.
+ */
+export const runCascadeQuery = async (
+  pageObjects: ScoutTestFixtures['pageObjects'],
+  query: string
+): Promise<boolean> => {
+  await pageObjects.discover.writeAndSubmitEsqlQuery(query);
+  return pageObjects.discover.isShowingCascadeLayout();
+};
+
+/**
+ * Discover page root, including the top nav. The tabs bar renders above it and
+ * is scanned as a second root.
+ */
+const PAGE_TEST_SUBJ = '[data-test-subj="dscPage"]';
+const TABS_BAR_TEST_SUBJ = '[data-test-subj="unifiedTabs_tabsBar"]';
+
+/**
+ * Left out of page-level scans, both pre-existing violations we do not own:
+ *
+ * - the tabs bar's tablist holds its tabs through `aria-owns` rather than as
+ *   children (`aria-required-children`, `@kbn/unified-tabs`);
+ * - EUI's virtualized grid body scrolls without being keyboard focusable
+ *   (`scrollable-region-focusable`) whenever it overflows.
+ *
+ * Both are scoped to the offending node so the rest of the tabs bar and the
+ * rest of the grid stay covered. The grid scroll container has no test subject
+ * or role, so its EUI class is the only handle — if that class is ever renamed
+ * the scan fails loudly on the violation rather than silently losing coverage.
+ */
+const PAGE_SCAN_EXCLUSIONS = [
+  '[data-test-subj="unifiedTabs_tabsBar"] [role="tablist"]',
+  '.euiDataGrid__virtualized',
+];
+
+/**
+ * Runs an axe scan over the Discover page and returns the violations, so the
+ * assertion stays in the test body.
+ */
+export const getPageA11yViolations = async (page: ScoutPage): Promise<string[]> => {
+  const { violations } = await page.checkA11y({
+    include: [PAGE_TEST_SUBJ, TABS_BAR_TEST_SUBJ],
+    exclude: PAGE_SCAN_EXCLUSIONS,
+  });
+  return violations;
+};

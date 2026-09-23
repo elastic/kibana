@@ -183,7 +183,7 @@ export const AlertBulkActionsComponent = React.memo<StatefulAlertBulkActionsProp
     const closePopoverRef = useRef<() => void>(noop);
     const closePopover = useCallback(() => closePopoverRef.current(), []);
 
-    const { items: bulkActionItems, panels: bulkActionsPanels } = useBulkActionItems({
+    const { panels: bulkActionsPanels, groups: bulkActionGroups } = useBulkActionItems({
       eventIds,
       currentStatus: filterStatus,
       ...(showClearSelection ? { query } : {}),
@@ -205,8 +205,8 @@ export const AlertBulkActionsComponent = React.memo<StatefulAlertBulkActionsProp
         showClearSelection={showClearSelection}
         onSelectAll={onSelectAll}
         onClearSelection={onClearSelection}
-        bulkActionItems={bulkActionItems}
         bulkActionPanels={bulkActionsPanels}
+        bulkActionGroups={bulkActionGroups}
         closePopoverRef={closePopoverRef}
       />
     );
@@ -233,7 +233,12 @@ const mapDispatchToProps = {
   clearSelected: dataTableActions.clearSelected,
 };
 
-const connector = connect(makeMapStateToProps, mapDispatchToProps);
+type StateProps = ReturnType<ReturnType<typeof makeMapStateToProps>>;
+type DispatchProps = typeof mapDispatchToProps;
+const connector = connect<StateProps, DispatchProps, OwnProps, DataTableState>(
+  makeMapStateToProps,
+  mapDispatchToProps
+);
 
 type PropsFromRedux = ConnectedProps<typeof connector>;
 

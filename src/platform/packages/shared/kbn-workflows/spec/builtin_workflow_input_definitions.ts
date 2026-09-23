@@ -68,7 +68,7 @@ const alertingV2NotificationGroup: JsonSchema = {
             description: 'Timestamp of the latest event seen for this episode',
           },
           rule_id: {
-            type: 'string',
+            type: ['string', 'null'],
             description: 'Identifier of the rule that produced this episode',
           },
           source: {

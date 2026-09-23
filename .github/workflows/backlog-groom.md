@@ -13,13 +13,23 @@ steps:
   - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
     with:
       node-version-file: '.nvmrc'
-      cache: yarn
+  - name: Enable corepack-managed pnpm
+    # Kibana pins pnpm via package.json "engines.pnpm" (no "packageManager" field) and
+    # `kbn bootstrap` refuses to run without it.
+    run: |
+      export COREPACK_ENABLE_DOWNLOAD_PROMPT=0
+      PNPM_VERSION="$(node -p "require('./package.json').engines.pnpm.replace(/^[^\d]*/, '')")"
+      corepack enable
+      corepack prepare "pnpm@${PNPM_VERSION}" --activate
+      pnpm --version
   - name: Bootstrap Kibana
-    run: yarn kbn bootstrap
+    run: pnpm kbn bootstrap
 permissions:
   contents: read
   issues: read
   pull-requests: read
+imports:
+  - .github/workflows/shared/app-dex-agents-otel.md
 engine:
   id: claude
   version: "2.1.111"
@@ -28,12 +38,12 @@ engine:
   env:
     ANTHROPIC_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
     ANTHROPIC_BASE_URL: https://openrouter.ai/api
-    ENABLE_PROMPT_CACHING_1H: "1"
     ANTHROPIC_DEFAULT_OPUS_MODEL: anthropic/claude-opus-4.7[1m]
     ANTHROPIC_DEFAULT_HAIKU_MODEL: anthropic/claude-haiku-4.5
     ANTHROPIC_DEFAULT_SONNET_MODEL: anthropic/claude-sonnet-4.6
     CLAUDE_CODE_SUBAGENT_MODEL: opus[1m]
 tools:
+  bash: true
   github:
     toolsets: [default]
     min-integrity: none

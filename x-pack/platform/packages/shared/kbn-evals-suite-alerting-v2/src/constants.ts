@@ -8,9 +8,11 @@
 import { platformCoreTools } from '@kbn/agent-builder-common';
 
 export {
+  ACTION_POLICY_MANAGEMENT_SKILL_ID,
   ALERTING_TOOL_IDS,
   CREATE_WITH_AGENT_INITIAL_PROMPT,
   RULE_MANAGEMENT_SKILL_ID,
+  RUNBOOK_ARTIFACT_TYPE,
 } from '@kbn/alerting-v2-constants';
 
 /** Attachment type for workflow YAML drafts produced by `generate_workflow`. */

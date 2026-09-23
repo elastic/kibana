@@ -7,11 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BuildkiteClient } from '../buildkite';
-import { CiStatsClient } from './client';
+import { BuildkiteClient } from '../buildkite/index.ts';
+import { CiStatsClient } from './client.ts';
 
 const buildkite = new BuildkiteClient();
 const ciStats = new CiStatsClient();
+
+export function isMissingMergeBaseBaselineReport(reportMd: string): boolean {
+  return /ERROR: no builds found for mergeBase sha \[[a-f0-9]{40}\]/i.test(reportMd);
+}
 
 export async function onComplete() {
   if (!process.env.CI_STATS_BUILD_ID) {
@@ -45,11 +49,15 @@ export async function onComplete() {
       );
     }
 
-    const annotationType = report?.success ? 'info' : 'error';
+    const annotationType = report.success
+      ? 'info'
+      : isMissingMergeBaseBaselineReport(report.md)
+      ? 'warning'
+      : 'error';
     buildkite.setAnnotation('ci-stats-report', annotationType, report.md);
   }
 
-  if (report && !report.success) {
+  if (report && !report.success && !isMissingMergeBaseBaselineReport(report.md)) {
     console.log('+++ CI Stats Report');
     console.error('Failing build due to CI Stats report. See annotation at top of build.');
     process.exit(1);

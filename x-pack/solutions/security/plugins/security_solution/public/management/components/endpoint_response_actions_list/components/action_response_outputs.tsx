@@ -9,14 +9,17 @@
 
 import React, { memo, useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
+import { KillSuspendProcessActionResult } from '../../kill_process_action_result';
 import { CancelActionResults } from '../../cancel_action_results';
 import {
   isCancelAction,
   isExecuteAction,
   isGetFileAction,
+  isKillProcessAction,
   isMemoryDumpAction,
   isProcessesAction,
   isRunScriptAction,
+  isSuspendProcessAction,
   isUploadAction,
 } from '../../../../../common/endpoint/service/response_actions/type_guards';
 import { ResponseActionFileDownloadLink } from '../../response_action_file_download_link';
@@ -62,10 +65,13 @@ export const ActionResponseOutputs = memo<ActionResponseOutputsProps>(
       return (
         <div data-test-subj={getTestId()}>
           {action.agents.map((agentId) => {
-            const { wasSuccessful, isCompleted, completedAt } = action.agentState[agentId] ?? {
+            const { wasSuccessful, isCompleted, wasCanceled, completedAt } = action.agentState[
+              agentId
+            ] ?? {
               wasSuccessful: action.wasSuccessful,
               isCompleted: action.isCompleted,
               completedAt: action.completedAt,
+              wasCanceled: action.wasCanceled,
             };
             const hostStatusMessage = !isCompleted
               ? OUTPUT_MESSAGES.isPending(consoleCommandName)
@@ -77,7 +83,13 @@ export const ActionResponseOutputs = memo<ActionResponseOutputsProps>(
             const hostName = action.hosts[agentId]?.name ?? agentId;
             let hostOutput: React.ReactNode = null;
 
-            if (isCompleted && wasSuccessful) {
+            // With `kill-process` we still want to show the returned content even
+            // during a failure. This accommodates for when the parent PID was not able
+            // to be killed, but descendants (at least some) were killed.
+            if (
+              (isCompleted && wasSuccessful) ||
+              (isKillProcessAction(action) && action.agentType === 'endpoint')
+            ) {
               if (isGetFileAction(action)) {
                 hostOutput = (
                   <ResponseActionFileDownloadLink
@@ -158,8 +170,19 @@ export const ActionResponseOutputs = memo<ActionResponseOutputsProps>(
                 );
               }
 
-              // CrowdStrike Isolate/Release actions (runscript has its own output via RunscriptActionResult)
+              if (isKillProcessAction(action) || isSuspendProcessAction(action)) {
+                hostOutput = (
+                  <KillSuspendProcessActionResult
+                    action={action}
+                    agentId={agentId}
+                    textSize="xs"
+                    data-test-subj={getTestId('killProcessOutput')}
+                  />
+                );
+              }
+
               if (action.agentType === 'crowdstrike' && !isRunScriptAction(action)) {
+                // CrowdStrike Isolate/Release actions (runscript has its own output via RunscriptActionResult)
                 hostOutput = <>{OUTPUT_MESSAGES.submittedSuccessfully(consoleCommandName)}</>;
               }
             }
@@ -181,15 +204,16 @@ export const ActionResponseOutputs = memo<ActionResponseOutputsProps>(
                         {OUTPUT_MESSAGES.expandSection.completedAt} {completedAt}
                       </div>
                     )}
-                    {wasSuccessful ? (
-                      hostOutput
-                    ) : (
+
+                    {(wasCanceled || (!wasSuccessful && !hostOutput)) && (
                       <EndpointActionFailureMessage
                         action={action}
                         agentId={agentId}
                         data-test-subj={getTestId(`${agentId}-outputFailureMessage`)}
                       />
                     )}
+
+                    {hostOutput}
                   </div>
                 )}
                 {hasMultipleAgents && <EuiSpacer size="l" />}

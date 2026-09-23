@@ -12,15 +12,21 @@ import type { RouteContext } from '../types';
 import {
   createGetMultiSpaceSettingsRoute,
   createPutMultiSpaceSettingsRoute,
+  SyntheticsMultiSpaceSettingsSchema,
 } from './multi_space_settings';
 
 const NOT_FOUND_SENTINEL = { status: 404 };
 
 const buildServer = ({
   isElasticsearchServerless = false,
-}: { isElasticsearchServerless?: boolean } = {}) =>
+  invalidateCache = jest.fn(),
+}: {
+  isElasticsearchServerless?: boolean;
+  invalidateCache?: jest.Mock;
+} = {}) =>
   ({
     isElasticsearchServerless,
+    syntheticsIndicesCache: { invalidate: invalidateCache, get: jest.fn() },
   } as unknown as RouteContext['server']);
 
 const buildResponse = () =>
@@ -39,6 +45,27 @@ const buildRouteContext = (overrides: Partial<RouteContext> = {}): RouteContext 
 describe('multi space settings routes', () => {
   afterEach(() => {
     jest.restoreAllMocks();
+  });
+
+  describe('SyntheticsMultiSpaceSettingsSchema', () => {
+    it('rejects unknown keys so a typo cannot reset settings via applyDefaults', () => {
+      const result = SyntheticsMultiSpaceSettingsSchema.safeParse({
+        useAllRemoteCluster: true,
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('accepts known settings', () => {
+      expect(
+        SyntheticsMultiSpaceSettingsSchema.parse({
+          useAllRemoteClusters: true,
+          selectedRemoteClusters: ['cluster-a'],
+        })
+      ).toEqual({
+        useAllRemoteClusters: true,
+        selectedRemoteClusters: ['cluster-a'],
+      });
+    });
   });
 
   describe('createGetMultiSpaceSettingsRoute', () => {
@@ -141,6 +168,68 @@ describe('multi space settings routes', () => {
       expect(response.notFound).toHaveBeenCalledTimes(1);
       expect(result).toBe(NOT_FOUND_SENTINEL);
       expect(saveSpy).not.toHaveBeenCalled();
+    });
+
+    it('invalidates the synthetics indices cache after a successful save', async () => {
+      jest
+        .spyOn(DefaultSyntheticsMultiSpaceSettingsRepository.prototype, 'save')
+        .mockResolvedValue({
+          useAllRemoteClusters: true,
+          selectedRemoteClusters: ['cluster-a'],
+          spaces: ['default'],
+        });
+
+      const invalidateCache = jest.fn();
+      const route = createPutMultiSpaceSettingsRoute();
+      await route.handler(
+        buildRouteContext({
+          server: buildServer({ invalidateCache }),
+          request: {
+            body: { useAllRemoteClusters: true, selectedRemoteClusters: ['cluster-a'] },
+          } as unknown as RouteContext['request'],
+        })
+      );
+
+      expect(invalidateCache).toHaveBeenCalledTimes(1);
+      expect(invalidateCache).toHaveBeenCalledWith();
+    });
+
+    it('does not invalidate the cache when the route short-circuits on serverless', async () => {
+      jest.spyOn(DefaultSyntheticsMultiSpaceSettingsRepository.prototype, 'save');
+      const invalidateCache = jest.fn();
+
+      const route = createPutMultiSpaceSettingsRoute();
+      await route.handler(
+        buildRouteContext({
+          server: buildServer({ isElasticsearchServerless: true, invalidateCache }),
+          request: { body: { useAllRemoteClusters: true } } as unknown as RouteContext['request'],
+        })
+      );
+
+      expect(invalidateCache).not.toHaveBeenCalled();
+    });
+
+    it('invalidates the cache even when save throws after a partial update', async () => {
+      jest
+        .spyOn(DefaultSyntheticsMultiSpaceSettingsRepository.prototype, 'save')
+        .mockRejectedValue(new Error('updateObjectsSpaces failed'));
+
+      const invalidateCache = jest.fn();
+      const route = createPutMultiSpaceSettingsRoute();
+
+      await expect(
+        route.handler(
+          buildRouteContext({
+            server: buildServer({ invalidateCache }),
+            request: {
+              body: { useAllRemoteClusters: true, selectedRemoteClusters: ['cluster-a'] },
+            } as unknown as RouteContext['request'],
+          })
+        )
+      ).rejects.toThrow('updateObjectsSpaces failed');
+
+      expect(invalidateCache).toHaveBeenCalledTimes(1);
+      expect(invalidateCache).toHaveBeenCalledWith();
     });
   });
 });

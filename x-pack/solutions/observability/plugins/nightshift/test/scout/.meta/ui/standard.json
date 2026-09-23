@@ -1,0 +1,24 @@
+{
+  "sha1": "31f0b51299eb62f33cbf55b6fdef7cf24a5cebca",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "ca3c97ed706025a-f8f616c28542479",
+      "title": "Nightshift navigation links to Settings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift/test/scout/ui/tests/nightshift.spec.ts",
+        "line": 46,
+        "column": 9
+      }
+    }
+  ]
+}

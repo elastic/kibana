@@ -8,7 +8,7 @@
 import type { Criteria } from '@elastic/eui';
 
 import type { HttpStart } from '@kbn/core/public';
-import type { QueryRolesResult } from '@kbn/security-plugin-types-common';
+import type { QueryRolesResult, RoleDataSourcePrivilege } from '@kbn/security-plugin-types-common';
 import type { BulkUpdatePayload, BulkUpdateRoleResponse } from '@kbn/security-plugin-types-public';
 
 import type { Role, RoleIndexPrivilege, RoleRemoteIndexPrivilege } from '../../../common';
@@ -96,6 +96,20 @@ export class RolesAPIClient {
     role.elasticsearch.remote_indices = role.elasticsearch.remote_indices?.filter(
       (indexPrivilege) => !isPlaceholderPrivilege(indexPrivilege)
     );
+
+    const isPlaceholderDataSourcePrivilege = (dataSourcePrivilege: RoleDataSourcePrivilege) => {
+      return dataSourcePrivilege.names.length === 0 && dataSourcePrivilege.privileges.length === 0;
+    };
+
+    const global = role.elasticsearch.global;
+    if (global?.data_source) {
+      role.elasticsearch.global = {
+        ...global,
+        data_source: global.data_source.filter(
+          (privilege) => !isPlaceholderDataSourcePrivilege(privilege)
+        ),
+      };
+    }
 
     // Remove any placeholder query entries
     role.elasticsearch.indices.forEach((index) => index.query || delete index.query);

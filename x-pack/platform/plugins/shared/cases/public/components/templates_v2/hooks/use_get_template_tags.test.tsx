@@ -31,7 +31,7 @@ describe('useGetTemplateTags', () => {
       ),
     });
 
-    await waitFor(() => expect(spyOnGetTemplateTags).toBeCalled());
+    await waitFor(() => expect(spyOnGetTemplateTags).toHaveBeenCalled());
   });
 
   it('returns tags data', async () => {
@@ -60,7 +60,7 @@ describe('useGetTemplateTags', () => {
       ),
     });
 
-    await waitFor(() => expect(addError).toBeCalled());
+    await waitFor(() => expect(addError).toHaveBeenCalled());
   });
 
   it('does not display error toast for AbortError', async () => {
@@ -79,7 +79,7 @@ describe('useGetTemplateTags', () => {
       ),
     });
 
-    await waitFor(() => expect(spyOnGetTemplateTags).toBeCalled());
-    expect(addError).not.toBeCalled();
+    await waitFor(() => expect(spyOnGetTemplateTags).toHaveBeenCalled());
+    expect(addError).not.toHaveBeenCalled();
   });
 });

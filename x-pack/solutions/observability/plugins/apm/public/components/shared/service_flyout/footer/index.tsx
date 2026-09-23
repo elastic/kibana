@@ -6,19 +6,27 @@
  */
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiFlyoutFooter } from '@elastic/eui';
-import { EBT_CLICK_ACTIONS } from '@kbn/ebt-click';
+import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { ActionsContextMenu, type ActionGroups } from '../../actions_context_menu';
 import { SERVICE_FLYOUT_EBT_ELEMENTS } from '../ebt_constants';
 import { useServiceFlyoutLinks } from '../hooks/use_service_flyout_links';
+import { useServiceFlyoutContext } from '../service_flyout_context';
 
 export function ServiceFlyoutFooter() {
+  const { capabilities } = useServiceFlyoutContext();
   const {
     alerts: alertsHref,
     slos: slosHref,
-    discover: { traces: tracesDiscoverHref, logs: logsDiscoverHref },
+    discover: {
+      traces: { href: tracesDiscoverHref, openInDiscoverTab: tracesOpenInDiscoverTab },
+      logs: { href: logsDiscoverHref, openInDiscoverTab: logsOpenInDiscoverTab },
+    },
   } = useServiceFlyoutLinks();
+
+  const showAlerts = Boolean(alertsHref && capabilities.footer?.alerts);
+  const showSlos = Boolean(slosHref && capabilities.footer?.slos);
 
   const actionGroups = useMemo(() => {
     const groups: ActionGroups = [];
@@ -30,10 +38,15 @@ export function ServiceFlyoutFooter() {
           tracesDiscoverHref
             ? {
                 id: 'openTracesInDiscover',
-                name: i18n.translate('xpack.apm.serviceFlyout.openTracesInDiscoverAction', {
-                  defaultMessage: 'Open traces in Discover',
-                }),
+                name: tracesOpenInDiscoverTab
+                  ? i18n.translate('xpack.apm.serviceFlyout.openTracesInDiscoverTabAction', {
+                      defaultMessage: 'Open traces in a Discover tab',
+                    })
+                  : i18n.translate('xpack.apm.serviceFlyout.openTracesInDiscoverAction', {
+                      defaultMessage: 'Open traces in Discover',
+                    }),
                 href: tracesDiscoverHref,
+                onClick: tracesOpenInDiscoverTab,
                 ebt: {
                   action: EBT_CLICK_ACTIONS.OPEN_IN_DISCOVER,
                   element: SERVICE_FLYOUT_EBT_ELEMENTS.ACTIONS_MENU,
@@ -44,10 +57,15 @@ export function ServiceFlyoutFooter() {
           logsDiscoverHref
             ? {
                 id: 'openLogsInDiscover',
-                name: i18n.translate('xpack.apm.serviceFlyout.openLogsInDiscoverAction', {
-                  defaultMessage: 'Open logs in Discover',
-                }),
+                name: logsOpenInDiscoverTab
+                  ? i18n.translate('xpack.apm.serviceFlyout.openLogsInDiscoverTabAction', {
+                      defaultMessage: 'Open logs in a Discover tab',
+                    })
+                  : i18n.translate('xpack.apm.serviceFlyout.openLogsInDiscoverAction', {
+                      defaultMessage: 'Open logs in Discover',
+                    }),
                 href: logsDiscoverHref,
+                onClick: logsOpenInDiscoverTab,
                 ebt: {
                   action: EBT_CLICK_ACTIONS.OPEN_IN_DISCOVER,
                   element: SERVICE_FLYOUT_EBT_ELEMENTS.ACTIONS_MENU,
@@ -59,7 +77,7 @@ export function ServiceFlyoutFooter() {
       });
     }
 
-    if (alertsHref) {
+    if (showAlerts) {
       groups.push({
         id: 'alerts',
         groupLabel: i18n.translate('xpack.apm.serviceFlyout.alertsActionsGroupLabel', {
@@ -81,7 +99,7 @@ export function ServiceFlyoutFooter() {
       });
     }
 
-    if (slosHref) {
+    if (showSlos) {
       groups.push({
         id: 'slos',
         groupLabel: i18n.translate('xpack.apm.serviceFlyout.sloActionsGroupLabel', {
@@ -104,7 +122,16 @@ export function ServiceFlyoutFooter() {
     }
 
     return groups;
-  }, [alertsHref, logsDiscoverHref, slosHref, tracesDiscoverHref]);
+  }, [
+    logsDiscoverHref,
+    logsOpenInDiscoverTab,
+    showAlerts,
+    alertsHref,
+    showSlos,
+    slosHref,
+    tracesDiscoverHref,
+    tracesOpenInDiscoverTab,
+  ]);
 
   return (
     <EuiFlyoutFooter>
@@ -120,8 +147,13 @@ export function ServiceFlyoutFooter() {
                 size="s"
                 iconType="chevronSingleDown"
                 iconSide="right"
-                disabled={actionGroups.length === 0}
+                isLoading={capabilities.loading}
+                disabled={capabilities.loading || actionGroups.length === 0}
                 data-test-subj="serviceFlyoutActionsButton"
+                {...getEbtProps({
+                  action: EBT_CLICK_ACTIONS.OPEN_ACTIONS,
+                  element: SERVICE_FLYOUT_EBT_ELEMENTS.ACTIONS_MENU,
+                })}
               >
                 {i18n.translate('xpack.apm.serviceFlyout.actionsButtonLabel', {
                   defaultMessage: 'Actions',

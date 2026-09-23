@@ -25,6 +25,9 @@ import type {
 import type { RuntimeAgentConfigurationOverrides } from '../agents/definition';
 import type { ConversationAccessControl } from './access_control';
 import type { RoundState } from './round_state';
+import type { ConversationEvent } from './timeline_events';
+import type { ExecutionInterruption } from './events';
+import type { MetadataFieldValue } from '../templates';
 
 /**
  * Represents the input that initiated a conversation round.
@@ -91,6 +94,8 @@ export enum ConversationRoundStepType {
   backgroundAgentComplete = 'background_agent_complete',
   updateTodos = 'update_todos',
   askUserQuestion = 'ask_user_question',
+  relevantSkills = 'relevant_skills',
+  subagentRosterUpdated = 'subagent_roster_updated',
 }
 
 // tool call step
@@ -143,6 +148,11 @@ export interface ToolCallWithResult {
   tool_call_group_id?: string;
   tool_origin?: ToolOrigin;
   tool_type?: ToolType;
+  /**
+   * Set when the run was interrupted while this call was in flight: `results` then carries no
+   * outcome (usually `[]`). An empty `results` without this flag is a real empty return.
+   */
+  interrupted?: true;
 }
 
 export type ToolCallStep = ConversationRoundStepMixin<
@@ -265,6 +275,44 @@ export const isAskUserQuestionStep = (step: ConversationRoundStep): step is AskU
 };
 
 /**
+ * A single skill deemed relevant to the current request, as surfaced in the
+ * `<relevant_skills>` notification.
+ */
+export interface RelevantSkill {
+  id: string;
+  name: string;
+  path: string;
+  description: string;
+  relevance_note?: string;
+}
+
+export interface RelevantSkillsStepData {
+  skills: RelevantSkill[];
+  /**
+   * How the selection was produced:
+   * - `implicit`: the pre-round automatic selection (fast-model call at round start).
+   * - `explicit`: an on-demand result from `search_relevant_skills` invoked by the agent.
+   */
+  source: 'implicit' | 'explicit';
+}
+
+export type RelevantSkillsStep = ConversationRoundStepMixin<
+  ConversationRoundStepType.relevantSkills,
+  RelevantSkillsStepData
+>;
+
+export const createRelevantSkillsStep = (data: RelevantSkillsStepData): RelevantSkillsStep => {
+  return {
+    type: ConversationRoundStepType.relevantSkills,
+    ...data,
+  };
+};
+
+export const isRelevantSkillsStep = (step: ConversationRoundStep): step is RelevantSkillsStep => {
+  return step.type === ConversationRoundStepType.relevantSkills;
+};
+
+/**
  * Returns the (single) todos step from a list of steps, if present.
  * A round only ever has at most one todos step, which is updated in place.
  */
@@ -291,7 +339,46 @@ export type ConversationRoundStep =
   | CompactionStep
   | BackgroundAgentCompleteStep
   | TodosStep
-  | AskUserQuestionStep;
+  | AskUserQuestionStep
+  | RelevantSkillsStep
+  | SubagentRosterUpdatedStep;
+
+/**
+ * An entry in the active persistent-sub-agent roster.
+ */
+export interface SubagentRosterEntry {
+  /** The name the parent addresses this sub-agent by (via `send_message`). */
+  name: string;
+  /** Role summary, sourced from the `description` param passed to `run_subagent`. */
+  purpose?: string;
+  /** The sub-agent's own conversation id. */
+  conversation_id: string;
+}
+
+export interface SubagentRosterUpdatedStepData {
+  /** Full active roster at time of emission. Latest entry supersedes older ones. */
+  roster: SubagentRosterEntry[];
+}
+
+export type SubagentRosterUpdatedStep = ConversationRoundStepMixin<
+  ConversationRoundStepType.subagentRosterUpdated,
+  SubagentRosterUpdatedStepData
+>;
+
+export const createSubagentRosterUpdatedStep = (
+  data: SubagentRosterUpdatedStepData
+): SubagentRosterUpdatedStep => {
+  return {
+    type: ConversationRoundStepType.subagentRosterUpdated,
+    ...data,
+  };
+};
+
+export const isSubagentRosterUpdatedStep = (
+  step: ConversationRoundStep
+): step is SubagentRosterUpdatedStep => {
+  return step.type === ConversationRoundStepType.subagentRosterUpdated;
+};
 
 export enum ConversationRoundStatus {
   /** round is currently being processed */
@@ -318,6 +405,48 @@ export enum ConversationDisplayStatus {
   awaitingPrompt = 'awaiting_prompt',
   /** last round ended with an error */
   error = 'error',
+}
+
+/**
+ * Stable identifier for a feedback chip. These values are stored in Elasticsearch;
+ * the display label is resolved at render time via i18n so feedback data is
+ * locale-independent and safe to use in cross-locale analytics.
+ */
+export type FeedbackChipId =
+  | 'inaccurate'
+  | 'incomplete'
+  | 'didnt_follow_instructions'
+  | 'accurate'
+  | 'useful'
+  | 'well_explained';
+
+/**
+ * User feedback submitted for a conversation round.
+ *
+ * Note: each new submission overwrites the previous one.
+ */
+export interface ConversationRoundFeedback {
+  /** Thumbs up or thumbs down */
+  vote: 'up' | 'down';
+  /**
+   * Stable chip IDs selected by the user. Stored as IDs (not display labels)
+   * so they are locale-independent and safe to use in cross-locale analytics.
+   */
+  chips?: FeedbackChipId[];
+  /** Optional free-text comment */
+  comment?: string;
+  /** ISO timestamp when the feedback was (most recently) submitted */
+  submitted_at: string;
+  /**
+   * Connector ID from the round's model_usage at submission time.
+   * Present whenever model_usage is available on the round.
+   */
+  connector_id?: string;
+  /**
+   * Model identifier. Only populated when the LLM provider returns the model
+   * in its response — many connectors omit it.
+   */
+  model?: string;
 }
 
 /**
@@ -355,6 +484,14 @@ export interface ConversationRound {
   trace_id?: string | string[];
   /** Runtime configuration overrides that were applied to this round */
   configuration_overrides?: RuntimeAgentConfigurationOverrides;
+  /** User feedback for this round, if submitted. */
+  feedback?: ConversationRoundFeedback;
+  /**
+   * Set when the round's last execution ended without an outcome (failed or aborted). The round
+   * is `completed` with an empty `response.message`; the steps completed before the interruption
+   * are kept.
+   */
+  interruption?: ExecutionInterruption;
 }
 
 export interface ConversationOrigin {
@@ -371,9 +508,40 @@ export interface ConversationRoundAuthor {
   full_name?: string;
 }
 
+export const getConversationRoundAuthorDisplayName = (
+  author?: ConversationRoundAuthor
+): string | undefined => {
+  if (!author) {
+    return undefined;
+  }
+
+  if (author.full_name) {
+    return author.full_name;
+  }
+
+  return author.username;
+};
+
 /** External system the message comes from, for example Slack or GitHub. */
 export enum ConversationOriginType {
   Slack = 'slack',
+}
+
+/**
+ * Type of parent/child relationship between two conversations.
+ * Set on the child's `parent_conversation.relation` field.
+ */
+export enum ConversationParentRelation {
+  /** Child conversation is a persistent sub-agent spawned from the parent. */
+  subagent = 'subagent',
+}
+
+/**
+ * Link from a child conversation to its parent.
+ */
+export interface ConversationParentLink {
+  id: string;
+  relation: ConversationParentRelation;
 }
 
 export interface ConversationRoundOrigin {
@@ -408,6 +576,41 @@ export interface RoundModelUsageStats {
    */
   model?: string;
 }
+
+/**
+ * Model usage of an execution whose usage is unknown (an interrupted run that never resolved its
+ * provider). Exactly these four keys: `isZeroModelUsage` is a structural equality check.
+ */
+export const ZERO_MODEL_USAGE: RoundModelUsageStats = {
+  connector_id: '',
+  llm_calls: 0,
+  input_tokens: 0,
+  output_tokens: 0,
+};
+
+/** True when `usage` is structurally the {@link ZERO_MODEL_USAGE} sentinel. */
+export const isZeroModelUsage = (usage: RoundModelUsageStats): boolean =>
+  usage.connector_id === '' &&
+  usage.llm_calls === 0 &&
+  usage.input_tokens === 0 &&
+  usage.output_tokens === 0 &&
+  usage.cached_input_tokens === undefined &&
+  usage.model === undefined;
+
+/** Placeholder title assigned to a new conversation */
+export const DEFAULT_CONVERSATION_TITLE = 'New conversation';
+
+/** Maximum accepted length for a client-supplied conversation title */
+export const CONVERSATION_TITLE_MAX_LENGTH = 500;
+
+/**
+ * Defensive cap on the length of a conversation id accepted from a request.
+ * Conversation ids are UUIDs, so this should be more than enough.
+ */
+export const CONVERSATION_ID_MAX_LENGTH = 256;
+
+/** Maximum accepted length for a conversation metadata key */
+export const CONVERSATION_METADATA_KEY_MAX_LENGTH = 256;
 
 /**
  * Main structure representing a conversation with an agent.
@@ -448,10 +651,31 @@ export interface Conversation {
    * Identifier of the bash/VFS workspace for this conversation.
    */
   workspace_id?: string;
+  /**
+   * When this conversation was created as a child of another, the link to the parent
+   */
+  parent_conversation?: ConversationParentLink;
   /** Access mode for the conversation. Missing values are treated as private. */
   access_control?: ConversationAccessControl;
   /** External origin used to resolve conversations submitted from an external system like Slack or GitHub. */
   origin?: ConversationOrigin;
+  /**
+   * Arbitrary key/value metadata seeded from a template or set by callers.
+   * Stored in ES as a `flattened` field; typed values are recovered on read via the active template.
+   */
+  metadata?: Record<string, MetadataFieldValue>;
+  /** ID of the template applied to this conversation. */
+  template_id?: string;
+  /** Version of the template as it was when it was last applied. */
+  template_version?: number;
+  /** Whether the conversation has been pinned by the user. */
+  pinned?: boolean;
+  /** Whether the conversation's history is presented as frozen in the UI. Purely presentational. */
+  read_only?: boolean;
+  /** Event timeline for this conversation. */
+  events?: ConversationEvent[];
+  /** Schema version of the stored events. */
+  schema_version?: number;
 }
 
 export type TodoStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled';
@@ -482,6 +706,17 @@ export interface ConversationInternalState {
   background_executions?: Record<string, BackgroundExecutionState>;
   /** Active todo list for the current conversation. Replaced wholesale on each write. */
   todos?: TodoItem[];
+  /**
+   * Map of persistent sub-agent name → sub agent entry describing the sub agent/run.
+   */
+  subagents?: Record<string, SubagentEntry>;
+}
+
+export interface SubagentEntry {
+  /** ID of the child conversation. */
+  conversation_id: string;
+  /** Agent id backing this persistent sub-agent — either a real agent id or `SELF_AGENT_ID`. */
+  agent_id: string;
 }
 
 export interface BackgroundExecutionCompletedAt {
@@ -504,8 +739,41 @@ export interface BackgroundExecutionState {
   completed_at?: BackgroundExecutionCompletedAt;
 }
 
-export type ConversationWithoutRounds = Omit<Conversation, 'rounds'>;
+/**
+ * Identity of one attachment, without any of its version content.
+ */
+export type ConversationAttachmentSummary = Pick<VersionedAttachment, 'id' | 'type'>;
 
+export type ConversationWithoutRounds = Omit<Conversation, 'rounds' | 'attachments'> & {
+  /**
+   * The conversation's active attachments, narrowed to their id and type: rows returned without
+   * rounds exclude attachment content from the query's `_source`
+   */
+  attachments?: ConversationAttachmentSummary[];
+};
+
+export interface ConversationPermissions {
+  rename: boolean;
+  delete: boolean;
+  update_access_control: boolean;
+}
+
+export type ConversationWithPermissions = Conversation & {
+  permissions: ConversationPermissions;
+};
+
+export type ConversationWithoutRoundsWithPermissions = ConversationWithoutRounds & {
+  permissions: ConversationPermissions;
+};
+
+export interface ConversationListResult {
+  results: ConversationWithoutRoundsWithPermissions[];
+  total: number;
+}
+
+/**
+ * @deprecated The regenerate capability has been removed.
+ */
 export type ConversationAction = 'regenerate';
 
 // Compaction summary types
@@ -555,4 +823,10 @@ export interface CompactionSummary {
   token_count: number;
   /** Structured summary data */
   structured_data: CompactionStructuredData;
+  /**
+   * Ids of the rounds this summary covers, in round order. Absent on summaries written before
+   * coverage became a set; those are interpreted through `summarized_round_count` with the
+   * pre-change fold's membership rule (see `coveredRoundIds`).
+   */
+  covered_round_ids?: string[];
 }

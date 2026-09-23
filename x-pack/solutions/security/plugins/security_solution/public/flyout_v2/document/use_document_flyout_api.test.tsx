@@ -12,6 +12,7 @@ import { useDocumentFlyoutApi } from './use_document_flyout_api';
 import { useKibana } from '../../common/lib/kibana';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 import { flyoutProviders } from '../shared/components/flyout_provider';
+import { CHILD_DOCUMENT_FLYOUT_TEST_ID } from '../shared/components/test_ids';
 import { documentFlyoutHistoryKey } from '../shared/constants/flyout_history';
 import {
   FlyoutV2EventTypes,
@@ -38,7 +39,7 @@ jest.mock('../shared/components/flyout_provider', () => ({
 }));
 jest.mock('../shared/hooks/use_default_flyout_properties', () => ({
   useDefaultDocumentFlyoutProperties: jest.fn(() => ({ size: 's' })),
-  defaultToolsFlyoutProperties: { size: 'm' },
+  useDefaultToolsFlyoutProperties: jest.fn(() => ({ minWidth: 384, size: 'm' })),
 }));
 
 const mockWriteOnOpen = jest.fn();
@@ -66,6 +67,7 @@ describe('useDocumentFlyoutApi', () => {
     (useKibana as jest.Mock).mockReturnValue({
       services: {
         overlays: { openSystemFlyout: mockOpenSystemFlyout },
+        storage: { get: jest.fn(), set: jest.fn(), remove: jest.fn() },
         telemetry: { reportEvent: mockReportEvent },
       },
     });
@@ -105,6 +107,10 @@ describe('useDocumentFlyoutApi', () => {
         historyKey: documentFlyoutHistoryKey,
       })
     );
+    const sessionContent = (flyoutProviders as jest.Mock).mock.calls[0][0].children;
+    const childContent = sessionContent.props.children.props.children;
+    expect(childContent.type).not.toBe('div');
+    expect(childContent.props.dataTestSubj).toBe(CHILD_DOCUMENT_FLYOUT_TEST_ID);
     expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
       surface: FLYOUT_SURFACE.FLYOUT,
       flyoutType: FLYOUT_TYPE.DOCUMENT,
@@ -167,7 +173,7 @@ describe('useDocumentFlyoutApi', () => {
 
     expect(mockOpenSystemFlyout).toHaveBeenCalledWith(
       'FLYOUT_CONTENT',
-      expect.objectContaining({ size: 'm', session: 'start' })
+      expect.objectContaining({ minWidth: 384, size: 'm', session: 'start' })
     );
     expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
       surface: FLYOUT_SURFACE.TOOL,
@@ -200,6 +206,7 @@ describe('useDocumentFlyoutApi', () => {
     expect(children.props.value).toEqual({
       session: 'inherit',
       historyKey: documentFlyoutHistoryKey,
+      isChildFlyout: false,
     });
   });
 
@@ -208,7 +215,6 @@ describe('useDocumentFlyoutApi', () => {
     result.current.openDocumentCorrelations({
       hit,
       scopeId: '',
-      isRulePreview: false,
       onShowAlert: jest.fn(),
     });
 
@@ -220,6 +226,7 @@ describe('useDocumentFlyoutApi', () => {
     expect(children.props.value).toEqual({
       session: 'inherit',
       historyKey: documentFlyoutHistoryKey,
+      isChildFlyout: false,
     });
   });
 
@@ -239,6 +246,7 @@ describe('useDocumentFlyoutApi', () => {
     expect(children.props.value).toEqual({
       session: 'inherit',
       historyKey: documentFlyoutHistoryKey,
+      isChildFlyout: false,
     });
   });
 
@@ -395,7 +403,6 @@ describe('useDocumentFlyoutApi', () => {
       result.current.openDocumentCorrelations({
         hit,
         scopeId: 'scope-1',
-        isRulePreview: false,
         onShowAlert: jest.fn(),
       });
 
@@ -405,7 +412,6 @@ describe('useDocumentFlyoutApi', () => {
           documentId: 'doc-id',
           indexName: 'doc-index',
           scopeId: 'scope-1',
-          isRulePreview: false,
         })
       );
       expect(mockBuildOnClose).toHaveBeenCalledWith(null);

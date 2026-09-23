@@ -21,6 +21,7 @@
     "@kbn/i18n-react",
     "@kbn/test-jest-helpers",
     "@kbn/shared-ux-page-kibana-template",
+    "@kbn/app-header",
     "@kbn/utility-types",
     "@kbn/ui-theme",
     "@kbn/config-schema",
@@ -31,9 +32,9 @@
     "@kbn/shared-ux-router",
     "@kbn/core-http-common",
     "@kbn/core-http-browser",
-    "@kbn/react-kibana-context-theme",
     "@kbn/css-utils",
     "@kbn/shared-ux-utility",
+    "@kbn/ui-callout",
   ],
   "exclude": [
     "target/**/*",

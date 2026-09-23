@@ -20,6 +20,7 @@ import chalk from 'chalk';
 import type { ToolingLog } from '@kbn/tooling-log';
 
 import { cache } from './utils/cache';
+import { createDownloadProgressBar } from './utils/download_progress';
 import { resolveCustomSnapshotUrl } from './custom_snapshots';
 import { createCliError, isCliError } from './errors';
 import { shouldPreferCachedSnapshot } from './utils/find_local_cached_snapshot';
@@ -384,31 +385,44 @@ export class Artifact {
 
     fs.mkdirSync(path.dirname(tmpPath), { recursive: true });
 
-    await asyncPipeline(
-      resp.body,
-      new Transform({
-        transform(chunk, encoding, cb) {
-          contentLength += Buffer.byteLength(chunk);
+    // content-length reflects the on-the-wire byte count; when the response is
+    // content-encoded (compressed) node-fetch inflates the body as it streams,
+    // so chunk sizes wouldn't add up to the header value — fall back to a
+    // size-less progress bar in that case rather than showing a wrong total.
+    const expectedContentLength = resp.headers.get('content-length');
+    const contentEncoding = resp.headers.get('content-encoding');
+    const progressTotal =
+      !contentEncoding && expectedContentLength ? parseInt(expectedContentLength, 10) : undefined;
+    const progress = createDownloadProgressBar(progressTotal, (msg) => this.log.info(msg));
 
-          if (first500Bytes.length < 500) {
-            first500Bytes = Buffer.concat(
-              [first500Bytes, chunk],
-              first500Bytes.length + chunk.length
-            ).slice(0, 500);
-          }
+    try {
+      await asyncPipeline(
+        resp.body,
+        progress.meter,
+        new Transform({
+          transform(chunk, encoding, cb) {
+            contentLength += Buffer.byteLength(chunk);
 
-          hash.update(chunk, encoding);
-          cb(null, chunk);
-        },
-      }),
-      fs.createWriteStream(tmpPath)
-    );
+            if (first500Bytes.length < 500) {
+              first500Bytes = Buffer.concat(
+                [first500Bytes, chunk],
+                first500Bytes.length + chunk.length
+              ).slice(0, 500);
+            }
+
+            hash.update(chunk, encoding);
+            cb(null, chunk);
+          },
+        }),
+        fs.createWriteStream(tmpPath)
+      );
+    } finally {
+      progress.stop();
+    }
 
     // Detect truncated downloads that closed cleanly (e.g. the server reset
     // the connection after sending partial data). The checksum would also catch
     // this, but failing here gives a clearer error message.
-    const expectedContentLength = resp.headers.get('content-length');
-    const contentEncoding = resp.headers.get('content-encoding');
     if (
       !contentEncoding &&
       expectedContentLength &&

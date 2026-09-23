@@ -211,18 +211,16 @@ evaluate.describe(
   'Self-correction: semantic errors',
   { tag: tags.serverless.observability.complete },
   () => {
-    evaluate(
-      'recovers from reference to nonexistent step output',
-      async ({ evaluateSelfCorrectionDataset }) => {
-        await evaluateSelfCorrectionDataset({
-          dataset: {
-            name: 'workflow-self-correction: missing-step-ref',
-            description:
-              'A Liquid expression references a step that does not exist in the workflow.',
-            examples: [
-              {
-                input: {
-                  brokenYaml: `name: Broken Reference
+    evaluate('semantic error correction cases', async ({ evaluateSelfCorrectionDataset }) => {
+      await evaluateSelfCorrectionDataset({
+        dataset: {
+          name: 'workflow-self-correction: semantic',
+          description:
+            'Semantic error correction: broken Liquid step reference, and silent-drop (workflow succeeds but writes nothing because the target index was never created).',
+          examples: [
+            {
+              input: {
+                brokenYaml: `name: Broken Reference
 triggers:
   - type: manual
 steps:
@@ -236,39 +234,24 @@ steps:
     with:
       message: "Got {{ steps.fetch_users.output.count }} users"
 `,
-                  brokenKind: 'semantic',
-                  instruction:
-                    "I tried to run this and it doesn't work as expected — the log line ends up with a blank/missing value. Figure out why and fix it.",
-                },
-                output: {
-                  maxTurns: 3,
-                  criteria: [
-                    'The log message references the actual fetch step name (steps.fetch), not a name that does not exist (e.g. steps.fetch_users).',
-                    'The output path on the reference is reasonable for an HTTP step (e.g. output, output.body, output.data).',
-                    'The fetch step itself is unchanged.',
-                    'The agent diagnosed the broken reference itself (its messages should mention the wrong step name / missing reference before fixing).',
-                  ],
-                },
-                metadata: { category: 'self-correction-semantic' },
+                brokenKind: 'semantic',
+                instruction:
+                  "I tried to run this and it doesn't work as expected — the log line ends up with a blank/missing value. Figure out why and fix it.",
               },
-            ],
-          },
-        });
-      }
-    );
-
-    evaluate(
-      'recovers when the workflow "succeeds" but writes nothing (missing index-create step)',
-      async ({ evaluateSelfCorrectionDataset }) => {
-        await evaluateSelfCorrectionDataset({
-          dataset: {
-            name: 'workflow-self-correction: success-without-data',
-            description:
-              'A workflow that runs to "completed" status while no documents land in the target index because the index was never created. Recovery should add an indices.create step (or equivalent) before the write step.',
-            examples: [
-              {
-                input: {
-                  brokenYaml: `name: Silent Drop
+              output: {
+                maxTurns: 3,
+                criteria: [
+                  'The log message references the actual fetch step name (steps.fetch), not a name that does not exist (e.g. steps.fetch_users).',
+                  'The output path on the reference is reasonable for an HTTP step (e.g. output, output.body, output.data).',
+                  'The fetch step itself is unchanged.',
+                  'The agent diagnosed the broken reference itself (its messages should mention the wrong step name / missing reference before fixing).',
+                ],
+              },
+              metadata: { category: 'self-correction-semantic' },
+            },
+            {
+              input: {
+                brokenYaml: `name: Silent Drop
 triggers:
   - type: manual
 steps:
@@ -284,26 +267,25 @@ steps:
       index: missing-index
       document: "{{ steps.fetch_payload.output.body }}"
 `,
-                  brokenKind: 'semantic',
-                  instruction:
-                    'This workflow reports successful completion every run, but when I look in Elasticsearch the missing-index index is empty and nothing is being stored. Figure out why and fix it so the data actually lands.',
-                },
-                output: {
-                  maxTurns: 3,
-                  criteria: [
-                    'The fixed workflow contains an elasticsearch.indices.create step (or an equivalent guarded create) that ensures the missing-index index exists before store_payload runs.',
-                    'The create step is ordered BEFORE the store_payload step in the workflow.',
-                    'store_payload is no longer silently swallowing failures: either on-failure: continue is removed or the conditional explicitly skips on success only, so a future indexing error surfaces.',
-                    'The agent diagnosed the missing-index root cause itself (its messages should mention the missing index / silent failure / index_not_found before fixing) — not just blindly rewrite the workflow.',
-                    'The fetch_payload step itself is unchanged.',
-                  ],
-                },
-                metadata: { category: 'self-correction-side-effect' },
+                brokenKind: 'semantic',
+                instruction:
+                  'This workflow reports successful completion every run, but when I look in Elasticsearch the missing-index index is empty and nothing is being stored. Figure out why and fix it so the data actually lands.',
               },
-            ],
-          },
-        });
-      }
-    );
+              output: {
+                maxTurns: 3,
+                criteria: [
+                  'The fixed workflow contains an elasticsearch.indices.create step (or an equivalent guarded create) that ensures the missing-index index exists before store_payload runs.',
+                  'The create step is ordered BEFORE the store_payload step in the workflow.',
+                  'store_payload is no longer silently swallowing failures: either on-failure: continue is removed or the conditional explicitly skips on success only, so a future indexing error surfaces.',
+                  'The agent diagnosed the missing-index root cause itself (its messages should mention the missing index / silent failure / index_not_found before fixing) — not just blindly rewrite the workflow.',
+                  'The fetch_payload step itself is unchanged.',
+                ],
+              },
+              metadata: { category: 'self-correction-side-effect' },
+            },
+          ],
+        },
+      });
+    });
   }
 );

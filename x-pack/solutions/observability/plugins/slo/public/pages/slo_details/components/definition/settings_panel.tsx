@@ -32,6 +32,7 @@ import {
   toDurationAdverbLabel,
   toDurationLabel,
 } from '../../../../utils/slo/labels';
+import { ProjectScopeRow } from './project_scope_row';
 
 export interface Props {
   slo: SLOWithSummaryResponse;
@@ -152,6 +153,8 @@ export function SettingsPanel({ slo }: Props) {
                 })}
           </EuiText>
         </EuiDescriptionListDescription>
+
+        <ProjectScopeRow slo={slo} />
 
         {hasTags && (
           <>

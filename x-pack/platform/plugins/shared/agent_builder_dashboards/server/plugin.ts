@@ -56,7 +56,9 @@ export class AgentBuilderDashboardsPlugin
       }) as Parameters<typeof setupDeps.agentBuilder.attachments.registerType>[0]
     );
     setupDeps.agentBuilderSml.registerType(createDashboardSmlType({ getDashboardClient }));
+
     registerSkills(setupDeps.agentBuilder);
+
     return {};
   }
 

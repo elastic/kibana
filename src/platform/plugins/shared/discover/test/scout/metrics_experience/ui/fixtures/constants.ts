@@ -32,6 +32,14 @@ export const PARTIAL_DIMENSION_SCENARIO = {
   ONLY_METRIC: 'partial_only',
 } as const;
 
+/**
+ * Local storage key Discover persists tab state under. Mirrors
+ * `TABS_LOCAL_STORAGE_KEY` in the Discover plugin's
+ * `public/application/main/state_management/tabs_storage_manager.ts` (not
+ * importable from Scout specs); keep in sync if that key ever changes.
+ */
+export const DISCOVER_TABS_LOCAL_STORAGE_KEY = 'discover.tabs';
+
 // The Security serverless viewer role only grants read access to `metrics-endpoint.metadata_current_*`.
 // Our test index doesn't match that pattern. Instead of renaming the index to fit, we prefer a custom role that explicitly grants read access.
 const METRICS_ES_INDEX_PRIVILEGES = [
@@ -58,6 +66,7 @@ export const ESQL_QUERIES = {
   TS: `TS ${METRICS_TEST_INDEX_NAME}`,
   TS_OTHER: `TS ${METRICS_TEST_INDEX_NAME_OTHER}`,
   TS_WILDCARD: `TS ${METRICS_TEST_INDEX_PATTERN}`,
+  TS_WILDCARD_UNBOUNDED: 'TS *,-.*',
   TS_PARTIAL: `TS ${METRICS_TEST_INDEX_PARTIAL_PATTERN}`,
   FROM: `FROM ${METRICS_TEST_INDEX_NAME}`,
 };
@@ -96,8 +105,6 @@ export const METRICS_EXPERIENCE_TAGS = [
 ];
 
 export const RECOMMENDED_QUERY_TAGS = [
-  ...tags.stateful.search,
-  ...tags.stateful.observability,
-  ...tags.stateful.security,
+  ...tags.stateful.classic,
   ...tags.serverless.observability.complete,
 ];
