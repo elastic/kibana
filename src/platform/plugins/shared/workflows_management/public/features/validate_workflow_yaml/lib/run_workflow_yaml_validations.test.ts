@@ -192,6 +192,7 @@ describe('runWorkflowYamlValidations', () => {
     const computed = performComputation(yaml);
     const model = monaco.editor.createModel(yaml, 'yaml');
     const shared = {
+      registry: emptyRegistry,
       yamlString: yaml,
       model,
       yamlDocument: computed.yamlDocument!,

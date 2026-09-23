@@ -537,6 +537,29 @@ describe('InternalHttpSelfScopedClient', () => {
     expect(new URL(secondRequest.url).pathname).toBe('/api/next');
   });
 
+  it('errors on a malformed redirect Location and discards the response body', async () => {
+    const response = new Response('stranded body', {
+      status: 302,
+      headers: { location: 'http://[' },
+    });
+    const cancel = jest.spyOn(response.body!, 'cancel');
+    (global.fetch as jest.Mock).mockResolvedValueOnce(response);
+    const { self } = createClient({
+      getHttpConfig: jest.fn().mockReturnValue({
+        ssl: { enabled: false, requestCert: false },
+        selfHttp: { maxRedirects: 1, ssl: { verificationMode: 'full' } },
+      } as HttpConfig),
+    });
+
+    await expect(self.asScoped(createFakeRequest()).fetch('/api/status')).rejects.toMatchObject({
+      name: 'HttpSelfFetchError',
+      message: expect.stringContaining('invalid Location header'),
+      response,
+    });
+    expect(cancel).toHaveBeenCalled();
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+  });
+
   it('refuses a cross-origin redirect even when maxRedirects allows hops', async () => {
     (global.fetch as jest.Mock).mockResolvedValueOnce(
       new Response(null, {

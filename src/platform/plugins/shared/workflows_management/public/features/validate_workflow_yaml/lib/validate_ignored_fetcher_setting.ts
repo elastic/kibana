@@ -13,8 +13,8 @@ import {
   IGNORED_KIBANA_FETCHER_SETTING_MESSAGE,
   shouldWarnIgnoredKibanaFetcher,
 } from '@kbn/workflows';
+import type { YamlValidationResult } from '@kbn/workflows-yaml';
 import type { WorkflowLookup } from '../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
-import type { YamlValidationResult } from '../model/types';
 
 export function validateIgnoredFetcherSetting(
   workflowLookup: WorkflowLookup,

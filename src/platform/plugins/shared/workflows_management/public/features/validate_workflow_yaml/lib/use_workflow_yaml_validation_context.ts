@@ -49,8 +49,10 @@ export function useWorkflowYamlValidationContext(): WorkflowYamlValidationContex
     () => createWorkflowContextRegistry(workflowsExtensions),
     [workflowsExtensions]
   );
-  const warnIgnoredKibanaFetcher =
-    featureFlags?.getBooleanValue(WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG, false) ?? false;
+  const warnIgnoredKibanaFetcher = featureFlags.useBooleanValue(
+    WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG,
+    false
+  );
   const esqlCallbacks = useWorkflowEsqlCallbacks({
     http,
     application,
