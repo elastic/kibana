@@ -20,8 +20,9 @@ export interface WorkerSettingsRegistration {
     patch: WorkerSettingsWrite
   ): { values: ManagedWorkflowTemplateValues } | { invalid: string };
   /**
-   * Parses persisted template values into complete settings. Throws when they do not match the
-   * current shape; there is no repair or migration of older development state.
+   * Parses persisted template values into complete settings. Missing fields the current
+   * declaration has are filled from its defaults; a stored key the schema no longer knows, a
+   * wrong type, or a version mismatch still throws.
    */
   toSettings(values: ManagedWorkflowTemplateValues): WorkerSettings;
 }
