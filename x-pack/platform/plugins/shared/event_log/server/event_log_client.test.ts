@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
+import type { SpaceId } from '@kbn/core-spaces-common';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import { EventLogClient } from './event_log_client';
 import type { EsContext } from './es';
@@ -315,7 +316,7 @@ describe('EventLogStart', () => {
         esContext,
         savedObjectGetter,
         request: FakeRequest(),
-        spaceId: 'my-space',
+        spaceId: 'my-space' as SpaceId,
         spacesService: { spaceIdToNamespace: (id: string) => id } as unknown as SpacesServiceStart,
       });
       await spacedClient.softDeleteByQuery(validParams);
