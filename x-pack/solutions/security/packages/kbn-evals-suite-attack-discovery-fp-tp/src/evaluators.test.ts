@@ -44,6 +44,22 @@ describe('verdictAccuracy', () => {
     expect(result.label).toBe('true_positive');
   });
 
+  // Graded verdict carries the full emit_result object (label via the `verdict`
+  // alias, plus summary_markdown) — the graded shape after the PayloadConformance fix.
+  it('accepts the graded emit_result object with the verdict alias', async () => {
+    const result = await verdictAccuracy.evaluate(
+      params(
+        {
+          verdict: { verdict: 'true_positive', summary_markdown: 's' },
+          executionStatus: 'completed',
+        },
+        { label: 'true_positive' }
+      )
+    );
+    expect(result.score).toBe(1);
+    expect(result.label).toBe('true_positive');
+  });
+
   it('scores 0 for a mismatched string verdict', async () => {
     const result = await verdictAccuracy.evaluate(
       params({ verdict: 'false_positive' }, { label: 'true_positive' })
@@ -85,6 +101,29 @@ describe('payloadConformance', () => {
       params({ verdict: 'true_positive', executionStatus: 'completed' }, {})
     );
     expect(result.score).toBe(1);
+  });
+
+  // REAL EMIT_RESULT SHAPE (verified live, GET /api/workflows/executions/{id}):
+  // the workflow.output step emits `{verdict: "true_positive", summary_markdown: ...}`,
+  // and the graded output now carries that full object as `verdict` — label via
+  // the `verdict` alias, summary graded directly.
+  it('scores 1 on the full emit_result object (verdict alias + summary_markdown)', async () => {
+    const result = await payloadConformance.evaluate(
+      params(
+        {
+          verdict: {
+            verdict: 'true_positive',
+            summary_markdown: 'C2 beacon to 10.0.0.7 observed.',
+          },
+          executionStatus: 'completed',
+        },
+        {}
+      )
+    );
+    expect(result.score).toBe(1);
+    expect(meta(result).labelValid).toBe(true);
+    expect(meta(result).summaryValid).toBe(true);
+    expect(meta(result).summaryLength).toBe('C2 beacon to 10.0.0.7 observed.'.length);
   });
 
   it('scores 1 on an enum label plus present summary', async () => {

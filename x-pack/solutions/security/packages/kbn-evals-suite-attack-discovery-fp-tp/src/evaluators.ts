@@ -20,7 +20,10 @@ export interface PayloadConformanceExpectation {
  * the object form (label/classification) was the schema-contract guess — the
  * evaluators accept both so the wiring is robust to either shape.
  */
-export type GradedVerdict = string | { label?: string; classification?: string } | undefined;
+export type GradedVerdict =
+  | string
+  | { verdict?: string; label?: string; classification?: string }
+  | undefined;
 
 interface Output {
   verdict?: GradedVerdict;
@@ -30,7 +33,7 @@ interface Output {
 /** Extracts the canonical verdict label from either output shape. */
 export const verdictLabel = (verdict: GradedVerdict): string | undefined => {
   if (verdict == null || typeof verdict === 'string') return verdict;
-  return verdict.label ?? verdict.classification;
+  return verdict.label ?? verdict.classification ?? verdict.verdict;
 };
 
 /** Extracts summary_markdown when the verdict carries one (object form). */
