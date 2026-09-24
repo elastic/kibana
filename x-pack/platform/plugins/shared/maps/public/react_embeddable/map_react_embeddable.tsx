@@ -205,7 +205,7 @@ export const mapEmbeddableFactory: EmbeddablePublicDefinition<MapEmbeddableState
       api,
       Component: () => {
         const viewMode = useStateFromPublishingSubject(viewMode$);
-        console.log({ viewMode });
+
         useEffect(() => {
           return () => {
             crossPanelActions.cleanup();
