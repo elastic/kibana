@@ -14,10 +14,13 @@ import {
   EVALS_EXPERIMENT_RUNS_URL,
   EVALS_EXPERIMENT_TRACES_URL,
   EVALS_EXPERIMENT_DATASET_EXAMPLES_URL,
+  EVALS_EXPERIMENT_EXAMPLE_DETAILS_URL,
   EVALS_EXPERIMENTS_COMPARE_URL,
   EVALS_EXAMPLE_SCORES_URL,
+  EXPERIMENT_EXAMPLE_PREVIEW_MAX_LENGTH,
   EvaluationIndices,
   type CompareExperimentsResponse,
+  type GetEvaluationExperimentExampleDetailsResponse,
   type GetEvaluationExperimentResponse,
   type GetEvaluationExperimentScoresResponse,
   type GetEvaluationExperimentRunsResponse,
@@ -35,6 +38,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   const es = getService('es');
   const spaces = getService('spaces');
+  const log = getService('log');
 
   let adminClient: SupertestWithRoleScopeType;
   let viewerClient: SupertestWithRoleScopeType;
@@ -43,10 +47,28 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     const suiteId = `ftr-experiments-${uniqueSuffix()}`;
     const baselineExperimentId = `experiment-baseline-${suiteId}`;
     const targetExperimentId = `experiment-target-${suiteId}`;
+    const largePayloadExperimentId = `experiment-large-payload-${suiteId}`;
     const datasetId = `dataset-${suiteId}`;
     const datasetName = `Dataset ${suiteId}`;
     const evaluatorName = 'correctness';
     const exampleIds = ['example-1', 'example-2', 'example-3'];
+    const largePayloadExampleId = 'large-example';
+    const largePayloadSize = 8192;
+    const createLargePayload = (sentinel: string) =>
+      `${sentinel}${'x'.repeat(largePayloadSize - sentinel.length)}`;
+    const largeInputSentinel = `large-input-${suiteId}`;
+    const largeOutputSentinel = `large-output-${suiteId}`;
+    const largeEvaluatorMetadataSentinel = `large-evaluator-metadata-${suiteId}`;
+    const largeInputPayload = createLargePayload(largeInputSentinel);
+    const largeOutputPayload = createLargePayload(largeOutputSentinel);
+    const largeEvaluatorMetadataPayload = createLargePayload(largeEvaluatorMetadataSentinel);
+    const largeInput = { payload: largeInputPayload };
+    const largeOutput = { payload: largeOutputPayload };
+    const responseSizes: Record<'default' | 'preview' | 'detail', number> = {
+      default: 0,
+      preview: 0,
+      detail: 0,
+    };
 
     // A third experiment with two evaluators per example (an LLM judge and a code evaluator)
     // and task/evaluator trace references, for the runs, traces, and evaluator inventory cases.
@@ -64,6 +86,21 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     const tracesPath = (experimentId: string) =>
       EVALS_EXPERIMENT_TRACES_URL.replace('{experimentId}', encodeURIComponent(experimentId));
 
+    const datasetExamplesPath = (experimentId: string) =>
+      EVALS_EXPERIMENT_DATASET_EXAMPLES_URL.replace(
+        '{experimentId}',
+        encodeURIComponent(experimentId)
+      ).replace('{datasetId}', encodeURIComponent(datasetId));
+
+    const exampleDetailsPath = (experimentId: string, exampleId: string) =>
+      EVALS_EXPERIMENT_EXAMPLE_DETAILS_URL.replace(
+        '{experimentId}',
+        encodeURIComponent(experimentId)
+      )
+        .replace('{datasetId}', encodeURIComponent(datasetId))
+        .replace('{exampleId}', encodeURIComponent(exampleId))
+        .replace('{repetitionIndex}', '0');
+
     const ingest = async (experimentId: string, scoresByExample: number[]) => {
       const body = buildScoresRequestBody({
         experimentId,
@@ -78,6 +115,40 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             score: scoresByExample[index],
           })
         ),
+      });
+      await adminClient.post(EVALS_SCORES_URL).send(body).expect(200);
+    };
+
+    const ingestLargePayloadExperiment = async () => {
+      const body = buildScoresRequestBody({
+        experimentId: largePayloadExperimentId,
+        suiteId,
+        scores: [evaluatorName, 'relevance'].map((largePayloadEvaluatorName) => {
+          const score = buildScore({
+            exampleId: largePayloadExampleId,
+            exampleIndex: 0,
+            datasetId,
+            datasetName,
+            evaluatorName: largePayloadEvaluatorName,
+            score: largePayloadEvaluatorName === evaluatorName ? 1 : 0.75,
+          });
+
+          return {
+            ...score,
+            example: {
+              ...score.example,
+              input: largeInput,
+            },
+            task: {
+              ...score.task,
+              output: largeOutput,
+            },
+            evaluator: {
+              ...score.evaluator,
+              metadata: { payload: largeEvaluatorMetadataPayload },
+            },
+          };
+        }),
       });
       await adminClient.post(EVALS_SCORES_URL).send(body).expect(200);
     };
@@ -141,6 +212,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           durationNanos: 1_000_000,
         },
       ]);
+      await ingestLargePayloadExperiment();
     });
 
     after(async () => {
@@ -160,6 +232,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .catch(() => {
           // best-effort cleanup
         });
+      log.info(
+        `Evals example payload response sizes (bytes): default=${responseSizes.default}, preview=${responseSizes.preview}, detail=${responseSizes.detail}`
+      );
     });
 
     describe('listing', () => {
@@ -173,6 +248,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(listing.total).to.eql(3);
         const ids = listing.experiments.map((experiment) => experiment.experiment_id).sort();
         expect(ids).to.eql([baselineExperimentId, targetExperimentId, tracedExperimentId].sort());
+        expect(ids).to.eql(
+          [baselineExperimentId, targetExperimentId, largePayloadExperimentId].sort()
+        );
       });
 
       it('honours pagination parameters', async () => {
@@ -509,14 +587,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('dataset examples', () => {
       it('groups an experiment scores by example for a dataset', async () => {
-        const path = EVALS_EXPERIMENT_DATASET_EXAMPLES_URL.replace(
-          '{experimentId}',
-          encodeURIComponent(baselineExperimentId)
-        ).replace('{datasetId}', encodeURIComponent(datasetId));
-
-        const { body } = await adminClient.get(path).expect(200);
+        const { body } = await adminClient
+          .get(datasetExamplesPath(baselineExperimentId))
+          .expect(200);
 
         const examplesResponse = body as GetEvaluationExperimentDatasetExamplesResponse;
+        expect(Object.keys(examplesResponse)).to.eql(['examples']);
         expect(examplesResponse.examples.length).to.eql(3);
         expect(examplesResponse.examples.map((example) => example.example_id).sort()).to.eql(
           [...exampleIds].sort()
@@ -524,6 +600,94 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(examplesResponse.examples.every((example) => example.scores.length >= 1)).to.be(
           true
         );
+        expect(examplesResponse.examples.every((example) => example.previews === undefined)).to.be(
+          true
+        );
+      });
+
+      it('omits complete input and output while retaining eager evaluator details', async () => {
+        const { body } = await adminClient
+          .get(datasetExamplesPath(largePayloadExperimentId))
+          .expect(200);
+
+        const examplesResponse = body as GetEvaluationExperimentDatasetExamplesResponse;
+        responseSizes.default = Buffer.byteLength(JSON.stringify(examplesResponse));
+        expect(Object.keys(examplesResponse)).to.eql(['examples']);
+        expect(examplesResponse.examples.length).to.eql(1);
+
+        const [example] = examplesResponse.examples;
+        expect(example.example_id).to.eql(largePayloadExampleId);
+        expect(example.previews).to.be(undefined);
+        expect(example.scores.length).to.eql(2);
+        expect(
+          example.scores.every(
+            (score) =>
+              score.example.input === undefined &&
+              score.task.output === undefined &&
+              score.evaluator.explanation === 'seeded by FTR' &&
+              score.evaluator.metadata?.payload === largeEvaluatorMetadataPayload
+          )
+        ).to.be(true);
+
+        const defaultResponse = JSON.stringify(examplesResponse);
+        expect(defaultResponse).to.not.contain(largeInputSentinel);
+        expect(defaultResponse).to.not.contain(largeOutputSentinel);
+        expect(defaultResponse).to.contain(largeEvaluatorMetadataSentinel);
+        expect(defaultResponse.split(largeEvaluatorMetadataPayload).length - 1).to.eql(2);
+      });
+
+      it('returns bounded input and output previews', async () => {
+        const { body } = await adminClient
+          .get(datasetExamplesPath(largePayloadExperimentId))
+          .query({ include_previews: true })
+          .expect(200);
+
+        const previewResponse = body as GetEvaluationExperimentDatasetExamplesResponse;
+        responseSizes.preview = Buffer.byteLength(JSON.stringify(previewResponse));
+        expect(Object.keys(previewResponse)).to.eql(['examples']);
+        expect(previewResponse.examples.length).to.eql(1);
+
+        const serializedInput = JSON.stringify(largeInput);
+        const serializedOutput = JSON.stringify(largeOutput);
+        const [example] = previewResponse.examples;
+        expect(example.previews).to.eql([
+          {
+            repetition_index: 0,
+            input: {
+              content: serializedInput.slice(0, EXPERIMENT_EXAMPLE_PREVIEW_MAX_LENGTH),
+              truncated: true,
+            },
+            output: {
+              content: serializedOutput.slice(0, EXPERIMENT_EXAMPLE_PREVIEW_MAX_LENGTH),
+              truncated: true,
+            },
+          },
+        ]);
+
+        const serializedPreviewResponse = JSON.stringify(previewResponse);
+        expect(serializedPreviewResponse).to.contain(largeInputSentinel);
+        expect(serializedPreviewResponse).to.contain(largeOutputSentinel);
+        expect(serializedPreviewResponse).to.not.contain(largeInputPayload);
+        expect(serializedPreviewResponse).to.not.contain(largeOutputPayload);
+      });
+
+      it('returns one complete example repetition without evaluator details', async () => {
+        const { body } = await adminClient
+          .get(exampleDetailsPath(largePayloadExperimentId, largePayloadExampleId))
+          .expect(200);
+
+        const details = body as GetEvaluationExperimentExampleDetailsResponse;
+        responseSizes.detail = Buffer.byteLength(JSON.stringify(details));
+        expect(Object.keys(details).sort()).to.eql(['example', 'task']);
+        expect(Object.keys(details.example)).to.eql(['input']);
+        expect(Object.keys(details.task)).to.eql(['output']);
+        expect(details.example.input).to.eql(largeInput);
+        expect(details.task.output).to.eql(largeOutput);
+
+        const detailResponse = JSON.stringify(details);
+        expect(detailResponse.split(largeInputPayload).length - 1).to.eql(1);
+        expect(detailResponse.split(largeOutputPayload).length - 1).to.eql(1);
+        expect(detailResponse).to.not.contain(largeEvaluatorMetadataSentinel);
       });
     });
 

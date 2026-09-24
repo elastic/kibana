@@ -19,9 +19,11 @@ import { registerGetExperimentRunsRoute } from './experiments/get_experiment_run
 import { registerGetExperimentTracesRoute } from './experiments/get_experiment_traces';
 import { registerGetExperimentScoresRoute } from './experiments/get_experiment_scores';
 import { registerGetExperimentDatasetExamplesRoute } from './experiments/get_experiment_dataset_examples';
+import { registerGetExperimentExampleDetailsRoute } from './experiments/get_experiment_example_details';
 import { registerCompareExperimentsRoute } from './experiments/compare_experiments';
 import { registerGetExampleScoresRoute } from './examples/get_example_scores';
 import { registerGetTraceRoute } from './traces/get_trace';
+import { registerGetTraceEvidenceRoute } from './traces/get_trace_evidence';
 import { registerListDatasetsRoute } from './datasets/list_datasets';
 import { registerCreateDatasetRoute } from './datasets/create_dataset';
 import { registerGetDatasetRoute } from './datasets/get_dataset';
@@ -76,9 +78,11 @@ export const registerRoutes = (dependencies: RouteDependencies) => {
   registerGetExperimentTracesRoute(dependencies);
   registerGetExperimentScoresRoute(dependencies);
   registerGetExperimentDatasetExamplesRoute(dependencies);
+  registerGetExperimentExampleDetailsRoute(dependencies);
   registerCompareExperimentsRoute(dependencies);
   registerGetExampleScoresRoute(dependencies);
   registerGetTraceRoute(dependencies);
+  registerGetTraceEvidenceRoute(dependencies);
   registerGetTracingProjectsRoute(dependencies);
   registerGetProjectTracesRoute(dependencies);
   registerIngestScoresRoute(dependencies);
