@@ -6,9 +6,13 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { ActionPoliciesArtifactsSubsection } from './action_policies_artifacts_subsection';
+import type { MatchedActionPolicy } from '@kbn/alerting-v2-schemas';
+import {
+  ActionPoliciesArtifactsSubsection,
+  LINKED_ACTION_POLICIES_VISIBLE_LIMIT,
+} from './action_policies_artifacts_subsection';
 import type { RuleApiResponse } from '../../../../services/rules_api';
 import { createMockLocators, MockLocatorProvider } from '../../../../test_utils/test_providers';
 import { AlertingV2ActionPoliciesLocatorDefinition } from '../../../../locators';
@@ -17,31 +21,25 @@ const mockLocators = createMockLocators();
 
 const mockUseLinkedActionPolicies = jest.fn();
 
-jest.mock('./use_linked_action_policies', () => {
-  const actual = jest.requireActual<typeof import('./use_linked_action_policies')>(
-    './use_linked_action_policies'
-  );
+jest.mock('./use_linked_action_policies', () => ({
+  useLinkedActionPolicies: (...args: unknown[]) => mockUseLinkedActionPolicies(...args),
+}));
 
-  return {
-    ...actual,
-    useLinkedActionPolicies: (...args: unknown[]) => mockUseLinkedActionPolicies(...args),
-  };
-});
-
-const mockHttpService = {
-  basePath: {
-    prepend: (path: string) => path,
-  },
-};
-
-jest.mock('@kbn/core-di-browser', () => ({
-  useService: (token: unknown) => {
-    if (token === 'http') {
-      return mockHttpService;
-    }
-    return {};
-  },
-  CoreStart: (key: string) => key,
+jest.mock('../../../action_policy/details_flyout/action_policy_details_flyout_container', () => ({
+  ActionPolicyDetailsFlyoutContainer: ({
+    policyId,
+    onClose,
+  }: {
+    policyId: string;
+    onClose: () => void;
+  }) => (
+    <div data-test-subj="actionPolicyDetailsFlyoutMock">
+      <span data-test-subj="actionPolicyDetailsFlyoutMockId">{policyId}</span>
+      <button type="button" onClick={onClose}>
+        close
+      </button>
+    </div>
+  ),
 }));
 
 const baseRule: RuleApiResponse = {
@@ -58,6 +56,40 @@ const baseRule: RuleApiResponse = {
   updated_at: '2026-03-04T12:00:00.000Z',
 };
 
+const buildItem = (
+  category: MatchedActionPolicy['category'],
+  overrides: Partial<MatchedActionPolicy['action_policy']> = {}
+): MatchedActionPolicy => ({
+  action_policy: {
+    id: 'policy-1',
+    name: 'Policy',
+    description: '',
+    enabled: true,
+    destinations: [{ type: 'workflow', id: 'workflow-1' }],
+    matcher: null,
+    group_by: null,
+    grouping_mode: 'per_episode',
+    throttle: null,
+    snoozed_until: null,
+    auth: { owner: 'user', created_by_user: true },
+    created_by: 'user',
+    created_at: '2026-01-01T00:00:00.000Z',
+    updated_by: 'user',
+    updated_at: '2026-01-01T00:00:00.000Z',
+    ...overrides,
+  },
+  category,
+});
+
+const idleHookResult = {
+  items: [] as MatchedActionPolicy[],
+  isLoading: false,
+  isError: false,
+  evaluatedCount: 0,
+  isMatchTruncated: false,
+  error: null,
+};
+
 const renderSubsection = (rule: RuleApiResponse = baseRule) =>
   render(
     <MockLocatorProvider locators={mockLocators}>
@@ -70,16 +102,12 @@ const renderSubsection = (rule: RuleApiResponse = baseRule) =>
 describe('ActionPoliciesArtifactsSubsection', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseLinkedActionPolicies.mockReturnValue({
-      totalCount: 0,
-      catchAllCount: 0,
-      matchingCriteriaCount: 0,
-      isLoading: false,
-      isError: false,
-      evaluatedCount: 0,
-      isCountTruncated: false,
-      error: null,
-    });
+    mockUseLinkedActionPolicies.mockReturnValue(idleHookResult);
+    jest
+      .mocked(mockLocators.actionPolicyLocators.getRedirectUrl)
+      .mockImplementation((params) =>
+        params.actionPolicyId ? `/mock-edit-${params.actionPolicyId}` : '/mock-locator-url'
+      );
   });
 
   it('loads linked policies using the current rule tags', () => {
@@ -87,65 +115,107 @@ describe('ActionPoliciesArtifactsSubsection', () => {
     expect(mockUseLinkedActionPolicies).toHaveBeenCalledWith(['prod']);
   });
 
-  it('renders loading state on the stat', () => {
+  it('loads linked policies with an empty tag list when the rule has none', () => {
+    renderSubsection({
+      ...baseRule,
+      metadata: { name: 'Untagged Rule', version: 1 },
+    });
+    expect(mockUseLinkedActionPolicies).toHaveBeenCalledWith([]);
+  });
+
+  it('renders a loading spinner while policies are fetched', () => {
     mockUseLinkedActionPolicies.mockReturnValue({
-      totalCount: 0,
-      catchAllCount: 0,
-      matchingCriteriaCount: 0,
+      ...idleHookResult,
       isLoading: true,
-      isError: false,
-      evaluatedCount: 0,
-      isCountTruncated: false,
-      error: null,
     });
 
     renderSubsection();
-    expect(screen.getByTestId('ruleActionPoliciesArtifactsStat')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleActionPoliciesArtifactsLoading')).toBeInTheDocument();
+    expect(screen.queryByTestId('ruleActionPoliciesArtifactsEmpty')).not.toBeInTheDocument();
   });
 
-  it('hides the stat when loading fails', () => {
+  it('renders an error prompt when loading fails', () => {
     mockUseLinkedActionPolicies.mockReturnValue({
-      totalCount: 0,
-      catchAllCount: 0,
-      matchingCriteriaCount: 0,
-      isLoading: false,
+      ...idleHookResult,
       isError: true,
-      evaluatedCount: 0,
-      isCountTruncated: false,
       error: new Error('boom'),
     });
 
     renderSubsection();
-    expect(screen.queryByTestId('ruleActionPoliciesArtifactsStat')).not.toBeInTheDocument();
     expect(screen.getByTestId('ruleActionPoliciesArtifactsError')).toBeInTheDocument();
-  });
-
-  it('renders zero count without a separate empty prompt', () => {
-    renderSubsection();
-    expect(screen.getByTestId('ruleActionPoliciesArtifactsStat')).toHaveTextContent('0');
     expect(screen.queryByTestId('ruleActionPoliciesArtifactsEmpty')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('ruleActionPoliciesArtifactsSummary')).not.toBeInTheDocument();
   });
 
-  it('renders stat, summary, and open link without listing individual policies', () => {
+  it('renders an empty prompt when no policies match', () => {
+    renderSubsection();
+    expect(screen.getByTestId('ruleActionPoliciesArtifactsEmpty')).toBeInTheDocument();
+    expect(screen.getByText('No matching notification policies')).toBeInTheDocument();
+    expect(screen.queryByTestId('ruleActionPolicyArtifactRow-policy-1')).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId('ruleActionPoliciesArtifactsTruncatedHint')
+    ).not.toBeInTheDocument();
+  });
+
+  it('still shows the truncated hint when no evaluated policies match', () => {
     mockUseLinkedActionPolicies.mockReturnValue({
-      totalCount: 2,
-      catchAllCount: 1,
-      matchingCriteriaCount: 1,
-      isLoading: false,
-      isError: false,
-      evaluatedCount: 0,
-      isCountTruncated: false,
-      error: null,
+      ...idleHookResult,
+      evaluatedCount: 50,
+      isMatchTruncated: true,
+    });
+
+    renderSubsection();
+
+    expect(screen.getByTestId('ruleActionPoliciesArtifactsEmpty')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleActionPoliciesArtifactsTruncatedHint')).toHaveTextContent(
+      'Only 50 notification policies were evaluated, so this list may be incomplete.'
+    );
+  });
+
+  it('lists matching and catch-all policies with distinct badges and an edit link', () => {
+    mockUseLinkedActionPolicies.mockReturnValue({
+      ...idleHookResult,
+      items: [
+        buildItem('tags', { id: 'policy-match', name: 'Tag policy' }),
+        buildItem('catch_all', { id: 'policy-catch', name: 'Catch-all policy' }),
+      ],
     });
 
     renderSubsection();
 
     const { actionPolicyLocators } = mockLocators;
     expect(actionPolicyLocators.useUrl).toHaveBeenCalledWith({ page: 'list' });
-    expect(screen.getByTestId('ruleActionPoliciesArtifactsStat')).toHaveTextContent('2');
-    expect(screen.getByTestId('ruleActionPoliciesArtifactsSummary')).toHaveTextContent(
-      '1 is matching criteria and 1 is catch-all'
+    expect(actionPolicyLocators.getRedirectUrl).toHaveBeenCalledWith({
+      page: 'edit',
+      actionPolicyId: 'policy-match',
+    });
+    expect(actionPolicyLocators.getRedirectUrl).toHaveBeenCalledWith({
+      page: 'edit',
+      actionPolicyId: 'policy-catch',
+    });
+
+    expect(screen.getByTestId('ruleActionPolicyArtifactRow-policy-match')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleActionPolicyArtifactName-policy-match')).toHaveTextContent(
+      'Tag policy'
+    );
+    expect(screen.getByTestId('ruleActionPolicyArtifactCategory-policy-match')).toHaveTextContent(
+      'Matching criteria'
+    );
+    expect(screen.getByTestId('ruleActionPolicyArtifactEditLink-policy-match')).toHaveAttribute(
+      'href',
+      '/mock-edit-policy-match'
+    );
+    expect(screen.getByTestId('ruleActionPolicyArtifactEditLink-policy-match')).toHaveAttribute(
+      'target',
+      '_blank'
+    );
+    expect(screen.getByTestId('ruleActionPolicyArtifactEditLink-policy-match')).toHaveAttribute(
+      'rel',
+      'noopener noreferrer'
+    );
+
+    expect(screen.getByTestId('ruleActionPolicyArtifactRow-policy-catch')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleActionPolicyArtifactCategory-policy-catch')).toHaveTextContent(
+      'Catch-all'
     );
     expect(screen.getByTestId('ruleActionPoliciesArtifactsOpenLink')).toHaveAttribute(
       'href',
@@ -155,26 +225,10 @@ describe('ActionPoliciesArtifactsSubsection', () => {
       'target',
       '_blank'
     );
-    expect(screen.getByTestId('ruleActionPoliciesArtifactsOpenLink')).toHaveAttribute(
-      'rel',
-      'noopener noreferrer'
-    );
     expect(screen.getByText('Open notification policies')).toBeInTheDocument();
-    expect(screen.queryByTestId('ruleActionPolicyArtifactRow-policy-1')).not.toBeInTheDocument();
   });
 
   it('open link params resolve to management action policies list URL', async () => {
-    mockUseLinkedActionPolicies.mockReturnValue({
-      totalCount: 2,
-      catchAllCount: 1,
-      matchingCriteriaCount: 1,
-      isLoading: false,
-      isError: false,
-      evaluatedCount: 0,
-      isCountTruncated: false,
-      error: null,
-    });
-
     renderSubsection();
 
     const [params] = jest.mocked(mockLocators.actionPolicyLocators.useUrl).mock.calls[0];
@@ -185,23 +239,129 @@ describe('ActionPoliciesArtifactsSubsection', () => {
     });
   });
 
-  it('shows the evaluated count when results are truncated', () => {
+  it('opens the policy details flyout when a policy name is clicked', () => {
     mockUseLinkedActionPolicies.mockReturnValue({
-      totalCount: 5,
-      catchAllCount: 2,
-      matchingCriteriaCount: 3,
-      isLoading: false,
-      isError: false,
-      evaluatedCount: 50,
-      isCountTruncated: true,
-      error: null,
+      ...idleHookResult,
+      items: [buildItem('tags', { id: 'policy-match', name: 'Tag policy' })],
     });
 
     renderSubsection();
 
-    expect(screen.getByTestId('ruleActionPoliciesArtifactsStat')).toHaveTextContent('5+');
+    expect(screen.queryByTestId('actionPolicyDetailsFlyoutMock')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('ruleActionPolicyArtifactName-policy-match'));
+    expect(screen.getByTestId('actionPolicyDetailsFlyoutMock')).toBeInTheDocument();
+    expect(screen.getByTestId('actionPolicyDetailsFlyoutMockId')).toHaveTextContent('policy-match');
+
+    fireEvent.click(screen.getByText('close'));
+    expect(screen.queryByTestId('actionPolicyDetailsFlyoutMock')).not.toBeInTheDocument();
+  });
+
+  it('shows disabled and snoozed badges when the policy would not fire', () => {
+    const snoozedUntil = new Date(Date.now() + 60_000).toISOString();
+    mockUseLinkedActionPolicies.mockReturnValue({
+      ...idleHookResult,
+      items: [
+        buildItem('catch_all', {
+          id: 'policy-quiet',
+          name: 'Quiet policy',
+          enabled: false,
+          snoozed_until: snoozedUntil,
+        }),
+      ],
+    });
+
+    renderSubsection();
+
+    expect(
+      screen.getByTestId('ruleActionPolicyArtifactDisabledBadge-policy-quiet')
+    ).toHaveTextContent('Disabled');
+    expect(
+      screen.getByTestId('ruleActionPolicyArtifactSnoozedBadge-policy-quiet')
+    ).toHaveTextContent('Snoozed');
+  });
+
+  it('caps the visible list and expands remaining policies in place', () => {
+    const items = Array.from({ length: LINKED_ACTION_POLICIES_VISIBLE_LIMIT + 2 }, (_, index) =>
+      buildItem('tags', {
+        id: `policy-${index}`,
+        name: `Policy ${index}`,
+      })
+    );
+
+    mockUseLinkedActionPolicies.mockReturnValue({
+      ...idleHookResult,
+      items,
+    });
+
+    renderSubsection();
+
+    expect(screen.getByTestId('ruleActionPolicyArtifactRow-policy-0')).toBeInTheDocument();
+    expect(
+      screen.getByTestId(
+        `ruleActionPolicyArtifactRow-policy-${LINKED_ACTION_POLICIES_VISIBLE_LIMIT - 1}`
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByTestId(
+        `ruleActionPolicyArtifactRow-policy-${LINKED_ACTION_POLICIES_VISIBLE_LIMIT}`
+      )
+    ).not.toBeInTheDocument();
+    expect(screen.getByTestId('ruleActionPoliciesArtifactsViewMoreLink')).toHaveTextContent(
+      '2 more notification policies'
+    );
+
+    fireEvent.click(screen.getByTestId('ruleActionPoliciesArtifactsViewMoreLink'));
+
+    expect(
+      screen.getByTestId(
+        `ruleActionPolicyArtifactRow-policy-${LINKED_ACTION_POLICIES_VISIBLE_LIMIT}`
+      )
+    ).toBeInTheDocument();
+    expect(screen.getByTestId('ruleActionPolicyArtifactRow-policy-9')).toBeInTheDocument();
+    expect(screen.queryByTestId('ruleActionPoliciesArtifactsViewMoreLink')).not.toBeInTheDocument();
+  });
+
+  it('does not label hidden catch-all overflow as matching policies', () => {
+    const items = [
+      ...Array.from({ length: LINKED_ACTION_POLICIES_VISIBLE_LIMIT }, (_, index) =>
+        buildItem('tags', {
+          id: `match-${index}`,
+          name: `Match ${index}`,
+        })
+      ),
+      buildItem('catch_all', { id: 'catch-hidden', name: 'Hidden catch-all' }),
+    ];
+
+    mockUseLinkedActionPolicies.mockReturnValue({
+      ...idleHookResult,
+      items,
+    });
+
+    renderSubsection();
+
+    expect(
+      screen.queryByTestId('ruleActionPolicyArtifactRow-catch-hidden')
+    ).not.toBeInTheDocument();
+    expect(screen.getByTestId('ruleActionPoliciesArtifactsViewMoreLink')).toHaveTextContent(
+      '1 more notification policy'
+    );
+    expect(screen.getByTestId('ruleActionPoliciesArtifactsViewMoreLink')).not.toHaveTextContent(
+      'matching'
+    );
+  });
+
+  it('shows a truncated list hint when match results may be incomplete', () => {
+    mockUseLinkedActionPolicies.mockReturnValue({
+      ...idleHookResult,
+      items: [buildItem('tags', { id: 'policy-match', name: 'Tag policy' })],
+      evaluatedCount: 50,
+      isMatchTruncated: true,
+    });
+
+    renderSubsection();
+
     expect(screen.getByTestId('ruleActionPoliciesArtifactsTruncatedHint')).toHaveTextContent(
-      `Only 50 action policies were evaluated, so this count may be low.`
+      'Only 50 notification policies were evaluated, so this list may be incomplete.'
     );
   });
 });
