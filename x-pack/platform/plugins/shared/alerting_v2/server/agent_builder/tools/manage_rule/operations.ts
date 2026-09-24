@@ -140,7 +140,6 @@ const toRunbookArtifact = (
 
 export const setMetadataOperationSchema = metadataSchema
   .partial()
-  .omit({ owner: true })
   .extend({ operation: z.literal('set_metadata') })
   .describe(
     'Use `set_metadata` to name the rule and add a description or tags so the user can filter by it later.'
