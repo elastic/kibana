@@ -19,7 +19,7 @@ export const setMonitorDetailsLocationAction = createAction<string>(
 );
 
 export const getMonitorAction = createAsyncAction<
-  { monitorId: string; spaceId?: string; hideParams?: boolean },
+  { monitorId: string; spaceId?: string },
   SyntheticsMonitorWithId
 >('[MONITOR DETAILS] GET MONITOR');
 

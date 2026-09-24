@@ -17,7 +17,6 @@ import { FormMonitorType } from '../types';
 import { getDefaultFormFields, formatDefaultFormValues } from './defaults';
 import { ActionBar } from './submit';
 import { Disclaimer } from './disclaimer';
-import { ParameterValuesProvider } from './parameter_values_context';
 import type { ClientPluginsStart } from '../../../../../plugin';
 const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
 
@@ -27,16 +26,8 @@ export const MonitorForm: FC<
     space?: string;
     readOnly?: boolean;
     canUsePublicLocations?: boolean;
-    hideParameterValuesByDefault?: boolean;
   }>
-> = ({
-  children,
-  defaultValues,
-  space,
-  readOnly = false,
-  canUsePublicLocations,
-  hideParameterValuesByDefault = false,
-}) => {
+> = ({ children, defaultValues, space, readOnly = false, canUsePublicLocations }) => {
   const methods = useFormWrapped({
     mode: 'onSubmit',
     reValidateMode: 'onSubmit',
@@ -62,20 +53,18 @@ export const MonitorForm: FC<
 
   return (
     <ContextWrapper>
-      <ParameterValuesProvider hideParameterValuesByDefault={hideParameterValuesByDefault}>
-        <FormProvider {...methods}>
-          <EuiForm
-            isInvalid={Boolean(isSubmitted && Object.keys(errors).length)}
-            component="form"
-            noValidate
-          >
-            {children}
-            <EuiSpacer />
-            <ActionBar readOnly={readOnly} canUsePublicLocations={canUsePublicLocations} />
-          </EuiForm>
-          <Disclaimer />
-        </FormProvider>
-      </ParameterValuesProvider>
+      <FormProvider {...methods}>
+        <EuiForm
+          isInvalid={Boolean(isSubmitted && Object.keys(errors).length)}
+          component="form"
+          noValidate
+        >
+          {children}
+          <EuiSpacer />
+          <ActionBar readOnly={readOnly} canUsePublicLocations={canUsePublicLocations} />
+        </EuiForm>
+        <Disclaimer />
+      </FormProvider>
     </ContextWrapper>
   );
 };
