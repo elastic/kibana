@@ -117,4 +117,30 @@ describe('useGetMaintenanceWindow', () => {
       })
     );
   });
+
+  it('should return an object where showMultipleSolutionsWarning is false if scope.alerting has only filters', async () => {
+    getMaintenanceWindow.mockResolvedValue({
+      categoryIds: ['observability', 'management'],
+      scope: {
+        alerting: {
+          enabled: true,
+          kql: '',
+          filters: [{ meta: {}, query: { match_all: {} } }],
+        },
+      },
+    });
+
+    const { result } = renderHook(() => useGetMaintenanceWindow('testId'), {
+      wrapper: appMockRenderer.AppWrapper,
+    });
+
+    await waitFor(() =>
+      expect(result.current).toEqual({
+        showMultipleSolutionsWarning: false,
+        isError: false,
+        isLoading: false,
+        maintenanceWindow: undefined,
+      })
+    );
+  });
 });

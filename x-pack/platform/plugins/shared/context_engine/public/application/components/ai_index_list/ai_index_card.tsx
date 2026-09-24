@@ -78,10 +78,18 @@ export const AiIndexCard = ({ aiIndex, href, onDeleteClick }: AiIndexCardProps) 
           justifyContent="spaceBetween"
           responsive={false}
         >
-          <EuiFlexItem className="eui-textTruncate">
+          <EuiFlexItem>
             <EuiFlexGroup gutterSize="s" alignItems="baseline" responsive={false}>
-              <EuiFlexItem className="eui-textTruncate">
-                <span className="eui-textTruncate">{aiIndex.id}</span>
+              <EuiFlexItem>
+                {/* Must stay wrappable: `1fr` grid tracks size to the card's min-content width. */}
+                <EuiTextBlockTruncate
+                  lines={1}
+                  className="eui-textBreakWord"
+                  title={aiIndex.id}
+                  data-test-subj="contextAiIndexCardTitle"
+                >
+                  {aiIndex.id}
+                </EuiTextBlockTruncate>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiText
@@ -168,7 +176,9 @@ export const AiIndexCard = ({ aiIndex, href, onDeleteClick }: AiIndexCardProps) 
         {aiIndex.description !== undefined && (
           <EuiFlexItem grow={false}>
             <EuiText size="s" color="subdued" data-test-subj="contextAiIndexCardDescription">
-              <EuiTextBlockTruncate lines={2}>{aiIndex.description}</EuiTextBlockTruncate>
+              <EuiTextBlockTruncate lines={2} className="eui-textBreakWord">
+                {aiIndex.description}
+              </EuiTextBlockTruncate>
             </EuiText>
           </EuiFlexItem>
         )}
