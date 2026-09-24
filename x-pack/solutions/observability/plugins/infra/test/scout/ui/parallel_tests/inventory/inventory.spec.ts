@@ -149,10 +149,9 @@ test.describe(
           `View details for kubernetes.pod.uid ${POD_NAME}`
         );
 
-        await expect(inventoryPage.contextMenuLogsLink).toHaveAttribute(
-          'href',
-          /kubernetes\.pod\.uid/
-        );
+        // LOGS_LOCATOR compresses the kuery into `lz=`; identity is covered by
+        // the menu subtitle and the uncompressed APM link below.
+        await expect(inventoryPage.contextMenuLogsLink).toHaveAttribute('href', /LOGS_LOCATOR/);
         await expect(inventoryPage.contextMenuApmLink).toHaveAttribute(
           'href',
           new RegExp(`kubernetes\\.pod\\.uid(%3A|:)(%22|")${POD_NAME}`)

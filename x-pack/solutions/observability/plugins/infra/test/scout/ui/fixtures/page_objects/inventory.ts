@@ -290,6 +290,7 @@ export class InventoryPage {
 
   public async selectGroupBy(field: string) {
     await this.waffleGroupByDropdown.click();
+    await this.groupByContextMenu.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
     await this.groupByContextMenu.getByRole('button', { name: field, exact: true }).click();
     await this.waitForNodesToLoad();
   }
@@ -355,6 +356,10 @@ export class InventoryPage {
     await this.schemaSelect.click();
     await this.page.getByRole('option', { name: schema }).waitFor();
     await this.page.getByRole('option', { name: schema }).click();
+    // Wait for the control to reflect the selection before callers assert URL/tiles.
+    await this.schemaSelect
+      .filter({ hasText: schema })
+      .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
     await this.waitForNodesToLoad();
   }
 
