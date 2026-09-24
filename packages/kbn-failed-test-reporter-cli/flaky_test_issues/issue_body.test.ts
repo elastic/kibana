@@ -301,6 +301,37 @@ describe('renderFlakySuiteIssueBody', () => {
     expect(body).toContain('#### Failures by Branch');
   });
 
+  it('shows the head of a long error and collapses the whole message under it', () => {
+    const diff = [
+      'Error: expect(received).toStrictEqual(expected)',
+      ...Array.from({ length: 40 }, (_, i) => `+   line ${i}`),
+    ].join('\n');
+    const report = flakyReport([
+      flakyTest({
+        sampleFailures: [
+          {
+            message: diff,
+            buildUrl: 'https://buildkite.com/elastic/kibana-on-merge/builds/12345',
+            jobId: '0199-abcd',
+            timestamp: new Date('2026-09-09T06:12:00.000Z'),
+          },
+        ],
+      }),
+    ]);
+    const [suite] = groupIntoSuites(report.flaky, report.files);
+    const body = renderFlakySuiteIssueBody(suite, { report });
+    // twelve lines inline, then the ellipsis
+    expect(body).toContain(
+      '+   line 10\n…\n```\n\n<details>\n<summary>Full message (41 lines)</summary>\n\n```text\nError: expect'
+    );
+    expect(body).toContain('+   line 39\n```\n\n</details>\n\nLast seen in');
+    // a short message has nothing to collapse
+    const short = singleTestReport();
+    expect(renderFlakySuiteIssueBody(short.suite, { report: short.report })).not.toContain(
+      '<details>'
+    );
+  });
+
   it('links the job each error was last seen in', () => {
     const { suite, report } = multiTestReport();
     expect(renderFlakySuiteIssueBody(suite, { report })).toContain(

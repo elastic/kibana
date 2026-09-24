@@ -14,12 +14,14 @@ import {
   BUILDKITE_ORG_URL,
   CATEGORY_LABELS,
   codeBlock,
+  collapsed,
   formatBuildLink,
   formatFailedBranches,
   formatDateRange,
   formatDateTime,
   formatFailedBuilds,
   formatFailureMessage,
+  formatFullFailureMessage,
   FRAMEWORK_LABELS,
   inlineCode,
   KIBANA_BLOB_URL,
@@ -249,6 +251,19 @@ const distinctFailures = (suite: FlakySuite): { distinct: DistinctFailure[]; tot
   return { distinct, total };
 };
 
+/**
+ * The message's head in a code block and, when the message goes on, the whole of it collapsed
+ * underneath. The head is what groups identical errors, so the full text is the newest sample's.
+ */
+const errorBlock = (head: string, latest: FlakyTestSampleFailure): string => {
+  const full = formatFullFailureMessage(latest.message);
+  if (full.length <= head.length) {
+    return codeBlock(head);
+  }
+  const lines = plural(full.split('\n').length, 'line');
+  return `${codeBlock(head)}\n\n${collapsed(`Full message (${lines})`, codeBlock(full))}`;
+};
+
 /** `Last seen in [#12345](…/builds/12345#job) · Scout Lane #3 - stateful-classic / default · 2026-09-09 06:12 UTC.` */
 const lastSeen = ({ buildUrl, jobId, stepLabel, timestamp }: FlakyTestSampleFailure): string =>
   buildUrl
@@ -264,7 +279,7 @@ const failuresSection = (suite: FlakySuite): string => {
   if (distinct.length === 1) {
     const [{ message, latest }] = distinct;
     const intro = total === 1 ? 'One sampled failure' : `Same error in all ${samples}`;
-    return `${intro}:\n\n${codeBlock(message)}\n\n${lastSeen(latest)}`;
+    return `${intro}:\n\n${errorBlock(message, latest)}\n\n${lastSeen(latest)}`;
   }
   const shown = distinct
     .slice(0, MAX_DISTINCT_FAILURES)
@@ -274,9 +289,10 @@ const failuresSection = (suite: FlakySuite): string => {
           ? tests.map((title) => `*${shortTitle(title, MAX_LABEL_TITLE_LENGTH)}*`).join(', ')
           : '';
       const share = count === total ? `all ${samples}` : `${count} of the ${samples}`;
-      return `${subject ? `${subject} ` : ''}(${share}):\n\n${codeBlock(message)}\n\n${lastSeen(
+      return `${subject ? `${subject} ` : ''}(${share}):\n\n${errorBlock(
+        message,
         latest
-      )}`;
+      )}\n\n${lastSeen(latest)}`;
     });
   const rest = distinct.length - shown.length;
   return [

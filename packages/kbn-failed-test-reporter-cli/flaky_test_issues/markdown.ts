@@ -215,19 +215,34 @@ export const testsTable = (
 
 const MAX_FAILURE_LINES = 12;
 const MAX_FAILURE_CHARACTERS = 1200;
+/** The collapsed full message is bounded too: GitHub caps an issue body at 65,536 characters. */
+const MAX_FULL_FAILURE_LINES = 300;
+const MAX_FULL_FAILURE_CHARACTERS = 12_000;
 
-/** A failure message safe to post publicly, cut to its first lines, fences neutralised. */
-export const formatFailureMessage = (message: string): string => {
+/** A failure message safe to post publicly: redacted, fences neutralised, cut to the given size. */
+const cutFailureMessage = (message: string, maxLines: number, maxCharacters: number): string => {
   const redacted = redactSensitiveGithubFailureText(message).replace(/```/g, '` ` `').trim();
   const lines = redacted.split('\n');
-  let text = lines.slice(0, MAX_FAILURE_LINES).join('\n');
-  if (text.length > MAX_FAILURE_CHARACTERS) {
-    text = text.slice(0, MAX_FAILURE_CHARACTERS);
+  let text = lines.slice(0, maxLines).join('\n');
+  if (text.length > maxCharacters) {
+    text = text.slice(0, maxCharacters);
   }
   return text.length < redacted.length ? `${text}\n…` : text;
 };
 
+/** The head of a failure message, what the issue shows inline. */
+export const formatFailureMessage = (message: string): string =>
+  cutFailureMessage(message, MAX_FAILURE_LINES, MAX_FAILURE_CHARACTERS);
+
+/** The whole failure message, for the collapsed section, within the issue body's limits. */
+export const formatFullFailureMessage = (message: string): string =>
+  cutFailureMessage(message, MAX_FULL_FAILURE_LINES, MAX_FULL_FAILURE_CHARACTERS);
+
 export const codeBlock = (text: string): string => `\`\`\`text\n${text}\n\`\`\``;
+
+/** A `<details>` block, collapsed by default; blank lines keep the markdown inside rendering. */
+export const collapsed = (summary: string, body: string): string =>
+  `<details>\n<summary>${summary}</summary>\n\n${body}\n\n</details>`;
 
 /** A Buildkite build and, when known, the job within it that ran the test. */
 export interface BuildkiteRef {

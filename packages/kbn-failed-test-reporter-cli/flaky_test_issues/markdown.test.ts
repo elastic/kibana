@@ -13,6 +13,7 @@ import {
   formatDateRange,
   formatFailedBranches,
   formatFailedBuilds,
+  formatFullFailureMessage,
   targetEnvironment,
   formatFailureMessage,
   formatBranchRates,
@@ -143,6 +144,16 @@ describe('targetEnvironment', () => {
     // falls back to the location when either part is unknown
     expect(targetEnvironment({ mode: 'stateful-classic', type: 'unknown' })).toBe('unknown');
     expect(targetEnvironment({ mode: 'unknown', type: 'local' })).toBe('local');
+  });
+});
+
+describe('formatFullFailureMessage', () => {
+  it('keeps a long message whole, within the body limits', () => {
+    const long = Array.from({ length: 200 }, (_, i) => `line ${i}`).join('\n');
+    expect(formatFullFailureMessage(long)).toBe(long);
+    const tooLong = Array.from({ length: 400 }, (_, i) => `line ${i}`).join('\n');
+    expect(formatFullFailureMessage(tooLong).split('\n')).toHaveLength(301);
+    expect(formatFullFailureMessage(tooLong).endsWith('\n…')).toBe(true);
   });
 });
 
