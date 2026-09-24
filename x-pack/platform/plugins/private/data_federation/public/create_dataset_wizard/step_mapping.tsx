@@ -140,7 +140,9 @@ export function StepMapping() {
 
   useEffect(() => {
     updateContent({
-      isValid: hasAttemptedValidation ? isMappingStepValid : undefined,
+      // Always report a boolean so other steps can still validate/navigate.
+      // We keep the "don't show errors until Next is pressed" behavior separate.
+      isValid: hasAttemptedValidation ? isMappingStepValid : true,
       validate: async () => {
         setHasAttemptedValidation(true);
         setShouldShowTimeseriesValidation(true);

@@ -5,16 +5,29 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { useFormContext } from 'react-hook-form';
+import { Forms } from '@kbn/es-ui-shared-plugin/public';
 
 import type { CreateDatasetFormValues } from './create_dataset_form_state';
 import { CreateDatasetAdditionalSettings } from './create_dataset_settings';
 import { createDatasetWizardStrings } from './create_dataset_wizard_i18n';
+import type { DatasetWizardContent } from './types';
 
 export function StepAdditional() {
-  const { control } = useFormContext<CreateDatasetFormValues>();
+  const { control, getValues } = useFormContext<CreateDatasetFormValues>();
+  const { updateContent } = Forms.useContent<DatasetWizardContent, 'settings'>('settings');
+
+  useEffect(() => {
+    updateContent({
+      // No required fields in this step today, but we still need a boolean
+      // so wizard navigation isn't blocked by "missing content" semantics.
+      isValid: true,
+      validate: async () => true,
+      getData: () => getValues().settings,
+    });
+  }, [getValues, updateContent]);
 
   return (
     <div data-test-subj="createDatasetWizardAdditionalStep">
