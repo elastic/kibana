@@ -10,11 +10,13 @@
 import { z } from '@kbn/zod/v4';
 import { AlertRuleTriggerSchema } from './alert_trigger_schema';
 import { ManualTriggerSchema } from './manual_trigger_schema';
+import { PageTriggerSchema } from './page_trigger_schema';
 import { ScheduledTriggerSchema } from './scheduled_trigger_schema';
 import { CONNECTOR_ID_MAX_LENGTH, IF_CONDITION_MAX_LENGTH } from '../../../common/constants';
 
 export { AlertRuleTriggerSchema } from './alert_trigger_schema';
 export { ManualTriggerSchema } from './manual_trigger_schema';
+export { PageTriggerSchema, isPageTrigger, type PageTrigger } from './page_trigger_schema';
 export {
   ScheduledTriggerSchema,
   SCHEDULED_INTERVAL_ERROR,
@@ -25,6 +27,7 @@ export const TriggerSchema = z.discriminatedUnion('type', [
   AlertRuleTriggerSchema,
   ScheduledTriggerSchema,
   ManualTriggerSchema,
+  PageTriggerSchema,
 ]);
 
 export type Trigger = z.infer<typeof TriggerSchema>;
@@ -140,6 +143,7 @@ export function getTriggerSchema(customTriggers: CustomTriggerSchemaInput[] = []
     AlertRuleTriggerSchema,
     ScheduledTriggerSchema,
     ManualTriggerSchema,
+    PageTriggerSchema,
     ...customSchemas,
   ]);
 }
@@ -148,5 +152,6 @@ export const TriggerTypes = [
   AlertRuleTriggerSchema.shape.type.value,
   ScheduledTriggerSchema.shape.type.value,
   ManualTriggerSchema.shape.type.value,
+  PageTriggerSchema.shape.type.value,
 ];
 export type TriggerType = (typeof TriggerTypes)[number];

@@ -11,6 +11,7 @@ import type { z } from '@kbn/zod/v4';
 import {
   AlertRuleTriggerSchema,
   ManualTriggerSchema,
+  PageTriggerSchema,
   ScheduledTriggerSchema,
 } from './schema/triggers';
 
@@ -49,6 +50,32 @@ export const builtInTriggerDefinitions: BaseTriggerDefinition[] = [
           description: The ID of the request to accept
       required:
         - request_id`,
+      ],
+    },
+  },
+  {
+    id: 'page',
+    label: 'Page',
+    description:
+      'Expose the workflow inputs as a hosted form that can be submitted without a Kibana login',
+    schema: PageTriggerSchema,
+    documentation: {
+      details:
+        'Declare the input contract under the trigger using JSON Schema ' +
+        '(`inputs.properties` + `inputs.required`) and reference values in steps with ' +
+        '`{{ inputs.<name> }}`. The page URL, access level, and token are managed outside the ' +
+        'workflow definition.',
+      examples: [
+        `triggers:
+  - type: page
+    title: Report an incident
+    inputs:
+      properties:
+        summary:
+          type: string
+          description: What happened
+      required:
+        - summary`,
       ],
     },
   },
