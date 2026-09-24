@@ -7,7 +7,7 @@
 
 import React, { useCallback, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { AiButton } from '@kbn/ui-ai-components';
+import { AiButtonEmpty } from '@kbn/ui-ai-components';
 import type { Investigation } from '../../types';
 import { BaseActions, type CardActionType } from '../actions';
 import {
@@ -58,15 +58,14 @@ export const ConversationDetailsFlyoutFooter = ({
     <>
       <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
-          <AiButton
-            variant="base"
+          <AiButtonEmpty
             size="s"
             iconType="productAgent"
             onClick={onOpenChat}
             data-test-subj="investigationFlyoutOpenChat"
           >
             {DETAILS_FLYOUT_LABELS.actions.openChat}
-          </AiButton>
+          </AiButtonEmpty>
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>

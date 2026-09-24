@@ -51,7 +51,7 @@ export const ConversationsActionsGroup = memo<ConversationsActionsGroupProps>(
       <EuiFlexGroup alignItems="center" gutterSize="xs" responsive direction="row">
         <EuiFlexItem grow={false}>
           <AiButtonIcon
-            variant="base"
+            variant="empty"
             size="s"
             iconType="productAgent"
             withToolTip
