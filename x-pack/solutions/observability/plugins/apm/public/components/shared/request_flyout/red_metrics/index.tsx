@@ -40,29 +40,24 @@ const CHARTS_LOAD_ERROR = i18n.translate('xpack.apm.requestFlyout.chartsUnavaila
   defaultMessage: 'Unable to load charts',
 });
 
-function useSecondaryChartsGridCss() {
+function useChartsGridCss() {
   const { euiTheme } = useEuiTheme();
 
   return css`
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: ${euiTheme.size.m};
   `;
 }
 
 function RedMetricsChartsSkeleton() {
-  const secondaryChartsGridCss = useSecondaryChartsGridCss();
+  const chartsGridCss = useChartsGridCss();
 
   return (
-    <div data-test-subj="requestFlyoutRedMetricsSkeleton">
-      <EuiSkeletonRectangle width="30%" height={16} borderRadius="m" />
-      <EuiSpacer size="s" />
+    <div data-test-subj="requestFlyoutRedMetricsSkeleton" css={chartsGridCss}>
       <EuiSkeletonRectangle width="100%" height={CHART_HEIGHT} borderRadius="m" />
-      <EuiSpacer size="m" />
-      <div css={secondaryChartsGridCss}>
-        <EuiSkeletonRectangle width="100%" height={CHART_HEIGHT} borderRadius="m" />
-        <EuiSkeletonRectangle width="100%" height={CHART_HEIGHT} borderRadius="m" />
-      </div>
+      <EuiSkeletonRectangle width="100%" height={CHART_HEIGHT} borderRadius="m" />
+      <EuiSkeletonRectangle width="100%" height={CHART_HEIGHT} borderRadius="m" />
     </div>
   );
 }
@@ -139,7 +134,7 @@ function RequestFlyoutRedMetricsCharts({
     deps: { core },
   } = useRequestFlyoutContext();
   const timeZone = getTimeZone(core.uiSettings);
-  const secondaryChartsGridCss = useSecondaryChartsGridCss();
+  const chartsGridCss = useChartsGridCss();
 
   const {
     latencyTimeseries,
@@ -171,33 +166,31 @@ function RequestFlyoutRedMetricsCharts({
 
   return (
     <ChartPointerEventContextProvider>
-      <FlyoutTimeseriesChartPanel
-        id="requestFlyoutRedMetricsChart-latency"
-        title={i18n.translate('xpack.apm.requestFlyout.latencyChartTitle', {
-          defaultMessage: 'Latency',
-        })}
-        titleAction={
-          <LatencyAggregationTypeSelect
-            latencyAggregationType={latencyAggregationType}
-            onChange={setLatencyAggregationType}
+      <div css={chartsGridCss}>
+        <FlyoutTimeseriesChartPanel
+          id="requestFlyoutRedMetricsChart-latency"
+          title={i18n.translate('xpack.apm.requestFlyout.latencyChartTitle', {
+            defaultMessage: 'Latency',
+          })}
+          titleAction={
+            <LatencyAggregationTypeSelect
+              latencyAggregationType={latencyAggregationType}
+              onChange={setLatencyAggregationType}
+            />
+          }
+        >
+          <TimeseriesChart
+            id="requestFlyoutLatencyChart"
+            height={CHART_HEIGHT}
+            fetchStatus={latencyStatus}
+            timeseries={latencyTimeseries}
+            yLabelFormat={getResponseTimeTickFormatter(latencyFormatter)}
+            comparisonEnabled={false}
+            timeZone={timeZone}
+            showAnnotations={false}
           />
-        }
-      >
-        <TimeseriesChart
-          id="requestFlyoutLatencyChart"
-          height={CHART_HEIGHT}
-          fetchStatus={latencyStatus}
-          timeseries={latencyTimeseries}
-          yLabelFormat={getResponseTimeTickFormatter(latencyFormatter)}
-          comparisonEnabled={false}
-          timeZone={timeZone}
-          showAnnotations={false}
-        />
-      </FlyoutTimeseriesChartPanel>
+        </FlyoutTimeseriesChartPanel>
 
-      <EuiSpacer size="m" />
-
-      <div css={secondaryChartsGridCss}>
         <FlyoutTimeseriesChartPanel
           id="requestFlyoutRedMetricsChart-throughput"
           title={i18n.translate('xpack.apm.requestFlyout.throughputChartTitle', {
