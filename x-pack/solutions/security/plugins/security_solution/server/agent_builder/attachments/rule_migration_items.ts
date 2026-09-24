@@ -9,6 +9,7 @@ import { z } from '@kbn/zod/v4';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
+import { MigrationId } from '../tools/siem_migrations/common/schemas';
 import {
   SIEM_MIGRATION_GET_MIGRATION_RULES_TOOL_ID,
   SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID,
@@ -19,16 +20,12 @@ import {
 import { RULE_MIGRATION_SKILLS } from '../skills/siem_migration/rules/skill_ids';
 
 const ruleMigrationItemsDataSchema = z.object({
-  migration_id: z.string().min(1),
-  rule_ids: z.array(z.string()).default([]),
-  attachmentLabel: z.string().optional(),
+  migration_id: MigrationId,
+  rule_ids: z.array(z.string().min(1).max(256)).max(200).default([]),
+  attachmentLabel: z.string().max(500).optional(),
 });
 
 type RuleMigrationItemsAttachmentData = z.infer<typeof ruleMigrationItemsDataSchema>;
-
-const isRuleMigrationItemsData = (data: unknown): data is RuleMigrationItemsAttachmentData => {
-  return ruleMigrationItemsDataSchema.safeParse(data).success;
-};
 
 export const createRuleMigrationItemsAttachmentType = (): AttachmentTypeDefinition => {
   return {
@@ -41,13 +38,8 @@ export const createRuleMigrationItemsAttachmentType = (): AttachmentTypeDefiniti
       return { valid: false, error: parseResult.error.message };
     },
     format: (attachment: Attachment<string, unknown>) => {
-      const data = attachment.data;
-      if (!isRuleMigrationItemsData(data)) {
-        throw new Error(
-          `Invalid rule migration items attachment data for attachment ${attachment.id}`
-        );
-      }
-      const { migration_id: migrationId, rule_ids: ruleIds } = data;
+      const { migration_id: migrationId, rule_ids: ruleIds } =
+        attachment.data as RuleMigrationItemsAttachmentData;
       return {
         getRepresentation: () => ({
           type: 'text' as const,
@@ -71,6 +63,7 @@ export const createRuleMigrationItemsAttachmentType = (): AttachmentTypeDefiniti
 
 This attachment provides one or more SIEM migration rule items for focused review or editing.
 The payload contains the migration id and the specific rule ids.
+
 ## Available Tools
 
 - \`${SIEM_MIGRATION_GET_MIGRATION_RULES_TOOL_ID}\` — Rule details: original query, vendor,

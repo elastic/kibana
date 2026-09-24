@@ -33,3 +33,35 @@ export const UPDATE_MISSING_INDEX_PATTERN_SELECTED_RULES = (numberOfSelectedRule
     }
   );
 };
+
+export const ADD_TO_CHAT_BUTTON_LABEL = (count: number) =>
+  i18n.translate('xpack.securitySolution.siemMigrations.rules.bulkAddToChatButton.label', {
+    defaultMessage: 'Add to chat{count, plural, =0 {} other { ({count})}}',
+    values: { count },
+  });
+
+export const ADD_TO_CHAT_ATTACHMENT_LABEL = (count: number) =>
+  i18n.translate(
+    'xpack.securitySolution.siemMigrations.rules.bulkAddToChatButton.attachmentLabel',
+    {
+      defaultMessage: '{count, plural, =0 {all rules} one {# rule} other {# rules}}',
+      values: { count },
+    }
+  );
+
+export const ADD_TO_CHAT_PROMPT_WITH_SELECTION = (count: number) =>
+  i18n.translate(
+    'xpack.securitySolution.siemMigrations.rules.bulkAddToChatButton.promptWithSelection',
+    {
+      defaultMessage:
+        "I've attached {count, plural, one {# Automatic migration rule} other {# Automatic migration rules}}. How can you help?",
+      values: { count },
+    }
+  );
+
+export const ADD_TO_CHAT_PROMPT_ALL_RULES = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.bulkAddToChatButton.promptAllRules',
+  {
+    defaultMessage: "I've attached all rules in this Automatic migration. How can you help?",
+  }
+);

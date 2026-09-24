@@ -8,6 +8,7 @@
 import React, { useCallback, memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { WithMissingPrivilegesTooltip } from '../../../../common/components/missing_privileges';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import {
   InstallTranslatedButton,
   ReprocessFailedItemsButton,
@@ -70,6 +71,9 @@ export const BulkActions: React.FC<BulkActionsProps> = memo(
       (item: BulkActionsItem) => item.translation_result === MigrationTranslationResult.FULL,
       []
     );
+    const isSiemMigrationAgentBuilderEnabled = useIsExperimentalFeatureEnabled(
+      'siemRuleMigrationsAgentBuilderEnabled'
+    );
     return (
       <EuiFlexGroup
         alignItems="center"
@@ -78,9 +82,11 @@ export const BulkActions: React.FC<BulkActionsProps> = memo(
         wrap={true}
         data-test-subj="migrationsBulkActions"
       >
-        <EuiFlexItem grow={false}>
-          <AddRulesToChatButton migrationStats={migrationStats} selectedRules={selectedRules} />
-        </EuiFlexItem>
+        {isSiemMigrationAgentBuilderEnabled && (
+          <EuiFlexItem grow={false}>
+            <AddRulesToChatButton migrationStats={migrationStats} selectedRules={selectedRules} />
+          </EuiFlexItem>
+        )}
         {showUpdateMissingIndexPatternButton && (
           <UpdateMissingIndex
             setMissingIndexPatternFlyoutOpen={setMissingIndexPatternFlyoutOpen}

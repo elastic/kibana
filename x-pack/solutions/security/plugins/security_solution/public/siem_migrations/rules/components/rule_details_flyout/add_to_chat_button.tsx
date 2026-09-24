@@ -12,6 +12,7 @@ import { NewAgentBuilderAttachment } from '../../../../agent_builder/components/
 import type { AgentBuilderAddToChatTelemetry } from '../../../../agent_builder/hooks/use_report_add_to_chat';
 import { useAgentBuilderAttachment } from '../../../../agent_builder/hooks/use_agent_builder_attachment';
 import { WithMissingPrivilegesTooltip } from '../../../common/components/missing_privileges';
+import { ADD_TO_CHAT_PROMPT } from './translations';
 
 const ADD_TO_CHAT_TELEMETRY: AgentBuilderAddToChatTelemetry = {
   pathway: 'translated_rules_flyout',
@@ -36,7 +37,7 @@ const AddMigrationRuleToChatButtonComponent: React.FC<AddMigrationRuleToChatButt
         attachmentLabel: `[${rule.original_rule.vendor}] ${rule.original_rule.title}`,
       },
       attachmentId: rule.id,
-      attachmentPrompt: `Please help me with this Automatic migration rule: ${rule.original_rule.title}`,
+      attachmentPrompt: ADD_TO_CHAT_PROMPT(rule.original_rule.title),
       autoSendInitialMessage: true,
     }),
     [rule]

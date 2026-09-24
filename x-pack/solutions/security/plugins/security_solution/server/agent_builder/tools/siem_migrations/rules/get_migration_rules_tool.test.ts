@@ -44,10 +44,16 @@ describe('getMigrationRulesTool', () => {
         data: [
           {
             id: 'rule-1',
-            original_rule: { title: 'Splunk rule', vendor: 'splunk', id: 's-1' },
+            original_rule: {
+              title: 'Splunk rule',
+              description: 'Detects something bad',
+              vendor: 'splunk',
+              id: 's-1',
+            },
             elastic_rule: { title: 'Elastic rule', prebuilt_rule_id: 'pre-1' },
             translation_result: 'full',
             status: 'completed',
+            comments: [{ content: 'Initial translation', created_at: '2024-01-01T00:00:00Z' }],
           },
           {
             id: 'rule-2',
@@ -79,24 +85,41 @@ describe('getMigrationRulesTool', () => {
     expect(data.total).toBe(2);
     expect(data.page).toBe(0);
     expect(data.per_page).toBe(50);
-    // Projected fields only — no original query body or elastic ES|QL.
-    expect(data.data[0]).toEqual({
+    // Projected fields — original query body and query_language are stripped when absent from
+    // the fixture; description and comments are now included.
+    expect(data.data[0]).toStrictEqual({
       id: 'rule-1',
-      original_rule: { title: 'Splunk rule', vendor: 'splunk' },
+      original_rule: {
+        title: 'Splunk rule',
+        description: 'Detects something bad',
+        vendor: 'splunk',
+        query: undefined,
+        query_language: undefined,
+      },
       elastic_rule: {
         title: 'Elastic rule',
         prebuilt_rule_id: 'pre-1',
         integration_ids: undefined,
+        query: undefined,
+        query_language: undefined,
       },
       translation_result: 'full',
       status: 'completed',
+      comments: [{ content: 'Initial translation', created_at: '2024-01-01T00:00:00Z' }],
     });
-    expect(data.data[1]).toEqual({
+    expect(data.data[1]).toStrictEqual({
       id: 'rule-2',
-      original_rule: { title: 'Failed rule', vendor: 'splunk' },
+      original_rule: {
+        title: 'Failed rule',
+        description: undefined,
+        vendor: 'splunk',
+        query: undefined,
+        query_language: undefined,
+      },
       elastic_rule: undefined,
       translation_result: 'failed',
       status: 'failed',
+      comments: undefined,
     });
   });
 

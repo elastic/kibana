@@ -265,91 +265,19 @@ export type GetRuleMigrationResourcesMissingResponse = z.infer<
 >;
 export const GetRuleMigrationRulesRequestQuery = lazySchema(() =>
   z.object({
-    /**
-     * Zero-based page number. Defaults to 0 — omit unless paginating past the first page.
-     */
-    page: z.coerce
-      .number()
-      .optional()
-      .describe(
-        'Zero-based page number. Defaults to 0 — omit unless paginating past the first page.'
-      ),
-    /**
-     * Number of rules per page. Defaults to 50 — omit unless you need a different page size.
-     */
-    per_page: z.coerce
-      .number()
-      .optional()
-      .describe(
-        'Number of rules per page. Defaults to 50 — omit unless you need a different page size.'
-      ),
+    page: z.coerce.number().optional(),
+    per_page: z.coerce.number().optional(),
     sort_field: NonEmptyString.optional(),
-    /**
-     * Sort direction when sort_field is set. asc or desc. Defaults to desc.
-     */
-    sort_direction: z
-      .enum(['asc', 'desc'])
-      .optional()
-      .describe('Sort direction when sort_field is set. asc or desc. Defaults to desc.'),
-    /**
-     * Free-text search term matched against the translated rule title (or original title for failed rules). Omit entirely if not searching — do not pass an empty string.
-     */
-    search_term: z
-      .string()
-      .optional()
-      .describe(
-        'Free-text search term matched against the translated rule title (or original title for failed rules). Omit entirely if not searching — do not pass an empty string.'
-      ),
-    /**
-     * Fetch specific rules by their ids. Omit entirely if not filtering by id — do not pass an empty array. When provided, no other filter param is needed.
-     */
-    ids: ArrayFromString(NonEmptyString)
-      .optional()
-      .describe(
-        'Fetch specific rules by their ids. Omit entirely if not filtering by id — do not pass an empty array. When provided, no other filter param is needed.'
-      ),
-    /**
-     * true = only rules with a prebuilt match; false = only rules without one. Omit entirely when not filtering by this condition.
-     */
-    is_prebuilt: BooleanFromString.optional().describe(
-      'true = only rules with a prebuilt match; false = only rules without one. Omit entirely when not filtering by this condition.'
-    ),
-    /**
-     * true = installed rules only; false = not-yet-installed only. Omit entirely when not filtering by this condition.
-     */
-    is_installed: BooleanFromString.optional().describe(
-      'true = installed rules only; false = not-yet-installed only. Omit entirely when not filtering by this condition.'
-    ),
-    /**
-     * true = fully translated rules only; false = exclude fully translated. Omit entirely when not filtering by this condition.
-     */
-    is_fully_translated: BooleanFromString.optional().describe(
-      'true = fully translated rules only; false = exclude fully translated. Omit entirely when not filtering by this condition.'
-    ),
-    /**
-     * true = partially translated rules only; false = exclude partially translated. Omit entirely when not filtering by this condition.
-     */
-    is_partially_translated: BooleanFromString.optional().describe(
-      'true = partially translated rules only; false = exclude partially translated. Omit entirely when not filtering by this condition.'
-    ),
-    /**
-     * true = untranslatable rules only; false = exclude untranslatable. Omit entirely when not filtering by this condition.
-     */
-    is_untranslatable: BooleanFromString.optional().describe(
-      'true = untranslatable rules only; false = exclude untranslatable. Omit entirely when not filtering by this condition.'
-    ),
-    /**
-     * true = failed-translation rules only; false = exclude failed. Omit entirely when not filtering by this condition.
-     */
-    is_failed: BooleanFromString.optional().describe(
-      'true = failed-translation rules only; false = exclude failed. Omit entirely when not filtering by this condition.'
-    ),
-    /**
-     * Set to true to return only rules that are missing a required index. false has no effect — omit this param entirely when not filtering by this condition.
-     */
-    is_missing_index: BooleanFromString.optional().describe(
-      'Set to true to return only rules that are missing a required index. false has no effect — omit this param entirely when not filtering by this condition.'
-    ),
+    sort_direction: z.enum(['asc', 'desc']).optional(),
+    search_term: z.string().optional(),
+    ids: ArrayFromString(NonEmptyString).optional(),
+    is_prebuilt: BooleanFromString.optional(),
+    is_installed: BooleanFromString.optional(),
+    is_fully_translated: BooleanFromString.optional(),
+    is_partially_translated: BooleanFromString.optional(),
+    is_untranslatable: BooleanFromString.optional(),
+    is_failed: BooleanFromString.optional(),
+    is_missing_index: BooleanFromString.optional(),
   })
 );
 export type GetRuleMigrationRulesRequestQuery = z.infer<typeof GetRuleMigrationRulesRequestQuery>;

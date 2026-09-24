@@ -12,6 +12,7 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import { SIEM_RULE_MIGRATION_RULES_PATH } from '../../../../../common/siem_migrations/constants';
 import { NonEmptyString } from '../../../../../common/api/model/primitives.gen';
+import { MigrationId } from '../common/schemas';
 import {
   GetRuleMigrationRulesRequestQuery,
   type GetRuleMigrationRulesResponse,
@@ -34,7 +35,7 @@ const SORT_FIELDS = [
 ] as const;
 
 const schema = GetRuleMigrationRulesRequestQuery.extend({
-  migration_id: NonEmptyString.describe(
+  migration_id: MigrationId.describe(
     'REQUIRED. The id of the rule migration whose rules to retrieve.'
   ),
   page: z.coerce
@@ -85,6 +86,7 @@ const projectRule = (rule: GetRuleMigrationRulesResponse['data'][number]) => ({
   id: rule.id,
   original_rule: {
     title: rule.original_rule.title,
+    description: rule.original_rule.description,
     vendor: rule.original_rule.vendor,
     query: rule.original_rule.query,
     query_language: rule.original_rule.query_language,
@@ -124,7 +126,7 @@ export const getMigrationRulesTool = (
 
 Only include the parameters you actually need. Boolean filter fields (is_fully_translated, is_failed, etc.) filter when set — omit them entirely when you are not filtering by that condition. Omit search_term and ids when not in use (do not pass empty strings or empty arrays). Omit pagination and sort params unless you need non-default values.
 
-Returns: id, original rule (title, vendor, query, query_language), translated elastic rule (title, prebuilt rule id, integration ids, ES|QL query, query language), translation result, status.
+Returns: id, original rule (title, description, vendor, query, query_language), translated elastic rule (title, prebuilt rule id, integration ids, ES|QL query, query language), translation result, status, comments.
 
 Read-only.`,
     schema,

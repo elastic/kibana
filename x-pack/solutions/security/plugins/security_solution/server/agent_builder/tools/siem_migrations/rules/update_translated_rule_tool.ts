@@ -25,40 +25,53 @@ import {
   cleanMarkdown,
 } from '../../../../lib/siem_migrations/common/task/util/comments';
 import { SIEM_MIGRATION_UPDATE_TRANSLATED_RULE_TOOL_ID } from './tool_ids';
+import {
+  getEsqlQueryUpdatePatch,
+  getUpdatePrebuiltRulePatch,
+} from './utils/update_translated_rule';
 
 const PreBuiltRuleSchema = z.object({
-  id: z.string().min(1).describe('The correct prebuilt rule id.'),
-  title: z.string().min(1).describe('The title of the prebuilt rule.'),
+  id: z.string().min(1).max(256).describe('The correct prebuilt rule id.'),
+  title: z.string().min(1).max(500).describe('The title of the prebuilt rule.'),
 });
 
 const schema = z.object({
   migration_id: MigrationId,
-  rule_id: z.string().min(1).describe('The id of the specific rule migration item to update.'),
+  rule_id: z
+    .string()
+    .min(1)
+    .max(256)
+    .describe('The id of the specific rule migration item to update.'),
   esql_query: z
     .string()
     .min(1)
+    .max(10_000)
     .optional()
     .describe(
       'The corrected ES|QL query. Provide ONLY when the translated query needs to be updated. ' +
         'Can be combined with new integration_ids, provided the index in the query is created ' +
-        'from those integrations.'
+        'from those integrations. Mutually exclusive with prebuilt_rule — if both are supplied, ' +
+        'prebuilt_rule takes precedence.'
     ),
   prebuilt_rule: PreBuiltRuleSchema.optional().describe(
-    'The correct prebuilt rule id. Provide ONLY when the matched prebuilt rule needs to be ' +
-      'updated. Can be combined with new integration_ids, provided the prebuilt rule relies ' +
-      'on data from those integrations.'
+    'The correct prebuilt rule match (id and title). Provide ONLY when the matched prebuilt rule ' +
+      'needs to be updated. Can be combined with new integration_ids, provided the prebuilt rule ' +
+      'relies on data from those integrations. Mutually exclusive with esql_query — if both are ' +
+      'supplied, prebuilt_rule takes precedence.'
   ),
   integration_ids: z
-    .array(z.string().min(1))
+    .array(z.string().min(1).max(256))
+    .min(1)
+    .max(10)
     .optional()
     .describe(
-      'The correct integration id(s). Provide ONLY when the matched integration(s) need to be ' +
-        'updated. Pass one or more integration ids. Can be combined with a new esql_query or ' +
-        'prebuilt_rule.id that relies on data from these integrations.'
+      'The correct integration id(s). Must be supplied together with esql_query or prebuilt_rule — ' +
+        'integration_ids cannot be updated on its own. Pass one or more integration ids (up to 10).'
     ),
   comment: z
     .string()
     .min(1)
+    .max(10_000)
     .describe(
       'REQUIRED. A markdown explanation of what you changed and why, covering every aspect you ' +
         "are updating in this call. It is appended to the rule's comment history and shown to the " +
@@ -86,28 +99,29 @@ export const updateTranslatedRuleTool = (
       title: 'Update Translated Rule',
       readOnlyHint: false,
       destructiveHint: false,
-      idempotentHint: true,
+      idempotentHint: false,
       openWorldHint: false,
     },
     confirmation: { askUser: 'always' },
-    description: `Update one or more aspects of a specific SIEM migration translated rule. Mutating — requires user confirmation.
+    description: `Update one or more aspects of a specific SIEM migration translated rule. Mutating — requires user confirmation. Each successful call appends a comment to the rule history.
 
-Mandatory Params:
+Mandatory params:
 - migration_id (required): the id of the specific migration
 - rule_id (required): the id of the specific rule migration item to update
 - comment (required): markdown explanation of what changed and why — appended to the rule's comment history and shown to the user in the rule details flyout
 
-### when updating prebuilt rule match:
-- prebuilt_rule: corrected prebuilt rule match (id and title)
-- integration_ids: corrected integration match(es) related to the prebuilt rule being updated as an array of one or more ids
+Two write paths — supply exactly one:
 
-### when updating integration match(es):
-- integration_ids: corrected integration match(es) as an array of one or more ides
-- New esql_query based on the new index obtained from the new recommended integration(s).
+### Write path 1 — prebuilt rule match:
+- prebuilt_rule: corrected prebuilt rule match (id and title, both required)
+- integration_ids (optional): corrected integration ids related to the prebuilt rule
 
-### when updating ES|QL query:
+### Write path 2 — ES|QL query:
 - esql_query: corrected ES|QL query (validated before applying)
-- integration_ids: corrected integration match(es) as an array of one or more ids
+- integration_ids (optional): corrected integration ids whose index pattern the query uses
+
+If both prebuilt_rule and esql_query are supplied, prebuilt_rule takes precedence.
+integration_ids cannot be updated on its own — always supply it with esql_query or prebuilt_rule.
 `,
     schema,
     tags: ['security', 'siem-migration', 'rules'],
@@ -121,14 +135,19 @@ Mandatory Params:
         comment,
       } = input;
 
-      const { id: prebuiltRuleId, title: prebuiltRuleTitle } = prebuiltRule ?? {};
-
       const hasPrivilege = await hasRuleMigrationPrivileges(core, request);
       if (!hasPrivilege) {
         return createMissingPrivilegeError('update a translated migration rule');
       }
 
-      if (esqlQuery == null && prebuiltRuleId == null && integrationIds == null) {
+      // Determine patch via two-branch dispatch.
+      // prebuilt_rule takes precedence; integration_ids alone is not a valid update.
+      let patchResult;
+      if (prebuiltRule != null) {
+        patchResult = getUpdatePrebuiltRulePatch(prebuiltRule, integrationIds);
+      } else if (esqlQuery != null) {
+        patchResult = await getEsqlQueryUpdatePatch(esqlQuery, integrationIds, { validateEsql });
+      } else {
         return {
           results: [
             {
@@ -136,42 +155,28 @@ Mandatory Params:
               type: ToolResultType.error,
               data: {
                 message:
-                  'At least one of esql_query, prebuilt_rule_id, or integration_ids must be provided.',
+                  'Provide either esql_query or prebuilt_rule. integration_ids cannot be updated ' +
+                  'on its own — supply it together with a new esql_query (when the index pattern ' +
+                  'changes) or a new prebuilt_rule.',
               },
             },
           ],
         };
       }
 
-      if (esqlQuery != null) {
-        if (/\[(macro|lookup):.*?\]/.test(esqlQuery)) {
-          return {
-            results: [
-              {
-                tool_result_id: getToolResultId(),
-                type: ToolResultType.error,
-                data: {
-                  message:
-                    'ES|QL query contains unresolved macro or lookup placeholders. Resolve them before applying the update.',
-                },
-              },
-            ],
-          };
-        }
-
-        const { error: validationError } = await validateEsql({ query: esqlQuery });
-        if (validationError) {
-          return {
-            results: [
-              {
-                tool_result_id: getToolResultId(),
-                type: ToolResultType.error,
-                data: { message: `ES|QL validation failed: ${validationError}` },
-              },
-            ],
-          };
-        }
+      if (!patchResult.ok) {
+        return {
+          results: [
+            {
+              tool_result_id: getToolResultId(),
+              type: ToolResultType.error,
+              data: { message: patchResult.error },
+            },
+          ],
+        };
       }
+
+      const elasticRule = patchResult.patch;
 
       // The PATCH persists via an ES partial-doc update, which replaces arrays wholesale, so the
       // new comment must be appended here and the full array resent.
@@ -200,13 +205,6 @@ Mandatory Params:
           ],
         };
       }
-
-      const elasticRule = {
-        ...(esqlQuery != null ? { query: esqlQuery, query_language: 'esql' as const } : {}),
-        ...(prebuiltRuleId != null ? { prebuilt_rule_id: prebuiltRuleId } : {}),
-        ...(integrationIds != null ? { integration_ids: integrationIds } : {}),
-        ...(prebuiltRuleTitle != null ? { title: prebuiltRuleTitle } : {}),
-      };
 
       const comments = [
         ...(currentRule.comments ?? []),

@@ -21,6 +21,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { RuleMigrationFilters } from '../../../../../common/siem_migrations/rules/types';
 import { useIsOpenState } from '../../../../common/hooks/use_is_open_state';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import type { RelatedIntegration, RuleResponse } from '../../../../../common/api/detection_engine';
 import { isMigrationPrebuiltRule } from '../../../../../common/siem_migrations/rules/utils';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
@@ -89,6 +90,9 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
   ({ refetchData, integrations, isIntegrationsLoading, migrationStats }) => {
     const migrationId = migrationStats.id;
     const { addError } = useAppToasts();
+    const isSiemMigrationAgentBuilderEnabled = useIsExperimentalFeatureEnabled(
+      'siemRuleMigrationsAgentBuilderEnabled'
+    );
 
     const [pageIndex, setPageIndex] = useState(0);
     const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
@@ -295,9 +299,11 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
           migrationRule.translation_result === MigrationTranslationResult.FULL;
         return (
           <EuiFlexGroup>
-            <EuiFlexItem grow={false}>
-              <AddMigrationRuleToChatButton rule={migrationRule} />
-            </EuiFlexItem>
+            {isSiemMigrationAgentBuilderEnabled && (
+              <EuiFlexItem grow={false}>
+                <AddMigrationRuleToChatButton rule={migrationRule} />
+              </EuiFlexItem>
+            )}
             <EuiFlexItem>
               <EuiButton
                 disabled={!canMigrationRuleBeInstalled}
@@ -328,7 +334,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
           </EuiFlexGroup>
         );
       },
-      [installSingleRule, isRulesLoading]
+      [installSingleRule, isSiemMigrationAgentBuilderEnabled, isRulesLoading]
     );
 
     const getMigrationRuleData = useCallback(
