@@ -137,12 +137,19 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
 
   // Clear stale ?collection= param when active filters remove or degrade the open collection
   // so it does not unexpectedly re-open the flyout after the filter is cleared.
-  // Guard on isLoading: rawFilteredCards is empty while packages load, so openCollectionCard
-  // would be undefined on every initial render, wiping a bookmarked ?collection= before it resolves.
+  // Guard on isLoading AND errors: rawFilteredCards is empty while packages load or when the
+  // catalog fetch fails, so openCollectionCard would be undefined in both cases — wipe the
+  // param only once the catalog has loaded successfully.
   useEffect(() => {
-    if (isLoading || !openCollectionGroupId || openCollectionCard) return;
+    if (isLoading || eprPackageLoadingError || !openCollectionGroupId || openCollectionCard) return;
     closeCollection();
-  }, [isLoading, openCollectionGroupId, openCollectionCard, closeCollection]);
+  }, [
+    isLoading,
+    eprPackageLoadingError,
+    openCollectionGroupId,
+    openCollectionCard,
+    closeCollection,
+  ]);
 
   const collectionReturnPath = useMemo(
     () =>

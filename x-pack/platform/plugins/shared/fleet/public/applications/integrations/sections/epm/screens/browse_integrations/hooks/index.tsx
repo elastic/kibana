@@ -94,6 +94,19 @@ export function useBrowseIntegrationHook({
   const localSearch = useLocalSearch(allCards, !!isLoading);
   const searchTerm = urlFilters.q ?? urlFilters.q !== '' ? urlFilters.q : undefined;
 
+  // IDs of top-level allCards entries that match the current search term.
+  // Computed once and shared by nonCategoryFilteredCards and filteredCards so both
+  // can distinguish original-index matches from promoted singletons when revalidating.
+  const searchResults = useMemo(
+    () =>
+      searchTerm
+        ? (localSearch?.search(searchTerm) as IntegrationCardItem[])?.map(
+            (match) => match[searchIdField]
+          ) ?? []
+        : [],
+    [localSearch, searchTerm]
+  );
+
   const sortedCards: IntegrationCardItem[] = useMemo(() => {
     const sortKey = urlFilters.sort ?? 'recent-old';
 
@@ -114,12 +127,6 @@ export function useBrowseIntegrationHook({
   // Cards filtered by non-category filters (search, status, setup method, signal).
   // Used to compute accurate category counts in the sidebar.
   const nonCategoryFilteredCards = useMemo(() => {
-    const searchResults = searchTerm
-      ? (localSearch?.search(searchTerm) as IntegrationCardItem[])?.map(
-          (match) => match[searchIdField]
-        ) ?? []
-      : [];
-
     let cards = searchTerm
       ? sortedCards.filter((item) => searchResults.includes(item[searchIdField]) ?? [])
       : sortedCards;
@@ -195,7 +202,7 @@ export function useBrowseIntegrationHook({
         const fields = [card.searchableContent ?? '', card.title, card.name, card.description ?? '']
           .join(' ')
           .toLowerCase();
-        return tokens.some((token) => fields.includes(token));
+        return tokens.every((token) => fields.includes(token));
       };
       cards = cards.filter((card) => {
         if (card.isCollectionCard) return matchesSearch(card);
@@ -208,7 +215,7 @@ export function useBrowseIntegrationHook({
 
     return cards;
   }, [
-    localSearch,
+    searchResults,
     searchTerm,
     sortedCards,
     urlFilters.status,
@@ -240,6 +247,29 @@ export function useBrowseIntegrationHook({
         },
         implicitVisible
       );
+
+      // Re-validate after category filtering: applyCardFilter can degrade a collection to
+      // a singleton from a member that didn't match the search. Apply the same check as
+      // nonCategoryFilteredCards, using searchResults to keep original-index cards intact.
+      if (searchTerm) {
+        const tokens = searchTerm.trim().toLowerCase().split(/\s+/);
+        const matchesSearch = (card: IntegrationCardItem) => {
+          const fields = [
+            card.searchableContent ?? '',
+            card.title,
+            card.name,
+            card.description ?? '',
+          ]
+            .join(' ')
+            .toLowerCase();
+          return tokens.every((token) => fields.includes(token));
+        };
+        result = result.filter((card) => {
+          if (card.isCollectionCard) return matchesSearch(card);
+          if (searchResults.includes(card[searchIdField])) return true;
+          return matchesSearch(card);
+        });
+      }
     } else {
       result = nonCategoryFilteredCards;
     }
@@ -254,6 +284,8 @@ export function useBrowseIntegrationHook({
     nonCategoryFilteredCards,
     effectiveCategories,
     selectedSubCategory,
+    searchTerm,
+    searchResults,
     urlFilters.sort,
     urlFilters.status,
     urlFilters.showContent,
