@@ -7,6 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import {
+  ATTACK_DISCOVERY_SCHEDULE_INTERVAL_DEFAULT,
+  RULE_TUNING_EXTRAS_DEFAULTS,
+  RULE_TUNING_SCHEDULE_INTERVAL_DEFAULT,
+} from './worker_settings_defaults';
 import type { ManagedWorkflowTemplateValues } from '../../types';
 
 export interface CommonWorkerTemplateValues extends ManagedWorkflowTemplateValues {
@@ -30,6 +35,26 @@ export interface ScheduledWorkerTemplateValues extends CommonWorkerTemplateValue
   scheduleInterval: string;
 }
 
+const isPlainObject = (value: unknown): value is Record<string, unknown> =>
+  value !== null && typeof value === 'object' && !Array.isArray(value);
+
+/**
+ * A stored document can omit a field added after it was written. The platform's boot
+ * re-render calls `yamlTemplate` with those stored values and no plugin code in the path,
+ * so an absent interval has to be filled here. A present value, including a wrong type,
+ * is left alone.
+ */
+const withScheduleDefault = (
+  values: ScheduledWorkerTemplateValues,
+  scheduleIntervalDefault: string
+): ScheduledWorkerTemplateValues => {
+  const storedInterval = (values as { scheduleInterval?: unknown }).scheduleInterval;
+  if (storedInterval !== undefined) {
+    return values;
+  }
+  return { ...values, scheduleInterval: scheduleIntervalDefault };
+};
+
 export const renderScheduledWorkerYaml = (
   yaml: string,
   values: ScheduledWorkerTemplateValues
@@ -37,6 +62,15 @@ export const renderScheduledWorkerYaml = (
   renderCommonWorkerYaml(yaml, values).replaceAll(
     '__WORKER_SCHEDULE_INTERVAL__',
     values.scheduleInterval
+  );
+
+export const renderAttackDiscoveryWorkerYaml = (
+  yaml: string,
+  values: ScheduledWorkerTemplateValues
+): string =>
+  renderScheduledWorkerYaml(
+    yaml,
+    withScheduleDefault(values, ATTACK_DISCOVERY_SCHEDULE_INTERVAL_DEFAULT)
   );
 
 /**
@@ -55,9 +89,19 @@ export interface RuleTuningWorkerTemplateValues extends ScheduledWorkerTemplateV
 export const renderRuleTuningWorkerYaml = (
   yaml: string,
   values: RuleTuningWorkerTemplateValues
-): string =>
+): string => {
+  const storedExtras = (values as { extras?: unknown }).extras;
+  // Stored keys win. An absent object or an absent key takes the declaration default;
+  // a non-object is left as stored so a wrong type still renders as itself.
+  const extras = isPlainObject(storedExtras)
+    ? { ...RULE_TUNING_EXTRAS_DEFAULTS, ...storedExtras }
+    : storedExtras === undefined
+    ? { ...RULE_TUNING_EXTRAS_DEFAULTS }
+    : storedExtras;
+
   // JSON is a YAML flow mapping, so the whole object lands under consts in one substitution.
-  renderScheduledWorkerYaml(yaml, values).replaceAll(
-    '__WORKER_EXTRAS__',
-    JSON.stringify(values.extras)
-  );
+  return renderScheduledWorkerYaml(
+    yaml,
+    withScheduleDefault(values, RULE_TUNING_SCHEDULE_INTERVAL_DEFAULT)
+  ).replaceAll('__WORKER_EXTRAS__', JSON.stringify(extras));
+};

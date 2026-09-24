@@ -85,12 +85,21 @@ describe('createWorkerSettingsRegistration', () => {
       });
     });
 
-    it('rejects stored values missing the declared schedule interval', () => {
-      // No defaulting of older development state: the document has to be reset.
-      // The autonomy level has to be one this worker allows, or the throw could be
-      // attributed to the wrong field.
+    it('fills the declared schedule interval default when the document has none', () => {
+      expect(registration.toSettings({ settingsVersion: 1, autonomyLevel: 'manual' })).toEqual({
+        workerId: AD_WORKER_ID,
+        autonomy: 'manual',
+        scheduleInterval: '24h',
+      });
+    });
+
+    it('does not overwrite a stored interval of the wrong type with the default', () => {
       expect(() =>
-        registration.toSettings({ settingsVersion: 1, autonomyLevel: 'manual' })
+        registration.toSettings({
+          settingsVersion: 1,
+          autonomyLevel: 'manual',
+          scheduleInterval: 24,
+        })
       ).toThrow(/scheduleInterval/);
     });
 
@@ -225,14 +234,34 @@ describe('createWorkerSettingsRegistration', () => {
       });
     });
 
-    it('rejects stored values missing extras', () => {
-      expect(() =>
+    it('fills declared extras defaults when the document has none', () => {
+      expect(
         registration.toSettings({
           settingsVersion: 1,
           autonomyLevel: 'assisted',
           scheduleInterval: '2h',
         })
-      ).toThrow(/extras/);
+      ).toEqual({
+        workerId: RULE_TUNING_WORKER_ID,
+        autonomy: 'assisted',
+        scheduleInterval: '2h',
+        extras: defaultExtras,
+      });
+    });
+
+    it('fills the declared schedule interval default when the document has none', () => {
+      expect(
+        registration.toSettings({
+          settingsVersion: 1,
+          autonomyLevel: 'manual',
+          extras: { analysisWindowDays: 7 },
+        })
+      ).toEqual({
+        workerId: RULE_TUNING_WORKER_ID,
+        autonomy: 'manual',
+        scheduleInterval: '2h',
+        extras: defaultExtras,
+      });
     });
 
     it('reads a stored supervised level as assisted, the closest level it still offers', () => {
@@ -256,11 +285,42 @@ describe('createWorkerSettingsRegistration', () => {
       });
     });
 
-    it('rejects stored extras missing a required field, naming it', () => {
-      // No default repair: a document written before the field existed has to be reset.
-      expect(() => registration.toSettings({ ...storedDefaults, extras: {} })).toThrow(
-        /extras\.analysisWindowDays/
-      );
+    it('fills a missing extras field from the declaration default', () => {
+      expect(registration.toSettings({ ...storedDefaults, extras: {} })).toEqual({
+        workerId: RULE_TUNING_WORKER_ID,
+        autonomy: 'manual',
+        scheduleInterval: '2h',
+        extras: defaultExtras,
+      });
+    });
+
+    it('keeps a stored extras value and fills only the keys the document lacks', () => {
+      expect(
+        registration.toSettings({
+          ...storedDefaults,
+          extras: { analysisWindowDays: 21, fpRateThresholdPct: 80 },
+        })
+      ).toEqual({
+        workerId: RULE_TUNING_WORKER_ID,
+        autonomy: 'manual',
+        scheduleInterval: '2h',
+        extras: { ...defaultExtras, analysisWindowDays: 21, fpRateThresholdPct: 80 },
+      });
+    });
+
+    it('does not overwrite a stored extras value of the wrong type with the default', () => {
+      expect(() =>
+        registration.toSettings({ ...storedDefaults, extras: { analysisWindowDays: '14' } })
+      ).toThrow(/extras\.analysisWindowDays/);
+    });
+
+    it('rejects a stored extras key the schema does not know', () => {
+      expect(() =>
+        registration.toSettings({
+          ...storedDefaults,
+          extras: { ...defaultExtras, retiredField: 1 },
+        })
+      ).toThrow(/retiredField/);
     });
 
     it('keeps extras when a shared-field patch omits them', () => {

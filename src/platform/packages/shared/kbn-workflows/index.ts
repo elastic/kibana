@@ -126,6 +126,20 @@ export type {
   ActionMetadata,
 } from './managed/action_workflow';
 
+// Defaults the managed Worker YAML templates substitute when a stored document omits a
+// field. Exported from the root entry (rather than only from `./managed`) so
+// `@kbn/alertzero-common` can import them without pulling every managed workflow
+// definition into its bundle. Workflows cannot import that package; the dependency
+// runs the other way.
+export {
+  ATTACK_DISCOVERY_SCHEDULE_INTERVAL_DEFAULT,
+  RULE_TUNING_ANALYSIS_WINDOW_DAYS_DEFAULT,
+  RULE_TUNING_EXTRAS_DEFAULTS,
+  RULE_TUNING_FP_COUNT_THRESHOLD_DEFAULT,
+  RULE_TUNING_FP_RATE_THRESHOLD_PCT_DEFAULT,
+  RULE_TUNING_SCHEDULE_INTERVAL_DEFAULT,
+} from './managed/definitions/alertzero/worker_settings_defaults';
+
 export {
   isWorkflowValidationRuleId,
   WORKFLOW_VALIDATION_RULE_IDS,
