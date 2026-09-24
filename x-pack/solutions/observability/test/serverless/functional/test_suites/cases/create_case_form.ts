@@ -102,24 +102,21 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
         );
         await toggleCustomField.click();
 
+        // Pre-open the accordion so it is ready when the case view loads after submission.
+        await cases.common.openLegacyCustomFieldsAccordion(owner);
         await cases.create.submitCase();
 
         await header.waitUntilLoadingHasFinished();
 
         await testSubjects.existOrFail('appHeaderTitle');
 
-        // The legacy custom fields accordion is closed by default; open it before asserting.
-        await testSubjects.click('case-view-sidebar-legacy-custom-fields-toggle');
-
-        // validate custom fields
-        const summary = await testSubjects.find(`case-text-custom-field-${customFields[0].key}`);
+        // validate custom fields (accordion is in view mode; use the view-mode selectors)
+        const summary = await testSubjects.find(`text-custom-field-view-${customFields[0].key}`);
 
         expect(await summary.getVisibleText()).equal('This is a sample text!');
 
-        const sync = await testSubjects.find(
-          `case-toggle-custom-field-form-field-${customFields[1].key}`
-        );
-        expect(await sync.getAttribute('aria-checked')).equal('true');
+        const sync = await testSubjects.find(`toggle-custom-field-view-${customFields[1].key}`);
+        expect(await sync.getAttribute('aria-label')).equal('On');
       });
     });
   });

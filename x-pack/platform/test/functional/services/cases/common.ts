@@ -34,6 +34,25 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
       await browser.setLocalStorageItem(`${owner}.cases.showLegacyCustomFields`, 'true');
     },
 
+    /**
+     * Pre-opens the legacy custom-fields accordion on the case view by writing its state
+     * to localStorage before the page loads.  Call this before any navigation that lands
+     * on the case view (goToFirstListedCase, submitCase redirect, etc.).  The accordion
+     * defaults to closed; writing it open avoids the race between a toggle click and the
+     * React re-render that would reveal the custom-field elements.
+     */
+    async openLegacyCustomFieldsAccordion(owner: string): Promise<void> {
+      await browser.setLocalStorageItem(
+        `${owner}.cases.caseView.sidebarAccordions`,
+        JSON.stringify({
+          attributes: true,
+          legacyCustomFields: true,
+          templateFields: true,
+          connectors: true,
+        })
+      );
+    },
+
     async waitForCaseViewToLoad() {
       await retry.waitFor('the case view page to load', async () => {
         if (await testSubjects.exists('create-case-submit')) return false;
