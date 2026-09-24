@@ -119,8 +119,8 @@ const kubernetes = (): CustomAppDefinition => ({
     // Each tab starts from the same row, since only one is visible at a time.
     summary: { type: 'panel', id: 'summary', row: 5, column: 0, width: 48, height: 6 },
     legend: { type: 'panel', id: 'legend', row: 11, column: 0, width: 48, height: 4 },
-    grid: { type: 'panel', id: 'grid', row: 15, column: 0, width: 48, height: 18 },
-    pods: { type: 'panel', id: 'pods', row: 33, column: 0, width: 48, height: 24 },
+    grid: { type: 'panel', id: 'grid', row: 15, column: 0, width: 48, height: 30 },
+    pods: { type: 'panel', id: 'pods', row: 45, column: 0, width: 48, height: 24 },
 
     nsHelp: { type: 'panel', id: 'nsHelp', row: 5, column: 0, width: 48, height: 4 },
     namespaces: { type: 'panel', id: 'namespaces', row: 9, column: 0, width: 48, height: 19 },
@@ -135,7 +135,7 @@ const kubernetes = (): CustomAppDefinition => ({
     filters: { hideBorder: true },
     summary: { title: 'Fleet', tab: 'Resources' },
     legend: { hideBorder: true, tab: 'Resources' },
-    grid: { title: 'Every pod', tab: 'Resources' },
+    grid: { hideBorder: true, tab: 'Resources' },
     pods: { title: 'Pods', tab: 'Resources' },
     nsHelp: { hideBorder: true, tab: 'Namespaces' },
     namespaces: { title: 'Pods and CPU by namespace', tab: 'Namespaces' },
@@ -173,7 +173,15 @@ const kubernetes = (): CustomAppDefinition => ({
         query: `FROM ${K8S_POD_METRICS_INDEX} | STATS pods = COUNT_DISTINCT(resource.attributes.k8s.pod.uid) BY name = resource.attributes.k8s.namespace.name | WHERE name IS NOT NULL | SORT name`,
       },
     ],
-    grid: [{ path: '/allPods', shape: 'rows', query: GRID_QUERY, params: PODS_PARAMS }],
+    grid: [
+      {
+        path: '/clusterGroups',
+        shape: 'groups',
+        groupBy: 'cluster',
+        query: GRID_QUERY,
+        params: PODS_PARAMS,
+      },
+    ],
     pods: [{ path: '/pods', shape: 'rows', query: PODS_QUERY, params: PODS_PARAMS }],
     logs: [
       {
@@ -325,11 +333,49 @@ const kubernetes = (): CustomAppDefinition => ({
         },
       },
     ]),
+    // One card per cluster, from a ChildList template over the grouped query —
+    // so the app follows however many clusters the data actually has rather than
+    // hardcoding two panels.
     grid: surface('grid', [
       {
         id: 'root',
+        component: 'Column',
+        gap: 'm',
+        children: { componentId: 'clusterCard', path: '/clusterGroups' },
+      },
+      { id: 'clusterCard', component: 'Card', header: 'cardHeader', child: 'cardGrid' },
+      {
+        id: 'cardHeader',
+        component: 'Row',
+        justify: 'spaceBetween',
+        align: 'center',
+        children: ['cardTitle', 'cardActions'],
+      },
+      {
+        id: 'cardTitle',
+        component: 'Row',
+        gap: 's',
+        align: 'center',
+        // Relative paths resolve against the current group.
+        children: ['cardName', 'cardCount'],
+      },
+      { id: 'cardName', component: 'Text', text: { path: 'key' }, variant: 'heading3' },
+      { id: 'cardCount', component: 'Badge', label: { path: 'count' }, color: 'hollow' },
+      {
+        id: 'cardActions',
+        component: 'Button',
+        variant: 'icon',
+        iconType: 'gear',
+        color: 'text',
+        label: 'Cluster settings',
+        action: {
+          event: { name: ACTION_SET_DATA, context: { path: '/ui/grid/menu', value: true } },
+        },
+      },
+      {
+        id: 'cardGrid',
         component: 'StatusGrid',
-        cells: { path: '/allPods' },
+        cells: { path: 'items' },
         labelField: 'pod',
         statusField: 'health',
         statuses: [

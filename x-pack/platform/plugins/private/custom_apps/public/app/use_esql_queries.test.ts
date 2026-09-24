@@ -83,3 +83,52 @@ describe('toParamValue', () => {
     expect(toParamValue({ nested: 1 })).toBe('');
   });
 });
+
+describe('shapeResult with groups', () => {
+  const grouped = {
+    columns: [
+      { name: 'pod', type: 'keyword' },
+      { name: 'cluster', type: 'keyword' },
+    ],
+    values: [
+      ['a', 'eu'],
+      ['b', 'us'],
+      ['c', 'eu'],
+    ],
+  } as unknown as ESQLSearchResponse;
+
+  it('nests rows so a ChildList template can render one card per group', () => {
+    expect(shapeResult(grouped, 'groups', 'cluster')).toEqual([
+      {
+        key: 'eu',
+        count: 2,
+        items: [
+          { pod: 'a', cluster: 'eu' },
+          { pod: 'c', cluster: 'eu' },
+        ],
+      },
+      { key: 'us', count: 1, items: [{ pod: 'b', cluster: 'us' }] },
+    ]);
+  });
+
+  it('orders groups by size, so the layout is stable across refreshes', () => {
+    const keys = (shapeResult(grouped, 'groups', 'cluster') as Array<{ key: string }>).map(
+      (group) => group.key
+    );
+    expect(keys).toEqual(['eu', 'us']);
+  });
+
+  it('returns nothing rather than guessing when groupBy is missing', () => {
+    expect(shapeResult(grouped, 'groups')).toEqual([]);
+  });
+
+  it('buckets rows with no value under the empty key rather than dropping them', () => {
+    const withNull = {
+      columns: [{ name: 'cluster', type: 'keyword' }],
+      values: [[null]],
+    } as unknown as ESQLSearchResponse;
+    expect(shapeResult(withNull, 'groups', 'cluster')).toEqual([
+      { key: '', count: 1, items: [{ cluster: null }] },
+    ]);
+  });
+});

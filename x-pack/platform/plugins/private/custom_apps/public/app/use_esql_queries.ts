@@ -35,9 +35,29 @@ export function rowsToObjects(response: ESQLSearchResponse): Array<Record<string
   });
 }
 
-export function shapeResult(response: ESQLSearchResponse, shape: EsqlQuery['shape']): JsonValue {
+export function shapeResult(
+  response: ESQLSearchResponse,
+  shape: EsqlQuery['shape'],
+  groupBy?: string
+): JsonValue {
   const rows = rowsToObjects(response);
   if (shape === 'rows') return rows;
+  if (shape === 'groups') {
+    // Nests rows so a ChildList template can render one card per group — ES|QL
+    // returns flat rows, and grouping is a data concern rather than something a
+    // component should own.
+    if (!groupBy) return [];
+    const byKey = new Map<string, Array<Record<string, JsonValue>>>();
+    for (const row of rows) {
+      const key = String(row[groupBy] ?? '');
+      const bucket = byKey.get(key);
+      if (bucket) bucket.push(row);
+      else byKey.set(key, [row]);
+    }
+    return [...byKey.entries()]
+      .map(([key, items]) => ({ key, count: items.length, items }))
+      .sort((a, b) => b.count - a.count);
+  }
   if (shape === 'first') return rows[0] ?? null;
   // 'value' — the first cell of the first row, for single-number panels.
   const first = rows[0];
@@ -187,7 +207,7 @@ export function useEsqlQueries({
               variables: variablesFor(entry, valuesRef.current),
             });
             if (cancelled) return;
-            dataModel.set(entry.path, shapeResult(response, entry.shape));
+            dataModel.set(entry.path, shapeResult(response, entry.shape, entry.groupBy));
           } catch (error) {
             if (cancelled || controller.signal.aborted) return;
             errors.push(`${entry.path}: ${error?.message ?? String(error)}`);

@@ -67,7 +67,13 @@ const a2uiMessageSchema = z.custom<A2uiMessage>(
 export const esqlQuerySchema = z.object({
   query: z.string().min(1),
   path: z.string().startsWith('/'),
-  shape: z.enum(['rows', 'first', 'value']).optional().default('rows'),
+  shape: z.enum(['rows', 'groups', 'first', 'value']).optional().default('rows'),
+  /**
+   * Required when shape is 'groups': the column to nest rows by. The result is
+   * `[{ key, count, items }]`, which a ChildList template renders as one card
+   * per group.
+   */
+  groupBy: z.string().optional(),
   /**
    * ES|QL named parameters, as `paramName -> data model pointer`. A query using
    * `?clusters` with `params: { clusters: '/filters/clusters' }` re-runs whenever
