@@ -137,6 +137,32 @@ describe('renderHistorySteps', () => {
     );
   });
 
+  it('renders a marked call as the interrupted tool message and an unmarked empty return as results: []', async () => {
+    const resultTransformer: ToolCallResultTransformer = jest.fn(async () => [other('summarized')]);
+    const messages = await renderHistorySteps({
+      steps: [call('a', { results: [], interrupted: true }), call('b', { results: [] })],
+      resultTransformer,
+    });
+
+    const tools = messages.filter((message) => message.getType() === 'tool') as ToolMessage[];
+    expect(tools).toHaveLength(2);
+    expect(tools[0].tool_call_id).toBe('a');
+    expect(String(tools[0].content)).toContain('"interrupted":true');
+    expect(String(tools[0].content)).toContain(
+      'The tool call was interrupted before it returned a result.'
+    );
+    // the interrupted call never went through the transformer; the unmarked one did
+    expect(resultTransformer).toHaveBeenCalledTimes(1);
+    expect(String(tools[1].content)).toContain('summarized');
+  });
+
+  it('renders an unmarked empty return as results: [] without a transformer', async () => {
+    const messages = await renderHistorySteps({ steps: [call('b', { results: [] })] });
+    expect((messages[1] as ToolMessage).content).toBe(
+      wrapToolResultContent(JSON.stringify({ results: [] }))
+    );
+  });
+
   it('renders an answered ask_user_question step as a tool call keyed on the prompt id', async () => {
     const step: ConversationRoundStep = {
       type: ConversationRoundStepType.askUserQuestion,

@@ -16,7 +16,9 @@ import { decode } from './codec_agnostic';
  * otherwise derives text from the field key, so "does this codec carry a custom
  * message" is itself part of the user-facing contract.
  */
-export const ioTsCustomMessages = (codec: t.Mixed, input: unknown): string[] => {
+type EitherCodec = t.Any | z.ZodType;
+
+export const ioTsCustomMessages = (codec: EitherCodec, input: unknown): string[] => {
   const result = decode(codec, input);
   if (result.success) {
     return [];
@@ -40,7 +42,7 @@ export const zodMessages = (schema: z.ZodType, input: unknown): string[] => {
 export const asCases = (inputs: unknown[]) => inputs.map((input) => [input]);
 
 export const expectSameOutcome = (
-  ioTsCodec: t.Mixed,
+  ioTsCodec: EitherCodec,
   zodSchema: z.ZodType,
   input: unknown
 ): void => {
@@ -56,7 +58,7 @@ export const expectSameOutcome = (
 
 export interface CodecParityCase {
   label: string;
-  ioTs: t.Mixed;
+  ioTs: EitherCodec;
   zod: z.ZodType;
   valid: unknown[];
   invalid: unknown[];
