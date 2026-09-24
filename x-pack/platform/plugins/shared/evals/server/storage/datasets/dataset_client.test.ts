@@ -1556,6 +1556,24 @@ describe('DatasetClient', () => {
       expect(remaining?.examples).toHaveLength(1);
     });
 
+    it('cannot delete or detach a dataset from a space it is not assigned to', async () => {
+      const [marketing, sales] = createClientsInSpaces(['marketing', 'sales']);
+
+      const created = await marketing.create({
+        name: 'dataset-1',
+        description: 'A dataset',
+        examples: [baseExampleA],
+      });
+
+      await expect(sales.delete(created.id)).resolves.toBe('not_found');
+      await expect(sales.delete(created.id, { intent: 'delete' })).resolves.toBe('not_found');
+      await expect(sales.delete(created.id, { intent: 'unshare' })).resolves.toBe('not_found');
+
+      const untouched = await marketing.get(created.id);
+      expect(untouched?.space_ids).toEqual(['marketing']);
+      expect(untouched?.examples).toHaveLength(1);
+    });
+
     it('deletes for real once the last space lets go', async () => {
       const [marketing, sales] = createClientsInSpaces(['marketing', 'sales']);
 

@@ -577,7 +577,7 @@ describe('editExamplesTool', () => {
     });
 
     expect(confirmation?.message).toContain(
-      'This removes 1 example(s) and adds 2 example(s) in dataset `bank`, which currently has 5. Every other example is kept.'
+      'This removes 1 example(s) and adds 2 example(s) in dataset `bank`, which currently has 5 example(s). Every other example is kept.'
     );
     expect(confirmation?.message).toContain('1. Input: `{"q":"hi"}`');
   });
@@ -662,71 +662,84 @@ describe('copyDatasetTool', () => {
 });
 
 describe('deleteDatasetTool', () => {
-  it('reports a shared dataset as detached rather than deleted', async () => {
+  const sharedDataset = { ...datasetDocument, space_ids: ['default', 'marketing'] };
+
+  it('detaches a dataset other spaces share', async () => {
     const { deps, datasetClient } = createDeps();
+    datasetClient.getMetadata.mockResolvedValue(sharedDataset);
     datasetClient.delete.mockResolvedValue('unshared');
 
     const result = firstResult(
       await deleteDatasetTool(deps).handler({ dataset_id: 'd1' }, createContext())
     );
 
-    expect(datasetClient.delete).toHaveBeenCalledWith('d1', { intent: undefined });
+    expect(datasetClient.delete).toHaveBeenCalledWith('d1', { intent: 'unshare' });
     expect(result.type).toBe(ToolResultType.other);
     expect(result.data).toEqual({ dataset_id: 'd1', deleted: false, unshared: true });
   });
 
-  it('reports a dataset that was deleted', async () => {
+  it('deletes a dataset only this space holds', async () => {
     const { deps, datasetClient } = createDeps();
+    datasetClient.getMetadata.mockResolvedValue(datasetDocument);
     datasetClient.delete.mockResolvedValue('deleted');
 
     const result = firstResult(
-      await deleteDatasetTool(deps).handler({ dataset_id: 'd1', intent: 'delete' }, createContext())
+      await deleteDatasetTool(deps).handler({ dataset_id: 'd1' }, createContext())
     );
 
     expect(datasetClient.delete).toHaveBeenCalledWith('d1', { intent: 'delete' });
     expect(result.data).toEqual({ dataset_id: 'd1', deleted: true, unshared: false });
   });
 
-  it('explains an intent mismatch when a delete would only unshare', async () => {
+  it('refuses rather than deletes when the other spaces stop sharing it mid-delete', async () => {
     const { deps, datasetClient } = createDeps();
+    datasetClient.getMetadata.mockResolvedValue(sharedDataset);
     datasetClient.delete.mockResolvedValue('intent_mismatch');
 
     const result = firstResult(
-      await deleteDatasetTool(deps).handler({ dataset_id: 'd1', intent: 'delete' }, createContext())
+      await deleteDatasetTool(deps).handler({ dataset_id: 'd1' }, createContext())
     );
 
     expect(result.type).toBe(ToolResultType.error);
-    expect(result.data.message).toBe(
-      'This dataset is shared with other spaces, so it can only be removed from this one.'
-    );
+    expect(result.data.message).toMatch(/^Nothing was changed: the other spaces stopped sharing/);
   });
 
-  it('explains an intent mismatch when an unshare would delete', async () => {
+  it('refuses rather than detaches when another space starts sharing it mid-delete', async () => {
     const { deps, datasetClient } = createDeps();
+    datasetClient.getMetadata.mockResolvedValue(datasetDocument);
     datasetClient.delete.mockResolvedValue('intent_mismatch');
 
     const result = firstResult(
-      await deleteDatasetTool(deps).handler(
-        { dataset_id: 'd1', intent: 'unshare' },
-        createContext()
-      )
+      await deleteDatasetTool(deps).handler({ dataset_id: 'd1' }, createContext())
     );
 
-    expect(result.data.message).toBe(
-      'This is the last space holding this dataset, so removing it here would delete it.'
-    );
+    expect(result.type).toBe(ToolResultType.error);
+    expect(result.data.message).toMatch(/^Nothing was changed: another space started sharing/);
   });
 
   it('returns an error when the dataset does not exist', async () => {
     const { deps, datasetClient } = createDeps();
-    datasetClient.delete.mockResolvedValue('not_found');
+    datasetClient.getMetadata.mockResolvedValue(undefined);
 
     const result = firstResult(
       await deleteDatasetTool(deps).handler({ dataset_id: 'missing' }, createContext())
     );
 
+    expect(datasetClient.delete).not.toHaveBeenCalled();
     expect(result.type).toBe(ToolResultType.error);
     expect(result.data.message).toBe('Evaluation dataset not found: missing');
+  });
+
+  it('returns an error when the dataset disappears before the delete', async () => {
+    const { deps, datasetClient } = createDeps();
+    datasetClient.getMetadata.mockResolvedValue(datasetDocument);
+    datasetClient.delete.mockResolvedValue('not_found');
+
+    const result = firstResult(
+      await deleteDatasetTool(deps).handler({ dataset_id: 'd1' }, createContext())
+    );
+
+    expect(result.data.message).toBe('Evaluation dataset not found: d1');
   });
 
   it('describes a permanent delete of a dataset only this space holds', async () => {
@@ -742,10 +755,7 @@ describe('deleteDatasetTool', () => {
 
   it('describes a detach of a dataset other spaces share', async () => {
     const { deps, datasetClient } = createDeps();
-    datasetClient.getMetadata.mockResolvedValue({
-      ...datasetDocument,
-      space_ids: ['default', 'marketing'],
-    });
+    datasetClient.getMetadata.mockResolvedValue(sharedDataset);
 
     const confirmation = await confirmationOf(deleteDatasetTool(deps), { dataset_id: 'd1' });
 
@@ -754,19 +764,7 @@ describe('deleteDatasetTool', () => {
     );
   });
 
-  it('warns up front when the requested intent will be refused', async () => {
-    const { deps, datasetClient } = createDeps();
-    datasetClient.getMetadata.mockResolvedValue(datasetDocument);
-
-    const confirmation = await confirmationOf(deleteDatasetTool(deps), {
-      dataset_id: 'd1',
-      intent: 'unshare',
-    });
-
-    expect(confirmation?.message).toMatch(/^This will be refused: this is the last space/);
-  });
-
-  it('falls back to describing every outcome when the lookup fails', async () => {
+  it('falls back to describing both outcomes when the lookup fails', async () => {
     const { deps, datasetClient } = createDeps();
     datasetClient.getMetadata.mockRejectedValue(new Error('boom'));
 
@@ -776,14 +774,11 @@ describe('deleteDatasetTool', () => {
     expect(confirmation?.message).toMatch(/examples are deleted/);
   });
 
-  it('falls back to the intent description when the caller cannot read datasets', async () => {
+  it('falls back to describing both outcomes when the caller cannot read datasets', async () => {
     const { deps } = createDeps(securityWith(false) as unknown as Record<string, unknown>);
 
-    const confirmation = await confirmationOf(deleteDatasetTool(deps), {
-      dataset_id: 'd1',
-      intent: 'delete',
-    });
+    const confirmation = await confirmationOf(deleteDatasetTool(deps), { dataset_id: 'd1' });
 
-    expect(confirmation?.message).toMatch(/permanently deletes dataset `d1`/);
+    expect(confirmation?.message).toMatch(/only detached here/);
   });
 });

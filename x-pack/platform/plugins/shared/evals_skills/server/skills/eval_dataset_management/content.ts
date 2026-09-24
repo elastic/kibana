@@ -69,6 +69,6 @@ for the user to confirm.
 - To add or remove a few examples, use \`${evalsDatasetTools.editExamples}\` rather than an upsert.
 - If \`${evalsDatasetTools.getDataset}\` reports \`examples_omitted\` greater than 0, that page is incomplete. Never send it to \`${evalsDatasetTools.upsertDataset}\`; use \`${evalsDatasetTools.editExamples}\` instead, paging with \`offset\` to find the ids of examples to remove.
 - On an upsert of an existing dataset, pass its current description unless the user asked to change it. The upsert overwrites it, in every space that shares the dataset.
-- Deleting a dataset shared with other spaces only detaches it from the current space. Pass \`intent: 'delete'\` only when the user wants it destroyed, and \`intent: 'unshare'\` only when they want it removed from this space and kept elsewhere. Omit \`intent\` to let the dataset's spaces decide.
+- Deleting a dataset shared with other spaces only detaches it from the current space; it is destroyed with its examples only when this is the last space. Check \`shared_with_other_spaces\` from \`${evalsDatasetTools.getDataset}\` and tell the user which one will happen.
 - Summaries use a short **bulleted list**, not a markdown table.
 `;

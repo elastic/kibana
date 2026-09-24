@@ -24,53 +24,37 @@ import type { DatasetDocument } from './tool_utils';
 
 const schema = z.object({
   dataset_id: datasetIdSchema,
-  intent: z
-    .enum(['unshare', 'delete'])
-    .optional()
-    .describe(
-      'The outcome to require. "unshare" only detaches the dataset from this space and fails if that would delete it. "delete" destroys the dataset and fails if another space still shares it. Omit to let the dataset\'s spaces decide: detach when shared, delete when this is the last space.'
-    ),
 });
 
-type DeleteIntent = 'unshare' | 'delete' | undefined;
+const countOtherSpaces = ({ space_ids: spaceIds }: DatasetDocument, spaceId: string): number =>
+  spaceIds.filter((id) => id !== spaceId).length;
 
-const fallbackMessage = (datasetId: string, intent: DeleteIntent): string => {
-  const dataset = inlineCode(datasetId);
-  if (intent === 'delete') {
-    return `This permanently deletes dataset ${dataset} and its examples. It is refused if the dataset is still shared with another space.`;
-  }
-  if (intent === 'unshare') {
-    return `This removes dataset ${dataset} from the current space only. It is refused if this is the last space, because that would delete the dataset.`;
-  }
-  return `This removes dataset ${dataset} from the current space. If other spaces still share it, it is only detached here. If this is the last space, the dataset and its examples are deleted.`;
-};
+/** Detach while other spaces share the dataset; delete once this is the last one. */
+const impliedIntent = (dataset: DatasetDocument, spaceId: string) =>
+  countOtherSpaces(dataset, spaceId) > 0 ? ('unshare' as const) : ('delete' as const);
 
-const describeDelete = (
-  { name, examples_count: examplesCount, space_ids: spaceIds }: DatasetDocument,
-  spaceId: string,
-  intent: DeleteIntent
-): string => {
-  const dataset = inlineCode(name);
-  const otherSpaces = spaceIds.filter((id) => id !== spaceId).length;
-  const permanentDelete = `This **permanently deletes** dataset ${dataset} and its ${examplesCount} example(s).`;
-  const detach = `This removes dataset ${dataset} from the current space only. It stays available, with its ${examplesCount} example(s), in ${otherSpaces} other space(s).`;
+const fallbackMessage = (datasetId: string): string =>
+  `This removes dataset ${inlineCode(
+    datasetId
+  )} from the current space. If other spaces still share it, it is only detached here. If this is the last space, the dataset and its examples are deleted.`;
 
-  if (intent === 'delete') {
-    return otherSpaces > 0
-      ? `This will be refused: dataset ${dataset} is still shared with ${otherSpaces} other space(s), so deleting it here would only remove it from this one.`
-      : permanentDelete;
-  }
-  if (intent === 'unshare') {
-    return otherSpaces === 0
-      ? `This will be refused: this is the last space holding dataset ${dataset}, so removing it here would delete it.`
-      : detach;
-  }
-  return otherSpaces > 0 ? detach : permanentDelete;
+const describeDelete = (dataset: DatasetDocument, spaceId: string): string => {
+  const { name, examples_count: examplesCount } = dataset;
+  return impliedIntent(dataset, spaceId) === 'delete'
+    ? `This **permanently deletes** dataset ${inlineCode(
+        name
+      )} and its ${examplesCount} example(s).`
+    : `This removes dataset ${inlineCode(
+        name
+      )} from the current space only. It stays available, with its ${examplesCount} example(s), in ${countOtherSpaces(
+        dataset,
+        spaceId
+      )} other space(s).`;
 };
 
 /**
- * Removes a dataset from the current space, deleting it only when this space
- * is the last one that holds it (unless the caller states an intent).
+ * Removes a dataset from the current space: detaches it while other spaces
+ * share it, deletes it when this is the last space.
  */
 export const deleteDatasetTool = (
   deps: EvalDatasetManagementToolDeps
@@ -78,20 +62,20 @@ export const deleteDatasetTool = (
   id: evalsDatasetTools.deleteDataset,
   type: ToolType.builtin,
   description:
-    'Remove an evaluation dataset from the current space. A dataset shared with other spaces is only detached here; it is deleted with its examples when this is the last space. Pass intent "delete" or "unshare" to require one of those outcomes.',
+    'Remove an evaluation dataset from the current space. A dataset shared with other spaces is only detached here; it is deleted with its examples when this is the last space.',
   schema,
   confirmation: {
     askUser: 'always',
-    getConfirmation: async ({ toolParams: { dataset_id: datasetId, intent }, context }) => ({
+    getConfirmation: async ({ toolParams: { dataset_id: datasetId }, context }) => ({
       title: 'Delete evaluation dataset?',
       message: await withDatasetLookup(
         deps,
         context,
-        fallbackMessage(datasetId, intent),
+        fallbackMessage(datasetId),
         async (client) => {
           const dataset = await client.getMetadata(datasetId);
           return dataset
-            ? describeDelete(dataset, context.spaceId, intent)
+            ? describeDelete(dataset, context.spaceId)
             : `Dataset ${inlineCode(
                 datasetId
               )} was not found in this space, so there is nothing to delete.`;
@@ -101,7 +85,7 @@ export const deleteDatasetTool = (
       cancel_text: 'Cancel',
     }),
   },
-  handler: async ({ dataset_id: datasetId, intent }, { request, spaceId }) => {
+  handler: async ({ dataset_id: datasetId }, { request, spaceId }) => {
     try {
       const loaded = await loadDatasetClient(
         deps,
@@ -113,6 +97,12 @@ export const deleteDatasetTool = (
         return loaded.error;
       }
 
+      const dataset = await loaded.client.getMetadata(datasetId);
+      if (!dataset) {
+        return datasetNotFoundResult(datasetId);
+      }
+
+      const intent = impliedIntent(dataset, spaceId);
       const result = await loaded.client.delete(datasetId, { intent });
       if (result === 'not_found') {
         return datasetNotFoundResult(datasetId);
@@ -120,8 +110,8 @@ export const deleteDatasetTool = (
       if (result === 'intent_mismatch') {
         return errorResult(
           intent === 'unshare'
-            ? 'This is the last space holding this dataset, so removing it here would delete it.'
-            : 'This dataset is shared with other spaces, so it can only be removed from this one.'
+            ? 'Nothing was changed: the other spaces stopped sharing this dataset, so removing it here would now delete it permanently. Confirm with the user before trying again.'
+            : 'Nothing was changed: another space started sharing this dataset, so it would now only be removed from this space. Confirm with the user before trying again.'
         );
       }
 
