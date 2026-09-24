@@ -12,6 +12,7 @@ import {
   DIAMOND_SUMMARY_EMBEDDING_INFERENCE_ID,
   THREAT_INTEL_DIAMOND_INFERENCE_FEATURE_ID,
   THREAT_INTEL_ENRICH_INFERENCE_FEATURE_ID,
+  THREAT_INTEL_GATE_INFERENCE_FEATURE_ID,
   THREAT_REPORTS_INDEX,
   THREAT_REPORTS_INDEX_PATTERN,
   type ReadinessResponse,
@@ -230,6 +231,18 @@ export const getThreatIntelReadiness = async ({
   const embeddingOk = await checkEmbeddingEndpoints(esClient, logger);
   if (!embeddingOk) {
     reasonCodes.push('embedding_endpoint_unavailable');
+  }
+
+  const gateOk =
+    Boolean(inference) &&
+    (await featureHasEndpoint({
+      searchInferenceEndpoints,
+      featureId: THREAT_INTEL_GATE_INFERENCE_FEATURE_ID,
+      request,
+      logger,
+    }));
+  if (!gateOk) {
+    reasonCodes.push('no_gate_connector');
   }
 
   const enrichOk =

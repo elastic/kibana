@@ -53,7 +53,12 @@ const UNENRICHED_EXTRACTION_METHODS = ['pending'] as const;
  * retained: it is also `semantic_text`, but a scrubbed report still has to be
  * identifiable in report lists and hunt results.
  */
-const SCRUBBED_FIELDS = ['content.body_text', 'content.body_text_bm25'] as const;
+const SCRUBBED_FIELDS = [
+  'content.body_text',
+  'content.body_text_bm25',
+  'content.rss_body_text',
+  'content.rendered_body_text',
+] as const;
 
 /**
  * Removes the report body rather than nulling it: `semantic_text` rejects an

@@ -33,6 +33,12 @@ const assessRelevancePayload = {
   primary_links: ['https://vendor.test/report'],
   has_original_commentary: true,
   reason: 'Original Volt Typhoon IR with IOCs and TTPs.',
+  context: {
+    mode: 'full',
+    original_chars: 1_000,
+    selected_chars: 1_000,
+    coverage: 1,
+  },
 };
 
 const extractIocsPayload = {
@@ -58,6 +64,10 @@ const extractDiamondPayload = {
   model_id: 'test-connector',
   extracted_at: '2026-09-18T00:00:00.000Z',
   extraction_mode: 'single_call',
+  context_mode: 'full',
+  context_coverage: 1,
+  context_chars: 1_000,
+  source_chars: 1_000,
   report_id: 'default:abc',
 };
 

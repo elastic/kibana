@@ -94,6 +94,30 @@ const threatReportsTemplate = {
               copy_to: ['content.body_text_bm25'],
             },
             body_text_bm25: { type: 'text' as const },
+            // RSS is retained as a bounded fallback while body_text becomes the
+            // validated effective body after article materialization.
+            article_url: {
+              type: 'keyword' as const,
+              ignore_above: FEED_TEXT_IGNORE_ABOVE,
+            },
+            rss_body_text: { type: 'text' as const, index: false },
+            rss_body_chars: { type: 'integer' as const },
+            rss_truncated: { type: 'boolean' as const },
+            rendered_body_text: { type: 'text' as const, index: false },
+            materialization: {
+              properties: {
+                provider: { type: 'keyword' as const },
+                status: { type: 'keyword' as const },
+                attempted_at: { type: 'date' as const },
+                source_url: {
+                  type: 'keyword' as const,
+                  ignore_above: FEED_TEXT_IGNORE_ABOVE,
+                },
+                rendered_chars: { type: 'integer' as const },
+                truncated: { type: 'boolean' as const },
+                reason: { type: 'keyword' as const, ignore_above: 500 },
+              },
+            },
             language: { type: 'keyword' as const },
           },
         },
@@ -161,6 +185,14 @@ const threatReportsTemplate = {
                 confidence: { type: 'float' as const },
               },
             },
+            artifacts: {
+              type: 'nested' as const,
+              properties: {
+                type: { type: 'keyword' as const },
+                value: { type: 'keyword' as const, ignore_above: FEED_TEXT_IGNORE_ABOVE },
+                context: { type: 'text' as const, index: false },
+              },
+            },
             threat_actors: { type: 'keyword' as const },
             target_sectors: { type: 'keyword' as const },
             // Closed-set 15-category taxonomy. Populated by the stage-2
@@ -215,8 +247,12 @@ const threatReportsTemplate = {
                 // Connector/model that produced the extraction — for audit trail.
                 model_id: { type: 'keyword' as const },
                 extracted_at: { type: 'date' as const },
-                // 'single_call' (normal path) | 'per_vertex_fallback' (context-overflow fallback).
+                // 'single_call' (normal path) | 'per_vertex_fallback' (structured-output fallback).
                 extraction_mode: { type: 'keyword' as const },
+                context_mode: { type: 'keyword' as const },
+                context_coverage: { type: 'float' as const },
+                context_chars: { type: 'integer' as const },
+                source_chars: { type: 'integer' as const },
                 // Whether extract_diamond considered this report suitable (observability).
                 suitable: { type: 'boolean' as const },
               },
@@ -231,6 +267,8 @@ const threatReportsTemplate = {
                 has_original_commentary: { type: 'boolean' as const },
                 reason: { type: 'text' as const, index: false },
                 assessed_at: { type: 'date' as const },
+                context_mode: { type: 'keyword' as const },
+                context_coverage: { type: 'float' as const },
               },
             },
             // Structured vulnerability fields from the kev adapter (keyword/date, aggregatable).
@@ -873,6 +911,139 @@ const migrateExistingContentScrubbedMapping = async (
   }
 };
 
+/** RSS article materialization fields (v31) for reports indices created before Jina support. */
+const migrateExistingMaterializationMappings = async (
+  esClient: ElasticsearchClient,
+  reportIndices: readonly string[],
+  logger: Logger
+): Promise<void> => {
+  const log = logger.get('materialization-mapping-migration');
+
+  for (const indexName of reportIndices) {
+    try {
+      const { [indexName]: indexMappings } = await esClient.indices.getMapping({
+        index: indexName,
+      });
+      const contentProps = (
+        (
+          indexMappings?.mappings?.properties as
+            | Record<string, { properties?: Record<string, unknown> }>
+            | undefined
+        )?.content as { properties?: Record<string, unknown> } | undefined
+      )?.properties;
+
+      if (!contentProps?.materialization) {
+        await esClient.indices.putMapping({
+          index: indexName,
+          properties: {
+            content: {
+              properties: {
+                article_url: { type: 'keyword', ignore_above: FEED_TEXT_IGNORE_ABOVE },
+                rss_body_text: { type: 'text', index: false },
+                rss_body_chars: { type: 'integer' },
+                rss_truncated: { type: 'boolean' },
+                rendered_body_text: { type: 'text', index: false },
+                materialization: {
+                  properties: {
+                    provider: { type: 'keyword' },
+                    status: { type: 'keyword' },
+                    attempted_at: { type: 'date' },
+                    source_url: { type: 'keyword', ignore_above: FEED_TEXT_IGNORE_ABOVE },
+                    rendered_chars: { type: 'integer' },
+                    truncated: { type: 'boolean' },
+                    reason: { type: 'keyword', ignore_above: 500 },
+                  },
+                },
+              },
+            },
+          },
+        });
+        log.info(`Migrated article materialization mappings on ${indexName} (v31 backfill)`);
+      }
+    } catch (err) {
+      log.error(
+        `Failed to migrate article materialization mappings on ${indexName}: ${
+          (err as Error).message
+        }. RSS materialization writes will fail until the mapping is updated.`
+      );
+    }
+  }
+};
+
+/** Consolidated core artifacts and Diamond context metadata (v32). */
+const migrateExistingCoreEnrichmentMappings = async (
+  esClient: ElasticsearchClient,
+  reportIndices: readonly string[],
+  logger: Logger
+): Promise<void> => {
+  const log = logger.get('core-enrichment-mapping-migration');
+
+  for (const indexName of reportIndices) {
+    try {
+      const { [indexName]: indexMappings } = await esClient.indices.getMapping({
+        index: indexName,
+      });
+      const extractedProps = (
+        indexMappings?.mappings?.properties as
+          | Record<string, { properties?: Record<string, unknown> }>
+          | undefined
+      )?.extracted?.properties as
+        | Record<string, { properties?: Record<string, unknown> }>
+        | undefined;
+      const diamondProps = extractedProps?.diamond?.properties;
+      const gateProps = extractedProps?.gate?.properties;
+      const needsMigration = !(
+        extractedProps?.artifacts &&
+        diamondProps?.context_mode &&
+        diamondProps?.context_coverage &&
+        gateProps?.context_mode &&
+        gateProps?.context_coverage
+      );
+
+      if (needsMigration) {
+        await esClient.indices.putMapping({
+          index: indexName,
+          properties: {
+            extracted: {
+              properties: {
+                artifacts: {
+                  type: 'nested',
+                  properties: {
+                    type: { type: 'keyword' },
+                    value: { type: 'keyword', ignore_above: FEED_TEXT_IGNORE_ABOVE },
+                    context: { type: 'text', index: false },
+                  },
+                },
+                gate: {
+                  properties: {
+                    context_mode: { type: 'keyword' },
+                    context_coverage: { type: 'float' },
+                  },
+                },
+                diamond: {
+                  properties: {
+                    context_mode: { type: 'keyword' },
+                    context_coverage: { type: 'float' },
+                    context_chars: { type: 'integer' },
+                    source_chars: { type: 'integer' },
+                  },
+                },
+              },
+            },
+          },
+        });
+        log.info(`Migrated consolidated core mappings on ${indexName} (v32 backfill)`);
+      }
+    } catch (err) {
+      log.error(
+        `Failed to migrate consolidated core mappings on ${indexName}: ${
+          (err as Error).message
+        }. Consolidated enrichment writes will fail until the mapping is updated.`
+      );
+    }
+  }
+};
+
 /**
  * Index templates only apply at creation time, so clusters that created these
  * indices before `index.hidden` was set still expose them to index patterns and
@@ -1320,7 +1491,14 @@ interface RequiredMapping {
 }
 
 const REQUIRED_REPORT_FIELDS: readonly RequiredMapping[] = [
+  { path: 'content.article_url', ignoreAbove: FEED_TEXT_IGNORE_ABOVE },
+  { path: 'content.rss_body_text' },
+  { path: 'content.rendered_body_text' },
+  { path: 'content.materialization.status' },
+  { path: 'extracted.artifacts' },
   { path: 'extracted.diamond' },
+  { path: 'extracted.diamond.context_mode' },
+  { path: 'extracted.gate.context_mode' },
   { path: 'extracted.gate' },
   { path: 'extracted.vulnerability' },
   { path: 'extracted.iocs.tier' },
@@ -1545,6 +1723,8 @@ export const installIndexTemplates = async ({
   await migrateExistingReportKeywordBounds(esClient, reportIndices, log);
   await migrateExistingVulnerabilityMappings(esClient, reportIndices, log);
   await migrateExistingContentScrubbedMapping(esClient, reportIndices, log);
+  await migrateExistingMaterializationMappings(esClient, reportIndices, log);
+  await migrateExistingCoreEnrichmentMappings(esClient, reportIndices, log);
   await migrateExistingIndicesToHidden(esClient, reportIndices, log);
 
   // Fails the install (and therefore bootstrap readiness) when a migration left the

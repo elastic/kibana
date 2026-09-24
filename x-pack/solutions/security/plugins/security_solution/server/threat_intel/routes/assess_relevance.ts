@@ -7,7 +7,7 @@
 
 import {
   ASSESS_RELEVANCE_API_PATH,
-  THREAT_INTEL_ENRICH_INFERENCE_FEATURE_ID,
+  THREAT_INTEL_GATE_INFERENCE_FEATURE_ID,
   assessRelevanceBodySchema,
   assessRelevanceResponseSchema,
   ASSESS_RELEVANCE_MAX_BODY_BYTES,
@@ -51,7 +51,7 @@ export const registerAssessRelevanceRoute = ({
           searchInferenceEndpoints: getSearchInferenceEndpoints(),
           request,
           uiSettingsClient: core.uiSettings.client,
-          featureId: THREAT_INTEL_ENRICH_INFERENCE_FEATURE_ID,
+          featureId: THREAT_INTEL_GATE_INFERENCE_FEATURE_ID,
           logger,
         });
         if (!modelOutcome.ok) {

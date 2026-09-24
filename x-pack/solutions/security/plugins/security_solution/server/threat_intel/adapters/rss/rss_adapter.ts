@@ -97,7 +97,8 @@ export const rssAdapter: FetchAdapter = {
         entry.publishedAt,
         fullBodyText,
       ]);
-      const sourceUrl = normalizeProvenanceUrl(entry.link) ?? normalizeProvenanceUrl(feedUrl);
+      const articleUrl = normalizeProvenanceUrl(entry.link);
+      const sourceUrl = articleUrl ?? normalizeProvenanceUrl(feedUrl);
       reports.push({
         '@timestamp': ingestedAt,
         content_fingerprint: fingerprint,
@@ -110,11 +111,17 @@ export const rssAdapter: FetchAdapter = {
           name: source._source.name,
           adapter_id: adapterId,
         },
-        content: buildReportContent({
-          title: truncate(title, TITLE_MAX_LENGTH),
-          bodyText,
-          language,
-        }),
+        content: {
+          ...buildReportContent({
+            title: truncate(title, TITLE_MAX_LENGTH),
+            bodyText,
+            language,
+          }),
+          ...(articleUrl ? { article_url: articleUrl } : {}),
+          rss_body_text: bodyText,
+          rss_body_chars: fullBodyText.length,
+          rss_truncated: fullBodyText.length > BODY_TEXT_MAX_LENGTH,
+        },
         severity: {
           level: DEFAULT_SEVERITY_LEVEL,
           score: DEFAULT_SEVERITY_SCORE,

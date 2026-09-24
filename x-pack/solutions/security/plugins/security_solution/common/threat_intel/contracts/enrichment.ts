@@ -83,6 +83,10 @@ export const extractDiamondResponseSchema = schema.object({
     schema.literal('single_call'),
     schema.literal('per_vertex_fallback'),
   ]),
+  context_mode: schema.oneOf([schema.literal('full'), schema.literal('degraded_context')]),
+  context_coverage: schema.number(),
+  context_chars: schema.number(),
+  source_chars: schema.number(),
   report_id: schema.maybe(schema.string()),
 });
 
@@ -120,6 +124,12 @@ export const assessRelevanceResponseSchema = schema.object({
   }),
   has_original_commentary: schema.boolean(),
   reason: schema.string(),
+  context: schema.object({
+    mode: schema.oneOf([schema.literal('full'), schema.literal('degraded_context')]),
+    original_chars: schema.number(),
+    selected_chars: schema.number(),
+    coverage: schema.number(),
+  }),
 });
 
 export type AssessRelevanceResponse = TypeOf<typeof assessRelevanceResponseSchema>;

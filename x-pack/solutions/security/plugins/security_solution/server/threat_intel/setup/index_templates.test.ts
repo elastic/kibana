@@ -55,15 +55,37 @@ const REPORT_INDEX = '.kibana-threat-reports';
 const fullyMigratedReportMappings = () => ({
   properties: {
     content: {
-      properties: {},
+      properties: {
+        article_url: { ignore_above: 2048 },
+        rss_body_text: {},
+        rss_body_chars: {},
+        rss_truncated: {},
+        rendered_body_text: {},
+        materialization: {
+          properties: {
+            status: {},
+          },
+        },
+      },
     },
     lineage: { properties: { content_scrubbed_at: {} } },
     // v30: evidence is a space-keyed nested array; the guard checks the leaf.
     evidence: { properties: { space_id: {} } },
     extracted: {
       properties: {
-        diamond: {},
-        gate: {},
+        diamond: {
+          properties: {
+            context_mode: {},
+            context_coverage: {},
+          },
+        },
+        gate: {
+          properties: {
+            context_mode: {},
+            context_coverage: {},
+          },
+        },
+        artifacts: {},
         vulnerability: {},
         iocs: {
           properties: {
@@ -233,6 +255,22 @@ describe('index_templates — migrations', () => {
     const { patchedPaths } = await runMigrations({ reportMappings: mappings });
 
     expect(patchedPaths).toContain('lineage.content_scrubbed_at');
+  });
+
+  it('adds article materialization fields when absent', async () => {
+    const mappings = fullyMigratedReportMappings();
+    delete (mappings.properties.content.properties as Record<string, unknown>).materialization;
+
+    const { patchedPaths } = await runMigrations({ reportMappings: mappings });
+
+    expect(patchedPaths).toEqual(
+      expect.arrayContaining([
+        'content.article_url',
+        'content.rss_body_text',
+        'content.rendered_body_text',
+        'content.materialization.status',
+      ])
+    );
   });
 
   it('adds space_id to the indicators index when absent', async () => {

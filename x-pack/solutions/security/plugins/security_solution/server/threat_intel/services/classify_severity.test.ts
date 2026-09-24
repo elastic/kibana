@@ -99,12 +99,12 @@ describe('classifySeverity', () => {
     expect(prompt).toContain('Report id: r-1');
   });
 
-  it('truncates body text to 30 000 chars in the prompt', async () => {
+  it('passes the complete body text to the compatibility prompt', async () => {
     const { model, invoke } = buildModel({ level: 'medium' });
     await classifySeverity(model, logger, { text: 'x'.repeat(40_000) });
     const prompt = invoke.mock.calls[0][0] as string;
     const bodyStart = prompt.indexOf('Report text:\n') + 'Report text:\n'.length;
-    expect(prompt.slice(bodyStart).length).toBeLessThanOrEqual(30_000);
+    expect(prompt.slice(bodyStart)).toBe('x'.repeat(40_000));
   });
 });
 
