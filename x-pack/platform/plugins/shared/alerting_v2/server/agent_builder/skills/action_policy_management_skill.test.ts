@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { ACTION_POLICY_MANAGEMENT_SKILL_ID, ALERTING_TOOL_IDS } from '@kbn/alerting-v2-constants';
+import {
+  ACTION_POLICY_MANAGEMENT_SKILL_ID,
+  ALERTING_TOOL_IDS,
+  ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID,
+} from '@kbn/alerting-v2-constants';
 import type { LoggerServiceContract } from '../../lib/services/logger_service/logger_service';
 import type { ManageActionPolicyToolDeps } from '../tools/manage_action_policy';
 import { createActionPolicyManagementSkill } from './action_policy_management_skill';
@@ -39,6 +43,16 @@ describe('createActionPolicyManagementSkill', () => {
     const skill = createActionPolicyManagementSkill(createDeps());
 
     expect(skill.experimental).toBe(true);
+  });
+
+  it('is unavailable when the current space has not enabled Alerting V2 experimental features', async () => {
+    const skill = createActionPolicyManagementSkill(createDeps());
+    const uiSettings = { get: jest.fn().mockResolvedValue(false) };
+
+    await expect(skill.availability?.handler({ uiSettings } as never)).resolves.toEqual({
+      status: 'unavailable',
+    });
+    expect(uiSettings.get).toHaveBeenCalledWith(ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID);
   });
 
   it('exposes only the manage action policy inline tool', async () => {

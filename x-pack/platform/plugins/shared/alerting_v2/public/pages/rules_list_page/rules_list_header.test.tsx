@@ -151,6 +151,14 @@ describe('RulesListHeader', () => {
     expect(screen.queryByTestId('createRuleButton')).not.toBeInTheDocument();
   });
 
+  it('hides experimental create actions when Alerting V2 experimental features are disabled', () => {
+    mockExperimentalFeaturesEnabled = false;
+    renderHeader();
+
+    expect(screen.queryByTestId('createSequenceRuleButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('createWithAgentButton')).not.toBeInTheDocument();
+  });
+
   it('renders host-provided tabs instead of management hrefs', async () => {
     const hostTabs = [
       {

@@ -72,6 +72,15 @@ describe('ActionPoliciesListHeader', () => {
     ).toBeInTheDocument();
   });
 
+  it('hides the create-with-agent menu when experimental features are disabled', async () => {
+    mockExperimentalFeaturesEnabled = false;
+    renderHeader();
+
+    expect(await screen.findByTestId('createActionPolicyButton')).toBeInTheDocument();
+    expect(screen.queryByTestId('createActionPolicyButton-secondary-button')).toBeNull();
+    expect(screen.queryByTestId('createActionPolicyWithAgentButton')).toBeNull();
+  });
+
   it('calls onCreatePolicy when the primary create button is clicked', async () => {
     const user = userEvent.setup({ delay: null });
     renderHeader();
