@@ -64,13 +64,16 @@ function MetricChartRenderer({ props, accessibility }: ComponentRenderProps) {
   const theme = useElasticChartsTheme();
   const { euiTheme } = useEuiTheme();
 
+  // Elastic Charts treats a tile's `color` as its background fill. Tiles sit on
+  // the panel, so the fill stays the plain panel background and the semantic
+  // colour goes on the value instead.
   const palette: Record<string, string> = {
-    primary: euiTheme.colors.backgroundLightPrimary,
-    success: euiTheme.colors.backgroundLightSuccess,
-    warning: euiTheme.colors.backgroundLightWarning,
-    danger: euiTheme.colors.backgroundLightDanger,
-    accent: euiTheme.colors.backgroundLightAccent,
-    subdued: euiTheme.colors.backgroundBaseSubdued,
+    primary: euiTheme.colors.textPrimary,
+    success: euiTheme.colors.textSuccess,
+    warning: euiTheme.colors.textWarning,
+    danger: euiTheme.colors.textDanger,
+    accent: euiTheme.colors.textAccent,
+    subdued: euiTheme.colors.textSubdued,
   };
 
   const entries = Array.isArray(props.metrics) ? props.metrics : [];
@@ -86,8 +89,10 @@ function MetricChartRenderer({ props, accessibility }: ComponentRenderProps) {
       ? (str(tile.format) as Format)
       : 'number';
 
+    const valueColor = palette[str(tile.color, 'primary')] ?? palette.primary;
     const base: MetricWNumber = {
-      color: palette[str(tile.color, 'primary')] ?? palette.primary,
+      color: euiTheme.colors.backgroundBasePlain,
+      valueColor,
       title: str(tile.title),
       subtitle: tile.subtitle ? str(tile.subtitle) : undefined,
       value,
@@ -115,6 +120,11 @@ function MetricChartRenderer({ props, accessibility }: ComponentRenderProps) {
       if (trend.length > 1) {
         tiles.push({
           ...base,
+          // The sparkline is `color` shifted 10% in lightness, and `color` is
+          // also the tile's background fill — so there is no way to keep a plain
+          // background and a saturated sparkline. Leaving both on the panel
+          // background gives a subtle grey wash behind the number, which is the
+          // point of the sparkline without the block of colour.
           trend,
           trendShape: MetricTrendShape.Area,
           trendA11yTitle: `${base.title} over time`,

@@ -187,6 +187,8 @@ export const METRIC_CHART_SCHEMA = {
             type: 'string',
             enum: ['primary', 'success', 'warning', 'danger', 'accent', 'subdued'],
             default: 'primary',
+            description:
+              'Colours the value, and the sparkline when there is one. Tiles keep the plain panel background.',
           },
           trendRows: {
             $ref: 'common_types.json#/$defs/DynamicValue',
