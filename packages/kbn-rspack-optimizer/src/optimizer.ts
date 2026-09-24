@@ -23,6 +23,8 @@ export interface RspackOptimizerOptions {
   cache?: boolean;
   dist?: boolean;
   examples?: boolean;
+  /** Include `devOnly` plugins */
+  devOnly?: boolean;
   themeTags?: ThemeTag[];
   /** Explicit plugin paths passed via --plugin-path */
   pluginPaths?: string[];
@@ -134,6 +136,7 @@ export class RspackOptimizer {
                 cache: this.options.cache,
                 dist: this.options.dist,
                 examples: this.options.examples,
+                devOnly: this.options.devOnly,
                 themeTags: this.options.themeTags ?? [...DEFAULT_THEME_TAGS],
                 hmr: this.options.hmr,
                 pluginPaths: this.options.pluginPaths,
