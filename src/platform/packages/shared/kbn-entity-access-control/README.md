@@ -1,7 +1,6 @@
 # Entity access control
 
-Shared ACL types, input validation, and permission checks. The stored shape follows
-Agent Builder conversations:
+Shared ACL types, input validation, and permission checks. Stored ACLs have this shape:
 
 ```json
 {
@@ -16,6 +15,9 @@ The entity stores its owner's profile ID separately. Entry IDs are user profile 
 not usernames. Each consumer defines the allowed roles and their operations.
 The package does not access storage, resolve users, or grant feature privileges.
 
+`buildEntityReadAccessQuery` requires `entries` to use an Elasticsearch `nested`
+mapping so principal fields are matched within the same entry.
+
 Consumers must check space and feature privileges before checking the ACL. They
 must apply the same policy to searches, counts, reads, writes, and execution.
 Missing ACLs and administrator access require an explicit consumer policy.
@@ -24,6 +26,3 @@ Missing ACLs and administrator access require an explicit consumer policy.
 entries, and preserves membership dates. Public entities can retain entries for
 additional permissions, such as editing. A consumer that forbids public entries
 can add that restriction without changing the stored shape.
-
-Agent Builder can keep its `member` role, private default, and public-entry policy
-when adopting these types. No field rename or data conversion is required.

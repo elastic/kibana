@@ -78,7 +78,8 @@ export function getTestRunTooltipContent({
   }
   if (!hasWorkflowAccess) {
     return i18n.translate('workflows.actionButtons.runWorkflow.accessRequired', {
-      defaultMessage: 'You need Executor or Editor access to run this workflow.',
+      defaultMessage: 'You need {executor} or {editor} access to run this workflow.',
+      values: { executor: 'Executor', editor: 'Editor' },
     });
   }
   return null;

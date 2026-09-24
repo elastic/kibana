@@ -25,10 +25,13 @@ const storageSettings = {
         dynamic: false,
         properties: {
           access_mode: types.keyword({}),
-          entries: types.object({
+          entries: types.nested({
             dynamic: false,
             properties: {
+              type: types.keyword({}),
               id: types.keyword({}),
+              role: types.keyword({}),
+              added_at: types.date({}),
             },
           }),
         },

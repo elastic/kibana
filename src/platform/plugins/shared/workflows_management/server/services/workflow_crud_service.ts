@@ -1013,7 +1013,7 @@ export class WorkflowCrudService {
       assertCanDelete: (workflow) =>
         assertWorkflowOperation(
           workflow,
-          options?.force && workflow.access_control ? 'manage' : 'edit',
+          options?.force && workflow.access_control?.access_mode === 'private' ? 'manage' : 'edit',
           profileId
         ),
       storage: this.deps.workflowStorage,

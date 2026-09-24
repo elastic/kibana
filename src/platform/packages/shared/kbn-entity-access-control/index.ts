@@ -115,7 +115,7 @@ export const hasEntityAccess = <Role extends string>({
   );
 };
 
-/** Builds a read filter for ACLs where every supported role permits reading. */
+/** Builds a read filter for nested ACL entries where every supported role permits reading. */
 export const buildEntityReadAccessQuery = ({
   profileId,
   ownerField,
@@ -136,7 +136,21 @@ export const buildEntityReadAccessQuery = ({
       ...(profileId
         ? [
             { term: { [ownerField]: profileId } },
-            { term: { [`${accessControlField}.entries.id`]: profileId } },
+            {
+              nested: {
+                path: `${accessControlField}.entries`,
+                ignore_unmapped: true,
+                score_mode: 'none' as const,
+                query: {
+                  bool: {
+                    filter: [
+                      { term: { [`${accessControlField}.entries.type`]: 'user' } },
+                      { term: { [`${accessControlField}.entries.id`]: profileId } },
+                    ],
+                  },
+                },
+              },
+            },
           ]
         : []),
     ],

@@ -52,8 +52,8 @@ export interface AccessControlFormProps<Role extends string> {
 const visibilityLabel = i18n.translate('entityAccessControl.visibilityLabel', {
   defaultMessage: 'Visibility',
 });
-const peopleLabel = i18n.translate('entityAccessControl.peopleLabel', {
-  defaultMessage: 'People with access',
+const usersLabel = i18n.translate('entityAccessControl.usersLabel', {
+  defaultMessage: 'Users with access',
 });
 const searchLabel = i18n.translate('entityAccessControl.searchPlaceholder', {
   defaultMessage: 'Find users',
@@ -168,7 +168,7 @@ export const AccessControlForm = <Role extends string>({
       </EuiFormRow>
       <EuiSpacer size="m" />
       {showEntries && (
-        <EuiFormRow label={peopleLabel} fullWidth>
+        <EuiFormRow label={usersLabel} fullWidth>
           <EuiComboBox<string>
             aria-label={searchLabel}
             placeholder={searchLabel}

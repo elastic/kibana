@@ -8,7 +8,7 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import { coreMock } from '@kbn/core/server/mocks';
+import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { EsWorkflow } from '@kbn/workflows';
 import type {
@@ -77,6 +77,7 @@ const makeStorageClient = () => ({
   search: jest.fn(),
   index: jest.fn().mockResolvedValue({ result: 'created', _seq_no: 1, _primary_term: 1 }),
   bulk: jest.fn(),
+  delete: jest.fn().mockResolvedValue({ result: 'deleted' }),
 });
 
 const makeSecurityMock = (username: string = 'alice') =>
@@ -2834,5 +2835,66 @@ describe('WorkflowCrudService', () => {
         expect.objectContaining({ scopedChangeHistory })
       );
     });
+  });
+});
+
+describe('WorkflowCrudService force deletion access', () => {
+  it.each([
+    ['legacy', undefined, 'another-user', true],
+    ['public non-owner', { access_mode: 'public', entries: [] }, 'another-user', true],
+    ['public API key', { access_mode: 'public', entries: [] }, undefined, true],
+    ['private owner', { access_mode: 'private', entries: [] }, 'owner', true],
+    ['private non-owner', { access_mode: 'private', entries: [] }, 'another-user', false],
+    [
+      'private editor',
+      {
+        access_mode: 'private',
+        entries: [
+          {
+            type: 'user',
+            id: 'another-user',
+            role: 'editor',
+            added_at: '2026-09-24T00:00:00.000Z',
+          },
+        ],
+      },
+      'another-user',
+      false,
+    ],
+  ] as const)('%s', async (_, accessControl, profileId, allowed) => {
+    const core = coreMock.createStart();
+    core.userProfile.getCurrentProfileId.mockResolvedValue(profileId ?? null);
+    const { deps, client } = makeDeps(undefined, { getCoreStart: () => core });
+    client.search.mockResolvedValue({
+      hits: {
+        hits: [
+          occSearchHit('wf-1', {
+            enabled: false,
+            owner_id: 'owner',
+            access_control: accessControl && {
+              ...accessControl,
+              entries: [...accessControl.entries],
+            },
+          }),
+        ],
+      },
+    });
+    client.bulk.mockResolvedValue({
+      items: [{ index: { _id: 'wf-1', status: 200, _seq_no: 6, _primary_term: 1 } }],
+    });
+    const result = new WorkflowCrudService(deps).deleteWorkflows(['wf-1'], 'default', {
+      force: true,
+      acknowledgeAclLoss: accessControl?.access_mode === 'private',
+      request: httpServerMock.createKibanaRequest(),
+    });
+
+    if (allowed) {
+      await expect(result).resolves.toMatchObject({ deleted: 1, failures: [] });
+      expect(client.delete).toHaveBeenCalledWith({ id: 'wf-1', if_seq_no: 6, if_primary_term: 1 });
+    } else {
+      await expect(result).rejects.toThrow();
+      expect(client.delete).not.toHaveBeenCalled();
+      expect(deps.stepExecutionsDataClient.deleteByQuery).not.toHaveBeenCalled();
+    }
   });
 });

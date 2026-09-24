@@ -174,6 +174,11 @@ steps:
         });
         expect(source).toHaveStatusCode(200);
         expect(source.body).toStrictEqual([{ id: workflowId, yaml }]);
+        const sharedList = await apiClient.get(`s/${spaceId}/api/workflows`, {
+          headers: readerHeaders,
+        });
+        expect(sharedList).toHaveStatusCode(200);
+        expect(sharedList.body.total).toBe(1);
         expect(read.body.permissions).toMatchObject({
           read: true,
           execute: role !== 'viewer',
@@ -208,6 +213,20 @@ steps:
           body: { workflowId, workflowYaml: yaml, inputs: {} },
         });
         expect(testDraft).toHaveStatusCode(role === 'editor' ? 200 : 403);
+        await expect
+          .poll(
+            async () => {
+              if (role !== 'editor') return 'denied';
+              const execution = await apiClient.get(
+                `s/${spaceId}/api/workflows/executions/${testDraft.body.workflowExecutionId}`,
+                { headers: readerHeaders }
+              );
+              return execution.body.status;
+            },
+            { timeout: 60000 }
+          )
+          .toBe(role === 'editor' ? 'completed' : 'denied');
+
         expect(
           await apiClient.put(accessPath, {
             headers: readerHeaders,
@@ -259,6 +278,27 @@ steps:
       });
       expect(hiddenSource).toHaveStatusCode(200);
       expect(hiddenSource.body).toStrictEqual([]);
+    }
+  );
+
+  apiTest(
+    'allows a non-owner to force-delete a public workflow without ACL confirmation',
+    async ({ apiClient }) => {
+      const created = await apiClient.post(`s/${spaceId}/api/workflows/workflow`, {
+        headers: ownerHeaders,
+        body: { yaml },
+      });
+      expect(created).toHaveStatusCode(200);
+      const workflowPath = `s/${spaceId}/api/workflows/workflow/${created.body.id}`;
+      try {
+        const deleted = await apiClient.delete(`${workflowPath}?force=true`, {
+          headers: readerHeaders,
+        });
+        expect(deleted).toHaveStatusCode(200);
+        expect(await apiClient.get(workflowPath, { headers: ownerHeaders })).toHaveStatusCode(404);
+      } finally {
+        await apiClient.delete(`${workflowPath}?force=true`, { headers: ownerHeaders });
+      }
     }
   );
 

@@ -111,6 +111,28 @@ describe('entity access control', () => {
       })
     ).toBe(false);
   });
+  it('matches the principal type and profile within the same nested entry', () => {
+    const query = buildEntityReadAccessQuery({
+      profileId: 'profile-a',
+      ownerField: 'owner',
+      accessControlField: 'access',
+    });
+    expect(query?.bool?.should).toContainEqual({
+      nested: {
+        path: 'access.entries',
+        ignore_unmapped: true,
+        score_mode: 'none',
+        query: {
+          bool: {
+            filter: [
+              { term: { 'access.entries.type': 'user' } },
+              { term: { 'access.entries.id': 'profile-a' } },
+            ],
+          },
+        },
+      },
+    });
+  });
   it('requires an explicit migration policy to include missing ACLs in searches', () => {
     const query = buildEntityReadAccessQuery({ ownerField: 'owner', accessControlField: 'access' });
     expect(query?.bool?.should).toEqual([{ term: { 'access.access_mode': 'public' } }]);

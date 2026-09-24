@@ -654,7 +654,11 @@ export class WorkflowsManagementApi {
       });
       if (workflow?.access_control) {
         const access = await this.workflowsService.getAccessControl();
-        await access.assertAccess(workflow, options?.force ? 'manage' : 'edit', request);
+        await access.assertAccess(
+          workflow,
+          options?.force && workflow.access_control.access_mode === 'private' ? 'manage' : 'edit',
+          request
+        );
       }
     }
     const workflows = await this.workflowsService.getWorkflowsByIds(workflowIds, spaceId);

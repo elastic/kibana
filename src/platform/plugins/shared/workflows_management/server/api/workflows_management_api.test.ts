@@ -1681,6 +1681,31 @@ steps:
       expect(mockWorkflowsService.deleteWorkflows).not.toHaveBeenCalled();
     });
 
+    it.each([
+      ['public', 'edit'],
+      ['private', 'manage'],
+    ] as const)(
+      'checks %s force-delete access with the %s operation',
+      async (accessMode, operation) => {
+        const workflow = createWorkflowDto({
+          access_control: { access_mode: accessMode, entries: [] },
+        });
+        mockWorkflowsService.getWorkflow.mockResolvedValue(workflow);
+        mockWorkflowsService.getWorkflowsByIds.mockResolvedValue([workflow]);
+        mockWorkflowsService.deleteWorkflows.mockResolvedValue({
+          total: 1,
+          deleted: 1,
+          successfulIds: [workflow.id],
+          failures: [],
+        });
+
+        await api.deleteWorkflows([workflow.id], 'default', mockRequest, { force: true });
+
+        const access = await mockWorkflowsService.getAccessControl();
+        expect(access.assertAccess).toHaveBeenCalledWith(workflow, operation, mockRequest);
+      }
+    );
+
     it('keeps unmanaged workflow deletes unchanged', async () => {
       const deleteResult = {
         total: 1,
