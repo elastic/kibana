@@ -62,7 +62,8 @@ export class AlertZeroPlugin
   private actionsService?: ActionsService;
   private workersService?: WorkersService;
   private conversationProposalsService?: ConversationProposalsService;
-  private agenticInvestigations?: AlertZeroStartDependencies['agenticInvestigations'];
+  private proposals?: AlertZeroStartDependencies['proposals'];
+  private agentBuilderConversations?: AlertZeroStartDependencies['agentBuilder']['conversations'];
 
   constructor(context: PluginInitializerContext<AlertZeroConfigSchemaType>) {
     this.logger = context.logger.get();
@@ -73,7 +74,7 @@ export class AlertZeroPlugin
     coreSetup: CoreSetup<AlertZeroStartDependencies, AlertZeroPluginStart>,
     {
       agentBuilder,
-      agenticInvestigations: _agenticInvestigationsSetup,
+      proposals: _proposalsSetup,
       features,
       searchInferenceEndpoints,
       workflowsExtensions,
@@ -98,7 +99,7 @@ export class AlertZeroPlugin
       ...listActionsTool(() => this.requireActionsService()),
     });
     agentBuilder.tools.register({
-      ...reviseProposalTool(() => this.requireAgenticInvestigations()),
+      ...reviseProposalTool(() => this.requireProposals()),
     });
 
     features.registerKibanaFeature({
@@ -133,6 +134,7 @@ export class AlertZeroPlugin
       getWorkersService: () => this.requireWorkersService(),
       getConversationProposalsService: () => this.requireConversationProposalsService(),
       getActionsService: () => this.requireActionsService(),
+      getAgentBuilderConversations: () => this.requireAgentBuilderConversations(),
     });
 
     return {};
@@ -140,7 +142,8 @@ export class AlertZeroPlugin
 
   start(_core: CoreStart, plugins: AlertZeroStartDependencies): AlertZeroPluginStart {
     this.spaces = plugins.spaces;
-    this.agenticInvestigations = plugins.agenticInvestigations;
+    this.proposals = plugins.proposals;
+    this.agentBuilderConversations = plugins.agentBuilder?.conversations;
 
     if (!this.config.enabled) {
       return {};
@@ -171,9 +174,10 @@ export class AlertZeroPlugin
     });
 
     this.conversationProposalsService = new ConversationProposalsService(
-      plugins.agenticInvestigations.getProposalsService(),
+      plugins.proposals.getProposalsService(),
       plugins.agentBuilder,
-      this.logger
+      this.logger,
+      plugins.agenticInvestigations.getImpactClient
     );
 
     this.watchesService = new WatchesService();
@@ -209,13 +213,13 @@ export class AlertZeroPlugin
     }
     return this.actionsService;
   }
-  private requireAgenticInvestigations(): AlertZeroStartDependencies['agenticInvestigations'] {
-    if (!this.agenticInvestigations) {
+  private requireProposals(): AlertZeroStartDependencies['proposals'] {
+    if (!this.proposals) {
       throw new Error(
-        'agenticInvestigations plugin start contract is not available until the AlertZero plugin has started'
+        'proposals plugin start contract is not available until the AlertZero plugin has started'
       );
     }
-    return this.agenticInvestigations;
+    return this.proposals;
   }
   private requireWorkersService(): WorkersService {
     if (!this.workersService) {
@@ -231,6 +235,15 @@ export class AlertZeroPlugin
       );
     }
     return this.conversationProposalsService;
+  }
+
+  private requireAgentBuilderConversations(): AlertZeroStartDependencies['agentBuilder']['conversations'] {
+    if (!this.agentBuilderConversations) {
+      throw new Error(
+        'agentBuilder.conversations is not available until the AlertZero plugin has started'
+      );
+    }
+    return this.agentBuilderConversations;
   }
 
   private getSpaceId(request: KibanaRequest): string {
