@@ -456,6 +456,7 @@ export class RuleTypeRunner<
 
         const events: AlertStatusChangedPayload[] = [
           ...newEntries.map(([, alert]) => ({
+            engine: 'v1',
             rule: rulePayload,
             alert: {
               id: alert.getId(),
@@ -467,6 +468,7 @@ export class RuleTypeRunner<
             },
           })),
           ...recoveredEntries.map(([, alert]) => ({
+            engine: 'v1',
             rule: rulePayload,
             alert: {
               id: alert.getId(),

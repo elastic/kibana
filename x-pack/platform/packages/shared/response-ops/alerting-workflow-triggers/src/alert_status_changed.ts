@@ -22,6 +22,11 @@ import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
 export const AlertStatusChangedTriggerId = 'alerting.alertStatusChanged' as const;
 
 export const alertStatusChangedEventSchema = z.object({
+  engine: z.string().describe(
+    i18n.translate('xpack.alertingWorkflowTriggers.triggers.alertStatusChanged.schema.engine', {
+      defaultMessage: 'Alerting engine that produced this event: "v1" or "v2".',
+    })
+  ),
   rule: z
     .object({
       id: z.string().describe(
