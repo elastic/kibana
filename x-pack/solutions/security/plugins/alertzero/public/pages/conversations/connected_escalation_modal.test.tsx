@@ -119,7 +119,11 @@ beforeEach(() => {
 
   mockUseKibana.mockReturnValue({
     services: {
-      notifications: { toasts: { addDanger: jest.fn() } },
+      notifications: { toasts: { addDanger: jest.fn(), addSuccess: jest.fn() } },
+      application: {
+        getUrlForApp: jest.fn(() => '/base/app/alertzero/escalations'),
+        navigateToApp: jest.fn(),
+      },
     },
   } as unknown as ReturnType<typeof useKibana>);
 });
@@ -258,5 +262,57 @@ describe('ConnectedEscalationModal', () => {
     renderModal({ mode: 'addToExisting' });
 
     expect(screen.getByTestId('escalationModalLoadError')).toBeInTheDocument();
+  });
+
+  it('success toast for create uses a basePath-aware href', () => {
+    renderModal({ mode: 'create' });
+    fireEvent.click(screen.getByTestId('escalationModalCreateEscalation'));
+
+    const [, callbacks] = createMutate.mock.calls[0];
+    const { services } = (mockUseKibana as jest.Mock).mock.results[0].value;
+    callbacks.onSuccess();
+
+    expect(services.notifications.toasts.addSuccess).toHaveBeenCalledWith(
+      expect.objectContaining({
+        actionProps: expect.objectContaining({
+          primary: expect.objectContaining({ href: '/base/app/alertzero/escalations' }),
+        }),
+      })
+    );
+  });
+
+  it('success toast for add-to uses a basePath-aware href', () => {
+    mockUseListEscalations.mockReturnValue({
+      data: {
+        results: [
+          {
+            id: 'esc-3',
+            title: 'Open escalation',
+            metadata: { linked_investigations: [] },
+            permissions: { rename: true, delete: true, update_access_control: true },
+          },
+        ],
+        pagination: { total: 1, page: 1, per_page: 20 },
+      },
+      isLoading: false,
+      isError: false,
+      refetch: jest.fn(),
+    } as unknown as ReturnType<typeof useListEscalations>);
+
+    renderModal({ mode: 'addToExisting' });
+    fireEvent.click(screen.getByTestId('escalationModalIncident-esc-3'));
+    fireEvent.click(screen.getByTestId('escalationModalAddToEscalation'));
+
+    const [, callbacks] = addMutate.mock.calls[0];
+    const { services } = (mockUseKibana as jest.Mock).mock.results[0].value;
+    callbacks.onSuccess();
+
+    expect(services.notifications.toasts.addSuccess).toHaveBeenCalledWith(
+      expect.objectContaining({
+        actionProps: expect.objectContaining({
+          primary: expect.objectContaining({ href: '/base/app/alertzero/escalations' }),
+        }),
+      })
+    );
   });
 });
