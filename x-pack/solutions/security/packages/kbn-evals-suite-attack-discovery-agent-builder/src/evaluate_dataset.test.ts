@@ -1432,11 +1432,15 @@ describe('slow-path handoff (#293046): waitForValidationPhase', () => {
     try {
       const fetch = jest
         .fn()
-        .mockResolvedValueOnce(trackingWith({ workflow_id: 'wf-val', workflow_run_id: 'run-failed-exec' }))
+        .mockResolvedValueOnce(
+          trackingWith({ workflow_id: 'wf-val', workflow_run_id: 'run-failed-exec' })
+        )
         // validation run probe: terminal
         .mockResolvedValueOnce({ status: 'completed' })
         // tracking poll again: now reportable as finished
-        .mockResolvedValueOnce(trackingWith({ workflow_id: 'wf-val', workflow_run_id: 'run-failed-exec' }));
+        .mockResolvedValueOnce(
+          trackingWith({ workflow_id: 'wf-val', workflow_run_id: 'run-failed-exec' })
+        );
 
       const pending = waitForValidationPhase({
         fetch,
