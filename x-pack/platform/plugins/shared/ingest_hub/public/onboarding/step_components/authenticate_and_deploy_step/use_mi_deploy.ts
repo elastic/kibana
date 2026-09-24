@@ -73,7 +73,7 @@ export function useMiDeploy({
   onboardingDeploymentId,
   policyIdsByInstance,
   pendingCleanupPolicyIds,
-}: UseMiDeployParams): (instanceIds?: string[]) => Promise<void> {
+}: UseMiDeployParams): (instanceIds?: string[]) => Promise<{ cleanupFailed: boolean }> {
   return useCallback(
     async (instanceIds?: string[]) => {
       const isInitialDeploy = instanceIds === undefined;
@@ -143,7 +143,7 @@ export function useMiDeploy({
           // Everything is already deployed: the only work left is a template-details write that failed
           // last time.
           await persistPendingIacTemplate();
-          return;
+          return { cleanupFailed: false };
         }
 
         const initialStatuses = buildInstanceStatuses(targets, []);
@@ -200,7 +200,7 @@ export function useMiDeploy({
           if (cleanupFailed) {
             // Cleanup did not fully succeed — keep the section actionable so the user can retry.
             updateDetectAndReviewStep({ isDeploying: false });
-            return;
+            return { cleanupFailed: true };
           }
           // Cleanup-only success: prune deleted policies from the SO record, then clear local
           // pendingCleanupPolicyIds only after the SO write is confirmed. A transient SO failure
@@ -225,7 +225,7 @@ export function useMiDeploy({
             updateDetectAndReviewStep({ pendingCleanupPolicyIds: {} });
           }
           await persistPendingIacTemplate();
-          return;
+          return { cleanupFailed: false };
         }
       } else {
         // Retry: select any group that intersects the requested instanceIds.
@@ -384,6 +384,7 @@ export function useMiDeploy({
         // this initial-deploy run; undefined leaves the retry path's mid-flight update intact.
         ...(remainingPending !== undefined ? { pendingCleanupPolicyIds: remainingPending } : {}),
       });
+      return { cleanupFailed: false };
     },
     [
       deployGroups,

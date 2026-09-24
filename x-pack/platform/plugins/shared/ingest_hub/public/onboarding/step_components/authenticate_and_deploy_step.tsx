@@ -252,16 +252,21 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
       !isAgentBased &&
       (Object.keys(detectAndReviewStep.policyIdsByInstance ?? {}).length > 0 ||
         Object.keys(detectAndReviewStep.pendingCleanupPolicyIds ?? {}).length > 0);
+    let miCleanupFailed = false;
     if (hasStaleMiPolicies && miServiceIds.length === 0) {
       // Lock the Next button while cleanup runs — showMiSection is false here so isNextDisabled
       // does not consume the MI isDeploying state, leaving Next clickable without this guard.
       setIsSavingSO(true);
       try {
-        await handleDeploy();
+        ({ cleanupFailed: miCleanupFailed } = await handleDeploy());
       } finally {
         setIsSavingSO(false);
       }
     }
+    // Do not proceed with the ECF-only transition until stale MI policies are fully cleaned up.
+    // handleDeploy catches individual Fleet failures internally; without this guard, a partial
+    // cleanup would still navigate and write mechanisms: ['ecf'], leaving active MI policies behind.
+    if (miCleanupFailed) return;
 
     // ECF-only: handleDeploy never runs for new deploys, so create the SO here then navigate.
     if (miServiceIds.length === 0 && hasAnyEcf) {

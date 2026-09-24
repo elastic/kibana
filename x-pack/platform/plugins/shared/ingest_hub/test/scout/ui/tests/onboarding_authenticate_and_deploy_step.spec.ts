@@ -217,12 +217,13 @@ test.describe('Onboarding Authenticate and Deploy step', { tag: tags.stateful.cl
         await route.fulfill({ status: 200, contentType: 'application/json', body: '{"id":""}' });
       }
     );
+    // Anchor to the collection path — Playwright runs last-registered routes first, so without $
+    // this handler would intercept POST /agent_policies/delete before the delete handler above,
+    // causing agentPolicyDeleteObserved to stay false even when the app sends the delete request.
     await page.route(
-      (url) => /\/api\/fleet\/agent_policies/.test(url.pathname),
+      (url) => /\/api\/fleet\/agent_policies$/.test(url.pathname),
       async (route) => {
         if (route.request().method() !== 'GET') {
-          // Any non-GET to the agent_policies namespace that slips past the /delete interceptor
-          // above is unexpected — fulfill with an error so the test surface is visible.
           await route.fulfill({ status: 405, contentType: 'application/json', body: '{}' });
           return;
         }

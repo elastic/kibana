@@ -34,7 +34,7 @@ export interface UseDeployResult {
   setNamespace: (ns: string) => void;
   isDeploying: boolean;
   failedInstances: string[];
-  handleDeploy: (instanceIds?: string[]) => Promise<void>;
+  handleDeploy: (instanceIds?: string[]) => Promise<{ cleanupFailed: boolean }>;
   isAlreadyDeployed: boolean;
   /** The reconciled instance groups Deploy will create policies for; drives the Federated Identity template set. */
   deployGroups: DeployGroup[];
