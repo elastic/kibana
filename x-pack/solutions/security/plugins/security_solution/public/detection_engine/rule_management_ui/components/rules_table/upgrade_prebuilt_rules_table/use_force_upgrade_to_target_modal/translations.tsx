@@ -50,11 +50,10 @@ export const ForceUpgradeToTargetModalBody = ({
             {' '}
             <FormattedMessage
               id="xpack.securitySolution.detectionEngine.forceUpgradeToTargetModal.customizedRules"
-              defaultMessage="{customizedCountBold} of {totalBold} {customizedCount, plural, one {has} other {have}} customizations that will be overwritten."
+              defaultMessage="{customizedCount, plural, one {Its modifications} other {Modifications on {customizedCountBold} of them}} will be overwritten."
               values={{
                 customizedCount,
                 customizedCountBold: <strong>{customizedCount}</strong>,
-                totalBold,
               }}
             />
           </>
