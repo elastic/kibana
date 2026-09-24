@@ -100,6 +100,7 @@ export class FlyoutSystemApp {
     await this.trigger(form, session).click();
     const flyout = this.flyout(form, session);
     await flyout.waitFor({ state: 'visible' });
+    await this.waitForAnimations(flyout);
     return flyout;
   }
 
@@ -107,7 +108,24 @@ export class FlyoutSystemApp {
     await this.childTrigger(form, session, label).click();
     const child = this.childFlyout(form, session, label);
     await child.waitFor({ state: 'visible' });
+    await this.waitForAnimations(child);
     return child;
+  }
+
+  /**
+   * The body keeps growing while the open animation and its accordions run, so a scroll issued
+   * before they settle can find too little range to cross the collapse threshold. Infinite
+   * animations, such as spinners, are skipped because they never finish.
+   */
+  private async waitForAnimations(root: Locator) {
+    await root.evaluate((el) =>
+      Promise.allSettled(
+        el
+          .getAnimations({ subtree: true })
+          .filter((animation) => animation.effect?.getComputedTiming().endTime !== Infinity)
+          .map((animation) => animation.finished)
+      )
+    );
   }
 
   // Parts within a flyout.
