@@ -17,15 +17,29 @@ import { coreMock } from '@kbn/core/public/mocks';
 import {
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
+  SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
+  SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
+  SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
 } from '@kbn/alertzero-common';
+import { queryKeys } from '../../query_keys';
 import { OnboardingPage } from './onboarding_page';
+
+const ALL_ONBOARDING_WORKER_IDS = [
+  SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
+  SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
+  SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
+  SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
+  SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
+];
 
 const renderPage = ({
   canWrite = false,
   httpPatch = jest.fn().mockResolvedValue({}),
+  seedWorkers = false,
 }: {
   canWrite?: boolean;
   httpPatch?: jest.Mock;
+  seedWorkers?: boolean;
 } = {}) => {
   const coreStart = coreMock.createStart();
   // coreMock.createStart() does not populate feature capabilities; set the
@@ -36,6 +50,14 @@ const renderPage = ({
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
   });
+
+  if (seedWorkers) {
+    // Pre-populate the workers list cache so useEnableWorkers can filter IDs
+    // against the server's known workers and avoid spurious 404s.
+    queryClient.setQueryData(queryKeys.workers.list(), {
+      workers: ALL_ONBOARDING_WORKER_IDS.map((id) => ({ id })),
+    });
+  }
 
   render(
     <I18nProvider>
@@ -78,8 +100,8 @@ describe('OnboardingPage', () => {
     });
 
     it('calls the API for all workers and navigates to /watches when Enable and continue is clicked', async () => {
-      const httpPatch = jest.fn().mockResolvedValue({});
-      const { history } = renderPage({ canWrite: true, httpPatch });
+      const httpPatch = jest.fn().mockResolvedValue({ worker: { id: 'mock', enabled: true } });
+      const { history } = renderPage({ canWrite: true, httpPatch, seedWorkers: true });
 
       fireEvent.click(screen.getByRole('button', { name: 'Enable and continue' }));
 
@@ -89,7 +111,7 @@ describe('OnboardingPage', () => {
 
     it('does not navigate when a worker update fails', async () => {
       const httpPatch = jest.fn().mockRejectedValue(new Error('server error'));
-      const { history } = renderPage({ canWrite: true, httpPatch });
+      const { history } = renderPage({ canWrite: true, httpPatch, seedWorkers: true });
 
       fireEvent.click(screen.getByRole('button', { name: 'Enable and continue' }));
 
@@ -116,8 +138,8 @@ describe('OnboardingPage', () => {
     });
 
     it('sends enabled: false for a worker that was toggled off', async () => {
-      const httpPatch = jest.fn().mockResolvedValue({});
-      renderPage({ canWrite: true, httpPatch });
+      const httpPatch = jest.fn().mockResolvedValue({ worker: { id: 'mock', enabled: false } });
+      renderPage({ canWrite: true, httpPatch, seedWorkers: true });
 
       // Toggle the second worker off.
       const toggles = screen.getAllByRole('switch');

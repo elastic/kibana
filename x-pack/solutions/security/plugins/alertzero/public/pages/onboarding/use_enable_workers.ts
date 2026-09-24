@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { useState } from 'react';
 import { useQueryClient } from '@kbn/react-query';
 import type { ListWorkersResponse } from '@kbn/alertzero-common';
 import { useUpdateWorker } from '../../hooks/use_workers_api';
@@ -18,15 +19,22 @@ export const useEnableWorkers = (
   onSuccess?: () => void
 ) => {
   const queryClient = useQueryClient();
-  const { mutateAsync: updateWorker, isLoading: isSaving } = useUpdateWorker();
+  const { mutateAsync: updateWorker } = useUpdateWorker();
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleEnableAndContinue = async () => {
     // Filter against the cached workers list so skill-gated workers absent from
     // the server response are not sent a PATCH that would return 404.
     const cached = queryClient.getQueryData<ListWorkersResponse>(queryKeys.workers.list());
-    const visibleIds = cached ? new Set(cached.workers.map((w) => w.id)) : null;
-    const idsToUpdate = visibleIds ? workerIds.filter((id) => visibleIds.has(id)) : [...workerIds];
+    if (!cached) {
+      // Cache miss: we cannot safely determine which workers exist server-side.
+      // Bail out rather than blindly PATCHing all IDs and hitting 404s.
+      return;
+    }
+    const visibleIds = new Set(cached.workers.map((w) => w.id));
+    const idsToUpdate = workerIds.filter((id) => visibleIds.has(id));
 
+    setIsSaving(true);
     try {
       await Promise.all(
         idsToUpdate.map((id) =>
@@ -36,6 +44,8 @@ export const useEnableWorkers = (
     } catch {
       // errors surfaced via toast in useUpdateWorker.onError
       return;
+    } finally {
+      setIsSaving(false);
     }
     onSuccess?.();
   };

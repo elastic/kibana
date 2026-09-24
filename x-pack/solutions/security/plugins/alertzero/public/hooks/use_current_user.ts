@@ -7,14 +7,17 @@
 
 import { useQuery } from '@kbn/react-query';
 import type { CoreStart } from '@kbn/core/public';
+import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { queryKeys } from '../query_keys';
+
+type KibanaServices = CoreStart & { security?: SecurityPluginStart };
 
 /** Returns the current user's email, falling back to their username. Undefined until resolved. */
 export const useCurrentUser = (): string | undefined => {
   const {
     services: { security },
-  } = useKibana<CoreStart>();
+  } = useKibana<KibanaServices>();
 
   const { data } = useQuery({
     queryKey: queryKeys.currentUser.get(),
