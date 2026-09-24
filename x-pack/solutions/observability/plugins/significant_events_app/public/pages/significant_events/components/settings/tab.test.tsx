@@ -177,6 +177,18 @@ describe('SettingsTab developer mode', () => {
     expect(screen.queryByTestId('streams-settings-tuning-editor')).not.toBeInTheDocument();
   });
 
+  it('hides stale event cleanup when developer mode is off', () => {
+    setup({ isDeveloperMode: false });
+
+    expect(screen.queryByTestId('stale-event-cleanup-section')).not.toBeInTheDocument();
+  });
+
+  it('shows stale event cleanup when developer mode is on', () => {
+    setup({ isDeveloperMode: true });
+
+    expect(screen.getByTestId('stale-event-cleanup-section')).toBeInTheDocument();
+  });
+
   it('shows the tuning YAML panel and Dev badge when developer mode is on', () => {
     setup({ isDeveloperMode: true });
 
