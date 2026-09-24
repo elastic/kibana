@@ -78,6 +78,9 @@ const isTerminal = (status: ExecutionStatus): boolean => TerminalExecutionStatus
 const isVerdict = (value: unknown): value is FpTpVerdict =>
   FP_TP_VERDICTS.some((verdict) => verdict === value);
 
+const conversationIdsOf = ({ stepExecutions }: WorkflowExecutionDto): string[] =>
+  extractAgentConversationIds(stepExecutions).map(({ conversationId }) => conversationId);
+
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
@@ -118,6 +121,8 @@ export const toOutcome = (
  * outcome. A run that is not terminal by `maxWaitMs` counts as `failed`: the contract
  * has a hard timeout, so an overrun is itself a failure. The overrun is cancelled and
  * awaited for up to `cancelWaitMs`, so the caller does not remove its fixture mid-run.
+ * When a status read fails, the run is cancelled the same way and the error rethrown;
+ * `onFailedReadConversationIds` receives the conversations it created, for cleanup.
  */
 export const runFpTpAnalysisWorkflow = async ({
   fetch,
@@ -131,6 +136,7 @@ export const runFpTpAnalysisWorkflow = async ({
   maxWaitMs = 15 * 60_000,
   cancelWaitMs = 60_000,
   pollIntervalMs = 3_000,
+  onFailedReadConversationIds,
 }: {
   fetch: HttpHandler;
   log: ToolingLog;
@@ -143,6 +149,7 @@ export const runFpTpAnalysisWorkflow = async ({
   maxWaitMs?: number;
   cancelWaitMs?: number;
   pollIntervalMs?: number;
+  onFailedReadConversationIds?: (conversationIds: string[]) => void;
 }): Promise<FpTpTaskOutput> => {
   const { workflowExecutionId } = (await fetch(
     `/api/workflows/workflow/${encodeURIComponent(workflowId)}/run`,
@@ -208,7 +215,10 @@ export const runFpTpAnalysisWorkflow = async ({
     log.warning(
       `Could not read FP/TP analysis execution ${workflowExecutionId}: ${error.message}; cancelling it`
     );
-    await cancelAndAwait();
+    const last = await cancelAndAwait();
+    if (last !== undefined) {
+      onFailedReadConversationIds?.(conversationIdsOf(last));
+    }
     throw error;
   }
 
@@ -228,9 +238,7 @@ export const runFpTpAnalysisWorkflow = async ({
 
   const output = readAnalysisOutput(execution);
 
-  const conversationIds = extractAgentConversationIds(execution.stepExecutions).map(
-    ({ conversationId }) => conversationId
-  );
+  const conversationIds = conversationIdsOf(execution);
   // The agent is tool-less, so no tool is exempt from the zero-tool guardrail.
   const { toolCallIds, unavailable } = await readAgentToolCallsFromTraces({
     traceEsClient,

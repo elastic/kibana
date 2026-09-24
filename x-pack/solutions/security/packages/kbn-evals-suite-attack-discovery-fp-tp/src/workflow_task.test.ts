@@ -186,6 +186,48 @@ describe('runFpTpAnalysisWorkflow', () => {
       await expect(run(failingFetch())).rejects.toThrow('read failed');
     });
 
+    it('returns the conversation ids from the record read after cancelling', async () => {
+      let reads = 0;
+      const fetch = jest.fn(async (path: string) => {
+        if (path.endsWith('/run')) {
+          return { workflowExecutionId: 'exec-1' };
+        }
+        if (path.endsWith('/cancel')) {
+          return undefined;
+        }
+        reads += 1;
+        if (reads === 1) {
+          throw new Error('read failed');
+        }
+        return execution({
+          status: ExecutionStatus.CANCELLED,
+          stepExecutions: [
+            outputStep({
+              stepId: 'analyze',
+              stepType: 'ai.agent',
+              output: { conversation_id: 'c1' },
+            }),
+          ],
+        });
+      }) as unknown as HttpHandler;
+      const onFailedReadConversationIds = jest.fn();
+
+      await runFpTpAnalysisWorkflow({
+        fetch,
+        log: new ToolingLog(),
+        workflowId: 'wf-1',
+        attackDiscoveryId: 'ad-1',
+        investigationId: 'inv-1',
+        seededIds,
+        seededEvidence,
+        cancelWaitMs: 0,
+        pollIntervalMs: 0,
+        onFailedReadConversationIds,
+      }).catch(() => undefined);
+
+      expect(onFailedReadConversationIds).toHaveBeenCalledWith(['c1']);
+    });
+
     it('cancels the run before rethrowing', async () => {
       const fetch = failingFetch();
       await run(fetch).catch(() => undefined);
