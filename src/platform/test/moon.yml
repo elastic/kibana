@@ -70,6 +70,7 @@ dependsOn:
   - '@kbn/visualizations-common'
   - '@kbn/ui-actions-plugin'
   - '@kbn/deeplinks-analytics'
+  - '@kbn/core-chrome-browser-components'
 tags:
   - test-helper
   - package

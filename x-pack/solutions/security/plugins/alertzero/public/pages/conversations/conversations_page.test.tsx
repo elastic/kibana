@@ -15,7 +15,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { coreMock } from '@kbn/core/public/mocks';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/public/mocks';
-import { useApproveProposal, useDismissProposal } from '@kbn/agentic-investigations-plugin/public';
+import { useApproveProposal, useDismissProposal } from '@kbn/proposals-plugin/public';
 import {
   useProposalsByCategory,
   useProposalsByCategoryCount,
@@ -29,8 +29,8 @@ import { ConversationsPage } from './conversations_page';
 
 // Only the mutations are stubbed: the module also exports DISMISS_REASON_OPTIONS, which
 // the dismiss modal's select needs for real.
-jest.mock('@kbn/agentic-investigations-plugin/public', () => ({
-  ...jest.requireActual('@kbn/agentic-investigations-plugin/public'),
+jest.mock('@kbn/proposals-plugin/public', () => ({
+  ...jest.requireActual('@kbn/proposals-plugin/public'),
   useApproveProposal: jest.fn(),
   useDismissProposal: jest.fn(),
 }));
@@ -273,7 +273,7 @@ describe('ConversationsPage open in chat', () => {
 
   const chatControl = () => screen.getByTestId('conversationCardOpenInChat');
 
-  it("navigates to the conversation's Agent Builder page", () => {
+  it("navigates to the conversation's Agent Builder page with the details flyout open", () => {
     const { core } = renderPage('/');
 
     fireEvent.click(chatControl());
@@ -281,7 +281,7 @@ describe('ConversationsPage open in chat', () => {
     // The chat is the investigation's own Agent Builder conversation, so the card resolves its
     // proposal to that conversation and its agent — the route is scoped to the agent.
     expect(core.application.navigateToApp).toHaveBeenCalledWith('agent_builder', {
-      path: '/agents/elastic-ai-agent/conversations/inv-1',
+      path: '/agents/elastic-ai-agent/conversations/inv-1?openConversationDetails=true',
     });
   });
 
@@ -289,11 +289,11 @@ describe('ConversationsPage open in chat', () => {
     const { core } = renderPage('/');
 
     expect(core.application.getUrlForApp).toHaveBeenCalledWith('agent_builder', {
-      path: '/agents/elastic-ai-agent/conversations/inv-1',
+      path: '/agents/elastic-ai-agent/conversations/inv-1?openConversationDetails=true',
     });
     expect(chatControl()).toHaveAttribute(
       'href',
-      '/app/agent_builder/agents/elastic-ai-agent/conversations/inv-1'
+      '/app/agent_builder/agents/elastic-ai-agent/conversations/inv-1?openConversationDetails=true'
     );
   });
 
@@ -306,7 +306,7 @@ describe('ConversationsPage open in chat', () => {
     fireEvent.click(chatControl());
 
     expect(core.application.navigateToApp).toHaveBeenCalledWith('agent_builder', {
-      path: '/conversations/inv-1',
+      path: '/conversations/inv-1?openConversationDetails=true',
     });
   });
 
@@ -423,18 +423,15 @@ describe('ConversationsPage decisions', () => {
     );
   });
 
-  it('offers no decision on a proposal that was already decided', () => {
+  it('hides the actions menu trigger for a decided proposal when escalation is not available', () => {
+    // A decided investigation without `canManageEscalations` has no available actions —
+    // the menu trigger must not be rendered at all, not just show an empty popover.
     mockProposals({ closed: [{ ...actionProposal, decidedAt: '2024-01-02T00:00:00Z' }] });
 
     renderPage('/');
     expandClosed();
-    fireEvent.click(screen.getByRole('button', { name: 'Open actions menu' }));
 
-    // Asserted by role, not by text: a closed row names its action as a label beside
-    // the title, so what matters is that nothing offers it as something to click.
-    expect(screen.queryByRole('menuitem', { name: 'Revoke sessions' })).not.toBeInTheDocument();
-    expect(screen.queryByRole('menuitem', { name: 'Assign' })).not.toBeInTheDocument();
-    expect(screen.queryByRole('menuitem', { name: 'Close' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Open actions menu' })).not.toBeInTheDocument();
   });
 
   // That the scalar itself excludes decided proposals is covered in the service tests.
@@ -651,5 +648,38 @@ describe('ConversationsPage queue sections', () => {
 
     const scaffold = screen.getByLabelText('Loading events…');
     expect(within(scaffold).getAllByRole('progressbar')).toHaveLength(6);
+  });
+});
+
+describe('ConversationsPage impact pills', () => {
+  const hostProposal: ProposalItem = {
+    ...proposal,
+    id: 'prop-host',
+    conversationTitle: 'Host investigation',
+    entityIds: ['host-1'],
+  };
+  const userProposal: ProposalItem = {
+    ...proposal,
+    id: 'prop-user',
+    conversationTitle: 'User investigation',
+    entityIds: ['user-1'],
+  };
+
+  beforeEach(() => {
+    mockProposals({ investigate: [hostProposal, userProposal] });
+  });
+
+  afterEach(() => jest.clearAllMocks());
+
+  it('filters the queue to conversations whose entity ids include the selected pill', () => {
+    renderPage('/');
+
+    expect(screen.getByText('Host investigation')).toBeInTheDocument();
+    expect(screen.getByText('User investigation')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'host-1' }));
+
+    expect(screen.getByText('Host investigation')).toBeInTheDocument();
+    expect(screen.queryByText('User investigation')).not.toBeInTheDocument();
   });
 });

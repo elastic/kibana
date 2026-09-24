@@ -11,15 +11,12 @@ import {
   AS_CODE_DATA_VIEW_REFERENCE_TYPE,
   AS_CODE_ESQL_DATA_SOURCE_TYPE,
 } from '@kbn/as-code-data-views-schema';
+import type { DiscoverSessionApiEmbeddableTab } from '@kbn/as-code-discover-schema';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { discoverServiceMock } from '../../__mocks__/services';
 import { getPersistedTabMock } from '../../application/main/state_management/redux/__mocks__/internal_state.mocks';
 import { deserializeState, serializeState } from './serialization_utils';
-import type {
-  DiscoverSessionEmbeddableByReferenceState,
-  DiscoverSessionEmbeddableByValueState,
-} from '../../../server';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import type {
   DiscoverSessionTab,
@@ -29,6 +26,8 @@ import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import { DataGridDensity, DiscoverTabType } from '@kbn/discover-session-constants';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import type {
+  DiscoverSessionEmbeddableByReferenceState,
+  DiscoverSessionEmbeddableByValueState,
   SearchEmbeddableByReferenceState,
   SearchEmbeddableByValueState,
 } from '../../../common/embeddable/types';
@@ -102,7 +101,7 @@ describe('Serialization utils', () => {
     histogramPercentile: 'p99',
   };
 
-  const metricsByValueTab: DiscoverSessionEmbeddableByValueState['tabs'][0] = {
+  const metricsByValueTab: DiscoverSessionApiEmbeddableTab = {
     type: DiscoverTabType.Metrics,
     dimensions: metricsTabTypeState.dimensions,
     search_term: metricsTabTypeState.searchTerm,
@@ -588,8 +587,8 @@ describe('Serialization utils', () => {
           selectedTabId: 'tab-1',
         });
 
-        // By-reference API shape includes ref_id; panel overrides (sampleSize, sort)
-        // are stored in the dashboard document but not part of the simplified by-ref schema
+        // By-reference API shape keeps ref_id; grid, sampleSize and sort edited on the panel
+        // are serialized as overrides
         expect(serializedState).toMatchObject({
           ref_id: 'test-id',
           overrides: {

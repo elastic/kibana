@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { AppMenu, type Locator, type ScoutPage } from '@kbn/scout';
+import { AppMenu, euiSelectors, type Locator, type ScoutPage } from '@kbn/scout';
 import { PLUGIN_ID } from '../../../../../common';
 
 export class WorkflowListPage {
@@ -72,7 +72,9 @@ export class WorkflowListPage {
     );
     // eslint-disable-next-line playwright/no-nth-methods
     await buttons.nth(index).click();
-    return this.page.locator(`.euiContextMenuPanel [data-test-subj="${action}"]`);
+    return this.page.locator(
+      `${euiSelectors.contextMenu.PANEL_SELECTOR} [data-test-subj="${action}"]`
+    );
   }
 
   // Bulk Actions
@@ -105,7 +107,9 @@ export class WorkflowListPage {
   // Filter/Search/Sort
   async getFilterOption(filterName: 'enabled-filter-popover-button', optionName: string) {
     await this.page.testSubj.click(filterName);
-    return this.page.locator('.euiSelectable li').filter({ hasText: optionName });
+    return this.page
+      .locator(`${euiSelectors.selectable.ROOT_SELECTOR} li`)
+      .filter({ hasText: optionName });
   }
 
   /** Returns the search field locator. */
