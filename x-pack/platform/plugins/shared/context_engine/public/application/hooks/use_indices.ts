@@ -20,7 +20,6 @@ export type IndexResourceType = 'index' | 'alias' | 'data_stream';
 export interface UseIndicesOptions {
   search: string;
   enabled?: boolean;
-  /** Restricts results to the given resource kinds. Defaults to all kinds. */
   types?: IndexResourceType[];
 }
 
@@ -34,8 +33,7 @@ const matchesTypes = (match: MatchedItem, types: IndexResourceType[] | undefined
   !types || match.tags.some((tag) => types.includes(tag.key as IndexResourceType));
 
 /**
- * Lists indices, aliases, and data streams matching the given search text, via the
- * `dataViews.getIndices` service backed by the ES `_resolve/index` endpoint.
+ * Lists indices, aliases, and data streams matching the given search text.
  */
 export const useIndices = ({
   search,
