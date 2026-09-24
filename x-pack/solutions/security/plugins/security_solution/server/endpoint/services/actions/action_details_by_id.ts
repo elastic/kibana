@@ -129,15 +129,18 @@ export const getActionDetailsById = async <T extends ActionDetails = ActionDetai
         }
       }
 
-      agentsHostInfo = unresolvedAgentIds.reduce((acc, agentId) => {
-        const hostname = hostnameByAgentId.get(agentId);
+      agentsHostInfo = unresolvedAgentIds.reduce(
+        (acc, agentId) => {
+          const hostname = hostnameByAgentId.get(agentId);
 
-        if (hostname) {
-          acc[agentId] = hostname;
-        }
+          if (hostname) {
+            acc[agentId] = hostname;
+          }
 
-        return acc;
-      }, { ...agentsHostInfo });
+          return acc;
+        },
+        { ...agentsHostInfo }
+      );
     }
   }
 
