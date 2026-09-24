@@ -20,6 +20,7 @@ export { getESQLWithSafeLimit } from './utils/get_esql_with_safe_limit';
 export {
   getLimitFromESQLQuery,
   removeDropCommandsFromESQLQuery,
+  hasAggregatingCommand,
   hasTransformationalCommand,
   parseTimeFieldFromESQLQuery,
   prettifyQuery,
