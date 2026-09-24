@@ -162,7 +162,8 @@ export interface ConversationClient {
   applyTemplate(conversationId: string, templateId: string): Promise<Conversation>;
   patchMetadata(
     conversationId: string,
-    updates: Record<string, unknown>
+    updates: Record<string, unknown>,
+    options?: { access: ConversationAccess }
   ): Promise<{ conversation: Conversation; changedFields: string[] }>;
 }
 
@@ -1011,13 +1012,14 @@ class ConversationClientImpl implements ConversationClient {
 
   async patchMetadata(
     conversationId: string,
-    updates: Record<string, unknown>
+    updates: Record<string, unknown>,
+    { access = 'owner' }: { access?: ConversationAccess } = {}
   ): Promise<{ conversation: Conversation; changedFields: string[] }> {
     let changedFields: string[] = [];
 
     const result = await this.writeConversation({
       conversationId,
-      access: 'owner',
+      access,
       fields: (current) => {
         if (!current.template_id) {
           throw createBadRequestError(
