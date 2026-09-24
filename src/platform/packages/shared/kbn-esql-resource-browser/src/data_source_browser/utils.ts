@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 export const VIEW_TYPE_KEY = 'view';
 
 const VIEW_LABEL = i18n.translate('esqlEditor.indicesBrowser.sourceType.view', {
-  defaultMessage: 'ES|QL View',
+  defaultMessage: 'View',
 });
 
 const SOURCE_TYPE_PATTERNS = [

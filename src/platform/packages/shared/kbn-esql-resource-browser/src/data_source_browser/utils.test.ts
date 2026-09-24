@@ -33,9 +33,9 @@ describe('getSourceTypeLabel', () => {
     expect(getSourceTypeLabel('Lookup')).toBe('Lookup Index');
   });
 
-  it('returns ES|QL View for the ES|QL view type', () => {
-    expect(getSourceTypeLabel(SOURCES_TYPES.VIEW)).toBe('ES|QL View');
-    expect(getSourceTypeLabel('view')).toBe('ES|QL View');
+  it('returns View for the ES|QL view type', () => {
+    expect(getSourceTypeLabel(SOURCES_TYPES.VIEW)).toBe('View');
+    expect(getSourceTypeLabel('view')).toBe('View');
   });
 });
 

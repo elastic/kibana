@@ -102,7 +102,7 @@ describe('DataSourceBrowser views', () => {
     renderBrowser();
 
     const view = await getResourceList().findByRole('option', { name: /errors_view/ });
-    expect(view).toHaveTextContent('ES|QL View');
+    expect(view).toHaveTextContent('View');
   });
 
   it('filters views independently from the other source types', async () => {
@@ -110,7 +110,7 @@ describe('DataSourceBrowser views', () => {
 
     await getResourceList().findByRole('option', { name: /errors_view/ });
 
-    await clickTypeFilterOption('ES|QL View');
+    await clickTypeFilterOption('View');
 
     await waitFor(() => {
       expect(getResourceList().queryByRole('option', { name: /logs-\*/ })).not.toBeInTheDocument();
