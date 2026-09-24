@@ -38,10 +38,7 @@ const EditPrivateLocationQuery = z.strictObject({
   locationId: routeId,
 });
 
-export type EditPrivateLocationAttributes = Pick<
-  PrivateLocationAttributes,
-  keyof z.infer<typeof EditPrivateLocationSchema>
->;
+export type EditPrivateLocationAttributes = Pick<PrivateLocationAttributes, 'label' | 'tags'>;
 
 const isPrivateLocationLabelChanged = (oldLabel: string, newLabel?: string): newLabel is string => {
   return typeof newLabel === 'string' && oldLabel !== newLabel;
