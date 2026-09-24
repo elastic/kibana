@@ -986,6 +986,74 @@ describe('propagateRoleArnToPackagePolicies', () => {
     expect(revertCalls.map(([, , id]) => id).sort()).toEqual(['a', 'b']);
   });
 
+  describe('when update() persisted the new Role ARN and then rejected', () => {
+    beforeEach(() => {
+      mockListReturns([makePolicy('a'), makePolicy('b')]);
+      (packagePolicyService.update as jest.Mock).mockImplementation(
+        async (_so, _es, id: string, update) => {
+          if (id === 'b' && update.inputs[0].vars.role_arn.value === NEW_ARN) {
+            throw new Error('post-persist boom');
+          }
+          return { id, version: `Wz${id}-after` };
+        }
+      );
+    });
+
+    const revertedIds = () =>
+      (packagePolicyService.update as jest.Mock).mock.calls
+        .filter(([, , , update]) => update.inputs[0].vars.role_arn.value === OLD_ARN)
+        .map(([, , id]) => id)
+        .sort();
+
+    it('leaves the policy alone and reports it when another edit landed after the write', async () => {
+      // The re-read version belongs to that edit, so restoring the snapshot with it would
+      // silently erase the edit instead of hitting a version conflict.
+      (packagePolicyService.get as jest.Mock).mockImplementation(async (_so, id: string) =>
+        id === 'b'
+          ? { ...makePolicy('b', NEW_ARN), name: 'renamed-by-someone-else', version: 'Wzb-other' }
+          : makePolicy(id)
+      );
+
+      await expect(
+        propagateRoleArnToPackagePolicies({
+          soClient,
+          esClient,
+          connectorId: CONNECTOR_ID,
+          newRoleArn: NEW_ARN,
+        })
+      ).rejects.toMatchObject({ detail: { updateFailed: ['b'], revertFailed: ['b'] } });
+      expect(revertedIds()).toEqual(['a']);
+    });
+
+    it('reverts the policy when only the compiled output differs from the write', async () => {
+      (packagePolicyService.get as jest.Mock).mockImplementation(async (_so, id: string) => {
+        if (id !== 'b') {
+          return makePolicy(id);
+        }
+        const persisted = makePolicy('b', NEW_ARN);
+        return {
+          ...persisted,
+          version: 'Wzb-persisted',
+          inputs: persisted.inputs.map((input) => ({ ...input, compiled_input: { compiled: 1 } })),
+        };
+      });
+
+      await expect(
+        propagateRoleArnToPackagePolicies({
+          soClient,
+          esClient,
+          connectorId: CONNECTOR_ID,
+          newRoleArn: NEW_ARN,
+        })
+      ).rejects.toMatchObject({ detail: { updateFailed: ['b'], revertFailed: [] } });
+      expect(revertedIds()).toEqual(['a', 'b']);
+      const revertOfB = (packagePolicyService.update as jest.Mock).mock.calls.find(
+        ([, , id, update]) => id === 'b' && update.inputs[0].vars.role_arn.value === OLD_ARN
+      );
+      expect(revertOfB?.[3].version).toBe('Wzb-persisted');
+    });
+  });
+
   it('does not revert when a failed update left the policy with no Role ARN fields', async () => {
     // `!rewrite(...).changed` is also true when every role_arn key was removed by a concurrent
     // edit; treating that as "persisted new ARN" would resurrect the stale snapshot on revert.

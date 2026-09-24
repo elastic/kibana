@@ -14,6 +14,7 @@ import {
 } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
+import { isEqual, omit } from 'lodash';
 import pMap from 'p-map';
 
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../common/constants';
@@ -85,6 +86,27 @@ const renderPolicyIds = (ids: string[]): string => {
   const remaining = ids.length - shown.length;
   return remaining > 0 ? `${shown.join(', ')}, +${remaining} more` : shown.join(', ');
 };
+
+/** The fields a Role ARN write sends, without the compiled output the service regenerates. */
+const writtenFields = (
+  policy: PackagePolicy,
+  vars: NewPackagePolicy['vars'],
+  inputs: NewPackagePolicy['inputs']
+) => ({
+  ...toPackagePolicyUpdate(policy),
+  vars,
+  inputs: inputs.map((input) => ({
+    ...omit(input, 'compiled_input'),
+    streams: input.streams.map((stream) => omit(stream, 'compiled_stream')),
+  })),
+});
+
+/** True when every field the plan's forward write sent is still what the policy stores. */
+const policyHoldsPlannedWrite = (current: PackagePolicy, plan: PolicyPlan): boolean =>
+  isEqual(
+    writtenFields(current, current.vars, current.inputs),
+    writtenFields(plan.policy, plan.updatedVars, plan.updatedInputs)
+  );
 
 /**
  * Fan out a new role ARN to every package policy that references this connector **in
@@ -442,8 +464,10 @@ export const propagateRoleArnToPackagePolicies = async ({
   // `packagePolicyService.update` persists the SO before later compilation / secret cleanup /
   // post-update callbacks. A rejection after that persist would leave the policy on the new ARN
   // while classifying it as `updateFailed` (and therefore out of Phase 2). On a non-conflict
-  // error we re-read and, if the stored ARN is already the new value, add the plan to
-  // `succeeded` so Phase 2 reverts it too.
+  // error we re-read and, if the policy still stores exactly what this write sent, add the plan
+  // to `succeeded` so Phase 2 reverts it too. If anything else changed since, the re-read
+  // version belongs to another edit that a snapshot restore would erase, so the policy is
+  // reported as left on the new ARN instead.
   //
   // An optimistic-concurrency conflict is different: this request's write was rejected, so a
   // re-read that shows the new ARN means another writer stored it. Role ARN saves on a connector
@@ -479,9 +503,13 @@ export const propagateRoleArnToPackagePolicies = async ({
               return;
             }
             // SO write landed (every role_arn field is already the new value) and a later step
-            // rejected. Include it in the revert set. Do not use bare `!changed` — that is also
-            // true when a concurrent edit removed all Role ARN fields.
-            succeeded.push({ ...plan, writeVersion: current.version });
+            // rejected. Do not use bare `!changed` — that is also true when a concurrent edit
+            // removed all Role ARN fields.
+            if (policyHoldsPlannedWrite(current, plan)) {
+              succeeded.push({ ...plan, writeVersion: current.version });
+            } else {
+              changedByOtherWriter.push(plan.policy.id);
+            }
           }
         } catch (reReadError) {
           const reReadMessage =
