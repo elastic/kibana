@@ -13,7 +13,7 @@ import type { TestFailure } from './get_failures';
 import { getLocationFromClassname } from './get_failures';
 import type { ScoutTestFailureExtended } from './get_scout_failures';
 
-const DASHBOARD_URL = 'https://ops.kibana.dev/s/ci/app/dashboards#/view/ci-test-history-ftr-scout';
+const DASHBOARD_URL = 'https://ops.kibana.dev/s/ci/app/dashboards#/view/test-failure-history';
 const LINK_LABEL = 'Test history: [passes and failures over time]';
 
 const risonString = (value: string): string => `'${value.replace(/!/g, '!!').replace(/'/g, "!'")}'`;

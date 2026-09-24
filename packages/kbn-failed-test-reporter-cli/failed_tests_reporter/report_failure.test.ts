@@ -117,7 +117,7 @@ describe('createFailureIssue()', () => {
 
       First failure: [kibana-on-merge - main](https://build-url)
 
-      Test history: [passes and failures over time](https://ops.kibana.dev/s/ci/app/dashboards#/view/ci-test-history-ftr-scout?_g=(time%3A(from%3Anow-30d%2Cto%3Anow))&_a=(query%3A(language%3Akuery%2Cquery%3A'test.id%20%3A%20%22a390190e0c2e618-b5e69c6ebadcc39%22')))
+      Test history: [passes and failures over time](https://ops.kibana.dev/s/ci/app/dashboards#/view/test-failure-history?_g=(time%3A(from%3Anow-30d%2Cto%3Anow))&_a=(query%3A(language%3Akuery%2Cquery%3A'test.id%20%3A%20%22a390190e0c2e618-b5e69c6ebadcc39%22')))
 
       <!-- kibanaCiData = {\\"failed-test\\":{\\"test.class\\":\\"Chrome X-Pack UI Functional Tests.x-pack/platform/test/functional/apps/maps/sample_data·js\\",\\"test.name\\":\\"maps app maps loaded from sample data\\",\\"test.failCount\\":1,\\"test.type\\":\\"ftr\\"}} -->",
             Array [
@@ -288,12 +288,10 @@ describe('updateFailureIssue()', () => {
     );
 
     const [, body] = api.editIssueBodyAndEnsureOpen.mock.calls[0];
-    expect(body).toContain(
-      'https://ops.kibana.dev/s/ci/app/dashboards#/view/ci-test-history-ftr-scout'
-    );
+    expect(body).toContain('https://ops.kibana.dev/s/ci/app/dashboards#/view/test-failure-history');
     expect(body).toContain('"test.failCount":3');
     expect(api.addIssueComment.mock.calls[0][1]).toContain(
-      'https://ops.kibana.dev/s/ci/app/dashboards#/view/ci-test-history-ftr-scout'
+      'https://ops.kibana.dev/s/ci/app/dashboards#/view/test-failure-history'
     );
   });
 
@@ -672,7 +670,7 @@ describe('updateFailureIssue()', () => {
             5678,
             "New failure for \\"local-serverless-observability_complete\\" target: [kibana-on-merge - main](https://build-url)
 
-      Test history: [passes and failures over time](https://ops.kibana.dev/s/ci/app/dashboards#/view/ci-test-history-ftr-scout?_g=(time%3A(from%3Anow-30d%2Cto%3Anow))&_a=(query%3A(language%3Akuery%2Cquery%3A'test.id%20%3A%20%22test-id-123%22')))",
+      Test history: [passes and failures over time](https://ops.kibana.dev/s/ci/app/dashboards#/view/test-failure-history?_g=(time%3A(from%3Anow-30d%2Cto%3Anow))&_a=(query%3A(language%3Akuery%2Cquery%3A'test.id%20%3A%20%22test-id-123%22')))",
           ],
         ],
         "results": Array [
@@ -866,7 +864,7 @@ describe('updateFailureIssue()', () => {
       dedent`
         New failure for "local-serverless-observability_complete" target: [kibana-on-merge - main](https://build-url)
 
-        Test history: [passes and failures over time](https://ops.kibana.dev/s/ci/app/dashboards#/view/ci-test-history-ftr-scout?_g=(time%3A(from%3Anow-30d%2Cto%3Anow))&_a=(query%3A(language%3Akuery%2Cquery%3A'test.id%20%3A%20%22test-id-1213%22')))
+        Test history: [passes and failures over time](https://ops.kibana.dev/s/ci/app/dashboards#/view/test-failure-history?_g=(time%3A(from%3Anow-30d%2Cto%3Anow))&_a=(query%3A(language%3Akuery%2Cquery%3A'test.id%20%3A%20%22test-id-1213%22')))
 
         New error message:
         \`\`\`
@@ -1010,7 +1008,7 @@ describe('createFailureIssue() - Scout failures', () => {
 
       First failure: [kibana-on-merge - main](https://build-url)
 
-      Test history: [passes and failures over time](https://ops.kibana.dev/s/ci/app/dashboards#/view/ci-test-history-ftr-scout?_g=(time%3A(from%3Anow-30d%2Cto%3Anow))&_a=(query%3A(language%3Akuery%2Cquery%3A'test.id%20%3A%20%22test-id-123%22')))
+      Test history: [passes and failures over time](https://ops.kibana.dev/s/ci/app/dashboards#/view/test-failure-history?_g=(time%3A(from%3Anow-30d%2Cto%3Anow))&_a=(query%3A(language%3Akuery%2Cquery%3A'test.id%20%3A%20%22test-id-123%22')))
 
       <!-- kibanaCiData = {\\"failed-test\\":{\\"test.class\\":\\"scout.suite\\",\\"test.name\\":\\"scout test name\\",\\"test.failCount\\":1,\\"test.type\\":\\"scout\\"}} -->",
             Array [

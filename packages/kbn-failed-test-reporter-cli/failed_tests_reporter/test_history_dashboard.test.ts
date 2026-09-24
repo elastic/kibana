@@ -25,9 +25,7 @@ describe('testHistoryDashboardUrl', () => {
     const url = testHistoryDashboardUrl(ftrFailure);
     const appState = new URLSearchParams(url?.split('?')[1]).get('_a');
 
-    expect(url).toContain(
-      'https://ops.kibana.dev/s/ci/app/dashboards#/view/ci-test-history-ftr-scout'
-    );
+    expect(url).toContain('https://ops.kibana.dev/s/ci/app/dashboards#/view/test-failure-history');
     expect(appState).toContain('test.id : "178cfea9207c0c2-dcbb0961455429b"');
     expect(appState).not.toContain('fullName');
   });
@@ -83,5 +81,8 @@ describe('withTestHistoryDashboardLink', () => {
     expect(linked.indexOf('Test history:')).toBeLessThan(linked.indexOf('<!-- kibanaCiData'));
     expect(getIssueMetadata(linked, 'test.failCount')).toBe(2);
     expect(withTestHistoryDashboardLink(linked, ftrFailure)).toBe(linked);
+
+    const oldLink = linked.replace('/view/test-failure-history', '/view/ci-test-history-ftr-scout');
+    expect(withTestHistoryDashboardLink(oldLink, ftrFailure)).toBe(linked);
   });
 });
