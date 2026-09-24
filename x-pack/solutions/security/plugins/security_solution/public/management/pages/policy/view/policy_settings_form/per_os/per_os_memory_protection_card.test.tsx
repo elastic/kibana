@@ -319,7 +319,7 @@ describe('PerOsMemoryProtectionCard', () => {
           expect(getCustomYaraSignaturesSwitch(os)).toBeEnabled();
         }
         expect(renderResult.getByTestId(testSubj.windows.customYaraSignatures)).toHaveTextContent(
-          'Apply custom YARA signatures in detection mode'
+          'Apply custom YARA signatures'
         );
       });
 

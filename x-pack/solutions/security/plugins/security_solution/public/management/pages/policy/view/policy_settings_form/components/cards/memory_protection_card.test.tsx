@@ -391,9 +391,7 @@ describe('Policy Memory Protections Card', () => {
         expect(
           getByTestId(testSubj.customYaraSignaturesEnableDisableSwitch).getAttribute('aria-checked')
         ).toBe('true');
-        expect(getByTestId(testSubj.card)).toHaveTextContent(
-          'Apply custom YARA signatures in detection mode'
-        );
+        expect(getByTestId(testSubj.card)).toHaveTextContent('Apply custom YARA signatures');
       });
     });
   });

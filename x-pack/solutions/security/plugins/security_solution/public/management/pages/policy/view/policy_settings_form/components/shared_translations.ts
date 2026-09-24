@@ -40,7 +40,7 @@ export const CUSTOMIZE_NOTIFICATION_MESSAGE_LABEL = i18n.translate(
 export const CUSTOM_YARA_SIGNATURES_LABEL = i18n.translate(
   'xpack.securitySolution.endpoint.policy.protections.customYaraSignaturesLabel',
   {
-    defaultMessage: 'Apply custom YARA signatures in detection mode',
+    defaultMessage: 'Apply custom YARA signatures',
   }
 );
 
