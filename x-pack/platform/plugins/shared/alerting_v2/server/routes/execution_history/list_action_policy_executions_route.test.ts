@@ -30,7 +30,6 @@ const item: PolicyExecutionHistoryItem = {
   error: null,
 };
 
-
 const createMocks = () => {
   const deps = createRouteDependencies();
   const executionHistoryClient: jest.Mocked<

@@ -197,9 +197,9 @@ describe('rule_execution_history_schema', () => {
       });
 
       it('rejects date-only strings without a time component', () => {
-        expect(
-          listRuleExecutionsRequestSchema.safeParse({ from: '2026-06-01' }).success
-        ).toBe(false);
+        expect(listRuleExecutionsRequestSchema.safeParse({ from: '2026-06-01' }).success).toBe(
+          false
+        );
       });
     });
 

@@ -309,9 +309,9 @@ describe('policy_execution_history_schema', () => {
 
     describe('sort_field / sort_order', () => {
       it('accepts dispatched_at as the sort field', () => {
-        expect(listPolicyExecutionHistoryRequestSchema.parse({ sort_field: 'dispatched_at' }).sort_field).toBe(
-          'dispatched_at'
-        );
+        expect(
+          listPolicyExecutionHistoryRequestSchema.parse({ sort_field: 'dispatched_at' }).sort_field
+        ).toBe('dispatched_at');
       });
 
       it('rejects sort fields the action policy stream does not expose', () => {
