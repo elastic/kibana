@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiIconTip, EuiLink, EuiText } from '@elastic/eui';
+import { EuiLink, EuiText } from '@elastic/eui';
 import React from 'react';
 import type { SyntheticEvent } from 'react';
 import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
@@ -64,18 +64,14 @@ export const getHostsColumns = (
     },
     {
       field: 'node.lastSeen',
-      name: (
-        <>
-          {i18n.LAST_SEEN}{' '}
-          <EuiIconTip
-            content={i18n.FIRST_LAST_SEEN_TOOLTIP}
-            type="info"
-            color="subdued"
-            aria-label={i18n.LAST_SEEN_TOOLTIP_ARIA_LABEL}
-            anchorProps={{ className: 'eui-alignTop' }}
-          />
-        </>
-      ),
+      name: i18n.LAST_SEEN,
+      // This column is sortable, so EUI wraps the whole header button in the
+      // tooltip and renders the icon as decorative. Labelling the icon here
+      // would pollute the sort button's accessible name.
+      nameTooltip: {
+        content: i18n.FIRST_LAST_SEEN_TOOLTIP,
+        icon: 'info',
+      },
       truncateText: false,
       mobileOptions: { show: true },
       sortable: true,
@@ -92,18 +88,12 @@ export const getHostsColumns = (
     },
     {
       field: 'node.host.os.name',
-      name: (
-        <>
-          {i18n.OS}{' '}
-          <EuiIconTip
-            content={i18n.OS_LAST_SEEN_TOOLTIP}
-            type="info"
-            color="subdued"
-            aria-label={i18n.OS_TOOLTIP_ARIA_LABEL}
-            anchorProps={{ className: 'eui-alignTop' }}
-          />
-        </>
-      ),
+      name: i18n.OS,
+      nameTooltip: {
+        content: i18n.OS_LAST_SEEN_TOOLTIP,
+        icon: 'info',
+        iconProps: { 'aria-label': i18n.OS_TOOLTIP_ARIA_LABEL },
+      },
       truncateText: false,
       mobileOptions: { show: true },
       sortable: false,

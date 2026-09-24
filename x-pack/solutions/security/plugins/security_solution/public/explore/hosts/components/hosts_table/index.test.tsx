@@ -121,12 +121,16 @@ describe('Hosts Table', () => {
         </TestProviders>
       );
 
+      // "Last seen" is sortable, so EUI wraps the whole header in the tooltip
+      // and the natively focusable sort button is the tooltip anchor.
+      expect(
+        screen.getByTestId('tableHeaderCell_node.lastSeen_1').querySelector('button')
+      ).toBeInTheDocument();
+
+      // "OS" is not sortable, so EUI renders a focusable icon as the anchor.
       // The EUI test environment renders `EuiIcon` as a stub that outputs its
       // `aria-label` as text content instead of as an attribute.
-      const lastSeenTooltip = screen.getByText('More information about the last seen column');
       const osTooltip = screen.getByText('More information about the operating system column');
-
-      expect(lastSeenTooltip).toHaveAttribute('tabindex', '0');
       expect(osTooltip).toHaveAttribute('tabindex', '0');
     });
 
