@@ -48,7 +48,7 @@ paths:
             application/json:
               schema:
                 type: object
-                required: [status, behaviors, indexed_behaviors, next_step, hasHit]
+                required: [status, behaviors, indexed_behaviors, next_step, has_hit]
                 properties:
                   status:
                     $ref: '#/components/schemas/HuntBehaviorStatus'
@@ -194,7 +194,7 @@ paths:
                     type: string
                   next_step:
                     type: string
-                  hasHit:
+                  has_hit:
                     type: boolean
                     description: >-
                       True when any behavior's execute path found at least one

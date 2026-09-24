@@ -84,5 +84,5 @@ export const rewriteLimit = (query: string, limit: number): string => {
 };
 
 /** Inject METADATA _id,_index (when absent) and bind the row LIMIT for execute. */
-export const prepareEsqlForExecute = (query: string, rowLimit: number): string =>
-  rewriteLimit(injectMetadataIndex(query), rowLimit);
+export const prepareEsqlForExecute = (query: string, row_limit: number): string =>
+  rewriteLimit(injectMetadataIndex(query), row_limit);

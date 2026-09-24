@@ -16,7 +16,7 @@ const scope: ResolvedIndexScope = {
   optional: ['logs-endpoint.events.*', '.alerts-security.alerts-default'],
   missing: [],
   window: { from: '2026-08-19T00:00:00.000Z', to: '2026-09-18T00:00:00.000Z' },
-  rowLimit: 25,
+  row_limit: 25,
 };
 
 const buildEsClient = (searchResponse: unknown): ElasticsearchClient =>
@@ -43,7 +43,7 @@ describe('huntForThreat', () => {
     });
 
     expect(result.status).toBe('no_searchable_terms');
-    expect(result.hasConfirmedHit).toBe(false);
+    expect(result.has_confirmed_hit).toBe(false);
     expect(esClient.search).not.toHaveBeenCalled();
   });
 
@@ -56,11 +56,11 @@ describe('huntForThreat', () => {
     });
 
     expect(result.status).toBe('no_environment_hits');
-    expect(result.hasConfirmedHit).toBe(false);
-    expect(result.counts.totalHits).toBe(0);
+    expect(result.has_confirmed_hit).toBe(false);
+    expect(result.counts.total_hits).toBe(0);
   });
 
-  it('sets hasConfirmedHit when a hit lands in a required index', async () => {
+  it('sets has_confirmed_hit when a hit lands in a required index', async () => {
     const esClient = buildEsClient({
       hits: {
         total: { value: 1 },
@@ -86,7 +86,7 @@ describe('huntForThreat', () => {
     });
 
     expect(result.status).toBe('environment_hits_found');
-    expect(result.hasConfirmedHit).toBe(true);
+    expect(result.has_confirmed_hit).toBe(true);
     expect(result.hits).toHaveLength(1);
   });
 
@@ -116,10 +116,10 @@ describe('huntForThreat', () => {
       iocs: [{ type: 'ip', value: '10.0.0.1' }],
     });
 
-    expect(result.hasConfirmedHit).toBe(true);
+    expect(result.has_confirmed_hit).toBe(true);
   });
 
-  it('does NOT set hasConfirmedHit when the only hit is in an optional index', async () => {
+  it('does NOT set has_confirmed_hit when the only hit is in an optional index', async () => {
     const esClient = buildEsClient({
       hits: {
         total: { value: 1 },
@@ -145,7 +145,7 @@ describe('huntForThreat', () => {
     });
 
     expect(result.status).toBe('environment_hits_found');
-    expect(result.hasConfirmedHit).toBe(false);
+    expect(result.has_confirmed_hit).toBe(false);
   });
 
   it('searches both required and optional patterns together with ignore_unavailable', async () => {
@@ -158,23 +158,23 @@ describe('huntForThreat', () => {
         index: [...scope.required, ...scope.optional],
         ignore_unavailable: true,
         allow_no_indices: true,
-        size: scope.rowLimit,
+        size: scope.row_limit,
       })
     );
   });
 
-  it('honors a caller-supplied timeRange and size override', async () => {
+  it('honors a caller-supplied time_range and size override', async () => {
     const esClient = buildEsClient(emptySearchResponse);
-    const timeRange = { from: '2026-09-17T00:00:00.000Z', to: '2026-09-18T00:00:00.000Z' };
+    const time_range = { from: '2026-09-17T00:00:00.000Z', to: '2026-09-18T00:00:00.000Z' };
 
     const result = await huntForThreat(esClient, {
       scope,
       iocs: [{ type: 'ip', value: '10.0.0.1' }],
-      timeRange,
+      time_range,
       size: 100,
     });
 
-    expect(result.timeRange).toEqual(timeRange);
+    expect(result.time_range).toEqual(time_range);
     expect(esClient.search).toHaveBeenCalledWith(expect.objectContaining({ size: 100 }));
   });
 
@@ -229,10 +229,10 @@ describe('huntForThreat', () => {
       iocs: [{ type: 'ip', value: '10.0.0.1' }],
     });
 
-    expect(result.affectedAssets.users).toEqual([
-      { name: 'dev-user', hitCount: 4 },
-      { name: 'legacy-service-account', hitCount: 2 },
+    expect(result.affected_assets.users).toEqual([
+      { name: 'dev-user', hit_count: 4 },
+      { name: 'legacy-service-account', hit_count: 2 },
     ]);
-    expect(result.affectedAssets.services).toEqual([{ name: 'escalated-role', hitCount: 6 }]);
+    expect(result.affected_assets.services).toEqual([{ name: 'escalated-role', hit_count: 6 }]);
   });
 });

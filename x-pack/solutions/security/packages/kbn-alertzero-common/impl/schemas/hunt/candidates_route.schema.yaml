@@ -10,7 +10,7 @@ paths:
       operationId: Candidates
       description: >-
         The single source of truth for hunt-once candidate selection. Named
-        reportIds mean manual-bypass semantics; absent or empty means a
+        report_ids mean manual-bypass semantics; absent or empty means a
         scheduled-shaped sweep.
       summary: Get candidate report ids for the next hunt run
       tags:
@@ -23,7 +23,7 @@ paths:
               type: object
               additionalProperties: false
               properties:
-                reportIds:
+                report_ids:
                   type: array
                   maxItems: 10
                   items:

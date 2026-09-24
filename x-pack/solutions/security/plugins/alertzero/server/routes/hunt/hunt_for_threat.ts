@@ -43,7 +43,7 @@ export const registerHuntForThreatRoute = ({ router, logger, getSpaceId }: Route
       },
       async (context, request, response) => {
         try {
-          const { technology, iocs, techniques, timeRange, size } = request.body;
+          const { technology, iocs, techniques, time_range, size } = request.body;
           const spaceId = getSpaceId(request);
           const esClient = (await context.core).elasticsearch.client.asCurrentUser;
 
@@ -68,7 +68,7 @@ export const registerHuntForThreatRoute = ({ router, logger, getSpaceId }: Route
             scope,
             iocs,
             techniques,
-            timeRange,
+            time_range,
             size,
           });
 

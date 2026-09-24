@@ -14,7 +14,7 @@ import { buildHuntInvestigationConversationId } from './hunt_investigation_id';
 export interface CandidateQueryParams {
   trigger: 'manual' | 'scheduled';
   /** For manual bypass: hunt exactly these report ids (bypasses hunt-once gate, still excludes open proposals). */
-  reportIds?: string[];
+  report_ids?: string[];
   spaceId: string;
   /** 1-10, default 10. */
   limit?: number;
@@ -53,10 +53,10 @@ export const buildCandidateQuery = async (
   params: CandidateQueryParams,
   readOpenProposalConversationIds?: OpenProposalConversationIdsReader
 ): Promise<CandidateQueryResult> => {
-  const { trigger, reportIds, spaceId, limit: rawLimit } = params;
+  const { trigger, report_ids, spaceId, limit: rawLimit } = params;
   const limit = Math.min(rawLimit ?? DEFAULT_LIMIT, MAX_LIMIT);
 
-  const isManualWithIds = trigger === 'manual' && reportIds && reportIds.length > 0;
+  const isManualWithIds = trigger === 'manual' && report_ids && report_ids.length > 0;
 
   const filterClauses: Array<Record<string, unknown>> = [buildHuntSpaceFilterTerms(spaceId)];
 
@@ -64,7 +64,7 @@ export const buildCandidateQuery = async (
     // Manual bypass: target exactly these report ids. The hunt-once gate is bypassed
     // for explicit ids (replay/re-run semantics), but the open-proposal guard below
     // still applies.
-    filterClauses.push({ ids: { values: reportIds } });
+    filterClauses.push({ ids: { values: report_ids } });
   } else {
     // Scheduled trigger: hunt-once gate, only reports never hunted in this space.
     //
@@ -182,7 +182,7 @@ export const buildCandidateQuery = async (
   // caller's side an unknown id and an id in another space are both "not selected".
   if (isManualWithIds) {
     const matched = new Set(matchedIds);
-    for (const requested of reportIds) {
+    for (const requested of report_ids) {
       if (!matched.has(requested)) {
         skipped.push({ id: requested, reason: 'not_found' });
       }

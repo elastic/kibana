@@ -212,7 +212,7 @@ const executeValidatedEsql = async ({
   techniqueId,
   esql,
   window,
-  rowLimit,
+  row_limit,
   requiredIndices,
 }: {
   esClient: ElasticsearchClient;
@@ -220,7 +220,7 @@ const executeValidatedEsql = async ({
   techniqueId: string;
   esql: string;
   window: { from: string; to: string };
-  rowLimit: number;
+  row_limit: number;
   requiredIndices: string[];
 }): Promise<{
   execution: BehaviorExecution;
@@ -230,7 +230,7 @@ const executeValidatedEsql = async ({
   affected_users_truncated?: boolean;
   hit_refs?: BehaviorHitRef[];
 }> => {
-  const prepared = prepareEsqlForExecute(esql, rowLimit);
+  const prepared = prepareEsqlForExecute(esql, row_limit);
   const matchesRequired = buildMatchesRequired(requiredIndices);
 
   try {
@@ -477,14 +477,14 @@ export const huntBehavior = async (
     article_context: articleContext,
     window,
     size,
-    row_limit: rowLimitParam,
+    row_limit: rowLimitFromParams,
     required_indices: requiredIndices = [],
   } = params;
 
-  const rowLimit = size ?? rowLimitParam;
+  const row_limit = size ?? rowLimitFromParams;
   const canExecute =
     window !== undefined &&
-    rowLimit !== undefined &&
+    row_limit !== undefined &&
     requiredIndices.length > 0 &&
     esClient !== undefined;
 
@@ -509,7 +509,7 @@ export const huntBehavior = async (
       report_id: reportId,
       behaviors: [],
       indexed_behaviors: [],
-      hasHit: false,
+      has_hit: false,
       message:
         'No behavioral candidates passed the LLM-confidence threshold. ' +
         'The report may be IOC-only or describe known/already-covered techniques.',
@@ -582,7 +582,7 @@ export const huntBehavior = async (
             techniqueId: behavior.technique_id,
             esql,
             window: window!,
-            rowLimit: rowLimit!,
+            row_limit: row_limit!,
             requiredIndices,
           });
           behavior.execution = executed.execution;
@@ -600,11 +600,11 @@ export const huntBehavior = async (
     }
   }
 
-  const hasHit = validated.some((b) => b.execution?.hit === true);
+  const has_hit = validated.some((b) => b.execution?.hit === true);
 
   logger.debug(
     `hunt_behavior validated=${validated.length} dropped=${droppedIds.length} ` +
-      `hasHit=${hasHit} report_id=${reportId}`
+      `has_hit=${has_hit} report_id=${reportId}`
   );
 
   return {
@@ -612,14 +612,14 @@ export const huntBehavior = async (
     report_id: reportId,
     behaviors: validated,
     indexed_behaviors: toIndexedBehaviors(validated, reportId),
-    hasHit,
+    has_hit,
     ...(droppedIds.length > 0 && { dropped_unknown_ids: droppedIds }),
     next_step:
       validated.length === 0
         ? 'No candidates matched the canonical ATT&CK catalog. The LLM may have ' +
           'hallucinated technique IDs; consider lowering the LLM threshold or falling ' +
           'back to IOC matching for this report.'
-        : hasHit
+        : has_hit
         ? 'Behaviors proposed; at least one grounded query hit a required index.'
         : 'Behaviors proposed for Investigation staging.',
   };

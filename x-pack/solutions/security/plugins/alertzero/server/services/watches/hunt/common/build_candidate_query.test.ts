@@ -59,12 +59,12 @@ describe('buildCandidateQuery', () => {
     expect(result.ids).toEqual(['rpt-1', 'rpt-2']);
   });
 
-  it('uses ids filter for manual trigger with explicit reportIds', async () => {
+  it('uses ids filter for manual trigger with explicit report_ids', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     esClient.search.mockResolvedValue(searchResponseOf(['rpt-abc']));
     const result = await buildCandidateQuery(esClient, logger, {
       trigger: 'manual',
-      reportIds: ['rpt-abc'],
+      report_ids: ['rpt-abc'],
       spaceId: 'default',
     });
     expect(result.ids).toContain('rpt-abc');
@@ -75,7 +75,7 @@ describe('buildCandidateQuery', () => {
     esClient.search.mockResolvedValue(searchResponseOf(['rpt-abc']));
     await buildCandidateQuery(esClient, logger, {
       trigger: 'manual',
-      reportIds: ['rpt-abc'],
+      report_ids: ['rpt-abc'],
       spaceId: 'default',
     });
     expect(JSON.stringify(searchBodyOf(esClient).query)).not.toContain('last_hunted_at');
@@ -177,7 +177,7 @@ describe('buildCandidateQuery', () => {
       const result = await buildCandidateQuery(
         esClient,
         logger,
-        { trigger: 'manual', reportIds: [hunted], spaceId: 'default' },
+        { trigger: 'manual', report_ids: [hunted], spaceId: 'default' },
         readOpenProposals
       );
       expect(result.ids).toEqual([]);
@@ -204,7 +204,7 @@ describe('buildCandidateQuery', () => {
     esClient.search.mockResolvedValue(searchResponseOf([]));
     const result = await buildCandidateQuery(esClient, logger, {
       trigger: 'manual',
-      reportIds: ['rpt-missing'],
+      report_ids: ['rpt-missing'],
       spaceId: 'default',
     });
     expect(result.skipped).toContainEqual({ id: 'rpt-missing', reason: 'not_found' });
@@ -238,7 +238,7 @@ describe('buildCandidateQuery', () => {
     esClient.search.mockResolvedValue(searchResponseOf([]));
     await buildCandidateQuery(esClient, logger, {
       trigger: 'manual',
-      reportIds: ['a', 'b'],
+      report_ids: ['a', 'b'],
       spaceId: 'default',
       limit: 5,
     });

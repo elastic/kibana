@@ -57,7 +57,7 @@ export const ResolvedIndexScope = lazySchema(() =>
     optional: z.array(z.string()),
     missing: z.array(z.string()),
     window: IndexScopeWindow,
-    rowLimit: z.number().int(),
+    row_limit: z.number().int(),
   })
 );
 export type ResolvedIndexScope = z.infer<typeof ResolvedIndexScope>;
@@ -91,7 +91,7 @@ export const HuntForThreatStatusEnum = HuntForThreatStatus.enum;
 export const AffectedAsset = lazySchema(() =>
   z.object({
     name: z.string(),
-    hitCount: z.number().int(),
+    hit_count: z.number().int(),
   })
 );
 export type AffectedAsset = z.infer<typeof AffectedAsset>;
@@ -131,35 +131,35 @@ export const HuntForThreatResult = lazySchema(() =>
     /**
      * A confirmed event match in a required index inside the window. Never set by an optional-index or out-of-window match.
      */
-    hasConfirmedHit: z
+    has_confirmed_hit: z
       .boolean()
       .describe(
         'A confirmed event match in a required index inside the window. Never set by an optional-index or out-of-window match.'
       ),
-    searchedIocs: z.number().int(),
-    searchedTechniques: z.number().int(),
-    resolvedIocs: z.array(HuntIoc),
-    resolvedTechniques: z.array(z.string()),
-    timeRange: z.object({
+    searched_iocs: z.number().int(),
+    searched_techniques: z.number().int(),
+    resolved_iocs: z.array(HuntIoc),
+    resolved_techniques: z.array(z.string()),
+    time_range: z.object({
       from: z.string(),
       to: z.string(),
     }),
     counts: z.object({
-      totalHits: z.number().int(),
-      returnedHits: z.number().int(),
-      affectedHosts: z.number().int(),
-      affectedUsers: z.number().int(),
+      total_hits: z.number().int(),
+      returned_hits: z.number().int(),
+      affected_hosts: z.number().int(),
+      affected_users: z.number().int(),
     }),
     hits: z.array(HuntForThreatHit),
-    affectedAssets: z.object({
+    affected_assets: z.object({
       hosts: z.array(AffectedAsset),
       users: z.array(AffectedAsset),
       services: z.array(AffectedAsset),
     }),
-    perIndex: z.array(
+    per_index: z.array(
       z.object({
         index: z.string(),
-        hitCount: z.number().int(),
+        hit_count: z.number().int(),
         /**
          * Regex match of this concrete `_index` bucket against the resolved technology's required index patterns (e.g. `logs-aws.*`), computed once by Tier 1, not re-derived downstream.
          */

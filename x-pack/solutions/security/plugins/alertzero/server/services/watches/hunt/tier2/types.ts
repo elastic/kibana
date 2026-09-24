@@ -31,10 +31,10 @@ export interface HuntBehaviorParams {
   article_context?: HuntBehaviorArticleContext;
   /**
    * Hunt window. When present (and dry-run passed), grounded queries execute
-   * against the environment. Absent → dry-run only, `hasHit` stays false.
+   * against the environment. Absent → dry-run only, `has_hit` stays false.
    */
   window?: { from: string; to: string };
-  /** Overrides `row_limit`, same resolution as Tier 1 (`size ?? scope.rowLimit`). */
+  /** Overrides `row_limit`, same resolution as Tier 1 (`size ?? scope.row_limit`). */
   size?: number;
   /** Scope row bound when `size` is absent. */
   row_limit?: number;
@@ -87,7 +87,7 @@ export interface HuntBehaviorResult {
    * True when any behavior's execute path found ≥1 row in a required index.
    * Independent of Tier 1: a technique-only report can set this without IOC hits.
    */
-  hasHit: boolean;
+  has_hit: boolean;
 }
 
 /** Mapping-safe projection for `extracted.behaviors` in `.kibana-threat-reports`. */

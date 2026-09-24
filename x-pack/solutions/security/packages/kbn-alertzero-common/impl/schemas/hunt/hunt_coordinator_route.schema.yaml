@@ -10,7 +10,7 @@ paths:
       operationId: HuntCoordinator
       description: >-
         Chains Tier 1 into Tier 2 with tier2_when gating and no-model
-        degradation. Returns completedSuccessfully so the calling workflow
+        degradation. Returns completed_successfully so the calling workflow
         decides whether to write the per-space evidence[] element.
       summary: Run the hunt coordinator
       tags:
@@ -107,19 +107,19 @@ paths:
                 type: object
                 required:
                   - status
-                  - runId
+                  - run_id
                   - technologies
                   - tier1
                   - message
                   - next_step
-                  - hasConfirmedHit
-                  - completedSuccessfully
+                  - has_confirmed_hit
+                  - completed_successfully
                 properties:
                   status:
                     $ref: '#/components/schemas/HuntCoordinatorStatus'
                   report_id:
                     type: string
-                  runId:
+                  run_id:
                     type: string
                   technologies:
                     type: array
@@ -145,7 +145,7 @@ paths:
                       - behaviors
                       - indexed_behaviors
                       - next_step
-                      - hasHit
+                      - has_hit
                     properties:
                       status:
                         type: string
@@ -290,7 +290,7 @@ paths:
                         type: string
                       next_step:
                         type: string
-                      hasHit:
+                      has_hit:
                         type: boolean
                         description: >-
                           True when any behavior's execute path found at least
@@ -304,14 +304,14 @@ paths:
                     type: string
                   next_step:
                     type: string
-                  hasConfirmedHit:
+                  has_confirmed_hit:
                     type: boolean
                     description: >-
                       True when Tier 1 confirmed a required-index hit or any
                       Tier 2 behavior executed with a required-index hit.
                       Callers that gate SSE emit or packaging on the hit bar
-                      must read this field, not tier1.hasConfirmedHit alone.
-                  completedSuccessfully:
+                      must read this field, not tier1.has_confirmed_hit alone.
+                  completed_successfully:
                     type: boolean
                     description: >-
                       True when the run completed without hard errors. The

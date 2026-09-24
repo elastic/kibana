@@ -49,7 +49,7 @@ export interface HuntCoordinatorParams {
   tier2_when?: 'on_hits' | 'always' | 'never';
   max_tier2_sample_events?: number;
   trigger: 'manual' | 'scheduled';
-  runId: string;
+  run_id: string;
 }
 
 export interface HuntCoordinatorTier1 extends HuntForThreatResult {
@@ -63,7 +63,7 @@ export interface HuntCoordinatorTier2 extends HuntBehaviorResult {
 export interface HuntCoordinatorResult {
   status: HuntCoordinatorStatus;
   report_id?: string;
-  runId: string;
+  run_id: string;
   /** Technologies whose indices the hunt actually ran against; empty when the scope was blocked. */
   technologies: HuntTechnology[];
   tier1: HuntCoordinatorTier1;
@@ -74,14 +74,14 @@ export interface HuntCoordinatorResult {
   /**
    * True when Tier 1 confirmed a required-index hit or any Tier 2 behavior
    * executed with a required-index hit. Callers that gate SSE emit / packaging
-   * on the hit bar must read this field, not `tier1.hasConfirmedHit` alone.
+   * on the hit bar must read this field, not `tier1.has_confirmed_hit` alone.
    */
-  hasConfirmedHit: boolean;
+  has_confirmed_hit: boolean;
   /**
    * True when the run completed without hard errors. The calling workflow checks
    * this before writing hunt evidence; the coordinator itself never writes feedback.
    */
-  completedSuccessfully: boolean;
+  completed_successfully: boolean;
 }
 
 const DEFAULT_TIER2_SAMPLE_EVENTS = 5;
@@ -196,17 +196,17 @@ const buildArticleContext = (
 ): HuntBehaviorArticleContext | undefined => {
   if (tier1.status === 'environment_hits_found') {
     const context: HuntBehaviorArticleContext = {};
-    const hosts = tier1.affectedAssets.hosts.map((h) => h.name).filter((n) => n.length > 0);
-    const users = tier1.affectedAssets.users.map((u) => u.name).filter((n) => n.length > 0);
+    const hosts = tier1.affected_assets.hosts.map((h) => h.name).filter((n) => n.length > 0);
+    const users = tier1.affected_assets.users.map((u) => u.name).filter((n) => n.length > 0);
     if (hosts.length > 0) context.affected_hosts = hosts;
     if (users.length > 0) context.affected_users = users;
-    if (tier1.perIndex.length > 0) {
-      context.matched_indices = tier1.perIndex.map((entry) => entry.index);
+    if (tier1.per_index.length > 0) {
+      context.matched_indices = tier1.per_index.map((entry) => entry.index);
     }
     if (tier1.hits.length > 0) {
       context.sample_events = tier1.hits.slice(0, maxSamples).map(summarizeHit);
     }
-    if (tier1.timeRange) context.time_range = tier1.timeRange;
+    if (tier1.time_range) context.time_range = tier1.time_range;
     return Object.keys(context).length === 0 ? undefined : context;
   }
 
@@ -220,7 +220,7 @@ const buildArticleContext = (
   if (grounding.sampleEvents.length > 0) {
     context.sample_events = grounding.sampleEvents;
   }
-  if (tier1.timeRange) context.time_range = tier1.timeRange;
+  if (tier1.time_range) context.time_range = tier1.time_range;
   return Object.keys(context).length === 0 ? undefined : context;
 };
 
@@ -235,7 +235,7 @@ const decideTier2Skip = (
   }
   // Gate on the confirmed hit bar, not merely `environment_hits_found`: optional-only
   // matches (alerts, endpoint) populate hits/counts but must not burn a Tier 2 run.
-  if (tier2When === 'on_hits' && !tier1.hasConfirmedHit) {
+  if (tier2When === 'on_hits' && !tier1.has_confirmed_hit) {
     return 'no_environment_hits';
   }
   return null;
@@ -252,14 +252,14 @@ export const huntCoordinator = async (
     spaceId,
     iocs: callerIocs = [],
     techniques: callerTechniques = [],
-    time_range: timeRange,
+    time_range: time_range,
     size,
     max_assets: maxAssets,
     llm_confidence_threshold: llmThreshold,
     tier2_when: tier2When = 'always',
     max_tier2_sample_events: maxSamples = DEFAULT_TIER2_SAMPLE_EVENTS,
     text: callerText,
-    runId,
+    run_id,
     technology,
   } = params;
 
@@ -277,7 +277,7 @@ export const huntCoordinator = async (
     return {
       status: 'tier1_only',
       report_id: reportId,
-      runId,
+      run_id,
       technologies: [],
       tier1: {
         tier: 1,
@@ -285,7 +285,7 @@ export const huntCoordinator = async (
           'no_searchable_terms',
           [],
           [],
-          timeRange ?? { from: 'now-24h', to: 'now' },
+          time_range ?? { from: 'now-24h', to: 'now' },
           message
         ),
       },
@@ -293,8 +293,8 @@ export const huntCoordinator = async (
       message,
       next_step:
         'Pass a report id that exists in this space, or pass iocs/techniques/text explicitly.',
-      hasConfirmedHit: false,
-      completedSuccessfully: false,
+      has_confirmed_hit: false,
+      completed_successfully: false,
     };
   }
   const iocs = callerIocs.length > 0 ? callerIocs : reportContext?.iocs ?? [];
@@ -318,21 +318,21 @@ export const huntCoordinator = async (
         'no_searchable_terms',
         [],
         [],
-        timeRange ?? { from: 'now-24h', to: 'now' },
+        time_range ?? { from: 'now-24h', to: 'now' },
         `Index scope resolution failed: ${(err as Error).message}`
       ),
     };
     return {
       status: 'tier1_only',
       report_id: reportId,
-      runId,
+      run_id,
       technologies: [],
       tier1: emptyTier1,
       tier2_skipped_reason: 'no_searchable_input',
       message: `Scope resolution failed: ${(err as Error).message}`,
       next_step: 'Verify the technology index patterns are configured correctly.',
-      hasConfirmedHit: false,
-      completedSuccessfully: false,
+      has_confirmed_hit: false,
+      completed_successfully: false,
     };
   }
 
@@ -348,7 +348,7 @@ export const huntCoordinator = async (
     return {
       status: 'blocked',
       report_id: reportId,
-      runId,
+      run_id,
       technologies,
       tier1: {
         tier: 1,
@@ -356,7 +356,7 @@ export const huntCoordinator = async (
           'scope_blocked',
           iocs,
           techniques,
-          timeRange ?? indexScope.window,
+          time_range ?? indexScope.window,
           message
         ),
       },
@@ -364,8 +364,8 @@ export const huntCoordinator = async (
       message,
       next_step:
         'Install the integration whose indices this hunt needs, or pass a technology whose indices exist in this space.',
-      hasConfirmedHit: false,
-      completedSuccessfully: false,
+      has_confirmed_hit: false,
+      completed_successfully: false,
     };
   }
 
@@ -373,7 +373,7 @@ export const huntCoordinator = async (
     scope: indexScope,
     iocs,
     techniques,
-    timeRange,
+    time_range,
     size,
     maxAssets,
   });
@@ -384,23 +384,23 @@ export const huntCoordinator = async (
     reason,
     message,
     nextStep,
-    completedSuccessfully,
+    completed_successfully,
   }: {
     reason: HuntCoordinatorTier2SkipReason;
     message: string;
     nextStep: string;
-    completedSuccessfully: boolean;
+    completed_successfully: boolean;
   }): HuntCoordinatorResult => ({
     status: 'tier1_only',
     report_id: reportId,
-    runId,
+    run_id,
     technologies,
     tier1,
     tier2_skipped_reason: reason,
     message,
     next_step: nextStep,
-    hasConfirmedHit: tier1Raw.hasConfirmedHit,
-    completedSuccessfully,
+    has_confirmed_hit: tier1Raw.has_confirmed_hit,
+    completed_successfully,
   });
 
   const skipReason = decideTier2Skip(tier2When, tier1Raw);
@@ -412,7 +412,7 @@ export const huntCoordinator = async (
         tier1Raw.status === 'environment_hits_found'
           ? 'Tier 1 matched. Re-run with tier2_when: "always" for behavioral rule proposals.'
           : 'No environment matches. Consider widening time_range.',
-      completedSuccessfully: true,
+      completed_successfully: true,
     });
   }
 
@@ -422,7 +422,7 @@ export const huntCoordinator = async (
       message: `Tier 1: ${tier1Raw.status}. Tier 2 skipped (no GenAI connector).`,
       nextStep:
         'Tier 2 requires a GenAI connector. Configure one via Stack Management → Connectors.',
-      completedSuccessfully: true,
+      completed_successfully: true,
     });
   }
 
@@ -430,24 +430,24 @@ export const huntCoordinator = async (
     return {
       status: 'tier2_only_skipped',
       report_id: reportId,
-      runId,
+      run_id,
       technologies,
       tier1,
       tier2_skipped_reason: 'no_report_text',
       message: `Tier 1: ${tier1Raw.status}. Tier 2 skipped (no report text).`,
       next_step:
         'Tier 2 needs report text. Pass `text` explicitly or use a `report_id` whose `content.body_text` has been ingested.',
-      hasConfirmedHit: tier1Raw.hasConfirmedHit,
-      completedSuccessfully: true,
+      has_confirmed_hit: tier1Raw.has_confirmed_hit,
+      completed_successfully: true,
     };
   }
 
   let articleContext = buildArticleContext(tier1Raw, maxSamples);
-  if (!articleContext && indexScope.required.length > 0 && tier1Raw.timeRange !== undefined) {
+  if (!articleContext && indexScope.required.length > 0 && tier1Raw.time_range !== undefined) {
     const sampleEvents = await sampleRequiredIndexEvents({
       esClient,
       requiredIndices: indexScope.required,
-      window: tier1Raw.timeRange,
+      window: tier1Raw.time_range,
       maxSamples,
       logger,
     });
@@ -467,9 +467,9 @@ export const huntCoordinator = async (
         llm_confidence_threshold: llmThreshold,
         iocs: iocs.map((ioc) => ({ type: ioc.type, value: ioc.value })),
         article_context: articleContext,
-        window: tier1Raw.timeRange,
+        window: tier1Raw.time_range,
         size,
-        row_limit: indexScope.rowLimit,
+        row_limit: indexScope.row_limit,
         required_indices: indexScope.required,
       },
       esClient
@@ -480,28 +480,28 @@ export const huntCoordinator = async (
       reason: 'tier2_failed',
       message: `Tier 1: ${tier1Raw.status}. Tier 2 failed: ${(err as Error).message}`,
       nextStep: 'Tier 2 LLM call failed. Check connector configuration and retry.',
-      completedSuccessfully: false,
+      completed_successfully: false,
     });
   }
 
   const tier2: HuntCoordinatorTier2 = { ...tier2Raw, tier: 2 };
-  const hasConfirmedHit = tier1Raw.hasConfirmedHit || tier2Raw.hasHit;
+  const has_confirmed_hit = tier1Raw.has_confirmed_hit || tier2Raw.has_hit;
 
   return {
     status: 'tier1_and_tier2',
     report_id: reportId,
-    runId,
+    run_id,
     technologies,
     tier1,
     tier2,
     message: `Tier 1: ${tier1Raw.status}. Tier 2: ${tier2Raw.status} (${tier2Raw.behaviors.length} proposed).`,
     next_step:
       tier2Raw.status === 'behaviors_proposed'
-        ? hasConfirmedHit
+        ? has_confirmed_hit
           ? 'Behaviors proposed; at least one tier confirmed an environment hit.'
           : 'Behaviors proposed for Investigation staging.'
         : 'No behavioral candidates survived catalog validation.',
-    hasConfirmedHit,
-    completedSuccessfully: true,
+    has_confirmed_hit,
+    completed_successfully: true,
   };
 };

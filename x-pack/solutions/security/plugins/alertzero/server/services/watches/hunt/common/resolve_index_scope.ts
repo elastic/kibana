@@ -57,13 +57,13 @@ export const resolveIndexScope = async ({
   technology,
   spaceId,
   window,
-  rowLimit = DEFAULT_ROW_LIMIT,
+  row_limit = DEFAULT_ROW_LIMIT,
 }: {
   esClient: ElasticsearchClient;
   technology: HuntTechnology;
   spaceId: string;
   window?: IndexScopeWindow;
-  rowLimit?: number;
+  row_limit?: number;
 }): Promise<ResolvedIndexScope> => {
   const { required, optional } = TECHNOLOGY_INDEX_MAP[technology];
   const alertsPattern = alertsIndexPattern(spaceId);
@@ -120,7 +120,7 @@ export const resolveIndexScope = async ({
     missing,
     status,
     window: resolvedWindow,
-    rowLimit,
+    row_limit,
   };
 };
 
@@ -150,18 +150,18 @@ export const resolveHuntScope = async ({
   spaceId,
   technology,
   window,
-  rowLimit,
+  row_limit,
 }: {
   esClient: ElasticsearchClient;
   spaceId: string;
   technology?: HuntTechnology;
   window?: IndexScopeWindow;
-  rowLimit?: number;
+  row_limit?: number;
 }): Promise<HuntScope> => {
   const candidates = technology ? [technology] : HUNT_TECHNOLOGIES;
   const scopes = await Promise.all(
     candidates.map((candidate) =>
-      resolveIndexScope({ esClient, technology: candidate, spaceId, window, rowLimit })
+      resolveIndexScope({ esClient, technology: candidate, spaceId, window, row_limit })
     )
   );
   const present = scopes.filter((scope) => scope.status !== 'blocked');
@@ -183,7 +183,7 @@ export const resolveHuntScope = async ({
     optional: uniq(source.flatMap((scope) => scope.optional)),
     missing: uniq(source.flatMap((scope) => scope.missing)),
     window: scopes[0].window,
-    rowLimit: scopes[0].rowLimit,
+    row_limit: scopes[0].row_limit,
   };
 };
 

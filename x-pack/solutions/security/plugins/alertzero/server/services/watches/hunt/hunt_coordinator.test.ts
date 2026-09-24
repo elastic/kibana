@@ -17,7 +17,7 @@ jest.mock('./common/resolve_index_scope', () => ({
     optional: [],
     missing: [],
     window: { from: 'now-24h', to: 'now' },
-    rowLimit: 100,
+    row_limit: 100,
   }),
 }));
 
@@ -33,16 +33,16 @@ jest.mock('./tier1/hunt_for_threat', () => ({
   ...jest.requireActual('./tier1/hunt_for_threat'),
   huntForThreat: jest.fn().mockResolvedValue({
     status: 'no_environment_hits',
-    hasConfirmedHit: false,
-    searchedIocs: 0,
-    searchedTechniques: 0,
-    resolvedIocs: [],
-    resolvedTechniques: [],
-    timeRange: { from: 'now-24h', to: 'now' },
-    counts: { totalHits: 0, returnedHits: 0, affectedHosts: 0, affectedUsers: 0 },
+    has_confirmed_hit: false,
+    searched_iocs: 0,
+    searched_techniques: 0,
+    resolved_iocs: [],
+    resolved_techniques: [],
+    time_range: { from: 'now-24h', to: 'now' },
+    counts: { total_hits: 0, returned_hits: 0, affected_hosts: 0, affected_users: 0 },
     hits: [],
-    affectedAssets: { hosts: [], users: [], services: [] },
-    perIndex: [],
+    affected_assets: { hosts: [], users: [], services: [] },
+    per_index: [],
   }),
 }));
 
@@ -51,7 +51,7 @@ jest.mock('./tier2/hunt_behavior', () => ({
     status: 'no_behaviors_found',
     behaviors: [],
     indexed_behaviors: [],
-    hasHit: false,
+    has_hit: false,
     next_step: 'Lower threshold.',
   }),
 }));
@@ -65,74 +65,74 @@ describe('huntCoordinator', () => {
     const result = await huntCoordinator(esClient, undefined, logger, {
       spaceId: 'default',
       trigger: 'scheduled',
-      runId: 'run-1',
+      run_id: 'run-1',
       tier2_when: 'on_hits',
     });
     expect(result.status).toBe('tier1_only');
     expect(result.tier2_skipped_reason).toBe('no_environment_hits');
-    expect(result.hasConfirmedHit).toBe(false);
-    expect(result.completedSuccessfully).toBe(true);
+    expect(result.has_confirmed_hit).toBe(false);
+    expect(result.completed_successfully).toBe(true);
   });
 
   it('defaults tier2_when to always so a no-hit run still attempts Tier 2', async () => {
     const result = await huntCoordinator(esClient, undefined, logger, {
       spaceId: 'default',
       trigger: 'scheduled',
-      runId: 'run-default-always',
+      run_id: 'run-default-always',
       text: 'report text',
     });
     expect(result.tier2_skipped_reason).toBe('no_inference');
-    expect(result.hasConfirmedHit).toBe(false);
+    expect(result.has_confirmed_hit).toBe(false);
   });
 
   it('returns tier1_only with no_inference when model absent but hits present', async () => {
     const { huntForThreat: mockT1 } = jest.requireMock('./tier1/hunt_for_threat');
     mockT1.mockResolvedValueOnce({
       status: 'environment_hits_found',
-      hasConfirmedHit: true,
-      searchedIocs: 1,
-      searchedTechniques: 0,
-      resolvedIocs: [{ type: 'ip', value: '1.2.3.4' }],
-      resolvedTechniques: [],
-      timeRange: { from: 'now-24h', to: 'now' },
-      counts: { totalHits: 5, returnedHits: 5, affectedHosts: 1, affectedUsers: 0 },
+      has_confirmed_hit: true,
+      searched_iocs: 1,
+      searched_techniques: 0,
+      resolved_iocs: [{ type: 'ip', value: '1.2.3.4' }],
+      resolved_techniques: [],
+      time_range: { from: 'now-24h', to: 'now' },
+      counts: { total_hits: 5, returned_hits: 5, affected_hosts: 1, affected_users: 0 },
       hits: [],
-      affectedAssets: { hosts: [{ name: 'host-1', hitCount: 5 }], users: [], services: [] },
-      perIndex: [],
+      affected_assets: { hosts: [{ name: 'host-1', hit_count: 5 }], users: [], services: [] },
+      per_index: [],
     });
 
     const result = await huntCoordinator(esClient, undefined, logger, {
       spaceId: 'default',
       trigger: 'scheduled',
-      runId: 'run-2',
+      run_id: 'run-2',
       text: 'some report text',
     });
     expect(result.status).toBe('tier1_only');
     expect(result.tier2_skipped_reason).toBe('no_inference');
-    expect(result.completedSuccessfully).toBe(true);
+    expect(result.completed_successfully).toBe(true);
   });
 
   it('returns tier1_only when text is absent', async () => {
     const { huntForThreat: mockT1 } = jest.requireMock('./tier1/hunt_for_threat');
     mockT1.mockResolvedValueOnce({
       status: 'environment_hits_found',
-      hasConfirmedHit: true,
-      searchedIocs: 1,
-      searchedTechniques: 0,
-      resolvedIocs: [],
-      resolvedTechniques: [],
-      timeRange: { from: 'now-24h', to: 'now' },
-      counts: { totalHits: 1, returnedHits: 1, affectedHosts: 0, affectedUsers: 0 },
+      has_confirmed_hit: true,
+      searched_iocs: 1,
+      searched_techniques: 0,
+      resolved_iocs: [],
+      resolved_techniques: [],
+      time_range: { from: 'now-24h', to: 'now' },
+      counts: { total_hits: 1, returned_hits: 1, affected_hosts: 0, affected_users: 0 },
       hits: [],
-      affectedAssets: { hosts: [], users: [], services: [] },
-      perIndex: [],
+      affected_assets: { hosts: [], users: [], services: [] },
+      per_index: [],
     });
 
     const mockModel = {} as import('@kbn/agent-builder-server').ScopedModel;
     const result = await huntCoordinator(esClient, mockModel, logger, {
       spaceId: 'default',
       trigger: 'scheduled',
-      runId: 'run-3',
+      run_id: 'run-3',
       // no text
     });
     expect(result.tier2_skipped_reason).toBe('no_report_text');
@@ -143,7 +143,7 @@ describe('huntCoordinator', () => {
     await huntCoordinator(esClient, undefined, logger, {
       spaceId: 'default',
       trigger: 'scheduled',
-      runId: 'run-5',
+      run_id: 'run-5',
       technology: 'fortigate',
     });
     expect(mockScope).toHaveBeenCalledWith(
@@ -155,18 +155,18 @@ describe('huntCoordinator', () => {
     const result = await huntCoordinator(esClient, undefined, logger, {
       spaceId: 'default',
       trigger: 'scheduled',
-      runId: 'run-6',
+      run_id: 'run-6',
     });
     expect(result.technologies).toEqual(['aws_iam']);
   });
 
-  it('echoes the caller-supplied runId', async () => {
+  it('echoes the caller-supplied run_id', async () => {
     const result = await huntCoordinator(esClient, undefined, logger, {
       spaceId: 'default',
       trigger: 'scheduled',
-      runId: 'run-from-worker',
+      run_id: 'run-from-worker',
     });
-    expect(result.runId).toBe('run-from-worker');
+    expect(result.run_id).toBe('run-from-worker');
   });
 
   describe('when the scope is blocked', () => {
@@ -183,12 +183,12 @@ describe('huntCoordinator', () => {
         optional: [],
         missing: ['logs-aws.*', 'logs-fortinet.*'],
         window: { from: 'now-24h', to: 'now' },
-        rowLimit: 100,
+        row_limit: 100,
       });
       result = await huntCoordinator(esClient, undefined, logger, {
         spaceId: 'default',
         trigger: 'scheduled',
-        runId: 'run-7',
+        run_id: 'run-7',
       });
     });
 
@@ -197,7 +197,7 @@ describe('huntCoordinator', () => {
     });
 
     it('does not report the run as completed, so no hunt evidence is written', () => {
-      expect(result.completedSuccessfully).toBe(false);
+      expect(result.completed_successfully).toBe(false);
     });
 
     it('names the skip reason', () => {
@@ -218,13 +218,13 @@ describe('huntCoordinator', () => {
     const result = await huntCoordinator(esClient, undefined, logger, {
       spaceId: 'default',
       trigger: 'scheduled',
-      runId: 'run-8',
+      run_id: 'run-8',
       tier2_when: 'never',
     });
     expect(result).toEqual(
       expect.objectContaining({
         tier2_skipped_reason: 'configured_never',
-        completedSuccessfully: true,
+        completed_successfully: true,
       })
     );
   });
@@ -235,23 +235,23 @@ describe('huntCoordinator', () => {
     mockT2.mockClear();
     mockT1.mockResolvedValueOnce({
       status: 'environment_hits_found',
-      hasConfirmedHit: false,
-      searchedIocs: 1,
-      searchedTechniques: 0,
-      resolvedIocs: [],
-      resolvedTechniques: [],
-      timeRange: { from: 'now-24h', to: 'now' },
-      counts: { totalHits: 3, returnedHits: 3, affectedHosts: 0, affectedUsers: 0 },
+      has_confirmed_hit: false,
+      searched_iocs: 1,
+      searched_techniques: 0,
+      resolved_iocs: [],
+      resolved_techniques: [],
+      time_range: { from: 'now-24h', to: 'now' },
+      counts: { total_hits: 3, returned_hits: 3, affected_hosts: 0, affected_users: 0 },
       hits: [],
-      affectedAssets: { hosts: [], users: [], services: [] },
-      perIndex: [{ index: '.alerts-security.alerts-default', hitCount: 3, required: false }],
+      affected_assets: { hosts: [], users: [], services: [] },
+      per_index: [{ index: '.alerts-security.alerts-default', hit_count: 3, required: false }],
     });
     const mockModel = {} as import('@kbn/agent-builder-server').ScopedModel;
 
     const result = await huntCoordinator(esClient, mockModel, logger, {
       spaceId: 'default',
       trigger: 'scheduled',
-      runId: 'run-optional-only',
+      run_id: 'run-optional-only',
       text: 'report text',
       tier2_when: 'on_hits',
     });
@@ -265,16 +265,16 @@ describe('huntCoordinator', () => {
     const { huntBehavior: mockT2 } = jest.requireMock('./tier2/hunt_behavior');
     mockT1.mockResolvedValueOnce({
       status: 'environment_hits_found',
-      hasConfirmedHit: true,
-      searchedIocs: 1,
-      searchedTechniques: 0,
-      resolvedIocs: [],
-      resolvedTechniques: [],
-      timeRange: { from: 'now-24h', to: 'now' },
-      counts: { totalHits: 1, returnedHits: 1, affectedHosts: 0, affectedUsers: 0 },
+      has_confirmed_hit: true,
+      searched_iocs: 1,
+      searched_techniques: 0,
+      resolved_iocs: [],
+      resolved_techniques: [],
+      time_range: { from: 'now-24h', to: 'now' },
+      counts: { total_hits: 1, returned_hits: 1, affected_hosts: 0, affected_users: 0 },
       hits: [],
-      affectedAssets: { hosts: [], users: [], services: [] },
-      perIndex: [],
+      affected_assets: { hosts: [], users: [], services: [] },
+      per_index: [],
     });
     mockT2.mockRejectedValueOnce(new Error('connector down'));
     const mockModel = {} as import('@kbn/agent-builder-server').ScopedModel;
@@ -282,13 +282,13 @@ describe('huntCoordinator', () => {
     const result = await huntCoordinator(esClient, mockModel, logger, {
       spaceId: 'default',
       trigger: 'scheduled',
-      runId: 'run-9',
+      run_id: 'run-9',
       text: 'report text',
     });
     expect(result).toEqual(
       expect.objectContaining({
         tier2_skipped_reason: 'tier2_failed',
-        completedSuccessfully: false,
+        completed_successfully: false,
       })
     );
   });
@@ -307,7 +307,7 @@ describe('huntCoordinator', () => {
         report_id: 'rpt-1',
         spaceId: 'hunt-a',
         trigger: 'scheduled',
-        runId: 'run-10',
+        run_id: 'run-10',
       });
       expect(mockT1).toHaveBeenCalledWith(
         esClient,
@@ -324,7 +324,7 @@ describe('huntCoordinator', () => {
         report_id: 'rpt-1',
         spaceId: 'hunt-a',
         trigger: 'scheduled',
-        runId: 'run-11',
+        run_id: 'run-11',
       });
       expect(mockLoad).toHaveBeenCalledWith({ esClient, spaceId: 'hunt-a', reportId: 'rpt-1' });
     });
@@ -335,7 +335,7 @@ describe('huntCoordinator', () => {
         report_id: 'rpt-1',
         spaceId: 'hunt-a',
         trigger: 'manual',
-        runId: 'run-12',
+        run_id: 'run-12',
         iocs: [{ type: 'domain', value: 'evil.example' }],
       });
       expect(mockT1).toHaveBeenCalledWith(
@@ -349,7 +349,7 @@ describe('huntCoordinator', () => {
       await huntCoordinator(esClient, undefined, logger, {
         spaceId: 'hunt-a',
         trigger: 'scheduled',
-        runId: 'run-13',
+        run_id: 'run-13',
       });
       expect(mockLoad).not.toHaveBeenCalled();
     });
@@ -361,32 +361,32 @@ describe('huntCoordinator', () => {
         report_id: 'rpt-elsewhere',
         spaceId: 'hunt-a',
         trigger: 'scheduled',
-        runId: 'run-14',
+        run_id: 'run-14',
       });
       expect(result).toEqual(
         expect.objectContaining({
           tier2_skipped_reason: 'report_not_found',
-          completedSuccessfully: false,
+          completed_successfully: false,
         })
       );
     });
   });
 
-  it('returns hasConfirmedHit true when Tier 2 alone hits', async () => {
+  it('returns has_confirmed_hit true when Tier 2 alone hits', async () => {
     const { huntForThreat: mockT1 } = jest.requireMock('./tier1/hunt_for_threat');
     const { huntBehavior: mockT2 } = jest.requireMock('./tier2/hunt_behavior');
     mockT1.mockResolvedValueOnce({
       status: 'no_environment_hits',
-      hasConfirmedHit: false,
-      searchedIocs: 0,
-      searchedTechniques: 1,
-      resolvedIocs: [],
-      resolvedTechniques: ['T1078.004'],
-      timeRange: { from: 'now-30d', to: 'now' },
-      counts: { totalHits: 0, returnedHits: 0, affectedHosts: 0, affectedUsers: 0 },
+      has_confirmed_hit: false,
+      searched_iocs: 0,
+      searched_techniques: 1,
+      resolved_iocs: [],
+      resolved_techniques: ['T1078.004'],
+      time_range: { from: 'now-30d', to: 'now' },
+      counts: { total_hits: 0, returned_hits: 0, affected_hosts: 0, affected_users: 0 },
       hits: [],
-      affectedAssets: { hosts: [], users: [], services: [] },
-      perIndex: [],
+      affected_assets: { hosts: [], users: [], services: [] },
+      per_index: [],
     });
     mockT2.mockResolvedValueOnce({
       status: 'behaviors_proposed',
@@ -397,7 +397,7 @@ describe('huntCoordinator', () => {
         },
       ],
       indexed_behaviors: [],
-      hasHit: true,
+      has_hit: true,
       next_step: 'hit',
     });
     const mockModel = {} as import('@kbn/agent-builder-server').ScopedModel;
@@ -405,11 +405,11 @@ describe('huntCoordinator', () => {
     const result = await huntCoordinator(esClient, mockModel, logger, {
       spaceId: 'default',
       trigger: 'scheduled',
-      runId: 'run-t2-only-hit',
+      run_id: 'run-t2-only-hit',
       text: 'report text',
     });
 
-    expect(result.hasConfirmedHit).toBe(true);
+    expect(result.has_confirmed_hit).toBe(true);
   });
 
   it('forwards the Tier 1 window into huntBehavior for execute', async () => {
@@ -418,16 +418,16 @@ describe('huntCoordinator', () => {
     mockT2.mockClear();
     mockT1.mockResolvedValueOnce({
       status: 'no_environment_hits',
-      hasConfirmedHit: false,
-      searchedIocs: 0,
-      searchedTechniques: 0,
-      resolvedIocs: [],
-      resolvedTechniques: [],
-      timeRange: { from: 'now-7d', to: 'now' },
-      counts: { totalHits: 0, returnedHits: 0, affectedHosts: 0, affectedUsers: 0 },
+      has_confirmed_hit: false,
+      searched_iocs: 0,
+      searched_techniques: 0,
+      resolved_iocs: [],
+      resolved_techniques: [],
+      time_range: { from: 'now-7d', to: 'now' },
+      counts: { total_hits: 0, returned_hits: 0, affected_hosts: 0, affected_users: 0 },
       hits: [],
-      affectedAssets: { hosts: [], users: [], services: [] },
-      perIndex: [],
+      affected_assets: { hosts: [], users: [], services: [] },
+      per_index: [],
     });
     const mockModel = {} as import('@kbn/agent-builder-server').ScopedModel;
     const search = jest.fn().mockResolvedValue({
@@ -454,7 +454,7 @@ describe('huntCoordinator', () => {
     await huntCoordinator(esWithSearch, mockModel, logger, {
       spaceId: 'default',
       trigger: 'scheduled',
-      runId: 'run-window-forward',
+      run_id: 'run-window-forward',
       text: 'report text',
       size: 40,
     });
@@ -478,12 +478,12 @@ describe('huntCoordinator', () => {
     );
   });
 
-  it('never writes feedback — completedSuccessfully is the caller signal', async () => {
+  it('never writes feedback — completed_successfully is the caller signal', async () => {
     const result = await huntCoordinator(esClient, undefined, logger, {
       spaceId: 'default',
       trigger: 'scheduled',
-      runId: 'run-4',
+      run_id: 'run-4',
     });
-    expect(result).toHaveProperty('completedSuccessfully');
+    expect(result).toHaveProperty('completed_successfully');
   });
 });

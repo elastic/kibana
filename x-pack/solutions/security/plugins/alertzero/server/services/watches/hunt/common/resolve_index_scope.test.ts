@@ -119,7 +119,7 @@ describe('resolveIndexScope', () => {
     });
     const after = Date.now();
 
-    expect(result.rowLimit).toBe(25);
+    expect(result.row_limit).toBe(25);
     const fromMs = new Date(result.window.from).getTime();
     const toMs = new Date(result.window.to).getTime();
     expect(toMs).toBeGreaterThanOrEqual(before);
@@ -135,11 +135,11 @@ describe('resolveIndexScope', () => {
       technology: 'fortigate',
       spaceId: SPACE_ID,
       window,
-      rowLimit: 100,
+      row_limit: 100,
     });
 
     expect(result.window).toEqual(window);
-    expect(result.rowLimit).toBe(100);
+    expect(result.row_limit).toBe(100);
   });
 });
 

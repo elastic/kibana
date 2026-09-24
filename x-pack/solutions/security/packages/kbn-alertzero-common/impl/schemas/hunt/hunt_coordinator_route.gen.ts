@@ -76,7 +76,7 @@ export const HuntCoordinatorResponse = lazySchema(() =>
   z.object({
     status: HuntCoordinatorStatus,
     report_id: z.string().optional(),
-    runId: z.string(),
+    run_id: z.string(),
     /**
      * Technologies whose indices the hunt ran against. Empty when the scope was blocked.
      */
@@ -194,7 +194,7 @@ export const HuntCoordinatorResponse = lazySchema(() =>
         /**
          * True when any behavior's execute path found at least one row in a required index. Independent of Tier 1.
          */
-        hasHit: z
+        has_hit: z
           .boolean()
           .describe(
             "True when any behavior's execute path found at least one row in a required index. Independent of Tier 1."
@@ -207,17 +207,17 @@ export const HuntCoordinatorResponse = lazySchema(() =>
     message: z.string(),
     next_step: z.string(),
     /**
-     * True when Tier 1 confirmed a required-index hit or any Tier 2 behavior executed with a required-index hit. Callers that gate SSE emit or packaging on the hit bar must read this field, not tier1.hasConfirmedHit alone.
+     * True when Tier 1 confirmed a required-index hit or any Tier 2 behavior executed with a required-index hit. Callers that gate SSE emit or packaging on the hit bar must read this field, not tier1.has_confirmed_hit alone.
      */
-    hasConfirmedHit: z
+    has_confirmed_hit: z
       .boolean()
       .describe(
-        'True when Tier 1 confirmed a required-index hit or any Tier 2 behavior executed with a required-index hit. Callers that gate SSE emit or packaging on the hit bar must read this field, not tier1.hasConfirmedHit alone.'
+        'True when Tier 1 confirmed a required-index hit or any Tier 2 behavior executed with a required-index hit. Callers that gate SSE emit or packaging on the hit bar must read this field, not tier1.has_confirmed_hit alone.'
       ),
     /**
      * True when the run completed without hard errors. The calling workflow checks this before writing hunt evidence, so a failed run writes nothing.
      */
-    completedSuccessfully: z
+    completed_successfully: z
       .boolean()
       .describe(
         'True when the run completed without hard errors. The calling workflow checks this before writing hunt evidence, so a failed run writes nothing.'
