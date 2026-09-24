@@ -7,11 +7,10 @@
 
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { SourcesToolbar } from './sources_toolbar';
 
 describe('SourcesToolbar', () => {
-  it('wires search, refresh, and source creation actions', async () => {
+  it('wires search, refresh, and source creation actions', () => {
     const onQueryChange = jest.fn();
     const onRefresh = jest.fn();
     const onAddSource = jest.fn();
@@ -35,8 +34,8 @@ describe('SourcesToolbar', () => {
     fireEvent.change(screen.getByRole('searchbox', { name: 'Search sources' }), {
       target: { value: 'otlp' },
     });
-    await userEvent.click(screen.getByRole('button', { name: 'Refresh sources' }));
-    await userEvent.click(screen.getByRole('button', { name: 'Add source' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Refresh sources' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Add source' }));
 
     expect(onQueryChange).toHaveBeenCalledWith('otlp');
     expect(onRefresh).toHaveBeenCalledTimes(1);
