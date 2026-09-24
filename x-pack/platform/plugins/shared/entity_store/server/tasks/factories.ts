@@ -13,7 +13,7 @@ import { AssetManagerClient } from '../domain/asset_manager';
 import { LogsExtractionClient } from '../domain/logs_extraction';
 import { EngineDescriptorClient, EntityStoreGlobalStateClient } from '../domain/saved_objects';
 import type { TelemetryReporter } from '../telemetry/events';
-import { isLegacySecurityAssetsMigrationEnabled } from '../infra/feature_flags';
+import { getLegacySecurityAssetsMigrationFlag } from '../infra/feature_flags';
 
 export interface LogsExtractionClientFactoryResult {
   logsExtractionClient: LogsExtractionClient;
@@ -114,7 +114,7 @@ export async function createAssetManagerClient({
       analytics,
       savedObjectsClient: soClient,
       isLegacySecurityAssetsMigrationEnabled: () =>
-        isLegacySecurityAssetsMigrationEnabled(coreStart.featureFlags),
+        getLegacySecurityAssetsMigrationFlag(coreStart.featureFlags),
     }),
   };
 }
