@@ -262,5 +262,6 @@ export {
   isBuiltInConversationEventType,
   isTimelineEvent,
   type ValidConversationEventType,
+  assertValidConversationEventType,
   type ConversationAddEventInput,
 } from './timeline_events';

@@ -685,6 +685,7 @@ src/platform/packages/shared/kbn-rrule @elastic/response-ops
 src/platform/packages/shared/kbn-rule-data-utils @elastic/security-detection-engineering @elastic/response-ops @elastic/nightshift-sre-agent-team
 src/platform/packages/shared/kbn-safer-lodash-set @elastic/kibana-security
 src/platform/packages/shared/kbn-saved-search-component @elastic/obs-signals-logs-team
+src/platform/packages/shared/kbn-schema-string-helpers @elastic/kibana-security @elastic/kibana-core
 src/platform/packages/shared/kbn-scout @elastic/appex-qa
 src/platform/packages/shared/kbn-scout-synthtrace @elastic/appex-qa
 src/platform/packages/shared/kbn-search-agent @elastic/search-ml-ux
@@ -1250,7 +1251,7 @@ x-pack/platform/plugins/shared/context_engine_agent_builder @elastic/context-eng
 x-pack/platform/plugins/shared/custom_content @elastic/kibana-dashboards
 x-pack/platform/plugins/shared/data_quality @elastic/kibana-management
 x-pack/platform/plugins/shared/dataset_quality @elastic/kibana-management
-x-pack/platform/plugins/shared/elastic_console @elastic/obs-elastic-brain-team
+x-pack/platform/plugins/shared/elastic_console @elastic/nightshift-context-and-research-team
 x-pack/platform/plugins/shared/embeddable_alerts_table @elastic/response-ops
 x-pack/platform/plugins/shared/encrypted_saved_objects @elastic/kibana-security
 x-pack/platform/plugins/shared/entity_store @elastic/security-entity-analytics
