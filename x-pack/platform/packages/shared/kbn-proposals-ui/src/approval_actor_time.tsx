@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { FormattedRelative, FormattedTime } from '@kbn/i18n-react';
+import { FormattedMessage, FormattedRelative, FormattedTime } from '@kbn/i18n-react';
 import { selectUnit } from '@formatjs/intl-utils';
 
 export interface ApprovalActorTimeProps {
@@ -34,20 +34,22 @@ export const ApprovalActorTime = ({ actorName, at, live = false }: ApprovalActor
   const { unit } = selectUnit(new Date(at));
 
   return (
-    <>
-      {`by `}
-      <strong>{actorName}</strong>
-      {' at '}
-      {live ? (
-        <FormattedRelative
-          value={at}
-          updateIntervalInSeconds={
-            INCREMENTABLE_UNITS.includes(unit) ? UPDATE_INTERVAL_SECONDS : undefined
-          }
-        />
-      ) : (
-        <FormattedTime value={at} />
-      )}
-    </>
+    <FormattedMessage
+      id="xpack.proposals.approvalActorTime.label"
+      defaultMessage="by {actorName} at {time}"
+      values={{
+        actorName: <strong>{actorName}</strong>,
+        time: live ? (
+          <FormattedRelative
+            value={at}
+            updateIntervalInSeconds={
+              INCREMENTABLE_UNITS.includes(unit) ? UPDATE_INTERVAL_SECONDS : undefined
+            }
+          />
+        ) : (
+          <FormattedTime value={at} />
+        ),
+      }}
+    />
   );
 };
