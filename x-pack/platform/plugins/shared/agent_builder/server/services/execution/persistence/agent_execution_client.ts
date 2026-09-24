@@ -42,13 +42,15 @@ export interface UpdateExecutionStatusOptions {
 
 /**
  * Lightweight snapshot returned by {@link AgentExecutionClient.peek}.
- * Includes only the status, error, event count, and last heartbeat — no events payload.
+ * Includes only the status, error, event count, last heartbeat and conversation id — no events
+ * payload.
  */
 export interface ExecutionPeek {
   status: ExecutionStatus;
   error?: SerializedExecutionError;
   eventCount: number;
   lastHeartbeat?: string;
+  conversationId?: string;
 }
 
 const fromEs = (source: AgentExecutionProperties): AgentExecution => {
@@ -262,17 +264,27 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
       const response = await this.esClient.get<AgentExecutionProperties>({
         index: agentExecutionIndexName,
         id: executionId,
-        _source_includes: ['status', 'error', 'event_count', 'last_heartbeat'] as string[],
+        _source_includes: [
+          'status',
+          'error',
+          'event_count',
+          'last_heartbeat',
+          'agent_params.conversationId',
+        ] as string[],
       });
       const source = response._source;
       if (!source) {
         return undefined;
       }
+      const { agent_params: agentParams } = source;
+      const conversationId =
+        agentParams && 'conversationId' in agentParams ? agentParams.conversationId : undefined;
       return {
         status: source.status,
         eventCount: source.event_count ?? 0,
         ...(source.error ? { error: source.error } : {}),
         ...(source.last_heartbeat ? { lastHeartbeat: source.last_heartbeat } : {}),
+        ...(conversationId ? { conversationId } : {}),
       };
     } catch (err) {
       if (err?.meta?.statusCode === 404) {

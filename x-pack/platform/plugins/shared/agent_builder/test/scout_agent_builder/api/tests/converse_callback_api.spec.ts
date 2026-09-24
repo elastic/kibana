@@ -410,14 +410,12 @@ apiTest.describe(
       'returns the existing execution for a replayed idempotency key',
       async ({ apiClient }) => {
         const executionIdempotencyKey = 'Ev-callback-replay';
+        // Neither conversation_id nor origin, so the replay cannot find the conversation on its
+        // own: it has to report the one the existing execution created.
         const requestBody = {
           input: 'Hello idempotent callback',
           connector_id: connectorId,
           execution_idempotency_key: executionIdempotencyKey,
-          origin: {
-            type: ConversationOriginType.Slack,
-            external_conversation_id: 'team:T123/channel:C123/thread:callback-idempotency',
-          },
           callback: {
             url: `${callbackServerUrl}/callback?token=idempotency`,
           },
@@ -442,6 +440,8 @@ apiTest.describe(
 
           const firstAccepted = first.body as ChatCallbackAcceptedResponse;
           executionId = firstAccepted.execution_id;
+          conversationId = firstAccepted.conversation_id;
+          conversationIds.add(conversationId);
           expect(executionId).toMatch(/^[a-f0-9]{64}$/);
 
           const firstRequests = await collectCompletedRoundRequests();
@@ -450,9 +450,7 @@ apiTest.describe(
 
           expect(getExecutionId(firstRequests)).toBe(executionId);
           expect(getRoundCompleteEvent(firstRequests)).toBeDefined();
-
-          conversationId = getConversationId(firstRequests);
-          conversationIds.add(conversationId);
+          expect(getConversationId(firstRequests)).toBe(conversationId);
         });
 
         await apiTest.step(
@@ -468,6 +466,7 @@ apiTest.describe(
 
             const replayAccepted = replay.body as ChatCallbackAcceptedResponse;
             expect(replayAccepted.execution_id).toBe(executionId);
+            expect(replayAccepted.conversation_id).toBe(conversationId);
 
             // No new execution ran: no LLM call was made (no interceptor was re-armed and the
             // proxy would reject an unexpected request) and the conversation kept a single round.

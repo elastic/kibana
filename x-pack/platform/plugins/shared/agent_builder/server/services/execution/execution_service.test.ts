@@ -859,6 +859,19 @@ describe('AgentExecutionService', () => {
       expect(mockTaskManagerEnsureScheduled).not.toHaveBeenCalled();
     });
 
+    it('reports the conversation the existing execution stored, not the one the replay resolved', async () => {
+      mockExecutionClient.create.mockRejectedValueOnce(conflictError());
+      mockExecutionClient.peek.mockResolvedValueOnce({
+        status: ExecutionStatus.running,
+        eventCount: 1,
+        conversationId: 'conversation-from-first-request',
+      });
+
+      const result = await executeWithKey('Ev123');
+
+      expect(result.conversationId).toBe('conversation-from-first-request');
+    });
+
     it('re-issues the schedule on replay when the existing execution never got a task', async () => {
       mockExecutionClient.create.mockRejectedValueOnce(conflictError());
       mockExecutionClient.peek.mockResolvedValueOnce({

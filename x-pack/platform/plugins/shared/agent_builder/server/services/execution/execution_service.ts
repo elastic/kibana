@@ -185,9 +185,11 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
             });
           }
 
+          // The replay resolved its own conversation, which is a fresh placeholder when the
+          // original created one; the existing execution writes to the one it stored.
           return {
             executionId,
-            ...(conversation ? { conversationId: conversation.id } : {}),
+            ...(existing?.conversationId ? { conversationId: existing.conversationId } : {}),
             events$: this.followExecution(executionId),
           };
         }
