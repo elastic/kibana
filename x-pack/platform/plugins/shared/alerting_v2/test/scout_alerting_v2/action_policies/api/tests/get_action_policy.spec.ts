@@ -69,8 +69,11 @@ apiTest.describe('Get action policy API', { tag: '@local-stateful-classic' }, ()
       expect(response.body.throttle).toStrictEqual({ interval: '10m' });
       expect(new Date(response.body.created_at).toISOString()).toBe(response.body.created_at);
       expect(new Date(response.body.updated_at).toISOString()).toBe(response.body.updated_at);
-      expect(typeof response.body.auth.owner).toBe('string');
-      expect(response.body.auth.apiKey).toBeUndefined();
+      // Actors are structured objects, not the legacy bare profile-UID string.
+      expect(typeof response.body.created_by.profile_uid).toBe('string');
+      expect(typeof response.body.updated_by.profile_uid).toBe('string');
+      // API key ownership is server-side only and must never be exposed over the wire.
+      expect(response.body.auth).toBeUndefined();
     }
   );
 

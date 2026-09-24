@@ -45,3 +45,17 @@ export const toSelectedSources = (sources: AiIndexSource[]): SelectedSource[] =>
     label: source.value,
     value: source.value,
   }));
+
+const sourceKey = ({ type, value }: SelectedSource) => `${type}:${value}`;
+
+/** Order-independent equality check on the {type, value} identity of two source lists. */
+export const areSourceSelectionsEqual = (a: SelectedSource[], b: SelectedSource[]): boolean => {
+  if (a.length !== b.length) {
+    return false;
+  }
+
+  const sortedA = a.map(sourceKey).sort();
+  const sortedB = b.map(sourceKey).sort();
+
+  return sortedA.every((key, index) => key === sortedB[index]);
+};
