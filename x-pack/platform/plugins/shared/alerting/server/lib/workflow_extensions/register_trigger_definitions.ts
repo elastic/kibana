@@ -6,14 +6,14 @@
  */
 
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
-import { alertStateChangedTriggerDefinition } from '../../../common/workflows/triggers/alert_state_changed';
+import { alertStatusChangedTriggerDefinition } from '@kbn/alerting-workflow-triggers';
 
 /**
- * Registers all v1 alerting workflow trigger definitions with the Workflows
+ * Registers all alerting workflow trigger definitions with the Workflows
  * Extensions platform. Call once during plugin setup.
  */
 export function registerTriggerDefinitions(
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup
 ): void {
-  workflowsExtensions.registerTriggerDefinition(alertStateChangedTriggerDefinition);
+  workflowsExtensions.registerTriggerDefinition(alertStatusChangedTriggerDefinition);
 }

@@ -88,6 +88,7 @@
     "@kbn/cps-utils",
     "@kbn/core-saved-objects-common",
     "@kbn/workflows-extensions",
+    "@kbn/alerting-workflow-triggers",
   ],
   "exclude": ["target/**/*"]
 }

@@ -255,8 +255,8 @@ export interface TaskRunnerContext {
   /**
    * Optional — absent when the `workflowsExtensions` plugin is not loaded
    * (e.g. some Serverless tiers). When present, rule executions emit
-   * `alerting.alertStateChanged` workflow trigger events on genuine alert
-   * state transitions.
+   * `alerting.alertStatusChanged` workflow trigger events on genuine alert
+   * status transitions.
    */
   workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
 }

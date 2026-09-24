@@ -41,9 +41,9 @@ import type {
 import { withAlertingSpan } from './lib';
 import type { WrappedSearchSourceClient } from '../lib/wrap_search_source_client';
 import {
-  AlertStateChangedTriggerId,
-  type AlertStateChangedPayload,
-} from '../../common/workflows/triggers/alert_state_changed';
+  AlertStatusChangedTriggerId,
+  type AlertStatusChangedPayload,
+} from '@kbn/alerting-workflow-triggers';
 
 interface ConstructorOpts<
   Params extends RuleTypeParams,
@@ -444,7 +444,7 @@ export class RuleTypeRunner<
 
       if (newEntries.length > 0 || recoveredEntries.length > 0) {
         const { workflowsExtensions } = this.options.context;
-        const rulePayload: AlertStateChangedPayload['rule'] = {
+        const rulePayload: AlertStatusChangedPayload['rule'] = {
           id: context.ruleId,
           name: rule.name,
           spaceId: context.spaceId,
@@ -454,13 +454,13 @@ export class RuleTypeRunner<
           ruleCategory: ruleType.name,
         };
 
-        const events: AlertStateChangedPayload[] = [
+        const events: AlertStatusChangedPayload[] = [
           ...newEntries.map(([, alert]) => ({
             rule: rulePayload,
             alert: {
               id: alert.getId(),
               uuid: alert.getUuid(),
-              category: 'new' as const,
+              previousStatus: null,
               actionGroup: alert.getScheduledActionOptions()?.actionGroup ?? null,
               start: alert.getStart(),
               status: 'active',
@@ -471,7 +471,7 @@ export class RuleTypeRunner<
             alert: {
               id: alert.getId(),
               uuid: alert.getUuid(),
-              category: 'recovered' as const,
+              previousStatus: 'active',
               actionGroup: alert.getLastScheduledActions()?.group ?? null,
               start: alert.getStart(),
               status: 'recovered',
@@ -485,12 +485,12 @@ export class RuleTypeRunner<
             .then(async (client) => {
               if (!client.isWorkflowsAvailable) return;
               await Promise.all(
-                events.map((payload) => client.emitEvent(AlertStateChangedTriggerId, payload))
+                events.map((payload) => client.emitEvent(AlertStatusChangedTriggerId, payload))
               );
             })
             .catch((err: Error) => {
               context.logger.error(
-                `[alerting.alertStateChanged] Failed to emit workflow trigger for rule ${context.ruleId}: ${err.message}`
+                `[alerting.alertStatusChanged] Failed to emit workflow trigger for rule ${context.ruleId}: ${err.message}`
               );
             });
         });

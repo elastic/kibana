@@ -1,0 +1,8 @@
+{
+  "name": "@kbn/alerting-workflow-triggers",
+  "description": "Shared workflow trigger definitions for Kibana alerting (v1 and v2).",
+  "private": true,
+  "version": "1.0.0",
+  "license": "Elastic License 2.0",
+  "sideEffects": false
+}
