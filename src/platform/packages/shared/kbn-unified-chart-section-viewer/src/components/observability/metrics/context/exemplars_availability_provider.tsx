@@ -12,6 +12,7 @@ import { isSuppressedFetchError } from '../../../chart/utils/is_suppressed_fetch
 import {
   fetchMetricsWithExemplars,
   type FetchMetricsWithExemplarsParams,
+  type MetricsWithExemplars,
 } from '../utils/fetch_metrics_with_exemplars';
 
 export interface ProbeExemplarsAvailabilityParams extends FetchMetricsWithExemplarsParams {
@@ -21,9 +22,9 @@ export interface ProbeExemplarsAvailabilityParams extends FetchMetricsWithExempl
 
 export type ProbeExemplarsAvailability = (
   params: ProbeExemplarsAvailabilityParams
-) => Promise<ReadonlySet<string>>;
+) => Promise<MetricsWithExemplars>;
 
-const NO_METRICS: ReadonlySet<string> = new Set();
+const NO_METRICS: MetricsWithExemplars = new Map();
 
 const ExemplarsAvailabilityContext = createContext<ProbeExemplarsAvailability | undefined>(
   undefined
@@ -34,7 +35,7 @@ const ExemplarsAvailabilityContext = createContext<ProbeExemplarsAvailability | 
  * rejects: a failure is reported once through `onError` and resolves to an empty set.
  */
 export const ExemplarsAvailabilityProvider = ({ children }: { children: React.ReactNode }) => {
-  const pendingProbe = useRef<Promise<ReadonlySet<string>> | undefined>(undefined);
+  const pendingProbe = useRef<Promise<MetricsWithExemplars> | undefined>(undefined);
 
   const probe = useCallback<ProbeExemplarsAvailability>(({ onError, ...requestParams }) => {
     if (!pendingProbe.current) {
@@ -48,8 +49,8 @@ export const ExemplarsAvailabilityProvider = ({ children }: { children: React.Re
 
       // The exemplars stream is created on the first exemplar write, so an empty or failed
       // result may be transient. Only a non-empty result stays cached.
-      void request.then((metricNames) => {
-        if (metricNames.size === 0 && pendingProbe.current === request) {
+      void request.then((metricsByStream) => {
+        if (metricsByStream.size === 0 && pendingProbe.current === request) {
           pendingProbe.current = undefined;
         }
       });

@@ -27,11 +27,14 @@ const params = {
   profileId: 'metrics-data-source-profile',
 };
 
-const probeResponse = (columnName: string, values: string[]) => ({
+const PROBE_COLUMNS = ['metric_name', 'data_stream.dataset', 'data_stream.namespace'];
+
+/** One row per distinct (metric name, dataset, namespace), as `STATS BY` returns them. */
+const probeResponse = (rows: unknown[][], columnNames = PROBE_COLUMNS) => ({
   documents: [],
   rawResponse: {
-    columns: [{ name: columnName, type: 'keyword' }],
-    values: values.map((value) => [value]),
+    columns: columnNames.map((name) => ({ name, type: 'keyword' })),
+    values: rows,
     requestParams: { query: EXEMPLARS_PROBE_QUERY },
   },
   requestParams: { query: EXEMPLARS_PROBE_QUERY },
@@ -43,7 +46,7 @@ describe('fetchMetricsWithExemplars', () => {
   });
 
   it('sends the probe query under the exemplars execution context without a time range, filters or signal', async () => {
-    mockExecuteEsqlQuery.mockResolvedValue(probeResponse('metric_name', []));
+    mockExecuteEsqlQuery.mockResolvedValue(probeResponse([]));
 
     await fetchMetricsWithExemplars(params);
 
@@ -54,19 +57,60 @@ describe('fetchMetricsWithExemplars', () => {
     });
   });
 
-  it('returns the metric names with the metrics. prefix Kibana field names carry', async () => {
+  it('groups metrics. prefixed names by their exemplars data stream', async () => {
     mockExecuteEsqlQuery.mockResolvedValue(
-      probeResponse('metric_name', ['http.server.request.duration', 'orders.created'])
+      probeResponse([
+        ['http.server.request.duration', 'generic.otel', 'default'],
+        ['orders.created', 'generic.otel', 'default'],
+        ['orders.created', 'payments.otel', 'prod'],
+      ])
     );
 
-    expect([...(await fetchMetricsWithExemplars(params))]).toEqual([
+    const result = await fetchMetricsWithExemplars(params);
+
+    expect([...result.keys()]).toEqual([
+      'exemplars-generic.otel-default',
+      'exemplars-payments.otel-prod',
+    ]);
+    expect([...result.get('exemplars-generic.otel-default')!]).toEqual([
       'metrics.http.server.request.duration',
       'metrics.orders.created',
     ]);
+    expect([...result.get('exemplars-payments.otel-prod')!]).toEqual(['metrics.orders.created']);
   });
 
-  it('returns an empty set when the response has no metric_name column', async () => {
-    mockExecuteEsqlQuery.mockResolvedValue(probeResponse('other', ['x']));
+  it('locates columns by name rather than position', async () => {
+    mockExecuteEsqlQuery.mockResolvedValue(
+      probeResponse(
+        [['default', 'generic.otel', 'orders.created']],
+        ['data_stream.namespace', 'data_stream.dataset', 'metric_name']
+      )
+    );
+
+    const result = await fetchMetricsWithExemplars(params);
+
+    expect([...result.get('exemplars-generic.otel-default')!]).toEqual(['metrics.orders.created']);
+  });
+
+  it('skips rows where any grouping value is null', async () => {
+    mockExecuteEsqlQuery.mockResolvedValue(
+      probeResponse([
+        [null, 'generic.otel', 'default'],
+        ['orders.created', null, 'default'],
+        ['orders.created', 'generic.otel', 'default'],
+      ])
+    );
+
+    const result = await fetchMetricsWithExemplars(params);
+
+    expect(result.size).toBe(1);
+    expect([...result.get('exemplars-generic.otel-default')!]).toEqual(['metrics.orders.created']);
+  });
+
+  it('returns an empty map when a grouping column is missing from the response', async () => {
+    mockExecuteEsqlQuery.mockResolvedValue(
+      probeResponse([['orders.created', 'generic.otel']], ['metric_name', 'data_stream.dataset'])
+    );
 
     expect((await fetchMetricsWithExemplars(params)).size).toBe(0);
   });

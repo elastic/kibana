@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isSingleSource } from '@kbn/esql-utils';
 import {
   EXEMPLARS_INDEX_PREFIX,
   EXEMPLARS_OTEL_DATASET_MARKER,
   METRICS_INDEX_PREFIX,
 } from '../../constants';
+import type { ParsedMetricItem } from '../../../types';
 
 // Wildcards, comma lists, cross-cluster prefixes (`remote:idx`), source selectors
 // (`idx::failures`) and whitespace: none of these name one concrete data stream.
@@ -44,3 +46,13 @@ export const deriveExemplarsIndex = (metricsIndex: string): string | undefined =
 
   return `${EXEMPLARS_INDEX_PREFIX}${suffix}`;
 };
+
+/**
+ * The exemplars stream for a metric chart. A concrete source the user typed wins over the
+ * metric's own index, matching how the chart query itself is scoped.
+ */
+export const resolveExemplarsIndex = (
+  { indexName }: Pick<ParsedMetricItem, 'indexName'>,
+  originalSource?: string
+): string | undefined =>
+  deriveExemplarsIndex(isSingleSource(originalSource) ? originalSource : indexName);

@@ -16,6 +16,7 @@ import type { ParsedMetricItem } from '../../../../types';
 import { isSuppressedFetchError } from '../../../chart/utils/is_suppressed_fetch_error';
 import { useReportChartSectionError } from '../../../chart/hooks/use_report_chart_section_error';
 import { createExemplarsQuery } from '../../../../common/utils/esql/create_exemplars_query';
+import { resolveExemplarsIndex } from '../../../../common/utils/exemplars/derive_exemplars_index';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 import { MetricsExecutionContextName } from '../utils/execution_context_enums';
 import { useExemplarsAvailabilityProbe } from '../context/exemplars_availability_provider';
@@ -63,22 +64,24 @@ export const useFetchExemplars = ({
         return undefined;
       }
 
+      // Non-OTel metrics have no exemplars stream and never probe.
+      const exemplarsIndex = resolveExemplarsIndex(metricItem, originalSource);
       const esqlQuery = createExemplarsQuery({ metricItem, whereStatements, originalSource });
-      if (!esqlQuery) {
+      if (!exemplarsIndex || !esqlQuery) {
         return undefined;
       }
 
       const onError = (error: unknown) =>
         reportError({ error, source: 'useFetchExemplars', labels: { profile_id: profileId } });
 
-      const metricsWithExemplars = await probeExemplarsAvailability({
+      const metricsByStream = await probeExemplarsAvailability({
         search,
         dataView,
         uiSettings,
         profileId,
         onError,
       });
-      if (signal.aborted || !metricsWithExemplars.has(metricItem.metricName)) {
+      if (signal.aborted || !metricsByStream.get(exemplarsIndex)?.has(metricItem.metricName)) {
         return undefined;
       }
 

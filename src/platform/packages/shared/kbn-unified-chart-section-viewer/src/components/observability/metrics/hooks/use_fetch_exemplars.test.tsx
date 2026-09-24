@@ -102,7 +102,9 @@ describe('useFetchExemplars', () => {
     jest.clearAllMocks();
     mockUseFeatureFlag.mockReturnValue(true);
     mockCreateExemplarsQuery.mockReturnValue(TEST_ESQL_QUERY);
-    mockProbe.mockResolvedValue(new Set([mockMetric.metricName]));
+    mockProbe.mockResolvedValue(
+      new Map([['exemplars-generic.otel-default', new Set([mockMetric.metricName])]])
+    );
     mockExecuteEsqlQuery.mockResolvedValue({
       documents: [],
       rawResponse: {
@@ -162,8 +164,21 @@ describe('useFetchExemplars', () => {
     expect(result.current).toBeUndefined();
   });
 
+  it('does not probe for a non-OTel metric', async () => {
+    const params = createParams({
+      metricItem: { ...mockMetric, indexName: 'metrics-system.cpu-default' },
+    });
+
+    const { result } = renderHook(() => useFetchExemplars(params));
+
+    await flushAsync();
+    expect(mockProbe).not.toHaveBeenCalled();
+    expect(mockExecuteEsqlQuery).not.toHaveBeenCalled();
+    expect(result.current).toBeUndefined();
+  });
+
   it('probes but does not fetch when the metric has no exemplars', async () => {
-    mockProbe.mockResolvedValue(new Set());
+    mockProbe.mockResolvedValue(new Map());
     const params = createParams();
 
     const { result } = renderHook(() => useFetchExemplars(params));
@@ -172,6 +187,32 @@ describe('useFetchExemplars', () => {
     expect(mockProbe).toHaveBeenCalledTimes(1);
     expect(mockExecuteEsqlQuery).not.toHaveBeenCalled();
     expect(result.current).toBeUndefined();
+  });
+
+  it('does not fetch when the metric only has exemplars in a different data stream', async () => {
+    mockProbe.mockResolvedValue(
+      new Map([['exemplars-payments.otel-prod', new Set([mockMetric.metricName])]])
+    );
+    const params = createParams();
+
+    const { result } = renderHook(() => useFetchExemplars(params));
+
+    await flushAsync();
+    expect(mockProbe).toHaveBeenCalledTimes(1);
+    expect(mockExecuteEsqlQuery).not.toHaveBeenCalled();
+    expect(result.current).toBeUndefined();
+  });
+
+  it('scopes the availability check to the user-typed source when it is one concrete index', async () => {
+    mockProbe.mockResolvedValue(
+      new Map([['exemplars-generic.otel-production', new Set([mockMetric.metricName])]])
+    );
+    const params = createParams({ originalSource: 'metrics-generic.otel-production' });
+
+    const { result } = renderHook(() => useFetchExemplars(params));
+
+    await waitFor(() => expect(result.current).toBeDefined());
+    expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
   });
 
   it('returns the exemplar columns and rows on a successful fetch', async () => {

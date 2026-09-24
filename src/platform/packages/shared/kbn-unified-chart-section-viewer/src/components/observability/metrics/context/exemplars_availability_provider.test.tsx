@@ -44,7 +44,11 @@ const renderProbe = () =>
 describe('ExemplarsAvailabilityProvider', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockFetch.mockResolvedValue(new Set(['metrics.http.server.request.duration']));
+    mockFetch.mockResolvedValue(
+      new Map([
+        ['exemplars-generic.otel-default', new Set(['metrics.http.server.request.duration'])],
+      ])
+    );
   });
 
   it('forwards the request parameters to the probe fetch', async () => {
@@ -77,7 +81,7 @@ describe('ExemplarsAvailabilityProvider', () => {
   });
 
   it('does not cache an empty result', async () => {
-    mockFetch.mockResolvedValue(new Set());
+    mockFetch.mockResolvedValue(new Map());
     const probe = renderProbe();
 
     expect((await probe({ ...requestParams, onError: jest.fn() })).size).toBe(0);

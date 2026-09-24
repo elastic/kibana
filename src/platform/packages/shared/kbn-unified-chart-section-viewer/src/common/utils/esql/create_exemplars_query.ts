@@ -9,13 +9,13 @@
 
 import { esql } from '@elastic/esql';
 import { fieldConstants } from '@kbn/discover-utils';
-import { escapeStringValue, isSingleSource, sanitazeESQLInput } from '@kbn/esql-utils';
+import { escapeStringValue, sanitazeESQLInput } from '@kbn/esql-utils';
 import {
   EXEMPLARS_MAX_ROWS,
   EXEMPLARS_METRIC_NAME_FIELD,
   EXEMPLARS_VALUE_FIELD,
 } from '../../constants';
-import { deriveExemplarsIndex } from '../exemplars/derive_exemplars_index';
+import { resolveExemplarsIndex } from '../exemplars/derive_exemplars_index';
 import type { ParsedMetricItem } from '../../../types';
 
 const { TIMESTAMP_FIELD, TRACE_ID_FIELD, SPAN_ID_FIELD } = fieldConstants;
@@ -47,9 +47,8 @@ export function createExemplarsQuery({
   originalSource,
   maxRows = EXEMPLARS_MAX_ROWS,
 }: CreateExemplarsQueryParams): string {
-  const { metricName, indexName, dimensionFields } = metricItem;
-  const metricsIndex = isSingleSource(originalSource) ? originalSource : indexName;
-  const exemplarsIndex = deriveExemplarsIndex(metricsIndex);
+  const { metricName, dimensionFields } = metricItem;
+  const exemplarsIndex = resolveExemplarsIndex(metricItem, originalSource);
 
   if (!exemplarsIndex || !metricName) {
     return '';
