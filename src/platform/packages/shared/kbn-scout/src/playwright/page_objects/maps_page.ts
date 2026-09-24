@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Locator } from 'playwright/test';
 import type { ScoutPage } from '..';
+import { AppMenu } from './app_menu';
 import { SavedObjectSaveModal } from './saved_object_save_modal';
 
 // Maps first paint regularly exceeds Scout's 10s actionTimeout under parallel load.
@@ -28,7 +28,7 @@ export class MapsPage {
   public readonly exitFullScreenButton;
   private readonly mapLayerToc;
   private readonly layerTocTooltip;
-  private readonly appMenuOverflowButton;
+  private readonly appMenu: AppMenu;
   /** Save modal locators/actions, shared with other apps (e.g. Visualize) via `SavedObjectSaveModal`. */
   public readonly saveModal: SavedObjectSaveModal;
 
@@ -44,7 +44,7 @@ export class MapsPage {
     this.documentsItem = this.page.testSubj.locator('documents');
     this.fullScreenModeButton = this.page.testSubj.locator('mapsFullScreenMode');
     this.exitFullScreenButton = this.page.testSubj.locator('exitFullScreenModeButton');
-    this.appMenuOverflowButton = this.page.testSubj.locator('app-menu-overflow-button');
+    this.appMenu = new AppMenu(this.page);
     this.mapLayerToc = this.page.testSubj.locator('mapLayerTOC');
     this.layerTocTooltip = this.page.testSubj.locator('layerTocTooltip');
     this.saveModal = new SavedObjectSaveModal(this.page);
@@ -55,21 +55,9 @@ export class MapsPage {
     await this.waitForRenderComplete();
   }
 
-  private async revealAppMenuItem(item: Locator) {
-    if (await item.isVisible()) {
-      return;
-    }
-    await item.or(this.appMenuOverflowButton).waitFor({ state: 'visible' });
-    if (await item.isVisible()) {
-      return;
-    }
-    await this.appMenuOverflowButton.click();
-    await item.waitFor({ state: 'visible' });
-  }
-
   /** Opens the AppHeader overflow menu when Full screen is not inline. */
   async revealFullScreenModeButton() {
-    await this.revealAppMenuItem(this.fullScreenModeButton);
+    await this.appMenu.revealItem(this.fullScreenModeButton);
   }
 
   async clickFullScreenMode() {
@@ -79,7 +67,7 @@ export class MapsPage {
 
   /** Save sits in overflow during save-and-return; primary is Save and return. */
   async clickSaveButton() {
-    await this.revealAppMenuItem(this.saveButton);
+    await this.appMenu.revealItem(this.saveButton);
     await this.saveButton.click();
   }
 

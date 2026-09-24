@@ -15,12 +15,20 @@ steps:
   - name: triage_alerts
     type: ai.agent
     agent-id: alertzero-thin-agent
+    # Keep in sync with ALERTZERO_FAST_INFERENCE_FEATURE_ID in @kbn/alertzero-common.
+    connector-id-by-feature: alertzero_fast
+    # plugin-id: per-Worker cost attribution; aggregate-by: ALERTZERO_INFERENCE_PARENT_FEATURE_ID.
+    plugin-id: alertzero_alert_triage
+    aggregate-by: alertzero_parent
     timeout: "10m"
     create-conversation: true
     with:
       configuration_overrides:
         skill_ids:
           - alert-analysis
+        tools:
+          - tool_ids:
+              - security.alertzero.actions.list
       message: >
         Triage the security alert context below. Prefer
         recall over precision when unsure. Return a structured

@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/286439
+issues:
+- https://github.com/elastic/kibana/issues/284399
+type: feature
+products:
+- product: cloud-serverless
+- product: kibana
+areas:
+- Dashboards and visualizations
+title: Add custom HTML and CSS panels to dashboards
+description: Adds custom dashboard panels that you can build with HTML, CSS, Liquid templates, and ES|QL.

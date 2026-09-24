@@ -333,7 +333,17 @@ export class VisualizeEditorPageObject extends FtrService {
   }
 
   public async toggleScaleMetrics() {
+    const toState =
+      (await this.testSubjects.getAttribute('scaleMetricsSwitch', 'aria-checked')) === 'true'
+        ? 'false'
+        : 'true';
     await this.testSubjects.click('scaleMetricsSwitch');
+    await this.retry.waitForWithTimeout(
+      `scale metrics switch to be checked=${toState}`,
+      2000,
+      async () =>
+        (await this.testSubjects.getAttribute('scaleMetricsSwitch', 'aria-checked')) === toState
+    );
   }
 
   public async toggleAutoMode() {
@@ -354,16 +364,23 @@ export class VisualizeEditorPageObject extends FtrService {
   }
 
   public async toggleAccordion(id: string, toState = 'true') {
-    const toggle = await this.find.byCssSelector(`button[aria-controls="${id}"]`);
-    const toggleOpen = await toggle.getAttribute('aria-expanded');
-    this.log.debug(`toggle ${id} expand = ${toggleOpen}`);
-    if (toggleOpen !== toState) {
+    const selector = `button[aria-controls="${id}"]`;
+    // The sidebar reflows while a neighbouring accordion is still animating, so a click issued
+    // right after another toggle can land on shifted content and never reach the button.
+    // Re-check the state and click again instead of waiting on a single click.
+    await this.retry.try(async () => {
+      const toggle = await this.find.byCssSelector(selector);
+      const toggleOpen = await toggle.getAttribute('aria-expanded');
+      this.log.debug(`toggle ${id} expand = ${toggleOpen}`);
+      if (toggleOpen === toState) {
+        return;
+      }
       this.log.debug(`toggle ${id} click()`);
       await toggle.click();
-      await this.retry.waitFor(`accordion ${id} to be ${toState}`, async () => {
+      await this.retry.waitForWithTimeout(`accordion ${id} to be ${toState}`, 2000, async () => {
         return (await toggle.getAttribute('aria-expanded')) === toState;
       });
-    }
+    });
   }
 
   public async toggleOpenEditor(index: number, toState = 'true') {
@@ -372,9 +389,19 @@ export class VisualizeEditorPageObject extends FtrService {
   }
 
   public async toggleAdvancedParams(aggId: string) {
-    const accordion = await this.testSubjects.find(`advancedParams-${aggId}`);
-    const accordionButton = await this.find.descendantDisplayedByCssSelector('button', accordion);
+    const findAccordionButton = async () => {
+      const accordion = await this.testSubjects.find(`advancedParams-${aggId}`);
+      return await this.find.descendantDisplayedByCssSelector('button', accordion);
+    };
+    const accordionButton = await findAccordionButton();
+    const toState =
+      (await accordionButton.getAttribute('aria-expanded')) === 'true' ? 'false' : 'true';
     await accordionButton.click();
+    await this.retry.waitForWithTimeout(
+      `advanced params accordion ${aggId} to be expanded=${toState}`,
+      2000,
+      async () => (await (await findAccordionButton()).getAttribute('aria-expanded')) === toState
+    );
   }
 
   public async inputValueInCodeEditor(value: string) {

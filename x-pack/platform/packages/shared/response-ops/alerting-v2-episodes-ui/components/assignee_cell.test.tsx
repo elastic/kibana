@@ -24,6 +24,18 @@ describe('AlertEpisodeAssigneeCell', () => {
     queryClient.clear();
   });
 
+  it('retains the assignee empty state', () => {
+    render(
+      <I18nProvider>
+        <AlertEpisodeAssigneeCell assigneeUid={null} userProfile={mockUserProfile} />
+      </I18nProvider>,
+      { wrapper }
+    );
+
+    expect(screen.getByText('—')).toBeInTheDocument();
+    expect(mockBulkGet).not.toHaveBeenCalled();
+  });
+
   it('renders a skeleton while the assignee profile is loading', () => {
     mockBulkGet.mockImplementation(() => new Promise(() => {}));
 
@@ -50,5 +62,22 @@ describe('AlertEpisodeAssigneeCell', () => {
     );
 
     expect(await screen.findByText('jdoe')).toBeInTheDocument();
+  });
+
+  it('does not make an unknown assignee tooltip focusable when embedded in a button', async () => {
+    mockBulkGet.mockResolvedValue([]);
+
+    render(
+      <I18nProvider>
+        <AlertEpisodeAssigneeCell
+          assigneeUid="u-1"
+          userProfile={mockUserProfile}
+          isTooltipFocusable={false}
+        />
+      </I18nProvider>,
+      { wrapper }
+    );
+
+    expect(await screen.findByText('Unknown user')).not.toHaveAttribute('tabindex');
   });
 });

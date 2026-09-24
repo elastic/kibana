@@ -82,6 +82,8 @@ export function createChromeApi({
     getCustomizeNavigationHandler$: () => projectNavigation.getCustomizeNavigationHandler$(),
     registerCustomizeNavigationHandler: (handler) =>
       projectNavigation.registerCustomizeNavigationHandler(handler),
+    registerNavigationLinks: (links) => projectNavigation.registerNavigationLinks(links),
+    getRegisteredNavigationLinks$: () => projectNavigation.getRegisteredNavigationLinks$(),
   };
 
   let appHeaderRegistrationId = 0;
@@ -269,19 +271,6 @@ export function createChromeApi({
     help,
     appHeader,
     inlineAppHeader,
-    next: {
-      aiButton: controls.aiButton,
-      globalSearch: controls.globalSearch,
-      contextSwitcher: controls.contextSwitcher,
-      projectPicker: controls.projectPicker,
-      userMenu: controls.userMenu,
-      inlineAppHeader,
-      appHeader,
-      registerFeedbackHandler: help.registerFeedbackHandler,
-      getFeedbackHandler$: help.getFeedbackHandler$,
-      registerNewsfeedHandler: help.registerNewsfeedHandler,
-      getNewsfeedHandler$: help.getNewsfeedHandler$,
-    },
     sidebar,
   };
 

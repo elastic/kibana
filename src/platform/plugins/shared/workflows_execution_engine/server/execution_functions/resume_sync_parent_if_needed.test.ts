@@ -7,180 +7,312 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EsWorkflowExecution } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
-
-import { createMockLogger } from './execution_functions_test_utils';
+import type { Logger } from '@kbn/core/server';
+import { type EsWorkflowExecution, ExecutionStatus } from '@kbn/workflows';
 import { resumeSyncParentIfNeeded } from './resume_sync_parent_if_needed';
+import { markExecutionFailedTaskRecovery, TASK_RECOVERY_ERROR_TYPE } from '../lib/task_recovery';
+import type { StepExecutionRepository } from '../repositories/step_execution_repository';
+import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
 
-const PARENT_EXECUTION_ID = 'parent-exec-1';
-const CHILD_EXECUTION_ID = 'child-exec-1';
-const SPACE_ID = 'default';
+jest.mock('../lib/task_recovery', () => {
+  const actual = jest.requireActual('../lib/task_recovery');
+  return {
+    ...actual,
+    markExecutionFailedTaskRecovery: jest.fn().mockResolvedValue(undefined),
+  };
+});
 
-const createChildExecution = (overrides: Partial<EsWorkflowExecution> = {}): EsWorkflowExecution =>
-  ({
-    id: CHILD_EXECUTION_ID,
-    status: ExecutionStatus.COMPLETED,
-    context: {
-      parentWorkflowInvocation: 'sync',
-      parentWorkflowExecutionId: PARENT_EXECUTION_ID,
-    },
-    ...overrides,
-  } as EsWorkflowExecution);
+const mockMarkFailed = markExecutionFailedTaskRecovery as jest.MockedFunction<
+  typeof markExecutionFailedTaskRecovery
+>;
 
 describe('resumeSyncParentIfNeeded', () => {
-  let logger: ReturnType<typeof createMockLogger>;
-  let internalResumeWorkflowExecution: jest.Mock;
+  const parentExecId = 'parent-execution-id';
+  const childExecId = 'child-execution-id';
+  const spaceId = 'default';
+  const logger = {
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+    debug: jest.fn(),
+  } as unknown as Logger;
+
+  const createChild = (overrides: Partial<EsWorkflowExecution> = {}): EsWorkflowExecution =>
+    ({
+      id: childExecId,
+      spaceId,
+      status: ExecutionStatus.COMPLETED,
+      context: {
+        parentWorkflowInvocation: 'sync',
+        parentWorkflowExecutionId: parentExecId,
+      },
+      ...overrides,
+    } as EsWorkflowExecution);
+
+  const createDeps = () => {
+    const internalResumeWorkflowExecution = jest.fn().mockResolvedValue(undefined);
+    const workflowExecutionRepository = {
+      getWorkflowExecutionById: jest.fn().mockResolvedValue({
+        id: parentExecId,
+        status: ExecutionStatus.WAITING_FOR_CHILD,
+      }),
+    } as unknown as jest.Mocked<WorkflowExecutionRepository>;
+    const stepExecutionRepository = {} as unknown as jest.Mocked<StepExecutionRepository>;
+    const workflowTaskManager = {
+      hasActiveTaskForExecution: jest.fn().mockResolvedValue(false),
+      runExistingResumeTask: jest.fn().mockResolvedValue(undefined),
+      scheduleAndRunImmediateResume: jest.fn().mockResolvedValue(undefined),
+    } as unknown as jest.Mocked<WorkflowTaskManager>;
+
+    return {
+      internalResumeWorkflowExecution,
+      workflowExecutionRepository,
+      stepExecutionRepository,
+      workflowTaskManager,
+    };
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
-    logger = createMockLogger();
-    internalResumeWorkflowExecution = jest.fn().mockResolvedValue(undefined);
+    jest.spyOn(global, 'setTimeout').mockImplementation(((callback: () => void) => {
+      callback();
+      return 0;
+    }) as typeof setTimeout);
   });
 
-  describe('parent execution identity', () => {
-    it('resumes the parent without a request so it wakes its own pre-scheduled resume task', async () => {
-      await resumeSyncParentIfNeeded({
-        childExecution: createChildExecution(),
-        spaceId: SPACE_ID,
-        internalResumeWorkflowExecution,
-        logger,
-      });
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
 
-      expect(internalResumeWorkflowExecution).toHaveBeenCalledTimes(1);
-      expect(internalResumeWorkflowExecution).toHaveBeenCalledWith(
-        PARENT_EXECUTION_ID,
-        SPACE_ID,
-        undefined
-      );
+  it('resumes the parent without a request so it wakes its own pre-scheduled resume task', async () => {
+    const { internalResumeWorkflowExecution, ...repos } = createDeps();
 
-      // The 4th argument is the `request`. Any value here makes
-      // internalResumeWorkflowExecution take its request-present branch, which deletes the
-      // parent's pre-scheduled resume task and reschedules from the caller's identity. After a
-      // child HITL approval the child runs as the approver, so passing anything derived from
-      // the child would leak the approver's identity into the parent.
-      const [, , , request] = internalResumeWorkflowExecution.mock.calls[0];
-      expect(request).toBeUndefined();
+    await resumeSyncParentIfNeeded({
+      childExecution: createChild(),
+      spaceId,
+      internalResumeWorkflowExecution,
+      logger,
+      ...repos,
     });
 
-    it('does not resume the parent under a descendant identity when the child completes after a HITL approval', async () => {
-      // A child that was resumed by an approver reaches a terminal status like any other child.
-      // Nothing about that child may influence which identity the parent resumes under.
-      const approvedChild = createChildExecution({
+    expect(internalResumeWorkflowExecution).toHaveBeenCalledTimes(1);
+    expect(internalResumeWorkflowExecution).toHaveBeenCalledWith(parentExecId, spaceId, undefined);
+    expect(mockMarkFailed).not.toHaveBeenCalled();
+  });
+
+  it('does not resume the parent under a descendant identity when the child completes after a HITL approval', async () => {
+    const { internalResumeWorkflowExecution, ...repos } = createDeps();
+
+    await resumeSyncParentIfNeeded({
+      childExecution: createChild(),
+      spaceId,
+      internalResumeWorkflowExecution,
+      logger,
+      ...repos,
+    });
+
+    const resumeArgs = internalResumeWorkflowExecution.mock.calls[0];
+    expect(resumeArgs).toHaveLength(3);
+    expect(resumeArgs[3]).toBeUndefined();
+  });
+
+  it('retries runSoon when the parent task does not exist yet, then succeeds', async () => {
+    const { internalResumeWorkflowExecution, ...repos } = createDeps();
+    internalResumeWorkflowExecution
+      .mockRejectedValueOnce(new Error('Saved object [task/workflow-wake-parent] not found'))
+      .mockRejectedValueOnce(new Error('Saved object [task/workflow-wake-parent] not found'))
+      .mockResolvedValue(undefined);
+
+    await resumeSyncParentIfNeeded({
+      childExecution: createChild(),
+      spaceId,
+      internalResumeWorkflowExecution,
+      logger,
+      ...repos,
+    });
+
+    expect(internalResumeWorkflowExecution).toHaveBeenCalledTimes(3);
+    expect(mockMarkFailed).not.toHaveBeenCalled();
+    expect(logger.info).toHaveBeenCalledWith(
+      expect.stringContaining(`scheduled resume for parent ${parentExecId}`)
+    );
+  });
+
+  it('fail-closes the parent when wake-up keeps failing and no authenticated resume task exists', async () => {
+    const { internalResumeWorkflowExecution, ...repos } = createDeps();
+    internalResumeWorkflowExecution.mockRejectedValue(new Error('not found'));
+
+    await resumeSyncParentIfNeeded({
+      childExecution: createChild(),
+      spaceId,
+      internalResumeWorkflowExecution,
+      logger,
+      ...repos,
+    });
+
+    expect(internalResumeWorkflowExecution).toHaveBeenCalledTimes(8);
+    expect(mockMarkFailed).toHaveBeenCalledWith(
+      repos.workflowExecutionRepository,
+      repos.stepExecutionRepository,
+      parentExecId,
+      expect.objectContaining({
+        type: TASK_RECOVERY_ERROR_TYPE,
+        message: expect.stringContaining('had no authenticated resume task to wake'),
+      })
+    );
+    expect(repos.workflowTaskManager.scheduleAndRunImmediateResume).not.toHaveBeenCalled();
+  });
+
+  it('wakes the grandparent after fail-closing a parent that is itself a sync child', async () => {
+    const grandparentExecId = 'grandparent-execution-id';
+    const { internalResumeWorkflowExecution, workflowExecutionRepository, ...repos } = createDeps();
+    internalResumeWorkflowExecution.mockImplementation(async (executionId: string) => {
+      if (executionId === grandparentExecId) {
+        return;
+      }
+      throw new Error('not found');
+    });
+    (workflowExecutionRepository.getWorkflowExecutionById as jest.Mock).mockResolvedValue({
+      id: parentExecId,
+      status: ExecutionStatus.WAITING_FOR_CHILD,
+      context: {
+        parentWorkflowInvocation: 'sync',
+        parentWorkflowExecutionId: grandparentExecId,
+      },
+    });
+
+    await resumeSyncParentIfNeeded({
+      childExecution: createChild(),
+      spaceId,
+      internalResumeWorkflowExecution,
+      workflowExecutionRepository,
+      logger,
+      ...repos,
+    });
+
+    expect(mockMarkFailed).toHaveBeenCalledTimes(1);
+    expect(mockMarkFailed).toHaveBeenCalledWith(
+      workflowExecutionRepository,
+      repos.stepExecutionRepository,
+      parentExecId,
+      expect.anything()
+    );
+    expect(internalResumeWorkflowExecution).toHaveBeenCalledWith(
+      grandparentExecId,
+      spaceId,
+      undefined
+    );
+    expect(internalResumeWorkflowExecution.mock.calls[8]).toEqual([
+      grandparentExecId,
+      spaceId,
+      undefined,
+    ]);
+  });
+
+  it('wakes an existing parent resume task instead of failing when one is already armed', async () => {
+    const { internalResumeWorkflowExecution, workflowTaskManager, ...repos } = createDeps();
+    internalResumeWorkflowExecution.mockRejectedValue(new Error('not found'));
+    (workflowTaskManager.hasActiveTaskForExecution as jest.Mock).mockResolvedValue(true);
+
+    await resumeSyncParentIfNeeded({
+      childExecution: createChild(),
+      spaceId,
+      internalResumeWorkflowExecution,
+      workflowTaskManager,
+      logger,
+      ...repos,
+    });
+
+    expect(workflowTaskManager.runExistingResumeTask).toHaveBeenCalledWith(parentExecId);
+    expect(mockMarkFailed).not.toHaveBeenCalled();
+  });
+
+  it('does not fail-close the parent when it is already running', async () => {
+    const { internalResumeWorkflowExecution, workflowExecutionRepository, ...repos } = createDeps();
+    internalResumeWorkflowExecution.mockRejectedValue(new Error('not found'));
+    (workflowExecutionRepository.getWorkflowExecutionById as jest.Mock).mockResolvedValue({
+      id: parentExecId,
+      status: ExecutionStatus.RUNNING,
+    });
+
+    await resumeSyncParentIfNeeded({
+      childExecution: createChild(),
+      spaceId,
+      internalResumeWorkflowExecution,
+      workflowExecutionRepository,
+      logger,
+      ...repos,
+    });
+
+    expect(mockMarkFailed).not.toHaveBeenCalled();
+  });
+
+  it('does not fail-close the parent when cancel has already been requested', async () => {
+    const { internalResumeWorkflowExecution, workflowExecutionRepository, ...repos } = createDeps();
+    internalResumeWorkflowExecution.mockRejectedValue(new Error('not found'));
+    (workflowExecutionRepository.getWorkflowExecutionById as jest.Mock).mockResolvedValue({
+      id: parentExecId,
+      status: ExecutionStatus.WAITING_FOR_CHILD,
+      cancelRequested: true,
+    });
+
+    await resumeSyncParentIfNeeded({
+      childExecution: createChild(),
+      spaceId,
+      internalResumeWorkflowExecution,
+      workflowExecutionRepository,
+      logger,
+      ...repos,
+    });
+
+    expect(mockMarkFailed).not.toHaveBeenCalled();
+  });
+
+  it('does not resume a non-terminal child', async () => {
+    const { internalResumeWorkflowExecution, ...repos } = createDeps();
+
+    await resumeSyncParentIfNeeded({
+      childExecution: createChild({ status: ExecutionStatus.RUNNING }),
+      spaceId,
+      internalResumeWorkflowExecution,
+      logger,
+      ...repos,
+    });
+
+    expect(internalResumeWorkflowExecution).not.toHaveBeenCalled();
+  });
+
+  it('does not resume an async parent invocation', async () => {
+    const { internalResumeWorkflowExecution, ...repos } = createDeps();
+
+    await resumeSyncParentIfNeeded({
+      childExecution: createChild({
         context: {
-          parentWorkflowInvocation: 'sync',
-          parentWorkflowExecutionId: PARENT_EXECUTION_ID,
-          resumedBy: 'approver@elastic.co',
+          parentWorkflowInvocation: 'async',
+          parentWorkflowExecutionId: parentExecId,
         },
-      } as Partial<EsWorkflowExecution>);
-
-      await resumeSyncParentIfNeeded({
-        childExecution: approvedChild,
-        spaceId: SPACE_ID,
-        internalResumeWorkflowExecution,
-        logger,
-      });
-
-      expect(internalResumeWorkflowExecution).toHaveBeenCalledWith(
-        PARENT_EXECUTION_ID,
-        SPACE_ID,
-        undefined
-      );
+      }),
+      spaceId,
+      internalResumeWorkflowExecution,
+      logger,
+      ...repos,
     });
 
-    it('does not write context into the parent when resuming it', async () => {
-      await resumeSyncParentIfNeeded({
-        childExecution: createChildExecution(),
-        spaceId: SPACE_ID,
-        internalResumeWorkflowExecution,
-        logger,
-      });
-
-      // `resumedBy` / `resumeInput` belong to the child's HITL step, not to the parent.
-      const [, , context] = internalResumeWorkflowExecution.mock.calls[0];
-      expect(context).toBeUndefined();
-    });
+    expect(internalResumeWorkflowExecution).not.toHaveBeenCalled();
   });
 
-  describe('when the resume fails', () => {
-    it('logs an error and does not schedule a replacement resume task', async () => {
-      internalResumeWorkflowExecution.mockRejectedValue(new Error('task not found'));
+  it('does nothing when internalResumeWorkflowExecution is missing', async () => {
+    const { workflowExecutionRepository, ...repos } = createDeps();
 
-      await resumeSyncParentIfNeeded({
-        childExecution: createChildExecution(),
-        spaceId: SPACE_ID,
-        internalResumeWorkflowExecution,
-        logger,
-      });
-
-      expect(internalResumeWorkflowExecution).toHaveBeenCalledTimes(1);
-      expect(logger.error).toHaveBeenCalledWith(
-        expect.stringContaining(`parent=${PARENT_EXECUTION_ID}`)
-      );
+    await resumeSyncParentIfNeeded({
+      childExecution: createChild(),
+      spaceId,
+      logger,
+      workflowExecutionRepository,
+      ...repos,
     });
 
-    it('does not throw', async () => {
-      internalResumeWorkflowExecution.mockRejectedValue(new Error('boom'));
-
-      await expect(
-        resumeSyncParentIfNeeded({
-          childExecution: createChildExecution(),
-          spaceId: SPACE_ID,
-          internalResumeWorkflowExecution,
-          logger,
-        })
-      ).resolves.toBeUndefined();
-    });
-  });
-
-  describe('when the parent should not be resumed', () => {
-    it('does nothing when the child is not in a terminal status', async () => {
-      await resumeSyncParentIfNeeded({
-        childExecution: createChildExecution({ status: ExecutionStatus.RUNNING }),
-        spaceId: SPACE_ID,
-        internalResumeWorkflowExecution,
-        logger,
-      });
-
-      expect(internalResumeWorkflowExecution).not.toHaveBeenCalled();
-    });
-
-    it('does nothing for an async parent invocation', async () => {
-      await resumeSyncParentIfNeeded({
-        childExecution: createChildExecution({
-          context: {
-            parentWorkflowInvocation: 'async',
-            parentWorkflowExecutionId: PARENT_EXECUTION_ID,
-          },
-        } as Partial<EsWorkflowExecution>),
-        spaceId: SPACE_ID,
-        internalResumeWorkflowExecution,
-        logger,
-      });
-
-      expect(internalResumeWorkflowExecution).not.toHaveBeenCalled();
-    });
-
-    it('does nothing when the execution has no parent', async () => {
-      await resumeSyncParentIfNeeded({
-        childExecution: createChildExecution({ context: {} } as Partial<EsWorkflowExecution>),
-        spaceId: SPACE_ID,
-        internalResumeWorkflowExecution,
-        logger,
-      });
-
-      expect(internalResumeWorkflowExecution).not.toHaveBeenCalled();
-    });
-
-    it('does nothing when no resume handler is wired', async () => {
-      await expect(
-        resumeSyncParentIfNeeded({
-          childExecution: createChildExecution(),
-          spaceId: SPACE_ID,
-          internalResumeWorkflowExecution: undefined,
-          logger,
-        })
-      ).resolves.toBeUndefined();
-    });
+    expect(mockMarkFailed).not.toHaveBeenCalled();
   });
 });

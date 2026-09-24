@@ -6,42 +6,49 @@
  */
 
 import React from 'react';
-import { screen, within, fireEvent } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
-// eslint-disable-next-line @kbn/eslint/module_migration
-import routeData from 'react-router';
+import { screen, waitFor } from '@testing-library/react';
 
-import { useUpdateComment } from '../../containers/use_update_comment';
-import {
-  basicCaseWithUnifiedComments,
-  basicCommentUnified,
-  caseUserActions,
-  getUserAction,
-} from '../../containers/mock';
 import { UserActions } from '.';
-
+import { basicCase } from '../../containers/mock';
 import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
-import type { UserActivityParams } from '../user_actions_activity_bar/types';
-import { useFindCaseUserActions } from '../../containers/use_find_case_user_actions';
-import { defaultUseFindCaseUserActions } from '../case_view/mocks';
-import { waitForComponentToUpdate } from '../../common/test_utils';
+import { casesConfigurationsMock } from '../../containers/configure/mock';
 import { useInfiniteFindCaseUserActions } from '../../containers/use_infinite_find_case_user_actions';
-import { getMockBuilderArgs } from './mock';
+import { useFindCaseUserActions } from '../../containers/use_find_case_user_actions';
+import { useGetCaseConnectors } from '../../containers/use_get_case_connectors';
+import { useGetCaseUsers } from '../../containers/use_get_case_users';
+import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
+import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
 import { renderWithTestingProviders } from '../../common/mock';
 import type { CaseUserActionsStats } from '../../containers/types';
+import type { UserActivityParams } from '../user_actions_activity_bar/types';
 
-const onUpdateField = jest.fn();
-const unifiedCommentTestId = `comment-${basicCommentUnified.type}-${basicCommentUnified.type}`;
+jest.mock('../../containers/use_infinite_find_case_user_actions');
+jest.mock('../../containers/use_find_case_user_actions');
+jest.mock('../../containers/use_get_case_connectors');
+jest.mock('../../containers/use_get_case_users');
+jest.mock('../../containers/configure/use_get_case_configuration');
+jest.mock('../../containers/user_profiles/use_get_current_user_profile');
+jest.mock('../../common/lib/kibana');
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useParams: () => ({ detailName: 'case-id' }),
+}));
+
+const useInfiniteFindCaseUserActionsMock = useInfiniteFindCaseUserActions as jest.Mock;
+const useFindCaseUserActionsMock = useFindCaseUserActions as jest.Mock;
+const useGetCaseConnectorsMock = useGetCaseConnectors as jest.Mock;
+const useGetCaseUsersMock = useGetCaseUsers as jest.Mock;
+const useGetCaseConfigurationMock = useGetCaseConfiguration as jest.Mock;
+const useGetCurrentUserProfileMock = useGetCurrentUserProfile as jest.Mock;
 
 const userActionsStats: CaseUserActionsStats = {
-  total: 25,
+  total: 5,
   totalDeletions: 0,
-  totalComments: 9,
+  totalComments: 2,
   totalCommentDeletions: 0,
-  totalCommentCreations: 5,
+  totalCommentCreations: 2,
   totalHiddenCommentUpdates: 0,
-  totalOtherActions: 16,
+  totalOtherActions: 3,
   totalOtherActionDeletions: 0,
 };
 
@@ -52,201 +59,192 @@ const userActivityQueryParams: UserActivityParams = {
   perPage: 10,
 };
 
-const builderArgs = getMockBuilderArgs();
-
 const defaultProps = {
-  caseUserActions,
-  ...builderArgs,
-  attachments: [basicCommentUnified],
-  caseConnectors: getCaseConnectorsMockResponse(),
-  data: basicCaseWithUnifiedComments,
-  onUpdateField,
+  data: basicCase,
   userActivityQueryParams,
   userActionsStats,
   statusActionButton: null,
+  attachActionButton: null,
+  onUpdateField: jest.fn(),
 };
 
-jest.mock('../../containers/use_infinite_find_case_user_actions');
-jest.mock('../../containers/use_find_case_user_actions');
-jest.mock('../../containers/use_update_comment');
-jest.mock('./timestamp', () => ({
-  UserActionTimestamp: () => <></>,
-}));
-jest.mock('../../common/lib/kibana');
-
-const useInfiniteFindCaseUserActionsMock = useInfiniteFindCaseUserActions as jest.Mock;
-const useFindCaseUserActionsMock = useFindCaseUserActions as jest.Mock;
-const useUpdateCommentMock = useUpdateComment as jest.Mock;
-const patchComment = jest.fn();
-
-const renderUserActions = (props = defaultProps) =>
-  renderWithTestingProviders(<UserActions {...props} />, {
-    wrapperProps: {
-      unifiedAttachmentTypeRegistry: builderArgs.unifiedAttachmentTypeRegistry,
-    },
-  });
-
-describe(`UserActions`, () => {
-  const sampleData = {
-    content: 'what a great comment update',
-  };
-
+describe('UserActions (redesign)', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    useUpdateCommentMock.mockReturnValue({
-      isLoadingIds: [],
-      mutate: patchComment,
+    useGetCaseConnectorsMock.mockReturnValue({ data: getCaseConnectorsMockResponse() });
+    useGetCaseUsersMock.mockReturnValue({ data: undefined });
+    useGetCaseConfigurationMock.mockReturnValue({ data: casesConfigurationsMock });
+    useGetCurrentUserProfileMock.mockReturnValue({ data: undefined });
+    useInfiniteFindCaseUserActionsMock.mockReturnValue({
+      data: { pages: [] },
+      isLoading: false,
+      hasNextPage: false,
+      fetchNextPage: jest.fn(),
+      isFetchingNextPage: false,
     });
     useFindCaseUserActionsMock.mockReturnValue({
-      ...defaultUseFindCaseUserActions,
-      data: {
-        ...defaultUseFindCaseUserActions.data,
-        latestAttachments: [basicCommentUnified],
-      },
+      data: { userActions: [], latestAttachments: [] },
+      isLoading: false,
     });
-    useInfiniteFindCaseUserActionsMock.mockReturnValue({ isLoading: false, data: undefined });
-
-    jest.spyOn(routeData, 'useParams').mockReturnValue({ detailName: 'case-id' });
   });
 
-  it('Renders service now update line with top and bottom when push is required', async () => {
-    const caseConnectors = getCaseConnectorsMockResponse({ 'push.needsToBePushed': true });
-    const ourActions = [
-      getUserAction('pushed', 'push_to_service', {
-        createdAt: '2023-01-17T09:46:29.813Z',
-      }),
-    ];
+  it('renders the user actions list when loaded', async () => {
+    renderWithTestingProviders(<UserActions {...defaultProps} />);
 
+    await waitFor(() => {
+      expect(screen.getByTestId('user-actions-list')).toBeInTheDocument();
+    });
+  });
+
+  it('shows loading skeleton while data is loading', () => {
+    useInfiniteFindCaseUserActionsMock.mockReturnValue({
+      data: undefined,
+      isLoading: true,
+      hasNextPage: false,
+      fetchNextPage: jest.fn(),
+      isFetchingNextPage: false,
+    });
     useFindCaseUserActionsMock.mockReturnValue({
-      ...defaultUseFindCaseUserActions,
-      data: { userActions: ourActions },
+      data: undefined,
+      isLoading: true,
     });
 
-    const props = {
-      ...defaultProps,
-      caseConnectors,
-    };
+    renderWithTestingProviders(<UserActions {...defaultProps} />);
 
-    renderUserActions(props);
-
-    await waitForComponentToUpdate();
-
-    expect(await screen.findByTestId('top-footer')).toBeInTheDocument();
-    expect(await screen.findByTestId('bottom-footer')).toBeInTheDocument();
+    expect(screen.getByTestId('user-actions-loading')).toBeInTheDocument();
   });
 
-  it('Renders service now update line with top only when push is up to date', async () => {
-    const ourActions = [
-      getUserAction('pushed', 'push_to_service', {
-        createdAt: '2023-01-17T09:46:29.813Z',
-      }),
-    ];
+  it('renders the comment list container', async () => {
+    renderWithTestingProviders(<UserActions {...defaultProps} />);
 
-    useFindCaseUserActionsMock.mockReturnValue({
-      ...defaultUseFindCaseUserActions,
-      data: { userActions: ourActions },
+    await waitFor(() => {
+      expect(screen.getByTestId('user-actions-list')).toBeInTheDocument();
+    });
+  });
+
+  describe('no search results', () => {
+    it('shows the empty prompt when a search filter has no matches', async () => {
+      useInfiniteFindCaseUserActionsMock.mockReturnValue({
+        data: { pages: [{ userActions: [], latestAttachments: [], total: 0 }] },
+        isLoading: false,
+        hasNextPage: false,
+        fetchNextPage: jest.fn(),
+        isFetchingNextPage: false,
+      });
+
+      renderWithTestingProviders(
+        <UserActions
+          {...defaultProps}
+          userActivityQueryParams={{ ...userActivityQueryParams, search: 'no matches' }}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId('user-actions-no-search-results')).toBeInTheDocument();
+      });
+      // The "add comment" UI (rendered via UserActionsList) must remain
+      // usable even when the current filters match nothing.
+      expect(screen.getByTestId('user-actions-list')).toBeInTheDocument();
     });
 
-    renderUserActions();
+    it('shows the empty prompt when an author filter has no matches', async () => {
+      useInfiniteFindCaseUserActionsMock.mockReturnValue({
+        data: { pages: [{ userActions: [], latestAttachments: [], total: 0 }] },
+        isLoading: false,
+        hasNextPage: false,
+        fetchNextPage: jest.fn(),
+        isFetchingNextPage: false,
+      });
 
-    expect(await screen.findByTestId('top-footer')).toBeInTheDocument();
-    expect(screen.queryByTestId('bottom-footer')).not.toBeInTheDocument();
-  });
+      renderWithTestingProviders(
+        <UserActions
+          {...defaultProps}
+          userActivityQueryParams={{ ...userActivityQueryParams, authors: ['elastic'] }}
+        />
+      );
 
-  it('Switches to markdown when edit is clicked and back to panel when canceled', async () => {
-    renderUserActions();
-
-    await userEvent.click(
-      await within(await screen.findByTestId(unifiedCommentTestId)).findByTestId(
-        'property-actions-user-action-ellipses'
-      )
-    );
-
-    await waitForEuiPopoverOpen();
-
-    await userEvent.click(await screen.findByTestId('property-actions-user-action-pencil'));
-
-    await userEvent.click(
-      await within(await screen.findByTestId(unifiedCommentTestId)).findByTestId(
-        'editable-cancel-markdown'
-      )
-    );
-
-    expect(
-      within(await screen.findByTestId(unifiedCommentTestId)).queryByTestId(
-        'editable-markdown-form'
-      )
-    ).not.toBeInTheDocument();
-  });
-
-  it('calls update comment when comment markdown is saved', async () => {
-    renderUserActions();
-
-    await userEvent.click(
-      await within(await screen.findByTestId(unifiedCommentTestId)).findByTestId(
-        'property-actions-user-action-ellipses'
-      )
-    );
-
-    await waitForEuiPopoverOpen();
-
-    await userEvent.click(await screen.findByTestId('property-actions-user-action-pencil'));
-
-    await waitForComponentToUpdate();
-
-    fireEvent.change((await screen.findAllByTestId(`euiMarkdownEditorTextArea`))[0], {
-      target: { value: sampleData.content },
+      await waitFor(() => {
+        expect(screen.getByTestId('user-actions-no-search-results')).toBeInTheDocument();
+      });
     });
 
-    await userEvent.click(
-      within(screen.getByTestId(unifiedCommentTestId)).getByTestId('editable-save-markdown')
-    );
+    it('shows the empty prompt when filtering by type only has no matches', async () => {
+      useInfiniteFindCaseUserActionsMock.mockReturnValue({
+        data: { pages: [{ userActions: [], latestAttachments: [], total: 0 }] },
+        isLoading: false,
+        hasNextPage: false,
+        fetchNextPage: jest.fn(),
+        isFetchingNextPage: false,
+      });
 
-    expect(
-      within(await screen.findByTestId(unifiedCommentTestId)).queryByTestId(
-        'editable-markdown-form'
-      )
-    ).not.toBeInTheDocument();
+      renderWithTestingProviders(
+        <UserActions
+          {...defaultProps}
+          userActivityQueryParams={{ ...userActivityQueryParams, type: 'action' }}
+        />
+      );
 
-    expect(patchComment).toHaveBeenCalledWith(
-      {
-        commentUpdate: sampleData.content,
-        caseId: 'case-id',
-        commentId: defaultProps.data.comments[0].id,
-        version: defaultProps.data.comments[0].version,
-      },
-      { onSuccess: expect.anything(), onError: expect.anything() }
-    );
-  });
-
-  it('shows quoted text in last MarkdownEditorTextArea', async () => {
-    const quoteableText = `> Solve this fast! \n\n`;
-
-    renderUserActions();
-
-    expect((await screen.findByTestId(`euiMarkdownEditorTextArea`)).textContent).not.toContain(
-      quoteableText
-    );
-
-    await userEvent.click(
-      await within(await screen.findByTestId(unifiedCommentTestId)).findByTestId(
-        'property-actions-user-action-ellipses'
-      )
-    );
-
-    await waitForEuiPopoverOpen();
-
-    await userEvent.click(await screen.findByTestId('property-actions-user-action-quote'));
-
-    expect((await screen.findAllByTestId('add-comment'))[0].textContent).toContain(quoteableText);
-  });
-
-  it('does not show add comment markdown when history filter is selected', async () => {
-    renderUserActions({
-      ...defaultProps,
-      userActivityQueryParams: { ...userActivityQueryParams, type: 'action' },
+      await waitFor(() => {
+        expect(screen.getByTestId('user-actions-no-search-results')).toBeInTheDocument();
+      });
     });
 
-    expect(screen.queryByTestId('add-comment')).not.toBeInTheDocument();
+    it('does not show the empty prompt when there are matches', async () => {
+      useInfiniteFindCaseUserActionsMock.mockReturnValue({
+        data: { pages: [{ userActions: [{ id: '1' }], latestAttachments: [], total: 1 }] },
+        isLoading: false,
+        hasNextPage: false,
+        fetchNextPage: jest.fn(),
+        isFetchingNextPage: false,
+      });
+
+      renderWithTestingProviders(
+        <UserActions
+          {...defaultProps}
+          userActivityQueryParams={{ ...userActivityQueryParams, search: 'matches' }}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId('user-actions-list')).toBeInTheDocument();
+      });
+      expect(screen.queryByTestId('user-actions-no-search-results')).not.toBeInTheDocument();
+    });
+
+    it('does not show the empty prompt when no filter is active, even with zero user actions', async () => {
+      useInfiniteFindCaseUserActionsMock.mockReturnValue({
+        data: { pages: [{ userActions: [], latestAttachments: [], total: 0 }] },
+        isLoading: false,
+        hasNextPage: false,
+        fetchNextPage: jest.fn(),
+        isFetchingNextPage: false,
+      });
+
+      renderWithTestingProviders(<UserActions {...defaultProps} />);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('user-actions-list')).toBeInTheDocument();
+      });
+      expect(screen.queryByTestId('user-actions-no-search-results')).not.toBeInTheDocument();
+    });
+
+    it('does not show the empty prompt while results are still loading', () => {
+      useInfiniteFindCaseUserActionsMock.mockReturnValue({
+        data: undefined,
+        isLoading: true,
+        hasNextPage: false,
+        fetchNextPage: jest.fn(),
+        isFetchingNextPage: false,
+      });
+
+      renderWithTestingProviders(
+        <UserActions
+          {...defaultProps}
+          userActivityQueryParams={{ ...userActivityQueryParams, search: 'no matches yet' }}
+        />
+      );
+
+      expect(screen.queryByTestId('user-actions-no-search-results')).not.toBeInTheDocument();
+    });
   });
 });

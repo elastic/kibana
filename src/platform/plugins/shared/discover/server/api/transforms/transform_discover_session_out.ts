@@ -8,6 +8,10 @@
  */
 
 import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
+import type {
+  DiscoverSessionApiData,
+  DiscoverSessionApiTabBase,
+} from '@kbn/as-code-discover-schema';
 import { toAsCodeTags } from '@kbn/as-code-shared-transforms';
 import type { SavedObjectReference } from '@kbn/core/server';
 import { parseSearchSourceJSON } from '@kbn/data-plugin/common';
@@ -16,12 +20,11 @@ import type {
   DiscoverSessionAttributes,
   DiscoverSessionTabAttributes,
 } from '@kbn/saved-search-plugin/server';
-import type { DiscoverSessionTab } from '../../embeddable';
 import { isDiscoverSessionEsqlTab } from '../../../common/embeddable';
 import { fromStoredTab } from '../../../common/embeddable/transform_utils';
-import type { DiscoverSessionApiData, DiscoverSessionWarning } from '../schema';
+import type { DiscoverSessionWarning } from '../schema';
 import { transformControlPanelsOut } from './transform_control_panels';
-import { transformTabTypeStateOut } from './transform_tab_type_state';
+import { toApiTabTypeState } from '../../../common/session/tab_type_state';
 import { toApiVisContext } from '../../../common/session/vis_context';
 
 export const transformDiscoverSessionOut = (
@@ -79,7 +82,7 @@ export const transformDiscoverSessionOut = (
           }),
       };
 
-      return transformTabTypeStateOut(sessionTab, tab.attributes.tabTypeState);
+      return toApiTabTypeState(sessionTab, tab.attributes.tabTypeState);
     }),
   };
 
@@ -115,7 +118,7 @@ const pinnedFiltersToAppFilters = (attributes: DiscoverSessionTabAttributes) => 
 
 /** Returns the stored ID only when the API tab contains an inline data view. */
 const getStoredInlineDataViewId = (
-  tab: DiscoverSessionTab,
+  tab: DiscoverSessionApiTabBase,
   searchSourceJSON: string
 ): string | undefined => {
   if (tab.data_source.type !== AS_CODE_DATA_VIEW_SPEC_TYPE) {
@@ -135,9 +138,9 @@ const getStoredInlineDataViewId = (
  * IDs pointing to other Data Views are preserved.
  */
 const omitInlineDataViewIdFromFilters = (
-  tab: DiscoverSessionTab,
+  tab: DiscoverSessionApiTabBase,
   inlineDataViewId: string | undefined
-): DiscoverSessionTab => {
+): DiscoverSessionApiTabBase => {
   if (inlineDataViewId === undefined || isDiscoverSessionEsqlTab(tab)) {
     return tab;
   }

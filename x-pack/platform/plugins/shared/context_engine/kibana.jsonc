@@ -9,8 +9,8 @@
     "server": true,
     "browser": true,
     "requiredPlugins": ["actions", "data", "features", "security", "share", "esql", "triggersActionsUi", "taskManager", "workflowsExtensions"],
-    "optionalPlugins": ["console", "spaces", "workflowsManagement"],
-    "runtimePluginDependencies": ["agentBuilder"],
+    "optionalPlugins": ["console", "spaces"],
+    "runtimePluginDependencies": ["agentBuilder", "workflowsManagement"],
     "requiredBundles": ["kibanaReact", "actions"]
   }
 }

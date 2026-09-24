@@ -17,8 +17,8 @@ import type {
 import {
   DEFAULT_MITRE_FRAMEWORK,
   DEFAULT_MITRE_ENTITY_STATUS,
+  MITRE_ATTACK_ENTITY_SO_TYPE,
 } from '@kbn/security-mitre-attack-common';
-import { MITRE_ATTACK_ENTITY_SO_TYPE } from '../../../saved_objects';
 import { buildKqlFilter, getEmptyMitreEntityCollection } from '../../utils';
 import { resolveLatestVersion } from '../resolve_latest_version';
 import { validateMitreEntity } from '../../mitre_entity_validation';
@@ -52,7 +52,7 @@ export const list = async ({
     type: MITRE_ATTACK_ENTITY_SO_TYPE,
     namespaces: ['*'],
     perPage: 10000,
-    sortField: 'id',
+    sortField: 'name',
     sortOrder: 'asc',
     filter: buildKqlFilter({ framework, frameworkVersion, types, status }),
   });

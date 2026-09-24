@@ -44,14 +44,6 @@ export interface CollectTelemetryDataParams {
   logger: Logger;
 }
 
-/**
- * Params for the collection boundary only. Deliberately separate from
- * `CollectTelemetryDataParams` so the individual query modules stay unaware of the flag.
- */
-export interface CollectCasesTelemetryParams extends CollectTelemetryDataParams {
-  templatesEnabled: boolean;
-}
-
 export interface TypeLong {
   type: 'long';
 }
@@ -287,11 +279,23 @@ export interface TemplatesSolutionTelemetry {
 }
 
 export interface TemplatesTelemetry {
-  featureEnabled: boolean;
   all: TemplatesSolutionTelemetry;
   sec: TemplatesSolutionTelemetry;
   obs: TemplatesSolutionTelemetry;
   main: TemplatesSolutionTelemetry;
+}
+
+export interface FieldLibrarySolutionTelemetry {
+  total: number;
+  totalGlobal: number;
+  totalReusable: number;
+}
+
+export interface FieldLibraryTelemetry {
+  all: FieldLibrarySolutionTelemetry;
+  sec: FieldLibrarySolutionTelemetry;
+  obs: FieldLibrarySolutionTelemetry;
+  main: FieldLibrarySolutionTelemetry;
 }
 
 export type CasesTelemetryConnectorKeys =
@@ -360,6 +364,7 @@ export interface CasesTelemetry {
     totalRules: number;
   };
   templates: TemplatesTelemetry;
+  fieldLibrary: FieldLibraryTelemetry;
 }
 
 export type CountSchema = MakeSchemaFrom<Count>;
@@ -373,3 +378,4 @@ export type AttachmentTypeStatsSchema = MakeSchemaFrom<AttachmentTypeStats>;
 export type SolutionTelemetrySchema = MakeSchemaFrom<SolutionTelemetry>;
 export type CustomFieldsSolutionTelemetrySchema = MakeSchemaFrom<CustomFieldsSolutionTelemetry>;
 export type TemplatesSolutionTelemetrySchema = MakeSchemaFrom<TemplatesSolutionTelemetry>;
+export type FieldLibrarySolutionTelemetrySchema = MakeSchemaFrom<FieldLibrarySolutionTelemetry>;

@@ -33,6 +33,7 @@ export class DisableRulesByQueryRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
+    access: 'public' as const,
     summary: 'Disable rules matching a query (dry-run by default)',
     oasOperationObject: disableRulesByQueryOasExamples,
   } as const;

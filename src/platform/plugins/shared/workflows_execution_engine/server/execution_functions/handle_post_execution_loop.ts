@@ -8,11 +8,12 @@
  */
 
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
-import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { isTerminalStatus } from '@kbn/workflows';
 import { resumeSyncParentIfNeeded } from './resume_sync_parent_if_needed';
 import { drainConcurrencyQueueSlots } from '../concurrency/concurrency_queue_drainer';
 import type { WorkflowsMeteringService } from '../metering';
+import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import type { InternalResumeWorkflowExecution } from '../types';
 import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
@@ -21,8 +22,8 @@ export async function handlePostExecutionLoop({
   workflowRunId,
   spaceId,
   logger,
-  fakeRequest,
   workflowExecutionRepository,
+  stepExecutionRepository,
   internalResumeWorkflowExecution,
   workflowTaskManager,
   meteringService,
@@ -31,8 +32,8 @@ export async function handlePostExecutionLoop({
   workflowRunId: string;
   spaceId: string;
   logger: Logger;
-  fakeRequest: KibanaRequest;
   workflowExecutionRepository: WorkflowExecutionRepository;
+  stepExecutionRepository?: StepExecutionRepository;
   internalResumeWorkflowExecution?: InternalResumeWorkflowExecution;
   workflowTaskManager?: WorkflowTaskManager;
   meteringService?: WorkflowsMeteringService;
@@ -77,6 +78,9 @@ export async function handlePostExecutionLoop({
       childExecution: finalExecution,
       spaceId,
       internalResumeWorkflowExecution,
+      workflowExecutionRepository,
+      stepExecutionRepository,
+      workflowTaskManager,
       logger,
     });
   }

@@ -40,29 +40,13 @@ export interface DiscoverServerPluginStart {
 }
 
 export { config } from './config';
-export type {
-  DiscoverSessionClassicTab,
-  DiscoverSessionEsqlTab,
-  DiscoverSessionTab,
-  DiscoverSessionPanelOverrides,
-  DiscoverSessionEmbeddableByValueProps,
-  DiscoverSessionEmbeddableByReferenceProps,
-  DiscoverSessionEmbeddableByValueState,
-  DiscoverSessionEmbeddableByReferenceState,
-  DiscoverSessionEmbeddableState,
-} from './embeddable';
-export { discoverSessionApiResponseSchema, discoverSessionApiDataSchema } from './api/schema';
+export { discoverSessionApiResponseSchema } from './api/schema';
 export { transformDiscoverSessionIn, transformDiscoverSessionOut } from './api/transforms';
 export type {
-  DiscoverSessionApiClassicTab,
-  DiscoverSessionApiEsqlTab,
-  DiscoverSessionApiMetricsTab,
   DiscoverSessionApiResponse,
-  DiscoverSessionApiTab,
-  DiscoverSessionApiData,
-  DiscoverSessionApiDataInput,
   DiscoverSessionSanitizeResponse,
   DiscoverSessionWarning,
+  DiscoverSessionGetResponse,
 } from './api/schema';
 export type { DiscoverSessionSanitizeRequest } from './api/session_sanitize';
 

@@ -456,6 +456,12 @@ export interface ContextManager {
   renderInputTemplate<T>(input: T, additionalContext?: Record<string, unknown>): T;
 
   /**
+   * Creates a template renderer that snapshots the current workflow context.
+   * Intended for synchronous batch operations where the context is stable.
+   */
+  createTemplateRenderer?(): <T>(input: T, additionalContext?: Record<string, unknown>) => T;
+
+  /**
    * Returns the fake request
    */
   getFakeRequest(): KibanaRequest;

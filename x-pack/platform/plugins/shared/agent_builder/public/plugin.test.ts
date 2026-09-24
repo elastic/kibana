@@ -33,6 +33,12 @@ jest.mock('./services', () => ({
   AgentService: jest.fn(),
   AttachmentsService: jest.fn(() => ({ addAttachmentType: jest.fn() })),
   RenderersService: jest.fn(() => ({ register: jest.fn() })),
+  ConversationEventsService: jest.fn(() => ({
+    register: jest.fn(),
+    getUiDefinition: jest.fn(),
+    has: jest.fn(),
+    list: jest.fn().mockReturnValue([]),
+  })),
   ChatService: jest.fn(),
   ConversationsService: jest.fn(),
   ConversationTemplatesService: jest.fn(() => ({
@@ -63,6 +69,10 @@ jest.mock('./services/conversation_templates', () => ({
 
 jest.mock('./services/renderers', () => ({
   createPublicRenderersContract: jest.fn(() => ({})),
+}));
+
+jest.mock('./services/conversation_events', () => ({
+  createPublicConversationEventsContract: jest.fn(() => ({})),
 }));
 
 jest.mock('./services/tools', () => ({
@@ -153,7 +163,7 @@ const createMockCoreStart = (sidebarApp: ReturnType<typeof createMockSidebarApp>
     },
     chrome: {
       sidebar: { getApp: jest.fn(() => sidebarApp) },
-      next: { aiButton: { register: jest.fn() } },
+      controls: { aiButton: { register: jest.fn() } },
     },
     uiSettings: {
       get$: jest.fn(() => new BehaviorSubject(false)),

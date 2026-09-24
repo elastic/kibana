@@ -316,6 +316,10 @@ export interface RawAction extends Record<string, unknown> {
   config: Record<string, unknown>;
   secrets: Record<string, unknown>;
   authMode?: AuthMode;
+  apiKey?: string | null;
+  uiamApiKey?: string | null;
+  uiamApiKeyExternal?: boolean;
+  hasInboundEventIdentity?: boolean;
 }
 
 export interface ActionTaskParams extends SavedObjectAttributes {

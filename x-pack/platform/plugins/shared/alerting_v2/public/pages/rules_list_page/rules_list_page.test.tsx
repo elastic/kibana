@@ -87,10 +87,6 @@ jest.mock('@kbn/core-di-browser', () => {
   };
 });
 
-jest.mock('@kbn/core-di', () => ({
-  PluginStart: (key: string) => key,
-}));
-
 jest.mock('@kbn/alerting-v2-rule-form', () => ({
   ComposeDiscoverFlyout: ({ onCreateRule }: { onCreateRule: (payload: unknown) => void }) => (
     <button data-test-subj="composeDiscoverFlyout" onClick={() => onCreateRule({})}>
@@ -120,10 +116,6 @@ jest.mock('../../hooks/use_create_rule', () => ({
 const mockUpdateRuleMutate = jest.fn();
 jest.mock('../../hooks/use_update_rule', () => ({
   useUpdateRule: () => ({ mutate: mockUpdateRuleMutate, isLoading: false }),
-}));
-
-jest.mock('../../hooks/use_setup_rule_notifications', () => ({
-  useSetupRuleNotifications: () => ({ mutate: jest.fn(), isLoading: false }),
 }));
 
 const mockDeleteMutate = jest.fn();

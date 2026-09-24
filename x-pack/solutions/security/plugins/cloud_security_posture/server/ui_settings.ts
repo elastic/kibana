@@ -8,7 +8,10 @@
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import type { UiSettingsParams } from '@kbn/core/server';
-import { GRAPH_RUNTIME_EVALUATIONS_ENABLED_SETTING } from '../common/constants';
+import {
+  GRAPH_RUNTIME_EVALUATIONS_ENABLED_SETTING,
+  GRAPH_SHOW_UNKNOWN_TARGET_ENABLED_SETTING,
+} from '../common/constants';
 
 export const cspUiSettings: Record<string, UiSettingsParams> = {
   [GRAPH_RUNTIME_EVALUATIONS_ENABLED_SETTING]: {
@@ -19,6 +22,21 @@ export const cspUiSettings: Record<string, UiSettingsParams> = {
     description: i18n.translate('xpack.csp.uiSettings.graphRuntimeEvaluationsEnabledDescription', {
       defaultMessage:
         'When enabled, the Security graph enriches event nodes with integration-specific entity classification (actor sub-type, target identity, display names). Disable this setting if the graph returns errors after adding new integrations.',
+    }),
+    type: 'boolean',
+    category: ['securitySolution'],
+    requiresPageReload: false,
+    schema: schema.boolean(),
+    solutionViews: ['classic', 'security'],
+  },
+  [GRAPH_SHOW_UNKNOWN_TARGET_ENABLED_SETTING]: {
+    name: i18n.translate('xpack.csp.uiSettings.graphShowUnknownTargetEnabledName', {
+      defaultMessage: 'Cloud Security graph show unknown targets',
+    }),
+    value: true,
+    description: i18n.translate('xpack.csp.uiSettings.graphShowUnknownTargetEnabledDescription', {
+      defaultMessage:
+        'When enabled, the Security graph displays nodes whose target entity is unknown or unresolved. Disable this setting to hide unknown targets and reduce graph noise.',
     }),
     type: 'boolean',
     category: ['securitySolution'],

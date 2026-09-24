@@ -839,7 +839,7 @@ const histogramFractionDefinition: PromQLFunctionDefinition = {
   name: 'histogram_fraction',
   description: i18n.translate('kbn-esql-language.promql.definitions.histogram_fraction', {
     defaultMessage:
-      'Returns the estimated fraction of observations of a native histogram that fall between the provided lower and upper values.',
+      'Returns the estimated fraction of observations of a classic or native histogram that fall between the provided lower and upper values.',
   }),
   preview: false,
   signatures: [

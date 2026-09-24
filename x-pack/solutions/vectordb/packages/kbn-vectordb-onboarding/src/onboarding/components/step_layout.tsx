@@ -21,6 +21,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { openWiredConnectionDetails } from '@kbn/cloud/connection_details';
 import { useKibana } from '../../services';
 import { StepRail } from './step_rail';
+import { getWizardTelemetryPrefix } from '../utils/wizard_telemetry_prefix';
 import type { VectorPath, WizardStep } from '../types';
 
 interface StepLayoutProps {
@@ -50,7 +51,7 @@ export const StepLayout = ({
     services: { notifications },
   } = useKibana();
 
-  const telemetryIdPrefix = `vectordbOnboarding-${path}-${step}`;
+  const telemetryIdPrefix = getWizardTelemetryPrefix(path, step);
 
   return (
     <EuiPageTemplate restrictWidth panelled={false} grow={false}>
