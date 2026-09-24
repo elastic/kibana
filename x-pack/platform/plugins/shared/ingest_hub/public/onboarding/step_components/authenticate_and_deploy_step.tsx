@@ -333,14 +333,17 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     const activeInstanceIds = new Set(deployGroups.flatMap((g) => g.instanceIds));
     const staleFailedIds = failedInstances.filter((id) => !activeInstanceIds.has(id));
     if (staleFailedIds.length > 0) {
+      let reconcileWriteSucceeded = true;
       if (detectAndReviewStep.onboardingDeploymentId) {
         const remainingFailed = failedInstances.filter((id) => !staleFailedIds.includes(id));
-        await updateDeployment(detectAndReviewStep.onboardingDeploymentId, {
+        reconcileWriteSucceeded = await updateDeployment(detectAndReviewStep.onboardingDeploymentId, {
           services: selectedServiceIds,
           status: remainingFailed.length === 0 ? 'succeeded' : 'failed',
         });
       }
-      removeDeployInstances(staleFailedIds);
+      // Only clear local state when the SO write is confirmed — a failed write leaves the
+      // deselected service in the SO; retaining it locally keeps session and SO consistent.
+      if (reconcileWriteSucceeded) removeDeployInstances(staleFailedIds);
     }
   }, [
     ecfStacks,
