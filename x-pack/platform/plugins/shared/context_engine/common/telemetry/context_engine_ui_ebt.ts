@@ -101,7 +101,7 @@ const ebtAction = {
     LOAD_MORE: 'load_more_signals',
     PREVIOUS: 'previous_signal',
     NEXT: 'next_signal',
-    SELECT_FEEDBACK_AGENT: 'select_feedback_agent',
+    INTERACT_FEEDBACK_AGENT: 'interact_feedback_agent',
   },
   kiList: {
     DEST_LINK: 'open_destination',

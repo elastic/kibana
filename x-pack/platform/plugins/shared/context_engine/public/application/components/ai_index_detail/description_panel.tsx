@@ -14,17 +14,17 @@ import {
   EuiSkeletonText,
   EuiSpacer,
   EuiText,
-  EuiTextArea,
   EuiTitle,
 } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
+import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
 import { MAX_AI_INDEX_DESCRIPTION_LENGTH } from '../../../../common/constants';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
-import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
+import { AiIndexDescriptionField } from '../ai_index_description_field';
 import { useSaveAiIndexDescription } from '../../hooks/use_save_ai_index_description';
+import { validateTextInput } from '../../utils/validate_text_input';
 
 interface DescriptionPanelProps {
   isLoading: boolean;
@@ -42,6 +42,10 @@ export const DescriptionPanel = ({
   const { saveDescription, isSaving } = useSaveAiIndexDescription();
   const [isEditing, setIsEditing] = useState(false);
   const [draft, setDraft] = useState('');
+  const descriptionValidation = validateTextInput({
+    value: draft,
+    maxLength: MAX_AI_INDEX_DESCRIPTION_LENGTH,
+  });
 
   const startEditing = () => {
     setDraft(aiIndex?.description ?? '');
@@ -49,7 +53,7 @@ export const DescriptionPanel = ({
   };
 
   const handleSave = async () => {
-    if (!aiIndex) {
+    if (!aiIndex || !descriptionValidation.valid) {
       return;
     }
     const saved = await saveDescription(aiIndex, draft);
@@ -98,19 +102,12 @@ export const DescriptionPanel = ({
         <EuiSkeletonText lines={2} />
       ) : isEditing ? (
         <>
-          <EuiTextArea
-            fullWidth
+          <AiIndexDescriptionField
             value={draft}
-            onChange={(event) => setDraft(event.target.value)}
-            maxLength={MAX_AI_INDEX_DESCRIPTION_LENGTH}
+            onChange={setDraft}
+            error={descriptionValidation.error}
+            warning={descriptionValidation.warning}
             data-test-subj="contextDescriptionTextArea"
-            aria-label={i18n.translate('xpack.contextEngine.aiIndexDetail.description.ariaLabel', {
-              defaultMessage: 'AI index description',
-            })}
-            placeholder={i18n.translate(
-              'xpack.contextEngine.aiIndexDetail.description.placeholder',
-              { defaultMessage: 'Describe what this AI index is for.' }
-            )}
           />
           <EuiSpacer size="m" />
           <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
@@ -136,6 +133,7 @@ export const DescriptionPanel = ({
                 size="s"
                 onClick={handleSave}
                 isLoading={isSaving}
+                isDisabled={!descriptionValidation.valid}
                 data-test-subj="contextDescriptionSaveButton"
                 {...getEbtProps({
                   element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageDescriptionPanel,

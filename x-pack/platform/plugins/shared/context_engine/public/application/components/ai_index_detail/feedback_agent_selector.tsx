@@ -66,7 +66,7 @@ export const FeedbackAgentSelector = ({ aiIndex }: FeedbackAgentSelectorProps) =
         data-test-subj="contextSignalsFeedbackAgentSelect"
         {...getEbtProps({
           element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageSignalsPanel,
-          action: CONTEXT_ENGINE_UI_EBT.action.signals.SELECT_FEEDBACK_AGENT,
+          action: CONTEXT_ENGINE_UI_EBT.action.signals.INTERACT_FEEDBACK_AGENT,
         })}
       />
     </EuiFormRow>

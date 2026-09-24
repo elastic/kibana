@@ -5,6 +5,16 @@
  * 2.0.
  */
 
+export {
+  EscalationQueue,
+  EscalationCard,
+  AssignToUsers,
+  EscalationMetaInfo,
+  LinkedInvestigationsBadge,
+  type EscalationQueueItem,
+  type EscalationStatus,
+} from './src/components/escalation_queue';
+
 export { ActionButton } from './src/components/actions/action_button';
 export {
   BaseActions,
@@ -36,6 +46,17 @@ export { OverviewTab } from './src/components/details/details_flyout_tab_content
 export { DetailsBlock } from './src/components/details/detail_block';
 
 export {
+  AttachmentSummarySection,
+  type AttachmentSummarySectionProps,
+  AttachmentSummaryList,
+  type AttachmentSummaryListProps,
+  selectSummaryAttachments,
+  type SummaryAttachment,
+  SUMMARY_ATTACHMENT_TYPES,
+  type SummaryAttachmentType,
+} from './src/components/attachment_summary';
+
+export {
   registerAgenticInvestigationTemplateUI,
   type RegisterAgenticInvestigationTemplateUIOptions,
   getInvestigationTabIds,
@@ -51,7 +72,7 @@ export {
   CONVERSATION_CATEGORY_COLORS,
 } from './src/types/queue';
 
-export { Impact } from './src/components/filters/impact/impact';
+export { Impact, investigationEntityIds } from './src/components/filters/impact';
 
 export { BaseActionModal } from './src/components/modals/base_action_modal';
 export { AssignActionModal } from './src/components/modals/assign_action_modal';
