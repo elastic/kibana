@@ -12,15 +12,18 @@ import { act, fireEvent, render, screen, waitFor, within } from '@testing-librar
 import { MemoryRouter, Route, Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
 import {
+  RULE_TUNING_DEFAULT_EXTRAS,
   SYSTEM_SECURITY_WATCH_HUNT_ID,
   SYSTEM_SECURITY_WATCH_DETECTION_ID,
   SYSTEM_SECURITY_WATCH_FLOOR_ID,
+  SYSTEM_SECURITY_WATCH_FORENSICS_ID,
   SYSTEM_SECURITY_WATCH_OFFICER_ID,
   SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
+  SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
   createCatalogWatchPlaceholder,
   type CatalogWatchId,
   type Worker,
@@ -106,6 +109,7 @@ const createWorker = (
   lastRun: null,
   state: 'paused',
   settingsRevision: null,
+  workflowId: null,
   settings: {
     workerId: overrides.id,
     autonomy: 'manual',
@@ -132,11 +136,20 @@ const floorWorkers: Worker[] = [
   }),
 ];
 
+const forensicsWorker = createWorker({
+  id: SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
+  name: 'Endpoint Analysis',
+  watchIds: [SYSTEM_SECURITY_WATCH_FORENSICS_ID],
+});
+
 const huntWorker = createWorker({
   id: SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
   name: 'Continuous Threat Hunt',
   watchIds: [SYSTEM_SECURITY_WATCH_HUNT_ID],
 });
+
+/** Complete Rule Tuning extras; cases vary the window and keep the FP thresholds at default. */
+const RULE_TUNING_EXTRAS = { ...RULE_TUNING_DEFAULT_EXTRAS, analysisWindowDays: 14 };
 
 const detectionWorkers: Worker[] = [
   createWorker({
@@ -147,7 +160,7 @@ const detectionWorkers: Worker[] = [
       workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
       autonomy: 'manual',
       scheduleInterval: '2h',
-      extras: { analysisWindowDays: 14 },
+      extras: RULE_TUNING_EXTRAS,
     },
   }),
   createWorker({
@@ -191,7 +204,7 @@ describe('WatchDetailPage', () => {
   });
 
   it('shows Floor Workers with per-Worker enablement and autonomy, and no Watch switch', () => {
-    renderWatch(SYSTEM_SECURITY_WATCH_FLOOR_ID, [...floorWorkers, huntWorker]);
+    renderWatch(SYSTEM_SECURITY_WATCH_FLOOR_ID, [...floorWorkers, huntWorker, forensicsWorker]);
 
     expect(screen.queryByTestId('alertZeroWatchEnabledSwitch')).not.toBeInTheDocument();
     expect(screen.getByTestId('alertZeroWatchWorkersSection')).toBeInTheDocument();
@@ -205,6 +218,11 @@ describe('WatchDetailPage', () => {
         `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID}`
       )
     ).toBeInTheDocument();
+    expect(
+      screen.queryByTestId(
+        `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID}`
+      )
+    ).not.toBeInTheDocument();
     expect(
       screen.queryByTestId(
         `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID}`
@@ -431,6 +449,7 @@ describe('WatchDetailPage', () => {
       ...floorWorkers,
       huntWorker,
       ...detectionWorkers,
+      forensicsWorker,
     ]);
 
     expect(screen.getByTestId('alertZeroWatchWorkersSection')).toBeInTheDocument();
@@ -496,6 +515,7 @@ describe('WatchDetailPage', () => {
       ...floorWorkers,
       huntWorker,
       ...detectionWorkers,
+      forensicsWorker,
     ]);
 
     for (const worker of detectionWorkers) {
@@ -511,6 +531,50 @@ describe('WatchDetailPage', () => {
         `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}`
       )
     ).not.toBeInTheDocument();
+  });
+
+  it('shows Forensics Watch with one Worker that has enablement and fixed autonomy', () => {
+    renderWatch(SYSTEM_SECURITY_WATCH_FORENSICS_ID, [
+      ...floorWorkers,
+      huntWorker,
+      ...detectionWorkers,
+      forensicsWorker,
+    ]);
+
+    const section = screen.getByTestId(
+      `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID}`
+    );
+    expect(section).toBeInTheDocument();
+    expect(
+      screen.queryByTestId(
+        `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}`
+      )
+    ).not.toBeInTheDocument();
+    expect(
+      within(section).getByTestId(
+        `alertZeroWorkerEnabledSwitch-${SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID}`
+      )
+    ).toBeInTheDocument();
+    // Endpoint analysis allows manual only, so the level renders as one selected card with no
+    // alternatives beside it — the same card a Worker offering three would show it as. Its sweep
+    // cadence is fixed in the definition, not a setting. The level set it declares is what says
+    // there is no choice to present; the card copy below only explains the level.
+    expect(within(section).getByTestId('alertZeroAutonomyFixedLevel')).toHaveTextContent('Manual');
+    expect(within(section).getAllByRole('radio')).toHaveLength(1);
+    expect(within(section).getByRole('radio')).toBeChecked();
+    expect(within(section).queryByRole('radiogroup')).not.toBeInTheDocument();
+    expect(within(section).queryByTestId('alertZeroScheduleIntervalField')).not.toBeInTheDocument();
+
+    // A fixed level still has to say what it means. Containment is the fact that makes this
+    // Worker manual-only, so it is the one an analyst must be able to read off the page.
+    expect(within(section).getByTestId('alertZeroAutonomyCardWho')).toHaveTextContent(
+      /every containment action waits for you/i
+    );
+    expect(
+      within(section)
+        .getAllByTestId('alertZeroAutonomyCardFact')
+        .map((fact) => fact.textContent)
+    ).toEqual([expect.stringContaining('Findings'), expect.stringContaining('Response')]);
   });
 
   it('shows the analysis window only on Rule Tuning and does not write while editing', () => {
@@ -646,18 +710,24 @@ describe('WatchDetailPage', () => {
     await waitFor(() => expect(mutateAsync).toHaveBeenCalledTimes(1));
     expect(mutateAsync).toHaveBeenCalledWith({
       workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
-      patch: { settings: { extras: { analysisWindowDays: 7 } }, settingsRevision: 1 },
+      patch: {
+        settings: { extras: { ...RULE_TUNING_EXTRAS, analysisWindowDays: 7 } },
+        settingsRevision: 1,
+      },
     });
   });
 
-  it('enables Save while the analysis window is being typed and saves the latest value', async () => {
+  it('enables Save once the analysis window is committed on blur and saves that value', async () => {
     const { mutateAsync } = renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, detectionWorkers);
     const field = screen.getByTestId('alertZeroAnalysisWindowDays');
     const save = screen.getByTestId('alertZeroWatchSettingsSave');
 
+    // Keystrokes stay local: "2" on the way to "21" must not reach the draft.
     fireEvent.change(field, { target: { value: '2' } });
-    expect(save).toBeEnabled();
+    expect(save).toBeDisabled();
     fireEvent.change(field, { target: { value: '21' } });
+    expect(save).toBeDisabled();
+    fireEvent.blur(field);
     expect(save).toBeEnabled();
     expect(mutateAsync).not.toHaveBeenCalled();
 
@@ -666,7 +736,10 @@ describe('WatchDetailPage', () => {
     await waitFor(() => expect(mutateAsync).toHaveBeenCalledTimes(1));
     expect(mutateAsync).toHaveBeenCalledWith({
       workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
-      patch: { settings: { extras: { analysisWindowDays: 21 } }, settingsRevision: null },
+      patch: {
+        settings: { extras: { ...RULE_TUNING_EXTRAS, analysisWindowDays: 21 } },
+        settingsRevision: null,
+      },
     });
   });
 
@@ -705,6 +778,7 @@ describe('WatchDetailPage', () => {
     );
 
     fireEvent.change(window, { target: { value: '7' } });
+    fireEvent.blur(window);
     fireEvent.change(interval, { target: { value: '6' } });
     expect(screen.getByTestId('alertZeroWatchSettingsDiscard')).toBeEnabled();
 
@@ -731,6 +805,7 @@ describe('WatchDetailPage', () => {
 
     // A valid edit elsewhere makes the page dirty, so Save would otherwise be live.
     fireEvent.change(window, { target: { value: '7' } });
+    fireEvent.blur(window);
     expect(save).toBeEnabled();
 
     fireEvent.change(interval, { target: { value: '1.9' } });
@@ -808,7 +883,10 @@ describe('WatchDetailPage', () => {
     // Uninstalled Worker: the draft's revision is null and is sent as such.
     expect(mutateAsync).toHaveBeenCalledWith({
       workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
-      patch: { settings: { extras: { analysisWindowDays: 7 } }, settingsRevision: null },
+      patch: {
+        settings: { extras: { ...RULE_TUNING_EXTRAS, analysisWindowDays: 7 } },
+        settingsRevision: null,
+      },
     });
   });
 

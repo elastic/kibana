@@ -2960,4 +2960,40 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       }
     ),
   },
+  {
+    key: 'linux.advanced.memory_protection.user_yara_rescan_interval_seconds',
+    first_supported_version: '9.6',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.memory_protection.user_yara_rescan_interval_seconds',
+      {
+        defaultMessage:
+          'Specify the interval, in seconds, at which memory is re-scanned using custom YARA signatures.',
+      }
+    ),
+    license: 'enterprise',
+  },
+  {
+    key: 'mac.advanced.memory_protection.user_yara_rescan_interval_seconds',
+    first_supported_version: '9.6',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.memory_protection.user_yara_rescan_interval_seconds',
+      {
+        defaultMessage:
+          'Specify the interval, in seconds, at which memory is re-scanned using custom YARA signatures.',
+      }
+    ),
+    license: 'enterprise',
+  },
+  {
+    key: 'windows.advanced.memory_protection.user_yara_rescan_interval_seconds',
+    first_supported_version: '9.6',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.memory_protection.user_yara_rescan_interval_seconds',
+      {
+        defaultMessage:
+          'Specify the interval, in seconds, at which memory is re-scanned using custom YARA signatures.',
+      }
+    ),
+    license: 'enterprise',
+  },
 ];

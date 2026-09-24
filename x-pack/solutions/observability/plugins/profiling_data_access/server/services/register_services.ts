@@ -16,10 +16,7 @@ import { createSetupState } from './setup_state';
 import { createFetchESFunctions } from './functions/es_functions';
 
 export interface RegisterServicesParams {
-  createProfilingEsClient: (params: {
-    esClient: ElasticsearchClient;
-    useDefaultAuth?: boolean;
-  }) => ProfilingESClient;
+  createProfilingEsClient: (params: { esClient: ElasticsearchClient }) => ProfilingESClient;
   logger: Logger;
   deps: {
     fleet?: FleetStartContract;
