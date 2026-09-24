@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, screen, waitFor } from '@testing-library/react';
+import { act, screen, waitFor, within } from '@testing-library/react';
 import type { AggregateQuery } from '@kbn/es-query';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { TypedLensSerializedState } from '@kbn/lens-common';
@@ -184,10 +184,12 @@ describe('ESQLEditor', () => {
     getSuggestionsMock.mockClear();
     getSuggestionsMock.mockReturnValue(new Promise(() => {}));
     renderEditor();
-    expect(screen.getByTestId('ESQLQueryResults')).toHaveTextContent('3');
-    expect(screen.queryByTestId('ESQLQueryResultsLoading')).not.toBeInTheDocument();
+    const results = screen.getByTestId('ESQLQueryResults');
+    expect(results).toHaveTextContent('3');
+    expect(within(results).queryByRole('progressbar')).not.toBeInTheDocument();
     expect(getSuggestionsMock).not.toHaveBeenCalled();
 
+    // While a refresh is in flight EuiAccordion swaps `extraAction` for its spinner
     await waitFor(() => expect(capturedOnSubmit).toBeDefined());
     act(() => {
       void capturedOnSubmit!(
@@ -195,9 +197,10 @@ describe('ESQLEditor', () => {
         new AbortController()
       );
     });
-    await waitFor(() => {
-      expect(screen.getByTestId('ESQLQueryResults')).toHaveTextContent('3');
-      expect(screen.getByTestId('ESQLQueryResultsLoading')).toBeInTheDocument();
-    });
+    await waitFor(() =>
+      expect(
+        within(screen.getByTestId('ESQLQueryResults')).getByRole('progressbar')
+      ).toBeInTheDocument()
+    );
   });
 });

@@ -12,14 +12,10 @@ import {
   EuiTitle,
   EuiAccordion,
   EuiSpacer,
-  EuiFlexGroup,
   EuiFlexItem,
   EuiNotificationBadge,
-  EuiLoadingSpinner,
   useEuiTheme,
-  type UseEuiTheme,
 } from '@elastic/eui';
-import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { AggregateQuery } from '@kbn/es-query';
 import { ESQLDataGrid } from '@kbn/esql-datagrid/public';
 import type { ESQLDataGridAttrs } from './helpers';
@@ -55,7 +51,6 @@ export const ESQLDataGridAccordion = ({
     [isAccordionOpen, onAccordionToggleCb, setIsAccordionOpen]
   );
   const { euiTheme } = useEuiTheme();
-  const styles = useMemoCss(componentStyles);
 
   const extraAction =
     dataGridAttrs || status === 'error' ? (
@@ -83,6 +78,9 @@ export const ESQLDataGridAccordion = ({
             display: flex;
             flex-direction: column;
             height: 100%;
+            /* EuiAccordion's isLoading style sets align-items: center, which in this
+             * column layout would shrink the grid to its content width while refreshing. */
+            align-items: stretch;
           }
           .euiDataGrid__virtualized {
             /* Prevents the horizontal scrollbar from toggling on/off as the accordion's
@@ -92,25 +90,18 @@ export const ESQLDataGridAccordion = ({
           }
         `}
         buttonContent={
-          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-            <EuiTitle
-              size="xxs"
-              css={css`
-                padding: 2px;
-              `}
-            >
-              <h5>
-                {i18n.translate('xpack.lens.config.ESQLQueryResultsTitle', {
-                  defaultMessage: 'ES|QL Query Results',
-                })}
-              </h5>
-            </EuiTitle>
-            <div css={styles.loadingSlot} aria-hidden>
-              {status === 'loading' && (
-                <EuiLoadingSpinner size="m" data-test-subj="ESQLQueryResultsLoading" />
-              )}
-            </div>
-          </EuiFlexGroup>
+          <EuiTitle
+            size="xxs"
+            css={css`
+              padding: 2px;
+            `}
+          >
+            <h5>
+              {i18n.translate('xpack.lens.config.ESQLQueryResultsTitle', {
+                defaultMessage: 'ES|QL Query Results',
+              })}
+            </h5>
+          </EuiTitle>
         }
         buttonProps={{
           paddingSize: 'm',
@@ -119,6 +110,8 @@ export const ESQLDataGridAccordion = ({
         forceState={isAccordionOpen ? 'open' : 'closed'}
         onToggle={onAccordionToggle}
         extraAction={extraAction}
+        isLoading={status === 'loading'}
+        isLoadingMessage={!dataGridAttrs}
       >
         {isAccordionOpen && dataGridAttrs && (
           <>
@@ -136,30 +129,7 @@ export const ESQLDataGridAccordion = ({
             <EuiSpacer />
           </>
         )}
-        {isAccordionOpen && status === 'loading' && !dataGridAttrs && (
-          <EuiFlexItem
-            css={css`
-              align-items: center;
-              justify-content: center;
-              padding: ${euiTheme.size.m};
-            `}
-          >
-            <EuiLoadingSpinner size="m" />
-          </EuiFlexItem>
-        )}
       </EuiAccordion>
     </EuiFlexItem>
   );
-};
-
-const componentStyles = {
-  loadingSlot: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      inlineSize: euiTheme.size.l,
-      blockSize: euiTheme.size.l,
-      flexShrink: 0,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-    }),
 };

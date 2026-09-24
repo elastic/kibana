@@ -121,8 +121,7 @@ export function ESQLEditor({
   );
   const dataGridAttrsRef = useRef<ESQLDataGridAttrs | undefined>(lastPreviewRef?.current);
   const [internalResultsAccordionOpen, setInternalResultsAccordionOpen] = useState(false);
-  const isESQLResultsAccordionOpen =
-    isESQLResultsAccordionOpenProp ?? internalResultsAccordionOpen;
+  const isESQLResultsAccordionOpen = isESQLResultsAccordionOpenProp ?? internalResultsAccordionOpen;
   const setIsESQLResultsAccordionOpen =
     setIsESQLResultsAccordionOpenProp ?? setInternalResultsAccordionOpen;
   const [isInitialized, setIsInitialized] = useState(false);
