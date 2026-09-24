@@ -71,4 +71,7 @@ export const APPROVAL_MODAL_TRANSLATIONS = Object.freeze({
   currentActorFallback: i18n.translate('xpack.proposals.approvalModal.outcome.currentActor', {
     defaultMessage: 'You',
   }),
+  unknownActorFallback: i18n.translate('xpack.proposals.approvalModal.outcome.unknownActor', {
+    defaultMessage: 'Someone',
+  }),
 });

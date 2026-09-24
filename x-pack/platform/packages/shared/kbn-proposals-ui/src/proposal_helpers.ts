@@ -44,19 +44,26 @@ export const getProposalCaption = (proposal: ApprovalProposal): string | undefin
 
 /**
  * The read-only decision `ApprovalContent` renders in place of its Approve/Decline buttons.
- * `undefined` while a proposal is still awaiting one, or if it was decided by someone the API
- * carried no name for — a decided card with no known decider is better shown as still pending
- * than attributed to nobody.
+ * `undefined` only while a proposal is still awaiting one — `decision` itself is the whole
+ * condition. Missing `decidedBy`/`decidedAt` is not a reason to hide a real decision: both
+ * `decision` and `decidedAt` are written in the same call the moment the record settles (see
+ * `proposals_service.ts`), so requiring `decidedAt` too only ever hid decisions that already
+ * existed for no reason; `decidedBy` can still be genuinely absent (no resolvable identity), in
+ * which case a fallback name still names *someone* rather than reverting to "awaiting a decision"
+ * for a proposal that plainly is not.
  */
 export const getProposalDecision = (proposal: ApprovalProposal): ApprovalDecision | undefined => {
-  const actorName = proposal.decidedBy?.fullName ?? proposal.decidedBy?.username ?? undefined;
-  if (!proposal.decision || !proposal.decidedAt || !actorName) {
+  if (!proposal.decision) {
     return undefined;
   }
+  const actorName =
+    proposal.decidedBy?.fullName ??
+    proposal.decidedBy?.username ??
+    APPROVAL_MODAL_TRANSLATIONS.unknownActorFallback;
   return {
     status: approvedStatusFor(proposal),
     actorName,
-    decidedAt: proposal.decidedAt,
+    decidedAt: proposal.decidedAt ?? new Date().toISOString(),
     reason: proposal.rationale,
   };
 };

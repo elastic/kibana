@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { getProposalCaption, getProposalTone, isProposalExpired } from './proposal_helpers';
+import {
+  getProposalCaption,
+  getProposalDecision,
+  getProposalTone,
+  isProposalExpired,
+} from './proposal_helpers';
 import type { ApprovalProposal } from './types';
 
 const proposal = (overrides: Partial<ApprovalProposal> = {}): ApprovalProposal => ({
@@ -76,6 +81,76 @@ describe('getProposalCaption', () => {
 
   it('is undefined when there is neither a category nor a reversibility flag', () => {
     expect(getProposalCaption(proposal())).toBeUndefined();
+  });
+});
+
+describe('getProposalDecision', () => {
+  it('is undefined while the proposal is still awaiting a decision', () => {
+    expect(getProposalDecision(proposal())).toBeUndefined();
+  });
+
+  it('reads a decision as soon as it is present, without requiring decidedBy or decidedAt too', () => {
+    // `decision` and `decidedAt` are always written together server-side (see
+    // proposals_service.ts), but `decidedBy` can still be genuinely absent — this must not hide
+    // a decision that plainly exists.
+    expect(
+      getProposalDecision(proposal({ decision: 'approved', status: 'succeeded' }))
+    ).toMatchObject({ status: 'applied', actorName: 'Someone' });
+  });
+
+  it('falls back to a valid timestamp when decidedAt is missing, rather than an invalid one', () => {
+    const decision = getProposalDecision(
+      proposal({
+        decision: 'approved',
+        status: 'succeeded',
+        decidedBy: { fullName: 'Ava', username: 'ava', email: null },
+      })
+    );
+    expect(Number.isNaN(Date.parse(decision!.decidedAt))).toBe(false);
+  });
+
+  it("prefers the decider's full name, falling back to username", () => {
+    expect(
+      getProposalDecision(
+        proposal({
+          decision: 'approved',
+          status: 'succeeded',
+          decidedBy: { fullName: null, username: 'bfishel', email: null },
+          decidedAt: '2024-01-01T17:20:00.000Z',
+        })
+      )
+    ).toMatchObject({ actorName: 'bfishel' });
+  });
+
+  it.each([
+    ['pending', 'applying'],
+    ['executing', 'applying'],
+    ['succeeded', 'applied'],
+    ['failed', 'failed'],
+  ] as const)('maps an approved decision with status %s to %s', (status, expected) => {
+    expect(
+      getProposalDecision(
+        proposal({
+          decision: 'approved',
+          status,
+          decidedBy: { fullName: 'Ava', username: 'ava', email: null },
+          decidedAt: '2024-01-01T17:20:00.000Z',
+        })
+      )
+    ).toMatchObject({ status: expected });
+  });
+
+  it('reads a dismissal as declined regardless of status', () => {
+    expect(
+      getProposalDecision(
+        proposal({
+          decision: 'dismissed',
+          status: 'no_action',
+          decidedBy: { fullName: 'Ava', username: 'ava', email: null },
+          decidedAt: '2024-01-01T17:20:00.000Z',
+        })
+      )
+    ).toMatchObject({ status: 'declined' });
   });
 });
 

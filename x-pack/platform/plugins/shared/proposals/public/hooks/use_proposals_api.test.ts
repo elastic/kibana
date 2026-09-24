@@ -289,6 +289,8 @@ describe('useApproveProposal', () => {
   it('posts to the approve endpoint with the given body', async () => {
     const http = makeHttp();
     http.post.mockResolvedValue({ id: 'p-1', status: 'approved' });
+    // `onSuccess` polls the proposal directly until it reads a decision — see `waitForDecision`.
+    http.get.mockResolvedValue({ decision: 'approved' });
     useKibanaMock.mockReturnValue({ services: { http } } as unknown as ReturnType<
       typeof useKibana
     >);
@@ -309,6 +311,7 @@ describe('useApproveProposal', () => {
   it('percent-encodes special characters in id when approving', async () => {
     const http = makeHttp();
     http.post.mockResolvedValue({ id: 'org/repo#42', status: 'approved' });
+    http.get.mockResolvedValue({ decision: 'approved' });
     useKibanaMock.mockReturnValue({ services: { http } } as unknown as ReturnType<
       typeof useKibana
     >);
@@ -327,6 +330,7 @@ describe('useApproveProposal', () => {
   it('invalidates only the top-level proposals key on success (single call)', async () => {
     const http = makeHttp();
     http.post.mockResolvedValue({ id: 'p-1', status: 'approved' });
+    http.get.mockResolvedValue({ decision: 'approved' });
     useKibanaMock.mockReturnValue({ services: { http } } as unknown as ReturnType<
       typeof useKibana
     >);
@@ -341,6 +345,25 @@ describe('useApproveProposal', () => {
       expect(invalidateSpy).toHaveBeenCalledTimes(1);
       expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.proposals.all });
     });
+  });
+
+  it('keeps polling the proposal until it reads a decision, rather than trusting the first look', async () => {
+    const http = makeHttp();
+    http.post.mockResolvedValue({ id: 'p-1', status: 'approved' });
+    http.get
+      .mockResolvedValueOnce({ decision: undefined })
+      .mockResolvedValueOnce({ decision: undefined })
+      .mockResolvedValueOnce({ decision: 'approved' });
+    useKibanaMock.mockReturnValue({ services: { http } } as unknown as ReturnType<
+      typeof useKibana
+    >);
+
+    const { Wrapper } = createWrapper();
+    const { result } = renderHook(() => useApproveProposal(), { wrapper: Wrapper });
+
+    await result.current.mutateAsync({ id: 'p-1', body: {} });
+
+    expect(http.get).toHaveBeenCalledTimes(3);
   });
 
   it('surfaces the error when the API call rejects', async () => {
@@ -363,6 +386,7 @@ describe('useDismissProposal', () => {
   it('posts to the dismiss endpoint with the given body', async () => {
     const http = makeHttp();
     http.post.mockResolvedValue({ id: 'p-1', status: 'dismissed' });
+    http.get.mockResolvedValue({ decision: 'dismissed' });
     useKibanaMock.mockReturnValue({ services: { http } } as unknown as ReturnType<
       typeof useKibana
     >);
@@ -384,6 +408,7 @@ describe('useDismissProposal', () => {
   it('invalidates only the top-level proposals key on success (single call)', async () => {
     const http = makeHttp();
     http.post.mockResolvedValue({ id: 'p-1', status: 'dismissed' });
+    http.get.mockResolvedValue({ decision: 'dismissed' });
     useKibanaMock.mockReturnValue({ services: { http } } as unknown as ReturnType<
       typeof useKibana
     >);
@@ -440,6 +465,7 @@ describe('useIsApprovingProposal / useIsDecliningProposal', () => {
           resolvePost = resolve;
         })
     );
+    http.get.mockResolvedValue({ decision: 'approved' });
     useKibanaMock.mockReturnValue({ services: { http } } as unknown as ReturnType<
       typeof useKibana
     >);
@@ -482,6 +508,7 @@ describe('useIsApprovingProposal / useIsDecliningProposal', () => {
           resolvePost = resolve;
         })
     );
+    http.get.mockResolvedValue({ decision: 'dismissed' });
     useKibanaMock.mockReturnValue({ services: { http } } as unknown as ReturnType<
       typeof useKibana
     >);

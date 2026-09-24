@@ -7,9 +7,15 @@
 
 import type { UseQueryResult } from '@kbn/react-query';
 import { useIsMutating, useMutation, useQuery, useQueryClient } from '@kbn/react-query';
+import type { HttpSetup } from '@kbn/core-http-browser';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { PROPOSALS_API_VERSION, PROPOSALS_INTERNAL_URL } from '@kbn/proposals-common';
+import {
+  PROPOSALS_API_VERSION,
+  PROPOSALS_INTERNAL_URL,
+  PROPOSAL_SETTLING_POLL_INTERVAL_MS,
+  isProposalSettling,
+} from '@kbn/proposals-common';
 import type {
   ApproveProposalRequest,
   DismissProposalRequest,
@@ -18,6 +24,9 @@ import type {
   ProposalWithMetadata,
 } from '@kbn/proposals-common';
 import { mutationKeys, queryKeys } from '../query_keys';
+
+const hasSettlingProposal = (response: ListProposalsResponse | undefined): boolean =>
+  response?.proposals.some(isProposalSettling) ?? false;
 
 /**
  * Retries on transient failures (network errors and 5xx responses), stops
@@ -68,6 +77,10 @@ export const usePendingProposals = (conversationId?: string) => {
         },
       }),
     keepPreviousData: true,
+    // No baseline poll otherwise — only while a row is settling, so the badge notices the
+    // action finish without the analyst having to reopen the modal to find out.
+    refetchInterval: (data) =>
+      hasSettlingProposal(data) ? PROPOSAL_SETTLING_POLL_INTERVAL_MS : false,
     retry: retryOnTransientError,
   });
 };
@@ -94,6 +107,8 @@ export const useConversationProposals = (
     // here is actionable against `conversationId`. Showing the previous conversation's proposals
     // — un-flagged as stale — while this one loads would let an approve/dismiss click land on a
     // proposal from the investigation the analyst just navigated away from.
+    refetchInterval: (data) =>
+      hasSettlingProposal(data) ? PROPOSAL_SETTLING_POLL_INTERVAL_MS : false,
     retry: retryOnTransientError,
   });
 };
@@ -115,6 +130,8 @@ export const useProposal = (id: string | undefined) => {
       );
     },
     enabled: Boolean(id),
+    refetchInterval: (data) =>
+      data && isProposalSettling(data) ? PROPOSAL_SETTLING_POLL_INTERVAL_MS : false,
     retry: retryOnTransientError,
   });
 };
@@ -139,6 +156,35 @@ export const useProposal = (id: string | undefined) => {
 const invalidateProposals = (queryClient: ReturnType<typeof useQueryClient>) =>
   queryClient.invalidateQueries({ queryKey: queryKeys.proposals.all });
 
+/** How often, and for how long, to poll for the decision before giving up on it. */
+const DECISION_POLL_INTERVAL_MS = 750;
+const DECISION_POLL_MAX_ATTEMPTS = 8;
+
+/**
+ * `/approve` and `/dismiss` only resume the gate — see their route handlers for why the decision
+ * itself is written by the gate workflow's own post-gate step, asynchronously, after the resume
+ * call already returned. Polling the proposal directly, before invalidating anything, is what
+ * lets the mutation itself — and therefore `useIsMutating` everywhere `isSubmitting` reads it —
+ * bridge that specific gap, rather than settling on the first refetch, which can beat the write
+ * and read `pending` once more with no decision to fall back on either.
+ *
+ * Bounded: a slow write should not hang the mutation forever. Giving up here does not lose the
+ * update — `usePendingProposals`/`useConversationProposals`/`useProposal`'s own settling-aware
+ * poll still catches it once the write lands, just on their cadence instead of this one.
+ */
+const waitForDecision = async (http: HttpSetup, id: string): Promise<void> => {
+  for (let attempt = 0; attempt < DECISION_POLL_MAX_ATTEMPTS; attempt++) {
+    const proposal = await http.get<ProposalWithMetadata>(
+      `${PROPOSALS_INTERNAL_URL}/${encodeURIComponent(id)}`,
+      { version: PROPOSALS_API_VERSION }
+    );
+    if (proposal.decision) {
+      return;
+    }
+    await new Promise((resolve) => setTimeout(resolve, DECISION_POLL_INTERVAL_MS));
+  }
+};
+
 /**
  * Approving submits the action input the analyst was shown, so the API can
  * refuse an approval that no longer matches the record.
@@ -154,7 +200,10 @@ export const useApproveProposal = () => {
         version: PROPOSALS_API_VERSION,
         body: JSON.stringify(body),
       }),
-    onSuccess: () => invalidateProposals(queryClient),
+    onSuccess: async (_data, { id }) => {
+      await waitForDecision(services.http!, id);
+      await invalidateProposals(queryClient);
+    },
   });
 };
 
@@ -169,7 +218,10 @@ export const useDismissProposal = () => {
         version: PROPOSALS_API_VERSION,
         body: JSON.stringify(body),
       }),
-    onSuccess: () => invalidateProposals(queryClient),
+    onSuccess: async (_data, { id }) => {
+      await waitForDecision(services.http!, id);
+      await invalidateProposals(queryClient);
+    },
   });
 };
 

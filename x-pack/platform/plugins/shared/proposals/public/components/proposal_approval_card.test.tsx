@@ -406,10 +406,9 @@ describe('ProposalApprovalCard', () => {
       expect(queryByTestId('approval-decision')).toBeNull();
     });
 
-    it('falls back to no decision when the API carried no name for the decider', () => {
-      // A decided card attributed to nobody is worse than showing it as still
-      // pending — but with the status marked `executing`, there are no buttons
-      // to offer either, so this just shouldn't crash or invent an actor.
+    it('names a fallback actor rather than hiding a decision that plainly exists', () => {
+      // `decision` is the whole condition — decidedBy can still be genuinely absent (no
+      // resolvable identity), but that decided card must not read as still pending either.
       setupMocks(
         baseProposal({
           decision: 'approved',
@@ -417,8 +416,8 @@ describe('ProposalApprovalCard', () => {
           decidedAt: '2026-01-02T00:00:00.000Z',
         })
       );
-      const { queryByTestId } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
-      expect(queryByTestId('approval-decision')).toBeNull();
+      const { getByTestId } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
+      expect(getByTestId('approval-decision')).toHaveTextContent('applying:Someone');
     });
   });
 
