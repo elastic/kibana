@@ -70,6 +70,7 @@ export const navigateToCasesApp = async (
   const header = getPageObject('header');
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
   const retry = getService('retry');
+  const testSubjects = getService('testSubjects');
 
   await common.navigateToApp('landingPage');
   await header.waitUntilLoadingHasFinished();
@@ -81,5 +82,6 @@ export const navigateToCasesApp = async (
 
   await retry.tryForTime(30000, async () => {
     await svlCommonNavigation.sidenav.clickLink(link);
+    await testSubjects.existOrFail('createNewCaseBtn', { timeout: 5000 });
   });
 };
