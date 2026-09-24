@@ -292,7 +292,6 @@ export class NightshiftInvestigationsPlugin
         plugins.workflowsExtensions.registerStepDefinition(
           memoryOptimizeStepDefinition({
             getAgentBuilder: () => this.agentBuilder,
-            getSandboxStart: () => this.sandboxStart,
             logger: this.logger.get('memory'),
             isEnabled: () => this.memoryEnabled,
             telemetry,

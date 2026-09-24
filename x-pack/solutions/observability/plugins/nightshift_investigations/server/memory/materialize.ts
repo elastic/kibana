@@ -16,10 +16,8 @@ import { rankForMode, type RankedArm, type SampleBeta } from './ranking';
 import { type MemoryPage } from '../../common/memory';
 
 export const MEMORY_WORKSPACE_ROOT = '/workspace/memories';
-export const MEMORY_RECALLED_PATH = `${MEMORY_WORKSPACE_ROOT}/.recalled.json`;
 export const MEMORY_INDEX_PATH = `${MEMORY_WORKSPACE_ROOT}/.index.json`;
 export const MEMORY_KEEP_COUNT = 15;
-export const MEMORY_RECALLED_MAX_BYTES = 65_536;
 export const MEMORY_INDEX_MAX_BYTES = 262_144;
 
 export interface MemoryCatalogEntry {
@@ -42,36 +40,6 @@ export interface MaterializeMemoryResult {
     notificationChars: number;
   };
 }
-
-export const parseRecalledSidecar = (raw: string): string[] => {
-  try {
-    const parsed: unknown = JSON.parse(raw);
-    if (typeof parsed !== 'object' || parsed === null || !('ids' in parsed)) {
-      return [];
-    }
-    const ids = (parsed as { ids: unknown }).ids;
-    if (!Array.isArray(ids)) {
-      return [];
-    }
-    return ids.filter((id): id is string => typeof id === 'string' && id.length > 0);
-  } catch {
-    return [];
-  }
-};
-
-export const readRecalledIds = async ({
-  session,
-}: {
-  session: SandboxSession;
-}): Promise<string[]> => {
-  const [result] = await session.readFiles([
-    { path: MEMORY_RECALLED_PATH, maxReadBytes: MEMORY_RECALLED_MAX_BYTES },
-  ]);
-  if (!result?.success) {
-    return [];
-  }
-  return parseRecalledSidecar(result.content.toString('utf8'));
-};
 
 const README_CONTENT = `# Semantic Memories
 
@@ -296,13 +264,9 @@ export const materializeMemory = async ({
       path: MEMORY_INDEX_PATH,
       content: Buffer.from(JSON.stringify({ entries }), 'utf8'),
     },
-    {
-      path: MEMORY_RECALLED_PATH,
-      content: Buffer.from(JSON.stringify({ ids: recalledIds }), 'utf8'),
-    },
   ]);
   logger.debug(
-    `Memory materialize wrote ${pages.length} page file(s) plus README.md, .index.json (${entries.length} catalog), ${MEMORY_RECALLED_PATH}; notification pages=${newPages.length}`
+    `Memory materialize wrote ${pages.length} page file(s) plus README.md and .index.json (${entries.length} catalog); notification pages=${newPages.length}`
   );
 
   logger.info(

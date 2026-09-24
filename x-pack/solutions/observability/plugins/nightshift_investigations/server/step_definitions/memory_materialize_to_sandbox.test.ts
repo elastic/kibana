@@ -103,12 +103,19 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
     expect(hydrateMemoryWorkspace).toHaveBeenCalledWith({
       session: mockSession,
       esClient,
+      spaceId: 'default',
       agentId: 'significant-events.deductive-investigation',
       query: 'checkout lag',
       signal: expect.any(AbortSignal),
       logger: expect.anything(),
     });
-    expect(result).toEqual({ output: { sandbox_id: 'default__conv-1', notification: '' } });
+    expect(result).toEqual({
+      output: {
+        sandbox_id: 'default__conv-1',
+        recalled_ids: ['memory_a'],
+        notification: '',
+      },
+    });
     expect(telemetry.reportSemanticMemoryMaterialized).toHaveBeenCalledWith({
       agent_id: 'significant-events.deductive-investigation',
       conversation_id: 'conv-1',
@@ -141,7 +148,13 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
     expect(hydrateMemoryWorkspace).toHaveBeenCalledWith(
       expect.objectContaining({ session: mockSession, agentId: 'agent-1' })
     );
-    expect(result).toEqual({ output: { sandbox_id: 'marketing__conv-1', notification: '' } });
+    expect(result).toEqual({
+      output: {
+        sandbox_id: 'marketing__conv-1',
+        recalled_ids: ['memory_a'],
+        notification: '',
+      },
+    });
   });
 
   it('throws when the sandbox is not configured', async () => {
@@ -189,7 +202,12 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
 
     expect(hydrateMemoryWorkspace).not.toHaveBeenCalled();
     expect(result).toEqual({
-      output: { sandbox_id: 'default__conv-1', skipped: true, notification: '' },
+      output: {
+        sandbox_id: 'default__conv-1',
+        skipped: true,
+        recalled_ids: [],
+        notification: '',
+      },
     });
   });
 
@@ -204,7 +222,12 @@ describe('memoryMaterializeToSandboxStepDefinition', () => {
 
     expect(hydrateMemoryWorkspace).not.toHaveBeenCalled();
     expect(result).toEqual({
-      output: { sandbox_id: 'default__conv-1', skipped: true, notification: '' },
+      output: {
+        sandbox_id: 'default__conv-1',
+        skipped: true,
+        recalled_ids: [],
+        notification: '',
+      },
     });
   });
 });

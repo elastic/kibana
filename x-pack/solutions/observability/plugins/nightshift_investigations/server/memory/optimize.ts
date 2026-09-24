@@ -161,15 +161,30 @@ export const capMergedContent = (content: string, maxChars = MERGED_CONTENT_MAX_
   return head + suffix;
 };
 
-const formatRecalled = (recalledMemories: MemoryPage[]): string =>
-  recalledMemories.length === 0
-    ? '(none)'
-    : recalledMemories
-        .map(
-          (mem) =>
-            `- id=${mem.id}\n  title: ${mem.title}\n  content: ${mem.content.substring(0, 150)}`
-        )
-        .join('\n');
+export const MAX_FORMATTED_RECALLED_CHARS = 32_000;
+
+export const formatRecalled = (recalledMemories: readonly MemoryPage[]): string => {
+  if (recalledMemories.length === 0) {
+    return '(none)';
+  }
+  let output = '';
+  for (const memory of recalledMemories) {
+    const separator = output.length === 0 ? '' : '\n';
+    const prefix =
+      `${separator}- id=${memory.id}\n  title: ${memory.title}\n` +
+      `  context: ${memory.context ?? ''}\n  content: `;
+    const remaining = MAX_FORMATTED_RECALLED_CHARS - output.length;
+    if (prefix.length > remaining) {
+      break;
+    }
+    const contentBudget = remaining - prefix.length;
+    output += prefix + memory.content.slice(0, contentBudget);
+    if (memory.content.length > contentBudget) {
+      break;
+    }
+  }
+  return output;
+};
 
 /** Pull a page id out of a critique string. LLMs often echo `id=memory_x | title=…`. */
 const MEMORY_LABEL_ID_RE = /\bmemory_[a-z0-9-]{1,80}\b/i;
@@ -457,10 +472,10 @@ export const isDuplicateExtraction = ({
     return true;
   }
 
-  const matches = (page: ExtractionPage, allowSameSlug: boolean): boolean => {
+  const matches = (page: ExtractionPage): boolean => {
     const samePage = page.id === extraId || page.slug === extraSlug;
     if (samePage) {
-      return !allowSameSlug;
+      return true;
     }
     if (extraTitle.length > 0 && normalizeMemoryTitle(page.title) === extraTitle) {
       return true;
@@ -471,8 +486,7 @@ export const isDuplicateExtraction = ({
   };
 
   return (
-    recalledMemories.some((page) => matches(page, false)) ||
-    catalogHits.some((page) => matches(page, true))
+    recalledMemories.some((page) => matches(page)) || catalogHits.some((page) => matches(page))
   );
 };
 
@@ -509,10 +523,10 @@ const liveOverlapPages = ({
 
   const extraTitle = normalizeMemoryTitle(extra.title);
   const extraText = `${extra.title}\n${extra.content}`;
-  const matches = (page: ExtractionPage, allowSameSlug: boolean): boolean => {
+  const matches = (page: ExtractionPage): boolean => {
     const samePage = page.id === extraId || page.slug === extraSlug;
     if (samePage) {
-      return !allowSameSlug;
+      return true;
     }
     if (extraTitle.length > 0 && normalizeMemoryTitle(page.title) === extraTitle) {
       return true;
@@ -523,12 +537,12 @@ const liveOverlapPages = ({
   };
 
   for (const page of recalledMemories) {
-    if (matches(page, false)) {
+    if (matches(page)) {
       push(page);
     }
   }
   for (const page of catalogHits) {
-    if (matches(page, true)) {
+    if (matches(page)) {
       push(page);
     }
   }
@@ -548,6 +562,23 @@ const unionStrings = (...groups: Array<readonly string[] | undefined>): string[]
     }
   }
   return out;
+};
+
+const unionPages = (...groups: Array<readonly MemoryPage[]>): MemoryPage[] => {
+  const order: string[] = [];
+  const byId = new Map<string, MemoryPage>();
+  for (const group of groups) {
+    for (const page of group) {
+      if (!byId.has(page.id)) {
+        order.push(page.id);
+      }
+      byId.set(page.id, page);
+    }
+  }
+  return order.flatMap((id) => {
+    const page = byId.get(id);
+    return page ? [page] : [];
+  });
 };
 
 export const applyMemoryEdits = async ({
@@ -628,6 +659,7 @@ export const applyMemoryEdits = async ({
   interface MergeGroup {
     sourceIds: string[];
     extract?: MemoryExtractProposal;
+    canonicalId?: string;
   }
   const groups: MergeGroup[] = [];
 
@@ -646,13 +678,20 @@ export const applyMemoryEdits = async ({
       continue;
     }
 
+    const exactId = toMemoryKiId(extra.slug);
+    const exactPage = await store.get(exactId);
+    if (exactPage?.status === 'archived') {
+      logger.debug(`Skipped extraction "${extra.slug}" — exact slug is archived`);
+      consumedExtracts.add(index);
+      continue;
+    }
     const catalogHits =
       (await store.retrieve({ query: extra.title, size: 5, match: 'content' })) ?? [];
     const overlaps = liveOverlapPages({
       extra,
       recalledIds,
       recalledMemories,
-      catalogHits,
+      catalogHits: exactPage ? [exactPage, ...catalogHits] : catalogHits,
     }).filter((page) => !consumedIds.has(page.id));
     if (overlaps.some((page) => harmful.has(page.id))) {
       logger.debug(`Skipped extraction "${extra.slug}" — merge group includes a harmful memory`);
@@ -667,7 +706,11 @@ export const applyMemoryEdits = async ({
       consumedIds.add(page.id);
     }
     consumedExtracts.add(index);
-    groups.push({ sourceIds: live.map((page) => page.id), extract: extra });
+    groups.push({
+      sourceIds: live.map((page) => page.id),
+      extract: extra,
+      ...(exactPage ? { canonicalId: exactId } : {}),
+    });
     logger.debug(
       `Memory merge group for "${extra.slug}" with ${formatPageRefs(live)} ` +
         `(catalog=${formatPageRefs(catalogHits)})`
@@ -708,6 +751,7 @@ export const applyMemoryEdits = async ({
       store,
       sources,
       extract: group.extract,
+      canonicalId: group.canonicalId,
       task,
       synthesizeMemoryGroup,
       now,
@@ -726,8 +770,7 @@ export const applyMemoryEdits = async ({
     }
     const extra = extractions[index];
     try {
-      const existing = await store.get(toMemoryKiId(extra.slug));
-      await store.upsert({
+      await store.create({
         slug: extra.slug,
         title: extra.title,
         content: extra.content,
@@ -735,7 +778,7 @@ export const applyMemoryEdits = async ({
         tags: extra.tags,
         categories: extra.categories,
         references: [],
-        status: existing?.status === 'established' ? 'established' : 'tentative',
+        status: 'tentative',
         user: 'nightshift-optimizer',
       });
       summary.standaloneUpsertCount += 1;
@@ -744,6 +787,32 @@ export const applyMemoryEdits = async ({
         `Memory extract upserted ${toMemoryKiId(extra.slug)} contextChars=${task.length}`
       );
     } catch (err) {
+      if ((err as { statusCode?: number }).statusCode === 409) {
+        const winner = await store.get(toMemoryKiId(extra.slug));
+        if (winner?.status === 'archived') {
+          logger.debug(`Skipped extraction "${extra.slug}" — race winner is archived`);
+          continue;
+        }
+        if (winner && synthesizeMemoryGroup) {
+          summary.mergeAttemptCount += 1;
+          const mergeResult = await mergeMemoryGroup({
+            store,
+            sources: [winner],
+            extract: extra,
+            canonicalId: winner.id,
+            task,
+            synthesizeMemoryGroup,
+            now,
+            logger,
+          });
+          if (mergeResult.merged) {
+            summary.mergeSuccessCount += 1;
+          }
+          summary.mergedSourceArchiveCount += mergeResult.archivedSourceCount;
+          summary.writeFailureCount += mergeResult.writeFailureCount;
+          continue;
+        }
+      }
       summary.writeFailureCount += 1;
       logger.warn(`Failed to extract memory "${extra.slug}": ${(err as Error).message}`);
     }
@@ -761,6 +830,7 @@ const mergeMemoryGroup = async ({
   store,
   sources,
   extract,
+  canonicalId: initialCanonicalId,
   task,
   synthesizeMemoryGroup,
   now,
@@ -769,90 +839,111 @@ const mergeMemoryGroup = async ({
   store: MemoryPageStore;
   sources: MemoryPage[];
   extract?: MemoryExtractProposal;
+  canonicalId?: string;
   task: string;
   synthesizeMemoryGroup: SynthesizeMemoryGroup;
   now: () => number;
   logger: Logger;
 }): Promise<MergeMemoryGroupResult> => {
-  let synthesis: MemoryMergeSynthesis;
-  try {
-    synthesis = await synthesizeMemoryGroup({
-      sources,
-      extract,
-      task: extract ? task : undefined,
-    });
-  } catch (err) {
-    logger.warn(`Memory merge synthesis failed: ${(err as Error).message}`);
-    return { merged: false, archivedSourceCount: 0, writeFailureCount: 0 };
-  }
-
-  const content = capMergedContent(synthesis.content);
-  if (synthesis.title.length === 0 || content.trim().length === 0) {
-    logger.warn('Memory merge aborted — synthesis returned an empty title or content');
-    return { merged: false, archivedSourceCount: 0, writeFailureCount: 0 };
-  }
-  if (looksLikeSecret(`${synthesis.title}\n${content}\n${synthesis.context}`)) {
-    logger.warn('Memory merge aborted — synthesised content looks like a secret');
-    return { merged: false, archivedSourceCount: 0, writeFailureCount: 0 };
-  }
-  const sourcesHadContext = sources.some((page) => (page.context ?? '').trim().length > 0);
-  const hadRecallKey = sourcesHadContext || (extract !== undefined && task.length > 0);
-  if (synthesis.context.length === 0 && hadRecallKey) {
-    logger.warn('Memory merge aborted — synthesis returned an empty recall context');
-    return { merged: false, archivedSourceCount: 0, writeFailureCount: 0 };
-  }
-
   const nowSec = now();
-  const avoid = new Set(sources.map((page) => page.id));
-  const base = canonicalizeSlug(synthesis.title) || 'merged';
-  let slug: string | undefined;
-  for (let attempt = 0; attempt < 6; attempt++) {
-    const candidate =
-      attempt === 0 ? base : attempt === 1 ? `${base}-merged` : `${base}-merged-${attempt}`;
-    const candidateId = toMemoryKiId(candidate);
-    if (avoid.has(candidateId)) {
-      continue;
-    }
-    const existing = await store.get(candidateId);
-    if (existing && existing.status !== 'archived') {
-      continue;
-    }
-    slug = candidate;
-    break;
-  }
-  if (!slug) {
-    logger.warn('Memory merge aborted — no free canonical slug found');
-    return { merged: false, archivedSourceCount: 0, writeFailureCount: 0 };
-  }
+  let canonicalId = initialCanonicalId;
+  let writtenCanonicalId: string | undefined;
+  const originalSources = [...sources];
 
-  const mergedFrom = unionStrings(
-    sources.flatMap((page) => [page.id, ...(page.merged_from ?? [])]),
-    extract ? [toMemoryKiId(extract.slug)] : []
-  );
-  let impressions = 0;
-  let conversions = 0;
-  for (const page of sources) {
-    const display = toMemoryDisplayTelemetry(page, nowSec);
-    impressions += display.impressions;
-    conversions += display.conversions;
-  }
+  for (let conflictAttempt = 0; conflictAttempt <= 2; conflictAttempt++) {
+    let versionedCanonical =
+      canonicalId !== undefined ? await store.getVersioned(canonicalId) : undefined;
+    if (canonicalId && !versionedCanonical) {
+      logger.warn(`Memory merge aborted — canonical ${canonicalId} disappeared`);
+      return { merged: false, archivedSourceCount: 0, writeFailureCount: 1 };
+    }
+    if (versionedCanonical?.page.status === 'archived') {
+      logger.debug(`Memory merge skipped — canonical ${canonicalId} is archived`);
+      return { merged: false, archivedSourceCount: 0, writeFailureCount: 0 };
+    }
 
-  try {
-    await store.upsert({
+    const currentSources = unionPages(
+      originalSources,
+      versionedCanonical ? [versionedCanonical.page] : []
+    );
+    let synthesis: MemoryMergeSynthesis;
+    try {
+      synthesis = await synthesizeMemoryGroup({
+        sources: currentSources,
+        extract,
+        task: extract ? task : undefined,
+      });
+    } catch (err) {
+      logger.warn(`Memory merge synthesis failed: ${(err as Error).message}`);
+      return { merged: false, archivedSourceCount: 0, writeFailureCount: 0 };
+    }
+
+    const content = capMergedContent(synthesis.content);
+    if (synthesis.title.length === 0 || content.trim().length === 0) {
+      logger.warn('Memory merge aborted — synthesis returned an empty title or content');
+      return { merged: false, archivedSourceCount: 0, writeFailureCount: 0 };
+    }
+    if (looksLikeSecret(`${synthesis.title}\n${content}\n${synthesis.context}`)) {
+      logger.warn('Memory merge aborted — synthesised content looks like a secret');
+      return { merged: false, archivedSourceCount: 0, writeFailureCount: 0 };
+    }
+    const hadRecallKey =
+      currentSources.some((page) => (page.context ?? '').trim().length > 0) ||
+      (extract !== undefined && task.length > 0);
+    if (synthesis.context.length === 0 && hadRecallKey) {
+      logger.warn('Memory merge aborted — synthesis returned an empty recall context');
+      return { merged: false, archivedSourceCount: 0, writeFailureCount: 0 };
+    }
+
+    let slug = versionedCanonical?.page.slug;
+    if (!slug) {
+      const avoid = new Set(currentSources.map((page) => page.id));
+      const base = canonicalizeSlug(synthesis.title) || 'merged';
+      for (let attempt = 0; attempt < 6; attempt++) {
+        const candidate =
+          attempt === 0 ? base : attempt === 1 ? `${base}-merged` : `${base}-merged-${attempt}`;
+        const candidateId = toMemoryKiId(candidate);
+        if (avoid.has(candidateId) || (await store.get(candidateId))) {
+          continue;
+        }
+        slug = candidate;
+        canonicalId = candidateId;
+        break;
+      }
+      if (!slug || !canonicalId) {
+        logger.warn('Memory merge aborted — no free canonical slug found');
+        return { merged: false, archivedSourceCount: 0, writeFailureCount: 0 };
+      }
+    }
+
+    const mergedFrom = unionStrings(
+      currentSources.flatMap((page) => [page.id, ...(page.merged_from ?? [])]),
+      extract ? [toMemoryKiId(extract.slug)] : []
+    );
+    let impressions = 0;
+    let conversions = 0;
+    for (const page of currentSources) {
+      const display = toMemoryDisplayTelemetry(page, nowSec);
+      impressions += display.impressions;
+      conversions += display.conversions;
+    }
+    const write = {
       slug,
       title: synthesis.title,
       content,
       context: synthesis.context,
       tags: unionStrings(
-        sources.flatMap((page) => page.tags),
+        currentSources.flatMap((page) => page.tags),
         extract?.tags
       ).filter((tag) => tag !== 'memory'),
       categories: unionStrings(
-        sources.flatMap((page) => page.categories),
+        currentSources.flatMap((page) => page.categories),
         extract?.categories
       ),
-      references: unionStrings(sources.flatMap((page) => page.references)),
-      status: sources.some((page) => page.status === 'established') ? 'established' : 'tentative',
+      references: unionStrings(currentSources.flatMap((page) => page.references)),
+      status: currentSources.some((page) => page.status === 'established')
+        ? ('established' as const)
+        : ('tentative' as const),
       source: `Merged from memories: ${mergedFrom.join(', ')}`,
       merged_from: mergedFrom,
       telemetry: {
@@ -861,15 +952,48 @@ const mergeMemoryGroup = async ({
         last_impression_time: epochSecondsToIso(nowSec),
       },
       user: 'nightshift-optimizer',
-    });
-  } catch (err) {
-    logger.warn(`Memory merge failed to write canonical page: ${(err as Error).message}`);
+    };
+    const targetCanonicalId = canonicalId;
+    if (!targetCanonicalId) {
+      return { merged: false, archivedSourceCount: 0, writeFailureCount: 1 };
+    }
+
+    try {
+      if (versionedCanonical) {
+        await store.update(targetCanonicalId, write, versionedCanonical);
+      } else {
+        await store.create(write);
+      }
+      writtenCanonicalId = targetCanonicalId;
+      sources = currentSources;
+      break;
+    } catch (err) {
+      if ((err as { statusCode?: number }).statusCode !== 409) {
+        logger.warn(`Memory merge failed to write canonical page: ${(err as Error).message}`);
+        return { merged: false, archivedSourceCount: 0, writeFailureCount: 1 };
+      }
+      versionedCanonical = await store.getVersioned(targetCanonicalId);
+      if (versionedCanonical?.page.status === 'archived') {
+        logger.debug(`Memory merge skipped — conflict winner ${targetCanonicalId} is archived`);
+        return { merged: false, archivedSourceCount: 0, writeFailureCount: 0 };
+      }
+      if (conflictAttempt === 2) {
+        logger.warn(`Memory merge exhausted conflicts for ${targetCanonicalId}; sources preserved`);
+        return { merged: false, archivedSourceCount: 0, writeFailureCount: 1 };
+      }
+    }
+  }
+
+  if (!writtenCanonicalId) {
     return { merged: false, archivedSourceCount: 0, writeFailureCount: 1 };
   }
 
   let archivedSourceCount = 0;
   let writeFailureCount = 0;
   for (const page of sources) {
+    if (page.id === writtenCanonicalId) {
+      continue;
+    }
     try {
       await store.archive(page.id, 'merged');
       archivedSourceCount += 1;
@@ -881,7 +1005,7 @@ const mergeMemoryGroup = async ({
     }
   }
   logger.info(
-    `Merged ${sources.map((page) => page.id).join(', ')} into ${toMemoryKiId(slug)}` +
+    `Merged ${sources.map((page) => page.id).join(', ')} into ${writtenCanonicalId}` +
       (extract ? ` (folded extract ${extract.slug})` : '')
   );
   return { merged: true, archivedSourceCount, writeFailureCount };

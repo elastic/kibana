@@ -63,6 +63,9 @@ export const memoryMaterializeToSandboxStepDefinition = ({
     outputSchema: z.object({
       sandbox_id: z.string().describe('Sandbox that received the memory pages.'),
       skipped: z.boolean().optional(),
+      recalled_ids: z
+        .array(z.string())
+        .describe('Memory page ids recalled for this exact conversation round.'),
       notification: z
         .string()
         .describe('Markdown fragment listing memory pages new this turn, or empty.'),
@@ -80,7 +83,9 @@ export const memoryMaterializeToSandboxStepDefinition = ({
 
       if (isEnabled && !isEnabled()) {
         context.logger.info(`Skipped memory materialize for sandbox ${sandboxId} (flag off)`);
-        return { output: { sandbox_id: sandboxId, skipped: true, notification: '' } };
+        return {
+          output: { sandbox_id: sandboxId, skipped: true, recalled_ids: [], notification: '' },
+        };
       }
 
       const trimmedAgentId = agentId?.trim();
@@ -88,7 +93,9 @@ export const memoryMaterializeToSandboxStepDefinition = ({
         context.logger.info(
           `Skipped memory materialize for sandbox ${sandboxId} (missing agent_id)`
         );
-        return { output: { sandbox_id: sandboxId, skipped: true, notification: '' } };
+        return {
+          output: { sandbox_id: sandboxId, skipped: true, recalled_ids: [], notification: '' },
+        };
       }
 
       const sandboxStart = getSandboxStart();
@@ -121,6 +128,7 @@ export const memoryMaterializeToSandboxStepDefinition = ({
             hydrateMemoryWorkspace({
               session,
               esClient: context.contextManager.getScopedEsClient(),
+              spaceId,
               agentId: trimmedAgentId,
               query: prompt,
               signal,
@@ -154,6 +162,12 @@ export const memoryMaterializeToSandboxStepDefinition = ({
         notification_chars: result.summary.notificationChars,
       });
 
-      return { output: { sandbox_id: sandboxId, notification: result.notification } };
+      return {
+        output: {
+          sandbox_id: sandboxId,
+          recalled_ids: result.recalledIds,
+          notification: result.notification,
+        },
+      };
     },
   });

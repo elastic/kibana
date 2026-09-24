@@ -6,7 +6,6 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import type { SandboxPluginStart, SandboxSession } from '@kbn/sandbox-plugin/server';
 import { runMemoryOptimize } from '../memory/register_memory';
 import { memoryOptimizeStepDefinition } from './memory_optimize';
 
@@ -32,7 +31,6 @@ const runMemoryOptimizeMock = jest.mocked(runMemoryOptimize);
 describe('memoryOptimizeStepDefinition', () => {
   const esClient = { search: jest.fn() };
   const request = { headers: {} };
-  const mockSession = { readFiles: jest.fn() } as unknown as SandboxSession;
   const getScopedEsClient = jest.fn().mockReturnValue(esClient);
   const getFakeRequest = jest.fn().mockReturnValue(request);
   const getAgentBuilder = jest.fn();
@@ -40,11 +38,6 @@ describe('memoryOptimizeStepDefinition', () => {
     reportSemanticMemoryMaterialized: jest.fn(),
     reportSemanticMemoryOptimized: jest.fn(),
   };
-
-  const makeSandboxStart = (): SandboxPluginStart => ({
-    getSession: jest.fn(),
-    getSessionForSpace: jest.fn().mockReturnValue(mockSession),
-  });
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -57,6 +50,7 @@ describe('memoryOptimizeStepDefinition', () => {
       prompt: string;
       response: string;
       agent_id?: string;
+      recalled_ids?: string[];
       sandbox_id?: string;
       connector_id?: string;
       conversation_id?: string;
@@ -82,11 +76,9 @@ describe('memoryOptimizeStepDefinition', () => {
       stepType: 'nightshift.memoryOptimize',
     } as never);
 
-  it('optimizes with the request-scoped ES client and obtained sandbox_id', async () => {
-    const sandboxStart = makeSandboxStart();
+  it('optimizes with the request-scoped ES client and persisted recalled ids', async () => {
     const definition = memoryOptimizeStepDefinition({
       getAgentBuilder,
-      getSandboxStart: () => sandboxStart,
       logger: loggerMock.create(),
       telemetry: telemetry as never,
     });
@@ -96,19 +88,19 @@ describe('memoryOptimizeStepDefinition', () => {
         prompt: 'why is checkout slow?',
         response: 'Redis evictions.',
         agent_id: 'significant-events.deductive-investigation',
+        recalled_ids: ['memory_a'],
         sandbox_id: 'default__conv-1',
         conversation_id: 'conv-1',
         round_id: 'round-1',
       })
     );
 
-    expect(sandboxStart.getSessionForSpace).toHaveBeenCalledWith('default', 'conv-1');
     expect(runMemoryOptimize).toHaveBeenCalledWith({
       request,
       agentId: 'significant-events.deductive-investigation',
       userMessage: 'why is checkout slow?',
       assistantMessage: 'Redis evictions.',
-      session: mockSession,
+      recalledIds: ['memory_a'],
       esClient,
       spaceId: 'default',
       signal: expect.any(AbortSignal),
@@ -138,11 +130,9 @@ describe('memoryOptimizeStepDefinition', () => {
     });
   });
 
-  it('uses the obtained sandbox_id without re-scoping it', async () => {
-    const sandboxStart = makeSandboxStart();
+  it('defaults an absent persisted recalled set to empty', async () => {
     const definition = memoryOptimizeStepDefinition({
       getAgentBuilder,
-      getSandboxStart: () => sandboxStart,
       logger: loggerMock.create(),
       telemetry: telemetry as never,
     });
@@ -158,28 +148,9 @@ describe('memoryOptimizeStepDefinition', () => {
       )
     );
 
-    expect(sandboxStart.getSessionForSpace).toHaveBeenCalledWith('marketing', 'conv-1');
-  });
-
-  it('still runs when the sandbox is not configured so ratings are skipped, not thrown', async () => {
-    const definition = memoryOptimizeStepDefinition({
-      getAgentBuilder,
-      getSandboxStart: () => undefined,
-      logger: loggerMock.create(),
-      telemetry: telemetry as never,
-    });
-
-    await definition.handler(
-      createContext({
-        prompt: 'why is checkout slow?',
-        response: 'Redis evictions.',
-        sandbox_id: 'default__conv-1',
-      })
-    );
-
     expect(runMemoryOptimize).toHaveBeenCalledWith(
       expect.objectContaining({
-        session: undefined,
+        recalledIds: [],
       })
     );
   });
@@ -187,7 +158,6 @@ describe('memoryOptimizeStepDefinition', () => {
   it('skips when the memory flag is off', async () => {
     const definition = memoryOptimizeStepDefinition({
       getAgentBuilder,
-      getSandboxStart: () => makeSandboxStart(),
       logger: loggerMock.create(),
       isEnabled: () => false,
       telemetry: telemetry as never,
@@ -206,10 +176,8 @@ describe('memoryOptimizeStepDefinition', () => {
   });
 
   it('forwards the Agent Builder connector id from the round', async () => {
-    const sandboxStart = makeSandboxStart();
     const definition = memoryOptimizeStepDefinition({
       getAgentBuilder,
-      getSandboxStart: () => sandboxStart,
       logger: loggerMock.create(),
       telemetry: telemetry as never,
     });
@@ -233,7 +201,6 @@ describe('memoryOptimizeStepDefinition', () => {
     runMemoryOptimizeMock.mockRejectedValueOnce(new Error('model failed'));
     const definition = memoryOptimizeStepDefinition({
       getAgentBuilder,
-      getSandboxStart: () => makeSandboxStart(),
       logger: loggerMock.create(),
       telemetry: telemetry as never,
     });
@@ -263,7 +230,6 @@ describe('memoryOptimizeStepDefinition', () => {
     runMemoryOptimizeMock.mockResolvedValueOnce(undefined);
     const definition = memoryOptimizeStepDefinition({
       getAgentBuilder,
-      getSandboxStart: () => makeSandboxStart(),
       logger: loggerMock.create(),
       telemetry: telemetry as never,
     });

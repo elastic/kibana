@@ -92,6 +92,7 @@ describe('nightshift sandbox materialize workspace workflow', () => {
             '{{ steps.hydrate_cortex.output.notification }}',
             '{{ steps.memory_materialize_to_sandbox.output.notification }}',
           ],
+          recalled_ids: '{{ steps.memory_materialize_to_sandbox.output.recalled_ids }}',
         },
       }),
     ]);

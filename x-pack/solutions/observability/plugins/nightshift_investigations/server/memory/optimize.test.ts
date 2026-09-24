@@ -15,7 +15,9 @@ import {
   canonicalizeMemoryLabelIds,
   contentOverlap,
   createLlmProposeMemoryExtractions,
+  formatRecalled,
   isDuplicateExtraction,
+  MAX_FORMATTED_RECALLED_CHARS,
   optimizeMemory,
   unwrapUserTask,
 } from './optimize';
@@ -48,14 +50,46 @@ const createStore = (overrides: Partial<MemoryPageStore> = {}): MemoryPageStore 
     list: jest.fn(),
     retrieve: jest.fn().mockResolvedValue([]),
     get: jest.fn(),
+    getVersioned: jest.fn(),
     getByName: jest.fn(),
     upsert: jest.fn().mockResolvedValue({}),
+    create: jest.fn().mockResolvedValue({}),
+    update: jest.fn().mockResolvedValue({}),
     applyCounterUpdates: jest.fn().mockResolvedValue(undefined),
     archive: jest.fn().mockResolvedValue({}),
     delete: jest.fn(),
     pruneDuplicates: jest.fn(),
     ...overrides,
   } as MemoryPageStore);
+
+describe('formatRecalled', () => {
+  it('includes context and facts beyond character 150', () => {
+    const memory = page('memory_long');
+    memory.context = 'checkout latency';
+    memory.content = `${'x'.repeat(150)}FACT_AFTER_150`;
+
+    const formatted = formatRecalled([memory]);
+
+    expect(formatted).toContain('context: checkout latency');
+    expect(formatted).toContain('FACT_AFTER_150');
+  });
+
+  it('is deterministic, capped, and truncates only the final included page', () => {
+    const first = page('memory_first');
+    first.content = 'a'.repeat(20_000);
+    const second = page('memory_second');
+    second.content = 'b'.repeat(20_000);
+    const third = page('memory_third');
+    third.content = 'must-not-appear';
+
+    const formatted = formatRecalled([first, second, third]);
+
+    expect(formatted).toBe(formatRecalled([first, second, third]));
+    expect(formatted).toHaveLength(MAX_FORMATTED_RECALLED_CHARS);
+    expect(formatted).toContain('id=memory_second');
+    expect(formatted).not.toContain('id=memory_third');
+  });
+});
 
 describe('createLlmProposeMemoryExtractions', () => {
   it('normalizes object-shaped merge target groups from the bound model', async () => {
@@ -203,7 +237,7 @@ describe('applyMemoryEdits', () => {
       logger: loggerMock.create(),
     });
 
-    expect(store.upsert).toHaveBeenCalledWith(
+    expect(store.create).toHaveBeenCalledWith(
       expect.objectContaining({
         slug: 'checkout-kafka-lag',
         context: 'checkout latency kafka consumer lag',
@@ -217,7 +251,7 @@ describe('applyMemoryEdits', () => {
       })
     );
     expect(store.archive).toHaveBeenCalledWith('memory_kafka-lag', 'merged');
-    expect(store.upsert).not.toHaveBeenCalledWith(
+    expect(store.create).not.toHaveBeenCalledWith(
       expect.objectContaining({ slug: 'checkout-kafka' })
     );
     expect(summary).toEqual(
@@ -261,7 +295,7 @@ describe('applyMemoryEdits', () => {
       logger: loggerMock.create(),
     });
 
-    expect(store.upsert).not.toHaveBeenCalled();
+    expect(store.create).not.toHaveBeenCalled();
     expect(store.archive).not.toHaveBeenCalled();
     expect(summary).toEqual(
       expect.objectContaining({ mergeAttemptCount: 1, mergeSuccessCount: 0 })
@@ -298,7 +332,7 @@ describe('applyMemoryEdits', () => {
       logger: loggerMock.create(),
     });
 
-    expect(store.upsert).not.toHaveBeenCalled();
+    expect(store.create).not.toHaveBeenCalled();
     expect(store.archive).not.toHaveBeenCalled();
   });
 
@@ -339,7 +373,7 @@ describe('applyMemoryEdits', () => {
     expect(summary).toEqual(
       expect.objectContaining({ mergeAttemptCount: 1, mergeSuccessCount: 0 })
     );
-    expect(store.upsert).not.toHaveBeenCalled();
+    expect(store.create).not.toHaveBeenCalled();
     expect(store.archive).not.toHaveBeenCalled();
   });
 
@@ -387,7 +421,7 @@ describe('applyMemoryEdits', () => {
       size: 5,
       match: 'content',
     });
-    expect(store.upsert).toHaveBeenCalledWith(
+    expect(store.create).toHaveBeenCalledWith(
       expect.objectContaining({
         slug: 'checkout-cart-cache',
         telemetry: expect.objectContaining({ impressions: 4, conversions: 2 }),
@@ -399,9 +433,17 @@ describe('applyMemoryEdits', () => {
     );
   });
 
-  it('still upserts when a catalog hit is the same slug', async () => {
+  it('merges an old exact slug in place with OCC and preserves its id', async () => {
+    const existing = page('memory_checkout-redis', 'Checkout Redis', 'Old fact.');
     const store = createStore({
-      retrieve: jest.fn().mockResolvedValue([page('memory_checkout-redis', 'Checkout Redis')]),
+      get: jest
+        .fn()
+        .mockImplementation(async (id: string) => (id === existing.id ? existing : undefined)),
+      getVersioned: jest.fn().mockResolvedValue({
+        page: existing,
+        seqNo: 7,
+        primaryTerm: 2,
+      }),
     });
 
     await applyMemoryEdits({
@@ -417,10 +459,136 @@ describe('applyMemoryEdits', () => {
           categories: [],
         },
       ],
+      synthesizeMemoryGroup: async () => ({
+        title: 'Checkout Redis canonical',
+        content: 'Old and new facts.',
+        context: 'checkout redis sessions',
+      }),
       logger: loggerMock.create(),
     });
 
-    expect(store.upsert).toHaveBeenCalledWith(expect.objectContaining({ slug: 'checkout-redis' }));
+    expect(store.update).toHaveBeenCalledWith(
+      'memory_checkout-redis',
+      expect.objectContaining({
+        slug: 'checkout-redis',
+        title: 'Checkout Redis canonical',
+        merged_from: ['memory_checkout-redis'],
+      }),
+      expect.objectContaining({ seqNo: 7, primaryTerm: 2 })
+    );
+    expect(store.archive).not.toHaveBeenCalledWith('memory_checkout-redis', 'merged');
+    expect(store.create).not.toHaveBeenCalled();
+  });
+
+  it('merges a create-conflict winner through the same in-place flow', async () => {
+    const winner = page('memory_checkout-redis', 'Concurrent winner', 'Winner fact.');
+    const get = jest.fn().mockResolvedValueOnce(undefined).mockResolvedValueOnce(winner);
+    const store = createStore({
+      get,
+      create: jest.fn().mockRejectedValue({ statusCode: 409 }),
+      getVersioned: jest.fn().mockResolvedValue({
+        page: winner,
+        seqNo: 4,
+        primaryTerm: 1,
+      }),
+    });
+
+    const summary = await applyMemoryEdits({
+      store,
+      recalledIds: [],
+      labels: { useful: [], harmful: [] },
+      extractions: [
+        {
+          slug: 'checkout-redis',
+          title: 'Checkout Redis',
+          content: 'New extracted fact.',
+          tags: ['redis'],
+          categories: [],
+        },
+      ],
+      synthesizeMemoryGroup: async () => ({
+        title: 'Checkout Redis',
+        content: 'Winner and extracted facts.',
+        context: 'checkout redis',
+      }),
+      logger: loggerMock.create(),
+    });
+
+    expect(store.update).toHaveBeenCalledWith(
+      winner.id,
+      expect.objectContaining({ content: 'Winner and extracted facts.' }),
+      expect.objectContaining({ seqNo: 4 })
+    );
+    expect(summary).toEqual(
+      expect.objectContaining({ mergeAttemptCount: 1, mergeSuccessCount: 1 })
+    );
+  });
+
+  it('preserves sources after exhausting OCC conflicts', async () => {
+    const canonical = page('memory_checkout-redis', 'Checkout Redis', 'Old fact.');
+    const store = createStore({
+      get: jest.fn().mockResolvedValue(canonical),
+      getVersioned: jest.fn().mockResolvedValue({
+        page: canonical,
+        seqNo: 8,
+        primaryTerm: 2,
+      }),
+      update: jest.fn().mockRejectedValue({ statusCode: 409 }),
+    });
+
+    const summary = await applyMemoryEdits({
+      store,
+      recalledIds: [],
+      labels: { useful: [], harmful: [] },
+      extractions: [
+        {
+          slug: 'checkout-redis',
+          title: 'Checkout Redis',
+          content: 'New fact.',
+          tags: [],
+          categories: [],
+        },
+      ],
+      synthesizeMemoryGroup: async () => ({
+        title: 'Checkout Redis',
+        content: 'Merged fact.',
+        context: 'checkout redis',
+      }),
+      logger: loggerMock.create(),
+    });
+
+    expect(store.update).toHaveBeenCalledTimes(3);
+    expect(store.archive).not.toHaveBeenCalled();
+    expect(summary).toEqual(
+      expect.objectContaining({ mergeSuccessCount: 0, writeFailureCount: 1 })
+    );
+  });
+
+  it('does not resurrect an archived exact slug', async () => {
+    const archived = page('memory_checkout-redis', 'Checkout Redis');
+    archived.status = 'archived';
+    const store = createStore({ get: jest.fn().mockResolvedValue(archived) });
+
+    await applyMemoryEdits({
+      store,
+      recalledIds: [],
+      labels: { useful: [], harmful: [] },
+      extractions: [
+        {
+          slug: 'checkout-redis',
+          title: 'Checkout Redis',
+          content: 'New fact.',
+          tags: [],
+          categories: [],
+        },
+      ],
+      synthesizeMemoryGroup: jest.fn(),
+      logger: loggerMock.create(),
+    });
+
+    expect(store.retrieve).not.toHaveBeenCalled();
+    expect(store.create).not.toHaveBeenCalled();
+    expect(store.update).not.toHaveBeenCalled();
   });
 
   it('skips extractions that look like secrets', async () => {
@@ -442,7 +610,7 @@ describe('applyMemoryEdits', () => {
       logger: loggerMock.create(),
     });
 
-    expect(store.upsert).not.toHaveBeenCalled();
+    expect(store.create).not.toHaveBeenCalled();
     expect(store.retrieve).not.toHaveBeenCalled();
     expect(summary.safetySkipCount).toBe(1);
   });
@@ -467,7 +635,7 @@ describe('applyMemoryEdits', () => {
       logger: loggerMock.create(),
     });
 
-    expect(store.upsert).not.toHaveBeenCalled();
+    expect(store.create).not.toHaveBeenCalled();
     expect(summary.safetySkipCount).toBe(1);
   });
 });
@@ -553,7 +721,7 @@ describe('optimizeMemory', () => {
 
     expect(proposeLabels).not.toHaveBeenCalled();
     expect(proposeExtractions).toHaveBeenCalled();
-    expect(store.upsert).toHaveBeenCalledWith(
+    expect(store.create).toHaveBeenCalledWith(
       expect.objectContaining({
         slug: 'checkout-redis',
         status: 'tentative',
@@ -590,7 +758,7 @@ describe('optimizeMemory', () => {
     });
 
     expect(unwrapUserTask).toBeDefined();
-    expect(store.upsert).toHaveBeenCalledWith(
+    expect(store.create).toHaveBeenCalledWith(
       expect.objectContaining({ context: 'why is checkout slow?' })
     );
   });

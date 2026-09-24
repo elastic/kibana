@@ -33,7 +33,7 @@ export interface StoredMemoryPage {
     categories?: string[];
     references?: string[];
     slug?: string;
-    /** Leftover on pre-cut docs. New writes use `agent_id` and do not query this. */
+    /** Space is the memory isolation boundary; `agent_id` is provenance metadata. */
     space_id?: string;
     agent_id?: string;
     source?: string;

@@ -15,15 +15,42 @@ import {
   type MemoryStats,
 } from '../../common/memory';
 import { formatPageRefs, previewText } from './log_format';
-import { applyUpdates, displayTelemetry, type CounterState, type CounterUpdate } from './ranking';
+import { DECAY_LAMBDA, displayTelemetry, type CounterState, type CounterUpdate } from './ranking';
 
 const MAX_LIST_SIZE = 500;
 const MEMORY_TAG = 'memory';
-const AGENT_ID_FIELD = 'attributes.agent_id';
+const SPACE_ID_FIELD = 'attributes.space_id';
 
 export type { CounterUpdate };
 
 export type MemoryRetrieveMatch = 'context' | 'content';
+
+export interface VersionedMemoryPage {
+  page: MemoryPage;
+  seqNo: number;
+  primaryTerm: number;
+}
+
+export interface MemoryPageWrite {
+  slug: string;
+  title: string;
+  description?: string;
+  content: string;
+  context?: string;
+  tags: string[];
+  categories: string[];
+  references: string[];
+  status: StoredMemoryStatus;
+  source?: string;
+  merged_from?: string[];
+  archive_reason?: MemoryArchiveReason;
+  telemetry?: {
+    impressions: number;
+    conversions: number;
+    last_impression_time: string;
+  };
+  user: string;
+}
 
 export interface MemoryPageStore {
   list: (options?: { status?: StoredMemoryStatus }) => Promise<{
@@ -37,27 +64,11 @@ export interface MemoryPageStore {
     match?: MemoryRetrieveMatch;
   }) => Promise<MemoryPage[]>;
   get: (id: string) => Promise<MemoryPage | undefined>;
+  getVersioned: (id: string) => Promise<VersionedMemoryPage | undefined>;
   getByName: (name: string) => Promise<MemoryPage | undefined>;
-  upsert: (page: {
-    slug: string;
-    title: string;
-    description?: string;
-    content: string;
-    context?: string;
-    tags: string[];
-    categories: string[];
-    references: string[];
-    status: StoredMemoryStatus;
-    source?: string;
-    merged_from?: string[];
-    archive_reason?: MemoryArchiveReason;
-    telemetry?: {
-      impressions: number;
-      conversions: number;
-      last_impression_time: string;
-    };
-    user: string;
-  }) => Promise<MemoryPage>;
+  upsert: (page: MemoryPageWrite) => Promise<MemoryPage>;
+  create: (page: MemoryPageWrite) => Promise<MemoryPage>;
+  update: (id: string, page: MemoryPageWrite, version: VersionedMemoryPage) => Promise<MemoryPage>;
   applyCounterUpdates: (updates: readonly CounterUpdate[]) => Promise<void>;
   archive: (id: string, reason: MemoryArchiveReason) => Promise<MemoryPage | undefined>;
   delete: (id: string) => Promise<void>;
@@ -171,12 +182,14 @@ const toPage = (id: string, source: StoredMemoryPage): MemoryPage | undefined =>
 export const createMemoryPageStore = ({
   esClient,
   logger,
+  spaceId,
   agentId,
   signal,
   now = () => Date.now() / 1000,
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
+  spaceId: string;
   agentId: string;
   signal?: AbortSignal;
   now?: () => number;
@@ -188,11 +201,56 @@ export const createMemoryPageStore = ({
     return message.includes('index_not_found_exception');
   };
 
-  const idPrefix = `${agentId}:`;
+  const idPrefix = `${spaceId}:`;
   const toStoredId = (pageId: string): string => `${idPrefix}${pageId}`;
-  /** Drops leftover `default:` (and any other agent) ids. No migration. */
+  /** Drops ids from other spaces. */
   const toPageId = (storedId: string): string | undefined =>
     storedId.startsWith(idPrefix) ? storedId.slice(idPrefix.length) : undefined;
+
+  const buildDocument = (
+    page: MemoryPageWrite,
+    existing: MemoryPage | undefined
+  ): StoredMemoryPage => {
+    const nowIso = epochSecondsToIso(now());
+    return {
+      '@timestamp': nowIso,
+      type: 'memory',
+      title: page.title,
+      description: page.description,
+      content: page.content,
+      context: page.context ?? existing?.context,
+      tags: memoryTags(page.tags),
+      attributes: {
+        status: page.status,
+        slug: page.slug,
+        space_id: spaceId,
+        agent_id: agentId,
+        categories: page.categories,
+        ...(page.source !== undefined ? { source: page.source } : {}),
+        ...(page.merged_from !== undefined ? { merged_from: page.merged_from } : {}),
+        ...(page.archive_reason !== undefined ? { archive_reason: page.archive_reason } : {}),
+        references: page.references,
+        created_at: existing?.created_at ?? nowIso,
+        updated_at: nowIso,
+        created_by: existing?.created_by ?? page.user,
+        updated_by: page.user,
+        impressions: page.telemetry?.impressions ?? existing?.telemetry.impressions ?? 0.0,
+        conversions: page.telemetry?.conversions ?? existing?.telemetry.conversions ?? 0.0,
+        last_impression_time:
+          page.telemetry?.last_impression_time ??
+          existing?.telemetry.last_impression_time ??
+          nowIso,
+      },
+    };
+  };
+
+  const mapWrittenPage = (id: string, document: StoredMemoryPage): MemoryPage => {
+    const updated = toPage(id, document);
+    if (!updated) {
+      throw new Error(`Failed to map standard index response to MemoryPage for ${id}`);
+    }
+    return updated;
+  };
 
   const listAll = async (): Promise<MemoryPage[]> => {
     try {
@@ -201,7 +259,7 @@ export const createMemoryPageStore = ({
           index: MEMORY_INDEX,
           query: {
             bool: {
-              filter: [{ term: { tags: MEMORY_TAG } }, { term: { [AGENT_ID_FIELD]: agentId } }],
+              filter: [{ term: { tags: MEMORY_TAG } }, { term: { [SPACE_ID_FIELD]: spaceId } }],
             },
           },
           size: MAX_LIST_SIZE,
@@ -256,14 +314,14 @@ export const createMemoryPageStore = ({
       const trimmed = query?.trim();
       const isSearch = trimmed !== undefined && trimmed.length > 0;
       const pageSize = size ?? (isSearch ? 50 : 150);
-      const agentAndTagFilter = [
+      const spaceAndTagFilter = [
         { term: { tags: MEMORY_TAG } },
-        { term: { [AGENT_ID_FIELD]: agentId } },
+        { term: { [SPACE_ID_FIELD]: spaceId } },
       ];
       const notArchived = { term: { 'attributes.status': 'archived' } };
       logger.debug(
         `Memory retrieve start match=${match} search=${isSearch} size=${pageSize} ` +
-          `agent=${agentId} query=${JSON.stringify(previewText(trimmed))}`
+          `space=${spaceId} agent=${agentId} query=${JSON.stringify(previewText(trimmed))}`
       );
 
       const hitsToPages = (
@@ -284,7 +342,7 @@ export const createMemoryPageStore = ({
               index: MEMORY_INDEX,
               query: {
                 bool: {
-                  filter: agentAndTagFilter,
+                  filter: spaceAndTagFilter,
                   must_not: [notArchived],
                   must: [
                     {
@@ -319,7 +377,7 @@ export const createMemoryPageStore = ({
                   ],
                   filter: {
                     bool: {
-                      filter: agentAndTagFilter,
+                      filter: spaceAndTagFilter,
                       must_not: [notArchived],
                     },
                   },
@@ -344,7 +402,7 @@ export const createMemoryPageStore = ({
               index: MEMORY_INDEX,
               query: {
                 bool: {
-                  filter: agentAndTagFilter,
+                  filter: spaceAndTagFilter,
                   must_not: [notArchived],
                   must: [{ match: { context: queryText } }],
                 },
@@ -365,7 +423,7 @@ export const createMemoryPageStore = ({
               index: MEMORY_INDEX,
               query: {
                 bool: {
-                  filter: agentAndTagFilter,
+                  filter: spaceAndTagFilter,
                   must_not: [notArchived],
                 },
               },
@@ -401,8 +459,34 @@ export const createMemoryPageStore = ({
           },
           { signal }
         );
+        return response.found && response._source ? toPage(id, response._source) : undefined;
+      } catch (err) {
+        if (isIndexNotFoundError(err) || (err as { statusCode?: number }).statusCode === 404) {
+          return undefined;
+        }
+        throw err;
+      }
+    },
+
+    async getVersioned(id) {
+      const storedId = toStoredId(id);
+      try {
+        const response = await esClient.get<StoredMemoryPage>(
+          {
+            index: MEMORY_INDEX,
+            id: storedId,
+          },
+          { signal }
+        );
         if (response.found && response._source) {
-          return toPage(id, response._source);
+          const page = toPage(id, response._source);
+          if (page && response._seq_no !== undefined && response._primary_term !== undefined) {
+            return {
+              page,
+              seqNo: response._seq_no,
+              primaryTerm: response._primary_term,
+            };
+          }
         }
         return undefined;
       } catch (err) {
@@ -421,39 +505,8 @@ export const createMemoryPageStore = ({
     async upsert(page) {
       const id = toMemoryKiId(page.slug);
       const storedId = toStoredId(id);
-
       const existing = await this.get(id);
-      const nowIso = epochSecondsToIso(now());
-
-      const document: StoredMemoryPage = {
-        '@timestamp': nowIso,
-        type: 'memory',
-        title: page.title,
-        description: page.description,
-        content: page.content,
-        context: page.context ?? existing?.context,
-        tags: memoryTags(page.tags),
-        attributes: {
-          status: page.status,
-          slug: page.slug,
-          agent_id: agentId,
-          categories: page.categories,
-          ...(page.source !== undefined ? { source: page.source } : {}),
-          ...(page.merged_from !== undefined ? { merged_from: page.merged_from } : {}),
-          ...(page.archive_reason !== undefined ? { archive_reason: page.archive_reason } : {}),
-          references: page.references,
-          created_at: existing?.created_at ?? nowIso,
-          updated_at: nowIso,
-          created_by: existing?.created_by ?? page.user,
-          updated_by: page.user,
-          impressions: page.telemetry?.impressions ?? existing?.telemetry.impressions ?? 0.0,
-          conversions: page.telemetry?.conversions ?? existing?.telemetry.conversions ?? 0.0,
-          last_impression_time:
-            page.telemetry?.last_impression_time ??
-            existing?.telemetry.last_impression_time ??
-            nowIso,
-        },
-      };
+      const document = buildDocument(page, existing);
 
       await esClient.index(
         {
@@ -464,12 +517,39 @@ export const createMemoryPageStore = ({
         },
         { signal }
       );
+      return mapWrittenPage(id, document);
+    },
 
-      const updated = toPage(id, document);
-      if (!updated) {
-        throw new Error(`Failed to map standard index response to MemoryPage for ${id}`);
-      }
-      return updated;
+    async create(page) {
+      const id = toMemoryKiId(page.slug);
+      const document = buildDocument(page, undefined);
+      await esClient.index(
+        {
+          index: MEMORY_INDEX,
+          id: toStoredId(id),
+          document,
+          op_type: 'create',
+          refresh: 'wait_for',
+        },
+        { signal }
+      );
+      return mapWrittenPage(id, document);
+    },
+
+    async update(id, page, version) {
+      const document = buildDocument(page, version.page);
+      await esClient.index(
+        {
+          index: MEMORY_INDEX,
+          id: toStoredId(id),
+          document,
+          if_seq_no: version.seqNo,
+          if_primary_term: version.primaryTerm,
+          refresh: 'wait_for',
+        },
+        { signal }
+      );
+      return mapWrittenPage(id, document);
     },
 
     async applyCounterUpdates(updates) {
@@ -477,83 +557,56 @@ export const createMemoryPageStore = ({
         return;
       }
 
-      const uniqueIds = [...new Set(updates.map((update) => update.id))];
-      const storedIds = uniqueIds.map(toStoredId);
-
-      let docs: Array<{
-        _id?: string;
-        found?: boolean;
-        _source?: StoredMemoryPage;
-      }>;
-      try {
-        const response = await esClient.mget<StoredMemoryPage>(
-          {
-            index: MEMORY_INDEX,
-            ids: storedIds,
-          },
-          { signal }
-        );
-        docs = response.docs;
-      } catch (err) {
-        if (isIndexNotFoundError(err)) {
-          return;
-        }
-        throw err;
+      const deltas = new Map<string, { addImp: number; addConv: number }>();
+      for (const update of updates) {
+        const previous = deltas.get(update.id) ?? { addImp: 0, addConv: 0 };
+        deltas.set(update.id, {
+          addImp: previous.addImp + update.addImp,
+          addConv: previous.addConv + update.addConv,
+        });
       }
-
-      const sourceByPageId = new Map<string, StoredMemoryPage>();
-      for (const doc of docs) {
-        if (!doc._id || doc.found === false || !doc._source) {
-          continue;
-        }
-        const pageId = toPageId(doc._id);
-        if (!pageId) {
-          continue;
-        }
-        sourceByPageId.set(pageId, doc._source);
-      }
-
       const nowSec = now();
-      const current: Record<string, CounterState> = {};
-      const sourcesToWrite: Array<{ id: string; source: StoredMemoryPage }> = [];
-
-      for (const id of uniqueIds) {
-        const source = sourceByPageId.get(id);
-        const page = source ? toPage(id, source) : undefined;
-        if (!source || !page || page.status === 'archived') {
-          continue;
-        }
-        current[id] = toCounterState(page.telemetry);
-        sourcesToWrite.push({ id, source });
-      }
-
-      const next = applyUpdates(
-        current,
-        updates.filter((update) => current[update.id] !== undefined),
-        nowSec
-      );
-
       const operations: object[] = [];
-      for (const { id, source } of sourcesToWrite) {
-        const counter = next[id];
-        if (!counter) {
-          continue;
-        }
-        const document: StoredMemoryPage = {
-          ...source,
-          attributes: {
-            ...source.attributes,
-            impressions: counter.impressions,
-            conversions: counter.conversions,
-            last_impression_time: epochSecondsToIso(counter.lastTime),
+      for (const [id, delta] of [...deltas].sort(([left], [right]) => left.localeCompare(right))) {
+        operations.push(
+          {
+            update: {
+              _index: MEMORY_INDEX,
+              _id: toStoredId(id),
+              retry_on_conflict: 3,
+            },
           },
-        };
-        operations.push({ index: { _index: MEMORY_INDEX, _id: toStoredId(id) } }, document);
-      }
-
-      if (operations.length === 0) {
-        logger.debug('Memory counter bulk update skipped — no writable pages');
-        return;
+          {
+            script: {
+              lang: 'painless',
+              source: `
+if (ctx.op == 'create' || ctx._source.attributes == null || ctx._source.attributes.status == 'archived') {
+  ctx.op = 'noop';
+} else {
+  def attributes = ctx._source.attributes;
+  double impressions = attributes.impressions == null ? 0.0 : ((Number) attributes.impressions).doubleValue();
+  double conversions = attributes.conversions == null ? 0.0 : ((Number) attributes.conversions).doubleValue();
+  double lastTime = params.now;
+  if (attributes.last_impression_time != null) {
+    lastTime = ZonedDateTime.parse(attributes.last_impression_time).toInstant().toEpochMilli() / 1000.0;
+  }
+  double elapsed = Math.max(0.0, params.now - lastTime);
+  double decay = Math.exp(-params.decayLambda * elapsed);
+  attributes.impressions = impressions * decay + params.addImp;
+  attributes.conversions = conversions * decay + params.addConv;
+  attributes.last_impression_time = Instant.ofEpochMilli((long) (params.now * 1000.0)).toString();
+}`.trim(),
+              params: {
+                now: nowSec,
+                decayLambda: DECAY_LAMBDA,
+                addImp: delta.addImp,
+                addConv: delta.addConv,
+              },
+            },
+            scripted_upsert: true,
+            upsert: {},
+          }
+        );
       }
 
       const bulk = await esClient.bulk(
@@ -564,16 +617,9 @@ export const createMemoryPageStore = ({
         { signal }
       );
       logger.debug(
-        `Memory counter bulk update wrote ${sourcesToWrite.length} doc(s): ` +
-          sourcesToWrite
-            .map((row) => {
-              const counter = next[row.id];
-              return counter
-                ? `${row.id} imp=${counter.impressions.toFixed(
-                    3
-                  )} conv=${counter.conversions.toFixed(3)}`
-                : row.id;
-            })
+        `Memory counter bulk update attempted ${deltas.size} doc(s): ` +
+          [...deltas]
+            .map(([id, delta]) => `${id} +imp=${delta.addImp} +conv=${delta.addConv}`)
             .join(', ')
       );
       if (bulk.errors) {

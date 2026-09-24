@@ -60,10 +60,10 @@ describe('formatHydrateNotification', () => {
 describe('composeHydrateNotificationsStepDefinition', () => {
   const definition = composeHydrateNotificationsStepDefinition();
 
-  const run = (notifications: string[]) =>
+  const run = (notifications: string[], recalledIds: string[] = []) =>
     definition.handler({
-      input: { notifications },
-      rawInput: { notifications },
+      input: { notifications, recalled_ids: recalledIds },
+      rawInput: { notifications, recalled_ids: recalledIds },
       contextManager: {
         getContext: jest.fn(),
         getFakeRequest: jest.fn(),
@@ -77,10 +77,20 @@ describe('composeHydrateNotificationsStepDefinition', () => {
       stepType: 'nightshift.composeHydrateNotifications',
     } as never);
 
-  it('returns model_context only when a fragment is present', async () => {
-    await expect(run(['', ''])).resolves.toEqual({ output: {} });
-    const wrapped = await run(['Semantic memories materialized this turn:\n- `/a` — A']);
+  it('always returns round workflow context and adds model context only for notifications', async () => {
+    await expect(run(['', ''], ['memory_a'])).resolves.toEqual({
+      output: {
+        workflow_context: { semantic_memory: { recalled_ids: ['memory_a'] } },
+      },
+    });
+    const wrapped = await run(
+      ['Semantic memories materialized this turn:\n- `/a` — A'],
+      ['memory_a']
+    );
     expect(wrapped.output?.model_context).toContain('<system_update>');
     expect(wrapped.output?.model_context?.startsWith('<system_update>\n')).toBe(true);
+    expect(wrapped.output?.workflow_context).toEqual({
+      semantic_memory: { recalled_ids: ['memory_a'] },
+    });
   });
 });

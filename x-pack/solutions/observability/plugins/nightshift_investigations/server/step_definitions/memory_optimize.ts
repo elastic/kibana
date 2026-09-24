@@ -10,12 +10,10 @@ import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
-import type { SandboxPluginStart, SandboxSession } from '@kbn/sandbox-plugin/server';
 import { NIGHTSHIFT_DEDUCTIVE_INVESTIGATION_AGENT_ID } from '../agents/deductive_investigation';
 import { runMemoryOptimize } from '../memory/register_memory';
 import { teeWorkflowLogger } from '../lib/tee_workflow_logger';
 import type { NightshiftTelemetryClient } from '../telemetry';
-import { unscopeConversationId } from '../tools/sandbox_bash/tool_utils';
 import { withTimeout } from './with_timeout';
 
 const MAX_ROUND_TEXT_LENGTH = 65_536;
@@ -28,13 +26,11 @@ const OPTIMIZE_TIMEOUT_MS = 120_000;
 
 export const memoryOptimizeStepDefinition = ({
   getAgentBuilder,
-  getSandboxStart,
   logger,
   isEnabled,
   telemetry,
 }: {
   getAgentBuilder: () => AgentBuilderPluginStart | undefined;
-  getSandboxStart: () => SandboxPluginStart | undefined;
   logger: Logger;
   isEnabled?: () => boolean;
   telemetry: NightshiftTelemetryClient;
@@ -45,8 +41,7 @@ export const memoryOptimizeStepDefinition = ({
     category: StepCategory.Ai,
     description:
       'Labels recalled Semantic Memory pages from a completed investigation round and ' +
-      'extracts durable customer-environment facts into the Semantic Memory index. Reads ' +
-      '/workspace/memories/.recalled.json from the sandbox_id hydrate wrote.',
+      'extracts durable customer-environment facts into the Semantic Memory index.',
     inputSchema: z.object({
       prompt: z
         .string()
@@ -57,6 +52,11 @@ export const memoryOptimizeStepDefinition = ({
         .max(MAX_ROUND_TEXT_LENGTH)
         .describe("The assistant's final response for the round."),
       agent_id: z.string().max(1024).optional().describe('Agent id that produced the round.'),
+      recalled_ids: z
+        .array(z.string().max(2_000))
+        .max(100)
+        .optional()
+        .describe('Semantic Memory ids persisted on the completed conversation round.'),
       sandbox_id: z
         .string()
         .max(1024)
@@ -94,24 +94,7 @@ export const memoryOptimizeStepDefinition = ({
       const workflowContext = context.contextManager.getContext();
       const { spaceId } = workflowContext.workflow;
       const workflowExecutionId = workflowContext.execution.id;
-      const sandboxStart = getSandboxStart();
       const sandboxId = context.input.sandbox_id?.trim() ? context.input.sandbox_id : undefined;
-      let session: SandboxSession | undefined;
-      if (sandboxStart && sandboxId) {
-        try {
-          session = sandboxStart.getSessionForSpace(
-            spaceId,
-            unscopeConversationId(spaceId, sandboxId)
-          );
-        } catch (err) {
-          session = undefined;
-          context.logger.debug(
-            `Memory optimize could not open sandbox session for ${sandboxId}: ${
-              err instanceof Error ? err.message : String(err)
-            }`
-          );
-        }
-      }
       context.logger.info(
         `Running memory optimize for sandbox ${sandboxId ?? 'none'} (agent ${
           context.input.agent_id ?? 'unknown'
@@ -120,7 +103,7 @@ export const memoryOptimizeStepDefinition = ({
       context.logger.debug(
         `Memory optimize step connector=${context.input.connector_id ?? '(none)'} ` +
           `promptChars=${context.input.prompt.length} responseChars=${context.input.response.length} ` +
-          `hasSession=${Boolean(session)}`
+          `recalledIds=${context.input.recalled_ids?.length ?? 0}`
       );
 
       let summary: Awaited<ReturnType<typeof runMemoryOptimize>>;
@@ -132,7 +115,7 @@ export const memoryOptimizeStepDefinition = ({
               agentId: context.input.agent_id,
               userMessage: context.input.prompt,
               assistantMessage: context.input.response,
-              session,
+              recalledIds: context.input.recalled_ids ?? [],
               esClient: context.contextManager.getScopedEsClient(),
               spaceId,
               signal,
