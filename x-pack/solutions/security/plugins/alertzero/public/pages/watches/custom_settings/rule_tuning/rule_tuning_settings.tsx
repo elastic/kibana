@@ -18,7 +18,7 @@ import {
   RuleTuningWorkerExtras,
   type WorkerSettings,
 } from '@kbn/alertzero-common';
-import { BoundedNumberField } from './bounded_number_field';
+import { BoundedNumberField } from '../bounded_number_field';
 import * as i18n from './translations';
 import type { WorkerCustomSettingsComponent } from '../types';
 

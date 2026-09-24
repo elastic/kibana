@@ -717,14 +717,17 @@ describe('WatchDetailPage', () => {
     });
   });
 
-  it('enables Save while the analysis window is being typed and saves the latest value', async () => {
+  it('enables Save once the analysis window is committed on blur and saves that value', async () => {
     const { mutateAsync } = renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, detectionWorkers);
     const field = screen.getByTestId('alertZeroAnalysisWindowDays');
     const save = screen.getByTestId('alertZeroWatchSettingsSave');
 
+    // Keystrokes stay local: "2" on the way to "21" must not reach the draft.
     fireEvent.change(field, { target: { value: '2' } });
-    expect(save).toBeEnabled();
+    expect(save).toBeDisabled();
     fireEvent.change(field, { target: { value: '21' } });
+    expect(save).toBeDisabled();
+    fireEvent.blur(field);
     expect(save).toBeEnabled();
     expect(mutateAsync).not.toHaveBeenCalled();
 
@@ -775,6 +778,7 @@ describe('WatchDetailPage', () => {
     );
 
     fireEvent.change(window, { target: { value: '7' } });
+    fireEvent.blur(window);
     fireEvent.change(interval, { target: { value: '6' } });
     expect(screen.getByTestId('alertZeroWatchSettingsDiscard')).toBeEnabled();
 
@@ -801,6 +805,7 @@ describe('WatchDetailPage', () => {
 
     // A valid edit elsewhere makes the page dirty, so Save would otherwise be live.
     fireEvent.change(window, { target: { value: '7' } });
+    fireEvent.blur(window);
     expect(save).toBeEnabled();
 
     fireEvent.change(interval, { target: { value: '1.9' } });

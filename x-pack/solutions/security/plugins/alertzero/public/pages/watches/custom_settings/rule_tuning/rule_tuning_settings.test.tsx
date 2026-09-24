@@ -87,12 +87,15 @@ describe('RuleTuningSettings', () => {
   });
 
   it.each(FIELDS)(
-    'hands back the complete extras object as soon as a valid $name is typed',
+    'hands back the complete extras object when a valid $name is committed on blur',
     ({ testSubj, valid, key }) => {
       const onExtrasChange = jest.fn();
       renderSettings(onExtrasChange);
+      const field = screen.getByTestId(testSubj);
 
-      fireEvent.change(screen.getByTestId(testSubj), { target: { value: String(valid) } });
+      fireEvent.change(field, { target: { value: String(valid) } });
+      expect(onExtrasChange).not.toHaveBeenCalled();
+      fireEvent.blur(field);
 
       expect(onExtrasChange).toHaveBeenCalledTimes(1);
       expect(onExtrasChange).toHaveBeenCalledWith({ ...SAVED_EXTRAS, [key]: valid });

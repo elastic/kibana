@@ -32,9 +32,11 @@ const parseBoundedNumber = (text: string, min: number, max: number): number | un
 /**
  * Whole-number setting within fixed bounds, for the Watch page's Save/Discard draft.
  *
- * Typing "1" on the way to "12" would otherwise publish 1, so incomplete and out-of-range input
- * is held locally and only a valid value reaches the draft. Blur discards whatever never became
- * valid, and a change to `value` re-syncs the input, which is how Discard restores it.
+ * The edit is buffered for the whole focus session and published once, on blur or Enter, and
+ * only if it is valid. Publishing per keystroke would leak valid prefixes: typing "31" over a
+ * saved 21 would publish 3, and the later revert would land on 3 instead of 21. An invalid or
+ * incomplete final value is discarded and the input snaps back to `value`; a change to `value`
+ * re-syncs the input, which is how Discard restores it.
  */
 export const BoundedNumberField: React.FC<BoundedNumberFieldProps> = ({
   value,
@@ -53,18 +55,20 @@ export const BoundedNumberField: React.FC<BoundedNumberFieldProps> = ({
     setDraft(String(value));
   }, [value]);
 
-  const onDraftChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const text = event.target.value;
-    setDraft(text);
-    const parsed = parseBoundedNumber(text, min, max);
-    if (parsed !== undefined && parsed !== value) {
+  const commitDraft = () => {
+    const parsed = parseBoundedNumber(draft, min, max);
+    if (parsed === undefined) {
+      setDraft(String(value));
+      return;
+    }
+    if (parsed !== value) {
       onChange(parsed);
     }
   };
 
-  const revertInvalidDraft = () => {
-    if (parseBoundedNumber(draft, min, max) === undefined) {
-      setDraft(String(value));
+  const onKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
+      commitDraft();
     }
   };
 
@@ -77,8 +81,9 @@ export const BoundedNumberField: React.FC<BoundedNumberFieldProps> = ({
         step={1}
         value={draft}
         disabled={isDisabled}
-        onChange={onDraftChange}
-        onBlur={revertInvalidDraft}
+        onChange={(event) => setDraft(event.target.value)}
+        onBlur={commitDraft}
+        onKeyDown={onKeyDown}
         aria-label={ariaLabel}
         data-test-subj={testSubj}
       />
