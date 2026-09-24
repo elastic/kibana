@@ -14,7 +14,7 @@ import type {
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import pRetry from 'p-retry';
 import { getPrivateLocations } from '../synthetics_service/get_private_locations';
-import { isAgentShardingLicensed } from '../synthetics_service/private_location/agent_sharding_license';
+import { getAgentShardingLicenseStatus } from '../synthetics_service/private_location/agent_sharding_license';
 import { getAgentInfo } from '../synthetics_service/private_location/get_agent_info';
 import { getRecentlyActiveAgentIds } from '../synthetics_service/private_location/get_active_agent_ids';
 import {
@@ -108,7 +108,14 @@ export class RebalancePrivateLocationShardsTask {
     try {
       signal.throwIfAborted();
       const isSwitchOn = isRebalancePrivateLocationShardsEnabled(taskInstance);
-      if (!isSwitchOn || !(await isAgentShardingLicensed(this.serverSetup))) {
+      const licenseStatus = isSwitchOn
+        ? await getAgentShardingLicenseStatus(this.serverSetup)
+        : 'unlicensed';
+      if (licenseStatus === 'unknown') {
+        this.debugLog('license unavailable; leaving agent pins as they are this cycle');
+        return { state: await this.returnedState(taskInstance), schedule };
+      }
+      if (licenseStatus === 'unlicensed') {
         return {
           state: await this.runDisabledDrain(taskInstance, isSwitchOn),
           schedule,

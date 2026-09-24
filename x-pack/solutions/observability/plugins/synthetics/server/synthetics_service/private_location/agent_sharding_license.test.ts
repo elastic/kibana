@@ -8,27 +8,39 @@
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { SyntheticsServerSetup } from '../../types';
-import { isAgentShardingActive, isAgentShardingLicensed } from './agent_sharding_license';
+import {
+  getAgentShardingLicenseStatus,
+  getAgentShardingMode,
+  isAgentShardingActive,
+} from './agent_sharding_license';
 
-const buildServer = (getLicense: jest.Mock) =>
+type LicenseType = 'basic' | 'platinum' | 'enterprise' | 'trial';
+
+const buildServer = (
+  getLicense: jest.Mock,
+  taskManagerGet: jest.Mock = jest.fn().mockResolvedValue({ state: {} })
+) =>
   ({
     logger: loggerMock.create(),
-    pluginsStart: { licensing: { getLicense } },
+    pluginsStart: { licensing: { getLicense }, taskManager: { get: taskManagerGet } },
   } as unknown as SyntheticsServerSetup);
 
-const withLicense = (type: 'basic' | 'platinum' | 'enterprise' | 'trial') =>
-  buildServer(jest.fn().mockResolvedValue(licenseMock.createLicense({ license: { type } })));
+const licenseOf = (type: LicenseType) =>
+  jest.fn().mockResolvedValue(licenseMock.createLicense({ license: { type } }));
 
-describe('isAgentShardingLicensed', () => {
-  it.each(['enterprise', 'trial'] as const)('is enabled with a %s license', async (type) => {
-    expect(await isAgentShardingLicensed(withLicense(type))).toBe(true);
+const switchOff = () =>
+  jest.fn().mockResolvedValue({ state: { rebalancePrivateLocationShardsEnabled: false } });
+
+describe('getAgentShardingLicenseStatus', () => {
+  it.each(['enterprise', 'trial'] as const)('is licensed with a %s license', async (type) => {
+    expect(await getAgentShardingLicenseStatus(buildServer(licenseOf(type)))).toBe('licensed');
   });
 
-  it.each(['basic', 'platinum'] as const)('is disabled with a %s license', async (type) => {
-    expect(await isAgentShardingLicensed(withLicense(type))).toBe(false);
+  it.each(['basic', 'platinum'] as const)('is unlicensed with a %s license', async (type) => {
+    expect(await getAgentShardingLicenseStatus(buildServer(licenseOf(type)))).toBe('unlicensed');
   });
 
-  it('is disabled when the license is expired', async () => {
+  it('is unlicensed when the license is expired', async () => {
     const server = buildServer(
       jest
         .fn()
@@ -36,49 +48,51 @@ describe('isAgentShardingLicensed', () => {
           licenseMock.createLicense({ license: { type: 'enterprise', status: 'expired' } })
         )
     );
-    expect(await isAgentShardingLicensed(server)).toBe(false);
+    expect(await getAgentShardingLicenseStatus(server)).toBe('unlicensed');
   });
 
-  it('is disabled when the license cannot be read', async () => {
+  it('is unknown when the license is unavailable', async () => {
+    const server = buildServer(
+      jest.fn().mockResolvedValue({ isAvailable: false, isActive: false, hasAtLeast: () => false })
+    );
+    expect(await getAgentShardingLicenseStatus(server)).toBe('unknown');
+  });
+
+  it('is unknown when the license cannot be read', async () => {
     const server = buildServer(jest.fn().mockRejectedValue(new Error('boom')));
-    expect(await isAgentShardingLicensed(server)).toBe(false);
+    expect(await getAgentShardingLicenseStatus(server)).toBe('unknown');
     expect(server.logger.error).toHaveBeenCalled();
   });
 });
 
-describe('isAgentShardingActive', () => {
-  const buildActiveServer = (
-    type: 'basic' | 'enterprise',
-    taskManagerGet: jest.Mock = jest.fn().mockResolvedValue({ state: {} })
-  ) =>
-    ({
-      logger: loggerMock.create(),
-      pluginsStart: {
-        licensing: {
-          getLicense: jest.fn().mockResolvedValue(licenseMock.createLicense({ license: { type } })),
-        },
-        taskManager: { get: taskManagerGet },
-      },
-    } as unknown as SyntheticsServerSetup);
-
+describe('getAgentShardingMode', () => {
   it('is active with an Enterprise license and rebalancing on', async () => {
-    expect(await isAgentShardingActive(buildActiveServer('enterprise'))).toBe(true);
+    expect(await getAgentShardingMode(buildServer(licenseOf('enterprise')))).toBe('active');
+    expect(await isAgentShardingActive(buildServer(licenseOf('enterprise')))).toBe(true);
   });
 
   it('is inactive when shard rebalancing is turned off', async () => {
-    const server = buildActiveServer(
-      'enterprise',
-      jest.fn().mockResolvedValue({ state: { rebalancePrivateLocationShardsEnabled: false } })
-    );
-    expect(await isAgentShardingActive(server)).toBe(false);
+    const server = buildServer(licenseOf('enterprise'), switchOff());
+    expect(await getAgentShardingMode(server)).toBe('inactive');
   });
 
   it('is inactive without an Enterprise license', async () => {
-    expect(await isAgentShardingActive(buildActiveServer('basic'))).toBe(false);
+    expect(await getAgentShardingMode(buildServer(licenseOf('basic')))).toBe('inactive');
+  });
+
+  it('is unknown when the license cannot be read and rebalancing is on', async () => {
+    const server = buildServer(jest.fn().mockRejectedValue(new Error('boom')));
+    expect(await getAgentShardingMode(server)).toBe('unknown');
+    expect(await isAgentShardingActive(server)).toBe(false);
+  });
+
+  it('is inactive when rebalancing is off, even if the license cannot be read', async () => {
+    const server = buildServer(jest.fn().mockRejectedValue(new Error('boom')), switchOff());
+    expect(await getAgentShardingMode(server)).toBe('inactive');
   });
 
   it('treats an unreadable kill-switch as on', async () => {
-    const server = buildActiveServer('enterprise', jest.fn().mockRejectedValue(new Error('boom')));
-    expect(await isAgentShardingActive(server)).toBe(true);
+    const server = buildServer(licenseOf('enterprise'), jest.fn().mockRejectedValue(new Error()));
+    expect(await getAgentShardingMode(server)).toBe('active');
   });
 });

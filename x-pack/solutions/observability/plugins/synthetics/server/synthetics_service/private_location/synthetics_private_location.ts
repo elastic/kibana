@@ -47,7 +47,7 @@ import {
 } from './rebalance_writes';
 import { getPrivateLocations } from '../get_private_locations';
 import { agentIdFromCondition, assignAgentById, isEqlSafeLiteral } from './assign_by_condition';
-import { isAgentShardingActive } from './agent_sharding_license';
+import { getAgentShardingMode, type AgentShardingMode } from './agent_sharding_license';
 
 export interface PrivateConfig {
   config: HeartbeatConfig;
@@ -214,7 +214,7 @@ export class SyntheticsPrivateLocation {
     runOnce?: boolean,
     conditionHosts?: EnrolledAgents,
     existingCondition?: string | null,
-    assignAgentConditions: boolean = false
+    shardingMode: AgentShardingMode = 'inactive'
   ): Promise<NewPackagePolicy | null> {
     const { label: locName } = privateLocation;
 
@@ -224,7 +224,7 @@ export class SyntheticsPrivateLocation {
       newPolicy.is_managed = true;
       newPolicy.policy_id = privateLocation.agentPolicyId;
       newPolicy.policy_ids = [privateLocation.agentPolicyId];
-      if (assignAgentConditions) {
+      if (shardingMode === 'active') {
         const agentIds = conditionHosts?.agentIds ?? [];
         const existingAgentId = agentIdFromCondition(existingCondition);
 
@@ -239,6 +239,11 @@ export class SyntheticsPrivateLocation {
           }
         }
         // No agents: omit condition. Rebalance pins a real agent once someone enrolls.
+      } else if (shardingMode === 'unknown') {
+        // License unreadable: keep whatever pin exists until it can be read again.
+        if (existingCondition) {
+          newPolicy.condition = existingCondition;
+        }
       } else if (existingCondition) {
         // No Enterprise license, or shard rebalancing paused: drop any leftover pin.
         newPolicy.condition = null;
@@ -326,10 +331,6 @@ export class SyntheticsPrivateLocation {
     return { agentIds: [...agentIds] };
   }
 
-  private async shouldAssignAgentConditions(): Promise<boolean> {
-    return isAgentShardingActive(this.server);
-  }
-
   /** Resolves each touched location at most once per monitor batch. */
   private async getEnrolledAgentsByLocation(
     locations: Array<{ id: string; agentPolicyId: string }>
@@ -377,10 +378,11 @@ export class SyntheticsPrivateLocation {
       configs,
       privateLocations
     );
-    const assignAgentConditions = await this.shouldAssignAgentConditions();
-    const enrolledAgentsByLocation = assignAgentConditions
-      ? await this.getEnrolledAgentsByLocation(referencedPrivateLocations)
-      : new Map<string, EnrolledAgents>();
+    const shardingMode = await getAgentShardingMode(this.server);
+    const enrolledAgentsByLocation =
+      shardingMode === 'active'
+        ? await this.getEnrolledAgentsByLocation(referencedPrivateLocations)
+        : new Map<string, EnrolledAgents>();
 
     for (const { config, globalParams } of configs) {
       try {
@@ -406,7 +408,7 @@ export class SyntheticsPrivateLocation {
             runOnce,
             enrolledAgentsByLocation.get(location.id),
             undefined,
-            assignAgentConditions
+            shardingMode
           );
 
           if (!newPolicy) {
@@ -476,10 +478,11 @@ export class SyntheticsPrivateLocation {
       const privateLocation = locations.find((loc) => !loc.isServiceManaged);
 
       const location = allPrivateLocations?.find((loc) => loc.id === privateLocation?.id)!;
-      const assignAgentConditions = await this.shouldAssignAgentConditions();
-      const conditionHosts = assignAgentConditions
-        ? await this.getEnrolledAgents(location.agentPolicyId)
-        : undefined;
+      const shardingMode = await getAgentShardingMode(this.server);
+      const conditionHosts =
+        shardingMode === 'active'
+          ? await this.getEnrolledAgents(location.agentPolicyId)
+          : undefined;
 
       const newPolicy = await this.generateNewPolicy(
         config,
@@ -492,7 +495,7 @@ export class SyntheticsPrivateLocation {
         undefined,
         conditionHosts,
         undefined,
-        assignAgentConditions
+        shardingMode
       );
 
       const pkgPolicy = {
@@ -538,10 +541,11 @@ export class SyntheticsPrivateLocation {
       configs,
       allPrivateLocations
     );
-    const assignAgentConditions = await this.shouldAssignAgentConditions();
-    const enrolledAgentsByLocation = assignAgentConditions
-      ? await this.getEnrolledAgentsByLocation(referencedPrivateLocations)
-      : new Map<string, EnrolledAgents>();
+    const shardingMode = await getAgentShardingMode(this.server);
+    const enrolledAgentsByLocation =
+      shardingMode === 'active'
+        ? await this.getEnrolledAgentsByLocation(referencedPrivateLocations)
+        : new Map<string, EnrolledAgents>();
     const existingPolicyById = new Map(existingPolicies.map((policy) => [policy.id, policy]));
 
     for (const { config, globalParams } of configs) {
@@ -581,7 +585,7 @@ export class SyntheticsPrivateLocation {
               undefined,
               enrolledAgentsByLocation.get(privateLocation.id),
               existingCondition,
-              assignAgentConditions
+              shardingMode
             );
 
             if (!newPolicy) {

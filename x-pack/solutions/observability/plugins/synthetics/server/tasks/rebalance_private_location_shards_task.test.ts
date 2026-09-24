@@ -292,6 +292,29 @@ describe('RebalancePrivateLocationShardsTask', () => {
       );
     });
 
+    it.each([
+      ['cannot be read', () => mockGetLicense.mockRejectedValue(new Error('es unavailable'))],
+      [
+        'is unavailable',
+        () =>
+          mockGetLicense.mockResolvedValue({
+            isAvailable: false,
+            isActive: false,
+            hasAtLeast: () => false,
+          }),
+      ],
+    ])('leaves pins untouched for the cycle when the license %s', async (_label, arrange) => {
+      arrange();
+      const getPrivateLocationsSpy = jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations');
+
+      const result = await run({ keep: 1, [REBALANCE_SHARDS_ENABLED_STATE_KEY]: true });
+
+      expect(mockClearShardConditions).not.toHaveBeenCalled();
+      expect(getPrivateLocationsSpy).not.toHaveBeenCalled();
+      expect(mockRebalanceShards).not.toHaveBeenCalled();
+      expect(result.state).toEqual({ keep: 1, [REBALANCE_SHARDS_ENABLED_STATE_KEY]: true });
+    });
+
     it('does not drain again on later unlicensed cycles once pins are cleared', async () => {
       mockGetLicense.mockResolvedValue(licenseMock.createLicense({ license: { type: 'basic' } }));
 

@@ -504,7 +504,7 @@ describe('SyntheticsPrivateLocation', () => {
         undefined,
         { agentIds },
         undefined,
-        true
+        'active'
       );
 
       expect(policy?.policy_id).toBe('single-agent-policy');
@@ -530,7 +530,7 @@ describe('SyntheticsPrivateLocation', () => {
         undefined,
         { agentIds },
         existingCondition,
-        true
+        'active'
       );
 
       expect(policy?.condition).toBe(existingCondition);
@@ -551,10 +551,75 @@ describe('SyntheticsPrivateLocation', () => {
         undefined,
         { agentIds },
         agentIdCondition('departed-agent'),
-        true
+        'active'
       );
 
       expect(policy?.condition).toBe(assignAgentById(testConfig.id, agentIds)?.condition);
+    });
+
+    it.each([
+      ['keeps', agentIdCondition('agent-b'), agentIdCondition('agent-b')],
+      ['does not add', undefined, undefined],
+    ])('%s a pin while the license cannot be read', async (_label, existingCondition, expected) => {
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
+
+      const policy = await syntheticsPrivateLocation.generateNewPolicy(
+        testConfig,
+        conditionLocation,
+        testMonitorPolicy,
+        'default',
+        {},
+        [],
+        undefined,
+        undefined,
+        undefined,
+        existingCondition,
+        'unknown'
+      );
+
+      expect(policy?.condition).toBe(expected);
+    });
+
+    it('keeps existing pins on edit without listing agents while the license cannot be read', async () => {
+      const policyId = `testId-${conditionLocation.id}`;
+      const existingCondition = agentIdCondition('agent-a');
+      const listAgents = jest.fn();
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
+        ...serverMock,
+        fleet: {
+          ...serverMock.fleet,
+          agentService: { asInternalUser: { listAgents } },
+          packagePolicyService: {
+            ...serverMock.fleet.packagePolicyService,
+            buildPackagePolicyFromPackage: jest.fn().mockResolvedValue(testMonitorPolicy),
+          },
+        },
+        pluginsStart: {
+          licensing: { getLicense: jest.fn().mockRejectedValue(new Error('es unavailable')) },
+        },
+      } as unknown as SyntheticsServerSetup);
+      jest.spyOn(syntheticsPrivateLocation, 'getExistingPolicies').mockResolvedValue({
+        policies: [{ id: policyId, condition: existingCondition }],
+        allSpaces: new Set(['default']),
+      });
+      const bulkUpdate = jest
+        .spyOn(PackagePolicyService.prototype, 'bulkUpdate')
+        .mockResolvedValue([]);
+      jest.spyOn(PackagePolicyService.prototype, 'bulkCreate').mockResolvedValue({
+        created: [],
+        failed: [],
+      });
+      jest.spyOn(PackagePolicyService.prototype, 'bulkDelete').mockResolvedValue(undefined);
+
+      await syntheticsPrivateLocation.editMonitors(
+        [{ config: { ...testConfig, locations: [conditionLocation] }, globalParams: {} }],
+        [conditionLocation],
+        'default',
+        []
+      );
+
+      expect(bulkUpdate.mock.calls[0][0].policiesToUpdate[0].condition).toBe(existingCondition);
+      expect(listAgents).not.toHaveBeenCalled();
     });
 
     it('omits condition when no agent is enrolled instead of stamping a sentinel pin', async () => {
@@ -589,7 +654,7 @@ describe('SyntheticsPrivateLocation', () => {
         undefined,
         { agentIds: ['agent-a', 'agent-b'] },
         undefined,
-        false
+        'inactive'
       );
 
       expect(policy?.condition).toBeUndefined();
@@ -610,7 +675,7 @@ describe('SyntheticsPrivateLocation', () => {
         undefined,
         { agentIds: ['agent-a', 'agent-b'] },
         existingCondition,
-        false
+        'inactive'
       );
 
       expect(policy?.condition).toBeNull();
