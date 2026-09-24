@@ -14,6 +14,7 @@ import {
   EuiSpacer,
   EuiText,
   useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import {
   ANALYSIS_WINDOW_DAYS_MAX,
@@ -52,6 +53,7 @@ export const RuleTuningSettings: WorkerCustomSettingsComponent = ({
   onExtrasChange,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const thresholdsHelpId = useGeneratedHtmlId({ prefix: 'alertZeroQualifyingThresholdsHelp' });
   const extras = readRuleTuningExtras(settings);
   const fieldWidth = css`
     width: ${NUMBER_FIELD_WIDTH_PX}px;
@@ -89,6 +91,7 @@ export const RuleTuningSettings: WorkerCustomSettingsComponent = ({
                 min={FP_COUNT_THRESHOLD_MIN}
                 max={FP_COUNT_THRESHOLD_MAX}
                 ariaLabel={i18n.FP_COUNT_THRESHOLD_ARIA_LABEL}
+                ariaDescribedBy={thresholdsHelpId}
                 testSubj="alertZeroFpCountThreshold"
                 isDisabled={isDisabled}
                 onChange={(fpCountThreshold) => onExtrasChange({ ...extras, fpCountThreshold })}
@@ -116,6 +119,7 @@ export const RuleTuningSettings: WorkerCustomSettingsComponent = ({
                 min={FP_RATE_THRESHOLD_PCT_MIN}
                 max={FP_RATE_THRESHOLD_PCT_MAX}
                 ariaLabel={i18n.FP_RATE_THRESHOLD_PCT_ARIA_LABEL}
+                ariaDescribedBy={thresholdsHelpId}
                 testSubj="alertZeroFpRateThresholdPct"
                 append="%"
                 isDisabled={isDisabled}
@@ -125,7 +129,12 @@ export const RuleTuningSettings: WorkerCustomSettingsComponent = ({
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="xs" />
-        <EuiText size="xs" color="subdued">
+        <EuiText
+          id={thresholdsHelpId}
+          size="xs"
+          color="subdued"
+          data-test-subj="alertZeroQualifyingThresholdsHelp"
+        >
           {i18n.QUALIFYING_THRESHOLDS_FIELDS_HELP}
         </EuiText>
       </SettingRow>

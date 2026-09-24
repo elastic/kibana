@@ -14,6 +14,8 @@ interface BoundedNumberFieldProps {
   min: number;
   max: number;
   ariaLabel: string;
+  /** Id of help text the input should announce, beyond what its SettingRow group already does. */
+  ariaDescribedBy?: string;
   testSubj: string;
   /** Unit shown inside the control, e.g. `%`. */
   append?: string;
@@ -45,6 +47,7 @@ export const BoundedNumberField: React.FC<BoundedNumberFieldProps> = ({
   min,
   max,
   ariaLabel,
+  ariaDescribedBy,
   testSubj,
   append,
   id,
@@ -88,6 +91,7 @@ export const BoundedNumberField: React.FC<BoundedNumberFieldProps> = ({
       onBlur={commitDraft}
       onKeyDown={onKeyDown}
       aria-label={ariaLabel}
+      aria-describedby={ariaDescribedBy}
       data-test-subj={testSubj}
     />
   );

@@ -6,7 +6,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ANALYSIS_WINDOW_DAYS_MAX, ANALYSIS_WINDOW_DAYS_MIN } from '@kbn/alertzero-common';
+import {
+  ANALYSIS_WINDOW_DAYS_MAX,
+  ANALYSIS_WINDOW_DAYS_MIN,
+  FP_COUNT_THRESHOLD_MAX,
+  FP_COUNT_THRESHOLD_MIN,
+  FP_RATE_THRESHOLD_PCT_MAX,
+  FP_RATE_THRESHOLD_PCT_MIN,
+} from '@kbn/alertzero-common';
 
 /** Copy for the Rule Tuning settings controls, owned by the Detection Watch team. */
 
@@ -42,10 +49,19 @@ export const QUALIFYING_THRESHOLDS_HELP = i18n.translate(
   }
 );
 
-/** Shared help line under both threshold inputs. */
+/** Shared help line under both threshold inputs; names the ranges an edit has to stay inside. */
 export const QUALIFYING_THRESHOLDS_FIELDS_HELP = i18n.translate(
   'xpack.alertzero.watches.settings.qualifyingThresholds.fieldsHelp',
-  { defaultMessage: 'Alerts closed as false positives within the analysis window.' }
+  {
+    defaultMessage:
+      'Alerts closed as false positives within the analysis window. Count between {countMin} and {countMax}, rate between {rateMin} and {rateMax}%.',
+    values: {
+      countMin: FP_COUNT_THRESHOLD_MIN,
+      countMax: FP_COUNT_THRESHOLD_MAX,
+      rateMin: FP_RATE_THRESHOLD_PCT_MIN,
+      rateMax: FP_RATE_THRESHOLD_PCT_MAX,
+    },
+  }
 );
 
 /** Conjunction rendered between the two threshold inputs. */

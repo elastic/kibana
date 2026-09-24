@@ -124,13 +124,8 @@ describe('detection rule workflows', () => {
     // The sweep's own consts are fallbacks for a manual run, so a saved setting only
     // takes effect if the wrapper renders it into the dispatch inputs.
     it('forwards the saved analysis window and both FP thresholds to the sweep', () => {
-      const rendered = parse(
-        renderRuleTuningWorker({
-          analysisWindowDays: 21,
-          fpCountThreshold: 4,
-          fpRateThresholdPct: 80,
-        })
-      ) as WorkflowYaml;
+      const saved = { analysisWindowDays: 21, fpCountThreshold: 4, fpRateThresholdPct: 80 };
+      const rendered = parse(renderRuleTuningWorker(saved)) as WorkflowYaml;
       const [dispatch] = flattenSteps(rendered.steps as unknown as NestedStep[]);
 
       // consts.worker_settings is the single place the saved values are rendered into...
@@ -138,16 +133,32 @@ describe('detection rule workflows', () => {
         settingsVersion: 1,
         autonomy: 'assisted',
         scheduleInterval: '6h',
-        extras: { analysisWindowDays: 21, fpCountThreshold: 4, fpRateThresholdPct: 80 },
+        extras: saved,
       });
-      // ...and each sweep input resolves from there, so a saved value cannot reach one and
-      // not the other.
-      expect(dispatch.with?.inputs).toEqual({
-        autonomy_level: '{{ consts.worker_settings.autonomy }}',
-        analysis_window_days: '${{ consts.worker_settings.extras.analysisWindowDays }}',
-        min_fp_count: '${{ consts.worker_settings.extras.fpCountThreshold }}',
-        min_fp_rate_pct: '${{ consts.worker_settings.extras.fpRateThresholdPct }}',
-      });
+
+      // ...and every sweep input is an expression over it. Evaluating them the way the engine
+      // does catches a mistyped consts path or a `{{ }}` that would stringify a number, which
+      // matching the literal expression text would let through.
+      const engine = createWorkflowLiquidEngine();
+      const resolve = (expression: unknown) =>
+        engine.evalValueSync(
+          String(expression)
+            .trim()
+            .replace(/^\$?\{\{/, '')
+            .replace(/\}\}$/, '')
+            .trim(),
+          { consts: rendered.consts }
+        );
+      const inputs = dispatch.with?.inputs as Record<string, unknown>;
+
+      expect(resolve(inputs.autonomy_level)).toBe('assisted');
+      expect(resolve(inputs.analysis_window_days)).toBe(21);
+      expect(resolve(inputs.min_fp_count)).toBe(4);
+      expect(resolve(inputs.min_fp_rate_pct)).toBe(80);
+      // `${{ }}` keeps the number type the sweep's integer inputs require; `{{ }}` would not.
+      for (const key of ['analysis_window_days', 'min_fp_count', 'min_fp_rate_pct']) {
+        expect(inputs[key]).toMatch(/^\$\{\{/);
+      }
     });
   });
 
