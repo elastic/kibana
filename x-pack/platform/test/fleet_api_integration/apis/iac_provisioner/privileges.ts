@@ -64,7 +64,7 @@ export default function (providerContext: FtrProviderContext) {
       scenarios: READ_SCENARIOS,
       send: {
         provider: 'aws',
-        workflow: 'federated_identity',
+        workflow: 'workload_identity_federation',
         flow: 'cloud_connector',
         integrations: TEST_PACKAGE_INTEGRATION_SET,
       },

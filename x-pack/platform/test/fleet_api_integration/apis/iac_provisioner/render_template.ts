@@ -39,7 +39,7 @@ export default function (providerContext: FtrProviderContext) {
 
   const VALID_RENDER_BODY = {
     provider: 'aws',
-    workflow: 'federated_identity',
+    workflow: 'workload_identity_federation',
     flow: 'cloud_connector',
     integrations: TEST_PACKAGE_INTEGRATION_SET,
   };
@@ -88,7 +88,7 @@ export default function (providerContext: FtrProviderContext) {
       // no templateSha on a first render.
       expect(requests[0].body).to.eql({
         provider: 'aws',
-        workflow: 'federated_identity',
+        workflow: 'workload_identity_federation',
         integrations: TEST_PACKAGE_PROVISIONER_INTEGRATIONS,
       });
     });

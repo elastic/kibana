@@ -184,7 +184,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(requests[0].url).to.be(IAC_PROVISIONER_RENDER_PATH);
         expect(requests[0].body).to.eql({
           provider: 'aws',
-          workflow: 'federated_identity',
+          workflow: 'workload_identity_federation',
           integrations: TEST_PACKAGE_PROVISIONER_INTEGRATIONS,
           templateSha: STORED_IAC_KEY,
         });
