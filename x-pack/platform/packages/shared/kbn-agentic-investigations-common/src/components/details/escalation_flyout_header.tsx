@@ -15,25 +15,33 @@ import {
   EuiTextTruncate,
   EuiTitle,
 } from '@elastic/eui';
-import type { Investigation } from '../../types';
-import { InvestigationHeaderBlocks } from './header_blocks';
+import { ConversationHeaderBlocks } from './header_blocks';
 
-export interface ConversationDetailsFlyoutHeaderProps {
-  investigation: Investigation;
+export interface EscalationFlyoutHeaderProps {
+  title: string;
+  createdAt: string;
   /** Optional pre-rendered interactive assignee picker from the consuming plugin. */
   assigneesNode?: React.ReactNode;
+  /** Status string parsed from `conversation.metadata.status`. */
+  status?: string;
+  /** Assignee uid list parsed from `conversation.metadata.assignees`. */
+  assigneeUids?: string[];
 }
 
 /**
- * Header slot content. Agent Builder renders this inside its own `EuiFlyoutHeader` and points the
- * flyout's `aria-labelledby` at it, so the title text has to live here.
+ * Header slot for the escalation details flyout.
+ *
+ * Accepts pre-parsed `status` and `assigneeUids` rather than re-reading the raw conversation
+ * metadata. The slot (`EscalationHeaderSlot`) calls `conversationToEscalationHeader` once and
+ * passes the derived values here, so the parsing logic lives in one place.
  */
-export const ConversationDetailsFlyoutHeader = ({
-  investigation,
+export const EscalationFlyoutHeader = ({
+  title,
+  createdAt,
   assigneesNode,
-}: ConversationDetailsFlyoutHeaderProps) => {
-  const { title, createdAt } = investigation;
-
+  status,
+  assigneeUids = [],
+}: EscalationFlyoutHeaderProps) => {
   return (
     <>
       <EuiFlexGroup direction="column" gutterSize="xs">
@@ -47,7 +55,7 @@ export const ConversationDetailsFlyoutHeader = ({
         <EuiFlexItem>
           <EuiText size="xs" color="subdued">
             <FormattedMessage
-              id="xpack.alertzero.detailsFlyout.header.since"
+              id="xpack.alertzero.escalationFlyout.header.since"
               defaultMessage="Since {time} ({relative})"
               values={{
                 time: <FormattedTime value={createdAt} />,
@@ -58,7 +66,12 @@ export const ConversationDetailsFlyoutHeader = ({
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <InvestigationHeaderBlocks investigation={investigation} assigneesNode={assigneesNode} />
+      <ConversationHeaderBlocks
+        status={status}
+        assigneesNode={assigneesNode}
+        assigneeUids={assigneeUids}
+        data-test-subj="escalationHeaderBlocks"
+      />
     </>
   );
 };
