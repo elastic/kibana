@@ -540,11 +540,35 @@ export const createDatasetWizardStrings = {
     }
   ),
 
+  settingsDelimiterPlaceholder: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsDelimiterPlaceholder',
+    {
+      defaultMessage: 'Select or enter a delimiter',
+    }
+  ),
+
   settingsDelimiterInvalid: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsDelimiterInvalid',
     {
       defaultMessage: 'Must be a single character.',
     }
+  ),
+
+  settingsDelimiterOptionComma: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsDelimiterOptionComma',
+    { defaultMessage: 'Comma (,)' }
+  ),
+  settingsDelimiterOptionTab: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsDelimiterOptionTab',
+    { defaultMessage: 'Tab (\\t)' }
+  ),
+  settingsDelimiterOptionSemicolon: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsDelimiterOptionSemicolon',
+    { defaultMessage: 'Semicolon (;)' }
+  ),
+  settingsDelimiterOptionPipe: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsDelimiterOptionPipe',
+    { defaultMessage: 'Pipe (|)' }
   ),
 
   settingsModeLabel: i18n.translate('xpack.dataFederation.createDatasetForm.settingsModeLabel', {
@@ -646,14 +670,15 @@ export const createDatasetWizardStrings = {
   settingsEncodingHelp: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsEncodingHelp',
     {
-      defaultMessage: 'Character encoding of the file.',
+      defaultMessage:
+        'Character encoding of the file. If your encoding is not available, create a custom one.',
     }
   ),
 
   settingsEncodingPlaceholder: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsEncodingPlaceholder',
     {
-      defaultMessage: 'Select encoding',
+      defaultMessage: 'Select or enter an encoding',
     }
   ),
 
@@ -891,7 +916,10 @@ export const createDatasetWizardStrings = {
   ),
   settingsDelimiterDescription: i18n.translate(
     'xpack.dataFederation.createDatasetWizard.additionalSettings.delimiter.description',
-    { defaultMessage: 'placeholder' }
+    {
+      defaultMessage:
+        'The character that separates fields. If your delimiter is not available, create a custom one.',
+    }
   ),
   settingsQuoteModeDescription: i18n.translate(
     'xpack.dataFederation.createDatasetWizard.additionalSettings.quoteMode.description',

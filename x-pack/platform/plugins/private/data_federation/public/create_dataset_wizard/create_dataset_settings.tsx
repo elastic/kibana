@@ -9,10 +9,12 @@ import type { FunctionComponent } from 'react';
 import React from 'react';
 import {
   EuiAccordion,
+  EuiCode,
   EuiFieldText,
   EuiFormRow,
   EuiSelect,
   EuiSpacer,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
@@ -24,10 +26,12 @@ import {
   type DatasetBooleanFormValue,
   type DatasetFormatFormValue,
   type DatasetSchemaResolutionFormValue,
+  validateDelimiter,
 } from './create_dataset_form_state';
 import { CsvTsvAdvancedSettings } from './components/csv_tsv_advanced_settings';
 import { CsvTsvCommonSettings } from './components/csv_tsv_common_settings';
 import { FormatSelect } from './components/format_select';
+import { DelimiterSelect } from './components/delimiter_select';
 import { NdjsonCommonSettings } from './components/ndjson_common_settings';
 import { ParquetAdvancedSettings } from './components/parquet_advanced_settings';
 import { ParquetCommonSettings } from './components/parquet_common_settings';
@@ -59,6 +63,12 @@ const MODE_OPTIONS = [
   { value: 'escaped', text: createDatasetWizardStrings.settingsModeEscaped },
   { value: 'plain', text: createDatasetWizardStrings.settingsModePlain },
 ];
+
+const helpTextDefault = (valueLabel: string) => (
+  <EuiText size="xs" color="subdued">
+    <EuiCode>{valueLabel}</EuiCode> {createDatasetWizardStrings.byDefaultSuffix}
+  </EuiText>
+);
 
 const HEADER_ROW_OPTIONS = [
   { value: '', text: createDatasetWizardStrings.settingsHeaderRowPlaceholder },
@@ -339,7 +349,12 @@ function FormatAdvancedSettings({
 // ---------------------------------------------------------------------------
 
 function CsvTsvCoreSettings({ control }: { control: Control<CreateDatasetFormValues> }) {
-  const { field: delimiterField } = useController({ name: 'settings.delimiter', control });
+  const format: DatasetFormatFormValue = useWatch({ control, name: 'settings.format' });
+  const { field: delimiterField, fieldState: delimiterState } = useController({
+    name: 'settings.delimiter',
+    control,
+    rules: { validate: validateDelimiter },
+  });
   const { field: modeField } = useController({ name: 'settings.mode', control });
   const { field: headerRowField } = useController({ name: 'settings.header_row', control });
 
@@ -348,16 +363,15 @@ function CsvTsvCoreSettings({ control }: { control: Control<CreateDatasetFormVal
       <EuiSpacer size="m" />
       <EuiFormRow
         label={createDatasetWizardStrings.settingsDelimiterLabel}
-        helpText={createDatasetWizardStrings.settingsDelimiterHelp}
+        helpText={helpTextDefault(format === 'tsv' ? '\\t' : ',')}
         fullWidth
+        isInvalid={Boolean(delimiterState.error)}
+        error={delimiterState.error?.message}
       >
-        <EuiFieldText
-          data-test-subj="createDatasetSettingsDelimiter"
-          fullWidth
+        <DelimiterSelect
           value={delimiterField.value}
-          onChange={(e) => delimiterField.onChange(e.target.value)}
-          name={delimiterField.name}
-          inputRef={delimiterField.ref}
+          onChange={(next) => delimiterField.onChange(next)}
+          onBlur={delimiterField.onBlur}
         />
       </EuiFormRow>
       <EuiFormRow label={createDatasetWizardStrings.settingsModeLabel} fullWidth>

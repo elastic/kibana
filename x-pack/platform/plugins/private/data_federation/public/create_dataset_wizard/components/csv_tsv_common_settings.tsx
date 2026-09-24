@@ -15,7 +15,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
-import { useController } from 'react-hook-form';
+import { useController, useWatch } from 'react-hook-form';
 
 import { createDatasetWizardStrings } from '../create_dataset_wizard_i18n';
 import {
@@ -25,8 +25,10 @@ import {
   validateSkipRows,
   type CreateDatasetFormValues,
   type DatasetBooleanFormValue,
+  type DatasetFormatFormValue,
   type DatasetModeFormValue,
 } from '../create_dataset_form_state';
+import { DelimiterSelect } from './delimiter_select';
 import { EncodingSelect } from './encoding_select';
 import { FormRowLabelWithInfo } from './form_row_label_with_info';
 
@@ -50,6 +52,7 @@ const helpTextDefault = (valueLabel: string) => (
 );
 
 export function CsvTsvCommonSettings({ control }: { control: Control<CreateDatasetFormValues> }) {
+  const format: DatasetFormatFormValue = useWatch({ control, name: 'settings.format' });
   const { field: delimiterField, fieldState: delimiterState } = useController({
     name: 'settings.delimiter',
     control,
@@ -77,20 +80,15 @@ export function CsvTsvCommonSettings({ control }: { control: Control<CreateDatas
             infoText={createDatasetWizardStrings.settingsDelimiterDescription}
           />
         }
-        helpText={createDatasetWizardStrings.settingsDelimiterHelp}
+        helpText={helpTextDefault(format === 'tsv' ? '\\t' : ',')}
         fullWidth
         isInvalid={Boolean(delimiterState.error)}
         error={delimiterState.error?.message}
       >
-        <EuiFieldText
-          data-test-subj="createDatasetSettingsDelimiter"
-          fullWidth
-          maxLength={1}
-          isInvalid={Boolean(delimiterState.error)}
+        <DelimiterSelect
           value={delimiterField.value}
-          onChange={(e) => delimiterField.onChange(e.target.value)}
-          name={delimiterField.name}
-          inputRef={delimiterField.ref}
+          onChange={(next) => delimiterField.onChange(next)}
+          onBlur={delimiterField.onBlur}
         />
       </EuiFormRow>
       <EuiFormRow
@@ -201,7 +199,7 @@ export function CsvTsvCommonSettings({ control }: { control: Control<CreateDatas
         label={
           <FormRowLabelWithInfo
             label={createDatasetWizardStrings.settingsEncodingLabel}
-            infoText={createDatasetWizardStrings.settingsEncodingDescription}
+            infoText={createDatasetWizardStrings.settingsEncodingHelp}
           />
         }
         helpText={helpTextDefault(DEFAULT_ENCODING)}

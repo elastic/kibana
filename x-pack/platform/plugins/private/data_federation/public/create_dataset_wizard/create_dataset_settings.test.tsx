@@ -14,6 +14,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { CreateDatasetAdditionalSettings, CreateDatasetSettings } from './create_dataset_settings';
 import type { CreateDatasetFormValues, DatasetFormatFormValue } from './create_dataset_form_state';
 import { emptyCreateDatasetSettingsFormValues } from './create_dataset_form_state';
+import { createDatasetWizardStrings } from './create_dataset_wizard_i18n';
 
 const docLinksMock = {
   links: {
@@ -126,12 +127,12 @@ describe('CreateDatasetSettings', () => {
     });
 
     it('updates a CSV core field in form state', () => {
-      const { getByTestId } = renderSettings();
+      const { getByTestId, getByText } = renderSettings();
 
       selectFormat(getByTestId, 'csv');
-      fireEvent.change(getByTestId('createDatasetSettingsDelimiter'), {
-        target: { value: '|' },
-      });
+      const delimiterCombo = getByTestId('createDatasetSettingsDelimiter');
+      fireEvent.click(delimiterCombo.querySelector('input') ?? delimiterCombo);
+      fireEvent.click(getByText(createDatasetWizardStrings.settingsDelimiterOptionPipe));
 
       expect(getSettingsValue(getByTestId)).toMatchObject({ delimiter: '|' });
     });

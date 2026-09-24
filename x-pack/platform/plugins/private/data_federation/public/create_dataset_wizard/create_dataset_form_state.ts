@@ -82,7 +82,7 @@ export const emptyCreateDatasetSettingsFormValues = (): CreateDatasetSettingsFor
   skip_rows: '',
   datetime_format: '',
   null_value: '',
-  encoding: DEFAULT_ENCODING,
+  encoding: '',
   quote: '',
   escape: '',
   column_prefix: DEFAULT_COLUMN_PREFIX,

@@ -31,7 +31,7 @@ describe('create_dataset_form_state', () => {
         skip_rows: '',
         datetime_format: '',
         null_value: '',
-        encoding: 'UTF-8',
+        encoding: '',
         error_mode: '',
         max_errors: '',
         max_error_ratio: '',

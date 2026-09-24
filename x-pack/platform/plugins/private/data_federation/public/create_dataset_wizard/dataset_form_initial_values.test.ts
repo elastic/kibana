@@ -34,7 +34,7 @@ describe('dataset_form_initial_values', () => {
     expect(values.settings.delimiter).toBe('');
     expect(values.settings.header_row).toBe('');
     expect(values.settings.skip_rows).toBe('');
-    expect(values.settings.encoding).toBe('UTF-8');
+    expect(values.settings.encoding).toBe('');
     expect(values.settings.column_prefix).toBe('col');
     expect(values.settings.trim_spaces).toBe(false);
   });

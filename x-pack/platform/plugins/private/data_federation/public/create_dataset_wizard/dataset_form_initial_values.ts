@@ -13,7 +13,6 @@ import type {
 import {
   emptyCreateDatasetSettingsFormValues,
   DEFAULT_COLUMN_PREFIX,
-  DEFAULT_ENCODING,
   DEFAULT_FILE_EXCLUSIONS,
   type CreateDatasetFormValues,
   type CreateDatasetSettingsFormValues,
@@ -73,7 +72,7 @@ const settingsToFormValues = (
     skip_rows: s.skip_rows !== undefined ? String(s.skip_rows) : '',
     datetime_format: s.datetime_format ?? '',
     null_value: s.null_value ?? '',
-    encoding: s.encoding ?? DEFAULT_ENCODING,
+    encoding: s.encoding ?? defaults.encoding,
     column_prefix: s.column_prefix ?? DEFAULT_COLUMN_PREFIX,
     quote: s.quote ?? '',
     escape: s.escape ?? '',
