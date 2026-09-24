@@ -1803,7 +1803,20 @@ describe('slow-path handoff (#293046): task-level backfill', () => {
       });
 
       const pending = run({
-        dataset: { name: 'slow-path-task', description: '', examples: [{ input: { question: "q", triageType: "provided-alerts", expectedSkills: [], expectedToolPath: [] } }] },
+        dataset: {
+          name: 'slow-path-task',
+          description: '',
+          examples: [
+            {
+              input: {
+                question: 'q',
+                triageType: 'provided-alerts',
+                expectedSkills: [],
+                expectedToolPath: [],
+              },
+            },
+          ],
+        },
       });
       await jest.advanceTimersByTimeAsync(60_000).then(() => pending);
 
