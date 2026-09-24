@@ -30,9 +30,15 @@ export const ARMS = {
 
 export type Arm = (typeof ARMS)[keyof typeof ARMS];
 
-/** Ground truth for an example is the query itself: its graded labels and traps. */
+/**
+ * Ground truth for an example is the query itself: its graded labels and traps.
+ *
+ * The metadata carries no arm. Arms share one dataset so that their scores can be paired against
+ * each other, and every arm upserts the same example rows, so anything arm-specific here would be
+ * overwritten by whichever arm ran last.
+ */
 export type SemanticLogExample = Example<
   { question: string; queryId: string },
   { query: EvalQuery },
-  { kind: EvalQuery['kind']; arm: Arm }
+  { kind: EvalQuery['kind'] }
 >;

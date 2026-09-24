@@ -15,7 +15,8 @@ import {
   readRerankAllocations,
   seedCorpusIfNeeded,
 } from '../../src/corpus_audit';
-import { datasetForArm } from '../../src/datasets';
+import { logArmComparison } from '../../src/arm_comparison';
+import { datasetFor, FAMILIES } from '../../src/datasets';
 import { countSanityEvaluator, retrievalEvaluators } from '../../src/retrieval/evaluators';
 import { toKeywordFilter } from '../../src/retrieval/keyword_filter';
 import {
@@ -24,7 +25,6 @@ import {
   executeGetLogsSemantic,
 } from '../../src/retrieval/tool_client';
 import type { RetrievalTaskOutput } from '../../src/retrieval/types';
-import { ARMS } from '../../src/types';
 
 /** Resolved once at module load; all tests in this file use the same corpus. */
 const corpus = resolveCorpus();
@@ -45,7 +45,14 @@ let auditTotalDocuments = 0;
  */
 const RETRIEVAL_CONCURRENCY = 1;
 
-/** Stamped on both experiments so a stored result can be interpreted without the run log. */
+/**
+ * Run context attached to each experiment.
+ *
+ * Not persisted: the framework ingests a fixed metadata set (`execution_id`, `suite_id`,
+ * `total_repetitions`, `hostname`, `git`) and drops everything passed here, which a stored score
+ * document confirms. `logRunManifest` is the provenance record; this stays for the in-memory
+ * experiment result and for whenever the framework starts ingesting it.
+ */
 const runMetadata = () => ({
   corpusId: activeCorpus.id,
   windowStart: activeCorpus.timeRange.start,
@@ -84,11 +91,21 @@ evaluate.describe(
       await logRunManifest({ esClient, corpus: activeCorpus, audit, log });
     });
 
+    // The framework's own table is execution-scoped and grouped by dataset, and the arms share one
+    // dataset, so its row is an average across them. This is the per-arm view.
+    evaluate.afterAll(async ({ esClient, log }) => {
+      await logArmComparison({
+        esClient,
+        datasetName: datasetFor(activeCorpus, FAMILIES.retrieval).name,
+        log,
+      });
+    });
+
     evaluate('keyword arm', async ({ executorClient, fetch, log, connector }) => {
       await executorClient.runExperiment(
         {
           name: 'retrieval-keyword',
-          datasets: [datasetForArm(ARMS.keyword, activeCorpus)],
+          datasets: [datasetFor(activeCorpus, FAMILIES.retrieval)],
           metadata: runMetadata(),
           concurrency: RETRIEVAL_CONCURRENCY,
           task: async ({ input }): Promise<RetrievalTaskOutput> =>
@@ -111,7 +128,7 @@ evaluate.describe(
       await executorClient.runExperiment(
         {
           name: 'retrieval-groups',
-          datasets: [datasetForArm(ARMS.groups, activeCorpus)],
+          datasets: [datasetFor(activeCorpus, FAMILIES.retrieval)],
           metadata: runMetadata(),
           concurrency: RETRIEVAL_CONCURRENCY,
           task: async ({ input }): Promise<RetrievalTaskOutput> =>
@@ -137,7 +154,7 @@ evaluate.describe(
       await executorClient.runExperiment(
         {
           name: 'retrieval-semantic',
-          datasets: [datasetForArm(ARMS.semantic, activeCorpus)],
+          datasets: [datasetFor(activeCorpus, FAMILIES.retrieval)],
           metadata: runMetadata(),
           concurrency: RETRIEVAL_CONCURRENCY,
           task: async ({ input }): Promise<RetrievalTaskOutput> =>

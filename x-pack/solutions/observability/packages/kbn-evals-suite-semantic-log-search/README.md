@@ -92,6 +92,24 @@ is 10. The semantic tool is server-side capped at that value; the keyword tool r
 categories and is capped client-side so Recall cannot be inflated by giving one arm more surface
 area.
 
+### Datasets are the questions; arms are experiments
+
+All arms in a family score against one dataset, `semantic-log-search-<corpus>-<family>`, and each arm
+is a separate experiment named after it. Nothing arm-specific belongs in the dataset, including
+example metadata: every arm upserts that same record, so an arm-specific field would be
+last-writer-wins.
+
+This is what makes the arms comparable. Scores pair on
+`(dataset.id, example.id, evaluator.name, repetition_index)` and the compare route declines when two
+experiments share no `dataset.id`, so a dataset per arm made arm-vs-arm comparison impossible in both
+the UI and `evals compare`. The cost of sharing is that the framework's `EVALUATION RESULTS` table
+groups by dataset, so its single row is an **average across the arms** and should be ignored; the
+suite prints its own arm-by-evaluator table at the end of each run. See
+[Comparing the arms](./SETUP.md#comparing-the-arms).
+
+Retrieval and agent keep separate datasets because they run different evaluators and are not
+comparable to each other.
+
 ## Corpus profiles
 
 The suite supports multiple corpora. Each corpus is defined in `src/corpora/` as a `CorpusProfile`:

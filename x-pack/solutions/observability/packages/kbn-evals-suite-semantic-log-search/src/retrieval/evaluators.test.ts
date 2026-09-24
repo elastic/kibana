@@ -43,7 +43,7 @@ const run = (
     input: { question: query.question, queryId: query.id },
     output: taskOutput,
     expected: expected ? { query: expected } : undefined,
-    metadata: { kind: query.kind, arm: 'semantic' },
+    metadata: { kind: query.kind },
   });
 
 describe('countSanityEvaluator', () => {

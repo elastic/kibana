@@ -191,44 +191,161 @@ At the end of the run, you'll see a metrics table with one row group per arm.
 
 ### One recorded run
 
-Means over the 8 queries of `sigevents_postgres_timeout`, one repetition, both arms in the same
-run. Provenance: ES and Kibana 9.6.0 (Scout, trial licence), 2,447 in-window documents of 2,632
-seeded, `.rerank-v1` already imported and deployed, connector `claude-sonnet-4-5-connector`.
+Means over the 8 queries of `sigevents_postgres_timeout`, one repetition, all three retrieval arms
+in the same run with the window resolved once and shared between them. Provenance: commit
+`43bb837f7ffa`, ES and Kibana 9.6.0-SNAPSHOT (Scout, trial licence), 2,625 in-window documents,
+21/21 labels present, `.rerank-v1` imported and deployed at **1 allocation**, `concurrency: 1`.
 Treat these as one observation, not a baseline: see the reproducibility note in the
-[README](./README.md), and note that a cold reranker changes latency completely.
+[README](./README.md).
 
-| Metric | `keyword` | `semantic` |
-|---|---|---|
-| Precision@10 | 0.18 | **0.31** |
-| Recall | 0.59 | **0.91** |
-| Distinct Relevant Messages@10 | 1.75 | **3.13** |
-| Hard Negatives@10 (lower better) | 1.00 | **0.75** |
-| R-Precision | 0.41 | **0.71** |
-| nDCG@10 | 0.55 | **0.77** |
-| MRR | 0.77 | **1.00** |
-| Weighted Precision@10 | **0.66** | 0.39 |
-| Retrieval Latency (see caveat) | **78 ms** | 8,316 ms |
-| Count Sanity (0 = contract held) | 0 | 0 |
+| Metric | `groups` | `keyword` | `semantic` |
+|---|---|---|---|
+| Precision@10 | 0.18 | 0.18 | **0.33** |
+| Recall | 0.59 | 0.59 | **0.91** |
+| Distinct Relevant Messages@10 | 1.75 | 1.75 | **3.25** |
+| Hard Negatives@10 (lower better) | 1.00 | 1.00 | **0.75** |
+| R-Precision | 0.41 | 0.41 | **0.69** |
+| nDCG@10 | 0.55 | 0.55 | **0.79** |
+| MRR | 0.77 | 0.77 | **1.00** |
+| Weighted Precision@10 | **0.66** | **0.66** | 0.39 |
+| Retrieval Latency (see caveat) | 34 ms | 39 ms | 7,241 ms |
+| Count Sanity (0 = contract held) | 0 | 0 | 0 |
 
-> **Ignore the latency row.** It was measured at concurrency 5, so it includes queueing against a
-> reranker that saturates at one in-flight request, and it sits at an unknown point on the
-> inference cache curve. Repeat runs of this same corpus produced means of 8,316 ms, then
-> 2,315 ms, then 71.88 ms with identical quality scores, purely from cache warming. A cold,
-> never-before-asked question on this corpus measured **~10.9 s**. Read
+> **The latency row is pinned to `concurrency: 1` and is still not a general figure.** It sits at
+> an unknown point on the inference cache curve, and at one allocation, which is the slowest
+> configuration this feature ships in. Earlier runs of this same corpus produced semantic means of
+> 8,316 ms, then 2,315 ms, then 71.88 ms with identical quality scores, purely from cache warming,
+> and a cold, never-before-asked question measured **~10.9 s**. Read
 > [Measuring latency properly](#measuring-latency-properly) before quoting any figure.
 >
-> The quality columns are unaffected by any of this: they were stable across all three runs.
+> The quality columns are unaffected by any of this: they were stable across all of those runs.
 
-Two results deserve attention rather than celebration:
+Three results deserve attention rather than celebration:
 
+- **`keyword` and `groups` are identical on every quality metric.** Given the same KQL filter the
+  two tools returned byte-identical pattern lists on all 8 questions, in content, order and count.
+  Both derive the list from the same `categorize_text` aggregation on `message`; `get_logs` merely
+  wraps a histogram, `topValues` and raw samples around it. The pair is a check that the shared
+  filter reaches both tools, not two independent baselines.
 - **Weighted Precision inverts.** The semantic arm wins every rank-based metric and loses the
   document-weighted one. That is consistent with it doing its job: it surfaces relevant *rare*
   patterns, which by definition cover few documents, while the keyword arm ranks by frequency and
-  is therefore flattered by a document-weighted denominator. Its median (0.21) sits well below its
-  mean (0.39), so the distribution is skewed by a few high-coverage answers.
-- **Latency differs by two orders of magnitude**, 8.3 s against 78 ms, with the reranker already
-  warm. Per-query spread was 2.8 s to 15.4 s. Whatever the interactive budget turns out to be,
-  this is the number that has to move.
+  is therefore flattered by a document-weighted denominator. It is a diagnostic, never a target.
+- **Latency differs by more than two orders of magnitude**, 7.2 s against 39 ms, measured on a
+  local CPU cross-encoder at one allocation. The same suite against a hosted reranker measured
+  497 ms, so most of that gap is the endpoint rather than the approach.
+
+#### The same run against a hosted reranker
+
+The identical suite with `xpack.logsDataAccess.semanticLogSearch.rerankInferenceId` pointed at
+EIS-hosted `.jina-reranker-v3`, same corpus, questions and window, changing nothing else. See
+[Running the semantic arm against a different reranker](#running-the-semantic-arm-against-a-different-reranker)
+for how to set it and how to confirm it took effect. `keyword` and `groups` were unchanged on every
+quality metric, as they must be since they never call the reranker; their latency moved 39 to 44 ms
+and 34 to 36 ms, which sets a noise floor of roughly plus or minus 10%.
+
+| Semantic arm | local `.rerank-v1` | hosted `.jina-reranker-v3` |
+|---|---|---|
+| Retrieval Latency (mean) | 7,241 ms | **497 ms** |
+| Retrieval Latency (median) | 8,237 ms | **438 ms** |
+| Retrieval Latency (std) | 2,719 ms | **145 ms** |
+| Recall | 0.91 | **0.97** |
+| MRR | **1.00** | 0.88 |
+| nDCG@10 | **0.79** | 0.76 |
+| Hard Negatives@10 (lower better) | **0.75** | 1.38 |
+| Distinct Relevant Messages@10 | **3.25** | 2.88 |
+| R-Precision | **0.69** | 0.66 |
+| Weighted Precision@10 | 0.39 | **0.41** |
+| Top Relevance Score | -1.22 | +0.38 |
+
+**The latency difference is the result: 14.6x, and the spread collapses with it.** That is end to
+end, including the ~350 ms of ES|QL, so the rerank call itself went from roughly 6.9 s to ~150 ms,
+which matches the 147 ms measured directly against Elasticsearch outside the harness. There is no
+local deployment to cold-start or scale, which is what removes the variance.
+
+**Do not read the quality column as a result.** MRR's standard deviation went 0 to 0.22, meaning a
+single question's top hit flipped; at n=8 with one repetition that is one example, not a trend. The
+one quality signal worth chasing is Hard Negatives, because this corpus plants those deliberately.
+
+**A fixed relevance threshold would have broken silently on this switch.** `Top Relevance Score`
+moved -1.22 to +0.38. The score is an uncalibrated per-model value, so a "nothing relevant matched"
+signal cannot be a single constant once the endpoint is configurable.
+
+#### The agent arms, through `converse()`
+
+Same run, same questions, through Agent Builder rather than the tool directly. `baseline` is the
+default agent with no log-specific tool, which is the baseline #6159 names.
+
+| Metric | `baseline` | `keyword` | `semantic` |
+|---|---|---|---|
+| Used Log Tool | 0.00 | 1.00 | 1.00 |
+| Relevant Messages Cited | 1.0 | 2.0 | **3.0** |
+| Judge, 3 criteria | 0.92 | 0.83 | **0.92** |
+| Tool Calls | 3.6 | 1.6 | **1.0** |
+| Latency | 25.60 s | 3.74 s | 5.77 s |
+| Input Tokens | 208,709 | 15,192 | **6,434** |
+| Output Tokens | 2,197 | 343 | **207** |
+
+- **`Used Log Tool: 0.00` on `baseline` is the check that the arm was really configured without
+  log tools.** Without it, a baseline that quietly called one would read as a weak semantic arm.
+- **The token gap is the strongest number here.** The semantic arm used 32x fewer input tokens than
+  the baseline while citing the most relevant messages. Baseline ranges from 16,586 to 788,944
+  tokens with latency up to 170 s, because with no log tool it explores. The semantic arm's token
+  standard deviation is 4.1, essentially constant: one tool call, one answer.
+- **The judge cannot separate the ends.** It scores 0.92 for semantic and 0.92 for the no-tool
+  baseline, so read evidence cited and tokens spent rather than how a judge rates the prose.
+
+## Comparing the arms
+
+Every arm scores against **one shared dataset per family** (`semantic-log-search-<corpus>-retrieval`
+and `-agent`), and the arm is the *experiment* (`retrieval-keyword`, `retrieval-semantic`, …). That
+split is what makes arm-vs-arm comparison possible: scores pair on
+`(dataset.id, example.id, evaluator.name, repetition_index)`, and the compare route declines outright
+when two experiments share no `dataset.id`. While each arm had its own dataset, the comparison this
+suite exists for was the one comparison nothing could produce.
+
+Three ways to read it, in increasing effort:
+
+**1. The suite prints it.** Each run ends with an arm-by-evaluator table, `*` marking the better arm
+per evaluator using the evaluator's own `direction`. Note that the framework's own
+`EVALUATION RESULTS` table is execution-scoped and grouped by *dataset*, so now that the arms share
+one it shows a single row that is an **average across arms**. Read the arm table, not that row.
+
+**2. `evals compare`, for statistics and markdown.** Takes two experiment ids, target first:
+
+```bash
+node scripts/evals compare <target-experiment-id> <baseline-experiment-id> --format markdown
+```
+
+It runs paired t-tests and emits a markdown table, which is what belongs in an issue comment. With
+8 questions expect most differences to come out as not significant; that is the honest answer, not a
+problem with the tool.
+
+**3. The Kibana UI**, at `/app/evals`. Experiments, datasets, per-example scores with each
+evaluator's explanation, and a compare page. Two traps:
+
+- The experiments list's **Compare button emits `type=execution`**, which pools every arm of one run.
+  Arm-vs-arm needs `type=experiment` with the two per-arm experiment ids:
+  ```
+  /app/evals/compare?type=experiment&baseline=<keyword-experiment-id>&target=<semantic-experiment-id>
+  ```
+- The **page** reads `baseline` / `target`; the **REST API** takes `baseline_id` / `target_id`. Using
+  the API names in a UI URL gives "Missing experiment IDs".
+
+Find the ids for a run with:
+
+```bash
+curl -s -u elastic:changeme -X POST "http://localhost:9220/.evaluation-scores/_search" \
+  -H 'Content-Type: application/json' -d '{"size":0,"aggs":{"e":{"terms":{"field":"metadata.execution_id","size":1,"order":{"t":"desc"}},"aggs":{"t":{"max":{"field":"@timestamp"}},"arms":{"terms":{"field":"experiment_name","size":10},"aggs":{"id":{"terms":{"field":"experiment_id","size":1}}}}}}}}' | \
+  python3 -c "
+import sys,json
+for b in json.load(sys.stdin)['aggregations']['e']['buckets']:
+    for a in b['arms']['buckets']:
+        print(a['key'], a['id']['buckets'][0]['key'])"
+```
+
+**Scores from before the shared-dataset change will not pair with scores after it**, since the
+dataset ids differ. Comparisons across that boundary are impossible by construction.
 
 ## Measuring latency properly
 

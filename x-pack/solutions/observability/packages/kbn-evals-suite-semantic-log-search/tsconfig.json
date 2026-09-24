@@ -11,6 +11,7 @@
     "@kbn/core",
     "@kbn/datemath",
     "@kbn/evals",
+    "@kbn/evals-common",
     "@kbn/repo-info",
     "@kbn/tooling-log"
   ]

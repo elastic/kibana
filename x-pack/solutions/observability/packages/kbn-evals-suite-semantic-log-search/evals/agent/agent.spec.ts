@@ -20,7 +20,8 @@ import {
   logRunManifest,
   seedCorpusIfNeeded,
 } from '../../src/corpus_audit';
-import { datasetForArm } from '../../src/datasets';
+import { logArmComparison } from '../../src/arm_comparison';
+import { datasetFor, FAMILIES } from '../../src/datasets';
 import { ARMS } from '../../src/types';
 import type { Arm } from '../../src/types';
 
@@ -72,7 +73,15 @@ evaluate.describe(
       }
     });
 
-    evaluate.afterAll(async ({ fetch, log }) => {
+    evaluate.afterAll(async ({ esClient, fetch, log }) => {
+      // The framework's own table is execution-scoped and grouped by dataset, and the arms share one
+      // dataset, so its row is an average across them. This is the per-arm view.
+      await logArmComparison({
+        esClient,
+        datasetName: datasetFor(activeCorpus, FAMILIES.agent).name,
+        log,
+      });
+
       for (const agentId of agentIdsByArm.values()) {
         await deleteAgent({ fetch, log, agentId });
       }
@@ -100,7 +109,7 @@ evaluate.describe(
       await executorClient.runExperiment(
         {
           name: `agent-${arm}`,
-          datasets: [datasetForArm(arm, activeCorpus)],
+          datasets: [datasetFor(activeCorpus, FAMILIES.agent)],
           metadata: {
             corpusId: activeCorpus.id,
             windowStart: activeCorpus.timeRange.start,
