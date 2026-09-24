@@ -8,22 +8,27 @@
 import {
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
+  SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
   SYSTEM_SECURITY_WORKER_IDS,
   WorkerScheduleInterval,
   WorkerSettings,
 } from '@kbn/alertzero-common';
 import { SCHEDULED_INTERVAL_PATTERN } from '@kbn/workflows';
 import { createWorkerSettingsRegistration } from './worker_settings';
+import type { RegisteredWorkerId } from '../worker_registry';
 
 const AD_WORKER_ID = SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID;
 const RULE_TUNING_WORKER_ID = SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID;
+const FORENSICS_WORKER_ID = SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID;
 
 const SCHEDULED_WORKER_IDS: string[] = [AD_WORKER_ID, RULE_TUNING_WORKER_ID];
 
-/** Every other Worker is alert- or event-triggered and owns no schedule. */
 const UNSCHEDULED_WORKER_IDS = SYSTEM_SECURITY_WORKER_IDS.filter(
   (id) => !SCHEDULED_WORKER_IDS.includes(id)
 );
+
+/** Workers that allow only manual autonomy, so any other level is rejected. */
+const MANUAL_ONLY_WORKER_IDS: string[] = [FORENSICS_WORKER_ID];
 
 const expectInvalid = (
   applied: ReturnType<ReturnType<typeof createWorkerSettingsRegistration>['applyPatch']>
@@ -81,8 +86,10 @@ describe('createWorkerSettingsRegistration', () => {
 
     it('rejects stored values missing the declared schedule interval', () => {
       // No defaulting of older development state: the document has to be reset.
+      // The autonomy level has to be one this worker allows, or the throw could be
+      // attributed to the wrong field.
       expect(() =>
-        registration.toSettings({ settingsVersion: 1, autonomyLevel: 'assisted' })
+        registration.toSettings({ settingsVersion: 1, autonomyLevel: 'manual' })
       ).toThrow(/scheduleInterval/);
     });
 
@@ -170,6 +177,9 @@ describe('createWorkerSettingsRegistration', () => {
       });
     });
 
+    // `supervised` rather than `assisted`: this worker gates exactly one thing, so it
+    // allows only `manual` and `supervised`. The interval is what is under test here,
+    // but the patch still has to be one the worker would accept.
     it('leaves the interval untouched when only autonomy is patched', () => {
       const applied = registration.applyPatch(
         { settingsVersion: 1, autonomyLevel: 'manual', scheduleInterval: '15m' },
@@ -349,12 +359,36 @@ describe('createWorkerSettingsRegistration', () => {
       ).toContain('scheduleInterval');
     });
 
-    it.each(UNSCHEDULED_WORKER_IDS)('%s still accepts an autonomy patch', (workerId) => {
-      const registration = createWorkerSettingsRegistration(workerId);
+    it.each(UNSCHEDULED_WORKER_IDS.filter((id) => !MANUAL_ONLY_WORKER_IDS.includes(id)))(
+      '%s still accepts an autonomy patch',
+      (workerId) => {
+        const registration = createWorkerSettingsRegistration(workerId);
+
+        expect(
+          registration.applyPatch(registration.createDefaultValues(), { autonomy: 'assisted' })
+        ).toEqual({ values: { settingsVersion: 1, autonomyLevel: 'assisted' } });
+      }
+    );
+  });
+
+  describe('Workers that allow only manual autonomy', () => {
+    it.each(MANUAL_ONLY_WORKER_IDS)('%s rejects a higher level, naming the field', (workerId) => {
+      const registration = createWorkerSettingsRegistration(workerId as RegisteredWorkerId);
 
       expect(
-        registration.applyPatch(registration.createDefaultValues(), { autonomy: 'assisted' })
-      ).toEqual({ values: { settingsVersion: 1, autonomyLevel: 'assisted' } });
+        expectInvalid(
+          registration.applyPatch(registration.createDefaultValues(), { autonomy: 'assisted' })
+        )
+      ).toContain('autonomy');
+    });
+
+    it.each(MANUAL_ONLY_WORKER_IDS)('%s still defaults to manual', (workerId) => {
+      expect(
+        createWorkerSettingsRegistration(workerId as RegisteredWorkerId).createDefaultValues()
+      ).toEqual({
+        settingsVersion: 1,
+        autonomyLevel: 'manual',
+      });
     });
   });
 });
