@@ -389,29 +389,11 @@ export class NightshiftInvestigationsPlugin
 
     return {
       getInvestigationsClient: this.getInvestigationsClient,
-      deleteAllInvestigations: async () => {
-        try {
-          const result = await createInvestigationSweepRepository(
-            coreStart.savedObjects
-          ).deleteAllAcrossSpaces();
-          this.logger.info(
-            `Deleted ${result.deleted} investigation(s) across all spaces with ${result.failures.length} failure(s)`
-          );
-          for (const failure of result.failures) {
-            this.logger.warn(
-              `Failed to delete investigation "${failure.id}" in space "${failure.spaceId}": ${failure.error}`
-            );
-          }
-          return result;
-        } catch (error) {
-          this.logger.error(
-            `Failed to delete investigations across all spaces: ${
-              error instanceof Error ? error.message : String(error)
-            }`
-          );
-          throw error;
-        }
-      },
+      deleteAllInvestigations: () =>
+        createInvestigationSweepRepository(
+          coreStart.savedObjects,
+          this.logger
+        ).deleteAllAcrossSpaces(),
       isInvestigationAvailable: (request) =>
         isInvestigationAvailable({
           request,

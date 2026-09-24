@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ISavedObjectsRepository, SavedObjectsServiceStart } from '@kbn/core/server';
+import type { ISavedObjectsRepository, Logger, SavedObjectsServiceStart } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers, SavedObjectsUtils } from '@kbn/core/server';
 import { NIGHTSHIFT_INVESTIGATION_SO_TYPE } from '../saved_objects';
 import { buildInvestigationFilter } from './build_investigation_filter';
@@ -25,13 +25,16 @@ const DELETE_BATCH_SIZE = 1000;
 export interface SavedObjectInvestigationSweepRepositoryDeps {
   /** Unscoped, so a single search covers every space. */
   savedObjects: ISavedObjectsRepository;
+  logger: Logger;
 }
 
 export class SavedObjectInvestigationSweepRepository implements InvestigationSweepRepository {
   private readonly savedObjects: ISavedObjectsRepository;
+  private readonly logger: Logger;
 
-  constructor({ savedObjects }: SavedObjectInvestigationSweepRepositoryDeps) {
+  constructor({ savedObjects, logger }: SavedObjectInvestigationSweepRepositoryDeps) {
     this.savedObjects = savedObjects;
+    this.logger = logger;
   }
 
   async findAcrossSpaces<
@@ -147,8 +150,24 @@ export class SavedObjectInvestigationSweepRepository implements InvestigationSwe
           failures.push(...result.failures);
         }
       }
+    } catch (error) {
+      this.logger.error(
+        `Failed to delete investigations across all spaces: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+      throw error;
     } finally {
       await finder.close();
+    }
+
+    this.logger.info(
+      `Deleted ${deleted} investigation(s) across all spaces with ${failures.length} failure(s)`
+    );
+    for (const failure of failures) {
+      this.logger.warn(
+        `Failed to delete investigation "${failure.id}" in space "${failure.spaceId}": ${failure.error}`
+      );
     }
 
     return { deleted, failures };
@@ -157,8 +176,10 @@ export class SavedObjectInvestigationSweepRepository implements InvestigationSwe
 
 /** Builds a repository that reaches every space, for use outside a request. */
 export const createInvestigationSweepRepository = (
-  savedObjects: SavedObjectsServiceStart
+  savedObjects: SavedObjectsServiceStart,
+  logger: Logger
 ): InvestigationSweepRepository =>
   new SavedObjectInvestigationSweepRepository({
     savedObjects: savedObjects.createInternalRepository([NIGHTSHIFT_INVESTIGATION_SO_TYPE]),
+    logger,
   });

@@ -8,6 +8,7 @@
 import type { ISavedObjectsPointInTimeFinder } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import { NIGHTSHIFT_INVESTIGATION_SO_TYPE } from '../saved_objects';
 import { InvestigationStaleWriteError } from './errors';
 import { SavedObjectInvestigationSweepRepository } from './saved_object_investigation_sweep_repository';
@@ -32,12 +33,16 @@ const findResponse = (savedObjects: Array<ReturnType<typeof foundInvestigation>>
 });
 
 const createFinder = (
-  responses: Array<ReturnType<typeof findResponse>>
+  responses: Array<ReturnType<typeof findResponse>>,
+  error?: Error
 ): ISavedObjectsPointInTimeFinder<
   ReturnType<typeof foundInvestigation>['attributes'],
   Record<string, never>
 > => ({
   async *find() {
+    if (error) {
+      throw error;
+    }
     for (const response of responses) {
       yield response;
     }
@@ -47,9 +52,11 @@ const createFinder = (
 
 const createRepository = () => {
   const savedObjects = savedObjectsRepositoryMock.create();
+  const logger = loggerMock.create();
   return {
+    logger,
     savedObjects,
-    repository: new SavedObjectInvestigationSweepRepository({ savedObjects }),
+    repository: new SavedObjectInvestigationSweepRepository({ savedObjects, logger }),
   };
 };
 
@@ -169,7 +176,7 @@ describe('SavedObjectInvestigationSweepRepository', () => {
 
   describe('deleteAllAcrossSpaces()', () => {
     it('iterates a point-in-time snapshot and bulk deletes each space independently', async () => {
-      const { repository, savedObjects } = createRepository();
+      const { repository, savedObjects, logger } = createRepository();
       const finder = createFinder([
         findResponse([
           foundInvestigation({ id: 'inv-1', namespaces: ['team-a'] }),
@@ -200,6 +207,10 @@ describe('SavedObjectInvestigationSweepRepository', () => {
         fields: [],
       });
       expect(finder.close).toHaveBeenCalled();
+      expect(logger.info).toHaveBeenCalledWith(
+        'Deleted 3 investigation(s) across all spaces with 0 failure(s)'
+      );
+      expect(logger.warn).not.toHaveBeenCalled();
       expect(savedObjects.bulkDelete).toHaveBeenCalledWith([{ type: TYPE, id: 'inv-1' }], {
         namespace: 'team-a',
       });
@@ -209,7 +220,7 @@ describe('SavedObjectInvestigationSweepRepository', () => {
     });
 
     it('continues deleting later pages after a per-object failure', async () => {
-      const { repository, savedObjects } = createRepository();
+      const { repository, savedObjects, logger } = createRepository();
       savedObjects.createPointInTimeFinder.mockReturnValue(
         createFinder([
           findResponse([foundInvestigation({ id: 'inv-1', namespaces: ['team-a'] })]),
@@ -231,6 +242,9 @@ describe('SavedObjectInvestigationSweepRepository', () => {
         failures: [{ id: 'inv-1', spaceId: 'team-a', error: 'delete failed' }],
       });
       expect(savedObjects.bulkDelete).toHaveBeenCalledTimes(2);
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Failed to delete investigation "inv-1" in space "team-a": delete failed'
+      );
     });
 
     it('does not count already-missing investigations as deleted or failed', async () => {
@@ -274,6 +288,18 @@ describe('SavedObjectInvestigationSweepRepository', () => {
           { id: 'inv-2', spaceId: 'team-a', error: 'index is write blocked' },
         ],
       });
+    });
+
+    it('logs and rethrows an unexpected finder error', async () => {
+      const { repository, savedObjects, logger } = createRepository();
+      savedObjects.createPointInTimeFinder.mockReturnValue(
+        createFinder([], new Error('point in time failed'))
+      );
+
+      await expect(repository.deleteAllAcrossSpaces()).rejects.toThrow('point in time failed');
+      expect(logger.error).toHaveBeenCalledWith(
+        'Failed to delete investigations across all spaces: point in time failed'
+      );
     });
   });
 });
