@@ -24,10 +24,9 @@ const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPoli
   grouping_mode: null,
   throttle: null,
   snoozed_until: null,
-  auth: { owner: 'elastic', created_by_user: true },
-  created_by: 'elastic',
+  created_by: { profile_uid: 'elastic' },
   created_at: '2026-01-01T00:00:00.000Z',
-  updated_by: 'elastic',
+  updated_by: { profile_uid: 'elastic' },
   updated_at: '2026-01-01T00:00:00.000Z',
   ...overrides,
 });

@@ -17,6 +17,11 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/public/mocks';
 import { useApproveProposal, useDismissProposal } from '@kbn/proposals-plugin/public';
 import {
+  useAssignInvestigation,
+  useUserProfiles,
+  useSuggestUserProfiles,
+} from '@kbn/agentic-investigations-plugin/public';
+import {
   useProposalsByCategory,
   useProposalsByCategoryCount,
   useClosedProposals,
@@ -34,6 +39,42 @@ jest.mock('@kbn/proposals-plugin/public', () => ({
   useApproveProposal: jest.fn(),
   useDismissProposal: jest.fn(),
 }));
+jest.mock('@kbn/agentic-investigations-plugin/public', () => ({
+  ...jest.requireActual('@kbn/agentic-investigations-plugin/public'),
+  useAssignInvestigation: jest.fn(),
+  useUserProfiles: jest.fn(),
+  useSuggestUserProfiles: jest.fn(),
+}));
+jest.mock('@kbn/agentic-investigations-common', () => {
+  const actual = jest.requireActual('@kbn/agentic-investigations-common');
+  return {
+    ...actual,
+    // Replace AssignToUsers with a minimal stub so the queue renders without needing
+    // a full EUI/user-profile environment.
+    // eslint-disable-next-line react/display-name
+    AssignToUsers: ({
+      conversationId,
+      onChange,
+      canManage,
+    }: {
+      conversationId: string;
+      onChange: (s: unknown[]) => void;
+      canManage: boolean;
+    }) =>
+      canManage ? (
+        <button
+          data-test-subj={`mock-assign-${conversationId}`}
+          onClick={() =>
+            onChange([{ uid: 'user-uid-1', enabled: true, user: { username: 'alice' }, data: {} }])
+          }
+        >
+          Assign
+        </button>
+      ) : (
+        <span data-test-subj={`mock-assignees-readonly-${conversationId}`}>Read-only</span>
+      ),
+  };
+});
 jest.mock('../../hooks/use_proposals_api');
 jest.mock('../../hooks/use_proposal_charts_summary');
 jest.mock('../../components/proposals_trend_chart', () => ({
@@ -47,6 +88,9 @@ const mockUseClosedProposalsCount = useClosedProposalsCount as jest.Mock;
 const mockUseProposalChartsSummary = useProposalChartsSummary as jest.Mock;
 const mockUseApproveProposal = useApproveProposal as jest.Mock;
 const mockUseDismissProposal = useDismissProposal as jest.Mock;
+const mockUseAssignInvestigation = useAssignInvestigation as jest.Mock;
+const mockUseUserProfiles = useUserProfiles as jest.Mock;
+const mockUseSuggestUserProfiles = useSuggestUserProfiles as jest.Mock;
 
 /** Records the fetchNextPage of each bucket, so a Show more click can be asserted. */
 const fetchNextPage: Record<string, jest.Mock> = {};
@@ -137,13 +181,17 @@ const proposal: ProposalItem = {
   conversationAssignees: [],
 };
 
-const renderPage = (initialEntry: string) => {
+const renderPage = (
+  initialEntry: string,
+  { capabilities = {} }: { capabilities?: Record<string, unknown> } = {}
+) => {
   const core = coreMock.createStart();
   // The real service returns a URL; the mock returns undefined, which would silently drop the
   // chat control's href and make the link assertions vacuous.
   core.application.getUrlForApp.mockImplementation(
     (appId, options) => `/app/${appId}${options?.path ?? ''}`
   );
+  (core.application.capabilities as Record<string, unknown>).agenticInvestigations = capabilities;
   const agentBuilder = agentBuilderMocks.createStart();
   const closeFlyout = jest.fn();
   (agentBuilder.openConversationDetails as jest.Mock).mockResolvedValue(closeFlyout);
@@ -170,10 +218,14 @@ const renderPage = (initialEntry: string) => {
 
 const approveMutate = jest.fn();
 const dismissMutate = jest.fn();
+const assignInvestigationMutate = jest.fn().mockResolvedValue({});
 
 beforeEach(() => {
   mockUseApproveProposal.mockReturnValue({ mutate: approveMutate });
   mockUseDismissProposal.mockReturnValue({ mutate: dismissMutate });
+  mockUseAssignInvestigation.mockReturnValue({ mutateAsync: assignInvestigationMutate });
+  mockUseUserProfiles.mockReturnValue({ data: [], isFetching: false });
+  mockUseSuggestUserProfiles.mockReturnValue({ data: [], isLoading: false });
   mockOpenCount(0);
 });
 
@@ -273,7 +325,7 @@ describe('ConversationsPage open in chat', () => {
 
   const chatControl = () => screen.getByTestId('conversationCardOpenInChat');
 
-  it("navigates to the conversation's Agent Builder page", () => {
+  it("navigates to the conversation's Agent Builder page with the details flyout open", () => {
     const { core } = renderPage('/');
 
     fireEvent.click(chatControl());
@@ -281,7 +333,7 @@ describe('ConversationsPage open in chat', () => {
     // The chat is the investigation's own Agent Builder conversation, so the card resolves its
     // proposal to that conversation and its agent — the route is scoped to the agent.
     expect(core.application.navigateToApp).toHaveBeenCalledWith('agent_builder', {
-      path: '/agents/elastic-ai-agent/conversations/inv-1',
+      path: '/agents/elastic-ai-agent/conversations/inv-1?openConversationDetails=true',
     });
   });
 
@@ -289,11 +341,11 @@ describe('ConversationsPage open in chat', () => {
     const { core } = renderPage('/');
 
     expect(core.application.getUrlForApp).toHaveBeenCalledWith('agent_builder', {
-      path: '/agents/elastic-ai-agent/conversations/inv-1',
+      path: '/agents/elastic-ai-agent/conversations/inv-1?openConversationDetails=true',
     });
     expect(chatControl()).toHaveAttribute(
       'href',
-      '/app/agent_builder/agents/elastic-ai-agent/conversations/inv-1'
+      '/app/agent_builder/agents/elastic-ai-agent/conversations/inv-1?openConversationDetails=true'
     );
   });
 
@@ -306,7 +358,7 @@ describe('ConversationsPage open in chat', () => {
     fireEvent.click(chatControl());
 
     expect(core.application.navigateToApp).toHaveBeenCalledWith('agent_builder', {
-      path: '/conversations/inv-1',
+      path: '/conversations/inv-1?openConversationDetails=true',
     });
   });
 
@@ -681,5 +733,47 @@ describe('ConversationsPage impact pills', () => {
 
     expect(screen.getByText('Host investigation')).toBeInTheDocument();
     expect(screen.queryByText('User investigation')).not.toBeInTheDocument();
+  });
+});
+
+describe('ConversationsPage assignee picker', () => {
+  beforeEach(() => {
+    mockProposals({ investigate: [proposal] });
+  });
+
+  afterEach(() => jest.clearAllMocks());
+
+  it('passes the conversationId (not the proposal id) to the assignment mutation', async () => {
+    renderPage('/', { capabilities: { manageInvestigations: true } });
+
+    // The stub AssignToUsers is keyed by getRowKey (proposal id), so the button test-id uses it.
+    fireEvent.click(screen.getByTestId('mock-assign-prop-1'));
+
+    await waitFor(() =>
+      expect(assignInvestigationMutate).toHaveBeenCalledWith(
+        expect.objectContaining({ investigationId: 'inv-1' })
+      )
+    );
+    // The proposal id 'prop-1' must NOT appear as the investigation id.
+    expect(assignInvestigationMutate).not.toHaveBeenCalledWith(
+      expect.objectContaining({ investigationId: 'prop-1' })
+    );
+  });
+
+  it('does not open the conversation flyout when the assign button is clicked', async () => {
+    const { agentBuilder } = renderPage('/', { capabilities: { manageInvestigations: true } });
+
+    fireEvent.click(screen.getByTestId('mock-assign-prop-1'));
+
+    // Wait for any async handlers.
+    await waitFor(() => expect(assignInvestigationMutate).toHaveBeenCalled());
+    expect(agentBuilder.openConversationDetails).not.toHaveBeenCalled();
+  });
+
+  it('renders the assignee picker as read-only when manageInvestigations is false', () => {
+    renderPage('/', { capabilities: { manageInvestigations: false } });
+
+    expect(screen.getByTestId('mock-assignees-readonly-prop-1')).toBeInTheDocument();
+    expect(screen.queryByTestId('mock-assign-prop-1')).not.toBeInTheDocument();
   });
 });

@@ -11,13 +11,14 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server';
 import { EVALS_EXPERIMENT_WORKFLOW_TAG } from '@kbn/evals-plugin/common';
 import type { EvalExperimentsToolDeps } from './deps';
-import { listEvalDatasetsTool } from './list_eval_datasets';
+import { listEvalDatasetsTool } from '../../common/list_eval_datasets';
 import { listEvaluatorsTool } from './list_evaluators';
 import { listEvalTargetsTool } from './list_eval_targets';
 import { listConnectorsTool } from './list_eval_connectors';
 import { previewEvalExperimentTool } from './preview_eval_experiment';
 import { saveEvalExperimentTool } from './save_eval_experiment';
 import { runEvalExperimentTool } from './run_eval_experiment';
+import { evalsExperimentTools } from './tool_utils';
 
 const createContext = (spaceId = 'default'): ToolHandlerContext =>
   ({ request: httpServerMock.createKibanaRequest(), spaceId } as unknown as ToolHandlerContext);
@@ -428,7 +429,12 @@ describe('discovery tools', () => {
       }) as unknown as EvalExperimentsToolDeps['getStartDependencies'],
     });
 
-    const result = firstResult(await listEvalDatasetsTool(deps).handler({}, createContext()));
+    const result = firstResult(
+      await listEvalDatasetsTool(deps, evalsExperimentTools.listDatasets).handler(
+        {},
+        createContext()
+      )
+    );
 
     expect(list).toHaveBeenCalledWith({
       search: undefined,
@@ -453,7 +459,10 @@ describe('discovery tools', () => {
       }) as unknown as EvalExperimentsToolDeps['getStartDependencies'],
     });
 
-    await listEvalDatasetsTool(deps).handler({}, createContext('sales'));
+    await listEvalDatasetsTool(deps, evalsExperimentTools.listDatasets).handler(
+      {},
+      createContext('sales')
+    );
 
     expect(getClient).toHaveBeenCalledWith({ spaceId: 'sales' });
   });
@@ -481,7 +490,7 @@ describe('discovery tools', () => {
     });
 
     const result = firstResult(
-      await listEvalDatasetsTool(deps).handler(
+      await listEvalDatasetsTool(deps, evalsExperimentTools.listDatasets).handler(
         { tags: ['golden'], maturity: ['golden'] },
         createContext()
       )
@@ -505,7 +514,12 @@ describe('discovery tools', () => {
       }) as unknown as EvalExperimentsToolDeps['getStartDependencies'],
     });
 
-    const result = firstResult(await listEvalDatasetsTool(deps).handler({}, createContext()));
+    const result = firstResult(
+      await listEvalDatasetsTool(deps, evalsExperimentTools.listDatasets).handler(
+        {},
+        createContext()
+      )
+    );
 
     expect(result.type).toBe(ToolResultType.error);
   });
@@ -519,7 +533,12 @@ describe('discovery tools', () => {
       }) as unknown as EvalExperimentsToolDeps['getStartDependencies'],
     });
 
-    const result = firstResult(await listEvalDatasetsTool(deps).handler({}, createContext()));
+    const result = firstResult(
+      await listEvalDatasetsTool(deps, evalsExperimentTools.listDatasets).handler(
+        {},
+        createContext()
+      )
+    );
 
     expect(result.type).toBe(ToolResultType.error);
     expect(result.data.message).toMatch(/read_evals/);

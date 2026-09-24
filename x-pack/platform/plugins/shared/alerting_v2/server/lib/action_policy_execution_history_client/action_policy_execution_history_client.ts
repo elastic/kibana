@@ -13,6 +13,7 @@ import { nodeBuilder, nodeTypes, toKqlExpression } from '@kbn/es-query';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import {
   EXECUTION_HISTORY_DEFAULT_PER_PAGE,
+  type ListPolicyExecutionHistoryRequest,
   type PolicyExecutionHistoryItem,
   type RuleResponse,
   type PolicyExecutionOutcomeFilter,
@@ -37,7 +38,7 @@ import {
 } from './build_execution_history_item';
 
 // Default lower bound on the event timestamp when the caller does not pass an
-// explicit `start_date`.
+// explicit `from`.
 const DEFAULT_TIME_WINDOW_HOURS = 24;
 
 // Pagination defaults applied when the caller omits them
@@ -60,14 +61,24 @@ export interface ListExecutionHistoryArgs {
    * Inclusive ISO timestamp lower bound for `@timestamp`. When provided it
    * replaces the default rolling {@link DEFAULT_TIME_WINDOW_HOURS}-hour window.
    */
-  startDate?: string;
+  from?: string;
+  /** Inclusive ISO timestamp upper bound for `@timestamp`. Unbounded when omitted. */
+  to?: string;
+  /**
+   * Sort field. `dispatched_at` is the only supported value and maps to
+   * `@timestamp`, which the event log query always sorts on; only `sortOrder`
+   * is forwarded.
+   */
+  sort?: ListPolicyExecutionHistoryRequest['sort'];
+  /** Sort direction. Defaults to `desc` (newest first). */
+  sortOrder?: 'asc' | 'desc';
 }
 
 export interface ListExecutionHistoryResult {
   items: PolicyExecutionHistoryItem[];
   page: number;
   perPage: number;
-  totalEvents: number;
+  total: number;
   searchMatches: SearchMatchCounts | null;
 }
 
@@ -96,10 +107,12 @@ export class ActionPolicyExecutionHistoryClient {
     ruleIds,
     outcome,
     episodeIds,
-    startDate,
+    from,
+    to,
+    sortOrder,
   }: ListExecutionHistoryArgs): Promise<ListExecutionHistoryResult> {
-    const effectiveStartDate =
-      startDate ?? new Date(Date.now() - DEFAULT_TIME_WINDOW_HOURS * 60 * 60 * 1000).toISOString();
+    const effectiveFrom =
+      from ?? new Date(Date.now() - DEFAULT_TIME_WINDOW_HOURS * 60 * 60 * 1000).toISOString();
     const spaceId = this.spaces.spacesService.getSpaceId(request);
     const searchIsActive = search !== undefined && search.trim() !== '';
 
@@ -110,14 +123,16 @@ export class ActionPolicyExecutionHistoryClient {
         items: [],
         page,
         perPage,
-        totalEvents: 0,
+        total: 0,
         searchMatches: matchingSearchIds.matches,
       };
     }
 
     const result = await this.eventLogService.findActionPolicyExecutionEvents({
       spaceId,
-      startDate: effectiveStartDate,
+      startDate: effectiveFrom,
+      endDate: to,
+      sortOrder,
       page,
       perPage,
       outcomes: outcome,
@@ -143,7 +158,7 @@ export class ActionPolicyExecutionHistoryClient {
       items,
       page: result.page,
       perPage: result.perPage,
-      totalEvents: result.total,
+      total: result.total,
       searchMatches: matchingSearchIds.matches,
     };
   }
@@ -177,7 +192,11 @@ export class ActionPolicyExecutionHistoryClient {
       policyIds: [...policyIds],
       ruleIds: [...ruleIds],
       hasMatches: policyIds.size > 0 || ruleIds.size > 0,
-      matches: { policies: policies.total, rules: rules.total, cap: SEARCH_ID_CAP },
+      matches: {
+        policies: policies.total,
+        rules: rules.total,
+        is_truncated: policies.total > SEARCH_ID_CAP || rules.total > SEARCH_ID_CAP,
+      },
     };
   }
 

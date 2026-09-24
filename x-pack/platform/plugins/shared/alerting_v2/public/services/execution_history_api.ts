@@ -31,7 +31,7 @@ export type {
 export class ExecutionHistoryApi {
   constructor(@inject(CoreStart('http')) private readonly http: HttpStart) {}
 
-  public async listActionPolicyExecutions(params: ListPolicyExecutionHistoryRequest = {}) {
+  public async listActionPolicyExecutions(params: Partial<ListPolicyExecutionHistoryRequest> = {}) {
     return this.http.get<ListPolicyExecutionHistoryResponse>(
       ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH,
       {
@@ -42,7 +42,10 @@ export class ExecutionHistoryApi {
           rule_ids: params.rule_ids,
           outcome: params.outcome,
           episode_ids: params.episode_ids,
-          start_date: params.start_date,
+          from: params.from,
+          to: params.to,
+          sort: params.sort,
+          sort_order: params.sort_order,
         },
       }
     );

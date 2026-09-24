@@ -19,8 +19,7 @@ export const SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH = 1024;
 /**
  * Cap on the length of an ephemeral service account token returned by UIAM's token exchange.
  * Those tokens are self-described, so the cap is generous and only exists to bound the validated
- * payload. The long-lived Elasticsearch token is a different shape with its own bound, in
- * {@link ES_SERVICE_ACCOUNT_TOKEN_MAX_LENGTH}.
+ * payload.
  */
 export const SERVICE_ACCOUNT_TOKEN_MAX_LENGTH = 16384;
 
@@ -45,13 +44,6 @@ export const ES_SERVICE_ACCOUNT_NAMESPACE = 'kibana';
  * from the account name alone.
  */
 export const ES_SERVICE_ACCOUNT_TOKEN_NAME = 'kibana-managed';
-
-/**
- * Cap on the length of the long-lived Elasticsearch service account token Kibana mints. The value
- * encodes the principal, the token name and a secret, so it is far shorter than this. Generous on
- * purpose, and only there to bound the validated response.
- */
-export const ES_SERVICE_ACCOUNT_TOKEN_MAX_LENGTH = 1024;
 
 /**
  * Role assigned when Kibana cannot work out what to give a new Elasticsearch service account —
@@ -81,3 +73,8 @@ export const SERVICE_ACCOUNT_MAX_ROLES = 1000;
  * how the two should relate.
  */
 export const SERVICE_ACCOUNT_CREATE_MAX_BODY_BYTES = 64 * 1024;
+
+/**
+ * Cap on a single page of listed service accounts.
+ */
+export const SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE = 100;

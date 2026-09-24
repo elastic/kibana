@@ -9,12 +9,11 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { AGENTIC_INVESTIGATIONS_PLUGIN_ID } from '../common/constants';
-import { IMPACT_UI_CAPABILITY_MANAGE, IMPACT_UI_CAPABILITY_SHOW } from '../common/impact/constants';
 import {
   ESCALATIONS_UI_CAPABILITY_MANAGE,
   ESCALATIONS_UI_CAPABILITY_SHOW,
 } from '../common/escalations/constants';
-import { IMPACT_API_PRIVILEGE_MANAGE, IMPACT_API_PRIVILEGE_READ } from './impact/constants';
+import { AttachImpactStepId, GetImpactStepId } from '../common/impact/step_types';
 import { registerImpactRoutes } from './impact/routes/register_routes';
 import {
   ESCALATIONS_API_PRIVILEGE_MANAGE,
@@ -42,16 +41,21 @@ const setupPlugin = () => {
   const coreSetup = coreMock.createSetup();
   const features = { registerKibanaFeature: jest.fn() };
 
+  const workflowsExtensions = { registerStepDefinition: jest.fn() };
+  const agentBuilder = { attachments: { registerType: jest.fn() } };
+
   plugin.setup(
     coreSetup as never,
     {
       features,
       // agentBuilderPlatform is a required dep for ordering; it exposes no API used at setup time.
       agentBuilderPlatform: {},
+      agentBuilder,
+      workflowsExtensions,
     } as never
   );
 
-  return { plugin, coreSetup, features };
+  return { plugin, coreSetup, features, agentBuilder, workflowsExtensions };
 };
 
 const startPlugin = (plugin: AgenticInvestigationsPlugin) => {
@@ -108,20 +112,14 @@ describe('AgenticInvestigationsPlugin', () => {
       );
     });
 
-    it('grants the impact capabilities from the top-level all privilege', () => {
+    it('leaves impact off the base privileges until it needs its own', () => {
       const { features } = setupPlugin();
       const { privileges } = registeredFeature(features);
 
-      expect(privileges.all.api).toEqual([IMPACT_API_PRIVILEGE_READ, IMPACT_API_PRIVILEGE_MANAGE]);
-      expect(privileges.all.ui).toEqual([IMPACT_UI_CAPABILITY_SHOW, IMPACT_UI_CAPABILITY_MANAGE]);
-    });
-
-    it('withholds manage from read, so a reader cannot attach impact', () => {
-      const { features } = setupPlugin();
-      const { privileges } = registeredFeature(features);
-
-      expect(privileges.read.api).toEqual([IMPACT_API_PRIVILEGE_READ]);
-      expect(privileges.read.ui).toEqual([IMPACT_UI_CAPABILITY_SHOW]);
+      expect(privileges.all.api).toEqual([]);
+      expect(privileges.all.ui).toEqual([]);
+      expect(privileges.read.api).toEqual([]);
+      expect(privileges.read.ui).toEqual([]);
     });
 
     it('keeps escalations in a sub-feature, joined to the base levels by includeIn', () => {
@@ -157,6 +155,24 @@ describe('AgenticInvestigationsPlugin', () => {
           api: [INVESTIGATIONS_API_PRIVILEGE_MANAGE],
         })
       );
+    });
+
+    it('registers the impact attachment type and workflow steps during setup', () => {
+      const { workflowsExtensions, agentBuilder } = setupPlugin();
+
+      expect(agentBuilder.attachments.registerType).toHaveBeenCalledTimes(1);
+
+      const registeredIds = workflowsExtensions.registerStepDefinition.mock.calls.map(
+        ([definition]) => definition.id
+      );
+      expect(registeredIds).toEqual([AttachImpactStepId, GetImpactStepId]);
+    });
+
+    it('does not resolve the authorization service until a step actually runs', () => {
+      const { coreSetup } = setupPlugin();
+
+      // Steps register during setup, when `security.authz` does not exist yet.
+      expect(coreSetup.getStartServices).not.toHaveBeenCalled();
     });
 
     it('grants no proposals privilege, which the proposals feature owns instead', () => {

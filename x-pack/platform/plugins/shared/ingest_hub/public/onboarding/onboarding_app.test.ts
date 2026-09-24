@@ -86,6 +86,25 @@ describe('hydrateOnboardingSession', () => {
     expect(auth?.authMethod).toBe('static_keys');
     expect(auth?.connectorId).toBeUndefined();
   });
+
+  it('restores ecfStacks into detectAndReviewStep so isMethodLocked stays true on ECF resume', async () => {
+    const ecfStacks = [{ stackName: 'my-stack', region: 'us-east-1', status: 'CREATE_COMPLETE' }];
+    mockSendGet.mockResolvedValue({ item: makeItem({ ecfStacks }) });
+    await hydrateOnboardingSession(INTEGRATION_ID, DEPLOYMENT_ID);
+    const detect = JSON.parse(
+      sessionStorage.getItem(`onboarding.${INTEGRATION_ID}.detectAndReviewStep`) ?? 'null'
+    );
+    expect(detect?.ecfStacks).toEqual(ecfStacks);
+  });
+
+  it('omits ecfStacks from detectAndReviewStep when item has none', async () => {
+    mockSendGet.mockResolvedValue({ item: makeItem({ ecfStacks: undefined }) });
+    await hydrateOnboardingSession(INTEGRATION_ID, DEPLOYMENT_ID);
+    const detect = JSON.parse(
+      sessionStorage.getItem(`onboarding.${INTEGRATION_ID}.detectAndReviewStep`) ?? 'null'
+    );
+    expect(detect?.ecfStacks).toBeUndefined();
+  });
 });
 
 describe('shouldClearSession', () => {

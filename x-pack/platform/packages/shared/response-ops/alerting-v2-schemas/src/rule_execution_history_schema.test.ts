@@ -271,8 +271,12 @@ describe('rule_execution_history_schema', () => {
         expect(parsed.per_page).toBe(25);
       });
 
-      it('rejects per_page below 1', () => {
-        expect(listRuleExecutionsRequestSchema.safeParse({ per_page: 0 }).success).toBe(false);
+      it('accepts per_page=0 for a count-only read', () => {
+        expect(listRuleExecutionsRequestSchema.parse({ per_page: 0 }).per_page).toBe(0);
+      });
+
+      it('rejects negative per_page', () => {
+        expect(listRuleExecutionsRequestSchema.safeParse({ per_page: -1 }).success).toBe(false);
       });
 
       it('rejects per_page above the maximum', () => {
@@ -305,6 +309,15 @@ describe('rule_execution_history_schema', () => {
           per_page: EXECUTION_HISTORY_MAX_PER_PAGE,
         });
         expect(result.success).toBe(false);
+      });
+
+      it('never trips the guard for a count-only read (per_page=0)', () => {
+        expect(
+          listRuleExecutionsRequestSchema.safeParse({
+            page: EXECUTION_HISTORY_MAX_RESULT_WINDOW,
+            per_page: 0,
+          }).success
+        ).toBe(true);
       });
     });
 
@@ -439,7 +452,7 @@ describe('rule_execution_history_schema', () => {
       ).toBe(false);
     });
 
-    it('rejects page or per_page below 1', () => {
+    it('rejects page below 1', () => {
       expect(
         listRuleExecutionsResponseSchema.safeParse({
           items: [],
@@ -448,13 +461,26 @@ describe('rule_execution_history_schema', () => {
           per_page: 20,
         }).success
       ).toBe(false);
+    });
 
+    it('accepts per_page=0 for a count-only read', () => {
+      expect(
+        listRuleExecutionsResponseSchema.safeParse({
+          items: [],
+          total: 42,
+          page: 1,
+          per_page: 0,
+        }).success
+      ).toBe(true);
+    });
+
+    it('rejects a negative per_page', () => {
       expect(
         listRuleExecutionsResponseSchema.safeParse({
           items: [],
           total: 0,
           page: 1,
-          per_page: 0,
+          per_page: -1,
         }).success
       ).toBe(false);
     });

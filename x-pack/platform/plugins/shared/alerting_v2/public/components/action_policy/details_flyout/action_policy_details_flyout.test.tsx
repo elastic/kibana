@@ -14,6 +14,7 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { ActionPolicyDetailsFlyout } from './action_policy_details_flyout';
 
 const ELASTIC_UID = 'elastic_uid';
+const ELASTIC_ACTOR = { profile_uid: ELASTIC_UID };
 
 const mockBulkGet = jest.fn();
 
@@ -72,10 +73,9 @@ const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPoli
   grouping_mode: 'per_field',
   throttle: { strategy: 'time_interval', interval: '5m' },
   snoozed_until: null,
-  auth: { owner: 'elastic', created_by_user: true },
-  created_by: ELASTIC_UID,
+  created_by: ELASTIC_ACTOR,
   created_at: '2026-03-01T10:00:00.000Z',
-  updated_by: ELASTIC_UID,
+  updated_by: ELASTIC_ACTOR,
   updated_at: '2026-03-02T11:00:00.000Z',
   ...overrides,
 });

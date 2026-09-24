@@ -13,6 +13,8 @@ import {
   type EpisodeSeverity,
 } from '../components/severity/severity_utils';
 
+export type SeverityRankResolver = (severity: string | null | undefined) => number;
+
 const NO_SEVERITY_RANK = -1;
 
 const DATE_SORT_FIELDS = new Set([
@@ -23,7 +25,7 @@ const DATE_SORT_FIELDS = new Set([
   'snooze_expiry',
 ]);
 
-const getSeverityRank = (severity: AlertEpisode['severity']): number => {
+const defaultSeverityRankResolver: SeverityRankResolver = (severity) => {
   if (!isSupportedEpisodeSeverity(severity)) {
     return NO_SEVERITY_RANK;
   }
@@ -53,9 +55,18 @@ const compareValues = (a: unknown, b: unknown): number => {
   return String(a).localeCompare(String(b));
 };
 
-const compareEpisodes = (a: AlertEpisode, b: AlertEpisode, sortField: string): number => {
+const compareEpisodes = (
+  a: AlertEpisode,
+  b: AlertEpisode,
+  sortField: string,
+  rankResolver: SeverityRankResolver
+): number => {
   if (sortField === 'severity') {
-    return getSeverityRank(a.severity) - getSeverityRank(b.severity);
+    const rankDiff = rankResolver(a.severity) - rankResolver(b.severity);
+    if (rankDiff !== 0) {
+      return rankDiff;
+    }
+    return toMillis(a['@timestamp']) - toMillis(b['@timestamp']);
   }
   if (DATE_SORT_FIELDS.has(sortField)) {
     return (
@@ -68,12 +79,13 @@ const compareEpisodes = (a: AlertEpisode, b: AlertEpisode, sortField: string): n
 export const mergeEpisodes = (
   episodeLists: AlertEpisode[][],
   sortState: EpisodesSortState,
-  pageSize: number
+  pageSize: number,
+  severityRankResolver: SeverityRankResolver = defaultSeverityRankResolver
 ): AlertEpisode[] => {
   const direction = sortState.sortDirection === 'asc' ? 1 : -1;
 
   return episodeLists
     .flat()
-    .sort((a, b) => direction * compareEpisodes(a, b, sortState.sortField))
+    .sort((a, b) => direction * compareEpisodes(a, b, sortState.sortField, severityRankResolver))
     .slice(0, pageSize);
 };

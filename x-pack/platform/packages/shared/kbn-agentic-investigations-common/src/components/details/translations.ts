@@ -43,7 +43,7 @@ export const DETAILS_FLYOUT_LABELS = Object.freeze({
   },
   actions: {
     openChat: i18n.translate('xpack.alertzero.detailsFlyout.actions.openChat', {
-      defaultMessage: 'Open in chat',
+      defaultMessage: 'Open chat',
     }),
     openCase: i18n.translate('xpack.alertzero.detailsFlyout.actions.openCase', {
       defaultMessage: 'Open a case',

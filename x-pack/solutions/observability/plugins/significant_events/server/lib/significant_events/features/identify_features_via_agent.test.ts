@@ -101,7 +101,7 @@ describe('executeFeatureIdentificationAgent', () => {
     expect(createConversation).toHaveBeenCalledWith({
       agentId: FEATURE_IDENTIFICATION_AGENT_ID,
       title: 'Feature identification: logs.test',
-      accessControl: { access_mode: 'private' },
+      accessControl: { access_mode: 'public' },
     });
     expect(executeAgent).toHaveBeenCalledWith(
       expect.objectContaining({

@@ -65,7 +65,7 @@ export class DiscoverPageObject extends FtrService {
    * chrome has no breadcrumbs, so we rely on the new/open buttons, which are hidden only while editing.
    */
   private async isStandaloneDiscoverSession(): Promise<boolean> {
-    if (await this.globalNav.isNextProjectChrome()) {
+    if (await this.globalNav.isProjectChrome()) {
       return !(await this.isOnDashboardsEditMode());
     }
     return (await this.globalNav.getFirstBreadcrumb()) === 'Discover';

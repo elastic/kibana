@@ -60,6 +60,8 @@ interface ManagedIntegrationsSectionProps {
   isDeploying: boolean;
   isDone: boolean;
   hasFailed: boolean;
+  /** When true, Deploy only runs cleanup (Fleet API calls) — AWS credentials are not required. */
+  isCleanupOnly?: boolean;
 }
 
 export function ManagedIntegrationsSection({
@@ -70,6 +72,7 @@ export function ManagedIntegrationsSection({
   isDeploying,
   isDone,
   hasFailed,
+  isCleanupOnly = false,
 }: ManagedIntegrationsSectionProps) {
   const { services } = useKibana<CoreStart & { cloud?: CloudStart }>();
   const { setConnectorId, setStaticKeys, setPendingIacTemplate, authenticateAndDeployStep } =
@@ -116,7 +119,14 @@ export function ManagedIntegrationsSection({
     if (isDone) setIsOpen(false);
   }, [isDone]);
 
-  const [isDeployReady, setIsDeployReady] = useState(false);
+  // Re-seed from session so the user doesn't have to re-enter credentials they already provided
+  // (e.g. after navigating Back/Forward or adding a new service without changing auth).
+  // isStaticKeysEditMode intentionally skips the seed: the replace-flow requires new credentials.
+  const [isDeployReady, setIsDeployReady] = useState(() => {
+    if (isStaticKeysEditMode) return false;
+    const keys = authenticateAndDeployStep.staticKeys;
+    return Boolean(keys?.access_key_id && keys?.secret_access_key);
+  });
 
   const handleStaticKeysChange = useCallback(
     (fields: AwsStaticKeyCredentials | undefined) => {
@@ -340,7 +350,7 @@ export function ManagedIntegrationsSection({
 
             {!hasFailed && !isDone && (
               <EuiButton
-                isDisabled={!isDeployReady}
+                isDisabled={!isDeployReady && !isCleanupOnly}
                 isLoading={isDeploying}
                 onClick={onDeploy}
                 data-test-subj="managedIntegrationsSection-deployButton"

@@ -8,7 +8,7 @@
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import { IMPACT_INTERNAL_URL } from '../../../common/impact/constants';
-import { IMPACT_API_PRIVILEGE_MANAGE, IMPACT_API_PRIVILEGE_READ } from '../constants';
+import { INVESTIGATIONS_API_PRIVILEGE_MANAGE } from '../../investigations/constants';
 import {
   ImpactConflictError,
   ImpactInvalidRequestError,
@@ -64,17 +64,19 @@ describe('investigation impact routes', () => {
     jest.clearAllMocks();
   });
 
-  it('gates attach on manage and get on read', () => {
+  it('gates attach and get on the investigations manage privilege', () => {
     const { posts, gets } = registerAndCollect({});
 
     expect(posts).toHaveLength(1);
     expect(gets).toHaveLength(1);
     expect(posts[0].config.path).toBe(IMPACT_INTERNAL_URL);
     expect(posts[0].config.security?.authz?.requiredPrivileges).toEqual([
-      IMPACT_API_PRIVILEGE_MANAGE,
+      INVESTIGATIONS_API_PRIVILEGE_MANAGE,
     ]);
     expect(gets[0].config.path).toBe(IMPACT_INTERNAL_URL);
-    expect(gets[0].config.security?.authz?.requiredPrivileges).toEqual([IMPACT_API_PRIVILEGE_READ]);
+    expect(gets[0].config.security?.authz?.requiredPrivileges).toEqual([
+      INVESTIGATIONS_API_PRIVILEGE_MANAGE,
+    ]);
   });
 
   it('attaches through the service with the space and the resolved user, never a body actor', async () => {

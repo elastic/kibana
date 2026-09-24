@@ -3,7 +3,7 @@ pageLoadAssetSize:
   advancedSettings: 1981
   agentBuilder: 644
   agentBuilderDashboards: 3743
-  agentBuilderPlatform: 21685
+  agentBuilderPlatform: 23882
   agentBuilderSml: 597
   agentBuilderVisualizations: 1551
   agentBuilderWorkflows: 1029
@@ -90,7 +90,7 @@ pageLoadAssetSize:
   files: 3954
   filesManagement: 940
   fileUpload: 480
-  fleet: 7307
+  fleet: 8071
   genAiSettings: 1795
   globalSearch: 5447
   globalSearchBar: 21704

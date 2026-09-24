@@ -14,8 +14,10 @@ import type {
   SignificantEventStatus,
   TriggerFeedback,
 } from '@kbn/significant-events-schema';
+import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { EventClient } from './event_client';
 import { emitSignificantEventWriteTriggers } from '../../../workflows/triggers/emit_significant_event_triggers';
+import { toRuleEvent } from './to_rule_event';
 
 interface SignificantEventFieldChanges {
   status?: SignificantEventStatus;
@@ -95,12 +97,14 @@ export const attachInvestigationToEvent = async ({
   eventId,
   investigation,
   triggerFeedback,
+  alertEventsClient,
   logger,
 }: {
   eventClient: EventClient;
   eventId: string;
   investigation: SignificantEventInvestigation;
   triggerFeedback?: SignificantEventTriggerFeedback;
+  alertEventsClient?: AlertEventsClientApi;
   logger?: Logger;
 }): Promise<{ event_uuid: string; updated: number; ignored: number }> => {
   const { hits } = await eventClient.findByEventId(eventId);
@@ -150,6 +154,16 @@ export const attachInvestigationToEvent = async ({
   };
 
   await eventClient.bulkCreate([updatedEvent], { throwOnFail: true });
+
+  alertEventsClient
+    ?.createAlertEvent(toRuleEvent(updatedEvent))
+    .catch((err) =>
+      logger?.error(
+        `attach_investigation dual-write to .rule-events failed: ${
+          err instanceof Error ? err.message : err
+        }`
+      )
+    );
 
   emitSignificantEventWriteTriggers({
     eventClient,

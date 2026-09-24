@@ -11,7 +11,7 @@ import { brandSpaceId, DEFAULT_SPACE_ID, type SpaceId } from '@kbn/core-spaces-c
 import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { ALERTING_ERROR_CODES, type RulesClientApi } from '@kbn/alerting-v2-plugin/server';
-import type { StreamsServer } from '@kbn/streams-plugin/server/types';
+import type { SignificantEventsServer } from '../../types';
 import type {
   SignificantEventsMaintenanceFailure,
   SignificantEventsMaintenanceStatus,
@@ -183,7 +183,7 @@ export const createSignificantEventsMaintenanceService = ({
   getScopedClients,
 }: {
   logger: Logger;
-  server: StreamsServer;
+  server: SignificantEventsServer;
   getScopedClients: GetScopedClients;
 }): SignificantEventsMaintenanceService => {
   const log = logger.get('significant-events-maintenance');

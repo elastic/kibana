@@ -149,6 +149,13 @@ export const ObservabilityAlertingApp = ({
     'rules'
   );
   const rulesTabVisibility = { showV1: hasV1Rules, showV2: hasV2Rules };
+
+  const manageRulesHref = useMemo(() => {
+    const rulesPath = hasV2Rules
+      ? OBSERVABILITY_ALERTING_RULES_V2_PATH
+      : OBSERVABILITY_ALERTING_RULES_V1_PATH;
+    return prepend(`${OBSERVABILITY_ALERTING_BASE_PATH}${rulesPath}`);
+  }, [hasV2Rules, prepend]);
   const rulesV1Tabs = useObservabilityRulesTabs(prepend, 'v1', rulesTabVisibility);
   const rulesV2Tabs = useObservabilityRulesTabs(prepend, 'v2', rulesTabVisibility);
 
@@ -176,6 +183,7 @@ export const ObservabilityAlertingApp = ({
             setBreadcrumbs={setBreadcrumbs}
             hostApp={hostApp}
             privilegeCheck={privilegeCheck}
+            manageRulesHref={manageRulesHref}
           />
         </EuiPageSection>
       </Route>

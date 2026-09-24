@@ -14,6 +14,7 @@ import { SavedSearchType } from '@kbn/saved-search-plugin/common';
 import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server';
 import type { DiscoverSessionApiResponse } from './schema';
 import { transformDiscoverSessionIn, transformDiscoverSessionOut } from './transforms';
+import { assignStoredInlineDataViewIds } from './transforms/assign_stored_inline_data_view_ids';
 
 export const createDiscoverSession = async (
   requestContext: RequestHandlerContext,
@@ -24,7 +25,7 @@ export const createDiscoverSession = async (
 
   const savedObject = await core.savedObjects.client.create<DiscoverSessionAttributes>(
     SavedSearchType,
-    attributes,
+    assignStoredInlineDataViewIds(attributes),
     { references }
   );
 

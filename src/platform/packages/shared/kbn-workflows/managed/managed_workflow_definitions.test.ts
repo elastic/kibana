@@ -91,7 +91,7 @@ const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
     settingsVersion: 1,
     autonomyLevel: 'manual',
     scheduleInterval: '2h',
-    extras: { analysisWindowDays: 14 },
+    extras: { analysisWindowDays: 7, fpCountThreshold: 10, fpRateThresholdPct: 50 },
   },
   [ALERTZERO_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID]: {
     settingsVersion: 1,
@@ -200,7 +200,7 @@ it.each([
     HUNT_CONTINUOUS_THREAT_HUNT_YAML,
     '1:83a50923',
   ],
-  [ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID, DETECTION_RULE_TUNING_YAML, '6:01d470b4'],
+  [ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID, DETECTION_RULE_TUNING_YAML, '7:f3649616'],
   [
     ALERTZERO_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID,
     DETECTION_RULE_CREATION_YAML,

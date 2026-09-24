@@ -52,7 +52,7 @@ export const EpisodeActionPolicyHistoryTab = ({ episodeId, episodeStart }: Props
     search: searchParam,
     outcome: outcomeParam,
     episodeIds: [episodeId],
-    startDate: episodeStart,
+    from: episodeStart,
   });
 
   const onSearchChange = useCallback((value: string) => {
@@ -72,7 +72,7 @@ export const EpisodeActionPolicyHistoryTab = ({ episodeId, episodeStart }: Props
   }, []);
 
   const items = data?.items ?? [];
-  const totalEvents = data?.total_events ?? 0;
+  const totalEvents = data?.total ?? 0;
   const isFiltered = searchParam !== undefined || outcome !== DEFAULT_OUTCOME;
 
   return (

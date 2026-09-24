@@ -36,7 +36,7 @@ export const serviceAccountRoleNameSchema = z
 
 /**
  * The role list an account is created with, whether the caller named it or Kibana derived it. One
- * schema for both, so that nothing Kibana writes falls outside what it is willing to read back.
+ * schema for both, so a list Kibana derives is held to exactly what a caller could have named.
  */
 export const serviceAccountRolesSchema = z
   .array(serviceAccountRoleNameSchema)

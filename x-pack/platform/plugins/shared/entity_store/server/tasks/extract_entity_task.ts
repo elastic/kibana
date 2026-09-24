@@ -30,9 +30,14 @@ import {
   resolveExtractionMode,
 } from '../../common/domain/definitions/registry';
 import { ENGINE_STATUS } from '../domain/constants';
-import { EngineDescriptorTypeName, EngineDescriptorClient } from '../domain/saved_objects';
+import {
+  EngineDescriptorTypeName,
+  EngineDescriptorClient,
+  EntityStoreGlobalStateClient,
+} from '../domain/saved_objects';
 import { wrapTaskRun } from '../telemetry/traces';
-import { entityStoreMetrics } from '../monitor/metrics';
+import { buildExtractionAttributes, entityStoreMetrics } from '../monitor/metrics';
+import { NonPriorityExtractionDisabledError } from '../domain/errors';
 import { shouldDeleteOrphanedEntityStoreTask } from './should_delete_orphaned_task';
 import { getMergedConfig } from '../domain/config';
 
@@ -110,7 +115,15 @@ async function bootstrapNonPriorityTask({
       logger,
       true
     );
-    const descriptor = await engineDescriptorClient.findOrThrow(entityType);
+    const globalStateClient = new EntityStoreGlobalStateClient(
+      coreStart.savedObjects.getUnsafeInternalClient().asScopedToNamespace(namespace),
+      namespace,
+      logger
+    );
+    const [descriptor, globalOverrides] = await Promise.all([
+      engineDescriptorClient.findOrThrow(entityType),
+      globalStateClient.findLogExtractionOverrides(),
+    ]);
 
     // Skip scheduling for stopped engines: stop()/uninstall() remove both tasks and this tick
     // must not recreate the non-priority one.
@@ -118,12 +131,12 @@ async function bootstrapNonPriorityTask({
       return;
     }
 
-    // Use the merged config so a custom frequency is not overwritten with the static default.
     const { frequency } = getMergedConfig(
       entityType,
-      {},
+      globalOverrides,
       descriptor.logExtractionConfig,
-      EXTRACTION_MODE.nonPriority
+      EXTRACTION_MODE.nonPriority,
+      descriptor.nonPriorityLogExtractionConfig
     );
 
     await pluginsStart.taskManager.ensureScheduled(
@@ -230,6 +243,10 @@ async function runTask({
   }
 
   let remote = false;
+  const metricAttributes = () =>
+    buildExtractionAttributes(entityType, namespace, extractionMode, remote);
+
+  const extractionStart = Date.now();
 
   try {
     const { logsExtractionClient } = await createLogsExtractionClient({
@@ -241,31 +258,31 @@ async function runTask({
       extractionMode,
     });
 
-    const extractionStart = Date.now();
     const extractionResult = await logsExtractionClient.extractLogs(entityType, {
       signal,
     });
     const extractionDuration = moment().diff(extractionStart, 'milliseconds');
 
     remote = extractionResult.isRemote;
-    if (!extractionResult.success) {
+
+    if (extractionResult.success) {
+      logger.info(
+        `Successfully extracted ${extractionResult.count} entities for ${entityType}, took ${extractionDuration}ms  `
+      );
+      entityStoreMetrics.extractionTaskSuccess.add(1, metricAttributes());
+    } else if (extractionResult.error instanceof NonPriorityExtractionDisabledError) {
+      // Not a failure: the non-priority process is switched off and this tick did nothing.
+      // Counting it as an extraction error would make an idle process look permanently broken.
+      logger.debug(
+        `Non-priority extraction skipped for ${entityType}: ${extractionResult.error.message}`
+      );
+    } else {
       logger.error(
         `Logs extraction failed for ${entityType}: ${extractionResult.error.message}, took ${extractionDuration}ms`
       );
       entityStoreMetrics.extractionTaskError.add(1, {
-        entity_type: entityType,
-        namespace,
+        ...metricAttributes(),
         error_type: extractionResult.error.name ?? 'UnknownError',
-        remote,
-      });
-    } else {
-      logger.info(
-        `Successfully extracted ${extractionResult.count} entities for ${entityType}, took ${extractionDuration}ms  `
-      );
-      entityStoreMetrics.extractionTaskSuccess.add(1, {
-        entity_type: entityType,
-        namespace,
-        remote,
       });
     }
 
@@ -293,10 +310,8 @@ async function runTask({
     logger.error(`Error running extract entity task, received ${e.message}`);
 
     entityStoreMetrics.extractionTaskError.add(1, {
-      entity_type: entityType,
-      namespace,
+      ...metricAttributes(),
       error_type: e.name ?? 'UnknownError',
-      remote,
     });
 
     return {
@@ -308,6 +323,11 @@ async function runTask({
         entityType,
       },
     };
+  } finally {
+    entityStoreMetrics.extractionTaskDurationMs.record(
+      moment().diff(extractionStart, 'milliseconds'),
+      metricAttributes()
+    );
   }
 }
 

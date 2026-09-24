@@ -50,3 +50,37 @@ export interface UiamServiceAccount {
   role_assignments: ServiceAccountRoleAssignments;
   assumable_by: ServiceAccountAssumableBy[];
 }
+
+/**
+ * The principal UIAM records as an account's creator. A user is identified by the numeric id that
+ * is also their Kibana username on serverless.
+ */
+export type UiamServiceAccountCreator =
+  | {
+      type: 'user';
+      id: string;
+      first_name?: string;
+      last_name?: string;
+    }
+  | {
+      type: 'api-key';
+      id: string;
+      description?: string;
+    };
+
+/**
+ * A service account as UIAM reports it from get and list, which add `creator` to what create
+ * returns.
+ */
+export interface UiamServiceAccountDetails extends UiamServiceAccount {
+  creator: UiamServiceAccountCreator;
+}
+
+/**
+ * One page of UIAM's list. `next_page` is the last id on the page and is only present when more
+ * results remain; it goes back to UIAM as `after`.
+ */
+export interface UiamListServiceAccountsResponse {
+  service_accounts: UiamServiceAccountDetails[];
+  next_page?: string;
+}

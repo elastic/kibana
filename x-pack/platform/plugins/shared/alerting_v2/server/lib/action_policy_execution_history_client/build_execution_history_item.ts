@@ -176,6 +176,9 @@ export function buildExecutionHistoryItem(
     total_rule_count: totalRuleCount,
     workflows,
     failure_reason: failureReason as DispatchFailureReason | undefined,
-    error: errorMessage !== undefined ? { message: errorMessage } : undefined,
+    error:
+      errorMessage !== undefined
+        ? { message: errorMessage, stack_trace: event.error?.stack_trace ?? null }
+        : null,
   };
 }

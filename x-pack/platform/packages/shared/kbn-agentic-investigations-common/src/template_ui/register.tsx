@@ -11,11 +11,12 @@ import { EuiSkeletonText } from '@elastic/eui';
 import type { ConversationTemplateServiceStartContract } from '@kbn/agent-builder-browser';
 import { DETAILS_FLYOUT_LABELS } from '../components/details/translations';
 import { ConversationTitle } from './conversation_title';
+import type { RenderAssignees } from './types';
 
 /**
  * The slot contents are loaded on demand: registration runs during every consuming plugin's
  * `start`, so anything this module imports statically lands in that plugin's page load bundle.
- * All three share one chunk, which the first opened flyout pulls in.
+ * All share one chunk, which the first opened flyout pulls in.
  */
 const LazyOverviewSlot = lazy(() =>
   import('./slots').then(({ OverviewSlot }) => ({ default: OverviewSlot }))
@@ -25,6 +26,9 @@ const LazyHeaderSlot = lazy(() =>
 );
 const LazyFooterSlot = lazy(() =>
   import('./slots').then(({ FooterSlot }) => ({ default: FooterSlot }))
+);
+const LazyEscalationHeaderSlot = lazy(() =>
+  import('./slots').then(({ EscalationHeaderSlot }) => ({ default: EscalationHeaderSlot }))
 );
 
 /**
@@ -48,6 +52,12 @@ export interface RegisterAgenticInvestigationTemplateUIOptions {
    * Kibana HTTP hooks unavailable in this package.
    */
   renderEscalationModal?: import('./slots').FooterSlotProps['onOpenEscalation'];
+  /**
+   * When provided, the header renders an interactive assignee picker instead of the read-only
+   * avatar stack. Supplied by the caller so the picker can use HTTP hooks and Kibana context
+   * unavailable in this package.
+   */
+  renderAssignees?: RenderAssignees;
 }
 
 /**
@@ -63,6 +73,7 @@ export const registerAgenticInvestigationTemplateUI = ({
   name,
   icon,
   renderEscalationModal,
+  renderAssignees,
 }: RegisterAgenticInvestigationTemplateUIOptions): void => {
   const [overviewTabId] = getInvestigationTabIds(templateId);
 
@@ -84,12 +95,16 @@ export const registerAgenticInvestigationTemplateUI = ({
       icon,
       tabs: [overviewTabId],
       detailsFlyout: {
-        header: function InvestigationFlyoutHeader({ conversation }) {
+        header: function InvestigationFlyoutHeader({ conversation, refetchConversation }) {
           return (
             // Agent Builder points the flyout's `aria-labelledby` at the header, so it must not
             // collapse to nothing while the slot's chunk loads.
             <Suspense fallback={<ConversationTitle title={conversation.title} />}>
-              <LazyHeaderSlot conversation={conversation} />
+              <LazyHeaderSlot
+                conversation={conversation}
+                renderAssignees={renderAssignees}
+                refetchConversation={refetchConversation}
+              />
             </Suspense>
           );
         },
@@ -104,6 +119,7 @@ export const registerAgenticInvestigationTemplateUI = ({
                   openFullscreenConversation({
                     conversationId: conversation.id,
                     agentId: conversation.agent_id,
+                    openDetails: true,
                   })
                 }
                 onOpenEscalation={renderEscalationModal}
@@ -114,4 +130,61 @@ export const registerAgenticInvestigationTemplateUI = ({
       },
     })
   );
+};
+
+// ---------------------------------------------------------------------------
+// Escalation flyout registration
+// ---------------------------------------------------------------------------
+
+export interface RegisterEscalationTemplateUIOptions {
+  conversationTemplates: ConversationTemplateServiceStartContract;
+  /** Escalation template id (typically `'escalation'`). Agent Builder throws on duplicate. */
+  templateId: string;
+  /** Localized template display name. */
+  name: string;
+  icon?: IconType;
+  /**
+   * When provided, the header renders an interactive assignee picker.
+   * See `RegisterAgenticInvestigationTemplateUIOptions.renderAssignees`.
+   */
+  renderAssignees?: RenderAssignees;
+}
+
+/**
+ * Registers the escalation conversation details flyout UI.
+ *
+ * Unlike investigations the escalation flyout has no tabs and no footer: its header shows the
+ * title, the status badge and the assignee picker. The body is empty, which Agent Builder renders
+ * as a blank `EuiFlyoutBody`.
+ *
+ * Call once from the plugin's `start`, **after** `registerAgenticInvestigationTemplateUI`.
+ * Agent Builder throws if the template id is already registered.
+ */
+export const registerEscalationTemplateUI = ({
+  conversationTemplates,
+  templateId,
+  name,
+  icon,
+  renderAssignees,
+}: RegisterEscalationTemplateUIOptions): void => {
+  conversationTemplates.registerTemplateUIDefinition(templateId, () => ({
+    name,
+    icon,
+    // No tabs: the body is intentionally empty for this MVP.
+    tabs: [],
+    detailsFlyout: {
+      header: function EscalationFlyoutHeaderWrapper({ conversation, refetchConversation }) {
+        return (
+          <Suspense fallback={<ConversationTitle title={conversation.title} />}>
+            <LazyEscalationHeaderSlot
+              conversation={conversation}
+              renderAssignees={renderAssignees}
+              refetchConversation={refetchConversation}
+            />
+          </Suspense>
+        );
+      },
+      // No footer for escalations yet.
+    },
+  }));
 };
