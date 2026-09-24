@@ -332,41 +332,37 @@ export async function resolveJestConfig(
   parsedArguments: any,
   resolvedConfigPath?: string
 ): Promise<{ config: Config.InitialOptions; configPath: string | undefined }> {
-  let initialOptions: Config.InitialOptions | undefined;
-
-  // If a config path was provided via argv, try to parse it as JSON first
   if (parsedArguments.config) {
     try {
-      initialOptions = JSON.parse(parsedArguments.config);
-    } catch (err) {
-      // If JSON parsing fails, treat it as a config file path
-      resolvedConfigPath = parsedArguments.config;
+      // Inline JSON has no file. Ignore resolvedConfigPath: runJest passes the raw
+      // --config string there, and that string is not a path.
+      return { config: JSON.parse(parsedArguments.config), configPath: undefined };
+    } catch {
+      // Not JSON. Fall through and load parsedArguments.config as a file.
     }
   }
 
-  if (!initialOptions && !resolvedConfigPath) {
+  const configFilePath = parsedArguments.config || resolvedConfigPath;
+  if (!configFilePath) {
     throw new Error(
       '--config is not set or invalid, and no config path was found for any listed files'
     );
   }
 
-  if (!initialOptions) {
-    const configFileExists = await fs
-      .stat(resolvedConfigPath!)
-      .then((stat) => stat.isFile())
-      .catch(() => false);
+  const configFileExists = await fs
+    .stat(configFilePath)
+    .then((stat) => stat.isFile())
+    .catch(() => false);
 
-    if (!configFileExists) {
-      throw new Error(`Config at ${resolvedConfigPath} does not exist`);
-    }
-
-    // readInitialOptions returns an object that includes the resolved Jest config at `config`
-    // along with some metadata (e.g. configPath). We only want to pass the actual Jest
-    // config object to --config, augmented with our overrides.
-    initialOptions = (await readInitialOptions(resolvedConfigPath!)).config;
+  if (!configFileExists) {
+    throw new Error(`Config at ${configFilePath} does not exist`);
   }
 
-  return { config: initialOptions, configPath: resolvedConfigPath };
+  // readInitialOptions returns an object that includes the resolved Jest config at `config`
+  // along with some metadata (e.g. configPath). We only want to pass the actual Jest
+  // config object to --config, augmented with our overrides.
+  const initialOptions = (await readInitialOptions(configFilePath)).config;
+  return { config: initialOptions, configPath: configFilePath };
 }
 
 interface JestExecutionContext {

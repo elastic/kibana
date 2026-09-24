@@ -471,9 +471,13 @@ describe('run.ts', () => {
       const configJson = '{"testMatch": ["**/*.test.js"]}';
       const parsedArguments = { config: configJson };
 
+      // runJest seeds resolvedConfigPath with the raw --config value.
       const result = await resolveJestConfig(parsedArguments, configJson);
 
-      expect(result).toEqual({ config: { testMatch: ['**/*.test.js'] }, configPath: configJson });
+      expect(result).toEqual({
+        config: { testMatch: ['**/*.test.js'] },
+        configPath: undefined,
+      });
     });
 
     it('should handle invalid JSON config as file path', async () => {
@@ -568,6 +572,23 @@ describe('run.ts', () => {
         id: 'kbn-test-jest',
         cacheDirectory: '/mock/repo/root/data/jest-cache',
       });
+    });
+
+    it('inlines a JSON --config that declares projects after resolveJestConfig', async () => {
+      const projects = ['<rootDir>/lens/public/jest.config.dev.js'];
+      const configJson = JSON.stringify({ projects });
+
+      const { config, configPath } = await resolveJestConfig({ config: configJson }, configJson);
+      const result = await prepareJestExecution(config, configPath);
+
+      expect(configPath).toBeUndefined();
+      const configValue = JSON.parse(result.jestArgv[result.jestArgv.indexOf('--config') + 1]);
+      expect(configValue).toEqual({
+        projects,
+        id: 'kbn-test-jest',
+        cacheDirectory: '/mock/repo/root/data/jest-cache',
+      });
+      expect(result.jestArgv).not.toContain('--cacheDirectory');
     });
 
     it('keeps inlining a file config that does not declare projects', async () => {
