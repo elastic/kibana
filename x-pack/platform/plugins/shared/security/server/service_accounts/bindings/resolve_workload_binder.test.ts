@@ -6,9 +6,15 @@
  */
 
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import {
+  CLOUD_SERVICE_ACCOUNT_REALM_TYPE,
+  SERVICE_ACCOUNT_REALM_TYPE,
+} from '@kbn/core-security-common';
 
 import { bestEffortUserProfileIdResolver, resolveWorkloadBinder } from './resolve_workload_binder';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
+
+const HTTP_PROVIDER = { type: 'http', name: '__http__' };
 
 describe('resolveWorkloadBinder', () => {
   let resolveUserProfileId: jest.Mock<Promise<string | undefined>, []>;
@@ -57,6 +63,7 @@ describe('resolveWorkloadBinder', () => {
   it('records UIAM API keys by ID alone, without asking Elasticsearch about the creator', async () => {
     const binder = await resolveWorkloadBinder(
       mockAuthenticatedUser({
+        authentication_provider: HTTP_PROVIDER,
         api_key: { id: 'key-id', name: 'key', managed_by: 'cloud' },
       }),
       resolveUserProfileId
@@ -71,6 +78,7 @@ describe('resolveWorkloadBinder', () => {
     await expect(
       resolveWorkloadBinder(
         mockAuthenticatedUser({
+          authentication_provider: HTTP_PROVIDER,
           api_key: { id: 'key-id', name: 'key', managed_by: 'elasticsearch' },
         }),
         resolveUserProfileId
@@ -87,6 +95,7 @@ describe('resolveWorkloadBinder', () => {
     await resolveWorkloadBinder(
       mockAuthenticatedUser({
         profile_uid: 'the-requests-own-profile',
+        authentication_provider: HTTP_PROVIDER,
         api_key: { id: 'key-id', name: 'key', managed_by: 'elasticsearch' },
       }),
       resolveUserProfileId
@@ -100,6 +109,7 @@ describe('resolveWorkloadBinder', () => {
 
     const binder = await resolveWorkloadBinder(
       mockAuthenticatedUser({
+        authentication_provider: HTTP_PROVIDER,
         api_key: { id: 'key-id', name: 'key', managed_by: 'elasticsearch' },
       }),
       resolveUserProfileId
@@ -114,7 +124,11 @@ describe('resolveWorkloadBinder', () => {
       resolveWorkloadBinder(
         mockAuthenticatedUser({
           username: 'elastic/kibana',
-          authentication_realm: { name: '_service_account', type: '_service_account' },
+          authentication_provider: HTTP_PROVIDER,
+          authentication_realm: {
+            name: SERVICE_ACCOUNT_REALM_TYPE,
+            type: SERVICE_ACCOUNT_REALM_TYPE,
+          },
           // Precedence: the machine identity wins over an accompanying credential.
           api_key: { id: 'key-id', name: 'key', managed_by: 'elasticsearch' },
         }),
@@ -123,6 +137,40 @@ describe('resolveWorkloadBinder', () => {
     ).resolves.toEqual({ type: 'service_account', serviceAccountId: 'elastic/kibana' });
 
     expect(resolveUserProfileId).not.toHaveBeenCalled();
+  });
+
+  it('records UIAM service accounts by ID as service accounts, not as users', async () => {
+    await expect(
+      resolveWorkloadBinder(
+        mockAuthenticatedUser({
+          username: 'JHb4PA-cStyMYWVkKrIwpA',
+          authentication_provider: HTTP_PROVIDER,
+          authentication_realm: {
+            name: CLOUD_SERVICE_ACCOUNT_REALM_TYPE,
+            type: CLOUD_SERVICE_ACCOUNT_REALM_TYPE,
+          },
+          profile_uid: undefined,
+        }),
+        resolveUserProfileId
+      )
+    ).resolves.toEqual({ type: 'service_account', serviceAccountId: 'JHb4PA-cStyMYWVkKrIwpA' });
+
+    expect(resolveUserProfileId).not.toHaveBeenCalled();
+  });
+
+  it('records anonymous callers as users, matching the persisted binder shape', async () => {
+    resolveUserProfileId.mockResolvedValue(undefined);
+
+    await expect(
+      resolveWorkloadBinder(
+        mockAuthenticatedUser({
+          username: 'anonymous_user',
+          profile_uid: undefined,
+          authentication_provider: { type: 'anonymous', name: 'anonymous1' },
+        }),
+        resolveUserProfileId
+      )
+    ).resolves.toEqual({ type: 'user', username: 'anonymous_user' });
   });
 });
 
