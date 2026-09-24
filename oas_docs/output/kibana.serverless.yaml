@@ -141850,7 +141850,7 @@ components:
         - data
     Kibana_HTTP_APIs_alerting_rule_breach:
       additionalProperties: false
-      description: Optional ES|QL clause appended to `query.base`. If omitted, every row from `query.base` is a match.
+      description: Optional ES|QL clause appended to `query.base`. If omitted, every row from `query.base` is a match, and a `no_data` strategy other than `ignore` then requires `no_data.query`.
       type: object
       properties:
         segment:
@@ -142030,7 +142030,7 @@ components:
       required:
         - name
     Kibana_HTTP_APIs_alerting_rule_no_data:
-      description: What the rule does when a group has no data. Required when `kind` is `alert`. Not allowed when `kind` is `signal`.
+      description: What the rule does when a group has no data. Required when `kind` is `alert`. Not allowed when `kind` is `signal`. Any strategy other than `ignore` requires either `query.breach` or `no_data.query`, so that a group with no data can be told apart from one that stopped breaching.
       discriminator:
         mapping:
           alert: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_no_data_alert'
@@ -142049,7 +142049,7 @@ components:
       type: object
       properties:
         query:
-          description: Optional ES|QL query that checks whether a group has data. If omitted, `query.base` is used.
+          description: Optional ES|QL query that checks whether a group has data. If omitted, `query.base` is used, which then has to be a presence query in its own right — so `query.breach` is required.
           maxLength: 10000
           minLength: 1
           type: string
@@ -142076,7 +142076,7 @@ components:
       type: object
       properties:
         query:
-          description: Optional ES|QL query that checks whether a group has data. If omitted, `query.base` is used.
+          description: Optional ES|QL query that checks whether a group has data. If omitted, `query.base` is used, which then has to be a presence query in its own right — so `query.breach` is required.
           maxLength: 10000
           minLength: 1
           type: string
@@ -142092,7 +142092,7 @@ components:
       type: object
       properties:
         query:
-          description: Optional ES|QL query that checks whether a group has data. If omitted, `query.base` is used.
+          description: Optional ES|QL query that checks whether a group has data. If omitted, `query.base` is used, which then has to be a presence query in its own right — so `query.breach` is required.
           maxLength: 10000
           minLength: 1
           type: string
