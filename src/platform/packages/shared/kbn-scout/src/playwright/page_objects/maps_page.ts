@@ -130,7 +130,8 @@ export class MapsPage {
     // Mapbox GL renders a <canvas> only after mapApi is initialised; mapContainer is
     // visible before that, so gate both branches on this signal.
     await this.page.waitForFunction(
-      () => document.querySelector('[data-test-subj="mapContainer"]')?.querySelector('canvas') !== null,
+      () =>
+        document.querySelector('[data-test-subj="mapContainer"]')?.querySelector('canvas') !== null,
       undefined,
       { timeout: DEFAULT_MAP_LOADING_TIMEOUT }
     );
