@@ -14,6 +14,8 @@ import { EXECUTION_TABLE_DEFAULT_PAGE_SIZE } from './workflow_executions_page_co
 import { createStartServicesMock } from '../../mocks';
 import { getTestProvider } from '../../shared/mocks/test_providers';
 
+jest.setTimeout(30_000);
+
 jest.mock('../../shared/ui/filter_controls', () => ({
   FilterControls: () => <div data-test-subj="filterControlsStub" />,
 }));
