@@ -12,9 +12,7 @@ import {
   ConversationDetailsFlyoutHeader,
   ConversationDetailsFlyoutFooter,
   type ConversationDetailsFlyoutFooterProps,
-  AttachmentsTab,
   OverviewTab,
-  TimelineTab,
 } from '../components/details';
 import { conversationToInvestigation } from './conversation_to_investigation';
 
@@ -29,21 +27,20 @@ interface InvestigationSlotProps {
   conversation: Conversation;
 }
 
-export const OverviewSlot = ({ conversation }: InvestigationSlotProps) => (
-  <OverviewTab investigation={conversationToInvestigation(conversation)} />
-);
-
-export const TimelineSlot = ({ conversation }: InvestigationSlotProps) => (
-  <TimelineTab events={conversationToInvestigation(conversation).events} />
-);
-
-export interface AttachmentsSlotProps {
-  conversation: Conversation;
+export interface OverviewSlotProps extends InvestigationSlotProps {
+  /**
+   * Captured at registration: the flyout can mount outside a `KibanaContextProvider`, so the
+   * attachment registry cannot be reached from ambient context.
+   */
   attachmentsService: AttachmentServiceStartContract;
 }
 
-export const AttachmentsSlot = ({ conversation, attachmentsService }: AttachmentsSlotProps) => (
-  <AttachmentsTab conversation={conversation} attachmentsService={attachmentsService} />
+export const OverviewSlot = ({ conversation, attachmentsService }: OverviewSlotProps) => (
+  <OverviewTab
+    investigation={conversationToInvestigation(conversation)}
+    attachments={conversation.attachments}
+    attachmentsService={attachmentsService}
+  />
 );
 
 export const HeaderSlot = ({ conversation }: InvestigationSlotProps) => (

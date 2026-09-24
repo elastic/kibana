@@ -1,5 +1,5 @@
 {
-  "sha1": "32a26b28f501abb6ebaf661a41b849d7afd63d81",
+  "sha1": "53d80e574146600b88643e5f728a7ded37338dfc",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -21,8 +21,8 @@
       }
     },
     {
-      "id": "63f7d4b20f6a785-10cc1e9ef7f5e5c",
-      "title": "Agent Builder — conversation error handling shows error message when there is an error and allows user to retry",
+      "id": "63f7d4b20f6a785-d1d9c3bf3993f6e",
+      "title": "Agent Builder — conversation error handling shows a failed turn as a collapsible error, live and after reload",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -48,8 +48,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/conversation_error_handling.spec.ts",
-        "line": 70,
-        "column": 28
+        "line": 59,
+        "column": 13
       }
     },
     {
@@ -64,7 +64,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/conversation_error_handling.spec.ts",
-        "line": 91,
+        "line": 80,
         "column": 13
       }
     },
@@ -80,13 +80,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/conversation_error_handling.spec.ts",
-        "line": 134,
+        "line": 120,
         "column": 9
       }
     },
     {
-      "id": "63f7d4b20f6a785-7f7342ab9798952",
-      "title": "Agent Builder — conversation error handling clears the error when the user sends a new message",
+      "id": "63f7d4b20f6a785-6defea9aee9ef29",
+      "title": "Agent Builder — conversation error handling keeps the failed turn and continues the conversation on the next message",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -96,8 +96,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/conversation_error_handling.spec.ts",
-        "line": 184,
-        "column": 13
+        "line": 167,
+        "column": 25
       }
     },
     {
@@ -112,8 +112,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/conversation_error_handling.spec.ts",
-        "line": 226,
-        "column": 16
+        "line": 204,
+        "column": 25
       }
     },
     {

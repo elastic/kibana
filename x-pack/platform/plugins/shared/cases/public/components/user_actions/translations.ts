@@ -155,6 +155,10 @@ export const SYNCED_ALERTS_WITH_CLOSE_REASON = (count: number) =>
     defaultMessage: 'and synced {count, plural, =1 {# alert} other {# alerts}} with close reason',
   });
 
+export const WORKFLOW_RAN = i18n.translate('xpack.cases.caseView.userActions.workflowRan', {
+  defaultMessage: 'ran a workflow',
+});
+
 const ACTION_SOURCE_KIND_LABELS: Record<ActionSourceType, string> = {
   [ActionSourceTypes.agent]: i18n.translate(
     'xpack.cases.caseView.userActions.actionSource.agentLabel',
@@ -242,12 +246,9 @@ export const EXPAND_ALL_ACTIVITIES = i18n.translate(
   { defaultMessage: 'Expand all' }
 );
 
-export const SHOW_MORE_ACTIVITY = i18n.translate(
-  'xpack.cases.casesRedesign.userActions.showMoreActivity',
-  {
-    defaultMessage: 'Show more',
-  }
-);
+export const SHOW_MORE_ACTIVITY = i18n.translate('xpack.cases.userActions.showMoreActivity', {
+  defaultMessage: 'Show more',
+});
 
 export const NOTHING_TO_COLLAPSE = i18n.translate(
   'xpack.cases.caseView.redesign.userActions.nothingToCollapse',
