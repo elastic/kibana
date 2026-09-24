@@ -17,16 +17,15 @@ import type {
   ProcessedRoundInput,
 } from '@kbn/agent-builder-server';
 import type { CompactionSummary } from '@kbn/agent-builder-common';
-import { formatExecutionFailedNotice, formatSubagentRosterNotice } from '../prompts/utils/notices';
+import { formatInterruptionNotice, formatSubagentRosterNotice } from '../prompts/utils/notices';
 import { formatDate } from '../prompts/utils/helpers';
 import type { ProcessedConversation } from './prepare_conversation';
 import {
   groupTimelineRounds,
   groupTimelineEntries,
-  isTimelineFailedExecution,
-  type TimelineFailedExecution,
   isAwaitingPrompt,
   isTimelineRound,
+  roundInterruption,
   roundResponse,
   type ProcessedTimelineEvent,
   type TimelineRound,
@@ -120,15 +119,6 @@ export const prepareMessages = async ({
       );
       continue;
     }
-    if (isTimelineFailedExecution(entry)) {
-      messages.push(
-        ...failedExecutionToLangchain(entry, {
-          attachmentTypes: conversation.attachmentTypes,
-          attachmentTypeInstructionsProvided,
-        })
-      );
-      continue;
-    }
     // a standalone user message: no execution to render
     messages.push(
       formatUserInput({
@@ -185,31 +175,16 @@ export const roundToLangchain = async (
     messages.push(...(await renderHistorySteps({ steps: round.steps, resultTransformer })));
   }
 
-  // assistant response
-  messages.push(formatAssistantResponse({ response: roundResponse(round) }));
+  // assistant response, or the notice standing in for it on an interrupted round
+  const interruption = roundInterruption(round);
+  messages.push(
+    interruption
+      ? createUserMessage(formatInterruptionNotice(interruption))
+      : formatAssistantResponse({ response: roundResponse(round) })
+  );
 
   return messages;
 };
-
-/**
- * The two messages a failed initial execution contributes to the history: the user message it
- * answered nothing to, and a system notice saying the attempt failed. Its steps are not rendered.
- */
-export const failedExecutionToLangchain = (
-  entry: TimelineFailedExecution<ProcessedTimelineEvent>,
-  {
-    attachmentTypes,
-    attachmentTypeInstructionsProvided,
-  }: Pick<RoundToLangchainOptions, 'attachmentTypes' | 'attachmentTypeInstructionsProvided'> = {}
-): BaseMessage[] => [
-  formatUserInput({
-    input: entry.userMessage.data,
-    timestamp: entry.userMessage.created_at,
-    attachmentTypes,
-    attachmentTypeInstructionsProvided,
-  }),
-  createUserMessage(formatExecutionFailedNotice(entry.failed.data.error)),
-];
 
 export const formatUserInput = ({
   input,
