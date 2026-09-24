@@ -336,7 +336,23 @@ export function CasesTableServiceProvider(
 
     async selectAllCasesAndOpenBulkActions() {
       await this.ensureTableView();
-      await testSubjects.setCheckbox('checkboxSelectAll', 'check');
+      await retry.tryForTime(30000, async () => {
+        const selectAllCheckbox = await testSubjects.find('checkboxSelectAll');
+
+        if (await selectAllCheckbox.isSelected()) {
+          return;
+        }
+
+        if (!(await selectAllCheckbox.isEnabled())) {
+          throw new Error('Select all cases checkbox is not enabled');
+        }
+
+        await selectAllCheckbox.click();
+
+        if (!(await selectAllCheckbox.isSelected())) {
+          throw new Error('Select all cases checkbox is not selected');
+        }
+      });
       await this.openBulkActions();
     },
 
