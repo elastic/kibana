@@ -68,6 +68,7 @@ const createIndexSummaries = async ({
     indices: indices.map((i) => i.name),
     esClient,
     includeFrozen,
+    skipUnauthorized: true,
   });
 
   return indices.map(({ name }) => {
