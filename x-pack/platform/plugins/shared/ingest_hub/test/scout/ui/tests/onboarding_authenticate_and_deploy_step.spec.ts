@@ -140,19 +140,19 @@ test.describe('Onboarding Authenticate and Deploy step', { tag: tags.stateful.cl
     // handler below (Playwright routes match in registration order).
     await page.route(
       (url) => /\/api\/fleet\/managed_integrations$/.test(url.pathname),
-      (route) => {
+      async (route) => {
         if (route.request().method() === 'POST') createObserved = true;
-        route.fulfill({ status: 200, contentType: 'application/json', body: '{"item":{}}' });
+        await route.fulfill({ status: 200, contentType: 'application/json', body: '{"item":{}}' });
       }
     );
     await page.route(
       (url) => /\/api\/fleet\/managed_integrations\//.test(url.pathname),
-      (route) => {
+      async (route) => {
         const method = route.request().method();
         if (method === 'DELETE') deleteObserved = true;
         // Return a Fleet-shaped item so sendGetAgentlessPolicy and sendUpdateAgentlessPolicy
         // can read/write metadata without dereferencing undefined.
-        route.fulfill({
+        await route.fulfill({
           status: 200,
           contentType: 'application/json',
           body: JSON.stringify({
@@ -215,21 +215,21 @@ test.describe('Onboarding Authenticate and Deploy step', { tag: tags.stateful.cl
     // so the list mock below doesn't silently swallow that destructive call.
     await page.route(
       (url) => /\/api\/fleet\/agent_policies\/delete$/.test(url.pathname),
-      (route) => {
+      async (route) => {
         agentPolicyDeleteObserved = true;
-        route.fulfill({ status: 200, contentType: 'application/json', body: '{"id":""}' });
+        await route.fulfill({ status: 200, contentType: 'application/json', body: '{"id":""}' });
       }
     );
     await page.route(
       (url) => /\/api\/fleet\/agent_policies/.test(url.pathname),
-      (route) => {
+      async (route) => {
         if (route.request().method() !== 'GET') {
           // Any non-GET to the agent_policies namespace that slips past the /delete interceptor
           // above is unexpected — fulfill with an error so the test surface is visible.
-          route.fulfill({ status: 405, contentType: 'application/json', body: '{}' });
+          await route.fulfill({ status: 405, contentType: 'application/json', body: '{}' });
           return;
         }
-        route.fulfill({
+        await route.fulfill({
           status: 200,
           contentType: 'application/json',
           body: JSON.stringify({ items: [] }),
@@ -241,9 +241,9 @@ test.describe('Onboarding Authenticate and Deploy step', { tag: tags.stateful.cl
     let createObserved = false;
     await page.route(
       (url) => /\/api\/fleet\/package_policies$/.test(url.pathname),
-      (route) => {
+      async (route) => {
         if (route.request().method() === 'POST') createObserved = true;
-        route.fulfill({ status: 200, contentType: 'application/json', body: '{"item":{}}' });
+        await route.fulfill({ status: 200, contentType: 'application/json', body: '{"item":{}}' });
       }
     );
 
@@ -251,14 +251,14 @@ test.describe('Onboarding Authenticate and Deploy step', { tag: tags.stateful.cl
     // GET and PUT return a Fleet-shaped item so Fleet's client can dereference metadata.
     await page.route(
       (url) => /\/api\/fleet\/package_policies\//.test(url.pathname),
-      (route) => {
+      async (route) => {
         if (
           route.request().method() === 'POST' &&
           new URL(route.request().url()).pathname.endsWith('/delete')
         ) {
           deleteObserved = true;
         }
-        route.fulfill({
+        await route.fulfill({
           status: 200,
           contentType: 'application/json',
           body: JSON.stringify({
