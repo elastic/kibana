@@ -11,6 +11,8 @@ import React from 'react';
 import useToggle from 'react-use/lib/useToggle';
 
 import { McpClientDetailsContent } from '@kbn/agent-builder-browser';
+import type { CoreStart } from '@kbn/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import { labels } from './constants/i18n';
 import type { OAuthClient } from './service/application_connections_api_client';
@@ -24,6 +26,9 @@ export interface RevokeClientDetailsPopoverProps {
 }
 
 export const RevokeClientDetailsPopover = ({ client }: RevokeClientDetailsPopoverProps) => {
+  const {
+    services: { http },
+  } = useKibana<CoreStart>();
   const [isOpen, toggleOpen] = useToggle(false);
   const displayName = client.client_name ?? client.id;
 
@@ -45,7 +50,11 @@ export const RevokeClientDetailsPopover = ({ client }: RevokeClientDetailsPopove
       }
     >
       <div css={popoverContentStyles} data-test-subj={`revokeClientDetailsPopover-${client.id}`}>
-        <McpClientDetailsContent clientDetails={client} presentation="popover" />
+        <McpClientDetailsContent
+          clientDetails={client}
+          spaceId={http.spaceId}
+          presentation="popover"
+        />
       </div>
     </EuiPopover>
   );
