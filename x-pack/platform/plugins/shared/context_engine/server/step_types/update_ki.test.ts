@@ -134,7 +134,38 @@ describe('getUpdateKiStepDefinition', () => {
         },
         if_seq_no: 5,
         if_primary_term: 1,
+        refresh: 'wait_for',
       },
+      { signal: context.abortSignal }
+    );
+  });
+
+  it('skips the refresh when refresh is false', async () => {
+    const esClient = {
+      search: jest.fn().mockResolvedValue(searchHit('ai-index-idx-my-ai-index')),
+      update: jest.fn().mockResolvedValue({ result: 'updated' }),
+    };
+    const context = createMockStepContext({
+      input: {
+        ai_index_id: 'my-ai-index',
+        ki_id: 'ki-1',
+        ki: { description: 'Updated' },
+        refresh: false,
+      },
+      esClient,
+    });
+    const service = mockAiIndexService({ type: 'index', value: 'ai-index-idx-my-ai-index' });
+
+    const { handler } = getUpdateKiStepDefinition({
+      getAiIndexService: () => service,
+      isContextEngineEnabled: enabled,
+      checkWritePrivilege: allowed,
+      ...mockKiStepTelemetry(),
+    });
+    await handler(context);
+
+    expect(esClient.update).toHaveBeenCalledWith(
+      expect.not.objectContaining({ refresh: 'wait_for' }),
       { signal: context.abortSignal }
     );
   });
@@ -346,6 +377,7 @@ describe('getUpdateKiStepDefinition', () => {
           },
         },
         op_type: 'create',
+        refresh: 'wait_for',
       },
       { signal: context.abortSignal }
     );

@@ -195,6 +195,28 @@ describe('getCreateKiStepDefinition', () => {
     );
   });
 
+  it('waits for the refresh when refresh is true', async () => {
+    const esClient = { index: jest.fn().mockResolvedValue({ _id: 'ki-1' }) };
+    const context = createMockStepContext({
+      input: { ai_index_id: 'my-ai-index', ki: kiInput, refresh: true },
+      esClient,
+    });
+    const service = mockAiIndexService({ type: 'index', value: 'ai-index-idx-my-ai-index' });
+
+    const { handler } = getCreateKiStepDefinition({
+      getAiIndexService: () => service,
+      isContextEngineEnabled: enabled,
+      checkWritePrivilege: allowed,
+      runKiVerifiers,
+      ...mockKiStepTelemetry(),
+    });
+    await handler(context);
+
+    expect(esClient.index).toHaveBeenCalledWith(expect.objectContaining({ refresh: 'wait_for' }), {
+      signal: context.abortSignal,
+    });
+  });
+
   it('throws ValidationError when the dest is an index pattern', async () => {
     for (const destValue of ['ai-index-idx-foo*', 'ai-index-idx-foo,ai-index-idx-bar']) {
       const esClient = { index: jest.fn() };

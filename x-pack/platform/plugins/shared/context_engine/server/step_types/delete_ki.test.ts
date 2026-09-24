@@ -110,7 +110,33 @@ describe('getDeleteKiStepDefinition', () => {
       {
         index: 'ai-index-idx-my-ai-index',
         id: 'ki-1',
+        refresh: 'wait_for',
       },
+      { signal: context.abortSignal }
+    );
+  });
+
+  it('skips the refresh when refresh is false', async () => {
+    const esClient = {
+      search: jest.fn().mockResolvedValue(searchHit('ai-index-idx-my-ai-index')),
+      delete: jest.fn().mockResolvedValue({ result: 'deleted' }),
+    };
+    const context = createMockStepContext({
+      input: { ai_index_id: 'my-ai-index', ki_id: 'ki-1', refresh: false },
+      esClient,
+    });
+    const service = mockAiIndexService({ type: 'index', value: 'ai-index-idx-my-ai-index' });
+
+    const { handler } = getDeleteKiStepDefinition({
+      getAiIndexService: () => service,
+      isContextEngineEnabled: enabled,
+      checkWritePrivilege: allowed,
+      ...mockKiStepTelemetry(),
+    });
+    await handler(context);
+
+    expect(esClient.delete).toHaveBeenCalledWith(
+      expect.not.objectContaining({ refresh: 'wait_for' }),
       { signal: context.abortSignal }
     );
   });
@@ -150,6 +176,7 @@ describe('getDeleteKiStepDefinition', () => {
           },
         },
         op_type: 'create',
+        refresh: 'wait_for',
       },
       { signal: context.abortSignal }
     );

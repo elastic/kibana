@@ -28,6 +28,12 @@ export const createKiInputSchema = z.object({
     .describe(
       'Optional verifiers to run before writing, in order: built-in verifier ids and custom verifier workflows (`workflow_id`). When any fails, the KI is not written.'
     ),
+  refresh: z
+    .boolean()
+    .optional()
+    .describe(
+      'Wait for the write to become searchable before the step completes (default false). Set when a later step in the same run updates or deletes this KI.'
+    ),
 });
 
 export const createKiOutputSchema = z.object({
@@ -63,8 +69,10 @@ export const createKiStepCommonDefinition: CommonStepDefinition<
         'store derived from its id. Pass ki_id to set a stable id; re-runs with the same id ' +
         'replace the KI on an index and append a new revision on a data stream. Pass verifiers to ' +
         'run KI verifiers before writing: when any fails, nothing is written, the output carries ' +
-        'no id, and verification.results names the failing verifiers. The step returns the id of ' +
-        'the created KI, which can be used by later steps to update or delete it.',
+        'no id, and verification.results names the failing verifiers. The write is not refreshed ' +
+        'unless refresh is true, so set it when a later step in the same run reads the KI back. ' +
+        'The step returns the id of the created KI, which can be used by later steps to update ' +
+        'or delete it.',
     }),
     examples: [
       `## Create a knowledge indicator

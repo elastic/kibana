@@ -36,7 +36,7 @@ export const getCreateKiStepDefinition = ({
       const spaceId = context.contextManager.getContext().workflow.spaceId;
       await assertContextEngineEnabled(isContextEngineEnabled, spaceId);
 
-      const { ai_index_id: aiIndexId, ki_id: kiId, ki, verifiers } = context.input;
+      const { ai_index_id: aiIndexId, ki_id: kiId, ki, verifiers, refresh = false } = context.input;
       return withKiWriteTelemetry<z.infer<typeof createKiOutputSchema>>({
         action: 'create',
         aiIndexId,
@@ -76,6 +76,7 @@ export const getCreateKiStepDefinition = ({
               },
               // Data streams only accept `create`.
               ...(dest.type === 'data_stream' ? { op_type: 'create' as const } : { id }),
+              ...(refresh && { refresh: 'wait_for' as const }),
             },
             { signal: context.abortSignal }
           );

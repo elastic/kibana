@@ -128,6 +128,7 @@ export const appendKiRevision = async ({
   kiId,
   source,
   changes,
+  refresh,
   abortSignal,
 }: {
   esClient: ElasticsearchClient;
@@ -135,6 +136,7 @@ export const appendKiRevision = async ({
   kiId: string;
   source: StoredKi;
   changes: KiRevisionChanges;
+  refresh: boolean;
   abortSignal: AbortSignal;
 }): Promise<void> => {
   await esClient.index(
@@ -146,6 +148,7 @@ export const appendKiRevision = async ({
         id: source.id ?? kiId,
       },
       op_type: 'create',
+      ...(refresh && { refresh: 'wait_for' as const }),
     },
     { signal: abortSignal }
   );
