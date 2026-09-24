@@ -670,6 +670,9 @@ function createNavTree({
               {
                 link: 'management:role_mappings',
               },
+              {
+                link: 'management:service_accounts',
+              },
             ],
           },
           {

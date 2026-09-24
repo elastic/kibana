@@ -271,6 +271,7 @@ export const createNavigationTree = (
               { link: 'management:roles' },
               { link: 'management:api_keys' },
               { link: 'management:role_mappings' },
+              { link: 'management:service_accounts' },
             ],
           },
           {

@@ -13,25 +13,39 @@ import { STACK_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
 
 import { getNavigationTreeDefinition } from '../navigation_tree';
 
+const getStackManagement = async (): Promise<NodeDefinition | undefined> => {
+  const core = coreMock.createStart();
+  core.settings.globalClient.get.mockReturnValue(false);
+
+  const definition = getNavigationTreeDefinition({
+    core,
+    dynamicItems$: of({}),
+    isCloudEnabled: false,
+  });
+  const { footer } = (await firstValueFrom(definition.navigationTree$)) as NavigationTreeDefinition;
+
+  return footer?.find((item) => item.id === STACK_MANAGEMENT_NAV_ID);
+};
+
 describe('Elasticsearch solution navigation tree', () => {
   it('includes Stack Alerts in Stack Management > Alerts and Insights', async () => {
-    const core = coreMock.createStart();
-    core.settings.globalClient.get.mockReturnValue(false);
-
-    const definition = getNavigationTreeDefinition({
-      core,
-      dynamicItems$: of({}),
-      isCloudEnabled: false,
-    });
-    const { footer } = (await firstValueFrom(
-      definition.navigationTree$
-    )) as NavigationTreeDefinition;
-    const stackManagement = footer?.find((item) => item.id === STACK_MANAGEMENT_NAV_ID);
+    const stackManagement = await getStackManagement();
     const alertsSection = stackManagement?.children?.find(
       (item) => item.id === 'alerts_and_insights'
     ) as NodeDefinition | undefined;
     const alertsLinks = alertsSection?.children?.map((item) => item.link) ?? [];
 
     expect(alertsLinks).toContain('management:triggersActionsAlerts');
+  });
+
+  it('includes service accounts in Stack Management > Security', async () => {
+    const stackManagement = await getStackManagement();
+    const securitySection = stackManagement?.children?.find(({ children }) =>
+      children?.some(({ link }) => link === 'management:role_mappings')
+    );
+
+    expect(securitySection?.children).toContainEqual(
+      expect.objectContaining({ link: 'management:service_accounts' })
+    );
   });
 });

@@ -339,6 +339,7 @@ export const getNavigationTreeDefinition = ({
                     { link: 'management:roles' },
                     { link: 'management:api_keys' },
                     { link: 'management:role_mappings' },
+                    { link: 'management:service_accounts' },
                   ],
                   title: i18n.translate('xpack.enterpriseSearch.searchNav.management.security', {
                     defaultMessage: 'Security',
