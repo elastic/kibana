@@ -133,7 +133,7 @@ export function CasesSingleViewServiceProvider({ getService, getPageObject }: Ft
     },
 
     async openAssigneesPopover() {
-      await common.clickAndValidate('case-view-assignees-edit-button', 'euiSelectableList');
+      await common.clickAndValidate('case-view-assign-users-link', 'euiSelectableList');
       await header.waitUntilLoadingHasFinished();
     },
 
