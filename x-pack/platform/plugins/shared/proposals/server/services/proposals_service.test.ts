@@ -21,6 +21,7 @@ import { ProposalsService } from './proposals_service';
 
 const SPACE_ID = 'default';
 const EXECUTION_ID = 'exec-1';
+const request = httpServerMock.createKibanaRequest();
 
 /** The resolved actor, in the shape the service stores. */
 const analyst = (username: string, profileUid = `${username}-uid`) => ({
@@ -120,18 +121,25 @@ const createService = (
   workflowsApi: ReturnType<typeof createWorkflowsApi> | null = createWorkflowsApi()
 ) => {
   const logger = loggerMock.create();
+  const attachmentsClient = {
+    create: jest.fn().mockResolvedValue({ id: 'attachment-1' }),
+    get: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+    list: jest.fn(),
+  };
   return {
     service: new ProposalsService({
       storage,
       logger,
       getWorkflowsApi: () => (workflowsApi ?? undefined) as never,
+      getAttachmentsClient: async () => attachmentsClient,
     }),
     workflowsApi: workflowsApi ?? createWorkflowsApi(),
+    attachmentsClient,
     logger,
   };
 };
-
-const request = httpServerMock.createKibanaRequest();
 
 const releaseParams = (overrides: Partial<ReleaseGateParams> = {}): ReleaseGateParams => ({
   approved: true,
@@ -175,6 +183,83 @@ describe('ProposalsService', () => {
       expect(storage.index).toHaveBeenCalledWith(
         expect.objectContaining({ op_type: 'create', id: proposal.id })
       );
+    });
+
+    it('should attach the proposal to its conversation so it renders in the chat', async () => {
+      const storage = createStorage();
+      const { service, attachmentsClient } = createService(storage);
+
+      const proposal = await service.create(
+        {
+          conversationId: 'conv-1',
+          comment: 'Tune the noisy rule',
+          actionWorkflowId: 'system-alertzero-action-create-rule',
+          actionInput: { name: 'Suspicious PowerShell' },
+          confidence: 'medium',
+          origin: 'worker',
+        },
+        { spaceId: SPACE_ID, request }
+      );
+
+      // The id, plus a title the synchronous card label cannot read live. No
+      // other field: the proposal is the source of truth, so a snapshot here
+      // would keep saying "pending" after the analyst had decided.
+      expect(attachmentsClient.create).toHaveBeenCalledWith({
+        conversationId: 'conv-1',
+        type: 'platform.proposal',
+        origin: proposal.id,
+        // The action's own name, so the card is distinguishable at a glance.
+        data: { proposalId: proposal.id, title: 'Create detection rule' },
+        render_inline: true,
+      });
+    });
+
+    // Falls back rather than leaving the card untitled, so an action whose
+    // workflow declares no metadata still reads as something specific.
+    it('should title the attachment with the workflow id when the action has no metadata', async () => {
+      const storage = createStorage();
+      const workflowsApi = createWorkflowsApi();
+      workflowsApi.getWorkflow.mockResolvedValue({ definition: {} });
+      const { service, attachmentsClient } = createService(storage, workflowsApi);
+
+      await service.create(
+        {
+          conversationId: 'conv-1',
+          comment: 'Tune the noisy rule',
+          actionWorkflowId: 'system-alertzero-action-create-rule',
+          confidence: 'medium',
+          origin: 'worker',
+        },
+        { spaceId: SPACE_ID, request }
+      );
+
+      expect(attachmentsClient.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ title: 'system-alertzero-action-create-rule' }),
+        })
+      );
+    });
+
+    it('should still return the proposal when the conversation attachment fails', async () => {
+      const storage = createStorage();
+      const { service, attachmentsClient, logger } = createService(storage);
+      attachmentsClient.create.mockRejectedValue(new Error('conversation is read-only'));
+
+      // The gate workflow is already parked on this proposal, so losing the
+      // card must not lose the decision it is waiting for.
+      const proposal = await service.create(
+        {
+          conversationId: 'conv-1',
+          comment: 'Tune the noisy rule',
+          confidence: 'medium',
+          origin: 'worker',
+        },
+        { spaceId: SPACE_ID, request }
+      );
+
+      expect(proposal.status).toBe('pending');
+      expect(storage.index).toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining(proposal.id));
     });
 
     it('should reject an actionInput the action could never accept', async () => {

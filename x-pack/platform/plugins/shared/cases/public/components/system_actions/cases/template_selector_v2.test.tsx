@@ -11,18 +11,27 @@ import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { showEuiComboBoxOptions } from '@elastic/eui/lib/test/rtl';
 import { TemplateSelectorV2 } from './template_selector_v2';
 
-const mockUseGetTemplates = jest.fn().mockReturnValue({
-  data: { templates: [] },
-  isLoading: false,
-});
-
-jest.mock('../../templates_v2/hooks/use_get_templates', () => ({
-  useGetTemplates: (...args: unknown[]) => mockUseGetTemplates(...args),
-}));
-
 const templates = [
-  { templateId: 'tmpl-1', name: 'Template One', templateVersion: 1, owner: 'securitySolution' },
-  { templateId: 'tmpl-2', name: 'Template Two', templateVersion: 3, owner: 'securitySolution' },
+  {
+    templateId: 'tmpl-1',
+    name: 'Template One',
+    templateVersion: 1,
+    owner: 'securitySolution',
+    definition: '',
+    definitionString: '',
+    deletedAt: null,
+    fieldSearchMatches: false,
+  },
+  {
+    templateId: 'tmpl-2',
+    name: 'Template Two',
+    templateVersion: 3,
+    owner: 'securitySolution',
+    definition: '',
+    definitionString: '',
+    deletedAt: null,
+    fieldSearchMatches: false,
+  },
 ];
 
 describe('TemplateSelectorV2', () => {
@@ -35,54 +44,80 @@ describe('TemplateSelectorV2', () => {
   beforeEach(() => {
     user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime, pointerEventsCheck: 0 });
     jest.clearAllMocks();
-    mockUseGetTemplates.mockReturnValue({ data: { templates }, isLoading: false });
   });
 
   it('renders the combobox', async () => {
-    render(<TemplateSelectorV2 owner="securitySolution" templateId={null} onChange={onChange} />);
+    render(
+      <TemplateSelectorV2
+        templateId={null}
+        templates={templates}
+        isLoadingTemplates={false}
+        onChange={onChange}
+      />
+    );
     expect(await screen.findByTestId('cases-connector-template-v2-select')).toBeInTheDocument();
   });
 
-  it('fetches templates scoped to the owner', () => {
-    render(<TemplateSelectorV2 owner="securitySolution" templateId={null} onChange={onChange} />);
-    expect(mockUseGetTemplates).toHaveBeenCalledWith(
-      expect.objectContaining({
-        queryParams: expect.objectContaining({ owner: ['securitySolution'] }),
-      })
-    );
-  });
-
   it('lists available templates', async () => {
-    render(<TemplateSelectorV2 owner="securitySolution" templateId={null} onChange={onChange} />);
+    render(
+      <TemplateSelectorV2
+        templateId={null}
+        templates={templates}
+        isLoadingTemplates={false}
+        onChange={onChange}
+      />
+    );
     await showEuiComboBoxOptions();
     expect(await screen.findByText('Template One')).toBeInTheDocument();
     expect(await screen.findByText('Template Two')).toBeInTheDocument();
   });
 
   it('calls onChange with templateId and templateVersion when a template is selected', async () => {
-    render(<TemplateSelectorV2 owner="securitySolution" templateId={null} onChange={onChange} />);
+    render(
+      <TemplateSelectorV2
+        templateId={null}
+        templates={templates}
+        isLoadingTemplates={false}
+        onChange={onChange}
+      />
+    );
     await showEuiComboBoxOptions();
     await user.click(await screen.findByText('Template Two'));
     expect(onChange).toHaveBeenCalledWith({ templateId: 'tmpl-2', templateVersion: '3' });
   });
 
   it('calls onChange with null/null when "No template selected" is chosen', async () => {
-    render(<TemplateSelectorV2 owner="securitySolution" templateId="tmpl-1" onChange={onChange} />);
+    render(
+      <TemplateSelectorV2
+        templateId="tmpl-1"
+        templates={templates}
+        isLoadingTemplates={false}
+        onChange={onChange}
+      />
+    );
     await showEuiComboBoxOptions();
     await user.click(await screen.findByText('No template selected'));
     expect(onChange).toHaveBeenCalledWith({ templateId: null, templateVersion: null });
   });
 
   it('displays the selected v2 template by templateId', async () => {
-    render(<TemplateSelectorV2 owner="securitySolution" templateId="tmpl-2" onChange={onChange} />);
+    render(
+      <TemplateSelectorV2
+        templateId="tmpl-2"
+        templates={templates}
+        isLoadingTemplates={false}
+        onChange={onChange}
+      />
+    );
     expect(await screen.findByRole('combobox')).toHaveValue('Template Two');
   });
 
   it('displays the migrated v2 template when the rule still stores a legacy template key', async () => {
     render(
       <TemplateSelectorV2
-        owner="securitySolution"
         templateId="legacy-key-1"
+        templates={templates}
+        isLoadingTemplates={false}
         legacyTemplates={[{ key: 'legacy-key-1', name: 'Template One' }]}
         onChange={onChange}
       />
@@ -93,19 +128,25 @@ describe('TemplateSelectorV2', () => {
   it('bridges a stored legacy key to the migrated template by its recorded legacyKey', async () => {
     // The migrated template carries the originating v1 key; its name may even differ from the v1
     // configure name. legacyKey must still resolve it (this is what disambiguates v1 duplicate names).
-    mockUseGetTemplates.mockReturnValue({
-      data: {
-        templates: [
-          { templateId: 'v2-x', name: 'Renamed In V2', templateVersion: 5, legacyKey: 'old-key' },
-        ],
+    const renamedTemplates = [
+      {
+        templateId: 'v2-x',
+        name: 'Renamed In V2',
+        templateVersion: 5,
+        owner: 'securitySolution',
+        definition: '',
+        definitionString: '',
+        deletedAt: null,
+        fieldSearchMatches: false,
+        legacyKey: 'old-key',
       },
-      isLoading: false,
-    });
+    ];
 
     render(
       <TemplateSelectorV2
-        owner="securitySolution"
         templateId="old-key"
+        templates={renamedTemplates}
+        isLoadingTemplates={false}
         legacyTemplates={[{ key: 'old-key', name: 'Original V1 Name' }]}
         onChange={onChange}
       />
@@ -117,8 +158,9 @@ describe('TemplateSelectorV2', () => {
   it('bridges a legacy key whose name differs only by case/whitespace from the migrated template', async () => {
     render(
       <TemplateSelectorV2
-        owner="securitySolution"
         templateId="legacy-key-1"
+        templates={templates}
+        isLoadingTemplates={false}
         legacyTemplates={[{ key: 'legacy-key-1', name: '  template one  ' }]}
         onChange={onChange}
       />
@@ -129,8 +171,9 @@ describe('TemplateSelectorV2', () => {
   it('shows no selection when a stored legacy key has no migrated template', async () => {
     render(
       <TemplateSelectorV2
-        owner="securitySolution"
         templateId="legacy-key-unmapped"
+        templates={templates}
+        isLoadingTemplates={false}
         legacyTemplates={[{ key: 'legacy-key-unmapped', name: 'Nonexistent Template' }]}
         onChange={onChange}
       />
@@ -141,8 +184,9 @@ describe('TemplateSelectorV2', () => {
   it('is disabled when isDisabled=true', async () => {
     render(
       <TemplateSelectorV2
-        owner="securitySolution"
         templateId={null}
+        templates={templates}
+        isLoadingTemplates={false}
         isDisabled={true}
         onChange={onChange}
       />
@@ -151,8 +195,14 @@ describe('TemplateSelectorV2', () => {
   });
 
   it('shows skeleton when templates are loading', async () => {
-    mockUseGetTemplates.mockReturnValue({ data: undefined, isLoading: true });
-    render(<TemplateSelectorV2 owner="securitySolution" templateId={null} onChange={onChange} />);
+    render(
+      <TemplateSelectorV2
+        templateId={null}
+        templates={[]}
+        isLoadingTemplates={true}
+        onChange={onChange}
+      />
+    );
     expect(screen.queryByRole('combobox')).not.toBeInTheDocument();
   });
 });
