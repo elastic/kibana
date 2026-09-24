@@ -114,8 +114,10 @@ export class ListPlugin
           user,
         });
       },
+      // Decided by the name alone: a lookup list that exists keeps being one when the flag
+      // that allowed its creation is turned off again.
       isValueListLookupIndex: (indexName): boolean =>
-        config.enableLookupIndices && indexName.startsWith(`${VALUE_LIST_INDEX_PREFIX}-`),
+        indexName.startsWith(`${VALUE_LIST_INDEX_PREFIX}-`),
       registerExtension: (extension): void => {
         this.extensionPoints.add(extension);
       },

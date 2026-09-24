@@ -8,7 +8,7 @@
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
 import type { RuleParams } from '../../rule_schema';
-import { getQueryRuleParams, getMlRuleParams } from '../../rule_schema/mocks';
+import { getQueryRuleParams, getMlRuleParams, getThreatRuleParams } from '../../rule_schema/mocks';
 import { runExecutionValidation } from './run_execution_validation';
 
 jest.mock('@kbn/data-views-plugin/server', () => ({
@@ -124,6 +124,48 @@ describe('runExecutionValidation', () => {
       const result = await run(getMlRuleParams());
       expect(result.dateNanosTimestampFields).toEqual([]);
       expect(scopedClusterClient.asCurrentUser.fieldCaps).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('a value list lookup index as a threat index', () => {
+    const LOOKUP_INDEX = '.value-list-v2-default-my-list';
+    const isValueListLookupIndex = (name: string): boolean => name.startsWith('.value-list-v2-');
+    const runThreat = (threatQuery: string, threatIndex: string[] = [LOOKUP_INDEX]) =>
+      runExecutionValidation({
+        params: { ...getThreatRuleParams(), threatIndex, threatQuery },
+        inputIndex: ['auditbeat-*'],
+        ruleName: 'test-rule',
+        scopedClusterClient,
+        runtimeMappings: undefined,
+        primaryTimestamp: '@timestamp',
+        secondaryTimestamp: undefined,
+        ruleExecutionLogger,
+        isServerless: false,
+        isValueListLookupIndex,
+      });
+
+    beforeEach(() => {
+      mockFieldCaps({ '@timestamp': { date: { type: 'date' } } });
+    });
+
+    it('warns when the threat query filters on the timestamp the lookup index lacks', async () => {
+      const result = await runThreat('@timestamp >= "now-30d/d"');
+      expect(result.warnings).toEqual([
+        expect.stringContaining(
+          `The threat query filters on "@timestamp", but the value list lookup index ${LOOKUP_INDEX} carries no timestamp field`
+        ),
+      ]);
+      expect(result.skipExecution).toBe(false);
+    });
+
+    it('does not warn for a threat query that does not filter on the timestamp', async () => {
+      const result = await runThreat('*:*');
+      expect(result.warnings).toEqual([]);
+    });
+
+    it('does not warn when no threat index is a lookup index', async () => {
+      const result = await runThreat('@timestamp >= "now-30d/d"', ['.items-default']);
+      expect(result.warnings).toEqual([]);
     });
   });
 });

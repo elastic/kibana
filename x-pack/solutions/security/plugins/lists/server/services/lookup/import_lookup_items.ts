@@ -39,6 +39,7 @@ export const importLookupItemsToStream = ({
   resolveTarget,
   stream,
   type,
+  user,
 }: {
   config: ConfigType;
   esClient: ElasticsearchClient;
@@ -46,6 +47,7 @@ export const importLookupItemsToStream = ({
   resolveTarget?: (fileName: string) => Promise<LookupImportTarget>;
   stream: Readable;
   type: Type;
+  user: string;
 }): Promise<void> => {
   return new Promise<void>((resolve, reject) => {
     const readBuffer = new BufferLines({ bufferSize: config.importBufferSize, input: stream });
@@ -78,7 +80,15 @@ export const importLookupItemsToStream = ({
         const { index, listId } = await targetPromise;
         // The shared stream's import drops the lines its mapper rejects and keeps the
         // rest; do the same rather than failing the whole file on one bad line.
-        await writeLookupItems({ esClient, ignoreErrors: true, index, listId, type, values });
+        await writeLookupItems({
+          esClient,
+          ignoreErrors: true,
+          index,
+          listId,
+          type,
+          user,
+          values,
+        });
         resolve();
       } catch (err) {
         reject(err);

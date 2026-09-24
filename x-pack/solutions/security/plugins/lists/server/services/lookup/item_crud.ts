@@ -20,6 +20,7 @@ import { getQueryFilter } from '../utils/get_query_filter';
 import { transformElasticToList } from '../utils/transform_elastic_to_list';
 
 import { isRangeType } from './build_lookup_mappings';
+import { formatLookupValue } from './format_lookup_value';
 import { lookupItemId } from './write_lookup_items';
 
 /**
@@ -38,6 +39,14 @@ const UNSORTABLE_TYPES: ReadonlySet<Type> = new Set([
   'text',
 ]);
 
+/** The stamp fields `_find` can sort on, with the field type to assume where unmapped. */
+const STAMP_SORT_FIELDS: Record<string, 'date' | 'keyword'> = {
+  created_at: 'date',
+  created_by: 'keyword',
+  updated_at: 'date',
+  updated_by: 'keyword',
+};
+
 /** Documents skipped per search while walking from a cursor position to a page start. */
 const HOP_SIZE = 100;
 
@@ -46,32 +55,55 @@ export const buildLookupListItem = ({
   type,
   value,
   user,
+  stamps,
 }: {
   listId: string;
   type: Type;
   value: string;
   user: string;
+  stamps?: LookupItemStamps;
 }): ListItemSchema => {
   const now = new Date().toISOString();
   return {
-    '@timestamp': now,
+    '@timestamp': stamps?.updated_at ?? now,
     _version: undefined,
-    created_at: now,
-    created_by: user,
+    created_at: stamps?.created_at ?? now,
+    created_by: stamps?.created_by ?? user,
     id: lookupItemId(type, value, listId),
     list_id: listId,
     meta: undefined,
     tie_breaker_id: lookupItemId(type, value, listId),
     type,
-    updated_at: now,
-    updated_by: user,
+    updated_at: stamps?.updated_at ?? now,
+    updated_by: stamps?.updated_by ?? user,
     value,
   };
 };
 
+/** Who wrote a lookup item and when, as stored on its document. */
+export interface LookupItemStamps {
+  created_at?: string;
+  created_by?: string;
+  updated_at?: string;
+  updated_by?: string;
+}
+
+/** The stored shape of a lookup item document, as far as the item routes read it. */
+type LookupItemSource = { value?: unknown } & LookupItemStamps;
+
+const LOOKUP_ITEM_SOURCE = ['value', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+
+const stampsOf = (source: LookupItemSource | undefined): LookupItemStamps => ({
+  created_at: source?.created_at,
+  created_by: source?.created_by,
+  updated_at: source?.updated_at,
+  updated_by: source?.updated_by,
+});
+
 interface LocatedLookupItem {
   /** The concrete index the document lives in. */
   index: string;
+  stamps: LookupItemStamps;
   value: string;
 }
 
@@ -112,17 +144,21 @@ export const locateLookupItem = async ({
   if (accessNames.length === 0) {
     return undefined;
   }
-  const response = await esClient.msearch<{ value?: unknown }>({
+  const response = await esClient.msearch<LookupItemSource>({
     searches: accessNames.flatMap((index) => [
       { ignore_unavailable: true, index },
-      { _source: ['value'], query: { ids: { values: [id] } }, size: 1 },
+      { _source: LOOKUP_ITEM_SOURCE, query: { ids: { values: [id] } }, size: 1 },
     ]),
   });
   for (const item of response.responses) {
     // a list the caller cannot read fails its own search; the others still answer
     const [hit] = 'error' in item ? [] : item.hits.hits;
     if (hit?._index != null && hit._source?.value != null) {
-      return { index: hit._index, value: String(hit._source.value) };
+      return {
+        index: hit._index,
+        stamps: stampsOf(hit._source),
+        value: formatLookupValue(hit._source.value),
+      };
     }
   }
   return undefined;
@@ -201,18 +237,28 @@ export const findLookupItems = async ({
     must.length > 0 ? { bool: { filter: must } } : { match_all: {} };
 
   const order = sortOrder ?? 'asc';
-  const sortOnValue = sortField != null && !UNSORTABLE_TYPES.has(type);
-  const sort: estypes.Sort = sortOnValue
-    ? [{ value: order }, { _seq_no: 'asc' }]
-    : [{ _seq_no: order }];
+  // The items table sorts on the stamps or on the value; anything else, or a type whose
+  // value cannot be sorted, falls back to write order. A stamp missing on a document
+  // written before the stamps existed sorts last, and an index created before them is
+  // sorted as if the field were mapped.
+  const stampSort = sortField != null ? STAMP_SORT_FIELDS[sortField] : undefined;
+  const sort: estypes.Sort =
+    stampSort != null
+      ? [
+          { [sortField as string]: { missing: '_last', order, unmapped_type: stampSort } },
+          { _seq_no: 'asc' },
+        ]
+      : sortField === 'value' && !UNSORTABLE_TYPES.has(type)
+      ? [{ value: order }, { _seq_no: 'asc' }]
+      : [{ _seq_no: order }];
 
   const search = (
     size: number,
     after: estypes.SortResults | undefined,
     withSource: boolean
-  ): Promise<estypes.SearchResponse<{ value?: unknown }>> =>
-    esClient.search<{ value?: unknown }>({
-      _source: withSource ? ['value'] : false,
+  ): Promise<estypes.SearchResponse<LookupItemSource>> =>
+    esClient.search<LookupItemSource>({
+      _source: withSource ? LOOKUP_ITEM_SOURCE : false,
       index,
       query,
       search_after: after,
@@ -245,9 +291,17 @@ export const findLookupItems = async ({
   ]);
   const hits = pageResponse?.hits.hits ?? [];
   const data = hits
-    .map((hit) => hit._source?.value)
-    .filter((value): value is unknown => value != null)
-    .map((value) => buildLookupListItem({ listId, type, user, value: String(value) }));
+    .map((hit) => hit._source)
+    .filter((source): source is LookupItemSource => source?.value != null)
+    .map((source) =>
+      buildLookupListItem({
+        listId,
+        stamps: stampsOf(source),
+        type,
+        user,
+        value: formatLookupValue(source.value),
+      })
+    );
   const last = hits[hits.length - 1]?.sort;
   return {
     cursor: encodeCursor({

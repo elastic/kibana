@@ -17,6 +17,24 @@ import { coalesceBounds, coalesceRangeValues, parseValueToBound } from '../../co
 
 export const TEST_INDEX = '.value-list-default-test';
 export const TEST_LIST_ID = 'test-list';
+export const TEST_USER = 'test-user';
+export const TEST_RUN_ID = 'run-1';
+export const TEST_NOW = '2026-09-24T10:00:00.000Z';
+
+/** The bulk pair a write sends per value: an upsert keyed on the item id, stamped. */
+export const expectedUpsertOp = (id: string, doc: Record<string, unknown>): unknown[] => [
+  { update: { _id: id, retry_on_conflict: 3 } },
+  {
+    doc: { updated_at: TEST_NOW, updated_by: TEST_USER, ...doc },
+    upsert: {
+      created_at: TEST_NOW,
+      created_by: TEST_USER,
+      updated_at: TEST_NOW,
+      updated_by: TEST_USER,
+      ...doc,
+    },
+  },
+];
 
 export type EsClientMock = ReturnType<
   typeof elasticsearchClientMock.createScopedClusterClient
@@ -39,11 +57,16 @@ export const coalescedId = (bound: CoalescedBound): string =>
 
 /** Build a search response body carrying the given docs, as the client returns it. */
 export const searchResponse = <T>(
-  docs: Array<{ _id: string; _source: T }>
+  docs: Array<{ _id: string; _source: T; sort?: Array<string | number> }>
 ): estypes.SearchResponse<T> => ({
   _shards: { failed: 0, successful: 1, total: 1 },
   hits: {
-    hits: docs.map((doc) => ({ _id: doc._id, _index: TEST_INDEX, _source: doc._source })),
+    hits: docs.map((doc) => ({
+      _id: doc._id,
+      _index: TEST_INDEX,
+      _source: doc._source,
+      ...(doc.sort != null ? { sort: doc.sort } : {}),
+    })),
     max_score: null,
     total: { relation: 'eq', value: docs.length },
   },
@@ -82,13 +105,16 @@ export const expectedSourceOps = (type: Type, values: string[]): unknown[] =>
             value,
           }
         : { kind: 'source', value };
-    return [{ index: { _id: sourceId(value) } }, doc];
+    return expectedUpsertOp(sourceId(value), doc);
   });
 
-export const expectedIndexCoalescedOps = (bounds: CoalescedBound[]): unknown[] =>
+export const expectedIndexCoalescedOps = (
+  bounds: CoalescedBound[],
+  runId = TEST_RUN_ID
+): unknown[] =>
   bounds.flatMap((bound) => [
     { index: { _id: coalescedId(bound) } },
-    { kind: 'coalesced', range_end: bound.range_end, range_start: bound.range_start },
+    { built_by: runId, kind: 'coalesced', ...bound },
   ]);
 
 export const expectedDeleteOps = (ids: string[]): unknown[] =>
@@ -118,7 +144,7 @@ export const expectedEqualityOps = (type: Type, values: string[]): unknown[] =>
   values.flatMap((value) => {
     const serialized = transformListItemToElasticQuery({ type, value });
     if (serialized == null) return [];
-    return [{ index: { _id: equalityId(value) } }, { value: Object.values(serialized)[0] }];
+    return expectedUpsertOp(equalityId(value), { value: Object.values(serialized)[0] });
   });
 
 // ---- expected search queries (what the localized paths should target) ----

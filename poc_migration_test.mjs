@@ -20,6 +20,7 @@ const ITEMS_INDEX = `.items-${SPACE}`;
 const MIG_LIST = 'poc-mig-list';
 const MAYBE_LIST = 'poc-mig-maybe';
 const EXC_LIST = 'poc-mig-exc';
+const REJ_LIST = 'poc-mig-rejected';
 const IM_RULE = 'poc-mig-im';
 const EXC_RULE = 'poc-mig-exc-rule';
 const EXC_CONTAINER = 'poc-mig-exc-container';
@@ -149,9 +150,10 @@ const cleanup = async () => {
   await kbn('DELETE', `/api/detection_engine/rules?rule_id=${IM_RULE}`);
   await kbn('DELETE', `/api/detection_engine/rules?rule_id=${EXC_RULE}`);
   await kbn('DELETE', `/api/exception_lists?list_id=${EXC_CONTAINER}&namespace_type=single`);
-  for (const id of [MIG_LIST, MAYBE_LIST, EXC_LIST])
+  for (const id of [MIG_LIST, MAYBE_LIST, EXC_LIST, REJ_LIST])
     await kbn('DELETE', `/api/lists?id=${id}&deleteReferences=true`);
   await es('DELETE', `/${MIG_INDEX}`);
+  await es('DELETE', `/.value-list-v2-${SPACE}-${REJ_LIST}`);
   await es('DELETE', `/.value-list-v2-${SPACE}-${MAYBE_LIST}`);
   await es('DELETE', `/.value-list-v2-${SPACE}-${EXC_LIST}`);
 };
@@ -259,6 +261,32 @@ const main = async () => {
       (r) => r.id === excRule.json.id && r.reason === 'exception' && r.canRead === true
     )
   );
+
+  log('\n=== migrate a list holding values the lookup grammar refuses ===');
+  // Elasticsearch stores `1.9` on a long field as 1, so the legacy list accepts it; the
+  // lookup grammar refuses a fraction on an integer type. Migration must list every such
+  // value and block, and with force leave them out and report them.
+  await kbn('POST', '/api/lists', { id: REJ_LIST, type: 'long', name: REJ_LIST, description: REJ_LIST, meta: { __forceLegacy: true } });
+  for (const value of ['1.9', '5', '2.5']) await kbn('POST', '/api/lists/items', { list_id: REJ_LIST, value });
+  const legacyCount = await es('POST', `/${ITEMS_INDEX}/_count`, { query: { term: { list_id: REJ_LIST } } });
+  check('legacy long list accepted the fractional values', legacyCount.json.count === 3, `count=${legacyCount.json.count}`);
+  const sortedSample = (rejected) => (rejected?.sample ?? []).slice().sort();
+  const rejDry = await kbn('POST', '/internal/lists/_migrate', { id: REJ_LIST, dryRun: true }, ih);
+  check('dry run reports the block with the rejected count and sample and changes nothing', rejDry.status === 200 && rejDry.json?.dryRun === true && rejDry.json?.blocked === true && rejDry.json?.rejectedValues?.count === 2 && JSON.stringify(sortedSample(rejDry.json?.rejectedValues)) === JSON.stringify(['1.9', '2.5']), `${rejDry.status} ${JSON.stringify(rejDry.json?.rejectedValues)} blocked=${rejDry.json?.blocked}`);
+  const rejDryList = await kbn('GET', `/api/lists?id=${REJ_LIST}`);
+  check('dry run left the list legacy', rejDryList.json?.storage == null);
+  const rejBlocked = await kbn('POST', '/internal/lists/_migrate', { id: REJ_LIST }, ih);
+  check('migration without force is blocked with 409 and reports the rejected count and sample', rejBlocked.status === 409 && rejBlocked.json?.attributes?.rejectedValues?.count === 2 && JSON.stringify(sortedSample(rejBlocked.json?.attributes?.rejectedValues)) === JSON.stringify(['1.9', '2.5']), `${rejBlocked.status} ${JSON.stringify(rejBlocked.json?.attributes?.rejectedValues)}`);
+  check('the message names the rejected values', String(rejBlocked.json?.message).includes('"1.9"') && String(rejBlocked.json?.message).includes('"2.5"'));
+  const rejStillLegacy = await kbn('GET', `/api/lists?id=${REJ_LIST}`);
+  check('blocked migration left the list legacy', rejStillLegacy.json?.storage == null);
+  const rejForced = await kbn('POST', '/internal/lists/_migrate', { id: REJ_LIST, force: true }, ih);
+  log(`  response: ${JSON.stringify(rejForced.json?.migration)}`);
+  check('forced migration succeeds and reports the dropped count and sample', rejForced.status === 200 && rejForced.json?.migration?.dropped?.count === 2 && JSON.stringify(sortedSample(rejForced.json?.migration?.dropped)) === JSON.stringify(['1.9', '2.5']) && rejForced.json?.migration?.itemsCopied === 1, JSON.stringify(rejForced.json?.migration));
+  const rejFind = await kbn('GET', `/api/lists/items/_find?list_id=${REJ_LIST}&page=1&per_page=10`);
+  check('the lookup list holds only the accepted value', rejFind.json?.total === 1 && rejFind.json?.data?.[0]?.value === '5', JSON.stringify(rejFind.json?.data?.map((d) => d.value)));
+  const rejLegacyAfter = await es('POST', `/${ITEMS_INDEX}/_count`, { query: { term: { list_id: REJ_LIST } } });
+  check('legacy rows untouched by the forced migration', rejLegacyAfter.json.count === 3);
 
   log('\n=== summary ===');
   log(

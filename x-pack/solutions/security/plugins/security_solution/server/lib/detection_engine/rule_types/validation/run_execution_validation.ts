@@ -144,6 +144,23 @@ export const runExecutionValidation = async (
       } catch (exc) {
         warnings.push(`Threat index timestamp fields check failed to execute ${exc}`);
       }
+
+      // The timestamp check above is skipped for a value list's lookup index, which has
+      // no timestamp field. The threat query still applies to it, and the product default
+      // filters on the timestamp field, so such a rule would match no indicators with no
+      // sign of why. Say so instead of running silently against nothing.
+      const lookupThreatIndices = params.threatIndex.filter(
+        (name) => isValueListLookupIndex?.(name) === true
+      );
+      if (lookupThreatIndices.length > 0 && params.threatQuery.includes(primaryTimestamp)) {
+        warnings.push(
+          `The threat query filters on "${primaryTimestamp}", but the value list lookup ${
+            lookupThreatIndices.length === 1 ? 'index' : 'indices'
+          } ${lookupThreatIndices.join(
+            ', '
+          )} carries no timestamp field, so no indicator from it can match. Use a threat query that does not filter on the timestamp, such as "*:*", for a value list.`
+        );
+      }
     }
   }
 

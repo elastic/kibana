@@ -20,14 +20,18 @@ export {
   deleteLookupItemByValue,
   lookupItemId,
   reconcileCoalesced,
+  recordRejected,
+  rejectedLookupValues,
   STATE_DOC_ID,
 } from './write_lookup_items';
+export type { RejectedValues } from './write_lookup_items';
 export {
   buildLookupListItem,
   findListByLookupIndex,
   findLookupItems,
   locateLookupItem,
 } from './item_crud';
+export type { LookupItemStamps } from './item_crud';
 export {
   countLookupItems,
   readLookupItemValues,

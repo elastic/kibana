@@ -18,13 +18,13 @@ import { isRangeType } from './build_lookup_mappings';
 import type { CoalescedBound } from './coalesce_ranges';
 import {
   coalesceBounds,
-  coalesceRangeValues,
+  createStreamingCoalescer,
   parseValueToBound,
-  uncoveredBounds,
+  uncoveredInStreams,
   widenForAdjacency,
 } from './coalesce_ranges';
 import { canonicalLookupValue, normalizeLookupValue } from './normalize_lookup_value';
-import { collectHits } from './paginate_hits';
+import { collectHits, paginateHits } from './paginate_hits';
 
 const hashId = (value: string): string => createHash('sha256').update(value).digest('hex');
 const coalescedId = (bound: CoalescedBound): string =>
@@ -62,10 +62,12 @@ const bulkOrThrow = async (
   const failures = response.items
     .map((item) => item.index ?? item.create ?? item.update ?? item.delete)
     .filter((operation) => operation?.error != null);
-  // `ignoreErrors` drops the items the mapper rejected, as the shared stream's import
-  // does; a failure that is not about the item (no privilege on the index) still raises.
+  // `ignoreErrors` drops the items the mapper rejected (a 400 on the item), as the shared
+  // stream's import does; any other item failure is not about the value (no privilege on
+  // the index, a rejected execution, an unavailable shard) and still raises, so an import
+  // never reports success with values silently missing.
   const failure = ignoreErrors
-    ? failures.find((operation) => operation?.status === 401 || operation?.status === 403)
+    ? failures.find((operation) => operation?.status !== 400)
     : failures[0];
   if (failure == null) return;
   const reason =
@@ -181,34 +183,85 @@ const serializeEqualityValue = (type: Type, value: string): unknown => {
   return Object.values(serialized)[0];
 };
 
+/** A parsed bound read back from a document, with the sequence number it was written at. */
+interface StreamedBound extends CoalescedBound {
+  seqNo: number;
+}
+
 /**
- * Replace the coalesced documents in an affected window. Indexes the recomputed
- * bounds first, then deletes the pulled coalesced documents that are not part of
- * the result, so an interruption leaves a superset of intervals (an over match)
- * rather than a hole (a missed match).
+ * Stream the bounds of documents matching `query`, in ascending start order. Paging is
+ * by `search_after` on the start field with `_seq_no` as the tie breaker, so a set of any
+ * size is read one page at a time and never held whole.
  */
-const replaceCoalescedWindow = async (
+const streamBounds = async function* (
   esClient: ElasticsearchClient,
   index: string,
-  result: CoalescedBound[],
-  pulledIds: Set<string>
-): Promise<void> => {
-  const resultIds = new Set(result.map(coalescedId));
-
-  if (result.length > 0) {
-    const operations = result.flatMap((bound) => [
-      { index: { _id: coalescedId(bound) } },
-      { kind: 'coalesced', ...bound },
-    ]);
-    await bulkOrThrow(esClient, { index, operations, refresh: true });
+  query: estypes.QueryDslQueryContainer,
+  startField: string,
+  endField: string
+): AsyncGenerator<StreamedBound, void, void> {
+  for await (const page of paginateHits<Record<string, string>>({
+    _source: [endField, startField],
+    esClient,
+    index,
+    query,
+    sort: [{ [startField]: 'asc' }, { _seq_no: 'asc' }],
+  })) {
+    for (const hit of page) {
+      const rangeStart = hit._source?.[startField];
+      const rangeEnd = hit._source?.[endField];
+      if (rangeStart != null && rangeEnd != null) {
+        yield { range_end: rangeEnd, range_start: rangeStart, seqNo: Number(hit.sort?.[1] ?? 0) };
+      }
+    }
   }
+};
 
-  const staleIds = [...pulledIds].filter((id) => !resultIds.has(id));
-  if (staleIds.length > 0) {
-    const operations = staleIds.map((id) => ({ delete: { _id: id } }));
-    // A stale document already deleted by a concurrent run is not a failure.
-    await bulkOrThrow(esClient, { index, operations, refresh: true }, true);
+/** Drop the sequence number, for consumers that only need bounds. */
+const boundsOnly = async function* (
+  stream: AsyncIterable<StreamedBound>
+): AsyncGenerator<CoalescedBound, void, void> {
+  for await (const { range_end: rangeEnd, range_start: rangeStart } of stream) {
+    yield { range_end: rangeEnd, range_start: rangeStart };
   }
+};
+
+/**
+ * Coalesced documents per bulk request. Matches the read page (10,000 hits, the search
+ * request limit), so a rebuild makes one round trip per 10,000 sources read and at most
+ * one per 10,000 intervals written; a coalesced document is about 150 bytes, so a full
+ * batch is about 1.5 MB, well inside the size Elasticsearch recommends for a bulk request.
+ */
+const COALESCED_WRITE_BATCH = 10000;
+
+/**
+ * Index coalesced intervals in batches as a coalescer produces them, tagged with the id
+ * of the run that wrote them. Only a batch is ever held; `onWritten` sees every id.
+ */
+const coalescedWriter = (
+  esClient: ElasticsearchClient,
+  index: string,
+  runId: string,
+  onWritten?: (id: string) => void
+): { add: (bounds: CoalescedBound[]) => Promise<void>; end: () => Promise<void> } => {
+  let operations: unknown[] = [];
+  const flush = async (): Promise<void> => {
+    if (operations.length === 0) return;
+    const batch = operations;
+    operations = [];
+    await bulkOrThrow(esClient, { index, operations: batch, refresh: true });
+  };
+  return {
+    add: async (bounds: CoalescedBound[]): Promise<void> => {
+      for (const bound of bounds) {
+        const id = coalescedId(bound);
+        onWritten?.(id);
+        operations.push({ index: { _id: id } }, { built_by: runId, kind: 'coalesced', ...bound });
+      }
+      if (operations.length >= COALESCED_WRITE_BATCH * 2) await flush();
+    },
+    end: flush,
+  };
 };
 
 /** A `bool` clause matching documents whose parsed bounds overlap `[start, end]`. */
@@ -226,23 +279,27 @@ const overlaps = (
 });
 
 /**
- * Re-coalesce a single dirty window from the current sources. This is the
- * incremental unit of the rebuild: it reads only the coalesced intervals the window
- * overlaps and only the sources inside those intervals, re-derives their disjoint
- * form, and replaces just those documents. Cost is proportional to the intervals
- * near the edit, not the list size. Correct because the task is the single writer,
- * so the coalesced set is disjoint when it reads it, which keeps the affected region
- * closed: the sources of an overlapping coalesced interval all overlap that interval,
- * so pulling "sources overlapping the window or any overlapping coalesced interval"
- * captures the whole connected component. For the discrete types the search bounds are
- * widened by one representable step, so exactly adjacent intervals are pulled in and
- * merged too (adjacency coalescing), matching the merge rule in `coalesceBounds`.
+ * Re-coalesce a single dirty window from the current sources. This is the incremental
+ * unit of the rebuild: it reads the coalesced intervals the window overlaps (few: a
+ * window touches one connected component and its neighbours), streams the sources inside
+ * those intervals in start order through a coalescer, writes the result in batches, and
+ * then deletes the pulled intervals the result did not reproduce. New intervals are
+ * written before old ones are deleted, so an interruption leaves a superset (an over
+ * match) rather than a hole (a missed match). Memory is one write batch plus the pulled
+ * interval ids, whatever the size of the component. Correct because the task is the
+ * single writer, so the coalesced set is disjoint when it reads it, which keeps the
+ * affected region closed: the sources of an overlapping coalesced interval all overlap
+ * that interval, so pulling "sources overlapping the window or any overlapping coalesced
+ * interval" captures the whole connected component. For the discrete types the search
+ * bounds are widened by one representable step, so exactly adjacent intervals are pulled
+ * in and merged too (adjacency coalescing), matching the merge rule in `coalesceBounds`.
  */
 const processWindow = async (
   esClient: ElasticsearchClient,
   index: string,
   type: Type,
-  window: Bounds
+  window: Bounds,
+  runId: string
 ): Promise<void> => {
   const coalescedDocs = await collectHits<Bounds>({
     _source: ['range_end', 'range_start'],
@@ -257,7 +314,8 @@ const processWindow = async (
       },
     },
   });
-  const pulledIds = new Set(coalescedDocs.map((hit) => hit._id as string));
+  // every pulled interval the result does not write again is stale
+  const stale = new Set(coalescedDocs.map((hit) => hit._id as string));
 
   const regions = [
     window,
@@ -265,11 +323,10 @@ const processWindow = async (
       .map((hit) => hit._source)
       .filter((s): s is Bounds => s?.range_start != null && s?.range_end != null),
   ];
-  const sources = await collectHits<{ src_end: string; src_start: string }>({
-    _source: ['src_end', 'src_start'],
+  const sources = streamBounds(
     esClient,
     index,
-    query: {
+    {
       bool: {
         filter: [{ term: { kind: 'source' } }],
         minimum_should_match: 1,
@@ -278,69 +335,90 @@ const processWindow = async (
         ),
       },
     },
+    'src_start',
+    'src_end'
+  );
+
+  const coalescer = createStreamingCoalescer(type);
+  const writer = coalescedWriter(esClient, index, runId, (id) => stale.delete(id));
+  for await (const source of sources) {
+    await writer.add(coalescer.push(source));
+  }
+  await writer.add(coalescer.flush());
+  await writer.end();
+
+  if (stale.size > 0) {
+    const operations = [...stale].map((id) => ({ delete: { _id: id } }));
+    // A stale document already deleted by a concurrent run is not a failure.
+    await bulkOrThrow(esClient, { index, operations, refresh: true }, true);
+  }
+};
+
+/**
+ * The highest sequence number in the index right now. Every document written later
+ * carries a larger one, so a reader that takes this mark before it starts can tell the
+ * documents it was meant to see from those that arrived while it worked.
+ */
+const highestSeqNo = async (esClient: ElasticsearchClient, index: string): Promise<number> => {
+  const response = await esClient.search({
+    _source: false,
+    index,
+    size: 1,
+    sort: [{ _seq_no: 'desc' }],
+    track_total_hits: false,
   });
-
-  const bounds = sources
-    .map((hit) => hit._source)
-    .filter(
-      (s): s is { src_end: string; src_start: string } => s?.src_start != null && s?.src_end != null
-    )
-    .map((s) => ({ range_end: s.src_end, range_start: s.src_start }));
-
-  const fragments = coalesceBounds(type, bounds);
-  await replaceCoalescedWindow(esClient, index, fragments, pulledIds);
+  return Number(response.hits.hits[0]?.sort?.[0] ?? -1);
 };
 
 /**
  * Verify that every source in `window` (or in the whole list) lies inside some coalesced
- * interval, reading both sets back from Elasticsearch. The version guard alone proves the
- * task ran, not that its result is complete: a bound the coalescer computed wrongly, or a
- * source the window query missed, would otherwise be recorded as clean and the future
- * join would miss it. A failure throws, so the state stays dirty, the markers stay, and the
- * task fails visibly with the first uncovered source in its message.
+ * interval, reading both sets back from Elasticsearch as two streams sorted by start and
+ * walking them together, so nothing is held beyond the current interval. The version
+ * guard alone proves the task ran, not that its result is complete: a bound the coalescer
+ * computed wrongly, or a source the window query missed, would otherwise be recorded as
+ * clean and the future join would miss it. A failure throws, so the state stays dirty, the
+ * markers stay, and the task fails visibly with the first uncovered source in its message.
+ * A source written after the markers were drained (its sequence number is above the mark)
+ * is owed to a later pass: its writer leaves a marker and bumps the version, so the guard
+ * at the end of this run reports stale. Checking it here would fail the run for a value
+ * that is not lost, only not yet processed.
  */
 const verifyCoverage = async (
   esClient: ElasticsearchClient,
   index: string,
   type: Type,
+  maxSeqNo: number,
   window?: Bounds
 ): Promise<void> => {
   const inWindow = (startField: string, endField: string): estypes.QueryDslQueryContainer[] =>
     window == null ? [] : [overlaps(startField, endField, window)];
-  const [sources, coalesced] = await Promise.all([
-    collectHits<{ src_end: string; src_start: string }>({
-      _source: ['src_end', 'src_start'],
-      esClient,
-      index,
-      query: {
-        bool: { filter: [{ term: { kind: 'source' } }, ...inWindow('src_start', 'src_end')] },
-      },
-    }),
-    collectHits<Bounds>({
-      _source: ['range_end', 'range_start'],
-      esClient,
-      index,
-      query: {
-        bool: {
-          filter: [{ term: { kind: 'coalesced' } }, ...inWindow('range_start', 'range_end')],
-        },
-      },
-    }),
-  ]);
-  const intervals = coalesced
-    .map((hit) => hit._source)
-    .filter((s): s is Bounds => s?.range_start != null && s?.range_end != null);
-  const sourceBounds = sources
-    .map((hit) => hit._source)
-    .filter(
-      (s): s is { src_end: string; src_start: string } => s?.src_start != null && s?.src_end != null
-    )
-    .map((s) => ({ range_end: s.src_end, range_start: s.src_start }));
-  const uncovered = uncoveredBounds(type, intervals, sourceBounds);
-  if (uncovered.length > 0) {
-    const [first] = uncovered;
+  const sources = streamBounds(
+    esClient,
+    index,
+    { bool: { filter: [{ term: { kind: 'source' } }, ...inWindow('src_start', 'src_end')] } },
+    'src_start',
+    'src_end'
+  );
+  const intervals = streamBounds(
+    esClient,
+    index,
+    {
+      bool: { filter: [{ term: { kind: 'coalesced' } }, ...inWindow('range_start', 'range_end')] },
+    },
+    'range_start',
+    'range_end'
+  );
+  const seenBeforeDrain = async function* (): AsyncGenerator<CoalescedBound, void, void> {
+    for await (const source of sources) {
+      if (source.seqNo <= maxSeqNo) {
+        yield { range_end: source.range_end, range_start: source.range_start };
+      }
+    }
+  };
+  const { count, first } = await uncoveredInStreams(type, seenBeforeDrain(), boundsOnly(intervals));
+  if (count > 0 && first != null) {
     throw new Error(
-      `coalesced set of ${index} does not cover ${uncovered.length} source(s); first: ${first.range_start}-${first.range_end}`
+      `coalesced set of ${index} does not cover ${count} source(s); first: ${first.range_start}-${first.range_end}`
     );
   }
 };
@@ -348,30 +426,43 @@ const verifyCoverage = async (
 /**
  * Full recompute of the coalesced set from all sources. The repair path only: a dirty
  * state with no markers, which means markers were lost to an interruption between
- * draining them and recording the state clean.
+ * draining them and recording the state clean. The sources stream in start order through
+ * a coalescer and the result is written in batches tagged with this run's id; the
+ * intervals of earlier runs that the result did not write again are then removed in one
+ * delete by query, after the new ones exist. Memory is one write batch, whatever the list
+ * size.
  */
 const rebuildCoalesced = async (
   esClient: ElasticsearchClient,
   index: string,
-  type: Type
+  type: Type,
+  runId: string
 ): Promise<void> => {
-  const sources = await collectHits<{ value: string }>({
-    _source: ['value'],
+  const sources = streamBounds(
     esClient,
     index,
-    query: { term: { kind: 'source' } },
-  });
-  const values = sources.map((hit) => hit._source?.value).filter((v): v is string => v != null);
-  const coalesced = coalesceRangeValues(type, values);
-
-  const existing = await collectHits<never>({
-    _source: [],
-    esClient,
+    { term: { kind: 'source' } },
+    'src_start',
+    'src_end'
+  );
+  const coalescer = createStreamingCoalescer(type);
+  const writer = coalescedWriter(esClient, index, runId);
+  for await (const source of sources) {
+    await writer.add(coalescer.push(source));
+  }
+  await writer.add(coalescer.flush());
+  await writer.end();
+  await esClient.deleteByQuery({
+    conflicts: 'proceed',
     index,
-    query: { term: { kind: 'coalesced' } },
+    query: {
+      bool: {
+        filter: [{ term: { kind: 'coalesced' } }],
+        must_not: [{ term: { built_by: runId } }],
+      },
+    },
+    refresh: true,
   });
-  const existingIds = new Set(existing.map((hit) => hit._id as string));
-  await replaceCoalescedWindow(esClient, index, coalesced, existingIds);
 };
 
 /**
@@ -385,15 +476,22 @@ const rebuildCoalesced = async (
  * - "clean": the cache now matches the sources.
  * - "stale": a newer write landed during the run, so the caller should re-run.
  * - "noop": nothing was owed.
+ * `shouldAbort` is read between steps; when it turns true the run stops and reports
+ * "stale", leaving the markers and the dirty state for the next run.
  */
 export const reconcileCoalesced = async ({
   esClient,
   index,
   type,
+  shouldAbort = (): boolean => false,
+  runId = randomUUID(),
 }: {
   esClient: ElasticsearchClient;
   index: string;
   type: Type;
+  shouldAbort?: () => boolean;
+  /** Tags the coalesced documents this run writes; a full rebuild removes every other tag. */
+  runId?: string;
 }): Promise<'clean' | 'stale' | 'noop'> => {
   const state = await esClient
     .get<CoalesceState>({ id: STATE_DOC_ID, index })
@@ -422,15 +520,23 @@ export const reconcileCoalesced = async ({
   // Every marker carries bounds, so each is a region to re-coalesce. A dirty state
   // with no markers means the markers were lost to an interruption, so recompute the
   // whole list from its sources to repair it.
+  // Everything written from here on belongs to a later pass: the coverage check below
+  // ignores sources above this mark, since their writers leave a marker and bump the
+  // version, and the guard at the end of this run reports stale for them.
+  const maxSeqNo = await highestSeqNo(esClient, index);
+
+  if (shouldAbort()) return 'stale';
   if (markers.length === 0) {
-    await rebuildCoalesced(esClient, index, type);
-    await verifyCoverage(esClient, index, type);
+    await rebuildCoalesced(esClient, index, type, runId);
+    await verifyCoverage(esClient, index, type, maxSeqNo);
   } else {
     for (const window of windows) {
-      await processWindow(esClient, index, type, window);
+      if (shouldAbort()) return 'stale';
+      await processWindow(esClient, index, type, window, runId);
     }
     for (const window of windows) {
-      await verifyCoverage(esClient, index, type, widenForAdjacency(type, window));
+      if (shouldAbort()) return 'stale';
+      await verifyCoverage(esClient, index, type, maxSeqNo, widenForAdjacency(type, window));
     }
   }
 
@@ -493,7 +599,9 @@ export const writeLookupItems = async ({
   index,
   listId,
   type,
+  user,
   values,
+  now = new Date().toISOString(),
   refresh = 'wait_for',
   ignoreErrors = false,
 }: {
@@ -501,11 +609,23 @@ export const writeLookupItems = async ({
   index: string;
   listId: string;
   type: Type;
+  user: string;
   values: string[];
+  now?: string;
   refresh?: estypes.Refresh;
   ignoreErrors?: boolean;
 }): Promise<void> => {
   if (values.length === 0) return;
+
+  // One document per value, so a repeated write is an update: the creation stamps are
+  // set once by the upsert and the update stamps move on every write. The items table
+  // sorts on them, as it does on the shared stream.
+  const updated = { updated_at: now, updated_by: user };
+  const created = { created_at: now, created_by: user, ...updated };
+  const upsertOperation = (id: string, doc: Record<string, unknown>): unknown[] => [
+    { update: { _id: id, retry_on_conflict: 3 } },
+    { doc: { ...updated, ...doc }, upsert: { ...created, ...doc } },
+  ];
 
   if (isRangeType(type)) {
     const bounds: CoalescedBound[] = [];
@@ -522,15 +642,15 @@ export const writeLookupItems = async ({
         );
       }
       bounds.push(bound);
-      const doc = {
+      // _id keyed on the authored value => idempotent source upsert; the value is kept
+      // trimmed, the spelling the id was hashed from
+      return upsertOperation(lookupItemId(type, value, listId), {
         kind: 'source',
         src_end: bound.range_end,
         src_range: { gte: bound.range_start, lte: bound.range_end },
         src_start: bound.range_start,
-        value,
-      };
-      // _id keyed on the authored value => idempotent source upsert
-      return [{ index: { _id: lookupItemId(type, value, listId) } }, doc];
+        value: value.trim(),
+      });
     });
     if (operations.length === 0) return;
     // the same refresh policy as an equality write, so a range write costs the caller
@@ -563,11 +683,38 @@ export const writeLookupItems = async ({
       throw new ErrorWithStatusCode(`list item invalid: ${reason}`, 400);
     }
     // _id keyed on the canonical value => idempotent, deduplicated upsert
-    return [{ index: { _id: lookupItemId(type, value, listId) } }, { value: serialized }];
+    return upsertOperation(lookupItemId(type, value, listId), { value: serialized });
   });
   if (operations.length === 0) return;
   await bulkOrThrow(esClient, { index, operations, refresh }, ignoreErrors);
 };
+
+/**
+ * The values a write to a lookup list of `type` would refuse: a range the parser cannot
+ * read, or a scalar outside the type's accepted grammar. The same checks the write
+ * applies, so a caller can report them all before writing anything.
+ */
+export const rejectedLookupValues = (type: Type, values: string[]): string[] =>
+  values.filter((value) =>
+    isRangeType(type)
+      ? parseValueToBound(type, value) == null
+      : !canonicalLookupValue(type, value).ok || serializeEqualityValue(type, value) === undefined
+  );
+
+/** How many rejected values a scan keeps as a sample; the rest are only counted. */
+export const REJECTED_SAMPLE_SIZE = 100;
+
+/** A running count of rejected values with a bounded sample, so a scan uses flat memory. */
+export interface RejectedValues {
+  count: number;
+  sample: string[];
+}
+
+/** Add a batch of rejected values to a running count, keeping the first sample only. */
+export const recordRejected = (sofar: RejectedValues, rejected: string[]): RejectedValues => ({
+  count: sofar.count + rejected.length,
+  sample: [...sofar.sample, ...rejected.slice(0, REJECTED_SAMPLE_SIZE - sofar.sample.length)],
+});
 
 /** Swallow a missing document on delete; any other failure (403, 5xx) is raised. */
 const ignoreNotFound = (err: { meta?: { statusCode?: number } }): void => {

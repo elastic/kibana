@@ -12,6 +12,8 @@ import {
   RANGE_FIXTURES,
   TEST_INDEX,
   TEST_LIST_ID,
+  TEST_NOW,
+  TEST_USER,
   createEsClientMock,
   expectedDirtyMarkerOps,
   expectedDirtyWindows,
@@ -39,7 +41,9 @@ describe('writeLookupItems (range types)', () => {
         esClient,
         index: TEST_INDEX,
         listId: TEST_LIST_ID,
+        now: TEST_NOW,
         type: fx.type,
+        user: TEST_USER,
         values: [fx.single],
       });
 
@@ -79,7 +83,9 @@ describe('writeLookupItems (range types)', () => {
         esClient,
         index: TEST_INDEX,
         listId: TEST_LIST_ID,
+        now: TEST_NOW,
         type: fx.type,
+        user: TEST_USER,
         values: fx.batch,
       });
 
@@ -114,7 +120,9 @@ describe('writeLookupItems (range types)', () => {
         esClient,
         index: TEST_INDEX,
         listId: TEST_LIST_ID,
+        now: TEST_NOW,
         type: 'ip_range',
+        user: TEST_USER,
         values: ['10.0.0.0/24'],
       });
 
@@ -131,7 +139,9 @@ describe('writeLookupItems (range types)', () => {
           esClient,
           index: TEST_INDEX,
           listId: TEST_LIST_ID,
+          now: TEST_NOW,
           type: 'ip_range',
+          user: TEST_USER,
           values: ['10.0.0.0/24'],
         })
       ).rejects.toBe(conflict);
@@ -144,7 +154,9 @@ describe('writeLookupItems (range types)', () => {
           esClient,
           index: TEST_INDEX,
           listId: TEST_LIST_ID,
+          now: TEST_NOW,
           type: 'ip_range',
+          user: TEST_USER,
           values: ['garbage-1', 'garbage-2'],
         })
       ).rejects.toMatchObject({
@@ -163,7 +175,9 @@ describe('writeLookupItems (range types)', () => {
         ignoreErrors: true,
         index: TEST_INDEX,
         listId: TEST_LIST_ID,
+        now: TEST_NOW,
         type: 'ip_range',
+        user: TEST_USER,
         values: ['garbage-1', 'garbage-2'],
       });
 
@@ -177,7 +191,9 @@ describe('writeLookupItems (range types)', () => {
         esClient,
         index: TEST_INDEX,
         listId: TEST_LIST_ID,
+        now: TEST_NOW,
         type: 'ip_range',
+        user: TEST_USER,
         values: [],
       });
 
@@ -193,7 +209,9 @@ describe('writeLookupItems (range types)', () => {
           esClient,
           index: TEST_INDEX,
           listId: TEST_LIST_ID,
+          now: TEST_NOW,
           type: 'ip_range',
+          user: TEST_USER,
           values: [ipFx.single],
         })
       ).rejects.toThrow('source boom');
@@ -207,7 +225,9 @@ describe('writeLookupItems (range types)', () => {
           esClient,
           index: TEST_INDEX,
           listId: TEST_LIST_ID,
+          now: TEST_NOW,
           type: 'ip_range',
+          user: TEST_USER,
           values: [ipFx.single],
         })
       ).rejects.toThrow('state boom');

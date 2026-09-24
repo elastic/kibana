@@ -68,28 +68,50 @@ export const registerCoalesceRebuildTask = ({
       cost: TaskCost.Normal,
       createTaskRunner: ({
         taskInstance,
-      }): { run: () => Promise<{ state: Record<string, unknown> }> } => ({
-        run: async (): Promise<{ state: Record<string, unknown> }> => {
-          const { index, type } = taskInstance.params as { index: string; type: Type };
-          const [coreStart] = await getStartServices();
-          const esClient = coreStart.elasticsearch.client.asInternalUser;
+      }): {
+        cancel: () => Promise<void>;
+        run: () => Promise<{ state: Record<string, unknown> }>;
+      } => {
+        // Task Manager calls `cancel` when a run outlives the task timeout, at which point
+        // it may hand the task to another claim. The run reads this flag between steps
+        // and stops, so two runs never write the same list for longer than one in-flight
+        // step. The list stays dirty with its markers in place; the next claim resumes it.
+        let cancelled = false;
+        const shouldAbort = (): boolean => cancelled;
+        return {
+          cancel: async (): Promise<void> => {
+            cancelled = true;
+          },
+          run: async (): Promise<{ state: Record<string, unknown> }> => {
+            const { index, type } = taskInstance.params as { index: string; type: Type };
+            const [coreStart] = await getStartServices();
+            const esClient = coreStart.elasticsearch.client.asInternalUser;
 
-          let outcome = await reconcileCoalesced({ esClient, index, type });
-          for (let pass = 1; outcome === 'stale' && pass < RECONCILE_PASSES_PER_RUN; pass++) {
-            outcome = await reconcileCoalesced({ esClient, index, type });
-          }
-          if (outcome === 'stale') {
-            throwRetryableError(
-              new Error(
-                `coalesced rebuild for ${index} still behind after ${RECONCILE_PASSES_PER_RUN} passes`
-              ),
-              true
-            );
-          }
-          logger.debug(`coalesced rebuild for ${index}: ${outcome}`);
-          return { state: {} };
-        },
-      }),
+            let outcome = await reconcileCoalesced({ esClient, index, shouldAbort, type });
+            for (
+              let pass = 1;
+              outcome === 'stale' && !cancelled && pass < RECONCILE_PASSES_PER_RUN;
+              pass++
+            ) {
+              outcome = await reconcileCoalesced({ esClient, index, shouldAbort, type });
+            }
+            if (cancelled) {
+              logger.warn(`coalesced rebuild for ${index} stopped at the task timeout`);
+              return { state: {} };
+            }
+            if (outcome === 'stale') {
+              throwRetryableError(
+                new Error(
+                  `coalesced rebuild for ${index} still behind after ${RECONCILE_PASSES_PER_RUN} passes`
+                ),
+                true
+              );
+            }
+            logger.debug(`coalesced rebuild for ${index}: ${outcome}`);
+            return { state: {} };
+          },
+        };
+      },
       description:
         'Rebuilds the coalesced (disjoint interval) projection of a range value list from its source documents, coordinated so only one rebuild runs per list.',
       maxAttempts: 5,

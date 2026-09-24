@@ -9,6 +9,8 @@ import * as ipaddr from 'ipaddr.js';
 import moment from 'moment';
 import type { Type } from '@kbn/securitysolution-io-ts-list-types';
 
+import { DEFAULT_GEO_REGEX } from '../utils/transform_list_item_to_elastic_query';
+
 import { isRangeType } from './build_lookup_mappings';
 
 /**
@@ -270,6 +272,24 @@ const canonicalDate = (type: Type, value: string): CanonicalResult => {
 };
 
 /**
+ * A geo value in the spelling a read returns. The shared serializer stores `lat,lon` on a
+ * `geo_point` as an object, rendered back as `lat,lon` with each part trimmed, and on a
+ * shape type as the WKT string `POINT (lon lat)`, returned as stored. Any other spelling
+ * is WKT and is stored and returned trimmed. Hashing that spelling keeps the id of an
+ * item read back equal to the id it was written under.
+ */
+const canonicalGeo = (
+  type: 'geo_point' | 'geo_shape' | 'shape',
+  value: string
+): CanonicalResult => {
+  const parsed = DEFAULT_GEO_REGEX.exec(value);
+  const lat = parsed?.groups?.lat?.trim();
+  const lon = parsed?.groups?.lon?.trim();
+  if (lat == null || lon == null) return accept(value);
+  return accept(type === 'geo_point' ? `${lat},${lon}` : `POINT (${lon} ${lat})`);
+};
+
+/**
  * The canonical spelling of a value under its list type: the value as Elasticsearch
  * stores it, so every accepted spelling of one stored value hashes to one document id
  * and `LOOKUP JOIN` returns one row per value. A spelling outside the accepted grammar
@@ -280,8 +300,11 @@ const canonicalDate = (type: Type, value: string): CanonicalResult => {
 export const canonicalLookupValue = (type: Type, value: string): CanonicalResult => {
   const trimmed = value.trim();
   if (trimmed === '') return reject('the value is empty');
-  if (isRangeType(type) || type === 'geo_point' || type === 'geo_shape' || type === 'shape') {
+  if (isRangeType(type)) {
     return accept(trimmed);
+  }
+  if (type === 'geo_point' || type === 'geo_shape' || type === 'shape') {
+    return canonicalGeo(type, trimmed);
   }
   if (/[\r\n]/.test(trimmed)) return reject('the value contains a line break');
   switch (type) {

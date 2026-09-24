@@ -1257,14 +1257,34 @@ export class TelemetryReceiver implements ITelemetryReceiver {
         },
       },
     };
-    // The names a rule can use to read a lookup list as a threat index: each list's alias
-    // (`.items-<space>-<id>`, under the `.items` prefix) and concrete index, taken from the
-    // locators in `.lists-*`. A prefix on `.items` alone would count alias readers as legacy.
-    const lookupAccessNames = await this.fetchLookupListAccessNames();
-    const readsLookupList: QueryDslQueryContainer[] =
-      lookupAccessNames.length > 0
+    // A rule reads the shared stream when its threat index names one of the `.items-<space>`
+    // data streams. It reads a lookup list when it names a `.value-list` concrete index
+    // (present, or orphaned by a delete), an alias or index recorded in a list's locator,
+    // or a name under `.items` that is not a stream (an alias dropped by a restrict). A
+    // rule that reads both counts once, as a lookup reader: the legacy count is the rules
+    // that read only the shared stream. `threatIndex` is an array, so the last clause
+    // cannot tell a dropped alias from a stream inside one rule; the locator names cover
+    // every alias that still exists.
+    const [legacyStreamNames, lookupAccessNames] = await Promise.all([
+      this.fetchLegacyItemStreamNames(),
+      this.fetchLookupListAccessNames(),
+    ]);
+    const readsLegacyStream: QueryDslQueryContainer[] =
+      legacyStreamNames.length > 0
+        ? [{ terms: { 'alert.params.threatIndex': legacyStreamNames } }]
+        : [{ match_none: {} }];
+    const readsLookupList: QueryDslQueryContainer[] = [
+      { prefix: { 'alert.params.threatIndex': '.value-list' } },
+      ...(lookupAccessNames.length > 0
         ? [{ terms: { 'alert.params.threatIndex': lookupAccessNames } }]
-        : [];
+        : []),
+      {
+        bool: {
+          must: [{ prefix: { 'alert.params.threatIndex': '.items' } }],
+          must_not: readsLegacyStream,
+        },
+      },
+    ];
     // indicator-match rules whose threat index is the shared `.items-<space>` stream
     const indicatorMatchRuleQuery: SearchRequest = {
       expand_wildcards: ['open' as const, 'hidden' as const],
@@ -1273,7 +1293,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       size: 0,
       query: {
         bool: {
-          must: [{ prefix: { 'alert.params.threatIndex': '.items' } }],
+          must: readsLegacyStream,
           must_not: readsLookupList,
         },
       },
@@ -1294,7 +1314,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       query: {
         bool: {
           minimum_should_match: 1,
-          should: [{ prefix: { 'alert.params.threatIndex': '.value-list' } }, ...readsLookupList],
+          should: readsLookupList,
         },
       },
       aggs: {
@@ -1355,6 +1375,21 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       indicatorMatchLookupMetricsResponse,
       storageMetricsResponse,
     };
+  }
+
+  /** The `.items-<space>` data streams: the shared value list item stores, one per space. */
+  private async fetchLegacyItemStreamNames(): Promise<string[]> {
+    try {
+      const response = await this.esClient().indices.getDataStream({
+        expand_wildcards: ['open' as const, 'hidden' as const],
+        name: '.items-*',
+      });
+      return response.data_streams.map((stream) => stream.name);
+    } catch (error) {
+      // without the stream names no legacy reader can be told apart, so count none
+      this.logger.warn('Error fetching value list item data streams', withErrorMessage(error));
+      return [];
+    }
   }
 
   /** Every alias and concrete index name recorded in the storage locators of lookup value lists. */

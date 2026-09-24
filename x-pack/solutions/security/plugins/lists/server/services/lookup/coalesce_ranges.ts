@@ -403,3 +403,88 @@ export const uncoveredBounds = (
     return candidate < 0 || cmp(sorted[candidate].end, iv.end) < 0;
   });
 };
+
+/**
+ * An incremental coalescer: feed it bounds in ascending start order and it hands back
+ * every interval it has finished, holding only the one still open. The streaming
+ * counterpart of `coalesceBounds`, for a source set too large to hold in memory.
+ */
+export interface StreamingCoalescer {
+  /** Add the next bound (start at or after every earlier one); returns finished intervals. */
+  push: (bound: CoalescedBound) => CoalescedBound[];
+  /** Close the open interval, if any, and return it. */
+  flush: () => CoalescedBound[];
+}
+
+export const createStreamingCoalescer = (type: Type): StreamingCoalescer => {
+  const codec = codecForType(type);
+  const mergeAdjacent = isDiscreteRangeType(type);
+  let open: Interval | undefined;
+  return {
+    flush: (): CoalescedBound[] => {
+      const finished = open != null ? [codec.format(open)] : [];
+      open = undefined;
+      return finished;
+    },
+    push: (bound: CoalescedBound): CoalescedBound[] => {
+      let iv: Interval;
+      try {
+        iv = boundToInterval(type, bound);
+      } catch {
+        return [];
+      }
+      if (open == null) {
+        open = { ...iv };
+        return [];
+      }
+      const mergeUpTo = mergeAdjacent ? nextValue(open.end) : open.end;
+      if (cmp(iv.start, mergeUpTo) <= 0) {
+        if (cmp(iv.end, open.end) > 0) open.end = iv.end;
+        return [];
+      }
+      const finished = codec.format(open);
+      open = { ...iv };
+      return [finished];
+    },
+  };
+};
+
+/**
+ * The streaming counterpart of `uncoveredBounds`: both inputs sorted by start, the
+ * intervals disjoint. A source is checked against the one interval that can contain it,
+ * the first whose end is not before the source's start, so both streams are read once
+ * and nothing is held beyond the current interval. Returns how many sources no interval
+ * contains, and the first of them.
+ */
+export const uncoveredInStreams = async (
+  type: Type,
+  sources: AsyncIterable<CoalescedBound>,
+  intervals: AsyncIterable<CoalescedBound>
+): Promise<{ count: number; first?: CoalescedBound }> => {
+  const iterator = intervals[Symbol.asyncIterator]();
+  let current: Interval | undefined;
+  let exhausted = false;
+  const advance = async (): Promise<void> => {
+    const next = await iterator.next();
+    if (next.done) {
+      current = undefined;
+      exhausted = true;
+    } else {
+      current = boundToInterval(type, next.value);
+    }
+  };
+  let count = 0;
+  let first: CoalescedBound | undefined;
+  for await (const source of sources) {
+    const iv = boundToInterval(type, source);
+    if (current == null && !exhausted) await advance();
+    while (current != null && cmp(current.end, iv.start) < 0) await advance();
+    const covered =
+      current != null && cmp(current.start, iv.start) <= 0 && cmp(current.end, iv.end) >= 0;
+    if (!covered) {
+      count += 1;
+      if (first == null) first = source;
+    }
+  }
+  return { count, first };
+};

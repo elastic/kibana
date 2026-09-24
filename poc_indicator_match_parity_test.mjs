@@ -36,6 +36,9 @@ const twinRule = (c) => `${P}-${c.storage}-rule`;
 const MIG_LIST = `${P}-mig`;
 const MIG_LEGACY_RULE = `${P}-mig-legacy-rule`;
 const MIG_CONCRETE_RULE = `${P}-mig-concrete-rule`;
+// a lookup rule saved with the product's default threat query, which filters on @timestamp
+const DEFAULT_QUERY_RULE = `${P}-default-query-rule`;
+const DEFAULT_THREAT_QUERY = '@timestamp >= "now-30d/d"';
 
 const kh = {
   authorization: AUTH,
@@ -82,7 +85,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const now = () => new Date().toISOString();
 
 const cleanup = async () => {
-  for (const ruleId of [...TWINS.map(twinRule), MIG_LEGACY_RULE, MIG_CONCRETE_RULE]) {
+  for (const ruleId of [...TWINS.map(twinRule), MIG_LEGACY_RULE, MIG_CONCRETE_RULE, DEFAULT_QUERY_RULE]) {
     await kbn('DELETE', `/api/detection_engine/rules?rule_id=${ruleId}`);
   }
   for (const listId of [...TWINS.map(twinList), MIG_LIST]) {
@@ -160,7 +163,7 @@ const ruleHandle = (id, ruleId, storage, listId) => ({
   lookupIndex: storage === 'lookup' ? concreteIndex(listId) : undefined,
 });
 
-const createRule = async (ruleId, storage, listId) => {
+const createRule = async (ruleId, storage, listId, overrides = {}) => {
   const rule = await kbn('POST', '/api/detection_engine/rules', {
     rule_id: ruleId,
     name: ruleId,
@@ -176,6 +179,7 @@ const createRule = async (ruleId, storage, listId) => {
     language: 'kuery',
     threat_language: 'kuery',
     ...threatSide(storage, listId),
+    ...overrides,
   });
   if (rule.status >= 400)
     throw new Error(`create rule ${ruleId}: ${rule.status} ${JSON.stringify(rule.json)}`);
@@ -340,6 +344,21 @@ const main = async () => {
     `concrete-index rule now alerts ${JSON.stringify([IN, ADDED].sort())}`,
     same(afterEdit[MIG_CONCRETE_RULE], [IN, ADDED].sort())
   );
+
+  log('\n=== phase 3: the default threat query on a lookup index is reported, not silent ===');
+  // The rule form defaults the threat query to a filter on @timestamp. A lookup index has
+  // no such field, so that query matches no indicator. The run must say so as a partial
+  // failure rather than succeed with no alerts.
+  const lookupTwin = TWINS.find((cell) => cell.storage === 'lookup');
+  const defaultQueryRule = ruleHandle(await createRule(DEFAULT_QUERY_RULE, 'lookup', twinList(lookupTwin), { threat_query: DEFAULT_THREAT_QUERY }), DEFAULT_QUERY_RULE, 'lookup', twinList(lookupTwin));
+  const since3 = now();
+  await sleep(1000);
+  await kbn('POST', `/internal/alerting/rule/${defaultQueryRule.id}/_run_soon`);
+  const last3 = await waitForExecution(DEFAULT_QUERY_RULE, since3);
+  check(`${DEFAULT_QUERY_RULE}: run is a partial failure`, last3?.status === 'partial failure', String(last3?.status));
+  check(`${DEFAULT_QUERY_RULE}: the message names the timestamp filter and the lookup index`, String(last3?.message ?? '').includes('carries no timestamp field') && String(last3?.message ?? '').includes(concreteIndex(twinList(lookupTwin))), String(last3?.message ?? '').slice(0, 200));
+  await sleep(3000);
+  check(`${DEFAULT_QUERY_RULE}: no alerts, since the query matches no indicator`, same(await alertsFor(DEFAULT_QUERY_RULE), []));
 
   log('\n=== summary ===');
   log(

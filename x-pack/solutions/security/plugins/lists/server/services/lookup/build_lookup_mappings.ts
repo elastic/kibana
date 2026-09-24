@@ -27,6 +27,18 @@ export const RANGE_BOUND_TYPE: Partial<Record<Type, string>> = {
 export const isRangeType = (type: Type): boolean => RANGE_BOUND_TYPE[type] != null;
 
 /**
+ * Who wrote an item and when, on every value document (equality) and source document
+ * (range). Set once on creation and moved on every later write of the same value; the
+ * items table sorts on them, as it does on the shared stream.
+ */
+export const STAMP_PROPERTIES: Record<string, estypes.MappingProperty> = {
+  created_at: { type: 'date' },
+  created_by: { type: 'keyword' },
+  updated_at: { type: 'date' },
+  updated_by: { type: 'keyword' },
+};
+
+/**
  * Builds the mappings for a per-list lookup index given the list element type.
  */
 export const buildLookupMappings = (type: Type): estypes.MappingTypeMapping => {
@@ -40,6 +52,9 @@ export const buildLookupMappings = (type: Type): estypes.MappingTypeMapping => {
         // source_version is bumped on every source mutation, and status is "dirty"
         // until a rebuild makes the coalesced set current. Retries are bounded by the
         // rebuild task's maxAttempts, not tracked here.
+        // the id of the task run that wrote a coalesced document; a full rebuild removes
+        // every coalesced document carrying another run's id once its own are written
+        built_by: { type: 'keyword' },
         coalesced_version: { type: 'long' },
         // "source" (authored, verbatim, for export/find/delete) | "coalesced" (joinable)
         // | "state" (the single rebuild bookkeeping doc, _id "__state") | "dirty" (a
@@ -60,6 +75,7 @@ export const buildLookupMappings = (type: Type): estypes.MappingTypeMapping => {
         status: { type: 'keyword' },
         // authored value kept verbatim on source docs, so export round-trips exactly
         value: { type: 'keyword' },
+        ...STAMP_PROPERTIES,
       },
     };
   }
@@ -70,6 +86,7 @@ export const buildLookupMappings = (type: Type): estypes.MappingTypeMapping => {
     dynamic: 'strict',
     properties: {
       value: { type } as estypes.MappingProperty,
+      ...STAMP_PROPERTIES,
     },
   };
 };

@@ -237,6 +237,18 @@ describe('canonicalLookupValue', () => {
       expect(canonical('geo_point', 'POINT (1 2)')).toBe('POINT (1 2)');
     });
 
+    it('spells a geo value the way a read returns it, so the id survives a round trip', () => {
+      // `lat,lon` on a geo_point is stored as an object and read back as `lat,lon`
+      expect(canonical('geo_point', ' 41.12 , -71.34 ')).toBe('41.12,-71.34');
+      expect(canonical('geo_point', '41.12,-71.34')).toBe('41.12,-71.34');
+      // `lat,lon` on a shape type is stored and read back as the WKT point the serializer builds
+      expect(canonical('geo_shape', '41.12, -71.34')).toBe('POINT (-71.34 41.12)');
+      expect(canonical('shape', '41.12,-71.34')).toBe('POINT (-71.34 41.12)');
+      // WKT is stored and read back as authored, trimmed
+      expect(canonical('geo_shape', ' POINT (-71.34 41.12) ')).toBe('POINT (-71.34 41.12)');
+      expect(canonical('geo_point', 'POINT (-71.34 41.12)')).toBe('POINT (-71.34 41.12)');
+    });
+
     it('rejects empty values and line breaks, which the shared stream stores truncated', () => {
       expect(rejected('keyword', '')).toBe(true);
       expect(rejected('keyword', '  ')).toBe(true);

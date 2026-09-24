@@ -11,6 +11,8 @@ import type { EsClientMock } from './test_helpers';
 import {
   TEST_INDEX,
   TEST_LIST_ID,
+  TEST_NOW,
+  TEST_USER,
   createEsClientMock,
   equalityId,
   expectedEqualityOps,
@@ -29,7 +31,9 @@ describe('writeLookupItems (equality / native types)', () => {
       esClient,
       index: TEST_INDEX,
       listId: TEST_LIST_ID,
+      now: TEST_NOW,
       type: 'keyword',
+      user: TEST_USER,
       values: ['a', 'b'],
     });
 
@@ -49,7 +53,9 @@ describe('writeLookupItems (equality / native types)', () => {
       esClient,
       index: TEST_INDEX,
       listId: TEST_LIST_ID,
+      now: TEST_NOW,
       type: 'ip',
+      user: TEST_USER,
       values: ['1.2.3.4'],
     });
 
@@ -65,14 +71,16 @@ describe('writeLookupItems (equality / native types)', () => {
       esClient,
       index: TEST_INDEX,
       listId: TEST_LIST_ID,
+      now: TEST_NOW,
       type: 'keyword',
+      user: TEST_USER,
       values: ['dup', 'dup'],
     });
 
     const [[{ operations }]] = (esClient.bulk as jest.Mock).mock.calls;
     expect(operations).toHaveLength(4);
-    expect(operations[0]).toEqual({ index: { _id: equalityId('dup') } });
-    expect(operations[2]).toEqual({ index: { _id: equalityId('dup') } });
+    expect(operations[0]).toEqual({ update: { _id: equalityId('dup'), retry_on_conflict: 3 } });
+    expect(operations[2]).toEqual({ update: { _id: equalityId('dup'), retry_on_conflict: 3 } });
   });
 
   it('honors an explicit refresh option', async () => {
@@ -80,8 +88,10 @@ describe('writeLookupItems (equality / native types)', () => {
       esClient,
       index: TEST_INDEX,
       listId: TEST_LIST_ID,
+      now: TEST_NOW,
       refresh: false,
       type: 'keyword',
+      user: TEST_USER,
       values: ['a'],
     });
 
@@ -93,7 +103,9 @@ describe('writeLookupItems (equality / native types)', () => {
       esClient,
       index: TEST_INDEX,
       listId: TEST_LIST_ID,
+      now: TEST_NOW,
       type: 'keyword',
+      user: TEST_USER,
       values: [],
     });
 
@@ -108,9 +120,55 @@ describe('writeLookupItems (equality / native types)', () => {
         esClient,
         index: TEST_INDEX,
         listId: TEST_LIST_ID,
+        now: TEST_NOW,
         type: 'keyword',
+        user: TEST_USER,
         values: ['a'],
       })
     ).rejects.toThrow('bulk boom');
+  });
+
+  // An import drops the values the mapper refuses, as the shared stream's import does, and
+  // nothing else: a failure that is not about the value must fail the import, or it would
+  // report success with values silently missing.
+  describe('with ignoreErrors (import)', () => {
+    const bulkWithItem = (status: number, reason: string): void => {
+      (esClient.bulk as jest.Mock).mockResolvedValueOnce({
+        errors: true,
+        items: [{ update: { _id: 'x', error: { reason, type: 'x' }, status } }],
+        took: 1,
+      });
+    };
+    const write = (): Promise<void> =>
+      writeLookupItems({
+        esClient,
+        ignoreErrors: true,
+        index: TEST_INDEX,
+        listId: TEST_LIST_ID,
+        now: TEST_NOW,
+        type: 'keyword',
+        user: TEST_USER,
+        values: ['a'],
+      });
+
+    it('drops a value the mapper rejected (400)', async () => {
+      bulkWithItem(400, 'mapper_parsing_exception');
+
+      await expect(write()).resolves.toBeUndefined();
+    });
+
+    it.each([
+      [401, 'unauthorized'],
+      [403, 'forbidden'],
+      [429, 'es_rejected_execution_exception'],
+      [503, 'unavailable_shards_exception'],
+    ])(
+      'raises an item failure with status %i, which is not about the value',
+      async (status, reason) => {
+        bulkWithItem(status, reason);
+
+        await expect(write()).rejects.toMatchObject({ message: reason, statusCode: status });
+      }
+    );
   });
 });

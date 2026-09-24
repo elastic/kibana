@@ -75,6 +75,7 @@ export const migrateListRoute = (
           request: {
             body: buildRouteValidationWithZod(
               z.object({
+                dryRun: z.boolean().optional(),
                 force: z.boolean().optional(),
                 id: z.string().max(1024),
                 restrict: z.boolean().optional(),
@@ -87,7 +88,7 @@ export const migrateListRoute = (
       async (context, request, response) => {
         const siemResponse = buildSiemResponse(response);
         try {
-          const { id, restrict = false, force = false } = request.body;
+          const { id, restrict = false, force = false, dryRun = false } = request.body;
           const [lists, exceptionLists] = await Promise.all([
             getListClient(context),
             getExceptionListClient(context),
@@ -133,10 +134,54 @@ export const migrateListRoute = (
           if (threatIndexWarning != null && warning.level !== 'maybe') {
             blockers.push(`${threatIndexWarning}.`);
           }
-          if (blockers.length > 0 && !force) {
+          // A value the lookup grammar refuses blocks too. Every such value is listed, so
+          // the caller can fix them in one pass or force the migration, which leaves them
+          // out of the lookup list and reports them; the legacy rows are never touched.
+          // Cheap checks first: the rule scan touches a handful of rules, the value scan
+          // reads every item. A plain call that the rules already block stops here; a dry
+          // run wants the whole report and a forced call copies anyway, so both go on.
+          if (blockers.length > 0 && !force && !dryRun) {
             return response.customError({
               body: {
                 attributes: { id, referencingRules: warning, warningLevel: warning.level },
+                message: `Migration is blocked: ${blockers.join(
+                  ' '
+                )} Pass force to migrate anyway, or dryRun to see the full report.`,
+              },
+              statusCode: 409,
+            });
+          }
+          // The scan counts while it streams and keeps a sample, so a list with millions
+          // of such values costs no memory and the response stays small.
+          const rejectedValues = await lists.findRejectedLegacyValues({ id });
+          if (rejectedValues.count > 0) {
+            const shown = rejectedValues.sample.slice(0, 20).map((value) => `"${value}"`);
+            const more = rejectedValues.count > shown.length ? ', ...' : '';
+            blockers.push(
+              `${
+                rejectedValues.count
+              } value(s) are not accepted spellings for this list type and would be left out: ${shown.join(
+                ', '
+              )}${more}. Edit them first, or pass force to migrate without them.`
+            );
+          }
+          const report = {
+            id,
+            referencingRules: warning,
+            rejectedValues,
+            warning: warningMessage(warning, itemsIndex),
+            warningLevel: warning.level,
+          };
+          // A dry run reports what a real call would do and changes nothing.
+          if (dryRun) {
+            return response.ok({
+              body: { ...report, blocked: blockers.length > 0 && !force, blockers, dryRun: true },
+            });
+          }
+          if (blockers.length > 0 && !force) {
+            return response.customError({
+              body: {
+                attributes: report,
                 message: `Migration is blocked: ${blockers.join(
                   ' '
                 )} Pass force to migrate anyway.`,
@@ -145,7 +190,7 @@ export const migrateListRoute = (
             });
           }
 
-          const migration = await lists.migrateListToLookup({ id });
+          const migration = await lists.migrateListToLookup({ force, id });
 
           const restriction = restrict
             ? await restrictListWithChecks({

@@ -12,6 +12,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Type } from '@kbn/securitysolution-io-ts-list-types';
 
 import { isRangeType } from './build_lookup_mappings';
+import { formatLookupValue } from './format_lookup_value';
 import { streamListValues } from './paginate_hits';
 
 const valuesQuery = (type: Type): estypes.QueryDslQueryContainer =>
@@ -60,7 +61,7 @@ export const streamLookupItemValues = ({
   streamListValues<{ value?: unknown }>({
     _source: ['value'],
     esClient,
-    extract: (source) => (source?.value == null ? undefined : String(source.value)),
+    extract: (source) => (source?.value == null ? undefined : formatLookupValue(source.value)),
     index,
     query: valuesQuery(type),
   });
