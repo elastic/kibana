@@ -13,7 +13,6 @@ import {
   getConnectorIdSuggestionsItems,
   getConnectorInstancesForType,
 } from './get_connector_id_suggestions_items';
-import { stepSchemas } from '../../../../../../../common/step_schemas';
 
 jest.mock('../../../../../../shared/lib/action_type_utils', () => ({
   getActionTypeIdFromStepType: jest.fn((stepType: string) => `.${stepType.split('.')[0]}`),
@@ -123,7 +122,6 @@ describe('getConnectorIdSuggestionsItems', () => {
     isCreateConnectorEnabledForStepType.mockReturnValue(false);
     getCustomStepConnectorIdSelectionHandler.mockReturnValue(undefined);
     getInferenceConnectorTaskTypeFromSubAction.mockReturnValue(undefined);
-    stepSchemas.setInferenceConnectorInstances(new Map());
   });
 
   it('should return suggestions for available connector instances', () => {
@@ -276,26 +274,24 @@ describe('getConnectorInstancesForType', () => {
       connectorTypes: ['inference.unified_completion'],
       inferenceFeatureId: 'ai_summarize',
     });
-    stepSchemas.setInferenceConnectorInstances(
-      new Map([
+    const inferenceConnectorInstances = new Map([
+      [
+        'ai_summarize',
         [
-          'ai_summarize',
-          [
-            {
-              id: 'endpoint-id',
-              name: 'Inference endpoint',
-              isPreconfigured: false,
-              isDeprecated: false,
-              isInferenceEndpoint: true,
-            },
-          ],
+          {
+            id: 'endpoint-id',
+            name: 'Inference endpoint',
+            isPreconfigured: false,
+            isDeprecated: false,
+            isInferenceEndpoint: true,
+          },
         ],
-      ])
-    );
-
-    expect(getConnectorInstancesForType('ai.summarize')).toEqual([
-      expect.objectContaining({ id: 'endpoint-id', isInferenceEndpoint: true }),
+      ],
     ]);
+
+    expect(
+      getConnectorInstancesForType('ai.summarize', undefined, inferenceConnectorInstances)
+    ).toEqual([expect.objectContaining({ id: 'endpoint-id', isInferenceEndpoint: true })]);
   });
 
   it('should return empty array when no matching connector type is found', () => {

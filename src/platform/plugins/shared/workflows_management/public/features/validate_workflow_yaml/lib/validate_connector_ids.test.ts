@@ -10,7 +10,15 @@
 import type { ConnectorTypeInfo } from '@kbn/workflows';
 import type { ConnectorIdItem } from '@kbn/workflows-yaml';
 import { validateConnectorIds } from './validate_connector_ids';
+import { getCachedInferenceConnectorInstances } from '../../../../common/schema';
 import { stepSchemas } from '../../../../common/step_schemas';
+
+jest.mock('../../../../common/schema', () => ({
+  ...jest.requireActual('../../../../common/schema'),
+  getCachedInferenceConnectorInstances: jest.fn(() => new Map()),
+}));
+
+const mockGetCachedInferenceConnectorInstances = jest.mocked(getCachedInferenceConnectorInstances);
 
 describe('validateConnectorIds', () => {
   const mockConnectorInstance = {
@@ -143,7 +151,7 @@ describe('validateConnectorIds', () => {
           },
         },
       } as never);
-      stepSchemas.setInferenceConnectorInstances(
+      mockGetCachedInferenceConnectorInstances.mockReturnValue(
         new Map([
           [
             'ai_summarize',
@@ -328,7 +336,7 @@ describe('validateConnectorIds', () => {
           },
         },
       } as never);
-      stepSchemas.setInferenceConnectorInstances(new Map([['ai_summarize', []]]));
+      mockGetCachedInferenceConnectorInstances.mockReturnValue(new Map([['ai_summarize', []]]));
 
       const results = validateConnectorIds(
         [createConnectorIdItem({ key: 'missing-endpoint', connectorType: 'ai.summarize' })],

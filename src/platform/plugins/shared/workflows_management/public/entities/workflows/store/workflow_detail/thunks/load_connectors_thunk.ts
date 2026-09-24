@@ -9,10 +9,9 @@
 
 import { createAsyncThunk } from 'redux-toolkit-v1';
 import { i18n } from '@kbn/i18n';
-import { loadConnectors } from '@kbn/inference-connectors';
 import { WorkflowApi } from '@kbn/workflows-ui';
 import { addDynamicConnectorsToCache, getWorkflowZodSchema } from '../../../../../../common/schema';
-import { stepSchemas } from '../../../../../../common/step_schemas';
+import { loadInferenceConnectorsForRegisteredSteps } from '../../../../../shared/lib/connectors_utils';
 import { triggerSchemas } from '../../../../../trigger_schemas';
 import type { WorkflowsServices } from '../../../../../types';
 import type { ConnectorsResponse } from '../../../../connectors/model/types';
@@ -34,44 +33,14 @@ export const loadConnectorsThunk = createAsyncThunk<
     const state = getState();
     const lastConnectorTypes = state.detail.connectors?.connectorTypes;
     try {
-      const inferenceFeatureIds = [
-        ...new Set(
-          stepSchemas.getAllRegisteredStepDefinitions().flatMap((definition) => {
-            if (!('editorHandlers' in definition)) {
-              return [];
-            }
-            const featureId =
-              definition.editorHandlers?.config?.['connector-id']?.connectorIdSelection
-                ?.inferenceFeatureId;
-            return featureId ? [featureId] : [];
-          })
-        ),
-      ];
-      const [response, inferenceConnectorEntries] = await Promise.all([
+      const [response, inferenceConnectorInstances] = await Promise.all([
         api.getConnectors(),
-        Promise.all(
-          inferenceFeatureIds.map(
-            async (featureId) =>
-              [
-                featureId,
-                (
-                  await loadConnectors({ http, featureId })
-                ).map((connector) => ({
-                  id: connector.id,
-                  name: connector.name,
-                  connectorType: connector.actionTypeId,
-                  isPreconfigured: connector.isPreconfigured,
-                  isDeprecated: connector.isDeprecated || connector.isConnectorTypeDeprecated,
-                  isInferenceEndpoint: connector.isInferenceEndpoint,
-                })),
-              ] as const
-          )
-        ),
+        loadInferenceConnectorsForRegisteredSteps(http),
       ]);
-      stepSchemas.setInferenceConnectorInstances(new Map(inferenceConnectorEntries));
       dispatch(setConnectors(response)); // Set connectors response first
 
       const currentConnectorTypes = response.connectorTypes;
+      addDynamicConnectorsToCache(currentConnectorTypes, inferenceConnectorInstances);
       // Simple check: compare the number of connector types and their keys
       const hasChanged =
         !lastConnectorTypes ||
@@ -79,8 +48,6 @@ export const loadConnectorsThunk = createAsyncThunk<
         !Object.keys(currentConnectorTypes).every((key) => key in lastConnectorTypes);
 
       if (hasChanged) {
-        addDynamicConnectorsToCache(currentConnectorTypes);
-
         const schema = getWorkflowZodSchema(
           currentConnectorTypes,
           triggerSchemas.getRegisteredTriggersForSchema()

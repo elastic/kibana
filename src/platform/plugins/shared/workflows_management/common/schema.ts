@@ -10,6 +10,7 @@
 import type {
   BaseConnectorContract,
   ConnectorContractUnion,
+  ConnectorInstance,
   ConnectorTypeInfo,
   CustomTriggerSchemaInput,
   StepDeprecationInfo,
@@ -35,6 +36,7 @@ import { stepSchemas } from './step_schemas';
 // stack_connectors_schema/* and @kbn/connector-specs; keeping it behind a
 // lazy require() avoids that cost at Kibana startup. See #264175.
 let _connectorSchemas: typeof import('./connector_action_schema') | null = null;
+let inferenceConnectorInstancesCache: ReadonlyMap<string, ConnectorInstance[]> = new Map();
 function getConnectorSchemas(): typeof import('./connector_action_schema') {
   if (_connectorSchemas === null) {
     _connectorSchemas = require('./connector_action_schema');
@@ -356,8 +358,10 @@ export function setCachedAllConnectorsMap(_allConnectors: ConnectorContractUnion
 }
 
 export function addDynamicConnectorsToCache(
-  dynamicConnectorTypes: Record<string, ConnectorTypeInfo>
+  dynamicConnectorTypes: Record<string, ConnectorTypeInfo>,
+  inferenceConnectorInstances: ReadonlyMap<string, ConnectorInstance[]> = new Map()
 ): void {
+  inferenceConnectorInstancesCache = inferenceConnectorInstances;
   // Create a simple hash of the connector types to detect changes.
   // Include the `enabled` flag to avoid keeping stale (now-disabled) connector contracts in cache.
   const currentHash = JSON.stringify(
@@ -404,6 +408,10 @@ export function addDynamicConnectorsToCache(
 
 export function getCachedDynamicConnectorTypes(): Record<string, ConnectorTypeInfo> | null {
   return stepSchemas.getDynamicConnectorTypesCache();
+}
+
+export function getCachedInferenceConnectorInstances(): ReadonlyMap<string, ConnectorInstance[]> {
+  return inferenceConnectorInstancesCache;
 }
 
 export function getAllConnectors(): ConnectorContractUnion[] {

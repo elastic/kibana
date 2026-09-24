@@ -10,7 +10,6 @@
 import { i18n } from '@kbn/i18n';
 import { monaco } from '@kbn/monaco';
 import type { ConnectorInstance, ConnectorTypeInfo } from '@kbn/workflows';
-import { stepSchemas } from '../../../../../../../common/step_schemas';
 import type { LineColumnPosition } from '../../../../../../entities/workflows/store';
 import {
   getActionTypeDisplayNameFromStepType,
@@ -29,11 +28,16 @@ import {
 export function getConnectorIdSuggestionsItems(
   stepType: string,
   range: monaco.IRange | monaco.languages.CompletionItemRanges,
-  dynamicConnectorTypes?: Record<string, ConnectorTypeInfo>
+  dynamicConnectorTypes?: Record<string, ConnectorTypeInfo>,
+  inferenceConnectorInstances?: ReadonlyMap<string, ConnectorInstance[]>
 ): monaco.languages.CompletionItem[] {
   const suggestions: monaco.languages.CompletionItem[] = [];
 
-  const instances = getConnectorInstancesForType(stepType, dynamicConnectorTypes);
+  const instances = getConnectorInstancesForType(
+    stepType,
+    dynamicConnectorTypes,
+    inferenceConnectorInstances
+  );
 
   instances.forEach((instance) =>
     suggestions.push(createConnectorSuggestion(instance, stepType, range))
@@ -51,7 +55,8 @@ export function getConnectorIdSuggestionsItems(
  */
 export function getConnectorInstancesForType(
   stepType: string,
-  dynamicConnectorTypes?: Record<string, ConnectorTypeInfo>
+  dynamicConnectorTypes?: Record<string, ConnectorTypeInfo>,
+  inferenceConnectorInstances?: ReadonlyMap<string, ConnectorInstance[]>
 ): ConnectorInstance[] {
   const customStepSelectionHandler = getCustomStepConnectorIdSelectionHandler(stepType);
   const connectorTypes = customStepSelectionHandler?.connectorTypes ?? [stepType];
@@ -59,10 +64,7 @@ export function getConnectorInstancesForType(
     connectorTypes.includes('inference.unified_completion') &&
     customStepSelectionHandler?.inferenceFeatureId
   ) {
-    return (
-      stepSchemas.getInferenceConnectorInstances(customStepSelectionHandler.inferenceFeatureId) ??
-      []
-    );
+    return inferenceConnectorInstances?.get(customStepSelectionHandler.inferenceFeatureId) ?? [];
   }
   if (!dynamicConnectorTypes) {
     return [];

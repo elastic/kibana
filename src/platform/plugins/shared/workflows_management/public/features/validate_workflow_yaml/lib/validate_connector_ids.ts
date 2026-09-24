@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { ALL_CONNECTOR_IDS, type ConnectorTypeInfo } from '@kbn/workflows';
 import type { ConnectorIdItem, YamlValidationResult } from '@kbn/workflows-yaml';
 import { isTemplateReference } from './is_template_reference';
+import { getCachedInferenceConnectorInstances } from '../../../../common/schema';
 import {
   getActionTypeDisplayNameFromStepType,
   getActionTypeIdFromStepType,
@@ -83,7 +84,11 @@ export function validateConnectorIds(
       const connectorType = dynamicConnectorTypes[stepType];
       const displayName =
         connectorType?.displayName ?? getActionTypeDisplayNameFromStepType(stepType);
-      const instances = getConnectorInstancesForType(stepType, dynamicConnectorTypes);
+      const instances = getConnectorInstancesForType(
+        stepType,
+        dynamicConnectorTypes,
+        getCachedInferenceConnectorInstances()
+      );
       const isInferenceFeature = Boolean(
         getCustomStepConnectorIdSelectionHandler(stepType)?.inferenceFeatureId
       );
