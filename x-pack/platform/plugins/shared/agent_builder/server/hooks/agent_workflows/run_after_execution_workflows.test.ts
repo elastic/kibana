@@ -155,10 +155,13 @@ describe('runAfterExecutionWorkflows', () => {
   });
 
   describe('workflow params', () => {
-    it('passes prompt, response, round_id, agent_id, conversation_id, connector_id, and tool_calls', async () => {
+    it('passes prompt, response, ids, connector_id, workflow_context, and tool_calls', async () => {
       const { workflowApi, getInternalServices } = createDeps();
+      const workflowContext = {
+        semantic_memory: { recalled_ids: ['memory-1', 'memory-2'] },
+      };
       const round = makeRound({
-        input: { message: 'my question' },
+        input: { message: 'my question', workflow_context: workflowContext },
         response: { message: 'my answer' },
         model_usage: {
           connector_id: ' connector-1 ',
@@ -181,6 +184,7 @@ describe('runAfterExecutionWorkflows', () => {
             agent_id: 'ag-1',
             conversation_id: 'cv-1',
             connector_id: 'connector-1',
+            workflow_context: workflowContext,
             tool_calls: [],
           }),
         })
@@ -208,6 +212,7 @@ describe('runAfterExecutionWorkflows', () => {
       expect(params).not.toHaveProperty('agent_id');
       expect(params).not.toHaveProperty('conversation_id');
       expect(params).not.toHaveProperty('connector_id');
+      expect(params).not.toHaveProperty('workflow_context');
     });
 
     it('extracts tool_calls from round steps', async () => {

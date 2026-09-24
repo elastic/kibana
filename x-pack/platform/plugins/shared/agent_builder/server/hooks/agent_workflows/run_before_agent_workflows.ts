@@ -13,6 +13,10 @@ import type {
 import {
   createWorkflowAbortedError,
   createWorkflowExecutionError,
+  MODEL_CONTEXT_MAX_LENGTH,
+  WORKFLOW_CONTEXT_RECALLED_ID_MAX_LENGTH,
+  WORKFLOW_CONTEXT_RECALLED_IDS_MAX_COUNT,
+  type WorkflowContext,
 } from '@kbn/agent-builder-common';
 import { AGENT_BUILDER_PRE_PROMPT_WORKFLOW_IDS } from '@kbn/management-settings-ids';
 import { ExecutionStatus, WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows';
@@ -57,6 +61,38 @@ function normalizeWorkflowOutput(output: unknown): unknown {
 function isBeforeAgentWorkflowOutput(value: unknown): value is BeforeAgentWorkflowOutput {
   return typeof value === 'object' && value !== null;
 }
+
+const normalizeModelContext = (value: unknown): string | undefined => {
+  if (typeof value !== 'string') {
+    return undefined;
+  }
+  const normalized = value.trim();
+  return normalized ? normalized.slice(0, MODEL_CONTEXT_MAX_LENGTH) : undefined;
+};
+
+const normalizeWorkflowContext = (value: unknown): WorkflowContext | undefined => {
+  if (typeof value !== 'object' || value === null || !('semantic_memory' in value)) {
+    return undefined;
+  }
+  const semanticMemory = value.semantic_memory;
+  if (
+    typeof semanticMemory !== 'object' ||
+    semanticMemory === null ||
+    !('recalled_ids' in semanticMemory) ||
+    !Array.isArray(semanticMemory.recalled_ids)
+  ) {
+    return undefined;
+  }
+
+  return {
+    semantic_memory: {
+      recalled_ids: semanticMemory.recalled_ids
+        .filter((id): id is string => typeof id === 'string')
+        .slice(0, WORKFLOW_CONTEXT_RECALLED_IDS_MAX_COUNT)
+        .map((id) => id.slice(0, WORKFLOW_CONTEXT_RECALLED_ID_MAX_LENGTH)),
+    },
+  };
+};
 
 /**
  * Runs the agent's configured before-agent workflows in sequence, updating the
@@ -129,14 +165,23 @@ export async function runBeforeAgentWorkflows({
       currentNextInput = { ...currentNextInput, message: output.new_prompt };
     }
 
-    const modelContext =
-      typeof output.model_context === 'string' ? output.model_context.trim() : undefined;
+    const modelContext = normalizeModelContext(output.model_context);
     if (modelContext) {
+      const combinedModelContext = [currentNextInput.model_context, modelContext]
+        .filter((fragment): fragment is string => Boolean(fragment))
+        .join('\n\n')
+        .slice(0, MODEL_CONTEXT_MAX_LENGTH);
       currentNextInput = {
         ...currentNextInput,
-        model_context: [currentNextInput.model_context?.trim(), modelContext]
-          .filter((fragment): fragment is string => Boolean(fragment))
-          .join('\n\n'),
+        model_context: combinedModelContext,
+      };
+    }
+
+    const workflowContext = normalizeWorkflowContext(output.workflow_context);
+    if (workflowContext) {
+      currentNextInput = {
+        ...currentNextInput,
+        workflow_context: workflowContext,
       };
     }
 

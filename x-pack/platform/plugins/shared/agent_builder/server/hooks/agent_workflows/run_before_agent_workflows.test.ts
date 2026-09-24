@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { AgentBuilderErrorCode } from '@kbn/agent-builder-common';
+import {
+  AgentBuilderErrorCode,
+  WORKFLOW_CONTEXT_RECALLED_ID_MAX_LENGTH,
+  WORKFLOW_CONTEXT_RECALLED_IDS_MAX_COUNT,
+} from '@kbn/agent-builder-common';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
@@ -253,6 +257,50 @@ describe('runBeforeAgentWorkflows', () => {
         logger,
       })
     ).resolves.toBeUndefined();
+  });
+
+  it('persists only bounded string recalled ids from workflow_context', async () => {
+    const context = createContext();
+    const { workflowApi, getInternalServices } = createDeps();
+    executeWorkflowMock.mockResolvedValue({
+      success: true,
+      execution: {
+        execution_id: 'exec-workflow-context',
+        status: ExecutionStatus.COMPLETED,
+        workflow_id: 'wf-1',
+        started_at: '2026-01-01T00:00:00.000Z',
+        output: {
+          workflow_context: {
+            semantic_memory: {
+              recalled_ids: [
+                'memory-1',
+                42,
+                'x'.repeat(WORKFLOW_CONTEXT_RECALLED_ID_MAX_LENGTH + 1),
+                ...Array.from(
+                  { length: WORKFLOW_CONTEXT_RECALLED_IDS_MAX_COUNT },
+                  (_, index) => `memory-${index + 2}`
+                ),
+              ],
+            },
+          },
+        },
+      },
+    });
+
+    const result = await runBeforeAgentWorkflows({
+      context,
+      workflowApi,
+      getInternalServices,
+      logger,
+    });
+
+    const recalledIds = result?.nextInput?.workflow_context?.semantic_memory?.recalled_ids;
+    expect(recalledIds).toHaveLength(WORKFLOW_CONTEXT_RECALLED_IDS_MAX_COUNT);
+    expect(recalledIds?.[0]).toBe('memory-1');
+    expect(recalledIds?.[1]).toHaveLength(WORKFLOW_CONTEXT_RECALLED_ID_MAX_LENGTH);
+    expect(recalledIds?.every((id) => id.length <= WORKFLOW_CONTEXT_RECALLED_ID_MAX_LENGTH)).toBe(
+      true
+    );
   });
 
   it('throws workflowAborted when output requests abort', async () => {

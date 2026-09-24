@@ -70,6 +70,9 @@ export const runAfterExecutionWorkflows = async ({
     ...(context.conversationId ? { conversation_id: context.conversationId } : {}),
     ...(context.agentId ? { agent_id: context.agentId } : {}),
     ...(connectorId ? { connector_id: connectorId } : {}),
+    ...(round.input.workflow_context !== undefined
+      ? { workflow_context: round.input.workflow_context }
+      : {}),
     tool_calls: toolCalls,
   };
 

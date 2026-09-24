@@ -13,7 +13,7 @@ import type {
   CompactionStructuredData,
   CompactionToolCallSummary,
 } from '@kbn/agent-builder-common';
-import { ChatEventType, isToolCallStep } from '@kbn/agent-builder-common';
+import { ChatEventType, TimelineEventType, isToolCallStep } from '@kbn/agent-builder-common';
 import type { AgentEventEmitterFn } from '@kbn/agent-builder-server';
 import { estimateTokens } from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
 import type { ConversationRoundStep } from '@kbn/agent-builder-common';
@@ -83,6 +83,14 @@ export interface CompactedConversation {
 }
 
 type Round = TimelineRound<ProcessedTimelineEvent>;
+
+const withoutModelContext = (event: ProcessedTimelineEvent): ProcessedTimelineEvent => {
+  if (event.type !== TimelineEventType.userMessage) {
+    return event;
+  }
+  const { model_context: _modelContext, ...data } = event.data;
+  return { ...event, data };
+};
 
 // ---------------------------------------------------------------------------
 // Programmatic extraction helpers
@@ -457,9 +465,9 @@ const generateLlmSummary = async ({
     const history = await prepareMessages({
       conversation: {
         ...conversation,
-        timeline: chunk.flatMap((round) => round.events),
-        // Before-agent context is ephemeral for the active model call. It must not be folded into
-        // the persisted compaction summary and replayed on later rounds.
+        timeline: chunk.flatMap((round) => round.events).map(withoutModelContext),
+        // Workflow model context is replayed verbatim with un-compacted rounds, but must not be
+        // folded into the persisted summary after those original messages are removed.
         nextInput: nextInputWithoutModelContext,
       },
       compactionSummary: prior,

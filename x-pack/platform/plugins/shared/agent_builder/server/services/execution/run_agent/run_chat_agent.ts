@@ -459,12 +459,18 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     finalize(() => manualEvents$.complete())
   );
 
-  // Persist only user-authored input. Ephemeral model_context from before-agent hooks was already
-  // consumed by the prompt factory and must not be rendered or replayed as if the user wrote it.
+  // Persist workflow-provided context separately from the user-authored message so later model
+  // turns can replay model_context exactly while workflow_context remains model-invisible.
   const processedInput: RoundInput = {
     message: processedConversation.nextInput.message,
     attachments: [], // legacy attachments are always stripped in `prepare_conversation` and replaced with refs
     attachment_refs: processedConversation.nextInput.attachment_refs,
+    ...(processedConversation.nextInput.model_context !== undefined
+      ? { model_context: processedConversation.nextInput.model_context }
+      : {}),
+    ...(processedConversation.nextInput.workflow_context !== undefined
+      ? { workflow_context: processedConversation.nextInput.workflow_context }
+      : {}),
   };
 
   manualEvents$.next({

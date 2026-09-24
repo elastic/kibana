@@ -32,6 +32,16 @@ import type { MetadataFieldValue } from '../templates';
 /**
  * Represents the input that initiated a conversation round.
  */
+export const MODEL_CONTEXT_MAX_LENGTH = 100_000;
+export const WORKFLOW_CONTEXT_RECALLED_IDS_MAX_COUNT = 100;
+export const WORKFLOW_CONTEXT_RECALLED_ID_MAX_LENGTH = 2_000;
+
+export interface WorkflowContext {
+  semantic_memory: {
+    recalled_ids: string[];
+  };
+}
+
 export interface RoundInput {
   /**
    * A text message from the user.
@@ -50,6 +60,14 @@ export interface RoundInput {
    * Pre-rendered, immutable prompt context for attachments created/updated in this round
    */
   attachment_context?: string;
+  /**
+   * Pre-rendered, immutable context added by before-agent workflows for model input only.
+   */
+  model_context?: string;
+  /**
+   * Bounded workflow state persisted with the round and never rendered to the model.
+   */
+  workflow_context?: WorkflowContext;
 }
 
 /**

@@ -328,8 +328,10 @@ describe('compactConversation', () => {
       createMockRound('r5', 200),
     ];
     const conversation = createMockConversation(rounds);
+    rounds[0].input.model_context = '<system_update>historical workflow context</system_update>';
+    conversation.timeline = timelineFromRounds(rounds);
     conversation.nextInput.model_context =
-      '<system_update>ephemeral workflow context</system_update>';
+      '<system_update>current workflow context</system_update>';
 
     const budget: ContextBudget = {
       totalBudget: 500,
@@ -338,6 +340,9 @@ describe('compactConversation', () => {
     };
 
     const chatModel = createMockChatModel();
+    const preCompactionMessages = await prepareMessages({ conversation });
+    expect(JSON.stringify(preCompactionMessages)).toContain('historical workflow context');
+
     const result = await compact({
       processedConversation: conversation,
       perRoundTokenCounts: countsFor(conversation),
@@ -350,7 +355,13 @@ describe('compactConversation', () => {
     expect(chatModel.withStructuredOutput).toHaveBeenCalled();
     const structuredModel = chatModel.withStructuredOutput.mock.results[0].value;
     expect(JSON.stringify(structuredModel.invoke.mock.calls[0][0])).not.toContain(
-      'ephemeral workflow context'
+      'historical workflow context'
+    );
+    expect(JSON.stringify(structuredModel.invoke.mock.calls[0][0])).not.toContain(
+      'current workflow context'
+    );
+    expect(JSON.stringify(result.processedConversation.timeline)).not.toContain(
+      'historical workflow context'
     );
   });
 

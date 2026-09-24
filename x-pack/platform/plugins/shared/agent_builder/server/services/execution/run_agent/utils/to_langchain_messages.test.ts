@@ -54,7 +54,7 @@ describe('prepareMessages', () => {
     overrides: Partial<
       Pick<
         ProcessedRoundInput,
-        'attachment_refs' | 'attachment_context' | 'model_context' | 'author'
+        'attachment_refs' | 'attachment_context' | 'model_context' | 'workflow_context' | 'author'
       >
     > = {}
   ): ProcessedRoundInput => ({
@@ -819,6 +819,64 @@ describe('prepareMessages', () => {
       expect(result[0].content).toBe(
         'user-authored task\n\n<system_update>hydrated context</system_update>\n'
       );
+    });
+
+    it('replays historical HumanMessage content byte-for-byte on later turns', async () => {
+      const round1 = createRound({
+        id: 'round-1',
+        started_at: '2026-09-24T10:00:00.000Z',
+        input: makeRoundInput('round one', [], {
+          model_context: '  <system_update>\nround 1 exact\n</system_update>  ',
+        }),
+      });
+      const round2 = createRound({
+        id: 'round-2',
+        started_at: '2026-09-24T10:01:00.000Z',
+        input: makeRoundInput('round two', [], {
+          model_context: '<system_update>round 2 exact</system_update>',
+        }),
+      });
+
+      const turn2 = await prepareMessages({
+        conversation: createConversation({
+          previousRounds: [round1],
+          nextInput: makeRoundInput('round two', [], {
+            model_context: '<system_update>round 2 exact</system_update>',
+          }),
+        }),
+        conversationTimestamp: round2.started_at,
+      });
+      const turn3 = await prepareMessages({
+        conversation: createConversation({
+          previousRounds: [round1, round2],
+          nextInput: makeRoundInput('round three'),
+        }),
+      });
+
+      expect(turn3[0].content).toBe(turn2[0].content);
+      expect(turn3[2].content).toBe(turn2[2].content);
+      expect(turn3[0].content).toContain(
+        'round one\n\n  <system_update>\nround 1 exact\n</system_update>  \n'
+      );
+    });
+
+    it('never renders workflow_context into a HumanMessage', async () => {
+      const result = await prepareMessages({
+        conversation: createConversation({
+          previousRounds: [
+            createRound({
+              input: makeRoundInput('historical', [], {
+                workflow_context: { semantic_memory: { recalled_ids: ['secret-history-id'] } },
+              }),
+            }),
+          ],
+          nextInput: makeRoundInput('current', [], {
+            workflow_context: { semantic_memory: { recalled_ids: ['secret-current-id'] } },
+          }),
+        }),
+      });
+
+      expect(JSON.stringify(result.map(({ content }) => content))).not.toContain('secret-');
     });
   });
 

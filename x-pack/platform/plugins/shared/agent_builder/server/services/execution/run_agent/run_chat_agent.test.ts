@@ -237,7 +237,7 @@ describe('runDefaultAgentMode', () => {
     expect(context.toolManager.setMaxToolResultTokens).toHaveBeenCalledWith(20_000);
   });
 
-  it('sends model_context to the prompt factory without persisting it as user input', async () => {
+  it('persists workflow contexts separately from the user-authored message', async () => {
     const context = createAgentHandlerContextMock();
     jest.spyOn(context.modelProvider, 'getDefaultModel').mockResolvedValue({
       connector: { name: 'test-connector' },
@@ -264,6 +264,9 @@ describe('runDefaultAgentMode', () => {
               nextInput: {
                 ...hookContext.nextInput,
                 model_context: '<system_update>hydrated context</system_update>',
+                workflow_context: {
+                  semantic_memory: { recalled_ids: ['memory-1', 'memory-2'] },
+                },
               },
             }
           : hookContext
@@ -283,6 +286,9 @@ describe('runDefaultAgentMode', () => {
           nextInput: expect.objectContaining({
             message: 'user task',
             model_context: '<system_update>hydrated context</system_update>',
+            workflow_context: {
+              semantic_memory: { recalled_ids: ['memory-1', 'memory-2'] },
+            },
           }),
         }),
       })
@@ -294,6 +300,10 @@ describe('runDefaultAgentMode', () => {
       message: 'user task',
       attachments: [],
       attachment_refs: undefined,
+      model_context: '<system_update>hydrated context</system_update>',
+      workflow_context: {
+        semantic_memory: { recalled_ids: ['memory-1', 'memory-2'] },
+      },
     });
   });
 

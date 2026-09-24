@@ -6,7 +6,7 @@
  */
 
 import type { Attachment, AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
-import type { ConversationRoundAuthor } from '@kbn/agent-builder-common';
+import type { ConversationRoundAuthor, WorkflowContext } from '@kbn/agent-builder-common';
 import type { AttachmentBoundedTool, AttachmentRepresentation } from './attachments';
 
 /**
@@ -41,10 +41,11 @@ export interface ProcessedRoundInput {
   message: string;
   attachments: ProcessedAttachment[];
   /**
-   * Ephemeral context appended to the user message only when constructing model input.
-   * It is intentionally not part of persisted RoundInput or rendered as user-authored text.
+   * Immutable persisted context appended only when constructing model input.
    */
   model_context?: string;
+  /** Persisted workflow state that is never rendered to the model. */
+  workflow_context?: WorkflowContext;
   /** References to versioned conversation-level attachments touched during this round. */
   attachment_refs?: ProcessedAttachmentVersionRef[];
   /** Pre-rendered, immutable attachment prompt context for this round (see RoundInput). */
