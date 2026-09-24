@@ -122,7 +122,14 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: tags.stateful.
         const [score] = exampleScores;
         expect(score.example.metadata?.case_id).toBe(output.case_id);
         expect(score.task.trace_id).toBe(output.traceId);
-        expect(score.task.output).toEqual(JSON.parse(JSON.stringify(output)));
+        // The examples listing returns previews only; the full output comes from the details route.
+        const details = await evalsClient.getExperimentExampleDetails(
+          experiment.id,
+          experiment.datasetId,
+          score.example.id,
+          run.repetition
+        );
+        expect(details.task.output).toEqual(JSON.parse(JSON.stringify(output)));
         expect(score.evaluator).toMatchObject({
           name: 'ungraded_placeholder',
           kind: 'code',
