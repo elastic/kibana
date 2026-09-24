@@ -7,14 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiIcon, transparentize, useEuiTheme } from '@elastic/eui';
+import { EuiIcon, transparentize, useEuiShadow, useEuiTheme } from '@elastic/eui';
 import type { Node, NodeProps } from '@xyflow/react';
 import { Handle, Position } from '@xyflow/react';
 import React, { memo } from 'react';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
+import { ExecutionStatus } from '@kbn/workflows';
 import { deslugifyStepName } from './deslugify_step_name';
-import { resolveExecutionState, resolveNodeColors } from './workflow_graph_node';
-import { getStepFamily, getStepIconType } from '../step_icons';
+import { resolveNodeChipStyle } from './resolve_node_chip_style';
+import { getStepIconType } from '../step_icons';
 
 interface ForeachGroupNodeData extends Record<string, unknown> {
   readonly label: string;
@@ -27,80 +28,83 @@ interface ForeachGroupNodeData extends Record<string, unknown> {
 function WorkflowGraphForeachGroupNodeInner(node: NodeProps<Node<ForeachGroupNodeData>>) {
   const { label, stepType, stepExecution } = node.data;
   const { euiTheme } = useEuiTheme();
-  // Display-only, mirrors workflow_graph_node.tsx: `label` itself must stay
-  // untouched since it's used to key execution status.
+  const { colors } = euiTheme;
+  // TODO: switch to xxs when available
+  const nodeShadow = useEuiShadow('xs', { border: 'none' });
   const displayLabel = deslugifyStepName(label);
   const targetHandlePos = node.targetPosition ?? Position.Top;
   const sourceHandlePos = node.sourcePosition ?? Position.Bottom;
 
-  // Reuse the same execution-state + colour pipeline as regular step cards so
-  // the container border and chip colours stay in sync (including CANCELLED
-  // being neutral, matching the step-card behaviour).
-  const family = getStepFamily(stepType, false);
-  const execState = resolveExecutionState(stepExecution?.status);
-  const { chip, cardBorderColor, stepLabelColor } = resolveNodeColors(euiTheme, family, execState);
+  const execStatus = stepExecution?.status;
+  const isSuccess = execStatus === ExecutionStatus.COMPLETED;
+  // CANCELLED stays neutral to match step-card behaviour (status_badge map).
+  const isFailed =
+    execStatus === ExecutionStatus.FAILED || execStatus === ExecutionStatus.TIMED_OUT;
+
+  const chip = resolveNodeChipStyle(euiTheme, stepType, false, { isSuccess, isFailed });
+  const panelBorder = isSuccess
+    ? colors.success
+    : isFailed
+    ? colors.danger
+    : colors.borderBasePlain;
+  const borderRadius = euiTheme.border.radius.small;
+  const iconType = getStepIconType(stepType);
 
   return (
     <>
       <Handle type="target" position={targetHandlePos} style={{ opacity: 0 }} />
       <div
-        css={{
-          width: '100%',
-          height: '100%',
-          // Semi-transparent white body (50%) so the canvas dot pattern shows
-          // through softly; token-based so it adapts to dark mode.
-          background: transparentize(euiTheme.colors.backgroundBasePlain, 0.5),
-          border: `1px solid ${cardBorderColor}`,
-          borderRadius: euiTheme.border.radius.medium,
-          position: 'relative',
-          transition: 'border-color 120ms ease',
-        }}
+        css={[
+          {
+            width: '100%',
+            height: '100%',
+            background: transparentize(colors.backgroundBasePlain, 0.5),
+            border: `${euiTheme.border.width.thin} solid ${panelBorder}`,
+            borderRadius,
+            position: 'relative',
+            transition: 'border-color 120ms ease',
+          },
+          nodeShadow,
+        ]}
       >
-        {/* Transparent header row: icon chip + label. The header has no
-            background so the canvas dot pattern remains visible behind it.
-            Sized to match WORKFLOW_COMPOUND_PADDING.top in
-            workflow_layout_pipeline.ts so inner nodes sit just below. */}
         <div
           data-test-subj="workflowGraphForeachGroupHeader"
           css={{
             display: 'flex',
             alignItems: 'center',
-            gap: 12,
-            // Asymmetric: chip sits 12px from the left edge, matching step
-            // cards; right and vertical gutters are symmetric at 8px.
-            padding: '8px 16px 8px 12px',
+            gap: euiTheme.size.s,
+            padding: `${euiTheme.size.s} ${euiTheme.size.m}`,
+            fontFamily: euiTheme.font.family,
+            fontSize: 12,
+            fontWeight: 500,
+            color: colors.textHeading,
+            lineHeight: '24px',
           }}
         >
-          {/* Icon chip — 28×28, matching the step-card chip size. */}
           <div
             data-test-subj="workflowGraphForeachGroupChip"
             css={{
               flex: '0 0 auto',
               width: 28,
               height: 28,
-              background: chip.fill,
+              background: chip.background,
               border: `1px solid ${chip.border}`,
-              borderRadius: euiTheme.border.radius.small,
+              borderRadius,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               transition: 'background 120ms ease, border-color 120ms ease',
             }}
           >
-            <EuiIcon type={getStepIconType(stepType)} size="m" color={chip.icon} aria-hidden />
+            <EuiIcon type={iconType} size="m" color={chip.iconColor} aria-hidden />
           </div>
           <span
             css={{
               flex: '1 1 auto',
-              fontFamily: euiTheme.font.family,
-              fontSize: 12,
-              fontWeight: 500,
-              lineHeight: '24px',
               whiteSpace: 'nowrap',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               minWidth: 0,
-              color: stepLabelColor,
             }}
             title={displayLabel}
           >

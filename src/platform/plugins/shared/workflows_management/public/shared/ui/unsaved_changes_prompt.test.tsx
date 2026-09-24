@@ -7,45 +7,49 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { render } from '@testing-library/react';
+import { act, render, waitFor } from '@testing-library/react';
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
+import { createMemoryHistory } from 'history';
+import { Router } from 'react-router-dom';
 import { I18nProvider } from '@kbn/i18n-react';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { createStartServicesMock } from '../../mocks';
 import { UnsavedChangesPrompt } from './unsaved_changes_prompt';
-
-// Mock react-router-dom's Prompt component
-let mockPromptMessage: ((location: any) => string | boolean) | null = null;
-let mockLocation = { pathname: '/workflow-123' };
-
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  Prompt: ({ when, message }: { when: boolean; message: (location: any) => string | boolean }) => {
-    // Store the message function for testing
-    mockPromptMessage = message;
-    return when ? <div data-test-subj="unsaved-changes-prompt" /> : null;
-  },
-  useLocation: () => mockLocation,
-}));
-
-const renderWithProviders = (component: React.ReactElement, initialPath = '/workflow-123') => {
-  return render(
-    <MemoryRouter initialEntries={[initialPath]}>
-      <I18nProvider>{component}</I18nProvider>
-    </MemoryRouter>
-  );
-};
 
 describe('UnsavedChangesPrompt', () => {
   let addEventListenerSpy: jest.SpyInstance;
   let removeEventListenerSpy: jest.SpyInstance;
+  let openConfirm: jest.Mock;
+  let navigateToUrl: jest.Mock;
+  let services: ReturnType<typeof createStartServicesMock>;
+
+  const renderPrompt = (
+    props: { hasUnsavedChanges: boolean; shouldPromptOnNavigation?: boolean },
+    initialPath = '/workflow-123'
+  ) => {
+    const history = createMemoryHistory({ initialEntries: [initialPath] });
+    const result = render(
+      <KibanaContextProvider services={services}>
+        <Router history={history}>
+          <I18nProvider>
+            <UnsavedChangesPrompt {...props} />
+          </I18nProvider>
+        </Router>
+      </KibanaContextProvider>
+    );
+    return { history, ...result };
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
     addEventListenerSpy = jest.spyOn(window, 'addEventListener');
     removeEventListenerSpy = jest.spyOn(window, 'removeEventListener');
-    // Clear any stored prompt message and reset location
-    mockPromptMessage = null;
-    mockLocation = { pathname: '/workflow-123' };
+    services = createStartServicesMock();
+    openConfirm = jest.fn().mockResolvedValue(false);
+    navigateToUrl = jest.fn();
+    services.overlays.openConfirm = openConfirm;
+    services.application.navigateToUrl = navigateToUrl;
+    jest.spyOn(services.http.basePath, 'prepend').mockImplementation((path: string) => path);
   });
 
   afterEach(() => {
@@ -53,207 +57,133 @@ describe('UnsavedChangesPrompt', () => {
     removeEventListenerSpy.mockRestore();
   });
 
-  describe('Prompt rendering', () => {
-    it('should render Prompt when hasUnsavedChanges is true and shouldPromptOnNavigation is true', () => {
-      const { getByTestId } = renderWithProviders(
-        <UnsavedChangesPrompt hasUnsavedChanges={true} shouldPromptOnNavigation={true} />
-      );
+  describe('beforeunload', () => {
+    it('registers beforeunload only when dirty', () => {
+      const { rerender, history } = renderPrompt({ hasUnsavedChanges: false });
 
-      expect(getByTestId('unsaved-changes-prompt')).toBeInTheDocument();
-    });
+      expect(addEventListenerSpy).not.toHaveBeenCalledWith('beforeunload', expect.any(Function));
 
-    it('should not render Prompt when hasUnsavedChanges is false', () => {
-      const { queryByTestId } = renderWithProviders(
-        <UnsavedChangesPrompt hasUnsavedChanges={false} shouldPromptOnNavigation={true} />
-      );
-
-      expect(queryByTestId('unsaved-changes-prompt')).not.toBeInTheDocument();
-    });
-
-    it('should not render Prompt when shouldPromptOnNavigation is false', () => {
-      const { queryByTestId } = renderWithProviders(
-        <UnsavedChangesPrompt hasUnsavedChanges={true} shouldPromptOnNavigation={false} />
-      );
-
-      expect(queryByTestId('unsaved-changes-prompt')).not.toBeInTheDocument();
-    });
-
-    it('should default shouldPromptOnNavigation to true', () => {
-      const { getByTestId } = renderWithProviders(
-        <UnsavedChangesPrompt hasUnsavedChanges={true} />
-      );
-
-      expect(getByTestId('unsaved-changes-prompt')).toBeInTheDocument();
-    });
-  });
-
-  describe('beforeunload event handling', () => {
-    it('should add beforeunload event listener when hasUnsavedChanges is true', () => {
-      renderWithProviders(<UnsavedChangesPrompt hasUnsavedChanges={true} />);
-
-      expect(addEventListenerSpy).toHaveBeenCalledWith('beforeunload', expect.any(Function));
-    });
-
-    it('should add beforeunload event listener even when hasUnsavedChanges is false', () => {
-      renderWithProviders(<UnsavedChangesPrompt hasUnsavedChanges={false} />);
-
-      expect(addEventListenerSpy).toHaveBeenCalledWith('beforeunload', expect.any(Function));
-    });
-
-    it('should remove beforeunload event listener on unmount', () => {
-      const { unmount } = renderWithProviders(<UnsavedChangesPrompt hasUnsavedChanges={true} />);
-
-      unmount();
-
-      expect(removeEventListenerSpy).toHaveBeenCalledWith('beforeunload', expect.any(Function));
-    });
-
-    it('should update event listener when hasUnsavedChanges changes', () => {
-      const { rerender } = renderWithProviders(<UnsavedChangesPrompt hasUnsavedChanges={false} />);
-
-      // Should have added listener initially
-      expect(addEventListenerSpy).toHaveBeenCalledWith('beforeunload', expect.any(Function));
-
-      // Rerender with hasUnsavedChanges true
       rerender(
-        <MemoryRouter initialEntries={['/workflow-123']}>
-          <I18nProvider>
-            <UnsavedChangesPrompt hasUnsavedChanges={true} />
-          </I18nProvider>
-        </MemoryRouter>
+        <KibanaContextProvider services={services}>
+          <Router history={history}>
+            <I18nProvider>
+              <UnsavedChangesPrompt hasUnsavedChanges={true} />
+            </I18nProvider>
+          </Router>
+        </KibanaContextProvider>
       );
 
-      // Should have called addEventListener again (and removeEventListener for cleanup)
-      expect(addEventListenerSpy).toHaveBeenCalledTimes(2);
+      expect(addEventListenerSpy).toHaveBeenCalledWith('beforeunload', expect.any(Function));
     });
-  });
 
-  describe('beforeunload event handler behavior', () => {
-    it('should prevent default and set returnValue when hasUnsavedChanges is true', () => {
-      renderWithProviders(<UnsavedChangesPrompt hasUnsavedChanges={true} />);
+    it('prevents default when dirty', () => {
+      renderPrompt({ hasUnsavedChanges: true });
 
-      const beforeUnloadHandler = addEventListenerSpy.mock.calls.find(
-        (call) => call[0] === 'beforeunload'
-      )?.[1];
+      const handler = addEventListenerSpy.mock.calls.find((call) => call[0] === 'beforeunload')?.[1];
+      const mockEvent = { preventDefault: jest.fn(), returnValue: '' } as BeforeUnloadEvent;
 
-      expect(beforeUnloadHandler).toBeDefined();
-
-      const mockEvent = {
-        preventDefault: jest.fn(),
-        returnValue: '',
-      } as any;
-
-      beforeUnloadHandler(mockEvent);
+      handler(mockEvent);
 
       expect(mockEvent.preventDefault).toHaveBeenCalled();
       expect(mockEvent.returnValue).toBe('');
     });
 
-    it('should not prevent default when hasUnsavedChanges is false', () => {
-      renderWithProviders(<UnsavedChangesPrompt hasUnsavedChanges={false} />);
-
-      const beforeUnloadHandler = addEventListenerSpy.mock.calls.find(
-        (call) => call[0] === 'beforeunload'
-      )?.[1];
-
-      expect(beforeUnloadHandler).toBeDefined();
-
-      const mockEvent = {
-        preventDefault: jest.fn(),
-        returnValue: '',
-      } as any;
-
-      beforeUnloadHandler(mockEvent);
-
-      expect(mockEvent.preventDefault).not.toHaveBeenCalled();
-      expect(mockEvent.returnValue).toBe('');
+    it('removes beforeunload on unmount', () => {
+      const { unmount } = renderPrompt({ hasUnsavedChanges: true });
+      unmount();
+      expect(removeEventListenerSpy).toHaveBeenCalledWith('beforeunload', expect.any(Function));
     });
   });
 
-  describe('navigation message logic', () => {
-    it('should allow navigation within the same workflow', () => {
-      renderWithProviders(<UnsavedChangesPrompt hasUnsavedChanges={true} />, '/workflow-123');
+  describe('SPA navigation confirm modal', () => {
+    it('does not block when clean', async () => {
+      const { history } = renderPrompt({ hasUnsavedChanges: false });
 
-      const messageFunction = mockPromptMessage;
-      expect(messageFunction).toBeDefined();
+      act(() => {
+        history.push('/workflow-456');
+      });
 
-      // Test navigation within same workflow
-      const result = messageFunction!({ pathname: '/app/workflows/workflow-123' });
-      expect(result).toBe(true);
+      expect(history.location.pathname).toBe('/workflow-456');
+      expect(openConfirm).not.toHaveBeenCalled();
     });
 
-    it('should show confirmation message when navigating to different workflow', () => {
-      renderWithProviders(<UnsavedChangesPrompt hasUnsavedChanges={true} />, '/workflow-123');
+    it('does not block when shouldPromptOnNavigation is false', async () => {
+      const { history } = renderPrompt({
+        hasUnsavedChanges: true,
+        shouldPromptOnNavigation: false,
+      });
 
-      const messageFunction = mockPromptMessage;
-      expect(messageFunction).toBeDefined();
+      act(() => {
+        history.push('/workflow-456');
+      });
 
-      // Test navigation to different workflow
-      const result = messageFunction!({ pathname: '/app/workflows/workflow-456' });
-      expect(result).toBe('Your changes have not been saved. Are you sure you want to leave?');
+      expect(history.location.pathname).toBe('/workflow-456');
+      expect(openConfirm).not.toHaveBeenCalled();
     });
 
-    it('should show confirmation message when navigating to create page', () => {
-      renderWithProviders(<UnsavedChangesPrompt hasUnsavedChanges={true} />, '/workflow-123');
+    it('allows navigation within the same workflow path', async () => {
+      const { history } = renderPrompt({ hasUnsavedChanges: true }, '/workflow-123');
 
-      const messageFunction = mockPromptMessage;
-      expect(messageFunction).toBeDefined();
+      act(() => {
+        history.push({ pathname: '/app/workflows/workflow-123', search: '?tab=executions' });
+      });
 
-      // Test navigation to create page
-      const result = messageFunction!({ pathname: '/app/workflows/create' });
-      expect(result).toBe('Your changes have not been saved. Are you sure you want to leave?');
+      await waitFor(() => {
+        expect(openConfirm).not.toHaveBeenCalled();
+      });
+      expect(history.location.pathname).toBe('/app/workflows/workflow-123');
     });
 
-    it('should show confirmation message when navigating outside workflows', () => {
-      renderWithProviders(<UnsavedChangesPrompt hasUnsavedChanges={true} />, '/workflow-123');
+    it('opens EuiConfirmModal copy with danger Discard and focus Keep editing', async () => {
+      const { history } = renderPrompt({ hasUnsavedChanges: true }, '/workflow-123');
 
-      const messageFunction = mockPromptMessage;
-      expect(messageFunction).toBeDefined();
+      act(() => {
+        history.push('/workflow-456');
+      });
 
-      // Test navigation outside workflows
-      const result = messageFunction!({ pathname: '/app/dashboards' });
-      expect(result).toBe('Your changes have not been saved. Are you sure you want to leave?');
+      await waitFor(() => {
+        expect(openConfirm).toHaveBeenCalledWith(
+          "Your changes to this workflow haven't been saved. If you leave now, they'll be lost.",
+          expect.objectContaining({
+            title: 'Discard unsaved changes?',
+            confirmButtonText: 'Discard changes',
+            cancelButtonText: 'Keep editing',
+            buttonColor: 'danger',
+            defaultFocusedButton: 'cancel',
+            maxWidth: 400,
+            'data-test-subj': 'workflowUnsavedChangesConfirmModal',
+          })
+        );
+      });
+      expect(history.location.pathname).toBe('/workflow-123');
     });
 
-    it('should handle undefined nextLocation', () => {
-      renderWithProviders(<UnsavedChangesPrompt hasUnsavedChanges={true} />, '/workflow-123');
+    it('navigates away when Discard changes is confirmed', async () => {
+      openConfirm.mockResolvedValue(true);
+      const { history } = renderPrompt({ hasUnsavedChanges: true }, '/workflow-123');
 
-      const messageFunction = mockPromptMessage;
-      expect(messageFunction).toBeDefined();
+      act(() => {
+        history.push('/workflow-456');
+      });
 
-      // Test with undefined nextLocation
-      const result = messageFunction!(undefined);
-      expect(result).toBe('Your changes have not been saved. Are you sure you want to leave?');
+      await waitFor(() => {
+        expect(navigateToUrl).toHaveBeenCalledWith('/workflow-456', { state: undefined });
+      });
     });
 
-    it('should handle nextLocation without pathname', () => {
-      renderWithProviders(<UnsavedChangesPrompt hasUnsavedChanges={true} />, '/workflow-123');
+    it('stays on the page when Keep editing is chosen', async () => {
+      openConfirm.mockResolvedValue(false);
+      const { history } = renderPrompt({ hasUnsavedChanges: true }, '/workflow-123');
 
-      const messageFunction = mockPromptMessage;
-      expect(messageFunction).toBeDefined();
+      act(() => {
+        history.push('/workflow-456');
+      });
 
-      // Test with nextLocation without pathname
-      const result = messageFunction!({});
-      expect(result).toBe('Your changes have not been saved. Are you sure you want to leave?');
-    });
-  });
-
-  describe('path tracking', () => {
-    it('should update current path ref when location changes', () => {
-      renderWithProviders(<UnsavedChangesPrompt hasUnsavedChanges={true} />, '/workflow-123');
-
-      // Update the mock location
-      mockLocation.pathname = '/workflow-456';
-
-      // Re-render to trigger the useEffect
-      renderWithProviders(<UnsavedChangesPrompt hasUnsavedChanges={true} />, '/workflow-456');
-
-      const messageFunction = mockPromptMessage;
-      expect(messageFunction).toBeDefined();
-
-      // Should now allow navigation within the new workflow
-      const result = messageFunction!({ pathname: '/app/workflows/workflow-456' });
-      expect(result).toBe(true);
+      await waitFor(() => {
+        expect(openConfirm).toHaveBeenCalled();
+      });
+      expect(navigateToUrl).not.toHaveBeenCalled();
+      expect(history.location.pathname).toBe('/workflow-123');
     });
   });
 });

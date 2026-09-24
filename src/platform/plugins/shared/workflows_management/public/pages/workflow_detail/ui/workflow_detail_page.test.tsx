@@ -501,6 +501,33 @@ describe('WorkflowDetailPage', () => {
 
       expect(mockLoadWorkflow).toHaveBeenCalledWith({ id: 'different-workflow-456' });
     });
+
+    it('does not reload the workflow when only the editor view toggles', () => {
+      const urlState = {
+        activeTab: 'workflow' as const,
+        selectedExecutionId: undefined as string | undefined,
+        setSelectedExecution: jest.fn(),
+        setActiveTab: jest.fn(),
+        editorView: 'yaml' as 'yaml' | 'graph',
+        setEditorView: jest.fn(),
+      };
+      mockUseWorkflowUrlState.mockImplementation(() => urlState);
+
+      const store = createMockStore();
+      const services = createStartServicesMock();
+      const wrapper = getTestProvider({ store, services });
+
+      const Harness = ({ view }: { view: 'yaml' | 'graph' }) => {
+        urlState.editorView = view;
+        return <WorkflowDetailPage id="test-workflow-123" />;
+      };
+
+      const { rerender } = render(<Harness view="yaml" />, { wrapper });
+      expect(mockLoadWorkflow).toHaveBeenCalledTimes(1);
+
+      rerender(<Harness view="graph" />);
+      expect(mockLoadWorkflow).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('workflow test modal', () => {

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isStep } from './types';
+import { getStepFallbackSteps, isStep } from './types';
 import type { Step } from './types';
 import type { WorkflowYaml } from '../spec/schema';
 
@@ -70,6 +70,10 @@ function walkStepsWithSlot(
     }
     if ('default' in record && Array.isArray(record.default)) {
       walkStepsWithSlot((record.default as unknown[]).filter(isStep), parts, 'default', depth + 1);
+    }
+    const fallbackSteps = getStepFallbackSteps(step);
+    if (fallbackSteps.length > 0) {
+      walkStepsWithSlot(fallbackSteps, parts, 'fallback', depth + 1);
     }
   }
 }

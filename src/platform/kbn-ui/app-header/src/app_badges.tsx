@@ -66,7 +66,7 @@ export const AppBadges = memo<AppBadgesProps>(({ badges }) => {
 
   return (
     <EuiFlexGroup
-      gutterSize="xs"
+      gutterSize="s"
       alignItems="center"
       responsive={false}
       wrap={false}

@@ -11,7 +11,7 @@ import type { EuiIconProps, IconType } from '@elastic/eui';
 import { EuiIcon, EuiLoadingSpinner, EuiToken, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { Suspense } from 'react';
-import type { ExecutionStatus } from '@kbn/workflows';
+import { TRIGGER_STEP_TYPES, type ExecutionStatus } from '@kbn/workflows';
 import {
   getMaskableIconUrl,
   getStepIconType,
@@ -58,7 +58,7 @@ export const StepIcon = React.memo(
     // Brand / step-type logos keep their own tokens. Status is signaled by the
     // tree label and row background, not by replacing or recoloring the logo.
     let iconType: IconType;
-    if (stepType.startsWith('trigger_')) {
+    if (stepType.startsWith('trigger_') || TRIGGER_STEP_TYPES.has(stepType)) {
       iconType = getTriggerTypeIconType(stepType);
     } else if (BASE_TYPE_AGGREGATE_ICONS[stepType]) {
       iconType = BASE_TYPE_AGGREGATE_ICONS[stepType];

@@ -94,7 +94,7 @@ describe('useWorkflowLayout', () => {
       );
     });
 
-    it('does NOT tag fan-in edges isMerge when both if branches are present', () => {
+    it('tags ALL fan-in edges isMerge when both if branches are present', () => {
       const workflow = minimal({
         steps: [
           {
@@ -110,7 +110,65 @@ describe('useWorkflowLayout', () => {
       const { result } = renderHook(() => useWorkflowLayout({ workflow }));
       const fanInEdges = result.current.edges.filter((e) => e.target === 'after');
       expect(fanInEdges).toHaveLength(2);
-      expect(fanInEdges.every((e) => !(e.data as Record<string, unknown>)?.isMerge)).toBe(true);
+      expect(fanInEdges.every((e) => (e.data as Record<string, unknown>)?.isMerge === true)).toBe(
+        true
+      );
+    });
+
+    it('routes if then/else edges from the matching sourceHandle ports', () => {
+      const workflow = minimal({
+        steps: [
+          {
+            name: 'gate',
+            type: 'if',
+            condition: 'x',
+            steps: [{ name: 'yes', type: 'http' }],
+            else: [{ name: 'no', type: 'http' }],
+          },
+        ] as unknown as WorkflowYaml['steps'],
+      });
+      const { result } = renderHook(() => useWorkflowLayout({ workflow }));
+      const thenEdge = result.current.edges.find(
+        (e) => (e.data as Record<string, unknown>)?.branchType === 'then'
+      );
+      const elseEdge = result.current.edges.find(
+        (e) => (e.data as Record<string, unknown>)?.branchType === 'else'
+      );
+      expect(thenEdge?.sourceHandle).toBe('then');
+      expect(elseEdge?.sourceHandle).toBe('else');
+    });
+
+    it('routes on-failure edges from the error port and the main path from step', () => {
+      const workflow = minimal({
+        steps: [
+          {
+            name: 'fetch',
+            type: 'http',
+            'on-failure': { fallback: [{ name: 'notify', type: 'console' }] },
+          },
+          { name: 'after', type: 'http' },
+        ] as unknown as WorkflowYaml['steps'],
+      });
+      const { result } = renderHook(() => useWorkflowLayout({ workflow }));
+      const failureEdge = result.current.edges.find(
+        (e) => (e.data as Record<string, unknown>)?.isFailure === true
+      );
+      const mainEdge = result.current.edges.find((e) => e.source === 'fetch' && e.target === 'after');
+      expect(failureEdge?.sourceHandle).toBe('error');
+      expect(mainEdge?.sourceHandle).toBe('step');
+    });
+
+    it('tags trigger edges isMerge when two triggers join the first step', () => {
+      const workflow = minimal({
+        triggers: [{ type: 'alert' }, { type: 'manual' }],
+        steps: [{ name: 'first', type: 'http' }] as unknown as WorkflowYaml['steps'],
+      });
+      const { result } = renderHook(() => useWorkflowLayout({ workflow }));
+      const triggerEdges = result.current.edges.filter((e) => e.target === 'first');
+      expect(triggerEdges).toHaveLength(2);
+      expect(triggerEdges.every((e) => (e.data as Record<string, unknown>)?.isMerge === true)).toBe(
+        true
+      );
     });
 
     it('does NOT tag a plain sequential edge isMerge', () => {

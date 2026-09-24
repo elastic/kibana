@@ -74,6 +74,12 @@ export interface TemplateDetailProps {
    * `'custom'` from the template's raw YAML. Forwarded to the install section.
    */
   installMode?: 'catalog' | 'custom';
+  /**
+   * When set, the primary action applies the rendered preview YAML into the
+   * current editor instead of creating a new workflow (in-workflow "Add to
+   * workflow" path).
+   */
+  onApplyToWorkflow?: (yaml: string) => void;
 }
 
 /** App icons for the known solutions; unknown solutions render without one. */
@@ -104,6 +110,7 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
   backButton,
   showGraphPreview = false,
   installMode = 'catalog',
+  onApplyToWorkflow,
 }) {
   // A pre-loaded template short-circuits the fetch; the query stays disabled.
   const query = useTemplate(template ? undefined : slug);
@@ -278,9 +285,6 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
       gap: euiTheme.size.xl,
       minHeight: 0,
       overflowY: 'auto',
-      // Keep the scrollbar off the content while preserving the column width.
-      paddingRight: euiTheme.size.s,
-      scrollbarGutter: 'stable',
     }),
     // 32px between the title block and the details block (Figma "Container" gap).
     header: css({ gap: euiTheme.size.xl }),
@@ -537,6 +541,7 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
                 onPreviewValuesChange={setPreviewValues}
                 previewYaml={previewYaml}
                 installMode={installMode}
+                onApplyToWorkflow={onApplyToWorkflow}
               />
             </EuiFlexGroup>
           </EuiFlexItem>

@@ -24,13 +24,16 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { StepInfo } from '@kbn/workflows-yaml';
 import { deslugifyStepName } from './deslugify_step_name';
-import { getStepChipPalette } from './step_chip_palette';
+import { AiIcon } from '@kbn/shared-ux-ai-components';
+import { aiIconTileCss } from './ai_icon_tile';
+import { resolveNodeChipStyle } from './resolve_node_chip_style';
+import { getStepIconType } from '../step_icons/get_step_icon_type';
 import type { RenderStepIcon } from './workflow_graph_actions_context';
 import {
   useWorkflowsMonacoTheme,
   WORKFLOWS_MONACO_EDITOR_THEME,
 } from '../../hooks/use_workflows_monaco_theme';
-import { getStepFamily, TypeIcon } from '../step_icons';
+import { TypeIcon } from '../step_icons';
 
 export type WorkflowVisualEditorFlyoutTarget =
   | {
@@ -105,6 +108,11 @@ export function WorkflowVisualEditorFlyout({
     target.kind === 'step'
       ? target.stepInfo?.stepType ?? target.stepType ?? 'package'
       : target.triggerType;
+  const chip = resolveNodeChipStyle(euiTheme, iconStepType, isTrigger, {
+    isSuccess: false,
+    isFailed: false,
+  });
+  const iconType = getStepIconType(iconStepType);
 
   const yamlSlice = useMemo(() => {
     if (target.kind === 'trigger') return target.yamlSnippet;
@@ -149,7 +157,7 @@ export function WorkflowVisualEditorFlyout({
         display: 'flex',
         flexDirection: 'column',
         background: euiTheme.colors.backgroundBasePlain,
-        borderRadius: 8,
+        borderRadius: euiTheme.border.radius.small,
         overflow: 'hidden',
         border: `1px solid ${euiTheme.colors.borderBasePlain}`,
       }}
@@ -172,42 +180,35 @@ export function WorkflowVisualEditorFlyout({
           css={{ minWidth: 0, flex: '1 1 auto' }}
         >
           <EuiFlexItem grow={false}>
-            {(() => {
-              // Flyout is the editor context — no execution status, always idle.
-              const flyoutChip = getStepChipPalette(
-                euiTheme,
-                getStepFamily(iconStepType, isTrigger),
-                'none'
-              );
-              return (
-                <div
-                  css={{
-                    width: 40,
-                    height: 40,
-                    // Echoes the idle chip colours from the graph node so the
-                    // flyout header reads as the same step that was clicked.
-                    background: flyoutChip.fill,
-                    border: `1px solid ${flyoutChip.border}`,
-                    borderRadius: euiTheme.border.radius.small,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0,
-                  }}
-                >
-                  {renderStepIcon ? (
-                    renderStepIcon({
-                      stepType: iconStepType,
-                      isTrigger,
-                      size: 'm',
-                      color: flyoutChip.icon,
-                    })
-                  ) : (
-                    <TypeIcon type={iconStepType} kind={isTrigger ? 'trigger' : 'step'} size="m" />
-                  )}
-                </div>
-              );
-            })()}
+            <div
+              css={[
+                {
+                  width: 28,
+                  height: 28,
+                  borderRadius: euiTheme.border.radius.small,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                  color: chip.iconColor,
+                  ...(chip.useAiGradient
+                    ? {}
+                    : {
+                        border: `1px solid ${chip.border}`,
+                        background: chip.background,
+                      }),
+                },
+                chip.useAiGradient ? aiIconTileCss({ euiTheme }) : {},
+              ]}
+            >
+              {chip.useAiGradient && iconType === 'sparkles' ? (
+                <AiIcon iconType="sparkles" size="m" aria-hidden />
+              ) : renderStepIcon ? (
+                renderStepIcon({ stepType: iconStepType, isTrigger, size: 'm' })
+              ) : (
+                <TypeIcon type={iconStepType} kind={isTrigger ? 'trigger' : 'step'} size="m" />
+              )}
+            </div>
           </EuiFlexItem>
           <EuiFlexItem css={{ minWidth: 0 }}>
             <div
