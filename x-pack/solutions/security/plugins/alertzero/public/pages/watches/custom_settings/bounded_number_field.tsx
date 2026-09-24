@@ -6,18 +6,19 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
+import { EuiFieldNumber } from '@elastic/eui';
 
 interface BoundedNumberFieldProps {
   value: number;
   /** Inclusive bounds; a value outside them is held locally and never published. */
   min: number;
   max: number;
-  label: string;
-  helpText: string;
   ariaLabel: string;
-  /** Applied to the input; the surrounding row gets `${testSubj}Field`. */
   testSubj: string;
+  /** Unit shown inside the control, e.g. `%`. */
+  append?: string;
+  /** Set by a wrapping EuiFormRow so its label points at the input. */
+  id?: string;
   isDisabled?: boolean;
   onChange: (value: number) => void;
 }
@@ -30,7 +31,8 @@ const parseBoundedNumber = (text: string, min: number, max: number): number | un
 };
 
 /**
- * Whole-number setting within fixed bounds, for the Watch page's Save/Discard draft.
+ * Whole-number setting within fixed bounds, for the Watch page's Save/Discard draft. Renders the
+ * bare input; the caller supplies the label, either through a SettingRow or an EuiFormRow.
  *
  * The edit is buffered for the whole focus session and published once, on blur or Enter, and
  * only if it is valid. Publishing per keystroke would leak valid prefixes: typing "31" over a
@@ -42,10 +44,10 @@ export const BoundedNumberField: React.FC<BoundedNumberFieldProps> = ({
   value,
   min,
   max,
-  label,
-  helpText,
   ariaLabel,
   testSubj,
+  append,
+  id,
   isDisabled,
   onChange,
 }) => {
@@ -73,20 +75,20 @@ export const BoundedNumberField: React.FC<BoundedNumberFieldProps> = ({
   };
 
   return (
-    <EuiFormRow label={label} helpText={helpText} fullWidth data-test-subj={`${testSubj}Field`}>
-      <EuiFieldNumber
-        fullWidth
-        min={min}
-        max={max}
-        step={1}
-        value={draft}
-        disabled={isDisabled}
-        onChange={(event) => setDraft(event.target.value)}
-        onBlur={commitDraft}
-        onKeyDown={onKeyDown}
-        aria-label={ariaLabel}
-        data-test-subj={testSubj}
-      />
-    </EuiFormRow>
+    <EuiFieldNumber
+      id={id}
+      fullWidth
+      min={min}
+      max={max}
+      step={1}
+      value={draft}
+      append={append}
+      disabled={isDisabled}
+      onChange={(event) => setDraft(event.target.value)}
+      onBlur={commitDraft}
+      onKeyDown={onKeyDown}
+      aria-label={ariaLabel}
+      data-test-subj={testSubj}
+    />
   );
 };

@@ -6,14 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  ANALYSIS_WINDOW_DAYS_MAX,
-  ANALYSIS_WINDOW_DAYS_MIN,
-  FP_COUNT_THRESHOLD_MAX,
-  FP_COUNT_THRESHOLD_MIN,
-  FP_RATE_THRESHOLD_PCT_MAX,
-  FP_RATE_THRESHOLD_PCT_MIN,
-} from '@kbn/alertzero-common';
+import { ANALYSIS_WINDOW_DAYS_MAX, ANALYSIS_WINDOW_DAYS_MIN } from '@kbn/alertzero-common';
 
 /** Copy for the Rule Tuning settings controls, owned by the Detection Watch team. */
 
@@ -36,18 +29,34 @@ export const ANALYSIS_WINDOW_DAYS_ARIA_LABEL = i18n.translate(
   { defaultMessage: 'Analysis window in days' }
 );
 
-export const FP_COUNT_THRESHOLD_LABEL = i18n.translate(
-  'xpack.alertzero.watches.settings.fpCountThreshold.label',
-  { defaultMessage: 'FP count threshold' }
+export const QUALIFYING_THRESHOLDS_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.qualifyingThresholds.label',
+  { defaultMessage: 'Qualifying thresholds' }
 );
 
-export const FP_COUNT_THRESHOLD_HELP = i18n.translate(
-  'xpack.alertzero.watches.settings.fpCountThreshold.help',
+export const QUALIFYING_THRESHOLDS_HELP = i18n.translate(
+  'xpack.alertzero.watches.settings.qualifyingThresholds.help',
   {
     defaultMessage:
-      'Minimum number of FP-closed alerts required to trigger analysis on a rule. Between {min} and {max}.',
-    values: { min: FP_COUNT_THRESHOLD_MIN, max: FP_COUNT_THRESHOLD_MAX },
+      'A rule qualifies for analysis only when both are met within the analysis window.',
   }
+);
+
+/** Shared help line under both threshold inputs. */
+export const QUALIFYING_THRESHOLDS_FIELDS_HELP = i18n.translate(
+  'xpack.alertzero.watches.settings.qualifyingThresholds.fieldsHelp',
+  { defaultMessage: 'Alerts closed as false positives within the analysis window.' }
+);
+
+/** Conjunction rendered between the two threshold inputs. */
+export const QUALIFYING_THRESHOLDS_AND = i18n.translate(
+  'xpack.alertzero.watches.settings.qualifyingThresholds.and',
+  { defaultMessage: 'and' }
+);
+
+export const FP_COUNT_THRESHOLD_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.fpCountThreshold.label',
+  { defaultMessage: 'False positive count' }
 );
 
 export const FP_COUNT_THRESHOLD_ARIA_LABEL = i18n.translate(
@@ -57,16 +66,7 @@ export const FP_COUNT_THRESHOLD_ARIA_LABEL = i18n.translate(
 
 export const FP_RATE_THRESHOLD_PCT_LABEL = i18n.translate(
   'xpack.alertzero.watches.settings.fpRateThresholdPct.label',
-  { defaultMessage: 'FP rate threshold (%)' }
-);
-
-export const FP_RATE_THRESHOLD_PCT_HELP = i18n.translate(
-  'xpack.alertzero.watches.settings.fpRateThresholdPct.help',
-  {
-    defaultMessage:
-      'Minimum FP rate, as a percentage of total alerts, required to trigger analysis. Between {min} and {max}.',
-    values: { min: FP_RATE_THRESHOLD_PCT_MIN, max: FP_RATE_THRESHOLD_PCT_MAX },
-  }
+  { defaultMessage: 'False positive rate' }
 );
 
 export const FP_RATE_THRESHOLD_PCT_ARIA_LABEL = i18n.translate(
