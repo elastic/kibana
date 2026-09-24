@@ -2775,6 +2775,15 @@ const KubernetesCard = ({
             />
           </EuiFlexItem>
         ) : null}
+        {nodeNames.length > 0 ? (
+          <EuiFlexItem grow={false}>
+            <KubernetesNodeFilter
+              nodeNames={nodeNames}
+              value={effectiveNodeFilter}
+              onChange={setNodeFilter}
+            />
+          </EuiFlexItem>
+        ) : null}
         {namespaceNames.length > 0 ? (
           <EuiFlexItem grow={false}>
             <KubernetesNamespaceFilter
@@ -2790,15 +2799,6 @@ const KubernetesCard = ({
               deploymentNames={deploymentNames}
               value={effectiveDeploymentFilter}
               onChange={setDeploymentFilter}
-            />
-          </EuiFlexItem>
-        ) : null}
-        {nodeNames.length > 0 ? (
-          <EuiFlexItem grow={false}>
-            <KubernetesNodeFilter
-              nodeNames={nodeNames}
-              value={effectiveNodeFilter}
-              onChange={setNodeFilter}
             />
           </EuiFlexItem>
         ) : null}

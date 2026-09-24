@@ -549,6 +549,15 @@ const KubernetesSectionHeader = ({
           />
         </EuiFlexItem>
       ) : null}
+      {nodeNames.length > 0 ? (
+        <EuiFlexItem grow={false}>
+          <KubernetesNodeFilter
+            nodeNames={nodeNames}
+            value={nodeFilter}
+            onChange={onNodeFilterChange}
+          />
+        </EuiFlexItem>
+      ) : null}
       {namespaceNames.length > 0 ? (
         <EuiFlexItem grow={false}>
           <KubernetesNamespaceFilter
@@ -564,15 +573,6 @@ const KubernetesSectionHeader = ({
             deploymentNames={deploymentNames}
             value={deploymentFilter}
             onChange={onDeploymentFilterChange}
-          />
-        </EuiFlexItem>
-      ) : null}
-      {nodeNames.length > 0 ? (
-        <EuiFlexItem grow={false}>
-          <KubernetesNodeFilter
-            nodeNames={nodeNames}
-            value={nodeFilter}
-            onChange={onNodeFilterChange}
           />
         </EuiFlexItem>
       ) : null}

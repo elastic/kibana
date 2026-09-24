@@ -2280,6 +2280,15 @@ const AllEntitiesViewInner = ({
                             />
                           </EuiFlexItem>
                         ) : null}
+                        {k8sFilterVisibility.showNode && k8sNodeNames.length > 0 ? (
+                          <EuiFlexItem grow={false}>
+                            <KubernetesNodeFilter
+                              nodeNames={k8sNodeNames}
+                              value={effectiveK8sNodeFilter}
+                              onChange={setK8sNodeFilter}
+                            />
+                          </EuiFlexItem>
+                        ) : null}
                         {k8sFilterVisibility.showNamespace && k8sNamespaceNames.length > 0 ? (
                           <EuiFlexItem grow={false}>
                             <KubernetesNamespaceFilter
@@ -2295,15 +2304,6 @@ const AllEntitiesViewInner = ({
                               deploymentNames={k8sDeploymentNames}
                               value={effectiveK8sDeploymentFilter}
                               onChange={setK8sDeploymentFilter}
-                            />
-                          </EuiFlexItem>
-                        ) : null}
-                        {k8sFilterVisibility.showNode && k8sNodeNames.length > 0 ? (
-                          <EuiFlexItem grow={false}>
-                            <KubernetesNodeFilter
-                              nodeNames={k8sNodeNames}
-                              value={effectiveK8sNodeFilter}
-                              onChange={setK8sNodeFilter}
                             />
                           </EuiFlexItem>
                         ) : null}
