@@ -9,7 +9,7 @@ import React from 'react';
 import { act, render, screen } from '@testing-library/react';
 import { Subject } from 'rxjs';
 import type { Observable } from 'rxjs';
-import type { ChatEvent, Conversation, TimelineEvent } from '@kbn/agent-builder-common';
+import type { ChatEvent, Conversation, ConversationEvent } from '@kbn/agent-builder-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { BrowserChatEvent } from '@kbn/agent-builder-browser/events';
 import { ConversationStreamService } from '../../../../services/events/conversation_stream_service';
@@ -21,6 +21,7 @@ import { createExecutionStartedEvent } from './items/execution_started.factory';
 import { createExecutionTerminatedEvent } from './items/execution_terminated_event.factory';
 import { createAttachmentAddedEvent } from './items/attachment_added_event.factory';
 import { createVersionedAttachment } from './items/versioned_attachment.factory';
+import { CUSTOM_EVENT_TYPE, createCustomEvent } from './items/custom_event.factory';
 import type { TimelineItem } from './types';
 import { TimelineConnector } from './timeline_connector';
 
@@ -49,11 +50,17 @@ jest.mock('../../../hooks/use_agent_builder_service', () => ({
     attachmentsService: {
       hasAttachmentType: (type: string) => registeredAttachmentTypes.has(type),
     },
+    conversationEventsService: {
+      getUiDefinition: (type: string) =>
+        registeredEventTypes.has(type) ? { type, render: () => null } : undefined,
+    },
   }),
 }));
 
 /** Attachment types with a UI in this test's Kibana; empty unless a test registers one. */
 const registeredAttachmentTypes = new Set<string>();
+/** Custom event types with a UI in this test's Kibana; empty unless a test registers one. */
+const registeredEventTypes = new Set<string>();
 jest.mock('./timeline', () => ({
   Timeline: ({ items }: { items: TimelineItem[] }) => (
     <ul>
@@ -103,7 +110,7 @@ const setState = ({
   });
 };
 
-const conversationWith = (events: TimelineEvent[], attachments?: VersionedAttachment[]) =>
+const conversationWith = (events: ConversationEvent[], attachments?: VersionedAttachment[]) =>
   ({ id: conversationId, events, attachments, rounds: [] } as unknown as Conversation);
 
 const renderedItems = () => screen.getAllByTestId('item').map((el) => el.textContent);
@@ -124,6 +131,7 @@ describe('TimelineConnector', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     registeredAttachmentTypes.clear();
+    registeredEventTypes.clear();
     mockStreamService.clearPersistedExecution(conversationId, 'round-1::execution');
   });
 
@@ -295,6 +303,36 @@ describe('TimelineConnector', () => {
       render(<TimelineConnector />);
 
       expect(renderedItems()).toHaveLength(2);
+    });
+  });
+
+  describe('custom events', () => {
+    const note = createCustomEvent({ id: 'note-1' });
+
+    it('shows the event once a refetch brings it and its type has a UI here', () => {
+      registeredEventTypes.add(CUSTOM_EVENT_TYPE);
+      setState({ conversation: conversationWith([savedUserMessage, started, terminated]) });
+      const { rerender } = render(<TimelineConnector />);
+      expect(renderedItems()).toHaveLength(2);
+
+      setState({ conversation: conversationWith([savedUserMessage, started, terminated, note]) });
+      rerender(<TimelineConnector />);
+
+      expect(renderedItems()).toEqual([
+        'userMessage:round-1::user_message:',
+        'agentTurn:round-1::execution:completed',
+        'customEvent:note-1:',
+      ]);
+    });
+
+    it('shows nothing for the event when its type has no UI here', () => {
+      setState({ conversation: conversationWith([savedUserMessage, started, terminated, note]) });
+      render(<TimelineConnector />);
+
+      expect(renderedItems()).toEqual([
+        'userMessage:round-1::user_message:',
+        'agentTurn:round-1::execution:completed',
+      ]);
     });
   });
 
