@@ -122,9 +122,8 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
     },
 
     async setSearchTextInAssigneesPopover(text: string) {
-      await (
-        await (await find.byClassName('euiContextMenuPanel')).findByClassName('euiFieldSearch')
-      ).type(text);
+      const searchInput = await find.byCssSelector('.euiSelectableSearch input');
+      await searchInput.type(text);
       await header.waitUntilLoadingHasFinished();
     },
 
