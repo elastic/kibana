@@ -10,6 +10,7 @@
 import type {
   FlakyTestBranchStats,
   FlakyTestEntry,
+  FlakyTestPipelineStats,
   FlakyTestReport,
   TestFramework,
 } from '@kbn/scout-reporting';
@@ -22,6 +23,14 @@ export const FRAMEWORK_LABELS: Record<TestFramework, { short: string; long: stri
   ftr: { short: 'FTR', long: 'FTR' },
   jest: { short: 'Jest', long: 'Jest' },
   cypress: { short: 'Cypress', long: 'Cypress' },
+};
+
+/** What a config runs, by its `test_run.config.category`; categories not listed here are not shown. */
+export const CATEGORY_LABELS: Record<string, string> = {
+  'ui-test': 'UI',
+  'api-test': 'API',
+  'unit-test': 'Unit',
+  'unit-integration-test': 'Unit integration',
 };
 
 export const KIBANA_BLOB_URL = 'https://github.com/elastic/kibana/blob/main';
@@ -222,6 +231,37 @@ export const formatBuildLink = (
     : undefined;
   const time = at ? formatDateTime(at) : undefined;
   return [link, stepLabel, time].filter((part) => part !== undefined).join(' · ') || '-';
+};
+
+const MAX_BRANCH_NAMES = 4;
+
+/** Pull request builds record the head ref as `owner:branch`; no release branch has a colon. */
+const isPullRequestRef = (branch: string): boolean => branch.includes(':');
+
+/**
+ * `` `main`, `8.19`, `9.4` ``, `57 PRs`, or `` `main`, 3 PRs `` for a mixed pipeline: the branches
+ * a pipeline failed on, `main` first then sorted, at most four named before `+N more`. Falls back
+ * to the count for reports written before the names were recorded.
+ */
+export const formatFailedBranches = ({
+  failedBranches,
+  failedBranchNames,
+}: Pick<FlakyTestPipelineStats, 'failedBranches' | 'failedBranchNames'>): string => {
+  if (!failedBranchNames) {
+    return String(failedBranches);
+  }
+  const branches = failedBranchNames
+    .filter((branch) => !isPullRequestRef(branch))
+    .sort((a, b) => Number(b === 'main') - Number(a === 'main') || a.localeCompare(b));
+  const pullRequests = failedBranchNames.length - branches.length;
+  const parts = branches.slice(0, MAX_BRANCH_NAMES).map(inlineCode);
+  if (branches.length > MAX_BRANCH_NAMES) {
+    parts.push(`+${branches.length - MAX_BRANCH_NAMES} more`);
+  }
+  if (pullRequests > 0) {
+    parts.push(plural(pullRequests, 'PR'));
+  }
+  return parts.join(', ') || String(failedBranches);
 };
 
 /** Newest sampled failure of a suite, across its tests. */

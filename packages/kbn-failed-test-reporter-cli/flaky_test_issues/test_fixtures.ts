@@ -28,6 +28,7 @@ export const flakyTest = (overrides: Partial<FlakyTestEntry> = {}): FlakyTestEnt
   filePath: SUITE_PATH,
   configPath:
     'x-pack/solutions/observability/plugins/synthetics/test/scout/ui/playwright.config.ts',
+  configCategory: 'ui-test',
   owners: ['elastic/obs-ux-management-team'],
   areas: [],
   runs: 509,
@@ -99,6 +100,7 @@ export const pipelineStats = (
   failedBuilds: 49,
   buildFailRate: 49 / 509,
   failedBranches: 1,
+  failedBranchNames: ['main'],
   lastFailedAt: new Date('2026-09-09T06:12:00.000Z'),
   lastFailedBuildUrl: 'https://buildkite.com/elastic/kibana-on-merge/builds/12345',
   lastFailedJobId: '0199-abcd',

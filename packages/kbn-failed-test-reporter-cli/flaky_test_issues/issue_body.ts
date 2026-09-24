@@ -8,12 +8,14 @@
  */
 
 import Path from 'path';
-import type { FlakyTestReport, FlakyTestSampleFailure } from '@kbn/scout-reporting';
+import type { FlakyTestReport, FlakyTestSampleFailure, TestFramework } from '@kbn/scout-reporting';
 import { getIssueMetadata, updateIssueMetadata } from '../failed_tests_reporter/issue_metadata';
 import {
   BUILDKITE_ORG_URL,
+  CATEGORY_LABELS,
   codeBlock,
   formatBuildLink,
+  formatFailedBranches,
   formatDateRange,
   formatDateTime,
   formatFailureMessage,
@@ -126,12 +128,38 @@ export const flakySuiteIssueMetadata = (
   'report.history': [snapshot(suite, report)],
 });
 
-/** `Flaky Scout suite: Lens ESQL dashboard inline editing`, or the file name without a suite title. */
+/**
+ * What the title says between the framework and "suite": `UI` or `API` for Scout and FTR,
+ * `integration` for Jest integration tests, nothing where the category is implied by the
+ * framework (Jest unit tests, Cypress) or unknown.
+ */
+const titleCategory = (
+  framework: TestFramework,
+  configCategory: string | undefined
+): string | undefined => {
+  if (framework === 'jest') {
+    return configCategory === 'unit-integration-test' ? 'integration' : undefined;
+  }
+  if (framework === 'cypress') {
+    return undefined;
+  }
+  return configCategory === 'ui-test' || configCategory === 'api-test'
+    ? CATEGORY_LABELS[configCategory]
+    : undefined;
+};
+
+/**
+ * `Flaky Scout API suite: Lens ESQL dashboard inline editing`, or the file name without a suite
+ * title. Display only; issues are matched on their metadata, never on the title.
+ */
 export const flakySuiteIssueTitle = (
-  suite: Pick<FlakySuite, 'filePath' | 'framework' | 'suiteTitle'>
+  suite: Pick<FlakySuite, 'filePath' | 'framework' | 'suiteTitle' | 'configCategory'>
 ): string => {
   const subject = suite.suiteTitle ?? Path.basename(suite.filePath);
-  const lead = `Flaky ${FRAMEWORK_LABELS[suite.framework].short} suite: `;
+  const category = titleCategory(suite.framework, suite.configCategory);
+  const lead = `Flaky ${FRAMEWORK_LABELS[suite.framework].short}${
+    category ? ` ${category}` : ''
+  } suite: `;
   // Nested describe blocks can join into a subject longer than GitHub accepts for a title
   const room = MAX_TITLE_LENGTH - lead.length;
   return lead + (subject.length > room ? `${subject.slice(0, room - 1)}…` : subject);
@@ -162,9 +190,11 @@ const blobLink = (repoRelativePath: string): string =>
 
 const suiteDetails = (suite: FlakySuite): string => {
   const framework = FRAMEWORK_LABELS[suite.framework].long;
+  const category = suite.configCategory ? CATEGORY_LABELS[suite.configCategory] : undefined;
   const rows: string[][] = [
     ['**File**', blobLink(suite.filePath)],
     ['**Framework**', framework],
+    ...(category ? [['**Category**', `${category} test`]] : []),
     ...(suite.configPath ? [['**Config**', blobLink(suite.configPath)]] : []),
     ['**Owners**', suite.owners.length > 0 ? suite.owners.map(inlineCode).join(', ') : '-'],
   ];
@@ -385,7 +415,7 @@ const failuresByPipeline = (suite: FlakySuite, report: FlakyTestReport): string 
   const rows = suite.byPipeline.map((stats) => [
     pipelineLink(stats.pipeline),
     pipelineFailedBuilds(stats),
-    String(stats.failedBranches),
+    formatFailedBranches(stats),
     formatBuildLink(
       { buildUrl: stats.lastFailedBuildUrl, jobId: stats.lastFailedJobId },
       stats.lastFailedAt

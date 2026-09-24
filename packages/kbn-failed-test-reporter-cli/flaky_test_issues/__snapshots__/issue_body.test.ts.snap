@@ -17,6 +17,7 @@ Latest run on \`main\` was skipped (2026-09-09).
 |---|---|
 | **File** | [\`x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/default_status_alert.spec.ts\`](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/default_status_alert.spec.ts) |
 | **Framework** | Scout (Playwright) |
+| **Category** | UI test |
 | **Config** | [\`x-pack/solutions/observability/plugins/synthetics/test/scout/ui/playwright.config.ts\`](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/synthetics/test/scout/ui/playwright.config.ts) |
 | **Owners** | \`elastic/obs-ux-management-team\`, \`elastic/kibana-data-discovery\`, \`elastic/other-team\` |
 
@@ -74,6 +75,7 @@ exports[`renderFlakySuiteIssueBody renders a single-test suite 1`] = `
 |---|---|
 | **File** | [\`x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/default_status_alert.spec.ts\`](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/default_status_alert.spec.ts) |
 | **Framework** | Scout (Playwright) |
+| **Category** | UI test |
 | **Config** | [\`x-pack/solutions/observability/plugins/synthetics/test/scout/ui/playwright.config.ts\`](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/synthetics/test/scout/ui/playwright.config.ts) |
 | **Owners** | \`elastic/obs-ux-management-team\` |
 
@@ -106,8 +108,8 @@ Where it failed 2–9 Sep 2026, across all pipelines and branches:
 
 | Pipeline | Failed builds | Branches | Sample failure |
 |---|---|---|---|
-| [\`kibana-pull-request\`](https://buildkite.com/elastic/kibana-pull-request) | 70 / 661 (11%) | 64 | [#498441](https://buildkite.com/elastic/kibana-pull-request/builds/498441#0199-abcd) · 2026-09-08 16:05 UTC |
-| [\`kibana-on-merge\`](https://buildkite.com/elastic/kibana-on-merge) | 49 / 509 (10%) | 1 | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd) · 2026-09-09 06:12 UTC |
+| [\`kibana-pull-request\`](https://buildkite.com/elastic/kibana-pull-request) | 70 / 661 (11%) | \`main\`, 63 PRs | [#498441](https://buildkite.com/elastic/kibana-pull-request/builds/498441#0199-abcd) · 2026-09-08 16:05 UTC |
+| [\`kibana-on-merge\`](https://buildkite.com/elastic/kibana-on-merge) | 49 / 509 (10%) | \`main\` | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd) · 2026-09-09 06:12 UTC |
 | [\`kibana-elasticsearch-snapshot-verify\`](https://buildkite.com/elastic/kibana-elasticsearch-snapshot-verify) | 1 / 5 (20%) | 1 | 2026-09-09 06:12 UTC |
 
 <!-- kibanaCiData = {\\"flaky-test-suite\\":{\\"suite.filePath\\":\\"x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/default_status_alert.spec.ts\\",\\"suite.title\\":\\"Default status alert\\",\\"suite.framework\\":\\"playwright\\",\\"suite.testIds\\":[\\"playwright:default_status_alert:creates default alert\\"],\\"report.generatedAt\\":\\"2026-09-09T09:04:41.000Z\\",\\"report.count\\":1,\\"report.history\\":[{\\"generatedAt\\":\\"2026-09-09T09:04:41.000Z\\",\\"builds\\":509,\\"failedBuilds\\":49}]}} -->"

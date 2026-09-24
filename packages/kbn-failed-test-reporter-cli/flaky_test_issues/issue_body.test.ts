@@ -30,6 +30,10 @@ const singleTestReport = () => {
             failedBuilds: 70,
             buildFailRate: 70 / 661,
             failedBranches: 64,
+            failedBranchNames: [
+              'main',
+              ...Array.from({ length: 63 }, (_, index) => `someone:branch-${index}`),
+            ],
             lastFailedAt: new Date('2026-09-08T16:05:00.000Z'),
             lastFailedBuildUrl: 'https://buildkite.com/elastic/kibana-pull-request/builds/498441',
           }),
@@ -39,6 +43,8 @@ const singleTestReport = () => {
             builds: 5,
             failedBuilds: 1,
             buildFailRate: 0.2,
+            // a report written before the names were recorded
+            failedBranchNames: undefined,
             lastFailedBuildUrl: undefined,
           }),
         ],
@@ -153,16 +159,31 @@ const multiTestReport = () => {
 };
 
 describe('flakySuiteIssueTitle', () => {
-  it('names the framework and the suite title', () => {
+  it('names the framework, what the config runs and the suite title', () => {
     const { suite } = singleTestReport();
-    expect(flakySuiteIssueTitle(suite)).toBe('Flaky Scout suite: Default status alert');
+    expect(flakySuiteIssueTitle(suite)).toBe('Flaky Scout UI suite: Default status alert');
+  });
+
+  it.each([
+    ['playwright', 'api-test', 'Flaky Scout API suite: x'],
+    ['ftr', 'ui-test', 'Flaky FTR UI suite: x'],
+    ['ftr', 'api-test', 'Flaky FTR API suite: x'],
+    ['jest', 'unit-test', 'Flaky Jest suite: x'],
+    ['jest', 'unit-integration-test', 'Flaky Jest integration suite: x'],
+    ['cypress', 'ui-test', 'Flaky Cypress suite: x'],
+    ['playwright', 'unknown', 'Flaky Scout suite: x'],
+    ['playwright', undefined, 'Flaky Scout suite: x'],
+  ] as const)('%s · %s → %s', (framework, configCategory, expected) => {
+    expect(
+      flakySuiteIssueTitle({ filePath: 'a.ts', framework, suiteTitle: 'x', configCategory })
+    ).toBe(expected);
   });
 
   it('cuts a suite title that would push the issue title past what GitHub accepts', () => {
     const { suite } = singleTestReport();
     const title = flakySuiteIssueTitle({ ...suite, suiteTitle: 'nested '.repeat(60).trim() });
     expect(title).toHaveLength(256);
-    expect(title.startsWith('Flaky Scout suite: nested nested')).toBe(true);
+    expect(title.startsWith('Flaky Scout UI suite: nested nested')).toBe(true);
     expect(title.endsWith('…')).toBe(true);
   });
 
@@ -221,6 +242,25 @@ describe('renderFlakySuiteIssueBody', () => {
         '| ✅ `serverless-observability_complete` · local | 0 / 426 |  |',
       ].join('\n')
     );
+  });
+
+  it('names what the config runs in the suite details, unless unknown', () => {
+    const single = singleTestReport();
+    expect(renderFlakySuiteIssueBody(single.suite, { report: single.report })).toContain(
+      '| **Framework** | Scout (Playwright) |\n| **Category** | UI test |\n| **Config** |'
+    );
+    const report = flakyReport([flakyTest({ configCategory: 'unknown' })]);
+    const [suite] = groupIntoSuites(report.flaky, report.files);
+    expect(renderFlakySuiteIssueBody(suite, { report })).not.toContain('**Category**');
+  });
+
+  it('names the branches each pipeline failed on, collapsing pull request heads', () => {
+    const { suite, report } = singleTestReport();
+    const body = renderFlakySuiteIssueBody(suite, { report });
+    expect(body).toContain('| 70 / 661 (11%) | `main`, 63 PRs | ');
+    expect(body).toContain('| 49 / 509 (10%) | `main` | ');
+    // the count, for a report written before the names were recorded
+    expect(body).toContain('| 1 / 5 (20%) | 1 | ');
   });
 
   it('omits the target table when no test of the suite recorded a target', () => {

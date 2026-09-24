@@ -27,6 +27,8 @@ export interface FlakySuite {
   /** Titles of the enclosing `describe` blocks joined by spaces, when the report knows them. */
   suiteTitle?: string;
   configPath?: string;
+  /** What the config runs (`ui-test`, `api-test`, ...), when the report knows it. */
+  configCategory?: string;
   /** Code owners of every test in the suite, in first-seen order. */
   owners: string[];
   /** Ranked by failed builds, worst first. */
@@ -68,6 +70,7 @@ export const groupIntoSuites = (
       framework: worst.framework,
       suiteTitle: suiteTitleOf(worst),
       configPath: tests.find((test) => test.configPath)?.configPath,
+      configCategory: tests.find((test) => test.configCategory)?.configCategory,
       owners: unique(tests.flatMap((test) => test.owners)),
       tests,
       byPipeline: pipelinesByFile.get(fileKey(worst.framework, worst.filePath)) ?? [],
