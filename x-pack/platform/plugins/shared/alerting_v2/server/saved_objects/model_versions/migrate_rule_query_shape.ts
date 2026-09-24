@@ -8,7 +8,7 @@
 import type { SavedObjectModelUnsafeTransformFn } from '@kbn/core-saved-objects-server';
 import type {
   RuleSavedObjectAttributes,
-  RuleSavedObjectAttributesV3,
+  RuleSavedObjectAttributesV4,
 } from '../schemas/rule_saved_object_attributes';
 import { collapseLegacyRuleShape } from '../legacy_rule_shape';
 
@@ -16,17 +16,17 @@ import { collapseLegacyRuleShape } from '../legacy_rule_shape';
  * Adds the collapsed `query`, the `recovery` / `no_data` objects and the nested
  * `state_transition` phases.
  *
- * The pre-collapse keys stay on disk: model version 5's schema requires
+ * The pre-collapse keys stay on disk: model version 6's schema requires
  * `query.format` and a present `query.breach`, so removing them would leave a
  * rolled-back node unable to read migrated rules. Nothing reads or writes them
- * from here on, and model version 7 removes them.
+ * from here on, and model version 8 removes them.
  *
  * `query.breach` is the one key both shapes claim, so the legacy value is kept
  * and readers go through `hasBreachCondition`, which reads a blank or absent
  * `segment` as "no breach condition".
  */
 export const migrateRuleQueryShape: SavedObjectModelUnsafeTransformFn<
-  RuleSavedObjectAttributesV3,
+  RuleSavedObjectAttributesV4,
   RuleSavedObjectAttributes
 > = (doc) => {
   const { query, state_transition: stateTransition, ...attributes } = doc.attributes;

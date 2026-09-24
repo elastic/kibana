@@ -62,7 +62,7 @@ const parseArtifacts = (artifacts: unknown): FormValues['artifacts'] => {
 
 interface YamlRuleObject {
   kind: string;
-  metadata: { name: string; description?: string; owner?: string; tags?: string[] };
+  metadata: { name: string; description?: string; tags?: string[] };
   time_field: string;
   schedule: { every: string; lookback: string };
   query: Query;
@@ -121,7 +121,7 @@ const serializeStateTransition = (
  * Convert FormValues to YAML-compatible object (snake_case keys for API compatibility).
  *
  * Note: `metadata.enabled` is intentionally NOT serialized. The API's `metadataSchema`
- * is strict and only accepts { name, description?, owner?, tags? }; `enabled` lives at
+ * is strict and only accepts { name, description?, tags? }; `enabled` lives at
  * the top level of the update/response schemas, never under metadata, and is not part
  * of the create payload at all.
  */
@@ -136,7 +136,6 @@ export const formValuesToYamlObject = (values: FormValues): YamlRuleObject => {
     metadata: {
       name: values.metadata.name,
       ...(values.metadata.description && { description: values.metadata.description }),
-      ...(values.metadata.owner && { owner: values.metadata.owner }),
       ...(values.metadata.tags?.length && { tags: values.metadata.tags }),
     },
     time_field: values.timeField,
@@ -371,7 +370,6 @@ export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
         name: typeof name === 'string' ? name.trim() : '',
         enabled: metadata?.enabled !== false,
         description: typeof metadata?.description === 'string' ? metadata.description : undefined,
-        owner: typeof metadata?.owner === 'string' ? metadata.owner : undefined,
         tags: Array.isArray(metadata?.tags) ? (metadata.tags as string[]) : undefined,
       },
       timeField: typeof obj.time_field === 'string' ? obj.time_field : '@timestamp',

@@ -18,8 +18,8 @@ const baseAttributes = {
   recovery: { strategy: 'no_breach' as const },
   no_data: { strategy: 'ignore' as const },
   enabled: true,
-  createdBy: 'elastic',
-  updatedBy: 'elastic',
+  createdBy: { profile_uid: 'elastic' },
+  updatedBy: { profile_uid: 'elastic' },
   createdAt: '2026-01-01T00:00:00.000Z',
   updatedAt: '2026-01-01T00:00:00.000Z',
 };

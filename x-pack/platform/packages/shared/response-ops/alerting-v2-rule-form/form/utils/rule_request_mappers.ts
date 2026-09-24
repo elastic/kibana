@@ -42,7 +42,6 @@ import {
 const mapMetadata = (metadata: FormValues['metadata']) => ({
   name: metadata.name,
   description: metadata.description,
-  owner: metadata.owner,
   ...(metadata.tags?.length ? { tags: metadata.tags } : {}),
 });
 
@@ -59,7 +58,7 @@ const mapGrouping = (grouping: FormValues['grouping']) =>
  * Contains all fields except `kind` (only required for create).
  */
 export interface RuleRequestCommon {
-  metadata: { name: string; description?: string; owner?: string; tags?: string[] };
+  metadata: { name: string; description?: string; tags?: string[] };
   time_field: string;
   schedule: { every: string; lookback?: string };
   query: Query;
@@ -118,7 +117,6 @@ export const mapRuleResponseToFormValues = (rule: RuleResponse): Partial<FormVal
       name: rule.metadata.name,
       description: rule.metadata.description,
       enabled: rule.enabled,
-      owner: rule.metadata.owner,
       tags: rule.metadata.tags,
     },
     timeField: rule.time_field,

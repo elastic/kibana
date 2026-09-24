@@ -11,10 +11,12 @@ import {
   ruleSavedObjectAttributesSchemaV2,
   ruleSavedObjectAttributesSchemaV3,
   ruleSavedObjectAttributesSchemaV4,
+  ruleSavedObjectAttributesSchemaV5,
 } from '../schemas/rule_saved_object_attributes';
 import { migrateRuleArtifactsToData } from './migrate_rule_artifacts_to_data';
 import { migrateDashboardArtifactDataKey } from './migrate_dashboard_artifact_data_key';
 import { migrateRuleQueryShape } from './migrate_rule_query_shape';
+import { toActor } from './to_actor';
 
 export const ruleModelVersions: SavedObjectsModelVersionMap = {
   '1': {
@@ -95,14 +97,53 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
     },
   },
   '6': {
+    /**
+     * v6 migrates `createdBy` and `updatedBy` from a bare profile UID string to a
+     * structured actor object. Only string values are rewritten: a `null` actor
+     * (an unattributed write) stays `null`, which the v6 schema still allows, and
+     * an already-structured actor is left alone so the backfill is idempotent.
+     *
+     * This reshapes existing attributes, so it is NOT rollback-compatible: the
+     * v1-v5 schemas type both fields as strings and reject the object, meaning a
+     * node rolled back to v5 fails to read any rule with an attributed actor.
+     * Accepted while alerting v2 is in technical preview. The SO migration
+     * fixtures therefore only carry `null` actors, which round-trip through the
+     * rollback check; the string -> object conversion is covered by unit tests.
+     */
+    changes: [
+      {
+        type: 'data_backfill',
+        backfillFn: (doc) => {
+          const { createdBy, updatedBy } = doc.attributes as {
+            createdBy?: unknown;
+            updatedBy?: unknown;
+          };
+          const createdByActor = toActor(createdBy);
+          const updatedByActor = toActor(updatedBy);
+
+          return {
+            attributes: {
+              ...(createdByActor ? { createdBy: createdByActor } : {}),
+              ...(updatedByActor ? { updatedBy: updatedByActor } : {}),
+            },
+          };
+        },
+      },
+    ],
+    schemas: {
+      forwardCompatibility: ruleSavedObjectAttributesSchemaV4.extends({}, { unknowns: 'ignore' }),
+      create: ruleSavedObjectAttributesSchemaV4,
+    },
+  },
+  '7': {
     // The GA baseline shape: one `query` (`base` plus an optional `breach`
     // segment) instead of the `composed`/`standalone` union, `recovery` and
     // `no_data` objects instead of the top-level strategy scalars, and a
     // `state_transition` nested per phase.
     //
-    // Additive only. Model version 5's schema requires `query.format` and a
+    // Additive only. Model version 6's schema requires `query.format` and a
     // present `query.breach`, so the pre-collapse keys stay on disk for the
-    // rollback window and model version 7 removes them. Rules created after the
+    // rollback window and model version 8 removes them. Rules created after the
     // upgrade carry only the new shape, matching the model version 4 precedent.
     //
     // An `unsafe_transform` rather than a `data_backfill` because `query` has to
@@ -116,8 +157,8 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
       },
     ],
     schemas: {
-      forwardCompatibility: ruleSavedObjectAttributesSchemaV4.extends({}, { unknowns: 'ignore' }),
-      create: ruleSavedObjectAttributesSchemaV4,
+      forwardCompatibility: ruleSavedObjectAttributesSchemaV5.extends({}, { unknowns: 'ignore' }),
+      create: ruleSavedObjectAttributesSchemaV5,
     },
   },
 };

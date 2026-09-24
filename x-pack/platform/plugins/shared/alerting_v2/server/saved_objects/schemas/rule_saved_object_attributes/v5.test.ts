@@ -6,7 +6,7 @@
  */
 
 import { deepFreeze } from '@kbn/std';
-import { ruleSavedObjectAttributesSchema } from './v4';
+import { ruleSavedObjectAttributesSchema } from './v5';
 
 const alertAttributes = {
   kind: 'alert',
@@ -17,13 +17,13 @@ const alertAttributes = {
   schedule: { every: '1m' },
   time_field: '@timestamp',
   enabled: true,
-  createdBy: 'elastic',
-  updatedBy: 'elastic',
+  createdBy: { profile_uid: 'elastic' },
+  updatedBy: { profile_uid: 'elastic' },
   createdAt: '2026-01-01T00:00:00.000Z',
   updatedAt: '2026-01-01T00:00:00.000Z',
 };
 
-describe('rule saved object attributes v4', () => {
+describe('rule saved object attributes v5', () => {
   it('validates an alert rule after the registry has frozen the schema', () => {
     deepFreeze({ schemas: { create: ruleSavedObjectAttributesSchema } });
 

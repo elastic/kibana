@@ -54,7 +54,6 @@ export interface RuleMetadata {
   name: string;
   enabled: boolean;
   description?: string;
-  owner?: string;
   tags?: string[];
 }
 

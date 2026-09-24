@@ -84,7 +84,7 @@ describe('createRuleDataSchema', () => {
     it('accepts a full payload with all optional fields', () => {
       const result = createRuleDataSchema.parse({
         ...validCreateData,
-        metadata: { name: 'test rule', owner: 'team-a', tags: ['label-1', 'label-2'] },
+        metadata: { name: 'test rule', tags: ['label-1', 'label-2'] },
         time_field: 'event.created',
         schedule: { every: '5m', lookback: '10m' },
         query: composedQuery,
@@ -100,7 +100,7 @@ describe('createRuleDataSchema', () => {
 
       expect(result).toEqual(
         expect.objectContaining({
-          metadata: { name: 'test rule', owner: 'team-a', tags: ['label-1', 'label-2'] },
+          metadata: { name: 'test rule', tags: ['label-1', 'label-2'] },
           time_field: 'event.created',
           schedule: { every: '5m', lookback: '10m' },
           query: composedQuery,
@@ -1807,9 +1807,9 @@ describe('bulkGetRulesResponseSchema', () => {
     schedule: { every: '5m' },
     query: { base: 'FROM logs-* | LIMIT 1' },
     enabled: true,
-    created_by: 'user-a',
+    created_by: { profile_uid: 'user-a' },
     created_at: '2026-01-01T00:00:00.000Z',
-    updated_by: 'user-a',
+    updated_by: { profile_uid: 'user-a' },
     updated_at: '2026-01-01T00:00:00.000Z',
   };
 
@@ -1904,9 +1904,9 @@ describe('bulkCreateRulesResponseSchema', () => {
     schedule: { every: '5m' },
     query: { base: 'FROM logs-* | LIMIT 1' },
     enabled: true,
-    created_by: 'user-a',
+    created_by: { profile_uid: 'user-a' },
     created_at: '2026-01-01T00:00:00.000Z',
-    updated_by: 'user-a',
+    updated_by: { profile_uid: 'user-a' },
     updated_at: '2026-01-01T00:00:00.000Z',
   };
 

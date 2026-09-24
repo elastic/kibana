@@ -10,12 +10,12 @@ import { hasBreachCondition } from '@kbn/alerting-v2-schemas';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../common/saved_object_types';
 import type {
   RuleSavedObjectAttributes,
-  RuleSavedObjectAttributesV3,
+  RuleSavedObjectAttributesV4,
 } from '../schemas/rule_saved_object_attributes';
-import { ruleSavedObjectAttributesSchemaV4 } from '../schemas/rule_saved_object_attributes';
+import { ruleSavedObjectAttributesSchemaV5 } from '../schemas/rule_saved_object_attributes';
 import { migrateRuleQueryShape } from './migrate_rule_query_shape';
 
-type LegacyAttributes = RuleSavedObjectAttributesV3;
+type LegacyAttributes = RuleSavedObjectAttributesV4;
 type TransformArgs = Parameters<typeof migrateRuleQueryShape>;
 
 const STANDALONE_QUERY = 'FROM logs-* | STATS errors = COUNT(*) BY host.name';
@@ -28,8 +28,8 @@ const legacyAttributes = (overrides: Partial<LegacyAttributes> = {}): LegacyAttr
   schedule: { every: '5m' },
   query: { format: 'standalone', breach: { query: STANDALONE_QUERY } },
   enabled: true,
-  createdBy: 'elastic',
-  updatedBy: 'elastic',
+  createdBy: { profile_uid: 'elastic' },
+  updatedBy: { profile_uid: 'elastic' },
   createdAt: '2026-01-01T00:00:00.000Z',
   updatedAt: '2026-01-01T00:00:00.000Z',
   ...overrides,
@@ -334,14 +334,14 @@ describe('migrateRuleQueryShape', () => {
       ...untouched,
       kind: 'alert',
       enabled: true,
-      createdBy: 'elastic',
-      updatedBy: 'elastic',
+      createdBy: { profile_uid: 'elastic' },
+      updatedBy: { profile_uid: 'elastic' },
       createdAt: '2026-01-01T00:00:00.000Z',
       updatedAt: '2026-01-01T00:00:00.000Z',
     });
   });
 
-  describe('model version 6 read schema', () => {
+  describe('model version 7 read schema', () => {
     it('accepts a migrated alert rule', () => {
       const attributes = migrate({
         query: {
@@ -355,13 +355,13 @@ describe('migrateRuleQueryShape', () => {
         state_transition: { pending_count: 3, pending_timeframe: '5m', pending_operator: 'AND' },
       });
 
-      expect(() => ruleSavedObjectAttributesSchemaV4.validate(attributes)).not.toThrow();
+      expect(() => ruleSavedObjectAttributesSchemaV5.validate(attributes)).not.toThrow();
     });
 
     it('accepts a migrated signal rule, which has no lifecycle objects', () => {
       const attributes = migrate({ kind: 'signal', recovery_strategy: 'no_breach' });
 
-      expect(() => ruleSavedObjectAttributesSchemaV4.validate(attributes)).not.toThrow();
+      expect(() => ruleSavedObjectAttributesSchemaV5.validate(attributes)).not.toThrow();
     });
 
     it.each([
@@ -380,7 +380,7 @@ describe('migrateRuleQueryShape', () => {
         no_data_strategy: noDataStrategy,
       });
 
-      expect(() => ruleSavedObjectAttributesSchemaV4.validate(attributes)).not.toThrow();
+      expect(() => ruleSavedObjectAttributesSchemaV5.validate(attributes)).not.toThrow();
     });
   });
 });
