@@ -10,7 +10,7 @@
   "x-pack/solutions/security/plugins/security_solution/server/lib/jest.config.js": 6,
   "x-pack/solutions/security/plugins/security_solution/public/detections/jest.config.js": 5,
   "x-pack/platform/plugins/shared/index_management/jest.config.js": 4,
-  "x-pack/platform/plugins/shared/lens/jest.config.js": 6,
+  "x-pack/platform/plugins/shared/lens/public/jest.config.js": 4,
   "x-pack/platform/plugins/shared/fleet/public/jest.config.js": 3,
   "x-pack/solutions/security/plugins/cloud_security_posture/jest.config.js": 5,
   "x-pack/solutions/security/plugins/security_solution/public/attack_discovery/jest.config.js": 5,
