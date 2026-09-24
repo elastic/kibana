@@ -11,6 +11,7 @@ import type { SyntheticsServerSetup } from '../../../types';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import type { AgentStat, LocationAgentStats } from '../../../../common/types';
+import { ConfigKey } from '../../../../common/runtime_types';
 import {
   configIdOf,
   countMonitorsByAssignedAgent,
@@ -202,10 +203,14 @@ const getVisibleMonitorConfigIds = async (
   }
   const monitors = await monitorConfigRepository.getAll({
     filter: getSavedObjectKqlFilter({ field: 'locations.id', values: locationIds }),
-    fields: ['config_id'],
+    fields: ['config_id', ConfigKey.MONITOR_QUERY_ID],
     showFromAllSpaces: true,
   });
-  return new Set(monitors.map(({ id, attributes }) => attributes.config_id || id));
+  return new Set(
+    monitors.map(
+      ({ id, attributes }) => attributes[ConfigKey.MONITOR_QUERY_ID] || attributes.config_id || id
+    )
+  );
 };
 
 /**

@@ -6,6 +6,7 @@
  */
 
 import type { LocationAgentStats } from '../../../../common/types';
+import { ConfigKey } from '../../../../common/runtime_types';
 import { agentIdCondition } from '../../../synthetics_service/private_location/assign_by_condition';
 import { PackagePolicyService } from '../../../synthetics_service/private_location/package_policy_service';
 import { getPrivateLocationAgentStats } from './get_agent_stats';
@@ -281,8 +282,32 @@ describe('getPrivateLocationAgentStats route', () => {
 
     expect(result[0].agents[0].monitorsAssigned).toBe(1);
     expect(routeContext.monitorConfigRepository.getAll).toHaveBeenCalledWith(
-      expect.objectContaining({ fields: ['config_id'], showFromAllSpaces: true })
+      expect.objectContaining({
+        fields: ['config_id', ConfigKey.MONITOR_QUERY_ID],
+        showFromAllSpaces: true,
+      })
     );
+  });
+
+  it('counts a visible project monitor by its package-policy id', async () => {
+    mockListByAgentPolicy.mockResolvedValue([
+      { id: 'project-monitor-id-loc-1', condition: agentIdCondition('agent-1') },
+    ]);
+    const listAgents = jest.fn().mockResolvedValue({ agents: [agent()], total: 1 });
+    const { routeContext } = makeContext({ listAgentsImpl: listAgents, hasEnterprise: true });
+    routeContext.monitorConfigRepository.getAll.mockResolvedValue([
+      {
+        id: 'saved-object-id',
+        attributes: {
+          config_id: 'saved-object-id',
+          [ConfigKey.MONITOR_QUERY_ID]: 'project-monitor-id',
+        },
+      },
+    ]);
+
+    const result = await run(routeContext);
+
+    expect(result[0].agents[0].monitorsAssigned).toBe(1);
   });
 
   it('reports no sharding when shard rebalancing is off, even with an Enterprise license', async () => {
