@@ -11,6 +11,7 @@ import { NIGHTSHIFT_INVESTIGATION_SO_TYPE } from '../saved_objects';
 import { buildInvestigationFilter } from './build_investigation_filter';
 import { InvestigationStaleWriteError } from './errors';
 import type {
+  DeleteAllInvestigationsFailure,
   DeleteAllInvestigationsResult,
   FindInvestigationsAcrossSpacesResult,
   FindInvestigationsQuery,
@@ -90,58 +91,67 @@ export class SavedObjectInvestigationSweepRepository implements InvestigationSwe
 
   async deleteAllAcrossSpaces(): Promise<DeleteAllInvestigationsResult> {
     let deleted = 0;
-    let page = 1;
-    const failures = new Map<string, DeleteAllInvestigationsResult['failures'][number]>();
+    const failures: DeleteAllInvestigationsFailure[] = [];
+    const finder = this.savedObjects.createPointInTimeFinder<InvestigationAttributes>({
+      type: NIGHTSHIFT_INVESTIGATION_SO_TYPE,
+      namespaces: ['*'],
+      perPage: DELETE_BATCH_SIZE,
+      fields: [],
+    });
 
-    while (true) {
-      const { results } = await this.findAcrossSpaces({ page, perPage: DELETE_BATCH_SIZE });
-      if (results.length === 0) {
-        break;
-      }
+    try {
+      for await (const { saved_objects: savedObjects } of finder.find()) {
+        const bySpace = new Map<string, string[]>();
+        for (const savedObject of savedObjects) {
+          const spaceId = SavedObjectsUtils.namespaceIdToString(savedObject.namespaces?.[0]);
+          const ids = bySpace.get(spaceId) ?? [];
+          ids.push(savedObject.id);
+          bySpace.set(spaceId, ids);
+        }
 
-      const bySpace = new Map<string, string[]>();
-      for (const { investigation, spaceId } of results) {
-        const ids = bySpace.get(spaceId) ?? [];
-        ids.push(investigation.id);
-        bySpace.set(spaceId, ids);
-      }
+        const results = await Promise.all(
+          [...bySpace].map(async ([spaceId, ids]) => {
+            try {
+              const { statuses } = await this.savedObjects.bulkDelete(
+                ids.map((id) => ({ type: NIGHTSHIFT_INVESTIGATION_SO_TYPE, id })),
+                { namespace: spaceId }
+              );
 
-      let resolvedThisBatch = 0;
-      for (const [spaceId, ids] of bySpace) {
-        try {
-          const { statuses } = await this.savedObjects.bulkDelete(
-            ids.map((id) => ({ type: NIGHTSHIFT_INVESTIGATION_SO_TYPE, id })),
-            { namespace: spaceId }
-          );
-          for (const status of statuses) {
-            const key = `${status.id}@${spaceId}`;
-            if (status.success) {
-              deleted += 1;
-              resolvedThisBatch += 1;
-              failures.delete(key);
-            } else if (status.error?.statusCode === 404) {
-              resolvedThisBatch += 1;
-              failures.delete(key);
-            } else {
-              failures.set(key, {
-                id: status.id,
-                spaceId,
-                error: status.error?.message ?? 'investigation was not deleted',
-              });
+              return {
+                deleted: statuses.filter(({ success }) => success).length,
+                failures: statuses.flatMap<DeleteAllInvestigationsFailure>((status) => {
+                  if (status.success || status.error?.statusCode === 404) {
+                    return [];
+                  }
+                  return [
+                    {
+                      id: status.id,
+                      spaceId,
+                      error: status.error?.message ?? 'investigation was not deleted',
+                    },
+                  ];
+                }),
+              };
+            } catch (error) {
+              const message = error instanceof Error ? error.message : String(error);
+              return {
+                deleted: 0,
+                failures: ids.map((id) => ({ id, spaceId, error: message })),
+              };
             }
-          }
-        } catch (error) {
-          const message = error instanceof Error ? error.message : String(error);
-          for (const id of ids) {
-            failures.set(`${id}@${spaceId}`, { id, spaceId, error: message });
-          }
+          })
+        );
+
+        for (const result of results) {
+          deleted += result.deleted;
+          failures.push(...result.failures);
         }
       }
-
-      page = resolvedThisBatch === 0 ? page + 1 : 1;
+    } finally {
+      await finder.close();
     }
 
-    return { deleted, failures: [...failures.values()] };
+    return { deleted, failures };
   }
 }
 

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ISavedObjectsPointInTimeFinder } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { NIGHTSHIFT_INVESTIGATION_SO_TYPE } from '../saved_objects';
@@ -28,6 +29,20 @@ const findResponse = (savedObjects: Array<ReturnType<typeof foundInvestigation>>
   total: savedObjects.length,
   page: 1,
   per_page: 100,
+});
+
+const createFinder = (
+  responses: Array<ReturnType<typeof findResponse>>
+): ISavedObjectsPointInTimeFinder<
+  ReturnType<typeof foundInvestigation>['attributes'],
+  Record<string, never>
+> => ({
+  async *find() {
+    for (const response of responses) {
+      yield response;
+    }
+  },
+  close: jest.fn().mockResolvedValue(undefined),
 });
 
 const createRepository = () => {
@@ -153,19 +168,16 @@ describe('SavedObjectInvestigationSweepRepository', () => {
   });
 
   describe('deleteAllAcrossSpaces()', () => {
-    it('repeatedly fetches page one and bulk deletes each space independently', async () => {
+    it('iterates a point-in-time snapshot and bulk deletes each space independently', async () => {
       const { repository, savedObjects } = createRepository();
-      savedObjects.find
-        .mockResolvedValueOnce(
-          findResponse([
-            foundInvestigation({ id: 'inv-1', namespaces: ['team-a'] }),
-            foundInvestigation({ id: 'inv-2', namespaces: ['team-b'] }),
-          ])
-        )
-        .mockResolvedValueOnce(
-          findResponse([foundInvestigation({ id: 'inv-3', namespaces: ['team-a'] })])
-        )
-        .mockResolvedValueOnce(findResponse([]));
+      const finder = createFinder([
+        findResponse([
+          foundInvestigation({ id: 'inv-1', namespaces: ['team-a'] }),
+          foundInvestigation({ id: 'inv-2', namespaces: ['team-b'] }),
+        ]),
+        findResponse([foundInvestigation({ id: 'inv-3', namespaces: ['team-a'] })]),
+      ]);
+      savedObjects.createPointInTimeFinder.mockReturnValue(finder);
       savedObjects.bulkDelete
         .mockResolvedValueOnce({
           statuses: [{ id: 'inv-1', type: TYPE, success: true }],
@@ -181,8 +193,13 @@ describe('SavedObjectInvestigationSweepRepository', () => {
         deleted: 3,
         failures: [],
       });
-      expect(savedObjects.find).toHaveBeenCalledTimes(3);
-      expect(savedObjects.find.mock.calls.every(([query]) => query.page === 1)).toBe(true);
+      expect(savedObjects.createPointInTimeFinder).toHaveBeenCalledWith({
+        type: TYPE,
+        namespaces: ['*'],
+        perPage: 1000,
+        fields: [],
+      });
+      expect(finder.close).toHaveBeenCalled();
       expect(savedObjects.bulkDelete).toHaveBeenCalledWith([{ type: TYPE, id: 'inv-1' }], {
         namespace: 'team-a',
       });
@@ -191,19 +208,14 @@ describe('SavedObjectInvestigationSweepRepository', () => {
       });
     });
 
-    it('advances past a failed page and still deletes older investigations', async () => {
+    it('continues deleting later pages after a per-object failure', async () => {
       const { repository, savedObjects } = createRepository();
-      savedObjects.find
-        .mockResolvedValueOnce(
-          findResponse([foundInvestigation({ id: 'inv-1', namespaces: ['team-a'] })])
-        )
-        .mockResolvedValueOnce(
-          findResponse([foundInvestigation({ id: 'inv-2', namespaces: ['team-b'] })])
-        )
-        .mockResolvedValueOnce(
-          findResponse([foundInvestigation({ id: 'inv-1', namespaces: ['team-a'] })])
-        )
-        .mockResolvedValueOnce(findResponse([]));
+      savedObjects.createPointInTimeFinder.mockReturnValue(
+        createFinder([
+          findResponse([foundInvestigation({ id: 'inv-1', namespaces: ['team-a'] })]),
+          findResponse([foundInvestigation({ id: 'inv-2', namespaces: ['team-b'] })]),
+        ])
+      );
       const failedStatus = {
         id: 'inv-1',
         type: TYPE,
@@ -212,24 +224,20 @@ describe('SavedObjectInvestigationSweepRepository', () => {
       } as const;
       savedObjects.bulkDelete
         .mockResolvedValueOnce({ statuses: [failedStatus] })
-        .mockResolvedValueOnce({ statuses: [{ id: 'inv-2', type: TYPE, success: true }] })
-        .mockResolvedValueOnce({ statuses: [failedStatus] });
+        .mockResolvedValueOnce({ statuses: [{ id: 'inv-2', type: TYPE, success: true }] });
 
       await expect(repository.deleteAllAcrossSpaces()).resolves.toEqual({
         deleted: 1,
         failures: [{ id: 'inv-1', spaceId: 'team-a', error: 'delete failed' }],
       });
-      expect(savedObjects.find.mock.calls.map(([query]) => query.page)).toEqual([1, 2, 1, 2]);
-      expect(savedObjects.bulkDelete).toHaveBeenCalledTimes(3);
+      expect(savedObjects.bulkDelete).toHaveBeenCalledTimes(2);
     });
 
-    it('treats already-missing investigations as resolved', async () => {
+    it('does not count already-missing investigations as deleted or failed', async () => {
       const { repository, savedObjects } = createRepository();
-      savedObjects.find
-        .mockResolvedValueOnce(
-          findResponse([foundInvestigation({ id: 'inv-1', namespaces: ['team-a'] })])
-        )
-        .mockResolvedValueOnce(findResponse([]));
+      savedObjects.createPointInTimeFinder.mockReturnValue(
+        createFinder([findResponse([foundInvestigation({ id: 'inv-1', namespaces: ['team-a'] })])])
+      );
       savedObjects.bulkDelete.mockResolvedValueOnce({
         statuses: [
           {
@@ -244,6 +252,27 @@ describe('SavedObjectInvestigationSweepRepository', () => {
       await expect(repository.deleteAllAcrossSpaces()).resolves.toEqual({
         deleted: 0,
         failures: [],
+      });
+    });
+
+    it('reports every investigation when a space bulk delete rejects', async () => {
+      const { repository, savedObjects } = createRepository();
+      savedObjects.createPointInTimeFinder.mockReturnValue(
+        createFinder([
+          findResponse([
+            foundInvestigation({ id: 'inv-1', namespaces: ['team-a'] }),
+            foundInvestigation({ id: 'inv-2', namespaces: ['team-a'] }),
+          ]),
+        ])
+      );
+      savedObjects.bulkDelete.mockRejectedValueOnce(new Error('index is write blocked'));
+
+      await expect(repository.deleteAllAcrossSpaces()).resolves.toEqual({
+        deleted: 0,
+        failures: [
+          { id: 'inv-1', spaceId: 'team-a', error: 'index is write blocked' },
+          { id: 'inv-2', spaceId: 'team-a', error: 'index is write blocked' },
+        ],
       });
     });
   });
