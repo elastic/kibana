@@ -215,7 +215,13 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
             return existsInMore;
           });
 
-          await testSubjects.click(`~nav-item-deepLinkId-${deepLinkId}`);
+          await retry.tryForTime(30000, async () => {
+            const link = await testSubjects.find(
+              `~nav-item-deepLinkId-${deepLinkId}`,
+              TIMEOUT_CHECK
+            );
+            await link.click();
+          });
         };
 
         const clickLinkByNavId = async (navId: string) => {
@@ -236,7 +242,10 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
             return existsInMore;
           });
 
-          await testSubjects.click(`~nav-item-id-${navId}`);
+          await retry.tryForTime(30000, async () => {
+            const link = await testSubjects.find(`~nav-item-id-${navId}`, TIMEOUT_CHECK);
+            await link.click();
+          });
         };
 
         const clickLinkByText = async (text: string) => {
