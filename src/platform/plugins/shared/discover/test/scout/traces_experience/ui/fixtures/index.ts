@@ -31,7 +31,7 @@ export const spaceTest = spaceBaseTest.extend<
         page,
         pageObjects.dataGrid,
         pageObjects.docViewer,
-        pageObjects.discover
+        pageObjects.controls
       ),
     };
 
