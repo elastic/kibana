@@ -6,7 +6,7 @@
  */
 
 import {
-  EPISODE_QUERY_LIMIT,
+  ESQL_QUERY_ROW_LIMIT,
   ESQL_IN_CLAUSE_LITERAL_BUDGET_BYTES,
   chunkInClauseLiterals,
   getDispatchableAlertEventsQuery,
@@ -18,7 +18,7 @@ import { createAlertEpisode } from './fixtures/test_utils';
 
 // Without an explicit LIMIT, ES|QL truncates results to 1 000 rows.
 const endsWithRowLimit = (query: string) =>
-  query.trimEnd().endsWith(`| LIMIT ${EPISODE_QUERY_LIMIT}`);
+  query.trimEnd().endsWith(`| LIMIT ${ESQL_QUERY_ROW_LIMIT}`);
 
 describe('getDispatchableAlertEventsQuery', () => {
   const SCAN_WINDOW = {
@@ -267,12 +267,12 @@ describe('getEpisodeDataQueries', () => {
   });
 
   it('never puts more episode ids in a chunk than the row limit returns', () => {
-    const ids = Array.from({ length: EPISODE_QUERY_LIMIT + 1 }, (_, i) => `ep-${i}`);
+    const ids = Array.from({ length: ESQL_QUERY_ROW_LIMIT + 1 }, (_, i) => `ep-${i}`);
 
     const requests = getEpisodeDataQueries(ids, { gte: GTE, lte: LTE });
 
     expect(requests).toHaveLength(2);
-    expect(requests[1].query).toContain(`episode.id IN ("ep-${EPISODE_QUERY_LIMIT}")`);
+    expect(requests[1].query).toContain(`episode.id IN ("ep-${ESQL_QUERY_ROW_LIMIT}")`);
   });
 
   it('applies the same gte/lte bounds on every chunk', () => {
@@ -360,13 +360,13 @@ describe('chunkInClauseLiterals', () => {
 
   it('caps each chunk at the row limit even when the byte budget would fit more', () => {
     // 36-byte UUID-sized literals: the 600 KB budget alone fits ~14 285 per chunk.
-    const literals = Array.from({ length: EPISODE_QUERY_LIMIT + 5 }, (_, i) =>
+    const literals = Array.from({ length: ESQL_QUERY_ROW_LIMIT + 5 }, (_, i) =>
       `${i}`.padStart(36, '0')
     );
 
     const chunks = chunkInClauseLiterals(literals);
 
-    expect(chunks.map((chunk) => chunk.length)).toEqual([EPISODE_QUERY_LIMIT, 5]);
+    expect(chunks.map((chunk) => chunk.length)).toEqual([ESQL_QUERY_ROW_LIMIT, 5]);
     expect(chunks.flat()).toEqual(literals);
   });
 
@@ -808,12 +808,14 @@ describe('getLastNotifiedTimestampsQueries', () => {
 
   it('never puts more action group ids in a chunk than the row limit returns', () => {
     // 40-char object-hash ids fit ~13 000 per chunk by bytes alone.
-    const ids = Array.from({ length: EPISODE_QUERY_LIMIT + 1 }, (_, i) => `${i}`.padStart(40, '0'));
+    const ids = Array.from({ length: ESQL_QUERY_ROW_LIMIT + 1 }, (_, i) =>
+      `${i}`.padStart(40, '0')
+    );
 
     const requests = getLastNotifiedTimestampsQueries(ids);
 
     expect(requests).toHaveLength(2);
-    expect(requests[1].query).toContain(`action_group_id IN ("${ids[EPISODE_QUERY_LIMIT]}")`);
+    expect(requests[1].query).toContain(`action_group_id IN ("${ids[ESQL_QUERY_ROW_LIMIT]}")`);
   });
 
   it('ends every chunk with an explicit row limit', () => {

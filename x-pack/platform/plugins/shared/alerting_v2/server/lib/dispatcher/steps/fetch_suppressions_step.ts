@@ -9,7 +9,7 @@ import { inject, injectable } from 'inversify';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 import { QueryServiceInternalToken } from '../../services/query_service/tokens';
-import { EPISODE_QUERY_LIMIT, getAlertEpisodeSuppressionsQueries } from '../queries';
+import { ESQL_QUERY_ROW_LIMIT, getAlertEpisodeSuppressionsQueries } from '../queries';
 import { EpisodeScan, SuppressionIndex } from '../state';
 import type {
   AlertEpisodeSuppression,
@@ -50,13 +50,13 @@ export class FetchSuppressionsStep implements DispatcherStep {
 
     // Chunks are keyed by series but return one row per episode, so the literal
     // cap cannot bound the row count; a full chunk may have dropped rows.
-    const truncatedChunks = responses.filter((rows) => rows.length >= EPISODE_QUERY_LIMIT).length;
+    const truncatedChunks = responses.filter((rows) => rows.length >= ESQL_QUERY_ROW_LIMIT).length;
     if (truncatedChunks > 0) {
       logger.warn({
         code: ALERTING_LOG_CODES.FETCH_SUPPRESSIONS_STEP_ROW_LIMIT_REACHED,
         message: () =>
           `${truncatedChunks} of ${responses.length} suppressions queries returned ` +
-          `${EPISODE_QUERY_LIMIT} rows; suppressions past the limit were dropped`,
+          `${ESQL_QUERY_ROW_LIMIT} rows; suppressions past the limit were dropped`,
       });
     }
 

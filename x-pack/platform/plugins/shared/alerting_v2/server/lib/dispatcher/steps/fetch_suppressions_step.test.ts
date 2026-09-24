@@ -9,7 +9,7 @@ import { FetchSuppressionsStep } from './fetch_suppressions_step';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import { createQueryService } from '../../services/query_service/query_service.mock';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
-import { EPISODE_QUERY_LIMIT } from '../queries';
+import { ESQL_QUERY_ROW_LIMIT } from '../queries';
 import { createAlertEpisodeSuppressionsResponse } from '../fixtures/dispatcher';
 import {
   createAlertEpisode,
@@ -129,7 +129,7 @@ describe('FetchSuppressionsStep', () => {
 
     mockEsClient.esql.query.mockResolvedValueOnce(
       createAlertEpisodeSuppressionsResponse(
-        Array.from({ length: EPISODE_QUERY_LIMIT }, (_, i) =>
+        Array.from({ length: ESQL_QUERY_ROW_LIMIT }, (_, i) =>
           createAlertEpisodeSuppression({ rule_id: 'r1', group_hash: 'h1', episode_id: `e${i}` })
         )
       )

@@ -11,7 +11,7 @@ import {
   OVERLAP_WINDOW_MINUTES,
   TICK_DEADLINE_MS,
 } from './constants';
-import { EPISODE_QUERY_LIMIT } from './queries';
+import { ESQL_QUERY_ROW_LIMIT } from './queries';
 
 /** Parses a TM timeout string like '1m' or '30s' to milliseconds. */
 const parseTimeoutMs = (timeout: string): number => {
@@ -36,14 +36,7 @@ describe('dispatcher constants invariants', () => {
     expect(DISPATCH_CHUNK_SIZE).toBe(250);
   });
 
-  it('EPISODE_QUERY_LIMIT matches the LIMIT literal in getDispatchableAlertEventsQuery', async () => {
-    // Dynamically import to keep the assertion co-located without a cross-file import cycle.
-    const { getDispatchableAlertEventsQuery } = await import('./queries');
-    const { query } = getDispatchableAlertEventsQuery({
-      gte: '2026-01-22T07:20:00.000Z',
-      lte: '2026-01-22T07:35:00.000Z',
-    });
-
-    expect(query).toContain(`LIMIT ${EPISODE_QUERY_LIMIT}`);
+  it('ESQL_QUERY_ROW_LIMIT does not exceed the ES|QL maximum LIMIT of 10 000', () => {
+    expect(ESQL_QUERY_ROW_LIMIT).toBeLessThanOrEqual(10_000);
   });
 });
