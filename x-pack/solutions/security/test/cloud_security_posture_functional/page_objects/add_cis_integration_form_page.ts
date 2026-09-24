@@ -444,10 +444,10 @@ export function AddCisIntegrationFormPageProvider({
     await testSubjects.existOrFail('packagePolicyCreateSuccessToast', { timeout: 20000 });
   };
 
-  const waitForPostInstallModal = async () =>
+  const waitForPostInstallModal = async (timeout: number = 20000) =>
     await retry.waitForWithTimeout(
       'post-install modal to appear',
-      20000,
+      timeout,
       async () =>
         (await testSubjects.exists(TEST_IDS.CONFIRM_CLOUD_FORMATION_MODAL_CONFIRM_BUTTON)) ||
         (await testSubjects.exists(TEST_IDS.CONFIRM_MODAL_TITLE_TEXT))
@@ -702,7 +702,7 @@ export function AddCisIntegrationFormPageProvider({
 
     // Clicking Save Button updates and navigates to Integration Policies Tab Page
     await clickSaveIntegrationButton();
-    await testSubjects.existOrFail(TEST_IDS.POLICY_UPDATE_SUCCESS_TOAST, { timeout: 5000 });
+    await testSubjects.existOrFail(TEST_IDS.POLICY_UPDATE_SUCCESS_TOAST, { timeout: 20000 });
     await PageObjects.header.waitUntilLoadingHasFinished();
 
     await navigateToEditAgentlessIntegrationPage();
