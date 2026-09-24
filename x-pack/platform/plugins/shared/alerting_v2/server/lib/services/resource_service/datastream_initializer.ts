@@ -59,10 +59,12 @@ export class DatastreamInitializer implements IResourceInitializer {
    * ES rejects the `putMapping` (cannot convert a real object field to an alias in place).
    * That error is expected and caught here; the important outcome is the template PUT.
    *
-   * Rather than inspecting the error shape (which ES may change across versions), we verify
-   * the result by re-reading the template version. If the version is current, any error from
-   * `putMapping` is discarded and we return. If the PUT itself failed, we rethrow so the
-   * caller aborts rather than deleting the stream with a stale template.
+   * We then verify both the template version and — for migration definitions — the mapping
+   * shape. `initializeTemplate` skips the PUT when the deployed version already matches
+   * ours (the version-collision case: a separate change incremented to the same version
+   * without the alias rename). In that case, the version check alone would not catch the
+   * problem; the shape check detects it and fails loudly instead of proceeding to wipe and
+   * recreating the stream from the wrong template.
    *
    * Once the current template is in place, any gap write (from any node or version) that
    * triggers an auto-create will use this template rather than rebuilding from the old shape.
@@ -79,34 +81,57 @@ export class DatastreamInitializer implements IResourceInitializer {
     } catch (error) {
       this.logger.debug(
         `[alerting_v2] installTemplate: initializeTemplate threw for ` +
-          `${this.resourceDefinition.dataStreamName} — verifying template version: ` +
+          `${this.resourceDefinition.dataStreamName} — verifying template: ` +
           `${error instanceof Error ? error.message : String(error)}`
       );
       caughtError = error;
     }
 
-    // Verify the template was installed. We don't inspect the error because the ES error
-    // shape (status code, type) can change across releases.
+    // Re-read the template to verify what was actually installed.
     const { index_templates: templates } = await this.esClient.indices.getIndexTemplate({
       name: this.resourceDefinition.dataStreamName,
     });
-    const rawVersion = templates[0]?.index_template?._meta?.version;
+    const tpl = templates[0]?.index_template;
+    const rawVersion = tpl?._meta?.version;
     const installedVersion = typeof rawVersion === 'number' ? rawVersion : -1;
 
-    if (installedVersion >= this.resourceDefinition.version) {
-      // Template is current. Any error was the expected putMapping rejection, not a PUT failure.
-      return;
+    if (installedVersion < this.resourceDefinition.version) {
+      // The PUT itself failed — the template is still at the old version.
+      if (caughtError !== undefined) throw caughtError;
+      throw new Error(
+        `[alerting_v2] Template for ${this.resourceDefinition.dataStreamName} reports ` +
+          `version ${installedVersion < 0 ? '(none)' : installedVersion} after install attempt, ` +
+          `expected >= ${this.resourceDefinition.version}`
+      );
     }
 
-    // Template was not installed — the PUT itself must have failed. Abort.
-    if (caughtError !== undefined) {
-      throw caughtError;
+    // Version is current. For migration definitions, also check that the installed template
+    // actually has the alias shape. initializeTemplate() skips the PUT when the deployed
+    // version already matches (the version-collision case), so the version number alone
+    // cannot confirm the content was updated.
+    if (this.resourceDefinition.episodeToAlertMigration) {
+      const templateMappingProps = tpl?.template?.mappings?.properties;
+      const episodeEntry =
+        templateMappingProps && 'episode' in templateMappingProps
+          ? templateMappingProps.episode
+          : undefined;
+      const episodeIdEntry =
+        episodeEntry && 'properties' in episodeEntry && episodeEntry.properties
+          ? episodeEntry.properties.id
+          : undefined;
+      const episodeIdType =
+        episodeIdEntry && 'type' in episodeIdEntry ? episodeIdEntry.type : undefined;
+
+      if (episodeIdType !== 'alias') {
+        throw new Error(
+          `[alerting_v2] Template for ${this.resourceDefinition.dataStreamName} is at ` +
+            `v${installedVersion} but episode.id type is ${episodeIdType ?? '(missing)'}, not alias. ` +
+            `This indicates a version collision: another change incremented to the same template ` +
+            `version without the episode→alert alias rename. ` +
+            `Resolve the template conflict manually, then restart Kibana.`
+        );
+      }
     }
-    throw new Error(
-      `[alerting_v2] Template for ${this.resourceDefinition.dataStreamName} reports ` +
-        `version ${installedVersion < 0 ? '(none)' : installedVersion} after install attempt, ` +
-        `expected >= ${this.resourceDefinition.version}`
-    );
   }
 
   private buildDataStreamDefinition(): DataStreamDefinition<
@@ -210,16 +235,23 @@ export class DatastreamInitializer implements IResourceInitializer {
   private async hasLegacyEpisodeObjectField(dataStreamName: string): Promise<boolean> {
     try {
       const response = await this.esClient.indices.getMapping({ index: dataStreamName });
+      // All backing indices must have the alias shape before we can consider migration done.
+      // A rollover after template install can leave a mix: new write index at v7 (alias),
+      // old backing indices still at v6 (keyword). Returning false at the first alias would
+      // skip the wipe and leave the legacy backing indices in place.
       for (const index of Object.values(response)) {
         const props = index.mappings?.properties;
         if (props && 'episode' in props) {
           const episode = props.episode;
           if (episode && 'properties' in episode) {
-            // A post-migration mapping keeps `episode.*` as alias fields pointing at
-            // `alert.*`. If `episode.id` is already an alias, the migration already
-            // ran and we must not wipe again.
             const idField = episode.properties?.id;
-            if (idField && 'type' in idField && idField.type === 'alias') return false;
+            if (!idField || !('type' in idField) || idField.type !== 'alias') {
+              // This backing index still has the legacy real-object shape.
+              return true;
+            }
+            // This backing index has episode.id as an alias — keep checking others.
+          } else {
+            // episode field exists but has no properties sub-structure — treat as legacy.
             return true;
           }
         }

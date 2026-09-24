@@ -207,9 +207,60 @@ describe('DatastreamInitializer', () => {
       });
     };
 
-    // Returns a queued `getIndexTemplate` response that reports v7 (current version).
-    // Used to confirm that installTemplate()'s post-PUT verification sees a current template.
-    const mockInstalledTemplate = () => mockDeployedTemplate(migrationDefinition.version);
+    // Returns a queued `getIndexTemplate` response that reports v7 (current version)
+    // AND the correct alias shape for episode.id — the normal success path.
+    const mockInstalledTemplate = () => {
+      esClient.indices.getIndexTemplate.mockResolvedValueOnce({
+        index_templates: [
+          {
+            name: '.alerting-test',
+            index_template: {
+              index_patterns: ['.alerting-test*'],
+              composed_of: [],
+              _meta: { version: migrationDefinition.version, previousVersions: [] },
+              template: {
+                mappings: {
+                  properties: {
+                    episode: {
+                      properties: {
+                        id: { type: 'alias' as const, path: 'alert.id' },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        ],
+      });
+    };
+
+    // Same as above but with the legacy episode.id shape — simulates a version collision.
+    const mockInstalledTemplateWithLegacyShape = () => {
+      esClient.indices.getIndexTemplate.mockResolvedValueOnce({
+        index_templates: [
+          {
+            name: '.alerting-test',
+            index_template: {
+              index_patterns: ['.alerting-test*'],
+              composed_of: [],
+              _meta: { version: migrationDefinition.version, previousVersions: [] },
+              template: {
+                mappings: {
+                  properties: {
+                    episode: {
+                      properties: {
+                        id: { type: 'keyword' as const },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        ],
+      });
+    };
 
     // All migration tests spy on DataStreamClient.initializeTemplate so we don't
     // have to thread the internal putMapping-rejection mock through every case.
@@ -277,6 +328,30 @@ describe('DatastreamInitializer', () => {
       expect(esClient.indices.deleteDataStream).not.toHaveBeenCalled();
     });
 
+    it('aborts the wipe when version matches but episode.id is not an alias (version collision)', async () => {
+      // Another change incremented the template to v7 without the alias rename.
+      // initializeTemplate() skips the PUT (deployedVersion >= version), so the
+      // installed template has the right version but the wrong field shape.
+      mockDeployedTemplate(7);
+      // verification read: v7, but episode.id is still keyword (wrong shape)
+      mockInstalledTemplateWithLegacyShape();
+      esClient.indices.getMapping.mockResolvedValueOnce({
+        '.ds-.alerting-test-000001': {
+          mappings: {
+            properties: {
+              episode: { properties: { id: { type: 'keyword' as const } } },
+            },
+          },
+        },
+      });
+
+      const initializer = new DatastreamInitializer(mockLogger, esClient, migrationDefinition);
+      await expect(initializer.initialize()).rejects.toThrow('version collision');
+
+      // Must not delete the stream — data is preserved pending manual template fix.
+      expect(esClient.indices.deleteDataStream).not.toHaveBeenCalled();
+    });
+
     it('proceeds to the delete when initializeTemplate throws but the template version is current', async () => {
       // The expected case: initializeTemplate PUT v7 but then its internal putMapping on the
       // v6 write index threw a 400. The template IS installed; we must not abort.
@@ -324,7 +399,7 @@ describe('DatastreamInitializer', () => {
       expect(esClient.indices.deleteDataStream).not.toHaveBeenCalled();
     });
 
-    it('skips the wipe when episode.id is already an alias (handles hand-migrated clusters)', async () => {
+    it('skips the wipe when all backing indices have episode.id as an alias', async () => {
       mockDeployedTemplate(6);
       esClient.indices.getMapping.mockResolvedValueOnce({
         '.ds-.alerting-test-000001': {
@@ -334,6 +409,17 @@ describe('DatastreamInitializer', () => {
                 properties: {
                   id: { type: 'alias' as const, path: 'alert.id' },
                   status: { type: 'alias' as const, path: 'alert.status' },
+                },
+              },
+            },
+          },
+        },
+        '.ds-.alerting-test-000002': {
+          mappings: {
+            properties: {
+              episode: {
+                properties: {
+                  id: { type: 'alias' as const, path: 'alert.id' },
                 },
               },
             },
@@ -349,6 +435,46 @@ describe('DatastreamInitializer', () => {
       expect(mockLogger.info).toHaveBeenCalledWith(
         expect.stringContaining('episode.id is already an alias field')
       );
+    });
+
+    it('wipes when a later backing index still has legacy episode.id even if an earlier one has the alias', async () => {
+      // After template install and a rollover, the new write index (listed last by ES) has
+      // episode.id as alias, but the old write index still has episode.id as keyword.
+      // The previous code exited at the first alias; this test guards against that regression.
+      mockDeployedTemplate(7);
+      mockInstalledTemplate(); // installTemplate() verification read
+      esClient.indices.getMapping.mockResolvedValueOnce({
+        // newer backing index: alias shape (v7)
+        '.ds-.alerting-test-000002': {
+          mappings: {
+            properties: {
+              episode: {
+                properties: {
+                  id: { type: 'alias' as const, path: 'alert.id' },
+                },
+              },
+            },
+          },
+        },
+        // older backing index: still legacy keyword shape (v6)
+        '.ds-.alerting-test-000001': {
+          mappings: {
+            properties: {
+              episode: {
+                properties: {
+                  id: { type: 'keyword' as const },
+                },
+              },
+            },
+          },
+        },
+      });
+      esClient.indices.deleteDataStream.mockResolvedValueOnce({ acknowledged: true });
+
+      const initializer = new DatastreamInitializer(mockLogger, esClient, migrationDefinition);
+      await initializer.initialize();
+
+      expect(esClient.indices.deleteDataStream).toHaveBeenCalledWith({ name: '.alerting-test' });
     });
 
     it('wipes when episode is still a real object field even if the deployed template version equals the current version (version collision fix)', async () => {
