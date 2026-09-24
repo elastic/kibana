@@ -166,21 +166,21 @@ describe('nightshift-investigations scout hook', () => {
     }
   });
   it('keeps dataset selection out of the server fingerprint', () => {
-    expect(runHook({ sandbox: SANDBOX }, { NIGHTSHIFT_DATASET_ID: 'first' }).output).toEqual(
+    expect(runHook({ sandbox: SANDBOX }, { NIGHTSHIFT_DATASET_NAME: 'first' }).output).toEqual(
       runHook(
         { sandbox: SANDBOX },
-        { NIGHTSHIFT_DATASET_ID: 'second', NIGHTSHIFT_DATASETS: 'trace-only' }
+        { NIGHTSHIFT_DATASET_NAME: 'second', NIGHTSHIFT_DATASETS: 'trace-only' }
       ).output
     );
   });
 
-  it('rejects conflicting dataset sources', () => {
+  it('leaves dataset validation to Playwright, including smoke-only startup', () => {
     const result = runHook(
-      { sandbox: SANDBOX },
-      { NIGHTSHIFT_DATASET_ID: 'stored', NIGHTSHIFT_EXAMPLES_FILE: 'examples.json' }
+      {},
+      { NIGHTSHIFT_DATASET_NAME: 'stored', NIGHTSHIFT_EXAMPLES_FILE: 'examples.json' }
     );
-    expect(result.status).not.toBe(0);
-    expect(result.stderr).toContain('Choose either');
+    expect(result.status).toBe(0);
+    expect(result.output).toEqual({});
   });
 
   it('exports telemetry from the profile, with shell fallback and an optional index hint', () => {

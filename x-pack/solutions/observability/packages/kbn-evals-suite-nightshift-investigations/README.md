@@ -189,18 +189,19 @@ eval and prints a warning.
 
 ## Stored investigation datasets and concurrency
 
-Select an existing evaluations dataset directly by its UI ID:
+Select an existing evaluations dataset by its exact name in the evaluations UI:
 
 ```bash
-NIGHTSHIFT_DATASET_ID=<dataset-id> \
+NIGHTSHIFT_DATASET_NAME='<dataset-name>' \
   node scripts/evals start --suite nightshift-investigations --profile dev-vault --repetitions 1 \
-  --model openrouter-anthropic-claude-sonnet-4-6 \
-  --judge openrouter-anthropic-claude-sonnet-4-6
+  --model eis-anthropic-claude-4-6-sonnet \
+  --judge eis-anthropic-claude-4-6-sonnet
 ```
 
-`NIGHTSHIFT_DATASET_ID` selects trace-only investigations when `NIGHTSHIFT_DATASETS` is unset.
+`NIGHTSHIFT_DATASET_NAME` selects trace-only investigations when `NIGHTSHIFT_DATASETS` is unset.
 It reads the dataset from the results profile's Kibana, in the first `--space-ids` Space (default: `default`). It preserves the original dataset
-and example IDs, labels, tags and metadata without updating the stored dataset. Its examples
+and example IDs, labels, tags and metadata through `trustUpstreamDataset`. The existing runner
+upserts the fetched dataset before running; skipping that write is a separate framework follow-up. Its examples
 must satisfy the same question and distinct `case_id` requirements as a file. Do not combine it
 with `NIGHTSHIFT_EXAMPLES_FILE`. The dataset's telemetry source still needs the sandbox and remote
 telemetry settings below; selecting a dataset does not provision its source data.
@@ -228,7 +229,8 @@ the profile still selects where experiment results and agent traces are persiste
 Configure a dedicated API key restricted to `read` and `view_index_metadata` on the telemetry
 patterns the example needs, with only the cluster privileges required for discovery. For
 cross-cluster search, verify that the key can read the intended remote and index pattern. Keep
-endpoints, keys, readable-index hints and customer examples in private, uncommitted files.
+endpoints, keys and readable-index hints in Vault (or a private local profile JSON), and customer
+example files private and uncommitted.
 
 Add a `nightshift.telemetry` block beside `sandbox` in the profile's existing evals Vault config
 (or local profile JSON). The suite hook reads it without adding Nightshift fields to the shared
@@ -258,10 +260,9 @@ URL and key are configured, and requires sandbox credentials for remote investig
 With those variables and the external sandbox's mTLS settings configured:
 
 ```bash
-node scripts/evals stop
 NIGHTSHIFT_DATASETS=trace-only NIGHTSHIFT_EXAMPLES_FILE=/private/path/examples.json \
-  node scripts/evals start --suite nightshift-investigations --profile golden \
-  --model openrouter-anthropic-claude-sonnet-4-6 --judge openrouter-anthropic-claude-sonnet-4-6
+  node scripts/evals start --suite nightshift-investigations --profile dev-vault \
+  --model eis-anthropic-claude-4-6-sonnet --judge eis-anthropic-claude-4-6-sonnet
 ```
 
 The committed [`scout/kibana.telemetry.yml`](scout/kibana.telemetry.yml) creates the preconfigured `nightshift-evals-telemetry` webhook with a secret
@@ -280,8 +281,7 @@ failures. Record the tested commit, experiment and trace links, plus sanitized q
 `connector_id`, exit code zero, completed investigation or placeholder score alone does not prove
 connectivity. This workflow remains ungraded and requires no reference answer or quality threshold.
 
-Restart the managed stack after changing any `NIGHTSHIFT_SANDBOX_*` setting as well as the sandbox
-settings described above. Leave the remote settings unset for the bundled synthetic examples;
+Leave the remote settings unset for the bundled synthetic examples;
 synthetic execution continues to need no telemetry connector. The former `remote` selection and
 `NIGHTSHIFT_REMOTE_EXAMPLES_FILE` are replaced by this shared file workflow. Grading, snapshot
 provisioning and micro-evals are separate follow-ups.
@@ -433,7 +433,7 @@ against.
 
 | Variable              | Effect                                                                                                                                                                                                                                                                                              |
 | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `NIGHTSHIFT_DATASETS` | Comma-separated dataset ids (whitespace trimmed). Smoke dataset ids such as `synthetic-smoke` select seeded evals; `trace-only` selects the file-driven investigations; they can be combined, e.g. `synthetic-smoke,trace-only`. Unset or `all` runs every eval when sandbox credentials are present, except that a stored `NIGHTSHIFT_DATASET_ID` defaults to trace-only when selection is unset. Without them, unset runs only smoke with a warning, while an explicit `all` or `trace-only` fails before any test runs, even when Scout is reused. Unknown ids fail early. |
+| `NIGHTSHIFT_DATASETS` | Comma-separated dataset ids (whitespace trimmed). Smoke dataset ids such as `synthetic-smoke` select seeded evals; `trace-only` selects the file-driven investigations; they can be combined, e.g. `synthetic-smoke,trace-only`. Unset or `all` runs every eval when sandbox credentials are present, except that a stored `NIGHTSHIFT_DATASET_NAME` defaults to trace-only when selection is unset. Without them, unset runs only smoke with a warning, while an explicit `all` or `trace-only` fails before any test runs, even when Scout is reused. Unknown ids fail early. |
 | `SELECTED_EVALUATORS` | Standard `@kbn/evals` filter, by evaluator name (`documents_restored`, `timestamps_replayed`).                                                                                                                                                                                                      |
 | `GCS_CREDENTIALS`     | Service account JSON Elasticsearch uses to reach the seed-data bucket. Read access is enough to run the suite.                                                                                                                                                                                      |
 

@@ -61,11 +61,6 @@ if [[ -n "$telemetry_url$telemetry_key$readable_indices" ]]; then
   telemetry_config="$script_dir/kibana.telemetry.yml"
 fi
 
-if [[ -n "${NIGHTSHIFT_DATASET_ID:-}" && -n "${NIGHTSHIFT_EXAMPLES_FILE:-}" ]]; then
-  echo "Choose either NIGHTSHIFT_DATASET_ID or NIGHTSHIFT_EXAMPLES_FILE, not both" >&2
-  exit 1
-fi
-
 if [[ -z "$api_key" ]]; then
   partial=()
   for name in host port certificate key ca; do

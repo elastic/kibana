@@ -98,16 +98,16 @@ describe('resolveEvalSelection', () => {
   });
   it('selects stored investigations by default without overriding explicit dataset selections', () => {
     expect(
-      resolveEvalSelection({ ...WITH_SANDBOX, NIGHTSHIFT_DATASET_ID: 'stored' })
+      resolveEvalSelection({ ...WITH_SANDBOX, NIGHTSHIFT_DATASET_NAME: 'stored' })
     ).toMatchObject({ runSmoke: false, runInvestigations: true });
     expect(
       resolveEvalSelection({
         ...WITH_SANDBOX,
-        NIGHTSHIFT_DATASET_ID: 'stored',
+        NIGHTSHIFT_DATASET_NAME: 'stored',
         NIGHTSHIFT_DATASETS: 'synthetic-smoke',
       })
     ).toMatchObject({ runSmoke: true, runInvestigations: false });
-    expect(() => resolveEvalSelection({ NIGHTSHIFT_DATASET_ID: 'stored' })).toThrow(
+    expect(() => resolveEvalSelection({ NIGHTSHIFT_DATASET_NAME: 'stored' })).toThrow(
       'SANDBOX_API_KEY is required'
     );
   });

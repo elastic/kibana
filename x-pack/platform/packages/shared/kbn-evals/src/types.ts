@@ -144,7 +144,7 @@ export type ExperimentTask<TExample extends Example, TTaskOutput extends TaskOut
  */
 export interface EvalsExecutorClient {
   runExperiment<
-    TEvaluationDataset extends EvaluationDataset | EvaluationDatasetWithId,
+    TEvaluationDataset extends EvaluationDataset,
     TTaskOutput extends TaskOutput = TaskOutput
   >(
     options: {
@@ -156,7 +156,6 @@ export interface EvalsExecutorClient {
        * Datasets to run the experiment against.
        * Each dataset is processed independently and a separate
        * {@link DatasetRunResult} is returned per dataset.
-       * A dataset with an id is already stored and is used without an upsert.
        */
       datasets: TEvaluationDataset[];
       metadata?: Record<string, unknown>;

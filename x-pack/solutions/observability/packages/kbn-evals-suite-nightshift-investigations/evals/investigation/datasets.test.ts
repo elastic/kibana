@@ -26,37 +26,38 @@ describe('stored investigation dataset', () => {
     ],
   };
 
-  it('loads the selected ID and preserves example IDs, labels and operator metadata', async () => {
-    const client = { getDatasetById: jest.fn().mockResolvedValue(dataset) };
-    await expect(loadInvestigationDataset(client, { datasetId: dataset.id })).resolves.toEqual(
-      dataset
-    );
-    expect(client.getDatasetById).toHaveBeenCalledWith('stored-dataset');
+  it('loads the selected name and preserves example IDs, labels and operator metadata', async () => {
+    const client = { getDatasetByName: jest.fn().mockResolvedValue(dataset) };
+    await expect(loadInvestigationDataset(client, { datasetName: dataset.name })).resolves.toEqual({
+      ...dataset,
+      id: undefined,
+    });
+    expect(client.getDatasetByName).toHaveBeenCalledWith(dataset.name);
   });
 
   it('fails before running when the dataset is missing or has duplicate case IDs', async () => {
-    const client = { getDatasetById: jest.fn().mockResolvedValue(null) };
-    await expect(loadInvestigationDataset(client, { datasetId: dataset.id })).rejects.toThrow(
+    const client = { getDatasetByName: jest.fn().mockResolvedValue(null) };
+    await expect(loadInvestigationDataset(client, { datasetName: dataset.name })).rejects.toThrow(
       'Investigation dataset not found'
     );
-    client.getDatasetById.mockResolvedValue({
+    client.getDatasetByName.mockResolvedValue({
       ...dataset,
       examples: [...dataset.examples, ...dataset.examples],
     });
-    await expect(loadInvestigationDataset(client, { datasetId: dataset.id })).rejects.toThrow(
+    await expect(loadInvestigationDataset(client, { datasetName: dataset.name })).rejects.toThrow(
       'Duplicate case_id'
     );
   });
 
   it('rejects ambiguous file and stored dataset selections before fetching', async () => {
-    const client = { getDatasetById: jest.fn() };
+    const client = { getDatasetByName: jest.fn() };
     await expect(
       loadInvestigationDataset(client, {
-        datasetId: dataset.id,
+        datasetName: dataset.name,
         examplesFile: '/tmp/examples.json',
       })
-    ).rejects.toThrow('Choose either NIGHTSHIFT_DATASET_ID or NIGHTSHIFT_EXAMPLES_FILE');
-    expect(client.getDatasetById).not.toHaveBeenCalled();
+    ).rejects.toThrow('Choose either NIGHTSHIFT_DATASET_NAME or NIGHTSHIFT_EXAMPLES_FILE');
+    expect(client.getDatasetByName).not.toHaveBeenCalled();
   });
 });
 

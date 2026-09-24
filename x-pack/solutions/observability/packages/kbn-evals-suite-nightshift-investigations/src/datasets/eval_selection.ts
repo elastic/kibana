@@ -25,7 +25,7 @@ export const resolveEvalSelection = (
 ): EvalSelection => {
   const requested =
     env.NIGHTSHIFT_DATASETS?.trim() ||
-    (env.NIGHTSHIFT_DATASET_ID ? INVESTIGATION_DATASET_ID : undefined);
+    (env.NIGHTSHIFT_DATASET_NAME ? INVESTIGATION_DATASET_ID : undefined);
   const ids = parseRequestedIds(requested);
   const hasSandbox = Boolean(env.SANDBOX_API_KEY);
   const requiresSandbox = (selected: string) => {

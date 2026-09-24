@@ -81,6 +81,7 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: tags.stateful.
         {
           name: 'Nightshift ungraded investigation traces',
           datasets: [dataset],
+          trustUpstreamDataset: Boolean(process.env.NIGHTSHIFT_DATASET_NAME),
           concurrency,
           metadata: { concurrency },
           task: (example) => runInvestigation(fetch, example),
@@ -123,7 +124,7 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: tags.stateful.
           );
           expect(conversation.rounds.length).toBeGreaterThan(0);
           expect(conversation.rounds).toHaveLength(output.conversation_round_count ?? 0);
-          if (!process.env.NIGHTSHIFT_EXAMPLES_FILE && !process.env.NIGHTSHIFT_DATASET_ID) {
+          if (!process.env.NIGHTSHIFT_EXAMPLES_FILE && !process.env.NIGHTSHIFT_DATASET_NAME) {
             assertSuccessfulSandboxCommand(conversation.rounds);
           }
           expect(output.traceId).toMatch(/^[a-f0-9]{32}$/);
