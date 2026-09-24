@@ -22,6 +22,7 @@ import { useDiscoverServices } from '../../hooks/use_discover_services';
 interface SavedSearchEmbeddableComponentProps {
   api: SearchEmbeddableApi & {
     fetchContext$: BehaviorSubject<FetchContext | undefined>;
+    viewMode$: BehaviorSubject<ViewMode>;
   };
   dataView: DataView;
   onAddFilter?: DocViewFilterFn;
@@ -34,9 +35,10 @@ export function SearchEmbeddablFieldStatsTableComponent({
   onAddFilter,
   stateManager,
 }: SavedSearchEmbeddableComponentProps) {
-  const [fetchContext, savedSearch] = useBatchedPublishingSubjects(
+  const [fetchContext, savedSearch, viewMode] = useBatchedPublishingSubjects(
     api.fetchContext$,
-    api.savedSearch$
+    api.savedSearch$,
+    api.viewMode$
   );
   const isEsql = useMemo(() => isEsqlMode(savedSearch), [savedSearch]);
   const services = useDiscoverServices();
@@ -56,7 +58,7 @@ export function SearchEmbeddablFieldStatsTableComponent({
       searchSessionId={fetchContext?.searchSessionId}
       isEsqlMode={isEsql}
       timeRange={fetchContext?.timeRange}
-      previewMode={true}
+      previewMode={viewMode === 'preview'}
     />
   );
 }
