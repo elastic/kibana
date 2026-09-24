@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   EuiButton,
   EuiCallOut,
@@ -35,6 +35,7 @@ import {
 } from '@kbn/alertzero-common';
 import { AlertZeroPageSection } from '../../components/layout/alertzero_page_section';
 import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
+import { useCurrentUser } from '../../hooks/use_current_user';
 import { workerName } from '../watches/workers/translations';
 import * as i18n from './translations';
 
@@ -68,7 +69,7 @@ const pageContentCss = css`
 export const OnboardingPage: React.FC = () => {
   const history = useHistory();
   const {
-    services: { application, security },
+    services: { application },
   } = useKibana<CoreStart>();
 
   useAlertZeroDocTitle(i18n.ONBOARDING_TITLE);
@@ -76,13 +77,7 @@ export const OnboardingPage: React.FC = () => {
   const canWrite = Boolean(application.capabilities[ALERTZERO_FEATURE_ID]?.write);
 
   const [workerEnabled, setWorkerEnabled] = useState<WorkerToggleState>(initialToggleState);
-  const [currentUserEmail, setCurrentUserEmail] = useState<string | undefined>();
-
-  useEffect(() => {
-    const promise = security?.authc?.getCurrentUser();
-    if (!promise) return;
-    promise.then((user) => setCurrentUserEmail(user?.email ?? user?.username)).catch(() => {});
-  }, [security]);
+  const currentUserEmail = useCurrentUser();
 
   const enabledCount = Object.values(workerEnabled).filter(Boolean).length;
 

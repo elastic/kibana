@@ -12,6 +12,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { coreMock } from '@kbn/core/public/mocks';
 import { OnboardingPage } from './onboarding_page';
 
@@ -21,15 +22,18 @@ const renderPage = ({ canWrite = false }: { canWrite?: boolean } = {}) => {
   // alertzero.write capability so the component can branch on it.
   (core.application.capabilities as Record<string, unknown>).alertzero = { write: canWrite };
   const history = createMemoryHistory();
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 
   render(
     <I18nProvider>
       <EuiProvider>
-        <KibanaContextProvider services={core}>
-          <Router history={history}>
-            <OnboardingPage />
-          </Router>
-        </KibanaContextProvider>
+        <QueryClientProvider client={queryClient}>
+          <KibanaContextProvider services={core}>
+            <Router history={history}>
+              <OnboardingPage />
+            </Router>
+          </KibanaContextProvider>
+        </QueryClientProvider>
       </EuiProvider>
     </I18nProvider>
   );
