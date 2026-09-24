@@ -5,16 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
-import {
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiTitle,
-  EuiToolTip,
-  useEuiTheme,
-} from '@elastic/eui';
+import React, { useCallback, useRef } from 'react';
+import { EuiButtonIcon, EuiPanel, EuiTitle, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 export interface CustomAppPanelProps {
@@ -28,8 +20,13 @@ export interface CustomAppPanelProps {
 }
 
 /**
- * Panel chrome. The header doubles as the grid drag handle, which is why it
- * registers itself via `setDragHandles` rather than the grid supplying one.
+ * Panel chrome.
+ *
+ * The header exists only when the panel has a title, in both modes. Reserving a
+ * header bar just to hold the edit controls moved every title-less panel's
+ * content down as soon as you entered edit mode, so a short row could not be
+ * positioned to look right in both. The controls float over the panel instead,
+ * on hover or keyboard focus.
  */
 export function CustomAppPanel({
   title,
@@ -41,14 +38,32 @@ export function CustomAppPanel({
   children,
 }: CustomAppPanelProps) {
   const { euiTheme } = useEuiTheme();
+  const headerRef = useRef<HTMLDivElement | null>(null);
+  const gripRef = useRef<HTMLButtonElement | null>(null);
 
-  const dragHandleRef = useCallback(
-    (node: HTMLDivElement | null) => setDragHandles([node]),
-    [setDragHandles]
+  // Both the title bar and the pill's grip drag the panel: the bar is the bigger
+  // target when there is one, and the grip is the only one a title-less panel has.
+  const publishHandles = useCallback(() => {
+    setDragHandles([headerRef.current, gripRef.current]);
+  }, [setDragHandles]);
+
+  const setHeader = useCallback(
+    (node: HTMLDivElement | null) => {
+      headerRef.current = node;
+      publishHandles();
+    },
+    [publishHandles]
   );
 
-  const editLabel = `Edit panel${title ? ` ${title}` : ''}`;
-  const removeLabel = `Remove panel${title ? ` ${title}` : ''}`;
+  const setGrip = useCallback(
+    (node: HTMLButtonElement | null) => {
+      gripRef.current = node;
+      publishHandles();
+    },
+    [publishHandles]
+  );
+
+  const named = title ? ` ${title}` : '';
 
   return (
     <EuiPanel
@@ -57,63 +72,90 @@ export function CustomAppPanel({
       hasBorder={!hideBorder || isEditing}
       color={hideBorder && !isEditing ? 'transparent' : 'plain'}
       paddingSize="none"
+      className="customAppPanel"
       css={css`
         height: 100%;
         display: flex;
         flex-direction: column;
         overflow: hidden;
+        position: relative;
       `}
     >
-      {/*
-        A title-less panel (the header and filter panels, say) should read as
-        plain content, so its chrome collapses entirely outside edit mode —
-        where the drag handle still has to exist.
-      */}
-      <EuiFlexGroup
-        ref={dragHandleRef}
-        alignItems="center"
-        gutterSize="xs"
-        responsive={false}
-        css={css`
-          padding: ${title || isEditing ? euiTheme.size.s : 0};
-          border-bottom: ${title || isEditing ? euiTheme.border.thin : 'none'};
-          cursor: ${isEditing ? 'grab' : 'default'};
-          flex-grow: 0;
-        `}
-      >
-        <EuiFlexItem>
-          {title && (
-            <EuiTitle size="xxs">
-              <h2>{title}</h2>
-            </EuiTitle>
-          )}
-        </EuiFlexItem>
-        {isEditing && (
-          <>
-            <EuiFlexItem grow={false}>
-              <EuiToolTip content={editLabel} disableScreenReaderOutput>
-                <EuiButtonIcon
-                  iconType="pencil"
-                  size="xs"
-                  aria-label={editLabel}
-                  onClick={onEdit}
-                />
-              </EuiToolTip>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiToolTip content={removeLabel} disableScreenReaderOutput>
-                <EuiButtonIcon
-                  iconType="trash"
-                  size="xs"
-                  color="danger"
-                  aria-label={removeLabel}
-                  onClick={onRemove}
-                />
-              </EuiToolTip>
-            </EuiFlexItem>
-          </>
-        )}
-      </EuiFlexGroup>
+      {title && (
+        <div
+          ref={setHeader}
+          css={css`
+            padding: ${euiTheme.size.s};
+            border-bottom: ${euiTheme.border.thin};
+            cursor: ${isEditing ? 'grab' : 'default'};
+            flex-grow: 0;
+          `}
+        >
+          <EuiTitle size="xxs">
+            <h2>{title}</h2>
+          </EuiTitle>
+        </div>
+      )}
+
+      {isEditing && (
+        <div
+          css={css`
+            position: absolute;
+            top: ${euiTheme.size.xs};
+            inset-inline-end: ${euiTheme.size.xs};
+            z-index: 2;
+            display: flex;
+            gap: ${euiTheme.size.xxs};
+            padding: ${euiTheme.size.xxs};
+            border: ${euiTheme.border.thin};
+            border-radius: ${euiTheme.border.radius.medium};
+            background-color: ${euiTheme.colors.backgroundBasePlain};
+            box-shadow: ${euiTheme.levels.menu ? '0 1px 4px rgba(0,0,0,0.25)' : 'none'};
+            opacity: 0;
+            transition: opacity ${euiTheme.animation.fast} ease-in;
+            /* Revealed on hover, and on keyboard focus so it is reachable
+               without a pointer. */
+            .customAppPanel:hover &,
+            &:focus-within {
+              opacity: 1;
+            }
+            @media (prefers-reduced-motion: reduce) {
+              transition: none;
+            }
+          `}
+        >
+          <EuiToolTip content={`Move panel${named}`} disableScreenReaderOutput>
+            <EuiButtonIcon
+              buttonRef={setGrip}
+              iconType="move"
+              size="xs"
+              color="text"
+              aria-label={`Move panel${named}`}
+              css={css`
+                cursor: grab;
+              `}
+            />
+          </EuiToolTip>
+          <EuiToolTip content={`Edit panel${named}`} disableScreenReaderOutput>
+            <EuiButtonIcon
+              iconType="pencil"
+              size="xs"
+              color="text"
+              aria-label={`Edit panel${named}`}
+              onClick={onEdit}
+            />
+          </EuiToolTip>
+          <EuiToolTip content={`Remove panel${named}`} disableScreenReaderOutput>
+            <EuiButtonIcon
+              iconType="trash"
+              size="xs"
+              color="danger"
+              aria-label={`Remove panel${named}`}
+              onClick={onRemove}
+            />
+          </EuiToolTip>
+        </div>
+      )}
 
       <div
         css={css`

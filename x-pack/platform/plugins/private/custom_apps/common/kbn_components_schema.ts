@@ -158,3 +158,48 @@ export const STATUS_GRID_SCHEMA = {
   },
   required: ['component', 'cells', 'labelField', 'statusField', 'statuses'],
 } as const;
+
+export const METRIC_CHART_SCHEMA = {
+  type: 'object',
+  description:
+    "A row of metric tiles — Elastic Charts' metric visualization, the same one Lens draws. Prefer this over Stat for headline numbers: a tile can carry a colour and a sparkline of how the value got there.",
+  properties: {
+    component: { const: 'MetricChart' },
+    metrics: {
+      type: 'array',
+      minItems: 1,
+      description: 'One entry per tile, left to right.',
+      items: {
+        type: 'object',
+        properties: {
+          title: { type: 'string' },
+          subtitle: { type: 'string' },
+          value: {
+            $ref: 'common_types.json#/$defs/DynamicNumber',
+            description: 'Normally a binding such as {"path": "/fleet/pods"}.',
+          },
+          format: {
+            type: 'string',
+            enum: ['number', 'percent', 'bytes', 'duration'],
+            default: 'number',
+          },
+          color: {
+            type: 'string',
+            enum: ['primary', 'success', 'warning', 'danger', 'accent', 'subdued'],
+            default: 'primary',
+          },
+          trendRows: {
+            $ref: 'common_types.json#/$defs/DynamicValue',
+            description:
+              'Optional rows for a background sparkline, from a query bucketed over time.',
+          },
+          trendX: { type: 'string', description: 'Column in trendRows holding the timestamp.' },
+          trendY: { type: 'string', description: 'Column in trendRows holding the value.' },
+        },
+        required: ['title', 'value'],
+        additionalProperties: false,
+      },
+    },
+  },
+  required: ['component', 'metrics'],
+} as const;

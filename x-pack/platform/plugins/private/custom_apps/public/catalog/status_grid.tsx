@@ -197,14 +197,28 @@ function StatusGridRenderer({
   const hidden = rows.length - cells.length;
 
   return (
-    <div style={{ width: '100%', maxWidth: layout.columns * maxCellSize }}>
+    // Fills the panel in both axes, so the grid uses the height it was given
+    // rather than overflowing into a second scrollbar. `meet` keeps the cells
+    // regular by scaling to whichever axis runs out first, and `maxWidth` stops
+    // a handful of cells from inflating into dinner plates in a wide panel.
+    // Top-aligned (`YMin`) so any slack falls below the grid rather than
+    // splitting into a gap above it.
+    <div
+      style={{
+        width: '100%',
+        height: '100%',
+        minHeight: 0,
+        maxWidth: layout.columns * maxCellSize,
+      }}
+    >
       {/* One <svg> with one <polygon> per cell: 1,000 divs would each carry a
           style object and a layout box, and clip-path would add a compositing
           layer apiece. */}
       <svg
         viewBox={`0 0 ${layout.width} ${layout.height}`}
         width="100%"
-        preserveAspectRatio="xMinYMin meet"
+        height="100%"
+        preserveAspectRatio="xMidYMin meet"
         role="grid"
         aria-label={`${accessibility?.label ?? 'Status grid'}: ${cells.length} items — ${summary}${
           hidden > 0 ? `, ${hidden} more not shown` : ''

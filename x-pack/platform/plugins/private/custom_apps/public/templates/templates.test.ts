@@ -7,6 +7,7 @@
 
 import { customAppDefinitionSchema, getPanelIds } from '../../common/app_definition';
 import { customAppCatalogSchema } from '../catalog';
+import { persistentDepth } from '../app/custom_app_grid';
 import { CUSTOM_APP_TEMPLATES } from '.';
 
 describe.each(CUSTOM_APP_TEMPLATES.map((t) => [t.name, t] as const))(
@@ -153,8 +154,11 @@ describe.each(CUSTOM_APP_TEMPLATES.map((t) => [t.name, t] as const))(
       }
       // Tabs are shown one at a time, so each must start just below the
       // persistent panels rather than continuing the previous tab's rows.
-      for (const rows of byTab.values()) {
-        expect(Math.min(...rows)).toBe(5);
+      // Derived rather than hardcoded, so resizing a header panel does not
+      // require editing this number.
+      const start = persistentDepth(definition);
+      for (const [tab, rows] of byTab) {
+        expect({ tab, start: Math.min(...rows) }).toEqual({ tab, start });
       }
     });
 

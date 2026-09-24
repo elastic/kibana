@@ -12,6 +12,7 @@ import {
   CHART_SCHEMA,
   KBN_CUSTOM_CONTENT_PANEL_SCHEMA,
   KBN_LENS_PANEL_SCHEMA,
+  METRIC_CHART_SCHEMA,
   KBN_TIME_FILTER_SCHEMA,
   STATUS_GRID_SCHEMA,
 } from './kbn_components_schema';
@@ -29,6 +30,7 @@ export const KIBANA_COMPONENT_SCHEMAS = {
   KbnLensPanel: KBN_LENS_PANEL_SCHEMA,
   KbnCustomContentPanel: KBN_CUSTOM_CONTENT_PANEL_SCHEMA,
   StatusGrid: STATUS_GRID_SCHEMA,
+  MetricChart: METRIC_CHART_SCHEMA,
 } as const;
 
 export const customAppCatalogSchema = {

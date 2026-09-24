@@ -50,11 +50,15 @@ ${FILTER_CLAUSES}
 | KEEP pod, namespace, cluster, node, cpu, mem, health, reason, rule_count
 | LIMIT 40`;
 
+const CLUSTERS = ['k8s-eu-prod', 'k8s-us-prod'] as const;
+
 /**
  * The honeycomb draws one cell per pod, so it keeps every match rather than the
- * table's top 40, and returns only the four fields a cell and its flyout need.
+ * table's top 40, and returns only what a cell and its flyout need. One query
+ * per cluster, because each cluster is its own panel — nesting cards inside a
+ * single panel drew a box inside a box.
  */
-const GRID_QUERY = `FROM ${K8S_POD_METRICS_INDEX}
+const gridQuery = (cluster: string) => `FROM ${K8S_POD_METRICS_INDEX}
 | STATS cpu = ROUND(AVG(metrics.k8s.pod.cpu_limit_utilization) * 100, 1),
         mem = ROUND(AVG(metrics.k8s.pod.memory_limit_utilization) * 100, 1)
     BY entity_id = resource.attributes.k8s.pod.uid,
@@ -62,13 +66,19 @@ const GRID_QUERY = `FROM ${K8S_POD_METRICS_INDEX}
        namespace = resource.attributes.k8s.namespace.name,
        cluster = resource.attributes.k8s.cluster.name,
        node = resource.attributes.k8s.node.name
-| WHERE pod IS NOT NULL
+| WHERE pod IS NOT NULL AND cluster == "${cluster}"
 | LOOKUP JOIN ${K8S_ALERTS_INDEX} ON entity_id
 | EVAL health = COALESCE(alert_status, "untracked")
 ${FILTER_CLAUSES}
-| SORT cluster ASC, pod ASC
+| SORT namespace ASC, pod ASC
 | KEEP pod, namespace, cluster, node, cpu, mem, health, reason, rule_count
 | LIMIT 1200`;
+
+const STATUSES = [
+  { value: 'active', label: 'Active alerts', color: 'danger' },
+  { value: 'clear', label: 'No active alerts', color: 'success' },
+  { value: 'untracked', label: 'No alert set up', color: 'subdued' },
+];
 
 const PODS_PARAMS = {
   q: '/filters/search',
@@ -85,20 +95,21 @@ const kubernetes = (): CustomAppDefinition => ({
     // Untabbed, so the heading and time picker persist across tabs.
     header: { type: 'panel', id: 'header', row: 0, column: 0, width: 32, height: 3 },
     toolbar: { type: 'panel', id: 'toolbar', row: 0, column: 32, width: 16, height: 3 },
-    filters: { type: 'panel', id: 'filters', row: 3, column: 0, width: 48, height: 2 },
+    filters: { type: 'panel', id: 'filters', row: 3, column: 0, width: 48, height: 3 },
 
     // Each tab starts from the same row, since only one is visible at a time.
-    summary: { type: 'panel', id: 'summary', row: 5, column: 0, width: 48, height: 6 },
-    legend: { type: 'panel', id: 'legend', row: 11, column: 0, width: 48, height: 4 },
-    grid: { type: 'panel', id: 'grid', row: 15, column: 0, width: 48, height: 30 },
-    pods: { type: 'panel', id: 'pods', row: 45, column: 0, width: 48, height: 24 },
+    summary: { type: 'panel', id: 'summary', row: 6, column: 0, width: 48, height: 8 },
+    legend: { type: 'panel', id: 'legend', row: 14, column: 0, width: 48, height: 3 },
+    gridEu: { type: 'panel', id: 'gridEu', row: 17, column: 0, width: 24, height: 20 },
+    gridUs: { type: 'panel', id: 'gridUs', row: 17, column: 24, width: 24, height: 20 },
+    pods: { type: 'panel', id: 'pods', row: 37, column: 0, width: 48, height: 24 },
 
-    nsHelp: { type: 'panel', id: 'nsHelp', row: 5, column: 0, width: 48, height: 3 },
-    nsPods: { type: 'panel', id: 'nsPods', row: 8, column: 0, width: 24, height: 18 },
-    nsCpu: { type: 'panel', id: 'nsCpu', row: 8, column: 24, width: 24, height: 18 },
+    nsHelp: { type: 'panel', id: 'nsHelp', row: 6, column: 0, width: 48, height: 3 },
+    nsPods: { type: 'panel', id: 'nsPods', row: 9, column: 0, width: 24, height: 18 },
+    nsCpu: { type: 'panel', id: 'nsCpu', row: 9, column: 24, width: 24, height: 18 },
 
-    logHelp: { type: 'panel', id: 'logHelp', row: 5, column: 0, width: 48, height: 4 },
-    logs: { type: 'panel', id: 'logs', row: 9, column: 0, width: 48, height: 22 },
+    logHelp: { type: 'panel', id: 'logHelp', row: 6, column: 0, width: 48, height: 4 },
+    logs: { type: 'panel', id: 'logs', row: 10, column: 0, width: 48, height: 22 },
   },
   panels: {
     // Prose and controls read as page content, so they lose the panel frame.
@@ -107,7 +118,8 @@ const kubernetes = (): CustomAppDefinition => ({
     filters: { hideBorder: true },
     summary: { title: 'Fleet', tab: 'Resources' },
     legend: { hideBorder: true, tab: 'Resources' },
-    grid: { hideBorder: true, tab: 'Resources' },
+    gridEu: { title: 'k8s-eu-prod', tab: 'Resources' },
+    gridUs: { title: 'k8s-us-prod', tab: 'Resources' },
     pods: { title: 'Pods', tab: 'Resources' },
     nsHelp: { hideBorder: true, tab: 'Namespaces' },
     nsPods: { title: 'Pods per namespace', tab: 'Namespaces' },
@@ -121,6 +133,11 @@ const kubernetes = (): CustomAppDefinition => ({
         path: '/fleet',
         shape: 'first',
         query: `FROM ${K8S_POD_METRICS_INDEX} | STATS pods = COUNT_DISTINCT(resource.attributes.k8s.pod.uid), nodes = COUNT_DISTINCT(resource.attributes.k8s.node.name), clusters = COUNT_DISTINCT(resource.attributes.k8s.cluster.name), cpu = ROUND(AVG(metrics.k8s.pod.cpu_limit_utilization) * 100, 1)`,
+      },
+      {
+        path: '/cpuTrend',
+        shape: 'rows',
+        query: `FROM ${K8S_POD_METRICS_INDEX} | STATS cpu = ROUND(AVG(metrics.k8s.pod.cpu_limit_utilization) * 100, 1) BY time = BUCKET(@timestamp, 1 hour) | SORT time ASC, cpu ASC | LIMIT 200`,
       },
     ],
     legend: [
@@ -146,14 +163,11 @@ const kubernetes = (): CustomAppDefinition => ({
         query: `FROM ${K8S_POD_METRICS_INDEX} | STATS pods = COUNT_DISTINCT(resource.attributes.k8s.pod.uid) BY name = resource.attributes.k8s.namespace.name | WHERE name IS NOT NULL | SORT name`,
       },
     ],
-    grid: [
-      {
-        path: '/clusterGroups',
-        shape: 'groups',
-        groupBy: 'cluster',
-        query: GRID_QUERY,
-        params: PODS_PARAMS,
-      },
+    gridEu: [
+      { path: '/podsEu', shape: 'rows', query: gridQuery(CLUSTERS[0]), params: PODS_PARAMS },
+    ],
+    gridUs: [
+      { path: '/podsUs', shape: 'rows', query: gridQuery(CLUSTERS[1]), params: PODS_PARAMS },
     ],
     pods: [{ path: '/pods', shape: 'rows', query: PODS_QUERY, params: PODS_PARAMS }],
     nsPods: [
@@ -262,37 +276,25 @@ const kubernetes = (): CustomAppDefinition => ({
       { filters: { search: '', clusters: [], namespaces: [], health: [] } }
     ),
     summary: surface('summary', [
-      { id: 'root', component: 'Row', children: ['pods', 'nodes', 'clusters', 'cpu'], gap: 'l' },
       {
-        id: 'pods',
-        component: 'Stat',
-        title: { call: 'formatNumber', args: { value: { path: '/fleet/pods' } } },
-        description: 'Pods',
-        color: 'primary',
-      },
-      {
-        id: 'nodes',
-        component: 'Stat',
-        title: { call: 'formatNumber', args: { value: { path: '/fleet/nodes' } } },
-        description: 'Nodes',
-        color: 'default',
-      },
-      {
-        id: 'clusters',
-        component: 'Stat',
-        title: { call: 'formatNumber', args: { value: { path: '/fleet/clusters' } } },
-        description: 'Clusters',
-        color: 'accent',
-      },
-      {
-        id: 'cpu',
-        component: 'Stat',
-        title: {
-          call: 'concat',
-          args: { values: [{ path: '/fleet/cpu' }, '%'], separator: '' },
-        },
-        description: 'Mean CPU of limit',
-        color: 'warning',
+        id: 'root',
+        component: 'MetricChart',
+        metrics: [
+          { title: 'Pods', value: { path: '/fleet/pods' }, color: 'primary' },
+          { title: 'Nodes', value: { path: '/fleet/nodes' }, color: 'subdued' },
+          { title: 'Clusters', value: { path: '/fleet/clusters' }, color: 'accent' },
+          {
+            title: 'CPU of limit',
+            subtitle: 'mean across pods',
+            value: { path: '/fleet/cpu' },
+            format: 'percent',
+            color: 'warning',
+            // A sparkline is the point of a metric chart over a styled number.
+            trendRows: { path: '/cpuTrend' },
+            trendX: 'time',
+            trendY: 'cpu',
+          },
+        ],
       },
     ]),
     legend: surface('legend', [
@@ -316,59 +318,31 @@ const kubernetes = (): CustomAppDefinition => ({
         },
       },
     ]),
-    // One card per cluster, from a ChildList template over the grouped query —
-    // so the app follows however many clusters the data actually has rather than
-    // hardcoding two panels.
-    grid: surface('grid', [
+    // Each cluster is its own panel, so the panel's own title and frame carry
+    // the heading and the grid is the panel's only content.
+    gridEu: surface('gridEu', [
       {
         id: 'root',
-        component: 'Column',
-        gap: 'm',
-        children: { componentId: 'clusterCard', path: '/clusterGroups' },
-      },
-      { id: 'clusterCard', component: 'Card', header: 'cardHeader', child: 'cardGrid' },
-      {
-        id: 'cardHeader',
-        component: 'Row',
-        justify: 'spaceBetween',
-        align: 'center',
-        children: ['cardTitle', 'cardActions'],
-      },
-      {
-        id: 'cardTitle',
-        component: 'Row',
-        gap: 's',
-        align: 'center',
-        // Relative paths resolve against the current group.
-        children: ['cardName', 'cardCount'],
-      },
-      { id: 'cardName', component: 'Text', text: { path: 'key' }, variant: 'heading3' },
-      { id: 'cardCount', component: 'Badge', label: { path: 'count' }, color: 'hollow' },
-      {
-        id: 'cardActions',
-        component: 'Button',
-        variant: 'icon',
-        iconType: 'gear',
-        color: 'text',
-        label: 'Cluster settings',
-        action: {
-          event: { name: ACTION_SET_DATA, context: { path: '/ui/grid/menu', value: true } },
-        },
-      },
-      {
-        id: 'cardGrid',
         component: 'StatusGrid',
-        cells: { path: 'items' },
+        cells: { path: '/podsEu' },
         labelField: 'pod',
         statusField: 'health',
-        statuses: [
-          { value: 'active', label: 'Active alerts', color: 'danger' },
-          { value: 'clear', label: 'No active alerts', color: 'success' },
-          { value: 'untracked', label: 'No alert set up', color: 'subdued' },
-        ],
+        statuses: STATUSES,
         defaultColor: 'subdued',
-        // Writes the clicked pod to the same path the table's row action uses, so
-        // the flyout declared in the Pods panel opens from here too.
+        // The same path the table's row action writes, so the flyout declared in
+        // the Pods panel opens from here too.
+        action: { event: { name: ACTION_SET_DATA, context: { path: '/selectedPod' } } },
+      },
+    ]),
+    gridUs: surface('gridUs', [
+      {
+        id: 'root',
+        component: 'StatusGrid',
+        cells: { path: '/podsUs' },
+        labelField: 'pod',
+        statusField: 'health',
+        statuses: STATUSES,
+        defaultColor: 'subdued',
         action: { event: { name: ACTION_SET_DATA, context: { path: '/selectedPod' } } },
       },
     ]),

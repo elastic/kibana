@@ -12,6 +12,7 @@ import { Chart } from './chart';
 import { KbnTimeFilter } from './kbn_time_filter';
 import { KbnCustomContentPanel } from './kbn_custom_content_panel';
 import { StatusGrid } from './status_grid';
+import { MetricChart } from './metric_chart';
 
 /**
  * The base catalog is a shared package and stays pure EUI, so it can be used
@@ -31,6 +32,7 @@ export const customAppCatalog: Catalog = {
     [KbnLensPanel.name]: KbnLensPanel,
     [KbnCustomContentPanel.name]: KbnCustomContentPanel,
     [StatusGrid.name]: StatusGrid,
+    [MetricChart.name]: MetricChart,
   },
 };
 
