@@ -4,8 +4,8 @@ description: >
   Per-space forensics worker. Finds pending `security.analyze_endpoint` knowledge
   indicators in this space and dispatches the global endpoint analysis workflow for
   each one, which reconstructs the attack timeline, extracts IoCs, attaches the
-  findings to the investigation, and proposes any justified containment actions for
-  human approval.
+  findings to the investigation, and proposes any justified containment actions.
+  Manual autonomy waits for approval; supervised carries them out.
 enabled: false
 tags:
   - watch
@@ -147,6 +147,9 @@ steps:
           inputs:
             ki_id: "{{ foreach.item._source.id | default: foreach.item._id }}"
             ai_index_id: "{{ inputs.ai_index_id | default: consts.ai_index_id }}"
+            # `${{ }}` preserves the value's type so the editor does not type-check the
+            # template source against the child's enum.
+            autonomy: "${{ consts.worker_settings.autonomy }}"
 
   - name: emit_result
     type: workflow.output

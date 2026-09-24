@@ -533,7 +533,7 @@ describe('WatchDetailPage', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('shows Forensics Watch with one Worker that has enablement and fixed autonomy', () => {
+  it('shows Forensics Watch with one Worker that has enablement and two autonomy levels', () => {
     renderWatch(SYSTEM_SECURITY_WATCH_FORENSICS_ID, [
       ...floorWorkers,
       huntWorker,
@@ -555,26 +555,20 @@ describe('WatchDetailPage', () => {
         `alertZeroWorkerEnabledSwitch-${SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID}`
       )
     ).toBeInTheDocument();
-    // Endpoint analysis allows manual only, so the level renders as one selected card with no
-    // alternatives beside it — the same card a Worker offering three would show it as. Its sweep
-    // cadence is fixed in the definition, not a setting. The level set it declares is what says
-    // there is no choice to present; the card copy below only explains the level.
-    expect(within(section).getByTestId('alertZeroAutonomyFixedLevel')).toHaveTextContent('Manual');
-    expect(within(section).getAllByRole('radio')).toHaveLength(1);
-    expect(within(section).getByRole('radio')).toBeChecked();
-    expect(within(section).queryByRole('radiogroup')).not.toBeInTheDocument();
+    // Same split as Attack Discovery: one level that gates containment and one that does not.
+    // The sweep cadence stays fixed in the definition, not a setting. Manual is the default.
+    expect(within(section).getByTestId('alertZeroAutonomyCard-manual')).toBeInTheDocument();
+    expect(within(section).getByTestId('alertZeroAutonomyCard-supervised')).toBeInTheDocument();
+    expect(within(section).queryByTestId('alertZeroAutonomyCard-assisted')).not.toBeInTheDocument();
+    expect(within(section).getByRole('radiogroup')).toBeInTheDocument();
+    expect(within(section).getAllByRole('radio')).toHaveLength(2);
+    expect(
+      within(within(section).getByTestId('alertZeroAutonomyCard-manual')).getByRole('radio')
+    ).toBeChecked();
     expect(within(section).queryByTestId('alertZeroScheduleIntervalField')).not.toBeInTheDocument();
-
-    // A fixed level still has to say what it means. Containment is the fact that makes this
-    // Worker manual-only, so it is the one an analyst must be able to read off the page.
-    expect(within(section).getByTestId('alertZeroAutonomyCardWho')).toHaveTextContent(
+    expect(within(section).getAllByTestId('alertZeroAutonomyCardWho')[0]).toHaveTextContent(
       /every containment action waits for you/i
     );
-    expect(
-      within(section)
-        .getAllByTestId('alertZeroAutonomyCardFact')
-        .map((fact) => fact.textContent)
-    ).toEqual([expect.stringContaining('Findings'), expect.stringContaining('Response')]);
   });
 
   it('shows the analysis window only on Rule Tuning and does not write while editing', () => {

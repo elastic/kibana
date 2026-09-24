@@ -3,9 +3,9 @@ name: Endpoint analysis run
 description: >
   Given an `analyze_endpoint` knowledge indicator, resolves the associated
   Attack Discovery alert and host, runs a forensic agent to reconstruct the
-  attack timeline and extract IoCs, attaches the findings and a containment
-  assessment to the investigation, and proposes any justified containment
-  actions for human approval.
+  attack timeline and extract IoCs, attaches the findings to the investigation,
+  journals the assessment, and proposes any justified containment
+  actions. Manual autonomy waits for approval; supervised carries them out.
 enabled: true
 tags:
   - security
@@ -41,6 +41,14 @@ triggers:
           # Mirrors AI_INDEX_ID_PATTERN in the context engine.
           pattern: "^[a-z0-9][a-z0-9_-]*$"
           description: AI index that holds the indicator. The result is written to the same index.
+        autonomy:
+          type: string
+          enum:
+            - manual
+            - supervised
+          description: >-
+            Worker autonomy level. `supervised` auto-approves containment proposals;
+            `manual` waits for an analyst. Defaults to `manual`.
       required:
         - ki_id
         - ai_index_id
@@ -63,6 +71,8 @@ consts:
   journal_note: system-alertzero-journal-note
   # Cap on the number of containment actions this run can propose.
   max_recommended_actions: 8
+  # Used when the dispatching worker omits `autonomy`.
+  default_autonomy: manual
 
 steps:
   # A read error fails the run, leaving the indicator pending for the next
@@ -134,7 +144,6 @@ steps:
     with:
       timeline: "forensic-timeline-{{ inputs.ki_id }}"
       iocs: "forensic-iocs-{{ inputs.ki_id }}"
-      assessment: "forensic-assessment-{{ inputs.ki_id }}"
 
   - name: when_ki_valid
     type: if
@@ -142,13 +151,14 @@ steps:
       ${{ steps.resolve_request.output.has_request == true
         and steps.verify_investigation.output.metadata != null }}
     steps:
-      # All three of this indicator's findings mean an earlier run finished the
+      # Both of this indicator's attachments mean an earlier run finished the
       # analysis but could not retire the indicator. Finding them lets this run
-      # skip the agent and retry just the write. Fewer than three after an attempt
+      # skip the agent and retry just the write. Fewer than both after an attempt
       # was already recorded skips the agent too: a later run does not start
-      # another 15m analysis. Another indicator's files do not count.
+      # another 15m analysis. Another indicator's files do not count. The
+      # assessment is a journal note, not an attachment, so it is not in this count.
       #
-      # Listing rather than reading the assessment by id, because `ai.attachment.read`
+      # Listing rather than reading an attachment by id, because `ai.attachment.read`
       # reports "no such attachment" and "the attachment service is broken" the same
       # way: it catches every error and returns no output, so a null version cannot
       # tell "no prior analysis" from "could not find out".
@@ -160,10 +170,10 @@ steps:
       - name: resolve_prior_assessment
         type: data.set
         with:
-          # A finished run leaves all three ids, including an empty timeline or an
-          # empty IoC list. Fewer than three is a partial write from this indicator.
+          # A finished run leaves both ids, including an empty timeline or an
+          # empty IoC list. One of the two is a partial write from this indicator.
           count: >-
-            ${{ steps.list_prior_findings.output.attachments | map: 'id' | where_exp: 'attachment_id', 'attachment_id == steps.finding_ids.output.timeline or attachment_id == steps.finding_ids.output.iocs or attachment_id == steps.finding_ids.output.assessment' | size }}
+            ${{ steps.list_prior_findings.output.attachments | map: 'id' | where_exp: 'attachment_id', 'attachment_id == steps.finding_ids.output.timeline or attachment_id == steps.finding_ids.output.iocs' | size }}
 
       # `workflow.spaceId` is the space of the worker that dispatched this run, not
       # the global space this workflow is installed in: a child execution inherits
@@ -244,19 +254,33 @@ steps:
           # the agent, and the indicator stays pending for one more try.
           - name: mark_attempted
             type: context-engine.updateKi
-            if: "${{ steps.resolve_prior_assessment.output.count != 3 and steps.resolve_request.output.forensic_attempted_at == blank }}"
+            if: "${{ steps.resolve_prior_assessment.output.count != 2 and steps.resolve_request.output.forensic_attempted_at == blank }}"
             with:
               ai_index_id: "{{ inputs.ai_index_id }}"
               ki_id: "{{ inputs.ki_id }}"
               ki:
                 attributes:
                   forensic_attempted_at: "{{ execution.startedAt }}"
+          # Mark the start of the analysis in the journal. Continue on
+          # failure: this note is before the agent, but a rejected note must not skip
+          # the analysis or leave the indicator pending
+          - name: journal_analysis_started
+            type: workflow.execute
+            if: "${{ steps.resolve_prior_assessment.output.count != 2 and steps.resolve_request.output.forensic_attempted_at == blank }}"
+            on-failure:
+              continue: true
+            with:
+              workflow-id: "{{ consts.journal_note }}"
+              inputs:
+                conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
+                message: >-
+                  Starting endpoint analysis of `{{ steps.resolve_host.output.host_name }}`.
           - name: forensic_analysis
             type: ai.agent
             # Runs once per indicator: only when findings are still missing and no
-            # earlier run has recorded an attempt. All three findings, or a recorded
-            # attempt with any still missing, skips the agent.
-            if: "${{ steps.resolve_prior_assessment.output.count != 3 and steps.resolve_request.output.forensic_attempted_at == blank }}"
+            # earlier run has recorded an attempt. Both attachments, or a recorded
+            # attempt with either still missing, skips the agent.
+            if: "${{ steps.resolve_prior_assessment.output.count != 2 and steps.resolve_request.output.forensic_attempted_at == blank }}"
             # Continues on failure so the run still reaches its terminal write.
             # If this step failed the run instead, the indicator would stay
             # `pending`, and the sweep would re-run this 15m agent every minute
@@ -340,12 +364,12 @@ steps:
                       True only when the agent recommends one or more specific containment actions
                   # Required and non-empty: `timeline` and `iocs` can legitimately both be
                   # empty, so this rationale is the one thing a completed analysis always
-                  # writes. `settled` below relies on that to tell "analyzed the host and
-                  # found nothing" apart from a run that produced nothing at all.
+                  # writes. It is journaled, and the journal note rejects a message
+                  # longer than 8000 characters.
                   rationale:
                     type: string
                     minLength: 1
-                    maxLength: 10000
+                    maxLength: 8000
                     description: >
                       Assessment only: whether this is a real incident, other affected hosts,
                       data gaps, and why the evidence supports the recommended actions. The
@@ -550,16 +574,42 @@ steps:
                             Input for the catalog action, shaped to satisfy that entry's
                             `inputSchema.properties.actionInput`. Do not wrap it in another `actionInput`.
 
-          # Timeline and IoCs are attached to the investigation; the forensic agent
-          # run itself is ephemeral (no conversation), so its ES|QL transcript never
-          # lands there. Continues on failure so a rejected attachment payload
-          # doesn't also block the assessment notes or containment proposals below.
+          # Timeline and IoCs are attached to the investigation; the assessment is a
+          # journal note rather than an attachment. The forensic agent run itself is
+          # ephemeral (no conversation), so its ES|QL transcript never lands there.
+          # Continues on failure so a rejected attachment payload doesn't also block
+          # the assessment note or containment proposals below.
           #
           # An empty reconstruction attaches too. "No events were reconstructed from the
           # available telemetry" is the answer to the question this run was dispatched to
           # ask, and both attachment types render exactly that sentence for an empty
-          # payload. Skipping the attach would leave the investigation silent instead,
-          # and silent reads as "not analyzed" rather than "analyzed, nothing found".
+          # payload.
+          - name: resolve_finding_presence
+            type: data.set
+            with:
+              timeline: "${{ steps.forensic_analysis.output.structured_output.timeline.events.size > 0 }}"
+              iocs: >-
+                ${{ steps.forensic_analysis.output.structured_output.iocs.shas.size > 0
+                  or steps.forensic_analysis.output.structured_output.iocs.ips.size > 0
+                  or steps.forensic_analysis.output.structured_output.iocs.file_paths.size > 0
+                  or steps.forensic_analysis.output.structured_output.iocs.ransom_note.size > 0
+                  or steps.forensic_analysis.output.structured_output.iocs.encryption_marker.size > 0
+                  or steps.forensic_analysis.output.structured_output.iocs.malicious_commands.size > 0
+                  or steps.forensic_analysis.output.structured_output.iocs.compromised_identities.size > 0
+                  or steps.forensic_analysis.output.structured_output.iocs.affected_hosts.size > 0 }}
+
+          - name: journal_timeline
+            type: workflow.execute
+            if: "${{ steps.resolve_finding_presence.output.timeline == true }}"
+            on-failure:
+              continue: true
+            with:
+              workflow-id: "{{ consts.journal_note }}"
+              inputs:
+                conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
+                message: >-
+                  Reconstructed forensic timeline for `{{ steps.resolve_host.output.host_name }}`.
+
           - name: attach_timeline
             type: ai.attachment.add
             if: >-
@@ -573,6 +623,18 @@ steps:
               type: security.investigation.timeline
               description: "Attack timeline: {{ steps.resolve_host.output.host_name }}"
               data: "${{ steps.forensic_analysis.output.structured_output.timeline }}"
+
+          - name: journal_iocs
+            type: workflow.execute
+            if: "${{ steps.resolve_finding_presence.output.iocs == true }}"
+            on-failure:
+              continue: true
+            with:
+              workflow-id: "{{ consts.journal_note }}"
+              inputs:
+                conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
+                message: >-
+                  Extracted IoCs during forensic analysis of `{{ steps.resolve_host.output.host_name }}`.
 
           - name: attach_iocs
             type: ai.attachment.add
@@ -588,21 +650,19 @@ steps:
               description: Extracted indicators of compromise
               data: "${{ steps.forensic_analysis.output.structured_output.iocs }}"
 
-          - name: attach_rationale
-            type: ai.attachment.add
+          - name: journal_rationale
+            type: workflow.execute
             if: >-
               ${{ steps.forensic_analysis.error == null
                 and steps.forensic_analysis.output.structured_output.rationale != blank }}
             on-failure:
               continue: true
             with:
-              conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
-              id: "{{ steps.finding_ids.output.assessment }}"
-              render_inline: true
-              type: text
-              description: Forensic assessment
-              data:
-                content: "{{ steps.forensic_analysis.output.structured_output.rationale }}"
+              workflow-id: "{{ consts.journal_note }}"
+              inputs:
+                conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
+                message: >-
+                  {%- if steps.forensic_analysis.output.structured_output.propose == true -%}Rationale for proposed actions{%- else -%}Rationale for ending investigation{%- endif -%}: {{ steps.forensic_analysis.output.structured_output.rationale }}
 
         else:
           - name: journal_no_host
@@ -658,22 +718,21 @@ steps:
               status: invalid
               invalid_reason: "Missing attack_discovery_alert_id or investigation_id"
 
-      # The other way into this branch: the indicator is well-formed, but its
-      # investigation could not be read. `failed` rather than `invalid` since
-      # the problem is on the investigation's end, not the indicator's. Still
-      # retired, since a retry won't fix a deleted or unshared investigation,
-      # and leaving it pending would keep re-dispatching it every minute.
-      - name: mark_unreachable
-        type: context-engine.updateKi
-        if: >-
-          ${{ steps.resolve_request.output.has_request == true }}
-        with:
-          ai_index_id: "{{ inputs.ai_index_id }}"
-          ki_id: "{{ inputs.ki_id }}"
-          ki:
-            attributes:
-              status: failed
-              failure_reason: "Could not read investigation {{ steps.resolve_request.output.investigation_id }}"
+  # Indicator is well-formed, but its investigation could not be read. Mark
+  # `failed` rather than `invalid` since the problem is on the investigation's end.
+  # Still retired, since a retry won't fix a deleted or unshared investigation
+  - name: mark_unreachable
+    type: context-engine.updateKi
+    if: >-
+      ${{ steps.resolve_request.output.has_request == true
+        and steps.verify_investigation.output.metadata == null }}
+    with:
+      ai_index_id: "{{ inputs.ai_index_id }}"
+      ki_id: "{{ inputs.ki_id }}"
+      ki:
+        attributes:
+          status: failed
+          failure_reason: "Could not read investigation {{ steps.resolve_request.output.investigation_id }}"
 
   # Reads back what's actually on the investigation instead of trusting the
   # add steps' output, because the adds continue on failure so we cannot
@@ -694,18 +753,45 @@ steps:
     with:
       attached: >-
         ${{ steps.resolve_written_findings.output.ids contains steps.finding_ids.output.timeline
-          and steps.resolve_written_findings.output.ids contains steps.finding_ids.output.iocs
-          and steps.resolve_written_findings.output.ids contains steps.finding_ids.output.assessment }}
+          and steps.resolve_written_findings.output.ids contains steps.finding_ids.output.iocs }}
       # Findings only exist when a host was known, since that's the only branch
       # where the agent runs. So no host means no findings is the correct
       # outcome, not a failure — and no retry will resolve a host that the
-      # discovery and its constituent alerts never named. One or two of this
-      # indicator's attachments is a partial write, not a finished run.
+      # discovery and its constituent alerts never named. One of this
+      # indicator's attachments is a partial write, not a finished run. The
+      # assessment is a journal note and is not part of this check.
       settled: >-
         ${{ (steps.resolve_written_findings.output.ids contains steps.finding_ids.output.timeline
-          and steps.resolve_written_findings.output.ids contains steps.finding_ids.output.iocs
-          and steps.resolve_written_findings.output.ids contains steps.finding_ids.output.assessment)
+          and steps.resolve_written_findings.output.ids contains steps.finding_ids.output.iocs)
           or steps.resolve_host.output.host_name == blank }}
+
+  - name: resolve_autonomy
+    type: data.set
+    with:
+      level: "{{ inputs.autonomy | default: consts.default_autonomy }}"
+
+  # Written before any proposal starts. Each proposal posts its own comment as
+  # soon as it reaches the approval gate, and those runs are asynchronous, so a
+  # note after the dispatch lands among them. The count is the list about to be
+  # queued; a rejection after this is `journal_proposals_lost`.
+  - name: journal_proposals_queued
+    type: workflow.execute
+    if: >-
+      ${{ steps.resolve_request.output.has_request == true
+        and steps.verify_investigation.output.metadata != null
+        and steps.resolve_run_outcome.output.attached == true
+        and steps.forensic_analysis.output.structured_output.propose == true
+        and steps.forensic_analysis.output.structured_output.recommendedActions.size > 0 }}
+    on-failure:
+      continue: true
+    with:
+      workflow-id: "{{ consts.journal_note }}"
+      inputs:
+        conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
+        message: >-
+          Endpoint analysis of `{{ steps.resolve_host.output.host_name }}` queued
+          {{ steps.forensic_analysis.output.structured_output.recommendedActions.size }} containment proposal(s)
+          {%- if steps.resolve_autonomy.output.level == 'supervised' %} and approved them{% else %} for approval{% endif %}.
 
   # Containment is proposed on the investigation, not returned as run output.
   # `executeAsync` so this run does not sit in the 72h approval gate; each
@@ -736,6 +822,7 @@ steps:
             # the action declares, and for containment they are intrinsic to the action
             # rather than to this run
             confidence: "{{ foreach.item.confidence | default: '' }}"
+            autoApprove: "${{ steps.resolve_autonomy.output.level == 'supervised' }}"
 
   # `0` when the step did not run: no host, findings did not land, the agent
   # did not propose, or the list was empty. A later check treats only a real
@@ -762,7 +849,6 @@ steps:
   # run, the we fail the run. The failure shows up in the execution record,
   # and the next sweep retries just the write. This is cheap since
   # `resolve_prior_assessment` skips the agent once findings are already attached.
-
   # Only `attributes.status` is written. `attributes` merges on update; `tags`
   # is a list and a partial update would replace the full list.
   - name: mark_processed

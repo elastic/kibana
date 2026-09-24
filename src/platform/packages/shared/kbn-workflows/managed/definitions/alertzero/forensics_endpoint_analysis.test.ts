@@ -130,6 +130,7 @@ describe('Endpoint analysis worker', () => {
     expect(start?.with?.inputs).toEqual({
       ki_id: '{{ foreach.item._source.id | default: foreach.item._id }}',
       ai_index_id: '{{ inputs.ai_index_id | default: consts.ai_index_id }}',
+      autonomy: '${{ consts.worker_settings.autonomy }}',
     });
 
     expect(allSteps.some(({ type }) => type === 'context-engine.updateKi')).toBe(false);
