@@ -90,6 +90,7 @@ backwards compatible. Renaming or removing a code is a breaking change.
 | `INVALID_ACTION_POLICY_DATA`     | 400                  | The submitted body fails the domain-level schema check                                                                                                                                                                                                                  | `{ context, errors }`                  |
 | `INVALID_DATE_STRING`            | 400                  | A user-supplied date (e.g. `snoozed_until`) fails ISO-8601 parsing                                                                                                                                                                                                      | `{ value }`                            |
 | `API_KEY_INVALIDATION_FAILED`    | 500 / 200 (per-item) | Delete-only. The policy's API key could not be queued for invalidation, so the policy was deliberately left in place — deleting it would strand a valid key with nothing referencing it. Safe to retry. The single delete returns 500; bulk delete reports it per item. | `{ action_policy_id }` (single delete) |
+| `ACTION_POLICY_LICENSE_NOT_SUPPORTED` | 403             | Create / update / upsert / enable / bulk enable is rejected because the current license is not an active Enterprise license (action policies dispatch to Workflows). Checked before any side effect. Get / list / disable / snooze / delete stay available so existing policies can be cleaned up. | `{ required_license, current_license, license_status }` |
 
 ### Alert actions (`server/lib/alert_actions_client/`)
 
@@ -126,7 +127,7 @@ validate()` merges into each subclass's `schemas.response`. Every route therefor
 | HTTP status | When                                                                                                |
 | ----------- | --------------------------------------------------------------------------------------------------- |
 | `401`       | The request was not authenticated.                                                                  |
-| `403`       | The caller lacks the route's `requiredPrivileges`.                                                  |
+| `403`       | The caller lacks the route's `requiredPrivileges`. License-gated action policy routes override the description and add an `ACTION_POLICY_LICENSE_NOT_SUPPORTED` example. |
 | `500`       | Any uncaught throw boomifies to 500.                                                                |
 | `503`       | Alerting is administratively disabled via the `alerting:v2:enabled` advanced setting (kill switch). |
 

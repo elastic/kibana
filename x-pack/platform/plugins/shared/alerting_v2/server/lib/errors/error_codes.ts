@@ -114,6 +114,13 @@ export const ALERTING_ERROR_CODES = {
    * it; bulk delete reports it per item.
    */
   API_KEY_INVALIDATION_FAILED: 'API_KEY_INVALIDATION_FAILED',
+  /**
+   * The current license does not support action policies. Action policies
+   * dispatch to Workflows, which require an active Enterprise license, so
+   * create / update / upsert / enable are rejected. Reading, disabling,
+   * snoozing and deleting existing policies stay available.
+   */
+  ACTION_POLICY_LICENSE_NOT_SUPPORTED: 'ACTION_POLICY_LICENSE_NOT_SUPPORTED',
 
   // ──────────────────────── Alert actions ────────────────────
   /** No alert event matched the supplied `group_hash` (and `episode_id`). */

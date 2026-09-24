@@ -152,7 +152,9 @@
     "@kbn/security-plugin-types-server",
     "@kbn/core-test-helpers-model-versions",
     "@kbn/content-list-common",
-    "@kbn/core-ui-settings-server"
+    "@kbn/core-ui-settings-server",
+    "@kbn/licensing-plugin",
+    "@kbn/licensing-types"
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"]
 }

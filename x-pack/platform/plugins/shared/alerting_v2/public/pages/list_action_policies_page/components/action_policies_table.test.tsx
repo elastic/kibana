@@ -35,6 +35,11 @@ let mockCapabilities: Record<string, Record<string, boolean>> = WRITE_CAPABILITI
 let mockAgentBuilderShow = true;
 let mockExperimentalFeaturesEnabled = true;
 let mockAlertingV2ExperimentalFeaturesEnabled = true;
+let mockIsLicenseValid = true;
+
+jest.mock('../../../hooks/use_is_action_policies_license_valid', () => ({
+  useIsActionPoliciesLicenseValid: () => mockIsLicenseValid,
+}));
 
 jest.mock('@kbn/core-di-browser', () => {
   const { UserCapabilities: ActualUserCapabilities } = jest.requireActual(
@@ -201,6 +206,7 @@ describe('ActionPoliciesTable', () => {
     mockAgentBuilderShow = true;
     mockExperimentalFeaturesEnabled = true;
     mockAlertingV2ExperimentalFeaturesEnabled = true;
+    mockIsLicenseValid = true;
 
     mockBulkGet.mockResolvedValue([]);
     mockSettingsClientGet.mockReturnValue('[mock formatted date]');
@@ -427,14 +433,7 @@ describe('ActionPoliciesTable', () => {
 
   describe('Enabled column switch', () => {
     const getSwitch = () => screen.getByRole('switch', { name: /policy one enabled/i });
-
-    it('renders checked when the policy is enabled', async () => {
-      renderTable();
-
-      await waitFor(() => expect(getSwitch()).toBeChecked());
-    });
-
-    it('renders unchecked when the policy is disabled', async () => {
+    const mockDisabledPolicy = () =>
       mockFindItems.mockResolvedValue({
         items: [
           {
@@ -446,6 +445,15 @@ describe('ActionPoliciesTable', () => {
         ],
         total: 1,
       });
+
+    it('renders checked when the policy is enabled', async () => {
+      renderTable();
+
+      await waitFor(() => expect(getSwitch()).toBeChecked());
+    });
+
+    it('renders unchecked when the policy is disabled', async () => {
+      mockDisabledPolicy();
       renderTable();
 
       await waitFor(() => expect(getSwitch()).not.toBeChecked());
@@ -463,17 +471,7 @@ describe('ActionPoliciesTable', () => {
     });
 
     it('calls enablePolicy when toggled on', async () => {
-      mockFindItems.mockResolvedValue({
-        items: [
-          {
-            ...createPolicy({ enabled: false }),
-            title: 'Policy One',
-            updatedAt: new Date('2026-01-02T03:04:05.000Z'),
-            policy: createPolicy({ enabled: false }),
-          },
-        ],
-        total: 1,
-      });
+      mockDisabledPolicy();
       const user = userEvent.setup();
       renderTable();
 
@@ -489,6 +487,25 @@ describe('ActionPoliciesTable', () => {
       renderTable();
 
       await waitFor(() => expect(getSwitch()).toBeDisabled());
+    });
+
+    it('is disabled on a disabled policy when the license is not valid', async () => {
+      mockIsLicenseValid = false;
+      mockDisabledPolicy();
+      renderTable();
+
+      await waitFor(() => expect(getSwitch()).toBeDisabled());
+    });
+
+    it('still allows disabling an enabled policy when the license is not valid', async () => {
+      mockIsLicenseValid = false;
+      const user = userEvent.setup();
+      renderTable();
+
+      await waitFor(() => expect(getSwitch()).toBeEnabled());
+      await user.click(getSwitch());
+
+      expect(mockDisableActionPolicy).toHaveBeenCalledWith('policy-1', expect.anything());
     });
   });
 
@@ -518,6 +535,15 @@ describe('ActionPoliciesTable', () => {
       await waitFor(() =>
         expect(mockFindItems.mock.calls.length).toBeGreaterThan(findItemsCallsBeforeSuccess)
       );
+    });
+
+    it('disables bulk enable when the license is not valid', async () => {
+      mockIsLicenseValid = false;
+      renderTable();
+
+      await selectAllAndOpenMenu();
+
+      expect(await screen.findByTestId('bulkEnableActionPolicies')).toBeDisabled();
     });
 
     it('refetches the list after a bulk action that has no confirmation step', async () => {
@@ -612,6 +638,24 @@ describe('ActionPoliciesTable', () => {
       expect(agentCard).toHaveAttribute('aria-disabled', 'true');
 
       fireEvent.click(agentCard);
+      expect(mockNavigateToApp).not.toHaveBeenCalled();
+    });
+
+    it('disables both create cards and shows the license callout when the license is not valid', async () => {
+      mockIsLicenseValid = false;
+      renderTable();
+
+      await waitFor(() => expect(screen.getByTestId('createActionPolicyCard')).toBeInTheDocument());
+      expect(screen.getByTestId('actionPoliciesLicenseCallout')).toBeInTheDocument();
+
+      const createCard = screen.getByTestId('createActionPolicyCard');
+      const agentCard = screen.getByTestId('createActionPolicyWithAgentCard');
+      expect(createCard).toHaveAttribute('aria-disabled', 'true');
+      expect(agentCard).toHaveAttribute('aria-disabled', 'true');
+
+      fireEvent.click(createCard);
+      fireEvent.click(agentCard);
+      expect(mockLocators.actionPolicyLocators.navigateSync).not.toHaveBeenCalled();
       expect(mockNavigateToApp).not.toHaveBeenCalled();
     });
   });
