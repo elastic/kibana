@@ -9063,6 +9063,16 @@ paths:
           content:
             application/json:
               examples:
+                actionPolicyLicenseNotSupported:
+                  summary: The current license does not support action policies
+                  value:
+                    code: ACTION_POLICY_LICENSE_NOT_SUPPORTED
+                    details:
+                      current_license: basic
+                      license_status: active
+                      required_license: enterprise
+                    error: Forbidden
+                    message: Action policies require an active enterprise license
                 forbidden:
                   summary: Caller lacks required privileges
                   value:
@@ -9071,7 +9081,7 @@ paths:
                     message: The current user does not have the required privileges for this request.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the user does not have the required privileges to perform the request.
+          description: Indicates the user does not have the required privileges, or the current license does not support action policies. Creating, updating, and enabling action policies requires an active Enterprise license.
         '500':
           content:
             application/json:
@@ -9432,6 +9442,16 @@ paths:
           content:
             application/json:
               examples:
+                actionPolicyLicenseNotSupported:
+                  summary: The current license does not support action policies
+                  value:
+                    code: ACTION_POLICY_LICENSE_NOT_SUPPORTED
+                    details:
+                      current_license: basic
+                      license_status: active
+                      required_license: enterprise
+                    error: Forbidden
+                    message: Action policies require an active enterprise license
                 forbidden:
                   summary: Caller lacks required privileges
                   value:
@@ -9440,7 +9460,7 @@ paths:
                     message: The current user does not have the required privileges for this request.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the user does not have the required privileges to perform the request.
+          description: Indicates the user does not have the required privileges, or the current license does not support action policies. Creating, updating, and enabling action policies requires an active Enterprise license.
         '500':
           content:
             application/json:
@@ -10225,6 +10245,16 @@ paths:
           content:
             application/json:
               examples:
+                actionPolicyLicenseNotSupported:
+                  summary: The current license does not support action policies
+                  value:
+                    code: ACTION_POLICY_LICENSE_NOT_SUPPORTED
+                    details:
+                      current_license: basic
+                      license_status: active
+                      required_license: enterprise
+                    error: Forbidden
+                    message: Action policies require an active enterprise license
                 forbidden:
                   summary: Caller lacks required privileges
                   value:
@@ -10233,7 +10263,7 @@ paths:
                     message: The current user does not have the required privileges for this request.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the user does not have the required privileges to perform the request.
+          description: Indicates the user does not have the required privileges, or the current license does not support action policies. Creating, updating, and enabling action policies requires an active Enterprise license.
         '404':
           content:
             application/json:
@@ -10448,6 +10478,16 @@ paths:
           content:
             application/json:
               examples:
+                actionPolicyLicenseNotSupported:
+                  summary: The current license does not support action policies
+                  value:
+                    code: ACTION_POLICY_LICENSE_NOT_SUPPORTED
+                    details:
+                      current_license: basic
+                      license_status: active
+                      required_license: enterprise
+                    error: Forbidden
+                    message: Action policies require an active enterprise license
                 forbidden:
                   summary: Caller lacks required privileges
                   value:
@@ -10456,7 +10496,7 @@ paths:
                     message: The current user does not have the required privileges for this request.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the user does not have the required privileges to perform the request.
+          description: Indicates the user does not have the required privileges, or the current license does not support action policies. Creating, updating, and enabling action policies requires an active Enterprise license.
         '409':
           content:
             application/json:
@@ -10773,6 +10813,16 @@ paths:
           content:
             application/json:
               examples:
+                actionPolicyLicenseNotSupported:
+                  summary: The current license does not support action policies
+                  value:
+                    code: ACTION_POLICY_LICENSE_NOT_SUPPORTED
+                    details:
+                      current_license: basic
+                      license_status: active
+                      required_license: enterprise
+                    error: Forbidden
+                    message: Action policies require an active enterprise license
                 forbidden:
                   summary: Caller lacks required privileges
                   value:
@@ -10781,7 +10831,7 @@ paths:
                     message: The current user does not have the required privileges for this request.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the user does not have the required privileges to perform the request.
+          description: Indicates the user does not have the required privileges, or the current license does not support action policies. Creating, updating, and enabling action policies requires an active Enterprise license.
         '404':
           content:
             application/json:
