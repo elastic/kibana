@@ -28,7 +28,7 @@ import type {
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
-import type { StreamsPluginSetup } from '@kbn/streams-plugin/server';
+import type { StreamsPluginSetup, StreamsPluginStart } from '@kbn/streams-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type {
   FieldsMetadataServerSetup,
@@ -89,6 +89,7 @@ export interface SignificantEventsPluginStartDependencies {
   spaces?: SpacesPluginStart;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
   workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
+  streams: StreamsPluginStart;
   nightshiftSources: NightshiftSourcesServerStart;
   nightshiftInvestigations?: NightshiftInvestigationsServerStart;
 }
@@ -112,8 +113,9 @@ export interface SignificantEventsServer {
   agentBuilder?: AgentBuilderPluginStart;
   spaces?: SpacesPluginStart;
   cloud?: CloudSetup;
-  /** Running Kibana version, sent to the Relay when connecting the Slack app. */
+  /** The running Kibana's version, e.g. `9.2.0`. Used to identify the deployment to the Relay service. */
   kibanaVersion: string;
+  /** Singleton client for the Relay service, owned by the Actions plugin. */
   relayClient?: RelayClientContract;
   nightshiftInvestigations?: NightshiftInvestigationsServerStart;
 }
