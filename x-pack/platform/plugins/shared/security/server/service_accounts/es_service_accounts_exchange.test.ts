@@ -7,6 +7,7 @@
 
 import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
+import { inspect } from 'node:util';
 
 import {
   elasticsearchServiceMock,
@@ -20,6 +21,7 @@ import { ServiceAccountCredentialStore } from './credentials';
 import { EsServiceAccounts } from './es_service_accounts';
 import { ServiceAccountTokenExchangeError } from './token_exchange_error';
 import { licenseMock } from '../../common/licensing/index.mock';
+import { getDetailedErrorMessage } from '../errors';
 import { securityMock } from '../mocks';
 
 jest.mock('./credentials');
@@ -162,7 +164,6 @@ describe('Elasticsearch service account token exchange', () => {
         backend.createFakeRequest({ serviceAccountId: ACCOUNT_ID })
       ).rejects.toMatchObject({
         message: 'Error occurred during service account token exchange.',
-        cause,
         retryable: false,
       });
       expect(JSON.stringify(logger.error.mock.calls)).not.toContain(credential.token);
@@ -348,11 +349,57 @@ describe('Elasticsearch service account token exchange', () => {
     expect(clusterClient.asInternalUser.security.invalidateToken).not.toHaveBeenCalled();
   });
 
-  it('retains a generic exchange error rather than exposing upstream messages', async () => {
-    const { backend, exchange } = setup();
-    exchange.mockRejectedValue(new Error(credential.token));
-    await expect(
-      backend.createFakeRequest({ serviceAccountId: ACCOUNT_ID })
-    ).rejects.toBeInstanceOf(ServiceAccountTokenExchangeError);
-  });
+  it.each([
+    ['message', false, 0],
+    ['nestedCause', false, 0],
+    ['boom', false, 0],
+    ['connectionMetadata', true, 0],
+    ['responseMetadata', true, 12000],
+  ] as const)(
+    'sanitizes %s before propagating an exchange failure',
+    async (source, retryable, retryAfterMs) => {
+      const { backend, exchange, logger } = setup();
+      const response = securityMock.createApiResponse({
+        statusCode: 503,
+        headers: { 'retry-after': '12' },
+        body: { error: { type: 'unavailable', reason: credential.token } },
+      });
+      response.meta.request = {
+        id: 'exchange',
+        options: {},
+        params: {
+          method: 'POST',
+          path: '/_security/oauth2/token',
+          body: JSON.stringify({ service_account_token: credential.token }),
+        },
+      };
+      const sourceErrors = {
+        message: new Error(credential.token),
+        nestedCause: new Error('Exchange failed', { cause: new Error(credential.token) }),
+        boom: Boom.forbidden(credential.token),
+        connectionMetadata: new errors.ConnectionError('Disconnected', response),
+        responseMetadata: new errors.ResponseError(response),
+      };
+      const sourceError = sourceErrors[source];
+      expect(inspect(sourceError, { depth: null, customInspect: false })).toContain(
+        credential.token
+      );
+      exchange.mockRejectedValue(sourceError);
+
+      const failure = await backend.createFakeRequest({ serviceAccountId: ACCOUNT_ID }).then(
+        () => {
+          throw new Error('Expected token exchange to fail');
+        },
+        (error: Error) => error
+      );
+      expect(failure).toBeInstanceOf(ServiceAccountTokenExchangeError);
+      expect(failure).toMatchObject({ retryable, retryAfterMs });
+      expect(failure.cause).not.toBe(sourceError);
+      expect(getDetailedErrorMessage(failure)).not.toContain(credential.token);
+      expect(
+        inspect(failure, { depth: null, showHidden: true, customInspect: false })
+      ).not.toContain(credential.token);
+      expect(JSON.stringify(logger.error.mock.calls)).not.toContain(credential.token);
+    }
+  );
 });

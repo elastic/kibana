@@ -548,13 +548,17 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
       const cause =
         error instanceof Error ? error : new Error('Service account token exchange failed.');
       const retryDelay = getExchangeRetryDelay(cause);
-      // Transport errors can include the request body containing the long-lived credential.
+      // Transport errors can contain the credential, so neither log them nor retain them as a cause.
       this.logger.error(
         `Failed to exchange service account ${serviceAccountId} for an ephemeral token (${
           retryDelay === null ? 'terminal' : 'retryable'
         } failure)`
       );
-      throw new ServiceAccountTokenExchangeError(cause, retryDelay !== null, retryDelay ?? 0);
+      throw new ServiceAccountTokenExchangeError(
+        new Error('Service account token exchange failed.'),
+        retryDelay !== null,
+        retryDelay ?? 0
+      );
     }
   }
 
