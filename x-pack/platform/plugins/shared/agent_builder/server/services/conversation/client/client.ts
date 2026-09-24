@@ -163,7 +163,8 @@ export interface ConversationClient {
   applyTemplate(conversationId: string, templateId: string): Promise<Conversation>;
   patchMetadata(
     conversationId: string,
-    updates: Record<string, unknown>
+    updates: Record<string, unknown>,
+    options?: { access: ConversationAccess }
   ): Promise<{ conversation: Conversation; changedFields: string[] }>;
 }
 
@@ -650,11 +651,13 @@ class ConversationClientImpl implements ConversationClient {
       space: this.space,
     });
 
+    let indexed: { _seq_no?: number; _primary_term?: number };
     try {
-      await this.storage.getClient().index({
+      indexed = await this.storage.getClient().index({
         id,
         document: attributes,
         op_type: 'create',
+        refresh: true,
       });
     } catch (error) {
       if (isVersionConflictError(error)) {
@@ -664,9 +667,22 @@ class ConversationClientImpl implements ConversationClient {
       throw error;
     }
 
+    if (indexed._seq_no === undefined || indexed._primary_term === undefined) {
+      throw createInternalError(`Conversation ${id} was indexed without version metadata`);
+    }
+
     this.notifyAttachmentEvents(id, conversation.events ?? []);
 
-    return this.get(id);
+    return toResponseConversation({
+      document: {
+        _id: id,
+        _source: attributes,
+        _seq_no: indexed._seq_no,
+        _primary_term: indexed._primary_term,
+      },
+      user: this.user,
+      resolveTemplate: getTemplate,
+    });
   }
 
   async update(
@@ -997,7 +1013,8 @@ class ConversationClientImpl implements ConversationClient {
 
   async patchMetadata(
     conversationId: string,
-    updates: Record<string, unknown>
+    updates: Record<string, unknown>,
+    { access = 'owner' }: { access?: ConversationAccess } = {}
   ): Promise<{ conversation: Conversation; changedFields: string[] }> {
     let changedFields: string[] = [];
 

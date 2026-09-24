@@ -15,8 +15,6 @@
     "@kbn/alertzero-common",
     "@kbn/management-settings-ids",
     "@kbn/agentic-investigations-plugin",
-    "@kbn/proposals-common",
-    "@kbn/proposals-plugin",
     "@kbn/security-solution-plugin",
     "@kbn/zod",
     "@kbn/zod-helpers",
@@ -48,6 +46,8 @@
     "@kbn/search-inference-endpoints",
     "@kbn/user-profile-components",
     "@kbn/shared-ux-error-boundary",
-    "@kbn/react-kibana-mount"
+    "@kbn/react-kibana-mount",
+    "@kbn/proposals-common",
+    "@kbn/proposals-plugin"
   ]
 }

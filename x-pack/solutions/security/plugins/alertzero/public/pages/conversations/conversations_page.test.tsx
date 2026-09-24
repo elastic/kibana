@@ -650,3 +650,36 @@ describe('ConversationsPage queue sections', () => {
     expect(within(scaffold).getAllByRole('progressbar')).toHaveLength(6);
   });
 });
+
+describe('ConversationsPage impact pills', () => {
+  const hostProposal: ProposalItem = {
+    ...proposal,
+    id: 'prop-host',
+    conversationTitle: 'Host investigation',
+    entityIds: ['host-1'],
+  };
+  const userProposal: ProposalItem = {
+    ...proposal,
+    id: 'prop-user',
+    conversationTitle: 'User investigation',
+    entityIds: ['user-1'],
+  };
+
+  beforeEach(() => {
+    mockProposals({ investigate: [hostProposal, userProposal] });
+  });
+
+  afterEach(() => jest.clearAllMocks());
+
+  it('filters the queue to conversations whose entity ids include the selected pill', () => {
+    renderPage('/');
+
+    expect(screen.getByText('Host investigation')).toBeInTheDocument();
+    expect(screen.getByText('User investigation')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'host-1' }));
+
+    expect(screen.getByText('Host investigation')).toBeInTheDocument();
+    expect(screen.queryByText('User investigation')).not.toBeInTheDocument();
+  });
+});
