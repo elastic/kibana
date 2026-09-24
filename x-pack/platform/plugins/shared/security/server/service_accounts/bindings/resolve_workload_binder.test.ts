@@ -172,6 +172,41 @@ describe('resolveWorkloadBinder', () => {
       )
     ).resolves.toEqual({ type: 'user', username: 'anonymous_user' });
   });
+
+  it('records anonymous callers authenticated with a stack API key as that key', async () => {
+    await expect(
+      resolveWorkloadBinder(
+        mockAuthenticatedUser({
+          username: 'anonymous_user',
+          profile_uid: undefined,
+          authentication_provider: { type: 'anonymous', name: 'anonymous1' },
+          api_key: { id: 'anonymous-key-id', name: 'key', managed_by: 'elasticsearch' },
+        }),
+        resolveUserProfileId
+      )
+    ).resolves.toEqual({
+      type: 'api_key',
+      apiKeyId: 'anonymous-key-id',
+      variant: 'stack',
+      userProfileId: 'resolved-profile-uid',
+    });
+  });
+
+  it('records anonymous callers authenticated with a UIAM API key as that key', async () => {
+    await expect(
+      resolveWorkloadBinder(
+        mockAuthenticatedUser({
+          username: 'anonymous_user',
+          profile_uid: undefined,
+          authentication_provider: { type: 'anonymous', name: 'anonymous1' },
+          api_key: { id: 'anonymous-key-id', name: 'key', managed_by: 'cloud' },
+        }),
+        resolveUserProfileId
+      )
+    ).resolves.toEqual({ type: 'api_key', apiKeyId: 'anonymous-key-id', variant: 'uiam' });
+
+    expect(resolveUserProfileId).not.toHaveBeenCalled();
+  });
 });
 
 describe('bestEffortUserProfileIdResolver', () => {

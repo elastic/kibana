@@ -50,6 +50,10 @@ export const bestEffortUserProfileIdResolver =
  * authenticated with an API key acted as that key, which carries its own privileges and outlives
  * any single session. The user profile is recorded alongside the credential where one exists, so
  * a binding can still be traced back to a person.
+ *
+ * Unlike {@link getAuthenticatedPrincipal}, which classifies anonymous callers as `anonymous`
+ * whatever credential the anonymous provider authenticates with, an anonymous caller that acted
+ * through an API key is recorded as that key.
  */
 export const resolveWorkloadBinder = async (
   user: AuthenticatedUser,
@@ -62,16 +66,7 @@ export const resolveWorkloadBinder = async (
       return { type: 'service_account', serviceAccountId: principal.serviceAccountId };
 
     case 'api_key':
-      // TODO: record the creator's user profile for UIAM API keys too, once fake requests can
-      // resolve user profiles: https://github.com/elastic/kibana/issues/271760
-      return {
-        type: 'api_key',
-        apiKeyId: principal.apiKeyId,
-        variant: principal.variant,
-        ...(principal.variant === 'stack'
-          ? optionalUserProfileId(await resolveUserProfileId())
-          : {}),
-      };
+      return await toApiKeyBinder(principal.apiKeyId, principal.variant, resolveUserProfileId);
 
     case 'user':
       return {
@@ -83,6 +78,13 @@ export const resolveWorkloadBinder = async (
     case 'anonymous':
       // The persisted binder has no anonymous arm; authorization decides whether anonymous
       // callers may bind at all, so record them the way they were recorded before.
+      if (user.api_key) {
+        return await toApiKeyBinder(
+          user.api_key.id,
+          user.api_key.managed_by === 'cloud' ? 'uiam' : 'stack',
+          resolveUserProfileId
+        );
+      }
       return {
         type: 'user',
         username: principal.username,
@@ -90,6 +92,19 @@ export const resolveWorkloadBinder = async (
       };
   }
 };
+
+const toApiKeyBinder = async (
+  apiKeyId: string,
+  variant: 'stack' | 'uiam',
+  resolveUserProfileId: ResolveUserProfileId
+): Promise<ServiceAccountWorkloadBinder> => ({
+  type: 'api_key',
+  apiKeyId,
+  variant,
+  // TODO: record the creator's user profile for UIAM API keys too, once fake requests can
+  // resolve user profiles: https://github.com/elastic/kibana/issues/271760
+  ...(variant === 'stack' ? optionalUserProfileId(await resolveUserProfileId()) : {}),
+});
 
 const optionalUserProfileId = (userProfileId: string | undefined) =>
   userProfileId ? { userProfileId } : {};
