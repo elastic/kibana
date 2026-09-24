@@ -80,7 +80,6 @@ const CREATE_MONITOR_LABEL = i18n.translate(
 );
 
 export interface SyntheticsAppHeaderMenuOptions {
-  showSettings?: boolean;
   showDiagnostics?: boolean;
   showCreateMonitor?: boolean;
   primaryActionItem?: AppHeaderMenu['primaryActionItem'];
@@ -95,7 +94,6 @@ export function useSyntheticsAppHeaderMenu(
   options: SyntheticsAppHeaderMenuOptions = {}
 ): SyntheticsAppHeaderMenuResult {
   const {
-    showSettings = true,
     showDiagnostics = false,
     showCreateMonitor: enableCreateMonitor = false,
     primaryActionItem,
@@ -304,17 +302,15 @@ export function useSyntheticsAppHeaderMenu(
       });
     }
 
-    if (showSettings) {
-      items.push({
-        id: 'settings',
-        label: SETTINGS_LABEL,
-        iconType: 'gear',
-        href: settingsHref,
-        testId: 'settings-page-link',
-        order: order++,
-        overflow: true,
-      });
-    }
+    items.push({
+      id: 'settings',
+      label: SETTINGS_LABEL,
+      iconType: 'gear',
+      href: settingsHref,
+      testId: 'settings-page-link',
+      order: order++,
+      overflow: true,
+    });
 
     return {
       items,
@@ -350,7 +346,6 @@ export function useSyntheticsAppHeaderMenu(
     settingsHref,
     showCreateMonitor,
     showDiagnostics,
-    showSettings,
     statusRuleExists,
     tlsRuleExists,
   ]);
