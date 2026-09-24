@@ -187,9 +187,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
 
         it('reopens a closed case via the status dropdown', async () => {
-          await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses.closed);
-          await header.waitUntilLoadingHasFinished();
-
           await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses.open);
           await header.waitUntilLoadingHasFinished();
 

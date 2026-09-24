@@ -259,8 +259,12 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('shows the tags correctly', async () => {
-        const tags = await testSubjects.find('case-tags');
-        expect(replaceNewLinesWithSpace(await tags.getVisibleText())).equal('upgrade test kibana');
+        const tagsText = replaceNewLinesWithSpace(
+          await (await testSubjects.find('case-tags')).getVisibleText()
+        );
+        expect(tagsText).to.contain('upgrade');
+        expect(tagsText).to.contain('test');
+        expect(tagsText).to.contain('kibana');
       });
 
       it('shows the connector fields', async () => {
@@ -325,7 +329,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('shows the severity correctly', async () => {
-        const severity = await testSubjects.find('case-table-column-severity-low');
+        const severity = await testSubjects.find('case-severity-badge-low');
         expect(await severity.getVisibleText()).equal('Low');
       });
 

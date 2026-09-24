@@ -52,7 +52,7 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
 
       await testSubjects.existOrFail('case-tags');
       await testSubjects.existOrFail('cases-categories');
-      await testSubjects.existOrFail('case-view-sidebar-connectors');
+      await testSubjects.existOrFail('case-view-sidebar-attributes');
     });
 
     it('displays errors correctly while creating a case', async () => {
