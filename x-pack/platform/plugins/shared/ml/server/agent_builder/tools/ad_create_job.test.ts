@@ -168,6 +168,7 @@ describe('adCreateJobTool', () => {
         influencers: ['host.name', 'source.ip', 'mlcategory'],
       };
       const datafeedQuery = { term: { 'event.category': 'network' } };
+      const duration = { start: 1_700_000_000_000, end: 1_700_003_600_000 };
 
       await adCreateJobTool.handler(
         {
@@ -177,6 +178,7 @@ describe('adCreateJobTool', () => {
             data_description: { time_field: '@timestamp' },
           },
           datafeed_config: { indices: ['logs-*'], query: datafeedQuery },
+          duration,
         },
         createContext(ml, search)
       );
@@ -191,8 +193,24 @@ describe('adCreateJobTool', () => {
         .map(([request]) => request.aggs.buckets.aggs.card.cardinality.field);
       expect(maxBucketFields).toEqual(['source.ip']);
 
+      const scopedQuery = {
+        bool: {
+          must: [
+            datafeedQuery,
+            {
+              range: {
+                '@timestamp': {
+                  gte: duration.start,
+                  lte: duration.end,
+                  format: 'epoch_millis',
+                },
+              },
+            },
+          ],
+        },
+      };
       for (const [request] of search.mock.calls) {
-        expect(request.query).toEqual(datafeedQuery);
+        expect(request.query).toEqual(scopedQuery);
       }
 
       expect(ml.estimateModelMemory).toHaveBeenCalledWith({
@@ -235,6 +253,74 @@ describe('adCreateJobTool', () => {
           },
         },
       });
+    });
+
+    it('operation=estimate_memory requires a duration before scanning max-bucket cardinality', async () => {
+      const ml = createMlMock();
+      const search = jest.fn();
+      const result = await adCreateJobTool.handler(
+        {
+          operation: 'estimate_memory',
+          job_config: {
+            analysis_config: {
+              bucket_span: '15m',
+              detectors: [{ function: 'count' }],
+              influencers: ['host.name'],
+            },
+          },
+          datafeed_config: { indices: ['logs-*'] },
+        },
+        createContext(ml, search)
+      );
+
+      expect(search).not.toHaveBeenCalled();
+      expect(ml.estimateModelMemory).not.toHaveBeenCalled();
+      const standardResult = result as {
+        results: Array<{ type: string; data: { message: string } }>;
+      };
+      expect(standardResult.results[0].type).toBe(ToolResultType.error);
+      expect(standardResult.results[0].data.message).toMatch('duration');
+    });
+
+    it('operation=estimate_memory caps the max-bucket histogram to 1000 buckets', async () => {
+      const ml = createMlMock();
+      const search = jest.fn().mockResolvedValue({
+        aggregations: { max_bucket_card: { value: 3 } },
+      });
+      const bucketMs = 15 * 60 * 1000;
+      const end = 2_000 * bucketMs;
+      const start = 0;
+
+      await adCreateJobTool.handler(
+        {
+          operation: 'estimate_memory',
+          job_config: {
+            analysis_config: {
+              bucket_span: '15m',
+              detectors: [{ function: 'count' }],
+              influencers: ['host.name'],
+            },
+            data_description: { time_field: '@timestamp' },
+          },
+          datafeed_config: { indices: ['logs-*'] },
+          duration: { start, end },
+        },
+        createContext(ml, search)
+      );
+
+      expect(search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: {
+            range: {
+              '@timestamp': {
+                gte: end - 1000 * bucketMs,
+                lte: end,
+                format: 'epoch_millis',
+              },
+            },
+          },
+        })
+      );
     });
 
     it('operation=estimate_memory returns an error when cardinality lookup fails', async () => {
@@ -308,7 +394,7 @@ describe('adCreateJobTool', () => {
         createContext()
       );
 
-      expect(previewDatafeed).toHaveBeenCalled();
+      expect(previewDatafeed).toHaveBeenCalledTimes(1);
       const standardResult = result as {
         results: Array<{ type: string; data: Record<string, unknown> }>;
       };

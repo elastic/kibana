@@ -117,10 +117,17 @@ export const createAdGetJobInfoTool = (
 
         case 'get_job_stats': {
           // Space-filter via MlClient so a canGetJobs user cannot read stats for
-          // jobs that belong only to other Kibana Spaces.
+          // jobs that belong only to other Kibana Spaces. Fail closed: `ml` here is
+          // the internal user and is not space-scoped.
           const mlClient = buildMlClient?.(esClient, savedObjectsClient, request);
-          const statsApi = mlClient ?? ml;
-          const response = await statsApi.getJobStats(jobId ? { job_id: jobId } : {});
+          if (!mlClient) {
+            return {
+              results: [
+                createErrorResult('Cannot read job stats: space-scoped ML client is unavailable.'),
+              ],
+            };
+          }
+          const response = await mlClient.getJobStats(jobId ? { job_id: jobId } : {});
           return { results: [{ type: ToolResultType.other, data: response }] };
         }
 

@@ -67,17 +67,56 @@ const DATE_MATH_UNIT_MS: Record<string, number> = {
   y: 31_536_000_000,
 };
 
-// Matches: now, now±Nunits, with optional /roundUnit suffix (suffix is dropped — we floor).
-const DATE_MATH_RE = /^now(?:([+-])(\d+)([smhdwMy]))?(?:\/[smhdwMy])?$/;
+// Matches: now, now±Nunits, and an optional /roundUnit suffix (floored in UTC).
+const DATE_MATH_RE = /^now(?:([+-])(\d+)([smhdwMy]))?(?:\/([smhdwMy]))?$/;
+
+/** Floors an instant to the start of a UTC date-math unit. Weeks start on Monday. */
+const floorToUtcUnit = (ms: number, unit: string): number => {
+  const date = new Date(ms);
+  switch (unit) {
+    case 's':
+      date.setUTCMilliseconds(0);
+      break;
+    case 'm':
+      date.setUTCSeconds(0, 0);
+      break;
+    case 'h':
+      date.setUTCMinutes(0, 0, 0);
+      break;
+    case 'd':
+      date.setUTCHours(0, 0, 0, 0);
+      break;
+    case 'w': {
+      date.setUTCHours(0, 0, 0, 0);
+      const daysSinceMonday = (date.getUTCDay() + 6) % 7;
+      date.setUTCDate(date.getUTCDate() - daysSinceMonday);
+      break;
+    }
+    case 'M':
+      date.setUTCDate(1);
+      date.setUTCHours(0, 0, 0, 0);
+      break;
+    case 'y':
+      date.setUTCMonth(0, 1);
+      date.setUTCHours(0, 0, 0, 0);
+      break;
+    default:
+      return ms;
+  }
+  return date.getTime();
+};
 
 const resolveDateMathParam = (value: string): string => {
   const match = DATE_MATH_RE.exec(value);
   if (!match) return value;
   let ms = Date.now();
-  const [, sign, amount, unit] = match;
+  const [, sign, amount, unit, roundUnit] = match;
   if (sign && amount && unit) {
     const delta = parseInt(amount, 10) * (DATE_MATH_UNIT_MS[unit] ?? 0);
     ms = sign === '+' ? ms + delta : ms - delta;
+  }
+  if (roundUnit) {
+    ms = floorToUtcUnit(ms, roundUnit);
   }
   return new Date(ms).toISOString();
 };
@@ -316,7 +355,7 @@ Pass the full ES|QL string in \`query\`. Only include \`params\` when the query 
 
 For record / bucket / influencer results copy templates that use \`FROM .ml-anomalies\`. This tool probes whether that materialized view exists on the connected Elasticsearch cluster and automatically rewrites to \`FROM .ml-anomalies-*\` (and \`timestamp\` instead of \`event.ingested\`) when it does not — older ES versions will not have the view.
 
-Prefer \`event.ingested\` for time-range filters in templates. Do not query \`causes\` — it is not supported on the view. Only the fields listed in \`esql-read-queries\` exist on that view.
+Filter anomaly time ranges on \`timestamp\` (the bucket time). Do not filter historical results on \`event.ingested\` — that is when the result document was written, so a batch job run today misses the analysis window. Do not query \`causes\` — it is not supported on the view. Only the fields listed in \`esql-read-queries\` exist on that view.
 
 For \`model_plot\`, \`model_forecast\`, \`model_snapshot\`, \`category_definition\`, and \`model_size_stats\` use \`FROM .ml-anomalies-*\`.
 

@@ -12,6 +12,7 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { createErrorResult } from '@kbn/agent-builder-server';
 import { MLCATEGORY } from '@kbn/ml-anomaly-utils';
+import { parseInterval } from '@kbn/ml-parse-interval';
 import type { ResolveMlCapabilities } from '@kbn/ml-common-types/capabilities';
 import { VALIDATION_STATUS } from '@kbn/ml-validators';
 import type { MlLicense } from '../../../common/license';
@@ -19,7 +20,7 @@ import type { MlFeatures } from '../../../common/constants/app';
 import type { MlAuthorizationService } from '../../lib/capabilities/check_capabilities';
 import { hasMlCapabilitiesProvider } from '../../lib/capabilities/check_capabilities';
 import { validateJob } from '../../models/job_validation/job_validation';
-import { validateDatafeedPreview } from '../../models/job_validation/validate_datafeed_preview';
+import { previewDatafeedForValidation } from '../../models/job_validation/validate_datafeed_preview';
 import { estimateBucketSpanFactory } from '../../models/bucket_span_estimator';
 import { getMessages } from '../../../common/constants/messages';
 import type { BuildMlClientFn, BuildDataRecognizerFn } from '../ml_client_factory';
@@ -57,7 +58,7 @@ const schema = z.object({
     })
     .optional()
     .describe(
-      'Time range in epoch ms. Providing it skips the internal time-range lookup in validate_full and scopes the datafeed preview.'
+      'Time range in epoch ms. Scopes estimate_memory cardinality lookups to the explored or batch window, skips the internal time-range lookup in validate_full, and scopes the datafeed preview.'
     ),
   estimator_params: z
     .record(z.string(), z.unknown())
@@ -183,6 +184,14 @@ export const createAdCreateJobTool = (
               ? (datafeedConfigObj.indices as string[])
               : undefined;
           const datafeedQuery = getDatafeedQuery(datafeedConfigObj);
+          const dataDesc = jobConfigObj.data_description as Record<string, unknown> | undefined;
+          const timeField =
+            typeof dataDesc?.time_field === 'string' ? dataDesc.time_field : '@timestamp';
+          const bucketSpan =
+            typeof analysisConfigObj.bucket_span === 'string'
+              ? analysisConfigObj.bucket_span
+              : '15m';
+          const cardinalityQuery = buildCardinalityQuery(datafeedQuery, timeField, duration);
 
           if (indices && indices.length > 0) {
             if (overallCardinalityFields.size > 0 && !resolvedOverallCardinality) {
@@ -192,7 +201,7 @@ export const createAdCreateJobTool = (
                   const result = await esClient.asCurrentUser.search({
                     index: indices,
                     size: 0,
-                    ...(datafeedQuery ? { query: datafeedQuery } : {}),
+                    ...(cardinalityQuery ? { query: cardinalityQuery } : {}),
                     aggs: { card: { cardinality: { field } } },
                   });
                   const cardinality = (result.aggregations?.card as { value?: number } | undefined)
@@ -221,21 +230,29 @@ export const createAdCreateJobTool = (
             }
 
             if (influencerCardinalityFields.size > 0 && !resolvedMaxBucketCardinality) {
+              if (duration?.start === undefined && duration?.end === undefined) {
+                return {
+                  results: [
+                    createErrorResult(
+                      'Cannot estimate memory: duration {start, end} is required so max-bucket cardinality stays inside the explored or batch time range.'
+                    ),
+                  ],
+                };
+              }
               resolvedMaxBucketCardinality = {};
-              const dataDesc = jobConfigObj.data_description as Record<string, unknown> | undefined;
-              const timeField =
-                typeof dataDesc?.time_field === 'string' ? dataDesc.time_field : '@timestamp';
-              const bucketSpan =
-                typeof analysisConfigObj.bucket_span === 'string'
-                  ? analysisConfigObj.bucket_span
-                  : '15m';
+              const histogramQuery = buildCardinalityQuery(
+                datafeedQuery,
+                timeField,
+                duration,
+                bucketSpan
+              );
 
               for (const field of influencerCardinalityFields) {
                 try {
                   const result = await esClient.asCurrentUser.search({
                     index: indices,
                     size: 0,
-                    ...(datafeedQuery ? { query: datafeedQuery } : {}),
+                    ...(histogramQuery ? { query: histogramQuery } : {}),
                     aggs: {
                       buckets: {
                         date_histogram: { field: timeField, fixed_interval: bucketSpan },
@@ -416,46 +433,34 @@ export const createAdCreateJobTool = (
           }
 
           const combinedJob = { ...jobConfig, datafeed_config: datafeedConfig };
-          const { valid, error } = await validateDatafeedPreview(
+          const preview = await previewDatafeedForValidation(
             mlClient,
             combinedJob as any,
             duration?.start,
             duration?.end
           );
 
-          if (!valid) {
+          if (!preview.valid) {
             return {
               results: [
                 {
                   type: ToolResultType.other,
-                  data: { valid: false, documentsFound: false, error },
+                  data: { valid: false, documentsFound: false, error: preview.error },
                 },
               ],
             };
           }
 
-          // Also fetch a small sample of actual documents for field verification.
-          let documents: unknown[] = [];
-          try {
-            const preview = (await mlClient.previewDatafeed(
-              {
-                job_config: jobConfig as any,
-                datafeed_config: datafeedConfig as any,
-                ...(duration?.start !== undefined ? { start: duration.start } : {}),
-                ...(duration?.end !== undefined ? { end: duration.end } : {}),
-              },
-              { maxRetries: 0 }
-            )) as unknown;
-            documents = getPreviewSampleDocuments(preview).slice(0, 20);
-          } catch {
-            // ignore — valid/documentsFound is the authoritative result
-          }
-
+          const documents = preview.documents.slice(0, 20);
           return {
             results: [
               {
                 type: ToolResultType.other,
-                data: { valid, documentsFound: documents?.length > 0, sample_documents: documents },
+                data: {
+                  valid: true,
+                  documentsFound: documents.length > 0,
+                  sample_documents: documents,
+                },
               },
             ],
           };
@@ -606,20 +611,46 @@ const getDatafeedQuery = (
   return query as estypes.QueryDslQueryContainer;
 };
 
+/** Matches the job-wizard estimator: a date histogram must stay under this many buckets. */
+const MAX_CARDINALITY_HISTOGRAM_BUCKETS = 1000;
+
 /**
- * `validateDatafeedPreview` documents `previewDatafeed` as `{ body: unknown[] }`
- * while the generated client type is `TDocument[]`. Accept both so Phase 1
- * still receives sample documents for field inspection.
+ * Combines the datafeed query with the explored/batch time range.
+ * When `bucketSpan` is set, the start is pulled forward so the date histogram
+ * cannot exceed {@link MAX_CARDINALITY_HISTOGRAM_BUCKETS}.
  */
-const getPreviewSampleDocuments = (preview: unknown): unknown[] => {
-  if (Array.isArray(preview)) {
-    return preview;
+const buildCardinalityQuery = (
+  datafeedQuery: estypes.QueryDslQueryContainer | undefined,
+  timeField: string,
+  duration: { start?: number; end?: number } | undefined,
+  bucketSpan?: string
+): estypes.QueryDslQueryContainer | undefined => {
+  if (duration?.start === undefined && duration?.end === undefined) {
+    return datafeedQuery;
   }
-  if (preview === null || typeof preview !== 'object' || !('body' in preview)) {
-    return [];
+
+  let start = duration.start;
+  const end = duration.end;
+  if (bucketSpan !== undefined && end !== undefined) {
+    const interval = parseInterval(bucketSpan);
+    if (interval !== null) {
+      const earliestAllowed = end - MAX_CARDINALITY_HISTOGRAM_BUCKETS * interval.asMilliseconds();
+      start = start === undefined ? earliestAllowed : Math.max(start, earliestAllowed);
+    }
   }
-  const { body } = preview;
-  return Array.isArray(body) ? body : [];
+
+  const bounds: estypes.QueryDslRangeQuery = { format: 'epoch_millis' };
+  if (start !== undefined) {
+    bounds.gte = start;
+  }
+  if (end !== undefined) {
+    bounds.lte = end;
+  }
+  const rangeQuery: estypes.QueryDslQueryContainer = { range: { [timeField]: bounds } };
+  if (!datafeedQuery) {
+    return rangeQuery;
+  }
+  return { bool: { must: [datafeedQuery, rangeQuery] } };
 };
 
 /**

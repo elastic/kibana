@@ -3,7 +3,7 @@
 Use `ml.query_anomalies` and pass the ES|QL below in the `query` parameter. Bind `?param` values via `params`. Never call with an empty argument object — `query` is required; omit the `params` field when unused.
 
 **Time fields:** never use `@timestamp`.
-- Record / bucket / influencer queries use `FROM .ml-anomalies`. Use `score` / `initial_score` (not `record_score` / `anomaly_score` / `influencer_score`). Prefer `` `event.ingested` `` for time-range filters; use `timestamp` for the bucket time and for aggregating scores over time. `ml.query_anomalies` falls back to `FROM .ml-anomalies-*` and automatically maps the raw per-type score fields to `score` / `initial_score` on older clusters.
+- Record / bucket / influencer queries use `FROM .ml-anomalies`. Use `score` / `initial_score` (not `record_score` / `anomaly_score` / `influencer_score`). Filter time ranges on `timestamp` (the bucket time). Do not filter on `` `event.ingested` `` — that is when the result document was written and does not match a historical analysis window. `ml.query_anomalies` falls back to `FROM .ml-anomalies-*` and automatically maps the raw per-type score fields to `score` / `initial_score` on older clusters.
 - `model_plot`, `model_forecast`, and `model_snapshot` are **not** on the materialized view — query `FROM .ml-anomalies-*` and filter on `timestamp`.
 
 Only `record` / `bucket` / `influencer` fields listed in `esql-read-queries` exist on `.ml-anomalies`. Do not select `causes`, `probability`, `multi_bucket_impact`, or `anomaly_score_explanation.*`.
@@ -61,13 +61,13 @@ Find anomalies where the model has significantly changed its assessment due to r
 FROM .ml-anomalies
 | WHERE result_type == "record"
   AND job_id LIKE ?job_id_pattern
-  AND `event.ingested` >= ?start_time
-  AND `event.ingested` <= ?end_time
+  AND timestamp >= ?start_time
+  AND timestamp <= ?end_time
 | EVAL score_drift = initial_score - score
 | WHERE ABS(score_drift) >= ?min_drift
 | SORT ABS(score_drift) DESC
 | LIMIT 30
-| KEEP job_id, timestamp, `event.ingested`, initial_score, score, score_drift,
+| KEEP job_id, timestamp, initial_score, score, score_drift,
        function, function_description, field_name, by_field_value, partition_field_value
 ```
 

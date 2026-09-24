@@ -180,6 +180,18 @@ The returned \`config\` in the result can also be forwarded to \`platform.dashbo
     const { chart_type: chartType } = params;
 
     try {
+      const verifiedJobs = await verifyChartJobs(
+        params.job_ids,
+        chartType,
+        buildMlClient,
+        esClient,
+        savedObjectsClient,
+        request
+      );
+      if ('error' in verifiedJobs) {
+        return { results: [createErrorResult(verifiedJobs.error)] };
+      }
+
       let attachmentType: string;
       let attachmentData: Record<string, unknown>;
       let description: string;
@@ -238,63 +250,42 @@ The returned \`config\` in the result can also be forwarded to \`platform.dashbo
         // Validate that all required entity fields for the chosen detector are provided
         // in selected_entities — otherwise the embeddable shows an empty callout instead of a chart.
         const detectorIndex = params.selected_detector_index ?? 0;
-        try {
-          const mlClient = buildMlClient?.(esClient, savedObjectsClient, request);
-          const jobsApi = mlClient ?? esClient.asCurrentUser.ml;
-          const jobResponse = await jobsApi.getJobs({
-            job_id: params.job_ids[0],
-          });
-          const job = jobResponse.jobs?.[0];
-          if (!job) {
-            return {
-              results: [
-                createErrorResult(
-                  `single_metric_viewer cannot render: job "${params.job_ids[0]}" was not found.`
-                ),
-              ],
-            };
-          }
-          const detectors = job.analysis_config?.detectors ?? [];
-          const detector = detectors[detectorIndex];
-          if (!detector) {
-            return {
-              results: [
-                createErrorResult(
-                  `single_metric_viewer cannot render: selected_detector_index ${detectorIndex} is out of range for job "${
-                    params.job_ids[0]
-                  }". The job has ${detectors.length} detector${detectors.length === 1 ? '' : 's'}.`
-                ),
-              ],
-            };
-          }
-          const requiredFields = [
-            detector.partition_field_name,
-            detector.by_field_name,
-            detector.over_field_name,
-          ].filter((f): f is string => typeof f === 'string');
-          const provided = params.selected_entities ?? {};
-          const missing = requiredFields.filter(
-            (f) => !(f in provided) || provided[f] == null || provided[f] === ''
-          );
-          if (missing.length > 0) {
-            return {
-              results: [
-                createErrorResult(
-                  `single_metric_viewer cannot render: the selected detector requires values for the following entity field${
-                    missing.length > 1 ? 's' : ''
-                  }: ${missing.map((f) => `"${f}"`).join(', ')}. ` +
-                    `Provide them via selected_entities (e.g. from a prior anomaly record's partition_field_value / by_field_value / over_field_value).`
-                ),
-              ],
-            };
-          }
-        } catch (fetchError) {
-          logger.warn(
-            `Could not validate detector entity fields for job ${params.job_ids[0]}: ${
-              fetchError instanceof Error ? fetchError.message : String(fetchError)
-            }`
-          );
-          // Non-fatal: proceed and let the embeddable show its own validation state.
+        const job =
+          verifiedJobs.jobs.find((candidate) => candidate.job_id === params.job_ids[0]) ??
+          verifiedJobs.jobs[0];
+        const detectors = job?.analysis_config?.detectors ?? [];
+        const detector = detectors[detectorIndex];
+        if (!detector) {
+          return {
+            results: [
+              createErrorResult(
+                `single_metric_viewer cannot render: selected_detector_index ${detectorIndex} is out of range for job "${
+                  params.job_ids[0]
+                }". The job has ${detectors.length} detector${detectors.length === 1 ? '' : 's'}.`
+              ),
+            ],
+          };
+        }
+        const requiredFields = [
+          detector.partition_field_name,
+          detector.by_field_name,
+          detector.over_field_name,
+        ].filter((f): f is string => typeof f === 'string');
+        const provided = params.selected_entities ?? {};
+        const missing = requiredFields.filter(
+          (f) => !(f in provided) || provided[f] == null || provided[f] === ''
+        );
+        if (missing.length > 0) {
+          return {
+            results: [
+              createErrorResult(
+                `single_metric_viewer cannot render: the selected detector requires values for the following entity field${
+                  missing.length > 1 ? 's' : ''
+                }: ${missing.map((f) => `"${f}"`).join(', ')}. ` +
+                  `Provide them via selected_entities (e.g. from a prior anomaly record's partition_field_value / by_field_value / over_field_value).`
+              ),
+            ],
+          };
         }
 
         attachmentType = SINGLE_METRIC_VIEWER_ATTACHMENT_TYPE;
@@ -343,3 +334,60 @@ The returned \`config\` in the result can also be forwarded to \`platform.dashbo
     }
   },
 });
+
+interface ChartJob {
+  job_id?: string;
+  groups?: string[];
+  analysis_config?: {
+    detectors?: Array<{
+      partition_field_name?: string;
+      by_field_name?: string;
+      over_field_name?: string;
+    }>;
+  };
+}
+
+const missingChartJobMessage = (chartType: string, missing: string[]): string => {
+  const quoted = missing.map((id) => `"${id}"`).join(', ');
+  return missing.length === 1
+    ? `${chartType} cannot render: job ${quoted} was not found.`
+    : `${chartType} cannot render: jobs ${quoted} were not found.`;
+};
+
+/** Confirms every requested job or group id is visible before an attachment is created. */
+const verifyChartJobs = async (
+  jobIds: string[],
+  chartType: string,
+  buildMlClient: BuildMlClientFn | undefined,
+  esClient: Parameters<BuildMlClientFn>[0],
+  savedObjectsClient: Parameters<BuildMlClientFn>[1],
+  request: Parameters<BuildMlClientFn>[2]
+): Promise<{ jobs: ChartJob[] } | { error: string }> => {
+  const mlClient = buildMlClient?.(esClient, savedObjectsClient, request);
+  const jobsApi = mlClient ?? esClient.asCurrentUser.ml;
+  try {
+    const jobResponse = await jobsApi.getJobs({ job_id: jobIds.join(',') });
+    const jobs = (jobResponse.jobs ?? []) as ChartJob[];
+    const foundJobIds = new Set(
+      jobs
+        .map((job) => job.job_id)
+        .filter((id): id is string => typeof id === 'string' && id.length > 0)
+    );
+    const foundGroupIds = new Set(
+      jobs.flatMap((job) => (Array.isArray(job.groups) ? job.groups : []))
+    );
+    const missing = jobIds.filter(
+      (id) => id !== '*' && !foundJobIds.has(id) && !foundGroupIds.has(id)
+    );
+    if (missing.length > 0) {
+      return { error: missingChartJobMessage(chartType, missing) };
+    }
+    if (jobs.length === 0) {
+      return { error: missingChartJobMessage(chartType, jobIds) };
+    }
+    return { jobs };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    return { error: `${chartType} cannot render: failed to verify job IDs: ${message}` };
+  }
+};

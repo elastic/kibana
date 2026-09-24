@@ -51,7 +51,18 @@ describe('createMlChartsTool', () => {
     mlLicense
   );
 
-  const createContext = (attachmentsAdd = jest.fn(), getJobs = jest.fn()) =>
+  const createContext = (
+    attachmentsAdd = jest.fn(),
+    getJobs = jest.fn().mockImplementation(async ({ job_id }: { job_id?: string } = {}) => ({
+      jobs: String(job_id ?? '')
+        .split(',')
+        .filter((id) => id.length > 0 && id !== '*')
+        .map((id) => ({
+          job_id: id,
+          analysis_config: { detectors: [{}] },
+        })),
+    }))
+  ) =>
     ({
       esClient: { asCurrentUser: { ml: { getJobs } } },
       request: {},
@@ -94,6 +105,7 @@ describe('createMlChartsTool', () => {
     const getJobs = jest.fn().mockResolvedValue({
       jobs: [
         {
+          job_id: 'job-1',
           analysis_config: {
             detectors: [{ partition_field_name: 'host.name' }],
           },
@@ -129,7 +141,7 @@ describe('createMlChartsTool', () => {
   it('looks up detector config via mlClient when the factory is provided', async () => {
     const mlClient = {
       getJobs: jest.fn().mockResolvedValue({
-        jobs: [{ analysis_config: { detectors: [{}] } }],
+        jobs: [{ job_id: 'job-1', analysis_config: { detectors: [{}] } }],
       }),
     };
     const asCurrentUserGetJobs = jest.fn();
@@ -151,6 +163,39 @@ describe('createMlChartsTool', () => {
 
     expect(mlClient.getJobs).toHaveBeenCalledWith({ job_id: 'job-1' });
     expect(asCurrentUserGetJobs).not.toHaveBeenCalled();
+  });
+
+  it('rejects a swim lane when a job id cannot be verified', async () => {
+    const attachmentsAdd = jest.fn();
+    const result = await createMlChartsToolInstance.handler(
+      { chart_type: 'anomaly_swimlane', job_ids: ['missing-job'], swimlane_type: 'overall' },
+      createContext(attachmentsAdd, jest.fn().mockResolvedValue({ jobs: [] }))
+    );
+
+    expect(attachmentsAdd).not.toHaveBeenCalled();
+    const missingJobResult = result as {
+      results: Array<{ type: string; data: { message: string } }>;
+    };
+    expect(missingJobResult.results[0].type).toBe(ToolResultType.error);
+    expect(missingJobResult.results[0].data.message).toBe(
+      'anomaly_swimlane cannot render: job "missing-job" was not found.'
+    );
+  });
+
+  it('rejects anomaly charts when a job id cannot be verified', async () => {
+    const attachmentsAdd = jest.fn();
+    const result = await createMlChartsToolInstance.handler(
+      { chart_type: 'anomaly_charts', job_ids: ['missing-job'] },
+      createContext(attachmentsAdd, jest.fn().mockResolvedValue({ jobs: [] }))
+    );
+
+    expect(attachmentsAdd).not.toHaveBeenCalled();
+    const missingJobResult = result as {
+      results: Array<{ type: string; data: { message: string } }>;
+    };
+    expect(missingJobResult.results[0].data.message).toBe(
+      'anomaly_charts cannot render: job "missing-job" was not found.'
+    );
   });
 
   it('returns an error when the requested job is missing', async () => {
@@ -175,6 +220,7 @@ describe('createMlChartsTool', () => {
     const getJobs = jest.fn().mockResolvedValue({
       jobs: [
         {
+          job_id: 'job-1',
           analysis_config: {
             detectors: [{ function: 'mean', field_name: 'bytes' }],
           },

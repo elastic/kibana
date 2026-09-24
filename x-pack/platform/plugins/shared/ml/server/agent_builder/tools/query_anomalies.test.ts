@@ -216,11 +216,15 @@ describe('resolveParamDates', () => {
     expect(Math.abs(resolved - sixMonthsAgo)).toBeLessThan(5_000);
   });
 
-  it('strips /roundUnit suffix without error', () => {
-    expect(() => resolveParamDates({ t: 'now/d' })).not.toThrow();
-    const result = resolveParamDates({ t: 'now-1d/d' });
-    expect(typeof result.t).toBe('string');
-    expect(result.t).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+  it('rounds now-1d/d down to the start of the previous UTC day', () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2024-03-15T15:30:45.000Z'));
+    try {
+      expect(resolveParamDates({ t: 'now/d' }).t).toBe('2024-03-15T00:00:00.000Z');
+      expect(resolveParamDates({ t: 'now-1d/d' }).t).toBe('2024-03-14T00:00:00.000Z');
+    } finally {
+      jest.useRealTimers();
+    }
   });
 });
 

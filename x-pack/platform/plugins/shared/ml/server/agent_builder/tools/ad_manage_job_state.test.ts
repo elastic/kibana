@@ -30,6 +30,15 @@ const createMlMock = () => ({
   }),
 });
 
+const createScopedTool = (mlClient: ReturnType<typeof createMlMock>) =>
+  createAdManageJobStateTool(
+    resolveMlCapabilities,
+    undefined,
+    undefined,
+    undefined,
+    () => mlClient as any
+  );
+
 const createContext = (
   mlMock = createMlMock(),
   events = { reportProgress: jest.fn(), sendUiEvent: jest.fn() }
@@ -155,7 +164,7 @@ describe('adManageJobStateTool', () => {
     it('operation=await_batch_completion returns completed when the datafeed has stopped', async () => {
       const ml = createMlMock();
       const events = { reportProgress: jest.fn(), sendUiEvent: jest.fn() };
-      const result = await adManageJobStateTool.handler(
+      const result = await createScopedTool(ml).handler(
         {
           operation: 'await_batch_completion',
           job_id: 'my-job',
@@ -186,7 +195,7 @@ describe('adManageJobStateTool', () => {
         jobs: [{ state: 'opened', data_counts: { latest_record_timestamp: 50 } }],
       });
 
-      const result = await adManageJobStateTool.handler(
+      const result = await createScopedTool(ml).handler(
         {
           operation: 'await_batch_completion',
           job_id: 'my-job',
@@ -218,7 +227,7 @@ describe('adManageJobStateTool', () => {
           jobs: [{ state: 'opened', data_counts: { latest_record_timestamp: 50 } }],
         });
 
-        const resultPromise = adManageJobStateTool.handler(
+        const resultPromise = createScopedTool(ml).handler(
           {
             operation: 'await_batch_completion',
             job_id: 'my-job',
@@ -249,7 +258,7 @@ describe('adManageJobStateTool', () => {
         jobs: [{ state: 'failed', data_counts: {} }],
       });
 
-      const result = await adManageJobStateTool.handler(
+      const result = await createScopedTool(ml).handler(
         { operation: 'await_batch_completion', job_id: 'my-job', max_wait_seconds: 0 },
         createContext(ml)
       );
@@ -267,7 +276,7 @@ describe('adManageJobStateTool', () => {
         jobs: [{ state: 'opened', data_counts: {} }],
       });
 
-      const result = await adManageJobStateTool.handler(
+      const result = await createScopedTool(ml).handler(
         { operation: 'await_batch_completion', job_id: 'my-job', max_wait_seconds: 0 },
         createContext(ml)
       );
@@ -279,31 +288,37 @@ describe('adManageJobStateTool', () => {
       });
     });
 
-    it('operation=delete_job uses the current-user ML client when mlClient is unavailable', async () => {
+    it('operation=await_batch_completion fails closed when the space-scoped client is unavailable', async () => {
       const ml = createMlMock();
-      await adManageJobStateTool.handler(
+      const result = await adManageJobStateTool.handler(
+        { operation: 'await_batch_completion', job_id: 'my-job' },
+        createContext(ml)
+      );
+
+      expect(ml.getJobStats).not.toHaveBeenCalled();
+      expect(getResultData(result).type).toBe(ToolResultType.error);
+      expect(String(getResultData(result).data.message)).toMatch('space-scoped ML client');
+    });
+
+    it('operation=delete_job fails closed when the space-scoped client is unavailable', async () => {
+      const ml = createMlMock();
+      const result = await adManageJobStateTool.handler(
         { operation: 'delete_job', job_id: 'scratch-job' },
         createContext(ml)
       );
 
-      expect(ml.getJobs).toHaveBeenCalledWith({ job_id: 'scratch-job' });
-      expect(ml.stopDatafeed).toHaveBeenCalledWith({
-        datafeed_id: 'datafeed-scratch-job',
-        force: true,
-      });
-      expect(ml.deleteDatafeed).toHaveBeenCalledWith({ datafeed_id: 'datafeed-scratch-job' });
-      expect(ml.deleteJob).toHaveBeenCalledWith({
-        job_id: 'scratch-job',
-        delete_user_annotations: true,
-      });
+      expect(ml.deleteJob).not.toHaveBeenCalled();
+      expect(ml.getJobs).not.toHaveBeenCalled();
+      expect(getResultData(result).type).toBe(ToolResultType.error);
+      expect(String(getResultData(result).data.message)).toMatch('space-scoped ML client');
     });
 
     it('operation=delete_job refuses jobs that are not in the scratch group', async () => {
       const ml = createMlMock();
       ml.getJobs.mockResolvedValue({ jobs: [{ groups: ['production'] }] });
-      const result = await adManageJobStateTool.handler(
+      const result = await createScopedTool(ml).handler(
         { operation: 'delete_job', job_id: 'prod-job' },
-        createContext(ml)
+        createContext(createMlMock())
       );
 
       expect(ml.deleteJob).not.toHaveBeenCalled();

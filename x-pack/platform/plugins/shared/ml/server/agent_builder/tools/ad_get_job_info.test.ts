@@ -70,7 +70,7 @@ describe('adGetJobInfoTool', () => {
       expect(ml.getJobs).toHaveBeenCalledWith({ job_id: 'my-job' });
     });
 
-    it('operation=get_job_stats uses the internal ML client when mlClient is unavailable', async () => {
+    it('operation=get_job_stats fails closed when the space-scoped client is unavailable', async () => {
       const ml = createMlMock();
       const context = createContext(createEsClientMock(ml));
 
@@ -79,8 +79,12 @@ describe('adGetJobInfoTool', () => {
         context
       );
 
-      expect(ml.getJobStats).toHaveBeenCalledWith({ job_id: 'my-job' });
-      expect(result).toEqual({ results: [{ type: ToolResultType.other, data: { jobs: [] } }] });
+      expect(ml.getJobStats).not.toHaveBeenCalled();
+      const standardResult = result as {
+        results: Array<{ type: string; data: { message: string } }>;
+      };
+      expect(standardResult.results[0].type).toBe(ToolResultType.error);
+      expect(standardResult.results[0].data.message).toMatch('space-scoped ML client');
     });
 
     it('operation=get_job_stats routes through mlClient when the factory is provided', async () => {

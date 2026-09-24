@@ -89,7 +89,7 @@ Read scores this way:
 - Raw per-type fields (`record_score`, `anomaly_score`, `influencer_score`, `initial_record_score`, …) exist on `.ml-anomalies-*` only; use `score` / `initial_score` in all ES|QL templates.
 - Compare `actual` to `typical`.
 - Map entities via `partition_field_value` / `by_field_value` / `over_field_value` / `influencer_field_value`.
-- Filter time ranges with `` `event.ingested` ``; use `timestamp` for the bucket time and for aggregating scores over time.
+- Filter anomaly time ranges on `timestamp` (the bucket time). Do not filter historical results on `` `event.ingested` `` — that is when the result document was written.
 - **`causes` is not supported** on the materialized view. Do not query `probability`, `multi_bucket_impact`, or `anomaly_score_explanation.*` via ES|QL.
 
 ---
@@ -359,7 +359,7 @@ Revise the first-pass config from Phase 1 based on answers. Return to this phase
 #### Phase 3 — Validate spec and confirm batch run
 
 1. **Validate** — `ml.ad_create_job` (`operation=validate_full`). Fix errors and re-validate (max 3 attempts). Add `"groups": ["ml-agent-scratch"]` to the batch job config before validation so the job is tagged as a scratch job and can be cleaned up later.
-2. **Estimate memory** — `ml.ad_create_job` (`operation=estimate_memory`). Report in plain terms (e.g. "this job will use about 50 MB").
+2. **Estimate memory** — `ml.ad_create_job` (`operation=estimate_memory`) with `duration` set to the explored or batch window in epoch ms. Report in plain terms (e.g. "this job will use about 50 MB").
 3. **Pre-run summary** — before showing any config, state in plain language:
    - Time range to be analysed (e.g. "the last 90 days of data")
    - Approximate record count
@@ -459,7 +459,7 @@ GET  _ml/anomaly_detectors/<job_id>/results  # 4. Read results      (ml.query_an
 2. **Never use ML jargon with users.** Translate `bucket_span` → detection frequency, `query_delay` → data latency, `by_field_name` → "split by entity". Users decide the business goal; you decide the config.
 3. **Never ask the user about job structure.** "One job per metric or one combined job?", "partition vs. population?", "split by service or by host?" are architecture decisions — make them based on Phase 1 data and the user's stated goal. State the choice and the reason; don't make it a question.
 4. **Always run batch before realtime.** Historical analysis lets the user validate the configuration before committing to a live job.
-5. **Never delete batch jobs without explicit user confirmation.** Name every job ID in the confirmation prompt. Batch jobs must carry the `ml-agent-scratch` group (set in Phase 3) — only scratch jobs may be deleted; never pass `allow_non_scratch: true`.
+5. **Never delete batch jobs without explicit user confirmation.** Name every job ID in the confirmation prompt. Batch jobs must carry the `ml-agent-scratch` group (set in Phase 3). The delete tool rejects every job that is not in that group.
 6. **Plain-language summary before dashboard.** Raw charts without context confuse non-ML users; state the key finding in one sentence first.
 7. **Handle the no-anomaly path explicitly.** Zero results is not the same as success — explain it and offer adjustments.
 8. **Create job before datafeed.** Datafeed references job by ID.

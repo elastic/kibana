@@ -327,6 +327,43 @@ describe('inline ML chart visualizations', () => {
     ).toEqual(pickerTimeRange);
   });
 
+  it('does not pin a time range when saving a realtime chart', async () => {
+    const user = userEvent.setup();
+    const registerActionButtons = jest.fn();
+    mockedUseVisPreviewUnifiedSearch.mockReturnValue({
+      searchBarProps: {},
+      effectiveTimeRange: { from: 'now-24h', to: 'now' },
+      onBrushEnd: jest.fn(),
+    } as unknown as ReturnType<typeof useVisPreviewUnifiedSearch>);
+
+    renderWithProviders(
+      <InlineAnomalyCharts
+        attachment={{
+          id: 'att-6',
+          type: 'ml.anomaly_charts',
+          data: {
+            job_ids: ['job-1'],
+          } as AnomalyChartsEmbeddableState,
+        }}
+        isSidebar={false}
+        services={createServices()}
+        registerActionButtons={registerActionButtons}
+      />
+    );
+
+    const saveButton = getLastRegisteredButtons(registerActionButtons).find(
+      (button) => button.label === 'Save to dashboard'
+    );
+    await act(async () => {
+      await saveButton?.handler();
+    });
+    await user.click(screen.getByText('confirm-save'));
+
+    expect(
+      mockNavigateToWithEmbeddablePackages.mock.calls[0][1].state[0].serializedState.time_range
+    ).toBeUndefined();
+  });
+
   it('disables Save to dashboard without dashboard write permissions', () => {
     const registerActionButtons = jest.fn();
 
