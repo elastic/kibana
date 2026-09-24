@@ -47,45 +47,10 @@ export const mapSortField = (sortField?: FindRuleTemplatesSortField): string => 
   return sortFieldMap[sortField ?? 'name'];
 };
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null;
-
-const normalizeLegacyOperator = (operator: unknown): unknown => {
-  if (operator === 'AND') return 'and';
-  if (operator === 'OR') return 'or';
-  return operator;
-};
-
-/**
- * The template's `rule` blob is stored without schema validation, so a
- * template saved before `state_transition.*_operator` moved to lowercase may
- * still carry the legacy `AND`/`OR` values. Normalize them before parsing so
- * those templates keep loading under the current API schema.
- */
-const normalizeLegacyRuleStateTransition = (rule: unknown): unknown => {
-  if (!isRecord(rule) || !isRecord(rule.state_transition)) {
-    return rule;
-  }
-  return {
-    ...rule,
-    state_transition: {
-      ...rule.state_transition,
-      pending_operator: normalizeLegacyOperator(rule.state_transition.pending_operator),
-      recovering_operator: normalizeLegacyOperator(rule.state_transition.recovering_operator),
-    },
-  };
-};
-
 export const transformRuleTemplateSoAttributesToApiResponse = (
   id: string,
   attributes: unknown
-): RuleTemplateResponse => {
-  const normalized = isRecord(attributes)
-    ? { ...attributes, rule: normalizeLegacyRuleStateTransition(attributes.rule) }
-    : attributes;
-
-  return {
-    id,
-    ...ruleTemplateDataSchema.parse(normalized),
-  };
-};
+): RuleTemplateResponse => ({
+  id,
+  ...ruleTemplateDataSchema.parse(attributes),
+});

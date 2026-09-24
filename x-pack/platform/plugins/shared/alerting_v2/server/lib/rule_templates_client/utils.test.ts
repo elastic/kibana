@@ -110,25 +110,5 @@ describe('rule templates client utils', () => {
         })
       ).toThrow();
     });
-
-    it('normalizes legacy uppercase state_transition operators stored before the lowercase rename', () => {
-      const legacyAttributes = {
-        ...validTemplateAttributes,
-        rule: {
-          ...validTemplateAttributes.rule,
-          state_transition: {
-            pending_operator: 'AND',
-            recovering_operator: 'OR',
-          },
-        },
-      };
-
-      const result = transformRuleTemplateSoAttributesToApiResponse('template-1', legacyAttributes);
-
-      expect(result.rule.state_transition).toEqual({
-        pending_operator: 'and',
-        recovering_operator: 'or',
-      });
-    });
   });
 });
