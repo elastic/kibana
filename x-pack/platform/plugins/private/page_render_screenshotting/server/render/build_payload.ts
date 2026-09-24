@@ -101,21 +101,21 @@ function getSingleUrl(urls: UrlOrUrlWithContext[]): {
   return { url, context: context as Record<string, unknown> };
 }
 
-/** Replaces the origin of a Reporting-built capture URL with `server.publicBaseUrl`, preserving
- * path, query and hash.
+/** Replaces the origin of a Reporting-built capture URL with an origin the render service can
+ * reach, preserving path, query and hash.
  *
  * Reporting derives the origin from `xpack.reporting.kibanaServer.*`, which defaults to
  * `server.host`/`server.port` — and a `0.0.0.0` host is silently rewritten to `localhost`. That
  * is fine for the real screenshotting plugin (Chromium runs in the Kibana pod) but a remote
  * render service resolves `localhost` to itself. Returns the URL untouched if there is no
- * `publicBaseUrl` to substitute, or if either value will not parse. */
-export function withPublicOrigin(url: string, publicBaseUrl?: string): string {
-  if (!publicBaseUrl) {
+ * `captureBaseUrl` to substitute, or if either value will not parse. */
+export function withCaptureOrigin(url: string, captureBaseUrl?: string): string {
+  if (!captureBaseUrl) {
     return url;
   }
   try {
     const target = new URL(url);
-    const { origin } = new URL(publicBaseUrl);
+    const { origin } = new URL(captureBaseUrl);
     return `${origin}${target.pathname}${target.search}${target.hash}`;
   } catch {
     return url;
@@ -125,10 +125,10 @@ export function withPublicOrigin(url: string, publicBaseUrl?: string): string {
 export function buildRenderPageRequest(
   options: PdfScreenshotOptions | PngScreenshotOptions,
   security: SecurityServiceStart,
-  publicBaseUrl?: string
+  captureBaseUrl?: string
 ): { payload: RenderPageRequest; droppedUrlCount: number } {
   const { url: rawUrl, context } = getSingleUrl(options.urls ?? []);
-  const url = withPublicOrigin(rawUrl, publicBaseUrl);
+  const url = withCaptureOrigin(rawUrl, captureBaseUrl);
   const droppedUrlCount = Math.max((options.urls?.length ?? 0) - 1, 0);
 
   const layoutId = options.layout?.id ?? 'preserve_layout';

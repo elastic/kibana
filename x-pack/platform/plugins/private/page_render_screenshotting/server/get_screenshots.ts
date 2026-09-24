@@ -25,7 +25,7 @@ import type { RenderPageResult } from './render/types';
  * Structurally identical to `ScreenshottingStart` (`@kbn/screenshotting-plugin/server`) — reporting
  * prefers this contract over the real one when this plugin is enabled (see reporting's
  * `server/plugin.ts`). Only the `urls`-based dashboard/visualization capture path is implemented;
- * expression-based (Canvas) input is out of scope for this POC.
+ * expression-based (Canvas) input is not supported.
  */
 export interface PageRenderScreenshottingStart {
   getScreenshots(options: ScreenshotOptions): Rx.Observable<ScreenshotResult>;
@@ -57,7 +57,7 @@ export function createGetScreenshots({
   config,
   logger,
   security,
-  publicBaseUrl,
+  getCaptureBaseUrl = () => undefined,
   getSystemIdentity,
   getDispatcher = () => undefined,
 }: {
@@ -68,16 +68,18 @@ export function createGetScreenshots({
   getSystemIdentity: () => SystemIdentity | undefined;
   /** Presents Kibana's client certificate. Resolved per call: see `render/dispatcher.ts`. */
   getDispatcher?: () => unknown;
-  /** `server.publicBaseUrl`, substituted into capture URLs so the remote render service can
-   * reach Kibana. See the note in `server/plugin.ts`. */
-  publicBaseUrl?: string;
+  /** Origin substituted into capture URLs so the remote render service can reach Kibana —
+   * `xpack.pageRenderScreenshotting.kibanaBaseUrl` if set, else `server.publicBaseUrl`. Resolved
+   * per call because `kibanaBaseUrl` is dynamically overridable. See the note in
+   * `server/plugin.ts`. */
+  getCaptureBaseUrl?: () => string | undefined;
 }): PageRenderScreenshottingStart['getScreenshots'] {
   return function getScreenshots(options: ScreenshotOptions): Rx.Observable<ScreenshotResult> {
     if (options.expression) {
       return Rx.throwError(
         () =>
           new Error(
-            'pageRenderScreenshotting does not support expression-based (Canvas) capture (POC scope is dashboard PDF/PNG export only)'
+            'pageRenderScreenshotting does not support expression-based (Canvas) capture (dashboard PDF/PNG export only)'
           )
       );
     }
@@ -89,7 +91,11 @@ export function createGetScreenshots({
     let payload;
     let droppedUrlCount;
     try {
-      ({ payload, droppedUrlCount } = buildRenderPageRequest(options, security, publicBaseUrl));
+      ({ payload, droppedUrlCount } = buildRenderPageRequest(
+        options,
+        security,
+        getCaptureBaseUrl()
+      ));
     } catch (err) {
       return Rx.throwError(() => err);
     }

@@ -8,7 +8,7 @@
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { securityServiceMock } from '@kbn/core-security-server-mocks';
 import type { PdfScreenshotOptions, PngScreenshotOptions } from '@kbn/screenshotting-plugin/server';
-import { buildRenderPageRequest, DEMO_BANNER, withPublicOrigin } from './build_payload';
+import { buildRenderPageRequest, DEMO_BANNER, withCaptureOrigin } from './build_payload';
 
 const REDIRECT_URL = 'http://localhost:5601/app/reportingRedirect?forceNow=2026-01-01';
 const LOCATOR_CONTEXT = {
@@ -43,10 +43,10 @@ function pngOptions(overrides: Partial<PngScreenshotOptions> = {}): PngScreensho
   };
 }
 
-describe('withPublicOrigin', () => {
+describe('withCaptureOrigin', () => {
   it('swaps the origin while preserving path, query and hash', () => {
     expect(
-      withPublicOrigin(
+      withCaptureOrigin(
         'https://localhost:5601/app/reportingRedirect?forceNow=2026-01-01#/view/abc',
         'https://my-project.kb.eu-west-1.aws.qa.elastic.cloud'
       )
@@ -55,26 +55,41 @@ describe('withPublicOrigin', () => {
     );
   });
 
-  it('ignores any path on publicBaseUrl and uses only its origin', () => {
-    expect(withPublicOrigin('https://localhost:5601/app/x', 'https://kb.example.com/base')).toBe(
+  it('ignores any path on captureBaseUrl and uses only its origin', () => {
+    expect(withCaptureOrigin('https://localhost:5601/app/x', 'https://kb.example.com/base')).toBe(
       'https://kb.example.com/app/x'
     );
   });
 
-  it('returns the url untouched when publicBaseUrl is unset', () => {
-    expect(withPublicOrigin(REDIRECT_URL, undefined)).toBe(REDIRECT_URL);
+  it('returns the url untouched when captureBaseUrl is unset', () => {
+    expect(withCaptureOrigin(REDIRECT_URL, undefined)).toBe(REDIRECT_URL);
   });
 
   it('returns the url untouched when either value is unparseable', () => {
-    expect(withPublicOrigin(REDIRECT_URL, 'not a url')).toBe(REDIRECT_URL);
-    expect(withPublicOrigin('not a url', 'https://kb.example.com')).toBe('not a url');
+    expect(withCaptureOrigin(REDIRECT_URL, 'not a url')).toBe(REDIRECT_URL);
+    expect(withCaptureOrigin('not a url', 'https://kb.example.com')).toBe('not a url');
+  });
+
+  // The serverless target shape: Kibana's internal URL resolves to the ingress proxy's private
+  // load balancer, so the render request never leaves the VPC. Unlike the public hostname, its
+  // first label is always the project id — which is what lets page-render-service bind the
+  // target to the authenticated caller (`projectRef` in its KIBANA_HOST_PATTERN).
+  it('swaps in an internal serverless origin', () => {
+    expect(
+      withCaptureOrigin(
+        'https://localhost:5601/app/reportingRedirect?forceNow=2026-01-01',
+        'https://8b1c4f2e9a7d43c6b05e1f8a2d6c9e34.kb.eu-west-1.aws.internal.qa.elastic.cloud'
+      )
+    ).toBe(
+      'https://8b1c4f2e9a7d43c6b05e1f8a2d6c9e34.kb.eu-west-1.aws.internal.qa.elastic.cloud/app/reportingRedirect?forceNow=2026-01-01'
+    );
   });
 });
 
 describe('buildRenderPageRequest', () => {
   const security = securityServiceMock.createStart();
 
-  it('rewrites the capture url origin to publicBaseUrl when provided', () => {
+  it('rewrites the capture url origin to captureBaseUrl when provided', () => {
     const { payload } = buildRenderPageRequest(
       pdfOptions(),
       security,
