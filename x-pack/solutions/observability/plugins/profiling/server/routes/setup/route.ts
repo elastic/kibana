@@ -14,6 +14,7 @@ import { handleRouteHandlerError } from '../../utils/handle_route_error_handler'
 import { getClient } from '../compat';
 import { getCloudSetupInstructions } from './get_cloud_setup_instructions';
 import { getSelfManagedInstructions } from './get_self_managed_instructions';
+import { setupStatusOASOperationObject } from './oas_examples';
 import { setupStatusResponseSchema } from './schemas';
 import { setupCloud } from './setup_cloud';
 import { setupSelfManaged } from './setup_self_managed';
@@ -45,6 +46,7 @@ export function registerSetupRoute({
         summary: 'Get Universal Profiling setup status',
         description: 'Check if Universal Profiling has been set up and configured properly',
         tags: ['oas-tag:Universal Profiling'],
+        oasOperationObject: () => setupStatusOASOperationObject,
       },
       validate: {
         request: {},

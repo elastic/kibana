@@ -4,7 +4,7 @@ info:
   title: Overlays for the Kibana API document
   version: 0.0.1
 actions:
-# Clean up server definitions
+  # Clean up server definitions
   - target: '$.servers.*'
     description: Remove all servers so we can add our own.
     remove: true
@@ -15,7 +15,7 @@ actions:
         variables:
           kibana_url:
             default: localhost:5601
-# Add tag descriptions that are specific to the Stack APIs
+  # Add tag descriptions that are specific to the Stack APIs
   - target: '$.tags[?(@.name=="cases")]'
     description: Change tag description and displayName
     update:
@@ -34,7 +34,7 @@ actions:
         Use the Fleet remote synced integrations API to check the status of the automatic integrations synchronization on a remote cluster:
 
         * Use the `/api/fleet/remote_synced_integrations/{outputId}/remote_status` endpoint on the management cluster to query the synchronization status of the integrations installed on the remote cluster by the ID of the configured remote Elasticsearch output.
-        
+
         * Use the `/api/fleet/remote_synced_integrations/status` endpoint on the remote cluster to query the synchronization status of the installed integrations.
       externalDocs:
         description: Automatic integrations synchronization documentation
@@ -48,7 +48,7 @@ actions:
   - target: '$.tags[?(@.name=="roles")]'
     description: Change displayName and description
     update:
-      x-displayName: "Roles"
+      x-displayName: 'Roles'
       description: Manage the roles that grant Elasticsearch and Kibana privileges.
       externalDocs:
         description: Kibana role management
@@ -56,7 +56,7 @@ actions:
   - target: '$.tags[?(@.name=="saved objects")]'
     description: Change displayName and description
     update:
-      x-displayName: "Saved objects"
+      x-displayName: 'Saved objects'
       description: |
         Export sets of saved objects that you want to import into Kibana, resolve import errors, and rotate an encryption key for encrypted saved objects with the saved objects APIs.
 
@@ -71,11 +71,11 @@ actions:
   - target: '$.tags[?(@.name=="synthetics")]'
     description: Add tag info
     update:
-        x-displayName: Synthetics
-        description: Synthetics APIs enable you to check the status of your services and applications.
-        externalDocs:
-          description: Synthetic monitoring
-          url: https://www.elastic.co/docs/solutions/observability/synthetics
+      x-displayName: Synthetics
+      description: Synthetics APIs enable you to check the status of your services and applications.
+      externalDocs:
+        description: Synthetic monitoring
+        url: https://www.elastic.co/docs/solutions/observability/synthetics
   - target: '$.tags[?(@.name=="user session")]'
     description: Change tag description
     update:
@@ -94,8 +94,8 @@ actions:
         description: Agent Builder docs
         url: https://www.elastic.co/docs/solutions/search/agent-builder/programmatic-access
       # externalDocs:
-        # description: 
-        # url: https://www.elastic.co/docs/solutions/search/elastic-agent-builder
+      # description:
+      # url: https://www.elastic.co/docs/solutions/search/elastic-agent-builder
       x-displayName: 'Agent Builder'
   - target: '$.tags[?(@.name=="workflows")]'
     description: Change tag description and displayName
@@ -125,22 +125,33 @@ actions:
         description: Context Engine documentation
         url: https://www.elastic.co/docs/explore-analyze/ai-features/context-engine
       x-displayName: 'Context Engine'
-# Remove extra tags from operations
-  - target: "$.paths[*][*].tags[1:]"
+  - target: '$.tags[?(@.name=="Universal Profiling")]'
+    description: Change tag description and displayName
+    update:
+      description: >
+        Universal Profiling provides whole-system, always-on, continuous profiling with zero instrumentation.
+        Use these APIs to check whether the Elasticsearch resources Universal Profiling depends on are set up, and to set them up.
+        Universal Profiling is available on Elastic Cloud Hosted and self-managed deployments.
+      externalDocs:
+        description: Universal Profiling documentation
+        url: https://www.elastic.co/docs/solutions/observability/infra-and-hosts/universal-profiling
+      x-displayName: 'Universal Profiling'
+  # Remove extra tags from operations
+  - target: '$.paths[*][*].tags[1:]'
     description: Remove all but first tag from operations
     remove: true
-# Examples that are not applicable to serverless
+  # Examples that are not applicable to serverless
   - target: "$.paths['/api/spaces/_copy_saved_objects']['post']"
-    description: "Add example to copy saved objects to space API"
+    description: 'Add example to copy saved objects to space API'
     update:
       requestBody:
         content:
           application/json:
             examples:
               copySavedObjectsRequestExample1:
-                $ref: "../examples/copy_saved_objects_request1.yaml"
+                $ref: '../examples/copy_saved_objects_request1.yaml'
               copySavedObjectsRequestExample2:
-                $ref: "../examples/copy_saved_objects_request2.yaml"
+                $ref: '../examples/copy_saved_objects_request2.yaml'
       responses:
         200:
           description: 'OK: A successful request.'
@@ -148,24 +159,24 @@ actions:
             application/json:
               examples:
                 copySavedObjectsResponseExample1:
-                  $ref: "../examples/copy_saved_objects_response1.yaml"
+                  $ref: '../examples/copy_saved_objects_response1.yaml'
                 copySavedObjectsResponseExample2:
-                  $ref: "../examples/copy_saved_objects_response2.yaml"
+                  $ref: '../examples/copy_saved_objects_response2.yaml'
                 copySavedObjectsResponseExample3:
-                  $ref: "../examples/copy_saved_objects_response3.yaml"
+                  $ref: '../examples/copy_saved_objects_response3.yaml'
                 copySavedObjectsResponseExample4:
-                  $ref: "../examples/copy_saved_objects_response4.yaml"
+                  $ref: '../examples/copy_saved_objects_response4.yaml'
   - target: "$.paths['/api/spaces/_resolve_copy_saved_objects_errors']['post']"
-    description: "Add example to resolve copy saved objects to space conflicts API"
+    description: 'Add example to resolve copy saved objects to space conflicts API'
     update:
       requestBody:
         content:
           application/json:
             examples:
               resolveCopySavedObjectsRequestExample1:
-                $ref: "../examples/resolve_copy_saved_objects_request1.yaml"
+                $ref: '../examples/resolve_copy_saved_objects_request1.yaml'
               resolveCopySavedObjectsRequestExample2:
-                $ref: "../examples/resolve_copy_saved_objects_request2.yaml"
+                $ref: '../examples/resolve_copy_saved_objects_request2.yaml'
       responses:
         200:
           description: 'OK: A successful request.'
@@ -173,30 +184,30 @@ actions:
             application/json:
               examples:
                 resolveCopySavedObjectsResponseExample1:
-                  $ref: "../examples/copy_saved_objects_response1.yaml"
+                  $ref: '../examples/copy_saved_objects_response1.yaml'
                 resolveCopySavedObjectsResponseExample2:
-                  $ref: "../examples/copy_saved_objects_response2.yaml"
+                  $ref: '../examples/copy_saved_objects_response2.yaml'
   - target: "$.paths['/api/spaces/_disable_legacy_url_aliases']['post']"
-    description: "Add example to disable legacy URL aliases API"
+    description: 'Add example to disable legacy URL aliases API'
     update:
       requestBody:
         content:
           application/json:
             examples:
               disableLegacyURLRequestExample1:
-                $ref: "../examples/disable_legacy_url_request1.yaml"
+                $ref: '../examples/disable_legacy_url_request1.yaml'
       responses:
         204:
           description: 'Indicates a successful call.'
   - target: "$.paths['/api/spaces/_get_shareable_references']['post']"
-    description: "Add examples to get shareable references API"
+    description: 'Add examples to get shareable references API'
     update:
       requestBody:
         content:
           application/json:
             examples:
               getShareableReferencesRequestExample1:
-                $ref: "../examples/get_shareable_references_request1.yaml"
+                $ref: '../examples/get_shareable_references_request1.yaml'
       responses:
         200:
           description: 'Indicates a successful call.'
@@ -204,16 +215,16 @@ actions:
             application/json:
               examples:
                 getShareableReferencesResponseExample1:
-                  $ref: "../examples/get_shareable_references_response1.yaml"
+                  $ref: '../examples/get_shareable_references_response1.yaml'
   - target: "$.paths['/api/spaces/_update_objects_spaces']['post']"
-    description: "Add example to update saved object spaces API"
+    description: 'Add example to update saved object spaces API'
     update:
       requestBody:
         content:
           application/json:
             examples:
               updateObjectSpacesRequestExample1:
-                $ref: "../examples/update_saved_objects_spaces_request1.yaml"
+                $ref: '../examples/update_saved_objects_spaces_request1.yaml'
       responses:
         200:
           description: 'OK: A successful request.'
@@ -221,24 +232,24 @@ actions:
             application/json:
               examples:
                 updateObjectSpacesResponseExample1:
-                  $ref: "../examples/update_saved_objects_spaces_response1.yaml"
+                  $ref: '../examples/update_saved_objects_spaces_response1.yaml'
   - target: "$.paths['/api/security/role/{name}']['put']"
-    description: "Add examples to create role API"
+    description: 'Add examples to create role API'
     update:
       requestBody:
         content:
           application/json:
             examples:
               createRoleRequest1:
-                $ref: "../examples/create_role_request1.yaml"
+                $ref: '../examples/create_role_request1.yaml'
               createRoleRequest2:
-                $ref: "../examples/create_role_request2.yaml"
+                $ref: '../examples/create_role_request2.yaml'
               createRoleRequest3:
-                $ref: "../examples/create_role_request3.yaml"
+                $ref: '../examples/create_role_request3.yaml'
               createRoleRequest4:
-                $ref: "../examples/create_role_request4.yaml"
+                $ref: '../examples/create_role_request4.yaml'
   - target: "$.paths['/api/security/role/{name}']['get']"
-    description: "Add example to get role API"
+    description: 'Add example to get role API'
     update:
       responses:
         200:
@@ -248,7 +259,7 @@ actions:
                 getRoleResponse1:
                   $ref: '../examples/get_role_response1.yaml'
   - target: "$.paths['/api/security/role']['get']"
-    description: "Add example to get roles API"
+    description: 'Add example to get roles API'
     update:
       responses:
         200:
