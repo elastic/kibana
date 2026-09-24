@@ -250,7 +250,7 @@ export class MbMap extends Component<Props> {
     mbMap.on(
       'moveend',
       _.debounce(() => {
-        if (!this.props.previewMode && this._isMounted) {
+        if (this._isMounted) {
           this.props.extentChanged(this._getMapExtentState());
         }
       }, 100)

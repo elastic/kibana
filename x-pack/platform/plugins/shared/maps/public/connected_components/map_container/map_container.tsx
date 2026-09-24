@@ -273,7 +273,7 @@ export class MapContainer extends Component<Props, State> {
             getActionContext={getActionContext}
             onSingleValueTrigger={onSingleValueTrigger}
             renderTooltipContent={renderTooltipContent}
-            previewMode={this.props.previewMode}
+            previewMode={previewMode}
           />
           {!previewMode && !this.props.settings.hideToolbarOverlay && !isScreenshotMode() && (
             <ToolbarOverlay

@@ -79,6 +79,7 @@ export const mapEmbeddableFactory: EmbeddablePublicDefinition<MapEmbeddableState
     const titleManager = initializeTitleManager(state);
     const timeRangeManager = initializeTimeRangeManager(state);
     const drilldownsManager = initializeDrilldownsManager(uuid, initialState);
+    const viewMode$ = getViewModeSubject(parentApi) ?? new BehaviorSubject<ViewMode>('view');
 
     const defaultTitle$ = new BehaviorSubject<string | undefined>(savedMap.getAttributes().title);
     const defaultDescription$ = new BehaviorSubject<string | undefined>(
@@ -144,6 +145,7 @@ export const mapEmbeddableFactory: EmbeddablePublicDefinition<MapEmbeddableState
           attributes: savedMap.getSavedObjectId() !== undefined ? 'skip' : 'deepEquality',
           mapSettings: 'deepEquality',
           savedObjectId: 'skip',
+          ...(viewMode$.getValue() === 'preview' && { mapCenter: 'skip' }),
         };
       },
       applySerializedState: async (nextState) => {
@@ -199,13 +201,11 @@ export const mapEmbeddableFactory: EmbeddablePublicDefinition<MapEmbeddableState
       store: savedMap.getStore(),
     });
 
-    const viewMode$ = getViewModeSubject(api) ?? new BehaviorSubject<ViewMode>('view');
-
     return {
       api,
       Component: () => {
         const viewMode = useStateFromPublishingSubject(viewMode$);
-
+        console.log({ viewMode });
         useEffect(() => {
           return () => {
             crossPanelActions.cleanup();
