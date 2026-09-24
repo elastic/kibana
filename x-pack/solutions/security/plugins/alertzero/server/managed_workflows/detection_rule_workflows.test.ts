@@ -20,7 +20,7 @@ import {
   ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW_ID,
   ALERTZERO_RULE_TUNING_WORKER_WORKFLOW_ID,
   ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID,
-  CREATE_INVESTIGATION_PROPOSAL_WORKFLOW_ID,
+  CREATE_PROPOSAL_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import { projectSkillsFromDefinition } from '../services/utils';
 import { workerRegistry } from './worker_registry';
@@ -198,8 +198,7 @@ describe('detection rule workflows', () => {
 
       const proposals = all.filter(
         ({ type, with: input }) =>
-          type === 'workflow.execute' &&
-          input?.['workflow-id'] === CREATE_INVESTIGATION_PROPOSAL_WORKFLOW_ID
+          type === 'workflow.execute' && input?.['workflow-id'] === CREATE_PROPOSAL_WORKFLOW_ID
       );
       expect(proposals.map(({ name }) => name)).toEqual([
         'propose_entry',
@@ -305,7 +304,7 @@ describe('detection rule workflows', () => {
       const review = parse(
         getManagedYaml(ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW_ID)
       ) as WorkflowYaml;
-      const gate = parse(getManagedYaml(CREATE_INVESTIGATION_PROPOSAL_WORKFLOW_ID)) as WorkflowYaml;
+      const gate = parse(getManagedYaml(CREATE_PROPOSAL_WORKFLOW_ID)) as WorkflowYaml;
       const hours = (timeout: unknown) => Number(String(timeout).replace(/h$/, ''));
 
       expect(String(review.settings?.timeout)).toMatch(/^\d+h$/);

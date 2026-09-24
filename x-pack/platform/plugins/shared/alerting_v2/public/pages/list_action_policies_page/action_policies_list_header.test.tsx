@@ -13,6 +13,12 @@ import { ListPageTestProviders } from '../../test_utils/test_providers';
 import { ActionPoliciesListHeader } from './action_policies_list_header';
 
 let mockPhase: 'initialLoad' | 'empty' | 'populated' | 'filtering' | 'filtered' = 'populated';
+let mockExperimentalFeaturesEnabled = true;
+let mockAreAgentBuilderSkillsAvailable = true;
+let mockAgentBuilderSkillsRequirements = {
+  hasAgentBuilderCapability: true,
+  isExperimentalFeaturesEnabled: true,
+};
 
 jest.mock('@kbn/content-list-provider', () => {
   const actual = jest.requireActual('@kbn/content-list-provider');
@@ -21,6 +27,15 @@ jest.mock('@kbn/content-list-provider', () => {
     useContentListPhase: () => mockPhase,
   };
 });
+
+jest.mock('../../hooks/use_alerting_v2_experimental_features', () => ({
+  useAlertingV2ExperimentalFeatures: () => mockExperimentalFeaturesEnabled,
+}));
+
+jest.mock('../../hooks/use_are_agent_builder_skills_available', () => ({
+  useAreAgentBuilderSkillsAvailable: () => mockAreAgentBuilderSkillsAvailable,
+  useAgentBuilderSkillsRequirements: () => mockAgentBuilderSkillsRequirements,
+}));
 
 const onCreatePolicy = jest.fn();
 const onCreateWithAgent = jest.fn();
@@ -41,6 +56,12 @@ describe('ActionPoliciesListHeader', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockPhase = 'populated';
+    mockExperimentalFeaturesEnabled = true;
+    mockAreAgentBuilderSkillsAvailable = true;
+    mockAgentBuilderSkillsRequirements = {
+      hasAgentBuilderCapability: true,
+      isExperimentalFeaturesEnabled: true,
+    };
   });
 
   it('renders the page title and experimental badge', () => {
@@ -75,18 +96,23 @@ describe('ActionPoliciesListHeader', () => {
     await waitFor(() =>
       expect(screen.getByTestId('createActionPolicyWithAgentButton')).toBeInTheDocument()
     );
+    expect(screen.getByTestId('createActionPolicyWithAgentButton')).toHaveTextContent(
+      'Create with agent (Experimental)'
+    );
     await user.click(screen.getByTestId('createActionPolicyWithAgentButton'));
 
     expect(onCreateWithAgent).toHaveBeenCalledTimes(1);
     expect(onCreatePolicy).not.toHaveBeenCalled();
   });
 
-  it('disables the agent option (does not hide it) when createWithAgentDisabled is set', async () => {
+  it('disables the agent option (does not hide it) when agent builder is unavailable', async () => {
     const user = userEvent.setup({ delay: null });
-    renderHeader({
-      createWithAgentDisabled: true,
-      createWithAgentTooltipText: 'Missing privileges',
-    });
+    mockAreAgentBuilderSkillsAvailable = false;
+    mockAgentBuilderSkillsRequirements = {
+      hasAgentBuilderCapability: false,
+      isExperimentalFeaturesEnabled: true,
+    };
+    renderHeader();
 
     await user.click(screen.getByTestId('createActionPolicyButton-secondary-button'));
     await waitFor(() =>
