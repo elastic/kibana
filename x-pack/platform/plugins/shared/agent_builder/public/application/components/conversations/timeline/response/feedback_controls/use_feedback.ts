@@ -319,7 +319,6 @@ export const useFeedback = (
     services.analytics,
     clearSubmittedTimers,
     addErrorToast,
-    resetTo,
     invalidateConversation,
   ]);
 

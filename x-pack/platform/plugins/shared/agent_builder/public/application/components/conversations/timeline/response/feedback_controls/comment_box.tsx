@@ -6,16 +6,9 @@
  */
 
 import React from 'react';
-import {
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiLink,
-  EuiText,
-  EuiTextArea,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiLink, EuiText, EuiTextArea } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 
 export const MAX_CHARS = 500;
 
@@ -55,18 +48,25 @@ export const CommentBox: React.FC<CommentBoxProps> = ({ value, onChange }) => {
         </EuiFormRow>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiCallOut size="s" color="primary" iconType="info">
-          <EuiText size="s">
-            {i18n.translate('xpack.agentBuilder.feedback.commentDisclosure', {
-              defaultMessage: 'Your comment and metadata will be shared with Elastic.',
-            })}{' '}
-            <EuiLink href="https://www.elastic.co/legal/privacy-statement" target="_blank" external>
-              {i18n.translate('xpack.agentBuilder.feedback.commentDisclosurePrivacyLink', {
-                defaultMessage: 'Privacy statement',
-              })}
-            </EuiLink>
-          </EuiText>
-        </EuiCallOut>
+        <KbnInfoCallout
+          size="s"
+          title={
+            <>
+              {i18n.translate('xpack.agentBuilder.feedback.commentDisclosure', {
+                defaultMessage: 'Your comment and metadata will be shared with Elastic.',
+              })}{' '}
+              <EuiLink
+                href="https://www.elastic.co/legal/privacy-statement"
+                target="_blank"
+                external
+              >
+                {i18n.translate('xpack.agentBuilder.feedback.commentDisclosurePrivacyLink', {
+                  defaultMessage: 'Privacy statement',
+                })}
+              </EuiLink>
+            </>
+          }
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
