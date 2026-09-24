@@ -2300,7 +2300,7 @@ describe('bulkCreate', () => {
       expect(bulkCreateCall.settings.extractObservables).toBe(false);
     });
 
-    it('falls back to true when no space configuration exists', async () => {
+    it('falls back to the owner autoExtractDefault when no space configuration exists', async () => {
       const clientArgs = createCasesClientMockArgs();
       clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
         saved_objects: [caseSoForDefaults],
