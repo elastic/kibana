@@ -35,10 +35,7 @@ export const buildMatchesRequired = (requiredPatterns: string[]): ((index: strin
  * `logs-aws.cloudtrail-*` but not the broader `logs-*` or an unrelated
  * `.kibana*`. Cross-cluster sources (`cluster:index`) are never allowed.
  */
-export const isIndexPatternAllowed = (
-  candidate: string,
-  allowedPatterns: string[]
-): boolean => {
+export const isIndexPatternAllowed = (candidate: string, allowedPatterns: string[]): boolean => {
   if (!candidate || candidate === '*' || allowedPatterns.length === 0) return false;
   if (candidate.includes(':')) return false;
   if (allowedPatterns.includes(candidate)) return true;

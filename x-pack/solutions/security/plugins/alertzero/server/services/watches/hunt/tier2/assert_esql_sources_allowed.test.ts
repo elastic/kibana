@@ -38,9 +38,7 @@ describe('assertEsqlSourcesAllowed', () => {
   });
 
   it('returns not ok when any source in a multi-source FROM is outside scope', () => {
-    expect(
-      assertEsqlSourcesAllowed('FROM logs-aws.*, .kibana-* | LIMIT 1', allowed)
-    ).toEqual({
+    expect(assertEsqlSourcesAllowed('FROM logs-aws.*, .kibana-* | LIMIT 1', allowed)).toEqual({
       ok: false,
       reason: expect.stringContaining('.kibana-*'),
     });

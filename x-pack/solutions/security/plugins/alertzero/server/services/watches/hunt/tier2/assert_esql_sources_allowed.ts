@@ -8,9 +8,7 @@
 import { Parser, mutate } from '@elastic/esql';
 import { isIndexPatternAllowed } from '../common/matches_required';
 
-export type AssertEsqlSourcesAllowedResult =
-  | { ok: true }
-  | { ok: false; reason: string };
+export type AssertEsqlSourcesAllowedResult = { ok: true } | { ok: false; reason: string };
 
 /**
  * Fail-closed gate for Tier 2 execute: every FROM source must sit inside the
