@@ -518,24 +518,6 @@ steps:
       # every alert is re-analyzed.
       pending_filter_expr: '{% if consts.override_previous %}false{% else %}a.kibana.alert.workflow_tags contains "{{ variables.tag_prefix }}"{% endif %}'
 
-  # The alert set under analysis. `workflow.execute` passes only `inputs` — a child run has
-  # no trigger event at all — so a caller-supplied set is the only way this workflow can be
-  # driven by anything other than its own alert trigger. Defaults to the trigger's alerts,
-  # which keeps the standalone path unchanged.
-  - name: set_alert_set
-    type: data.set
-    with:
-      alert_set: "${{ event.alerts }}"
-
-  - name: use_caller_alerts_if_provided
-    type: if
-    condition: "${{ inputs.calledByWorker == true }}"
-    steps:
-      - name: apply_caller_alerts
-        type: data.set
-        with:
-          alert_set: "${{ inputs.alerts }}"
-
   # Worker supplies an explicit alert set and expects a complete structured result for it.
   # The standalone "already analyzed" tag filter would drop tagged alerts on retry (e.g.
   # after a mid-run failure) and leave those ids out of workflow.output. Bypass dedup on
@@ -575,8 +557,8 @@ steps:
       - name: compute_caller_alert_id_counts
         type: data.set
         with:
-          caller_alert_count: "${{ variables.alert_set.size }}"
-          caller_unique_alert_id_count: "${{ variables.alert_set | map: '_id' | uniq | size }}"
+          caller_alert_count: "${{ inputs.alerts.size }}"
+          caller_unique_alert_id_count: "${{ inputs.alerts | map: '_id' | uniq | size }}"
       - name: fail_if_duplicate_caller_alert_ids
         type: if
         condition: "${{ variables.caller_alert_count != variables.caller_unique_alert_id_count }}"
@@ -589,7 +571,7 @@ steps:
                 inputs.alerts contained duplicate ids.
 
   # All enrichment (prevalence, noise, close history, rule metadata, AI prompt) anchors on
-  # alert_set[0].kibana.alert.rule.uuid. Mixed-rule batches would analyze remaining alerts
+  # inputs.alerts[0].kibana.alert.rule.uuid. Mixed-rule batches would analyze remaining alerts
   # with the wrong rule context. Fail loud so the caller is forced to split by rule before
   # invoking the workflow.
   - name: reject_multi_rule_caller_alerts
@@ -599,7 +581,7 @@ steps:
       - name: compute_caller_unique_rule_count
         type: data.set
         with:
-          caller_unique_rule_uuid_count: "${{ variables.alert_set | map: 'kibana.alert.rule.uuid' | uniq | size }}"
+          caller_unique_rule_uuid_count: "${{ inputs.alerts | map: 'kibana.alert.rule.uuid' | uniq | size }}"
       - name: fail_if_multi_rule_caller_alerts
         type: if
         condition: "${{ variables.caller_unique_rule_uuid_count > 1 }}"
@@ -615,7 +597,7 @@ steps:
   # Rule context for enrichment queries / logs
   # ---------------------------------------------------------------------------
   # Standalone (alert trigger) reads event.rule. Worker/manual child runs have no
-  # trigger event, so derive from the first alert in alert_set. Worker batches are
+  # trigger event, so derive from the first caller alert. Worker batches are
   # guaranteed single-rule by the reject_multi_rule_caller_alerts gate above.
   - name: set_rule_context
     type: data.set
@@ -627,17 +609,19 @@ steps:
     type: if
     condition: "${{ inputs.calledByWorker == true }}"
     steps:
-      - name: apply_rule_from_alert_set
+      - name: apply_rule_from_caller_alerts
         type: data.set
         with:
-          rule_id: "{{ variables.alert_set[0].kibana.alert.rule.uuid }}"
-          rule_name: "{{ variables.alert_set[0].kibana.alert.rule.name }}"
+          rule_id: "{{ inputs.alerts[0].kibana.alert.rule.uuid }}"
+          rule_name: "{{ inputs.alerts[0].kibana.alert.rule.name }}"
 
+  # Alerts are read inline (trigger event first, caller input as fallback) and never stored
+  # in a step output, which would subject them to max-step-size and duplicate them in state.
   - name: set_alert_counts
     type: data.set
     with:
-      total_alert_count: "${{ variables.alert_set | size }}"
-      pending_alert_count: "${{ variables.alert_set | reject_exp: 'a', variables.pending_filter_expr | size }}"
+      total_alert_count: "${{ event.alerts | default: inputs.alerts | size }}"
+      pending_alert_count: "${{ event.alerts | default: inputs.alerts | reject_exp: 'a', variables.pending_filter_expr | size }}"
 
   # ---------------------------------------------------------------------------
   # Runtime guard
@@ -676,7 +660,7 @@ steps:
       - name: set_enrichment_anchor
         type: data.set
         with:
-          anchor_timestamp: '{{ variables.alert_set[0]["@timestamp"] }}'
+          anchor_timestamp: '{{ event.alerts[0]["@timestamp"] | default: inputs.alerts[0]["@timestamp"] }}'
 
       # Close history: how often this rule's alerts have been closed and
       # the distribution of close reasons (e.g. false_positive, resolved).
@@ -1019,7 +1003,7 @@ steps:
       # the total alert count), so workflow-execution state stays proportional to batch size.
       - name: classify_alert_batches
         type: foreach
-        foreach: "{{ variables.alert_set | reject_exp: 'a', variables.pending_filter_expr | chunk: consts.batch_size | json }}"
+        foreach: "{{ event.alerts | default: inputs.alerts | reject_exp: 'a', variables.pending_filter_expr | chunk: consts.batch_size | json }}"
         steps:
 
           # -----------------------------------------------------------------
@@ -1707,7 +1691,7 @@ steps:
 
       - name: apply_verdicts
         type: foreach
-        foreach: "{{ variables.alert_set | reject_exp: 'a', variables.pending_filter_expr | json }}"
+        foreach: "{{ event.alerts | default: inputs.alerts | reject_exp: 'a', variables.pending_filter_expr | json }}"
         steps:
           - name: select_alert_verdict
             type: data.set
@@ -2113,7 +2097,7 @@ steps:
         type: data.set
         if: "${{ inputs.calledByWorker == true }}"
         with:
-          missing_alert_ids: "${{ variables.alert_set | reject_exp: 'a', variables.pending_filter_expr | map: '_id' }}"
+          missing_alert_ids: "${{ inputs.alerts | reject_exp: 'a', variables.pending_filter_expr | map: '_id' }}"
 
   # ---------------------------------------------------------------------------
   # Emit structured output for callers (Worker path)
