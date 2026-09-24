@@ -14,6 +14,7 @@ import { handleRouteHandlerError } from '../../utils/handle_route_error_handler'
 import { getClient } from '../compat';
 import { getCloudSetupInstructions } from './get_cloud_setup_instructions';
 import { getSelfManagedInstructions } from './get_self_managed_instructions';
+import { setupStatusResponseSchema } from './schemas';
 import { setupCloud } from './setup_cloud';
 import { setupSelfManaged } from './setup_self_managed';
 
@@ -36,9 +37,25 @@ export function registerSetupRoute({
         access: 'public',
         summary: 'Get Universal Profiling setup status',
         description: 'Check if Universal Profiling has been set up and configured properly',
-        tags: ['Universal Profiling'],
+        tags: ['oas-tag:Universal Profiling'],
       },
-      validate: false,
+      validate: {
+        request: {},
+        response: {
+          200: {
+            description: 'Indicates a successful call.',
+            body: setupStatusResponseSchema,
+          },
+          403: {
+            description:
+              'The user does not have the privileges required to read the Universal Profiling setup status.',
+          },
+          500: {
+            description:
+              'An unexpected error occurred while checking the Universal Profiling setup status.',
+          },
+        },
+      },
     },
     async (context, request, response) => {
       try {
@@ -82,9 +99,28 @@ export function registerSetupRoute({
         access: 'public',
         summary: 'Initialize Universal Profiling setup',
         description: 'Set up Universal Profiling resources and configuration',
-        tags: ['Universal Profiling'],
+        tags: ['oas-tag:Universal Profiling'],
       },
-      validate: false,
+      validate: {
+        request: {},
+        response: {
+          202: {
+            description:
+              'Setup was accepted. Enabling resource management in Elasticsearch is asynchronous and may not have completed by the time this response is sent.',
+          },
+          400: {
+            description:
+              'Setup is not supported for this deployment: either "xpack.profiling.elasticsearch" points Universal Profiling at a remote cluster, or the deployment is serverless.',
+          },
+          403: {
+            description:
+              'The user does not have the privileges required to set up Universal Profiling.',
+          },
+          500: {
+            description: 'An unexpected error occurred. Setup failed.',
+          },
+        },
+      },
     },
     async (context, request, response) => {
       try {
