@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import type { Observable } from 'rxjs';
-import { map, skip } from 'rxjs';
+import { defer, map, skip, switchMap } from 'rxjs';
 import type { ServerSentEvent } from '@kbn/sse-utils';
 import { AgentExecutionMode } from '@kbn/agent-builder-common';
 import { observableIntoEventSourceStream, cloudProxyBufferSize } from '@kbn/sse-utils-server';
@@ -17,6 +17,7 @@ import { internalApiPath } from '../../../common/constants';
 import { apiPrivileges } from '../../../common/features';
 import { AGENT_SOCKET_TIMEOUT_MS, getSSEResponseHeaders } from '../utils';
 import { filterEventsNativeApiEvents, filterLegacyApiEvents } from '../converse_helpers';
+import { waitForConversationAccess } from './wait_for_conversation_access';
 
 export function registerInternalExecutionRoutes({
   coreSetup,
@@ -138,9 +139,7 @@ export function registerInternalExecutionRoutes({
         });
       }
 
-      // Throws when the user may not converse in the execution's conversation.
       const conversationClient = await conversationsService.getScopedClient({ request });
-      await conversationClient.get(conversationId);
 
       const abortController = new AbortController();
       request.events.aborted$.subscribe(() => {
@@ -148,13 +147,20 @@ export function registerInternalExecutionRoutes({
       });
 
       // `offset` counts events after the events-native filter, so it is applied after filtering.
-      const events$: Observable<ServerSentEvent> = executionService
-        .followExecution(executionId)
-        .pipe(
-          filterEventsNativeApiEvents(),
-          skip(offset),
-          map((event) => ({ ...event }))
-        );
+      const events$: Observable<ServerSentEvent> = defer(() =>
+        waitForConversationAccess({
+          conversationClient,
+          conversationId,
+          executionService,
+          executionId,
+          signal: abortController.signal,
+        })
+      ).pipe(
+        switchMap(() => executionService.followExecution(executionId)),
+        filterEventsNativeApiEvents(),
+        skip(offset),
+        map((event) => ({ ...event }))
+      );
       return response.ok({
         headers: getSSEResponseHeaders(),
         body: observableIntoEventSourceStream(events$, {

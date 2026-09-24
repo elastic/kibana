@@ -71,7 +71,10 @@ const setup = ({
   const getConversation = conversationAccessError
     ? jest.fn().mockRejectedValue(conversationAccessError)
     : jest.fn().mockResolvedValue({ id: 'conv-1' });
-  const getScopedClient = jest.fn().mockResolvedValue({ get: getConversation });
+  const getScopedClient = jest.fn().mockResolvedValue({
+    exists: jest.fn().mockResolvedValue(true),
+    get: getConversation,
+  });
 
   registerInternalExecutionRoutes({
     router: { get: register, post: register },
@@ -176,14 +179,15 @@ describe('GET /internal/agent_builder/executions/{executionId}/reattach', () => 
     expect(getConversation).toHaveBeenCalledWith('conv-1');
   });
 
-  it('returns 404 without streaming when the user cannot access the conversation', async () => {
-    const { followExecution, callHandler } = setup({
-      conversationAccessError: createConversationNotFoundError({ conversationId: 'conv-1' }),
-    });
+  it('fails the stream without following the execution when the user cannot access the conversation', async () => {
+    const error = createConversationNotFoundError({ conversationId: 'conv-1' });
+    const { followExecution, callHandler } = setup({ conversationAccessError: error });
 
     const result = await callHandler(0);
+    const [streamed] = mockObservableIntoEventSourceStream.mock.calls[0] as [Observable<unknown>];
 
-    expect(result.status).toBe(404);
+    expect(result.status).toBe(200);
+    await expect(firstValueFrom(streamed)).rejects.toBe(error);
     expect(followExecution).not.toHaveBeenCalled();
   });
 
