@@ -79,7 +79,7 @@ const rememberSchema = z.object({
     .datetime()
     .optional()
     .describe(
-      'Optional timestamp after which the memory must not be recalled. New memories default to 90 days from creation.'
+      'Optional timestamp after which the memory must not be recalled. If omitted, this call sets the expiry to 90 days from now, including when revising an existing memory.'
     ),
 });
 
@@ -240,11 +240,7 @@ export const createRememberTool = ({
           : existingDocument?.tags !== undefined
           ? { tags: existingDocument.tags }
           : {}),
-        ...(params.expires_at !== undefined
-          ? { expires_at: params.expires_at }
-          : existingDocument?.expires_at !== undefined
-          ? { expires_at: existingDocument.expires_at }
-          : { expires_at: defaultExpiresAt }),
+        expires_at: params.expires_at ?? defaultExpiresAt,
         updated_at: now,
         references: addConversationReference(existingDocument?.references, conversationId),
         attributes: {
