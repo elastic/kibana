@@ -168,18 +168,12 @@ export async function scheduleLegacySecurityAssetsMigrationIfNeeded({
   coreStart,
   taskManager,
   logger,
-  isMigrationEnabled,
 }: {
   coreStart: CoreStart;
   taskManager: TaskManagerStartContract;
   logger: Logger;
-  isMigrationEnabled: () => Promise<boolean>;
 }): Promise<void> {
   const taskLogger = logger.get(config.type);
-  if (!(await isMigrationEnabled())) {
-    taskLogger.info('Skipping legacy security assets migration schedule; feature flag is off');
-    return;
-  }
   const esClient = coreStart.elasticsearch.client.asInternalUser;
 
   let namespaces: string[];
