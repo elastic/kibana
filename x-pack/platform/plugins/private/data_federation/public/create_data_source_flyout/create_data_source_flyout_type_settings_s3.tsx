@@ -242,7 +242,7 @@ export function CreateDataSourceFlyoutTypeSettingsS3FederatedIdentity({
       {setupValues ? (
         <>
           <FederatedIdentityManualSetup
-            intro={s3FederatedIdentitySetupStrings.manualIntro()}
+            intro={s3FederatedIdentitySetupStrings.manualIntro}
             steps={getS3FederatedIdentityManualSteps(setupValues)}
             testSubjPrefix="createDataSourceFlyoutS3Federated"
           />
@@ -250,11 +250,11 @@ export function CreateDataSourceFlyoutTypeSettingsS3FederatedIdentity({
         </>
       ) : null}
       <EuiFormRow
-        label={s3FederatedIdentitySetupStrings.roleArnLabel()}
+        label={s3FederatedIdentitySetupStrings.roleArnLabel}
         fullWidth
         isInvalid={Boolean(roleArnState.error)}
         error={roleArnState.error?.message}
-        helpText={setupValues ? s3FederatedIdentitySetupStrings.roleArnHelp() : undefined}
+        helpText={setupValues ? s3FederatedIdentitySetupStrings.roleArnHelp : undefined}
       >
         <EuiFieldText
           data-test-subj="createDataSourceFlyoutS3FederatedRoleArn"

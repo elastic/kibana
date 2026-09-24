@@ -26,7 +26,6 @@ interface ManualSetupLineNumbers {
   annotations: Record<number, string>;
 }
 const CODE_BLOCK_MAX_HEIGHT = 180;
-const ANNOTATION_MAX_WIDTH = 250;
 
 export interface FederatedIdentityManualSetupStep {
   id: string;
@@ -36,23 +35,24 @@ export interface FederatedIdentityManualSetupStep {
   lineNumbers: ManualSetupLineNumbers;
 }
 
-const showCommandLabel = () =>
-  i18n.translate('xpack.dataFederation.createFlyout.federated.manual.showCommand', {
-    defaultMessage: 'Show command',
-  });
+const SHOW_COMMAND_LABEL = i18n.translate(
+  'xpack.dataFederation.createFlyout.federated.manual.showCommand',
+  { defaultMessage: 'Show command' }
+);
 
-const hideCommandLabel = () =>
-  i18n.translate('xpack.dataFederation.createFlyout.federated.manual.hideCommand', {
-    defaultMessage: 'Hide command',
-  });
+const HIDE_COMMAND_LABEL = i18n.translate(
+  'xpack.dataFederation.createFlyout.federated.manual.hideCommand',
+  { defaultMessage: 'Hide command' }
+);
 
 const annotationsWithWidthLimit = (
-  annotations: ManualSetupLineNumbers['annotations']
+  annotations: ManualSetupLineNumbers['annotations'],
+  maxInlineSize: number
 ): Record<number, ReactNode> =>
   Object.fromEntries(
     Object.entries(annotations).map(([line, annotation]) => [
       line,
-      <EuiText size="s" css={{ maxInlineSize: ANNOTATION_MAX_WIDTH }}>
+      <EuiText size="s" css={{ maxInlineSize }}>
         {annotation}
       </EuiText>,
     ])
@@ -131,15 +131,17 @@ function ManualSetupStep({
               id={accordionId}
               buttonContent={
                 <EuiText size="s" color="primary">
-                  {isCommandOpen ? hideCommandLabel() : showCommandLabel()}
+                  {isCommandOpen ? HIDE_COMMAND_LABEL : SHOW_COMMAND_LABEL}
                 </EuiText>
               }
               arrowDisplay="right"
-              buttonProps={{ css: { inlineSize: 'auto', flexGrow: 0 } }}
+              buttonProps={{
+                css: { inlineSize: 'auto', flexGrow: 0 },
+                'data-test-subj': `${testSubjPrefix}ManualStepCommandToggle-${step.id}`,
+              }}
               forceState={isCommandOpen ? 'open' : 'closed'}
               onToggle={onCommandToggle}
               paddingSize="none"
-              data-test-subj={`${testSubjPrefix}ManualStepCommandToggle-${step.id}`}
             >
               <EuiSpacer size="s" />
               <EuiCodeBlock
@@ -148,7 +150,10 @@ function ManualSetupStep({
                 overflowHeight={CODE_BLOCK_MAX_HEIGHT}
                 lineNumbers={{
                   highlight: step.lineNumbers.highlight,
-                  annotations: annotationsWithWidthLimit(step.lineNumbers.annotations),
+                  annotations: annotationsWithWidthLimit(
+                    step.lineNumbers.annotations,
+                    euiTheme.base * 16
+                  ),
                 }}
                 data-test-subj={`${testSubjPrefix}ManualStepCommand-${step.id}`}
               >
@@ -182,7 +187,7 @@ export function FederatedIdentityManualSetup({
     >
       <EuiFlexItem grow={false}>
         <EuiText size="s" color="subdued">
-          <p>{intro}</p>
+          {intro}
         </EuiText>
       </EuiFlexItem>
       {steps.map((step, index) => (

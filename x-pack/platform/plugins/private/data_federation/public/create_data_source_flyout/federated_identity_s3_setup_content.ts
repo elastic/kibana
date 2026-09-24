@@ -11,21 +11,18 @@ import type { FederatedIdentityManualSetupStep } from './federated_identity_manu
 import { federatedIdentityManualSetupStrings } from './federated_identity_manual_setup_code_block';
 
 export const s3FederatedIdentitySetupStrings = {
-  manualIntro: () =>
-    i18n.translate('xpack.dataFederation.createFlyout.s3.federated.manual.intro', {
-      defaultMessage:
-        'Run the commands below in order in AWS CloudShell, or any shell with the AWS CLI configured and permissions to create IAM resources.',
-    }),
+  manualIntro: i18n.translate('xpack.dataFederation.createFlyout.s3.federated.manual.intro', {
+    defaultMessage:
+      'Run the commands below in order in AWS CloudShell, or any shell with the AWS CLI configured and permissions to create IAM resources.',
+  }),
 
-  roleArnLabel: () =>
-    i18n.translate('xpack.dataFederation.createFlyout.s3.fields.roleArn', {
-      defaultMessage: 'Role ARN',
-    }),
+  roleArnLabel: i18n.translate('xpack.dataFederation.createFlyout.s3.fields.roleArn', {
+    defaultMessage: 'Role ARN',
+  }),
 
-  roleArnHelp: () =>
-    i18n.translate('xpack.dataFederation.createFlyout.s3.federated.roleArnHelp.manual', {
-      defaultMessage: 'Paste the ARN returned by step 3 above.',
-    }),
+  roleArnHelp: i18n.translate('xpack.dataFederation.createFlyout.s3.federated.roleArnHelp.manual', {
+    defaultMessage: 'Paste the ARN returned by step 3 above.',
+  }),
 };
 
 /** Quotes a value so the shell exports it verbatim instead of expanding it. */
@@ -126,8 +123,8 @@ export const getS3FederatedIdentityManualSteps = ({
     lineNumbers: {
       highlight: '1, 2',
       annotations: {
-        1: federatedIdentityManualSetupStrings.jwtIssuerAnnotation(),
-        2: federatedIdentityManualSetupStrings.subjectAnnotation(),
+        1: federatedIdentityManualSetupStrings.jwtIssuerAnnotation,
+        2: federatedIdentityManualSetupStrings.subjectAnnotation,
       },
     },
   },
@@ -147,8 +144,8 @@ export const getS3FederatedIdentityManualSteps = ({
     lineNumbers: {
       highlight: '1, 2',
       annotations: {
-        1: federatedIdentityManualSetupStrings.bucketAnnotation(),
-        2: federatedIdentityManualSetupStrings.defaultAnnotation(),
+        1: federatedIdentityManualSetupStrings.bucketAnnotation,
+        2: federatedIdentityManualSetupStrings.defaultAnnotation,
       },
     },
   },
@@ -167,7 +164,7 @@ export const getS3FederatedIdentityManualSteps = ({
     command: CREATE_ROLE_COMMAND,
     lineNumbers: {
       highlight: '1',
-      annotations: { 1: federatedIdentityManualSetupStrings.roleNameAnnotation() },
+      annotations: { 1: federatedIdentityManualSetupStrings.roleNameAnnotation },
     },
   },
 ];

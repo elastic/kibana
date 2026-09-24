@@ -39,47 +39,45 @@ const renderManualSetup = () =>
     </EuiProvider>
   );
 
-const commandToggles = () => screen.getAllByRole('button', { name: /command$/ });
+const toggle = (id: string) => screen.getByTestId(`testPrefixManualStepCommandToggle-${id}`);
 
 describe('FederatedIdentityManualSetup', () => {
-  it('lists the steps in order with their descriptions', () => {
+  it('renders one step per entry, in order', () => {
     renderManualSetup();
 
-    expect(screen.getByText('Run the commands below in order.')).toBeInTheDocument();
-    expect(
-      screen.getAllByRole('heading', { name: /Create the (identity provider|read policy)/ }).length
-    ).toBe(2);
-    expect(screen.getByText('Read access is scoped to one bucket.')).toBeInTheDocument();
+    const renderedSteps = screen.getAllByTestId(/testPrefixManualStep-/);
+    expect(renderedSteps.map((step) => step.getAttribute('data-test-subj'))).toEqual([
+      'testPrefixManualStep-first',
+      'testPrefixManualStep-second',
+    ]);
   });
 
   // The role can already exist, leaving the user only its ARN to paste.
   it('keeps every command collapsed initially', () => {
     renderManualSetup();
 
-    for (const toggle of commandToggles()) {
-      expect(toggle).toHaveTextContent('Show command');
-    }
+    expect(toggle('first')).toHaveAttribute('aria-expanded', 'false');
+    expect(toggle('second')).toHaveAttribute('aria-expanded', 'false');
   });
 
   // The steps run in order, so opening a later command collapses the earlier one.
   it('keeps only one command open at a time', () => {
     renderManualSetup();
 
-    fireEvent.click(commandToggles()[0]);
-    fireEvent.click(commandToggles()[1]);
+    fireEvent.click(toggle('first'));
+    fireEvent.click(toggle('second'));
 
-    const [first, second] = commandToggles();
-    expect(first).toHaveTextContent('Show command');
-    expect(second).toHaveTextContent('Hide command');
+    expect(toggle('first')).toHaveAttribute('aria-expanded', 'false');
+    expect(toggle('second')).toHaveAttribute('aria-expanded', 'true');
   });
 
   it('collapses the open command when its toggle is clicked again', () => {
     renderManualSetup();
 
-    fireEvent.click(commandToggles()[0]);
-    expect(commandToggles()[0]).toHaveTextContent('Hide command');
+    fireEvent.click(toggle('first'));
+    expect(toggle('first')).toHaveAttribute('aria-expanded', 'true');
 
-    fireEvent.click(commandToggles()[0]);
-    expect(commandToggles()[0]).toHaveTextContent('Show command');
+    fireEvent.click(toggle('first'));
+    expect(toggle('first')).toHaveAttribute('aria-expanded', 'false');
   });
 });

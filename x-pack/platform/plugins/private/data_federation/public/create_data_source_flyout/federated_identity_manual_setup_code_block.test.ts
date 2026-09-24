@@ -11,8 +11,8 @@ describe('federatedIdentityManualSetupStrings', () => {
   // These two values are resolved from cloud metadata, so editing them breaks the trust policy.
   it('tells the user to leave the prefilled values unchanged', () => {
     for (const annotation of [
-      federatedIdentityManualSetupStrings.jwtIssuerAnnotation(),
-      federatedIdentityManualSetupStrings.subjectAnnotation(),
+      federatedIdentityManualSetupStrings.jwtIssuerAnnotation,
+      federatedIdentityManualSetupStrings.subjectAnnotation,
     ]) {
       expect(annotation).toMatch(/unchanged/i);
       expect(annotation).not.toMatch(/replace/i);
