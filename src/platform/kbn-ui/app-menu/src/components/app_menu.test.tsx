@@ -9,13 +9,16 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import type { EuiBreakpointSize } from '@elastic/eui';
+import type { EuiBreakpointSize, EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { AppMenuComponent } from './app_menu';
-import type { AppMenuConfig, AppMenuItemType } from '../types';
+import type { AppMenuConfig, AppMenuItemType, AppMenuStaticItem } from '../types';
 import { APP_MENU_TEST_SUBJECTS } from '../test_subjects';
+import { openAppMenuOverflow } from '../test_helpers';
 
 let mockCurrentBreakpoint: EuiBreakpointSize | undefined = 'xl';
 let mockViewportBreakpoint: EuiBreakpointSize = 'xl';
+
+const renderedPanels: EuiContextMenuPanelDescriptor[][] = [];
 
 jest.mock('@kbn/ui-chrome-layout', () => ({
   useCurrentChromeApplicationBreakpoint: () => mockCurrentBreakpoint,
@@ -23,10 +26,15 @@ jest.mock('@kbn/ui-chrome-layout', () => ({
 
 jest.mock('@elastic/eui', () => {
   const actual = jest.requireActual('@elastic/eui');
+  const react = jest.requireActual('react');
 
   return {
     ...actual,
     useCurrentEuiBreakpoint: () => mockViewportBreakpoint,
+    EuiContextMenu: (props: { panels: EuiContextMenuPanelDescriptor[] }) => {
+      renderedPanels.push(props.panels);
+      return react.createElement(actual.EuiContextMenu, props);
+    },
   };
 });
 
@@ -44,6 +52,32 @@ describe('AppMenu', () => {
     jest.clearAllMocks();
     mockCurrentBreakpoint = 'xl';
     mockViewportBreakpoint = 'xl';
+    renderedPanels.length = 0;
+  });
+
+  describe('panel identity', () => {
+    /**
+     * `EuiContextMenu` discards and re-renders every item whenever `panels` changes identity, and
+     * each rebuild schedules a nested commit-phase `setState` in `EuiContextMenuPanel`.
+     */
+    it('should hand EuiContextMenu the same panels across re-renders with unchanged props', async () => {
+      mockCurrentBreakpoint = 'xs';
+      const staticItems: AppMenuStaticItem[] = [
+        { id: 'static1', label: 'Static 1', run: jest.fn() },
+      ];
+
+      const { rerender } = render(
+        <AppMenuComponent config={defaultConfig} staticItems={staticItems} />
+      );
+      await openAppMenuOverflow();
+
+      const panels = renderedPanels.at(-1);
+      expect(panels).toBeDefined();
+
+      rerender(<AppMenuComponent config={defaultConfig} staticItems={staticItems} />);
+
+      expect(renderedPanels.at(-1)).toBe(panels);
+    });
   });
 
   describe('rendering', () => {

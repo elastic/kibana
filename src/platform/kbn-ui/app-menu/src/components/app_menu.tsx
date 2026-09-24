@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import { getAppMenuItems, hasNonGlobalStaticItems, processStaticItems } from '../utils';
 import { AppMenuActionButton } from './app_menu_action_button';
 import { AppMenuItem } from './app_menu_item';
 import { AppMenuOverflowButton } from './app_menu_overflow_button';
 import { AppMenuSwitchComponent } from './app_menu_switch';
-import type { AppMenuConfig, AppMenuStaticItem } from '../types';
+import type { AppMenuConfig, AppMenuItemType, AppMenuStaticItem } from '../types';
 import { AppMenuHistoryComponent } from './app_menu_history';
 import {
   AppMenuApplicationResponsiveContent,
@@ -43,6 +43,8 @@ export interface AppMenuItemsProps {
 const hasNoItems = (config: AppMenuConfig) =>
   !config.items?.length && !config?.primaryActionItem && !config?.switch;
 
+const NO_ITEMS: AppMenuItemType[] = [];
+
 export const AppMenuComponent = ({
   config,
   visible = true,
@@ -50,6 +52,27 @@ export const AppMenuComponent = ({
   staticItems,
 }: AppMenuItemsProps) => {
   const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
+
+  const processedStaticItems = useMemo(() => processStaticItems(staticItems), [staticItems]);
+  const hasStaticItems = processedStaticItems.length > 0;
+
+  const { displayedItems, overflowItems } = useMemo(
+    () => getAppMenuItems({ config, hasStaticItems }),
+    [config, hasStaticItems]
+  );
+
+  const allItems = useMemo(
+    () => [...displayedItems, ...overflowItems],
+    [displayedItems, overflowItems]
+  );
+
+  const handlePopoverToggle = useCallback((id: string) => {
+    setOpenPopoverId((prev) => (prev === id ? null : id));
+  }, []);
+
+  const handleOnPopoverClose = useCallback(() => {
+    setOpenPopoverId(null);
+  }, []);
 
   /**
    * Global static items are registered once, usually before
@@ -72,21 +95,6 @@ export const AppMenuComponent = ({
   const switchConfig = config?.switch;
   const historyConfig = config?.historyConfig;
   const showMoreButtonId = 'show-more';
-  const processedStaticItems = processStaticItems(staticItems);
-  const hasStaticItems = processedStaticItems.length > 0;
-
-  const { displayedItems, overflowItems } = getAppMenuItems({
-    config,
-    hasStaticItems,
-  });
-
-  const handlePopoverToggle = (id: string) => {
-    setOpenPopoverId((prev) => (prev === id ? null : id));
-  };
-
-  const handleOnPopoverClose = () => {
-    setOpenPopoverId(null);
-  };
 
   const primaryActionComponent = primaryActionItem ? (
     <AppMenuActionButton
@@ -101,7 +109,7 @@ export const AppMenuComponent = ({
 
   const collapsedComponent = (
     <AppMenuOverflowButton
-      items={[...displayedItems, ...overflowItems]}
+      items={allItems}
       staticItems={processedStaticItems}
       isPopoverOpen={openPopoverId === showMoreButtonId}
       primaryActionItem={primaryActionItem}
@@ -111,9 +119,10 @@ export const AppMenuComponent = ({
     />
   );
 
-  const renderInlineContent = (inlineItemLimit: number) => {
-    const inlineItems = displayedItems.slice(0, inlineItemLimit);
-    const responsiveOverflowItems = [...displayedItems.slice(inlineItemLimit), ...overflowItems];
+  const renderInlineContent = (
+    inlineItems: AppMenuItemType[],
+    responsiveOverflowItems: AppMenuItemType[]
+  ) => {
     const shouldShowOverflow = responsiveOverflowItems.length > 0 || hasStaticItems;
     const hasSecondaryActions =
       Boolean(switchConfig) || inlineItems.length > 0 || shouldShowOverflow;
@@ -151,8 +160,8 @@ export const AppMenuComponent = ({
 
   const content: Record<AppMenuLayout, React.ReactNode> = {
     collapsed: collapsedComponent,
-    minimal: renderInlineContent(0),
-    expanded: renderInlineContent(displayedItems.length),
+    minimal: renderInlineContent(NO_ITEMS, allItems),
+    expanded: renderInlineContent(displayedItems, overflowItems),
   };
 
   const ResponsiveContent =
