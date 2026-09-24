@@ -169,23 +169,6 @@ describe('SourcePicker', () => {
     expect(within(listbox).getByText('metrics-*')).toBeInTheDocument();
   });
 
-  it('shows a toast warning when the indices request fails', async () => {
-    const { services } = renderWithProviders(
-      <Harness />,
-      createServices({ indicesError: new Error('Network error') })
-    );
-
-    const input = within(screen.getByTestId('contextIndexComboBox')).getByRole('combobox');
-    fireEvent.focus(input);
-
-    await waitFor(() =>
-      expect(services.notifications.toasts.addWarning).toHaveBeenCalledWith({
-        title: 'Unable to load indices.',
-      })
-    );
-    expect(screen.queryByTestId('contextIndexTabError')).not.toBeInTheDocument();
-  });
-
   it('adds a raw ES|QL query as a source from the advanced accordion', async () => {
     renderWithProviders(<Harness />);
 
@@ -193,7 +176,10 @@ describe('SourcePicker', () => {
 
     expect(screen.getByTestId('contextAddEsqlSourceButton')).toBeDisabled();
 
-    await addEsqlSource('FROM logs-* | LIMIT 10');
+    fireEvent.change(screen.getByTestId('mockEsqlEditor'), {
+      target: { value: 'FROM logs-* | LIMIT 10' },
+    });
+    fireEvent.click(screen.getByTestId('contextAddEsqlSourceButton'));
 
     expect(screen.getByTestId('contextSelectedSource-esql-0')).toBeInTheDocument();
   });

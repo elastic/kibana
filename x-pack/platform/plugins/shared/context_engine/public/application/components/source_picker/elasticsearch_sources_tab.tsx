@@ -21,10 +21,9 @@ import { ESQLLangEditor } from '@kbn/esql/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useDebouncedValue } from '@kbn/react-hooks';
-import React, { useEffect, useId, useMemo, useState } from 'react';
+import React, { useId, useMemo, useState } from 'react';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import { useIndices } from '../../hooks/use_indices';
-import { useKibana } from '../../hooks/use_kibana';
 import { isIndexPickerSourceSelected } from '../../utils/sources';
 import type { SelectedSource } from './types';
 
@@ -44,9 +43,6 @@ export const ElasticsearchSourcesTab = ({
   onAddIndex,
   onAddEsql,
 }: ElasticsearchSourcesTabProps) => {
-  const {
-    services: { notifications },
-  } = useKibana();
   const accordionId = useId();
   const [searchValue, setSearchValue] = useState('');
   const debouncedSearch = useDebouncedValue(searchValue, SEARCH_DEBOUNCE_MS);
@@ -54,7 +50,7 @@ export const ElasticsearchSourcesTab = ({
   const [esqlQuery, setEsqlQuery] = useState('');
   const trimmedEsqlQuery = esqlQuery.trim();
 
-  const { indexNames, isLoading, isError } = useIndices({
+  const { indexNames, isLoading } = useIndices({
     search: debouncedSearch.trim(),
     enabled: hasFocused,
   });
@@ -66,17 +62,6 @@ export const ElasticsearchSourcesTab = ({
         .map((name) => ({ label: name, value: name })),
     [indexNames, selectedSources]
   );
-
-  useEffect(() => {
-    if (!isError) {
-      return;
-    }
-    notifications.toasts.addWarning({
-      title: i18n.translate('xpack.contextEngine.sourcePicker.index.loadError', {
-        defaultMessage: 'Unable to load indices.',
-      }),
-    });
-  }, [isError, notifications]);
 
   const addIndexFromCombo = (indexName: string) => {
     const trimmed = indexName.trim();

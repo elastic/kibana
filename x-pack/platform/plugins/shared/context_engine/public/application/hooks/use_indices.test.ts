@@ -75,7 +75,19 @@ describe('useIndices', () => {
 
     await waitFor(() =>
       expect(getIndices).toHaveBeenCalledWith({
-        pattern: 'log*,-.*',
+        pattern: '*log*',
+        isRollupIndex: expect.any(Function),
+      })
+    );
+  });
+
+  it('uses substring matching for explicit searches including dot-prefixed names', async () => {
+    const getIndices = jest.fn().mockResolvedValue([buildMatchedItem('.ds-logs-default')]);
+    renderUseIndices({ search: '.ds-logs' }, getIndices);
+
+    await waitFor(() =>
+      expect(getIndices).toHaveBeenCalledWith({
+        pattern: '*.ds-logs*',
         isRollupIndex: expect.any(Function),
       })
     );
@@ -90,17 +102,6 @@ describe('useIndices', () => {
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
     expect(result.current.indexNames).toEqual(['logs-*', '.ds-metrics-default']);
-    expect(result.current.isError).toBe(false);
-  });
-
-  it('returns isError when the indices request rejects', async () => {
-    const getIndices = jest.fn().mockRejectedValue(new Error('Network error'));
-    const { result } = renderUseIndices({ search: '' }, getIndices);
-
-    await waitFor(() => expect(result.current.isLoading).toBe(false));
-
-    expect(result.current.isError).toBe(true);
-    expect(result.current.indexNames).toEqual([]);
   });
 
   it('does not fetch indices when enabled is false', () => {
@@ -109,7 +110,6 @@ describe('useIndices', () => {
 
     expect(getIndices).not.toHaveBeenCalled();
     expect(result.current.isLoading).toBe(false);
-    expect(result.current.isError).toBe(false);
     expect(result.current.indexNames).toEqual([]);
   });
 

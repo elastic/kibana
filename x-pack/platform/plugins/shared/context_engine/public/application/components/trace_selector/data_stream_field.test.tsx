@@ -28,7 +28,6 @@ jest.mock('../../hooks/use_indices', () => ({
 const defaultHookResult = {
   indexNames: ['logs-genai-default'],
   isLoading: false,
-  isError: false,
 };
 
 const renderField = (props: React.ComponentProps<typeof DataStreamField>) => {
@@ -122,21 +121,6 @@ describe('DataStreamField', () => {
 
     expect(screen.getByText('logs-genai-default')).toBeInTheDocument();
     expect(screen.getByText('logs-other')).toBeInTheDocument();
-  });
-
-  it('shows a toast warning on load error instead of rendering the raw error message', () => {
-    mockUseIndices.mockReturnValue({
-      ...defaultHookResult,
-      indexNames: [],
-      isError: true,
-    });
-
-    const { services } = renderField({ value: undefined, onChange: jest.fn() });
-
-    expect(services.notifications.toasts.addWarning).toHaveBeenCalledWith({
-      title: 'Unable to load data streams.',
-    });
-    expect(screen.queryByText('Unable to load data streams.')).not.toBeInTheDocument();
   });
 
   it('calls onChange when a data stream is selected', () => {

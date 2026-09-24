@@ -32,7 +32,6 @@ export interface UseIndicesOptions {
 export interface UseIndicesResult {
   indexNames: string[];
   isLoading: boolean;
-  isError: boolean;
 }
 
 const matchesTypes = (match: MatchedItem, types: IndexResourceType[] | undefined): boolean =>
@@ -51,13 +50,9 @@ export const useIndices = ({
   } = useKibana();
 
   const trimmedSearch = search.trim();
-  const pattern = trimmedSearch ? `${trimmedSearch}*,-.*` : DEFAULT_PATTERN;
+  const pattern = trimmedSearch ? `*${trimmedSearch}*` : DEFAULT_PATTERN;
 
-  const {
-    data: matches,
-    isLoading,
-    isError,
-  } = useQuery<MatchedItem[], Error>({
+  const { data: matches, isLoading } = useQuery<MatchedItem[], Error>({
     queryKey: contextEngineQueryKeys.indices.list(trimmedSearch),
     queryFn: () => data.dataViews.getIndices({ pattern, isRollupIndex: NOT_ROLLUP_INDEX }),
     refetchOnWindowFocus: false,
@@ -76,6 +71,5 @@ export const useIndices = ({
   return {
     indexNames,
     isLoading: enabled && isLoading,
-    isError: enabled && isError,
   };
 };

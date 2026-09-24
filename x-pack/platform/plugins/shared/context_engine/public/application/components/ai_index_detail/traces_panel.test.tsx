@@ -67,7 +67,6 @@ describe('TracesPanel', () => {
     mockUseIndices.mockReturnValue({
       indexNames: ['logs-genai-default'],
       isLoading: false,
-      isError: false,
     });
   });
 

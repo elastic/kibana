@@ -8,9 +8,8 @@
 import { EuiComboBox, EuiFormRow, type EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useDebouncedValue } from '@kbn/react-hooks';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useIndices } from '../../hooks/use_indices';
-import { useKibana } from '../../hooks/use_kibana';
 import type { EditableAiIndexTrace } from './types';
 
 interface DataStreamFieldProps {
@@ -21,14 +20,11 @@ interface DataStreamFieldProps {
 const SEARCH_DEBOUNCE_MS = 300;
 
 export const DataStreamField = ({ value, onChange }: DataStreamFieldProps) => {
-  const {
-    services: { notifications },
-  } = useKibana();
   const [searchValue, setSearchValue] = useState('');
   const debouncedSearch = useDebouncedValue(searchValue, SEARCH_DEBOUNCE_MS);
   const [hasFocused, setHasFocused] = useState(false);
 
-  const { indexNames, isLoading, isError } = useIndices({
+  const { indexNames, isLoading } = useIndices({
     search: debouncedSearch.trim(),
     enabled: hasFocused,
     types: ['data_stream'],
@@ -47,15 +43,6 @@ export const DataStreamField = ({ value, onChange }: DataStreamFieldProps) => {
     () => indexNames.map((name) => ({ label: name, value: name })),
     [indexNames]
   );
-
-  useEffect(() => {
-    if (!isError) return;
-    notifications.toasts.addWarning({
-      title: i18n.translate('xpack.contextEngine.traceSelector.dataStreamField.loadError', {
-        defaultMessage: 'Unable to load data streams.',
-      }),
-    });
-  }, [isError, notifications]);
 
   const handleFocus = () => {
     setHasFocused(true);
