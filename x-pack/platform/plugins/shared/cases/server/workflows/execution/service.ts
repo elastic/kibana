@@ -32,7 +32,6 @@ import type { ResolvedWorkflowAttachmentOrigin } from './validate_origin';
 import {
   parseSelectedAlertPairs,
   parseSelectedDocumentPairs,
-  rejectDocumentIdSelections,
   validateOrigin,
 } from './validate_origin';
 
@@ -184,7 +183,6 @@ export class CasesWorkflowRunService {
     // before any case fetch, so the validated sets equal what processing later uses.
     const selectedAlerts = parseSelectedAlertPairs(body.inputs);
     const selectedDocuments = parseSelectedDocumentPairs(body.inputs);
-    rejectDocumentIdSelections(body.inputs);
     let theCase: Awaited<ReturnType<typeof casesClient.cases.get>> | undefined;
     let resolvedAttachmentOrigin: ResolvedWorkflowAttachmentOrigin | undefined;
     // Observable inputs (observableIds / observableTypeKeys) are server-owned and stripped before
@@ -305,15 +303,15 @@ export class CasesWorkflowRunService {
     // runs. Preprocessing replaces the whole `event` object with the alert-event shape, so
     // pre-merging caseIds into event (before the call) would silently drop them on alert runs.
     //
-    // expandSelections lists only alertIds: they are the only compact selection checked against
-    // case membership above, so no other kind may be expanded on a case's behalf.
+    // expandSelections lists only the compact selections checked against case membership above,
+    // so a kind the workflows server learns to expand later is not expanded on a case's behalf.
     const { workflowExecutionId } = await this.management.runWorkflowWithAlertPreprocessing({
       workflow: toWorkflowExecutionEngineModel(workflow),
       spaceId,
       inputs: sanitizedInputs,
       request,
       preprocessingContext: context,
-      expandSelections: ['alertIds'],
+      expandSelections: ['alertIds', 'documentIds'],
       metadata,
       eventOverrides: {
         caseIds,
