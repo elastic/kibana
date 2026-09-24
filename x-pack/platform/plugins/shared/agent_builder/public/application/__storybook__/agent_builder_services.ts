@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EMPTY } from 'rxjs';
-import { EuiCodeBlock } from '@elastic/eui';
+import { EuiCodeBlock, EuiText } from '@elastic/eui';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import {
   AttachmentType,
@@ -77,12 +77,31 @@ type StorybookInlineAttachment = UnknownAttachment & { data: { text: string } };
 const storybookInlineAttachmentDefinition: AttachmentUIDefinition<StorybookInlineAttachment> = {
   getLabel: () => 'Text',
   getIcon: () => 'document',
-  renderInlineContent: ({ attachment }) =>
-    React.createElement(
-      EuiCodeBlock,
-      { language: 'text', fontSize: 's', overflowHeight: 300 },
-      attachment.data.text
-    ),
+  // Shows the previous version struck through above the current one, so a story for a later
+  // version proves the diff base reaches the renderer.
+  renderInlineContent: ({ attachment }) => {
+    const previousText = (attachment.versionData?.previousVersionData as { text?: string })?.text;
+    return React.createElement(
+      React.Fragment,
+      null,
+      previousText &&
+        React.createElement(
+          EuiText,
+          { size: 's', color: 'subdued', style: { padding: '8px 12px 0' } },
+          React.createElement(
+            'p',
+            null,
+            'Previously: ',
+            React.createElement('del', null, previousText)
+          )
+        ),
+      React.createElement(
+        EuiCodeBlock,
+        { language: 'text', fontSize: 's', overflowHeight: 300 },
+        attachment.data.text
+      )
+    );
+  },
   getActionButtons: ({ attachment }) => [
     {
       label: 'Copy',

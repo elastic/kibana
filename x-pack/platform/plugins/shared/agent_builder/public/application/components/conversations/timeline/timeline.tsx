@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import moment from 'moment';
 import type { AgentDefinition, VersionedAttachment } from '@kbn/agent-builder-common';
@@ -37,6 +37,13 @@ export const Timeline: React.FC<TimelineProps> = ({
     return !previous || !moment(itemDate(items[index])).isSame(moment(itemDate(previous)), 'day');
   };
 
+  // The resume spinner belongs to the last turn, which is not always the last item: an inline
+  // attachment can follow it.
+  const lastTurnIndex = useMemo(
+    () => items.findLastIndex((item) => item.kind === 'agentTurn'),
+    [items]
+  );
+
   return (
     <>
       <EuiFlexGroup direction="column" gutterSize="l">
@@ -59,7 +66,7 @@ export const Timeline: React.FC<TimelineProps> = ({
                   item={item}
                   agent={agent}
                   conversationAttachments={conversationAttachments}
-                  isResuming={isResuming && index === items.length - 1}
+                  isResuming={isResuming && index === lastTurnIndex}
                 />
               );
               break;

@@ -77,6 +77,17 @@ describe('Timeline', () => {
 
       expect(resumingFlags()).toEqual(['false', 'false']);
     });
+
+    it('still marks the last turn when an inline attachment follows it', () => {
+      render(
+        <Timeline
+          items={[message('u1'), turn('t1'), createAttachmentItem({ key: 'a1' })]}
+          isResuming
+        />
+      );
+
+      expect(resumingFlags()).toEqual(['true']);
+    });
   });
 
   describe('date dividers', () => {

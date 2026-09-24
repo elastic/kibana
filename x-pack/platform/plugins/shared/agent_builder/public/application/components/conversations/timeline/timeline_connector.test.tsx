@@ -10,6 +10,7 @@ import { act, render, screen } from '@testing-library/react';
 import { Subject } from 'rxjs';
 import type { Observable } from 'rxjs';
 import type { ChatEvent, Conversation, TimelineEvent } from '@kbn/agent-builder-common';
+import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { BrowserChatEvent } from '@kbn/agent-builder-browser/events';
 import { ConversationStreamService } from '../../../../services/events/conversation_stream_service';
 import { useConversation } from '../../../hooks/use_conversation';
@@ -18,6 +19,8 @@ import { useStreamRecord } from '../../../context/streaming/streaming_context';
 import { createUserMessageEvent } from './items/user_message_event.factory';
 import { createExecutionStartedEvent } from './items/execution_started.factory';
 import { createExecutionTerminatedEvent } from './items/execution_terminated_event.factory';
+import { createAttachmentAddedEvent } from './items/attachment_added_event.factory';
+import { createVersionedAttachment } from './items/versioned_attachment.factory';
 import type { TimelineItem } from './types';
 import { TimelineConnector } from './timeline_connector';
 
@@ -42,8 +45,15 @@ jest.mock('../../../hooks/use_conversation_stream', () => ({
   useConversationStream: () => ({ isResuming: false }),
 }));
 jest.mock('../../../hooks/use_agent_builder_service', () => ({
-  useAgentBuilderServices: () => ({ attachmentsService: { hasAttachmentType: () => false } }),
+  useAgentBuilderServices: () => ({
+    attachmentsService: {
+      hasAttachmentType: (type: string) => registeredAttachmentTypes.has(type),
+    },
+  }),
 }));
+
+/** Attachment types with a UI in this test's Kibana; empty unless a test registers one. */
+const registeredAttachmentTypes = new Set<string>();
 jest.mock('./timeline', () => ({
   Timeline: ({ items }: { items: TimelineItem[] }) => (
     <ul>
@@ -93,8 +103,8 @@ const setState = ({
   });
 };
 
-const conversationWith = (events: TimelineEvent[]) =>
-  ({ id: conversationId, events, rounds: [] } as unknown as Conversation);
+const conversationWith = (events: TimelineEvent[], attachments?: VersionedAttachment[]) =>
+  ({ id: conversationId, events, attachments, rounds: [] } as unknown as Conversation);
 
 const renderedItems = () => screen.getAllByTestId('item').map((el) => el.textContent);
 
@@ -113,6 +123,7 @@ const savedUserMessage = createUserMessageEvent({ id: 'round-1::user_message' })
 describe('TimelineConnector', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    registeredAttachmentTypes.clear();
     mockStreamService.clearPersistedExecution(conversationId, 'round-1::execution');
   });
 
@@ -234,6 +245,57 @@ describe('TimelineConnector', () => {
     });
     rerender(<TimelineConnector />);
     expect(renderedItems()[0]).toBe('userMessage:round-1::user_message:saved-1');
+  });
+
+  describe('inline attachments', () => {
+    const inlineAdded = createAttachmentAddedEvent({ id: 'round-1::attachment_added' });
+    const record = createVersionedAttachment({ id: inlineAdded.data.attachment_id });
+
+    it('shows the card once a refetch brings the event and its record', () => {
+      registeredAttachmentTypes.add(record.type);
+      setState({ conversation: conversationWith([savedUserMessage, started, terminated]) });
+      const { rerender } = render(<TimelineConnector />);
+      expect(renderedItems()).toHaveLength(2);
+
+      setState({
+        conversation: conversationWith(
+          [savedUserMessage, started, terminated, inlineAdded],
+          [record]
+        ),
+      });
+      rerender(<TimelineConnector />);
+
+      expect(renderedItems()).toEqual([
+        'userMessage:round-1::user_message:',
+        'agentTurn:round-1::execution:completed',
+        'attachment:round-1::attachment_added:',
+      ]);
+    });
+
+    it('shows nothing for the event when its type has no UI here', () => {
+      setState({
+        conversation: conversationWith(
+          [savedUserMessage, started, terminated, inlineAdded],
+          [record]
+        ),
+      });
+      render(<TimelineConnector />);
+
+      expect(renderedItems()).toEqual([
+        'userMessage:round-1::user_message:',
+        'agentTurn:round-1::execution:completed',
+      ]);
+    });
+
+    it('shows nothing for the event when the record is gone', () => {
+      registeredAttachmentTypes.add(record.type);
+      setState({
+        conversation: conversationWith([savedUserMessage, started, terminated, inlineAdded], []),
+      });
+      render(<TimelineConnector />);
+
+      expect(renderedItems()).toHaveLength(2);
+    });
   });
 
   it('observes the live events of a conversation that has not been fetched yet', () => {
