@@ -10,6 +10,7 @@ import { z } from '@kbn/zod';
 import type { IntervalSchedule } from '@kbn/task-manager-plugin/server';
 import { MAX_ROUTE_STRING_LENGTH } from '../zod_query';
 import {
+  fromSettingsAttribute,
   getSyntheticsDynamicSettings,
   setSyntheticsDynamicSettings,
 } from '../../saved_objects/synthetics_settings';
@@ -188,19 +189,6 @@ export const createPostDynamicSettingsRoute: SyntheticsRestApiRouteFactory<
     };
   },
 });
-
-export const fromSettingsAttribute = (
-  attr: DynamicSettingsAttributes
-): DynamicSettingsAttributes => {
-  return {
-    certExpirationThreshold: attr.certExpirationThreshold,
-    certAgeThreshold: attr.certAgeThreshold,
-    defaultConnectors: attr.defaultConnectors,
-    defaultEmail: attr.defaultEmail,
-    defaultStatusRuleEnabled: attr.defaultStatusRuleEnabled ?? true,
-    defaultTLSRuleEnabled: attr.defaultTLSRuleEnabled ?? true,
-  };
-};
 
 const emailList = z.array(z.string().max(MAX_ROUTE_STRING_LENGTH)).max(1000);
 
