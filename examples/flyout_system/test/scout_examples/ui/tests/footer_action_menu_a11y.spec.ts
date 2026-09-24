@@ -82,6 +82,13 @@ test.describe(
         await trigger.focus();
         await trigger.press('Enter');
         await expect(panel).toBeVisible();
+        // Wait for focus to enter the panel — this also confirms the popover's opening
+        // animation has settled (isOpenStable), so the focus trap is active.
+        await expect
+          .poll(async () => app.isFocusWithin(panel), {
+            message: 'focus should move into the menu before Escape is pressed',
+          })
+          .toBe(true);
 
         await page.keyboard.press('Escape');
 
