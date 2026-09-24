@@ -90,6 +90,11 @@ Use it only when something outside the query itself requires the results to be n
 It is parsed separately from the query text, so it cannot reference \`?named\` parameters.
 Prefer a filter that every targeted index can match: against a wildcard pattern such as \`FROM logs-*\`, a clause naming a field that only some indices have will drop the others from the results.
 
+### Data tiers
+
+Indices on the frozen tier are always excluded, because querying them requires recovering searchable snapshots from object storage and can take several minutes.
+If results look incomplete for a time range that reaches far into the past, tell the user that frozen tier data was not searched.
+
 ## API documentation
 - ES|QL reference: https://www.elastic.co/docs/reference/query-languages/esql
 - Query DSL reference (for the filter parameter): https://www.elastic.co/docs/reference/query-languages/querydsl`,

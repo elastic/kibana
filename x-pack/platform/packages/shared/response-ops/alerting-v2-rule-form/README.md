@@ -143,7 +143,6 @@ interface FormValues {
     name: string;
     enabled: boolean;
     description?: string;
-    owner?: string;
     tags?: string[];
   };
   timeField: string;
