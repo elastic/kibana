@@ -336,10 +336,13 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
       let reconcileWriteSucceeded = true;
       if (detectAndReviewStep.onboardingDeploymentId) {
         const remainingFailed = failedInstances.filter((id) => !staleFailedIds.includes(id));
-        reconcileWriteSucceeded = await updateDeployment(detectAndReviewStep.onboardingDeploymentId, {
-          services: selectedServiceIds,
-          status: remainingFailed.length === 0 ? 'succeeded' : 'failed',
-        });
+        reconcileWriteSucceeded = await updateDeployment(
+          detectAndReviewStep.onboardingDeploymentId,
+          {
+            services: selectedServiceIds,
+            status: remainingFailed.length === 0 ? 'succeeded' : 'failed',
+          }
+        );
       }
       // Only clear local state when the SO write is confirmed — a failed write leaves the
       // deselected service in the SO; retaining it locally keeps session and SO consistent.
