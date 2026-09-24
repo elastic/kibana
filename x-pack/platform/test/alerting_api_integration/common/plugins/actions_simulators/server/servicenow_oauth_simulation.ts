@@ -29,14 +29,16 @@ const TOKEN_EXPIRES_IN_SEC = 3660;
 let authorizationCodeExchangeSeq = 0;
 let refreshTokenExchangeSeq = 0;
 let clientCredentialsJwtExchangeSeq = 0;
+let passwordExchangeSeq = 0;
 
-type OAuthGrantType = 'authorization_code' | 'refresh_token' | 'client_credentials';
+type OAuthGrantType = 'authorization_code' | 'refresh_token' | 'client_credentials' | 'password';
 
 function toOAuthGrantType(value: string | undefined): OAuthGrantType | undefined {
   if (
     value === 'authorization_code' ||
     value === 'refresh_token' ||
-    value === 'client_credentials'
+    value === 'client_credentials' ||
+    value === 'password'
   ) {
     return value;
   }
@@ -183,6 +185,28 @@ export function initPlugin(router: IRouter, path: string) {
     ): Promise<IKibanaResponse<any>> {
       const fields = getFormFields(req.body);
       const grantType = toOAuthGrantType(fields.grant_type);
+
+      if (grantType === 'password') {
+        const contentType = req.headers['content-type'];
+        const isJson =
+          typeof contentType === 'string' && contentType.startsWith('application/json');
+        const usernameField = isJson ? 'email' : 'username';
+        const otherField = isJson ? 'username' : 'email';
+        if (
+          fields[usernameField] !== 'password-grant@example.com' ||
+          fields[otherField] !== undefined ||
+          fields.password !== 'password-grant-password' ||
+          fields.client_id !== 'password-grant-client-id'
+        ) {
+          return res.badRequest({ body: { message: 'invalid_grant' } });
+        }
+        passwordExchangeSeq += 1;
+        return jsonResponse(res, 200, {
+          access_token: `sim-oauth-password-${passwordExchangeSeq}`,
+          expires_in: fields.scope === 'short-lived' ? 1 : TOKEN_EXPIRES_IN_SEC,
+          token_type: 'bearer',
+        });
+      }
 
       if (grantType === 'authorization_code') {
         authorizationCodeExchangeSeq += 1;

@@ -43,7 +43,7 @@ describe('createInferenceEndpointExecutor', () => {
       {
         asStream: true,
         requestTimeout: 180_000,
-        headers: { 'X-Elastic-Product-Use-Case': 'inference' },
+        headers: { 'X-Elastic-Product-Use-Case': 'inference', 'accept-encoding': 'identity' },
       }
     );
   });
@@ -71,6 +71,7 @@ describe('createInferenceEndpointExecutor', () => {
           'X-Elastic-Product-Solution': 'observability',
           'X-Elastic-Product-Feature': 'nightshift',
           'X-Elastic-Inference-Interaction-Id': 'execution-1',
+          'accept-encoding': 'identity',
         },
       })
     );
@@ -96,6 +97,7 @@ describe('createInferenceEndpointExecutor', () => {
       expect.objectContaining({
         headers: {
           'X-Elastic-Product-Use-Case': 'significant_events_discovery',
+          'accept-encoding': 'identity',
         },
       })
     );
@@ -120,6 +122,7 @@ describe('createInferenceEndpointExecutor', () => {
         headers: {
           'X-Elastic-Product-Use-Case': 'alertzero',
           'X-Elastic-Inference-Interaction-Id': 'execution-1',
+          'accept-encoding': 'identity',
         },
       })
     );

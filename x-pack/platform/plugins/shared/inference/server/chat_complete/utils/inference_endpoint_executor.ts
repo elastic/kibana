@@ -60,6 +60,9 @@ export const createInferenceEndpointExecutor = ({
             ...(interactionId
               ? { 'X-Elastic-Inference-Interaction-Id': interactionId }
               : undefined),
+            // asStream bypasses the transport's decompression step, so explicitly request
+            // an uncompressed response to avoid receiving raw gzipped bytes as SSE events.
+            'accept-encoding': 'identity',
           },
           ...(signal ? { signal } : {}),
         }

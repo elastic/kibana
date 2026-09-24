@@ -43,6 +43,10 @@ export const createAlertZeroSecondaryNavigationTree = (): NodeDefinition[] => [
     icon: 'warning',
   },
   {
+    link: alertZeroLink(SecurityPageName.alertZeroEscalations),
+    icon: 'flag',
+  },
+  {
     // Kept a flat entry on purpose: the per-watch, Workers and Skills links are registered as deep
     // links so they stay searchable, but they are not children here — the chrome sub-panel is not the
     // navigation we want for them. The in-page subnav owns that, including the per-watch accent dots
