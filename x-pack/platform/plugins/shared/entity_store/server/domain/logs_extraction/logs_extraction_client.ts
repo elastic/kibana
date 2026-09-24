@@ -232,6 +232,10 @@ export class LogsExtractionClient {
     // Where this run resumes from, captured before any work so the error path can still report
     // lag. Stays undefined when the engine is stopped or the non-priority process is disabled,
     // because neither is stalled — they are idle, and an idle process must not report lag.
+    // Note: this is the raw cursor before applyMaxLagCutoff clips it. In the rare case where
+    // the checkpoint is older than lookbackPeriod AND the run fails, the error-path lag is
+    // overstated (raw age vs. effective search distance). An alert still fires correctly; only
+    // the number is larger than the cutoff distance. The success path is accurate in all cases.
     let resumePointISO: string | undefined;
     // Updated whenever a checkpoint is persisted mid-run; the error path uses the most-recent
     // committed point rather than the pre-run start, so partial progress does not inflate the

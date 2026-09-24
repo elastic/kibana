@@ -100,7 +100,7 @@ export const entityStoreMetrics = {
 
   extractionTaskDurationMs: histogram<ExtractionAttributes>(m('extraction.task.duration_ms'), {
     description:
-      'End-to-end duration of one extraction task run. The two processes run on different cadences, so overlap between a long non-priority run and the next priority run is visible here',
+      'Duration of the extraction step of one task run (excludes per-tick bootstrap work such as ensureScheduled). The two processes run on different cadences, so overlap between a long non-priority run and the next priority run is visible here',
     unit: 'ms',
     valueType: ValueType.DOUBLE,
   }),
