@@ -191,6 +191,7 @@ describe('CasesWorkflowRunService', () => {
       inputs: { event: {} },
       request,
       preprocessingContext: context,
+      expandSelections: ['alertIds'],
       eventOverrides: { caseIds: ['case-1'] },
       metadata: {
         schemaVersion: 1,
@@ -431,9 +432,9 @@ describe('CasesWorkflowRunService', () => {
       expect(management.runWorkflowWithAlertPreprocessing).not.toHaveBeenCalled();
     });
 
-    // SECURITY REGRESSION TEST: documentIds are expanded server-side, and case membership is only
-    // checked for pre-expanded documents, so a case run must never accept them — otherwise a run
-    // could pull in documents unrelated to the case it is audited against.
+    // SECURITY REGRESSION TEST: case membership is only checked for pre-expanded documents, so a
+    // case run must never accept documentIds — otherwise a run could carry documents unrelated to
+    // the case it is audited against.
     it('rejects documentIds inputs', async () => {
       await expect(
         run({

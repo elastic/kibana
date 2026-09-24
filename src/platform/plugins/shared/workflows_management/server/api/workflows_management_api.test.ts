@@ -51,7 +51,10 @@ const mockResumeExternallyWithInput =
     typeof resumeWorkflowExecutionExternallyWithInput
   >;
 
-jest.mock('./routes/executions/utils/preprocess_trigger_inputs');
+jest.mock('./routes/executions/utils/preprocess_trigger_inputs', () => ({
+  ...jest.requireActual('./routes/executions/utils/preprocess_trigger_inputs'),
+  preprocessTriggerInputs: jest.fn(),
+}));
 
 describe('WorkflowsManagementApi', () => {
   let api: WorkflowsManagementApi;
@@ -754,7 +757,10 @@ steps:
         workflowExecutionId: 'test-exec-id',
       });
 
-      expect(mockPreprocessTriggerInputs).toHaveBeenCalledWith(inputs, context, 'default', logger);
+      expect(mockPreprocessTriggerInputs).toHaveBeenCalledWith(inputs, context, 'default', logger, [
+        'alertIds',
+        'documentIds',
+      ]);
       expect(mockWorkflowsExecutionEngine.executeWorkflow).toHaveBeenCalledWith(
         workflow,
         {
@@ -766,6 +772,37 @@ steps:
         },
         mockRequest
       );
+    });
+
+    it('expands only the selection kinds the caller allows', async () => {
+      const workflow = {
+        id: 'workflow-123',
+        name: 'Test workflow',
+        enabled: true,
+        definition: {
+          version: '1',
+          name: 'Test workflow',
+          enabled: true,
+          triggers: [{ type: 'manual' }],
+          steps: [],
+        },
+        yaml: 'name: Test workflow',
+      } as WorkflowExecutionEngineModel;
+      const inputs = { event: { triggerType: 'alert' } };
+      const context = {} as AlertPreprocessingContext;
+
+      await api.runWorkflowWithAlertPreprocessing({
+        workflow,
+        spaceId: 'default',
+        inputs,
+        request: mockRequest,
+        preprocessingContext: context,
+        expandSelections: ['alertIds'],
+      });
+
+      expect(mockPreprocessTriggerInputs).toHaveBeenCalledWith(inputs, context, 'default', logger, [
+        'alertIds',
+      ]);
     });
 
     it('merges eventOverrides into event after preprocessing so caller-owned fields survive event replacement', async () => {

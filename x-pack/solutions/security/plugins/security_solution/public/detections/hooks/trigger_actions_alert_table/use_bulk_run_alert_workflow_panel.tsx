@@ -46,6 +46,8 @@ import { globalFiltersQuerySelector } from '../../../common/store/inputs/selecto
 /** Distinct from the table's own id so this search does not disturb the table's query state. */
 const RUN_WORKFLOW_SELECTION_QUERY_ID = 'bulk-run-workflow-selection';
 
+const MATCH_ALL_FILTER_QUERY = JSON.stringify({ match_all: {} });
+
 interface BulkAlertWorkflowsPanelProps {
   alertItems: TimelineItem[];
   /**
@@ -138,7 +140,9 @@ export const useBulkRunAlertWorkflowPanel = ({
       browserFields,
       kqlMode: 'filter',
     });
-    return combinedQuery?.filterQuery ?? '';
+    // With no filters at all `combineQueries` returns null, and the timeline search does not run
+    // without a filter query. Everything in the time range is still a valid "select all".
+    return combinedQuery?.filterQuery ?? MATCH_ALL_FILTER_QUERY;
   }, [esQueryConfig, dataView, combinedFilters, browserFields]);
 
   const selectionScope: RunWorkflowSelectionScope = useMemo(

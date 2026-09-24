@@ -20,6 +20,12 @@ import { useAlertsPrivileges } from '../../containers/detection_engine/alerts/us
 import * as i18n from '../../components/alerts_table/translations';
 import { PageScope } from '../../../data_view_manager/constants';
 import { useTimelineEventsHandler } from '../../../timelines/containers';
+import { combineQueries } from '../../../common/lib/kuery';
+import type { SelectionIdSearchHandler } from '../../components/alerts_table/timeline_actions/use_run_workflow_selection';
+import {
+  NEWEST_FIRST_SORT,
+  useResolvedRunWorkflowSelection,
+} from '../../components/alerts_table/timeline_actions/use_run_workflow_selection';
 
 jest.mock('@kbn/workflows-ui', () => ({
   useWorkflowsCapabilities: jest.fn(),
@@ -37,8 +43,10 @@ jest.mock('../../../data_view_manager/hooks/use_browser_fields', () => ({
   useBrowserFields: () => ({}),
 }));
 jest.mock('../../../common/lib/kuery', () => ({
-  combineQueries: () => ({ filterQuery: '{"bool":{}}' }),
+  combineQueries: jest.fn(),
 }));
+
+const combineQueriesMock = combineQueries as jest.MockedFunction<typeof combineQueries>;
 
 const useTimelineEventsHandlerMock = useTimelineEventsHandler as jest.MockedFunction<
   typeof useTimelineEventsHandler
@@ -129,6 +137,11 @@ describe('useBulkRunAlertWorkflowPanel', () => {
     (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasIndexWrite: true });
     useWorkflowsCapabilitiesMock.mockReturnValue(createCapabilities());
     useWorkflowsUIEnabledSettingMock.mockReturnValue(true);
+    combineQueriesMock.mockReturnValue({
+      filterQuery: '{"bool":{}}',
+      kqlError: undefined,
+      baseKqlQuery: { query: '', language: 'kuery' },
+    });
     mockAlertIdSearch({ events: [], totalCount: 0 });
   });
 
@@ -262,11 +275,28 @@ describe('useBulkRunAlertWorkflowPanel', () => {
       expect(screen.queryByTestId('bulk-run-workflow-selection-trimmed')).not.toBeInTheDocument();
     });
 
-    it('requests at most the supported maximum when resolving the selection', () => {
+    it('requests at most the supported maximum, newest first, when resolving the selection', () => {
+      renderPanel({ alertItems: [alertItem('alert-1', 'index-1')], isAllSelected: true });
+
+      // Newest first is what makes a trimmed selection keep the most recent alerts, as the
+      // trimmed-selection callout promises; the timeline search defaults to oldest first.
+      expect(useTimelineEventsHandlerMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          limit: MAX_RUN_WORKFLOW_DOCS,
+          fields: ['_id'],
+          sort: NEWEST_FIRST_SORT,
+        })
+      );
+      expect(NEWEST_FIRST_SORT).toEqual([expect.objectContaining({ direction: 'desc' })]);
+    });
+
+    it('searches everything in the time range when no filters apply', () => {
+      combineQueriesMock.mockReturnValue(null);
+
       renderPanel({ alertItems: [alertItem('alert-1', 'index-1')], isAllSelected: true });
 
       expect(useTimelineEventsHandlerMock).toHaveBeenCalledWith(
-        expect.objectContaining({ limit: MAX_RUN_WORKFLOW_DOCS, fields: ['_id'] })
+        expect.objectContaining({ filterQuery: JSON.stringify({ match_all: {} }) })
       );
     });
 
@@ -285,19 +315,85 @@ describe('useBulkRunAlertWorkflowPanel', () => {
       expect(screen.getByTestId('alert-id-alert-1')).toBeInTheDocument();
     });
 
-    it('surfaces an error instead of a partial run when resolving the selection fails', () => {
+    it('surfaces an error instead of a partial run when resolving the selection fails', async () => {
+      // The timeline search reports failures through its error callback, never by throwing.
       useTimelineEventsHandlerMock.mockReturnValue([
         undefined as never,
         undefined as never,
-        (() => {
-          throw new Error('search failed');
+        ((_onResponse: unknown, onError: (error: unknown) => void) => {
+          onError(new Error('search failed'));
         }) as never,
       ]);
 
       renderPanel({ alertItems: [alertItem('alert-1', 'index-1')], isAllSelected: true });
 
-      expect(screen.getByTestId('bulk-run-workflow-selection-error')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByTestId('bulk-run-workflow-selection-error')).toBeInTheDocument();
+      });
       expect(screen.queryByTestId('bulk-alert-workflows-panel')).not.toBeInTheDocument();
+    });
+  });
+});
+
+describe('useResolvedRunWorkflowSelection', () => {
+  it('drops an earlier result when the search changes', async () => {
+    const firstSearch = jest.fn((onResponse: (response: never) => void) => {
+      onResponse({ events: [alertItem('alert-1', 'index-1')], totalCount: 1 } as never);
+    });
+    const pendingSearch = jest.fn();
+
+    const { result, rerender } = renderHook(
+      ({ searchSelectionIds }) =>
+        useResolvedRunWorkflowSelection({
+          isAllSelected: true,
+          pageSelections: [],
+          searchSelectionIds,
+        }),
+      { initialProps: { searchSelectionIds: firstSearch as SelectionIdSearchHandler } }
+    );
+
+    await waitFor(() => {
+      expect(result.current).toEqual({
+        status: 'ready',
+        selections: [{ _id: 'alert-1', _index: 'index-1' }],
+        wasTrimmed: false,
+      });
+    });
+
+    rerender({ searchSelectionIds: pendingSearch as SelectionIdSearchHandler });
+
+    expect(pendingSearch).toHaveBeenCalledTimes(1);
+    expect(result.current).toEqual({ status: 'loading' });
+  });
+
+  it('recovers from an earlier failure when the search changes', async () => {
+    const failingSearch = jest.fn((_onResponse: unknown, onError: (error: unknown) => void) => {
+      onError(new Error('search failed'));
+    });
+    const succeedingSearch = jest.fn((onResponse: (response: never) => void) => {
+      onResponse({ events: [alertItem('alert-2', 'index-2')], totalCount: 1 } as never);
+    });
+
+    const { result, rerender } = renderHook(
+      ({ searchSelectionIds }) =>
+        useResolvedRunWorkflowSelection({
+          isAllSelected: true,
+          pageSelections: [],
+          searchSelectionIds,
+        }),
+      { initialProps: { searchSelectionIds: failingSearch as SelectionIdSearchHandler } }
+    );
+
+    await waitFor(() => expect(result.current).toEqual({ status: 'error' }));
+
+    rerender({ searchSelectionIds: succeedingSearch as SelectionIdSearchHandler });
+
+    await waitFor(() => {
+      expect(result.current).toEqual({
+        status: 'ready',
+        selections: [{ _id: 'alert-2', _index: 'index-2' }],
+        wasTrimmed: false,
+      });
     });
   });
 });

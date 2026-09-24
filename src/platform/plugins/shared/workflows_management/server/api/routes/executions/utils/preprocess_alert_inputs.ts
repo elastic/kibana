@@ -20,6 +20,7 @@ import type {
   AlertTriggerInput,
 } from '../../../../../common/types/alert_types';
 import { buildAlertEvent } from '../../../../../common/utils/build_alert_event';
+import { WorkflowTriggerInputError } from '../../../workflow_trigger_input_error';
 import type { AlertPreprocessingContext } from '../../../workflows_management_api';
 
 /**
@@ -140,7 +141,7 @@ export async function preprocessAlertInputs(
   const alertHits = await fetchAlerts(event.alertIds, context, logger);
 
   if (alertHits.length === 0) {
-    throw new Error('No alerts found with the provided IDs');
+    throw new WorkflowTriggerInputError('No alerts found with the provided IDs');
   }
 
   const rulesByUuid = extractRulesFromAlerts(alertHits);

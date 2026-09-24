@@ -10,6 +10,7 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { MAX_RUN_WORKFLOW_DOCS } from '@kbn/workflows';
 import type { DocumentSelection } from '../../../../../common/types/document_types';
+import { WorkflowTriggerInputError } from '../../../workflow_trigger_input_error';
 
 export interface FetchedSource {
   _id: string;
@@ -24,9 +25,9 @@ export interface FetchedFields {
   fields: Record<string, unknown>;
 }
 
-const assertWithinRunLimit = (count: number, plural: string) => {
+export const assertWithinRunLimit = (count: number, plural: string): void => {
   if (count > MAX_RUN_WORKFLOW_DOCS) {
-    throw new Error(
+    throw new WorkflowTriggerInputError(
       `Cannot run a workflow on more than ${MAX_RUN_WORKFLOW_DOCS} ${plural} (received ${count}).`
     );
   }
@@ -86,10 +87,14 @@ export const fetchAlertSourcesByIds = async ({
 /**
  * Fetches the mapped fields of each selected document with a single `fields: ['*']` search.
  *
- * Deliberately not `mget`: every client that embedded documents itself sent dotted field paths
- * with array values, derived from the `fields` API. Reading `_source` instead would hand
- * workflows nested objects and scalars, silently breaking any expression written against the
- * embedded shape, and would drop runtime fields entirely.
+ * Deliberately not `mget`: reading through the `fields` API yields dotted field paths with array
+ * values, the shape the Security tables embed today, and includes runtime fields defined in the
+ * index mappings. Runtime fields that exist only on a Kibana data view are not included — the
+ * server has no data view to read them from.
+ *
+ * Each index gets its own `ids` clause so the query matches exactly the requested pairs. A single
+ * `ids` query over every selected index would also match an id in an index it was not selected
+ * for, and those extra hits would compete for the `size` window with the pairs actually asked for.
  *
  * The caller must pass an `asCurrentUser` client so the read stays scoped to the requesting
  * user's index privileges and space. Pairs that resolve to nothing are logged and skipped rather
@@ -112,14 +117,27 @@ export const fetchDocumentFieldsByIds = async ({
   assertWithinRunLimit(selections.length, 'documents');
 
   const requested = new Set(selections.map(selectionKey));
+  const idsByIndex = new Map<string, Set<string>>();
+  for (const { _id, _index } of selections) {
+    const ids = idsByIndex.get(_index) ?? new Set<string>();
+    ids.add(_id);
+    idsByIndex.set(_index, ids);
+  }
 
   try {
     const response = await esClient.search<never>({
-      index: [...new Set(selections.map(({ _index }) => _index))],
-      size: selections.length,
+      index: [...idsByIndex.keys()],
+      size: requested.size,
       _source: false,
       fields: ['*'],
-      query: { ids: { values: [...new Set(selections.map(({ _id }) => _id))] } },
+      query: {
+        bool: {
+          should: [...idsByIndex].map(([index, ids]) => ({
+            bool: { filter: [{ term: { _index: index } }, { ids: { values: [...ids] } }] },
+          })),
+          minimum_should_match: 1,
+        },
+      },
       ignore_unavailable: true,
     });
 
@@ -131,8 +149,8 @@ export const fetchDocumentFieldsByIds = async ({
     );
     for (const hit of identifiedHits) {
       const key = selectionKey({ _id: hit._id, _index: hit._index });
-      // An `ids` query spans every selected index, so it can match an id in an index the user
-      // did not select. Keep only the pairs that were actually asked for.
+      // A hit reported under a different index name than the one selected (e.g. the concrete
+      // index behind an alias) is not the pair that was asked for. Keep only exact pairs.
       if (requested.has(key)) {
         found.add(key);
         documents.push({ _id: hit._id, _index: hit._index, fields: hit.fields ?? {} });
