@@ -101,6 +101,30 @@ describe('mergeRounds', () => {
 });
 
 describe('applyResumeResolution', () => {
+  it('preserves the original round context when follow-up hooks return different context', () => {
+    const previous = baseRound({
+      status: ConversationRoundStatus.awaitingPrompt,
+      input: {
+        message: 'original request',
+        model_context: '<system_update>original context</system_update>',
+        workflow_context: { semantic_memory: { recalled_ids: ['memory-original'] } },
+      },
+      response: { message: '' },
+    });
+    const next = baseRound({
+      input: {
+        message: '',
+        model_context: '<system_update>follow-up context</system_update>',
+        workflow_context: { semantic_memory: { recalled_ids: ['memory-follow-up'] } },
+      },
+      response: { message: 'final answer' },
+    });
+
+    const merged = applyResumeResolution(previous, next, new Map());
+
+    expect(merged.input).toEqual(previous.input);
+  });
+
   it('answers a pending ask_user_question step from the answers map', () => {
     const previous = baseRound({
       status: ConversationRoundStatus.awaitingPrompt,

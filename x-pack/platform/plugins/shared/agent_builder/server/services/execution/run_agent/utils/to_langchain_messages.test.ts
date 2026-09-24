@@ -9,6 +9,7 @@ import type { AIMessage, ToolMessage } from '@langchain/core/messages';
 import { isAIMessage, isHumanMessage, isToolMessage } from '@langchain/core/messages';
 import type {
   CompactionSummary,
+  ConversationRound,
   ConversationRoundStep,
   ReasoningStep,
   TimelineEvent,
@@ -44,6 +45,7 @@ import {
   type ProcessedConversationRound,
 } from '../../../../test_utils/timeline';
 import { eventsForContext, type ProcessedTimelineEvent } from './context_timeline';
+import { applyResumeResolution } from '../../../conversation/client/merge_rounds';
 
 describe('prepareMessages', () => {
   const now = new Date().toISOString();
@@ -863,6 +865,49 @@ describe('prepareMessages', () => {
       expect(turn3[0].content).toContain(
         'round one\n\n  <system_update>\nround 1 exact\n</system_update>  \n'
       );
+    });
+
+    it('keeps the historical HumanMessage byte-identical after an HITL resume', async () => {
+      const paused = createRound({
+        id: 'round-paused',
+        status: ConversationRoundStatus.awaitingPrompt,
+        started_at: '2026-09-24T10:00:00.000Z',
+        input: makeRoundInput('original request', [], {
+          model_context: '<system_update>original context</system_update>',
+        }),
+        response: { message: '' },
+      });
+      const followUp = createRound({
+        id: 'follow-up-execution',
+        input: makeRoundInput('', [], {
+          model_context: '<system_update>different follow-up context</system_update>',
+        }),
+        response: { message: 'completed response' },
+      });
+
+      const resumedCall = await prepareMessages({
+        conversation: createConversation({
+          previousRounds: [paused],
+          nextInput: followUp.input,
+        }),
+      });
+      const resolved = applyResumeResolution(
+        paused as unknown as ConversationRound,
+        followUp as unknown as ConversationRound,
+        new Map()
+      ) as unknown as ProcessedConversationRound;
+      const laterTurn = await prepareMessages({
+        conversation: createConversation({
+          previousRounds: [resolved],
+          nextInput: makeRoundInput('later turn'),
+        }),
+      });
+
+      expect(laterTurn[0].content).toBe(resumedCall[0].content);
+      expect(laterTurn[0].content).toContain(
+        'original request\n\n<system_update>original context</system_update>\n'
+      );
+      expect(laterTurn[0].content).not.toContain('different follow-up context');
     });
 
     it('never renders workflow_context into a HumanMessage', async () => {
