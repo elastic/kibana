@@ -6,10 +6,10 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
 import type { SourcesClient } from '@kbn/nightshift-sources-plugin/server';
 import type { WorkflowExecutionListItemDto } from '@kbn/workflows';
-import { isTerminalStatus } from '@kbn/workflows';
 import type { SignificantEventsMaintenanceService } from '../../../lib/maintenance/maintenance_service';
 import type { KnowledgeIndicatorClient } from '../../../lib/knowledge_indicators/knowledge_indicator_client/knowledge_indicator_client';
 import { parseStreamNameFromConcurrencyKey } from '../../../lib/workflows/onboarding_workflow_client';
@@ -17,7 +17,7 @@ import { listAllSources } from '../../utils/list_all_sources';
 
 interface OnboardingClient {
   cancel: (args: { streamName: string; request: KibanaRequest }) => Promise<unknown>;
-  getRecentExecutions?: () => Promise<WorkflowExecutionListItemDto[]>;
+  getNonTerminalExecutions?: () => Promise<WorkflowExecutionListItemDto[]>;
 }
 
 type CatalogKiClient = Pick<
@@ -55,11 +55,12 @@ export async function retireSourceKnowledge({
 
 /**
  * Aligns owned rules and onboarding with the source catalog.
- * A disabled source has its onboarding cancelled before its owned rules are disabled,
- * so a running run cannot create a rule after the disable snapshot.
+ * A disabled source with a running onboarding execution has that run cancelled
+ * before its owned rules are disabled.
  * Enabled sources that own rules have those rules enabled, unless maintenance is paused.
- * Sources with no owned rules are left alone apart from that cancel.
  * Ids that still have knowledge indicators or owned rules but no catalog row are retired.
+ * A running execution whose source is gone is retired only in the default space,
+ * where those executions are stored.
  */
 export async function reconcileSourceCatalog({
   sourcesClient,
@@ -78,10 +79,11 @@ export async function reconcileSourceCatalog({
   const catalogIds = new Set(sources.map((source) => source.id));
   const ownedRuleSourceIds = new Set(await kiClient.findStreamNamesWithOwnedRules());
   const maintenanceState = await maintenanceService.getState({ request });
+  const runningSourceIds = await loadRunningSourceIds(onboardingClient);
 
   for (const source of sources) {
     if (!source.enabled) {
-      if (onboardingClient) {
+      if (onboardingClient && runningSourceIds.has(source.id)) {
         await onboardingClient.cancel({ streamName: source.id, request });
       }
       if (ownedRuleSourceIds.has(source.id)) {
@@ -106,19 +108,32 @@ export async function reconcileSourceCatalog({
     await retireSourceKnowledge({ sourceId, kiClient, onboardingClient, request });
   }
 
-  // A deleted source can still have a run that has not written a rule or indicator yet.
-  const executions = (await onboardingClient?.getRecentExecutions?.()) ?? [];
-  for (const execution of executions) {
-    if (!execution.concurrencyGroupKey || isTerminalStatus(execution.status)) {
-      continue;
+  // Executions are stored in the default space and carry no space id. Another space's
+  // catalog must not treat those runs as deleted sources.
+  if (request.spaceId === DEFAULT_SPACE_ID) {
+    for (const sourceId of runningSourceIds) {
+      if (catalogIds.has(sourceId) || retiredIds.has(sourceId)) {
+        continue;
+      }
+      retiredIds.add(sourceId);
+      await retireSourceKnowledge({ sourceId, kiClient, onboardingClient, request });
     }
-    const sourceId = parseStreamNameFromConcurrencyKey(execution.concurrencyGroupKey);
-    if (!sourceId || catalogIds.has(sourceId) || retiredIds.has(sourceId)) {
-      continue;
-    }
-    retiredIds.add(sourceId);
-    await retireSourceKnowledge({ sourceId, kiClient, onboardingClient, request });
   }
 
   return { sources, reconcileIds: survivingReconcileIds };
+}
+
+async function loadRunningSourceIds(onboardingClient?: OnboardingClient): Promise<Set<string>> {
+  const executions = (await onboardingClient?.getNonTerminalExecutions?.()) ?? [];
+  const sourceIds = new Set<string>();
+  for (const execution of executions) {
+    if (!execution.concurrencyGroupKey) {
+      continue;
+    }
+    const sourceId = parseStreamNameFromConcurrencyKey(execution.concurrencyGroupKey);
+    if (sourceId) {
+      sourceIds.add(sourceId);
+    }
+  }
+  return sourceIds;
 }

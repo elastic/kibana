@@ -339,6 +339,15 @@ export class SignificantEventsKIsOnboardingClient {
     });
   }
 
+  /** Returns non-terminal onboarding executions in one query. */
+  async getNonTerminalExecutions(): Promise<WorkflowExecutionListItemDto[]> {
+    const { results } = await this.workflowExecutionService.getExecutions(
+      { statuses: [...NonTerminalExecutionStatuses], size: MAX_STREAMS_PER_QUERY },
+      ONBOARDING_EXECUTIONS_SPACE_ID
+    );
+    return results;
+  }
+
   /**
    * Cancels every non-terminal onboarding execution across all streams.
    * Used during teardown of the continuous KI onboarding workflow.
@@ -346,10 +355,7 @@ export class SignificantEventsKIsOnboardingClient {
    * @returns The number of executions that were canceled.
    */
   async cancelAllRunning({ request }: { request: KibanaRequest }): Promise<number> {
-    const { results } = await this.workflowExecutionService.getExecutions(
-      { statuses: [...NonTerminalExecutionStatuses], size: MAX_STREAMS_PER_QUERY },
-      ONBOARDING_EXECUTIONS_SPACE_ID
-    );
+    const results = await this.getNonTerminalExecutions();
 
     if (results.length === 0) {
       return 0;

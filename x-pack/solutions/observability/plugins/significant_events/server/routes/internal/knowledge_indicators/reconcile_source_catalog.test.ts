@@ -11,7 +11,12 @@ import type { SourcesClient } from '@kbn/nightshift-sources-plugin/server';
 import { ExecutionStatus } from '@kbn/workflows';
 import { reconcileSourceCatalog } from './reconcile_source_catalog';
 
-const request = {} as KibanaRequest;
+const request = { spaceId: 'default' } as KibanaRequest;
+
+const runningExecution = (sourceId: string) => ({
+  status: ExecutionStatus.RUNNING,
+  concurrencyGroupKey: `streams-ki-onboarding-${sourceId}`,
+});
 
 const makeSource = (
   overrides: Partial<NightshiftSource> & Pick<NightshiftSource, 'id'>
@@ -42,6 +47,10 @@ const makeSourcesClient = (sources: NightshiftSource[]): SourcesClient =>
 
 describe('reconcileSourceCatalog', () => {
   const cancel = jest.fn().mockResolvedValue(null);
+  const onboardingWithRuns = (sourceIds: string[]) => ({
+    cancel,
+    getNonTerminalExecutions: jest.fn().mockResolvedValue(sourceIds.map(runningExecution)),
+  });
 
   const makeKiClient = (reconcileIds: string[], ownedRuleIds: string[] = reconcileIds) => ({
     setSourceRulesEnabled: jest.fn().mockResolvedValue(undefined),
@@ -61,7 +70,7 @@ describe('reconcileSourceCatalog', () => {
     await reconcileSourceCatalog({
       sourcesClient: makeSourcesClient([makeSource({ id: 'disabled-source', enabled: false })]),
       kiClient,
-      onboardingClient: { cancel },
+      onboardingClient: onboardingWithRuns(['disabled-source']),
       maintenanceService: { getState: jest.fn().mockResolvedValue('enabled') },
       request,
     });
@@ -97,7 +106,7 @@ describe('reconcileSourceCatalog', () => {
         makeSource({ id: 'disabled-source', enabled: false }),
       ]),
       kiClient,
-      onboardingClient: { cancel },
+      onboardingClient: onboardingWithRuns(['disabled-source']),
       maintenanceService: { getState: jest.fn().mockResolvedValue('paused') },
       request,
     });
@@ -125,12 +134,26 @@ describe('reconcileSourceCatalog', () => {
     await reconcileSourceCatalog({
       sourcesClient: makeSourcesClient([makeSource({ id: 'disabled-source', enabled: false })]),
       kiClient,
-      onboardingClient: { cancel },
+      onboardingClient: onboardingWithRuns(['disabled-source']),
       maintenanceService: { getState: jest.fn().mockResolvedValue('enabled') },
       request,
     });
 
     expect(cancel).toHaveBeenCalledWith({ streamName: 'disabled-source', request });
+    expect(kiClient.setSourceRulesEnabled).not.toHaveBeenCalled();
+  });
+
+  it('leaves a disabled source alone when it has no running execution and no rules', async () => {
+    const kiClient = makeKiClient([], []);
+    await reconcileSourceCatalog({
+      sourcesClient: makeSourcesClient([makeSource({ id: 'disabled-source', enabled: false })]),
+      kiClient,
+      onboardingClient: onboardingWithRuns([]),
+      maintenanceService: { getState: jest.fn().mockResolvedValue('enabled') },
+      request,
+    });
+
+    expect(cancel).not.toHaveBeenCalled();
     expect(kiClient.setSourceRulesEnabled).not.toHaveBeenCalled();
   });
 
@@ -153,33 +176,33 @@ describe('reconcileSourceCatalog', () => {
 
   it('cancels a running execution for a deleted source that has no knowledge yet', async () => {
     const kiClient = makeKiClient([]);
-    const getRecentExecutions = jest.fn().mockResolvedValue([
-      {
-        status: ExecutionStatus.RUNNING,
-        concurrencyGroupKey: 'streams-ki-onboarding-gone-source',
-      },
-      {
-        status: ExecutionStatus.COMPLETED,
-        concurrencyGroupKey: 'streams-ki-onboarding-finished-source',
-      },
-      {
-        status: ExecutionStatus.RUNNING,
-        concurrencyGroupKey: 'streams-ki-onboarding-enabled-source',
-      },
-    ]);
-
     await reconcileSourceCatalog({
       sourcesClient: makeSourcesClient([makeSource({ id: 'enabled-source' })]),
       kiClient,
-      onboardingClient: { cancel, getRecentExecutions },
+      onboardingClient: onboardingWithRuns(['gone-source', 'enabled-source']),
       maintenanceService: { getState: jest.fn().mockResolvedValue('enabled') },
       request,
     });
 
     expect(cancel).toHaveBeenCalledWith({ streamName: 'gone-source', request });
-    expect(cancel).not.toHaveBeenCalledWith({ streamName: 'finished-source', request });
     expect(cancel).not.toHaveBeenCalledWith({ streamName: 'enabled-source', request });
     expect(kiClient.deleteOwnedRules).toHaveBeenCalledWith('gone-source');
     expect(kiClient.deleteIndicators).toHaveBeenCalledWith('gone-source');
+  });
+
+  it('does not cancel a default-space execution from another space', async () => {
+    const kiClient = makeKiClient([]);
+    const otherRequest = { spaceId: 'other' } as KibanaRequest;
+
+    await reconcileSourceCatalog({
+      sourcesClient: makeSourcesClient([makeSource({ id: 'enabled-source' })]),
+      kiClient,
+      onboardingClient: onboardingWithRuns(['gone-source']),
+      maintenanceService: { getState: jest.fn().mockResolvedValue('enabled') },
+      request: otherRequest,
+    });
+
+    expect(cancel).not.toHaveBeenCalled();
+    expect(kiClient.deleteOwnedRules).not.toHaveBeenCalled();
   });
 });
