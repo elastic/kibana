@@ -16,9 +16,6 @@ export const IMPACT_INDEX_NAME = '.kibana-investigation-impact' as const;
 
 export const IMPACT_INTERNAL_URL = `${AGENTIC_INVESTIGATIONS_INTERNAL_URL}/impact` as const;
 
-export const IMPACT_UI_CAPABILITY_SHOW = 'showImpact' as const;
-export const IMPACT_UI_CAPABILITY_MANAGE = 'manageImpact' as const;
-
 /** Ceiling on `listByConversationIds` so a caller cannot ask for an unbounded terms query. */
 export const MAX_IMPACT_CONVERSATION_IDS = 1000;
 

@@ -91,21 +91,55 @@ export const readVaultConfigFromFile = (
   return JSON.parse(raw) as VaultConfig;
 };
 
-export const readVaultConfigFromDevVault = (): VaultConfig | undefined => {
+const readDevVaultConfigUncached = (): VaultConfig | undefined => {
   const stdout = safeExec('vault', [
     'read',
     `-field=${KBN_EVALS_VAULT_CONFIG_FIELD}`,
     KBN_EVALS_VAULT_PATHS.dev,
   ]);
-  if (!stdout) return undefined;
-
-  try {
-    const value = Buffer.from(stdout, 'base64').toString('utf-8').trim();
-    const parsed = JSON.parse(value);
-    return validateKbnEvalsConfig(parsed);
-  } catch {
+  if (!stdout) {
+    process.stderr.write(
+      `[kbn-evals] Could not read ${KBN_EVALS_VAULT_PATHS.dev} from Vault; the dev-vault profile is empty. ` +
+        'Check `vault login --method oidc`.\n'
+    );
     return undefined;
   }
+
+  // Fixed messages only: parser and validator errors can quote the config, which holds credentials.
+  const ignore = (reason: string): undefined => {
+    process.stderr.write(
+      `[kbn-evals] Ignoring dev-vault config (${reason}); the dev-vault profile is empty.\n`
+    );
+    return undefined;
+  };
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(Buffer.from(stdout, 'base64').toString('utf-8').trim());
+  } catch {
+    return ignore('not valid base64-encoded JSON');
+  }
+
+  try {
+    return validateKbnEvalsConfig(parsed);
+  } catch {
+    return ignore('does not match the evals config schema');
+  }
+};
+
+// One successful read per process: profile env and the suite's scout hook must see the same config,
+// and a later read that failed transiently would otherwise silently drop part of it. Failures are
+// not cached, so a read after `vault login` can still succeed.
+let devVaultConfig: VaultConfig | undefined;
+
+export const readVaultConfigFromDevVault = (): VaultConfig | undefined => {
+  devVaultConfig ??= readDevVaultConfigUncached();
+  return devVaultConfig;
+};
+
+/** Clears the cached dev-vault read; for tests. */
+export const resetDevVaultConfigCache = (): void => {
+  devVaultConfig = undefined;
 };
 
 /**
