@@ -211,7 +211,10 @@ export const huntResultSchema = z
       if (result.hit_sources.length === 0) {
         return false;
       }
-      if (result.hit_sources.includes('tier1') && result.tier1.status !== 'environment_hits_found') {
+      if (
+        result.hit_sources.includes('tier1') &&
+        result.tier1.status !== 'environment_hits_found'
+      ) {
         return false;
       }
       if (result.hit_sources.includes('tier2') && !tierHasExecutionHit(result.tier2)) {
