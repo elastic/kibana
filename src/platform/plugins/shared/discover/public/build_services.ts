@@ -80,6 +80,7 @@ import {
 } from './constants';
 import { EmbeddableEditorService } from './plugin_imports/embeddable_editor_service';
 import { InitialTabStateService } from './plugin_imports/initial_tab_state_service';
+import type { InlineDataViewService } from './services/inline_data_view_service';
 
 /**
  * Location state of internal Discover history instance
@@ -125,6 +126,7 @@ export interface DiscoverServices {
   filterManager: FilterManager;
   fieldFormats: FieldFormatsStart;
   dataViews: DataViewsContract;
+  inlineDataViews: InlineDataViewService;
   inspector: InspectorPublicPluginStart;
   metadata: { branch: string; version: string };
   navigation: NavigationPublicPluginStart;
@@ -196,6 +198,7 @@ export const buildServices = ({
   profilesManager,
   profileStateRegistry,
   ebtManager,
+  inlineDataViews,
   setHeaderActionMenu = noop,
 }: {
   core: CoreStart;
@@ -210,6 +213,7 @@ export const buildServices = ({
   profilesManager: ProfilesManager;
   profileStateRegistry: ProfileStateRegistry;
   ebtManager: DiscoverEBTManager;
+  inlineDataViews: InlineDataViewService;
   setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
 }): DiscoverServices => {
   const { usageCollection } = plugins;
@@ -246,6 +250,7 @@ export const buildServices = ({
     initialTabStateService: new InitialTabStateService(),
     setHeaderActionMenu,
     dataViews: plugins.data.dataViews,
+    inlineDataViews,
     inspector: plugins.inspector,
     metadata: {
       branch: context.env.packageInfo.branch,
