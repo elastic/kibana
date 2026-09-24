@@ -32,7 +32,7 @@ describe('ServiceAccountsPage', () => {
       name: string;
       roles: string[];
       enabled: boolean;
-      hasCredential: boolean;
+      assumable: boolean;
     }>;
     loadError?: Error;
     nextPage?: string;
@@ -41,7 +41,7 @@ describe('ServiceAccountsPage', () => {
       name: string;
       roles: string[];
       enabled: boolean;
-      hasCredential: boolean;
+      assumable: boolean;
     }>;
     nextResponseCursor?: string;
     loadMoreError?: Error;
@@ -104,7 +104,7 @@ describe('ServiceAccountsPage', () => {
           name: 'nightshift-relay',
           roles: ['viewer'],
           enabled: true,
-          hasCredential: true,
+          assumable: true,
         },
       ],
     });
@@ -122,7 +122,7 @@ describe('ServiceAccountsPage', () => {
           name: 'first-account',
           roles: ['viewer'],
           enabled: true,
-          hasCredential: true,
+          assumable: true,
         },
       ],
       nextPage: 'next-page',
@@ -132,7 +132,7 @@ describe('ServiceAccountsPage', () => {
           name: 'second-account',
           roles: ['editor'],
           enabled: true,
-          hasCredential: true,
+          assumable: true,
         },
       ],
     });
@@ -152,7 +152,7 @@ describe('ServiceAccountsPage', () => {
           name: 'nightshift-relay',
           roles: ['viewer'],
           enabled: true,
-          hasCredential: true,
+          assumable: true,
         },
       ],
       nextPage: 'next-page',
@@ -173,7 +173,7 @@ describe('ServiceAccountsPage', () => {
           name: 'nightshift-relay',
           roles: ['viewer'],
           enabled: true,
-          hasCredential: true,
+          assumable: true,
         },
       ],
       nextPage: 'repeated-page',
@@ -183,7 +183,7 @@ describe('ServiceAccountsPage', () => {
           name: 'duplicate-account',
           roles: ['viewer'],
           enabled: true,
-          hasCredential: true,
+          assumable: true,
         },
       ],
       nextResponseCursor: 'repeated-page',

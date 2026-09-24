@@ -21,7 +21,7 @@ describe('ServiceAccountsTable', () => {
     description: 'Executes nightshift workflows',
     roles: ['viewer'],
     enabled: true,
-    hasCredential: true,
+    assumable: true,
     createdBy: {
       type: 'user' as const,
       username: 'operator',
@@ -34,7 +34,7 @@ describe('ServiceAccountsTable', () => {
     name: 'incident-responder',
     roles: ['editor'],
     enabled: true,
-    hasCredential: true,
+    assumable: true,
   };
 
   const renderTable = ({

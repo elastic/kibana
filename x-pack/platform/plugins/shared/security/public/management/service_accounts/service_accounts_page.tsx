@@ -16,6 +16,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { ServiceAccountsEmptyPrompt } from './service_accounts_empty_prompt';
 import type { ServiceAccountTableItem } from './service_accounts_table';
 import { ServiceAccountsTable } from './service_accounts_table';
+import { SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE } from '../../../common/service_accounts/constants';
 import type { ServiceAccountsAPIClient } from '../../service_accounts';
 
 export interface ServiceAccountsPageProps {
@@ -49,7 +50,7 @@ export const ServiceAccountsPage = ({
 
       try {
         const response = await serviceAccountsAPIClient.list({
-          limit: 100,
+          limit: SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE,
           ...(after !== undefined ? { after } : {}),
         });
         if (isLoadingNextPage && response.nextPage === after) {

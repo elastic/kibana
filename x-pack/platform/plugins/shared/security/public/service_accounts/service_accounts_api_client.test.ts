@@ -44,7 +44,7 @@ describe('ServiceAccountsAPIClient', () => {
             name: 'nightshift-relay',
             roles: ['viewer'],
             enabled: true,
-            hasCredential: true,
+            assumable: true,
           },
         ],
         nextPage: 'next-page',

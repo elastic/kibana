@@ -7,28 +7,14 @@
 
 import type { HttpStart } from '@kbn/core/public';
 import type { CreateServiceAccountParams, ServiceAccount } from '@kbn/core-security-browser';
-import type { ServiceAccountWorkloadBinder } from '@kbn/core-security-common';
 
-// These directory types mirror the draft contract in #286880. Move them to the shared service
-// account contract when that backend PR lands, so the browser client cannot drift from the route.
-export type ServiceAccountDirectoryCreator = ServiceAccountWorkloadBinder & {
-  displayName?: string;
-};
+import type { ListServiceAccountsResponse } from '../../common/service_accounts';
 
-export interface ServiceAccountDirectoryEntry {
-  id: string;
-  name: string;
-  roles: string[];
-  enabled: boolean;
-  hasCredential: boolean;
-  createdBy?: ServiceAccountDirectoryCreator;
-  createdAt?: string;
-}
-
-export interface ListServiceAccountsResponse {
-  serviceAccounts: ServiceAccountDirectoryEntry[];
-  nextPage?: string;
-}
+export type {
+  ListServiceAccountsResponse,
+  ServiceAccountDirectoryCreator,
+  ServiceAccountDirectoryEntry,
+} from '../../common/service_accounts';
 
 export interface ListServiceAccountsParams {
   limit?: number;
