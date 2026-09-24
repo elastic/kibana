@@ -96,12 +96,14 @@ async function updateAgentBasedPolicy(
   let existingName: string | undefined;
   let existingNamespace: string | undefined;
   let existingVersion: string | undefined;
+  let existingPolicyIds: string[] | undefined;
   try {
     const existing = await sendGetOnePackagePolicy(policyId);
     if (existing.error) throw existing.error;
     existingName = existing.data?.item?.name;
     existingNamespace = existing.data?.item?.namespace;
     existingVersion = existing.data?.item?.package?.version;
+    existingPolicyIds = existing.data?.item?.policy_ids;
   } catch {
     throw new Error(
       `Cannot safely update agent-based policy ${policyId}: failed to fetch existing metadata.`
@@ -157,6 +159,6 @@ async function updateAgentBasedPolicy(
     package: { name: packageName, version: pkgVersion },
     ...(vars ? { vars } : {}),
     inputs,
-    policy_ids: selectedAgentPolicyIds,
+    policy_ids: existingPolicyIds ?? selectedAgentPolicyIds,
   } as unknown as Parameters<typeof sendUpdatePackagePolicy>[1]);
 }

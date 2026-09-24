@@ -123,9 +123,15 @@ export function useMiDeploy({
         // won't capture them. Detect stale entries by comparing policyIdsByInstance against the
         // reconciled deployGroups (which already filters by selectedServiceIds).
         const activeInstanceIds = new Set(deployGroups.flatMap((g) => g.instanceIds));
+        const activePolicyIds = new Set(
+          [...activeInstanceIds]
+            .map((iid) => policyIdsByInstance[iid])
+            .filter((pid): pid is string => Boolean(pid))
+        );
         const liveStalePolicyIds: Record<string, string> = {};
         for (const [iid, pid] of Object.entries(policyIdsByInstance)) {
-          if (!activeInstanceIds.has(iid)) liveStalePolicyIds[iid] = pid;
+          if (!activeInstanceIds.has(iid) && !activePolicyIds.has(pid))
+            liveStalePolicyIds[iid] = pid;
         }
         const effectivePendingCleanup: Record<string, string> = {
           ...liveStalePolicyIds,
