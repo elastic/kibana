@@ -34,6 +34,26 @@ describe('verdictAccuracy', () => {
     expect(result.score).toBe(1);
   });
 
+  // The executor passes `expected: example.output ?? null`, so the gold label
+  // arrives as `{ classification: ... }` (the toExample output shape).
+  it('reads the gold label from the executor-expected output.classification shape', async () => {
+    const result = await verdictAccuracy.evaluate(
+      params(
+        { verdict: 'true_positive', executionStatus: 'completed' },
+        { classification: 'true_positive' }
+      )
+    );
+    expect(result.score).toBe(1);
+    expect(meta(result).expected).toBe('true_positive');
+  });
+
+  it('scores 0 when the gold classification is missing (pre-fix regression guard)', async () => {
+    const result = await verdictAccuracy.evaluate(
+      params({ verdict: 'true_positive', executionStatus: 'completed' }, {})
+    );
+    expect(result.score).toBe(0);
+  });
+
   // REAL WORKFLOW SHAPE (smoke4, execution f9ab02c9): the graded output carries
   // the label as a plain string, e.g. `{"verdict": "true_positive", ...}`.
   it('accepts the real workflow shape: verdict as a plain string label', async () => {
