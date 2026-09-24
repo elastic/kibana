@@ -72,42 +72,42 @@ const webTraffic = (): CustomAppDefinition => ({
       {
         path: '/series',
         shape: 'rows',
-        query: `${FROM} | STATS requests = COUNT(*) BY time = BUCKET(@timestamp, 1 day), status = response.keyword | SORT time | LIMIT 500`,
+        query: `${FROM} | STATS requests = COUNT(*) BY time = BUCKET(@timestamp, 1 day), status = response.keyword | SORT time, status | LIMIT 500`,
       },
     ],
     status: [
       {
         path: '/codes',
         shape: 'rows',
-        query: `${FROM} | STATS requests = COUNT(*) BY status = response.keyword | SORT requests DESC | LIMIT 6`,
+        query: `${FROM} | STATS requests = COUNT(*) BY status = response.keyword | SORT requests DESC, status ASC | LIMIT 6`,
       },
     ],
     topPages: [
       {
         path: '/pages',
         shape: 'rows',
-        query: `${FROM} | STATS requests = COUNT(*), avg_bytes = ROUND(AVG(bytes)) BY page = url.keyword | SORT requests DESC | LIMIT 10`,
+        query: `${FROM} | STATS requests = COUNT(*), avg_bytes = ROUND(AVG(bytes)) BY page = url.keyword | SORT requests DESC, page ASC | LIMIT 10`,
       },
     ],
     countries: [
       {
         path: '/countries',
         shape: 'rows',
-        query: `${FROM} | STATS requests = COUNT(*) BY country = geo.dest | SORT requests DESC | LIMIT 8`,
+        query: `${FROM} | STATS requests = COUNT(*) BY country = geo.dest | SORT requests DESC, country ASC | LIMIT 8`,
       },
     ],
     fileTypes: [
       {
         path: '/types',
         shape: 'rows',
-        query: `${FROM} | WHERE extension.keyword != "" | STATS bytes = SUM(bytes) BY type = extension.keyword | SORT bytes DESC | LIMIT 6`,
+        query: `${FROM} | WHERE extension.keyword != "" | STATS bytes = SUM(bytes) BY type = extension.keyword | SORT bytes DESC, type ASC | LIMIT 6`,
       },
     ],
     platforms: [
       {
         path: '/platforms',
         shape: 'rows',
-        query: `${FROM} | STATS requests = COUNT(*) BY os = machine.os.keyword | SORT requests DESC | LIMIT 6`,
+        query: `${FROM} | STATS requests = COUNT(*) BY os = machine.os.keyword | SORT requests DESC, os ASC | LIMIT 6`,
       },
     ],
     health: [
@@ -121,7 +121,7 @@ const webTraffic = (): CustomAppDefinition => ({
       {
         path: '/errors',
         shape: 'rows',
-        query: `${FROM} | WHERE response.keyword != "200" | STATS errors = COUNT(*) BY page = url.keyword, status = response.keyword | SORT errors DESC | LIMIT 12`,
+        query: `${FROM} | WHERE response.keyword != "200" | STATS errors = COUNT(*) BY page = url.keyword, status = response.keyword | SORT errors DESC, page ASC | LIMIT 12`,
       },
     ],
   },

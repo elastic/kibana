@@ -46,7 +46,7 @@ const PODS_QUERY = `FROM ${K8S_POD_METRICS_INDEX}
 | EVAL health = COALESCE(alert_status, "untracked"),
        rank = CASE(health == "active", 0, health == "untracked", 2, 1)
 ${FILTER_CLAUSES}
-| SORT rank ASC, cpu DESC
+| SORT rank ASC, cpu DESC, pod ASC
 | KEEP pod, namespace, cluster, node, cpu, mem, health, reason, rule_count
 | LIMIT 40`;
 
@@ -66,6 +66,7 @@ const GRID_QUERY = `FROM ${K8S_POD_METRICS_INDEX}
 | LOOKUP JOIN ${K8S_ALERTS_INDEX} ON entity_id
 | EVAL health = COALESCE(alert_status, "untracked")
 ${FILTER_CLAUSES}
+| SORT cluster ASC, pod ASC
 | KEEP pod, namespace, cluster, node, cpu, mem, health, reason, rule_count
 | LIMIT 1200`;
 
@@ -130,7 +131,7 @@ const kubernetes = (): CustomAppDefinition => ({
         // alone — which is correct: alert state is current, not historical.
         // The colour and the wording come from the query rather than the catalog,
         // so the legend cannot drift from the statuses the data actually holds.
-        query: `FROM ${K8S_ALERTS_INDEX} | STATS count = COUNT(*) BY status = alert_status | EVAL color = CASE(status == "active", "danger", status == "clear", "success", "subdued"), label = CASE(status == "active", "Resources with active alerts", status == "clear", "Resources with no active alerts", "Resources with no alert set up") | SORT count DESC`,
+        query: `FROM ${K8S_ALERTS_INDEX} | STATS count = COUNT(*) BY status = alert_status | EVAL color = CASE(status == "active", "danger", status == "clear", "success", "subdued"), label = CASE(status == "active", "Resources with active alerts", status == "clear", "Resources with no active alerts", "Resources with no alert set up") | SORT count DESC, status ASC`,
       },
     ],
     filters: [
@@ -161,7 +162,7 @@ const kubernetes = (): CustomAppDefinition => ({
         shape: 'rows',
         // Grouped by cluster first so the filter has a column to match on, then
         // rolled up to one row per namespace.
-        query: `FROM ${K8S_POD_METRICS_INDEX} | STATS pods = COUNT_DISTINCT(resource.attributes.k8s.pod.uid), cpu = AVG(metrics.k8s.pod.cpu_limit_utilization) * 100 BY namespace = resource.attributes.k8s.namespace.name, cluster = resource.attributes.k8s.cluster.name | WHERE namespace IS NOT NULL AND (?clusters == "" OR MV_CONTAINS(SPLIT(?clusters, ","), cluster)) | STATS pods = SUM(pods), cpu = ROUND(AVG(cpu), 1) BY namespace | SORT pods DESC`,
+        query: `FROM ${K8S_POD_METRICS_INDEX} | STATS pods = COUNT_DISTINCT(resource.attributes.k8s.pod.uid), cpu = AVG(metrics.k8s.pod.cpu_limit_utilization) * 100 BY namespace = resource.attributes.k8s.namespace.name, cluster = resource.attributes.k8s.cluster.name | WHERE namespace IS NOT NULL AND (?clusters == "" OR MV_CONTAINS(SPLIT(?clusters, ","), cluster)) | STATS pods = SUM(pods), cpu = ROUND(AVG(cpu), 1) BY namespace | SORT pods DESC, namespace ASC`,
         params: { clusters: '/filters/clusters' },
       },
     ],
@@ -169,7 +170,7 @@ const kubernetes = (): CustomAppDefinition => ({
       {
         path: '/logEvents',
         shape: 'rows',
-        query: `FROM ${K8S_LOGS_INDEX} | WHERE severity_text IN ("ERROR", "FATAL") | STATS events = COUNT(*) BY pod = resource.attributes.k8s.pod.name, namespace = resource.attributes.k8s.namespace.name, severity = severity_text | SORT events DESC | LIMIT 15`,
+        query: `FROM ${K8S_LOGS_INDEX} | WHERE severity_text IN ("ERROR", "FATAL") | STATS events = COUNT(*) BY pod = resource.attributes.k8s.pod.name, namespace = resource.attributes.k8s.namespace.name, severity = severity_text | SORT events DESC, pod ASC | LIMIT 15`,
       },
     ],
   },

@@ -60,6 +60,43 @@ describe.each(CUSTOM_APP_TEMPLATES.map((t) => [t.name, t] as const))(
       expect(all).toContain(template.indexPattern);
     });
 
+    it('orders every multi-row query totally, so a refetch cannot reshuffle it', () => {
+      // ES|QL does not break ties deterministically: two namespaces with the same
+      // pod count came back in a different order on consecutive runs, which reads
+      // as rows flickering whenever anything re-renders. So a list query needs a
+      // SORT, and that SORT has to end on something unique per row — either
+      // several columns, or the query's sole grouping key.
+      for (const [panelId, queries] of Object.entries(definition.queries ?? {})) {
+        for (const query of queries) {
+          if (query.shape !== 'rows' && query.shape !== 'groups') continue;
+
+          const sort = /\|\s*SORT\s+([^|`]+)/i.exec(query.query);
+          expect({ panelId, hasSort: Boolean(sort) }).toEqual({ panelId, hasSort: true });
+
+          const columns = sort![1]
+            .split(',')
+            .map((part) => part.trim().replace(/\s+(ASC|DESC)$/i, ''))
+            .filter(Boolean);
+
+          // `STATS ... BY x = expr` makes x unique per row, so sorting on it alone
+          // is already a total order.
+          const byClause = /\bBY\s+([^|`]+)/i.exec(query.query)?.[1] ?? '';
+          const groupKeys = byClause
+            .split(',')
+            .map((part) => part.split('=')[0].trim())
+            .filter(Boolean);
+          const isTotal =
+            columns.length > 1 || (groupKeys.length === 1 && columns[0] === groupKeys[0]);
+
+          expect({ panelId, sort: sort![1].trim(), isTotal }).toEqual({
+            panelId,
+            sort: sort![1].trim(),
+            isTotal: true,
+          });
+        }
+      }
+    });
+
     it('writes every query into a path some component binds to', () => {
       const serialized = JSON.stringify(definition.surfaces);
       for (const query of Object.values(definition.queries ?? {}).flat()) {

@@ -63,6 +63,14 @@ export const createCreateAppTool = (): BuiltinToolDefinition<typeof createAppSch
       Name every output column in the query (STATS x = COUNT(*) BY y = field),
       then bind to those exact names.
 
+      Always SORT a query that returns a list, and end the SORT on something
+      unique per row — either the grouping key, or an extra column after the
+      metric. ES|QL does not break ties deterministically, so two rows with the
+      same value swap places between runs, which shows up as rows flickering
+      whenever the panel re-renders.
+        bad:  ... | STATS pods = COUNT(*) BY namespace | SORT pods DESC
+        good: ... | STATS pods = COUNT(*) BY namespace | SORT pods DESC, namespace ASC
+
       Example: a query { "path": "/series", "shape": "rows",
         "query": "FROM logs | STATS requests = COUNT(*) BY time = BUCKET(@timestamp, 1 day) | SORT time" }
       feeds a chart { "component": "Chart", "chartType": "line",
