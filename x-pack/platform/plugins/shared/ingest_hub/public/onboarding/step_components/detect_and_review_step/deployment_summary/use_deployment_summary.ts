@@ -15,6 +15,7 @@ import {
 import { getOnboardingSessionKey } from '../../../onboarding_session_storage';
 import { getManagedIntegrationSummaryFields } from './managed_integration_summary';
 import { getAgentBasedSummaryFields } from './agent_based_summary';
+import { useAgentPolicySummary } from './use_agent_policy_summary';
 import type { SummaryField } from './managed_integration_summary';
 import {
   ECF_LAUNCH_STEP_SESSION_KEY,
@@ -53,9 +54,16 @@ export function useDeploymentSummary(deploymentMethod: DeploymentMethod): Summar
   const globalRegion = serviceSettings?.globalRegion || undefined;
   const connectorName = authStep?.connectorName || undefined;
 
+  // Fetch live agent-policy summary data (only relevant for agent_based deployment).
+  // The hook internally gates its queries on agentPolicyId presence, so it is safe to call
+  // unconditionally — it is a no-op for the managed_integration path.
+  const { agentPolicyName, enrollmentToken, agentCount } = useAgentPolicySummary();
+
   return useMemo(() => {
     if (deploymentMethod === 'agent_based') {
-      return getAgentBasedSummaryFields().filter((f) => f.value != null);
+      return getAgentBasedSummaryFields({ agentPolicyName, enrollmentToken, agentCount }).filter(
+        (f) => f.value != null
+      );
     }
 
     // Resolve the CloudFormation stack name from session storage. When multiple families
@@ -90,5 +98,13 @@ export function useDeploymentSummary(deploymentMethod: DeploymentMethod): Summar
 
     // Filter out fields with null value — a null value means the data source isn't available yet.
     return fields.filter((f) => f.value != null);
-  }, [deploymentMethod, globalRegion, ecfLaunchStep, connectorName]);
+  }, [
+    deploymentMethod,
+    globalRegion,
+    ecfLaunchStep,
+    connectorName,
+    agentPolicyName,
+    enrollmentToken,
+    agentCount,
+  ]);
 }

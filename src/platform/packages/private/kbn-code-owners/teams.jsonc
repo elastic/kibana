@@ -832,7 +832,8 @@
       "security"
     ],
     "github": {
-      "team": "elastic/security-detection-engineering"
+      "team": "elastic/security-detection-engineering",
+      "label": "Team:Detection Engineering"
     }
   },
   {
@@ -879,16 +880,6 @@
     "responsibilities": [
       "Entity Analytics features in Kibana: Entity Risk Scoring, Privileged User monitoring, Explore pages, Asset Criticality"
     ]
-  },
-  {
-    "id": "security-genai-research-and-development",
-    "name": "Security Genai Research And Development",
-    "areas": [
-      "security"
-    ],
-    "github": {
-      "team": "elastic/security-genai-research-and-development"
-    }
   },
   {
     "id": "security-generative-ai",
@@ -1143,6 +1134,14 @@
     "github": {
       "team": "elastic/threat-research-and-detection-engineering",
       "label": "Team:TRaDE"
+    }
+  },
+  {
+    "id": "security-investigations",
+    "name": "Security Investigations",
+    "github": {
+      "team": "elastic/security-investigations",
+      "label": "Team:Security Investigations"
     }
   }
 ]

@@ -7,12 +7,10 @@
 
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { getStructuredAnswerPrompt } from './answer_agent';
-import { buildVisibleContext } from '../utils/visible_context';
+import { prepareMessages } from '../utils/to_langchain_messages';
 
-jest.mock('../utils/visible_context', () => ({
-  buildVisibleContext: jest
-    .fn()
-    .mockResolvedValue({ history: [['human', 'history']], inFlight: [] }),
+jest.mock('../utils/to_langchain_messages', () => ({
+  prepareMessages: jest.fn().mockResolvedValue([['human', 'history']]),
 }));
 
 describe('getStructuredAnswerPrompt', () => {
@@ -39,11 +37,15 @@ describe('getStructuredAnswerPrompt', () => {
         instructions: '',
       },
       skills: [],
-      actions: [],
-      answerActions: [],
-      cycleLimit: 1,
+      run: {
+        steps: [],
+        renderState: {},
+        pendingToolCallIds: [],
+        retryNotices: [],
+        cycleLimit: 1,
+      },
       experimentalFeatures: { bash: false, skills: false },
-      toolManager: { getToolIdMapping: () => new Map() } as any,
+      toolManager: {} as any,
       resultTransformer: jest.fn(),
     } as any;
 
@@ -51,9 +53,8 @@ describe('getStructuredAnswerPrompt', () => {
 
     const systemMessage = (messages[0] as ['system', string])[1];
     expect(systemMessage).not.toContain('Current date');
-    expect(buildVisibleContext).toHaveBeenCalledWith(
-      expect.objectContaining({ conversationTimestamp: now }),
-      expect.anything()
+    expect(prepareMessages).toHaveBeenCalledWith(
+      expect.objectContaining({ conversationTimestamp: now })
     );
   });
 
@@ -78,11 +79,15 @@ describe('getStructuredAnswerPrompt', () => {
         instructions: '',
       },
       skills: [],
-      actions: [],
-      answerActions: [],
-      cycleLimit: 1,
+      run: {
+        steps: [],
+        renderState: {},
+        pendingToolCallIds: [],
+        retryNotices: [],
+        cycleLimit: 1,
+      },
       experimentalFeatures: { bash: false, skills: false },
-      toolManager: { getToolIdMapping: () => new Map() } as any,
+      toolManager: {} as any,
       resultTransformer: jest.fn(),
     } as any;
 

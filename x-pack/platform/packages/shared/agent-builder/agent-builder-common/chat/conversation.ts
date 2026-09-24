@@ -25,7 +25,8 @@ import type {
 import type { RuntimeAgentConfigurationOverrides } from '../agents/definition';
 import type { ConversationAccessControl } from './access_control';
 import type { RoundState } from './round_state';
-import type { TimelineEvent } from './timeline_events';
+import type { ConversationEvent } from './timeline_events';
+import type { ExecutionInterruption } from './events';
 import type { MetadataFieldValue } from '../templates';
 
 /**
@@ -148,6 +149,11 @@ export interface ToolCallWithResult {
   tool_call_group_id?: string;
   tool_origin?: ToolOrigin;
   tool_type?: ToolType;
+  /**
+   * Set when the run was interrupted while this call was in flight: `results` then carries no
+   * outcome (usually `[]`). An empty `results` without this flag is a real empty return.
+   */
+  interrupted?: true;
 }
 
 export type ToolCallStep = ConversationRoundStepMixin<
@@ -505,6 +511,12 @@ export interface ConversationRound {
   configuration_overrides?: RuntimeAgentConfigurationOverrides;
   /** User feedback for this round, if submitted. */
   feedback?: ConversationRoundFeedback;
+  /**
+   * Set when the round's last execution ended without an outcome (failed or aborted). The round
+   * is `completed` with an empty `response.message`; the steps completed before the interruption
+   * are kept.
+   */
+  interruption?: ExecutionInterruption;
 }
 
 export interface ConversationOrigin {
@@ -594,6 +606,26 @@ export interface RoundModelUsageStats {
   last_call_input_tokens?: number;
 }
 
+/**
+ * Model usage of an execution whose usage is unknown (an interrupted run that never resolved its
+ * provider). Exactly these four keys: `isZeroModelUsage` is a structural equality check.
+ */
+export const ZERO_MODEL_USAGE: RoundModelUsageStats = {
+  connector_id: '',
+  llm_calls: 0,
+  input_tokens: 0,
+  output_tokens: 0,
+};
+
+/** True when `usage` is structurally the {@link ZERO_MODEL_USAGE} sentinel. */
+export const isZeroModelUsage = (usage: RoundModelUsageStats): boolean =>
+  usage.connector_id === '' &&
+  usage.llm_calls === 0 &&
+  usage.input_tokens === 0 &&
+  usage.output_tokens === 0 &&
+  usage.cached_input_tokens === undefined &&
+  usage.model === undefined;
+
 /** Placeholder title assigned to a new conversation */
 export const DEFAULT_CONVERSATION_TITLE = 'New conversation';
 
@@ -605,6 +637,9 @@ export const CONVERSATION_TITLE_MAX_LENGTH = 500;
  * Conversation ids are UUIDs, so this should be more than enough.
  */
 export const CONVERSATION_ID_MAX_LENGTH = 256;
+
+/** Maximum accepted length for a conversation metadata key */
+export const CONVERSATION_METADATA_KEY_MAX_LENGTH = 256;
 
 /**
  * Main structure representing a conversation with an agent.
@@ -666,8 +701,8 @@ export interface Conversation {
   pinned?: boolean;
   /** Whether the conversation's history is presented as frozen in the UI. Purely presentational. */
   read_only?: boolean;
-  /** Coarse event timeline for this conversation, derived from `rounds` on read.*/
-  events?: TimelineEvent[];
+  /** Event timeline for this conversation. */
+  events?: ConversationEvent[];
   /** Schema version of the stored events. */
   schema_version?: number;
 }
@@ -733,7 +768,18 @@ export interface BackgroundExecutionState {
   completed_at?: BackgroundExecutionCompletedAt;
 }
 
-export type ConversationWithoutRounds = Omit<Conversation, 'rounds'>;
+/**
+ * Identity of one attachment, without any of its version content.
+ */
+export type ConversationAttachmentSummary = Pick<VersionedAttachment, 'id' | 'type'>;
+
+export type ConversationWithoutRounds = Omit<Conversation, 'rounds' | 'attachments'> & {
+  /**
+   * The conversation's active attachments, narrowed to their id and type: rows returned without
+   * rounds exclude attachment content from the query's `_source`
+   */
+  attachments?: ConversationAttachmentSummary[];
+};
 
 export interface ConversationPermissions {
   rename: boolean;
@@ -754,6 +800,9 @@ export interface ConversationListResult {
   total: number;
 }
 
+/**
+ * @deprecated The regenerate capability has been removed.
+ */
 export type ConversationAction = 'regenerate';
 
 // Compaction summary types
@@ -806,4 +855,10 @@ export interface CompactionSummary {
   token_count: number;
   /** Structured summary data */
   structured_data: CompactionStructuredData;
+  /**
+   * Ids of the rounds this summary covers, in round order. Absent on summaries written before
+   * coverage became a set; those are interpreted through `summarized_round_count` with the
+   * pre-change fold's membership rule (see `coveredRoundIds`).
+   */
+  covered_round_ids?: string[];
 }

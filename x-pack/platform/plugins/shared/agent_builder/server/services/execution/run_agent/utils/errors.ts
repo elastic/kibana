@@ -61,7 +61,3 @@ export const isRecoverableError = (error: AgentBuilderAgentExecutionError): bool
   }
   return recoverableErrorCodes.includes(error.meta.errCode);
 };
-
-export const isContextLengthError = (error: AgentBuilderAgentExecutionError): boolean => {
-  return isAgentExecutionError(error) && error.meta.errCode === ErrCodes.contextLengthExceeded;
-};

@@ -45,12 +45,14 @@ export const markResultAsCleaned = (result: ToolResult): ToolResult => {
   return result;
 };
 
-/**
- * Transforms a tool call's results before they are rendered to the model. Implementations
- * return the input `results` array by reference when they change nothing, so callers can
- * detect "untouched" by identity.
- */
-export type ToolCallResultTransformer = (toolCall: ToolCallWithResult) => Promise<ToolResult[]>;
+export interface ToolCallResultTransformerOptions {
+  forceFilestoreSubstitution?: boolean;
+}
+
+export type ToolCallResultTransformer = (
+  toolCall: ToolCallWithResult,
+  options?: ToolCallResultTransformerOptions
+) => Promise<ToolResult[]>;
 
 export interface ToolSummarizationDeps {
   toolManager: ToolManager;

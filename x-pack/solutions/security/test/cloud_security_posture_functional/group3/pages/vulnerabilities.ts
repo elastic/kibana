@@ -104,17 +104,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await fieldsButton.click();
         await testSubjects.existOrFail(CSP_FIELDS_SELECTOR_MODAL);
 
-        const agentIdCheckbox = await testSubjects.find(
-          'cloud-security-fields-selector-item-agent.id'
-        );
-        await agentIdCheckbox.click();
-
-        const agentNameCheckbox = await testSubjects.find(
-          'cloud-security-fields-selector-item-agent.name'
-        );
-        await agentNameCheckbox.click();
-
+        await testSubjects.setCheckbox('cloud-security-fields-selector-item-agent.id', 'check');
         await testSubjects.existOrFail('dataGridHeaderCell-agent.id');
+
+        await testSubjects.setCheckbox('cloud-security-fields-selector-item-agent.name', 'check');
         await testSubjects.existOrFail('dataGridHeaderCell-agent.name');
 
         const closeFieldsButton = await testSubjects.find(CSP_FIELDS_SELECTOR_CLOSE_BUTTON);

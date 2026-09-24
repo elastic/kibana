@@ -39,6 +39,9 @@ import {
 import type {
   AwsStaticKeyCredentials,
   CloudSetupForCloudConnector,
+  IacRenderedTemplate,
+  IacTemplateLaunchedFor,
+  RenderIacTemplateIntegration,
 } from '@kbn/fleet-plugin/public';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import { StaticKeysReplaceView } from './static_keys_replace_view';
@@ -48,6 +51,11 @@ type PreferredMethod = 'identity_federation' | 'access_keys';
 interface ManagedIntegrationsSectionProps {
   serviceCount: number;
   showIdentityFederation: boolean;
+  /**
+   * Integration set the Federated Identity must cover (built by buildIacIntegrations). Fleet renders
+   * the CloudFormation template for exactly this set and gates readiness on it.
+   */
+  iacIntegrations: RenderIacTemplateIntegration[];
   onDeploy: () => void;
   isDeploying: boolean;
   isDone: boolean;
@@ -57,14 +65,33 @@ interface ManagedIntegrationsSectionProps {
 export function ManagedIntegrationsSection({
   serviceCount,
   showIdentityFederation,
+  iacIntegrations,
   onDeploy,
   isDeploying,
   isDone,
   hasFailed,
 }: ManagedIntegrationsSectionProps) {
   const { services } = useKibana<CoreStart & { cloud?: CloudStart }>();
-  const { setConnectorId, setStaticKeys, authenticateAndDeployStep } = useOnboardingFlow();
+  const { setConnectorId, setStaticKeys, setPendingIacTemplate, authenticateAndDeployStep } =
+    useOnboardingFlow();
   const { connectorId: initialConnectorId } = authenticateAndDeployStep;
+
+  // The Existing Identity check renders the stack update without writing the key; the template
+  // details are parked on the flow and written to the connector after Deploy succeeds. They are
+  // tagged with the identity and the integration set the render was launched for, not the ones
+  // current when it lands: the render is asynchronous and the user may have switched identities
+  // or changed the enabled inputs meanwhile. Deploy only writes the parked details when both
+  // match what it deploys.
+  const handleIacTemplateRecorded = useCallback(
+    (iac: IacRenderedTemplate, { cloudConnectorId, integrations }: IacTemplateLaunchedFor) => {
+      setPendingIacTemplate({
+        connectorId: cloudConnectorId,
+        integrationsKey: JSON.stringify(integrations),
+        ...iac,
+      });
+    },
+    [setPendingIacTemplate]
+  );
   const location = useLocation();
   const isEditMode = new URLSearchParams(location.search).has('deploymentId');
   const isStaticKeysEditMode = isEditMode && authenticateAndDeployStep.authMethod === 'static_keys';
@@ -246,8 +273,10 @@ export function ManagedIntegrationsSection({
                 <LazyAwsIdentityFederationSetup
                   cloud={cloud}
                   iacTemplateUrl={iacTemplateUrl}
+                  integrations={iacIntegrations}
                   onReadyChange={setIsDeployReady}
                   onConnectorIdChange={setConnectorId}
+                  onIacTemplateRecorded={handleIacTemplateRecorded}
                   initialConnectorId={initialConnectorId}
                 />
               ) : isStaticKeysEditMode ? (

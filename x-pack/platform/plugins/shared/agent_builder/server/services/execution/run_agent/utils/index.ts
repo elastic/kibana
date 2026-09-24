@@ -11,47 +11,30 @@ export { prepareMessages } from './to_langchain_messages';
 export { prepareConversation } from './prepare_conversation';
 export {
   groupTimelineRounds,
-  groupTimelineCycles,
-  sliceTimelineRounds,
-  sliceTimelineAfterEvent,
+  dropTimelineRounds,
   type ProcessedTimelineEvent,
   type TimelineRound,
-  type TimelineCycle,
 } from './context_timeline';
 export { selectSkills } from './select_skills';
 export { selectTools } from './select_tools';
-export { getPendingRound } from './prompts';
-export { evictInternalEvents } from './evict_internal_events';
+export {
+  foldConversationTurns,
+  getPendingTurn,
+  type ConversationTurn,
+  type PendingTurn,
+} from './conversation_turn';
 export { formatAttachmentsMetadata } from './attachment_presentation';
 export { createPreExecutionSteps } from './round_steps';
 export {
+  createResultTransformer,
+  type CreateResultTransformerOptions,
+  FS_TOOL_CALL_TOKEN_THRESHOLD,
+} from './create_result_transformer';
+export {
   type ToolCallResultTransformer,
+  type ToolCallResultTransformerOptions,
   createSummarizationTransformer,
 } from './tool_summarization';
-export {
-  createContextManagementNode,
-  type ContextManagementDeps,
-  type PreviousRoundInfo,
-} from './context_management';
-export { computeCacheState, parseCacheControlTtl, type CacheState } from './cache_state';
-export { getContextWindow } from './context_budget';
-export {
-  buildVisibleContext,
-  createContextTransformer,
-  groupActionCycles,
-  renderActionCycle,
-  renderTimelineCycle,
-  type ActionCycle,
-  type VisibleContext,
-  type VisibleContextDeps,
-  type VisibleContextInput,
-} from './visible_context';
-export {
-  isSubstitutionCandidate,
-  collectSubstitutionMarks,
-  substituteToolCallResults,
-  createMarkedResultTransformer,
-  selectSubstitutionCandidates,
-} from './filestore_substitution';
-export { estimateMessagesTokens } from './estimate_conversation_tokens';
+export { estimateMessagesTokens, estimatePerRoundTokens } from './estimate_conversation_tokens';
+export { legacyEligibleRoundIds, coveredRoundIds } from './compaction_coverage';
 export { createImageResolver, type CreateImageResolverOptions } from './image_resolver';

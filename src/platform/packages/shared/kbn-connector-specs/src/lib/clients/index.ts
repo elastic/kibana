@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { MongoClient } from 'mongodb';
+import type { Pool as Mysql2Pool } from 'mysql2/promise';
 import type { ClientTypeSpec } from './client_type_spec';
+import { mongodbClientType } from './mongodb_client_type';
+import { mysqlClientType } from './mysql';
 
 export type {
   ClientTypeSpec,
@@ -15,12 +19,14 @@ export type {
   ConnectorNetworkSettings,
   ConnectorResponseSettings,
   CredentialAccessor,
+  HostTarget,
+  PlatformServices,
 } from './client_type_spec';
 
-// No client types are registered yet. `ClientTypeId` resolves to `never`
-// until a client type is added to `ClientRegistry`.
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ClientRegistry {}
+export interface ClientRegistry {
+  mongodb: MongoClient;
+  mysql: Mysql2Pool;
+}
 
 export type ClientTypeId = keyof ClientRegistry;
 
@@ -28,4 +34,7 @@ export type ClientTypeSpecs = Readonly<{
   [K in ClientTypeId]: ClientTypeSpec<ClientRegistry[K]>;
 }>;
 
-export const clientTypes: ClientTypeSpecs = {};
+export const clientTypes: ClientTypeSpecs = {
+  mongodb: mongodbClientType,
+  mysql: mysqlClientType,
+};

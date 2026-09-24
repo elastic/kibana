@@ -7,51 +7,41 @@
 
 import { END as _END_, START as _START_, StateGraph } from '@langchain/langgraph';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
-import type { AIMessageChunk, BaseMessage } from '@langchain/core/messages';
+import type { BaseMessage } from '@langchain/core/messages';
 import type { Logger } from '@kbn/core/server';
 import type { ChatCompleteCacheControl } from '@kbn/inference-common';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { AgentExecutionErrorCode as ErrCodes } from '@kbn/agent-builder-common/agents';
-import { createAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
+import {
+  createAgentExecutionError,
+  type AgentBuilderAgentExecutionError,
+} from '@kbn/agent-builder-common/base/errors';
 import type { AgentEventEmitter } from '@kbn/agent-builder-server';
 import {
   createReasoningEvent,
   createToolCallMessage,
 } from '@kbn/agent-builder-genai-utils/langchain';
-import type { ToolManager } from '@kbn/agent-builder-server/runner';
+import type { TodoStateManager, ToolManager } from '@kbn/agent-builder-server/runner';
 import {
+  ConversationRoundStepType,
   isSubagentRosterUpdatedStep,
+  isToolCallStep,
   TimelineEventType,
   type SubagentRosterEntry,
+  type ToolCallStep,
 } from '@kbn/agent-builder-common';
 import type { ResolvedConfiguration } from './types';
-import type { ResearchAgentAction } from './actions';
-import { convertError, isContextLengthError, isRecoverableError } from './utils/errors';
-import {
-  createContextManagementNode,
-  type ContextManagementDeps,
-} from './utils/context_management';
+import { convertError, isRecoverableError } from './utils/errors';
 import type { PromptFactory } from './prompts';
 import { getRandomThinkingMessage } from './i18n';
-import { steps, tags, BACKGROUND_CHECK_CYCLE_INTERVAL, MAX_CONTEXT_RETRY_COUNT } from './constants';
+import { steps, tags, BACKGROUND_CHECK_CYCLE_INTERVAL, BROWSER_TOOL_PREFIX } from './constants';
 import type { BackgroundExecutionService } from './background_execution_service';
-import type { StateType } from './state';
-import { StateAnnotation } from './state';
-import { processResearchResponse, processToolNodeResponse } from './action_utils';
+import type { StateType, StateUpdate } from './state';
+import { StateAnnotation, toCurrentRun } from './state';
+import { processResearchResponse, processToolNodeResponse } from './response_processing';
 import { createAnswerAgentStructured } from './answer_agent_structured';
-import {
-  errorAction,
-  handoverAction,
-  backgroundExecutionCompleteAction,
-  subagentRosterUpdatedAction,
-  contextLengthErrorAction,
-  isAgentErrorAction,
-  isContextLengthErrorAction,
-  isHandoverAction,
-  isStructuredAnswerAction,
-  isToolCallAction,
-  isToolPromptAction,
-} from './actions';
+import { countNonTodosSteps, stepUpdates, type RunStepUpdate } from './step_state';
+import type { ToolExecutionBuffer } from './run_tracker';
 import type { SubagentTracker } from './subagent_tracker';
 import type { ProcessedConversation } from './utils/prepare_conversation';
 
@@ -70,10 +60,11 @@ export const createAgentGraph = ({
   promptFactory,
   backgroundExecutionService,
   subagentTracker,
+  toolExecutionBuffer,
+  todoStateManager,
   roundId,
   sessionId,
   cacheControl,
-  contextManagement,
 }: {
   chatModel: InferenceChatModel;
   toolManager: ToolManager;
@@ -86,19 +77,20 @@ export const createAgentGraph = ({
   promptFactory: PromptFactory;
   backgroundExecutionService?: BackgroundExecutionService;
   subagentTracker?: SubagentTracker;
+  /** Buffer of out-of-band tool events (progress, todos writes) observed by the runner. */
+  toolExecutionBuffer?: ToolExecutionBuffer;
+  /** Authoritative view of the todos written by the `todo_write` tool during this run. */
+  todoStateManager?: TodoStateManager;
   roundId: string;
   /** Optional session ID forwarded to EIS for prompt-cache scoping. Non-EIS endpoints ignore it. */
   sessionId?: string;
   cacheControl?: ChatCompleteCacheControl;
-  contextManagement: ContextManagementDeps;
 }) => {
-  const init = async () => {
+  const init = async (): Promise<StateUpdate> => {
     return {};
   };
 
-  const contextManagementNode = createContextManagementNode(contextManagement);
-
-  const checkBackgroundWork = async (state: StateType) => {
+  const checkBackgroundWork = async (state: StateType): Promise<StateUpdate> => {
     // Only check at the beginning (cycle 0) and every BACKGROUND_CHECK_CYCLE_INTERVAL cycles
     if (
       !backgroundExecutionService ||
@@ -109,14 +101,7 @@ export const createAgentGraph = ({
     }
 
     // Find the last tool call group ID for positioning the completion notice
-    let lastToolCallGroupId: string | undefined;
-    for (let i = state.mainActions.length - 1; i >= 0; i--) {
-      const action = state.mainActions[i];
-      if (isToolCallAction(action)) {
-        lastToolCallGroupId = action.tool_call_group_id;
-        break;
-      }
-    }
+    const lastToolCallGroupId = [...state.steps].reverse().find(isToolCallStep)?.tool_call_group_id;
 
     const completions = await backgroundExecutionService.checkForCompletions({
       roundId,
@@ -124,59 +109,60 @@ export const createAgentGraph = ({
     });
 
     return {
-      mainActions: completions.map(backgroundExecutionCompleteAction),
+      steps: completions.map((execution) =>
+        stepUpdates.append({
+          type: ConversationRoundStepType.backgroundAgentComplete,
+          ...execution,
+        })
+      ),
     };
   };
 
-  const researchAgent = async (state: StateType) => {
+  const researchAgent = async (state: StateType): Promise<StateUpdate> => {
     const researcherModel = chatModel.bindTools(toolManager.list()).withConfig({
       tags: [tags.agent, tags.researchAgent],
       sessionId,
       cacheControl,
     });
 
-    if (state.mainActions.length === 0 && state.errorCount === 0) {
+    if (state.currentCycle === 0 && state.errorCount === 0) {
       events.emit(createReasoningEvent(getRandomThinkingMessage(), { transient: true }));
     }
+
+    const retryUpdate = (error: AgentBuilderAgentExecutionError): StateUpdate => ({
+      researchOutcome: { type: 'retry_error', error },
+      errorCount: state.errorCount + 1,
+      retryNotices: [
+        { phase: 'research', afterNonTodosStepCount: countNonTodosSteps(state.steps), error },
+      ],
+    });
+
     try {
       const response = await researcherModel.invoke(
-        await promptFactory.getMainPrompt({
-          cycleLimit: state.cycleLimit,
-          actions: state.mainActions,
-          compactionSummary: state.compactionSummary,
-          compactionCoverage: state.compactionCoverage,
-        })
+        await promptFactory.getMainPrompt({ run: toCurrentRun(state) })
       );
 
       const currentCycle = state.currentCycle + 1;
-      const action = processResearchResponse(response, { cycle: currentCycle });
-      const inputTokens = extractInputTokens(response);
+      const turn = processResearchResponse(response, { cycle: currentCycle, toolManager });
+
+      if (turn.outcome.type === 'retry_error') {
+        // Successful inference calls can still produce recoverable errors,
+        // which must count toward the retry limit.
+        return { ...retryUpdate(turn.outcome.error), currentCycle };
+      }
 
       return {
-        mainActions: [action],
+        steps: turn.stepUpdates,
+        researchOutcome: turn.outcome,
+        toolRenderState: turn.renderState,
+        pendingToolCallIds: turn.pendingToolCallIds,
         currentCycle,
-        // Successful inference calls can still produce recoverable error actions,
-        // which must count toward the retry limit.
-        errorCount: isAgentErrorAction(action) ? state.errorCount + 1 : 0,
-        contextRetryCount: 0,
-        ...(inputTokens !== undefined ? { lastCallUsage: { inputTokens } } : {}),
+        errorCount: 0,
       };
     } catch (error) {
       const executionError = convertError(error);
-      if (isContextLengthError(executionError)) {
-        if (state.contextRetryCount >= MAX_CONTEXT_RETRY_COUNT) {
-          throw executionError;
-        }
-        return {
-          mainActions: [contextLengthErrorAction(executionError)],
-          contextRetryCount: state.contextRetryCount + 1,
-        };
-      }
       if (isRecoverableError(executionError)) {
-        return {
-          mainActions: [errorAction(executionError)],
-          errorCount: state.errorCount + 1,
-        };
+        return retryUpdate(executionError);
       } else {
         throw executionError;
       }
@@ -184,19 +170,19 @@ export const createAgentGraph = ({
   };
 
   const researchAgentEdge = async (state: StateType) => {
-    const lastAction = state.mainActions[state.mainActions.length - 1];
-
-    if (isContextLengthErrorAction(lastAction)) {
-      return steps.contextManagement;
+    const outcome = state.researchOutcome;
+    if (!outcome) {
+      throw invalidState('[researchAgentEdge] missing research outcome');
     }
-    if (isAgentErrorAction(lastAction)) {
+
+    if (outcome.type === 'retry_error') {
       if (state.errorCount <= MAX_ERROR_COUNT) {
         return steps.researchAgent;
       } else {
         // max error count reached, stop execution by throwing
-        throw lastAction.error;
+        throw outcome.error;
       }
-    } else if (isToolCallAction(lastAction)) {
+    } else if (outcome.type === 'tool_calls') {
       const maxCycleReached = state.currentCycle > state.cycleLimit;
       if (maxCycleReached) {
         if (structuredOutput) {
@@ -210,70 +196,102 @@ export const createAgentGraph = ({
       } else {
         return steps.executeTool;
       }
-    } else if (isHandoverAction(lastAction)) {
-      return structuredOutput ? steps.prepareToAnswer : steps.finalize;
     }
-
-    throw invalidState(`[researchAgentEdge] last action type was ${lastAction.type}}`);
+    // handover
+    return structuredOutput ? steps.prepareToAnswer : steps.finalize;
   };
 
-  const executeTool = async (state: StateType) => {
-    const toolNode = new ToolNode<BaseMessage[]>(toolManager.list());
-
-    const lastAction = state.mainActions[state.mainActions.length - 1];
-    if (!isToolCallAction(lastAction)) {
+  const executeTool = async (state: StateType): Promise<StateUpdate> => {
+    const outcome = state.researchOutcome;
+    if (outcome?.type !== 'tool_calls') {
       throw invalidState(
-        `[executeTool] expected last action to be "tool_call" action, got "${lastAction.type}"`
+        `[executeTool] expected a "tool_calls" research outcome, got "${outcome?.type}"`
       );
     }
 
-    lastAction.tool_calls.forEach((toolCall) => toolManager.recordToolUse(toolCall.toolName));
+    outcome.toolCalls.forEach((toolCall) => toolManager.recordToolUse(toolCall.toolName));
 
     // Snapshot the tracker's creation counter before executing the batch.
     const creationsBefore = subagentTracker?.creationCount() ?? 0;
 
-    const toolCallMessage = createToolCallMessage(lastAction.tool_calls, lastAction.message);
-    const toolNodeResult = await toolNode.invoke([toolCallMessage], {});
-    const actions: ResearchAgentAction[] = processToolNodeResponse(toolNodeResult, {
+    const toolNode = new ToolNode<BaseMessage[]>(toolManager.list());
+    const toolNodeResult = await toolNode.invoke([createToolCallMessage(outcome.toolCalls)], {});
+
+    // The internal tool id of a call: the step stores the stripped id for browser tools, but
+    // `tool_result` events use the prefixed one — reconstruct it from the render state.
+    const toolIdFor = (toolCallId: string): string => {
+      const step = state.steps.find(
+        (candidate): candidate is ToolCallStep =>
+          isToolCallStep(candidate) && candidate.tool_call_id === toolCallId
+      );
+      if (!step) {
+        throw invalidState(`[executeTool] tool_call_id "${toolCallId}" has no step in the run`);
+      }
+      return state.toolRenderState[toolCallId]?.kind === 'browser'
+        ? `${BROWSER_TOOL_PREFIX}${step.tool_id}`
+        : step.tool_id;
+    };
+
+    const processed = processToolNodeResponse(toolNodeResult, {
       cycle: state.currentCycle,
+      drainProgress: (toolCallId) => toolExecutionBuffer?.drainProgress(toolCallId) ?? [],
+      toolIdFor,
     });
+
+    const updates: RunStepUpdate[] = [...processed.stepUpdates];
 
     if (subagentTracker && subagentTracker.creationCount() > creationsBefore) {
       const roster = subagentTracker.activeRoster(getPriorPurposes(processedConversation));
-      actions.push(subagentRosterUpdatedAction(roster));
+      updates.push(
+        stepUpdates.append({ type: ConversationRoundStepType.subagentRosterUpdated, roster })
+      );
     }
 
+    const writtenTodos = toolExecutionBuffer?.consumeTodosWrite();
+    if (writtenTodos !== undefined) {
+      // Prefer the manager's view (authoritative), fall back to the event payload.
+      const todos = todoStateManager?.get() ?? writtenTodos;
+      updates.push(stepUpdates.setTodos({ type: ConversationRoundStepType.updateTodos, todos }));
+    }
+
+    const completed = new Set(processed.completedToolCallIds);
     return {
-      mainActions: actions,
+      steps: updates,
+      toolRenderState: processed.renderState,
+      pendingToolCallIds: state.pendingToolCallIds.filter((id) => !completed.has(id)),
+      toolOutcome:
+        processed.prompts.length > 0
+          ? { type: 'interrupted', prompts: processed.prompts }
+          : { type: 'completed' },
     };
   };
 
   const executeToolEdge = async (state: StateType) => {
-    const lastAction = state.mainActions[state.mainActions.length - 1];
-    if (isToolPromptAction(lastAction)) {
+    if (state.toolOutcome?.type === 'interrupted') {
       return steps.handleToolInterrupt;
     }
     return steps.checkBackgroundWork;
   };
 
-  const handleToolInterrupt = async (state: StateType) => {
-    const lastAction = state.mainActions[state.mainActions.length - 1];
-    if (!isToolPromptAction(lastAction)) {
-      throw invalidState(`[handleToolInterrupt] last action type was ${lastAction.type}}`);
+  const handleToolInterrupt = async (state: StateType): Promise<StateUpdate> => {
+    const outcome = state.toolOutcome;
+    if (outcome?.type !== 'interrupted') {
+      throw invalidState(
+        `[handleToolInterrupt] expected an "interrupted" tool outcome, got "${outcome?.type}"`
+      );
     }
     return {
       interrupted: true,
-      prompts: lastAction.prompts.map((entry) => entry.prompt),
+      prompts: outcome.prompts.map(({ prompt }) => prompt),
     };
   };
 
-  const prepareToAnswer = async (state: StateType) => {
-    const lastAction = state.mainActions[state.mainActions.length - 1];
+  const prepareToAnswer = async (state: StateType): Promise<StateUpdate> => {
     const maxCycleReached = state.currentCycle > state.cycleLimit;
 
-    if (maxCycleReached && !isHandoverAction(lastAction)) {
+    if (maxCycleReached && state.researchOutcome?.type !== 'handover') {
       return {
-        mainActions: [handoverAction('', true)],
+        researchOutcome: { type: 'handover', message: '', forceful: true },
       };
     } else {
       return {};
@@ -289,56 +307,52 @@ export const createAgentGraph = ({
   });
 
   const answerAgentEdge = async (state: StateType) => {
-    const lastAction = state.answerActions[state.answerActions.length - 1];
+    const outcome = state.answerOutcome;
+    if (!outcome) {
+      throw invalidState('[answerAgentEdge] missing answer outcome');
+    }
 
-    if (isAgentErrorAction(lastAction)) {
+    if (outcome.type === 'retry_error') {
       if (state.errorCount <= MAX_ERROR_COUNT) {
         return steps.answerAgent;
       } else {
         // max error count reached, stop execution by throwing
-        throw lastAction.error;
+        throw outcome.error;
       }
-    } else if (isStructuredAnswerAction(lastAction)) {
-      return steps.finalize;
     }
-
-    // @ts-expect-error - lastAction.type is never because we cover all use cases.
-    throw invalidState(`[answerAgentEdge] last action type was ${lastAction.type}}`);
+    return steps.finalize;
   };
 
-  const finalize = async (state: StateType) => {
+  const finalize = async (state: StateType): Promise<StateUpdate> => {
     if (structuredOutput) {
-      const answerAction = state.answerActions[state.answerActions.length - 1];
-      if (isStructuredAnswerAction(answerAction)) {
-        return { finalAnswer: answerAction.data };
+      const outcome = state.answerOutcome;
+      if (outcome?.type === 'structured_answer') {
+        return { finalAnswer: outcome.data };
       }
       throw invalidState(
-        `[finalize] expected structured answer action, got ${answerAction.type} instead.`
+        `[finalize] expected structured answer outcome, got ${outcome?.type} instead.`
       );
     }
 
-    // Non-structured: the research agent's terminal HandoverAction carries the
-    // user-facing answer.
-    const lastMainAction = state.mainActions[state.mainActions.length - 1];
-    if (isHandoverAction(lastMainAction)) {
-      return { finalAnswer: lastMainAction.message };
+    // Non-structured: the research agent's terminal handover carries the user-facing answer.
+    const outcome = state.researchOutcome;
+    if (outcome?.type === 'handover') {
+      return { finalAnswer: outcome.message };
     }
-    throw invalidState(`[finalize] expected handover action, got ${lastMainAction.type} instead.`);
+    throw invalidState(`[finalize] expected handover outcome, got ${outcome?.type} instead.`);
   };
 
   // note: the node names are used in the event convertion logic, they should *not* be changed
   const graphBuilder = new StateGraph(StateAnnotation)
     .addNode(steps.init, init)
     .addNode(steps.checkBackgroundWork, checkBackgroundWork)
-    .addNode(steps.contextManagement, contextManagementNode)
     .addNode(steps.researchAgent, researchAgent)
     .addNode(steps.executeTool, executeTool)
     .addNode(steps.handleToolInterrupt, handleToolInterrupt)
     .addNode(steps.finalize, finalize)
     .addEdge(_START_, steps.init)
     .addEdge(steps.init, steps.checkBackgroundWork)
-    .addEdge(steps.checkBackgroundWork, steps.contextManagement)
-    .addEdge(steps.contextManagement, steps.researchAgent)
+    .addEdge(steps.checkBackgroundWork, steps.researchAgent)
     .addConditionalEdges(steps.executeTool, executeToolEdge, {
       [steps.checkBackgroundWork]: steps.checkBackgroundWork,
       [steps.handleToolInterrupt]: steps.handleToolInterrupt,
@@ -352,7 +366,6 @@ export const createAgentGraph = ({
       .addNode(steps.answerAgent, answerAgentStructured)
       .addConditionalEdges(steps.researchAgent, researchAgentEdge, {
         [steps.researchAgent]: steps.researchAgent,
-        [steps.contextManagement]: steps.contextManagement,
         [steps.executeTool]: steps.executeTool,
         [steps.prepareToAnswer]: steps.prepareToAnswer,
       })
@@ -364,7 +377,6 @@ export const createAgentGraph = ({
   } else {
     graphBuilder.addConditionalEdges(steps.researchAgent, researchAgentEdge, {
       [steps.researchAgent]: steps.researchAgent,
-      [steps.contextManagement]: steps.contextManagement,
       [steps.executeTool]: steps.executeTool,
       [steps.finalize]: steps.finalize,
     });
@@ -391,11 +403,6 @@ const getPriorPurposes = (processedConversation: ProcessedConversation): Record<
       .map((e: SubagentRosterEntry) => [e.name, e.purpose as string])
   );
 };
-
-/** Total prompt tokens (incl. cached) of the call, from the LangChain usage metadata. */
-const extractInputTokens = (response: AIMessageChunk): number | undefined =>
-  response.usage_metadata?.input_tokens ??
-  (response.response_metadata as { usage?: { prompt?: number } } | undefined)?.usage?.prompt;
 
 const invalidState = (message: string) => {
   return createAgentExecutionError(message, ErrCodes.invalidState, {});

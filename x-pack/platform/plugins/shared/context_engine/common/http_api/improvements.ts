@@ -92,6 +92,8 @@ export interface Improvement {
   /** True on the newest revision of this `improvement_id`. */
   latest: boolean;
   ai_index_id: string;
+  /** A lineage belongs to one space. */
+  space: string;
   /** Revision time. */
   '@timestamp': string;
   status: ImprovementStatus;
@@ -110,7 +112,7 @@ export interface Improvement {
 /** What a caller supplies to {@link ImprovementsServiceApi.write}. */
 export type ImprovementRevisionInput = Omit<
   Improvement,
-  'revision_id' | 'previous_revision_id' | 'latest' | '@timestamp' | 'suggested_at'
+  'revision_id' | 'previous_revision_id' | 'latest' | '@timestamp' | 'suggested_at' | 'space'
 > & {
   /** Defaults to the write time. */
   suggested_at?: string;

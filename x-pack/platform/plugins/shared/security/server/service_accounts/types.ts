@@ -12,7 +12,21 @@ import type {
   UiamProjectType,
 } from '@kbn/core-security-server';
 
+import type { ServiceAccountWorkloadBindingsApi } from './bindings';
 import type { CreateServiceAccountFakeRequestParams } from './fake_requests';
+import type {
+  ListServiceAccountsResponse,
+  ServiceAccountDirectoryEntry,
+} from '../../common/service_accounts';
+
+/**
+ * Paging parameters for listing service accounts. `after` is the `next_page` cursor of the
+ * previous page, opaque to the caller and specific to the backend that issued it.
+ */
+export interface ListServiceAccountsParams {
+  limit?: number;
+  after?: string;
+}
 
 /**
  * A backend capable of managing service accounts for the current runtime.
@@ -22,6 +36,22 @@ import type { CreateServiceAccountFakeRequestParams } from './fake_requests';
  */
 export interface ServiceAccountsBackend {
   create(request: KibanaRequest, params: CreateServiceAccountParams): Promise<ServiceAccount>;
+
+  /**
+   * Lists the service accounts this Kibana can see, one page at a time.
+   *
+   * Authorizes the Kibana caller first. On UIAM the outbound call is then authenticated as Kibana
+   * over mTLS, not as the user.
+   */
+  list(
+    request: KibanaRequest,
+    params?: ListServiceAccountsParams
+  ): Promise<ListServiceAccountsResponse>;
+
+  /**
+   * Fetches one service account by id, with the same authorization model as {@link list}.
+   */
+  get(request: KibanaRequest, id: string): Promise<ServiceAccountDirectoryEntry>;
 
   /**
    * Mints a fake `KibanaRequest` bound to the given service account, for use with `asScoped(...)`
@@ -43,13 +73,29 @@ export interface ServiceAccountsBackend {
    * Kibana's to re-mint.
    */
   reauthenticateFakeRequest(request: KibanaRequest): Promise<{ authorization: string } | null>;
+
+  /**
+   * Drops a fake request from the refresh registry: transparent credential replacement is
+   * permanently disabled and the request rides out the remainder of its current short-lived
+   * token. Idempotent, and a no-op for requests this backend did not mint.
+   */
+  releaseFakeRequest(request: KibanaRequest): void;
 }
 
 /**
  * Start contract of the service accounts service. `null` when the feature is
  * disabled.
  */
-export type ServiceAccountsServiceStart = ServiceAccountsBackend;
+export interface ServiceAccountsServiceStart {
+  /** Service account management and credential minting for this deployment's backend. */
+  backend: ServiceAccountsBackend;
+
+  /**
+   * Workload binding management and execution. Consumed exclusively by the Core security
+   * delegate, which scopes every call to the plugin Core identified as the caller.
+   */
+  workloads: ServiceAccountWorkloadBindingsApi;
+}
 
 export interface CloudProjectContext {
   organizationId: string;
