@@ -6,6 +6,7 @@
  */
 
 import {
+  getAllowedAutonomyLevels,
   RULE_TUNING_DEFAULT_EXTRAS,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
@@ -429,10 +430,12 @@ describe('createWorkerSettingsRegistration', () => {
       '%s still accepts an autonomy patch',
       (workerId) => {
         const registration = createWorkerSettingsRegistration(workerId);
+        // Which level that is differs per Worker; the catalog narrows to what each gate honours.
+        const [level] = getAllowedAutonomyLevels(workerId).filter((it) => it !== 'manual');
 
         expect(
-          registration.applyPatch(registration.createDefaultValues(), { autonomy: 'assisted' })
-        ).toEqual({ values: { ...storedDefaultsFor(workerId), autonomyLevel: 'assisted' } });
+          registration.applyPatch(registration.createDefaultValues(), { autonomy: level })
+        ).toEqual({ values: { ...storedDefaultsFor(workerId), autonomyLevel: level } });
       }
     );
   });

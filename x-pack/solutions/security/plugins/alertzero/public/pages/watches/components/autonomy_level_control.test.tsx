@@ -10,6 +10,7 @@ import { AutonomyLevelControl } from './autonomy_level_control';
 
 const AD_WORKER_ID = 'system-security-floor-attack-discovery';
 const TRIAGE_WORKER_ID = 'system-security-floor-alert-triage';
+const RULE_TUNING_WORKER_ID = 'system-security-detection-rule-tuning';
 
 describe('AutonomyLevelControl (Sep 14 radios)', () => {
   const onChange = jest.fn();
@@ -63,7 +64,7 @@ describe('AutonomyLevelControl (Sep 14 radios)', () => {
     expect(screen.getByTestId('alertZeroAutonomyWarn')).toBeInTheDocument();
   });
 
-  it('hides the warning at manual/assisted levels', () => {
+  it('hides the warning below the highest level', () => {
     render(
       <AutonomyLevelControl workerId={TRIAGE_WORKER_ID} current="manual" onChange={onChange} />
     );
@@ -74,7 +75,7 @@ describe('AutonomyLevelControl (Sep 14 radios)', () => {
     it('renders only the levels the server allows', () => {
       render(
         <AutonomyLevelControl
-          workerId={TRIAGE_WORKER_ID}
+          workerId={RULE_TUNING_WORKER_ID}
           current="manual"
           allowedAutonomyLevels={['manual', 'assisted']}
           onChange={onChange}

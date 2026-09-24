@@ -202,14 +202,15 @@ describe('allowed autonomy levels', () => {
   // Worker, not a UI choice. Asserting the registered sets keeps a later "allow everything"
   // edit from silently re-opening a level the gate cannot run.
   it('narrows the registered Workers to the levels their gates support', () => {
+    // One skippable gate each, so one level that gates it and one that does not.
     expect(getAllowedAutonomyLevels(ATTACK_DISCOVERY)).toEqual(['manual', 'supervised']);
+    expect(getAllowedAutonomyLevels(TRIAGE)).toEqual(['manual', 'supervised']);
+    // Review-gated throughout, so no unattended level at all.
     expect(getAllowedAutonomyLevels(RULE_TUNING)).toEqual(['manual', 'assisted']);
     expect(getAllowedAutonomyLevels(SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID)).toEqual([
       'manual',
       'assisted',
     ]);
-    // Triage and threat hunt keep the full dial.
-    expect(getAllowedAutonomyLevels(TRIAGE)).toEqual(['manual', 'assisted', 'supervised']);
   });
 
   it('rejects a PATCH naming a level the Worker does not allow', () => {
