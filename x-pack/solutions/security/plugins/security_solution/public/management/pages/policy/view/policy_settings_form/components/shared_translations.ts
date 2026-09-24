@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 /**
- * Shared translations for user notification components across different protection types
+ * Shared translations for policy settings form components across different protection types
  */
 
 export const NOTIFY_USER_SECTION_TITLE = i18n.translate(
@@ -34,5 +34,27 @@ export const CUSTOMIZE_NOTIFICATION_MESSAGE_LABEL = i18n.translate(
   'xpack.securitySolution.endpoint.policyDetailsConfig.customizeUserNotification',
   {
     defaultMessage: 'Customize notification message',
+  }
+);
+
+export const CUSTOM_YARA_SIGNATURES_LABEL = i18n.translate(
+  'xpack.securitySolution.endpoint.policy.protections.customYaraSignaturesLabel',
+  {
+    defaultMessage: 'Apply custom YARA signatures in detection mode',
+  }
+);
+
+export const CUSTOM_YARA_SIGNATURES_HINT = i18n.translate(
+  'xpack.securitySolution.endpoint.policyDetailsConfig.customYaraSignaturesTooltip',
+  {
+    defaultMessage:
+      'Endpoints enabled with this policy will apply custom YARA signatures from the custom YARA signatures page.',
+  }
+);
+
+export const CUSTOM_YARA_SIGNATURES_LICENSE_UPSELL = i18n.translate(
+  'xpack.securitySolution.endpoint.policy.protections.customYaraSignaturesLicenseTooltip',
+  {
+    defaultMessage: 'Custom YARA signatures require an Enterprise license.',
   }
 );
