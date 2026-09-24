@@ -22,7 +22,6 @@ const timestamp = FP_TP_BASE_TIME.toISOString().replace(/\.\d{3}Z$/, '.000Z');
 
 const buildHostEntity = ({
   runMarker,
-  variant,
   subType,
   criticality,
   riskLevel,
@@ -30,7 +29,6 @@ const buildHostEntity = ({
   asset,
 }: {
   runMarker: string;
-  variant: EncodedPowershellVariant;
   subType: string;
   criticality: string;
   riskLevel: string;
@@ -43,10 +41,7 @@ const buildHostEntity = ({
     id: hostEntityId,
     source: {
       '@timestamp': timestamp,
-      labels: {
-        ad_fp_tp_twin: `encoded-powershell.${variant}`,
-        ad_portable_seed: runMarker,
-      },
+      labels: { ad_portable_seed: runMarker },
       host: {
         name: ENCODED_POWERSHELL_HOST,
         hostname: ENCODED_POWERSHELL_HOST,
@@ -71,14 +66,12 @@ const buildHostEntity = ({
 
 const buildUserEntity = ({
   runMarker,
-  variant,
   subType,
   criticality,
   riskLevel,
   riskScoreNorm,
 }: {
   runMarker: string;
-  variant: EncodedPowershellVariant;
   subType: string;
   criticality: string;
   riskLevel: string;
@@ -90,10 +83,7 @@ const buildUserEntity = ({
     id: userEntityId,
     source: {
       '@timestamp': timestamp,
-      labels: {
-        ad_fp_tp_twin: `encoded-powershell.${variant}`,
-        ad_portable_seed: runMarker,
-      },
+      labels: { ad_portable_seed: runMarker },
       user: { name: ENCODED_POWERSHELL_USER, domain: 'CONTOSO' },
       host: { name: ENCODED_POWERSHELL_HOST, id: hostId },
       asset: { criticality },
@@ -120,7 +110,6 @@ export const buildEncodedPowershellEntities = (
     ? [
         buildHostEntity({
           runMarker,
-          variant,
           subType: 'employee_workstation',
           criticality: 'medium_impact',
           riskLevel: 'Low',
@@ -134,7 +123,6 @@ export const buildEncodedPowershellEntities = (
         }),
         buildUserEntity({
           runMarker,
-          variant,
           subType: 'employee',
           criticality: 'medium_impact',
           riskLevel: 'Low',
@@ -144,7 +132,6 @@ export const buildEncodedPowershellEntities = (
     : [
         buildHostEntity({
           runMarker,
-          variant,
           subType: 'mdm_management',
           criticality: 'low_impact',
           riskLevel: 'High',
@@ -159,7 +146,6 @@ export const buildEncodedPowershellEntities = (
         }),
         buildUserEntity({
           runMarker,
-          variant,
           subType: 'intune_admin',
           criticality: 'low_impact',
           riskLevel: 'Moderate',

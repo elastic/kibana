@@ -6,12 +6,14 @@
  */
 
 import type { HttpHandler } from '@kbn/core/public';
+import { readAgentToolCallsFromTraces } from '@kbn/security-evals-workflow-traces';
 import { ToolingLog } from '@kbn/tooling-log';
 import {
   ExecutionStatus,
   type WorkflowExecutionDto,
   type WorkflowStepExecutionDto,
 } from '@kbn/workflows';
+import type { FpTpSeededEvidence } from './world';
 import type { FpTpSeededIds } from './workflow_task';
 import { readAnalysisOutput, runFpTpAnalysisWorkflow, toOutcome } from './workflow_task';
 
@@ -48,6 +50,12 @@ const seededIds: FpTpSeededIds = {
   eventIds: [],
 };
 
+const seededEvidence: FpTpSeededEvidence = {
+  alerts: [{ id: 'a1', source: { host: { name: 'wks-1' } } }],
+  entities: [],
+  events: [],
+};
+
 const mockFetch = (records: WorkflowExecutionDto[]): HttpHandler => {
   let poll = 0;
   return jest.fn(async (path: string) => {
@@ -68,6 +76,7 @@ const run = (fetch: HttpHandler, maxWaitMs = 60_000) =>
     attackDiscoveryId: 'ad-1',
     investigationId: 'inv-1',
     seededIds,
+    seededEvidence,
     maxWaitMs,
     pollIntervalMs: 0,
   });
@@ -143,5 +152,34 @@ describe('runFpTpAnalysisWorkflow', () => {
   it('returns the seeded ids unchanged', async () => {
     const fetch = mockFetch([execution({ context: { output } })]);
     expect((await run(fetch)).seededIds).toEqual(seededIds);
+  });
+
+  it('returns the seeded facts unchanged', async () => {
+    const fetch = mockFetch([execution({ context: { output } })]);
+    expect((await run(fetch)).seededEvidence).toEqual(seededEvidence);
+  });
+
+  it('returns the conversation ids the agent steps created', async () => {
+    const fetch = mockFetch([
+      execution({
+        context: { output },
+        stepExecutions: [
+          outputStep({
+            stepId: 'analyze',
+            stepType: 'ai.agent',
+            output: { conversation_id: 'c1' },
+          }),
+        ],
+      }),
+    ]);
+    expect((await run(fetch)).agentConversationIds).toEqual(['c1']);
+  });
+
+  it('returns tool calls without excluding any tool', async () => {
+    const fetch = mockFetch([execution({ context: { output } })]);
+    await run(fetch);
+    expect(readAgentToolCallsFromTraces).toHaveBeenLastCalledWith(
+      expect.objectContaining({ excludeToolIds: [] })
+    );
   });
 });

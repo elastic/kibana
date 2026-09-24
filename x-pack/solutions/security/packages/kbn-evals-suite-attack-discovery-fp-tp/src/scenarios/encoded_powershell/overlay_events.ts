@@ -28,21 +28,39 @@ const FP_CCMEXEC_PARENT = {
   code_signature: { status: 'trusted', subject_name: 'Microsoft Windows' },
 };
 
-const withTwinLabel = (
-  source: Record<string, unknown>,
-  variant: 'tp' | 'fp'
-): Record<string, unknown> => {
-  const labels =
-    typeof source.labels === 'object' && source.labels !== null
-      ? (source.labels as Record<string, unknown>)
-      : {};
-  return {
-    ...source,
-    labels: {
-      ...labels,
-      ad_fp_tp_twin: `encoded-powershell.${variant}`,
-    },
-  };
+const asRecord = (value: unknown): Record<string, unknown> =>
+  typeof value === 'object' && value !== null ? (value as Record<string, unknown>) : {};
+
+const hasCategory = (source: Record<string, unknown>, category: string): boolean => {
+  const categories = asRecord(source.event).category;
+  return Array.isArray(categories) && categories.includes(category);
+};
+
+/**
+ * The registry's `message` narrates the TP chain ("WINWORD.EXE spawned…", "connected to
+ * malicious-c2…"). Process and network messages are rebuilt from the overlaid fields in
+ * both twins, so the text matches the fields and does not differ in style between twins.
+ */
+const withFieldMessage = (event: Ad2IndexedRawEvent): Ad2IndexedRawEvent => {
+  const process = asRecord(event.source.process);
+  const parent = asRecord(process.parent);
+  const destination = asRecord(event.source.destination);
+  if (hasCategory(event.source, 'network')) {
+    return {
+      ...event,
+      source: {
+        ...event.source,
+        message: `${process.name} connected to ${destination.domain} (${destination.ip}:${destination.port})`,
+      },
+    };
+  }
+  if (hasCategory(event.source, 'process')) {
+    return {
+      ...event,
+      source: { ...event.source, message: `${parent.name} started ${process.name}` },
+    };
+  }
+  return event;
 };
 
 const withProcessParent = (
@@ -87,13 +105,9 @@ export const overlayEncodedPowershellEvents = (
   ids: EncodedPowershellIds
 ): Ad2IndexedRawEvent[] =>
   events.map((event) => {
-    let next: Ad2IndexedRawEvent = {
-      ...event,
-      source: withTwinLabel(event.source, variant),
-    };
     // Step 1 is the only step whose events are the Office child itself.
     const tpParent = event.id === ids.process1Id ? TP_WINWORD_PARENT : TP_POWERSHELL_PARENT;
-    next = withProcessParent(next, variant === 'tp' ? tpParent : FP_CCMEXEC_PARENT);
+    let next = withProcessParent(event, variant === 'tp' ? tpParent : FP_CCMEXEC_PARENT);
     if (variant === 'fp' && event.id === ids.network2Id) {
       next = withDestination(next, {
         domain: 'manage.microsoft.com',
@@ -108,5 +122,5 @@ export const overlayEncodedPowershellEvents = (
         port: 445,
       });
     }
-    return next;
+    return withFieldMessage(next);
   });

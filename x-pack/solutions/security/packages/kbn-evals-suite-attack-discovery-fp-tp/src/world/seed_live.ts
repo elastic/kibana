@@ -265,6 +265,30 @@ const createEntity = async (
   }
 };
 
+const writeIdentityFields = async (
+  esClient: EsClient,
+  request: FpTpEntityCrudRequest
+): Promise<void> => {
+  if (request.identityFields === undefined) {
+    return;
+  }
+  const { updated } = await esClient.updateByQuery({
+    index: FP_TP_ENTITY_READ_ALIAS,
+    refresh: true,
+    query: { term: { 'entity.id': request.entityId } },
+    script: {
+      source:
+        'for (entry in params.fields.entrySet()) { ctx._source[entry.getKey()] = entry.getValue(); }',
+      params: { fields: request.identityFields },
+    },
+  });
+  if (updated !== 1) {
+    throw new Error(
+      `Expected to write identity fields on entity ${request.entityId}, updated ${updated}`
+    );
+  }
+};
+
 const esStatusCode = (error: unknown): number | undefined =>
   typeof error === 'object' && error !== null && 'statusCode' in error
     ? (error as { statusCode?: number }).statusCode
@@ -423,6 +447,7 @@ export const seedFixture = async ({
     }
     for (const entity of plan.entities) {
       await createEntity(kbnRequest, entity);
+      await writeIdentityFields(esClient, entity);
     }
   } catch (error) {
     await cleanup().catch(() => undefined);

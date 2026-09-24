@@ -24,6 +24,8 @@ const completed: FpTpTaskOutput = {
   payload: { verdict: 'false_positive', summary_markdown: 'A summary' },
   attackDiscoveryIdEcho: 'ad-1',
   seededIds: { attackDiscoveryId: 'ad-1', alertIds: [], entityIds: [], eventIds: [] },
+  seededEvidence: { alerts: [], entities: [], events: [] },
+  agentConversationIds: [],
   toolCallIds: [],
   toolCallsUnavailable: false,
 };
@@ -117,6 +119,16 @@ describe('PayloadConformance', () => {
 
   it('returns 0 for a run that should fail but produced a payload', async () => {
     expect(await score(payloadConformance, completed, 'failed')).toBe(0);
+  });
+
+  it('returns 0 for a run that should fail but completed without a payload', async () => {
+    expect(
+      await score(
+        payloadConformance,
+        { ...failed, executionStatus: ExecutionStatus.COMPLETED, outcome: undefined },
+        'failed'
+      )
+    ).toBe(0);
   });
 });
 

@@ -23,6 +23,7 @@ import {
   type FpTpOutcome,
   type FpTpVerdict,
 } from './constants';
+import type { FpTpSeededEvidence } from './world';
 
 const OUTPUT_STEP_TYPE = 'workflow.output';
 
@@ -64,6 +65,10 @@ export interface FpTpTaskOutput {
   /** The whole execution output, including `coverage`, `checks`, and `claims`. */
   raw?: FpTpAnalysisOutput;
   seededIds: FpTpSeededIds;
+  /** The seeded documents, so LLM graders can check the summary invents nothing. */
+  seededEvidence: FpTpSeededEvidence;
+  /** Conversations the workflow's `ai.agent` steps created; the caller deletes them. */
+  agentConversationIds: string[];
   toolCallIds?: string[];
   toolCallsUnavailable?: boolean;
 }
@@ -121,6 +126,7 @@ export const runFpTpAnalysisWorkflow = async ({
   attackDiscoveryId,
   investigationId,
   seededIds,
+  seededEvidence,
   maxWaitMs = 15 * 60_000,
   pollIntervalMs = 3_000,
 }: {
@@ -131,6 +137,7 @@ export const runFpTpAnalysisWorkflow = async ({
   attackDiscoveryId: string;
   investigationId: string;
   seededIds: FpTpSeededIds;
+  seededEvidence: FpTpSeededEvidence;
   maxWaitMs?: number;
   pollIntervalMs?: number;
 }): Promise<FpTpTaskOutput> => {
@@ -183,10 +190,12 @@ export const runFpTpAnalysisWorkflow = async ({
   const conversationIds = extractAgentConversationIds(execution.stepExecutions).map(
     ({ conversationId }) => conversationId
   );
+  // The agent is tool-less, so no tool is exempt from the zero-tool guardrail.
   const { toolCallIds, unavailable } = await readAgentToolCallsFromTraces({
     traceEsClient,
     conversationIds,
     log,
+    excludeToolIds: [],
   });
 
   return {
@@ -197,6 +206,8 @@ export const runFpTpAnalysisWorkflow = async ({
     attackDiscoveryIdEcho: output?.attack_discovery_id,
     raw: output,
     seededIds,
+    seededEvidence,
+    agentConversationIds: conversationIds,
     toolCallIds,
     toolCallsUnavailable: unavailable,
   };

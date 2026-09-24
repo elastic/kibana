@@ -7,6 +7,7 @@
 
 import type { Evaluator } from '@kbn/evals';
 import { createTrajectoryEvaluator } from '@kbn/evals';
+import { ExecutionStatus } from '@kbn/workflows';
 import {
   FP_TP_VERDICTS,
   RATIONALE_MARKDOWN_MAX_LENGTH,
@@ -92,9 +93,16 @@ const payloadProblems = (output: FpTpTaskOutput, attackDiscoveryId: string): str
   return problems;
 };
 
+const failureProblems = (output: FpTpTaskOutput): string[] => [
+  ...(output.executionStatus === ExecutionStatus.COMPLETED
+    ? ['execution completed but should have failed']
+    : []),
+  ...(output.payload ? ['payload produced by a run that should have failed'] : []),
+];
+
 /**
- * Contract conformance. A run whose gold is `failed` must produce no payload; any other
- * run must produce a payload that satisfies the output contract.
+ * Contract conformance. A run whose gold is `failed` must fail and produce no payload;
+ * any other run must produce a payload that satisfies the output contract.
  */
 export const payloadConformance: Evaluator = {
   name: 'PayloadConformance',
@@ -104,9 +112,7 @@ export const payloadConformance: Evaluator = {
     const task = asOutput(output);
     const problems =
       expectedOutcome(expected) === 'failed'
-        ? task.payload
-          ? ['payload produced by a run that should have failed']
-          : []
+        ? failureProblems(task)
         : payloadProblems(task, task.seededIds.attackDiscoveryId);
     return {
       score: problems.length === 0 ? 1 : 0,

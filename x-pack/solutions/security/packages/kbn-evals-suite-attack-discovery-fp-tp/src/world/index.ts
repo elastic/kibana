@@ -36,6 +36,8 @@ export type {
   FpTpLiveSeedSummary,
   FpTpSeededFixture,
 } from './seed_live';
+export { toSeededEvidence } from './seeded_evidence';
+export type { FpTpSeededEvidence } from './seeded_evidence';
 export { shiftTwinToNow } from './shift_timestamps';
 export type { FpTpGold, FpTpIndexedEntity, FpTpMustRetrieve, FpTpTwin, FpTpWorld } from './types';
 export { toRunMarker, uniquify } from './uniquify';

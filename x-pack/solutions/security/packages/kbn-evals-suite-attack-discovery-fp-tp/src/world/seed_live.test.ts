@@ -126,6 +126,7 @@ describe('seedFixture', () => {
     index: jest.Mock;
     deleteByQuery: jest.Mock;
     search: jest.Mock;
+    updateByQuery: jest.Mock;
   };
   let kbnRequest: jest.MockedFunction<FpTpLiveKbnRequest>;
 
@@ -135,6 +136,7 @@ describe('seedFixture', () => {
       index: jest.fn().mockResolvedValue({}),
       deleteByQuery: jest.fn().mockResolvedValue({}),
       search: jest.fn().mockResolvedValue({ hits: { hits: [] } }),
+      updateByQuery: jest.fn().mockResolvedValue({ updated: 1 }),
     };
     kbnRequest = jest.fn().mockResolvedValue({ statusCode: 200, body: {} });
   });
@@ -186,6 +188,29 @@ describe('seedFixture', () => {
     expect(kbnRequest.mock.calls.map(([options]) => options.body)).toEqual([
       { entityId: extractedId },
     ]);
+  });
+
+  it('returns after writing the user name and host id onto the seeded user entity', async () => {
+    await seedFixture({ esClient: esClient as unknown as EsClient, kbnRequest, world });
+
+    expect(esClient.updateByQuery).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: { term: { 'entity.id': ids.userEntityId } },
+        script: expect.objectContaining({
+          params: {
+            fields: expect.objectContaining({ host: expect.objectContaining({ id: ids.hostId }) }),
+          },
+        }),
+      })
+    );
+  });
+
+  it('throws when the user entity identity fields are not written', async () => {
+    esClient.updateByQuery.mockResolvedValue({ updated: 0 });
+
+    await expect(
+      seedFixture({ esClient: esClient as unknown as EsClient, kbnRequest, world })
+    ).rejects.toThrow(`Expected to write identity fields on entity ${ids.userEntityId}, updated 0`);
   });
 
   it('returns after deleting the partially seeded alerts when indexing fails', async () => {

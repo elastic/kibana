@@ -38,6 +38,17 @@ describe('toEntityCrudRequest', () => {
     expect(toEntityCrudRequest(tpUser).body.host).toBeUndefined();
   });
 
+  it('returns the user name and host id as identity fields for the user entity', () => {
+    expect(toEntityCrudRequest(tpUser).identityFields).toEqual({
+      user: { name: 'alice.chen', domain: 'CONTOSO' },
+      host: { name: 'wks-alice-01', id: ids.hostId },
+    });
+  });
+
+  it('returns no identity fields for a host entity', () => {
+    expect(toEntityCrudRequest(tpHost).identityFields).toBeUndefined();
+  });
+
   it('returns mdm_management as the FP host sub_type', () => {
     const entity = toEntityCrudRequest(fpHost).body.entity as { sub_type?: string };
     expect(entity.sub_type).toBe('mdm_management');

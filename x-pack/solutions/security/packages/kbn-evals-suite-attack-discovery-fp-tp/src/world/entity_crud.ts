@@ -13,6 +13,8 @@ export interface FpTpEntityCrudRequest {
   readonly entityType: FpTpEntityCrudType;
   readonly entityId: string;
   readonly body: Record<string, unknown>;
+  /** Root fields the CRUD schema rejects, written onto the created record afterwards. */
+  readonly identityFields?: Record<string, unknown>;
 }
 
 const asString = (value: unknown): string | undefined =>
@@ -50,6 +52,9 @@ const entityFieldsFromSource = (source: Record<string, unknown>): Record<string,
  * Hosts go to `POST .../entities/host`. Users cannot: UserEntity is strict and
  * omits `host.id`, which local-namespace EUIDs need. Users are created as
  * generic records with the authored `entity.id` so gold evidence ids still resolve.
+ * GenericEntity is strict too, so `user` and `host` go in `identityFields`; without
+ * them the analysis, which queries entities by `user.name` and `host.id`, cannot find
+ * the record.
  */
 export const toEntityCrudRequest = (entity: FpTpIndexedEntity): FpTpEntityCrudRequest => {
   const entityFields = entityFieldsFromSource(entity.source);
@@ -78,6 +83,12 @@ export const toEntityCrudRequest = (entity: FpTpIndexedEntity): FpTpEntityCrudRe
     };
   }
 
+  const identityFields = Object.fromEntries(
+    (['user', 'host'] as const)
+      .filter((field) => entity.source[field] !== undefined)
+      .map((field) => [field, entity.source[field]])
+  );
+
   return {
     entityType: 'generic',
     entityId: entity.id,
@@ -87,5 +98,6 @@ export const toEntityCrudRequest = (entity: FpTpIndexedEntity): FpTpEntityCrudRe
       asset: entity.source.asset,
       entity: entityFields,
     },
+    ...(Object.keys(identityFields).length > 0 ? { identityFields } : {}),
   };
 };

@@ -45,11 +45,11 @@ import { kbnRequestFromFetch } from '../src/kbn_request';
 import { deleteSampleWorkflow, installSampleWorkflow } from '../src/sample_workflow/install';
 import { buildFpTpExampleWorld, FP_TP_EXAMPLES } from '../src/scenarios';
 import { runFpTpAnalysisWorkflow } from '../src/workflow_task';
-import { ensureFpTpSeedPrerequisites, seedFixture } from '../src/world';
+import { ensureFpTpSeedPrerequisites, seedFixture, toSeededEvidence } from '../src/world';
 
 const SUMMARY_CRITERIA = [
   'Every id the summary or rationale cites appears in output.seededIds (the attack discovery, alert, entity, or event ids seeded for this run)',
-  'The summary and rationale do not invent hosts, users, processes, domains, or events that are not in the seeded data',
+  'The summary and rationale do not invent hosts, users, processes, domains, events, or entity roles that are not in output.seededEvidence (the documents this run seeded)',
   'The summary or rationale names the check or checks that decided the verdict (alert_linkage, entity_role, process_parent, network_destination)',
   'When the verdict is inconclusive, the summary or rationale says which evidence was missing or which checks conflicted',
   'When the entity store or raw events were empty or unavailable, the summary or rationale names that source, whatever the verdict',
@@ -145,6 +145,7 @@ evaluate.describe('Attack Discovery FP/TP analysis', { tag: tags.stateful.classi
               throw error;
             });
 
+            let agentConversationIds: string[] = [];
             try {
               const result = await runFpTpAnalysisWorkflow({
                 fetch,
@@ -159,7 +160,9 @@ evaluate.describe('Attack Discovery FP/TP analysis', { tag: tags.stateful.classi
                   entityIds: world.entities.map(({ id }) => id),
                   eventIds: world.events.map(({ id }) => id),
                 },
+                seededEvidence: toSeededEvidence(world),
               });
+              agentConversationIds = result.agentConversationIds;
               log.info(
                 `FP/TP example ${exampleId}: outcome ${result.outcome}, coverage ${JSON.stringify(
                   result.raw?.coverage ?? null
@@ -173,6 +176,13 @@ evaluate.describe('Attack Discovery FP/TP analysis', { tag: tags.stateful.classi
               await deleteConversation(fetch, investigationId).catch((error: Error) =>
                 log.warning(`Could not delete Investigation ${investigationId}: ${error.message}`)
               );
+              for (const conversationId of agentConversationIds) {
+                await deleteConversation(fetch, conversationId).catch((error: Error) =>
+                  log.warning(
+                    `Could not delete agent conversation ${conversationId}: ${error.message}`
+                  )
+                );
+              }
             }
           },
         },

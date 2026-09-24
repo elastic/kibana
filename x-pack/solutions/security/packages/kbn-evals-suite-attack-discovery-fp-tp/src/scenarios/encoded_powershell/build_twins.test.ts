@@ -38,15 +38,37 @@ describe('encoded-powershell FP/TP twins', () => {
     expect(fp.alerts.map((alert) => alert.id)).toEqual(tp.alerts.map((alert) => alert.id));
   });
 
-  it('returns alert documents that differ only by twin labels', () => {
-    const withoutLabels = (source: Record<string, unknown>): Record<string, unknown> => {
-      const rest = { ...source };
-      delete rest.labels;
-      return rest;
-    };
-    expect(fp.alerts.map((alert) => withoutLabels(alert.source))).toEqual(
-      tp.alerts.map((alert) => withoutLabels(alert.source))
+  it('returns identical alert documents for both twins', () => {
+    expect(fp.alerts).toEqual(tp.alerts);
+  });
+
+  it.each([
+    ['tp', tp],
+    ['fp', fp],
+  ])('returns %s seeded documents that do not name the variant', (variant, twin) => {
+    const seeded = JSON.stringify([twin.alerts, twin.events, twin.entities, twin.attack]);
+    expect(seeded).not.toContain(`encoded-powershell.${variant}`);
+  });
+
+  it('returns a fp process message that matches its parent', () => {
+    const event = fp.events.find((item) => item.id === ids.process1Id);
+    expect(event?.source.message).toBe('ccmexec.exe started powershell.exe');
+  });
+
+  it('returns a fp network message that matches its destination', () => {
+    const event = fp.events.find((item) => item.id === ids.network2Id);
+    expect(event?.source.message).toBe(
+      'powershell.exe connected to manage.microsoft.com (20.190.128.10:443)'
     );
+  });
+
+  it('returns a tp process message that matches its parent', () => {
+    const event = tp.events.find((item) => item.id === ids.process1Id);
+    expect(event?.source.message).toBe('WINWORD.EXE started powershell.exe');
+  });
+
+  it('returns no fp raw event that mentions the TP C2 domain', () => {
+    expect(JSON.stringify(fp.events)).not.toContain('malicious-c2.example.com');
   });
 
   it('returns the same authored attack document for both twins', () => {

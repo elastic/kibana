@@ -18,30 +18,12 @@ import {
 } from './ids';
 import { overlayEncodedPowershellEvents } from './overlay_events';
 
-const withTwinAlertLabels = (
-  alerts: FpTpTwin['alerts'],
-  variant: EncodedPowershellVariant
-): FpTpTwin['alerts'] =>
-  alerts.map((alert) => {
-    const labels =
-      typeof alert.source.labels === 'object' && alert.source.labels !== null
-        ? (alert.source.labels as Record<string, unknown>)
-        : {};
-    return {
-      ...alert,
-      source: {
-        ...alert.source,
-        labels: {
-          ...labels,
-          ad_fp_tp_twin: `encoded-powershell.${variant}`,
-        },
-      },
-    };
-  });
-
 /**
  * Builds one encoded-powershell twin. Alerts and the authored attack are shared;
  * entity store documents, raw-event overlays, and gold labels differ.
+ *
+ * Seeded documents never name the variant: the analysis reads them, so a variant
+ * label would give the answer away.
  *
  * Every seeded id is a digest of `runMarker`, so two markers never share a document.
  */
@@ -58,7 +40,7 @@ export const buildEncodedPowershellTwin = (
 
   return {
     id: `encoded-powershell.${variant}`,
-    alerts: withTwinAlertLabels(plan.alerts, variant),
+    alerts: plan.alerts,
     events: overlayEncodedPowershellEvents(
       plan.rawEvents,
       variant,
