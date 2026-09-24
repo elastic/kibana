@@ -6,8 +6,8 @@
  */
 
 import type { IndexKind, MatchedItem } from '@kbn/data-views-plugin/public';
-import { useQuery } from '@kbn/react-query';
-import { useMemo } from 'react';
+import { CancelledError, useQuery } from '@kbn/react-query';
+import { useMemo, useRef } from 'react';
 import { contextEngineQueryKeys } from './query_keys';
 import { useKibana } from './use_kibana';
 
@@ -51,10 +51,21 @@ export const useIndices = ({
 
   const trimmedSearch = search.trim();
   const pattern = trimmedSearch ? `*${trimmedSearch}*` : DEFAULT_PATTERN;
+  const listRequestRef = useRef(0);
 
   const { data: matches, isLoading } = useQuery<MatchedItem[], Error>({
     queryKey: contextEngineQueryKeys.indices.list(trimmedSearch),
-    queryFn: () => data.dataViews.getIndices({ pattern, isRollupIndex: NOT_ROLLUP_INDEX }),
+    queryFn: async () => {
+      const requestId = ++listRequestRef.current;
+      const result = await data.dataViews.getIndices({
+        pattern,
+        isRollupIndex: NOT_ROLLUP_INDEX,
+      });
+      if (requestId !== listRequestRef.current) {
+        throw new CancelledError();
+      }
+      return result;
+    },
     refetchOnWindowFocus: false,
     enabled,
   });

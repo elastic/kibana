@@ -161,4 +161,52 @@ describe('useIndices', () => {
 
     expect(result.current.indexNames).toEqual(['logs-ds']);
   });
+
+  it('ignores stale responses when a slower earlier search finishes after a newer one', async () => {
+    let resolveSlow!: (value: MatchedItem[]) => void;
+    const slowPromise = new Promise<MatchedItem[]>((resolve) => {
+      resolveSlow = resolve;
+    });
+
+    const getIndices = jest.fn(({ pattern }: { pattern: string }) => {
+      if (pattern === '*slow*') {
+        return slowPromise;
+      }
+      return Promise.resolve([buildMatchedItem('fast-match')]);
+    });
+
+    const core = coreMock.createStart();
+    const data = dataPluginMock.createStartContract();
+    data.dataViews.getIndices = getIndices;
+    const services = { ...core, data };
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const wrapper = ({ children }: { children: React.ReactNode }) =>
+      React.createElement(
+        KibanaContextProvider,
+        { services },
+        React.createElement(QueryClientProvider, { client: queryClient }, children)
+      );
+
+    const searchRef = { current: 'slow' };
+    const { result, rerender } = renderHook(() => useIndices({ search: searchRef.current }), {
+      wrapper,
+    });
+
+    await waitFor(() =>
+      expect(getIndices).toHaveBeenCalledWith({
+        pattern: '*slow*',
+        isRollupIndex: expect.any(Function),
+      })
+    );
+
+    searchRef.current = 'fast';
+    rerender();
+
+    await waitFor(() => expect(result.current.indexNames).toEqual(['fast-match']));
+
+    resolveSlow([buildMatchedItem('stale-match')]);
+    await waitFor(() => expect(getIndices).toHaveBeenCalledTimes(2));
+
+    expect(result.current.indexNames).toEqual(['fast-match']);
+  });
 });
