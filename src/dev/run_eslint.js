@@ -24,7 +24,6 @@ process.env.KIBANA_RESOLVER_HARD_CACHE = 'true';
 const OXLINT_UNSUPPORTED_FLAGS = [
   '--fix-dry-run',
   '--fix-type',
-  '--print-config',
   '--stdin',
   '--stdin-filename',
   '--watch',
@@ -54,6 +53,14 @@ const runLegacyEslint = () => {
     console.log(
       "This is a wrapper around ESLint's CLI that sets some defaults - see Eslint's help for flags:"
     );
+    require(eslintBinPath); // eslint-disable-line import/no-dynamic-require
+    return;
+  }
+  if (
+    process.argv
+      .slice(2)
+      .some((arg) => arg === '--print-config' || arg.startsWith('--print-config='))
+  ) {
     require(eslintBinPath); // eslint-disable-line import/no-dynamic-require
     return;
   }
