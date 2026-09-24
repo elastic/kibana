@@ -82,7 +82,9 @@ const RULE_EVENT_SEVERITY_TO_SIGNIFICANT_EVENT_SEVERITY: Partial<
 export interface RuleEventsFilterOptions {
   status?: SignificantEventStatus[];
   severity?: Severity[];
+  stream?: string[];
   search?: string;
+  eventIds?: string[];
 }
 
 type RuleEventsCurrentStateSearchOptions = CommonSearchOptions & RuleEventsFilterOptions;
@@ -110,13 +112,18 @@ interface RuleEventSourceRow {
 type RuleEventSourceRowWithCreatedAt = RuleEventSourceRow & { created_at: string };
 
 /**
- * Decodes a `.rule-events` row into a `SignificantEvent`. `data_json` (via `JSON_EXTRACT`) carries
- * the fields `toRuleEvent` copied under `data` (`event_id`, `title`, `summary`, `stream_names`, …);
- * `@timestamp`, `episode.status`, and `severity` are read from the top-level document.
- *
- * `event_uuid` is not persisted to `.rule-events` at all (see the class doc comment), so
- * `group_hash` — the closest stable per-series identifier this index carries — stands in for it.
- * Callers that need the real `event_uuid` must keep using `EventClient`.
+ * `.rule-events` doesn't guarantee `stream_names` is an array — bridge docs write a scalar
+ * string, and the field can be absent. Normalize so callers always get `string[]`.
+ */
+const normalizeStreamNames = (value: unknown): string[] => {
+  if (typeof value === 'string') return [value];
+  if (Array.isArray(value)) return value.filter((item): item is string => typeof item === 'string');
+  return [];
+};
+
+/**
+ * Decodes a `.rule-events` row into a `SignificantEvent`. `event_uuid` isn't persisted here, so
+ * `group_hash` stands in for it; callers needing the real `event_uuid` must use `EventClient`.
  */
 const decodeSignificantEvent = (row: RuleEventSourceRow): SignificantEvent => {
   const data = JSON.parse(row.data_json || '{}') as Omit<
@@ -125,6 +132,7 @@ const decodeSignificantEvent = (row: RuleEventSourceRow): SignificantEvent => {
   >;
   return {
     ...data,
+    stream_names: normalizeStreamNames(data.stream_names),
     '@timestamp': row['@timestamp'],
     event_uuid: row[GROUP_HASH_FIELD],
     status:
@@ -195,6 +203,17 @@ const eventIdIn = (eventIds: string[]): ESQLAstExpression =>
   )})`;
 
 /**
+ * `EventClient`'s `multiValueContainsAnyFilter` equivalent, targeting `FIELD_EXTRACT(data,
+ * "stream_names")` instead of a top-level column. `MV_INTERSECTS` works correctly against
+ * `FIELD_EXTRACT`'s output for array, scalar-string, and absent-field shapes (verified live
+ * against `.rule-events` on nightshift-program#1492) — no extra normalization is needed here.
+ */
+const streamNamesIntersects = (values: string[]): ESQLAstExpression =>
+  esql.exp`MV_INTERSECTS(FIELD_EXTRACT(${esql.col('data')}, ${esql.str(
+    'stream_names'
+  )}), [${values.map((value) => esql.str(value))}])`;
+
+/**
  * Read-only `.rule-events` counterpart to `EventClient`, returned by `EventService.getClient()`
  * when `SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ` is enabled. Query strategy (which ES|QL extraction
  * form to use per field) is validated per-shape on nightshift-program#1492 before this client's
@@ -245,6 +264,12 @@ export class RuleEventsClient {
       query = query.where`${esql.col('severity')} IN (${options.severity.map((severity) =>
         esql.str(SIGNIFICANT_EVENTS_SEVERITY_MAP[severity])
       )})`;
+    }
+    if (options.stream?.length) {
+      query = query.where`${streamNamesIntersects(options.stream)}`;
+    }
+    if (options.eventIds?.length) {
+      query = query.where`${eventIdIn(options.eventIds)}`;
     }
 
     return query;
