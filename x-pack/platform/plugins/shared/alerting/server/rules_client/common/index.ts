@@ -26,8 +26,6 @@ export {
   API_KEY_ATTRIBUTES_TO_STRIP,
   apiKeyAsAlertAttributes,
   apiKeyAsRuleDomainProperties,
-  addMissingUiamKeyTagIfNeeded,
-  shouldAddMissingUiamKeyTag,
 } from './api_key_as_alert_attributes';
 export {
   injectReferencesIntoActions,
