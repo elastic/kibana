@@ -6,11 +6,8 @@
  */
 
 import React from 'react';
-import { fireEvent, render, waitFor } from '@testing-library/react';
-import { getFlyoutManagerStore } from '@elastic/eui';
+import { render, waitFor } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { Router } from '@kbn/shared-ux-router';
-import { createMemoryHistory } from 'history';
 import { TestProviders } from '../../../../common/mock';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
@@ -64,18 +61,14 @@ const createHit = (entryId?: string): DataTableRecord =>
     isAnchor: false,
   } as DataTableRecord);
 
-const renderLink = (hit?: DataTableRecord) => {
-  const history = createMemoryHistory();
-  return render(
+const renderLink = (hit?: DataTableRecord) =>
+  render(
     <TestProviders>
-      <Router history={history}>
-        <CustomYaraSignatureHighlightedFieldLink hit={hit}>
-          <span data-test-subj="cysChild">{'User defined entry name'}</span>
-        </CustomYaraSignatureHighlightedFieldLink>
-      </Router>
+      <CustomYaraSignatureHighlightedFieldLink hit={hit}>
+        <span data-test-subj="cysChild">{'User defined entry name'}</span>
+      </CustomYaraSignatureHighlightedFieldLink>
     </TestProviders>
   );
-};
 
 describe('isCustomYaraSignatureHighlightedField', () => {
   it('returns true for CYS highlighted field names', () => {
@@ -114,6 +107,7 @@ describe('CustomYaraSignatureHighlightedFieldLink', () => {
       'href',
       expect.stringContaining(getCustomYaraSignaturesListPath({ show: 'view', itemId: ITEM_ID }))
     );
+    expect(link).toHaveAttribute('target', '_blank');
     expect(getByTestId('cysChild')).toBeInTheDocument();
   });
 
@@ -139,26 +133,6 @@ describe('CustomYaraSignatureHighlightedFieldLink', () => {
       queryByTestId(HIGHLIGHTED_FIELDS_CUSTOM_YARA_SIGNATURE_NOT_FOUND_TEST_ID)
     ).not.toBeInTheDocument();
     expect(getByTestId('cysChild')).toBeInTheDocument();
-  });
-
-  it('closes open system flyouts when the link is followed in-app', async () => {
-    const closeAllFlyouts = jest.spyOn(getFlyoutManagerStore(), 'closeAllFlyouts');
-    const { findByTestId } = renderLink(createHit(ENTRY_ID));
-
-    fireEvent.click(await findByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID));
-
-    expect(closeAllFlyouts).toHaveBeenCalledTimes(1);
-    closeAllFlyouts.mockRestore();
-  });
-
-  it('does not close system flyouts when the link is opened in a new tab', async () => {
-    const closeAllFlyouts = jest.spyOn(getFlyoutManagerStore(), 'closeAllFlyouts');
-    const { findByTestId } = renderLink(createHit(ENTRY_ID));
-
-    fireEvent.click(await findByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID), { metaKey: true });
-
-    expect(closeAllFlyouts).not.toHaveBeenCalled();
-    closeAllFlyouts.mockRestore();
   });
 
   it('renders plain text when the feature flag is disabled', () => {

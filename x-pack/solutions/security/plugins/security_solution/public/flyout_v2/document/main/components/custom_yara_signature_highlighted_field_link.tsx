@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import type { FC, MouseEvent, ReactNode } from 'react';
-import React, { useCallback, useMemo } from 'react';
+import type { FC, ReactNode } from 'react';
+import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
-import { EuiIconTip, EuiLink, getFlyoutManagerStore, useEuiTheme } from '@elastic/eui';
+import { EuiIconTip, EuiLink, useEuiTheme } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { useNavigateByRouterEventHandler } from '../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
 import { useAppUrl, useHttp } from '../../../../common/lib/kibana';
 import { getCustomYaraSignaturesListPath } from '../../../../management/common/routing';
 import { useGetArtifact } from '../../../../management/hooks/artifacts/use_get_artifact';
@@ -77,8 +76,8 @@ export interface CustomYaraSignatureHighlightedFieldLinkProps {
 }
 
 /**
- * Renders a highlighted-field value as a link to the Custom YARA Signatures view page
- * when the user can read CYS, the feature is enabled, and the signature still exists.
+ * Renders a highlighted-field value as a link that opens the Custom YARA Signatures view page
+ * in a new tab when the user can read CYS, the feature is enabled, and the signature still exists.
  * When the signature cannot be found, shows an info tooltip instead of the link.
  * Falls back to plain text otherwise.
  */
@@ -130,30 +129,13 @@ const CustomYaraSignatureHighlightedFieldLinkContent: FC<
   });
   const itemId = data?.item_id;
 
-  const { toRoutePath, toRouteUrl } = useMemo(() => {
+  const toRouteUrl = useMemo(() => {
     if (!itemId) {
-      return { toRoutePath: '', toRouteUrl: '' };
+      return '';
     }
 
-    const path = getCustomYaraSignaturesListPath({ show: 'view', itemId });
-    return {
-      toRoutePath: path,
-      toRouteUrl: getAppUrl({ path }),
-    };
+    return getAppUrl({ path: getCustomYaraSignaturesListPath({ show: 'view', itemId }) });
   }, [getAppUrl, itemId]);
-
-  const navigateToCustomYaraSignatures = useNavigateByRouterEventHandler(toRoutePath);
-  const onClick = useCallback(
-    (event: MouseEvent<HTMLAnchorElement>) => {
-      navigateToCustomYaraSignatures(event);
-
-      // The alert flyout is a system overlay, so in-app navigation does not unmount it.
-      if (event.defaultPrevented) {
-        getFlyoutManagerStore().closeAllFlyouts();
-      }
-    },
-    [navigateToCustomYaraSignatures]
-  );
 
   if (isArtifactNotFound(error)) {
     return (
@@ -185,7 +167,7 @@ const CustomYaraSignatureHighlightedFieldLinkContent: FC<
   return (
     <EuiLink
       href={toRouteUrl}
-      onClick={onClick}
+      target="_blank"
       data-test-subj={HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID}
     >
       {children}
