@@ -29,7 +29,8 @@ import type {
 import { z } from '@kbn/zod/v4';
 import { NonEmptyString } from '@kbn/zod-helpers/v4';
 
-import { recursiveRecord } from '../shared/record_types';
+import { recursiveRecord, boundedJsonValue } from '../shared/record_types';
+import type { RecursiveRecord } from '../shared/record_types';
 
 export const FIELD_DEFINITION_TYPES = [
   'keyword',
@@ -216,3 +217,34 @@ export const namedFieldDefinitionConfigSchema: z.Schema<NamedFieldDefinitionConf
       name: NonEmptyString,
     })
   );
+
+// HTTP-request-scoped bounded field definition schemas.
+// Use these instead of fieldDefinitionConfigSchema / namedFieldDefinitionConfigSchema in route
+// body schemas. The persisted schemas remain permissive for backward compatibility; these cap
+// advanced parameter nesting, array sizes, and record entry counts so HTTP callers cannot
+// overflow simulation handlers.
+export const boundedFieldDefinitionConfigSchema = z.intersection(
+  boundedJsonValue as z.ZodType<RecursiveRecord>,
+  z.union([
+    z.object({
+      type: z.enum(FIELD_DEFINITION_TYPES),
+      format: z.optional(NonEmptyString),
+      description: z.optional(z.string().max(1000)),
+    }),
+    z.object({
+      description: z.string().max(1000),
+      type: z.never().optional(),
+      format: z.never().optional(),
+    }),
+    z.object({
+      type: z.literal('system'),
+      description: z.optional(z.string().max(1000)),
+    }),
+  ])
+) as z.ZodType<FieldDefinitionConfig>;
+
+export const boundedNamedFieldDefinitionSchema: z.ZodType<NamedFieldDefinitionConfig> =
+  z.intersection(
+    boundedFieldDefinitionConfigSchema,
+    z.object({ name: z.string().nonempty().max(256) })
+  ) as z.ZodType<NamedFieldDefinitionConfig>;

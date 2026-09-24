@@ -8,6 +8,7 @@
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -70,7 +71,11 @@ export const AutomationsPanel = ({
     save,
     createAndAttach,
   } = useAutomationsEditor({ aiIndex, onSaved });
-  const { summaries, isLoading: isLoadingSummaries } = useWorkflowSummaries(workflowIds);
+  const {
+    summaries,
+    isLoading: isLoadingSummaries,
+    missingReadPrivilege,
+  } = useWorkflowSummaries(workflowIds);
   const { canSuggest, suggestAutomation } = useSuggestAutomation({ aiIndex, isManaged, onSaved });
 
   const returnSearch = aiIndex ? `?${getWorkflowReturnSearch(aiIndex.id)}` : '';
@@ -193,6 +198,24 @@ export const AutomationsPanel = ({
         </p>
       </EuiText>
       <EuiSpacer size="m" />
+      {missingReadPrivilege && (
+        <>
+          <EuiCallOut
+            announceOnMount
+            size="s"
+            color="warning"
+            iconType="warning"
+            title={i18n.translate(
+              'xpack.contextEngine.aiIndexDetail.automations.missingWorkflowPrivilege',
+              {
+                defaultMessage: 'You need the Workflows read privilege to see automation details.',
+              }
+            )}
+            data-test-subj="contextAutomationsMissingPrivilegeCallout"
+          />
+          <EuiSpacer size="m" />
+        </>
+      )}
       {isLoading || isLoadingSummaries ? (
         <EuiSkeletonText lines={2} data-test-subj="contextAiIndexAutomationsLoading" />
       ) : (

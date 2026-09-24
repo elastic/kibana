@@ -12,6 +12,7 @@ import type { GetAiIndexResponse } from '@kbn/context-engine-plugin/common/http_
 import { BehaviorSubject, Subject } from 'rxjs';
 import { AI_INDEX_ATTACHMENT_TYPE } from '../common/agent_builder_attachments';
 import { CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID } from '../common/agent_builder_tools';
+import { CONTEXT_ENGINE_SETUP_AGENT_ID } from '../common/agent_builder_agents';
 import { createSuggestAutomationProvider } from './create_suggest_automation_provider';
 
 const aiIndex: GetAiIndexResponse = {
@@ -21,16 +22,31 @@ const aiIndex: GetAiIndexResponse = {
   dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
   automations: [{ type: 'workflow', value: 'wf-existing' }],
   sources: [{ type: 'esql', value: 'FROM tickets' }],
+  traces: [
+    {
+      type: 'elastic_agent',
+      value: 'my-support-agent',
+      query: 'FROM traces-agent_builder.otel-default',
+    },
+  ],
   date_created: '2026-01-01T00:00:00.000Z',
   date_modified: '2026-01-01T00:00:00.000Z',
 };
 
 const createProvider = ({
   hasAgentBuilder = true,
-  hasPrivilege = true,
+  hasAgentBuilderPrivilege = true,
+  hasContextEngineWritePrivilege = true,
+  hasWorkflowsReadPrivilege = true,
+  hasWorkflowsCreatePrivilege = true,
+  hasWorkflowsExecutePrivilege = true,
 }: {
   hasAgentBuilder?: boolean;
-  hasPrivilege?: boolean;
+  hasAgentBuilderPrivilege?: boolean;
+  hasContextEngineWritePrivilege?: boolean;
+  hasWorkflowsReadPrivilege?: boolean;
+  hasWorkflowsCreatePrivilege?: boolean;
+  hasWorkflowsExecutePrivilege?: boolean;
 } = {}) => {
   const openChat = jest.fn();
   const activeConversation$ = new BehaviorSubject<{ id?: string } | null>({
@@ -55,7 +71,13 @@ const createProvider = ({
   const application = coreMock.createStart().application;
   application.capabilities = {
     ...application.capabilities,
-    agentBuilder: { show: hasPrivilege },
+    agentBuilder: { show: hasAgentBuilderPrivilege },
+    contextEngine: { write: hasContextEngineWritePrivilege },
+    workflowsManagement: {
+      readWorkflow: hasWorkflowsReadPrivilege,
+      createWorkflow: hasWorkflowsCreatePrivilege,
+      executeWorkflow: hasWorkflowsExecutePrivilege,
+    },
   };
 
   const provider = createSuggestAutomationProvider({ agentBuilder, application });
@@ -83,7 +105,31 @@ describe('createSuggestAutomationProvider', () => {
   });
 
   it('returns canSuggest false without agent builder privilege', () => {
-    const { provider } = createProvider({ hasPrivilege: false });
+    const { provider } = createProvider({ hasAgentBuilderPrivilege: false });
+
+    expect(provider.canSuggest({ aiIndex, isManaged: false })).toBe(false);
+  });
+
+  it('returns canSuggest false without contextEngine write privilege', () => {
+    const { provider } = createProvider({ hasContextEngineWritePrivilege: false });
+
+    expect(provider.canSuggest({ aiIndex, isManaged: false })).toBe(false);
+  });
+
+  it('returns canSuggest false without workflowsManagement read privilege', () => {
+    const { provider } = createProvider({ hasWorkflowsReadPrivilege: false });
+
+    expect(provider.canSuggest({ aiIndex, isManaged: false })).toBe(false);
+  });
+
+  it('returns canSuggest false without workflowsManagement create privilege', () => {
+    const { provider } = createProvider({ hasWorkflowsCreatePrivilege: false });
+
+    expect(provider.canSuggest({ aiIndex, isManaged: false })).toBe(false);
+  });
+
+  it('returns canSuggest false without workflowsManagement execute privilege', () => {
+    const { provider } = createProvider({ hasWorkflowsExecutePrivilege: false });
 
     expect(provider.canSuggest({ aiIndex, isManaged: false })).toBe(false);
   });
@@ -107,6 +153,7 @@ describe('createSuggestAutomationProvider', () => {
       expect.objectContaining({
         newConversation: true,
         autoSendInitialMessage: true,
+        agentId: CONTEXT_ENGINE_SETUP_AGENT_ID,
         initialMessage: 'Suggest an automation for this AI index.',
         sessionTag: 'context-engine-ai-index-my-ai-index',
         attachments: [
@@ -119,6 +166,7 @@ describe('createSuggestAutomationProvider', () => {
               dest: aiIndex.dest,
               sources: aiIndex.sources,
               automations: aiIndex.automations,
+              traces: aiIndex.traces,
             },
           }),
         ],

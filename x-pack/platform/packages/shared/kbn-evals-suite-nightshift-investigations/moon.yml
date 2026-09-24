@@ -21,9 +21,19 @@ dependsOn:
   - '@kbn/dev-cli-runner'
   - '@kbn/es-snapshot-loader'
   - '@kbn/evals'
+  - '@kbn/evals-common'
   - '@kbn/kibana-api-cli'
   - '@kbn/scout'
   - '@kbn/tooling-log'
+  - '@kbn/agent-builder-common'
+  - '@kbn/agent-builder-genai-utils'
+  - '@kbn/core'
+  - '@kbn/inference-tracing'
+  - '@kbn/repo-info'
+  - '@kbn/nightshift-investigations-plugin'
+  - '@kbn/significant-events-schema'
+  - '@kbn/workflows'
+  - '@kbn/zod'
 tags:
   - functional-tests
   - package

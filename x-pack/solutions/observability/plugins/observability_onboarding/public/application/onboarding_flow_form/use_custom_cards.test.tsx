@@ -66,7 +66,7 @@ describe('useCustomCards', () => {
           },
         },
         featureFlags: {
-          getBooleanValue: jest.fn(() => false),
+          useBooleanValue: jest.fn(() => false),
         },
         context: {
           isCloud: false,

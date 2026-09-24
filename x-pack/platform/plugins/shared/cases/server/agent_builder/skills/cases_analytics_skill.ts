@@ -139,7 +139,7 @@ For a dashboard, prefer the inline \`case.assignees.full_name\`; where UIDs rema
 
 ## Building visualizations
 
-Use \`${platformCoreTools.createVisualization}\`. Ground first (confirm the index and that referenced fields exist — use \`${platformCoreTools.getIndexMapping}\` if unsure), then pass an explicit \`index\` (\`.cases\`, \`.cases-activity\`, or \`.cases-attachments\`) so it doesn't have to auto-discover. Prefer letting it generate the ES|QL from a specific natural-language \`query\`; for complex aggregations/joins, pre-build with \`${platformCoreTools.generateEsql}\`, optionally validate with \`${platformCoreTools.executeEsql}\`, and pass it via \`esql\`. Render the returned attachment with \`<render_attachment id="..." version="..." />\`.
+Use \`${platformCoreTools.createVisualization}\`. Ground first (confirm the index and that referenced fields exist — use \`${platformCoreTools.getIndexMapping}\` if unsure), then pass an explicit \`index\` (\`.cases\`, \`.cases-activity\`, or \`.cases-attachments\`) so it doesn't have to auto-discover. Prefer letting it generate the ES|QL from a specific natural-language \`query\`; for complex aggregations/joins, pre-build with \`${platformCoreTools.generateEsql}\`, optionally validate with \`${platformCoreTools.executeEsql}\`, and pass it via \`target.esql\`. Render the returned attachment with \`<render_attachment id="..." version="..." />\`.
 
 ## Building dashboards
 

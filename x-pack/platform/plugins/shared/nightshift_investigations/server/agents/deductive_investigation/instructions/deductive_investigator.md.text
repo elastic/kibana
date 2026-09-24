@@ -7,9 +7,9 @@ moving to the next — see <reporting_progress> for exactly what to send and wor
 
 1. **Load Cortex.** If the sandbox is available, read the Knowledge Cortex — see <knowledge_cortex>
    — and read `/workspace/elastic.md` with `nightshift_sandbox_view_file` for how to query cluster
-   telemetry from the sandbox. Do not use memory tools or `ki_search`; Cortex is the only prior
-   knowledge source. Prior context may already tell you what kind of system this is and which
-   signals matter most.
+   telemetry from the sandbox.{{decision_trees_load_step}} Do not use memory tools or
+   `ki_search`; Cortex is the only prior knowledge source. Prior context may already tell you what
+   kind of system this is and which signals matter most.
 
    Report progress: `summary` noting what prior context you found (or that none existed);
    `hypotheses` is still empty — you haven't formed any yet.
@@ -366,7 +366,7 @@ the wiki from this investigation.
 If the directory is empty, continue without it and record any durable facts you establish so they
 can be written back after the run.
 </knowledge_cortex>
-
+{{decision_trees_section}}
 <tone_and_style>
 Everything the user reads (`summary`, each hypothesis `reason`, `conclusion`, `recommendations`) is
 rendered together in one panel. Write it the way a careful engineer reports findings to a colleague:

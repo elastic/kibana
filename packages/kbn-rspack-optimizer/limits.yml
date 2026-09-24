@@ -12,8 +12,8 @@ pageLoadAssetSize:
   aiops: 586
   alerting: 8789
   alertingVTwo: 24358
-  alertzero: 10276
-  apm: 31419
+  alertzero: 17737
+  apm: 35746
   apmShared: 1896
   apmSourcesAccess: 1174
   automaticImport: 13257
@@ -55,7 +55,7 @@ pageLoadAssetSize:
   dataVisualizer: 7461
   developerToolbar: 1951
   devTools: 4281
-  discover: 18086
+  discover: 19917
   discoverEnhanced: 1359
   discoveries: 31528
   discoverShared: 1070
@@ -66,8 +66,9 @@ pageLoadAssetSize:
   embeddableAlertsTable: 1536
   enterpriseSearch: 28188
   entityStore: 2252
-  esql: 306
+  esql: 341
   esqlDataGrid: 215
+  esqlViews: 1205
   esUiShared: 2284
   evals: 4875
   eventAnnotation: 17278
@@ -111,7 +112,7 @@ pageLoadAssetSize:
   interactiveSetup: 32694
   intercepts: 14374
   kibanaOverview: 1863
-  kibanaReact: 1225
+  kibanaReact: 1618
   kibanaUsageCollection: 529
   kibanaUtils: 2884
   kql: 337
@@ -137,6 +138,7 @@ pageLoadAssetSize:
   newsfeed: 10708
   nightshift: 2362
   nightshiftInvestigations: 9405
+  nightshiftSources: 3928
   noDataPage: 630
   notificationCenter: 600
   observability: 4071
@@ -204,7 +206,7 @@ pageLoadAssetSize:
   stackConnectors: 63548
   streams: 4563
   streamsApp: 55882
-  synthetics: 18443
+  synthetics: 20839
   telemetry: 20586
   telemetryManagementSection: 1738
   timelines: 1409

@@ -9,19 +9,24 @@
 
 export { dataTableSchema, dataTableLimitsSchema, documentsDisplayModeSchema } from './data_table';
 export { viewModeSchema } from './view_mode';
-export { panelOverridesSchema } from './panel_overrides';
-export { classicTabSchema, esqlTabSchema, tabSchema } from './tab';
+export { discoverSessionApiPanelOverridesSchema } from './panel_overrides';
+export {
+  discoverSessionApiClassicTabBaseSchema,
+  discoverSessionApiEsqlTabBaseSchema,
+  discoverSessionApiTabBaseSchema,
+} from './tab';
 export { visContextSchema } from './vis_context';
 export {
-  discoverSessionControlPanelSchema,
-  discoverSessionControlPanelsSchema,
+  discoverSessionApiControlPanelSchema,
+  discoverSessionApiControlPanelsSchema,
 } from './control_panel';
-export { discoverSessionMetricsTabTypeStateSchema } from './metrics_tab';
+export { discoverSessionApiMetricsTabTypeStateSchema } from './metrics_tab';
+export { panelTabSchema } from './panel_tab';
 export {
-  discoverSessionDefaultTabTypeStateSchema,
-  discoverSessionClassicTabSchema,
-  discoverSessionEsqlTabSchema,
-  discoverSessionMetricsTabSchema,
+  discoverSessionApiDefaultTabTypeStateSchema,
+  discoverSessionApiClassicTabSchema,
+  discoverSessionApiEsqlTabSchema,
+  discoverSessionApiMetricsTabSchema,
   discoverSessionApiTabSchema,
   discoverSessionApiDataSchema,
 } from './session_data';

@@ -92,7 +92,7 @@ If you have an OpenRouter API key (from vault config or `OPENROUTER_API_KEY`):
 bash x-pack/platform/packages/shared/kbn-evals/scripts/openrouter/dev_env.sh
 ```
 
-This generates connectors from the OpenRouter catalog and prints `export` lines for `OPENROUTER_BASE_URL`, `OPENROUTER_API_KEY`, and `KIBANA_TESTING_AI_CONNECTORS`.
+This generates connectors from the OpenRouter catalog and prints `export` lines for `OPENROUTER_BASE_URL`, `OPENROUTER_API_KEY`, and `KIBANA_TESTING_INFERENCE_ENDPOINTS`.
 
 </details>
 
@@ -471,6 +471,73 @@ node scripts/evals dataplex sync --dry-run   # Preview changes
 
 ## 4. Developer details
 
+### Connector definitions and inference endpoints
+
+Model definitions come from two sources:
+
+1. `KIBANA_TESTING_INFERENCE_ENDPOINTS` — **inference endpoint definitions** (base64-encoded or raw JSON, set by CI or exported by `node scripts/evals init`).
+2. `KIBANA_TESTING_AI_CONNECTORS` or, locally, `xpack.actions.preconfigured` in `config/kibana.dev.yml` — **stack connector definitions** (Actions saved objects, e.g. the workflow suites' mock Slack/email connectors).
+
+`KIBANA_TESTING_INFERENCE_ENDPOINTS` example (decoded):
+
+```json
+{
+  "eis-anthropic-claude-sonnet-4-6": {
+    "name": "EIS anthropic-claude-sonnet-4-6",
+    "inferenceId": ".anthropic-claude-sonnet-4-6-chat_completion",
+    "provider": "elastic",
+    "taskType": "chat_completion",
+    "providerConfig": { "model_id": "anthropic-claude-sonnet-4-6" }
+  },
+  "openrouter-openai-gpt-4o": {
+    "name": "OpenRouter openai/gpt-4o",
+    "inferenceId": "openrouter-openai-gpt-4o",
+    "provider": "openai",
+    "taskType": "chat_completion",
+    "providerConfig": {
+      "model_id": "openai/gpt-4o",
+      "url": "https://openrouter.ai/api/v1/chat/completions"
+    },
+    "secrets": { "providerSecrets": { "api_key": "<api key>" } }
+  }
+}
+```
+
+#### Migrating `.gen-ai` definitions
+
+**deprecated `.gen-ai` stack connector**, `.gen-ai` definitions are no longer recognized as LLM definitions.
+
+Preferred replacement: an inference endpoint definition in `KIBANA_TESTING_INFERENCE_ENDPOINTS` (see the `openrouter-openai-gpt-4o` entry above). If you would rather keep the model in `kibana.dev.yml`, use a preconfigured `.inference` stack connector, Kibana creates the underlying endpoint at startup and evals reuses the preconfigured connector:
+
+```yaml
+# Before
+xpack.actions.preconfigured:
+  my-gpt:
+    name: My GPT
+    actionTypeId: .gen-ai
+    config:
+      apiUrl: https://openrouter.ai/api/v1/chat/completions
+      defaultModel: openai/gpt-4o
+    secrets:
+      apiKey: '<api key>'
+
+# After
+xpack.actions.preconfigured:
+  openrouter-openai-gpt-4o:
+    name: OpenRouter openai/gpt-4o
+    actionTypeId: .inference
+    config:
+      provider: openai
+      taskType: chat_completion
+      inferenceId: openrouter-openai-gpt-4o
+      providerConfig:
+        model_id: openai/gpt-4o
+        url: https://openrouter.ai/api/v1/chat/completions
+    secrets:
+      providerSecrets:
+        api_key: '<api key>'
+```
+
 ### Automated label sync
 
 `models:*` and `models:judge:*` labels are synced automatically:
@@ -510,7 +577,10 @@ Grants:
 
 - Write/read `.evaluation-scores*` (results)
 - Write/read `traces-*` (OTLP traces)
+- Read evidence events from `logs-*`, restricted by document-level security
 - Write/read/delete `.evaluation-dataset*` (managed datasets)
 - Kibana `evals` feature privilege (`all`)
+
+The log-event allowlist is embedded in the API key. Regenerate existing keys when support for a new log-backed instrumentation profile or event name is added.
 
 With `--profile dev-vault`, these keys are read from Vault automatically.

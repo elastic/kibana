@@ -18,7 +18,8 @@ const baseProps: ApprovalContentProps = {
   title: 'Block IP 10.0.0.4',
   tone: 'danger',
   iconType: 'lock',
-  blastRadius: { variant: 'description', description: 'Isolate the compromised host.' },
+  comment: 'Isolate the compromised host.',
+  actionImpact: { variant: 'description', description: 'One host, reversible.' },
   primaryAction: {
     label: 'Approve',
     onClick: jest.fn(),
@@ -37,6 +38,11 @@ const baseProps: ApprovalContentProps = {
 const renderContent = (props: Partial<ApprovalContentProps> = {}) =>
   render(<ApprovalContent {...baseProps} {...props} />, { wrapper });
 
+/** DOM order, so the bitmask is spelled out once rather than at every call site. */
+const isBefore = (first: Element, second: Element) =>
+  // eslint-disable-next-line no-bitwise
+  Boolean(first.compareDocumentPosition(second) & Node.DOCUMENT_POSITION_FOLLOWING);
+
 describe('ApprovalContent', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -52,19 +58,43 @@ describe('ApprovalContent', () => {
     expect(screen.queryByText(/approval required/i)).not.toBeInTheDocument();
   });
 
-  it('renders the blast radius section label', () => {
-    renderContent();
-    expect(screen.getByText('Blast radius')).toBeInTheDocument();
-  });
-
-  it('renders the description variant prose', () => {
+  it('renders the comment', () => {
     renderContent();
     expect(screen.getByText('Isolate the compromised host.')).toBeInTheDocument();
   });
 
-  it('renders list variant items', () => {
+  it('renders emphasis in the comment as markdown rather than literal asterisks', () => {
+    renderContent({ comment: 'Revoking **all** sessions.' });
+    expect(screen.getByText('all').tagName).toBe('STRONG');
+  });
+
+  it('renders a GFM table in the comment, which is how a proposal lists what it touches', () => {
+    const { container } = renderContent({
+      comment: ['| Field | Value |', '| --- | --- |', '| host | fin-dc-01 |'].join('\n'),
+    });
+
+    expect(container.querySelector('table')).toBeInTheDocument();
+    expect(screen.getByText('fin-dc-01')).toBeInTheDocument();
+  });
+
+  it('omits the comment block entirely when no comment is supplied', () => {
+    renderContent({ comment: undefined });
+    expect(screen.queryByTestId('approvalContent-comment')).not.toBeInTheDocument();
+  });
+
+  it('renders the impact section label', () => {
+    renderContent();
+    expect(screen.getByText('Impact')).toBeInTheDocument();
+  });
+
+  it('renders the impact description variant prose', () => {
+    renderContent();
+    expect(screen.getByText('One host, reversible.')).toBeInTheDocument();
+  });
+
+  it('renders impact list variant items', () => {
     renderContent({
-      blastRadius: {
+      actionImpact: {
         variant: 'list',
         items: [
           { id: 'item-1', iconType: 'globe', text: 'host: 10.0.0.4' },
@@ -74,6 +104,34 @@ describe('ApprovalContent', () => {
     });
     expect(screen.getByText('host: 10.0.0.4')).toBeInTheDocument();
     expect(screen.getByText('network')).toBeInTheDocument();
+  });
+
+  it('omits the impact section when no actionImpact is supplied', () => {
+    renderContent({ actionImpact: undefined });
+    expect(screen.queryByText('Impact')).not.toBeInTheDocument();
+  });
+
+  it("renders the comment above the impact section, so the proposal's own explanation leads", () => {
+    renderContent();
+    expect(
+      isBefore(screen.getByText('Isolate the compromised host.'), screen.getByText('Impact'))
+    ).toBe(true);
+  });
+
+  it('renders the secondary action before the primary, so the committing decision sits last', () => {
+    renderContent();
+    expect(
+      isBefore(screen.getByTestId('content-cancel'), screen.getByTestId('content-confirm'))
+    ).toBe(true);
+  });
+
+  it('renders the icon a secondary action asks for', () => {
+    renderContent({
+      secondaryActions: [
+        { label: 'Dismiss', iconType: 'cross', onClick: jest.fn(), 'data-test-subj': 'content-x' },
+      ],
+    });
+    expect(screen.getByTestId('content-x').querySelector('[data-euiicon-type]')).toBeTruthy();
   });
 
   it('renders the actor row by default', () => {
@@ -123,11 +181,9 @@ describe('ApprovalContent', () => {
 
   it('renders children between the body and the footer', () => {
     renderContent({ children: <div data-test-subj="inline-form">dismiss form</div> });
-    const form = screen.getByTestId('inline-form');
-    const confirm = screen.getByTestId('content-confirm');
-    // children should appear before the confirm button in DOM order
-    // eslint-disable-next-line no-bitwise
-    expect(form.compareDocumentPosition(confirm) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(isBefore(screen.getByTestId('inline-form'), screen.getByTestId('content-confirm'))).toBe(
+      true
+    );
   });
 
   it('renders always-allow checkbox when alwaysAllow is supplied', () => {

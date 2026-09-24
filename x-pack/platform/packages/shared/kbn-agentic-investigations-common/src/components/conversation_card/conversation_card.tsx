@@ -18,6 +18,7 @@ import {
 import { type Investigation } from '../../types';
 import type { BaseActionsProps } from '../actions';
 import { ConversationsActionsGroup } from './actions_group';
+import { ConversationMetaInfo } from './conversation_meta_info';
 
 interface ConversationCardProps {
   investigation: Investigation;
@@ -28,6 +29,10 @@ interface ConversationCardProps {
   onClickAction: BaseActionsProps['onClickAction'];
   onClickCard: (id: Investigation['id']) => void;
   onOpenChat: (id: Investigation['id']) => void;
+  /** URL for this card's chat, so its control renders as a link. */
+  chatHref?: string;
+  /** When true escalation actions are shown. Requires the manage escalations capability. */
+  canManageEscalations?: boolean;
 }
 
 export const ConversationCard = memo<ConversationCardProps>(
@@ -39,18 +44,22 @@ export const ConversationCard = memo<ConversationCardProps>(
     onClickAction,
     onClickCard,
     onOpenChat,
+    chatHref,
+    canManageEscalations,
   }) => {
     const { euiTheme } = useEuiTheme();
 
     return (
       <EuiPanel
-        paddingSize="l"
+        paddingSize="none"
         role="button"
         tabIndex={0}
         aria-label={investigation.title}
         aria-current={isSelected || undefined}
         borderRadius="none"
         css={{
+          // Asymmetric by design — off EUI's padding scale, which has no 20px step.
+          padding: '20px 16px 24px 24px',
           cursor: 'pointer',
           borderBottom: hasBorder ? `1px solid ${euiTheme.colors.disabled}` : 'none',
           borderRadius: hasBorder ? 'none' : `0 0 ${euiTheme.size.s} ${euiTheme.size.s}`,
@@ -74,37 +83,44 @@ export const ConversationCard = memo<ConversationCardProps>(
           }
         }}
       >
-        <EuiFlexGroup
-          alignItems="flexStart"
-          gutterSize="l"
-          responsive
-          justifyContent="spaceBetween"
-          direction="row"
-        >
-          <EuiFlexItem grow={true}>
-            <EuiFlexGroup gutterSize="xs" responsive direction="column">
+        {/* The age and the actions share the top row, which leaves the title and
+            summary the full width of the card rather than the actions' leftovers. */}
+        <EuiFlexGroup gutterSize="xs" responsive direction="column">
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup
+              alignItems="center"
+              gutterSize="l"
+              responsive={false}
+              justifyContent="spaceBetween"
+              direction="row"
+            >
               <EuiFlexItem grow={false}>
-                <EuiTitle size="xxs">
-                  <EuiTextTruncate text={investigation.title} />
-                </EuiTitle>
+                <ConversationMetaInfo createdAt={investigation.createdAt} />
               </EuiFlexItem>
-              {investigation.summary ? (
-                <EuiFlexItem grow={false}>
-                  <EuiText size="s" color="subdued">
-                    <EuiTextTruncate text={investigation.summary} />
-                  </EuiText>
-                </EuiFlexItem>
-              ) : null}
+              <EuiFlexItem grow={false}>
+                <ConversationsActionsGroup
+                  investigation={investigation}
+                  onClickRecommendedAction={onClickRecommendedAction}
+                  onClickAction={onClickAction}
+                  onOpenChat={() => onOpenChat(investigation.id)}
+                  chatHref={chatHref}
+                  canManageEscalations={canManageEscalations}
+                />
+              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <ConversationsActionsGroup
-              investigation={investigation}
-              onClickRecommendedAction={onClickRecommendedAction}
-              onClickAction={onClickAction}
-              onOpenChat={() => onOpenChat(investigation.id)}
-            />
+            <EuiTitle size="xxs">
+              <EuiTextTruncate text={investigation.title} />
+            </EuiTitle>
           </EuiFlexItem>
+          {investigation.summary ? (
+            <EuiFlexItem grow={false}>
+              <EuiText size="s" color="subdued">
+                <EuiTextTruncate text={investigation.summary} />
+              </EuiText>
+            </EuiFlexItem>
+          ) : null}
         </EuiFlexGroup>
       </EuiPanel>
     );

@@ -42,9 +42,17 @@ const renderManagedWorkflowYaml = (id: string, values: Record<string, unknown> |
   throw new Error(`Managed workflow "${id}" cannot be rendered`);
 };
 
+/** Not `<workerId>-<spaceId>`, so a projection that rebuilds that convention fails. */
+const reportedWorkflowId = (workerId: string, spaceId: string) => `opaque:${workerId}:${spaceId}`;
+const storedIdFromReport = (workflowId: string) =>
+  workflowId.startsWith('opaque:')
+    ? workflowId.slice('opaque:'.length).replace(':', '-')
+    : workflowId;
+
 const createPersistentHarness = () => {
   const documents = new Map<string, PersistentWorkerDocument>();
   const documentId = (id: string, spaceId: string) => `${id}-${spaceId}`;
+  const findDocument = (workflowId: string) => documents.get(storedIdFromReport(workflowId));
   const install = jest.fn(
     async (
       id: string,
@@ -72,7 +80,7 @@ const createPersistentHarness = () => {
     const document = documents.get(idWithSuffix);
     return {
       status: document ? (document.enabled ? 'intact' : 'disabled') : 'missing',
-      workflowId: idWithSuffix,
+      workflowId: reportedWorkflowId(id, options.spaceId),
       definitionId: id,
       spaceId: options.spaceId,
       installed: Boolean(document),
@@ -92,12 +100,12 @@ const createPersistentHarness = () => {
     ready: jest.fn(),
     getWorkflowStatus,
     getInstalledWorkflowState: jest.fn(async (id: string, spaceId: string) => {
-      const document = documents.get(id);
+      const document = findDocument(id);
       if (!document) return null;
       return {
         workflowId: id,
         spaceId,
-        definitionId: id.replace(`-${spaceId}`, ''),
+        definitionId: storedIdFromReport(id).replace(`-${spaceId}`, ''),
         templateValues: document.values,
         documentVersion: document.version,
       };
@@ -108,7 +116,7 @@ const createPersistentHarness = () => {
   const scheduledTasks = new Map<string, { apiKeyId: string; interval: string | null }>();
   const updateWorkflow = jest.fn(
     async (id: string, { enabled }: { enabled: boolean }, _spaceId: string) => {
-      const document = documents.get(id);
+      const document = findDocument(id);
       if (!document) throw new Error('not found');
       document.enabled = enabled;
       document.version += 1;
@@ -154,7 +162,8 @@ describe('WorkersService', () => {
     expect(response.workers.map(({ id }) => id)).toEqual([...SYSTEM_SECURITY_WORKER_IDS]);
     expect(
       response.workers.every(
-        ({ enabled, settingsRevision }) => !enabled && settingsRevision === null
+        ({ enabled, settingsRevision, workflowId }) =>
+          !enabled && settingsRevision === null && workflowId === null
       )
     ).toBe(true);
   });
@@ -175,6 +184,7 @@ describe('WorkersService', () => {
       throw new Error('Expected configure-before-enable to succeed');
     expect(result.response.worker.enabled).toBe(false);
     expect(result.response.worker.settings.autonomy).toBe('assisted');
+    expect(result.response.worker.workflowId).toBe(reportedWorkflowId(TRIAGE, SPACE));
     expect(harness.documents.get(`${TRIAGE}-${SPACE}`)?.enabled).toBe(false);
   });
 
@@ -271,12 +281,14 @@ describe('WorkersService', () => {
 
     expect(result.outcome).toBe('updated');
     expect(harness.updateWorkflow).toHaveBeenCalledWith(
-      `${TRIAGE}-${SPACE}`,
+      reportedWorkflowId(TRIAGE, SPACE),
       { enabled: true },
       SPACE,
       request
     );
-    expect(harness.scheduledTasks.get(`${TRIAGE}-${SPACE}`)?.apiKeyId).toEqual(expect.any(String));
+    expect(harness.scheduledTasks.get(reportedWorkflowId(TRIAGE, SPACE))?.apiKeyId).toEqual(
+      expect.any(String)
+    );
   });
 
   it('re-registers the schedule at the new interval after a schedule-only save', async () => {
@@ -284,7 +296,8 @@ describe('WorkersService', () => {
     const service = harness.createService();
     const enabled = await service.update(ATTACK_DISCOVERY, { enabled: true }, SPACE, request);
     if (enabled.outcome !== 'updated') throw new Error('Expected enable to succeed');
-    const workflowId = `${ATTACK_DISCOVERY}-${SPACE}`;
+    const storedId = `${ATTACK_DISCOVERY}-${SPACE}`;
+    const workflowId = reportedWorkflowId(ATTACK_DISCOVERY, SPACE);
 
     expect(enabled.response.worker.settings.scheduleInterval).toBe('24h');
     expect(harness.scheduledTasks.get(workflowId)?.interval).toBe('24h');
@@ -311,7 +324,7 @@ describe('WorkersService', () => {
       SPACE,
       request
     );
-    expect(harness.documents.get(workflowId)?.yaml).toContain('every: "15m"');
+    expect(harness.documents.get(storedId)?.yaml).toContain('every: "15m"');
     expect(harness.scheduledTasks.get(workflowId)?.interval).toBe('15m');
   });
 
@@ -432,7 +445,31 @@ describe('WorkersService', () => {
     expect(disabled.outcome).toBe('updated');
     if (disabled.outcome !== 'updated') throw new Error('Expected disable to succeed');
     expect(disabled.response.worker.enabled).toBe(false);
+    expect(disabled.response.worker.workflowId).toBe(reportedWorkflowId(TRIAGE, 'space-a'));
     expect(harness.documents.has(`${TRIAGE}-space-a`)).toBe(true);
+  });
+
+  it('does not project a workflow id when a non-managed document occupies that id', async () => {
+    const harness = createPersistentHarness();
+    const service = harness.createService();
+    (harness.managedWorkflows.getWorkflowStatus as jest.Mock).mockResolvedValue({
+      status: 'not_managed',
+      workflowId: 'opaque:foreign-workflow',
+      definitionId: TRIAGE,
+      spaceId: SPACE,
+      installed: true,
+      enabled: true,
+      valid: true,
+      managedBy: null,
+      storedVersion: null,
+      registryVersion: 1,
+      storedHash: null,
+      registryHash: 'registry',
+    });
+
+    const worker = await service.get(TRIAGE, request, SPACE);
+
+    expect(worker?.workflowId).toBeNull();
   });
 
   it('projects skills from the installed workflow definition when the worker is installed', async () => {
@@ -457,7 +494,10 @@ describe('WorkersService', () => {
     const { workers } = await service.list(request, SPACE);
     const triage = workers.find((w) => w.id === TRIAGE);
 
-    expect(harness.management.getWorkflow).toHaveBeenCalledWith(`${TRIAGE}-${SPACE}`, SPACE);
+    expect(harness.management.getWorkflow).toHaveBeenCalledWith(
+      reportedWorkflowId(TRIAGE, SPACE),
+      SPACE
+    );
     expect(triage?.skills?.some((s) => s.id === 'test.installed.skill')).toBe(true);
   });
 

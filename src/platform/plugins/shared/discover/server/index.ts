@@ -41,10 +41,6 @@ export interface DiscoverServerPluginStart {
 
 export { config } from './config';
 export type {
-  DiscoverSessionClassicTab,
-  DiscoverSessionEsqlTab,
-  DiscoverSessionTab,
-  DiscoverSessionPanelOverrides,
   DiscoverSessionEmbeddableByValueProps,
   DiscoverSessionEmbeddableByReferenceProps,
   DiscoverSessionEmbeddableByValueState,
@@ -55,8 +51,6 @@ export { discoverSessionApiResponseSchema } from './api/schema';
 export { transformDiscoverSessionIn, transformDiscoverSessionOut } from './api/transforms';
 export type {
   DiscoverSessionApiResponse,
-  DiscoverSessionApiData,
-  DiscoverSessionApiDataInput,
   DiscoverSessionSanitizeResponse,
   DiscoverSessionWarning,
   DiscoverSessionGetResponse,

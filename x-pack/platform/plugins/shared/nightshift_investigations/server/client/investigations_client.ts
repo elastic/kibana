@@ -14,6 +14,7 @@ import {
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import type { AgentAvailabilityConfig } from '@kbn/agent-builder-server/agents';
 import { investigationStateSchema } from '@kbn/significant-events-schema';
 import { assertNever } from '@kbn/std';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
@@ -30,8 +31,6 @@ import type {
   ListInvestigationItem,
   ListInvestigationsRequest,
   ListInvestigationsResponse,
-  SeverityCountsRequest,
-  SeverityCountsResponse,
   UpdateInvestigationRequest,
   StartInvestigationRequest,
   StartInvestigationResponse,
@@ -317,6 +316,8 @@ export interface NightshiftInvestigationsClientDeps {
    */
   spaceIdOverride?: string;
   agentBuilder?: AgentBuilderPluginStart;
+  /** Passed through to `agents.ensure` so a pre-installed agent is hidden while unavailable. */
+  agentAvailability: AgentAvailabilityConfig;
   investigationQuotaCallback?: InvestigationQuotaCallback;
   investigationRepository: InvestigationRepository;
   isAvailable: () => Promise<boolean>;
@@ -329,6 +330,7 @@ export class NightshiftInvestigationsClient {
   private readonly logger: Logger;
   private readonly spaceIdOverride?: string;
   private readonly agentBuilder?: AgentBuilderPluginStart;
+  private readonly agentAvailability: AgentAvailabilityConfig;
   private readonly investigationQuotaCallback?: InvestigationQuotaCallback;
   private readonly investigationRepository: InvestigationRepository;
   private readonly checkAvailability: () => Promise<boolean>;
@@ -340,6 +342,7 @@ export class NightshiftInvestigationsClient {
     this.logger = deps.logger;
     this.spaceIdOverride = deps.spaceIdOverride;
     this.agentBuilder = deps.agentBuilder;
+    this.agentAvailability = deps.agentAvailability;
     this.investigationQuotaCallback = deps.investigationQuotaCallback;
     this.investigationRepository = deps.investigationRepository;
     this.checkAvailability = deps.isAvailable;
@@ -444,7 +447,11 @@ export class NightshiftInvestigationsClient {
     // below executes the *stored* workflow definition, which predates that step until the managed
     // install has upgraded it — and that install is fire-and-forget. Deliberately without the
     // step's visibility retry: the workflow owns that, and this request path should not pay for it.
-    await installAgentForSubject(subject)({ agentBuilder: this.agentBuilder, spaceId });
+    await installAgentForSubject(subject)({
+      agentBuilder: this.agentBuilder,
+      spaceId,
+      availability: this.agentAvailability,
+    });
 
     const inputs = {
       message: prepared.message,
@@ -787,39 +794,5 @@ export class NightshiftInvestigationsClient {
       size: result.size,
       total: result.total,
     };
-  }
-
-  /**
-   * Severity facet counts under the given filters, for the homepage tiles.
-   *
-   * Separate from `list()` because the counts are independent of pagination and sort — bundling
-   * them would recompute an identical aggregation on every page change.
-   */
-  async getSeverityCounts({
-    statuses,
-    subject_types,
-    query,
-    concurrency_key,
-    created_after,
-    created_before,
-    started_after,
-    started_before,
-    completed_after,
-    completed_before,
-  }: SeverityCountsRequest = {}): Promise<SeverityCountsResponse> {
-    const severityCounts = await this.investigationRepository.countBySeverity({
-      statuses,
-      subjectTypes: subject_types,
-      query,
-      concurrencyKey: concurrency_key,
-      createdAfter: created_after,
-      createdBefore: created_before,
-      startedAfter: started_after,
-      startedBefore: started_before,
-      completedAfter: completed_after,
-      completedBefore: completed_before,
-    });
-
-    return { severity_counts: severityCounts };
   }
 }

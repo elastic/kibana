@@ -1531,9 +1531,14 @@ describe('prepareMessages — multi-execution (HITL) timelines', () => {
     // user message, ask_user_question tool call + answer, assistant response, next input
     expect(messages).toHaveLength(5);
     expect(messages[0].content as string).toContain('do it');
-    expect(isAIMessage(messages[1]) && messages[1].tool_calls?.[0].name).toBe('ask_user_question');
-    expect(isToolMessage(messages[2])).toBe(true);
-    expect(messages[2].content as string).toContain('"selected_options":["a"]');
+    expect(isAIMessage(messages[1]) && messages[1].tool_calls?.[0]).toMatchObject({
+      id: 'p1',
+      name: 'ask_user_question',
+    });
+    expect(isToolMessage(messages[2]) && messages[2].tool_call_id).toBe('p1');
+    expect(messages[2].content as string).toMatch(
+      /^<tool_result>.*"selected_options":\["a"\].*<\/tool_result>$/
+    );
     expect(messages[3].content).toBe('done');
     expect(messages[4].content).toBe('current');
   });
@@ -1548,9 +1553,94 @@ describe('prepareMessages — multi-execution (HITL) timelines', () => {
     const fromAppendOnly = await prepareMessages({ conversation: baseConversation(appendOnly) });
     const fromSingle = await prepareMessages({ conversation: baseConversation(singleExecution) });
 
-    // The materialized ask_user_question tool call gets a fresh id on every render.
-    const withoutToolCallIds = (messages: unknown) =>
-      JSON.stringify(messages).replace(/[0-9a-f]{8}-[0-9a-f-]{27}/g, '<id>');
-    expect(withoutToolCallIds(fromAppendOnly)).toEqual(withoutToolCallIds(fromSingle));
+    // The materialized ask_user_question tool call is keyed on the prompt id, so both renderings match exactly.
+    expect(JSON.stringify(fromAppendOnly)).toEqual(JSON.stringify(fromSingle));
+  });
+
+  describe('failed executions', () => {
+    it('renders Round A, then the failed message with a failure notice, then Round B', async () => {
+      const a = timelineFromRounds([
+        {
+          id: 'a',
+          input: { message: 'first', attachments: [] },
+          response: { message: 'first answer' },
+          started_at: '2026-01-01T00:00:00.000Z',
+        },
+      ]);
+      const b = timelineFromRounds([
+        {
+          id: 'b',
+          input: { message: 'third', attachments: [] },
+          response: { message: 'third answer' },
+          started_at: '2026-01-01T00:02:00.000Z',
+        },
+      ]);
+      const failedAt = '2026-01-01T00:01:00.000Z';
+      const failed = [
+        {
+          id: 'f::user_message',
+          type: TimelineEventType.userMessage,
+          created_at: failedAt,
+          actor: { type: 'user', id: 'u1', username: 'user1' },
+          data: { message: 'second', attachments: [] },
+        },
+        {
+          id: 'f::execution_started',
+          type: TimelineEventType.executionStarted,
+          created_at: failedAt,
+          actor: { type: 'agent', id: 'agent-1' },
+          execution_id: 'f::execution',
+          trigger_event_id: 'f::user_message',
+          data: { trigger_type: 'user_message' },
+        },
+        {
+          id: 'f::step::0',
+          type: TimelineEventType.executionStep,
+          created_at: failedAt,
+          actor: { type: 'agent', id: 'agent-1' },
+          execution_id: 'f::execution',
+          trigger_event_id: 'f::user_message',
+          data: { step: { type: 'reasoning', reasoning: 'never rendered' }, sequence: 0 },
+        },
+        {
+          id: 'f::execution_failed',
+          type: TimelineEventType.executionFailed,
+          created_at: failedAt,
+          actor: { type: 'agent', id: 'agent-1' },
+          execution_id: 'f::execution',
+          trigger_event_id: 'f::user_message',
+          data: { time_to_last_token: 1, error: { code: 'internalError', message: 'LLM <boom>' } },
+        },
+      ] as unknown as ProcessedTimelineEvent[];
+      const result = await prepareMessages({
+        conversation: {
+          nextInput: { message: 'bye', attachments: [] },
+          timeline: [...a, ...failed, ...b],
+          attachmentTypes: [],
+          attachmentStateManager: createAttachmentStateManager([], {
+            getTypeDefinition: () => undefined as never,
+          }),
+        },
+      });
+
+      // A: user + assistant; F: user + notice; B: user + assistant; next input
+      expect(result).toHaveLength(7);
+      expect(result.map((message) => message.getType())).toEqual([
+        'human',
+        'ai',
+        'human',
+        'human',
+        'human',
+        'ai',
+        'human',
+      ]);
+      expect(result[2].content).toContain('second');
+      expect(result[3].content).toContain('<system_notice>');
+      expect(result[3].content).toContain('attempt to answer the previous message failed');
+      expect(result[3].content).toContain('code="internalError"');
+      expect(result[3].content).toContain('LLM &lt;boom&gt;');
+      expect(result[3].content).not.toContain('never rendered');
+      expect(result[4].content).toContain('third');
+    });
   });
 });
