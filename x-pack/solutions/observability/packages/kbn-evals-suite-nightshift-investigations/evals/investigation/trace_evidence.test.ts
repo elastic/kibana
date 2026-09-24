@@ -283,7 +283,9 @@ it('requires every conversation tool call to have a corresponding span', () => {
   ).toThrow();
 });
 
-it('rejects changed tool result content', () => {
+it('accepts a stored result preview that differs from the full execution result', () => {
+  // Agent Builder replaces oversized non-MCP results with a preview before saving the
+  // conversation; the execution span keeps the full payload. Linkage, not equality, is checked.
   expect(() =>
     assertAgentTrace(attributes, {
       ...expected,
@@ -291,12 +293,21 @@ it('rejects changed tool result content', () => {
         {
           ...expected.rounds[0],
           steps: [
-            { ...toolCall, results: [{ ...toolCall.results[0], data: { stdout: 'different' } }] },
+            {
+              ...toolCall,
+              results: [{ ...toolCall.results[0], data: { stdout: '30% [truncated preview]' } }],
+            },
           ],
         },
       ],
     })
-  ).toThrow();
+  ).not.toThrow();
+});
+
+it.each(['[]', '{"results":[]}'])('rejects an empty execution result %s', (result) => {
+  expect(() =>
+    assertAgentTrace([{ ...attributes[0], 'gen_ai.tool.call.result': result }], expected)
+  ).toThrow('must retain a result');
 });
 
 it('allows result IDs assigned after the tool span ends', () => {
