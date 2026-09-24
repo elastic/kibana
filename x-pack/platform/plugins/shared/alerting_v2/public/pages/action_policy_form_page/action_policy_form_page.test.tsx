@@ -18,6 +18,9 @@ const mockLocators = createMockLocators();
 
 const mockNavigateToUrl = jest.fn();
 const mockBasePath = { prepend: jest.fn((path: string) => `/mock${path}`) };
+const mockGetUrlForApp = jest.fn(
+  (appId: string, options?: { path?: string }) => `/app/${appId}${options?.path ?? ''}`
+);
 
 jest.mock('../../components/action_policy/form/components/matcher_input', () => ({
   MatcherInput: (props: {
@@ -44,10 +47,7 @@ jest.mock('@kbn/core-di-browser', () => {
       if (tokenStr.includes('application')) {
         return {
           navigateToUrl: mockNavigateToUrl,
-          getUrlForApp: jest.fn(
-            (appId: string, options?: { path?: string }) =>
-              `/app/${appId}${options?.path ? `/${options.path}` : ''}`
-          ),
+          getUrlForApp: mockGetUrlForApp,
         };
       }
       if (tokenStr.includes('chrome')) {
@@ -101,11 +101,17 @@ jest.mock('@kbn/alerting-v2-rule-form', () => ({
   InlineWorkflowEditor: ({
     value,
     onChange,
+    connectorCreationConfig,
   }: {
     value: { id: string; connectorId: string | null; params: string };
     onChange: (next: { id: string; connectorId: string | null; params: string }) => void;
+    connectorCreationConfig?: { mode: string; href?: string };
   }) => (
-    <div data-test-subj={`inlineWorkflowEditor-${value.id}`}>
+    <div
+      data-test-subj={`inlineWorkflowEditor-${value.id}`}
+      data-connector-creation-mode={connectorCreationConfig?.mode}
+      data-connector-creation-href={connectorCreationConfig?.href}
+    >
       <button
         type="button"
         data-test-subj={`inlineFill-${value.id}`}
@@ -248,6 +254,17 @@ describe('ActionPolicyFormPage', () => {
 
       expect(screen.getByTestId(TEST_SUBJ.pageTitle)).toHaveTextContent('Create action policy');
       expect(screen.getByTestId(TEST_SUBJ.submitButton)).toHaveTextContent('Create policy');
+    });
+
+    it('does not override the default, in-page, connector creation behavior', async () => {
+      const user = userEvent.setup();
+      renderPage();
+
+      await user.click(screen.getByTestId('simpleWorkflowAdd-slack'));
+
+      expect(await screen.findByTestId(/inlineWorkflowEditor-/)).not.toHaveAttribute(
+        'data-connector-creation-mode'
+      );
     });
 
     it('submits create payload on save', async () => {
@@ -414,11 +431,6 @@ describe('ActionPolicyFormPage', () => {
       });
 
       renderPage();
-
-      await user.click(screen.getByTestId(TEST_SUBJ.nameInput));
-      await user.tab();
-      await user.click(screen.getByTestId(TEST_SUBJ.descriptionInput));
-      await user.tab();
 
       const updateButton = screen.getByTestId(TEST_SUBJ.submitButton);
       await waitFor(() => expect(updateButton).toBeEnabled());
