@@ -17,15 +17,12 @@ apiTest.describe(
   () => {
     let ruleId: string | undefined;
 
-    apiTest.afterAll(async ({ apiClient, samlAuth }) => {
+    apiTest.afterAll(async ({ apiServices }) => {
       if (!ruleId) {
         return;
       }
 
-      const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
-      await apiClient.delete(`api/alerting/rule/${ruleId}`, {
-        headers: { ...COMMON_HEADERS, ...cookieHeader },
-      });
+      await apiServices.alerting.rules.delete(ruleId);
     });
 
     apiTest(

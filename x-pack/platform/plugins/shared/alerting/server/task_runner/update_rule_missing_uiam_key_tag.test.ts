@@ -75,6 +75,7 @@ describe('updateRuleMissingUiamKeyTag', () => {
       {
         mergeAttributes: false,
         namespace: spaceId,
+        refresh: false,
         version: '1',
       }
     );
@@ -123,6 +124,20 @@ describe('updateRuleMissingUiamKeyTag', () => {
     expect(result).toBe(ruleData);
     expect(logger.warn).toHaveBeenCalledWith(
       `Failed to update missing UIAM API key tags for rule ${ruleId}: saved object update failed`
+    );
+  });
+
+  test('continues with the loaded rule when creating the saved objects client fails', async () => {
+    const ruleData = getRuleData({ uiamApiKey: null, tags: [] });
+    savedObjects.getUnsafeInternalClient.mockImplementationOnce(() => {
+      throw new Error('saved objects client creation failed');
+    });
+
+    const result = await updateRuleMissingUiamKeyTag(context, ruleId, spaceId, ruleData);
+
+    expect(result).toBe(ruleData);
+    expect(logger.warn).toHaveBeenCalledWith(
+      `Failed to update missing UIAM API key tags for rule ${ruleId}: saved objects client creation failed`
     );
   });
 });

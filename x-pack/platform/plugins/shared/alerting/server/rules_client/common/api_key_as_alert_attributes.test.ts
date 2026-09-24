@@ -261,6 +261,11 @@ describe('updateMissingUiamKeyTag', () => {
     expect(updateMissingUiamKeyTag(tags, null, true, true, ApiKeyType.UIAM)).toBe(tags);
   });
 
+  test('preserves the current tag position', () => {
+    const tags = [MISSING_UIAM_API_KEY_TAG, 'existing-tag'];
+    expect(updateMissingUiamKeyTag(tags, null, true, true, ApiKeyType.UIAM)).toBe(tags);
+  });
+
   test.each([
     ['non-serverless deployments', false, true, ApiKeyType.UIAM],
     ['deployments that do not grant UIAM keys', true, false, ApiKeyType.UIAM],

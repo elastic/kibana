@@ -31,11 +31,11 @@ export const updateRuleMissingUiamKeyTag = async (
   }
 
   const rawRule = { ...ruleData.rawRule, tags };
-  const savedObjectsClient = context.savedObjects.getUnsafeInternalClient({
-    includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE],
-    excludedExtensions: [SPACES_EXTENSION_ID],
-  });
   try {
+    const savedObjectsClient = context.savedObjects.getUnsafeInternalClient({
+      includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE],
+      excludedExtensions: [SPACES_EXTENSION_ID],
+    });
     const updatedSavedObject = await savedObjectsClient.update<RawRule>(
       RULE_SAVED_OBJECT_TYPE,
       ruleId,
@@ -43,6 +43,7 @@ export const updateRuleMissingUiamKeyTag = async (
       {
         mergeAttributes: false,
         namespace: context.spaceIdToNamespace(spaceId),
+        refresh: false,
         version: ruleData.version,
       }
     );

@@ -126,6 +126,14 @@ export function updateMissingUiamKeyTag(
     return tags;
   }
 
+  if (
+    !uiamApiKey &&
+    !tags.includes(LEGACY_MISSING_UIAM_API_KEY_TAG) &&
+    tags.filter((tag) => tag === MISSING_UIAM_API_KEY_TAG).length === 1
+  ) {
+    return tags;
+  }
+
   const tagsWithoutMissingUiamKeyTags = tags.filter(
     (tag) => tag !== MISSING_UIAM_API_KEY_TAG && tag !== LEGACY_MISSING_UIAM_API_KEY_TAG
   );
