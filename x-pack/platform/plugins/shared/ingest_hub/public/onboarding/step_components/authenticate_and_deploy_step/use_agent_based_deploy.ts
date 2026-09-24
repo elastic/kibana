@@ -22,6 +22,12 @@ import {
 import type { AgentCredentialVars } from './package_inputs';
 import type { DeployGroup } from './deploy_groups';
 import { cleanupAgentBasedPolicies } from './policy_cleanup_agent_based';
+import {
+  buildLiveStalePolicyIds,
+  buildEffectivePendingCleanup,
+  buildCleanedLiveStale,
+  buildRemainingPending,
+} from './cleanup_reconciliation';
 
 export interface UseAgentBasedDeployResult {
   targets: DeployGroup[];
@@ -129,14 +135,14 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
       // won't capture them. Detect stale entries by comparing policyIdsByInstance against the
       // reconciled targets (which already filters by selectedServiceIds).
       const activeInstanceIds = new Set(targets.flatMap((g) => g.instanceIds));
-      const liveStalePolicyIds: Record<string, string> = {};
-      for (const [iid, pid] of Object.entries(detectAndReviewStep.policyIdsByInstance ?? {})) {
-        if (!activeInstanceIds.has(iid)) liveStalePolicyIds[iid] = pid;
-      }
-      const effectivePendingCleanup: Record<string, string> = {
-        ...liveStalePolicyIds,
-        ...(detectAndReviewStep.pendingCleanupPolicyIds ?? {}),
-      };
+      const liveStalePolicyIds = buildLiveStalePolicyIds(
+        detectAndReviewStep.policyIdsByInstance ?? {},
+        activeInstanceIds
+      );
+      const effectivePendingCleanup = buildEffectivePendingCleanup(
+        liveStalePolicyIds,
+        detectAndReviewStep.pendingCleanupPolicyIds
+      );
 
       const hasPendingCleanup = Object.keys(effectivePendingCleanup).length > 0;
 
@@ -180,14 +186,13 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
             ...cleanupOps.toDelete,
             ...cleanupOps.toUpdate.map((u) => u.policyId),
           ]);
-          const cleanedLiveStale = Object.keys(liveStalePolicyIds).filter((id) =>
-            succeededIds.has(liveStalePolicyIds[id])
-          );
+          // Agent-based deploy has no "update" semantics — a policy is either deleted or kept
+          // entirely, so no survivingInstanceIds filter is needed here.
+          const cleanedLiveStale = buildCleanedLiveStale(liveStalePolicyIds, succeededIds);
           removeDeployInstances(cleanedLiveStale);
-          const remainingPending = Object.fromEntries(
-            Object.entries(detectAndReviewStep.pendingCleanupPolicyIds ?? {}).filter(
-              ([, policyId]) => !succeededIds.has(policyId)
-            )
+          const remainingPending = buildRemainingPending(
+            detectAndReviewStep.pendingCleanupPolicyIds,
+            succeededIds
           );
           updateDetectAndReviewStep({ pendingCleanupPolicyIds: remainingPending });
         }

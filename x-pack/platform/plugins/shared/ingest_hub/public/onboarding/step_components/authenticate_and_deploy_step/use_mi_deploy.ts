@@ -20,6 +20,12 @@ import { toSOServiceVars } from './package_inputs';
 import type { UseOnboardingSOResult } from './use_onboarding_so';
 import { cleanupManagedIntegrationsPolicies } from './policy_cleanup_managed_integrations';
 import type { PolicyCleanupOps } from './policy_cleanup';
+import {
+  buildLiveStalePolicyIds,
+  buildEffectivePendingCleanup,
+  buildCleanedLiveStale,
+  buildRemainingPending,
+} from './cleanup_reconciliation';
 
 export interface UseMiDeployParams {
   deployGroups: DeployGroup[];
@@ -47,6 +53,147 @@ export interface UseMiDeployParams {
   policyIdsByInstance: Record<string, string>;
   pendingCleanupPolicyIds: Record<string, string> | undefined;
 }
+
+// ── Module-level planning helpers ────────────────────────────────────────────
+// Pure functions that compute what to deploy/clean up. Extracted so they can be
+// tested independently of the React hook and its async cleanup/deploy logic.
+
+interface MiInitialRunPlan {
+  groupsToDeploy: DeployGroup[];
+  targets: string[];
+  newNonAgentlessStatuses: Record<string, ServiceChipState>;
+  liveStalePolicyIds: Record<string, string>;
+  effectivePendingCleanup: Record<string, string>;
+  hasPendingCleanup: boolean;
+}
+
+export function planMiInitialRun(
+  deployGroups: DeployGroup[],
+  serviceStatuses: Record<string, ServiceChipState>,
+  policyIdsByInstance: Record<string, string>,
+  pendingCleanupPolicyIds: Record<string, string> | undefined,
+  nonAgentlessServices: AwsServiceMatrixEntry[]
+): MiInitialRunPlan {
+  // Only deploy instances not already tracked — prevents re-deploying on Back+Next or after resume.
+  const groupsToDeploy = deployGroups
+    .map((group) => {
+      const untrackedMembers = group.members.filter(
+        ({ instance }) =>
+          !(instance.instanceId in serviceStatuses) &&
+          !(instance.instanceId in policyIdsByInstance)
+      );
+      if (untrackedMembers.length === 0) return null;
+      return {
+        ...group,
+        instanceIds: untrackedMembers.map(({ instance }) => instance.instanceId),
+        members: untrackedMembers,
+      };
+    })
+    .filter((g): g is DeployGroup => g !== null);
+
+  const targets = groupsToDeploy.flatMap(({ instanceIds: ids }) => ids);
+
+  // Non-MI services (ECF) get a gray 'instantiating' chip if not yet tracked.
+  const newNonAgentlessStatuses: Record<string, ServiceChipState> = {};
+  for (const service of nonAgentlessServices) {
+    if (!(service.id in serviceStatuses)) {
+      newNonAgentlessStatuses[service.id] = 'instantiating';
+    }
+  }
+
+  // Step-1 deselections do not go through removeDeployInstance, so detect them via
+  // the reconciled deployGroups (which already filters by selectedServiceIds).
+  const activeInstanceIds = new Set(deployGroups.flatMap((g) => g.instanceIds));
+  const liveStalePolicyIds = buildLiveStalePolicyIds(policyIdsByInstance, activeInstanceIds);
+  const effectivePendingCleanup = buildEffectivePendingCleanup(
+    liveStalePolicyIds,
+    pendingCleanupPolicyIds
+  );
+  const hasPendingCleanup = Object.keys(effectivePendingCleanup).length > 0;
+
+  return {
+    groupsToDeploy,
+    targets,
+    newNonAgentlessStatuses,
+    liveStalePolicyIds,
+    effectivePendingCleanup,
+    hasPendingCleanup,
+  };
+}
+
+interface MiRetryPlan {
+  groupsToDeploy: DeployGroup[];
+  deployedTargets: string[];
+  remainingFailed: string[];
+  retryLiveStale: Record<string, string>;
+  retryPending: Record<string, string>;
+}
+
+export function planMiRetryRun(
+  instanceIds: string[],
+  deployGroups: DeployGroup[],
+  policyIdsByInstance: Record<string, string>,
+  pendingCleanupPolicyIds: Record<string, string> | undefined,
+  failedInstances: string[]
+): MiRetryPlan {
+  const retrySet = new Set(instanceIds);
+  const groupsToDeploy = deployGroups.filter(({ instanceIds: ids }) =>
+    ids.some((id) => retrySet.has(id))
+  );
+  // May be wider than retrySet when a bundled group is included.
+  const deployedTargets = groupsToDeploy.flatMap(({ instanceIds: ids }) => ids);
+  const remainingFailed = failedInstances.filter((id) => !deployedTargets.includes(id));
+
+  const retryActiveIds = new Set(deployGroups.flatMap((g) => g.instanceIds));
+  const retryLiveStale = buildLiveStalePolicyIds(policyIdsByInstance, retryActiveIds);
+  const retryPending = buildEffectivePendingCleanup(retryLiveStale, pendingCleanupPolicyIds);
+
+  return { groupsToDeploy, deployedTargets, remainingFailed, retryLiveStale, retryPending };
+}
+
+interface MiCleanupReconciliation {
+  cleanedInstanceIds: Set<string>;
+  remainingPending: Record<string, string>;
+  cleanupFailed: boolean;
+}
+
+/**
+ * After cleanupManagedIntegrationsPolicies resolves, computes which live-stale
+ * instances were cleaned and what pending entries remain for retry. Also calls
+ * removeDeployInstances so the session state is updated in the same write.
+ */
+export function reconcileMiCleanupOps(
+  cleanupOps: PolicyCleanupOps,
+  liveStalePolicyIds: Record<string, string>,
+  pendingCleanupPolicyIds: Record<string, string> | undefined,
+  removeDeployInstances: (ids: string[]) => void
+): MiCleanupReconciliation {
+  const succeededIds = new Set([
+    ...cleanupOps.toDelete,
+    ...cleanupOps.toUpdate.map((u) => u.policyId),
+  ]);
+  // Surviving instances from toUpdate still have an active policy — they must not be pruned.
+  const survivingFromUpdate = new Set(
+    cleanupOps.toUpdate.flatMap((u) => u.survivingInstanceIds)
+  );
+  const cleanedLiveStale = buildCleanedLiveStale(
+    liveStalePolicyIds,
+    succeededIds,
+    survivingFromUpdate
+  );
+  // removeDeployInstances must come before clearing pendingCleanupPolicyIds so its
+  // full-replacement write isn't overwritten by a subsequent updateDetectAndReviewStep.
+  removeDeployInstances(cleanedLiveStale);
+  const remainingPending = buildRemainingPending(pendingCleanupPolicyIds, succeededIds);
+  const cleanupFailed = Object.keys(remainingPending).length > 0;
+  return {
+    cleanedInstanceIds: new Set(cleanedLiveStale),
+    remainingPending,
+    cleanupFailed,
+  };
+}
+
+// ── Hook ─────────────────────────────────────────────────────────────────────
 
 export function useMiDeploy({
   deployGroups,
@@ -83,81 +230,46 @@ export function useMiDeploy({
       // Instance IDs whose cleanup succeeded this run. Used to drop stale entries from the
       // persisted policyIdsByInstance — filtering by deleted policyId alone misses toUpdate cases
       // where the policy survives with fewer inputs but the removed instance should not reappear.
-      const cleanedInstanceIds = new Set<string>();
+      let cleanedInstanceIds = new Set<string>();
       // Set when cleanup runs on the initial deploy path (targets.length > 0 branch). Written to
       // state in the final shared update so succeeded entries are cleared after the deploy SO write.
       // undefined means cleanup didn't run this invocation; the retry path writes mid-flight instead.
       let remainingPending: Record<string, string> | undefined;
 
       if (isInitialDeploy) {
-        // Restrict each group to members not already tracked — an already-deployed instance
-        // must not get a second policy on a subsequent Deploy click (e.g. after navigating back
-        // or after resume, where serviceStatuses is reset but policyIdsByInstance is hydrated).
-        groupsToDeploy = deployGroups
-          .map((group) => {
-            const untrackedMembers = group.members.filter(
-              ({ instance }) =>
-                !(instance.instanceId in serviceStatuses) &&
-                !(instance.instanceId in policyIdsByInstance)
-            );
-            if (untrackedMembers.length === 0) return null;
-            return {
-              ...group,
-              instanceIds: untrackedMembers.map(({ instance }) => instance.instanceId),
-              members: untrackedMembers,
-            };
-          })
-          .filter((g): g is DeployGroup => g !== null);
-        // Flat list of all instanceIds being deployed this run.
-        const targets = groupsToDeploy.flatMap(({ instanceIds: ids }) => ids);
-
-        // Non-managed-integration services are shown as gray chips (ECF deployed on a different path).
-        const newNonAgentlessStatuses: Record<string, ServiceChipState> = {};
-        for (const service of nonAgentlessServices) {
-          if (!(service.id in serviceStatuses)) {
-            newNonAgentlessStatuses[service.id] = 'instantiating';
-          }
-        }
-
-        // Services deselected from Step 1 never call removeDeployInstance, so pendingCleanupPolicyIds
-        // won't capture them. Detect stale entries by comparing policyIdsByInstance against the
-        // reconciled deployGroups (which already filters by selectedServiceIds).
-        const activeInstanceIds = new Set(deployGroups.flatMap((g) => g.instanceIds));
-        const liveStalePolicyIds: Record<string, string> = {};
-        for (const [iid, pid] of Object.entries(policyIdsByInstance)) {
-          if (!activeInstanceIds.has(iid)) liveStalePolicyIds[iid] = pid;
-        }
-        const effectivePendingCleanup: Record<string, string> = {
-          ...liveStalePolicyIds,
-          ...(pendingCleanupPolicyIds ?? {}),
-        };
-
-        const hasPendingCleanup = Object.keys(effectivePendingCleanup).length > 0;
+        const plan = planMiInitialRun(
+          deployGroups,
+          serviceStatuses,
+          policyIdsByInstance,
+          pendingCleanupPolicyIds,
+          nonAgentlessServices
+        );
+        groupsToDeploy = plan.groupsToDeploy;
 
         if (
-          targets.length === 0 &&
-          Object.keys(newNonAgentlessStatuses).length === 0 &&
-          !hasPendingCleanup
+          plan.targets.length === 0 &&
+          Object.keys(plan.newNonAgentlessStatuses).length === 0 &&
+          !plan.hasPendingCleanup
         ) {
           onContinue();
-          // Everything is already deployed: the only work left is a template-details write that failed
-          // last time.
+          // Everything is already deployed: the only work left is a template-details write that
+          // failed last time.
           await persistPendingIacTemplate();
           return { cleanupFailed: false };
         }
 
-        const initialStatuses = buildInstanceStatuses(targets, []);
-        if (hasPendingCleanup || targets.length > 0) setIsDeploying(true);
+        const initialStatuses = buildInstanceStatuses(plan.targets, []);
+        if (plan.hasPendingCleanup || plan.targets.length > 0) setIsDeploying(true);
         updateDetectAndReviewStep({
-          isDeploying: hasPendingCleanup || targets.length > 0,
-          serviceStatuses: { ...initialStatuses, ...newNonAgentlessStatuses },
+          isDeploying: plan.hasPendingCleanup || plan.targets.length > 0,
+          serviceStatuses: { ...initialStatuses, ...plan.newNonAgentlessStatuses },
         });
         onContinue();
 
         let cleanupFailed = false;
-        if (hasPendingCleanup) {
+        if (plan.hasPendingCleanup) {
           cleanupOps = await cleanupManagedIntegrationsPolicies({
-            pendingCleanupPolicyIds: effectivePendingCleanup,
+            pendingCleanupPolicyIds: plan.effectivePendingCleanup,
             currentPolicyIdsByInstance: policyIdsByInstance,
             instances: serviceSettings?.instances ?? [],
             storedServiceVars: serviceSettings?.serviceVars ?? {},
@@ -166,36 +278,15 @@ export function useMiDeploy({
             authenticateAndDeployStep,
             servicesMap: servicesMap ?? new Map(),
           });
-          // Only prune instances whose policy cleanup actually succeeded — failed cleanups
-          // remain in pendingCleanupPolicyIds for retry on the next deploy attempt.
-          const succeededIds = new Set([
-            ...cleanupOps.toDelete,
-            ...cleanupOps.toUpdate.map((u) => u.policyId),
-          ]);
-          // Surviving instances from toUpdate still have an active policy — keep them in
-          // policyIdsByInstance. Only instances whose policy was deleted, or instances that
-          // were removed from an updated policy, should be cleaned up here.
-          const survivingFromUpdate = new Set(
-            cleanupOps.toUpdate.flatMap((u) => u.survivingInstanceIds)
-          );
-          const cleanedLiveStale = Object.keys(liveStalePolicyIds).filter(
-            (id) => !survivingFromUpdate.has(id) && succeededIds.has(liveStalePolicyIds[id])
-          );
-          for (const id of cleanedLiveStale) cleanedInstanceIds.add(id);
-          // Prune stale instances before clearing the staging area (removeDeployInstances
-          // must come first so its write isn't overwritten).
-          removeDeployInstances(cleanedLiveStale);
-          remainingPending = Object.fromEntries(
-            Object.entries(pendingCleanupPolicyIds ?? {}).filter(
-              ([, policyId]) => !succeededIds.has(policyId)
-            )
-          );
-          // pendingCleanupPolicyIds is cleared below — after the SO write succeeds — so that a
-          // transient SO failure keeps the cleanup retryable in the same session.
-          cleanupFailed = Object.keys(remainingPending).length > 0;
+          ({ cleanedInstanceIds, remainingPending, cleanupFailed } = reconcileMiCleanupOps(
+            cleanupOps,
+            plan.liveStalePolicyIds,
+            pendingCleanupPolicyIds,
+            removeDeployInstances
+          ));
         }
 
-        if (targets.length === 0) {
+        if (plan.targets.length === 0) {
           setIsDeploying(false);
           if (cleanupFailed) {
             // Cleanup did not fully succeed — keep the section actionable so the user can retry.
@@ -228,35 +319,22 @@ export function useMiDeploy({
           return { cleanupFailed: false };
         }
       } else {
-        // Retry: select any group that intersects the requested instanceIds.
-        // A bundled group is re-run as a whole — retrying one bundled original re-runs its bundle.
-        const retrySet = new Set(instanceIds);
-        groupsToDeploy = deployGroups.filter(({ instanceIds: ids }) =>
-          ids.some((id) => retrySet.has(id))
+        const plan = planMiRetryRun(
+          instanceIds,
+          deployGroups,
+          policyIdsByInstance,
+          pendingCleanupPolicyIds,
+          failedInstances
         );
-        // Expand to the full set of ids actually being re-deployed (may be wider than retrySet
-        // when a bundled group is included). A stale id that's no longer in any group is silently
-        // dropped — otherwise it would be set to 'instantiating' and never resolved.
-        const deployedTargets = groupsToDeploy.flatMap(({ instanceIds: ids }) => ids);
-        const retryStatuses = buildInstanceStatuses(deployedTargets, []);
-        const remainingFailed = failedInstances.filter((id) => !deployedTargets.includes(id));
+        groupsToDeploy = plan.groupsToDeploy;
 
-        // Cleanup must run on retry too — pending/live-stale policies are not bound to initial deploys.
-        const retryActiveIds = new Set(deployGroups.flatMap((g) => g.instanceIds));
-        const retryLiveStale: Record<string, string> = {};
-        for (const [iid, pid] of Object.entries(policyIdsByInstance)) {
-          if (!retryActiveIds.has(iid)) retryLiveStale[iid] = pid;
-        }
-        const retryPending: Record<string, string> = {
-          ...retryLiveStale,
-          ...(pendingCleanupPolicyIds ?? {}),
-        };
         // Mark as deploying before awaiting cleanup so a double-click cannot start a second run.
         setIsDeploying(true);
         updateDetectAndReviewStep({ isDeploying: true });
-        if (Object.keys(retryPending).length > 0) {
+
+        if (Object.keys(plan.retryPending).length > 0) {
           cleanupOps = await cleanupManagedIntegrationsPolicies({
-            pendingCleanupPolicyIds: retryPending,
+            pendingCleanupPolicyIds: plan.retryPending,
             currentPolicyIdsByInstance: policyIdsByInstance,
             instances: serviceSettings?.instances ?? [],
             storedServiceVars: serviceSettings?.serviceVars ?? {},
@@ -265,30 +343,21 @@ export function useMiDeploy({
             authenticateAndDeployStep,
             servicesMap: servicesMap ?? new Map(),
           });
-          const retrySucceeded = new Set([
-            ...cleanupOps.toDelete,
-            ...cleanupOps.toUpdate.map((u) => u.policyId),
-          ]);
-          const retrySurvivingFromUpdate = new Set(
-            cleanupOps.toUpdate.flatMap((u) => u.survivingInstanceIds)
+          const retryReconciliation = reconcileMiCleanupOps(
+            cleanupOps,
+            plan.retryLiveStale,
+            pendingCleanupPolicyIds,
+            removeDeployInstances
           );
-          const retryCleanedLiveStale = Object.keys(retryLiveStale).filter(
-            (id) => !retrySurvivingFromUpdate.has(id) && retrySucceeded.has(retryLiveStale[id])
-          );
-          for (const id of retryCleanedLiveStale) cleanedInstanceIds.add(id);
-          removeDeployInstances(retryCleanedLiveStale);
+          cleanedInstanceIds = retryReconciliation.cleanedInstanceIds;
           updateDetectAndReviewStep({
-            pendingCleanupPolicyIds: Object.fromEntries(
-              Object.entries(pendingCleanupPolicyIds ?? {}).filter(
-                ([, policyId]) => !retrySucceeded.has(policyId)
-              )
-            ),
+            pendingCleanupPolicyIds: retryReconciliation.remainingPending,
           });
         }
 
         updateDetectAndReviewStep({
-          serviceStatuses: retryStatuses,
-          failedInstances: remainingFailed,
+          serviceStatuses: buildInstanceStatuses(plan.deployedTargets, []),
+          failedInstances: plan.remainingFailed,
           deployErrors: {},
         });
       }

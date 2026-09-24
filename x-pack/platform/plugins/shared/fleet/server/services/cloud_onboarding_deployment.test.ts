@@ -340,7 +340,6 @@ describe('cloudOnboardingDeploymentService', () => {
     describe('retry semantics', () => {
       it('resets status to pending and increments attemptCount', async () => {
         const retriedAttrs = makeAttributes({ status: 'pending', attemptCount: 2 });
-        soClient.update.mockResolvedValue(makeSOResponse('deploy-1', retriedAttrs));
         soClient.get.mockResolvedValue(makeSOResponse('deploy-1', retriedAttrs));
 
         const result = await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', {
@@ -360,7 +359,6 @@ describe('cloudOnboardingDeploymentService', () => {
       it('does not modify serviceVars on retry', async () => {
         const serviceVars = { cloudtrail: { regions: ['us-east-1'] } };
         const retriedAttrs = makeAttributes({ status: 'pending', attemptCount: 2, serviceVars });
-        soClient.update.mockResolvedValue(makeSOResponse('deploy-1', retriedAttrs));
         soClient.get.mockResolvedValue(makeSOResponse('deploy-1', retriedAttrs));
 
         const result = await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', {
