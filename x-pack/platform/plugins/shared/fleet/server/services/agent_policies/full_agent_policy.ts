@@ -171,8 +171,12 @@ export async function getFullAgentPolicy(
 
   // For cross-space callers (spaceId '*'), derive the actual SO namespace from the policy's
   // own space_ids so that package-policy reads/writes are scoped to the right namespace.
+  // When space_ids[0] is '*' (policy shared to all spaces), pass undefined: shared-policy
+  // package policies are accessible from any namespace and soClient.get rejects '*' as a namespace.
   const packagePoliciesNamespace =
-    options?.spaceId === '*' ? (agentPolicy.space_ids?.[0] ?? undefined) : options?.spaceId;
+    options?.spaceId === '*'
+      ? (agentPolicy.space_ids?.[0] === '*' ? undefined : agentPolicy.space_ids?.[0])
+      : options?.spaceId;
 
   const agentInputs = await storedPackagePoliciesToAgentInputs(
     agentPolicy.package_policies as PackagePolicy[],
