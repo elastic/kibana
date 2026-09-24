@@ -192,8 +192,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await retry.waitFor(`${columnName} ${dir} sort results`, async () => {
             const vals = (await latestFindingsTable.getColumnValues(columnName)).filter(Boolean);
             if (vals.length !== data.length) return false;
-            const expected = [...vals].sort(
-              (a, b) => (dir === 'asc' ? sortingMethod(a, b) : sortingMethod(b, a))
+            const expected = [...vals].sort((a, b) =>
+              dir === 'asc' ? sortingMethod(a, b) : sortingMethod(b, a)
             );
             return vals.every((v, i) => v === expected[i]);
           });
