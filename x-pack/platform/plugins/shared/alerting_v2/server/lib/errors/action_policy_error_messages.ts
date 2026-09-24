@@ -16,6 +16,9 @@ export const getActionPolicyAlreadyExistsMessage = (id: string): string =>
 export const getActionPolicyVersionConflictMessage = (id: string): string =>
   `Action policy with ID "${id}" has already been updated by another user`;
 
+export const getActionPolicyLicenseNotSupportedMessage = (requiredLicense: string): string =>
+  `Action policies require an active ${requiredLicense} license`;
+
 export const getInvalidActionPolicyDataMessage = (
   context: ActionPolicyValidationContext,
   zodError: string

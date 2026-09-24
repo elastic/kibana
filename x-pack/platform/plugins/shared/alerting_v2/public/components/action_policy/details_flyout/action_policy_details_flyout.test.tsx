@@ -43,6 +43,11 @@ jest.mock('@kbn/core-di-browser', () => ({
   CoreStart: (key: string) => key,
 }));
 
+let mockIsLicenseValid = true;
+jest.mock('../../../hooks/use_is_action_policies_license_valid', () => ({
+  useIsActionPoliciesLicenseValid: () => mockIsLicenseValid,
+}));
+
 jest.mock('../../../hooks/use_fetch_workflow', () => ({
   useFetchWorkflow: (id: string) => ({
     data: { id, name: `Workflow ${id}` },
@@ -135,6 +140,7 @@ const renderFlyout = (props: RenderProps = {}) => {
 describe('ActionPolicyDetailsFlyout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockIsLicenseValid = true;
     mockBulkGet.mockResolvedValue([
       { uid: ELASTIC_UID, user: { username: 'elastic', full_name: 'Elastic User' } },
     ]);
@@ -220,6 +226,20 @@ describe('ActionPolicyDetailsFlyout', () => {
     it('disables the switch when canWrite is false', () => {
       renderFlyout({ canWrite: false });
       expect(screen.getByTestId('actionPolicyDetailsFlyoutEnabledSwitch')).toBeDisabled();
+    });
+
+    it('disables the switch on a disabled policy when the license is not valid', () => {
+      mockIsLicenseValid = false;
+      renderFlyout({ policy: createPolicy({ enabled: false }) });
+      expect(screen.getByTestId('actionPolicyDetailsFlyoutEnabledSwitch')).toBeDisabled();
+    });
+
+    it('keeps the switch enabled on an enabled policy when the license is not valid', () => {
+      mockIsLicenseValid = false;
+      const onDisable = jest.fn();
+      renderFlyout({ policy: createPolicy({ enabled: true }), onDisable });
+      fireEvent.click(screen.getByTestId('actionPolicyDetailsFlyoutEnabledSwitch'));
+      expect(onDisable).toHaveBeenCalledWith('policy-1');
     });
 
     it('renders a loading spinner instead of the switch when isStateLoading is true', () => {

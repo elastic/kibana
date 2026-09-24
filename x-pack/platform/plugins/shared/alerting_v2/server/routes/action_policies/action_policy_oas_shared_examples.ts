@@ -14,11 +14,13 @@ import type {
 } from '@kbn/alerting-v2-schemas';
 import { ALERTING_ERROR_CODES } from '../../lib/errors/error_codes';
 import {
+  getActionPolicyLicenseNotSupportedMessage,
   getActionPolicyNotFoundMessage,
   getActionPolicyVersionConflictMessage,
   getInvalidActionPolicyDataMessage,
   type ActionPolicyValidationContext,
 } from '../../lib/errors/action_policy_error_messages';
+import { ACTION_POLICIES_REQUIRED_LICENSE } from '../../../common/action_policies_license';
 import {
   ACTION_POLICY_NOT_FOUND_DESCRIPTION,
   ACTION_POLICY_VERSION_CONFLICT_DESCRIPTION,
@@ -122,6 +124,21 @@ export const ACTION_POLICY_VERSION_CONFLICT_RESPONSE: OasExampleEntry = {
   name: 'actionPolicyVersionConflict',
   summary: ACTION_POLICY_VERSION_CONFLICT_DESCRIPTION,
   value: ACTION_POLICY_VERSION_CONFLICT_VALUE,
+};
+
+export const ACTION_POLICY_LICENSE_NOT_SUPPORTED_RESPONSE: OasExampleEntry = {
+  name: 'actionPolicyLicenseNotSupported',
+  summary: 'The current license does not support action policies',
+  value: {
+    code: ALERTING_ERROR_CODES.ACTION_POLICY_LICENSE_NOT_SUPPORTED,
+    error: 'Forbidden',
+    message: getActionPolicyLicenseNotSupportedMessage(ACTION_POLICIES_REQUIRED_LICENSE),
+    details: {
+      required_license: ACTION_POLICIES_REQUIRED_LICENSE,
+      current_license: 'basic',
+      license_status: 'active',
+    },
+  } satisfies ErrorResponse,
 };
 
 export const BULK_BY_IDS_REQUEST: BulkByIdsParams = {

@@ -44,6 +44,7 @@ jest.mock('@kbn/core-di-browser', () => {
       if (tokenStr.includes('application')) {
         return {
           navigateToUrl: mockNavigateToUrl,
+          capabilities: {},
           getUrlForApp: jest.fn(
             (appId: string, options?: { path?: string }) =>
               `/app/${appId}${options?.path ? `/${options.path}` : ''}`
@@ -148,6 +149,11 @@ jest.mock('../../hooks/use_create_inline_workflows', () => ({
   }),
 }));
 
+let mockIsLicenseValid = true;
+jest.mock('../../hooks/use_is_action_policies_license_valid', () => ({
+  useIsActionPoliciesLicenseValid: () => mockIsLicenseValid,
+}));
+
 const mockUseFetchActionPolicy = jest.fn();
 jest.mock('../../hooks/use_fetch_action_policy', () => ({
   useFetchActionPolicy: (...args: unknown[]) => mockUseFetchActionPolicy(...args),
@@ -226,6 +232,7 @@ const mockUseActionPolicyAutoAttach = jest.mocked(useActionPolicyAutoAttach);
 describe('ActionPolicyFormPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockIsLicenseValid = true;
     mockCreateMutateAsync.mockResolvedValue({});
     mockUpdateMutateAsync.mockResolvedValue({});
     mockCreateInlineWorkflows.mockResolvedValue([]);
@@ -248,6 +255,24 @@ describe('ActionPolicyFormPage', () => {
 
       expect(screen.getByTestId(TEST_SUBJ.pageTitle)).toHaveTextContent('Create action policy');
       expect(screen.getByTestId(TEST_SUBJ.submitButton)).toHaveTextContent('Create policy');
+      expect(screen.queryByTestId('actionPoliciesLicenseCallout')).toBeNull();
+    });
+
+    it('shows the license callout and keeps submit disabled when the license is not valid', async () => {
+      mockIsLicenseValid = false;
+      const user = userEvent.setup({ delay: null });
+      renderPage();
+
+      expect(screen.getByTestId('actionPoliciesLicenseCallout')).toBeInTheDocument();
+
+      await user.type(screen.getByTestId(TEST_SUBJ.nameInput), 'Policy from test');
+      await user.tab();
+      const destinationsCombo = screen.getByTestId('destinationsInput');
+      await user.click(within(destinationsCombo).getByRole('combobox'));
+      await user.click(await screen.findByRole('option', { name: 'Workflow 1' }));
+
+      expect(screen.getByTestId(TEST_SUBJ.submitButton)).toBeDisabled();
+      expect(mockCreateMutateAsync).not.toHaveBeenCalled();
     });
 
     it('submits create payload on save', async () => {

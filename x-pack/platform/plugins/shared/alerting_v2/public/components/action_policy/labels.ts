@@ -28,6 +28,14 @@ export const GROUP_BY_LABEL = i18n.translate('xpack.alertingV2.actionPolicyDefin
   defaultMessage: 'Group by',
 });
 
+export const ACTION_POLICIES_LICENSE_REQUIRED_MESSAGE = i18n.translate(
+  'xpack.alertingV2.actionPolicy.license.requiredMessage',
+  {
+    defaultMessage:
+      'Action policies run Workflows, which require an active Enterprise license. You can view, disable, snooze, and delete existing policies, but you cannot create, edit, or enable them.',
+  }
+);
+
 export const FREQUENCY_LABEL = i18n.translate('xpack.alertingV2.actionPolicyDefinition.frequency', {
   defaultMessage: 'Frequency',
 });
