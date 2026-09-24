@@ -10,6 +10,8 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter, Route, Router } from '@kbn/shared-ux-router';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { createMemoryHistory } from 'history';
 import {
   SYSTEM_SECURITY_WATCH_HUNT_ID,
@@ -31,6 +33,7 @@ import { WatchDetailPage } from './watch_detail';
 import * as settingsI18n from './settings_translations';
 import { useWatch } from '../../hooks/use_watches_api';
 import { useUpdateWorker, useWorkers } from '../../hooks/use_workers_api';
+import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
 
 jest.mock('../../hooks/use_alertzero_doc_title', () => ({ useAlertZeroDocTitle: jest.fn() }));
 jest.mock('../../hooks/use_watches_api');
@@ -166,6 +169,21 @@ const detectionWorkers: Worker[] = [
   }),
 ];
 
+/**
+ * The real app wraps the page in `KibanaContextProvider` + `QueryClientProvider` (see
+ * `application.tsx`). Watch-owned settings components use `useKibana()` and `useQuery`, so the
+ * harness provides the same context rather than testing a tree the app never renders.
+ */
+const TestProviders: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <KibanaContextProvider services={{ agentBuilder: { agents: { list: jest.fn() } } }}>
+    <QueryClientProvider
+      client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}
+    >
+      {children}
+    </QueryClientProvider>
+  </KibanaContextProvider>
+);
+
 const renderWatch = (watchId: string, workers: Worker[]) => {
   mockUseWatch.mockReturnValue({
     data: { watch: createCatalogWatchPlaceholder(watchId as CatalogWatchId) },
@@ -184,11 +202,13 @@ const renderWatch = (watchId: string, workers: Worker[]) => {
   mockUseUpdateWorker.mockReturnValue({ mutate, mutateAsync } as never);
 
   render(
-    <MemoryRouter initialEntries={[`/watches/${watchId}`]}>
-      <Route path="/watches/:watchId">
-        <WatchDetailPage />
-      </Route>
-    </MemoryRouter>
+    <TestProviders>
+      <MemoryRouter initialEntries={[`/watches/${watchId}`]}>
+        <Route path="/watches/:watchId">
+          <WatchDetailPage />
+        </Route>
+      </MemoryRouter>
+    </TestProviders>
   );
 
   return { mutate, mutateAsync };
@@ -197,6 +217,9 @@ const renderWatch = (watchId: string, workers: Worker[]) => {
 describe('WatchDetailPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    ExperimentalFeaturesService.init({
+      experimentalFeatures: { workerAgentPickerEnabled: true },
+    });
   });
 
   it('shows Floor Workers with per-Worker enablement and autonomy, and no Watch switch', () => {
@@ -425,11 +448,13 @@ describe('WatchDetailPage', () => {
     mockUseUpdateWorker.mockReturnValue({ mutate: jest.fn(), mutateAsync: jest.fn() } as never);
 
     render(
-      <MemoryRouter initialEntries={[`/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`]}>
-        <Route path="/watches/:watchId">
-          <WatchDetailPage />
-        </Route>
-      </MemoryRouter>
+      <TestProviders>
+        <MemoryRouter initialEntries={[`/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`]}>
+          <Route path="/watches/:watchId">
+            <WatchDetailPage />
+          </Route>
+        </MemoryRouter>
+      </TestProviders>
     );
 
     expect(screen.getByTestId('alertZeroWatchWorkersLoadError')).toBeInTheDocument();
@@ -674,11 +699,13 @@ describe('WatchDetailPage', () => {
     mockUseUpdateWorker.mockReturnValue({ mutate: jest.fn(), mutateAsync } as never);
     // A fresh element each time, or React bails out of re-rendering an identical element.
     const tree = () => (
-      <MemoryRouter initialEntries={[`/watches/${SYSTEM_SECURITY_WATCH_DETECTION_ID}`]}>
-        <Route path="/watches/:watchId">
-          <WatchDetailPage />
-        </Route>
-      </MemoryRouter>
+      <TestProviders>
+        <MemoryRouter initialEntries={[`/watches/${SYSTEM_SECURITY_WATCH_DETECTION_ID}`]}>
+          <Route path="/watches/:watchId">
+            <WatchDetailPage />
+          </Route>
+        </MemoryRouter>
+      </TestProviders>
     );
     const { rerender } = render(tree());
 
@@ -895,11 +922,13 @@ describe('WatchDetailPage', () => {
       initialEntries: [`/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`],
     });
     render(
-      <Router history={history}>
-        <Route path="/watches/:watchId">
-          <WatchDetailPage />
-        </Route>
-      </Router>
+      <TestProviders>
+        <Router history={history}>
+          <Route path="/watches/:watchId">
+            <WatchDetailPage />
+          </Route>
+        </Router>
+      </TestProviders>
     );
 
     const [first] = floorWorkers;
@@ -972,11 +1001,13 @@ describe('WatchDetailPage', () => {
       initialEntries: [`/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`],
     });
     render(
-      <Router history={history}>
-        <Route path="/watches/:watchId">
-          <WatchDetailPage />
-        </Route>
-      </Router>
+      <TestProviders>
+        <Router history={history}>
+          <Route path="/watches/:watchId">
+            <WatchDetailPage />
+          </Route>
+        </Router>
+      </TestProviders>
     );
 
     const amount = screen.getByTestId(`alertZeroTriggerAmount-${shared.id}`);
@@ -1037,11 +1068,13 @@ describe('WatchDetailPage', () => {
       initialEntries: [`/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`],
     });
     render(
-      <Router history={history}>
-        <Route path="/watches/:watchId">
-          <WatchDetailPage />
-        </Route>
-      </Router>
+      <TestProviders>
+        <Router history={history}>
+          <Route path="/watches/:watchId">
+            <WatchDetailPage />
+          </Route>
+        </Router>
+      </TestProviders>
     );
 
     const amount = screen.getByTestId(`alertZeroTriggerAmount-${shared.id}`);
@@ -1090,11 +1123,13 @@ describe('WatchDetailPage', () => {
     mockUseUpdateWorker.mockReturnValue({ mutate: jest.fn(), mutateAsync } as never);
 
     render(
-      <MemoryRouter initialEntries={[`/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`]}>
-        <Route path="/watches/:watchId">
-          <WatchDetailPage />
-        </Route>
-      </MemoryRouter>
+      <TestProviders>
+        <MemoryRouter initialEntries={[`/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`]}>
+          <Route path="/watches/:watchId">
+            <WatchDetailPage />
+          </Route>
+        </MemoryRouter>
+      </TestProviders>
     );
 
     const amount = screen.getByTestId(`alertZeroTriggerAmount-${shared.id}`);

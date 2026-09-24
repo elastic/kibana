@@ -9,6 +9,7 @@ import {
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
   SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
+  SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
   SYSTEM_SECURITY_WORKER_IDS,
   WorkerScheduleInterval,
   WorkerSettings,
@@ -20,6 +21,7 @@ import type { RegisteredWorkerId } from '../worker_registry';
 const AD_WORKER_ID = SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID;
 const RULE_TUNING_WORKER_ID = SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID;
 const FORENSICS_WORKER_ID = SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID;
+const HUNT_WORKER_ID = SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID;
 
 const SCHEDULED_WORKER_IDS: string[] = [AD_WORKER_ID, RULE_TUNING_WORKER_ID];
 
@@ -391,6 +393,104 @@ describe('createWorkerSettingsRegistration', () => {
       });
     });
   });
+});
+
+describe('Continuous Threat Hunt agent (opt-in extras)', () => {
+  // The whole point of the opt-in shape: installing the setting must not change what a Worker
+  // already in the field stores. A fresh install writes no `extras` key at all.
+  it('writes no extras on a fresh install', () => {
+    const registration = createWorkerSettingsRegistration(HUNT_WORKER_ID);
+
+    expect(registration.createDefaultValues()).toEqual({
+      settingsVersion: 1,
+      autonomyLevel: 'manual',
+    });
+  });
+
+  // The backward-compatibility guarantee. This is the document shape stored before the Worker
+  // declared any extras, and it must still read back rather than projecting as unavailable.
+  it('reads back a document stored with no extras, unchanged', () => {
+    const registration = createWorkerSettingsRegistration(HUNT_WORKER_ID);
+
+    const projected = registration.toSettings({ settingsVersion: 1, autonomyLevel: 'assisted' });
+
+    expect(projected).toEqual({
+      workerId: HUNT_WORKER_ID,
+      autonomy: 'assisted',
+    });
+    expect('extras' in projected).toBe(false);
+  });
+
+  it('round-trips a stored agent id', () => {
+    const registration = createWorkerSettingsRegistration(HUNT_WORKER_ID);
+
+    expect(
+      registration.toSettings({
+        settingsVersion: 1,
+        autonomyLevel: 'manual',
+        extras: { agentId: 'my-custom-agent' },
+      })
+    ).toEqual({
+      workerId: HUNT_WORKER_ID,
+      autonomy: 'manual',
+      extras: { agentId: 'my-custom-agent' },
+    });
+  });
+
+  it('persists a picked agent through a patch', () => {
+    const registration = createWorkerSettingsRegistration(HUNT_WORKER_ID);
+
+    expect(
+      registration.applyPatch(registration.createDefaultValues(), {
+        extras: { agentId: 'my-custom-agent' },
+      })
+    ).toEqual({
+      values: {
+        agentId: 'my-custom-agent',
+        settingsVersion: 1,
+        autonomyLevel: 'manual',
+        extras: { agentId: 'my-custom-agent' },
+      },
+    });
+  });
+
+  it('rejects an unknown key inside extras, naming it', () => {
+    const registration = createWorkerSettingsRegistration(HUNT_WORKER_ID);
+
+    expect(
+      expectInvalid(
+        registration.applyPatch(registration.createDefaultValues(), {
+          extras: { agentId: 'a', nope: true } as never,
+        })
+      )
+    ).toContain('nope');
+  });
+
+  it('rejects an empty agent id', () => {
+    const registration = createWorkerSettingsRegistration(HUNT_WORKER_ID);
+
+    expect(
+      expectInvalid(
+        registration.applyPatch(registration.createDefaultValues(), { extras: { agentId: '' } })
+      )
+    ).toContain('agentId');
+  });
+
+  // Scope guard: only Workers that declare the agent setting may accept it. A Worker gets the
+  // picker by declaring `agentId` in its own extras schema, never by the propagation code
+  // special-casing it, so this list is the complete set of opted-in Workers.
+  it.each(SYSTEM_SECURITY_WORKER_IDS.filter((id) => id !== HUNT_WORKER_ID))(
+    '%s rejects an agentId patch',
+    (workerId) => {
+      const registration = createWorkerSettingsRegistration(workerId);
+
+      expectInvalid(
+        registration.applyPatch(registration.createDefaultValues(), {
+          extras: { agentId: 'my-custom-agent' } as never,
+        })
+      );
+    }
+  );
 });
 
 describe('WorkerScheduleInterval API schema', () => {

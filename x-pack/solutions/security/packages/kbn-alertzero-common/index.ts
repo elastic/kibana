@@ -99,6 +99,8 @@ export {
   WatchTriggerProjection,
   AnalysisWindowDays,
   RuleTuningWorkerExtras,
+  ContinuousThreatHuntWorkerExtras,
+  HuntAgentId,
   Worker,
   WorkerRunState,
   WorkerScheduleInterval,

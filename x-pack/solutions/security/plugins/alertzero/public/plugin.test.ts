@@ -13,6 +13,7 @@ import { AlertZeroPublicPlugin } from './plugin';
 
 const createConfig = (overrides: Partial<AlertZeroClientConfig> = {}): AlertZeroClientConfig => ({
   enabled: false,
+  enableExperimental: [],
   ...overrides,
 });
 

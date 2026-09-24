@@ -28,7 +28,11 @@ export const buildCompleteWorkerSettingsSchema = (
     shape.scheduleInterval = WorkerScheduleInterval;
   }
   if (declaration.extras) {
-    shape.extras = declaration.extras.schema;
+    // Omitted `defaultValue` = opt-in extras; see `WorkerSettingsDeclaration` for the contract.
+    shape.extras =
+      declaration.extras.defaultValue === undefined
+        ? declaration.extras.schema.optional()
+        : declaration.extras.schema;
   }
   return z.object(shape).strict().pipe(WorkerSettings);
 };
@@ -76,7 +80,9 @@ export const buildDefaultWorkerSettings = (
   ...(declaration.scheduleInterval
     ? { scheduleInterval: declaration.scheduleInterval.defaultValue }
     : {}),
-  ...(declaration.extras ? { extras: declaration.extras.defaultValue } : {}),
+  ...(declaration.extras?.defaultValue === undefined
+    ? {}
+    : { extras: declaration.extras.defaultValue }),
 });
 
 /**

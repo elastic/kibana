@@ -12,15 +12,49 @@ import type { ManagedWorkflowTemplateValues } from '../../types';
 export interface CommonWorkerTemplateValues extends ManagedWorkflowTemplateValues {
   settingsVersion: number;
   autonomyLevel: 'manual' | 'assisted' | 'supervised';
+  /**
+   * Agent that every `ai.agent` step in this Worker's chain runs as. Optional and
+   * generic: any Worker may carry one, and a Worker with none is rendered exactly as
+   * before. Sourced from the Worker's own settings, so no Worker id appears here.
+   */
+  agentId?: string;
 }
+
+/**
+ * Substitutes the generic agent placeholder in two forms:
+ *
+ *   `__WORKER_AGENT_ID__`                  — no per-step default. Unset removes the whole
+ *                                            line, because `agent-id: ""` is NOT equivalent
+ *                                            to an omission: an empty string overrides the
+ *                                            space's default agent with a nameless one.
+ *   `__WORKER_AGENT_ID_OR:some-agent__`    — a step that already hardcoded an agent. Unset
+ *                                            restores exactly that literal, so an existing
+ *                                            Worker renders byte-identically to before.
+ *
+ * Substitution happens at INSTALL time, before any Liquid context exists, which is why the
+ * default is carried in the placeholder rather than expressed as a `| default:` filter.
+ */
+const renderWorkerAgentId = (yaml: string, agentId?: string): string => {
+  const chosen = agentId === undefined || agentId === '' ? undefined : agentId;
+  const withDefaults = yaml.replace(
+    /__WORKER_AGENT_ID_OR:([^_\s"]+)__/g,
+    (_match, fallback: string) => chosen ?? fallback
+  );
+  return chosen === undefined
+    ? withDefaults.replace(/^[^\S\n]*[^\n]*__WORKER_AGENT_ID__[^\n]*\n/gm, '')
+    : withDefaults.replaceAll('__WORKER_AGENT_ID__', chosen);
+};
 
 export const renderCommonWorkerYaml = (
   yaml: string,
-  { settingsVersion, autonomyLevel }: CommonWorkerTemplateValues
+  { settingsVersion, autonomyLevel, agentId }: CommonWorkerTemplateValues
 ): string =>
-  yaml
-    .replaceAll('__WORKER_SETTINGS_VERSION__', String(settingsVersion))
-    .replaceAll('__WORKER_AUTONOMY_LEVEL__', autonomyLevel);
+  renderWorkerAgentId(
+    yaml
+      .replaceAll('__WORKER_SETTINGS_VERSION__', String(settingsVersion))
+      .replaceAll('__WORKER_AUTONOMY_LEVEL__', autonomyLevel),
+    agentId
+  );
 
 /**
  * Values for the subset of Workers that own a scheduled trigger. Kept out of

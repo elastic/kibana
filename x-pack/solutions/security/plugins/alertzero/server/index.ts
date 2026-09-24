@@ -6,7 +6,7 @@
  */
 
 import type { PluginInitializer, PluginInitializerContext } from '@kbn/core/server';
-import type { AlertZeroConfig } from './config';
+import type { AlertZeroConfigSchemaType } from './config';
 import type {
   AlertZeroPluginSetup,
   AlertZeroPluginStart,
@@ -21,7 +21,7 @@ export const plugin: PluginInitializer<
   AlertZeroPluginStart,
   AlertZeroSetupDependencies,
   AlertZeroStartDependencies
-> = async (pluginInitializerContext: PluginInitializerContext<AlertZeroConfig>) => {
+> = async (pluginInitializerContext: PluginInitializerContext<AlertZeroConfigSchemaType>) => {
   const { AlertZeroPlugin } = await import('./plugin');
   return new AlertZeroPlugin(pluginInitializerContext);
 };

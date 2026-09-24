@@ -8,7 +8,7 @@
 import { coreMock } from '@kbn/core/server/mocks';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { loggerMock } from '@kbn/logging-mocks';
-import type { AlertZeroConfig } from './config';
+import type { AlertZeroConfigSchemaType } from './config';
 import { ALERTZERO_API_PRIVILEGE_READ, ALERTZERO_API_PRIVILEGE_WRITE } from '../common/constants';
 import { AlertZeroPlugin } from './plugin';
 import { initializeManagedWorkflows } from './managed_workflows/initialize_managed_workflows';
@@ -39,12 +39,15 @@ jest.mock('./routes/register_routes', () => ({
   registerRoutes: jest.fn(),
 }));
 
-const createConfig = (overrides: Partial<AlertZeroConfig> = {}): AlertZeroConfig => ({
+const createConfig = (
+  overrides: Partial<AlertZeroConfigSchemaType> = {}
+): AlertZeroConfigSchemaType => ({
   enabled: false,
+  enableExperimental: [],
   ...overrides,
 });
 
-const createContext = (config: AlertZeroConfig) => {
+const createContext = (config: AlertZeroConfigSchemaType) => {
   const context = {
     logger: { get: () => loggerMock.create() },
     config: { get: () => config },

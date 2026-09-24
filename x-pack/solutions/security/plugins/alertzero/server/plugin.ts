@@ -22,7 +22,8 @@ import {
   ALERTZERO_FEATURE_ID,
   ALERTZERO_PLUGIN_NAME,
 } from '../common/constants';
-import type { AlertZeroConfig } from './config';
+import type { AlertZeroConfig, AlertZeroConfigSchemaType } from './config';
+import { createConfig } from './create_config';
 import type {
   AlertZeroPluginSetup,
   AlertZeroPluginStart,
@@ -64,9 +65,9 @@ export class AlertZeroPlugin
   private proposals?: AlertZeroStartDependencies['proposals'];
   private agentBuilderConversations?: AlertZeroStartDependencies['agentBuilder']['conversations'];
 
-  constructor(context: PluginInitializerContext<AlertZeroConfig>) {
+  constructor(context: PluginInitializerContext<AlertZeroConfigSchemaType>) {
     this.logger = context.logger.get();
-    this.config = context.config.get();
+    this.config = createConfig(context);
   }
 
   setup(
