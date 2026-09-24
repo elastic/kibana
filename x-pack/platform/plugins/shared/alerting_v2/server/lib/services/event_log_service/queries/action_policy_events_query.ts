@@ -32,6 +32,10 @@ export interface BuildActionPolicyEventsQueryParams {
   spaceId: string;
   /** Inclusive lower bound applied to `@timestamp`. */
   startDate: string;
+  /** Inclusive upper bound applied to `@timestamp`. Unbounded when omitted. */
+  endDate?: string;
+  /** Sort direction on `@timestamp`. Defaults to `desc` (newest first). */
+  sortOrder?: 'asc' | 'desc';
   outcomes?: PolicyExecutionOutcome[];
   policyIds?: string[];
   ruleIds?: string[];
@@ -94,7 +98,7 @@ export const buildFindActionPolicyEventsQuery = (
  * privilege (`executionHistory.read`) is the sole gate; see spec §6.4.
  *
  * `track_total_hits: true` is set so callers see precise counts (the list
- * `totalEvents` and the "new events since" badge depend on exact totals).
+ * `total` and the "new events since" badge depend on exact totals).
  */
 const buildBaseActionPolicyEventsQuery = (
   params: BuildActionPolicyEventsQueryParams
@@ -102,7 +106,14 @@ const buildBaseActionPolicyEventsQuery = (
   const filters: QueryDslQueryContainer[] = [
     { term: { 'event.provider': ACTION_POLICY_EVENT_PROVIDER } },
     { term: { 'kibana.space_ids': params.spaceId } },
-    { range: { '@timestamp': { gte: params.startDate } } },
+    {
+      range: {
+        '@timestamp': {
+          gte: params.startDate,
+          ...(params.endDate && { lte: params.endDate }),
+        },
+      },
+    },
     actionFilter(params.outcomes),
   ];
 
@@ -121,7 +132,7 @@ const buildBaseActionPolicyEventsQuery = (
 
   return {
     query: { bool: { filter: filters } },
-    sort: [{ '@timestamp': { order: 'desc' } }],
+    sort: [{ '@timestamp': { order: params.sortOrder ?? 'desc' } }],
     track_total_hits: true,
   };
 };

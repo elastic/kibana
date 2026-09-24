@@ -5,6 +5,16 @@
  * 2.0.
  */
 
+export {
+  EscalationQueue,
+  EscalationCard,
+  AssignToUsers,
+  EscalationMetaInfo,
+  LinkedInvestigationsBadge,
+  type EscalationQueueItem,
+  type EscalationStatus,
+} from './src/components/escalation_queue';
+
 export { ActionButton } from './src/components/actions/action_button';
 export {
   BaseActions,
@@ -29,17 +39,37 @@ export {
   type ConversationDetailsFlyoutFooterProps,
 } from './src/components/details/flyout_footer';
 export {
+  ConversationHeaderBlocks,
+  type ConversationHeaderBlocksProps,
   InvestigationHeaderBlocks,
   type InvestigationHeaderBlocksProps,
 } from './src/components/details/header_blocks';
+export {
+  EscalationFlyoutHeader,
+  type EscalationFlyoutHeaderProps,
+} from './src/components/details/escalation_flyout_header';
 export { OverviewTab } from './src/components/details/details_flyout_tab_contents';
 export { DetailsBlock } from './src/components/details/detail_block';
 
 export {
+  AttachmentSummarySection,
+  type AttachmentSummarySectionProps,
+  AttachmentSummaryList,
+  type AttachmentSummaryListProps,
+  selectSummaryAttachments,
+  type SummaryAttachment,
+  SUMMARY_ATTACHMENT_TYPES,
+  type SummaryAttachmentType,
+} from './src/components/attachment_summary';
+
+export {
   registerAgenticInvestigationTemplateUI,
   type RegisterAgenticInvestigationTemplateUIOptions,
+  registerEscalationTemplateUI,
+  type RegisterEscalationTemplateUIOptions,
   getInvestigationTabIds,
 } from './src/template_ui/register';
+export { type RenderAssignees, type AssigneesSlotRenderProps } from './src/template_ui/types';
 export { conversationToInvestigation } from './src/template_ui/conversation_to_investigation';
 
 export { getEmptyValue, getActionButtonIconProps, isDecided } from './src/components/helpers';
@@ -51,7 +81,7 @@ export {
   CONVERSATION_CATEGORY_COLORS,
 } from './src/types/queue';
 
-export { Impact } from './src/components/filters/impact/impact';
+export { Impact, investigationEntityIds } from './src/components/filters/impact';
 
 export { BaseActionModal } from './src/components/modals/base_action_modal';
 export { AssignActionModal } from './src/components/modals/assign_action_modal';

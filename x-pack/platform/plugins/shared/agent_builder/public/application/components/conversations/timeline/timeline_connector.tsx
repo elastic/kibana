@@ -22,7 +22,7 @@ export const TimelineConnector: React.FC = () => {
   const agentId = useAgentId();
   const { agent } = useAgentBuilderAgentById(agentId);
   const items = useTimelineItems();
-  const { isResuming } = useConversationStream();
+  const { isResuming, isStreaming } = useConversationStream();
   const lastTurn = items.filter((item): item is AgentTurnItem => item.kind === 'agentTurn').at(-1);
 
   return (
@@ -33,6 +33,7 @@ export const TimelineConnector: React.FC = () => {
         agent={agent}
         conversationAttachments={conversation?.attachments}
         isResuming={isResuming}
+        isStreaming={isStreaming}
       />
     </>
   );
