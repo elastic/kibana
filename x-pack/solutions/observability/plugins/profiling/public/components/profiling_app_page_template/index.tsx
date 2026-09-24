@@ -12,13 +12,10 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import type { NoDataPageProps } from '@kbn/shared-ux-page-no-data-types';
-import { KbnWarningCallout } from '@kbn/ui-callout';
 import { AppHeader } from '@kbn/app-header';
 import { IndexLifecyclePhaseSelectOption } from '../../../common/storage_explorer';
 import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
 import { PrimaryProfilingSearchBar } from './primary_profiling_search_bar';
-import { useLocalStorage } from '../../hooks/use_local_storage';
-import { useProfilingSetupStatus } from '../contexts/profiling_setup_status/use_profiling_setup_status';
 import { useProfilingRouter } from '../../hooks/use_profiling_router';
 import { useDefaultTimeRange } from '../../hooks/use_default_time_range';
 import { useBackNavigation } from '../contexts/back_navigation/use_back_navigation';
@@ -50,12 +47,6 @@ export function ProfilingAppPageTemplate({
   const {
     start: { observabilityShared },
   } = useProfilingDependencies();
-
-  const [privilegesWarningDismissed, setPrivilegesWarningDismissed] = useLocalStorage(
-    'profiling.privilegesWarningDismissed',
-    false
-  );
-  const { profilingSetupStatus } = useProfilingSetupStatus();
 
   const { PageTemplate: ObservabilityPageTemplate } = observabilityShared.navigation;
 
@@ -167,31 +158,6 @@ export function ProfilingAppPageTemplate({
               {customSearchBar ?? <PrimaryProfilingSearchBar />}
             </EuiFlexItem>
           )}
-          {profilingSetupStatus?.unauthorized === true && privilegesWarningDismissed !== true ? (
-            <EuiFlexItem grow={false}>
-              <KbnWarningCallout
-                title={i18n.translate('xpack.profiling.privilegesWarningTitle', {
-                  defaultMessage: 'User privilege limitation',
-                })}
-                text={i18n.translate('xpack.profiling.privilegesWarningDescription', {
-                  defaultMessage:
-                    'Due to privileges issues we could not check the Universal Profiling status. If you encounter any issues or if data fails to load, please contact your administrator for assistance.',
-                })}
-                actionProps={{
-                  primary: {
-                    children: i18n.translate('xpack.profiling.dismissPrivilegesCallout', {
-                      defaultMessage: 'Dismiss',
-                    }),
-                    onClick: () => {
-                      setPrivilegesWarningDismissed(true);
-                    },
-                    'data-test-subj': 'profilingProfilingAppPageTemplateDismissButton',
-                  },
-                }}
-                announceOnMount
-              />
-            </EuiFlexItem>
-          ) : null}
           <EuiFlexItem>{children}</EuiFlexItem>
         </EuiFlexGroup>
       </ObservabilityPageTemplate>

@@ -33,12 +33,14 @@ import {
 
 export interface McpClientDetailsProps {
   clientDetails: McpClientDetailsData;
+  spaceId: string;
   presentation: McpClientDetailsPresentation;
   onClose: () => void;
 }
 
 export const McpClientDetails = ({
   clientDetails,
+  spaceId,
   presentation,
   onClose,
 }: McpClientDetailsProps) => {
@@ -68,7 +70,11 @@ export const McpClientDetails = ({
             <h3>{labels.details.flyout.serverDetailsHeading}</h3>
           </EuiTitle>
           <EuiSpacer size="l" />
-          <McpClientDetailsContent clientDetails={clientDetails} presentation="flyout" />
+          <McpClientDetailsContent
+            clientDetails={clientDetails}
+            spaceId={spaceId}
+            presentation="flyout"
+          />
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
@@ -97,7 +103,11 @@ export const McpClientDetails = ({
           {labels.details.modal.description}
         </EuiText>
         <EuiSpacer size="l" />
-        <McpClientDetailsContent clientDetails={clientDetails} presentation="modal" />
+        <McpClientDetailsContent
+          clientDetails={clientDetails}
+          spaceId={spaceId}
+          presentation="modal"
+        />
       </EuiModalBody>
       <EuiModalFooter>
         <EuiButton onClick={onClose} fill data-test-subj="mcpClientDetailsCloseButton">

@@ -4909,7 +4909,7 @@ This is the type of text _investigation guides_ will contain.`;
   });
 
   describe('missing UIAM API key tagging', () => {
-    test('should add missing UIAM API key tag when UIAM key creation fails in serverless', async () => {
+    test('should defer missing UIAM API key tagging until rule execution', async () => {
       // Set up serverless environment
       const serverlessRulesClient = new RulesClient({
         ...rulesClientParams,
@@ -4957,11 +4957,11 @@ This is the type of text _investigation guides_ will contain.`;
 
       await serverlessRulesClient.create({ data });
 
-      // Verify the missing UIAM key tag was added
+      // Rule execution owns the missing UIAM key tag.
       expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
         RULE_SAVED_OBJECT_TYPE,
         expect.objectContaining({
-          tags: expect.arrayContaining(['foo', 'Missing Elastic Cloud API Key']),
+          tags: ['foo'],
         }),
         expect.anything()
       );

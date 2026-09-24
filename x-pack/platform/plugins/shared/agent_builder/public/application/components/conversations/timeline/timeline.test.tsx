@@ -10,12 +10,17 @@ import { render, screen } from '@testing-library/react';
 import type { TimelineItem } from './types';
 import { createUserMessageEvent } from './items/user_message_event.factory';
 import { createAttachmentAddedEvent } from './items/attachment_added_event.factory';
-import { createAttachmentItem } from './items/timeline_item.factory';
+import { createAttachmentItem, createCustomEventItem } from './items/timeline_item.factory';
 import { Timeline } from './timeline';
 
 jest.mock('./items/user_message_event', () => ({ UserMessageEvent: () => null }));
 jest.mock('./items/attachment_event', () => ({
   AttachmentEvent: () => <div data-test-subj="attachmentEvent" />,
+}));
+jest.mock('./items/custom_event', () => ({
+  CustomEvent: ({ isStreaming }: { isStreaming?: boolean }) => (
+    <div data-test-subj="customEvent" data-streaming={String(isStreaming)} />
+  ),
 }));
 jest.mock('./agent_turn', () => ({
   AgentTurn: ({ isResuming }: { isResuming?: boolean }) => (
@@ -35,6 +40,7 @@ describe('Timeline', () => {
         steps: [],
       },
       createAttachmentItem({ key: 'attachment-added-1' }),
+      createCustomEventItem({ key: 'custom-event-1' }),
     ];
 
     const { container } = render(<Timeline items={items} />);
@@ -43,8 +49,20 @@ describe('Timeline', () => {
       Array.from(container.querySelectorAll('[data-timeline-item-key]')).map((el) =>
         el.getAttribute('data-timeline-item-key')
       )
-    ).toEqual(['round-1::user_message', 'round-1::execution', 'attachment-added-1']);
+    ).toEqual([
+      'round-1::user_message',
+      'round-1::execution',
+      'attachment-added-1',
+      'custom-event-1',
+    ]);
     expect(screen.getByTestId('attachmentEvent')).toBeInTheDocument();
+    expect(screen.getByTestId('customEvent')).toBeInTheDocument();
+  });
+
+  it('passes the streaming state to custom events', () => {
+    render(<Timeline items={[createCustomEventItem()]} isStreaming />);
+
+    expect(screen.getByTestId('customEvent')).toHaveAttribute('data-streaming', 'true');
   });
 
   describe('resume loading', () => {
