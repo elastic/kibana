@@ -241,6 +241,11 @@ describe('step validation', () => {
       expect(outcomeStep.validate).toBeUndefined();
     });
 
+    it('outcome triggers both lifecycle fields, so the no-data rule blocks "Next"', () => {
+      const outcomeStep = getSteps(true).steps.find((s) => s.id === 'outcome')!;
+      expect(outcomeStep.fields).toEqual(['recovery', 'noData']);
+    });
+
     it('builderCondition does not inherit queryCommitted meetsPrecondition from the ES|QL registry', () => {
       const builderStep = getSteps(true, 'threshold').steps.find(
         (s) => s.id === 'builderCondition'

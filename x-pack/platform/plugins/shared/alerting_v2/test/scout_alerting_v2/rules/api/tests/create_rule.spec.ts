@@ -483,7 +483,10 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
       const body = buildCreateRuleData({
         metadata: { name: `no-data-${strategy}-rule` },
         no_data: { strategy },
-        query: { base: 'FROM logs-* | LIMIT 1' },
+        query: {
+          base: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
+          breach: { segment: 'WHERE count >= 1' },
+        },
       });
       const response = await apiClient.post(testData.RULE_API_PATH, {
         headers: writerHeaders,
@@ -498,7 +501,10 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
     const body = buildCreateRuleData({
       metadata: { name: 'no-data-alert-rule' },
       no_data: { strategy: 'alert' },
-      query: { base: 'FROM logs-* | LIMIT 1' },
+      query: {
+        base: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
+        breach: { segment: 'WHERE count >= 1' },
+      },
     });
     const response = await apiClient.post(testData.RULE_API_PATH, {
       headers: writerHeaders,
@@ -507,6 +513,23 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
     expect(response).toHaveStatusCode(400);
     expect(response.body.code).toBe('BAD_REQUEST');
   });
+
+  apiTest(
+    'validation: rejects a classifying no_data strategy that has no way to tell absence from a breach',
+    async ({ apiClient }) => {
+      const body = buildCreateRuleData({
+        metadata: { name: 'no-data-indistinguishable-rule' },
+        no_data: { strategy: 'keep_last' },
+        query: { base: 'FROM logs-* | STATS count = COUNT(*) BY host.name | WHERE count >= 1' },
+      });
+      const response = await apiClient.post(testData.RULE_API_PATH, {
+        headers: writerHeaders,
+        body,
+      });
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
+    }
+  );
 
   apiTest('create: returns 201 with a breach segment', async ({ apiClient }) => {
     const body = buildCreateRuleData({

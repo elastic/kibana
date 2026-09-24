@@ -195,6 +195,26 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
   );
 
   apiTest(
+    'validation: rejects a no_data strategy the merged query cannot tell apart from a breach',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'rule-no-data-indistinguishable' } })
+      );
+
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: { no_data: { strategy: 'keep_last' } },
+      });
+
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('INVALID_RULE_QUERY_CONFIG');
+
+      const persisted = await apiServices.alertingV2.rules.get(created.id);
+      expect(persisted.no_data).toStrictEqual({ strategy: 'ignore' });
+    }
+  );
+
+  apiTest(
     'validation: rejects the "alert" no_data strategy',
     async ({ apiClient, apiServices }) => {
       const created = await apiServices.alertingV2.rules.create(

@@ -31,10 +31,12 @@ import {
   getRootEsqlQuery,
   groupingSchema,
   stateTransitionSchema,
+  isAbsenceDistinguishableFromBreach,
   isStateTransitionAllowed,
   isLifecycleConfigAllowedForKind,
   isRecoveryConditionUsableWithBreach,
   isRecoveryTransitionConsistentWithStrategy,
+  REQUIRE_DISTINGUISHABLE_ABSENCE_MESSAGE,
 } from '@kbn/alerting-v2-schemas';
 import { resolveArtifactId } from '@kbn/alerting-v2-utils';
 import { buildRulePayload } from '@kbn/alerting-v2-utils';
@@ -552,6 +554,13 @@ export const executeRuleOperations = async (
 
   if (!isLifecycleConfigAllowedForKind(next)) {
     throw new RuleOperationValidationError('Signal rules cannot set recovery or no_data.');
+  }
+
+  if (!isAbsenceDistinguishableFromBreach(next)) {
+    throw new RuleOperationValidationError(
+      `${REQUIRE_DISTINGUISHABLE_ABSENCE_MESSAGE} Without one, a group that stops breaching ` +
+        'disappears from both queries and is read as no data rather than recovered.'
+    );
   }
 
   if (!isRecoveryTransitionConsistentWithStrategy(next)) {

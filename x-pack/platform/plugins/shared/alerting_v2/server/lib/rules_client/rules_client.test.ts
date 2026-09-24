@@ -1279,12 +1279,13 @@ describe('RulesClient', () => {
       expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
     });
 
-    it('allows a no-data strategy without a presence query, which falls back to the base query', async () => {
+    it('allows a no-data strategy without a presence query when the stored query has a breach segment', async () => {
       const client = createClient();
 
       const existingAttributes: RuleSavedObjectAttributes = {
         ...baseSoAttrs,
         kind: 'alert',
+        query: { base: 'FROM logs-*', breach: { segment: 'WHERE status == "error"' } },
       };
 
       rulesSavedObjectService.get.mockResolvedValueOnce({
@@ -1299,6 +1300,30 @@ describe('RulesClient', () => {
           data: { no_data: { strategy: 'keep_last' } },
         })
       ).resolves.not.toThrow();
+    });
+
+    it('rejects a no-data strategy the merged query cannot tell apart from a breach', async () => {
+      const client = createClient();
+
+      const existingAttributes: RuleSavedObjectAttributes = {
+        ...baseSoAttrs,
+        kind: 'alert',
+      };
+
+      rulesSavedObjectService.get.mockResolvedValueOnce({
+        id: 'rule-id-indistinguishable-no-data',
+        attributes: existingAttributes,
+        version: 'WzEsMV0=',
+      });
+
+      await expect(
+        client.updateRule({
+          id: 'rule-id-indistinguishable-no-data',
+          data: { no_data: { strategy: 'keep_last' } },
+        })
+      ).rejects.toThrow('requires query.breach or no_data.query');
+
+      expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
     });
 
     it('allows setting state_transition to null on a signal rule (removing it)', async () => {

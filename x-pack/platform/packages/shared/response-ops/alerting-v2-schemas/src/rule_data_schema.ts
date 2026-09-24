@@ -153,7 +153,7 @@ const breachSchema = z
   })
   .strict()
   .describe(
-    'Optional ES|QL clause appended to `query.base`. If omitted, every row from `query.base` is a match.'
+    'Optional ES|QL clause appended to `query.base`. If omitted, every row from `query.base` is a match, and a `no_data` strategy other than `ignore` then requires `no_data.query`.'
   )
   .meta({ id: 'alerting_rule_breach' });
 
@@ -257,7 +257,7 @@ export const noDataStrategy = noDataStrategySchema.enum;
 export type NoDataStrategy = z.infer<typeof noDataStrategySchema>;
 
 const NO_DATA_PRESENCE_QUERY_DESCRIPTION =
-  'Optional ES|QL query that checks whether a group has data. If omitted, `query.base` is used.';
+  'Optional ES|QL query that checks whether a group has data. If omitted, `query.base` is used, which then has to be a presence query in its own right — so `query.breach` is required.';
 
 /**
  * A no-data mode that classifies absence, and therefore may carry a presence
@@ -299,7 +299,7 @@ export const noDataSchema = z
     ),
   ])
   .describe(
-    'What the rule does when a group has no data. Required when `kind` is `alert`. Not allowed when `kind` is `signal`.'
+    'What the rule does when a group has no data. Required when `kind` is `alert`. Not allowed when `kind` is `signal`. Any strategy other than `ignore` requires either `query.breach` or `no_data.query`, so that a group with no data can be told apart from one that stopped breaching.'
   )
   .meta({ id: 'alerting_rule_no_data' });
 
@@ -576,7 +576,7 @@ interface RuleLifecycleShape {
   kind?: string;
   query?: { breach?: { segment?: string } | null };
   recovery?: { strategy?: string } | null;
-  no_data?: { strategy?: string } | null;
+  no_data?: { strategy?: string; query?: string } | null;
   state_transition?: { recovering?: unknown } | null;
 }
 
@@ -610,6 +610,20 @@ export const isRecoveryConditionUsableWithBreach = (data: RuleLifecycleShape): b
   data.recovery?.strategy !== recoveryStrategy.condition || hasBreachCondition(data.query?.breach);
 
 /**
+ * Without a breach segment, `base` is both the breach query and the fallback
+ * presence query, so a group that stops breaching disappears from both and is
+ * read as "no data" rather than "recovered" — under `keep_last` the episode
+ * would never close. Only the author knows which `base` means, so make them say
+ * it: split the condition into `breach`, or state the presence query.
+ */
+export const isAbsenceDistinguishableFromBreach = (data: RuleLifecycleShape): boolean => {
+  const strategy = data.no_data?.strategy;
+  if (strategy == null || strategy === noDataStrategy.ignore) return true;
+
+  return data.no_data?.query != null || hasBreachCondition(data.query?.breach);
+};
+
+/**
  * `alert` is stored and executed, but the write APIs do not accept it yet: the
  * engine only classifies groups that already have an episode, so the strategy
  * cannot open one for a group that never breached.
@@ -620,6 +634,14 @@ export const isNoDataStrategyWritable = (data: RuleLifecycleShape): boolean =>
 const rejectAlertNoDataStrategy = {
   message: 'no_data.strategy "alert" is not currently supported.',
   path: ['no_data', 'strategy'],
+};
+
+export const REQUIRE_DISTINGUISHABLE_ABSENCE_MESSAGE =
+  'A no_data strategy other than "ignore" requires query.breach or no_data.query.';
+
+const requireDistinguishableAbsence = {
+  message: REQUIRE_DISTINGUISHABLE_ABSENCE_MESSAGE,
+  path: ['no_data', 'query'],
 };
 
 /**
@@ -683,6 +705,7 @@ const applyCreateRuleRefinements = <T extends z.ZodType<CreateRuleRefinementFiel
       message: 'recovery.strategy "condition" requires query.breach.',
       path: ['recovery', 'segment'],
     })
+    .refine(isAbsenceDistinguishableFromBreach, requireDistinguishableAbsence)
     .refine(isNoDataStrategyWritable, rejectAlertNoDataStrategy)
     .refine(isRecoveryTransitionConsistentWithStrategy, {
       message: 'state_transition.recovering has no effect when recovery.strategy is "manual".',

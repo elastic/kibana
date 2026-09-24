@@ -351,7 +351,7 @@ describe('schema_to_skill_docs', () => {
       const doc = generateRuleOperationsDoc();
       expect(doc).toContain('##### `query`');
       expect(doc).toContain(
-        '| `breach` | object | optional | Optional ES\\|QL clause appended to `query.base`. If omitted, every row from `query.base` is a match. |'
+        '| `breach` | object | optional | Optional ES\\|QL clause appended to `query.base`. If omitted, every row from `query.base` is a match, and a `no_data` strategy other than `ignore` then requires `no_data.query`. |'
       );
     });
 

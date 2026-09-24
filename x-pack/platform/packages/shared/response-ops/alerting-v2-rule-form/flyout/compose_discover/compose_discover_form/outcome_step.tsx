@@ -40,7 +40,10 @@ export function OutcomeStep({
   isEditing,
   renderCustomRecovery,
 }: OutcomeStepProps) {
-  const { setValue } = useFormContext<FormValues>();
+  const {
+    setValue,
+    formState: { errors },
+  } = useFormContext<FormValues>();
   const kind = useWatch<FormValues, 'kind'>({ name: 'kind' });
   const isAlert = kind === 'alert';
   const noData = useWatch<FormValues, 'noData'>({ name: 'noData' });
@@ -75,6 +78,7 @@ export function OutcomeStep({
               setValue('noData', { ...noData, strategy }, { shouldDirty: true })
             }
             compressed
+            error={errors.noData?.message}
             data-test-subj="composeDiscoverNoDataStrategy"
           />
           <EuiSpacer size="m" />

@@ -10,9 +10,11 @@ import { isEqual } from 'lodash';
 import type { CreateRuleData, RuleResponse, UpdateRuleData } from '@kbn/alerting-v2-schemas';
 import {
   IMMUTABLE_RULE_FIELDS,
+  isAbsenceDistinguishableFromBreach,
   isLifecycleConfigAllowedForKind,
   isLifecycleConfigPresentForKind,
   isRecoveryConditionUsableWithBreach,
+  REQUIRE_DISTINGUISHABLE_ABSENCE_MESSAGE,
   isRecoveryTransitionConsistentWithStrategy,
   recoveryStrategy,
   validateComposedEsqlQuery,
@@ -359,6 +361,12 @@ export function validateMergedRuleAttributes(
     {
       valid: isRecoveryConditionUsableWithBreach(attrs),
       message: 'recovery.strategy "condition" requires query.breach.',
+      code: ALERTING_ERROR_CODES.INVALID_RULE_QUERY_CONFIG,
+      details: { rule_id: ruleId },
+    },
+    {
+      valid: isAbsenceDistinguishableFromBreach(attrs),
+      message: REQUIRE_DISTINGUISHABLE_ABSENCE_MESSAGE,
       code: ALERTING_ERROR_CODES.INVALID_RULE_QUERY_CONFIG,
       details: { rule_id: ruleId },
     },

@@ -309,7 +309,7 @@ describe('executeRuleOperations', () => {
       const ops: RuleOperation[] = [
         {
           operation: 'set_query',
-          query: { base: 'FROM metrics-* | WHERE cpu > 0.9' },
+          query: { base: 'FROM metrics-*', breach: { segment: 'WHERE cpu > 0.9' } },
           no_data: { strategy: 'alert' },
         },
       ];
@@ -492,7 +492,21 @@ describe('executeRuleOperations', () => {
       expect(result.success).toBe(false);
     });
 
-    it('accepts a classifying strategy with no presence query, falling back to the base query', async () => {
+    it('accepts a classifying strategy with no presence query when the query has a breach segment', async () => {
+      const ops: RuleOperation[] = [
+        {
+          operation: 'set_query',
+          query: { base: 'FROM metrics-*', breach: { segment: 'WHERE cpu > 0.9' } },
+          no_data: { strategy: 'keep_last' },
+        },
+      ];
+
+      const result = await executeRuleOperations({}, ops);
+
+      expect(result.data.no_data).toEqual({ strategy: 'keep_last' });
+    });
+
+    it('rejects a classifying strategy when neither a breach segment nor a presence query is set', async () => {
       const ops: RuleOperation[] = [
         {
           operation: 'set_query',
@@ -501,9 +515,9 @@ describe('executeRuleOperations', () => {
         },
       ];
 
-      const result = await executeRuleOperations({}, ops);
-
-      expect(result.data.no_data).toEqual({ strategy: 'keep_last' });
+      await expect(executeRuleOperations({}, ops)).rejects.toThrow(
+        'requires query.breach or no_data.query'
+      );
     });
 
     it('passes when a classifying strategy carries its own presence query', async () => {

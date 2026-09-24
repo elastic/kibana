@@ -945,11 +945,38 @@ describe('utils', () => {
       expect(() => validateMergedRuleAttributes('rule-1', attrs)).not.toThrow();
     });
 
-    it('does not require a presence query — the base query is the fallback', () => {
+    it('does not require a presence query when the breach segment already marks presence', () => {
       const attrs = createRuleSoAttributes({
         kind: 'alert',
         query: { base: 'FROM logs-*', breach: { segment: 'WHERE error' } },
         no_data: { strategy: 'keep_last' },
+      });
+
+      expect(() => validateMergedRuleAttributes('rule-1', attrs)).not.toThrow();
+    });
+
+    it('throws INVALID_RULE_QUERY_CONFIG when a classifying no-data strategy has neither a breach segment nor a presence query', () => {
+      const attrs = createRuleSoAttributes({
+        kind: 'alert',
+        query: { base: 'FROM logs-* | WHERE error' },
+        no_data: { strategy: 'keep_last' },
+      });
+
+      expect(() => validateMergedRuleAttributes('rule-1', attrs)).toThrow(
+        expect.objectContaining({
+          isBoom: true,
+          output: expect.objectContaining({ statusCode: 400 }),
+          message: 'A no_data strategy other than "ignore" requires query.breach or no_data.query.',
+          data: { code: 'INVALID_RULE_QUERY_CONFIG', details: { rule_id: 'rule-1' } },
+        })
+      );
+    });
+
+    it('does not require a breach segment when a presence query is set', () => {
+      const attrs = createRuleSoAttributes({
+        kind: 'alert',
+        query: { base: 'FROM logs-* | WHERE error' },
+        no_data: { strategy: 'keep_last', query: 'FROM logs-*' },
       });
 
       expect(() => validateMergedRuleAttributes('rule-1', attrs)).not.toThrow();

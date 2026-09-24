@@ -12,6 +12,7 @@ import {
   createRuleDataBaseSchema,
   createRuleDataSchema,
   isLifecycleConfigAllowedForKind,
+  isAbsenceDistinguishableFromBreach,
   isRecoveryConditionUsableWithBreach,
   isRecoveryTransitionConsistentWithStrategy,
   isStateTransitionAllowed,
@@ -572,10 +573,29 @@ describe('createRuleDataSchema', () => {
     });
 
     it.each(['keep_last', 'resolve'] as const)(
-      'accepts strategy "%s" without a presence query',
+      'rejects strategy "%s" when neither query.breach nor no_data.query says what presence means',
+      (strategy) => {
+        const result = createRuleDataSchema.safeParse({
+          ...validCreateData,
+          no_data: { strategy },
+        });
+        expect(result.success).toBe(false);
+        expect(result.error?.issues).toEqual([
+          expect.objectContaining({
+            path: ['no_data', 'query'],
+            message:
+              'A no_data strategy other than "ignore" requires query.breach or no_data.query.',
+          }),
+        ]);
+      }
+    );
+
+    it.each(['keep_last', 'resolve'] as const)(
+      'accepts strategy "%s" without a presence query when query.breach is set',
       (strategy) => {
         const result = createRuleDataSchema.parse({
           ...validCreateData,
+          query: composedQuery,
           no_data: { strategy },
         });
         expect(result.no_data).toEqual({ strategy });
@@ -2041,6 +2061,49 @@ describe('isRecoveryConditionUsableWithBreach', () => {
 
   it('returns true when recovery is absent', () => {
     expect(isRecoveryConditionUsableWithBreach({ query: {} })).toBe(true);
+  });
+});
+
+describe('isAbsenceDistinguishableFromBreach', () => {
+  it.each(['keep_last', 'resolve', 'alert'])(
+    'returns false for strategy "%s" when the query is base-only and no presence query is set',
+    (strategy) => {
+      expect(isAbsenceDistinguishableFromBreach({ query: {}, no_data: { strategy } })).toBe(false);
+    }
+  );
+
+  it.each(['keep_last', 'resolve', 'alert'])(
+    'returns true for strategy "%s" when a breach block is present',
+    (strategy) => {
+      expect(
+        isAbsenceDistinguishableFromBreach({
+          query: { breach: { segment: 'WHERE cpu > 0.9' } },
+          no_data: { strategy },
+        })
+      ).toBe(true);
+    }
+  );
+
+  it.each(['keep_last', 'resolve', 'alert'])(
+    'returns true for strategy "%s" when a presence query is set',
+    (strategy) => {
+      expect(
+        isAbsenceDistinguishableFromBreach({
+          query: {},
+          no_data: { strategy, query: 'FROM heartbeat-* | LIMIT 1' },
+        })
+      ).toBe(true);
+    }
+  );
+
+  it('returns true for strategy "ignore"', () => {
+    expect(isAbsenceDistinguishableFromBreach({ query: {}, no_data: { strategy: 'ignore' } })).toBe(
+      true
+    );
+  });
+
+  it('returns true when no_data is absent', () => {
+    expect(isAbsenceDistinguishableFromBreach({ query: {} })).toBe(true);
   });
 });
 
