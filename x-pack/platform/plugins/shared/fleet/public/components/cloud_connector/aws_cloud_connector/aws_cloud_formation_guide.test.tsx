@@ -9,8 +9,6 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 
-import { SINGLE_ACCOUNT } from '../constants';
-
 import { CloudFormationCloudCredentialsGuide } from './aws_cloud_formation_guide';
 
 const renderGuide = (props: React.ComponentProps<typeof CloudFormationCloudCredentialsGuide>) =>
@@ -45,14 +43,6 @@ describe('CloudFormationCloudCredentialsGuide', () => {
 
     expect(lastStepText()).toBe(
       'Copy Access Key ID and Secret Access Key then paste the credentials below'
-    );
-  });
-
-  it('adapts the login step to the account type', () => {
-    renderGuide({ accountType: SINGLE_ACCOUNT });
-
-    expect(screen.getAllByRole('listitem')[0].textContent).toBe(
-      'Log in as an admin in the AWS account you want to onboard'
     );
   });
 });

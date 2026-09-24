@@ -1338,25 +1338,24 @@ describe('Workload Identity template URLs', () => {
 
   describe('parseElasticCloudHost', () => {
     it.each([
-      ['us-east-1.aws.found.io', 'us-east-1', 'aws', 'production'],
-      ['us-central1.gcp.cloud.es.io', 'us-central1', 'gcp', 'production'],
-      ['eastus2.azure.elastic-cloud.com', 'eastus2', 'azure', 'production'],
-      ['us-gov-east-1.aws.elastic-cloud.com', 'us-gov-east-1', 'aws', 'production'],
-      ['eu-west-1.aws.elastic.cloud', 'eu-west-1', 'aws', 'production'],
-      ['eu-west-1.aws.qa.cld.elstc.co', 'eu-west-1', 'aws', 'qa'],
-      ['us-central1.gcp.qa.elastic.cloud', 'us-central1', 'gcp', 'qa'],
-      ['us-east-1.aws.staging.foundit.no', 'us-east-1', 'aws', 'staging'],
-      ['us-east-1.aws.staging.elastic.cloud', 'us-east-1', 'aws', 'staging'],
-      ['EU-WEST-1.AWS.QA.CLD.ELSTC.CO:9243', 'eu-west-1', 'aws', 'qa'],
-    ])('parses %s', (host, region, csp, environment) => {
-      expect(parseElasticCloudHost(host)).toEqual({ region, csp, environment });
+      ['us-east-1.aws.found.io', 'us-east-1', 'aws'],
+      ['us-central1.gcp.cloud.es.io', 'us-central1', 'gcp'],
+      ['eastus2.azure.elastic-cloud.com', 'eastus2', 'azure'],
+      ['us-gov-east-1.aws.elastic-cloud.com', 'us-gov-east-1', 'aws'],
+      ['eu-west-1.aws.elastic.cloud', 'eu-west-1', 'aws'],
+      ['eu-west-1.aws.qa.cld.elstc.co', 'eu-west-1', 'aws'],
+      ['us-central1.gcp.qa.elastic.cloud', 'us-central1', 'gcp'],
+      ['us-east-1.aws.staging.foundit.no', 'us-east-1', 'aws'],
+      ['us-east-1.aws.staging.elastic.cloud', 'us-east-1', 'aws'],
+      ['EU-WEST-1.AWS.QA.CLD.ELSTC.CO:9243', 'eu-west-1', 'aws'],
+    ])('parses %s', (host, region, csp) => {
+      expect(parseElasticCloudHost(host)).toEqual({ region, csp });
     });
 
     it('leaves the CSP undefined for hosts that do not follow the Elastic Cloud layout', () => {
       expect(parseElasticCloudHost('my-ece.example.com')).toEqual({
         region: 'my-ece',
         csp: undefined,
-        environment: 'production',
       });
     });
 

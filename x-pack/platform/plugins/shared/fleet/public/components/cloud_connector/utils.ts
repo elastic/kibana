@@ -212,7 +212,6 @@ export const getCloudHostFromCloudId = (cloudId: string | undefined): string | u
 export interface ElasticCloudHostInfo {
   region?: string;
   csp?: CloudProvider;
-  environment: ElasticCloudEnvironment;
 }
 
 const REGION_LABEL_REGEX = /^[a-z0-9-]+$/;
@@ -253,7 +252,6 @@ export const parseElasticCloudHost = (
   return {
     region: normalizeRegion(region),
     csp: isCloudProvider(csp) ? csp : undefined,
-    environment: getElasticCloudEnvironmentFromHost(host) ?? ELASTIC_CLOUD_ENVIRONMENT_PRODUCTION,
   };
 };
 
