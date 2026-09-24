@@ -66,12 +66,12 @@ export const registerAgenticInvestigationTemplateUI = ({
 }: RegisterAgenticInvestigationTemplateUIOptions): void => {
   const [overviewTabId] = getInvestigationTabIds(templateId);
 
-  conversationTemplates.registerTab(overviewTabId, () => ({
+  conversationTemplates.registerTab(overviewTabId, ({ attachmentsService }) => ({
     label: DETAILS_FLYOUT_LABELS.tabs.overview,
     content: function OverviewTabContent({ conversation }) {
       return (
         <Suspense fallback={<EuiSkeletonText lines={3} />}>
-          <LazyOverviewSlot conversation={conversation} />
+          <LazyOverviewSlot conversation={conversation} attachmentsService={attachmentsService} />
         </Suspense>
       );
     },
