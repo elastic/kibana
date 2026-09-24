@@ -92,6 +92,56 @@ export const HuntBehaviorResponse = lazySchema(() =>
         rule_name: z.string(),
         severity: z.enum(['critical', 'high', 'medium', 'low']),
         risk_score: z.number(),
+        execution: z
+          .object({
+            /**
+             * True when dry-run passed and an execute call was attempted.
+             */
+            executed: z
+              .boolean()
+              .describe('True when dry-run passed and an execute call was attempted.'),
+            /**
+             * Rows remaining after the required-index filter.
+             */
+            row_count: z
+              .number()
+              .int()
+              .min(0)
+              .describe('Rows remaining after the required-index filter.'),
+            /**
+             * True when at least one required-index row was returned.
+             */
+            hit: z.boolean().describe('True when at least one required-index row was returned.'),
+          })
+          .optional(),
+        /**
+         * Distinct host.name values from required-index rows, capped at 20.
+         */
+        affected_hosts: z
+          .array(z.string())
+          .optional()
+          .describe('Distinct host.name values from required-index rows, capped at 20.'),
+        /**
+         * Distinct user.name values from required-index rows, capped at 20.
+         */
+        affected_users: z
+          .array(z.string())
+          .optional()
+          .describe('Distinct user.name values from required-index rows, capped at 20.'),
+        /**
+         * True when more than 20 distinct hosts were seen.
+         */
+        affected_hosts_truncated: z
+          .boolean()
+          .optional()
+          .describe('True when more than 20 distinct hosts were seen.'),
+        /**
+         * True when more than 20 distinct users were seen.
+         */
+        affected_users_truncated: z
+          .boolean()
+          .optional()
+          .describe('True when more than 20 distinct users were seen.'),
       })
     ),
     indexed_behaviors: z.array(

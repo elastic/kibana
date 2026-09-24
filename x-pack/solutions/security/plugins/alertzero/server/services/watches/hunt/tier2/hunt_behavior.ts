@@ -248,6 +248,15 @@ const executeValidatedEsql = async ({
     const hostCol = columnIndex(columns, 'host.name');
     const userCol = columnIndex(columns, 'user.name');
 
+    if (values.length > 0 && indexCol < 0) {
+      // Aggregating pipelines (STATS, etc.) drop METADATA columns. Rows existed
+      // but the required-index hit bar cannot evaluate them.
+      logger.warn(
+        `[ti:esql] execute for ${techniqueId} returned ${values.length} row(s) with no _index ` +
+          `column (query may aggregate away METADATA). Treating as hit: false.`
+      );
+    }
+
     const requiredRows: unknown[][] = [];
     for (const row of values) {
       if (!Array.isArray(row)) continue;

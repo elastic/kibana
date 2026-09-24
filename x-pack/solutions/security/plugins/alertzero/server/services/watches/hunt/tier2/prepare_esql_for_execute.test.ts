@@ -15,7 +15,7 @@ describe('injectMetadataIndex', () => {
   it('returns injection when METADATA is absent', () => {
     expect(
       injectMetadataIndex('FROM logs-aws.*\n| WHERE event.action == "AssumeRole"\n| LIMIT 10')
-    ).toBe('FROM logs-aws.* METADATA _index | WHERE event.action == "AssumeRole" | LIMIT 10');
+    ).toBe('FROM logs-aws.* METADATA _index\n| WHERE event.action == "AssumeRole"\n| LIMIT 10');
   });
 
   it('returns no double-injection when _index is already present', () => {
@@ -33,6 +33,24 @@ describe('injectMetadataIndex', () => {
   it('returns _index appended to KEEP when KEEP would drop it', () => {
     expect(injectMetadataIndex('FROM logs-* | KEEP host.name | LIMIT 5')).toBe(
       'FROM logs-* METADATA _index | KEEP host.name, _index | LIMIT 5'
+    );
+  });
+
+  it('returns METADATA injection when the first pipe has no leading whitespace', () => {
+    expect(injectMetadataIndex('FROM logs-*| WHERE true | LIMIT 1')).toBe(
+      'FROM logs-* METADATA _index| WHERE true | LIMIT 1'
+    );
+  });
+
+  it('returns string literals in the pipeline unchanged', () => {
+    expect(injectMetadataIndex('FROM logs-*\n| WHERE message == "hello  world"\n| LIMIT 1')).toBe(
+      'FROM logs-* METADATA _index\n| WHERE message == "hello  world"\n| LIMIT 1'
+    );
+  });
+
+  it('returns comment lines in the pipeline unchanged', () => {
+    expect(injectMetadataIndex('FROM logs-*\n| WHERE true\n// keep me\n| LIMIT 1')).toBe(
+      'FROM logs-* METADATA _index\n| WHERE true\n// keep me\n| LIMIT 1'
     );
   });
 });
@@ -63,7 +81,7 @@ describe('prepareEsqlForExecute', () => {
         25
       )
     ).toBe(
-      'FROM logs-aws.cloudtrail-* METADATA _index | WHERE aws.cloudtrail.event_name == "AssumeRole" | KEEP host.name, user.name, _index | LIMIT 25'
+      'FROM logs-aws.cloudtrail-* METADATA _index\n| WHERE aws.cloudtrail.event_name == "AssumeRole"\n| KEEP host.name, user.name, _index\n| LIMIT 25'
     );
   });
 });
