@@ -6,7 +6,7 @@
   ],
   "group": "platform",
   "visibility": "private",
-  "description": "POC: a remote ScreenshottingStart implementation backed by the page-render-service, used by the reporting plugin in place of local Chromium on serverless.",
+  "description": "A remote ScreenshottingStart implementation backed by the page-render-service, used by the reporting plugin in place of local Chromium on serverless.",
   "plugin": {
     "id": "pageRenderScreenshotting",
     "server": true,
