@@ -8,7 +8,6 @@
 import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import {
   RelayRequestError,
   type InMemoryConnector,

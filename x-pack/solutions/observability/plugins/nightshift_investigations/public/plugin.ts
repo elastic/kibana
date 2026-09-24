@@ -8,8 +8,8 @@
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 import type { SharePluginSetup } from '@kbn/share-plugin/public';
-import { InvestigationLocatorDefinition } from '../common/locators';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
+import { InvestigationLocatorDefinition } from '../common/locators';
 import {
   createNightshiftInvestigationsRepositoryClient,
   type NightshiftInvestigationsRepositoryClient,
