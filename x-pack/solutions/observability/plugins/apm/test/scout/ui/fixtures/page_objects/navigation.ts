@@ -38,7 +38,7 @@ export class NavigationPage {
   }
 
   public get globalSearchButton() {
-    return this.page.getByTestId('chromeNextGlobalHeaderSearchButton');
+    return this.page.getByTestId('kbnChromeHeader-searchButton');
   }
 
   async searchGlobalNav(keyword: string) {
@@ -52,11 +52,11 @@ export class NavigationPage {
   }
 
   private get virtualizedSearchList() {
-    return this.page.locator('[data-test-subj="chromeNextSearchModal"] .euiSelectableList__list');
+    return this.page.locator('[data-test-subj="globalSearchModal"] .euiSelectableList__list');
   }
 
   private get searchPanel() {
-    return this.page.locator('[data-test-subj="chromeNextSearchModal"]');
+    return this.page.locator('[data-test-subj="globalSearchModal"]');
   }
 
   private async waitForSearchResults() {

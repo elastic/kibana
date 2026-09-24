@@ -9,8 +9,8 @@
  * Explicit allow-list of the public surface (single entry, single source of truth).
  *
  * Prefer named `export { … } from '…'` over `export *`. Star re-exports defeat
- * `@kbn/optimizer` tree-shaking: importing a few constants from the plugin
- * entry can otherwise drag Zod schemas and mock samples into page-load JS.
+ * `@kbn/rspack-optimizer` tree-shaking: importing a few constants from the plugin
+ * entry can otherwise drag Zod schemas into page-load JS.
  */
 
 export {
@@ -23,25 +23,24 @@ export {
   ALERTZERO_FAST_INFERENCE_FEATURE_ID,
   ALERTZERO_INFERENCE_PARENT_FEATURE_ID,
   ALERTZERO_INTERNAL_URL,
-  ALERTZERO_INVESTIGATIONS_URL,
-  ALERTZERO_INVESTIGATION_URL_TEMPLATE,
   ALERTZERO_PLUGIN_NAME,
   ALERTZERO_REASONING_INFERENCE_FEATURE_ID,
   ALERTZERO_ACTIONS_URL,
+  ALERTZERO_INVESTIGATIONS_COUNT_URL,
   ALERTZERO_ACTIONS_LIST_TOOL_ID,
-  ALERTZERO_PROPOSALS_URL,
+  ALERTZERO_PROPOSALS_CATEGORY_URL,
+  ALERTZERO_PROPOSALS_CLOSED_URL,
+  ALERTZERO_PROPOSALS_REVISE_TOOL_ID,
   ALERTZERO_THIN_AGENT_ID,
-  ALERTZERO_SKILLS_URL,
-  ALERTZERO_SKILL_URL_TEMPLATE,
   ALERTZERO_WATCHES_URL,
   ALERTZERO_WATCH_URL_TEMPLATE,
   ALERTZERO_WORKERS_URL,
   ALERTZERO_WORKER_URL_TEMPLATE,
   SYSTEM_SECURITY_WATCH_CATALOG,
   SYSTEM_SECURITY_WATCH_HUNT_ID,
-  SYSTEM_SECURITY_WATCH_DEEP_ID,
   SYSTEM_SECURITY_WATCH_DETECTION_ID,
   SYSTEM_SECURITY_WATCH_FLOOR_ID,
+  SYSTEM_SECURITY_WATCH_FORENSICS_ID,
   SYSTEM_SECURITY_WATCH_IDS,
   SYSTEM_SECURITY_WATCH_OFFICER_ID,
   SYSTEM_SECURITY_WORKER_CATALOG,
@@ -50,21 +49,20 @@ export {
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
+  SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
   SYSTEM_SECURITY_WORKER_IDS,
-  TEMPLATE_ID_INCIDENT,
+  TEMPLATE_ID_ESCALATION,
   TEMPLATE_ID_INVESTIGATION,
-  TEMPLATE_ID_PROPOSAL,
   WATCH_AUTONOMY_LEVELS,
+  WATCH_AUTONOMY_REVIEW_GATED,
   WORKER_SCHEDULE_UNITS,
   WATCH_HUNT_TAG,
-  WATCH_DEEP_TAG,
   WATCH_DETECTION_TAG,
   WATCH_FLOOR_TAG,
+  WATCH_FORENSICS_TAG,
   WATCH_OFFICER_TAG,
   WATCH_TAG,
   WATCH_TIER_TAGS,
-  buildInvestigationUrl,
-  buildSkillUrl,
   buildWatchUrl,
   buildWorkerUrl,
 } from './constants';
@@ -79,18 +77,10 @@ export type {
 } from './action_catalog_types';
 
 export {
-  ApprovalRequirement,
-  GetInvestigationResponse,
   GetWatchResponse,
-  Investigation,
   Lifecycle,
-  ListInvestigationProposalsResponse,
-  ListInvestigationsResponse,
-  ListSkillsResponse,
   ListWatchesResponse,
   ListWorkersResponse,
-  Proposal,
-  RecommendedAction,
   ScheduleCadence,
   ScheduleHandoff,
   ScheduleMode,
@@ -98,26 +88,15 @@ export {
   UpdateWorkerRequestBody,
   UpdateWorkerResponse,
   Watch,
-  WatchApprovalGate,
   WatchAutonomyLevel,
   WatchCallableRef,
-  WatchLedgerEntry,
   WatchMetrics,
   WatchRecentRun,
   WatchRecentRunStep,
   WatchRunAction,
-  WatchRunOutcome,
   WatchSchedule,
   WatchScope,
-  WatchScopeRoutingSettings,
-  WatchSelectSetting,
-  WatchSettings,
-  WatchSkill,
-  WatchSkillAttachment,
   WatchTriggerProjection,
-  WatchTriggersSettings,
-  WatchWorker,
-  WatchWorkerAttachment,
   AnalysisWindowDays,
   RuleTuningWorkerExtras,
   Worker,
@@ -127,7 +106,6 @@ export {
   WorkerSettingsExtras,
   WorkerSettingsWrite,
   WorkflowTriggerType,
-  type TimelineEvent,
 } from './impl/schemas';
 
 export {
@@ -135,6 +113,7 @@ export {
   coverageFromSchedule,
   createCatalogWatchPlaceholder,
   isOnDutyNow,
+  resolveWatchAccent,
 } from './impl/watches/watch_helpers';
 export type {
   CatalogWatchId,
@@ -142,18 +121,6 @@ export type {
   WatchScheduleCoverageInput,
 } from './impl/watches/watch_helpers';
 
-export {
-  MOCK_CLEAN_RUN_NOTE,
-  MOCK_INVESTIGATIONS,
-  MOCK_PROPOSALS,
-  SKILLS_SEED,
-  WATCHES_SEED,
-  WORKERS_SEED,
-  createMockInvestigation,
-  getMockInvestigationById,
-  getMockInvestigationsByWatchId,
-  getMockProposalsByConversationId,
-} from './impl/samples';
 export {
   ANALYSIS_WINDOW_DAYS_DEFAULT,
   ANALYSIS_WINDOW_DAYS_MAX,
@@ -167,6 +134,7 @@ export {
   getAllowedAutonomyLevels,
   getCompleteWorkerSettingsSchema,
   getWorkerSettingsDeclaration,
+  projectStoredAutonomyLevel,
   touchesWorkerSettings,
 } from './impl/worker_settings';
 export type { WorkerSettingsDeclaration } from './impl/worker_settings';
@@ -175,4 +143,3 @@ export type {
   SystemSecurityWorkerCatalogEntry,
   WorkerScheduleUnit,
 } from './constants';
-export type { WatchSkillSeed, WatchWorkerSeed } from './impl/samples';
