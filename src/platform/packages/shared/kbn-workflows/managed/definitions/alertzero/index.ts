@@ -22,7 +22,6 @@ import {
   ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID,
   ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW_ID,
 } from './attack_discovery_workflows';
-import { ALERTZERO_CORRELATION_WORKFLOW_ID } from './correlation';
 import { ALERTZERO_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID } from './detection_rule_creation';
 import { ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID } from './detection_rule_tuning';
 import { ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID } from './floor_alert_triage';
@@ -95,7 +94,6 @@ export {
   ALERTZERO_JOURNAL_NOTE_WORKFLOW_ID,
 } from './journal_note';
 export { ALERTZERO_HUNT_WORKFLOW, ALERTZERO_HUNT_WORKFLOW_ID } from './hunt';
-export { ALERTZERO_CORRELATION_WORKFLOW, ALERTZERO_CORRELATION_WORKFLOW_ID } from './correlation';
 export {
   ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW,
   ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
@@ -168,17 +166,14 @@ export const ALERTZERO_FORENSICS_WORKFLOW_IDS = [
 ] as const;
 
 /**
- * Hunt Watch's two untagged children (PR 3b), invoked via `workflow.execute`
- * by PR 4's tagged Worker (`hunt_continuous_threat_hunt.yaml`) using the
- * registered ids `system-security-hunt-execute` /
- * `system-security-hunt-correlation`. Own no trigger, so — like
- * `journal_note` above — they must be installed globally for the Worker's
- * `workflow.execute` call to resolve them.
+ * Hunt Watch's untagged hunt child (former 3D, now on PR 4), invoked via
+ * `workflow.execute` by the tagged Worker (`hunt_continuous_threat_hunt.yaml`)
+ * using the registered id `system-security-hunt-execute`. Own no trigger, so —
+ * like `journal_note` above — it must be installed globally for the Worker's
+ * `workflow.execute` call to resolve it. Correlation (`system-security-hunt-
+ * correlation`) lands with 3B under R.7.
  */
-export const ALERTZERO_HUNT_CHILD_WORKFLOW_IDS = [
-  ALERTZERO_HUNT_WORKFLOW_ID,
-  ALERTZERO_CORRELATION_WORKFLOW_ID,
-] as const;
+export const ALERTZERO_HUNT_CHILD_WORKFLOW_IDS = [ALERTZERO_HUNT_WORKFLOW_ID] as const;
 
 /**
  * Action workflows AlertZero may propose. Discovery is normally by the generic
