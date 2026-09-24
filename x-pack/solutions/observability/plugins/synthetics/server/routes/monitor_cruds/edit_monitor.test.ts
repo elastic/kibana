@@ -298,6 +298,44 @@ describe('editSyntheticsMonitorRoute', () => {
     );
   });
 
+  it('rejects a masked parameter that has no stored value', async () => {
+    const { mergeSourceMonitor } = jest.requireMock('./formatters/saved_object_to_monitor');
+    mergeSourceMonitor.mockClear();
+    const { routeContext } = getRouteContextMock();
+    routeContext.response = {
+      ...routeContext.response,
+      badRequest: (value: unknown) => value,
+    };
+    routeContext.request = {
+      params: { monitorId },
+      query: {},
+      body: { [ConfigKey.PARAMS]: '{"token2":"********"}' },
+    } as any;
+    routeContext.spaceId = 'default';
+    routeContext.monitorConfigRepository.getDecrypted = jest.fn().mockResolvedValue({
+      decryptedMonitor: {
+        id: monitorId,
+        type: 'synthetics-monitor-multi-space',
+        namespaces: ['default'],
+      },
+      normalizedMonitor: {
+        id: monitorId,
+        attributes: {
+          origin: 'ui',
+          [ConfigKey.MONITOR_TYPE]: 'http',
+          [ConfigKey.REVISION]: 3,
+          [ConfigKey.PARAMS]: '{"token":"changeme"}',
+          locations: [],
+        },
+      },
+    });
+
+    const result = await editSyntheticsMonitorRoute().handler(routeContext);
+
+    expect(result.body.message).toContain('token2');
+    expect(mergeSourceMonitor).not.toHaveBeenCalled();
+  });
+
   it('restores masked parameter objects submitted by the public API', async () => {
     const { assertCanPerformMonitorBulkActionInAllSpaces } = jest.requireMock(
       './monitor_locations_utils'

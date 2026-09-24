@@ -61,6 +61,27 @@ export const maskMonitorParams = (params?: string): string | undefined => {
   );
 };
 
+/** Returns submitted parameter names whose masked placeholder has no stored value to restore. */
+export const getUnrestorableMaskedParamKeys = ({
+  previousParams,
+  submittedParams,
+}: {
+  previousParams?: string;
+  submittedParams?: string;
+}): string[] => {
+  const parsedSubmittedParams = submittedParams ? parseMonitorParams(submittedParams) : undefined;
+  if (!parsedSubmittedParams) {
+    return [];
+  }
+
+  const parsedPreviousParams = previousParams ? parseMonitorParams(previousParams) : undefined;
+  return Object.entries(parsedSubmittedParams)
+    .filter(
+      ([key, value]) => value === MASKED_PARAM_VALUE && parsedPreviousParams?.[key] === undefined
+    )
+    .map(([key]) => key);
+};
+
 /** Restores previously stored values for parameter placeholders returned by a masked edit form. */
 export const restoreMaskedMonitorParams = ({
   previousParams,
