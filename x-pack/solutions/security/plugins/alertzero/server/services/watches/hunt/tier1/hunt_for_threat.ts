@@ -13,7 +13,13 @@ import type {
   HuntIoc,
 } from '@kbn/alertzero-common';
 import { buildMatchesRequired } from '../common/matches_required';
-import { ALERT_TECHNIQUE_ID_FIELDS, attributeHits } from './attribute_hits';
+import {
+  ALERT_TECHNIQUE_ID_FIELDS,
+  attributeHits,
+  HASH_ALGO_BY_LENGTH,
+  hashFieldsForAlgo,
+  IOC_FIELDS_BY_TYPE,
+} from './attribute_hits';
 import type { HuntForThreatParams } from './types';
 
 const termClause = (field: string, value: string): Record<string, unknown> => ({
@@ -24,65 +30,19 @@ const termClause = (field: string, value: string): Record<string, unknown> => ({
  * Per-IOC `should` clause across every ECS field the value might reasonably
  * land in, not narrowed by event source since the same IOC type can appear
  * in several ECS slots depending on which integration produced the document.
+ * Hash is the one type narrowed further, by length, to the matching algo's
+ * fields — an md5 value has no business matching a sha256 field.
  */
 const buildIocShould = (iocs: HuntIoc[]): Array<Record<string, unknown>> => {
   const clauses: Array<Record<string, unknown>> = [];
   for (const { type, value } of iocs) {
-    switch (type) {
-      case 'ip':
-        clauses.push(
-          termClause('source.ip', value),
-          termClause('destination.ip', value),
-          termClause('host.ip', value),
-          termClause('client.ip', value),
-          termClause('server.ip', value),
-          // ECS related + Kubernetes audit commonly stamp IPs here when
-          // `source.ip` is absent (e.g. Technology Watch kubernetes pack).
-          termClause('related.ip', value),
-          termClause('kubernetes.audit.sourceIPs', value)
-        );
-        break;
-      case 'email':
-        clauses.push(
-          termClause('user.email', value),
-          termClause('user.name', value),
-          termClause('user.target.email', value),
-          termClause('user.target.name', value),
-          termClause('related.user', value)
-        );
-        break;
-      case 'domain':
-        clauses.push(
-          termClause('dns.question.name', value),
-          termClause('destination.domain', value),
-          termClause('url.domain', value),
-          termClause('source.domain', value)
-        );
-        break;
-      case 'url':
-        clauses.push(termClause('url.full', value), termClause('url.original', value));
-        break;
-      case 'hash': {
-        const hashLen = value.length;
-        const field =
-          hashLen === 32
-            ? 'file.hash.md5'
-            : hashLen === 40
-            ? 'file.hash.sha1'
-            : hashLen === 64
-            ? 'file.hash.sha256'
-            : null;
-        if (field) {
-          clauses.push(
-            termClause(field, value),
-            termClause(field.replace('file.', 'process.'), value),
-            termClause(field.replace('file.', 'dll.'), value)
-          );
-        }
-        break;
-      }
-      default:
-        break;
+    if (type === 'hash') {
+      const algo = HASH_ALGO_BY_LENGTH[value.length];
+      if (algo) clauses.push(...hashFieldsForAlgo(algo).map((field) => termClause(field, value)));
+      continue;
+    }
+    for (const field of IOC_FIELDS_BY_TYPE[type] ?? []) {
+      clauses.push(termClause(field, value));
     }
   }
   return clauses;

@@ -59,11 +59,8 @@ export const registerHuntBehaviorRoute = ({
           const core = await context.core;
           const { getInference, getSearchInferenceEndpoints } = getHuntServices();
 
-          // Tier 2 is one-shot extraction plus one-shot ES|QL rule drafting, which is
-          // what the Reasoning tier is for. Resolving it by tier rather than by the
-          // deployment default is required, not cosmetic: the tiers register with
-          // `ignoreGlobalDefault: true`, so the default connector is a different model
-          // than the one the operator picked in Model Settings.
+          // Resolved by tier, not the deployment default — see resolveScopedModel's
+          // doc for why that distinction matters.
           const modelOutcome = await resolveScopedModel({
             inference: getInference(),
             searchInferenceEndpoints: getSearchInferenceEndpoints(),

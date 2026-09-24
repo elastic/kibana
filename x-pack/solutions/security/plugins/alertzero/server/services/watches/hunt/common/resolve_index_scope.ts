@@ -46,6 +46,9 @@ const defaultWindow = (): IndexScopeWindow => ({
   to: new Date().toISOString(),
 });
 
+const deriveStatus = (blocked: boolean, degraded: boolean): ResolvedIndexScope['status'] =>
+  blocked ? 'blocked' : degraded ? 'degraded' : 'ok';
+
 /**
  * Resolves whether a technology's target indices actually exist in the given
  * space. Every pattern — required, optional, and the space-derived alerts
@@ -103,15 +106,7 @@ export const resolveIndexScope = async ({
   // technology `ok`/`degraded` while still listing a missing required pattern.
   const hasAllRequired = requiredResults.every(([, present]) => present);
   const missingOptionalCount = optionalResults.filter(([, present]) => !present).length;
-
-  let status: ResolvedIndexScope['status'];
-  if (!hasAllRequired) {
-    status = 'blocked';
-  } else if (missingOptionalCount > 0) {
-    status = 'degraded';
-  } else {
-    status = 'ok';
-  }
+  const status = deriveStatus(!hasAllRequired, missingOptionalCount > 0);
 
   return {
     technology,
@@ -166,15 +161,10 @@ export const resolveHuntScope = async ({
   );
   const present = scopes.filter((scope) => scope.status !== 'blocked');
   const source = present.length > 0 ? present : scopes;
-
-  let status: ResolvedIndexScope['status'];
-  if (present.length === 0) {
-    status = 'blocked';
-  } else if (present.some((scope) => scope.status === 'degraded')) {
-    status = 'degraded';
-  } else {
-    status = 'ok';
-  }
+  const status = deriveStatus(
+    present.length === 0,
+    present.some((scope) => scope.status === 'degraded')
+  );
 
   return {
     technologies: present.map((scope) => scope.technology),
