@@ -8,7 +8,8 @@
 import React from 'react';
 import dateMath from '@kbn/datemath';
 import moment from 'moment';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { InventoryTsvbType, InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { NodeDetailsMetricDataResponseRT } from '../../../../../common/http_api/node_details_api';
@@ -54,6 +55,7 @@ const parseRange = (range: MetricsTimeInput) => {
 };
 
 export const NodeDetailsPage = (props: Props) => {
+  const { euiTheme } = useEuiTheme();
   const { data, status, error, refetch } = useFetcher(
     async (callApi) => {
       const response = await callApi('/api/metrics/node_details', {
@@ -88,7 +90,13 @@ export const NodeDetailsPage = (props: Props) => {
 
   return (
     <>
-      <EuiFlexGroup justifyContent="flexEnd">
+      <EuiFlexGroup
+        justifyContent="flexEnd"
+        css={css`
+          padding-block-start: ${euiTheme.size.s};
+          padding-block-end: ${euiTheme.size.s};
+        `}
+      >
         <EuiFlexItem grow={false}>
           <MetricsTimeControls
             currentTimeRange={props.timeRange}
@@ -102,9 +110,15 @@ export const NodeDetailsPage = (props: Props) => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup>
-        <EuiFlexItem grow={false}>
-          <MetricsSideNav loading={props.metadataLoading} name={props.name} items={props.sideNav} />
-        </EuiFlexItem>
+        {metrics.length > 0 && (
+          <EuiFlexItem grow={false}>
+            <MetricsSideNav
+              loading={props.metadataLoading}
+              name={props.name}
+              items={props.sideNav}
+            />
+          </EuiFlexItem>
+        )}
         <EuiFlexItem>
           <SideNavContext.Provider
             value={{
