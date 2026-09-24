@@ -180,21 +180,15 @@ export function useWorkflowLayout({
       if (arr) arr.push(e.source);
       else incomingByTarget.set(e.target, [e.source]);
     }
-    // Build fallback-lane sets for execution highlighting and merge detection.
-    // Leaf ids: last nodes in each fallback lane (rejoin sources for shape 2).
-    const fallbackLeafIds = new Set(transformed.fallbackLanes.flatMap((l) => [...l.leaves]));
-
     const mergeNodeIds = new Set<string>();
     for (const [target, sources] of incomingByTarget) {
-      // Original rule: bypass-lane source → merge node.
-      // Extended: fallback-lane leaf source → merge node (shape 2 rejoin edge).
-      if (
-        sources.length > 1 &&
-        (sources.some((s) => allBypassLaneIds.has(s)) ||
-          sources.some((s) => fallbackLeafIds.has(s)))
-      ) {
-        mergeNodeIds.add(target);
-      }
+      // Every fan-in joins on the shared bus just above its target, so the lane
+      // change happens as late as possible. Synthetic bypass lanes are not special
+      // here — this is exactly the set of edges for which applyDagre blanks
+      // `points` (predecessorCount > 1), so nothing usable is being discarded.
+      // Array length is safe as a distinct-source count: transformWorkflowToGraph
+      // dedupes exit ids (`dedupeIds`) before emitting sequential edges.
+      if (sources.length > 1) mergeNodeIds.add(target);
     }
 
     return {
@@ -204,14 +198,12 @@ export function useWorkflowLayout({
       nodeById,
       allEdges,
       mergeNodeIds,
-      fallbackLeafIds,
     };
   }, [
     transformed.bypassLaneNodes,
     transformed.foreachGroups,
     transformed.nodes,
     transformed.edges,
-    transformed.fallbackLanes,
   ]);
 
   // Branch-aware execution highlighting. Computes which fork edges (and which

@@ -25,6 +25,7 @@ import { isFailure, isPending, isSuccess } from '../../../../hooks/use_fetcher';
 import { useUnifiedWaterfallFetcher } from '../../../app/transaction_details/use_unified_waterfall_fetcher';
 import { MaybeViewTraceLink } from '../../../app/transaction_details/waterfall_with_summary/maybe_view_trace_link';
 import { TransactionSummary } from '../../summary/transaction_summary';
+import { TRANSACTION_DETAIL_FLYOUT_EBT_ELEMENTS } from '../ebt_constants';
 import { useTransactionDetailFlyoutContext } from '../transaction_detail_flyout_context';
 import { TransactionDetailFlyoutTraceSampleTimeline } from './trace_sample_timeline';
 import { useTransactionDetailFlyoutTraceSamplesFetcher } from './use_transaction_detail_flyout_trace_samples_fetcher';
@@ -171,6 +172,7 @@ export function TransactionDetailFlyoutTraceSample() {
                 transaction={entryTransaction}
                 traceItems={unifiedWaterfallFetchResult.traceItems}
                 onViewFullTrace={openSelectedFullTrace}
+                ebtElement={TRANSACTION_DETAIL_FLYOUT_EBT_ELEMENTS.VIEW_FULL_TRACE}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
