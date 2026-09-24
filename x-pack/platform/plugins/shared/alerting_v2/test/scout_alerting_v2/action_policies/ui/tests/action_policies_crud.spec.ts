@@ -24,9 +24,10 @@ test.describe(
   'Action Policies - create and edit',
   { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
   () => {
-    const CREATED_POLICY_NAME = 'scout-action-policy-created';
-    const SEEDED_POLICY_NAME = 'scout-action-policy-to-edit';
-    const EDITED_POLICY_NAME = 'scout-action-policy-edited';
+    const RUN_ID = Date.now().toString();
+    const CREATED_POLICY_NAME = `scout-action-policy-created-${RUN_ID}`;
+    const SEEDED_POLICY_NAME = `scout-action-policy-to-edit-${RUN_ID}`;
+    const EDITED_POLICY_NAME = `scout-action-policy-edited-${RUN_ID}`;
     // Intentionally includes a legacy `rule.*` field: with no form validation (AC#3) the expression
     // round-trips through the edit form unchanged, proving backward compatibility.
     const MATCHER = 'episode_status: "active" and rule.tags: "scout"';
@@ -36,6 +37,14 @@ test.describe(
     const createdPolicyIds: string[] = [];
 
     test.beforeAll(async ({ apiServices }) => {
+      // Clean up stale policies from prior failed runs (search-scoped, not match-all).
+      const { items } = await apiServices.alertingV2.actionPolicies.list({
+        search: 'scout-action-policy',
+      });
+      for (const item of items) {
+        await apiServices.alertingV2.actionPolicies.delete(item.id);
+      }
+
       // Action policy destinations are workflow references, so the form's
       // workflows combo box needs a real workflow to offer.
       workflowName = `scout-action-policy-destination-${Date.now()}`;
@@ -80,6 +89,13 @@ test.describe(
 
       await test.step('the form returns to the list with the new policy', async () => {
         await expect(actionPoliciesList.detailsLink(CREATED_POLICY_NAME)).toBeVisible();
+        // Capture the created policy ID for teardown before any count assertions.
+        const { items } = await apiServices.alertingV2.actionPolicies.list({
+          search: CREATED_POLICY_NAME,
+        });
+        if (items[0]?.id) {
+          createdPolicyIds.push(items[0].id);
+        }
       });
 
       await test.step('the persisted policy matches the submitted form', async () => {
@@ -88,7 +104,6 @@ test.describe(
         });
 
         expect(items).toHaveLength(1);
-        createdPolicyIds.push(items[0].id);
         expect(items[0]).toMatchObject({
           name: CREATED_POLICY_NAME,
           matcher: { expression: MATCHER },

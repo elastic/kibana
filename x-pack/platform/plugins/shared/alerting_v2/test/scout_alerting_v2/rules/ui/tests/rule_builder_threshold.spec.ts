@@ -115,7 +115,7 @@ test.describe(
         await expect(pageObjects.composeDiscover.flyout).toBeHidden({ timeout: 30_000 });
       });
 
-      await test.step('verify rule created with builder_type metadata', async () => {
+      await test.step('capture created rule for teardown', async () => {
         await expect
           .poll(
             async () => {
@@ -125,11 +125,16 @@ test.describe(
               if (items[0]?.id && !createdRuleIds.includes(items[0].id)) {
                 createdRuleIds.push(items[0].id);
               }
-              return items[0]?.metadata?.builder_type;
+              return items.length;
             },
             { timeout: 30_000 }
           )
-          .toBe('threshold');
+          .toBeGreaterThanOrEqual(1);
+      });
+
+      await test.step('the persisted rule has builder_type metadata', async () => {
+        const { items } = await apiServices.alertingV2.rules.find({ search: RULE_NAME });
+        expect(items[0]?.metadata?.builder_type).toBe('threshold');
       });
     });
 

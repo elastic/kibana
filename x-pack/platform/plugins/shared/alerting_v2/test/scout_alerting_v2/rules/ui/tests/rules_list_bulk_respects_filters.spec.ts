@@ -12,8 +12,9 @@ test.describe(
   'Rules list bulk actions respect active filters',
   { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
   () => {
-    const tagA = 'scout-bulk-filter-a';
-    const tagB = 'scout-bulk-filter-b';
+    const RUN_ID = Date.now().toString();
+    const tagA = `scout-bulk-filter-a-${RUN_ID}`;
+    const tagB = `scout-bulk-filter-b-${RUN_ID}`;
     const ruleIdsA: string[] = [];
     const ruleIdsB: string[] = [];
 

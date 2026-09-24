@@ -197,7 +197,7 @@ test.describe(
         await expect(pageObjects.composeDiscover.submitButton).toBeVisible();
       });
 
-      await test.step('submit and verify rule created', async () => {
+      await test.step('submit and capture rule for teardown', async () => {
         await pageObjects.composeDiscover.clickSubmit();
         await expect(pageObjects.composeDiscover.flyout).toBeHidden({ timeout: 30_000 });
 
@@ -210,14 +210,21 @@ test.describe(
               if (items[0]?.id && !createdRuleIds.includes(items[0].id)) {
                 createdRuleIds.push(items[0].id);
               }
-              return items[0]?.artifacts?.some(
-                (artifact) =>
-                  artifact.type === RUNBOOK_ARTIFACT_TYPE && artifact.data?.content === RUNBOOK_TEXT
-              );
+              return items.length;
             },
             { timeout: 30_000 }
           )
-          .toBe(true);
+          .toBeGreaterThanOrEqual(1);
+      });
+
+      await test.step('the persisted rule includes the runbook artifact', async () => {
+        const { items } = await apiServices.alertingV2.rules.find({ search: RULE_NAME });
+        expect(
+          items[0]?.artifacts?.some(
+            (artifact) =>
+              artifact.type === RUNBOOK_ARTIFACT_TYPE && artifact.data?.content === RUNBOOK_TEXT
+          )
+        ).toBe(true);
       });
     });
 

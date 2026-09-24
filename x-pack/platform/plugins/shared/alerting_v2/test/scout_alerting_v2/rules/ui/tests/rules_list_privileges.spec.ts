@@ -23,10 +23,13 @@ test.describe(
   { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
   () => {
     let ruleId: string;
+    const SUITE_TAG = `scout-privileges-${Date.now()}`;
 
     test.beforeAll(async ({ apiServices }) => {
       const rule = await apiServices.alertingV2.rules.create(
-        buildCreateRuleData({ metadata: { name: 'scout-rules-privileges' } })
+        buildCreateRuleData({
+          metadata: { name: 'scout-rules-privileges', tags: [SUITE_TAG] },
+        })
       );
       ruleId = rule.id;
     });
@@ -39,6 +42,7 @@ test.describe(
       await browserAuth.loginWithCustomRole(ALERTING_V2_RULES_ALL_ROLE);
       await pageObjects.rulesList.goto();
       await expect(pageObjects.rulesList.rulesListTable).toBeVisible();
+      await pageObjects.rulesList.filterBySingleTag(SUITE_TAG);
 
       await expect(pageObjects.rulesList.createRuleButton).toBeVisible();
       await expect(pageObjects.rulesList.enabledSwitch(ruleId)).toBeEnabled();
@@ -51,6 +55,7 @@ test.describe(
       await browserAuth.loginWithCustomRole(ALERTING_V2_RULES_READ_ROLE);
       await pageObjects.rulesList.goto();
       await expect(pageObjects.rulesList.rulesListTable).toBeVisible();
+      await pageObjects.rulesList.filterBySingleTag(SUITE_TAG);
 
       await expect(pageObjects.rulesList.createRuleButton).toBeHidden();
       // Read-only users get a status badge instead of a toggle, so the switch is never rendered.

@@ -28,6 +28,14 @@ test.describe(
     let policyName: string;
 
     test.beforeAll(async ({ apiServices }) => {
+      // Clean up stale policies from prior failed runs (search-scoped, not match-all).
+      const { items } = await apiServices.alertingV2.actionPolicies.list({
+        search: 'scout-action-policy-privileges',
+      });
+      for (const item of items) {
+        await apiServices.alertingV2.actionPolicies.delete(item.id);
+      }
+
       const policy = await apiServices.alertingV2.actionPolicies.create(
         buildCreateActionPolicyData({ name: 'scout-action-policy-privileges' })
       );
