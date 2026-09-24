@@ -112,21 +112,32 @@ export const getActionDetailsById = async <T extends ActionDetails = ActionDetai
           return undefined;
         });
 
-      agentsHostInfo = unresolvedAgentIds.reduce(
-        (acc, agentId) => {
-          const match = (metadata?.data ?? []).find(
-            (entry) => entry.metadata?.agent?.id === agentId
-          );
-          const hostname = match?.metadata?.host?.hostname;
+      // Index the metadata rows by agent id once. A `.find()` per unresolved
+      // agent rescans the whole metadata result every time, so a fan-out
+      // action targeting thousands of agents performs millions of
+      // comparisons and can delay or time out both this read and the status
+      // tool. A Map makes the enrichment linear in the fan-out.
+      const hostnameByAgentId = new Map<string, string>();
+      for (const entry of metadata?.data ?? []) {
+        const agentId = entry.metadata?.agent?.id;
+        const hostname = entry.metadata?.host?.hostname;
 
-          if (hostname) {
-            acc[agentId] = hostname;
-          }
+        // First row wins, matching the previous `.find()` semantics when a
+        // backend returns more than one row for the same agent id.
+        if (agentId && hostname && !hostnameByAgentId.has(agentId)) {
+          hostnameByAgentId.set(agentId, hostname);
+        }
+      }
 
-          return acc;
-        },
-        { ...agentsHostInfo }
-      );
+      agentsHostInfo = unresolvedAgentIds.reduce((acc, agentId) => {
+        const hostname = hostnameByAgentId.get(agentId);
+
+        if (hostname) {
+          acc[agentId] = hostname;
+        }
+
+        return acc;
+      }, { ...agentsHostInfo });
     }
   }
 

@@ -78,6 +78,16 @@ export interface EndpointLookupService {
 interface CandidatePage<T> {
   items: T[];
   total?: number;
+  /**
+   * Raw backend page length before space-based visibility filtering.
+   *
+   * Page termination must be judged on this, never on `items.length`: a page
+   * that is full on the backend but has some agents hidden from the caller's
+   * space filters down to fewer visible items, and treating that as "the last
+   * page" stops the walk early — reporting a matching endpoint on a later page
+   * as not-found.
+   */
+  rawItemCount?: number;
 }
 
 /** Structural view of the metadata-index fields this lookup reads. */
@@ -103,28 +113,38 @@ interface MetadataCandidateWithAgent extends MetadataCandidate {
  * because a backend that does not report it gives no evidence of more results;
  * an unknown total is treated as "nothing further", matching the pre-paging
  * behavior.
+ *
+ * The walk tracks the RAW record count, not the accumulated (possibly
+ * filtered) `items`: `total` counts pre-filter records, so comparing the
+ * filtered length against it would keep the loop running to
+ * `MAX_LOOKUP_PAGES` whenever any record was hidden, and `truncated` would
+ * then be reported for a hostname that had in fact been fully examined.
  */
 async function collectPages<T>(
   fetchPage: (page: number) => Promise<CandidatePage<T>>
 ): Promise<{ items: T[]; truncated: boolean; total?: number }> {
   const items: T[] = [];
   let total: number | undefined;
+  let rawCount = 0;
 
   for (let page = 1; page <= MAX_LOOKUP_PAGES; page++) {
-    const { items: pageItems, total: pageTotal } = await fetchPage(page);
+    const { items: pageItems, total: pageTotal, rawItemCount } = await fetchPage(page);
     items.push(...pageItems);
     total = pageTotal;
 
-    if (pageItems.length < LOOKUP_PAGE_SIZE) {
+    const pageLength = rawItemCount ?? pageItems.length;
+    rawCount += pageLength;
+
+    if (pageLength < LOOKUP_PAGE_SIZE) {
       break;
     }
 
-    if (pageTotal === undefined || items.length >= pageTotal) {
+    if (pageTotal === undefined || rawCount >= pageTotal) {
       break;
     }
   }
 
-  return { items, truncated: total !== undefined && items.length < total, total };
+  return { items, truncated: total !== undefined && rawCount < total, total };
 }
 
 /**
@@ -248,6 +268,10 @@ export function createEndpointLookupService(
       return {
         items: pageCandidates.filter((candidate) => visibleIds.has(candidate.id)),
         total: response?.total,
+        // Raw backend page length: `items` above is space-filtered, so a page
+        // holding any hidden agent would otherwise look like a short (final)
+        // page and cut the walk short.
+        rawItemCount: pageCandidates.length,
       };
     });
 

@@ -54,6 +54,15 @@ export const MAX_OUTPUT_DEPTH = 4;
 export const MAX_OUTPUT_OBJECT_KEYS = 50;
 
 /**
+ * Parameter keys reported for one action. `parameters` is a flat bag of
+ * action input (hosts, comment, script body, timeout...), so a modest key cap
+ * is enough; the size risk is in the VALUES, not the key count — a
+ * CrowdStrike `runscript` carries a 65,536-character `raw` script and an
+ * 8,192-character `commandLine`.
+ */
+export const MAX_PARAMETER_KEYS = 50;
+
+/**
  * Hosts and per-agent states reported for one action. A fan-out action carries
  * one entry per targeted agent, so a batch isolate injects thousands of records
  * into the model context unless they are bounded.
@@ -137,6 +146,15 @@ export type HostLookupReason = 'endpoint_not_found' | 'ambiguous_hostname';
  * Shared return shape for the endpoint-status tool when the host could not be
  * found. All host-lookup tools use a consistent `found` + `reason` pattern so
  * the AI agent can branch on the cause of a not-found outcome.
+ *
+ * `reason` is deliberately narrowed to `endpoint_not_found` rather than the
+ * full `HostLookupReason`: the ambiguity outcome carries `candidates` instead
+ * of a resolved status, so it is modelled separately (see
+ * `AmbiguousHostnameResult` in `get_endpoint_status`). Typing this interface
+ * with the wider union would claim that an ambiguous response carries the
+ * `status`/`isolated`/`lastSeen` fields below, which it does not — a consumer
+ * narrowing on `HostLookupReason` would then read those fields off a payload
+ * that never had them.
  */
 export interface EndpointNotFoundResult {
   /**
@@ -147,7 +165,7 @@ export interface EndpointNotFoundResult {
   kind: 'response_action_result';
   hostName: string;
   found: false;
-  reason: HostLookupReason;
+  reason: 'endpoint_not_found';
   status: string;
   isolated: false;
   lastSeen: null;
@@ -418,6 +436,52 @@ export interface ActionErrorsSummary {
   errors: unknown[];
   totalErrors: number;
   errorsTruncated?: number;
+}
+
+/**
+ * Bounds `ActionDetails.parameters` before it reaches the model.
+ *
+ * `parameters` is not touched by the outputs bounding path, but it is not
+ * small: a CrowdStrike `runscript` action permits a 65,536-character `raw`
+ * script plus an 8,192-character `commandLine`. Returning it verbatim means
+ * every status poll of such an action injects tens of thousands of characters
+ * into the conversation before the separately bounded outputs are even added.
+ * Values go through the same bounder as `outputs`, and the paths that were
+ * shortened are reported rather than silently trimmed.
+ */
+export function summarizeActionParameters(
+  parameters: unknown
+): ActionParametersSummary | undefined {
+  if (!parameters || typeof parameters !== 'object') {
+    return undefined;
+  }
+
+  const entries = Object.entries(parameters as Record<string, unknown>);
+  const kept = entries.slice(0, MAX_PARAMETER_KEYS);
+
+  const truncatedFields: string[] = [];
+  const bounded: Record<string, unknown> = {};
+
+  for (const [key, value] of kept) {
+    const boundedValue = boundOutputValue(value, key);
+    bounded[key] = boundedValue.value;
+    truncatedFields.push(...boundedValue.truncatedPaths);
+  }
+
+  return {
+    parameters: bounded,
+    totalParameters: entries.length,
+    ...(entries.length > kept.length ? { parametersTruncated: entries.length - kept.length } : {}),
+    ...(truncatedFields.length ? { truncatedParameterFields: truncatedFields } : {}),
+  };
+}
+
+export interface ActionParametersSummary {
+  parameters: Record<string, unknown>;
+  totalParameters: number;
+  parametersTruncated?: number;
+  /** Parameter paths whose value was shortened by the output bounds. */
+  truncatedParameterFields?: string[];
 }
 
 export interface ActionOutputAgentSummary {

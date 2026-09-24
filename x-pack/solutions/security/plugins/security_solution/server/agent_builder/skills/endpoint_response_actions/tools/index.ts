@@ -8,4 +8,6 @@
 export { getEndpointStatusTool } from './get_endpoint_status';
 export { listEndpointsTool } from './list_endpoints';
 export { getResponseActionStatusTool } from './get_response_action_status';
+export type { AmbiguousHostnameResult } from './get_endpoint_status';
 export type { EndpointNotFoundResult, HostLookupReason } from './types';
+export type { ActionParametersSummary } from './types';

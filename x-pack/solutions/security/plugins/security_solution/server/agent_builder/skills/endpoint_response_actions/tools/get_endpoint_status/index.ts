@@ -23,6 +23,29 @@ import {
   responseActionErrorResult,
 } from '../types';
 import { createEndpointLookupService } from '../services/endpoint_lookup';
+import type { EndpointCandidate } from '../services/endpoint_lookup';
+
+/**
+ * Tool result returned when a hostname matches more than one endpoint record.
+ *
+ * Modelled apart from `EndpointNotFoundResult` on purpose: the ambiguity
+ * outcome deliberately reports the candidate list instead of a status, so
+ * sharing the not-found interface would advertise `status`/`isolated`/
+ * `lastSeen` fields that this payload never carries. `reason` stays on the
+ * shared `HostLookupReason` vocabulary so a consumer can still branch on it.
+ */
+export interface AmbiguousHostnameResult {
+  kind: 'response_action_result';
+  action: 'get-endpoint-status';
+  hostName: string;
+  found: false;
+  reason: 'ambiguous_hostname';
+  candidates: EndpointCandidate[];
+  /** Set when more records matched than the lookup examined. */
+  truncated?: true;
+  totalCandidates?: number;
+  message: string;
+}
 
 const getEndpointStatusSchema = z.object({
   hostName: z
@@ -113,7 +136,7 @@ export const getEndpointStatusTool = (
                     message: resolved.truncated
                       ? `More endpoints match the hostname "${hostName}" than could be examined, so it cannot be resolved to a single host. Ask the analyst which agent ID they mean, then call this tool again with that agentId.`
                       : `Multiple online endpoints share the hostname "${hostName}". Ask the analyst which agent ID they mean, then call this tool again with that agentId.`,
-                  },
+                  } satisfies AmbiguousHostnameResult,
                 },
               ],
             };

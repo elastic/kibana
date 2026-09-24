@@ -20,6 +20,7 @@ import {
   summarizeActionErrors,
   summarizeActionHosts,
   summarizeActionOutputs,
+  summarizeActionParameters,
   summarizeAgentState,
 } from '../types';
 
@@ -101,7 +102,13 @@ export const getResponseActionStatusTool = (
                 // host records into the model context. The total is reported
                 // alongside the bounded sample.
                 ...(summarizeActionHosts(actionDetails.hosts) ?? {}),
-                parameters: actionDetails.parameters,
+                // Bounded: `parameters` is a flat bag but its VALUES are not
+                // small — a CrowdStrike `runscript` permits a 65,536-character
+                // `raw` script plus an 8,192-character `commandLine`, so
+                // forwarding it verbatim injects tens of thousands of
+                // characters into the conversation on every status poll.
+                // Bounded like `hosts`; the paths shortened are reported.
+                ...(summarizeActionParameters(actionDetails.parameters) ?? {}),
                 // Bounded: raw `outputs` can carry multi-MB command output and
                 // one entry per process. Summarized so a single lookup cannot
                 // exhaust the conversation context.
