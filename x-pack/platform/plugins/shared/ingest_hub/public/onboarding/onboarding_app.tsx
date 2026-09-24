@@ -97,6 +97,7 @@ export async function hydrateOnboardingSession(
       JSON.stringify({
         serviceStatuses: {},
         policyIdsByInstance: item.policyIdsByInstance ?? {},
+        ...(item.ecfStacks ? { ecfStacks: item.ecfStacks } : {}),
         failedInstances: [],
         deployErrors: {},
         onboardingDeploymentId: item.id,

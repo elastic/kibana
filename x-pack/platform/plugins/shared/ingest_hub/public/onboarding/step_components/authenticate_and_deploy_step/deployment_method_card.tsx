@@ -157,8 +157,9 @@ export function DeploymentMethodCard({
                   : undefined
               }
             >
-              {/* span needed: disabled EuiButtonEmpty has pointer-events:none; span intercepts hover so tooltip fires */}
-              <span style={{ display: 'inline-block' }}>
+              {/* span needed: disabled EuiButtonEmpty has pointer-events:none; span intercepts hover
+                  and keyboard focus (tabIndex) so the tooltip fires for mouse and keyboard users */}
+              <span style={{ display: 'inline-block' }} tabIndex={disabled ? 0 : undefined}>
                 <EuiButtonEmpty
                   size="xs"
                   onClick={disabled ? undefined : openModal}
