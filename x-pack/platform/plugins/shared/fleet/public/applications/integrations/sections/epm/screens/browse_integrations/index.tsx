@@ -151,13 +151,12 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
     closeCollection,
   ]);
 
-  const collectionReturnPath = useMemo(
-    () =>
-      openCollectionGroupId
-        ? `${pathname}?${COLLECTION_QUERYPARAM}=${openCollectionGroupId}`
-        : undefined,
-    [openCollectionGroupId, pathname]
-  );
+  const collectionReturnPath = useMemo(() => {
+    if (!openCollectionGroupId) return undefined;
+    const params = new URLSearchParams(search);
+    params.set(COLLECTION_QUERYPARAM, openCollectionGroupId);
+    return `${pathname}?${params.toString()}`;
+  }, [openCollectionGroupId, pathname, search]);
 
   const collectionVariants: CollectionVariant[] = useMemo(() => {
     if (!openCollectionCard?.groupMembers || !collectionReturnPath) return [];
