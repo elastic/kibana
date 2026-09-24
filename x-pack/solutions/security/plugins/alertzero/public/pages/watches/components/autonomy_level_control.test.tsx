@@ -86,7 +86,7 @@ describe('AutonomyLevelControl (Sep 14 radios)', () => {
       expect(within(group).queryByRole('radio', { name: /Supervised/ })).not.toBeInTheDocument();
     });
 
-    it('renders a single allowed level as a fixed value rather than a selector', () => {
+    it('renders a single allowed level as the one selected option', () => {
       render(
         <AutonomyLevelControl
           workerId={TRIAGE_WORKER_ID}
@@ -97,7 +97,79 @@ describe('AutonomyLevelControl (Sep 14 radios)', () => {
       );
 
       expect(screen.getByTestId('alertZeroAutonomyFixedLevel')).toBeInTheDocument();
-      expect(screen.queryByRole('radio')).not.toBeInTheDocument();
+      // Selected and alone: the level is fixed because nothing else is offered, not because the
+      // control was withheld. A second radio here would mean the server's projection was ignored.
+      expect(screen.getByRole('radio')).toBeChecked();
+      expect(screen.getAllByRole('radio')).toHaveLength(1);
+    });
+
+    it('renders a single allowed level as fixed even for a Worker with no card copy', () => {
+      render(
+        <AutonomyLevelControl
+          workerId="system-security-worker-with-no-card-copy"
+          current="manual"
+          allowedAutonomyLevels={['manual']}
+          onChange={onChange}
+        />
+      );
+
+      expect(screen.getByTestId('alertZeroAutonomyFixedLevel')).toHaveTextContent('Manual');
+      expect(screen.getAllByRole('radio')).toHaveLength(1);
+      expect(screen.queryByTestId('alertZeroAutonomyCardFact')).not.toBeInTheDocument();
+    });
+
+    it('still explains what the level does when there is no choice to make', () => {
+      render(
+        <AutonomyLevelControl
+          workerId={TRIAGE_WORKER_ID}
+          current="manual"
+          allowedAutonomyLevels={['manual']}
+          onChange={onChange}
+        />
+      );
+
+      expect(screen.getByTestId('alertZeroAutonomyCardWho')).toBeInTheDocument();
+      expect(screen.getAllByTestId('alertZeroAutonomyCardFact').length).toBeGreaterThan(0);
+      expect(screen.getAllByText('Closures').length).toBeGreaterThan(0);
+    });
+
+    it('presents the fixed level as the same card an offered level gets', () => {
+      render(
+        <AutonomyLevelControl
+          workerId={TRIAGE_WORKER_ID}
+          current="manual"
+          allowedAutonomyLevels={['manual']}
+          onChange={onChange}
+        />
+      );
+
+      // `EuiCheckableCard` forwards `data-test-subj` to its radio, so this subject marks the
+      // control inside the card, the same place it lands for the Workers that offer three levels.
+      expect(
+        within(screen.getByTestId('alertZeroAutonomyCard-manual')).getByRole('radio')
+      ).toBeChecked();
+      expect(screen.getByTestId('alertZeroAutonomyFixedLevel')).toHaveTextContent('Manual');
+      expect(screen.getByTestId('alertZeroAutonomyCardWho')).toBeInTheDocument();
+    });
+
+    // React routes a radio's `onChange` off its click event, so an already-checked radio still
+    // calls the handler — which is why the fixed branch passes its own no-op rather than the save.
+    it('saves nothing when the only level is clicked', () => {
+      // Its own mock: the suite's shared one carries calls from the selection tests above.
+      const onFixedChange = jest.fn();
+      render(
+        <AutonomyLevelControl
+          workerId={TRIAGE_WORKER_ID}
+          current="manual"
+          allowedAutonomyLevels={['manual']}
+          onChange={onFixedChange}
+        />
+      );
+
+      fireEvent.click(screen.getByRole('radio'));
+
+      expect(onFixedChange).not.toHaveBeenCalled();
+      expect(screen.getByRole('radio')).toBeChecked();
     });
 
     it('offers every level when the server projects none (pre-field Worker)', () => {
