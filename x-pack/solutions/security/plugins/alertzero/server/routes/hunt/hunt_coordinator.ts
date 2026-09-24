@@ -135,7 +135,7 @@ export const registerHuntCoordinatorRoute = ({
           // report; the hunt child fans out over them with ai.attachment.add.
           // Use the coordinator OR (Tier 1 || Tier 2), not Tier 1 alone.
           const body: HuntCoordinatorResponse =
-            result.hasConfirmedHit && report_id
+            result.has_confirmed_hit && report_id
               ? { ...result, sse: buildSseData(result, report_id, { spaceId }) }
               : result;
           return response.ok({ body });
