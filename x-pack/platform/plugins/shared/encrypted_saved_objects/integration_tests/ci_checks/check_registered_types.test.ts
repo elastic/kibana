@@ -20,7 +20,7 @@ import type { EncryptedSavedObjectsService } from '../../server/crypto';
 import * as EncryptedSavedObjectsModule from '../../server/saved_objects';
 
 // This will only change if new ESOs are introduced. This number should never get smaller.
-export const ESO_TYPES_COUNT = 26 as const;
+export const ESO_TYPES_COUNT = 27 as const;
 
 describe('checking changes on all registered encrypted SO types', () => {
   let esServer: TestElasticsearchUtils;
@@ -79,6 +79,7 @@ describe('checking changes on all registered encrypted SO types', () => {
         "fleet-uninstall-tokens": "6e7d75921dcce46e566f175eab1b0e3825fe565f20cdb3c984e7037934d61e23",
         "ingest-download-sources": "b3740796eab0a91736e43bd22f7489cbf6f2ad0241ae370d1c8195b6a8d8ad52",
         "ingest-outputs": "d66716d5333484a25c57f7917bead5ac2576ec57a4b9eb61701b573f35ab62ad",
+        "nightshift-secrets": "5fbb5b35cb5763ea2ff3f29f7131889a1e6f73a40c9e30e9e2077230bb355fe7",
         "oauth_state": "b01289e5c133db9d4d802a2b838e43cce4a8399566dedb21de551da57c88894a",
         "privmon-api-key": "7d7b76b3bc5287a784518731ba66d4f761052177fc04b1a85e5605846ab9de42",
         "service-account-credential": "5d9f328d92718249b324fbd5d01332bcef80be980003d510a3bd24af230244ff",
@@ -173,6 +174,7 @@ describe('checking changes on all registered encrypted SO types', () => {
         "ingest-outputs|11",
         "ingest-outputs|10",
         "ingest-outputs|1",
+        "nightshift-secrets|1",
         "oauth_state|1",
         "service-account-credential|1",
         "service-account-workload-binding|1",

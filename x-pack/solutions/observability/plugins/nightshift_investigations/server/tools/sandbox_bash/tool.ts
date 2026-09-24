@@ -15,6 +15,11 @@ import type { ResolveConnectorCredentials } from './connector_credentials';
 import { redactSecrets } from './connector_credentials';
 import { getConversationId, getSandboxCallContext } from './tool_utils';
 import type { SandboxWorkspaceManager } from './sandbox_workspace_manager';
+import {
+  MAX_SANDBOX_SECRETS,
+  MAX_SANDBOX_SECRET_KEY_LENGTH,
+} from '../../../common/sandbox_secrets';
+import type { SandboxSecretsClient } from '../../sandbox_secrets';
 
 export const SANDBOX_BASH_TOOL_ID = 'nightshift_sandbox_bash';
 
@@ -40,23 +45,32 @@ const sandboxBashSchema = z.object({
     .describe(
       'Connector whose credentials this command needs (see /workspace/connectors.md). Its config and secrets are exposed to this command only, as CONNECTOR_CONFIG_<KEY> / CONNECTOR_SECRET_<KEY> environment variables, and are gone when the command exits.'
     ),
+  secret_keys: z
+    .array(z.string().max(MAX_SANDBOX_SECRET_KEY_LENGTH))
+    .max(MAX_SANDBOX_SECRETS)
+    .optional()
+    .describe(
+      'Names of sandbox secrets (see /workspace/connectors.md) this command needs. Each one is exposed to this command only, as an environment variable of the same name, and is gone when the command exits.'
+    ),
 });
 
 export const createSandboxBashTool = ({
   getSandboxStart,
   sandboxWorkspaceManager,
   resolveConnectorCredentials,
+  sandboxSecretsClient,
   logger,
 }: {
   getSandboxStart: () => SandboxPluginStart | undefined;
   sandboxWorkspaceManager: SandboxWorkspaceManager;
   resolveConnectorCredentials?: ResolveConnectorCredentials;
+  sandboxSecretsClient?: Pick<SandboxSecretsClient, 'resolveForCommand'>;
   logger: Logger;
 }): BuiltinToolDefinition<typeof sandboxBashSchema> => ({
   id: SANDBOX_BASH_TOOL_ID,
   type: ToolType.builtin,
   description:
-    'Execute a bash command inside a sandboxed container. Use this to run shell commands, scripts, or any computation that requires a shell environment. Python 3 is available as `python` (via /home/appuser/.venv/bin/python). The default working directory is /workspace. To call an external service through a Kibana connector, read /workspace/connectors.md and pass the connector id as `connector_id`: the connector credentials are then available to that single command as CONNECTOR_* environment variables (e.g. `curl -H "Authorization: Bearer $CONNECTOR_SECRET_TOKEN" "$CONNECTOR_CONFIG_APIURL/..."`).',
+    'Execute a bash command inside a sandboxed container. Use this to run shell commands, scripts, or any computation that requires a shell environment. Python 3 is available as `python` (via /home/appuser/.venv/bin/python). The default working directory is /workspace. To call an external service through a Kibana connector, read /workspace/connectors.md and pass the connector id as `connector_id`: the connector credentials are then available to that single command as CONNECTOR_* environment variables (e.g. `curl -H "Authorization: Bearer $CONNECTOR_SECRET_TOKEN" "$CONNECTOR_CONFIG_APIURL/..."`). To use a sandbox secret listed in /workspace/connectors.md, pass its name in `secret_keys`: it is then available to that single command as an environment variable of the same name (e.g. `secret_keys: ["GITHUB_TOKEN"]` with `curl -H "Authorization: Bearer $GITHUB_TOKEN" ...`).',
   tags: ['sandbox', 'bash'],
   schema: sandboxBashSchema,
   annotations: {
@@ -66,8 +80,9 @@ export const createSandboxBashTool = ({
     idempotentHint: false,
     openWorldHint: true,
   },
+  excludeFromMcp: true,
   handler: async (params, context) => {
-    const { command, working_directory, env, timeout_seconds, connector_id } = params;
+    const { command, working_directory, env, timeout_seconds, connector_id, secret_keys } = params;
 
     const rawConversationId = getConversationId(context);
     if (!rawConversationId) {
@@ -134,14 +149,37 @@ export const createSandboxBashTool = ({
       secretValues = resolved.secretValues;
     }
 
+    let sandboxSecretsEnv: Record<string, string> = {};
+    if (secret_keys && secret_keys.length > 0) {
+      if (!sandboxSecretsClient) {
+        return {
+          results: [
+            {
+              type: ToolResultType.error,
+              data: { message: 'Sandbox secrets are not available in this deployment.' },
+            },
+          ],
+        };
+      }
+      const resolved = await sandboxSecretsClient.resolveForCommand(context.request, secret_keys);
+      if ('errorMessage' in resolved) {
+        return {
+          results: [{ type: ToolResultType.error, data: { message: resolved.errorMessage } }],
+        };
+      }
+      sandboxSecretsEnv = resolved.env;
+      secretValues = [...secretValues, ...resolved.secretValues];
+    }
+
     logger.debug(`Executing sandbox bash command for session ${rawConversationId}: ${command}`);
 
     try {
       // Prepend the venv bin dir so `python` resolves without requiring a full path.
-      // Credential vars are applied last so agent-supplied env cannot shadow them.
+      // Secret and credential vars are applied last so agent-supplied env cannot shadow them.
       const mergedEnv: Record<string, string> = {
         PATH: `/home/appuser/.venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin`,
         ...env,
+        ...sandboxSecretsEnv,
         ...credentialEnv,
       };
 

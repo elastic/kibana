@@ -8,12 +8,10 @@
 import type { Logger } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { SandboxCallContext } from './tool_utils';
+import { createOutputRedactor, MIN_REDACTABLE_SECRET_LENGTH } from './output_redactor';
 
 /** Env var prefix under which connector material is exposed to a single sandbox command. */
 export const CONNECTOR_ENV_PREFIX = 'CONNECTOR_';
-
-/** Minimum length for a secret value to be redacted from command output. */
-const MIN_REDACTABLE_SECRET_LENGTH = 6;
 
 export interface ConnectorCredentialEnv {
   /** Environment variables to inject into the command. */
@@ -109,9 +107,9 @@ export const buildConnectorEnv = ({
   return { env, secretValues };
 };
 
-/** Replaces every occurrence of an injected secret value in command output. */
+/** Redacts injected secret values (and their common encodings) from command output. */
 export const redactSecrets = (text: string, secretValues: readonly string[]): string =>
-  secretValues.reduce((acc, secret) => acc.split(secret).join('[REDACTED]'), text);
+  createOutputRedactor(secretValues).redact(text);
 
 /**
  * Creates the resolver that turns a connector id into a one-command credential environment.

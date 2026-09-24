@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { EuiPageTemplate } from '@elastic/eui';
+import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
@@ -19,6 +20,7 @@ import { NightshiftApp } from './app/app';
 import { NightshiftAppHeader } from './app/app_header';
 import { useKibana } from './hooks/use_kibana';
 import { useSignificantEventsAvailability } from './hooks/use_significant_events_availability';
+import { SandboxSecretsFlyout } from './sandbox_secrets/sandbox_secrets_flyout';
 
 export function NightshiftPage(): React.ReactElement | null {
   const {
@@ -26,6 +28,7 @@ export function NightshiftPage(): React.ReactElement | null {
     http: { basePath },
     serverless,
     observabilityShared,
+    nightshiftInvestigations,
   } = useKibana().services;
   const { PageTemplate: ObservabilityPageTemplate } = observabilityShared.navigation;
   const settingsHref = application.getUrlForApp(SIGNIFICANT_EVENTS_APP_ID, {
@@ -42,6 +45,13 @@ export function NightshiftPage(): React.ReactElement | null {
     () => application.navigateToUrl(managementHref),
     [application, managementHref]
   );
+
+  const { canManage } = getNightshiftCapabilities(application.capabilities.nightshift);
+  const canManageSandboxSecrets =
+    canManage && nightshiftInvestigations?.investigationsClient != null;
+  const [isSandboxSecretsFlyoutOpen, setIsSandboxSecretsFlyoutOpen] = useState(false);
+  const openSandboxSecretsFlyout = useCallback(() => setIsSandboxSecretsFlyoutOpen(true), []);
+  const closeSandboxSecretsFlyout = useCallback(() => setIsSandboxSecretsFlyoutOpen(false), []);
 
   const { isAvailable, isLoading: isAvailabilityLoading } = useSignificantEventsAvailability();
 
@@ -82,10 +92,14 @@ export function NightshiftPage(): React.ReactElement | null {
         managementHref={managementHref}
         onSettingsClick={navigateToSettings}
         settingsHref={settingsHref}
+        onSandboxSecretsClick={canManageSandboxSecrets ? openSandboxSecretsFlyout : undefined}
       />
       <EuiPageTemplate.Section component="div" color="subdued" restrictWidth="900px">
         <NightshiftApp />
       </EuiPageTemplate.Section>
+      {canManageSandboxSecrets && isSandboxSecretsFlyoutOpen && (
+        <SandboxSecretsFlyout onClose={closeSandboxSecretsFlyout} />
+      )}
     </ObservabilityPageTemplate>
   );
 }

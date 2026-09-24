@@ -24,6 +24,10 @@ const managementLabel = i18n.translate('xpack.nightshift.managementLinkLabel', {
   defaultMessage: 'Management',
 });
 
+const sandboxSecretsLabel = i18n.translate('xpack.nightshift.sandboxSecretsLinkLabel', {
+  defaultMessage: 'Sandbox secrets',
+});
+
 const settingsEbtProps = getEbtProps({
   action: NIGHTSHIFT_EBT_ACTIONS.VIEW_SETTINGS,
   element: NIGHTSHIFT_EBT_ELEMENTS.PAGE_HEADER,
@@ -54,15 +58,30 @@ export function NightshiftAppHeader({
   managementHref,
   onSettingsClick,
   settingsHref,
+  onSandboxSecretsClick,
 }: {
   onManagementClick: () => void | Promise<void>;
   managementHref: string;
   onSettingsClick: () => void | Promise<void>;
   settingsHref: string;
+  /** Shows the sandbox secrets menu item when set. */
+  onSandboxSecretsClick?: () => void;
 }): React.ReactElement {
   const menu = useMemo<AppMenuConfig>(
     () => ({
       items: [
+        ...(onSandboxSecretsClick
+          ? [
+              {
+                id: 'nightshiftSandboxSecrets',
+                label: sandboxSecretsLabel,
+                iconType: 'lock',
+                run: () => onSandboxSecretsClick(),
+                testId: 'nightshiftSandboxSecretsLink',
+                overflow: true,
+              },
+            ]
+          : []),
         {
           id: 'nightshiftManagement',
           label: managementLabel,
@@ -84,10 +103,11 @@ export function NightshiftAppHeader({
             void onSettingsClick();
           },
           testId: 'nightshiftSettingsLink',
+          overflow: true,
         },
       ],
     }),
-    [managementHref, onManagementClick, onSettingsClick, settingsHref]
+    [managementHref, onManagementClick, onSandboxSecretsClick, onSettingsClick, settingsHref]
   );
 
   return <AppHeader title={nightshiftPageTitle} menu={menu} spacing="compact" />;
