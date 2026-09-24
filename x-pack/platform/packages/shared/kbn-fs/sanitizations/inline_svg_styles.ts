@@ -84,6 +84,9 @@ const IGNORED_BLOCK_AT_RULES: ReadonlySet<string> = new Set([
   'property',
 ]);
 const AT_RULE_NAME = /@([a-zA-Z-]+)/y;
+// Stop properties aren't inherited, but these values read from the stop's parent, which changes when it's copied.
+const PARENT_DEPENDENT_VALUE = /currentcolor|inherit|var\(|\\/i;
+const MARKUP_NAME = /<\/?([a-zA-Z][^\s/>]*)|[\s"']([^\s"'<>/=]+)\s*=/g;
 
 type Grammar = (value: string) => boolean;
 
@@ -324,6 +327,48 @@ const collectElements = (svgDocument: Document, window: DOMWindow): Element[] =>
   return elements;
 };
 
+// Lowercased tag and attribute names this module matches on.
+const READ_NAMES: ReadonlySet<string> = new Set(
+  [
+    'class',
+    'id',
+    'href',
+    'xlink:href',
+    'xmlns',
+    'type',
+    'media',
+    'title',
+    SVG_TYPE_SELECTOR,
+    'style',
+    'stop',
+    'use',
+    ...ANIMATION_ELEMENTS,
+    ...GRADIENT_ELEMENTS,
+    ...CONTAINER_REFERENCES,
+    ...BASIC_SHAPES,
+    ...SHARED_GRADIENT_ATTRIBUTES,
+    ...Object.values(GRADIENT_GEOMETRY_ATTRIBUTES).flat(),
+  ].map(toAsciiLowerCase)
+);
+
+// The HTML parser rewrites the case of names (`CLASS`, `<STYLE>`, `lineargradient`), while XML matches them
+// exactly, so inlining could apply rules or references the browser never would.
+const changesNameCase = (svgContent: string, elements: readonly Element[]): boolean => {
+  const names = new Set(
+    elements.flatMap((element) => [
+      element.localName,
+      ...Array.from(element.attributes, ({ name }) => name),
+    ])
+  );
+  for (const [, tagName, attributeName] of svgContent.matchAll(MARKUP_NAME)) {
+    const name = tagName ?? attributeName;
+    if (!names.has(name) && READ_NAMES.has(toAsciiLowerCase(name))) {
+      return true;
+    }
+  }
+  return false;
+};
+
 // HTML parsing ignores xmlns, but in the XML file a foreign default namespace takes an element and its
 // descendants out of SVG (Illustrator's `<sfw xmlns="ns_sfw;">` metadata, for example).
 const collectForeignElements = (elements: readonly Element[]): ReadonlySet<Element> => {
@@ -431,6 +476,10 @@ interface ReferencePlan {
 // Only flat elements are copied, so the markup measured while planning is exactly what gets written.
 const isFlat = (element: Element): boolean => element.children.length === 0;
 
+const isCopyableStop = (stop: Element): boolean =>
+  isFlat(stop) &&
+  Array.from(stop.attributes).every(({ value }) => !PARENT_DEPENDENT_VALUE.test(value));
+
 // DOMPurify strips href and drops <use>, so gradients inheriting through href would paint nothing and clip
 // paths built from <use> would hide their shape.
 const planReferences = (
@@ -467,7 +516,7 @@ const planReferences = (
       const stopSource = hasStops(element) ? undefined : chain.find(hasStops);
       if (stopSource) {
         const stops = Array.from(stopSource.children).filter((child) => kindOf(child) === 'stop');
-        if (stops.every(isFlat)) {
+        if (stops.every(isCopyableStop)) {
           if (!withinBudget(stops.reduce((total, stop) => total + stop.outerHTML.length, 0))) {
             return undefined;
           }
@@ -617,6 +666,9 @@ const inlineSupportedStyles = (svgContent: string, window: DOMWindow): InlinedSv
   // Parse as HTML like DOMPurify does; XML parsing plus re-serialization makes DOMPurify drop Inkscape SVGs.
   const svgDocument = new window.DOMParser().parseFromString(svgContent, 'text/html');
   const elements = collectElements(svgDocument, window);
+  if (changesNameCase(svgContent, elements)) {
+    return undefined;
+  }
   const foreignElements = collectForeignElements(elements);
   const cssTexts: string[] = [];
   for (const element of elements) {

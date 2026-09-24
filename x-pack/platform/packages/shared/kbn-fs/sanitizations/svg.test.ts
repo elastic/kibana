@@ -338,6 +338,19 @@ describe('sanitizeSvg style inlining', () => {
     expect(sanitize(svg)).toEqual(sanitizeWithoutStyles(svg));
   });
 
+  it('falls back when HTML parsing changes the case of a name that XML matches exactly', () => {
+    for (const svg of [
+      '<svg><style>.a{fill:#f00}</style><rect CLASS="a" fill="green"/></svg>',
+      '<svg><style>.a{fill:#f00}</style><rect Class="a" fill="green"/></svg>',
+      '<svg><STYLE>.a{fill:#f00}</STYLE><style>.b{fill:#00f}</style><rect class="a b"/></svg>',
+      '<svg><style>svg{fill:#f00}</style><Svg><rect/></Svg></svg>',
+      '<svg><style>.a{fill:url(#g)}</style><lineargradient id="g"><stop/></lineargradient>' +
+        '<rect class="a"/></svg>',
+    ]) {
+      expect(sanitize(svg)).toEqual(sanitizeWithoutStyles(svg));
+    }
+  });
+
   it('keeps cascade order across style elements', () => {
     expect(
       sanitize(
@@ -821,6 +834,22 @@ describe('sanitizeSvg style inlining', () => {
         '<rect class="a"/></svg>';
 
       expect(sanitize(svg)).toEqual(sanitizeWithoutStyles(svg));
+    });
+
+    it('does not copy stops whose values depend on the gradient that defines them', () => {
+      for (const stopAttributes of [
+        'stop-color="currentColor"',
+        'stop-opacity="inherit"',
+        'style="stop-color:var(--brand)"',
+        String.raw`style="stop-color:currentcol\6fr"`,
+      ]) {
+        const svg =
+          '<svg><defs><style>.a{fill:url(#child)}</style>' +
+          `<linearGradient id="base" style="color:#f00"><stop ${stopAttributes}/></linearGradient>` +
+          '<linearGradient id="child" href="#base"/></defs><rect class="a" fill="#f00"/></svg>';
+
+        expect(sanitize(svg)).toEqual(sanitizeWithoutStyles(svg));
+      }
     });
 
     it('falls back when a referenced element depends on one that sanitization empties', () => {
