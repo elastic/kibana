@@ -105,8 +105,8 @@ export async function getConnectionConfig(
   const { elasticsearch, server: serverConfig } = readKibanaConfig(log);
 
   const esUrl = String(flags['es-url'] || elasticsearch.hosts);
-  const username = String(flags['es-username'] || 'elastic');
-  const password = String(flags['es-password'] || 'changeme');
+  const username = String(flags['es-username'] || process.env.ELASTICSEARCH_USERNAME || 'elastic');
+  const password = String(flags['es-password'] || process.env.ELASTICSEARCH_PASSWORD || 'changeme');
 
   const rawKibanaUrl = flags['kibana-url']
     ? String(flags['kibana-url'])

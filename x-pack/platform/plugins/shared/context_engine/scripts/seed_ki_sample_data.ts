@@ -15,6 +15,7 @@ import { kibanaRequest } from './seed_ki_sample_data/lib/kibana';
 const DEFAULT_AI_INDEX_ID = 'sample-ki';
 const DEFAULT_COUNT = 25;
 const DEFAULT_TYPE_COUNT = 3;
+const LOCAL_HOSTNAMES = new Set(['localhost', '127.0.0.1', '[::1]']);
 
 async function dataStreamExists(esClient: Client, name: string): Promise<boolean> {
   try {
@@ -147,7 +148,11 @@ async function registerAiIndex(
 
   if (status !== 200 && status !== 201) {
     throw new Error(
-      `Failed to register AI index "${aiIndexId}" (${status}): ${JSON.stringify(data)}`
+      `Failed to register AI index "${aiIndexId}" (${status}): ${JSON.stringify(data)}${
+        status === 404
+          ? ' — enable the contextEngine:enabled advanced setting in Kibana and retry.'
+          : ''
+      }`
     );
   }
 }
@@ -205,9 +210,12 @@ run(
       throw new Error('--types must be a positive integer');
     }
 
+    const esUrl = new URL(config.esUrl);
     const esClient = new Client({
       node: config.esUrl,
       auth: { username: config.username, password: config.password },
+      ...(esUrl.protocol === 'https:' &&
+        LOCAL_HOSTNAMES.has(esUrl.hostname) && { tls: { rejectUnauthorized: false } }),
     });
 
     if (flags.clean === true || cleanOnly) {
@@ -278,9 +286,9 @@ run(
         --clean                Delete existing AI index + backing stores, then re-seed
         --clean-only           Delete existing AI index + backing stores and exit (no re-seed)
         --skip-kibana          Only write to Elasticsearch; skip Context Engine registration
-        --es-url <url>         Elasticsearch URL (default: http://localhost:9200)
-        --es-username <user>   ES username (default: elastic)
-        --es-password <pass>   ES password (default: changeme)
+        --es-url <url>         Elasticsearch URL (default: ELASTICSEARCH_HOST or http://localhost:9200)
+        --es-username <user>   ES username (default: ELASTICSEARCH_USERNAME or elastic)
+        --es-password <pass>   ES password (default: ELASTICSEARCH_PASSWORD or changeme)
         --kibana-url <url>     Kibana base URL (default: from kibana.dev.yml)
 
         Usage:
