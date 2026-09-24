@@ -187,6 +187,34 @@ describe('useConversationProposals', () => {
       queryKeys.proposals.list('conv-42')
     );
   });
+
+  it("does not keep the previous conversation's proposals on screen while the next one loads", async () => {
+    const http = makeHttp();
+    const convAProposals = { proposals: [{ id: 'a-1' }], total: 1 };
+    const convBProposals = { proposals: [{ id: 'b-1' }], total: 1 };
+    http.get.mockImplementation((_url, { query }: { query: { conversationId: string } }) =>
+      Promise.resolve(query.conversationId === 'conv-a' ? convAProposals : convBProposals)
+    );
+    useKibanaMock.mockReturnValue({ services: { http } } as unknown as ReturnType<
+      typeof useKibana
+    >);
+
+    const { Wrapper } = createWrapper();
+    const { result, rerender } = renderHook(
+      ({ conversationId }) => useConversationProposals(conversationId),
+      { wrapper: Wrapper, initialProps: { conversationId: 'conv-a' } }
+    );
+    await waitFor(() => expect(result.current.data).toEqual(convAProposals));
+
+    // A row keyed by `conv-a`'s proposal must not still be on screen, un-flagged as stale, once
+    // the analyst has navigated to `conv-b` — that is what would let an approve/dismiss click
+    // land on the wrong investigation.
+    rerender({ conversationId: 'conv-b' });
+    expect(result.current.isLoading).toBe(true);
+    expect(result.current.data).toBeUndefined();
+
+    await waitFor(() => expect(result.current.data).toEqual(convBProposals));
+  });
 });
 
 describe('useProposal', () => {

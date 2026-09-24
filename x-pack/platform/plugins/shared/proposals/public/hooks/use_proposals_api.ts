@@ -90,7 +90,10 @@ export const useConversationProposals = (
         version: PROPOSALS_API_VERSION,
         query: { conversationId, excludeSuperseded: true },
       }),
-    keepPreviousData: true,
+    // No `keepPreviousData`: unlike `usePendingProposals`'s cross-conversation queue, every row
+    // here is actionable against `conversationId`. Showing the previous conversation's proposals
+    // — un-flagged as stale — while this one loads would let an approve/dismiss click land on a
+    // proposal from the investigation the analyst just navigated away from.
     retry: retryOnTransientError,
   });
 };
