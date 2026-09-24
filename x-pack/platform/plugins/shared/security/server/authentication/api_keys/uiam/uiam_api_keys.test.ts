@@ -63,6 +63,8 @@ describe('UiamAPIKeys', () => {
       convertApiKeys: jest.fn(),
       exchangeOAuthToken: jest.fn(),
       createServiceAccount: jest.fn(),
+      listServiceAccounts: jest.fn(),
+      getServiceAccount: jest.fn(),
       exchangeServiceAccountToken: jest.fn(),
       authenticateAsKibana: jest.fn(),
       createOAuthClient: jest.fn(),
@@ -504,6 +506,54 @@ describe('UiamAPIKeys', () => {
       await expect(uiamApiKeys.convert(['es-api-key'])).rejects.toThrow('UIAM service error');
 
       expect(logger.error).toHaveBeenCalledWith('Failed to convert API keys: UIAM service error');
+    });
+  });
+
+  describe('isOwnClientAuthentication()', () => {
+    beforeEach(() => {
+      mockUiam.getClientAuthentication.mockReturnValue({
+        scheme: 'SharedSecret',
+        value: 'kibana-shared-secret',
+      });
+    });
+
+    it("returns true for Kibana's own shared secret", () => {
+      expect(uiamApiKeys.isOwnClientAuthentication('kibana-shared-secret')).toBe(true);
+      expect(mockUiam.getClientAuthentication).toHaveBeenCalledWith();
+    });
+
+    it('returns false for an upstream relay secret', () => {
+      expect(uiamApiKeys.isOwnClientAuthentication('upstream-secret')).toBe(false);
+    });
+
+    it('returns false when the presented value has a different length', () => {
+      expect(uiamApiKeys.isOwnClientAuthentication('short')).toBe(false);
+    });
+  });
+
+  describe('isExternalApiKey()', () => {
+    it('returns true for a user-created UIAM API key', () => {
+      authenticatedWithApiKey(false);
+      const request = httpServerMock.createKibanaRequest();
+
+      expect(uiamApiKeys.isExternalApiKey(request)).toBe(true);
+      expect(mockGetCurrentUser).toHaveBeenCalledWith(request);
+    });
+
+    it('returns false for an internally minted UIAM API key', () => {
+      authenticatedWithApiKey(true);
+
+      expect(uiamApiKeys.isExternalApiKey(httpServerMock.createKibanaRequest())).toBe(false);
+    });
+
+    it('returns false for a session user', () => {
+      expect(uiamApiKeys.isExternalApiKey(httpServerMock.createKibanaRequest())).toBe(false);
+    });
+
+    it('returns false when there is no current user', () => {
+      mockGetCurrentUser.mockReturnValue(null);
+
+      expect(uiamApiKeys.isExternalApiKey(httpServerMock.createKibanaRequest())).toBe(false);
     });
   });
 

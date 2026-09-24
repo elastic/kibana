@@ -210,16 +210,18 @@ export class DispatcherService implements DispatcherServiceContract {
     const lagMs = startedAt.getTime() - eventWatermark.getTime();
 
     if (blockingEpisodes.length === 0) {
-      // Stuck before FetchEpisodesStep: nothing to force-record, and advancing
+      // No episodes were fetched (aborted before or during FetchEpisodesStep, or
+      // the scan query was rejected): nothing to force-record, and advancing
       // would silently drop the window. Hold while lag is within one max scan
-      // window so transient infra pressure can recover; past that, skip the
-      // unread window rather than stall forever.
+      // window so the scan can recover and the overlap re-read still covers the
+      // window; past that, skip the unread window rather than stall forever.
+      const haltReason = pipelineResult.haltReason ?? 'completed';
       if (lagMs > PRE_FETCH_STUCK_ADVANCE_LAG_MS) {
         logger.error({
           code: ALERTING_LOG_CODES.DISPATCHER_ESCAPE_HATCH_PRE_FETCH_FORCED_ADVANCE,
           message: () =>
-            `escape hatch triggered but pipeline stopped before FetchEpisodesStep ` +
-            `(lag: ${lagMs}ms > ${MAX_WINDOW_MINUTES}m). Force-advancing to ` +
+            `escape hatch triggered with no fetched episodes (halt_reason: ${haltReason}, ` +
+            `lag: ${lagMs}ms > ${MAX_WINDOW_MINUTES}m). Force-advancing to ` +
             `${windowEnd.toISOString()}; unread episodes in this window are skipped.`,
           error: new Error(`Pre-fetch watermark stuck at ${eventWatermark.toISOString()}`),
         });
@@ -229,8 +231,8 @@ export class DispatcherService implements DispatcherServiceContract {
       logger.warn({
         code: ALERTING_LOG_CODES.DISPATCHER_ESCAPE_HATCH_PRE_FETCH_STUCK,
         message: () =>
-          `escape hatch triggered but pipeline stopped before FetchEpisodesStep ` +
-          `(lag: ${lagMs}ms). Holding watermark at ${eventWatermark.toISOString()} ` +
+          `escape hatch triggered with no fetched episodes (halt_reason: ${haltReason}, ` +
+          `lag: ${lagMs}ms). Holding watermark at ${eventWatermark.toISOString()} ` +
           `and resetting stuck counter.`,
       });
       return { startedAt, nextWatermark: eventWatermark, nextStuckTicks: 0, pipelineResult };

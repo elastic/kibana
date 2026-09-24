@@ -83,6 +83,17 @@ steps:
 
       - name: summarize_document
         type: ai.prompt
+        # The default model for every prompt step. Change it to another AI connector id if the
+        # user asks for one; leave it in place otherwise.
+        connector-id: .google-gemini-3.5-flash-chat_completion
+        # Transient connector errors, rate limits and structured-output parse failures are
+        # retried; a prompt that can never satisfy its schema still fails every attempt.
+        on-failure:
+          retry:
+            max-attempts: 3
+            delay: "5s"
+            strategy: exponential
+            jitter: true
         with:
           systemPrompt: |
             You summarise source documents for a retrieval index. Ground every statement in the
@@ -110,12 +121,13 @@ steps:
             what *this* document settles that its neighbours do not. A summary that would fit any
             document in the corpus is worse than useless: it makes the whole set unrankable.
 
-            For `access_patterns` give at least 2 ways to reach this material as live data, each
-            with:
+            For `access_patterns` give up to 2 ways to reach this material as live data. Return
+            an empty array rather than an invented query when the document is reached only by its
+            id or no ES|QL against it is meaningful; a KI that only orients is allowed, a query
+            that answers nothing is not. Each entry has:
             - question_type: a short label for the kind of question.
             - esql_template: a parameterized ES|QL query using named `?param` placeholders.
             - esql_example: the same query with real values substituted and a small LIMIT.
-            - params: the named parameters used, each with name/type/example.
             - returns: a short description of what the query returns.
 
             At least one pattern retrieves this exact document; the others reach the documents
@@ -153,7 +165,6 @@ steps:
                 type: string
               access_patterns:
                 type: array
-                minItems: 2
                 items:
                   type: object
                   properties:
@@ -163,21 +174,9 @@ steps:
                       type: string
                     esql_example:
                       type: string
-                    params:
-                      type: array
-                      items:
-                        type: object
-                        properties:
-                          name:
-                            type: string
-                          type:
-                            type: string
-                          example:
-                            type: string
-                        required: ["name", "type", "example"]
                     returns:
                       type: string
-                  required: ["question_type", "esql_template", "esql_example", "params", "returns"]
+                  required: ["question_type", "esql_template", "esql_example", "returns"]
             required:
               ["display_name", "summary", "topics", "answers_questions", "when_to_use", "access_patterns"]
 
@@ -213,18 +212,30 @@ steps:
               {{ steps.summarize_document.output.content.when_to_use }}
 
               ## Access patterns
+              {% if steps.summarize_document.output.content.access_patterns.size > 0 -%}
               {% for ap in steps.summarize_document.output.content.access_patterns -%}
               - [{{ ap.question_type }}] {{ ap.returns }}
                 Template: `{{ ap.esql_template }}`
                 Example: `{{ ap.esql_example }}`
               {% endfor %}
+              {%- else -%}
+              None. Fetch the document from {{ consts.source_index }} by its id, {{ steps.document_context.output.doc_id }}.
+              {%- endif %}
             tags:
               - "{{ consts.source_index }}"
               - document
+            # What the KI was derived from: the index and the one document it summarizes. Who
+            # wrote it is stamped by `createKi` itself.
+            references:
+              - uri: "index://{{ consts.source_index }}"
+                relation: derived_from
+              - uri: "doc://{{ consts.source_index }}/{{ steps.document_context.output.doc_id }}"
+                relation: derived_from
             attributes:
-              # Every ES|QL the KI carries goes here, which is what the verifiers check.
-              esql: "${{ steps.summarize_document.output.content.access_patterns | map: 'esql_example' }}"
-              source_doc_id: "{{ steps.document_context.output.doc_id }}"
+              # Every ES|QL the KI carries goes here, which is what the verifiers check. `default: nil`
+              # omits the attribute when there are no access patterns, so the verifiers skip the KI
+              # instead of failing an empty list.
+              esql: "${{ steps.summarize_document.output.content.access_patterns | map: 'esql_example' | default: nil }}"
               topics: "${{ steps.summarize_document.output.content.topics }}"
 
       - name: verify_ki
@@ -240,9 +251,9 @@ steps:
         condition: "steps.verify_ki.output.passed : true"
         steps:
           # `ki_id` pairs the index with the source document id, so a re-run replaces that
-          # document's KI rather than appending a second copy, and two indices holding the same
-          # document id do not collide. Omit `ki_id` entirely on a data-stream destination, which
-          # rejects it.
+          # document's KI on an index destination (a data stream appends a newer revision of it)
+          # rather than writing a second KI, and two indices holding the same document id do not
+          # collide.
           - name: create_ki
             type: context-engine.createKi
             with:

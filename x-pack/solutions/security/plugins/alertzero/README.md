@@ -125,6 +125,7 @@ Managed Worker definitions:
 - `system-security-hunt-continuous-threat-hunt`
 - `system-security-detection-rule-tuning`
 - `system-security-detection-rule-creation`
+- `system-security-forensics-endpoint-analysis`
 
 Those definitions live in `src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/`. Each Worker's settings contract is one `WorkerSettingsDeclaration` in `@kbn/alertzero-common` (`impl/worker_settings/`, one file per Watch team); AlertZero's `server/managed_workflows/workers/` derives defaults, validation, patch application and API projection from it, registered from `server/managed_workflows/worker_registry.ts`. Watch GET/list returns catalog placeholders only.
 
@@ -276,6 +277,6 @@ Keep `pageLoadAssetSize.alertzero` lean — prefer a thin plugin entry over rais
 Measure with:
 
 ```bash
-node scripts/build_kibana_platform_plugins.js --filter alertzero --dist --no-cache --no-examples
-# inspect …/alertzero/target/public/metrics.json → "page load bundle size"
+node scripts/build_kibana_platform_plugins.js --dist --no-cache
+# inspect target/public/bundles/metrics.json → "page load bundle size" for alertzero
 ```

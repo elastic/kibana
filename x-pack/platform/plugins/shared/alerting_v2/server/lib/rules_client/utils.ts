@@ -231,9 +231,9 @@ export function transformCreateRuleBodyToRuleSoAttributes(
   data: CreateRuleData,
   serverFields: {
     enabled: boolean;
-    createdBy: string | null;
+    createdBy: RuleSavedObjectAttributes['createdBy'];
     createdAt: string;
-    updatedBy: string | null;
+    updatedBy: RuleSavedObjectAttributes['updatedBy'];
     updatedAt: string;
     version: number;
   }
@@ -244,7 +244,6 @@ export function transformCreateRuleBodyToRuleSoAttributes(
     metadata: {
       name: data.metadata.name,
       description: data.metadata.description,
-      owner: data.metadata.owner,
       tags: data.metadata.tags,
       builder_type: data.metadata.builder_type,
       version,
@@ -313,7 +312,11 @@ function resolveBuilderType(
 export function buildUpdateRuleAttributes(
   existingAttrs: RuleSavedObjectAttributes,
   updateData: UpdateRuleData,
-  serverFields: { updatedBy: string | null; updatedAt: string; version: number }
+  serverFields: {
+    updatedBy: RuleSavedObjectAttributes['updatedBy'];
+    updatedAt: string;
+    version: number;
+  }
 ): RuleSavedObjectAttributes {
   const { version, ...restServerFields } = serverFields;
   return {
@@ -448,7 +451,6 @@ export function transformRuleSoAttributesToRuleApiResponse(
     metadata: {
       name: attrs.metadata.name,
       description: attrs.metadata.description,
-      owner: attrs.metadata.owner,
       tags: attrs.metadata.tags,
       builder_type: attrs.metadata.builder_type,
       version: attrs.metadata.version ?? RULE_VERSION_FALLBACK,
