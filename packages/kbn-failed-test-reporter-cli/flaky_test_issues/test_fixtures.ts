@@ -7,8 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FlakyTestEntry, FlakyTestReport } from '@kbn/scout-reporting';
+import type {
+  FlakyTestEntry,
+  FlakyTestFileStats,
+  FlakyTestPipelineStats,
+  FlakyTestReport,
+} from '@kbn/scout-reporting';
 import type { GithubIssue } from '../failed_tests_reporter/github_api';
+import { updateIssueMetadata } from '../failed_tests_reporter/issue_metadata';
 
 export const GENERATED_AT = new Date('2026-09-09T09:04:41.000Z');
 
@@ -32,6 +38,7 @@ export const flakyTest = (overrides: Partial<FlakyTestEntry> = {}): FlakyTestEnt
   failedBuilds: 49,
   buildFailRate: 49 / 509,
   failedBranches: 1,
+  flakiestBranch: { branch: 'main', builds: 509, failedBuilds: 49, buildFailRate: 49 / 509 },
   byBranch: [
     {
       branch: 'main',
@@ -46,6 +53,7 @@ export const flakyTest = (overrides: Partial<FlakyTestEntry> = {}): FlakyTestEnt
       },
     },
   ],
+  byTarget: [],
   firstFailedAt: new Date('2026-09-02T10:00:00.000Z'),
   lastFailedAt: new Date('2026-09-09T06:12:00.000Z'),
   latestRun: {
@@ -61,10 +69,27 @@ export const flakyTest = (overrides: Partial<FlakyTestEntry> = {}): FlakyTestEnt
       timestamp: new Date('2026-09-09T06:12:00.000Z'),
     },
   ],
+  suiteTitle: 'Default status alert',
   ...overrides,
 });
 
-export const flakyReport = (flaky: FlakyTestEntry[]): FlakyTestReport => ({
+export const pipelineStats = (
+  overrides: Partial<FlakyTestPipelineStats> = {}
+): FlakyTestPipelineStats => ({
+  pipeline: 'kibana-on-merge',
+  builds: 509,
+  failedBuilds: 49,
+  buildFailRate: 49 / 509,
+  failedBranches: 1,
+  lastFailedAt: new Date('2026-09-09T06:12:00.000Z'),
+  lastFailedBuildUrl: 'https://buildkite.com/elastic/kibana-on-merge/builds/12345',
+  ...overrides,
+});
+
+export const flakyReport = (
+  flaky: FlakyTestEntry[],
+  files: FlakyTestFileStats[] = []
+): FlakyTestReport => ({
   schemaVersion: 1,
   generatedAt: GENERATED_AT,
   window: {
@@ -78,12 +103,7 @@ export const flakyReport = (flaky: FlakyTestEntry[]): FlakyTestReport => ({
     frameworks: ['jest', 'ftr', 'cypress', 'playwright'],
     classifications: ['flaky'],
   },
-  thresholds: {
-    minBuilds: 10,
-    minFailedBuilds: 2,
-    minFailRate: 0,
-    maxTests: 200,
-  },
+  thresholds: { minBuilds: 10, minFailedBuilds: 2, minFailRate: 0.03, maxTests: 200 },
   summary: {
     totalFlaky: flaky.length,
     totalConsistentlyFailing: 0,
@@ -92,7 +112,7 @@ export const flakyReport = (flaky: FlakyTestEntry[]): FlakyTestReport => ({
   },
   flaky,
   consistentlyFailing: [],
-  files: [],
+  files,
 });
 
 export const githubIssue = (overrides: Partial<GithubIssue> & { number: number }): GithubIssue => ({
@@ -104,3 +124,21 @@ export const githubIssue = (overrides: Partial<GithubIssue> & { number: number }
   state: 'open',
   ...overrides,
 });
+
+/** A suite issue about every suite of a file: `flaky-test-suite` metadata without a suite title. */
+export const fileWideIssue = (
+  number: number,
+  overrides: Partial<GithubIssue> & { filePath?: string; framework?: string } = {}
+): GithubIssue => {
+  const { filePath = SUITE_PATH, framework = 'playwright', ...issue } = overrides;
+  return githubIssue({
+    number,
+    title: `Flaky Scout suite: ${filePath}`,
+    body: updateIssueMetadata(
+      'Filed for the whole file',
+      { 'suite.filePath': filePath, 'suite.framework': framework },
+      'flaky-test-suite'
+    ),
+    ...issue,
+  });
+};

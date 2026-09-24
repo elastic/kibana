@@ -25,6 +25,11 @@ export function TransactionDetailFlyoutFooter() {
     : i18n.translate('xpack.apm.transactionDetailFlyout.openTracesInDiscoverAction', {
         defaultMessage: 'Open traces in Discover',
       });
+  const discoverButtonProps = openInDiscoverTab
+    ? { onClick: openInDiscoverTab }
+    : discoverHref
+    ? { href: discoverHref }
+    : undefined;
 
   return (
     <EuiFlyoutFooter>
@@ -37,10 +42,10 @@ export function TransactionDetailFlyoutFooter() {
             isLoading={loading}
             isDisabled={loading || !(openInDiscoverTab || discoverHref)}
             data-test-subj="transactionDetailFlyoutOpenInDiscoverButton"
-            {...(openInDiscoverTab ? { onClick: openInDiscoverTab } : { href: discoverHref })}
+            {...discoverButtonProps}
             {...getEbtProps({
               action: EBT_CLICK_ACTIONS.OPEN_IN_DISCOVER,
-              element: TRANSACTION_DETAIL_FLYOUT_EBT_ELEMENTS.ACTIONS_MENU,
+              element: TRANSACTION_DETAIL_FLYOUT_EBT_ELEMENTS.FOOTER,
               detail: 'traces',
             })}
           >

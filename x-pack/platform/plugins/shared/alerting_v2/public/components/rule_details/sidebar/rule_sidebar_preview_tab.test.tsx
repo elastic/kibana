@@ -52,9 +52,9 @@ const baseRule: RuleApiResponse = {
     base: 'FROM logs-* | STATS count() BY host.name',
     breach: { segment: '' },
   },
-  created_by: 'alice@example.com',
+  created_by: { profile_uid: 'alice@example.com' },
   created_at: '2026-03-01T12:00:00.000Z',
-  updated_by: 'bob@example.com',
+  updated_by: { profile_uid: 'bob@example.com' },
   updated_at: '2026-03-04T12:00:00.000Z',
 };
 
