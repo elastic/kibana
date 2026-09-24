@@ -121,6 +121,7 @@ describe('AgentExecutionService', () => {
   const conversationClient = createConversationClientMock();
   const conversationService = {
     getScopedClient: jest.fn().mockImplementation(async () => conversationClient),
+    getScopedClientAsUser: jest.fn().mockImplementation(async () => conversationClient),
   };
 
   const service = createAgentExecutionService({
@@ -834,6 +835,43 @@ describe('AgentExecutionService', () => {
     });
   });
 
+  describe('executeAgent for a sub-agent', () => {
+    const executeSubAgent = () =>
+      service.executeAgent({
+        mode: AgentExecutionMode.standalone,
+        request: httpServerMock.createKibanaRequest(),
+        params: { agentId: 'agent-1', parentExecutionId: 'parent-1', nextInput: { message: 'hi' } },
+        useTaskManager: true,
+      });
+
+    it("acts as the parent execution's owner when the request is the same user", async () => {
+      mockExecutionClient.peek.mockResolvedValueOnce({
+        status: ExecutionStatus.running,
+        eventCount: 0,
+        owner: { id: 'profile-1', username: 'alice' },
+      });
+
+      await executeSubAgent();
+
+      expect(mockExecutionClient.peek).toHaveBeenCalledWith('parent-1');
+      expect(conversationService.getScopedClientAsUser).toHaveBeenCalledWith(
+        expect.objectContaining({ user: expect.objectContaining({ id: 'profile-1' }) })
+      );
+    });
+
+    it("does not borrow the parent owner's identity for a different user", async () => {
+      mockExecutionClient.peek.mockResolvedValueOnce({
+        status: ExecutionStatus.running,
+        eventCount: 0,
+        owner: { id: 'profile-2', username: 'mallory' },
+      });
+
+      await executeSubAgent();
+
+      expect(conversationService.getScopedClientAsUser).not.toHaveBeenCalled();
+    });
+  });
+
   describe('executeAgent with an idempotency key', () => {
     const executeWithKey = (executionIdempotencyKey: string) =>
       service.executeAgent({
@@ -1020,6 +1058,13 @@ describe('AgentExecutionService', () => {
       const [{ agentParams }] = mockExecutionClient.create.mock.calls[0];
       const { roundId } = agentParams as { roundId?: string };
       expect(events[0].id).toBe(`${roundId}::user_message`);
+    });
+
+    it('falls back to the conversation owner when the requester has no author, as the round rewrite does', async () => {
+      await converse();
+
+      const [{ events }] = conversationClient.appendEvents.mock.calls[0];
+      expect(events[0].actor).toMatchObject({ id: 'unknown', username: 'unknown' });
     });
 
     it('trims the message once, so the receipt-time write and the stored execution agree', async () => {

@@ -121,7 +121,11 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
 
     const executionClient = this.createExecutionClient();
 
-    const conversationClient = await this.deps.conversationService.getScopedClient({ request });
+    const conversationClient = await this.getConversationClient({
+      request,
+      executionClient,
+      parentExecutionId: params.parentExecutionId,
+    });
     const owner = conversationClient.getUser();
 
     // Resolving up front keeps conversation creation and the message write on the request node,
@@ -185,8 +189,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
             });
           }
 
-          // The replay resolved its own conversation, which is a fresh placeholder when the
-          // original created one; the existing execution writes to the one it stored.
+          // The replay's own conversation may be an unwritten placeholder.
           return {
             executionId,
             ...(existing?.conversationId ? { conversationId: existing.conversationId } : {}),
@@ -640,6 +643,37 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     });
   }
 
+  /** A sub-agent acts as its parent execution's owner, when the request is the same user. */
+  private async getConversationClient({
+    request,
+    executionClient,
+    parentExecutionId,
+  }: {
+    request: KibanaRequest;
+    executionClient: AgentExecutionClient;
+    parentExecutionId?: string;
+  }): Promise<ConversationClient> {
+    const { conversationService } = this.deps;
+
+    const requestClient = await conversationService.getScopedClient({ request });
+
+    if (!parentExecutionId) {
+      return requestClient;
+    }
+
+    const parentOwner = (await executionClient.peek(parentExecutionId))?.owner;
+    const requestUser = requestClient.getUser();
+
+    if (!parentOwner || parentOwner.username !== requestUser.username) {
+      return requestClient;
+    }
+
+    return conversationService.getScopedClientAsUser({
+      request,
+      user: { ...requestUser, ...parentOwner },
+    });
+  }
+
   private async resolveConversationRequest({
     params,
     request,
@@ -692,21 +726,21 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     const { nextInput, origin: requestOrigin } = params;
     const author = conversationClient.getAuthor(requestOrigin?.author);
     const origin = requestOrigin ? { type: requestOrigin.type } : undefined;
-    const user = conversationClient.getUser();
     const base = {
       conversation,
       conversationClient,
       receivedAt,
       eventId,
       author,
-      user,
       ...(origin ? { origin } : {}),
     };
 
+    // The round rewrite falls back to the conversation owner, not the requester.
     if (!mergeAttachments) {
       return persistUserMessage({ ...base, input: nextInput });
     }
 
+    const user = conversationClient.getUser();
     const snapshot = conversation.attachments ?? [];
     const stateManager = this.deps.attachmentsService.createStateManager(snapshot);
 
@@ -719,6 +753,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
 
     return persistUserMessage({
       ...base,
+      user,
       input: { message: nextInput.message, attachment_refs: stateManager.getAccessedRefs() },
       additionalEvents: attachmentChangesToEvents(stateManager.drainChanges(), {
         source: 'chat_input',

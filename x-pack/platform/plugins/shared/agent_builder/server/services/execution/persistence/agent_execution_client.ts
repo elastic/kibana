@@ -11,6 +11,7 @@ import type {
   ChatEvent,
   ExecutionAbortReason,
   SerializedExecutionError,
+  UserIdAndName,
 } from '@kbn/agent-builder-common';
 import { AgentExecutionMode, ExecutionStatus } from '@kbn/agent-builder-common';
 import type { AgentExecution, FindExecutionsOptions } from '@kbn/agent-builder-server/execution';
@@ -40,17 +41,14 @@ export interface UpdateExecutionStatusOptions {
   abortReason?: ExecutionAbortReason;
 }
 
-/**
- * Lightweight snapshot returned by {@link AgentExecutionClient.peek}.
- * Includes only the status, error, event count, last heartbeat and conversation id — no events
- * payload.
- */
+/** Lightweight snapshot returned by {@link AgentExecutionClient.peek}, without the events. */
 export interface ExecutionPeek {
   status: ExecutionStatus;
   error?: SerializedExecutionError;
   eventCount: number;
   lastHeartbeat?: string;
   conversationId?: string;
+  owner?: UserIdAndName;
 }
 
 const fromEs = (source: AgentExecutionProperties): AgentExecution => {
@@ -270,13 +268,14 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
           'event_count',
           'last_heartbeat',
           'agent_params.conversationId',
+          'owner',
         ] as string[],
       });
       const source = response._source;
       if (!source) {
         return undefined;
       }
-      const { agent_params: agentParams } = source;
+      const { agent_params: agentParams, owner } = source;
       const conversationId =
         agentParams && 'conversationId' in agentParams ? agentParams.conversationId : undefined;
       return {
@@ -285,6 +284,7 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
         ...(source.error ? { error: source.error } : {}),
         ...(source.last_heartbeat ? { lastHeartbeat: source.last_heartbeat } : {}),
         ...(conversationId ? { conversationId } : {}),
+        ...(owner ? { owner } : {}),
       };
     } catch (err) {
       if (err?.meta?.statusCode === 404) {
