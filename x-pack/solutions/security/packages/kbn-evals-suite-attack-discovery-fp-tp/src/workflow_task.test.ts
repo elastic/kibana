@@ -309,6 +309,11 @@ describe('readAgentVerdict', () => {
     const steps = [agentStep({ stepType: undefined, output: { structured_output: { verdict } } })];
     expect(readAgentVerdict(steps)).toEqual(verdict);
   });
+
+  it('passes through a bare-string structured verdict (real runtime shape)', () => {
+    const steps = [agentStep({ output: { structured_output: { verdict: 'true_positive' } } })];
+    expect(readAgentVerdict(steps)).toBe('true_positive');
+  });
 });
 
 describe('readWorkflowOutput + normalizeVerdictLabel', () => {
@@ -396,7 +401,14 @@ describe('runAttackDiscoveryWorkflow (corpus → ids bridge)', () => {
 
     expect(result.workflowOutput?.verdict).toBe('false_positive');
     expect(result.workflowOutput?.analysis_execution_id).toBe('child-9');
-    expect(result.verdict?.confidence).toBe(0.8);
+    // GRADED SHAPE FIX: when the emit_result output exists, the graded verdict
+    // carries the FULL workflow output object (label + summary_markdown), so
+    // PayloadConformance can grade summary passthrough from the real payload.
+    expect(result.verdict).toEqual({
+      verdict: 'false_positive',
+      summary_markdown: 'not a real attack',
+      analysis_execution_id: 'child-9',
+    });
     expect(result.executionId).toBe('exec-1');
     expect(result.executionStatus).toBe('completed');
     expect(result.seedingError).toBeUndefined();

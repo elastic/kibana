@@ -79,6 +79,9 @@ export interface WorkflowVerdict {
   rationale_markdown?: string;
 }
 
+/** Runtime alias so readAgentVerdict can return a bare-string structured verdict too. */
+export type AgentVerdict = string | WorkflowVerdict;
+
 /** The workflow output shape of the fp-tp analysis workflow. */
 interface WorkflowOutput {
   verdict?: string;
@@ -99,7 +102,7 @@ interface StructuredOutput {
  * that as incorrect/non-conformant rather than throwing.
  */
 export interface AttackDiscoveryTaskOutput {
-  verdict?: WorkflowVerdict;
+  verdict?: AgentVerdict;
   workflowOutput?: WorkflowOutput;
   executionId: string;
   executionStatus: ExecutionStatus;
@@ -138,7 +141,7 @@ export const readWorkflowOutput = (execution: WorkflowExecutionDto): WorkflowOut
  */
 export const readAgentVerdict = (
   stepExecutions: WorkflowStepExecutionDto[]
-): WorkflowVerdict | undefined => {
+): WorkflowVerdict | string | undefined => {
   for (const step of stepExecutions.filter(isAgentStep)) {
     const output = step.output as { structured_output?: StructuredOutput } | null | undefined;
     const structured = output?.structured_output;
@@ -159,10 +162,9 @@ export const normalizeVerdictLabel = (
   task: Pick<AttackDiscoveryTaskOutput, 'verdict' | 'workflowOutput'>
 ): string | undefined =>
   task.workflowOutput?.verdict ??
-  task.verdict?.verdict ??
-  task.verdict?.label ??
-  task.verdict?.classification;
-
+  (typeof task.verdict === 'string'
+    ? task.verdict
+    : task.verdict?.verdict ?? task.verdict?.label ?? task.verdict?.classification);
 // ---------------------------------------------------------------------------
 // Investigation-id derivation (mirrors attack_discovery_review.yaml's
 // resolve_investigation_id Liquid template: an 8-4-4-4-12 slice of the AD
@@ -823,8 +825,17 @@ export const runAttackDiscoveryWorkflow = async ({
   }
 
   const workflowOutput = readWorkflowOutput(execution);
-  const verdict = readAgentVerdict(execution.stepExecutions);
-  if (!verdict && !workflowOutput?.verdict) {
+  const agentVerdict = readAgentVerdict(execution.stepExecutions);
+
+  // GRADED SHAPE: evaluators receive a verdict that always carries the label
+  // (string or {verdict,label,...}) — plus, when the emit_result
+  // (workflow.output) step carries the full output object, that object
+  // (label + summary_markdown + rationale) so PayloadConformance can grade
+  // summary passthrough from the actual emitted payload, not just the agent
+  // step's structured output. String fallback when neither source exists.
+  const verdict: AgentVerdict | undefined =
+    workflowOutput?.verdict != null ? workflowOutput : agentVerdict;
+  if (!verdict) {
     log.warning(
       `Workflow execution ${workflowExecutionId} produced no verdict (status: ${execution.status})`
     );
