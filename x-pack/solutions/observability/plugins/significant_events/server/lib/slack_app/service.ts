@@ -7,13 +7,13 @@
 
 import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import type { SignificantEventsServer } from '../../types';
 import {
   RelayRequestError,
   type InMemoryConnector,
   type RelayClientContract,
 } from '@kbn/actions-plugin/server';
 import { RELAY_AUTH_ID } from '@kbn/connector-specs';
+import type { SignificantEventsServer } from '../../types';
 import type {
   SlackAppBindingsResponse,
   SlackAppConnectResponse,
