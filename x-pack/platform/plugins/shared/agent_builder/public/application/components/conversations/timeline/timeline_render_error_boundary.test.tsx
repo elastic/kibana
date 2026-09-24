@@ -7,13 +7,13 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { AttachmentRenderErrorBoundary } from './attachment_render_error_boundary';
+import { TimelineRenderErrorBoundary } from './timeline_render_error_boundary';
 
 const ThrowingContent = () => {
   throw new Error('boom');
 };
 
-describe('AttachmentRenderErrorBoundary', () => {
+describe('TimelineRenderErrorBoundary', () => {
   beforeEach(() => {
     jest.spyOn(console, 'error').mockImplementation(() => {});
   });
@@ -24,27 +24,25 @@ describe('AttachmentRenderErrorBoundary', () => {
 
   it('renders children when nothing throws', () => {
     render(
-      <AttachmentRenderErrorBoundary>
+      <TimelineRenderErrorBoundary>
         {() => <div>Attachment content</div>}
-      </AttachmentRenderErrorBoundary>
+      </TimelineRenderErrorBoundary>
     );
 
     expect(screen.getByText('Attachment content')).toBeInTheDocument();
   });
 
   it('renders a fallback callout instead of crashing when a child throws', () => {
-    render(
-      <AttachmentRenderErrorBoundary>{() => <ThrowingContent />}</AttachmentRenderErrorBoundary>
-    );
+    render(<TimelineRenderErrorBoundary>{() => <ThrowingContent />}</TimelineRenderErrorBoundary>);
 
     expect(screen.getByText("Couldn't render this attachment")).toBeInTheDocument();
   });
 
   it('uses the given title for the fallback callout', () => {
     render(
-      <AttachmentRenderErrorBoundary title="Couldn't render this event">
+      <TimelineRenderErrorBoundary title="Couldn't render this event">
         {() => <ThrowingContent />}
-      </AttachmentRenderErrorBoundary>
+      </TimelineRenderErrorBoundary>
     );
 
     expect(screen.getByText("Couldn't render this event")).toBeInTheDocument();

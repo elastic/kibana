@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useConversationId } from '../../../../context/conversation/use_conversation_id';
-import { AttachmentRenderErrorBoundary } from '../response/attachments/attachment_render_error_boundary';
+import { TimelineRenderErrorBoundary } from '../timeline_render_error_boundary';
 import type { CustomEventItem } from '../types';
 
 const labels = {
@@ -50,9 +50,9 @@ export const CustomEvent = ({ item, isStreaming = false }: CustomEventProps) => 
     >
       <EuiFlexItem grow={false} css={avatarColumnStyles} />
       <EuiFlexItem grow={true}>
-        <AttachmentRenderErrorBoundary title={labels.renderError}>
+        <TimelineRenderErrorBoundary title={labels.renderError}>
           {() => item.definition.render(item.event, { conversationId, isStreaming })}
-        </AttachmentRenderErrorBoundary>
+        </TimelineRenderErrorBoundary>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

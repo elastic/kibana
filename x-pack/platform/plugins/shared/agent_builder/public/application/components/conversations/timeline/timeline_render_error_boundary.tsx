@@ -13,23 +13,23 @@ const fallbackTitle = i18n.translate('xpack.agentBuilder.attachments.renderError
   defaultMessage: "Couldn't render this attachment",
 });
 
-interface AttachmentRenderErrorBoundaryProps {
+interface TimelineRenderErrorBoundaryProps {
   children: () => ReactNode;
   /** Callout title shown when `children` throws. */
   title?: string;
 }
 
-interface AttachmentRenderErrorBoundaryState {
+interface TimelineRenderErrorBoundaryState {
   hasError: boolean;
 }
 
 const RenderContent: React.FC<{ children: () => ReactNode }> = ({ children }) => <>{children()}</>;
 
-export class AttachmentRenderErrorBoundary extends Component<
-  AttachmentRenderErrorBoundaryProps,
-  AttachmentRenderErrorBoundaryState
+export class TimelineRenderErrorBoundary extends Component<
+  TimelineRenderErrorBoundaryProps,
+  TimelineRenderErrorBoundaryState
 > {
-  state: AttachmentRenderErrorBoundaryState = { hasError: false };
+  state: TimelineRenderErrorBoundaryState = { hasError: false };
 
   static getDerivedStateFromError() {
     return { hasError: true };
@@ -37,7 +37,7 @@ export class AttachmentRenderErrorBoundary extends Component<
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     // eslint-disable-next-line no-console
-    console.error('Attachment renderer threw an error', error, errorInfo);
+    console.error('Timeline renderer threw an error', error, errorInfo);
   }
 
   render() {
