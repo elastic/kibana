@@ -267,6 +267,21 @@ describe('verify_ki workflow step', () => {
     expect(output).toEqual({ passed: true, results: [] });
   });
 
+  it('treats an esql attribute rendered as null as absent, so the ES|QL verifiers skip it', async () => {
+    setContextEngineEnabled(true);
+
+    // `${{ patterns | map: 'esql_example' | default: nil }}` with no patterns. Without the null
+    // handling, `esql: null` counts as present and fails as an empty query list. The handler's
+    // input type is the schema output (nulls removed); the engine passes the unparsed input.
+    const unparsedKi = { title: 'orients only', attributes: { esql: null } };
+    const output = await runHandler(
+      unparsedKi as unknown as VerifyKiHandlerContext['input']['ki'],
+      { verifiers: ALL_ESQL_VERIFIERS }
+    );
+
+    expect(output).toEqual({ passed: true, results: [] });
+  });
+
   it('runs only the listed verifier when a subset is specified', async () => {
     setContextEngineEnabled(true);
 
@@ -501,6 +516,30 @@ describe('verify_ki workflow step', () => {
         expect.objectContaining({ id: 'no-pii' }),
         'space-a',
         { ki: { title: 'x' } },
+        { headers: {} },
+        'context-engine:verify-ki',
+        expect.anything()
+      );
+    });
+
+    it('hands a workflow verifier the KI without its null attributes, next to a skipped built-in', async () => {
+      setContextEngineEnabled(true);
+      workflowsManagement.getWorkflowExecution.mockResolvedValue(completedWith({ passed: true }));
+
+      const unparsedKi = { title: 'orients only', attributes: { esql: null, unit: 'sku-1' } };
+      const output = await runHandler(
+        unparsedKi as unknown as VerifyKiHandlerContext['input']['ki'],
+        { verifiers: [ESQL_VALID_SYNTAX_VERIFIER_ID, { workflow_id: 'no-pii' }] }
+      );
+
+      expect(output).toEqual({
+        passed: true,
+        results: [{ verifier: 'workflow:no-pii', passed: true }],
+      });
+      expect(workflowsManagement.runWorkflow).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'no-pii' }),
+        'space-a',
+        { ki: { title: 'orients only', attributes: { unit: 'sku-1' } } },
         { headers: {} },
         'context-engine:verify-ki',
         expect.anything()

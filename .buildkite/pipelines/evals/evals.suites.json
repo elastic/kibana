@@ -141,19 +141,17 @@
       "id": "nightshift-investigations",
       "name": "Nightshift Investigations",
       "slackChannel": "#nightshift-alerts",
-      "configPath": "x-pack/platform/packages/shared/kbn-evals-suite-nightshift-investigations/playwright.config.ts",
+      "configPath": "x-pack/solutions/observability/packages/kbn-evals-suite-nightshift-investigations/playwright.config.ts",
       "serverConfigSet": "evals_nightshift_investigations",
+      "scoutHook": "x-pack/solutions/observability/packages/kbn-evals-suite-nightshift-investigations/scout/scout_hook.sh",
       "tags": [
-        "platform",
+        "observability",
         "nightshift-investigations"
       ],
       "ciLabels": [
         "evals:nightshift-investigations"
       ],
-      "stepTimeoutInMinutes": 60,
-      "defaultModelGroups": [
-        "eis/anthropic-claude-4.5-haiku"
-      ]
+      "stepTimeoutInMinutes": 60
     },
     {
       "id": "llm-tasks",

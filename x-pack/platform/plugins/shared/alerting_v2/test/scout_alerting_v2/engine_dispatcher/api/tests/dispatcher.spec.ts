@@ -1458,6 +1458,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
             duration: '10m',
           },
         },
+        scope: { alerting_v2: {} },
       });
 
       await apiServices.alertingV2.dispatcher.waitForDispatcherTick();

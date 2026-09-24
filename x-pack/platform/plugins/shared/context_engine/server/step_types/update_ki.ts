@@ -8,6 +8,7 @@
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { isResponseError } from '@kbn/es-errors';
 import { updateKiStepCommonDefinition } from '../../common/step_types/update_ki';
+import { omitNullKiAttributes } from '../../common/step_types/ki';
 import type { KiStepDependencies } from './helpers';
 import {
   appendKiRevision,
@@ -40,11 +41,12 @@ export const getUpdateKiStepDefinition = ({
       const {
         ai_index_id: aiIndexId,
         ki_id: kiId,
-        ki,
         lifecycle,
         force = false,
         refresh = false,
       } = context.input;
+      // A null attribute is left out of the patch, so the stored value is untouched.
+      const ki = omitNullKiAttributes(context.input.ki);
       return withKiWriteTelemetry({
         action: 'update',
         aiIndexId,
