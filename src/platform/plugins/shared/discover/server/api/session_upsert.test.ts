@@ -10,13 +10,19 @@
 import type { RequestHandlerContext, SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
+import { parseSearchSourceJSON } from '@kbn/data-plugin/common';
 import { SavedSearchType } from '@kbn/saved-search-plugin/common';
 import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server';
 import { discoverSessionApiData } from './transforms/transform_discover_session.fixtures';
 import { transformDiscoverSessionIn } from './transforms';
 import { upsertDiscoverSession } from './session_upsert';
+import { assignStoredInlineDataViewIds } from './transforms/assign_stored_inline_data_view_ids';
 
-const { attributes, references } = transformDiscoverSessionIn(discoverSessionApiData);
+jest.mock('uuid', () => ({ v4: jest.fn(() => 'generated-inline-id') }));
+
+const { attributes: apiAttributes, references } =
+  transformDiscoverSessionIn(discoverSessionApiData);
+const attributes = assignStoredInlineDataViewIds(apiAttributes);
 
 const createSavedObject = (
   id: string,
@@ -130,7 +136,7 @@ describe('upsertDiscoverSession', () => {
     expect(coreContext.savedObjects.client.get).toHaveBeenCalledTimes(1);
   });
 
-  it('creates a session when the exact ID does not exist', async () => {
+  it('creates a session with inline IDs when the exact ID does not exist', async () => {
     const created = createSavedObject(requestId, { created_at: '2026-07-15T12:00:00.000Z' });
     coreContext.savedObjects.client.get
       .mockRejectedValueOnce(
@@ -153,5 +159,11 @@ describe('upsertDiscoverSession', () => {
         mergeAttributes: false,
       }
     );
+    const { index } = parseSearchSourceJSON(
+      attributes.tabs[0].attributes.kibanaSavedObjectMeta.searchSourceJSON
+    );
+
+    expect(index).toStrictEqual(expect.objectContaining({ id: 'generated-inline-id' }));
+    expect(result.body.data.tabs[0].data_source).not.toHaveProperty('id');
   });
 });

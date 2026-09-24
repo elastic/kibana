@@ -43,6 +43,8 @@ import { ActionPolicySavedObjectServiceScopedToken } from '../services/action_po
 import type { ActionPolicySavedObjectServiceContract } from '../services/action_policy_saved_object_service/types';
 import type { ApiKeyServiceContract } from '../services/api_key_service/api_key_service';
 import { ApiKeyService } from '../services/api_key_service/api_key_service';
+import type { LicenseServiceContract } from '../services/license_service/license_service';
+import { LicenseServiceToken } from '../services/license_service/tokens';
 import {
   LoggerServiceToken,
   type LoggerServiceContract,
@@ -144,6 +146,7 @@ export class ActionPolicyClient {
     private readonly esoClient: EncryptedSavedObjectsClient,
     @inject(ActionPolicyNamespaceToken)
     private readonly namespace: string | undefined,
+    @inject(LicenseServiceToken) private readonly licenseService: LicenseServiceContract,
     @inject(LoggerServiceToken) loggerService: LoggerServiceContract
   ) {
     this.logger = loggerService.forSubsystem('actionPolicyClient');
@@ -224,6 +227,7 @@ export class ActionPolicyClient {
   }
 
   public async createActionPolicy(params: CreateActionPolicyParams): Promise<ActionPolicyResponse> {
+    await this.licenseService.assertActionPoliciesLicense();
     const parsed = this.parseActionPolicyData(createActionPolicyDataSchema, params.data, 'create');
 
     const actor = await this.userService.getCurrentActor();
@@ -308,6 +312,7 @@ export class ActionPolicyClient {
   }
 
   public async updateActionPolicy(params: UpdateActionPolicyParams): Promise<ActionPolicyResponse> {
+    await this.licenseService.assertActionPoliciesLicense();
     const parsed = this.parseActionPolicyData(updateActionPolicyDataSchema, params.data, 'update');
 
     const actor = await this.userService.getCurrentActor();
@@ -414,6 +419,7 @@ export class ActionPolicyClient {
   }
 
   public async enableActionPolicy({ id }: { id: string }): Promise<ActionPolicyResponse> {
+    await this.licenseService.assertActionPoliciesLicense();
     return this.updatePolicyState(id, { enabled: true });
   }
 
@@ -470,6 +476,7 @@ export class ActionPolicyClient {
   public async bulkEnableActionPolicies({
     ids,
   }: BulkActionPoliciesByIdsParams): Promise<BulkResponse> {
+    await this.licenseService.assertActionPoliciesLicense();
     return this.executeBulkUpdate(ids, { enabled: true });
   }
 
@@ -873,6 +880,7 @@ export class ActionPolicyClient {
     id: string;
     data: CreateActionPolicyDataInput;
   }): Promise<{ policy: ActionPolicyResponse; created: boolean }> {
+    await this.licenseService.assertActionPoliciesLicense();
     // Validate up front so a bad body never spends an API key allocation or
     // even consults the SO store.
     const parsed = this.parseActionPolicyData(createActionPolicyDataSchema, data, 'upsert');

@@ -23,6 +23,7 @@ import type { UserService } from '../services/user_service/user_service';
 import { createUserService } from '../services/user_service/user_service.mock';
 import type { LoggerService } from '../services/logger_service/logger_service';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
+import { createMockLicenseService } from '../services/license_service/license_service.mock';
 import { ALERTING_LOG_CODES } from '../errors/error_codes';
 import { ActionPolicyClient } from './action_policy_client';
 
@@ -37,6 +38,7 @@ describe('ActionPolicyClient', () => {
   let mockLogger: jest.Mocked<Logger>;
   let mockEncryptedSavedObjects: ReturnType<typeof createMockEncryptedSavedObjects>;
   let mockEsoClient: ReturnType<ReturnType<typeof createMockEncryptedSavedObjects>['getClient']>;
+  let licenseService: ReturnType<typeof createMockLicenseService>;
 
   beforeAll(() => {
     jest.useFakeTimers().setSystemTime(new Date('2025-01-01T00:00:00.000Z'));
@@ -60,12 +62,15 @@ describe('ActionPolicyClient', () => {
     });
     mockEsoClient = mockEncryptedSavedObjects.getClient();
 
+    licenseService = createMockLicenseService();
+
     client = new ActionPolicyClient(
       actionPolicySavedObjectService,
       userService,
       apiKeyService,
       mockEsoClient as any,
       'default',
+      licenseService,
       loggerService
     );
 
@@ -2812,6 +2817,59 @@ describe('ActionPolicyClient', () => {
         'policy-id-del-no-key'
       );
       expect(apiKeyService.markApiKeysForInvalidation).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('license gating', () => {
+    const licenseError = new Error('license not supported');
+    const validData = {
+      name: 'my-policy',
+      description: 'my-policy description',
+      destinations: [{ type: 'workflow' as const, id: 'my-workflow' }],
+    };
+
+    beforeEach(() => {
+      licenseService.assertActionPoliciesLicense.mockRejectedValue(licenseError);
+    });
+
+    it.each([
+      ['createActionPolicy', () => client.createActionPolicy({ data: validData })],
+      [
+        'updateActionPolicy',
+        () =>
+          client.updateActionPolicy({
+            data: { name: 'renamed' },
+            options: { id: 'policy-id-update-1', version: 'WzEsMV0=' },
+          }),
+      ],
+      ['upsertActionPolicy', () => client.upsertActionPolicy({ id: 'policy-1', data: validData })],
+      ['enableActionPolicy', () => client.enableActionPolicy({ id: 'policy-1' })],
+      ['bulkEnableActionPolicies', () => client.bulkEnableActionPolicies({ ids: ['policy-1'] })],
+    ])('%s rejects before any side effect when the license is insufficient', async (_, call) => {
+      await expect(call()).rejects.toBe(licenseError);
+
+      expect(apiKeyService.create).not.toHaveBeenCalled();
+      expect(mockSavedObjectsClient.get).not.toHaveBeenCalled();
+      expect(mockSavedObjectsClient.create).not.toHaveBeenCalled();
+      expect(mockSavedObjectsClient.update).not.toHaveBeenCalled();
+      expect(mockSavedObjectsClient.bulkUpdate).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['disableActionPolicy', () => client.disableActionPolicy({ id: 'policy-1' })],
+      ['bulkDisableActionPolicies', () => client.bulkDisableActionPolicies({ ids: ['policy-1'] })],
+      [
+        'snoozeActionPolicy',
+        () =>
+          client.snoozeActionPolicy({ id: 'policy-1', snoozedUntil: '2025-02-01T00:00:00.000Z' }),
+      ],
+      ['unsnoozeActionPolicy', () => client.unsnoozeActionPolicy({ id: 'policy-1' })],
+      ['deleteActionPolicy', () => client.deleteActionPolicy({ id: 'policy-1' })],
+      ['findActionPolicies', () => client.findActionPolicies()],
+    ])('%s does not check the license', async (_, call) => {
+      await call().catch(() => undefined);
+
+      expect(licenseService.assertActionPoliciesLicense).not.toHaveBeenCalled();
     });
   });
 
