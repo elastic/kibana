@@ -43,6 +43,7 @@
     "@kbn/dev-cli-runner",
     "@kbn/tooling-log",
     "@kbn/setup-node-env",
-    "@kbn/esql-types"
+    "@kbn/esql-types",
+    "@kbn/custom-content-renderer"
   ]
 }

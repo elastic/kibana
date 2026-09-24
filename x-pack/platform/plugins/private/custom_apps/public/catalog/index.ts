@@ -10,6 +10,8 @@ import { euiCatalog } from '@kbn/a2ui-eui-catalog';
 import { KbnLensPanel } from './kbn_lens_panel';
 import { Chart } from './chart';
 import { KbnTimeFilter } from './kbn_time_filter';
+import { KbnCustomContentPanel } from './kbn_custom_content_panel';
+import { StatusGrid } from './status_grid';
 
 /**
  * The base catalog is a shared package and stays pure EUI, so it can be used
@@ -27,6 +29,8 @@ export const customAppCatalog: Catalog = {
     [Chart.name]: Chart,
     [KbnTimeFilter.name]: KbnTimeFilter,
     [KbnLensPanel.name]: KbnLensPanel,
+    [KbnCustomContentPanel.name]: KbnCustomContentPanel,
+    [StatusGrid.name]: StatusGrid,
   },
 };
 

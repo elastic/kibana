@@ -78,3 +78,77 @@ export const KBN_TIME_FILTER_SCHEMA = {
   },
   required: ['component'],
 } as const;
+
+export const KBN_CUSTOM_CONTENT_PANEL_SCHEMA = {
+  type: 'object',
+  description:
+    'Any visualization, as themed HTML/SVG with Liquid tags over an ES|QL result — a honeycomb, sankey or gauge. Sandboxed: no JavaScript, no links, no external resources, and it cannot call back, so hover effects must be CSS. Colour marks with var(--cc-vis-0)..9.',
+  properties: {
+    component: { const: 'KbnCustomContentPanel' },
+    template: {
+      type: 'string',
+      description:
+        "HTML and CSS with Liquid tags. `rows` is the ES|QL result; `row['col'].value` is a cell and `row['col'].pct` is its percentage of that column's maximum, which is what bar widths want.",
+    },
+    esql: {
+      type: 'string',
+      description:
+        'The query whose rows the template iterates. The page time range is applied automatically.',
+    },
+    height: {
+      type: 'number',
+      description: 'Panel height in pixels; defaults to filling the panel.',
+    },
+  },
+  required: ['component', 'template'],
+} as const;
+
+export const STATUS_GRID_SCHEMA = {
+  type: 'object',
+  description:
+    'One shape per entity, coloured by status — a honeycomb. For hundreds of pods or hosts at once, when clicking one must do something; for a static picture use KbnCustomContentPanel.',
+  properties: {
+    component: { const: 'StatusGrid' },
+    cells: {
+      $ref: 'common_types.json#/$defs/DynamicValue',
+      description: 'Array of row objects, normally an ES|QL result such as {"path": "/pods"}.',
+    },
+    labelField: {
+      type: 'string',
+      description: "Key holding each cell's name, used as its accessible label.",
+    },
+    statusField: { type: 'string', description: 'Key holding the status token.' },
+    statuses: {
+      type: 'array',
+      minItems: 1,
+      items: {
+        type: 'object',
+        properties: {
+          value: { type: 'string' },
+          label: { type: 'string' },
+          color: {
+            type: 'string',
+            enum: ['success', 'warning', 'danger', 'primary', 'accent', 'subdued'],
+          },
+        },
+        required: ['value', 'color'],
+        additionalProperties: false,
+      },
+    },
+    defaultColor: {
+      type: 'string',
+      enum: ['success', 'warning', 'danger', 'primary', 'accent', 'subdued'],
+      default: 'subdued',
+    },
+    shape: { type: 'string', enum: ['hex', 'square'], default: 'hex' },
+    columns: { type: 'number', description: 'Cells per row. Defaults to ceil(sqrt(n) * 1.3).' },
+    maxCellSize: { type: 'number', default: 34 },
+    maxCells: { type: 'number', default: 2000 },
+    action: {
+      $ref: 'common_types.json#/$defs/Action',
+      description:
+        'Dispatched on click or Enter with the clicked row merged into the context as `row`.',
+    },
+  },
+  required: ['component', 'cells', 'labelField', 'statusField', 'statuses'],
+} as const;

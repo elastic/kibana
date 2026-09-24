@@ -6,7 +6,7 @@
  */
 
 import React, { createContext, useContext } from 'react';
-import type { HttpStart } from '@kbn/core/public';
+import type { HttpStart, IUiSettingsClient } from '@kbn/core/public';
 import type { TimeRange } from '@kbn/es-query';
 import type { ISearchGeneric } from '@kbn/search-types';
 
@@ -24,6 +24,8 @@ export interface CustomAppServices {
   setTimeRange: (next: TimeRange) => void;
   search: ISearchGeneric;
   http: HttpStart;
+  /** Needed by the Custom HTML renderer to resolve date and number formats. */
+  uiSettings: IUiSettingsClient;
 }
 
 const CustomAppServicesContext = createContext<CustomAppServices | undefined>(undefined);

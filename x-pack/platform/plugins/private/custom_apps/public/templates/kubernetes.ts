@@ -50,12 +50,61 @@ ${FILTER_CLAUSES}
 | KEEP pod, namespace, cluster, node, cpu, mem, health, reason, rule_count
 | LIMIT 40`;
 
+/**
+ * The honeycomb draws one cell per pod, so it keeps every match rather than the
+ * table's top 40, and returns only the four fields a cell and its flyout need.
+ */
+const GRID_QUERY = `FROM ${K8S_POD_METRICS_INDEX}
+| STATS cpu = ROUND(AVG(metrics.k8s.pod.cpu_limit_utilization) * 100, 1),
+        mem = ROUND(AVG(metrics.k8s.pod.memory_limit_utilization) * 100, 1)
+    BY entity_id = resource.attributes.k8s.pod.uid,
+       pod = resource.attributes.k8s.pod.name,
+       namespace = resource.attributes.k8s.namespace.name,
+       cluster = resource.attributes.k8s.cluster.name,
+       node = resource.attributes.k8s.node.name
+| WHERE pod IS NOT NULL
+| LOOKUP JOIN ${K8S_ALERTS_INDEX} ON entity_id
+| EVAL health = COALESCE(alert_status, "untracked")
+${FILTER_CLAUSES}
+| KEEP pod, namespace, cluster, node, cpu, mem, health, reason, rule_count
+| LIMIT 1200`;
+
 const PODS_PARAMS = {
   q: '/filters/search',
   clusters: '/filters/clusters',
   namespaces: '/filters/namespaces',
   health: '/filters/health',
 };
+
+/**
+ * A visualization the catalog has no component for, rendered through Kibana's
+ * Custom HTML panel instead. `.pct` is each value as a percentage of its column's
+ * maximum, which is exactly what a bar width wants, and `--cc-vis-*` is EUI's
+ * colourblind-safe palette, so this follows the theme with no work.
+ */
+const NAMESPACE_TEMPLATE = `<!-- cc-height: 340 -->
+<style>
+  .hdr, .row { display: flex; align-items: center; gap: var(--cc-space-s); font-size: 12px; }
+  .hdr { color: var(--cc-color-text); opacity: .65; margin-bottom: var(--cc-space-s); }
+  .row { margin-bottom: var(--cc-space-xs); }
+  .name { width: 120px; flex: none; }
+  .track { flex: 1; height: 16px; background: var(--cc-color-surface);
+           border: 1px solid var(--cc-color-border); border-radius: var(--cc-radius-s); overflow: hidden; }
+  .hdr .track { background: none; border: none; }
+  .bar { display: block; height: 100%; }
+  .val { width: 62px; flex: none; text-align: right; font-variant-numeric: tabular-nums; }
+</style>
+{% if rows.size == 0 %}<p>No namespaces in this time range.</p>{% endif %}
+<div class="hdr"><span class="name">Namespace</span><span class="track"></span><span class="val">Pods</span><span class="track"></span><span class="val">CPU</span></div>
+{% for row in rows %}
+<div class="row">
+  <span class="name">{{ row["namespace"].value }}</span>
+  <span class="track"><span class="bar" style="width: {{ row["pods"].pct }}%; background: var(--cc-vis-0);"></span></span>
+  <span class="val">{{ row["pods"].value }}</span>
+  <span class="track"><span class="bar" style="width: {{ row["cpu"].pct }}%; background: var(--cc-vis-3);"></span></span>
+  <span class="val">{{ row["cpu"].value }}%</span>
+</div>
+{% endfor %}`;
 
 const kubernetes = (): CustomAppDefinition => ({
   version: 1,
@@ -70,7 +119,11 @@ const kubernetes = (): CustomAppDefinition => ({
     // Each tab starts from the same row, since only one is visible at a time.
     summary: { type: 'panel', id: 'summary', row: 5, column: 0, width: 48, height: 6 },
     legend: { type: 'panel', id: 'legend', row: 11, column: 0, width: 48, height: 4 },
-    pods: { type: 'panel', id: 'pods', row: 15, column: 0, width: 48, height: 24 },
+    grid: { type: 'panel', id: 'grid', row: 15, column: 0, width: 48, height: 18 },
+    pods: { type: 'panel', id: 'pods', row: 33, column: 0, width: 48, height: 24 },
+
+    nsHelp: { type: 'panel', id: 'nsHelp', row: 5, column: 0, width: 48, height: 4 },
+    namespaces: { type: 'panel', id: 'namespaces', row: 9, column: 0, width: 48, height: 19 },
 
     logHelp: { type: 'panel', id: 'logHelp', row: 5, column: 0, width: 48, height: 4 },
     logs: { type: 'panel', id: 'logs', row: 9, column: 0, width: 48, height: 22 },
@@ -82,7 +135,10 @@ const kubernetes = (): CustomAppDefinition => ({
     filters: { hideBorder: true },
     summary: { title: 'Fleet', tab: 'Resources' },
     legend: { hideBorder: true, tab: 'Resources' },
+    grid: { title: 'Every pod', tab: 'Resources' },
     pods: { title: 'Pods', tab: 'Resources' },
+    nsHelp: { hideBorder: true, tab: 'Namespaces' },
+    namespaces: { title: 'Pods and CPU by namespace', tab: 'Namespaces' },
     logHelp: { hideBorder: true, tab: 'Logs' },
     logs: { title: 'Noisiest containers', tab: 'Logs' },
   },
@@ -117,6 +173,7 @@ const kubernetes = (): CustomAppDefinition => ({
         query: `FROM ${K8S_POD_METRICS_INDEX} | STATS pods = COUNT_DISTINCT(resource.attributes.k8s.pod.uid) BY name = resource.attributes.k8s.namespace.name | WHERE name IS NOT NULL | SORT name`,
       },
     ],
+    grid: [{ path: '/allPods', shape: 'rows', query: GRID_QUERY, params: PODS_PARAMS }],
     pods: [{ path: '/pods', shape: 'rows', query: PODS_QUERY, params: PODS_PARAMS }],
     logs: [
       {
@@ -141,7 +198,7 @@ const kubernetes = (): CustomAppDefinition => ({
       {
         id: 'subtitle',
         component: 'Text',
-        text: 'OTel pod metrics joined to alert state. Seed the data with `node x-pack/platform/plugins/private/custom_apps/scripts/k8s_otel_data.js --clean`.',
+        text: 'Pod health across two clusters, from OTel metrics joined to alert state.',
         color: 'subdued',
       },
     ]),
@@ -268,6 +325,24 @@ const kubernetes = (): CustomAppDefinition => ({
         },
       },
     ]),
+    grid: surface('grid', [
+      {
+        id: 'root',
+        component: 'StatusGrid',
+        cells: { path: '/allPods' },
+        labelField: 'pod',
+        statusField: 'health',
+        statuses: [
+          { value: 'active', label: 'Active alerts', color: 'danger' },
+          { value: 'clear', label: 'No active alerts', color: 'success' },
+          { value: 'untracked', label: 'No alert set up', color: 'subdued' },
+        ],
+        defaultColor: 'subdued',
+        // Writes the clicked pod to the same path the table's row action uses, so
+        // the flyout declared in the Pods panel opens from here too.
+        action: { event: { name: ACTION_SET_DATA, context: { path: '/selectedPod' } } },
+      },
+    ]),
     pods: surface(
       'pods',
       [
@@ -336,6 +411,27 @@ const kubernetes = (): CustomAppDefinition => ({
       ],
       { selectedPod: null }
     ),
+    nsHelp: surface('nsHelp', [
+      {
+        id: 'root',
+        component: 'Text',
+        text: "This panel is not an EUI component — it is Kibana's **Custom HTML** panel, so the agent can generate any visualization it can express as themed HTML and SVG. It renders in a sandboxed iframe, which is why it is a picture rather than something you can click.",
+        color: 'subdued',
+      },
+    ]),
+    namespaces: surface('namespaces', [
+      {
+        id: 'root',
+        component: 'KbnCustomContentPanel',
+        template: NAMESPACE_TEMPLATE,
+        // Grouped by cluster first so the filter has a column to match on, then
+        // rolled up to one row per namespace.
+        esql: `FROM ${K8S_POD_METRICS_INDEX} | STATS pods = COUNT_DISTINCT(resource.attributes.k8s.pod.uid), cpu = AVG(metrics.k8s.pod.cpu_limit_utilization) * 100 BY namespace = resource.attributes.k8s.namespace.name, cluster = resource.attributes.k8s.cluster.name | WHERE namespace IS NOT NULL AND (?clusters == "" OR MV_CONTAINS(SPLIT(?clusters, ","), cluster)) | STATS pods = SUM(pods), cpu = ROUND(AVG(cpu), 1) BY namespace | SORT pods DESC`,
+        // The panel owns its query, so the page filters reach it as bound
+        // variables rather than through the data model like every other panel.
+        variables: [{ key: 'clusters', value: { path: '/filters/clusters' } }],
+      },
+    ]),
     logHelp: surface('logHelp', [
       {
         id: 'root',

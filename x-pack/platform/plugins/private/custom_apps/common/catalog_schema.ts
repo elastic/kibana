@@ -10,8 +10,10 @@
 import euiCatalogSchema from '@kbn/a2ui-eui-catalog/catalog.json';
 import {
   CHART_SCHEMA,
+  KBN_CUSTOM_CONTENT_PANEL_SCHEMA,
   KBN_LENS_PANEL_SCHEMA,
   KBN_TIME_FILTER_SCHEMA,
+  STATUS_GRID_SCHEMA,
 } from './kbn_components_schema';
 import type { describeCatalog } from './describe_catalog';
 
@@ -25,6 +27,8 @@ export const KIBANA_COMPONENT_SCHEMAS = {
   Chart: CHART_SCHEMA,
   KbnTimeFilter: KBN_TIME_FILTER_SCHEMA,
   KbnLensPanel: KBN_LENS_PANEL_SCHEMA,
+  KbnCustomContentPanel: KBN_CUSTOM_CONTENT_PANEL_SCHEMA,
+  StatusGrid: STATUS_GRID_SCHEMA,
 } as const;
 
 export const customAppCatalogSchema = {

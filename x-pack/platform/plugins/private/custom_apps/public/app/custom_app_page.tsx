@@ -295,7 +295,13 @@ export function CustomAppPage({
         )}
 
         <CustomAppServicesProvider
-          services={{ timeRange, setTimeRange, search: data.search.search, http: core.http }}
+          services={{
+            timeRange,
+            setTimeRange,
+            search: data.search.search,
+            http: core.http,
+            uiSettings: core.uiSettings,
+          }}
         >
           <CustomAppGrid
             definition={definition}
