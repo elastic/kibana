@@ -27,9 +27,10 @@ const { SCHEDULE_INTERVAL } = testData;
  * Index a list of alert events by their `data['host.name']` value.
  *
  * Several tests breach multiple groups in a single executor batch and need to
- * assert per-group output. Because the events share a `@timestamp`, their
- * order in `.rule-events` is not deterministic, so we look them up by host
- * name instead of asserting positional array order.
+ * assert per-group output. Events in one batch are indexed together and get
+ * near-identical ES-assigned `@timestamp` values, so their order in
+ * `.rule-events` is not deterministic; we look them up by host name instead of
+ * asserting positional array order.
  */
 const groupEventsByHost = (events: AlertEvent[]): Record<string, AlertEvent> =>
   keyBy(events, (event) => event.data['host.name'] as string);
@@ -281,6 +282,61 @@ const defineRuleExecutorSuite = (responseFormat: EsqlResponseFormat) => {
           expect(event.type).toBe('alert');
           expect(event.status).toBe('breached');
           expect(event.space_id).toBe('default');
+        }
+      );
+
+      apiTest(
+        'stamps timestamp in Elasticsearch on every event of a multi-batch run',
+        async ({ apiServices }) => {
+          // The executor omits `@timestamp`; the data stream's final pipeline
+          // assigns it at ingest. A run spanning several 100-row batches must
+          // still persist every event with a timestamp no older than the run.
+          const groupCount = 250;
+          const hostPrefix = 'host-multi-batch-';
+
+          await apiServices.alertingV2.sourceIndex.indexDocs({
+            index: SOURCE_INDEX,
+            docs: Array.from({ length: groupCount }, (_, i) => ({
+              '@timestamp': new Date().toISOString(),
+              'host.name': `${hostPrefix}${i}`,
+              severity: 'high',
+              value: 1,
+            })),
+          });
+
+          const rule = await apiServices.alertingV2.rules.create(
+            buildCreateRuleData({
+              metadata: { name: 'executor-multi-batch-timestamps' },
+              grouping: { fields: ['host.name'] },
+              query: {
+                format: 'standalone',
+                breach: {
+                  query: `FROM ${SOURCE_INDEX} | WHERE host.name LIKE "${hostPrefix}*" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+                },
+              },
+            })
+          );
+
+          await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, groupCount, {
+            status: 'breached',
+            size: groupCount,
+          });
+
+          // Stop the rule so it doesn't keep writing 250 events per tick for the rest of the suite.
+          await apiServices.alertingV2.rules.disable(rule.id);
+
+          const events = await apiServices.alertingV2.ruleEvents.find(rule.id, {
+            status: 'breached',
+            size: groupCount,
+          });
+          expect(events).toHaveLength(groupCount);
+
+          const scheduled = Date.parse(events[0].scheduled_timestamp!);
+          for (const event of events) {
+            const timestamp = Date.parse(event['@timestamp']);
+            expect(Number.isNaN(timestamp)).toBe(false);
+            expect(timestamp).toBeGreaterThanOrEqual(scheduled);
+          }
         }
       );
 

@@ -18,7 +18,7 @@ import {
 } from '../test_utils';
 import { createQueryService } from '../../services/query_service/query_service.mock';
 import { buildGroupHash } from '../build_alert_events';
-import type { AlertEvent } from '../../../resources/datastreams/alert_events';
+import type { AlertEventDocument } from '../../../resources/datastreams/alert_events';
 import type { PipelineStateStream } from '../types';
 import type { RuleResponse } from '../../rules_client';
 import type { PluginConfig } from '../../../config';
@@ -74,8 +74,8 @@ describe('ClassifyAbsentGroupsStep', () => {
   }
 
   const statusesByGroup = (
-    events: ReadonlyArray<AlertEvent>
-  ): Record<string, AlertEvent['status']> =>
+    events: ReadonlyArray<AlertEventDocument>
+  ): Record<string, AlertEventDocument['status']> =>
     Object.fromEntries(events.map((e) => [e.group_hash, e.status]));
 
   describe('streaming / forwarding', () => {

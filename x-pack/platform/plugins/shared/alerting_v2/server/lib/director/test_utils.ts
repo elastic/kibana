@@ -49,22 +49,26 @@ export const buildStrategyStateTransitionContext = ({
   eventStatus,
   stateTransition,
   noDataStrategy,
-  eventTimestamp,
+  evaluatedAt = DEFAULT_TIMESTAMP,
   previousEpisode,
 }: {
   eventStatus: AlertEventStatus;
   stateTransition?: RuleResponse['state_transition'];
   noDataStrategy?: RuleResponse['no_data_strategy'];
-  eventTimestamp?: string;
+  evaluatedAt?: string;
   previousEpisode?: LatestAlertEventState;
-}): StateTransitionContext => ({
-  rule: createRuleResponse({
-    state_transition: stateTransition,
-    no_data_strategy: noDataStrategy,
-  }),
-  alertEvent: createAlertEvent({
+}): StateTransitionContext => {
+  const { '@timestamp': ignoredTimestamp, ...alertEvent } = createAlertEvent({
     status: eventStatus,
-    '@timestamp': eventTimestamp ?? DEFAULT_TIMESTAMP,
-  }),
-  ...(previousEpisode ? { previousEpisode } : {}),
-});
+  });
+
+  return {
+    rule: createRuleResponse({
+      state_transition: stateTransition,
+      no_data_strategy: noDataStrategy,
+    }),
+    alertEvent,
+    evaluatedAt,
+    ...(previousEpisode ? { previousEpisode } : {}),
+  };
+};

@@ -122,14 +122,13 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
   }
 
   override getNextState(ctx: StateTransitionContext): StateTransitionResult {
-    const { rule, previousEpisode, alertEvent } = ctx;
+    const { rule, previousEpisode, alertEvent, evaluatedAt } = ctx;
     const stateTransition = rule.state_transition;
     const currentEpisodeStatus = previousEpisode?.last_episode_status;
     const currentStatusCount = this.getCurrentStatusCount(previousEpisode);
     const currentEpisodeTimestamp = previousEpisode?.last_episode_timestamp;
-    const alertEventTimestamp = alertEvent['@timestamp'];
 
-    const elapsedMs = this.getElapsedMs(alertEventTimestamp, currentEpisodeTimestamp);
+    const elapsedMs = this.getElapsedMs(evaluatedAt, currentEpisodeTimestamp);
 
     // Delegate to the inherited basic state machine to get the "natural" next state.
     const basicResult = super.getNextState(ctx);
@@ -306,12 +305,12 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
     }
   }
 
-  private getElapsedMs(currentTimestamp?: string, previousTimestamp?: string | null): number {
-    if (!currentTimestamp || !previousTimestamp) {
+  private getElapsedMs(evaluatedAt: string, previousTimestamp?: string | null): number {
+    if (!previousTimestamp) {
       return 0;
     }
 
-    const currentMs = Date.parse(currentTimestamp);
+    const currentMs = Date.parse(evaluatedAt);
     const previousMs = Date.parse(previousTimestamp);
 
     if (Number.isNaN(currentMs) || Number.isNaN(previousMs)) {

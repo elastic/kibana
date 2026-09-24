@@ -27,7 +27,7 @@ import {
   getAlertSeriesNotFoundMessage,
   getEpisodeNotLatestMessage,
 } from '../errors/alert_error_messages';
-import type { AlertAction } from '../../resources/datastreams/alert_actions';
+import type { AlertActionDocument } from '../../resources/datastreams/alert_actions';
 import { AlertActionEventPublisher } from '../events/alert_action_event_publisher/alert_action_event_publisher';
 import { type QueryServiceContract } from '../services/query_service/query_service';
 import { QueryServiceInternalToken } from '../services/query_service/tokens';
@@ -94,7 +94,7 @@ const boomToBulkActionError = (id: string, error: Boom.Boom): BulkAlertActionErr
 
 /**
  * Lifecycle actions (`activate` / `deactivate`) write a synthetic
- * `.rule-events` doc with `@timestamp: now`; applied to a superseded episode
+ * `.rule-events` doc with `@timestamp set at ingest time; applied to a superseded episode
  * that doc would make the old episode the group's latest and hijack the
  * director's group-level state machine, so they are guarded to the latest
  * episode of the series. The other episode actions are pure audit records
@@ -427,7 +427,7 @@ export class AlertActionsClient {
     alertEvent: AlertEventRecord;
     userProfileUid: string | null;
     docEpisodeId: string | null;
-  }): AlertAction {
+  }): AlertActionDocument {
     const { action, alertEvent, userProfileUid, docEpisodeId } = params;
     // Strip the identifiers bulk items carry alongside the action payload
     // (`group_hash` on series items, `episode_id` on episode items) — the
@@ -435,7 +435,6 @@ export class AlertActionsClient {
     const actionData = omit(action, ['group_hash', 'episode_id', 'action_type']);
 
     return {
-      '@timestamp': new Date().toISOString(),
       actor: userProfileUid,
       action_type: action.action_type,
       last_series_event_timestamp: alertEvent['@timestamp'],

@@ -122,6 +122,7 @@ dependsOn:
   - '@kbn/agent-builder-sml-plugin'
   - '@kbn/core-saved-objects-api-server'
   - '@kbn/core-elasticsearch-server'
+  - '@kbn/core-elasticsearch-server-utils'
   - '@kbn/core-user-profile-browser'
   - '@kbn/workflows-ui'
   - '@kbn/core-spaces-common'
@@ -153,6 +154,7 @@ dependsOn:
   - '@kbn/security-plugin-types-server'
   - '@kbn/core-test-helpers-model-versions'
   - '@kbn/content-list-common'
+  - '@kbn/core-test-helpers-kbn-server'
   - '@kbn/core-ui-settings-server'
 tags:
   - plugin

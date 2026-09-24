@@ -8,9 +8,10 @@
 import type { MappingsDefinition } from '@kbn/es-mappings';
 import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import { z } from '@kbn/zod/v4';
+import { getIngestTimestampPipeline } from './ingest_timestamp_pipeline';
 import type { ResourceDefinition } from './types';
 
-export const ALERT_ACTIONS_DATA_STREAM_VERSION = 5;
+export const ALERT_ACTIONS_DATA_STREAM_VERSION = 6;
 export const ALERT_ACTIONS_BACKING_INDEX = '.ds-.alert-actions-*';
 
 const mappings: MappingsDefinition = {
@@ -55,6 +56,8 @@ export const alertActionSchema = z.object({
 });
 
 export type AlertAction = z.infer<typeof alertActionSchema>;
+/** Write shape: `@timestamp` is set by the data stream's ingest pipeline at index time. */
+export type AlertActionDocument = Omit<AlertAction, '@timestamp'> & { '@timestamp'?: string };
 
 export const getAlertActionsResourceDefinition = (): ResourceDefinition => ({
   key: `data_stream:${ALERT_ACTIONS_DATA_STREAM}`,
@@ -62,4 +65,5 @@ export const getAlertActionsResourceDefinition = (): ResourceDefinition => ({
   version: ALERT_ACTIONS_DATA_STREAM_VERSION,
   mappings,
   lifecycle: {},
+  ingestPipeline: getIngestTimestampPipeline(ALERT_ACTIONS_DATA_STREAM),
 });
