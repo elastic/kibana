@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CORPUS_CASE_COUNTS, type CorpusName } from './constants';
+import { CORPUS_CASE_COUNTS, CORPUS_NAMES, type CorpusName } from './constants';
 import {
   loadAllCorpora,
   loadCorpus,
@@ -21,6 +21,29 @@ describe('corpus_loader — real vendored corpora', () => {
     for (const [name, expected] of Object.entries(CORPUS_CASE_COUNTS)) {
       expect(all[name as CorpusName]).toHaveLength(expected);
     }
+  });
+
+  it('stamps every example with its own corpus name (no family remap)', () => {
+    for (const name of CORPUS_NAMES) {
+      const wrong = loadCorpusExamples(name).filter((e) => e.metadata.corpus !== name);
+      // A family remap (e.g. stamping adversarial-twins/perturbations as `tp-chains`)
+      // would fold distinct corpora into one reporting bucket — must never happen.
+      expect(wrong.map((e) => e.metadata.caseId)).toEqual([]);
+      expect(loadCorpus(name).every((c) => c.corpus === name)).toBe(true);
+    }
+  });
+
+  it('keeps adversarial-twins and perturbations as distinct corpora', () => {
+    expect(
+      loadCorpusExamples('adversarial-twins').every(
+        (e) => e.metadata.corpus === 'adversarial-twins'
+      )
+    ).toBe(true);
+    expect(
+      loadCorpusExamples('perturbations').every((e) => e.metadata.corpus === 'perturbations')
+    ).toBe(true);
+    expect(loadAllCorpora()['adversarial-twins'].some((c) => c.corpus === 'tp-chains')).toBe(false);
+    expect(loadAllCorpora().perturbations.some((c) => c.corpus === 'tp-chains')).toBe(false);
   });
 
   it('enforces the documented label counts per corpus', () => {
