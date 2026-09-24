@@ -5,6 +5,16 @@
  * 2.0.
  */
 
+export {
+  EscalationQueue,
+  EscalationCard,
+  AssignToUsers,
+  EscalationMetaInfo,
+  LinkedInvestigationsBadge,
+  type EscalationQueueItem,
+  type EscalationStatus,
+} from './src/components/escalation_queue';
+
 export { ActionButton } from './src/components/actions/action_button';
 export {
   BaseActions,
@@ -29,17 +39,37 @@ export {
   type ConversationDetailsFlyoutFooterProps,
 } from './src/components/details/flyout_footer';
 export {
+  ConversationHeaderBlocks,
+  type ConversationHeaderBlocksProps,
   InvestigationHeaderBlocks,
   type InvestigationHeaderBlocksProps,
 } from './src/components/details/header_blocks';
+export {
+  EscalationFlyoutHeader,
+  type EscalationFlyoutHeaderProps,
+} from './src/components/details/escalation_flyout_header';
 export { OverviewTab } from './src/components/details/details_flyout_tab_contents';
 export { DetailsBlock } from './src/components/details/detail_block';
 
 export {
+  AttachmentSummarySection,
+  type AttachmentSummarySectionProps,
+  AttachmentSummaryList,
+  type AttachmentSummaryListProps,
+  selectSummaryAttachments,
+  type SummaryAttachment,
+  SUMMARY_ATTACHMENT_TYPES,
+  type SummaryAttachmentType,
+} from './src/components/attachment_summary';
+
+export {
   registerAgenticInvestigationTemplateUI,
   type RegisterAgenticInvestigationTemplateUIOptions,
+  registerEscalationTemplateUI,
+  type RegisterEscalationTemplateUIOptions,
   getInvestigationTabIds,
 } from './src/template_ui/register';
+export { type RenderAssignees, type AssigneesSlotRenderProps } from './src/template_ui/types';
 export { conversationToInvestigation } from './src/template_ui/conversation_to_investigation';
 
 export { getEmptyValue, getActionButtonIconProps, isDecided } from './src/components/helpers';
@@ -51,7 +81,7 @@ export {
   CONVERSATION_CATEGORY_COLORS,
 } from './src/types/queue';
 
-export { Impact } from './src/components/filters/impact/impact';
+export { Impact, investigationEntityIds } from './src/components/filters/impact';
 
 export { BaseActionModal } from './src/components/modals/base_action_modal';
 export { AssignActionModal } from './src/components/modals/assign_action_modal';
@@ -61,24 +91,12 @@ export {
   type InvestigationActionModalsProps,
 } from './src/components/modals/investigation_action_modals';
 export {
-  ApprovalModal,
-  type ApprovalModalProps,
-} from './src/components/modals/approval_modal/approval_modal';
-export {
-  ApprovalContent,
-  type ApprovalContentProps,
-  type ApprovalAction,
-  type AlwaysAllowOption,
-} from './src/components/modals/approval_modal/approval_content';
-export {
-  getProposalTone,
-  isProposalExpired,
-} from './src/components/modals/approval_modal/proposal_helpers';
-export { toActionImpactItems } from './src/components/modals/approval_modal/to_action_impact_items';
-export type { ApprovalProposal } from './src/components/modals/approval_modal/types';
-export { type ActionImpactItemProps } from './src/components/modals/approval_modal/action_impact_item';
-export {
   type EscalationModalMode,
   type EscalationIncidentSummary,
 } from './src/components/modals/escalation_modal';
 export { type EscalationModalRenderProps } from './src/components/modals/investigation_action_modals';
+
+// The approval primitives live in `@kbn/proposals-ui`. This package consumes
+// `ApprovalModal` for the investigation flyout's action modals, but does not
+// re-export it: a consumer that wants the approval UI on its own should depend
+// on the proposals package directly rather than reach it through here.

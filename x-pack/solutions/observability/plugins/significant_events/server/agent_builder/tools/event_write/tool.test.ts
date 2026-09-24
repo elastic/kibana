@@ -6,9 +6,10 @@
  */
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import type { StreamsServer } from '@kbn/streams-plugin/server/types';
+import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
+import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
 import { createMockToolContext, invokeHandler } from '../../utils/test_helpers';
 import { BulkWriteError, MAX_BULK_WRITE_ITEMS } from '../bulk_write';
 import { eventsWriteBulkHandler } from './handler';
@@ -16,6 +17,10 @@ import { createEventsWriteTool, eventsWriteSchema } from './tool';
 
 jest.mock('../../../routes/utils/assert_significant_events_access', () => ({
   assertSignificantEventsAccess: jest.fn(),
+}));
+
+jest.mock('../../../routes/utils/assert_can_manage_significant_events', () => ({
+  assertCanManageSignificantEvents: jest.fn(),
 }));
 
 jest.mock('./handler', () => ({
@@ -38,11 +43,12 @@ const createTool = (telemetry: { trackAgentToolEventsWrite: jest.Mock }) => {
   const getScopedClients = jest.fn().mockResolvedValue({
     getEventClient: jest.fn().mockReturnValue({}),
     getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ getFeatures }),
+    getAlertEventsClient: jest.fn().mockResolvedValue(undefined),
     licensing: {},
   });
   return createEventsWriteTool({
     getScopedClients: getScopedClients as unknown as GetScopedClients,
-    server: {} as StreamsServer,
+    server: {} as SignificantEventsServer,
     logger: loggingSystemMock.createLogger(),
     telemetry: telemetry as never,
   });
@@ -53,6 +59,7 @@ describe('events_write tool', () => {
     jest.clearAllMocks();
     getFeatures.mockResolvedValue({ hits: [] });
     (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
+    (assertCanManageSignificantEvents as jest.Mock).mockResolvedValue(undefined);
   });
 
   it('enforces the batch bounds', () => {
@@ -313,19 +320,24 @@ describe('events_write tool', () => {
       includeExcluded: true,
       includeExpired: true,
     });
-    expect(eventsWriteBulkHandler).toHaveBeenCalledWith({
-      eventClient: {},
-      source: 'discovery',
-      inputs: [
-        expect.objectContaining({
-          causal_features: [
-            expect.objectContaining({ type: 'entity', subtype: 'service' }),
-            expect.objectContaining({ type: 'technology', subtype: 'web_server' }),
-          ],
-          blast_radius: [expect.objectContaining({ type: 'entity', subtype: 'service' })],
-        }),
-      ],
-    });
+    expect(eventsWriteBulkHandler).toHaveBeenCalledWith(
+      expect.objectContaining({
+        eventClient: {},
+        source: 'discovery',
+        inputs: [
+          expect.objectContaining({
+            causal_features: [
+              expect.objectContaining({ type: 'entity', subtype: 'service' }),
+              expect.objectContaining({ type: 'technology', subtype: 'web_server' }),
+            ],
+            blast_radius: [expect.objectContaining({ type: 'entity', subtype: 'service' })],
+          }),
+        ],
+      })
+    );
+    expect(assertCanManageSignificantEvents).toHaveBeenCalledWith(
+      expect.objectContaining({ request: expect.anything() })
+    );
   });
 
   it('disambiguates stream-less causal features using the event streams', async () => {

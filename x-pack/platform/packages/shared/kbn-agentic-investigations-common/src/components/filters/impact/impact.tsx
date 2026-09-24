@@ -18,6 +18,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import type { Investigation } from '../../../types';
+import { investigationEntityIds } from './entity_ids';
 import { IMPACT_LABELS } from './translations';
 
 interface ImpactProps {
@@ -37,8 +38,10 @@ export const Impact: React.FC<ImpactProps> = ({
     const seen = new Set<string>();
     const labels: string[] = [];
     for (const investigation of investigations) {
-      const surface = investigation.affectedSurface?.trim();
-      if (surface && !seen.has(surface)) {
+      for (const surface of investigationEntityIds(investigation)) {
+        if (seen.has(surface)) {
+          continue;
+        }
         seen.add(surface);
         labels.push(surface);
       }
@@ -99,7 +102,10 @@ export const Impact: React.FC<ImpactProps> = ({
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiBadge color="hollow">
-                    {investigations.filter((i) => i.affectedSurface === surface).length}
+                    {
+                      investigations.filter((i) => investigationEntityIds(i).includes(surface))
+                        .length
+                    }
                   </EuiBadge>
                 </EuiFlexItem>
               </EuiFlexGroup>

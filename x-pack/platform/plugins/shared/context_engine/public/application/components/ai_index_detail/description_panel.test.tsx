@@ -12,6 +12,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
+import { MAX_AI_INDEX_DESCRIPTION_LENGTH } from '../../../../common/constants';
 import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
 import { DescriptionPanel } from './description_panel';
 
@@ -220,6 +221,34 @@ describe('DescriptionPanel', () => {
     fireEvent.click(screen.getByTestId('contextEditDescriptionButton'));
 
     expect(screen.getByTestId('contextDescriptionTextArea')).toHaveValue('My custom description');
+  });
+
+  it('shows a warning when the description is within 5% of the max length', () => {
+    renderWithProviders(
+      <DescriptionPanel isLoading={false} aiIndex={aiIndex} onSaved={jest.fn()} isManaged={false} />
+    );
+
+    fireEvent.click(screen.getByTestId('contextEditDescriptionButton'));
+    fireEvent.change(screen.getByTestId('contextDescriptionTextArea'), {
+      target: { value: 'a'.repeat(MAX_AI_INDEX_DESCRIPTION_LENGTH - 10) },
+    });
+
+    expect(screen.getByText(/10 characters remaining/)).toBeInTheDocument();
+    expect(screen.getByTestId('contextDescriptionSaveButton')).toBeEnabled();
+  });
+
+  it('shows an error and disables Save when the description exceeds the max length', () => {
+    renderWithProviders(
+      <DescriptionPanel isLoading={false} aiIndex={aiIndex} onSaved={jest.fn()} isManaged={false} />
+    );
+
+    fireEvent.click(screen.getByTestId('contextEditDescriptionButton'));
+    fireEvent.change(screen.getByTestId('contextDescriptionTextArea'), {
+      target: { value: 'a'.repeat(MAX_AI_INDEX_DESCRIPTION_LENGTH + 1) },
+    });
+
+    expect(screen.getByText(/1 character over the 2,048 character limit/)).toBeInTheDocument();
+    expect(screen.getByTestId('contextDescriptionSaveButton')).toBeDisabled();
   });
 
   it('shows a loading state on the Save button while the PUT is in flight', async () => {

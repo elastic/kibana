@@ -37,7 +37,7 @@ export const useCountNewActionPolicyExecutions = ({
     queryKey: executionHistoryKeys.newEventsSince(since, { search, ruleIds, outcome }),
     queryFn: () =>
       executionHistoryApi.listActionPolicyExecutions({
-        start_date: since,
+        from: since,
         per_page: 0,
         search,
         rule_ids: ruleIds,

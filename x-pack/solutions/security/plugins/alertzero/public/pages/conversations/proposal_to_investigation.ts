@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ProposalConfidence, ProposalImpact } from '@kbn/agentic-investigations-plugin/common';
+import type { ProposalConfidence, ProposalImpact } from '@kbn/proposals-common';
 import type { Investigation, RecommendedAction } from '@kbn/agentic-investigations-common';
 import type { ProposalItem } from '../../../common/proposals/list';
 import { CLOSED_GROUP_KEY } from '../../../common/proposals/list';
@@ -57,7 +57,8 @@ const UNTITLED_INVESTIGATION = i18n.translate(
  * - `watch_id`         fabricated `''`; no equivalent on a proposal.
  * - `watch_execution_id` fabricated `''`; no equivalent.
  * - `events`           `[]`; proposals have no timeline. The flyout renders an empty list.
- * - `affectedSurface`  `undefined`; Impact self-hides (returns null) with no surfaces.
+ * - `affectedSurface`  first Impact entity id, when hydrated; otherwise undefined.
+ * - `entityIds`        from the conversation's Impact document; omitted when none.
  * - `status`           deliberately `undefined`. A proposal's own statuses (`'pending'`,
  *                      `'succeeded'`, …) are not investigation statuses, and mapping them
  *                      across would be inventing a meaning. The bucket carries the part
@@ -114,7 +115,11 @@ export const proposalToInvestigation = (proposal: ProposalItem): Investigation =
     // because the flyout header renders one avatar. First entry wins, as in the
     // conversation adapter.
     assignee: proposal.conversationAssignees[0] ?? null,
+    assignees: proposal.conversationAssignees,
     events: [],
-    // affectedSurface left undefined → Impact self-hides (returns null).
+    entityIds: proposal.entityIds,
+    // First id feeds the flyout Overview "Compromised" row until that surface
+    // reads `entityIds` directly. Pills and the queue filter use `entityIds`.
+    affectedSurface: proposal.entityIds?.[0],
   };
 };
