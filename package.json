@@ -1021,6 +1021,7 @@
     "@kbn/proposals-common": "workspace:*",
     "@kbn/proposals-plugin": "workspace:*",
     "@kbn/proposals-ui": "workspace:*",
+    "@kbn/pubsub-example-plugin": "workspace:*",
     "@kbn/query-activity-plugin": "workspace:*",
     "@kbn/random-sampling": "workspace:*",
     "@kbn/react-env": "workspace:*",

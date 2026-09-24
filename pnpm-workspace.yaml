@@ -219,6 +219,7 @@ packages:
   - 'examples/partial_results_example'
   - 'examples/portable_dashboards_example'
   - 'examples/preboot_example'
+  - 'examples/pubsub_example'
   - 'examples/resizable_layout_examples'
   - 'examples/response_stream'
   - 'examples/routing_example'
