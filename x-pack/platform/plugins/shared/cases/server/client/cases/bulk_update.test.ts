@@ -846,7 +846,7 @@ describe('update', () => {
 
     it('resolves the applied template name and passes it to buildUserActions', async () => {
       clientArgs.services.templatesService.getTemplate.mockResolvedValue({
-        attributes: { name: 'My Template' },
+        attributes: { name: 'My Template', owner: SECURITY_SOLUTION_OWNER },
       } as Awaited<ReturnType<typeof clientArgs.services.templatesService.getTemplate>>);
 
       await bulkUpdate(
@@ -871,28 +871,46 @@ describe('update', () => {
       );
     });
 
-    it('omits the applied template from templateNamesByKey when it cannot be resolved', async () => {
+    it('rejects when the applied template cannot be found', async () => {
       clientArgs.services.templatesService.getTemplate.mockResolvedValue(undefined);
 
-      await bulkUpdate(
-        {
-          cases: [
-            {
-              id: mockCases[0].id,
-              version: mockCases[0].version ?? '',
-              template: { id: 'tmpl-missing', version: 1 },
-            },
-          ],
-        },
-        clientArgs,
-        casesClientMock
-      );
+      await expect(
+        bulkUpdate(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                template: { id: 'tmpl-missing', version: 1 },
+              },
+            ],
+          },
+          clientArgs,
+          casesClientMock
+        )
+      ).rejects.toThrow('Template tmpl-missing version 1 not found');
+    });
 
-      expect(clientArgs.services.userActionService.creator.buildUserActions).toHaveBeenCalledWith(
-        expect.objectContaining({
-          templateNamesByKey: new Map(),
-        })
-      );
+    it('rejects when the applied template belongs to a different owner', async () => {
+      clientArgs.services.templatesService.getTemplate.mockResolvedValue({
+        attributes: { name: 'Other Template', owner: OBSERVABILITY_OWNER },
+      } as Awaited<ReturnType<typeof clientArgs.services.templatesService.getTemplate>>);
+
+      await expect(
+        bulkUpdate(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                template: { id: 'tmpl-other-owner', version: 1 },
+              },
+            ],
+          },
+          clientArgs,
+          casesClientMock
+        )
+      ).rejects.toThrow('Template tmpl-other-owner version 1 not found');
     });
   });
 
@@ -934,7 +952,7 @@ describe('update', () => {
         saved_objects: patchedCases ?? originalCases,
       });
       args.services.templatesService.getTemplate.mockResolvedValue({
-        attributes: { name: 'My Template' },
+        attributes: { name: 'My Template', owner: SECURITY_SOLUTION_OWNER },
       } as Awaited<ReturnType<typeof args.services.templatesService.getTemplate>>);
 
       return args;

@@ -429,7 +429,7 @@ export const CaseTitle = lazySchema(() => z.string().max(160));
 export type CaseTitle = z.infer<typeof CaseTitle>;
 
 /**
-  * Case field values keyed by storage key. This replaces `customFields`. Keys follow the `<field_name>_as_<storage_type>` convention (for example `priority_as_keyword`) and map to the owner's global (library-wide) fields plus, when a template is applied to the case, that template's fields; any other key is rejected. On update, the keys provided are merged into the stored map; unlisted keys are left untouched. Legacy custom fields are migrated into this map, so a migrated field's value is found under its `<key>_as_<storage_type>` key. Requires the `xpack.cases.templates.enabled` setting (enabled by default); when disabled, field-library fields and templates are unavailable. To discover the writable keys, use the get case fields API (`GET /api/cases/fields`, or `GET /api/cases/{caseId}/fields` for an existing case).
+  * Case field values keyed by storage key (for example, `priority_as_keyword`). Keys are validated against the fields exposed by the case's active template and global field library. On update, provided keys are merged into the stored map; unlisted keys are left untouched. Requires the `xpack.cases.templates.enabled` setting (enabled by default). Use the get case fields API to discover valid keys.
 
   */
 export const CaseExtendedFields = lazySchema(() => z.object({}).catchall(z.string().max(30000)));
@@ -668,7 +668,7 @@ export const UserCommentResponseProperties = lazySchema(() =>
 export type UserCommentResponseProperties = z.infer<typeof UserCommentResponseProperties>;
 
 /**
-  * A read-only map from each `extended_fields` storage key to its human-readable label. Populated at response time from the field library and any applied template; it is not persisted and is ignored on write.
+  * A read-only, response-only map from each `extended_fields` storage key to its human-readable label. Only populated by the get case and search cases endpoints; absent on create, update, push, and comment responses. Not persisted. Including this field in a write request returns a 400 error.
 
   */
 export const CaseExtendedFieldsLabels = lazySchema(() => z.object({}).catchall(z.string()));
@@ -974,7 +974,7 @@ export const UpdateCaseRequest = lazySchema(() =>
               'Deprecated. Use `extended_fields` instead. Custom field values for a case. Any optional custom fields that are not specified in the request are set to null. Values written here continue to work during the migration to `extended_fields`.\n'
             ),
           /**
-      * The case template. Requires the `xpack.cases.templates.enabled` setting. Omit to leave the current template unchanged; set to `null` to clear it; set to `{ id, version }` to switch. Unlike create, switching a template on update is an explicit versioned action: both `id` and `version` are required — the server does not resolve a latest version here. If `extended_fields` is also provided in the same request, those values are validated against the new template's fields; already-stored field values are not re-validated. After switching, use the get case fields API to see the fields the new template exposes.
+      * The case template to apply, clear, or leave unchanged. Requires the `xpack.cases.templates.enabled` setting. Omit to keep the current template; set to `null` to clear it; set to `{ id, version }` to switch. Switching is an explicit versioned action: both `id` and `version` are required. If `extended_fields` is also provided in the same request, those values are validated against the new template's fields. Use the get case fields API to see what fields the new template exposes.
 
       */
           template: z
@@ -1002,7 +1002,7 @@ export const UpdateCaseRequest = lazySchema(() =>
             .nullable()
             .optional()
             .describe(
-              "The case template. Requires the `xpack.cases.templates.enabled` setting. Omit to leave the current template unchanged; set to `null` to clear it; set to `{ id, version }` to switch. Unlike create, switching a template on update is an explicit versioned action: both `id` and `version` are required — the server does not resolve a latest version here. If `extended_fields` is also provided in the same request, those values are validated against the new template's fields; already-stored field values are not re-validated. After switching, use the get case fields API to see the fields the new template exposes.\n"
+              "The case template to apply, clear, or leave unchanged. Requires the `xpack.cases.templates.enabled` setting. Omit to keep the current template; set to `null` to clear it; set to `{ id, version }` to switch. Switching is an explicit versioned action: both `id` and `version` are required. If `extended_fields` is also provided in the same request, those values are validated against the new template's fields. Use the get case fields API to see what fields the new template exposes.\n"
             ),
           description: CaseDescription.optional(),
           extended_fields: CaseExtendedFields.optional(),
@@ -1286,7 +1286,7 @@ export const SetCaseConfigurationRequest = lazySchema(() =>
       })
       .describe('An object that contains the connector configuration.'),
     /**
-      * Deprecated. Custom fields are superseded by the field library and the case `extended_fields`. Custom fields case configuration.
+      * Custom fields case configuration. Deprecated. Use the field library (`/api/cases/field_definitions`) to manage field definitions and `extended_fields` on case create/update to set field values.
 
       */
     customFields: z
@@ -1339,7 +1339,7 @@ export const SetCaseConfigurationRequest = lazySchema(() =>
       .max(10)
       .optional()
       .describe(
-        'Deprecated. Custom fields are superseded by the field library and the case `extended_fields`. Custom fields case configuration.\n'
+        'Custom fields case configuration. Deprecated. Use the field library (`/api/cases/field_definitions`) to manage field definitions and `extended_fields` on case create/update to set field values.\n'
       ),
     owner: Owner,
     templates: Templates.optional(),
@@ -1389,7 +1389,7 @@ export const UpdateCaseConfigurationRequest = lazySchema(() =>
       .optional()
       .describe('An object that contains the connector configuration.'),
     /**
-      * Deprecated. Custom fields are superseded by the field library and the case `extended_fields`. Custom fields case configuration.
+      * Custom fields case configuration. Deprecated. Use the field library (`/api/cases/field_definitions`) to manage field definitions and `extended_fields` on case create/update to set field values.
 
       */
     customFields: z
@@ -1441,7 +1441,7 @@ export const UpdateCaseConfigurationRequest = lazySchema(() =>
       )
       .optional()
       .describe(
-        'Deprecated. Custom fields are superseded by the field library and the case `extended_fields`. Custom fields case configuration.\n'
+        'Custom fields case configuration. Deprecated. Use the field library (`/api/cases/field_definitions`) to manage field definitions and `extended_fields` on case create/update to set field values.\n'
       ),
     templates: Templates.optional(),
     /**
@@ -1828,6 +1828,17 @@ export const CaseResponseGetCase = lazySchema(() =>
       )
       .optional()
       .describe('Deprecated. Use `extended_fields` instead. Custom field values for the case.'),
+    /**
+      * The case's stored field values, keyed by storage key (for example `priority_as_keyword`).
+
+      */
+    extended_fields: z
+      .object({})
+      .catchall(z.string())
+      .optional()
+      .describe(
+        "The case's stored field values, keyed by storage key (for example `priority_as_keyword`).\n"
+      ),
     extended_fields_labels: CaseExtendedFieldsLabels.optional(),
     description: z.string(),
     /**

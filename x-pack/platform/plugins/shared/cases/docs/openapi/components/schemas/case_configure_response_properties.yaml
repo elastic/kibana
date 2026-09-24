@@ -21,7 +21,8 @@ customFields:
   deprecated: true
   description: >
     Custom fields configuration details.
-    Deprecated. Use `extended_fields` instead.
+    Deprecated. Use the field library (`/api/cases/field_definitions`) to manage
+    field definitions and `extended_fields` on case create/update to set field values.
   items:
     type: object
     properties:

@@ -481,14 +481,10 @@ export const validateTemplateInRequest = async ({
   const { id, version } = updateReq.template;
   const templateSO = await templatesService.getTemplate(id, String(version));
 
-  if (!templateSO) {
+  // Return the same "not found" error for both missing and cross-owner cases to avoid
+  // leaking the existence of another owner's templates (matches resolveTemplateForCreate).
+  if (!templateSO || templateSO.attributes.owner !== originalCase.attributes.owner) {
     throw Boom.badRequest(`Template ${id} version ${version} not found`);
-  }
-
-  if (templateSO.attributes.owner !== originalCase.attributes.owner) {
-    throw Boom.badRequest(
-      `Template ${id} does not belong to owner ${originalCase.attributes.owner}`
-    );
   }
 };
 
