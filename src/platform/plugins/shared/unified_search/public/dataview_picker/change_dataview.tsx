@@ -64,9 +64,12 @@ const dataViewLabelGhostCss = css`
   white-space: nowrap;
 `;
 
+// Disabled form controls set an inherited `-webkit-text-fill-color`, which would otherwise
+// override the transparent color EuiTextTruncate uses to hide its full-text overlay.
 const dataViewLabelVisibleCss = css`
   position: absolute;
   inset: 0;
+  -webkit-text-fill-color: currentColor;
 `;
 
 /**
