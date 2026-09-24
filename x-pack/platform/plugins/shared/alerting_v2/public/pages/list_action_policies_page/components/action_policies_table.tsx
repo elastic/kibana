@@ -7,7 +7,7 @@
 
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type { ActionPolicyResponse, CreateActionPolicyData } from '@kbn/alerting-v2-schemas';
-import { EuiEmptyPrompt } from '@elastic/eui';
+import { EuiBadge, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -31,12 +31,14 @@ import {
   useAgentBuilderSkillsRequirements,
 } from '../../../hooks/use_are_agent_builder_skills_available';
 import { useNavigateToAgentBuilder } from '../../../hooks/use_navigate_to_agent_builder';
+import { useAlertingV2ExperimentalFeatures } from '../../../hooks/use_alerting_v2_experimental_features';
 import { useSnoozeActionPolicy } from '../../../hooks/use_snooze_action_policy';
 import { useUnsnoozeActionPolicy } from '../../../hooks/use_unsnooze_action_policy';
 import { useUpdateActionPolicyApiKey } from '../../../hooks/use_update_action_policy_api_key';
 import { UserCapabilities } from '../../../services/user_capabilities';
 import { ENABLED_FILTER_ID, useActionPoliciesDataSource } from '../action_policies_data_source';
 import { ActionPoliciesListHeader } from '../action_policies_list_header';
+import { experimentalBadgeLabel } from '../../../components/experimental_badge';
 import { UpdateApiKeyConfirmationModal } from './update_api_key_confirmation_modal';
 import {
   ActionPoliciesTableContent,
@@ -91,6 +93,7 @@ export const ActionPoliciesTable = () => {
   );
   const areAgentBuilderSkillsAvailable = useAreAgentBuilderSkillsAvailable();
   const abSkillRequirements = useAgentBuilderSkillsRequirements();
+  const showExperimentalFeatures = useAlertingV2ExperimentalFeatures();
   const createWithAgentTooltipText = getCreateActionPolicyWithAgentTooltipText(abSkillRequirements);
 
   const navigateToCreate = useCallback(() => {
@@ -186,22 +189,39 @@ export const ActionPoliciesTable = () => {
         onClick: navigateToCreate,
         'data-test-subj': 'createActionPolicyCard',
       },
-      {
-        id: 'create-with-agent',
-        iconType: 'productAgent',
-        title: CREATE_WITH_AGENT_OPTION_TITLE,
-        description: CREATE_WITH_AGENT_OPTION_DESCRIPTION,
-        onClick: navigateToAgentBuilder,
-        disabled: !areAgentBuilderSkillsAvailable,
-        tooltipText: createWithAgentTooltipText,
-        'data-test-subj': 'createActionPolicyWithAgentCard',
-      },
+      ...(showExperimentalFeatures
+        ? [
+            {
+              id: 'create-with-agent',
+              iconType: 'productAgent' as const,
+              title: (
+                <EuiFlexGroup gutterSize="s" responsive={false}>
+                  <EuiFlexItem grow={false}>{CREATE_WITH_AGENT_OPTION_TITLE}</EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge
+                      color="hollow"
+                      data-test-subj="createActionPolicyWithAgentExperimentalBadge"
+                    >
+                      {experimentalBadgeLabel}
+                    </EuiBadge>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              ),
+              description: CREATE_WITH_AGENT_OPTION_DESCRIPTION,
+              onClick: navigateToAgentBuilder,
+              disabled: !areAgentBuilderSkillsAvailable,
+              tooltipText: createWithAgentTooltipText,
+              'data-test-subj': 'createActionPolicyWithAgentCard',
+            },
+          ]
+        : []),
     ],
     [
       navigateToCreate,
       navigateToAgentBuilder,
       areAgentBuilderSkillsAvailable,
       createWithAgentTooltipText,
+      showExperimentalFeatures,
     ]
   );
 
@@ -272,8 +292,6 @@ export const ActionPoliciesTable = () => {
           canWrite={canWrite}
           onCreatePolicy={navigateToCreate}
           onCreateWithAgent={navigateToAgentBuilder}
-          createWithAgentDisabled={!areAgentBuilderSkillsAvailable}
-          createWithAgentTooltipText={createWithAgentTooltipText}
         />
         <ContentList emptyState={emptyState}>
           <ActionPoliciesTableContent

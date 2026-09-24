@@ -56,9 +56,9 @@ const rule: RuleApiResponse = {
   time_field: '@timestamp',
   schedule: { every: '5m' },
   query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
-  created_by: 'alice@example.com',
+  created_by: { profile_uid: 'alice@example.com' },
   created_at: '2026-03-01T12:00:00.000Z',
-  updated_by: 'bob@example.com',
+  updated_by: { profile_uid: 'bob@example.com' },
   updated_at: '2026-03-04T12:00:00.000Z',
 };
 

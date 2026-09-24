@@ -25,6 +25,7 @@ import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
+import { UIAM_INTERNAL_CALLER_ATTESTATION_HEADER } from '@kbn/core-security-server';
 import { getSpaceUrlPrefix } from '@kbn/core-spaces-common';
 import type { HttpConfig } from './http_config';
 import { SelfHttpDispatcherProvider } from './self_client_dispatcher';
@@ -33,6 +34,16 @@ import { SELF_CALL_HEADER } from './self_client_observer';
 const JSON_CONTENT = /^(application\/(json|x-javascript)|text\/(x-)?javascript|x-json)(;.*)?$/;
 const DEFAULT_TIMEOUT_MS = 60_000;
 const KIBANA_VERSION_HEADER = 'kbn-version';
+
+/**
+ * Returns the UIAM internal-caller attestation for `outboundAuthorization`, or nothing.
+ * @internal
+ */
+export type SelfClientUiamAttestationGetter = (
+  request: KibanaRequest,
+  outboundAuthorization: string | null
+) => string | undefined;
+
 export const SELF_CALL_RECURSION_ERROR =
   'Refusing Kibana self HTTP call because a self call cannot issue another self call.';
 export const SELF_CALL_MTLS_ERROR =
@@ -58,6 +69,7 @@ interface HttpSelfClientParams {
   readonly kibanaVersion: string;
   readonly log: Logger;
   readonly target: 'auto' | 'local';
+  readonly getUiamAttestationGetter?: () => SelfClientUiamAttestationGetter | undefined;
 }
 
 interface SelfFetchInit extends RequestInit {
@@ -255,6 +267,14 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
       headers.set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'Kibana');
     }
 
+    const getAttestation = this.params.getUiamAttestationGetter?.();
+    if (getAttestation) {
+      const attestation = getAttestation(this.request, headers.get('authorization'));
+      if (attestation) {
+        headers.set(UIAM_INTERNAL_CALLER_ATTESTATION_HEADER, attestation);
+      }
+    }
+
     return headers;
   }
 
@@ -357,7 +377,8 @@ const isProtectedHeader = (name: string) => {
     lowerName === 'host' ||
     lowerName.startsWith('kbn-') ||
     lowerName === SELF_CALL_HEADER ||
-    lowerName.startsWith('x-elastic-internal-')
+    lowerName.startsWith('x-elastic-internal-') ||
+    lowerName === UIAM_INTERNAL_CALLER_ATTESTATION_HEADER
   );
 };
 

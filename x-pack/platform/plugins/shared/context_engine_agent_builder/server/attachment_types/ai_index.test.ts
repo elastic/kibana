@@ -10,6 +10,7 @@ import {
   AI_INDEX_AUTOMATIONS_SKILL_ID,
   AI_INDEX_SOURCES_SKILL_ID,
   ANALYZE_AND_IMPROVE_SKILL_ID,
+  CONTEXT_ENGINE_SIGNALS_SKILL_ID,
   KI_RETRIEVAL_SKILL_ID,
 } from '../../common/agent_builder_skills';
 import { CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID } from '../../common/agent_builder_tools';
@@ -55,6 +56,24 @@ describe('createAiIndexAttachmentType', () => {
     expect(description).toContain(AI_INDEX_AUTOMATIONS_SKILL_ID);
     expect(description).toContain(AI_INDEX_SOURCES_SKILL_ID);
     expect(description).toContain(CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID);
+  });
+
+  it('scopes evidence by what the user chose: data alone for a fresh index, signals only with traces or automations', () => {
+    const description = attachmentType.getAgentDescription?.();
+
+    expect(description).toContain(CONTEXT_ENGINE_SIGNALS_SKILL_ID);
+    expect(description).toMatch(/nothing built yet is analyzed from its data alone/);
+    expect(description).toMatch(/do not look for signals or traces/);
+    expect(description).toMatch(/Read signals only when the user brought traces into scope/);
+    expect(description).toMatch(/or when the index already has automations/);
+    expect(description).not.toMatch(/when the index has signals/);
+  });
+
+  it('offers a catalog-free option in the strategy question, so the unit framing survives it', () => {
+    const description = attachmentType.getAgentDescription?.();
+
+    expect(description).toMatch(/name the unit and what one KI should carry/);
+    expect(description).toMatch(/not forced into the nearest one/);
   });
 
   it('carries the interaction choreography the skills leave out', () => {
@@ -109,6 +128,16 @@ describe('createAiIndexAttachmentType', () => {
     // The plan belongs in chat: `ask_user_question` documents its own question and option
     // lengths, and asking for the plan inside the question overrides it into a wall of text.
     expect(description).toMatch(/Lay the plan out in chat before it/);
+  });
+
+  it('lays the plan out in the proposal shape the analysis skill defines, grounded in queries', () => {
+    const description = attachmentType.getAgentDescription?.();
+
+    expect(description).toMatch(
+      new RegExp(`proposal shape \`${ANALYZE_AND_IMPROVE_SKILL_ID}\` defines`)
+    );
+    expect(description).toMatch(/with its Evidence and Cost sections filled from queries you ran/);
+    expect(description).toMatch(/rather than from the mapping/);
   });
 
   it('suppresses the workflow preview, which other attachments ask the agent to render', () => {

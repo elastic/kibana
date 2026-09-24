@@ -34,13 +34,13 @@ export class PageNavigation {
     pageHeader: Locator;
     urlPath: string;
     classicBreadcrumbs: string[];
-    isNextChrome: boolean;
+    isProjectChrome: boolean;
     isServerless?: boolean;
   }): Promise<void> {
     await expect(options.pageHeader).toBeVisible();
     await this.expectPageUrlContains(options.urlPath);
 
-    if (options.isNextChrome) {
+    if (options.isProjectChrome) {
       return;
     }
 

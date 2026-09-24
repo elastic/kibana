@@ -421,6 +421,10 @@ Refer to [Terraform](./guidelines-for-terraform-friendly-http-apis.md#return-as-
 
 If you are in doubt, rather go with stricter validation. Making a requirement more lax if needed is never a breaking change!
 
+**Prefer the built-in string helpers over hand-picked lengths**
+
+`@kbn/config-schema` and `@kbn/zod` ship semantic helpers (`savedObjectId`, `displayName`, `description`, ...) that carry shared default bounds, plus a reporting mode for measuring an existing route before enforcing one. Refer to [Bounded string schemas](../../key-concepts/security/bounded-string-schemas.md).
+
 ### Headers
 
 **Should not be used to specify behavior**

@@ -21,5 +21,6 @@
     "@kbn/ebt-click",
     "@kbn/zod",
     "@kbn/i18n",
+    "@kbn/core-spaces-common",
   ]
 }

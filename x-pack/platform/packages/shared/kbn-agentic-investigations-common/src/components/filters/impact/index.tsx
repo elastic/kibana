@@ -6,3 +6,4 @@
  */
 
 export { Impact } from './impact';
+export { investigationEntityIds } from './entity_ids';
