@@ -11,7 +11,10 @@ import {
   useApproveProposal,
   useConversationProposals,
   useDismissProposal,
+  useIsApprovingProposal,
+  useIsDecliningProposal,
 } from '@kbn/proposals-plugin/public';
+import type { ProposalWithMetadata } from '@kbn/proposals-common';
 import { useCurrentUserProfile } from '@kbn/agentic-investigations-plugin/public';
 import { getUserDisplayName } from '@kbn/user-profile-components';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -24,6 +27,66 @@ import { PROPOSED_ACTIONS_EMPTY_LABEL } from './translations';
 export interface ProposedActionsSlotProps {
   conversationId: string;
 }
+
+interface ProposedActionRowProps {
+  proposal: ProposalWithMetadata;
+  currentActorName?: string;
+  onDecisionError: (err: unknown) => void;
+  approve: ReturnType<typeof useApproveProposal>;
+  dismiss: ReturnType<typeof useDismissProposal>;
+}
+
+/**
+ * One row, split out from `ProposedActionsSlot` so `useIsApprovingProposal`/
+ * `useIsDecliningProposal` — each scoped to this row's own proposal id — are called a fixed
+ * number of times per render, rather than a variable number inside the list's `.map`.
+ */
+const ProposedActionRow = ({
+  proposal,
+  currentActorName,
+  onDecisionError,
+  approve,
+  dismiss,
+}: ProposedActionRowProps) => {
+  const isApproving = useIsApprovingProposal(proposal.id);
+  const isDeclining = useIsDecliningProposal(proposal.id);
+
+  return (
+    <EuiFlexItem>
+      <ProposedActionButton
+        proposal={proposal}
+        isSubmitting={isApproving ? 'applying' : isDeclining ? 'declining' : undefined}
+        onConfirm={async () => {
+          try {
+            await approve.mutateAsync({
+              id: proposal.id,
+              body: { actionInput: proposal.actionInput },
+            });
+          } catch (err) {
+            onDecisionError(err);
+            throw err;
+          }
+        }}
+        onDismiss={async ({ dismissReason, rationale }) => {
+          try {
+            await dismiss.mutateAsync({
+              id: proposal.id,
+              body: { dismissReason, rationale },
+            });
+          } catch (err) {
+            onDecisionError(err);
+            throw err;
+          }
+        }}
+        renderDismissModal={({ onClose, onConfirm }) => (
+          <DismissProposalModal proposalId={proposal.id} onClose={onClose} onConfirm={onConfirm} />
+        )}
+        currentActorName={currentActorName}
+        data-test-subj={`investigationFlyoutProposedAction-${proposal.id}`}
+      />
+    </EuiFlexItem>
+  );
+};
 
 /**
  * `renderProposedActions` content for the investigation flyout's overview tab. Shows the whole
@@ -68,42 +131,14 @@ export const ProposedActionsSlot = ({ conversationId }: ProposedActionsSlotProps
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       {proposals.map((proposal) => (
-        <EuiFlexItem key={proposal.id}>
-          <ProposedActionButton
-            proposal={proposal}
-            onConfirm={async () => {
-              try {
-                await approve.mutateAsync({
-                  id: proposal.id,
-                  body: { actionInput: proposal.actionInput },
-                });
-              } catch (err) {
-                onDecisionError(err);
-                throw err;
-              }
-            }}
-            onDismiss={async ({ dismissReason, rationale }) => {
-              try {
-                await dismiss.mutateAsync({
-                  id: proposal.id,
-                  body: { dismissReason, rationale },
-                });
-              } catch (err) {
-                onDecisionError(err);
-                throw err;
-              }
-            }}
-            renderDismissModal={({ onClose, onConfirm }) => (
-              <DismissProposalModal
-                proposalId={proposal.id}
-                onClose={onClose}
-                onConfirm={onConfirm}
-              />
-            )}
-            currentActorName={currentActorName}
-            data-test-subj={`investigationFlyoutProposedAction-${proposal.id}`}
-          />
-        </EuiFlexItem>
+        <ProposedActionRow
+          key={proposal.id}
+          proposal={proposal}
+          currentActorName={currentActorName}
+          onDecisionError={onDecisionError}
+          approve={approve}
+          dismiss={dismiss}
+        />
       ))}
     </EuiFlexGroup>
   );

@@ -22,7 +22,13 @@ import { getUserDisplayName } from '@kbn/user-profile-components';
 import { isAwaitingDecision } from '@kbn/proposals-common';
 import type { DismissReason } from '@kbn/proposals-common';
 import { PROPOSAL_WITHOUT_ACTION_LABEL } from '../translations';
-import { useApproveProposal, useDismissProposal, useProposal } from '../hooks/use_proposals_api';
+import {
+  useApproveProposal,
+  useDismissProposal,
+  useIsApprovingProposal,
+  useIsDecliningProposal,
+  useProposal,
+} from '../hooks/use_proposals_api';
 import { useCurrentUserProfile } from '../hooks/use_current_user_profile';
 import { ProposalDismissForm } from './proposal_dismiss_form';
 
@@ -99,6 +105,9 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(
     const proposalQuery = useProposal(proposalId);
     const approveMutation = useApproveProposal();
     const dismissMutation = useDismissProposal();
+    const isApproving = useIsApprovingProposal(proposalId);
+    const isDeclining = useIsDecliningProposal(proposalId);
+    const isSubmitting = isApproving ? 'applying' : isDeclining ? 'declining' : undefined;
     const { data: currentUserProfile } = useCurrentUserProfile();
 
     const currentActorName = currentUserProfile
@@ -192,7 +201,6 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(
           }),
           color: 'success',
           onClick: handleApprove,
-          outcomeStatus: 'applied',
           isDisabled: isExpired,
           'data-test-subj': `proposalApprove-${proposalId}`,
         };
@@ -215,7 +223,6 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(
           }),
           color: 'danger',
           onClick: handleDismissConfirm,
-          outcomeStatus: 'declined',
           isDisabled: !rationale.trim(),
           'data-test-subj': `proposalDismissConfirm-${proposalId}`,
         };
@@ -244,6 +251,7 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(
           iconType="lock"
           comment={liveProposal.comment}
           decision={decision}
+          isSubmitting={isSubmitting}
           currentActorName={currentActorName}
           primaryAction={primaryAction}
           secondaryActions={secondaryActions}

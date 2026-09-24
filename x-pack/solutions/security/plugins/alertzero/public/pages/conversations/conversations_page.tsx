@@ -17,7 +17,12 @@ import {
   type EscalationModalRenderProps,
   Impact,
 } from '@kbn/agentic-investigations-common';
-import { useApproveProposal, useDismissProposal } from '@kbn/proposals-plugin/public';
+import {
+  useApproveProposal,
+  useDismissProposal,
+  useIsApprovingProposal,
+  useIsDecliningProposal,
+} from '@kbn/proposals-plugin/public';
 import { useCurrentUserProfile } from '@kbn/agentic-investigations-plugin/public';
 import { getUserDisplayName } from '@kbn/user-profile-components';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -66,6 +71,13 @@ export const ConversationsPage: React.FC = () => {
   const [selectedIdForRecommendedAction, setSelectedIdForRecommendedAction] = useState<
     string | undefined
   >(undefined);
+  const isApprovingSelected = useIsApprovingProposal(selectedIdForRecommendedAction);
+  const isDecliningSelected = useIsDecliningProposal(selectedIdForRecommendedAction);
+  const isSubmittingSelected = isApprovingSelected
+    ? 'applying'
+    : isDecliningSelected
+    ? 'declining'
+    : undefined;
 
   const { selectedConversationId, selectConversation, clearSelectedConversation } =
     useConversationsUrlParams();
@@ -76,8 +88,8 @@ export const ConversationsPage: React.FC = () => {
 
   // From chartsSummary rather than the pages: no page-size cap, and every
   // category. Shares the chart row's query key, so it costs no extra request.
-  const chartsSummary = useProposalChartsSummary();
-  const openCount = chartsSummary.data?.currentOpen ?? 0;
+  const { data: chartsSummary, isLoading, error } = useProposalChartsSummary();
+  const openCount = chartsSummary?.currentOpen ?? 0;
 
   const onClickAction: BaseActionsProps['onClickAction'] = useCallback((action, recordId) => {
     setModalState({ type: action, recordId });
@@ -237,6 +249,7 @@ export const ConversationsPage: React.FC = () => {
         onCloseAction={closeModal}
         onCloseApproval={closeApproval}
         onConfirmApproval={confirmApproval}
+        isSubmitting={isSubmittingSelected}
         currentActorName={currentActorName}
         onDismissApproval={dismissApproval}
         renderDismissModal={renderDismissModal}
@@ -248,8 +261,8 @@ export const ConversationsPage: React.FC = () => {
           <AlertZeroPageHeader
             // The header renders the charts-summary count, so it tracks that query
             // rather than the section pages, which now load independently.
-            isLoading={chartsSummary.isLoading}
-            hasError={Boolean(chartsSummary.error) && chartsSummary.data === undefined}
+            isLoading={isLoading}
+            hasError={Boolean(error) && chartsSummary === undefined}
             // Closed proposals are rows but not work: a window holding only decisions
             // already made is an empty queue, and must not read as "0 actions need you"
             // beside a populated header.

@@ -14,6 +14,8 @@ import {
   useApproveProposal,
   useConversationProposals,
   useDismissProposal,
+  useIsApprovingProposal,
+  useIsDecliningProposal,
 } from '@kbn/proposals-plugin/public';
 import { useCurrentUserProfile } from '@kbn/agentic-investigations-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -23,6 +25,8 @@ jest.mock('@kbn/proposals-plugin/public', () => ({
   useConversationProposals: jest.fn(),
   useApproveProposal: jest.fn(),
   useDismissProposal: jest.fn(),
+  useIsApprovingProposal: jest.fn(),
+  useIsDecliningProposal: jest.fn(),
 }));
 
 jest.mock('@kbn/agentic-investigations-plugin/public', () => ({
@@ -38,6 +42,12 @@ const mockUseConversationProposals = useConversationProposals as jest.MockedFunc
 >;
 const mockUseApproveProposal = useApproveProposal as jest.MockedFunction<typeof useApproveProposal>;
 const mockUseDismissProposal = useDismissProposal as jest.MockedFunction<typeof useDismissProposal>;
+const mockUseIsApprovingProposal = useIsApprovingProposal as jest.MockedFunction<
+  typeof useIsApprovingProposal
+>;
+const mockUseIsDecliningProposal = useIsDecliningProposal as jest.MockedFunction<
+  typeof useIsDecliningProposal
+>;
 const mockUseCurrentUserProfile = useCurrentUserProfile as jest.MockedFunction<
   typeof useCurrentUserProfile
 >;
@@ -91,6 +101,8 @@ describe('ProposedActionsSlot', () => {
     mockUseDismissProposal.mockReturnValue({
       mutateAsync: dismissMutateAsync,
     } as unknown as ReturnType<typeof useDismissProposal>);
+    mockUseIsApprovingProposal.mockReturnValue(false);
+    mockUseIsDecliningProposal.mockReturnValue(false);
     mockUseCurrentUserProfile.mockReturnValue({
       data: null,
     } as unknown as ReturnType<typeof useCurrentUserProfile>);
@@ -143,7 +155,7 @@ describe('ProposedActionsSlot', () => {
     expect(screen.getByText('No proposed actions for this investigation.')).toBeInTheDocument();
   });
 
-  it('approves with the proposal id and its own action input, keeping the modal open on Applying', async () => {
+  it('approves with the proposal id and its own action input', () => {
     mockUseConversationProposals.mockReturnValue({
       data: { proposals: [mockProposal], total: 1 },
       isLoading: false,
@@ -159,11 +171,24 @@ describe('ProposedActionsSlot', () => {
       id: 'proposal-1',
       body: { actionInput: undefined },
     });
+  });
+
+  it('shows Applying on the row and its modal, scoped to the proposal useIsApprovingProposal reports', () => {
+    mockUseConversationProposals.mockReturnValue({
+      data: { proposals: [mockProposal], total: 1 },
+      isLoading: false,
+    } as unknown as ReturnType<typeof useConversationProposals>);
+    mockUseIsApprovingProposal.mockImplementation((id) => id === 'proposal-1');
+
+    renderSlot();
+
+    const row = screen.getByTestId('investigationFlyoutProposedAction-proposal-1');
+    expect(within(row).getByText('Applying')).toBeInTheDocument();
+
+    fireEvent.click(row);
     // Approving only resumes the gate workflow — the action it starts still runs afterward, so
-    // resolving that call must not yet claim "Applied". Only a refetched, real decision can.
-    await waitFor(() => {
-      expect(within(screen.getByRole('dialog')).getAllByText('Applying').length).toBeGreaterThan(0);
-    });
+    // being in flight must not yet claim "Applied". Only a refetched, real decision can.
+    expect(within(screen.getByRole('dialog')).getAllByText('Applying').length).toBeGreaterThan(0);
     expect(within(screen.getByRole('dialog')).queryByText('Applied')).not.toBeInTheDocument();
   });
 

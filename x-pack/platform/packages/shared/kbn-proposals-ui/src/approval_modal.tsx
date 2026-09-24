@@ -27,11 +27,6 @@ export interface ApprovalModalProps {
     onChange: (checked: boolean) => void;
   };
   proposal: ApprovalProposal;
-  /**
-   * Awaited by `ApprovalContent` itself, which shows the "Applying" transient state for as long
-   * as this takes and the "Applied" one once it resolves — pass the mutation's own promise
-   * (`mutateAsync`) rather than a fire-and-forget `mutate` call.
-   */
   onConfirm: () => Promise<void>;
   onClose: () => void;
   /**
@@ -39,7 +34,14 @@ export interface ApprovalModalProps {
    * why there is no Cancel here — `EuiModal`'s own close control already covers walking away.
    */
   onDismiss?: () => void;
-  /** Who's approving, for the optimistic "Applying" state before the server confirms a decider. */
+  /**
+   * Whether this proposal's approve/decline is currently in flight. Sourced from the host's own
+   * mutation cache (e.g. `useIsMutating`) so it agrees with whatever else shows the same proposal
+   * (the flyout row this modal opened from, say) and survives this modal being closed and
+   * reopened mid-submission.
+   */
+  isSubmitting?: 'applying' | 'declining';
+  /** Who's approving, for the "Applying"/"Declining" caption before the server confirms a decider. */
   currentActorName?: string;
   'data-test-subj'?: string;
 }
@@ -58,6 +60,7 @@ export const ApprovalModal = memo<ApprovalModalProps>(
     onConfirm,
     onClose,
     onDismiss,
+    isSubmitting,
     currentActorName,
     'data-test-subj': dataTestSubj,
   }) => {
@@ -82,13 +85,13 @@ export const ApprovalModal = memo<ApprovalModalProps>(
           titleId={titleId}
           caption={getProposalCaption(proposal)}
           decision={getProposalDecision(proposal)}
+          isSubmitting={isSubmitting}
           currentActorName={currentActorName}
           alwaysAllow={alwaysAllow}
           data-test-subj={dataTestSubj}
           primaryAction={{
             label: APPROVAL_MODAL_TRANSLATIONS.approve,
             onClick: onConfirm,
-            outcomeStatus: 'applied',
             isDisabled: isExpired,
             'data-test-subj': dataTestSubj ? `${dataTestSubj}-confirm` : undefined,
           }}

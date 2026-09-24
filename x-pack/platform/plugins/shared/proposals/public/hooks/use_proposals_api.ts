@@ -6,7 +6,7 @@
  */
 
 import type { UseQueryResult } from '@kbn/react-query';
-import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
+import { useIsMutating, useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { PROPOSALS_API_VERSION, PROPOSALS_INTERNAL_URL } from '@kbn/proposals-common';
@@ -17,7 +17,7 @@ import type {
   Proposal,
   ProposalWithMetadata,
 } from '@kbn/proposals-common';
-import { queryKeys } from '../query_keys';
+import { mutationKeys, queryKeys } from '../query_keys';
 
 /**
  * Retries on transient failures (network errors and 5xx responses), stops
@@ -129,10 +129,15 @@ export const useProposal = (id: string | undefined) => {
  * because those keys all share this prefix. A refetch that beats the post-gate
  * write reads `pending` once more; that is expected while the gate workflow
  * settles and is not a sign of a failed invalidation.
+ *
+ * Awaited, not fired-and-forgotten: `invalidateQueries` also refetches every
+ * active matching query, and returning that promise from `onSuccess` keeps the
+ * mutation itself — and therefore `useIsMutating` for it — pending until that
+ * refetch lands. Without this, a submission could read as "done" the instant
+ * the HTTP call returns, before the UI has any fresher data to show instead.
  */
-const invalidateProposals = (queryClient: ReturnType<typeof useQueryClient>) => {
-  void queryClient.invalidateQueries({ queryKey: queryKeys.proposals.all });
-};
+const invalidateProposals = (queryClient: ReturnType<typeof useQueryClient>) =>
+  queryClient.invalidateQueries({ queryKey: queryKeys.proposals.all });
 
 /**
  * Approving submits the action input the analyst was shown, so the API can
@@ -143,6 +148,7 @@ export const useApproveProposal = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
+    mutationKey: mutationKeys.proposals.approve,
     mutationFn: ({ id, body }: { id: string; body: ApproveProposalRequest }): Promise<Proposal> =>
       services.http!.post<Proposal>(`${PROPOSALS_INTERNAL_URL}/${encodeURIComponent(id)}/approve`, {
         version: PROPOSALS_API_VERSION,
@@ -157,6 +163,7 @@ export const useDismissProposal = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
+    mutationKey: mutationKeys.proposals.decline,
     mutationFn: ({ id, body }: { id: string; body: DismissProposalRequest }): Promise<Proposal> =>
       services.http!.post<Proposal>(`${PROPOSALS_INTERNAL_URL}/${encodeURIComponent(id)}/dismiss`, {
         version: PROPOSALS_API_VERSION,
@@ -165,3 +172,25 @@ export const useDismissProposal = () => {
     onSuccess: () => invalidateProposals(queryClient),
   });
 };
+
+/**
+ * Whether *this* proposal's approve/decline is currently in flight, read from the shared
+ * mutation cache rather than component state — so the answer is the same for the flyout row and
+ * the modal alike, and survives the modal being closed and reopened mid-submission (a local
+ * `useState` tracking this would not: it dies with the component that owned it).
+ *
+ * `useIsMutating` only ever returns a count, so the predicate is what actually scopes it to one
+ * proposal — every approve (or decline) shares the same `mutationKey`, and `variables` is the
+ * `{ id, body }` a specific `mutate`/`mutateAsync` call was made with.
+ */
+export const useIsApprovingProposal = (id: string | undefined): boolean =>
+  useIsMutating({
+    mutationKey: mutationKeys.proposals.approve,
+    predicate: (mutation) => id !== undefined && mutation.state.variables?.id === id,
+  }) > 0;
+
+export const useIsDecliningProposal = (id: string | undefined): boolean =>
+  useIsMutating({
+    mutationKey: mutationKeys.proposals.decline,
+    predicate: (mutation) => id !== undefined && mutation.state.variables?.id === id,
+  }) > 0;

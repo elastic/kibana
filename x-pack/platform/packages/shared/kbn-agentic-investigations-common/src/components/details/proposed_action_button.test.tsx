@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { ApprovalProposal } from '@kbn/proposals-ui';
@@ -86,41 +86,24 @@ describe('ProposedActionButton', () => {
     ).toBeGreaterThanOrEqual(2);
   });
 
-  it('commits the approval and keeps showing Applying without closing the modal', async () => {
+  it('commits the approval by calling onConfirm from the modal', () => {
     renderButton();
     fireEvent.click(screen.getByTestId('proposedAction'));
 
     fireEvent.click(screen.getByTestId('proposedAction-modal-confirm'));
 
     expect(baseProps.onConfirm).toHaveBeenCalledTimes(1);
-    // Approving only resumes the gate workflow — the action it starts still runs afterward, so
-    // resolving that call must not yet claim "Applied". Only a refetched, real decision can.
-    await waitFor(() => {
-      expect(within(screen.getByRole('dialog')).getAllByText('Applying').length).toBeGreaterThan(0);
-    });
-    expect(screen.queryByText('Applied')).not.toBeInTheDocument();
-    expect(screen.getByRole('dialog')).toBeInTheDocument();
   });
 
-  it('shows an Applying badge on the row itself while onConfirm is in flight', async () => {
-    let resolveConfirm: () => void = () => {};
-    const onConfirm = jest.fn(
-      () =>
-        new Promise<void>((resolve) => {
-          resolveConfirm = resolve;
-        })
-    );
-    renderButton({ onConfirm });
+  it('shows Applying on the row and in the modal when isSubmitting is set, hiding the actions', () => {
+    renderButton({ isSubmitting: 'applying' });
     fireEvent.click(screen.getByTestId('proposedAction'));
-    fireEvent.click(screen.getByTestId('proposedAction-modal-confirm'));
 
-    // The row badge, not the modal's own header badge — both say "Applying" while it is in flight.
+    // The row badge, not just the modal's own header badge — both say "Applying".
     const row = screen.getByTestId('proposedAction');
     expect(within(row).getByText('Applying')).toBeInTheDocument();
-
-    await act(async () => {
-      resolveConfirm();
-    });
+    expect(within(screen.getByRole('dialog')).getAllByText('Applying').length).toBeGreaterThan(0);
+    expect(screen.queryByTestId('proposedAction-modal-confirm')).not.toBeInTheDocument();
   });
 
   it('hands Dismiss off to the host dismiss modal rather than recording it directly', () => {
@@ -150,25 +133,11 @@ describe('ProposedActionButton', () => {
     });
   });
 
-  it('shows a Declining badge on the row itself while the dismiss modal onConfirm is in flight', async () => {
-    let resolveDismiss: () => void = () => {};
-    const onDismiss = jest.fn(
-      () =>
-        new Promise<void>((resolve) => {
-          resolveDismiss = resolve;
-        })
-    );
-    renderButton({ onDismiss });
-    fireEvent.click(screen.getByTestId('proposedAction'));
-    fireEvent.click(screen.getByTestId('proposedAction-modal-dismiss'));
-    fireEvent.click(screen.getByText('Confirm dismiss'));
+  it('shows a Declining badge on the row itself when isSubmitting is set', () => {
+    renderButton({ isSubmitting: 'declining' });
 
     const row = screen.getByTestId('proposedAction');
     expect(within(row).getByText('Declining')).toBeInTheDocument();
-
-    await act(async () => {
-      resolveDismiss();
-    });
   });
 
   it('omits the modal Dismiss button for a host that cannot record one', () => {

@@ -15,7 +15,12 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { coreMock } from '@kbn/core/public/mocks';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/public/mocks';
-import { useApproveProposal, useDismissProposal } from '@kbn/proposals-plugin/public';
+import {
+  useApproveProposal,
+  useDismissProposal,
+  useIsApprovingProposal,
+  useIsDecliningProposal,
+} from '@kbn/proposals-plugin/public';
 import {
   useProposalsByCategory,
   useProposalsByCategoryCount,
@@ -33,6 +38,8 @@ jest.mock('@kbn/proposals-plugin/public', () => ({
   ...jest.requireActual('@kbn/proposals-plugin/public'),
   useApproveProposal: jest.fn(),
   useDismissProposal: jest.fn(),
+  useIsApprovingProposal: jest.fn(),
+  useIsDecliningProposal: jest.fn(),
 }));
 // Only the profile lookup is stubbed here.
 jest.mock('@kbn/agentic-investigations-plugin/public', () => ({
@@ -52,6 +59,8 @@ const mockUseClosedProposalsCount = useClosedProposalsCount as jest.Mock;
 const mockUseProposalChartsSummary = useProposalChartsSummary as jest.Mock;
 const mockUseApproveProposal = useApproveProposal as jest.Mock;
 const mockUseDismissProposal = useDismissProposal as jest.Mock;
+const mockUseIsApprovingProposal = useIsApprovingProposal as jest.Mock;
+const mockUseIsDecliningProposal = useIsDecliningProposal as jest.Mock;
 
 /** Records the fetchNextPage of each bucket, so a Show more click can be asserted. */
 const fetchNextPage: Record<string, jest.Mock> = {};
@@ -181,6 +190,8 @@ beforeEach(() => {
   dismissMutateAsync.mockResolvedValue(undefined);
   mockUseApproveProposal.mockReturnValue({ mutateAsync: approveMutateAsync });
   mockUseDismissProposal.mockReturnValue({ mutateAsync: dismissMutateAsync });
+  mockUseIsApprovingProposal.mockReturnValue(false);
+  mockUseIsDecliningProposal.mockReturnValue(false);
   mockOpenCount(0);
 });
 
@@ -367,18 +378,16 @@ describe('ConversationsPage decisions', () => {
     });
   });
 
-  it('stays open and keeps showing Applying once the mutation succeeds, rather than closing', async () => {
+  it('stays open and shows Applying while useIsApprovingProposal reports this proposal in flight', () => {
+    mockUseIsApprovingProposal.mockImplementation((id: string) => id === 'prop-1');
     renderPage('/');
     openApproval();
-    fireEvent.click(approvalDialog().getByRole('button', { name: 'Approve' }));
 
-    // The decision's own outcome now shows in place — the modal never auto-closes, so a
-    // refusal (expired deadline, someone decided first) reads the same way: still open. Approving
-    // only resumes the gate workflow, whose action still runs afterward, so this must not yet
-    // claim "Applied" — only a refetched, real decision can.
-    await waitFor(() =>
-      expect(approvalDialog().getAllByText('Applying').length).toBeGreaterThan(0)
-    );
+    // The decision's own outcome shows in place — the modal never auto-closes, so a refusal
+    // (expired deadline, someone decided first) reads the same way: still open. Approving only
+    // resumes the gate workflow, whose action still runs afterward, so being in flight must not
+    // yet claim "Applied" — only a refetched, real decision can.
+    expect(approvalDialog().getAllByText('Applying').length).toBeGreaterThan(0);
     expect(approvalDialog().queryByText('Applied')).not.toBeInTheDocument();
     expect(screen.getByRole('dialog', { name: 'Revoke sessions' })).toBeInTheDocument();
   });

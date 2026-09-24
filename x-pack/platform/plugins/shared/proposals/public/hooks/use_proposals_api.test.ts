@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
@@ -17,6 +17,8 @@ import {
   useProposal,
   useApproveProposal,
   useDismissProposal,
+  useIsApprovingProposal,
+  useIsDecliningProposal,
 } from './use_proposals_api';
 import { PROPOSALS_INTERNAL_URL, PROPOSALS_API_VERSION } from '@kbn/proposals-common';
 import { queryKeys } from '../query_keys';
@@ -411,5 +413,107 @@ describe('useDismissProposal', () => {
     await expect(
       result.current.mutateAsync({ id: 'p-1', body: { dismissReason: 'wrong' } })
     ).rejects.toThrow('Conflict');
+  });
+});
+
+describe('useIsApprovingProposal / useIsDecliningProposal', () => {
+  it('is false for every proposal before any mutation has been called', () => {
+    const { Wrapper } = createWrapper();
+    const { result } = renderHook(
+      () => ({
+        approving: useIsApprovingProposal('p-1'),
+        declining: useIsDecliningProposal('p-1'),
+      }),
+      { wrapper: Wrapper }
+    );
+
+    expect(result.current.approving).toBe(false);
+    expect(result.current.declining).toBe(false);
+  });
+
+  it('is true only for the proposal actually being approved, and settles back to false', async () => {
+    const http = makeHttp();
+    let resolvePost: (value: unknown) => void = () => {};
+    http.post.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolvePost = resolve;
+        })
+    );
+    useKibanaMock.mockReturnValue({ services: { http } } as unknown as ReturnType<
+      typeof useKibana
+    >);
+
+    const { Wrapper } = createWrapper();
+    const { result } = renderHook(
+      () => ({
+        approve: useApproveProposal(),
+        isApprovingP1: useIsApprovingProposal('p-1'),
+        isApprovingP2: useIsApprovingProposal('p-2'),
+        isDecliningP1: useIsDecliningProposal('p-1'),
+      }),
+      { wrapper: Wrapper }
+    );
+
+    let mutatePromise: Promise<unknown> = Promise.resolve();
+    act(() => {
+      mutatePromise = result.current.approve.mutateAsync({ id: 'p-1', body: {} });
+    });
+
+    await waitFor(() => expect(result.current.isApprovingP1).toBe(true));
+    // Neither a different proposal nor a decline reads this approval.
+    expect(result.current.isApprovingP2).toBe(false);
+    expect(result.current.isDecliningP1).toBe(false);
+
+    resolvePost({ id: 'p-1', status: 'approved' });
+    await act(async () => {
+      await mutatePromise;
+    });
+
+    await waitFor(() => expect(result.current.isApprovingP1).toBe(false));
+  });
+
+  it('is true only for the proposal actually being declined, and settles back to false', async () => {
+    const http = makeHttp();
+    let resolvePost: (value: unknown) => void = () => {};
+    http.post.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolvePost = resolve;
+        })
+    );
+    useKibanaMock.mockReturnValue({ services: { http } } as unknown as ReturnType<
+      typeof useKibana
+    >);
+
+    const { Wrapper } = createWrapper();
+    const { result } = renderHook(
+      () => ({
+        dismiss: useDismissProposal(),
+        isDecliningP1: useIsDecliningProposal('p-1'),
+        isDecliningP2: useIsDecliningProposal('p-2'),
+        isApprovingP1: useIsApprovingProposal('p-1'),
+      }),
+      { wrapper: Wrapper }
+    );
+
+    let mutatePromise: Promise<unknown> = Promise.resolve();
+    act(() => {
+      mutatePromise = result.current.dismiss.mutateAsync({
+        id: 'p-1',
+        body: { dismissReason: 'wrong' },
+      });
+    });
+
+    await waitFor(() => expect(result.current.isDecliningP1).toBe(true));
+    expect(result.current.isDecliningP2).toBe(false);
+    expect(result.current.isApprovingP1).toBe(false);
+
+    resolvePost({ id: 'p-1', status: 'dismissed' });
+    await act(async () => {
+      await mutatePromise;
+    });
+
+    await waitFor(() => expect(result.current.isDecliningP1).toBe(false));
   });
 });

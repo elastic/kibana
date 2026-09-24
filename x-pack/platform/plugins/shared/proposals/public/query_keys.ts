@@ -20,3 +20,15 @@ export const queryKeys = {
     current: () => [...queryKeys.userProfiles.all, 'current'] as const,
   },
 };
+
+/**
+ * Fixed per decision type rather than per proposal: a mutation's *key* identifies which
+ * operation it is, and `useIsMutating`'s `predicate` narrows an in-flight one down to a specific
+ * proposal by its call-time `variables.id` — see `useIsApprovingProposal`/`useIsDecliningProposal`.
+ */
+export const mutationKeys = {
+  proposals: {
+    approve: ['proposals', 'approve'] as const,
+    decline: ['proposals', 'decline'] as const,
+  },
+};

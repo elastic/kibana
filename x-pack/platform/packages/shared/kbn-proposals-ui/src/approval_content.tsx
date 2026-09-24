@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useState } from 'react';
+import React, { memo, useCallback, useEffect, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiButton,
@@ -23,7 +23,6 @@ import { AlwaysAllowCheckbox } from './always_allow_checkbox';
 import {
   getApprovalOutcomeBadge,
   getApprovalOutcomeBanner,
-  type ApprovalOutcomeStatus,
   type ApprovalPhase,
 } from './approval_outcome';
 import { APPROVAL_MODAL_TRANSLATIONS } from './translations';
@@ -43,21 +42,14 @@ export interface ApprovalAction {
   color?: EuiButtonColor;
   isDisabled?: boolean;
   isLoading?: boolean;
-  /**
-   * Read only off `primaryAction`. Once its `onClick` promise resolves, this is the decision it
-   * made — drives the transient "Applying"/"Declining" phase and the badge/banner/footer once it
-   * settles, so a caller stops having to track loading state and render the outcome itself.
-   */
-  outcomeStatus?: ApprovalOutcomeStatus;
   'data-test-subj'?: string;
 }
 
 /**
- * A proposal already decided — by this component's own click, or before this render existed.
- * `status` admits `'applying'`/`'failed'` alongside the two the caller can request via
- * `outcomeStatus`: approving only resumes the gate workflow, whose post-gate steps run the
- * action and can still leave a decided proposal `executing` or `failed` once the real, refetched
- * proposal is what supplies this — nothing optimistic ever claims either.
+ * A proposal already decided, read from the real record rather than assumed from a click.
+ * `status` admits `'applying'`/`'failed'` alongside `'applied'`/`'declined'`: approving only
+ * resumes the gate workflow, whose post-gate steps run the action, so a decided proposal can
+ * still read `executing` or `failed` once that real record is what supplies this.
  */
 export interface ApprovalDecision {
   status: Exclude<ApprovalPhase, 'pending'>;
@@ -87,9 +79,17 @@ export interface ApprovalContentProps {
   /** Already decided — read-only history. Omit while a proposal is still awaiting one. */
   decision?: ApprovalDecision;
   /**
-   * Who is submitting `primaryAction` right now, for the optimistic "Applying"/"Declining" phase.
-   * Falls back to a generic "You" when omitted, so a host that has not wired a profile lookup
-   * still gets a coherent transient state.
+   * Whether this proposal's approve/decline is currently in flight. Sourced from the host's own
+   * mutation cache (e.g. `useIsMutating`) rather than tracked here — a local `useState` would not
+   * survive this component being unmounted and remounted mid-submission (closing and reopening
+   * the modal, say), and would have no way to agree with another component showing the same
+   * proposal (the flyout row this modal opened from, for instance).
+   */
+  isSubmitting?: 'applying' | 'declining';
+  /**
+   * Who is submitting right now, for the "Applying"/"Declining" phase's live caption. Falls back
+   * to a generic "You" when omitted, so a host that has not wired a profile lookup still gets a
+   * coherent transient state.
    */
   currentActorName?: string;
   alwaysAllow?: AlwaysAllowOption;
@@ -102,8 +102,6 @@ export interface ApprovalContentProps {
   'data-test-subj'?: string;
 }
 
-type TransientPhase = 'idle' | 'applying' | 'declining';
-
 const bannerIconFor = (color: 'success' | 'primary' | 'danger'): IconType =>
   color === 'success' ? 'check' : color === 'danger' ? 'warning' : 'clock';
 
@@ -114,12 +112,11 @@ const bannerIconFor = (color: 'success' | 'primary' | 'danger'): IconType =>
  * {@link ApprovalModal}) or directly into a div/card (by the Agent Builder
  * proposal attachment) without adding an extra wrapping element.
  *
- * Owns the decision's async lifecycle: `primaryAction.onClick` may return a promise, and while it
- * is in flight (and once it settles) this renders the transient/outcome UI itself — the badge,
- * the header's actor/time caption, and the outcome banner — rather than a caller tracking
- * `isLoading` and re-deriving the same thing. A caller only needs to supply the mutation and, once
- * the server confirms it, a real `decision` prop; until then the optimistic one this produces
- * carries the UI.
+ * The decision's async lifecycle is the host's, not this component's: `isSubmitting` and
+ * `decision` together are the whole phase this renders — the badge, the header's actor/time
+ * caption, and the outcome banner. This only wraps `primaryAction.onClick` to surface a
+ * rejection as its own banner; it holds no phase of its own, so it renders identically whether
+ * it just mounted or has been open the whole time.
  *
  * Footer is omitted entirely when neither `primaryAction` nor `secondaryActions` are provided.
  */
@@ -133,6 +130,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     titleId,
     caption,
     decision,
+    isSubmitting,
     currentActorName,
     alwaysAllow,
     primaryAction,
@@ -141,14 +139,17 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     'data-test-subj': dataTestSubj,
   }) => {
     const { euiTheme } = useEuiTheme();
-    const [transientPhase, setTransientPhase] = useState<TransientPhase>('idle');
-    const [transientSince, setTransientSince] = useState<string | undefined>(undefined);
-    const [optimisticDecision, setOptimisticDecision] = useState<ApprovalDecision | undefined>(
-      undefined
-    );
     const [actionError, setActionError] = useState<string | undefined>(undefined);
+    // Only for the live "Xs ago" caption below — not for the phase itself, which reads `isSubmitting`
+    // directly. Resets whenever this component (re)mounts while already submitting, so a modal
+    // reopened mid-submission restarts the counter rather than reading the true elapsed time; the
+    // phase it is captioning is still correct either way.
+    const [since, setSince] = useState<string | undefined>(undefined);
 
-    const effectiveDecision = decision ?? optimisticDecision;
+    useEffect(() => {
+      setSince(isSubmitting ? new Date().toISOString() : undefined);
+    }, [isSubmitting]);
+
     const actorName = currentActorName ?? APPROVAL_MODAL_TRANSLATIONS.currentActorFallback;
 
     const handlePrimaryClick = useCallback(async () => {
@@ -156,49 +157,26 @@ export const ApprovalContent = memo<ApprovalContentProps>(
         return;
       }
       setActionError(undefined);
-      if (!primaryAction.outcomeStatus) {
-        // No decision to track (e.g. a step that just moves to a different form) — run it as-is.
-        await primaryAction.onClick();
-        return;
-      }
-      const startedAt = new Date().toISOString();
-      const isDeclining = primaryAction.outcomeStatus === 'declined';
-      setTransientSince(startedAt);
-      setTransientPhase(isDeclining ? 'declining' : 'applying');
       try {
         await primaryAction.onClick();
-        if (isDeclining) {
-          // Declining settles as soon as the call returns — there is no action afterward that
-          // could still fail, so this is the real outcome, not an optimistic guess at one.
-          setOptimisticDecision({ status: 'declined', actorName, decidedAt: startedAt });
-          setTransientPhase('idle');
-        }
-        // Approving only resumes the gate workflow; the action it starts still runs afterward and
-        // can fail. Deliberately left `transientPhase: 'applying'` rather than optimistically
-        // claiming `'applied'` — only the real, refetched `decision` prop can say it succeeded.
       } catch (err) {
         setActionError(
           err instanceof Error ? err.message : APPROVAL_MODAL_TRANSLATIONS.actionErrorTitle
         );
-        setTransientPhase('idle');
       }
-    }, [primaryAction, actorName]);
+    }, [primaryAction]);
 
-    const approvalPhase = effectiveDecision
-      ? effectiveDecision.status
-      : transientPhase === 'idle'
-      ? 'pending'
-      : transientPhase;
+    const approvalPhase: ApprovalPhase = decision ? decision.status : isSubmitting ?? 'pending';
 
     const badge = getApprovalOutcomeBadge(approvalPhase);
     const banner = getApprovalOutcomeBanner(approvalPhase);
-    const bannerSuffix = effectiveDecision?.reason ?? banner?.hint;
+    const bannerSuffix = decision?.reason ?? banner?.hint;
     const isSettledOrTransient = approvalPhase !== 'pending';
 
-    const headerCaption = effectiveDecision ? (
-      <ApprovalActorTime actorName={effectiveDecision.actorName} at={effectiveDecision.decidedAt} />
-    ) : transientPhase !== 'idle' && transientSince ? (
-      <ApprovalActorTime actorName={actorName} at={transientSince} live />
+    const headerCaption = decision ? (
+      <ApprovalActorTime actorName={decision.actorName} at={decision.decidedAt} />
+    ) : isSubmitting && since ? (
+      <ApprovalActorTime actorName={actorName} at={since} live />
     ) : (
       caption
     );

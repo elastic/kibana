@@ -30,15 +30,11 @@ export interface DismissProposalParams {
 export interface ProposedActionButtonProps {
   /** Same shape the card's recommended-action menu item reads its proposal from. */
   proposal: ApprovalProposal;
-  /**
-   * Commits the approval. Awaited by this row, which shows the "Applying"/"Applied" states for
-   * as long as this takes — pass the mutation's own promise (`mutateAsync`).
-   */
+  /** Commits the approval — pass the mutation's own promise (`mutateAsync`). */
   onConfirm: () => Promise<void>;
   /**
-   * Records the dismissal. Awaited by this row the same way `onConfirm` is, so the badge shows
-   * "Declining" for as long as it takes. Omitted by hosts that cannot record a dismissal, which
-   * also hides the modal's Dismiss button.
+   * Records the dismissal. Omitted by hosts that cannot record a dismissal, which also hides the
+   * modal's Dismiss button.
    */
   onDismiss?: (params: DismissProposalParams) => Promise<void>;
   /**
@@ -50,12 +46,16 @@ export interface ProposedActionButtonProps {
     onClose: () => void;
     onConfirm: (params: DismissProposalParams) => Promise<void>;
   }) => React.ReactNode;
-  /** Who's approving/declining, for the modal's optimistic "Applying"/"Declining" state. */
+  /**
+   * Whether this proposal's approve/decline is currently in flight. Sourced from the host's own
+   * mutation cache (e.g. `useIsMutating`) rather than tracked here, so this row and the modal it
+   * opens agree even across the modal being closed and reopened mid-submission.
+   */
+  isSubmitting?: 'applying' | 'declining';
+  /** Who's approving/declining, for the modal's "Applying"/"Declining" caption. */
   currentActorName?: string;
   'data-test-subj'?: string;
 }
-
-type TransientPhase = 'idle' | 'applying' | 'declining';
 
 const PENDING_BADGE = {
   color: 'primary' as const,
@@ -73,10 +73,9 @@ const PENDING_BADGE = {
  * own flyout. For a decided proposal that modal is read-only — the badge reports the outcome and
  * who/when decided it, and there is nothing left to submit.
  *
- * Owns its own transient "Applying"/"Declining" phase, wrapping whichever of `onConfirm`/
- * `onDismiss` it called — the same {@link getApprovalOutcomeBadge} source of truth the modal
- * itself reads, so the row behind the modal shows the submission in progress too, not just the
- * modal's own header badge.
+ * Reads `isSubmitting` for its transient "Applying"/"Declining" phase — the same
+ * {@link getApprovalOutcomeBadge} source of truth the modal itself reads, so the row behind the
+ * modal shows the submission in progress too, not just the modal's own header badge.
  */
 export const ProposedActionButton = memo<ProposedActionButtonProps>(
   ({
@@ -84,13 +83,13 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
     onConfirm,
     onDismiss,
     renderDismissModal,
+    isSubmitting,
     currentActorName,
     'data-test-subj': dataTestSubj,
   }) => {
     const { euiTheme } = useEuiTheme();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isDismissModalOpen, setIsDismissModalOpen] = useState(false);
-    const [transientPhase, setTransientPhase] = useState<TransientPhase>('idle');
     const isDecided = proposal.decision !== undefined;
 
     const openModal = useCallback(() => setIsModalOpen(true), []);
@@ -104,27 +103,13 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
       setIsDismissModalOpen(true);
     }, [closeModal]);
 
-    const wrappedOnConfirm = useCallback(async () => {
-      setTransientPhase('applying');
-      try {
-        await onConfirm();
-      } finally {
-        setTransientPhase('idle');
-      }
-    }, [onConfirm]);
-
     const wrappedOnDismiss = useCallback(
       async (params: DismissProposalParams) => {
         if (!onDismiss) {
           return;
         }
-        setTransientPhase('declining');
-        try {
-          await onDismiss(params);
-          closeDismissModal();
-        } finally {
-          setTransientPhase('idle');
-        }
+        await onDismiss(params);
+        closeDismissModal();
       },
       [onDismiss, closeDismissModal]
     );
@@ -133,12 +118,10 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
       ? proposal.decision === 'approved'
         ? 'applied'
         : 'declined'
-      : transientPhase === 'idle'
-      ? 'pending'
-      : transientPhase;
+      : isSubmitting ?? 'pending';
 
     const badge = getApprovalOutcomeBadge(approvalPhase) ?? PENDING_BADGE;
-    const isInteractive = !isDecided && transientPhase === 'idle';
+    const isInteractive = !isDecided && !isSubmitting;
 
     const decidedByName = proposal.decidedBy?.fullName ?? proposal.decidedBy?.username ?? undefined;
     const pendingCaption = getProposalCaption(proposal);
@@ -220,9 +203,10 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
         {isModalOpen && (
           <ApprovalModal
             proposal={proposal}
-            onConfirm={wrappedOnConfirm}
+            onConfirm={onConfirm}
             onClose={closeModal}
             onDismiss={onDismiss ? openDismissModal : undefined}
+            isSubmitting={isSubmitting}
             currentActorName={currentActorName}
             data-test-subj={dataTestSubj ? `${dataTestSubj}-modal` : undefined}
           />

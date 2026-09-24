@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ApprovalModal, type ApprovalModalProps } from './approval_modal';
@@ -117,31 +117,24 @@ describe('ApprovalModal', () => {
     expect(baseProps.onConfirm).toHaveBeenCalledTimes(1);
   });
 
-  it('stays Applying once onConfirm resolves, since only the gate resume has completed', async () => {
-    let resolveConfirm: () => void = () => {};
-    const onConfirm = jest.fn(
-      () =>
-        new Promise<void>((resolve) => {
-          resolveConfirm = resolve;
-        })
-    );
-    renderModal({ onConfirm, currentActorName: 'Ava' });
-
-    fireEvent.click(screen.getByTestId('approvalModal-confirm'));
+  it('shows Applying when isSubmitting is set, hiding the actions', () => {
+    renderModal({ isSubmitting: 'applying', currentActorName: 'Ava' });
 
     // The badge and the outcome banner's own title both say it.
     expect(screen.getAllByText('Applying').length).toBeGreaterThanOrEqual(2);
     expect(screen.queryByTestId('approvalModal-confirm')).not.toBeInTheDocument();
-
-    await act(async () => {
-      resolveConfirm();
-    });
-
-    // Approving only resumes the gate workflow — the action it starts still runs afterward, so
-    // resolving that call must not yet claim success. Only a refetched, real `decision` can.
-    expect(screen.getAllByText('Applying').length).toBeGreaterThanOrEqual(2);
-    expect(screen.queryByText('Applied')).not.toBeInTheDocument();
     expect(screen.getAllByText(/Ava/).length).toBeGreaterThan(0);
+  });
+
+  it('keeps showing Applying across a close and reopen mid-submission, since isSubmitting is sourced externally', () => {
+    const { unmount } = renderModal({ isSubmitting: 'applying', currentActorName: 'Ava' });
+    expect(screen.getAllByText('Applying').length).toBeGreaterThanOrEqual(2);
+    unmount();
+
+    // A fresh mount — standing in for the modal being reopened — reads the same externally
+    // sourced `isSubmitting`, unlike a local `useState` that would have died with the unmount.
+    renderModal({ isSubmitting: 'applying', currentActorName: 'Ava' });
+    expect(screen.getAllByText('Applying').length).toBeGreaterThanOrEqual(2);
   });
 
   it('keeps showing Applying for a recorded decision whose action is still executing', () => {

@@ -9,7 +9,13 @@ import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react';
 import type { ApprovalAction, ApprovalDecision } from '@kbn/proposals-ui';
 import { ProposalApprovalCard } from './proposal_approval_card';
-import { useProposal, useApproveProposal, useDismissProposal } from '../hooks/use_proposals_api';
+import {
+  useProposal,
+  useApproveProposal,
+  useDismissProposal,
+  useIsApprovingProposal,
+  useIsDecliningProposal,
+} from '../hooks/use_proposals_api';
 import { useCurrentUserProfile } from '../hooks/use_current_user_profile';
 import type { ProposalWithMetadata } from '@kbn/proposals-common';
 
@@ -46,12 +52,14 @@ jest.mock('@kbn/proposals-ui', () => ({
     tone,
     comment,
     decision,
+    isSubmitting,
     currentActorName,
   }: {
     children?: React.ReactNode;
     tone?: string;
     comment?: string;
     decision?: ApprovalDecision;
+    isSubmitting?: 'applying' | 'declining';
     currentActorName?: string;
     primaryAction?: {
       label: string;
@@ -98,6 +106,7 @@ jest.mock('@kbn/proposals-ui', () => ({
           </div>
         )}
         {currentActorName && <div data-test-subj="approval-current-actor">{currentActorName}</div>}
+        {isSubmitting && <div data-test-subj="approval-is-submitting">{isSubmitting}</div>}
         {children}
       </div>
     );
@@ -114,6 +123,8 @@ jest.mock('../hooks/use_proposals_api', () => ({
   useProposal: jest.fn(),
   useApproveProposal: jest.fn(),
   useDismissProposal: jest.fn(),
+  useIsApprovingProposal: jest.fn(),
+  useIsDecliningProposal: jest.fn(),
 }));
 
 jest.mock('../hooks/use_current_user_profile', () => ({
@@ -146,6 +157,12 @@ jest.mock('./proposal_dismiss_form', () => ({
 const useProposalMock = useProposal as jest.MockedFunction<typeof useProposal>;
 const useApproveProposalMock = useApproveProposal as jest.MockedFunction<typeof useApproveProposal>;
 const useDismissProposalMock = useDismissProposal as jest.MockedFunction<typeof useDismissProposal>;
+const useIsApprovingProposalMock = useIsApprovingProposal as jest.MockedFunction<
+  typeof useIsApprovingProposal
+>;
+const useIsDecliningProposalMock = useIsDecliningProposal as jest.MockedFunction<
+  typeof useIsDecliningProposal
+>;
 const useCurrentUserProfileMock = useCurrentUserProfile as jest.MockedFunction<
   typeof useCurrentUserProfile
 >;
@@ -187,6 +204,8 @@ const setupMocks = (
   useDismissProposalMock.mockReturnValue({ ...noopMutation } as unknown as ReturnType<
     typeof useDismissProposal
   >);
+  useIsApprovingProposalMock.mockReturnValue(false);
+  useIsDecliningProposalMock.mockReturnValue(false);
   useCurrentUserProfileMock.mockReturnValue({ data: null } as unknown as ReturnType<
     typeof useCurrentUserProfile
   >);
@@ -509,10 +528,11 @@ describe('ProposalApprovalCard', () => {
       });
     });
 
-    it('marks the Approve action as resolving to Applied, for ApprovalContent to track', () => {
+    it('passes isSubmitting="applying" to ApprovalContent while useIsApprovingProposal is true', () => {
       setupMocks();
-      render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
-      expect(latestPrimaryAction?.outcomeStatus).toBe('applied');
+      useIsApprovingProposalMock.mockReturnValue(true);
+      const { getByTestId } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
+      expect(getByTestId('approval-is-submitting')).toHaveTextContent('applying');
     });
 
     it('rejects with a friendly message rather than the raw generic error', async () => {
@@ -628,15 +648,11 @@ describe('ProposalApprovalCard', () => {
       expect(confirmBtn).toBeDisabled();
     });
 
-    it('marks the Confirm dismiss action as resolving to Declined, for ApprovalContent to track', () => {
+    it('passes isSubmitting="declining" to ApprovalContent while useIsDecliningProposal is true', () => {
       setupMocks();
-      const { container } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
-      fireEvent.click(
-        container.querySelector(
-          '[data-test-subj="proposalDismiss-proposal-1"]'
-        ) as HTMLButtonElement
-      );
-      expect(latestPrimaryAction?.outcomeStatus).toBe('declined');
+      useIsDecliningProposalMock.mockReturnValue(true);
+      const { getByTestId } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
+      expect(getByTestId('approval-is-submitting')).toHaveTextContent('declining');
     });
 
     it('calls dismissProposal.mutateAsync with the reason and rationale on confirm', async () => {
