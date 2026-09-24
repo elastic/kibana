@@ -12,7 +12,7 @@ import { MatcherRuleEventFieldsRoute } from './matcher_rule_event_fields_route';
 
 const createSuggestionsService = (): jest.Mocked<MatcherSuggestionsService> =>
   ({
-    getDataFieldNames: jest.fn(),
+    getRuleEventFieldNames: jest.fn(),
     getSuggestions: jest.fn(),
   } as unknown as jest.Mocked<MatcherSuggestionsService>);
 
@@ -21,29 +21,29 @@ describe('MatcherRuleEventFieldsRoute', () => {
     const { ctx } = createRouteDependencies();
     const request = httpServerMock.createKibanaRequest({ query: {} });
     const suggestionsService = createSuggestionsService();
-    suggestionsService.getDataFieldNames.mockResolvedValue(['data.host.name']);
+    suggestionsService.getRuleEventFieldNames.mockResolvedValue(['data.host.name']);
 
     const route = new MatcherRuleEventFieldsRoute(ctx, request, suggestionsService);
 
     await route.handle();
 
-    expect(suggestionsService.getDataFieldNames).toHaveBeenCalledWith(undefined);
+    expect(suggestionsService.getRuleEventFieldNames).toHaveBeenCalledWith(undefined);
     expect(ctx.response.ok).toHaveBeenCalledWith({ body: ['data.host.name'] });
   });
 
   it('forwards the matcher query param to getDataFieldNames', async () => {
     const { ctx } = createRouteDependencies();
     const request = httpServerMock.createKibanaRequest({
-      query: { matcher: 'rule.id : "abc"' },
+      query: { matcher: 'episode_id: "abc"' },
     });
     const suggestionsService = createSuggestionsService();
-    suggestionsService.getDataFieldNames.mockResolvedValue([]);
+    suggestionsService.getRuleEventFieldNames.mockResolvedValue([]);
 
     const route = new MatcherRuleEventFieldsRoute(ctx, request, suggestionsService);
 
     await route.handle();
 
-    expect(suggestionsService.getDataFieldNames).toHaveBeenCalledWith('rule.id : "abc"');
+    expect(suggestionsService.getRuleEventFieldNames).toHaveBeenCalledWith('episode_id: "abc"');
     expect(ctx.response.ok).toHaveBeenCalledWith({ body: [] });
   });
 
@@ -51,7 +51,7 @@ describe('MatcherRuleEventFieldsRoute', () => {
     const { ctx } = createRouteDependencies();
     const request = httpServerMock.createKibanaRequest({ query: {} });
     const suggestionsService = createSuggestionsService();
-    suggestionsService.getDataFieldNames.mockRejectedValue(new Error('boom'));
+    suggestionsService.getRuleEventFieldNames.mockRejectedValue(new Error('boom'));
 
     const route = new MatcherRuleEventFieldsRoute(ctx, request, suggestionsService);
 

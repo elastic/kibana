@@ -5,108 +5,176 @@
  * 2.0.
  */
 
-// TODO(elastic/search-team#15972): replace N individual get() calls with a bulk API once it lands.
-
-import { asyncMapWithLimit } from '@kbn/std';
+import type { SortCombinations } from '@elastic/elasticsearch/lib/api/types';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import type { MetadataFieldValue } from '@kbn/agent-builder-common';
 import type { AgenticInvestigationsPluginStart } from '@kbn/agentic-investigations-plugin/server';
-import type {
-  ProposalWithMetadata,
-  ProposalsQuery,
-} from '@kbn/agentic-investigations-plugin/common';
-import {
-  CLOSED_GROUP_KEY,
-  type ProposalGroups,
-  type ProposalItem,
-  type GetProposalsListResponse,
-} from '../../../common/proposals/list';
+import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
+import type { ProposalWithMetadata } from '@kbn/proposals-common';
+import type { ProposalItem, ProposalsPageResponse } from '../../../common/proposals/list';
 
-type ProposalsService = ReturnType<AgenticInvestigationsPluginStart['getProposalsService']>;
+type ProposalsService = ReturnType<ProposalsPluginStart['getProposalsService']>;
+type GetImpactClient = AgenticInvestigationsPluginStart['getImpactClient'];
 
-const CONCURRENCY_LIMIT = 10;
+/** Conversation-derived fields merged onto a proposal on read. Absent when unreadable. */
+type ConversationDecoration = Pick<
+  ProposalItem,
+  'conversationTitle' | 'conversationAgentId' | 'conversationAssignees'
+>;
+
+/**
+ * Metadata is only deserialized to a `TEXT_ARRAY`'s declared `string[]` when the
+ * conversation's template resolves; otherwise it stays in storage form, where a
+ * single entry is a bare string.
+ */
+const readAssignees = (value: MetadataFieldValue | undefined): string[] => {
+  if (Array.isArray(value)) return value;
+  return typeof value === 'string' ? [value] : [];
+};
+
+/** Fixed window for the closed-proposals queue: decisions older than this are not shown. */
+const CLOSED_DECIDED_WITHIN_HOURS = 72;
+
+/**
+ * Breaks every tie the timestamps leave, so a row cannot move between two offset
+ * pages and be shown twice or skipped. Unique per live proposal: `create` roots a
+ * chain at its own id, `revise` numbers it, and the one other pair that shares both
+ * — an original and its clone — never appear together, since both queues exclude
+ * superseded records.
+ */
+const TIEBREAKER: SortCombinations[] = [
+  { rootProposalId: { order: 'asc' } },
+  { revision: { order: 'asc' } },
+];
 
 export class ConversationProposalsService {
   constructor(
     private readonly proposalsService: ProposalsService,
     private readonly agentBuilder: AgentBuilderPluginStart,
-    private readonly logger: Logger
+    private readonly logger: Logger,
+    private readonly getImpactClient: GetImpactClient
   ) {}
 
-  async list(
-    query: ProposalsQuery,
+  /** Returns pending proposals for a single action category, newest first. */
+  async listByCategory(
+    category: string,
     request: KibanaRequest,
-    spaceId: string
-  ): Promise<GetProposalsListResponse> {
-    const { proposals, truncated } = await this.proposalsService.listByWindow(
-      { includeStatuses: ['pending'], decidedWithinHours: query.windowHours },
-      spaceId
+    spaceId: string,
+    { size, from }: { size: number; from: number }
+  ): Promise<ProposalsPageResponse> {
+    const { proposals, total } = await this.proposalsService.list(
+      { category, status: 'pending', excludeSuperseded: true, excludeExpired: false, size, from },
+      spaceId,
+      [{ createdAt: { order: 'desc' as const } }, ...TIEBREAKER]
     );
 
-    const titles = await this.getTitles(
-      proposals.map((p) => p.conversationId),
-      request
+    return { proposals: await this.decorate(proposals, request), total };
+  }
+
+  /** Proposals that stopped awaiting a human in the last 72 h, newest decision first. */
+  async listClosed(
+    request: KibanaRequest,
+    spaceId: string,
+    { size, from }: { size: number; from: number }
+  ): Promise<ProposalsPageResponse> {
+    const { proposals, total } = await this.proposalsService.list(
+      {
+        decidedWithinHours: CLOSED_DECIDED_WITHIN_HOURS,
+        excludeSuperseded: true,
+        excludeExpired: false,
+        size,
+        from,
+      },
+      spaceId,
+      [
+        { decidedAt: { order: 'desc' as const } },
+        { createdAt: { order: 'desc' as const } },
+        ...TIEBREAKER,
+      ]
     );
 
-    const groups = this.groupProposals(proposals, titles);
-    const total = Object.values(groups).reduce((sum, items) => sum + items.length, 0);
-    return { groups, total, truncated };
+    return { proposals: await this.decorate(proposals, request), total };
   }
 
-  private groupProposals(
-    proposals: ProposalWithMetadata[],
-    titles: Map<string, string>
-  ): ProposalGroups {
-    const groups: ProposalGroups = { [CLOSED_GROUP_KEY]: [] };
-
-    for (const proposal of proposals) {
-      const item: ProposalItem = {
-        ...proposal,
-        ...(titles.has(proposal.conversationId)
-          ? { conversationTitle: titles.get(proposal.conversationId) }
-          : {}),
-      };
-
-      if (proposal.decidedAt) {
-        groups[CLOSED_GROUP_KEY].push(item);
-      } else if (proposal.category) {
-        if (!groups[proposal.category]) {
-          groups[proposal.category] = [];
-        }
-        groups[proposal.category].push(item);
-      }
-    }
-
-    groups[CLOSED_GROUP_KEY].sort((a, b) => {
-      if (!a.decidedAt || !b.decidedAt) return 0;
-      return b.decidedAt.localeCompare(a.decidedAt);
-    });
-
-    return groups;
-  }
-
-  private async getTitles(
+  /** Returns an empty map if the read fails: enrichment is decoration, not load-bearing. */
+  private async fetchConversations(
     conversationIds: string[],
     request: KibanaRequest
-  ): Promise<Map<string, string>> {
+  ): Promise<Map<string, ConversationDecoration>> {
     const uniqueIds = [...new Set(conversationIds)];
+    if (uniqueIds.length === 0) return new Map();
+
     const client = await this.agentBuilder.conversations.getScopedClient({ request });
 
-    const pairs = await asyncMapWithLimit(uniqueIds, CONCURRENCY_LIMIT, async (id) => {
-      try {
-        const conversation = await client.get(id);
-        if (!conversation.title) return undefined;
-        return [id, conversation.title] as [string, string];
-      } catch (err) {
-        this.logger.debug(`Could not resolve title for conversation [${id}]: ${err}`);
-        return undefined;
-      }
-    });
-
-    const map = new Map<string, string>();
-    for (const pair of pairs) {
-      if (pair) map.set(pair[0], pair[1]);
+    try {
+      const conversations = await client.bulkGet(uniqueIds);
+      return new Map(
+        [...conversations].map(([id, { title, agent_id: agentId, metadata }]) => [
+          id,
+          {
+            ...(title ? { conversationTitle: title } : {}),
+            ...(agentId ? { conversationAgentId: agentId } : {}),
+            conversationAssignees: readAssignees(metadata?.assignees),
+          },
+        ])
+      );
+    } catch (err) {
+      this.logger.debug(`Could not resolve conversations: ${err}`);
+      return new Map();
     }
-    return map;
+  }
+
+  /**
+   * Second pass after the proposal list. Impact lives in its own index, keyed
+   * by conversationId. The client checks the investigations manage privilege and derives the space
+   * from the request. Failure here omits the field the same way a missing
+   * title does — the queue is still usable without pills.
+   */
+  private async getEntityIds(
+    conversationIds: string[],
+    request: KibanaRequest
+  ): Promise<Map<string, string[]>> {
+    const uniqueIds = [...new Set(conversationIds)];
+    if (uniqueIds.length === 0) return new Map();
+
+    try {
+      const impacts = await this.getImpactClient(request).listByConversationIds(uniqueIds);
+      return new Map(
+        impacts.map((impact) => [impact.conversationId, impact.entities.map((entity) => entity.id)])
+      );
+    } catch (err) {
+      this.logger.debug(`Could not resolve investigation impact: ${err}`);
+      return new Map();
+    }
+  }
+
+  private async decorate(
+    proposals: ProposalWithMetadata[],
+    request: KibanaRequest
+  ): Promise<ProposalItem[]> {
+    const conversationIds = proposals.map((proposal) => proposal.conversationId);
+    const [conversations, entityIds] = await Promise.all([
+      this.fetchConversations(conversationIds, request),
+      this.getEntityIds(conversationIds, request),
+    ]);
+    return this.enrichProposals(proposals, conversations, entityIds);
+  }
+
+  private enrichProposals(
+    proposals: ProposalWithMetadata[],
+    conversations: Map<string, ConversationDecoration>,
+    entityIds: Map<string, string[]>
+  ): ProposalItem[] {
+    return proposals.map((proposal) => {
+      const conversation = conversations.get(proposal.conversationId);
+      const ids = entityIds.get(proposal.conversationId);
+      return {
+        ...proposal,
+        ...conversation,
+        conversationAssignees: conversation?.conversationAssignees ?? [],
+        ...(ids && ids.length > 0 ? { entityIds: ids } : {}),
+      };
+    });
   }
 }

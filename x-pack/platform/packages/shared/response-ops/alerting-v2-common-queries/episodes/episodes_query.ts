@@ -128,7 +128,6 @@ const addGroupHashActionStats = (query: ComposerQuery) => {
   query
     .pipe`INLINE STATS last_snooze_action = LAST(action_type, @timestamp) WHERE action_type IN ("snooze", "unsnooze"),
                        snooze_expiry      = LAST(expiry, @timestamp)      WHERE action_type == "snooze",
-                       last_tags          = LAST(tags, @timestamp)        WHERE action_type == "tag",
                        first_series_event_timestamp = MIN(@timestamp)    WHERE type == "alert"
           BY group_hash`;
 };
@@ -141,7 +140,8 @@ const addEpisodeIdActionStats = (query: ComposerQuery) => {
   query
     .pipe`EVAL episode_id = COALESCE(\`episode.id\`, episode_id)`
     .pipe`INLINE STATS last_ack_action      = LAST(action_type,  @timestamp) WHERE action_type IN ("ack", "unack"),
-                       last_assignee_uid    = LAST(assignee_uid, @timestamp) WHERE action_type == "assign"
+                       last_assignee_uid    = LAST(assignee_uid, @timestamp) WHERE action_type == "assign",
+                       last_tags            = LAST(tags,         @timestamp) WHERE action_type == "tag"
           BY episode_id`;
 };
 
@@ -189,6 +189,8 @@ const addSeverityFilter = (query: ComposerQuery, severities: string[]) => {
     parts.push('severity IS NULL');
   }
   if (!parts.length) {
+    // No selected severity is a v2 value — exclude all v2 rows
+    query.pipe('WHERE false');
     return;
   }
   query.pipe(`WHERE ${parts.join(' OR ')}`);
@@ -320,8 +322,13 @@ export const buildEpisodesQuery = (
 
   addDurationLowerBoundFlag(query);
 
+  const sortedQuery =
+    sortState.sortField === 'severity'
+      ? query.sort([sortField, sortDir], ['@timestamp', sortDir])
+      : query.sort([sortField, sortDir]);
+
   return asTypedEsqlQuery<AlertEpisodeEsqlRow>(
-    query.sort([sortField, sortDir]).pipe`LIMIT ${pageSizeParam}`.keep(
+    sortedQuery.pipe`LIMIT ${pageSizeParam}`.keep(
       ...ALERT_EPISODE_FIELDS,
       DURATION_LOWER_BOUND_FIELD
     )

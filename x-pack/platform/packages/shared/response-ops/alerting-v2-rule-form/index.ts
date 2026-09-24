@@ -52,7 +52,6 @@ export type {
   RuleFormMeta,
   RuleFormLayout,
   RuleRequestCommon,
-  RuleNotificationsValue,
   RuleQuery,
   ComposedQuery,
   StandaloneQuery,
@@ -61,10 +60,6 @@ export type {
 
 export {
   buildInlineWorkflowYaml,
-  buildRuleScopedMatcher,
-  buildRuleNotificationTag,
-  resolveRuleNotificationTag,
-  ruleHasNotificationTag,
   InlineWorkflowEditor,
   INLINE_ACTION_STEP_DEFINITIONS,
   getInlineActionStepDefinition,
@@ -73,6 +68,7 @@ export {
 } from './actions_form';
 export type {
   ActionDraft,
+  ConnectorCreationConfig,
   InlineActionStepDefinition,
   InlineActionStepType,
   InlineWorkflowActionDraft,
@@ -128,3 +124,4 @@ export type { SequenceNodeType } from './sequence/sequence_node';
 export { SequenceEdge, WINDOW_OPTIONS } from './sequence/sequence_edge';
 export type { SequenceEdgeType } from './sequence/sequence_edge';
 export { layoutSequence } from './sequence/layout_sequence';
+export type { LayoutSequenceOptions } from './sequence/layout_sequence';

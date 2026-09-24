@@ -46,7 +46,6 @@ dependsOn:
   - '@kbn/usage-collection-plugin'
   - '@kbn/kibana-react-plugin'
   - '@kbn/i18n-react'
-  - '@kbn/securitysolution-io-ts-utils'
   - '@kbn/es-query'
   - '@kbn/rule-data-utils'
   - '@kbn/core-http-browser'
@@ -75,6 +74,7 @@ dependsOn:
   - '@kbn/shared-ux-router'
   - '@kbn/alerts-as-data-utils'
   - '@kbn/exploratory-view-plugin'
+  - '@kbn/event-annotation-common'
   - '@kbn/observability-shared-plugin'
   - '@kbn/observability-utils-common'
   - '@kbn/core-http-server'
@@ -85,7 +85,6 @@ dependsOn:
   - '@kbn/unified-doc-viewer-plugin'
   - '@kbn/code-editor'
   - '@kbn/code-editor-mock'
-  - '@kbn/securitysolution-io-ts-types'
   - '@kbn/shared-ux-link-redirect-app'
   - '@kbn/serverless'
   - '@kbn/index-management-plugin'
@@ -129,6 +128,7 @@ dependsOn:
   - '@kbn/content-management-utils'
   - '@kbn/presentation-publishing-schemas'
   - '@kbn/zod'
+  - '@kbn/router-to-openapispec'
   - '@kbn/maintenance-windows-plugin'
   - '@kbn/observability-agent-builder-plugin'
   - '@kbn/agent-builder-browser'
@@ -142,6 +142,8 @@ dependsOn:
   - '@kbn/cps-server-utils'
   - '@kbn/observability-utils-server'
   - '@kbn/ui-callout'
+  - '@kbn/app-header'
+  - '@kbn/app-menu'
 tags:
   - plugin
   - prod

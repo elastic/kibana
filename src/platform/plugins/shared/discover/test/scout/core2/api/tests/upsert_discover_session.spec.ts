@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DiscoverTabType } from '@kbn/discover-utils';
+import { DiscoverTabType } from '@kbn/discover-session-constants';
 import { apiTest, tags, type RoleApiCredentials } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { injectReferences, parseSearchSourceJSON } from '@kbn/data-plugin/common';
 import { FILTERS, FilterStateStore } from '@kbn/es-query';
 import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server';
-import type { DiscoverSessionApiDataInput } from '../../../../../server/api/schema';
+import type { DiscoverSessionApiDataInput } from '@kbn/as-code-discover-schema';
 import {
   COMMON_HEADERS,
   DISCOVER_SESSION_API_BASE_PATH,
@@ -36,6 +36,7 @@ const createEsqlTab = (id: string, query: string) => ({
 apiTest.describe('PUT /api/discover_sessions/{id}', { tag: tags.deploymentAgnostic }, () => {
   let editorCredentials: RoleApiCredentials;
   let viewerCredentials: RoleApiCredentials;
+  const createdLegacyAliasIds: string[] = [];
 
   apiTest.beforeAll(async ({ requestAuth }) => {
     editorCredentials = await requestAuth.getApiKeyForPrivilegedUser();
@@ -47,6 +48,12 @@ apiTest.describe('PUT /api/discover_sessions/{id}', { tag: tags.deploymentAgnost
   });
 
   apiTest.afterEach(async ({ kbnClient }) => {
+    if (createdLegacyAliasIds.length > 0) {
+      await kbnClient.savedObjects.bulkDelete({
+        objects: createdLegacyAliasIds.map((id) => ({ type: 'legacy-url-alias', id })),
+      });
+      createdLegacyAliasIds.length = 0;
+    }
     await kbnClient.savedObjects.clean({ types: ['search'] });
   });
 
@@ -99,6 +106,70 @@ apiTest.describe('PUT /api/discover_sessions/{id}', { tag: tags.deploymentAgnost
     });
     expect(response.body.meta.version).toBeDefined();
   });
+
+  apiTest(
+    'returns the resolved ID when loading an alias and rejects writes through the alias',
+    async ({ apiClient, kbnClient }) => {
+      const aliasId = createId('legacy-session');
+      const legacyAliasId = `default:search:${aliasId}`;
+      const headers = { ...COMMON_HEADERS, ...editorCredentials.apiKeyHeader };
+
+      await kbnClient.savedObjects.create({
+        type: 'legacy-url-alias',
+        id: legacyAliasId,
+        overwrite: false,
+        attributes: {
+          targetType: 'search',
+          targetId: TEST_DISCOVER_SESSION_ID,
+          targetNamespace: 'default',
+          sourceId: aliasId,
+          purpose: 'savedObjectConversion',
+        },
+        references: [],
+        migrationVersion: { 'legacy-url-alias': '8.2.0' },
+      });
+      createdLegacyAliasIds.push(legacyAliasId);
+
+      const session = await apiTest.step('load the session through its alias', async () => {
+        const response = await apiClient.get(`${DISCOVER_SESSION_API_BASE_PATH}/${aliasId}`, {
+          headers,
+          responseType: 'json',
+        });
+
+        expect(response).toHaveStatusCode(200);
+        expect(response).toHaveHeaders({
+          'kbn-resolve-outcome': 'aliasMatch',
+          'kbn-resolve-alias-target-id': TEST_DISCOVER_SESSION_ID,
+        });
+        expect(response.body.id).toBe(TEST_DISCOVER_SESSION_ID);
+        return response.body;
+      });
+
+      await apiTest.step(
+        'reject a write through the alias without changing the session',
+        async () => {
+          const response = await apiClient.put(`${DISCOVER_SESSION_API_BASE_PATH}/${aliasId}`, {
+            headers,
+            body: { ...session.data, title: 'Must not overwrite the alias target' },
+            responseType: 'json',
+          });
+
+          expect(response).toHaveStatusCode(409);
+
+          const reloaded = await apiClient.get(
+            `${DISCOVER_SESSION_API_BASE_PATH}/${TEST_DISCOVER_SESSION_ID}`,
+            {
+              headers,
+              responseType: 'json',
+            }
+          );
+
+          expect(reloaded).toHaveStatusCode(200);
+          expect(reloaded.body.data).toStrictEqual(session.data);
+        }
+      );
+    }
+  );
 
   apiTest('fully replaces an existing Discover session', async ({ apiClient, kbnClient }) => {
     const id = TEST_DISCOVER_SESSION_ID;
@@ -207,6 +278,92 @@ apiTest.describe('PUT /api/discover_sessions/{id}', { tag: tags.deploymentAgnost
       },
     ]);
   });
+
+  apiTest(
+    'preserves the stored inline ID and filter references through GET and PUT',
+    async ({ apiClient, kbnClient }) => {
+      const id = createId('inline-id-round-trip');
+      const url = `${DISCOVER_SESSION_API_BASE_PATH}/${id}`;
+      const headers = { ...COMMON_HEADERS, ...editorCredentials.apiKeyHeader };
+      const inlineDataView = { id: 'legacy-inline-id', title: 'logs-*' };
+      const filters = [
+        {
+          meta: { index: inlineDataView.id, type: FILTERS.PHRASE, key: 'service.name' },
+          query: { match_phrase: { 'service.name': 'checkout' } },
+        },
+        {
+          meta: { index: 'foreign-data-view', type: FILTERS.EXISTS, key: 'bytes' },
+          query: { exists: { field: 'bytes' } },
+        },
+      ];
+
+      // Seed a stored ID as CM would: the public API does not accept inline IDs.
+      await kbnClient.savedObjects.create<DiscoverSessionAttributes>({
+        type: 'search',
+        id,
+        overwrite: false,
+        attributes: {
+          title: 'Inline ID round trip',
+          description: '',
+          tabs: [
+            {
+              id: 'main',
+              label: 'Main',
+              attributes: {
+                hideChart: false,
+                hideTable: false,
+                columns: [],
+                sort: [],
+                grid: {},
+                isTextBasedQuery: false,
+                kibanaSavedObjectMeta: {
+                  searchSourceJSON: JSON.stringify({ index: inlineDataView, filter: filters }),
+                },
+              },
+            },
+          ],
+        },
+        references: [],
+      });
+
+      const getResponse = await apiClient.get(url, { headers, responseType: 'json' });
+
+      expect(getResponse).toHaveStatusCode(200);
+      expect(getResponse.body.data.tabs[0].data_source).toStrictEqual({
+        type: 'data_view_spec',
+        index_pattern: inlineDataView.title,
+      });
+      expect('data_view_id' in getResponse.body.data.tabs[0].filters[0]).toBe(false);
+      expect(getResponse.body.data.tabs[0].filters[1].data_view_id).toBe('foreign-data-view');
+
+      const putResponse = await apiClient.put(url, {
+        headers,
+        body: getResponse.body.data,
+        responseType: 'json',
+      });
+
+      expect(putResponse).toHaveStatusCode(200);
+      expect(putResponse.body.data).toStrictEqual(getResponse.body.data);
+
+      // The response hides the ID; check that the actual write kept it and its filters.
+      const storedSession = await kbnClient.savedObjects.get<DiscoverSessionAttributes>({
+        type: 'search',
+        id,
+      });
+      const storedSearchSource = injectReferences(
+        parseSearchSourceJSON(
+          storedSession.attributes.tabs[0].attributes.kibanaSavedObjectMeta.searchSourceJSON
+        ),
+        storedSession.references
+      );
+
+      expect(storedSearchSource.index).toStrictEqual(inlineDataView);
+      expect(storedSearchSource.filter).toMatchObject(filters);
+      expect(storedSession.references.map(({ id: referenceId }) => referenceId)).toStrictEqual([
+        'foreign-data-view',
+      ]);
+    }
+  );
 
   apiTest(
     'preserves metrics tab state through a GET and PUT round trip',

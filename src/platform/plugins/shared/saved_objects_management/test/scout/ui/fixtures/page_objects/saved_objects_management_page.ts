@@ -7,9 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { APP_MENU_TEST_SUBJECTS } from '@kbn/app-header';
-import type { Locator, ScoutPage, KibanaUrl } from '@kbn/scout';
-import { KibanaCodeEditorWrapper } from '@kbn/scout';
+import { euiSelectors } from '@kbn/scout';
+import {
+  AppMenu,
+  KibanaCodeEditorWrapper,
+  type KibanaUrl,
+  type Locator,
+  type ScoutPage,
+} from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
 const spacePrefix = (spaceId?: string) => (spaceId && spaceId !== 'default' ? `/s/${spaceId}` : '');
@@ -23,8 +28,8 @@ export class SavedObjectsManagementPage {
   public readonly selectAllCheckbox: Locator;
   public readonly deleteListButton: Locator;
   public readonly inspectDeleteButton: Locator;
-  public readonly appMenuOverflowButton: Locator;
   public readonly inspectSaveButton: Locator;
+  private readonly appMenu: AppMenu;
   public readonly codeEditor: Locator;
   public readonly appNotFoundPageContent: Locator;
   public readonly searchBar: Locator;
@@ -44,8 +49,8 @@ export class SavedObjectsManagementPage {
     this.selectAllCheckbox = this.page.testSubj.locator('checkboxSelectAll');
     this.deleteListButton = this.page.testSubj.locator('savedObjectsManagementDelete');
     this.inspectDeleteButton = this.page.testSubj.locator('savedObjectEditDelete');
-    this.appMenuOverflowButton = this.page.testSubj.locator(APP_MENU_TEST_SUBJECTS.overflowButton);
     this.inspectSaveButton = this.page.testSubj.locator('savedObjectEditSave');
+    this.appMenu = new AppMenu(this.page);
     this.codeEditor = this.page.testSubj.locator('kibanaCodeEditor');
     this.appNotFoundPageContent = this.page.testSubj.locator('appNotFoundPageContent');
     this.searchBar = this.page.testSubj.locator('savedObjectSearchBar');
@@ -230,13 +235,12 @@ export class SavedObjectsManagementPage {
 
   /** Opens the inspect AppHeader overflow so Delete is queryable. */
   async openInspectHeaderOverflow(): Promise<void> {
-    await this.appMenuOverflowButton.click();
+    await this.appMenu.revealItem(this.inspectDeleteButton);
   }
 
   /** Clicks the inspect-view delete button and confirms the modal. */
   async deleteFromInspect(): Promise<void> {
-    await this.openInspectHeaderOverflow();
-    await this.inspectDeleteButton.click();
+    await this.appMenu.clickItem(this.inspectDeleteButton);
     const confirmTitle = this.page.testSubj.locator('confirmModalTitleText');
     await confirmTitle.waitFor({ state: 'visible' });
     await this.page.testSubj.locator('confirmModalConfirmButton').click();
@@ -265,7 +269,7 @@ export class SavedObjectsManagementPage {
     const row = this.rowByTitle(title);
     await row.waitFor({ state: 'visible' });
     await row.locator('[data-test-subj="euiCollapsedItemActionsButton"]').click();
-    const menuPanel = this.page.locator('.euiContextMenuPanel');
+    const menuPanel = this.page.locator(euiSelectors.contextMenu.PANEL_SELECTOR);
     await menuPanel.waitFor({ state: 'visible' });
     return menuPanel;
   }

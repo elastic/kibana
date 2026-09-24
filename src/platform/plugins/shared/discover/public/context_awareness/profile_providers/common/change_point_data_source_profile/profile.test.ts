@@ -50,6 +50,7 @@ describe('createChangePointDataSourceProfileProvider', () => {
         useChartsBaseTheme: () => ({}),
       },
     } as unknown as ChartsPluginStart,
+    data: { search: { esql: jest.fn() } },
   } as unknown as ProfileProviderServices;
 
   const provider = createChangePointDataSourceProfileProvider(mockServices);

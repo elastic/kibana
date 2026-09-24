@@ -96,7 +96,6 @@
     "@kbn/std",
     "@kbn/css-utils",
     "@kbn/es-query-server",
-    "@kbn/data-service-server",
     "@kbn/controls-schemas",
     "@kbn/controls-constants",
     "@kbn/controls-renderer",
@@ -112,6 +111,7 @@
     "@kbn/as-code-filters-schema",
     "@kbn/as-code-filters-transforms",
     "@kbn/as-code-export-flyout-component",
+    "@kbn/as-code-import-flyout-component",
     "@kbn/scout",
     "@kbn/core-chrome-app-menu-components",
     "@kbn/core-chrome-app-menu",
@@ -133,6 +133,7 @@
     "@kbn/core-chrome-browser-hooks",
     "@kbn/ui-callout",
     "@kbn/zod-helpers",
+    "@kbn/as-code-dashboard-schema",
   ],
   "exclude": ["target/**/*"]
 }

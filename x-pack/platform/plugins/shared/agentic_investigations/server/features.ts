@@ -10,43 +10,104 @@ import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { i18n } from '@kbn/i18n';
 import { AGENTIC_INVESTIGATIONS_PLUGIN_ID } from '../common/constants';
 import {
-  PROPOSALS_UI_CAPABILITY_DECIDE,
-  PROPOSALS_UI_CAPABILITY_SHOW,
-} from '../common/proposals/constants';
+  ESCALATIONS_UI_CAPABILITY_MANAGE,
+  ESCALATIONS_UI_CAPABILITY_SHOW,
+} from '../common/escalations/constants';
 import {
-  PROPOSALS_API_PRIVILEGE_MANAGE,
-  PROPOSALS_API_PRIVILEGE_READ,
-} from './proposals/constants';
+  INVESTIGATIONS_UI_CAPABILITY_MANAGE,
+  INVESTIGATIONS_UI_CAPABILITY_SHOW,
+} from '../common/investigations/constants';
+import {
+  ESCALATIONS_API_PRIVILEGE_MANAGE,
+  ESCALATIONS_API_PRIVILEGE_READ,
+} from './escalations/constants';
+import { INVESTIGATIONS_API_PRIVILEGE_MANAGE } from './investigations/constants';
 
 export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }) => {
   features.registerKibanaFeature({
     id: AGENTIC_INVESTIGATIONS_PLUGIN_ID,
-    // Named for proposals alone because action proposals move to their own
-    // plugin in a follow-up; until then this feature grants only proposals.
     name: i18n.translate('xpack.agenticInvestigations.featureName', {
-      defaultMessage: 'Proposed Actions',
+      defaultMessage: 'Agentic Investigations',
     }),
     minimumLicense: 'enterprise',
-    // Sits just after Workflows (3000), whose platform it builds on, and after
-    // Agent Builder (1000). The category drives placement in the Roles and
-    // Spaces feature pickers; `app` stays empty because this plugin
-    // contributes no navigation of its own.
-    order: 3100,
+    // Sits just after Proposed Actions (3100), whose records these entities
+    // reference, and after Workflows (3000) and Agent Builder (1000). The
+    // category drives placement in the Roles and Spaces feature pickers; `app`
+    // stays empty because this plugin contributes no navigation of its own.
+    order: 3110,
     category: DEFAULT_APP_CATEGORIES.kibana,
     app: [],
     privileges: {
       all: {
         app: [],
-        api: [PROPOSALS_API_PRIVILEGE_READ, PROPOSALS_API_PRIVILEGE_MANAGE],
+        // Impact has no privilege of its own yet. Reads and writes use the
+        // investigations sub-feature below, which `includeIn: 'all'` joins here.
+        api: [],
         savedObject: { all: [], read: [] },
-        ui: [PROPOSALS_UI_CAPABILITY_SHOW, PROPOSALS_UI_CAPABILITY_DECIDE],
+        ui: [],
       },
       read: {
         app: [],
-        api: [PROPOSALS_API_PRIVILEGE_READ],
+        api: [],
         savedObject: { all: [], read: [] },
-        ui: [PROPOSALS_UI_CAPABILITY_SHOW],
+        ui: [],
       },
     },
+    subFeatures: [
+      {
+        name: i18n.translate('xpack.agenticInvestigations.escalationsSubFeatureName', {
+          defaultMessage: 'Escalations',
+        }),
+        privilegeGroups: [
+          {
+            groupType: 'mutually_exclusive',
+            privileges: [
+              {
+                id: 'escalations_all',
+                name: i18n.translate('xpack.agenticInvestigations.escalationsAllPrivilegeName', {
+                  defaultMessage: 'Create, update, and view escalations',
+                }),
+                includeIn: 'all',
+                api: [ESCALATIONS_API_PRIVILEGE_READ, ESCALATIONS_API_PRIVILEGE_MANAGE],
+                savedObject: { all: [], read: [] },
+                ui: [ESCALATIONS_UI_CAPABILITY_SHOW, ESCALATIONS_UI_CAPABILITY_MANAGE],
+              },
+              {
+                id: 'escalations_read',
+                name: i18n.translate('xpack.agenticInvestigations.escalationsReadPrivilegeName', {
+                  defaultMessage: 'View escalations',
+                }),
+                includeIn: 'read',
+                api: [ESCALATIONS_API_PRIVILEGE_READ],
+                savedObject: { all: [], read: [] },
+                ui: [ESCALATIONS_UI_CAPABILITY_SHOW],
+              },
+            ],
+          },
+        ],
+      },
+      {
+        name: i18n.translate('xpack.agenticInvestigations.investigationsSubFeatureName', {
+          defaultMessage: 'Investigations',
+        }),
+        privilegeGroups: [
+          {
+            groupType: 'mutually_exclusive',
+            privileges: [
+              {
+                id: 'investigations_all',
+                name: i18n.translate('xpack.agenticInvestigations.investigationsAllPrivilegeName', {
+                  defaultMessage: 'Manage investigations',
+                }),
+                includeIn: 'all',
+                api: [INVESTIGATIONS_API_PRIVILEGE_MANAGE],
+                savedObject: { all: [], read: [] },
+                ui: [INVESTIGATIONS_UI_CAPABILITY_SHOW, INVESTIGATIONS_UI_CAPABILITY_MANAGE],
+              },
+            ],
+          },
+        ],
+      },
+    ],
   });
 };

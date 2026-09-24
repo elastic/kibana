@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import type {
-  AgentHandlerContext,
-  ScopedRunnerRunAgentParams,
-  RunAgentReturn,
+import {
+  type AgentHandlerContext,
+  type ScopedRunnerRunAgentParams,
+  type RunAgentReturn,
 } from '@kbn/agent-builder-server';
 import { getConnectorProvider } from '@kbn/inference-common';
 import { getCurrentSpaceId } from '../../../utils/spaces';
 import { withAgentSpan } from '../../../tracing';
 import { createAgentHandler } from '../run_agent/create_handler';
+import { resolveTelemetryOrigin } from '../utils/pending_round';
 import {
   createAgentEventEmitter,
   forkContextForAgentRun,
@@ -146,18 +147,22 @@ export const runAgent = async ({
   parentManager: RunnerManager;
 }): Promise<RunAgentReturn> => {
   const { agentId, agentParams, executionId } = agentExecutionParams;
+  const { agentsService, request } = parentManager.deps;
+  const agentRegistry = await agentsService.getRegistry({ request });
+  const agent = await agentRegistry.get(agentId, { access: 'use' });
 
   const forkedContext = forkContextForAgentRun({
     parentContext: parentManager.context,
     agentId,
+    agentName: agent.name,
     executionId,
     conversationId: agentParams.conversation?.id,
+    origin: resolveTelemetryOrigin({
+      conversation: agentParams.conversation,
+      requestOrigin: agentParams.origin?.type,
+    }),
   });
   const manager = parentManager.createChild(forkedContext);
-
-  const { agentsService, request } = manager.deps;
-  const agentRegistry = await agentsService.getRegistry({ request });
-  const agent = await agentRegistry.get(agentId, { access: 'use' });
 
   // Layer runtime overrides onto the agent's own config first, then merge with the type base.
   const agentWithOverrides = {

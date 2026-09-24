@@ -9,7 +9,9 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
+import { UnifiedDataTable } from '@kbn/unified-data-table';
 import type { PolicyExecutionHistoryItem } from '../../../services/execution_history_api';
+import { POLICY_EXECUTION_FIELDS } from '../../execution_history_page/data_view';
 import { EpisodeActionPolicyHistoryTab } from './episode_action_policy_history_tab';
 
 const EPISODE_ID = 'episode-42';
@@ -39,6 +41,52 @@ jest.mock('../../../hooks/use_fetch_execution_history', () => ({
 
 jest.mock('../../../hooks/use_fetch_rules', () => ({
   useFetchRules: () => ({ data: { items: [] }, isFetching: false }),
+}));
+
+// The policies table renders on UnifiedDataTable; stub the grid (rendering each row through the
+// custom renderers) and the ad-hoc data view / services helpers so the test needs no real
+// DataViews service.
+jest.mock('@kbn/unified-data-table', () => {
+  const ReactActual = jest.requireActual('react');
+  return {
+    DataLoadingState: { loading: 'loading', loaded: 'loaded' },
+    ROWS_HEIGHT_OPTIONS: { auto: -1, single: 1, default: 3 },
+    UnifiedDataTable: jest.fn(({ rows, columns, externalCustomRenderers }: Record<string, any>) =>
+      ReactActual.createElement(
+        'div',
+        { 'data-test-subj': 'unifiedDataTable' },
+        rows.map((row: any) =>
+          ReactActual.createElement(
+            'div',
+            { key: row.id, role: 'row' },
+            columns.map((columnId: string) => {
+              const Renderer = externalCustomRenderers?.[columnId];
+              return ReactActual.createElement(
+                'div',
+                { key: columnId, role: 'cell' },
+                Renderer
+                  ? ReactActual.createElement(Renderer, { row, columnId })
+                  : String(row.flattened?.[columnId] ?? '')
+              );
+            })
+          )
+        )
+      )
+    ),
+  };
+});
+
+jest.mock('@kbn/cell-actions', () => ({
+  CellActionsProvider: ({ children }: { children: React.ReactNode }) => children,
+}));
+
+jest.mock('../../execution_history_page/data_view', () => ({
+  ...jest.requireActual('../../execution_history_page/data_view'),
+  usePolicyExecutionsDataView: () => ({ dataView: {}, error: undefined }),
+}));
+
+jest.mock('../../execution_history_page/hooks/use_unified_data_table_services', () => ({
+  useUnifiedDataTableServices: () => ({}),
 }));
 
 jest.mock(
@@ -72,6 +120,7 @@ const buildItem = (
   episodes: [],
   action_group_count: 2,
   workflows: [{ id: 'wf-1', name: 'My Workflow' }],
+  error: null,
   ...overrides,
 });
 
@@ -81,7 +130,7 @@ const mockFetchResult = (
       items: PolicyExecutionHistoryItem[];
       page: number;
       perPage: number;
-      totalEvents: number;
+      total: number;
       searchMatches: null;
     };
     isFetching: boolean;
@@ -89,7 +138,7 @@ const mockFetchResult = (
   }> = {}
 ) => {
   mockUseFetchExecutionHistory.mockReturnValue({
-    data: { items: [], page: 1, perPage: 10, totalEvents: 0, searchMatches: null },
+    data: { items: [], page: 1, perPage: 10, total: 0, searchMatches: null },
     isFetching: false,
     isError: false,
     refetch: mockRefetch,
@@ -130,7 +179,7 @@ describe('EpisodeActionPolicyHistoryTab', () => {
       perPage: 10,
       outcome: undefined,
       episodeIds: [EPISODE_ID],
-      startDate: '2026-01-01T00:00:00.000Z',
+      from: '2026-01-01T00:00:00.000Z',
     });
   });
 
@@ -159,14 +208,17 @@ describe('EpisodeActionPolicyHistoryTab', () => {
 
   it('renders rows without the Episodes, Action groups, and Rules columns', () => {
     mockFetchResult({
-      data: { items: [buildItem()], page: 1, perPage: 10, totalEvents: 1, searchMatches: null },
+      data: { items: [buildItem()], page: 1, perPage: 10, total: 1, searchMatches: null },
     });
     renderTab();
 
     expect(screen.getByText('My Policy')).toBeInTheDocument();
-    expect(screen.queryByRole('columnheader', { name: /Episodes/i })).not.toBeInTheDocument();
-    expect(screen.queryByRole('columnheader', { name: /Action groups/i })).not.toBeInTheDocument();
-    expect(screen.queryByRole('columnheader', { name: /Rules/i })).not.toBeInTheDocument();
+
+    const calls = jest.mocked(UnifiedDataTable).mock.calls;
+    const { columns } = calls[calls.length - 1][0] as Record<string, any>;
+    expect(columns).not.toContain(POLICY_EXECUTION_FIELDS.episodeCount);
+    expect(columns).not.toContain(POLICY_EXECUTION_FIELDS.actionGroupCount);
+    expect(columns).not.toContain(POLICY_EXECUTION_FIELDS.rules);
     expect(screen.queryByText('My Rule')).not.toBeInTheDocument();
   });
 
@@ -188,7 +240,7 @@ describe('EpisodeActionPolicyHistoryTab', () => {
 
   it('opens the policy flyout when the policy link is clicked and closes it on dismiss', async () => {
     mockFetchResult({
-      data: { items: [buildItem()], page: 1, perPage: 10, totalEvents: 1, searchMatches: null },
+      data: { items: [buildItem()], page: 1, perPage: 10, total: 1, searchMatches: null },
     });
     renderTab();
 

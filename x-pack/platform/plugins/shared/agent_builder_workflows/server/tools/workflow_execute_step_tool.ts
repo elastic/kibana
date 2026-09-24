@@ -50,7 +50,6 @@ export const SAFE_STEP_TYPES = new Set([
   'kibana.getCase',
   'kibana.streams.list',
   'kibana.streams.get',
-  'kibana.streams.getSignificantEvents',
   'cases.getCase',
   'cases.getCases',
   'cases.findCases',

@@ -173,7 +173,6 @@ describe('getWorkflowExecutionsTracking', () => {
               { term: { 'kibana.alert.rule.execution.uuid': executionId } },
               { term: { 'kibana.space_ids': spaceId } },
               { term: { 'user.name': username } },
-              { exists: { field: 'event.reference' } },
             ]),
           }),
         }),
@@ -722,5 +721,130 @@ describe('getWorkflowExecutionsTracking', () => {
     });
 
     expect(result).toBeNull();
+  });
+
+  describe('when an event reference is too large to be indexed', () => {
+    /**
+     * `event.reference` is a `keyword` with `ignore_above`, so a reference larger
+     * than the limit stays in `_source` but is never indexed. The
+     * generate-step-started event embeds the provided alerts, routinely exceeds the
+     * limit, and is the only event carrying the generation run id.
+     */
+    const oversizedGenerateStepReference = JSON.stringify({
+      alertRetrieval: null,
+      gate: null,
+      generation: {
+        workflowId: 'workflow-generation',
+        workflowRunId: 'generation-run-id',
+      },
+      providedAlerts: [`@timestamp,2026-09-17T02:04:33.324Z\n${'a'.repeat(200_000)}`],
+      validation: null,
+    });
+
+    const gateOnlyReference = JSON.stringify({
+      alertRetrieval: null,
+      gate: [
+        {
+          workflowId: 'system-attack-discovery-skill-alert-retrieval',
+          workflowRunId: 'gate-run-id',
+        },
+      ],
+      generation: null,
+      validation: null,
+    });
+
+    beforeEach(() => {
+      // Model Elasticsearch: a hit whose `event.reference` exceeds `ignore_above` is
+      // returned only when the query does NOT filter on `exists: event.reference`,
+      // because the field was never indexed. Sorted descending by timestamp, so the
+      // oversized generate-step event is first.
+      mockSearch.mockImplementation(({ query }) => {
+        const requiresIndexedReference = query.bool.filter.some(
+          (clause: Record<string, unknown>) =>
+            (clause.exists as { field?: string } | undefined)?.field === 'event.reference'
+        );
+
+        const hits = [
+          ...(requiresIndexedReference
+            ? []
+            : [{ _source: { event: { reference: oversizedGenerateStepReference } } }]),
+          { _source: { event: { reference: gateOnlyReference } } },
+        ];
+
+        return Promise.resolve({ hits: { hits, total: { value: hits.length } } });
+      });
+    });
+
+    it('does not require event.reference to be indexed', async () => {
+      await getWorkflowExecutionsTracking({
+        esClient,
+        eventLogIndex,
+        executionId,
+        spaceId,
+        username,
+      });
+
+      const { query } = mockSearch.mock.calls[0][0];
+
+      expect(query.bool.filter).not.toContainEqual({
+        exists: { field: 'event.reference' },
+      });
+    });
+
+    it('surfaces the generation run id from the oversized reference', async () => {
+      const result = await getWorkflowExecutionsTracking({
+        esClient,
+        eventLogIndex,
+        executionId,
+        spaceId,
+        username,
+      });
+
+      expect(result?.generation).toEqual({
+        workflowId: 'workflow-generation',
+        workflowRunId: 'generation-run-id',
+      });
+    });
+
+    it('still merges tracking from the other events', async () => {
+      const result = await getWorkflowExecutionsTracking({
+        esClient,
+        eventLogIndex,
+        executionId,
+        spaceId,
+        username,
+      });
+
+      expect(result?.gate).toEqual([
+        {
+          workflowId: 'system-attack-discovery-skill-alert-retrieval',
+          workflowRunId: 'gate-run-id',
+        },
+      ]);
+    });
+  });
+
+  it('skips events whose reference was dropped by the index, without failing the lookup', async () => {
+    // A hit with no `event.reference` at all: previously excluded by the query, now
+    // reduced over and skipped, so one unusable event cannot hide a whole execution.
+    mockSearch.mockResolvedValue({
+      hits: {
+        hits: [
+          { _source: { event: {} } },
+          { _source: { event: { reference: JSON.stringify(validTracking) } } },
+        ],
+        total: { value: 2 },
+      },
+    });
+
+    const result = await getWorkflowExecutionsTracking({
+      esClient,
+      eventLogIndex,
+      executionId,
+      spaceId,
+      username,
+    });
+
+    expect(result?.generation).toEqual(validTracking.generation);
   });
 });

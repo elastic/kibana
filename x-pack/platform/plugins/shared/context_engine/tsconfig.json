@@ -30,6 +30,8 @@
     "@kbn/storage-adapter",
     "@kbn/es-errors",
     "@kbn/core-elasticsearch-client-server-mocks",
+    "@kbn/core-saved-objects-api-server-mocks",
+    "@kbn/core-spaces-common",
     "@kbn/management-settings-ids",
     "@kbn/shared-ux-router",
     "@kbn/shared-ux-page-kibana-template",
@@ -61,6 +63,7 @@
     "@kbn/logging-mocks",
     "@kbn/agent-builder-common",
     "@kbn/agent-builder-browser",
+    "@kbn/agent-builder-server",
     "@kbn/content-list",
     "@kbn/content-list-provider",
     "@kbn/content-list-provider-client",
@@ -75,6 +78,7 @@
     "@kbn/alerts-ui-shared",
     "@kbn/react-hooks",
     "@kbn/datemath",
-    "@kbn/esql-utils"
+    "@kbn/esql-utils",
+    "@kbn/ebt-click"
   ]
 }

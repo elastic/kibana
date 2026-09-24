@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { durationSchema } from './common';
+import { actorSchema, durationSchema } from './common';
 import {
   groupingModeSchema,
   actionPolicyDestinationSchema,
@@ -30,7 +30,6 @@ export const actionPolicyResponseSchema = z
       .array(z.string())
       .nullable()
       .describe('The fields used to group alerts, or null for no grouping.'),
-    tags: z.array(z.string()).nullable().describe('Tags associated with the action policy.'),
     grouping_mode: groupingModeSchema
       .nullable()
       .describe('The grouping mode for alert notifications.'),
@@ -49,17 +48,9 @@ export const actionPolicyResponseSchema = z
       .string()
       .nullable()
       .describe('The ISO datetime until which the policy is snoozed, or null if not snoozed.'),
-    auth: z
-      .object({
-        owner: z.string().describe('The owner of the action policy.'),
-        created_by_user: z
-          .boolean()
-          .describe('Whether this policy was created by a user (vs system-generated).'),
-      })
-      .describe('Authentication and ownership information.'),
-    created_by: z.string().nullable().describe('The user ID who created the action policy.'),
+    created_by: actorSchema.nullable().describe('The actor who created the action policy.'),
     created_at: z.string().describe('The ISO datetime when the action policy was created.'),
-    updated_by: z.string().nullable().describe('The user ID who last updated the action policy.'),
+    updated_by: actorSchema.nullable().describe('The actor who last updated the action policy.'),
     updated_at: z.string().describe('The ISO datetime when the action policy was last updated.'),
   })
   .meta({ id: 'alerting_action_policy_response' });
