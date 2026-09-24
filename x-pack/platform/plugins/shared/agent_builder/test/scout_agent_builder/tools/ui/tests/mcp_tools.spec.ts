@@ -28,7 +28,7 @@ test.describe(
     let connectorId: string;
     const ownedConnectorIds: string[] = [];
 
-    test.beforeAll(async () => {
+    test.beforeAll(async ({ kbnClient }) => {
       mcpServer = createTestMcpServer();
       mcpServerUrl = await mcpServer.start();
       const connector = await createMcpConnectorViaKbn(kbnClient, mcpServerUrl);
