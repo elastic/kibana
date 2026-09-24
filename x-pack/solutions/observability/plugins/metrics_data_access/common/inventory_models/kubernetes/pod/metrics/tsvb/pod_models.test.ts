@@ -63,6 +63,8 @@ describe('pod TSVB models', () => {
     const overview = podOverview(timeField, indexPattern, interval, { schema: 'semconv' });
     const rx = overview.series.find((series) => series.id === 'rx');
     const tx = overview.series.find((series) => series.id === 'tx');
+    expect(rx?.split_mode).toBe('filter');
+    expect(tx?.split_mode).toBe('filter');
     expect(rx?.filter).toEqual({ query: 'direction: receive', language: 'kuery' });
     expect(tx?.filter).toEqual({ query: 'direction: transmit', language: 'kuery' });
     expect(rx?.metrics[0]).toMatchObject({ field: SEMCONV_K8S_POD_NETWORK_IO, type: 'max' });

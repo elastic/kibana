@@ -15,8 +15,9 @@ import {
   SEMCONV_K8S_POD_NETWORK_IO,
 } from '../../../../../constants';
 
-const LIMIT_FALLBACK_SCRIPT =
-  '(params.with_limit != null && params.with_limit > 0.0) ? params.with_limit : params.without_limit';
+// Same painless pick Inventory snapshot uses. With gap_policy insert_zeros, a
+// missing limit avg becomes 0 and the node utilization is selected.
+const LIMIT_FALLBACK_SCRIPT = 'params.with_limit > 0.0 ? params.with_limit : params.without_limit';
 
 export const podModelRequires = (schema?: DataSchemaFormat): string[] =>
   schema === 'semconv' ? [KUBELET_STATS_RECEIVER_OTEL] : ['kubernetes.pod'];
@@ -128,18 +129,23 @@ export const podNetworkSeries = (
     });
   }
 
-  const directionFilter: NonNullable<TSVBSeries['filter']> | undefined =
-    schema === 'semconv'
-      ? {
-          query: direction === 'rx' ? 'direction: receive' : 'direction: transmit',
-          language: 'kuery',
-        }
-      : undefined;
+  if (schema !== 'semconv') {
+    return {
+      id: direction,
+      split_mode: 'everything',
+      metrics,
+    };
+  }
 
+  // split_mode filter applies the kuery as a series aggregation filter. Inventory
+  // snapshot uses a term filter on the same `direction` field.
   return {
     id: direction,
-    split_mode: 'everything',
-    ...(directionFilter ? { filter: directionFilter } : {}),
+    split_mode: 'filter',
+    filter: {
+      query: direction === 'rx' ? 'direction: receive' : 'direction: transmit',
+      language: 'kuery',
+    },
     metrics,
   };
 };

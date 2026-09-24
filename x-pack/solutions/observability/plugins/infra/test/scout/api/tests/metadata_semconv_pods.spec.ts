@@ -18,6 +18,7 @@ import {
 } from '../fixtures';
 
 const POD = testData.SEMCONV_PODS[0];
+const ECS_POD_UID = 'pod-0';
 
 apiTest.describe(
   'API /api/infra/metadata (semconv pods)',
@@ -109,7 +110,7 @@ apiTest.describe(
         responseType: 'json',
         body: {
           sourceId: 'default',
-          nodeId: 'pod-0',
+          nodeId: ECS_POD_UID,
           nodeType: 'pod',
           timeRange,
         },
@@ -117,7 +118,14 @@ apiTest.describe(
 
       expect(response).toHaveStatusCode(200);
       const metadata = response.body as InfraMetadata;
-      expect(metadata.features?.map((feature) => feature.name)).toContain('kubernetes.pod');
+      // generatePodsData indexes container siblings with event.dataset=kubernetes.container
+      // and pod metrics without event.dataset. Prove the ECS path found the pod and did
+      // not switch to kubeletstats.
+      expect(metadata.name).toBe(ECS_POD_UID);
+      expect(metadata.features?.map((feature) => feature.name)).not.toContain(
+        'kubeletstatsreceiver.otel'
+      );
+      expect(metadata.features?.map((feature) => feature.name)).toContain('kubernetes.container');
     });
   }
 );

@@ -9,6 +9,7 @@ import type { ApiClientFixture, RoleApiCredentials } from '@kbn/scout-oblt';
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import type {
+  NodeDetailsMetricData,
   NodeDetailsMetricDataResponse,
   NodeDetailsRequest,
 } from '../../../../common/http_api/node_details_api';
@@ -16,6 +17,19 @@ import { apiTest, generatePodsData, generateSemconvPodsData, testData } from '..
 
 const POD_WITH_LIMITS = testData.SEMCONV_PODS[0];
 const POD_WITHOUT_LIMITS = testData.SEMCONV_PODS[1];
+const SEMCONV_CPU_WITH_LIMIT = 0.46;
+const SEMCONV_CPU_WITHOUT_LIMIT = 0.32;
+
+const lastNonZero = (metric: NodeDetailsMetricData | undefined): number | undefined => {
+  const points = metric?.series[0]?.data ?? [];
+  for (let i = points.length - 1; i >= 0; i--) {
+    const value = points[i]?.value;
+    if (typeof value === 'number' && value !== 0) {
+      return value;
+    }
+  }
+  return undefined;
+};
 
 apiTest.describe(
   'API /api/metrics/node_details (semconv pods)',
@@ -87,10 +101,10 @@ apiTest.describe(
         ['podCpuUsage', 'podMemoryUsage', 'podNetworkTraffic', 'podOverview'].sort()
       );
 
-      const cpu = metrics.find((metric) => metric.id === 'podCpuUsage')?.series[0];
-      const lastCpu = cpu?.data.at(-1)?.value;
-      expect(lastCpu).toBeDefined();
-      expect(Number(lastCpu?.toFixed(2))).toBe(0.46);
+      const cpu = metrics.find((metric) => metric.id === 'podCpuUsage');
+      const cpuValue = lastNonZero(cpu);
+      expect(cpuValue).toBeDefined();
+      expect(Number(cpuValue?.toFixed(2))).toBe(SEMCONV_CPU_WITH_LIMIT);
 
       const overviewRx = metrics
         .find((metric) => metric.id === 'podOverview')
@@ -106,8 +120,9 @@ apiTest.describe(
 
       expect(response).toHaveStatusCode(200);
       const { metrics } = response.body as NodeDetailsMetricDataResponse;
-      const lastCpu = metrics[0]?.series[0]?.data.at(-1)?.value;
-      expect(Number(lastCpu?.toFixed(2))).toBe(0.32);
+      const cpuValue = lastNonZero(metrics.find((metric) => metric.id === 'podCpuUsage'));
+      expect(cpuValue).toBeDefined();
+      expect(Number(cpuValue?.toFixed(2))).toBe(SEMCONV_CPU_WITHOUT_LIMIT);
     });
 
     apiTest('does not find an OpenTelemetry pod on the default schema', async ({ apiClient }) => {

@@ -34,6 +34,7 @@ test.describe(
     test.beforeEach(async ({ browserAuth, pageObjects: { inventoryPage } }) => {
       await browserAuth.loginAsViewer();
       await inventoryPage.addDismissK8sTourInitScript();
+      await inventoryPage.goToPage();
     });
 
     test.afterAll(async ({ apiServices }) => {
@@ -93,8 +94,11 @@ test.describe(
     }) => {
       await inventoryPage.goToTime(DATE_WITH_POD_DATA);
       await inventoryPage.showPods();
+      // A prior OpenTelemetry selection would hide ECS-only pods at this time range.
+      await inventoryPage.selectSchema('Elastic System Integration');
+      await inventoryPage.goToTime(DATE_WITH_POD_DATA);
 
-      const waffleNode = await inventoryPage.getWaffleNode(ECS_POD_NAME);
+      const waffleNode = await inventoryPage.podWaffleNodeByName(ECS_POD_NAME);
       await waffleNode.container.click();
 
       const metadataRequest = page.waitForRequest(
