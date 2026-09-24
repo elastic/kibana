@@ -498,11 +498,13 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
   it('keeps the related-alert graph per alert and summarises it into the batch prompt', () => {
     const graphStep = findStepByName(workflow.steps, 'get_related_alerts') as {
       type: string;
-      with: { alertId: string; max_alerts: string };
+      with: { alertId: string; alertIndex: string; max_alerts: string };
     };
 
     expect(graphStep.type).toBe('security.buildAlertEntityGraph');
     expect(graphStep.with.alertId).toBe('{{foreach.item._id}}');
+    // Space-scoped alias — never foreach.item._index (caller could point at another space).
+    expect(graphStep.with.alertIndex).toBe('.alerts-security.alerts-{{ variables.spaceId }}');
     // Per alert, inside the batch loop: the outer foreach is classify_alert_batches (over
     // batches) and the inner foreach is collect_related_alerts (over the batch's alerts).
     // Two enclosing loops keep the related_summaries accumulator bounded to batch_size entries.
@@ -922,9 +924,8 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(alertsInput?.items?.required).toEqual(
       expect.arrayContaining(['_id', '_index', '@timestamp', 'kibana'])
     );
-    // Related-alert graph passes foreach.item._index as alertIndex — require a Security
-    // alerts alias/backing index so a schema-valid Worker payload cannot omit it or point
-    // the graph at an arbitrary ES index.
+    // Caller _index must still be a Security alerts alias/backing index (schema boundary);
+    // related-alert graph search uses the executing-space alias, not this field.
     expect(alertsInput?.items?.properties?._index?.maxLength).toBe(512);
     expect(alertsInput?.items?.properties?._index?.pattern).toBe(
       '^\\.(internal\\.)?(preview\\.)?alerts-security\\.alerts-[a-zA-Z0-9._-]+$'
@@ -1027,6 +1028,31 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     );
     expect(rejectGate.steps[1].steps?.[0].type).toBe('workflow.fail');
     expect(rejectGate.steps[1].steps?.[0].with.message).toContain('unique alert _id');
+  });
+
+  it('fails the Worker path when alerts span multiple rule UUIDs', () => {
+    const rejectGate = findStepByName(workflow.steps, 'reject_multi_rule_caller_alerts') as {
+      type: string;
+      condition: string;
+      steps: Array<{
+        name: string;
+        type: string;
+        condition?: string;
+        with?: { caller_unique_rule_uuid_count?: string };
+        steps?: Array<{ type: string; with: { message: string } }>;
+      }>;
+    };
+    expect(rejectGate.type).toBe('if');
+    expect(rejectGate.condition).toBe('${{ inputs.calledByWorker == true }}');
+    expect(rejectGate.steps[0].name).toBe('compute_caller_unique_rule_count');
+    expect(rejectGate.steps[0].with?.caller_unique_rule_uuid_count).toBe(
+      "${{ variables.alert_set | map: 'kibana.alert.rule.uuid' | uniq | size }}"
+    );
+    expect(rejectGate.steps[1].condition).toBe(
+      '${{ variables.caller_unique_rule_uuid_count > 1 }}'
+    );
+    expect(rejectGate.steps[1].steps?.[0].type).toBe('workflow.fail');
+    expect(rejectGate.steps[1].steps?.[0].with.message).toContain('single rule');
   });
 
   it('bypasses already-analyzed dedup on the Worker path so retries return full output', () => {
@@ -1531,6 +1557,43 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
     ).toBe(false);
   });
 
+  it('detects multi-rule caller alerts via unique rule uuid count before failing', () => {
+    const computeStep = findStepByName(workflow.steps, 'compute_caller_unique_rule_count') as {
+      with: { caller_unique_rule_uuid_count: string };
+    };
+    const failGate = findStepByName(workflow.steps, 'fail_if_multi_rule_caller_alerts') as {
+      condition: string;
+    };
+
+    const makeAlert = (ruleUuid: string) => ({
+      _id: `alert-${ruleUuid}`,
+      kibana: { alert: { rule: { uuid: ruleUuid } } },
+    });
+
+    const multiRuleAlerts = [makeAlert('rule-1'), makeAlert('rule-2'), makeAlert('rule-1')];
+    const singleRuleAlerts = [makeAlert('rule-1'), makeAlert('rule-1')];
+
+    const multiCount = evaluateExpression(engine, computeStep.with.caller_unique_rule_uuid_count, {
+      variables: { alert_set: multiRuleAlerts },
+    });
+    const singleCount = evaluateExpression(engine, computeStep.with.caller_unique_rule_uuid_count, {
+      variables: { alert_set: singleRuleAlerts },
+    });
+    expect(multiCount).toBe(2);
+    expect(singleCount).toBe(1);
+
+    expect(
+      evaluateExpression(engine, failGate.condition, {
+        variables: { caller_unique_rule_uuid_count: multiCount },
+      })
+    ).toBe(true);
+    expect(
+      evaluateExpression(engine, failGate.condition, {
+        variables: { caller_unique_rule_uuid_count: singleCount },
+      })
+    ).toBe(false);
+  });
+
   it('builds an output verdict keyed on the real alert id, with __missing__ entity defaults', () => {
     const buildStep = findStepByName(workflow.steps, 'build_output_verdict') as {
       with: { output_verdict: Record<string, unknown> };
@@ -1983,22 +2046,23 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
     const summaryStep = findStepByName(workflow.steps, 'build_generated_summary') as {
       with: { generated_summary: string };
     };
-    // 20 × 101 chars (+ spaces) exceeds 2000; truncate: 2000, '' must keep emit valid.
+    // 20 × 101 chars (+ spaces) exceeds 2000; truncate must keep emit valid and signal truncation.
     const batchSummaries = Array.from({ length: 20 }, () => 'x'.repeat(101));
     const rendered = engine.parseAndRenderSync(summaryStep.with.generated_summary, {
       variables: { batch_summaries: batchSummaries },
     });
 
-    expect(rendered.length).toBe(2000);
-    expect(summaryStep.with.generated_summary).toContain("truncate: 2000, ''");
+    expect(rendered.length).toBeLessThanOrEqual(2000);
+    expect(rendered).toContain('[truncated]');
+    expect(summaryStep.with.generated_summary).toContain("truncate: 2000, ' [truncated]'");
   });
 
   it('caps unique hosts at 50 before building grouped_counts_summary, then truncates to 10000 chars', () => {
     const summaryStep = findStepByName(workflow.steps, 'build_grouped_counts_summary') as {
       with: { grouped_counts_summary: string };
     };
-    expect(summaryStep.with.grouped_counts_summary).toContain('uniq | slice: 0, 50');
-    expect(summaryStep.with.grouped_counts_summary).toContain("truncate: 10000, ''");
+    expect(summaryStep.with.grouped_counts_summary).toContain('all_host_names | slice: 0, 50');
+    expect(summaryStep.with.grouped_counts_summary).toContain("truncate: 10000, ' [truncated]'");
 
     // Short names so all 50 capped hosts fit under the 10000-char truncate; otherwise the
     // char cap alone would hide whether the host slice ran.
@@ -2016,6 +2080,8 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
     expect(summary).toContain('host-0');
     expect(summary).toContain('host-49');
     expect(summary).not.toContain('host-50');
+    // 80 verdicts, 80 unique hosts → 30 omitted; overflow note must appear
+    expect(summary).toContain('30 additional host(s) omitted from summary');
     expect(summary.length).toBeLessThanOrEqual(10000);
 
     const longHost = 'h'.repeat(200);
@@ -2029,6 +2095,9 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
     const longSummary = engine.parseAndRenderSync(summaryStep.with.grouped_counts_summary, {
       variables: { output_verdicts: longVerdicts },
     });
+    // 50 hosts × ~210 chars each exceeds 10000 — truncation suffix must appear so the
+    // caller knows the summary is partial (not silently cut mid-sentence).
     expect(longSummary.length).toBeLessThanOrEqual(10000);
+    expect(longSummary).toContain('[truncated]');
   });
 });

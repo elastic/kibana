@@ -588,12 +588,35 @@ steps:
                 Alert Analysis Worker path requires unique alert _id values;
                 inputs.alerts contained duplicate ids.
 
+  # All enrichment (prevalence, noise, close history, rule metadata, AI prompt) anchors on
+  # alert_set[0].kibana.alert.rule.uuid. Mixed-rule batches would analyze remaining alerts
+  # with the wrong rule context. Fail loud so the caller is forced to split by rule before
+  # invoking the workflow.
+  - name: reject_multi_rule_caller_alerts
+    type: if
+    condition: "${{ inputs.calledByWorker == true }}"
+    steps:
+      - name: compute_caller_unique_rule_count
+        type: data.set
+        with:
+          caller_unique_rule_uuid_count: "${{ variables.alert_set | map: 'kibana.alert.rule.uuid' | uniq | size }}"
+      - name: fail_if_multi_rule_caller_alerts
+        type: if
+        condition: "${{ variables.caller_unique_rule_uuid_count > 1 }}"
+        steps:
+          - name: fail_multi_rule_caller_alerts
+            type: workflow.fail
+            with:
+              message: >-
+                Alert Analysis Worker path requires all alerts to belong to a single rule;
+                inputs.alerts contained alerts from multiple rule UUIDs.
+
   # ---------------------------------------------------------------------------
   # Rule context for enrichment queries / logs
   # ---------------------------------------------------------------------------
   # Standalone (alert trigger) reads event.rule. Worker/manual child runs have no
-  # trigger event, so derive from the first alert in alert_set. Floor Triage batches
-  # are single-rule; multi-rule Worker sets are unsupported (enrichment filters one uuid).
+  # trigger event, so derive from the first alert in alert_set. Worker batches are
+  # guaranteed single-rule by the reject_multi_rule_caller_alerts gate above.
   - name: set_rule_context
     type: data.set
     with:
@@ -642,10 +665,14 @@ steps:
       # -----------------------------------------------------------------------
       # Rule-scoped enrichment (once per execution)
       # -----------------------------------------------------------------------
-      # Every alert in the trigger batch comes from the same rule execution, so these
-      # queries return the same answer for all of them. They are anchored on the first
-      # alert's timestamp — the alerts of one execution share a detection window, so the
-      # anchor is equivalent to the per-alert anchor it replaces.
+      # Enrichment is rule-scoped (same UUID, same 30d/7d/±24h windows for all alerts).
+      # The anchor is the first alert's timestamp. For standalone triggers all alerts share
+      # one rule execution window, so the anchor is equivalent to a per-alert anchor.
+      # For Worker batches the anchor may lag the newest alert by hours, but the query
+      # windows (30d close history, 7d/24h prevalence) are large enough that realistic
+      # batch spreads do not materially change the enrichment result. Running enrichment
+      # once per execution rather than once per alert avoids multiplying ES queries by
+      # batch size.
       - name: set_enrichment_anchor
         type: data.set
         with:
@@ -1017,7 +1044,11 @@ steps:
                 type: security.buildAlertEntityGraph
                 with:
                   alertId: "{{foreach.item._id}}"
-                  alertIndex: "{{foreach.item._index}}"
+                  # Executing-space alias only — never foreach.item._index. A Worker caller can
+                  # supply another space's Security alerts index; buildAlertEntityGraph has no
+                  # kibana.space_ids filter, so trusting caller _index would leak related-alert
+                  # metadata across spaces. Same-space alerts still resolve via this alias.
+                  alertIndex: ".alerts-security.alerts-{{ variables.spaceId }}"
                   # The alert itself is already in the prompt; the graph only needs to add the others.
                   include_seed: false
                   entity_fields:
@@ -1909,7 +1940,8 @@ steps:
               # and can hit the engine render limit after tags/notes are already written.
               grouped_counts_summary: >-
                 {%- capture grouped_counts_summary_raw -%}
-                {%- assign hosts = variables.output_verdicts | map: 'host_name' | uniq | slice: 0, 50 -%}
+                {%- assign all_host_names = variables.output_verdicts | map: 'host_name' | uniq -%}
+                {%- assign hosts = all_host_names | slice: 0, 50 -%}
                 {%- for h in hosts -%}
                 {%- assign for_host = variables.output_verdicts | where: 'host_name', h -%}
                 {%- assign tp = for_host | where: 'classification', 'true_positive' | size -%}
@@ -1919,8 +1951,9 @@ steps:
                 {%- if fp > 0 %} {{ fp }} alert(s) for host {{ h }} classified as false positive.{% endif -%}
                 {%- if inc > 0 %} {{ inc }} alert(s) for host {{ h }} were inconclusive.{% endif -%}
                 {%- endfor -%}
+                {%- if all_host_names.size > 50 %} ({{ all_host_names.size | minus: 50 }} additional host(s) omitted from summary.){% endif -%}
                 {%- endcapture -%}
-                {{- grouped_counts_summary_raw | truncate: 10000, '' -}}
+                {{- grouped_counts_summary_raw | truncate: 10000, ' [truncated]' -}}
 
           # Join the per-batch summaries the model returned, skipping nil entries
           # (compact drops values the model omitted when batch_summary was not filled).
@@ -1929,7 +1962,7 @@ steps:
           - name: build_generated_summary
             type: data.set
             with:
-              generated_summary: "{{ variables.batch_summaries | compact | join: ' ' | truncate: 2000, '' }}"
+              generated_summary: "{{ variables.batch_summaries | compact | join: ' ' | truncate: 2000, ' [truncated]' }}"
 
           # Build one entity row per unique host, then per unique user, collecting
           # per-entity verdict counts. The Worker passes this to the security.impact

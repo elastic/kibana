@@ -163,7 +163,7 @@ const securityAlertAnalysisCallerAlerts: JsonSchema = {
         maxLength: 512,
         pattern: '^\\.(internal\\.)?(preview\\.)?alerts-security\\.alerts-[a-zA-Z0-9._-]+$',
         description:
-          'Security alerts alias or backing index passed to security.buildAlertEntityGraph as alertIndex.',
+          'Security alerts alias or backing index. Related-alert graph search uses the executing-space alerts alias (not this value) so a cross-space index cannot leak enrichment; still required so caller payloads name a Security alerts index.',
       },
       '@timestamp': {
         type: 'string',
