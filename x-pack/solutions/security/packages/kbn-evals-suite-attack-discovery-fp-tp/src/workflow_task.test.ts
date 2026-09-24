@@ -1,0 +1,147 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { HttpHandler } from '@kbn/core/public';
+import { ToolingLog } from '@kbn/tooling-log';
+import {
+  ExecutionStatus,
+  type WorkflowExecutionDto,
+  type WorkflowStepExecutionDto,
+} from '@kbn/workflows';
+import type { FpTpSeededIds } from './workflow_task';
+import { readAnalysisOutput, runFpTpAnalysisWorkflow, toOutcome } from './workflow_task';
+
+jest.mock('@kbn/security-evals-workflow-traces', () => ({
+  ...jest.requireActual('@kbn/security-evals-workflow-traces'),
+  readAgentToolCallsFromTraces: jest.fn().mockResolvedValue({ toolCallIds: [], unavailable: true }),
+}));
+
+const output = {
+  attack_discovery_id: 'ad-1',
+  investigation_id: 'inv-1',
+  workflow_id: 'wf-1',
+  payload: { verdict: 'false_positive', summary_markdown: 'A summary' },
+  checks: [],
+  claims: {},
+};
+
+const execution = (overrides: Partial<WorkflowExecutionDto>): WorkflowExecutionDto =>
+  ({
+    id: 'exec-1',
+    status: ExecutionStatus.COMPLETED,
+    stepExecutions: [],
+    error: null,
+    ...overrides,
+  } as WorkflowExecutionDto);
+
+const outputStep = (overrides: Partial<WorkflowStepExecutionDto>): WorkflowStepExecutionDto =>
+  ({ output, ...overrides } as WorkflowStepExecutionDto);
+
+const seededIds: FpTpSeededIds = {
+  attackDiscoveryId: 'ad-1',
+  alertIds: ['a1'],
+  entityIds: [],
+  eventIds: [],
+};
+
+const mockFetch = (records: WorkflowExecutionDto[]): HttpHandler => {
+  let poll = 0;
+  return jest.fn(async (path: string) => {
+    if (path.endsWith('/run')) {
+      return { workflowExecutionId: 'exec-1' };
+    }
+    const record = records[Math.min(poll, records.length - 1)];
+    poll += 1;
+    return record;
+  }) as unknown as HttpHandler;
+};
+
+const run = (fetch: HttpHandler, maxWaitMs = 60_000) =>
+  runFpTpAnalysisWorkflow({
+    fetch,
+    log: new ToolingLog(),
+    workflowId: 'wf-1',
+    attackDiscoveryId: 'ad-1',
+    investigationId: 'inv-1',
+    seededIds,
+    maxWaitMs,
+    pollIntervalMs: 0,
+  });
+
+describe('readAnalysisOutput', () => {
+  it('returns the output from the execution context', () => {
+    expect(readAnalysisOutput(execution({ context: { output } }))).toEqual(output);
+  });
+
+  it('returns the workflow.output step output when the context has none', () => {
+    expect(
+      readAnalysisOutput(
+        execution({
+          stepExecutions: [outputStep({ stepId: 'emit_result', stepType: 'workflow.output' })],
+        })
+      )
+    ).toEqual(output);
+  });
+
+  it('returns undefined when the run produced no output', () => {
+    expect(readAnalysisOutput(execution({}))).toBeUndefined();
+  });
+});
+
+describe('toOutcome', () => {
+  it('returns the verdict for a completed run', () => {
+    expect(toOutcome(execution({}), output)).toBe('false_positive');
+  });
+
+  it.each([ExecutionStatus.FAILED, ExecutionStatus.TIMED_OUT, ExecutionStatus.RUNNING])(
+    'returns failed for a %s run',
+    (status) => {
+      expect(toOutcome(execution({ status }), output)).toBe('failed');
+    }
+  );
+
+  it('returns undefined for a completed run with an unsupported verdict', () => {
+    expect(toOutcome(execution({}), { payload: { verdict: 'failed' } })).toBeUndefined();
+  });
+});
+
+describe('runFpTpAnalysisWorkflow', () => {
+  it('returns the verdict outcome for a completed record', async () => {
+    const fetch = mockFetch([
+      execution({ status: ExecutionStatus.RUNNING }),
+      execution({ context: { output } }),
+    ]);
+    expect((await run(fetch)).outcome).toBe('false_positive');
+  });
+
+  it('returns the echoed attack id for a completed record', async () => {
+    const fetch = mockFetch([execution({ context: { output } })]);
+    expect((await run(fetch)).attackDiscoveryIdEcho).toBe('ad-1');
+  });
+
+  it('returns failed for a failed record', async () => {
+    const fetch = mockFetch([
+      execution({ status: ExecutionStatus.FAILED, error: { type: 'Error', message: 'boom' } }),
+    ]);
+    expect((await run(fetch)).outcome).toBe('failed');
+  });
+
+  it('returns no payload for a failed record', async () => {
+    const fetch = mockFetch([execution({ status: ExecutionStatus.FAILED })]);
+    expect((await run(fetch)).payload).toBeUndefined();
+  });
+
+  it('returns failed when the run is not terminal by the deadline', async () => {
+    const fetch = mockFetch([execution({ status: ExecutionStatus.RUNNING })]);
+    expect((await run(fetch, 0)).outcome).toBe('failed');
+  });
+
+  it('returns the seeded ids unchanged', async () => {
+    const fetch = mockFetch([execution({ context: { output } })]);
+    expect((await run(fetch)).seededIds).toEqual(seededIds);
+  });
+});

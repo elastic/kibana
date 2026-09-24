@@ -1,0 +1,203 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { Client as EsClient } from '@elastic/elasticsearch';
+import type { HttpHandler } from '@kbn/core/public';
+import type { ToolingLog } from '@kbn/tooling-log';
+import {
+  extractAgentConversationIds,
+  readAgentToolCallsFromTraces,
+} from '@kbn/security-evals-workflow-traces';
+import {
+  ExecutionStatus,
+  TerminalExecutionStatuses,
+  type WorkflowExecutionDto,
+} from '@kbn/workflows';
+import {
+  FP_TP_VERDICTS,
+  PUBLIC_API_VERSION,
+  type FpTpOutcome,
+  type FpTpVerdict,
+} from './constants';
+
+const OUTPUT_STEP_TYPE = 'workflow.output';
+
+/** The analysis output's `payload`, as the contract defines it. */
+export interface FpTpPayload {
+  verdict?: string;
+  summary_markdown?: string;
+  rationale_markdown?: string;
+}
+
+/** The analysis's execution output. Only `payload` is graded for now. */
+export interface FpTpAnalysisOutput {
+  attack_discovery_id?: string;
+  investigation_id?: string;
+  workflow_id?: string;
+  workflow_version?: number;
+  coverage?: Record<string, unknown>;
+  payload?: FpTpPayload;
+  checks?: unknown[];
+  claims?: Record<string, unknown>;
+}
+
+/** Ids this run seeded, carried in the task output so LLM graders can check citations. */
+export interface FpTpSeededIds {
+  attackDiscoveryId: string;
+  alertIds: string[];
+  entityIds: string[];
+  eventIds: string[];
+}
+
+/** Task output graded by the suite's evaluators. */
+export interface FpTpTaskOutput {
+  executionId: string;
+  executionStatus: ExecutionStatus;
+  /** `failed` when the run failed or did not finish in time; otherwise the verdict. */
+  outcome?: FpTpOutcome;
+  payload?: FpTpPayload;
+  attackDiscoveryIdEcho?: string;
+  /** The whole execution output, including `coverage`, `checks`, and `claims`. */
+  raw?: FpTpAnalysisOutput;
+  seededIds: FpTpSeededIds;
+  toolCallIds?: string[];
+  toolCallsUnavailable?: boolean;
+}
+
+const isTerminal = (status: ExecutionStatus): boolean => TerminalExecutionStatuses.includes(status);
+
+const isVerdict = (value: unknown): value is FpTpVerdict =>
+  FP_TP_VERDICTS.some((verdict) => verdict === value);
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/**
+ * Reads the analysis output from an execution record. The engine stores it in
+ * `context.output`; the `workflow.output` step's own output is the fallback.
+ */
+export const readAnalysisOutput = (
+  execution: WorkflowExecutionDto
+): FpTpAnalysisOutput | undefined => {
+  const fromContext = execution.context?.output;
+  if (typeof fromContext === 'object' && fromContext !== null) {
+    return fromContext as FpTpAnalysisOutput;
+  }
+  const step = execution.stepExecutions.find(
+    ({ stepType, output }) => stepType === OUTPUT_STEP_TYPE && output
+  );
+  return (step?.output ?? undefined) as FpTpAnalysisOutput | undefined;
+};
+
+/**
+ * Maps a terminal (or timed-out) execution to its graded outcome. Only a completed run
+ * with a supported verdict has a verdict outcome; a completed run with anything else
+ * has no outcome, which the evaluators score as wrong.
+ */
+export const toOutcome = (
+  execution: WorkflowExecutionDto,
+  output: FpTpAnalysisOutput | undefined
+): FpTpOutcome | undefined => {
+  if (execution.status !== ExecutionStatus.COMPLETED) {
+    return 'failed';
+  }
+  const verdict = output?.payload?.verdict;
+  return isVerdict(verdict) ? verdict : undefined;
+};
+
+/**
+ * Runs the FP/TP analysis workflow for one seeded Attack Discovery and returns its
+ * outcome. A run that is not terminal by `maxWaitMs` counts as `failed`: the contract
+ * has a hard timeout, so an overrun is itself a failure.
+ */
+export const runFpTpAnalysisWorkflow = async ({
+  fetch,
+  log,
+  traceEsClient,
+  workflowId,
+  attackDiscoveryId,
+  investigationId,
+  seededIds,
+  maxWaitMs = 15 * 60_000,
+  pollIntervalMs = 3_000,
+}: {
+  fetch: HttpHandler;
+  log: ToolingLog;
+  traceEsClient?: EsClient;
+  workflowId: string;
+  attackDiscoveryId: string;
+  investigationId: string;
+  seededIds: FpTpSeededIds;
+  maxWaitMs?: number;
+  pollIntervalMs?: number;
+}): Promise<FpTpTaskOutput> => {
+  const { workflowExecutionId } = (await fetch(
+    `/api/workflows/workflow/${encodeURIComponent(workflowId)}/run`,
+    {
+      method: 'POST',
+      version: PUBLIC_API_VERSION,
+      headers: { 'elastic-api-version': PUBLIC_API_VERSION },
+      body: JSON.stringify({
+        inputs: { attack_discovery_id: attackDiscoveryId, investigation_id: investigationId },
+      }),
+    }
+  )) as { workflowExecutionId: string };
+
+  log.info(
+    `Started FP/TP analysis execution ${workflowExecutionId} for Attack Discovery ${attackDiscoveryId}`
+  );
+
+  const readExecution = async (): Promise<WorkflowExecutionDto> =>
+    (await fetch(`/api/workflows/executions/${workflowExecutionId}`, {
+      method: 'GET',
+      version: PUBLIC_API_VERSION,
+      headers: { 'elastic-api-version': PUBLIC_API_VERSION },
+      query: { includeOutput: true },
+    })) as WorkflowExecutionDto;
+
+  const deadline = Date.now() + maxWaitMs;
+  let execution = await readExecution();
+
+  while (!isTerminal(execution.status) && Date.now() < deadline) {
+    await sleep(pollIntervalMs);
+    execution = await readExecution();
+  }
+
+  if (!isTerminal(execution.status)) {
+    log.warning(
+      `FP/TP analysis execution ${workflowExecutionId} was not terminal after ${maxWaitMs}ms (last status: ${execution.status}); counting it as failed`
+    );
+  } else if (execution.status !== ExecutionStatus.COMPLETED) {
+    log.info(
+      `FP/TP analysis execution ${workflowExecutionId} ended ${execution.status}: ${
+        execution.error?.message ?? 'no error message'
+      }`
+    );
+  }
+
+  const output = readAnalysisOutput(execution);
+
+  const conversationIds = extractAgentConversationIds(execution.stepExecutions).map(
+    ({ conversationId }) => conversationId
+  );
+  const { toolCallIds, unavailable } = await readAgentToolCallsFromTraces({
+    traceEsClient,
+    conversationIds,
+    log,
+  });
+
+  return {
+    executionId: workflowExecutionId,
+    executionStatus: execution.status,
+    outcome: toOutcome(execution, output),
+    payload: output?.payload,
+    attackDiscoveryIdEcho: output?.attack_discovery_id,
+    raw: output,
+    seededIds,
+    toolCallIds,
+    toolCallsUnavailable: unavailable,
+  };
+};
