@@ -203,4 +203,35 @@ describe('ESQLEditor', () => {
       ).toBeInTheDocument()
     );
   });
+
+  it('stops showing the loading spinner when a refresh fails with cached rows', async () => {
+    const preview = {
+      rows: [{ a: 1 }, { a: 2 }, { a: 3 }],
+      columns: [],
+      dataView: {},
+    } as unknown as ESQLDataGridAttrs;
+
+    getSuggestionsMock.mockImplementationOnce(async (...args: unknown[]) => {
+      const setDataGridAttrs = args[9] as ((attrs: ESQLDataGridAttrs) => void) | undefined;
+      setDataGridAttrs?.(preview);
+      return undefined;
+    });
+
+    renderEditor();
+    await waitFor(() => expect(capturedOnSubmit).toBeDefined());
+    await act(() =>
+      capturedOnSubmit!({ esql: 'FROM index1 | STATS maxB = MAX(bytes)' }, new AbortController())
+    );
+    expect(screen.getByTestId('ESQLQueryResults')).toHaveTextContent('3');
+
+    // getSuggestions swallows query errors and resolves without new attrs
+    getSuggestionsMock.mockResolvedValue(undefined);
+    await act(() =>
+      capturedOnSubmit!({ esql: 'FROM index1 | STATS broken(' }, new AbortController())
+    );
+
+    const results = screen.getByTestId('ESQLQueryResults');
+    expect(within(results).queryByRole('progressbar')).not.toBeInTheDocument();
+    expect(results).toHaveTextContent('3');
+  });
 });

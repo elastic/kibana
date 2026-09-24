@@ -32,10 +32,7 @@ import { getSuggestions } from '../../../app_plugin/shared/edit_on_the_fly/helpe
 import { useESQLVariables } from '../../../app_plugin/shared/edit_on_the_fly/use_esql_variables';
 import { MAX_NUM_OF_COLUMNS } from '../../../datasources/text_based/utils';
 import type { LayerPanelProps } from './types';
-import {
-  ESQLDataGridAccordion,
-  type ESQLDataGridAccordionStatus,
-} from '../../../app_plugin/shared/edit_on_the_fly/esql_data_grid_accordion';
+import { ESQLDataGridAccordion } from '../../../app_plugin/shared/edit_on_the_fly/esql_data_grid_accordion';
 import { useInitializeChart } from './use_initialize_chart';
 import { useEditorFrameService } from '../../editor_frame_service_context';
 
@@ -116,10 +113,7 @@ export function ESQLEditor({
   const [dataGridAttrs, setDataGridAttrs] = useState<ESQLDataGridAttrs | undefined>(
     () => lastPreviewRef?.current
   );
-  const [dataGridStatus, setDataGridStatus] = useState<ESQLDataGridAccordionStatus>(() =>
-    lastPreviewRef?.current ? 'ready' : 'loading'
-  );
-  const dataGridAttrsRef = useRef<ESQLDataGridAttrs | undefined>(lastPreviewRef?.current);
+  const [isPreviewLoading, setIsPreviewLoading] = useState(() => !lastPreviewRef?.current);
   const [internalResultsAccordionOpen, setInternalResultsAccordionOpen] = useState(false);
   const isESQLResultsAccordionOpen = isESQLResultsAccordionOpenProp ?? internalResultsAccordionOpen;
   const setIsESQLResultsAccordionOpen =
@@ -169,59 +163,53 @@ export function ESQLEditor({
 
   const applyDataGridAttrs = useCallback(
     (attrs: ESQLDataGridAttrs) => {
-      dataGridAttrsRef.current = attrs;
       if (lastPreviewRef) {
         lastPreviewRef.current = attrs;
       }
       setDataGridAttrs(attrs);
-      setDataGridStatus('ready');
     },
     [lastPreviewRef]
   );
 
-  const applyPreviewErrors = useCallback((previewErrors: Error[]) => {
-    setErrors(previewErrors);
-    if (!dataGridAttrsRef.current) {
-      setDataGridStatus('error');
-    }
-  }, []);
-
   const runQuery = useCallback(
     async (q: AggregateQuery, abortController?: AbortController, shouldUpdateAttrs?: boolean) => {
       setErrors([]);
-      setDataGridStatus('loading');
-      const attrs = await getSuggestions(
-        q,
-        data,
-        http,
-        uiSettings,
-        datasourceMap,
-        visualizationMap,
-        adHocDataViews,
-        applyPreviewErrors,
-        abortController,
-        applyDataGridAttrs,
-        esqlVariables,
-        shouldUpdateAttrs,
-        currentAttributesRef.current,
-        isApproximate
-      );
-      // An aborted run (e.g. the user clicked "Cancel", or a re-render tore
-      // down the request) produced no result. Bail out *without* recording the
-      // query as submitted: `onTextLangQuerySubmit` skips queries equal to
-      // `prevQuery.current`, so marking an aborted run here would silently
-      // drop every future resubmission of the same query text.
-      if (abortController?.signal.aborted) {
+      setIsPreviewLoading(true);
+      try {
+        const attrs = await getSuggestions(
+          q,
+          data,
+          http,
+          uiSettings,
+          datasourceMap,
+          visualizationMap,
+          adHocDataViews,
+          setErrors,
+          abortController,
+          applyDataGridAttrs,
+          esqlVariables,
+          shouldUpdateAttrs,
+          currentAttributesRef.current,
+          isApproximate
+        );
+        // An aborted run (e.g. the user clicked "Cancel", or a re-render tore
+        // down the request) produced no result. Bail out *without* recording the
+        // query as submitted: `onTextLangQuerySubmit` skips queries equal to
+        // `prevQuery.current`, so marking an aborted run here would silently
+        // drop every future resubmission of the same query text.
+        if (abortController?.signal.aborted) {
+          return;
+        }
+        if (attrs) {
+          setCurrentAttributes?.(attrs);
+          updateSuggestion?.(attrs);
+        }
+        prevQuery.current = q;
+        setSubmittedQuery(q);
+      } finally {
+        setIsPreviewLoading(false);
         setIsVisualizationLoading(false);
-        return;
       }
-      if (attrs) {
-        setCurrentAttributes?.(attrs);
-        updateSuggestion?.(attrs);
-      }
-      prevQuery.current = q;
-      setSubmittedQuery(q);
-      setIsVisualizationLoading(false);
     },
     [
       uiSettings,
@@ -232,7 +220,6 @@ export function ESQLEditor({
       adHocDataViews,
       esqlVariables,
       isApproximate,
-      applyPreviewErrors,
       applyDataGridAttrs,
       setCurrentAttributes,
       updateSuggestion,
@@ -275,7 +262,7 @@ export function ESQLEditor({
 
     const abortController = new AbortController();
 
-    setDataGridStatus('loading');
+    setIsPreviewLoading(true);
 
     getSuggestions(
       lastSubmittedQuery,
@@ -292,9 +279,16 @@ export function ESQLEditor({
       false,
       currentAttributesRef.current,
       isApproximate
-    ).catch(() => {
-      // The chart itself will surface query errors via its own error handling path
-    });
+    )
+      .catch(() => {
+        // The chart itself will surface query errors via its own error handling path
+      })
+      .finally(() => {
+        // A newer run already owns the loading state when this one was aborted
+        if (!abortController.signal.aborted) {
+          setIsPreviewLoading(false);
+        }
+      });
 
     return () => {
       abortController.abort();
@@ -338,7 +332,7 @@ export function ESQLEditor({
       />
       <ESQLDataGridAccordion
         dataGridAttrs={dataGridAttrs}
-        status={dataGridStatus}
+        isLoading={isPreviewLoading}
         isAccordionOpen={isESQLResultsAccordionOpen}
         isTableView={visualization.activeId !== 'lnsDatatable'}
         isApproximate={isApproximate}

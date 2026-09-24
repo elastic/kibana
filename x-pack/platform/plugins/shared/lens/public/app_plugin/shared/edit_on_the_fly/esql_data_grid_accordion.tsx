@@ -21,12 +21,10 @@ import type { AggregateQuery } from '@kbn/es-query';
 import { ESQLDataGrid } from '@kbn/esql-datagrid/public';
 import type { ESQLDataGridAttrs } from './helpers';
 
-export type ESQLDataGridAccordionStatus = 'loading' | 'ready' | 'error';
-
 interface ESQLDataGridAccordionProps {
   isAccordionOpen: boolean;
   dataGridAttrs?: ESQLDataGridAttrs;
-  status: ESQLDataGridAccordionStatus;
+  isLoading: boolean;
   query: AggregateQuery;
   isTableView: boolean;
   isApproximate: boolean;
@@ -37,7 +35,7 @@ interface ESQLDataGridAccordionProps {
 export const ESQLDataGridAccordion = ({
   isAccordionOpen,
   dataGridAttrs,
-  status,
+  isLoading,
   query,
   isTableView,
   isApproximate,
@@ -84,7 +82,7 @@ export const ESQLDataGridAccordion = ({
             </EuiNotificationBadge>
           ) : undefined
         }
-        isLoading={status === 'loading'}
+        isLoading={isLoading}
         // Keep the previous table visible while refreshing; only take over the
         // content area when there is nothing to show yet.
         isLoadingMessage={!dataGridAttrs}
