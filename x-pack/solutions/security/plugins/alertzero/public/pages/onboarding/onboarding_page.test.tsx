@@ -39,26 +39,54 @@ const renderPage = ({ canWrite = false }: { canWrite?: boolean } = {}) => {
 
 describe('OnboardingPage', () => {
   it('renders the title', () => {
-    renderPage();
-    expect(screen.getByText('Get started with AlertZero')).toBeInTheDocument();
+    renderPage({ canWrite: true });
+    expect(screen.getByText('Enable your workers')).toBeInTheDocument();
   });
 
   describe('with write capability', () => {
-    it('renders the writable body copy', () => {
+    it('renders the subtitle', () => {
       renderPage({ canWrite: true });
-      expect(
-        screen.getByText(/Enable a Watch worker to start receiving investigations/)
-      ).toBeInTheDocument();
+      expect(screen.getByText(/Choose the workers you need/)).toBeInTheDocument();
     });
 
-    it('renders a Configure Watches button that navigates to /watches', () => {
+    it('renders worker toggle rows', () => {
+      renderPage({ canWrite: true });
+      expect(screen.getByText('Attack Discovery')).toBeInTheDocument();
+      expect(screen.getByText('Alert Triage')).toBeInTheDocument();
+    });
+
+    it('renders the Before you enable callout', () => {
+      renderPage({ canWrite: true });
+      expect(screen.getByText('Before you enable')).toBeInTheDocument();
+    });
+
+    it('renders the Enable and continue button that navigates to /watches', () => {
       const { history } = renderPage({ canWrite: true });
-      const button = screen.getByRole('button', { name: 'Configure Watches' });
+      const button = screen.getByRole('button', { name: 'Enable and continue' });
       expect(button).toBeInTheDocument();
 
       fireEvent.click(button);
 
       expect(history.location.pathname).toBe('/watches');
+    });
+
+    it('renders the Not now link', () => {
+      renderPage({ canWrite: true });
+      expect(screen.getByText(/Not now/)).toBeInTheDocument();
+    });
+
+    it('disables a toggle when it is the last enabled worker', () => {
+      renderPage({ canWrite: true });
+
+      // Toggle all workers off except one
+      const toggles = screen.getAllByRole('switch');
+      // Disable all but the first by clicking them
+      for (let i = 1; i < toggles.length; i++) {
+        fireEvent.click(toggles[i]);
+      }
+
+      // The first (and now only enabled) toggle should be disabled
+      expect(toggles[0]).toBeDisabled();
     });
   });
 
@@ -68,9 +96,9 @@ describe('OnboardingPage', () => {
       expect(screen.getByText(/Ask an administrator to enable a Watch worker/)).toBeInTheDocument();
     });
 
-    it('does not render the Configure Watches button', () => {
+    it('does not render the worker toggle list', () => {
       renderPage({ canWrite: false });
-      expect(screen.queryByRole('button', { name: 'Configure Watches' })).not.toBeInTheDocument();
+      expect(screen.queryByTestId(/alertZeroOnboardingWorkerToggle/)).not.toBeInTheDocument();
     });
   });
 });
