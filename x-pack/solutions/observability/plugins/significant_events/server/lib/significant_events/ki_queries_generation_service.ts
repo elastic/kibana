@@ -5,84 +5,50 @@
  * 2.0.
  */
 
-import type {
-  ElasticsearchClient,
-  FeatureFlagsStart,
-  KibanaRequest,
-  Logger,
-} from '@kbn/core/server';
-import type { ToolsStart } from '@kbn/agent-builder-server';
-import type { InferenceClient } from '@kbn/inference-common';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import { getStreamTypeFromDefinition } from '@kbn/streams-schema';
 import {
   SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
   type SignificantEventsQueriesGenerationResult,
 } from '@kbn/significant-events-schema';
-import { isInferenceProviderError } from '@kbn/inference-common';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import type { StreamsClient } from '@kbn/streams-plugin/server';
-import { isSignificantEventsSemanticCodeSearchGroundingEnabled } from '../semantic_code_search_grounding/is_significant_events_semantic_code_search_grounding_enabled';
-import { isSignificantEventsFeatureFlagEnabled } from '../feature_flags/is_significant_events_feature_flag_enabled';
-import { createSemanticCodeSearchTools } from '../semantic_code_search_grounding/semantic_code_search_tools';
-import type { KnowledgeIndicatorClient } from '../knowledge_indicators';
 import type { EbtTelemetryClient } from '../telemetry/ebt';
+import type { KnowledgeIndicatorClient } from '../knowledge_indicators';
 import { resolveConnectorForFeature } from '../../routes/utils/resolve_connector_for_feature';
-import { formatInferenceProviderError } from '../../routes/utils/create_connector_sse_error';
-import { identifyKIQueries } from './identify_ki_queries';
-import { createKiExtractionContextTools } from './ki_extraction_context_tools';
+import { executeKIQueryGenerationAgent } from './identify_ki_queries_via_agent';
 
 export interface GenerateKIQueriesParams {
   streamName: string;
   connectorId?: string;
-  maxExistingQueriesForContext?: number;
-  maxDurationMs?: number;
-  queryValidationTimeoutMs?: number;
 }
 
 export interface GenerateKIQueriesDependencies {
   streamsClient: StreamsClient;
-  inferenceClient: InferenceClient;
   kiClient: KnowledgeIndicatorClient;
-  esClient: ElasticsearchClient;
-  /**
-   * Client used to validate generated ES|QL against the stream's data, always routed across every
-   * CPS-linked project. Separate from `esClient` because the stream can resolve to a remote
-   * CPS-connected project, while `esClient` reads the plugin's own (origin-only) indices.
-   */
-  streamDataEsClient: ElasticsearchClient;
-  featureFlags: FeatureFlagsStart;
+  agentBuilder: AgentBuilderPluginStart;
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart | undefined;
   request: KibanaRequest;
   logger: Logger;
   signal: AbortSignal;
   telemetry: EbtTelemetryClient;
-  agentBuilderTools?: ToolsStart;
 }
 
 export async function generateKIQueries(
   params: GenerateKIQueriesParams,
   deps: GenerateKIQueriesDependencies
 ): Promise<SignificantEventsQueriesGenerationResult & { connectorId: string }> {
-  const {
-    streamName,
-    connectorId: connectorIdOverride,
-    maxExistingQueriesForContext,
-    maxDurationMs,
-    queryValidationTimeoutMs,
-  } = params;
+  const { streamName, connectorId: connectorIdOverride } = params;
   const {
     streamsClient,
-    inferenceClient,
     kiClient,
-    esClient,
-    streamDataEsClient,
-    featureFlags,
+    agentBuilder,
     searchInferenceEndpoints,
     request,
     logger,
     signal,
     telemetry,
-    agentBuilderTools,
   } = deps;
 
   const connectorId =
@@ -96,72 +62,30 @@ export async function generateKIQueries(
 
   logger.debug(`Using connector ${connectorId} for query generation`);
 
-  const [definition, significantEventsAvailable, useSemanticCodeSearchGrounding] =
-    await Promise.all([
-      streamsClient.getStream(streamName),
-      isSignificantEventsFeatureFlagEnabled(featureFlags),
-      isSignificantEventsSemanticCodeSearchGroundingEnabled(featureFlags),
-    ]);
-
-  const semanticCodeSearchLogger = logger.get('semantic_code_search_grounding');
-
-  const isCodeGroundingActive = useSemanticCodeSearchGrounding && Boolean(agentBuilderTools);
-
-  const semanticCodeSearchTools =
-    isCodeGroundingActive && agentBuilderTools
-      ? await createSemanticCodeSearchTools({
-          agentBuilderTools,
-          request,
-          esClient,
-          logger: semanticCodeSearchLogger,
-        })
-      : undefined;
-
-  if (useSemanticCodeSearchGrounding && !semanticCodeSearchTools) {
-    semanticCodeSearchLogger.debug(
-      `Semantic code search grounding enabled but inactive for stream "${streamName}" (agentBuilder unavailable or SCS tools not installed).`
-    );
-  }
-
-  const kiExtractionContextTools =
-    significantEventsAvailable && agentBuilderTools
-      ? await createKiExtractionContextTools({
-          agentBuilderTools,
-          request,
-          logger: logger.get('ki_extraction_context'),
-        })
-      : undefined;
+  const definition = await streamsClient.getStream(streamName);
+  const { [definition.name]: existingLinks } = await kiClient.getStreamToQueryLinksMap([
+    definition.name,
+  ]);
+  const existingQueries = existingLinks.map(({ query }) => ({
+    id: query.id,
+    title: query.title,
+    type: query.type,
+    severity_score: query.severity_score,
+    description: query.description,
+    esql: query.esql.query,
+  }));
 
   const startedAt = Date.now();
-  const result = await identifyKIQueries(
-    {
-      definition,
-      connectorId,
-      maxExistingQueriesForContext,
-      maxDurationMs,
-      queryValidationTimeoutMs,
-    },
-    {
-      inferenceClient,
-      esClient: streamDataEsClient,
-      kiClient,
-      logger: logger.get('significant_events_generation'),
-      signal,
-      kiExtractionContextTools,
-      semanticCodeSearchTools,
-    }
-  ).catch(async (error) => {
-    if (isInferenceProviderError(error)) {
-      const connector = await inferenceClient.getConnectorById(connectorId).catch(() => undefined);
-      if (connector) {
-        throw new Error(formatInferenceProviderError(error, connector), { cause: error });
-      }
-    }
-    throw error;
+  const { queries, tokensUsed } = await executeKIQueryGenerationAgent({
+    agentBuilder,
+    request,
+    connectorId,
+    definition,
+    existingQueries,
+    signal,
+    logger: logger.get('significant_events_queries_generation'),
   });
   const durationMs = Date.now() - startedAt;
-
-  const { queries, tokensUsed, toolUsage, reasoningDiagnostics } = result;
 
   telemetry.trackSignificantEventsQueriesGenerated({
     count: queries.length,
@@ -172,8 +96,6 @@ export async function generateKIQueries(
     output_tokens_used: tokensUsed.completion,
     cached_tokens_used: tokensUsed.cached ?? 0,
     duration_ms: durationMs,
-    tool_usage: toolUsage,
-    external_content_tool_continuations: reasoningDiagnostics.externalContentToolContinuations,
   });
 
   return { queries, tokensUsed, connectorId };

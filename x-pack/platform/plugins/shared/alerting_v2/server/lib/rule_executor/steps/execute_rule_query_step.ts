@@ -19,6 +19,8 @@ import type { PipelineStateStream, RuleExecutionStep } from '../types';
 import { getQueryPayload } from '../get_query_payload';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 import { QueryServiceScopedSpaceRoutingToken } from '../../services/query_service/tokens';
+import type { EsqlResponseFormatServiceContract } from '../../services/esql_response_format_service/esql_response_format_service';
+import { EsqlResponseFormatServiceToken } from '../../services/esql_response_format_service/tokens';
 import { guardedExpandStep, withAtLeastOne } from '../stream_utils';
 import { RULE_EXECUTION_COUNTERS, type RuleExecutionCounter } from '../metrics/counters';
 import { type PluginConfig, getQueryRowLimit } from '../../../config';
@@ -29,18 +31,19 @@ type EsqlRowBatch = Record<string, unknown>[];
 export class ExecuteRuleQueryStep implements RuleExecutionStep {
   public readonly name = 'execute_rule_query';
 
-  private readonly queryRowLimit: number;
+  private readonly pluginConfig: PluginConfig;
   private readonly maxQueryResponseSize: number;
 
   constructor(
     @inject(QueryServiceScopedSpaceRoutingToken)
     private readonly queryService: QueryServiceContract,
+    @inject(EsqlResponseFormatServiceToken)
+    private readonly esqlResponseFormatService: EsqlResponseFormatServiceContract,
     @inject(PluginInitializer('config'))
     pluginConfigAccessor: PluginInitializerContext<PluginConfig>['config']
   ) {
-    const config = pluginConfigAccessor.get<PluginConfig>();
-    this.queryRowLimit = getQueryRowLimit(config);
-    this.maxQueryResponseSize = config.rules.run.query.maxResponseSize.getValueInBytes();
+    this.pluginConfig = pluginConfigAccessor.get<PluginConfig>();
+    this.maxQueryResponseSize = this.pluginConfig.rules.run.query.maxResponseSize.getValueInBytes();
   }
 
   public executeStream(streamState: PipelineStateStream): PipelineStateStream {
@@ -60,7 +63,11 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
         lookbackWindow,
       });
 
-      const boundedQuery = appendLimitToQuery(effectiveQuery, step.queryRowLimit);
+      // Snapshot once so the LIMIT appended to the query and the transport
+      // chosen by QueryService are always derived from the same flag value.
+      const format = step.esqlResponseFormatService.get();
+      const queryRowLimit = getQueryRowLimit(step.pluginConfig, format);
+      const boundedQuery = appendLimitToQuery(effectiveQuery, queryRowLimit);
 
       logger.debug({
         message: 'Executing ES|QL query',
@@ -74,6 +81,7 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
           params: queryPayload.params,
           abortSignal: input.executionContext.signal,
           maxResponseSize: step.maxQueryResponseSize,
+          format,
         });
 
         let totalRows = 0;
@@ -86,11 +94,11 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
             [RULE_EXECUTION_COUNTERS.rowsReturnedByQuery]: batch.length,
           };
 
-          if (!loggedRowsDropped && totalRows >= step.queryRowLimit) {
+          if (!loggedRowsDropped && totalRows >= queryRowLimit) {
             loggedRowsDropped = true;
             counters[RULE_EXECUTION_COUNTERS.rowsDroppedByLimit] = 1;
             logger.debug({
-              message: `ES|QL query results truncated at the ${step.queryRowLimit}-row limit; some rows may have been dropped`,
+              message: `ES|QL query results truncated at the ${queryRowLimit}-row limit; some rows may have been dropped`,
               labels: { rule_id: input.ruleId, step: step.name },
             });
           }

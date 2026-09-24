@@ -9,8 +9,9 @@ import type { KibanaRequest } from '@kbn/core/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { AgentBuilderPlatformPluginSetup } from '@kbn/agent-builder-platform-plugin/server';
+import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { ImpactReadClient } from './impact/services/impact_client';
 import type { EscalationsService } from './escalations/services/escalations_service';
 
@@ -23,6 +24,10 @@ export interface AgenticInvestigationsSetupDependencies {
    * them.
    */
   agentBuilderPlatform: AgentBuilderPlatformPluginSetup;
+  /** Registers the readonly investigation_impact attachment type. */
+  agentBuilder: AgentBuilderPluginSetup;
+  /** Registers Impact workflow steps. */
+  workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
 }
 
 export interface AgenticInvestigationsStartDependencies {
@@ -43,8 +48,9 @@ export interface AgenticInvestigationsStartDependencies {
  */
 export interface AgenticInvestigationsPluginStart {
   /**
-   * Request-scoped impact reads. Checks `read_impact` and derives the space
-   * from the request, because in-process callers bypass route `security.authz`.
+   * Request-scoped impact reads. Checks the investigations manage privilege and
+   * derives the space from the request, because in-process callers bypass
+   * route `security.authz`.
    */
   getImpactClient: (request: KibanaRequest) => ImpactReadClient;
   getEscalationsService: () => EscalationsService;

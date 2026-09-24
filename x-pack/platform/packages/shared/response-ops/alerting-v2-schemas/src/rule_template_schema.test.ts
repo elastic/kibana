@@ -353,11 +353,6 @@ describe('rule template create-rule schema coupling', () => {
                   "minLength": 1,
                   "type": "string",
                 },
-                "owner": Object {
-                  "description": "Owner of the rule.",
-                  "maxLength": 256,
-                  "type": "string",
-                },
                 "tags": Object {
                   "description": "Tags for categorization, e.g. [\\"production\\", \\"infra\\"].",
                   "items": Object {
