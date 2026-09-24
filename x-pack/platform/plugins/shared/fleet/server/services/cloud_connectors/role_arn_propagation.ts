@@ -92,13 +92,17 @@ const renderPolicyIds = (ids: string[]): string => {
   return remaining > 0 ? `${shown.join(', ')}, +${remaining} more` : shown.join(', ');
 };
 
-/** The fields a Role ARN write sends, without the compiled output the service regenerates. */
+/**
+ * The fields a Role ARN write sends, without the compiled output the service regenerates or the
+ * `experimental_data_stream_features` that `packagePolicyService.get` adds from the installation.
+ */
 const writtenFields = (
   policy: PackagePolicy,
   vars: NewPackagePolicy['vars'],
   inputs: NewPackagePolicy['inputs']
 ) => ({
   ...toPackagePolicyUpdate(policy),
+  ...(policy.package ? { package: omit(policy.package, 'experimental_data_stream_features') } : {}),
   vars,
   inputs: inputs.map((input) => ({
     ...omit(input, 'compiled_input'),

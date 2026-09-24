@@ -1179,6 +1179,34 @@ describe('propagateRoleArnToPackagePolicies', () => {
       );
       expect(revertOfB?.[3].version).toBe('Wzb-persisted');
     });
+
+    it("reverts the policy when the re-read carries the installation's data stream features", async () => {
+      // `packagePolicyService.get` adds these from the installation; `fetchAllItems` does not.
+      (packagePolicyService.get as jest.Mock).mockImplementation(async (_so, id: string) =>
+        id === 'b'
+          ? {
+              ...makePolicy('b', NEW_ARN),
+              version: 'Wzb-persisted',
+              package: {
+                ...PACKAGE,
+                experimental_data_stream_features: [
+                  { data_stream: 'logs-cloud_security_posture.findings', features: {} },
+                ],
+              },
+            }
+          : makePolicy(id)
+      );
+
+      await expect(
+        propagateRoleArnToPackagePolicies({
+          soClient,
+          esClient,
+          connectorId: CONNECTOR_ID,
+          newRoleArn: NEW_ARN,
+        })
+      ).rejects.toMatchObject({ detail: { updateFailed: ['b'], revertFailed: [] } });
+      expect(revertedIds()).toEqual(['a', 'b']);
+    });
   });
 
   it('does not revert when a failed update left the policy with no Role ARN fields', async () => {
