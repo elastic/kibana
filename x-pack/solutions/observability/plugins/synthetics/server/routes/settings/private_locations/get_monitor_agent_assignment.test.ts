@@ -37,11 +37,13 @@ const makeContext = ({
   listAgentsImpl,
   getMonitorImpl,
   hasEnterprise = false,
+  rebalanceEnabled = true,
 }: {
   monitorId?: string;
   listAgentsImpl: jest.Mock;
   getMonitorImpl: jest.Mock;
   hasEnterprise?: boolean;
+  rebalanceEnabled?: boolean;
 }) => {
   const notFound = jest.fn((opts) => ({ status: 404, ...opts }));
   const routeContext = {
@@ -52,6 +54,11 @@ const makeContext = ({
     server: {
       fleet: { agentService: { asInternalUser: { listAgents: listAgentsImpl } } },
       pluginsStart: {
+        taskManager: {
+          get: jest.fn().mockResolvedValue({
+            state: { rebalancePrivateLocationShardsEnabled: rebalanceEnabled },
+          }),
+        },
         licensing: {
           getLicense: jest.fn().mockResolvedValue({
             isAvailable: true,
@@ -357,5 +364,27 @@ describe('getMonitorAgentAssignment route', () => {
     });
 
     await expect(run(routeContext)).rejects.toThrow('Fleet unavailable');
+  });
+
+  it('returns every enrolled agent when shard rebalancing is off, even with an Enterprise license', async () => {
+    const getMonitor = jest.fn().mockResolvedValue({
+      attributes: { locations: [{ id: 'loc-1', isServiceManaged: false }] },
+    });
+    const listAgents = jest.fn().mockResolvedValue({
+      agents: [agent(), agent({ id: 'agent-2' })],
+      total: 2,
+    });
+    const { routeContext } = makeContext({
+      listAgentsImpl: listAgents,
+      getMonitorImpl: getMonitor,
+      hasEnterprise: true,
+      rebalanceEnabled: false,
+    });
+
+    const result = (await run(routeContext)) as MonitorLocationAssignment[];
+
+    expect(result[0].isAgentSharding).toBe(false);
+    expect(result[0].agents.map(({ agentId }) => agentId)).toEqual(['agent-1', 'agent-2']);
+    expect(mockGetByIds).not.toHaveBeenCalled();
   });
 });

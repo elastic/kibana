@@ -16,7 +16,7 @@ import { ConfigKey } from '../../../../common/runtime_types';
 import type { MonitorAssignedAgent, MonitorLocationAssignment } from '../../../../common/types';
 import { getMonitorNotFoundResponse } from '../../synthetics_service/service_errors';
 import { assignedAgentIdForMonitorLocation } from '../../../synthetics_service/private_location/assign_by_condition';
-import { isAgentShardingLicensed } from '../../../synthetics_service/private_location/agent_sharding_license';
+import { isAgentShardingActive } from '../../../synthetics_service/private_location/agent_sharding_license';
 import { PackagePolicyService } from '../../../synthetics_service/private_location/package_policy_service';
 
 const toAssignedAgent = (meta: {
@@ -82,7 +82,7 @@ export const getMonitorAgentAssignment: SyntheticsRestApiRouteFactory<
       const locationById = new Map(locations.map((location) => [location.id, location]));
       const policyNameById = new Map(agentPolicies.map((policy) => [policy.id, policy.name]));
 
-      const isAgentSharding = await isAgentShardingLicensed(server);
+      const isAgentSharding = await isAgentShardingActive(server);
       const shardedMonitorLocations = isAgentSharding
         ? privateMonitorLocations.filter((location) => locationById.has(location.id))
         : [];

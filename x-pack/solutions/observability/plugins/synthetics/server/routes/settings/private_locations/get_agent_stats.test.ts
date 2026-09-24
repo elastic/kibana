@@ -72,16 +72,23 @@ const makeContext = ({
   listAgentsImpl,
   buckets = [],
   hasEnterprise = false,
+  rebalanceEnabled = true,
 }: {
   listAgentsImpl: jest.Mock;
   buckets?: ReturnType<typeof bucket>[];
   hasEnterprise?: boolean;
+  rebalanceEnabled?: boolean;
 }) => {
   const search = jest.fn().mockResolvedValue({ aggregations: { by_host: { buckets } } });
   const routeContext = {
     server: {
       fleet: { agentService: { asInternalUser: { listAgents: listAgentsImpl } } },
       pluginsStart: {
+        taskManager: {
+          get: jest.fn().mockResolvedValue({
+            state: { rebalancePrivateLocationShardsEnabled: rebalanceEnabled },
+          }),
+        },
         licensing: {
           getLicense: jest.fn().mockResolvedValue({
             isAvailable: true,
@@ -249,5 +256,20 @@ describe('getPrivateLocationAgentStats route', () => {
     expect(result[0].isAgentSharding).toBe(true);
     expect(result[0].agents[0].monitorsAssigned).toBe(2);
     expect(mockListByAgentPolicy).toHaveBeenCalledWith({ agentPolicyId: 'policy-1' });
+  });
+
+  it('reports no sharding when shard rebalancing is off, even with an Enterprise license', async () => {
+    const listAgents = jest.fn().mockResolvedValue({ agents: [agent()], total: 1 });
+    const { routeContext } = makeContext({
+      listAgentsImpl: listAgents,
+      hasEnterprise: true,
+      rebalanceEnabled: false,
+    });
+
+    const result = await run(routeContext);
+
+    expect(result[0].isAgentSharding).toBe(false);
+    expect(result[0].agents[0].monitorsAssigned).toBeNull();
+    expect(mockListByAgentPolicy).not.toHaveBeenCalled();
   });
 });

@@ -8,7 +8,7 @@
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { SyntheticsServerSetup } from '../../types';
-import { isAgentShardingLicensed } from './agent_sharding_license';
+import { isAgentShardingActive, isAgentShardingLicensed } from './agent_sharding_license';
 
 const buildServer = (getLicense: jest.Mock) =>
   ({
@@ -43,5 +43,42 @@ describe('isAgentShardingLicensed', () => {
     const server = buildServer(jest.fn().mockRejectedValue(new Error('boom')));
     expect(await isAgentShardingLicensed(server)).toBe(false);
     expect(server.logger.error).toHaveBeenCalled();
+  });
+});
+
+describe('isAgentShardingActive', () => {
+  const buildActiveServer = (
+    type: 'basic' | 'enterprise',
+    taskManagerGet: jest.Mock = jest.fn().mockResolvedValue({ state: {} })
+  ) =>
+    ({
+      logger: loggerMock.create(),
+      pluginsStart: {
+        licensing: {
+          getLicense: jest.fn().mockResolvedValue(licenseMock.createLicense({ license: { type } })),
+        },
+        taskManager: { get: taskManagerGet },
+      },
+    } as unknown as SyntheticsServerSetup);
+
+  it('is active with an Enterprise license and rebalancing on', async () => {
+    expect(await isAgentShardingActive(buildActiveServer('enterprise'))).toBe(true);
+  });
+
+  it('is inactive when shard rebalancing is turned off', async () => {
+    const server = buildActiveServer(
+      'enterprise',
+      jest.fn().mockResolvedValue({ state: { rebalancePrivateLocationShardsEnabled: false } })
+    );
+    expect(await isAgentShardingActive(server)).toBe(false);
+  });
+
+  it('is inactive without an Enterprise license', async () => {
+    expect(await isAgentShardingActive(buildActiveServer('basic'))).toBe(false);
+  });
+
+  it('treats an unreadable kill-switch as on', async () => {
+    const server = buildActiveServer('enterprise', jest.fn().mockRejectedValue(new Error('boom')));
+    expect(await isAgentShardingActive(server)).toBe(true);
   });
 });

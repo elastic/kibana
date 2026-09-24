@@ -13,7 +13,6 @@ import { escapeQuotes } from '@kbn/es-query';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { getAgentPoliciesAsInternalUser } from '../../routes/settings/private_locations/get_agent_policies';
-import { getRebalancePrivateLocationShardsEnabled } from '../../tasks/rebalance_shards_enabled';
 import {
   syntheticsMonitorSOTypes,
   syntheticsMonitorSavedObjectType,
@@ -48,7 +47,7 @@ import {
 } from './rebalance_writes';
 import { getPrivateLocations } from '../get_private_locations';
 import { agentIdFromCondition, assignAgentById, isEqlSafeLiteral } from './assign_by_condition';
-import { isAgentShardingLicensed } from './agent_sharding_license';
+import { isAgentShardingActive } from './agent_sharding_license';
 
 export interface PrivateConfig {
   config: HeartbeatConfig;
@@ -327,26 +326,8 @@ export class SyntheticsPrivateLocation {
     return { agentIds: [...agentIds] };
   }
 
-  /**
-   * Cluster-wide kill-switch stored on the rebalance Task Manager task.
-   * Defaults to on so a task-read failure does not change CRUD behavior.
-   */
-  private async isShardRebalanceEnabled(): Promise<boolean> {
-    try {
-      return await getRebalancePrivateLocationShardsEnabled(this.server.pluginsStart.taskManager);
-    } catch (e) {
-      this.server.logger.error(e);
-      return true;
-    }
-  }
-
-  /** Monitors are pinned to one agent only with an Enterprise license and rebalancing on. */
   private async shouldAssignAgentConditions(): Promise<boolean> {
-    const [isLicensed, isRebalanceEnabled] = await Promise.all([
-      isAgentShardingLicensed(this.server),
-      this.isShardRebalanceEnabled(),
-    ]);
-    return isLicensed && isRebalanceEnabled;
+    return isAgentShardingActive(this.server);
   }
 
   /** Resolves each touched location at most once per monitor batch. */
