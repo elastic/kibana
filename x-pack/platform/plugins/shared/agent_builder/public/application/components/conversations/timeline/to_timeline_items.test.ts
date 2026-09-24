@@ -28,10 +28,7 @@ import type { ExecutionStreamingEvent, TimelineDisplayEvent } from '../../../../
 import { EXECUTION_STREAMING_EVENT_TYPE } from '../../../../services/events';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents';
 import { AgentPromptType } from '@kbn/agent-builder-common/agents';
-import {
-  createExecutionPausedEvent,
-  createConfirmationPrompt,
-} from './items/execution_paused_event.factory';
+import { createExecutionPausedEvent } from './items/execution_paused_event.factory';
 
 const makeEventsById = (events: TimelineDisplayEvent[]) => new Map(events.map((e) => [e.id, e]));
 
@@ -455,8 +452,8 @@ describe('groupTimelineEvents folding resumed executions', () => {
     return { pausedTerm, events: [user, started1, pausedTerm, promptResponse, started2] };
   };
 
-  it('keeps the turn awaiting_prompt when the resume fails, so the user can answer again', () => {
-    const { pausedTerm, events: baseEvents } = pausedRoundWithResume('exec-2');
+  it('fails the turn when the resume fails: the answered prompt is not asked again', () => {
+    const { events: baseEvents } = pausedRoundWithResume('exec-2');
     const failed = createExecutionFailedEvent({ id: 'ef-2', execution_id: 'exec-2' });
 
     const events = [...baseEvents, failed];
@@ -467,14 +464,15 @@ describe('groupTimelineEvents folding resumed executions', () => {
     expect(agentTurns).toHaveLength(1);
     const [turn] = agentTurns;
     if (turn.kind === 'agentTurn') {
-      expect(turn.status).toBe('awaiting_prompt');
-      expect(turn.terminal).toBe(pausedTerm);
-      expect(turn.pendingPrompts).toEqual([createConfirmationPrompt()]);
+      expect(turn.key).toBe('exec-1');
+      expect(turn.status).toBe('failed');
+      expect(turn.terminal).toBe(failed);
+      expect(turn.pendingPrompts).toBeUndefined();
     }
   });
 
-  it('keeps the turn awaiting_prompt when the resume is aborted', () => {
-    const { pausedTerm, events: baseEvents } = pausedRoundWithResume('exec-2');
+  it('aborts the turn when the resume is aborted: the answered prompt is not asked again', () => {
+    const { events: baseEvents } = pausedRoundWithResume('exec-2');
     const aborted = createExecutionAbortedEvent({ id: 'ea-2', execution_id: 'exec-2' });
 
     const events = [...baseEvents, aborted];
@@ -485,13 +483,14 @@ describe('groupTimelineEvents folding resumed executions', () => {
     expect(agentTurns).toHaveLength(1);
     const [turn] = agentTurns;
     if (turn.kind === 'agentTurn') {
-      expect(turn.status).toBe('awaiting_prompt');
-      expect(turn.terminal).toBe(pausedTerm);
-      expect(turn.pendingPrompts).toEqual([createConfirmationPrompt()]);
+      expect(turn.key).toBe('exec-1');
+      expect(turn.status).toBe('aborted');
+      expect(turn.terminal).toBe(aborted);
+      expect(turn.pendingPrompts).toBeUndefined();
     }
   });
 
-  it('keeps the turn awaiting_prompt when the resume of a second pause fails', () => {
+  it('fails the turn when the resume of an answered second pause fails', () => {
     const { events: baseEvents } = pausedRoundWithResume('exec-2');
     const pausedTerm2 = createExecutionPausedEvent({ id: 'paused-term-2', execution_id: 'exec-2' });
     const promptResponse2 = createPromptResponseEvent({
@@ -517,9 +516,9 @@ describe('groupTimelineEvents folding resumed executions', () => {
     const [turn] = agentTurns;
     if (turn.kind === 'agentTurn') {
       expect(turn.key).toBe('exec-1');
-      expect(turn.status).toBe('awaiting_prompt');
-      expect(turn.terminal).toBe(pausedTerm2);
-      expect(turn.pendingPrompts).toEqual([createConfirmationPrompt()]);
+      expect(turn.status).toBe('failed');
+      expect(turn.terminal).toBe(failed);
+      expect(turn.pendingPrompts).toBeUndefined();
     }
   });
 
