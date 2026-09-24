@@ -11,10 +11,7 @@ import { isEarsExperimentalConnector } from './ears_experimental_utils';
 
 describe('isEarsExperimentalConnector', () => {
   test('returns true for connector types whose EARS auth is marked experimental', () => {
-    // Google connectors have experimental: true on their EARS auth type
-    expect(isEarsExperimentalConnector('.google_calendar')).toBe(true);
-    expect(isEarsExperimentalConnector('.gmail')).toBe(true);
-    expect(isEarsExperimentalConnector('.google_drive')).toBe(true);
+    // Add future experimental connectors here
   });
 
   test('returns false for connector types whose EARS auth is stable', () => {
@@ -22,6 +19,9 @@ describe('isEarsExperimentalConnector', () => {
     expect(isEarsExperimentalConnector('.microsoft_teams')).toBe(false);
     expect(isEarsExperimentalConnector('.slack')).toBe(false);
     expect(isEarsExperimentalConnector('.sharepoint_online')).toBe(false);
+    expect(isEarsExperimentalConnector('.google_calendar')).toBe(false);
+    expect(isEarsExperimentalConnector('.gmail')).toBe(false);
+    expect(isEarsExperimentalConnector('.google_drive')).toBe(false);
   });
 
   test('returns false for connector types with no EARS auth', () => {

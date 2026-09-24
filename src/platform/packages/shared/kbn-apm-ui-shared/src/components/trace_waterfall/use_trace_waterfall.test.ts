@@ -26,6 +26,7 @@ const rootItem: TraceItem = {
 function buildError(overrides: Partial<Error>): Error {
   return {
     id: 'error-doc-1',
+    source: 'apm',
     trace: { id: 'trace-1' },
     parent: { id: 'span-1' },
     service: { name: 'my-service' },

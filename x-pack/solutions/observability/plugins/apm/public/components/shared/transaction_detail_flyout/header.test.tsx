@@ -44,6 +44,8 @@ describe('TransactionDetailFlyoutHeader', () => {
     const link = screen.getByTestId('transactionDetailFlyoutTitleLink');
     expect(link).toHaveAttribute('href', '/app/apm/services/checkout/transactions/view?name=GET');
     expect(link).toHaveTextContent('GET /api/orders');
+    expect(link).toHaveAttribute('data-ebt-action', 'viewSpan');
+    expect(link).toHaveAttribute('data-ebt-element', 'transactionDetailFlyoutTitle');
   });
 
   it('renders plain text when the APM href is unavailable', () => {
