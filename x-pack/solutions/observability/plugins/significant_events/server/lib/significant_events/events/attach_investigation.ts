@@ -7,18 +7,25 @@
 
 import { isEqual } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
+import type { Logger } from '@kbn/core/server';
 import type { SignificantEventInvestigation } from '@kbn/significant-events-schema';
+import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { EventClient } from './event_client';
 import { emitSignificantEventWriteTriggers } from '../../../workflows/triggers/emit_significant_event_triggers';
+import { toRuleEvent } from './to_rule_event';
 
 export const attachInvestigationToEvent = async ({
   eventClient,
   eventId,
   investigation,
+  alertEventsClient,
+  logger,
 }: {
   eventClient: EventClient;
   eventId: string;
   investigation: SignificantEventInvestigation;
+  alertEventsClient?: AlertEventsClientApi;
+  logger?: Logger;
 }): Promise<{ event_uuid: string; updated: number; ignored: number }> => {
   const { hits } = await eventClient.findByEventId(eventId);
   const latest = hits[hits.length - 1];
@@ -60,6 +67,16 @@ export const attachInvestigationToEvent = async ({
   };
 
   await eventClient.bulkCreate([updatedEvent], { throwOnFail: true });
+
+  alertEventsClient
+    ?.createAlertEvent(toRuleEvent(updatedEvent))
+    .catch((err) =>
+      logger?.error(
+        `attach_investigation dual-write to .rule-events failed: ${
+          err instanceof Error ? err.message : err
+        }`
+      )
+    );
 
   emitSignificantEventWriteTriggers({
     eventClient,

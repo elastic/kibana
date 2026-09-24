@@ -245,8 +245,8 @@ const eventsAttachInvestigationRoute = createServerRoute({
     }),
     body: significantEventInvestigationSchema.required({ completed_at: true }),
   }),
-  handler: async ({ params, request, getScopedClients, server }) => {
-    const { getEventClient, licensing } = await getScopedClients({ request });
+  handler: async ({ params, request, getScopedClients, server, logger }) => {
+    const { getEventClient, getAlertEventsClient, licensing } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing });
 
@@ -254,6 +254,8 @@ const eventsAttachInvestigationRoute = createServerRoute({
       eventClient: await getEventClient(),
       eventId: params.path.id,
       investigation: params.body,
+      alertEventsClient: await getAlertEventsClient(),
+      logger,
     });
   },
 });
@@ -389,8 +391,8 @@ const eventsUpdateRoute = createServerRoute({
         }
       }),
   }),
-  handler: async ({ params, request, getScopedClients, server }) => {
-    const { getEventClient, licensing } = await getScopedClients({ request });
+  handler: async ({ params, request, getScopedClients, server, logger }) => {
+    const { getEventClient, getAlertEventsClient, licensing } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing });
 
@@ -399,6 +401,8 @@ const eventsUpdateRoute = createServerRoute({
       eventUuid: params.path.id,
       status: params.body.status,
       assessmentNote: params.body.assessment_note,
+      alertEventsClient: await getAlertEventsClient(),
+      logger,
     });
   },
 });
@@ -427,17 +431,21 @@ const cleanupStaleEventsRoute = createServerRoute({
     request,
     getScopedClients,
     server,
+    logger,
   }): Promise<CleanupStaleEventsResult> => {
     const scopedClients = await getScopedClients({ request });
-    const { getEventClient, licensing } = scopedClients;
+    const { getEventClient, getAlertEventsClient, licensing } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
 
     const { rulesClient } = await scopedClients.getSignificantEventsAlertingContext();
+
     return cleanupStaleEvents({
       eventClient: await getEventClient(),
       rulesClient,
       candidateRuleIds: params?.body?.candidateRuleIds,
+      alertEventsClient: await getAlertEventsClient(),
+      logger,
     });
   },
 });

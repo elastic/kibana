@@ -14,6 +14,7 @@ import {
   type ErrorSampleDetailsResponse,
   type ErrorDistributionResponse,
   type TopErroneousTransactionsResponse,
+  type UnprocessedOtelErrorsResponse,
 } from '@kbn/apm-api-shared';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { getErrorDistribution } from './distribution/get_distribution';
@@ -23,6 +24,8 @@ import { getErrorGroupSampleIds } from './get_error_groups/get_error_group_sampl
 import { getErrorSampleDetails } from './get_error_groups/get_error_sample_details';
 import { getTopErroneousTransactionsPeriods } from './erroneous_transactions/get_top_erroneous_transactions';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
+import { createLogsClient } from '../../lib/helpers/create_es_client/create_logs_client';
+import { getUnprocessedOtelErrorsByService } from './get_unprocessed_otel_errors_by_service';
 
 const errorsMainStatisticsRoute = createApmServerRoute({
   endpoint: routeDefinitions.errors.mainStatistics.endpoint,
@@ -218,6 +221,30 @@ const topErroneousTransactionsRoute = createApmServerRoute({
   },
 });
 
+const unprocessedOtelErrorsRoute = createApmServerRoute({
+  endpoint: routeDefinitions.errors.unprocessedOtel.endpoint,
+  params: routeDefinitions.errors.unprocessedOtel.params,
+  security: { authz: { requiredPrivileges: ['apm'] } },
+  handler: async (resources): Promise<UnprocessedOtelErrorsResponse> => {
+    const { params } = resources;
+    const { serviceName } = params.path;
+    const { environment, kuery, start, end } = params.query;
+
+    // This route reads log indices via logsDataAccess rather than APM event client.
+    // logsDataAccess is a required APM plugin dependency, so createLogsClient always works here.
+    // createLogsClient uses asCurrentUser, so index-level authz applies on top of the 'apm' privilege.
+    const logsClient = await createLogsClient(resources);
+    return getUnprocessedOtelErrorsByService({
+      logsClient,
+      serviceName,
+      environment,
+      kuery,
+      start,
+      end,
+    });
+  },
+});
+
 export const errorsRouteRepository = {
   ...errorsMainStatisticsRoute,
   ...errorsMainStatisticsByTransactionNameRoute,
@@ -226,4 +253,5 @@ export const errorsRouteRepository = {
   ...errorGroupSampleDetailsRoute,
   ...errorDistributionRoute,
   ...topErroneousTransactionsRoute,
+  ...unprocessedOtelErrorsRoute,
 };
