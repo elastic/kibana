@@ -17,6 +17,7 @@ const RUN_ID = randomUUID().slice(0, 8);
 const AI_INDEX_ID = `scout_view_ai_index_${RUN_ID}`;
 const VIEW_NAME = `v-ai-index-${AI_INDEX_ID}`;
 const DEST = `ai-index-idx-scout-view-${RUN_ID}`;
+const NEW_DEST = `ai-index-idx-scout-view-new-${RUN_ID}`;
 const DS_AI_INDEX_ID = `scout_view_ai_index_ds_${RUN_ID}`;
 const DS_VIEW_NAME = `v-ai-index-${DS_AI_INDEX_ID}`;
 const DS_DEST = `ai-index-ds-scout-view-${RUN_ID}`;
@@ -53,6 +54,7 @@ apiTest.describe('context engine KI retrieval view', { tag: tags.stateful.classi
   apiTest.beforeAll(async ({ requestAuth, esClient }) => {
     adminApiCredentials = await requestAuth.getApiKey('admin');
     await esClient.indices.create({ index: DEST, mappings: MAPPINGS });
+    await esClient.indices.create({ index: NEW_DEST, mappings: MAPPINGS });
     await esClient.indices.createDataStream({ name: DS_DEST });
   });
 
@@ -66,6 +68,7 @@ apiTest.describe('context engine KI retrieval view', { tag: tags.stateful.classi
     await esClient.esql.deleteView({ name: VIEW_NAME }, { ignore: [404] });
     await esClient.esql.deleteView({ name: DS_VIEW_NAME }, { ignore: [404] });
     await esClient.indices.delete({ index: DEST }, { ignore: [404] });
+    await esClient.indices.delete({ index: NEW_DEST }, { ignore: [404] });
     await esClient.indices.deleteDataStream({ name: DS_DEST }, { ignore: [404] });
   });
 
@@ -129,6 +132,29 @@ apiTest.describe('context engine KI retrieval view', { tag: tags.stateful.classi
         const [[id, score]] = response.values;
         expect(id).toBe('active');
         expect(typeof score).toBe('number');
+      });
+
+      await apiTest.step('updating the dest repoints the view', async () => {
+        await esClient.index({
+          index: NEW_DEST,
+          id: 'moved',
+          refresh: true,
+          document: ki('moved'),
+        });
+
+        const response = await apiClient.put(`${AI_INDEX_COLLECTION_PATH}/${AI_INDEX_ID}`, {
+          headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
+          responseType: 'json',
+          body: {
+            dest: { type: 'index', value: NEW_DEST },
+            automations: [],
+            sources: [],
+          },
+        });
+        expect(response).toHaveStatusCode(200);
+
+        const { values } = await esClient.esql.query({ query: `FROM ${VIEW_NAME} | KEEP id` });
+        expect(values).toStrictEqual([['moved']]);
       });
 
       await apiTest.step('deleting the AI index removes the view', async () => {
