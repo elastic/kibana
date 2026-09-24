@@ -15,12 +15,12 @@ import {
   buildWorkflowLink,
   errorResult,
   evalExperimentConfigSchema,
-  evalsTools,
+  evalsExperimentTools,
   otherResult,
   toErrorResult,
   toGenerateParams,
-} from './common';
-import { hasManageEvalsPrivilege } from './check_privileges';
+} from './tool_utils';
+import { hasManageEvalsPrivilege } from '../../common/check_privileges';
 import type { EvalExperimentsToolDeps } from './deps';
 
 const saveSchema = evalExperimentConfigSchema.extend({
@@ -40,7 +40,7 @@ const saveSchema = evalExperimentConfigSchema.extend({
 export const saveEvalExperimentTool = (
   deps: EvalExperimentsToolDeps
 ): BuiltinSkillBoundedTool<typeof saveSchema> => ({
-  id: evalsTools.saveExperiment,
+  id: evalsExperimentTools.saveExperiment,
   type: ToolType.builtin,
   description:
     'Save an evaluation experiment as a reusable workflow. Pass workflow_id to update an existing saved workflow in place (idempotent re-save); omit it to create a new one. Returns the workflow id and a link.',
