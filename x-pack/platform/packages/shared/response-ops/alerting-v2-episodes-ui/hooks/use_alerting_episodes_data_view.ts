@@ -7,6 +7,7 @@
 
 import useAsync from 'react-use/lib/useAsync';
 import { getEsqlDataView } from '@kbn/discover-utils';
+import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { DataViewsContract, RuntimeField } from '@kbn/data-views-plugin/public';
 import { useMemo } from 'react';
@@ -15,6 +16,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { buildEpisodesBaseQuery } from '@kbn/alerting-v2-common-queries';
 import * as i18n from './translations';
 import { useSpaceId } from './use_space_id';
+import { useQueryV2Source } from '../context/episode_data_source_context';
 
 export interface UseAlertingEpisodesDataViewOptions {
   services: {
@@ -74,11 +76,20 @@ const computedFields: Record<string, RuntimeField> = {
  */
 export const useAlertingEpisodesDataView = ({ services }: UseAlertingEpisodesDataViewOptions) => {
   const spaceId = useSpaceId(services.spaces);
+  const queryV2Source = useQueryV2Source();
   const query = buildEpisodesBaseQuery(spaceId).print('basic');
 
   const dataViewAsync = useAsync(
-    () => getEsqlDataView({ esql: query }, undefined, services),
-    [query, services]
+    () =>
+      queryV2Source
+        ? getEsqlDataView({ esql: query }, undefined, services)
+        : // Users without v2 access can't resolve the v2 index fields or time field
+          getESQLAdHocDataview({
+            dataViewsService: services.dataViews,
+            query,
+            options: { createNewInstanceEvenIfCachedOneAvailable: true, skipFetchFields: true },
+          }),
+    [query, services, queryV2Source]
   );
 
   return useMemo(() => {

@@ -5,8 +5,11 @@
  * 2.0.
  */
 
+import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { useAlertingRulesCache } from './use_alerting_rules_cache';
+import { EpisodeDataSourceProvider } from '../context/episode_data_source_context';
+import { createTestEpisodeSource } from '../types/episode_data_source.mock';
 import type { FindRulesResponse } from '@kbn/alerting-v2-schemas';
 import { ALERTING_V2_RULE_API_PATH } from '@kbn/alerting-v2-constants';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
@@ -141,5 +144,30 @@ describe('useAlertingRulesCache', () => {
     rerender({ ruleIds: [presentRuleId, missingRuleId] });
 
     expect(mockHttp.get).toHaveBeenCalledTimes(callsAfterFirstFetch);
+  });
+
+  it('resolves rules only from the additional source when queryV2Source is false', async () => {
+    const ruleId = 'classic-rule';
+    const classicRule = {
+      id: ruleId,
+      metadata: { name: 'Classic Rule' },
+    } as unknown as FindRulesResponse['items'][number];
+    const dataSource = createTestEpisodeSource({
+      resolveRules: jest.fn().mockResolvedValue([classicRule]),
+    });
+    const wrapper = ({ children }: { children: React.ReactNode }) =>
+      React.createElement(
+        EpisodeDataSourceProvider,
+        { dataSource, queryV2Source: false },
+        children
+      );
+
+    const { result } = renderHook(
+      () => useAlertingRulesCache({ ruleIds: [ruleId], services: { http: mockHttp } }),
+      { wrapper }
+    );
+
+    await waitFor(() => expect(result.current.rulesCache).toEqual({ [ruleId]: classicRule }));
+    expect(mockHttp.get).not.toHaveBeenCalled();
   });
 });

@@ -60,19 +60,22 @@ export interface FetchFromV2AndSourceResult<TV2, TSource> {
 
 /**
  * Runs the v2 fetch and an optional additional source in parallel, settling both
- * so one failure does not drop the other source's data.
+ * so one failure does not drop the other source's data. The v2 fetch is skipped
+ * when `queryV2Source` is false.
  */
 export const fetchFromV2AndSource = async <TV2, TSource>({
   v2,
   source,
   fromSource,
+  queryV2Source = true,
 }: {
   v2: () => Promise<TV2>;
   source: EpisodeDataSource | undefined;
   fromSource: (source: EpisodeDataSource) => Promise<TSource> | undefined;
+  queryV2Source?: boolean;
 }): Promise<FetchFromV2AndSourceResult<TV2, TSource>> => {
   const [v2Fetch, sourceFetch] = await Promise.all([
-    settleFetch(ALERTING_V2_EPISODE_SOURCE_ID, v2),
+    queryV2Source ? settleFetch(ALERTING_V2_EPISODE_SOURCE_ID, v2) : EMPTY_RESULT,
     fetchFromSource(source, fromSource),
   ]);
 

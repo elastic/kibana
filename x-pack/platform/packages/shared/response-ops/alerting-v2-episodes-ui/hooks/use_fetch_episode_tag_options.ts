@@ -12,7 +12,10 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import type { TimeRange } from '@kbn/es-query';
 import { fetchEpisodeTagOptions } from '../apis/fetch_episode_tag_options';
 import { fetchFromV2AndSource } from '../utils/fetch_from_sources';
-import { useAdditionalEpisodesDataSource } from '../context/episode_data_source_context';
+import {
+  useAdditionalEpisodesDataSource,
+  useQueryV2Source,
+} from '../context/episode_data_source_context';
 import { mergeTagOptions } from '../utils/merge_tag_options';
 import { queryKeys } from '../query_keys';
 import { useSpaceId } from './use_space_id';
@@ -27,6 +30,7 @@ export const useFetchEpisodeTagOptions = ({
   timeRange,
 }: UseFetchEpisodeTagOptionsParams) => {
   const additionalEpisodesDataSource = useAdditionalEpisodesDataSource();
+  const queryV2Source = useQueryV2Source();
   const spaceId = useSpaceId(services.spaces);
   return useQuery({
     queryKey: queryKeys.tagOptions(
@@ -40,6 +44,7 @@ export const useFetchEpisodeTagOptions = ({
         source: additionalEpisodesDataSource,
         fromSource: (source) =>
           source.fetchTagOptions?.({ services, timeRange, abortSignal: signal }),
+        queryV2Source,
       });
 
       return [...(v2 ?? []).map(({ tags }) => tags), ...additional.flat()];

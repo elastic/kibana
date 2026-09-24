@@ -45,6 +45,30 @@ describe('shouldSwallowFetchError', () => {
     ).toBe(true);
   });
 
+  it('swallows an ES|QL security_exception wrapped by the expressions error', () => {
+    expect(
+      shouldSwallowFetchError({
+        name: 'Error',
+        message: 'action [indices:data/read/esql] is unauthorized',
+        original: {
+          name: 'EsError',
+          message: 'action [indices:data/read/esql] is unauthorized',
+          attributes: { error: { type: 'security_exception', reason: 'unauthorized' } },
+        },
+      })
+    ).toBe(true);
+  });
+
+  it('does not swallow other ES|QL errors', () => {
+    expect(
+      shouldSwallowFetchError({
+        name: 'EsError',
+        message: 'parsing failed',
+        attributes: { error: { type: 'parsing_exception', reason: 'bad query' } },
+      })
+    ).toBe(false);
+  });
+
   it('does not swallow HTTP 500', () => {
     expect(shouldSwallowFetchError(httpError(500))).toBe(false);
   });

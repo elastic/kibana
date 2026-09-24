@@ -131,4 +131,25 @@ describe('fetchFromV2AndSource', () => {
       errors: [],
     });
   });
+
+  it('skips v2 and returns only additional data when queryV2Source is false', async () => {
+    const v2 = jest.fn();
+    const source = createTestEpisodeSource({
+      fetchKpis: jest.fn().mockResolvedValue({ alerts_count: 10 }),
+    });
+
+    await expect(
+      fetchFromV2AndSource({
+        v2,
+        source,
+        fromSource: (s) => s.fetchKpis?.({} as never),
+        queryV2Source: false,
+      })
+    ).resolves.toEqual({
+      v2: undefined,
+      additional: [{ alerts_count: 10 }],
+      errors: [],
+    });
+    expect(v2).not.toHaveBeenCalled();
+  });
 });

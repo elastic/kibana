@@ -5,17 +5,22 @@
  * 2.0.
  */
 
+import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { getEsqlDataView } from '@kbn/discover-utils';
+import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import { useAlertingEpisodesDataView } from './use_alerting_episodes_data_view';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { EpisodeDataSourceProvider } from '../context/episode_data_source_context';
 import { createMockSpaces } from './test_utils';
 
 jest.mock('@kbn/discover-utils');
+jest.mock('@kbn/esql-utils');
 
 const mockGetEsqlDataView = jest.mocked(getEsqlDataView);
+const mockGetESQLAdHocDataview = jest.mocked(getESQLAdHocDataview);
 
 const http = httpServiceMock.createSetupContract();
 const { dataViews } = dataPluginMock.createStartContract();
@@ -139,5 +144,23 @@ describe('useAlertingEpisodesDataView', () => {
     });
 
     expect(result.current).toBe(mockDataView);
+  });
+
+  it('skips field and time field fetching when queryV2Source is false', async () => {
+    mockGetESQLAdHocDataview.mockResolvedValue(mockDataView);
+    const services = { dataViews, http, spaces: mockSpaces };
+    const wrapper = ({ children }: { children: React.ReactNode }) =>
+      React.createElement(EpisodeDataSourceProvider, { queryV2Source: false }, children);
+
+    const { result } = renderHook(() => useAlertingEpisodesDataView({ services }), { wrapper });
+
+    await waitFor(() => expect(result.current).toBe(mockDataView));
+
+    expect(mockGetEsqlDataView).not.toHaveBeenCalled();
+    expect(mockGetESQLAdHocDataview).toHaveBeenCalledWith({
+      dataViewsService: dataViews,
+      query: mockDefaultQuery,
+      options: { createNewInstanceEvenIfCachedOneAvailable: true, skipFetchFields: true },
+    });
   });
 });
