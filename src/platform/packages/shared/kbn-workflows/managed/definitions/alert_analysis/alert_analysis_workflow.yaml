@@ -1953,7 +1953,7 @@ steps:
                 {%- endfor -%}
                 {%- if all_host_names.size > 50 %} ({{ all_host_names.size | minus: 50 }} additional host(s) omitted from summary.){% endif -%}
                 {%- endcapture -%}
-                {{- grouped_counts_summary_raw | truncate: 10000, '' -}}
+                {{- grouped_counts_summary_raw | truncate: 10000, ' [truncated]' -}}
 
           # Join the per-batch summaries the model returned, skipping nil entries
           # (compact drops values the model omitted when batch_summary was not filled).
