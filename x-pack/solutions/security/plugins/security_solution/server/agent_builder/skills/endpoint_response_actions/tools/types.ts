@@ -71,6 +71,12 @@ export const MAX_ACTION_HOSTS = 50;
 export const MAX_AGENT_STATE_ENTRIES = MAX_OUTPUT_AGENTS;
 
 /**
+ * Cumulative serialized budget for the whole `agentState` summary — bounds the
+ * combined per-agent error payloads that individually pass their own bounds.
+ */
+export const MAX_AGENT_STATE_TOTAL_CHARS = 24_000;
+
+/**
  * Errors reported for one action. `getActionCompletionInfo` appends every
  * unsuccessful agent response's errors into this aggregate array, so a large
  * failed fan-out can carry thousands of entries (with arbitrarily long text)
@@ -91,7 +97,10 @@ export const MAX_OUTPUT_TOTAL_CHARS = 64_000;
  * the AI agent branch on the failure cause and gives the frontend a stable
  * contract instead of free-text messages.
  */
-export type ResponseActionErrorType = 'insufficient_privileges' | 'unknown_error';
+export type ResponseActionErrorType =
+  | 'insufficient_privileges'
+  | 'invalid_argument'
+  | 'unknown_error';
 
 /**
  * Builds a typed error result. The optional `extra` fields are merged at the
@@ -386,12 +395,30 @@ export function summarizeAgentState(agentState: unknown): AgentStateSummary | un
   const byAgentId = Object.entries(agentState as Record<string, unknown>);
   const kept = byAgentId.slice(0, MAX_AGENT_STATE_ENTRIES);
 
+  const retained = Object.fromEntries(
+    kept.map(([agentId, state]) => [agentId, boundOutputValue(state, agentId).value])
+  );
+  let cumulativeDropped = 0;
+  while (
+    JSON.stringify(retained).length > MAX_AGENT_STATE_TOTAL_CHARS &&
+    Object.keys(retained).length > 1
+  ) {
+    const ids = Object.keys(retained);
+    delete retained[ids[ids.length - 1]];
+    cumulativeDropped++;
+  }
+
+  const totalDropped = byAgentId.length - Object.keys(retained).length;
+
   return {
-    agentState: Object.fromEntries(
-      kept.map(([agentId, state]) => [agentId, boundOutputValue(state, agentId).value])
-    ),
+    agentState: retained,
     totalAgents: byAgentId.length,
-    ...(byAgentId.length > kept.length ? { agentsTruncated: byAgentId.length - kept.length } : {}),
+    ...(totalDropped > 0
+      ? {
+          agentsTruncated: totalDropped,
+          ...(cumulativeDropped > 0 ? { agentsTruncatedByBudget: cumulativeDropped } : {}),
+        }
+      : {}),
   };
 }
 
@@ -430,6 +457,8 @@ export interface AgentStateSummary {
   agentState: Record<string, unknown>;
   totalAgents: number;
   agentsTruncated?: number;
+  /** How many agents were dropped specifically by the cumulative budget (subset of `agentsTruncated`). */
+  agentsTruncatedByBudget?: number;
 }
 
 export interface ActionErrorsSummary {

@@ -35,12 +35,13 @@ const getResponseActionStatusSchema = z.object({
 
 /**
  * Read-only lookup for a previously dispatched response action by its action ID.
- * Mirrors `GET /api/endpoint/action/{action_id}` and is the follow-up path when
- * a write action returned `pending` because the host had not finished yet.
+ * Mirrors `GET /api/endpoint/action/{action_id}`. Read-only slice: inspects any
+ * action from Response Actions history; once write tools land it is also the
+ * follow-up path for actions that returned `pending`.
  */
 export const getResponseActionStatusTool = (
   endpointAppContextService: EndpointAppContextService
-): BuiltinSkillBoundedTool => {
+): BuiltinSkillBoundedTool<typeof getResponseActionStatusSchema> => {
   return {
     id: GET_RESPONSE_ACTION_STATUS_TOOL_ID,
     type: ToolType.builtin,
@@ -49,7 +50,7 @@ export const getResponseActionStatusTool = (
     schema: getResponseActionStatusSchema,
     handler: async (params, { logger, request, spaceId }) => {
       try {
-        const actionId = params.actionId as string;
+        const actionId = params.actionId;
 
         // The HTTP details route gates this behind
         // `withEndpointAuthz({ all: ['canAccessEndpointActionsLogManagement'] })`.
@@ -133,7 +134,7 @@ export const getResponseActionStatusTool = (
         };
       } catch (error) {
         if (error instanceof NotFoundError) {
-          const actionId = params.actionId as string;
+          const actionId = params.actionId;
           return {
             results: [
               {

@@ -48,7 +48,7 @@ const listEndpointsSchema = z.object({
 
 export const listEndpointsTool = (
   endpointAppContextService: EndpointAppContextService
-): BuiltinSkillBoundedTool => {
+): BuiltinSkillBoundedTool<typeof listEndpointsSchema> => {
   return {
     id: LIST_ENDPOINTS_TOOL_ID,
     type: ToolType.builtin,
@@ -71,14 +71,14 @@ export const listEndpointsTool = (
         // `hostNameFilter` is user/LLM-controlled, so escape it before
         // interpolating into the KQL wildcard expression.
         const kuery = params.hostNameFilter
-          ? `united.endpoint.host.hostname: *${escapeKuery(params.hostNameFilter as string)}*`
+          ? `united.endpoint.host.hostname: *${escapeKuery(params.hostNameFilter)}*`
           : undefined;
 
-        const page = (params.page as number | undefined) ?? 0;
+        const page = (params.page) ?? 0;
 
         if (page > MAX_LIST_ENDPOINTS_PAGE) {
           return responseActionErrorResult(
-            'unknown_error',
+            'invalid_argument',
             `The endpoint inventory is capped at the first ${
               (MAX_LIST_ENDPOINTS_PAGE + 1) * LIST_ENDPOINTS_PAGE_SIZE
             } endpoints. Narrow the list with the hostNameFilter once a hostname is known instead of paging further.`
@@ -157,7 +157,7 @@ export const listEndpointsTool = (
       } catch (error) {
         logger.error(error);
         return responseActionErrorResult(
-          'unknown_error',
+          'invalid_argument',
           `Error listing endpoints: ${error instanceof Error ? error.message : String(error)}`
         );
       }

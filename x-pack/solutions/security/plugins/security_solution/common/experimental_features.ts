@@ -97,7 +97,8 @@ export const allowedExperimentalValues = Object.freeze({
   defendCrossProjectSearch: true,
 
   /**
-   * AI Agent chat-first endpoint response actions skill (isolate, unisolate, etc.)
+   * AI Agent chat-first endpoint response actions skill (read-only: list endpoints,
+   * endpoint status, response action status)
    * Release: TBD
    *
    * Ships disabled: it surfaces endpoint response-action state to chat and is

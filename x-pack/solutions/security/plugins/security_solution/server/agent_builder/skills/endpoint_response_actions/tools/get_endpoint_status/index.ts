@@ -65,7 +65,7 @@ const getEndpointStatusSchema = z.object({
 
 export const getEndpointStatusTool = (
   endpointAppContextService: EndpointAppContextService
-): BuiltinSkillBoundedTool => {
+): BuiltinSkillBoundedTool<typeof getEndpointStatusSchema> => {
   return {
     id: GET_ENDPOINT_STATUS_TOOL_ID,
     type: ToolType.builtin,
@@ -73,8 +73,8 @@ export const getEndpointStatusTool = (
     schema: getEndpointStatusSchema,
     handler: async (params, { logger, request, spaceId }) => {
       try {
-        const hostName = params.hostName as string;
-        const requestedAgentId = params.agentId as string | undefined;
+        const hostName = params.hostName;
+        const requestedAgentId = params.agentId;
 
         // The endpoint metadata detail route gates this behind
         // `withEndpointAuthz({ any: ['canReadSecuritySolution', 'canAccessFleet'] })`

@@ -15,6 +15,7 @@ import {
   summarizeAgentState,
   MAX_ACTION_HOSTS,
   MAX_AGENT_STATE_ENTRIES,
+  MAX_AGENT_STATE_TOTAL_CHARS,
   MAX_OUTPUT_AGENTS,
   MAX_OUTPUT_DEPTH,
   MAX_OUTPUT_ENTRIES_PER_AGENT,
@@ -267,6 +268,32 @@ describe('summarizeAgentState', () => {
     expect(Object.keys(result.agentState)).toHaveLength(MAX_AGENT_STATE_ENTRIES);
     expect(result.totalAgents).toBe(MAX_AGENT_STATE_ENTRIES + 2);
     expect(result.agentsTruncated).toBe(2);
+  });
+
+  it('enforces the cumulative serialized budget across retained agent states', () => {
+    const agentState: Record<string, unknown> = {};
+    for (let i = 0; i < MAX_AGENT_STATE_ENTRIES; i++) {
+      agentState[`agent-${i}`] = {
+        errors: Array.from({ length: MAX_OUTPUT_ENTRIES_PER_AGENT }, () => 'e'.repeat(5_000)),
+      };
+    }
+
+    const result = summarizeAgentState(agentState)!;
+
+    // The budget drops whole agents from the tail but always keeps at least
+    // one, so the serialized size is bounded by the budget OR one full agent
+    // (plus the map-key wrapper around it).
+    expect(Object.keys(result.agentState).length).toBeLessThan(MAX_AGENT_STATE_ENTRIES);
+    const oneAgentOverhead = JSON.stringify(result.agentState).length -
+      JSON.stringify(result.agentState[Object.keys(result.agentState)[0]]).length;
+    expect(JSON.stringify(result.agentState).length).toBeLessThanOrEqual(
+      Math.max(MAX_AGENT_STATE_TOTAL_CHARS, JSON.stringify(result.agentState['agent-0']).length + oneAgentOverhead)
+    );
+    expect(result.totalAgents).toBe(MAX_AGENT_STATE_ENTRIES);
+    expect(result.agentsTruncatedByBudget).toBeGreaterThan(0);
+    expect(result.agentsTruncated).toBe(
+      MAX_AGENT_STATE_ENTRIES - Object.keys(result.agentState).length
+    );
   });
 
   it('bounds oversized error strings inside a per-agent state', () => {
