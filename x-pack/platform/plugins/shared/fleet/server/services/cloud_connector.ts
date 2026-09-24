@@ -681,9 +681,9 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
             user,
           });
         }
+        // The verifier treats a connector updated in the last few minutes as due, so the
+        // previous verification timestamps can stay until it stamps new ones.
         updateAttributes.verification_status = 'pending';
-        updateAttributes.verification_started_at = null;
-        updateAttributes.verification_failed_at = null;
       }
 
       async function commitConnectorUpdate() {

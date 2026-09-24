@@ -855,6 +855,21 @@ describe('verify_permissions_task', () => {
         expect(mockedAgentPolicyService.createVerifierPolicy).toHaveBeenCalledTimes(1);
       });
 
+      it('should verify a connector whose Role ARN changed right after a recent verification', async () => {
+        // A Role ARN save resets the status to pending and keeps the previous timestamps.
+        setupEligibilityTest({
+          created_at: minutesAgo(10),
+          updated_at: minutesAgo(0),
+          verification_started_at: minutesAgo(2),
+          verification_failed_at: minutesAgo(2),
+          verification_status: 'pending',
+        });
+
+        await taskRunner.run();
+
+        expect(mockedAgentPolicyService.createVerifierPolicy).toHaveBeenCalledTimes(1);
+      });
+
       it('should re-verify connector whose verification_started_at expired and status is not failed', async () => {
         setupEligibilityTest({
           created_at: minutesAgo(10),

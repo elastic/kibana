@@ -1262,8 +1262,6 @@ describe('CloudConnectorService', () => {
           vars: validVars,
           updated_at: expect.any(String),
           verification_status: 'pending',
-          verification_started_at: null,
-          verification_failed_at: null,
         }
       );
 
@@ -2073,13 +2071,12 @@ describe('CloudConnectorService', () => {
         expect(mockSoClient.update).toHaveBeenCalledWith(
           CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
           connectorId,
-          expect.objectContaining({
-            verification_status: 'pending',
-            verification_started_at: null,
-            verification_failed_at: null,
-          }),
+          expect.objectContaining({ verification_status: 'pending' }),
           { version: 'Wz-cc-version' }
         );
+        const [, , attributes] = mockSoClient.update.mock.calls[0];
+        expect(attributes).not.toHaveProperty('verification_started_at');
+        expect(attributes).not.toHaveProperty('verification_failed_at');
       });
 
       // `external_id` is a Fleet secret reference that only lives on the connector; nothing

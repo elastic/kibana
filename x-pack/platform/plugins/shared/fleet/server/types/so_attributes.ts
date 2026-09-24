@@ -370,8 +370,8 @@ export interface CloudConnectorSOAttributes {
   created_at: string;
   updated_at: string;
   verification_status?: VerificationStatus;
-  verification_started_at?: string | null;
-  verification_failed_at?: string | null;
+  verification_started_at?: string;
+  verification_failed_at?: string;
   iac_key?: string | null;
   iac_blueprint_id?: string | null;
   iac_blueprint_version?: string | null;

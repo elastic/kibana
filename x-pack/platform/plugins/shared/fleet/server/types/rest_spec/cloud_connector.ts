@@ -152,10 +152,8 @@ const CloudConnectorResponseVarsSchema = schema.recordOf(schema.string(), schema
 
 const VerificationFieldsSchema = {
   verification_status: schema.maybe(schema.string()),
-  // Both timestamps are reset to null when the connector has to be re-verified, e.g. after its
-  // role ARN changes.
-  verification_started_at: schema.maybe(schema.nullable(schema.string())),
-  verification_failed_at: schema.maybe(schema.nullable(schema.string())),
+  verification_started_at: schema.maybe(schema.string()),
+  verification_failed_at: schema.maybe(schema.string()),
 };
 
 export const CreateCloudConnectorResponseSchema = schema.object({
