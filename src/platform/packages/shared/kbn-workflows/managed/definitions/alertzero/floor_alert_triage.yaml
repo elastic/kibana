@@ -148,7 +148,7 @@ steps:
   #    autoCloseEnabled: false — the Worker owns the close decision (R11 says
   #    every close is a Proposal, so the sub-workflow must not close inline).
   #
-  #    connectorIdByFeature: alertzero_alert_triage — resolves the model via
+  #    connectorIdByFeature: alertzero_fast — resolves the model via
   #    the Model Management feature registry rather than the standalone
   #    workflow's uiSettings connector, so model choice is an operator-facing
   #    setting rather than a template value.
@@ -178,7 +178,7 @@ steps:
         input: >-
           🤖 **Alert Triage** — Triage started for rule "{{ event.rule.name }}"
           ({{ event.alerts | size }} alert(s)).
-          Model routed via Model Management feature `alertzero_alert_triage`.
+          Model routed via Model Management feature `alertzero_fast`.
           Alerts: {% for a in event.alerts limit: 10 %}`{{ a._id }}`{% unless forloop.last %}, {% endunless %}{% endfor %}{% if event.alerts.size > 10 %} and {{ event.alerts.size | minus: 10 }} more{% endif %}.
           Execution: {{ execution.url }}
 
@@ -188,7 +188,7 @@ steps:
   #    autoCloseEnabled: false — the Worker owns the close decision (R11 says
   #    every close is a Proposal, so the sub-workflow must not close inline).
   #
-  #    connectorIdByFeature: alertzero_alert_triage — resolves the model via
+  #    connectorIdByFeature: alertzero_fast — resolves the model via
   #    the Model Management feature registry rather than the standalone
   #    workflow's uiSettings connector, so model choice is an operator-facing
   #    setting rather than a template value.
@@ -241,7 +241,7 @@ steps:
         alerts: "${{ event.alerts }}"
         autoCloseEnabled: false
         autoCloseConfidenceScoreMinThreshold: "${{ consts.worker_settings.autoCloseConfidenceScoreMinThreshold }}"
-        connectorIdByFeature: alertzero_alert_triage
+        connectorIdByFeature: alertzero_fast
         calledByWorker: true
         investigationConversationId: "{{ steps.create_investigation.output.conversation_id }}"
 
@@ -312,7 +312,7 @@ steps:
                 input: >-
                   🤖 **Alert Triage** ⚠️ — Alert Analysis returned no verdicts for {{ event.alerts | size }} alert(s).
                   Analysis is on for this space (a disabled setting aborts before an Investigation is opened).
-                  Likely causes: the alerts already carry the analysis tag, the `alertzero_alert_triage`
+                  Likely causes: the alerts already carry the analysis tag, the `alertzero_fast`
                   Model Management feature has no connector, or the sub-workflow skipped the batch.
                   Alerts have NOT been tagged or closed.
 

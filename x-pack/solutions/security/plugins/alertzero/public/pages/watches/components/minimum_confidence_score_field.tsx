@@ -6,7 +6,8 @@
  */
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { EuiFieldNumber } from '@elastic/eui';
 import * as i18n from '../settings_translations';
 
 interface MinimumConfidenceScoreFieldProps {
@@ -20,9 +21,13 @@ interface MinimumConfidenceScoreFieldProps {
 const toDisplay = (decimal: number) => Math.round(decimal * 100);
 const toDecimal = (display: number) => display / 100;
 
+/** Compact width so the control sits beside the SettingRow label instead of stretching full-bleed. */
+const FIELD_WIDTH_PX = 120;
+
 /**
  * Confidence score field for Alert Triage Worker. Displays as 0–100% (integer),
  * stores and emits as 0–1 decimal. Persists on blur to avoid mid-type API calls.
+ * Label/help live on the surrounding `SettingRow`; this is the control only.
  */
 export const MinimumConfidenceScoreField: React.FC<MinimumConfidenceScoreFieldProps> = ({
   current,
@@ -62,13 +67,14 @@ export const MinimumConfidenceScoreField: React.FC<MinimumConfidenceScoreFieldPr
   }, []);
 
   return (
-    <EuiFormRow
-      label={i18n.MINIMUM_CONFIDENCE_SCORE_LABEL}
-      helpText={i18n.MINIMUM_CONFIDENCE_SCORE_HELP_TEXT}
-      fullWidth
+    <div
       data-test-subj="alertZeroMinimumConfidenceScoreField"
+      css={css`
+        width: ${FIELD_WIDTH_PX}px;
+      `}
     >
       <EuiFieldNumber
+        compressed
         fullWidth
         min={0}
         max={100}
@@ -77,8 +83,9 @@ export const MinimumConfidenceScoreField: React.FC<MinimumConfidenceScoreFieldPr
         onChange={onValueChange}
         onBlur={persist}
         append="%"
+        aria-label={i18n.MINIMUM_CONFIDENCE_SCORE_LABEL}
         data-test-subj="alertZeroMinimumConfidenceScoreInput"
       />
-    </EuiFormRow>
+    </div>
   );
 };

@@ -22,5 +22,11 @@ export interface AlertZeroStartDependencies {
   workflowsManagement?: WorkflowsPublicPluginStart;
 }
 
-export type AlertZeroPublicSetup = Record<string, never>;
+/**
+ * Soft-enable contract. Always returned from `setup()` so optional consumers
+ * can gate on `enabled` without reading `xpack.alertzero` config themselves.
+ */
+export interface AlertZeroPublicSetup {
+  enabled: boolean;
+}
 export type AlertZeroPublicStart = Record<string, never>;

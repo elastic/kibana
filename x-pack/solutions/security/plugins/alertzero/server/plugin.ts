@@ -16,7 +16,6 @@ import {
 } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import { ALERTZERO_ALERT_TRIAGE_INFERENCE_FEATURE_ID } from '@kbn/alertzero-common';
 import { SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED } from '@kbn/management-settings-ids';
 import {
   ALERTZERO_API_PRIVILEGE_READ,
@@ -84,7 +83,7 @@ export class AlertZeroPlugin
   ): AlertZeroPluginSetup {
     if (!this.config.enabled) {
       this.logger.info('AlertZero plugin is disabled');
-      return {};
+      return { enabled: false };
     }
 
     this.logger.info('Setting up AlertZero plugin');
@@ -125,19 +124,6 @@ export class AlertZeroPlugin
       },
     });
 
-    if (searchInferenceEndpoints) {
-      searchInferenceEndpoints.features.register({
-        featureId: ALERTZERO_ALERT_TRIAGE_INFERENCE_FEATURE_ID,
-        parentFeatureId: 'security_search_inference_parent',
-        featureName: 'Alert Triage',
-        featureDescription: 'Model used by the Alert Triage Worker to classify alerts',
-        taskType: 'chat_completion',
-        recommendedEndpoints: [],
-        // No ignoreGlobalDefault — falls back to platform default so the Worker works immediately
-        // after onboarding, unlike Hunt Watch's tiered TI features which use ignoreGlobalDefault: true.
-      });
-    }
-
     const router = coreSetup.http.createRouter();
 
     registerRoutes({
@@ -151,7 +137,7 @@ export class AlertZeroPlugin
       getAgentBuilderConversations: () => this.requireAgentBuilderConversations(),
     });
 
-    return {};
+    return { enabled: true };
   }
 
   start(core: CoreStart, plugins: AlertZeroStartDependencies): AlertZeroPluginStart {

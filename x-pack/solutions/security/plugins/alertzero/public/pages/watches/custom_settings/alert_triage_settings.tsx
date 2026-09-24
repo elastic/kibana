@@ -6,13 +6,14 @@
  */
 
 import React from 'react';
-import { EuiSpacer } from '@elastic/eui';
 import {
   ALERT_TRIAGE_DEFAULT_EXTRAS,
   AlertTriageWorkerExtras,
   type WorkerSettings,
 } from '@kbn/alertzero-common';
 import { MinimumConfidenceScoreField } from '../components/minimum_confidence_score_field';
+import { SettingRow } from '../components/setting_row';
+import * as i18n from '../settings_translations';
 import type { WorkerCustomSettingsComponent } from './types';
 
 /** The server projects complete extras; fall back to the defaults rather than crash a render. */
@@ -33,8 +34,11 @@ export const AlertTriageSettings: WorkerCustomSettingsComponent = ({
   const extras = readAlertTriageExtras(settings);
 
   return (
-    <>
-      <EuiSpacer size="m" />
+    <SettingRow
+      label={i18n.MINIMUM_CONFIDENCE_SCORE_LABEL}
+      labelHelp={i18n.MINIMUM_CONFIDENCE_SCORE_HELP_TEXT}
+      data-test-subj="alertZeroMinimumConfidenceScoreRow"
+    >
       <MinimumConfidenceScoreField
         current={extras.autoCloseConfidenceScoreMinThreshold}
         isDisabled={isDisabled}
@@ -42,6 +46,6 @@ export const AlertTriageSettings: WorkerCustomSettingsComponent = ({
           onExtrasChange({ ...extras, autoCloseConfidenceScoreMinThreshold })
         }
       />
-    </>
+    </SettingRow>
   );
 };

@@ -20,7 +20,14 @@ import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extens
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { PluginStart as SecuritySolutionPluginStart } from '@kbn/security-solution-plugin/server';
 
-export type AlertZeroPluginSetup = Record<string, never>;
+/**
+ * Soft-enable contract. Always returned from `setup()` so optional consumers
+ * (e.g. security_solution threat-intel supply) can gate on `enabled` without
+ * reading `xpack.alertzero` config themselves.
+ */
+export interface AlertZeroPluginSetup {
+  enabled: boolean;
+}
 export type AlertZeroPluginStart = Record<string, never>;
 
 export interface AlertZeroSetupDependencies {
