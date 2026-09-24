@@ -21,6 +21,7 @@ const makeInvestigation = (overrides: Partial<Investigation> = {}): Investigatio
   watch_execution_id: 'exec-1',
   recordId: 'inv-1',
   pendingProposalCount: 1,
+  assignees: [],
   recommendedAction: 'respond',
   primaryActionLabel: 'Revoke sessions',
   events: [],

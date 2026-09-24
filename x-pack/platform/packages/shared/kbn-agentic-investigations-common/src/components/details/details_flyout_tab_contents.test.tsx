@@ -21,6 +21,7 @@ const investigation = {
   watch_id: '',
   watch_execution_id: '',
   pendingProposalCount: 0,
+  assignees: [],
   summary: 'A second sign-in replayed the same session cookie.',
   // Both fed the removed Impact table; neither should surface here any more.
   affectedSurface: 'cfo@corp',

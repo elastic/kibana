@@ -22,6 +22,7 @@ const investigation: Investigation = {
   recordId: 'CASE-2047',
   assignee: 'ava',
   pendingProposalCount: 0,
+  assignees: [],
   events: [],
 };
 

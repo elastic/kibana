@@ -32,6 +32,8 @@ export interface Investigation {
   watch_tier?: string;
   severity?: string;
   assignee?: string | null;
+  /** Full list of assignee user-profile uids. Used by the interactive assignee picker in the flyout. */
+  assignees: string[];
   status?: string;
   pendingProposalCount: number;
   recommendedAction?: RecommendedAction;

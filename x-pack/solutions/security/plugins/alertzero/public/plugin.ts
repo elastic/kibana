@@ -20,13 +20,15 @@ import {
   ALERTZERO_APP_ID,
   ALERTZERO_APP_PATH,
   TEMPLATE_ID_INVESTIGATION,
+  TEMPLATE_ID_ESCALATION,
 } from '@kbn/alertzero-common';
-import {
-  AGENTIC_INVESTIGATIONS_PLUGIN_ID,
-  ESCALATIONS_UI_CAPABILITY_MANAGE,
-} from '@kbn/agentic-investigations-plugin/common';
 import React from 'react';
-import { registerAgenticInvestigationTemplateUI } from '@kbn/agentic-investigations-common';
+import {
+  registerAgenticInvestigationTemplateUI,
+  registerEscalationTemplateUI,
+  type RenderAssignees,
+} from '@kbn/agentic-investigations-common';
+import { getAgenticInvestigationsCapabilities } from './hooks/use_agentic_investigations_capabilities';
 import { getAlertZeroDeepLinks } from './deep_links';
 import { EscalationModalBoundary } from './pages/conversations/escalation_modal_boundary';
 import type {
@@ -46,6 +48,11 @@ const APP_TITLE = i18n.translate('xpack.alertzero.appTitle', {
 const INVESTIGATION_TEMPLATE_NAME = i18n.translate('xpack.alertzero.conversationTemplate.name', {
   defaultMessage: 'Investigation',
 });
+
+const ESCALATION_TEMPLATE_NAME = i18n.translate(
+  'xpack.alertzero.escalationConversationTemplate.name',
+  { defaultMessage: 'Escalation' }
+);
 
 export class AlertZeroPublicPlugin
   implements
@@ -112,53 +119,91 @@ export class AlertZeroPublicPlugin
       deepLinks: getAlertZeroDeepLinks(core.application.capabilities),
     }));
 
-    // Lazy-load the entire escalation modal subtree — only resolved when the modal is first opened.
-    // This keeps KibanaContextProvider, QueryClient, and ConnectedEscalationModal (plus all their
-    // EUI and hook dependencies) out of alertzero's main chunk.
-    const LazyEscalationModal = React.lazy(async () => {
-      const [
-        { KibanaContextProvider },
-        { QueryClient, QueryClientProvider },
-        { ConnectedEscalationModal },
-      ] = await Promise.all([
-        import('@kbn/kibana-react-plugin/public'),
-        import('@kbn/react-query'),
-        import('./pages/conversations/connected_escalation_modal'),
-      ]);
+    // ---------------------------------------------------------------------------
+    // Lazy provider wrapper
+    // ---------------------------------------------------------------------------
+    // Both the escalation modal and the assignee picker need to mount inside
+    // KibanaContextProvider + QueryClientProvider. The factory is called once
+    // per flyout-type so each gets its own isolated QueryClient. Wrapped lazily so
+    // these heavy deps land in async chunks rather than the main bundle.
 
-      // Both `flyoutQueryClient` and `stableServices` are created once inside the lazy factory
-      // so they are stable across renders. KibanaContextProvider compares `services` by reference;
-      // a spread inside the component body would create a new object on every render and
-      // cause all consumers to re-render unnecessarily.
-      const flyoutQueryClient = new QueryClient();
-      const stableServices = { ...core, ...startDeps };
+    /**
+     * Returns a React.lazy factory that wraps `getComponent()` with providers.
+     * Each call creates an independent QueryClient so caches don't bleed across flyouts.
+     */
+    const makeLazyWithProviders = <P extends object>(
+      getComponent: () => Promise<React.ComponentType<P>>
+    ): React.LazyExoticComponent<React.ComponentType<P>> => {
+      return React.lazy(async () => {
+        const [{ KibanaContextProvider }, { QueryClient, QueryClientProvider }, Component] =
+          await Promise.all([
+            import('@kbn/kibana-react-plugin/public'),
+            import('@kbn/react-query'),
+            getComponent(),
+          ]);
 
-      const WrappedModal: React.FC<React.ComponentProps<typeof ConnectedEscalationModal>> = (
-        props
-      ) =>
-        React.createElement(
-          KibanaContextProvider,
-          { services: stableServices },
+        const queryClient = new QueryClient();
+        const stableServices = { ...core, ...startDeps };
+
+        const Wrapped: React.FC<P> = (props) =>
           React.createElement(
-            QueryClientProvider,
-            { client: flyoutQueryClient },
-            React.createElement(ConnectedEscalationModal, props)
-          )
-        );
+            KibanaContextProvider,
+            { services: stableServices },
+            React.createElement(
+              QueryClientProvider,
+              { client: queryClient },
+              React.createElement(Component, props)
+            )
+          );
 
-      return { default: WrappedModal };
+        return { default: Wrapped };
+      });
+    };
+
+    // ---------------------------------------------------------------------------
+    // Escalation creation modal (opened from the investigation flyout footer)
+    // ---------------------------------------------------------------------------
+    const LazyEscalationModal = makeLazyWithProviders(async () => {
+      const { ConnectedEscalationModal } = await import(
+        './pages/conversations/connected_escalation_modal'
+      );
+      return ConnectedEscalationModal as React.ComponentType<
+        React.ComponentProps<typeof ConnectedEscalationModal>
+      >;
     });
 
-    const canManageEscalations =
-      core.application.capabilities[AGENTIC_INVESTIGATIONS_PLUGIN_ID]?.[
-        ESCALATIONS_UI_CAPABILITY_MANAGE
-      ] === true;
+    // ---------------------------------------------------------------------------
+    // Assignee picker (embedded in both investigation and escalation flyout headers)
+    // ---------------------------------------------------------------------------
+    const LazyConnectedAssignees = makeLazyWithProviders(async () => {
+      const { ConnectedAssignees } = await import(
+        './components/connected_assignees/connected_assignees'
+      );
+      return ConnectedAssignees as React.ComponentType<
+        React.ComponentProps<typeof ConnectedAssignees>
+      >;
+    });
+
+    const { manageEscalations: canManageEscalations } = getAgenticInvestigationsCapabilities(
+      core.application.capabilities
+    );
+
+    // ---------------------------------------------------------------------------
+    // renderAssignees render prop — shared by both templates
+    // ---------------------------------------------------------------------------
+    const renderAssignees: RenderAssignees = (props) =>
+      React.createElement(
+        EscalationModalBoundary,
+        null,
+        React.createElement(LazyConnectedAssignees, props)
+      );
 
     registerAgenticInvestigationTemplateUI({
       conversationTemplates: startDeps.agentBuilder.conversationTemplates,
       templateId: TEMPLATE_ID_INVESTIGATION,
       name: INVESTIGATION_TEMPLATE_NAME,
       icon: 'securitySignalDetected',
+      renderAssignees,
       renderEscalationModal: canManageEscalations
         ? (props) =>
             React.createElement(
@@ -167,6 +212,14 @@ export class AlertZeroPublicPlugin
               React.createElement(LazyEscalationModal, props)
             )
         : undefined,
+    });
+
+    registerEscalationTemplateUI({
+      conversationTemplates: startDeps.agentBuilder.conversationTemplates,
+      templateId: TEMPLATE_ID_ESCALATION,
+      name: ESCALATION_TEMPLATE_NAME,
+      icon: 'warning',
+      renderAssignees,
     });
 
     return {};
