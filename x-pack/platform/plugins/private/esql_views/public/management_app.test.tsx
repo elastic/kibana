@@ -8,7 +8,9 @@
 import React from 'react';
 import { EuiProvider } from '@elastic/eui';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
+import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import type { EsqlViewsResult } from '@kbn/esql-types';
 import {
   ESQL_VIEW_ALREADY_EXISTS_ERROR_TYPE,
@@ -96,7 +98,9 @@ describe('ManagementApp', () => {
     expect(
       screen.getByText('Define named, reusable queries and reference them like an index.')
     ).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /Learn more/ })).toHaveAttribute(
+    expect(screen.queryByRole('link', { name: /Learn more/ })).not.toBeInTheDocument();
+    await openAppMenuOverflow();
+    expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.menuDocumentation)).toHaveAttribute(
       'href',
       documentationUrl
     );

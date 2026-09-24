@@ -108,10 +108,8 @@ export const ManagementApp: FunctionComponent<ManagementAppProps> = ({
     <div data-test-subj="esqlViewsManagementPage">
       <AppHeader
         title={PLUGIN_NAME}
-        description={{
-          text: translations.pageDescription,
-          learnMoreUrl: documentationUrl,
-        }}
+        description={translations.pageDescription}
+        docLink={documentationUrl}
         menu={menu}
         spacing="bleed"
       />
