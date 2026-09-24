@@ -135,16 +135,24 @@ const workflowDetailSlice = createSlice({
     setExecution: (state, action: { payload: WorkflowExecutionDto | undefined }) => {
       if (!action.payload || action.payload.id !== state.execution?.id) {
         state.stepExecutionsTotal = 0;
+        state.durationStepExecutions = undefined;
       }
       state.execution = action.payload;
     },
     setStepExecutionsTotal: (state, action: { payload: number }) => {
       state.stepExecutionsTotal = action.payload;
     },
+    setDurationStepExecutions: (
+      state,
+      action: { payload: NonNullable<WorkflowExecutionDto['stepExecutions']> }
+    ) => {
+      state.durationStepExecutions = action.payload;
+    },
     clearExecution: (state) => {
       state.execution = undefined;
       state.stepExecutionsTotal = 0;
       state.computedExecution = undefined;
+      state.durationStepExecutions = undefined;
     },
     setActiveTab: (state, action: { payload: ActiveTab | undefined }) => {
       state.activeTab = action.payload;
@@ -245,6 +253,7 @@ export const {
   setWorkflows,
   setExecution,
   setStepExecutionsTotal,
+  setDurationStepExecutions,
   clearExecution,
   setActiveTab,
   setHasYamlSchemaValidationErrors,

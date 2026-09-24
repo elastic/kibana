@@ -8,6 +8,10 @@
  */
 
 import { createSelector } from 'redux-toolkit-v1';
+import {
+  buildStepDurations,
+  EMPTY_STEP_DURATIONS,
+} from '../../../../shared/lib/build_step_durations';
 import type { RootState } from '../types';
 
 // Selectors
@@ -132,6 +136,19 @@ export const selectStepExecutions = createSelector(
   (execution) => execution?.stepExecutions
 );
 
+/**
+ * Step execution docs used exclusively for duration chip computation.
+ * For terminal executions with more than `WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE` docs,
+ * `loadExecutionThunk` fetches a larger page (up to `WORKFLOW_EXECUTION_STEPS_MAX_PAGE_SIZE`)
+ * and stores it here so chips cover steps beyond the step-tree's 1000-doc window.
+ * Falls back to `execution.stepExecutions` when the big fetch hasn't run or wasn't needed.
+ */
+export const selectDurationStepExecutions = createSelector(
+  selectDetail,
+  selectExecution,
+  (detail, execution) => detail.durationStepExecutions ?? execution?.stepExecutions
+);
+
 export const selectIsExecutionsTab = createSelector(
   selectActiveTab,
   (activeTab): activeTab is 'executions' => activeTab === 'executions'
@@ -215,6 +232,44 @@ export const selectEditorWorkflowDefinition = createSelector(
 export const selectEditorYamlLineCounter = createSelector(
   selectEditorComputed,
   (computed) => computed?.yamlLineCounter
+);
+
+/**
+ * True when the YAML currently shown in the editor is the exact snapshot the loaded execution ran.
+ * Used by duration-chip decorations to verify that line numbers from the execution's computed
+ * lookup align with the editor content.
+ *
+ * Covers both tabs:
+ * - Executions tab: `selectEditorYaml` returns `execution.yaml` by construction → always true.
+ * - Workflow tab after a test run: true while the draft still matches what ran; false the moment the
+ *   user makes an edit — at which point chips would be mispositioned anyway.
+ */
+export const selectIsEditorYamlExecutionSnapshot = createSelector(
+  selectEditorYaml,
+  selectExecution,
+  (editorYaml, execution) => execution?.yaml != null && editorYaml === execution.yaml
+);
+
+/**
+ * Per-step duration map, populated whenever an execution is loaded in the store.
+ * Covers both the old sidebar (workflow tab + execution open) and the executions tab.
+ * Uses the same allow-list as the flyout tree so numbers always agree.
+ */
+export const selectStepDurations = createSelector(
+  selectDurationStepExecutions,
+  selectEditorWorkflowLookup,
+  (stepExecutions, lookup) =>
+    stepExecutions?.length && lookup
+      ? buildStepDurations(stepExecutions, lookup.steps)
+      : EMPTY_STEP_DURATIONS
+);
+
+/**
+ * Denominator for the hotspot colour ratio: the execution's total duration in ms.
+ * Returns 0 while the run is still in flight (duration is null), which suppresses all colour.
+ */
+export const selectStepDurationDenominator = createSelector(selectExecution, (execution) =>
+  typeof execution?.duration === 'number' && execution.duration > 0 ? execution.duration : 0
 );
 
 export const selectConnectorFlyout = createSelector(
