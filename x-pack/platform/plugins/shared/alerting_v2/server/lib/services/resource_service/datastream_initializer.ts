@@ -125,7 +125,9 @@ export class DatastreamInitializer implements IResourceInitializer {
       if (episodeIdType !== 'alias') {
         throw new Error(
           `[alerting_v2] Template for ${this.resourceDefinition.dataStreamName} is at ` +
-            `v${installedVersion} but episode.id type is ${episodeIdType ?? '(missing)'}, not alias. ` +
+            `v${installedVersion} but episode.id type is ${
+              episodeIdType ?? '(missing)'
+            }, not alias. ` +
             `This indicates a version collision: another change incremented to the same template ` +
             `version without the episode→alert alias rename. ` +
             `Resolve the template conflict manually, then restart Kibana.`
