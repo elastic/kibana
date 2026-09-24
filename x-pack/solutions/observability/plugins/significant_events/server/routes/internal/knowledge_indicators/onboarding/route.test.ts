@@ -61,3 +61,40 @@ describe('onboardingBulkStatusRoute', () => {
     expect(assertSignificantEventsAccess).toHaveBeenCalled();
   });
 });
+
+describe('onboardingExecuteRoute', () => {
+  const executeRoute =
+    internalKIOnboardingRoutes['POST /internal/streams/{streamName}/onboarding/_execute'];
+
+  it('rejects scheduling a disabled source', async () => {
+    const run = jest.fn();
+    const handlerParams = {
+      params: {
+        path: { streamName: 'source-a' },
+        body: { action: 'schedule', from: Date.now(), to: Date.now(), steps: [] },
+      },
+      request: {},
+      getScopedClients: jest.fn().mockResolvedValue({
+        licensing: {},
+        sourcesClient: {
+          get: jest.fn().mockResolvedValue({
+            source: { id: 'source-a', enabled: false },
+          }),
+        },
+      }),
+      server: {},
+      workflowClients: {
+        streamsKIsOnboardingClient: { run },
+      },
+      maintenanceService: { getState: jest.fn() },
+    } as unknown as Parameters<typeof executeRoute.handler>[0];
+
+    const error = await executeRoute.handler(handlerParams).catch((caught: unknown) => caught);
+
+    expect(error).toMatchObject({
+      message: 'Cannot schedule onboarding for a disabled source',
+      output: { statusCode: 400 },
+    });
+    expect(run).not.toHaveBeenCalled();
+  });
+});

@@ -20,6 +20,7 @@ import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { assertNotPaused } from '../../../utils/assert_not_paused';
 import { FeatureNotEnabledError } from '../../../../lib/errors/feature_not_enabled_error';
+import { StatusError } from '../../../../lib/errors/status_error';
 import { listAllSources } from '../../../utils/list_all_sources';
 import {
   MAX_STREAMS_PER_QUERY,
@@ -112,6 +113,9 @@ const onboardingExecuteRoute = createServerRoute({
     const { source } = await sourcesClient.get(streamName);
 
     if (body.action === 'schedule') {
+      if (!source.enabled) {
+        throw new StatusError('Cannot schedule onboarding for a disabled source', 400);
+      }
       await assertNotPaused({ maintenanceService, request });
       const { skipFeatures, skipQueries } = mapStepsToSkipFlags(body.steps);
 
