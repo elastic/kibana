@@ -22,10 +22,10 @@ import { aiIndexAutomationsSkill } from './ai_index_automations';
 import { contextEngineSkillAvailability } from './context_engine_skill_availability';
 import { loadElasticSkills } from './elastic_skills';
 
-const KIBANA_CONTEXT_ENGINE_SKILL_ID = 'kibana-context-engine';
+const universalContextEngineSkills: string[] = ['kibana-context-engine'];
 
 const withContextEngineAvailability = (skill: SkillDefinition): SkillDefinition =>
-  skill.id === KIBANA_CONTEXT_ENGINE_SKILL_ID
+  universalContextEngineSkills.includes(skill.id)
     ? { ...skill, availability: contextEngineSkillAvailability }
     : skill;
 
