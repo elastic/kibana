@@ -30,6 +30,8 @@ export const EditPrivateLocationSchema = z.strictObject({
     .max(MAX_ROUTE_ID_LENGTH)
     .optional(),
   tags: z.array(z.string().max(256)).max(100).optional(),
+  /** @deprecated Accepted for backward compatibility and ignored; sharding follows the license. */
+  isAgentSharding: z.boolean().optional(),
 });
 
 const EditPrivateLocationQuery = z.strictObject({

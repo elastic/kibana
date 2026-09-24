@@ -95,6 +95,26 @@ describe('editPrivateLocationRoute', () => {
     expect(updatePrivateLocationMonitors).not.toHaveBeenCalled();
   });
 
+  it('ignores the deprecated isAgentSharding field without writing', async () => {
+    const edit = stubRepo();
+    const { routeContext } = makeRouteContext({ isAgentSharding: true });
+
+    const result = await editPrivateLocationRoute().handler(routeContext);
+
+    expect(edit).not.toHaveBeenCalled();
+    expect(updatePrivateLocationMonitors).not.toHaveBeenCalled();
+    expect(result).not.toHaveProperty('isAgentSharding');
+  });
+
+  it('persists label and tags but not the deprecated isAgentSharding field', async () => {
+    const edit = stubRepo({ tags: ['new'] });
+    const { routeContext } = makeRouteContext({ tags: ['new'], isAgentSharding: false });
+
+    await editPrivateLocationRoute().handler(routeContext);
+
+    expect(edit).toHaveBeenCalledWith('loc-1', { label: 'Loc', tags: ['new'] });
+  });
+
   it('returns forbidden when a monitor using the location belongs to an unauthorized space', async () => {
     const edit = stubRepo();
     const { routeContext, response } = makeRouteContext({ label: 'New label' });
@@ -193,8 +213,8 @@ describe('EditPrivateLocationSchema', () => {
     expect(EditPrivateLocationSchema.safeParse({ lable: 'x' }).success).toBe(false);
   });
 
-  it('rejects the removed isAgentSharding field', () => {
-    expect(EditPrivateLocationSchema.safeParse({ isAgentSharding: true }).success).toBe(false);
+  it('still accepts the deprecated isAgentSharding field', () => {
+    expect(EditPrivateLocationSchema.safeParse({ isAgentSharding: true }).success).toBe(true);
   });
 
   it('accepts a known partial update', () => {

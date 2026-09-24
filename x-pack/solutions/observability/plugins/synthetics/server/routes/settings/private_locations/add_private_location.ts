@@ -31,6 +31,8 @@ export const PrivateLocationSchema = z.strictObject({
     })
     .optional(),
   spaces: z.array(z.string().max(256)).max(100).optional(),
+  /** @deprecated Accepted for backward compatibility and ignored; sharding follows the license. */
+  isAgentSharding: z.boolean().optional(),
 });
 
 export type PrivateLocationObject = z.infer<typeof PrivateLocationSchema>;
