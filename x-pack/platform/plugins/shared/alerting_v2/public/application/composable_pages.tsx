@@ -25,6 +25,8 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { AppHeaderTab } from '@kbn/app-header';
+import type { EpisodeAction, EpisodeActionsDeps } from '@kbn/alerting-v2-episodes-ui/actions';
+import type { EpisodeDataSource } from '@kbn/alerting-v2-episodes-ui/types/episode_data_source';
 import { RulesApp } from './rules_app';
 import { RuleLibraryApp } from './rule_library_app';
 import { ActionPoliciesApp } from './action_policies_app';
@@ -38,12 +40,15 @@ import { MANAGEMENT_HOST, type AlertingV2HostApp } from '../locators';
 import type { AlertEpisodesKibanaServices } from '../episodes_kibana_services';
 import { PrivilegeCheckProvider, type PrivilegeCheck } from './privilege_check_context';
 
+import { CLASSIC_EPISODES_DATA_SOURCE } from '../episode_sources';
+
 export interface AlertingV2PageProps {
   coreStart: CoreStart;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   hostApp?: AlertingV2HostApp;
   privilegeCheck?: PrivilegeCheck;
   tabs?: AppHeaderTab[];
+  createActions?: (deps: EpisodeActionsDeps) => EpisodeAction[];
 }
 
 /** Internal props — includes the DI container injected by the lazy wrapper. */
@@ -162,12 +167,24 @@ export const AlertingV2EpisodesPage = ({
   setBreadcrumbs,
   hostApp = MANAGEMENT_HOST,
   privilegeCheck,
+  createActions,
 }: InternalPageProps) => {
   const [queryClient] = useState(() => new QueryClient());
   const locators = useMemo(() => {
     const share = container.get(PluginStart('share')) as SharePluginStart;
     return bindLocatorsToHost(getAlertingV2Locators(share), hostApp);
   }, [container, hostApp]);
+
+  const dataSource: EpisodeDataSource = useMemo(
+    () =>
+      createActions
+        ? {
+            ...CLASSIC_EPISODES_DATA_SOURCE,
+            createActions,
+          }
+        : CLASSIC_EPISODES_DATA_SOURCE,
+    [createActions]
+  );
 
   const kibanaReactServices: AlertEpisodesKibanaServices = useMemo(
     () => ({
@@ -196,7 +213,7 @@ export const AlertingV2EpisodesPage = ({
             <BreadcrumbProvider setBreadcrumbs={setBreadcrumbs}>
               <PrivilegeCheckProvider value={privilegeCheck}>
                 <I18nProvider>
-                  <EpisodesApp />
+                  <EpisodesApp dataSource={dataSource} />
                 </I18nProvider>
               </PrivilegeCheckProvider>
             </BreadcrumbProvider>

@@ -39,8 +39,8 @@ export interface EpisodeFooterActionMenuProps {
   /** Already filtered to compatible actions. The menu does not re-filter. */
   actions: EpisodeAction[];
   episodes: AlertEpisode[];
-  /** Full episode details page href, rendered as the first menu item. */
-  viewDetailsHref: string;
+  /** Full episode details page href, rendered as the first menu item when present. */
+  viewDetailsHref?: string | null;
   onSuccess?: () => void;
 }
 
@@ -80,14 +80,16 @@ export const EpisodeFooterActionMenu = ({
     };
   };
 
-  const viewDetailsGroup: EuiContextMenuPanelItemDescriptor[] = [
-    {
-      name: i18n.FLYOUT_VIEW_DETAILS,
-      icon: 'eye',
-      href: viewDetailsHref,
-      'data-test-subj': 'alertingV2EpisodeTakeAction-viewDetails',
-    },
-  ];
+  const viewDetailsGroup: EuiContextMenuPanelItemDescriptor[] = viewDetailsHref
+    ? [
+        {
+          name: i18n.FLYOUT_VIEW_DETAILS,
+          icon: 'eye',
+          href: viewDetailsHref,
+          'data-test-subj': 'alertingV2EpisodeTakeAction-viewDetails',
+        },
+      ]
+    : [];
 
   const nonEmptyGroups = [
     viewDetailsGroup,

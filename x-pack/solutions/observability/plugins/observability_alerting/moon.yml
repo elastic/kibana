@@ -28,6 +28,8 @@ dependsOn:
   - '@kbn/app-header'
   - '@kbn/triggers-actions-ui-plugin'
   - '@kbn/rule-data-utils'
+  - '@kbn/observability-plugin'
+  - '@kbn/alerting-v2-episodes-ui'
 tags:
   - plugin
   - prod
