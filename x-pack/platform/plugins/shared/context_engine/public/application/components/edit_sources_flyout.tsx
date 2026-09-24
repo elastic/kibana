@@ -21,10 +21,10 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import type { GetAiIndexResponse } from '../../../common/http_api/ai_indices';
 import { useSaveAiIndexSources } from '../hooks/use_save_ai_index_sources';
-import { toSelectedSources } from '../utils/sources';
+import { areSourceSelectionsEqual, toSelectedSources } from '../utils/sources';
 import { SourcePicker } from './source_picker';
 import type { SelectedSource } from './source_picker';
 
@@ -37,8 +37,11 @@ interface EditSourcesFlyoutProps {
 export const EditSourcesFlyout = ({ aiIndex, onClose, onSaved }: EditSourcesFlyoutProps) => {
   const flyoutTitleId = useGeneratedHtmlId();
   const { saveSources, isSaving } = useSaveAiIndexSources();
-  const [selectedSources, setSelectedSources] = useState<SelectedSource[]>(() =>
-    toSelectedSources(aiIndex.sources)
+  const [initialSources] = useState<SelectedSource[]>(() => toSelectedSources(aiIndex.sources));
+  const [selectedSources, setSelectedSources] = useState<SelectedSource[]>(initialSources);
+  const hasChanges = useMemo(
+    () => !areSourceSelectionsEqual(selectedSources, initialSources),
+    [selectedSources, initialSources]
   );
 
   const handleDone = async () => {
@@ -102,6 +105,7 @@ export const EditSourcesFlyout = ({ aiIndex, onClose, onSaved }: EditSourcesFlyo
               fill
               onClick={handleDone}
               isLoading={isSaving}
+              isDisabled={!hasChanges}
               data-test-subj="contextEditSourcesDoneButton"
             >
               <FormattedMessage

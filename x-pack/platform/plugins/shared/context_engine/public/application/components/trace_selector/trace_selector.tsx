@@ -55,7 +55,7 @@ export const TraceSelector = ({ value, onChange }: TraceSelectorProps) => {
           data-test-subj="contextTraceToggle-elastic_agent"
         >
           {i18n.translate('xpack.contextEngine.traceSelector.elasticAgentsToggle', {
-            defaultMessage: 'Elastic agents',
+            defaultMessage: 'Agents on Elastic',
           })}
         </EuiButton>
         <EuiButton id="index" iconType="listBullet" data-test-subj="contextTraceToggle-index">
