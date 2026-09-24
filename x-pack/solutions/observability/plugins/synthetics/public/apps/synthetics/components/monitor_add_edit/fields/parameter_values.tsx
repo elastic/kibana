@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiButton,
   EuiButtonIcon,
-  EuiFieldPassword,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,14 +19,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useParams } from 'react-router-dom';
-import { ConfigKey } from '../../../../../../common/runtime_types';
 import { canRevealParameterValues } from '../../../../../../common/utils/can_reveal_parameter_values';
-import { restoreMaskedMonitorParams } from '../../../../../../common/utils/mask_monitor_params';
-import { fetchSyntheticsMonitor } from '../../../state/monitor_details/api';
-import { useGetUrlParams } from '../../../hooks';
-import { useParameterValues } from '../form/parameter_values_context';
-import { kibanaService } from '../../../../../utils/kibana_service';
+import { MASKED_PARAM_VALUE } from '../../../../../../common/utils/mask_monitor_params';
 import type { Pair } from './key_value_field';
 
 interface ParameterValuesEditorProps {
@@ -74,11 +67,10 @@ export const ParameterValuesEditor = ({
   value,
 }: ParameterValuesEditorProps): React.ReactElement => {
   const { application } = useKibana().services;
-  const { monitorId } = useParams<{ monitorId: string }>();
-  const { spaceId } = useGetUrlParams();
-  const { parametersAreMasked, revealParameterValues } = useParameterValues();
-  const [isRevealing, setIsRevealing] = useState(false);
   const [visibleRows, setVisibleRows] = useState<Record<number, boolean>>({});
+  const [editingIndex, setEditingIndex] = useState<number>();
+  const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
+  const valueBeforeEdit = useRef<Record<number, string>>({});
   const pairsFromValue = useMemo(() => paramsJsonToPairs(value), [value]);
   const [pairs, setPairs] = useState<Pair[]>(pairsFromValue);
 
@@ -102,51 +94,40 @@ export const ParameterValuesEditor = ({
     [onChange, value]
   );
 
-  const toggleValueVisibility = useCallback(
-    async (index: number) => {
-      if (!canReveal || isRevealing) {
+  useEffect(() => {
+    if (editingIndex === undefined) {
+      return;
+    }
+    inputRefs.current[editingIndex]?.focus();
+  }, [editingIndex]);
+
+  const editValue = useCallback(
+    (index: number) => {
+      const current = pairs[index];
+      if (!current || readOnly) {
         return;
       }
-
-      if (visibleRows[index]) {
-        setVisibleRows((rows) => ({ ...rows, [index]: false }));
-        return;
+      const [key, paramValue] = current;
+      valueBeforeEdit.current[index] = paramValue;
+      if (paramValue === MASKED_PARAM_VALUE) {
+        const nextPairs = [...pairs];
+        nextPairs[index] = [key, ''];
+        updatePairs(nextPairs);
       }
-
-      if (parametersAreMasked && monitorId) {
-        setIsRevealing(true);
-        try {
-          const monitor = await fetchSyntheticsMonitor({ monitorId, spaceId, hideParams: false });
-          const plaintext = monitor[ConfigKey.PARAMS] ?? '';
-          onChange(
-            restoreMaskedMonitorParams({
-              previousParams: plaintext,
-              submittedParams: value,
-            }) ?? ''
-          );
-          revealParameterValues(plaintext);
-          setVisibleRows((rows) => ({ ...rows, [index]: true }));
-        } catch (error) {
-          kibanaService.toasts.addError(error, { title: SHOW_PARAMETER_VALUES_ERROR });
-        } finally {
-          setIsRevealing(false);
-        }
-        return;
-      }
-
-      setVisibleRows((rows) => ({ ...rows, [index]: true }));
+      setEditingIndex(index);
     },
-    [
-      canReveal,
-      isRevealing,
-      monitorId,
-      onChange,
-      parametersAreMasked,
-      revealParameterValues,
-      spaceId,
-      value,
-      visibleRows,
-    ]
+    [pairs, readOnly, updatePairs]
+  );
+
+  const toggleValueVisibility = useCallback(
+    (index: number) => {
+      if (!canReveal) {
+        return;
+      }
+
+      setVisibleRows((rows) => ({ ...rows, [index]: !rows[index] }));
+    },
+    [canReveal]
   );
 
   return (
@@ -159,6 +140,7 @@ export const ParameterValuesEditor = ({
             iconType="plus"
             isDisabled={readOnly}
             onClick={() => updatePairs([['', ''], ...pairs])}
+            size="s"
           >
             {ADD_PARAMETER_LABEL}
           </EuiButton>
@@ -181,6 +163,14 @@ export const ParameterValuesEditor = ({
               }
             );
             const isValueVisible = Boolean(visibleRows[index]);
+            const showValue = isValueVisible || editingIndex === index;
+            const editLabel = i18n.translate(
+              'xpack.synthetics.monitorConfig.params.editItem.label',
+              {
+                defaultMessage: 'Edit parameter {key}',
+                values: { key: key || String(index + 1) },
+              }
+            );
             const visibilityLabel = !canReveal
               ? NO_READ_PARAMETER_VALUES_PERMISSION
               : isValueVisible
@@ -194,6 +184,7 @@ export const ParameterValuesEditor = ({
                   <EuiFlexItem>
                     <EuiFieldText
                       aria-label={PARAMETER_KEY_LABEL}
+                      compressed
                       data-test-subj={`keyValuePairsKey${index}`}
                       fullWidth
                       onBlur={onBlur}
@@ -207,7 +198,7 @@ export const ParameterValuesEditor = ({
                     />
                   </EuiFlexItem>
                   <EuiFlexItem>
-                    <EuiFieldPassword
+                    <EuiFieldText
                       append={
                         <EuiToolTip content={visibilityLabel} disableScreenReaderOutput>
                           <span tabIndex={canReveal ? -1 : 0}>
@@ -215,9 +206,10 @@ export const ParameterValuesEditor = ({
                               aria-label={visibilityLabel}
                               data-test-subj={`syntheticsParamValueVisibility${index}`}
                               iconType={isValueVisible ? 'eyeSlash' : 'eye'}
-                              isDisabled={!canReveal || isRevealing}
+                              isDisabled={!canReveal}
+                              size="s"
                               onClick={() => {
-                                void toggleValueVisibility(index);
+                                toggleValueVisibility(index);
                               }}
                             />
                           </span>
@@ -225,36 +217,70 @@ export const ParameterValuesEditor = ({
                       }
                       aria-label={PARAMETER_VALUE_LABEL}
                       autoComplete="new-password"
+                      compressed
                       data-test-subj={`keyValuePairsValue${index}`}
                       fullWidth
-                      isLoading={isRevealing}
-                      onBlur={onBlur}
+                      icon="lock"
+                      inputRef={(node) => {
+                        inputRefs.current[index] = node;
+                      }}
+                      onBlur={() => {
+                        const previous = valueBeforeEdit.current[index];
+                        delete valueBeforeEdit.current[index];
+                        setEditingIndex((current) => (current === index ? undefined : current));
+                        if (previous && paramValue === '') {
+                          const nextPairs = [...pairs];
+                          nextPairs[index] = [key, previous];
+                          updatePairs(nextPairs);
+                        }
+                        onBlur?.();
+                      }}
                       onChange={(event) => {
                         const nextPairs = [...pairs];
                         nextPairs[index] = [key, event.target.value];
                         updatePairs(nextPairs);
                       }}
-                      readOnly={readOnly}
-                      type={isValueVisible ? 'text' : 'password'}
+                      readOnly={readOnly || editingIndex !== index}
+                      type={showValue ? 'text' : 'password'}
                       value={paramValue}
                     />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiToolTip content={deleteLabel} disableScreenReaderOutput>
-                      <EuiButtonIcon
-                        aria-label={deleteLabel}
-                        color="danger"
-                        data-test-subj="syntheticsKeyValuePairsFieldButton"
-                        display="empty"
-                        iconType="trash"
-                        isDisabled={readOnly}
-                        onClick={() => {
-                          const nextPairs = [...pairs];
-                          nextPairs.splice(index, 1);
-                          updatePairs(nextPairs);
-                        }}
-                      />
-                    </EuiToolTip>
+                    <EuiFlexGroup gutterSize="xs" responsive={false}>
+                      <EuiFlexItem grow={false}>
+                        <EuiToolTip content={editLabel} disableScreenReaderOutput>
+                          <EuiButtonIcon
+                            aria-label={editLabel}
+                            data-test-subj={`syntheticsParamValueEdit${index}`}
+                            display="empty"
+                            iconType="pencil"
+                            isDisabled={readOnly}
+                            size="s"
+                            onClick={() => {
+                              editValue(index);
+                            }}
+                          />
+                        </EuiToolTip>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiToolTip content={deleteLabel} disableScreenReaderOutput>
+                          <EuiButtonIcon
+                            aria-label={deleteLabel}
+                            color="danger"
+                            data-test-subj="syntheticsKeyValuePairsFieldButton"
+                            display="empty"
+                            iconType="trash"
+                            isDisabled={readOnly}
+                            size="s"
+                            onClick={() => {
+                              const nextPairs = [...pairs];
+                              nextPairs.splice(index, 1);
+                              updatePairs(nextPairs);
+                            }}
+                          />
+                        </EuiToolTip>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </Fragment>
@@ -299,12 +325,5 @@ const NO_READ_PARAMETER_VALUES_PERMISSION = i18n.translate(
   'xpack.synthetics.monitorConfig.params.noReadPermissionTooltip',
   {
     defaultMessage: 'You do not have permission to read parameter values.',
-  }
-);
-
-const SHOW_PARAMETER_VALUES_ERROR = i18n.translate(
-  'xpack.synthetics.monitorConfig.params.showValuesErrorMessage',
-  {
-    defaultMessage: 'Unable to show parameter values. Please try again.',
   }
 );

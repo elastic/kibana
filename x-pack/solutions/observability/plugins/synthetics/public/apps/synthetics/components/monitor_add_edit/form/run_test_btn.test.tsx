@@ -11,7 +11,6 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { render } from '../../../utils/testing/rtl_helpers';
 import { ConfigKey, FormMonitorType } from '../../../../../../common/runtime_types';
 import { runOnceMonitor } from '../../../state/manual_test_runs/api';
-import { ParameterValuesProvider } from './parameter_values_context';
 import { getDefaultFormFields } from './defaults';
 import { RunTestButton } from './run_test_btn';
 
@@ -68,10 +67,8 @@ const RunTestHarness = () => {
   });
 
   return (
-    <ParameterValuesProvider hideParameterValuesByDefault>
-      <FormProvider {...methods}>
-        <RunTestButton canUsePublicLocations isServiceAllowed />
-      </FormProvider>
-    </ParameterValuesProvider>
+    <FormProvider {...methods}>
+      <RunTestButton canUsePublicLocations isServiceAllowed />
+    </FormProvider>
   );
 };

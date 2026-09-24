@@ -48,8 +48,7 @@ const SYNTHETICS_WITH_PARAM_VALUES_ROLE = {
   ],
 } satisfies KibanaRole;
 
-const monitorPath = (monitorId: string) =>
-  `api/synthetics/monitors/${monitorId}?internal=true&hideParams=false`;
+const monitorPath = (monitorId: string) => `api/synthetics/monitors/${monitorId}?internal=true`;
 
 const getMonitorWithParams = (
   apiClient: ApiClientFixture,

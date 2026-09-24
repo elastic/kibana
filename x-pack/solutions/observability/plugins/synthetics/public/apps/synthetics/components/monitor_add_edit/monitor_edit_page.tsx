@@ -57,7 +57,7 @@ export const MonitorEditPage: React.FC = () => {
   const error = useSelector(selectSyntheticsMonitorError);
 
   useEffect(() => {
-    dispatch(getMonitorAction.get({ monitorId, spaceId, hideParams: true }));
+    dispatch(getMonitorAction.get({ monitorId, spaceId }));
   }, [dispatch, monitorId, spaceId]);
 
   const monitorNotFoundError = useMonitorNotFound(error, data?.id);
@@ -115,7 +115,6 @@ export const MonitorEditPage: React.FC = () => {
             defaultValues={data}
             readOnly={isReadOnly}
             canUsePublicLocations={canUsePublicLocations}
-            hideParameterValuesByDefault
           >
             <MonitorSteps
               stepMap={EDIT_MONITOR_STEPS(isReadOnly)}

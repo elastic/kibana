@@ -28,7 +28,6 @@ export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
       }),
       query: z.strictObject({
         internal: queryBoolean.optional().default(false),
-        hideParams: queryBoolean.optional().default(false),
       }),
     },
   },
@@ -41,7 +40,7 @@ export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   }): Promise<any> => {
     const { monitorId } = request.params;
     try {
-      const { internal, hideParams } = request.query;
+      const { internal } = request.query;
 
       const capabilities = await coreStart?.capabilities.resolveCapabilities(request, {
         capabilityPath: 'uptime.*',
@@ -55,18 +54,17 @@ export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
       if (canSave) {
         // only user with write permissions can decrypt the monitor
         const monitor = await monitorConfigRepository.getDecrypted(monitorId, spaceId);
-        const normalizedMonitor =
-          hideParams || !canRevealParams
-            ? {
-                ...monitor.normalizedMonitor,
-                attributes: {
-                  ...monitor.normalizedMonitor.attributes,
-                  [ConfigKey.PARAMS]: maskMonitorParams(
-                    monitor.normalizedMonitor.attributes[ConfigKey.PARAMS]
-                  ),
-                },
-              }
-            : monitor.normalizedMonitor;
+        const normalizedMonitor = !canRevealParams
+          ? {
+              ...monitor.normalizedMonitor,
+              attributes: {
+                ...monitor.normalizedMonitor.attributes,
+                [ConfigKey.PARAMS]: maskMonitorParams(
+                  monitor.normalizedMonitor.attributes[ConfigKey.PARAMS]
+                ),
+              },
+            }
+          : monitor.normalizedMonitor;
         return {
           ...mapSavedObjectToMonitor({ monitor: normalizedMonitor, internal }),
           spaceId,

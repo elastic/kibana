@@ -84,18 +84,15 @@ export const fetchLatestTestRun = async ({
 export const fetchSyntheticsMonitor = async ({
   monitorId,
   spaceId,
-  hideParams,
 }: {
   monitorId: string;
   spaceId?: string;
-  hideParams?: boolean;
 }): Promise<SyntheticsMonitorWithId> => {
   return apiService.get<SyntheticsMonitorWithId>(
     SYNTHETICS_API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', monitorId),
     {
       internal: true,
       spaceId,
-      hideParams,
       version: INITIAL_REST_VERSION,
     },
     EncryptedSyntheticsMonitorCodec

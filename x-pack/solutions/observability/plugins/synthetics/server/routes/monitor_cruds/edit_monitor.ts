@@ -46,7 +46,10 @@ import {
 import { formatSecrets } from '../../synthetics_service/utils/secrets';
 import { mapSavedObjectToMonitor } from './formatters/saved_object_to_monitor';
 import { getBrowserTimeoutWarningForMonitor } from './monitor_warnings';
-import { restoreMaskedMonitorParams } from '../../../common/utils/mask_monitor_params';
+import {
+  maskMonitorParams,
+  restoreMaskedMonitorParams,
+} from '../../../common/utils/mask_monitor_params';
 
 // Simplify return promise type and type it with runtime_types
 export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
@@ -60,7 +63,6 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
       }),
       query: z.strictObject({
         internal: queryBoolean.optional().default(false),
-        preserveMaskedParams: queryBoolean.optional().default(false),
       }),
       body: editMonitorRequestBody,
     },
@@ -69,7 +71,7 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
     const { request, response, spaceId, server, monitorConfigRepository } = routeContext;
     const { logger } = server;
     const monitor = request.body as SyntheticsMonitor;
-    const reqQuery = request.query as { internal?: boolean; preserveMaskedParams?: boolean };
+    const reqQuery = request.query as { internal?: boolean };
     const { monitorId } = request.params;
 
     if (!monitor || typeof monitor !== 'object' || isEmpty(monitor) || Array.isArray(monitor)) {
@@ -105,15 +107,18 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
         return response.badRequest(getInvalidOriginError(monitor));
       }
 
-      const monitorWithRestoredParams = reqQuery.preserveMaskedParams
-        ? {
-            ...monitor,
-            [ConfigKey.PARAMS]: restoreMaskedMonitorParams({
-              previousParams: normalizedPreviousMonitor[ConfigKey.PARAMS],
-              submittedParams: monitor[ConfigKey.PARAMS],
-            }),
-          }
-        : monitor;
+      const submittedParams = toParamJson(monitor[ConfigKey.PARAMS]);
+      // A submitted ******** is the masked placeholder, so keep the stored secret.
+      const monitorWithRestoredParams =
+        submittedParams === undefined
+          ? monitor
+          : {
+              ...monitor,
+              [ConfigKey.PARAMS]: restoreMaskedMonitorParams({
+                previousParams: toParamJson(normalizedPreviousMonitor[ConfigKey.PARAMS]),
+                submittedParams,
+              }),
+            };
 
       let editedMonitor = mergeSourceMonitor(normalizedPreviousMonitor, monitorWithRestoredParams);
 
@@ -236,11 +241,18 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
       editMonitorAPI.initDefaultAlerts(editedMonitorSavedObject.attributes.name);
 
       const warning = getBrowserTimeoutWarningForMonitor(monitorWithRevision, monitorId);
+      // The saved monitor keeps the real values. The response must not echo them.
       const monitorResponse = mapSavedObjectToMonitor({
         internal: reqQuery.internal,
         monitor: {
           ...(editedMonitorSavedObject as SavedObject<EncryptedSyntheticsMonitorAttributes>),
           created_at: previousMonitor.created_at,
+          attributes: {
+            ...editedMonitorSavedObject.attributes,
+            [ConfigKey.PARAMS]: maskMonitorParams(
+              editedMonitorSavedObject.attributes[ConfigKey.PARAMS]
+            ),
+          },
         },
       });
       return warning ? { ...monitorResponse, warnings: [warning] } : monitorResponse;
@@ -417,6 +429,16 @@ export const validateLocationPermissions = async ({ server, request }: RouteCont
     canManagePrivateLocations,
     elasticManagedLocationsEnabled,
   };
+};
+
+const toParamJson = (params: unknown): string | undefined => {
+  if (typeof params === 'string') {
+    return params;
+  }
+  if (params == null) {
+    return undefined;
+  }
+  return JSON.stringify(params);
 };
 
 const getInvalidOriginError = (monitor: SyntheticsMonitor) => {

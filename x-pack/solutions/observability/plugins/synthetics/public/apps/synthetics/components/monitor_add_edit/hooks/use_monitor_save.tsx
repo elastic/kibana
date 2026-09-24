@@ -20,11 +20,7 @@ import type { IHttpSerializedFetchError } from '../../../state';
 import { cleanMonitorListState } from '../../../state';
 import { useSyntheticsRefreshContext } from '../../../contexts';
 
-export const useMonitorSave = ({
-  submission,
-}: {
-  submission?: { monitor: SyntheticsMonitor; preserveMaskedParams: boolean };
-}) => {
+export const useMonitorSave = ({ submission }: { submission?: SyntheticsMonitor }) => {
   const dispatch = useDispatch();
   const { refreshApp } = useSyntheticsRefreshContext();
   const { monitorId } = useParams<{ monitorId: string }>();
@@ -35,17 +31,15 @@ export const useMonitorSave = ({
 
   const { data, status, loading, error } = useFetcher(() => {
     if (submission) {
-      const { monitor, preserveMaskedParams } = submission;
       if (isEdit) {
         return updateMonitorAPI({
           id: monitorId,
           spaceId,
-          monitor,
-          preserveMaskedParams,
+          monitor: submission,
         });
       } else {
         return createMonitorAPI({
-          monitor,
+          monitor: submission,
         });
       }
     }

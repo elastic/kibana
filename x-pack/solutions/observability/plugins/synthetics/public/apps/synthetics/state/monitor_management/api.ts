@@ -65,16 +65,13 @@ export const updateMonitorAPI = async ({
   monitor,
   id,
   spaceId,
-  preserveMaskedParams,
 }: {
   monitor: SyntheticsMonitor | EncryptedSyntheticsMonitor;
   spaceId?: string;
   id: string;
-  preserveMaskedParams?: boolean;
 }): Promise<UpsertMonitorResponse> => {
   return await apiService.put(`${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${id}`, monitor, null, {
     spaceId,
-    preserveMaskedParams,
     internal: true,
     version: INITIAL_REST_VERSION,
   });

@@ -6,13 +6,11 @@
  */
 
 import React from 'react';
-import { fireEvent, waitFor } from '@testing-library/react';
+import { fireEvent } from '@testing-library/react';
 import { FormProvider, useForm, useFormContext } from 'react-hook-form';
 import { render } from '../../../utils/testing/rtl_helpers';
 import { ParameterValuesEditor } from './parameter_values';
-import { ParameterValuesProvider } from '../form/parameter_values_context';
 import { ConfigKey } from '../../../../../../common/runtime_types';
-import { fetchSyntheticsMonitor } from '../../../state/monitor_details/api';
 
 const mockUseKibana = jest.fn();
 
@@ -21,22 +19,8 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: () => mockUseKibana(),
 }));
 
-jest.mock('../../../state/monitor_details/api', () => ({
-  fetchSyntheticsMonitor: jest.fn(),
-}));
-
-jest.mock('../../../hooks', () => ({
-  useGetUrlParams: () => ({}),
-}));
-
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useParams: () => ({ monitorId: 'monitor-id' }),
-}));
-
 describe('ParameterValuesEditor', () => {
   beforeEach(() => {
-    (fetchSyntheticsMonitor as jest.Mock).mockReset();
     mockUseKibana.mockReturnValue({
       services: {
         application: {
@@ -56,19 +40,24 @@ describe('ParameterValuesEditor', () => {
 
     expect(getByTestId('keyValuePairsKey0')).toHaveValue('password');
     expect(getByTestId('keyValuePairsValue0')).toHaveAttribute('type', 'password');
+    expect(getByTestId('keyValuePairsValue0')).toHaveAttribute('readonly');
     expect(getByTestId('keyValuePairsValue0')).toHaveValue('********');
     expect(getByTestId('syntheticsParamValueVisibility0')).toBeInTheDocument();
+    expect(getByTestId('syntheticsParamValueEdit0')).toBeInTheDocument();
   });
 
   it('lets the user replace a hidden value', () => {
     const { getByTestId } = render(<ParameterValuesEditorForm />);
 
+    expect(getByTestId('keyValuePairsValue0')).toHaveAttribute('readonly');
+
+    fireEvent.click(getByTestId('syntheticsParamValueEdit0'));
     fireEvent.change(getByTestId('keyValuePairsValue0'), {
       target: { value: 'replacement' },
     });
 
     expect(getByTestId('parameterValuesValue')).toHaveTextContent('{"password":"replacement"}');
-    expect(getByTestId('keyValuePairsValue0')).toHaveAttribute('type', 'password');
+    expect(getByTestId('keyValuePairsValue0')).not.toHaveAttribute('readonly');
   });
 
   it('disables the visibility toggle without canReadParamValues', () => {
@@ -94,70 +83,59 @@ describe('ParameterValuesEditor', () => {
       'You do not have permission to read parameter values.'
     );
     fireEvent.click(toggle);
-    expect(fetchSyntheticsMonitor).not.toHaveBeenCalled();
     expect(getByTestId('keyValuePairsValue0')).toHaveAttribute('type', 'password');
-    expect(getByTestId('keyValuePairsValue0')).not.toHaveAttribute('readonly');
+    expect(getByTestId('keyValuePairsValue0')).toHaveAttribute('readonly');
   });
 
-  it('fetches stored values when the password visibility toggle is shown', async () => {
-    (fetchSyntheticsMonitor as jest.Mock).mockResolvedValue({
-      [ConfigKey.PARAMS]: '{"password":"changeme"}',
-    });
-
+  it('clears a masked value when edit is clicked', () => {
     const { getByTestId } = render(<ParameterValuesEditorForm />);
 
-    fireEvent.click(getByTestId('syntheticsParamValueVisibility0'));
+    fireEvent.click(getByTestId('syntheticsParamValueEdit0'));
 
-    await waitFor(() => {
-      expect(fetchSyntheticsMonitor).toHaveBeenCalledWith({
-        monitorId: 'monitor-id',
-        spaceId: undefined,
-        hideParams: false,
-      });
-    });
+    expect(getByTestId('keyValuePairsValue0')).toHaveValue('');
+    expect(getByTestId('keyValuePairsValue0')).not.toHaveAttribute('readonly');
+    expect(getByTestId('keyValuePairsValue0')).toHaveAttribute('type', 'text');
+    expect(getByTestId('parameterValuesValue')).toHaveTextContent('{"password":""}');
 
-    await waitFor(() => {
-      expect(getByTestId('keyValuePairsValue0')).toHaveValue('changeme');
-    });
+    fireEvent.blur(getByTestId('keyValuePairsValue0'));
+
+    expect(getByTestId('keyValuePairsValue0')).toHaveValue('********');
+    expect(getByTestId('keyValuePairsValue0')).toHaveAttribute('readonly');
+    expect(getByTestId('parameterValuesValue')).toHaveTextContent('{"password":"********"}');
   });
 
-  it('keeps in-progress replacements when revealing stored values', async () => {
-    (fetchSyntheticsMonitor as jest.Mock).mockResolvedValue({
-      [ConfigKey.PARAMS]: '{"password":"changeme","token":"stored"}',
-    });
-
+  it('shows the loaded value without requesting it again', () => {
     const { getByTestId } = render(
-      <ParameterValuesEditorForm defaultParams={'{"password":"********","token":"********"}'} />
+      <ParameterValuesEditorForm defaultParams={'{"password":"changeme"}'} />
     );
 
-    fireEvent.change(getByTestId('keyValuePairsValue0'), {
-      target: { value: 'replacement' },
-    });
     fireEvent.click(getByTestId('syntheticsParamValueVisibility0'));
 
-    await waitFor(() => {
-      expect(JSON.parse(getByTestId('parameterValuesValue').textContent ?? '')).toEqual({
-        password: 'replacement',
-        token: 'stored',
-      });
-    });
+    expect(getByTestId('keyValuePairsValue0')).toHaveValue('changeme');
+    expect(getByTestId('keyValuePairsValue0')).toHaveAttribute('type', 'text');
+
+    fireEvent.click(getByTestId('syntheticsParamValueVisibility0'));
+
+    expect(getByTestId('keyValuePairsValue0')).toHaveValue('changeme');
+    expect(getByTestId('keyValuePairsValue0')).toHaveAttribute('type', 'password');
   });
 
-  it('does not refetch after values have been revealed', async () => {
-    (fetchSyntheticsMonitor as jest.Mock).mockResolvedValue({
-      [ConfigKey.PARAMS]: '{"password":"changeme"}',
-    });
+  it('keeps a revealed value when edit is clicked', () => {
+    const { getByTestId } = render(
+      <ParameterValuesEditorForm defaultParams={'{"password":"changeme"}'} />
+    );
 
-    const { getByTestId } = render(<ParameterValuesEditorForm />);
+    fireEvent.click(getByTestId('syntheticsParamValueEdit0'));
 
-    fireEvent.click(getByTestId('syntheticsParamValueVisibility0'));
-    await waitFor(() => {
-      expect(getByTestId('keyValuePairsValue0')).toHaveValue('changeme');
-    });
+    expect(getByTestId('keyValuePairsValue0')).toHaveValue('changeme');
+    expect(getByTestId('keyValuePairsValue0')).not.toHaveAttribute('readonly');
+    expect(getByTestId('keyValuePairsValue0')).toHaveAttribute('type', 'text');
 
-    fireEvent.click(getByTestId('syntheticsParamValueVisibility0'));
+    fireEvent.change(getByTestId('keyValuePairsValue0'), { target: { value: '' } });
+    fireEvent.blur(getByTestId('keyValuePairsValue0'));
 
-    expect(fetchSyntheticsMonitor).toHaveBeenCalledTimes(1);
+    expect(getByTestId('keyValuePairsValue0')).toHaveValue('changeme');
+    expect(getByTestId('parameterValuesValue')).toHaveTextContent('{"password":"changeme"}');
   });
 });
 
@@ -174,15 +152,13 @@ const ParameterValuesEditorForm = ({
   const params = methods.watch(ConfigKey.PARAMS);
 
   return (
-    <ParameterValuesProvider hideParameterValuesByDefault>
-      <FormProvider {...methods}>
-        <ParameterValuesEditor
-          onChange={(next) => methods.setValue(ConfigKey.PARAMS, next)}
-          value={params}
-        />
-        <ParameterValuesValue />
-      </FormProvider>
-    </ParameterValuesProvider>
+    <FormProvider {...methods}>
+      <ParameterValuesEditor
+        onChange={(next) => methods.setValue(ConfigKey.PARAMS, next)}
+        value={params}
+      />
+      <ParameterValuesValue />
+    </FormProvider>
   );
 };
 
