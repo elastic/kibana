@@ -344,14 +344,14 @@ export class MonitorConfigRepository {
   ): Promise<SavedObjectsFindResponse<T>> {
     const perPage = options.perPage ?? 5000;
     const page = options.page ?? 1;
-    // fetch all possible monitors, sort locally since we can't sort across multiple types yet
     const maximumPageSize = 10_000;
+    const perTypePageSize = Math.min(page * perPage, maximumPageSize);
 
     const promises: Array<Promise<SavedObjectsFindResponse<T>>> = types.map((type) => {
       const opts = {
         type,
         ...options,
-        perPage: maximumPageSize,
+        perPage: perTypePageSize,
         page: 1,
       };
       return soClient.find<T>(this.handleLegacyOptions(opts, type));
