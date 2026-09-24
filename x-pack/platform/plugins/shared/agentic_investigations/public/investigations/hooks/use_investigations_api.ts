@@ -8,10 +8,7 @@
 import { useMutation } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
-import {
-  AGENTIC_INVESTIGATIONS_API_VERSION,
-  INVESTIGATION_ASSIGN_URL,
-} from '../../../common';
+import { AGENTIC_INVESTIGATIONS_API_VERSION, INVESTIGATION_ASSIGN_URL } from '../../../common';
 
 /** Replaces the assignee list on an investigation (replace-in-full semantics). */
 export const useAssignInvestigation = () => {

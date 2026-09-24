@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from 'react';
 import { css } from '@emotion/react';
 import {
   EuiEmptyPrompt,
@@ -70,8 +77,8 @@ export const EscalationsPage: React.FC = () => {
       return;
     }
     void queryClient.invalidateQueries({ queryKey: escalationQueryKeys.all });
-  // queryClient identity is stable; signalSnapshot reference changes only on bump.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // queryClient identity is stable; signalSnapshot reference changes only on bump.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [signalSnapshot]);
 
   const { selectedConversationId, selectConversation, clearSelectedConversation } =

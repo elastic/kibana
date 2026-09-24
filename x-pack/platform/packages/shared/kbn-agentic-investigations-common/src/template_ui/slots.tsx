@@ -50,7 +50,11 @@ export interface HeaderSlotProps extends InvestigationSlotProps {
   renderAssignees?: RenderAssignees;
 }
 
-export const HeaderSlot = ({ conversation, renderAssignees, refetchConversation }: HeaderSlotProps) => {
+export const HeaderSlot = ({
+  conversation,
+  renderAssignees,
+  refetchConversation,
+}: HeaderSlotProps) => {
   const investigation = conversationToInvestigation(conversation);
   const assigneesNode = renderAssignees
     ? renderAssignees({

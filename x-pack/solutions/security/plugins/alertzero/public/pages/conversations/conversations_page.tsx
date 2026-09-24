@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import {
@@ -33,9 +40,9 @@ import {
   useUserProfiles,
   useSuggestUserProfiles,
 } from '@kbn/agentic-investigations-plugin/public';
-import { assigneeSignal } from '../../components/connected_assignees/assignee_overrides';
 import { useQueryClient } from '@kbn/react-query';
 import { queryKeys as platformQueryKeys } from '@kbn/proposals-plugin/public';
+import { assigneeSignal } from '../../components/connected_assignees/assignee_overrides';
 import type { ProposalItem } from '../../../common/proposals/list';
 import { useProposalChartsSummary } from '../../hooks/use_proposal_charts_summary';
 import { AlertZeroPageSection } from '../../components/layout/alertzero_page_section';
@@ -167,8 +174,8 @@ export const ConversationsPage: React.FC = () => {
       return;
     }
     void queryClient.invalidateQueries({ queryKey: platformQueryKeys.proposals.all });
-  // queryClient identity is stable; signalSnapshot reference changes only on bump.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // queryClient identity is stable; signalSnapshot reference changes only on bump.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [signalSnapshot]);
 
   // Collect every assignee UID from all investigations for a single bulk profile fetch.

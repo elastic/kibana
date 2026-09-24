@@ -91,7 +91,9 @@ export const InvestigationHeaderBlocks = ({
   <ConversationHeaderBlocks
     status={investigation.status}
     assigneesNode={assigneesNode}
-    assigneeUids={investigation.assignees ?? (investigation.assignee ? [investigation.assignee] : [])}
+    assigneeUids={
+      investigation.assignees ?? (investigation.assignee ? [investigation.assignee] : [])
+    }
     data-test-subj="investigationHeaderBlocks"
   />
 );

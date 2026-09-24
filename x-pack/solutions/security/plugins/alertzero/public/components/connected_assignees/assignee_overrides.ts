@@ -63,4 +63,3 @@ export const assigneeSignal = {
     return _snapshot;
   },
 };
-

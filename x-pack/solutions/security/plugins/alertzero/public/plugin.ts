@@ -152,7 +152,11 @@ export class AlertZeroPublicPlugin
           React.createElement(
             KibanaContextProvider,
             { services: stableServices },
-            React.createElement(QueryClientProvider, { client: queryClient }, React.createElement(Component, props))
+            React.createElement(
+              QueryClientProvider,
+              { client: queryClient },
+              React.createElement(Component, props)
+            )
           );
 
         return { default: Wrapped };
@@ -166,7 +170,9 @@ export class AlertZeroPublicPlugin
       const { ConnectedEscalationModal } = await import(
         './pages/conversations/connected_escalation_modal'
       );
-      return ConnectedEscalationModal as React.ComponentType<React.ComponentProps<typeof ConnectedEscalationModal>>;
+      return ConnectedEscalationModal as React.ComponentType<
+        React.ComponentProps<typeof ConnectedEscalationModal>
+      >;
     });
 
     // ---------------------------------------------------------------------------
@@ -176,7 +182,9 @@ export class AlertZeroPublicPlugin
       const { ConnectedAssignees } = await import(
         './components/connected_assignees/connected_assignees'
       );
-      return ConnectedAssignees as React.ComponentType<React.ComponentProps<typeof ConnectedAssignees>>;
+      return ConnectedAssignees as React.ComponentType<
+        React.ComponentProps<typeof ConnectedAssignees>
+      >;
     });
 
     const canManageEscalations =

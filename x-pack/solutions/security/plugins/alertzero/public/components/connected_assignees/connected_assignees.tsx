@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import React, {
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from 'react';
 import { AssignToUsers } from '@kbn/agentic-investigations-common';
 import type { AssigneesSlotRenderProps } from '@kbn/agentic-investigations-common';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
@@ -155,7 +163,10 @@ const ConnectedAssigneesInner = ({
       };
 
       if (templateId === 'escalation') {
-        assignEscalation.mutate({ escalationId: conversationId, assignees }, { onSuccess, onError });
+        assignEscalation.mutate(
+          { escalationId: conversationId, assignees },
+          { onSuccess, onError }
+        );
       } else {
         assignInvestigation.mutate(
           { investigationId: conversationId, assignees },
