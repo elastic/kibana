@@ -8,22 +8,27 @@
 import {
   AppStatus,
   DEFAULT_APP_CATEGORIES,
+  type AppUpdater,
   type CoreSetup,
   type CoreStart,
   type Plugin,
   type PluginInitializerContext,
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { Subject } from 'rxjs';
 import {
   ALERTZERO_APP_ID,
   ALERTZERO_APP_PATH,
-  API_VERSIONS,
   TEMPLATE_ID_INVESTIGATION,
-  buildInvestigationUrl,
 } from '@kbn/alertzero-common';
-import type { GetInvestigationResponse } from '@kbn/alertzero-common';
+import {
+  AGENTIC_INVESTIGATIONS_PLUGIN_ID,
+  ESCALATIONS_UI_CAPABILITY_MANAGE,
+} from '@kbn/agentic-investigations-plugin/common';
+import React from 'react';
 import { registerAgenticInvestigationTemplateUI } from '@kbn/agentic-investigations-common';
 import { getAlertZeroDeepLinks } from './deep_links';
+import { EscalationModalBoundary } from './pages/conversations/escalation_modal_boundary';
 import type {
   AlertZeroClientConfig,
   AlertZeroPublicSetup,
@@ -52,6 +57,11 @@ export class AlertZeroPublicPlugin
     >
 {
   private readonly config: AlertZeroClientConfig;
+  /**
+   * Allows `start()` to push updated deep links (with capability-resolved visibility)
+   * after capabilities become available, without re-registering the application.
+   */
+  private readonly appUpdater$ = new Subject<AppUpdater>();
 
   constructor(context: PluginInitializerContext<AlertZeroClientConfig>) {
     this.config = context.config.get();
@@ -74,7 +84,10 @@ export class AlertZeroPublicPlugin
       status: AppStatus.accessible,
       visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'],
       order: 101,
+      // Initial deep links without capability filtering — capabilities are not available at
+      // setup. `start()` emits an update via appUpdater$ once capabilities are known.
       deepLinks: getAlertZeroDeepLinks(),
+      updater$: this.appUpdater$,
       mount: async (params) => {
         const [coreStart, startDeps] = await coreSetup.getStartServices();
         const { renderApp } = await import('./application');
@@ -82,7 +95,6 @@ export class AlertZeroPublicPlugin
           coreStart,
           startDeps,
           params,
-          config: this.config,
         });
       },
     });
@@ -95,18 +107,66 @@ export class AlertZeroPublicPlugin
       return {};
     }
 
+    // Push capability-resolved deep links now that `core.application.capabilities` is available.
+    this.appUpdater$.next(() => ({
+      deepLinks: getAlertZeroDeepLinks(core.application.capabilities),
+    }));
+
+    // Lazy-load the entire escalation modal subtree — only resolved when the modal is first opened.
+    // This keeps KibanaContextProvider, QueryClient, and ConnectedEscalationModal (plus all their
+    // EUI and hook dependencies) out of alertzero's main chunk.
+    const LazyEscalationModal = React.lazy(async () => {
+      const [
+        { KibanaContextProvider },
+        { QueryClient, QueryClientProvider },
+        { ConnectedEscalationModal },
+      ] = await Promise.all([
+        import('@kbn/kibana-react-plugin/public'),
+        import('@kbn/react-query'),
+        import('./pages/conversations/connected_escalation_modal'),
+      ]);
+
+      // Both `flyoutQueryClient` and `stableServices` are created once inside the lazy factory
+      // so they are stable across renders. KibanaContextProvider compares `services` by reference;
+      // a spread inside the component body would create a new object on every render and
+      // cause all consumers to re-render unnecessarily.
+      const flyoutQueryClient = new QueryClient();
+      const stableServices = { ...core, ...startDeps };
+
+      const WrappedModal: React.FC<React.ComponentProps<typeof ConnectedEscalationModal>> = (
+        props
+      ) =>
+        React.createElement(
+          KibanaContextProvider,
+          { services: stableServices },
+          React.createElement(
+            QueryClientProvider,
+            { client: flyoutQueryClient },
+            React.createElement(ConnectedEscalationModal, props)
+          )
+        );
+
+      return { default: WrappedModal };
+    });
+
+    const canManageEscalations =
+      core.application.capabilities[AGENTIC_INVESTIGATIONS_PLUGIN_ID]?.[
+        ESCALATIONS_UI_CAPABILITY_MANAGE
+      ] === true;
+
     registerAgenticInvestigationTemplateUI({
       conversationTemplates: startDeps.agentBuilder.conversationTemplates,
       templateId: TEMPLATE_ID_INVESTIGATION,
       name: INVESTIGATION_TEMPLATE_NAME,
       icon: 'securitySignalDetected',
-      loadInvestigation: async (conversationId) => {
-        const { investigation } = await core.http.get<GetInvestigationResponse>(
-          buildInvestigationUrl(conversationId),
-          { version: API_VERSIONS.internal.v1 }
-        );
-        return investigation;
-      },
+      renderEscalationModal: canManageEscalations
+        ? (props) =>
+            React.createElement(
+              EscalationModalBoundary,
+              null,
+              React.createElement(LazyEscalationModal, props)
+            )
+        : undefined,
     });
 
     return {};
