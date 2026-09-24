@@ -105,17 +105,25 @@ const readDevVaultConfigUncached = (): VaultConfig | undefined => {
     return undefined;
   }
 
-  try {
-    const value = Buffer.from(stdout, 'base64').toString('utf-8').trim();
-    const parsed = JSON.parse(value);
-    return validateKbnEvalsConfig(parsed);
-  } catch (error) {
-    // Never print the config itself: it holds credentials.
-    const reason = error instanceof Error ? error.message : String(error);
+  // Fixed messages only: parser and validator errors can quote the config, which holds credentials.
+  const ignore = (reason: string): undefined => {
     process.stderr.write(
-      `[kbn-evals] Ignoring invalid dev-vault config (${reason}); the dev-vault profile is empty.\n`
+      `[kbn-evals] Ignoring dev-vault config (${reason}); the dev-vault profile is empty.\n`
     );
     return undefined;
+  };
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(Buffer.from(stdout, 'base64').toString('utf-8').trim());
+  } catch {
+    return ignore('not valid base64-encoded JSON');
+  }
+
+  try {
+    return validateKbnEvalsConfig(parsed);
+  } catch {
+    return ignore('does not match the evals config schema');
   }
 };
 

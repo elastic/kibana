@@ -62,12 +62,23 @@ describe('readVaultConfigFromDevVault', () => {
     expect(readVaultConfigFromDevVault()).toMatchObject({ evaluationConnectorId: 'judge' });
   });
 
-  it('logs why an invalid config was ignored without printing its contents', () => {
+  const loggedOutput = () => stderr.mock.calls.map(([line]) => String(line)).join('');
+
+  it('logs a schema-invalid config without printing its contents', () => {
     mockedSafeExec.mockReturnValue(encode({ openrouter: { apiKey: 'leaked-secret' } }));
 
     expect(readVaultConfigFromDevVault()).toBeUndefined();
-    const logged = stderr.mock.calls.map(([line]) => String(line)).join('');
-    expect(logged).toContain('Ignoring invalid dev-vault config');
-    expect(logged).not.toContain('leaked-secret');
+    expect(loggedOutput()).toContain('does not match the evals config schema');
+    expect(loggedOutput()).not.toContain('leaked-secret');
+  });
+
+  it('logs malformed JSON without echoing the parser error, which quotes the input', () => {
+    mockedSafeExec.mockReturnValue(
+      Buffer.from('{"sandbox": {"apiKey": leaked-secret}}').toString('base64')
+    );
+
+    expect(readVaultConfigFromDevVault()).toBeUndefined();
+    expect(loggedOutput()).toContain('not valid base64-encoded JSON');
+    expect(loggedOutput()).not.toContain('leaked-secret');
   });
 });
