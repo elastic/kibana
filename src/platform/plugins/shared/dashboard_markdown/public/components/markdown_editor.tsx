@@ -16,7 +16,6 @@ import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import React, { useCallback, useLayoutEffect, useRef, useState } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { BehaviorSubject } from 'rxjs';
-import type { MarkdownFooterProps } from './markdown_footer';
 import { SHORT_CONTAINER_QUERY, FOOTER_HELP_TEXT, MarkdownFooter } from './markdown_footer';
 import { MarkdownRenderer } from './markdown_renderer';
 import { MarkdownEditorSettingsPopover } from './markdown_editor_settings_popover';
@@ -30,12 +29,10 @@ interface EuiMarkdownEditorRef {
 const componentStyles = {
   rootContainer: css({
     display: 'flex',
-    height: '100%',
     width: '100%',
     containerType: 'size',
   }),
   container: css({
-    height: '100%',
     width: '100%',
   }),
   componentInvisible: css({
@@ -62,9 +59,6 @@ const componentStyles = {
         },
       },
     }),
-  footerlessEditorStyles: css({
-    blockSize: '100%',
-  }),
 };
 
 const strings = {
@@ -79,42 +73,30 @@ export interface MarkdownEditorProps {
   parsingPluginList?: EuiMarkdownEditorProps['parsingPluginList'];
   processingPluginList: EuiMarkdownFormatProps['processingPluginList'];
   content: string;
+  onChange?: (value: string) => void;
   onCancel: () => void;
   onSave: (value: string) => Promise<void>;
   isPreview$: PublishingSubject<boolean>;
   settings$: BehaviorSubject<MarkdownSettingsState>;
-  uiPlugins?: EuiMarkdownEditorProps['uiPlugins'];
-  onChange?: (value: string) => void;
-  footerLabels?: Pick<
-    MarkdownFooterProps,
-    'cancelButtonLabel' | 'saveButtonLabel' | 'saveDisabledTooltip' | 'helpText'
-  >;
   showFooter?: boolean;
+  uiPlugins?: EuiMarkdownEditorProps['uiPlugins'];
 }
 
 export const MarkdownEditor = ({
   parsingPluginList,
   processingPluginList,
   content,
+  onChange: onContentChange,
   onCancel,
   onSave,
   isPreview$,
   settings$,
-  uiPlugins = [],
-  onChange: onValueChange,
-  footerLabels,
   showFooter = true,
+  uiPlugins = [],
 }: MarkdownEditorProps) => {
   const styles = useMemoCss(componentStyles);
   const [isPreview, settings] = useBatchedPublishingSubjects(isPreview$, settings$);
   const [value, setValue] = useState(content);
-  const onChange = useCallback(
-    (nextValue: string) => {
-      setValue(nextValue);
-      onValueChange?.(nextValue);
-    },
-    [onValueChange]
-  );
 
   const editorRef = useRef<EuiMarkdownEditorRef>(null);
   const cancelButtonRef = useRef<HTMLButtonElement>(null);
@@ -129,6 +111,14 @@ export const MarkdownEditor = ({
       setHaveSettingsChanged(true);
     },
     [settings, settings$]
+  );
+
+  const onChange = useCallback(
+    (nextValue: string) => {
+      setValue(nextValue);
+      onContentChange?.(nextValue);
+    },
+    [onContentChange]
   );
 
   return (
@@ -151,8 +141,8 @@ export const MarkdownEditor = ({
           uiPlugins={uiPlugins}
           height="full"
           ref={editorRef}
-          css={[styles.editorStyles, !showFooter && styles.footerlessEditorStyles]}
-          aria-describedby={showFooter ? FOOTER_HELP_TEXT : undefined}
+          css={styles.editorStyles}
+          aria-describedby={FOOTER_HELP_TEXT}
           showFooter={false}
           toolbarProps={{
             right: (
@@ -184,7 +174,6 @@ export const MarkdownEditor = ({
           isPreview={isPreview}
           cancelButtonRef={cancelButtonRef}
           isSaveable={isSaveable}
-          {...footerLabels}
         />
       ) : null}
     </div>

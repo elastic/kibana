@@ -9,8 +9,8 @@
 
 import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
-import type { OverlaySystemFlyoutOpenOptions } from '@kbn/core-overlays-browser';
-import { htmlIdGenerator } from '@elastic/eui';
+import { EuiDelayRender, EuiSkeletonText, EuiSkeletonTitle, htmlIdGenerator } from '@elastic/eui';
+import { FlyoutTemplate } from '@kbn/flyout-template';
 import {
   createLazyFlyoutLifecycle,
   LazyFlyoutContent,
@@ -18,18 +18,37 @@ import {
   type LoadContentArgs,
 } from './lazy_flyout_common';
 
-const htmlId = htmlIdGenerator('systemFlyoutTitleId');
+const htmlId = htmlIdGenerator('flyoutTemplateTitleId');
 
-export interface OpenLazySystemFlyoutParams {
+export interface OpenLazyFlyoutTemplateParams {
   core: CoreStart;
   parentApi?: unknown;
   returnFocus?: () => void;
   loadContent: (args: LoadContentArgs) => Promise<JSX.Element | null | void>;
-  flyoutProps?: Partial<OverlaySystemFlyoutOpenOptions> & { focusedPanelId?: string };
+  flyoutProps?: Partial<Parameters<CoreStart['overlays']['openFlyoutTemplate']>[0]> & {
+    focusedPanelId?: string;
+  };
 }
 
-/** Opens a system-managed flyout with lazily loaded content. */
-export const openLazySystemFlyout = (params: OpenLazySystemFlyoutParams) => {
+const LoadingFlyoutTemplate = ({ closeFlyout }: { closeFlyout: () => void }) => (
+  <FlyoutTemplate onClose={closeFlyout}>
+    <FlyoutTemplate.Header
+      title={
+        <EuiDelayRender delay={300}>
+          <EuiSkeletonTitle size="xs" />
+        </EuiDelayRender>
+      }
+    />
+    <FlyoutTemplate.Body>
+      <EuiDelayRender delay={300}>
+        <EuiSkeletonText />
+      </EuiDelayRender>
+    </FlyoutTemplate.Body>
+  </FlyoutTemplate>
+);
+
+/** Opens a FlyoutTemplate-based flyout with lazily loaded content. */
+export const openLazyFlyoutTemplate = (params: OpenLazyFlyoutTemplateParams) => {
   const { core, parentApi, returnFocus, loadContent, flyoutProps: allFlyoutProps } = params;
   const { focusedPanelId, ...flyoutProps } = allFlyoutProps ?? {};
   const ariaLabelledBy = flyoutProps['aria-labelledby'] ?? htmlId();
@@ -40,28 +59,30 @@ export const openLazySystemFlyout = (params: OpenLazySystemFlyoutParams) => {
   });
   const { type, ownFocus } = resolvePanelFlyoutDefaults(overlayTracker, flyoutProps);
 
-  const flyoutRef = core.overlays.openSystemFlyout(
-    <LazyFlyoutContent
-      closeFlyout={closeFlyout}
-      loadContent={loadContent}
-      core={core}
-      ariaLabelledBy={ariaLabelledBy}
-      flyoutClassName="kbnPresentationLazySystemFlyout"
-    />,
+  const flyoutRef = core.overlays.openFlyoutTemplate(
     {
       size: 500,
       type,
       paddingSize: 'm',
       maxWidth: 800,
       ownFocus,
-      isResizable: true,
+      resizable: true,
       outsideClickCloses: true,
-      className: 'kbnPresentationLazySystemFlyout',
+      className: 'kbnPresentationLazyFlyoutTemplate',
       'aria-labelledby': ariaLabelledBy,
-      session: 'start',
       onClose: closeFlyout,
       ...flyoutProps,
-    }
+    },
+    () => (
+      <LazyFlyoutContent
+        closeFlyout={closeFlyout}
+        loadContent={loadContent}
+        core={core}
+        ariaLabelledBy={ariaLabelledBy}
+        fallback={<LoadingFlyoutTemplate closeFlyout={closeFlyout} />}
+        flyoutClassName="kbnPresentationLazyFlyoutTemplate"
+      />
+    )
   );
   setFlyoutRef(flyoutRef);
   return flyoutRef;

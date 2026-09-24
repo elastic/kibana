@@ -19,13 +19,8 @@ export {
   LazyDataViewPicker,
   LazyFieldPicker,
   EmbeddableEditorPreview,
-  ManagedEditorFooter,
 } from './components';
-export type {
-  EmbeddableEditorPreviewProps,
-  ManagedEditorFooterProps,
-  ManagedEditorPreviewConfig,
-} from './components';
+export type { EmbeddableEditorPreviewProps } from './components';
 
 export function plugin() {
   return new PresentationUtilPlugin();

@@ -10,6 +10,8 @@
 import React, { Suspense, lazy, useEffect, useRef } from 'react';
 import { EuiLoadingChart } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
+import { fromStoredFilters, toStoredFilters } from '@kbn/as-code-filters-transforms';
+import { toAsCodeQuery, toStoredQuery } from '@kbn/as-code-shared-transforms';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { dispatchRenderComplete } from '@kbn/kibana-utils-plugin/public';
 import type { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
@@ -18,10 +20,15 @@ import type {
   EmbeddablePublicDefinition,
   HasDrilldowns,
 } from '@kbn/embeddable-plugin/public';
-import { openLazySystemFlyout } from '@kbn/presentation-util';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { BehaviorSubject, combineLatest, map, merge, skip, switchMap, tap } from 'rxjs';
-import { isOfQueryType, type AggregateQuery, type Filter, type Query } from '@kbn/es-query';
+import {
+  FilterStateStore,
+  isOfQueryType,
+  type AggregateQuery,
+  type Filter,
+  type Query,
+} from '@kbn/es-query';
 import { parse } from 'hjson';
 import { ON_APPLY_FILTER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import {
@@ -30,6 +37,7 @@ import {
   areTriggersDisabled,
   fetch$,
   getInheritedViewMode,
+  initializeStateManager,
   initializeStateApi,
   initializeTimeRangeManager,
   initializeTitleManager,
@@ -66,14 +74,10 @@ import { getEsqlQueriesFromSpec } from '../lib/spec_uses_esql';
 import { reportVegaRender } from '../lib/vega_render_telemetry';
 import { createInspectorAdapters } from '../vega_inspector';
 import type { VegaByValueState } from '../../server';
-import {
-  createVegaEditorMenuManager,
-  createVegaEditorMenuServices,
-  type VegaEditorRenderParams,
-} from './vega_editor_menu_session';
 // Frame only. The spec editor stays a separate lazy chunk inside this module, so Edit does not
 // wait on `vega_editor_flyout` before the flyout can render.
 import { VegaEditorFlyout } from './vega_editor_flyout';
+import { openVegaEditor } from './open_vega_editor';
 
 const LazyVegaVisComponent = lazy(() =>
   import('../async_services').then(({ VegaVisComponent }) => ({ default: VegaVisComponent }))
@@ -112,11 +116,22 @@ const mergePanelSearch = (
   return { query: panelQuery, filters };
 };
 
-const persistedPanelQuery = (
-  query: Query | AggregateQuery | undefined
-): VegaByValueState['query'] => {
-  if (!query || !isOfQueryType(query) || typeof query.query !== 'string') return undefined;
-  return { language: query.language, query: query.query };
+const toUnifiedSearchFilters = (filters: VegaByValueState['filters']): Filter[] | undefined => {
+  return toStoredFilters(filters)?.map((filter): Filter => {
+    if (filter.$state) {
+      return {
+        ...filter,
+        $state: {
+          store: filter.$state.store ?? FilterStateStore.APP_STATE,
+        },
+      };
+    }
+
+    return {
+      ...filter,
+      $state: undefined,
+    };
+  });
 };
 
 /**
@@ -140,12 +155,15 @@ export type VegaEmbeddableApi = DefaultEmbeddableApi<VegaByValueState> &
   PublishesProjectRoutingOverrides &
   PublishesDataViews &
   PublishesRendered & {
-    /** Renders the editor into a flyout that is already open. */
-    renderEditor: (params: VegaEditorRenderParams) => JSX.Element;
+    /** Returns the editor panel content for an already-open flyout. */
+    getEditPanel?: (options?: {
+      closeFlyout?: () => void;
+      isNewPanel?: boolean;
+    }) => Promise<JSX.Element | undefined>;
   };
 
 interface VegaEmbeddableDependencies {
-  uiActions: Pick<VegaPluginStartDependencies['uiActions'], 'executeTriggerActions' | 'getAction'>;
+  uiActions: Pick<VegaPluginStartDependencies['uiActions'], 'executeTriggerActions'>;
   SearchBar: UnifiedSearchPublicPluginStart['ui']['SearchBar'];
   visualizationDependencies: VegaVisualizationDependencies;
 }
@@ -166,16 +184,23 @@ export const vegaEmbeddableFactory = (
     const timeRangeManager = initializeTimeRangeManager(initialState);
     const drilldownsManager = initializeDrilldownsManager(uuid, initialState);
     const spec$ = new BehaviorSubject(initialState.spec);
-    const query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(initialState.query);
-    const filters$ = new BehaviorSubject<Filter[] | undefined>(
-      initialState.filters as Filter[] | undefined
+    const panelSearchStateManager = initializeStateManager<{
+      query?: Query | AggregateQuery;
+      filters?: Filter[];
+    }>(
+      {
+        query: toStoredQuery(initialState.query),
+        filters: toUnifiedSearchFilters(initialState.filters),
+      },
+      {
+        query: undefined,
+        filters: undefined,
+      },
+      {
+        query: 'deepEquality',
+        filters: 'deepEquality',
+      }
     );
-    const setQuery = (query: Query | undefined) => {
-      query$.next(query);
-    };
-    const setFilters = (filters: Filter[] | undefined) => {
-      filters$.next(filters);
-    };
     const esql$ = new BehaviorSubject<AggregateQuery[]>([]);
     const approximationApplied$ = new BehaviorSubject<boolean | undefined>(undefined);
     const projectRoutingOverrides$ = new BehaviorSubject<ProjectRoutingOverrides>(undefined);
@@ -217,14 +242,18 @@ export const vegaEmbeddableFactory = (
     const stateApi = initializeStateApi<VegaByValueState>({
       uuid,
       parentApi,
-      serializeState: () => ({
-        ...titleManager.getLatestState(),
-        ...timeRangeManager.getLatestState(),
-        ...drilldownsManager.getLatestState(),
-        query: persistedPanelQuery(query$.getValue()),
-        filters: filters$.getValue() as VegaByValueState['filters'],
-        spec: spec$.getValue(),
-      }),
+      serializeState: () => {
+        const panelQuery = panelSearchStateManager.api.query$.getValue();
+
+        return {
+          ...titleManager.getLatestState(),
+          ...timeRangeManager.getLatestState(),
+          ...drilldownsManager.getLatestState(),
+          query: isOfQueryType(panelQuery) ? toAsCodeQuery(panelQuery) : undefined,
+          filters: fromStoredFilters(panelSearchStateManager.api.filters$.getValue()),
+          spec: spec$.getValue(),
+        };
+      },
       anyStateChange$: merge(
         titleManager.anyStateChange$,
         timeRangeManager.anyStateChange$,
@@ -233,14 +262,7 @@ export const vegaEmbeddableFactory = (
           skip(1),
           map((): void => undefined)
         ),
-        query$.pipe(
-          skip(1),
-          map((): void => undefined)
-        ),
-        filters$.pipe(
-          skip(1),
-          map((): void => undefined)
-        )
+        panelSearchStateManager.anyStateChange$
       ),
       getComparators: () => ({
         ...titleComparators,
@@ -254,25 +276,27 @@ export const vegaEmbeddableFactory = (
         titleManager.reinitializeState(nextState);
         timeRangeManager.reinitializeState(nextState);
         drilldownsManager.reinitializeState(nextState);
-        query$.next(nextState.query);
-        filters$.next(nextState.filters as Filter[] | undefined);
+        panelSearchStateManager.reinitializeState({
+          query: toStoredQuery(nextState.query),
+          filters: toUnifiedSearchFilters(nextState.filters),
+        });
         spec$.next(nextState.spec);
       },
     });
 
-    const renderEditor = ({
-      ariaLabelledBy,
-      closeFlyout,
-      isNewPanel,
-      menuManager,
-    }: VegaEditorRenderParams) => {
-      menuManager.setPanelApi(api);
+    const getEditPanel = async ({
+      closeFlyout = () => {},
+      isNewPanel = false,
+    }: {
+      closeFlyout?: () => void;
+      isNewPanel?: boolean;
+    } = {}) => {
       const initialSpec = spec$.getValue();
+      const initialSearch = panelSearchStateManager.getLatestState();
       return (
         <VegaEditorFlyout
-          menuManager={menuManager}
+          api={api}
           SearchBar={deps.SearchBar}
-          ariaLabelledBy={ariaLabelledBy}
           closeFlyout={closeFlyout}
           initialSpec={initialSpec}
           isNewPanel={isNewPanel}
@@ -283,6 +307,7 @@ export const vegaEmbeddableFactory = (
               parentApi.removePanel(api.uuid);
             } else {
               spec$.next(initialSpec);
+              panelSearchStateManager.reinitializeState(initialSearch);
             }
           }}
         />
@@ -293,10 +318,7 @@ export const vegaEmbeddableFactory = (
       ...titleManager.api,
       ...timeRangeManager.api,
       ...drilldownsManager.api,
-      query$,
-      setQuery,
-      filters$,
-      setFilters,
+      ...panelSearchStateManager.api,
       ...stateApi,
       blockingError$,
       dataLoading$,
@@ -308,26 +330,16 @@ export const vegaEmbeddableFactory = (
       supportedTriggers: () => VEGA_SUPPORTED_TRIGGERS,
       getTypeDisplayName: () => 'Vega',
       isEditingEnabled: () => true,
-      renderEditor,
+      getEditPanel,
       onEdit: async ({ isNewPanel = false, returnFocus } = {}) => {
-        const menuManager = createVegaEditorMenuManager(
-          createVegaEditorMenuServices(core, deps.uiActions),
-          api
-        );
-        const flyoutRef = openLazySystemFlyout({
+        openVegaEditor({
           core,
           parentApi,
           returnFocus,
-          flyoutProps: {
-            size: 'm',
-            id: menuManager.flyoutId,
-            historyKey: menuManager.historyKey,
-            flyoutMenuProps: menuManager.flyoutMenuProps,
-            focusedPanelId: uuid,
-          },
-          loadContent: async (args) => renderEditor({ ...args, isNewPanel, menuManager }),
+          focusedPanelId: uuid,
+          isNewPanel,
+          loadApi: async () => api,
         });
-        void flyoutRef.onClose.then(menuManager.dispose);
       },
       getInspectorAdapters: () => inspectorAdapters,
       // Only when the flag is on: the public dashboards-as-code schema is registered then, so
@@ -363,7 +375,12 @@ export const vegaEmbeddableFactory = (
       rendered$.next(true);
     };
 
-    const fetchSubscription = combineLatest([spec$, fetch$(api), query$, filters$])
+    const fetchSubscription = combineLatest([
+      spec$,
+      fetch$(api),
+      panelSearchStateManager.api.query$,
+      panelSearchStateManager.api.filters$,
+    ])
       .pipe(
         switchMap(async ([spec, data, panelQuery, panelFilters]) => {
           abortController.abort();

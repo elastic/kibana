@@ -26,7 +26,6 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import {
   ADD_CANVAS_ELEMENT_TRIGGER,
   ADD_PANEL_TRIGGER,
-  EMBEDDABLE_EDITOR_MENU_TRIGGER,
 } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import {
   setNotifications,
@@ -47,12 +46,9 @@ import type { ConfigSchema } from '../server/config';
 import { getVegaInspectorView } from './vega_inspector/vega_inspector';
 import { getServiceSettingsLazy } from './vega_view/vega_map_view/service_settings/get_service_settings_lazy';
 import { VEGA_EMBEDDABLE_TYPE, VEGA_STANDALONE_EMBEDDABLE_FLAG } from '../common/constants';
-import {
-  ADD_VEGA_EMBEDDABLE_ACTION_ID,
-  ADD_VEGA_PANEL_ACTION_ID,
-  VEGA_EDITOR_HELP_ACTION,
-  VEGA_EDITOR_OPTIONS_ACTION,
-} from './constants';
+import { ADD_VEGA_EMBEDDABLE_ACTION_ID, ADD_VEGA_PANEL_ACTION_ID } from './constants';
+import { getAddVegaPanelAction } from './add_vega_panel_action';
+import { getAddVegaEmbeddableAction } from './embeddable/add_vega_embeddable_action';
 
 /** @internal */
 export interface VegaVisualizationDependencies {
@@ -143,31 +139,12 @@ export class VegaPlugin implements Plugin<void, void> {
     setThemeService(core.theme);
     setUsageCollectionStart(deps.usageCollection);
 
-    // Load these actions from their own single chunk. Importing it through async_module waits
-    // on the renderer before the editor flyout can open
-    deps.uiActions.registerActionAsync(VEGA_EDITOR_OPTIONS_ACTION, async () => {
-      const { getVegaEditorOptionsAction } = await import('./embeddable/editor_menu_actions');
-      return getVegaEditorOptionsAction();
-    });
-    deps.uiActions.attachAction(EMBEDDABLE_EDITOR_MENU_TRIGGER, VEGA_EDITOR_OPTIONS_ACTION);
-
-    deps.uiActions.registerActionAsync(VEGA_EDITOR_HELP_ACTION, async () => {
-      const { getVegaEditorHelpAction } = await import('./embeddable/editor_menu_actions');
-      return getVegaEditorHelpAction();
-    });
-    deps.uiActions.attachAction(EMBEDDABLE_EDITOR_MENU_TRIGGER, VEGA_EDITOR_HELP_ACTION);
-
     deps.uiActions.registerActionAsync(ADD_VEGA_PANEL_ACTION_ID, async () => {
-      const { AddVegaPanelAction } = await import('./async_module');
-      return new AddVegaPanelAction(deps);
+      return getAddVegaPanelAction(deps);
     });
 
-    // Load this action on its own. Importing it through async_module waits on the renderer
-    // before the editor flyout can open. The embeddable factory is registered in setup, so
-    // existing panels still render after a flag rollback.
     deps.uiActions.registerActionAsync(ADD_VEGA_EMBEDDABLE_ACTION_ID, async () => {
-      const { AddVegaEmbeddableAction } = await import('./embeddable/add_vega_embeddable_action');
-      return new AddVegaEmbeddableAction(core, deps.uiActions);
+      return getAddVegaEmbeddableAction(core);
     });
 
     // The feature flag swaps both Dashboard and Canvas from legacy Visualize action to the

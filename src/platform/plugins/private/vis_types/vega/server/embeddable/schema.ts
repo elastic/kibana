@@ -8,6 +8,8 @@
  */
 
 import { z } from '@kbn/zod';
+import { asCodeFilterSchema } from '@kbn/as-code-filters-schema';
+import { asCodeQuerySchema } from '@kbn/as-code-shared-schemas';
 import type {
   GetDrilldownsSchemaFnType,
   SerializedDrilldowns,
@@ -25,24 +27,13 @@ export const getVegaEmbeddableSchema = (getDrilldownsSchema: GetDrilldownsSchema
         ...serializedTitlesSchema.shape,
         ...serializedTimeRangeSchema.shape,
         ...getDrilldownsSchema(VEGA_SUPPORTED_TRIGGERS).shape,
-        query: z
-          .object({
-            language: z.string().max(32),
-            query: z.string().max(10_000),
-          })
-          .optional()
-          .meta({
-            description:
-              'Panel-level KQL or Lucene query. Applied together with the dashboard query.',
-          }),
-        filters: z
-          .array(z.looseObject({}))
-          .max(100)
-          .optional()
-          .meta({
-            description:
-              'Panel-level filters. Applied together with the dashboard filters.',
-          }),
+        query: asCodeQuerySchema.optional().meta({
+          description:
+            'Panel-level KQL or Lucene query. Applied together with the dashboard query.',
+        }),
+        filters: z.array(asCodeFilterSchema).max(100).optional().meta({
+          description: 'Panel-level filters. Applied together with the dashboard filters.',
+        }),
         spec: z
           .discriminatedUnion('format', [
             z.object({

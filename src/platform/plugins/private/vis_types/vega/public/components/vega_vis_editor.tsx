@@ -24,7 +24,6 @@ import type { VegaByValueState } from '../../server';
 import { getNotifications } from '../services';
 import type { VisParams } from '../vega_fn';
 import { VegaHelpMenu } from './vega_help_menu';
-import type { VegaActionsMenuProps } from './vega_actions_menu';
 import { VegaActionsMenu } from './vega_actions_menu';
 
 function format(
@@ -54,11 +53,17 @@ function format(
 const vegaVisStyles = {
   base: css({
     '&.vgaEditor': {
+      blockSize: '100%',
+      display: 'flex',
+      flexDirection: 'column',
+      minHeight: 0,
+      position: 'relative',
       width: '100%',
       flexGrow: 1,
-      minHeight: 0,
 
       '.kibanaCodeEditor': {
+        flex: 1,
+        minBlockSize: 0,
         width: '100%',
       },
     },
@@ -91,9 +96,7 @@ export function VegaSpecEditor({
   initialFormat,
   onChange,
   onFormatChange,
-  renderControls,
 }: {
-  renderControls?: (actions: VegaActionsMenuProps) => React.ReactNode;
   editorValue: string;
   initialFormat?: VegaByValueState['spec']['format'];
   onChange: (value: string) => void;
@@ -153,14 +156,10 @@ export function VegaSpecEditor({
 
   return (
     <div className="vgaEditor" data-test-subj="vega-editor" css={styles.base}>
-      {renderControls ? (
-        renderControls({ formatHJson, formatJson })
-      ) : (
-        <div className="vgaEditor__editorActions" css={styles.editorActions}>
-          <VegaHelpMenu />
-          <VegaActionsMenu formatHJson={formatHJson} formatJson={formatJson} />
-        </div>
-      )}
+      <div className="vgaEditor__editorActions" css={styles.editorActions}>
+        <VegaHelpMenu />
+        <VegaActionsMenu formatHJson={formatHJson} formatJson={formatJson} />
+      </div>
       <CodeEditor
         classNameCss={monacoStyles.override}
         width="100%"

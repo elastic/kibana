@@ -15,8 +15,7 @@
       "uiActions",
       "savedObjectsFinder",
       "savedObjectsManagement",
-      "contentManagement",
-      "unifiedSearch"
+      "contentManagement"
     ],
     "optionalPlugins": ["licensing", "savedObjectsTaggingOss", "usageCollection"],
     "requiredBundles": ["kibanaReact", "kibanaUtils", "unifiedSearch"],

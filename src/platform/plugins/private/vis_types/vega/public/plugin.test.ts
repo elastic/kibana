@@ -11,7 +11,6 @@ import { BehaviorSubject } from 'rxjs';
 import {
   ADD_CANVAS_ELEMENT_TRIGGER,
   ADD_PANEL_TRIGGER,
-  EMBEDDABLE_EDITOR_MENU_TRIGGER,
 } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -25,12 +24,7 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { MapsEmsPluginPublicStart } from '@kbn/maps-ems-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { VEGA_EMBEDDABLE_TYPE } from '../common/constants';
-import {
-  ADD_VEGA_EMBEDDABLE_ACTION_ID,
-  ADD_VEGA_PANEL_ACTION_ID,
-  VEGA_EDITOR_HELP_ACTION,
-  VEGA_EDITOR_OPTIONS_ACTION,
-} from './constants';
+import { ADD_VEGA_EMBEDDABLE_ACTION_ID, ADD_VEGA_PANEL_ACTION_ID } from './constants';
 import { VegaPlugin, type VegaPluginStartDependencies } from './plugin';
 
 const mockCreateVegaFn = jest.fn();
@@ -38,18 +32,16 @@ const mockGetVegaVisRenderer = jest.fn();
 const mockGetAddVegaPanelAction = jest.fn(() => ({ id: ADD_VEGA_PANEL_ACTION_ID }));
 const mockGetAddVegaEmbeddableAction = jest.fn(() => ({ id: ADD_VEGA_EMBEDDABLE_ACTION_ID }));
 
+jest.mock('./add_vega_panel_action', () => ({
+  getAddVegaPanelAction: () => mockGetAddVegaPanelAction(),
+}));
+
 jest.mock('./embeddable/add_vega_embeddable_action', () => ({
-  AddVegaEmbeddableAction: function AddVegaEmbeddableAction() {
-    return mockGetAddVegaEmbeddableAction();
-  },
+  getAddVegaEmbeddableAction: () => mockGetAddVegaEmbeddableAction(),
 }));
 
 jest.mock('./async_module', () => ({
   createVegaFn: mockCreateVegaFn,
-  AddVegaEmbeddableAction: mockGetAddVegaEmbeddableAction,
-  AddVegaPanelAction: function AddVegaPanelAction() {
-    return mockGetAddVegaPanelAction();
-  },
   getVegaVisRenderer: mockGetVegaVisRenderer,
   vegaVisType: {},
 }));
@@ -60,7 +52,7 @@ describe('VegaPlugin', () => {
     const startCore = coreMock.createStart();
     const startDeps = {
       expressions: { getFunction: jest.fn() },
-      uiActions: { executeTriggerActions: jest.fn(), getAction: jest.fn() },
+      uiActions: { executeTriggerActions: jest.fn() },
       unifiedSearch: { ui: { SearchBar: jest.fn() } },
     };
     core.getStartServices.mockResolvedValue([startCore, startDeps, {}]);
@@ -150,36 +142,7 @@ describe('VegaPlugin', () => {
       );
     });
 
-    it('registers Vega editor menu actions with loaders', async () => {
-      const { uiActions } = startPlugin(new BehaviorSubject(false));
-      expect(uiActions.registerActionAsync).toHaveBeenCalledWith(
-        VEGA_EDITOR_OPTIONS_ACTION,
-        expect.any(Function)
-      );
-      expect(uiActions.registerActionAsync).toHaveBeenCalledWith(
-        VEGA_EDITOR_HELP_ACTION,
-        expect.any(Function)
-      );
-      expect(uiActions.attachAction).toHaveBeenCalledWith(
-        EMBEDDABLE_EDITOR_MENU_TRIGGER,
-        VEGA_EDITOR_OPTIONS_ACTION
-      );
-      expect(uiActions.attachAction).toHaveBeenCalledWith(
-        EMBEDDABLE_EDITOR_MENU_TRIGGER,
-        VEGA_EDITOR_HELP_ACTION
-      );
-      const optionsLoader = uiActions.registerActionAsync.mock.calls.find(
-        ([actionId]) => actionId === VEGA_EDITOR_OPTIONS_ACTION
-      )?.[1];
-      const helpLoader = uiActions.registerActionAsync.mock.calls.find(
-        ([actionId]) => actionId === VEGA_EDITOR_HELP_ACTION
-      )?.[1];
-      if (!optionsLoader || !helpLoader) throw new Error('Expected editor menu action loaders');
-      expect((await optionsLoader()).id).toBe(VEGA_EDITOR_OPTIONS_ACTION);
-      expect((await helpLoader()).id).toBe(VEGA_EDITOR_HELP_ACTION);
-    });
-
-    it('loads the legacy add action from the shared async module and the embeddable action on its own', async () => {
+    it('loads both add actions through their registered loaders', async () => {
       const { uiActions } = startPlugin(new BehaviorSubject(false));
       const legacyLoader = uiActions.registerActionAsync.mock.calls.find(
         ([actionId]) => actionId === ADD_VEGA_PANEL_ACTION_ID

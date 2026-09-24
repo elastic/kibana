@@ -12,7 +12,6 @@
     "test/scout/**/*"
   ],
   "kbn_references": [
-    "@kbn/presentation-util-plugin",
     "@kbn/core",
     "@kbn/i18n",
     "@kbn/dashboard-plugin",
@@ -46,8 +45,7 @@
     "@kbn/as-code-utils",
     "@kbn/as-code-shared-transforms",
     "@kbn/as-code-shared-telemetry",
-    "@kbn/scout",
-    "@kbn/deeplinks-analytics"
+    "@kbn/scout"
   ],
   "exclude": ["target/**/*"]
 }

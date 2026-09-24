@@ -17,7 +17,6 @@ project:
   owner: '@elastic/kibana-dashboards'
   sourceRoot: src/platform/plugins/private/links
 dependsOn:
-  - '@kbn/presentation-util-plugin'
   - '@kbn/core'
   - '@kbn/i18n'
   - '@kbn/dashboard-plugin'
@@ -52,7 +51,6 @@ dependsOn:
   - '@kbn/as-code-shared-transforms'
   - '@kbn/as-code-shared-telemetry'
   - '@kbn/scout'
-  - '@kbn/deeplinks-analytics'
 tags:
   - plugin
   - prod

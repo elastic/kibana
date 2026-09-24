@@ -175,7 +175,13 @@ export type FlyoutFooterSecondaryActionProps = Omit<
   EuiButtonPropsForButton,
   ActionOwnedProps | 'onClick' | 'minWidth'
 > &
-  FlyoutFooterActionBaseProps;
+  FlyoutFooterActionBaseProps & {
+    /**
+     * Which side of the footer to render the action on.
+     * `left` matches the historical secondary-action placement.
+     */
+    side?: 'left' | 'right';
+  };
 
 /**
  * A single item in a footer action menu (either a clickable action or a separator).

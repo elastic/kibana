@@ -10,5 +10,3 @@
 export { vegaVisType } from './vega_type';
 export { createVegaFn } from './vega_fn';
 export { getVegaVisRenderer } from './vega_vis_renderer';
-export { AddVegaPanelAction } from './add_vega_panel_action';
-export { AddVegaEmbeddableAction } from './embeddable/add_vega_embeddable_action';

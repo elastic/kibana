@@ -25,7 +25,7 @@ import {
   titleComparators,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
-import { openLazySystemFlyout } from '@kbn/presentation-util';
+import { openLazyFlyout } from '@kbn/presentation-util';
 
 import type { LinksByReferenceState, LinksByValueState, LinksEmbeddableState } from '../../common';
 import { DISPLAY_NAME, LINKS_EMBEDDABLE_TYPE } from '../../common';
@@ -34,7 +34,7 @@ import {
   LINKS_HORIZONTAL_LAYOUT,
   LINKS_VERTICAL_LAYOUT,
 } from '../../common/constants';
-import { isLinksParentApiCompatible } from '../actions/add_links_panel_action';
+import { isParentApiCompatible as isLinksParentApiCompatible } from '../actions/add_links_panel_action';
 import { DashboardLinkComponent } from '../components/dashboard_link/dashboard_link_component';
 import { ExternalLinkComponent } from '../components/external_link/external_link_component';
 import { resolveLinks, serializeResolvedLinks } from '../lib/resolve_links';
@@ -158,7 +158,7 @@ export const getLinksEmbeddableFactory = () => {
         canUnlinkFromLibrary: async () => isByReference,
         hasLibraryItemWithTitle,
         onEdit: async () => {
-          openLazySystemFlyout({
+          openLazyFlyout({
             core: coreServices,
             parentApi,
             loadContent: async ({ closeFlyout }) => {

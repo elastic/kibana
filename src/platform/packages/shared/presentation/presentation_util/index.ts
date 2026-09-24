@@ -9,20 +9,9 @@
 
 export { openLazyFlyout } from './src/open_lazy_flyout';
 export {
-  openLazySystemFlyout,
-  type OpenLazySystemFlyoutParams,
-} from './src/open_lazy_system_flyout';
+  openLazyFlyoutTemplate,
+  type OpenLazyFlyoutTemplateParams,
+} from './src/open_lazy_flyout_template';
 export { openLazyModal } from './src/open_lazy_modal';
 export { getPanelContextMenuTriggerId } from './src/focus_helpers';
 export { tracksOverlays, type TracksOverlays } from './src/tracks_overlays';
-export { initializeEditorMenuManager } from './src/editor_menu/editor_menu_manager';
-export type {
-  ActiveEditorMenu,
-  EditorMenuActionContext,
-  EditorMenuDescriptor,
-  EditorMenuItem,
-  EditorMenuManager,
-  EditorMenuServices,
-  EditorMenuSubject,
-  InitializeEditorMenuManagerParams,
-} from './src/editor_menu/types';

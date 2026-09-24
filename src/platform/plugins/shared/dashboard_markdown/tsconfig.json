@@ -31,6 +31,7 @@
     "@kbn/usage-collection-plugin",
     "@kbn/as-code-shared-telemetry",
     "@kbn/as-code-shared-transforms",
+    "@kbn/flyout-template",
     "@kbn/presentation-util-plugin",
     "@kbn/presentation-util",
     "@kbn/content-management-utils"

@@ -18,7 +18,6 @@ import type {
 import { savedObjectsManagementPluginMock } from '@kbn/saved-objects-management-plugin/public/mocks';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
-import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 
 import { BehaviorSubject, of, Subject } from 'rxjs';
 import type { EmbeddableStateTransfer } from '.';
@@ -104,7 +103,6 @@ const createInstance = (setupPlugins: Partial<EmbeddableSetupDependencies> = {})
       usageCollection: { reportUiCounter: jest.fn() },
       contentManagement:
         startPlugins.contentManagement || contentManagementMock.createStartContract(),
-      unifiedSearch: startPlugins.unifiedSearch || unifiedSearchPluginMock.createStartContract(),
     });
   return {
     plugin,
@@ -119,9 +117,7 @@ export const embeddablePluginMock = {
   createInstance,
 };
 
-export const setStubKibanaServices = (
-  overrides: Partial<EmbeddableStartDependencies> = {}
-) => {
+export const setStubKibanaServices = () => {
   const core = coreMock.createStart();
   const selfStart = embeddablePluginMock.createStartContract();
 
@@ -131,8 +127,6 @@ export const setStubKibanaServices = (
     savedObjectsManagement: savedObjectsManagementPluginMock.createStartContract(),
     usageCollection: { reportUiCounter: jest.fn() },
     contentManagement: contentManagementMock.createStartContract(),
-    unifiedSearch: unifiedSearchPluginMock.createStartContract(),
-    ...overrides,
   });
 };
 
