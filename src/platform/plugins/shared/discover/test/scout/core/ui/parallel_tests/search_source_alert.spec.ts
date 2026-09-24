@@ -74,6 +74,17 @@ const getAdHocDataViewSpec = (id: string, title: string) => ({
   type: 'index-pattern',
 });
 
+const refreshSourceDocuments = async (esClient: Client, sourceIndex: string): Promise<void> => {
+  const timestamp = new Date().toISOString();
+  await esClient.bulk({
+    refresh: 'wait_for',
+    operations: Array.from({ length: 5 }, (_, i) => [
+      { index: { _index: sourceIndex, _id: `search-source-alert-${i}` } },
+      { '@timestamp': timestamp, message: `msg-${i}` },
+    ]).flat(),
+  });
+};
+
 const createSearchSourceRule = async ({
   apiServices,
   connectorId,
@@ -232,14 +243,7 @@ spaceTest.describe('Discover app - search source alert', { tag: tags.deploymentA
       },
     });
 
-    const timestamp = new Date(Date.now() - 10 * 60 * 1000).toISOString();
-    await esClient.bulk({
-      refresh: 'wait_for',
-      operations: Array.from({ length: 5 }, (_, i) => [
-        { index: { _index: sourceIndex } },
-        { '@timestamp': timestamp, message: `msg-${i}` },
-      ]).flat(),
-    });
+    await refreshSourceDocuments(esClient, sourceIndex);
 
     await esClient.indices.create({
       index: outputIndex,
@@ -291,8 +295,9 @@ spaceTest.describe('Discover app - search source alert', { tag: tags.deploymentA
     );
   });
 
-  spaceTest.beforeEach(async ({ browserAuth }) => {
+  spaceTest.beforeEach(async ({ browserAuth, esClient }) => {
     await browserAuth.loginAsAdmin();
+    await refreshSourceDocuments(esClient, sourceIndex);
   });
 
   spaceTest.afterAll(async ({ apiServices, esClient, scoutSpace }) => {

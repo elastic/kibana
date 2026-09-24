@@ -7,18 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", or the "Server Side
- * Public License, v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
- */
-
 import type { KibanaRole } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../../../common/ui/fixtures';
+
+const getSearchSourceRuleParams = (dataViewId: string) => ({
+  searchType: 'searchSource',
+  timeWindowSize: 30,
+  timeWindowUnit: 'm',
+  threshold: [1],
+  thresholdComparator: '>',
+  size: 100,
+  aggType: 'count',
+  groupBy: 'all',
+  termSize: 5,
+  excludeHitsFromPreviousRun: false,
+  sourceFields: [],
+  searchConfiguration: {
+    query: { query: '', language: 'kuery' },
+    index: dataViewId,
+    filter: [],
+  },
+});
 
 spaceTest.describe(
   'Discover app - search source alert privileges',
@@ -48,6 +58,19 @@ spaceTest.describe(
         spaceId: scoutSpace.id,
       });
       dataViewId = dataView.data.id;
+      const rule = await apiServices.alerting.rules.create(
+        {
+          name: ruleName,
+          ruleTypeId: '.es-query',
+          consumer: 'stackAlerts',
+          schedule: { interval: '1m' },
+          notifyWhen: 'onActiveAlert',
+          params: getSearchSourceRuleParams(dataViewId),
+          actions: [],
+        },
+        scoutSpace.id
+      );
+      ruleId = rule.data.id as string;
     });
 
     spaceTest.afterAll(async ({ apiServices, esClient, scoutSpace }) => {
@@ -59,15 +82,15 @@ spaceTest.describe(
     });
 
     spaceTest(
-      'allows a Discover alert user to create a rule and navigate to its results',
-      async ({ apiServices, browserAuth, page, pageObjects, scoutSpace }) => {
+      "allows a Discover alert user to view a rule's results",
+      async ({ browserAuth, page, pageObjects }) => {
         const role: KibanaRole = {
           elasticsearch: {
             cluster: [],
             indices: [
               {
                 names: [sourceIndex],
-                privileges: ['read', 'view_index_metadata', 'manage', 'create_index', 'index'],
+                privileges: ['read', 'view_index_metadata'],
               },
             ],
           },
@@ -87,25 +110,6 @@ spaceTest.describe(
           ],
         };
         await browserAuth.loginWithCustomRole(role);
-        await pageObjects.discover.goto({ queryMode: 'classic' });
-        await pageObjects.discover.waitUntilSearchingHasFinished();
-        await pageObjects.discover.selectDataView(sourceIndex);
-        await pageObjects.datePicker.setCommonlyUsedTime('Last_15 minutes');
-        await pageObjects.discover.openSearchThresholdRuleFlyout();
-        await page.testSubj.click('ruleFormStep-details');
-        await page.testSubj.fill('ruleDetailsNameInput', ruleName);
-        await page.components.toast().closeAll();
-        await page.testSubj.click('ruleFlyoutFooterSaveButton');
-        await page.testSubj.locator('ruleFlyoutFooterSaveButton').waitFor({ state: 'hidden' });
-        const {
-          data: { data: createdRules },
-        } = await apiServices.alerting.rules.find(
-          { search: ruleName, search_fields: 'name' },
-          scoutSpace.id
-        );
-        const [createdRule] = createdRules;
-        expect(createdRule).toBeDefined();
-        ruleId = createdRule.id;
         await page.gotoApp('management/insightsAndAlerting/triggersActions/rules');
         const rulesList = page.testSubj.locator('rulesList');
         await rulesList.waitFor({ state: 'visible' });
@@ -113,7 +117,9 @@ spaceTest.describe(
         await page.testSubj.click('app-menu-overflow-button');
         await page.testSubj.click('ruleDetails-viewInDiscover');
         await pageObjects.discover.waitUntilSearchingHasFinished();
+        await pageObjects.dataGrid.waitForDocTableRendered();
         await expect(pageObjects.discover.getSelectedDataView()).toHaveAccessibleName(sourceIndex);
+        await expect.poll(() => pageObjects.discover.getHitCountInt()).toBe(1);
       }
     );
   }
