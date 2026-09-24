@@ -96,7 +96,7 @@ spaceTest.describe(
     );
 
     spaceTest('restores ES query draft and submitted state per tab', async ({ pageObjects }) => {
-      const { discover, unifiedTabs } = pageObjects;
+      const { discover, unifiedTabs, esqlEditor } = pageObjects;
       const draftQuery0 = 'from logstash-* | sort @timestamp desc | limit 50';
       const draftQuery2 = 'from logstash-* | sort @timestamp desc | limit 150';
 
@@ -104,7 +104,7 @@ spaceTest.describe(
       await discover.waitUntilTabIsLoaded();
       await expectEsqlQueryState(pageObjects, DEFAULT_ESQL_QUERY);
 
-      await discover.codeEditor.setCodeEditorValue(draftQuery0);
+      await esqlEditor.setQuery(draftQuery0);
       await expectEsqlQueryState(pageObjects, draftQuery0);
 
       await unifiedTabs.createNewTab();
@@ -114,7 +114,7 @@ spaceTest.describe(
       await unifiedTabs.createNewTab();
       await discover.writeAndSubmitEsqlQuery(DEFAULT_ESQL_QUERY);
       await expectEsqlQueryState(pageObjects, DEFAULT_ESQL_QUERY);
-      await discover.codeEditor.setCodeEditorValue(draftQuery2);
+      await esqlEditor.setQuery(draftQuery2);
       await expectEsqlQueryState(pageObjects, draftQuery2);
 
       await unifiedTabs.selectTab(0);
@@ -149,7 +149,7 @@ spaceTest.describe(
     spaceTest(
       'restores an already submitted ES query and a draft ES query',
       async ({ pageObjects }) => {
-        const { discover, unifiedTabs } = pageObjects;
+        const { discover, unifiedTabs, esqlEditor } = pageObjects;
         const submittedQuery =
           'from logstash-* | sort @timestamp desc | limit 50 // edit and run this';
         const draftQuery = 'from logstash-* | sort @timestamp desc | limit 150 // only edit this';
@@ -158,14 +158,14 @@ spaceTest.describe(
         await discover.waitUntilTabIsLoaded();
         await expectEsqlQueryState(pageObjects, DEFAULT_ESQL_QUERY);
 
-        await discover.codeEditor.setCodeEditorValue(submittedQuery);
+        await esqlEditor.setQuery(submittedQuery);
         await expectEsqlQueryState(pageObjects, submittedQuery);
         await discover.submitQuery();
         await discover.waitUntilTabIsLoaded();
         await expectEsqlQueryState(pageObjects, submittedQuery);
         await unifiedTabs.createNewTab();
         await discover.writeAndSubmitEsqlQuery(DEFAULT_ESQL_QUERY);
-        await discover.codeEditor.setCodeEditorValue(draftQuery);
+        await esqlEditor.setQuery(draftQuery);
         await expectEsqlQueryState(pageObjects, draftQuery);
         expect(await discover.getHitCount()).toBe('1,000');
 
@@ -200,7 +200,7 @@ spaceTest.describe(
       await expect(historyPanel).toBeVisible();
       await esqlEditor.toggleHistoryPanel();
       await expect(historyPanel).toBeHidden();
-      await discover.codeEditor.setCodeEditorValue(DEFAULT_ESQL_QUERY);
+      await esqlEditor.setQuery(DEFAULT_ESQL_QUERY);
       await discover.submitQueryAndWait();
       await expect(historyPanel).toBeHidden();
       expect(await esqlEditor.getHeight()).toBe(initialHeight);

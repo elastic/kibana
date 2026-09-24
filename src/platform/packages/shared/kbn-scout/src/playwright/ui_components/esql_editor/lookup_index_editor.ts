@@ -10,7 +10,6 @@
 import type { Locator } from '@playwright/test';
 import { escapeRegExp } from 'lodash';
 import type { ScoutPage } from '../..';
-import { expect } from '../../../../ui';
 import { DataGrid } from '../../page_objects/data_grid';
 import type { EsqlEditor } from './esql_editor';
 
@@ -49,24 +48,7 @@ export class LookupIndexEditor {
    * `Create lookup index "my-index"` suggestion). Waits for the flyout to open.
    */
   async openFromSuggestion(query: string, suggestionLabel: string): Promise<void> {
-    await this.esqlEditor.setQuery(query);
-
-    const suggestWidget = this.esqlEditor.getSuggestWidget();
-    const targetSuggestion = suggestWidget.locator('.monaco-list-row', {
-      hasText: suggestionLabel,
-    });
-
-    // `triggerSuggest(query)` moves the cursor to the end of `query` first (needed
-    // since `setQuery` doesn't). Retry the whole trigger, not just the
-    // wait: ES|QL re-validates the query asynchronously, so a suggest triggered
-    // too early can latch Monaco onto an empty widget that never repopulates.
-    await expect(async () => {
-      await this.esqlEditor.triggerSuggest(query);
-      await expect(targetSuggestion).toBeVisible({ timeout: 1_000 });
-    }).toPass();
-
-    await targetSuggestion.click();
-
+    await this.esqlEditor.selectSuggestion(query, suggestionLabel);
     await this.waitForOpen();
   }
 
@@ -77,7 +59,9 @@ export class LookupIndexEditor {
 
   async getColumnNames(): Promise<string[]> {
     const columnNameButtons = this.page.testSubj.locator('indexEditorColumnNameButton');
-    await expect(columnNameButtons).not.toHaveCount(0);
+    await this.page
+      .locator('[data-column-index="0"] [data-test-subj="indexEditorColumnNameButton"]')
+      .waitFor({ state: 'visible' });
     return columnNameButtons.allInnerTexts();
   }
 
@@ -101,7 +85,7 @@ export class LookupIndexEditor {
       .locator('.euiComboBoxOption__renderOption', {
         hasText: new RegExp(`^${escapeRegExp(type)}$`, 'i'),
       });
-    await expect(option).toHaveCount(1);
+    // Strict mode makes the click fail if more than one option still matches.
     await option.click();
     await searchField.blur();
   }

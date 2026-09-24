@@ -9,9 +9,11 @@
 
 import type { Locator } from '@playwright/test';
 import type { ScoutPage } from '../..';
-import { expect } from '../../../../ui';
 import { KibanaCodeEditorWrapper } from '../monaco_editor';
 import { LookupIndexEditor } from './lookup_index_editor';
+
+const SELECT_SUGGESTION_TIMEOUT_MS = 30_000;
+const SUGGESTION_ATTEMPT_TIMEOUT_MS = 2_000;
 
 export interface EsqlControlOptions {
   variableName?: string;
@@ -39,6 +41,10 @@ export interface EsqlControlOptions {
 export class EsqlEditor {
   /** Root of the editor (`ESQLEditor`), wrapping the Monaco instance. */
   readonly editor: Locator;
+  /** Rendered text lines; prefer {@link getQuery} unless asserting on what's displayed. */
+  readonly content: Locator;
+  /** Monaco's hidden textarea, e.g. for focus assertions. */
+  readonly input: Locator;
   /** Run button; only rendered by inline editors (`editorIsInline`). */
   readonly runButton: Locator;
   readonly queryStatsTotalDocumentsProcessed: Locator;
@@ -60,6 +66,8 @@ export class EsqlEditor {
     this.codeEditor = new KibanaCodeEditorWrapper(page);
 
     this.editor = this.scope.getByTestId('ESQLEditor');
+    this.content = this.editor.locator('.view-lines');
+    this.input = this.editor.locator('textarea');
     this.runButton = this.scope.getByTestId('ESQLEditor-run-query-button');
     this.queryStatsTotalDocumentsProcessed = this.scope.getByTestId(
       'ESQLEditor-queryStats-totalDocumentsProcessed'
@@ -82,7 +90,7 @@ export class EsqlEditor {
 
   /** Waits until the Monaco instance is mounted; its text model doesn't exist before that. */
   async waitReady(): Promise<void> {
-    await expect(this.editor.getByTestId('kibanaCodeEditor')).toBeVisible();
+    await this.editor.getByTestId('kibanaCodeEditor').waitFor({ state: 'visible' });
   }
 
   /** Replaces the query in this editor (and only this one) and returns the applied value. */
@@ -98,9 +106,11 @@ export class EsqlEditor {
     return this.codeEditor.getCodeEditorValue(modelIndex);
   }
 
-  /** Clicks the inline editor's run button. Waiting for results is up to the host. */
+  /**
+   * Clicks the inline editor's run button, once it's enabled (Playwright's click waits
+   * for that). Waiting for results is up to the host.
+   */
   async runQuery(): Promise<void> {
-    await expect(this.runButton).toBeEnabled();
     await this.runButton.click();
   }
 
@@ -120,9 +130,69 @@ export class EsqlEditor {
     return this.codeEditor.getCodeEditorSuggestWidget();
   }
 
+  /**
+   * Sets `query`, opens the suggestion widget at its end, and clicks the suggestion whose
+   * label contains `label`.
+   *
+   * ES|QL re-validates the query asynchronously, so a suggest triggered too early can latch
+   * Monaco onto a widget that never gets the suggestion. The whole trigger is retried
+   * rather than just the wait.
+   */
+  async selectSuggestion(query: string, label: string): Promise<void> {
+    await this.setQuery(query);
+
+    const suggestion = this.getSuggestWidget().locator('.monaco-list-row', { hasText: label });
+    const deadline = Date.now() + SELECT_SUGGESTION_TIMEOUT_MS;
+    for (;;) {
+      await this.triggerSuggest(query);
+      try {
+        await suggestion.waitFor({ state: 'visible', timeout: SUGGESTION_ATTEMPT_TIMEOUT_MS });
+        break;
+      } catch (error) {
+        if (Date.now() >= deadline) {
+          throw new Error(`ES|QL suggestion "${label}" did not appear for query "${query}"`, {
+            cause: error,
+          });
+        }
+      }
+    }
+    await suggestion.click();
+  }
+
+  /** Documentation panel shown next to the focused autocomplete suggestion. */
+  getSuggestDetails(): Locator {
+    return this.codeEditor.getSuggestDetailsContainer();
+  }
+
+  /**
+   * Toggles the suggestion documentation panel with Monaco's default `Ctrl+Space`
+   * keybinding (same on macOS), so it acts on the focused editor. A suggestion must be
+   * focused first (e.g. `triggerSuggest()` then `ArrowDown`).
+   */
+  async toggleSuggestDetails(): Promise<void> {
+    await this.page.keyboard.press('Control+Space');
+  }
+
   /** Error markers (squiggly underlines) currently shown in this editor. */
   getErrorMarkers(): Locator {
     return this.editor.locator('.cdr.squiggly-error');
+  }
+
+  /**
+   * Inline decoration rendered via `inlineClassName` (e.g. the lookup-join badges).
+   * Monaco injects these as plain spans, so a CSS class is the only way to target them.
+   */
+  getDecoration(decorationClassName: string): Locator {
+    return this.editor.locator(`.${decorationClassName}`);
+  }
+
+  /** Hovers an inline decoration and clicks the hover-popover row containing `optionText`. */
+  async selectDecorationHoverOption(
+    decorationClassName: string,
+    optionText: string
+  ): Promise<void> {
+    await this.getDecoration(decorationClassName).waitFor({ state: 'visible' });
+    await this.codeEditor.selectDecorationHoverOption(decorationClassName, optionText);
   }
 
   // ── Help menu ──────────────────────────────────────────────────────────────
@@ -137,9 +207,7 @@ export class EsqlEditor {
   async openRecommendedQueriesPanel(): Promise<void> {
     await this.openHelpMenu();
 
-    const recommendedQueriesButton = this.page.testSubj.locator('esql-recommended-queries');
-    await expect(recommendedQueriesButton).toBeVisible();
-    await recommendedQueriesButton.click();
+    await this.page.testSubj.click('esql-recommended-queries');
     await this.page.testSubj.locator('contextMenuPanelTitleButton').waitFor({ state: 'visible' });
   }
 
@@ -152,7 +220,6 @@ export class EsqlEditor {
       name: queryLabel,
     });
 
-    await expect(queryOption).toBeVisible();
     await queryOption.click();
   }
 
@@ -177,14 +244,35 @@ export class EsqlEditor {
     await this.historyPanel.waitFor({ state: wasOpen ? 'hidden' : 'visible' });
   }
 
+  async openStarredQueriesTab(): Promise<void> {
+    await this.page.testSubj.click('starred-queries-tab');
+    await this.scope.getByTestId('ESQLEditor-starredQueries').waitFor({ state: 'visible' });
+  }
+
+  /** Row of the open history panel's History tab whose query is exactly `query`. */
+  getHistoryRow(query: string): Locator {
+    return this.getQueryListRow('ESQLEditor-queryHistory', query);
+  }
+
+  /** Row of the open history panel's Starred tab whose query is exactly `query`. */
+  getStarredRow(query: string): Locator {
+    return this.getQueryListRow('ESQLEditor-starredQueries', query);
+  }
+
   /**
    * Runs the given query from the open history panel. The row's run button both loads
    * the query into the editor and submits it; waiting for results is up to the host.
    * Matches the row by query text rather than index, so callers don't depend on ordering.
    */
   async runHistoryQuery(query: string): Promise<void> {
-    const row = this.scope
-      .getByTestId('ESQLEditor-queryHistory')
+    await this.getHistoryRow(query)
+      .getByTestId('ESQLEditor-history-starred-queries-run-button')
+      .click();
+  }
+
+  private getQueryListRow(listTestSubj: string, query: string): Locator {
+    return this.scope
+      .getByTestId(listTestSubj)
       .locator('tr')
       .filter({
         // Match the whole text of the query cell rather than `hasText` on the
@@ -193,7 +281,6 @@ export class EsqlEditor {
         // merely contains it.
         has: this.page.testSubj.locator('queryString').getByText(query, { exact: true }),
       });
-    await row.getByTestId('ESQLEditor-history-starred-queries-run-button').click();
   }
 
   // ── Layout ─────────────────────────────────────────────────────────────────
@@ -233,12 +320,7 @@ export class EsqlEditor {
     query: string,
     { variableName, label, values }: EsqlControlOptions = {}
   ): Promise<void> {
-    await this.setQuery(query);
-    await this.triggerSuggest(query);
-
-    const suggestionWidget = this.getSuggestWidget();
-    await suggestionWidget.waitFor({ state: 'visible' });
-    await suggestionWidget.locator('.monaco-list-row', { hasText: 'Create control' }).click();
+    await this.selectSuggestion(query, 'Create control');
 
     const flyout = this.page.testSubj.locator('create_esql_control_flyout');
     await flyout.waitFor({ state: 'visible' });

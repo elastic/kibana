@@ -9,7 +9,7 @@ import type { ToolConfirmationPolicyMode, ToolType } from '@kbn/agent-builder-co
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import type { LlmProxy } from '@kbn/ftr-llm-proxy';
 import type { ScoutPage } from '@kbn/scout';
-import { euiSelectors, KibanaCodeEditorWrapper } from '@kbn/scout';
+import { EsqlEditor, euiSelectors } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { subj } from '@kbn/test-subj-selector';
 import {
@@ -18,10 +18,10 @@ import {
 } from '../../../../scout_agent_builder_shared/lib/proxy_scenario';
 
 export class AgentBuilderApp {
-  private readonly codeEditor: KibanaCodeEditorWrapper;
+  private readonly esqlEditor: EsqlEditor;
 
   constructor(private readonly page: ScoutPage) {
-    this.codeEditor = new KibanaCodeEditorWrapper(page);
+    this.esqlEditor = new EsqlEditor(page, 'agentBuilderEsqlEditor');
   }
 
   async navigateToApp(path: string = `agents/${agentBuilderDefaultAgentId}/conversations/new`) {
@@ -297,9 +297,8 @@ export class AgentBuilderApp {
   }
 
   async setEsqlQuery(query: string) {
-    await this.codeEditor.setCodeEditorValue(query);
-    const editor = this.page.testSubj.locator('agentBuilderEsqlEditor');
-    await editor.click();
+    await this.esqlEditor.setQuery(query);
+    await this.esqlEditor.editor.click();
     await this.page.keyboard.press('Tab');
   }
 

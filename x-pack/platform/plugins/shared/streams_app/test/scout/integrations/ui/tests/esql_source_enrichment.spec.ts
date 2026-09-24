@@ -35,18 +35,18 @@ test.describe(
       await browserAuth.loginAsAdmin();
       await pageObjects.discover.goto({ queryMode: 'classic' });
 
-      const codeEditor = pageObjects.discover.codeEditor;
+      const { esqlEditor } = pageObjects;
 
       await test.step('switch to ES|QL mode', async () => {
         await pageObjects.discover.selectTextBaseLang();
       });
 
       await test.step('trigger autocomplete after FROM', async () => {
-        await codeEditor.setCodeEditorValue('FROM ');
-        await codeEditor.triggerSuggest('FROM ');
+        await esqlEditor.setQuery('FROM ');
+        await esqlEditor.triggerSuggest('FROM ');
       });
 
-      const suggestWidget = codeEditor.getCodeEditorSuggestWidget();
+      const suggestWidget = esqlEditor.getSuggestWidget();
 
       await test.step('filter to test stream and assert suggestion with Wired Stream type', async () => {
         await expect(suggestWidget).toBeVisible();
@@ -64,9 +64,9 @@ test.describe(
         // 'toggleSuggestionDetails' command's precondition is satisfied.
         await page.keyboard.press('ArrowDown');
 
-        await codeEditor.toggleSuggestDetails();
+        await esqlEditor.toggleSuggestDetails();
 
-        const detailsPanel = codeEditor.getSuggestDetailsContainer();
+        const detailsPanel = esqlEditor.getSuggestDetails();
         await expect(detailsPanel).toBeVisible();
         // The enricher populates description and a management link
         await expect(detailsPanel).toContainText(STREAM_DESCRIPTION);

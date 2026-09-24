@@ -61,9 +61,7 @@ test.describe(
       await pageObjects.streams.selectChildStreamType('Query');
       await pageObjects.streams.openCreateChildQueryStreamForm();
       await pageObjects.streams.fillRoutingRuleName(CHILD_STREAM_NAME);
-      await pageObjects.streams.kibanaMonacoEditor.setCodeEditorValue(
-        'FROM $.wrong-parent | LIMIT 100'
-      );
+      await pageObjects.esqlEditor.setQuery('FROM $.wrong-parent | LIMIT 100');
       await pageObjects.streams.clickQueryStreamFormCreateButton();
 
       await expect(page.getByText(/must reference its parent stream/)).toBeVisible();

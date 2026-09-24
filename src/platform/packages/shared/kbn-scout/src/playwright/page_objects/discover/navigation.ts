@@ -103,7 +103,7 @@ export abstract class NavigationMixin extends DiscoverAppBase {
    * the ES|QL editor and the classic KQL `queryInput`.
    */
   async getCurrentQueryMode(): Promise<DiscoverQueryMode> {
-    const esqlEditor = this.page.testSubj.locator('ESQLEditor');
+    const esqlEditor = this.esqlEditor.editor;
     const classicQueryInput = this.page.testSubj.locator('queryInput');
 
     // Wait until one of the two mode-specific anchors is rendered
@@ -120,7 +120,7 @@ export abstract class NavigationMixin extends DiscoverAppBase {
       await this.page.testSubj.click('select-text-based-language-btn');
     }
 
-    await this.codeEditor.waitCodeEditorReady('ESQLEditor');
+    await this.esqlEditor.waitReady();
   }
 
   async selectClassicMode() {
@@ -137,7 +137,7 @@ export abstract class NavigationMixin extends DiscoverAppBase {
 
   async writeAndSubmitEsqlQuery(query: string) {
     await this.selectTextBaseLang();
-    await this.codeEditor.setCodeEditorValue(query);
+    await this.esqlEditor.setQuery(query);
     await this.submitQueryAndWait();
   }
 
@@ -186,7 +186,7 @@ export abstract class NavigationMixin extends DiscoverAppBase {
     await this.unifiedTabs.createNewTab();
 
     if (previousEsqlQuery) {
-      await this.codeEditor.setCodeEditorValue(previousEsqlQuery);
+      await this.esqlEditor.setQuery(previousEsqlQuery);
     }
 
     await this.submitQueryAndWait();
@@ -201,8 +201,8 @@ export abstract class NavigationMixin extends DiscoverAppBase {
     await rowLocator.waitFor({ state: 'visible', timeout });
   }
 
-  async getEsqlQueryValue(nthIndex: number = 0): Promise<string> {
-    return this.codeEditor.getCodeEditorValue(nthIndex);
+  async getEsqlQueryValue(): Promise<string> {
+    return this.esqlEditor.getQuery();
   }
 
   async clickAppMenuItem(testId: string) {

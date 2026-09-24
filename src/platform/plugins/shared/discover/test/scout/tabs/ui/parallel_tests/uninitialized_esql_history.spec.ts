@@ -76,7 +76,7 @@ spaceTest.describe(
 
         await expect(historyPanel).toBeVisible();
 
-        await discover.codeEditor.setCodeEditorValue(QUERY);
+        await esqlEditor.setQuery(QUERY);
         await discover.submitQuery();
 
         await expect(historyPanel).toBeHidden();
@@ -95,7 +95,7 @@ spaceTest.describe(
         await expect(historyPanel).toBeHidden();
 
         await esqlEditor.toggleHistoryPanel();
-        await discover.codeEditor.setCodeEditorValue(QUERY);
+        await esqlEditor.setQuery(QUERY);
         await discover.submitQuery();
         await discover.waitUntilSearchingHasFinished();
 
@@ -122,7 +122,7 @@ spaceTest.describe(
     spaceTest(
       'shows keyboard shortcuts and disables search on an empty ES|QL tab until a query is entered',
       async ({ pageObjects }) => {
-        const { discover, unifiedTabs } = pageObjects;
+        const { discover, unifiedTabs, esqlEditor } = pageObjects;
 
         await discover.goto({ queryMode: 'esql' });
         await discover.waitUntilSearchingHasFinished();
@@ -131,7 +131,7 @@ spaceTest.describe(
         await expect(discover.getUninitializedKeyboardShortcuts()).toBeVisible();
         await expect(discover.getQuerySubmitButton()).toBeDisabled();
 
-        await discover.codeEditor.setCodeEditorValue(QUERY);
+        await esqlEditor.setQuery(QUERY);
 
         await expect(discover.getQuerySubmitButton()).toBeEnabled();
         await expect(discover.getUninitializedKeyboardShortcuts()).toBeVisible();

@@ -53,18 +53,12 @@ spaceTest.describe('Discover ES|QL starred queries', { tag: '@local-stateful-cla
   spaceTest(
     'stars a query, persists it across reload, and runs it from Starred',
     async ({ page, pageObjects: { discover, esqlEditor } }) => {
-      const starredQuery = page.testSubj
-        .locator('ESQLEditor-starredQueries')
-        .getByRole('row')
-        .filter({ has: page.getByText(query, { exact: true }) });
+      const starredQuery = esqlEditor.getStarredRow(query);
 
       await spaceTest.step('star a query from history', async () => {
         await discover.writeAndSubmitEsqlQuery(query);
         await esqlEditor.toggleHistoryPanel();
-        const historyQuery = page.testSubj
-          .locator('ESQLEditor-queryHistory')
-          .getByRole('row')
-          .filter({ has: page.getByText(query, { exact: true }) });
+        const historyQuery = esqlEditor.getHistoryRow(query);
         // The star renders optimistically; wait for the background write before reloading.
         const persisted = page.waitForResponse(
           (response) =>
@@ -73,7 +67,7 @@ spaceTest.describe('Discover ES|QL starred queries', { tag: '@local-stateful-cla
         );
         await historyQuery.getByRole('button', { name: 'Add ES|QL query to Starred' }).click();
         expect((await persisted).ok()).toBe(true);
-        await page.testSubj.locator('starred-queries-tab').click();
+        await esqlEditor.openStarredQueriesTab();
         await expect(starredQuery).toBeVisible();
       });
 
@@ -81,7 +75,7 @@ spaceTest.describe('Discover ES|QL starred queries', { tag: '@local-stateful-cla
         await page.reload();
         await discover.waitUntilTabIsLoaded();
         await esqlEditor.toggleHistoryPanel();
-        await page.testSubj.locator('starred-queries-tab').click();
+        await esqlEditor.openStarredQueriesTab();
         await expect(starredQuery).toBeVisible();
       });
 
@@ -90,7 +84,7 @@ spaceTest.describe('Discover ES|QL starred queries', { tag: '@local-stateful-cla
         await discover.waitUntilTabIsLoaded();
         await discover.writeAndSubmitEsqlQuery('FROM logstash-* | LIMIT 1');
         await esqlEditor.toggleHistoryPanel();
-        await page.testSubj.locator('starred-queries-tab').click();
+        await esqlEditor.openStarredQueriesTab();
         await starredQuery.getByRole('button', { name: 'Run query', exact: true }).click();
         await expect.poll(() => discover.getEsqlQueryValue()).toBe(query);
         await discover.waitUntilTabIsLoaded();
