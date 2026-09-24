@@ -31,6 +31,8 @@ export type {
   ExceptionsListPreMultiListFindServerExtension,
   ExceptionsListPreSingleListFindServerExtension,
   ExceptionsListPreDeleteItemServerExtension,
+  ExceptionsListPreDeleteListServerExtension,
+  ExceptionListPreDeleteListBlocker,
 } from './types';
 export type { ExportExceptionListAndItemsReturn } from './services/exception_lists/export_exception_list_and_items';
 

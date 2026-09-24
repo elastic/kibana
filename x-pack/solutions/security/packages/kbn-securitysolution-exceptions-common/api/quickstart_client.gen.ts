@@ -21,6 +21,10 @@ import { replaceParams } from '@kbn/openapi-common/shared';
 import { catchAxiosErrorFormatAndThrow } from '@kbn/securitysolution-utils';
 
 import type {
+  BulkDeleteExceptionListsRequestBodyInput,
+  BulkDeleteExceptionListsResponse,
+} from './bulk_delete_exception_list/bulk_delete_exception_list.gen';
+import type {
   CreateExceptionListItemRequestBodyInput,
   CreateExceptionListItemResponse,
 } from './create_exception_list_item/create_exception_list_item.gen';
@@ -95,6 +99,37 @@ export class Client {
   constructor(options: ClientOptions) {
     this.kbnClient = options.kbnClient;
     this.log = options.log;
+  }
+  /**
+    * Perform a bulk action on exception lists. Currently supports the `delete` action,
+which deletes multiple exception lists by their saved object `id`. Lists that are
+referenced by one or more detection rules cannot be deleted; unlink the list from
+all rules before retrying.
+
+The reference check is provided by the Security Solution plugin and requires the
+caller to have detection rule read access. A caller who holds the `exceptions` Kibana
+privilege but lacks detection rule read access will receive a per-list error for every
+list in the request, even when no rules reference those lists, because
+the endpoint cannot verify the absence of references. The list is not deleted in
+that case.
+
+The reference check searches only within the caller's current Kibana space. A rule
+in another space that references a space-agnostic list is not detected and does not
+block the deletion. Cross-space reference checking is deferred to a future release.
+
+    */
+  async bulkDeleteExceptionLists(props: BulkDeleteExceptionListsProps) {
+    this.log.info(`${new Date().toISOString()} Calling API BulkDeleteExceptionLists`);
+    return this.kbnClient
+      .request<BulkDeleteExceptionListsResponse>({
+        path: '/api/exception_lists/_bulk_action',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
     * An exception list groups exception items and can be associated with detection rules. You can assign exception lists to multiple detection rules.
@@ -378,6 +413,9 @@ an exception list that no longer exists.
   }
 }
 
+export interface BulkDeleteExceptionListsProps {
+  body: BulkDeleteExceptionListsRequestBodyInput;
+}
 export interface CreateExceptionListProps {
   body: CreateExceptionListRequestBodyInput;
 }

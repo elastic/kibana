@@ -9,11 +9,16 @@
 
 import { parseDuration } from '@kbn/alerting-plugin/common/parse_duration';
 // We _must_ import from the restricted path or we pull in _everything_ including memory leaks from Kibana core
-import { ReadOperations, WriteOperations } from '@kbn/alerting-plugin/server/authorization';
+import {
+  AlertingAuthorizationEntity,
+  ReadOperations,
+  WriteOperations,
+} from '@kbn/alerting-plugin/server/authorization';
 import { isMissingUiamApiKeyMessage } from '@kbn/alerting-plugin/server/lib/uiam_api_key_error';
 
 module.exports = {
   parseDuration,
+  AlertingAuthorizationEntity,
   ReadOperations,
   WriteOperations,
   isMissingUiamApiKeyMessage,

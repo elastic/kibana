@@ -86,5 +86,7 @@ export type {
   ExceptionsListPreMultiListFindServerExtension,
   ExceptionsListPreSingleListFindServerExtension,
   ExceptionsListPreDeleteItemServerExtension,
+  ExceptionsListPreDeleteListServerExtension,
+  ExceptionListPreDeleteListBlocker,
   ListsServerExtensionRegistrar,
 } from './services/extension_points';
