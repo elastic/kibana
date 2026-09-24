@@ -9,6 +9,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { usePageReady } from '@kbn/ebt-tools';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { ListInvestigationItem } from '@kbn/nightshift-investigations-plugin/common';
+import { NIGHTSHIFT_UI_PRIVILEGES } from '@kbn/nightshift-shared';
 import React from 'react';
 import { MemoryRouter, useLocation } from 'react-router-dom';
 import { NightshiftApp } from './app';
@@ -85,6 +86,11 @@ const highInvestigation: ListInvestigationItem = {
 };
 
 const refetchAll = jest.fn();
+
+const manageCapabilities = {
+  [NIGHTSHIFT_UI_PRIVILEGES.show]: true,
+  [NIGHTSHIFT_UI_PRIVILEGES.manage]: true,
+};
 
 // jsdom implements neither, and scrolling to a section is how a tile and `?severity=` both work.
 const scrollIntoView = jest.fn();
@@ -177,6 +183,7 @@ describe('NightshiftApp', () => {
     mockUseKibana.mockReturnValue({
       services: {
         application: {
+          capabilities: { nightshift: manageCapabilities },
           getUrlForApp: () => '/app/significant_events/significant_events',
         },
         nightshiftInvestigations: { investigationsClient: {} },
@@ -214,7 +221,10 @@ describe('NightshiftApp', () => {
   it('shows the unavailable callout and reports ready when the optional plugin is absent', () => {
     mockUseKibana.mockReturnValue({
       services: {
-        application: { getUrlForApp: () => '/app/significant_events/significant_events' },
+        application: {
+          capabilities: { nightshift: manageCapabilities },
+          getUrlForApp: () => '/app/significant_events/significant_events',
+        },
       },
     });
     setSections({ sections: defaultSections() });
@@ -415,5 +425,23 @@ describe('NightshiftApp', () => {
       screen.queryByTestId('o11yNightshiftAppStartInvestigationButton')
     ).not.toBeInTheDocument();
     expect(screen.getByTestId('o11yNightshiftAppShowAllLink')).toBeInTheDocument();
+  });
+
+  it('hides the start investigation button without the Nightshift manage privilege', () => {
+    mockUseKibana.mockReturnValue({
+      services: {
+        application: {
+          capabilities: { nightshift: { [NIGHTSHIFT_UI_PRIVILEGES.show]: true } },
+          getUrlForApp: () => '/app/significant_events/significant_events',
+        },
+        nightshiftInvestigations: { investigationsClient: {} },
+      },
+    });
+
+    renderApp();
+
+    expect(
+      screen.queryByTestId('o11yNightshiftAppStartInvestigationButton')
+    ).not.toBeInTheDocument();
   });
 });
