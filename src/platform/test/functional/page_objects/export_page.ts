@@ -25,16 +25,33 @@ export class ExportPageObject extends FtrService {
   }
 
   async clickExportTopNavButton(): Promise<boolean> {
+    if (await this.isExportPopoverOpen()) {
+      return true;
+    }
+
     // First check if export button is directly visible
-    if (await this.testSubjects.exists('exportTopNavButton')) {
-      await this.testSubjects.click('exportTopNavButton');
+    if (await this.testSubjects.waitForExists('exportTopNavButton', { timeout: 5000 })) {
+      try {
+        await this.testSubjects.click('exportTopNavButton');
+      } catch (error) {
+        // In responsive layouts, the action can move into the overflow menu between the readiness
+        // probe and click. Its open export panel is the successful state for this helper.
+        if (!(await this.isExportPopoverOpen())) {
+          throw error;
+        }
+      }
       return true;
     }
 
     // If not visible, try the overflow menu
     if (await this.testSubjects.exists('app-menu-overflow-button')) {
       await this.testSubjects.click('app-menu-overflow-button');
-      if (await this.testSubjects.exists('exportTopNavButton')) {
+
+      if (await this.testSubjects.waitForExists('exportPopoverPanel', { timeout: 5000 })) {
+        return true;
+      }
+
+      if (await this.testSubjects.waitForExists('exportTopNavButton', { timeout: 5000 })) {
         await this.testSubjects.click('exportTopNavButton');
         return true;
       }

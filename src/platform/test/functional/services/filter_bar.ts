@@ -380,9 +380,10 @@ export class FilterBarService extends FtrService {
    * Closes field editor modal window
    */
   public async ensureFieldEditorModalIsClosed(): Promise<void> {
-    const cancelSaveFilterModalButtonExists = await this.testSubjects.exists('cancelSaveFilter', {
-      timeout: 1000,
-    });
+    const cancelSaveFilterModalButtonExists = await this.testSubjects.waitForExists(
+      'cancelSaveFilter',
+      { timeout: 1000 }
+    );
     if (cancelSaveFilterModalButtonExists) {
       await this.testSubjects.click('cancelSaveFilter');
     }

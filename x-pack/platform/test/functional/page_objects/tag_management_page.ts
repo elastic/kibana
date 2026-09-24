@@ -73,7 +73,7 @@ class TagModal extends FtrService {
       // Close the popover before moving to the next input, as it can get in the way of interacting with other elements
       await this.testSubjects.existOrFail('euiSaturation');
       await this.retry.try(async () => {
-        if (await this.testSubjects.exists('euiSaturation', { timeout: 10 })) {
+        if (await this.testSubjects.exists('euiSaturation')) {
           await this.browser.pressKeys(this.browser.keys.ENTER);
         }
         await this.testSubjects.missingOrFail('euiSaturation', { timeout: 250 });

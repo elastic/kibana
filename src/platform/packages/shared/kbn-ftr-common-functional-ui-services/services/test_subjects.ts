@@ -13,8 +13,11 @@ import type { TimeoutOpt } from '../types';
 import { FtrService } from './ftr_provider_context';
 
 interface ExistsOptions {
-  timeout?: number;
   allowHidden?: boolean;
+}
+
+interface WaitForExistsOptions extends ExistsOptions {
+  timeout?: number;
 }
 
 interface SetValueOptions {
@@ -37,24 +40,45 @@ export class TestSubjects extends FtrService {
   public readonly WAIT_FOR_EXISTS_TIME = this.config.get('timeouts.waitForExists');
 
   /**
-   * Get a promise that resolves with `true` when an element exists, if the element doesn't exist
-   * yet it will wait until the element does exist. If we wait until the timeout and the element
-   * still doesn't exist the promise will resolve with `false`.
+   * Performs a single immediate DOM check and returns `true` if the element exists, `false`
+   * otherwise. There is no polling: if the element is not present right now this resolves `false`.
    *
-   * This method is intended to quickly answer the question "does this testSubject exist". Its
-   * 2.5 second timeout responds quickly, making it a good candidate for putting inside
-   * `retry.waitFor()` loops.
-   *
-   * When `options.timeout` is not passed the `timeouts.waitForExists` config is used as
-   * the timeout. The default value for that config is currently 2.5 seconds (in ms).
+   * This is the right tool inside `retry.waitFor()` or `retry.try()` loops and for branching on
+   * current UI state when the UI is already settled. Use `waitForExists` when the element may
+   * still be rendering and you want to wait up to a bounded timeout. Use `existOrFail` when the
+   * element is required and its absence should throw.
    *
    * If the element is hidden it is not treated as "existing", unless `options.allowHidden`
    * is set to `true`.
    */
   public async exists(selector: string, options: ExistsOptions = {}): Promise<boolean> {
-    const { timeout = this.WAIT_FOR_EXISTS_TIME, allowHidden = false } = options;
+    const { allowHidden = false } = options;
 
     this.log.debug(`TestSubjects.exists(${selector})`);
+    return await (allowHidden
+      ? this.findService.existsByCssSelector(testSubjSelector(selector), 0)
+      : this.findService.existsByDisplayedByCssSelector(testSubjSelector(selector), 0));
+  }
+
+  /**
+   * Waits up to `options.timeout` (default: `timeouts.waitForExists`, 2.5 s) for the element to
+   * appear and returns `true` as soon as it does, or `false` if the timeout elapses.
+   *
+   * Returns rather than throws, making it suitable for branching on optional UI that may still be
+   * rendering. A missing optional element costs the full timeout; when choosing between alternative
+   * UI states, probe both with `exists` and retry until one appears instead of waiting for one to be
+   * absent. Use `existOrFail` when the element is required and its absence should throw.
+   *
+   * If the element is hidden it is not treated as "existing", unless `options.allowHidden`
+   * is set to `true`.
+   */
+  public async waitForExists(
+    selector: string,
+    options: WaitForExistsOptions = {}
+  ): Promise<boolean> {
+    const { timeout = this.WAIT_FOR_EXISTS_TIME, allowHidden = false } = options;
+
+    this.log.debug(`TestSubjects.waitForExists(${selector})`);
     return await (allowHidden
       ? this.findService.existsByCssSelector(testSubjSelector(selector), timeout)
       : this.findService.existsByDisplayedByCssSelector(testSubjSelector(selector), timeout));
@@ -64,15 +88,15 @@ export class TestSubjects extends FtrService {
    * Get a promise that resolves when an element exists, if the element doesn't exist
    * before the timeout is reached the promise will reject with an error.
    *
-   * This method is intended to be used as success critieria when something is expected
+   * This method is intended to be used as success criteria when something is expected
    * to exist. The default 2 minute timeout is not appropriate for all conditions, but
    * hard-coding timeouts all over tests is also bad, so please use your best judgement.
-   *
-   * The options are equal to the options accepted by the {@link #exists} method except
-   * that `options.timeout` defaults to the `timeouts.try` config, or 2 minutes.
    */
-  public async existOrFail(selector: string, existsOptions?: ExistsOptions): Promise<void | never> {
-    if (!(await this.exists(selector, { timeout: this.TRY_TIME, ...existsOptions }))) {
+  public async existOrFail(
+    selector: string,
+    existsOptions?: WaitForExistsOptions
+  ): Promise<void | never> {
+    if (!(await this.waitForExists(selector, { timeout: this.TRY_TIME, ...existsOptions }))) {
       throw new Error(`expected testSubject(${selector}) to exist`);
     }
   }
@@ -91,7 +115,10 @@ export class TestSubjects extends FtrService {
    * If the element is hidden but still in the DOM it is treated as "existing", unless `options.allowHidden`
    * is set to `true`.
    */
-  public async missingOrFail(selector: string, options: ExistsOptions = {}): Promise<void | never> {
+  public async missingOrFail(
+    selector: string,
+    options: WaitForExistsOptions = {}
+  ): Promise<void | never> {
     const { timeout = this.WAIT_FOR_EXISTS_TIME, allowHidden = false } = options;
 
     this.log.debug(`TestSubjects.missingOrFail(${selector})`);

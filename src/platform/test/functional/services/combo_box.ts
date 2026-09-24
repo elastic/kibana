@@ -353,9 +353,7 @@ export class ComboBoxService extends FtrService {
     const isOptionListClosed = await this.retry.tryWithRetries(
       'wait for possible ongoing closing of the combobox listbox',
       async () => {
-        const isOpen = await this.testSubjects.exists('~comboBoxOptionsList', {
-          timeout: 50,
-        });
+        const isOpen = await this.testSubjects.exists('~comboBoxOptionsList');
 
         return !isOpen;
       },
@@ -384,9 +382,7 @@ export class ComboBoxService extends FtrService {
    */
   public async openOptionsList(comboBoxElement: WebElementWrapper): Promise<void> {
     this.log.debug('comboBox.openOptionsList');
-    const isOptionsListOpen = await this.testSubjects.exists('~comboBoxOptionsList', {
-      timeout: 50,
-    });
+    const isOptionsListOpen = await this.testSubjects.exists('~comboBoxOptionsList');
 
     if (!isOptionsListOpen) {
       await this.retry.try(async () => {

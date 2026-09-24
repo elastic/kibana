@@ -6,7 +6,6 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import expect from '@kbn/expect';
 import {
   AWS_PROVIDER_TEST_SUBJ,
   GCP_PROVIDER_TEST_SUBJ,
@@ -441,8 +440,14 @@ export function AddCisIntegrationFormPageProvider({
     await optionToBeClicked.click();
   };
 
-  const waitUntilLaunchCloudFormationButtonAppears = async () =>
-    await testSubjects.exists(TEST_IDS.CONFIRM_CLOUD_FORMATION_MODAL_CONFIRM_BUTTON);
+  const waitForPostInstallModal = async (timeout: number = 20000) =>
+    await retry.waitForWithTimeout(
+      'post-install modal to appear',
+      timeout,
+      async () =>
+        (await testSubjects.exists(TEST_IDS.CONFIRM_CLOUD_FORMATION_MODAL_CONFIRM_BUTTON)) ||
+        (await testSubjects.exists(TEST_IDS.CONFIRM_MODAL_TITLE_TEXT))
+    );
 
   const clickSaveIntegrationButton = async () => {
     const optionToBeClicked = await findOptionInPage(TEST_IDS.SAVE_INTEGRATION);
@@ -450,11 +455,24 @@ export function AddCisIntegrationFormPageProvider({
   };
 
   const getPostInstallModal = async () => {
-    return await testSubjects.exists(TEST_IDS.CONFIRM_MODAL_TITLE_TEXT);
+    if (await testSubjects.waitForExists(TEST_IDS.CONFIRM_MODAL_TITLE_TEXT, { timeout: 10000 })) {
+      return await testSubjects.find(TEST_IDS.CONFIRM_MODAL_TITLE_TEXT);
+    }
+    return undefined;
   };
 
   const checkIntegrationPliAuthBlockExists = async () => {
     return await testSubjects.exists(TEST_IDS.CLOUD_SECURITY_POSTURE_PLI_AUTH_BLOCK);
+  };
+
+  const waitForIntegrationPliAuthBlock = async () => {
+    return await testSubjects.waitForExists(TEST_IDS.CLOUD_SECURITY_POSTURE_PLI_AUTH_BLOCK, {
+      timeout: 20000,
+    });
+  };
+
+  const waitForCreateIntegrationForm = async () => {
+    await testSubjects.existOrFail(TEST_IDS.CREATE_PACKAGE_POLICY_PAGE, { timeout: 10000 });
   };
 
   const pasteTextInField = async (selector: string, text: string) => {
@@ -536,7 +554,10 @@ export function AddCisIntegrationFormPageProvider({
   };
 
   const showCredentialJsonSecretPanel = async () => {
-    return await testSubjects.exists(GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_JSON_SECRET_PANEL);
+    return await testSubjects.waitForExists(
+      GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_JSON_SECRET_PANEL,
+      { timeout: 5000 }
+    );
   };
 
   const inputUniqueIntegrationName = async () => {
@@ -654,6 +675,12 @@ export function AddCisIntegrationFormPageProvider({
       /^(textAreaInput|passwordInput)-/,
       'button-replace-'
     );
+    await retry.waitForWithTimeout(`editor for ${testSubjectId} to render`, 10000, async () => {
+      return (
+        (await testSubjects.exists(testSubjectId)) ||
+        (replaceButtonId !== testSubjectId && (await testSubjects.exists(replaceButtonId)))
+      );
+    });
     if (replaceButtonId !== testSubjectId && (await testSubjects.exists(replaceButtonId))) {
       await testSubjects.click(replaceButtonId);
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -670,10 +697,8 @@ export function AddCisIntegrationFormPageProvider({
 
     // Clicking Save Button updates and navigates to Integration Policies Tab Page
     await clickSaveIntegrationButton();
+    await testSubjects.existOrFail(TEST_IDS.POLICY_UPDATE_SUCCESS_TOAST, { timeout: 20000 });
     await PageObjects.header.waitUntilLoadingHasFinished();
-
-    // Check if the Direct Access Key is updated package policy api with successful toast
-    expect(await testSubjects.exists(TEST_IDS.POLICY_UPDATE_SUCCESS_TOAST)).to.be(true);
 
     await navigateToEditAgentlessIntegrationPage();
     await PageObjects.header.waitUntilLoadingHasFinished();
@@ -775,6 +800,8 @@ export function AddCisIntegrationFormPageProvider({
     getValueInEditPage,
     isOptionChecked,
     checkIntegrationPliAuthBlockExists,
+    waitForIntegrationPliAuthBlock,
+    waitForCreateIntegrationForm,
     getReplaceSecretButton,
     getSecretComponentReplaceButton,
     inputUniqueIntegrationName,
@@ -794,7 +821,7 @@ export function AddCisIntegrationFormPageProvider({
     navigateToEditIntegrationPage,
     navigateToEditAgentlessIntegrationPage,
     closeAllOpenTabs,
-    waitUntilLaunchCloudFormationButtonAppears,
+    waitForPostInstallModal,
     showCredentialJsonSecretPanel,
     isSaveButtonEnabled,
     clickAwsPolicyOption,

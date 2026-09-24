@@ -60,10 +60,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       destinationDashboardTitle: dashboardDrilldownsManage.DASHBOARD_WITH_AREA_CHART_NAME,
     });
     await dashboardDrilldownsManage.saveChanges();
+    await retry.waitForWithTimeout(
+      'dashboard drilldown to be saved',
+      10000,
+      async () => (await dashboardDrilldownPanelActions.getPanelDrilldownCount()) === 1
+    );
     await dashboardDrilldownsManage.closeFlyout();
-
-    // check that drilldown notification badge is shown
-    expect(await dashboardDrilldownPanelActions.getPanelDrilldownCount()).to.be(1);
 
     // save dashboard, navigate to view mode
     await dashboard.ensureHasUnsavedChangesNotification();
@@ -310,11 +312,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           const controlIds = await dashboardControls.getAllControlIds();
           const [optionsListControl, rangeSliderControl] = controlIds;
           await dashboardControls.optionsListOpenPopover(optionsListControl);
-          await dashboardControls.optionsListPopoverSelectOption('CN');
-          await dashboardControls.optionsListPopoverSelectOption('US');
+          await dashboardControls.optionsListPopoverSelectOption('CN', optionsListControl);
+          await dashboardControls.optionsListPopoverSelectOption('US', optionsListControl);
+          await dashboard.clickQuickSave();
           await dashboardControls.rangeSliderWaitForLoading(rangeSliderControl); // wait for range slider to respond to options list selections before proceeding
           await dashboardControls.rangeSliderSetLowerBound(rangeSliderControl, '1000');
           await dashboardControls.rangeSliderSetUpperBound(rangeSliderControl, '15000');
+          await dashboard.expectUnsavedChangesNotificationExists(5000);
           await dashboard.waitForRenderComplete();
           await dashboard.clickQuickSave();
           await header.waitUntilLoadingHasFinished();
@@ -346,7 +350,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           // drilldown creates filter pills for control selections
           expect(await filterBar.hasFilter('geo.src', 'CN, US')).to.be(true);
-          expect(await filterBar.hasFilter('bytes', '1,000 to 15,000')).to.be(true);
+          await retry.waitForWithTimeout('range slider control filter to be applied', 5000, () =>
+            filterBar.hasFilter('bytes', '1,000 to 15,000')
+          );
 
           // control filter pills impact destination dashboard controls
           const controlIds = await dashboardControls.getAllControlIds();

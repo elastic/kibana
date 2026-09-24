@@ -36,7 +36,7 @@ export function MonitoringElasticsearchSummaryStatusProvider({ getService }) {
     }
 
     viewLogsLinkIsShowing() {
-      return testSubjects.exists(SUBJ_SUMMARY_LOGS_LINK);
+      return testSubjects.waitForExists(SUBJ_SUMMARY_LOGS_LINK);
     }
   })();
 }

@@ -113,8 +113,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await lens.filterLegend('jpg');
-      const hasExtensionFilter = await filterBar.hasFilter('extension.raw', 'jpg');
-      expect(hasExtensionFilter).to.be(true);
+      await retry.waitFor('legend filter to be applied', () =>
+        filterBar.hasFilter('extension.raw', 'jpg')
+      );
 
       await filterBar.removeFilter('extension.raw');
     });

@@ -20,6 +20,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const testSubjects = getService('testSubjects');
   const pageObjects = getPageObjects([
     'common',
     'cloudPostureDashboard',
@@ -34,6 +35,21 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     let rule: typeof pageObjects.rule;
     let findings: typeof pageObjects.findings;
     let agentPolicyId: string;
+    const expectBulkActionDisabledState = async (
+      enableDisabled: boolean,
+      disableDisabled: boolean
+    ) => {
+      await retryService.tryForTime(10000, async () => {
+        expect(
+          (await rule.rulePage.isBulkActionOptionDisabled(RULES_BULK_ACTION_OPTION_ENABLE)) ===
+            'true'
+        ).to.be(enableDisabled);
+        expect(
+          (await rule.rulePage.isBulkActionOptionDisabled(RULES_BULK_ACTION_OPTION_DISABLE)) ===
+            'true'
+        ).to.be(disableDisabled);
+      });
+    };
 
     before(async () => {
       rule = pageObjects.rule;
@@ -100,64 +116,41 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('It should disable Enable option when there are all rules selected are already enabled ', async () => {
         await rule.rulePage.clickSelectAllRules();
         await rule.rulePage.toggleBulkActionButton();
-        expect(
-          (await rule.rulePage.isBulkActionOptionDisabled(RULES_BULK_ACTION_OPTION_ENABLE)) ===
-            'true'
-        ).to.be(true);
-        expect(
-          (await rule.rulePage.isBulkActionOptionDisabled(RULES_BULK_ACTION_OPTION_DISABLE)) ===
-            'true'
-        ).to.be(false);
+        await expectBulkActionDisabledState(true, false);
       });
 
       it('It should disable both Enable and Disable options when there are no rules selected', async () => {
         await rule.rulePage.toggleBulkActionButton();
-        expect(
-          (await rule.rulePage.isBulkActionOptionDisabled(RULES_BULK_ACTION_OPTION_ENABLE)) ===
-            'true'
-        ).to.be(true);
-        expect(
-          (await rule.rulePage.isBulkActionOptionDisabled(RULES_BULK_ACTION_OPTION_DISABLE)) ===
-            'true'
-        ).to.be(true);
+        await expectBulkActionDisabledState(true, true);
       });
 
       it('It should disable Disable option when there are all rules selected are already Disabled', async () => {
         await rule.rulePage.clickSelectAllRules();
-        // Retry open+click together: if the dropdown re-renders between open and click the stale
-        // element reference fails, and retrying re-opens with a fresh reference.
-        await retryService.try(async () => {
+        // A click can be accepted while the request is still in flight. Retry the complete action
+        // until its success toast confirms that the rules state changed.
+        await retryService.tryForTime(30000, async () => {
           await rule.rulePage.toggleBulkActionButton();
           await rule.rulePage.clickBulkActionOption(RULES_BULK_ACTION_OPTION_DISABLE);
+          await testSubjects.existOrFail('csp:toast-success-rule-state-change', { timeout: 10000 });
         });
         await pageObjects.header.waitUntilLoadingHasFinished();
         await rule.rulePage.clickSelectAllRules();
-        await retryService.try(async () => {
+        await retryService.tryForTime(30000, async () => {
+          await rule.rulePage.closeBulkActionButton();
           await rule.rulePage.toggleBulkActionButton();
-          expect(
-            (await rule.rulePage.isBulkActionOptionDisabled(RULES_BULK_ACTION_OPTION_ENABLE)) ===
-              'true'
-          ).to.be(false);
-          expect(
-            (await rule.rulePage.isBulkActionOptionDisabled(RULES_BULK_ACTION_OPTION_DISABLE)) ===
-              'true'
-          ).to.be(true);
+          await expectBulkActionDisabledState(false, true);
         });
       });
 
       it('Both option should not be disabled if selected rules contains both enabled and disabled rules', async () => {
         await rule.rulePage.clickEnableRulesRowSwitchButton(0);
         await pageObjects.header.waitUntilLoadingHasFinished();
+        await retryService.waitForWithTimeout('disabled rule count to update', 10000, async () =>
+          (await (await rule.rulePage.getDisabledRulesCounter()).getVisibleText()).includes('1')
+        );
         await rule.rulePage.clickSelectAllRules();
         await rule.rulePage.toggleBulkActionButton();
-        expect(
-          (await rule.rulePage.isBulkActionOptionDisabled(RULES_BULK_ACTION_OPTION_ENABLE)) ===
-            'true'
-        ).to.be(false);
-        expect(
-          (await rule.rulePage.isBulkActionOptionDisabled(RULES_BULK_ACTION_OPTION_DISABLE)) ===
-            'true'
-        ).to.be(false);
+        await expectBulkActionDisabledState(false, false);
       });
     });
 
@@ -208,11 +201,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('Alerts section of Rules Flyout shows Detection Rule Counter component when Rules are enabled', async () => {
         await rule.rulePage.clickRulesNames(0);
         await pageObjects.header.waitUntilLoadingHasFinished();
-        expect(
-          (await rule.rulePage.doesElementExist(
-            'csp:findings-flyout-create-detection-rule-link'
-          )) === true
-        ).to.be(true);
+        await retryService.waitForWithTimeout('detection rule link to appear', 10000, () =>
+          rule.rulePage.doesElementExist('csp:findings-flyout-create-detection-rule-link')
+        );
       });
     });
   });

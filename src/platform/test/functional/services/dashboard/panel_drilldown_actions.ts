@@ -95,12 +95,10 @@ export function DashboardDrilldownPanelActionsProvider({
       const panel = (await dashboard.getDashboardPanels())[panelIndex];
 
       try {
-        const exists = await testSubjects.exists(MANAGE_DRILLDOWNS_DATA_TEST_SUBJ, {
-          timeout: 500,
-        });
+        const exists = await testSubjects.exists(MANAGE_DRILLDOWNS_DATA_TEST_SUBJ);
         if (!exists) {
           await dashboardPanelActions.openContextMenu(panel);
-          if (!(await testSubjects.exists(MANAGE_DRILLDOWNS_DATA_TEST_SUBJ, { timeout: 500 }))) {
+          if (!(await testSubjects.exists(MANAGE_DRILLDOWNS_DATA_TEST_SUBJ))) {
             return 0;
           }
         }

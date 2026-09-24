@@ -26,7 +26,7 @@ export class FlyoutService extends FtrService {
   }
 
   public async ensureClosed(dataTestSubj: string): Promise<void> {
-    if (await this.testSubjects.exists(dataTestSubj, { timeout: 1000 })) {
+    if (await this.testSubjects.exists(dataTestSubj)) {
       await this.close(dataTestSubj);
     }
   }

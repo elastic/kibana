@@ -92,6 +92,7 @@ export default function ({ getPageObjects }: FtrProviderContext) {
       await pageObjects.header.waitUntilLoadingHasFinished();
 
       await cisIntegration.clickSaveButton();
+      await cisIntegration.waitForPostInstallModal(60000);
       await pageObjects.header.waitUntilLoadingHasFinished();
 
       const agentPolicyName = await cisIntegration.getAgentBasedPolicyValue();

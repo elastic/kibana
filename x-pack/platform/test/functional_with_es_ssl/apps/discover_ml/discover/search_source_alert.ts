@@ -738,7 +738,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await browser.refresh();
         await PageObjects.header.waitUntilLoadingHasFinished();
 
-        return await testSubjects.exists('ruleStatus-ok');
+        return await testSubjects.waitForExists('ruleStatus-ok', { timeout: 5000 });
       });
     });
   });

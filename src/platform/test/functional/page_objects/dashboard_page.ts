@@ -370,7 +370,9 @@ export class DashboardPageObject extends FtrService {
     await this.appMenu.clickMenuItem('dashboardViewOnlyMode');
 
     if (accept) {
-      const confirmation = await this.testSubjects.exists('confirmModalTitleText');
+      const confirmation = await this.testSubjects.waitForExists('confirmModalTitleText', {
+        timeout: 2000,
+      });
       if (confirmation) {
         await this.common.clickConfirmOnModal();
       }
@@ -393,6 +395,9 @@ export class DashboardPageObject extends FtrService {
     await this.common.expectConfirmModalOpenState(true);
     if (accept) {
       await this.common.clickConfirmOnModal();
+      await this.retry.tryForTime(5000, async () => {
+        await this.testSubjects.missingOrFail(UNSAVED_CHANGES_NOTIFICATION);
+      });
     }
   }
 
@@ -447,8 +452,10 @@ export class DashboardPageObject extends FtrService {
     }
   }
 
-  public async expectUnsavedChangesNotificationExists(timeout: number | undefined = undefined) {
-    await this.testSubjects.exists(UNSAVED_CHANGES_NOTIFICATION, { timeout });
+  public async expectUnsavedChangesNotificationExists(
+    timeout = this.testSubjects.WAIT_FOR_EXISTS_TIME
+  ) {
+    await this.testSubjects.existOrFail(UNSAVED_CHANGES_NOTIFICATION, { timeout });
   }
 
   public async clickNewDashboard(
@@ -459,7 +466,9 @@ export class DashboardPageObject extends FtrService {
     if (!continueEditing && discardButtonExists) {
       this.log.debug('found discard button');
       await this.testSubjects.click('discardDashboardPromptButton');
-      const confirmation = await this.testSubjects.exists('confirmModalTitleText');
+      const confirmation = await this.testSubjects.waitForExists('confirmModalTitleText', {
+        timeout: 2000,
+      });
       if (confirmation) {
         await this.common.clickConfirmOnModal();
       }
@@ -468,7 +477,7 @@ export class DashboardPageObject extends FtrService {
     if (expectWarning) {
       await this.testSubjects.existOrFail('dashboardCreateConfirm');
     }
-    if (await this.testSubjects.exists('dashboardCreateConfirm')) {
+    if (await this.testSubjects.waitForExists('dashboardCreateConfirm', { timeout: 2000 })) {
       if (continueEditing) {
         await this.testSubjects.click('dashboardCreateConfirmContinue');
       } else {
@@ -499,12 +508,12 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async getCreateDashboardPromptExists() {
-    return this.testSubjects.exists('emptyListPrompt');
+    return this.testSubjects.waitForExists('emptyListPrompt', { timeout: 2000 });
   }
 
   public async isSettingsOpen() {
     this.log.debug('isSettingsOpen');
-    return await this.testSubjects.exists('dashboardSettingsMenu');
+    return await this.testSubjects.exists('dashboardSettingsFlyout');
   }
 
   public async openSettingsFlyout() {
@@ -513,6 +522,7 @@ export class DashboardPageObject extends FtrService {
     if (!isOpen) {
       await this.appMenu.clickMenuItem('dashboardSettingsButton');
     }
+    await this.testSubjects.existOrFail('dashboardSettingsFlyout', { timeout: 5000 });
   }
 
   // avoids any 'Object with id x not found' errors when switching tests.
@@ -572,32 +582,30 @@ export class DashboardPageObject extends FtrService {
   }) {
     await this.openSettingsFlyout();
 
-    await this.retry.try(async () => {
-      if (title) {
-        this.log.debug('entering new title');
-        await this.testSubjects.setValue('dashboardTitleInput', title);
-      }
+    if (title) {
+      this.log.debug('entering new title');
+      await this.testSubjects.setValue('dashboardTitleInput', title);
+    }
 
-      if (storeTimeWithDashboard !== undefined) {
-        await this.setStoreTimeWithDashboard(storeTimeWithDashboard);
-      }
+    if (storeTimeWithDashboard !== undefined) {
+      await this.setStoreTimeWithDashboard(storeTimeWithDashboard);
+    }
 
-      if (tags) {
-        const tagsComboBox = await this.testSubjects.find('comboBoxInput');
-        for (const tagName of tags) {
-          await this.comboBox.setElement(tagsComboBox, tagName);
-        }
+    if (tags) {
+      const tagsComboBox = await this.testSubjects.find('comboBoxInput');
+      for (const tagName of tags) {
+        await this.comboBox.setElement(tagsComboBox, tagName);
       }
+    }
 
+    await this.testSubjects.click('applyCustomizeDashboardButton');
+
+    if (confirmDuplicateTitle) {
+      await this.ensureDuplicateTitleCallout();
       await this.testSubjects.click('applyCustomizeDashboardButton');
+    }
 
-      if (confirmDuplicateTitle) {
-        await this.ensureDuplicateTitleCallout();
-        await this.testSubjects.click('applyCustomizeDashboardButton');
-      }
-
-      return await this.expectUnsavedChangesNotificationExists(1500);
-    });
+    await this.testSubjects.missingOrFail('dashboardSettingsFlyout', { timeout: 5000 });
   }
 
   /**
@@ -668,7 +676,7 @@ export class DashboardPageObject extends FtrService {
     dashboardTitle: string,
     saveOptions: Omit<SaveDashboardOptions, 'saveAsNew'> = { waitDialogIsClosed: true }
   ) {
-    const isSaveModalOpen = await this.testSubjects.exists('savedObjectSaveModal', {
+    const isSaveModalOpen = await this.testSubjects.waitForExists('savedObjectSaveModal', {
       timeout: 2000,
     });
 
@@ -993,7 +1001,7 @@ export class DashboardPageObject extends FtrService {
   public async getNotLoadedVisualizations(vizList: string[]) {
     const checkList = [];
     for (const name of vizList) {
-      const isPresent = await this.testSubjects.exists(
+      const isPresent = await this.testSubjects.waitForExists(
         `embeddablePanelHeading-${name.replace(/\s+/g, '')}`,
         { timeout: 10000 }
       );

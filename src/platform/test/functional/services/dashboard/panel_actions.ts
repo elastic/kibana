@@ -395,7 +395,7 @@ export class DashboardPanelActionsService extends FtrService {
   async canConvertToLens(wrapper?: WebElementWrapper, { timeout = 500 } = {}) {
     this.log.debug('canConvertToLens');
     await this.openContextMenu(wrapper);
-    return await this.testSubjects.exists(CONVERT_TO_LENS_TEST_SUBJ, { timeout });
+    return await this.testSubjects.exists(CONVERT_TO_LENS_TEST_SUBJ);
   }
 
   async canConvertToLensByTitle(title = '', options?: { timeout?: number }) {
