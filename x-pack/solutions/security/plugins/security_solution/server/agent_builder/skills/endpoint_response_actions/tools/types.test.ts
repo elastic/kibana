@@ -284,10 +284,14 @@ describe('summarizeAgentState', () => {
     // one, so the serialized size is bounded by the budget OR one full agent
     // (plus the map-key wrapper around it).
     expect(Object.keys(result.agentState).length).toBeLessThan(MAX_AGENT_STATE_ENTRIES);
-    const oneAgentOverhead = JSON.stringify(result.agentState).length -
+    const oneAgentOverhead =
+      JSON.stringify(result.agentState).length -
       JSON.stringify(result.agentState[Object.keys(result.agentState)[0]]).length;
     expect(JSON.stringify(result.agentState).length).toBeLessThanOrEqual(
-      Math.max(MAX_AGENT_STATE_TOTAL_CHARS, JSON.stringify(result.agentState['agent-0']).length + oneAgentOverhead)
+      Math.max(
+        MAX_AGENT_STATE_TOTAL_CHARS,
+        JSON.stringify(result.agentState['agent-0']).length + oneAgentOverhead
+      )
     );
     expect(result.totalAgents).toBe(MAX_AGENT_STATE_ENTRIES);
     expect(result.agentsTruncatedByBudget).toBeGreaterThan(0);
