@@ -20,6 +20,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const testSubjects = getService('testSubjects');
   const pageObjects = getPageObjects([
     'common',
     'cloudPostureDashboard',
@@ -125,11 +126,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('It should disable Disable option when there are all rules selected are already Disabled', async () => {
         await rule.rulePage.clickSelectAllRules();
-        // Retry open+click together: if the dropdown re-renders between open and click the stale
-        // element reference fails, and retrying re-opens with a fresh reference.
-        await retryService.try(async () => {
+        // A click can be accepted while the request is still in flight. Retry the complete action
+        // until its success toast confirms that the rules state changed.
+        await retryService.tryForTime(30000, async () => {
           await rule.rulePage.toggleBulkActionButton();
           await rule.rulePage.clickBulkActionOption(RULES_BULK_ACTION_OPTION_DISABLE);
+          await testSubjects.existOrFail('csp:toast-success-rule-state-change', { timeout: 10000 });
         });
         await pageObjects.header.waitUntilLoadingHasFinished();
         await rule.rulePage.clickSelectAllRules();
