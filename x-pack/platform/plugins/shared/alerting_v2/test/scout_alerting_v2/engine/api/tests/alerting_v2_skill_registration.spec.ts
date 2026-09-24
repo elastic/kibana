@@ -7,6 +7,7 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
+import { ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/alerting-v2-constants';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { apiTest } from '../fixtures';
 import { COMMON_HEADERS } from '../../../common/constants';
@@ -21,14 +22,22 @@ const getSkillIds = (results: Array<{ id: string }>) => results.map((skill) => s
 /*
  * Alerting v2's Agent Builder skills (`rule-management` and
  * `action-policy-management`) are registered unconditionally whenever the
- * Alerting v2 plugin loads, and gated only by the agent builder
- * experimental-features advanced setting (`experimental: true` on the skill
- * definition). This config set does not pin that setting, so it can be
- * flipped on and off at runtime to exercise both states.
+ * Alerting v2 plugin loads. They require both the Agent Builder and the
+ * space-scoped Alerting v2 experimental-features advanced settings.
  */
 apiTest.describe('Agent Builder — alerting v2 skill gating', () => {
+  apiTest.beforeEach(async ({ kbnClient }) => {
+    await Promise.all([
+      kbnClient.uiSettings.unset(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID),
+      kbnClient.uiSettings.unset(ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID),
+    ]);
+  });
+
   apiTest.afterEach(async ({ kbnClient }) => {
-    await kbnClient.uiSettings.unset(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID);
+    await Promise.all([
+      kbnClient.uiSettings.unset(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID),
+      kbnClient.uiSettings.unset(ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID),
+    ]);
   });
 
   apiTest(
@@ -59,6 +68,7 @@ apiTest.describe('Agent Builder — alerting v2 skill gating', () => {
     async ({ apiClient, kbnClient, requestAuth }) => {
       await kbnClient.uiSettings.update({
         [AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID]: true,
+        [ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID]: true,
       });
 
       const { apiKeyHeader } = await requestAuth.getApiKeyForAdmin();
