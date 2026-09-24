@@ -407,7 +407,7 @@ describe('Trusted apps form', () => {
       });
     });
 
-    describe('invisible character validation', () => {
+    describe('edge whitespace trimming', () => {
       it('validates the trimmed value instead of warning about edge whitespace', () => {
         formProps.item = createItem({
           entries: [createEntry(ConditionEntryField.PATH, 'match', ' malformed-path ')],

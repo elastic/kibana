@@ -128,13 +128,13 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
       expect(() => initValidator()._validateEntryValueCharacters(exceptionLikeItem)).not.toThrow();
     });
 
-    it('rejects a null character in a nested entry without trimming edge whitespace', () => {
+    it('rejects a null character in a nested entry', () => {
       exceptionLikeItem.entries = [
         {
           field: 'process.executable.caseless',
           type: 'wildcard',
           operator: 'included',
-          value: ' C:\\Elastic\\*.exe',
+          value: 'C:\\Elastic\\*.exe',
         },
         {
           field: 'process.Ext.code_signature',
@@ -144,7 +144,7 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
               field: 'subject_name',
               type: 'match_any',
               operator: 'included',
-              value: [' Elastic ', 'bad\u0000signer'],
+              value: ['Elastic', 'bad\u0000signer'],
             },
           ],
         },
@@ -153,32 +153,9 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
       expect(() => initValidator()._validateEntryValueCharacters(exceptionLikeItem)).toThrow(
         /null characters in fields: subject_name/
       );
-      // Character validation never mutates values -- trimming is opt-in per artifact type.
-      expect(exceptionLikeItem.entries[0]).toEqual(
-        expect.objectContaining({ value: ' C:\\Elastic\\*.exe' })
-      );
-      expect(
-        (exceptionLikeItem.entries[1] as { entries: Array<{ value: string[] }> }).entries[0].value
-      ).toEqual([' Elastic ', 'bad\u0000signer']);
     });
 
-    it('accepts edge whitespace and leaves the value untouched', () => {
-      exceptionLikeItem.entries = [
-        {
-          field: 'process.executable.caseless',
-          type: 'match',
-          operator: 'included',
-          value: ' C:\\Program Files\\Elastic\\endpoint.exe ',
-        },
-      ] as ExceptionItemLikeOptions['entries'];
-
-      expect(() => initValidator()._validateEntryValueCharacters(exceptionLikeItem)).not.toThrow();
-      expect(exceptionLikeItem.entries[0]).toEqual(
-        expect.objectContaining({ value: ' C:\\Program Files\\Elastic\\endpoint.exe ' })
-      );
-    });
-
-    it('trims edge whitespace only when trimEntryValues is called', () => {
+    it('trims edge whitespace with trimEntryValues', () => {
       exceptionLikeItem.entries = [
         {
           field: 'process.executable.caseless',

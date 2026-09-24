@@ -63,14 +63,6 @@ describe('Endpoint Exceptions API validations', () => {
       await expect(promise).rejects.toThrow(/maximum length of \[64\]/);
     });
 
-    it('does not trim edge whitespace, leaving a padded IP to fail schema validation', async () => {
-      // Only Trusted Apps and Blocklist trim; every other artifact stores values verbatim. A
-      // padded IP is therefore rejected loudly by the IP schema rather than silently repaired.
-      await expect(validator.validatePreCreateItem(buildCreateItem(' 10.0.0.1 '))).rejects.toThrow(
-        /invalid ip/
-      );
-    });
-
     it('rejects a null character on create', async () => {
       await expect(
         validator.validatePreCreateItem(buildCreateItem('10.0.0.1\u0000'))

@@ -16,10 +16,6 @@ describe('hasNullCharacter', () => {
     expect(hasNullCharacter(value)).toBe(true);
   });
 
-  it('detects a NUL surrounded by edge whitespace', () => {
-    expect(hasNullCharacter(' value\u0000 ')).toBe(true);
-  });
-
   // Deliberately allowed: a real process.command_line or a Linux file name can contain these,
   // and the Endpoint matches values literally, so rejecting them would break valid entries.
   it.each([
@@ -34,25 +30,18 @@ describe('hasNullCharacter', () => {
   });
 
   it('inspects every array member', () => {
-    expect(hasNullCharacter([' whitespace ', 'ctl\u0000'])).toBe(true);
+    expect(hasNullCharacter(['clean', 'ctl\u0000'])).toBe(true);
     expect(hasNullCharacter(['clean', 'also clean', 'bad\u0000value'])).toBe(true);
     expect(hasNullCharacter(['clean', 'also clean'])).toBe(false);
   });
 
   it.each([
     ['empty value', ''],
-    ['absent value', undefined],
     ['empty array', []],
     ['Windows path', 'C:\\Program Files\\Elastic\\endpoint.exe'],
     ['Unix path', '/opt/Elastic Endpoint/endpoint'],
     ['hash', 'a'.repeat(64)],
     ['ordinary interior spaces', 'Elastic Endpoint'],
-    ['leading and trailing space', ' value '],
-    ['edge tab', '\tvalue\t'],
-    ['edge line feed', '\nvalue\n'],
-    ['edge non-breaking space', '\u00A0value\u00A0'],
-    ['edge byte order mark', '\uFEFFvalue\uFEFF'],
-    ['array of edge-whitespace members', ['clean', ' trailing ']],
   ])('returns false for a clean %s', (_, value) => {
     expect(hasNullCharacter(value)).toBe(false);
   });

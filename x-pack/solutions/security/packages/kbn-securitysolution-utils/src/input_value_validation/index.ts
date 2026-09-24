@@ -9,11 +9,7 @@
 const NULL_CHARACTER = '\u0000';
 
 /** Returns true when a value, or any array member, contains a NUL character. */
-export const hasNullCharacter = (value?: string | string[]): boolean => {
-  if (value === undefined) {
-    return false;
-  }
-
+export const hasNullCharacter = (value: string | string[]): boolean => {
   const values = Array.isArray(value) ? value : [value];
 
   return values.some((member) => member.includes(NULL_CHARACTER));
