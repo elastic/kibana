@@ -19,9 +19,7 @@ const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   </EuiProvider>
 );
 
-const renderList = (
-  props: Partial<React.ComponentProps<typeof LinkedInvestigationsList>> = {}
-) =>
+const renderList = (props: Partial<React.ComponentProps<typeof LinkedInvestigationsList>> = {}) =>
   render(
     <LinkedInvestigationsList
       items={undefined}

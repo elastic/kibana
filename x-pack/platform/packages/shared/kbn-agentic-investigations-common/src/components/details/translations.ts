@@ -8,17 +8,15 @@
 import { i18n } from '@kbn/i18n';
 
 export const LINKED_INVESTIGATIONS_LABELS = Object.freeze({
-  sectionTitle: i18n.translate(
-    'xpack.alertzero.detailsFlyout.linkedInvestigations.sectionTitle',
-    { defaultMessage: 'Linked investigations' }
-  ),
+  sectionTitle: i18n.translate('xpack.alertzero.detailsFlyout.linkedInvestigations.sectionTitle', {
+    defaultMessage: 'Linked investigations',
+  }),
   statusOpen: i18n.translate('xpack.alertzero.detailsFlyout.linkedInvestigations.statusOpen', {
     defaultMessage: 'Open',
   }),
-  statusClosed: i18n.translate(
-    'xpack.alertzero.detailsFlyout.linkedInvestigations.statusClosed',
-    { defaultMessage: 'Closed' }
-  ),
+  statusClosed: i18n.translate('xpack.alertzero.detailsFlyout.linkedInvestigations.statusClosed', {
+    defaultMessage: 'Closed',
+  }),
   empty: i18n.translate('xpack.alertzero.detailsFlyout.linkedInvestigations.empty', {
     defaultMessage: 'No linked investigations',
   }),

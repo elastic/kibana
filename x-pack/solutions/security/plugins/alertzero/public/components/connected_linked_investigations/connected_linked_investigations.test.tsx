@@ -48,7 +48,11 @@ describe('ConnectedLinkedInvestigations', () => {
   });
 
   it('passes the loading state to the list', () => {
-    mockUseLinkedInvestigations.mockReturnValue({ data: undefined, isLoading: true, isError: false });
+    mockUseLinkedInvestigations.mockReturnValue({
+      data: undefined,
+      isLoading: true,
+      isError: false,
+    });
 
     render(<ConnectedLinkedInvestigations {...defaultProps} />, { wrapper });
 
@@ -56,7 +60,11 @@ describe('ConnectedLinkedInvestigations', () => {
   });
 
   it('passes the error state to the list', () => {
-    mockUseLinkedInvestigations.mockReturnValue({ data: undefined, isLoading: false, isError: true });
+    mockUseLinkedInvestigations.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isError: true,
+    });
 
     render(<ConnectedLinkedInvestigations {...defaultProps} />, { wrapper });
 
@@ -82,18 +90,13 @@ describe('ConnectedLinkedInvestigations', () => {
   it('calls onOpenInvestigation with the correct conversationId and agentId when a row is clicked', () => {
     const onOpenInvestigation = jest.fn();
     mockUseLinkedInvestigations.mockReturnValue({
-      data: [
-        { id: 'inv-1', title: 'Mass file encryption', status: 'open', agent_id: 'agent-1' },
-      ],
+      data: [{ id: 'inv-1', title: 'Mass file encryption', status: 'open', agent_id: 'agent-1' }],
       isLoading: false,
       isError: false,
     });
 
     render(
-      <ConnectedLinkedInvestigations
-        {...defaultProps}
-        onOpenInvestigation={onOpenInvestigation}
-      />,
+      <ConnectedLinkedInvestigations {...defaultProps} onOpenInvestigation={onOpenInvestigation} />,
       { wrapper }
     );
 
@@ -109,13 +112,9 @@ describe('ConnectedLinkedInvestigations', () => {
     mockUseLinkedInvestigations.mockReturnValue({ data: [], isLoading: false, isError: false });
     const ids = ['inv-x', 'inv-y'];
 
-    render(
-      <ConnectedLinkedInvestigations
-        {...defaultProps}
-        linkedInvestigationIds={ids}
-      />,
-      { wrapper }
-    );
+    render(<ConnectedLinkedInvestigations {...defaultProps} linkedInvestigationIds={ids} />, {
+      wrapper,
+    });
 
     expect(mockUseLinkedInvestigations).toHaveBeenCalledWith(
       expect.objectContaining({ linkedInvestigationIds: ids })

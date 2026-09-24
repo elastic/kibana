@@ -258,7 +258,7 @@ describe('registerEscalationTemplateUI', () => {
     metadata: { status: 'open', assignees: ['uid-1'] },
   };
 
-  it('registers the template with an empty tabs list and a header only', () => {
+  it('registers the template with an overview tab and a header only (no footer)', () => {
     const { contract } = createFakeService();
 
     registerEscalationTemplateUI({
@@ -268,7 +268,7 @@ describe('registerEscalationTemplateUI', () => {
     });
 
     const definition = contract.getTemplateUIDefinition('escalation');
-    expect(definition?.tabs).toEqual([]);
+    expect(definition?.tabs).toEqual(['escalation.overview']);
     expect(definition?.detailsFlyout?.header).toBeDefined();
     expect(definition?.detailsFlyout?.footer).toBeUndefined();
   });

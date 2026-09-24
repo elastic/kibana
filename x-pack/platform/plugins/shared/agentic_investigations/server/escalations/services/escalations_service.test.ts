@@ -663,7 +663,12 @@ describe('EscalationsService.listLinkedInvestigations', () => {
   it('returns summaries in the stored order', async () => {
     const { service } = makeService({
       get: jest.fn().mockResolvedValue(makeEscalation(['inv-a', 'inv-b'])),
-      bulkGet: jest.fn().mockResolvedValue(new Map([['inv-a', INV_A], ['inv-b', INV_B]])),
+      bulkGet: jest.fn().mockResolvedValue(
+        new Map([
+          ['inv-a', INV_A],
+          ['inv-b', INV_B],
+        ])
+      ),
     });
 
     const result = await service.listLinkedInvestigations(request, 'escalation-1');
