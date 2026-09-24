@@ -32,9 +32,9 @@ export function registerGetConnectorsTool(
 **When to use:** To find connector IDs needed for the \`connector-id\` field in workflow steps (e.g., which Slack or Jira connectors are available).
 **When NOT to use:** To discover step types and their schemas (use get_step_definitions instead).
 
-Returns connector instances with their ID and name, plus:
-- \`actionTypeId\`: the Kibana action type ID (e.g. ".slack")
-- \`stepTypes\`: workflow step types this connector supports (e.g. ["inference.completion", "inference.rerank"] for sub-action connectors, or ["slack"] for simple connectors)
+Returns:
+- \`connectors\`: instances with their ID, name, and \`actionTypeId\` (Kibana action type ID, e.g. ".slack")
+- \`stepTypesByActionType\`: a map from \`actionTypeId\` to the workflow step types it supports (e.g. \`{".inference": ["inference.completion", "inference.rerank"]}\`). Look up a connector's supported step types via its \`actionTypeId\`.
 
 The connector \`id\` is what you put in the \`connector-id\` field of a workflow step.`,
     schema: z.object({
@@ -61,23 +61,28 @@ The connector \`id\` is what you put in the \`connector-id\` field of a workflow
           : []
         : Object.entries(connectorTypes);
 
+      const stepTypesByActionType: Record<string, string[]> = {};
+
       let connectors = entries.flatMap(([type, typeInfo]) => {
         const baseStepType = type.replace(/^\./, '');
-        const stepTypes =
+        const stepTypesForType =
           typeInfo.subActions?.length > 0
             ? typeInfo.subActions.map((sa) => `${baseStepType}.${sa.name}`)
             : [baseStepType];
+
+        stepTypesByActionType[type] = stepTypesForType;
 
         return (typeInfo.instances ?? []).map((instance) => ({
           id: instance.id,
           name: instance.name,
           actionTypeId: type,
-          stepTypes,
         }));
       });
 
       if (stepType) {
-        connectors = connectors.filter((c) => c.stepTypes.includes(stepType));
+        connectors = connectors.filter((c) =>
+          stepTypesByActionType[c.actionTypeId]?.includes(stepType)
+        );
       }
 
       if (search) {
@@ -86,7 +91,7 @@ The connector \`id\` is what you put in the \`connector-id\` field of a workflow
           (c) =>
             c.name.toLowerCase().includes(term) ||
             c.actionTypeId.toLowerCase().includes(term) ||
-            c.stepTypes.some((st) => st.toLowerCase().includes(term))
+            stepTypesByActionType[c.actionTypeId]?.some((st) => st.toLowerCase().includes(term))
         );
       }
 
@@ -97,6 +102,7 @@ The connector \`id\` is what you put in the \`connector-id\` field of a workflow
             data: {
               count: connectors.length,
               totalAvailable: totalConnectors,
+              stepTypesByActionType,
               connectors,
             },
           },

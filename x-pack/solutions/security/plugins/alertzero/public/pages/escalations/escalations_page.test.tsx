@@ -6,12 +6,13 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { coreMock } from '@kbn/core/public/mocks';
 import {
   useAssignEscalation,
@@ -19,7 +20,17 @@ import {
   useUserProfiles,
   useSuggestUserProfiles,
 } from '@kbn/agentic-investigations-plugin/public';
+import { useInvestigationDetails } from '../conversations/use_investigation_details';
+import { useConversationsUrlParams } from '../conversations/conversations_url_params';
 import { EscalationsPage } from './escalations_page';
+
+// These hooks open the Agent Builder flyout and manage the URL; stub them out here.
+jest.mock('../conversations/use_investigation_details', () => ({
+  useInvestigationDetails: jest.fn(),
+}));
+jest.mock('../conversations/conversations_url_params', () => ({
+  useConversationsUrlParams: jest.fn(),
+}));
 
 jest.mock('@kbn/agentic-investigations-plugin/public', () => ({
   ...jest.requireActual('@kbn/agentic-investigations-plugin/public'),
@@ -71,6 +82,12 @@ const mockUseAssignEscalation = useAssignEscalation as jest.Mock;
 const mockUseListEscalations = useListEscalations as jest.Mock;
 const mockUseUserProfiles = useUserProfiles as jest.Mock;
 const mockUseSuggestUserProfiles = useSuggestUserProfiles as jest.Mock;
+const mockUseInvestigationDetails = useInvestigationDetails as jest.Mock;
+const mockUseConversationsUrlParams = useConversationsUrlParams as jest.Mock;
+
+// Stable URL-param spies — recreated in beforeEach so jest.clearAllMocks() can track calls.
+let selectConversation: jest.Mock;
+let clearSelectedConversation: jest.Mock;
 
 const openEscalation = {
   id: 'esc-open-1',
@@ -88,7 +105,7 @@ const closedEscalation = {
   metadata: { status: 'closed' },
 };
 
-const assignMutate = jest.fn();
+const assignMutate = jest.fn().mockResolvedValue({});
 
 const renderPage = (overrides: { capabilities?: object } = {}) => {
   const core = coreMock.createStart();
@@ -99,24 +116,39 @@ const renderPage = (overrides: { capabilities?: object } = {}) => {
     ...((overrides.capabilities as object | undefined) ?? {}),
   };
   const history = createMemoryHistory();
+  // A fresh client per test so cache from one test never bleeds into the next.
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 
-  render(
+  const ui = (
     <I18nProvider>
       <EuiProvider>
         <KibanaContextProvider services={core}>
-          <Router history={history}>
-            <EscalationsPage />
-          </Router>
+          <QueryClientProvider client={queryClient}>
+            <Router history={history}>
+              <EscalationsPage />
+            </Router>
+          </QueryClientProvider>
         </KibanaContextProvider>
       </EuiProvider>
     </I18nProvider>
   );
 
-  return { core };
+  const { rerender: rtlRerender } = render(ui);
+  const rerender = () => rtlRerender(ui);
+
+  return { core, rerender };
 };
 
 beforeEach(() => {
-  mockUseAssignEscalation.mockReturnValue({ mutate: assignMutate });
+  selectConversation = jest.fn();
+  clearSelectedConversation = jest.fn();
+  mockUseConversationsUrlParams.mockReturnValue({
+    selectedConversationId: undefined,
+    selectConversation,
+    clearSelectedConversation,
+  });
+  mockUseInvestigationDetails.mockImplementation(() => undefined);
+  mockUseAssignEscalation.mockReturnValue({ mutateAsync: assignMutate });
   mockUseUserProfiles.mockReturnValue({ data: [], isLoading: false });
   mockUseSuggestUserProfiles.mockReturnValue({ data: [], isLoading: false });
 });
@@ -239,22 +271,20 @@ describe('EscalationsPage', () => {
       expect.objectContaining({
         escalationId: 'esc-open-1',
         assignees: ['user-uid-1'],
-      }),
-      expect.anything()
+      })
     );
   });
 
-  it('shows a success toast when the assignee update succeeds', () => {
+  it('shows a success toast when the assignee update succeeds', async () => {
     mockBothQueues([openEscalation], []);
     const { core } = renderPage();
 
     fireEvent.click(screen.getByTestId('mock-assign-esc-open-1'));
 
-    // Extract the callbacks object passed as the second arg to mutate and invoke onSuccess.
-    const [, callbacks] = assignMutate.mock.calls[0];
-    callbacks.onSuccess();
-
-    expect(core.notifications.toasts.addSuccess).toHaveBeenCalledWith('Assignees updated');
+    // mutateAsync resolves in the next microtask tick; wait for the toast.
+    await waitFor(() =>
+      expect(core.notifications.toasts.addSuccess).toHaveBeenCalledWith('Assignees updated')
+    );
   });
 
   it('renders the assignee widget as read-only for closed escalations regardless of canManage', () => {
@@ -320,5 +350,97 @@ describe('EscalationsPage', () => {
     // Closed bucket renders an inline error, not a page-level empty prompt that hides open.
     expect(screen.getByTestId('escalationQueue-closed')).toBeInTheDocument();
     expect(screen.getByText('Failed to load escalations')).toBeInTheDocument();
+  });
+
+  it('opens the flyout when a row card is clicked', () => {
+    mockBothQueues([openEscalation], []);
+    renderPage();
+
+    fireEvent.click(screen.getByTestId('escalationCard-esc-open-1'));
+
+    expect(selectConversation).toHaveBeenCalledWith('esc-open-1');
+  });
+
+  it('clears the URL when the flyout closes', () => {
+    // Capture the onClose passed to the details hook so we can invoke it.
+    let capturedOnClose: (() => void) | undefined;
+    mockUseInvestigationDetails.mockImplementation(({ onClose }: { onClose: () => void }) => {
+      capturedOnClose = onClose;
+    });
+
+    mockBothQueues([openEscalation], []);
+    renderPage();
+
+    act(() => {
+      capturedOnClose?.();
+    });
+
+    expect(clearSelectedConversation).toHaveBeenCalled();
+  });
+
+  it('does not duplicate rows when the same page 2 data is re-delivered (refetch regression)', async () => {
+    // The old append-only implementation pushed new items on every `useEffect` fire.
+    // A refetch of page 2 (same page, new object reference) would append a second copy.
+    // The new page-keyed state replaces the entry instead, preventing duplication.
+    const page2Item = {
+      id: 'esc-p2',
+      title: 'Page 2 escalation',
+      created_at: '2024-02-01T00:00:00Z',
+      updated_at: '2024-02-02T00:00:00Z',
+      metadata: {},
+    };
+    const stableClosedResult = {
+      data: { results: [], pagination: { total: 0, page: 1, per_page: 1 } },
+      isLoading: false,
+      error: null,
+    };
+    // Stable page-1 and page-2 result objects. The page-2 object is reassigned below
+    // to a new reference to simulate a refetch; page-1 stays stable throughout.
+    const page1Result = {
+      data: { results: [openEscalation], pagination: { total: 2, page: 1, per_page: 1 } },
+      isLoading: false,
+      error: null,
+    };
+    let page2Result = {
+      data: { results: [page2Item], pagination: { total: 2, page: 2, per_page: 1 } },
+      isLoading: false,
+      error: null,
+    };
+    // Route by page so "Show more" (page=2 query) gets page-2 data.
+    mockUseListEscalations.mockImplementation(
+      ({ status, page }: { status: string; page: number }) => {
+        if (status !== 'open') return stableClosedResult;
+        return page === 1 ? page1Result : page2Result;
+      }
+    );
+
+    const { rerender } = renderPage();
+
+    // Page 1: only openEscalation visible; "Show more" button available (total=2, loaded=1).
+    expect(screen.getByText('Suspicious login')).toBeInTheDocument();
+    expect(screen.getByTestId('escalationQueueLoadMore-open')).toBeInTheDocument();
+
+    // Click "Show more" → component increments openPage to 2 → useListEscalations called
+    // with page=2 → page2Result returned → useEffect fires → openPages[2] set.
+    fireEvent.click(screen.getByTestId('escalationQueueLoadMore-open'));
+    await waitFor(() => {
+      expect(screen.getByText('Page 2 escalation')).toBeInTheDocument();
+    });
+    expect(screen.getByText('Suspicious login')).toBeInTheDocument();
+
+    // Simulate a refetch: replace page2Result with a new object (same content, new ref).
+    // The useEffect dependency [openQuery.data] changes → effect fires again.
+    page2Result = {
+      data: { results: [page2Item], pagination: { total: 2, page: 2, per_page: 1 } },
+      isLoading: false,
+      error: null,
+    };
+    await act(async () => {
+      rerender();
+    });
+
+    // Both items still present exactly once — page-keyed state replaces, not appends.
+    expect(screen.getByText('Suspicious login')).toBeInTheDocument();
+    expect(screen.getAllByText('Page 2 escalation')).toHaveLength(1);
   });
 });
