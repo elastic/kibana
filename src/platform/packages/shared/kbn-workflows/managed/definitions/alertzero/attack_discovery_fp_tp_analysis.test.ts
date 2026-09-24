@@ -369,10 +369,9 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
     });
 
     it('reads it from the space-scoped discovery index the data_generator route writes', () => {
-      // Route evidence (live stack, 2026-09-23): POST …/data_generator/attack_discoveries/_create
-      // returns each doc's `index` = `.internal.alerts-security.attack.discovery.alerts-default-000001`,
-      // behind the `.alerts-security.attack.discovery.alerts-<space>` alias. The
-      // `.adhoc…` alias is a different, empty backfill index.
+      // The data_generator route indexes each discovery behind the
+      // `.alerts-security.attack.discovery.alerts-<space>` alias; the `.adhoc…`
+      // alias is a different, empty backfill index.
       expect(loadAttack?.with?.index).toBe(
         '.alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}'
       );
