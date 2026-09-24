@@ -9,14 +9,14 @@ import type { AlertEpisode } from '../types';
 
 /**
  * Result of the windowed candidate-episode scan (FetchEpisodesStep): the fetched
- * rows plus whether the scan hit EPISODE_QUERY_LIMIT and deferred a tail.
+ * rows plus whether the scan hit ESQL_QUERY_ROW_LIMIT and deferred a tail.
  */
 export class EpisodeScan {
   private static readonly EMPTY = new EpisodeScan([], false);
 
   private constructor(
     public readonly episodes: readonly AlertEpisode[],
-    /** True when the scan reached EPISODE_QUERY_LIMIT and a tail was deferred. */
+    /** True when the scan reached ESQL_QUERY_ROW_LIMIT and a tail was deferred. */
     public readonly truncated: boolean
   ) {}
 
