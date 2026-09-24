@@ -20,7 +20,7 @@ export function RequestFlyoutQueryControls() {
   const {
     deps: { core },
     connection,
-    filters: { environment, setEnvironment, rangeFrom, rangeTo, setRange },
+    filters: { environment, setEnvironment, start, end, rangeFrom, rangeTo, setRange },
     onRefresh,
   } = useRequestFlyoutContext();
 
@@ -29,10 +29,11 @@ export function RequestFlyoutQueryControls() {
     []
   );
 
+  // Pass ISO start/end (not relative rangeFrom/rangeTo) — the API requires ISO date strings.
   const { environments, status: environmentsStatus } = useUnifiedEnvironmentsFetcher({
     serviceName: connection.sourceServiceName,
-    start: rangeFrom,
-    end: rangeTo,
+    start,
+    end,
   });
 
   return (

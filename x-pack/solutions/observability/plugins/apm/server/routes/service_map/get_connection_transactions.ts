@@ -62,11 +62,20 @@ export function getConnectionTransactions({
     // attribution bug in get_top_dependency_spans.ts:126 (trace-id keying attributes the wrong
     // transaction in multi-service traces).
     //
+    // We query BOTH span and transaction documents in Phase 1. The service map's own exit span
+    // query (fetch_exit_span_samples.ts) does the same — in some cases (single-span transactions,
+    // certain agent types) `span.destination.service.resource` appears on a transaction document
+    // rather than a span document. If we only query spans we silently miss those connections.
+    //
+    // When the doc is a span: `transaction.id` = the containing transaction's ID.
+    // When the doc is a transaction: `transaction.id` = the doc's own ID (self-referential).
+    // Either way Phase 2 correctly resolves to a transaction document.
+    //
     const spanAggResponse = await apmEventClient.search(
       'get_connection_transactions_exit_span_ids',
       {
         apm: {
-          events: [ProcessorEvent.span],
+          events: [ProcessorEvent.span, ProcessorEvent.transaction],
         },
         track_total_hits: false,
         size: 0,
