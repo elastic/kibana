@@ -85,6 +85,7 @@ export const UploadListItem = ({ listId, type }: { listId: string; type: ListTyp
     <>
       <EuiToolTip position="bottom" content={UPLOAD_TOOLTIP}>
         <EuiFilePicker
+          aria-label={UPLOAD_FILE_PICKER_INITAL_PROMT_TEXT}
           className={uploadStyle}
           accept={validFileTypes.join()}
           id="value-list-item-upload"

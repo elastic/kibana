@@ -128,6 +128,9 @@ function ImportCard() {
                 </>
               )}
               <EuiFilePicker
+                aria-label={i18n.translate('xpack.apm.importCard.filePickerAriaLabel', {
+                  defaultMessage: 'Select or drag and drop a diagnostics report',
+                })}
                 fullWidth
                 id="file-picker"
                 multiple

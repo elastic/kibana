@@ -52,6 +52,7 @@ describe('EndpointScriptEditForm', () => {
 
     // file and checkbox don't have labels
     expect(getByTestId('test-file-picker-row')).toBeInTheDocument();
+    expect(getByTestId('test-file-picker')).toHaveAccessibleName('Select or drag and drop a file');
     expect(getByTestId('test-requires-input-row')).toBeInTheDocument();
 
     const visibleRowLabels = rows
