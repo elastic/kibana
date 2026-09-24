@@ -143,7 +143,10 @@ const CloudOnboardingDeploymentItemSchema = schema.object({
     })
   ),
   policyIdsByInstance: schema.maybe(
-    schema.recordOf(schema.string(), schema.string(), {
+    schema.recordOf(schema.string({ maxLength: 255 }), schema.string({ maxLength: 255 }), {
+      validate: (v) => {
+        if (Object.keys(v).length > 1000) return 'policyIdsByInstance must not exceed 1000 entries';
+      },
       meta: {
         description:
           'instanceId → policyId mapping persisted after deploy. Hydrated into the wizard on resume to enable cleanup of stale policies when services are removed.',
@@ -268,7 +271,12 @@ export const UpdateCloudOnboardingDeploymentRequestSchema = {
       schema.arrayOf(schema.string({ maxLength: 255 }), { maxSize: 100 })
     ),
     policyIdsByInstance: schema.maybe(
-      schema.recordOf(schema.string({ maxLength: 255 }), schema.string({ maxLength: 255 }))
+      schema.recordOf(schema.string({ maxLength: 255 }), schema.string({ maxLength: 255 }), {
+        validate: (v) => {
+          if (Object.keys(v).length > 1000)
+            return 'policyIdsByInstance must not exceed 1000 entries';
+        },
+      })
     ),
     apiKeyId: schema.maybe(schema.string({ maxLength: 255 })),
     mechanisms: schema.maybe(
