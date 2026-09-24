@@ -8,6 +8,7 @@
  */
 
 import ATTACK_DISCOVERY_BATCHED_GENERATION_YAML from './attack_discovery_batched_generation.yaml';
+import ATTACK_DISCOVERY_FP_TP_ANALYSIS_YAML from './attack_discovery_fp_tp_analysis.yaml';
 import ATTACK_DISCOVERY_REVIEW_YAML from './attack_discovery_review.yaml';
 import ATTACK_DISCOVERY_RUNNER_YAML from './attack_discovery_runner.yaml';
 import {
@@ -27,6 +28,8 @@ export const ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID =
   'system-security-attack-discovery-review';
 export const ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW_ID =
   'system-security-attack-discovery-batched-generation';
+export const ALERTZERO_ATTACK_DISCOVERY_FP_TP_ANALYSIS_WORKFLOW_ID =
+  'system-security-attack-discovery-fp-tp-analysis';
 
 export const ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW = {
   billable: false,
@@ -37,12 +40,18 @@ export const ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW = {
   yaml: ATTACK_DISCOVERY_RUNNER_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
+/**
+ * The version carries the switch from the `run_fp_tp_analysis` console stub to the
+ * FP/TP analysis workflow below. Without the bump an existing install keeps calling
+ * the stub and takes its verdict from a `stub_verdict` input this version no longer
+ * declares.
+ */
 export const ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW = {
   billable: false,
   id: ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 4,
+  version: 5,
   yaml: ATTACK_DISCOVERY_REVIEW_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
@@ -63,4 +72,20 @@ export const ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW = {
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
   version: 2,
   yaml: ATTACK_DISCOVERY_BATCHED_GENERATION_YAML,
+} as const satisfies ManagedWorkflowDefinition;
+
+/**
+ * FP/TP analysis of one Attack Discovery, invoked by the review via
+ * `workflow.execute`. Owns no trigger, so like batched generation it uses the
+ * internal-workflow management profile: enablement is enforced rather than
+ * restorable, because a disabled analysis would leave the review recording every
+ * attack as a failure.
+ */
+export const ALERTZERO_ATTACK_DISCOVERY_FP_TP_ANALYSIS_WORKFLOW = {
+  billable: false,
+  id: ALERTZERO_ATTACK_DISCOVERY_FP_TP_ANALYSIS_WORKFLOW_ID,
+  management: ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
+  pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
+  version: 1,
+  yaml: ATTACK_DISCOVERY_FP_TP_ANALYSIS_YAML,
 } as const satisfies ManagedWorkflowDefinition;
