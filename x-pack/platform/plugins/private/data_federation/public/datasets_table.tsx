@@ -137,6 +137,10 @@ export const DatasetsTable: FunctionComponent<DatasetsTableProps> = ({
         itemId="name"
         columns={columns}
         search={{
+          onChange: () => {
+            onSelectionChange([]);
+            return true;
+          },
           box: {
             incremental: true,
             placeholder: mainTranslations.columns.dataSets.searchPlaceholder,

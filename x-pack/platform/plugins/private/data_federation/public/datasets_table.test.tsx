@@ -136,14 +136,56 @@ describe('DatasetsTable', () => {
     await act(async () => {
       fireEvent.click(getByRole('button', { name: /Data sources/ }));
     });
-    const option = await findByRole('option', { name: 'ds1' });
+    const ds1Option = await findByRole('option', { name: 'ds1' });
     await act(async () => {
-      fireEvent.click(option);
+      fireEvent.click(ds1Option);
     });
 
     expect(queryByText('set1')).toBeInTheDocument();
     expect(queryByText('set2')).not.toBeInTheDocument();
     expect(queryByText('set3')).not.toBeInTheDocument();
+
+    const ds2Option = await findByRole('option', { name: 'ds2' });
+    await act(async () => {
+      fireEvent.click(ds2Option);
+    });
+
+    expect(queryByText('set1')).toBeInTheDocument();
+    expect(queryByText('set2')).not.toBeInTheDocument();
+    expect(queryByText('set3')).toBeInTheDocument();
+  });
+
+  it('clears the selection when the data source filter changes', async () => {
+    const onSelectionChange = jest.fn();
+    const selectedItems = [createDataSetRow({ name: 'set1', dataSource: 'ds1' })];
+
+    const { getByRole, findByRole } = render(
+      <EuiProvider>
+        <KibanaContextProvider services={{ docLinks: docLinksMock }}>
+          <DatasetsTable
+            items={[...selectedItems, createDataSetRow({ name: 'set2', dataSource: 'ds2' })]}
+            selectedItems={selectedItems}
+            dataSourceNames={['ds1', 'ds2']}
+            isCreateDisabled={false}
+            onSelectionChange={onSelectionChange}
+            onCreate={jest.fn()}
+            onEdit={jest.fn()}
+            onDelete={jest.fn()}
+            onDeleteSelected={jest.fn()}
+          />
+        </KibanaContextProvider>
+      </EuiProvider>
+    );
+
+    await act(async () => {
+      fireEvent.click(getByRole('button', { name: /Data sources/ }));
+    });
+    const option = await findByRole('option', { name: 'ds2' });
+    await act(async () => {
+      fireEvent.click(option);
+    });
+
+    expect(onSelectionChange).toHaveBeenCalledWith([]);
   });
 
   it('calls onEdit and onDelete for row actions', async () => {
