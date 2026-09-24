@@ -15,7 +15,6 @@ export const aiIndexSourcesSkill = defineSkillType({
   id: 'ai-index-sources',
   name: 'ai-index-sources',
   basePath: 'skills/platform/context-engine',
-  experimental: true,
   availability: contextEngineSkillAvailability,
   description:
     'Choose and configure the data a Context Engine AI index draws on. Load when picking which Elasticsearch indices or connectors should feed an AI index, when writing or fixing an ES|QL source query, when agreeing the corpus filter that bounds one, or when working out whether a coverage gap is a source problem.',

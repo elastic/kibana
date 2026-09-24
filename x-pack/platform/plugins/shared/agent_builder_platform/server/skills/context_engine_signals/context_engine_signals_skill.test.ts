@@ -20,8 +20,8 @@ describe('contextEngineSignalsSkill', () => {
     expect(isAllowedBuiltinSkill(contextEngineSignalsSkill.id)).toBe(true);
   });
 
-  it('is gated behind experimental features', () => {
-    expect(contextEngineSignalsSkill.experimental).toBe(true);
+  it('is not gated behind experimental features', () => {
+    expect(contextEngineSignalsSkill.experimental).toBeFalsy();
   });
 
   it('ships non-empty markdown content', () => {

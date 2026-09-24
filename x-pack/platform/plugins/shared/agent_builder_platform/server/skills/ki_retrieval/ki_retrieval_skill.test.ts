@@ -20,8 +20,8 @@ describe('kiRetrievalSkill', () => {
     expect(isAllowedBuiltinSkill(kiRetrievalSkill.id)).toBe(true);
   });
 
-  it('is gated behind experimental features', () => {
-    expect(kiRetrievalSkill.experimental).toBe(true);
+  it('is not gated behind experimental features', () => {
+    expect(kiRetrievalSkill.experimental).toBeFalsy();
   });
 
   it('ships non-empty markdown content', () => {

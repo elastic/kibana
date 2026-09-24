@@ -14,7 +14,6 @@ export const kiRetrievalSkill = defineSkillType({
   id: 'ki-retrieval',
   name: 'ki-retrieval',
   basePath: 'skills/platform/context-engine',
-  experimental: true,
   availability: contextEngineSkillAvailability,
   description:
     'Retrieve context from a Context Engine AI Index at query time using keyword, semantic, or hybrid (FORK+FUSE) ES|QL search.',

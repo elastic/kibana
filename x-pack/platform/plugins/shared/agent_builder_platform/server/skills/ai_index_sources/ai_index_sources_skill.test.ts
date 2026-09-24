@@ -21,8 +21,8 @@ describe('aiIndexSourcesSkill', () => {
     expect(isAllowedBuiltinSkill(aiIndexSourcesSkill.id)).toBe(true);
   });
 
-  it('is gated behind experimental features', () => {
-    expect(aiIndexSourcesSkill.experimental).toBe(true);
+  it('is not gated behind experimental features', () => {
+    expect(aiIndexSourcesSkill.experimental).toBeFalsy();
   });
 
   it('ships non-empty markdown content', () => {

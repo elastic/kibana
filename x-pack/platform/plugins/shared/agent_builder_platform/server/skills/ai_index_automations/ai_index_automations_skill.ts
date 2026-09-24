@@ -18,7 +18,6 @@ export const aiIndexAutomationsSkill = defineSkillType({
   id: 'ai-index-automations',
   name: 'ai-index-automations',
   basePath: 'skills/platform/context-engine',
-  experimental: true,
   availability: contextEngineSkillAvailability,
   description:
     'Read, draft and change the workflow automations that generate Knowledge Indicators for a Context Engine AI Index. Load when authoring a KI generation workflow, when inspecting what an existing automation does, when a proposed fix names a workflow step, or when validating or piloting an automation.',

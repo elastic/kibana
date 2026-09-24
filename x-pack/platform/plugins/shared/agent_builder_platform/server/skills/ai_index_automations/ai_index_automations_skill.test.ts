@@ -22,8 +22,8 @@ describe('aiIndexAutomationsSkill', () => {
     expect(isAllowedBuiltinSkill(aiIndexAutomationsSkill.id)).toBe(true);
   });
 
-  it('is gated behind experimental features and Context Engine availability', () => {
-    expect(aiIndexAutomationsSkill.experimental).toBe(true);
+  it('is gated behind Context Engine availability but not experimental features', () => {
+    expect(aiIndexAutomationsSkill.experimental).toBeFalsy();
     expect(aiIndexAutomationsSkill.availability).toBe(contextEngineSkillAvailability);
   });
 

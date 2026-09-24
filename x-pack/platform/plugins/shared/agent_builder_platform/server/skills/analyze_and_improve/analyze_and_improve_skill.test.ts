@@ -21,8 +21,8 @@ describe('analyzeAndImproveSkill', () => {
     expect(isAllowedBuiltinSkill(analyzeAndImproveSkill.id)).toBe(true);
   });
 
-  it('is gated behind experimental features', () => {
-    expect(analyzeAndImproveSkill.experimental).toBe(true);
+  it('is not gated behind experimental features', () => {
+    expect(analyzeAndImproveSkill.experimental).toBeFalsy();
   });
 
   it('is not excluded from Elastic capabilities, so the default agent picks it up', () => {
