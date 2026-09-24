@@ -732,6 +732,7 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
       const noDeploymentIdSetup = {
         ...mockCloudSetup,
         deploymentId: undefined,
+        deploymentUrl: undefined,
       } as CloudSetup;
 
       const result = getCloudConnectorRemoteRoleTemplate({
@@ -773,14 +774,31 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
       expect(result).toBeUndefined();
     });
 
-    it('should return undefined when deployment ID is empty', () => {
-      const emptyDeploymentIdSetup = {
+    it('falls back to the deployment URL when deploymentId is empty (trailing-slash deployment_url)', () => {
+      const trailingSlashSetup = {
         ...mockCloudSetup,
         deploymentId: '',
+        deploymentUrl: 'https://cloud.elastic.co/deployments/deployment-123/',
       } as CloudSetup;
 
       const result = getCloudConnectorRemoteRoleTemplate({
-        cloud: emptyDeploymentIdSetup,
+        cloud: trailingSlashSetup,
+        accountType: SINGLE_ACCOUNT,
+        iacTemplateUrl: mockIacTemplateUrl,
+      });
+
+      expect(result).toContain('kibana-component-id');
+    });
+
+    it('should return undefined when neither deploymentId nor a parseable deployment URL is present', () => {
+      const noDeploymentSetup = {
+        ...mockCloudSetup,
+        deploymentId: '',
+        deploymentUrl: 'https://invalid-url-without-deployments-path',
+      } as CloudSetup;
+
+      const result = getCloudConnectorRemoteRoleTemplate({
+        cloud: noDeploymentSetup,
         accountType: SINGLE_ACCOUNT,
         iacTemplateUrl: mockIacTemplateUrl,
       });

@@ -264,9 +264,12 @@ export interface ElasticResource {
 export const getElasticResource = (
   cloud: CloudSetupForCloudConnector | undefined
 ): ElasticResource => {
+  // The cloud plugin derives deploymentId with split('/').pop(), which is empty for a
+  // deployment_url that ends in a slash; the URL parser still finds the id in that case.
+  const deploymentId = cloud?.deploymentId || getDeploymentIdFromUrl(cloud?.deploymentUrl);
   const kibanaComponentId = getKibanaComponentId(cloud?.cloudId);
 
-  if (cloud?.isCloudEnabled && cloud.deploymentId && kibanaComponentId) {
+  if (cloud?.isCloudEnabled && deploymentId && kibanaComponentId) {
     return { type: ELASTIC_RESOURCE_TYPE_DEPLOYMENT, id: kibanaComponentId };
   }
   if (cloud?.isServerlessEnabled && cloud?.serverless?.projectId) {
