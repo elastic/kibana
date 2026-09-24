@@ -12,6 +12,10 @@ import type { IntegrationCardItem } from '..';
 const mockGetBooleanValue = jest.fn();
 const mockGetUrlForApp = jest.fn().mockReturnValue('/app/onboarding/aws');
 const mockNavigateToApp = jest.fn();
+const mockGetHref = jest.fn(
+  (_page: string, values: { pkgkey: string }) =>
+    `/app/integrations/detail/${values.pkgkey}/overview`
+);
 
 jest.mock('../../../../../hooks', () => ({
   useStartServices: () => ({
@@ -21,6 +25,7 @@ jest.mock('../../../../../hooks', () => ({
       getUrlForApp: mockGetUrlForApp,
     },
   }),
+  useLink: () => ({ getHref: mockGetHref }),
 }));
 
 import { useOnboardingOverride } from './use_onboarding_override';
@@ -47,7 +52,11 @@ const ALL_HIDDEN_NAMES = [
   'aws_waf_otel',
 ];
 
-function makeCard(name: string, id?: string): IntegrationCardItem {
+function makeCard(
+  name: string,
+  id?: string,
+  overrides: Partial<IntegrationCardItem> = {}
+): IntegrationCardItem {
   return {
     id: id ?? `epr:${name}`,
     name,
@@ -58,6 +67,7 @@ function makeCard(name: string, id?: string): IntegrationCardItem {
     categories: [],
     url: '',
     version: '',
+    ...overrides,
   };
 }
 
@@ -80,23 +90,45 @@ describe('useOnboardingOverride', () => {
   describe('when onboarding is enabled', () => {
     beforeEach(() => mockGetBooleanValue.mockReturnValue(true));
 
-    it('filters every hidden name and replaces with single onboarding card', () => {
+    it('filters every hidden name down to the single aws package card', () => {
       const cards = ALL_HIDDEN_NAMES.map((name) => makeCard(name));
       const { result } = renderHook(() => useOnboardingOverride());
       const output = result.current.applyOnboardingOverride(cards);
 
       expect(output).toHaveLength(1);
-      expect(output[0].name).toBe('aws-onboarding');
       expect(output[0].id).toBe('epr:aws');
+      expect(output[0].name).toBe('aws');
     });
 
-    it('filters cards whose id is epr:aws (content-package cards)', () => {
-      const cards = [makeCard('some-other-aws-package', 'epr:aws')];
+    it('keeps the aws package card so the tile still opens the detail page', () => {
+      const awsCard = makeCard('aws', undefined, { version: '3.2.1' });
       const { result } = renderHook(() => useOnboardingOverride());
-      const output = result.current.applyOnboardingOverride(cards);
+      const [output] = result.current.applyOnboardingOverride([awsCard]);
 
-      expect(output).toHaveLength(1);
-      expect(output[0].name).toBe('aws-onboarding');
+      expect(output).toEqual({ ...awsCard, url: '/app/integrations/detail/aws-3.2.1/overview' });
+      expect(output.onCardClick).toBeUndefined();
+    });
+
+    it('pins the aws tile to the overview page even when tile-click-to-add points it at the wizard', () => {
+      const awsCard = makeCard('aws', undefined, {
+        version: '3.2.1',
+        url: '/app/integrations/detail/aws-3.2.1/add-integration',
+      });
+      const { result } = renderHook(() => useOnboardingOverride());
+      const [output] = result.current.applyOnboardingOverride([awsCard]);
+
+      expect(mockGetHref).toHaveBeenCalledWith('integration_details_overview', {
+        pkgkey: 'aws-3.2.1',
+        integration: 'aws',
+      });
+      expect(output.url).toBe('/app/integrations/detail/aws-3.2.1/overview');
+    });
+
+    it('filters the aws policy template tiles', () => {
+      const cards = [makeCard('aws', 'epr:aws-cloudtrail'), makeCard('aws', 'epr:aws-ec2')];
+      const { result } = renderHook(() => useOnboardingOverride());
+
+      expect(result.current.applyOnboardingOverride(cards)).toHaveLength(0);
     });
 
     it('preserves non-AWS cards', () => {
@@ -106,21 +138,29 @@ describe('useOnboardingOverride', () => {
       const output = result.current.applyOnboardingOverride(cards);
 
       expect(output).toHaveLength(2);
-      expect(output[0].name).toBe('aws-onboarding');
+      expect(output[0].id).toBe('epr:aws');
       expect(output[1]).toBe(nonAwsCard);
-    });
-
-    it('places onboarding tile first', () => {
-      const cards = [makeCard('elastic_agent', 'epr:elastic_agent'), makeCard('aws')];
-      const { result } = renderHook(() => useOnboardingOverride());
-      const output = result.current.applyOnboardingOverride(cards);
-
-      expect(output[0].name).toBe('aws-onboarding');
     });
 
     it('isOnboardingEnabled is true', () => {
       const { result } = renderHook(() => useOnboardingOverride());
       expect(result.current.isOnboardingEnabled).toBe(true);
+    });
+
+    it('navigateToOnboarding starts a new session in the onboarding app', () => {
+      const { result } = renderHook(() => useOnboardingOverride());
+      result.current.navigateToOnboarding();
+
+      expect(mockNavigateToApp).toHaveBeenCalledWith('onboarding', {
+        path: '/aws',
+        state: { newSession: true },
+      });
+    });
+
+    it('exposes the onboarding url for the detail page button', () => {
+      const { result } = renderHook(() => useOnboardingOverride());
+
+      expect(result.current.onboardingUrl).toBe('/app/onboarding/aws');
     });
   });
 });

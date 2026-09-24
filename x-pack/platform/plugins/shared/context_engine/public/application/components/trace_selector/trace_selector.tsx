@@ -6,18 +6,24 @@
  */
 
 import { EuiButton, EuiButtonGroup, EuiSpacer } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
+import type { ContextEngineUiEbt } from '../../../../common/telemetry';
+import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import { DataStreamField } from './data_stream_field';
 import { ElasticAgentField } from './elastic_agent_field';
 import type { EditableAiIndexTrace, EditableTraceType } from './types';
 
+type ContextEngineEbtElement = ContextEngineUiEbt['element'][keyof ContextEngineUiEbt['element']];
+
 interface TraceSelectorProps {
   value: EditableAiIndexTrace | undefined;
   onChange: (trace: EditableAiIndexTrace | undefined) => void;
+  ebtElement: ContextEngineEbtElement;
 }
 
-export const TraceSelector = ({ value, onChange }: TraceSelectorProps) => {
+export const TraceSelector = ({ value, onChange, ebtElement }: TraceSelectorProps) => {
   const [mode, setMode] = useState<EditableTraceType>(value?.type ?? 'elastic_agent');
 
   useEffect(() => {
@@ -53,12 +59,24 @@ export const TraceSelector = ({ value, onChange }: TraceSelectorProps) => {
           id="elastic_agent"
           iconType="productAgent"
           data-test-subj="contextTraceToggle-elastic_agent"
+          {...getEbtProps({
+            element: ebtElement,
+            action: CONTEXT_ENGINE_UI_EBT.action.traces.TOGGLE_ELASTIC_AGENT,
+          })}
         >
           {i18n.translate('xpack.contextEngine.traceSelector.elasticAgentsToggle', {
             defaultMessage: 'Elastic agents',
           })}
         </EuiButton>
-        <EuiButton id="index" iconType="listBullet" data-test-subj="contextTraceToggle-index">
+        <EuiButton
+          id="index"
+          iconType="listBullet"
+          data-test-subj="contextTraceToggle-index"
+          {...getEbtProps({
+            element: ebtElement,
+            action: CONTEXT_ENGINE_UI_EBT.action.traces.TOGGLE_DATA_STREAM,
+          })}
+        >
           {i18n.translate('xpack.contextEngine.traceSelector.genAiLibrariesToggle', {
             defaultMessage: 'GenAI libraries',
           })}
