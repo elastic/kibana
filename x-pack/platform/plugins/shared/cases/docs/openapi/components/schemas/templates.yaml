@@ -2,9 +2,8 @@ type: array
 deprecated: true
 x-state: Technical preview
 description: >
-  Deprecated. These configuration-embedded templates are superseded by the case templates system.
-  Manage templates through the templates API (`GET /api/cases/templates`) and apply their fields via
-  the case `extended_fields`.
+  Configuration-embedded templates.
+  Deprecated: use the templates API (`GET /api/cases/templates`) and case `extended_fields` instead.
 items:
   type: object
   properties:

@@ -145817,7 +145817,7 @@ components:
         customFields:
           deprecated: true
           description: |
-            Deprecated. Use `extended_fields` instead. Custom field values for a case. Any optional custom fields that are not specified in the request are set to null. Values written here continue to work during the migration to `extended_fields`.
+            Custom field values for a case. Omitted optional fields default to null. Deprecated: use `extended_fields` instead.
           items:
             type: object
             properties:
@@ -146640,7 +146640,7 @@ components:
     Cases_templates:
       deprecated: true
       description: |
-        Deprecated. These configuration-embedded templates are superseded by the case templates system. Manage templates through the templates API (`GET /api/cases/templates`) and apply their fields via the case `extended_fields`.
+        Configuration-embedded templates. Deprecated: use the templates API (`GET /api/cases/templates`) and case `extended_fields` instead.
       items:
         type: object
         properties:
@@ -146868,7 +146868,7 @@ components:
               customFields:
                 deprecated: true
                 description: |
-                  Deprecated. Use `extended_fields` instead. Custom field values for a case. Any optional custom fields that are not specified in the request are set to null. Values written here continue to work during the migration to `extended_fields`.
+                  Custom field values for a case. Omitted optional fields default to null. Deprecated: use `extended_fields` instead.
                 items:
                   type: object
                   properties:
