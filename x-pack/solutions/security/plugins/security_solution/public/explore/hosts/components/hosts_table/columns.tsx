@@ -65,9 +65,6 @@ export const getHostsColumns = (
     {
       field: 'node.lastSeen',
       name: i18n.LAST_SEEN,
-      // This column is sortable, so EUI wraps the whole header button in the
-      // tooltip and renders the icon as decorative. Labelling the icon here
-      // would pollute the sort button's accessible name.
       nameTooltip: {
         content: i18n.FIRST_LAST_SEEN_TOOLTIP,
         icon: 'info',
