@@ -553,6 +553,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       queryESQLApproximateResults: `${ELASTIC_DOCS}explore-analyze/query-filter/languages/esql-kibana#approximation-fast-mode`,
       queryESQLMultiValueControls: `${ELASTIC_DOCS}explore-analyze/query-filter/languages/esql-kibana#esql-multi-values-controls`,
       queryESQLMvIntersects: `${ELASTIC_DOCS}reference/query-languages/esql/functions-operators/mv-functions/mv_intersects`,
+      queryESQLViews: `${ELASTIC_DOCS}reference/query-languages/esql/esql-views`,
     },
     search: {
       sessions: `${ELASTIC_DOCS}explore-analyze/discover/search-sessions`,
