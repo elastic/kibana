@@ -8,6 +8,7 @@
  */
 
 import { firstValueFrom } from 'rxjs';
+import { act, renderHook } from '@testing-library/react';
 import type { Transaction } from '@elastic/apm-rum';
 import { apm } from '@elastic/apm-rum';
 import {
@@ -306,6 +307,33 @@ describe('FeatureFlagsService Browser', () => {
       });
     });
 
+    test('getBooleanValue$ delivers the current evaluation before subscribe returns', () => {
+      jest.spyOn(featureFlagsClient, 'getBooleanValue').mockReturnValue(true);
+
+      let value: boolean | undefined;
+      startContract
+        .getBooleanValue$('my-flag', false)
+        .subscribe((next) => {
+          value = next;
+        })
+        .unsubscribe();
+
+      // Unsubscribing in the same turn drops a later emission, so this stays
+      // undefined unless the current value was delivered synchronously.
+      expect(value).toBe(true);
+
+      jest.spyOn(featureFlagsClient, 'getBooleanValue').mockReturnValue(false);
+      value = undefined;
+      startContract
+        .getBooleanValue$('my-flag', true)
+        .subscribe((next) => {
+          value = next;
+        })
+        .unsubscribe();
+
+      expect(value).toBe(false);
+    });
+
     test('observe a boolean flag', async () => {
       const value = false;
       const flag$ = startContract.getBooleanValue$('my-flag', value);
@@ -330,6 +358,85 @@ describe('FeatureFlagsService Browser', () => {
       await startContract.appendContext({ kind: 'multi', kibana: { key: 'kibana-2' } });
       await expect(firstValueFrom(flag$)).resolves.toEqual(value);
       expect(observedValues).toHaveLength(3);
+    });
+
+    test('useBooleanValue seeds from the synchronous evaluation and updates when the flag changes', () => {
+      jest.spyOn(featureFlagsClient, 'getBooleanValue').mockReturnValue(true);
+
+      const { result } = renderHook(() => startContract.useBooleanValue('my-flag', false));
+
+      expect(result.current).toBe(true);
+
+      jest.mocked(featureFlagsClient.getBooleanValue).mockReturnValue(false);
+      act(() => {
+        addHandlerSpy.mock.calls[0][1]({ flagsChanged: ['my-flag'] });
+      });
+
+      expect(result.current).toBe(false);
+    });
+
+    test('useBooleanValue uses the synchronous evaluation when the flag or fallback changes', () => {
+      jest
+        .spyOn(featureFlagsClient, 'getBooleanValue')
+        .mockImplementation((flagName: string, fallback: boolean) =>
+          flagName === 'my-flag' ? false : fallback
+        );
+
+      const seen: boolean[] = [];
+      const { rerender } = renderHook(
+        ({ flagName, fallback }: { flagName: string; fallback: boolean }) => {
+          const value = startContract.useBooleanValue(flagName, fallback);
+          seen.push(value);
+          return value;
+        },
+        { initialProps: { flagName: 'my-flag', fallback: false } }
+      );
+
+      expect(seen).toEqual([false]);
+
+      rerender({ flagName: 'other-flag', fallback: true });
+      expect(seen).toEqual([false, true]);
+
+      rerender({ flagName: 'other-flag', fallback: false });
+      expect(seen).toEqual([false, true, false]);
+    });
+
+    test('useBooleanValue honors config overrides on the first render', () => {
+      const { result } = renderHook(() =>
+        startContract.useBooleanValue('my-overridden-flag', false)
+      );
+
+      expect(result.current).toBe(true);
+    });
+
+    test('useStringValue seeds from the synchronous evaluation and updates when the flag changes', () => {
+      jest.spyOn(featureFlagsClient, 'getStringValue').mockReturnValue('live');
+
+      const { result } = renderHook(() => startContract.useStringValue('my-flag', 'fallback'));
+
+      expect(result.current).toBe('live');
+
+      jest.mocked(featureFlagsClient.getStringValue).mockReturnValue('updated');
+      act(() => {
+        addHandlerSpy.mock.calls[0][1]({ flagsChanged: ['my-flag'] });
+      });
+
+      expect(result.current).toBe('updated');
+    });
+
+    test('useNumberValue seeds from the synchronous evaluation and updates when the flag changes', () => {
+      jest.spyOn(featureFlagsClient, 'getNumberValue').mockReturnValue(2);
+
+      const { result } = renderHook(() => startContract.useNumberValue('my-flag', 1));
+
+      expect(result.current).toBe(2);
+
+      jest.mocked(featureFlagsClient.getNumberValue).mockReturnValue(3);
+      act(() => {
+        addHandlerSpy.mock.calls[0][1]({ flagsChanged: ['my-flag'] });
+      });
+
+      expect(result.current).toBe(3);
     });
 
     test('observe a string flag', async () => {

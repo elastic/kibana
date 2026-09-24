@@ -8,6 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 import {
   ConversationQueue,
+  investigationEntityIds,
   type BaseActionsProps,
   type ConversationsActionsGroupProps,
   type Investigation,
@@ -25,6 +26,9 @@ export interface QueueSectionProps {
   onOpenChat: (id: Investigation['id']) => void;
   onClickRecommendedAction: ConversationsActionsGroupProps['onClickRecommendedAction'];
   getChatHref: (id: Investigation['id']) => string | undefined;
+  canManageEscalations?: boolean;
+  /** Optional: render the assignee picker widget for each non-closed card. */
+  renderAssignees: (investigation: Investigation) => React.ReactNode;
 }
 
 export const QueueSection = ({
@@ -54,7 +58,9 @@ export const QueueSection = ({
   const briefingList = useMemo(
     () =>
       surfaceFilter
-        ? investigations.filter(({ affectedSurface }) => affectedSurface === surfaceFilter)
+        ? investigations.filter((investigation) =>
+            investigationEntityIds(investigation).includes(surfaceFilter)
+          )
         : investigations,
     [investigations, surfaceFilter]
   );
