@@ -33,7 +33,6 @@ yaml-language-server
 @opentelemetry/api-logs
 @opentelemetry/exporter-logs-otlp-http
 @opentelemetry/sdk-logs
-simple-statistics
 monaco-promql
 json-stable-stringify
 apache-arrow
