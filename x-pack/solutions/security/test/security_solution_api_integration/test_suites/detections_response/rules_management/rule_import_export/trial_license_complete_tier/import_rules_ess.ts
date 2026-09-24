@@ -17,6 +17,7 @@ import {
   checkInvestigationFieldSoValue,
   combineToNdJson,
   getCustomQueryRuleParams,
+  getMLRuleParams,
 } from '../../../utils';
 import { createUserAndRole, deleteUserAndRole } from '../../../../../config/services/common';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
