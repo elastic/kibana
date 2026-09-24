@@ -11,7 +11,7 @@ import { SavedObjectsErrorHelpers, type ElasticsearchClient } from '@kbn/core/se
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import { isNonLocalIndexName } from '@kbn/es-query';
 import type { ExtractionAttributes } from '../../monitor/metrics';
-import { entityStoreMetrics } from '../../monitor/metrics';
+import { buildExtractionAttributes, entityStoreMetrics } from '../../monitor/metrics';
 import type {
   EntityType,
   GatedEntityDefinition,
@@ -169,13 +169,8 @@ export class LogsExtractionClient {
    * threaded down, so the two processes stay on separate series and `remote` reflects the
    * index patterns actually resolved rather than a hardcoded guess.
    */
-  private extractionAttributes(type: EntityType, remote: boolean): ExtractionAttributes {
-    return {
-      entity_type: type,
-      namespace: this.namespace,
-      extraction_mode: this.extractionMode,
-      remote,
-    };
+  private getExtractionAttributes(type: EntityType, remote: boolean): ExtractionAttributes {
+    return buildExtractionAttributes(type, this.namespace, this.extractionMode, remote);
   }
 
   private errorPatch(error: EngineError | null): Partial<EngineDescriptor> {
@@ -244,7 +239,6 @@ export class LogsExtractionClient {
       ({ fromDateISO: resumePointISO } = resolveMainExtractionWindow({ config, engineState }));
       const entityDefinition = getEntityDefinition(type, this.namespace, this.extractionMode);
       const {
-        isRemote: resolvedIsRemote,
         count,
         pages,
         indexPatterns,
@@ -258,9 +252,10 @@ export class LogsExtractionClient {
         engineState,
         opts,
         entityDefinition,
+        onRemoteResolved: (r) => {
+          isRemote = r;
+        },
       });
-
-      isRemote = resolvedIsRemote;
 
       const operationResult = {
         success: true as const,
@@ -295,7 +290,7 @@ export class LogsExtractionClient {
         });
       }
 
-      this.recordExtractionLag(nextResumePointISO, this.extractionAttributes(type, isRemote));
+      this.recordExtractionLag(nextResumePointISO, this.getExtractionAttributes(type, isRemote));
 
       return operationResult;
     } catch (error) {
@@ -303,7 +298,7 @@ export class LogsExtractionClient {
       // advances the scheduled cursor, so its outcome says nothing about how far behind the
       // engine is.
       if (!opts?.specificWindow) {
-        this.recordExtractionLag(resumePointISO, this.extractionAttributes(type, isRemote));
+        this.recordExtractionLag(resumePointISO, this.getExtractionAttributes(type, isRemote));
       }
       return await this.handleError(error, type, isRemote);
     }
@@ -340,12 +335,16 @@ export class LogsExtractionClient {
     engineState,
     opts,
     entityDefinition,
+    onRemoteResolved,
   }: {
     type: EntityType;
     config: LogExtractionConfig;
     engineState: EngineLogExtractionState;
     opts?: LogsExtractionOptions;
     entityDefinition: GatedEntityDefinition<ManagedEntityDefinition>;
+    // Called once remote patterns are resolved and before any fallible work begins, so the caller
+    // can propagate the flag even when runMainPath or a subsequent step throws.
+    onRemoteResolved?: (isRemote: boolean) => void;
   }): Promise<{
     isRemote: boolean;
     count: number;
@@ -369,6 +368,7 @@ export class LogsExtractionClient {
     ]);
 
     const isRemote = remoteIndexPatterns.length > 0;
+    onRemoteResolved?.(isRemote);
 
     const mainResult = await this.runMainPath({
       type,
@@ -378,7 +378,7 @@ export class LogsExtractionClient {
       entityDefinition,
       latestIndex: await resolveLatestEntitiesIndexName(this.esClient, this.namespace),
       indexPatterns: allIndexPatterns,
-      metricAttributes: this.extractionAttributes(type, isRemote),
+      metricAttributes: this.getExtractionAttributes(type, isRemote),
     });
 
     return {

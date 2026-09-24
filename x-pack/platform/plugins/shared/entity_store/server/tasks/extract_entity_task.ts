@@ -32,7 +32,7 @@ import {
 import { ENGINE_STATUS } from '../domain/constants';
 import { EngineDescriptorTypeName, EngineDescriptorClient } from '../domain/saved_objects';
 import { wrapTaskRun } from '../telemetry/traces';
-import { entityStoreMetrics } from '../monitor/metrics';
+import { buildExtractionAttributes, entityStoreMetrics } from '../monitor/metrics';
 import { NonPriorityExtractionDisabledError } from '../domain/errors';
 import { shouldDeleteOrphanedEntityStoreTask } from './should_delete_orphaned_task';
 import { getMergedConfig } from '../domain/config';
@@ -231,14 +231,9 @@ async function runTask({
   }
 
   let remote = false;
-  const metricAttributes = () => ({
-    entity_type: entityType,
-    namespace,
-    extraction_mode: extractionMode,
-    remote,
-  });
+  const metricAttributes = () =>
+    buildExtractionAttributes(entityType, namespace, extractionMode, remote);
 
-  // Hoisted so the catch below can report duration for a run that threw.
   const extractionStart = Date.now();
 
   try {
@@ -257,7 +252,6 @@ async function runTask({
     const extractionDuration = moment().diff(extractionStart, 'milliseconds');
 
     remote = extractionResult.isRemote;
-    entityStoreMetrics.extractionTaskDurationMs.record(extractionDuration, metricAttributes());
 
     if (extractionResult.success) {
       logger.info(
@@ -303,10 +297,6 @@ async function runTask({
   } catch (e) {
     logger.error(`Error running extract entity task, received ${e.message}`);
 
-    entityStoreMetrics.extractionTaskDurationMs.record(
-      moment().diff(extractionStart, 'milliseconds'),
-      metricAttributes()
-    );
     entityStoreMetrics.extractionTaskError.add(1, {
       ...metricAttributes(),
       error_type: e.name ?? 'UnknownError',
@@ -321,6 +311,11 @@ async function runTask({
         entityType,
       },
     };
+  } finally {
+    entityStoreMetrics.extractionTaskDurationMs.record(
+      moment().diff(extractionStart, 'milliseconds'),
+      metricAttributes()
+    );
   }
 }
 

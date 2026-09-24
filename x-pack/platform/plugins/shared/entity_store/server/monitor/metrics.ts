@@ -38,6 +38,14 @@ export interface ExtractionAttributes {
 
 type CapBehavior = LogExtractionConfig['maxLogsPerWindowCapBehavior'];
 
+/** Constructs a fully-typed ExtractionAttributes object. Shared so task and client never diverge. */
+export const buildExtractionAttributes = (
+  entity_type: EntityType,
+  namespace: string,
+  extraction_mode: ExtractionMode,
+  remote: boolean
+): ExtractionAttributes => ({ entity_type, namespace, extraction_mode, remote });
+
 export interface TypedCounter<A> {
   add(value: number, attributes: A): void;
 }

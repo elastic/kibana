@@ -2477,4 +2477,28 @@ describe('LogsExtractionClient extraction metrics', () => {
     // There is no fraction to report. A recorded 0 would read as an idle process.
     expect(utilizationRecord).not.toHaveBeenCalled();
   });
+
+  it('labels failure metrics remote:true when the query throws on a CCS/CPS run', async () => {
+    const { client, mockEngineDescriptorClient, mockDataViewsService } = createContextWithMode(
+      EXTRACTION_MODE.single
+    );
+    mockDataViewsService.get.mockResolvedValue({
+      getIndexPattern: jest.fn().mockReturnValue('remote-cluster:logs-*'),
+    } as unknown as Awaited<ReturnType<DataViewsService['get']>>);
+    mockEngineDescriptorClient.findOrThrow.mockResolvedValue(startedDescriptor());
+    // Probe succeeds (index patterns resolved, isRemote set), main query throws.
+    mockExecuteEsqlQuery
+      .mockResolvedValueOnce(mockLogPaginationCursorProbeEmpty())
+      .mockRejectedValueOnce(new Error('remote shard unavailable'));
+
+    const result = await client.extractLogs('user');
+
+    // isRemote was set by onRemoteResolved before the query threw, so the error metric carries
+    // remote:true rather than the initialised-to-false default.
+    expect(result.isRemote).toBe(true);
+    expect(lagRecord).toHaveBeenCalledWith(
+      expect.any(Number),
+      expect.objectContaining({ remote: true })
+    );
+  });
 });
