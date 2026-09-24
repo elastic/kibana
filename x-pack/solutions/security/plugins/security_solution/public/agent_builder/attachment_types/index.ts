@@ -85,9 +85,7 @@ export const registerAttachmentUiDefinitions = ({
 }) => {
   attachments.addAttachmentType<UnknownAttachmentWithLabel>(ALERT_ATTACHMENT_CONFIG.type, {
     ...createAttachmentTypeConfig(ALERT_ATTACHMENT_CONFIG.label, ALERT_ATTACHMENT_CONFIG.icon),
-    renderConversationDetailsContent: createAttachmentSummaryDrilldown({
-      resolveSecurityCanvasContext,
-    }),
+    ...createAttachmentSummaryDrilldown({ resolveSecurityCanvasContext }),
   });
 
   attachments.addAttachmentType<Attachment<string, { alertIds?: unknown[] }>>(

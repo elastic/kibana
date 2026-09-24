@@ -144,11 +144,8 @@ export const createEntityAttachmentDefinition = ({
     ),
     // The attachment summary drill-down needs the Security store, and nothing else, so it is
     // available on surfaces that get no `application` and therefore no Canvas.
-    ...(resolveSecurityCanvasContext && {
-      renderConversationDetailsContent: createAttachmentSummaryDrilldown<EntityAttachment>({
-        resolveSecurityCanvasContext,
-      }),
-    }),
+    ...(resolveSecurityCanvasContext &&
+      createAttachmentSummaryDrilldown<EntityAttachment>({ resolveSecurityCanvasContext })),
   };
 
   if (application == null || resolveSecurityCanvasContext == null) {

@@ -176,3 +176,21 @@ export const toFlyoutDescriptor = (
       return null;
   }
 };
+
+/**
+ * Stand-ins for the two index patterns the environment supplies. They let the check below reuse
+ * the mapper as-is, so the question it answers is only ever "does this payload identify
+ * something" — never "has the data view loaded yet".
+ */
+const RESOLVED_ELSEWHERE: DrilldownIndices = {
+  alertsIndex: 'resolved-at-open-time',
+  attacksIndex: 'resolved-at-open-time',
+};
+
+/**
+ * Whether the attachment carries enough to open a flyout at all. Answered by running the mapper
+ * rather than by a parallel set of rules, so the two cannot disagree: a payload this rejects is
+ * exactly a payload the drill-down would fail to open.
+ */
+export const hasDrilldownIdentity = (attachment: UnknownAttachment): boolean =>
+  toFlyoutDescriptor(attachment, RESOLVED_ELSEWHERE) !== null;

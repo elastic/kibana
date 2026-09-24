@@ -104,9 +104,7 @@ export const createAttackDiscoveryAttachmentDefinition = ({
   getIcon: () => 'sparkles',
   getLabel: (attachment) => attachment.data?.title ?? DEFAULT_LABEL,
   renderInlineContent: (props) => <AttackDiscoveryInlineContent {...props} />,
-  renderConversationDetailsContent: createAttachmentSummaryDrilldown({
-    resolveSecurityCanvasContext,
-  }),
+  ...createAttachmentSummaryDrilldown<AttackDiscoveryAttachment>({ resolveSecurityCanvasContext }),
 });
 
 export const registerAttackDiscoveryAttachment = ({

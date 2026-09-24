@@ -7,7 +7,7 @@
 
 import type { UnknownAttachment } from '@kbn/agent-builder-common/attachments';
 import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
-import { toFlyoutDescriptor } from './to_flyout_descriptor';
+import { hasDrilldownIdentity, toFlyoutDescriptor } from './to_flyout_descriptor';
 
 const INDICES = { alertsIndex: '.alerts-security.alerts-default', attacksIndex: '.attacks-*' };
 
@@ -260,5 +260,34 @@ describe('toFlyoutDescriptor', () => {
 
   it('stays read-only for a type the summary does not drill into', () => {
     expect(toFlyoutDescriptor(attachmentOf('security.exception', {}), INDICES)).toBeNull();
+  });
+
+  describe('hasDrilldownIdentity', () => {
+    it('accepts a payload that identifies something, whatever the environment supplies', () => {
+      expect(
+        hasDrilldownIdentity(alertAttachment({ _id: ['alert-1'], _index: ['.alerts-1'] }))
+      ).toBe(true);
+    });
+
+    it('accepts an attack, whose index is only known once the data view loads', () => {
+      // The check must not depend on the index, or every attack row would look inert on first paint.
+      expect(
+        hasDrilldownIdentity(
+          attachmentOf(SecurityAgentBuilderAttachments.attackDiscovery, {}, { origin: 'attack-1' })
+        )
+      ).toBe(true);
+    });
+
+    it('rejects a payload that identifies nothing', () => {
+      expect(hasDrilldownIdentity(alertAttachment({ message: ['no ids here'] }))).toBe(false);
+    });
+
+    it('rejects an attack that was never persisted', () => {
+      expect(
+        hasDrilldownIdentity(
+          attachmentOf(SecurityAgentBuilderAttachments.attackDiscovery, { id: 'llm-uuid' })
+        )
+      ).toBe(false);
+    });
   });
 });

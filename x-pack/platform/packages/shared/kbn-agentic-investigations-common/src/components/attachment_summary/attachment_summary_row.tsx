@@ -78,7 +78,13 @@ export const AttachmentSummaryRow = memo<AttachmentSummaryRowProps>(
     const [activationCount, setActivationCount] = useState(0);
     const openDrilldown = useCallback(() => setActivationCount((count) => count + 1), []);
 
-    const renderDrilldown = uiDefinition?.renderConversationDetailsContent;
+    // A type can register a drill-down that only some of its attachments carry enough to open —
+    // an alert whose payload never recorded its index, say. Asking per attachment keeps the row
+    // inert in those cases instead of offering a click that quietly does nothing.
+    const renderDrilldown =
+      uiDefinition?.hasConversationDetailsContent?.(renderedAttachment) ?? true
+        ? uiDefinition?.renderConversationDetailsContent
+        : undefined;
 
     const padding = `${euiTheme.size.s} ${euiTheme.size.base}`;
 

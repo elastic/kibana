@@ -115,6 +115,33 @@ describe('AttachmentSummaryRow', () => {
     expect(screen.queryByRole('link')).not.toBeInTheDocument();
   });
 
+  it('stays read-only when the type reports this attachment cannot be opened', async () => {
+    const renderConversationDetailsContent = jest.fn(() => <div data-test-subj="drilldown" />);
+    renderRow({
+      getLabel: () => '3 alerts',
+      renderConversationDetailsContent,
+      hasConversationDetailsContent: () => false,
+    });
+
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
+    expect(
+      screen
+        .queryByTestId('attachmentSummaryRow')
+        ?.querySelector('[data-euiicon-type="chevronSingleRight"]')
+    ).toBeNull();
+    expect(renderConversationDetailsContent).not.toHaveBeenCalled();
+  });
+
+  it('is clickable when the type reports this attachment can be opened', () => {
+    renderRow({
+      getLabel: () => '3 alerts',
+      renderConversationDetailsContent: () => null,
+      hasConversationDetailsContent: () => true,
+    });
+
+    expect(screen.getByRole('button')).toBeInTheDocument();
+  });
+
   it('shows no chevron on a read-only row, which would promise a drill-down it lacks', () => {
     const { container } = renderRow({ getLabel: () => '3 alerts' });
 

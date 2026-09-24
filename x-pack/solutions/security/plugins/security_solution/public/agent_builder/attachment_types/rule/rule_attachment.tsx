@@ -88,11 +88,8 @@ export const createRuleAttachmentDefinition = ({
         <RuleInlineContent {...props} aiRuleCreation={aiRuleCreation} />
       </UserPrivilegesContext.Provider>
     ),
-    ...(resolveSecurityCanvasContext && {
-      renderConversationDetailsContent: createAttachmentSummaryDrilldown<RuleAttachment>({
-        resolveSecurityCanvasContext,
-      }),
-    }),
+    ...(resolveSecurityCanvasContext &&
+      createAttachmentSummaryDrilldown<RuleAttachment>({ resolveSecurityCanvasContext })),
     // Runs outside the render boundary, so a parse throw here would take down the whole card.
     getActionButtons: ({ attachment, updateOrigin }) => {
       try {
