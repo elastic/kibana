@@ -287,6 +287,46 @@ describe('BrowseIntegrationsPage', () => {
       );
     });
 
+    it('calls history.replace without the collection param when a filter removes the open collection', async () => {
+      mockUseBrowseIntegrationHook.mockReturnValue(
+        makeDefaultHookReturn({
+          filteredCards: [nginxCollectionCard],
+          allCards: [nginxCollectionCard],
+        })
+      );
+      mockUseLocation.mockReturnValue({
+        pathname: '/app/integrations/browse',
+        search: '?collection=nginx',
+      });
+      const { rerender } = renderPage();
+      await waitFor(() => {
+        expect(capturedFilteredCards.some((c) => c.isCollectionCard)).toBe(true);
+      });
+
+      mockHistoryReplace.mockClear();
+
+      // Simulate a filter removing the open collection
+      mockUseBrowseIntegrationHook.mockReturnValue(
+        makeDefaultHookReturn({
+          filteredCards: [],
+          allCards: [nginxCollectionCard],
+        })
+      );
+      rerender(
+        <I18nProvider>
+          <EuiThemeProvider>
+            <BrowseIntegrationsPage prereleaseIntegrationsEnabled={false} />
+          </EuiThemeProvider>
+        </I18nProvider>
+      );
+
+      await waitFor(() => {
+        expect(mockHistoryReplace).toHaveBeenCalledWith(
+          expect.objectContaining({ search: expect.not.stringContaining('collection') })
+        );
+      });
+    });
+
     it('calls history.replace with the collection param when a collection card is clicked', async () => {
       mockUseBrowseIntegrationHook.mockReturnValue(
         makeDefaultHookReturn({
