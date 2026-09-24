@@ -46,6 +46,7 @@ jest.mock('../agent_policy', () => ({
     getByIds: jest.fn().mockResolvedValue([]),
     getInactivityTimeouts: jest.fn().mockResolvedValue([]),
   },
+  getAgentPolicySavedObjectType: jest.fn().mockResolvedValue('fleet-agent-policies'),
 }));
 jest.mock('../../../common/services/is_agent_upgradeable', () => ({
   isAgentUpgradeAvailable: jest.fn().mockImplementation((agent: Agent) => agent.id.includes('up')),
@@ -799,6 +800,48 @@ describe('Agents CRUD test', () => {
         expect(queryStr).toContain('policy_base_id');
         expect(queryStr).toContain('policy-agentless-1');
         expect(queryStr).toContain('policy-agentless-2');
+      });
+
+      it('queries agentless policies using the unscoped SO client with spaceId *', async () => {
+        // .fleet-agents is not space-partitioned. If a space-scoped client is used to build the
+        // exclusion list, agentless policies from other spaces are missed and their agents leak
+        // through. The fix uses getInternalUserSOClientWithoutSpaceExtension() + spaceId '*'.
+        (agentPolicyService.list as jest.Mock).mockResolvedValueOnce({
+          items: agentlessPolicyIds.map((id) => ({ id })),
+        });
+
+        await getAgentsByKuery(esClientMock, soClientMock, {
+          showAgentless: false,
+          showInactive: false,
+        });
+
+        // soClientMock is wired as the withoutSpaceExtensions client in beforeEach
+        // (createAppContextStartContractMock({ withoutSpaceExtensions: soClientMock })).
+        // Assert that list() was called with that specific unscoped client and spaceId '*'.
+        expect(agentPolicyService.list).toHaveBeenCalledWith(
+          soClientMock,
+          expect.objectContaining({ spaceId: '*' })
+        );
+      });
+
+      it('excludes cross-space agentless agents even when the current space owns no agentless policies', async () => {
+        // Worst-case: current space owns zero agentless policies, but the unscoped query
+        // finds policies from other spaces. Without the unscoped client the items.length > 0
+        // guard fails and NO filter is built, leaking every agentless agent deployment-wide.
+        const crossSpacePolicyIds = ['space-a-policy-1', 'space-a-policy-2'];
+        (agentPolicyService.list as jest.Mock).mockResolvedValueOnce({
+          items: crossSpacePolicyIds.map((id) => ({ id })),
+        });
+
+        await getAgentsByKuery(esClientMock, soClientMock, {
+          showAgentless: false,
+          showInactive: false,
+        });
+
+        const query = searchMock.mock.calls.at(-1)[0].query;
+        expect(query.bool.must_not).toEqual([
+          buildPolicyBaseIdsWithFallbackEsFilter(crossSpacePolicyIds),
+        ]);
       });
 
       it('adds no exclusion clause when there are no agentless policies', async () => {
