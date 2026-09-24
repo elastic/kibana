@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { firstValueFrom } from 'rxjs';
 import type {
   CoreSetup,
   CoreStart,
@@ -25,9 +26,8 @@ export class ElasticConsolePlugin implements Plugin {
       visibleIn: [],
       async mount(params: AppMountParameters) {
         const [coreStart] = await core.getStartServices();
-        const featureFlagEnabled = coreStart.featureFlags.getBooleanValue(
-          ELASTIC_CONSOLE_ENABLED_FLAG,
-          false
+        const featureFlagEnabled = await firstValueFrom(
+          coreStart.featureFlags.getBooleanValue$(ELASTIC_CONSOLE_ENABLED_FLAG, false)
         );
         const advancedSettingEnabled = coreStart.uiSettings.get<boolean>(
           ELASTIC_CONSOLE_ENABLED_SETTING_ID,

@@ -6,7 +6,7 @@
  */
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import type { StreamsServer } from '@kbn/streams-plugin/server/types';
+import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients, RouteHandlerScopedClients } from '../../../routes/types';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import { createMockToolContext, invokeHandler } from '../../utils/test_helpers';
@@ -21,7 +21,7 @@ jest.mock('../../../routes/utils/assert_significant_events_access', () => ({
 
 describe('ki_feature_similarity_search tool', () => {
   const logger = loggingSystemMock.createLogger();
-  const server = {} as StreamsServer;
+  const server = {} as SignificantEventsServer;
 
   beforeEach(() => {
     jest.clearAllMocks();

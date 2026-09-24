@@ -27,7 +27,7 @@ import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/s
 import { computeIngestTokenHash } from '../../../../inbound/compute_ingest_token_hash';
 import { parseIngestToken } from '../../../../inbound/ingress_credential';
 import { CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE } from '../../../../constants/saved_objects';
-import { connectorTypeHasInboundEvents } from '@kbn/connector-specs';
+import { connectorTypeHasInboundEvents, connectorTypeIsDual } from '@kbn/connector-specs';
 
 jest.mock('@kbn/connector-specs', () => {
   const actual = jest.requireActual('@kbn/connector-specs');
@@ -35,6 +35,9 @@ jest.mock('@kbn/connector-specs', () => {
     ...actual,
     connectorTypeHasInboundEvents: jest.fn((actionTypeId: string) =>
       actual.connectorTypeHasInboundEvents(actionTypeId)
+    ),
+    connectorTypeIsDual: jest.fn((actionTypeId: string) =>
+      actual.connectorTypeIsDual(actionTypeId)
     ),
   };
 });
@@ -110,6 +113,9 @@ describe('rotateInboundIngress', () => {
     (connectorTypeHasInboundEvents as jest.Mock).mockImplementation((actionTypeId: string) =>
       jest.requireActual('@kbn/connector-specs').connectorTypeHasInboundEvents(actionTypeId)
     );
+    (connectorTypeIsDual as jest.Mock).mockImplementation((actionTypeId: string) =>
+      jest.requireActual('@kbn/connector-specs').connectorTypeIsDual(actionTypeId)
+    );
     authorization.ensureAuthorized.mockResolvedValue(undefined);
     connectorTokenClient.deleteConnectorTokens.mockResolvedValue(undefined);
     authTypeRegistry.get.mockImplementation((authTypeId: string) => ({
@@ -156,7 +162,7 @@ describe('rotateInboundIngress', () => {
     expect(parsed).toBeDefined();
 
     const created = unsecuredSavedObjectsClient.create.mock.calls.find(
-      (call) => call[0] === CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE
+      (call: [string, ...unknown[]]) => call[0] === CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE
     );
     expect(created).toBeDefined();
     expect(created?.[1]).toEqual(
@@ -176,13 +182,15 @@ describe('rotateInboundIngress', () => {
     );
     expect(created?.[2]).not.toEqual(expect.objectContaining({ overwrite: true }));
     expect(parsed?.credentialId).not.toBe('connector-id');
-    expect(unsecuredSavedObjectsClient.create.mock.calls.some((call) => call[0] === 'action')).toBe(
-      false
-    );
+    expect(
+      unsecuredSavedObjectsClient.create.mock.calls.some(
+        (call: [string, ...unknown[]]) => call[0] === 'action'
+      )
+    ).toBe(false);
   });
 
   it('rejects connectors that do not declare inbound events', async () => {
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
       ...decryptedInbound,
       attributes: {
         ...decryptedInbound.attributes,
@@ -196,15 +204,27 @@ describe('rotateInboundIngress', () => {
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
   });
 
-  it('rotates ingest credentials for dual connectors that declare events', async () => {
+  it('mints the first ingest credential for a dual connector that has identity', async () => {
     (connectorTypeHasInboundEvents as jest.Mock).mockImplementation(
       (actionTypeId: string) => actionTypeId === '.inboundWebhook' || actionTypeId === '.dual'
     );
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    (connectorTypeIsDual as jest.Mock).mockImplementation(
+      (actionTypeId: string) => actionTypeId === '.dual'
+    );
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
       ...decryptedInbound,
       attributes: {
         ...decryptedInbound.attributes,
         actionTypeId: '.dual',
+        hasInboundEventIdentity: true,
+      },
+    } as never);
+    unsecuredSavedObjectsClient.get.mockResolvedValue({
+      ...decryptedInbound,
+      attributes: {
+        ...decryptedInbound.attributes,
+        actionTypeId: '.dual',
+        hasInboundEventIdentity: true,
       },
     } as never);
     (actionTypeRegistry.get as jest.Mock).mockReturnValue(
@@ -230,5 +250,95 @@ describe('rotateInboundIngress', () => {
       expect.any(Object),
       expect.any(Object)
     );
+  });
+
+  it('rotates ingest credentials for dual connectors that already have a credential', async () => {
+    (connectorTypeHasInboundEvents as jest.Mock).mockImplementation(
+      (actionTypeId: string) => actionTypeId === '.inboundWebhook' || actionTypeId === '.dual'
+    );
+    (connectorTypeIsDual as jest.Mock).mockImplementation(
+      (actionTypeId: string) => actionTypeId === '.dual'
+    );
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+      ...decryptedInbound,
+      attributes: {
+        ...decryptedInbound.attributes,
+        actionTypeId: '.dual',
+        hasInboundEventIdentity: true,
+      },
+    } as never);
+    unsecuredSavedObjectsClient.get.mockResolvedValue({
+      ...decryptedInbound,
+      attributes: {
+        ...decryptedInbound.attributes,
+        actionTypeId: '.dual',
+        hasInboundEventIdentity: true,
+      },
+    } as never);
+    unsecuredSavedObjectsClient.find.mockResolvedValue({
+      saved_objects: [
+        {
+          id: 'cred-1',
+          type: CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE,
+          attributes: { connectorId: 'connector-id' },
+          references: [],
+        },
+      ],
+      total: 1,
+      page: 1,
+      per_page: 10,
+    } as never);
+    unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
+      statuses: [{ id: 'cred-1', success: true }],
+    } as never);
+    (actionTypeRegistry.get as jest.Mock).mockReturnValue(
+      getConnectorType({
+        id: '.dual',
+        source: ACTION_TYPE_SOURCES.spec,
+        validate: {
+          config: { schema: z.any() },
+          secrets: { schema: z.any() },
+          params: { schema: z.object({}) },
+        },
+      })
+    );
+
+    const result = await rotateInboundIngress({
+      context: mockContext,
+      id: 'connector-id',
+    });
+
+    expect(result.ingestToken).toEqual(expect.any(String));
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+      CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE,
+      expect.any(Object),
+      expect.any(Object)
+    );
+  });
+
+  it('rejects dual connectors that are not enabled', async () => {
+    (connectorTypeHasInboundEvents as jest.Mock).mockImplementation(
+      (actionTypeId: string) => actionTypeId === '.dual'
+    );
+    (connectorTypeIsDual as jest.Mock).mockImplementation(
+      (actionTypeId: string) => actionTypeId === '.dual'
+    );
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+      ...decryptedInbound,
+      attributes: {
+        ...decryptedInbound.attributes,
+        actionTypeId: '.dual',
+        apiKey: undefined,
+      },
+    } as never);
+
+    await expect(
+      rotateInboundIngress({ context: mockContext, id: 'connector-id' })
+    ).rejects.toThrow('Inbound events are not enabled for this connector.');
+    expect(
+      unsecuredSavedObjectsClient.create.mock.calls.some(
+        (call: [string, ...unknown[]]) => call[0] === CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE
+      )
+    ).toBe(false);
   });
 });
