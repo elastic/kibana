@@ -61,6 +61,8 @@ consts:
   # produces about itself — what it could not do and why
   # Installed in the same global set as this workflow, so it is always resolvable.
   journal_note: system-alertzero-journal-note
+  # Cap on the number of containment actions this run can propose.
+  max_recommended_actions: 8
 
 steps:
   # A read error fails the run, leaving the indicator pending for the next
@@ -114,11 +116,10 @@ steps:
         ${{ steps.read_ki.output.hits.hits[0]._source.attributes.attack_discovery_alert_id != blank
           and steps.read_ki.output.hits.hits[0]._source.attributes.investigation_id != blank }}
 
-  # Verify the investigation exists, is readable, and is writable by this run
-  # before the agent. `metadata` is a converse-level read; `can_attach` is owner,
-  # which is what the finding writes require. A missing investigation is retired
-  # by `mark_unreachable`. One this user can read but not own is retired by
-  # `mark_unwritable`, so the sweep does not spend another analysis on it.
+  # Verify the investigation exists and is readable and writable by this run
+  # before proceeding.
+  # If the investigation does not exist, the indicator is retired by `mark_unreachable`.
+  # If the investigation exists but is not writable by this run, it is retired by `mark_unwritable`.
   - name: verify_investigation
     type: ai.conversation.metadata.read
     if: "${{ steps.resolve_request.output.investigation_id != blank }}"
@@ -502,7 +503,7 @@ steps:
                   # Required but may be empty, same as `timeline` and `iocs`.
                   recommendedActions:
                     type: array
-                    maxItems: 8
+                    maxItems: "${{ consts.max_recommended_actions }}"
                     description: >
                       Containment this reconstruction justifies, taken from
                       `security.alertzero.actions.list`. Empty when the evidence
@@ -659,9 +660,8 @@ steps:
               status: invalid
               invalid_reason: "Missing attack_discovery_alert_id or investigation_id"
 
-      # Readable, but this run is not the owner. Attachment writes would be
-      # rejected after the agent, and a retry will not transfer ownership, so
-      # the indicator is retired instead of re-dispatched every minute. The
+      # This run is not the owner of the investigation so attachment writes would be
+      # rejected. Retire the indicator re-dispatched every minute. The
       # note uses converse access, which is why it can land when the attachments
       # cannot. A rejected note must not block the retirement.
       - name: journal_unwritable
@@ -748,11 +748,9 @@ steps:
           or steps.resolve_host.output.host_name == blank }}
 
   # Containment is proposed on the investigation, not returned as run output.
-  # Only after `attached` is true: the add steps continue on failure, so a
-  # proposal queued before this check can sit in the approval queue for an
-  # investigation that has no findings. `settled` is the wrong gate — it is
-  # also true when there was no host. `executeAsync` so this run does not sit
-  # in the 72h approval gate; each proposal workflow parks on its own.
+  # `executeAsync` so this run does not sit in the 72h approval gate; each
+  # proposal workflow parks on its own. Continue on failure so a single bad
+  # action cannot fail the run. Runs after investigation items are attached.
   # `parallel` with `settled` keeps every dispatch's outcome: `foreach` would
   # keep only the last one, and continuing on failure would clear a rejection.
   - name: propose_actions
@@ -763,8 +761,7 @@ steps:
     foreach: "${{ steps.forensic_analysis.output.structured_output.recommendedActions | default: [] }}"
     mode: settled
     concurrency:
-      # Matches recommendedActions maxItems.
-      max: 8
+      max: "{{ consts.max_recommended_actions }}"
     steps:
       - name: propose_action
         type: workflow.executeAsync
@@ -824,9 +821,7 @@ steps:
           status: processed
 
   # Findings are on the investigation, but at least one containment proposal
-  # never reached the queue. Say so, then retire the indicator. A note that
-  # fails must not block the retirement: the next sweep would skip the agent
-  # and mark the indicator processed with the proposal still missing.
+  # never reached the queue. Document this then retire the indicator.
   - name: journal_proposals_lost
     type: workflow.execute
     if: >-

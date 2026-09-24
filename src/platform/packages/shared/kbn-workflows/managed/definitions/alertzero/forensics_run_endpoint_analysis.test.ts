@@ -1017,7 +1017,15 @@ describe('Endpoint analysis run', () => {
       const dispatch = stepByName('propose_actions');
       expect(dispatch?.type).toBe('parallel');
       expect(dispatch?.mode).toBe('settled');
-      expect(dispatch?.concurrency?.max).toBe(8);
+      expect(dispatch?.concurrency?.max).toBe('{{ consts.max_recommended_actions }}');
+      const recommendedActions = schema?.properties?.recommendedActions as { maxItems?: unknown };
+      // Typed expression: `{{ }}` would leave maxItems a string, which Claude rejects.
+      expect(recommendedActions?.maxItems).toBe('${{ consts.max_recommended_actions }}');
+      expect(
+        evaluate(String(recommendedActions?.maxItems), {
+          consts: { max_recommended_actions: 8 },
+        })
+      ).toBe(8);
       expect(dispatch?.['on-failure']).toBeUndefined();
       expect(stepByName('propose_action')?.['on-failure']).toBeUndefined();
 
