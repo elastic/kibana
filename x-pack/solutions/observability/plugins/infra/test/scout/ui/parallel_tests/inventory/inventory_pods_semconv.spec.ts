@@ -196,8 +196,8 @@ test.describe(
         `View details for k8s.pod.uid ${SEMCONV_POD.uid}`
       );
 
-      // LOGS_LOCATOR compresses the kuery into `lz=`, so assert identity on the
-      // uncompressed APM link and that logs still targets the locator.
+      // LOGS_LOCATOR / ASSET_DETAILS_LOCATOR compress state into `lz=`. Assert
+      // uncompressed APM identity and that the other links target the locators.
       await expect(inventoryPage.contextMenuLogsLink).toHaveAttribute('href', /LOGS_LOCATOR/);
       await expect(inventoryPage.contextMenuApmLink).toHaveAttribute(
         'href',
@@ -205,11 +205,7 @@ test.describe(
       );
       await expect(inventoryPage.contextMenuMetricsLink).toHaveAttribute(
         'href',
-        new RegExp(`/app/metrics/detail/pod/${encodeURIComponent(SEMCONV_POD.uid)}`)
-      );
-      await expect(inventoryPage.contextMenuMetricsLink).toHaveAttribute(
-        'href',
-        /preferredSchema:semconv/
+        /ASSET_DETAILS_LOCATOR/
       );
     });
 
