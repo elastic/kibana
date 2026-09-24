@@ -58,7 +58,10 @@ const ROOT_TRANSACTION: TraceItem = {
   timestampUs: 1_737_000_000_000_000,
   traceId: 'trace-abc',
   duration: 2_000_000,
-  errors: [{ errorDocId: 'err-1' }, { errorDocId: 'err-2' }],
+  errors: [
+    { errorDocId: 'err-1', source: 'apm' },
+    { errorDocId: 'err-2', source: 'apm' },
+  ],
   serviceName: 'products-service',
   spanLinksCount: { incoming: 3, outgoing: 1 },
   docType: 'transaction',

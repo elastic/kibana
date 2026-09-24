@@ -255,6 +255,8 @@ describe('bulkDeleteQueriesRoute', () => {
   it('triggers stale event cleanup only for deleted backing rules', async () => {
     const eventClient = {};
     const rulesClient = {};
+    const alertEventsClient = {};
+    const sigEventsLogger = { error: jest.fn() };
     const deleteQueries = jest.fn().mockResolvedValue(undefined);
     const handlerParams = {
       params: { body: { queryIds: ['q1', 'q2'] } },
@@ -274,12 +276,13 @@ describe('bulkDeleteQueriesRoute', () => {
           deleteQueries,
         }),
         getEventClient: () => eventClient,
+        getAlertEventsClient: jest.fn().mockResolvedValue(alertEventsClient),
         getSignificantEventsAlertingContext: jest.fn().mockResolvedValue({ rulesClient }),
       }),
       server: makeServer(),
       logger: {
         warn: jest.fn(),
-        get: jest.fn().mockReturnValue({ error: jest.fn() }),
+        get: jest.fn().mockReturnValue(sigEventsLogger),
       },
     } as never;
 
@@ -293,12 +296,16 @@ describe('bulkDeleteQueriesRoute', () => {
       eventClient,
       rulesClient,
       candidateRuleIds: ['rule-q1'],
+      alertEventsClient,
+      logger: sigEventsLogger,
     });
   });
 
   it('excludes backing rules from streams whose deletion failed', async () => {
     const eventClient = {};
     const rulesClient = {};
+    const alertEventsClient = {};
+    const sigEventsLogger = { error: jest.fn() };
     const deleteQueries = jest
       .fn()
       .mockResolvedValueOnce(undefined)
@@ -321,12 +328,13 @@ describe('bulkDeleteQueriesRoute', () => {
           deleteQueries,
         }),
         getEventClient: () => eventClient,
+        getAlertEventsClient: jest.fn().mockResolvedValue(alertEventsClient),
         getSignificantEventsAlertingContext: jest.fn().mockResolvedValue({ rulesClient }),
       }),
       server: makeServer(),
       logger: {
         warn: jest.fn(),
-        get: jest.fn().mockReturnValue({ error: jest.fn() }),
+        get: jest.fn().mockReturnValue(sigEventsLogger),
       },
     } as never;
 
@@ -339,6 +347,8 @@ describe('bulkDeleteQueriesRoute', () => {
       eventClient,
       rulesClient,
       candidateRuleIds: ['rule-q1'],
+      alertEventsClient,
+      logger: sigEventsLogger,
     });
   });
 });

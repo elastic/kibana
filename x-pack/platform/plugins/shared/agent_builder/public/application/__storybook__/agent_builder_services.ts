@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import React from 'react';
+import { EMPTY } from 'rxjs';
+import { EuiCodeBlock, EuiText } from '@elastic/eui';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import {
   AttachmentType,
@@ -12,7 +15,9 @@ import {
 } from '@kbn/agent-builder-common/attachments';
 import type { ImageAttachmentData, UnknownAttachment } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser';
+import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import { AttachmentsService } from '../../services/attachments';
+import { ConversationEventsService } from '../../services/conversation_events';
 import type { AgentBuilderInternalService } from '../../services/types';
 import { createStorybookKibanaServices } from './kibana_services';
 
@@ -62,6 +67,58 @@ storybookAttachmentsService.addAttachmentType(
   storybookImageAttachmentDefinition
 );
 
+/**
+ * Type of the attachment the inline-card stories use. Mirrors the platform's text type, which
+ * lives in a plugin this one cannot import: a code block body and a Copy action, since the card
+ * header only draws when the type has at least one action.
+ */
+export const STORY_INLINE_ATTACHMENT_TYPE = 'story_inline';
+
+type StorybookInlineAttachment = UnknownAttachment & { data: { text: string } };
+const storybookInlineAttachmentDefinition: AttachmentUIDefinition<StorybookInlineAttachment> = {
+  getLabel: () => 'Text',
+  getIcon: () => 'document',
+  // Shows the previous version struck through above the current one, so a story for a later
+  // version proves the diff base reaches the renderer.
+  renderInlineContent: ({ attachment }) => {
+    const previousText = (attachment.versionData?.previousVersionData as { text?: string })?.text;
+    return React.createElement(
+      React.Fragment,
+      null,
+      previousText &&
+        React.createElement(
+          EuiText,
+          { size: 's', color: 'subdued', style: { padding: '8px 12px 0' } },
+          React.createElement(
+            'p',
+            null,
+            'Previously: ',
+            React.createElement('del', null, previousText)
+          )
+        ),
+      React.createElement(
+        EuiCodeBlock,
+        { language: 'text', fontSize: 's', overflowHeight: 300 },
+        attachment.data.text
+      )
+    );
+  },
+  getActionButtons: ({ attachment }) => [
+    {
+      label: 'Copy',
+      icon: 'copy',
+      type: ActionButtonType.PRIMARY,
+      handler: async () => {
+        await navigator.clipboard.writeText(attachment.data.text);
+      },
+    },
+  ],
+};
+storybookAttachmentsService.addAttachmentType(
+  STORY_INLINE_ATTACHMENT_TYPE,
+  storybookInlineAttachmentDefinition
+);
+
 const defaultServices: AgentBuilderInternalService = {
   filesClient: storybookFilesClient,
   agentService: {
@@ -80,6 +137,7 @@ const defaultServices: AgentBuilderInternalService = {
     delete: () => Promise.resolve({} as never),
   } as never,
   attachmentsService: storybookAttachmentsService,
+  conversationEventsService: new ConversationEventsService(),
   renderersService: {} as never,
   chatService: {} as never,
   conversationsService: {} as never,
@@ -102,7 +160,7 @@ const defaultServices: AgentBuilderInternalService = {
   } as never,
   pluginsService: {} as never,
   oauthClientsService: {} as never,
-  startDependencies: {} as never,
+  startDependencies: { data: { search: { search: () => EMPTY } } } as never,
   accessChecker: {} as never,
   eventsService: { track: noOp } as never,
   isEarsEnabled: false,
