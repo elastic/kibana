@@ -725,4 +725,9 @@ export class LensApp {
       await clearPrevRenderCount();
     }
   }
+
+  async assertLegacyMetric(title: string, count: string) {
+    await expect(this.page.locator('[data-test-subj="metric_label"]')).toHaveText(title);
+    await expect(this.page.locator('[data-test-subj="metric_value"]')).toHaveText(count);
+  }
 }
