@@ -84,7 +84,7 @@ test.describe(
         // The popover focuses its own panel first, then EuiContextMenu moves focus into its inner
         // panel. An Escape between the two lets that deferred focus pull focus off the trigger.
         await expect
-          .poll(async () => app.isFocusWithin(panel.locator('.euiContextMenuPanel')), {
+          .poll(async () => app.isFocusWithin(app.childFooterMenuActionsPanel(form, session)), {
             message: 'focus should move into the menu before Escape is pressed',
           })
           .toBe(true);

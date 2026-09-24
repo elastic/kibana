@@ -23,6 +23,7 @@ const log = (action: string) => () => {
 export const FOOTER_MENU_PANELS: FlyoutFooterMenuPanel[] = [
   {
     id: 'actions',
+    'data-test-subj': 'footerMenuActionsPanel',
     items: [
       { name: 'Add to case', icon: 'plusInCircle', onClick: log('add to case') },
       { name: 'Copy link', icon: 'link', onClick: log('copy link') },

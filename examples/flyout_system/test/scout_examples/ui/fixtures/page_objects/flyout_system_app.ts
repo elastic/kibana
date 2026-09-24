@@ -233,6 +233,11 @@ export class FlyoutSystemApp {
     return this.page.locator(this.childFooterMenuPanelSelector(form, session));
   }
 
+  /** The first `EuiContextMenu` panel, which takes focus from the popover once the menu opens. */
+  childFooterMenuActionsPanel(form: FlyoutForm, session: string): Locator {
+    return this.childFooterMenuPanel(form, session).locator(subj('footerMenuActionsPanel'));
+  }
+
   // Interactions.
 
   /**
