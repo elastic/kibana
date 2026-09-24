@@ -101,28 +101,43 @@ describe('ServiceAccountCredentialStore', () => {
   describe('#findExisting', () => {
     const OTHER_ACCOUNT_ID = 'kibana/other';
 
+    const USER_CREATOR = {
+      type: 'user',
+      username: 'elastic',
+      userProfileId: 'profile-uid',
+    } as const;
+    const API_KEY_CREATOR = { type: 'api_key', apiKeyId: 'key-id', variant: 'stack' } as const;
+
     /** A stored credential as the plain (undecrypted) read reports it. */
-    const found = (serviceAccountId: string) => ({
+    const found = (
+      serviceAccountId: string,
+      createdBy: ServiceAccountCredentialAttributes['createdBy'] = USER_CREATOR
+    ) => ({
       type: SERVICE_ACCOUNT_CREDENTIAL_TYPE,
       id: getCredentialId(serviceAccountId),
       references: [],
-      attributes: { serviceAccountId },
+      attributes: { serviceAccountId, createdBy },
     });
 
-    it('reports the accounts a credential is on file for, without decrypting', async () => {
+    it('reports the creator of each credential on file, without decrypting', async () => {
       client.bulkGet.mockResolvedValue({
-        saved_objects: [found(SERVICE_ACCOUNT_ID), found(OTHER_ACCOUNT_ID)],
+        saved_objects: [found(SERVICE_ACCOUNT_ID), found(OTHER_ACCOUNT_ID, API_KEY_CREATOR)],
       });
 
       const existing = await store.findExisting([SERVICE_ACCOUNT_ID, OTHER_ACCOUNT_ID]);
 
-      expect(existing).toEqual(new Set([SERVICE_ACCOUNT_ID, OTHER_ACCOUNT_ID]));
+      expect(existing).toEqual(
+        new Map<string, ServiceAccountCredentialAttributes['createdBy']>([
+          [SERVICE_ACCOUNT_ID, USER_CREATOR],
+          [OTHER_ACCOUNT_ID, API_KEY_CREATOR],
+        ])
+      );
       expect(encryptedClient.getDecryptedAsInternalUser).not.toHaveBeenCalled();
     });
 
     // `fields: []` would read as "no filtering" and hand back the whole document, so the token
-    // would ride along on every list. One cheap field is what keeps the ciphertext out.
-    it('names a field so the encrypted token stays out of the response', async () => {
+    // would ride along on every list. Naming the fields is what keeps the ciphertext out.
+    it('names its fields so the encrypted token stays out of the response', async () => {
       client.bulkGet.mockResolvedValue({ saved_objects: [found(SERVICE_ACCOUNT_ID)] });
 
       await store.findExisting([SERVICE_ACCOUNT_ID]);
@@ -131,7 +146,7 @@ describe('ServiceAccountCredentialStore', () => {
         {
           type: SERVICE_ACCOUNT_CREDENTIAL_TYPE,
           id: getCredentialId(SERVICE_ACCOUNT_ID),
-          fields: ['serviceAccountId'],
+          fields: ['serviceAccountId', 'createdBy'],
         },
       ]);
     });
@@ -155,7 +170,7 @@ describe('ServiceAccountCredentialStore', () => {
     });
 
     it('does not touch the client for an empty page', async () => {
-      await expect(store.findExisting([])).resolves.toEqual(new Set());
+      await expect(store.findExisting([])).resolves.toEqual(new Map());
 
       expect(client.bulkGet).not.toHaveBeenCalled();
     });
