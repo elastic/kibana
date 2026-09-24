@@ -633,6 +633,26 @@ export const getMlApiHelper = (
       });
     },
 
+    async waitForJobState(
+      jobId: string,
+      expectedState: string,
+      timeout: number = 60 * 1000
+    ): Promise<void> {
+      await waitForCondition(
+        `anomaly detection job '${jobId}' to be in state '${expectedState}'`,
+        async () => {
+          const resp = await esClient.ml.getJobStats({ job_id: jobId });
+          const jobStats = resp.jobs[0];
+          if (!jobStats) throw new Error(`Job '${jobId}' not found`);
+          if (jobStats.state === expectedState) return true;
+          throw new Error(
+            `Job '${jobId}' state is '${jobStats.state}', expected '${expectedState}'`
+          );
+        },
+        timeout
+      );
+    },
+
     async delete({
       jobIds,
       deleteUserAnnotations = false,
@@ -685,24 +705,6 @@ export const getMlApiHelper = (
           const allJobs = await this.getAllJobs();
           if (!allJobs.some((j) => j.job_id === jobId)) return true;
           throw new Error(`Anomaly detection job '${jobId}' still exists`);
-        },
-        timeout
-      );
-    },
-
-    async waitForJobState(
-      jobId: string,
-      expectedState: string,
-      timeout = 2 * 60 * 1000
-    ): Promise<void> {
-      await waitForCondition(
-        `job '${jobId}' to be in state '${expectedState}'`,
-        async () => {
-          const { jobs } = await esClient.ml.getJobStats({ job_id: jobId });
-          if (jobs[0]?.state === expectedState) return true;
-          throw new Error(
-            `Anomaly detection job '${jobId}' is in state '${jobs[0]?.state}', expected '${expectedState}'`
-          );
         },
         timeout
       );
