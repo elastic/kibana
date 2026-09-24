@@ -15,7 +15,7 @@ import {
   type ConversationDetailsFlyoutFooterProps,
   OverviewTab,
 } from '../components/details';
-import { conversationToInvestigation } from './conversation_to_investigation';
+import { conversationToInvestigation, conversationToEscalationHeader } from './conversation_to_investigation';
 import type { RenderAssignees } from './types';
 
 /**
@@ -98,16 +98,7 @@ export const EscalationHeaderSlot = ({
   renderAssignees,
   refetchConversation,
 }: EscalationHeaderSlotProps) => {
-  const assigneeUids: string[] = Array.isArray(conversation.metadata?.assignees)
-    ? (conversation.metadata!.assignees as unknown[]).filter(
-        (v): v is string => typeof v === 'string' && v.length > 0
-      )
-    : [];
-
-  const status =
-    typeof conversation.metadata?.status === 'string' && conversation.metadata.status.length > 0
-      ? conversation.metadata.status
-      : undefined;
+  const { status, assigneeUids } = conversationToEscalationHeader(conversation);
 
   const assigneesNode = renderAssignees
     ? renderAssignees({
@@ -119,5 +110,13 @@ export const EscalationHeaderSlot = ({
       })
     : undefined;
 
-  return <EscalationFlyoutHeader conversation={conversation} assigneesNode={assigneesNode} />;
+  return (
+    <EscalationFlyoutHeader
+      title={conversation.title}
+      createdAt={conversation.created_at}
+      status={status}
+      assigneeUids={assigneeUids}
+      assigneesNode={assigneesNode}
+    />
+  );
 };

@@ -22,10 +22,7 @@ import {
   TEMPLATE_ID_INVESTIGATION,
   TEMPLATE_ID_ESCALATION,
 } from '@kbn/alertzero-common';
-import {
-  AGENTIC_INVESTIGATIONS_PLUGIN_ID,
-  ESCALATIONS_UI_CAPABILITY_MANAGE,
-} from '@kbn/agentic-investigations-plugin/common';
+import { getAgenticInvestigationsCapabilities } from './hooks/use_agentic_investigations_capabilities';
 import React from 'react';
 import {
   registerAgenticInvestigationTemplateUI,
@@ -187,10 +184,9 @@ export class AlertZeroPublicPlugin
       >;
     });
 
-    const canManageEscalations =
-      core.application.capabilities[AGENTIC_INVESTIGATIONS_PLUGIN_ID]?.[
-        ESCALATIONS_UI_CAPABILITY_MANAGE
-      ] === true;
+    const { manageEscalations: canManageEscalations } = getAgenticInvestigationsCapabilities(
+      core.application.capabilities
+    );
 
     // ---------------------------------------------------------------------------
     // renderAssignees render prop — shared by both templates

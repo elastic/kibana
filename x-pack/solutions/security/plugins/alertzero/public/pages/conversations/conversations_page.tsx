@@ -22,13 +22,9 @@ import { queryKeys as platformQueryKeys } from '@kbn/proposals-plugin/public';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
-import {
-  AGENTIC_INVESTIGATIONS_PLUGIN_ID,
-  ESCALATIONS_UI_CAPABILITY_MANAGE,
-  INVESTIGATIONS_UI_CAPABILITY_MANAGE,
-} from '@kbn/agentic-investigations-plugin/common';
 import { useAssignInvestigation } from '@kbn/agentic-investigations-plugin/public';
 import { useQueueAssignees } from '../../components/connected_assignees/use_queue_assignees';
+import { useAgenticInvestigationsCapabilities } from '../../hooks/use_agentic_investigations_capabilities';
 import type { ProposalItem } from '../../../common/proposals/list';
 import { useProposalChartsSummary } from '../../hooks/use_proposal_charts_summary';
 import { AlertZeroPageSection } from '../../components/layout/alertzero_page_section';
@@ -129,18 +125,11 @@ export const ConversationsPage: React.FC = () => {
   );
 
   const {
-    services: { notifications, application },
+    services: { notifications },
   } = useKibana<CoreStart>();
 
-  const canManageEscalations =
-    application?.capabilities[AGENTIC_INVESTIGATIONS_PLUGIN_ID]?.[
-      ESCALATIONS_UI_CAPABILITY_MANAGE
-    ] === true;
-
-  const canManageInvestigations =
-    application?.capabilities[AGENTIC_INVESTIGATIONS_PLUGIN_ID]?.[
-      INVESTIGATIONS_UI_CAPABILITY_MANAGE
-    ] === true;
+  const { manageEscalations: canManageEscalations, manageInvestigations: canManageInvestigations } =
+    useAgenticInvestigationsCapabilities();
 
   // ---------------------------------------------------------------------------
   // Assignee picker — shared across all non-closed investigation cards

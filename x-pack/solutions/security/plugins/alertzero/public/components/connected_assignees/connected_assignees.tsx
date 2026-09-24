@@ -5,27 +5,17 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
-import { AssignToUsers } from '@kbn/agentic-investigations-common';
+import React, { memo, useCallback, useMemo } from 'react';
 import type { AssigneesSlotRenderProps } from '@kbn/agentic-investigations-common';
-import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import {
   useAssignEscalation,
   useAssignInvestigation,
-  useUserProfiles,
-  useSuggestUserProfiles,
 } from '@kbn/agentic-investigations-plugin/public';
-import {
-  AGENTIC_INVESTIGATIONS_PLUGIN_ID,
-  ESCALATIONS_UI_CAPABILITY_MANAGE,
-  INVESTIGATIONS_UI_CAPABILITY_MANAGE,
-} from '@kbn/agentic-investigations-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { CONNECTED_ASSIGNEES_LABELS } from './translations';
-import { assigneeSignal } from './assignee_overrides';
-import { useAssigneeSignal } from './use_assignee_signal';
-import { indexProfiles, toSelectedProfiles } from './to_selected_profiles';
+import { useAssigneePickers } from './use_assignee_pickers';
+import { useAgenticInvestigationsCapabilities } from '../../hooks/use_agentic_investigations_capabilities';
 
 /**
  * Connected assignee picker for the investigation and escalation flyout headers.
@@ -44,118 +34,51 @@ const ConnectedAssigneesInner = ({
   status,
   refetchConversation,
 }: AssigneesSlotRenderProps) => {
-  const {
-    services: { notifications, application },
-  } = useKibana<CoreStart>();
-
-  // Capability check differs by template.
-  const canManageEscalations =
-    application.capabilities[AGENTIC_INVESTIGATIONS_PLUGIN_ID]?.[
-      ESCALATIONS_UI_CAPABILITY_MANAGE
-    ] === true;
-  const canManageInvestigations =
-    application.capabilities[AGENTIC_INVESTIGATIONS_PLUGIN_ID]?.[
-      INVESTIGATIONS_UI_CAPABILITY_MANAGE
-    ] === true;
+  useKibana<CoreStart>(); // ensure context; capabilities are read via the shared hook below
+  const { manageEscalations, manageInvestigations } = useAgenticInvestigationsCapabilities();
 
   const canManage =
     templateId === 'escalation'
-      ? canManageEscalations && status !== 'closed'
-      : canManageInvestigations;
+      ? manageEscalations && status !== 'closed'
+      : manageInvestigations;
 
-  // Stable ref so the signal callback always reads the latest refetchConversation without
-  // needing it as a dependency (its identity changes every render from the Agent Builder).
-  const refetchConversationRef = useRef(refetchConversation);
-  refetchConversationRef.current = refetchConversation;
-
-  // When a queue row bumps the signal for this conversation, the flyout refetches so its
-  // header reflects the new assignees without waiting for the 5 s poll.
-  useAssigneeSignal((changedIds) => {
-    if (changedIds.includes(conversationId)) refetchConversationRef.current?.();
-  });
-
-  // Bulk-resolve the current assignee uids into full profile objects.
-  const profilesQuery = useUserProfiles({
-    uids: assigneeUids as string[],
-    enabled: (assigneeUids?.length ?? 0) > 0,
-  });
-
-  // Suggestion search for the popover.
-  const [searchTerm, setSearchTerm] = useState('');
-  const suggestQuery = useSuggestUserProfiles(searchTerm, { size: 20, enabled: canManage });
-
-  // Mutations — pick the right endpoint by template id.
   const assignInvestigation = useAssignInvestigation();
   const assignEscalation = useAssignEscalation();
 
-  // Optimistic state: submitted but not yet server-confirmed selection.
-  const [pendingAssignees, setPendingAssignees] = useState<UserProfileWithAvatar[] | null>(null);
-
-  const profilesByUid = useMemo(() => indexProfiles(profilesQuery.data), [profilesQuery.data]);
-
-  const resolvedSelected = useMemo(
-    () => toSelectedProfiles(assigneeUids as string[], profilesByUid),
-    [assigneeUids, profilesByUid]
+  const assign = useCallback(
+    (targetId: string, assignees: string[]) =>
+      templateId === 'escalation'
+        ? assignEscalation.mutateAsync({ escalationId: targetId, assignees })
+        : assignInvestigation.mutateAsync({ investigationId: targetId, assignees }),
+    [templateId, assignEscalation, assignInvestigation]
   );
 
-  const selected = pendingAssignees ?? resolvedSelected;
-
-  const handleChange = useCallback(
-    (newSelected: UserProfileWithAvatar[]) => {
-      setPendingAssignees(newSelected);
-
-      const assignees = newSelected.map((p) => p.uid);
-
-      const onSuccess = async () => {
-        notifications?.toasts.addSuccess(CONNECTED_ASSIGNEES_LABELS.assignSuccess);
-        // Bump the signal so queue rows (in the page's React root) invalidate their cache
-        // and reflect the new assignees without waiting for their next poll.
-        assigneeSignal.bump(conversationId);
-        // Await the flyout's own refetch so pending state is cleared only after fresh
-        // assigneeUids arrive from the server, avoiding a flash of the old avatars.
-        await refetchConversation?.();
-        setPendingAssignees(null);
-      };
-
-      const onError = () => {
-        notifications?.toasts.addDanger(CONNECTED_ASSIGNEES_LABELS.assignError);
-        setPendingAssignees(null);
-      };
-
-      if (templateId === 'escalation') {
-        assignEscalation.mutate({ escalationId: conversationId, assignees }, { onSuccess, onError });
-      } else {
-        assignInvestigation.mutate(
-          { investigationId: conversationId, assignees },
-          { onSuccess, onError }
-        );
-      }
-    },
-    [
-      conversationId,
-      templateId,
-      assignEscalation,
-      assignInvestigation,
-      notifications,
-      refetchConversation,
-    ]
+  // refetchConversation's identity changes every render from the Agent Builder; the pickers
+  // hook stores refresh in a ref so an unstable reference here is fine.
+  const refresh = useCallback(
+    () => (refetchConversation ? refetchConversation() : Promise.resolve()),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [refetchConversation]
   );
 
-  const isUpdating = pendingAssignees !== null;
-
-  return (
-    <AssignToUsers
-      conversationId={conversationId}
-      selected={selected}
-      suggestions={suggestQuery.data ?? []}
-      isSuggestionsLoading={suggestQuery.isLoading}
-      isProfilesLoading={profilesQuery.isFetching}
-      isUpdating={isUpdating}
-      canManage={canManage}
-      onSearchChange={setSearchTerm}
-      onChange={handleChange}
-    />
+  // Wrap in a stable array so the bulk profile fetch doesn't retrigger on every render.
+  const items = useMemo(
+    () => [{ conversationId, assigneeUids: (assigneeUids ?? []) as string[] }],
+    [conversationId, assigneeUids]
   );
+
+  const renderPicker = useAssigneePickers({
+    items,
+    getRowKey: (item) => item.conversationId,
+    getTargetId: (item) => item.conversationId,
+    getAssigneeUids: (item) => item.assigneeUids,
+    assign,
+    refresh,
+    canManage,
+    labels: CONNECTED_ASSIGNEES_LABELS,
+  });
+
+  return <>{renderPicker(items[0])}</>;
 };
 
 ConnectedAssigneesInner.displayName = 'ConnectedAssignees';

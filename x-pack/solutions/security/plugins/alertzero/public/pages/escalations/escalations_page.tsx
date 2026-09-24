@@ -21,8 +21,7 @@ import {
   escalationQueryKeys,
 } from '@kbn/agentic-investigations-plugin/public';
 import { useQueryClient } from '@kbn/react-query';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { CoreStart } from '@kbn/core/public';
+import { useAgenticInvestigationsCapabilities } from '../../hooks/use_agentic_investigations_capabilities';
 
 import { AlertZeroPageSection } from '../../components/layout/alertzero_page_section';
 import { EscalationsPageHeader } from '../../components/escalations_page_header';
@@ -35,14 +34,10 @@ import { useQueueAssignees } from '../../components/connected_assignees/use_queu
 
 export const EscalationsPage: React.FC = () => {
   const { euiTheme } = useEuiTheme();
-  const {
-    services: { application },
-  } = useKibana<CoreStart>();
-
   useAlertZeroDocTitle(ESCALATIONS_PAGE_INFO.pageTitle);
 
   // Capability check: only render the assignee picker when the user can manage escalations.
-  const canManage = application.capabilities.agenticInvestigations?.manageEscalations === true;
+  const { manageEscalations: canManage } = useAgenticInvestigationsCapabilities();
 
   // ---------------------------------------------------------------------------
   // Flyout — reuse the conversation URL params / details hook, which is

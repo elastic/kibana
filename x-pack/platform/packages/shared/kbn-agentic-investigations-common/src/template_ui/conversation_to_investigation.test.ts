@@ -7,7 +7,10 @@
 
 import type { Conversation, TimelineEvent } from '@kbn/agent-builder-common';
 import { EventActorType, TimelineEventType, TimelineTriggerType } from '@kbn/agent-builder-common';
-import { conversationToInvestigation } from './conversation_to_investigation';
+import {
+  conversationToInvestigation,
+  conversationToEscalationHeader,
+} from './conversation_to_investigation';
 
 const conversation = (overrides: Partial<Conversation> = {}): Conversation => ({
   id: 'conversation-1',
@@ -302,5 +305,49 @@ describe('conversationToInvestigation', () => {
 
       expect(result.events).toEqual([]);
     });
+  });
+});
+
+describe('conversationToEscalationHeader', () => {
+  it('returns undefined status and empty assigneeUids when metadata is absent', () => {
+    const result = conversationToEscalationHeader(conversation());
+    expect(result.status).toBeUndefined();
+    expect(result.assigneeUids).toEqual([]);
+  });
+
+  it('reads the status string from metadata', () => {
+    const result = conversationToEscalationHeader(
+      conversation({ metadata: { status: 'closed' } })
+    );
+    expect(result.status).toBe('closed');
+  });
+
+  it('returns undefined status for an empty string', () => {
+    const result = conversationToEscalationHeader(
+      conversation({ metadata: { status: '' } })
+    );
+    expect(result.status).toBeUndefined();
+  });
+
+  it('reads assignee uids from the assignees array', () => {
+    const result = conversationToEscalationHeader(
+      conversation({ metadata: { assignees: ['uid-1', 'uid-2'] } })
+    );
+    expect(result.assigneeUids).toEqual(['uid-1', 'uid-2']);
+  });
+
+  it('drops non-string entries from the assignees array', () => {
+    const result = conversationToEscalationHeader(
+      // Cast to bypass strict typing: the runtime value can be any MetadataFieldValue.
+      conversation({ metadata: { assignees: ['uid-1', 42 as unknown as string, null as unknown as string, 'uid-2'] } })
+    );
+    expect(result.assigneeUids).toEqual(['uid-1', 'uid-2']);
+  });
+
+  it('returns empty assigneeUids when assignees is not an array', () => {
+    const result = conversationToEscalationHeader(
+      conversation({ metadata: { assignees: 'uid-single' } })
+    );
+    expect(result.assigneeUids).toEqual([]);
   });
 });

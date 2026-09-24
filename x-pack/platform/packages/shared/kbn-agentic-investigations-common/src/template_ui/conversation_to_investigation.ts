@@ -108,6 +108,23 @@ const toTimelineEvents = (events: Conversation['events']): TimelineEvent[] =>
   });
 
 /**
+ * Parses the escalation-specific metadata fields from a conversation into a plain object.
+ *
+ * The field names intentionally duplicate the constants from `agentic_investigations/common`
+ * (which cannot be imported from this package without crossing a plugin boundary).
+ * See the comment at the top of `escalation_flyout_header.tsx` for the authoritative source.
+ */
+export const conversationToEscalationHeader = (
+  conversation: Conversation
+): { status: string | undefined; assigneeUids: string[] } => {
+  const metadata = conversation.metadata ?? {};
+  return {
+    status: readString(metadata.status),
+    assigneeUids: readAssignees(metadata.assignees),
+  };
+};
+
+/**
  * Projects an Agent Builder conversation into the `Investigation` shape the flyout components read.
  *
  * Fields with no conversation equivalent are deliberately left out rather than invented:
