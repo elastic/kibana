@@ -29,17 +29,17 @@ import { createQueryService } from '../../services/query_service/query_service.m
 import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { RULE_EXECUTION_COUNTERS } from '../metrics/counters';
-import type { EsqlConfig, PluginConfig } from '../../../config';
+import type { PluginConfig } from '../../../config';
 import { NON_STREAMING_MAX_ROWS } from '../../services/query_service/formats';
+import type { EsqlResponseFormatName } from '../../services/query_service/formats';
+import { createEsqlResponseFormatService } from '../../services/esql_response_format_service/esql_response_format_service.mock';
 
 const DEFAULT_MAX_ALERTS_PER_RUN = 10000;
 
 const createPluginConfigAccessor = ({
   maxAlertsPerRun = DEFAULT_MAX_ALERTS_PER_RUN,
-  responseFormat = 'json',
 }: {
   maxAlertsPerRun?: number;
-  responseFormat?: EsqlConfig['responseFormat'];
 } = {}) => {
   const config: PluginConfig = {
     enabled: true,
@@ -53,7 +53,6 @@ const createPluginConfigAccessor = ({
         maxGroupsPerExecution: 10000,
       },
     },
-    esql: { responseFormat },
   };
 
   return coreMock.createPluginInitializerContext<PluginConfig>(config).config;
@@ -65,16 +64,14 @@ describe('ExecuteRuleQueryStep', () => {
   let mockLogger: ReturnType<typeof createLoggerService>['mockLogger'];
   let loggerService: ReturnType<typeof createLoggerService>['loggerService'];
 
-  function createStep(
-    maxAlertsPerRun?: number,
-    responseFormat: EsqlConfig['responseFormat'] = 'json'
-  ) {
+  function createStep(maxAlertsPerRun?: number, responseFormat: EsqlResponseFormatName = 'json') {
     ({ loggerService, mockLogger } = createLoggerService());
     const mocks = createQueryService(responseFormat);
     mockEsClient = mocks.mockEsClient;
     return new ExecuteRuleQueryStep(
       mocks.queryService,
-      createPluginConfigAccessor({ maxAlertsPerRun, responseFormat })
+      createEsqlResponseFormatService(responseFormat),
+      createPluginConfigAccessor({ maxAlertsPerRun })
     );
   }
 

@@ -40,7 +40,6 @@ describe('CreateAlertEventsStep', () => {
         },
         ...rulesConfigOverrides,
       },
-      esql: { responseFormat: 'json' },
     };
 
     const pluginConfigAccessor =

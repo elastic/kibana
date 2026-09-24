@@ -489,6 +489,12 @@ export const ALERTING_LOG_CODES = {
   STORAGE_BULK_INDEX_FAILED: 'STORAGE_BULK_INDEX_FAILED',
   /** An ES|QL query issued by the plugin failed to execute. */
   QUERY_ESQL_EXECUTION_FAILED: 'QUERY_ESQL_EXECUTION_FAILED',
+  /**
+   * The `alertingV2.esqlResponseFormat` feature flag resolved to a format name
+   * that is not in the response format registry. Queries keep running on the
+   * default format; the flag's variations need correcting.
+   */
+  QUERY_ESQL_RESPONSE_FORMAT_UNKNOWN: 'QUERY_ESQL_RESPONSE_FORMAT_UNKNOWN',
 
   // ────────────────────────────── Resources ──────────────────────────
   /**
