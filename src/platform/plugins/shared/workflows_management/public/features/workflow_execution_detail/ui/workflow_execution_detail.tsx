@@ -30,10 +30,7 @@ import {
 } from './workflow_pseudo_step_context';
 import { WorkflowStepExecutionDetails } from './workflow_step_execution_details';
 import { useWorkflowExecutionPolling } from '../../../entities/workflows/model/use_workflow_execution_polling';
-import {
-  selectExecution,
-  selectStepExecutionsTotal,
-} from '../../../entities/workflows/store/workflow_detail/selectors';
+import { selectStepExecutionsTotal } from '../../../entities/workflows/store/workflow_detail/selectors';
 import {
   HIGHLIGHTED_STEP_TRIGGER,
   setHighlightedStepId,
@@ -82,9 +79,7 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
   }) => {
     const dispatch = useDispatch();
     const stepExecutionsTotal = useSelector(selectStepExecutionsTotal);
-    const { error } = useWorkflowExecutionPolling(executionId);
-    // Read from the store so pages appended by "Show more" reach the tree without a re-poll.
-    const workflowExecution = useSelector(selectExecution);
+    const { workflowExecution, error } = useWorkflowExecutionPolling(executionId);
     const queryClient = useQueryClient();
 
     const urlState = useWorkflowUrlState();

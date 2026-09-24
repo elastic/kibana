@@ -61,10 +61,7 @@ import {
   useFetchConnector,
 } from '../../../entities/connectors/model/use_available_connectors';
 import { useWorkflowExecutionPolling } from '../../../entities/workflows/model/use_workflow_execution_polling';
-import {
-  selectExecution,
-  selectStepExecutionsTotal,
-} from '../../../entities/workflows/store/workflow_detail/selectors';
+import { selectStepExecutionsTotal } from '../../../entities/workflows/store/workflow_detail/selectors';
 import { useNavigateToExecution } from '../../../hooks/navigation/use_navigate_to_execution';
 import { useKibana } from '../../../hooks/use_kibana';
 import { formatDuration } from '../../../shared/lib/format_duration';
@@ -466,9 +463,7 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
     const [errorArrivalPulseStepId, setErrorArrivalPulseStepId] = useState<string | null>(null);
     const autoExpandedForExecutionIdRef = useRef<string | null>(null);
 
-    const { error } = useWorkflowExecutionPolling(executionId);
-    // Read from the store so pages appended by "Show more" reach the tree without a re-poll.
-    const workflowExecution = useSelector(selectExecution);
+    const { workflowExecution, error } = useWorkflowExecutionPolling(executionId);
     const stepExecutionsTotal = useSelector(selectStepExecutionsTotal);
     // Monaco renders only the visible lines, so a run with thousands of loaded steps stays usable.
     // Only stringify while the JSON tab is showing; the Table tab re-renders on every poll.

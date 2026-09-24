@@ -9,7 +9,7 @@
 
 import { EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import { useSelector } from 'react-redux-v7';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KbnWarningCallout } from '@kbn/ui-callout';
@@ -18,12 +18,13 @@ import {
   WORKFLOW_EXECUTION_STEPS_MAX_PAGE_COUNT,
   WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE,
 } from '../../../../common';
+import type { AppDispatch } from '../../../entities/workflows/store/store';
 import {
+  selectExecutionRequest,
   selectStepExecutionPages,
   selectStepExecutionsTotal,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
-import { loadMoreStepExecutionsThunk } from '../../../entities/workflows/store/workflow_detail/thunks/load_more_step_executions_thunk';
-import { useAsyncThunkState } from '../../../hooks/use_async_thunk';
+import { loadExecutionThunk } from '../../../entities/workflows/store/workflow_detail/thunks/load_execution_thunk';
 
 const truncatedTitle = i18n.translate(
   'workflows.workflowExecutionPanel.stepExecutionsTruncatedTitle',
@@ -44,15 +45,18 @@ export const StepExecutionsTruncatedCallout = React.memo<StepExecutionsTruncated
   ({ executionId, loadedCount }) => {
     const stepExecutionsTotal = useSelector(selectStepExecutionsTotal);
     const loadedPageCount = useSelector(selectStepExecutionPages).length;
-    const [loadMore, { isLoading }] = useAsyncThunkState(loadMoreStepExecutionsThunk);
+    const dispatch = useDispatch<AppDispatch>();
+    const request = useSelector(selectExecutionRequest);
+    const isLoading = request?.id === executionId && request.loadMore;
+    const isDisabled = request !== undefined;
 
     const omittedCount = getOmittedStepExecutionsCount(stepExecutionsTotal, loadedPageCount);
     const canShowMore = loadedPageCount < WORKFLOW_EXECUTION_STEPS_MAX_PAGE_COUNT;
     const nextBatchCount = Math.min(WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE, omittedCount);
 
     const onShowMore = useCallback(() => {
-      loadMore({ id: executionId });
-    }, [loadMore, executionId]);
+      void dispatch(loadExecutionThunk({ id: executionId, loadMore: true }));
+    }, [dispatch, executionId]);
 
     const showMoreAction = useMemo(
       () =>
@@ -68,11 +72,12 @@ export const StepExecutionsTruncatedCallout = React.memo<StepExecutionsTruncated
                 ),
                 onClick: onShowMore,
                 isLoading,
+                isDisabled,
                 'data-test-subj': 'workflowExecutionShowMoreStepExecutionsButton',
               },
             }
           : undefined,
-      [canShowMore, nextBatchCount, onShowMore, isLoading]
+      [canShowMore, nextBatchCount, onShowMore, isLoading, isDisabled]
     );
 
     if (omittedCount === 0 || loadedCount === 0) {

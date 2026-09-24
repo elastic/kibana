@@ -16,6 +16,7 @@ import type {
   WorkflowStepExecutionDto,
 } from '@kbn/workflows';
 import { WORKFLOW_GRAPH_FOCUS_TRIGGER } from '@kbn/workflows';
+import { loadExecutionThunk } from './thunks/load_execution_thunk';
 import type { ActiveTab, ComputedData, LineColumnPosition, WorkflowDetailState } from './types';
 import { addLoadingStateReducers, initialLoadingState } from './utils/loading_states';
 import { resolveFocusForLine } from './utils/trigger_finder';
@@ -142,17 +143,24 @@ const workflowDetailSlice = createSlice({
       if (!action.payload || action.payload.id !== state.execution?.id) {
         state.stepExecutionsTotal = 0;
         state.stepExecutionPages = [];
+        state.executionRequest = undefined;
+        state.executionError = undefined;
       }
       state.execution = action.payload;
     },
     setStepExecutionsTotal: (state, action: { payload: number }) => {
       state.stepExecutionsTotal = action.payload;
     },
-    /** Single writer for loaded step pages; keeps `execution.stepExecutions` as their flat view. */
+    /** Sets loaded pages and their flattened view in `execution.stepExecutions`. */
     setStepExecutionPages: (state, action: { payload: WorkflowStepExecutionDto[][] }) => {
       state.stepExecutionPages = action.payload;
       if (state.execution) {
         state.execution.stepExecutions = action.payload.flat();
+      }
+    },
+    cancelExecutionLoading: (state, action: { payload: string }) => {
+      if (state.executionRequest?.id === action.payload) {
+        state.executionRequest = undefined;
       }
     },
     clearExecution: (state) => {
@@ -160,6 +168,8 @@ const workflowDetailSlice = createSlice({
       state.stepExecutionsTotal = 0;
       state.stepExecutionPages = [];
       state.computedExecution = undefined;
+      state.executionRequest = undefined;
+      state.executionError = undefined;
     },
     setActiveTab: (state, action: { payload: ActiveTab | undefined }) => {
       state.activeTab = action.payload;
@@ -214,6 +224,39 @@ const workflowDetailSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
+    builder.addCase(loadExecutionThunk.pending, (state, { meta }) => {
+      if (state.execution?.id !== meta.arg.id) {
+        state.execution = undefined;
+        state.stepExecutionPages = [];
+        state.stepExecutionsTotal = 0;
+        state.computedExecution = undefined;
+      }
+      state.executionRequest = {
+        id: meta.arg.id,
+        requestId: meta.requestId,
+        loadMore: meta.arg.loadMore ?? false,
+      };
+      state.executionError = undefined;
+    });
+    builder.addCase(loadExecutionThunk.fulfilled, (state, { meta, payload }) => {
+      if (state.executionRequest?.requestId !== meta.requestId) {
+        return;
+      }
+      state.execution = payload.execution;
+      state.stepExecutionPages = payload.stepExecutionPages;
+      state.stepExecutionsTotal = payload.stepExecutionsTotal;
+      state.computedExecution = payload.computedExecution;
+      state.executionRequest = undefined;
+    });
+    builder.addCase(loadExecutionThunk.rejected, (state, { meta, payload }) => {
+      if (state.executionRequest?.requestId !== meta.requestId) {
+        return;
+      }
+      state.executionRequest = undefined;
+      if (!meta.aborted && !meta.arg.loadMore) {
+        state.executionError = { id: meta.arg.id, message: payload ?? 'Failed to load execution' };
+      }
+    });
     addLoadingStateReducers(builder);
     builder.addMatcher(
       (action: Action): action is Action => action.type === 'detail/loadConnectorsThunk/pending',
@@ -262,6 +305,7 @@ export const {
   setStepExecutionsTotal,
   setStepExecutionPages,
   clearExecution,
+  cancelExecutionLoading,
   setActiveTab,
   setHasYamlSchemaValidationErrors,
   setAiAssisted,
@@ -289,4 +333,5 @@ export const ignoredActions: Array<string> = [
   'detail/_setComputedDataInternal',
   'detail/_setGeneratedSchemaInternal',
   'detail/_setComputedExecution',
+  'detail/loadExecutionThunk/fulfilled',
 ];

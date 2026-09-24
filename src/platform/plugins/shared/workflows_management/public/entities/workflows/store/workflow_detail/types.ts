@@ -42,6 +42,8 @@ export interface WorkflowDetailState {
   computed?: ComputedData;
   /** The currently selected execution (when viewing executions tab) */
   execution?: WorkflowExecutionDto;
+  executionRequest?: { id: string; requestId: string; loadMore: boolean };
+  executionError?: { id: string; message: string };
   /** `total` from the paginated execution-steps list; used for the truncation callout. */
   stepExecutionsTotal: number;
   /**

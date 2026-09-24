@@ -9,7 +9,7 @@
 
 import { EuiPanel } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import { useDispatch, useSelector } from 'react-redux-v7';
+import { useDispatch } from 'react-redux-v7';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
 import { useQueryClient } from '@kbn/react-query';
@@ -25,7 +25,6 @@ import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json
 import { WorkflowExecutionPanel } from './workflow_execution_panel';
 import { WorkflowStepExecutionDetails } from './workflow_step_execution_details';
 import { useWorkflowExecutionPolling } from '../../../entities/workflows/model/use_workflow_execution_polling';
-import { selectExecution } from '../../../entities/workflows/store/workflow_detail/selectors';
 import {
   HIGHLIGHTED_STEP_TRIGGER,
   setHighlightedStepId,
@@ -78,9 +77,7 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
     onSelectedStepExecutionChange,
   }) => {
     const dispatch = useDispatch();
-    const { error } = useWorkflowExecutionPolling(executionId);
-    // Read from the store so pages appended by "Show more" reach the tree without a re-poll.
-    const workflowExecution = useSelector(selectExecution);
+    const { workflowExecution, error } = useWorkflowExecutionPolling(executionId);
     const queryClient = useQueryClient();
 
     const urlState = useWorkflowUrlState();

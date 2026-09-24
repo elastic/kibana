@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import type { WorkflowExecutionDto, WorkflowYaml } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
@@ -24,17 +24,20 @@ import {
   setStepExecutionPages,
   setStepExecutionsTotal,
 } from '../../../entities/workflows/store/workflow_detail/slice';
+import { loadExecutionThunk } from '../../../entities/workflows/store/workflow_detail/thunks/load_execution_thunk';
 import { createStartServicesMock } from '../../../mocks';
 import { getTestProvider } from '../../../shared/mocks/test_providers';
 
 const mockNavigateToApp = jest.fn();
 const mockGetExecutionSteps = jest.fn();
+const mockGetExecution = jest.fn();
 
 jest.mock('@kbn/workflows-ui', () => ({
   ...jest.requireActual('@kbn/workflows-ui'),
   useWorkflowsCapabilities: jest.fn(),
   WorkflowApi: jest.fn().mockImplementation(() => ({
     getExecutionSteps: mockGetExecutionSteps,
+    getExecution: mockGetExecution,
   })),
 }));
 
@@ -123,6 +126,9 @@ describe('WorkflowExecutionPanel', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockNavigateToApp.mockReset();
+    mockGetExecutionSteps.mockReset();
+    mockGetExecution.mockReset();
+    mockGetExecution.mockResolvedValue(mockExecution);
     jest.mocked(useWorkflowsCapabilities).mockReturnValue(createMockWorkflowsCapabilities());
   });
 
@@ -248,11 +254,15 @@ describe('WorkflowExecutionPanel', () => {
       stepExecutionIndex: 0,
     };
 
-    const renderWithLoadedPages = (pages: number, total: number) => {
+    const renderWithLoadedPages = (
+      pages: number,
+      total: number,
+      status = ExecutionStatus.COMPLETED
+    ) => {
       const services = createStartServicesMock();
       services.application.navigateToApp = mockNavigateToApp;
       const store = createMockStore(services);
-      store.dispatch(setExecution({ ...mockExecution, stepExecutions: [] }));
+      store.dispatch(setExecution({ ...mockExecution, status, stepExecutions: [] }));
       store.dispatch(setStepExecutionPages(Array.from({ length: pages }, () => [loadedStep])));
       store.dispatch(setStepExecutionsTotal(total));
       const execution = store.getState().detail.execution;
@@ -299,6 +309,21 @@ describe('WorkflowExecutionPanel', () => {
       expect(
         screen.getByTestId('workflowExecutionShowMoreStepExecutionsButton')
       ).toBeInTheDocument();
+    });
+
+    it('disables Show more during polling and enables it after the response', async () => {
+      const response = Promise.withResolvers<WorkflowExecutionDto>();
+      mockGetExecution.mockReturnValueOnce(response.promise);
+      mockGetExecutionSteps.mockResolvedValue({ results: [loadedStep], total: 1500 });
+      const store = renderWithLoadedPages(1, 1500, ExecutionStatus.RUNNING);
+      act(() => {
+        void store.dispatch(loadExecutionThunk({ id: 'exec-123' }));
+      });
+      expect(screen.getByTestId('workflowExecutionShowMoreStepExecutionsButton')).toBeDisabled();
+      await act(async () => {
+        response.resolve(mockExecution);
+      });
+      expect(screen.getByTestId('workflowExecutionShowMoreStepExecutionsButton')).toBeEnabled();
     });
 
     it('should hide Show more once the page ceiling is reached', () => {

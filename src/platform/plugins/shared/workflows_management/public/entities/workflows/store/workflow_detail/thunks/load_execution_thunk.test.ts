@@ -14,7 +14,7 @@ import { loadExecutionThunk } from './load_execution_thunk';
 import { WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE } from '../../../../../../common';
 import { createMockStore, getMockServices } from '../../__mocks__/store.mock';
 import type { MockServices, MockStore } from '../../__mocks__/store.mock';
-import { setExecution, setStepExecutionPages } from '../slice';
+import { clearExecution, setExecution, setStepExecutionPages } from '../slice';
 
 const mockGetExecution = jest.fn();
 const mockGetExecutionSteps = jest.fn();
@@ -71,6 +71,8 @@ describe('loadExecutionThunk', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockGetExecution.mockReset();
+    mockGetExecutionSteps.mockReset();
 
     store = createMockStore();
     mockServices = getMockServices(store);
@@ -92,7 +94,7 @@ describe('loadExecutionThunk', () => {
       size: WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE,
     });
     expect(result.type).toBe('detail/loadExecutionThunk/fulfilled');
-    expect(result.payload).toEqual(mockExecution);
+    expect(result.payload).toMatchObject({ execution: mockExecution });
   });
 
   it('should set execution in the store on success', async () => {
@@ -130,7 +132,7 @@ describe('loadExecutionThunk', () => {
 
     expect(result.type).toBe('detail/loadExecutionThunk/fulfilled');
     expect(result.payload).toMatchObject({
-      stepExecutions: pageResults,
+      execution: { stepExecutions: pageResults },
     });
     expect(result.payload).not.toHaveProperty('stepExecutionsTruncatedCount');
     expect(store.getState().detail.stepExecutionsTotal).toBe(2);
@@ -174,7 +176,7 @@ describe('loadExecutionThunk', () => {
       size: WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE,
     });
     expect(result.payload).toMatchObject({
-      stepExecutions: nextSteps,
+      execution: { stepExecutions: nextSteps },
     });
   });
 
@@ -208,7 +210,9 @@ describe('loadExecutionThunk', () => {
 
     expect(mockGetExecutionSteps).not.toHaveBeenCalled();
     expect(store.getState().detail.stepExecutionPages).toHaveLength(2);
-    expect(result.payload).toMatchObject({ stepExecutions: [loadedStep, loadedStep] });
+    expect(result.payload).toMatchObject({
+      execution: { stepExecutions: [loadedStep, loadedStep] },
+    });
   });
 
   it('should start from the first page when the execution id changes', async () => {
@@ -226,59 +230,58 @@ describe('loadExecutionThunk', () => {
     expect(store.getState().detail.stepExecutionPages).toHaveLength(1);
   });
 
-  it('should drop the response when the poll loop was superseded in flight', async () => {
-    store.dispatch(setExecution({ ...mockExecution, id: 'exec-b' }));
-    store.dispatch(setStepExecutionPages([loadedPage]));
-    mockGetExecution.mockResolvedValue({ ...mockExecution, id: 'exec-a' });
-
-    const result = await store.dispatch(loadExecutionThunk({ id: 'exec-a', isStale: () => true }));
-
-    const { execution, stepExecutionPages } = store.getState().detail;
-    expect(execution?.id).toBe('exec-b');
-    expect(stepExecutionPages).toEqual([loadedPage]);
-    // The superseded request hands back whatever the store holds now, never its own response.
-    expect(result.payload).toBe(execution);
-  });
-
-  it('should settle a superseded request that fails without touching the store or toasting', async () => {
-    store.dispatch(setExecution({ ...mockExecution, id: 'exec-b' }));
-    store.dispatch(setStepExecutionPages([loadedPage]));
-    mockGetExecution.mockRejectedValue(new Error('network down'));
-
-    const result = await store.dispatch(loadExecutionThunk({ id: 'exec-a', isStale: () => true }));
-
-    expect(result.meta.requestStatus).toBe('fulfilled');
-    expect(result.payload).toBe(store.getState().detail.execution);
-    expect(store.getState().detail.execution?.id).toBe('exec-b');
-    expect(mockServices.notifications.toasts.addError).not.toHaveBeenCalled();
-  });
-
-  it('should refetch a page appended during the poll that saw the run finish', async () => {
-    const runningRows = [
-      { id: 's2', stepId: 's2', status: ExecutionStatus.RUNNING },
-    ] as WorkflowExecutionDto['stepExecutions'];
-    const finalRows = [
-      { id: 's2', stepId: 's2', status: ExecutionStatus.COMPLETED },
-    ] as WorkflowExecutionDto['stepExecutions'];
+  it('should keep loaded data when a request is aborted', async () => {
     store.dispatch(setExecution({ ...mockExecution, status: ExecutionStatus.RUNNING }));
     store.dispatch(setStepExecutionPages([loadedPage]));
-    mockGetExecution.mockResolvedValue(mockExecution); // now terminal
+    const response = Promise.withResolvers<WorkflowExecutionDto>();
+    mockGetExecution.mockReturnValue(response.promise);
+
+    const request = store.dispatch(loadExecutionThunk({ id: 'exec-1' }));
+    request.abort();
+    await request;
+    response.resolve(mockExecution);
+    await Promise.resolve();
+
+    expect(store.getState().detail.execution?.status).toBe(ExecutionStatus.RUNNING);
+    expect(store.getState().detail.stepExecutionPages).toEqual([loadedPage]);
+    expect(store.getState().detail.executionError).toBeUndefined();
+  });
+
+  it('should not toast when an aborted request subsequently fails', async () => {
+    const response = Promise.withResolvers<WorkflowExecutionDto>();
+    mockGetExecution.mockReturnValue(response.promise);
+    const request = store.dispatch(loadExecutionThunk({ id: 'exec-1' }));
+    request.abort();
+    await request;
+    response.reject(new Error('Request failed after cancellation'));
+    await Promise.resolve();
+
+    expect(mockServices.notifications.toasts.addError).not.toHaveBeenCalled();
+    expect(store.getState().detail.executionError).toBeUndefined();
+  });
+
+  it('should wait for every loaded page before publishing a terminal execution', async () => {
+    const secondPage = Promise.withResolvers<typeof mockStepsPage>();
+    const secondPageStarted = Promise.withResolvers<void>();
+    store.dispatch(setExecution({ ...mockExecution, status: ExecutionStatus.RUNNING }));
+    store.dispatch(setStepExecutionPages([loadedPage, loadedPage]));
+    mockGetExecution.mockResolvedValue(mockExecution);
     mockGetExecutionSteps.mockImplementation(async (_id: string, { page }: { page: number }) => {
-      if (page === 1) {
-        // "Show more" lands while this poll is still in flight, with rows fetched before the run finished.
-        store.dispatch(setStepExecutionPages([loadedPage, runningRows]));
-        return { results: loadedPage, total: 2, page, size: WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE };
+      if (page === 2) {
+        secondPageStarted.resolve();
+        return secondPage.promise;
       }
-      return { results: finalRows, total: 2, page, size: WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE };
+      return { ...mockStepsPage, results: loadedPage };
     });
 
-    await store.dispatch(loadExecutionThunk({ id: 'exec-1' }));
+    const request = store.dispatch(loadExecutionThunk({ id: 'exec-1' }));
+    await secondPageStarted.promise;
+    expect(store.getState().detail.execution?.status).toBe(ExecutionStatus.RUNNING);
+    secondPage.resolve({ ...mockStepsPage, results: loadedPage });
+    await request;
 
-    expect(mockGetExecutionSteps).toHaveBeenCalledWith('exec-1', {
-      page: 2,
-      size: WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE,
-    });
-    expect(store.getState().detail.stepExecutionPages).toEqual([loadedPage, finalRows]);
+    expect(store.getState().detail.execution?.status).toBe(ExecutionStatus.COMPLETED);
+    expect(store.getState().detail.stepExecutionPages).toEqual([loadedPage, loadedPage]);
   });
 
   it('should handle HTTP error with body message', async () => {
@@ -329,5 +332,119 @@ describe('loadExecutionThunk', () => {
     );
     expect(result.type).toBe('detail/loadExecutionThunk/rejected');
     expect(result.payload).toBe('Failed to load execution');
+  });
+
+  describe('request ordering', () => {
+    it('keeps the newly selected execution when an older request resolves last', async () => {
+      const firstResponse = Promise.withResolvers<WorkflowExecutionDto>();
+      mockGetExecution.mockReturnValueOnce(firstResponse.promise).mockResolvedValueOnce({
+        ...mockExecution,
+        id: 'exec-b',
+      });
+
+      const firstRequest = store.dispatch(loadExecutionThunk({ id: 'exec-1' }));
+      await store.dispatch(loadExecutionThunk({ id: 'exec-b' }));
+      firstResponse.resolve(mockExecution);
+      await firstRequest;
+
+      expect(store.getState().detail.execution?.id).toBe('exec-b');
+    });
+
+    it('ignores an older request after switching A to B and back to A', async () => {
+      const firstResponse = Promise.withResolvers<WorkflowExecutionDto>();
+      mockGetExecution
+        .mockReturnValueOnce(firstResponse.promise)
+        .mockResolvedValueOnce({ ...mockExecution, id: 'exec-b' })
+        .mockResolvedValueOnce(mockExecution);
+
+      const firstRequest = store.dispatch(loadExecutionThunk({ id: 'exec-1' }));
+      await store.dispatch(loadExecutionThunk({ id: 'exec-b' }));
+      await store.dispatch(loadExecutionThunk({ id: 'exec-1' }));
+      firstResponse.resolve({ ...mockExecution, status: ExecutionStatus.RUNNING });
+      await firstRequest;
+
+      expect(store.getState().detail.execution?.status).toBe(ExecutionStatus.COMPLETED);
+    });
+
+    it('does not toast a superseded failure', async () => {
+      const firstResponse = Promise.withResolvers<WorkflowExecutionDto>();
+      mockGetExecution.mockReturnValueOnce(firstResponse.promise).mockResolvedValueOnce({
+        ...mockExecution,
+        id: 'exec-b',
+      });
+
+      const firstRequest = store.dispatch(loadExecutionThunk({ id: 'exec-1' }));
+      await store.dispatch(loadExecutionThunk({ id: 'exec-b' }));
+      firstResponse.reject(new Error('Old request failed'));
+      await firstRequest;
+
+      expect(store.getState().detail.execution?.id).toBe('exec-b');
+      expect(mockServices.notifications.toasts.addError).not.toHaveBeenCalled();
+    });
+
+    it('does not restore an execution after the selection was cleared', async () => {
+      const response = Promise.withResolvers<WorkflowExecutionDto>();
+      mockGetExecution.mockReturnValueOnce(response.promise);
+      const request = store.dispatch(loadExecutionThunk({ id: 'exec-1' }));
+      store.dispatch(clearExecution());
+      response.resolve(mockExecution);
+      await request;
+
+      expect(store.getState().detail.execution).toBeUndefined();
+      expect(store.getState().detail.stepExecutionPages).toEqual([]);
+      expect(store.getState().detail.computedExecution).toBeUndefined();
+    });
+
+    it('loads final step statuses when the execution finishes during the request', async () => {
+      let finished = false;
+      const runningRows = [{ ...loadedStep, status: ExecutionStatus.RUNNING }];
+      mockGetExecution.mockImplementation(async () => {
+        finished = true;
+        return mockExecution;
+      });
+      mockGetExecutionSteps.mockImplementation(async () => ({
+        ...mockStepsPage,
+        results: finished ? loadedPage : runningRows,
+        total: 1,
+      }));
+
+      await store.dispatch(loadExecutionThunk({ id: 'exec-1' }));
+
+      expect(store.getState().detail.execution?.status).toBe(ExecutionStatus.COMPLETED);
+      expect(store.getState().detail.execution?.stepExecutions).toEqual(loadedPage);
+    });
+
+    it('ignores a page response from the previous execution', async () => {
+      const pageResponse = Promise.withResolvers<typeof mockStepsPage>();
+      const pageStarted = Promise.withResolvers<void>();
+      mockGetExecution.mockImplementation(async (id: string) => ({ ...mockExecution, id }));
+      mockGetExecutionSteps
+        .mockImplementationOnce(() => {
+          pageStarted.resolve();
+          return pageResponse.promise;
+        })
+        .mockResolvedValue(mockStepsPage);
+
+      const request = store.dispatch(loadExecutionThunk({ id: 'exec-1' }));
+      await pageStarted.promise;
+      await store.dispatch(loadExecutionThunk({ id: 'exec-b' }));
+      pageResponse.resolve({ ...mockStepsPage, results: loadedPage });
+      await request;
+
+      expect(store.getState().detail.execution?.id).toBe('exec-b');
+      expect(store.getState().detail.stepExecutionPages).toEqual([[]]);
+    });
+
+    it('does not overlap requests for the same execution', async () => {
+      const response = Promise.withResolvers<WorkflowExecutionDto>();
+      mockGetExecution.mockReturnValue(response.promise);
+      const first = store.dispatch(loadExecutionThunk({ id: 'exec-1' }));
+      const second = store.dispatch(loadExecutionThunk({ id: 'exec-1' }));
+      response.resolve(mockExecution);
+      await Promise.all([first, second]);
+
+      expect(mockGetExecution).toHaveBeenCalledTimes(1);
+      expect(mockGetExecutionSteps).toHaveBeenCalledTimes(1);
+    });
   });
 });

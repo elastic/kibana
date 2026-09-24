@@ -10,17 +10,22 @@
 import type { WorkflowExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 
-import { loadMoreStepExecutionsThunk } from './load_more_step_executions_thunk';
-import { WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE } from '../../../../../../common';
+import { loadExecutionThunk } from './load_execution_thunk';
+import {
+  WORKFLOW_EXECUTION_STEPS_MAX_PAGE_COUNT,
+  WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE,
+} from '../../../../../../common';
 import { createMockStore, getMockServices } from '../../__mocks__/store.mock';
 import type { MockServices, MockStore } from '../../__mocks__/store.mock';
-import { setExecution, setStepExecutionPages } from '../slice';
+import { setExecution, setStepExecutionPages, setStepExecutionsTotal } from '../slice';
 
 const mockGetExecutionSteps = jest.fn();
+const mockGetExecution = jest.fn();
 
 jest.mock('@kbn/workflows-ui', () => ({
   WorkflowApi: jest.fn().mockImplementation(() => ({
     getExecutionSteps: mockGetExecutionSteps,
+    getExecution: mockGetExecution,
   })),
 }));
 
@@ -53,16 +58,20 @@ const secondPage = [
   { id: 's2', stepId: 's2', status: ExecutionStatus.COMPLETED },
 ] as WorkflowExecutionDto['stepExecutions'];
 
-describe('loadMoreStepExecutionsThunk', () => {
+describe('loadExecutionThunk pagination', () => {
   let store: MockStore;
   let mockServices: MockServices;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockGetExecutionSteps.mockReset();
+    mockGetExecution.mockReset();
+    mockGetExecution.mockResolvedValue(mockExecution);
     store = createMockStore();
     mockServices = getMockServices(store);
     store.dispatch(setExecution(mockExecution));
     store.dispatch(setStepExecutionPages([firstPage]));
+    store.dispatch(setStepExecutionsTotal(1500));
   });
 
   it('should append the next page and update the total', async () => {
@@ -73,8 +82,9 @@ describe('loadMoreStepExecutionsThunk', () => {
       size: WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE,
     });
 
-    await store.dispatch(loadMoreStepExecutionsThunk({ id: 'exec-1' }));
+    await store.dispatch(loadExecutionThunk({ id: 'exec-1', loadMore: true }));
 
+    expect(mockGetExecution).not.toHaveBeenCalled();
     expect(mockGetExecutionSteps).toHaveBeenCalledWith('exec-1', {
       page: 2,
       size: WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE,
@@ -88,7 +98,7 @@ describe('loadMoreStepExecutionsThunk', () => {
   it('should leave the store unchanged and notify when the request fails', async () => {
     mockGetExecutionSteps.mockRejectedValue({ body: { message: 'nope' } });
 
-    const result = await store.dispatch(loadMoreStepExecutionsThunk({ id: 'exec-1' }));
+    const result = await store.dispatch(loadExecutionThunk({ id: 'exec-1', loadMore: true }));
 
     expect(result.meta.requestStatus).toBe('rejected');
     expect(store.getState().detail.stepExecutionPages).toEqual([firstPage]);
@@ -98,33 +108,22 @@ describe('loadMoreStepExecutionsThunk', () => {
     );
   });
 
-  it('should refetch the page once when the run finished while it was in flight', async () => {
-    const runningRows = [
-      { id: 's2', stepId: 's2', status: ExecutionStatus.RUNNING },
-    ] as WorkflowExecutionDto['stepExecutions'];
+  it('should refresh all pages when Show more observes the run finishing', async () => {
+    const runningRows = firstPage.map((step) => ({ ...step, status: ExecutionStatus.RUNNING }));
     store.dispatch(setExecution({ ...mockExecution, status: ExecutionStatus.RUNNING }));
-    store.dispatch(setStepExecutionPages([firstPage]));
-    mockGetExecutionSteps
-      .mockImplementationOnce(async () => {
-        // The final poll lands while this page is in flight.
-        store.dispatch(setExecution(mockExecution));
-        return {
-          results: runningRows,
-          total: 2,
-          page: 2,
-          size: WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE,
-        };
-      })
-      .mockResolvedValueOnce({
-        results: secondPage,
-        total: 2,
-        page: 2,
-        size: WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE,
-      });
+    store.dispatch(setStepExecutionPages([runningRows]));
+    mockGetExecutionSteps.mockImplementation(async (_id: string, { page }: { page: number }) => ({
+      results: page === 1 ? firstPage : secondPage,
+      total: 1500,
+      page,
+      size: WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE,
+    }));
 
-    await store.dispatch(loadMoreStepExecutionsThunk({ id: 'exec-1' }));
+    await store.dispatch(loadExecutionThunk({ id: 'exec-1', loadMore: true }));
 
+    expect(mockGetExecution).toHaveBeenCalledTimes(1);
     expect(mockGetExecutionSteps).toHaveBeenCalledTimes(2);
+    expect(store.getState().detail.execution?.status).toBe(ExecutionStatus.COMPLETED);
     expect(store.getState().detail.stepExecutionPages).toEqual([firstPage, secondPage]);
   });
 
@@ -139,8 +138,85 @@ describe('loadMoreStepExecutionsThunk', () => {
       };
     });
 
-    await store.dispatch(loadMoreStepExecutionsThunk({ id: 'exec-1' }));
+    await store.dispatch(loadExecutionThunk({ id: 'exec-1', loadMore: true }));
 
     expect(store.getState().detail.stepExecutionPages).toEqual([]);
+  });
+
+  it('does not overlap a poll with Show more', async () => {
+    store.dispatch(setExecution({ ...mockExecution, status: ExecutionStatus.RUNNING }));
+    const response = Promise.withResolvers<typeof mockExecution>();
+    mockGetExecution.mockReturnValue(response.promise);
+    mockGetExecutionSteps.mockResolvedValue({ results: firstPage, total: 1500 });
+    const polling = store.dispatch(loadExecutionThunk({ id: 'exec-1' }));
+    const loadMore = await store.dispatch(loadExecutionThunk({ id: 'exec-1', loadMore: true }));
+    response.resolve(mockExecution);
+    await polling;
+
+    expect(loadMore.meta.requestStatus).toBe('rejected');
+    expect(mockGetExecution).toHaveBeenCalledTimes(1);
+    expect(mockGetExecutionSteps).toHaveBeenCalledTimes(1);
+    expect(store.getState().detail.stepExecutionPages).toEqual([firstPage]);
+  });
+
+  it('ignores polling and double clicks while a page is loading', async () => {
+    const response = Promise.withResolvers<{ results: typeof secondPage; total: number }>();
+    mockGetExecutionSteps.mockReturnValue(response.promise);
+    const first = store.dispatch(loadExecutionThunk({ id: 'exec-1', loadMore: true }));
+    await store.dispatch(loadExecutionThunk({ id: 'exec-1', loadMore: true }));
+    await store.dispatch(loadExecutionThunk({ id: 'exec-1' }));
+    response.resolve({ results: secondPage, total: 1500 });
+    await first;
+
+    expect(mockGetExecutionSteps).toHaveBeenCalledTimes(1);
+    expect(store.getState().detail.stepExecutionPages).toEqual([firstPage, secondPage]);
+  });
+
+  it('retries the same page after a failed Show more without hiding loaded data', async () => {
+    mockGetExecutionSteps
+      .mockRejectedValueOnce(new Error('Page failed'))
+      .mockResolvedValue({ results: secondPage, total: 1500 });
+    await store.dispatch(loadExecutionThunk({ id: 'exec-1', loadMore: true }));
+    expect(store.getState().detail.stepExecutionPages).toEqual([firstPage]);
+    expect(store.getState().detail.stepExecutionsTotal).toBe(1500);
+    expect(store.getState().detail.executionError).toBeUndefined();
+    await store.dispatch(loadExecutionThunk({ id: 'exec-1', loadMore: true }));
+
+    expect(mockGetExecutionSteps.mock.calls.map(([, params]) => params.page)).toEqual([2, 2]);
+    expect(store.getState().detail.stepExecutionPages).toEqual([firstPage, secondPage]);
+  });
+
+  it('keeps page boundaries when an earlier page has missing documents', async () => {
+    store.dispatch(setStepExecutionPages([[], firstPage]));
+    store.dispatch(setStepExecutionsTotal(2500));
+    mockGetExecutionSteps.mockResolvedValue({ results: secondPage, total: 2500 });
+    await store.dispatch(loadExecutionThunk({ id: 'exec-1', loadMore: true }));
+
+    expect(mockGetExecutionSteps).toHaveBeenCalledWith('exec-1', {
+      page: 3,
+      size: WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE,
+    });
+    expect(store.getState().detail.stepExecutionPages).toEqual([[], firstPage, secondPage]);
+    expect(store.getState().detail.execution?.stepExecutions).toEqual([
+      ...firstPage,
+      ...secondPage,
+    ]);
+  });
+
+  it('does not request pages beyond the page limit', async () => {
+    store.dispatch(
+      setStepExecutionPages(
+        Array.from({ length: WORKFLOW_EXECUTION_STEPS_MAX_PAGE_COUNT }, () => firstPage)
+      )
+    );
+    store.dispatch(setStepExecutionsTotal(20000));
+    await store.dispatch(loadExecutionThunk({ id: 'exec-1', loadMore: true }));
+    expect(mockGetExecutionSteps).not.toHaveBeenCalled();
+  });
+
+  it('does not load another page when all pages have been loaded', async () => {
+    store.dispatch(setStepExecutionsTotal(1000));
+    await store.dispatch(loadExecutionThunk({ id: 'exec-1', loadMore: true }));
+    expect(mockGetExecutionSteps).not.toHaveBeenCalled();
   });
 });
