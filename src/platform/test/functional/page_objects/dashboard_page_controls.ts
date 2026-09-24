@@ -535,11 +535,11 @@ export class DashboardPageControls extends FtrService {
     await this.retry.tryForTime(10000, async () => {
       if (controlId) await this.optionsListOpenPopover(controlId);
       await this.testSubjects.existOrFail('optionsList-control-search-input', { timeout: 5000 });
+      // Type into the search input element itself, not whatever happens to hold focus,
+      // so a missed focus can't drop the search text on the wrong element.
       const input = await this.testSubjects.find('optionsList-control-search-input');
-      await input.click();
-      const focusedInput = await this.find.activeElement();
-      await focusedInput.clearValue();
-      await focusedInput.type(search, { charByChar: true });
+      await input.clearValue();
+      await input.type(search, { charByChar: true });
     });
     await this.optionsListPopoverWaitForLoading();
   }

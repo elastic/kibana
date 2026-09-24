@@ -351,16 +351,22 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
       },
       async isPanelOpen(sectionId: NavigationId) {
         try {
+          // Each attempt is bounded rather than an instantaneous probe, so a panel that is
+          // still animating in is observed by the time the enclosing retry polls again.
           // Check for side panel (when item is in main nav)
-          const sidePanelExists = await testSubjects.exists(`~kbnChromeNav-sidePanel_${sectionId}`);
+          const sidePanelExists = await testSubjects.waitForExists(
+            `~kbnChromeNav-sidePanel_${sectionId}`,
+            { timeout: 500 }
+          );
 
           if (sidePanelExists) {
             return true;
           }
 
           // Check for nested panel (when item is in More menu)
-          const nestedPanelExists = await testSubjects.exists(
-            `~kbnChromeNav-nestedPanel-${sectionId}`
+          const nestedPanelExists = await testSubjects.waitForExists(
+            `~kbnChromeNav-nestedPanel-${sectionId}`,
+            { timeout: 500 }
           );
 
           return nestedPanelExists;
