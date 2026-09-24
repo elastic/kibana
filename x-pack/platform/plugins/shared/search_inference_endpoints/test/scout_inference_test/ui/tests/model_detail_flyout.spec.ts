@@ -168,7 +168,7 @@ test.describe('Model Detail Flyout', { tag: [...INFERENCE_LOCAL_TAGS] }, () => {
     });
   });
 
-  test('flyout shows geo region badges for a model with regions', async ({ pageObjects }) => {
+  test('flyout shows region options for a model with regions', async ({ pageObjects }) => {
     const { eisModels } = pageObjects;
 
     await test.step('open flyout for Anthropic Claude Sonnet 3.7', async () => {
@@ -176,36 +176,20 @@ test.describe('Model Detail Flyout', { tag: [...INFERENCE_LOCAL_TAGS] }, () => {
       await expect(eisModels.flyout).toBeVisible();
     });
 
-    await test.step('Regions row is visible with badges', async () => {
-      await expect(eisModels.flyoutRegionBadges).toBeVisible();
-    });
-
-    await test.step('US and APAC badges are shown with correct X/Y counts', async () => {
-      await expect(eisModels.flyoutRegionBadge('us')).toBeVisible();
-      await expect(eisModels.flyoutRegionBadge('us')).toContainText('US (1/1)');
-      await expect(eisModels.flyoutRegionBadge('apac')).toBeVisible();
-      await expect(eisModels.flyoutRegionBadge('apac')).toContainText('APAC (1/1)');
-    });
-
-    await test.step('EU badge is not shown (model has no EU regions)', async () => {
-      await expect(eisModels.flyoutRegionBadge('eu')).toBeHidden();
+    await test.step("Region options lists this model's geographies and regions", async () => {
+      await expect(eisModels.flyoutRegionOption('geo-apac')).toHaveText('Asia Pacific');
+      await expect(eisModels.flyoutRegionOption('geo-us')).toHaveText('North America');
+      await expect(eisModels.flyoutRegionOption('geo-eu')).toBeHidden();
+      await expect(eisModels.flyoutRegionOption('region-aws-ap-southeast-1')).toHaveText(
+        'ap-southeast-1 - AWS'
+      );
+      await expect(eisModels.flyoutRegionOption('region-aws-us-east-1')).toHaveText(
+        'us-east-1 - AWS'
+      );
     });
   });
 
-  test('flyout shows no region badges for a model without regions', async ({ pageObjects }) => {
-    const { eisModels } = pageObjects;
-
-    await test.step('open flyout for OpenAI GPT-4.1 (no regions in metadata)', async () => {
-      await eisModels.modelCard('OpenAI GPT-4.1').click();
-      await expect(eisModels.flyout).toBeVisible();
-    });
-
-    await test.step('Regions row is not shown', async () => {
-      await expect(eisModels.flyoutRegionBadges).toBeHidden();
-    });
-  });
-
-  test('flyout shows correct region badges for ELSER v2', async ({ pageObjects }) => {
+  test('flyout shows region options for ELSER', async ({ pageObjects }) => {
     const { eisModels } = pageObjects;
 
     await test.step('open flyout for Elastic ELSER v2', async () => {
@@ -213,15 +197,29 @@ test.describe('Model Detail Flyout', { tag: [...INFERENCE_LOCAL_TAGS] }, () => {
       await expect(eisModels.flyout).toBeVisible();
     });
 
-    await test.step('EU and US badges are shown with correct X/Y counts', async () => {
-      await expect(eisModels.flyoutRegionBadge('eu')).toBeVisible();
-      await expect(eisModels.flyoutRegionBadge('eu')).toContainText('EU (1/1)');
-      await expect(eisModels.flyoutRegionBadge('us')).toBeVisible();
-      await expect(eisModels.flyoutRegionBadge('us')).toContainText('US (1/1)');
+    await test.step('Region options lists Europe and North America, not Asia Pacific', async () => {
+      await expect(eisModels.flyoutRegionOption('geo-eu')).toHaveText('Europe');
+      await expect(eisModels.flyoutRegionOption('geo-us')).toHaveText('North America');
+      await expect(eisModels.flyoutRegionOption('geo-apac')).toBeHidden();
+      await expect(eisModels.flyoutRegionOption('region-aws-eu-west-1')).toHaveText(
+        'eu-west-1 - AWS'
+      );
+      await expect(eisModels.flyoutRegionOption('region-aws-us-east-1')).toHaveText(
+        'us-east-1 - AWS'
+      );
+    });
+  });
+
+  test('flyout hides region options when the model has no regions', async ({ pageObjects }) => {
+    const { eisModels } = pageObjects;
+
+    await test.step('open flyout for OpenAI GPT-4.1', async () => {
+      await eisModels.modelCard('OpenAI GPT-4.1').click();
+      await expect(eisModels.flyout).toBeVisible();
     });
 
-    await test.step('APAC badge is not shown (ELSER has no APAC regions)', async () => {
-      await expect(eisModels.flyoutRegionBadge('apac')).toBeHidden();
+    await test.step('Region options section is hidden', async () => {
+      await expect(eisModels.flyoutRegionOptions).toBeHidden();
     });
   });
 

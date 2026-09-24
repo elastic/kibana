@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, within, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import type { EisInferenceEndpoint } from '../../../common/types';
 import { ModelDetailFlyout } from './model_detail_flyout';
 import { useKibana } from '../../hooks/use_kibana';
@@ -166,58 +166,62 @@ describe('ModelDetailFlyout', () => {
     });
   });
 
-  describe('region badges', () => {
-    const endpointWithRegions = {
-      ...createEndpoint(),
-      metadata: {
-        regions: [{ csp: 'aws', region: 'us-east-1', geo: 'us' }],
-      },
-    } as unknown as EisInferenceEndpoint;
+  describe('region options', () => {
+    const endpointWithRegions = createEndpoint({
+      metadata: { regions: [{ csp: 'aws', region: 'us-east-1', geo: 'us' }] },
+    });
 
-    it('renders region badges when endpoint has region metadata', () => {
+    it('renders geography and region badges when the endpoint has region metadata', () => {
       renderFlyout(MODEL_ID, [endpointWithRegions]);
 
-      expect(screen.getByTestId('flyoutRegionBadges')).toBeInTheDocument();
-      expect(screen.getByTestId('flyoutRegionBadge-us')).toBeInTheDocument();
+      expect(screen.getByTestId('flyoutRegionOptions')).toBeInTheDocument();
+      expect(screen.getByTestId('flyoutRegionOption-geo-us')).toHaveTextContent('North America');
+      expect(screen.getByTestId('flyoutRegionOption-region-aws-us-east-1')).toHaveTextContent(
+        'us-east-1 - AWS'
+      );
     });
 
-    it('shows region_display_name in the region badge tooltip', async () => {
-      const endpoint = {
-        ...createEndpoint(),
-        metadata: {
-          regions: [
-            {
-              csp: 'aws',
-              region: 'eu-west-1',
-              geo: 'eu',
-              region_display_name: 'EU West (Ireland)',
-            },
-          ],
-        },
-      } as unknown as EisInferenceEndpoint;
-      renderFlyout(MODEL_ID, [endpoint]);
+    it('renders only the geography badge when the endpoint has geo-only metadata', () => {
+      renderFlyout(MODEL_ID, [
+        createEndpoint({
+          metadata: { regions: [{ geo: 'us' }] },
+        }),
+      ]);
 
-      fireEvent.mouseOver(screen.getByTestId('flyoutRegionBadge-eu'));
-      await waitFor(() => {
-        expect(screen.getByTestId('flyoutRegionBadgeTooltip-eu')).toHaveTextContent(
-          'EU West (Ireland)'
-        );
-      });
+      expect(screen.getByTestId('flyoutRegionOptions').textContent).toBe('North America');
     });
 
-    it('shows the region id in the tooltip when region_display_name is missing', async () => {
-      renderFlyout(MODEL_ID, [endpointWithRegions]);
+    it('renders one badge per region when several endpoints share it', () => {
+      renderFlyout(MODEL_ID, [
+        endpointWithRegions,
+        createEndpoint({
+          inference_id: 'ep-2',
+          metadata: { regions: [{ csp: 'aws', region: 'us-east-1', geo: 'us' }] },
+        }),
+      ]);
 
-      fireEvent.mouseOver(screen.getByTestId('flyoutRegionBadge-us'));
-      await waitFor(() => {
-        expect(screen.getByTestId('flyoutRegionBadgeTooltip-us')).toHaveTextContent('us-east-1');
-      });
+      expect(screen.getAllByTestId('flyoutRegionOption-region-aws-us-east-1')).toHaveLength(1);
+      expect(screen.getAllByTestId('flyoutRegionOption-geo-us')).toHaveLength(1);
     });
 
-    it('does not render region badges when endpoint has no region metadata', () => {
+    it('still renders region options when the model is denied by region policy', () => {
+      renderFlyout(MODEL_ID, [
+        createEndpoint({
+          metadata: {
+            denied_by_region_policy: true,
+            regions: [{ csp: 'aws', region: 'us-east-1', geo: 'us' }],
+          },
+        }),
+      ]);
+
+      expect(screen.getByTestId('modelDetailFlyoutRegionUnavailableCallout')).toBeInTheDocument();
+      expect(screen.getByTestId('flyoutRegionOptions')).toBeInTheDocument();
+    });
+
+    it('does not render region options when the endpoint has no region metadata', () => {
       renderFlyout();
 
-      expect(screen.queryByTestId('flyoutRegionBadges')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('flyoutRegionOptions')).not.toBeInTheDocument();
     });
   });
 
