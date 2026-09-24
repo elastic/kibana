@@ -121,6 +121,56 @@ describe('AccessControlForm', () => {
     expect(screen.queryByLabelText('Role for current')).not.toBeInTheDocument();
   });
 
+  it('distinguishes users with the same display name in suggestions and access entries', async () => {
+    const onChange = jest.fn();
+    const profiles = ['alice', 'bob'].map((username) => ({
+      uid: `profile-${username}`,
+      enabled: true,
+      user: { username, full_name: 'Alex Smith' },
+      data: {},
+    }));
+    const props = {
+      onChange,
+      profiles,
+      suggestedProfiles: profiles,
+      onSearch: jest.fn(),
+      roles,
+      publicDescription: 'Visible in this space',
+    };
+    const { rerender } = render(
+      <EuiProvider>
+        <AccessControlForm {...props} value={{ access_mode: 'private', entries: [] }} />
+      </EuiProvider>
+    );
+
+    await userEvent.click(screen.getByRole('combobox', { name: 'Find users' }));
+    expect(screen.getByRole('option', { name: /Alex Smith.*alice/ })).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('option', { name: /Alex Smith.*bob/ }));
+    expect(onChange).toHaveBeenCalledWith({
+      access_mode: 'private',
+      entries: [{ type: 'user', id: 'profile-bob', role: 'viewer' }],
+    });
+
+    const entries = profiles.map(({ uid }) => ({
+      type: 'user' as const,
+      id: uid,
+      role: 'viewer' as const,
+    }));
+    rerender(
+      <EuiProvider>
+        <AccessControlForm {...props} value={{ access_mode: 'private', entries }} />
+      </EuiProvider>
+    );
+    expect(screen.getAllByText('Alex Smith')).toHaveLength(2);
+    expect(screen.getByText('alice')).toBeInTheDocument();
+    expect(screen.getByText('bob')).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Remove alice' }));
+    expect(onChange).toHaveBeenLastCalledWith({
+      access_mode: 'private',
+      entries: [entries[1]],
+    });
+  });
+
   it('prevents edits while saving', () => {
     renderForm(true);
     expect(screen.getByLabelText('Visibility')).toBeDisabled();

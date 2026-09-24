@@ -91,11 +91,18 @@ export const AccessControlForm = <Role extends string>({
   const excludedIds = new Set([ownerId, currentUserId, ...entries.map(({ id }) => id)]);
   const options = suggestedProfiles
     .filter(({ uid }) => !excludedIds.has(uid))
-    .map((profile) => ({ value: profile.uid, label: getUserDisplayName(profile.user) }));
+    .map(({ uid, user }) => {
+      const displayName = getUserDisplayName(user);
+      return {
+        value: uid,
+        label: displayName === user.username ? displayName : `${displayName} (${user.username})`,
+      };
+    });
   const owner = ownerId ? profileById.get(ownerId) : undefined;
 
   const renderUser = (id: string) => {
     const profile = profileById.get(id);
+    const displayName = profile ? getUserDisplayName(profile.user) : id;
     return (
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         {profile && (
@@ -104,7 +111,12 @@ export const AccessControlForm = <Role extends string>({
           </EuiFlexItem>
         )}
         <EuiFlexItem>
-          <EuiText size="s">{profile ? getUserDisplayName(profile.user) : id}</EuiText>
+          <EuiText size="s">{displayName}</EuiText>
+          {profile && profile.user.username !== displayName && (
+            <EuiText size="xs" color="subdued">
+              {profile.user.username}
+            </EuiText>
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     );
@@ -185,6 +197,7 @@ export const AccessControlForm = <Role extends string>({
               }
             }}
             renderOption={({ value: id }) => (id ? renderUser(id) : null)}
+            rowHeight="auto"
             singleSelection={{ asPlainText: true }}
             isDisabled={isDisabled || entries.length >= ACCESS_CONTROL_MAX_ENTRIES}
             isLoading={isSearching}
