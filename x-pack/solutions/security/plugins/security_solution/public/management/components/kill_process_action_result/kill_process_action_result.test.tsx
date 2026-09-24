@@ -189,6 +189,47 @@ describe('KillSuspendProcessActionResult', () => {
     ).not.toBeNull();
   });
 
+  it('should render the process output (not just a failure message) when the action failed but output is present', () => {
+    action = {
+      ...action,
+      isCompleted: true,
+      wasSuccessful: false,
+      errors: ['Some failure'],
+      agentState: {
+        'agent-a': {
+          isCompleted: true,
+          wasSuccessful: false,
+          wasCanceled: false,
+          completedAt: '2022-04-30T16:08:47.449Z',
+          errors: ['Some failure'],
+        },
+      },
+      outputs: {
+        'agent-a': {
+          type: 'json',
+          content: {
+            code: 'ra_kill-process_error_partial-descendants',
+            pid: 1234,
+            entity_id: 'entity-a',
+          },
+        },
+      },
+    };
+
+    const { getByTestId, queryByTestId } = render();
+    const output = getByTestId(testPrefix).textContent ?? '';
+
+    expect(output).toContain('PID 1234');
+    expect(output).toContain('Entity ID entity-a');
+    expect(output).toContain(
+      'Failed to kill the provided process, but some descendant processes were killed'
+    );
+    // The generic action failure message should NOT be rendered when output content is available
+    expect(
+      queryByTestId(`${testPrefix}-agent-a-outputFailureMessage-response-action-failure-info`)
+    ).toBeNull();
+  });
+
   it('should default to the first agent when the agentId prop is not provided', () => {
     action = generator.generateActionDetails<
       KillProcessActionOutputContent | SuspendProcessActionOutputContent,
@@ -371,6 +412,42 @@ describe('KillSuspendProcessActionResult', () => {
 
       expect(getByTestId(testPrefix).textContent).not.toContain('Descendants');
       expect(queryByTestId(`${testPrefix}-agent-a-processTree`)).toBeNull();
+    });
+
+    it('should render the descendants tree even when the action was not successful', () => {
+      action = {
+        ...action,
+        isCompleted: true,
+        wasSuccessful: false,
+        errors: ['Failed to kill the parent process'],
+        agentState: {
+          'agent-a': {
+            isCompleted: true,
+            wasSuccessful: false,
+            wasCanceled: false,
+            completedAt: '2022-04-30T16:08:47.449Z',
+            errors: ['Failed to kill the parent process'],
+          },
+        },
+        outputs: {
+          'agent-a': {
+            type: 'json',
+            content: {
+              code: 'ra_kill-process_error_partial-descendants',
+              pid: 234,
+              descendants,
+            },
+          },
+        },
+      };
+
+      const { getByTestId } = render();
+      const treeTestId = `${testPrefix}-agent-a-processTree`;
+
+      expect(getByTestId(testPrefix).textContent).toContain('Descendants (6)');
+      [456, 567, 5671, 56711, 56712, 654].forEach((pid) => {
+        expect(getByTestId(`${treeTestId}-${pid}`)).not.toBeNull();
+      });
     });
 
     it('should not render the descendants section when the output has no descendants', () => {
