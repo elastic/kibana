@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import {
-  ecsPodGroupByFields,
-  podGroupByFieldsForSchema,
-  semconvPodGroupByFields,
-} from './pod_toolbar_items';
+import { podGroupByFieldsForSchema } from './pod_toolbar_items';
+
+const ECS_POD_GROUP_BY_FIELDS = ['kubernetes.namespace', 'kubernetes.node.name', 'service.type'];
+
+const SEMCONV_POD_GROUP_BY_FIELDS = ['k8s.namespace.name', 'k8s.node.name', 'k8s.deployment.name'];
 
 describe('podGroupByFieldsForSchema', () => {
   it('keeps ECS fields while the selector flag is off, even with OpenTelemetry preferred', () => {
-    expect(podGroupByFieldsForSchema('semconv', false)).toEqual(ecsPodGroupByFields);
+    expect(podGroupByFieldsForSchema('semconv', false)).toEqual(ECS_POD_GROUP_BY_FIELDS);
   });
 
   it('uses SemConv fields when the flag is on and preferredSchema is OpenTelemetry', () => {
-    expect(podGroupByFieldsForSchema('semconv', true)).toEqual(semconvPodGroupByFields);
+    expect(podGroupByFieldsForSchema('semconv', true)).toEqual(SEMCONV_POD_GROUP_BY_FIELDS);
   });
 
   it('uses SemConv fields when preferredSchema is still null (DEFAULT_SCHEMA is semconv)', () => {
-    expect(podGroupByFieldsForSchema(null, true)).toEqual(semconvPodGroupByFields);
+    expect(podGroupByFieldsForSchema(null, true)).toEqual(SEMCONV_POD_GROUP_BY_FIELDS);
   });
 
   it('uses ECS fields when the flag is on and Elastic System Integration is selected', () => {
-    expect(podGroupByFieldsForSchema('ecs', true)).toEqual(ecsPodGroupByFields);
+    expect(podGroupByFieldsForSchema('ecs', true)).toEqual(ECS_POD_GROUP_BY_FIELDS);
   });
 });
