@@ -147,6 +147,11 @@ export type LogDocument = Fields &
     'span.id'?: string;
     'error.type'?: string;
     'error.code'?: string;
+
+    // Unprocessed OTel exception log fields (stored at the document root, not nested in attributes)
+    event_name?: string;
+    'exception.type'?: string;
+    'exception.message'?: string;
   }>;
 
 class Log extends Serializable<LogDocument> {

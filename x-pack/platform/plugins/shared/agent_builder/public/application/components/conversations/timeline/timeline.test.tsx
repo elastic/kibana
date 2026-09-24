@@ -9,9 +9,14 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { TimelineItem } from './types';
 import { createUserMessageEvent } from './items/user_message_event.factory';
+import { createAttachmentAddedEvent } from './items/attachment_added_event.factory';
+import { createAttachmentItem } from './items/timeline_item.factory';
 import { Timeline } from './timeline';
 
 jest.mock('./items/user_message_event', () => ({ UserMessageEvent: () => null }));
+jest.mock('./items/attachment_event', () => ({
+  AttachmentEvent: () => <div data-test-subj="attachmentEvent" />,
+}));
 jest.mock('./agent_turn', () => ({
   AgentTurn: ({ isResuming }: { isResuming?: boolean }) => (
     <div data-test-subj="agentTurn" data-resuming={String(isResuming)} />
@@ -29,6 +34,7 @@ describe('Timeline', () => {
         startedAt: '2025-01-01T00:00:10.000Z',
         steps: [],
       },
+      createAttachmentItem({ key: 'attachment-added-1' }),
     ];
 
     const { container } = render(<Timeline items={items} />);
@@ -37,7 +43,8 @@ describe('Timeline', () => {
       Array.from(container.querySelectorAll('[data-timeline-item-key]')).map((el) =>
         el.getAttribute('data-timeline-item-key')
       )
-    ).toEqual(['round-1::user_message', 'round-1::execution']);
+    ).toEqual(['round-1::user_message', 'round-1::execution', 'attachment-added-1']);
+    expect(screen.getByTestId('attachmentEvent')).toBeInTheDocument();
   });
 
   describe('resume loading', () => {
@@ -69,6 +76,17 @@ describe('Timeline', () => {
       render(<Timeline items={[message('u1'), turn('t1'), message('u2'), turn('t2')]} />);
 
       expect(resumingFlags()).toEqual(['false', 'false']);
+    });
+
+    it('still marks the last turn when an inline attachment follows it', () => {
+      render(
+        <Timeline
+          items={[message('u1'), turn('t1'), createAttachmentItem({ key: 'a1' })]}
+          isResuming
+        />
+      );
+
+      expect(resumingFlags()).toEqual(['true']);
     });
   });
 
@@ -125,6 +143,24 @@ describe('Timeline', () => {
       render(<Timeline items={[message('u1', new Date().toISOString())]} />);
 
       expect(screen.getByRole('separator')).toHaveAttribute('aria-label', 'Today');
+    });
+
+    it('dates an attachment item by its event', () => {
+      const attachment = createAttachmentItem({
+        key: 'a1',
+        event: createAttachmentAddedEvent({ id: 'a1', created_at: '2025-01-02T09:00:00.000Z' }),
+      });
+      const { container } = render(
+        <Timeline items={[message('u1', '2025-01-01T09:00:00.000Z'), attachment]} />
+      );
+
+      const children = Array.from(container.querySelector('.euiFlexGroup')!.children);
+      const kinds = children.map((el) =>
+        el.getAttribute('role') === 'separator'
+          ? 'divider'
+          : el.getAttribute('data-timeline-item-key')
+      );
+      expect(kinds).toEqual(['divider', 'u1', 'divider', 'a1']);
     });
   });
 });

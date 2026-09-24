@@ -13,8 +13,10 @@ import {
   EuiTextBlockTruncate,
   EuiTitle,
 } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import type { GetKiResponse, KiListItem } from '../../../../common/http_api/knowledge_indicators';
 import { useKi } from '../../hooks/use_ki';
 import { getErrorMessage } from '../../utils/get_error_message';
@@ -85,7 +87,13 @@ export const KiRow = ({ aiIndexId, ki }: KiRowProps) => {
       borders="none"
       paddingSize="s"
       data-test-subj="contextKiRow"
-      buttonProps={{ 'data-test-subj': 'contextKiRowToggle' }}
+      buttonProps={{
+        'data-test-subj': 'contextKiRowToggle',
+        ...getEbtProps({
+          element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageKiListPanel,
+          action: CONTEXT_ENGINE_UI_EBT.action.kiList.TOGGLE_ROW,
+        }),
+      }}
       onToggle={setIsOpen}
       buttonContent={
         <div>
