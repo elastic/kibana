@@ -117,6 +117,11 @@ export const FlakyTestEntrySchema = z.object({
   suiteTitle: z.optional(z.string()),
   filePath: z.string(),
   configPath: z.optional(z.string()),
+  /**
+   * What the config runs: `ui-test`, `api-test`, `unit-test`, `unit-integration-test` or
+   * `unknown`. Absent in reports written before the field existed.
+   */
+  configCategory: z.optional(z.string()),
   owners: z.array(z.string()),
   areas: z.array(z.string()),
   /** Executions that were not skipped. */
@@ -164,6 +169,11 @@ export const FlakyTestPipelineStatsSchema = z.object({
   buildFailRate: z.number(),
   /** Distinct branches with at least one failed execution. */
   failedBranches: z.int(),
+  /**
+   * Names of those branches, sorted; pull request builds record the head ref as `owner:branch`.
+   * Absent in reports written before the field existed.
+   */
+  failedBranchNames: z.optional(z.array(z.string())),
   lastFailedAt: z.optional(z.coerce.date()),
   /** The most recent build with a failure. */
   lastFailedBuildUrl: z.optional(z.string()),

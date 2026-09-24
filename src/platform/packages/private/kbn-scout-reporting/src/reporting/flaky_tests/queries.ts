@@ -53,6 +53,7 @@ export interface TestMetadataRow {
   suiteTitle?: string;
   filePath?: string;
   configPath?: string;
+  configCategory?: string;
   owners: string[];
   areas: string[];
 }
@@ -239,6 +240,7 @@ export const buildTestMetadataQuery = (
       ' suite_title = MAX(suite.title.keyword),' +
       ' file_path = MAX(test.file.path),' +
       ' config_path = MAX(test_run.config.file.path),' +
+      ' config_category = MAX(test_run.config.category),' +
       ' owners = VALUES(test.file.owner),' +
       ' areas = VALUES(test.file.area)' +
       ' BY test.id',
@@ -317,6 +319,7 @@ export const fetchTestMetadata = async (
     suite_title: string | null;
     file_path: string | null;
     config_path: string | null;
+    config_category: string | null;
     owners: string | string[] | null;
     areas: string | string[] | null;
   }>(es, buildTestMetadataQuery(scope, frameworks));
@@ -333,6 +336,7 @@ export const fetchTestMetadata = async (
             : undefined,
         filePath: record.file_path ?? undefined,
         configPath: record.config_path ?? undefined,
+        configCategory: record.config_category ?? undefined,
         owners: asArray(record.owners),
         areas: asArray(record.areas),
       },
@@ -551,6 +555,7 @@ export const buildFilePipelineStatsQuery = (
     'STATS builds = COUNT_DISTINCT(buildkite.build.id),' +
       ' failed_builds = COUNT_DISTINCT(CASE(failed == 1, buildkite.build.id, NULL)),' +
       ' failed_branches = COUNT_DISTINCT(CASE(failed == 1, buildkite.branch, NULL)),' +
+      ' failed_branch_names = VALUES(CASE(failed == 1, buildkite.branch, NULL)),' +
       ' last_failed_at = MAX(CASE(failed == 1, @timestamp, NULL)),' +
       ' last_failed_build_url = LAST(buildkite.build.url, @timestamp) WHERE failed == 1,' +
       ' last_failed_job_id = LAST(buildkite.job_id, @timestamp) WHERE failed == 1,' +
@@ -585,6 +590,7 @@ export const fetchFilePipelineStats = async (
         builds: number;
         failed_builds: number;
         failed_branches: number;
+        failed_branch_names: string | string[] | null;
         last_failed_at: string | null;
         last_failed_build_url: string | null;
         last_failed_job_id: string | null;
@@ -604,6 +610,7 @@ export const fetchFilePipelineStats = async (
       failedBuilds: record.failed_builds,
       buildFailRate: record.builds > 0 ? record.failed_builds / record.builds : 0,
       failedBranches: record.failed_branches,
+      failedBranchNames: asArray(record.failed_branch_names).sort(),
       lastFailedAt: record.last_failed_at ? new Date(record.last_failed_at) : undefined,
       lastFailedBuildUrl: record.last_failed_build_url || undefined,
       lastFailedJobId: record.last_failed_job_id || undefined,

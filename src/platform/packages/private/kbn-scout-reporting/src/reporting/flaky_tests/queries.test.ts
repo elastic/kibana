@@ -390,6 +390,7 @@ describe('buildTestMetadataQuery', () => {
 
     expect(query).toContain('test.status IN ("failed", "timedOut")');
     expect(query).toContain('title = MAX(test.title.keyword)');
+    expect(query).toContain('config_category = MAX(test_run.config.category)');
     expect(query).toContain('suite_title = MAX(suite.title.keyword)');
     expect(query).toContain('owners = VALUES(test.file.owner)');
     expect(query).toContain('BY test.id');
@@ -459,6 +460,7 @@ describe('fetchTestMetadata', () => {
         suite_title: 'my suite',
         file_path: 'a.ts',
         config_path: 'a.config.ts',
+        config_category: 'api-test',
         owners: 'elastic/team-a',
         areas: ['platform', 'security'],
       },
@@ -468,6 +470,7 @@ describe('fetchTestMetadata', () => {
         suite_title: null,
         file_path: null,
         config_path: null,
+        config_category: null,
         owners: null,
         areas: null,
       },
@@ -481,6 +484,7 @@ describe('fetchTestMetadata', () => {
       suiteTitle: 'my suite',
       filePath: 'a.ts',
       configPath: 'a.config.ts',
+      configCategory: 'api-test',
       owners: ['elastic/team-a'],
       areas: ['platform', 'security'],
     });
@@ -490,6 +494,7 @@ describe('fetchTestMetadata', () => {
       suiteTitle: undefined,
       filePath: undefined,
       configPath: undefined,
+      configCategory: undefined,
       owners: [],
       areas: [],
     });
@@ -719,6 +724,7 @@ describe('buildFilePipelineStatsQuery', () => {
     expect(query).toContain('test.id IN ("j1")');
     expect(query).toContain(
       'failed_branches = COUNT_DISTINCT(CASE(failed == 1, buildkite.branch, NULL)), ' +
+        'failed_branch_names = VALUES(CASE(failed == 1, buildkite.branch, NULL)), ' +
         'last_failed_at = MAX(CASE(failed == 1, @timestamp, NULL)), ' +
         'last_failed_build_url = LAST(buildkite.build.url, @timestamp) WHERE failed == 1, ' +
         'last_failed_job_id = LAST(buildkite.job_id, @timestamp) WHERE failed == 1, ' +
@@ -749,6 +755,7 @@ describe('fetchFilePipelineStats', () => {
         builds: 700,
         failed_builds: 140,
         failed_branches: 100,
+        failed_branch_names: ['someone:fix-it', 'main', 'else:feature'],
         last_failed_at: '2026-09-06T08:00:00.000Z',
         last_failed_build_url: 'https://buildkite.com/elastic/kibana-pull-request/builds/499472',
         last_failed_job_id: 'job-1',
@@ -761,6 +768,7 @@ describe('fetchFilePipelineStats', () => {
         builds: 500,
         failed_builds: 98,
         failed_branches: 1,
+        failed_branch_names: 'main',
         last_failed_at: '2026-09-06T09:00:00.000Z',
         last_failed_build_url: null,
         last_failed_job_id: null,
@@ -788,6 +796,7 @@ describe('fetchFilePipelineStats', () => {
         failedBuilds: 140,
         buildFailRate: 0.2,
         failedBranches: 100,
+        failedBranchNames: ['else:feature', 'main', 'someone:fix-it'],
         lastFailedAt: new Date('2026-09-06T08:00:00.000Z'),
         lastFailedBuildUrl: 'https://buildkite.com/elastic/kibana-pull-request/builds/499472',
         lastFailedJobId: 'job-1',
@@ -799,6 +808,7 @@ describe('fetchFilePipelineStats', () => {
         failedBuilds: 98,
         buildFailRate: 0.196,
         failedBranches: 1,
+        failedBranchNames: ['main'],
         lastFailedAt: new Date('2026-09-06T09:00:00.000Z'),
         lastFailedBuildUrl: undefined,
         lastFailedJobId: undefined,
@@ -815,6 +825,7 @@ describe('fetchFilePipelineStats', () => {
       builds: 100,
       failed_builds: failedBuilds,
       failed_branches: 1,
+      failed_branch_names: null,
       last_failed_at: null,
       last_failed_build_url: null,
       last_failed_job_id: null,

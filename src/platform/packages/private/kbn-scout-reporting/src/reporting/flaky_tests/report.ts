@@ -142,6 +142,7 @@ const toEntry = (
   suiteTitle: metadata?.suiteTitle,
   filePath: metadata?.filePath ?? '(unknown)',
   configPath: metadata?.configPath,
+  configCategory: metadata?.configCategory,
   owners: metadata?.owners ?? [],
   areas: metadata?.areas ?? [],
   runs: stats.runs,
