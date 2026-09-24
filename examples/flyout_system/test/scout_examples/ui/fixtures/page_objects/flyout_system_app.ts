@@ -28,9 +28,6 @@ const ROOT_SUBJ_STEM: Record<FlyoutForm, string> = {
 
 const subj = (value: string) => `[data-test-subj="${value}"]`;
 
-/** Popovers and context menus render here, outside the flyout root, so scans must include it. */
-export const PORTAL_SELECTOR = '[data-euiportal="true"]';
-
 /**
  * Page object for the flyout_system example app.
  * Locators are scoped to individual flyout roots to handle parent and child flyouts.
@@ -139,6 +136,11 @@ export class FlyoutSystemApp {
     return this.flyout(form, session).locator(subj('flyoutHeaderBadgeOverflow'));
   }
 
+  /** The popover renders in a portal, outside the flyout root, so this is not scoped to it. */
+  badgeOverflowPanelSelector(): string {
+    return subj('flyoutHeaderBadgeOverflowPanel');
+  }
+
   metaBlockLink(form: FlyoutForm, session: string): Locator {
     return this.flyout(form, session).locator(subj('flyoutMetaBlockLink'));
   }
@@ -205,8 +207,12 @@ export class FlyoutSystemApp {
   }
 
   /** The menu renders in a portal, outside the flyout root, so this is not scoped to it. */
+  childFooterMenuPanelSelector(form: FlyoutForm, session: string): string {
+    return subj(`${this.childFooterMenuSubj(form, session)}Panel`);
+  }
+
   childFooterMenuPanel(form: FlyoutForm, session: string): Locator {
-    return this.page.locator(subj(`${this.childFooterMenuSubj(form, session)}Panel`));
+    return this.page.locator(this.childFooterMenuPanelSelector(form, session));
   }
 
   // Interactions.

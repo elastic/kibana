@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { FlyoutSystemApp, PORTAL_SELECTOR } from './flyout_system_app';
+export { FlyoutSystemApp } from './flyout_system_app';
 export type { ChildLabel, FlyoutForm } from './flyout_system_app';

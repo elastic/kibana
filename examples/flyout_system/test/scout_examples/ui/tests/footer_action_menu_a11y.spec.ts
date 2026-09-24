@@ -9,7 +9,7 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { PORTAL_SELECTOR, test } from '../fixtures';
+import { test } from '../fixtures';
 import type { FlyoutForm, FlyoutSystemApp } from '../fixtures';
 
 const FORMS: FlyoutForm[] = ['component', 'service'];
@@ -127,7 +127,10 @@ test.describe(
         await expect(panel.getByRole('menuitem', { name: 'Add to case' })).toBeVisible();
 
         const { violations } = await page.checkA11y({
-          include: [app.childRootSelector(form, session, 'B'), PORTAL_SELECTOR],
+          include: [
+            app.childRootSelector(form, session, 'B'),
+            app.childFooterMenuPanelSelector(form, session),
+          ],
         });
         expect(violations).toHaveLength(0);
       });

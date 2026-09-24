@@ -9,7 +9,7 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { PORTAL_SELECTOR, test } from '../fixtures';
+import { test } from '../fixtures';
 import type { FlyoutForm } from '../fixtures';
 
 const FORMS: FlyoutForm[] = ['component', 'service'];
@@ -131,9 +131,8 @@ test.describe('Flyout System - full surface accessibility', { tag: tags.stateful
       await expect(popover).toBeVisible();
       await expect(popover.getByText('Metadata 3 very very very very long label')).toBeVisible();
 
-      // Popover renders in an EuiPortal, outside the flyout root.
       const { violations } = await page.checkA11y({
-        include: [app.rootSelector(form, session), PORTAL_SELECTOR],
+        include: [app.rootSelector(form, session), app.badgeOverflowPanelSelector()],
       });
       expect(violations).toHaveLength(0);
     });

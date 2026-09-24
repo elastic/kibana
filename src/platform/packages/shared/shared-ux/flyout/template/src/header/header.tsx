@@ -184,6 +184,7 @@ const BadgeOverflow = ({ badges, isHidden }: { badges: ReactNode[]; isHidden: bo
       closePopover={() => setIsOpen(false)}
       anchorPosition="downCenter"
       panelPaddingSize="s"
+      panelProps={{ 'data-test-subj': 'flyoutHeaderBadgeOverflowPanel' }}
       button={
         <EuiBadge
           color="hollow"
