@@ -147,6 +147,15 @@ describe('mapClassicAlertToEpisode', () => {
     expect(episode).not.toHaveProperty('snooze_expiry');
   });
 
+  it('preserves classic warning severity without mapping it to medium', () => {
+    const episode = mapClassicAlertToEpisode(
+      { ...baseSource, 'kibana.alert.severity': 'Warning' },
+      TEST_INDEX
+    );
+
+    expect(episode.severity).toBe('warning');
+  });
+
   it('maps kibana.alert.grouping onto source_grouping', () => {
     const episode = mapClassicAlertToEpisode(
       {

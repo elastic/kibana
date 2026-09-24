@@ -115,6 +115,7 @@ export const proposalToInvestigation = (proposal: ProposalItem): Investigation =
     // because the flyout header renders one avatar. First entry wins, as in the
     // conversation adapter.
     assignee: proposal.conversationAssignees[0] ?? null,
+    assignees: proposal.conversationAssignees,
     events: [],
     entityIds: proposal.entityIds,
     // First id feeds the flyout Overview "Compromised" row until that surface
