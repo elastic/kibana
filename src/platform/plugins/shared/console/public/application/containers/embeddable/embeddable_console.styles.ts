@@ -69,6 +69,7 @@ export const useStyles = () => {
       left: calc(
         var(--euiCollapsibleNavOffset, 0) + ${layoutVar('application.content.left', '0px')}
       );
+      border-radius: 0 0 ${euiTheme.border.radius.frame} ${euiTheme.border.radius.frame};
     `,
 
     embeddableConsoleChromeClassic: css`

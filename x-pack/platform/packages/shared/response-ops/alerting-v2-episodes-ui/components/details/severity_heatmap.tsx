@@ -169,6 +169,7 @@ export const AlertEpisodeSeverityHeatmap = ({
   return (
     <EuiPanel
       hasShadow={false}
+      hasBorder={false}
       paddingSize="none"
       data-test-subj="alertingV2EpisodeSeverityHeatmap"
     >

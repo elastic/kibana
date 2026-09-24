@@ -20,10 +20,9 @@ export function InfoPanel({ title, headerRightContent, children }: InfoPanelProp
   return (
     <EuiPanel
       hasBorder
-      borderRadius="none"
+      borderRadius="m"
       css={css`
         padding: 0;
-        border-radius: ${euiTheme.border.radius.medium};
       `}
     >
       <EuiText
@@ -32,6 +31,8 @@ export function InfoPanel({ title, headerRightContent, children }: InfoPanelProp
           background: ${euiTheme.colors.backgroundBaseSubdued};
           padding: ${euiTheme.size.m};
           border-bottom: ${euiTheme.border.thin};
+          border-top-left-radius: ${euiTheme.border.radius.panel};
+          border-top-right-radius: ${euiTheme.border.radius.panel};
           font-weight: ${euiTheme.font.weight.semiBold};
         `}
       >

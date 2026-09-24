@@ -136,7 +136,7 @@ const TABLE_ROW_LINE_HEIGHT = '24px';
 
 const getTableCss = (euiTheme: EuiThemeComputed) => css`
   height: 100%;
-  border-radius: ${euiTheme.border.radius.medium};
+  border-radius: ${euiTheme.border.radius.panel};
   border: ${euiTheme.border.thin};
   overflow: hidden;
 
