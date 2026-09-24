@@ -39,6 +39,14 @@ const SUITES = {
       configPath: 'x-pack/smoke-tests/playwright.config.ts',
       defaultModelGroups: ['eis/anthropic-claude-4.5-haiku'],
     },
+    {
+      id: 'long-run',
+      name: 'Long Run',
+      ciLabels: ['evals:long-run'],
+      configPath: 'x-pack/long-run/playwright.config.ts',
+      defaultModelGroups: ['eis/anthropic-claude-4.6-sonnet'],
+      ci: { excludeFromAll: true },
+    },
   ],
 };
 
@@ -125,6 +133,15 @@ describe('eval_pipeline', () => {
       const yaml = getEvalPipeline(labels) as string;
       expect(yaml).toContain('kbn-evals-agent-builder');
       expect(yaml).not.toContain('kbn-evals-smoke-tests');
+    });
+
+    it('leaves a suite that opted out of `evals:all` to its own label', () => {
+      const all = getEvalPipeline('evals:all,models:eis/openai-gpt-5.4') as string;
+      expect(all).toContain('kbn-evals-agent-builder');
+      expect(all).not.toContain('kbn-evals-long-run');
+
+      const own = getEvalPipeline('evals:long-run') as string;
+      expect(own).toContain('kbn-evals-long-run');
     });
 
     it('drops a skipped suite from `evals:all` too', () => {

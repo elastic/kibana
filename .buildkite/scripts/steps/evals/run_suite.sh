@@ -42,6 +42,55 @@ EVAL_SUITE_SLACK_CHANNEL="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.slackChan
 # Per-suite step timeout for suites that legitimately need longer than the 120m default.
 EVAL_SUITE_STEP_TIMEOUT="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.stepTimeoutInMinutes // empty' 2>/dev/null || true)"
 
+# The CI defaults below decide which eval a suite runs, so an unreadable registry must not pass
+# as "no defaults" and silently run another selection.
+if [[ -z "${EVAL_SUITE_INFO}" ]]; then
+  echo "Could not read suite ${EVAL_SUITE_ID} from .buildkite/pipelines/evals/evals.suites.json" >&2
+  exit 1
+fi
+
+# A suite can declare CI-only defaults under `ci.env` in evals.suites.json: each value applies when
+# that variable is unset or empty. Resolve them before fanout so child steps and baseline refreshes
+# run the same selection.
+EVAL_SUITE_CI_ENV="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '(.ci.env // {}) | to_entries[] | [.key, .value] | @tsv')"
+EVAL_SUITE_CI_ENV_NAMES=()
+while IFS=$'\t' read -r ci_env_name ci_env_default; do
+  [[ -z "$ci_env_name" ]] && continue
+  EVAL_SUITE_CI_ENV_NAMES+=("$ci_env_name")
+  if [[ -z "${!ci_env_name:-}" ]]; then
+    export "$ci_env_name=$ci_env_default"
+  fi
+  # The value is written into a double-quoted YAML scalar for the fanout steps; a build-level
+  # override must be as plain as the committed defaults.
+  if [[ ! "${!ci_env_name}" =~ ^[A-Za-z0-9_.,:/-]+$ ]]; then
+    echo "Suite ${EVAL_SUITE_ID}: ${ci_env_name} must contain only letters, digits and _.,:/- to be forwarded to fanout steps." >&2
+    exit 1
+  fi
+done <<<"${EVAL_SUITE_CI_ENV}"
+
+# A suite can also list `ci.requiredConfig`: dotted paths into the evals Vault config (decoded from
+# `KBN_EVALS_CONFIG_B64`, which the pre-command hook exports) that its selection cannot run without,
+# e.g. the `sandbox` and `nightshift.telemetry` blocks the suite's scout hook turns into env. Fail
+# here, before any stack boots, instead of starting Kibana without them and running the wrong eval.
+while IFS= read -r required_path; do
+  [[ -z "$required_path" ]] && continue
+  required_present="$(printf '%s' "${KBN_EVALS_CONFIG_B64:-}" | base64 -d 2>/dev/null \
+    | jq -r --arg path "$required_path" \
+      '(try getpath($path | split(".")) catch null) | if type == "string" and length > 0 and (contains("REPLACE_ME") | not) then "yes" else "no" end' 2>/dev/null || true)"
+  if [[ "$required_present" != "yes" ]]; then
+    echo "Suite ${EVAL_SUITE_ID} requires \`${required_path}\` in the evals Vault config (kbn-evals), which is missing or a placeholder; add it, then rerun." >&2
+    exit 1
+  fi
+done < <(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '(.ci.requiredConfig // [])[]')
+
+# Emits YAML `env` entries that forward the suite's `ci.env` selection to uploaded or triggered steps.
+suite_ci_env_yaml() {
+  local indent="$1" name
+  for name in ${EVAL_SUITE_CI_ENV_NAMES[@]+"${EVAL_SUITE_CI_ENV_NAMES[@]}"}; do
+    printf '%s%s: "%s"\n' "$indent" "$name" "${!name:-}"
+  done
+}
+
 cleanup() {
   if [[ -n "${SCOUT_PID:-}" ]]; then
     kill "$SCOUT_PID" 2>/dev/null || true
@@ -283,6 +332,7 @@ EOF
           EVAL_FANOUT: "0"
           TEST_RUN_ID: "${TEST_RUN_ID:-}"
           EVAL_SERVER_CONFIG_SET: "${EVAL_SERVER_CONFIG_SET:-}"
+$(suite_ci_env_yaml '          ')
           EVAL_GREP: "${EVAL_GREP:-}"
           EVAL_GREP_INVERT: "${EVAL_GREP_INVERT:-}"
           EVAL_SPEC_FILES: "${shard_spec_file_args}"
@@ -429,6 +479,7 @@ EOF
         EVAL_INCLUDE_EIS_MODELS: "${EVAL_INCLUDE_EIS_MODELS:-}"
         EVAL_MODEL_GROUPS: "${EVAL_MODEL_GROUPS:-}"
         EVAL_SERVER_CONFIG_SET: "${EVAL_SERVER_CONFIG_SET:-}"
+$(suite_ci_env_yaml '        ')
 EOF
       elif [[ -n "${FRESH_BASELINE_PR_EXPERIMENT_ID:-}" ]]; then
         # Fresh-baseline mode: emit the post-comparison step inside the fanout so
@@ -500,6 +551,8 @@ if [[ -n "$EVAL_SUITE_SCOUT_HOOK" ]]; then
     [[ -z "$_scout_hook_name" ]] && continue
     export "$_scout_hook_name=$(printf '%s' "$_scout_hook_output" | jq -r --arg name "$_scout_hook_name" '.env[$name]')"
   done < <(printf '%s' "$_scout_hook_output" | jq -r '(.env // {}) | keys[]')
+  # Names only, never values: the log shows which credentials reached the step.
+  echo "--- Scout hook env: $(printf '%s' "$_scout_hook_output" | jq -r '(.env // {}) | to_entries | map("\(.key)=\(if .value == "" then "empty" else "set" end)") | join(" ")')"
   unset _scout_hook_config _scout_hook_output _scout_hook_name
 fi
 

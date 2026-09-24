@@ -154,6 +154,43 @@
       "stepTimeoutInMinutes": 60
     },
     {
+      "id": "nightshift-investigations-customer0",
+      "name": "Nightshift Investigations (customer0)",
+      "slackChannel": "#nightshift-alerts",
+      "configPath": "x-pack/solutions/observability/packages/kbn-evals-suite-nightshift-investigations/playwright.config.ts",
+      "serverConfigSet": "evals_nightshift_investigations",
+      "scoutHook": "x-pack/solutions/observability/packages/kbn-evals-suite-nightshift-investigations/scout/scout_hook.sh",
+      "tags": [
+        "observability",
+        "nightshift-investigations"
+      ],
+      "ciLabels": [
+        "evals:nightshift-investigations-customer0"
+      ],
+      "stepTimeoutInMinutes": 180,
+      "defaultModelGroups": [
+        "eis/anthropic-claude-4.6-sonnet"
+      ],
+      "ci": {
+        "excludeFromAll": true,
+        "requiredConfig": [
+          "sandbox.host",
+          "sandbox.apiKey",
+          "sandbox.ssl.certificate",
+          "sandbox.ssl.key",
+          "sandbox.ssl.certificateAuthorities",
+          "nightshift.telemetry.url",
+          "nightshift.telemetry.apiKey"
+        ],
+        "env": {
+          "NIGHTSHIFT_DATASETS": "trace-only",
+          "NIGHTSHIFT_DATASET_NAME": "nightshift/customer0-manual",
+          "EVAL_FANOUT_CONCURRENCY": "1",
+          "SCOUT_TEST_RETRIES": "0"
+        }
+      }
+    },
+    {
       "id": "llm-tasks",
       "name": "LLM Tasks",
       "slackChannel": "#search-ml-ux-team",
@@ -207,7 +244,7 @@
     },
     {
       "id": "security-persona-matrix-attack-discovery",
-      "name": "Security Persona Matrix — Attack Discovery (Chrysalis kill-chains)",
+      "name": "Security Persona Matrix \u2014 Attack Discovery (Chrysalis kill-chains)",
       "slackChannel": "#security-generative-ai-evals",
       "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-persona-matrix/attack_discovery.playwright.config.ts",
       "tags": [
