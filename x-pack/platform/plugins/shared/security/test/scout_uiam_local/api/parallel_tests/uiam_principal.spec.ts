@@ -13,7 +13,7 @@ import { expect } from '@kbn/scout/api';
 
 import { COMMON_HEADERS } from '../fixtures';
 
-const PRINCIPAL_PATH = 'test_endpoints/uiam/principal';
+const PRINCIPAL_PATH = 'test_endpoints/principal';
 
 // These tests cannot be run on MKI because they rely on the Mock IdP plugin and its fixed credentials.
 apiTest.describe(

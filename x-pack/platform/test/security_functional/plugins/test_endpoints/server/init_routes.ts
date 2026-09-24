@@ -1050,7 +1050,7 @@ export function initRoutes(
   // Kibana privileges.
   router.get(
     {
-      path: '/test_endpoints/uiam/principal',
+      path: '/test_endpoints/principal',
       validate: false,
       security: {
         authz: { enabled: false, reason: 'Test endpoint reporting the authenticated principal' },
