@@ -9,7 +9,7 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
-import type { StreamsServer } from '@kbn/streams-plugin/server/types';
+import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients, RouteHandlerScopedClients } from '../../../routes/types';
 import { createMockToolContext, invokeHandler } from '../../utils/test_helpers';
 import {
@@ -24,7 +24,7 @@ jest.mock('../../../routes/utils/assert_significant_events_access', () => ({
 
 describe('ki_query_create tool', () => {
   const logger = loggingSystemMock.createLogger();
-  const server = {} as unknown as StreamsServer;
+  const server = {} as unknown as SignificantEventsServer;
   const request = {} as unknown as KibanaRequest;
   const uiSettings = {} as unknown as IUiSettingsClient;
   const telemetry = {

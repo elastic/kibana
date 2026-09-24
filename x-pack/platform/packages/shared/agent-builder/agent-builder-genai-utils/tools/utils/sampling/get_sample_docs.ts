@@ -9,6 +9,7 @@ import { castArray, uniq } from 'lodash';
 import type { SearchHit, QueryDslFieldAndFormat } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { getFlattenedObject } from '@kbn/std';
+import { frozenTierClauses } from '../data_tiers';
 
 export interface SampleDoc {
   index: string;
@@ -25,12 +26,14 @@ export const getSampleDocs = async ({
   size = 100,
   _source = false,
   fields = [{ field: '*', include_unmapped: true }],
+  includeFrozen = false,
   esClient,
 }: {
   index: string | string[];
   size?: number;
   _source?: boolean;
   fields?: QueryDslFieldAndFormat[];
+  includeFrozen?: boolean;
   esClient: ElasticsearchClient;
 }): Promise<{ samples: SampleDoc[] }> => {
   const { hits } = await esClient.search<Record<string, any>>({
@@ -49,6 +52,7 @@ export const getSampleDocs = async ({
             },
           },
         ],
+        ...(includeFrozen ? {} : { must_not: frozenTierClauses() }),
       },
     },
     fields,

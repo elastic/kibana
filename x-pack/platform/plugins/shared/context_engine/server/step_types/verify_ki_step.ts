@@ -13,6 +13,7 @@ import {
   DEFAULT_KI_VERIFIER_STEP_TIMEOUT_SEC,
   VerifyKiStepCommonDefinition,
 } from '../../common/step_types/verify_ki_step';
+import { omitNullKiAttributes } from '../../common/step_types/ki';
 import {
   createKiVerifierRegistry,
   createWorkflowVerifier,
@@ -147,7 +148,7 @@ export const createVerifyKiStepDefinition = (
         run: async () => {
           const verifiers = await buildVerifiers();
           try {
-            return await service.verifyKi(context.input.ki, {
+            return await service.verifyKi(omitNullKiAttributes(context.input.ki), {
               isEnabled,
               esClient: context.contextManager.getScopedEsClient(),
               logger,

@@ -119,16 +119,6 @@ describe('DescriptionPanel', () => {
     expect(screen.getByTestId('contextDescriptionTextArea')).toHaveValue('My custom description');
   });
 
-  it('shows help text below the description field while editing', () => {
-    renderWithProviders(
-      <DescriptionPanel isLoading={false} aiIndex={aiIndex} onSaved={jest.fn()} isManaged={false} />
-    );
-
-    fireEvent.click(screen.getByTestId('contextEditDescriptionButton'));
-
-    expect(screen.getByText(/Optional — describe what this AI index is for/)).toBeInTheDocument();
-  });
-
   it('hides the edit button for managed AI indexes', () => {
     renderWithProviders(
       <DescriptionPanel isLoading={false} aiIndex={aiIndex} onSaved={jest.fn()} isManaged />

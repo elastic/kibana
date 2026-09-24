@@ -10,9 +10,11 @@ import {
   ruleSavedObjectAttributesSchemaV1,
   ruleSavedObjectAttributesSchemaV2,
   ruleSavedObjectAttributesSchemaV3,
+  ruleSavedObjectAttributesSchemaV4,
 } from '../schemas/rule_saved_object_attributes';
 import { migrateRuleArtifactsToData } from './migrate_rule_artifacts_to_data';
 import { migrateDashboardArtifactDataKey } from './migrate_dashboard_artifact_data_key';
+import { toActor } from './to_actor';
 
 export const ruleModelVersions: SavedObjectsModelVersionMap = {
   '1': {
@@ -90,6 +92,45 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
     schemas: {
       forwardCompatibility: ruleSavedObjectAttributesSchemaV3.extends({}, { unknowns: 'ignore' }),
       create: ruleSavedObjectAttributesSchemaV3,
+    },
+  },
+  '6': {
+    /**
+     * v6 migrates `createdBy` and `updatedBy` from a bare profile UID string to a
+     * structured actor object. Only string values are rewritten: a `null` actor
+     * (an unattributed write) stays `null`, which the v6 schema still allows, and
+     * an already-structured actor is left alone so the backfill is idempotent.
+     *
+     * This reshapes existing attributes, so it is NOT rollback-compatible: the
+     * v1-v5 schemas type both fields as strings and reject the object, meaning a
+     * node rolled back to v5 fails to read any rule with an attributed actor.
+     * Accepted while alerting v2 is in technical preview. The SO migration
+     * fixtures therefore only carry `null` actors, which round-trip through the
+     * rollback check; the string -> object conversion is covered by unit tests.
+     */
+    changes: [
+      {
+        type: 'data_backfill',
+        backfillFn: (doc) => {
+          const { createdBy, updatedBy } = doc.attributes as {
+            createdBy?: unknown;
+            updatedBy?: unknown;
+          };
+          const createdByActor = toActor(createdBy);
+          const updatedByActor = toActor(updatedBy);
+
+          return {
+            attributes: {
+              ...(createdByActor ? { createdBy: createdByActor } : {}),
+              ...(updatedByActor ? { updatedBy: updatedByActor } : {}),
+            },
+          };
+        },
+      },
+    ],
+    schemas: {
+      forwardCompatibility: ruleSavedObjectAttributesSchemaV4.extends({}, { unknowns: 'ignore' }),
+      create: ruleSavedObjectAttributesSchemaV4,
     },
   },
 };
