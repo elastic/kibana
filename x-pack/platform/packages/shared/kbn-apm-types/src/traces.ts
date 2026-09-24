@@ -12,6 +12,7 @@ import { EVENT_OUTCOME } from './es_fields/apm';
 import { STATUS_CODE } from './es_fields/otel';
 import type { Span } from './es_schemas/ui/span';
 import type { Transaction } from './es_schemas/ui/transaction';
+import type { TraceErrorSource } from './errors';
 
 const STATUS_FIELD_NAME = [EVENT_OUTCOME, STATUS_CODE] as const;
 
@@ -32,7 +33,7 @@ export interface TraceItem {
   traceId: string;
   duration: number;
   result?: string;
-  errors: Array<{ errorDocId: string; errorDocIndex?: string }>;
+  errors: Array<{ errorDocId: string; errorDocIndex?: string; source: TraceErrorSource }>;
   status?: {
     fieldName: (typeof STATUS_FIELD_NAME)[number];
     value: EventOutcome | StatusCode;
