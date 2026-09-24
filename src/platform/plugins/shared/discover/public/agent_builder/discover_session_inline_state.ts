@@ -14,15 +14,14 @@ import {
 import type {
   DiscoverSessionApiEsqlTab,
   DiscoverSessionApiTab,
-  DiscoverSessionData,
+  DiscoverSessionApiData,
 } from '@kbn/as-code-discover-schema';
 import { DataGridDensity } from '@kbn/discover-session-constants';
 import type { TimeRange } from '@kbn/es-query';
 import { omit } from 'lodash';
 import { toSearchEmbeddableByValueState } from '../../common/agent_builder/to_search_embeddable_by_value_state';
 import { NEW_TAB_ID } from '../../common/constants';
-import type { DiscoverAppLocatorParams } from '../../common';
-import type { DiscoverSessionEmbeddableByValueState } from '../../server';
+import type { DiscoverAppLocatorParams, DiscoverSessionEmbeddableByValueState } from '../../common';
 import type { SearchEmbeddableInputState } from '../embeddable/types';
 
 export const DEFAULT_DISCOVER_SESSION_TIME_RANGE: TimeRange = { from: 'now-24h', to: 'now' };
@@ -39,7 +38,7 @@ export const getDiscoverSessionSeedTimeRange = ({
 }): TimeRange => mappedTimeRange ?? screenContextTimeRange ?? DEFAULT_DISCOVER_SESSION_TIME_RANGE;
 
 export const buildDiscoverSessionEmbeddableInput = (
-  data: DiscoverSessionData,
+  data: DiscoverSessionApiData,
   timeRange: TimeRange
 ): DiscoverSessionEmbeddableByValueState &
   Pick<SearchEmbeddableInputState, 'nonPersistedDisplayOptions'> => {
@@ -72,16 +71,22 @@ export const buildDiscoverSessionEmbeddableInput = (
 export const getDiscoverSessionLocatorParams = ({
   data,
   timeRange,
+  columns,
+  sort,
 }: {
-  data: DiscoverSessionData;
+  data: DiscoverSessionApiData;
   timeRange: TimeRange;
+  columns?: string[];
+  sort?: DiscoverSessionApiTab['sort'];
 }): DiscoverAppLocatorParams => {
   const [tab] = data.tabs;
+  const locatorColumns = columns ?? tab.column_order;
+  const locatorSort = sort ?? tab.sort;
   const params: DiscoverAppLocatorParams = {
     timeRange,
     hideChart: true,
-    columns: tab.column_order,
-    sort: tab.sort?.map((entry) => [entry.name, entry.direction]),
+    columns: locatorColumns,
+    sort: locatorSort?.map((entry) => [entry.name, entry.direction]),
     tab: { id: NEW_TAB_ID, label: data.title },
   };
 

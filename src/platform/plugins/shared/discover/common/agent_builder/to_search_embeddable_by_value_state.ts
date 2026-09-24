@@ -11,18 +11,18 @@ import { AS_CODE_ESQL_DATA_SOURCE_TYPE } from '@kbn/as-code-data-views-schema';
 import type {
   DiscoverSessionApiEsqlTab,
   DiscoverSessionApiTab,
-  DiscoverSessionData,
+  DiscoverSessionApiData,
 } from '@kbn/as-code-discover-schema';
 import { DiscoverTabType } from '@kbn/discover-session-constants';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
-import type { DiscoverSessionEmbeddableByValueState } from '../../server';
+import type { DiscoverSessionEmbeddableByValueState } from '../embeddable/types';
 
 /**
  * Projects Discover session API data into as-code by-value search embeddable state.
  * Extra session tabs are ignored: embeddable by-value currently supports one tab.
  */
 export const toSearchEmbeddableByValueState = (
-  data: DiscoverSessionData
+  data: DiscoverSessionApiData
 ): DiscoverSessionEmbeddableByValueState => {
   const [tab] = data.tabs;
   const state: DiscoverSessionEmbeddableByValueState = {
@@ -46,6 +46,8 @@ const isApiEsqlTab = (tab: DiscoverSessionApiTab): tab is DiscoverSessionApiEsql
   return tab.data_source.type === AS_CODE_ESQL_DATA_SOURCE_TYPE;
 };
 
+// Copy only shared table settings into the embeddable state. Keep this list explicit to avoid
+// leaking session-only fields, and omit undefined values so the embeddable can apply its defaults.
 const toTableFields = (tab: DiscoverSessionApiTab) => ({
   sort: tab.sort ?? [],
   ...(tab.column_order !== undefined ? { column_order: tab.column_order } : {}),

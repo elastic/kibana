@@ -17,7 +17,7 @@ import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachmen
 import { AS_CODE_ESQL_DATA_SOURCE_TYPE } from '@kbn/as-code-data-views-schema';
 import {
   discoverSessionApiDataSchema,
-  type DiscoverSessionData as DiscoverSessionApiData,
+  type DiscoverSessionApiData,
 } from '@kbn/as-code-discover-schema';
 import { MAX_SESSION_TITLE_LENGTH, MAX_TAB_LABEL_LENGTH } from '@kbn/discover-session-constants';
 import { hasAggregatingCommand } from '@kbn/esql-utils';

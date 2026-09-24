@@ -12,7 +12,7 @@ import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { EuiProvider } from '@elastic/eui';
 import { AS_CODE_ESQL_DATA_SOURCE_TYPE } from '@kbn/as-code-data-views-schema';
-import type { DiscoverSessionData } from '@kbn/as-code-discover-schema';
+import type { DiscoverSessionApiData } from '@kbn/as-code-discover-schema';
 import { DataGridDensity, DiscoverTabType } from '@kbn/discover-session-constants';
 import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
 import type { ApplicationStart } from '@kbn/core/public';
@@ -20,8 +20,7 @@ import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { ActionButton } from '@kbn/agent-builder-browser/attachments';
-import type { DiscoverAppLocator } from '../../common';
-import type { DiscoverSessionEmbeddableByValueState } from '../../server';
+import type { DiscoverAppLocator, DiscoverSessionEmbeddableByValueState } from '../../common';
 import { useSearchEmbeddableToolbar } from '../embeddable/components/search_embeddable_toolbar_context';
 import { DiscoverSessionInline } from './discover_session_inline';
 
@@ -59,6 +58,7 @@ const capturedSearchBarProps: Array<{
   appName?: string;
   disableSubscribingToGlobalDataServices?: boolean;
   showTimeWindowButtons?: boolean;
+  onQueryChange?: (payload: { dateRange: { from: string; to: string } }) => void;
 }> = [];
 
 jest.mock('@kbn/embeddable-plugin/public', () => ({
@@ -76,7 +76,7 @@ jest.mock('@kbn/presentation-util-plugin/public', () => ({
   },
 }));
 
-const sessionData: DiscoverSessionData = {
+const sessionData: DiscoverSessionApiData = {
   title: 'Nginx errors',
   description: '',
   tabs: [
@@ -101,6 +101,7 @@ const SearchBar = (props: {
   appName?: string;
   disableSubscribingToGlobalDataServices?: boolean;
   showTimeWindowButtons?: boolean;
+  onQueryChange?: (payload: { dateRange: { from: string; to: string } }) => void;
   onQuerySubmit?: (payload: { dateRange: { from: string; to: string } }) => void;
 }) => {
   capturedSearchBarProps.push(props);
@@ -124,7 +125,7 @@ const inlineProps = ({
   registerActionButtons?: jest.Mock;
   canWriteDashboards?: boolean;
   canOpenInDiscover?: boolean;
-  data?: DiscoverSessionData;
+  data?: DiscoverSessionApiData;
   version?: number;
 } = {}) => {
   const navigate = jest.fn();
@@ -262,6 +263,76 @@ describe('DiscoverSessionInline', () => {
         timeRange: { from: 'now-15m', to: 'now' },
       })
     );
+  });
+
+  it('commits a legacy picker range and opens Discover with it', async () => {
+    const registerActionButtons = jest.fn();
+    const { navigate } = renderInline({ registerActionButtons });
+    const absoluteRange = {
+      from: '2024-01-01T00:00:00.000Z',
+      to: '2024-01-02T00:00:00.000Z',
+    };
+
+    await waitFor(() => {
+      expect(embeddableApi.setTimeRange).toHaveBeenCalledTimes(1);
+    });
+
+    act(() => {
+      capturedSearchBarProps.at(-1)?.onQueryChange?.({ dateRange: absoluteRange });
+    });
+
+    await waitFor(() => {
+      expect(embeddableApi.setTimeRange).toHaveBeenCalledWith(absoluteRange);
+    });
+
+    const actionButtons = registerActionButtons.mock.calls.at(-1)?.[0] as ActionButton[];
+    actionButtons.find((button) => button.icon === 'discoverApp')?.handler();
+
+    expect(navigate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        timeRange: absoluteRange,
+      })
+    );
+  });
+
+  it('opens Discover with the visible columns and live sort', async () => {
+    const registerActionButtons = jest.fn();
+    const { navigate } = renderInline({ registerActionButtons });
+
+    embeddableApi.getSerializedStateByValue.mockReturnValueOnce({
+      ...liveSerializedState,
+      tabs: [
+        {
+          ...liveSerializedState.tabs[0],
+          sort: [{ name: 'message', direction: 'asc' }],
+        },
+      ],
+    });
+
+    await waitFor(() => {
+      const actionButtons = registerActionButtons.mock.calls.at(-1)?.[0] as ActionButton[];
+      expect(actionButtons.find((button) => button.icon === 'discoverApp')).toBeDefined();
+    });
+
+    const actionButtons = registerActionButtons.mock.calls.at(-1)?.[0] as ActionButton[];
+    actionButtons.find((button) => button.icon === 'discoverApp')?.handler();
+
+    expect(navigate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        columns: ['event.action', '@timestamp'],
+        sort: [['message', 'asc']],
+        query: { esql: 'FROM logs-* | LIMIT 100' },
+      })
+    );
+  });
+
+  it('does not offer Open in Discover until the embeddable API is available', () => {
+    exposeApi = false;
+    const registerActionButtons = jest.fn();
+    renderInline({ registerActionButtons });
+
+    const actionButtons = registerActionButtons.mock.calls.at(-1)?.[0] as ActionButton[];
+    expect(actionButtons.find((button) => button.icon === 'discoverApp')).toBeUndefined();
   });
 
   it('hides Open in Discover when the user cannot open Discover', () => {

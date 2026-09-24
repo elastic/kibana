@@ -8,10 +8,10 @@
  */
 
 import { AS_CODE_ESQL_DATA_SOURCE_TYPE } from '@kbn/as-code-data-views-schema';
-import type { DiscoverSessionApiTab, DiscoverSessionData } from '@kbn/as-code-discover-schema';
+import type { DiscoverSessionApiTab, DiscoverSessionApiData } from '@kbn/as-code-discover-schema';
 import { DataGridDensity, DiscoverTabType } from '@kbn/discover-session-constants';
 import { NEW_TAB_ID } from '../../common/constants';
-import type { DiscoverSessionEmbeddableByValueState } from '../../server';
+import type { DiscoverSessionEmbeddableByValueState } from '../../common';
 import {
   buildDiscoverSessionDashboardSaveState,
   buildDiscoverSessionEmbeddableInput,
@@ -37,8 +37,8 @@ const esqlTab: DiscoverSessionApiTab = {
 };
 
 const createSession = (
-  overrides: Partial<DiscoverSessionData> & Pick<DiscoverSessionData, 'title' | 'tabs'>
-): DiscoverSessionData => ({
+  overrides: Partial<DiscoverSessionApiData> & Pick<DiscoverSessionApiData, 'title' | 'tabs'>
+): DiscoverSessionApiData => ({
   description: '',
   ...overrides,
 });
@@ -145,6 +145,38 @@ describe('discover session inline state', () => {
         hideChart: true,
         tab: { id: NEW_TAB_ID, label: 'Nginx errors' },
       });
+    });
+
+    it('uses live columns and sort when the grid has edited them', () => {
+      const data = createSession({ title: 'Nginx errors', tabs: [esqlTab] });
+      const result = getDiscoverSessionLocatorParams({
+        data,
+        timeRange: { from: 'now-15m', to: 'now' },
+        columns: ['event.action', '@timestamp'],
+        sort: [{ name: 'message', direction: 'asc' }],
+      });
+
+      expect(result).toEqual({
+        query: { esql: 'FROM logs-* | LIMIT 100' },
+        columns: ['event.action', '@timestamp'],
+        sort: [['message', 'asc']],
+        timeRange: { from: 'now-15m', to: 'now' },
+        hideChart: true,
+        tab: { id: NEW_TAB_ID, label: 'Nginx errors' },
+      });
+    });
+
+    it('keeps an explicit empty column list and sort', () => {
+      const data = createSession({ title: 'Nginx errors', tabs: [esqlTab] });
+      const result = getDiscoverSessionLocatorParams({
+        data,
+        timeRange: { from: 'now-15m', to: 'now' },
+        columns: [],
+        sort: [],
+      });
+
+      expect(result.columns).toEqual([]);
+      expect(result.sort).toEqual([]);
     });
   });
 

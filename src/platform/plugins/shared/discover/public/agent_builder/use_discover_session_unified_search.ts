@@ -41,14 +41,11 @@ export const useDiscoverSessionUnifiedSearch = ({
     );
   }, [initialBounds]);
 
-  const onQuerySubmit = useCallback<NonNullable<StatefulSearchBarProps<Query>['onQuerySubmit']>>(
-    ({ dateRange }) => {
-      setCommittedTimeRange((current) =>
-        areTimeRangesEqual(current, dateRange) ? current : dateRange
-      );
-    },
-    []
-  );
+  const commitTimeRange = useCallback(({ dateRange }: { dateRange: TimeRange }) => {
+    setCommittedTimeRange((current) =>
+      areTimeRangesEqual(current, dateRange) ? current : dateRange
+    );
+  }, []);
 
   const searchBarProps = useMemo(
     (): StatefulSearchBarProps<Query> => ({
@@ -70,10 +67,11 @@ export const useDiscoverSessionUnifiedSearch = ({
       indexPatterns: [],
       dateRangeFrom: committedTimeRange.from,
       dateRangeTo: committedTimeRange.to,
-      onQuerySubmit,
+      onQueryChange: commitTimeRange,
+      onQuerySubmit: commitTimeRange,
       dataTestSubj: 'discoverAgentBuilderSessionTimeRangePicker',
     }),
-    [committedTimeRange.from, committedTimeRange.to, onQuerySubmit]
+    [committedTimeRange.from, committedTimeRange.to, commitTimeRange]
   );
 
   return { searchBarProps, effectiveTimeRange: committedTimeRange };

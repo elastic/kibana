@@ -10,7 +10,7 @@
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import type { DiscoverSessionData } from '@kbn/as-code-discover-schema';
+import type { DiscoverSessionApiData } from '@kbn/as-code-discover-schema';
 import type { ApplicationStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { TimeRange } from '@kbn/es-query';
@@ -74,7 +74,7 @@ const saveModalObjectType = i18n.translate('discover.agentBuilder.saveToDashboar
 });
 
 export interface DiscoverSessionInlineProps {
-  data: DiscoverSessionData;
+  data: DiscoverSessionApiData;
   /**
    * Attachment snapshot version. Combined with session state so a follow-up update
    * remounts the embeddable. Omit when version metadata is unavailable.
@@ -235,7 +235,7 @@ export const DiscoverSessionInline = ({
       Boolean(application?.capabilities.discover_v2?.show) ||
       Boolean(application?.capabilities.discover_v2?.save);
 
-    if (locator && canOpenInDiscover) {
+    if (locator && embeddableApi && canOpenInDiscover) {
       buttons.push({
         type: ActionButtonType.SECONDARY,
         icon: 'discoverApp',
@@ -243,8 +243,23 @@ export const DiscoverSessionInline = ({
           defaultMessage: 'Open in Discover',
         }),
         handler: () => {
+          const liveState = embeddableApi.getSerializedStateByValue();
+          if (!isDiscoverSessionByValueState(liveState)) {
+            return;
+          }
+
+          const [liveTab] = liveState.tabs;
+          if (!liveTab) {
+            return;
+          }
+
           void locator.navigate(
-            getDiscoverSessionLocatorParams({ data, timeRange: effectiveTimeRange })
+            getDiscoverSessionLocatorParams({
+              data,
+              timeRange: effectiveTimeRange,
+              columns: visibleColumnsRef.current ?? liveTab.column_order,
+              sort: liveTab.sort,
+            })
           );
         },
       });
@@ -252,7 +267,7 @@ export const DiscoverSessionInline = ({
 
     registerActionButtons(buttons);
     return () => registerActionButtons([]);
-  }, [application, data, effectiveTimeRange, locator, registerActionButtons]);
+  }, [application, data, effectiveTimeRange, embeddableApi, locator, registerActionButtons]);
 
   return (
     <SearchEmbeddableToolbarProvider value={toolbarSlot}>

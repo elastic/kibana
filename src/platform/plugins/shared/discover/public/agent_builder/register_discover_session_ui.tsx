@@ -8,7 +8,7 @@
  */
 
 import React, { Suspense } from 'react';
-import type { DiscoverSessionData } from '@kbn/as-code-discover-schema';
+import type { DiscoverSessionApiData } from '@kbn/as-code-discover-schema';
 import type { ApplicationStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
@@ -37,7 +37,7 @@ export const registerDiscoverSessionAttachmentUi = ({
   application?: ApplicationStart;
 }) => {
   agentBuilder.attachments.addAttachmentType<
-    Attachment<typeof DISCOVER_SESSION_ATTACHMENT_TYPE, DiscoverSessionData>
+    Attachment<typeof DISCOVER_SESSION_ATTACHMENT_TYPE, DiscoverSessionApiData>
   >(DISCOVER_SESSION_ATTACHMENT_TYPE, {
     getLabel: (attachment) => {
       const title = attachment.data?.title;

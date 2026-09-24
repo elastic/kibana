@@ -17,7 +17,7 @@ import {
 import {
   discoverSessionApiDataSchema,
   type DiscoverSessionApiTab,
-  type DiscoverSessionData as DiscoverSessionApiData,
+  type DiscoverSessionApiData,
 } from '@kbn/as-code-discover-schema';
 import { DISCOVER_SESSION_ATTACHMENT_TYPE } from '../../common/agent_builder';
 
