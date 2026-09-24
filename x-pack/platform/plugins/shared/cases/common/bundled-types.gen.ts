@@ -388,14 +388,14 @@ export const Settings = lazySchema(() =>
      */
     syncAlerts: z.boolean().describe('Turns alert syncing on or off.'),
     /**
-      * When true, observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments. When omitted on create, the space configuration default is used. Falls back to `true` if no space configuration exists. Precedence: explicit value > template setting > space config > true.
+      * When true, observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments. When omitted on create, the space configuration default is used. Falls back to the owner's default when no space configuration exists: `true` for Security, `false` for Stack and Observability. Precedence: explicit value > template setting > space config > owner default.
 
       */
     extractObservables: z
       .boolean()
       .optional()
       .describe(
-        'When true, observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments. When omitted on create, the space configuration default is used. Falls back to `true` if no space configuration exists. Precedence: explicit value > template setting > space config > true.\n'
+        "When true, observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments. When omitted on create, the space configuration default is used. Falls back to the owner's default when no space configuration exists: `true` for Security, `false` for Stack and Observability. Precedence: explicit value > template setting > space config > owner default.\n"
       ),
   })
 );
@@ -1295,14 +1295,14 @@ export const SetCaseConfigurationRequest = lazySchema(() =>
       .optional()
       .describe('Custom fields case configuration.'),
     /**
-      * Indicates whether observables are automatically extracted from alerts when they are added to new cases. When omitted, defaults to `true`.
+      * Indicates whether observables are automatically extracted from alerts when they are added to new cases. When omitted, defaults to the owner's default: `true` for Security, `false` for Stack and Observability.
 
       */
     extractObservables: z
       .boolean()
       .optional()
       .describe(
-        'Indicates whether observables are automatically extracted from alerts when they are added to new cases. When omitted, defaults to `true`.\n'
+        "Indicates whether observables are automatically extracted from alerts when they are added to new cases. When omitted, defaults to the owner's default: `true` for Security, `false` for Stack and Observability.\n"
       ),
     owner: Owner,
     templates: Templates.optional(),
