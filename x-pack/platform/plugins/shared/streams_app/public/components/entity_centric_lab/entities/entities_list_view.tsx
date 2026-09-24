@@ -842,6 +842,7 @@ export const EntitiesListView = ({
     effectiveEntities,
     clusterFilter,
     effectiveNamespaceFilter,
+    effectiveDeploymentFilter,
     effectiveNodeFilter,
     clusterNames,
     groupCloudByProvider,

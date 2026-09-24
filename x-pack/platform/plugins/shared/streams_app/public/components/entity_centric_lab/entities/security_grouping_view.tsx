@@ -37,11 +37,17 @@ import type { Entity, EntityCategoryId } from './fake_entities';
 import { EntityDataGridSection } from './entities_data_grid';
 import type { GroupByFieldDef } from './entity_group_by';
 import {
-  KUBERNETES_CLUSTER_FILTER_ALL,
+  KUBERNETES_FILTER_ALL,
   KUBERNETES_SUB_TYPE_ORDER,
   KubernetesClusterFilter,
-  filterEntitiesByCluster,
+  KubernetesDeploymentFilter,
+  KubernetesNamespaceFilter,
+  KubernetesNodeFilter,
+  filterKubernetesEntities,
   getKubernetesClusterNames,
+  getKubernetesDeploymentNames,
+  getKubernetesNamespaceNames,
+  getKubernetesNodeNames,
 } from './kubernetes_cluster_filter';
 import {
   CLOUD_PROVIDER_FILTER_ALL,
@@ -306,11 +312,50 @@ const GroupAccordion = ({
   const isCloud = bucket.category === 'cloud';
   const hasChildren = bucket.children.length > 0;
 
-  // Kubernetes cluster filter — inline, same as the other views.
-  const [clusterFilter, setClusterFilter] = useState<string>(KUBERNETES_CLUSTER_FILTER_ALL);
+  // Kubernetes filters — inline, same as the other views.
+  const [clusterFilter, setClusterFilter] = useState<string>(KUBERNETES_FILTER_ALL);
+  const [nodeFilter, setNodeFilter] = useState<string>(KUBERNETES_FILTER_ALL);
+  const [namespaceFilter, setNamespaceFilter] = useState<string>(KUBERNETES_FILTER_ALL);
+  const [deploymentFilter, setDeploymentFilter] = useState<string>(KUBERNETES_FILTER_ALL);
+
   const clusterNames = useMemo(
     () => (isK8s ? getKubernetesClusterNames(bucket.entities) : []),
     [isK8s, bucket.entities]
+  );
+  const nodeNames = useMemo(
+    () => (isK8s ? getKubernetesNodeNames(bucket.entities, clusterFilter, clusterNames) : []),
+    [isK8s, bucket.entities, clusterFilter, clusterNames]
+  );
+  const namespaceNames = useMemo(
+    () => (isK8s ? getKubernetesNamespaceNames(bucket.entities, clusterFilter, clusterNames) : []),
+    [isK8s, bucket.entities, clusterFilter, clusterNames]
+  );
+  const deploymentNames = useMemo(
+    () => (isK8s ? getKubernetesDeploymentNames(bucket.entities, clusterFilter, namespaceFilter, clusterNames) : []),
+    [isK8s, bucket.entities, clusterFilter, namespaceFilter, clusterNames]
+  );
+
+  const effectiveNodeFilter =
+    nodeFilter !== KUBERNETES_FILTER_ALL && !nodeNames.includes(nodeFilter)
+      ? KUBERNETES_FILTER_ALL
+      : nodeFilter;
+  const effectiveNamespaceFilter =
+    namespaceFilter !== KUBERNETES_FILTER_ALL && !namespaceNames.includes(namespaceFilter)
+      ? KUBERNETES_FILTER_ALL
+      : namespaceFilter;
+  const effectiveDeploymentFilter =
+    deploymentFilter !== KUBERNETES_FILTER_ALL && !deploymentNames.includes(deploymentFilter)
+      ? KUBERNETES_FILTER_ALL
+      : deploymentFilter;
+
+  const handleClusterChange = useCallback(
+    (next: string) => {
+      setClusterFilter(next);
+      setNodeFilter(KUBERNETES_FILTER_ALL);
+      setNamespaceFilter(KUBERNETES_FILTER_ALL);
+      setDeploymentFilter(KUBERNETES_FILTER_ALL);
+    },
+    []
   );
 
   // Cloud provider filter — mirrors the K8s cluster filter.
@@ -319,13 +364,13 @@ const GroupAccordion = ({
   const visibleEntities = useMemo(() => {
     let result = bucket.entities;
     if (isK8s) {
-      result = filterEntitiesByCluster(result, clusterFilter, clusterNames) as Entity[];
+      result = filterKubernetesEntities(result, clusterFilter, effectiveNamespaceFilter, effectiveDeploymentFilter, effectiveNodeFilter, clusterNames) as Entity[];
     }
     if (isCloud) {
       result = filterEntitiesByProvider(result, providerFilter) as Entity[];
     }
     return result;
-  }, [isK8s, isCloud, bucket.entities, clusterFilter, clusterNames, providerFilter]);
+  }, [isK8s, isCloud, bucket.entities, clusterFilter, effectiveNamespaceFilter, effectiveDeploymentFilter, effectiveNodeFilter, clusterNames, providerFilter]);
   const visibleAlertingCount = useMemo(
     () => visibleEntities.filter((e) => e.alerts && e.alerts.active > 0).length,
     [visibleEntities]
@@ -333,7 +378,7 @@ const GroupAccordion = ({
 
   // When a filter is active, rebuild child buckets from filtered entities.
   const needsChildRebuild =
-    (isK8s && clusterFilter !== KUBERNETES_CLUSTER_FILTER_ALL) ||
+    (isK8s && (clusterFilter !== KUBERNETES_FILTER_ALL || effectiveNodeFilter !== KUBERNETES_FILTER_ALL || effectiveNamespaceFilter !== KUBERNETES_FILTER_ALL || effectiveDeploymentFilter !== KUBERNETES_FILTER_ALL)) ||
     (isCloud && providerFilter !== CLOUD_PROVIDER_FILTER_ALL);
   const visibleChildren = useMemo(() => {
     if (!hasChildren) return [];
@@ -369,13 +414,40 @@ const GroupAccordion = ({
         </EuiTitle>
       }
       extraAction={
-        <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           {isK8s && clusterNames.length > 0 && categoryScope !== 'kubernetes' ? (
             <EuiFlexItem grow={false}>
               <KubernetesClusterFilter
                 clusterNames={clusterNames}
                 value={clusterFilter}
-                onChange={setClusterFilter}
+                onChange={handleClusterChange}
+              />
+            </EuiFlexItem>
+          ) : null}
+          {isK8s && nodeNames.length > 0 && categoryScope !== 'kubernetes' ? (
+            <EuiFlexItem grow={false}>
+              <KubernetesNodeFilter
+                nodeNames={nodeNames}
+                value={effectiveNodeFilter}
+                onChange={setNodeFilter}
+              />
+            </EuiFlexItem>
+          ) : null}
+          {isK8s && namespaceNames.length > 0 && categoryScope !== 'kubernetes' ? (
+            <EuiFlexItem grow={false}>
+              <KubernetesNamespaceFilter
+                namespaceNames={namespaceNames}
+                value={effectiveNamespaceFilter}
+                onChange={setNamespaceFilter}
+              />
+            </EuiFlexItem>
+          ) : null}
+          {isK8s && deploymentNames.length > 0 && categoryScope !== 'kubernetes' ? (
+            <EuiFlexItem grow={false}>
+              <KubernetesDeploymentFilter
+                deploymentNames={deploymentNames}
+                value={effectiveDeploymentFilter}
+                onChange={setDeploymentFilter}
               />
             </EuiFlexItem>
           ) : null}
