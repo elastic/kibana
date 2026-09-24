@@ -198,7 +198,7 @@ describe('createActionPolicySmlType', () => {
         content: [
           'Critical alerts → Slack',
           'Route every critical-priority alert to #oncall',
-          '(alert.severity = "critical")',
+          'expression: "alert.severity = "critical""',
           'per_episode',
           'workflow:wf-critical-route',
         ].join('\n'),
@@ -276,12 +276,23 @@ describe('createActionPolicySmlType', () => {
         title: 'Critical alerts → Slack',
         content: '',
         permissions: { kibana: { privileges: [] } },
-        attributes: {
-          id: 'sml-1',
-          origin: { uri: `${ACTION_POLICY_KI_TYPE}://${originId}` },
-          created_at: '2026-04-10T00:00:00.000Z',
-          updated_at: '2026-04-10T00:00:00.000Z',
-          ingestion_method: 'crawled' as const,
+        id: 'sml-1',
+        '@timestamp': '2026-04-10T00:00:00.000Z',
+        updated_at: '2026-04-10T00:00:00.000Z',
+        references: [
+          { uri: `${ACTION_POLICY_KI_TYPE}://${originId}`, relation: 'derived_from' as const },
+        ],
+        governance: {
+          provenance: {
+            created_by: {
+              uri: 'crawler://sml',
+              metadata: { ingestion_method: 'crawled' as const },
+            },
+            updated_by: {
+              uri: 'crawler://sml',
+              metadata: { ingestion_method: 'crawled' as const },
+            },
+          },
         },
       };
     };
@@ -325,12 +336,12 @@ describe('createActionPolicySmlType', () => {
     });
 
     it('uses an empty string when the origin uri carries no id', async () => {
-      // Defensive contract: the origin id is parsed out of `attributes.origin.uri`. A malformed
-      // uri must thread an empty string down to `getActionPolicy` rather than crash the call.
       getActionPolicy.mockResolvedValueOnce({ ...baseActionPolicyAttrs, id: '' });
 
       const document = buildSmlDocument();
-      document.attributes.origin.uri = `${ACTION_POLICY_KI_TYPE}://`;
+      document.references = [
+        { uri: `${ACTION_POLICY_KI_TYPE}://`, relation: 'derived_from' as const },
+      ];
 
       await buildDefinition().toAttachment(document, buildToAttachmentContext());
 

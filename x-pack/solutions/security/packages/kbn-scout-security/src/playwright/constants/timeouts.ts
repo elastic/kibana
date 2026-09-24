@@ -7,3 +7,6 @@
 
 /** First Security app load waits for user-info / lists init and the ad-hoc data view. */
 export const APP_LOAD_TIMEOUT_MS = 60_000;
+
+/** Timeout for async data fetches after the app has already mounted (e.g. MITRE API, matrix query). */
+export const DATA_LOAD_TIMEOUT_MS = 30_000;

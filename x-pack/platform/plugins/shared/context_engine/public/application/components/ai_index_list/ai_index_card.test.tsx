@@ -19,6 +19,7 @@ const buildAiIndex = (overrides: Partial<AiIndexHttpItem> = {}): AiIndexHttpItem
   dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
   automations: [],
   sources: [],
+  traces: [],
   date_created: '2026-07-17T00:00:00.000Z',
   date_modified: '2026-07-17T00:00:00.000Z',
   ...overrides,
@@ -62,6 +63,27 @@ describe('AiIndexCard', () => {
 
     expect(screen.getByTestId('contextAiIndexCardType')).toHaveTextContent(
       AI_INDEX_TYPE_LABEL[destType]
+    );
+  });
+
+  // `1fr` grid tracks size to the card's min-content width, so an unbreakable id stretches the grid.
+  it('keeps a long id breakable and clamped to one line', () => {
+    const id = 'a'.repeat(256);
+
+    renderAiIndexCard(buildAiIndex({ id }));
+
+    const title = screen.getByTestId('contextAiIndexCardTitle');
+    expect(title).toHaveClass('euiTextBlockTruncate', 'eui-textBreakWord');
+    // The clamp hides most of a long id, so the full value stays reachable on hover.
+    expect(title).toHaveAttribute('title', id);
+  });
+
+  it('keeps a long description breakable', () => {
+    renderAiIndexCard(buildAiIndex({ description: `See https://example.com/${'x'.repeat(200)}` }));
+
+    expect(screen.getByTestId('contextAiIndexCardDescription').firstElementChild).toHaveClass(
+      'euiTextBlockTruncate',
+      'eui-textBreakWord'
     );
   });
 

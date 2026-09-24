@@ -22,13 +22,28 @@ jest.mock('../src/restore', () => ({
   }),
 }));
 
+jest.mock('../src/replay', () => ({
+  replaySnapshot: jest.fn().mockResolvedValue({
+    success: true,
+    snapshotName: 'snapshot',
+    restoredIndices: [],
+    reindexedIndices: [],
+    maxTimestamp: '2024-01-15T12:00:00.000Z',
+    errors: [],
+  }),
+}));
+
 import { run } from '@kbn/dev-cli-runner';
 import type { RunContext } from '@kbn/dev-cli-runner';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { restoreSnapshot } from '../src/restore';
+import { replaySnapshot } from '../src/replay';
 import { runCli } from './cli';
 
 const mockClient = jest.requireMock('@elastic/elasticsearch').Client as jest.Mock;
 const mockRun = run as jest.MockedFunction<typeof run>;
+const mockRestoreSnapshot = restoreSnapshot as jest.MockedFunction<typeof restoreSnapshot>;
+const mockReplaySnapshot = replaySnapshot as jest.MockedFunction<typeof replaySnapshot>;
 
 const createLog = (): ToolingLog =>
   ({
@@ -53,13 +68,19 @@ const createRunContext = (flags: Record<string, unknown>): RunContext =>
     },
   } as unknown as RunContext);
 
-describe('createEsClientFromUrl auth precedence', () => {
+describe('runCli', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   const getRestoreHandler = () => {
     process.argv = ['node', 'scripts/es_snapshot_loader', 'restore'];
+    runCli();
+    return mockRun.mock.calls[0][0];
+  };
+
+  const getReplayHandler = () => {
+    process.argv = ['node', 'scripts/es_snapshot_loader', 'replay'];
     runCli();
     return mockRun.mock.calls[0][0];
   };
@@ -111,5 +132,56 @@ describe('createEsClientFromUrl auth precedence', () => {
       node: 'https://example.com:9200/',
       auth: { username: 'elastic', password: 'changeme' },
     });
+  });
+
+  it('parses restore index settings into numbers, booleans, and strings', async () => {
+    const restoreHandler = getRestoreHandler();
+
+    await restoreHandler(
+      createRunContext({
+        'es-url': 'https://example.com:9200',
+        'snapshot-url': 'file:///tmp/snapshots',
+        'index-settings': 'a=1,b=true,c=x,d=value=with=equals',
+      })
+    );
+
+    expect(mockRestoreSnapshot).toHaveBeenCalledWith(
+      expect.objectContaining({
+        indexSettings: { a: 1, b: true, c: 'x', d: 'value=with=equals' },
+      })
+    );
+  });
+
+  it('parses replay index settings into numbers, booleans, and strings', async () => {
+    const replayHandler = getReplayHandler();
+
+    await replayHandler(
+      createRunContext({
+        'es-url': 'https://example.com:9200',
+        'snapshot-url': 'file:///tmp/snapshots',
+        patterns: 'logs-*',
+        'index-settings': 'a=1,b=true,c=x,d=value=with=equals',
+      })
+    );
+
+    expect(mockReplaySnapshot).toHaveBeenCalledWith(
+      expect.objectContaining({
+        indexSettings: { a: 1, b: true, c: 'x', d: 'value=with=equals' },
+      })
+    );
+  });
+
+  it('rejects malformed index settings', async () => {
+    const restoreHandler = getRestoreHandler();
+
+    await expect(
+      restoreHandler(
+        createRunContext({
+          'es-url': 'https://example.com:9200',
+          'snapshot-url': 'file:///tmp/snapshots',
+          'index-settings': 'valid=1,missing-value',
+        })
+      )
+    ).rejects.toThrow('--index-settings entries must use key=value: missing-value');
   });
 });

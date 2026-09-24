@@ -9,28 +9,28 @@ import Boom from '@hapi/boom';
 
 import type { RequestHandler, RouteConfig } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
-import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
+import type {
+  CheckPrivileges,
+  CheckPrivilegesWithRequest,
+} from '@kbn/security-plugin-types-server';
 
 import { defineCreateServiceAccountRoute } from './create';
 import { createServiceAccountBodySchema } from './schemas';
+import { licenseMock } from '../../../common/licensing/index.mock';
 import { SERVICE_ACCOUNT_NAME_MAX_LENGTH } from '../../../common/service_accounts';
-import { EsServiceAccounts, type ServiceAccountsServiceStart } from '../../service_accounts';
-import { createNotImplementedWorkloadBindings } from '../../service_accounts/bindings';
+import type { ServiceAccountsServiceStart } from '../../service_accounts';
 import { serviceAccountsServiceMock } from '../../service_accounts/service_accounts_service.mock';
+import { UiamServiceAccounts } from '../../service_accounts/uiam_service_accounts';
+import { uiamServiceMock } from '../../uiam/uiam_service.mock';
 import { routeDefinitionParamsMock } from '../index.mock';
 
 const enabledConfig = { serviceAccounts: { enabled: true } };
 
 const requestBody = { name: 'nightshift-relay' };
 
-const serviceAccount = {
-  id: 'service-account-id',
-  type: 'project' as const,
-  name: 'nightshift-relay',
-  organization_id: 'mock-organization-id',
-  role_assignments: { limit: { access: ['application'], resource: ['project'] } },
-  assumable_by: [],
-};
+const serviceAccount = { id: 'service-account-id', name: 'nightshift-relay' };
 
 describe('Create service account route', () => {
   function getMockContext(
@@ -76,13 +76,9 @@ describe('Create service account route', () => {
 
   const callRoute = (
     routeHandler: RequestHandler<any, any, any, any>,
-    context = getMockContext()
-  ) =>
-    routeHandler(
-      context,
-      httpServerMock.createKibanaRequest({ body: requestBody }),
-      kibanaResponseFactory
-    );
+    context = getMockContext(),
+    request = httpServerMock.createKibanaRequest({ body: requestBody })
+  ) => routeHandler(context, request, kibanaResponseFactory);
 
   describe('route registration', () => {
     it('registers an internal route that delegates authorization to UIAM', () => {
@@ -93,7 +89,8 @@ describe('Create service account route', () => {
       expect(routeConfig.security?.authz).toEqual({
         enabled: false,
         reason:
-          'This route delegates authorization to the upstream UIAM service via the forwarded access token',
+          'This route delegates authorization to the service account provider: UIAM via the ' +
+          "forwarded access token, or Elasticsearch via the caller's `manage_security` cluster privilege",
       });
     });
 
@@ -140,15 +137,14 @@ describe('Create service account route', () => {
     });
   });
 
-  it('reaches the Elasticsearch backend without serverless context', async () => {
-    const { routeHandler } = setup({
-      serviceAccounts: {
-        backend: new EsServiceAccounts(),
-        workloads: createNotImplementedWorkloadBindings(),
-      },
-      serverless: false,
-    });
-    expect((await callRoute(routeHandler)).status).toBe(501);
+  it('delegates to whichever backend is selected outside serverless', async () => {
+    const { routeHandler, serviceAccounts } = setup({ serverless: false });
+    serviceAccounts.backend.create.mockResolvedValue(serviceAccount);
+
+    const response = await callRoute(routeHandler);
+
+    expect(response.status).toBe(200);
+    expect(response.payload).toEqual(serviceAccount);
   });
 
   it.each([400, 401, 403, 501])('preserves backend status %s', async (statusCode) => {
@@ -168,6 +164,99 @@ describe('Create service account route', () => {
     const response = await callRoute(routeHandler);
 
     expect(response.status).toBe(409);
+  });
+
+  describe('UIAM creation credentials', () => {
+    const setupUiam = () => {
+      const uiam = uiamServiceMock.create();
+      uiam.createServiceAccount.mockResolvedValue({
+        ...serviceAccount,
+        type: 'project',
+        organization_id: 'organization-id',
+        role_assignments: {},
+        assumable_by: [],
+      });
+      const license = licenseMock.create();
+      license.isEnabled.mockReturnValue(true);
+      const checkPrivileges: jest.Mocked<CheckPrivileges> = {
+        atSpace: jest.fn(),
+        atSpaces: jest.fn(),
+        globally: jest.fn().mockResolvedValue({
+          hasAllRequested: true,
+          username: 'elastic',
+          privileges: {
+            kibana: [],
+            elasticsearch: {
+              cluster: [{ privilege: 'manage_security', authorized: true }],
+              index: {},
+            },
+          },
+        }),
+      };
+      const checkPrivilegesWithRequest: jest.MockedFunction<CheckPrivilegesWithRequest> = jest
+        .fn()
+        .mockReturnValue(checkPrivileges);
+      const backend = new UiamServiceAccounts({
+        logger: loggingSystemMock.createLogger(),
+        requestLifetimeMs: 600_000,
+        license,
+        uiam,
+        checkPrivilegesWithRequest,
+        getCurrentUser: () => null,
+        cloudProjectContext: {
+          organizationId: 'organization-id',
+          projectId: 'project-id',
+          projectType: 'security',
+        },
+      });
+      const { routeHandler } = setup({
+        serviceAccounts: { ...serviceAccountsServiceMock.createStart(), backend },
+      });
+
+      return { routeHandler, uiam, checkPrivilegesWithRequest, checkPrivileges };
+    };
+
+    it.each(['Bearer essu_user_session', 'ApiKey essu_key'])(
+      'creates an account with %s',
+      async (authorization) => {
+        const { routeHandler, uiam, checkPrivilegesWithRequest, checkPrivileges } = setupUiam();
+        const request = httpServerMock.createKibanaRequest({
+          body: requestBody,
+          headers: { authorization },
+        });
+
+        const response = await callRoute(routeHandler, undefined, request);
+
+        expect(response.status).toBe(200);
+        expect(response.payload).toEqual(serviceAccount);
+        expect(checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
+        expect(checkPrivileges.globally).toHaveBeenCalledWith({
+          elasticsearch: { cluster: ['manage_security'], index: {} },
+        });
+        expect(uiam.createServiceAccount).toHaveBeenCalledWith(
+          HTTPAuthorizationHeader.parseFromRequest(request),
+          expect.objectContaining(requestBody),
+          undefined
+        );
+      }
+    );
+
+    it('returns a 400 for an Elasticsearch API key before checking privileges', async () => {
+      const { routeHandler, uiam, checkPrivilegesWithRequest } = setupUiam();
+      const request = httpServerMock.createKibanaRequest({
+        body: requestBody,
+        headers: { authorization: 'ApiKey a2V5LWlkOnNlY3JldA==' },
+      });
+
+      const response = await callRoute(routeHandler, undefined, request);
+
+      expect(response.status).toBe(400);
+      expect(response.payload).toMatchObject({
+        message: 'Provided credential is not compatible with UIAM',
+      });
+      expect(checkPrivilegesWithRequest).not.toHaveBeenCalled();
+      expect(uiam.createServiceAccount).not.toHaveBeenCalled();
+    });
   });
 
   describe('body schema', () => {
