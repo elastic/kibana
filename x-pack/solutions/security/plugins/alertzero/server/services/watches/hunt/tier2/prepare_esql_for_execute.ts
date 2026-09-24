@@ -6,12 +6,15 @@
  */
 
 /**
- * Upserts `METADATA _index` onto the first FROM source list and appends `_index`
- * to any KEEP that would otherwise drop it. No-op when `_index` is already present.
+ * Upserts `METADATA _id, _index` onto the first FROM source list and appends
+ * those columns to any KEEP that would otherwise drop them. No-op for fields
+ * already present.
  *
  * Only the FROM clause is rewritten. The rest of the pipeline (string literals,
  * comment lines, newlines) is left byte-identical aside from KEEP column lists.
  */
+const METADATA_FIELDS = ['_id', '_index'] as const;
+
 export const injectMetadataIndex = (query: string): string => {
   const trimmed = query.trim();
   // First pipeline pipe, with or without surrounding whitespace (FROM logs-*| WHERE …).
@@ -34,11 +37,13 @@ export const injectMetadataIndex = (query: string): string => {
       .split(',')
       .map((f) => f.trim())
       .filter(Boolean);
-    nextFrom = fields.includes('_index')
-      ? `FROM ${afterFrom}`
-      : `FROM ${sources} METADATA ${[...fields, '_index'].join(', ')}`;
+    const missing = METADATA_FIELDS.filter((f) => !fields.includes(f));
+    nextFrom =
+      missing.length === 0
+        ? `FROM ${afterFrom}`
+        : `FROM ${sources} METADATA ${[...fields, ...missing].join(', ')}`;
   } else {
-    nextFrom = `FROM ${afterFrom} METADATA _index`;
+    nextFrom = `FROM ${afterFrom} METADATA ${METADATA_FIELDS.join(', ')}`;
   }
 
   if (!rest) {
@@ -51,10 +56,14 @@ export const injectMetadataIndex = (query: string): string => {
       .split(',')
       .map((c) => c.trim())
       .filter(Boolean);
-    if (columns.some((c) => c === '_index' || c === '*')) {
+    if (columns.some((c) => c === '*')) {
       return full;
     }
-    return `${prefix}${[...columns, '_index'].join(', ')}${trailingWs}`;
+    const missing = METADATA_FIELDS.filter((f) => !columns.includes(f));
+    if (missing.length === 0) {
+      return full;
+    }
+    return `${prefix}${[...columns, ...missing].join(', ')}${trailingWs}`;
   });
 
   // Keep the original whitespace (or lack of it) between FROM and the first `|`.
@@ -74,6 +83,6 @@ export const rewriteLimit = (query: string, limit: number): string => {
   return `${query.trimEnd()}\n| LIMIT ${limit}`;
 };
 
-/** Inject METADATA _index (when absent) and bind the row LIMIT for execute. */
+/** Inject METADATA _id,_index (when absent) and bind the row LIMIT for execute. */
 export const prepareEsqlForExecute = (query: string, rowLimit: number): string =>
   rewriteLimit(injectMetadataIndex(query), rowLimit);

@@ -103,7 +103,7 @@ export const HuntForThreatHit = lazySchema(() =>
       id: z.string(),
       score: z.number().nullable(),
       /**
-       * Which IOC and/or ATT&CK technique produced this hit. Not yet populated by Tier 1: requires per-IOC attribution (highlight or a per-IOC query) that Tier 1's current single combined `should` query doesn't provide. Declared here so the SSE mapper's `events[].matched` has a stable contract to fill in once Tier 1 adds attribution.
+       * Which IOC and/or ATT&CK technique produced this hit. Tier 1 fills this by post-matching returned documents against the searched IOC values and `kibana.alert.rule.threat.technique` ids. Technique attribution only applies to alerts already tagged with that MITRE id (not raw telemetry matched by behavior). Used by the SSE mapper to scope Tier 1 `events[]` onto technique-specific attachments.
        */
       matched: z
         .object({
@@ -118,7 +118,7 @@ export const HuntForThreatHit = lazySchema(() =>
         })
         .optional()
         .describe(
-          "Which IOC and/or ATT&CK technique produced this hit. Not yet populated by Tier 1: requires per-IOC attribution (highlight or a per-IOC query) that Tier 1's current single combined `should` query doesn't provide. Declared here so the SSE mapper's `events[].matched` has a stable contract to fill in once Tier 1 adds attribution."
+          'Which IOC and/or ATT&CK technique produced this hit. Tier 1 fills this by post-matching returned documents against the searched IOC values and `kibana.alert.rule.threat.technique` ids. Technique attribution only applies to alerts already tagged with that MITRE id (not raw telemetry matched by behavior). Used by the SSE mapper to scope Tier 1 `events[]` onto technique-specific attachments.'
         ),
     })
     .catchall(z.unknown())

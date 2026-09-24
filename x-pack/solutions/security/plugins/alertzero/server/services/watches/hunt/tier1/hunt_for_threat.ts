@@ -13,6 +13,7 @@ import type {
   HuntIoc,
 } from '@kbn/alertzero-common';
 import { buildMatchesRequired } from '../common/matches_required';
+import { attributeHits } from './attribute_hits';
 import type { HuntForThreatParams } from './types';
 
 const termClause = (field: string, value: string): Record<string, unknown> => ({
@@ -252,13 +253,17 @@ export const huntForThreat = async (
 
   const total =
     typeof response.hits.total === 'number' ? response.hits.total : response.hits.total?.value ?? 0;
-  const hits = (response.hits.hits ?? []).map(
-    (hit): HuntForThreatHit => ({
-      index: hit._index,
-      id: hit._id ?? '',
-      score: hit._score ?? null,
-      ...(hit._source as Record<string, unknown>),
-    })
+  const hits = attributeHits(
+    (response.hits.hits ?? []).map(
+      (hit): HuntForThreatHit => ({
+        index: hit._index,
+        id: hit._id ?? '',
+        score: hit._score ?? null,
+        ...(hit._source as Record<string, unknown>),
+      })
+    ),
+    iocs,
+    techniques
   );
 
   const hosts: AffectedAsset[] = (aggs?.affected_hosts?.buckets ?? []).map((b) => ({

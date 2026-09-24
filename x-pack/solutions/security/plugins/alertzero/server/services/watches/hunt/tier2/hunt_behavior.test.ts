@@ -220,6 +220,48 @@ describe('huntBehavior', () => {
     expect(result.hasHit).toBe(true);
   });
 
+  it('returns hit_refs from METADATA _id and _index on required-index rows', async () => {
+    const esClient = {
+      esql: {
+        query: jest
+          .fn()
+          .mockResolvedValueOnce({ columns: [], values: [] })
+          .mockResolvedValueOnce({
+            columns: [
+              { name: '_id' },
+              { name: '_index' },
+              { name: '@timestamp' },
+              { name: 'host.name' },
+            ],
+            values: [
+              ['doc-1', 'logs-aws.cloudtrail-default', '2026-09-24T12:00:00.000Z', 'WIN-ANALYST01'],
+            ],
+          }),
+      },
+    } as unknown as ElasticsearchClient;
+    const model = buildMockModel({
+      extractionResult: { candidates: [t1078Candidate] },
+    });
+    const result = await huntBehavior(
+      model,
+      logger,
+      {
+        text: 'report',
+        window: { from: 'now-30d', to: 'now' },
+        required_indices: ['logs-aws.*'],
+        row_limit: 25,
+      },
+      esClient
+    );
+    expect(result.behaviors[0].hit_refs).toEqual([
+      {
+        event_id: 'doc-1',
+        source_index: 'logs-aws.cloudtrail-default',
+        timestamp: '2026-09-24T12:00:00.000Z',
+      },
+    ]);
+  });
+
   it('returns execution.hit true for a required-index row', async () => {
     const esClient = {
       esql: {

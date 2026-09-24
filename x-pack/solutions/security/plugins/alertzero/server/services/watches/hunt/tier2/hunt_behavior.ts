@@ -22,6 +22,7 @@ import { getMitreCatalog } from './mitre_catalog';
 import { prepareEsqlForExecute } from './prepare_esql_for_execute';
 import type {
   BehaviorExecution,
+  BehaviorHitRef,
   HuntBehaviorParams,
   HuntBehaviorResult,
   SeverityLevel,
@@ -30,6 +31,8 @@ import type {
 
 const ESQL_REQUEST_TIMEOUT = '30s';
 const MAX_AFFECTED_ENTITIES = 20;
+/** Cap Tier 2 Discover refs to match SSE `events[]` / `alerts[]` max. */
+const MAX_HIT_REFS = 50;
 const NO_EXECUTION: BehaviorExecution = { executed: false, row_count: 0, hit: false };
 
 const severityFromConfidence = (confidence: number): SeverityLevel => {
@@ -225,6 +228,7 @@ const executeValidatedEsql = async ({
   affected_users?: string[];
   affected_hosts_truncated?: boolean;
   affected_users_truncated?: boolean;
+  hit_refs?: BehaviorHitRef[];
 }> => {
   const prepared = prepareEsqlForExecute(esql, rowLimit);
   const matchesRequired = buildMatchesRequired(requiredIndices);
@@ -245,8 +249,10 @@ const executeValidatedEsql = async ({
     const columns = response.columns ?? [];
     const values = response.values ?? [];
     const indexCol = columnIndex(columns, '_index');
+    const idCol = columnIndex(columns, '_id');
     const hostCol = columnIndex(columns, 'host.name');
     const userCol = columnIndex(columns, 'user.name');
+    const tsCol = columnIndex(columns, '@timestamp');
 
     if (values.length > 0 && indexCol < 0) {
       // Aggregating pipelines (STATS, etc.) drop METADATA columns. Rows existed
@@ -281,6 +287,23 @@ const executeValidatedEsql = async ({
           )
         : undefined;
 
+    const hitRefs: BehaviorHitRef[] = [];
+    if (idCol >= 0 && indexCol >= 0) {
+      for (const row of requiredRows) {
+        if (hitRefs.length >= MAX_HIT_REFS) break;
+        const eventId = row[idCol];
+        const sourceIndex = row[indexCol];
+        if (typeof eventId !== 'string' || eventId.length === 0) continue;
+        if (typeof sourceIndex !== 'string' || sourceIndex.length === 0) continue;
+        const timestamp = tsCol >= 0 ? row[tsCol] : undefined;
+        hitRefs.push({
+          event_id: eventId,
+          source_index: sourceIndex,
+          ...(typeof timestamp === 'string' && timestamp.length > 0 ? { timestamp } : {}),
+        });
+      }
+    }
+
     return {
       execution: {
         executed: true,
@@ -299,6 +322,7 @@ const executeValidatedEsql = async ({
             ...(users.truncated ? { affected_users_truncated: true } : {}),
           }
         : {}),
+      ...(hitRefs.length > 0 ? { hit_refs: hitRefs } : {}),
     };
   } catch (err) {
     logger.warn(
@@ -570,6 +594,7 @@ export const huntBehavior = async (
           if (executed.affected_users_truncated) {
             behavior.affected_users_truncated = true;
           }
+          if (executed.hit_refs) behavior.hit_refs = executed.hit_refs;
         }
       }
     }
