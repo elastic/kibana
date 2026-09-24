@@ -181,8 +181,10 @@ const getResolvedPanelCreationRequests = ({
  * - `source: 'config'`: built by value from the panel type's registry definition.
  * - `source: 'request'`: read from the up-front parallel resolution (keyed by
  *   panel input index).
+ * - `source: 'attachment'`: built from the referenced visualization attachment.
  *
- * Returns `undefined` and records a failure when a panel request didn't resolve.
+ * Returns `undefined` and records a failure when a panel request or attachment
+ * didn't resolve.
  */
 export const createPanelInputMaterializer = ({
   resolvedPanelCreationRequests,
