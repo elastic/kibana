@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { WorkflowLike } from './page_service';
 import { getPageSubmitter, parsePageSubmission, resolvePage } from './page_service';
 import { computePageToken, verifyPageToken } from './page_token';
 import { ExternalResumeError } from '../external_resume/external_resume_error';
@@ -69,11 +70,11 @@ describe('resolvePage', () => {
   });
 
   it('does not expose why a request failed', () => {
-    const cases = [
+    const cases: Array<[WorkflowLike | undefined, number]> = [
       [undefined, 404],
       [{ ...workflowWithPage, enabled: false }, 404],
       [{ enabled: true, valid: true, definition: { triggers: [{ type: 'manual' }] } }, 404],
-    ] as const;
+    ];
 
     for (const [workflow, statusCode] of cases) {
       try {

@@ -15,6 +15,7 @@ import {
   PAGE_TOKEN_MAX_LENGTH,
   PAGE_WORKFLOW_ID_MAX_LENGTH,
 } from '../../pages/constants';
+import { buildPageRunRequest } from '../../pages/page_run_identity';
 import {
   buildPageFormUrl,
   getPageSubmitter,
@@ -32,7 +33,7 @@ import {
   htmlSuccess,
 } from '../executions/external_resume_route_helpers';
 import type { RouteDependencies } from '../types';
-import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
+import { API_VERSION, INTERNAL_API_VERSION } from '../utils/route_constants';
 import { WORKFLOW_EXECUTE_SECURITY } from '../utils/route_security';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
 
@@ -89,7 +90,11 @@ export function registerPageFormRoute(deps: RouteDependencies, signingKey: strin
 }
 
 /** POST a page submission, which validates the input and runs the workflow. */
-export function registerPageSubmitRoute(deps: RouteDependencies, signingKey: string) {
+export function registerPageSubmitRoute(
+  deps: RouteDependencies,
+  signingKey: string,
+  runAsApiKey: string
+) {
   const { router, api, spaces, logger, audit } = deps;
 
   router.versioned
@@ -123,11 +128,14 @@ export function registerPageSubmitRoute(deps: RouteDependencies, signingKey: str
           const inputs = parsePageSubmission(request.body, page.inputsSchema);
           const submitter = getPageSubmitter(request.headers, request.socket?.remoteAddress);
 
+          // The visitor has no Kibana identity, so the run carries the
+          // configured one. `request` stays the visitor's only for audit.
+          const runRequest = buildPageRunRequest(runAsApiKey);
           const { workflowExecutionId } = await api.runWorkflowWithAlertPreprocessing({
             workflow: toWorkflowExecutionEngineModel(page.workflow),
             spaceId,
             inputs,
-            request,
+            request: runRequest,
             preprocessingContext: context,
             // No stored run identity yet. The submitter's network details are the
             // only attribution a page run has, so keep them on the execution.
@@ -154,10 +162,9 @@ export function registerPageLinkRoute(deps: RouteDependencies, signingKey: strin
       access: 'internal',
       security: WORKFLOW_EXECUTE_SECURITY,
       summary: 'Get the shareable link for a workflow page',
-      options: { tags: [OAS_TAG], availability: AVAILABILITY },
     })
     .addVersion(
-      { version: API_VERSION, validate: { request: { params: pageParamsSchema } } },
+      { version: INTERNAL_API_VERSION, validate: { request: { params: pageParamsSchema } } },
       withAvailabilityCheck(async (context, request, response) => {
         const { workflowId } = request.params;
         const spaceId = spaces.getSpaceId(request);

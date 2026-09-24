@@ -34,7 +34,7 @@ export interface ResolvedPage<T extends WorkflowLike = WorkflowLike> {
   inputsSchema: JsonModelSchemaType | undefined;
 }
 
-interface WorkflowLike {
+export interface WorkflowLike {
   enabled: boolean;
   valid: boolean;
   definition?: { triggers?: Array<{ type?: string }> } | null;
